@@ -1,14 +1,7 @@
-//
-//  app_state.h
-//  app
-//
-//  Created by Tobias Schwandt on 18/09/14.
-//  Copyright (c) 2014 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
 
-namespace App
+namespace Game
 {
     class CState
     {
@@ -42,9 +35,9 @@ namespace App
         virtual CState::EStateType InternOnRun()   = 0;
         
     };
-} // namespace App
+} // namespace Game
 
-namespace App
+namespace Game
 {
     CState::EStateType CState::OnEnter()
     {
@@ -64,4 +57,4 @@ namespace App
     {
         return InternOnRun();
     }
-} // namespace App
+} // namespace Game

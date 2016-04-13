@@ -1,9 +1,9 @@
 
-#include "app/app_play_state.h"
-
 #include "base/base_console.h"
 
 #include "camera/cam_control_manager.h"
+
+#include "game/game_play_state.h"
 
 #include "graphic/gfx_play_state.h"
 
@@ -11,7 +11,7 @@
 
 #include "logic/lg_play_state.h"
 
-namespace App
+namespace Game
 {
     CPlayState& CPlayState::GetInstance()
     {
@@ -19,9 +19,9 @@ namespace App
         
         return s_Singleton;
     }
-} // namespace App
+} // namespace Game
 
-namespace App
+namespace Game
 {
     CPlayState::CPlayState()
     {
@@ -39,13 +39,13 @@ namespace App
     
     CState::EStateType CPlayState::InternOnEnter()
     {
-        BASE_CONSOLE_STREAMINFO("App> Enter play state.");
+        BASE_CONSOLE_STREAMINFO("Game> Enter play state.");
 
         Lg ::Play::OnEnter();
         Gui::Play::OnEnter();
         Gfx::Play::OnEnter();        
         
-        return App::CState::Play;
+        return Game::CState::Play;
     }
     
     // -----------------------------------------------------------------------------
@@ -56,9 +56,9 @@ namespace App
         Gui::Play::OnLeave();
         Lg ::Play::OnLeave();
 
-        BASE_CONSOLE_STREAMINFO("App> Leave play state.");
+        BASE_CONSOLE_STREAMINFO("Game> Leave play state.");
         
-        return App::CState::Play;
+        return Game::CState::Play;
     }
     
     // -----------------------------------------------------------------------------
@@ -96,4 +96,4 @@ namespace App
         
         return NextState;
     }
-} // namespace App
+} // namespace Game

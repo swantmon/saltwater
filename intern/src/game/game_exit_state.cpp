@@ -1,7 +1,7 @@
 
-#include "app/app_exit_state.h"
-
 #include "base/base_console.h"
+
+#include "game/game_exit_state.h"
 
 #include "graphic/gfx_exit_state.h"
 #include "graphic/gfx_main.h"
@@ -10,7 +10,7 @@
 
 #include "logic/lg_exit_state.h"
 
-namespace App
+namespace Game
 {
     CExitState& CExitState::GetInstance()
     {
@@ -18,9 +18,9 @@ namespace App
         
         return s_Singleton;
     }
-} // namespace App
+} // namespace Game
 
-namespace App
+namespace Game
 {
     CExitState::CExitState()
     {
@@ -38,7 +38,7 @@ namespace App
     
     CState::EStateType CExitState::InternOnEnter()
     {
-        BASE_CONSOLE_STREAMINFO("App> Enter exit state.");
+        BASE_CONSOLE_STREAMINFO("Game> Enter exit state.");
 
         Lg ::Exit::OnEnter();
         Gfx::Exit::OnEnter();
@@ -49,7 +49,7 @@ namespace App
         // -----------------------------------------------------------------------------
         Gfx::Main::OnExit();
         
-        return App::CState::Exit;
+        return Game::CState::Exit;
     }
     
     // -----------------------------------------------------------------------------
@@ -60,9 +60,9 @@ namespace App
         Gfx::Exit::OnLeave();
         Lg ::Exit::OnLeave();
 
-        BASE_CONSOLE_STREAMINFO("App> Leave exit state.");
+        BASE_CONSOLE_STREAMINFO("Game> Leave exit state.");
         
-        return App::CState::Exit;
+        return Game::CState::Exit;
     }
     
     // -----------------------------------------------------------------------------
@@ -83,4 +83,4 @@ namespace App
         
         return NextState;
     }
-} // namespace App
+} // namespace Game

@@ -1,9 +1,9 @@
 
-#include "app/app_start_state.h"
-
 #include "base/base_console.h"
 
 #include "camera/cam_control_manager.h"
+
+#include "game/game_start_state.h"
 
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_start_state.h"
@@ -12,7 +12,7 @@
 
 #include "logic/lg_start_state.h"
 
-namespace App
+namespace Game
 {
     CStartState& CStartState::GetInstance()
     {
@@ -20,9 +20,9 @@ namespace App
         
         return s_Singleton;
     }
-} // namespace App
+} // namespace Game
 
-namespace App
+namespace Game
 {
     CStartState::CStartState()
         : m_Width       (0)
@@ -42,7 +42,7 @@ namespace App
     
     void CStartState::SetResolution(int _Width, int _Height)
     {
-        BASE_CONSOLE_STREAMINFO("App> Enter set resolution to w=" << _Width << " and h=" << _Height);
+        BASE_CONSOLE_STREAMINFO("Game> Enter set resolution to w=" << _Width << " and h=" << _Height);
 
         m_Width  = _Width;
         m_Height = _Height;
@@ -52,7 +52,7 @@ namespace App
     
     CState::EStateType CStartState::InternOnEnter()
     {
-        BASE_CONSOLE_STREAMINFO("App> Enter start state.");
+        BASE_CONSOLE_STREAMINFO("Game> Enter start state.");
 
         // -----------------------------------------------------------------------------
         // Start engine
@@ -69,7 +69,7 @@ namespace App
         Gfx::Start::OnEnter();
         Gui::Start::OnEnter();
         
-        return App::CState::Start;
+        return Game::CState::Start;
     }
     
     // -----------------------------------------------------------------------------
@@ -80,9 +80,9 @@ namespace App
         Gfx::Start::OnLeave();
         Lg ::Start::OnLeave();
 
-        BASE_CONSOLE_STREAMINFO("App> Leave start state.");
+        BASE_CONSOLE_STREAMINFO("Game> Leave start state.");
         
-        return App::CState::Start;
+        return Game::CState::Start;
     }
     
     // -----------------------------------------------------------------------------
@@ -106,4 +106,4 @@ namespace App
         
         return NextState;
     }
-} // namespace App
+} // namespace Game

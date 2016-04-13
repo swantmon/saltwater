@@ -1,8 +1,8 @@
 
-#include "app/app_load_map_state.h"
-
 #include "base/base_console.h"
 #include "base/base_serialize_text_reader.h"
+
+#include "game/game_load_map_state.h"
 
 #include "graphic/gfx_load_map_state.h"
 
@@ -14,7 +14,7 @@
 #include <fstream>
 #include <string>
 
-namespace App
+namespace Game
 {
     CLoadMapState& CLoadMapState::GetInstance()
     {
@@ -22,9 +22,9 @@ namespace App
         
         return s_Singleton;
     }
-} // namespace App
+} // namespace Game
 
-namespace App
+namespace Game
 {
     CLoadMapState::CLoadMapState()
         : m_pMapfile("")
@@ -43,7 +43,7 @@ namespace App
     
     void CLoadMapState::SetMapfile(const char* _pFilename)
     {
-        BASE_CONSOLE_STREAMINFO("App> Setting load level to " << _pFilename);
+        BASE_CONSOLE_STREAMINFO("Game> Setting load level to " << _pFilename);
 
         m_pMapfile = _pFilename;
     }
@@ -59,7 +59,7 @@ namespace App
     
     CState::EStateType CLoadMapState::InternOnEnter()
     {
-        BASE_CONSOLE_STREAMINFO("App> Enter load level state.");
+        BASE_CONSOLE_STREAMINFO("Game> Enter load level state.");
 
         // -----------------------------------------------------------------------------
         // Load an map given by name from the gui. So the steps are as following:
@@ -68,7 +68,7 @@ namespace App
         // 3. Give this text reader to every part of the game (map, graphic, ...)
         // -----------------------------------------------------------------------------
         
-        BASE_CONSOLE_STREAMINFO("App> Load level " << m_pMapfile);
+        BASE_CONSOLE_STREAMINFO("Game> Load level " << m_pMapfile);
 
         // 1.
         const char* pFilename = m_pMapfile;
@@ -91,7 +91,7 @@ namespace App
         Gui::LoadMap::OnEnter(TextReader);
         Gfx::LoadMap::OnEnter(TextReader);
         
-        return App::CState::LoadMap;
+        return Game::CState::LoadMap;
     }
     
     // -----------------------------------------------------------------------------
@@ -102,9 +102,9 @@ namespace App
         Gui::LoadMap::OnLeave();
         Lg ::LoadMap::OnLeave();        
 
-        BASE_CONSOLE_STREAMINFO("App> Leave load level state.");
+        BASE_CONSOLE_STREAMINFO("Game> Leave load level state.");
         
-        return App::CState::LoadMap;
+        return Game::CState::LoadMap;
     }
     
     // -----------------------------------------------------------------------------
@@ -128,4 +128,4 @@ namespace App
         
         return NextState;
     }
-} // namespace App
+} // namespace Game

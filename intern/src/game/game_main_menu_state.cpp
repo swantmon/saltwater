@@ -1,7 +1,7 @@
 
-#include "app/app_main_menu_state.h"
-
 #include "base/base_console.h"
+
+#include "game/game_main_menu_state.h"
 
 #include "graphic/gfx_main_menu_state.h"
 
@@ -9,7 +9,7 @@
 
 #include "logic/lg_main_menu_state.h"
 
-namespace App
+namespace Game
 {
     CMainMenuState& CMainMenuState::GetInstance()
     {
@@ -17,9 +17,9 @@ namespace App
         
         return s_Singleton;
     }
-} // namespace App
+} // namespace Game
 
-namespace App
+namespace Game
 {
     CMainMenuState::CMainMenuState()
     {
@@ -37,13 +37,13 @@ namespace App
     
     CState::EStateType CMainMenuState::InternOnEnter()
     {
-        BASE_CONSOLE_STREAMINFO("App> Enter main menu state.");
+        BASE_CONSOLE_STREAMINFO("Game> Enter main menu state.");
 
         Lg ::MainMenu::OnEnter();
         Gfx::MainMenu::OnEnter();
         Gui::MainMenu::OnEnter();
         
-        return App::CState::MainMenu;
+        return Game::CState::MainMenu;
     }
     
     // -----------------------------------------------------------------------------
@@ -54,9 +54,9 @@ namespace App
         Gfx::MainMenu::OnLeave();
         Lg ::MainMenu::OnLeave();
 
-        BASE_CONSOLE_STREAMINFO("App> Leave main menu state.");
+        BASE_CONSOLE_STREAMINFO("Game> Leave main menu state.");
         
-        return App::CState::MainMenu;
+        return Game::CState::MainMenu;
     }
     
     // -----------------------------------------------------------------------------
@@ -80,4 +80,4 @@ namespace App
         
         return NextState;
     }
-} // namespace App
+} // namespace Game

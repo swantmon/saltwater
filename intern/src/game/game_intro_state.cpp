@@ -1,7 +1,7 @@
 
-#include "app/app_intro_state.h"
-
 #include "base/base_console.h"
+
+#include "game/game_intro_state.h"
 
 #include "graphic/gfx_intro_state.h"
 
@@ -9,7 +9,7 @@
 
 #include "logic/lg_intro_state.h"
 
-namespace App
+namespace Game
 {
     CIntroState& CIntroState::GetInstance()
     {
@@ -17,9 +17,9 @@ namespace App
         
         return s_Singleton;
     }
-} // namespace App
+} // namespace Game
 
-namespace App
+namespace Game
 {
     CIntroState::CIntroState()
     {
@@ -37,13 +37,13 @@ namespace App
     
     CState::EStateType CIntroState::InternOnEnter()
     {
-        BASE_CONSOLE_STREAMINFO("App> Enter intro state.");
+        BASE_CONSOLE_STREAMINFO("Game> Enter intro state.");
 
         Lg ::Intro::OnEnter();
         Gfx::Intro::OnEnter();
         Gui::Intro::OnEnter();
         
-        return App::CState::Intro;
+        return Game::CState::Intro;
     }
     
     // -----------------------------------------------------------------------------
@@ -54,9 +54,9 @@ namespace App
         Gfx::Intro::OnLeave();
         Lg ::Intro::OnLeave();
 
-        BASE_CONSOLE_STREAMINFO("App> Leave intro state.");
+        BASE_CONSOLE_STREAMINFO("Game> Leave intro state.");
         
-        return App::CState::Intro;
+        return Game::CState::Intro;
     }
     
     // -----------------------------------------------------------------------------
@@ -80,4 +80,4 @@ namespace App
         
         return NextState;
     }
-} // namespace App
+} // namespace Game

@@ -1,6 +1,4 @@
 
-#include "app/app_load_map_state.h"
-
 #include "base/base_input_event.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
@@ -61,15 +59,7 @@ namespace
     // -----------------------------------------------------------------------------
 
     int CLgMainMenuState::OnRun()
-    {
-        // -----------------------------------------------------------------------------
-        // Set level to load
-        // -----------------------------------------------------------------------------
-        App::CLoadMapState::GetInstance().SetMapfile("../data/level/level_global_illumination_sponza.rsw");
-//        App::CLoadMapState::GetInstance().SetMapfile("../data/level/level_liquid_test.rsw");
-//        App::CLoadMapState::GetInstance().SetMapfile("../data/level/level_augmented_box.rsw");
-//        App::CLoadMapState::GetInstance().SetMapfile("../data/level/level_augmented_water.rsw");
-        
+    { 
         return Lg::MainMenu::SResult::LoadMap;
     }
 

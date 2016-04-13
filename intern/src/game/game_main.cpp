@@ -1,6 +1,6 @@
 //
 //  main.cpp
-//  game_sdl
+//  game
 //
 //  Created by Tobias Schwandt on 14/10/14.
 //  Copyright (c) 2014 TU Ilmenau. All rights reserved.
@@ -12,6 +12,8 @@
 #include "base/base_console.h"
 #include "base/base_exception.h"
 #include "base/base_input_event.h"
+
+#include "game/game_application.h"
 
 #include <SDL2/SDL.h>
 #undef main
@@ -54,7 +56,7 @@ int main(int _Argc, const char* _pArgv[])
     }
     
     // -----------------------------------------------------------------------------
-    // Initialize core profile of opengl. We use OpenGL 4.1 because of several
+    // Initialize core profile of OpenGL. We use OpenGL 4.1 because of several
     // reasons like different shader functions and some performance reasons.
     // Moreover we define different specifications like DoubleBuffer, PixelFormat
     // and so on.
@@ -101,7 +103,7 @@ int main(int _Argc, const char* _pArgv[])
     int       WindowMessage      = 0;
     SDL_Event WindowEvent;
     
-    App::Application::OnStart(APP_WIDTH, APP_HEIGHT);
+    Game::Runtime::OnStart(APP_WIDTH, APP_HEIGHT);
     
     try
     {
@@ -117,7 +119,7 @@ int main(int _Argc, const char* _pArgv[])
                 }
             }
             
-            ApplicationMessage = App::Application::OnRun();
+            ApplicationMessage = Game::Runtime::OnRun();
             
             SDL_GL_SwapWindow(s_pWindow);
         }
@@ -134,7 +136,7 @@ int main(int _Argc, const char* _pArgv[])
         BASE_CONSOLE_ERROR("An undefined exception stops application");
     }
     
-    App::Application::OnExit();
+    Game::Runtime::OnExit();
 
     // -----------------------------------------------------------------------------
     // At the end we have to clean our context and window.

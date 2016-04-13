@@ -1,8 +1,8 @@
 
-#include "app/app_unload_map_state.h"
-
 #include "base/base_console.h"
 #include "base/base_serialize_text_writer.h"
+
+#include "game/game_unload_map_state.h"
 
 #include "graphic/gfx_unload_map_state.h"
 
@@ -15,7 +15,7 @@
 #include <string>
 
 
-namespace App
+namespace Game
 {
     CUnloadMapState& CUnloadMapState::GetInstance()
     {
@@ -23,9 +23,9 @@ namespace App
         
         return s_Singleton;
     }
-} // namespace App
+} // namespace Game
 
-namespace App
+namespace Game
 {
     CUnloadMapState::CUnloadMapState()
     {
@@ -43,7 +43,7 @@ namespace App
     
     CState::EStateType CUnloadMapState::InternOnEnter()
     {
-        BASE_CONSOLE_STREAMINFO("App> Enter unload map state.");
+        BASE_CONSOLE_STREAMINFO("Game> Enter unload map state.");
 
         // -----------------------------------------------------------------------------
         // Save current map to file to get same result on next load
@@ -72,7 +72,7 @@ namespace App
 //         
 //         File.close();
         
-        return App::CState::UnloadMap;
+        return Game::CState::UnloadMap;
     }
     
     // -----------------------------------------------------------------------------
@@ -83,9 +83,9 @@ namespace App
         Gfx::UnloadMap::OnLeave();
         Lg ::UnloadMap::OnLeave();
 
-        BASE_CONSOLE_STREAMINFO("App> Leave unload map state.");
+        BASE_CONSOLE_STREAMINFO("Game> Leave unload map state.");
         
-        return App::CState::UnloadMap;
+        return Game::CState::UnloadMap;
     }
     
     // -----------------------------------------------------------------------------
@@ -109,4 +109,4 @@ namespace App
         
         return NextState;
     }
-} // namespace App
+} // namespace Game

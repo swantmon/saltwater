@@ -1,7 +1,7 @@
 
-#include "app/app_debug_state.h"
-
 #include "base/base_console.h"
+
+#include "game/game_debug_state.h"
 
 #include "camera/cam_control_manager.h"
 
@@ -11,7 +11,7 @@
 
 #include "logic/lg_debug_state.h"
 
-namespace App
+namespace Game
 {
     CDebugState& CDebugState::GetInstance()
     {
@@ -19,9 +19,9 @@ namespace App
         
         return s_Singleton;
     }
-} // namespace App
+} // namespace Game
 
-namespace App
+namespace Game
 {
     CDebugState::CDebugState()
     {
@@ -39,13 +39,13 @@ namespace App
     
     CState::EStateType CDebugState::InternOnEnter()
     {
-        BASE_CONSOLE_STREAMINFO("App> Enter debug state.");
+        BASE_CONSOLE_STREAMINFO("Game> Enter debug state.");
 
         Lg ::Debug::OnEnter();
         Gfx::Debug::OnEnter();
         Gui::Debug::OnEnter();
         
-        return App::CState::Debug;
+        return Game::CState::Debug;
     }
     
     // -----------------------------------------------------------------------------
@@ -56,9 +56,9 @@ namespace App
         Gfx::Debug::OnLeave();
         Lg ::Debug::OnLeave();
 
-        BASE_CONSOLE_STREAMINFO("App> Leave debug state.");
+        BASE_CONSOLE_STREAMINFO("Game> Leave debug state.");
         
-        return App::CState::Debug;
+        return Game::CState::Debug;
     }
     
     // -----------------------------------------------------------------------------
@@ -68,7 +68,7 @@ namespace App
         CState::EStateType NextState = CState::Debug;
         
         // -----------------------------------------------------------------------------
-        // Update cameran with cameras and views (stuff for graphic and logic)
+        // Update camera with cameras and views (stuff for graphic and logic)
         // -----------------------------------------------------------------------------
         Cam::ControlManager::Update();
         
@@ -90,4 +90,4 @@ namespace App
         
         return NextState;
     }
-} // namespace App
+} // namespace Game

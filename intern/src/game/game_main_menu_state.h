@@ -1,16 +1,9 @@
-//
-//  app_main_menu_state.h
-//  app
-//
-//  Created by Tobias Schwandt on 26/02/15.
-//  Copyright (c) 2015 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
 
-#include "app/app_state.h"
+#include "game/game_state.h"
 
-namespace App
+namespace Game
 {
     class CMainMenuState : public CState
     {
@@ -31,4 +24,4 @@ namespace App
         virtual CState::EStateType InternOnRun();
         
     };
-} // namespace App
+} // namespace Game

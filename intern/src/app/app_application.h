@@ -32,10 +32,10 @@ namespace App
 {
 namespace Application
 {
-    void OnStart(int _Width, int _Height);
-
+    void OnStart();
     void OnExit();
-    int  OnRun();
+
+    void Update();
     
     void OnInputEvent(Base::CInputEvent& _rInputEvent);
     void OnResize(int _Width, int _Height);
