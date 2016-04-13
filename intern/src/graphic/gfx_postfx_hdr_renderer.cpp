@@ -1,0 +1,1046 @@
+
+#include "base/base_matrix4x4.h"
+#include "base/base_singleton.h"
+#include "base/base_uncopyable.h"
+
+#include "data/data_entity.h"
+#include "data/data_fx_facet.h"
+#include "data/data_map.h"
+
+#include "graphic/gfx_buffer_manager.h"
+#include "graphic/gfx_context_manager.h"
+#include "graphic/gfx_main.h"
+#include "graphic/gfx_model_manager.h"
+#include "graphic/gfx_performance.h"
+#include "graphic/gfx_postfx_hdr_renderer.h"
+#include "graphic/gfx_sampler_manager.h"
+#include "graphic/gfx_shader_manager.h"
+#include "graphic/gfx_state_manager.h"
+#include "graphic/gfx_target_set.h"
+#include "graphic/gfx_target_set_manager.h"
+#include "graphic/gfx_texture_2d.h"
+#include "graphic/gfx_texture_manager.h"
+#include "graphic/gfx_view_manager.h"
+
+using namespace Gfx;
+
+namespace
+{
+    class CGfxPostFXHDRRenderer : private Base::CUncopyable
+    {
+        BASE_SINGLETON_FUNC(CGfxPostFXHDRRenderer)
+        
+    public:
+        CGfxPostFXHDRRenderer();
+        ~CGfxPostFXHDRRenderer();
+        
+    public:
+        void OnStart();
+        void OnExit();
+        
+        void OnSetupShader();
+        void OnSetupKernels();
+        void OnSetupRenderTargets();
+        void OnSetupStates();
+        void OnSetupTextures();
+        void OnSetupBuffers();
+        void OnSetupResources();
+        void OnSetupModels();
+        void OnSetupEnd();
+        
+        void OnReload();
+        void OnNewMap();
+        void OnUnloadMap();
+        
+        void Update();
+        void Render();
+
+    private:
+
+        static const unsigned int s_NumberOfBlurStages = 5;
+        static const unsigned int s_BlurTileSize       = 8;
+        
+    private:
+        
+        enum EPostEffectShader
+        {
+            Bloom,
+            NumberOfPostEffects,
+            UndefinedPostEffect = -1
+        };
+
+        enum EDownSamples
+        {
+            DownSample1,
+            DownSample2,
+            DownSample3,
+            DownSample4,
+            DownSample5,
+            NumberOfDownSamples,
+        };
+
+    private:
+
+        struct SBloomRenderJob
+        {
+            Dt::CBloomFXFacet* m_pDataBloomFacet;
+        };
+
+        struct SGaussianShaderProperties
+        {
+            Base::Int2 m_Direction;
+            Base::Int2 m_MaxPixelCoord;
+            float      m_Weights[7];
+        };
+
+        struct SBloomShaderProperties
+        {
+            Base::Float4 m_BloomThresholdValue;
+            Base::Float4 m_BloomTintIntensity;
+        };
+
+        struct SDownSampleShaderProperties
+        {
+            Base::Float4 m_InvertTexturesize;
+        };
+
+    private:
+
+        typedef std::vector<SBloomRenderJob> CBloomRenderJobs;
+        
+    private: 
+
+        CModelPtr m_QuadModelPtr;
+
+        CInputLayoutPtr m_FullQuadInputLayoutPtr;
+
+        CShaderPtr m_RectangleShaderVSPtr;
+        CShaderPtr m_DownSampleShaderPSPtr;
+        CShaderPtr m_GaussianBlurShaderPtr;
+        CShaderPtr m_BloomShaderPSPtr;
+        CShaderPtr m_PassThroughPSPtr;
+
+        CBufferSetPtr m_BaseVSBufferSetPtr;
+        CBufferSetPtr m_GaussianBlurPropertiesCSBufferSetPtr;
+        CBufferSetPtr m_DownSamplePropertiesPSBufferSetPtr;
+        CBufferSetPtr m_BloomPropertiesPSBufferSetPtr;
+
+        CTextureSetPtr m_BlurStagesTextureSetPtrs[s_NumberOfBlurStages * 2];
+        CTextureSetPtr m_BlurStageFinalTextureSetPtrs[s_NumberOfBlurStages];
+
+        CTextureSetPtr    m_SwapTexturePtrs[2];
+        CRenderContextPtr m_SwapContextPtrs[2];
+        CTargetSetPtr     m_SwapRenderTargetPtrs[2];
+
+        CTextureSetPtr    m_DownSampleTextureSetPtrs[NumberOfDownSamples];
+        CRenderContextPtr m_DownSampleRenderContextPtrs[NumberOfDownSamples];
+        CTargetSetPtr     m_DownSampleTargetSetPtrs[NumberOfDownSamples];
+        Base::Int2        m_DownSampleSizes[NumberOfDownSamples];
+
+        CSamplerSetPtr m_PSSamplerSetPtr;
+
+        CBloomRenderJobs m_BloomRenderJobs;
+        
+        unsigned int m_SwapCounter;
+        
+    private:
+        
+        void RenderBloom();
+        void PassThrough();
+
+        void BuildRenderJobs();
+    };
+} // namespace
+
+namespace
+{
+    CGfxPostFXHDRRenderer::CGfxPostFXHDRRenderer()
+        : m_QuadModelPtr                        ()
+        , m_FullQuadInputLayoutPtr              ()
+        , m_RectangleShaderVSPtr                ()
+        , m_DownSampleShaderPSPtr               ()
+        , m_GaussianBlurShaderPtr               ()
+        , m_BloomShaderPSPtr                    ()
+        , m_PassThroughPSPtr                    ()
+        , m_BaseVSBufferSetPtr                  ()
+        , m_GaussianBlurPropertiesCSBufferSetPtr()
+        , m_DownSamplePropertiesPSBufferSetPtr  ()
+        , m_BloomPropertiesPSBufferSetPtr       ()
+        , m_BlurStagesTextureSetPtrs            ()
+        , m_BlurStageFinalTextureSetPtrs        ()
+        , m_SwapTexturePtrs                     ()
+        , m_SwapContextPtrs                     ()
+        , m_SwapRenderTargetPtrs                ()
+        , m_DownSampleTextureSetPtrs            ()
+        , m_DownSampleRenderContextPtrs         ()
+        , m_DownSampleTargetSetPtrs             ()
+        , m_DownSampleSizes                     ()
+        , m_PSSamplerSetPtr                     ()
+        , m_BloomRenderJobs                     ()
+        , m_SwapCounter                         (0)
+    {
+        m_BloomRenderJobs.reserve(2);
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    CGfxPostFXHDRRenderer::~CGfxPostFXHDRRenderer()
+    {
+        
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CGfxPostFXHDRRenderer::OnStart()
+    {
+        // -----------------------------------------------------------------------------
+        // Initiate target set sizes of down samples
+        // -----------------------------------------------------------------------------
+        Base::Int2 Size = Main::GetScreenSize();
+
+        for (unsigned int IndexOfBlur = 0; IndexOfBlur < s_NumberOfBlurStages; ++ IndexOfBlur)
+        {
+            int Devisor = Base::Pow(2, (IndexOfBlur + 1));
+
+            m_DownSampleSizes[IndexOfBlur] = Base::Int2(Size[0] / Devisor, Size[1] / Devisor);
+        }
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CGfxPostFXHDRRenderer::OnExit()
+    {
+        m_QuadModelPtr = 0;
+
+        m_FullQuadInputLayoutPtr = 0;
+
+        m_RectangleShaderVSPtr  = 0;
+        m_DownSampleShaderPSPtr = 0;
+        m_GaussianBlurShaderPtr = 0;
+        m_BloomShaderPSPtr      = 0;
+        m_PassThroughPSPtr      = 0;
+
+        m_BaseVSBufferSetPtr                   = 0;
+        m_GaussianBlurPropertiesCSBufferSetPtr = 0;
+        m_DownSamplePropertiesPSBufferSetPtr   = 0;
+        m_BloomPropertiesPSBufferSetPtr        = 0;
+
+        m_SwapTexturePtrs[0]      = 0;
+        m_SwapTexturePtrs[1]      = 0;
+        m_SwapContextPtrs[0]      = 0;
+        m_SwapContextPtrs[1]      = 0;
+        m_SwapRenderTargetPtrs[0] = 0;
+        m_SwapRenderTargetPtrs[1] = 0;
+
+        m_PSSamplerSetPtr = 0;
+
+        for (unsigned int IndexOfBlurStage = 0; IndexOfBlurStage < s_NumberOfBlurStages; ++IndexOfBlurStage)
+        {
+            m_BlurStageFinalTextureSetPtrs[IndexOfBlurStage] = 0;
+        }
+
+        for (unsigned int IndexOfBlurStage = 0; IndexOfBlurStage < s_NumberOfBlurStages * 2; ++ IndexOfBlurStage)
+        {
+            m_BlurStagesTextureSetPtrs[IndexOfBlurStage] = 0;
+        }
+
+        for (unsigned int IndexOfDownSample = 0; IndexOfDownSample < NumberOfDownSamples; ++IndexOfDownSample)
+        {
+            m_DownSampleTextureSetPtrs[IndexOfDownSample] = 0;
+            m_DownSampleRenderContextPtrs[IndexOfDownSample] = 0;
+            m_DownSampleTargetSetPtrs[IndexOfDownSample] = 0;
+        }
+
+        m_BloomRenderJobs.clear();
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CGfxPostFXHDRRenderer::OnSetupShader()
+    {   
+        m_RectangleShaderVSPtr  = ShaderManager::CompileVS("vs_screen_p_quad.glsl"        , "main");
+        m_DownSampleShaderPSPtr = ShaderManager::CompilePS("fs_down_sample.glsl"          , "main");
+        m_GaussianBlurShaderPtr = ShaderManager::CompileCS("cs_gaussian_blur_rgba16f.glsl", "main");
+        m_BloomShaderPSPtr      = ShaderManager::CompilePS("fs_bloom.glsl"                , "main");
+        m_PassThroughPSPtr       = ShaderManager::CompilePS("fs_pass_through.glsl"         , "main");
+
+        // -----------------------------------------------------------------------------
+
+        const SInputElementDescriptor InputLayout[] =
+        {
+            { "POSITION", 0, CInputLayout::Float2Format, 0, 0, 8, CInputLayout::PerVertex, 0, },
+        };
+
+        m_FullQuadInputLayoutPtr = ShaderManager::CreateInputLayout(InputLayout, 1, m_RectangleShaderVSPtr);
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CGfxPostFXHDRRenderer::OnSetupKernels()
+    {
+        
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CGfxPostFXHDRRenderer::OnSetupRenderTargets()
+    {
+        // -----------------------------------------------------------------------------
+        // Initiate target set
+        // -----------------------------------------------------------------------------
+        Base::Int2 Size = Main::GetScreenSize();
+        
+        // -----------------------------------------------------------------------------
+        // Create render target textures
+        // -----------------------------------------------------------------------------
+        STextureDescriptor RendertargetDescriptor;
+        
+        RendertargetDescriptor.m_NumberOfPixelsU  = Size[0];
+        RendertargetDescriptor.m_NumberOfPixelsV  = Size[1];
+        RendertargetDescriptor.m_NumberOfPixelsW  = 1;
+        RendertargetDescriptor.m_NumberOfMipMaps  = 1;
+        RendertargetDescriptor.m_NumberOfTextures = 1;
+        RendertargetDescriptor.m_Binding          = CTextureBase::RenderTarget | CTextureBase::ShaderResource;
+        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
+        RendertargetDescriptor.m_Format           = CTextureBase::Unknown;
+        RendertargetDescriptor.m_Usage            = CTextureBase::GPURead;
+        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_pFileName        = 0;
+        RendertargetDescriptor.m_pPixels          = 0;
+        RendertargetDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        
+        CTexture2DPtr ColorTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Swap Color
+
+        // -----------------------------------------------------------------------------
+        // Create down sample target sets
+        // -----------------------------------------------------------------------------
+        for (unsigned int IndexofDownSample = 0; IndexofDownSample < NumberOfDownSamples; ++ IndexofDownSample)
+        {
+            RendertargetDescriptor.m_NumberOfPixelsU = m_DownSampleSizes[IndexofDownSample][0];
+            RendertargetDescriptor.m_NumberOfPixelsV = m_DownSampleSizes[IndexofDownSample][1];
+
+            CTexture2DPtr DownSampleRenderTargetTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Down Samples
+
+            m_DownSampleTargetSetPtrs[IndexofDownSample] = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(DownSampleRenderTargetTexturePtr));
+        }
+        
+        // -----------------------------------------------------------------------------
+        // Create swap buffer target set
+        // -----------------------------------------------------------------------------
+        m_SwapRenderTargetPtrs[0] = TargetSetManager::CreateTargetSet(TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0));
+        m_SwapRenderTargetPtrs[1] = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(ColorTexturePtr));
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CGfxPostFXHDRRenderer::OnSetupStates()
+    {
+        // -----------------------------------------------------------------------------
+        // Get screen resolutions
+        // -----------------------------------------------------------------------------
+        Base::Int2 Size = Main::GetScreenSize();
+        
+        // -----------------------------------------------------------------------------
+        // Setup states
+        // -----------------------------------------------------------------------------
+        CCameraPtr          CameraPtr          = ViewManager     ::GetFullQuadCamera();
+        CViewPortSetPtr     ViewPortSetPtr     = ViewManager     ::GetViewPortSet();
+        CRenderStatePtr     RenderStatePtr     = StateManager    ::GetRenderState(CRenderState::NoDepth);
+        CTargetSetPtr       TargetSetPtr       = TargetSetManager::GetSystemTargetSet();
+        
+        // -----------------------------------------------------------------------------
+        
+        CRenderContextPtr SwapOneContextPtr = ContextManager::CreateRenderContext();
+        
+        SwapOneContextPtr->SetCamera(CameraPtr);
+        SwapOneContextPtr->SetViewPortSet(ViewPortSetPtr);
+        SwapOneContextPtr->SetTargetSet(m_SwapRenderTargetPtrs[0]);
+        SwapOneContextPtr->SetRenderState(RenderStatePtr);
+        
+        m_SwapContextPtrs[0] = SwapOneContextPtr;
+        
+        // -----------------------------------------------------------------------------
+        
+        CRenderContextPtr SwapTwoContextPtr = ContextManager::CreateRenderContext();
+        
+        SwapTwoContextPtr->SetCamera(CameraPtr);
+        SwapTwoContextPtr->SetViewPortSet(ViewPortSetPtr);
+        SwapTwoContextPtr->SetTargetSet(m_SwapRenderTargetPtrs[1]);
+        SwapTwoContextPtr->SetRenderState(RenderStatePtr);
+        
+        m_SwapContextPtrs[1] = SwapTwoContextPtr;
+
+        // -----------------------------------------------------------------------------
+
+        for (unsigned int IndexOfDownSample = 0; IndexOfDownSample < NumberOfDownSamples; ++IndexOfDownSample)
+        {
+            SViewPortDescriptor ViewPortDesc;
+
+            ViewPortDesc.m_TopLeftX = 0.0f;
+            ViewPortDesc.m_TopLeftY = 0.0f;
+            ViewPortDesc.m_Width    = static_cast<float>(m_DownSampleSizes[IndexOfDownSample][0]);
+            ViewPortDesc.m_Height   = static_cast<float>(m_DownSampleSizes[IndexOfDownSample][1]);
+            ViewPortDesc.m_MinDepth = 0.0f;
+            ViewPortDesc.m_MaxDepth = 1.0f;
+        
+            CViewPortPtr DownSampleViewPortPtr = ViewManager::CreateViewPort(ViewPortDesc);
+
+            CViewPortSetPtr DownSampleViewPortSetPtr = ViewManager::CreateViewPortSet(DownSampleViewPortPtr);
+
+            // -----------------------------------------------------------------------------
+
+            CRenderContextPtr DownSampleRenderContextPtr = ContextManager::CreateRenderContext();
+
+            DownSampleRenderContextPtr->SetCamera(CameraPtr);
+            DownSampleRenderContextPtr->SetViewPortSet(DownSampleViewPortSetPtr);
+            DownSampleRenderContextPtr->SetTargetSet(m_DownSampleTargetSetPtrs[IndexOfDownSample]);
+            DownSampleRenderContextPtr->SetRenderState(RenderStatePtr);
+
+            m_DownSampleRenderContextPtrs[IndexOfDownSample] = DownSampleRenderContextPtr;
+        }
+
+        // -----------------------------------------------------------------------------
+
+        CSamplerPtr LinearFilter = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
+
+        m_PSSamplerSetPtr = SamplerManager::CreateSamplerSet(LinearFilter, LinearFilter, LinearFilter, LinearFilter);
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CGfxPostFXHDRRenderer::OnSetupTextures()
+    {
+        CTextureBasePtr ColorOneTexturePtr          = m_SwapRenderTargetPtrs[0]->GetRenderTarget(0);
+        CTextureBasePtr ColorTwoTexturePtr          = m_SwapRenderTargetPtrs[1]->GetRenderTarget(0);
+        CTextureBasePtr LightAccumulationTexturePtr = TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0);
+        CTextureBasePtr DepthTexturePtr             = TargetSetManager::GetDeferredTargetSet()         ->GetDepthStencilTarget();
+
+        // -----------------------------------------------------------------------------
+
+        STextureDescriptor TextureDescriptor;
+        
+        TextureDescriptor.m_NumberOfPixelsW  = 1;
+        TextureDescriptor.m_NumberOfMipMaps  = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
+        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
+        TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        TextureDescriptor.m_Usage            = CTextureBase::GPUReadWrite;
+        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        TextureDescriptor.m_pFileName        = 0;
+        TextureDescriptor.m_pPixels          = 0;
+
+        assert(s_NumberOfBlurStages == NumberOfDownSamples);
+
+        for (unsigned int IndexOfBlurStage = 0; IndexOfBlurStage < s_NumberOfBlurStages; ++IndexOfBlurStage)
+        {
+            TextureDescriptor.m_NumberOfPixelsU = m_DownSampleSizes[IndexOfBlurStage][0];
+            TextureDescriptor.m_NumberOfPixelsV = m_DownSampleSizes[IndexOfBlurStage][1];
+
+            CTextureBasePtr ResultTexturePtr     = static_cast<CTextureBasePtr>(TextureManager::CreateTexture2D(TextureDescriptor));
+            CTextureBasePtr TempTexturePtr       = static_cast<CTextureBasePtr>(TextureManager::CreateTexture2D(TextureDescriptor));
+            CTextureBasePtr DownSampleTexturePtr = m_DownSampleTargetSetPtrs[IndexOfBlurStage]->GetRenderTarget(0);
+
+            m_BlurStagesTextureSetPtrs[IndexOfBlurStage * 2 + 0] = TextureManager::CreateTextureSet(DownSampleTexturePtr, TempTexturePtr);
+            m_BlurStagesTextureSetPtrs[IndexOfBlurStage * 2 + 1] = TextureManager::CreateTextureSet(TempTexturePtr      , ResultTexturePtr);
+        }
+
+        // -----------------------------------------------------------------------------
+
+        m_DownSampleTextureSetPtrs[DownSample1] = TextureManager::CreateTextureSet(LightAccumulationTexturePtr);
+        m_DownSampleTextureSetPtrs[DownSample2] = TextureManager::CreateTextureSet(m_DownSampleTargetSetPtrs[0]->GetRenderTarget(0));
+        m_DownSampleTextureSetPtrs[DownSample3] = TextureManager::CreateTextureSet(m_DownSampleTargetSetPtrs[1]->GetRenderTarget(0));
+        m_DownSampleTextureSetPtrs[DownSample4] = TextureManager::CreateTextureSet(m_DownSampleTargetSetPtrs[2]->GetRenderTarget(0));
+        m_DownSampleTextureSetPtrs[DownSample5] = TextureManager::CreateTextureSet(m_DownSampleTargetSetPtrs[3]->GetRenderTarget(0));
+
+        // -----------------------------------------------------------------------------
+        
+        for (unsigned int IndexOfBlurStage = 0; IndexOfBlurStage < s_NumberOfBlurStages; ++IndexOfBlurStage)
+        {
+            unsigned int BlurStageIndex = IndexOfBlurStage * 2 + 1;
+
+            m_BlurStageFinalTextureSetPtrs[IndexOfBlurStage] = TextureManager::CreateTextureSet(m_BlurStagesTextureSetPtrs[BlurStageIndex]->GetTexture(1));
+        }
+
+        // -----------------------------------------------------------------------------
+
+        m_SwapTexturePtrs[0] = TextureManager::CreateTextureSet(ColorOneTexturePtr, DepthTexturePtr);
+        m_SwapTexturePtrs[1] = TextureManager::CreateTextureSet(ColorTwoTexturePtr, DepthTexturePtr);
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CGfxPostFXHDRRenderer::OnSetupBuffers()
+    {        
+        // -----------------------------------------------------------------------------
+        // Setup view buffer for post rendering
+        // -----------------------------------------------------------------------------
+        SBufferDescriptor ConstanteBufferDesc;
+
+        // -----------------------------------------------------------------------------
+        
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SGaussianShaderProperties);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        CBufferPtr GaussianSettingsResourceBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+        
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SBloomShaderProperties);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        CBufferPtr BloomSettingsResourceBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+        
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SDownSampleShaderProperties);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        CBufferPtr DownSampleSettingsResourceBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        
+        // -----------------------------------------------------------------------------
+
+        m_BaseVSBufferSetPtr                   = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
+        m_GaussianBlurPropertiesCSBufferSetPtr = BufferManager::CreateBufferSet(GaussianSettingsResourceBuffer);
+        m_BloomPropertiesPSBufferSetPtr        = BufferManager::CreateBufferSet(BloomSettingsResourceBuffer);
+        m_DownSamplePropertiesPSBufferSetPtr   = BufferManager::CreateBufferSet(DownSampleSettingsResourceBuffer);
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CGfxPostFXHDRRenderer::OnSetupResources()
+    {
+        
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CGfxPostFXHDRRenderer::OnSetupModels()
+    {
+        m_QuadModelPtr = ModelManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CGfxPostFXHDRRenderer::OnSetupEnd()
+    {
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CGfxPostFXHDRRenderer::OnReload()
+    {
+        
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CGfxPostFXHDRRenderer::OnNewMap()
+    {
+        
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CGfxPostFXHDRRenderer::OnUnloadMap()
+    {
+        
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CGfxPostFXHDRRenderer::Update()
+    {
+        BuildRenderJobs();
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CGfxPostFXHDRRenderer::Render()
+    {
+        Performance::BeginEvent("HDR Post Process");
+
+        m_SwapCounter = 0;
+
+        RenderBloom();
+
+        PassThrough();
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxPostFXHDRRenderer::RenderBloom()
+    {
+        if (m_BloomRenderJobs.size() == 0) return;
+
+        Performance::BeginEvent("Bloom");
+
+        // TODO: What happens if more then one DOF effect is available?
+        Dt::CBloomFXFacet* pDataBloomFacet = m_BloomRenderJobs[0].m_pDataBloomFacet;
+
+        assert(pDataBloomFacet != 0);
+
+        // -----------------------------------------------------------------------------
+        // Down Sample
+        // -----------------------------------------------------------------------------
+        for (unsigned int IndexOfDownSample = 0; IndexOfDownSample < pDataBloomFacet->GetSize(); ++IndexOfDownSample)
+        {
+            SDownSampleShaderProperties* pDownSampleSettings = static_cast<SDownSampleShaderProperties*>(BufferManager::MapConstantBuffer(m_DownSamplePropertiesPSBufferSetPtr->GetBuffer(0)));
+
+            pDownSampleSettings->m_InvertTexturesize[0] = 1.0f / static_cast<float>(m_DownSampleSizes[IndexOfDownSample][0] * 2);
+            pDownSampleSettings->m_InvertTexturesize[1] = 1.0f / static_cast<float>(m_DownSampleSizes[IndexOfDownSample][1] * 2);
+
+            BufferManager::UnmapConstantBuffer(m_DownSamplePropertiesPSBufferSetPtr->GetBuffer(0));
+
+            const unsigned int pOffset[] = { 0, 0 };
+
+            ContextManager::SetRenderContext(m_DownSampleRenderContextPtrs[IndexOfDownSample]);
+
+            ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
+
+            ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+
+            ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+
+            ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
+
+            ContextManager::SetTopology(STopology::TriangleList);
+
+            ContextManager::SetShaderVS(m_RectangleShaderVSPtr);
+
+            ContextManager::SetShaderPS(m_DownSampleShaderPSPtr);
+
+            ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
+
+            ContextManager::SetConstantBufferSetPS(m_DownSamplePropertiesPSBufferSetPtr);
+
+            ContextManager::SetTextureSetPS(m_DownSampleTextureSetPtrs[IndexOfDownSample]);
+
+            ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+
+            ContextManager::ResetTextureSetPS();
+
+            ContextManager::ResetConstantBufferSetPS();
+
+            ContextManager::ResetConstantBufferSetVS();
+
+            ContextManager::ResetTopology();
+
+            ContextManager::ResetInputLayout();
+
+            ContextManager::ResetIndexBuffer();
+
+            ContextManager::ResetVertexBufferSet();
+
+            ContextManager::ResetSamplerSetPS();
+
+            ContextManager::ResetShaderVS();
+
+            ContextManager::ResetShaderPS();
+
+            ContextManager::ResetRenderContext();
+        }
+
+        // -----------------------------------------------------------------------------
+        // Blur down samples
+        // -----------------------------------------------------------------------------
+        for (unsigned int IndexOfBlurStage = 0; IndexOfBlurStage < pDataBloomFacet->GetSize(); ++IndexOfBlurStage)
+        {
+            unsigned int NumberOfThreadGroupsX;
+            unsigned int NumberOfThreadGroupsY;
+
+            NumberOfThreadGroupsX = (m_DownSampleSizes[IndexOfBlurStage][0] + s_BlurTileSize - 1) / (s_BlurTileSize);
+            NumberOfThreadGroupsY = (m_DownSampleSizes[IndexOfBlurStage][1] + s_BlurTileSize - 1) / (s_BlurTileSize);
+
+            // -----------------------------------------------------------------------------
+            // Blur
+            // -----------------------------------------------------------------------------
+            SGaussianShaderProperties* pGaussianSettings = static_cast<SGaussianShaderProperties*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0)));
+
+            pGaussianSettings->m_Direction[0] = 1;
+            pGaussianSettings->m_Direction[1] = 0;
+            pGaussianSettings->m_MaxPixelCoord[0] = m_DownSampleSizes[IndexOfBlurStage][0];
+            pGaussianSettings->m_MaxPixelCoord[1] = m_DownSampleSizes[IndexOfBlurStage][1];
+            pGaussianSettings->m_Weights[0] = 0.018816f;
+            pGaussianSettings->m_Weights[1] = 0.034474f;
+            pGaussianSettings->m_Weights[2] = 0.056577f;
+            pGaussianSettings->m_Weights[3] = 0.083173f;
+            pGaussianSettings->m_Weights[4] = 0.109523f;
+            pGaussianSettings->m_Weights[5] = 0.129188f;
+            pGaussianSettings->m_Weights[6] = 0.136498f;
+
+            BufferManager::UnmapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0));
+
+
+
+            ContextManager::SetShaderCS(m_GaussianBlurShaderPtr);
+
+            ContextManager::SetConstantBufferSetCS(m_GaussianBlurPropertiesCSBufferSetPtr);
+
+            ContextManager::SetTextureSetCS(m_BlurStagesTextureSetPtrs[IndexOfBlurStage * 2 + 0]);
+
+            ContextManager::Dispatch(NumberOfThreadGroupsX, NumberOfThreadGroupsY, 1);
+
+            ContextManager::ResetTextureSetCS();
+
+            ContextManager::ResetConstantBufferSetCS();
+
+            ContextManager::ResetShaderCS();
+
+
+            // -----------------------------------------------------------------------------
+            // Blur
+            // -----------------------------------------------------------------------------
+            pGaussianSettings = static_cast<SGaussianShaderProperties*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0)));
+
+            pGaussianSettings->m_Direction[0] = 0;
+            pGaussianSettings->m_Direction[1] = 1;
+            pGaussianSettings->m_MaxPixelCoord[0] = m_DownSampleSizes[IndexOfBlurStage][0];
+            pGaussianSettings->m_MaxPixelCoord[1] = m_DownSampleSizes[IndexOfBlurStage][1];
+            pGaussianSettings->m_Weights[0] = 0.018816f;
+            pGaussianSettings->m_Weights[1] = 0.034474f;
+            pGaussianSettings->m_Weights[2] = 0.056577f;
+            pGaussianSettings->m_Weights[3] = 0.083173f;
+            pGaussianSettings->m_Weights[4] = 0.109523f;
+            pGaussianSettings->m_Weights[5] = 0.129188f;
+            pGaussianSettings->m_Weights[6] = 0.136498f;
+
+            BufferManager::UnmapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0));
+
+
+
+            ContextManager::SetShaderCS(m_GaussianBlurShaderPtr);
+
+            ContextManager::SetConstantBufferSetCS(m_GaussianBlurPropertiesCSBufferSetPtr);
+
+            ContextManager::SetTextureSetCS(m_BlurStagesTextureSetPtrs[IndexOfBlurStage * 2 + 1]);
+
+            ContextManager::Dispatch(NumberOfThreadGroupsX, NumberOfThreadGroupsY, 1);
+
+            ContextManager::ResetTextureSetCS();
+
+            ContextManager::ResetConstantBufferSetCS();
+
+            ContextManager::ResetShaderCS();
+        }
+
+        // -----------------------------------------------------------------------------
+        // Set current swap buffer count
+        // -----------------------------------------------------------------------------
+        int CurrentSwapBufferCount = m_SwapCounter        % 2;
+        int NextSwapBufferCount    = (m_SwapCounter += 1) % 2;
+
+        // -----------------------------------------------------------------------------
+        // Buffer
+        // -----------------------------------------------------------------------------
+        SBloomShaderProperties* pBloomShaderProperties = static_cast<SBloomShaderProperties*>(BufferManager::MapConstantBuffer(m_BloomPropertiesPSBufferSetPtr->GetBuffer(0)));
+
+        pBloomShaderProperties->m_BloomThresholdValue = Base::Float4(static_cast<float>(pDataBloomFacet->GetTreshhold()), 0, 0, pDataBloomFacet->GetExposureScale());
+        pBloomShaderProperties->m_BloomTintIntensity  = pDataBloomFacet->GetTint() * pDataBloomFacet->GetIntensity();
+
+        BufferManager::UnmapConstantBuffer(m_BloomPropertiesPSBufferSetPtr->GetBuffer(0));
+
+        // -----------------------------------------------------------------------------
+        // Rendering
+        // -----------------------------------------------------------------------------
+        const unsigned int pOffset[] = {0, 0};
+
+        ContextManager::SetRenderContext(m_SwapContextPtrs[NextSwapBufferCount]);
+        
+        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
+        
+        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        
+        ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
+        
+        ContextManager::SetTopology(STopology::TriangleList);
+        
+        ContextManager::SetShaderVS(m_RectangleShaderVSPtr);
+        
+        ContextManager::SetShaderPS(m_BloomShaderPSPtr);
+        
+        ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
+        
+        ContextManager::SetConstantBufferSetPS(m_BloomPropertiesPSBufferSetPtr);
+        
+        ContextManager::SetTextureSetPS(m_SwapTexturePtrs[CurrentSwapBufferCount]);
+
+        ContextManager::SetTextureSetPS(m_BlurStageFinalTextureSetPtrs[pDataBloomFacet->GetSize() - 1]);
+        
+        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        
+        ContextManager::ResetTextureSetPS();
+        
+        ContextManager::ResetConstantBufferSetPS();
+        
+        ContextManager::ResetConstantBufferSetVS();
+        
+        ContextManager::ResetTopology();
+        
+        ContextManager::ResetInputLayout();
+        
+        ContextManager::ResetIndexBuffer();
+        
+        ContextManager::ResetVertexBufferSet();
+        
+        ContextManager::ResetSamplerSetPS();
+        
+        ContextManager::ResetShaderVS();
+        
+        ContextManager::ResetShaderPS();
+        
+        ContextManager::ResetRenderContext();
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxPostFXHDRRenderer::PassThrough()
+    {
+        // -----------------------------------------------------------------------------
+        // Set current swap buffer count
+        // -----------------------------------------------------------------------------
+        int CurrentSwapBufferCount = m_SwapCounter        % 2;
+        int NextSwapBufferCount    = (m_SwapCounter += 1) % 2;
+
+        if (CurrentSwapBufferCount == 0)
+        {
+            return;
+        }
+
+        Performance::BeginEvent("Pass Through");
+        
+        // -----------------------------------------------------------------------------
+        // Rendering
+        // -----------------------------------------------------------------------------
+        const unsigned int pOffset[] = {0, 0};
+        
+        ContextManager::SetRenderContext(m_SwapContextPtrs[NextSwapBufferCount]);
+        
+        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
+        
+        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        
+        ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
+        
+        ContextManager::SetTopology(STopology::TriangleList);
+        
+        ContextManager::SetShaderVS(m_RectangleShaderVSPtr);
+        
+        ContextManager::SetShaderPS(m_PassThroughPSPtr);
+        
+        ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
+        
+        ContextManager::SetTextureSetPS(m_SwapTexturePtrs[CurrentSwapBufferCount]);
+        
+        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        
+        ContextManager::ResetTextureSetPS();
+        
+        ContextManager::ResetConstantBufferSetPS();
+        
+        ContextManager::ResetConstantBufferSetVS();
+        
+        ContextManager::ResetTopology();
+        
+        ContextManager::ResetInputLayout();
+        
+        ContextManager::ResetIndexBuffer();
+        
+        ContextManager::ResetVertexBufferSet();
+        
+        ContextManager::ResetSamplerSetPS();
+        
+        ContextManager::ResetShaderVS();
+        
+        ContextManager::ResetShaderPS();
+        
+        ContextManager::ResetRenderContext();
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxPostFXHDRRenderer::BuildRenderJobs()
+    {
+        // -----------------------------------------------------------------------------
+        // Clear current render jobs
+        // -----------------------------------------------------------------------------
+        m_BloomRenderJobs.clear();
+
+        // -----------------------------------------------------------------------------
+        // Iterate throw every entity inside this map
+        // -----------------------------------------------------------------------------
+        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::FX);
+        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
+
+        for (; CurrentEntity != EndOfEntities; )
+        {
+            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+
+            // -----------------------------------------------------------------------------
+            // Get graphic facet
+            // -----------------------------------------------------------------------------
+            if (rCurrentEntity.GetType() == Dt::SFXType::Bloom)
+            {
+                Dt::CBloomFXFacet* pDataBloomFacet = static_cast<Dt::CBloomFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+                assert(pDataBloomFacet != 0);
+
+                // -----------------------------------------------------------------------------
+                // Set sun into a new render job
+                // -----------------------------------------------------------------------------
+                SBloomRenderJob NewRenderJob;
+
+                NewRenderJob.m_pDataBloomFacet = pDataBloomFacet;
+
+                m_BloomRenderJobs.push_back(NewRenderJob);
+            }
+
+            // -----------------------------------------------------------------------------
+            // Next entity
+            // -----------------------------------------------------------------------------
+            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::FX);
+        }
+    }
+} // namespace
+
+namespace Gfx
+{
+namespace PostFXHDR
+{
+    void OnStart()
+    {
+        CGfxPostFXHDRRenderer::GetInstance().OnStart();
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void OnExit()
+    {
+        CGfxPostFXHDRRenderer::GetInstance().OnExit();
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void OnSetupShader()
+    {
+        CGfxPostFXHDRRenderer::GetInstance().OnSetupShader();
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void OnSetupKernels()
+    {
+        CGfxPostFXHDRRenderer::GetInstance().OnSetupKernels();
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void OnSetupRenderTargets()
+    {
+        CGfxPostFXHDRRenderer::GetInstance().OnSetupRenderTargets();
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void OnSetupStates()
+    {
+        CGfxPostFXHDRRenderer::GetInstance().OnSetupStates();
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void OnSetupTextures()
+    {
+        CGfxPostFXHDRRenderer::GetInstance().OnSetupTextures();
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void OnSetupBuffers()
+    {
+        CGfxPostFXHDRRenderer::GetInstance().OnSetupBuffers();
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void OnSetupResources()
+    {
+        CGfxPostFXHDRRenderer::GetInstance().OnSetupResources();
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void OnSetupModels()
+    {
+        CGfxPostFXHDRRenderer::GetInstance().OnSetupModels();
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void OnSetupEnd()
+    {
+        CGfxPostFXHDRRenderer::GetInstance().OnSetupEnd();
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void OnReload()
+    {
+        CGfxPostFXHDRRenderer::GetInstance().OnReload();
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void OnNewMap()
+    {
+        CGfxPostFXHDRRenderer::GetInstance().OnNewMap();
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void OnUnloadMap()
+    {
+        CGfxPostFXHDRRenderer::GetInstance().OnUnloadMap();
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void Update()
+    {
+        CGfxPostFXHDRRenderer::GetInstance().Update();
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void Render()
+    {
+        CGfxPostFXHDRRenderer::GetInstance().Render();
+    }
+} // namespace PostFXHDR
+} // namespace Gfx
+

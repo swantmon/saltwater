@@ -1,0 +1,19 @@
+
+#ifndef __INCLUDE_VS_NON_P_GLSL__
+#define __INCLUDE_VS_NON_P_GLSL__
+
+#include "vs_global.glsl"
+
+layout(location = 0) in vec3 VertexPosition;
+
+out gl_PerVertex
+{
+    vec4 gl_Position;
+};
+
+void main(void)
+{
+    gl_Position = vs_ViewProjectionMatrix * vec4(VertexPosition.xyz, 1.0f);
+}
+
+#endif // __INCLUDE_VS_NON_P_GLSL__

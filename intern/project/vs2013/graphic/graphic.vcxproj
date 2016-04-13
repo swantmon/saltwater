@@ -1,0 +1,411 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\graphic\gfx_actor_facet.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_actor_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_ar_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_light_area_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_light_facet.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_light_sun_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_performance.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_histogram_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_postfx_hdr_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_sky_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_blend_state.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_buffer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_buffer_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_buffer_set.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_reflection_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_light_probe_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_material_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_camera.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_camera_interface.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_context_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_debug_interface.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_debug_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_debug_state.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_depth_stencil_state.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_light_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_exit_state.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_input_layout.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_intro_state.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_load_map_state.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_lod.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_main.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_main_menu_state.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_material.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_model.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_model_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_actor_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_particle_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_play_state.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_postfx_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_light_point_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_rasterizer_state.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_render_context.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_render_state.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_sampler.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_sampler_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_sampler_set.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_shader.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_shader_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_tonemapping_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_shadow_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_start_state.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_state_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_surface.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_target_set.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_target_set_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_texture_1d.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_texture_2d.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_texture_3d.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_texture_base.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_texture_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_texture_set.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_unload_map_state.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_view.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_view_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_view_port.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_view_port_set.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\graphic\gfx_actor_facet.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_actor_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_light_area_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_light_facet.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_ar_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_light_sun_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_performance.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_histogram_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_postfx_hdr_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_sky_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_blend_description.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_blend_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_buffer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_buffer_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_buffer_set.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_reflection_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_material_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_camera.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_camera_interface.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_context_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_data_behavior.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_debug_interface.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_debug_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_debug_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_depth_description.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_depth_stencil_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_light_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_exit_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_input_layout.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_intro_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_load_map_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_lod.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_main.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_main_menu_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_material.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_model.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_model_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_actor_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_buffer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_buffer_set.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_sampler.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_sampler_set.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_shader.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_target_set.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_texture_2d.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_types.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_particle_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_play_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_postfx_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_light_point_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_rasterizer_description.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_rasterizer_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_release.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_render_context.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_render_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_sampler.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_sampler_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_sampler_set.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_shader.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_shader_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_tonemapping_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_shadow_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_start_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_state_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_surface.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_target_set.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_target_set_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_texture_1d.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_texture_2d.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_texture_3d.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_texture_base.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_texture_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_texture_set.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_topology.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_unload_map_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_view.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_view_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_view_port.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_view_port_set.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\data\graphic\shaders\cs_brdf.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\cs_global.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\cs_histogram.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\cs_test.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\es_global.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\es_test.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_atmosphere_cubemap.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_atmosphere_texture.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_bilateral_blur.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_color.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_color_sphere_alpha.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_color_alpha.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_cubemap.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_dof_apply.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_dof_down_sample.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_dof_near.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_dof_near_blur.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_lightprobe_diffuse_sampling.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_lightprobe_specular_sampling.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_light_disklight.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_light_imagelight.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_light_spherelight.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_tone_mapping.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_fxaa.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_gaussian_blur.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_global.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_invert_color.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_light_sunlight.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_light_punctuallight.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_liquid_depth.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_liquid_shading.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_liquid_thickness.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_pane.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_sepia_color.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_shadow.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_shadow_rsm.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_spherical_env_cubemap_generation.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_ssao.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_ssao_apply.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_text.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_texture_copy.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_texture_copy_inverse.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\fs_texture_light_alpha.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\functions.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\gs_global.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\gs_spherical_env_cubemap_generation.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\light.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\material.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\vs_cubemap.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\vs_dof_down_sample.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\vs_dof_near_blur.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\vs_global.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\vs_spherical_env_cubemap_generation.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\vs_vm_p_quad.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\vs_liquid_particle.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\vs_m_p.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\vs_m_pn.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\vs_m_pntbx0.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\vs_m_pnx0.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\vs_m_p_quad.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\vs_non_p.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\vs_screen_p_quad.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\vs_text.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\vs_vm_pc.glsl" />
+    <None Include="..\..\..\..\data\graphic\shaders\vs_vm_pnx0.glsl" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{CCA65C12-1AB6-4E15-9DA2-630AA1D60B2F}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>graphics</RootNamespace>
+    <ProjectName>graphic</ProjectName>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IntDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)d</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <TargetName>$(ProjectName)d</TargetName>
+    <OutDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IntDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)r</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <TargetName>$(ProjectName)r</TargetName>
+    <OutDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\tinyxml2\include</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy ..\..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\*.lib ..\..\..\build\$(Platform)</Command>
+    </PostBuildEvent>
+    <Lib>
+      <OutputFile>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\\$(TargetFileName)</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\opencv\include;..\..\..\..\extern\tinyxml2\include</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy ..\..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\*.lib ..\..\..\build\$(Platform)</Command>
+    </PostBuildEvent>
+    <Lib>
+      <OutputFile>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\\$(TargetFileName)</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\tinyxml2\include</AdditionalIncludeDirectories>
+      <PrecompiledHeaderFile>graphics\gfx_precompiled.h</PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy ..\..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\*.lib ..\..\..\build\$(Platform)</Command>
+    </PostBuildEvent>
+    <Lib>
+      <OutputFile>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\\$(TargetFileName)</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\opencv\include;..\..\..\..\extern\tinyxml2\include</AdditionalIncludeDirectories>
+      <PrecompiledHeaderFile>graphics\gfx_precompiled.h</PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy ..\..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\*.lib ..\..\..\build\$(Platform)</Command>
+    </PostBuildEvent>
+    <Lib>
+      <OutputFile>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\\$(TargetFileName)</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

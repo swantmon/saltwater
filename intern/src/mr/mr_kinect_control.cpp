@@ -1,0 +1,391 @@
+
+#include "base/base_console.h"
+#include "base/base_memory.h"
+
+#include "data/data_texture_manager.h"
+
+#include "mr/cv_guidedfilter.h"
+#include "mr/mr_control_manager.h"
+#include "mr/mr_kinect_control.h"
+
+#include "opencv2/opencv.hpp"
+#include "Kinect.h"
+#include <AR/video.h>
+
+#define COLOR_WIDTH  1920
+#define COLOR_HEIGHT 1080
+#define DEPTH_WIDTH  512
+#define DEPTH_HEIGHT 424
+
+IKinectSensor*     g_pSensor;
+IColorFrameReader* g_pColorFrameReader;
+IDepthFrameReader* g_pDepthFrameReader;
+ICoordinateMapper* g_pCoordinateMapper;
+unsigned char      g_pColorFrameDataRAW[COLOR_WIDTH * COLOR_HEIGHT * 4];
+float              g_pDepthFrameDataRAW[COLOR_WIDTH * COLOR_HEIGHT];
+cv::Mat            DepthFC1CropTemp = cv::Mat(720, 1280, CV_32FC1, 0);
+
+cv::Mat DepthFC1     = cv::Mat(1080, 1920, CV_32FC1, &g_pDepthFrameDataRAW);
+cv::Mat ColorUC4     = cv::Mat(1080, 1920, CV_8UC4, &g_pColorFrameDataRAW);
+cv::Mat ColorUC3     = cv::Mat(1080, 1920, CV_8UC3, 0);
+cv::Mat ColorUC1Crop = cv::Mat(720, 1280, CV_8UC1, 0);
+cv::Mat DepthFC1Crop = cv::Mat(720, 1280, CV_32FC1, 0);
+cv::Mat ColorUC3Crop = cv::Mat(720, 1280, CV_8UC3, 0);
+
+namespace MR
+{
+    CKinectControl::CKinectControl()
+        : CControl          (CControl::Kinect)
+        , m_OriginalSize    ()
+        , m_ConvertedSize   ()
+        , m_pOriginalFrame  (0)
+        , m_pConvertedFrame (0)
+        , m_pCubemap        (0)
+        , m_CameraParameters()
+        , m_ProjectionMatrix()
+    {
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CKinectControl::~CKinectControl()
+    {
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void* CKinectControl::GetOriginalDepthFrame() const
+    {
+        return static_cast<void*>(static_cast<Base::Ptr>(DepthFC1.data));
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void* CKinectControl::GetConvertedDepthFrame() const
+    {
+        return static_cast<void*>(static_cast<Base::Ptr>(DepthFC1Crop.data));
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CKinectControl::InternStart(const SControlDescription& _rDescriptor)
+    {
+        int Error;
+
+        std::string PathToResources = "../data/ar/";
+        std::string PathToResource;
+
+        // -----------------------------------------------------------------------------
+        // Save configuration
+        // -----------------------------------------------------------------------------
+        m_ConvertedSize = Base::Int2(1280, 720);
+        m_OriginalSize  = Base::Int2(1920, 1080);
+
+        // -----------------------------------------------------------------------------
+        // Load the camera parameters from file and save to camera parameters
+        // -----------------------------------------------------------------------------
+        ARParam NativeParams;
+
+        PathToResource = PathToResources + "configurations/" + _rDescriptor.m_pCameraParameterFile;
+
+        Error = arParamLoad(PathToResource.c_str(), 1, &NativeParams);
+
+        assert(Error >= 0);
+
+        arParamChangeSize(&NativeParams, m_OriginalSize[0], m_OriginalSize[1], &NativeParams);
+
+        assert(m_OriginalSize[0] == NativeParams.xsize && m_OriginalSize[1] == NativeParams.ysize);
+
+        m_CameraParameters.m_FrameWidth = NativeParams.xsize;
+        m_CameraParameters.m_FrameHeight = NativeParams.ysize;
+
+        m_CameraParameters.m_ProjectionMatrix[0][0] = NativeParams.mat[0][0];
+        m_CameraParameters.m_ProjectionMatrix[0][1] = NativeParams.mat[0][1];
+        m_CameraParameters.m_ProjectionMatrix[0][2] = NativeParams.mat[0][2];
+        m_CameraParameters.m_ProjectionMatrix[0][3] = NativeParams.mat[0][3];
+
+        m_CameraParameters.m_ProjectionMatrix[1][0] = NativeParams.mat[1][0];
+        m_CameraParameters.m_ProjectionMatrix[1][1] = NativeParams.mat[1][1];
+        m_CameraParameters.m_ProjectionMatrix[1][2] = NativeParams.mat[1][2];
+        m_CameraParameters.m_ProjectionMatrix[1][3] = NativeParams.mat[1][3];
+
+        m_CameraParameters.m_ProjectionMatrix[2][0] = NativeParams.mat[2][0];
+        m_CameraParameters.m_ProjectionMatrix[2][1] = NativeParams.mat[2][1];
+        m_CameraParameters.m_ProjectionMatrix[2][2] = NativeParams.mat[2][2];
+        m_CameraParameters.m_ProjectionMatrix[2][3] = NativeParams.mat[2][3];
+
+        m_CameraParameters.m_DistortionFactor[0] = NativeParams.dist_factor[0];
+        m_CameraParameters.m_DistortionFactor[1] = NativeParams.dist_factor[1];
+        m_CameraParameters.m_DistortionFactor[2] = NativeParams.dist_factor[2];
+        m_CameraParameters.m_DistortionFactor[3] = NativeParams.dist_factor[3];
+        m_CameraParameters.m_DistortionFactor[4] = NativeParams.dist_factor[4];
+        m_CameraParameters.m_DistortionFactor[5] = NativeParams.dist_factor[5];
+        m_CameraParameters.m_DistortionFactor[6] = NativeParams.dist_factor[6];
+        m_CameraParameters.m_DistortionFactor[7] = NativeParams.dist_factor[7];
+        m_CameraParameters.m_DistortionFactor[8] = NativeParams.dist_factor[8];
+
+        m_CameraParameters.m_DistortionFunctionVersion = NativeParams.dist_function_version;
+
+        m_CameraParameters.m_PixelFormat = 1;
+
+        // -----------------------------------------------------------------------------
+        // Set projection matrix
+        // -----------------------------------------------------------------------------
+        m_ProjectionMatrix.SetIdentity();
+
+        m_ProjectionMatrix[0][0] = static_cast<float>(m_CameraParameters.m_ProjectionMatrix[0][0]);
+        m_ProjectionMatrix[0][1] = static_cast<float>(m_CameraParameters.m_ProjectionMatrix[0][1]);
+        m_ProjectionMatrix[0][2] = static_cast<float>(m_CameraParameters.m_ProjectionMatrix[0][2]);
+
+        m_ProjectionMatrix[1][0] = static_cast<float>(m_CameraParameters.m_ProjectionMatrix[1][0]);
+        m_ProjectionMatrix[1][1] = static_cast<float>(m_CameraParameters.m_ProjectionMatrix[1][1]);
+        m_ProjectionMatrix[1][2] = static_cast<float>(m_CameraParameters.m_ProjectionMatrix[1][2]);
+
+        m_ProjectionMatrix[2][0] = static_cast<float>(m_CameraParameters.m_ProjectionMatrix[2][0]);
+        m_ProjectionMatrix[2][1] = static_cast<float>(m_CameraParameters.m_ProjectionMatrix[2][1]);
+        m_ProjectionMatrix[2][2] = static_cast<float>(m_CameraParameters.m_ProjectionMatrix[2][2]);
+
+        // -----------------------------------------------------------------------------
+        // Start capturing
+        // -----------------------------------------------------------------------------
+        HRESULT Result;
+
+        // -----------------------------------------------------------------------------
+        // Get default sensor
+        // -----------------------------------------------------------------------------
+        Result = GetDefaultKinectSensor(&g_pSensor);
+
+        if (FAILED(Result))
+        {
+            BASE_CONSOLE_INFO("Getting default kinect failed.");
+        }
+
+        // -----------------------------------------------------------------------------
+        // Startup sensor
+        // -----------------------------------------------------------------------------
+        g_pSensor->Open();
+
+        g_pSensor->get_CoordinateMapper(&g_pCoordinateMapper);
+
+        // -----------------------------------------------------------------------------
+        // Start streams
+        // -----------------------------------------------------------------------------
+        IColorFrameSource* pColorFrameSource = 0;
+
+        g_pSensor->get_ColorFrameSource(&pColorFrameSource);
+
+        pColorFrameSource->OpenReader(&g_pColorFrameReader);
+
+        if (g_pColorFrameReader != 0)
+        {
+            pColorFrameSource->Release();
+
+            pColorFrameSource = 0;
+        }
+
+        // -----------------------------------------------------------------------------
+
+        IDepthFrameSource* pDepthFrameSource = 0;
+
+        g_pSensor->get_DepthFrameSource(&pDepthFrameSource);
+
+        pDepthFrameSource->OpenReader(&g_pDepthFrameReader);
+
+        if (pDepthFrameSource != 0)
+        {
+            pDepthFrameSource->Release();
+
+            pDepthFrameSource = 0;
+        }
+
+        // -----------------------------------------------------------------------------
+        // Setup intern data
+        // -----------------------------------------------------------------------------
+        Dt::STextureDescriptor TextureDescriptor;
+
+        TextureDescriptor.m_NumberOfPixelsU  = m_OriginalSize[0];
+        TextureDescriptor.m_NumberOfPixelsV  = m_OriginalSize[1];
+        TextureDescriptor.m_NumberOfPixelsW  = 1;
+        TextureDescriptor.m_Format           = Dt::CTextureBase::R8G8B8_UBYTE;
+        TextureDescriptor.m_Semantic         = Dt::CTextureBase::Diffuse;
+        TextureDescriptor.m_pPixels          = static_cast<void*>(static_cast<Base::Ptr>(ColorUC3.data));
+        TextureDescriptor.m_pFileName        = 0;
+        TextureDescriptor.m_pIdentifier      = "ID_Webcam_RGB_Original_Output";
+
+        m_pOriginalFrame = Dt::TextureManager::CreateTexture2D(TextureDescriptor, true, Dt::SDataBehavior::Listen);
+
+        // -----------------------------------------------------------------------------
+
+        TextureDescriptor.m_NumberOfPixelsU  = m_ConvertedSize[0];
+        TextureDescriptor.m_NumberOfPixelsV  = m_ConvertedSize[1];
+        TextureDescriptor.m_pPixels          = static_cast<void*>(static_cast<Base::Ptr>(ColorUC3Crop.data));
+        TextureDescriptor.m_pFileName        = 0;
+        TextureDescriptor.m_pIdentifier      = "ID_Webcam_RGB_Converted_Output";
+
+        m_pConvertedFrame = Dt::TextureManager::CreateTexture2D(TextureDescriptor, true, Dt::SDataBehavior::Listen);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CKinectControl::InternStop()
+    {
+        // -----------------------------------------------------------------------------
+        // Shutdown streams
+        // -----------------------------------------------------------------------------
+        if (g_pColorFrameReader != 0)
+        {
+            g_pColorFrameReader->Release();
+
+            g_pColorFrameReader = 0;
+        }
+
+        // -----------------------------------------------------------------------------
+
+        if (g_pDepthFrameReader == 0)
+        {
+            g_pDepthFrameReader->Release();
+
+            g_pDepthFrameReader = 0;
+        }
+
+        // -----------------------------------------------------------------------------
+        // Shutdown device
+        // -----------------------------------------------------------------------------
+        if (!g_pSensor)
+        {
+            g_pSensor->Close();
+
+            g_pSensor->Release();
+
+            g_pSensor = 0;
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CKinectControl::InternUpdate()
+    {
+        HRESULT Result;
+
+        IColorFrame* pColorFrame = 0;
+
+        Result = g_pColorFrameReader->AcquireLatestFrame(&pColorFrame);
+
+        if (SUCCEEDED(Result))
+        {
+            pColorFrame->CopyConvertedFrameDataToArray(COLOR_WIDTH * COLOR_HEIGHT * 4, g_pColorFrameDataRAW, ColorImageFormat_Bgra);
+        }
+
+        if (pColorFrame)
+        {
+            pColorFrame->Release();
+
+            pColorFrame = 0;
+        }
+
+        // -----------------------------------------------------------------------------
+
+        IDepthFrame* pDepthFrame = 0;
+
+        Result = g_pDepthFrameReader->AcquireLatestFrame(&pDepthFrame);
+
+        if (SUCCEEDED(Result))
+        {
+            unsigned int Capacity;
+            unsigned short* pBuffer;
+
+            pDepthFrame->AccessUnderlyingBuffer(&Capacity, &pBuffer);
+
+            static CameraSpacePoint CameraSpaceOfColorFrame[COLOR_WIDTH * COLOR_HEIGHT];
+
+            g_pCoordinateMapper->MapColorFrameToCameraSpace(
+                DEPTH_WIDTH * DEPTH_HEIGHT, pBuffer,
+                COLOR_WIDTH * COLOR_HEIGHT, CameraSpaceOfColorFrame);
+
+            assert(Capacity == DEPTH_HEIGHT * DEPTH_WIDTH);
+
+            for (unsigned int IndexOfColorValue = 0; IndexOfColorValue < COLOR_WIDTH * COLOR_HEIGHT; ++IndexOfColorValue)
+            {
+                // -----------------------------------------------------------------------------
+                // Depth in millimeters
+                // -----------------------------------------------------------------------------
+                CameraSpacePoint ColorCameraSpacePoint = CameraSpaceOfColorFrame[IndexOfColorValue];
+
+                // -----------------------------------------------------------------------------
+                // Index of destination
+                // -----------------------------------------------------------------------------
+                g_pDepthFrameDataRAW[IndexOfColorValue] = 0.0f;
+
+                if (!std::isinf(fabsf(ColorCameraSpacePoint.Z)))
+                {
+                    g_pDepthFrameDataRAW[IndexOfColorValue] = ColorCameraSpacePoint.Z;
+                }
+            }
+        }
+
+        if (pDepthFrame)
+        {
+            pDepthFrame->Release();
+
+            pDepthFrame = 0;
+        }
+
+        // -----------------------------------------------------------------------------
+
+        // -----------------------------------------------------------------------------
+        // Prepare OpenCV data
+        // -----------------------------------------------------------------------------
+        DepthFC1 = cv::Mat(1080, 1920, CV_32FC1, &g_pDepthFrameDataRAW);
+        ColorUC4 = cv::Mat(1080, 1920, CV_8UC4, &g_pColorFrameDataRAW);
+
+        cv::flip(DepthFC1, DepthFC1, 1);
+        cv::flip(ColorUC4, ColorUC4, 1);
+
+        cv::cvtColor(ColorUC4, ColorUC3, CV_BGRA2RGB);
+
+        ColorUC3(cv::Rect(320, 180, 1280, 720)).copyTo(ColorUC3Crop);
+        DepthFC1(cv::Rect(320, 180, 1280, 720)).copyTo(DepthFC1Crop);
+
+        //cv::cvtColor(ColorUC3Crop, ColorUC1Crop, CV_RGB2GRAY);
+
+        // -----------------------------------------------------------------------------
+        // Blur
+        // -----------------------------------------------------------------------------
+        //DepthFC1Crop = guidedFilter(ColorUC1Crop, DepthFC1Crop, 4, 0.5 * 0.5 * 8.0 * 8.0);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Dt::CTexture2D* CKinectControl::InternGetOriginalFrame()
+    {
+        return m_pOriginalFrame;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Dt::CTexture2D* CKinectControl::InternGetConvertedFrame()
+    {
+        return m_pConvertedFrame;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Dt::CTextureCube* CKinectControl::InternGetCubemap()
+    {
+        return m_pCubemap;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    SDeviceParameter& CKinectControl::InternGetCameraParameters()
+    {
+        return m_CameraParameters;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Base::Float3x3& CKinectControl::InternGetProjectionMatrix()
+    {
+        return m_ProjectionMatrix;
+    }
+} // namespace MR

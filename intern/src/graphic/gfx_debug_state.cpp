@@ -1,0 +1,170 @@
+
+#include "base/base_singleton.h"
+#include "base/base_uncopyable.h"
+
+#include "data/data_entity.h"
+#include "data/data_light_facet.h"
+#include "data/data_map.h"
+
+#include "graphic/gfx_actor_manager.h"
+#include "graphic/gfx_actor_renderer.h"
+#include "graphic/gfx_ar_renderer.h"
+#include "graphic/gfx_debug_renderer.h"
+#include "graphic/gfx_debug_state.h"
+#include "graphic/gfx_histogram_renderer.h"
+#include "graphic/gfx_light_manager.h"
+#include "graphic/gfx_light_area_renderer.h"
+#include "graphic/gfx_light_point_renderer.h"
+#include "graphic/gfx_light_sun_renderer.h"
+#include "graphic/gfx_main.h"
+#include "graphic/gfx_particle_renderer.h"
+#include "graphic/gfx_performance.h"
+#include "graphic/gfx_postfx_renderer.h"
+#include "graphic/gfx_postfx_hdr_renderer.h"
+#include "graphic/gfx_reflection_renderer.h"
+#include "graphic/gfx_render_context.h"
+#include "graphic/gfx_tonemapping_renderer.h"
+#include "graphic/gfx_shadow_renderer.h"
+#include "graphic/gfx_sky_renderer.h"
+#include "graphic/gfx_target_set_manager.h"
+#include "graphic/gfx_view_manager.h"
+
+using namespace Gfx;
+
+namespace
+{
+    class CGfxDebugState : private Base::CUncopyable
+    {
+        BASE_SINGLETON_FUNC(CGfxDebugState)
+        
+    public:
+        
+        void OnEnter();
+        void OnLeave();
+        void OnRun();
+        
+    };
+} // namespace
+
+namespace
+{
+    void CGfxDebugState::OnEnter()
+    {
+        
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CGfxDebugState::OnLeave()
+    {
+        
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CGfxDebugState::OnRun()
+    {
+        ActorManager::Update();
+        LightManager::Update();
+
+        Main::UploadPerFrameConstantBuffers();
+        
+        Main::BeginFrame();
+        
+        // -----------------------------------------------------------------------------
+        // Update renderer to prepare for rendering
+        // -----------------------------------------------------------------------------
+        ARRenderer         ::Update();
+        ActorRenderer      ::Update();   
+        ShadowRenderer     ::Update();
+        LightAreaRenderer  ::Update();
+        LightPointRenderer ::Update();   
+        LightSunRenderer   ::Update();   
+        ReflectionRenderer ::Update();    
+        SkyRenderer        ::Update();
+        HistogramRenderer  ::Update(); 
+        TonemappingRenderer::Update();
+        PostFXHDR          ::Update();
+        PostFX             ::Update();
+
+        // -----------------------------------------------------------------------------
+        // Add debug outputs
+        // -----------------------------------------------------------------------------
+        DebugRenderer::DrawText("DEBUGGING!", Base::Float2(0.0f, 0.0f), Base::Float4(0.0f, 1.0f, 0.0f, 1.0f), 20);
+
+        Gfx::DebugRenderer::DrawGizmo(true);
+        
+        // -----------------------------------------------------------------------------
+        // Creation Pass
+        // -----------------------------------------------------------------------------
+        Performance::BeginEvent("Creation Pass");
+
+        ActorRenderer::Render(); 
+        ARRenderer   ::Render();
+
+        Performance::EndEvent();
+        
+        // -----------------------------------------------------------------------------
+        // Lighting Pass
+        // -----------------------------------------------------------------------------
+        Performance::BeginEvent("Lighting Pass");
+
+        ShadowRenderer    ::Render();
+        LightSunRenderer  ::Render();        
+        LightAreaRenderer ::Render();
+        LightPointRenderer::Render();
+        ReflectionRenderer::Render();
+        SkyRenderer       ::Render();
+
+        HistogramRenderer::Render();
+
+        PostFXHDR::Render();
+
+        Performance::EndEvent();
+
+        // -----------------------------------------------------------------------------
+        // Shading Pass
+        // -----------------------------------------------------------------------------
+        Performance::BeginEvent("Shading Pass");
+        
+        TonemappingRenderer::Render();
+
+        Performance::BeginEvent("Debugging Pass");
+        
+        LightAreaRenderer::RenderBulbs();
+        DebugRenderer::Render();
+
+        Performance::EndEvent();
+
+        PostFX::Render();
+
+        Performance::EndEvent();
+
+        Main::EndFrame();
+    }
+} // namespace
+
+namespace Gfx
+{
+namespace Debug
+{
+    void OnEnter()
+    {
+        CGfxDebugState::GetInstance().OnEnter();
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void OnLeave()
+    {
+        CGfxDebugState::GetInstance().OnLeave();
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void OnRun()
+    {
+        CGfxDebugState::GetInstance().OnRun();
+    }
+} // namespace Debug
+} // namespace Gfx

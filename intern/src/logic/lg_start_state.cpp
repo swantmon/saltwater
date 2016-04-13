@@ -1,0 +1,85 @@
+
+#include "base/base_console.h"
+#include "base/base_singleton.h"
+#include "base/base_uncopyable.h"
+
+#include "data/data_actor_manager.h"
+#include "data/data_entity.h"
+#include "data/data_entity_manager.h"
+#include "data/data_fx_manager.h"
+#include "data/data_light_manager.h"
+#include "data/data_material_manager.h"
+#include "data/data_model_manager.h"
+#include "data/data_texture_manager.h"
+
+#include "logic/lg_start_state.h"
+
+namespace
+{
+    class CLgStartState : private Base::CUncopyable
+    {
+        BASE_SINGLETON_FUNC(CLgStartState)
+        
+    public:
+        
+        int OnEnter();
+        int OnLeave();
+        int OnRun();
+        
+    };
+} // namespace
+
+namespace
+{
+    int CLgStartState::OnEnter()
+    {        
+        Dt::ActorManager   ::OnStart();
+        Dt::EntityManager  ::OnStart();
+        Dt::LightManager   ::OnStart();
+        Dt::FXManager      ::OnStart();
+        Dt::ModelManager   ::OnStart();
+        Dt::MaterialManager::OnStart();
+        Dt::TextureManager ::OnStart();
+
+        return Lg::Start::SResult::Start;
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    int CLgStartState::OnLeave()
+    {
+        return Lg::Start::SResult::Start;
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    int CLgStartState::OnRun()
+    {
+        return Lg::Start::SResult::Intro;
+    }
+} // namespace
+
+namespace Lg
+{
+namespace Start
+{
+    int OnEnter()
+    {
+        return CLgStartState::GetInstance().OnEnter();
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    int OnLeave()
+    {
+        return CLgStartState::GetInstance().OnLeave();
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    int OnRun()
+    {
+        return CLgStartState::GetInstance().OnRun();
+    }
+} // namespace Start
+} // namespace Lg

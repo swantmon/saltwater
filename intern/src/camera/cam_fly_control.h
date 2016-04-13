@@ -1,0 +1,38 @@
+
+#pragma once
+
+#include "camera/cam_control.h"
+
+#include "base/base_input_event.h"
+#include "base/base_vector2.h"
+
+namespace Cam
+{
+    class CFlyControl : public CControl
+    {
+        public:
+
+            CFlyControl();
+             ~CFlyControl();
+
+        private:
+
+            static const float s_MoveVelocityBorder[];
+            static const float s_RotationVelocity;
+
+        private:
+
+            bool          m_IsFlying;
+            Base::Short2  m_LastCursorPosition;
+            Base::Float3  m_CurrentRotation;
+            unsigned int  m_MoveDirection;
+
+        private:
+
+            virtual void InternOnEvent(const Base::CInputEvent& _rEvent);
+
+        private:
+
+            virtual void InternUpdate();
+    };
+}

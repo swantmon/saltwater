@@ -1,0 +1,383 @@
+
+#include "base/base_math_operations.h"
+
+#include "graphic/gfx_camera.h"
+
+namespace Gfx
+{
+    // -------------------------
+    // Equals the camera lens
+    // -------------------------
+    CCamera::CCamera()
+        : m_ProjectionMatrix    ()
+        , m_ViewProjectionMatrix()
+        , m_Left                (0.0f)
+        , m_Right               (0.0f)
+        , m_Bottom              (0.0f)
+        , m_Top                 (0.0f)
+        , m_Near                (0.0f)
+        , m_Far                 (0.0f)
+        , m_Radius              (0.0f)
+        , m_Mode                (Auto)
+        , m_ShutterSpeed        (1.0f / 125.0f)
+        , m_Aperture            (16.0f)
+        , m_ISO                 (100.0f)
+        , m_EC                  (0.0f)
+        , m_WorldAABB           ()
+        , m_pSibling            (nullptr)
+        , m_ViewPtr             (nullptr)
+    {
+    }
+
+    // --------------------------------------------------------------------------------
+
+    CCamera::~CCamera()
+    {
+    }
+
+    // --------------------------------------------------------------------------------
+
+    void CCamera::SetFieldOfView(float _FOVY, float _Aspect, float _Near, float _Far)
+    {
+        float Left;
+        float Right;
+        float Bottom;
+        float Top;
+
+        Bottom = -Base::Tan(Base::DegreesToRadians(_FOVY) / 2.0f) * _Near;
+        Top    = -Bottom;
+        Left   =  _Aspect * Bottom;
+        Right  =  _Aspect * Top;
+
+        SetPerspective(Left, Right, Bottom, Top, _Near, _Far);
+    }
+
+    // --------------------------------------------------------------------------------
+
+    void CCamera::SetPerspective(float _Width, float _Height, float _Near, float _Far)
+    {
+        float HalfWidth;
+        float HalfHeight;
+
+        HalfWidth  = _Width  / 2.0f;
+        HalfHeight = _Height / 2.0f;
+
+        SetPerspective(-HalfWidth, HalfWidth, -HalfHeight, HalfHeight, _Near, _Far);
+    }
+
+    // --------------------------------------------------------------------------------
+
+    void CCamera::SetPerspective(float _Left, float _Right, float _Bottom, float _Top, float _Near, float _Far)
+    {
+        float Scale;
+
+        // --------------------------------------------------------------------------------
+        // Save the dimensions.
+        // --------------------------------------------------------------------------------
+        m_Left   = _Left;
+		m_Right  = _Right;
+		m_Bottom = _Bottom;        
+        m_Top    = _Top;
+        m_Near   = _Near;
+        m_Far    = _Far;
+
+        // --------------------------------------------------------------------------------
+        // Compute the view frustum without the eye point in object space coordinates. By
+        // default the view directions is along the negative-z-axis.       
+        // 
+        //      z |
+        //        |    / y up
+        //        |   / 
+        //        |  /
+        //        | /
+        //        |/_________ 
+        //        |          
+        //        |         x right
+        //        |
+        //        |
+        //   view |
+        //        
+        // --------------------------------------------------------------------------------
+        Scale = _Far / _Near;
+
+        m_ObjectSpaceFrustum[SFace::Near | SFace::Left  | SFace::Bottom] = Base::Float3(_Left         , _Bottom        , -_Near);
+        m_ObjectSpaceFrustum[SFace::Near | SFace::Left  | SFace::Top   ] = Base::Float3(_Left         , _Top           , -_Near);
+        m_ObjectSpaceFrustum[SFace::Near | SFace::Right | SFace::Bottom] = Base::Float3(_Right        , _Bottom        , -_Near);
+        m_ObjectSpaceFrustum[SFace::Near | SFace::Right | SFace::Top   ] = Base::Float3(_Right        , _Top           , -_Near);
+        m_ObjectSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Bottom] = Base::Float3(_Left  * Scale, _Bottom * Scale, -_Far );
+        m_ObjectSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Top   ] = Base::Float3(_Left  * Scale, _Top    * Scale, -_Far );
+        m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Bottom] = Base::Float3(_Right * Scale, _Bottom * Scale, -_Far );
+        m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Top   ] = Base::Float3(_Right * Scale, _Top    * Scale, -_Far );
+
+        // --------------------------------------------------------------------------------
+        // Get the distance from the eye point to the furthest point of the camera.
+        // --------------------------------------------------------------------------------
+        m_Radius = static_cast<float>(m_ObjectSpaceFrustum[SFace::Far | SFace::Right | SFace::Top].Length());
+
+        // --------------------------------------------------------------------------------
+        // Compute the projection matrix.
+        // --------------------------------------------------------------------------------
+        m_ProjectionMatrix.SetRHPerspective(_Left, _Right, _Bottom, _Top, _Near, _Far);
+    }
+    
+    // --------------------------------------------------------------------------------
+
+    void CCamera::SetOrthographic(float _Width, float _Height, float _Near, float _Far)
+    {
+        float HalfWidth;
+        float HalfHeight;
+
+        HalfWidth  = _Width  / 2.0f;
+        HalfHeight = _Height / 2.0f;
+
+        SetOrthographic(-HalfWidth, HalfWidth, -HalfHeight, HalfHeight, _Near, _Far);
+    }
+
+    // --------------------------------------------------------------------------------
+
+    void CCamera::SetOrthographic(float _Left, float _Right, float _Bottom, float _Top, float _Near, float _Far)
+    {
+        // --------------------------------------------------------------------------------
+        // Save the dimensions.
+        // --------------------------------------------------------------------------------
+        m_Left   = _Left;		
+		m_Right  = _Right;
+		m_Bottom = _Bottom;
+        m_Top    = _Top;
+        m_Near   = _Near;
+        m_Far    = _Far;
+
+        // --------------------------------------------------------------------------------
+        // Compute the cubic view frustum in object space coordinates.
+        // --------------------------------------------------------------------------------
+        m_ObjectSpaceFrustum[SFace::Near | SFace::Left  | SFace::Bottom] = Base::Float3(_Left , _Bottom, -_Near);
+        m_ObjectSpaceFrustum[SFace::Near | SFace::Left  | SFace::Top   ] = Base::Float3(_Left , _Top   , -_Near);
+        m_ObjectSpaceFrustum[SFace::Near | SFace::Right | SFace::Bottom] = Base::Float3(_Right, _Bottom, -_Near);
+        m_ObjectSpaceFrustum[SFace::Near | SFace::Right | SFace::Top   ] = Base::Float3(_Right, _Top   , -_Near);
+        m_ObjectSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Bottom] = Base::Float3(_Left , _Bottom, -_Far );
+        m_ObjectSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Top   ] = Base::Float3(_Left , _Top   , -_Far );
+        m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Bottom] = Base::Float3(_Right, _Bottom, -_Far );
+        m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Top   ] = Base::Float3(_Right, _Top   , -_Far );
+
+        // --------------------------------------------------------------------------------
+        // Compute the projection matrix.
+        // --------------------------------------------------------------------------------
+        m_ProjectionMatrix.SetRHOrthographic(_Left, _Right, _Bottom, _Top, _Near, _Far);
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CCamera::InjectCameraMatrix(const Base::Float3x3& _rCameraMatrix)
+    {
+        // --------------------------------------------------------------------------------
+        // Compute the projection matrix with camera matrix. Here we can handle several
+        // projection effects for virtual reality devices.
+        // --------------------------------------------------------------------------------
+        m_ProjectionMatrix.SetRHPerspective(m_Near, m_Far, _rCameraMatrix);
+    }
+
+    // --------------------------------------------------------------------------------
+
+    CViewPtr CCamera::GetView()
+    {
+        return m_ViewPtr;
+    }
+
+    // --------------------------------------------------------------------------------
+
+    float CCamera::GetWidth() const
+    {
+        return m_Left - m_Right;
+    }
+
+    // --------------------------------------------------------------------------------
+
+    float CCamera::GetHeight() const
+    {
+        return m_Top - m_Bottom;
+    }
+
+    // --------------------------------------------------------------------------------
+
+    float CCamera::GetLeft() const
+    {
+        return m_Left;
+    }
+
+    // --------------------------------------------------------------------------------
+
+    float CCamera::GetRight() const
+    {
+        return m_Right;
+    }
+
+    // --------------------------------------------------------------------------------
+
+    float CCamera::GetTop() const
+    {
+        return m_Top;
+    }
+
+    // --------------------------------------------------------------------------------
+
+    float CCamera::GetBottom() const
+    {
+        return m_Bottom;
+    }
+
+    // --------------------------------------------------------------------------------
+
+    float CCamera::GetNear() const
+    {
+        return m_Near;
+    }
+
+    // --------------------------------------------------------------------------------
+
+    float CCamera::GetFar() const
+    {
+        return m_Far;
+    }
+
+    // --------------------------------------------------------------------------------
+
+    float CCamera::GetRadius() const
+    {
+        return m_Radius;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CCamera::ECameraMode CCamera::GetMode() const
+    {
+        return m_Mode;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CCamera::GetShuttertime() const
+    {
+        return m_ShutterSpeed;
+    }
+
+    // --------------------------------------------------------------------------------
+
+    float CCamera::GetAperture() const
+    {
+        return m_Aperture;
+    }
+
+    // --------------------------------------------------------------------------------
+
+    float CCamera::GetISO() const
+    {
+        return m_ISO;
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    float CCamera::GetExposureCompensation() const
+    {
+        return m_EC;
+    }
+
+    // --------------------------------------------------------------------------------
+
+    const Base::Float4x4& CCamera::GetProjectionMatrix() const
+    {
+        return m_ProjectionMatrix;
+    }
+
+    // --------------------------------------------------------------------------------
+
+    const Base::Float4x4& CCamera::GetViewProjectionMatrix() const
+    {
+        return m_ViewProjectionMatrix;
+    }
+
+    // --------------------------------------------------------------------------------
+
+    const Base::Float3* CCamera::GetWorldSpaceFrustum() const
+    {
+        return m_WorldSpaceFrustum;
+    }
+
+    // --------------------------------------------------------------------------------
+
+    const Base::AABB3Float& CCamera::GetWorldAABB() const
+    {
+        return m_WorldAABB;
+    }
+
+    // --------------------------------------------------------------------------------
+
+    void CCamera::UpdateFrustum()
+    {
+        // --------------------------------------------------------------------------------
+        // Compute the model of the camera in world space.
+        // --------------------------------------------------------------------------------
+        m_WorldSpaceFrustum[SFace::Near | SFace::Left  | SFace::Bottom] = m_ViewPtr->m_Position + m_ObjectSpaceFrustum[SFace::Near | SFace::Left  | SFace::Bottom] * m_ViewPtr->m_RotationMatrix;
+        m_WorldSpaceFrustum[SFace::Near | SFace::Left  | SFace::Top   ] = m_ViewPtr->m_Position + m_ObjectSpaceFrustum[SFace::Near | SFace::Left  | SFace::Top   ] * m_ViewPtr->m_RotationMatrix;
+        m_WorldSpaceFrustum[SFace::Near | SFace::Right | SFace::Bottom] = m_ViewPtr->m_Position + m_ObjectSpaceFrustum[SFace::Near | SFace::Right | SFace::Bottom] * m_ViewPtr->m_RotationMatrix;
+        m_WorldSpaceFrustum[SFace::Near | SFace::Right | SFace::Top   ] = m_ViewPtr->m_Position + m_ObjectSpaceFrustum[SFace::Near | SFace::Right | SFace::Top   ] * m_ViewPtr->m_RotationMatrix;
+
+        m_WorldSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Bottom] = m_ViewPtr->m_Position + m_ObjectSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Bottom] * m_ViewPtr->m_RotationMatrix;
+        m_WorldSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Top   ] = m_ViewPtr->m_Position + m_ObjectSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Top   ] * m_ViewPtr->m_RotationMatrix;
+        m_WorldSpaceFrustum[SFace::Far  | SFace::Right | SFace::Bottom] = m_ViewPtr->m_Position + m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Bottom] * m_ViewPtr->m_RotationMatrix;
+        m_WorldSpaceFrustum[SFace::Far  | SFace::Right | SFace::Top   ] = m_ViewPtr->m_Position + m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Top   ] * m_ViewPtr->m_RotationMatrix;
+    }
+
+	// --------------------------------------------------------------------------------
+
+    void CCamera::Update()
+    {
+        // --------------------------------------------------------------------------------
+        // Get the coordinates of the frustum vertices's in world space.
+        // --------------------------------------------------------------------------------
+        UpdateFrustum();
+
+        // --------------------------------------------------------------------------------
+        // Compute the product of view and projection matrix.
+        // --------------------------------------------------------------------------------
+        m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewPtr->m_ViewMatrix;
+
+		// --------------------------------------------------------------------------------
+		// Determine the lower and higher extrema of camera's world position
+		// --------------------------------------------------------------------------------
+		Base::Float3& rMin = m_WorldAABB.GetMin();
+        Base::Float3& rMax = m_WorldAABB.GetMax();
+
+        rMin = m_WorldSpaceFrustum[0];
+        rMax = m_WorldSpaceFrustum[0];
+
+		for (int IndexOfVertex = 1; IndexOfVertex < 8; ++ IndexOfVertex)
+		{
+			if (m_WorldSpaceFrustum[IndexOfVertex][0] < rMin[0])
+			{
+                rMin[0] = m_WorldSpaceFrustum[IndexOfVertex][0];
+			}
+            else if (m_WorldSpaceFrustum[IndexOfVertex][0] > rMax[0])
+            {
+                rMax[0] = m_WorldSpaceFrustum[IndexOfVertex][0];
+            }
+
+            if (m_WorldSpaceFrustum[IndexOfVertex][1] < rMin[1])
+            {
+                rMin[1] = m_WorldSpaceFrustum[IndexOfVertex][1];
+            }
+            else if (m_WorldSpaceFrustum[IndexOfVertex][1] > rMax[1])
+            {
+                rMax[1] = m_WorldSpaceFrustum[IndexOfVertex][1];
+            }
+
+            if (m_WorldSpaceFrustum[IndexOfVertex][2] < rMin[2])
+            {
+                rMin[2] = m_WorldSpaceFrustum[IndexOfVertex][2];
+            }
+            else if (m_WorldSpaceFrustum[IndexOfVertex][2] > rMax[2])
+            {
+                rMax[2] = m_WorldSpaceFrustum[IndexOfVertex][2];
+            }
+		}
+    }
+} // namespace Gfx
