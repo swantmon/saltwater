@@ -196,7 +196,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Initiate target set sizes of down samples
         // -----------------------------------------------------------------------------
-        Base::Int2 Size = Main::GetScreenSize();
+        Base::Int2 Size = Main::GetActiveWindowSize();
 
         for (unsigned int IndexOfBlur = 0; IndexOfBlur < s_NumberOfBlurStages; ++ IndexOfBlur)
         {
@@ -288,7 +288,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Initiate target set
         // -----------------------------------------------------------------------------
-        Base::Int2 Size = Main::GetScreenSize();
+        Base::Int2 Size = Main::GetActiveWindowSize();
         
         // -----------------------------------------------------------------------------
         // Create render target textures
@@ -338,7 +338,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Get screen resolutions
         // -----------------------------------------------------------------------------
-        Base::Int2 Size = Main::GetScreenSize();
+        Base::Int2 Size = Main::GetActiveWindowSize();
         
         // -----------------------------------------------------------------------------
         // Setup states

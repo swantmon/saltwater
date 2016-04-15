@@ -1,9 +1,9 @@
 
-#include "app/app_application.h"
-
 #include "base/base_pool.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
+
+#include "core/core_time.h"
 
 #include "data/data_entity.h"
 #include "data/data_light_facet.h"
@@ -793,7 +793,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Check update needs
                 // -----------------------------------------------------------------------------
-                Base::U64 FrameTime = App::Application::GetNumberOfFrame();
+                Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
 
                 if (pGraphicGlobalProbeFacet->GetTimeStamp() == FrameTime)
                 {

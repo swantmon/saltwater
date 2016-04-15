@@ -19,17 +19,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\app\app_application.cpp" />
+    <ClInclude Include="..\..\..\src\core\core_config.h" />
+    <ClInclude Include="..\..\..\src\core\core_time.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\app\app_application.h" />
-    <ClInclude Include="..\..\..\src\app\app_config.h" />
+    <ClCompile Include="..\..\..\src\core\core_time.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8BF7FB01-1873-4CB2-85A8-57EF3ED5AFD4}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>camera</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <ProjectName>core</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

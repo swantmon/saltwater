@@ -1,10 +1,10 @@
 
-#include "app/app_application.h"
-
 #include "base/base_exception.h"
 #include "base/base_pool.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
+
+#include "core/core_time.h"
 
 #include "data/data_actor_facet.h"
 #include "data/data_actor_manager.h"
@@ -388,7 +388,7 @@ namespace
 
         if (pHierarchicalFacet != nullptr)
         {
-            const Base::U64 TimeStamp = App::Application::GetNumberOfFrame();
+            const Base::U64 TimeStamp = Core::Time::GetNumberOfFrame();
 
             if (pHierarchicalFacet->GetTimeStamp() == TimeStamp)
             {

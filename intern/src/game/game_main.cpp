@@ -9,7 +9,7 @@
 #include "base/base_console.h"
 #include "base/base_exception.h"
 
-#include "game/game_application.h"
+#include "game/game_runtime.h"
 
 int main(int _Argc, const char* _pArgv[])
 {

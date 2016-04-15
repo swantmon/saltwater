@@ -29,21 +29,24 @@ namespace Gfx
 {
 namespace Main
 {
-    void OnStart(int _Width, int _Height);
+    void OnStart();
     void OnExit();
-    
-    void OnResize(int _Width, int _Height);
-    
-    Base::Int2 GetScreenSize();
+
     void RegisterResizeHandler(CResizeDelegate _NewDelgate);
 
-    void ActivateWindow(unsigned int _WindowID);
     unsigned int RegisterWindow(void* _pWindow);
-    
+
+    unsigned int GetNumberOfWindows();
+
+    void ActivateWindow(unsigned int _WindowID);
+
+    const Base::Int2& GetActiveWindowSize();
+    const Base::Int2& GetWindowSize(unsigned int _WindowID);
+
+    void OnResize(unsigned int _WindowID, unsigned int _Width, unsigned int _Height);
+
     void BeginFrame();
     void EndFrame();
-    
-    unsigned int GetFrame();
     
     void CreatePerFrameConstantBuffers();
     void DestroyPerFrameConstantBuffers();

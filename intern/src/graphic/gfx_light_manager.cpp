@@ -1,11 +1,11 @@
 
-#include "app/app_application.h"
-
 #include "base/base_aabb3.h"
 #include "base/base_pool.h"
 #include "base/base_singleton.h"
 #include "base/base_sphere.h"
 #include "base/base_uncopyable.h"
+
+#include "core/core_time.h"
 
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
@@ -263,7 +263,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Other data
         // -----------------------------------------------------------------------------
-        Base::U64 FrameTime = App::Application::GetNumberOfFrame();
+        Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
 
         pGraphicPointLightFacet->SetTimeStamp(FrameTime);
     }
@@ -333,7 +333,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Other data
         // -----------------------------------------------------------------------------
-        Base::U64 FrameTime = App::Application::GetNumberOfFrame();
+        Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
 
         pGraphicSunLightFacet->SetTimeStamp(FrameTime);
     }
@@ -378,7 +378,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Other data
         // -----------------------------------------------------------------------------
-        Base::U64 FrameTime = App::Application::GetNumberOfFrame();
+        Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
 
         pGraphicGlobalProbeLightFacet->SetTimeStamp(FrameTime);
     }
@@ -450,7 +450,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Other data
         // -----------------------------------------------------------------------------
-        Base::U64 FrameTime = App::Application::GetNumberOfFrame();
+        Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
 
         pGraphicSkyboxFacet->SetTimeStamp(FrameTime);
     }

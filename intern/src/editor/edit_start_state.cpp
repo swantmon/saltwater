@@ -25,8 +25,6 @@ namespace Edit
 namespace Edit
 {
     CStartState::CStartState()
-        : m_Width       (0)
-        , m_Height      (0)
     {
         
     }
@@ -36,16 +34,6 @@ namespace Edit
     CStartState::~CStartState()
     {
         
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CStartState::SetResolution(int _Width, int _Height)
-    {
-        BASE_CONSOLE_STREAMINFO("Edit> Enter set resolution to w=" << _Width << " and h=" << _Height);
-
-        m_Width  = _Width;
-        m_Height = _Height;
     }
     
     // -----------------------------------------------------------------------------
@@ -60,7 +48,7 @@ namespace Edit
         Cam::ControlManager::CreateControl(Cam::CControl::FlyControl);
         Cam::ControlManager::CreateControl(Cam::CControl::ARControl);
          
-        Gfx::Main::OnStart(m_Width, m_Height);
+        Gfx::Main::OnStart();
         
         // -----------------------------------------------------------------------------
         // Start normal states

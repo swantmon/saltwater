@@ -35,7 +35,6 @@ namespace
 
         QApplication* m_pApplication;
         CMainWindow*  m_pMainWindow;
-
     };
 } // namespace 
 

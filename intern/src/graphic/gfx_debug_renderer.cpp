@@ -892,7 +892,7 @@ namespace
         void*                   pInstances;
         SPerTextInstanceBuffer* pInstance;
         unsigned int            NumberOfLetters = 0;
-        Base::Int2              ScreenSize = Main::GetScreenSize();
+        Base::Int2              ScreenSize = Main::GetActiveWindowSize();
 
         CDebugTexts::const_iterator CurrentText = m_DebugTexts.begin();
         CDebugTexts::const_iterator EndOfTexts  = m_DebugTexts.end();

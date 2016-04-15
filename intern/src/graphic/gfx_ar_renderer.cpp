@@ -289,7 +289,7 @@ namespace
 
     void CGfxARRenderer::OnSetupTextures()
     {
-        Base::Int2 Size = Main::GetScreenSize();
+        Base::Int2 Size = Main::GetActiveWindowSize();
 
         STextureDescriptor TextureDescriptor;
         

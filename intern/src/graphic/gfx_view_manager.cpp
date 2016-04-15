@@ -180,7 +180,7 @@ namespace
         
         try
         {
-            Base::Int2 ScreenSize = Main::GetScreenSize();
+            Base::Int2 ScreenSize = Main::GetActiveWindowSize();
             
             Width  = static_cast<float>(ScreenSize[0]);
             Height = static_cast<float>(ScreenSize[1]);

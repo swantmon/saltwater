@@ -11,20 +11,11 @@ namespace Game
     public:
         
         static CStartState& GetInstance();
-        
-    public:
-        
-        void SetResolution(int _Width, int _Height);
-        
+                
     private:
         
         CStartState();
         ~CStartState();
-        
-    private:
-        
-        int   m_Width;
-        int   m_Height;
         
     private:
         

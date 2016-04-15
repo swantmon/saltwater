@@ -1,6 +1,4 @@
 
-#include "app/app_application.h"
-
 #include "base/base_console.h"
 #include "base/base_input_event.h"
 #include "base/base_math_operations.h"
@@ -9,6 +7,8 @@
 
 #include "camera/cam_ar_control.h"
 #include "camera/cam_control_manager.h"
+
+#include "core/core_time.h"
 
 #include "data/data_actor_manager.h"
 #include "data/data_entity.h"
@@ -85,7 +85,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Prepare updates depending on time difference between frames
         // -----------------------------------------------------------------------------
-        float TimeOfLastFrame = static_cast<float>(App::Application::GetDeltaTimeLastFrame());
+        float TimeOfLastFrame = static_cast<float>(Core::Time::GetDeltaTimeLastFrame());
 
         BASE_UNUSED(TimeOfLastFrame);
 

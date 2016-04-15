@@ -25,8 +25,8 @@
     <ClCompile Include="..\..\..\src\game\game_unload_map_state.cpp">
       <Filter>states</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\game\game_application.cpp" />
     <ClCompile Include="..\..\..\src\game\game_main.cpp" />
+    <ClCompile Include="..\..\..\src\game\game_runtime.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="states">
@@ -61,6 +61,6 @@
     <ClInclude Include="..\..\..\src\game\game_unload_map_state.h">
       <Filter>states</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\game\game_application.h" />
+    <ClInclude Include="..\..\..\src\game\game_runtime.h" />
   </ItemGroup>
 </Project>

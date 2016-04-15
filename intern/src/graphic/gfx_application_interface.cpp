@@ -6,6 +6,15 @@ namespace Gfx
 {
 namespace App
 {
+    unsigned int RegisterWindow(void* _pWindow)
+    {
+        assert(_pWindow != 0);
+
+        return Gfx::Main::RegisterWindow(_pWindow);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void ActivateWindow(unsigned int _WindowID)
     {
         Gfx::Main::ActivateWindow(_WindowID);
@@ -13,11 +22,9 @@ namespace App
 
     // -----------------------------------------------------------------------------
 
-    unsigned int RegisterWindow(void* _pWindow)
+    void OnResize(unsigned int _WindowID, unsigned int _Width, unsigned int _Height)
     {
-        assert(_pWindow != 0);
-
-        return Gfx::Main::RegisterWindow(_pWindow);
+        Gfx::Main::OnResize(_WindowID, _Width, _Height);
     }
 } // namespace App
 } // namespace Gfx

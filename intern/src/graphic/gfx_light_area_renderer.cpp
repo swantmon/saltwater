@@ -517,7 +517,7 @@ namespace
         pPSBuffer->m_InverseCameraProjection = CameraPtr->GetProjectionMatrix().GetInverted();
         pPSBuffer->m_InverseCameraView       = CameraPtr->GetView()->GetViewMatrix().GetInverted();
         pPSBuffer->m_CameraPosition          = Base::Float4(Position[0], Position[1], Position[2], 1.0f);
-        pPSBuffer->m_InvertedScreenSize      = Base::Float4(1.0f / Main::GetScreenSize()[0], 1.0f / Main::GetScreenSize()[1], 0, 0);
+        pPSBuffer->m_InvertedScreenSize      = Base::Float4(1.0f / Main::GetActiveWindowSize()[0], 1.0f / Main::GetActiveWindowSize()[1], 0, 0);
         pPSBuffer->m_ExposureHistoryIndex    = HistogramRenderer::GetLastExposureHistoryIndex();
 
         BufferManager::UnmapConstantBuffer(m_SphereLightPSBufferPtr->GetBuffer(0));

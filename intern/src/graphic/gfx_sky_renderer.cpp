@@ -1,6 +1,4 @@
 
-#include "app/app_application.h"
-
 #include "base/base_console.h"
 #include "base/base_matrix4x4.h"
 #include "base/base_singleton.h"
@@ -8,6 +6,8 @@
 #include "base/base_vector4.h"
 
 #include "camera/cam_control_manager.h"
+
+#include "core/core_time.h"
 
 #include "data/data_light_facet.h"
 #include "data/data_entity.h"
@@ -658,7 +658,7 @@ namespace
     {
         SSkyboxRenderJob& rRenderJob = m_SkyboxRenderJobs[0];
 
-        if (rRenderJob.m_pGraphicSkybox->GetTimeStamp() != App::Application::GetNumberOfFrame())
+        if (rRenderJob.m_pGraphicSkybox->GetTimeStamp() != Core::Time::GetNumberOfFrame())
         {
             return;
         }
@@ -753,7 +753,7 @@ namespace
     {
         SSkyboxRenderJob& rRenderJob = m_SkyboxRenderJobs[0];
 
-        if (rRenderJob.m_pGraphicSkybox->GetTimeStamp() != App::Application::GetNumberOfFrame())
+        if (rRenderJob.m_pGraphicSkybox->GetTimeStamp() != Core::Time::GetNumberOfFrame())
         {
             return;
         }
@@ -871,7 +871,7 @@ namespace
         
         assert(pPSBuffer != nullptr);
     
-        pPSBuffer->m_InvertedScreenSize   = Base::Float4(1.0f / Main::GetScreenSize()[0], 1.0f / Main::GetScreenSize()[1], 0, 0);
+        pPSBuffer->m_InvertedScreenSize   = Base::Float4(1.0f / Main::GetActiveWindowSize()[0], 1.0f / Main::GetActiveWindowSize()[1], 0, 0);
         pPSBuffer->m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
         
         BufferManager::UnmapConstantBuffer(m_SkyboxPSBufferSetPtr->GetBuffer(0));
@@ -938,7 +938,7 @@ namespace
     {
         SSkyboxRenderJob& rRenderJob = m_SkyboxRenderJobs[0];
 
-        if (rRenderJob.m_pGraphicSkybox->GetTimeStamp() != App::Application::GetNumberOfFrame())
+        if (rRenderJob.m_pGraphicSkybox->GetTimeStamp() != Core::Time::GetNumberOfFrame())
         {
             return;
         }

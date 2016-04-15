@@ -305,7 +305,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Initiate target set
         // -----------------------------------------------------------------------------
-        Base::Int2 Size = Main::GetScreenSize();
+        Base::Int2 Size = Main::GetActiveWindowSize();
         
         Base::Int2 HalfSize   (Size[0] / 2, Size[1] / 2);
         Base::Int2 QuarterSize(Size[0] / 4, Size[1] / 4);
@@ -400,7 +400,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Get screen resolutions
         // -----------------------------------------------------------------------------
-        Base::Int2 Size = Main::GetScreenSize();
+        Base::Int2 Size = Main::GetActiveWindowSize();
         
         Base::Int2 HalfSize   (Size[0] / 2, Size[1] / 2);
         Base::Int2 QuarterSize(Size[0] / 4, Size[1] / 4);
@@ -720,7 +720,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Get screen resolutions
         // -----------------------------------------------------------------------------
-        Base::Int2 Size = Main::GetScreenSize();
+        Base::Int2 Size = Main::GetActiveWindowSize();
         
         Base::Int2 HalfSize   (Size[0] / 2, Size[1] / 2);
         Base::Int2 QuarterSize(Size[0] / 4, Size[1] / 4);

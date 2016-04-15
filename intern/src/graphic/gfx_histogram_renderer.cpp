@@ -1,10 +1,10 @@
 
-#include "app/app_application.h"
-
 #include "base/base_console.h"
 #include "base/base_matrix4x4.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
+
+#include "core/core_time.h"
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
@@ -350,11 +350,11 @@ namespace
         float        TimeSinceLastFrame;
         CCameraPtr   MainCameraPtr;
 
-        TimeSinceLastFrame = static_cast<float>(App::Application::GetDeltaTimeLastFrame());
+        TimeSinceLastFrame = static_cast<float>(Core::Time::GetDeltaTimeLastFrame());
         MainCameraPtr      = ViewManager::GetMainCamera();
-        Width              = Main::GetScreenSize()[0];
-        Height             = Main::GetScreenSize()[1];
-        FrameCounter       = Main::GetFrame();
+        Width              = Main::GetActiveWindowSize()[0];
+        Height             = Main::GetActiveWindowSize()[1];
+        FrameCounter       = Core::Time::GetNumberOfFrame();
 
         NumberOfThreadGroupsX = (Width  + s_HistogramTileSize * s_HistogramThreadGroupSizeX - 1) / (s_HistogramTileSize * s_HistogramThreadGroupSizeX);
         NumberOfThreadGroupsY = (Height + s_HistogramTileSize * s_HistogramThreadGroupSizeY - 1) / (s_HistogramTileSize * s_HistogramThreadGroupSizeY);
@@ -542,7 +542,7 @@ namespace
     
     void CGfxHistogramRenderer::ResetEyeAdaption()
     {
-        m_FrameOnResetEyeAdaption = Main::GetFrame();
+        m_FrameOnResetEyeAdaption = Core::Time::GetNumberOfFrame();
     }
 } // namespace
 

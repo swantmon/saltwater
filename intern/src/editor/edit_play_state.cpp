@@ -41,6 +41,10 @@ namespace Edit
     {
         BASE_CONSOLE_STREAMINFO("Edit> Enter play state.");
 
+        // -----------------------------------------------------------------------------
+        // In game mode we can directly activate this window. It will be active the
+        // whole runtime.
+        // -----------------------------------------------------------------------------
         Lg ::Play::OnEnter();
         Gui::Play::OnEnter();
         Gfx::Play::OnEnter();        

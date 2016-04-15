@@ -2,7 +2,7 @@
 #include "base/base_console.h"
 #include "base/base_exception.h"
 
-#include "editor/edit_application.h"
+#include "editor/edit_runtime.h"
 
 int main(int _Argc, char* _pArgv[])
 {    

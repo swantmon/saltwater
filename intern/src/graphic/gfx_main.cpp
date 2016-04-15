@@ -1,7 +1,4 @@
 
-#include "app/app_application.h"
-#include "app/app_config.h"
-
 #include "base/base_console.h"
 #include "base/base_exception.h"
 #include "base/base_matrix4x4.h"
@@ -9,6 +6,9 @@
 #include "base/base_uncopyable.h"
 #include "base/base_vector3.h"
 #include "base/base_vector4.h"
+
+#include "core/core_time.h"
+#include "core/core_config.h"
 
 #include "data/data_map.h"
 
@@ -74,10 +74,8 @@ namespace
         
     public:
         
-        void OnStart(int _Width, int _Height);
+        void OnStart();
         void OnExit();
-        
-        void OnResize(int _Width, int _Height);
         
     public:
         
@@ -86,8 +84,16 @@ namespace
 
     public:
 
-        void ActivateWindow(unsigned int _WindowID);
         unsigned int RegisterWindow(void* _pWindow);
+
+        unsigned int GetNumberOfWindows();
+
+        void ActivateWindow(unsigned int _WindowID);
+
+        const Base::Int2& GetActiveWindowSize();
+        const Base::Int2& GetWindowSize(unsigned int _WindowID);
+
+        void OnResize(unsigned int _WindowID, unsigned int _Width, unsigned int _Height);
         
     public:
         
@@ -116,9 +122,10 @@ namespace
 
         struct SWindowInfo
         {
-            HWND  m_pNativeWindowHandle;
-            HDC   m_pNativeDeviceContextHandle;
-            HGLRC m_pNativeOpenGLContextHandle;
+            HWND       m_pNativeWindowHandle;
+            HDC        m_pNativeDeviceContextHandle;
+            HGLRC      m_pNativeOpenGLContextHandle;
+            Base::Int2 m_WindowSize;
         };
         
         struct SPerFrameConstantBufferVS
@@ -163,8 +170,8 @@ namespace
         
     private:
         
-        typedef std::vector<App::Application::CResizeDelegate> CResizeDelagates;
-        typedef CResizeDelagates::iterator                     CResizeDelegateIterator;
+        typedef std::vector<Gfx::Main::CResizeDelegate> CResizeDelegates;
+        typedef CResizeDelegates::iterator              CResizeDelegateIterator;
         
     private:
 
@@ -172,21 +179,16 @@ namespace
         SWindowInfo* m_pActiveWindowInfo;
         unsigned int m_NumberOfWindows;
 
-        Base::Int2       m_ScreenSize;
-        CResizeDelagates m_ResizeDelegates;
+        CResizeDelegates m_ResizeDelegates;
         unsigned int     m_FrameCounter;
 
         SPerFrameConstantBufferPS m_PerFrameConstantBufferPS;
 
-        CBufferPtr       m_PerFrameConstantBufferVSBufferPtr;
-        CBufferPtr       m_PerFrameConstantBufferHSBufferPtr;
-        CBufferPtr       m_PerFrameConstantBufferDSBufferPtr;
-        CBufferPtr       m_PerFrameConstantBufferGSBufferPtr;
-        CBufferPtr       m_PerFrameConstantBufferPSBufferPtr;
-        
-    private:
-        
-        void InitializeOpenGL();        
+        CBufferPtr m_PerFrameConstantBufferVSBufferPtr;
+        CBufferPtr m_PerFrameConstantBufferHSBufferPtr;
+        CBufferPtr m_PerFrameConstantBufferDSBufferPtr;
+        CBufferPtr m_PerFrameConstantBufferGSBufferPtr;
+        CBufferPtr m_PerFrameConstantBufferPSBufferPtr;      
     };
 } // namespace
 
@@ -195,7 +197,6 @@ namespace
     CGfxMain::CGfxMain()
         : m_pActiveWindowInfo                (0)
         , m_NumberOfWindows                  (0)
-        , m_ScreenSize                       ()
         , m_ResizeDelegates                  ()
         , m_FrameCounter                     (0)
         , m_PerFrameConstantBufferPS         ()
@@ -217,24 +218,65 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    void CGfxMain::OnStart(int _Width, int _Height)
-    {
-        assert(_Width > 0 && _Height > 0);
-        
+    void CGfxMain::OnStart()
+    {                
         // -----------------------------------------------------------------------------
-        // Register resize function to application.
+        // Show information of windows and initialize them
         // -----------------------------------------------------------------------------
-        OnResize(_Width, _Height);
-        
-        m_ScreenSize[0] = _Width;
-        m_ScreenSize[1] = _Height;
-        
-        App::Application::RegisterResizeHandler(APP_BIND_RESIZE_METHOD(&CGfxMain::OnResize));
-        
-        // -----------------------------------------------------------------------------
-        // Init this graphic engine.
-        // -----------------------------------------------------------------------------
-        InitializeOpenGL();
+        unsigned int IndexOfWindow = 0;
+
+        for (IndexOfWindow = 0; IndexOfWindow < m_NumberOfWindows; ++IndexOfWindow)
+        {
+            SWindowInfo& rWindowInfo = m_WindowInfos[IndexOfWindow];
+
+            wglMakeCurrent(rWindowInfo.m_pNativeDeviceContextHandle, rWindowInfo.m_pNativeOpenGLContextHandle);
+
+            // -----------------------------------------------------------------------------
+            // Activate GLEW. GLEW is an extension manager which handles all different
+            // OpenGL extensions.
+            //
+            // glewExperimental defines a possible option for extensions in experimental
+            // state.
+            // -----------------------------------------------------------------------------
+            glewExperimental = GL_TRUE;
+
+            GLenum res = glewInit();
+
+            if (res != GLEW_OK)
+            {
+                BASE_THROWV("GLEW can't be initialized on this system because '%s'", glewGetErrorString(res));
+            }
+
+            // -----------------------------------------------------------------------------
+            // Check specific OpenGL versions and availability
+            // -----------------------------------------------------------------------------
+            const unsigned char* pInfoGLEWVersion   = glewGetString(GLEW_VERSION);
+            const unsigned char* pInfoGLVersion     = glGetString(GL_VERSION);                      //< Returns a version or release number.
+            const unsigned char* pInfoGLVendor      = glGetString(GL_VENDOR);                       //< Returns the company responsible for this GL implementation. This name does not change from release to release.
+            const unsigned char* pInfoGLRenderer    = glGetString(GL_RENDERER);                     //< Returns the name of the renderer. This name is typically specific to a particular configuration of a hardware platform. It does not change from release to release.
+            const unsigned char* pInfoGLGLSLVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);     //< Returns a version or release number for the shading language.
+
+            assert(pInfoGLEWVersion && pInfoGLVersion && pInfoGLGLSLVersion && pInfoGLVendor && pInfoGLRenderer);
+
+            if (!GLEW_VERSION_4_3)
+            {
+                BASE_THROWV("GL 4.3 or higher can't initialized. Available version %s is to old!", pInfoGLVersion);
+            }
+
+            BASE_CONSOLE_INFOV("Window ID: %i", IndexOfWindow);
+            BASE_CONSOLE_INFOV("GLEW:      %s", pInfoGLEWVersion);
+            BASE_CONSOLE_INFOV("GL:        %s", pInfoGLVersion);
+            BASE_CONSOLE_INFOV("GLSL:      %s", pInfoGLGLSLVersion);
+            BASE_CONSOLE_INFOV("Vendor:    %s", pInfoGLVendor);
+            BASE_CONSOLE_INFOV("Renderer:  %s", pInfoGLRenderer);
+
+#if APP_DEBUG_MODE == 1
+            glDebugMessageCallback(OpenGLDebugCallback, NULL);
+
+            glEnable(GL_DEBUG_OUTPUT);
+            glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+#endif
+        }
     }
     
     // -----------------------------------------------------------------------------
@@ -245,48 +287,9 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    void CGfxMain::OnResize(int _Width, int _Height)
-    {
-        assert(_Width > 0 && _Height > 0);
-        
-        // -----------------------------------------------------------------------------
-        // Setup view port of render target (back buffer, ...).
-        // -----------------------------------------------------------------------------
-        m_ScreenSize[0] = _Width;
-        m_ScreenSize[1] = _Height;
-        
-        // -----------------------------------------------------------------------------
-        // Send to every delegate that resize has changed
-        // -----------------------------------------------------------------------------
-        CResizeDelegateIterator EndOfDelegates = m_ResizeDelegates.end();
-        
-        for (CResizeDelegateIterator CurrentDelegate = m_ResizeDelegates.begin(); CurrentDelegate != EndOfDelegates; ++ CurrentDelegate)
-        {
-            (*CurrentDelegate)(_Width, _Height);
-        }
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    Base::Int2 CGfxMain::GetScreenSize()
-    {
-        return m_ScreenSize;
-    }
-    
-    // -----------------------------------------------------------------------------
-    
     void CGfxMain::RegisterResizeHandler(Gfx::Main::CResizeDelegate _NewDelgate)
     {
         m_ResizeDelegates.push_back(_NewDelgate);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxMain::ActivateWindow(unsigned int _WindowID)
-    {
-        if (_WindowID >= m_NumberOfWindows) return;
-
-        m_pActiveWindowInfo = &m_WindowInfos[_WindowID];
     }
 
     // -----------------------------------------------------------------------------
@@ -345,6 +348,65 @@ namespace
         ++ m_NumberOfWindows;
 
         return m_NumberOfWindows - 1;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    unsigned int CGfxMain::GetNumberOfWindows()
+    {
+        return m_NumberOfWindows;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxMain::ActivateWindow(unsigned int _WindowID)
+    {
+        if (_WindowID >= m_NumberOfWindows) return;
+
+        m_pActiveWindowInfo = &m_WindowInfos[_WindowID];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const Base::Int2& CGfxMain::GetActiveWindowSize()
+    {
+        assert(m_pActiveWindowInfo != 0);
+
+        return m_pActiveWindowInfo->m_WindowSize;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const Base::Int2& CGfxMain::GetWindowSize(unsigned int _WindowID)
+    {
+        assert(_WindowID < m_NumberOfWindows);
+
+        return m_WindowInfos[_WindowID].m_WindowSize;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxMain::OnResize(unsigned int _WindowID, unsigned int _Width, unsigned int _Height)
+    {
+        assert(_Width > 0 && _Height > 0);
+
+        if (_WindowID >= m_NumberOfWindows) return;
+
+        // -----------------------------------------------------------------------------
+        // Setup view port of render target (back buffer, ...).
+        // -----------------------------------------------------------------------------
+        m_WindowInfos[_WindowID].m_WindowSize[0] = _Width;
+        m_WindowInfos[_WindowID].m_WindowSize[1] = _Height;
+
+        // -----------------------------------------------------------------------------
+        // Send to every delegate that resize has changed
+        // -----------------------------------------------------------------------------
+        CResizeDelegateIterator EndOfDelegates = m_ResizeDelegates.end();
+
+        for (CResizeDelegateIterator CurrentDelegate = m_ResizeDelegates.begin(); CurrentDelegate != EndOfDelegates; ++CurrentDelegate)
+        {
+            (*CurrentDelegate)(_Width, _Height);
+        }
     }
     
     // -----------------------------------------------------------------------------
@@ -502,8 +564,8 @@ namespace
         NumberOfMetersPerRegionRow    = static_cast<float>(Dt::CRegion::s_NumberOfMetersX);
         NumberOfMetersPerRegionColumn = static_cast<float>(Dt::CRegion::s_NumberOfMetersY);
         
-        ScreensizeX = static_cast<float>(m_ScreenSize[0]);
-        ScreensizeY = static_cast<float>(m_ScreenSize[1]);
+        ScreensizeX = static_cast<float>(m_pActiveWindowInfo->m_WindowSize[0]);
+        ScreensizeY = static_cast<float>(m_pActiveWindowInfo->m_WindowSize[1]);
 
         InvertedScreensizeX = 1.0f / ScreensizeX;
         InvertedScreensizeY = 1.0f / ScreensizeY;
@@ -616,78 +678,15 @@ namespace
     {
         return m_PerFrameConstantBufferPSBufferPtr;
     }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGfxMain::InitializeOpenGL()
-    {
-        // -----------------------------------------------------------------------------
-        // Show information of windows and initialize them
-        // -----------------------------------------------------------------------------
-        unsigned int IndexOfWindow = 0;
-
-        for (IndexOfWindow = 0; IndexOfWindow < m_NumberOfWindows; ++IndexOfWindow)
-        {
-            SWindowInfo& rWindowInfo = m_WindowInfos[IndexOfWindow];
-
-            wglMakeCurrent(rWindowInfo.m_pNativeDeviceContextHandle, rWindowInfo.m_pNativeOpenGLContextHandle);
-
-            // -----------------------------------------------------------------------------
-            // Activate GLEW. GLEW is an extension manager which handles all different
-            // OpenGL extensions.
-            //
-            // glewExperimental defines a possible option for extensions in experimental
-            // state.
-            // -----------------------------------------------------------------------------
-            glewExperimental = GL_TRUE;
-
-            GLenum res = glewInit();
-
-            if (res != GLEW_OK)
-            {
-                BASE_THROWV("GLEW can't be initialized on this system because '%s'", glewGetErrorString(res));
-            }
-
-            // -----------------------------------------------------------------------------
-            // Check specific OpenGL versions and availability
-            // -----------------------------------------------------------------------------
-            const unsigned char* pInfoGLEWVersion   = glewGetString(GLEW_VERSION);
-            const unsigned char* pInfoGLVersion     = glGetString(GL_VERSION);                      //< Returns a version or release number.
-            const unsigned char* pInfoGLVendor      = glGetString(GL_VENDOR);                       //< Returns the company responsible for this GL implementation. This name does not change from release to release.
-            const unsigned char* pInfoGLRenderer    = glGetString(GL_RENDERER);                     //< Returns the name of the renderer. This name is typically specific to a particular configuration of a hardware platform. It does not change from release to release.
-            const unsigned char* pInfoGLGLSLVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);     //< Returns a version or release number for the shading language.
-
-            assert(pInfoGLEWVersion && pInfoGLVersion && pInfoGLGLSLVersion && pInfoGLVendor && pInfoGLRenderer);
-
-            if (!GLEW_VERSION_4_3)
-            {
-                BASE_THROWV("GL 4.3 or higher can't initialized. Available version %s is to old!", pInfoGLVersion);
-            }
-
-            BASE_CONSOLE_INFOV("Window ID: %i", IndexOfWindow);
-            BASE_CONSOLE_INFOV("GLEW:      %s", pInfoGLEWVersion);
-            BASE_CONSOLE_INFOV("GL:        %s", pInfoGLVersion);
-            BASE_CONSOLE_INFOV("GLSL:      %s", pInfoGLGLSLVersion);
-            BASE_CONSOLE_INFOV("Vendor:    %s", pInfoGLVendor);
-            BASE_CONSOLE_INFOV("Renderer:  %s", pInfoGLRenderer);
-
-#if APP_DEBUG_MODE == 1
-            glDebugMessageCallback(OpenGLDebugCallback, NULL);
-
-            glEnable(GL_DEBUG_OUTPUT);
-            glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-#endif
-        }
-    }
 } // namespace
 
 namespace Gfx
 {
 namespace Main
 {
-    void OnStart(int _Width, int _Height)
+    void OnStart()
     {
-        CGfxMain::GetInstance().OnStart(_Width, _Height);
+        CGfxMain::GetInstance().OnStart();
     }
     
     // -----------------------------------------------------------------------------
@@ -699,20 +698,6 @@ namespace Main
     
     // -----------------------------------------------------------------------------
     
-    void OnResize(int _Width, int _Height)
-    {
-        CGfxMain::GetInstance().OnResize(_Width, _Height);
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    Base::Int2 GetScreenSize()
-    {
-        return CGfxMain::GetInstance().GetScreenSize();
-    }
-    
-    // -----------------------------------------------------------------------------
-    
     void RegisterResizeHandler(CResizeDelegate _NewDelgate)
     {
         CGfxMain::GetInstance().RegisterResizeHandler(_NewDelgate);
@@ -720,16 +705,44 @@ namespace Main
 
     // -----------------------------------------------------------------------------
 
-    void ActivateWindow(unsigned int _WindowID)
+    unsigned int RegisterWindow(void* _pWindow)
     {
-        CGfxMain::GetInstance().ActivateWindow( _WindowID);
+        return CGfxMain::GetInstance().RegisterWindow(_pWindow);
     }
 
     // -----------------------------------------------------------------------------
 
-    unsigned int RegisterWindow(void* _pWindow)
+    unsigned int GetNumberOfWindows()
     {
-        return CGfxMain::GetInstance().RegisterWindow(_pWindow);
+        return CGfxMain::GetInstance().GetNumberOfWindows();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ActivateWindow(unsigned int _WindowID)
+    {
+        return CGfxMain::GetInstance().ActivateWindow(_WindowID);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const Base::Int2& GetActiveWindowSize()
+    {
+        return CGfxMain::GetInstance().GetActiveWindowSize();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const Base::Int2& GetWindowSize(unsigned int _WindowID)
+    {
+        return CGfxMain::GetInstance().GetWindowSize(_WindowID);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void OnResize(unsigned int _WindowID, unsigned int _Width, unsigned int _Height)
+    {
+        return CGfxMain::GetInstance().OnResize(_WindowID, _Width, _Height);
     }
     
     // -----------------------------------------------------------------------------

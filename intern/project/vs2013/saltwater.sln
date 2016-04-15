@@ -3,11 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "app", "app\app.vcxproj", "{8BF7FB01-1873-4CB2-85A8-57EF3ED5AFD4}"
-	ProjectSection(ProjectDependencies) = postProject
-		{F00B40D7-026A-45AE-A0DB-126DBABC483D} = {F00B40D7-026A-45AE-A0DB-126DBABC483D}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "base", "base\base.vcxproj", "{F00B40D7-026A-45AE-A0DB-126DBABC483D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "camera", "camera\camera.vcxproj", "{BD2866F6-A265-40F7-92D0-AD067FE79F65}"
@@ -43,7 +38,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "logic", "logic\logic.vcxpro
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcxproj", "{470B0BE6-8875-4485-9B04-C6CC9914834D}"
 	ProjectSection(ProjectDependencies) = postProject
-		{8BF7FB01-1873-4CB2-85A8-57EF3ED5AFD4} = {8BF7FB01-1873-4CB2-85A8-57EF3ED5AFD4}
 		{CCA65C12-1AB6-4E15-9DA2-630AA1D60B2F} = {CCA65C12-1AB6-4E15-9DA2-630AA1D60B2F}
 		{1BBA2732-A51B-4FF0-8393-492884561668} = {1BBA2732-A51B-4FF0-8393-492884561668}
 		{BCE4CC5A-541E-4838-94D1-73B962A02FBC} = {BCE4CC5A-541E-4838-94D1-73B962A02FBC}
@@ -83,6 +77,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "editor", "editor\editor.vcx
 		{BD2866F6-A265-40F7-92D0-AD067FE79F65} = {BD2866F6-A265-40F7-92D0-AD067FE79F65}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "core", "core\core.vcxproj", "{8BF7FB01-1873-4CB2-85A8-57EF3ED5AFD4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F00B40D7-026A-45AE-A0DB-126DBABC483D} = {F00B40D7-026A-45AE-A0DB-126DBABC483D}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -91,14 +90,6 @@ Global
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8BF7FB01-1873-4CB2-85A8-57EF3ED5AFD4}.Debug|Win32.ActiveCfg = Debug|Win32
-		{8BF7FB01-1873-4CB2-85A8-57EF3ED5AFD4}.Debug|Win32.Build.0 = Debug|Win32
-		{8BF7FB01-1873-4CB2-85A8-57EF3ED5AFD4}.Debug|x64.ActiveCfg = Debug|x64
-		{8BF7FB01-1873-4CB2-85A8-57EF3ED5AFD4}.Debug|x64.Build.0 = Debug|x64
-		{8BF7FB01-1873-4CB2-85A8-57EF3ED5AFD4}.Release|Win32.ActiveCfg = Release|Win32
-		{8BF7FB01-1873-4CB2-85A8-57EF3ED5AFD4}.Release|Win32.Build.0 = Release|Win32
-		{8BF7FB01-1873-4CB2-85A8-57EF3ED5AFD4}.Release|x64.ActiveCfg = Release|x64
-		{8BF7FB01-1873-4CB2-85A8-57EF3ED5AFD4}.Release|x64.Build.0 = Release|x64
 		{F00B40D7-026A-45AE-A0DB-126DBABC483D}.Debug|Win32.ActiveCfg = Debug|Win32
 		{F00B40D7-026A-45AE-A0DB-126DBABC483D}.Debug|Win32.Build.0 = Debug|Win32
 		{F00B40D7-026A-45AE-A0DB-126DBABC483D}.Debug|x64.ActiveCfg = Debug|x64
@@ -187,6 +178,14 @@ Global
 		{399D716C-0FEC-4D19-AA74-0C434B6C3047}.Release|Win32.Build.0 = Release|Win32
 		{399D716C-0FEC-4D19-AA74-0C434B6C3047}.Release|x64.ActiveCfg = Release|x64
 		{399D716C-0FEC-4D19-AA74-0C434B6C3047}.Release|x64.Build.0 = Release|x64
+		{8BF7FB01-1873-4CB2-85A8-57EF3ED5AFD4}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8BF7FB01-1873-4CB2-85A8-57EF3ED5AFD4}.Debug|Win32.Build.0 = Debug|Win32
+		{8BF7FB01-1873-4CB2-85A8-57EF3ED5AFD4}.Debug|x64.ActiveCfg = Debug|x64
+		{8BF7FB01-1873-4CB2-85A8-57EF3ED5AFD4}.Debug|x64.Build.0 = Debug|x64
+		{8BF7FB01-1873-4CB2-85A8-57EF3ED5AFD4}.Release|Win32.ActiveCfg = Release|Win32
+		{8BF7FB01-1873-4CB2-85A8-57EF3ED5AFD4}.Release|Win32.Build.0 = Release|Win32
+		{8BF7FB01-1873-4CB2-85A8-57EF3ED5AFD4}.Release|x64.ActiveCfg = Release|x64
+		{8BF7FB01-1873-4CB2-85A8-57EF3ED5AFD4}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

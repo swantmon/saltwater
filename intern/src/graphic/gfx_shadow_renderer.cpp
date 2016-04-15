@@ -1,10 +1,10 @@
 
-#include "app/app_application.h"
-
 #include "base/base_console.h"
 #include "base/base_matrix4x4.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
+
+#include "core/core_time.h"
 
 #include "data/data_actor_facet.h"
 #include "data/data_entity.h"
@@ -313,7 +313,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Initiate target set
         // -----------------------------------------------------------------------------
-        Base::Int2 Size = Main::GetScreenSize();
+        Base::Int2 Size = Main::GetActiveWindowSize();
 
         Base::Int2 HalfSize   (Size[0] / 2, Size[1] / 2);
 
@@ -371,7 +371,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Get screen resolutions
         // -----------------------------------------------------------------------------
-        Base::Int2 Size = Main::GetScreenSize();
+        Base::Int2 Size = Main::GetActiveWindowSize();
 
         Base::Int2 HalfSize(Size[0] / 2, Size[1] / 2);
         Base::Int2 QuarterSize(Size[0] / 4, Size[1] / 4);
@@ -446,7 +446,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Initiate target set
         // -----------------------------------------------------------------------------
-        Base::Int2 Size = Main::GetScreenSize();
+        Base::Int2 Size = Main::GetActiveWindowSize();
         
         Base::Int2 HalfSize(Size[0] / 2, Size[1] / 2);
         
@@ -671,7 +671,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Get screen resolutions
         // -----------------------------------------------------------------------------
-        Base::Int2 Size = Main::GetScreenSize();
+        Base::Int2 Size = Main::GetActiveWindowSize();
         
         Base::Int2 HalfSize   (Size[0] / 2, Size[1] / 2);
 
@@ -1205,7 +1205,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // If update is needed
                 // -----------------------------------------------------------------------------
-                Base::U64 FrameTime = App::Application::GetNumberOfFrame();
+                Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
 
                 if (pGraphicSunFacet->GetTimeStamp() == FrameTime || pDataSunFacet->GetRefreshMode() == Dt::CSunLightFacet::Dynamic)
                 {
@@ -1227,7 +1227,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // If update is needed
                 // -----------------------------------------------------------------------------
-                Base::U64 FrameTime = App::Application::GetNumberOfFrame();
+                Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
 
                 if (pGraphicPointFacet->GetTimeStamp() == FrameTime || pDataPointFacet->GetRefreshMode() == Dt::CPointLightFacet::Dynamic)
                 {

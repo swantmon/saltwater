@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\app\app_application.cpp" />
+    <ClInclude Include="..\..\..\src\core\core_config.h" />
+    <ClInclude Include="..\..\..\src\core\core_time.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\app\app_application.h" />
-    <ClInclude Include="..\..\..\src\app\app_config.h" />
+    <ClCompile Include="..\..\..\src\core\core_time.cpp" />
   </ItemGroup>
 </Project>

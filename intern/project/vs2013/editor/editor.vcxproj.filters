@@ -6,7 +6,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\editor\edit_application.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_edit_state.cpp">
       <Filter>states</Filter>
     </ClCompile>
@@ -29,9 +28,9 @@
       <Filter>states</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor\edit_main.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_runtime.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\editor\edit_application.h" />
     <ClInclude Include="..\..\..\src\editor\edit_edit_state.h">
       <Filter>states</Filter>
     </ClInclude>
@@ -56,5 +55,6 @@
     <ClInclude Include="..\..\..\src\editor\edit_unload_map_state.h">
       <Filter>states</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_runtime.h" />
   </ItemGroup>
 </Project>

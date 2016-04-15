@@ -1,14 +1,14 @@
 
-#include "app/app_application.h"
-#include "app/app_config.h"
-
 #include "base/base_console.h"
 #include "base/base_exception.h"
 #include "base/base_input_event.h"
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
-#include "game/game_application.h"
+#include "core/core_time.h"
+#include "core/core_config.h"
+
+#include "game/game_runtime.h"
 #include "game/game_debug_state.h"
 #include "game/game_exit_state.h"
 #include "game/game_intro_state.h"
@@ -19,6 +19,8 @@
 #include "game/game_unload_map_state.h"
 
 #include "graphic/gfx_application_interface.h"
+
+#include "gui/gui_event_handler.h"
 
 #include <SDL2/SDL_syswm.h>
 #include <SDL2/SDL.h>
@@ -144,14 +146,14 @@ namespace
         // -----------------------------------------------------------------------------
         Gfx::App::ActivateWindow(m_GameWindowID);
 
+        Gfx::App::OnResize(m_GameWindowID, _Width, _Height);
+
         // -----------------------------------------------------------------------------
         // From now on we can start the state engine and enter the first state
-        // -----------------------------------------------------------------------------
-        Game::CStartState::GetInstance().SetResolution(_Width, _Height);
-        
+        // -----------------------------------------------------------------------------        
         s_pStates[m_CurrentState]->OnEnter();
 
-        App::Application::OnStart();
+        Core::Time::OnStart();
     }
     
     // -----------------------------------------------------------------------------
@@ -161,7 +163,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Exit the application
         // -----------------------------------------------------------------------------
-        App::Application::OnExit();
+        Core::Time::OnExit();
 
         // -----------------------------------------------------------------------------
         // Make last transition to exit
@@ -213,9 +215,9 @@ namespace
             }
 
             // -----------------------------------------------------------------------------
-            // Application
+            // Time
             // -----------------------------------------------------------------------------
-            App::Application::Update();
+            Core::Time::Update();
 
             // -----------------------------------------------------------------------------
             // State engine
@@ -255,7 +257,7 @@ namespace
 
             SDL_GetWindowSize(m_pWindow, &WindowWidth, &WindowHeight);
 
-            App::Application::OnResize(WindowWidth, WindowHeight);
+            Gfx::App::OnResize(m_GameWindowID, WindowWidth, WindowHeight);
         }
         break;
 
@@ -281,7 +283,7 @@ namespace
 
             Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::KeyPressed, Key, Mod);
 
-            App::Application::OnInputEvent(NewInput);
+            Gui::EventHandler::OnUserEvent(NewInput);
         }
         break;
 
@@ -292,7 +294,7 @@ namespace
 
             Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::KeyReleased, Key, Mod);
 
-            App::Application::OnInputEvent(NewInput);
+            Gui::EventHandler::OnUserEvent(NewInput);
         }
         break;
 
@@ -317,7 +319,7 @@ namespace
             {
                 Base::CInputEvent NewInput(Base::CInputEvent::Input, MouseAction, Base::CInputEvent::Mouse, m_LatestMousePosition);
 
-                App::Application::OnInputEvent(NewInput);
+                Gui::EventHandler::OnUserEvent(NewInput);
             }
         }
         break;
@@ -343,7 +345,7 @@ namespace
             {
                 Base::CInputEvent NewInput(Base::CInputEvent::Input, MouseAction, Base::CInputEvent::Mouse, m_LatestMousePosition);
 
-                App::Application::OnInputEvent(NewInput);
+                Gui::EventHandler::OnUserEvent(NewInput);
             }
         }
         break;
@@ -354,7 +356,7 @@ namespace
 
             Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseWheel, Base::CInputEvent::Mouse, m_LatestMousePosition, WheelData);
 
-            App::Application::OnInputEvent(NewInput);
+            Gui::EventHandler::OnUserEvent(NewInput);
         }
         break;
 
@@ -370,7 +372,7 @@ namespace
 
             Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseMove, Base::CInputEvent::Mouse, m_LatestMousePosition);
 
-            App::Application::OnInputEvent(NewInput);
+            Gui::EventHandler::OnUserEvent(NewInput);
         }
         break;
         }
@@ -402,4 +404,4 @@ namespace Runtime
         CApplication::GetInstance().OnRun();
     }
 } // namespace Runtime
-} // namespace App
+} // namespace Game

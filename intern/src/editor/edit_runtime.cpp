@@ -1,12 +1,12 @@
 
-#include "app/app_application.h"
-#include "app/app_config.h"
-
 #include "base/base_input_event.h"
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
-#include "editor/edit_application.h"
+#include "core/core_time.h"
+#include "core/core_config.h"
+
+#include "editor/edit_runtime.h"
 #include "editor/edit_edit_state.h"
 #include "editor/edit_exit_state.h"
 #include "editor/edit_intro_state.h"
@@ -35,6 +35,8 @@ namespace
         void OnStart(int& _rArgc, char** _ppArgv);
         void OnExit();
         void OnRun();
+
+        unsigned int GetEditWindowID();
         
     private:
         
@@ -104,20 +106,16 @@ namespace
         // -----------------------------------------------------------------------------
         m_EditWindowID = Gfx::App::RegisterWindow(Edit::GUI::GetEditorWindowHandle());
 
-        // -----------------------------------------------------------------------------
-        // In game mode we can directly activate this window. It will be active the
-        // whole runtime.
-        // -----------------------------------------------------------------------------
         Gfx::App::ActivateWindow(m_EditWindowID);
+
+        Gfx::App::OnResize(m_EditWindowID, 1280, 720);
 
         // -----------------------------------------------------------------------------
         // From now on we can start the state engine and enter the first state
         // -----------------------------------------------------------------------------
-        Edit::CStartState::GetInstance().SetResolution(1280, 720);
-        
         s_pStates[m_CurrentState]->OnEnter();
 
-        App::Application::OnStart();
+        Core::Time::OnStart();
     }
     
     // -----------------------------------------------------------------------------
@@ -127,7 +125,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Exit the application
         // -----------------------------------------------------------------------------
-        App::Application::OnExit();
+        Core::Time::OnExit();
 
         // -----------------------------------------------------------------------------
         // Make last transition to exit
@@ -169,9 +167,9 @@ namespace
             Edit::GUI::ProcessEvents();
 
             // -----------------------------------------------------------------------------
-            // Application
+            // Time
             // -----------------------------------------------------------------------------
-            App::Application::Update();
+            Core::Time::Update();
 
             // -----------------------------------------------------------------------------
             // State engine
@@ -185,6 +183,13 @@ namespace
                 OnTranslation(NextState);
             }
         }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    unsigned int CApplication::GetEditWindowID()
+    {
+        return m_EditWindowID;
     }
     
     // -----------------------------------------------------------------------------
@@ -221,5 +226,12 @@ namespace Runtime
     {
         CApplication::GetInstance().OnRun();
     }
+
+    // -----------------------------------------------------------------------------
+
+    unsigned int GetEditWindowID()
+    {
+        return CApplication::GetInstance().GetEditWindowID();
+    }
 } // namespace Runtime
-} // namespace App
+} // namespace Edit
