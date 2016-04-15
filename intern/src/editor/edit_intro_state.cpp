@@ -63,7 +63,7 @@ namespace Edit
     
     CState::EStateType CIntroState::InternOnRun()
     {
-        CState::EStateType NextState = CState::Edit;
+        CState::EStateType NextState = CState::LoadMap;
         
         Lg ::Intro::OnRun();
         Gfx::Intro::OnRun();

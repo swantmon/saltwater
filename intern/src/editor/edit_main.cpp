@@ -25,11 +25,26 @@
 
 int main(int _Argc, char* _pArgv[])
 {    
+    // -----------------------------------------------------------------------------
+    // Initialize GUI.
+    // -----------------------------------------------------------------------------
     Edit::GUI::Create(_Argc, _pArgv);
 
+    // -----------------------------------------------------------------------------
+    // Setup main window with some properties.
+    // -----------------------------------------------------------------------------
     Edit::GUI::Setup(APP_WIDTH, APP_HEIGHT);
 
+    // -----------------------------------------------------------------------------
+    // Show main window.
+    // -----------------------------------------------------------------------------
     Edit::GUI::Show();
+
+    // -----------------------------------------------------------------------------
+    // With an upcoming window we should have a window handle and we can
+    // create an OpenGL context.
+    // -----------------------------------------------------------------------------
+    Edit::GUI::CreateContext();
 
     // -----------------------------------------------------------------------------
     // With an window and context we initialize our application and run our game.
@@ -38,15 +53,25 @@ int main(int _Argc, char* _pArgv[])
     int ApplicationMessage = 0;
     int WindowMessage      = 0;
     
-    //Edit::Runtime::OnStart(APP_WIDTH, APP_HEIGHT);
+    Edit::Runtime::OnStart(APP_WIDTH, APP_HEIGHT);
     
     try
     {
         for (; ApplicationMessage == 0 && WindowMessage == 0; )
         {            
+            // -----------------------------------------------------------------------------
+            // Process GUI inputs
+            // -----------------------------------------------------------------------------
             Edit::GUI::ProcessEvents();
 
-            //ApplicationMessage = Edit::Runtime::OnRun();
+            // -----------------------------------------------------------------------------
+            // Render engine content into GUI
+            // -----------------------------------------------------------------------------
+            Edit::GUI::CreateContext();
+
+            ApplicationMessage = Edit::Runtime::OnRun();
+
+            Edit::GUI::SwapWindow();
         }
     }
     catch (const Base::CException& _rException)
@@ -61,8 +86,11 @@ int main(int _Argc, char* _pArgv[])
         BASE_CONSOLE_ERROR("An undefined exception stops application");
     }
     
-    //Edit::Runtime::OnExit();
+    Edit::Runtime::OnExit();
 
+    // -----------------------------------------------------------------------------
+    // At the end we have to clean  our context and windows.
+    // -----------------------------------------------------------------------------
     Edit::GUI::Destroy();
 
     return 0;

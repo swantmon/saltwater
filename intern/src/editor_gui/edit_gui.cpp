@@ -29,6 +29,9 @@ namespace
 
         void ProcessEvents();
 
+        void CreateContext();
+        void SwapWindow();
+
     private:
 
         QApplication* m_pApplication;
@@ -64,7 +67,11 @@ namespace
 
     void CEditorGui::Destroy()
     {
+        delete m_pMainWindow;
+        delete m_pApplication;
 
+        m_pMainWindow  = 0;
+        m_pApplication = 0;
     }
 
     // -----------------------------------------------------------------------------
@@ -86,6 +93,20 @@ namespace
     void CEditorGui::ProcessEvents()
     {
         m_pApplication->processEvents();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEditorGui::CreateContext()
+    {
+        m_pMainWindow->CreateContext();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEditorGui::SwapWindow()
+    {
+        m_pMainWindow->SwapWindow();
     }
 } // namespace 
 
@@ -124,6 +145,20 @@ namespace GUI
     void ProcessEvents()
     {
         CEditorGui::GetInstance().ProcessEvents();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CreateContext()
+    {
+        CEditorGui::GetInstance().CreateContext();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SwapWindow()
+    {
+        CEditorGui::GetInstance().SwapWindow();
     }
 } // namespace GUI
 } // namespace Edit

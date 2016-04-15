@@ -9,6 +9,7 @@
 #ifndef UI_EDIT_MAINWINDOW_H
 #define UI_EDIT_MAINWINDOW_H
 
+#include <QtCore/QLocale>
 #include <QtCore/QVariant>
 #include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
@@ -20,6 +21,7 @@
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QWidget>
+#include "edit_graphicwidget.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -28,6 +30,7 @@ class Ui_CMainWindow
 public:
     QWidget *centralWidget;
     QPushButton *pushButton;
+    COpenGLWidget *m_pRenderContext;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -36,16 +39,26 @@ public:
     {
         if (CMainWindow->objectName().isEmpty())
             CMainWindow->setObjectName(QStringLiteral("CMainWindow"));
-        CMainWindow->resize(400, 300);
+        CMainWindow->setWindowModality(Qt::NonModal);
+        CMainWindow->resize(1494, 874);
+        CMainWindow->setCursor(QCursor(Qt::ArrowCursor));
+        CMainWindow->setMouseTracking(true);
         centralWidget = new QWidget(CMainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         pushButton = new QPushButton(centralWidget);
         pushButton->setObjectName(QStringLiteral("pushButton"));
-        pushButton->setGeometry(QRect(160, 100, 75, 23));
+        pushButton->setGeometry(QRect(900, 780, 75, 23));
+        m_pRenderContext = new COpenGLWidget(centralWidget);
+        m_pRenderContext->setObjectName(QStringLiteral("m_pRenderContext"));
+        m_pRenderContext->setGeometry(QRect(130, 20, 1280, 720));
+        m_pRenderContext->setCursor(QCursor(Qt::ArrowCursor));
+        m_pRenderContext->setMouseTracking(true);
+        m_pRenderContext->setAutoFillBackground(false);
+        m_pRenderContext->setLocale(QLocale(QLocale::English, QLocale::UnitedStates));
         CMainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(CMainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 400, 21));
+        menuBar->setGeometry(QRect(0, 0, 1494, 21));
         CMainWindow->setMenuBar(menuBar);
         mainToolBar = new QToolBar(CMainWindow);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));

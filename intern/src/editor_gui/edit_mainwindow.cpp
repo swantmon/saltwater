@@ -18,6 +18,20 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
+    void CMainWindow::CreateContext()
+    {
+        m_UserInterface.m_pRenderContext->initializeGL();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::SwapWindow()
+    {
+        m_UserInterface.m_pRenderContext->paintGL();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CMainWindow::slot1()
     {
         int a = 4;

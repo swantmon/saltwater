@@ -111,7 +111,7 @@ namespace Edit
     
     CState::EStateType CLoadMapState::InternOnRun()
     {
-        CState::EStateType NextState = CState::Edit;
+        CState::EStateType NextState = CState::Play;
         
         Lg ::LoadMap::OnRun();
         Gui::LoadMap::OnRun();

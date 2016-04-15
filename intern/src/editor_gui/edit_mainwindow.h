@@ -16,6 +16,12 @@ namespace Edit
         CMainWindow(QWidget* _pParent = Q_NULLPTR);
         ~CMainWindow();
 
+    public:
+
+        void CreateContext();
+
+        void SwapWindow();
+
     public Q_SLOTS:
 
         void slot1();
