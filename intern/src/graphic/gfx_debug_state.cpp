@@ -64,12 +64,12 @@ namespace
     
     void CGfxDebugState::OnRun()
     {
+        Main::BeginFrame();
+
         ActorManager::Update();
         LightManager::Update();
 
         Main::UploadPerFrameConstantBuffers();
-        
-        Main::BeginFrame();
         
         // -----------------------------------------------------------------------------
         // Update renderer to prepare for rendering

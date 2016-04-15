@@ -21,7 +21,6 @@
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QWidget>
-#include "edit_graphicwidget.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -30,7 +29,7 @@ class Ui_CMainWindow
 public:
     QWidget *centralWidget;
     QPushButton *pushButton;
-    COpenGLWidget *m_pRenderContext;
+    QWidget *m_pEditorRenderContext;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -48,13 +47,13 @@ public:
         pushButton = new QPushButton(centralWidget);
         pushButton->setObjectName(QStringLiteral("pushButton"));
         pushButton->setGeometry(QRect(900, 780, 75, 23));
-        m_pRenderContext = new COpenGLWidget(centralWidget);
-        m_pRenderContext->setObjectName(QStringLiteral("m_pRenderContext"));
-        m_pRenderContext->setGeometry(QRect(130, 20, 1280, 720));
-        m_pRenderContext->setCursor(QCursor(Qt::ArrowCursor));
-        m_pRenderContext->setMouseTracking(true);
-        m_pRenderContext->setAutoFillBackground(false);
-        m_pRenderContext->setLocale(QLocale(QLocale::English, QLocale::UnitedStates));
+        m_pEditorRenderContext = new QWidget(centralWidget);
+        m_pEditorRenderContext->setObjectName(QStringLiteral("m_pEditorRenderContext"));
+        m_pEditorRenderContext->setGeometry(QRect(130, 20, 1280, 720));
+        m_pEditorRenderContext->setCursor(QCursor(Qt::ArrowCursor));
+        m_pEditorRenderContext->setMouseTracking(true);
+        m_pEditorRenderContext->setAutoFillBackground(false);
+        m_pEditorRenderContext->setLocale(QLocale(QLocale::English, QLocale::UnitedStates));
         CMainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(CMainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));

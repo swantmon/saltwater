@@ -17,14 +17,12 @@
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_mainwindow.cpp" />
-    <ClCompile Include="..\..\..\src\editor_gui\edit_graphicwidget.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_mainwindow.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_mainwindow.h" />
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_graphicwidget.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor_gui\edit_gui.h" />

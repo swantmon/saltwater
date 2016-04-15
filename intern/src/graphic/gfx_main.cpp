@@ -20,6 +20,7 @@
 #include "GL/glew.h"
 
 #include <vector>
+#include <windows.h>
 
 using namespace Gfx;
 
@@ -82,6 +83,11 @@ namespace
         
         Base::Int2 GetScreenSize();
         void RegisterResizeHandler(Gfx::Main::CResizeDelegate _NewDelgate);
+
+    public:
+
+        void ActivateWindow(unsigned int _WindowID);
+        unsigned int RegisterWindow(void* _pWindow);
         
     public:
         
@@ -101,8 +107,19 @@ namespace
         CBufferPtr GetPerFrameConstantBufferDS();
         CBufferPtr GetPerFrameConstantBufferGS();
         CBufferPtr GetPerFrameConstantBufferPS();
+
+    private:
+
+        static const unsigned int s_MaxNumberOfWindows = 4;
         
     private:
+
+        struct SWindowInfo
+        {
+            HWND  m_pNativeWindowHandle;
+            HDC   m_pNativeDeviceContextHandle;
+            HGLRC m_pNativeOpenGLContextHandle;
+        };
         
         struct SPerFrameConstantBufferVS
         {
@@ -150,8 +167,10 @@ namespace
         typedef CResizeDelagates::iterator                     CResizeDelegateIterator;
         
     private:
-        
-        
+
+        SWindowInfo  m_WindowInfos[s_MaxNumberOfWindows];
+        SWindowInfo* m_pActiveWindowInfo;
+        unsigned int m_NumberOfWindows;
 
         Base::Int2       m_ScreenSize;
         CResizeDelagates m_ResizeDelegates;
@@ -174,7 +193,9 @@ namespace
 namespace
 {
     CGfxMain::CGfxMain()
-        : m_ScreenSize                       ()
+        : m_pActiveWindowInfo                (0)
+        , m_NumberOfWindows                  (0)
+        , m_ScreenSize                       ()
         , m_ResizeDelegates                  ()
         , m_FrameCounter                     (0)
         , m_PerFrameConstantBufferPS         ()
@@ -258,11 +279,84 @@ namespace
     {
         m_ResizeDelegates.push_back(_NewDelgate);
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxMain::ActivateWindow(unsigned int _WindowID)
+    {
+        if (_WindowID >= m_NumberOfWindows) return;
+
+        m_pActiveWindowInfo = &m_WindowInfos[_WindowID];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    unsigned int CGfxMain::RegisterWindow(void* _pWindow)
+    {
+        if (_pWindow == 0 || m_NumberOfWindows == s_MaxNumberOfWindows) return 0;
+
+        HWND  pNativeWindowHandle;
+        HDC   pNativeDeviceContextHandle;
+        HGLRC pNativeOpenGLContextHandle;
+        int   Format;
+
+        const PIXELFORMATDESCRIPTOR PixelFormatDesc =
+        {
+            sizeof(PIXELFORMATDESCRIPTOR),
+            1,
+            PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,    //< Flags
+            PFD_TYPE_RGBA,                                                 //< RGBA or palette.
+            32,                                                            //< Depth of color frame buffer.
+            0, 0, 0, 0, 0, 0,
+            0,
+            0,
+            0,
+            0, 0, 0, 0,
+            32,                                                            //< Number of bits for the depth buffer
+            8,                                                             //< Number of bits for the stencil buffer
+            0,                                                             //< Number of Aux buffers in the frame buffer.
+            PFD_MAIN_PLANE,
+            0,
+            0, 0, 0
+        };
+
+        // -----------------------------------------------------------------------------
+        // Create OpenGL specific stuff
+        // -----------------------------------------------------------------------------
+        pNativeWindowHandle = static_cast<HWND>(_pWindow);
+
+        pNativeDeviceContextHandle = ::GetDC(pNativeWindowHandle); 
+
+        Format = ChoosePixelFormat(pNativeDeviceContextHandle, &PixelFormatDesc);
+
+        SetPixelFormat(pNativeDeviceContextHandle, Format, &PixelFormatDesc);
+
+        pNativeOpenGLContextHandle = ::wglCreateContext(pNativeDeviceContextHandle);
+
+        // -----------------------------------------------------------------------------
+        // Save data to new window
+        // -----------------------------------------------------------------------------
+        SWindowInfo& rNewWindow = m_WindowInfos[m_NumberOfWindows];
+
+        rNewWindow.m_pNativeWindowHandle        = pNativeWindowHandle;
+        rNewWindow.m_pNativeDeviceContextHandle = pNativeDeviceContextHandle;
+        rNewWindow.m_pNativeOpenGLContextHandle = pNativeOpenGLContextHandle;
+
+        ++ m_NumberOfWindows;
+
+        return m_NumberOfWindows - 1;
+    }
     
     // -----------------------------------------------------------------------------
     
     void CGfxMain::BeginFrame()
     {
+        assert(m_pActiveWindowInfo != 0);
+
+        SWindowInfo& rWindowInfo = *m_pActiveWindowInfo;
+
+        wglMakeCurrent(rWindowInfo.m_pNativeDeviceContextHandle, rWindowInfo.m_pNativeOpenGLContextHandle);
+
         Gfx::TargetSetManager::ClearTargetSet(Gfx::TargetSetManager::GetSystemTargetSet());
         Gfx::TargetSetManager::ClearTargetSet(Gfx::TargetSetManager::GetDefaultTargetSet());
         Gfx::TargetSetManager::ClearTargetSet(Gfx::TargetSetManager::GetDeferredTargetSet());
@@ -273,6 +367,13 @@ namespace
     
     void CGfxMain::EndFrame()
     {
+        assert(m_pActiveWindowInfo != 0);
+
+        SWindowInfo& rWindowInfo = *m_pActiveWindowInfo;
+
+        SwapBuffers(rWindowInfo.m_pNativeDeviceContextHandle);
+        wglMakeCurrent(NULL, NULL);
+
         ++ m_FrameCounter;
     }
     
@@ -521,49 +622,62 @@ namespace
     void CGfxMain::InitializeOpenGL()
     {
         // -----------------------------------------------------------------------------
-        // Activate GLEW. GLEW is an extension manager which handles all different
-        // OpenGL extensions.
-        //
-        // glewExperimental defines a possible option for extensions in experimental
-        // state.
+        // Show information of windows and initialize them
         // -----------------------------------------------------------------------------
-        glewExperimental = GL_TRUE;
-        
-        GLenum res = glewInit();
-        
-        if (res != GLEW_OK)
+        unsigned int IndexOfWindow = 0;
+
+        for (IndexOfWindow = 0; IndexOfWindow < m_NumberOfWindows; ++IndexOfWindow)
         {
-            BASE_THROWV("GLEW can't be initialized on this system because '%s'", glewGetErrorString(res));
-        }
-        
-        // -----------------------------------------------------------------------------
-        // Check specific opengl versions and availability
-        // -----------------------------------------------------------------------------
-        const unsigned char* pInfoGLEWVersion   = glewGetString(GLEW_VERSION);
-		const unsigned char* pInfoGLVersion     = glGetString(GL_VERSION);                      //< Returns a version or release number.
-		const unsigned char* pInfoGLVendor      = glGetString(GL_VENDOR);                       //< Returns the company responsible for this GL implementation. This name does not change from release to release.
-		const unsigned char* pInfoGLRenderer    = glGetString(GL_RENDERER);                     //< Returns the name of the renderer. This name is typically specific to a particular configuration of a hardware platform. It does not change from release to release.
-		const unsigned char* pInfoGLGLSLVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);     //< Returns a version or release number for the shading language.
-        
-        assert(pInfoGLEWVersion && pInfoGLVersion && pInfoGLGLSLVersion && pInfoGLVendor && pInfoGLRenderer);
-        
-        if (!GLEW_VERSION_4_3)
-        {
-            BASE_THROWV("GL 4.3 or higher can't initialized. Available version %s is to old!", pInfoGLVersion);
-        }
-        
-        BASE_CONSOLE_INFOV("GLEW     %s", pInfoGLEWVersion);
-        BASE_CONSOLE_INFOV("GL       %s", pInfoGLVersion);
-        BASE_CONSOLE_INFOV("GLSL     %s", pInfoGLGLSLVersion);
-        BASE_CONSOLE_INFOV("Vendor   %s", pInfoGLVendor);
-        BASE_CONSOLE_INFOV("Renderer %s", pInfoGLRenderer);
+            SWindowInfo& rWindowInfo = m_WindowInfos[IndexOfWindow];
+
+            wglMakeCurrent(rWindowInfo.m_pNativeDeviceContextHandle, rWindowInfo.m_pNativeOpenGLContextHandle);
+
+            // -----------------------------------------------------------------------------
+            // Activate GLEW. GLEW is an extension manager which handles all different
+            // OpenGL extensions.
+            //
+            // glewExperimental defines a possible option for extensions in experimental
+            // state.
+            // -----------------------------------------------------------------------------
+            glewExperimental = GL_TRUE;
+
+            GLenum res = glewInit();
+
+            if (res != GLEW_OK)
+            {
+                BASE_THROWV("GLEW can't be initialized on this system because '%s'", glewGetErrorString(res));
+            }
+
+            // -----------------------------------------------------------------------------
+            // Check specific OpenGL versions and availability
+            // -----------------------------------------------------------------------------
+            const unsigned char* pInfoGLEWVersion   = glewGetString(GLEW_VERSION);
+            const unsigned char* pInfoGLVersion     = glGetString(GL_VERSION);                      //< Returns a version or release number.
+            const unsigned char* pInfoGLVendor      = glGetString(GL_VENDOR);                       //< Returns the company responsible for this GL implementation. This name does not change from release to release.
+            const unsigned char* pInfoGLRenderer    = glGetString(GL_RENDERER);                     //< Returns the name of the renderer. This name is typically specific to a particular configuration of a hardware platform. It does not change from release to release.
+            const unsigned char* pInfoGLGLSLVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);     //< Returns a version or release number for the shading language.
+
+            assert(pInfoGLEWVersion && pInfoGLVersion && pInfoGLGLSLVersion && pInfoGLVendor && pInfoGLRenderer);
+
+            if (!GLEW_VERSION_4_3)
+            {
+                BASE_THROWV("GL 4.3 or higher can't initialized. Available version %s is to old!", pInfoGLVersion);
+            }
+
+            BASE_CONSOLE_INFOV("Window ID: %i", IndexOfWindow);
+            BASE_CONSOLE_INFOV("GLEW:      %s", pInfoGLEWVersion);
+            BASE_CONSOLE_INFOV("GL:        %s", pInfoGLVersion);
+            BASE_CONSOLE_INFOV("GLSL:      %s", pInfoGLGLSLVersion);
+            BASE_CONSOLE_INFOV("Vendor:    %s", pInfoGLVendor);
+            BASE_CONSOLE_INFOV("Renderer:  %s", pInfoGLRenderer);
 
 #if APP_DEBUG_MODE == 1
-        glDebugMessageCallback(OpenGLDebugCallback, NULL);
+            glDebugMessageCallback(OpenGLDebugCallback, NULL);
 
-        glEnable(GL_DEBUG_OUTPUT);
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+            glEnable(GL_DEBUG_OUTPUT);
+            glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 #endif
+        }
     }
 } // namespace
 
@@ -602,6 +716,20 @@ namespace Main
     void RegisterResizeHandler(CResizeDelegate _NewDelgate)
     {
         CGfxMain::GetInstance().RegisterResizeHandler(_NewDelgate);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ActivateWindow(unsigned int _WindowID)
+    {
+        CGfxMain::GetInstance().ActivateWindow( _WindowID);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    unsigned int RegisterWindow(void* _pWindow)
+    {
+        return CGfxMain::GetInstance().RegisterWindow(_pWindow);
     }
     
     // -----------------------------------------------------------------------------

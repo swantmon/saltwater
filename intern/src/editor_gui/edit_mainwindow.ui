@@ -36,7 +36,7 @@
      <string>PushButton</string>
     </property>
    </widget>
-   <widget class="COpenGLWidget" name="m_pRenderContext" native="true">
+   <widget class="QWidget" name="m_pEditorRenderContext" native="true">
     <property name="geometry">
      <rect>
       <x>130</x>
@@ -80,14 +80,6 @@
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <customwidgets>
-  <customwidget>
-   <class>COpenGLWidget</class>
-   <extends>QWidget</extends>
-   <header>edit_graphicwidget.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections>
   <connection>

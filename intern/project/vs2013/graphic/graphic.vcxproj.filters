@@ -199,6 +199,9 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_light_point_renderer.cpp">
       <Filter>engine\renderer</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_application_interface.cpp">
+      <Filter>interface\app</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\graphic\gfx_debug_interface.h">
@@ -441,6 +444,9 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_light_point_renderer.h">
       <Filter>engine\renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_application_interface.h">
+      <Filter>interface\app</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="interface">
@@ -580,6 +586,9 @@
     </Filter>
     <Filter Include="engine\map\actors">
       <UniqueIdentifier>{02e2bfc8-3fc9-4c52-94d8-71e03226c74f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="interface\app">
+      <UniqueIdentifier>{d2d6b2f8-bc87-4bab-a774-595fc150e167}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -14,8 +14,6 @@ namespace GUI
 
     void ProcessEvents();
 
-    void CreateContext();
-    void SwapWindow();
-
+    void* GetEditorWindowHandle();
 } // namespace GUI
 } // namespace Edit

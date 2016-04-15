@@ -35,8 +35,10 @@ namespace Main
     void OnResize(int _Width, int _Height);
     
     Base::Int2 GetScreenSize();
-    
     void RegisterResizeHandler(CResizeDelegate _NewDelgate);
+
+    void ActivateWindow(unsigned int _WindowID);
+    unsigned int RegisterWindow(void* _pWindow);
     
     void BeginFrame();
     void EndFrame();

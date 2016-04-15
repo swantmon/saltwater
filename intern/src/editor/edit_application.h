@@ -5,9 +5,8 @@ namespace Edit
 {
 namespace Runtime
 {
-    void OnStart(int _Width, int _Height);
-
+    void OnStart(int& _rArgc, char** _ppArgv);
     void OnExit();
-    int  OnRun();
+    void OnRun();
 } // namespace Runtime
 } // namespace Edit

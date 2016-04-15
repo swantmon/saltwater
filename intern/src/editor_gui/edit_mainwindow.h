@@ -18,9 +18,7 @@ namespace Edit
 
     public:
 
-        void CreateContext();
-
-        void SwapWindow();
+        void* GetEditorWindowHandle();
 
     public Q_SLOTS:
 

@@ -29,8 +29,7 @@ namespace
 
         void ProcessEvents();
 
-        void CreateContext();
-        void SwapWindow();
+        void* GetEditorWindowHandle();
 
     private:
 
@@ -78,7 +77,6 @@ namespace
 
     void CEditorGui::Setup(int _Width, int _Height)
     {
-
     }
 
     // -----------------------------------------------------------------------------
@@ -97,16 +95,9 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CEditorGui::CreateContext()
+    void* CEditorGui::GetEditorWindowHandle()
     {
-        m_pMainWindow->CreateContext();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CEditorGui::SwapWindow()
-    {
-        m_pMainWindow->SwapWindow();
+        return m_pMainWindow->GetEditorWindowHandle();
     }
 } // namespace 
 
@@ -149,16 +140,9 @@ namespace GUI
 
     // -----------------------------------------------------------------------------
 
-    void CreateContext()
+    void* GetEditorWindowHandle()
     {
-        CEditorGui::GetInstance().CreateContext();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SwapWindow()
-    {
-        CEditorGui::GetInstance().SwapWindow();
+        return CEditorGui::GetInstance().GetEditorWindowHandle();
     }
 } // namespace GUI
 } // namespace Edit

@@ -1,6 +1,8 @@
 
 #include "app/app_application.h"
+#include "app/app_config.h"
 
+#include "base/base_input_event.h"
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
@@ -12,6 +14,10 @@
 #include "editor/edit_play_state.h"
 #include "editor/edit_start_state.h"
 #include "editor/edit_unload_map_state.h"
+
+#include "editor_gui/edit_gui.h"
+
+#include "graphic/gfx_application_interface.h"
 
 namespace
 {
@@ -26,9 +32,9 @@ namespace
         
     public:
         
-        void OnStart(int _Width, int _Height);
+        void OnStart(int& _rArgc, char** _ppArgv);
         void OnExit();
-        int OnRun();
+        void OnRun();
         
     private:
         
@@ -37,6 +43,7 @@ namespace
     private:
         
         Edit::CState::EStateType m_CurrentState;
+        unsigned int             m_EditWindowID;
         
     private:
         
@@ -62,7 +69,8 @@ namespace
 namespace
 {
     CApplication::CApplication()
-        : m_CurrentState   (Edit::CState::Start)
+        : m_CurrentState(Edit::CState::Start)
+        , m_EditWindowID(0)
     {
     }
     
@@ -73,9 +81,39 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    void CApplication::OnStart(int _Width, int _Height)
-    {        
-        Edit::CStartState::GetInstance().SetResolution(_Width, _Height);
+    void CApplication::OnStart(int& _rArgc, char** _ppArgv)
+    {   
+        // -----------------------------------------------------------------------------
+        // Initialize GUI.
+        // -----------------------------------------------------------------------------
+        Edit::GUI::Create(_rArgc, _ppArgv);
+
+        // -----------------------------------------------------------------------------
+        // Setup main window with some properties.
+        // -----------------------------------------------------------------------------
+        Edit::GUI::Setup(1280, 720);
+
+        // -----------------------------------------------------------------------------
+        // Show main window.
+        // -----------------------------------------------------------------------------
+        Edit::GUI::Show();
+
+        // -----------------------------------------------------------------------------
+        // Now we get the information of the window handle and set this to
+        // the graphic part and active this window.
+        // -----------------------------------------------------------------------------
+        m_EditWindowID = Gfx::App::RegisterWindow(Edit::GUI::GetEditorWindowHandle());
+
+        // -----------------------------------------------------------------------------
+        // In game mode we can directly activate this window. It will be active the
+        // whole runtime.
+        // -----------------------------------------------------------------------------
+        Gfx::App::ActivateWindow(m_EditWindowID);
+
+        // -----------------------------------------------------------------------------
+        // From now on we can start the state engine and enter the first state
+        // -----------------------------------------------------------------------------
+        Edit::CStartState::GetInstance().SetResolution(1280, 720);
         
         s_pStates[m_CurrentState]->OnEnter();
 
@@ -86,8 +124,14 @@ namespace
     
     void CApplication::OnExit()
     {
+        // -----------------------------------------------------------------------------
+        // Exit the application
+        // -----------------------------------------------------------------------------
         App::Application::OnExit();
 
+        // -----------------------------------------------------------------------------
+        // Make last transition to exit
+        // -----------------------------------------------------------------------------
         OnTranslation(Edit::CState::UnloadMap);
         
         s_pStates[m_CurrentState]->OnRun();
@@ -99,24 +143,48 @@ namespace
         s_pStates[m_CurrentState]->OnRun();
         
         s_pStates[m_CurrentState]->OnLeave();
+
+        // -----------------------------------------------------------------------------
+        // At the end we have to clean our context and windows.
+        // -----------------------------------------------------------------------------
+        Edit::GUI::Destroy();
     }
     
     // -----------------------------------------------------------------------------
     
-    int CApplication::OnRun()
+    void CApplication::OnRun()
     {
-        App::Application::Update();
+        // -----------------------------------------------------------------------------
+        // With an window and context we initialize our application and run our game.
+        // Furthermore we handle different events by the window.
+        // -----------------------------------------------------------------------------
+        int ApplicationMessage = 0;
+        int WindowMessage      = 0;
 
-        Edit::CState::EStateType NextState;
-        
-        NextState = s_pStates[m_CurrentState]->OnRun();
-        
-        if (NextState != m_CurrentState)
+        for (; ApplicationMessage == 0 && WindowMessage == 0; )
         {
-            OnTranslation(NextState);
-        }
+            // -----------------------------------------------------------------------------
+            // Events
+            // -----------------------------------------------------------------------------
+            Edit::GUI::ProcessEvents();
 
-        return 0;
+            // -----------------------------------------------------------------------------
+            // Application
+            // -----------------------------------------------------------------------------
+            App::Application::Update();
+
+            // -----------------------------------------------------------------------------
+            // State engine
+            // -----------------------------------------------------------------------------
+            Edit::CState::EStateType NextState;
+
+            NextState = s_pStates[m_CurrentState]->OnRun();
+
+            if (NextState != m_CurrentState)
+            {
+                OnTranslation(NextState);
+            }
+        }
     }
     
     // -----------------------------------------------------------------------------
@@ -135,9 +203,9 @@ namespace Edit
 {
 namespace Runtime
 {
-    void OnStart(int _Width, int _Height)
+    void OnStart(int& _rArgc, char** _ppArgv)
     {
-        CApplication::GetInstance().OnStart(_Width, _Height);
+        CApplication::GetInstance().OnStart(_rArgc, _ppArgv);
     }
     
     // -----------------------------------------------------------------------------
@@ -149,9 +217,9 @@ namespace Runtime
     
     // -----------------------------------------------------------------------------
     
-    int OnRun()
+    void OnRun()
     {
-        return CApplication::GetInstance().OnRun();
+        CApplication::GetInstance().OnRun();
     }
 } // namespace Runtime
 } // namespace App
