@@ -79,7 +79,6 @@ namespace
         
     public:
         
-        Base::Int2 GetScreenSize();
         void RegisterResizeHandler(Gfx::Main::CResizeDelegate _NewDelgate);
 
     public:
@@ -99,8 +98,6 @@ namespace
         
         void BeginFrame();
         void EndFrame();
-        
-        unsigned int GetFrame() const;
         
     public:
         
@@ -180,7 +177,6 @@ namespace
         unsigned int m_NumberOfWindows;
 
         CResizeDelegates m_ResizeDelegates;
-        unsigned int     m_FrameCounter;
 
         SPerFrameConstantBufferPS m_PerFrameConstantBufferPS;
 
@@ -198,7 +194,6 @@ namespace
         : m_pActiveWindowInfo                (0)
         , m_NumberOfWindows                  (0)
         , m_ResizeDelegates                  ()
-        , m_FrameCounter                     (0)
         , m_PerFrameConstantBufferPS         ()
         , m_PerFrameConstantBufferVSBufferPtr()
         , m_PerFrameConstantBufferHSBufferPtr()
@@ -434,16 +429,6 @@ namespace
         SWindowInfo& rWindowInfo = *m_pActiveWindowInfo;
 
         SwapBuffers(rWindowInfo.m_pNativeDeviceContextHandle);
-        wglMakeCurrent(NULL, NULL);
-
-        ++ m_FrameCounter;
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    unsigned int CGfxMain::GetFrame() const
-    {
-        return m_FrameCounter;
     }
     
     // -----------------------------------------------------------------------------
@@ -757,13 +742,6 @@ namespace Main
     void EndFrame()
     {
         CGfxMain::GetInstance().EndFrame();
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    unsigned int GetFrame()
-    {
-        return CGfxMain::GetInstance().GetFrame();
     }
     
     // -----------------------------------------------------------------------------
