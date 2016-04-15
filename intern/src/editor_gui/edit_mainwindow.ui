@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>edit_gui_mainwindow</class>
- <widget class="QMainWindow" name="edit_gui_mainwindow">
+ <class>CMainWindow</class>
+ <widget class="QMainWindow" name="CMainWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>edit_gui_mainwindow</string>
+   <string>Editor</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QPushButton" name="pushButton">
@@ -54,7 +54,7 @@
   <connection>
    <sender>pushButton</sender>
    <signal>clicked()</signal>
-   <receiver>edit_gui_mainwindow</receiver>
+   <receiver>CMainWindow</receiver>
    <slot>slot1()</slot>
    <hints>
     <hint type="sourcelabel">

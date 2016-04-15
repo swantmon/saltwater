@@ -20,11 +20,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\editor_gui\edit_gui.cpp" />
-    <ClCompile Include="..\..\..\src\editor_gui\edit_gui_mainwindow.cpp" />
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_gui_mainwindow.cpp" />
+    <ClCompile Include="..\..\..\src\editor_gui\edit_mainwindow.cpp" />
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_mainwindow.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_gui_mainwindow.ui">
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_mainwindow.ui">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\src\editor_gui\ui_%(Filename).h;%(Outputs)</Outputs>
@@ -44,26 +44,25 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_gui_mainwindow.h">
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing edit_gui_mainwindow.h...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\src\editor_gui\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\..\..\..\src\editor_gui\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DEDITUR_GUI_LIB "-I.\..\..\..\src" "-I.\..\..\..\..\extern\qt\include" "-I.\..\..\..\..\extern\qt\include\QtCore" "-I.\..\..\..\..\extern\qt\include\QtGui" "-I.\..\..\..\..\extern\qt\include\QtWidgets"</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing edit_gui_mainwindow.h...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\..\src\editor_gui\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\..\..\..\src\editor_gui\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DEDITUR_GUI_LIB "-I.\..\..\..\src" "-I.\..\..\..\..\extern\qt\include" "-I.\..\..\..\..\extern\qt\include\QtCore" "-I.\..\..\..\..\extern\qt\include\QtGui" "-I.\..\..\..\..\extern\qt\include\QtWidgets"</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing edit_gui_mainwindow.h...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\..\..\..\src\editor_gui\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\..\..\..\src\editor_gui\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DEDITUR_GUI_LIB "-I.\..\..\..\src" "-I.\..\..\..\..\extern\qt\include" "-I.\..\..\..\..\extern\qt\include\QtCore" "-I.\..\..\..\..\extern\qt\include\QtGui" "-I.\..\..\..\..\extern\qt\include\QtWidgets"</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing edit_gui_mainwindow.h...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\..\..\src\editor_gui\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\..\..\..\src\editor_gui\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DEDITUR_GUI_LIB "-I.\..\..\..\src" "-I.\..\..\..\..\extern\qt\include" "-I.\..\..\..\..\extern\qt\include\QtCore" "-I.\..\..\..\..\extern\qt\include\QtGui" "-I.\..\..\..\..\extern\qt\include\QtWidgets"</Command>
-    </CustomBuild>
     <ClInclude Include="..\..\..\src\editor_gui\edit_gui.h" />
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_gui_mainwindow.h" />
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_mainwindow.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing edit_mainwindow.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\src\editor_gui\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\..\..\..\src\editor_gui\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DEDITUR_GUI_LIB "-I.\..\..\..\src" "-I.\..\..\..\..\extern\qt\include" "-I.\..\..\..\..\extern\qt\include\QtCore" "-I.\..\..\..\..\extern\qt\include\QtGui" "-I.\..\..\..\..\extern\qt\include\QtWidgets" "-I.\..\..\..\src\editor_gui"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing edit_mainwindow.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\..\src\editor_gui\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\..\..\..\src\editor_gui\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DEDITUR_GUI_LIB "-I.\..\..\..\src" "-I.\..\..\..\..\extern\qt\include" "-I.\..\..\..\..\extern\qt\include\QtCore" "-I.\..\..\..\..\extern\qt\include\QtGui" "-I.\..\..\..\..\extern\qt\include\QtWidgets" "-I.\..\..\..\src\editor_gui"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing edit_mainwindow.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\..\..\..\src\editor_gui\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\..\..\..\src\editor_gui\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DEDITUR_GUI_LIB "-I.\..\..\..\src" "-I.\..\..\..\..\extern\qt\include" "-I.\..\..\..\..\extern\qt\include\QtCore" "-I.\..\..\..\..\extern\qt\include\QtGui" "-I.\..\..\..\..\extern\qt\include\QtWidgets" "-I.\..\..\..\src\editor_gui"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing edit_mainwindow.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\..\..\src\editor_gui\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\..\..\..\src\editor_gui\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DEDITUR_GUI_LIB "-I.\..\..\..\src" "-I.\..\..\..\..\extern\qt\include" "-I.\..\..\..\..\extern\qt\include\QtCore" "-I.\..\..\..\..\extern\qt\include\QtGui" "-I.\..\..\..\..\extern\qt\include\QtWidgets" "-I.\..\..\..\src\editor_gui"</Command>
+    </CustomBuild>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B12702AD-ABFB-343A-A199-8E24837244A3}</ProjectGuid>
@@ -130,7 +129,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PreprocessorDefinitions>UNICODE;WIN32;QT_DLL;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;EDITUR_GUI_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\..\..\..\src;.\..\..\..\..\extern\qt\include;.\..\..\..\..\extern\qt\include\QtCore;.\..\..\..\..\extern\qt\include\QtGui;.\..\..\..\..\extern\qt\include\QtWidgets;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\..\..\..\src;.\..\..\..\..\extern\qt\include;.\..\..\..\..\extern\qt\include\QtCore;.\..\..\..\..\extern\qt\include\QtGui;.\..\..\..\..\extern\qt\include\QtWidgets;.\..\..\..\src\editor_gui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -153,7 +152,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PreprocessorDefinitions>UNICODE;WIN32;QT_DLL;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;EDITUR_GUI_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\..\..\..\src;.\..\..\..\..\extern\qt\include;.\..\..\..\..\extern\qt\include\QtCore;.\..\..\..\..\extern\qt\include\QtGui;.\..\..\..\..\extern\qt\include\QtWidgets;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\..\..\..\src;.\..\..\..\..\extern\qt\include;.\..\..\..\..\extern\qt\include\QtCore;.\..\..\..\..\extern\qt\include\QtGui;.\..\..\..\..\extern\qt\include\QtWidgets;.\..\..\..\src\editor_gui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -176,7 +175,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <PreprocessorDefinitions>UNICODE;WIN32;QT_DLL;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;EDITUR_GUI_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\..\..\..\src;.\..\..\..\..\extern\qt\include;.\..\..\..\..\extern\qt\include\QtCore;.\..\..\..\..\extern\qt\include\QtGui;.\..\..\..\..\extern\qt\include\QtWidgets;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\..\..\..\src;.\..\..\..\..\extern\qt\include;.\..\..\..\..\extern\qt\include\QtCore;.\..\..\..\..\extern\qt\include\QtGui;.\..\..\..\..\extern\qt\include\QtWidgets;.\..\..\..\src\editor_gui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -198,7 +197,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PreprocessorDefinitions>UNICODE;WIN32;QT_DLL;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;EDITUR_GUI_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\..\..\..\src;.\..\..\..\..\extern\qt\include;.\..\..\..\..\extern\qt\include\QtCore;.\..\..\..\..\extern\qt\include\QtGui;.\..\..\..\..\extern\qt\include\QtWidgets;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\..\..\..\src;.\..\..\..\..\extern\qt\include;.\..\..\..\..\extern\qt\include\QtCore;.\..\..\..\..\extern\qt\include\QtGui;.\..\..\..\..\extern\qt\include\QtWidgets;.\..\..\..\src\editor_gui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>

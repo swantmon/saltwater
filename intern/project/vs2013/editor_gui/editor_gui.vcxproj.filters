@@ -12,22 +12,19 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\editor_gui\edit_gui_mainwindow.cpp" />
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_gui_mainwindow.cpp">
+    <ClCompile Include="..\..\..\src\editor_gui\edit_gui.cpp" />
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_mainwindow.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\edit_gui.cpp" />
+    <ClCompile Include="..\..\..\src\editor_gui\edit_mainwindow.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_gui_mainwindow.ui">
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_mainwindow.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_gui_mainwindow.h" />
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_mainwindow.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_gui_mainwindow.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\editor_gui\edit_gui.h" />
   </ItemGroup>
 </Project>

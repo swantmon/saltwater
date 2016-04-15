@@ -2,8 +2,10 @@
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
-#include "editor_gui/edit_gui_mainwindow.h"
 #include "editor_gui/edit_gui.h"
+#include "editor_gui/edit_mainwindow.h"
+
+using namespace Edit;
 
 namespace 
 {
@@ -29,8 +31,8 @@ namespace
 
     private:
 
-        QApplication*        m_pApplication;
-        edit_gui_mainwindow* m_pMainWindow;
+        QApplication* m_pApplication;
+        CMainWindow*  m_pMainWindow;
 
     };
 } // namespace 
@@ -55,7 +57,7 @@ namespace
     {
         m_pApplication = new QApplication(_rArgc, _ppArgv);
 
-        m_pMainWindow = new edit_gui_mainwindow();
+        m_pMainWindow = new CMainWindow();
     }
 
     // -----------------------------------------------------------------------------

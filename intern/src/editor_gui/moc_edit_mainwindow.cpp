@@ -1,16 +1,16 @@
 /****************************************************************************
-** Meta object code from reading C++ file 'edit_gui_mainwindow.h'
+** Meta object code from reading C++ file 'edit_mainwindow.h'
 **
 ** Created by: The Qt Meta Object Compiler version 67 (Qt 5.6.0)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "edit_gui_mainwindow.h"
+#include "edit_mainwindow.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
-#error "The header file 'edit_gui_mainwindow.h' doesn't include <QObject>."
+#error "The header file 'edit_mainwindow.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
 #error "This file was generated using the moc from 5.6.0. It"
 #error "cannot be used with the include files from this version of Qt."
@@ -18,27 +18,27 @@
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
-struct qt_meta_stringdata_edit_gui_mainwindow_t {
+struct qt_meta_stringdata_Edit__CMainWindow_t {
     QByteArrayData data[3];
-    char stringdata0[27];
+    char stringdata0[25];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
-    qptrdiff(offsetof(qt_meta_stringdata_edit_gui_mainwindow_t, stringdata0) + ofs \
+    qptrdiff(offsetof(qt_meta_stringdata_Edit__CMainWindow_t, stringdata0) + ofs \
         - idx * sizeof(QByteArrayData)) \
     )
-static const qt_meta_stringdata_edit_gui_mainwindow_t qt_meta_stringdata_edit_gui_mainwindow = {
+static const qt_meta_stringdata_Edit__CMainWindow_t qt_meta_stringdata_Edit__CMainWindow = {
     {
-QT_MOC_LITERAL(0, 0, 19), // "edit_gui_mainwindow"
-QT_MOC_LITERAL(1, 20, 5), // "slot1"
-QT_MOC_LITERAL(2, 26, 0) // ""
+QT_MOC_LITERAL(0, 0, 17), // "Edit::CMainWindow"
+QT_MOC_LITERAL(1, 18, 5), // "slot1"
+QT_MOC_LITERAL(2, 24, 0) // ""
 
     },
-    "edit_gui_mainwindow\0slot1\0"
+    "Edit::CMainWindow\0slot1\0"
 };
 #undef QT_MOC_LITERAL
 
-static const uint qt_meta_data_edit_gui_mainwindow[] = {
+static const uint qt_meta_data_Edit__CMainWindow[] = {
 
  // content:
        7,       // revision
@@ -60,10 +60,10 @@ static const uint qt_meta_data_edit_gui_mainwindow[] = {
        0        // eod
 };
 
-void edit_gui_mainwindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void Edit::CMainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        edit_gui_mainwindow *_t = static_cast<edit_gui_mainwindow *>(_o);
+        CMainWindow *_t = static_cast<CMainWindow *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->slot1(); break;
@@ -73,26 +73,26 @@ void edit_gui_mainwindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, 
     Q_UNUSED(_a);
 }
 
-const QMetaObject edit_gui_mainwindow::staticMetaObject = {
-    { &QMainWindow::staticMetaObject, qt_meta_stringdata_edit_gui_mainwindow.data,
-      qt_meta_data_edit_gui_mainwindow,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
+const QMetaObject Edit::CMainWindow::staticMetaObject = {
+    { &QMainWindow::staticMetaObject, qt_meta_stringdata_Edit__CMainWindow.data,
+      qt_meta_data_Edit__CMainWindow,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
 };
 
 
-const QMetaObject *edit_gui_mainwindow::metaObject() const
+const QMetaObject *Edit::CMainWindow::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
-void *edit_gui_mainwindow::qt_metacast(const char *_clname)
+void *Edit::CMainWindow::qt_metacast(const char *_clname)
 {
     if (!_clname) return Q_NULLPTR;
-    if (!strcmp(_clname, qt_meta_stringdata_edit_gui_mainwindow.stringdata0))
-        return static_cast<void*>(const_cast< edit_gui_mainwindow*>(this));
+    if (!strcmp(_clname, qt_meta_stringdata_Edit__CMainWindow.stringdata0))
+        return static_cast<void*>(const_cast< CMainWindow*>(this));
     return QMainWindow::qt_metacast(_clname);
 }
 
-int edit_gui_mainwindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int Edit::CMainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QMainWindow::qt_metacall(_c, _id, _a);
     if (_id < 0)
