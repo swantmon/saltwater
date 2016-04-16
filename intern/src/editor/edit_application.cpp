@@ -23,6 +23,8 @@
 
 #include "graphic/gfx_application_interface.h"
 
+#include "gui/gui_event_handler.h"
+
 namespace
 {
     class CApplication : private Base::CUncopyable
@@ -50,12 +52,21 @@ namespace
         
         Edit::CState::EStateType m_CurrentState;
         unsigned int             m_EditWindowID;
+        Base::Short2             m_LatestMousePosition;
         
     private:
         
         void OnTranslation(Edit::CState::EStateType _NewState);
 
         void OnKeyPressed(Edit::CMessage& _rMessage);
+        void OnKeyReleased(Edit::CMessage& _rMessage);
+        void OnMouseLeftPressed(Edit::CMessage& _rMessage);
+        void OnMouseLeftReleased(Edit::CMessage& _rMessage);
+        void OnMouseMiddlePressed(Edit::CMessage& _rMessage);
+        void OnMouseMiddleReleased(Edit::CMessage& _rMessage);
+        void OnMouseRightPressed(Edit::CMessage& _rMessage);
+        void OnMouseRightReleased(Edit::CMessage& _rMessage);
+        void OnMouseMove(Edit::CMessage& _rMessage);
         
     };
 } // namespace
@@ -77,8 +88,9 @@ namespace
 namespace
 {
     CApplication::CApplication()
-        : m_CurrentState(Edit::CState::Start)
-        , m_EditWindowID(0)
+        : m_CurrentState       (Edit::CState::Start)
+        , m_EditWindowID       (0)
+        , m_LatestMousePosition(Base::Short2(0, 0))
     { 
     }
     
@@ -127,7 +139,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Register messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SGUIMessageType::KeyPressed, EDIT_RECEIVE_MESSAGE(&CApplication::OnKeyPressed));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::KeyPressed         , EDIT_RECEIVE_MESSAGE(&CApplication::OnKeyPressed));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::KeyReleased        , EDIT_RECEIVE_MESSAGE(&CApplication::OnKeyReleased));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::MouseLeftPressed   , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseLeftPressed));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::MouseLeftReleased  , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseLeftReleased));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::MouseMiddlePressed , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseMiddlePressed));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::MouseMiddleReleased, EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseMiddleReleased));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::MouseRightPressed  , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseRightPressed));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::MouseRightReleased , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseRightReleased));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::MouseMove          , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseMove));
     }
     
     // -----------------------------------------------------------------------------
@@ -210,9 +230,129 @@ namespace
 
     void CApplication::OnKeyPressed(Edit::CMessage& _rMessage)
     {
-        int Test = _rMessage.GetInt();
+        unsigned int Key = _rMessage.GetInt();
+        unsigned int Mod = _rMessage.GetInt();
 
-        BASE_CONSOLE_INFOV("Got key pressed: %i", Test);
+        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::KeyPressed, Key, Mod);
+
+        Gui::EventHandler::OnUserEvent(NewInput);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CApplication::OnKeyReleased(Edit::CMessage& _rMessage)
+    {
+        unsigned int Key = _rMessage.GetInt();
+        unsigned int Mod = _rMessage.GetInt();
+
+        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::KeyReleased, Key, Mod);
+
+        Gui::EventHandler::OnUserEvent(NewInput);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CApplication::OnMouseLeftPressed(Edit::CMessage& _rMessage)
+    {
+        int MousePositionX = _rMessage.GetInt();
+        int MousePositionY = _rMessage.GetInt();
+
+        m_LatestMousePosition[0] = MousePositionX;
+        m_LatestMousePosition[1] = MousePositionY;
+
+        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseLeftPressed, Base::CInputEvent::Mouse, m_LatestMousePosition);
+
+        Gui::EventHandler::OnUserEvent(NewInput);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CApplication::OnMouseLeftReleased(Edit::CMessage& _rMessage)
+    {
+        int MousePositionX = _rMessage.GetInt();
+        int MousePositionY = _rMessage.GetInt();
+
+        m_LatestMousePosition[0] = MousePositionX;
+        m_LatestMousePosition[1] = MousePositionY;
+
+        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseLeftReleased, Base::CInputEvent::Mouse, m_LatestMousePosition);
+
+        Gui::EventHandler::OnUserEvent(NewInput);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CApplication::OnMouseMiddlePressed(Edit::CMessage& _rMessage)
+    {
+        int MousePositionX = _rMessage.GetInt();
+        int MousePositionY = _rMessage.GetInt();
+
+        m_LatestMousePosition[0] = MousePositionX;
+        m_LatestMousePosition[1] = MousePositionY;
+
+        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseMiddlePressed, Base::CInputEvent::Mouse, m_LatestMousePosition);
+
+        Gui::EventHandler::OnUserEvent(NewInput);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CApplication::OnMouseMiddleReleased(Edit::CMessage& _rMessage)
+    {
+        int MousePositionX = _rMessage.GetInt();
+        int MousePositionY = _rMessage.GetInt();
+
+        m_LatestMousePosition[0] = MousePositionX;
+        m_LatestMousePosition[1] = MousePositionY;
+
+        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseMiddleReleased, Base::CInputEvent::Mouse, m_LatestMousePosition);
+
+        Gui::EventHandler::OnUserEvent(NewInput);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CApplication::OnMouseRightPressed(Edit::CMessage& _rMessage)
+    {
+        int MousePositionX = _rMessage.GetInt();
+        int MousePositionY = _rMessage.GetInt();
+
+        m_LatestMousePosition[0] = MousePositionX;
+        m_LatestMousePosition[1] = MousePositionY;
+
+        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseRightPressed, Base::CInputEvent::Mouse, m_LatestMousePosition);
+
+        Gui::EventHandler::OnUserEvent(NewInput);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CApplication::OnMouseRightReleased(Edit::CMessage& _rMessage)
+    {
+        int MousePositionX = _rMessage.GetInt();
+        int MousePositionY = _rMessage.GetInt();
+
+        m_LatestMousePosition[0] = MousePositionX;
+        m_LatestMousePosition[1] = MousePositionY;
+
+        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseRightReleased, Base::CInputEvent::Mouse, m_LatestMousePosition);
+
+        Gui::EventHandler::OnUserEvent(NewInput);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CApplication::OnMouseMove(Edit::CMessage& _rMessage)
+    {
+        int MousePositionX = _rMessage.GetInt();
+        int MousePositionY = _rMessage.GetInt();
+
+        m_LatestMousePosition[0] = MousePositionX;
+        m_LatestMousePosition[1] = MousePositionY;
+
+        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseMove, Base::CInputEvent::Mouse, m_LatestMousePosition);
+
+        Gui::EventHandler::OnUserEvent(NewInput);
     }
 }
 

@@ -32,6 +32,11 @@ namespace Edit
     private:
 
         void closeEvent(QCloseEvent* _pEvent);
+        void keyPressEvent(QKeyEvent* _pKeyEvent);
+        void keyReleaseEvent(QKeyEvent* _pKeyEvent);
+        void mouseMoveEvent(QMouseEvent* _pMouseEvent);
+        void mousePressEvent(QMouseEvent* _pMouseEvent);
+        void mouseReleaseEvent(QMouseEvent* _pMouseEvent);
     };
 } // namespace Edit
 
