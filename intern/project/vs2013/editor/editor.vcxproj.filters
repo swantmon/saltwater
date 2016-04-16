@@ -28,7 +28,7 @@
       <Filter>states</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor\edit_main.cpp" />
-    <ClCompile Include="..\..\..\src\editor\edit_runtime.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_application.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor\edit_edit_state.h">
@@ -55,6 +55,6 @@
     <ClInclude Include="..\..\..\src\editor\edit_unload_map_state.h">
       <Filter>states</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\editor\edit_runtime.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_application.h" />
   </ItemGroup>
 </Project>

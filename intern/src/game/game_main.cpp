@@ -9,15 +9,15 @@
 #include "base/base_console.h"
 #include "base/base_exception.h"
 
-#include "game/game_runtime.h"
+#include "game/game_application.h"
 
 int main(int _Argc, const char* _pArgv[])
 {
     try
     {
-        Game::Runtime::OnStart(1280, 720);
+        Game::Application::OnStart(1280, 720);
 
-        Game::Runtime::OnRun();
+        Game::Application::OnRun();
     }
     catch (const Base::CException& _rException)
     {
@@ -33,7 +33,7 @@ int main(int _Argc, const char* _pArgv[])
     
     try
     {
-        Game::Runtime::OnExit();
+        Game::Application::OnExit();
     }
     catch (const Base::CException& _rException)
     {

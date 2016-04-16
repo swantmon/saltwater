@@ -2,15 +2,15 @@
 #include "base/base_console.h"
 #include "base/base_exception.h"
 
-#include "editor/edit_runtime.h"
+#include "editor/edit_application.h"
 
 int main(int _Argc, char* _pArgv[])
 {    
     try
     {
-        Edit::Runtime::OnStart(_Argc, _pArgv);
+        Edit::Application::OnStart(_Argc, _pArgv);
 
-        Edit::Runtime::OnRun();
+        Edit::Application::OnRun();
     }
     catch (const Base::CException& _rException)
     {
@@ -26,7 +26,7 @@ int main(int _Argc, char* _pArgv[])
 
     try
     {
-        Edit::Runtime::OnExit();
+        Edit::Application::OnExit();
     }
     catch (const Base::CException& _rException)
     {

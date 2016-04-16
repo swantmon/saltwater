@@ -4,6 +4,10 @@
 #include "camera/cam_control_manager.h"
 
 #include "editor/edit_play_state.h"
+#include "editor/edit_unload_map_state.h"
+
+#include "editor_port/edit_message.h"
+#include "editor_port/edit_message_manager.h"
 
 #include "graphic/gfx_play_state.h"
 
@@ -24,8 +28,12 @@ namespace Edit
 namespace Edit
 {
     CPlayState::CPlayState()
+        : m_Action(CState::Play)
     {
-        
+        // -----------------------------------------------------------------------------
+        // Register messages
+        // -----------------------------------------------------------------------------
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Exit, EDIT_RECEIVE_MESSAGE(&CPlayState::OnExit));
     }
     
     // -----------------------------------------------------------------------------
@@ -47,7 +55,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Lg ::Play::OnEnter();
         Gui::Play::OnEnter();
-        Gfx::Play::OnEnter();        
+        Gfx::Play::OnEnter();
         
         return Edit::CState::Play;
     }
@@ -70,6 +78,14 @@ namespace Edit
     CState::EStateType CPlayState::InternOnRun()
     {
         CState::EStateType NextState = CState::Play;
+
+        switch (m_Action)
+        {
+        case Edit::CState::Exit:
+            CUnloadMapState::GetInstance().SetNextState(CState::Exit);
+            NextState = CState::UnloadMap;
+            break;
+        }
         
         // -----------------------------------------------------------------------------
         // Update logic
@@ -88,5 +104,12 @@ namespace Edit
         Gfx::Play::OnRun();
         
         return NextState;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPlayState::OnExit(Edit::CMessage& _rMessage)
+    {
+        m_Action = CState::Exit;
     }
 } // namespace Edit

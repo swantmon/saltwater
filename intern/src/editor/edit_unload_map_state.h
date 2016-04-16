@@ -11,6 +11,14 @@ namespace Edit
     public:
         
         static CUnloadMapState& GetInstance();
+
+    public:
+
+        void SetNextState(CState::EStateType _NextState);
+
+    private:
+
+        CState::EStateType m_NextState;
         
     private:
         
@@ -22,6 +30,6 @@ namespace Edit
         virtual CState::EStateType InternOnEnter();
         virtual CState::EStateType InternOnLeave();
         virtual CState::EStateType InternOnRun();
-        
+
     };
 } // namespace Edit

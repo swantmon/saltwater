@@ -3,10 +3,10 @@
 
 namespace Game
 {
-namespace Runtime
+namespace Application
 {
     void OnStart(int _Width, int _Height);
     void OnExit();
     void OnRun();
-} // namespace Runtime
+} // namespace Application
 } // namespace Game

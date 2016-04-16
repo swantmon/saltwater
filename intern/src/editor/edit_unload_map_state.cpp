@@ -28,6 +28,7 @@ namespace Edit
 namespace Edit
 {
     CUnloadMapState::CUnloadMapState()
+        : m_NextState(CState::UnloadMap)
     {
         
     }
@@ -37,6 +38,13 @@ namespace Edit
     CUnloadMapState::~CUnloadMapState()
     {
         
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CUnloadMapState::SetNextState(CState::EStateType _NextState)
+    {
+        m_NextState = _NextState;
     }
     
     // -----------------------------------------------------------------------------
@@ -60,18 +68,7 @@ namespace Edit
         Lg ::UnloadMap::OnEnter(TextWriter);
         Gfx::UnloadMap::OnEnter(TextWriter);
         Gui::UnloadMap::OnEnter(TextWriter);
-        
-        // -----------------------------------------------------------------------------
-        // Save stream data to file
-        // -----------------------------------------------------------------------------
-//         std::ofstream File("../data/level/default_map.txt", std::ios::out);
-//         
-//         assert(File.is_open());
-//         
-//         File << Stream.str();
-//         
-//         File.close();
-        
+                
         return Edit::CState::UnloadMap;
     }
     
@@ -92,7 +89,7 @@ namespace Edit
     
     CState::EStateType CUnloadMapState::InternOnRun()
     {
-        CState::EStateType NextState = CState::Exit;
+        CState::EStateType NextState = m_NextState;
         
         Lg ::UnloadMap::OnRun();
         Gfx::UnloadMap::OnRun();

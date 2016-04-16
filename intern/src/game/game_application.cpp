@@ -8,7 +8,7 @@
 #include "core/core_time.h"
 #include "core/core_config.h"
 
-#include "game/game_runtime.h"
+#include "game/game_application.h"
 #include "game/game_debug_state.h"
 #include "game/game_exit_state.h"
 #include "game/game_intro_state.h"
@@ -383,7 +383,7 @@ namespace
 
 namespace Game
 {
-namespace Runtime
+namespace Application
 {
     void OnStart(int _Width, int _Height)
     {
@@ -403,5 +403,5 @@ namespace Runtime
     {
         CApplication::GetInstance().OnRun();
     }
-} // namespace Runtime
+} // namespace Application
 } // namespace Game

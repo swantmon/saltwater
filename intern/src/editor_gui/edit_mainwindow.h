@@ -3,6 +3,7 @@
 
 #include "editor_gui/ui_edit_mainwindow.h"
 
+#include <QCloseEvent>
 #include <QMainWindow>
 
 namespace Edit
@@ -27,6 +28,10 @@ namespace Edit
     private:
 
         Ui::CMainWindow m_UserInterface;
+
+    private:
+
+        void closeEvent(QCloseEvent* _pEvent);
     };
 } // namespace Edit
 

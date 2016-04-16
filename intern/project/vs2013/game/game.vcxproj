@@ -194,7 +194,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\game\game_runtime.cpp" />
+    <ClCompile Include="..\..\..\src\game\game_application.cpp" />
     <ClCompile Include="..\..\..\src\game\game_debug_state.cpp" />
     <ClCompile Include="..\..\..\src\game\game_exit_state.cpp" />
     <ClCompile Include="..\..\..\src\game\game_intro_state.cpp" />
@@ -206,7 +206,7 @@
     <ClCompile Include="..\..\..\src\game\game_main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\game\game_runtime.h" />
+    <ClInclude Include="..\..\..\src\game\game_application.h" />
     <ClInclude Include="..\..\..\src\game\game_debug_state.h" />
     <ClInclude Include="..\..\..\src\game\game_exit_state.h" />
     <ClInclude Include="..\..\..\src\game\game_intro_state.h" />

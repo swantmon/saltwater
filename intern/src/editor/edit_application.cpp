@@ -1,4 +1,5 @@
 
+#include "base/base_console.h"
 #include "base/base_input_event.h"
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
@@ -6,7 +7,7 @@
 #include "core/core_time.h"
 #include "core/core_config.h"
 
-#include "editor/edit_runtime.h"
+#include "editor/edit_application.h"
 #include "editor/edit_edit_state.h"
 #include "editor/edit_exit_state.h"
 #include "editor/edit_intro_state.h"
@@ -16,6 +17,9 @@
 #include "editor/edit_unload_map_state.h"
 
 #include "editor_gui/edit_gui.h"
+
+#include "editor_port/edit_message.h"
+#include "editor_port/edit_message_manager.h"
 
 #include "graphic/gfx_application_interface.h"
 
@@ -50,6 +54,8 @@ namespace
     private:
         
         void OnTranslation(Edit::CState::EStateType _NewState);
+
+        void OnKeyPressed(Edit::CMessage& _rMessage);
         
     };
 } // namespace
@@ -73,13 +79,14 @@ namespace
     CApplication::CApplication()
         : m_CurrentState(Edit::CState::Start)
         , m_EditWindowID(0)
-    {
+    { 
     }
     
     // -----------------------------------------------------------------------------
     
     CApplication::~CApplication()
-    { }
+    {
+    }
     
     // -----------------------------------------------------------------------------
     
@@ -116,6 +123,11 @@ namespace
         s_pStates[m_CurrentState]->OnEnter();
 
         Core::Time::OnStart();
+
+        // -----------------------------------------------------------------------------
+        // Register messages
+        // -----------------------------------------------------------------------------
+        Edit::MessageManager::Register(Edit::SGUIMessageType::KeyPressed, EDIT_RECEIVE_MESSAGE(&CApplication::OnKeyPressed));
     }
     
     // -----------------------------------------------------------------------------
@@ -126,21 +138,6 @@ namespace
         // Exit the application
         // -----------------------------------------------------------------------------
         Core::Time::OnExit();
-
-        // -----------------------------------------------------------------------------
-        // Make last transition to exit
-        // -----------------------------------------------------------------------------
-        OnTranslation(Edit::CState::UnloadMap);
-        
-        s_pStates[m_CurrentState]->OnRun();
-        
-        s_pStates[m_CurrentState]->OnLeave();
-        
-        OnTranslation(Edit::CState::Exit);
-        
-        s_pStates[m_CurrentState]->OnRun();
-        
-        s_pStates[m_CurrentState]->OnLeave();
 
         // -----------------------------------------------------------------------------
         // At the end we have to clean our context and windows.
@@ -156,10 +153,7 @@ namespace
         // With an window and context we initialize our application and run our game.
         // Furthermore we handle different events by the window.
         // -----------------------------------------------------------------------------
-        int ApplicationMessage = 0;
-        int WindowMessage      = 0;
-
-        for (; ApplicationMessage == 0 && WindowMessage == 0; )
+        for (;;)
         {
             // -----------------------------------------------------------------------------
             // Events
@@ -182,6 +176,15 @@ namespace
             {
                 OnTranslation(NextState);
             }
+
+            if (NextState == Edit::CState::Exit)
+            {
+                Edit::CExitState::GetInstance().OnRun();
+
+                Edit::CExitState::GetInstance().OnLeave();
+
+                break;
+            }
         }
     }
 
@@ -202,11 +205,20 @@ namespace
         
         m_CurrentState = _NewState;
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CApplication::OnKeyPressed(Edit::CMessage& _rMessage)
+    {
+        int Test = _rMessage.GetInt();
+
+        BASE_CONSOLE_INFOV("Got key pressed: %i", Test);
+    }
 }
 
 namespace Edit
 {
-namespace Runtime
+namespace Application
 {
     void OnStart(int& _rArgc, char** _ppArgv)
     {
@@ -233,5 +245,5 @@ namespace Runtime
     {
         return CApplication::GetInstance().GetEditWindowID();
     }
-} // namespace Runtime
+} // namespace Application
 } // namespace Edit
