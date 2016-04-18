@@ -179,9 +179,9 @@ namespace Gfx
         
         protected:
 
-            SInfo                m_Info;
-            void*                m_pPixels;
-            const Base::Char*    m_pFileName;
+            SInfo       m_Info;
+            void*       m_pPixels;
+            Base::Char* m_pFileName;
 
         protected:
 

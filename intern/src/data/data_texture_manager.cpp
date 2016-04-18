@@ -37,10 +37,10 @@ namespace
 
     public:
 
-        CTexture1D* CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::Copy);
-        CTexture2D* CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::Copy);
+        CTexture1D* CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
+        CTexture2D* CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
 
-        CTextureCube* CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::Copy);
+        CTextureCube* CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
 
         void CopyToTexture2D(CTexture2D* _pTexture2D, void* _pPixels);
         void CopyToTexture2D(CTexture2D* _pTexture2D, CTexture2D* _pTexture);
@@ -237,7 +237,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Load texture from file if one is set in descriptor
         // -----------------------------------------------------------------------------
-        if (_rDescriptor.m_pFileName != nullptr && _rDescriptor.m_pPixels == nullptr)
+        if (_rDescriptor.m_pFileName != nullptr && _rDescriptor.m_pPixels == nullptr && _Behavior != SDataBehavior::Listen)
         {
 			PathToTexture = g_PathToAssets + _rDescriptor.m_pFileName;
 
@@ -293,8 +293,8 @@ namespace
             // Setup the new texture inside manager
             // -----------------------------------------------------------------------------
             rTexture.m_Hash              = Hash;
-            rTexture.m_pFileName         = _rDescriptor.m_pFileName;
-            rTexture.m_pIdentifier       = _rDescriptor.m_pIdentifier;
+            rTexture.m_pFileName         = 0;
+            rTexture.m_pIdentifier       = 0;
             rTexture.m_pPixels           = _rDescriptor.m_pPixels;
             rTexture.m_NumberOfPixels[0] = static_cast<Dt::CTextureBase::BPixels>(ImageWidth);
             rTexture.m_NumberOfPixels[1] = static_cast<Dt::CTextureBase::BPixels>(ImageHeight);
@@ -306,6 +306,24 @@ namespace
             rTexture.m_Info.m_IsDummyTexture   = false;
             rTexture.m_Info.m_Semantic         = _rDescriptor.m_Semantic;
             rTexture.m_Info.m_NumberOfTextures = 1;
+
+            if (_rDescriptor.m_pFileName)
+            {
+                Base::Size NumberOfBytes = (strlen(_rDescriptor.m_pFileName) + 1) * sizeof(Base::Char);
+
+                rTexture.m_pFileName = static_cast<Base::Char*>(Base::CMemory::Allocate(NumberOfBytes));
+
+                strcpy_s(rTexture.m_pFileName, NumberOfBytes, _rDescriptor.m_pFileName);
+            }
+
+            if (_rDescriptor.m_pIdentifier)
+            {
+                Base::Size NumberOfBytes = (strlen(_rDescriptor.m_pIdentifier) + 1) * sizeof(Base::Char);
+
+                rTexture.m_pIdentifier = static_cast<Base::Char*>(Base::CMemory::Allocate(NumberOfBytes));
+
+                strcpy_s(rTexture.m_pFileName, NumberOfBytes, _rDescriptor.m_pIdentifier);
+            }
             
             // -----------------------------------------------------------------------------
             // Set hash to map
@@ -337,7 +355,6 @@ namespace
                 case SDataBehavior::Listen:
                 {
                     rTexture.m_Info.m_IsPixelOwner = false;
-                    rTexture.m_pPixels             = _rDescriptor.m_pPixels != 0 ? _rDescriptor.m_pPixels : pTextureData;
                 }
                 break;
 
@@ -454,8 +471,8 @@ namespace
             // Setup the new texture inside manager
             // -----------------------------------------------------------------------------
             rTexture.m_Hash              = Hash;
-            rTexture.m_pFileName         = _rDescriptor.m_pFileName;
-            rTexture.m_pIdentifier       = _rDescriptor.m_pIdentifier;
+            rTexture.m_pFileName         = 0;
+            rTexture.m_pIdentifier       = 0;
             rTexture.m_pPixels           = _rDescriptor.m_pPixels;
             rTexture.m_NumberOfPixels[0] = static_cast<Dt::CTextureBase::BPixels>(ImageWidth);
             rTexture.m_NumberOfPixels[1] = static_cast<Dt::CTextureBase::BPixels>(ImageHeight);
@@ -467,6 +484,24 @@ namespace
             rTexture.m_Info.m_IsDummyTexture   = false;
             rTexture.m_Info.m_Semantic         = _rDescriptor.m_Semantic;
             rTexture.m_Info.m_NumberOfTextures = 6;
+
+            if (_rDescriptor.m_pFileName)
+            {
+                Base::Size NumberOfBytes = (strlen(_rDescriptor.m_pFileName) + 1) * sizeof(Base::Char);
+
+                rTexture.m_pFileName = static_cast<Base::Char*>(Base::CMemory::Allocate(NumberOfBytes));
+
+                strcpy_s(rTexture.m_pFileName, NumberOfBytes, _rDescriptor.m_pFileName);
+            }
+
+            if (_rDescriptor.m_pIdentifier)
+            {
+                Base::Size NumberOfBytes = (strlen(_rDescriptor.m_pIdentifier) + 1) * sizeof(Base::Char);
+
+                rTexture.m_pIdentifier = static_cast<Base::Char*>(Base::CMemory::Allocate(NumberOfBytes));
+
+                strcpy_s(rTexture.m_pFileName, NumberOfBytes, _rDescriptor.m_pIdentifier);
+            }
             
             // -----------------------------------------------------------------------------
             // Set hash to map
@@ -498,7 +533,6 @@ namespace
                 case SDataBehavior::Listen:
                 {
                     rTexture.m_Info.m_IsPixelOwner = false;
-                    rTexture.m_pPixels             = _rDescriptor.m_pPixels != 0 ? _rDescriptor.m_pPixels : pTextureData;
                 }
                 break;
 
@@ -876,6 +910,16 @@ namespace
     {
         if (m_Info.m_IsDeletable)
         {
+            if (m_pFileName)
+            {
+                Base::CMemory::Free(m_pFileName);
+            }
+
+            if (m_pIdentifier)
+            {
+                Base::CMemory::Free(m_pIdentifier);
+            }
+
             if (m_Info.m_IsPixelOwner)
             {
                 Base::CMemory::Free(m_pPixels);
@@ -897,6 +941,16 @@ namespace
     {
         if (m_Info.m_IsDeletable)
         {
+            if (m_pFileName)
+            {
+                Base::CMemory::Free(m_pFileName);
+            }
+
+            if (m_pIdentifier)
+            {
+                Base::CMemory::Free(m_pIdentifier);
+            }
+
             if (m_Info.m_IsPixelOwner)
             {
                 Base::CMemory::Free(m_pPixels);
@@ -924,6 +978,16 @@ namespace
             m_pFaces[3] = 0;
             m_pFaces[4] = 0;
             m_pFaces[5] = 0;
+
+            if (m_pFileName)
+            {
+                Base::CMemory::Free(m_pFileName);
+            }
+
+            if (m_pIdentifier)
+            {
+                Base::CMemory::Free(m_pIdentifier);
+            }
 
             if (m_Info.m_IsPixelOwner)
             {

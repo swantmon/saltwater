@@ -392,6 +392,7 @@ namespace
             TextureDescriptor.m_NumberOfPixelsU = rDataMaterial.m_pColorMap->GetNumberOfPixelsU();
             TextureDescriptor.m_NumberOfPixelsV = rDataMaterial.m_pColorMap->GetNumberOfPixelsV();
             TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_pFileName       = rDataMaterial.m_pColorMap->GetFileName();
             TextureDescriptor.m_pPixels         = rDataMaterial.m_pColorMap->GetPixels();
 
             TexturePtrs[0]    = TextureManager::CreateTexture2D(TextureDescriptor);
@@ -402,6 +403,7 @@ namespace
             TextureDescriptor.m_NumberOfPixelsU = rDataMaterial.m_pNormalMap->GetNumberOfPixelsU();
             TextureDescriptor.m_NumberOfPixelsV = rDataMaterial.m_pNormalMap->GetNumberOfPixelsV();
             TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_pFileName       = rDataMaterial.m_pNormalMap->GetFileName();
             TextureDescriptor.m_pPixels         = rDataMaterial.m_pNormalMap->GetPixels();
 
             TexturePtrs[1]    = TextureManager::CreateTexture2D(TextureDescriptor);
@@ -412,6 +414,7 @@ namespace
             TextureDescriptor.m_NumberOfPixelsU = rDataMaterial.m_pRoughnessMap->GetNumberOfPixelsU();
             TextureDescriptor.m_NumberOfPixelsV = rDataMaterial.m_pRoughnessMap->GetNumberOfPixelsV();
             TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_pFileName       = rDataMaterial.m_pRoughnessMap->GetFileName();
             TextureDescriptor.m_pPixels         = rDataMaterial.m_pRoughnessMap->GetPixels();
 
             TexturePtrs[2] = TextureManager::CreateTexture2D(TextureDescriptor);
@@ -422,6 +425,7 @@ namespace
             TextureDescriptor.m_NumberOfPixelsU = rDataMaterial.m_pReflectanceMap->GetNumberOfPixelsU();
             TextureDescriptor.m_NumberOfPixelsV = rDataMaterial.m_pReflectanceMap->GetNumberOfPixelsV();
             TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_pFileName       = rDataMaterial.m_pReflectanceMap->GetFileName();
             TextureDescriptor.m_pPixels         = rDataMaterial.m_pReflectanceMap->GetPixels();
 
             TexturePtrs[3] = TextureManager::CreateTexture2D(TextureDescriptor);
@@ -432,6 +436,7 @@ namespace
             TextureDescriptor.m_NumberOfPixelsU = rDataMaterial.m_pMetalMaskMap->GetNumberOfPixelsU();
             TextureDescriptor.m_NumberOfPixelsV = rDataMaterial.m_pMetalMaskMap->GetNumberOfPixelsV();
             TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_pFileName       = rDataMaterial.m_pMetalMaskMap->GetFileName();
             TextureDescriptor.m_pPixels         = rDataMaterial.m_pMetalMaskMap->GetPixels();
 
             TexturePtrs[4] = TextureManager::CreateTexture2D(TextureDescriptor);
@@ -442,6 +447,7 @@ namespace
             TextureDescriptor.m_NumberOfPixelsU = rDataMaterial.m_pAOMap->GetNumberOfPixelsU();
             TextureDescriptor.m_NumberOfPixelsV = rDataMaterial.m_pAOMap->GetNumberOfPixelsV();
             TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_pFileName       = rDataMaterial.m_pAOMap->GetFileName();
             TextureDescriptor.m_pPixels         = rDataMaterial.m_pAOMap->GetPixels();
 
             TexturePtrs[5] = TextureManager::CreateTexture2D(TextureDescriptor);
@@ -453,6 +459,7 @@ namespace
             TextureDescriptor.m_NumberOfPixelsV = rDataMaterial.m_pBumpMap->GetNumberOfPixelsV();
             TextureDescriptor.m_NumberOfPixelsW = 1;
             TextureDescriptor.m_Format          = CTextureBase::R8_UBYTE;
+            TextureDescriptor.m_pFileName       = rDataMaterial.m_pBumpMap->GetFileName();
             TextureDescriptor.m_pPixels         = rDataMaterial.m_pBumpMap->GetPixels();
 
             TexturePtrs[6] = TextureManager::CreateTexture2D(TextureDescriptor);

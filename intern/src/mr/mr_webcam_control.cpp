@@ -199,7 +199,7 @@ namespace MR
         TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pIdentifier      = "ID_Webcam_RGB_Original_Output";
 
-        m_pOriginalFrame = Dt::TextureManager::CreateTexture2D(TextureDescriptor, true, Dt::SDataBehavior::Listen);
+        m_pOriginalFrame = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
 
         // -----------------------------------------------------------------------------
 
@@ -209,7 +209,7 @@ namespace MR
         TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pIdentifier      = "ID_Webcam_RGB_Converted_Output";
 
-        m_pConvertedFrame = Dt::TextureManager::CreateTexture2D(TextureDescriptor, true, Dt::SDataBehavior::Listen);
+        m_pConvertedFrame = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
 
         // -----------------------------------------------------------------------------
 
@@ -223,7 +223,7 @@ namespace MR
         TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pIdentifier      = "ID_Webcam_RGB_Converted_Cubemap";
 
-        m_pCubemap = Dt::TextureManager::CreateCubeTexture(TextureDescriptor, true, Dt::SDataBehavior::Listen);
+        m_pCubemap = Dt::TextureManager::CreateCubeTexture(TextureDescriptor);
 
         TextureDescriptor.m_pIdentifier = 0;
 

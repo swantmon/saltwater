@@ -37,10 +37,10 @@ namespace TextureManager
     void OnStart();
     void OnExit();
 
-    CTexture1D* CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::Copy);
-    CTexture2D* CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::Copy);
+    CTexture1D* CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::Listen);
+    CTexture2D* CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::Listen);
 
-    CTextureCube* CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::Copy);
+    CTextureCube* CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::Listen);
 
     void CopyToTexture2D(CTexture2D* _pTexture2D, void* _pPixels);
     void CopyToTexture2D(CTexture2D* _pTexture2D, CTexture2D* _pTexture);

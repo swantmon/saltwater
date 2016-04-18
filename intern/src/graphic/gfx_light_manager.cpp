@@ -799,7 +799,7 @@ namespace
             TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
             TextureDescriptor.m_Usage            = CTextureBase::GPURead;
             TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-            TextureDescriptor.m_pFileName        = 0;
+            TextureDescriptor.m_pFileName        = pDataSkyboxFacet->GetTexture()->GetFileName();
             TextureDescriptor.m_pPixels          = pDataSkyboxFacet->GetTexture()->GetPixels();
             TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
 
@@ -831,7 +831,7 @@ namespace
             TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
             TextureDescriptor.m_Usage            = CTextureBase::GPURead;
             TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-            TextureDescriptor.m_pFileName        = 0;
+            TextureDescriptor.m_pFileName        = pDataSkyboxFacet->GetTexture()->GetFileName();
             TextureDescriptor.m_pPixels          = pDataSkyboxFacet->GetTexture()->GetPixels();
             TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
 

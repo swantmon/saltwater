@@ -149,11 +149,11 @@ namespace Dt
         
         protected:
 
-            SInfo                m_Info;
-            void*                m_pPixels;
-            const Base::Char*    m_pFileName;
-            const Base::Char*    m_pIdentifier;
-            unsigned int         m_Hash;
+            SInfo        m_Info;
+            void*        m_pPixels;
+            Base::Char*  m_pFileName;
+            Base::Char*  m_pIdentifier;
+            unsigned int m_Hash;
 
         protected:
 
