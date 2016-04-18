@@ -4,6 +4,8 @@
 #include "editor_port/edit_message.h"
 #include "editor_port/edit_message_manager.h"
 
+#include <QString>
+
 namespace Edit
 {
     CMainWindow::CMainWindow(QWidget* _pParent) 
@@ -56,7 +58,9 @@ namespace Edit
     {
         CMessage NewMessage;
 
-        NewMessage.PutInt(_pKeyEvent->key());
+        char CharCode = _pKeyEvent->text()[0].toLatin1();
+
+        NewMessage.PutInt((int)(CharCode));
         NewMessage.PutInt(_pKeyEvent->modifiers());
 
         NewMessage.Reset();
@@ -70,7 +74,9 @@ namespace Edit
     {
         CMessage NewMessage;
 
-        NewMessage.PutInt(_pKeyEvent->key());
+        char CharCode = _pKeyEvent->text()[0].toLatin1();
+
+        NewMessage.PutInt((int)(CharCode));
         NewMessage.PutInt(_pKeyEvent->modifiers());
 
         NewMessage.Reset();
