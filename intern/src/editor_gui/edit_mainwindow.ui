@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1494</width>
-    <height>874</height>
+    <width>1280</width>
+    <height>760</height>
    </rect>
   </property>
   <property name="cursor">
@@ -20,27 +20,14 @@
    <bool>true</bool>
   </property>
   <property name="windowTitle">
-   <string>Editor</string>
+   <string>Saltwater Editor</string>
   </property>
-  <widget class="QWidget" name="centralWidget">
-   <widget class="QPushButton" name="pushButton">
-    <property name="geometry">
-     <rect>
-      <x>900</x>
-      <y>780</y>
-      <width>75</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>PushButton</string>
-    </property>
-   </widget>
+  <widget class="QWidget" name="m_pCentralWidget">
    <widget class="QWidget" name="m_pEditorRenderContext" native="true">
     <property name="geometry">
      <rect>
-      <x>130</x>
-      <y>20</y>
+      <x>0</x>
+      <y>0</y>
       <width>1280</width>
       <height>720</height>
      </rect>
@@ -59,42 +46,120 @@
     </property>
    </widget>
   </widget>
-  <widget class="QMenuBar" name="menuBar">
+  <widget class="QMenuBar" name="m_pMenuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1494</width>
+     <width>1280</width>
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="m_pMenuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="m_pActionNew"/>
+    <addaction name="m_pActionOpen"/>
+    <addaction name="separator"/>
+    <addaction name="m_pActionExit"/>
+   </widget>
+   <widget class="QMenu" name="m_pMenuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="m_pMenuAssets">
+    <property name="title">
+     <string>Assets</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="m_pMenuEntity">
+    <property name="title">
+     <string>Entity</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="m_pMenuComponent">
+    <property name="title">
+     <string>Component</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="m_pMenuWindow">
+    <property name="title">
+     <string>Window</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="m_pMenuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="m_pActionAboutSaltwater"/>
+    <addaction name="separator"/>
+    <addaction name="m_pActionReleaseNotes"/>
+    <addaction name="m_pActionReportBug"/>
+   </widget>
+   <addaction name="m_pMenuFile"/>
+   <addaction name="m_pMenuEdit"/>
+   <addaction name="m_pMenuAssets"/>
+   <addaction name="m_pMenuEntity"/>
+   <addaction name="m_pMenuComponent"/>
+   <addaction name="m_pMenuWindow"/>
+   <addaction name="m_pMenuHelp"/>
   </widget>
-  <widget class="QToolBar" name="mainToolBar">
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-  </widget>
-  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QStatusBar" name="m_pStatusBar"/>
+  <action name="m_pActionNew">
+   <property name="text">
+    <string>New</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="m_pActionOpen">
+   <property name="text">
+    <string>Open</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="m_pActionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="m_pActionAboutSaltwater">
+   <property name="text">
+    <string>About Saltwater</string>
+   </property>
+  </action>
+  <action name="m_pActionReleaseNotes">
+   <property name="text">
+    <string>Release Notes</string>
+   </property>
+  </action>
+  <action name="m_pActionReportBug">
+   <property name="text">
+    <string>Report a Bug...</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
  <connections>
   <connection>
-   <sender>pushButton</sender>
-   <signal>clicked()</signal>
+   <sender>m_pActionExit</sender>
+   <signal>triggered()</signal>
    <receiver>CMainWindow</receiver>
-   <slot>slot1()</slot>
+   <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>199</x>
-     <y>145</y>
+     <x>-1</x>
+     <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>342</x>
-     <y>201</y>
+     <x>746</x>
+     <y>436</y>
     </hint>
    </hints>
   </connection>

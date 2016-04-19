@@ -273,7 +273,10 @@ namespace
 
             pDummyNativeOpenGLContextHandle = ::wglCreateContext(pNativeDeviceContextHandle);
 
-            assert(pNativeDeviceContextHandle != 0);
+            if (pDummyNativeOpenGLContextHandle == 0)
+            {
+                BASE_THROWM("OpenGL dummy context creation failed.");
+            }
 
             wglMakeCurrent(pNativeDeviceContextHandle, pDummyNativeOpenGLContextHandle);
 
@@ -283,7 +286,7 @@ namespace
             //
             // glewExperimental defines a possible option for extensions in experimental
             // state. It is needed to start this on while a dummy context is created.
-            // Depending on this dummy context glew initialize possible functionality.
+            // Depending on this dummy context GLEW initialize possible functionality.
             // -----------------------------------------------------------------------------
             glewExperimental = GL_TRUE;
 
@@ -299,7 +302,10 @@ namespace
             // -----------------------------------------------------------------------------
             pNativeOpenGLContextHandle = ::wglCreateContextAttribsARB(pNativeDeviceContextHandle, 0, Attributes);
 
-            assert(pNativeDeviceContextHandle != 0);
+            if (pNativeDeviceContextHandle == 0)
+            {
+                BASE_THROWM("OpenGL context creation failed.");
+            }
 
             wglMakeCurrent(pNativeDeviceContextHandle, pNativeOpenGLContextHandle);
 
@@ -316,7 +322,7 @@ namespace
 
             if (!GLEW_VERSION_4_5)
             {
-                BASE_THROWV("GL 4.5 or higher can't initialized. Available version %s is to old!", pInfoGLVersion);
+                BASE_THROWV("GL 4.5 can't be initialized. Available version %s is to old!", pInfoGLVersion);
             }
 
             BASE_CONSOLE_INFOV("Window ID: %i", IndexOfWindow);

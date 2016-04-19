@@ -16,10 +16,9 @@
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QMainWindow>
+#include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
-#include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
-#include <QtWidgets/QToolBar>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -27,55 +26,116 @@ QT_BEGIN_NAMESPACE
 class Ui_CMainWindow
 {
 public:
-    QWidget *centralWidget;
-    QPushButton *pushButton;
+    QAction *m_pActionNew;
+    QAction *m_pActionOpen;
+    QAction *m_pActionExit;
+    QAction *m_pActionAboutSaltwater;
+    QAction *m_pActionReleaseNotes;
+    QAction *m_pActionReportBug;
+    QWidget *m_pCentralWidget;
     QWidget *m_pEditorRenderContext;
-    QMenuBar *menuBar;
-    QToolBar *mainToolBar;
-    QStatusBar *statusBar;
+    QMenuBar *m_pMenuBar;
+    QMenu *m_pMenuFile;
+    QMenu *m_pMenuEdit;
+    QMenu *m_pMenuAssets;
+    QMenu *m_pMenuEntity;
+    QMenu *m_pMenuComponent;
+    QMenu *m_pMenuWindow;
+    QMenu *m_pMenuHelp;
+    QStatusBar *m_pStatusBar;
 
     void setupUi(QMainWindow *CMainWindow)
     {
         if (CMainWindow->objectName().isEmpty())
             CMainWindow->setObjectName(QStringLiteral("CMainWindow"));
         CMainWindow->setWindowModality(Qt::NonModal);
-        CMainWindow->resize(1494, 874);
+        CMainWindow->resize(1280, 760);
         CMainWindow->setCursor(QCursor(Qt::ArrowCursor));
         CMainWindow->setMouseTracking(true);
-        centralWidget = new QWidget(CMainWindow);
-        centralWidget->setObjectName(QStringLiteral("centralWidget"));
-        pushButton = new QPushButton(centralWidget);
-        pushButton->setObjectName(QStringLiteral("pushButton"));
-        pushButton->setGeometry(QRect(900, 780, 75, 23));
-        m_pEditorRenderContext = new QWidget(centralWidget);
+        m_pActionNew = new QAction(CMainWindow);
+        m_pActionNew->setObjectName(QStringLiteral("m_pActionNew"));
+        m_pActionOpen = new QAction(CMainWindow);
+        m_pActionOpen->setObjectName(QStringLiteral("m_pActionOpen"));
+        m_pActionExit = new QAction(CMainWindow);
+        m_pActionExit->setObjectName(QStringLiteral("m_pActionExit"));
+        m_pActionAboutSaltwater = new QAction(CMainWindow);
+        m_pActionAboutSaltwater->setObjectName(QStringLiteral("m_pActionAboutSaltwater"));
+        m_pActionReleaseNotes = new QAction(CMainWindow);
+        m_pActionReleaseNotes->setObjectName(QStringLiteral("m_pActionReleaseNotes"));
+        m_pActionReportBug = new QAction(CMainWindow);
+        m_pActionReportBug->setObjectName(QStringLiteral("m_pActionReportBug"));
+        m_pCentralWidget = new QWidget(CMainWindow);
+        m_pCentralWidget->setObjectName(QStringLiteral("m_pCentralWidget"));
+        m_pEditorRenderContext = new QWidget(m_pCentralWidget);
         m_pEditorRenderContext->setObjectName(QStringLiteral("m_pEditorRenderContext"));
-        m_pEditorRenderContext->setGeometry(QRect(130, 20, 1280, 720));
+        m_pEditorRenderContext->setGeometry(QRect(0, 0, 1280, 720));
         m_pEditorRenderContext->setCursor(QCursor(Qt::ArrowCursor));
         m_pEditorRenderContext->setMouseTracking(true);
         m_pEditorRenderContext->setAutoFillBackground(false);
         m_pEditorRenderContext->setLocale(QLocale(QLocale::English, QLocale::UnitedStates));
-        CMainWindow->setCentralWidget(centralWidget);
-        menuBar = new QMenuBar(CMainWindow);
-        menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 1494, 21));
-        CMainWindow->setMenuBar(menuBar);
-        mainToolBar = new QToolBar(CMainWindow);
-        mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
-        CMainWindow->addToolBar(Qt::TopToolBarArea, mainToolBar);
-        statusBar = new QStatusBar(CMainWindow);
-        statusBar->setObjectName(QStringLiteral("statusBar"));
-        CMainWindow->setStatusBar(statusBar);
+        CMainWindow->setCentralWidget(m_pCentralWidget);
+        m_pMenuBar = new QMenuBar(CMainWindow);
+        m_pMenuBar->setObjectName(QStringLiteral("m_pMenuBar"));
+        m_pMenuBar->setGeometry(QRect(0, 0, 1280, 21));
+        m_pMenuFile = new QMenu(m_pMenuBar);
+        m_pMenuFile->setObjectName(QStringLiteral("m_pMenuFile"));
+        m_pMenuEdit = new QMenu(m_pMenuBar);
+        m_pMenuEdit->setObjectName(QStringLiteral("m_pMenuEdit"));
+        m_pMenuAssets = new QMenu(m_pMenuBar);
+        m_pMenuAssets->setObjectName(QStringLiteral("m_pMenuAssets"));
+        m_pMenuEntity = new QMenu(m_pMenuBar);
+        m_pMenuEntity->setObjectName(QStringLiteral("m_pMenuEntity"));
+        m_pMenuComponent = new QMenu(m_pMenuBar);
+        m_pMenuComponent->setObjectName(QStringLiteral("m_pMenuComponent"));
+        m_pMenuWindow = new QMenu(m_pMenuBar);
+        m_pMenuWindow->setObjectName(QStringLiteral("m_pMenuWindow"));
+        m_pMenuHelp = new QMenu(m_pMenuBar);
+        m_pMenuHelp->setObjectName(QStringLiteral("m_pMenuHelp"));
+        CMainWindow->setMenuBar(m_pMenuBar);
+        m_pStatusBar = new QStatusBar(CMainWindow);
+        m_pStatusBar->setObjectName(QStringLiteral("m_pStatusBar"));
+        CMainWindow->setStatusBar(m_pStatusBar);
+
+        m_pMenuBar->addAction(m_pMenuFile->menuAction());
+        m_pMenuBar->addAction(m_pMenuEdit->menuAction());
+        m_pMenuBar->addAction(m_pMenuAssets->menuAction());
+        m_pMenuBar->addAction(m_pMenuEntity->menuAction());
+        m_pMenuBar->addAction(m_pMenuComponent->menuAction());
+        m_pMenuBar->addAction(m_pMenuWindow->menuAction());
+        m_pMenuBar->addAction(m_pMenuHelp->menuAction());
+        m_pMenuFile->addAction(m_pActionNew);
+        m_pMenuFile->addAction(m_pActionOpen);
+        m_pMenuFile->addSeparator();
+        m_pMenuFile->addAction(m_pActionExit);
+        m_pMenuHelp->addAction(m_pActionAboutSaltwater);
+        m_pMenuHelp->addSeparator();
+        m_pMenuHelp->addAction(m_pActionReleaseNotes);
+        m_pMenuHelp->addAction(m_pActionReportBug);
 
         retranslateUi(CMainWindow);
-        QObject::connect(pushButton, SIGNAL(clicked()), CMainWindow, SLOT(slot1()));
+        QObject::connect(m_pActionExit, SIGNAL(triggered()), CMainWindow, SLOT(close()));
 
         QMetaObject::connectSlotsByName(CMainWindow);
     } // setupUi
 
     void retranslateUi(QMainWindow *CMainWindow)
     {
-        CMainWindow->setWindowTitle(QApplication::translate("CMainWindow", "Editor", 0));
-        pushButton->setText(QApplication::translate("CMainWindow", "PushButton", 0));
+        CMainWindow->setWindowTitle(QApplication::translate("CMainWindow", "Saltwater Editor", 0));
+        m_pActionNew->setText(QApplication::translate("CMainWindow", "New", 0));
+        m_pActionNew->setShortcut(QApplication::translate("CMainWindow", "Ctrl+N", 0));
+        m_pActionOpen->setText(QApplication::translate("CMainWindow", "Open", 0));
+        m_pActionOpen->setShortcut(QApplication::translate("CMainWindow", "Ctrl+O", 0));
+        m_pActionExit->setText(QApplication::translate("CMainWindow", "Exit", 0));
+        m_pActionAboutSaltwater->setText(QApplication::translate("CMainWindow", "About Saltwater", 0));
+        m_pActionReleaseNotes->setText(QApplication::translate("CMainWindow", "Release Notes", 0));
+        m_pActionReportBug->setText(QApplication::translate("CMainWindow", "Report a Bug...", 0));
+        m_pMenuFile->setTitle(QApplication::translate("CMainWindow", "File", 0));
+        m_pMenuEdit->setTitle(QApplication::translate("CMainWindow", "Edit", 0));
+        m_pMenuAssets->setTitle(QApplication::translate("CMainWindow", "Assets", 0));
+        m_pMenuEntity->setTitle(QApplication::translate("CMainWindow", "Entity", 0));
+        m_pMenuComponent->setTitle(QApplication::translate("CMainWindow", "Component", 0));
+        m_pMenuWindow->setTitle(QApplication::translate("CMainWindow", "Window", 0));
+        m_pMenuHelp->setTitle(QApplication::translate("CMainWindow", "Help", 0));
     } // retranslateUi
 
 };
