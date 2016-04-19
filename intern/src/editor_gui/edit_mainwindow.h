@@ -3,7 +3,11 @@
 
 #include "editor_gui/ui_edit_mainwindow.h"
 
+#include "editor_port/edit_message.h"
+#include "editor_port/edit_message_manager.h"
+
 #include <QCloseEvent>
+#include <QLabel>
 #include <QMainWindow>
 
 namespace Edit
@@ -21,13 +25,10 @@ namespace Edit
 
         void* GetEditorWindowHandle();
 
-    public Q_SLOTS:
-
-        void slot1();
-
     private:
 
         Ui::CMainWindow m_UserInterface;
+        QLabel*         m_pStatusLabel;
 
     private:
 
@@ -37,6 +38,10 @@ namespace Edit
         void mouseMoveEvent(QMouseEvent* _pMouseEvent);
         void mousePressEvent(QMouseEvent* _pMouseEvent);
         void mouseReleaseEvent(QMouseEvent* _pMouseEvent);
+
+    private:
+
+        void OnFramesPerSecond(Edit::CMessage& _rMessage);
     };
 } // namespace Edit
 

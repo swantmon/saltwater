@@ -14,48 +14,33 @@ namespace
 {
     class CEditMessageManager : private Base::CUncopyable
     {
-        public:
+        BASE_SINGLETON_FUNC(CEditMessageManager)
 
-            static CEditMessageManager& GetInstance();
+    public:
 
-        public:
+        void Register(SGUIMessageType::Enum _Type, const CMessageDelegate& _rDelegate);
+        void Register(SApplicationMessageType::Enum _Type, const CMessageDelegate& _rDelegate);
 
-            void Register(SGUIMessageType::Enum _Type, const CMessageDelegate& _rDelegate);
-            void Register(SApplicationMessageType::Enum _Type, const CMessageDelegate& _rDelegate);
+    public:
 
-        public:
+        int SendMessage(SGUIMessageType::Enum _Type, const CMessage& _rMessage);
+        int SendMessage(SApplicationMessageType::Enum _Type, const CMessage& _rMessage);
 
-            int SendMessage(SGUIMessageType::Enum _Type, const CMessage& _rMessage);
-            int SendMessage(SApplicationMessageType::Enum _Type, const CMessage& _rMessage);
+    private:
 
-        private:
+        typedef std::vector<CMessageDelegate>    CMessageDelegateVector;
+        typedef CMessageDelegateVector::iterator CMessageDelegateIterator;
 
-            typedef std::vector<CMessageDelegate>    CMessageDelegateVector;
-            typedef CMessageDelegateVector::iterator CMessageDelegateIterator;
+    private:
 
-        private:
+        CMessageDelegateVector m_GUIMessageDelegates[SGUIMessageType::NumberOfMembers];
+        CMessageDelegateVector m_ApplicationMessageDelegates[SApplicationMessageType::NumberOfMembers];
 
-            CMessageDelegateVector m_GUIMessageDelegates[SGUIMessageType::NumberOfMembers];
-            CMessageDelegateVector m_ApplicationMessageDelegates[SGUIMessageType::NumberOfMembers];
+    private:
 
-        private:
-
-            CEditMessageManager();
-           ~CEditMessageManager();
+        CEditMessageManager();
+        ~CEditMessageManager();
     };
-} // namespace
-
-namespace
-{
-    // -----------------------------------------------------------------------------
-    // Use Scott Meyers singleton here to be safe in the startup phase.
-    // -----------------------------------------------------------------------------
-    CEditMessageManager& CEditMessageManager::GetInstance()
-    {
-        static CEditMessageManager s_Singleton;
-
-        return s_Singleton;
-    }
 } // namespace
 
 namespace
@@ -129,7 +114,7 @@ namespace
 
         Message.Proof();
 
-        CMessageDelegateVector& rDelegates = m_GUIMessageDelegates[_Type];
+        CMessageDelegateVector& rDelegates = m_ApplicationMessageDelegates[_Type];
 
         const CMessageDelegateIterator DelegatesEndIterator = rDelegates.end();
 

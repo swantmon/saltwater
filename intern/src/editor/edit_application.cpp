@@ -186,6 +186,17 @@ namespace
             Core::Time::Update();
 
             // -----------------------------------------------------------------------------
+            // Send FPS to editor
+            // -----------------------------------------------------------------------------
+            Edit::CMessage NewMessage;
+
+            NewMessage.PutFloat(Core::Time::GetDeltaTimeLastFrame());
+
+            NewMessage.Reset();
+
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::FramesPerSecond, NewMessage);
+
+            // -----------------------------------------------------------------------------
             // State engine
             // -----------------------------------------------------------------------------
             Edit::CState::EStateType NextState;

@@ -1,9 +1,6 @@
 ﻿
 #include "editor_gui/edit_mainwindow.h"
 
-#include "editor_port/edit_message.h"
-#include "editor_port/edit_message_manager.h"
-
 #include <QString>
 
 namespace Edit
@@ -11,14 +8,33 @@ namespace Edit
     CMainWindow::CMainWindow(QWidget* _pParent) 
         : QMainWindow(_pParent)
     {
+        // -----------------------------------------------------------------------------
+        // Form setup
+        // -----------------------------------------------------------------------------
         m_UserInterface.setupUi(this);
+
+        // -----------------------------------------------------------------------------
+        // User specific setup
+        // -----------------------------------------------------------------------------
+        m_pStatusLabel = new QLabel();
+        m_pStatusLabel->setText("FPS:");
+
+        m_UserInterface.m_pStatusBar->addPermanentWidget(m_pStatusLabel, 1);
+
+        // -----------------------------------------------------------------------------
+        // Messages
+        // -----------------------------------------------------------------------------
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::FramesPerSecond, EDIT_RECEIVE_MESSAGE(&CMainWindow::OnFramesPerSecond));
     }
 
     // -----------------------------------------------------------------------------
 
     CMainWindow::~CMainWindow() 
     {
-
+        // -----------------------------------------------------------------------------
+        // Remove user specific UI
+        // -----------------------------------------------------------------------------
+        delete m_pStatusLabel;
     }
 
     // -----------------------------------------------------------------------------
@@ -26,19 +42,6 @@ namespace Edit
     void* CMainWindow::GetEditorWindowHandle()
     {
         return (HWND)m_UserInterface.m_pEditorRenderContext->winId();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMainWindow::slot1()
-    {
-        CMessage NewMessage;
-
-        NewMessage.PutInt(1337);
-
-        NewMessage.Reset();
-
-        MessageManager::SendMessage(SGUIMessageType::Undefined, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -152,6 +155,15 @@ namespace Edit
             MessageManager::SendMessage(SGUIMessageType::MouseRightReleased, NewMessage);
             break;
         }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::OnFramesPerSecond(Edit::CMessage& _rMessage)
+    {
+        float FPS = _rMessage.GetFloat();
+
+        m_pStatusLabel->setText("FPS: " + QString::number(1.0f / FPS));
     }
 } // namespace Edit
 
