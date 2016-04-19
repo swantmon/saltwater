@@ -322,7 +322,7 @@ namespace
 
                 rTexture.m_pIdentifier = static_cast<Base::Char*>(Base::CMemory::Allocate(NumberOfBytes));
 
-                strcpy_s(rTexture.m_pFileName, NumberOfBytes, _rDescriptor.m_pIdentifier);
+                strcpy_s(rTexture.m_pIdentifier, NumberOfBytes, _rDescriptor.m_pIdentifier);
             }
             
             // -----------------------------------------------------------------------------
@@ -500,7 +500,7 @@ namespace
 
                 rTexture.m_pIdentifier = static_cast<Base::Char*>(Base::CMemory::Allocate(NumberOfBytes));
 
-                strcpy_s(rTexture.m_pFileName, NumberOfBytes, _rDescriptor.m_pIdentifier);
+                strcpy_s(rTexture.m_pIdentifier, NumberOfBytes, _rDescriptor.m_pIdentifier);
             }
             
             // -----------------------------------------------------------------------------
