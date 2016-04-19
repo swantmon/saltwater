@@ -18,6 +18,7 @@
 #include "graphic/gfx_view_manager.h"
 
 #include "GL/glew.h"
+#include "GL/wglew.h"
 
 #include <vector>
 #include <windows.h>
@@ -224,14 +225,65 @@ namespace
         {
             SWindowInfo& rWindowInfo = m_WindowInfos[IndexOfWindow];
 
-            wglMakeCurrent(rWindowInfo.m_pNativeDeviceContextHandle, rWindowInfo.m_pNativeOpenGLContextHandle);
+            HWND  pNativeWindowHandle;
+            HDC   pNativeDeviceContextHandle;
+            HGLRC pNativeOpenGLContextHandle;
+            HGLRC pDummyNativeOpenGLContextHandle;
+            int   Format;
+
+            const PIXELFORMATDESCRIPTOR PixelFormatDesc =
+            {
+                sizeof(PIXELFORMATDESCRIPTOR),
+                1,
+                PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,    //< Flags
+                PFD_TYPE_RGBA,                                                 //< RGBA or palette.
+                32,                                                            //< Depth of color frame buffer.
+                0, 0, 0, 0, 0, 0,
+                0,
+                0,
+                0,
+                0, 0, 0, 0,
+                32,                                                            //< Number of bits for the depth buffer
+                8,                                                             //< Number of bits for the stencil buffer
+                0,                                                             //< Number of Aux buffers in the frame buffer.
+                PFD_MAIN_PLANE,
+                0,
+                0, 0, 0
+            };
+
+            const int Attributes[] =
+            {
+                WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
+                WGL_CONTEXT_MINOR_VERSION_ARB, 5,
+                WGL_CONTEXT_PROFILE_MASK_ARB , WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+                WGL_CONTEXT_FLAGS_ARB        , APP_DEBUG_MODE ? WGL_CONTEXT_DEBUG_BIT_ARB : 0,
+                0,        //End
+            };
+
+            // -----------------------------------------------------------------------------
+            // Create OpenGL specific stuff with dummy context
+            // -----------------------------------------------------------------------------
+            pNativeWindowHandle = rWindowInfo.m_pNativeWindowHandle;
+
+            pNativeDeviceContextHandle = ::GetDC(pNativeWindowHandle);
+
+            Format = ChoosePixelFormat(pNativeDeviceContextHandle, &PixelFormatDesc);
+
+            SetPixelFormat(pNativeDeviceContextHandle, Format, &PixelFormatDesc);
+
+            pDummyNativeOpenGLContextHandle = ::wglCreateContext(pNativeDeviceContextHandle);
+
+            assert(pNativeDeviceContextHandle != 0);
+
+            wglMakeCurrent(pNativeDeviceContextHandle, pDummyNativeOpenGLContextHandle);
 
             // -----------------------------------------------------------------------------
             // Activate GLEW. GLEW is an extension manager which handles all different
             // OpenGL extensions.
             //
             // glewExperimental defines a possible option for extensions in experimental
-            // state.
+            // state. It is needed to start this on while a dummy context is created.
+            // Depending on this dummy context glew initialize possible functionality.
             // -----------------------------------------------------------------------------
             glewExperimental = GL_TRUE;
 
@@ -241,6 +293,15 @@ namespace
             {
                 BASE_THROWV("GLEW can't be initialized on this system because '%s'", glewGetErrorString(res));
             }
+
+            // -----------------------------------------------------------------------------
+            // Create final OpenGL context with attributes
+            // -----------------------------------------------------------------------------
+            pNativeOpenGLContextHandle = ::wglCreateContextAttribsARB(pNativeDeviceContextHandle, 0, Attributes);
+
+            assert(pNativeDeviceContextHandle != 0);
+
+            wglMakeCurrent(pNativeDeviceContextHandle, pNativeOpenGLContextHandle);
 
             // -----------------------------------------------------------------------------
             // Check specific OpenGL versions and availability
@@ -253,9 +314,9 @@ namespace
 
             assert(pInfoGLEWVersion && pInfoGLVersion && pInfoGLGLSLVersion && pInfoGLVendor && pInfoGLRenderer);
 
-            if (!GLEW_VERSION_4_3)
+            if (!GLEW_VERSION_4_5)
             {
-                BASE_THROWV("GL 4.3 or higher can't initialized. Available version %s is to old!", pInfoGLVersion);
+                BASE_THROWV("GL 4.5 or higher can't initialized. Available version %s is to old!", pInfoGLVersion);
             }
 
             BASE_CONSOLE_INFOV("Window ID: %i", IndexOfWindow);
@@ -271,6 +332,12 @@ namespace
             glEnable(GL_DEBUG_OUTPUT);
             glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 #endif
+
+            // -----------------------------------------------------------------------------
+            // Save created data
+            // -----------------------------------------------------------------------------
+            rWindowInfo.m_pNativeDeviceContextHandle = pNativeDeviceContextHandle;
+            rWindowInfo.m_pNativeOpenGLContextHandle = pNativeOpenGLContextHandle;
         }
     }
     
@@ -294,42 +361,11 @@ namespace
         if (_pWindow == 0 || m_NumberOfWindows == s_MaxNumberOfWindows) return 0;
 
         HWND  pNativeWindowHandle;
-        HDC   pNativeDeviceContextHandle;
-        HGLRC pNativeOpenGLContextHandle;
-        int   Format;
-
-        const PIXELFORMATDESCRIPTOR PixelFormatDesc =
-        {
-            sizeof(PIXELFORMATDESCRIPTOR),
-            1,
-            PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,    //< Flags
-            PFD_TYPE_RGBA,                                                 //< RGBA or palette.
-            32,                                                            //< Depth of color frame buffer.
-            0, 0, 0, 0, 0, 0,
-            0,
-            0,
-            0,
-            0, 0, 0, 0,
-            32,                                                            //< Number of bits for the depth buffer
-            8,                                                             //< Number of bits for the stencil buffer
-            0,                                                             //< Number of Aux buffers in the frame buffer.
-            PFD_MAIN_PLANE,
-            0,
-            0, 0, 0
-        };
 
         // -----------------------------------------------------------------------------
-        // Create OpenGL specific stuff
+        // Cast data
         // -----------------------------------------------------------------------------
         pNativeWindowHandle = static_cast<HWND>(_pWindow);
-
-        pNativeDeviceContextHandle = ::GetDC(pNativeWindowHandle); 
-
-        Format = ChoosePixelFormat(pNativeDeviceContextHandle, &PixelFormatDesc);
-
-        SetPixelFormat(pNativeDeviceContextHandle, Format, &PixelFormatDesc);
-
-        pNativeOpenGLContextHandle = ::wglCreateContext(pNativeDeviceContextHandle);
 
         // -----------------------------------------------------------------------------
         // Save data to new window
@@ -337,8 +373,8 @@ namespace
         SWindowInfo& rNewWindow = m_WindowInfos[m_NumberOfWindows];
 
         rNewWindow.m_pNativeWindowHandle        = pNativeWindowHandle;
-        rNewWindow.m_pNativeDeviceContextHandle = pNativeDeviceContextHandle;
-        rNewWindow.m_pNativeOpenGLContextHandle = pNativeOpenGLContextHandle;
+        rNewWindow.m_pNativeDeviceContextHandle = 0;
+        rNewWindow.m_pNativeOpenGLContextHandle = 0;
 
         ++ m_NumberOfWindows;
 
