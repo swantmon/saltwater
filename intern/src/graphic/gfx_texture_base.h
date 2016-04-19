@@ -2,7 +2,7 @@
 #pragma once
 
 #include "base/base_managed_pool.h"
-
+#include "base/base_string.h"
 #include "base/base_typedef.h"
 
 namespace Gfx
@@ -179,9 +179,9 @@ namespace Gfx
         
         protected:
 
-            SInfo       m_Info;
-            void*       m_pPixels;
-            Base::Char* m_pFileName;
+            SInfo            m_Info;
+            void*            m_pPixels;
+            Base::CharString m_FileName;
 
         protected:
 

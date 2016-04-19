@@ -30,6 +30,7 @@
     <ClInclude Include="..\..\..\src\base\base_defines.h" />
     <ClInclude Include="..\..\..\src\base\base_event_queue.h" />
     <ClInclude Include="..\..\..\src\base\base_exception.h" />
+    <ClInclude Include="..\..\..\src\base\base_string.h" />
     <ClInclude Include="..\..\..\src\base\base_tokenizer.h" />
     <ClInclude Include="..\..\..\src\base\base_frustum.h" />
     <ClInclude Include="..\..\..\src\base\base_input_event.h" />

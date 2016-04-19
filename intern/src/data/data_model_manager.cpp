@@ -92,20 +92,18 @@ namespace
         
     private:
         
-        typedef Base::CPool<CModelActorFacet, 64  > CModelActorFacets;
-        typedef Base::CPool<CInternModel    , 64  > CModels;
-        typedef Base::CPool<CInternLOD      , 256 > CLODs;
-        typedef Base::CPool<CInternSurface  , 1024> CSurfaces;
+        typedef Base::CPool<CInternModel  , 64  > CModels;
+        typedef Base::CPool<CInternLOD    , 256 > CLODs;
+        typedef Base::CPool<CInternSurface, 1024> CSurfaces;
         
         typedef std::unordered_map<unsigned int, CInternModel*> CModelByIDs;
         typedef CModelByIDs::iterator                           CModelByIDPair;
         
     private:
         
-        CModelActorFacets m_ModelActorFacets;
-        CModels           m_Models;
-        CLODs             m_LODs;
-        CSurfaces         m_Surfaces;
+        CModels   m_Models;
+        CLODs     m_LODs;
+        CSurfaces m_Surfaces;
         
         CModelByIDs m_ModelByID;
         
@@ -121,11 +119,10 @@ namespace
 namespace
 {
     CDtModelManager::CDtModelManager()
-        : m_ModelActorFacets()
-        , m_Models          ()
-        , m_LODs            ()
-        , m_Surfaces        ()
-        , m_ModelByID       ()
+        : m_Models   ()
+        , m_LODs     ()
+        , m_Surfaces ()
+        , m_ModelByID()
     {
         m_ModelByID.reserve(64);
     }
@@ -444,7 +441,7 @@ namespace
                             // -----------------------------------------------------------------------------
                             // Setup material
                             // -----------------------------------------------------------------------------
-                            rNewMaterial.m_pMaterialname   = "";
+                            rNewMaterial.m_Materialname    = "";
                             rNewMaterial.m_Color           = Base::Float3(ColorR, ColorG, ColorB);
                             rNewMaterial.m_Roughness       = 0.0f;
                             rNewMaterial.m_Reflectance     = 0.0f;
@@ -740,7 +737,7 @@ namespace
                         // -----------------------------------------------------------------------------
                         // Setup material
                         // -----------------------------------------------------------------------------
-                        rNewMaterial.m_pMaterialname   = "";
+                        rNewMaterial.m_Materialname    = "";
                         rNewMaterial.m_Color           = Base::Float3(ColorR, ColorG, ColorB);
                         rNewMaterial.m_Roughness       = 0.0f;
                         rNewMaterial.m_Reflectance     = 0.0f;
@@ -1149,7 +1146,7 @@ namespace
         }
         
         rInternModel.m_NumberOfLODs = 0;
-        rInternModel.m_pModelname.clear();
+        rInternModel.m_Modelname.Clear();
         
         m_Models.Free(&rInternModel);
     }
@@ -1178,7 +1175,7 @@ namespace
         // -----------------------------------------------------------------------------
         CInternModel& rNewModel = m_Models.Allocate();
         
-        rNewModel.m_pModelname   = _pModelname != 0 ? _pModelname : "";
+        rNewModel.m_Modelname    = _pModelname != 0 ? _pModelname : "";
         rNewModel.m_NumberOfLODs = 0;
         
         for (unsigned int IndexOfLOD = 0; IndexOfLOD < CModel::s_NumberOfLODs; ++ IndexOfLOD)

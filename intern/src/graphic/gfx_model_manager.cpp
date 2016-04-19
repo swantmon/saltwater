@@ -142,9 +142,9 @@ namespace
         // -----------------------------------------------------------------------------
         unsigned int Hash = 0;
         
-        if (rDataModel.m_pModelname != "")
+        if (rDataModel.m_Modelname != "")
         {
-            Hash = Base::CRC32(rDataModel.m_pModelname.c_str(), static_cast<unsigned int>(rDataModel.m_pModelname.length()));
+            Hash = Base::CRC32(rDataModel.m_Modelname.GetConst(), static_cast<unsigned int>(rDataModel.m_Modelname.GetLength()));
             
             if (m_ModelByID.find(Hash) != m_ModelByID.end())
             {

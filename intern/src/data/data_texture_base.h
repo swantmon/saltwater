@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "base/base_string.h"
 #include "base/base_typedef.h"
 
 namespace Dt
@@ -149,11 +150,11 @@ namespace Dt
         
         protected:
 
-            SInfo        m_Info;
-            void*        m_pPixels;
-            Base::Char*  m_pFileName;
-            Base::Char*  m_pIdentifier;
-            unsigned int m_Hash;
+            SInfo            m_Info;
+            void*            m_pPixels;
+            Base::CharString m_FileName;
+            Base::CharString m_Identifier;
+            unsigned int     m_Hash;
 
         protected:
 

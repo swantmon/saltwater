@@ -33,6 +33,7 @@
     <ClCompile Include="..\..\..\test\base\test_base_vector4.cpp" />
     <ClCompile Include="..\..\..\test\core\test_core_function_call.cpp" />
     <ClCompile Include="..\..\..\test\main.cpp" />
+    <ClCompile Include="..\..\..\test\test_base_string.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{470B0BE6-8875-4485-9B04-C6CC9914834D}</ProjectGuid>

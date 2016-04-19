@@ -31,6 +31,7 @@
 #define MEM                         BASE_USER_NAMESPACE
 #define PAT                         BASE_USER_NAMESPACE
 #define SER                         BASE_USER_NAMESPACE
+#define STR                         BASE_USER_NAMESPACE
 #define UT                          BASE_USER_NAMESPACE
 #else
 #define CON                         Container
@@ -42,5 +43,6 @@
 #define MEM                         Memory
 #define PAT                         Pattern
 #define SER                         Serialization
+#define STR                         String
 #define UT                          Unittest
 #endif // User defined or default namespace

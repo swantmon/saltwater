@@ -524,7 +524,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Setup the new texture inside manager
             // -----------------------------------------------------------------------------
-            rTexture.m_pFileName         = 0;
+            rTexture.m_FileName          = _rDescriptor.m_pFileName;
             rTexture.m_pPixels           = _rDescriptor.m_pPixels;
             rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTextureBase::BPixels>(ImageWidth);
             rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTextureBase::BPixels>(ImageHeight);
@@ -546,15 +546,6 @@ namespace
             rTexture.m_NativeUsage          = GLUsage;
             rTexture.m_NativeInternalFormat = GLInternalFormat;
             rTexture.m_NativeDimension      = GL_TEXTURE_2D;
-
-            if (_rDescriptor.m_pFileName)
-            {
-                Base::Size NumberOfBytes = (strlen(_rDescriptor.m_pFileName) + 1) * sizeof(Base::Char);
-
-                rTexture.m_pFileName = static_cast<Base::Char*>(Base::CMemory::Allocate(NumberOfBytes));
-
-                strcpy_s(rTexture.m_pFileName, NumberOfBytes, _rDescriptor.m_pFileName);
-            }
             
             // -----------------------------------------------------------------------------
             // Set hash to map
@@ -739,7 +730,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup the new texture inside manager
         // -----------------------------------------------------------------------------
-        rTexture.m_pFileName         = 0;
+        rTexture.m_FileName          = _rDescriptor.m_pFileName;
         rTexture.m_pPixels           = _rDescriptor.m_pPixels;
         rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTextureBase::BPixels>(_rDescriptor.m_NumberOfPixelsU);
         rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTextureBase::BPixels>(_rDescriptor.m_NumberOfPixelsV);
@@ -758,15 +749,6 @@ namespace
         rTexture.m_Info.m_Usage             = _rDescriptor.m_Usage;
         
         rTexture.m_NativeTexture = NativeTextureHandle;
-
-        if (_rDescriptor.m_pFileName)
-        {
-            Base::Size NumberOfBytes = (strlen(_rDescriptor.m_pFileName) + 1) * sizeof(Base::Char);
-
-            rTexture.m_pFileName = static_cast<Base::Char*>(Base::CMemory::Allocate(NumberOfBytes));
-
-            strcpy_s(rTexture.m_pFileName, NumberOfBytes, _rDescriptor.m_pFileName);
-        }
         
         return CTexture2DPtr(Texture2DPtr);
     }
@@ -966,7 +948,7 @@ namespace
             
             unsigned int MipmapPow = Base::Pow(2, _Mipmap);
 
-            rTexture.m_pFileName         = 0;
+            rTexture.m_FileName          = _TexturePtr->GetFileName();
             rTexture.m_pPixels           = _TexturePtr->GetPixels();
             rTexture.m_NumberOfPixels[0] = static_cast<Base::U16>(Base::Max(static_cast<unsigned int>(_TexturePtr->GetNumberOfPixelsU()) / MipmapPow, 1u));
             rTexture.m_NumberOfPixels[1] = static_cast<Base::U16>(Base::Max(static_cast<unsigned int>(_TexturePtr->GetNumberOfPixelsV()) / MipmapPow, 1u));
@@ -985,15 +967,6 @@ namespace
             rTexture.m_Info.m_Usage             = _TexturePtr->GetUsage();
             
             rTexture.m_NativeTexture = (*static_cast<CInternTexture2D*>(_TexturePtr.GetPtr())).m_NativeTexture;      
-
-            if (_TexturePtr->GetFileName())
-            {
-                Base::Size NumberOfBytes = (strlen(_TexturePtr->GetFileName()) + 1) * sizeof(Base::Char);
-
-                rTexture.m_pFileName = static_cast<Base::Char*>(Base::CMemory::Allocate(NumberOfBytes));
-
-                strcpy_s(rTexture.m_pFileName, NumberOfBytes, _TexturePtr->GetFileName());
-            }
         }
         catch (...)
         {
@@ -1543,10 +1516,7 @@ namespace
     {
         if (m_Info.m_IsDeletable)
         {
-            if (m_pFileName)
-            {
-                Base::CMemory::Free(m_pFileName);
-            }
+            m_FileName.Clear();
 
             if (m_Info.m_IsPixelOwner)
             {
@@ -1569,10 +1539,7 @@ namespace
     {
         if (m_Info.m_IsDeletable)
         {
-            if (m_pFileName)
-            {
-                Base::CMemory::Free(m_pFileName);
-            }
+            m_FileName.Clear();
 
             if (m_Info.m_IsPixelOwner)
             {
@@ -1597,10 +1564,7 @@ namespace
     {
         if (m_Info.m_IsDeletable)
         {
-            if (m_pFileName)
-            {
-                Base::CMemory::Free(m_pFileName);
-            }
+            m_FileName.Clear();
 
             if (m_Info.m_IsPixelOwner)
             {

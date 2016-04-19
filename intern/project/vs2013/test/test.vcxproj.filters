@@ -41,6 +41,9 @@
     <ClCompile Include="..\..\..\test\base\test_base_tokenizer.cpp">
       <Filter>base</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\test\test_base_string.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="core">
@@ -48,9 +51,6 @@
     </Filter>
     <Filter Include="base">
       <UniqueIdentifier>{c739d2e7-e863-4199-9903-366a5a0e63f7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="data">
-      <UniqueIdentifier>{8011d678-3b07-4439-a092-b66b3428e042}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

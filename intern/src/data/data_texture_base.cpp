@@ -73,14 +73,14 @@ namespace Dt
 
     const Base::Char* CTextureBase::GetFileName() const
     {
-        return m_pFileName;
+        return m_FileName.GetConst();
     }
 
     // -----------------------------------------------------------------------------
 
     const Base::Char* CTextureBase::GetIdentifier() const
     {
-        return m_pIdentifier;
+        return m_Identifier.GetConst();
     }
 
     // -----------------------------------------------------------------------------

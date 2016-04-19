@@ -267,7 +267,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup material
         // -----------------------------------------------------------------------------
-        rNewMaterial.m_pMaterialname   = pMaterialName;
+        rNewMaterial.m_Materialname    = pMaterialName;
         rNewMaterial.m_Color           = Base::Float3(ColorR, ColorG, ColorB);
         rNewMaterial.m_Roughness       = Roughness;
         rNewMaterial.m_Reflectance     = Reflectance;
@@ -369,7 +369,7 @@ namespace
         // -----------------------------------------------------------------------------
         CInternMaterial& rNewMaterial = m_Materials.Allocate();
 
-        rNewMaterial.m_pMaterialname   = _pMaterialname;
+        rNewMaterial.m_Materialname    = _pMaterialname;
         rNewMaterial.m_Color           = Base::Float3(1.0f);
         rNewMaterial.m_Roughness       = 0.0f;
         rNewMaterial.m_Reflectance     = 0.0f;

@@ -9,11 +9,10 @@
 #pragma once
 
 #include "base/base_aabb3.h"
+#include "base/base_string.h"
 #include "base/base_typedef.h"
 
 #include "data/data_lod.h"
-
-#include <string>
 
 namespace Dt
 {
@@ -25,7 +24,7 @@ namespace Dt
         
     public:
         
-        std::string      m_pModelname;
+        Base::CharString m_Modelname;
         unsigned int     m_NumberOfLODs;
         CLOD*            m_LODs[s_NumberOfLODs];
         Base::AABB3Float m_AABB;
