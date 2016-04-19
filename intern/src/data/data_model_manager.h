@@ -59,7 +59,6 @@ namespace ModelManager
     CModel& CreateModel(const SModelFileDescriptor& _rDescriptor);
     CModel& CreateModel(const SModelSceneDescriptor& _rDescriptor);
     CModel& CreateBox(float _Width, float _Height, float _Depth);
-    CModel& CreateBox(float _Width, float _Height, float _Depth);
     CModel& CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices);
     CModel& CreateCone(float _Radius, float _Height, unsigned int _Slices);
     CModel& CreateRectangle(float _X, float _Y, float _Width, float _Height);
