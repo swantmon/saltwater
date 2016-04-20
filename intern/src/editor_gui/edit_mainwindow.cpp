@@ -161,7 +161,7 @@ namespace Edit
 
     void CMainWindow::OnFramesPerSecond(Edit::CMessage& _rMessage)
     {
-        float FPS = _rMessage.GetFloat();
+        float FPS = _rMessage.GetDouble();
 
         m_pStatusLabel->setText("FPS: " + QString::number(1.0f / FPS));
     }

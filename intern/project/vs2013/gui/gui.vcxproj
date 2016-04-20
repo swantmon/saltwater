@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\gui\gui_debug_state.cpp" />
+    <ClCompile Include="..\..\..\src\gui\gui_edit_state.cpp" />
     <ClCompile Include="..\..\..\src\gui\gui_event_handler.cpp" />
     <ClCompile Include="..\..\..\src\gui\gui_exit_state.cpp" />
     <ClCompile Include="..\..\..\src\gui\gui_intro_state.cpp" />
@@ -31,6 +32,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\gui\gui_debug_state.h" />
+    <ClInclude Include="..\..\..\src\gui\gui_edit_state.h" />
     <ClInclude Include="..\..\..\src\gui\gui_event_delegate.h" />
     <ClInclude Include="..\..\..\src\gui\gui_event_handler.h" />
     <ClInclude Include="..\..\..\src\gui\gui_exit_state.h" />

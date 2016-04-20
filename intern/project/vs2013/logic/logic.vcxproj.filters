@@ -25,6 +25,9 @@
     <ClCompile Include="..\..\..\src\logic\lg_unload_map_state.cpp">
       <Filter>states</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\logic\lg_edit_state.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\logic\lg_debug_state.h">
@@ -49,6 +52,9 @@
       <Filter>states</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\logic\lg_unload_map_state.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\logic\lg_edit_state.h">
       <Filter>states</Filter>
     </ClInclude>
   </ItemGroup>

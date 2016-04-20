@@ -202,6 +202,9 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_application_interface.cpp">
       <Filter>interface\app</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_edit_state.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\graphic\gfx_debug_interface.h">
@@ -446,6 +449,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_application_interface.h">
       <Filter>interface\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_edit_state.h">
+      <Filter>states</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

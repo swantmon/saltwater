@@ -23,6 +23,7 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_actor_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_application_interface.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_ar_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_edit_state.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_light_area_renderer.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_light_facet.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_light_sun_renderer.cpp" />
@@ -91,6 +92,7 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_actor_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_actor_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_application_interface.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_edit_state.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_area_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_ar_renderer.h" />

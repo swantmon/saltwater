@@ -3,6 +3,8 @@
 
 #include "editor/edit_state.h"
 
+#include "editor_port/edit_message.h"
+
 namespace Edit
 {
     class CEditState : public CState
@@ -11,7 +13,11 @@ namespace Edit
     public:
         
         static CEditState& GetInstance();
-        
+
+    private:
+
+        CState::EStateType m_Action;
+
     private:
         
         CEditState();
@@ -23,5 +29,8 @@ namespace Edit
         virtual CState::EStateType InternOnLeave();
         virtual CState::EStateType InternOnRun();
         
+    private:
+
+        void OnExit(Edit::CMessage& _rMessage);
     };
 } // namespace Edit

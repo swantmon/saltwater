@@ -83,7 +83,7 @@ namespace Edit
         {
         case Edit::CState::Exit:
             CUnloadMapState::GetInstance().SetNextState(CState::Exit);
-            NextState = CState::UnloadMap;
+            NextState = CState::Play;
             break;
         }
         

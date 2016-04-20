@@ -190,7 +190,7 @@ namespace
             // -----------------------------------------------------------------------------
             Edit::CMessage NewMessage;
 
-            NewMessage.PutFloat(Core::Time::GetDeltaTimeLastFrame());
+            NewMessage.PutDouble(Core::Time::GetDeltaTimeLastFrame());
 
             NewMessage.Reset();
 

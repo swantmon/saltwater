@@ -28,6 +28,9 @@
     <ClCompile Include="..\..\..\src\gui\gui_unload_map_state.cpp">
       <Filter>states</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\gui_edit_state.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\gui\gui_event_delegate.h">
@@ -58,6 +61,9 @@
       <Filter>states</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\gui_unload_map_state.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\gui_edit_state.h">
       <Filter>states</Filter>
     </ClInclude>
   </ItemGroup>
