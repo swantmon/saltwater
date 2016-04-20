@@ -8,12 +8,12 @@
 
 namespace Cam
 {
-    class CARControl : public CControl
+    class CGameControl : public CControl
     {
     public:
         
-        CARControl();
-        ~CARControl();
+        CGameControl();
+        ~CGameControl();
         
     public:
         

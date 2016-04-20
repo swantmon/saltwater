@@ -49,6 +49,16 @@ namespace Edit
     {
         BASE_CONSOLE_STREAMINFO("Edit> Enter edit state.");
 
+        // -----------------------------------------------------------------------------
+        // Set editor camera in edit state
+        // -----------------------------------------------------------------------------
+        Cam::ControlManager::SetActiveControl(Cam::CControl::EditorControl);
+
+        Cam::ControlManager::GetActiveControl().SetPosition(Base::Float3(0.0f, 0.0f, 10.0f));
+
+        // -----------------------------------------------------------------------------
+        // Running states
+        // -----------------------------------------------------------------------------
         Lg ::Edit::OnEnter();
         Gui::Edit::OnEnter();
         Gfx::Edit::OnEnter();        

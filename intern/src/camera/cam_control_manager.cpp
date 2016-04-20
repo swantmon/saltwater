@@ -3,8 +3,8 @@
 #include "base/base_input_event.h"
 
 #include "camera/cam_control_manager.h"
-#include "camera/cam_fly_control.h"
-#include "camera/cam_ar_control.h"
+#include "camera/cam_editor_control.h"
+#include "camera/cam_game_control.h"
 
 #include "gui/gui_event_handler.h"
 
@@ -66,7 +66,10 @@ namespace
     {
         for (unsigned int IndexOfControl = 0; IndexOfControl < CControl::NumberOfControls; ++ IndexOfControl)
         {
-            Base::CMemory::DeleteObject(m_pControls[IndexOfControl]);
+            if (m_pControls[IndexOfControl] != nullptr)
+            {
+                Base::CMemory::DeleteObject(m_pControls[IndexOfControl]);
+            }
         }
     }
 
@@ -78,14 +81,14 @@ namespace
         {
             switch (_Type)
             {
-                case CControl::FlyControl:
+                case CControl::EditorControl:
                 {
-                    m_pControls[_Type] = Base::CMemory::NewObject<CFlyControl>();
+                    m_pControls[_Type] = Base::CMemory::NewObject<CEditorControl>();
                 }
                 break;
-                case CControl::ARControl:
+                case CControl::GameControl:
                 {
-                    m_pControls[_Type] = Base::CMemory::NewObject<CARControl>();
+                    m_pControls[_Type] = Base::CMemory::NewObject<CGameControl>();
                 }
                 break;
                     

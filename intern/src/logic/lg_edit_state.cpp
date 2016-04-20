@@ -1,30 +1,12 @@
 
-#include "base/base_console.h"
-#include "base/base_input_event.h"
-#include "base/base_math_operations.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "camera/cam_ar_control.h"
-#include "camera/cam_control_manager.h"
-
-#include "core/core_time.h"
-
 #include "data/data_actor_manager.h"
-#include "data/data_entity.h"
 #include "data/data_entity_manager.h"
-#include "data/data_light_facet.h"
 #include "data/data_light_manager.h"
-#include "data/data_map.h"
-
-#include "gui/gui_event_handler.h"
 
 #include "logic/lg_edit_state.h"
-
-#include "mr/mr_control_manager.h"
-#include "mr/mr_marker_info.h"
-#include "mr/mr_tracker_manager.h"
-#include "mr/mr_webcam_control.h"
 
 namespace
 {

@@ -21,14 +21,14 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\src\camera\cam_control.cpp" />
     <ClCompile Include="..\..\..\src\camera\cam_control_manager.cpp" />
-    <ClCompile Include="..\..\..\src\camera\cam_fly_control.cpp" />
-    <ClCompile Include="..\..\..\src\camera\cam_ar_control.cpp" />
+    <ClCompile Include="..\..\..\src\camera\cam_editor_control.cpp" />
+    <ClCompile Include="..\..\..\src\camera\cam_game_control.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\camera\cam_control.h" />
     <ClInclude Include="..\..\..\src\camera\cam_control_manager.h" />
-    <ClInclude Include="..\..\..\src\camera\cam_fly_control.h" />
-    <ClInclude Include="..\..\..\src\camera\cam_ar_control.h" />
+    <ClInclude Include="..\..\..\src\camera\cam_editor_control.h" />
+    <ClInclude Include="..\..\..\src\camera\cam_game_control.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{BD2866F6-A265-40F7-92D0-AD067FE79F65}</ProjectGuid>

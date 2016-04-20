@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "data/data_entity.h"
+
 #include <functional>
 
 namespace Dt

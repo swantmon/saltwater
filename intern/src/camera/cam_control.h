@@ -13,8 +13,8 @@ namespace Cam
 
             enum EType
             {
-                FlyControl,
-                ARControl,
+                EditorControl,
+                GameControl,
                 NumberOfControls,
                 Undefined = -1,
             };

@@ -1,13 +1,13 @@
 
 #include "camera/cam_control_manager.h"
-#include "camera/cam_ar_control.h"
+#include "camera/cam_game_control.h"
 
 #include "graphic/gfx_camera_interface.h"
 
 namespace Cam
 {
-    CARControl::CARControl()
-        : CControl    (CControl::ARControl)
+    CGameControl::CGameControl()
+        : CControl    (CControl::GameControl)
     {
         m_Position[0] = 0.0f;
         m_Position[1] = 0.0f;
@@ -16,7 +16,7 @@ namespace Cam
     
     // -----------------------------------------------------------------------------
     
-    CARControl::~CARControl()
+    CGameControl::~CGameControl()
     {
 
         
@@ -24,14 +24,14 @@ namespace Cam
     
     // -----------------------------------------------------------------------------
     
-    void CARControl::SetProjectionMatrix(const Base::Float3x3& _rProjectionMatrix)
+    void CGameControl::SetProjectionMatrix(const Base::Float3x3& _rProjectionMatrix)
     {
         Gfx::Cam::InjectCameraMatrix(_rProjectionMatrix);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CARControl::SetMarkerTransformation(const Base::Float3x3& _rRotationMatrix, const Base::Float3& _rTranslation)
+    void CGameControl::SetMarkerTransformation(const Base::Float3x3& _rRotationMatrix, const Base::Float3& _rTranslation)
     {
         m_RotationMatrix[0][0] = _rRotationMatrix[0][0];
         m_RotationMatrix[0][1] = _rRotationMatrix[0][1];
@@ -54,14 +54,14 @@ namespace Cam
     
     // -----------------------------------------------------------------------------
     
-    void CARControl::InternOnEvent(const Base::CInputEvent& _rEvent)
+    void CGameControl::InternOnEvent(const Base::CInputEvent& _rEvent)
     {
         BASE_UNUSED(_rEvent);
     }
     
     // -----------------------------------------------------------------------------
     
-    void CARControl::InternUpdate()
+    void CGameControl::InternUpdate()
     {
         Gfx::Cam::SetPosition(m_Position);
         Gfx::Cam::SetRotation(m_RotationMatrix);

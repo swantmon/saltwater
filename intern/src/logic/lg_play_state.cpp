@@ -5,8 +5,8 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "camera/cam_ar_control.h"
 #include "camera/cam_control_manager.h"
+#include "camera/cam_game_control.h"
 
 #include "core/core_time.h"
 
@@ -101,7 +101,9 @@ namespace
         // -----------------------------------------------------------------------------  
         Cam::CControl& rControl = Cam::ControlManager::GetActiveControl();
 
-        if (rControl.GetType() == Cam::CControl::ARControl)
+        // TODO by tschwandt
+        // MR should be an entity with plugin -> find entity and setup depending on this!
+        if (false && rControl.GetType() == Cam::CControl::GameControl)
         {
             // -----------------------------------------------------------------------------
             // Update AR
@@ -156,7 +158,7 @@ namespace
                     // That is the first marker. So we have to set our camera with the
                     // marker information. That is our world origin
                     // -----------------------------------------------------------------------------
-                    Cam::CARControl& rARControl = static_cast<Cam::CARControl&>(Cam::ControlManager::GetActiveControl());
+                    Cam::CGameControl& rARControl = static_cast<Cam::CGameControl&>(Cam::ControlManager::GetActiveControl());
 
                     rARControl.SetMarkerTransformation(MarkerInfo.m_RotationToCamera, MarkerInfo.m_TranslationToCamera);
                 }

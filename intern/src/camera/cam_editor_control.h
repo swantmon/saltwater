@@ -8,12 +8,12 @@
 
 namespace Cam
 {
-    class CFlyControl : public CControl
+    class CEditorControl : public CControl
     {
         public:
 
-            CFlyControl();
-             ~CFlyControl();
+            CEditorControl();
+             ~CEditorControl();
 
         private:
 

@@ -6,7 +6,7 @@
 #include "base/base_vector3.h"
 
 #include "camera/cam_control_manager.h"
-#include "camera/cam_ar_control.h"
+#include "camera/cam_game_control.h"
 
 #include "data/data_actor_facet.h"
 #include "data/data_actor_manager.h"
@@ -96,13 +96,6 @@ namespace
         // Allocate a map
         // -----------------------------------------------------------------------------
         Dt::Map::AllocateMap(1, 1);
-        
-        // -----------------------------------------------------------------------------
-        // Set our camera and position
-        // -----------------------------------------------------------------------------
-        Cam::ControlManager::SetActiveControl(Cam::CControl::FlyControl);
-        
-        Cam::ControlManager::GetActiveControl().SetPosition(Base::Float3(0.0f, 0.0f, 10.0f));
 
         // -----------------------------------------------------------------------------
         // Setup cameras
@@ -423,9 +416,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Set our camera and position
         // -----------------------------------------------------------------------------
-        Cam::ControlManager::SetActiveControl(Cam::CControl::ARControl);
+        Cam::ControlManager::SetActiveControl(Cam::CControl::GameControl);
 
-        Cam::CARControl& rARControl = static_cast<Cam::CARControl&>(Cam::ControlManager::GetActiveControl());
+        Cam::CGameControl& rARControl = static_cast<Cam::CGameControl&>(Cam::ControlManager::GetActiveControl());
 
         rARControl.SetProjectionMatrix(MR::ControlManager::GetActiveControl().GetProjectionMatrix());
 
@@ -628,13 +621,6 @@ namespace
     
     void CLgLoadMapState::CreatePBRSponzaScene()
     {
-        // -----------------------------------------------------------------------------
-        // Set our camera and position
-        // -----------------------------------------------------------------------------
-        Cam::ControlManager::SetActiveControl(Cam::CControl::FlyControl);
-
-        Cam::ControlManager::GetActiveControl().SetPosition(Base::Float3(14.0f, 6.0f, 10.0f));
-
         // -----------------------------------------------------------------------------
         // Allocate a map
         // -----------------------------------------------------------------------------

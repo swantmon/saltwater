@@ -4,8 +4,8 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "camera/cam_ar_control.h"
 #include "camera/cam_control_manager.h"
+#include "camera/cam_game_control.h"
 
 #include "data/data_actor_facet.h"
 #include "data/data_entity.h"

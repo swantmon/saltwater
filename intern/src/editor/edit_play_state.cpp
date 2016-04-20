@@ -50,8 +50,14 @@ namespace Edit
         BASE_CONSOLE_STREAMINFO("Edit> Enter play state.");
 
         // -----------------------------------------------------------------------------
-        // In game mode we can directly activate this window. It will be active the
-        // whole runtime.
+        // Activate game control for play state
+        // -----------------------------------------------------------------------------
+        Cam::ControlManager::SetActiveControl(Cam::CControl::GameControl);
+
+        Cam::ControlManager::GetActiveControl().SetPosition(Base::Float3(0.0f, 0.0f, 10.0f));
+
+        // -----------------------------------------------------------------------------
+        // Running states
         // -----------------------------------------------------------------------------
         Lg ::Play::OnEnter();
         Gui::Play::OnEnter();

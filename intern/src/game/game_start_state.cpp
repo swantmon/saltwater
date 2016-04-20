@@ -45,8 +45,7 @@ namespace Game
         // -----------------------------------------------------------------------------
         // Start engine
         // -----------------------------------------------------------------------------
-        Cam::ControlManager::CreateControl(Cam::CControl::FlyControl);
-        Cam::ControlManager::CreateControl(Cam::CControl::ARControl);
+        Cam::ControlManager::CreateControl(Cam::CControl::GameControl);
          
         Gfx::Main::OnStart();
         

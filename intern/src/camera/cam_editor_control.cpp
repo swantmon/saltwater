@@ -3,7 +3,7 @@
 #include "base/base_math_operations.h"
 
 #include "camera/cam_control_manager.h"
-#include "camera/cam_fly_control.h"
+#include "camera/cam_editor_control.h"
 
 #include "graphic/gfx_camera_interface.h"
 
@@ -12,14 +12,14 @@
 
 namespace Cam
 {
-    const float CFlyControl::s_MoveVelocityBorder[] =  { 0.001f, 1.0f, 0.008f };
-    const float CFlyControl::s_RotationVelocity     =  0.35f;
+    const float CEditorControl::s_MoveVelocityBorder[] =  { 0.001f, 1.0f, 0.008f };
+    const float CEditorControl::s_RotationVelocity     =  0.35f;
 } // namespace Cam
 
 namespace Cam
 {
-    CFlyControl::CFlyControl()
-        : CControl            (CControl::FlyControl)
+    CEditorControl::CEditorControl()
+        : CControl            (CControl::EditorControl)
         , m_IsFlying          (false)
         , m_LastCursorPosition( )
         , m_CurrentRotation   ( )
@@ -32,13 +32,13 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
-    CFlyControl::~CFlyControl()
+    CEditorControl::~CEditorControl()
     {
     }
 
     // -----------------------------------------------------------------------------
 
-    void CFlyControl::InternOnEvent(const Base::CInputEvent& _rEvent)
+    void CEditorControl::InternOnEvent(const Base::CInputEvent& _rEvent)
     {
         if (_rEvent.GetAction() == Base::CInputEvent::MouseLeftPressed)
         {
@@ -116,7 +116,7 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
-    void CFlyControl::InternUpdate()
+    void CEditorControl::InternUpdate()
     {
         Base::Float3 Forward(0.0f, 0.0f, -1.0f);
         Base::Float3 Right  (1.0f, 0.0f,  0.0f);
