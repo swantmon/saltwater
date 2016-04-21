@@ -86,6 +86,15 @@ namespace Gfx
         return m_RotationMatrix;
     }
 
+    // -----------------------------------------------------------------------------
+
+    void CView::SetViewMatrix(const Base::Float4x4& _rViewMatrix)
+    {
+        _rViewMatrix.GetRotation(m_RotationMatrix);
+
+        _rViewMatrix.GetTranslation(m_Position);
+    }
+
     // --------------------------------------------------------------------------------
 
     const Base::Float4x4& CView::GetViewMatrix() const

@@ -11,6 +11,8 @@ namespace Gfx
     CCamera::CCamera()
         : m_ProjectionMatrix    ()
         , m_ViewProjectionMatrix()
+        , m_CullingMask         (0)
+        , m_Depth               (0)
         , m_Left                (0.0f)
         , m_Right               (0.0f)
         , m_Bottom              (0.0f)
@@ -23,7 +25,10 @@ namespace Gfx
         , m_Aperture            (16.0f)
         , m_ISO                 (100.0f)
         , m_EC                  (0.0f)
+        , m_Size                (0.0f)
+        , m_BackgroundColor     (Base::Float3::s_Zero)
         , m_WorldAABB           ()
+        , m_ViewportRect        ()
         , m_pSibling            (nullptr)
         , m_ViewPtr             (nullptr)
     {
@@ -44,7 +49,7 @@ namespace Gfx
         float Bottom;
         float Top;
 
-        Bottom = -Base::Tan(Base::DegreesToRadians(_FOVY) / 2.0f) * _Near;
+        Bottom = -Base::Tan(Base::DegreesToRadians(_FOVY) / 2.0f) * Base::Max(_Near, 0.000001f);
         Top    = -Bottom;
         Left   =  _Aspect * Bottom;
         Right  =  _Aspect * Top;
@@ -164,6 +169,13 @@ namespace Gfx
         // --------------------------------------------------------------------------------
         m_ProjectionMatrix.SetRHOrthographic(_Left, _Right, _Bottom, _Top, _Near, _Far);
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CCamera::SetProjection(const Base::Float4x4& _rProjectionMatrix)
+    {
+        m_ProjectionMatrix = _rProjectionMatrix;
+    }
     
     // -----------------------------------------------------------------------------
     
@@ -176,109 +188,211 @@ namespace Gfx
         m_ProjectionMatrix.SetRHPerspective(m_Near, m_Far, _rCameraMatrix);
     }
 
-    // --------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-    CViewPtr CCamera::GetView()
+    void CCamera::SetBackgroundColor(Base::Float3& _rBackgroundColor)
     {
-        return m_ViewPtr;
+        m_BackgroundColor = _rBackgroundColor;
     }
 
-    // --------------------------------------------------------------------------------
-
-    float CCamera::GetWidth() const
+    // -----------------------------------------------------------------------------
+    Base::Float3& CCamera::GetBackgroundColor()
     {
-        return m_Left - m_Right;
+        return m_BackgroundColor;
     }
 
-    // --------------------------------------------------------------------------------
-
-    float CCamera::GetHeight() const
+    // -----------------------------------------------------------------------------
+    const Base::Float3& CCamera::GetBackgroundColor() const
     {
-        return m_Top - m_Bottom;
+        return m_BackgroundColor;
     }
 
-    // --------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-    float CCamera::GetLeft() const
+    void CCamera::SetCullingMask(unsigned int _CullingMask)
     {
-        return m_Left;
+        m_CullingMask = _CullingMask;
     }
 
-    // --------------------------------------------------------------------------------
-
-    float CCamera::GetRight() const
+    // -----------------------------------------------------------------------------
+    unsigned int CCamera::GetCullingMask() const
     {
-        return m_Right;
+        return m_CullingMask;
     }
 
-    // --------------------------------------------------------------------------------
-
-    float CCamera::GetTop() const
-    {
-        return m_Top;
-    }
-
-    // --------------------------------------------------------------------------------
-
-    float CCamera::GetBottom() const
-    {
-        return m_Bottom;
-    }
-
-    // --------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
     float CCamera::GetNear() const
     {
         return m_Near;
     }
 
-    // --------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
     float CCamera::GetFar() const
     {
         return m_Far;
     }
 
-    // --------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-    float CCamera::GetRadius() const
+    void CCamera::SetViewportRect(Base::AABB2Float& _rViewportRect)
     {
-        return m_Radius;
+        m_ViewportRect = _rViewportRect;
     }
 
     // -----------------------------------------------------------------------------
 
-    CCamera::ECameraMode CCamera::GetMode() const
+    Base::AABB2Float& CCamera::GetViewportRect()
+    {
+        return m_ViewportRect;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const Base::AABB2Float& CCamera::GetViewportRect() const
+    {
+        return m_ViewportRect;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CCamera::SetDepth(float _Depth)
+    {
+        m_Depth = _Depth;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CCamera::GetDepth() const
+    {
+        return m_Depth;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CCamera::SetCameraMode(ECameraMode _CameraMode)
+    {
+        m_Mode = _CameraMode;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CCamera::ECameraMode CCamera::GetCameraMode() const
     {
         return m_Mode;
     }
 
     // -----------------------------------------------------------------------------
 
-    float CCamera::GetShuttertime() const
+    void CCamera::SetShutterSpeed(float _ShutterSpeed)
+    {
+        m_ShutterSpeed = _ShutterSpeed;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CCamera::GetShutterSpeed() const
     {
         return m_ShutterSpeed;
     }
 
-    // --------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
+
+    void CCamera::SetAperture(float _Aperture)
+    {
+        m_Aperture = _Aperture;
+    }
+
+    // -----------------------------------------------------------------------------
 
     float CCamera::GetAperture() const
     {
         return m_Aperture;
     }
 
-    // --------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
+
+    void CCamera::SetISO(float _ISO)
+    {
+        m_ISO = _ISO;
+    }
+
+    // -----------------------------------------------------------------------------
 
     float CCamera::GetISO() const
     {
         return m_ISO;
     }
-    
+
     // -----------------------------------------------------------------------------
-    
-    float CCamera::GetExposureCompensation() const
+
+    void CCamera::SetEC(float _EC)
+    {
+        m_EC = _EC;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CCamera::GetEC() const
     {
         return m_EC;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CViewPtr CCamera::GetView()
+    {
+        return m_ViewPtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CCamera::GetWidth() const
+    {
+        return m_Left - m_Right;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CCamera::GetHeight() const
+    {
+        return m_Top - m_Bottom;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CCamera::GetLeft() const
+    {
+        return m_Left;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CCamera::GetRight() const
+    {
+        return m_Right;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CCamera::GetTop() const
+    {
+        return m_Top;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CCamera::GetBottom() const
+    {
+        return m_Bottom;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CCamera::GetRadius() const
+    {
+        return m_Radius;
     }
 
     // --------------------------------------------------------------------------------

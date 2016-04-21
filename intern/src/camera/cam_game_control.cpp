@@ -2,6 +2,10 @@
 #include "camera/cam_control_manager.h"
 #include "camera/cam_game_control.h"
 
+#include "data/data_actor_facet.h"
+#include "data/data_entity.h"
+#include "data/data_transformation_facet.h"
+
 #include "graphic/gfx_camera_interface.h"
 
 namespace Cam
@@ -85,13 +89,72 @@ namespace Cam
     
     void CGameControl::InternUpdate()
     {
+        assert(m_pMainCameraEntity != 0);
+
         if (m_pMainCameraEntity != 0)
         {
-            m_Position = m_pMainCameraEntity->GetWorldPosition();
+            Dt::CTransformationFacet* pTransformationFacet = m_pMainCameraEntity->GetTransformationFacet();
+            Dt::CCameraActorFacet*    pCameraFacet         = static_cast<Dt::CCameraActorFacet*>(m_pMainCameraEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+
+            assert(pTransformationFacet != nullptr);
+
+            // -----------------------------------------------------------------------------
+            // Position
+            // -----------------------------------------------------------------------------
+            m_Position.Set(m_pMainCameraEntity->GetWorldPosition());
+
+            // -----------------------------------------------------------------------------
+            // Rotation
+            // -----------------------------------------------------------------------------
+            Base::Float3& rRotationInDegree = pTransformationFacet->GetRotation();
+
+            m_RotationMatrix.SetRotation(rRotationInDegree[0], rRotationInDegree[1], rRotationInDegree[2]);
+
+            // -----------------------------------------------------------------------------
+            // Projection
+            // -----------------------------------------------------------------------------
+            if (pCameraFacet->GetProjectionType() == Dt::CCameraActorFacet::Perspective)
+            {
+                // TODO: Get aspect ratio from ???
+                Gfx::Cam::SetFieldOfView(pCameraFacet->GetFoV(), 1280.0f / 720.0f, pCameraFacet->GetNear(), pCameraFacet->GetFar());
+            }
+            else if (pCameraFacet->GetProjectionType() == Dt::CCameraActorFacet::Orthographic)
+            {
+                Gfx::Cam::SetOrthographic(pCameraFacet->GetSize(), pCameraFacet->GetSize(), pCameraFacet->GetNear(), pCameraFacet->GetFar());
+            }
+
+            // -----------------------------------------------------------------------------
+            // Camera mode + variables
+            // -----------------------------------------------------------------------------
+            Gfx::Cam::SetAutoCameraMode();
+            
+            if (pCameraFacet->GetCameraMode() == Dt::CCameraActorFacet::Manual)
+            {
+                Gfx::Cam::SetManualCameraMode();
+
+                Gfx::Cam::SetShutterSpeed(pCameraFacet->GetShutterSpeed());
+
+                Gfx::Cam::SetAperture(pCameraFacet->GetAperture());
+
+                Gfx::Cam::SetISO(pCameraFacet->GetISO());
+
+                Gfx::Cam::SetEC(pCameraFacet->GetEC());
+            }
+
+            // -----------------------------------------------------------------------------
+            // Other
+            // -----------------------------------------------------------------------------
+            Gfx::Cam::SetBackgroundColor(pCameraFacet->GetBackgroundColor());
+            
+            Gfx::Cam::SetCullingMask(pCameraFacet->GetCullingMask());
+
+            Gfx::Cam::SetViewportRect(pCameraFacet->GetViewportRect());
+
+            Gfx::Cam::SetDepth(pCameraFacet->GetDepth());
         }
 
         Gfx::Cam::SetPosition(m_Position);
-        Gfx::Cam::SetRotation(m_RotationMatrix);
+        Gfx::Cam::SetRotationMatrix(m_RotationMatrix);
         Gfx::Cam::Update();
     }
 } // namespace Cam

@@ -369,10 +369,10 @@ namespace
         m_ConstantBufferPS.m_HistoryIndex             = m_HistoryIndex;
         m_ConstantBufferPS.m_LastHistoryIndex         = m_LastHistoryIndex;
         m_ConstantBufferPS.m_Time                     = TimeSinceLastFrame;
-        m_ConstantBufferPS.m_ExposureCompensation     = MainCameraPtr->GetExposureCompensation();
-        m_ConstantBufferPS.m_UseAutoExposure          = MainCameraPtr->GetMode() == CCamera::Auto ? 1.0f : 0.0f;
+        m_ConstantBufferPS.m_ExposureCompensation     = MainCameraPtr->GetEC();
+        m_ConstantBufferPS.m_UseAutoExposure          = MainCameraPtr->GetCameraMode() == CCamera::Auto ? 1.0f : 0.0f;
         m_ConstantBufferPS.m_Aperture                 = MainCameraPtr->GetAperture();
-        m_ConstantBufferPS.m_Shuttertime              = MainCameraPtr->GetShuttertime();
+        m_ConstantBufferPS.m_Shuttertime              = MainCameraPtr->GetShutterSpeed();
         m_ConstantBufferPS.m_ISO                      = MainCameraPtr->GetISO();
         
         if (m_FrameOnResetEyeAdaption + s_HistogramHistorySize ==  FrameCounter)

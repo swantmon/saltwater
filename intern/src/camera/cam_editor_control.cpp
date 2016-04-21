@@ -130,7 +130,7 @@ namespace Cam
         if (m_MoveDirection & 0x08) m_Position += (Right   * m_MoveVelocity);
 
         Gfx::Cam::SetPosition(m_Position);
-        Gfx::Cam::SetRotation(m_RotationMatrix);
+        Gfx::Cam::SetRotationMatrix(m_RotationMatrix);
         Gfx::Cam::Update();
     }
 } // namespace Cam

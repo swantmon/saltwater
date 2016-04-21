@@ -105,11 +105,17 @@ namespace
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
             EntityDesc.m_EntityType     = Dt::SActorType::Camera;
-            EntityDesc.m_FacetFlags     = 0;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
             rEntity.SetWorldPosition(Base::Float3(0.0f, 0.0f, 10.0f));
+
+            Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetScale   (Base::Float3(1.0f));
+            pTransformationFacet->SetRotation(Base::Float3(0.0f, 0.0f, 0.0f));
 
             Dt::CCameraActorFacet* pFacet = Dt::ActorManager::CreateCameraActor();
 
@@ -625,6 +631,35 @@ namespace
         // Allocate a map
         // -----------------------------------------------------------------------------
         Dt::Map::AllocateMap(1, 1);
+
+        // -----------------------------------------------------------------------------
+        // Setup cameras
+        // -----------------------------------------------------------------------------
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
+            EntityDesc.m_EntityType     = Dt::SActorType::Camera;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+
+            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            rEntity.SetWorldPosition(Base::Float3(14.0f, 6.0f, 10.0f));
+
+            Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetScale   (Base::Float3(1.0f));
+            pTransformationFacet->SetRotation(Base::Float3(0.0f, 0.0f, 0.0f));
+
+            Dt::CCameraActorFacet* pFacet = Dt::ActorManager::CreateCameraActor();
+
+            pFacet->SetMainCamera(true);
+
+            rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
         
         // -----------------------------------------------------------------------------
         // Setup environment

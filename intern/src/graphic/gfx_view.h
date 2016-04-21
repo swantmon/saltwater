@@ -29,6 +29,7 @@ namespace Gfx
             const Base::Float3& GetRightDirection() const;
             const Base::Float3& GetUpDirection() const;
 
+            void SetViewMatrix(const Base::Float4x4& _rViewMatrix);
             const Base::Float4x4& GetViewMatrix() const;
 
         public:
