@@ -96,6 +96,44 @@ namespace
         Dt::EntityManager::Update();
         Dt::LightManager ::Update();
 
+
+
+
+        // -----------------------------------------------------------------------------
+        // Get main camera entity and set this entity to the camera project
+        // as linked entity.
+        // After the first main camera we can break the loop.
+        // -----------------------------------------------------------------------------
+        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Actor);
+        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
+
+        for (; CurrentEntity != EndOfEntities; CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor))
+        {
+            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+
+            if (rCurrentEntity.GetType() == Dt::SActorType::Camera)
+            {
+                Dt::CCameraActorFacet* pCameraActorFacet = static_cast<Dt::CCameraActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+                assert(pCameraActorFacet != nullptr);
+
+                if (pCameraActorFacet->IsMainCamera())
+                {
+                    Cam::CControl& rControl = Cam::ControlManager::GetActiveControl();
+
+                    assert(rControl.GetType() == Cam::CControl::GameControl);
+
+                    Cam::CGameControl& rGameControl = static_cast<Cam::CGameControl&>(rControl);
+
+                    rGameControl.SetEntity(rCurrentEntity);
+
+                    break;
+                }
+            }
+        }
+
+
+
         // -----------------------------------------------------------------------------
         // Update logical map (entity movement, notification, physic, ...)
         // -----------------------------------------------------------------------------  

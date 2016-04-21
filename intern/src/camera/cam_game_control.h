@@ -6,6 +6,8 @@
 
 #include "camera/cam_control.h"
 
+#include "data/data_entity.h"
+
 namespace Cam
 {
     class CGameControl : public CControl
@@ -19,6 +21,15 @@ namespace Cam
         
         void SetProjectionMatrix(const Base::Float3x3& _rProjectionMatrix);
         void SetMarkerTransformation(const Base::Float3x3& _rRotationMatrix, const Base::Float3& _rTranslation);
+        
+        void SetEntity(Dt::CEntity& _rEntity);
+
+        Dt::CEntity* GetEntity();
+        const Dt::CEntity* GetEntity() const;
+
+    private:
+
+        Dt::CEntity* m_pMainCameraEntity;
         
     private:
         

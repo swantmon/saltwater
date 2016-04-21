@@ -7,7 +7,8 @@
 namespace Cam
 {
     CGameControl::CGameControl()
-        : CControl    (CControl::GameControl)
+        : CControl           (CControl::GameControl)
+        , m_pMainCameraEntity(nullptr)
     {
         m_Position[0] = 0.0f;
         m_Position[1] = 0.0f;
@@ -51,6 +52,27 @@ namespace Cam
 
         m_Position = m_RotationMatrix.GetInverted() * m_Position;
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CGameControl::SetEntity(Dt::CEntity& _rEntity)
+    {
+        m_pMainCameraEntity = &_rEntity;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Dt::CEntity* CGameControl::GetEntity()
+    {
+        return m_pMainCameraEntity;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const Dt::CEntity* CGameControl::GetEntity() const
+    {
+        return m_pMainCameraEntity;
+    }
     
     // -----------------------------------------------------------------------------
     
@@ -63,6 +85,11 @@ namespace Cam
     
     void CGameControl::InternUpdate()
     {
+        if (m_pMainCameraEntity != 0)
+        {
+            m_Position = m_pMainCameraEntity->GetWorldPosition();
+        }
+
         Gfx::Cam::SetPosition(m_Position);
         Gfx::Cam::SetRotation(m_RotationMatrix);
         Gfx::Cam::Update();
