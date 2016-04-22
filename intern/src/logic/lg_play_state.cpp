@@ -128,16 +128,11 @@ namespace
             }
         }
 
-
-
         // -----------------------------------------------------------------------------
-        // Update logical map (entity movement, notification, physic, ...)
+        // Update some lights if AR is enabled
+        // This means, we have changing backgrounds and light conditions
         // -----------------------------------------------------------------------------  
-        Cam::CControl& rControl = Cam::ControlManager::GetActiveControl();
-
-        // TODO by tschwandt
-        // Updating of skybox has to be triggered in another way
-        if (false && rControl.GetType() == Cam::CControl::GameControl)
+        if (MR::ControlManager::IsActive())
         {
             Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
             Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
@@ -159,8 +154,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
             }
-        }
-        
+        }  
         
         // -----------------------------------------------------------------------------
         // Return state changes
