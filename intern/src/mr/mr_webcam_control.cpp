@@ -227,9 +227,7 @@ namespace MR
             pVideoData = arVideoGetImage();
         }
 
-        unsigned int NumberOfBytes = NumberOfVideoComponents * sizeof(char) * OriginalSizeU * OriginalSizeV;
-
-        Base::CMemory::Copy(static_cast<IplImage*>(m_OriginalColorFrame)->imageData, pVideoData, NumberOfBytes);
+        static_cast<IplImage*>(m_OriginalColorFrame)->imageData = static_cast<char*>(static_cast<void*>(pVideoData));
 
         // -----------------------------------------------------------------------------
         // Convert from original to output
@@ -256,20 +254,7 @@ namespace MR
 
         if (pVideoData != 0)
         {
-            unsigned int NumberOfVideoComponents = 3;
-            unsigned int OriginalSizeU = m_pOriginalFrame->GetNumberOfPixelsU();
-            unsigned int OriginalSizeV = m_pOriginalFrame->GetNumberOfPixelsV();
-
-#ifdef __APPLE__
-            NumberOfVideoComponents = 4;
-#endif
-            unsigned int NumberOfBytes = NumberOfVideoComponents * sizeof(char) * OriginalSizeU * OriginalSizeV;
-
-            Base::CMemory::Copy(static_cast<IplImage*>(m_OriginalColorFrame)->imageData, pVideoData, NumberOfBytes);
-
-            // TODO:
-            // Test if a copy by texture manager is possible
-
+            static_cast<IplImage*>(m_OriginalColorFrame)->imageData = static_cast<char*>(static_cast<void*>(pVideoData));
 
             // -----------------------------------------------------------------------------
             // Convert to output

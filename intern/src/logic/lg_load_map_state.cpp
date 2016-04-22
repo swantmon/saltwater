@@ -402,7 +402,7 @@ namespace
 
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            rEntity.SetWorldPosition(Base::Float3(0.0f, 0.0f, 10.0f));
+            rEntity.SetWorldPosition(Base::Float3(0.0f, 0.0f, 0.5f));
 
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
@@ -413,6 +413,7 @@ namespace
             Dt::CCameraActorFacet* pFacet = Dt::ActorManager::CreateCameraActor();
 
             pFacet->SetMainCamera(true);
+            pFacet->SetNear(0.001f);
 
             rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
 
