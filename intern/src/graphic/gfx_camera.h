@@ -29,6 +29,7 @@ namespace Gfx
         
     public:
 
+        void SetFieldOfView(float _FOVY, float _Near, float _Far);
         void SetFieldOfView(float _FOVY, float _Aspect, float _Near, float _Far);
         void SetPerspective(float _Width, float _Height, float _Near, float _Far);
         void SetPerspective(float _Left, float _Right, float _Bottom, float _Top, float _Near, float _Far);
@@ -37,9 +38,20 @@ namespace Gfx
         
         void SetProjection(const Base::Float4x4& _rProjectionMatrix);
 
+
+
+
+        // TODO: remove this function because it is only for MR
         void InjectCameraMatrix(const Base::Float3x3& _rCameraMatrix);
 
+
+
+
+
     public:
+
+        void SetAspectRatio(float _Aspect);
+        float GetAspectRatio();
 
         void SetBackgroundColor(Base::Float3& _rBackgroundColor);
         Base::Float3& GetBackgroundColor();
@@ -47,9 +59,6 @@ namespace Gfx
 
         void SetCullingMask(unsigned int _CullingMask);
         unsigned int GetCullingMask() const;
-
-        float GetNear() const;
-        float GetFar() const;
 
         void SetViewportRect(Base::AABB2Float& _rViewportRect);
         Base::AABB2Float& GetViewportRect();
@@ -89,6 +98,9 @@ namespace Gfx
         float GetBottom() const;
 
         float GetRadius() const;
+
+        float GetNear() const;
+        float GetFar() const;
 
         const Base::Float4x4& GetProjectionMatrix() const;
         const Base::Float4x4& GetViewProjectionMatrix() const;

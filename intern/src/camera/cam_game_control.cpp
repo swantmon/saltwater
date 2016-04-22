@@ -14,9 +14,6 @@ namespace Cam
         : CControl           (CControl::GameControl)
         , m_pMainCameraEntity(nullptr)
     {
-        m_Position[0] = 0.0f;
-        m_Position[1] = 0.0f;
-        m_Position[2] = 1.0f;
     }
     
     // -----------------------------------------------------------------------------
@@ -91,12 +88,13 @@ namespace Cam
     {
         assert(m_pMainCameraEntity != 0);
 
-        if (m_pMainCameraEntity != 0)
+        if (m_pMainCameraEntity != 0 && m_pMainCameraEntity->GetDirtyFlags() != 0)
         {
             Dt::CTransformationFacet* pTransformationFacet = m_pMainCameraEntity->GetTransformationFacet();
             Dt::CCameraActorFacet*    pCameraFacet         = static_cast<Dt::CCameraActorFacet*>(m_pMainCameraEntity->GetDetailFacet(Dt::SFacetCategory::Data));
 
             assert(pTransformationFacet != nullptr);
+            assert(pCameraFacet         != nullptr);
 
             // -----------------------------------------------------------------------------
             // Position
@@ -115,12 +113,16 @@ namespace Cam
             // -----------------------------------------------------------------------------
             if (pCameraFacet->GetProjectionType() == Dt::CCameraActorFacet::Perspective)
             {
-                // TODO: Get aspect ratio from ???
-                Gfx::Cam::SetFieldOfView(pCameraFacet->GetFoV(), 1280.0f / 720.0f, pCameraFacet->GetNear(), pCameraFacet->GetFar());
+                Gfx::Cam::SetFieldOfView(pCameraFacet->GetFoV(), pCameraFacet->GetNear(), pCameraFacet->GetFar());
             }
             else if (pCameraFacet->GetProjectionType() == Dt::CCameraActorFacet::Orthographic)
             {
-                Gfx::Cam::SetOrthographic(pCameraFacet->GetSize(), pCameraFacet->GetSize(), pCameraFacet->GetNear(), pCameraFacet->GetFar());
+                float Left   = -pCameraFacet->GetSize() / 2.0f;
+                float Right  =  pCameraFacet->GetSize() / 2.0f;
+                float Bottom = -pCameraFacet->GetSize() / 2.0f;
+                float Top    =  pCameraFacet->GetSize() / 2.0f;
+                
+                Gfx::Cam::SetOrthographic(Left, Right, Bottom, Top, pCameraFacet->GetNear(), pCameraFacet->GetFar());
             }
 
             // -----------------------------------------------------------------------------

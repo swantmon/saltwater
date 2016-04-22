@@ -5,7 +5,7 @@ namespace Cam
 {
     CControl::CControl(EType _Type)
         : m_Type                  (_Type)
-        , m_Position              ()
+        , m_Position              (Base::Float3::s_Zero)
         , m_RotationMatrix        (Base::Float3x3::s_Identity)
         , m_MoveVelocity          (0.1f)
         , m_HasPositionChanged    (false)

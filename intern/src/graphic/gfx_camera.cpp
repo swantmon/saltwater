@@ -21,9 +21,9 @@ namespace Gfx
         , m_Far                 (0.0f)
         , m_Radius              (0.0f)
         , m_Mode                (Auto)
-        , m_ShutterSpeed        (1.0f / 125.0f)
-        , m_Aperture            (16.0f)
-        , m_ISO                 (100.0f)
+        , m_ShutterSpeed        (0.0f)
+        , m_Aperture            (0.0f)
+        , m_ISO                 (0.0f)
         , m_EC                  (0.0f)
         , m_Size                (0.0f)
         , m_BackgroundColor     (Base::Float3::s_Zero)
@@ -38,6 +38,17 @@ namespace Gfx
 
     CCamera::~CCamera()
     {
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CCamera::SetFieldOfView(float _FOVY, float _Near, float _Far)
+    {
+        float Aspect;
+
+        Aspect = m_Left / m_Bottom;
+
+        SetFieldOfView(_FOVY, Aspect, _Near, _Far);
     }
 
     // --------------------------------------------------------------------------------
@@ -190,6 +201,26 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
+    void CCamera::SetAspectRatio(float _Aspect)
+    {
+        float Left;
+        float Right;
+
+        Left  = _Aspect * m_Bottom;
+        Right = _Aspect * m_Top;
+
+        SetPerspective(Left, Right, m_Bottom, m_Top, m_Near, m_Far);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CCamera::GetAspectRatio()
+    {
+        return m_Left / m_Bottom;
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CCamera::SetBackgroundColor(Base::Float3& _rBackgroundColor)
     {
         m_BackgroundColor = _rBackgroundColor;
@@ -218,20 +249,6 @@ namespace Gfx
     unsigned int CCamera::GetCullingMask() const
     {
         return m_CullingMask;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    float CCamera::GetNear() const
-    {
-        return m_Near;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    float CCamera::GetFar() const
-    {
-        return m_Far;
     }
 
     // -----------------------------------------------------------------------------
@@ -393,6 +410,20 @@ namespace Gfx
     float CCamera::GetRadius() const
     {
         return m_Radius;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CCamera::GetNear() const
+    {
+        return m_Near;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CCamera::GetFar() const
+    {
+        return m_Far;
     }
 
     // --------------------------------------------------------------------------------

@@ -8,38 +8,11 @@ namespace Gfx
 {
 namespace Cam
 {
-    void SetFieldOfView(float _FOVY, float _Aspect, float _Near, float _Far)
+    void SetFieldOfView(float _FOVY, float _Near, float _Far)
     {
         CCamera& rCamera = *ViewManager::GetMainCamera();
 
-        return rCamera.SetFieldOfView(_FOVY, _Aspect, _Near, _Far);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SetPerspective(float _Width, float _Height, float _Near, float _Far)
-    {
-        CCamera& rCamera = *ViewManager::GetMainCamera();
-
-        return rCamera.SetPerspective(_Width, _Height, _Near, _Far);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SetPerspective(float _Left, float _Right, float _Bottom, float _Top, float _Near, float _Far)
-    {
-        CCamera& rCamera = *ViewManager::GetMainCamera();
-
-        return rCamera.SetPerspective(_Left, _Right, _Bottom, _Top, _Near, _Far);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SetOrthographic(float _Width, float _Height, float _Near, float _Far)
-    {
-        CCamera& rCamera = *ViewManager::GetMainCamera();
-
-        return rCamera.SetOrthographic(_Width, _Height, _Near, _Far);
+        return rCamera.SetFieldOfView(_FOVY, _Near, _Far);
     }
 
     // -----------------------------------------------------------------------------
@@ -52,7 +25,6 @@ namespace Cam
     }
 
     // -----------------------------------------------------------------------------
-
 
     void SetProjection(const Base::Float4x4& _rProjectionMatrix)
     {

@@ -175,6 +175,7 @@ namespace
     
     void CGfxViewManager::OnStart()
     {
+        float AspectRatio;
         float Width;
         float Height;
         
@@ -207,6 +208,16 @@ namespace
             m_ViewPortPtr       = ViewManager::CreateViewPort(ViewPortDescriptor);
             m_ViewPortSetPtr    = ViewManager::CreateViewPortSet(m_ViewPortPtr);
             
+            AspectRatio = Width / Height;
+        
+            m_MainCameraPtr ->SetFieldOfView(60.0f, AspectRatio, 0.01f, 4096.0f);
+            m_DebugCameraPtr->SetFieldOfView(60.0f, AspectRatio, 0.01f, 4096.0f);
+            m_DecalCameraPtr->SetFieldOfView(60.0f, AspectRatio, 0.01f, 8192.0f);
+        
+            m_MainCameraPtr ->Update();
+            m_DebugCameraPtr->Update();
+            m_DecalCameraPtr->Update();
+
             ResizeCameras(Width, Height);
             
             Gfx::Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxViewManager::OnResize));
@@ -271,14 +282,13 @@ namespace
         
         AspectRatio = _Width / _Height;
         
-        m_MainCameraPtr ->SetFieldOfView(60.0f, AspectRatio, 0.01f, 4096.0f);
-        m_DebugCameraPtr->SetFieldOfView(60.0f, AspectRatio, 0.01f, 4096.0f);
-        m_DecalCameraPtr->SetFieldOfView(60.0f, AspectRatio, 0.01f, 8192.0f);
+        m_MainCameraPtr ->SetAspectRatio(AspectRatio);
+        m_DebugCameraPtr->SetAspectRatio(AspectRatio);
+        m_DecalCameraPtr->SetAspectRatio(AspectRatio);
         
         m_MainCameraPtr ->Update();
         m_DebugCameraPtr->Update();
         m_DecalCameraPtr->Update();
-        
         
         // -----------------------------------------------------------------------------
         // Setup the GUI camera.

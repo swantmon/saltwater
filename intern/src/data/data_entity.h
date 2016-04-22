@@ -177,16 +177,16 @@ namespace Dt
 
     protected:
         
-        Dt::CEntity*          m_pNextNeighbor;               //< Next neighbor entity in folder
-        Dt::CEntity*          m_pPreviousNeighbor;           //< Previous neighbor entity in folder
-        Dt::CEntityFolder*    m_pFolder;                     //< Pointer to folder of this entity
-        CHierarchyFacet*      m_pHierarchyFacet;             //< Contains hierarchical informations of the entity (scene graph)
-        CTransformationFacet* m_pTransformationFacet;        //< Contains transformation informations depending on hierarchy
+        Dt::CEntity*          m_pNextNeighbor;                                                    //< Next neighbor entity in folder
+        Dt::CEntity*          m_pPreviousNeighbor;                                                //< Previous neighbor entity in folder
+        Dt::CEntityFolder*    m_pFolder;                                                          //< Pointer to folder of this entity
+        CHierarchyFacet*      m_pHierarchyFacet;                                                  //< Contains hierarchical informations of the entity (scene graph)
+        CTransformationFacet* m_pTransformationFacet;                                             //< Contains transformation informations depending on hierarchy
         void*                 m_pDetailFacets[SFacetCategory::NumberOfCategories];                //< Contains detail informations of the entity (@see EFacetFlags::FacetDetail)
-        BID                   m_ID;                          //< A specific unique id of this entity inside the map
-        Base::AABB3Float      m_WorldAABB;                   //< Axis Aligned Bounding Box (AABB) of the entity in map for region bounding box calculations
-        Base::Float3          m_WorldPosition;               //< World position of the entity
-        SFlags                m_Flags;                       //< Set of possible states of the entity (dirty, type, level, ... -> @see SFlags)
+        BID                   m_ID;                                                               //< A specific unique id of this entity inside the map
+        Base::AABB3Float      m_WorldAABB;                                                        //< Axis Aligned Bounding Box (AABB) of the entity in map for region bounding box calculations
+        Base::Float3          m_WorldPosition;                                                    //< World position of the entity
+        SFlags                m_Flags;                                                            //< Set of possible states of the entity (dirty, type, level, ... -> @see SFlags)
 
     protected:
 
