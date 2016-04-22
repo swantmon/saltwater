@@ -12,6 +12,7 @@
 #include "data/data_model_manager.h"
 #include "data/data_texture_manager.h"
 
+#include "logic/lg_script_manager.h"
 #include "logic/lg_start_state.h"
 
 #include "mr/mr_control_manager.h"
@@ -35,6 +36,9 @@ namespace
 {
     int CLgStartState::OnEnter()
     {        
+        // -----------------------------------------------------------------------------
+        // Data
+        // -----------------------------------------------------------------------------
         Dt::ActorManager   ::OnStart();
         Dt::EntityManager  ::OnStart();
         Dt::LightManager   ::OnStart();
@@ -43,6 +47,14 @@ namespace
         Dt::MaterialManager::OnStart();
         Dt::TextureManager ::OnStart();
 
+        // -----------------------------------------------------------------------------
+        // Logic
+        // -----------------------------------------------------------------------------
+        Lg::ScriptManager::OnStart();
+
+        // -----------------------------------------------------------------------------
+        // External
+        // -----------------------------------------------------------------------------
         MR::ControlManager::OnStart();
 
         return Lg::Start::SResult::Start;

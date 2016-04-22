@@ -28,6 +28,9 @@
     <ClCompile Include="..\..\..\src\logic\lg_edit_state.cpp">
       <Filter>states</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\logic\lg_script_manager.cpp">
+      <Filter>scripts</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\logic\lg_debug_state.h">
@@ -57,10 +60,16 @@
     <ClInclude Include="..\..\..\src\logic\lg_edit_state.h">
       <Filter>states</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\logic\lg_script_manager.h">
+      <Filter>scripts</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="states">
       <UniqueIdentifier>{9d45e775-c55f-4745-902e-fdbb14daf323}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts">
+      <UniqueIdentifier>{e2b956db-a9df-4455-a39d-c62b67f6bdd1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

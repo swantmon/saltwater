@@ -20,6 +20,7 @@
 #include "gui/gui_event_handler.h"
 
 #include "logic/lg_play_state.h"
+#include "logic/lg_script_manager.h"
 
 #include "mr/mr_control_manager.h"
 
@@ -92,6 +93,8 @@ namespace
         Dt::ActorManager ::Update();
         Dt::EntityManager::Update();
         Dt::LightManager ::Update();
+
+        Lg::ScriptManager::Update();
 
         MR::ControlManager::Update();
 

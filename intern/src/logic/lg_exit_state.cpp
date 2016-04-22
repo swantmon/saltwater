@@ -13,6 +13,7 @@
 #include "data/data_texture_manager.h"
 
 #include "logic/lg_exit_state.h"
+#include "logic/lg_script_manager.h"
 
 #include "mr/mr_control_manager.h"
 
@@ -35,8 +36,19 @@ namespace
 {
     int CLgExitState::OnEnter()
     {
+        // -----------------------------------------------------------------------------
+        // External
+        // -----------------------------------------------------------------------------
         MR::ControlManager::OnExit();
 
+        // -----------------------------------------------------------------------------
+        // Logic
+        // -----------------------------------------------------------------------------
+        Lg::ScriptManager::OnExit();
+
+        // -----------------------------------------------------------------------------
+        // Data
+        // -----------------------------------------------------------------------------
         Dt::TextureManager ::OnExit();
         Dt::MaterialManager::OnExit();
         Dt::ModelManager   ::OnExit();
