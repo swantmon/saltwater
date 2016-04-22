@@ -31,16 +31,10 @@ namespace MR
 {
     CWebcamControl::CWebcamControl()
         : CControl               (CControl::Webcam)
+        , m_DeviceNumber         (0)
         , m_OriginalColorFrame   ()
         , m_OriginalColorFrameRGB()
         , m_ConvertedColorFrame  ()
-        , m_pOriginalFrame       (0)
-        , m_pConvertedFrame      (0)
-        , m_pCubemap             (0)
-        , m_OriginalSize         ()
-        , m_ConvertedSize        ()
-        , m_CameraParameters     ()
-        , m_ProjectionMatrix     ()
     {
     }
 
@@ -52,17 +46,34 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CWebcamControl::InternStart(const SControlDescription& _rDescriptor)
+    void CWebcamControl::SetDeviceNumber(unsigned int _DeviceNumber)
+    {
+        m_DeviceNumber = _DeviceNumber;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    unsigned int CWebcamControl::GetDeviceNumber() const
+    {
+        return m_DeviceNumber;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CWebcamControl::InternStart(const Base::Char* _pCameraParameterFile)
     {
         int Error;
 
         std::string PathToResource;
 
         // -----------------------------------------------------------------------------
-        // Save configuration
+        // Setup
         // -----------------------------------------------------------------------------
-        m_ConvertedSize[0] = _rDescriptor.m_pOutputBackground->GetNumberOfPixelsU();
-        m_ConvertedSize[1] = _rDescriptor.m_pOutputBackground->GetNumberOfPixelsV();
+        Base::U16 ConvertedSizeU = m_pConvertedFrame->GetNumberOfPixelsU();
+        Base::U16 ConvertedSizeV = m_pConvertedFrame->GetNumberOfPixelsV();
+
+        int OriginalSizeU = 0;
+        int OriginalSizeV = 0;
 
         // -----------------------------------------------------------------------------
         // Setup camera parameters and open video
@@ -72,7 +83,7 @@ namespace MR
 #ifdef __APPLE__
         VideoParameter << "-source=" << _rDescriptor.m_DeviceNumber;
 #else
-        VideoParameter << "-device=WinDS -showDialog -flipV -devNum=" << _rDescriptor.m_DeviceNumber;
+        VideoParameter << "-device=WinDS -showDialog -flipV -devNum=" << m_DeviceNumber;
 #endif  
 
         Error = arVideoOpen(VideoParameter.str().c_str());
@@ -82,7 +93,7 @@ namespace MR
         // -----------------------------------------------------------------------------
         // Get original video size
         // -----------------------------------------------------------------------------
-        Error = arVideoGetSize(&m_OriginalSize[0], &m_OriginalSize[1]);
+        Error = arVideoGetSize(&OriginalSizeU, &OriginalSizeV);
 
         assert(Error >= 0);
 
@@ -100,15 +111,15 @@ namespace MR
         // -----------------------------------------------------------------------------
         ARParam NativeParams;
 
-		PathToResource = g_PathToAssets + _rDescriptor.m_pCameraParameterFile;
+		PathToResource = g_PathToAssets + _pCameraParameterFile;
 
         Error = arParamLoad(PathToResource.c_str(), 1, &NativeParams);
 
         assert(Error >= 0);
 
-        arParamChangeSize(&NativeParams, m_OriginalSize[0], m_OriginalSize[1], &NativeParams);
+        arParamChangeSize(&NativeParams, OriginalSizeU, OriginalSizeV, &NativeParams);
 
-        assert(m_OriginalSize[0] == NativeParams.xsize && m_OriginalSize[1] == NativeParams.ysize);
+        assert(OriginalSizeU == NativeParams.xsize && OriginalSizeV == NativeParams.ysize);
 
         m_CameraParameters.m_FrameWidth = NativeParams.xsize;
         m_CameraParameters.m_FrameHeight = NativeParams.ysize;
@@ -175,9 +186,9 @@ namespace MR
         NumberOfVideoComponents = 4;
 #endif
 
-        m_OriginalColorFrame    = cvCreateImage(cvSize(m_OriginalSize[0], m_OriginalSize[1]), IPL_DEPTH_8U, NumberOfVideoComponents);
-        m_OriginalColorFrameRGB = cvCreateImage(cvSize(m_OriginalSize[0], m_OriginalSize[1]), IPL_DEPTH_8U, 3);
-        m_ConvertedColorFrame   = cvCreateImage(cvSize(m_ConvertedSize[0], m_ConvertedSize[1]), IPL_DEPTH_8U, 3);
+        m_OriginalColorFrame    = cvCreateImage(cvSize(OriginalSizeU, OriginalSizeV), IPL_DEPTH_8U, NumberOfVideoComponents);
+        m_OriginalColorFrameRGB = cvCreateImage(cvSize(OriginalSizeU, OriginalSizeV), IPL_DEPTH_8U, 3);
+        m_ConvertedColorFrame   = cvCreateImage(cvSize(ConvertedSizeU, ConvertedSizeV), IPL_DEPTH_8U, 3);
 
         CombinedRight.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
         CombinedLeft.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
@@ -191,8 +202,8 @@ namespace MR
         // -----------------------------------------------------------------------------
         Dt::STextureDescriptor TextureDescriptor;
 
-        TextureDescriptor.m_NumberOfPixelsU  = m_OriginalSize[0];
-        TextureDescriptor.m_NumberOfPixelsV  = m_OriginalSize[1];
+        TextureDescriptor.m_NumberOfPixelsU  = OriginalSizeU;
+        TextureDescriptor.m_NumberOfPixelsV  = OriginalSizeV;
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_Format           = Dt::CTextureBase::R8G8B8_UBYTE;
         TextureDescriptor.m_Semantic         = Dt::CTextureBase::Diffuse;
@@ -204,13 +215,7 @@ namespace MR
 
         // -----------------------------------------------------------------------------
 
-        Dt::TextureManager::CopyToTexture2D(_rDescriptor.m_pOutputBackground, static_cast<IplImage*>(m_ConvertedColorFrame)->imageData);
-
-        m_pConvertedFrame = _rDescriptor.m_pOutputBackground;
-
-        // -----------------------------------------------------------------------------
-
-        m_pCubemap = _rDescriptor.m_pOutputCubemap;
+        Dt::TextureManager::CopyToTexture2D(m_pConvertedFrame, static_cast<IplImage*>(m_ConvertedColorFrame)->imageData);
 
         // -----------------------------------------------------------------------------
         // Set data of original video / image
@@ -222,7 +227,7 @@ namespace MR
             pVideoData = arVideoGetImage();
         }
 
-        unsigned int NumberOfBytes = NumberOfVideoComponents * sizeof(char) * m_OriginalSize[0] * m_OriginalSize[1];
+        unsigned int NumberOfBytes = NumberOfVideoComponents * sizeof(char) * OriginalSizeU * OriginalSizeV;
 
         Base::CMemory::Copy(static_cast<IplImage*>(m_OriginalColorFrame)->imageData, pVideoData, NumberOfBytes);
 
@@ -252,13 +257,19 @@ namespace MR
         if (pVideoData != 0)
         {
             unsigned int NumberOfVideoComponents = 3;
+            unsigned int OriginalSizeU = m_pOriginalFrame->GetNumberOfPixelsU();
+            unsigned int OriginalSizeV = m_pOriginalFrame->GetNumberOfPixelsV();
 
 #ifdef __APPLE__
             NumberOfVideoComponents = 4;
 #endif
-            unsigned int NumberOfBytes = NumberOfVideoComponents * sizeof(char) * m_OriginalSize[0] * m_OriginalSize[1];
+            unsigned int NumberOfBytes = NumberOfVideoComponents * sizeof(char) * OriginalSizeU * OriginalSizeV;
 
             Base::CMemory::Copy(static_cast<IplImage*>(m_OriginalColorFrame)->imageData, pVideoData, NumberOfBytes);
+
+            // TODO:
+            // Test if a copy by texture manager is possible
+
 
             // -----------------------------------------------------------------------------
             // Convert to output
@@ -270,41 +281,6 @@ namespace MR
             // -----------------------------------------------------------------------------
             ProcessEnvironmentApproximation();
         }
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Dt::CTexture2D* CWebcamControl::InternGetOriginalFrame()
-    {
-        return m_pOriginalFrame;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Dt::CTexture2D* CWebcamControl::InternGetConvertedFrame()
-    {
-        return m_pConvertedFrame;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Dt::CTextureCube* CWebcamControl::InternGetCubemap()
-    {
-        return m_pCubemap;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    SDeviceParameter& CWebcamControl::InternGetCameraParameters()
-    {
-        return m_CameraParameters;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Base::Float3x3& CWebcamControl::InternGetProjectionMatrix()
-    {
-        return m_ProjectionMatrix;
     }
 
     // -----------------------------------------------------------------------------

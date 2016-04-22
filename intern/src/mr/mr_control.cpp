@@ -4,8 +4,13 @@
 namespace MR
 {
     CControl::CControl(EType _Type)
-        : m_Type     (_Type)
-        , m_IsStarted(false)
+        : m_Type            (_Type)
+        , m_IsStarted       (false)
+        , m_pCubemap        (nullptr)
+        , m_pOriginalFrame  (nullptr)
+        , m_pConvertedFrame (nullptr)
+        , m_CameraParameters()
+        , m_ProjectionMatrix(Base::Float3x3::s_Identity)
     {
     }
 
@@ -17,11 +22,11 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CControl::Start(const SControlDescription& _rDescriptor)
+    void CControl::Start(const Base::Char* m_pCameraParameterFile)
     {
         m_IsStarted = true;
 
-        InternStart(_rDescriptor);
+        InternStart(m_pCameraParameterFile);
     }
 
     // -----------------------------------------------------------------------------
@@ -42,13 +47,6 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    CControl::EType CControl::GetType() const
-    {
-        return m_Type;
-    }
-
-    // -----------------------------------------------------------------------------
-
     bool CControl::IsStarted() const
     {
         return m_IsStarted;
@@ -56,36 +54,59 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    SDeviceParameter& CControl::GetCameraParameters()
+    CControl::EType CControl::GetType() const
     {
-        return InternGetCameraParameters();
+        return m_Type;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float3x3& CControl::GetProjectionMatrix()
+    void CControl::SetConvertedFrame(Dt::CTexture2D* _pTexture)
     {
-        return InternGetProjectionMatrix();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Dt::CTexture2D* CControl::GetOriginalFrame()
-    {
-        return InternGetOriginalFrame();
+        m_pConvertedFrame = _pTexture;
     }
 
     // -----------------------------------------------------------------------------
 
     Dt::CTexture2D* CControl::GetConvertedFrame()
     {
-        return InternGetConvertedFrame();
+        return m_pConvertedFrame;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CControl::SetCubemap(Dt::CTextureCube* _pTexture)
+    {
+        m_pCubemap = _pTexture;
     }
 
     // -----------------------------------------------------------------------------
 
     Dt::CTextureCube* CControl::GetCubemap()
     {
-        return InternGetCubemap();
+        return m_pCubemap;
     }
+
+    // -----------------------------------------------------------------------------
+
+    Dt::CTexture2D* CControl::GetOriginalFrame()
+    {
+        return m_pOriginalFrame;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    SDeviceParameter& CControl::GetCameraParameters()
+    {
+        return m_CameraParameters;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Base::Float3x3& CControl::GetProjectionMatrix()
+    {
+        return m_ProjectionMatrix;
+    }
+
+    
 } // namespace AR

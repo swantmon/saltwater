@@ -28,10 +28,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\mr\cv_guidedfilter.h" />
-    <ClInclude Include="..\..\..\src\mr\mr_camera_parameter.h" />
-    <ClInclude Include="..\..\..\src\mr\mr_control_description.h" />
     <ClInclude Include="..\..\..\src\mr\mr_marker.h" />
-    <ClInclude Include="..\..\..\src\mr\mr_marker_info.h" />
     <ClInclude Include="..\..\..\src\mr\mr_marker_manager.h" />
     <ClInclude Include="..\..\..\src\mr\mr_control.h" />
     <ClInclude Include="..\..\..\src\mr\mr_control_manager.h" />

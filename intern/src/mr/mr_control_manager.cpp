@@ -14,7 +14,6 @@
 
 #include "mr/mr_control_manager.h"
 #include "mr/mr_kinect_control.h"
-#include "mr/mr_marker_info.h"
 #include "mr/mr_marker_manager.h"
 #include "mr/mr_webcam_control.h"
 
@@ -49,8 +48,20 @@ namespace
 
     private:
 
+        class SMarkerInfo
+        {
+        public:
+
+            unsigned int   m_UserID;
+            unsigned int   m_FrameCounter;
+            Base::Float3x3 m_RotationToCamera;
+            Base::Float3   m_TranslationToCamera;
+        };
+
+    private:
+
         typedef std::vector<Dt::CEntity*> CEntityVector;
-        typedef std::vector<CMarkerInfo>  CMarkerInfos;
+        typedef std::vector<SMarkerInfo>  CMarkerInfos;
 
     private:
 
@@ -62,7 +73,7 @@ namespace
         CEntityVector                 m_DirtyEntities;
         CControl*                     m_pActiveControl;
         CControl*                     m_pControls[CControl::NumberOfControls];
-        Dt::CARControllerPluginFacet* m_pController;
+        Dt::CARControllerPluginFacet* m_pControllerPlugin;
 
     private:
 
@@ -75,8 +86,15 @@ namespace
         void CreatePluginARController(Dt::CEntity& _rEntity);
         void CreatePluginARTrackedObject(Dt::CEntity& _rEntity);
 
-        void TrackMarker();
-        void UpdateTrackerEntities();
+        void SetupActiveControl();
+        void SetupCameraEntity();
+        void SetupTrackerManager();
+        void SetupMarkerManager();
+
+        void UpdateActiveControl();
+        void UpdateTrackerManager();
+        void UpdateCameraEntity();
+        void UpdateTrackedEntities();
     };
 } // namespace
 
@@ -90,7 +108,7 @@ namespace
         , m_MarkerInfos             ()
         , m_DirtyEntities           ()
         , m_pActiveControl          (nullptr)
-        , m_pController             (nullptr)
+        , m_pControllerPlugin       (nullptr)
     {
         m_DirtyEntities.reserve(8);
     }
@@ -145,17 +163,9 @@ namespace
 
     void CMRControlManager::Update()
     {
-        if (m_pActiveControl != nullptr)
-        {
-            m_pActiveControl->Update();
-        }
-
-        TrackMarker();
-
-        UpdateTrackerEntities();
-
         // -----------------------------------------------------------------------------
-
+        // New and dirty entities
+        // -----------------------------------------------------------------------------
         CEntityVector::iterator CurrentDirtyEntity = m_DirtyEntities.begin();
         CEntityVector::iterator EndOfDirtyEntities = m_DirtyEntities.end();
 
@@ -165,13 +175,24 @@ namespace
         }
 
         m_DirtyEntities.clear();
+
+        // -----------------------------------------------------------------------------
+        // Default behavior of the manager
+        // -----------------------------------------------------------------------------
+        UpdateActiveControl();
+
+        UpdateTrackerManager();
+
+        UpdateCameraEntity();
+
+        UpdateTrackedEntities();
     }
 
     // -----------------------------------------------------------------------------
 
     bool CMRControlManager::IsActive()
     {
-        return (m_pActiveControl != nullptr && m_pActiveControl->IsStarted());
+        return (m_pControllerPlugin != nullptr && m_pActiveControl != nullptr && m_pActiveControl->IsStarted());
     }
 
     // -----------------------------------------------------------------------------
@@ -229,7 +250,19 @@ namespace
 
     void CMRControlManager::UpdatePluginARController(Dt::CEntity& _rEntity)
     {
-        BASE_UNUSED(_rEntity);
+        Dt::CARControllerPluginFacet* pControllerPlugin = static_cast<Dt::CARControllerPluginFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+        assert(pControllerPlugin != nullptr);
+
+        m_pControllerPlugin = pControllerPlugin;
+
+        SetupActiveControl();
+
+        SetupCameraEntity();
+
+        SetupTrackerManager();
+
+        SetupMarkerManager();
     }
 
     // -----------------------------------------------------------------------------
@@ -243,48 +276,84 @@ namespace
 
     void CMRControlManager::CreatePluginARController(Dt::CEntity& _rEntity)
     {
-        Dt::CARControllerPluginFacet* pControllerPlugin = static_cast<Dt::CARControllerPluginFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        BASE_UNUSED(_rEntity);
+    }
 
-        assert(pControllerPlugin != nullptr);
+    // -----------------------------------------------------------------------------
 
-        m_pController = pControllerPlugin;
+    void CMRControlManager::CreatePluginARTrackedObject(Dt::CEntity& _rEntity)
+    {
+        BASE_UNUSED(_rEntity);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMRControlManager::SetupActiveControl()
+    {
+        assert (m_pControllerPlugin != nullptr);
 
         // -----------------------------------------------------------------------------
         // Create control
         // -----------------------------------------------------------------------------
-        SControlDescription ControlDesc;
-
-        ControlDesc.m_pOutputBackground    = pControllerPlugin->GetOutputBackground();
-        ControlDesc.m_pOutputCubemap       = pControllerPlugin->GetOutputCubemap();
-        ControlDesc.m_pCameraParameterFile = pControllerPlugin->GetCameraParameterFile();
-        ControlDesc.m_DeviceNumber         = pControllerPlugin->GetDeviceNumber();
-
-        switch (pControllerPlugin->GetDeviceType())
+        switch (m_pControllerPlugin->GetDeviceType())
         {
         case Dt::CARControllerPluginFacet::Webcam:
+        {
             m_pActiveControl = m_pControls[CControl::Webcam];
-            break;
+
+            assert(m_pActiveControl != nullptr);
+
+            // -----------------------------------------------------------------------------
+            // Setup device depending stuff
+            // -----------------------------------------------------------------------------
+            CWebcamControl* pWebcamControl = static_cast<CWebcamControl*>(m_pActiveControl);
+
+            pWebcamControl->SetDeviceNumber(m_pControllerPlugin->GetDeviceNumber());
+        }
+        break;
         case Dt::CARControllerPluginFacet::Kinect:
+        {
             m_pActiveControl = m_pControls[CControl::Kinect];
-            break;
+
+            assert(m_pActiveControl != nullptr);
+        }
+        break;
         };
 
-        assert(m_pActiveControl != nullptr);
+        // -----------------------------------------------------------------------------
+        // Update general stuff
+        // -----------------------------------------------------------------------------
+        m_pActiveControl->SetConvertedFrame(m_pControllerPlugin->GetOutputBackground());
+        m_pActiveControl->SetCubemap(m_pControllerPlugin->GetOutputCubemap());
 
-        m_pActiveControl->Start(ControlDesc);
+        m_pActiveControl->Start(m_pControllerPlugin->GetCameraParameterFile());
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMRControlManager::SetupCameraEntity()
+    {
+        assert(m_pControllerPlugin != nullptr && m_pActiveControl != nullptr);
 
         // -----------------------------------------------------------------------------
         // Set camera
         // Note: Camera will be automatically set to RAW projection input
         // -----------------------------------------------------------------------------
-        Dt::CEntity* pCameraEntity = pControllerPlugin->GetCameraEntity();
+        Dt::CEntity* pCameraEntity = m_pControllerPlugin->GetCameraEntity();
 
         assert(pCameraEntity != nullptr);
 
         Dt::CCameraActorFacet* pCameraActorFacet = static_cast<Dt::CCameraActorFacet*>(pCameraEntity->GetDetailFacet(Dt::SFacetCategory::Data));
 
-        pCameraActorFacet->SetProjectionType  (Dt::CCameraActorFacet::RAW);
+        pCameraActorFacet->SetProjectionType(Dt::CCameraActorFacet::RAW);
         pCameraActorFacet->SetProjectionMatrix(m_pActiveControl->GetProjectionMatrix());
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMRControlManager::SetupTrackerManager()
+    {
+        assert(m_pActiveControl != nullptr);
 
         // -----------------------------------------------------------------------------
         // Create tracker
@@ -295,7 +364,7 @@ namespace
         // Get camera parameters and save to native structure
         // -----------------------------------------------------------------------------
         ARParam NativeParams;
-        
+
         SDeviceParameter& rCameraParameters = m_pActiveControl->GetCameraParameters();
 
         NativeParams.xsize = rCameraParameters.m_FrameWidth;
@@ -329,45 +398,49 @@ namespace
         NativeParams.dist_function_version = rCameraParameters.m_DistortionFunctionVersion;
 
         AR_PIXEL_FORMAT OriginalPixelFormat = static_cast<AR_PIXEL_FORMAT>(rCameraParameters.m_PixelFormat);
-        
+
         // -----------------------------------------------------------------------------
         // Create parameter lookup table
         // -----------------------------------------------------------------------------
         m_pNativeParamLookupTable = arParamLTCreate(&NativeParams, AR_PARAM_LT_DEFAULT_OFFSET);
-        
+
         assert(m_pNativeParamLookupTable != 0);
-        
+
         // -----------------------------------------------------------------------------
         // Create AR handle with parameters
         // -----------------------------------------------------------------------------
         m_pARHandle = arCreateHandle(m_pNativeParamLookupTable);
 
         assert(m_pARHandle != 0);
-        
+
         // -----------------------------------------------------------------------------
         // Set AR pixel format
         // -----------------------------------------------------------------------------
         Error = arSetPixelFormat(m_pARHandle, OriginalPixelFormat);
-        
+
         assert(Error >= 0);
-        
+
         // -----------------------------------------------------------------------------
         // Create 3D AR handle
         // -----------------------------------------------------------------------------
         m_pAR3DHandle = ar3DCreateHandle(&NativeParams);
 
         assert(m_pAR3DHandle != 0);
-        
-        m_IsActive = true;
 
-        // -----------------------------------------------------------------------------
-        // Create marker
-        // -----------------------------------------------------------------------------
-        unsigned int NumberOfMarker = pControllerPlugin->GetNumberOfMarker();
+        m_IsActive = true;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMRControlManager::SetupMarkerManager()
+    {
+        assert(m_pControllerPlugin != nullptr);
+
+        unsigned int NumberOfMarker = m_pControllerPlugin->GetNumberOfMarker();
 
         for (unsigned int IndexOfMarker = 0; IndexOfMarker < NumberOfMarker; ++ IndexOfMarker)
         {
-            Dt::CARControllerPluginFacet::SMarker& rCurrentMarker = pControllerPlugin->GetMarker(IndexOfMarker);
+            Dt::CARControllerPluginFacet::SMarker& rCurrentMarker = m_pControllerPlugin->GetMarker(IndexOfMarker);
 
             SMarkerDescription MarkerDescription;
 
@@ -393,16 +466,18 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CMRControlManager::CreatePluginARTrackedObject(Dt::CEntity& _rEntity)
+    void CMRControlManager::UpdateActiveControl()
     {
-        BASE_UNUSED(_rEntity);
+        if (IsActive() == false) return;
+
+        m_pActiveControl->Update();
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMRControlManager::TrackMarker()
+    void CMRControlManager::UpdateTrackerManager()
     {
-        if (m_IsActive == false) return;
+        if (IsActive() == false) return;
         
         // -----------------------------------------------------------------------------
         // Prepare collections
@@ -470,7 +545,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Create / Edit marker infos
                 // -----------------------------------------------------------------------------
-                CMarkerInfo NewMarkerInfo;
+                SMarkerInfo NewMarkerInfo;
 
                 NewMarkerInfo.m_UserID                 = MarkerPtr->m_UserID;
                 NewMarkerInfo.m_FrameCounter           = 0;
@@ -498,19 +573,21 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CMRControlManager::UpdateTrackerEntities()
+    void CMRControlManager::UpdateCameraEntity()
     {
+        if (IsActive() == false) return;
+
         // -----------------------------------------------------------------------------
-        // Detect marker
+        // Take the first detected marker as origin
         // -----------------------------------------------------------------------------
-        MR::CMarkerInfo MarkerInfo;
+        SMarkerInfo MarkerInfo;
 
         CMarkerInfos::iterator CurrentOfMarkerInfo = m_MarkerInfos.begin();
         CMarkerInfos::iterator EndOfMarkerInfos    = m_MarkerInfos.end();
 
         for (; CurrentOfMarkerInfo != EndOfMarkerInfos; ++ CurrentOfMarkerInfo)
         {
-            CMarkerInfo& rMarkerInfo = *CurrentOfMarkerInfo;
+            SMarkerInfo& rMarkerInfo = *CurrentOfMarkerInfo;
 
             Base::Float3x3 RotationMatrix(Base::Float3x3::s_Identity);
             Base::Float3   Position;
@@ -536,7 +613,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Marker Found: Now search for entity with AR facet
             // -----------------------------------------------------------------------------
-            Dt::CEntity* pCameraEntity = m_pController->GetCameraEntity();
+            Dt::CEntity* pCameraEntity = m_pControllerPlugin->GetCameraEntity();
 
             assert(pCameraEntity != nullptr);
 
@@ -551,7 +628,16 @@ namespace
             RotationMatrix.GetRotation(Rotation);
 
             pTransformationFacet->SetRotation(Rotation * -1.0f);
+
+            break;
         }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMRControlManager::UpdateTrackedEntities()
+    {
+        if (IsActive() == false) return;
     }
 
 } // namespace

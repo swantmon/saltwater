@@ -2,14 +2,24 @@
 #pragma once
 
 #include "base/base_matrix3x3.h"
-#include "base/base_vector2.h"
-#include "base/base_vector3.h"
 
 #include "data/data_texture_2d.h"
 #include "data/data_texture_cube.h"
 
-#include "mr/mr_camera_parameter.h"
-#include "mr/mr_control_description.h"
+namespace MR
+{
+    struct SDeviceParameter
+    {
+        static const unsigned int s_MaximumNumberOfDistortionFactorValues = 9;
+
+        int      m_FrameWidth;
+        int      m_FrameHeight;
+        double   m_ProjectionMatrix[3][4];
+        double   m_DistortionFactor[s_MaximumNumberOfDistortionFactorValues];
+        int      m_DistortionFunctionVersion;
+        int      m_PixelFormat;
+    };
+} // namespace MR
 
 namespace MR
 {
@@ -31,7 +41,7 @@ namespace MR
 
     public:
 
-        void Start(const SControlDescription& _rDescriptor);
+        void Start(const Base::Char* m_pCameraParameterFile);
         void Stop();
 
         void Update();
@@ -42,23 +52,27 @@ namespace MR
 
         EType GetType() const;
 
-        Dt::CTexture2D* GetOriginalFrame();
+        void SetConvertedFrame(Dt::CTexture2D* _pTexture);
         Dt::CTexture2D* GetConvertedFrame();
 
-        Dt::CTextureCube* GetCubemap();
-
-        SDeviceParameter& GetCameraParameters();
-
-        Base::Float3x3& GetProjectionMatrix();
+        void SetCubemap(Dt::CTextureCube* _pTexture);
+        Dt::CTextureCube* GetCubemap();        
 
     public:
 
-        
+        Dt::CTexture2D* GetOriginalFrame();
+        SDeviceParameter& GetCameraParameters();
+        Base::Float3x3& GetProjectionMatrix();
 
     protected:
 
-        EType m_Type;
-        bool  m_IsStarted;
+        EType             m_Type;
+        bool              m_IsStarted;
+        Dt::CTextureCube* m_pCubemap;
+        Dt::CTexture2D*   m_pOriginalFrame;
+        Dt::CTexture2D*   m_pConvertedFrame;
+        SDeviceParameter  m_CameraParameters;
+        Base::Float3x3    m_ProjectionMatrix;
 
     protected:
 
@@ -66,18 +80,9 @@ namespace MR
 
     private:
 
-        virtual void InternStart(const SControlDescription& _rDescription) = 0;
+        virtual void InternStart(const Base::Char* m_pCameraParameterFile) = 0;
         virtual void InternStop() = 0;
 
         virtual void InternUpdate() = 0;
-
-        virtual Dt::CTexture2D* InternGetOriginalFrame()  = 0;
-        virtual Dt::CTexture2D* InternGetConvertedFrame() = 0;
-
-        virtual Dt::CTextureCube* InternGetCubemap() = 0;
-
-        virtual SDeviceParameter& InternGetCameraParameters() = 0;
-
-        virtual Base::Float3x3& InternGetProjectionMatrix() = 0;
     };
 } // namespace MR

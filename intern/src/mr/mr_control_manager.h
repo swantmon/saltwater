@@ -2,7 +2,6 @@
 #pragma once
 
 #include "mr/mr_control.h"
-#include "mr/mr_control_description.h"
 
 namespace MR
 {

@@ -36,13 +36,6 @@ namespace MR
 {
     CKinectControl::CKinectControl()
         : CControl          (CControl::Kinect)
-        , m_OriginalSize    ()
-        , m_ConvertedSize   ()
-        , m_pOriginalFrame  (0)
-        , m_pConvertedFrame (0)
-        , m_pCubemap        (0)
-        , m_CameraParameters()
-        , m_ProjectionMatrix()
     {
     }
 
@@ -68,7 +61,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CKinectControl::InternStart(const SControlDescription& _rDescriptor)
+    void CKinectControl::InternStart(const Base::Char* _pCameraParameterFile)
     {
         int Error;
 
@@ -78,23 +71,22 @@ namespace MR
         // -----------------------------------------------------------------------------
         // Save configuration
         // -----------------------------------------------------------------------------
-        m_ConvertedSize = Base::Int2(1280, 720);
-        m_OriginalSize  = Base::Int2(1920, 1080);
+        Base::Int2 OriginalSize  = Base::Int2(1920, 1080);
 
         // -----------------------------------------------------------------------------
         // Load the camera parameters from file and save to camera parameters
         // -----------------------------------------------------------------------------
         ARParam NativeParams;
 
-        PathToResource = PathToResources + "configurations/" + _rDescriptor.m_pCameraParameterFile;
+        PathToResource = PathToResources + "configurations/" + _pCameraParameterFile;
 
         Error = arParamLoad(PathToResource.c_str(), 1, &NativeParams);
 
         assert(Error >= 0);
 
-        arParamChangeSize(&NativeParams, m_OriginalSize[0], m_OriginalSize[1], &NativeParams);
+        arParamChangeSize(&NativeParams, OriginalSize[0], OriginalSize[1], &NativeParams);
 
-        assert(m_OriginalSize[0] == NativeParams.xsize && m_OriginalSize[1] == NativeParams.ysize);
+        assert(OriginalSize[0] == NativeParams.xsize && OriginalSize[1] == NativeParams.ysize);
 
         m_CameraParameters.m_FrameWidth = NativeParams.xsize;
         m_CameraParameters.m_FrameHeight = NativeParams.ysize;
@@ -203,8 +195,8 @@ namespace MR
         // -----------------------------------------------------------------------------
         Dt::STextureDescriptor TextureDescriptor;
 
-        TextureDescriptor.m_NumberOfPixelsU  = m_OriginalSize[0];
-        TextureDescriptor.m_NumberOfPixelsV  = m_OriginalSize[1];
+        TextureDescriptor.m_NumberOfPixelsU  = OriginalSize[0];
+        TextureDescriptor.m_NumberOfPixelsV  = OriginalSize[1];
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_Format           = Dt::CTextureBase::R8G8B8_UBYTE;
         TextureDescriptor.m_Semantic         = Dt::CTextureBase::Diffuse;
@@ -216,13 +208,7 @@ namespace MR
 
         // -----------------------------------------------------------------------------
 
-        TextureDescriptor.m_NumberOfPixelsU  = m_ConvertedSize[0];
-        TextureDescriptor.m_NumberOfPixelsV  = m_ConvertedSize[1];
-        TextureDescriptor.m_pPixels          = static_cast<void*>(static_cast<Base::Ptr>(ColorUC3Crop.data));
-        TextureDescriptor.m_pFileName        = 0;
-        TextureDescriptor.m_pIdentifier      = "ID_Webcam_RGB_Converted_Output";
-
-        m_pConvertedFrame = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+        Dt::TextureManager::CopyToTexture2D(m_pConvertedFrame, static_cast<void*>(static_cast<Base::Ptr>(ColorUC3Crop.data)));
     }
 
     // -----------------------------------------------------------------------------
@@ -352,40 +338,5 @@ namespace MR
         // Blur
         // -----------------------------------------------------------------------------
         //DepthFC1Crop = guidedFilter(ColorUC1Crop, DepthFC1Crop, 4, 0.5 * 0.5 * 8.0 * 8.0);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Dt::CTexture2D* CKinectControl::InternGetOriginalFrame()
-    {
-        return m_pOriginalFrame;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Dt::CTexture2D* CKinectControl::InternGetConvertedFrame()
-    {
-        return m_pConvertedFrame;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Dt::CTextureCube* CKinectControl::InternGetCubemap()
-    {
-        return m_pCubemap;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    SDeviceParameter& CKinectControl::InternGetCameraParameters()
-    {
-        return m_CameraParameters;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Base::Float3x3& CKinectControl::InternGetProjectionMatrix()
-    {
-        return m_ProjectionMatrix;
     }
 } // namespace MR

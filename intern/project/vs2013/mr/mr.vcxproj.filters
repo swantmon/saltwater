@@ -34,13 +34,9 @@
     <ClInclude Include="..\..\..\src\mr\mr_marker_manager.h">
       <Filter>marker</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\mr\mr_marker_info.h">
-      <Filter>marker</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\mr\mr_marker.h">
       <Filter>marker</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\mr\mr_camera_parameter.h" />
     <ClInclude Include="..\..\..\src\mr\mr_control.h" />
     <ClInclude Include="..\..\..\src\mr\mr_control_manager.h" />
     <ClInclude Include="..\..\..\src\mr\mr_kinect_control.h">
@@ -49,6 +45,5 @@
     <ClInclude Include="..\..\..\src\mr\mr_webcam_control.h">
       <Filter>controls</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\mr\mr_control_description.h" />
   </ItemGroup>
 </Project>

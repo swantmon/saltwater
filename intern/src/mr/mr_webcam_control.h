@@ -1,9 +1,6 @@
 
 #pragma once
 
-#include "base/base_input_event.h"
-#include "base/base_vector2.h"
-
 #include "mr/mr_control.h"
 
 namespace MR
@@ -18,38 +15,23 @@ namespace MR
 
     public:
 
-        
+        void SetDeviceNumber(unsigned int _DeviceNumber);
+        unsigned int GetDeviceNumber() const;
 
     private:
 
-        void*             m_OriginalColorFrame;
-        void*             m_OriginalColorFrameRGB;
-        void*             m_ConvertedColorFrame;
-        Base::Int2        m_OriginalSize;
-        Base::Int2        m_ConvertedSize;
-        Dt::CTextureCube* m_pCubemap;
-        Dt::CTexture2D*   m_pOriginalFrame;
-        Dt::CTexture2D*   m_pConvertedFrame;
-        SDeviceParameter  m_CameraParameters;
-        Base::Float3x3    m_ProjectionMatrix;
+        unsigned int m_DeviceNumber;
+        void*        m_OriginalColorFrame;
+        void*        m_OriginalColorFrameRGB;
+        void*        m_ConvertedColorFrame;
 
     private:
 
-        virtual void InternStart(const SControlDescription& _rDescriptor);
+        virtual void InternStart(const Base::Char* _pCameraParameterFile);
 
         virtual void InternStop();
 
         virtual void InternUpdate();
-
-        virtual Dt::CTexture2D* InternGetOriginalFrame();
-
-        virtual Dt::CTexture2D* InternGetConvertedFrame();
-
-        virtual Dt::CTextureCube* InternGetCubemap();
-
-        virtual SDeviceParameter& InternGetCameraParameters();
-
-        virtual Base::Float3x3& InternGetProjectionMatrix();
 
     private:
 
