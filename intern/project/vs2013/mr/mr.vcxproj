@@ -21,7 +21,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\src\mr\cv_guidedfilter.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_marker_manager.cpp" />
-    <ClCompile Include="..\..\..\src\mr\mr_tracker_manager.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_control.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_control_manager.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_kinect_control.cpp" />
@@ -34,7 +33,6 @@
     <ClInclude Include="..\..\..\src\mr\mr_marker.h" />
     <ClInclude Include="..\..\..\src\mr\mr_marker_info.h" />
     <ClInclude Include="..\..\..\src\mr\mr_marker_manager.h" />
-    <ClInclude Include="..\..\..\src\mr\mr_tracker_manager.h" />
     <ClInclude Include="..\..\..\src\mr\mr_control.h" />
     <ClInclude Include="..\..\..\src\mr\mr_control_manager.h" />
     <ClInclude Include="..\..\..\src\mr\mr_kinect_control.h" />

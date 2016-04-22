@@ -14,6 +14,8 @@
 
 #include "logic/lg_exit_state.h"
 
+#include "mr/mr_control_manager.h"
+
 namespace
 {
     class CLgExitState : private Base::CUncopyable
@@ -33,6 +35,8 @@ namespace
 {
     int CLgExitState::OnEnter()
     {
+        MR::ControlManager::OnExit();
+
         Dt::TextureManager ::OnExit();
         Dt::MaterialManager::OnExit();
         Dt::ModelManager   ::OnExit();

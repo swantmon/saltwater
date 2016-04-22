@@ -19,15 +19,12 @@
 #include "data/data_map.h"
 #include "data/data_material_manager.h"
 #include "data/data_model_manager.h"
+#include "data/data_plugin_facet.h"
+#include "data/data_plugin_manager.h"
 #include "data/data_texture_manager.h"
 #include "data/data_transformation_facet.h"
 
 #include "logic/lg_load_map_state.h"
-
-#include "mr/mr_control_manager.h"
-#include "mr/mr_marker_manager.h"
-#include "mr/mr_tracker_manager.h"
-#include "mr/mr_webcam_control.h"
 
 namespace
 {
@@ -387,51 +384,103 @@ namespace
     void CLgLoadMapState::CreatePBRARScene()
     {
         // -----------------------------------------------------------------------------
-        // Set augmented reality on
-        // -----------------------------------------------------------------------------
-        MR::ControlManager::CreateControl   (MR::CControl::Webcam);
-        MR::ControlManager::SetActiveControl(MR::CControl::Webcam);
-
-        MR::SControlDescription  ControlSettings;
-
-        ControlSettings.m_pCameraParameterFile = "ar/configurations/logitech_para.dat";
-        ControlSettings.m_DeviceNumber         = 1;
-        ControlSettings.m_OutputSize           = Base::Int2(1280, 720);
-
-        MR::ControlManager::Start(ControlSettings);
-
-        // -----------------------------------------------------------------------------
-
-        MR::MarkerManager::OnStart();
-
-        MR::SMarkerDescription  MarkerDescription;
-
-        MarkerDescription.m_UserID       = 0;
-        MarkerDescription.m_Type         = MR::SMarkerDescription::Square;
-        MarkerDescription.m_WidthInMeter = 0.08f;
-        MarkerDescription.m_pPatternFile = "ar/patterns/patt.hiro";
-
-        MR::CMarkerPtr MarkerPtr = MR::MarkerManager::CreateMarker(MarkerDescription);
-
-        // -----------------------------------------------------------------------------
-
-        MR::TrackerManager::OnStart();
-
-        MR::TrackerManager::RegisterMarker(MarkerPtr);
-
-        // -----------------------------------------------------------------------------
-        // Set our camera and position
-        // -----------------------------------------------------------------------------
-        Cam::ControlManager::SetActiveControl(Cam::CControl::GameControl);
-
-        Cam::CGameControl& rARControl = static_cast<Cam::CGameControl&>(Cam::ControlManager::GetActiveControl());
-
-        rARControl.SetProjectionMatrix(MR::ControlManager::GetActiveControl().GetProjectionMatrix());
-
-        // -----------------------------------------------------------------------------
         // Allocate a map
         // -----------------------------------------------------------------------------
         Dt::Map::AllocateMap(1, 1);
+
+        // -----------------------------------------------------------------------------
+        // Setup cameras
+        // -----------------------------------------------------------------------------
+        Dt::CEntity* pCameraEntity = nullptr;
+
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
+            EntityDesc.m_EntityType     = Dt::SActorType::Camera;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+
+            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            rEntity.SetWorldPosition(Base::Float3(0.0f, 0.0f, 10.0f));
+
+            Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetScale   (Base::Float3(1.0f));
+            pTransformationFacet->SetRotation(Base::Float3(0.0f, 0.0f, 0.0f));
+
+            Dt::CCameraActorFacet* pFacet = Dt::ActorManager::CreateCameraActor();
+
+            pFacet->SetMainCamera(true);
+
+            rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+
+            pCameraEntity = &rEntity;
+        }
+
+        // -----------------------------------------------------------------------------
+        // Setup AR
+        // -----------------------------------------------------------------------------
+        Dt::STextureDescriptor TextureDescriptor;
+
+        TextureDescriptor.m_NumberOfPixelsU  = 1280;
+        TextureDescriptor.m_NumberOfPixelsV  = 720;
+        TextureDescriptor.m_NumberOfPixelsW  = 1;
+        TextureDescriptor.m_Format           = Dt::CTextureBase::R8G8B8A8_UBYTE;
+        TextureDescriptor.m_Semantic         = Dt::CTextureBase::Diffuse;
+        TextureDescriptor.m_pPixels          = 0;
+        TextureDescriptor.m_pFileName        = 0;
+        TextureDescriptor.m_pIdentifier      = 0;
+
+        Dt::CTexture2D* pBackgroundTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+
+        TextureDescriptor.m_NumberOfPixelsU = 512;
+        TextureDescriptor.m_NumberOfPixelsV = 512;
+
+        Dt::CTextureCube* pTextureCubemap = Dt::TextureManager::CreateCubeTexture(TextureDescriptor);
+
+        Dt::TextureManager::CopyToTextureCube(pTextureCubemap, Dt::CTextureCube::Right,  Dt::TextureManager::CreateTexture2D(TextureDescriptor));
+        Dt::TextureManager::CopyToTextureCube(pTextureCubemap, Dt::CTextureCube::Left,   Dt::TextureManager::CreateTexture2D(TextureDescriptor));
+        Dt::TextureManager::CopyToTextureCube(pTextureCubemap, Dt::CTextureCube::Top,    Dt::TextureManager::CreateTexture2D(TextureDescriptor));
+        Dt::TextureManager::CopyToTextureCube(pTextureCubemap, Dt::CTextureCube::Bottom, Dt::TextureManager::CreateTexture2D(TextureDescriptor));
+        Dt::TextureManager::CopyToTextureCube(pTextureCubemap, Dt::CTextureCube::Front,  Dt::TextureManager::CreateTexture2D(TextureDescriptor));
+        Dt::TextureManager::CopyToTextureCube(pTextureCubemap, Dt::CTextureCube::Back,   Dt::TextureManager::CreateTexture2D(TextureDescriptor));
+
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Plugin;
+            EntityDesc.m_EntityType     = Dt::SPluginType::ARControlManager;
+            EntityDesc.m_FacetFlags     = 0;
+
+            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            rEntity.SetWorldPosition(Base::Float3(0.0f, 0.0f, 0.0f));
+
+            Dt::CARControllerPluginFacet* pFacet = Dt::PluginManager::CreateARControllerPlugin();
+
+            pFacet->SetCameraEntity       (pCameraEntity);
+            pFacet->SetCameraParameterFile("ar/configurations/logitech_para.dat");
+            pFacet->SetDeviceNumber       (1);
+            pFacet->SetOutputBackground   (pBackgroundTexture);
+            pFacet->SetOutputCubemap      (pTextureCubemap);
+            pFacet->SetDeviceType         (Dt::CARControllerPluginFacet::Webcam);
+            pFacet->SetNumberOfMarker     (1);
+            
+            Dt::CARControllerPluginFacet::SMarker& rMarkerOne = pFacet->GetMarker(0);
+
+            rMarkerOne.m_UID          = 0;
+            rMarkerOne.m_Type         = Dt::CARControllerPluginFacet::SMarker::Square;
+            rMarkerOne.m_WidthInMeter = 0.08f;
+            rMarkerOne.m_PatternFile  = "ar/patterns/patt.hiro";
+
+            rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
 
         // -----------------------------------------------------------------------------
         // Setup effects
@@ -472,10 +521,6 @@ namespace
         // Environment
         // -----------------------------------------------------------------------------
         {
-            MR::CControl& rMRControl = MR::ControlManager::GetActiveControl();
-
-            MR::CWebcamControl& rWebcamControl = static_cast<MR::CWebcamControl&>(rMRControl);
-
             Dt::SEntityDescriptor EntityDesc;
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
@@ -487,8 +532,8 @@ namespace
             Dt::CSkyboxFacet* pSkyboxFacet = Dt::LightManager::CreateSkybox();
 
             pSkyboxFacet->SetType     (Dt::CSkyboxFacet::ImageBackground);
-            pSkyboxFacet->SetTexture  (rMRControl.GetConvertedFrame());
-            pSkyboxFacet->SetCubemap  (rWebcamControl.GetCubemap());
+            pSkyboxFacet->SetTexture  (pBackgroundTexture);
+            pSkyboxFacet->SetCubemap  (pTextureCubemap);
             pSkyboxFacet->SetIntensity(20000.0f);
 
             rEnvironment.SetDetailFacet(Dt::SFacetCategory::Data, pSkyboxFacet);

@@ -37,6 +37,8 @@
     <ClInclude Include="..\..\..\src\data\data_model.h" />
     <ClInclude Include="..\..\..\src\data\data_model_facet.h" />
     <ClInclude Include="..\..\..\src\data\data_model_manager.h" />
+    <ClInclude Include="..\..\..\src\data\data_plugin_facet.h" />
+    <ClInclude Include="..\..\..\src\data\data_plugin_manager.h" />
     <ClInclude Include="..\..\..\src\data\data_region.h" />
     <ClInclude Include="..\..\..\src\data\data_surface.h" />
     <ClInclude Include="..\..\..\src\data\data_texture_1d.h" />
@@ -59,6 +61,8 @@
     <ClCompile Include="..\..\..\src\data\data_map.cpp" />
     <ClCompile Include="..\..\..\src\data\data_material_manager.cpp" />
     <ClCompile Include="..\..\..\src\data\data_model_manager.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_plugin_facet.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_plugin_manager.cpp" />
     <ClCompile Include="..\..\..\src\data\data_texture_1d.cpp" />
     <ClCompile Include="..\..\..\src\data\data_texture_2d.cpp" />
     <ClCompile Include="..\..\..\src\data\data_texture_base.cpp" />

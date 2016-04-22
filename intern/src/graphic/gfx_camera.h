@@ -38,16 +38,6 @@ namespace Gfx
         
         void SetProjection(const Base::Float4x4& _rProjectionMatrix);
 
-
-
-
-        // TODO: remove this function because it is only for MR
-        void InjectCameraMatrix(const Base::Float3x3& _rCameraMatrix);
-
-
-
-
-
     public:
 
         void SetAspectRatio(float _Aspect);

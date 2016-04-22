@@ -29,6 +29,7 @@ namespace Dt
             Actor,
             Light,
             FX,
+            Plugin,
             NumberOfCategories,
             UndefinedCategory = -1,
         };

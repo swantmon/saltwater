@@ -187,17 +187,6 @@ namespace Gfx
     {
         m_ProjectionMatrix = _rProjectionMatrix;
     }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CCamera::InjectCameraMatrix(const Base::Float3x3& _rCameraMatrix)
-    {
-        // --------------------------------------------------------------------------------
-        // Compute the projection matrix with camera matrix. Here we can handle several
-        // projection effects for virtual reality devices.
-        // --------------------------------------------------------------------------------
-        m_ProjectionMatrix.SetRHPerspective(m_Near, m_Far, _rCameraMatrix);
-    }
 
     // -----------------------------------------------------------------------------
 

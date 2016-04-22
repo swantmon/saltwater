@@ -9,6 +9,7 @@
 #pragma once
 
 #include "base/base_aabb2.h"
+#include "base/base_matrix3x3.h"
 
 #include "data/data_lod.h"
 
@@ -100,6 +101,7 @@ namespace Dt
         {
             Perspective,
             Orthographic,
+            RAW,
         };
 
         enum ECameraMode
@@ -131,6 +133,10 @@ namespace Dt
 
         void SetFoV(float _FoV);
         float GetFoV() const;
+
+        void SetProjectionMatrix(const Base::Float3x3& _rProjection);
+        Base::Float3x3& GetProjectionMatrix();
+        const Base::Float3x3& GetProjectionMatrix() const;
 
         void SetNear(float _Near);
         float GetNear() const;
@@ -179,6 +185,7 @@ namespace Dt
         float            m_Near;                            //< Near field of the camera
         float            m_Far;                             //< Far field of the camera
         Base::Float3     m_BackgroundColor;                 //< Default background color of the camera (depending on clear flag)
+        Base::Float3x3   m_ProjectionMatrix;                //< RAW projection matrix even RAW is active
         Base::AABB2Float m_ViewportRect;                    //< View port this camera should render
         EClearFlag       m_ClearFlag;                       //< Clear flag of the render target (@see EClearFlag)
         EProjectionType  m_ProjectionType;                  //< Camera can be orthographic or projection

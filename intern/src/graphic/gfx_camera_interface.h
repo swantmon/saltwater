@@ -19,8 +19,6 @@ namespace Cam
 
     void SetProjection(const Base::Float4x4& _rProjectionMatrix);
 
-    void InjectCameraMatrix(const Base::Float3x3& _rCameraMatrix);
-
     void SetBackgroundColor(Base::Float3& _rBackgroundColor);
     const Base::Float3& GetBackgroundColor();
 

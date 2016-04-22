@@ -22,9 +22,6 @@
 #include "logic/lg_play_state.h"
 
 #include "mr/mr_control_manager.h"
-#include "mr/mr_marker_info.h"
-#include "mr/mr_tracker_manager.h"
-#include "mr/mr_webcam_control.h"
 
 namespace
 {
@@ -96,8 +93,7 @@ namespace
         Dt::EntityManager::Update();
         Dt::LightManager ::Update();
 
-
-
+        MR::ControlManager::Update();
 
         // -----------------------------------------------------------------------------
         // Get main camera entity and set this entity to the camera project
@@ -140,68 +136,28 @@ namespace
         Cam::CControl& rControl = Cam::ControlManager::GetActiveControl();
 
         // TODO by tschwandt
-        // MR should be an entity with plugin -> find entity and setup depending on this!
+        // Updating of skybox has to be triggered in another way
         if (false && rControl.GetType() == Cam::CControl::GameControl)
         {
-            // -----------------------------------------------------------------------------
-            // Update AR
-            // -----------------------------------------------------------------------------
-            MR::ControlManager::Update();
-            MR::TrackerManager::Update();
+            Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
+            Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
 
-            // -----------------------------------------------------------------------------
-            // Refresh global custom probe and sky texture environment
-            // -----------------------------------------------------------------------------
-            MR::CControl& rMRControl = MR::ControlManager::GetActiveControl();
-
-            if (rMRControl.GetType() == MR::CControl::Webcam)
+            for (; CurrentEntity != EndOfEntities; )
             {
-                Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
-                Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
+                Dt::CEntity& rCurrentEntity = *CurrentEntity;
 
-                for (; CurrentEntity != EndOfEntities; )
-                {
-                    Dt::CEntity& rCurrentEntity = *CurrentEntity;
-
-                    // -----------------------------------------------------------------------------
-                    // Get graphic facet
-                    // -----------------------------------------------------------------------------
-                    if (rCurrentEntity.GetType() == Dt::SLightType::GlobalProbe || rCurrentEntity.GetType() == Dt::SLightType::Skybox)
-                    {
-                        Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
-                    }
-
-                    // -----------------------------------------------------------------------------
-                    // Next entity
-                    // -----------------------------------------------------------------------------
-                    CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
-                }
-            }
-
-            // -----------------------------------------------------------------------------
-            // Detect marker
-            // -----------------------------------------------------------------------------
-            MR::CMarkerInfo MarkerInfo;
-
-            unsigned int IndexOfMarker = 0;
-
-            for (; MR::TrackerManager::PollMarker(&MarkerInfo); )
-            {
                 // -----------------------------------------------------------------------------
-                // Marker Found: Now search for entity with AR facet and right user id
+                // Get graphic facet
                 // -----------------------------------------------------------------------------
-                if (IndexOfMarker == 0)
+                if (rCurrentEntity.GetType() == Dt::SLightType::GlobalProbe || rCurrentEntity.GetType() == Dt::SLightType::Skybox)
                 {
-                    // -----------------------------------------------------------------------------
-                    // That is the first marker. So we have to set our camera with the
-                    // marker information. That is our world origin
-                    // -----------------------------------------------------------------------------
-                    Cam::CGameControl& rARControl = static_cast<Cam::CGameControl&>(Cam::ControlManager::GetActiveControl());
-
-                    rARControl.SetMarkerTransformation(MarkerInfo.m_RotationToCamera, MarkerInfo.m_TranslationToCamera);
+                    Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
                 }
 
-                ++IndexOfMarker;
+                // -----------------------------------------------------------------------------
+                // Next entity
+                // -----------------------------------------------------------------------------
+                CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
             }
         }
         

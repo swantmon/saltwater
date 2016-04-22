@@ -79,6 +79,12 @@
     <ClInclude Include="..\..\..\src\data\data_data_behavior.h">
       <Filter>textures</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_plugin_facet.h">
+      <Filter>map\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_plugin_manager.h">
+      <Filter>map\plugins</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\data\data_entity_manager.cpp">
@@ -135,6 +141,12 @@
     <ClCompile Include="..\..\..\src\data\data_texture_manager.cpp">
       <Filter>textures</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_plugin_facet.cpp">
+      <Filter>map\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_plugin_manager.cpp">
+      <Filter>map\plugins</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="map">
@@ -169,6 +181,9 @@
     </Filter>
     <Filter Include="textures">
       <UniqueIdentifier>{71afbfc9-2627-4eba-a9d3-f355b40c9a27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\plugins">
+      <UniqueIdentifier>{7ffd24e8-c227-4102-88eb-f81cc0290671}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

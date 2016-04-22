@@ -14,6 +14,8 @@
 
 #include "logic/lg_start_state.h"
 
+#include "mr/mr_control_manager.h"
+
 namespace
 {
     class CLgStartState : private Base::CUncopyable
@@ -40,6 +42,8 @@ namespace
         Dt::ModelManager   ::OnStart();
         Dt::MaterialManager::OnStart();
         Dt::TextureManager ::OnStart();
+
+        MR::ControlManager::OnStart();
 
         return Lg::Start::SResult::Start;
     }

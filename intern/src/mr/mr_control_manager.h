@@ -8,17 +8,13 @@ namespace MR
 {
 namespace ControlManager
 {
-    void CreateControl(CControl::EType _Type);
-    void SetActiveControl(CControl::EType _Type);
-    CControl& GetActiveControl();
-
-    // -----------------------------------------------------------------------------
-
-    void Start(const SControlDescription& _rDescriptor);
-    void Stop();
+    void OnStart();
+    void OnExit();
 
     void Update();
 
     bool IsActive();
+
+    CControl* GetActiveControl();
 } // namespace ControlManager
 } // namespace MR

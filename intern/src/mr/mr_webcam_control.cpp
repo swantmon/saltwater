@@ -61,7 +61,8 @@ namespace MR
         // -----------------------------------------------------------------------------
         // Save configuration
         // -----------------------------------------------------------------------------
-        m_ConvertedSize = _rDescriptor.m_OutputSize;
+        m_ConvertedSize[0] = _rDescriptor.m_pOutputBackground->GetNumberOfPixelsU();
+        m_ConvertedSize[1] = _rDescriptor.m_pOutputBackground->GetNumberOfPixelsV();
 
         // -----------------------------------------------------------------------------
         // Setup camera parameters and open video
@@ -203,37 +204,13 @@ namespace MR
 
         // -----------------------------------------------------------------------------
 
-        TextureDescriptor.m_NumberOfPixelsU  = m_ConvertedSize[0];
-        TextureDescriptor.m_NumberOfPixelsV  = m_ConvertedSize[1];
-        TextureDescriptor.m_pPixels          = static_cast<IplImage*>(m_ConvertedColorFrame)->imageData;
-        TextureDescriptor.m_pFileName        = 0;
-        TextureDescriptor.m_pIdentifier      = "ID_Webcam_RGB_Converted_Output";
+        Dt::TextureManager::CopyToTexture2D(_rDescriptor.m_pOutputBackground, static_cast<IplImage*>(m_ConvertedColorFrame)->imageData);
 
-        m_pConvertedFrame = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+        m_pConvertedFrame = _rDescriptor.m_pOutputBackground;
 
         // -----------------------------------------------------------------------------
 
-        void* pTestData = Base::CMemory::Allocate(IMAGE_EDGE_LENGTH * IMAGE_EDGE_LENGTH * 3 * sizeof(Base::U8));
-
-        Base::CMemory::Zero(pTestData, IMAGE_EDGE_LENGTH * IMAGE_EDGE_LENGTH * 3 * sizeof(Base::U8));
-
-        TextureDescriptor.m_NumberOfPixelsU  = IMAGE_EDGE_LENGTH;
-        TextureDescriptor.m_NumberOfPixelsV  = IMAGE_EDGE_LENGTH;
-        TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_pFileName        = 0;
-        TextureDescriptor.m_pIdentifier      = "ID_Webcam_RGB_Converted_Cubemap";
-
-        m_pCubemap = Dt::TextureManager::CreateCubeTexture(TextureDescriptor);
-
-        TextureDescriptor.m_pIdentifier = 0;
-
-        Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Right, Dt::TextureManager::CreateTexture2D(TextureDescriptor));
-        Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Left, Dt::TextureManager::CreateTexture2D(TextureDescriptor));
-        Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Top, Dt::TextureManager::CreateTexture2D(TextureDescriptor));
-        Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Bottom, Dt::TextureManager::CreateTexture2D(TextureDescriptor));
-        Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Front, Dt::TextureManager::CreateTexture2D(TextureDescriptor));
-        Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Back, Dt::TextureManager::CreateTexture2D(TextureDescriptor));
-
+        m_pCubemap = _rDescriptor.m_pOutputCubemap;
 
         // -----------------------------------------------------------------------------
         // Set data of original video / image

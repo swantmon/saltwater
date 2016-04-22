@@ -104,22 +104,23 @@ namespace Dt
 namespace Dt
 {
     CCameraActorFacet::CCameraActorFacet()
-        : m_IsMainCamera   (false)
-        , m_CullingMask    (0)
-        , m_Depth          (-1)
-        , m_ShutterSpeed   (1.0f / 125.0f)
-        , m_Aperture       (16.0f)
-        , m_ISO            (100.0f)
-        , m_EC             (0.0f)
-        , m_Size           (5.0f)
-        , m_FoV            (60.0f)
-        , m_Near           (0.3f)
-        , m_Far            (1000.0f)
-        , m_BackgroundColor(Base::Float3::s_One)
-        , m_ViewportRect   ()
-        , m_ClearFlag      (Skybox)
-        , m_ProjectionType (Perspective)
-        , m_CameraMode     (Auto)
+        : m_IsMainCamera    (false)
+        , m_CullingMask     (0)
+        , m_Depth           (-1)
+        , m_ShutterSpeed    (1.0f / 125.0f)
+        , m_Aperture        (16.0f)
+        , m_ISO             (100.0f)
+        , m_EC              (0.0f)
+        , m_Size            (5.0f)
+        , m_FoV             (60.0f)
+        , m_Near            (0.3f)
+        , m_Far             (1000.0f)
+        , m_BackgroundColor (Base::Float3::s_One)
+        , m_ProjectionMatrix(Base::Float3x3::s_Identity)
+        , m_ViewportRect    ()
+        , m_ClearFlag       (Skybox)
+        , m_ProjectionType  (Perspective)
+        , m_CameraMode      (Auto)
     {
     }
 
@@ -233,6 +234,27 @@ namespace Dt
     float CCameraActorFacet::GetFoV() const
     {
         return m_FoV;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CCameraActorFacet::SetProjectionMatrix(const Base::Float3x3& _rProjection)
+    {
+        m_ProjectionMatrix = _rProjection;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Base::Float3x3& CCameraActorFacet::GetProjectionMatrix()
+    {
+        return m_ProjectionMatrix;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const Base::Float3x3& CCameraActorFacet::GetProjectionMatrix() const
+    {
+        return m_ProjectionMatrix;
     }
 
     // -----------------------------------------------------------------------------

@@ -23,36 +23,6 @@ namespace Cam
 
         
     }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGameControl::SetProjectionMatrix(const Base::Float3x3& _rProjectionMatrix)
-    {
-        Gfx::Cam::InjectCameraMatrix(_rProjectionMatrix);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGameControl::SetMarkerTransformation(const Base::Float3x3& _rRotationMatrix, const Base::Float3& _rTranslation)
-    {
-        m_RotationMatrix[0][0] = _rRotationMatrix[0][0];
-        m_RotationMatrix[0][1] = _rRotationMatrix[0][1];
-        m_RotationMatrix[0][2] = _rRotationMatrix[0][2];
-
-        m_RotationMatrix[1][0] = -_rRotationMatrix[1][0];
-        m_RotationMatrix[1][1] = -_rRotationMatrix[1][1];
-        m_RotationMatrix[1][2] = -_rRotationMatrix[1][2];
-
-        m_RotationMatrix[2][0] = -_rRotationMatrix[2][0];
-        m_RotationMatrix[2][1] = -_rRotationMatrix[2][1];
-        m_RotationMatrix[2][2] = -_rRotationMatrix[2][2];
-
-        m_Position[0] = -_rTranslation[0];
-        m_Position[1] =  _rTranslation[1];
-        m_Position[2] =  _rTranslation[2];
-
-        m_Position = m_RotationMatrix.GetInverted() * m_Position;
-    }
 
     // -----------------------------------------------------------------------------
 
@@ -123,6 +93,17 @@ namespace Cam
                 float Top    =  pCameraFacet->GetSize() / 2.0f;
                 
                 Gfx::Cam::SetOrthographic(Left, Right, Bottom, Top, pCameraFacet->GetNear(), pCameraFacet->GetFar());
+            }
+            else if (pCameraFacet->GetProjectionType() == Dt::CCameraActorFacet::RAW)
+            {
+                Base::Float4x4 ProjectionMatrix(Base::Float3x3::s_Identity);
+
+                float Near = pCameraFacet->GetNear();
+                float Far  = pCameraFacet->GetFar();
+
+                ProjectionMatrix.SetRHPerspective(Near, Far, pCameraFacet->GetProjectionMatrix());
+
+                Gfx::Cam::SetProjection(ProjectionMatrix);
             }
 
             // -----------------------------------------------------------------------------

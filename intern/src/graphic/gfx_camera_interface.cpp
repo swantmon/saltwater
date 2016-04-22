@@ -35,15 +35,6 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
-    void InjectCameraMatrix(const Base::Float3x3& _rCameraMatrix)
-    {
-        CCamera& rCamera = *ViewManager::GetMainCamera();
-
-        rCamera.InjectCameraMatrix(_rCameraMatrix);
-
-        rCamera.Update();
-    }
-
     void SetBackgroundColor(Base::Float3& _rBackgroundColor)
     {
         CCamera& rCamera = *ViewManager::GetMainCamera();

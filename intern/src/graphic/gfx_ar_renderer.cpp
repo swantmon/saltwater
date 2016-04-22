@@ -493,11 +493,11 @@ namespace
         // -----------------------------------------------------------------------------
         // Check if camera has video output
         // -----------------------------------------------------------------------------
-        MR::CControl& rControl = MR::ControlManager::GetActiveControl();
+        MR::CControl* pControl = MR::ControlManager::GetActiveControl();
 
-        if (rControl.GetType() == MR::CControl::Webcam)
+        if (pControl != nullptr && pControl->GetType() == MR::CControl::Webcam)
         {
-            MR::CWebcamControl& rWebcamControl = static_cast<MR::CWebcamControl&>(rControl);
+            MR::CWebcamControl& rWebcamControl = static_cast<MR::CWebcamControl&>(*pControl);
 
             // -----------------------------------------------------------------------------
             // Upload to texture on graphic card
@@ -507,9 +507,9 @@ namespace
 
             TextureManager::CopyToTexture2D(m_WebcamTexturePtr, TargetRect, TargetRect[1][0], rWebcamControl.GetConvertedFrame()->GetPixels());
         }
-        else if (rControl.GetType() == MR::CControl::Kinect)
+        else if (pControl != nullptr && pControl->GetType() == MR::CControl::Kinect)
         {
-            MR::CKinectControl& rKinectControl = static_cast<MR::CKinectControl&>(rControl);
+            MR::CKinectControl& rKinectControl = static_cast<MR::CKinectControl&>(*pControl);
 
             Base::AABB2UInt TargetRect(Base::UInt2(0), Base::UInt2(1280, 720));
 
@@ -531,7 +531,7 @@ namespace
 
         const unsigned int pOffset[] = { 0, 0 };
 
-        MR::CControl& rControl = MR::ControlManager::GetActiveControl();
+        MR::CControl* pControl = MR::ControlManager::GetActiveControl();
 
         // -----------------------------------------------------------------------------
 
@@ -624,7 +624,7 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        if (rControl.GetType() == MR::CControl::Kinect)
+        if (pControl->GetType() == MR::CControl::Kinect)
         {
 //             SBilateralBlurConstantBufferCS* pBilateralBlurConstantBuffer;
 //             

@@ -4,9 +4,6 @@
     <Filter Include="extern">
       <UniqueIdentifier>{a0b74be8-1a6f-401a-839b-c867c8633dcd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="tracker">
-      <UniqueIdentifier>{26dc6a3c-e59b-4d73-81d7-90f83d1b6ca7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="marker">
       <UniqueIdentifier>{b00c4a40-d36c-4f14-a663-1f5c24a97b2c}</UniqueIdentifier>
     </Filter>
@@ -28,9 +25,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\mr\mr_webcam_control.cpp">
       <Filter>controls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\mr\mr_tracker_manager.cpp">
-      <Filter>tracker</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -56,8 +50,5 @@
       <Filter>controls</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\mr\mr_control_description.h" />
-    <ClInclude Include="..\..\..\src\mr\mr_tracker_manager.h">
-      <Filter>tracker</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

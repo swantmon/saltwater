@@ -58,13 +58,13 @@ namespace
         typedef Base::CPool<CInternModelActorFacet, 1024> CActorModels;
         typedef Base::CPool<CInternARActorFacet, 32> CActorARs;
 
-        typedef std::vector<Dt::CEntity*>  CEntityVector;
+        typedef std::vector<Dt::CEntity*> CEntityVector;
 
     private:
 
-        CEntityVector      m_DirtyEntities;
-        CActorModels       m_ActorModels;
-        CActorARs          m_ActorARs;
+        CEntityVector m_DirtyEntities;
+        CActorModels  m_ActorModels;
+        CActorARs     m_ActorARs;
         
     private:
 
@@ -82,8 +82,9 @@ namespace
 namespace
 {
     CGfxActorManager::CGfxActorManager()
-        : m_ActorModels()
-        , m_ActorARs   ()
+        : m_DirtyEntities()
+        , m_ActorModels  ()
+        , m_ActorARs     ()
     {
         m_DirtyEntities.reserve(65536);
     }
@@ -154,7 +155,7 @@ namespace
             switch (_pEntity->GetType())
             {
             case Dt::SActorType::Model: CreateActorModel(*_pEntity); break;
-            case Dt::SActorType::AR: CreateActorAR(*_pEntity); break;
+            case Dt::SActorType::AR:    CreateActorAR(*_pEntity); break;
             }
         }
 
@@ -171,7 +172,7 @@ namespace
         switch (_rEntity.GetType())
         {
         case Dt::SActorType::Model: UpdateActorModel(_rEntity); break;
-        case Dt::SActorType::AR: UpdateActorAR(_rEntity); break;
+        case Dt::SActorType::AR:    UpdateActorAR(_rEntity); break;
         }
     }
 
