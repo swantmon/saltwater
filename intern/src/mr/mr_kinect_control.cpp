@@ -32,6 +32,11 @@ cv::Mat ColorUC1Crop = cv::Mat(720, 1280, CV_8UC1, 0);
 cv::Mat DepthFC1Crop = cv::Mat(720, 1280, CV_32FC1, 0);
 cv::Mat ColorUC3Crop = cv::Mat(720, 1280, CV_8UC3, 0);
 
+namespace
+{
+    std::string g_PathToAssets = "../assets/";
+} // namespace
+
 namespace MR
 {
     CKinectControl::CKinectControl()
@@ -65,7 +70,6 @@ namespace MR
     {
         int Error;
 
-        std::string PathToResources = "../data/ar/";
         std::string PathToResource;
 
         // -----------------------------------------------------------------------------
@@ -78,7 +82,7 @@ namespace MR
         // -----------------------------------------------------------------------------
         ARParam NativeParams;
 
-        PathToResource = PathToResources + "configurations/" + _pCameraParameterFile;
+        PathToResource = g_PathToAssets + _pCameraParameterFile;
 
         Error = arParamLoad(PathToResource.c_str(), 1, &NativeParams);
 
@@ -200,15 +204,11 @@ namespace MR
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_Format           = Dt::CTextureBase::R8G8B8_UBYTE;
         TextureDescriptor.m_Semantic         = Dt::CTextureBase::Diffuse;
-        TextureDescriptor.m_pPixels          = static_cast<void*>(static_cast<Base::Ptr>(ColorUC3.data));
+        TextureDescriptor.m_pPixels          = 0;
         TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pIdentifier      = "ID_Webcam_RGB_Original_Output";
 
         m_pOriginalFrame = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
-
-        // -----------------------------------------------------------------------------
-
-        Dt::TextureManager::CopyToTexture2D(m_pConvertedFrame, static_cast<void*>(static_cast<Base::Ptr>(ColorUC3Crop.data)));
     }
 
     // -----------------------------------------------------------------------------
@@ -317,8 +317,6 @@ namespace MR
         }
 
         // -----------------------------------------------------------------------------
-
-        // -----------------------------------------------------------------------------
         // Prepare OpenCV data
         // -----------------------------------------------------------------------------
         DepthFC1 = cv::Mat(1080, 1920, CV_32FC1, &g_pDepthFrameDataRAW);
@@ -332,11 +330,11 @@ namespace MR
         ColorUC3(cv::Rect(320, 180, 1280, 720)).copyTo(ColorUC3Crop);
         DepthFC1(cv::Rect(320, 180, 1280, 720)).copyTo(DepthFC1Crop);
 
-        //cv::cvtColor(ColorUC3Crop, ColorUC1Crop, CV_RGB2GRAY);
+        // -----------------------------------------------------------------------------
+        // Copy final result to the
+        // -----------------------------------------------------------------------------
+        Dt::TextureManager::CopyToTexture2D(m_pOriginalFrame, static_cast<void*>(static_cast<Base::Ptr>(ColorUC3.data)));
 
-        // -----------------------------------------------------------------------------
-        // Blur
-        // -----------------------------------------------------------------------------
-        //DepthFC1Crop = guidedFilter(ColorUC1Crop, DepthFC1Crop, 4, 0.5 * 0.5 * 8.0 * 8.0);
+        Dt::TextureManager::CopyToTexture2D(m_pConvertedFrame, static_cast<void*>(static_cast<Base::Ptr>(ColorUC3Crop.data)));
     }
 } // namespace MR
