@@ -4,9 +4,6 @@
     <Filter Include="extern">
       <UniqueIdentifier>{a0b74be8-1a6f-401a-839b-c867c8633dcd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="marker">
-      <UniqueIdentifier>{b00c4a40-d36c-4f14-a663-1f5c24a97b2c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="controls">
       <UniqueIdentifier>{01e74968-0a08-4664-bc3e-f20bfc2e1ee8}</UniqueIdentifier>
     </Filter>
@@ -14,9 +11,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\src\mr\cv_guidedfilter.cpp">
       <Filter>extern</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\mr\mr_marker_manager.cpp">
-      <Filter>marker</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\mr\mr_control.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_control_manager.cpp" />
@@ -30,12 +24,6 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\src\mr\cv_guidedfilter.h">
       <Filter>extern</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\mr\mr_marker_manager.h">
-      <Filter>marker</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\mr\mr_marker.h">
-      <Filter>marker</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\mr\mr_control.h" />
     <ClInclude Include="..\..\..\src\mr\mr_control_manager.h" />

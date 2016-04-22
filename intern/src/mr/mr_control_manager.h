@@ -10,6 +10,8 @@ namespace ControlManager
     void OnStart();
     void OnExit();
 
+    void Clear();
+
     void Update();
 
     bool IsActive();

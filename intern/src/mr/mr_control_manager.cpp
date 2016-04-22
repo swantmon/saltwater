@@ -2,6 +2,7 @@
 #include "base/base_console.h"
 #include "base/base_input_event.h"
 #include "base/base_memory.h"
+#include "base/base_pool.h"
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
@@ -14,15 +15,21 @@
 
 #include "mr/mr_control_manager.h"
 #include "mr/mr_kinect_control.h"
-#include "mr/mr_marker_manager.h"
 #include "mr/mr_webcam_control.h"
 
 #include <AR/ar.h>
 #include <AR/gsub_lite.h>
 
 #include <assert.h>
+#include <unordered_map>
+#include <vector>
 
 using namespace MR;
+
+namespace
+{
+    std::string g_PathToAssets = "../assets/";
+} // namespace
 
 namespace
 {
@@ -40,6 +47,8 @@ namespace
         void OnStart();
         void OnExit();
 
+        void Clear();
+
         void Update();
 
         bool IsActive();
@@ -48,11 +57,19 @@ namespace
 
     private:
 
-        class SMarkerInfo
+        struct CInternMarker
         {
         public:
+            unsigned int                           m_UID;
+            unsigned int                           m_NativeID;
+            Dt::CARControllerPluginFacet::SMarker* m_pDataInfos;
+            ARPattHandle*                          m_pPatternHandle;
+        };
 
-            unsigned int   m_UserID;
+        struct CInternTrackedMarker
+        {
+        public:
+            unsigned int   m_UID;
             unsigned int   m_FrameCounter;
             Base::Float3x3 m_RotationToCamera;
             Base::Float3   m_TranslationToCamera;
@@ -60,17 +77,21 @@ namespace
 
     private:
 
-        typedef std::vector<Dt::CEntity*> CEntityVector;
-        typedef std::vector<SMarkerInfo>  CMarkerInfos;
+        typedef Base::CPool<CInternMarker, 8>                    CMarkers;
+
+        typedef std::vector<Dt::CEntity*>                        CEntityVector;
+        typedef std::vector<CInternTrackedMarker>                CTrackedMarker;
+        typedef std::unordered_map<unsigned int, CInternMarker*> CMarkerByIDs;
 
     private:
 
-        ARHandle*	                  m_pARHandle;
-        AR3DHandle*	                  m_pAR3DHandle;
-        ARParamLT*	                  m_pNativeParamLookupTable;
-        bool                          m_IsActive;
-        CMarkerInfos                  m_MarkerInfos;
+        ARHandle*	                  m_pNativeTrackingHandle;
+        AR3DHandle*	                  m_pNativeTracking3DHandle;
+        ARParamLT*	                  m_pNativeParameterLT;
         CEntityVector                 m_DirtyEntities;
+        CTrackedMarker                m_TrackedMarker;
+        CMarkerByIDs                  m_MarkerByIDs;
+        CMarkers                      m_Markers;
         CControl*                     m_pActiveControl;
         CControl*                     m_pControls[CControl::NumberOfControls];
         Dt::CARControllerPluginFacet* m_pControllerPlugin;
@@ -101,14 +122,15 @@ namespace
 namespace
 {
     CMRControlManager::CMRControlManager()
-        : m_pARHandle               (0)
-        , m_pAR3DHandle             (0)
-        , m_pNativeParamLookupTable (0)
-        , m_IsActive                (false)
-        , m_MarkerInfos             ()
-        , m_DirtyEntities           ()
-        , m_pActiveControl          (nullptr)
-        , m_pControllerPlugin       (nullptr)
+        : m_pNativeTrackingHandle  (0)
+        , m_pNativeTracking3DHandle(0)
+        , m_pNativeParameterLT     (0)
+        , m_TrackedMarker          ()
+        , m_DirtyEntities          ()
+        , m_Markers                ()
+        , m_MarkerByIDs            ()
+        , m_pActiveControl         (nullptr)
+        , m_pControllerPlugin      (nullptr)
     {
         m_DirtyEntities.reserve(8);
     }
@@ -133,6 +155,16 @@ namespace
 
     void CMRControlManager::OnExit()
     {
+        Clear();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMRControlManager::Clear()
+    {
+        // -----------------------------------------------------------------------------
+        // Delete controls
+        // -----------------------------------------------------------------------------
         if (m_pActiveControl != nullptr)
         {
             m_pActiveControl->Stop();
@@ -148,15 +180,37 @@ namespace
             Base::CMemory::Free(m_pControls[CControl::Kinect]);
         }
 
-        arPattDetach(m_pARHandle);
-        ar3DDeleteHandle(&m_pAR3DHandle);
-        arDeleteHandle(m_pARHandle);
-        arParamLTFree(&m_pNativeParamLookupTable);
-
-        m_IsActive = false;
-
-        m_MarkerInfos  .clear();
+        // -----------------------------------------------------------------------------
+        // Delete entities
+        // -----------------------------------------------------------------------------
         m_DirtyEntities.clear();
+
+        // -----------------------------------------------------------------------------
+        // Delete tracked marker informations and IDs
+        // -----------------------------------------------------------------------------
+        m_TrackedMarker.clear();
+        m_MarkerByIDs  .clear();
+
+        // -----------------------------------------------------------------------------
+        // Delete markers
+        // -----------------------------------------------------------------------------
+        CMarkers::CIterator CurrentMarker = m_Markers.Begin();
+        CMarkers::CIterator EndOfMarkers  = m_Markers.End();
+
+        for (; CurrentMarker != EndOfMarkers; ++CurrentMarker)
+        {
+            arPattDeleteHandle(CurrentMarker->m_pPatternHandle);
+        }
+
+        m_Markers.Clear();
+
+        // -----------------------------------------------------------------------------
+        // Delete native part
+        // -----------------------------------------------------------------------------
+        arPattDetach(m_pNativeTrackingHandle);
+        ar3DDeleteHandle(&m_pNativeTracking3DHandle);
+        arDeleteHandle(m_pNativeTrackingHandle);
+        arParamLTFree(&m_pNativeParameterLT);
     }
 
     // -----------------------------------------------------------------------------
@@ -402,32 +456,30 @@ namespace
         // -----------------------------------------------------------------------------
         // Create parameter lookup table
         // -----------------------------------------------------------------------------
-        m_pNativeParamLookupTable = arParamLTCreate(&NativeParams, AR_PARAM_LT_DEFAULT_OFFSET);
+        m_pNativeParameterLT = arParamLTCreate(&NativeParams, AR_PARAM_LT_DEFAULT_OFFSET);
 
-        assert(m_pNativeParamLookupTable != 0);
+        assert(m_pNativeParameterLT != 0);
 
         // -----------------------------------------------------------------------------
         // Create AR handle with parameters
         // -----------------------------------------------------------------------------
-        m_pARHandle = arCreateHandle(m_pNativeParamLookupTable);
+        m_pNativeTrackingHandle = arCreateHandle(m_pNativeParameterLT);
 
-        assert(m_pARHandle != 0);
+        assert(m_pNativeTrackingHandle != 0);
 
         // -----------------------------------------------------------------------------
         // Set AR pixel format
         // -----------------------------------------------------------------------------
-        Error = arSetPixelFormat(m_pARHandle, OriginalPixelFormat);
+        Error = arSetPixelFormat(m_pNativeTrackingHandle, OriginalPixelFormat);
 
         assert(Error >= 0);
 
         // -----------------------------------------------------------------------------
         // Create 3D AR handle
         // -----------------------------------------------------------------------------
-        m_pAR3DHandle = ar3DCreateHandle(&NativeParams);
+        m_pNativeTracking3DHandle = ar3DCreateHandle(&NativeParams);
 
-        assert(m_pAR3DHandle != 0);
-
-        m_IsActive = true;
+        assert(m_pNativeTracking3DHandle != 0);
     }
 
     // -----------------------------------------------------------------------------
@@ -442,25 +494,204 @@ namespace
         {
             Dt::CARControllerPluginFacet::SMarker& rCurrentMarker = m_pControllerPlugin->GetMarker(IndexOfMarker);
 
-            SMarkerDescription MarkerDescription;
+            // -----------------------------------------------------------------------------
+            // Create marker and save to collection
+            // -----------------------------------------------------------------------------
+#pragma warning( disable : 4706 4996 )
+            auto LoadPatternFromBuffer = [&](ARPattHandle *pattHandle, const char *buffer) 
+            {
+                char   *bufCopy;
+                int     patno;
+                int     h, i1, i2, i3;
+                int     i, j, l, m;
+                char   *buffPtr;
+                const char *delims = " \t\n\r";
 
-            MarkerDescription.m_UserID       = rCurrentMarker.m_UID;
-            MarkerDescription.m_Type         = SMarkerDescription::Square;
-            MarkerDescription.m_pPatternFile = rCurrentMarker.m_PatternFile.GetConst();
-            MarkerDescription.m_WidthInMeter = rCurrentMarker.m_WidthInMeter;
+                if (!pattHandle) {
+                    ARLOGe("Error: NULL pattHandle.\n");
+                    return (-1);
+                }
+                if (!buffer) {
+                    ARLOGe("Error: can't load pattern from NULL buffer.\n");
+                    return (-1);
+                }
 
-            MR::CMarkerPtr MarkerPtr = MR::MarkerManager::CreateMarker(MarkerDescription);
+                for (i = 0; i < pattHandle->patt_num_max; i++) {
+                    if (pattHandle->pattf[i] == 0) break;
+                }
+                if (i == pattHandle->patt_num_max) return -1;
+                patno = i;
 
+                if (!(bufCopy = _strdup(buffer))) { // Make a mutable copy.
+                    ARLOGe("Error: out of memory.\n");
+                    return (-1);
+                }
+                buffPtr = strtok(bufCopy, delims);
 
+                for (h = 0; h<4; h++) {
+                    l = 0;
+                    for (i3 = 0; i3 < 3; i3++) { // Three colours B G R
+                        for (i2 = 0; i2 < pattHandle->pattSize; i2++) { // Rows
+                            for (i1 = 0; i1 < pattHandle->pattSize; i1++) { // Columns
+
+                                /* Switch file scanning to buffer reading */
+
+                                /* if( fscanf(fp, "%d", &j) != 1 ) {
+                                ARLOGe("Pattern Data read error!!\n");
+                                return -1;
+                                }
+                                */
+
+                                if (buffPtr == NULL) {
+                                    ARLOGe("Pattern Data read error!!\n");
+                                    free(bufCopy);
+                                    return -1;
+                                }
+
+                                j = atoi(buffPtr);
+                                buffPtr = strtok(NULL, delims);
+
+                                j = 255 - j;
+                                pattHandle->patt[patno * 4 + h][(i2*pattHandle->pattSize + i1) * 3 + i3] = j;
+                                if (i3 == 0) pattHandle->pattBW[patno * 4 + h][i2*pattHandle->pattSize + i1] = j;
+                                else          pattHandle->pattBW[patno * 4 + h][i2*pattHandle->pattSize + i1] += j;
+                                if (i3 == 2) pattHandle->pattBW[patno * 4 + h][i2*pattHandle->pattSize + i1] /= 3;
+                                l += j;
+                            }
+                        }
+                    }
+                    l /= (pattHandle->pattSize*pattHandle->pattSize * 3);
+
+                    m = 0;
+                    for (i = 0; i < pattHandle->pattSize*pattHandle->pattSize * 3; i++) {
+                        pattHandle->patt[patno * 4 + h][i] -= l;
+                        m += (pattHandle->patt[patno * 4 + h][i] * pattHandle->patt[patno * 4 + h][i]);
+                    }
+                    pattHandle->pattpow[patno * 4 + h] = sqrt((ARdouble)m);
+                    if (pattHandle->pattpow[patno * 4 + h] == 0.0) pattHandle->pattpow[patno * 4 + h] = 0.0000001;
+
+                    m = 0;
+                    for (i = 0; i < pattHandle->pattSize*pattHandle->pattSize; i++) {
+                        pattHandle->pattBW[patno * 4 + h][i] -= l;
+                        m += (pattHandle->pattBW[patno * 4 + h][i] * pattHandle->pattBW[patno * 4 + h][i]);
+                    }
+                    pattHandle->pattpowBW[patno * 4 + h] = sqrt((ARdouble)m);
+                    if (pattHandle->pattpowBW[patno * 4 + h] == 0.0) pattHandle->pattpowBW[patno * 4 + h] = 0.0000001;
+                }
+
+                free(bufCopy);
+
+                pattHandle->pattf[patno] = 1;
+                pattHandle->patt_num++;
+
+                return(patno);
+            };
+
+            auto LoadPattern = [&](ARPattHandle *pattHandle, const char *filename)
+            {
+                FILE   *fp;
+                int     patno;
+                size_t  ret;
+
+                /* Old variables */
+                /*
+                int     h, i1, i2, i3;
+                int     i, j, l, m;
+                */
+
+                /* New variables */
+                long pos = 0;
+                char* bytes = NULL;
+
+                /* Open file */
+                fp = fopen(filename, "rb");
+                if (fp == NULL) {
+                    ARLOGe("Error opening pattern file '%s' for reading.\n", filename);
+                    return (-1);
+                }
+
+                /* Determine number of bytes in file */
+                fseek(fp, 0L, SEEK_END);
+                pos = ftell(fp);
+                fseek(fp, 0L, SEEK_SET);
+
+                //ARLOGd("Pattern file is %ld bytes\n", pos);
+
+                /* Allocate buffer */
+                bytes = (char *)malloc(pos + 1);
+                if (!bytes) {
+                    ARLOGe("Out of memory!!\n");
+                    fclose(fp);
+                    return (-1);
+                }
+
+                /* Read pattern into buffer and close file */
+                ret = fread(bytes, pos, 1, fp);
+                fclose(fp);
+                if (ret < 1) {
+                    ARLOGe("Error reading pattern file '%s'.\n", filename);
+                    free(bytes);
+                    return (-1);
+                }
+
+                /* Terminate string */
+                bytes[pos] = '\0';
+
+                /* Load pattern from buffer */
+                patno = LoadPatternFromBuffer(pattHandle, bytes);
+
+                /* Free allocated buffer */
+                free(bytes);
+
+                return(patno);
+            };
+#pragma warning( error : 4706 4996 )
+
+            // -----------------------------------------------------------------------------
+            // Build path to texture in file system
+            // -----------------------------------------------------------------------------
+            std::string PathToPattern;
+        
+            // -----------------------------------------------------------------------------
+            // Create hash and check if marker already available
+            // -----------------------------------------------------------------------------
+            const char* pPatternFile = rCurrentMarker.m_PatternFile.GetConst();
+        
+            assert(pPatternFile != 0);
+
+		    PathToPattern = g_PathToAssets + pPatternFile;
+        
+            // -----------------------------------------------------------------------------
+            // Setup basic marker informations and after that create handle
+            // -----------------------------------------------------------------------------
+            CInternMarker& rNewMarker = m_Markers.Allocate();
+
+            rNewMarker.m_UID        = rCurrentMarker.m_UID;
+            rNewMarker.m_pDataInfos = &rCurrentMarker;
+            
+            rNewMarker.m_pPatternHandle = arPattCreateHandle();
+            
+            assert(rNewMarker.m_pPatternHandle != 0);
+
+    #ifdef __APPLE__
+            rNewMarker.m_NativeID = arPattLoad(rNewMarker.m_pPatternHandle, PathToPattern.c_str());
+#else
+            rNewMarker.m_NativeID = LoadPattern(rNewMarker.m_pPatternHandle, PathToPattern.c_str());
+    #endif  
+                        
+            // -----------------------------------------------------------------------------
+            // Set hash to map to reuse this kind of marker
+            // -----------------------------------------------------------------------------
+            m_MarkerByIDs[rNewMarker.m_NativeID] = &rNewMarker;
+
+            // -----------------------------------------------------------------------------
+            // Attach marker
+            // -----------------------------------------------------------------------------
             int Error = 0;
 
-            ARPattHandle* pNativeARPatternHandle = static_cast<ARPattHandle*>(MarkerPtr->m_pHandle);
-
-            Error = arPattAttach(m_pARHandle, pNativeARPatternHandle);
+            Error = arPattAttach(m_pNativeTrackingHandle, rNewMarker.m_pPatternHandle);
 
             assert(Error == 0);
-
-            MarkerPtr->m_IsRegistered = true;
         }
     }
 
@@ -482,7 +713,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Prepare collections
         // -----------------------------------------------------------------------------        
-        m_MarkerInfos.clear();
+        m_TrackedMarker.clear();
 
         // -----------------------------------------------------------------------------
         // Get image stream for tracking and detect marker in image
@@ -493,14 +724,14 @@ namespace
         
         assert(pImagedata != 0);
 
-        arDetectMarker(m_pARHandle, pImagedata);
+        arDetectMarker(m_pNativeTrackingHandle, pImagedata);
         
         // -----------------------------------------------------------------------------
         // Get number of markers found in last detection
         // -----------------------------------------------------------------------------
         unsigned int NumberOfMarkers;
         
-        NumberOfMarkers = static_cast<unsigned int>(arGetMarkerNum(m_pARHandle));
+        NumberOfMarkers = static_cast<unsigned int>(arGetMarkerNum(m_pNativeTrackingHandle));
 
         if (NumberOfMarkers == 0)
         {
@@ -514,7 +745,7 @@ namespace
         
         ARMarkerInfo* pMarkerInfos;
         
-        pMarkerInfos = arGetMarker(m_pARHandle);
+        pMarkerInfos = arGetMarker(m_pNativeTrackingHandle);
 
         for (unsigned int IndexOfMarker = 0; IndexOfMarker < NumberOfMarkers; ++ IndexOfMarker)
         {
@@ -525,30 +756,20 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Found a marker
                 // -----------------------------------------------------------------------------
-                CMarkerPtr MarkerPtr = MarkerManager::GetMarkerByID(rCurrentMarkerInfo.id);
+                CInternMarker* pMarker = m_MarkerByIDs.at(rCurrentMarkerInfo.id);
                 
                 // -----------------------------------------------------------------------------
                 // Get transformation of this pattern
                 // -----------------------------------------------------------------------------
-                arGetTransMatSquare(m_pAR3DHandle, &(rCurrentMarkerInfo), MarkerPtr->m_WidthInMeter * 1000.0f, PatternTransformation);
-
-                // -----------------------------------------------------------------------------
-                // Edit Marker
-                // -----------------------------------------------------------------------------
-                if (MarkerPtr->m_IsFound == false)
-                {
-                    ++ MarkerPtr->m_AppearCounter;
-                    
-                    MarkerPtr->m_IsFound = true;
-                }
+                arGetTransMatSquare(m_pNativeTracking3DHandle, &(rCurrentMarkerInfo), pMarker->m_pDataInfos->m_WidthInMeter * 1000.0f, PatternTransformation);
                 
                 // -----------------------------------------------------------------------------
                 // Create / Edit marker infos
                 // -----------------------------------------------------------------------------
-                SMarkerInfo NewMarkerInfo;
+                CInternTrackedMarker NewMarkerInfo;
 
-                NewMarkerInfo.m_UserID                 = MarkerPtr->m_UserID;
-                NewMarkerInfo.m_FrameCounter           = 0;
+                NewMarkerInfo.m_UID          = pMarker->m_pDataInfos->m_UID;
+                NewMarkerInfo.m_FrameCounter = 0;
                 
                 NewMarkerInfo.m_TranslationToCamera[0] = static_cast<float>(PatternTransformation[0][3]) / 1000.0f;
                 NewMarkerInfo.m_TranslationToCamera[1] = static_cast<float>(PatternTransformation[1][3]) / 1000.0f;
@@ -566,7 +787,7 @@ namespace
                 NewMarkerInfo.m_RotationToCamera[2][1] = static_cast<float>(PatternTransformation[2][1]);
                 NewMarkerInfo.m_RotationToCamera[2][2] = static_cast<float>(PatternTransformation[2][2]);
                 
-                m_MarkerInfos.push_back(NewMarkerInfo);
+                m_TrackedMarker.push_back(NewMarkerInfo);
             }
         }
     }
@@ -580,14 +801,12 @@ namespace
         // -----------------------------------------------------------------------------
         // Take the first detected marker as origin
         // -----------------------------------------------------------------------------
-        SMarkerInfo MarkerInfo;
-
-        CMarkerInfos::iterator CurrentOfMarkerInfo = m_MarkerInfos.begin();
-        CMarkerInfos::iterator EndOfMarkerInfos    = m_MarkerInfos.end();
+        CTrackedMarker::iterator CurrentOfMarkerInfo = m_TrackedMarker.begin();
+        CTrackedMarker::iterator EndOfMarkerInfos    = m_TrackedMarker.end();
 
         for (; CurrentOfMarkerInfo != EndOfMarkerInfos; ++ CurrentOfMarkerInfo)
         {
-            SMarkerInfo& rMarkerInfo = *CurrentOfMarkerInfo;
+            CInternTrackedMarker& rMarkerInfo = *CurrentOfMarkerInfo;
 
             Base::Float3x3 RotationMatrix(Base::Float3x3::s_Identity);
             Base::Float3   Position;
@@ -656,6 +875,13 @@ namespace ControlManager
     void OnExit()
     {
         CMRControlManager::GetInstance().OnExit();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void Clear()
+    {
+        CMRControlManager::GetInstance().Clear();
     }
 
     // -----------------------------------------------------------------------------
