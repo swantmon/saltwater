@@ -25,10 +25,15 @@ namespace Edit
 
         void* GetEditorWindowHandle();
 
+    public Q_SLOTS:
+
+        void switchPlayingCurrentScene();
+
     private:
 
         Ui::CMainWindow m_UserInterface;
         QLabel*         m_pStatusLabel;
+        bool            m_IsPlaying;
 
     private:
 

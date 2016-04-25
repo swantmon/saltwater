@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>1280</width>
-    <height>760</height>
+    <height>798</height>
    </rect>
   </property>
   <property name="cursor">
@@ -27,7 +27,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>0</y>
+      <y>40</y>
       <width>1280</width>
       <height>720</height>
      </rect>
@@ -43,6 +43,19 @@
     </property>
     <property name="locale">
      <locale language="English" country="UnitedStates"/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="m_pPlayButton">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Play</string>
     </property>
    </widget>
   </widget>
@@ -163,8 +176,24 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_pPlayButton</sender>
+   <signal>clicked()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>switchPlayingCurrentScene()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>653</x>
+     <y>41</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>736</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
-  <slot>slot1()</slot>
+  <slot>switchPlayingCurrentScene()</slot>
  </slots>
 </ui>

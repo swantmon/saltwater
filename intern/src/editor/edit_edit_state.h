@@ -32,5 +32,6 @@ namespace Edit
     private:
 
         void OnExit(Edit::CMessage& _rMessage);
+        void OnPlay(Edit::CMessage& _rMessage);
     };
 } // namespace Edit

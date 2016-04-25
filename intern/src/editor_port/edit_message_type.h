@@ -27,6 +27,8 @@ namespace Edit
             LoadMap,
             SaveMap,
             SaveMapAs,
+            Play,
+            Edit,
 
             NumberOfMembers,
             Undefined = -1,

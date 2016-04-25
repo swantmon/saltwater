@@ -32,6 +32,7 @@ namespace Edit
     private:
 
         void OnExit(Edit::CMessage& _rMessage);
+        void OnEdit(Edit::CMessage& _rMessage);
         
     };
 } // namespace Edit

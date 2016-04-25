@@ -18,6 +18,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
+#include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QWidget>
 
@@ -34,6 +35,7 @@ public:
     QAction *m_pActionReportBug;
     QWidget *m_pCentralWidget;
     QWidget *m_pEditorRenderContext;
+    QPushButton *m_pPlayButton;
     QMenuBar *m_pMenuBar;
     QMenu *m_pMenuFile;
     QMenu *m_pMenuEdit;
@@ -49,7 +51,7 @@ public:
         if (CMainWindow->objectName().isEmpty())
             CMainWindow->setObjectName(QStringLiteral("CMainWindow"));
         CMainWindow->setWindowModality(Qt::NonModal);
-        CMainWindow->resize(1280, 760);
+        CMainWindow->resize(1280, 798);
         CMainWindow->setCursor(QCursor(Qt::ArrowCursor));
         CMainWindow->setMouseTracking(true);
         m_pActionNew = new QAction(CMainWindow);
@@ -68,11 +70,14 @@ public:
         m_pCentralWidget->setObjectName(QStringLiteral("m_pCentralWidget"));
         m_pEditorRenderContext = new QWidget(m_pCentralWidget);
         m_pEditorRenderContext->setObjectName(QStringLiteral("m_pEditorRenderContext"));
-        m_pEditorRenderContext->setGeometry(QRect(0, 0, 1280, 720));
+        m_pEditorRenderContext->setGeometry(QRect(0, 40, 1280, 720));
         m_pEditorRenderContext->setCursor(QCursor(Qt::ArrowCursor));
         m_pEditorRenderContext->setMouseTracking(true);
         m_pEditorRenderContext->setAutoFillBackground(false);
         m_pEditorRenderContext->setLocale(QLocale(QLocale::English, QLocale::UnitedStates));
+        m_pPlayButton = new QPushButton(m_pCentralWidget);
+        m_pPlayButton->setObjectName(QStringLiteral("m_pPlayButton"));
+        m_pPlayButton->setGeometry(QRect(600, 10, 75, 23));
         CMainWindow->setCentralWidget(m_pCentralWidget);
         m_pMenuBar = new QMenuBar(CMainWindow);
         m_pMenuBar->setObjectName(QStringLiteral("m_pMenuBar"));
@@ -114,6 +119,7 @@ public:
 
         retranslateUi(CMainWindow);
         QObject::connect(m_pActionExit, SIGNAL(triggered()), CMainWindow, SLOT(close()));
+        QObject::connect(m_pPlayButton, SIGNAL(clicked()), CMainWindow, SLOT(switchPlayingCurrentScene()));
 
         QMetaObject::connectSlotsByName(CMainWindow);
     } // setupUi
@@ -129,6 +135,7 @@ public:
         m_pActionAboutSaltwater->setText(QApplication::translate("CMainWindow", "About Saltwater", 0));
         m_pActionReleaseNotes->setText(QApplication::translate("CMainWindow", "Release Notes", 0));
         m_pActionReportBug->setText(QApplication::translate("CMainWindow", "Report a Bug...", 0));
+        m_pPlayButton->setText(QApplication::translate("CMainWindow", "Play", 0));
         m_pMenuFile->setTitle(QApplication::translate("CMainWindow", "File", 0));
         m_pMenuEdit->setTitle(QApplication::translate("CMainWindow", "Edit", 0));
         m_pMenuAssets->setTitle(QApplication::translate("CMainWindow", "Assets", 0));

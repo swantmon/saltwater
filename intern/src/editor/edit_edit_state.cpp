@@ -34,6 +34,7 @@ namespace Edit
         // Register messages
         // -----------------------------------------------------------------------------
         Edit::MessageManager::Register(Edit::SGUIMessageType::Exit, EDIT_RECEIVE_MESSAGE(&CEditState::OnExit));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Play, EDIT_RECEIVE_MESSAGE(&CEditState::OnPlay));
     }
     
     // -----------------------------------------------------------------------------
@@ -54,7 +55,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Cam::ControlManager::SetActiveControl(Cam::CControl::EditorControl);
 
-        Cam::ControlManager::GetActiveControl().SetPosition(Base::Float3(0.0f, 0.0f, 10.0f));
+        // Cam::ControlManager::GetActiveControl().SetPosition(Base::Float3(0.0f, 0.0f, 10.0f));
 
         // -----------------------------------------------------------------------------
         // Running states
@@ -70,6 +71,14 @@ namespace Edit
     
     CState::EStateType CEditState::InternOnLeave()
     {
+        // -----------------------------------------------------------------------------
+        // Reset action
+        // -----------------------------------------------------------------------------
+        m_Action = CState::Edit;
+
+        // -----------------------------------------------------------------------------
+        // Running states
+        // -----------------------------------------------------------------------------
         Gfx::Edit::OnLeave();
         Gui::Edit::OnLeave();
         Lg ::Edit::OnLeave();
@@ -89,7 +98,10 @@ namespace Edit
         {
         case Edit::CState::Exit:
             CUnloadMapState::GetInstance().SetNextState(CState::Exit);
-            NextState = CState::UnloadMap;
+            NextState = Edit::CState::UnloadMap;
+            break;
+        case Edit::CState::Play:
+            NextState = Edit::CState::Play;
             break;
         }
 
@@ -117,5 +129,12 @@ namespace Edit
     void CEditState::OnExit(Edit::CMessage& _rMessage)
     {
         m_Action = CState::Exit;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEditState::OnPlay(Edit::CMessage& _rMessage)
+    {
+        m_Action = CState::Play;
     }
 } // namespace Edit

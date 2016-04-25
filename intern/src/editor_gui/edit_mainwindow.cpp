@@ -6,7 +6,9 @@
 namespace Edit
 {
     CMainWindow::CMainWindow(QWidget* _pParent) 
-        : QMainWindow(_pParent)
+        : QMainWindow   (_pParent)
+        , m_pStatusLabel(nullptr)
+        , m_IsPlaying   (false)
     {
         // -----------------------------------------------------------------------------
         // Form setup
@@ -42,6 +44,28 @@ namespace Edit
     void* CMainWindow::GetEditorWindowHandle()
     {
         return (HWND)m_UserInterface.m_pEditorRenderContext->winId();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::switchPlayingCurrentScene()
+    {
+        CMessage NewMessage;
+
+        NewMessage.Reset();
+
+        if (m_IsPlaying == false)
+        {
+            MessageManager::SendMessage(SGUIMessageType::Play, NewMessage);
+
+            m_IsPlaying = true;
+        }
+        else
+        {
+            MessageManager::SendMessage(SGUIMessageType::Edit, NewMessage);
+            
+            m_IsPlaying = false;
+        }
     }
 
     // -----------------------------------------------------------------------------
