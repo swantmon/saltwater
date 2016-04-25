@@ -3,6 +3,8 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_time.h"
+
 #include "logic/lg_script_manager.h"
 
 #include "lua.hpp"
@@ -39,6 +41,106 @@ namespace
         lua_pushnumber(_pLuaState, Summe);
 
         return 1;
+    }
+
+
+
+
+
+    struct SEntity
+    {
+        float m_X;
+        float m_Y;
+    };
+
+
+    static SEntity StaticEntity;
+
+    
+
+
+    int ScriptFuncEntity(lua_State* _pLuaState)
+    {
+        lua_pushlightuserdata(_pLuaState, &StaticEntity);
+
+        return 1;
+    }
+
+    int ScriptFuncEntitySetXY(lua_State* _pLuaState)
+    {
+        SEntity* pEntity = static_cast<SEntity*>(lua_touserdata(_pLuaState, 1));
+
+        float X = lua_tonumber(_pLuaState, 2);
+        float Y = lua_tonumber(_pLuaState, 3);
+
+        pEntity->m_X = X;
+        pEntity->m_Y = Y;
+
+        return 0;
+    }
+
+    int ScriptFuncEntitySetX(lua_State* _pLuaState)
+    {
+        SEntity* pEntity = static_cast<SEntity*>(lua_touserdata(_pLuaState, 1));
+
+        float X = lua_tonumber(_pLuaState, 2);
+
+        pEntity->m_X = X;
+
+        return 0;
+    }
+
+    int ScriptFuncEntitySetY(lua_State* _pLuaState)
+    {
+        SEntity* pEntity = static_cast<SEntity*>(lua_touserdata(_pLuaState, 1));
+
+        float Y = lua_tonumber(_pLuaState, 2);
+
+        pEntity->m_Y = Y;
+
+        return 0;
+    }
+
+    int ScriptFuncEntityGetX(lua_State* _pLuaState)
+    {
+        SEntity* pEntity = static_cast<SEntity*>(lua_touserdata(_pLuaState, 1));
+
+        lua_pushnumber(_pLuaState, pEntity->m_X);
+
+        return 1;
+    }
+
+    int ScriptFuncEntityGetY(lua_State* _pLuaState)
+    {
+        SEntity* pEntity = static_cast<SEntity*>(lua_touserdata(_pLuaState, 1));
+
+        lua_pushnumber(_pLuaState, pEntity->m_Y);
+
+        return 1;
+    }
+
+    int ScriptFuncEntityGetXY(lua_State* _pLuaState)
+    {
+        SEntity* pEntity = static_cast<SEntity*>(lua_touserdata(_pLuaState, 1));
+
+        lua_pushnumber(_pLuaState, pEntity->m_X);
+        lua_pushnumber(_pLuaState, pEntity->m_Y);
+
+        return 2;
+    }
+} // namespace 
+
+namespace 
+{
+    void lua_register_Entity(lua_State* _pLuaState)
+    {
+        lua_register(_pLuaState, "Entity"     , ScriptFuncEntity);
+        lua_register(_pLuaState, "EntitySetX" , ScriptFuncEntitySetX);
+        lua_register(_pLuaState, "EntitySetY" , ScriptFuncEntitySetY);
+        lua_register(_pLuaState, "EntitySetXY", ScriptFuncEntitySetXY);
+        lua_register(_pLuaState, "EntityGetX" , ScriptFuncEntityGetX);
+        lua_register(_pLuaState, "EntityGetY" , ScriptFuncEntityGetY);
+        lua_register(_pLuaState, "EntityGetXY", ScriptFuncEntityGetXY);
     }
 } // namespace 
 
@@ -78,7 +180,8 @@ namespace
     CLgScriptManager::CLgScriptManager()
         : m_pLuaState(0)
     {
-
+        StaticEntity.m_X = 5.0f;
+        StaticEntity.m_Y = 5.0f;
     }
 
     // -----------------------------------------------------------------------------
@@ -111,7 +214,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Register C-Functions
         // -----------------------------------------------------------------------------
-        lua_register(m_pLuaState, "Summarize", ScriptFuncSummarize);
+        lua_register_Entity(m_pLuaState);
 
         // -----------------------------------------------------------------------------
         // Load a script
@@ -136,6 +239,8 @@ namespace
         if (Script == 0)
         {
             Script = lua_pcall(m_pLuaState, 0, LUA_MULTRET, 0);
+
+            LuaErrorCallback(m_pLuaState, Script);
         }
 
         lua_getglobal(m_pLuaState, "Update");
@@ -143,6 +248,8 @@ namespace
         if (Script == 0)
         {
             Script = lua_pcall(m_pLuaState, 0, LUA_MULTRET, 0);
+
+            LuaErrorCallback(m_pLuaState, Script);
         }
 
         lua_getglobal(m_pLuaState, "OnExit");
@@ -150,6 +257,8 @@ namespace
         if (Script == 0)
         {
             Script = lua_pcall(m_pLuaState, 0, LUA_MULTRET, 0);
+
+            LuaErrorCallback(m_pLuaState, Script);
         }
     }
 
