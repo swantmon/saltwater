@@ -14,7 +14,7 @@
 
 namespace 
 {
-    void LuaErrorCallback(lua_State* _pLuaState, int _StatusCode)
+    void OnLuaErrorCallback(lua_State* _pLuaState, int _StatusCode)
     {
         if (_StatusCode != 0)
         {
@@ -25,12 +25,162 @@ namespace
     }
 } // namespace 
 
+namespace
+{
+    struct SVector2
+    {
+        float m_X;
+        float m_Y;
+    };
+
+    int ScriptFuncVector2New(lua_State* _pLuaState)
+    {
+        SVector2* pNewEntityInScript;
+
+        float X = static_cast<float>(lua_tonumber(_pLuaState, 1));
+        float Y = static_cast<float>(lua_tonumber(_pLuaState, 2));
+
+        // -----------------------------------------------------------------------------
+        // Create new full user data for a entity
+        // -----------------------------------------------------------------------------
+        pNewEntityInScript = static_cast<SVector2*>(lua_newuserdata(_pLuaState, sizeof(SVector2)));
+        pNewEntityInScript->m_X = X;
+        pNewEntityInScript->m_Y = Y;
+
+        // -----------------------------------------------------------------------------
+        // Set meta table for entities on this new entity
+        // -----------------------------------------------------------------------------
+        luaL_getmetatable(_pLuaState, "Data.Vector2");
+        lua_setmetatable(_pLuaState, -2);
+
+        return 1;
+    }
+
+    int ScriptFuncVector2SetX(lua_State* _pLuaState)
+    {
+        SVector2* pVector2 = static_cast<SVector2*>(lua_touserdata(_pLuaState, 1));
+
+        float X = static_cast<float>(lua_tonumber(_pLuaState, 2));
+
+        pVector2->m_X = X;
+
+        return 0;
+    }
+
+    int ScriptFuncVector2SetY(lua_State* _pLuaState)
+    {
+        SVector2* pVector2 = static_cast<SVector2*>(lua_touserdata(_pLuaState, 1));
+
+        float Y = static_cast<float>(lua_tonumber(_pLuaState, 2));
+
+        pVector2->m_Y = Y;
+
+        return 0;
+    }
+
+    int ScriptFuncVector2GetX(lua_State* _pLuaState)
+    {
+        SVector2* pVector2 = static_cast<SVector2*>(lua_touserdata(_pLuaState, 1));
+
+        lua_pushnumber(_pLuaState, pVector2->m_X);
+
+        return 1;
+    }
+
+    int ScriptFuncVector2GetY(lua_State* _pLuaState)
+    {
+        SVector2* pVector2 = static_cast<SVector2*>(lua_touserdata(_pLuaState, 1));
+
+        lua_pushnumber(_pLuaState, pVector2->m_Y);
+
+        return 1;
+    }
+
+    static int ScriptFuncVector2ToString(lua_State* _pLuaState)
+    {
+        SVector2* pVector2 = static_cast<SVector2*>(lua_touserdata(_pLuaState, 1));
+
+        lua_pushfstring(_pLuaState, "Vector2 x=%f, y=%f", pVector2->m_X, pVector2->m_Y);
+
+        return 1;
+    }
+
+
+    // -----------------------------------------------------------------------------
+    // Create a table with every function that is accessible inside
+    // Lua. It is an array of name and function pointer.
+    // -----------------------------------------------------------------------------
+    static const struct luaL_Reg s_RequireVector2FunctionTable[] =
+    {
+        { "new", ScriptFuncVector2New },
+        { NULL, NULL }
+    };
+
+
+    // -----------------------------------------------------------------------------
+    // That is an meta table that describes the functionality of an Vector2.
+    // Combination of name and function pointer is needed.
+    // -----------------------------------------------------------------------------
+    static const struct luaL_Reg s_ObjectVector2FunctionTable[] =
+    {
+        { "__tostring", ScriptFuncVector2ToString },
+        { "GetX", ScriptFuncVector2GetX },
+        { "GetY", ScriptFuncVector2GetY },
+        { "SetX", ScriptFuncVector2SetX },
+        { "SetY", ScriptFuncVector2SetY },
+        { NULL, NULL }
+    };
+} // namespace 
+
+namespace
+{
+    int OnLuaRequireVector2(lua_State* _pLuaState)
+    {
+        // -----------------------------------------------------------------------------
+        // Create new table
+        // -----------------------------------------------------------------------------
+        lua_newtable(_pLuaState);
+
+        // -----------------------------------------------------------------------------
+        // Set specific function on this table
+        // -----------------------------------------------------------------------------
+        luaL_setfuncs(_pLuaState, s_RequireVector2FunctionTable, 0);
+
+        return 1;
+    }
+
+    void LuaRegisterLibraryVector2(lua_State* _pLuaState)
+    {
+        luaL_requiref(_pLuaState, "vector2", OnLuaRequireVector2, 1);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void LuaRegisterVector2Object(lua_State *_pLuaState)
+    {
+        // -----------------------------------------------------------------------------
+        // Create a new meta table for this Lua script
+        // Namespace.UniqueName
+        // -----------------------------------------------------------------------------
+        luaL_newmetatable(_pLuaState, "Data.Vector2");
+
+        lua_pushvalue(_pLuaState, -1);
+        lua_setfield(_pLuaState, -2, "__index");
+
+        // -----------------------------------------------------------------------------
+        // Set a function that loads the function table on the meta table as soon
+        // as the scripts require an entity
+        // -----------------------------------------------------------------------------
+        luaL_setfuncs(_pLuaState, s_ObjectVector2FunctionTable, 0);
+    }
+} // namespace 
+
 namespace 
 {
     struct SEntity
     {
-        float m_X;
-        float m_Y;
+        SVector2 m_Position;
+        float    m_Speed;
     };
 
     int ScriptFuncEntityNew(lua_State* _pLuaState)
@@ -41,8 +191,9 @@ namespace
         // Create new full user data for a entity
         // -----------------------------------------------------------------------------
         pNewEntityInScript = static_cast<SEntity*>(lua_newuserdata(_pLuaState, sizeof(SEntity)));
-        pNewEntityInScript->m_X = 0;
-        pNewEntityInScript->m_Y = 0;
+        pNewEntityInScript->m_Position.m_X = 0;
+        pNewEntityInScript->m_Position.m_Y = 0;
+        pNewEntityInScript->m_Speed = 0;
 
         // -----------------------------------------------------------------------------
         // Set meta table for entities on this new entity
@@ -53,42 +204,30 @@ namespace
         return 1;
     }
 
-    int ScriptFuncEntitySetX(lua_State* _pLuaState)
+    int ScriptFuncEntitySetPos(lua_State* _pLuaState)
     {
-        SEntity* pEntity = static_cast<SEntity*>(luaL_checkudata(_pLuaState, 1, "Data.Entity"));
+        SEntity*  pEntity = static_cast<SEntity*>(luaL_checkudata(_pLuaState, 1, "Data.Entity"));
+        SVector2* pVector = static_cast<SVector2*>(luaL_checkudata(_pLuaState, 2, "Data.Vector2"));
 
-        float X = lua_tonumber(_pLuaState, 2);
-
-        pEntity->m_X = X;
+        pEntity->m_Position.m_X = pVector->m_X;
+        pEntity->m_Position.m_Y = pVector->m_Y;
 
         return 0;
     }
 
-    int ScriptFuncEntitySetY(lua_State* _pLuaState)
+    int ScriptFuncEntityGetPos(lua_State* _pLuaState)
     {
-        SEntity* pEntity = static_cast<SEntity*>(luaL_checkudata(_pLuaState, 1, "Data.Entity"));
+        SEntity*  pEntity = static_cast<SEntity*>(luaL_checkudata(_pLuaState, 1, "Data.Entity"));
 
-        float Y = lua_tonumber(_pLuaState, 2);
+        SVector2* pNewEntityInScript = static_cast<SVector2*>(lua_newuserdata(_pLuaState, sizeof(SVector2)));
+        pNewEntityInScript->m_X = pEntity->m_Position.m_X;
+        pNewEntityInScript->m_Y = pEntity->m_Position.m_Y;
 
-        pEntity->m_Y = Y;
-
-        return 0;
-    }
-
-    int ScriptFuncEntityGetX(lua_State* _pLuaState)
-    {
-        SEntity* pEntity = static_cast<SEntity*>(luaL_checkudata(_pLuaState, 1, "Data.Entity"));
-
-        lua_pushnumber(_pLuaState, pEntity->m_X);
-
-        return 1;
-    }
-
-    int ScriptFuncEntityGetY(lua_State* _pLuaState)
-    {
-        SEntity* pEntity = static_cast<SEntity*>(luaL_checkudata(_pLuaState, 1, "Data.Entity"));
-
-        lua_pushnumber(_pLuaState, pEntity->m_Y);
+        // -----------------------------------------------------------------------------
+        // Set meta table for entities on this new entity
+        // -----------------------------------------------------------------------------
+        luaL_getmetatable(_pLuaState, "Data.Vector2");
+        lua_setmetatable(_pLuaState, -2);
 
         return 1;
     }
@@ -97,7 +236,7 @@ namespace
     {
         SEntity* pEntity = static_cast<SEntity*>(luaL_checkudata(_pLuaState, 1, "Data.Entity"));
 
-        lua_pushfstring(_pLuaState, "Entity at position: x=%f, y=%f", pEntity->m_X, pEntity->m_Y);
+        lua_pushfstring(_pLuaState, "Entity at position: x=%f, y=%f and speed=%f", pEntity->m_Position.m_X, pEntity->m_Position.m_Y, pEntity->m_Speed);
 
         return 1;
     }
@@ -121,35 +260,37 @@ namespace
     static const struct luaL_Reg s_ObjectEntityFunctionTable[] = 
     {
         { "__tostring", ScriptFuncEntityToString },
-        { "x", ScriptFuncEntityGetX },
-        { "y", ScriptFuncEntityGetY },
-        { "setx", ScriptFuncEntitySetX },
-        { "sety", ScriptFuncEntitySetY },
+        { "GetPosition", ScriptFuncEntityGetPos },
+        { "SetPosition", ScriptFuncEntitySetPos },
         { NULL, NULL }
     };
-
 } // namespace 
 
 namespace 
 {
-    int lua_reguire_entity(lua_State *L)
+    int OnLuaRequireEntity(lua_State* _pLuaState)
     {
         // -----------------------------------------------------------------------------
-        // Create new table with informations from global informations
+        // Create new table
         // -----------------------------------------------------------------------------
-        lua_newtable(L);
-        lua_pushvalue(L, -2);
-        lua_setfield(L, -2, "Data.Entity");
+        lua_newtable(_pLuaState);
 
         // -----------------------------------------------------------------------------
         // Set specific function on this table
         // -----------------------------------------------------------------------------
-        luaL_setfuncs(L, s_RequireEntityFunctionTable, 0);
+        luaL_setfuncs(_pLuaState, s_RequireEntityFunctionTable, 0);
 
         return 1;
     }
 
-    int lua_register_entity_meta(lua_State *_pLuaState)
+    void LuaRegisterLibraryEntity(lua_State* _pLuaState)
+    {
+        luaL_requiref(_pLuaState, "entity", OnLuaRequireEntity, 1);
+    }
+    
+    // -----------------------------------------------------------------------------
+
+    void LuaRegisterEntityObject(lua_State *_pLuaState)
     {
         // -----------------------------------------------------------------------------
         // Create a new meta table for this Lua script
@@ -165,9 +306,6 @@ namespace
         // as the scripts require an entity
         // -----------------------------------------------------------------------------
         luaL_setfuncs(_pLuaState, s_ObjectEntityFunctionTable, 0);
-        luaL_requiref(_pLuaState, "data_entity", lua_reguire_entity, 1);
-
-        return 1;
     }
 } // namespace 
 
@@ -177,15 +315,16 @@ namespace
 {
     static SEntity StaticEntity;
 
-    int ScriptGetBindedEntity(lua_State* _pLuaState)
+    int OnLuaGetBindedEntity(lua_State* _pLuaState)
     {
         // -----------------------------------------------------------------------------
         // Create new full user data for a entity and set an existing entity 
         // on it.
         // -----------------------------------------------------------------------------
         SEntity* res = (SEntity *)lua_newuserdata(_pLuaState, sizeof(SEntity));
-        res->m_X = StaticEntity.m_X;
-        res->m_Y = StaticEntity.m_Y;
+        res->m_Position.m_X = StaticEntity.m_Position.m_X;
+        res->m_Position.m_Y = StaticEntity.m_Position.m_Y;
+        res->m_Speed = StaticEntity.m_Speed;
 
         // -----------------------------------------------------------------------------
         // Set meta table for entities on this new entity
@@ -199,9 +338,9 @@ namespace
 
 namespace
 {
-    void lua_register_Entity(lua_State* _pLuaState)
+    void LuaRegisterGlobalFunctionGetBindedEntity(lua_State* _pLuaState)
     {
-        lua_register(_pLuaState, "Entity", ScriptGetBindedEntity);
+        lua_register(_pLuaState, "Entity", OnLuaGetBindedEntity);
     }
 } // namespace 
 
@@ -243,8 +382,9 @@ namespace
     CLgScriptManager::CLgScriptManager()
         : m_pLuaState(0)
     {
-        StaticEntity.m_X = 5.0f;
-        StaticEntity.m_Y = 5.0f;
+        StaticEntity.m_Position.m_X = 5.0f;
+        StaticEntity.m_Position.m_Y = 5.0f;
+        StaticEntity.m_Speed = 2.0f;
     }
 
     // -----------------------------------------------------------------------------
@@ -277,9 +417,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Register C-Functions
         // -----------------------------------------------------------------------------
-        lua_register_entity_meta(m_pLuaState);
+        LuaRegisterVector2Object(m_pLuaState);
 
-        lua_register_Entity(m_pLuaState);
+        LuaRegisterLibraryVector2(m_pLuaState);
+        
+        LuaRegisterEntityObject(m_pLuaState);
+
+        LuaRegisterLibraryEntity(m_pLuaState);
+
+        LuaRegisterGlobalFunctionGetBindedEntity(m_pLuaState);
 
         // -----------------------------------------------------------------------------
         // Load a script
@@ -290,7 +436,7 @@ namespace
 
         int Script = lua_pcall(m_pLuaState, 0, 0, 0);
 
-        LuaErrorCallback(m_pLuaState, Script);
+        OnLuaErrorCallback(m_pLuaState, Script);
 
         // -----------------------------------------------------------------------------
         // Execute
@@ -305,7 +451,7 @@ namespace
         {
             Script = lua_pcall(m_pLuaState, 0, LUA_MULTRET, 0);
 
-            LuaErrorCallback(m_pLuaState, Script);
+            OnLuaErrorCallback(m_pLuaState, Script);
         }
 
         lua_getglobal(m_pLuaState, "Update");
@@ -314,7 +460,7 @@ namespace
         {
             Script = lua_pcall(m_pLuaState, 0, LUA_MULTRET, 0);
 
-            LuaErrorCallback(m_pLuaState, Script);
+            OnLuaErrorCallback(m_pLuaState, Script);
         }
 
         lua_getglobal(m_pLuaState, "OnExit");
@@ -323,7 +469,7 @@ namespace
         {
             Script = lua_pcall(m_pLuaState, 0, LUA_MULTRET, 0);
 
-            LuaErrorCallback(m_pLuaState, Script);
+            OnLuaErrorCallback(m_pLuaState, Script);
         }
     }
 
