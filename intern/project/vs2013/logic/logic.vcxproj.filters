@@ -31,6 +31,21 @@
     <ClCompile Include="..\..\..\src\logic\lg_script_manager.cpp">
       <Filter>scripts</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\logic\lua_argument.cpp">
+      <Filter>scripts\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\logic\lua_export.cpp">
+      <Filter>scripts\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\logic\lua_result.cpp">
+      <Filter>scripts\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\logic\lua_state.cpp">
+      <Filter>scripts\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\logic\lua_main.cpp">
+      <Filter>scripts\lua</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\logic\lg_debug_state.h">
@@ -63,6 +78,24 @@
     <ClInclude Include="..\..\..\src\logic\lg_script_manager.h">
       <Filter>scripts</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\logic\lua_argument.h">
+      <Filter>scripts\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\logic\lua_export.h">
+      <Filter>scripts\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\logic\lua_result.h">
+      <Filter>scripts\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\logic\lua_state.h">
+      <Filter>scripts\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\logic\lua_typedef.h">
+      <Filter>scripts\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\logic\lua_main.h">
+      <Filter>scripts\lua</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="states">
@@ -70,6 +103,9 @@
     </Filter>
     <Filter Include="scripts">
       <UniqueIdentifier>{e2b956db-a9df-4455-a39d-c62b67f6bdd1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\lua">
+      <UniqueIdentifier>{8dc77bfa-4d33-4d26-aef3-533576ed9c80}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

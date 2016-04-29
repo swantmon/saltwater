@@ -29,6 +29,11 @@
     <ClCompile Include="..\..\..\src\logic\lg_start_state.cpp" />
     <ClCompile Include="..\..\..\src\logic\lg_unload_map_state.cpp" />
     <ClCompile Include="..\..\..\src\logic\lg_script_manager.cpp" />
+    <ClCompile Include="..\..\..\src\logic\lua_argument.cpp" />
+    <ClCompile Include="..\..\..\src\logic\lua_export.cpp" />
+    <ClCompile Include="..\..\..\src\logic\lua_main.cpp" />
+    <ClCompile Include="..\..\..\src\logic\lua_result.cpp" />
+    <ClCompile Include="..\..\..\src\logic\lua_state.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\logic\lg_debug_state.h" />
@@ -41,6 +46,12 @@
     <ClInclude Include="..\..\..\src\logic\lg_script_manager.h" />
     <ClInclude Include="..\..\..\src\logic\lg_start_state.h" />
     <ClInclude Include="..\..\..\src\logic\lg_unload_map_state.h" />
+    <ClInclude Include="..\..\..\src\logic\lua_argument.h" />
+    <ClInclude Include="..\..\..\src\logic\lua_export.h" />
+    <ClInclude Include="..\..\..\src\logic\lua_main.h" />
+    <ClInclude Include="..\..\..\src\logic\lua_result.h" />
+    <ClInclude Include="..\..\..\src\logic\lua_state.h" />
+    <ClInclude Include="..\..\..\src\logic\lua_typedef.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{BCE4CC5A-541E-4838-94D1-73B962A02FBC}</ProjectGuid>
