@@ -3,7 +3,9 @@
 
 #include <assert.h>
 
-namespace LUA
+namespace Core
+{
+namespace Lua
 {
     CResult::CResult()
         : m_Type (SValueType::Nil)
@@ -129,4 +131,5 @@ namespace LUA
 
         return m_Value.m_pValueAsPtr;
     }
-} // namespace LUA
+} // namespace Lua
+} // namespace Core

@@ -4,7 +4,7 @@
 
 #include <assert.h>
 
-using namespace LUA;
+using namespace Core::Lua;
 
 namespace
 {
@@ -90,15 +90,20 @@ namespace
     }
 } // namespace
 
-namespace LUA
+namespace Core
+{
+namespace Lua
 {
     CStaticFunctionList::CStaticFunctionList()
         : m_pFirst(nullptr)
     {
     }
-} // namespace LUA
+} // namespace Lua
+} // namespace Core
 
-namespace LUA
+namespace Core
+{
+namespace Lua
 {
 namespace Private
 {
@@ -143,4 +148,5 @@ namespace Private
         rInternFunctionList.RegisterObject(_State, _pObjectName);
     }
 } // namespace Private
-} // namespace LUA
+} // namespace Lua
+} // namespace Core

@@ -5,13 +5,18 @@
 
 #include "core/core_lua_typedef.h"
 
-namespace LUA
+namespace Core
+{
+namespace Lua
 {
     class CArgument;
     class CResult;
-} // namespace LUA
+} // namespace Lua
+} // namespace Core
 
-namespace LUA
+namespace Core
+{
+namespace Lua
 {
 namespace State
 {
@@ -72,4 +77,5 @@ namespace State
     bool IsNumber(BState _State, int _IndexOfStack);
     bool IsString(BState _State, int _IndexOfStack);
 } // namespace State
-} // namespace LUA
+} // namespace Lua
+} // namespace Core

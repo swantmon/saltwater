@@ -5,7 +5,9 @@
 
 #include "core/core_lua_typedef.h"
 
-namespace LUA
+namespace Core
+{
+namespace Lua
 {
     class CResult
     {
@@ -52,4 +54,5 @@ namespace LUA
         SValueType::Enum m_Type;
         UValue           m_Value;
     };
-} // namespace LUA
+} // namespace Lua
+} // namespace Core

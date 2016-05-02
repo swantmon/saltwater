@@ -3,10 +3,13 @@
 
 #include "core/core_lua_typedef.h"
 
-namespace LUA
+namespace Core
+{
+namespace Lua
 {
 namespace Main
 {
     BState GetMainState();
 } // namespace Main
-} // namespace LUA
+} // namespace Lua
+} // namespace Core

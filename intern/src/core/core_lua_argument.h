@@ -6,7 +6,9 @@
 
 #include "core/core_lua_typedef.h"
 
-namespace LUA
+namespace Core
+{
+namespace Lua
 {
     class CArgument
     {
@@ -51,4 +53,5 @@ namespace LUA
         SValueType::Enum m_Type;
         UAny             m_Value;
     };
-} // namespace LUA
+} // namespace Lua
+} // namespace Core

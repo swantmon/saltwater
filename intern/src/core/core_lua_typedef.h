@@ -3,17 +3,25 @@
 
 #include "base/base_typedef.h"
 
-namespace LUA
+namespace Core
+{
+namespace Lua
 {
     typedef void* BState;
-} // namespace LUA
+} // namespace Lua
+} // namespace Core
 
-namespace LUA
+namespace Core
+{
+namespace Lua
 {
     typedef int(*FLuaCFunc) (BState _State);
-} // namespace LUA
+} // namespace Lua
+} // namespace Core
 
-namespace LUA
+namespace Core
+{
+namespace Lua
 {
     struct SValueType
     {
@@ -26,9 +34,12 @@ namespace LUA
             Pointer,
         };
     };
-} // namespace LUA
+} // namespace Lua
+} // namespace Core
 
-namespace LUA
+namespace Core
+{
+namespace Lua
 {
     struct SLoadFlags
     {
@@ -37,4 +48,5 @@ namespace LUA
             DoNotExecute = 0x01,
         };
     };
-} // namespace LUA
+} // namespace Lua
+} // namespace Core

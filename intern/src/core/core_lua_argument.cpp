@@ -1,7 +1,9 @@
 
 #include "core/core_lua_argument.h"
 
-namespace LUA
+namespace Core
+{
+namespace Lua
 {
     CArgument::CArgument()
         : m_Type(SValueType::Nil)
@@ -99,4 +101,5 @@ namespace LUA
     {
         return m_Value.m_pValueAsPtr;
     }
-} // namespace LUA
+} // namespace Lua
+} // namespace Core

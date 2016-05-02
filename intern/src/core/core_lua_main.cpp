@@ -5,7 +5,7 @@
 #include "core/core_lua_main.h"
 #include "core/core_lua_state.h"
 
-using namespace LUA;
+using namespace Core::Lua;
 
 namespace 
 {
@@ -50,7 +50,9 @@ namespace
     }
 } // namespace
 
-namespace LUA
+namespace Core
+{
+namespace Lua
 {
 namespace Main
 {
@@ -59,4 +61,5 @@ namespace Main
         return CLuaMain::GetInstance().GetMainState();
     }
 } // namespace Main
-} // namespace LUA
+} // namespace Lua
+} // namespace Core

@@ -10,7 +10,7 @@
 
 #include "lua.hpp"
 
-using namespace LUA;
+using namespace Core::Lua;
 
 namespace 
 {
@@ -283,17 +283,6 @@ namespace
         luaL_setmetatable(pNativeState, _pObjectName);
         lua_pushvalue(pNativeState, -1);
         lua_setfield(pNativeState, -2, "__index");
-
-//         LUALIB_API void luaL_setfuncs(lua_State *L, const luaL_Reg *l, int nup) {
-//             luaL_checkstack(L, nup, "too many upvalues");
-//             for (; l->name != NULL; l++) {  /* fill the table with given functions */
-//                 int i;
-//                 for (i = 0; i < nup; i++)  /* copy upvalues to the top */
-//                     lua_pushvalue(L, -nup);
-//                 lua_pushcclosure(L, l->func, nup);  /* closure with those upvalues */
-//                 lua_setfield(L, -(nup + 2), l->name);
-//             }
-//             lua_pop(L, nup);  /* remove upvalues */
 
         // -----------------------------------------------------------------------------
         // Set a function that loads the function table on the meta table as soon
@@ -644,7 +633,9 @@ namespace
     }
 } // namespace 
 
-namespace LUA
+namespace Core
+{
+namespace Lua
 {
 namespace State
 {
@@ -999,4 +990,5 @@ namespace State
         return CLuaStateManager::GetInstance().IsString(_State, _IndexOfStack);
     }
 } // namespace State
-} // namespace LUA
+} // namespace Lua
+} // namespace Core
