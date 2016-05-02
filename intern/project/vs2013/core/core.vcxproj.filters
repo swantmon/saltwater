@@ -2,9 +2,54 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="..\..\..\src\core\core_config.h" />
-    <ClInclude Include="..\..\..\src\core\core_time.h" />
+    <ClInclude Include="..\..\..\src\core\core_time.h">
+      <Filter>time</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\core_lua_argument.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\core_lua_export.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\core_lua_main.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\core_lua_result.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\core_lua_state.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\core_lua_typedef.h">
+      <Filter>script</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\core\core_time.cpp" />
+    <ClCompile Include="..\..\..\src\core\core_time.cpp">
+      <Filter>time</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\core_lua_argument.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\core_lua_export.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\core_lua_main.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\core_lua_result.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\core_lua_state.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="time">
+      <UniqueIdentifier>{11f879af-229b-4063-b024-0b178902d5e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="script">
+      <UniqueIdentifier>{2be001e9-db45-4288-80ad-bd4da4bc1ce1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

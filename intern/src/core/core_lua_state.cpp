@@ -3,10 +3,10 @@
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
-#include "logic/lua_argument.h"
-#include "logic/lua_result.h"
-#include "logic/lua_state.h"
-#include "logic/lua_typedef.h"
+#include "core/core_lua_argument.h"
+#include "core/core_lua_result.h"
+#include "core/core_lua_state.h"
+#include "core/core_lua_typedef.h"
 
 #include "lua.hpp"
 
@@ -208,6 +208,11 @@ namespace
 
             Result = lua_pcall(pNativeState, NumberOfArguments, (_pResult == nullptr) ? 0 : 1, 0);
 
+            if (Result != 0)
+            {
+                OnLuaErrorCallback(pNativeState, Result);
+            }
+
             // -----------------------------------------------------------------------------
             // Get result
             // -----------------------------------------------------------------------------
@@ -244,6 +249,8 @@ namespace
 
     void CLuaStateManager::RegisterLibrary(BState _State, const Base::Char* _pLibraryName, const Base::Char* _pFunctionName, FLuaCFunc _pFunction)
     {
+        BASE_UNUSED(_pLibraryName);
+
         lua_State* pNativeState = GetNativeState(_State);
 
         // -----------------------------------------------------------------------------

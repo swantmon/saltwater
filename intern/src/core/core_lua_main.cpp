@@ -2,8 +2,8 @@
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
-#include "logic/lua_main.h"
-#include "logic/lua_state.h"
+#include "core/core_lua_main.h"
+#include "core/core_lua_state.h"
 
 using namespace LUA;
 

@@ -1,6 +1,6 @@
 
-#include "logic/lua_export.h"
-#include "logic/lua_state.h"
+#include "core/core_lua_export.h"
+#include "core/core_lua_state.h"
 
 #include <assert.h>
 

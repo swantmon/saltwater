@@ -3,10 +3,11 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_lua_export.h"
+#include "core/core_lua_main.h"
+#include "core/core_lua_state.h"
+
 #include "logic/lg_script_manager.h"
-#include "logic/lua_export.h"
-#include "logic/lua_main.h"
-#include "logic/lua_state.h"
 
 #include <assert.h>
 #include <string>

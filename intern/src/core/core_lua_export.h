@@ -4,7 +4,7 @@
 #include "base/base_defines.h"
 #include "base/base_typedef.h"
 
-#include "logic/lua_typedef.h"
+#include "core/core_lua_typedef.h"
 
 // -----------------------------------------------------------------------------
 // Define to help registering different modules like functions, libraries and
@@ -52,7 +52,7 @@ struct BASE_CONCAT(SRegObject, BASE_CONCAT(FunctionList, ObjectName))           
 #define LUA_REGISTER_LIBRARY(LuaState, FunctionList, LibraryName)                                                                                                           \
 static int BASE_CONCAT(LuaFunction, BASE_CONCAT(FunctionList, LibraryName))(LUA::BState _State)                                                                             \
 {                                                                                                                                                                           \
-    ::LUA::Private::RegisterLibrary(LuaState, FunctionList, #LibraryName); return 1;                                                                                        \
+    ::LUA::Private::RegisterLibrary(_State, FunctionList, #LibraryName); return 1;                                                                                          \
 }                                                                                                                                                                           \
 struct BASE_CONCAT(SRegLibrary, BASE_CONCAT(FunctionList, LibraryName))                                                                                                     \
 {                                                                                                                                                                           \

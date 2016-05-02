@@ -21,9 +21,20 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\src\core\core_config.h" />
     <ClInclude Include="..\..\..\src\core\core_time.h" />
+    <ClInclude Include="..\..\..\src\core\core_lua_argument.h" />
+    <ClInclude Include="..\..\..\src\core\core_lua_export.h" />
+    <ClInclude Include="..\..\..\src\core\core_lua_main.h" />
+    <ClInclude Include="..\..\..\src\core\core_lua_result.h" />
+    <ClInclude Include="..\..\..\src\core\core_lua_state.h" />
+    <ClInclude Include="..\..\..\src\core\core_lua_typedef.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\src\core\core_lua_result.cpp" />
     <ClCompile Include="..\..\..\src\core\core_time.cpp" />
+    <ClCompile Include="..\..\..\src\core\core_lua_argument.cpp" />
+    <ClCompile Include="..\..\..\src\core\core_lua_export.cpp" />
+    <ClCompile Include="..\..\..\src\core\core_lua_main.cpp" />
+    <ClCompile Include="..\..\..\src\core\core_lua_state.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8BF7FB01-1873-4CB2-85A8-57EF3ED5AFD4}</ProjectGuid>
@@ -105,7 +116,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\lua\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
@@ -128,7 +139,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\lua\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
@@ -153,7 +164,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\lua\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
@@ -180,7 +191,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\lua\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>

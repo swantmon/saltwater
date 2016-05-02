@@ -3,7 +3,7 @@
 
 #include "base/base_string.h"
 
-#include "logic/lua_typedef.h"
+#include "core/core_lua_typedef.h"
 
 namespace LUA
 {
