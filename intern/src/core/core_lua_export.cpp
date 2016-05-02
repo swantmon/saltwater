@@ -23,7 +23,6 @@ namespace
         {
             const Base::Char* m_pFunctionName;
             FLuaCFunc         m_pLuaCFtr;
-            const Base::Char* m_pDoc;
             SFunctionInfo*    m_pNext;
         };
     };
