@@ -26,6 +26,7 @@
     <ClInclude Include="..\..\..\src\core\core_script_base_vector3.h">
       <Filter>script</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\core\core_precompiled.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\core\core_time.cpp">
@@ -46,6 +47,7 @@
     <ClCompile Include="..\..\..\src\core\core_lua_state.cpp">
       <Filter>lua</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\core\core_precompiled.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="time">

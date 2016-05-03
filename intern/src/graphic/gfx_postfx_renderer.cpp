@@ -1,4 +1,6 @@
 
+#include "graphic/gfx_precompiled.h"
+
 #include "base/base_matrix4x4.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"

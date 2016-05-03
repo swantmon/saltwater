@@ -1,4 +1,6 @@
 
+#include "data/data_precompiled.h"
+
 #include "data/data_light_facet.h"
 
 namespace Dt

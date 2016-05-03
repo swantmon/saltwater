@@ -1,4 +1,6 @@
 
+#include "graphic/gfx_precompiled.h"
+
 #include "graphic/gfx_buffer_set.h"
 
 #include <assert.h>

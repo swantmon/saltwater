@@ -1,4 +1,6 @@
 
+#include "mr/mr_precompiled.h"
+
 #include "base/base_memory.h"
 
 #include "data/data_texture_manager.h"

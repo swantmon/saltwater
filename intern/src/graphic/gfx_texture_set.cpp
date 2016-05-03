@@ -1,4 +1,6 @@
 
+#include "graphic/gfx_precompiled.h"
+
 #include "graphic/gfx_texture_set.h"
 
 #include <assert.h>

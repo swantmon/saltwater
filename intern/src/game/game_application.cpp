@@ -1,4 +1,6 @@
 
+#include "game/game_precompiled.h"
+
 #include "base/base_console.h"
 #include "base/base_exception.h"
 #include "base/base_input_event.h"

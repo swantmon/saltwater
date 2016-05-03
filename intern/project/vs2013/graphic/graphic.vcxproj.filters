@@ -205,6 +205,7 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_edit_state.cpp">
       <Filter>states</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_precompiled.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\graphic\gfx_debug_interface.h">
@@ -453,6 +454,7 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_edit_state.h">
       <Filter>states</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_precompiled.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="interface">

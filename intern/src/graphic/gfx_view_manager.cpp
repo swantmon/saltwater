@@ -6,6 +6,8 @@
 //  Copyright (c) 2014 TU Ilmenau. All rights reserved.
 //
 
+#include "graphic/gfx_precompiled.h"
+
 #include "base/base_exception.h"
 #include "base/base_managed_pool.h"
 #include "base/base_matrix3x3.h"

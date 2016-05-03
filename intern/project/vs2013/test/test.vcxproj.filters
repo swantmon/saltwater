@@ -28,7 +28,6 @@
     <ClCompile Include="..\..\..\test\core\test_core_function_call.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\test\main.cpp" />
     <ClCompile Include="..\..\..\test\base\test_base_plane.cpp">
       <Filter>base</Filter>
     </ClCompile>
@@ -44,6 +43,8 @@
     <ClCompile Include="..\..\..\test\test_base_string.cpp">
       <Filter>base</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\test\test_precompiled.cpp" />
+    <ClCompile Include="..\..\..\test\test_main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="core">
@@ -52,5 +53,8 @@
     <Filter Include="base">
       <UniqueIdentifier>{c739d2e7-e863-4199-9903-366a5a0e63f7}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\test\test_precompiled.h" />
   </ItemGroup>
 </Project>

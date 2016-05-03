@@ -1,4 +1,6 @@
 
+#include "logic/lg_precompiled.h"
+
 #include "base/base_input_event.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"

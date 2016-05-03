@@ -9,6 +9,7 @@
     <ClCompile Include="..\..\..\src\camera\cam_game_control.cpp">
       <Filter>controls</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\camera\cam_precompiled.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\camera\cam_control.h" />
@@ -19,6 +20,7 @@
     <ClInclude Include="..\..\..\src\camera\cam_game_control.h">
       <Filter>controls</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\camera\cam_precompiled.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="controls">

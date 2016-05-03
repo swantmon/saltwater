@@ -6,6 +6,8 @@
 //  Copyright (c) 2014 TU Ilmenau. All rights reserved.
 //
 
+#include "game/game_precompiled.h"
+
 #include "base/base_console.h"
 #include "base/base_exception.h"
 

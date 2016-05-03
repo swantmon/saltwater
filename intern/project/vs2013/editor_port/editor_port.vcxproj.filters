@@ -4,9 +4,11 @@
     <ClInclude Include="..\..\..\src\editor_port\edit_message.h" />
     <ClInclude Include="..\..\..\src\editor_port\edit_message_manager.h" />
     <ClInclude Include="..\..\..\src\editor_port\edit_message_type.h" />
+    <ClInclude Include="..\..\..\src\editor_port\edit_precompiled.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\editor_port\edit_message_manager.cpp" />
     <ClCompile Include="..\..\..\src\editor_port\edit_message.cpp" />
+    <ClCompile Include="..\..\..\src\editor_port\edit_precompiled.cpp" />
   </ItemGroup>
 </Project>

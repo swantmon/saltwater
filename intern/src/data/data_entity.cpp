@@ -1,4 +1,6 @@
 
+#include "data/data_precompiled.h"
+
 #include "data/data_entity.h"
 #include "data/data_hierarchy_facet.h"
 

@@ -1,5 +1,7 @@
 
-#include "gfx_render_context.h"
+#include "graphic/gfx_precompiled.h"
+
+#include "graphic/gfx_render_context.h"
 
 namespace Gfx
 {

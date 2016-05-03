@@ -1,4 +1,6 @@
 
+#include "test_precompiled.h"
+
 #include "base/base_test_defines.h"
 
 #include "base/base_plane.h"
@@ -25,7 +27,7 @@ BASE_TEST(TestPlaneAgainstRay)
     MyPlane.Set(0.0f, 0.0f, 1.0f, 0.0f);
     
     Float3 IntersectionPoint;
-    float  Lambda;
+    float  Lambda = 0.0f;
     
     // -----------------------------------------------------------------------------
     

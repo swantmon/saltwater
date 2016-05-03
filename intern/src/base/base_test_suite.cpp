@@ -1,4 +1,6 @@
 
+#include "base/base_precompiled.h"
+
 #include "base/base_defines.h"
 #include "base/base_clock.h"
 #include "base/base_timer.h"

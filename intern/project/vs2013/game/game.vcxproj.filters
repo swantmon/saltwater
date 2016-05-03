@@ -27,6 +27,7 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\game\game_main.cpp" />
     <ClCompile Include="..\..\..\src\game\game_application.cpp" />
+    <ClCompile Include="..\..\..\src\game\game_precompiled.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="states">
@@ -62,5 +63,6 @@
       <Filter>states</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\game\game_application.h" />
+    <ClInclude Include="..\..\..\src\game\game_precompiled.h" />
   </ItemGroup>
 </Project>

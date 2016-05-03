@@ -1,4 +1,6 @@
 
+#include "graphic/gfx_precompiled.h"
+
 #include "graphic/gfx_texture_3d.h"
 
 namespace Gfx

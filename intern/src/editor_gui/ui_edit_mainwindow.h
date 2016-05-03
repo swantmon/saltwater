@@ -77,7 +77,7 @@ public:
         m_pEditorRenderContext->setLocale(QLocale(QLocale::English, QLocale::UnitedStates));
         m_pPlayButton = new QPushButton(m_pCentralWidget);
         m_pPlayButton->setObjectName(QStringLiteral("m_pPlayButton"));
-        m_pPlayButton->setGeometry(QRect(600, 10, 75, 23));
+        m_pPlayButton->setGeometry(QRect(10, 10, 75, 23));
         CMainWindow->setCentralWidget(m_pCentralWidget);
         m_pMenuBar = new QMenuBar(CMainWindow);
         m_pMenuBar->setObjectName(QStringLiteral("m_pMenuBar"));

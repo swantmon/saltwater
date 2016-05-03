@@ -1,4 +1,6 @@
 
+#include "graphic/gfx_precompiled.h"
+
 #include "graphic/gfx_camera.h"
 #include "graphic/gfx_view.h"
 

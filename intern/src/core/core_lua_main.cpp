@@ -1,4 +1,6 @@
 
+#include "core/core_precompiled.h"
+
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 

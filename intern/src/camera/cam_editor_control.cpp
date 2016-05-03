@@ -1,4 +1,6 @@
 
+#include "camera/cam_precompiled.h"
+
 #include "base/base_input_event.h"
 #include "base/base_math_operations.h"
 

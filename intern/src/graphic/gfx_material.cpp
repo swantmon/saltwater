@@ -1,4 +1,6 @@
 
+#include "graphic/gfx_precompiled.h"
+
 #include "base/base_memory.h"
 
 #include "graphic/gfx_material.h"

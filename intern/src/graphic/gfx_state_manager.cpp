@@ -1,4 +1,6 @@
 
+#include "graphic/gfx_precompiled.h"
+
 #include "base/base_exception.h"
 #include "base/base_managed_pool.h"
 #include "base/base_typedef.h"

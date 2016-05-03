@@ -1,4 +1,6 @@
 
+#include "game/game_precompiled.h"
+
 #include "base/base_console.h"
 
 #include "game/game_exit_state.h"

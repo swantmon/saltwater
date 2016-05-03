@@ -1,4 +1,6 @@
 
+#include "graphic/gfx_precompiled.h"
+
 #include "base/base_console.h"
 #include "base/base_matrix4x4.h"
 #include "base/base_singleton.h"
@@ -354,7 +356,7 @@ namespace
         MainCameraPtr      = ViewManager::GetMainCamera();
         Width              = Main::GetActiveWindowSize()[0];
         Height             = Main::GetActiveWindowSize()[1];
-        FrameCounter       = Core::Time::GetNumberOfFrame();
+        FrameCounter       = static_cast<unsigned int>(Core::Time::GetNumberOfFrame());
 
         NumberOfThreadGroupsX = (Width  + s_HistogramTileSize * s_HistogramThreadGroupSizeX - 1) / (s_HistogramTileSize * s_HistogramThreadGroupSizeX);
         NumberOfThreadGroupsY = (Height + s_HistogramTileSize * s_HistogramThreadGroupSizeY - 1) / (s_HistogramTileSize * s_HistogramThreadGroupSizeY);
@@ -542,7 +544,7 @@ namespace
     
     void CGfxHistogramRenderer::ResetEyeAdaption()
     {
-        m_FrameOnResetEyeAdaption = Core::Time::GetNumberOfFrame();
+        m_FrameOnResetEyeAdaption = static_cast<unsigned int>(Core::Time::GetNumberOfFrame());
     }
 } // namespace
 

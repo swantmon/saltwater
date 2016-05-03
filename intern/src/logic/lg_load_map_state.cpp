@@ -1,4 +1,6 @@
 
+#include "logic/lg_precompiled.h"
+
 #include "base/base_console.h"
 #include "base/base_serialize_text_reader.h"
 #include "base/base_singleton.h"

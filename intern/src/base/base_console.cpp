@@ -1,4 +1,6 @@
 
+#include "base/base_precompiled.h"
+
 #include "base/base_console.h"
 
 #include <stdarg.h>

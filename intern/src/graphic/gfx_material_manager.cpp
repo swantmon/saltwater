@@ -6,6 +6,8 @@
 //  Copyright (c) 2015 TU Ilmenau. All rights reserved.
 //
 
+#include "graphic/gfx_precompiled.h"
+
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 

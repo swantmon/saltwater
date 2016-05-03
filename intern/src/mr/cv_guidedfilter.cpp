@@ -4,6 +4,8 @@
 // https://github.com/atilimcetin/guided-filter
 // -----------------------------------------------------------------------------
 
+#include "mr/mr_precompiled.h"
+
 #include "mr/cv_guidedfilter.h"
 
 static cv::Mat boxfilter(const cv::Mat &I, int r)

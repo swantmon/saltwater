@@ -1,4 +1,6 @@
 
+#include "editor/edit_precompiled.h"
+
 #include "base/base_console.h"
 #include "base/base_serialize_text_writer.h"
 

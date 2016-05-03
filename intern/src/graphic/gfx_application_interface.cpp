@@ -1,4 +1,6 @@
 
+#include "graphic/gfx_precompiled.h"
+
 #include "graphic/gfx_application_interface.h"
 #include "graphic/gfx_main.h"
 

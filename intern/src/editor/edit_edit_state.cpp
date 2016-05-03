@@ -1,4 +1,6 @@
 
+#include "editor/edit_precompiled.h"
+
 #include "base/base_console.h"
 
 #include "camera/cam_control_manager.h"

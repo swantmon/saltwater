@@ -1,4 +1,6 @@
 
+#include "core/core_precompiled.h"
+
 #include "core/core_lua_export.h"
 #include "core/core_lua_state.h"
 

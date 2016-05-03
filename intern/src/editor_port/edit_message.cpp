@@ -1,4 +1,6 @@
 
+#include "editor_port/edit_precompiled.h"
+
 #include "editor_port/edit_message.h"
 
 #include <assert.h>

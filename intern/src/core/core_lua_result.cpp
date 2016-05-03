@@ -1,4 +1,6 @@
 
+#include "core/core_precompiled.h"
+
 #include "core/core_lua_result.h"
 
 #include <assert.h>

@@ -1,4 +1,6 @@
 
+#include "data/data_precompiled.h"
+
 #include "base/base_memory.h"
 
 #include "data/data_fx_facet.h"

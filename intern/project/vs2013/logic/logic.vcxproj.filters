@@ -31,6 +31,7 @@
     <ClCompile Include="..\..\..\src\logic\lg_script_manager.cpp">
       <Filter>scripts</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\logic\lg_precompiled.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\logic\lg_debug_state.h">
@@ -63,6 +64,7 @@
     <ClInclude Include="..\..\..\src\logic\lg_script_manager.h">
       <Filter>scripts</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\logic\lg_precompiled.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="states">

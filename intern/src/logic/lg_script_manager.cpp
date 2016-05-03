@@ -1,11 +1,12 @@
 
+#include "logic/lg_precompiled.h"
+
 #include "base/base_console.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
 #include "core/core_lua_main.h"
 #include "core/core_lua_state.h"
-#include "core/core_script_base_vector3.h"
 
 #include "logic/lg_script_manager.h"
 

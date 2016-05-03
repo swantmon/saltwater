@@ -1,4 +1,6 @@
 
+#include "data/data_precompiled.h"
+
 #include "base/base_crc.h"
 #include "base/base_console.h"
 #include "base/base_exception.h"

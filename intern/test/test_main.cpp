@@ -6,6 +6,8 @@
 //  Copyright (c) 2015 TU Ilmenau. All rights reserved.
 //
 
+#include "test_precompiled.h"
+
 #include "base/base_test_suite.h"
 
 #include <iostream>

@@ -10,6 +10,7 @@
     <ClCompile Include="..\..\..\src\base\base_tokenizer.cpp">
       <Filter>container</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\base_precompiled.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\base_aabb2.h">
@@ -191,6 +192,7 @@
     <ClInclude Include="..\..\..\src\base\base_string.h">
       <Filter>string</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_precompiled.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="container">

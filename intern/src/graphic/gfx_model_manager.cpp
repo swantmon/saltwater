@@ -1,4 +1,6 @@
 
+#include "graphic/gfx_precompiled.h"
+
 #include "base/base_aabb3.h"
 #include "base/base_console.h"
 #include "base/base_crc.h"

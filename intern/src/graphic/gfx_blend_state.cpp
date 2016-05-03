@@ -1,4 +1,6 @@
 
+#include "graphic/gfx_precompiled.h"
+
 #include "base/base_typedef.h"
 
 #include "graphic/gfx_blend_state.h"

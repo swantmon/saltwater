@@ -1,4 +1,6 @@
 
+#include "graphic/gfx_precompiled.h"
+
 #include "base/base_defines.h"
 
 #include "graphic/gfx_unload_map_state.h"

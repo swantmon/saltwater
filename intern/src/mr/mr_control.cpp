@@ -1,4 +1,6 @@
 
+#include "mr/mr_precompiled.h"
+
 #include "mr/mr_control.h"
 
 namespace MR

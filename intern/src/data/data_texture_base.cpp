@@ -1,4 +1,6 @@
 
+#include "data/data_precompiled.h"
+
 #include "data/data_texture_base.h"
 
 namespace Dt

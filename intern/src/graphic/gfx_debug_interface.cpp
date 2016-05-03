@@ -6,6 +6,8 @@
 //  Copyright (c) 2014 TU Ilmenau. All rights reserved.
 //
 
+#include "graphic/gfx_precompiled.h"
+
 #include "graphic/gfx_debug_interface.h"
 
 namespace Gfx

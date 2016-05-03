@@ -1,4 +1,6 @@
 
+#include "data/data_precompiled.h"
+
 #include "base/base_exception.h"
 #include "base/base_pool.h"
 #include "base/base_singleton.h"

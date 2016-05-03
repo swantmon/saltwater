@@ -1,4 +1,6 @@
 
+#include "gui/gui_precompiled.h"
+
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
