@@ -76,10 +76,15 @@ LUA_DEFINE_FUNCTION(BaseFloat3ObjFuncs, GetZ)
 
 LUA_DEFINE_FUNCTION(BaseFloat3ObjFuncs, __add)
 {
+    Base::Float3* pResult;
     Base::Float3* pVector1 = static_cast<Base::Float3*>(Core::Lua::State::GetUserData(_State, 1));
     Base::Float3* pVector2 = static_cast<Base::Float3*>(Core::Lua::State::GetUserData(_State, 2));
 
-    return 0;
+    pResult = static_cast<Base::Float3*>(Core::Lua::State::PushUserData(_State, sizeof(Base::Float3), "Base_Vector3"));
+
+    (*pResult) = (*pVector1) + (*pVector2);
+
+    return 1;
 }
 
 LUA_DEFINE_FUNCTION(BaseFloat3ObjFuncs, __tostring)
