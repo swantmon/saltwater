@@ -5,6 +5,7 @@
 #include "base/base_uncopyable.h"
 
 #include "gui/gui_start_state.h"
+#include "gui/gui_input_manager.h"
 
 namespace
 {
@@ -25,6 +26,7 @@ namespace
 {
     void CGuiStartState::OnEnter()
     {
+        Gui::InputManager::OnStart();
     }
     
     // -----------------------------------------------------------------------------

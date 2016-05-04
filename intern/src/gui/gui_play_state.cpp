@@ -5,6 +5,7 @@
 #include "base/base_uncopyable.h"
 
 #include "gui/gui_play_state.h"
+#include "gui/gui_input_manager.h"
 
 namespace
 {
@@ -37,6 +38,7 @@ namespace
     
     void CGuiPlayState::OnRun()
     {
+        Gui::InputManager::Update();
     }
 } // namespace
 

@@ -1,12 +1,10 @@
 
-#pragma once
+#include "core/core_precompiled.h"
 
 #include "core/core_lua_export.h"
 #include "core/core_lua_main.h"
 #include "core/core_lua_state.h"
 #include "core/core_time.h"
-
-#include <string>
 
 // -----------------------------------------------------------------------------
 // Library

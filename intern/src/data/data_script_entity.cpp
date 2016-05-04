@@ -1,5 +1,5 @@
 
-#pragma once
+#include "data/data_precompiled.h"
 
 #include "core/core_lua_export.h"
 #include "core/core_lua_main.h"

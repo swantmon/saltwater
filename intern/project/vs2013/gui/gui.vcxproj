@@ -23,6 +23,7 @@
     <ClCompile Include="..\..\..\src\gui\gui_edit_state.cpp" />
     <ClCompile Include="..\..\..\src\gui\gui_event_handler.cpp" />
     <ClCompile Include="..\..\..\src\gui\gui_exit_state.cpp" />
+    <ClCompile Include="..\..\..\src\gui\gui_input_manager.cpp" />
     <ClCompile Include="..\..\..\src\gui\gui_intro_state.cpp" />
     <ClCompile Include="..\..\..\src\gui\gui_load_map_state.cpp" />
     <ClCompile Include="..\..\..\src\gui\gui_main_menu_state.cpp" />
@@ -33,6 +34,12 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\gui_script_input.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\gui_start_state.cpp" />
     <ClCompile Include="..\..\..\src\gui\gui_unload_map_state.cpp" />
   </ItemGroup>
@@ -42,6 +49,7 @@
     <ClInclude Include="..\..\..\src\gui\gui_event_delegate.h" />
     <ClInclude Include="..\..\..\src\gui\gui_event_handler.h" />
     <ClInclude Include="..\..\..\src\gui\gui_exit_state.h" />
+    <ClInclude Include="..\..\..\src\gui\gui_input_manager.h" />
     <ClInclude Include="..\..\..\src\gui\gui_intro_state.h" />
     <ClInclude Include="..\..\..\src\gui\gui_load_map_state.h" />
     <ClInclude Include="..\..\..\src\gui\gui_main_menu_state.h" />

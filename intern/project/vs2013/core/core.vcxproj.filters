@@ -23,16 +23,7 @@
       <Filter>lua</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\core\core_config.h" />
-    <ClInclude Include="..\..\..\src\core\core_script_base_vector3.h">
-      <Filter>script</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\core\core_precompiled.h" />
-    <ClInclude Include="..\..\..\src\core\core_script_base_vector4.h">
-      <Filter>script</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\core\core_script_core_time.h">
-      <Filter>script</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\core\core_time.cpp">
@@ -54,6 +45,15 @@
       <Filter>lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\core\core_precompiled.cpp" />
+    <ClCompile Include="..\..\..\src\core\core_script_base_vector3.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\core_script_base_vector4.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\core_script_core_time.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="time">

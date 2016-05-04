@@ -1,5 +1,5 @@
 
-#pragma once
+#include "core/core_precompiled.h"
 
 #include "base/base_vector4.h"
 

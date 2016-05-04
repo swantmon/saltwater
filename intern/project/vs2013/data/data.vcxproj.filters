@@ -86,9 +86,6 @@
       <Filter>map\plugins</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_precompiled.h" />
-    <ClInclude Include="..\..\..\src\data\data_script_entity.h">
-      <Filter>script</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\data\data_entity_manager.cpp">
@@ -152,6 +149,9 @@
       <Filter>map\plugins</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_precompiled.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_script_entity.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="map">

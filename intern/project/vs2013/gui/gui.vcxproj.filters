@@ -32,6 +32,12 @@
       <Filter>states</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\gui_precompiled.cpp" />
+    <ClCompile Include="..\..\..\src\gui\gui_input_manager.cpp">
+      <Filter>input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\gui_script_input.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\gui\gui_event_delegate.h">
@@ -68,6 +74,9 @@
       <Filter>states</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\gui_precompiled.h" />
+    <ClInclude Include="..\..\..\src\gui\gui_input_manager.h">
+      <Filter>input</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="interface">
@@ -78,6 +87,12 @@
     </Filter>
     <Filter Include="states">
       <UniqueIdentifier>{2aa2998c-e628-4bd0-8b46-ed4de4242779}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="input">
+      <UniqueIdentifier>{32741b68-19ae-4dd2-8ddf-a33c9bbc8b52}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="script">
+      <UniqueIdentifier>{d3fc3a1b-e5c3-43c6-b426-a826b0d292c1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
