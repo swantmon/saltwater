@@ -86,6 +86,9 @@
       <Filter>map\plugins</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_precompiled.h" />
+    <ClInclude Include="..\..\..\src\data\data_script_entity.h">
+      <Filter>script</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\data\data_entity_manager.cpp">
@@ -186,6 +189,9 @@
     </Filter>
     <Filter Include="map\plugins">
       <UniqueIdentifier>{7ffd24e8-c227-4102-88eb-f81cc0290671}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="script">
+      <UniqueIdentifier>{457423ce-2a73-42ec-88ad-91117d644247}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

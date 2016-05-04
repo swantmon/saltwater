@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\data\data_script_entity.h" />
     <ClInclude Include="..\..\..\src\data\data_actor_facet.h" />
     <ClInclude Include="..\..\..\src\data\data_actor_manager.h" />
     <ClInclude Include="..\..\..\src\data\data_data_behavior.h" />
