@@ -54,21 +54,7 @@ namespace
 
     void CLgScriptManager::OnStart()
     {
-        // -----------------------------------------------------------------------------
-        // Create state
-        // -----------------------------------------------------------------------------
-        Core::Lua::BState LuaState = Core::Lua::Main::GetMainState();
-
-        // -----------------------------------------------------------------------------
-        // Load a script
-        // -----------------------------------------------------------------------------
-        std::string PathToScript = std::string(g_PathToAssets) + "test.lua";
-
-        Core::Lua::State::LoadScript(LuaState, PathToScript.c_str(), 0);
-
-        Core::Lua::State::CallFunction(LuaState, "OnStart", 0);
-        Core::Lua::State::CallFunction(LuaState, "Update", 0);
-        Core::Lua::State::CallFunction(LuaState, "OnExit", 0);
+        
     }
 
     // -----------------------------------------------------------------------------
@@ -89,7 +75,21 @@ namespace
 
     void CLgScriptManager::Update()
     {
-        
+        // -----------------------------------------------------------------------------
+        // Create state
+        // -----------------------------------------------------------------------------
+        Core::Lua::BState LuaState = Core::Lua::Main::GetMainState();
+
+        // -----------------------------------------------------------------------------
+        // Load a script
+        // -----------------------------------------------------------------------------
+        std::string PathToScript = std::string(g_PathToAssets) + "test.lua";
+
+        Core::Lua::State::LoadScript(LuaState, PathToScript.c_str(), 0);
+
+        Core::Lua::State::CallFunction(LuaState, "OnStart", 0);
+        Core::Lua::State::CallFunction(LuaState, "Update", 0);
+        Core::Lua::State::CallFunction(LuaState, "OnExit", 0);
     }
 } // namespace 
 
