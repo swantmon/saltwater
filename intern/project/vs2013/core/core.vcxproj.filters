@@ -24,6 +24,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\core\core_config.h" />
     <ClInclude Include="..\..\..\src\core\core_precompiled.h" />
+    <ClInclude Include="..\..\..\src\core\core_script_base_vector3.h">
+      <Filter>interface\script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\core_script_base_vector4.h">
+      <Filter>interface\script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\core_script_core_time.h">
+      <Filter>interface\script</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\core\core_time.cpp">
@@ -45,15 +54,6 @@
       <Filter>lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\core\core_precompiled.cpp" />
-    <ClCompile Include="..\..\..\src\core\core_script_base_vector3.cpp">
-      <Filter>script</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\core\core_script_base_vector4.cpp">
-      <Filter>script</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\core\core_script_core_time.cpp">
-      <Filter>script</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="time">
@@ -62,8 +62,11 @@
     <Filter Include="lua">
       <UniqueIdentifier>{2be001e9-db45-4288-80ad-bd4da4bc1ce1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="script">
+    <Filter Include="interface">
       <UniqueIdentifier>{69036678-d5a4-4af0-a324-8d9c7bb1e4b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="interface\script">
+      <UniqueIdentifier>{6309367c-ebc4-4677-82ed-50420d47abce}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

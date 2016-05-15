@@ -44,6 +44,14 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\test\test_precompiled.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\base\base.vcxproj">
+      <Project>{f00b40d7-026a-45ae-a0db-126dbabc483d}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\data\data.vcxproj">
+      <Project>{969d14c4-1e9d-4feb-ba0a-247f244871e6}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{470B0BE6-8875-4485-9B04-C6CC9914834D}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -133,7 +141,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OutputFile>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\\$(TargetFileName)</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\build\win32</AdditionalLibraryDirectories>
-      <AdditionalDependencies>based.lib;datad.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy ..\..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\*.exe ..\..\..\..\bin\</Command>
@@ -155,7 +163,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OutputFile>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\\$(TargetFileName)</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\build\x64</AdditionalLibraryDirectories>
-      <AdditionalDependencies>based.lib;datad.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy ..\..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\*.exe ..\..\..\..\bin\</Command>
@@ -180,7 +188,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <OutputFile>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\\$(TargetFileName)</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\build\win32</AdditionalLibraryDirectories>
-      <AdditionalDependencies>baser.lib;datar.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy ..\..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\*.exe ..\..\..\..\bin\</Command>
@@ -205,7 +213,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <OutputFile>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\\$(TargetFileName)</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\build\x64</AdditionalLibraryDirectories>
-      <AdditionalDependencies>baser.lib;datar.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy ..\..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\*.exe ..\..\..\..\bin\</Command>

@@ -21,27 +21,9 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\src\core\core_config.h" />
     <ClInclude Include="..\..\..\src\core\core_precompiled.h" />
-    <ClCompile Include="..\..\..\src\core\core_script_base_vector3.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
-      <FileType>CppCode</FileType>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\core\core_script_base_vector4.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
-      <FileType>CppCode</FileType>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\core\core_script_core_time.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
-      <FileType>CppCode</FileType>
-    </ClCompile>
+    <ClInclude Include="..\..\..\src\core\core_script_base_vector3.h" />
+    <ClInclude Include="..\..\..\src\core\core_script_base_vector4.h" />
+    <ClInclude Include="..\..\..\src\core\core_script_core_time.h" />
     <ClInclude Include="..\..\..\src\core\core_time.h" />
     <ClInclude Include="..\..\..\src\core\core_lua_argument.h" />
     <ClInclude Include="..\..\..\src\core\core_lua_export.h" />

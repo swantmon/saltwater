@@ -47,6 +47,38 @@
     <ClInclude Include="..\..\..\src\editor\edit_state.h" />
     <ClInclude Include="..\..\..\src\editor\edit_unload_map_state.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\base\base.vcxproj">
+      <Project>{f00b40d7-026a-45ae-a0db-126dbabc483d}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\camera\camera.vcxproj">
+      <Project>{bd2866f6-a265-40f7-92d0-ad067fe79f65}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\core\core.vcxproj">
+      <Project>{8bf7fb01-1873-4cb2-85a8-57ef3ed5afd4}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\data\data.vcxproj">
+      <Project>{969d14c4-1e9d-4feb-ba0a-247f244871e6}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\editor_gui\editor_gui.vcxproj">
+      <Project>{b12702ad-abfb-343a-a199-8e24837244a3}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\editor_port\editor_port.vcxproj">
+      <Project>{53ccef0f-9efc-4780-9b1d-b3771960936d}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\graphic\graphic.vcxproj">
+      <Project>{cca65c12-1ab6-4e15-9da2-630aa1d60b2f}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\gui\gui.vcxproj">
+      <Project>{7d68649a-94cb-47ce-b2ac-ec0fc44333e4}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\logic\logic.vcxproj">
+      <Project>{bce4cc5a-541e-4838-94d1-73b962a02fbc}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\mr\mr.vcxproj">
+      <Project>{1bba2732-a51b-4ff0-8393-492884561668}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{399D716C-0FEC-4D19-AA74-0C434B6C3047}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -139,7 +171,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OutputFile>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\\$(TargetFileName)</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\build\win32;..\..\..\..\extern\artoolkit\lib\win32;..\..\..\..\extern\assimp\lib\win32;..\..\..\..\extern\devil\lib\win32;..\..\..\..\extern\glew\lib\win32;..\..\..\..\extern\kinect\lib\win32;..\..\..\..\extern\lua\lib\win32;..\..\..\..\extern\opencv\lib\win32;..\..\..\..\extern\qt\lib\win32;..\..\..\..\extern\tinyxml2\lib\win32</AdditionalLibraryDirectories>
-      <AdditionalDependencies>based.lib;camerad.lib;cored.lib;datad.lib;editor_guid.lib;editor_portd.lib;graphicd.lib;guid.lib;logicd.lib;mrd.lib;AR.lib;ARICP.lib;ARvideo.lib;assimp.lib;DevIL.lib;ILU.lib;ILUT.lib;glew32.lib;luad.lib;opencv_calib3d300d.lib;opencv_core300d.lib;opencv_features2d300d.lib;opencv_flann300d.lib;opencv_highgui300d.lib;opencv_imgcodecs300d.lib;opencv_imgproc300d.lib;opencv_ml300d.lib;opencv_objdetect300d.lib;opencv_photo300d.lib;opencv_shape300d.lib;opencv_stitching300d.lib;opencv_superres300d.lib;opencv_ts300d.lib;opencv_video300d.lib;opencv_videoio300d.lib;opencv_videostab300d.lib;SDL2.lib;SDL2main.lib;tinyxml2d.lib;opengl32.lib;glu32.lib;Kinect20.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>AR.lib;ARICP.lib;ARvideo.lib;assimp.lib;DevIL.lib;ILU.lib;ILUT.lib;glew32.lib;luad.lib;opencv_calib3d300d.lib;opencv_core300d.lib;opencv_features2d300d.lib;opencv_flann300d.lib;opencv_highgui300d.lib;opencv_imgcodecs300d.lib;opencv_imgproc300d.lib;opencv_ml300d.lib;opencv_objdetect300d.lib;opencv_photo300d.lib;opencv_shape300d.lib;opencv_stitching300d.lib;opencv_superres300d.lib;opencv_ts300d.lib;opencv_video300d.lib;opencv_videoio300d.lib;opencv_videostab300d.lib;SDL2.lib;SDL2main.lib;tinyxml2d.lib;opengl32.lib;glu32.lib;Kinect20.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>
       </EntryPointSymbol>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
@@ -163,7 +195,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OutputFile>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\\$(TargetFileName)</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\build\x64;..\..\..\..\extern\artoolkit\lib\x64;..\..\..\..\extern\assimp\lib\x64;..\..\..\..\extern\devil\lib\x64;..\..\..\..\extern\glew\lib\x64;..\..\..\..\extern\kinect\lib\x64;..\..\..\..\extern\opencv\lib\x64;..\..\..\..\extern\lua\lib\x64;..\..\..\..\extern\qt\lib\x64;..\..\..\..\extern\tinyxml\lib\win32;..\..\..\..\extern\qt\lib\x64;..\..\..\..\extern\tinyxml2\lib\x64</AdditionalLibraryDirectories>
-      <AdditionalDependencies>based.lib;camerad.lib;cored.lib;datad.lib;editor_guid.lib;editor_portd.lib;graphicd.lib;guid.lib;logicd.lib;mrd.lib;AR.lib;ARICP.lib;ARvideo.lib;assimp.lib;DevIL.lib;ILU.lib;ILUT.lib;glew32.lib;luad.lib;opencv_calib3d300d.lib;opencv_core300d.lib;opencv_features2d300d.lib;opencv_flann300d.lib;opencv_highgui300d.lib;opencv_imgcodecs300d.lib;opencv_imgproc300d.lib;opencv_ml300d.lib;opencv_objdetect300d.lib;opencv_photo300d.lib;opencv_shape300d.lib;opencv_stitching300d.lib;opencv_superres300d.lib;opencv_ts300d.lib;opencv_video300d.lib;opencv_videoio300d.lib;opencv_videostab300d.lib;tinyxml2d.lib;opengl32.lib;glu32.lib;Kinect20.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;qtmaind.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>AR.lib;ARICP.lib;ARvideo.lib;assimp.lib;DevIL.lib;ILU.lib;ILUT.lib;glew32.lib;luad.lib;opencv_calib3d300d.lib;opencv_core300d.lib;opencv_features2d300d.lib;opencv_flann300d.lib;opencv_highgui300d.lib;opencv_imgcodecs300d.lib;opencv_imgproc300d.lib;opencv_ml300d.lib;opencv_objdetect300d.lib;opencv_photo300d.lib;opencv_shape300d.lib;opencv_stitching300d.lib;opencv_superres300d.lib;opencv_ts300d.lib;opencv_video300d.lib;opencv_videoio300d.lib;opencv_videostab300d.lib;tinyxml2d.lib;opengl32.lib;glu32.lib;Kinect20.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;qtmaind.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>
       </EntryPointSymbol>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
@@ -191,7 +223,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <OutputFile>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\\$(TargetFileName)</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\build\win32;..\..\..\..\extern\artoolkit\lib\win32;..\..\..\..\extern\assimp\lib\win32;..\..\..\..\extern\devil\lib\win32;..\..\..\..\extern\glew\lib\win32;..\..\..\..\extern\kinect\lib\win32;..\..\..\..\extern\lua\lib\win32;..\..\..\..\extern\opencv\lib\win32;..\..\..\..\extern\qt\lib\win32;..\..\..\..\extern\tinyxml2\lib\win32</AdditionalLibraryDirectories>
-      <AdditionalDependencies>baser.lib;camerar.lib;corer.lib;datar.lib;editor_guir.lib;editor_portr.lib;graphicr.lib;guir.lib;logicr.lib;mrr.lib;AR.lib;ARICP.lib;ARvideo.lib;assimp.lib;DevIL.lib;ILU.lib;ILUT.lib;glew32.lib;lua.lib;opencv_calib3d300.lib;opencv_core300.lib;opencv_features2d300.lib;opencv_flann300.lib;opencv_imgproc300.lib;SDL2.lib;SDL2main.lib;tinyxml2.lib;opengl32.lib;glu32.lib;kinect20.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>AR.lib;ARICP.lib;ARvideo.lib;assimp.lib;DevIL.lib;ILU.lib;ILUT.lib;glew32.lib;lua.lib;opencv_calib3d300.lib;opencv_core300.lib;opencv_features2d300.lib;opencv_flann300.lib;opencv_imgproc300.lib;SDL2.lib;SDL2main.lib;tinyxml2.lib;opengl32.lib;glu32.lib;kinect20.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy ..\..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\*.exe ..\..\..\..\bin\</Command>
@@ -216,7 +248,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <OutputFile>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\\$(TargetFileName)</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\build\x64;..\..\..\..\extern\artoolkit\lib\x64;..\..\..\..\extern\assimp\lib\x64;..\..\..\..\extern\devil\lib\x64;..\..\..\..\extern\glew\lib\x64;..\..\..\..\extern\kinect\lib\x64;..\..\..\..\extern\opencv\lib\x64;..\..\..\..\extern\lua\lib\x64;..\..\..\..\extern\qt\lib\x64;..\..\..\..\extern\tinyxml\lib\win32;..\..\..\..\extern\tinyxml2\lib\x64</AdditionalLibraryDirectories>
-      <AdditionalDependencies>baser.lib;camerar.lib;corer.lib;datar.lib;editor_guir.lib;editor_portr.lib;graphicr.lib;guir.lib;logicr.lib;mrr.lib;AR.lib;ARICP.lib;ARvideo.lib;assimp.lib;DevIL.lib;ILU.lib;ILUT.lib;glew32.lib;lua.lib;opencv_calib3d300.lib;opencv_core300.lib;opencv_features2d300.lib;opencv_flann300.lib;opencv_highgui300.lib;opencv_imgcodecs300.lib;opencv_imgproc300.lib;opencv_ml300.lib;opencv_objdetect300.lib;opencv_photo300.lib;opencv_shape300.lib;opencv_stitching300.lib;opencv_superres300.lib;opencv_ts300.lib;opencv_video300.lib;opencv_videoio300.lib;opencv_videostab300.lib;SDL2.lib;SDL2main.lib;tinyxml2.lib;opengl32.lib;glu32.lib;kinect20.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>AR.lib;ARICP.lib;ARvideo.lib;assimp.lib;DevIL.lib;ILU.lib;ILUT.lib;glew32.lib;lua.lib;opencv_calib3d300.lib;opencv_core300.lib;opencv_features2d300.lib;opencv_flann300.lib;opencv_highgui300.lib;opencv_imgcodecs300.lib;opencv_imgproc300.lib;opencv_ml300.lib;opencv_objdetect300.lib;opencv_photo300.lib;opencv_shape300.lib;opencv_stitching300.lib;opencv_superres300.lib;opencv_ts300.lib;opencv_video300.lib;opencv_videoio300.lib;opencv_videostab300.lib;SDL2.lib;SDL2main.lib;tinyxml2.lib;opengl32.lib;glu32.lib;kinect20.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy ..\..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\*.exe ..\..\..\..\bin\</Command>

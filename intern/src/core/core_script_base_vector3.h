@@ -1,19 +1,23 @@
 
-#include "core/core_precompiled.h"
+#pragma once
+
+#include "core/core_lua_export.h"
 
 #include "base/base_vector3.h"
 
+#include "core/core_script_base_vector3.h"
 #include "core/core_lua_export.h"
 #include "core/core_lua_main.h"
 #include "core/core_lua_state.h"
 
 #include <string>
 
+Core::Lua::CStaticFunctionList BaseFloat3ObjFuncs;
+Core::Lua::CStaticFunctionList BaseFloat3LibFuncs;
+
 // -----------------------------------------------------------------------------
 // Object
 // -----------------------------------------------------------------------------
-Core::Lua::CStaticFunctionList BaseFloat3ObjFuncs;
-
 LUA_DEFINE_FUNCTION(BaseFloat3ObjFuncs, Set)
 {
     Base::Float3& rVector = *static_cast<Base::Float3*>(Core::Lua::State::GetUserData(_State, 1));
@@ -223,13 +227,9 @@ LUA_DEFINE_FUNCTION(BaseFloat3ObjFuncs, __tostring)
     return 1;
 }
 
-LUA_REGISTER_OBJECT(Core::Lua::Main::GetMainState(), BaseFloat3ObjFuncs, Base_Vector3)
-
 // -----------------------------------------------------------------------------
 // Library
 // -----------------------------------------------------------------------------
-Core::Lua::CStaticFunctionList BaseFloat3LibFuncs;
-
 LUA_DEFINE_FUNCTION(BaseFloat3LibFuncs, New)
 {
     float X = Core::Lua::State::GetFloat(_State, 1, 0.0f);
@@ -245,5 +245,3 @@ LUA_DEFINE_FUNCTION(BaseFloat3LibFuncs, New)
 
     return 1;
 }
-
-LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), BaseFloat3LibFuncs, Vector3)

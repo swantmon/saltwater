@@ -28,39 +28,23 @@
     static int BASE_CONCAT(LuaFunction, BASE_CONCAT(FunctionList, FunctionName))(Core::Lua::BState _State)
 
 #define LUA_REGISTER_FUNCTIONS(LuaState, FunctionList)                                                                                                                      \
-struct BASE_CONCAT(SRegGlobalFunc, FunctionList)                                                                                                                            \
-{                                                                                                                                                                           \
-    BASE_CONCAT(SRegGlobalFunc, FunctionList)()                                                                                                                             \
-    {                                                                                                                                                                       \
-        ::Core::Lua::Private::RegisterFunctions(LuaState, FunctionList);                                                                                                    \
-    }                                                                                                                                                                       \
-} const BASE_CONCAT(g_RegGlobalFunc, FunctionList);
+    ::Core::Lua::Private::RegisterFunctions(LuaState, FunctionList)
 
 // -----------------------------------------------------------------------------
 
 #define LUA_REGISTER_OBJECT(LuaState, FunctionList, ObjectName)                                                                                                             \
-struct BASE_CONCAT(SRegObject, BASE_CONCAT(FunctionList, ObjectName))                                                                                                       \
-{                                                                                                                                                                           \
-    BASE_CONCAT(SRegObject, BASE_CONCAT(FunctionList, ObjectName))()                                                                                                        \
-    {                                                                                                                                                                       \
-        ::Core::Lua::Private::RegisterObject(LuaState, FunctionList, #ObjectName);                                                                                          \
-    }                                                                                                                                                                       \
-} const BASE_CONCAT(g_RegObject, BASE_CONCAT(FunctionList, ObjectName));
+    ::Core::Lua::Private::RegisterObject(LuaState, FunctionList, #ObjectName)
 
 // -----------------------------------------------------------------------------
 
-#define LUA_REGISTER_LIBRARY(LuaState, FunctionList, LibraryName)                                                                                                           \
+#define LUA_REQUIRE_LIBRARY_FUNC(FunctionList, LibraryName)                                                                                                                 \
 static int BASE_CONCAT(LuaFunction, BASE_CONCAT(FunctionList, LibraryName))(Core::Lua::BState _State)                                                                       \
 {                                                                                                                                                                           \
     ::Core::Lua::Private::RegisterLibrary(_State, FunctionList, #LibraryName); return 1;                                                                                    \
-}                                                                                                                                                                           \
-struct BASE_CONCAT(SRegLibrary, BASE_CONCAT(FunctionList, LibraryName))                                                                                                     \
-{                                                                                                                                                                           \
-    BASE_CONCAT(SRegLibrary, BASE_CONCAT(FunctionList, LibraryName))()                                                                                                      \
-    {                                                                                                                                                                       \
-        ::Core::Lua::Private::RequireLibrary(LuaState, #LibraryName, BASE_CONCAT(LuaFunction, BASE_CONCAT(FunctionList, LibraryName)));                                     \
-    }                                                                                                                                                                       \
-} const BASE_CONCAT(g_RegLibrary, BASE_CONCAT(FunctionList, LibraryName));
+}
+
+#define LUA_REGISTER_LIBRARY(LuaState, FunctionList, LibraryName)                                                                                                            \
+    ::Core::Lua::Private::RequireLibrary(LuaState, #LibraryName, BASE_CONCAT(LuaFunction, BASE_CONCAT(FunctionList, LibraryName)))
 
 // -----------------------------------------------------------------------------
 // Functionality

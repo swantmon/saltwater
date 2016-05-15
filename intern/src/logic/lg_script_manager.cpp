@@ -5,10 +5,23 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_lua_export.h"
 #include "core/core_lua_main.h"
 #include "core/core_lua_state.h"
+#include "core/core_script_base_vector3.h"
+#include "core/core_script_base_vector4.h"
+#include "core/core_script_core_time.h"
+
+#include "data/data_script_entity.h"
+
+#include "gui/gui_script_input.h"
 
 #include "logic/lg_script_manager.h"
+
+LUA_REQUIRE_LIBRARY_FUNC(CoreTimeLibFuncs, Time)
+LUA_REQUIRE_LIBRARY_FUNC(BaseFloat3LibFuncs, Vector3)
+LUA_REQUIRE_LIBRARY_FUNC(BaseFloat4LibFuncs, Vector4)
+LUA_REQUIRE_LIBRARY_FUNC(GuiInputLibFuncs, Input)
 
 namespace
 {
@@ -54,7 +67,14 @@ namespace
 
     void CLgScriptManager::OnStart()
     {
-        
+        LUA_REGISTER_OBJECT(Core::Lua::Main::GetMainState(), BaseFloat3ObjFuncs, Base_Vector3);
+        LUA_REGISTER_OBJECT(Core::Lua::Main::GetMainState(), BaseFloat4ObjFuncs, Base_Vector4);
+        LUA_REGISTER_OBJECT(Core::Lua::Main::GetMainState(), DataEntityObjFuncs, Data_Entity);
+
+        LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), CoreTimeLibFuncs, Time);
+        LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), BaseFloat3LibFuncs, Vector3);
+        LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), BaseFloat4LibFuncs, Vector4);
+        LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), GuiInputLibFuncs, Input);
     }
 
     // -----------------------------------------------------------------------------

@@ -1,17 +1,18 @@
 
-#include "gui/gui_precompiled.h"
+#pragma once
 
 #include "core/core_lua_export.h"
 #include "core/core_lua_main.h"
 #include "core/core_lua_state.h"
 
 #include "gui/gui_input_manager.h"
+#include "gui/gui_script_input.h"
+
+Core::Lua::CStaticFunctionList GuiInputLibFuncs;
 
 // -----------------------------------------------------------------------------
 // Library
 // -----------------------------------------------------------------------------
-Core::Lua::CStaticFunctionList GuiInputLibFuncs;
-
 LUA_DEFINE_FUNCTION(GuiInputLibFuncs, IsAnyKey)
 {
     Core::Lua::State::PushBoolean(_State, Gui::InputManager::IsAnyKey());
@@ -103,5 +104,3 @@ LUA_DEFINE_FUNCTION(GuiInputLibFuncs, GetMouseScrollDelta)
 
     return 1;
 }
-
-LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), GuiInputLibFuncs, Input)

@@ -1,16 +1,17 @@
 
-#include "core/core_precompiled.h"
+#pragma once
 
 #include "core/core_lua_export.h"
-#include "core/core_lua_main.h"
+
 #include "core/core_lua_state.h"
+#include "core/core_script_core_time.h"
 #include "core/core_time.h"
+
+Core::Lua::CStaticFunctionList CoreTimeLibFuncs;
 
 // -----------------------------------------------------------------------------
 // Library
 // -----------------------------------------------------------------------------
-Core::Lua::CStaticFunctionList CoreTimeLibFuncs;
-
 LUA_DEFINE_FUNCTION(CoreTimeLibFuncs, DeltaTime)
 {
     double DeltaTimeLastFrame = Core::Time::GetDeltaTimeLastFrame();
@@ -19,5 +20,3 @@ LUA_DEFINE_FUNCTION(CoreTimeLibFuncs, DeltaTime)
 
     return 1;
 }
-
-LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), CoreTimeLibFuncs, Time)

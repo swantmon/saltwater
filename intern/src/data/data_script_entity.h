@@ -1,20 +1,21 @@
 
-#include "data/data_precompiled.h"
+#pragma once
 
 #include "core/core_lua_export.h"
 #include "core/core_lua_main.h"
 #include "core/core_lua_state.h"
 
 #include "data/data_entity.h"
+#include "data/data_script_entity.h"
 #include "data/data_transformation_facet.h"
 
 #include <string>
 
+Core::Lua::CStaticFunctionList DataEntityObjFuncs;
+
 // -----------------------------------------------------------------------------
 // Object
 // -----------------------------------------------------------------------------
-Core::Lua::CStaticFunctionList DataEntityObjFuncs;
-
 LUA_DEFINE_FUNCTION(DataEntityObjFuncs, GetID)
 {
     Dt::CEntity& rEntity = *static_cast<Dt::CEntity*>(Core::Lua::State::GetUserData(_State, 1));
@@ -135,5 +136,3 @@ LUA_DEFINE_FUNCTION(DataEntityObjFuncs, __tostring)
 
     return 1;
 }
-
-LUA_REGISTER_OBJECT(Core::Lua::Main::GetMainState(), DataEntityObjFuncs, Data_Entity)
