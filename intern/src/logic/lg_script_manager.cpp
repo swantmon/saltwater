@@ -25,6 +25,8 @@ LUA_REQUIRE_LIBRARY_FUNC(BaseFloat3LibFuncs, Vector3)
 LUA_REQUIRE_LIBRARY_FUNC(BaseFloat4LibFuncs, Vector4)
 LUA_REQUIRE_LIBRARY_FUNC(GuiInputLibFuncs, Input)
 
+Core::Lua::CStaticFunctionList ScriptFunctions;
+
 namespace
 {
     static const char* g_PathToAssets = "../assets/";
@@ -50,6 +52,8 @@ namespace
 
         void Update();
 
+        Dt::CEntity* GetActiveEntity() const;
+
     private:
 
         struct SInternScript
@@ -65,6 +69,7 @@ namespace
     private:
 
         CInternScripts m_InternScripts;
+        SInternScript* m_pActiveScript;
 
     private:
 
@@ -76,6 +81,7 @@ namespace
 {
     CLgScriptManager::CLgScriptManager()
         : m_InternScripts()
+        , m_pActiveScript(0)
     {
     }
 
@@ -98,6 +104,8 @@ namespace
         LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), BaseFloat3LibFuncs, Vector3);
         LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), BaseFloat4LibFuncs, Vector4);
         LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), GuiInputLibFuncs, Input);
+
+        LUA_REGISTER_FUNCTIONS(Core::Lua::Main::GetMainState(), ScriptFunctions);
 
         Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CLgScriptManager::OnDirtyEntity));
     }
@@ -125,11 +133,16 @@ namespace
         // -----------------------------------------------------------------------------
         Core::Lua::BState LuaState = Core::Lua::Main::GetMainState();
 
-        CInternScripts::const_iterator CurrentInternScript = m_InternScripts.begin();
-        CInternScripts::const_iterator EndOfInternScripts = m_InternScripts.end();
+        CInternScripts::iterator CurrentInternScript = m_InternScripts.begin();
+        CInternScripts::iterator EndOfInternScripts = m_InternScripts.end();
 
         for (; CurrentInternScript != EndOfInternScripts; ++ CurrentInternScript)
         {
+            // -----------------------------------------------------------------------------
+            // Set active entity
+            // -----------------------------------------------------------------------------
+            m_pActiveScript = &(*CurrentInternScript);
+
             // -----------------------------------------------------------------------------
             // Load a script
             // -----------------------------------------------------------------------------
@@ -141,6 +154,13 @@ namespace
             Core::Lua::State::CallFunction(LuaState, "Update", 0);
             Core::Lua::State::CallFunction(LuaState, "OnExit", 0);
         }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Dt::CEntity* CLgScriptManager::GetActiveEntity() const
+    {
+        return m_pActiveScript->m_pEntity;
     }
 
     // -----------------------------------------------------------------------------
@@ -176,6 +196,22 @@ namespace
         }
     }
 } // namespace 
+
+LUA_DEFINE_FUNCTION(ScriptFunctions, GetEntity)
+{
+    Dt::CEntity* pActiveEntity = CLgScriptManager::GetInstance().GetActiveEntity();
+
+    if (pActiveEntity != 0)
+    {
+        Dt::CEntity& rResult = *static_cast<Dt::CEntity*>(Core::Lua::State::PushUserData(_State, sizeof(Dt::CEntity), "Data_Entity"));
+
+        rResult = *pActiveEntity;
+
+        return 1;
+    }
+
+    return 0;
+}
 
 namespace Lg
 {

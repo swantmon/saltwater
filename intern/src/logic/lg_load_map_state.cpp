@@ -110,11 +110,9 @@ namespace
 
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            rEntity.SetWorldPosition(Base::Float3(0.0f, 0.0f, 10.0f));
-
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 10.0f));
             pTransformationFacet->SetScale   (Base::Float3(1.0f));
             pTransformationFacet->SetRotation(Base::Float3(0.0f, 0.0f, 0.0f));
 
@@ -251,7 +249,7 @@ namespace
             pSunLightFacet->SetDirection     (Base::Float3(0.0f, 0.0f, -1.0f));
             pSunLightFacet->SetIntensity     (90600.0f);
             pSunLightFacet->SetTemperature   (0);
-            pSunLightFacet->SetRefreshMode   (Dt::CSunLightFacet::Static);
+            pSunLightFacet->SetRefreshMode   (Dt::CSunLightFacet::Dynamic);
 
             pSunLightFacet->UpdateLightness();
 
@@ -292,11 +290,9 @@ namespace
 
             Dt::CEntity& rPlane = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            rPlane.SetWorldPosition(Base::Float3(0.0f, 0.0f, 0.1f));
-
             Dt::CTransformationFacet* pTransformationFacet = rPlane.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.1f));
             pTransformationFacet->SetScale   (Base::Float3(0.01f));
             pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, 0.0f));
 
@@ -357,11 +353,9 @@ namespace
 
             Dt::CEntity& rSphere = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            rSphere.SetWorldPosition(Base::Float3(0.0f, 0.0f, 2.0f));
-
             Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 2.0f));
             pTransformationFacet->SetScale   (Base::Float3(0.1f));
             pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, 0.0f));
 
@@ -412,11 +406,9 @@ namespace
 
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            rEntity.SetWorldPosition(Base::Float3(0.0f, 0.0f, 0.5f));
-
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.5f));
             pTransformationFacet->SetScale   (Base::Float3(1.0f));
             pTransformationFacet->SetRotation(Base::Float3(0.0f, 0.0f, 0.0f));
 
@@ -612,8 +604,6 @@ namespace
 
             Dt::CEntity& rSphere = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            rSphere.SetWorldPosition(Base::Float3(0.0f, 0.0f, 0.0f));
-
             Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
 
             pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.0f));
@@ -651,11 +641,9 @@ namespace
 
             Dt::CEntity& rSphere = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            rSphere.SetWorldPosition(Base::Float3(0.0f, 0.0f, 0.1f));
-
             Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.1f));
             pTransformationFacet->SetScale   (Base::Float3(0.005f));
             pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, 0.0f));
 
@@ -700,11 +688,9 @@ namespace
 
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            rEntity.SetWorldPosition(Base::Float3(14.0f, 6.0f, 10.0f));
-
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetPosition(Base::Float3(14.0f, 6.0f, 10.0f));
             pTransformationFacet->SetScale   (Base::Float3(1.0f));
             pTransformationFacet->SetRotation(Base::Float3(0.0f, 0.0f, 0.0f));
 
@@ -844,11 +830,9 @@ namespace
 
             Dt::CEntity& rSceneEntity = Dt::EntityManager::CreateEntities(SceneDesc);
 
-            rSceneEntity.SetWorldPosition(Base::Float3(20.0f, 6.0f, 0.0f));
-
             Dt::CTransformationFacet* pTransformationFacet = rSceneEntity.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetPosition(Base::Float3(20.0f, 6.0f, 0.0f));
             pTransformationFacet->SetScale(Base::Float3(0.01f));
             pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, 0.0f));
 

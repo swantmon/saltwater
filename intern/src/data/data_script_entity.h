@@ -35,6 +35,8 @@ LUA_DEFINE_FUNCTION(DataEntityObjFuncs, SetPosition)
     if (pTransformationFacet != nullptr)
     {
         pTransformationFacet->SetPosition(rVector);
+
+        Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyMove);
     }
 
     return 0;
@@ -53,9 +55,11 @@ LUA_DEFINE_FUNCTION(DataEntityObjFuncs, GetPosition)
     if (pTransformationFacet != nullptr)
     {
         rResult = pTransformationFacet->GetPosition();
+
+        return 1;
     }
 
-    return 1;
+    return 0;
 }
 
 LUA_DEFINE_FUNCTION(DataEntityObjFuncs, SetRotation)
@@ -64,10 +68,13 @@ LUA_DEFINE_FUNCTION(DataEntityObjFuncs, SetRotation)
     Base::Float3& rVector = *static_cast<Base::Float3*>(Core::Lua::State::GetUserData(_State, 2));
 
     Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
+    
 
     if (pTransformationFacet != nullptr)
     {
         pTransformationFacet->SetRotation(rVector);
+
+        Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyMove);
     }
 
     return 0;
@@ -86,9 +93,11 @@ LUA_DEFINE_FUNCTION(DataEntityObjFuncs, GetRotation)
     if (pTransformationFacet != nullptr)
     {
         rResult = pTransformationFacet->GetRotation();
+
+        return 1;
     }
 
-    return 1;
+    return 0;
 }
 
 LUA_DEFINE_FUNCTION(DataEntityObjFuncs, SetScale)
@@ -101,6 +110,8 @@ LUA_DEFINE_FUNCTION(DataEntityObjFuncs, SetScale)
     if (pTransformationFacet != nullptr)
     {
         pTransformationFacet->SetScale(rVector);
+
+        Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyMove);
     }
 
     return 0;
@@ -119,9 +130,11 @@ LUA_DEFINE_FUNCTION(DataEntityObjFuncs, GetScale)
     if (pTransformationFacet != nullptr)
     {
         rResult = pTransformationFacet->GetScale();
+
+        return 1;
     }
 
-    return 1;
+    return 0;
 }
 
 LUA_DEFINE_FUNCTION(DataEntityObjFuncs, __tostring)

@@ -505,13 +505,13 @@ namespace
 
             pParentEntity = pHierarchyFacet->GetParent();
 
+            // -----------------------------------------------------------------------------
+            // In case of an hierarchy we use the position relative to the parent.
+            // -----------------------------------------------------------------------------
+            WorldMatrix.InjectTranslation(pTransformationFacet->GetPosition());
+
             if (pParentEntity != nullptr)
             {
-                // -----------------------------------------------------------------------------
-                // In case of an hierarchy we use the position relative to the parent.
-                // -----------------------------------------------------------------------------
-                WorldMatrix.InjectTranslation(pTransformationFacet->GetPosition());
-
                 // -----------------------------------------------------------------------------
                 // Ensure that the parent world matrix is calculated before the child.
                 // -----------------------------------------------------------------------------
@@ -520,13 +520,6 @@ namespace
                 pParentTransformationFacet = pParentEntity->GetTransformationFacet();
 
                 WorldMatrix *= pParentTransformationFacet->GetWorldMatrix();
-            }
-            else
-            {
-                // -----------------------------------------------------------------------------
-                // If the entity does not have a parent then use the absolute world position.
-                // -----------------------------------------------------------------------------
-                WorldMatrix.InjectTranslation(_rEntity.GetWorldPosition());
             }
         }
         else
