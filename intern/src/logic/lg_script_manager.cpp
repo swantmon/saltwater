@@ -20,13 +20,6 @@
 
 #include "logic/lg_script_manager.h"
 
-LUA_REQUIRE_LIBRARY_FUNC(CoreTimeLibFuncs, Time)
-LUA_REQUIRE_LIBRARY_FUNC(BaseFloat3LibFuncs, Vector3)
-LUA_REQUIRE_LIBRARY_FUNC(BaseFloat4LibFuncs, Vector4)
-LUA_REQUIRE_LIBRARY_FUNC(GuiInputLibFuncs, Input)
-
-Core::Lua::CStaticFunctionList ScriptFunctions;
-
 namespace
 {
     static const char* g_PathToAssets = "../assets/";
@@ -96,17 +89,6 @@ namespace
 
     void CLgScriptManager::OnStart()
     {
-        LUA_REGISTER_OBJECT(Core::Lua::Main::GetMainState(), BaseFloat3ObjFuncs, Base_Vector3);
-        LUA_REGISTER_OBJECT(Core::Lua::Main::GetMainState(), BaseFloat4ObjFuncs, Base_Vector4);
-        LUA_REGISTER_OBJECT(Core::Lua::Main::GetMainState(), DataEntityObjFuncs, Data_Entity);
-
-        LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), CoreTimeLibFuncs, Time);
-        LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), BaseFloat3LibFuncs, Vector3);
-        LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), BaseFloat4LibFuncs, Vector4);
-        LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), GuiInputLibFuncs, Input);
-
-        LUA_REGISTER_FUNCTIONS(Core::Lua::Main::GetMainState(), ScriptFunctions);
-
         Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CLgScriptManager::OnDirtyEntity));
     }
 
@@ -197,21 +179,39 @@ namespace
     }
 } // namespace 
 
-LUA_DEFINE_FUNCTION(ScriptFunctions, GetEntity)
+namespace 
 {
-    Dt::CEntity* pActiveEntity = CLgScriptManager::GetInstance().GetActiveEntity();
+	LUA_REGISTER_OBJECT(Core::Lua::Main::GetMainState(), BaseFloat3ObjFuncs, Base_Vector3)
+    LUA_REGISTER_OBJECT(Core::Lua::Main::GetMainState(), BaseFloat4ObjFuncs, Base_Vector4)
+    LUA_REGISTER_OBJECT(Core::Lua::Main::GetMainState(), DataEntityObjFuncs, Data_Entity)
 
-    if (pActiveEntity != 0)
+    LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), CoreTimeLibFuncs, Time)
+    LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), BaseFloat3LibFuncs, Vector3)
+    LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), BaseFloat4LibFuncs, Vector4)
+    LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), GuiInputLibFuncs, Input)
+
+    // -----------------------------------------------------------------------------
+
+    Core::Lua::CStaticFunctionList ScriptFunctions;
+
+    LUA_DEFINE_FUNCTION(ScriptFunctions, GetEntity)
     {
-        Dt::CEntity& rResult = *static_cast<Dt::CEntity*>(Core::Lua::State::PushUserData(_State, sizeof(Dt::CEntity), "Data_Entity"));
+        Dt::CEntity* pActiveEntity = CLgScriptManager::GetInstance().GetActiveEntity();
 
-        rResult = *pActiveEntity;
+        if (pActiveEntity != 0)
+        {
+            Dt::CEntity& rResult = *static_cast<Dt::CEntity*>(Core::Lua::State::PushUserData(_State, sizeof(Dt::CEntity), "Data_Entity"));
 
-        return 1;
+            rResult = *pActiveEntity;
+
+            return 1;
+        }
+
+        return 0;
     }
 
-    return 0;
-}
+    LUA_REGISTER_FUNCTIONS(Core::Lua::Main::GetMainState(), ScriptFunctions)
+} // namespace 
 
 namespace Lg
 {
