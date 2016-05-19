@@ -7,6 +7,7 @@
 #include "data/data_actor_manager.h"
 #include "data/data_entity_manager.h"
 #include "data/data_light_manager.h"
+#include "data/data_script_manager.h"
 
 #include "logic/lg_edit_state.h"
 
@@ -50,7 +51,8 @@ namespace
         // -----------------------------------------------------------------------------
         Dt::ActorManager ::Update();
         Dt::EntityManager::Update();
-        Dt::LightManager ::Update();       
+        Dt::LightManager ::Update();    
+        Dt::ScriptManager ::Update();
         
         // -----------------------------------------------------------------------------
         // Return state changes

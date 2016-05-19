@@ -23,6 +23,8 @@
 #include "data/data_model_manager.h"
 #include "data/data_plugin_facet.h"
 #include "data/data_plugin_manager.h"
+#include "data/data_script_facet.h"
+#include "data/data_script_manager.h"
 #include "data/data_texture_manager.h"
 #include "data/data_transformation_facet.h"
 
@@ -378,6 +380,12 @@ namespace
             pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
 
             rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
+
+            Dt::CScriptFacet* pScriptFacet = Dt::ScriptManager::CreateScript();
+
+            pScriptFacet->SetScriptFile("scripts/move_circle.lua");
+
+            rSphere.SetDetailFacet(Dt::SFacetCategory::Script, pScriptFacet);
 
             Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }

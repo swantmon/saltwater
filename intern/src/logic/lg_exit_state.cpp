@@ -12,6 +12,7 @@
 #include "data/data_light_manager.h"
 #include "data/data_material_manager.h"
 #include "data/data_model_manager.h"
+#include "data/data_script_manager.h"
 #include "data/data_texture_manager.h"
 
 #include "logic/lg_exit_state.h"
@@ -58,6 +59,7 @@ namespace
         Dt::ActorManager   ::OnExit();
         Dt::EntityManager  ::OnExit();
         Dt::LightManager   ::OnExit();
+        Dt::ScriptManager   ::OnExit();
 
         return Lg::Exit::SResult::Exit;
     }

@@ -89,6 +89,12 @@
     <ClInclude Include="..\..\..\src\data\data_script_entity.h">
       <Filter>interface\script</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_script_facet.h">
+      <Filter>map\scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_script_manager.h">
+      <Filter>map\scripts</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\data\data_entity_manager.cpp">
@@ -152,6 +158,12 @@
       <Filter>map\plugins</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_precompiled.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_script_manager.cpp">
+      <Filter>map\scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_script_facet.cpp">
+      <Filter>map\scripts</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="map">
@@ -195,6 +207,9 @@
     </Filter>
     <Filter Include="interface\script">
       <UniqueIdentifier>{f2d82096-23d7-4fc1-83bc-29fe07616da0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\scripts">
+      <UniqueIdentifier>{a0851fd6-c93a-42c8-a39a-0062d242c79b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

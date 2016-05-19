@@ -42,6 +42,8 @@
     <ClInclude Include="..\..\..\src\data\data_precompiled.h" />
     <ClInclude Include="..\..\..\src\data\data_region.h" />
     <ClInclude Include="..\..\..\src\data\data_script_entity.h" />
+    <ClInclude Include="..\..\..\src\data\data_script_facet.h" />
+    <ClInclude Include="..\..\..\src\data\data_script_manager.h" />
     <ClInclude Include="..\..\..\src\data\data_surface.h" />
     <ClInclude Include="..\..\..\src\data\data_texture_1d.h" />
     <ClInclude Include="..\..\..\src\data\data_texture_2d.h" />
@@ -71,6 +73,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_script_facet.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_script_manager.cpp" />
     <ClCompile Include="..\..\..\src\data\data_texture_1d.cpp" />
     <ClCompile Include="..\..\..\src\data\data_texture_2d.cpp" />
     <ClCompile Include="..\..\..\src\data\data_texture_base.cpp" />

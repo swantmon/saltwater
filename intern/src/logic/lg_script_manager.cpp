@@ -12,6 +12,8 @@
 #include "core/core_script_base_vector4.h"
 #include "core/core_script_core_time.h"
 
+#include "data/data_entity_manager.h"
+#include "data/data_script_manager.h"
 #include "data/data_script_entity.h"
 
 #include "gui/gui_script_input.h"
@@ -47,6 +49,10 @@ namespace
         void Clear();
 
         void Update();
+
+    private:
+
+        void OnDirtyEntity(Dt::CEntity* _pEntity);
     };
 } // namespace 
 
@@ -75,6 +81,8 @@ namespace
         LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), BaseFloat3LibFuncs, Vector3);
         LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), BaseFloat4LibFuncs, Vector4);
         LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), GuiInputLibFuncs, Input);
+
+        Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CLgScriptManager::OnDirtyEntity));
     }
 
     // -----------------------------------------------------------------------------
@@ -88,7 +96,6 @@ namespace
 
     void CLgScriptManager::Clear()
     {
-        
     }
 
     // -----------------------------------------------------------------------------
@@ -110,6 +117,34 @@ namespace
         Core::Lua::State::CallFunction(LuaState, "OnStart", 0);
         Core::Lua::State::CallFunction(LuaState, "Update", 0);
         Core::Lua::State::CallFunction(LuaState, "OnExit", 0);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CLgScriptManager::OnDirtyEntity(Dt::CEntity* _pEntity)
+    {
+        assert(_pEntity != 0);
+
+        unsigned int DirtyFlags;
+
+        DirtyFlags = _pEntity->GetDirtyFlags();
+
+        // -----------------------------------------------------------------------------
+        // Check if it is a new actor
+        // -----------------------------------------------------------------------------
+        if ((DirtyFlags & Dt::CEntity::DirtyCreate) != 0)
+        {
+            Dt::CScriptFacet* pScriptFacet = static_cast<Dt::CScriptFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Script));
+
+            if (pScriptFacet)
+            {
+                // -----------------------------------------------------------------------------
+                // Do something
+                // -----------------------------------------------------------------------------
+
+                int a = 4;
+            }
+        }
     }
 } // namespace 
 

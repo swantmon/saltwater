@@ -12,6 +12,7 @@
 #include "data/data_light_manager.h"
 #include "data/data_material_manager.h"
 #include "data/data_model_manager.h"
+#include "data/data_script_manager.h"
 #include "data/data_texture_manager.h"
 
 #include "logic/lg_script_manager.h"
@@ -47,6 +48,7 @@ namespace
         Dt::FXManager      ::OnStart();
         Dt::ModelManager   ::OnStart();
         Dt::MaterialManager::OnStart();
+        Dt::ScriptManager   ::OnStart();
         Dt::TextureManager ::OnStart();
 
         // -----------------------------------------------------------------------------

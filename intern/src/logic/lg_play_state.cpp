@@ -18,6 +18,7 @@
 #include "data/data_light_facet.h"
 #include "data/data_light_manager.h"
 #include "data/data_map.h"
+#include "data/data_script_manager.h"
 
 #include "gui/gui_event_handler.h"
 
@@ -95,6 +96,7 @@ namespace
         Dt::ActorManager ::Update();
         Dt::EntityManager::Update();
         Dt::LightManager ::Update();
+        Dt::ScriptManager ::Update();
 
         Lg::ScriptManager::Update();
 
