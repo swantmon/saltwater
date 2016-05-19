@@ -52,6 +52,22 @@ namespace
 
     private:
 
+        struct SInternScript
+        {
+            Dt::CEntity*      m_pEntity;
+            Dt::CScriptFacet* m_pScriptFacet;
+        };
+
+    private:
+
+        typedef std::vector<SInternScript> CInternScripts;
+
+    private:
+
+        CInternScripts m_InternScripts;
+
+    private:
+
         void OnDirtyEntity(Dt::CEntity* _pEntity);
     };
 } // namespace 
@@ -59,6 +75,7 @@ namespace
 namespace 
 {
     CLgScriptManager::CLgScriptManager()
+        : m_InternScripts()
     {
     }
 
@@ -66,7 +83,7 @@ namespace
 
     CLgScriptManager::~CLgScriptManager()
     {
-
+        m_InternScripts.clear();
     }
 
     // -----------------------------------------------------------------------------
@@ -96,6 +113,7 @@ namespace
 
     void CLgScriptManager::Clear()
     {
+        m_InternScripts.clear();
     }
 
     // -----------------------------------------------------------------------------
@@ -107,16 +125,22 @@ namespace
         // -----------------------------------------------------------------------------
         Core::Lua::BState LuaState = Core::Lua::Main::GetMainState();
 
-        // -----------------------------------------------------------------------------
-        // Load a script
-        // -----------------------------------------------------------------------------
-        std::string PathToScript = std::string(g_PathToAssets) + "test.lua";
+        CInternScripts::const_iterator CurrentInternScript = m_InternScripts.begin();
+        CInternScripts::const_iterator EndOfInternScripts = m_InternScripts.end();
 
-        Core::Lua::State::LoadScript(LuaState, PathToScript.c_str(), 0);
+        for (; CurrentInternScript != EndOfInternScripts; ++ CurrentInternScript)
+        {
+            // -----------------------------------------------------------------------------
+            // Load a script
+            // -----------------------------------------------------------------------------
+            std::string PathToScript = std::string(g_PathToAssets) + CurrentInternScript->m_pScriptFacet->GetScriptFile();
 
-        Core::Lua::State::CallFunction(LuaState, "OnStart", 0);
-        Core::Lua::State::CallFunction(LuaState, "Update", 0);
-        Core::Lua::State::CallFunction(LuaState, "OnExit", 0);
+            Core::Lua::State::LoadScript(LuaState, PathToScript.c_str(), 0);
+
+            Core::Lua::State::CallFunction(LuaState, "OnStart", 0);
+            Core::Lua::State::CallFunction(LuaState, "Update", 0);
+            Core::Lua::State::CallFunction(LuaState, "OnExit", 0);
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -139,10 +163,15 @@ namespace
             if (pScriptFacet)
             {
                 // -----------------------------------------------------------------------------
-                // Do something
+                // TODO:
+                // Check if entity is already inside; is this possible?
                 // -----------------------------------------------------------------------------
+                SInternScript NewScript;
 
-                int a = 4;
+                NewScript.m_pScriptFacet = pScriptFacet;
+                NewScript.m_pEntity      = _pEntity;
+
+                m_InternScripts.push_back(NewScript);
             }
         }
     }
