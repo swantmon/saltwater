@@ -11,6 +11,12 @@
 
 #include <string>
 
+class CLuaEntity
+{
+public:
+    Dt::CEntity* m_pEntity;
+};
+
 Core::Lua::CStaticFunctionList DataEntityObjFuncs;
 
 // -----------------------------------------------------------------------------
@@ -18,7 +24,9 @@ Core::Lua::CStaticFunctionList DataEntityObjFuncs;
 // -----------------------------------------------------------------------------
 LUA_DEFINE_FUNCTION(DataEntityObjFuncs, GetID)
 {
-    Dt::CEntity& rEntity = *static_cast<Dt::CEntity*>(Core::Lua::State::GetUserData(_State, 1));
+    CLuaEntity& rScriptEntity = *static_cast<CLuaEntity*>(Core::Lua::State::GetUserData(_State, 1));
+
+    Dt::CEntity& rEntity = *rScriptEntity.m_pEntity;
 
     Core::Lua::State::PushUInt(_State, rEntity.GetID());
 
@@ -27,8 +35,10 @@ LUA_DEFINE_FUNCTION(DataEntityObjFuncs, GetID)
 
 LUA_DEFINE_FUNCTION(DataEntityObjFuncs, SetPosition)
 {
-    Dt::CEntity&  rEntity = *static_cast<Dt::CEntity*>(Core::Lua::State::GetUserData(_State, 1));
+    CLuaEntity& rScriptEntity = *static_cast<CLuaEntity*>(Core::Lua::State::GetUserData(_State, 1));
     Base::Float3& rVector = *static_cast<Base::Float3*>(Core::Lua::State::GetUserData(_State, 2));
+
+    Dt::CEntity& rEntity = *rScriptEntity.m_pEntity;
 
     Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
@@ -44,7 +54,9 @@ LUA_DEFINE_FUNCTION(DataEntityObjFuncs, SetPosition)
 
 LUA_DEFINE_FUNCTION(DataEntityObjFuncs, GetPosition)
 {
-    Dt::CEntity&  rEntity = *static_cast<Dt::CEntity*>(Core::Lua::State::GetUserData(_State, 1));
+    CLuaEntity& rScriptEntity = *static_cast<CLuaEntity*>(Core::Lua::State::GetUserData(_State, 1));
+
+    Dt::CEntity& rEntity = *rScriptEntity.m_pEntity;
 
     Base::Float3& rResult = *static_cast<Base::Float3*>(Core::Lua::State::PushUserData(_State, sizeof(Base::Float3), "Base_Vector3"));
 
@@ -64,8 +76,10 @@ LUA_DEFINE_FUNCTION(DataEntityObjFuncs, GetPosition)
 
 LUA_DEFINE_FUNCTION(DataEntityObjFuncs, SetRotation)
 {
-    Dt::CEntity&  rEntity = *static_cast<Dt::CEntity*>(Core::Lua::State::GetUserData(_State, 1));
+    CLuaEntity& rScriptEntity = *static_cast<CLuaEntity*>(Core::Lua::State::GetUserData(_State, 1));
     Base::Float3& rVector = *static_cast<Base::Float3*>(Core::Lua::State::GetUserData(_State, 2));
+
+    Dt::CEntity& rEntity = *rScriptEntity.m_pEntity;
 
     Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
     
@@ -82,7 +96,9 @@ LUA_DEFINE_FUNCTION(DataEntityObjFuncs, SetRotation)
 
 LUA_DEFINE_FUNCTION(DataEntityObjFuncs, GetRotation)
 {
-    Dt::CEntity&  rEntity = *static_cast<Dt::CEntity*>(Core::Lua::State::GetUserData(_State, 1));
+    CLuaEntity& rScriptEntity = *static_cast<CLuaEntity*>(Core::Lua::State::GetUserData(_State, 1));
+
+    Dt::CEntity& rEntity = *rScriptEntity.m_pEntity;
 
     Base::Float3& rResult = *static_cast<Base::Float3*>(Core::Lua::State::PushUserData(_State, sizeof(Base::Float3), "Base_Vector3"));
 
@@ -102,8 +118,10 @@ LUA_DEFINE_FUNCTION(DataEntityObjFuncs, GetRotation)
 
 LUA_DEFINE_FUNCTION(DataEntityObjFuncs, SetScale)
 {
-    Dt::CEntity&  rEntity = *static_cast<Dt::CEntity*>(Core::Lua::State::GetUserData(_State, 1));
-    Base::Float3& rVector = *static_cast<Base::Float3*>(Core::Lua::State::GetUserData(_State, 2));
+    CLuaEntity& rScriptEntity = *static_cast<CLuaEntity*>(Core::Lua::State::GetUserData(_State, 1));
+    Base::Float3& rVector     = *static_cast<Base::Float3*>(Core::Lua::State::GetUserData(_State, 2));
+
+    Dt::CEntity& rEntity = *rScriptEntity.m_pEntity;
 
     Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
@@ -119,7 +137,9 @@ LUA_DEFINE_FUNCTION(DataEntityObjFuncs, SetScale)
 
 LUA_DEFINE_FUNCTION(DataEntityObjFuncs, GetScale)
 {
-    Dt::CEntity&  rEntity = *static_cast<Dt::CEntity*>(Core::Lua::State::GetUserData(_State, 1));
+    CLuaEntity& rScriptEntity = *static_cast<CLuaEntity*>(Core::Lua::State::GetUserData(_State, 1));
+
+    Dt::CEntity& rEntity = *rScriptEntity.m_pEntity;
 
     Base::Float3& rResult = *static_cast<Base::Float3*>(Core::Lua::State::PushUserData(_State, sizeof(Base::Float3), "Base_Vector3"));
 
@@ -139,7 +159,9 @@ LUA_DEFINE_FUNCTION(DataEntityObjFuncs, GetScale)
 
 LUA_DEFINE_FUNCTION(DataEntityObjFuncs, __tostring)
 {
-    Dt::CEntity& rEntity = *static_cast<Dt::CEntity*>(Core::Lua::State::GetUserData(_State, 1));
+    CLuaEntity& rScriptEntity = *static_cast<CLuaEntity*>(Core::Lua::State::GetUserData(_State, 1));
+
+    Dt::CEntity& rEntity = *rScriptEntity.m_pEntity;
 
     std::string String;
 

@@ -122,6 +122,12 @@ namespace
 
             rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
 
+            Dt::CScriptFacet* pScriptFacet = Dt::ScriptManager::CreateScript();
+
+            pScriptFacet->SetScriptFile("scripts/camera_behavior.lua");
+
+            rEntity.SetDetailFacet(Dt::SFacetCategory::Script, pScriptFacet);
+
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
@@ -375,11 +381,11 @@ namespace
 
             rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
 
-            Dt::CScriptFacet* pScriptFacet = Dt::ScriptManager::CreateScript();
-
-            pScriptFacet->SetScriptFile("scripts/move_circle.lua");
-
-            rSphere.SetDetailFacet(Dt::SFacetCategory::Script, pScriptFacet);
+//             Dt::CScriptFacet* pScriptFacet = Dt::ScriptManager::CreateScript();
+// 
+//             pScriptFacet->SetScriptFile("scripts/move_circle.lua");
+// 
+//             rSphere.SetDetailFacet(Dt::SFacetCategory::Script, pScriptFacet);
 
             Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }

@@ -198,9 +198,9 @@ namespace
 
         if (pActiveEntity != 0)
         {
-            Dt::CEntity& rResult = *static_cast<Dt::CEntity*>(Core::Lua::State::PushUserData(_State, sizeof(Dt::CEntity), "Data_Entity"));
+            CLuaEntity& rResult = *static_cast<CLuaEntity*>(Core::Lua::State::PushUserData(_State, sizeof(CLuaEntity), "Data_Entity"));
 
-            rResult = *pActiveEntity;
+            rResult.m_pEntity = pActiveEntity;
 
             return 1;
         }
