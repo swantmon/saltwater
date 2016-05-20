@@ -180,6 +180,18 @@ LUA_DEFINE_FUNCTION(BaseFloat3ObjFuncs, __add)
     return 1;
 }
 
+LUA_DEFINE_FUNCTION(BaseFloat3ObjFuncs, __sub)
+{
+    Base::Float3& rVector1 = *static_cast<Base::Float3*>(Core::Lua::State::GetUserData(_State, 1));
+    Base::Float3& rVector2 = *static_cast<Base::Float3*>(Core::Lua::State::GetUserData(_State, 2));
+
+    Base::Float3& rResult = *static_cast<Base::Float3*>(Core::Lua::State::PushUserData(_State, sizeof(Base::Float3), "Base_Vector3"));
+
+    rResult = rVector1 - rVector2;
+
+    return 1;
+}
+
 LUA_DEFINE_FUNCTION(BaseFloat3ObjFuncs, __mul)
 {
     Base::Float3& rVector1 = *static_cast<Base::Float3*>(Core::Lua::State::GetUserData(_State, 1));

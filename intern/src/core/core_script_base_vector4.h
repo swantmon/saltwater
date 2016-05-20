@@ -169,6 +169,18 @@ LUA_DEFINE_FUNCTION(BaseFloat4ObjFuncs, __add)
     return 1;
 }
 
+LUA_DEFINE_FUNCTION(BaseFloat4ObjFuncs, __sub)
+{
+    Base::Float4& rVector1 = *static_cast<Base::Float4*>(Core::Lua::State::GetUserData(_State, 1));
+    Base::Float4& rVector2 = *static_cast<Base::Float4*>(Core::Lua::State::GetUserData(_State, 2));
+
+    Base::Float4& rResult = *static_cast<Base::Float4*>(Core::Lua::State::PushUserData(_State, sizeof(Base::Float4), "Base_Vector4"));
+
+    rResult = rVector1 - rVector2;
+
+    return 1;
+}
+
 LUA_DEFINE_FUNCTION(BaseFloat4ObjFuncs, __mul)
 {
     Base::Float4& rVector1 = *static_cast<Base::Float4*>(Core::Lua::State::GetUserData(_State, 1));

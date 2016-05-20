@@ -187,21 +187,21 @@ namespace
 
     bool CGuiInputManager::GetKey(Base::CInputEvent::EKey _Key)
     {
-        return m_KeyboardKeys.lower_bound(_Key) != m_KeyboardKeys.end() && m_KeyboardKeys.at(_Key) >= 0;
+        return m_KeyboardKeys.find(_Key) != m_KeyboardKeys.end() && m_KeyboardKeys.at(_Key) >= 0;
     }
 
     // -----------------------------------------------------------------------------
 
     bool CGuiInputManager::GetKeyDown(Base::CInputEvent::EKey _Key)
     {
-        return m_KeyboardKeys.lower_bound(_Key) != m_KeyboardKeys.end() && m_KeyboardKeys.at(_Key) == 0;
+        return m_KeyboardKeys.find(_Key) != m_KeyboardKeys.end() && m_KeyboardKeys.at(_Key) == 0;
     }
 
     // -----------------------------------------------------------------------------
 
     bool CGuiInputManager::GetKeyUp(Base::CInputEvent::EKey _Key)
     {
-        bool Return = m_KeyboardKeys.lower_bound(_Key) != m_KeyboardKeys.end() && m_KeyboardKeys.at(_Key) == -1;
+        bool Return = m_KeyboardKeys.find(_Key) != m_KeyboardKeys.end() && m_KeyboardKeys.at(_Key) == -1;
 
         if (Return)
         {
