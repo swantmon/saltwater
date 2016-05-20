@@ -24,6 +24,7 @@
     <ClInclude Include="..\..\..\src\core\core_script_base_vector3.h" />
     <ClInclude Include="..\..\..\src\core\core_script_base_vector4.h" />
     <ClInclude Include="..\..\..\src\core\core_script_core_time.h" />
+    <ClInclude Include="..\..\..\src\core\core_script_interface.h" />
     <ClInclude Include="..\..\..\src\core\core_time.h" />
     <ClInclude Include="..\..\..\src\core\core_lua_argument.h" />
     <ClInclude Include="..\..\..\src\core\core_lua_export.h" />

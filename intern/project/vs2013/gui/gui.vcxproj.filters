@@ -74,7 +74,7 @@
     <ClInclude Include="..\..\..\src\gui\gui_input_manager.h">
       <Filter>input</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\gui_script_input.h">
+    <ClInclude Include="..\..\..\src\gui\gui_script_interface.h">
       <Filter>interface\script</Filter>
     </ClInclude>
   </ItemGroup>

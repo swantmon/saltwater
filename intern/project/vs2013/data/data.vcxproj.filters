@@ -86,14 +86,14 @@
       <Filter>map\plugins</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_precompiled.h" />
-    <ClInclude Include="..\..\..\src\data\data_script_entity.h">
-      <Filter>interface\script</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_script_facet.h">
       <Filter>map\scripts</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_script_manager.h">
       <Filter>map\scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_script_interface.h">
+      <Filter>interface\script</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

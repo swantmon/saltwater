@@ -6,7 +6,7 @@
 #include "core/core_lua_state.h"
 
 #include "data/data_entity.h"
-#include "data/data_script_entity.h"
+#include "data/data_entity_manager.h"
 #include "data/data_transformation_facet.h"
 
 #include <string>

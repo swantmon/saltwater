@@ -8,15 +8,13 @@
 #include "core/core_lua_export.h"
 #include "core/core_lua_main.h"
 #include "core/core_lua_state.h"
-#include "core/core_script_base_vector3.h"
-#include "core/core_script_base_vector4.h"
-#include "core/core_script_core_time.h"
+#include "core/core_script_interface.h"
 
+#include "data/data_script_interface.h"
 #include "data/data_entity_manager.h"
 #include "data/data_script_manager.h"
-#include "data/data_script_entity.h"
 
-#include "gui/gui_script_input.h"
+#include "gui/gui_script_interface.h"
 
 #include "logic/lg_script_manager.h"
 

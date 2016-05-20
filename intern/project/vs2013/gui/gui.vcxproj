@@ -49,7 +49,7 @@
     <ClInclude Include="..\..\..\src\gui\gui_main_menu_state.h" />
     <ClInclude Include="..\..\..\src\gui\gui_play_state.h" />
     <ClInclude Include="..\..\..\src\gui\gui_precompiled.h" />
-    <ClInclude Include="..\..\..\src\gui\gui_script_input.h" />
+    <ClInclude Include="..\..\..\src\gui\gui_script_interface.h" />
     <ClInclude Include="..\..\..\src\gui\gui_start_state.h" />
     <ClInclude Include="..\..\..\src\gui\gui_unload_map_state.h" />
   </ItemGroup>

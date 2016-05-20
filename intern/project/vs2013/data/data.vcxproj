@@ -41,7 +41,7 @@
     <ClInclude Include="..\..\..\src\data\data_plugin_manager.h" />
     <ClInclude Include="..\..\..\src\data\data_precompiled.h" />
     <ClInclude Include="..\..\..\src\data\data_region.h" />
-    <ClInclude Include="..\..\..\src\data\data_script_entity.h" />
+    <ClInclude Include="..\..\..\src\data\data_script_interface.h" />
     <ClInclude Include="..\..\..\src\data\data_script_facet.h" />
     <ClInclude Include="..\..\..\src\data\data_script_manager.h" />
     <ClInclude Include="..\..\..\src\data\data_surface.h" />
