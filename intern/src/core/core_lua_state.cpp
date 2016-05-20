@@ -256,15 +256,44 @@ namespace
         lua_State* pNativeState = GetNativeState(_State);
 
         // -----------------------------------------------------------------------------
-        // Check if table already exist
+        // Get table from global environment
         // -----------------------------------------------------------------------------
-        lua_newtable(pNativeState);
+        lua_getglobal(pNativeState, _pLibraryName);
+
+        // -----------------------------------------------------------------------------
+        // Check if table exists
+        // -----------------------------------------------------------------------------
+        if (lua_isnil(pNativeState, -1)) 
+        {
+            // -----------------------------------------------------------------------------
+            // Pop error form stack
+            // -----------------------------------------------------------------------------
+            lua_pop(pNativeState, 1);
+
+            // -----------------------------------------------------------------------------
+            // Create new table and set to global environment
+            // -----------------------------------------------------------------------------
+            lua_newtable(pNativeState);
+
+            lua_setglobal(pNativeState, _pLibraryName);
+
+            // -----------------------------------------------------------------------------
+            // Pop current table
+            // -----------------------------------------------------------------------------
+            lua_pop(pNativeState, 1);
+
+            // -----------------------------------------------------------------------------
+            // Get table from global environment
+            // -----------------------------------------------------------------------------
+            lua_getglobal(pNativeState, _pLibraryName);
+        }
 
         // -----------------------------------------------------------------------------
         // Set specific function on this table
         // -----------------------------------------------------------------------------
-        lua_pushcclosure(pNativeState, reinterpret_cast<lua_CFunction>(_pFunction), 0);
-        lua_setfield(pNativeState, -2, _pFunctionName);
+        lua_pushstring(pNativeState, _pFunctionName);
+        lua_pushcfunction(pNativeState, reinterpret_cast<lua_CFunction>(_pFunction));
+        lua_settable(pNativeState, -3);
     }
 
     // -----------------------------------------------------------------------------

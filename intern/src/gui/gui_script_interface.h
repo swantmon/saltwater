@@ -6,7 +6,6 @@
 #include "core/core_lua_state.h"
 
 #include "gui/gui_input_manager.h"
-#include "gui/gui_script_interface.h"
 
 Core::Lua::CStaticFunctionList GuiInputLibFuncs;
 
