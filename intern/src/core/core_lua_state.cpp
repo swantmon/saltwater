@@ -233,6 +233,8 @@ namespace
 
     void CLuaStateManager::RequireLibrary(BState _State, const Base::Char* _pLibraryName, FLuaCFunc _pFunction)
     {
+        assert(_pLibraryName != 0 && _pFunction != 0);
+
         lua_State* pNativeState = GetNativeState(_State);
 
         luaL_requiref(pNativeState, _pLibraryName, reinterpret_cast<lua_CFunction>(_pFunction), 1);
@@ -242,6 +244,8 @@ namespace
 
     void CLuaStateManager::RegisterFunction(BState _State, const Base::Char* _pFunctionName, FLuaCFunc _pFunction)
     {
+        assert(_pFunctionName != 0 && _pFunction != 0);
+
         lua_State* pNativeState = GetNativeState(_State);
 
         lua_register(pNativeState, _pFunctionName, reinterpret_cast<lua_CFunction>(_pFunction));
@@ -251,7 +255,7 @@ namespace
 
     void CLuaStateManager::RegisterLibrary(BState _State, const Base::Char* _pLibraryName, const Base::Char* _pFunctionName, FLuaCFunc _pFunction)
     {
-        BASE_UNUSED(_pLibraryName);
+        assert(_pLibraryName != 0 && _pFunctionName != 0 && _pFunction != 0);
 
         lua_State* pNativeState = GetNativeState(_State);
 
