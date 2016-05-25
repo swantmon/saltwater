@@ -70,6 +70,7 @@ namespace
         void OnMouseRightReleased(Edit::CMessage& _rMessage);
         void OnMouseMove(Edit::CMessage& _rMessage);
         
+        void OnTakeScreenshot(Edit::CMessage& _rMessage);
     };
 } // namespace
 
@@ -150,6 +151,7 @@ namespace
         Edit::MessageManager::Register(Edit::SGUIMessageType::MouseRightPressed  , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseRightPressed));
         Edit::MessageManager::Register(Edit::SGUIMessageType::MouseRightReleased , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseRightReleased));
         Edit::MessageManager::Register(Edit::SGUIMessageType::MouseMove          , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseMove));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::TakeScreenshot     , EDIT_RECEIVE_MESSAGE(&CApplication::OnTakeScreenshot));
     }
     
     // -----------------------------------------------------------------------------
@@ -366,6 +368,17 @@ namespace
         Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseMove, Base::CInputEvent::Mouse, m_LatestMousePosition);
 
         Gui::EventHandler::OnUserEvent(NewInput);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CApplication::OnTakeScreenshot(Edit::CMessage& _rMessage)
+    {
+        char pPathToSave[256];
+
+        _rMessage.GetString(pPathToSave, 256);
+
+        Gfx::App::TakeScreenshot(m_EditWindowID, pPathToSave);
     }
 }
 

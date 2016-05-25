@@ -36,6 +36,7 @@ public:
     QWidget *m_pCentralWidget;
     QWidget *m_pEditorRenderContext;
     QPushButton *m_pPlayButton;
+    QPushButton *m_pScreenshotButton;
     QMenuBar *m_pMenuBar;
     QMenu *m_pMenuFile;
     QMenu *m_pMenuEdit;
@@ -78,6 +79,9 @@ public:
         m_pPlayButton = new QPushButton(m_pCentralWidget);
         m_pPlayButton->setObjectName(QStringLiteral("m_pPlayButton"));
         m_pPlayButton->setGeometry(QRect(10, 10, 75, 23));
+        m_pScreenshotButton = new QPushButton(m_pCentralWidget);
+        m_pScreenshotButton->setObjectName(QStringLiteral("m_pScreenshotButton"));
+        m_pScreenshotButton->setGeometry(QRect(1190, 10, 75, 23));
         CMainWindow->setCentralWidget(m_pCentralWidget);
         m_pMenuBar = new QMenuBar(CMainWindow);
         m_pMenuBar->setObjectName(QStringLiteral("m_pMenuBar"));
@@ -120,6 +124,7 @@ public:
         retranslateUi(CMainWindow);
         QObject::connect(m_pActionExit, SIGNAL(triggered()), CMainWindow, SLOT(close()));
         QObject::connect(m_pPlayButton, SIGNAL(clicked()), CMainWindow, SLOT(switchPlayingCurrentScene()));
+        QObject::connect(m_pScreenshotButton, SIGNAL(clicked()), CMainWindow, SLOT(takeScreenshot()));
 
         QMetaObject::connectSlotsByName(CMainWindow);
     } // setupUi
@@ -136,6 +141,7 @@ public:
         m_pActionReleaseNotes->setText(QApplication::translate("CMainWindow", "Release Notes", 0));
         m_pActionReportBug->setText(QApplication::translate("CMainWindow", "Report a Bug...", 0));
         m_pPlayButton->setText(QApplication::translate("CMainWindow", "Play", 0));
+        m_pScreenshotButton->setText(QApplication::translate("CMainWindow", "Screenshot", 0));
         m_pMenuFile->setTitle(QApplication::translate("CMainWindow", "File", 0));
         m_pMenuEdit->setTitle(QApplication::translate("CMainWindow", "Edit", 0));
         m_pMenuAssets->setTitle(QApplication::translate("CMainWindow", "Assets", 0));

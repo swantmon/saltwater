@@ -8,7 +8,7 @@ namespace Edit
     // ----------------------------------------------------------------------------------
     struct SGUIMessageType 
     {
-        enum Enum 
+        enum Enum
         {
             MouseMove,
             MouseLeftPressed,
@@ -27,6 +27,7 @@ namespace Edit
             LoadMap,
             SaveMap,
             SaveMapAs,
+            TakeScreenshot,
             Play,
             Edit,
 

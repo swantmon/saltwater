@@ -28,6 +28,7 @@ namespace Edit
     public Q_SLOTS:
 
         void switchPlayingCurrentScene();
+        void takeScreenshot();
 
     private:
 

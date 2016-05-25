@@ -70,6 +70,19 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
+    void CMainWindow::takeScreenshot()
+    {
+        CMessage NewMessage;
+
+        NewMessage.PutString("save.png");
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::TakeScreenshot, NewMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CMainWindow::closeEvent(QCloseEvent* _pEvent)
     {
         CMessage NewMessage(true);

@@ -45,6 +45,8 @@ namespace Main
 
     void OnResize(unsigned int _WindowID, unsigned int _Width, unsigned int _Height);
 
+    void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile);
+
     void BeginFrame();
     void EndFrame();
     

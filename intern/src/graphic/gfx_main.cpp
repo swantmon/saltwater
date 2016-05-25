@@ -13,10 +13,12 @@
 #include "core/core_config.h"
 
 #include "data/data_map.h"
+#include "data/data_texture_manager.h"
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_target_set_manager.h"
+#include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
 
 #include "GL/glew.h"
@@ -96,6 +98,8 @@ namespace
         const Base::Int2& GetWindowSize(unsigned int _WindowID);
 
         void OnResize(unsigned int _WindowID, unsigned int _Width, unsigned int _Height);
+
+        void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile);
         
     public:
         
@@ -447,6 +451,52 @@ namespace
             (*CurrentDelegate)(_Width, _Height);
         }
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxMain::TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile)
+    {
+        assert(_WindowID < m_NumberOfWindows);
+
+        // -----------------------------------------------------------------------------
+        // Read pixels from last framebuffer
+        // -----------------------------------------------------------------------------
+        SWindowInfo& rWindowInfo = m_WindowInfos[_WindowID];
+
+        unsigned int Width = rWindowInfo.m_WindowSize[0];
+        unsigned int Height = rWindowInfo.m_WindowSize[1];
+
+        char* pixels = new char[3 * Width * Height];
+
+        glReadPixels(0, 0, Width, Height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+
+        // -----------------------------------------------------------------------------
+        // Create texture
+        // -----------------------------------------------------------------------------
+        Dt::STextureDescriptor TextureDesc;
+
+        TextureDesc.m_pIdentifier = 0;
+        TextureDesc.m_NumberOfPixelsU = Width;
+        TextureDesc.m_NumberOfPixelsV = Height;
+        TextureDesc.m_NumberOfPixelsW = 1;
+        TextureDesc.m_NumberOfTextures = 1;
+        TextureDesc.m_Format = Dt::CTextureBase::R8G8B8A8_UBYTE;
+        TextureDesc.m_Semantic = Dt::CTextureBase::Diffuse;
+        TextureDesc.m_pFileName = 0;
+        TextureDesc.m_pPixels = pixels;
+
+        Dt::CTexture2D* pScreenshot = Dt::TextureManager::CreateTexture2D(TextureDesc);
+
+        // -----------------------------------------------------------------------------
+        // Save texture to file
+        // -----------------------------------------------------------------------------
+        Dt::TextureManager::SaveTexture2DToFile(pScreenshot, _pPathToFile);
+
+        // -----------------------------------------------------------------------------
+        // Free data
+        // -----------------------------------------------------------------------------
+        delete[] pixels;
+    }
     
     // -----------------------------------------------------------------------------
     
@@ -772,6 +822,13 @@ namespace Main
     void OnResize(unsigned int _WindowID, unsigned int _Width, unsigned int _Height)
     {
         return CGfxMain::GetInstance().OnResize(_WindowID, _Width, _Height);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile)
+    {
+        CGfxMain::GetInstance().TakeScreenshot(_WindowID, _pPathToFile);
     }
     
     // -----------------------------------------------------------------------------

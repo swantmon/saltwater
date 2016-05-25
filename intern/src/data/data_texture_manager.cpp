@@ -49,6 +49,8 @@ namespace
 
         void CopyToTextureCube(CTextureCube* _pTextureCube, CTextureCube::EFace _Face, CTexture2D* _pTexture);
 
+        void SaveTexture2DToFile(CTexture2D* _pTexture2D, const Base::Char* _pPathToFile);
+
     private:
 
         // -----------------------------------------------------------------------------
@@ -615,6 +617,37 @@ namespace
         // -----------------------------------------------------------------------------
         pInternTextureCube->m_pFaces[_Face] = _pTexture;
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CDtTextureManager::SaveTexture2DToFile(CTexture2D* _pTexture2D, const Base::Char* _pPathToFile)
+    {
+        assert(_pTexture2D && _pPathToFile);
+
+        CInternTexture2D* pInternTexture2D = static_cast<CInternTexture2D*>(_pTexture2D);
+
+        // -----------------------------------------------------------------------------
+        // Variables
+        // -----------------------------------------------------------------------------
+        ILuint NativeImageHandle;
+
+        // -----------------------------------------------------------------------------
+        // Create devIL image
+        // -----------------------------------------------------------------------------
+        ilEnable(IL_FILE_OVERWRITE);
+        ilGenImages(1, &NativeImageHandle);
+        ilBindImage(NativeImageHandle);
+
+        // -----------------------------------------------------------------------------
+        // Save date to image
+        // -----------------------------------------------------------------------------
+        ilTexImage(pInternTexture2D->GetNumberOfPixelsU(), pInternTexture2D->GetNumberOfPixelsV(), 1, 3, IL_RGB, IL_UNSIGNED_BYTE, pInternTexture2D->GetPixels());
+
+        // -----------------------------------------------------------------------------
+        // Save image on file system
+        // -----------------------------------------------------------------------------
+        ilSave(IL_PNG, (const ILstring)_pPathToFile);
+    }
     
     // -----------------------------------------------------------------------------
     
@@ -1001,6 +1034,13 @@ namespace TextureManager
     void CopyToTextureCube(CTextureCube* _pTextureCube, CTextureCube::EFace _Face, CTexture2D* _pTexture)
     {
         CDtTextureManager::GetInstance().CopyToTextureCube(_pTextureCube, _Face, _pTexture);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SaveTexture2DToFile(CTexture2D* _pTexture2D, const Base::Char* _pPathToFile)
+    {
+        CDtTextureManager::GetInstance().SaveTexture2DToFile(_pTexture2D, _pPathToFile);
     }
 } // namespace TextureManager
 } // namespace Dt

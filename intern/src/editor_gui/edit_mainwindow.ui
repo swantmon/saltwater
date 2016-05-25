@@ -58,6 +58,19 @@
      <string>Play</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="m_pScreenshotButton">
+    <property name="geometry">
+     <rect>
+      <x>1190</x>
+      <y>10</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Screenshot</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="m_pMenuBar">
    <property name="geometry">
@@ -183,8 +196,8 @@
    <slot>switchPlayingCurrentScene()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>653</x>
-     <y>41</y>
+     <x>84</x>
+     <y>53</y>
     </hint>
     <hint type="destinationlabel">
      <x>736</x>
@@ -192,8 +205,25 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_pScreenshotButton</sender>
+   <signal>clicked()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>takeScreenshot()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1211</x>
+     <y>45</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1166</x>
+     <y>44</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>switchPlayingCurrentScene()</slot>
+  <slot>takeScreenshot()</slot>
  </slots>
 </ui>

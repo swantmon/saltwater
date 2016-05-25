@@ -28,5 +28,12 @@ namespace App
     {
         Gfx::Main::OnResize(_WindowID, _Width, _Height);
     }
+
+    // -----------------------------------------------------------------------------
+
+    void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile)
+    {
+        Gfx::Main::TakeScreenshot(_WindowID, _pPathToFile);
+    }
 } // namespace App
 } // namespace Gfx

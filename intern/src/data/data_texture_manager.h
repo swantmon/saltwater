@@ -46,5 +46,7 @@ namespace TextureManager
     void CopyToTexture2D(CTexture2D* _pTexture2D, CTexture2D* _pTexture);
 
     void CopyToTextureCube(CTextureCube* _pTextureCube, CTextureCube::EFace _Face, CTexture2D* _pTexture);
+
+    void SaveTexture2DToFile(CTexture2D* _pTexture2D, const Base::Char* _pPathToFile);
 } // namespace TextureManager
 } // namespace Dt
