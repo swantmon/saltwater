@@ -128,6 +128,7 @@ namespace
 
         ILenum ConvertILImageFormat(Dt::CTextureBase::EFormat _Format) const;
         ILenum ConvertILImageType(Dt::CTextureBase::EFormat _Format) const;
+        ILubyte ConvertILImageChannels(Dt::CTextureBase::EFormat _Format) const;
     };
 } // namespace
 
@@ -629,7 +630,10 @@ namespace
         // -----------------------------------------------------------------------------
         // Variables
         // -----------------------------------------------------------------------------
-        ILuint NativeImageHandle;
+        ILuint  NativeImageHandle;
+        ILenum  NativeFormat;
+        ILenum  NativeImageType;
+        ILubyte NativeNumberOfChannels;
 
         // -----------------------------------------------------------------------------
         // Create devIL image
@@ -638,10 +642,14 @@ namespace
         ilGenImages(1, &NativeImageHandle);
         ilBindImage(NativeImageHandle);
 
+        NativeFormat           = ConvertILImageFormat(pInternTexture2D->GetFormat());
+        NativeImageType        = ConvertILImageType(pInternTexture2D->GetFormat());
+        NativeNumberOfChannels = ConvertILImageChannels(pInternTexture2D->GetFormat());
+
         // -----------------------------------------------------------------------------
         // Save date to image
         // -----------------------------------------------------------------------------
-        ilTexImage(pInternTexture2D->GetNumberOfPixelsU(), pInternTexture2D->GetNumberOfPixelsV(), 1, 3, IL_RGB, IL_UNSIGNED_BYTE, pInternTexture2D->GetPixels());
+        ilTexImage(pInternTexture2D->GetNumberOfPixelsU(), pInternTexture2D->GetNumberOfPixelsV(), 1, NativeNumberOfChannels, NativeFormat, NativeImageType, pInternTexture2D->GetPixels());
 
         // -----------------------------------------------------------------------------
         // Save image on file system
@@ -893,6 +901,88 @@ namespace
         };
 
         return s_NativeType[_Format];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    ILubyte CDtTextureManager::ConvertILImageChannels(Dt::CTextureBase::EFormat _Format) const
+    {
+        static ILubyte s_NativeFormat[] =
+        {
+            1,
+            0,
+            3,
+            4,
+            1,
+            0,
+            3,
+            4,
+            1,
+            0,
+            3,
+            4,
+            1,
+            0,
+            3,
+            4,
+            1,
+            0,
+            3,
+            4,
+            1,
+            0,
+            3,
+            4,
+
+            1,
+            0,
+            3,
+            4,
+            1,
+            0,
+            3,
+            4,
+            1,
+            0,
+            3,
+            4,
+            1,
+            0,
+            3,
+            4,
+            1,
+            0,
+            3,
+            4,
+            1,
+            0,
+            3,
+            4,
+            1,
+            0,
+            3,
+            4,
+
+            1,
+            0,
+            3,
+            4,
+            1,
+            0,
+            3,
+            4,
+            1,
+            0,
+            3,
+            4,
+
+            3,
+            4,
+            4,
+            4,
+        };
+
+        return s_NativeFormat[_Format];
     }
 } // namespace
 
