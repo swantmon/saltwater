@@ -66,8 +66,8 @@ namespace
 
         BASE_CONSOLE_STREAMINFO("Logic> Loading level number " << LevelIndexDebug);
         
-        CreatePBRTestScene();
-//        CreatePBRARScene();
+//        CreatePBRTestScene();
+        CreatePBRARScene();
 //        CreatePBRSponzaScene();
 
         BASE_CONSOLE_STREAMINFO("Logic> Loading level finished.");
@@ -569,7 +569,7 @@ namespace
             pSunLightFacet->SetDirection     (Base::Float3(0.0f, 0.0f, -1.0f));
             pSunLightFacet->SetIntensity     (90700.0f);
             pSunLightFacet->SetTemperature   (0);
-            pSunLightFacet->SetRefreshMode   (Dt::CSunLightFacet::Static);
+            pSunLightFacet->SetRefreshMode   (Dt::CSunLightFacet::Dynamic);
 
             pSunLightFacet->UpdateLightness();
 
@@ -649,8 +649,8 @@ namespace
 
             Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.1f));
-            pTransformationFacet->SetScale   (Base::Float3(0.005f));
+            pTransformationFacet->SetPosition(Base::Float3(0.05f, 0.1f, 0.1f));
+            pTransformationFacet->SetScale   (Base::Float3(0.006f));
             pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, 0.0f));
 
             Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
@@ -663,6 +663,40 @@ namespace
             Dt::SMaterialFileDescriptor MaterialFileDesc;
 
             MaterialFileDesc.m_pFileName = "materials/naturals/metals/Gold_Worn_00.mat";
+
+            pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
+            pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
+
+            rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
+            EntityDesc.m_EntityType     = Dt::SActorType::Model;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+
+            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.1f));
+            pTransformationFacet->SetScale   (Base::Float3(0.0005f));
+            pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(35.0f), Base::DegreesToRadians(0.0f), Base::DegreesToRadians(10.0f)));
+
+            Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
+
+            Dt::SModelFileDescriptor ModelFileDesc;
+
+            ModelFileDesc.m_pFileName = "models/plane.obj";
+            ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
+
+            Dt::SMaterialFileDescriptor MaterialFileDesc;
+
+            MaterialFileDesc.m_pFileName = "materials/naturals/metals/Chrome_Glossy_00.mat";
 
             pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
             pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
