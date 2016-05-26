@@ -15,6 +15,7 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLineEdit>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
@@ -38,6 +39,7 @@ public:
     Edit::CRenderContext *m_pEditorRenderContext;
     QPushButton *m_pPlayButton;
     QPushButton *m_pScreenshotButton;
+    QLineEdit *m_pMailAdressEdit;
     QMenuBar *m_pMenuBar;
     QMenu *m_pMenuFile;
     QMenu *m_pMenuEdit;
@@ -83,6 +85,9 @@ public:
         m_pScreenshotButton = new QPushButton(m_pCentralWidget);
         m_pScreenshotButton->setObjectName(QStringLiteral("m_pScreenshotButton"));
         m_pScreenshotButton->setGeometry(QRect(1190, 10, 75, 23));
+        m_pMailAdressEdit = new QLineEdit(m_pCentralWidget);
+        m_pMailAdressEdit->setObjectName(QStringLiteral("m_pMailAdressEdit"));
+        m_pMailAdressEdit->setGeometry(QRect(962, 10, 221, 20));
         CMainWindow->setCentralWidget(m_pCentralWidget);
         m_pMenuBar = new QMenuBar(CMainWindow);
         m_pMenuBar->setObjectName(QStringLiteral("m_pMenuBar"));
@@ -143,6 +148,7 @@ public:
         m_pActionReportBug->setText(QApplication::translate("CMainWindow", "Report a Bug...", 0));
         m_pPlayButton->setText(QApplication::translate("CMainWindow", "Play", 0));
         m_pScreenshotButton->setText(QApplication::translate("CMainWindow", "Screenshot", 0));
+        m_pMailAdressEdit->setPlaceholderText(QApplication::translate("CMainWindow", "max.mustermann@mail.com", 0));
         m_pMenuFile->setTitle(QApplication::translate("CMainWindow", "File", 0));
         m_pMenuEdit->setTitle(QApplication::translate("CMainWindow", "Edit", 0));
         m_pMenuAssets->setTitle(QApplication::translate("CMainWindow", "Assets", 0));

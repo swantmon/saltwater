@@ -71,6 +71,19 @@
      <string>Screenshot</string>
     </property>
    </widget>
+   <widget class="QLineEdit" name="m_pMailAdressEdit">
+    <property name="geometry">
+     <rect>
+      <x>962</x>
+      <y>10</y>
+      <width>221</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="placeholderText">
+     <string>max.mustermann@mail.com</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="m_pMenuBar">
    <property name="geometry">

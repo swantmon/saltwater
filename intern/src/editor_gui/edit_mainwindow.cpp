@@ -74,7 +74,16 @@ namespace Edit
     {
         CMessage NewMessage;
 
-        NewMessage.PutString("save.png");
+        // -----------------------------------------------------------------------------
+        // Prepare image path
+        // -----------------------------------------------------------------------------
+        QString    PathToImage       = m_UserInterface.m_pMailAdressEdit->text() + ".png";
+        QByteArray PathToImageBinary = PathToImage.toLatin1();
+
+        // -----------------------------------------------------------------------------
+        // Compare message
+        // -----------------------------------------------------------------------------
+        NewMessage.PutString(PathToImageBinary.data());
 
         NewMessage.Reset();
 
