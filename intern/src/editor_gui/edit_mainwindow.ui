@@ -23,7 +23,7 @@
    <string>Saltwater Editor</string>
   </property>
   <widget class="QWidget" name="m_pCentralWidget">
-   <widget class="QWidget" name="m_pEditorRenderContext" native="true">
+   <widget class="Edit::CRenderContext" name="m_pEditorRenderContext" native="true">
     <property name="geometry">
      <rect>
       <x>0</x>
@@ -171,6 +171,14 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>Edit::CRenderContext</class>
+   <extends>QWidget</extends>
+   <header>editor_gui/edit_render_context.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>

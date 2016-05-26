@@ -21,6 +21,7 @@
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QWidget>
+#include "editor_gui/edit_render_context.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -34,7 +35,7 @@ public:
     QAction *m_pActionReleaseNotes;
     QAction *m_pActionReportBug;
     QWidget *m_pCentralWidget;
-    QWidget *m_pEditorRenderContext;
+    Edit::CRenderContext *m_pEditorRenderContext;
     QPushButton *m_pPlayButton;
     QPushButton *m_pScreenshotButton;
     QMenuBar *m_pMenuBar;
@@ -69,7 +70,7 @@ public:
         m_pActionReportBug->setObjectName(QStringLiteral("m_pActionReportBug"));
         m_pCentralWidget = new QWidget(CMainWindow);
         m_pCentralWidget->setObjectName(QStringLiteral("m_pCentralWidget"));
-        m_pEditorRenderContext = new QWidget(m_pCentralWidget);
+        m_pEditorRenderContext = new Edit::CRenderContext(m_pCentralWidget);
         m_pEditorRenderContext->setObjectName(QStringLiteral("m_pEditorRenderContext"));
         m_pEditorRenderContext->setGeometry(QRect(0, 40, 1280, 720));
         m_pEditorRenderContext->setCursor(QCursor(Qt::ArrowCursor));
