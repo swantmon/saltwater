@@ -94,6 +94,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
+    void CMainWindow::mousePressEvent(QMouseEvent* _pMouseEvent)
+    {
+        setFocus();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CMainWindow::OnFramesPerSecond(Edit::CMessage& _rMessage)
     {
         float FPS = _rMessage.GetDouble();

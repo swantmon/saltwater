@@ -39,6 +39,7 @@ namespace Edit
     private:
 
         void closeEvent(QCloseEvent* _pEvent);
+        void mousePressEvent(QMouseEvent* _pMouseEvent);
 
     private:
 

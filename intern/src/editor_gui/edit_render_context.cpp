@@ -5,7 +5,6 @@ namespace Edit
     CRenderContext::CRenderContext(QWidget * parent) 
         : QWidget(parent) 
     {
-        setFocusPolicy(Qt::ClickFocus);
     }
 
     // -----------------------------------------------------------------------------
@@ -67,6 +66,8 @@ namespace Edit
 
     void CRenderContext::mousePressEvent(QMouseEvent* _pMouseEvent)
     {
+        setFocus();
+
         CMessage NewMessage;
 
         NewMessage.PutInt(_pMouseEvent->globalX());
