@@ -458,17 +458,21 @@ namespace
     {
         assert(_WindowID < m_NumberOfWindows);
 
+        unsigned int Width;
+        unsigned int Height;
+        char*        pPixels;
+
         // -----------------------------------------------------------------------------
-        // Read pixels from last framebuffer
+        // Read pixels from last frame buffer
         // -----------------------------------------------------------------------------
         SWindowInfo& rWindowInfo = m_WindowInfos[_WindowID];
 
-        unsigned int Width = rWindowInfo.m_WindowSize[0];
-        unsigned int Height = rWindowInfo.m_WindowSize[1];
+        Width  = rWindowInfo.m_WindowSize[0];
+        Height = rWindowInfo.m_WindowSize[1];
 
-        char* pixels = new char[3 * Width * Height];
+        pPixels = static_cast<char*>(Base::CMemory::Allocate(3 * Width * Height * sizeof(char)));
 
-        glReadPixels(0, 0, Width, Height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+        glReadPixels(0, 0, Width, Height, GL_RGB, GL_UNSIGNED_BYTE, pPixels);
 
         // -----------------------------------------------------------------------------
         // Create texture
@@ -483,7 +487,7 @@ namespace
         TextureDesc.m_Format           = Dt::CTextureBase::R8G8B8_UBYTE;
         TextureDesc.m_Semantic         = Dt::CTextureBase::Diffuse;
         TextureDesc.m_pFileName        = 0;
-        TextureDesc.m_pPixels          = pixels;
+        TextureDesc.m_pPixels          = pPixels;
 
         Dt::CTexture2D* pScreenshot = Dt::TextureManager::CreateTexture2D(TextureDesc);
 
@@ -495,7 +499,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Free data
         // -----------------------------------------------------------------------------
-        delete[] pixels;
+        Base::CMemory::Free(pPixels);
     }
     
     // -----------------------------------------------------------------------------
