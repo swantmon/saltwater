@@ -4,7 +4,6 @@
 #include "core/core_lua_export.h"
 
 #include "core/core_lua_state.h"
-#include "core/core_script_core_time.h"
 #include "core/core_time.h"
 
 Core::Lua::CStaticFunctionList CoreTimeLibFuncs;

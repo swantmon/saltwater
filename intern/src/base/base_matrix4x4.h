@@ -196,6 +196,10 @@ namespace MATH
         inline CThis& SetRHOrthographic(X _Width, X _Height, X _Near, X _Far);
         inline CThis& SetRHOrthographic(X _Left, X _Right, X _Bottom, X _Top, X _Near, X _Far);
 
+    public:
+
+        bool IsEqual(const CThis& _rRight, X _Epsilon) const;
+
     private:
 
         T m_V[s_MaxNumberOfElements];
@@ -1297,5 +1301,28 @@ namespace MATH
         m_V[A41] =                    X(0); m_V[A42] =                    X(0); m_V[A43] =                   X(0); m_V[A44] = X(1);
 
         return *this;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<typename T>
+    bool CMatrix4x4<T>::IsEqual(const CThis& _rRight, X _Epsilon) const
+    {
+        return MATH::IsEqual(m_V[A11], _rRight.m_V[A11], _Epsilon)
+            && MATH::IsEqual(m_V[A12], _rRight.m_V[A12], _Epsilon)
+            && MATH::IsEqual(m_V[A13], _rRight.m_V[A13], _Epsilon)
+            && MATH::IsEqual(m_V[A14], _rRight.m_V[A14], _Epsilon)
+            && MATH::IsEqual(m_V[A21], _rRight.m_V[A21], _Epsilon)
+            && MATH::IsEqual(m_V[A22], _rRight.m_V[A22], _Epsilon)
+            && MATH::IsEqual(m_V[A23], _rRight.m_V[A23], _Epsilon)
+            && MATH::IsEqual(m_V[A24], _rRight.m_V[A24], _Epsilon)
+            && MATH::IsEqual(m_V[A31], _rRight.m_V[A31], _Epsilon)
+            && MATH::IsEqual(m_V[A32], _rRight.m_V[A32], _Epsilon)
+            && MATH::IsEqual(m_V[A33], _rRight.m_V[A33], _Epsilon)
+            && MATH::IsEqual(m_V[A34], _rRight.m_V[A34], _Epsilon)
+            && MATH::IsEqual(m_V[A41], _rRight.m_V[A41], _Epsilon)
+            && MATH::IsEqual(m_V[A42], _rRight.m_V[A42], _Epsilon)
+            && MATH::IsEqual(m_V[A43], _rRight.m_V[A43], _Epsilon)
+            && MATH::IsEqual(m_V[A44], _rRight.m_V[A44], _Epsilon);
     }
 } // namespace MATH

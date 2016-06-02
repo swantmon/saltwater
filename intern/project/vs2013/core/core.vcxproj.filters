@@ -36,6 +36,12 @@
     <ClInclude Include="..\..\..\src\core\core_script_interface.h">
       <Filter>interface\script</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\core\core_script_base_matrix3x3.h">
+      <Filter>interface\script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\core_script_base_matrix4x4.h">
+      <Filter>interface\script</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\core\core_time.cpp">
