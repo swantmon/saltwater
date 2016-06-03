@@ -17,35 +17,6 @@ Core::Lua::CStaticFunctionList BaseMatrix4x4LibFuncs;
 // -----------------------------------------------------------------------------
 // Object
 // -----------------------------------------------------------------------------
-LUA_DEFINE_FUNCTION(BaseMatrix4x4ObjFuncs, Set)
-{
-    Base::Float4x4& rMatrix = *static_cast<Base::Float4x4*>(Core::Lua::State::GetUserData(_State, 1));
-
-    float A1 = Core::Lua::State::GetFloat(_State,  2, 0.0f);
-    float A2 = Core::Lua::State::GetFloat(_State,  3, 0.0f);
-    float A3 = Core::Lua::State::GetFloat(_State,  4, 0.0f);
-    float A4 = Core::Lua::State::GetFloat(_State,  5, 0.0f);
-
-    float B1 = Core::Lua::State::GetFloat(_State,  6, 0.0f);
-    float B2 = Core::Lua::State::GetFloat(_State,  7, 0.0f);
-    float B3 = Core::Lua::State::GetFloat(_State,  8, 0.0f);
-    float B4 = Core::Lua::State::GetFloat(_State,  9, 0.0f);
-
-    float C1 = Core::Lua::State::GetFloat(_State, 10, 0.0f);
-    float C2 = Core::Lua::State::GetFloat(_State, 11, 0.0f);
-    float C3 = Core::Lua::State::GetFloat(_State, 12, 0.0f);
-    float C4 = Core::Lua::State::GetFloat(_State, 13, 0.0f);
-
-    float D1 = Core::Lua::State::GetFloat(_State, 14, 0.0f);
-    float D2 = Core::Lua::State::GetFloat(_State, 15, 0.0f);
-    float D3 = Core::Lua::State::GetFloat(_State, 16, 0.0f);
-    float D4 = Core::Lua::State::GetFloat(_State, 17, 0.0f);
-
-    rMatrix.Set(A1, A2, A3, A4, B1, B2, B3, B4, C1, C2, C3, C4, D1, D2, D3, D4);
-
-    return 0;
-}
-
 LUA_DEFINE_FUNCTION(BaseMatrix4x4ObjFuncs, SetZero)
 {
     Base::Float4x4& rMatrix = *static_cast<Base::Float4x4*>(Core::Lua::State::GetUserData(_State, 1));
@@ -67,12 +38,12 @@ LUA_DEFINE_FUNCTION(BaseMatrix4x4ObjFuncs, IsEqual)
     return 1;
 }
 
-LUA_DEFINE_FUNCTION(BaseMatrix4x4ObjFuncs, SetElement)
+LUA_DEFINE_FUNCTION(BaseMatrix4x4ObjFuncs, Set)
 {
     Base::Float4x4& rMatrix = *static_cast<Base::Float4x4*>(Core::Lua::State::GetUserData(_State, 1));
 
-    unsigned int Row    = Core::Lua::State::GetSInt(_State, 2, 0);
-    unsigned int Column = Core::Lua::State::GetSInt(_State, 3, 0);
+    unsigned int Row    = Core::Lua::State::GetSInt(_State, 2, 0) - 1;
+    unsigned int Column = Core::Lua::State::GetSInt(_State, 3, 0) - 1;
     float        Value  = Core::Lua::State::GetFloat(_State, 4);
 
     rMatrix[Row][Column] = Value;
@@ -80,12 +51,12 @@ LUA_DEFINE_FUNCTION(BaseMatrix4x4ObjFuncs, SetElement)
     return 0;
 }
 
-LUA_DEFINE_FUNCTION(BaseMatrix4x4ObjFuncs, GetElement)
+LUA_DEFINE_FUNCTION(BaseMatrix4x4ObjFuncs, Get)
 {
     Base::Float4x4& rMatrix = *static_cast<Base::Float4x4*>(Core::Lua::State::GetUserData(_State, 1));
 
-    unsigned int Row    = Core::Lua::State::GetSInt(_State, 2, 0);
-    unsigned int Column = Core::Lua::State::GetSInt(_State, 3, 0);
+    unsigned int Row    = Core::Lua::State::GetSInt(_State, 2, 0) - 1;
+    unsigned int Column = Core::Lua::State::GetSInt(_State, 3, 0) - 1;
 
     Core::Lua::State::PushFloat(_State, rMatrix[Row][Column]);
 
@@ -146,9 +117,9 @@ LUA_DEFINE_FUNCTION(BaseMatrix4x4ObjFuncs, __tostring)
 
     String = 
         "{{" + std::to_string(rMatrix[0][0]) + ", " + std::to_string(rMatrix[0][1]) + ", " + std::to_string(rMatrix[0][2]) + ", " + std::to_string(rMatrix[0][3]) + "},"
-        "{" + std::to_string(rMatrix[1][0]) + ", " + std::to_string(rMatrix[1][1]) + ", " + std::to_string(rMatrix[1][2]) + ", " + std::to_string(rMatrix[1][3]) + "},"
-        "{" + std::to_string(rMatrix[2][0]) + ", " + std::to_string(rMatrix[2][1]) + ", " + std::to_string(rMatrix[2][2]) + ", " + std::to_string(rMatrix[2][3]) + "}"
-        "{" + std::to_string(rMatrix[3][0]) + ", " + std::to_string(rMatrix[3][1]) + ", " + std::to_string(rMatrix[3][2]) + ", " + std::to_string(rMatrix[3][3]) + "}}";
+         "{" + std::to_string(rMatrix[1][0]) + ", " + std::to_string(rMatrix[1][1]) + ", " + std::to_string(rMatrix[1][2]) + ", " + std::to_string(rMatrix[1][3]) + "},"
+         "{" + std::to_string(rMatrix[2][0]) + ", " + std::to_string(rMatrix[2][1]) + ", " + std::to_string(rMatrix[2][2]) + ", " + std::to_string(rMatrix[2][3]) + "},"
+         "{" + std::to_string(rMatrix[3][0]) + ", " + std::to_string(rMatrix[3][1]) + ", " + std::to_string(rMatrix[3][2]) + ", " + std::to_string(rMatrix[3][3]) + "}}";
 
     Core::Lua::State::PushString(_State, String.c_str());
 

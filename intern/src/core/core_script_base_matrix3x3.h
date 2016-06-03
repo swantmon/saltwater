@@ -17,27 +17,6 @@ Core::Lua::CStaticFunctionList BaseMatrix3x3LibFuncs;
 // -----------------------------------------------------------------------------
 // Object
 // -----------------------------------------------------------------------------
-LUA_DEFINE_FUNCTION(BaseMatrix3x3ObjFuncs, Set)
-{
-    Base::Float3x3& rMatrix = *static_cast<Base::Float3x3*>(Core::Lua::State::GetUserData(_State, 1));
-
-    float A1 = Core::Lua::State::GetFloat(_State,  2, 0.0f);
-    float A2 = Core::Lua::State::GetFloat(_State,  3, 0.0f);
-    float A3 = Core::Lua::State::GetFloat(_State,  4, 0.0f);
-
-    float B1 = Core::Lua::State::GetFloat(_State,  5, 0.0f);
-    float B2 = Core::Lua::State::GetFloat(_State,  6, 0.0f);
-    float B3 = Core::Lua::State::GetFloat(_State,  7, 0.0f);
-
-    float C1 = Core::Lua::State::GetFloat(_State,  8, 0.0f);
-    float C2 = Core::Lua::State::GetFloat(_State,  9, 0.0f);
-    float C3 = Core::Lua::State::GetFloat(_State, 10, 0.0f);
-
-    rMatrix.Set(A1, A2, A3, B1, B2, B3, C1, C2, C3);
-
-    return 0;
-}
-
 LUA_DEFINE_FUNCTION(BaseMatrix3x3ObjFuncs, SetZero)
 {
     Base::Float3x3& rMatrix = *static_cast<Base::Float3x3*>(Core::Lua::State::GetUserData(_State, 1));
@@ -59,12 +38,12 @@ LUA_DEFINE_FUNCTION(BaseMatrix3x3ObjFuncs, IsEqual)
     return 1;
 }
 
-LUA_DEFINE_FUNCTION(BaseMatrix3x3ObjFuncs, SetElement)
+LUA_DEFINE_FUNCTION(BaseMatrix3x3ObjFuncs, Set)
 {
     Base::Float3x3& rMatrix = *static_cast<Base::Float3x3*>(Core::Lua::State::GetUserData(_State, 1));
 
-    unsigned int Row    = Core::Lua::State::GetSInt(_State, 2, 0);
-    unsigned int Column = Core::Lua::State::GetSInt(_State, 3, 0);
+    unsigned int Row    = Core::Lua::State::GetSInt(_State, 2, 0) - 1;
+    unsigned int Column = Core::Lua::State::GetSInt(_State, 3, 0) - 1;
     float        Value  = Core::Lua::State::GetFloat(_State, 4);
 
     rMatrix[Row][Column] = Value;
@@ -72,12 +51,12 @@ LUA_DEFINE_FUNCTION(BaseMatrix3x3ObjFuncs, SetElement)
     return 0;
 }
 
-LUA_DEFINE_FUNCTION(BaseMatrix3x3ObjFuncs, GetElement)
+LUA_DEFINE_FUNCTION(BaseMatrix3x3ObjFuncs, Get)
 {
     Base::Float3x3& rMatrix = *static_cast<Base::Float3x3*>(Core::Lua::State::GetUserData(_State, 1));
 
-    unsigned int Row    = Core::Lua::State::GetSInt(_State, 2, 0);
-    unsigned int Column = Core::Lua::State::GetSInt(_State, 3, 0);
+    unsigned int Row    = Core::Lua::State::GetSInt(_State, 2, 0) - 1;
+    unsigned int Column = Core::Lua::State::GetSInt(_State, 3, 0) - 1;
 
     Core::Lua::State::PushFloat(_State, rMatrix[Row][Column]);
 

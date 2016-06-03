@@ -181,15 +181,15 @@ namespace
 {
 	LUA_REGISTER_OBJECT(Core::Lua::Main::GetMainState(), BaseFloat3ObjFuncs, Base_Vector3)
     LUA_REGISTER_OBJECT(Core::Lua::Main::GetMainState(), BaseFloat4ObjFuncs, Base_Vector4)
-    //LUA_REGISTER_OBJECT(Core::Lua::Main::GetMainState(), BaseMatrix3x3ObjFuncs, Base_Matrix3x3)
-    //LUA_REGISTER_OBJECT(Core::Lua::Main::GetMainState(), BaseMatrix4x4ObjFuncs, Base_Matrix4x4)
+    LUA_REGISTER_OBJECT(Core::Lua::Main::GetMainState(), BaseMatrix3x3ObjFuncs, Base_Matrix3x3)
+    LUA_REGISTER_OBJECT(Core::Lua::Main::GetMainState(), BaseMatrix4x4ObjFuncs, Base_Matrix4x4)
     LUA_REGISTER_OBJECT(Core::Lua::Main::GetMainState(), DataEntityObjFuncs, Data_Entity)
 
     LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), CoreTimeLibFuncs, Time)
     LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), BaseFloat3LibFuncs, Vector3)
     LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), BaseFloat4LibFuncs, Vector4)
-    //LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), BaseMatrix3x3LibFuncs, Matrix3x3)
-    //LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), BaseMatrix4x4LibFuncs, Matrix4x4)
+    LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), BaseMatrix3x3LibFuncs, Matrix3x3)
+    LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), BaseMatrix4x4LibFuncs, Matrix4x4)
     LUA_REGISTER_LIBRARY(Core::Lua::Main::GetMainState(), GuiInputLibFuncs, Input)
 
     // -----------------------------------------------------------------------------

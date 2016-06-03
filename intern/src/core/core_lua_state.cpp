@@ -312,16 +312,26 @@ namespace
         // -----------------------------------------------------------------------------
         if (luaL_getmetatable(pNativeState, _pObjectName) == LUA_TNIL)
         {
+            // -----------------------------------------------------------------------------
+            // Pop error form stack
+            // -----------------------------------------------------------------------------
+            lua_pop(pNativeState, 2);
+
+            // -----------------------------------------------------------------------------
+            // Create new meta table
+            // -----------------------------------------------------------------------------
             luaL_newmetatable(pNativeState, _pObjectName);
         }
 
+        // -----------------------------------------------------------------------------
+        // Set meta table and load index
+        // -----------------------------------------------------------------------------
         luaL_setmetatable(pNativeState, _pObjectName);
         lua_pushvalue(pNativeState, -1);
         lua_setfield(pNativeState, -2, "__index");
 
         // -----------------------------------------------------------------------------
-        // Set a function that loads the function table on the meta table as soon
-        // as the scripts require an entity
+        // Set a function that loads the function on table
         // -----------------------------------------------------------------------------
         lua_pushcclosure(pNativeState, reinterpret_cast<lua_CFunction>(_pFunction), 0);
         lua_setfield(pNativeState, -2, _pFunctionName);
