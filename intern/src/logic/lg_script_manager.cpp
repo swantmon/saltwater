@@ -51,6 +51,7 @@ namespace
         {
             Dt::CEntity*      m_pEntity;
             Dt::CScriptFacet* m_pScriptFacet;
+            unsigned int      m_CallCounter;
         };
 
     private:
@@ -130,9 +131,16 @@ namespace
 
             Core::Lua::State::LoadScript(LuaState, PathToScript.c_str(), 0);
 
-            Core::Lua::State::CallFunction(LuaState, "OnStart", 0);
-            Core::Lua::State::CallFunction(LuaState, "Update", 0);
-            Core::Lua::State::CallFunction(LuaState, "OnExit", 0);
+            if (CurrentInternScript->m_CallCounter == 0)
+            {
+                Core::Lua::State::CallFunction(LuaState, "OnStart", 0);
+            }
+            else
+            {
+                Core::Lua::State::CallFunction(LuaState, "Update", 0);
+            }
+
+            ++CurrentInternScript->m_CallCounter;
         }
     }
 
@@ -170,6 +178,7 @@ namespace
 
                 NewScript.m_pScriptFacet = pScriptFacet;
                 NewScript.m_pEntity      = _pEntity;
+                NewScript.m_CallCounter  = 0;
 
                 m_InternScripts.push_back(NewScript);
             }

@@ -63,6 +63,36 @@ LUA_DEFINE_FUNCTION(BaseMatrix3x3ObjFuncs, Get)
     return 1;
 }
 
+LUA_DEFINE_FUNCTION(BaseMatrix3x3ObjFuncs, SetRotationX)
+{
+    Base::Float3x3& rMatrix = *static_cast<Base::Float3x3*>(Core::Lua::State::GetUserData(_State, 1));
+    float Value = Core::Lua::State::GetFloat(_State, 2);
+
+    rMatrix.SetRotationX(Value);
+
+    return 0;
+}
+
+LUA_DEFINE_FUNCTION(BaseMatrix3x3ObjFuncs, SetRotationY)
+{
+    Base::Float3x3& rMatrix = *static_cast<Base::Float3x3*>(Core::Lua::State::GetUserData(_State, 1));
+    float Value = Core::Lua::State::GetFloat(_State, 2);
+
+    rMatrix.SetRotationY(Value);
+
+    return 0;
+}
+
+LUA_DEFINE_FUNCTION(BaseMatrix3x3ObjFuncs, SetRotationZ)
+{
+    Base::Float3x3& rMatrix = *static_cast<Base::Float3x3*>(Core::Lua::State::GetUserData(_State, 1));
+    float Value = Core::Lua::State::GetFloat(_State, 2);
+
+    rMatrix.SetRotationZ(Value);
+
+    return 0;
+}
+
 LUA_DEFINE_FUNCTION(BaseMatrix3x3ObjFuncs, __add)
 {
     Base::Float3x3& rMatrix1 = *static_cast<Base::Float3x3*>(Core::Lua::State::GetUserData(_State, 1));
@@ -117,8 +147,8 @@ LUA_DEFINE_FUNCTION(BaseMatrix3x3ObjFuncs, __tostring)
 
     String = 
         "{{" + std::to_string(rMatrix[0][0]) + ", " + std::to_string(rMatrix[0][1]) + ", " + std::to_string(rMatrix[0][2]) + "}," 
-        "{" + std::to_string(rMatrix[1][0]) + ", " + std::to_string(rMatrix[1][1]) + ", " + std::to_string(rMatrix[1][2]) + "},"
-        "{" + std::to_string(rMatrix[2][0]) + ", " + std::to_string(rMatrix[2][1]) + ", " + std::to_string(rMatrix[2][2]) + "}}";
+         "{" + std::to_string(rMatrix[1][0]) + ", " + std::to_string(rMatrix[1][1]) + ", " + std::to_string(rMatrix[1][2]) + "},"
+         "{" + std::to_string(rMatrix[2][0]) + ", " + std::to_string(rMatrix[2][1]) + ", " + std::to_string(rMatrix[2][2]) + "}}";
 
     Core::Lua::State::PushString(_State, String.c_str());
 
