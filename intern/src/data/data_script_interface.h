@@ -76,17 +76,39 @@ LUA_DEFINE_FUNCTION(DataEntityObjFuncs, GetPosition)
 
 LUA_DEFINE_FUNCTION(DataEntityObjFuncs, SetRotation)
 {
-    CLuaEntity& rScriptEntity = *static_cast<CLuaEntity*>(Core::Lua::State::GetUserData(_State, 1));
-    Base::Float3& rVector = *static_cast<Base::Float3*>(Core::Lua::State::GetUserData(_State, 2));
+    CLuaEntity&   rScriptEntity = *static_cast<CLuaEntity*>(Core::Lua::State::GetUserData(_State, 1));
+    Base::Float3& rVector       = *static_cast<Base::Float3*>(Core::Lua::State::GetUserData(_State, 2));
 
     Dt::CEntity& rEntity = *rScriptEntity.m_pEntity;
 
     Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
     
-
     if (pTransformationFacet != nullptr)
     {
         pTransformationFacet->SetRotation(rVector);
+
+        Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyMove);
+    }
+
+    return 0;
+}
+
+LUA_DEFINE_FUNCTION(DataEntityObjFuncs, SetRotationMatrix)
+{
+    CLuaEntity&     rScriptEntity = *static_cast<CLuaEntity*>(Core::Lua::State::GetUserData(_State, 1));
+    Base::Float3x3& rMatrix       = *static_cast<Base::Float3x3*>(Core::Lua::State::GetUserData(_State, 2));
+
+    Dt::CEntity& rEntity = *rScriptEntity.m_pEntity;
+
+    Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
+
+    if (pTransformationFacet != nullptr)
+    {
+        Base::Float3 RotationVector;
+
+        rMatrix.GetRotation(RotationVector);
+
+        pTransformationFacet->SetRotation(RotationVector * -1.0f);
 
         Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyMove);
     }

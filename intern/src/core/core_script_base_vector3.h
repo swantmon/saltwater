@@ -4,6 +4,7 @@
 #include "core/core_lua_export.h"
 
 #include "base/base_vector3.h"
+#include "base/base_matrix3x3.h"
 
 #include "core/core_lua_export.h"
 #include "core/core_lua_main.h"
@@ -163,6 +164,18 @@ LUA_DEFINE_FUNCTION(BaseFloat3ObjFuncs, SquaredLength)
     Base::Float3& rVector = *static_cast<Base::Float3*>(Core::Lua::State::GetUserData(_State, 1));
 
     Core::Lua::State::PushFloat(_State, rVector.SquaredLength());
+
+    return 1;
+}
+
+LUA_DEFINE_FUNCTION(BaseFloat3ObjFuncs, MultiplyMatrix3x3)
+{
+    Base::Float3&   rVector = *static_cast<Base::Float3*>(Core::Lua::State::GetUserData(_State, 1));
+    Base::Float3x3& rMatrix = *static_cast<Base::Float3x3*>(Core::Lua::State::GetUserData(_State, 2));
+
+    Base::Float3& rResult = *static_cast<Base::Float3*>(Core::Lua::State::PushUserData(_State, sizeof(Base::Float3), "Base_Vector3"));
+
+    rResult = rVector * rMatrix;
 
     return 1;
 }
