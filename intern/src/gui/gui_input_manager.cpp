@@ -117,6 +117,22 @@ namespace
             {
                 ++ CurrentKey->second;
             }
+            else if (CurrentKey->second == -1)
+            {
+                CurrentKey->second = -2;
+            }
+        }
+
+        // -----------------------------------------------------------------------------
+        // Mouse
+        // -----------------------------------------------------------------------------
+        if (m_Mouse.m_ButtonLeft >= 0)
+        {
+            ++m_Mouse.m_ButtonLeft;
+        }
+        else if (m_Mouse.m_ButtonLeft == -1)
+        {
+            m_Mouse.m_ButtonLeft = -2;
         }
     }
 
