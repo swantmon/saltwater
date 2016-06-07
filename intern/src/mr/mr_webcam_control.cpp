@@ -15,6 +15,7 @@
 #define CROP_PERCENTAGE 0.8f
 #define IMAGE_EDGE_LENGTH 512
 #define IMAGE_SPACE 0
+#define USE_INPAINTING 0
 #define INPAINT_RADIUS 0
 #define INPAINT_METHOD INPAINT_TELEA
 
@@ -426,8 +427,9 @@ namespace MR
 
             Mat Combination = CombineFaces(_rOne, _rTwo, DestPointsOne, DestPointsTwo);
 
-            // -----------------------------------------------------------------------------
-
+#if USE_INPAINTING == 0
+            return Combination;
+#else
             Mat Mask   = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, CV_8U);
             Mat Result = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, Combination.type());
 
@@ -454,6 +456,7 @@ namespace MR
             // -----------------------------------------------------------------------------
 
             return Result;
+#endif
         };
 
         // -----------------------------------------------------------------------------
@@ -473,8 +476,9 @@ namespace MR
 
             Mat Combination = CombineFaces(_rOne, _rTwo, DestPointsOne, DestPointsTwo);
 
-            // -----------------------------------------------------------------------------
-
+#if USE_INPAINTING == 0
+            return Combination;
+#else
             Mat Mask   = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, CV_8U);
             Mat Result = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, Combination.type());
 
@@ -501,6 +505,7 @@ namespace MR
             // -----------------------------------------------------------------------------
 
             return Result;
+#endif
         };
 
         // -----------------------------------------------------------------------------
@@ -520,8 +525,9 @@ namespace MR
 
             Mat Combination = CombineFaces(_rOne, _rTwo, DestPointsOne, DestPointsTwo);
 
-            // -----------------------------------------------------------------------------
-
+#if USE_INPAINTING == 0
+            return Combination;
+#else
             Mat Mask   = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, CV_8U);
             Mat Result = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, Combination.type());
 
@@ -548,6 +554,7 @@ namespace MR
             // -----------------------------------------------------------------------------
 
             return Result;
+#endif
         };
 
         // -----------------------------------------------------------------------------
@@ -567,8 +574,9 @@ namespace MR
 
             Mat Combination = CombineFaces(_rOne, _rTwo, DestPointsOne, DestPointsTwo);
 
-            // -----------------------------------------------------------------------------
-
+#if USE_INPAINTING == 0
+            return Combination;
+#else
             Mat Mask   = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, CV_8U);
             Mat Result = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, Combination.type());
 
@@ -595,34 +603,10 @@ namespace MR
             // -----------------------------------------------------------------------------
 
             return Result;
+#endif
         };
 
         // -----------------------------------------------------------------------------
-
-        auto BlurEdges = [&](const Mat& _Input, Mat& _Output)
-        {
-            Mat Test;
-            Mat UnBlurred;
-            Mat Blurred;
-
-            UnBlurred = _Input;
-
-            GaussianBlur(_Input, Blurred, Size(33, 33), 5.0);
-
-            Canny(_Input, Test, 5, 40);
-
-            GaussianBlur(Test, Test, Size(33, 33), 15.0);
-
-            Mat NotTest;
-
-            bitwise_not(Test, NotTest);
-
-            cvtColor(NotTest, NotTest, CV_GRAY2RGB);
-
-            cvtColor(Test, Test, CV_GRAY2RGB);
-
-            add(Blurred.mul(NotTest / 255), _Input.mul(Test / 255), _Output);
-        };
 
         IplImage* pConvertedColorFrame = static_cast<IplImage*>(m_ConvertedColorFrame);
 
