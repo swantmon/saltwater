@@ -44,6 +44,7 @@ namespace
         
     private:
         
+        void CreateSimplePBRTestScene();
         void CreatePBRTestScene();
         void CreatePBRARScene();
         void CreatePBRSponzaScene();
@@ -66,7 +67,8 @@ namespace
 
         BASE_CONSOLE_STREAMINFO("Logic> Loading level number " << LevelIndexDebug);
         
-        CreatePBRTestScene();
+        CreateSimplePBRTestScene();
+//        CreatePBRTestScene();
 //        CreatePBRARScene();
 //        CreatePBRSponzaScene();
 
@@ -87,6 +89,316 @@ namespace
     int CLgLoadMapState::OnRun()
     {
         return Lg::LoadMap::SResult::Play;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CLgLoadMapState::CreateSimplePBRTestScene()
+    {
+        // -----------------------------------------------------------------------------
+        // Allocate a map
+        // -----------------------------------------------------------------------------
+        Dt::Map::AllocateMap(1, 1);
+
+        // -----------------------------------------------------------------------------
+        // Setup cameras
+        // -----------------------------------------------------------------------------
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
+            EntityDesc.m_EntityType     = Dt::SActorType::Camera;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+
+            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 10.0f));
+            pTransformationFacet->SetScale(Base::Float3(1.0f));
+            pTransformationFacet->SetRotation(Base::Float3(0.0f, 0.0f, 0.0f));
+
+            Dt::CCameraActorFacet* pFacet = Dt::ActorManager::CreateCameraActor();
+
+            pFacet->SetMainCamera(true);
+
+            rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
+
+            Dt::CScriptFacet* pScriptFacet = Dt::ScriptManager::CreateScript();
+
+            pScriptFacet->SetScriptFile("scripts/camera_behavior.lua");
+
+            rEntity.SetDetailFacet(Dt::SFacetCategory::Script, pScriptFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Setup environment
+        // -----------------------------------------------------------------------------
+        {
+            Dt::STextureDescriptor TextureDescriptor;
+
+            TextureDescriptor.m_NumberOfPixelsU = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
+            TextureDescriptor.m_NumberOfPixelsV = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
+            TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_Format          = Dt::CTextureBase::R16G16B16_FLOAT;
+            TextureDescriptor.m_Semantic        = Dt::CTextureBase::HDR;
+            TextureDescriptor.m_pPixels         = 0;
+            TextureDescriptor.m_pFileName       = "environments/Ridgecrest_Road_Ref.hdr";
+            TextureDescriptor.m_pIdentifier     = 0;
+
+            Dt::CTexture2D* pPanoramaTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+
+            // -----------------------------------------------------------------------------
+
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
+            EntityDesc.m_EntityType     = Dt::SLightType::Skybox;
+            EntityDesc.m_FacetFlags     = 0;
+
+            Dt::CEntity& rEnvironment = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            Dt::CSkyboxFacet* pSkyboxFacet = Dt::LightManager::CreateSkybox();
+
+            pSkyboxFacet->SetType(Dt::CSkyboxFacet::Panorama);
+            pSkyboxFacet->SetTexture(pPanoramaTexture);
+            pSkyboxFacet->SetIntensity(10000.0f);
+
+            rEnvironment.SetDetailFacet(Dt::SFacetCategory::Data, pSkyboxFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEnvironment, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Setup effects
+        // -----------------------------------------------------------------------------
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::FX;
+            EntityDesc.m_EntityType     = Dt::SFXType::FXAA;
+            EntityDesc.m_FacetFlags     = 0;
+
+            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            Dt::CFXAAFXFacet* pEffectFacet = Dt::FXManager::CreateFXAAFX();
+
+            rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEffectEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::FX;
+            EntityDesc.m_EntityType     = Dt::SFXType::SSR;
+            EntityDesc.m_FacetFlags     = 0;
+
+            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            Dt::CSSRFXFacet* pEffectFacet = Dt::FXManager::CreateSSRFX();
+
+            rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEffectEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::FX;
+            EntityDesc.m_EntityType     = Dt::SFXType::Bloom;
+            EntityDesc.m_FacetFlags     = 0;
+
+            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            Dt::CBloomFXFacet* pEffectFacet = Dt::FXManager::CreateBloomFX();
+
+            pEffectFacet->SetSize(1);
+            pEffectFacet->SetIntensity(0.5f);
+
+            rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEffectEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::FX;
+            EntityDesc.m_EntityType     = Dt::SFXType::SSAO;
+            EntityDesc.m_FacetFlags     = 0;
+
+            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            Dt::CSSAOFXFacet* pEffectFacet = Dt::FXManager::CreateSSAOFX();
+
+            rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEffectEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Setup light
+        // -----------------------------------------------------------------------------
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
+            EntityDesc.m_EntityType     = Dt::SLightType::Sun;
+            EntityDesc.m_FacetFlags     = 0;
+
+            Dt::CEntity& rSunLight = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            Dt::CSunLightFacet* pSunLightFacet = Dt::LightManager::CreateSunLight();
+
+            pSunLightFacet->EnableTemperature(false);
+            pSunLightFacet->SetColor(Base::Float3(1.0f, 1.0f, 1.0f));
+            pSunLightFacet->SetDirection(Base::Float3(0.0f, 0.0f, -1.0f));
+            pSunLightFacet->SetIntensity(90600.0f);
+            pSunLightFacet->SetTemperature(0);
+            pSunLightFacet->SetRefreshMode(Dt::CSunLightFacet::Dynamic);
+
+            pSunLightFacet->UpdateLightness();
+
+            rSunLight.SetDetailFacet(Dt::SFacetCategory::Data, pSunLightFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rSunLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
+            EntityDesc.m_EntityType     = Dt::SLightType::GlobalProbe;
+            EntityDesc.m_FacetFlags     = 0;
+
+            Dt::CEntity& rGlobalProbeLight = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            Dt::CGlobalProbeLightFacet* pGlobalProbeLightFacet = Dt::LightManager::CreateGlobalProbeLight();
+
+            pGlobalProbeLightFacet->SetType(Dt::CGlobalProbeLightFacet::Sky);
+            pGlobalProbeLightFacet->SetQuality(Dt::CGlobalProbeLightFacet::PX512);
+            pGlobalProbeLightFacet->SetIntensity(1.0f);
+
+            rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pGlobalProbeLightFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rGlobalProbeLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Setup entities
+        // -----------------------------------------------------------------------------
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
+            EntityDesc.m_EntityType     = Dt::SActorType::Model;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+
+            Dt::CEntity& rPlane = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            Dt::CTransformationFacet* pTransformationFacet = rPlane.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.1f));
+            pTransformationFacet->SetScale(Base::Float3(0.01f));
+            pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, 0.0f));
+
+            Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
+
+            Dt::SModelFileDescriptor ModelFileDesc;
+
+            ModelFileDesc.m_pFileName = "models/plane.obj";
+            ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
+
+            pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
+
+            rPlane.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rPlane, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+
+        // -----------------------------------------------------------------------------
+
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
+            EntityDesc.m_EntityType     = Dt::SActorType::Model;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+
+            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(4.0f, 4.0f, 1.0f));
+            pTransformationFacet->SetScale(Base::Float3(0.1f));
+            pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, 0.0f));
+
+            Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
+
+            Dt::SModelFileDescriptor ModelFileDesc;
+
+            ModelFileDesc.m_pFileName = "models/sphere.obj";
+            ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
+
+            Dt::SMaterialFileDescriptor MaterialFileDesc;
+
+            MaterialFileDesc.m_pFileName = "materials/naturals/metals/Gold_Worn_00.mat";
+
+            pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
+            pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
+
+            rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
+
+//             Dt::CScriptFacet* pScriptFacet = Dt::ScriptManager::CreateScript();
+// 
+//             pScriptFacet->SetScriptFile("scripts/move_circle.lua");
+// 
+//             rSphere.SetDetailFacet(Dt::SFacetCategory::Script, pScriptFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        // -----------------------------------------------------------------------------
+
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
+            EntityDesc.m_EntityType     = Dt::SActorType::Model;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+
+            Dt::CEntity& rPlane = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            Dt::CTransformationFacet* pTransformationFacet = rPlane.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetScale(Base::Float3(0.1f));
+            pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, 0.0f));
+
+            Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
+
+            Dt::SModelFileDescriptor ModelFileDesc;
+
+            ModelFileDesc.m_pFileName = "models/plane.obj";
+            ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
+
+            Dt::SMaterialFileDescriptor MaterialFileDesc;
+
+            MaterialFileDesc.m_pFileName = "materials/tests/checker.mat";
+
+            pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
+            pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
+
+            rPlane.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rPlane, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
     }
     
     // -----------------------------------------------------------------------------
@@ -316,6 +628,243 @@ namespace
             Dt::EntityManager::MarkEntityAsDirty(rPlane, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
+
+        // -----------------------------------------------------------------------------
+
+        for (unsigned int IndexOfMatTester = 0; IndexOfMatTester < 9; ++IndexOfMatTester)
+        {
+            const Base::Char* pMaterials[] = 
+                { "materials/naturals/metals/Chrome_Glossy_00.mat"
+                , "materials/naturals/metals/Chrome_Rough_00.mat"
+                , "materials/naturals/metals/Gold_Glossy_00.mat"
+                , "materials/naturals/metals/Gold_Rough_00.mat"
+                , "materials/naturals/metals/Gold_Rough_Worn_00.mat"
+                , "materials/naturals/metals/Gold_Worn_00.mat"
+                , "materials/naturals/metals/Steel_Blued_00.mat"
+                , "materials/naturals/metals/Steel_Blued_Worn_00.mat"
+                , "materials/naturals/metals/Steel_Worn_00.mat" 
+                };
+
+            float PositionOffset = 3.0f * static_cast<float>(IndexOfMatTester);
+
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
+            EntityDesc.m_EntityType     = Dt::SActorType::Model;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+
+            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(PositionOffset, 12.0f, 7.0f));
+            pTransformationFacet->SetScale   (Base::Float3(0.1f));
+            pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, Base::DegreesToRadians(180.0f)));
+
+            Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
+
+            Dt::SModelFileDescriptor ModelFileDesc;
+
+            ModelFileDesc.m_pFileName = "models/sphere.obj";
+            ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
+
+            Dt::SMaterialFileDescriptor MaterialFileDesc;
+
+            MaterialFileDesc.m_pFileName = pMaterials[IndexOfMatTester];
+
+            pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
+            pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
+
+            rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
+
+//             Dt::CScriptFacet* pScriptFacet = Dt::ScriptManager::CreateScript();
+// 
+//             pScriptFacet->SetScriptFile("scripts/move_circle.lua");
+// 
+//             rSphere.SetDetailFacet(Dt::SFacetCategory::Script, pScriptFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        // -----------------------------------------------------------------------------
+
+        for (unsigned int IndexOfMatTester = 0; IndexOfMatTester < 9; ++IndexOfMatTester)
+        {
+            const Base::Char* pMaterials[] = 
+                { "materials/naturals/grime/Dust_00.mat"
+                , "materials/naturals/plastics/Plastic_Glossy_00.mat"
+                , "materials/naturals/plastics/Plastic_Worn_Glossy_00.mat"
+                , "materials/naturals/plastics/Plastic_Worn_Rough_00.mat"
+                , "materials/naturals/rubber/Rubber_00.mat"
+                , "materials/naturals/rust/Rust_00.mat"
+                , "materials/naturals/wood/Wood_Fine_Lacquered_00.mat"
+                , "materials/naturals/polymers/Jeans_00.mat"
+                , "materials/naturals/polymers/Zytel_Nylon_00.mat" 
+                };
+
+            float PositionOffset = 3.0f * static_cast<float>(IndexOfMatTester);
+
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
+            EntityDesc.m_EntityType     = Dt::SActorType::Model;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+
+            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(PositionOffset, 15.0f, 9.0f));
+            pTransformationFacet->SetScale   (Base::Float3(0.1f));
+            pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, Base::DegreesToRadians(180.0f)));
+
+            Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
+
+            Dt::SModelFileDescriptor ModelFileDesc;
+
+            ModelFileDesc.m_pFileName = "models/sphere.obj";
+            ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
+
+            Dt::SMaterialFileDescriptor MaterialFileDesc;
+
+            MaterialFileDesc.m_pFileName = pMaterials[IndexOfMatTester];
+
+            pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
+            pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
+
+            rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        // -----------------------------------------------------------------------------
+
+        for (unsigned int IndexOfSphere = 0; IndexOfSphere < 9; ++IndexOfSphere)
+        {
+            float PositionOffset = 3.0f * static_cast<float>(IndexOfSphere);
+
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
+            EntityDesc.m_EntityType     = Dt::SActorType::Model;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+
+            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(PositionOffset, 3.0f, 1.0f));
+            pTransformationFacet->SetScale   (Base::Float3(0.1f));
+            pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, Base::DegreesToRadians(180.0f)));
+
+            Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
+
+            Dt::SModelFileDescriptor ModelFileDesc;
+
+            ModelFileDesc.m_pFileName = "models/sphere.obj";
+            ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
+
+            Dt::CMaterial& rMaterial = Dt::MaterialManager::CreateEmptyMaterial();
+
+            rMaterial.m_Color       = Base::Float3(1.0f);
+            rMaterial.m_Roughness   = static_cast<float>(IndexOfSphere) / 9.0f;
+            rMaterial.m_Reflectance = 0.0f;
+            rMaterial.m_MetalMask   = 1.0f;
+
+            pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
+            pModelActorFacet->SetMaterial(0, &rMaterial);
+
+            rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        // -----------------------------------------------------------------------------
+
+        for (unsigned int IndexOfSphere = 0; IndexOfSphere < 9; ++IndexOfSphere)
+        {
+            float PositionOffset = 3.0f * static_cast<float>(IndexOfSphere);
+
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
+            EntityDesc.m_EntityType     = Dt::SActorType::Model;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+
+            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(PositionOffset, 6.0f, 3.0f));
+            pTransformationFacet->SetScale   (Base::Float3(0.1f));
+            pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, Base::DegreesToRadians(180.0f)));
+
+            Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
+
+            Dt::SModelFileDescriptor ModelFileDesc;
+
+            ModelFileDesc.m_pFileName = "models/sphere.obj";
+            ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
+
+            Dt::CMaterial& rMaterial = Dt::MaterialManager::CreateEmptyMaterial();
+
+            rMaterial.m_Color       = Base::Float3(1.0f);
+            rMaterial.m_Roughness   = static_cast<float>(IndexOfSphere) / 9.0f;
+            rMaterial.m_Reflectance = 1.0f;
+            rMaterial.m_MetalMask   = 1.0f;
+
+            pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
+            pModelActorFacet->SetMaterial(0, &rMaterial);
+
+            rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        // -----------------------------------------------------------------------------
+
+        for (unsigned int IndexOfSphere = 0; IndexOfSphere < 9; ++IndexOfSphere)
+        {
+            float PositionOffset = 3.0f * static_cast<float>(IndexOfSphere);
+
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
+            EntityDesc.m_EntityType     = Dt::SActorType::Model;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+
+            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(PositionOffset, 9.0f, 5.0f));
+            pTransformationFacet->SetScale   (Base::Float3(0.1f));
+            pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, Base::DegreesToRadians(180.0f)));
+
+            Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
+
+            Dt::SModelFileDescriptor ModelFileDesc;
+
+            ModelFileDesc.m_pFileName = "models/sphere.obj";
+            ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
+
+            Dt::CMaterial& rMaterial = Dt::MaterialManager::CreateEmptyMaterial();
+
+            rMaterial.m_Color       = Base::Float3(1.0f);
+            rMaterial.m_Roughness   = static_cast<float>(IndexOfSphere) / 9.0f;
+            rMaterial.m_Reflectance = 1.0f;
+            rMaterial.m_MetalMask   = 0.0f;
+
+            pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
+            pModelActorFacet->SetMaterial(0, &rMaterial);
+
+            rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        // -----------------------------------------------------------------------------
+
         {
             Dt::SEntityDescriptor EntityDesc;
 
@@ -349,47 +898,9 @@ namespace
 
             Dt::EntityManager::MarkEntityAsDirty(rPlane, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
-
-        {
-            Dt::SEntityDescriptor EntityDesc;
-
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
-            EntityDesc.m_EntityType     = Dt::SActorType::Model;
-            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
-
-            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntity(EntityDesc);
-
-            Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
-
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 2.0f));
-            pTransformationFacet->SetScale   (Base::Float3(0.1f));
-            pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, 0.0f));
-
-            Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
-
-            Dt::SModelFileDescriptor ModelFileDesc;
-
-            ModelFileDesc.m_pFileName = "models/sphere.obj";
-            ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
-
-            Dt::SMaterialFileDescriptor MaterialFileDesc;
-
-            MaterialFileDesc.m_pFileName = "materials/naturals/metals/Chrome_Glossy_00.mat";
-
-            pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
-            pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
-
-            rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
-
-//             Dt::CScriptFacet* pScriptFacet = Dt::ScriptManager::CreateScript();
-// 
-//             pScriptFacet->SetScriptFile("scripts/move_circle.lua");
-// 
-//             rSphere.SetDetailFacet(Dt::SFacetCategory::Script, pScriptFacet);
-
-            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-        }
     }
+
+    // -----------------------------------------------------------------------------
     
     void CLgLoadMapState::CreatePBRARScene()
     {
