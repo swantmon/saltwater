@@ -1098,9 +1098,9 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Set other graphic data of this entity
                 // -----------------------------------------------------------------------------
-                CModelActorFacet* pActorModelFacet = static_cast<CModelActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+                CModelActorFacet* pGraphicModelActorFacet = static_cast<CModelActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
 
-                CModelPtr ModelPtr = pActorModelFacet->GetModel();
+                CModelPtr ModelPtr = pGraphicModelActorFacet->GetModel();
                 
                 // -----------------------------------------------------------------------------
                 // Upload model matrix to buffer
@@ -1130,14 +1130,23 @@ namespace
                     // -----------------------------------------------------------------------------
                     // Set material
                     // -----------------------------------------------------------------------------
-                    CMaterialPtr MaterialPtr = SurfacePtr->GetMaterial();
+                    CMaterialPtr MaterialPtr;
+
+                    if (pGraphicModelActorFacet->GetMaterial(IndexOfSurface) != 0)
+                    {
+                        MaterialPtr = pGraphicModelActorFacet->GetMaterial(IndexOfSurface);
+                    }
+                    else
+                    {
+                        MaterialPtr = SurfacePtr->GetMaterial();
+                    }
                     
                     // -----------------------------------------------------------------------------
                     // Get input layout from optimal shader
                     // -----------------------------------------------------------------------------
                     assert(SurfacePtr->GetKey().m_HasPosition);
                     
-                    CInputLayoutPtr LayoutPtr = SurfacePtr->GetMaterial()->GetShaderVS()->GetInputLayout();
+                    CInputLayoutPtr LayoutPtr = MaterialPtr->GetShaderVS()->GetInputLayout();
                     
                     // -----------------------------------------------------------------------------
                     // Set items to context manager
