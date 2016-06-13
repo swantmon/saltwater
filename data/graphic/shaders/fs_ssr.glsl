@@ -471,7 +471,7 @@ void main(void)
     const uint RandomizeOverNFrames = 8;
     FrameRandom = (uint(0) % RandomizeOverNFrames) * 1551;
 
-    const int NumSteps = 64;
+    const int NumSteps = 256;
     const int NumRays  = 1;
 
 
