@@ -206,6 +206,9 @@
       <Filter>states</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_precompiled.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_fog_renderer.cpp">
+      <Filter>engine\renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\graphic\gfx_debug_interface.h">
@@ -455,6 +458,9 @@
       <Filter>states</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_precompiled.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_fog_renderer.h">
+      <Filter>engine\renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="interface">

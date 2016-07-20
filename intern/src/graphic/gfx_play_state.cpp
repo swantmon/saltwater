@@ -6,6 +6,7 @@
 
 #include "graphic/gfx_actor_manager.h"
 #include "graphic/gfx_actor_renderer.h"
+#include "graphic/gfx_fog_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_area_renderer.h"
 #include "graphic/gfx_light_manager.h"
@@ -77,7 +78,8 @@ namespace
         // Update renderer to prepare for rendering
         // -----------------------------------------------------------------------------
         ARRenderer         ::Update();
-        ActorRenderer      ::Update();   
+        ActorRenderer      ::Update();
+        FogRenderer        ::Update();
         ShadowRenderer     ::Update();
         LightAreaRenderer  ::Update();
         LightPointRenderer ::Update();   
@@ -112,6 +114,7 @@ namespace
         SkyRenderer       ::Render();
         LightProbeRenderer::Render();
         ReflectionRenderer::Render();
+        FogRenderer       ::Render();
 
         HistogramRenderer::Render();
 

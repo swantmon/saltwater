@@ -27,6 +27,7 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_light_area_renderer.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_light_facet.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_light_sun_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_fog_renderer.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_performance.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_histogram_renderer.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_postfx_hdr_renderer.cpp" />
@@ -103,6 +104,7 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_light_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_ar_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_sun_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_fog_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_performance.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_histogram_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_postfx_hdr_renderer.h" />

@@ -356,7 +356,7 @@ namespace
         bool         Result;
         void*        pBytes;
         void*        pTextureData;
-        unsigned int Hash = 0;
+        unsigned int Hash;
         unsigned int NativeImageName;
         GLuint       NativeTextureHandle;
         int          ImageWidth;
@@ -370,6 +370,10 @@ namespace
         int          GLType;
         ILenum       NativeILFormat;
         ILenum       NativeILType;
+
+        pBytes       = nullptr;
+        pTextureData = nullptr;
+        Hash         = 0;
 
         // -----------------------------------------------------------------------------
         // Create hash value over filename

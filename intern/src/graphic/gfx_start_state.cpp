@@ -11,6 +11,7 @@
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
+#include "graphic/gfx_fog_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_manager.h"
 #include "graphic/gfx_light_area_renderer.h"
@@ -106,6 +107,7 @@ namespace
         LightProbeRenderer ::OnStart();
         LightSunRenderer   ::OnStart();
         ShadowRenderer     ::OnStart();
+        FogRenderer        ::OnStart();
         ARRenderer         ::OnStart();
         ActorRenderer      ::OnStart();
         ParticleRenderer   ::OnStart();
@@ -126,6 +128,7 @@ namespace
         LightProbeRenderer ::OnSetupShader();
         LightSunRenderer   ::OnSetupShader();
         ShadowRenderer     ::OnSetupShader();
+        FogRenderer        ::OnSetupShader();
         ARRenderer         ::OnSetupShader();
         ActorRenderer      ::OnSetupShader();
         ParticleRenderer   ::OnSetupShader();
@@ -145,6 +148,7 @@ namespace
         LightProbeRenderer ::OnSetupKernels();
         LightSunRenderer   ::OnSetupKernels();
         ShadowRenderer     ::OnSetupKernels();
+        FogRenderer        ::OnSetupKernels();
         ARRenderer         ::OnSetupKernels();
         ActorRenderer      ::OnSetupKernels();
         ParticleRenderer   ::OnSetupKernels();
@@ -164,6 +168,7 @@ namespace
         LightProbeRenderer ::OnSetupRenderTargets();
         LightSunRenderer   ::OnSetupRenderTargets();
         ShadowRenderer     ::OnSetupRenderTargets();
+        FogRenderer        ::OnSetupRenderTargets();
         ARRenderer         ::OnSetupRenderTargets();
         ActorRenderer      ::OnSetupRenderTargets();
         ParticleRenderer   ::OnSetupRenderTargets();
@@ -183,6 +188,7 @@ namespace
         LightProbeRenderer ::OnSetupStates();
         LightSunRenderer   ::OnSetupStates();
         ShadowRenderer     ::OnSetupStates();
+        FogRenderer        ::OnSetupStates();
         ARRenderer         ::OnSetupStates();
         ActorRenderer      ::OnSetupStates();
         ParticleRenderer   ::OnSetupStates();
@@ -202,6 +208,7 @@ namespace
         LightProbeRenderer ::OnSetupTextures();
         LightSunRenderer   ::OnSetupTextures();
         ShadowRenderer     ::OnSetupTextures();
+        FogRenderer        ::OnSetupTextures();
         ARRenderer         ::OnSetupTextures();
         ActorRenderer      ::OnSetupTextures();
         ParticleRenderer   ::OnSetupTextures();
@@ -221,6 +228,7 @@ namespace
         LightProbeRenderer ::OnSetupBuffers();
         LightSunRenderer   ::OnSetupBuffers();
         ShadowRenderer     ::OnSetupBuffers();
+        FogRenderer        ::OnSetupBuffers();
         ARRenderer         ::OnSetupBuffers();
         ActorRenderer      ::OnSetupBuffers();
         ParticleRenderer   ::OnSetupBuffers();
@@ -240,6 +248,7 @@ namespace
         LightProbeRenderer ::OnSetupResources();
         LightSunRenderer   ::OnSetupResources();
         ShadowRenderer     ::OnSetupResources();
+        FogRenderer        ::OnSetupResources();
         ARRenderer         ::OnSetupResources();
         ActorRenderer      ::OnSetupResources();
         ParticleRenderer   ::OnSetupResources();
@@ -259,6 +268,7 @@ namespace
         LightProbeRenderer ::OnSetupModels();
         LightSunRenderer   ::OnSetupModels();
         ShadowRenderer     ::OnSetupModels();
+        FogRenderer        ::OnSetupModels();
         ARRenderer         ::OnSetupModels();
         ActorRenderer      ::OnSetupModels();
         ParticleRenderer   ::OnSetupModels();
@@ -278,6 +288,7 @@ namespace
         LightProbeRenderer ::OnSetupEnd();
         LightSunRenderer   ::OnSetupEnd();
         ShadowRenderer     ::OnSetupEnd();
+        FogRenderer        ::OnSetupEnd();
         ARRenderer         ::OnSetupEnd();
         ActorRenderer      ::OnSetupEnd();
         ParticleRenderer   ::OnSetupEnd();

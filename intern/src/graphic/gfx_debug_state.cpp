@@ -13,9 +13,11 @@
 #include "graphic/gfx_ar_renderer.h"
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_debug_state.h"
+#include "graphic/gfx_fog_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
-#include "graphic/gfx_light_manager.h"
 #include "graphic/gfx_light_area_renderer.h"
+#include "graphic/gfx_light_manager.h"
+#include "graphic/gfx_light_probe_renderer.h"
 #include "graphic/gfx_light_point_renderer.h"
 #include "graphic/gfx_light_sun_renderer.h"
 #include "graphic/gfx_main.h"
@@ -78,9 +80,11 @@ namespace
         // -----------------------------------------------------------------------------
         ARRenderer         ::Update();
         ActorRenderer      ::Update();   
+        FogRenderer        ::Update();
         ShadowRenderer     ::Update();
         LightAreaRenderer  ::Update();
-        LightPointRenderer ::Update();   
+        LightPointRenderer ::Update();  
+        LightProbeRenderer ::Update();
         LightSunRenderer   ::Update();   
         ReflectionRenderer ::Update();    
         SkyRenderer        ::Update();
@@ -112,11 +116,13 @@ namespace
         Performance::BeginEvent("Lighting Pass");
 
         ShadowRenderer    ::Render();
-        LightSunRenderer  ::Render();        
+        LightSunRenderer  ::Render();
         LightAreaRenderer ::Render();
         LightPointRenderer::Render();
-        ReflectionRenderer::Render();
         SkyRenderer       ::Render();
+        LightProbeRenderer::Render();
+        ReflectionRenderer::Render();
+        FogRenderer       ::Render();
 
         HistogramRenderer::Render();
 

@@ -12,6 +12,7 @@
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
+#include "graphic/gfx_fog_renderer.h"
 #include "graphic/gfx_light_manager.h"
 #include "graphic/gfx_light_area_renderer.h"
 #include "graphic/gfx_light_probe_renderer.h"
@@ -68,6 +69,7 @@ namespace
         LightProbeRenderer ::OnExit();
         LightSunRenderer   ::OnExit();
         ShadowRenderer     ::OnExit();
+        FogRenderer        ::OnExit();
         HistogramRenderer  ::OnExit();
         ActorRenderer      ::OnExit();
         ARRenderer         ::OnExit();
