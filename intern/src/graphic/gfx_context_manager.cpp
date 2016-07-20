@@ -13,6 +13,7 @@
 #include "graphic/gfx_native_shader.h"
 #include "graphic/gfx_native_target_set.h"
 #include "graphic/gfx_native_texture_2d.h"
+#include "graphic/gfx_native_texture_3d.h"
 #include "graphic/gfx_state_manager.h"
 
 #include <assert.h>
@@ -1984,44 +1985,57 @@ namespace
 
             for (unsigned int IndexOfTexture = 0; IndexOfTexture < _TextureSetPtr->GetNumberOfTextures(); ++IndexOfTexture)
             {
-                CNativeTexture2D& rNativeTexture = *static_cast<CNativeTexture2D*>(_TextureSetPtr->GetTexture(IndexOfTexture).GetPtr());
+                CTextureBase& rBaseTexture = *static_cast<CTextureBase*>(_TextureSetPtr->GetTexture(IndexOfTexture).GetPtr());
 
-                TextureHandle = rNativeTexture.m_NativeTexture;
-
-                // -----------------------------------------------------------------------------
-                // 'Access' for binding the texture is depending on the usage of this certain
-                // texture.
-                // 'Format' is the internal format.
-                // -----------------------------------------------------------------------------
-                Access = rNativeTexture.m_NativeUsage;
-                Format = rNativeTexture.m_NativeInternalFormat;
-
-                if ((rNativeTexture.GetBinding() & CTextureBase::EBinding::DepthStencilTarget) == CTextureBase::EBinding::DepthStencilTarget)
+                if (rBaseTexture.GetDimension() == CTextureBase::Dim3D)
                 {
+                    CNativeTexture3D& rNativeTexture = static_cast<CNativeTexture3D&>(rBaseTexture);
+
                     TextureHandle = rNativeTexture.m_NativeTexture;
 
                     TextureBinding = rNativeTexture.m_NativeDimension;
 
-                    if (rNativeTexture.IsCube())
-                    {
-                        TextureBinding = GL_TEXTURE_CUBE_MAP;
-                    }
+                    // -----------------------------------------------------------------------------
+                    // 'Access' for binding the texture is depending on the usage of this certain
+                    // texture.
+                    // 'Format' is the internal format.
+                    // -----------------------------------------------------------------------------
+                    Access = rNativeTexture.m_NativeUsage;
+                    Format = rNativeTexture.m_NativeInternalFormat;
 
-                    glActiveTexture(GL_TEXTURE0 + m_IndexOfTextureBinding);
-
-                    glBindTexture(TextureBinding, TextureHandle);
-                }
-                else if (rNativeTexture.IsCube())
-                {
-                    // layered
-                }
-                else if (rNativeTexture.GetDimension() == CTextureBase::Dim3D)
-                {
                     glBindImageTexture(m_IndexOfTextureBinding, TextureHandle, 0, GL_TRUE, 0, Access, Format);
                 }
-                else
+                else if (rBaseTexture.GetDimension() == CTextureBase::Dim2D)
                 {
-                    glBindImageTexture(m_IndexOfTextureBinding, TextureHandle, 0, GL_FALSE, 0, Access, Format);
+                    CNativeTexture2D& rNativeTexture = static_cast<CNativeTexture2D&>(rBaseTexture);
+
+                    TextureHandle = rNativeTexture.m_NativeTexture;
+
+                    TextureBinding = rNativeTexture.m_NativeDimension;
+
+                    // -----------------------------------------------------------------------------
+                    // 'Access' for binding the texture is depending on the usage of this certain
+                    // texture.
+                    // 'Format' is the internal format.
+                    // -----------------------------------------------------------------------------
+                    Access = rNativeTexture.m_NativeUsage;
+                    Format = rNativeTexture.m_NativeInternalFormat;
+
+                    if ((rBaseTexture.GetBinding() & CTextureBase::EBinding::DepthStencilTarget) == CTextureBase::EBinding::DepthStencilTarget)
+                    {
+                        glActiveTexture(GL_TEXTURE0 + m_IndexOfTextureBinding);
+
+                        glBindTexture(TextureBinding, TextureHandle);
+                    }
+                    else
+                    {
+                        if (rNativeTexture.IsCube())
+                        {
+                            TextureBinding = GL_TEXTURE_CUBE_MAP;
+                        }
+
+                        glBindImageTexture(m_IndexOfTextureBinding, TextureHandle, 0, GL_FALSE, 0, Access, Format);
+                    }
                 }
 
                 ++ m_IndexOfTextureBinding;
