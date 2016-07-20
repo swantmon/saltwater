@@ -62,6 +62,19 @@ namespace
         
         void Update();
         void Render();
+
+    private:
+
+        static const unsigned int s_BlurTileSize = 8;
+
+    private:
+
+        struct SGaussianShaderProperties
+        {
+            Base::Int2 m_Direction;
+            Base::Int2 m_MaxPixelCoord;
+            float      m_Weights[7];
+        };
         
     private:
         
@@ -78,6 +91,10 @@ namespace
         CTexture2DPtr     m_ESMTexturePtr;
         CTextureSetPtr    m_ESMTextureSetPtr;
 
+        CShaderPtr     m_GaussianBlurShaderPtr;
+        CBufferSetPtr  m_GaussianBlurPropertiesCSBufferSetPtr;
+        CTextureSetPtr m_BlurStagesTextureSetPtrs[2];
+
     private:
 
         void RenderESM();
@@ -90,18 +107,21 @@ namespace
 namespace
 {
     CGfxFogRenderer::CGfxFogRenderer()
-        : m_QuadModelPtr           ()
-        , m_FullQuadViewVSBufferPtr()
-        , m_P2InputLayoutPtr       ()
-        , m_RectangleShaderVSPtr   ()
-        , m_ESMCSPtr               ()
-        , m_VolumeLightingCSPtr    ()
-        , m_VolumeScatteringCSPtr  ()
-        , m_ApplyPSPtr             ()
-        , m_PSSamplerSetPtr        ()
-        , m_LightRenderContextPtr  ()
-        , m_ESMTexturePtr          ()
-        , m_ESMTextureSetPtr       ()
+        : m_QuadModelPtr                        ()
+        , m_FullQuadViewVSBufferPtr             ()
+        , m_P2InputLayoutPtr                    ()
+        , m_RectangleShaderVSPtr                ()
+        , m_ESMCSPtr                            ()
+        , m_VolumeLightingCSPtr                 ()
+        , m_VolumeScatteringCSPtr               ()
+        , m_ApplyPSPtr                          ()
+        , m_PSSamplerSetPtr                     ()
+        , m_LightRenderContextPtr               ()
+        , m_ESMTexturePtr                       ()
+        , m_ESMTextureSetPtr                    ()
+        , m_GaussianBlurShaderPtr               ()
+        , m_GaussianBlurPropertiesCSBufferSetPtr()
+        , m_BlurStagesTextureSetPtrs            ()
     {
     }
     
@@ -134,6 +154,11 @@ namespace
         m_LightRenderContextPtr   = 0;
         m_ESMTexturePtr           = 0;
         m_ESMTextureSetPtr        = 0;
+
+        m_GaussianBlurShaderPtr                = 0;
+        m_GaussianBlurPropertiesCSBufferSetPtr = 0;
+        m_BlurStagesTextureSetPtrs[0]          = 0;
+        m_BlurStagesTextureSetPtrs[1]          = 0;
     }
     
     // -----------------------------------------------------------------------------
@@ -145,6 +170,7 @@ namespace
         m_VolumeLightingCSPtr   = ShaderManager::CompileCS("cs_volume_lighting.glsl", "main");
         m_VolumeScatteringCSPtr = ShaderManager::CompileCS("cs_volume_scattering.glsl", "main");  
         m_ApplyPSPtr            = ShaderManager::CompilePS("fs_fog_apply.glsl", "main");  
+        m_GaussianBlurShaderPtr = ShaderManager::CompileCS("cs_gaussian_blur_r32f.glsl", "main");
         
         // -----------------------------------------------------------------------------
         
@@ -220,12 +246,33 @@ namespace
         RendertargetDescriptor.m_pPixels          = 0;
         
         m_ESMTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
+
+        CTexture2DPtr ESMSwapTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
+
+        m_BlurStagesTextureSetPtrs[0] = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_ESMTexturePtr), static_cast<CTextureBasePtr>(ESMSwapTexturePtr));
+        m_BlurStagesTextureSetPtrs[1] = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(ESMSwapTexturePtr), static_cast<CTextureBasePtr>(m_ESMTexturePtr));
+
     }
     
     // -----------------------------------------------------------------------------
     
     void CGfxFogRenderer::OnSetupBuffers()
     {
+        SBufferDescriptor ConstanteBufferDesc;
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SGaussianShaderProperties);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        CBufferPtr GaussianSettingsResourceBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        m_GaussianBlurPropertiesCSBufferSetPtr = BufferManager::CreateBufferSet(GaussianSettingsResourceBuffer);
+
+
         m_FullQuadViewVSBufferPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
     }
     
@@ -338,7 +385,78 @@ namespace
         // -----------------------------------------------------------------------------
         // Blur
         // -----------------------------------------------------------------------------
-        
+        unsigned int NumberOfThreadGroupsX;
+        unsigned int NumberOfThreadGroupsY;
+
+        NumberOfThreadGroupsX = (256 + s_BlurTileSize - 1) / (s_BlurTileSize);
+        NumberOfThreadGroupsY = (256 + s_BlurTileSize - 1) / (s_BlurTileSize);
+
+        // -----------------------------------------------------------------------------
+        // Blur
+        // -----------------------------------------------------------------------------
+        SGaussianShaderProperties* pGaussianSettings = static_cast<SGaussianShaderProperties*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0)));
+
+        pGaussianSettings->m_Direction[0] = 1;
+        pGaussianSettings->m_Direction[1] = 0;
+        pGaussianSettings->m_MaxPixelCoord[0] = 256;
+        pGaussianSettings->m_MaxPixelCoord[1] = 256;
+        pGaussianSettings->m_Weights[0] = 0.018816f;
+        pGaussianSettings->m_Weights[1] = 0.034474f;
+        pGaussianSettings->m_Weights[2] = 0.056577f;
+        pGaussianSettings->m_Weights[3] = 0.083173f;
+        pGaussianSettings->m_Weights[4] = 0.109523f;
+        pGaussianSettings->m_Weights[5] = 0.129188f;
+        pGaussianSettings->m_Weights[6] = 0.136498f;
+
+        BufferManager::UnmapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0));
+
+        ContextManager::SetShaderCS(m_GaussianBlurShaderPtr);
+
+        ContextManager::SetConstantBufferSetCS(m_GaussianBlurPropertiesCSBufferSetPtr);
+
+        ContextManager::SetTextureSetCS(m_BlurStagesTextureSetPtrs[0]);
+
+        ContextManager::Dispatch(NumberOfThreadGroupsX, NumberOfThreadGroupsY, 1);
+
+        ContextManager::ResetTextureSetCS();
+
+        ContextManager::ResetConstantBufferSetCS();
+
+        ContextManager::ResetShaderCS();
+
+
+        // -----------------------------------------------------------------------------
+        // Blur
+        // -----------------------------------------------------------------------------
+        pGaussianSettings = static_cast<SGaussianShaderProperties*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0)));
+
+        pGaussianSettings->m_Direction[0] = 0;
+        pGaussianSettings->m_Direction[1] = 1;
+        pGaussianSettings->m_MaxPixelCoord[0] = 256;
+        pGaussianSettings->m_MaxPixelCoord[1] = 256;
+        pGaussianSettings->m_Weights[0] = 0.018816f;
+        pGaussianSettings->m_Weights[1] = 0.034474f;
+        pGaussianSettings->m_Weights[2] = 0.056577f;
+        pGaussianSettings->m_Weights[3] = 0.083173f;
+        pGaussianSettings->m_Weights[4] = 0.109523f;
+        pGaussianSettings->m_Weights[5] = 0.129188f;
+        pGaussianSettings->m_Weights[6] = 0.136498f;
+
+        BufferManager::UnmapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0));
+
+        ContextManager::SetShaderCS(m_GaussianBlurShaderPtr);
+
+        ContextManager::SetConstantBufferSetCS(m_GaussianBlurPropertiesCSBufferSetPtr);
+
+        ContextManager::SetTextureSetCS(m_BlurStagesTextureSetPtrs[1]);
+
+        ContextManager::Dispatch(NumberOfThreadGroupsX, NumberOfThreadGroupsY, 1);
+
+        ContextManager::ResetTextureSetCS();
+
+        ContextManager::ResetConstantBufferSetCS();
+
+        ContextManager::ResetShaderCS();
 
         // -----------------------------------------------------------------------------
         // Apply shadow map
