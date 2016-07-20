@@ -46,7 +46,7 @@ namespace CON
         
         inline static int AddRef(CManagedPoolItemBase& _rItem);
         inline static int Release(CManagedPoolItemBase& _rItem);
-        inline static int GetnUmberOfReferences(const CManagedPoolItemBase& _rItem);
+        inline static int GetNumberOfReferences(const CManagedPoolItemBase& _rItem);
         
     private:
         typedef void (*FRelease) (CManagedPoolItemBase&);
@@ -421,7 +421,7 @@ namespace CON
     
     // -----------------------------------------------------------------------------
     
-    inline int CManagedPoolItemBase::GetnUmberOfReferences(const CManagedPoolItemBase& _rItem)
+    inline int CManagedPoolItemBase::GetNumberOfReferences(const CManagedPoolItemBase& _rItem)
     {
         return _rItem.m_NumberOfReferences;
     }

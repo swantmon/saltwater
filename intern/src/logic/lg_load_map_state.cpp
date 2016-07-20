@@ -67,8 +67,8 @@ namespace
 
         BASE_CONSOLE_STREAMINFO("Logic> Loading level number " << LevelIndexDebug);
         
-//        CreateSimplePBRTestScene();
-        CreatePBRTestScene();
+        CreateSimplePBRTestScene();
+//        CreatePBRTestScene();
 //        CreatePBRARScene();
 //        CreatePBRSponzaScene();
 

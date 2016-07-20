@@ -10,12 +10,14 @@
 #include "camera/cam_control_manager.h"
 
 #include "data/data_entity.h"
+#include "data/data_light_facet.h"
 #include "data/data_map.h"
 #include "data/data_model_manager.h"
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_fog_renderer.h"
+#include "graphic/gfx_light_facet.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_model_manager.h"
 #include "graphic/gfx_performance.h"
@@ -73,6 +75,8 @@ namespace
         CShaderPtr        m_ApplyPSPtr;
         CSamplerSetPtr    m_PSSamplerSetPtr;
         CRenderContextPtr m_LightRenderContextPtr;
+        CTexture2DPtr     m_ESMTexturePtr;
+        CTextureSetPtr    m_ESMTextureSetPtr;
 
     private:
 
@@ -96,6 +100,8 @@ namespace
         , m_ApplyPSPtr             ()
         , m_PSSamplerSetPtr        ()
         , m_LightRenderContextPtr  ()
+        , m_ESMTexturePtr          ()
+        , m_ESMTextureSetPtr       ()
     {
     }
     
@@ -126,6 +132,8 @@ namespace
         m_ApplyPSPtr              = 0;
         m_PSSamplerSetPtr         = 0;
         m_LightRenderContextPtr   = 0;
+        m_ESMTexturePtr           = 0;
+        m_ESMTextureSetPtr        = 0;
     }
     
     // -----------------------------------------------------------------------------
@@ -196,6 +204,22 @@ namespace
     
     void CGfxFogRenderer::OnSetupTextures()
     {
+        STextureDescriptor RendertargetDescriptor;
+        
+        RendertargetDescriptor.m_NumberOfPixelsU  = 256;
+        RendertargetDescriptor.m_NumberOfPixelsV  = 256;
+        RendertargetDescriptor.m_NumberOfPixelsW  = 1;
+        RendertargetDescriptor.m_NumberOfMipMaps  = 1;
+        RendertargetDescriptor.m_NumberOfTextures = 1;
+        RendertargetDescriptor.m_Binding          = CTextureBase::ShaderResource;
+        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
+        RendertargetDescriptor.m_Format           = CTextureBase::R32_FLOAT;
+        RendertargetDescriptor.m_Usage            = CTextureBase::GPUReadWrite;
+        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_pFileName        = 0;
+        RendertargetDescriptor.m_pPixels          = 0;
+        
+        m_ESMTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
     }
     
     // -----------------------------------------------------------------------------
@@ -250,6 +274,7 @@ namespace
     
     void CGfxFogRenderer::Update()
     {
+        
     }
     
     // -----------------------------------------------------------------------------
@@ -274,6 +299,50 @@ namespace
     void CGfxFogRenderer::RenderESM()
     {
         Performance::BeginEvent("ESM");
+
+
+        // -----------------------------------------------------------------------------
+        // Get light(s) and compute exponetial shadow map
+        // TODO: Can this be done in shadow renderer because of other uses with the
+        // light?
+        // -----------------------------------------------------------------------------
+        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
+        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
+
+        Gfx::CSunLightFacet* pGraphicSunFacet = 0;
+
+        for (; CurrentEntity != EndOfEntities; CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light))
+        {
+            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+
+            if (rCurrentEntity.GetType() == Dt::SLightType::Sun)
+            {
+                pGraphicSunFacet = static_cast<Gfx::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+            }
+        }
+
+        CTextureBasePtr ShadowMapPtr = pGraphicSunFacet->GetRenderContext()->GetTargetSet()->GetDepthStencilTarget();
+
+        m_ESMTextureSetPtr = TextureManager::CreateTextureSet(ShadowMapPtr, static_cast<CTextureBasePtr>(m_ESMTexturePtr));
+
+        ContextManager::SetShaderCS(m_ESMCSPtr);
+
+        ContextManager::SetTextureSetCS(m_ESMTextureSetPtr);
+
+        ContextManager::Dispatch(256, 256, 1);
+
+        ContextManager::ResetTextureSetCS();
+
+        ContextManager::ResetShaderCS();
+
+        // -----------------------------------------------------------------------------
+        // Blur
+        // -----------------------------------------------------------------------------
+        
+
+        // -----------------------------------------------------------------------------
+        // Apply shadow map
+        // -----------------------------------------------------------------------------
 
         Performance::EndEvent();
     }

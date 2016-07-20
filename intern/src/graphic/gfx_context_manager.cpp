@@ -1977,9 +1977,10 @@ namespace
 
         if (m_TextureSetCSPtr != _TextureSetPtr)
         {
-            Gfx::CNativeTextureHandle TextureHandle = 0;
-            GLenum                    Access        = 0;
-            GLenum                    Format        = 0;
+            Gfx::CNativeTextureHandle TextureHandle  = 0;
+            GLenum                    Access         = 0;
+            GLenum                    Format         = 0;
+            GLuint                    TextureBinding = 0;
 
             for (unsigned int IndexOfTexture = 0; IndexOfTexture < _TextureSetPtr->GetNumberOfTextures(); ++IndexOfTexture)
             {
@@ -1995,7 +1996,22 @@ namespace
                 Access = rNativeTexture.m_NativeUsage;
                 Format = rNativeTexture.m_NativeInternalFormat;
 
-                if (rNativeTexture.IsCube())
+                if ((rNativeTexture.GetBinding() & CTextureBase::EBinding::DepthStencilTarget) == CTextureBase::EBinding::DepthStencilTarget)
+                {
+                    TextureHandle = rNativeTexture.m_NativeTexture;
+
+                    TextureBinding = rNativeTexture.m_NativeDimension;
+
+                    if (rNativeTexture.IsCube())
+                    {
+                        TextureBinding = GL_TEXTURE_CUBE_MAP;
+                    }
+
+                    glActiveTexture(GL_TEXTURE0 + m_IndexOfTextureBinding);
+
+                    glBindTexture(TextureBinding, TextureHandle);
+                }
+                else if (rNativeTexture.IsCube())
                 {
                     // layered
                 }
