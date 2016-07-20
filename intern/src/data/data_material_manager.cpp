@@ -347,6 +347,8 @@ namespace
 
             rNewMaterial.m_pBumpMap = TextureManager::CreateTexture2D(TextureDescriptor);
         }
+
+        MaterialFile.Clear();
         
         return rNewMaterial;
     }

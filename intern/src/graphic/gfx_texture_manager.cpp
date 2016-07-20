@@ -369,6 +369,8 @@ namespace
         ILenum NativeILFormat;
         ILenum NativeILType;
 
+        unsigned int NativeImageName;
+
         unsigned int Hash = 0;
         
         // -----------------------------------------------------------------------------
@@ -409,7 +411,14 @@ namespace
 
         NativeILFormat  = ConvertILImageFormat(_rDescriptor.m_Format);
         NativeILType    = ConvertILImageType(_rDescriptor.m_Format);
-        
+
+        // -----------------------------------------------------------------------------
+        // Create and bin texture on DevIL
+        // -----------------------------------------------------------------------------
+        NativeImageName = ilGenImage();
+
+        ilBindImage(NativeImageName);
+
         // -----------------------------------------------------------------------------
         // Load texture from file if one is set in descriptor
         // -----------------------------------------------------------------------------
@@ -459,6 +468,8 @@ namespace
             else
             {
                 BASE_CONSOLE_STREAMERROR("Fails loading image '" << PathToTexture.c_str() << "' from file.");
+
+                ilDeleteImage(NativeImageName);
                 
                 return GetDummyTexture2D();
             }
@@ -509,7 +520,7 @@ namespace
         }
 
         glBindTexture(GL_TEXTURE_2D, 0);
-        
+
         // -----------------------------------------------------------------------------
         // Generate texture inside texture manager
         // -----------------------------------------------------------------------------
@@ -573,6 +584,13 @@ namespace
                     memcpy(pBytes, _rDescriptor.m_pPixels, NumberOfBytes);
                 }
             }
+            
+            // -----------------------------------------------------------------------------
+            // Delete image on DevIL because it isn't needed anymore
+            // -----------------------------------------------------------------------------
+            ilDeleteImage(NativeImageName);
+
+            ilBindImage(0);
             
             switch (_Behavior)
             {
