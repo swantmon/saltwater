@@ -191,6 +191,7 @@ namespace
         void*             pBytes;
         void*             pTextureData;
         unsigned int      Hash;
+        unsigned int      NativeImageName;
         int               ImageWidth;
         int               ImageHeight;
         int               NumberOfPixel;
@@ -234,16 +235,25 @@ namespace
         NumberOfPixel   = ImageWidth * ImageHeight;
         NumberOfBytes   = ConvertFormatToBytesPerPixel(_rDescriptor.m_Format) * NumberOfPixel;
 
-        // -----------------------------------------------------------------------------
-        // Build path to texture in file system
-        // -----------------------------------------------------------------------------
-        std::string PathToTexture;
-        
+        NativeImageName = 0;
+
         // -----------------------------------------------------------------------------
         // Load texture from file if one is set in descriptor
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_pFileName != nullptr && _rDescriptor.m_pPixels == nullptr && _Behavior != SDataBehavior::Listen)
         {
+            // -----------------------------------------------------------------------------
+            // Create and bin texture on DevIL
+            // -----------------------------------------------------------------------------
+            NativeImageName = ilGenImage();
+
+            ilBindImage(NativeImageName);
+
+            // -----------------------------------------------------------------------------
+            // Load texture from file (either in assets or data)
+            // -----------------------------------------------------------------------------
+            std::string PathToTexture;
+
 			PathToTexture = g_PathToAssets + _rDescriptor.m_pFileName;
 
             NativeILFormat = ConvertILImageFormat(_rDescriptor.m_Format);
@@ -276,6 +286,8 @@ namespace
             else
             {
                 BASE_CONSOLE_STREAMERROR("Failed loading image '" << PathToTexture.c_str() << "' from file.");
+
+                ilDeleteImage(NativeImageName);
                 
                 return nullptr;
             }
@@ -329,11 +341,11 @@ namespace
                 
                 if (pTextureData)
                 {
-                    memcpy(pBytes, pTextureData, NumberOfBytes);
+                    pBytes = Base::CMemory::Copy(NumberOfBytes, pTextureData);
                 }
                 else if (_rDescriptor.m_pPixels)
                 {
-                    memcpy(pBytes, _rDescriptor.m_pPixels, NumberOfBytes);
+                    pBytes = Base::CMemory::Copy(NumberOfBytes, _rDescriptor.m_pPixels);
                 }
             }
             
@@ -373,6 +385,15 @@ namespace
                     break;
             }
             
+            // -----------------------------------------------------------------------------
+            // Delete image on DevIL because it isn't needed anymore
+            // -----------------------------------------------------------------------------
+            if (_rDescriptor.m_pFileName != nullptr && _rDescriptor.m_pPixels == nullptr)
+            {
+                ilDeleteImage(NativeImageName);
+
+                ilBindImage(0);
+            }
         }
         catch (...)
         {

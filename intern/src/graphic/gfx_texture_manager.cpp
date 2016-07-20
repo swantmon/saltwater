@@ -353,31 +353,24 @@ namespace
 
     CTexture2DPtr CGfxTextureManager::CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
-        bool   Result;
-        void*  pBytes;
-        void*  pTextureData;
-        GLuint NativeTextureHandle;
-        int    ImageWidth;
-        int    ImageHeight;
-        int    NumberOfPixel;
-        int    NumberOfBytes;
-        int    NumberOfMipmaps;
-        int    GLInternalFormat;
-        int    GLFormat;
-        int    GLUsage;
-        int    GLType;
-        ILenum NativeILFormat;
-        ILenum NativeILType;
-
-        unsigned int NativeImageName;
-
+        bool         Result;
+        void*        pBytes;
+        void*        pTextureData;
         unsigned int Hash = 0;
-        
-        // -----------------------------------------------------------------------------
-        // Build path to texture in file system
-        // -----------------------------------------------------------------------------
-        std::string PathToTexture;
-        
+        unsigned int NativeImageName;
+        GLuint       NativeTextureHandle;
+        int          ImageWidth;
+        int          ImageHeight;
+        int          NumberOfPixel;
+        int          NumberOfBytes;
+        int          NumberOfMipmaps;
+        int          GLInternalFormat;
+        int          GLFormat;
+        int          GLUsage;
+        int          GLType;
+        ILenum       NativeILFormat;
+        ILenum       NativeILType;
+
         // -----------------------------------------------------------------------------
         // Create hash value over filename
         // -----------------------------------------------------------------------------
@@ -412,21 +405,24 @@ namespace
         NativeILFormat  = ConvertILImageFormat(_rDescriptor.m_Format);
         NativeILType    = ConvertILImageType(_rDescriptor.m_Format);
 
-        // -----------------------------------------------------------------------------
-        // Create and bin texture on DevIL
-        // -----------------------------------------------------------------------------
-        NativeImageName = ilGenImage();
-
-        ilBindImage(NativeImageName);
+        NativeImageName = 0;
 
         // -----------------------------------------------------------------------------
         // Load texture from file if one is set in descriptor
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_pFileName != nullptr && _rDescriptor.m_pPixels == nullptr)
         {
-#ifdef __APPLE__
-            Result = ilLoadImage(PathToTexture.c_str());
-#else
+            // -----------------------------------------------------------------------------
+            // Create and bin texture on DevIL
+            // -----------------------------------------------------------------------------
+            NativeImageName = ilGenImage();
+
+            ilBindImage(NativeImageName);
+
+            // -----------------------------------------------------------------------------
+            // Load texture from file (either in assets or data)
+            // -----------------------------------------------------------------------------
+            std::string    PathToTexture;
 			const wchar_t* pPathToTexture = 0;
 
 			PathToTexture = g_PathToAssets + _rDescriptor.m_pFileName;
@@ -443,7 +439,6 @@ namespace
 
 				Result = ilLoadImage(pPathToTexture) == IL_TRUE;
 			}
-#endif
             
             if (Result)
             {
@@ -467,7 +462,7 @@ namespace
             }
             else
             {
-                BASE_CONSOLE_STREAMERROR("Fails loading image '" << PathToTexture.c_str() << "' from file.");
+                BASE_CONSOLE_STREAMERROR("Failed loading image '" << PathToTexture.c_str() << "' from file.");
 
                 ilDeleteImage(NativeImageName);
                 
@@ -577,20 +572,13 @@ namespace
                 
                 if (pTextureData)
                 {
-                    memcpy(pBytes, pTextureData, NumberOfBytes);
+                    pBytes = Base::CMemory::Copy(NumberOfBytes, pTextureData);
                 }
                 else if (_rDescriptor.m_pPixels)
                 {
-                    memcpy(pBytes, _rDescriptor.m_pPixels, NumberOfBytes);
+                    pBytes = Base::CMemory::Copy(NumberOfBytes, _rDescriptor.m_pPixels);
                 }
             }
-            
-            // -----------------------------------------------------------------------------
-            // Delete image on DevIL because it isn't needed anymore
-            // -----------------------------------------------------------------------------
-            ilDeleteImage(NativeImageName);
-
-            ilBindImage(0);
             
             switch (_Behavior)
             {
@@ -637,7 +625,16 @@ namespace
                     BASE_CONSOLE_STREAMWARNING("Undefined texture data behavior while creating an texture.");
                     break;
             }
-            
+
+            // -----------------------------------------------------------------------------
+            // Delete image on DevIL because it isn't needed anymore
+            // -----------------------------------------------------------------------------
+            if (_rDescriptor.m_pFileName != nullptr && _rDescriptor.m_pPixels == nullptr)
+            {
+                ilDeleteImage(NativeImageName);
+
+                ilBindImage(0);
+            }
         }
         catch (...)
         {
