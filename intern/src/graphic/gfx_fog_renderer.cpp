@@ -91,6 +91,9 @@ namespace
         CTexture2DPtr     m_ESMTexturePtr;
         CTextureSetPtr    m_ESMTextureSetPtr;
 
+        CTexture3DPtr     m_VolumeTexturePtr;
+        CTextureSetPtr    m_VolumeTextureSetPtr;
+
         CShaderPtr     m_GaussianBlurShaderPtr;
         CBufferSetPtr  m_GaussianBlurPropertiesCSBufferSetPtr;
         CTextureSetPtr m_BlurStagesTextureSetPtrs[2];
@@ -119,6 +122,8 @@ namespace
         , m_LightRenderContextPtr               ()
         , m_ESMTexturePtr                       ()
         , m_ESMTextureSetPtr                    ()
+        , m_VolumeTexturePtr                    ()
+        , m_VolumeTextureSetPtr                 ()
         , m_GaussianBlurShaderPtr               ()
         , m_GaussianBlurPropertiesCSBufferSetPtr()
         , m_BlurStagesTextureSetPtrs            ()
@@ -154,6 +159,8 @@ namespace
         m_LightRenderContextPtr   = 0;
         m_ESMTexturePtr           = 0;
         m_ESMTextureSetPtr        = 0;
+        m_VolumeTexturePtr        = 0;
+        m_VolumeTextureSetPtr     = 0;
 
         m_GaussianBlurShaderPtr                = 0;
         m_GaussianBlurPropertiesCSBufferSetPtr = 0;
@@ -248,6 +255,27 @@ namespace
         m_ESMTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
 
         CTexture2DPtr ESMSwapTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
+
+        // -----------------------------------------------------------------------------
+
+        RendertargetDescriptor.m_NumberOfPixelsU  = 160;
+        RendertargetDescriptor.m_NumberOfPixelsV  = 90;
+        RendertargetDescriptor.m_NumberOfPixelsW  = 128;
+        RendertargetDescriptor.m_NumberOfMipMaps  = 1;
+        RendertargetDescriptor.m_NumberOfTextures = 1;
+        RendertargetDescriptor.m_Binding          = CTextureBase::ShaderResource;
+        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
+        RendertargetDescriptor.m_Format           = CTextureBase::R32G32B32A32_FLOAT;
+        RendertargetDescriptor.m_Usage            = CTextureBase::GPUReadWrite;
+        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_pFileName        = 0;
+        RendertargetDescriptor.m_pPixels          = 0;
+
+        m_VolumeTexturePtr = TextureManager::CreateTexture3D(RendertargetDescriptor);
+
+        m_VolumeTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_ESMTexturePtr), static_cast<CTextureBasePtr>(m_VolumeTexturePtr));
+
+        // -----------------------------------------------------------------------------
 
         m_BlurStagesTextureSetPtrs[0] = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_ESMTexturePtr), static_cast<CTextureBasePtr>(ESMSwapTexturePtr));
         m_BlurStagesTextureSetPtrs[1] = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(ESMSwapTexturePtr), static_cast<CTextureBasePtr>(m_ESMTexturePtr));
@@ -458,10 +486,6 @@ namespace
 
         ContextManager::ResetShaderCS();
 
-        // -----------------------------------------------------------------------------
-        // Apply shadow map
-        // -----------------------------------------------------------------------------
-
         Performance::EndEvent();
     }
 
@@ -470,6 +494,16 @@ namespace
     void CGfxFogRenderer::RenderVolumeLighting()
     {
         Performance::BeginEvent("Volume Lighting");
+
+        ContextManager::SetShaderCS(m_VolumeLightingCSPtr);
+
+        ContextManager::SetTextureSetCS(m_VolumeTextureSetPtr);
+
+        ContextManager::Dispatch(160, 90, 128);
+
+        ContextManager::ResetTextureSetCS();
+
+        ContextManager::ResetShaderCS();
 
         Performance::EndEvent();
     }

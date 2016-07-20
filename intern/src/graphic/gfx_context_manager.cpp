@@ -2015,6 +2015,10 @@ namespace
                 {
                     // layered
                 }
+                else if (rNativeTexture.GetDimension() == CTextureBase::Dim3D)
+                {
+                    glBindImageTexture(m_IndexOfTextureBinding, TextureHandle, 0, GL_TRUE, 0, Access, Format);
+                }
                 else
                 {
                     glBindImageTexture(m_IndexOfTextureBinding, TextureHandle, 0, GL_FALSE, 0, Access, Format);

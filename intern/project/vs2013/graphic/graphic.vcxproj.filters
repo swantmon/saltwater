@@ -461,6 +461,9 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_fog_renderer.h">
       <Filter>engine\renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_texture_3d.h">
+      <Filter>ogl\textures</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="interface">

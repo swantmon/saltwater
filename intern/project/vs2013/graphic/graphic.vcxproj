@@ -105,6 +105,7 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_ar_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_sun_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_fog_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_texture_3d.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_performance.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_histogram_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_postfx_hdr_renderer.h" />
