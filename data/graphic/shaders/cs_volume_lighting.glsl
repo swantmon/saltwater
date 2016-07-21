@@ -42,7 +42,7 @@ float ImprovedPerlinNoise3D(in vec3 _Seed)
 
 	UV = UV / 256.0f;
 
-	const float One = 1.0f;
+	const float One = 1.0f / 256.0f;
 	
 	// -------------------------------------------------------------------------------------
     // HASH COORDINATES OF THE 8 CUBE CORNERS
