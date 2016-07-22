@@ -17,6 +17,7 @@
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_fog_renderer.h"
+#include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_facet.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_model_manager.h"
@@ -75,11 +76,22 @@ namespace
             Base::Int2 m_MaxPixelCoord;
             float      m_Weights[7];
         };
+
+        struct SSunLightProperties
+        {
+            Base::Float4x4 m_LightViewProjection;
+            Base::Float4   m_LightDirection;
+            Base::Float4   m_LightColor;
+            float          m_SunAngularRadius;
+            unsigned int   m_ExposureHistoryIndex;
+            float          m_Padding[2];
+        };
         
     private:
         
         CModelPtr         m_QuadModelPtr;
         CBufferSetPtr     m_FullQuadViewVSBufferPtr;
+        CBufferSetPtr     m_VolumeLightingCSBufferSetPtr;
         CInputLayoutPtr   m_P2InputLayoutPtr;
         CShaderPtr        m_RectangleShaderVSPtr;
         CShaderPtr        m_ESMCSPtr;
@@ -115,6 +127,7 @@ namespace
     CGfxFogRenderer::CGfxFogRenderer()
         : m_QuadModelPtr                        ()
         , m_FullQuadViewVSBufferPtr             ()
+        , m_VolumeLightingCSBufferSetPtr        ()
         , m_P2InputLayoutPtr                    ()
         , m_RectangleShaderVSPtr                ()
         , m_ESMCSPtr                            ()
@@ -154,6 +167,7 @@ namespace
     {
         m_QuadModelPtr                  = 0;
         m_FullQuadViewVSBufferPtr       = 0;
+        m_VolumeLightingCSBufferSetPtr  = 0;
         m_P2InputLayoutPtr              = 0;
         m_RectangleShaderVSPtr          = 0;
         m_ESMCSPtr                      = 0;
@@ -317,7 +331,7 @@ namespace
         RendertargetDescriptor.m_NumberOfTextures = 1;
         RendertargetDescriptor.m_Binding          = CTextureBase::ShaderResource;
         RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
-        RendertargetDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        RendertargetDescriptor.m_Format           = CTextureBase::R32G32B32A32_FLOAT;
         RendertargetDescriptor.m_Usage            = CTextureBase::GPUReadWrite;
         RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
         RendertargetDescriptor.m_pFileName        = 0;
@@ -368,7 +382,7 @@ namespace
         RendertargetDescriptor.m_NumberOfTextures = 1;
         RendertargetDescriptor.m_Binding          = CTextureBase::ShaderResource;
         RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
-        RendertargetDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        RendertargetDescriptor.m_Format           = CTextureBase::R32G32B32A32_FLOAT;
         RendertargetDescriptor.m_Usage            = CTextureBase::GPUReadWrite;
         RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
         RendertargetDescriptor.m_pFileName        = 0;
@@ -387,7 +401,7 @@ namespace
         RendertargetDescriptor.m_NumberOfTextures = 1;
         RendertargetDescriptor.m_Binding          = CTextureBase::ShaderResource;
         RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
-        RendertargetDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        RendertargetDescriptor.m_Format           = CTextureBase::R32G32B32A32_FLOAT;
         RendertargetDescriptor.m_Usage            = CTextureBase::GPUReadWrite;
         RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
         RendertargetDescriptor.m_pFileName        = 0;
@@ -395,13 +409,33 @@ namespace
 
         m_VolumeTexturePtr = TextureManager::CreateTexture3D(RendertargetDescriptor);
 
-        m_VolumeTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_ESMTexturePtr), static_cast<CTextureBasePtr>(m_VolumeTexturePtr), static_cast<CTextureBasePtr>(m_PermutationTexturePtr), static_cast<CTextureBasePtr>(m_GradientPermutationTexturePtr));
+        // -----------------------------------------------------------------------------
+
+        CTextureBasePtr GBuffer0TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0);
+        CTextureBasePtr GBuffer1TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1);
+        CTextureBasePtr GBuffer2TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2);
+        CTextureBasePtr DepthTexturePtr    = TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget();
+
+        // -----------------------------------------------------------------------------
+
+        CTextureBasePtr VolumeTextures[] =
+        {
+            static_cast<CTextureBasePtr>(m_VolumeTexturePtr), 
+            static_cast<CTextureBasePtr>(m_PermutationTexturePtr), 
+            static_cast<CTextureBasePtr>(m_GradientPermutationTexturePtr),
+            static_cast<CTextureBasePtr>(GBuffer0TexturePtr),
+            static_cast<CTextureBasePtr>(GBuffer1TexturePtr),
+            static_cast<CTextureBasePtr>(GBuffer2TexturePtr),
+            static_cast<CTextureBasePtr>(DepthTexturePtr),
+            static_cast<CTextureBasePtr>(m_ESMTexturePtr),
+        };
+
+        m_VolumeTextureSetPtr = TextureManager::CreateTextureSet(VolumeTextures, 8);
 
         // -----------------------------------------------------------------------------
 
         m_BlurStagesTextureSetPtrs[0] = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_ESMTexturePtr), static_cast<CTextureBasePtr>(ESMSwapTexturePtr));
         m_BlurStagesTextureSetPtrs[1] = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(ESMSwapTexturePtr), static_cast<CTextureBasePtr>(m_ESMTexturePtr));
-
     }
     
     // -----------------------------------------------------------------------------
@@ -420,10 +454,28 @@ namespace
         
         CBufferPtr GaussianSettingsResourceBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
+        // -----------------------------------------------------------------------------
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSunLightProperties);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        CBufferPtr SunLightBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+
+        CBufferPtr HistogramExposureHistoryBufferPtr = HistogramRenderer::GetExposureHistoryBuffer();
+
+        // -----------------------------------------------------------------------------
+
         m_GaussianBlurPropertiesCSBufferSetPtr = BufferManager::CreateBufferSet(GaussianSettingsResourceBuffer);
+        m_VolumeLightingCSBufferSetPtr         = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), SunLightBufferPtr, HistogramExposureHistoryBufferPtr);
+        m_FullQuadViewVSBufferPtr              = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
 
-
-        m_FullQuadViewVSBufferPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
     }
     
     // -----------------------------------------------------------------------------
@@ -617,13 +669,48 @@ namespace
     {
         Performance::BeginEvent("Volume Lighting");
 
+        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
+        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
+
+        Gfx::CSunLightFacet* pGraphicSunFacet = 0;
+        Dt::CSunLightFacet* pDataSunFacet = 0;
+
+        for (; CurrentEntity != EndOfEntities; CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light))
+        {
+            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+
+            if (rCurrentEntity.GetType() == Dt::SLightType::Sun)
+            {
+                pDataSunFacet = static_cast<Dt::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+                pGraphicSunFacet = static_cast<Gfx::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+            }
+        }
+
+        SSunLightProperties* pLightBuffer = static_cast<SSunLightProperties*>(BufferManager::MapConstantBuffer(m_VolumeLightingCSBufferSetPtr->GetBuffer(1)));
+
+	    assert(pLightBuffer != nullptr);
+
+	    pLightBuffer->m_LightViewProjection  = pGraphicSunFacet->GetRenderContext()->GetCamera()->GetViewProjectionMatrix();
+	    pLightBuffer->m_LightDirection       = Base::Float4(pDataSunFacet->GetDirection(), 0.0f).Normalize();
+	    pLightBuffer->m_LightColor           = Base::Float4(pDataSunFacet->GetLightness(), 1.0f);
+	    pLightBuffer->m_SunAngularRadius     = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
+	    pLightBuffer->m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
+
+        BufferManager::UnmapConstantBuffer(m_VolumeLightingCSBufferSetPtr->GetBuffer(1));
+
+        // -----------------------------------------------------------------------------
+
         ContextManager::SetShaderCS(m_VolumeLightingCSPtr);
+
+        // ContextManager::SetConstantBufferSetCS(m_VolumeLightingCSBufferSetPtr);
 
         ContextManager::SetTextureSetCS(m_VolumeTextureSetPtr);
 
         ContextManager::Dispatch(160, 90, 128);
 
         ContextManager::ResetTextureSetCS();
+        
+        // ContextManager::ResetConstantBufferSetCS();
 
         ContextManager::ResetShaderCS();
 

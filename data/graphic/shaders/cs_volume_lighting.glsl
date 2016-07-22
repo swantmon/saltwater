@@ -1,11 +1,40 @@
 #ifndef __INCLUDE_CS_VOLUME_LIGHTING_GLSL__
 #define __INCLUDE_CS_VOLUME_LIGHTING_GLSL__
 
-layout (binding = 0, r32f) readonly  uniform image2D cs_InputImage;
-layout (binding = 1, rgba16f) writeonly uniform image3D cs_OutputImage;
+#include "fs_global.glsl"
 
-layout (binding = 2, rgba16f) readonly uniform image2D cs_PermutationImage;
-layout (binding = 3, rgba16f) readonly uniform image2D cs_PermutationGradientImage;
+#include "common.glsl"
+#include "common_light.glsl"
+#include "common_gbuffer.glsl"
+
+// -------------------------------------------------------------------------------------
+// Input from engine
+// -------------------------------------------------------------------------------------
+layout(row_major, std140, binding = 1) uniform USunLightProperties
+{
+    mat4   ps_LightViewProjection;
+    vec4   ps_LightDirection;
+    vec4   ps_LightColor;
+    float  ps_SunAngularRadius;
+    uint   ps_ExposureHistoryIndex;
+};
+
+layout(std430, binding = 0) readonly buffer UExposureHistoryBuffer
+{
+    float ps_ExposureHistory[8];
+};
+
+
+layout (binding = 0, rgba32f) writeonly uniform image3D cs_OutputImage;
+
+layout (binding = 1, rgba32f) readonly uniform image2D cs_PermutationImage;
+layout (binding = 2, rgba32f) readonly uniform image2D cs_PermutationGradientImage;
+
+layout (binding = 3, rgba8) readonly uniform image2D cs_GBuffer0;
+layout (binding = 4, rgba8) readonly uniform image2D cs_GBuffer1;
+layout (binding = 5, rgba8) readonly uniform image2D cs_GBuffer2;
+layout (binding = 6) uniform sampler2D cs_DepthTexture;
+layout (binding = 7, r32f) readonly uniform image2D cs_ESMTexture;
 
 // -------------------------------------------------------------------------------------
 // Simon Green. 
@@ -25,7 +54,7 @@ vec4 SamplePermutation(in vec2 _UV)
 
 float SampleGradientPermutation(in float _U, in vec3 _Point)
 {
-	return dot(imageLoad(cs_PermutationImage, ivec2(_U * 256, 0)).xyz, _Point);
+	return dot(imageLoad(cs_PermutationGradientImage, ivec2(_U * 256, 0)).xyz, _Point);
 }
 
 float ImprovedPerlinNoise3D(in vec3 _Seed)
@@ -66,15 +95,49 @@ float ImprovedPerlinNoise3D(in vec3 _Seed)
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main()
 {
-    uint X = gl_GlobalInvocationID.x;
-    uint Y = gl_GlobalInvocationID.y;
-    uint Z = gl_GlobalInvocationID.z;
+    vec4 Pixel;
+    vec4 Lighting;
+    vec3 Seed;
+    vec3 Wind;
+    float PerlinNoise;
+    uint X;
+    uint Y;
+    uint Z;
 
-    vec4 Pixel = imageLoad(cs_InputImage, ivec2(X, Y));
+    X = gl_GlobalInvocationID.x;
+    Y = gl_GlobalInvocationID.y;
+    Z = gl_GlobalInvocationID.z;
 
-    float PerlinNoise = ImprovedPerlinNoise3D(vec3(X / 160.0f, Y / 90.0f, Z / 128.0f));
+    // -------------------------------------------------------------------------------------
+    // Getting wind and apply to seed
+    // -------------------------------------------------------------------------------------
+    Wind = vec3(0.0f);
 
-    imageStore(cs_OutputImage, ivec3(X, Y, Z), vec4(PerlinNoise * 100.0f, 0, 0, 0));
+    Seed  = vec3(X / 160.0f, Y / 90.0f, Z / 128.0f);
+    Seed += Wind;
+
+    // -------------------------------------------------------------------------------------
+    // Calculate Perlin Noise at this position in space
+    // -------------------------------------------------------------------------------------
+    PerlinNoise = ImprovedPerlinNoise3D(Seed);
+
+    // -------------------------------------------------------------------------------------
+    // Calculate Perlin Noise at this position in space
+    // -------------------------------------------------------------------------------------
+    Lighting = vec4(PerlinNoise * 10.0f);
+
+
+    vec2 TexCoord = vec2(X / 160.0f, Y / 90.0f);
+
+    vec4  GBuffer0 = imageLoad(cs_GBuffer0, ivec2(TexCoord * vec2(1280.0f, 720.0f)));
+    vec4  GBuffer1 = imageLoad(cs_GBuffer1, ivec2(TexCoord * vec2(1280.0f, 720.0f)));
+    vec4  GBuffer2 = imageLoad(cs_GBuffer2, ivec2(TexCoord * vec2(1280.0f, 720.0f)));
+
+    float VSDepth  = texture(cs_DepthTexture, TexCoord).r;
+
+    vec4  ESMTexture = imageLoad(cs_ESMTexture, ivec2(TexCoord * vec2(1280.0f, 720.0f)));
+
+    imageStore(cs_OutputImage, ivec3(X, Y, Z), Lighting * GBuffer0 * GBuffer1 * GBuffer2 * ESMTexture * VSDepth.rrrr);
 }
 
 #endif // __INCLUDE_CS_VOLUME_LIGHTING_GLSL__
