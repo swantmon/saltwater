@@ -702,7 +702,7 @@ namespace
 
         ContextManager::SetShaderCS(m_VolumeLightingCSPtr);
 
-        // ContextManager::SetConstantBufferSetCS(m_VolumeLightingCSBufferSetPtr);
+        ContextManager::SetConstantBufferSetCS(m_VolumeLightingCSBufferSetPtr);
 
         ContextManager::SetTextureSetCS(m_VolumeTextureSetPtr);
 
@@ -710,7 +710,7 @@ namespace
 
         ContextManager::ResetTextureSetCS();
         
-        // ContextManager::ResetConstantBufferSetCS();
+        ContextManager::ResetConstantBufferSetCS();
 
         ContextManager::ResetShaderCS();
 

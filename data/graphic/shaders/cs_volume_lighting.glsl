@@ -111,7 +111,7 @@ void main()
     // -------------------------------------------------------------------------------------
     // Getting wind and apply to seed
     // -------------------------------------------------------------------------------------
-    Wind = vec3(0.0f);
+    Wind = vec3(ps_SunAngularRadius);
 
     Seed  = vec3(X / 160.0f, Y / 90.0f, Z / 128.0f);
     Seed += Wind;
@@ -135,9 +135,96 @@ void main()
 
     float VSDepth  = texture(cs_DepthTexture, TexCoord).r;
 
-    vec4  ESMTexture = imageLoad(cs_ESMTexture, ivec2(TexCoord * vec2(1280.0f, 720.0f)));
+    // -----------------------------------------------------------------------------
+    // VS position
+    // -----------------------------------------------------------------------------
+    vec3 VSPosition = GetViewSpacePositionFromDepth(VSDepth, TexCoord, ps_ScreenToView);
+    
+    // -----------------------------------------------------------------------------
+    // WS position
+    // -----------------------------------------------------------------------------
+    vec3 WSPosition = (ps_ViewToWorld * vec4(VSPosition, 1.0f)).xyz;
 
-    imageStore(cs_OutputImage, ivec3(X, Y, Z), Lighting * GBuffer0 * GBuffer1 * GBuffer2 * ESMTexture * VSDepth.rrrr);
+    // -----------------------------------------------------------------------------
+    // Surface data
+    // -----------------------------------------------------------------------------
+    SSurfaceData Data;
+
+    UnpackGBuffer(GBuffer0, GBuffer1, GBuffer2, WSPosition.xyz, VSDepth, Data);
+
+    // -----------------------------------------------------------------------------
+    // Exposure data
+    // -----------------------------------------------------------------------------
+    float AverageExposure = ps_ExposureHistory[ps_ExposureHistoryIndex];
+    
+    // -----------------------------------------------------------------------------
+    // Compute lighting for sun light
+    // -----------------------------------------------------------------------------
+    vec3 WSLightDirection  = -ps_LightDirection.xyz;
+    vec3 WSViewDirection   = normalize(ps_ViewPosition.xyz - Data.m_WSPosition);
+    
+    float NdotV = dot(Data.m_WSNormal, WSViewDirection);
+    
+    vec3 ViewMirrorUnitDir = 2.0f * NdotV * Data.m_WSNormal - WSViewDirection;
+    
+    // -----------------------------------------------------------------------------
+    // Compute sun data
+    // -----------------------------------------------------------------------------
+    float r = sin(ps_SunAngularRadius);
+    float d = cos(ps_SunAngularRadius);
+
+    float DdotR = dot(WSLightDirection, ViewMirrorUnitDir);
+    vec3  S     = ViewMirrorUnitDir - DdotR * WSLightDirection;
+    vec3  L     = DdotR < d ? normalize(d * WSLightDirection + normalize(S) * r) : ViewMirrorUnitDir;
+    
+
+    // -----------------------------------------------------------------------------
+    // Shadow
+    // -----------------------------------------------------------------------------
+    vec4  LSPosition;
+    vec3  ShadowCoord;
+    float DepthValue;
+    float Shadow;
+
+    // -----------------------------------------------------------------------------
+    // Set world space coord into light projection by multiply with light
+    // view and projection matrix;
+    // -----------------------------------------------------------------------------
+    LSPosition = ps_LightViewProjection * vec4(Data.m_WSPosition, 1.0f);
+    
+    // -----------------------------------------------------------------------------
+    // Divide xyz by w to get the position in light view's clip space.
+    // -----------------------------------------------------------------------------
+    LSPosition.xyz /= LSPosition.w;
+    
+    // -----------------------------------------------------------------------------
+    // Get uv texcoords for this position
+    // -----------------------------------------------------------------------------
+    ShadowCoord = LSPosition.xyz * 0.5f + 0.5f;
+    
+    // -----------------------------------------------------------------------------
+    // Get final depth at this texcoord and compare it with the real
+    // position z value (do a manual depth test)
+    // -----------------------------------------------------------------------------
+    DepthValue = imageLoad(cs_ESMTexture, ivec2(vec2(ShadowCoord.x, ShadowCoord.y) * vec2(256.0f, 256.0f))).r;
+
+    Shadow = 1.0f;
+    
+    if (ShadowCoord.z + 0.001f > DepthValue)
+    {
+        Shadow = 0.0f;
+    }
+
+    // -----------------------------------------------------------------------------
+    // Apply light luminance
+    // -----------------------------------------------------------------------------
+    vec3 Luminance = BRDF(L, WSViewDirection, Data.m_WSNormal, Data) * clamp(dot(Data.m_WSNormal, L), 0.0f, 1.0f) * ps_LightColor.xyz * Data.m_AmbientOcclusion * Shadow;
+
+    //Luminance *= AverageExposure;
+    
+    Lighting *= vec4(Luminance, 1.0f);
+
+    imageStore(cs_OutputImage, ivec3(X, Y, Z), Lighting);
 }
 
 #endif // __INCLUDE_CS_VOLUME_LIGHTING_GLSL__
