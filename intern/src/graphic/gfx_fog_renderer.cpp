@@ -411,26 +411,15 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        CTextureBasePtr GBuffer0TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0);
-        CTextureBasePtr GBuffer1TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1);
-        CTextureBasePtr GBuffer2TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2);
-        CTextureBasePtr DepthTexturePtr    = TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget();
-
-        // -----------------------------------------------------------------------------
-
         CTextureBasePtr VolumeTextures[] =
         {
             static_cast<CTextureBasePtr>(m_VolumeTexturePtr), 
             static_cast<CTextureBasePtr>(m_PermutationTexturePtr), 
             static_cast<CTextureBasePtr>(m_GradientPermutationTexturePtr),
-            static_cast<CTextureBasePtr>(GBuffer0TexturePtr),
-            static_cast<CTextureBasePtr>(GBuffer1TexturePtr),
-            static_cast<CTextureBasePtr>(GBuffer2TexturePtr),
-            static_cast<CTextureBasePtr>(DepthTexturePtr),
             static_cast<CTextureBasePtr>(m_ESMTexturePtr),
         };
 
-        m_VolumeTextureSetPtr = TextureManager::CreateTextureSet(VolumeTextures, 8);
+        m_VolumeTextureSetPtr = TextureManager::CreateTextureSet(VolumeTextures, 4);
 
         // -----------------------------------------------------------------------------
 
@@ -551,7 +540,7 @@ namespace
 
 
         // -----------------------------------------------------------------------------
-        // Get light(s) and compute exponetial shadow map
+        // Get light(s) and compute exponential shadow map
         // TODO: Can this be done in shadow renderer because of other uses with the
         // light?
         // -----------------------------------------------------------------------------
