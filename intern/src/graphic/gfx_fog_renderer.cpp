@@ -109,8 +109,12 @@ namespace
         CTexture3DPtr     m_ScatteringTexturePtr;
         CTextureSetPtr    m_ScatteringTextureSetPtr;
 
+        CTextureSetPtr    m_ApplyTextureSetPtr;
+
         CTexture2DPtr m_PermutationTexturePtr;
         CTexture2DPtr m_GradientPermutationTexturePtr;
+
+        
 
         CShaderPtr     m_GaussianBlurShaderPtr;
         CBufferSetPtr  m_GaussianBlurPropertiesCSBufferSetPtr;
@@ -145,6 +149,7 @@ namespace
         , m_VolumeTextureSetPtr                 ()
         , m_ScatteringTexturePtr                ()
         , m_ScatteringTextureSetPtr             ()
+        , m_ApplyTextureSetPtr                  ()
         , m_PermutationTexturePtr               ()
         , m_GradientPermutationTexturePtr       ()
         , m_GaussianBlurShaderPtr               ()
@@ -187,6 +192,7 @@ namespace
         m_VolumeTextureSetPtr           = 0;
         m_ScatteringTexturePtr          = 0;
         m_ScatteringTextureSetPtr       = 0;
+        m_ApplyTextureSetPtr            = 0;
         m_PermutationTexturePtr         = 0;
         m_GradientPermutationTexturePtr = 0;
 
@@ -259,6 +265,8 @@ namespace
         Sampler[3] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
         Sampler[4] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
         Sampler[5] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
+
+        m_PSSamplerSetPtr = SamplerManager::CreateSamplerSet(Sampler, 6);
     }
     
     // -----------------------------------------------------------------------------
@@ -425,6 +433,14 @@ namespace
         // -----------------------------------------------------------------------------
 
         m_ScatteringTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_VolumeTexturePtr), static_cast<CTextureBasePtr>(m_ScatteringTexturePtr));
+
+        // -----------------------------------------------------------------------------
+
+        CTextureBasePtr LightAccumulationTexture = TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0);
+
+        CTextureBasePtr DepthTexturePtr = TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget();
+
+        m_ApplyTextureSetPtr = TextureManager::CreateTextureSet(LightAccumulationTexture, DepthTexturePtr, static_cast<CTextureBasePtr>(m_ScatteringTexturePtr));
 
         // -----------------------------------------------------------------------------
 
@@ -735,6 +751,53 @@ namespace
     void CGfxFogRenderer::RenderApply()
     {
         Performance::BeginEvent("Apply");
+
+        // -----------------------------------------------------------------------------
+        // Rendering
+        // -----------------------------------------------------------------------------
+        const unsigned int pOffset[] = { 0, 0 };
+
+        ContextManager::SetRenderContext(m_LightRenderContextPtr);
+
+        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+
+        ContextManager::SetInputLayout(m_P2InputLayoutPtr);
+
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        ContextManager::SetShaderVS(m_RectangleShaderVSPtr);
+
+        ContextManager::SetShaderPS(m_ApplyPSPtr);
+
+        ContextManager::SetConstantBufferSetVS(m_FullQuadViewVSBufferPtr);
+
+        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
+
+        ContextManager::SetTextureSetPS(m_ApplyTextureSetPtr);
+
+        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+
+        ContextManager::ResetTextureSetPS();
+
+        ContextManager::ResetConstantBufferSetVS();
+
+        ContextManager::ResetTopology();
+
+        ContextManager::ResetInputLayout();
+
+        ContextManager::ResetIndexBuffer();
+
+        ContextManager::ResetVertexBufferSet();
+
+        ContextManager::ResetSamplerSetPS();
+
+        ContextManager::ResetShaderVS();
+
+        ContextManager::ResetShaderPS();
+
+        ContextManager::ResetRenderContext();
 
         Performance::EndEvent();
     }
