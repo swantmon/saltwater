@@ -106,6 +106,9 @@ namespace
         CTexture3DPtr     m_VolumeTexturePtr;
         CTextureSetPtr    m_VolumeTextureSetPtr;
 
+        CTexture3DPtr     m_ScatteringTexturePtr;
+        CTextureSetPtr    m_ScatteringTextureSetPtr;
+
         CTexture2DPtr m_PermutationTexturePtr;
         CTexture2DPtr m_GradientPermutationTexturePtr;
 
@@ -140,6 +143,8 @@ namespace
         , m_ESMTextureSetPtr                    ()
         , m_VolumeTexturePtr                    ()
         , m_VolumeTextureSetPtr                 ()
+        , m_ScatteringTexturePtr                ()
+        , m_ScatteringTextureSetPtr             ()
         , m_PermutationTexturePtr               ()
         , m_GradientPermutationTexturePtr       ()
         , m_GaussianBlurShaderPtr               ()
@@ -180,6 +185,8 @@ namespace
         m_ESMTextureSetPtr              = 0;
         m_VolumeTexturePtr              = 0;
         m_VolumeTextureSetPtr           = 0;
+        m_ScatteringTexturePtr          = 0;
+        m_ScatteringTextureSetPtr       = 0;
         m_PermutationTexturePtr         = 0;
         m_GradientPermutationTexturePtr = 0;
 
@@ -409,17 +416,15 @@ namespace
 
         m_VolumeTexturePtr = TextureManager::CreateTexture3D(RendertargetDescriptor);
 
+        m_ScatteringTexturePtr = TextureManager::CreateTexture3D(RendertargetDescriptor);
+
         // -----------------------------------------------------------------------------
 
-        CTextureBasePtr VolumeTextures[] =
-        {
-            static_cast<CTextureBasePtr>(m_VolumeTexturePtr), 
-            static_cast<CTextureBasePtr>(m_PermutationTexturePtr), 
-            static_cast<CTextureBasePtr>(m_GradientPermutationTexturePtr),
-            static_cast<CTextureBasePtr>(m_ESMTexturePtr),
-        };
+        m_VolumeTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_VolumeTexturePtr), static_cast<CTextureBasePtr>(m_PermutationTexturePtr), static_cast<CTextureBasePtr>(m_GradientPermutationTexturePtr), static_cast<CTextureBasePtr>(m_ESMTexturePtr));
 
-        m_VolumeTextureSetPtr = TextureManager::CreateTextureSet(VolumeTextures, 4);
+        // -----------------------------------------------------------------------------
+
+        m_ScatteringTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_VolumeTexturePtr), static_cast<CTextureBasePtr>(m_ScatteringTexturePtr));
 
         // -----------------------------------------------------------------------------
 
@@ -711,6 +716,16 @@ namespace
     void CGfxFogRenderer::RenderScattering()
     {
         Performance::BeginEvent("Scattering");
+
+        ContextManager::SetShaderCS(m_VolumeScatteringCSPtr);
+
+        ContextManager::SetTextureSetCS(m_ScatteringTextureSetPtr);
+
+        ContextManager::Dispatch(160, 90, 1);
+
+        ContextManager::ResetTextureSetCS();
+
+        ContextManager::ResetShaderCS();
 
         Performance::EndEvent();
     }
