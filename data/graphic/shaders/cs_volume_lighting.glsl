@@ -9,11 +9,11 @@
 // Input from engine
 // -------------------------------------------------------------------------------------
 #define cs_FrustumDepthInMeter                50.0f
-#define cs_ShadowIntensity                    1.0f
-#define cs_VolumetricFogScatteringCoefficient 1.0f
-#define cs_VolumetricFogAbsorptionCoefficient 1.0f
+#define cs_ShadowIntensity                    100.0f
+#define cs_VolumetricFogScatteringCoefficient 0.8f
+#define cs_VolumetricFogAbsorptionCoefficient 0.2f
 #define cs_WindDirection                      vec3(0.0f)
-#define cs_FogColor                           vec3(1.0f);
+#define cs_FogColor                           vec3(1.0f, 0.0f, 0.0f);
 
 
 layout(row_major, std140, binding = 1) uniform USunLightProperties
@@ -121,7 +121,7 @@ void main()
     // -----------------------------------------------------------------------------
     // Thickness of slice
     // -----------------------------------------------------------------------------
-    float Thickness = 1.0f;
+    float Thickness = 1.0f / 128.0f;
     
     // -----------------------------------------------------------------------------
     // Density of dust
@@ -179,7 +179,7 @@ void main()
         
     vec3 Lighting = vec3(0.0f);
     
-    Lighting += AverageExposure * ps_LightColor.xyz * Shadow * MiePhase;
+    Lighting += AverageExposure * ps_LightColor.xyz * Shadow;
 
     // -----------------------------------------------------------------------------
     // Ambient lighting 

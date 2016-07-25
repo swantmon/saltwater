@@ -520,22 +520,6 @@ namespace
             Dt::SEntityDescriptor EntityDesc;
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::FX;
-            EntityDesc.m_EntityType     = Dt::SFXType::Bloom;
-            EntityDesc.m_FacetFlags     = 0;
-
-            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
-
-            Dt::CBloomFXFacet* pEffectFacet = Dt::FXManager::CreateBloomFX();
-
-            rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
-
-            Dt::EntityManager::MarkEntityAsDirty(rEffectEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-        }
-
-        {
-            Dt::SEntityDescriptor EntityDesc;
-
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::FX;
             EntityDesc.m_EntityType     = Dt::SFXType::SSAO;
             EntityDesc.m_FacetFlags     = 0;
 
