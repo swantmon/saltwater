@@ -8,6 +8,14 @@
 // -------------------------------------------------------------------------------------
 // Input from engine
 // -------------------------------------------------------------------------------------
+#define cs_FrustumDepthInMeter                50.0f
+#define cs_ShadowIntensity                    1.0f
+#define cs_VolumetricFogScatteringCoefficient 1.0f
+#define cs_VolumetricFogAbsorptionCoefficient 1.0f
+#define cs_WindDirection                      vec3(0.0f)
+#define cs_FogColor                           vec3(1.0f);
+
+
 layout(row_major, std140, binding = 1) uniform USunLightProperties
 {
     mat4   ps_LightViewProjection;
@@ -87,15 +95,6 @@ float ImprovedPerlinNoise3D(in vec3 _Seed)
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main()
 {
-    vec4 Pixel;
-    vec4 Lighting;
-    vec3 Seed;
-    vec3 Wind;
-    vec4 LSPosition;
-    vec3 ShadowCoord;
-    float DepthValue;
-    float Shadow;
-    float PerlinNoise;
     uint X;
     uint Y;
     uint Z;
@@ -103,52 +102,46 @@ void main()
     X = gl_GlobalInvocationID.x;
     Y = gl_GlobalInvocationID.y;
     Z = gl_GlobalInvocationID.z;
-
-    // -------------------------------------------------------------------------------------
-    // Getting wind and apply to seed
-    // -------------------------------------------------------------------------------------
-    Wind = vec3(ps_SunAngularRadius);
-
-    Seed  = vec3(X / 160.0f, Y / 90.0f, Z / 128.0f);
-    Seed += Wind;
-
-    // -------------------------------------------------------------------------------------
-    // Calculate Perlin Noise at this position in space
-    // -------------------------------------------------------------------------------------
-    PerlinNoise = ImprovedPerlinNoise3D(Seed);
     
     // -------------------------------------------------------------------------------------
     // World position from frustum
     // -------------------------------------------------------------------------------------
     vec2  TexCoord    = vec2(X / 160.0f, Y / 90.0f);
-    float LinearDepth = 1.0f - Z / 4096.0f;
     float Near        = 0.01f;
     float Far         = 4096.0f;
-
+    float LinearDepth = 1.0f - (Z * cs_FrustumDepthInMeter / 128.0f) / Far;
+    
     float VSDepth = 2.0f * Far * Near / (Far + Near - (Far - Near) * (2.0f * LinearDepth - 1.0f));
 
     VSDepth = 1.0f - (VSDepth / Far);
     
     vec3 VSPosition = GetViewSpacePositionFromDepth(VSDepth, TexCoord, ps_ScreenToView);
     vec3 WSPosition = (ps_ViewToWorld * vec4(VSPosition, 1.0f)).xyz;
-
-    // -----------------------------------------------------------------------------
-    // Shadow
-    // -----------------------------------------------------------------------------
-    LSPosition = ps_LightViewProjection * vec4(WSPosition, 1.0f);
-   
-    LSPosition.xyz /= LSPosition.w;
     
-    ShadowCoord = LSPosition.xyz * 0.5f + 0.5f;
-
-    DepthValue = imageLoad(cs_ESMTexture, ivec2(vec2(ShadowCoord.x, ShadowCoord.y) * vec2(256.0f, 256.0f))).r;
-
-    Shadow = 1.0f;
+    // -----------------------------------------------------------------------------
+    // Thickness of slice
+    // -----------------------------------------------------------------------------
+    float Thickness = 1.0f;
     
-    if (ShadowCoord.z + 0.001f > DepthValue)
-    {
-        Shadow = 0.0f;
-    }
+    // -----------------------------------------------------------------------------
+    // Density of dust
+    // -----------------------------------------------------------------------------
+    vec3 Seed;
+    
+    Seed  = vec3(X / 160.0f, Y / 90.0f, Z / 128.0f);
+    Seed += cs_WindDirection;
+    
+    float Density = abs(ImprovedPerlinNoise3D(Seed));
+    
+    // -----------------------------------------------------------------------------
+    // Scattering
+    // -----------------------------------------------------------------------------
+    float Scattering = cs_VolumetricFogScatteringCoefficient * Density * Thickness;
+    
+    // -----------------------------------------------------------------------------
+    // Absorption
+    // -----------------------------------------------------------------------------
+    float Absorption = cs_VolumetricFogAbsorptionCoefficient * Density * Thickness;
     
     // -----------------------------------------------------------------------------
     // Exposure data
@@ -156,20 +149,56 @@ void main()
     float AverageExposure = ps_ExposureHistory[ps_ExposureHistoryIndex];
     
     // -----------------------------------------------------------------------------
-    // Compute lighting for sun light
+    // Sun lighting
     // -----------------------------------------------------------------------------
+    vec4 LSPosition = ps_LightViewProjection * vec4(WSPosition, 1.0f);
+   
+    LSPosition.xyz /= LSPosition.w;
+    
+    vec3 ShadowCoord = LSPosition.xyz * 0.5f + 0.5f;
+
+    float DepthValue = imageLoad(cs_ESMTexture, ivec2(vec2(ShadowCoord.x, ShadowCoord.y) * vec2(256.0f, 256.0f))).r;
+
+    float Shadow = 1.0f;
+    
+    if (ShadowCoord.z > DepthValue)
+    {
+        Shadow = DepthValue / cs_ShadowIntensity;
+    }
+    
     vec3 WSLightDirection  = -ps_LightDirection.xyz;
     vec3 WSViewDirection   = normalize(ps_ViewPosition.xyz - WSPosition);
     
-    float r = sin(ps_SunAngularRadius);
-    float d = cos(ps_SunAngularRadius);
+    float LdotV  = dot(WSLightDirection, WSViewDirection);
+    float LdotV2 = LdotV * LdotV;
+    
+    float d  = cos(ps_SunAngularRadius);
+    float d2 = d * d;
+
+    float MiePhase = 1.5f * ((1.0f - d2) / (2.0f + d2)) * (1.0f + LdotV2) / pow(abs(1.0f + d2 - 2.0f * d * LdotV), 1.5f);
+        
+    vec3 Lighting = vec3(0.0f);
+    
+    Lighting += AverageExposure * ps_LightColor.xyz * Shadow * MiePhase;
+
+    // -----------------------------------------------------------------------------
+    // Ambient lighting 
+    // TODO: Get ambient light from skybox
+    // -----------------------------------------------------------------------------
+    Lighting += vec3(0.0f);
+
+    // -----------------------------------------------------------------------------
+    // Other lights (spot, point, ...)
+    // TODO: Iterate over maximum of four lights
+    // -----------------------------------------------------------------------------
     
     // -----------------------------------------------------------------------------
-    // Apply light luminance
+    // Fog color
     // -----------------------------------------------------------------------------
-    Lighting = abs(PerlinNoise.rrrr) * Shadow.rrrr * AverageExposure * ps_LightColor;
+    Lighting *= cs_FogColor;    
     
-    imageStore(cs_OutputImage, ivec3(X, Y, Z), Lighting);
+   
+    imageStore(cs_OutputImage, ivec3(X, Y, Z), vec4(Lighting * Scattering, Scattering + Absorption));
 }
 
 #endif // __INCLUDE_CS_VOLUME_LIGHTING_GLSL__
