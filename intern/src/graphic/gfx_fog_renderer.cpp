@@ -261,12 +261,9 @@ namespace
 
         Sampler[0] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
         Sampler[1] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[2] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[3] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[4] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[5] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
+        Sampler[2] = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
 
-        m_PSSamplerSetPtr = SamplerManager::CreateSamplerSet(Sampler, 6);
+        m_PSSamplerSetPtr = SamplerManager::CreateSamplerSet(Sampler, 3);
     }
     
     // -----------------------------------------------------------------------------
@@ -751,7 +748,6 @@ namespace
 
         unsigned int NumberOfThreadGroupsX;
         unsigned int NumberOfThreadGroupsY;
-        unsigned int NumberOfThreadGroupsZ;
 
         unsigned int s_TileSizeX = 16;
         unsigned int s_TileSizeY = 10;
