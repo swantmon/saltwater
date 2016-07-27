@@ -92,7 +92,7 @@ float ImprovedPerlinNoise3D(in vec3 _Seed)
                           SampleGradientPermutation(Hash.w + One, _Seed + vec3(-1.0f, -1.0f, -1.0f) ), Fade.x), Fade.y), Fade.z);
 }
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x = 16, local_size_y = 10, local_size_z = 8) in;
 void main()
 {
     uint X;

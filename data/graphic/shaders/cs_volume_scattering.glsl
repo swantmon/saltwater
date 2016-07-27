@@ -26,7 +26,7 @@ void WriteScattering(in ivec3 _UV, in vec4 _ColorAndDensity)
 	imageStore(cs_OutputImage, _UV, FinalOutput);
 }
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x = 16, local_size_y = 10, local_size_z = 1) in;
 void main()
 {
     uint X = gl_GlobalInvocationID.x;

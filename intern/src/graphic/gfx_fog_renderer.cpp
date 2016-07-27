@@ -716,7 +716,19 @@ namespace
 
         ContextManager::SetTextureSetCS(m_VolumeTextureSetPtr);
 
-        ContextManager::Dispatch(160, 90, 128);
+        unsigned int NumberOfThreadGroupsX;
+        unsigned int NumberOfThreadGroupsY;
+        unsigned int NumberOfThreadGroupsZ;
+
+        unsigned int s_TileSizeX = 16;
+        unsigned int s_TileSizeY = 10;
+        unsigned int s_TileSizeZ = 8;
+
+        NumberOfThreadGroupsX = (160 + s_TileSizeX - 1) / (s_TileSizeX);
+        NumberOfThreadGroupsY = ( 90 + s_TileSizeY - 1) / (s_TileSizeY);
+        NumberOfThreadGroupsZ = (128 + s_TileSizeZ - 1) / (s_TileSizeZ);
+
+        ContextManager::Dispatch(NumberOfThreadGroupsX, NumberOfThreadGroupsY, NumberOfThreadGroupsZ);
 
         ContextManager::ResetTextureSetCS();
         
@@ -737,7 +749,17 @@ namespace
 
         ContextManager::SetTextureSetCS(m_ScatteringTextureSetPtr);
 
-        ContextManager::Dispatch(160, 90, 1);
+        unsigned int NumberOfThreadGroupsX;
+        unsigned int NumberOfThreadGroupsY;
+        unsigned int NumberOfThreadGroupsZ;
+
+        unsigned int s_TileSizeX = 16;
+        unsigned int s_TileSizeY = 10;
+
+        NumberOfThreadGroupsX = (160 + s_TileSizeX - 1) / (s_TileSizeX);
+        NumberOfThreadGroupsY = ( 90 + s_TileSizeY - 1) / (s_TileSizeY);
+
+        ContextManager::Dispatch(NumberOfThreadGroupsX, NumberOfThreadGroupsY, 1);
 
         ContextManager::ResetTextureSetCS();
 
