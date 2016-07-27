@@ -9,11 +9,11 @@
 // Input from engine
 // -------------------------------------------------------------------------------------
 #define cs_FrustumDepthInMeter                50.0f
-#define cs_ShadowIntensity                    100.0f
-#define cs_VolumetricFogScatteringCoefficient 0.8f
-#define cs_VolumetricFogAbsorptionCoefficient 0.2f
+#define cs_ShadowIntensity                    2.0f
+#define cs_VolumetricFogScatteringCoefficient 0.5f
+#define cs_VolumetricFogAbsorptionCoefficient 0.5f
 #define cs_WindDirection                      vec3(0.0f)
-#define cs_FogColor                           vec3(1.0f, 0.0f, 0.0f);
+#define cs_FogColor                           vec3(1.0f);
 
 
 layout(row_major, std140, binding = 1) uniform USunLightProperties
@@ -109,13 +109,13 @@ void main()
     vec2  TexCoord    = vec2(X / 160.0f, Y / 90.0f);
     float Near        = 0.01f;
     float Far         = 4096.0f;
-    float LinearDepth = 1.0f - (Z * cs_FrustumDepthInMeter / 128.0f) / Far;
+    float LinearDepth = -(max(Z, Near));
     
-    float VSDepth = 2.0f * Far * Near / (Far + Near - (Far - Near) * (2.0f * LinearDepth - 1.0f));
-
-    VSDepth = 1.0f - (VSDepth / Far);
+    float SSDepth = (ps_ViewToScreen[2].z * LinearDepth + ps_ViewToScreen[3].z) / (-LinearDepth);
     
-    vec3 VSPosition = GetViewSpacePositionFromDepth(VSDepth, TexCoord, ps_ScreenToView);
+    SSDepth = SSDepth * 0.5f + 0.5f;
+    
+    vec3 VSPosition = GetViewSpacePositionFromDepth(SSDepth, TexCoord, ps_ScreenToView);
     vec3 WSPosition = (ps_ViewToWorld * vec4(VSPosition, 1.0f)).xyz;
     
     // -----------------------------------------------------------------------------

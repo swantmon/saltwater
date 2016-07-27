@@ -68,9 +68,9 @@ namespace
         BASE_CONSOLE_STREAMINFO("Logic> Loading level number " << LevelIndexDebug);
         
 //        CreateSimplePBRTestScene();
-        CreatePBRTestScene();
+//        CreatePBRTestScene();
 //        CreatePBRARScene();
-//        CreatePBRSponzaScene();
+        CreatePBRSponzaScene();
 
         BASE_CONSOLE_STREAMINFO("Logic> Loading level finished.");
         
@@ -1225,15 +1225,23 @@ namespace
 
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(14.0f, 6.0f, 10.0f));
+            pTransformationFacet->SetPosition(Base::Float3(7.0f, 5.0f, 7.0f));
             pTransformationFacet->SetScale   (Base::Float3(1.0f));
             pTransformationFacet->SetRotation(Base::Float3(0.0f, 0.0f, 0.0f));
 
             Dt::CCameraActorFacet* pFacet = Dt::ActorManager::CreateCameraActor();
 
             pFacet->SetMainCamera(true);
+            pFacet->SetNear(0.01f);
+            pFacet->SetFar(4096.0f);
 
             rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
+
+            Dt::CScriptFacet* pScriptFacet = Dt::ScriptManager::CreateScript();
+
+            pScriptFacet->SetScriptFile("scripts/camera_behavior.lua");
+
+            rEntity.SetDetailFacet(Dt::SFacetCategory::Script, pScriptFacet);
 
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
@@ -1292,7 +1300,7 @@ namespace
 
             pSunLightFacet->EnableTemperature(false);
             pSunLightFacet->SetColor         (Base::Float3(1.0f, 1.0f, 1.0f));
-            pSunLightFacet->SetDirection     (Base::Float3(0.0f, 0.0f, -1.0f));
+            pSunLightFacet->SetDirection     (Base::Float3(0.1f, 0.1f, -1.0f));
             pSunLightFacet->SetIntensity     (90600.0f);
             pSunLightFacet->SetTemperature   (0);
             pSunLightFacet->SetRefreshMode   (Dt::CSunLightFacet::Static);
