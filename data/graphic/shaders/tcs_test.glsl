@@ -2,7 +2,7 @@
 #ifndef __INCLUDE_TCS_TEST_GLSL__
 #define __INCLUDE_TCS_TEST_GLSL__
 
-#include "tcs_global.glsl"
+#include "common_global.glsl"
 
 // -----------------------------------------------------------------------------
 // Built-in variables
@@ -78,9 +78,9 @@ void main()
     // -----------------------------------------------------------------------------
     // Calculate the distance from the camera to the three control points
     // -----------------------------------------------------------------------------
-    float EyeToVertexDistance0 = distance(hs_ViewPosition.xyz, out_Position[0]);
-    float EyeToVertexDistance1 = distance(hs_ViewPosition.xyz, out_Position[1]);
-    float EyeToVertexDistance2 = distance(hs_ViewPosition.xyz, out_Position[2]);
+    float EyeToVertexDistance0 = distance(ps_ViewPosition.xyz, out_Position[0]);
+    float EyeToVertexDistance1 = distance(ps_ViewPosition.xyz, out_Position[1]);
+    float EyeToVertexDistance2 = distance(ps_ViewPosition.xyz, out_Position[2]);
 
     // -----------------------------------------------------------------------------
     // Calculate the tessellation levels

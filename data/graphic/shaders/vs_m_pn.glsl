@@ -2,9 +2,9 @@
 #ifndef __INCLUDE_VS_M_PN_GLSL__
 #define __INCLUDE_VS_M_PN_GLSL__
 
-#include "vs_global.glsl"
+#include "common_global.glsl"
 
-layout(row_major, std140, binding = 1) uniform UConstantBufferVS1 /* UPerDrawCallConstantBuffer */
+layout(row_major, std140, binding = 1) uniform UB1
 {
     mat4 m_ModelMatrix;
 };
@@ -28,7 +28,7 @@ void main(void)
     PSPosition = WSPosition.xyz;
     PSNormal   = WSNormal.xyz;
     
-    gl_Position = vs_ViewProjectionMatrix * WSPosition;
+    gl_Position = ps_WorldToScreen * WSPosition;
 }
 
 #endif // __INCLUDE_VS_M_PN_GLSL__

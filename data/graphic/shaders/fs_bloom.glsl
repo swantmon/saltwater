@@ -5,7 +5,7 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(std140, binding = 0) uniform UBloomSettings
+layout(std140, binding = 0) uniform UB0
 {
     vec4 ps_ConstantValues0;
     vec4 ps_ConstantValues1;

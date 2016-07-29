@@ -5,7 +5,7 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(binding = 0) uniform UDofDownProperties
+layout(binding = 0) uniform UB0
 {
     vec2 m_DofNear;
     vec2 m_DofRowDelta;

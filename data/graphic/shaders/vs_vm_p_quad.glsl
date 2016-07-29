@@ -2,9 +2,9 @@
 #ifndef __INCLUDE_VS_VM_P_QUAD_GLSL__
 #define __INCLUDE_VS_VM_P_QUAD_GLSL__
 
-#include "vs_global.glsl"
+#include "common_global.glsl"
 
-layout(row_major, std140, binding = 1) uniform UConstantBufferVS1 /* UPerDrawCallConstantBuffer */
+layout(row_major, std140, binding = 1) uniform UB1
 {
     mat4 m_ModelMatrix;
 };
@@ -24,7 +24,7 @@ void main()
     
     PSTexCoord = VertexPosition.xy;
 
-	gl_Position = vs_ViewProjectionMatrix * WSPosition;
+	gl_Position = ps_WorldToScreen * WSPosition;
 }
 
 #endif // __INCLUDE_VS_VM_P_QUAD_GLSL__

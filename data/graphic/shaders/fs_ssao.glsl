@@ -3,14 +3,14 @@
 #define __INCLUDE_FS_SSAO_GLSL__
 
 #include "common.glsl"
-#include "fs_global.glsl"
+#include "common_global.glsl"
 
 #define KERNEL_SIZE 16
 
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(row_major, std140, binding = 1) uniform USSAOProperties
+layout(row_major, std140, binding = 1) uniform UB1
 {
     mat4 ps_InverseCameraProjection;
     mat4 ps_CameraProjection;

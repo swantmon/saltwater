@@ -2,13 +2,13 @@
 #ifndef __INCLUDE_FS_DIFFERENTIAL_SCENE_GLSL_
 #define __INCLUDE_FS_DIFFERENTIAL_SCENE_GLSL_
 
-#include "fs_global.glsl"
 #include "common_gbuffer.glsl"
+#include "common_global.glsl"
 
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(std140, binding = 0) uniform UMaterialSettings
+layout(std140, binding = 1) uniform UB1
 {
     vec4  ps_TilingOffset;
     vec3  ps_Color;

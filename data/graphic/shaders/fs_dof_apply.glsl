@@ -2,7 +2,7 @@
 #ifndef __INCLUDE_FS_DOF_APPLY_GLSL__
 #define __INCLUDE_FS_DOF_APPLY_GLSL__
 
-#include "fs_global.glsl"
+#include "common_global.glsl"
 
 // -----------------------------------------------------------------------------
 // Input from engine
@@ -12,7 +12,7 @@ layout(binding = 1) uniform sampler2D ps_Depth;
 layout(binding = 2) uniform sampler2D ps_NearBlur;
 layout(binding = 3) uniform sampler2D ps_DownBlur;
 
-layout(binding = 0) uniform UDofApplyProperties
+layout(binding = 1) uniform UB1
 {
     vec4 ps_DofLerpScale;
     vec4 ps_DofLerpBias;

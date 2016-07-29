@@ -112,11 +112,7 @@ namespace
         void DestroyPerFrameConstantBuffers();
         void UploadPerFrameConstantBuffers();
         
-        CBufferPtr GetPerFrameConstantBufferVS();
-        CBufferPtr GetPerFrameConstantBufferHS();
-        CBufferPtr GetPerFrameConstantBufferDS();
-        CBufferPtr GetPerFrameConstantBufferGS();
-        CBufferPtr GetPerFrameConstantBufferPS();
+        CBufferPtr GetPerFrameConstantBuffer();
 
     private:
 
@@ -132,30 +128,10 @@ namespace
             Base::Int2 m_WindowSize;
         };
         
-        struct SPerFrameConstantBufferVS
+        struct SPerFrameConstantBuffer
         {
-            Base::Float4   vs_InvertedScreensize;
-            Base::Float4x4 vs_ViewProjectionMatrix;
-            Base::Float4x4 vs_ViewProjectionScreenMatrix;
-        };
-
-        struct SPerFrameConstantBufferHS
-        {
-            Base::Float4 hs_ViewPosition;
-        };
-        
-        struct SPerFrameConstantBufferDS
-        {
-            Base::Float4x4 ds_ViewProjectionMatrix;
-        };
-        
-        struct SPerFrameConstantBufferGS
-        {
-            Base::Float4x4 gs_ViewProjectionScreenMatrix;
-        };
-        
-        struct SPerFrameConstantBufferPS
-        {
+            Base::Float4x4 ps_WorldToScreen;
+            Base::Float4x4 ps_WorldToQuad;
             Base::Float4x4 ps_WorldToView;
             Base::Float4x4 ps_ViewToScreen;
             Base::Float4x4 ps_ScreenToView;
@@ -170,6 +146,7 @@ namespace
             Base::Float4   ps_PreviousViewDirection;
             Base::Float4   ps_InvertedScreensizeAndScreensize;
             Base::Float4   ps_ScreenPositionScaleBias;
+            Base::Float4   ps_CameraParameters;
         };
         
     private:
@@ -185,28 +162,20 @@ namespace
 
         CResizeDelegates m_ResizeDelegates;
 
-        SPerFrameConstantBufferPS m_PerFrameConstantBufferPS;
+        SPerFrameConstantBuffer m_PerFrameConstantBuffer;
 
-        CBufferPtr m_PerFrameConstantBufferVSBufferPtr;
-        CBufferPtr m_PerFrameConstantBufferHSBufferPtr;
-        CBufferPtr m_PerFrameConstantBufferDSBufferPtr;
-        CBufferPtr m_PerFrameConstantBufferGSBufferPtr;
-        CBufferPtr m_PerFrameConstantBufferPSBufferPtr;      
+        CBufferPtr m_PerFrameConstantBufferBufferPtr;   
     };
 } // namespace
 
 namespace
 {
     CGfxMain::CGfxMain()
-        : m_pActiveWindowInfo                (0)
-        , m_NumberOfWindows                  (0)
-        , m_ResizeDelegates                  ()
-        , m_PerFrameConstantBufferPS         ()
-        , m_PerFrameConstantBufferVSBufferPtr()
-        , m_PerFrameConstantBufferHSBufferPtr()
-        , m_PerFrameConstantBufferDSBufferPtr()
-        , m_PerFrameConstantBufferGSBufferPtr()
-        , m_PerFrameConstantBufferPSBufferPtr()
+        : m_pActiveWindowInfo              (0)
+        , m_NumberOfWindows                (0)
+        , m_ResizeDelegates                ()
+        , m_PerFrameConstantBuffer         ()
+        , m_PerFrameConstantBufferBufferPtr()
     {
         
     }
@@ -533,11 +502,7 @@ namespace
     
     void CGfxMain::CreatePerFrameConstantBuffers()
     {
-        assert(m_PerFrameConstantBufferVSBufferPtr == nullptr);
-        assert(m_PerFrameConstantBufferHSBufferPtr == nullptr);
-        assert(m_PerFrameConstantBufferDSBufferPtr == nullptr);
-        assert(m_PerFrameConstantBufferGSBufferPtr == nullptr);
-        assert(m_PerFrameConstantBufferPSBufferPtr == nullptr);
+        assert(m_PerFrameConstantBufferBufferPtr == nullptr);
         
         SBufferDescriptor BufferDescription;
         
@@ -547,54 +512,30 @@ namespace
         BufferDescription.m_Access        = Gfx::CBuffer::CPUWrite;
         BufferDescription.m_pBytes        = 0;
         BufferDescription.m_pClassKey     = 0;
+        BufferDescription.m_NumberOfBytes = sizeof(SPerFrameConstantBuffer);
         
-        // -----------------------------------------------------------------------------
-        
-        BufferDescription.m_NumberOfBytes = sizeof(SPerFrameConstantBufferVS);
-        
-        m_PerFrameConstantBufferVSBufferPtr = BufferManager::CreateBuffer(BufferDescription);
-        
-        // -----------------------------------------------------------------------------
-        
-        BufferDescription.m_NumberOfBytes = sizeof(SPerFrameConstantBufferHS);
-        
-        m_PerFrameConstantBufferHSBufferPtr = BufferManager::CreateBuffer(BufferDescription);
-        
-        // -----------------------------------------------------------------------------
-        
-        BufferDescription.m_NumberOfBytes = sizeof(SPerFrameConstantBufferDS);
-        
-        m_PerFrameConstantBufferDSBufferPtr = BufferManager::CreateBuffer(BufferDescription);
-
-        // -----------------------------------------------------------------------------
-
-        BufferDescription.m_NumberOfBytes = sizeof(SPerFrameConstantBufferGS);
-
-        m_PerFrameConstantBufferGSBufferPtr = BufferManager::CreateBuffer(BufferDescription);
-        
-        // -----------------------------------------------------------------------------
-        
-        BufferDescription.m_NumberOfBytes = sizeof(SPerFrameConstantBufferPS);
-        
-        m_PerFrameConstantBufferPSBufferPtr = BufferManager::CreateBuffer(BufferDescription);
+        m_PerFrameConstantBufferBufferPtr = BufferManager::CreateBuffer(BufferDescription);
 
         // -----------------------------------------------------------------------------
         // Setup default values
         // -----------------------------------------------------------------------------
-        m_PerFrameConstantBufferPS.ps_WorldToView                    .SetIdentity();
-        m_PerFrameConstantBufferPS.ps_ViewToScreen                   .SetIdentity();
-        m_PerFrameConstantBufferPS.ps_ScreenToView                   .SetIdentity();
-        m_PerFrameConstantBufferPS.ps_ViewToWorld                    .SetIdentity();
-        m_PerFrameConstantBufferPS.ps_ViewPosition                   .SetZero();
-        m_PerFrameConstantBufferPS.ps_ViewDirection                  .SetZero();
-        m_PerFrameConstantBufferPS.ps_InvertedScreensizeAndScreensize.SetZero();
-        m_PerFrameConstantBufferPS.ps_ScreenPositionScaleBias        .SetZero();
-        m_PerFrameConstantBufferPS.ps_PreviousWorldToView            = m_PerFrameConstantBufferPS.ps_WorldToView;
-        m_PerFrameConstantBufferPS.ps_PreviousViewToScreen           = m_PerFrameConstantBufferPS.ps_ViewToScreen;
-        m_PerFrameConstantBufferPS.ps_PreviousScreenToView           = m_PerFrameConstantBufferPS.ps_ScreenToView;
-        m_PerFrameConstantBufferPS.ps_PreviousViewToWorld            = m_PerFrameConstantBufferPS.ps_ViewToWorld;
-        m_PerFrameConstantBufferPS.ps_PreviousViewPosition           = m_PerFrameConstantBufferPS.ps_ViewPosition;
-        m_PerFrameConstantBufferPS.ps_PreviousViewDirection          = m_PerFrameConstantBufferPS.ps_ViewDirection;
+        m_PerFrameConstantBuffer.ps_WorldToScreen                  .SetIdentity();
+        m_PerFrameConstantBuffer.ps_WorldToQuad                    .SetIdentity();
+        m_PerFrameConstantBuffer.ps_WorldToView                    .SetIdentity();
+        m_PerFrameConstantBuffer.ps_ViewToScreen                   .SetIdentity();
+        m_PerFrameConstantBuffer.ps_ScreenToView                   .SetIdentity();
+        m_PerFrameConstantBuffer.ps_ViewToWorld                    .SetIdentity();
+        m_PerFrameConstantBuffer.ps_ViewPosition                   .SetZero();
+        m_PerFrameConstantBuffer.ps_ViewDirection                  .SetZero();
+        m_PerFrameConstantBuffer.ps_InvertedScreensizeAndScreensize.SetZero();
+        m_PerFrameConstantBuffer.ps_ScreenPositionScaleBias        .SetZero();
+        m_PerFrameConstantBuffer.ps_CameraParameters               .SetZero();
+        m_PerFrameConstantBuffer.ps_PreviousWorldToView            = m_PerFrameConstantBuffer.ps_WorldToView;
+        m_PerFrameConstantBuffer.ps_PreviousViewToScreen           = m_PerFrameConstantBuffer.ps_ViewToScreen;
+        m_PerFrameConstantBuffer.ps_PreviousScreenToView           = m_PerFrameConstantBuffer.ps_ScreenToView;
+        m_PerFrameConstantBuffer.ps_PreviousViewToWorld            = m_PerFrameConstantBuffer.ps_ViewToWorld;
+        m_PerFrameConstantBuffer.ps_PreviousViewPosition           = m_PerFrameConstantBuffer.ps_ViewPosition;
+        m_PerFrameConstantBuffer.ps_PreviousViewDirection          = m_PerFrameConstantBuffer.ps_ViewDirection;
 
     }
     
@@ -602,22 +543,14 @@ namespace
     
     void CGfxMain::DestroyPerFrameConstantBuffers()
     {
-        m_PerFrameConstantBufferVSBufferPtr = 0;
-        m_PerFrameConstantBufferHSBufferPtr = 0;
-        m_PerFrameConstantBufferDSBufferPtr = 0;
-        m_PerFrameConstantBufferGSBufferPtr = 0;
-        m_PerFrameConstantBufferPSBufferPtr = 0;
+        m_PerFrameConstantBufferBufferPtr = 0;
     }
     
     // -----------------------------------------------------------------------------
     
     void CGfxMain::UploadPerFrameConstantBuffers()
     {
-        assert(m_PerFrameConstantBufferVSBufferPtr != nullptr);
-        assert(m_PerFrameConstantBufferHSBufferPtr != nullptr);
-        assert(m_PerFrameConstantBufferDSBufferPtr != nullptr);
-        assert(m_PerFrameConstantBufferGSBufferPtr != nullptr);
-        assert(m_PerFrameConstantBufferPSBufferPtr != nullptr);
+        assert(m_PerFrameConstantBufferBufferPtr != nullptr);
         
         // -----------------------------------------------------------------------------
         // Prepare data
@@ -632,6 +565,8 @@ namespace
         float ScreensizeY;
         float InvertedScreensizeX;
         float InvertedScreensizeY;
+        float Near;
+        float Far;
         
         CCameraPtr MainCameraPtr   = ViewManager::GetMainCamera ();
         CCameraPtr DecalCameraPtr  = ViewManager::GetDecalCamera();
@@ -652,114 +587,50 @@ namespace
 
         InvertedScreensizeX = 1.0f / ScreensizeX;
         InvertedScreensizeY = 1.0f / ScreensizeY;
-        
-        // -----------------------------------------------------------------------------
-        // Upload data to vertex shader including infos about:
-        // -----------------------------------------------------------------------------
-        
-        SPerFrameConstantBufferVS* pPerFrameConstantBufferVS = static_cast<SPerFrameConstantBufferVS*>(BufferManager::MapConstantBuffer(m_PerFrameConstantBufferVSBufferPtr));
-        
-        pPerFrameConstantBufferVS->vs_InvertedScreensize        .Set(InvertedScreensizeX, InvertedScreensizeY, ScreensizeX, ScreensizeY);
-        pPerFrameConstantBufferVS->vs_ViewProjectionMatrix      .Set(MainCameraPtr  ->GetViewProjectionMatrix());
-        pPerFrameConstantBufferVS->vs_ViewProjectionScreenMatrix.Set(ScreenCameraPtr->GetViewProjectionMatrix());
-        
-        BufferManager::UnmapConstantBuffer(m_PerFrameConstantBufferVSBufferPtr);
-        
-        // -----------------------------------------------------------------------------
-        // Upload data to tesselation control / hull shader including infos about:
-        // -----------------------------------------------------------------------------
-        
-        SPerFrameConstantBufferHS* pPerFrameConstantBufferHS = static_cast<SPerFrameConstantBufferHS*>(BufferManager::MapConstantBuffer(m_PerFrameConstantBufferHSBufferPtr));
-        
-        pPerFrameConstantBufferHS->hs_ViewPosition.Set(MainViewPtr->GetPosition(), 0.0f);
-        
-        BufferManager::UnmapConstantBuffer(m_PerFrameConstantBufferHSBufferPtr);
-        
-        // -----------------------------------------------------------------------------
-        // Upload data to tesselation evaluation / domain shader including infos about:
-        // -----------------------------------------------------------------------------
-        
-        SPerFrameConstantBufferDS* pPerFrameConstantBufferDS = static_cast<SPerFrameConstantBufferDS*>(BufferManager::MapConstantBuffer(m_PerFrameConstantBufferDSBufferPtr));
-        
-        pPerFrameConstantBufferDS->ds_ViewProjectionMatrix.Set(MainCameraPtr->GetViewProjectionMatrix());
-        
-        BufferManager::UnmapConstantBuffer(m_PerFrameConstantBufferDSBufferPtr);
 
+        Near = MainCameraPtr->GetNear();
+        Far  = MainCameraPtr->GetFar();
+                
         // -----------------------------------------------------------------------------
-        // Upload data to geometry shader including infos about:
+        // Map buffer
         // -----------------------------------------------------------------------------
-
-        SPerFrameConstantBufferGS* pPerFrameConstantBufferGS = static_cast<SPerFrameConstantBufferGS*>(BufferManager::MapConstantBuffer(m_PerFrameConstantBufferGSBufferPtr));
-
-        pPerFrameConstantBufferGS->gs_ViewProjectionScreenMatrix.Set(ScreenCameraPtr->GetViewProjectionMatrix());
-
-        BufferManager::UnmapConstantBuffer(m_PerFrameConstantBufferGSBufferPtr);
-        
-        // -----------------------------------------------------------------------------
-        // Upload data to fragment / pixel shader including infos about:
-        // -----------------------------------------------------------------------------
-        SPerFrameConstantBufferPS* pPerFrameConstantBufferPS = static_cast<SPerFrameConstantBufferPS*>(BufferManager::MapConstantBuffer(m_PerFrameConstantBufferPSBufferPtr));
+        SPerFrameConstantBuffer* pPerFrameConstantBuffer = static_cast<SPerFrameConstantBuffer*>(BufferManager::MapConstantBuffer(m_PerFrameConstantBufferBufferPtr));
         
         // -----------------------------------------------------------------------------
         // Set previous values
         // -----------------------------------------------------------------------------
-        m_PerFrameConstantBufferPS.ps_PreviousWorldToView   = m_PerFrameConstantBufferPS.ps_WorldToView;
-        m_PerFrameConstantBufferPS.ps_PreviousViewToScreen  = m_PerFrameConstantBufferPS.ps_ViewToScreen;
-        m_PerFrameConstantBufferPS.ps_PreviousScreenToView  = m_PerFrameConstantBufferPS.ps_ScreenToView;
-        m_PerFrameConstantBufferPS.ps_PreviousViewToWorld   = m_PerFrameConstantBufferPS.ps_ViewToWorld;
-        m_PerFrameConstantBufferPS.ps_PreviousViewPosition  = m_PerFrameConstantBufferPS.ps_ViewPosition;
-        m_PerFrameConstantBufferPS.ps_PreviousViewDirection = m_PerFrameConstantBufferPS.ps_ViewDirection;
+        m_PerFrameConstantBuffer.ps_PreviousWorldToView   = m_PerFrameConstantBuffer.ps_WorldToView;
+        m_PerFrameConstantBuffer.ps_PreviousViewToScreen  = m_PerFrameConstantBuffer.ps_ViewToScreen;
+        m_PerFrameConstantBuffer.ps_PreviousScreenToView  = m_PerFrameConstantBuffer.ps_ScreenToView;
+        m_PerFrameConstantBuffer.ps_PreviousViewToWorld   = m_PerFrameConstantBuffer.ps_ViewToWorld;
+        m_PerFrameConstantBuffer.ps_PreviousViewPosition  = m_PerFrameConstantBuffer.ps_ViewPosition;
+        m_PerFrameConstantBuffer.ps_PreviousViewDirection = m_PerFrameConstantBuffer.ps_ViewDirection;
 
         // -----------------------------------------------------------------------------
         // Set new values;
         // -----------------------------------------------------------------------------
-        m_PerFrameConstantBufferPS.ps_WorldToView                    .Set(MainViewPtr->GetViewMatrix());
-        m_PerFrameConstantBufferPS.ps_ViewToScreen                   .Set(MainCameraPtr->GetProjectionMatrix());
-        m_PerFrameConstantBufferPS.ps_ScreenToView                   .Set(MainCameraPtr->GetProjectionMatrix().GetInverted());
-        m_PerFrameConstantBufferPS.ps_ViewToWorld                    .Set(MainViewPtr->GetViewMatrix().GetInverted());
-        m_PerFrameConstantBufferPS.ps_ViewPosition                   .Set(MainViewPtr->GetPosition(), 1.0f);
-        m_PerFrameConstantBufferPS.ps_ViewDirection                  .Set(MainViewPtr->GetViewDirection(), 0.0f);
-        m_PerFrameConstantBufferPS.ps_InvertedScreensizeAndScreensize.Set(InvertedScreensizeX, InvertedScreensizeY, ScreensizeX, ScreensizeY);
-        m_PerFrameConstantBufferPS.ps_ScreenPositionScaleBias        .Set(0.5f, 0.5f, 0.5f, 0.5f);
+        m_PerFrameConstantBuffer.ps_WorldToScreen                  .Set(MainCameraPtr->GetViewProjectionMatrix());
+        m_PerFrameConstantBuffer.ps_WorldToQuad                    .Set(ScreenCameraPtr->GetViewProjectionMatrix());
+        m_PerFrameConstantBuffer.ps_WorldToView                    .Set(MainViewPtr->GetViewMatrix());
+        m_PerFrameConstantBuffer.ps_ViewToScreen                   .Set(MainCameraPtr->GetProjectionMatrix());
+        m_PerFrameConstantBuffer.ps_ScreenToView                   .Set(MainCameraPtr->GetProjectionMatrix().GetInverted());
+        m_PerFrameConstantBuffer.ps_ViewToWorld                    .Set(MainViewPtr->GetViewMatrix().GetInverted());
+        m_PerFrameConstantBuffer.ps_ViewPosition                   .Set(MainViewPtr->GetPosition(), 1.0f);
+        m_PerFrameConstantBuffer.ps_ViewDirection                  .Set(MainViewPtr->GetViewDirection(), 0.0f);
+        m_PerFrameConstantBuffer.ps_InvertedScreensizeAndScreensize.Set(InvertedScreensizeX, InvertedScreensizeY, ScreensizeX, ScreensizeY);
+        m_PerFrameConstantBuffer.ps_ScreenPositionScaleBias        .Set(0.5f, 0.5f, 0.5f, 0.5f);
+        m_PerFrameConstantBuffer.ps_CameraParameters               .Set(Near, Far, 0.0f, 0.0f);
 
-        Base::CMemory::Copy(pPerFrameConstantBufferPS, &m_PerFrameConstantBufferPS, sizeof(SPerFrameConstantBufferPS));
+        Base::CMemory::Copy(pPerFrameConstantBuffer, &m_PerFrameConstantBuffer, sizeof(SPerFrameConstantBuffer));
         
-        BufferManager::UnmapConstantBuffer(m_PerFrameConstantBufferPSBufferPtr);
+        BufferManager::UnmapConstantBuffer(m_PerFrameConstantBufferBufferPtr);
     }
     
     // -----------------------------------------------------------------------------
     
-    CBufferPtr CGfxMain::GetPerFrameConstantBufferVS()
+    CBufferPtr CGfxMain::GetPerFrameConstantBuffer()
     {
-        return m_PerFrameConstantBufferVSBufferPtr;
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CBufferPtr CGfxMain::GetPerFrameConstantBufferHS()
-    {
-        return m_PerFrameConstantBufferHSBufferPtr;
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CBufferPtr CGfxMain::GetPerFrameConstantBufferDS()
-    {
-        return m_PerFrameConstantBufferDSBufferPtr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CBufferPtr CGfxMain::GetPerFrameConstantBufferGS()
-    {
-        return m_PerFrameConstantBufferGSBufferPtr;
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CBufferPtr CGfxMain::GetPerFrameConstantBufferPS()
-    {
-        return m_PerFrameConstantBufferPSBufferPtr;
+        return m_PerFrameConstantBufferBufferPtr;
     }
 } // namespace
 
@@ -874,35 +745,35 @@ namespace Main
     
     CBufferPtr GetPerFrameConstantBufferVS()
     {
-        return CGfxMain::GetInstance().GetPerFrameConstantBufferVS();
+        return CGfxMain::GetInstance().GetPerFrameConstantBuffer();
     }
     
     // -----------------------------------------------------------------------------
     
     CBufferPtr GetPerFrameConstantBufferHS()
     {
-        return CGfxMain::GetInstance().GetPerFrameConstantBufferHS();
+        return CGfxMain::GetInstance().GetPerFrameConstantBuffer();
     }
     
     // -----------------------------------------------------------------------------
     
     CBufferPtr GetPerFrameConstantBufferDS()
     {
-        return CGfxMain::GetInstance().GetPerFrameConstantBufferDS();
+        return CGfxMain::GetInstance().GetPerFrameConstantBuffer();
     }
 
     // -----------------------------------------------------------------------------
 
     CBufferPtr GetPerFrameConstantBufferGS()
     {
-        return CGfxMain::GetInstance().GetPerFrameConstantBufferGS();
+        return CGfxMain::GetInstance().GetPerFrameConstantBuffer();
     }
     
     // -----------------------------------------------------------------------------
     
     CBufferPtr GetPerFrameConstantBufferPS()
     {
-        return CGfxMain::GetInstance().GetPerFrameConstantBufferPS();
+        return CGfxMain::GetInstance().GetPerFrameConstantBuffer();
     }
 } // namespace Main
 } // namespace Gfx

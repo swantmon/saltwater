@@ -4,7 +4,7 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(row_major, std140, binding = 0) uniform USettings
+layout(row_major, std140, binding = 0) uniform UB0
 {
     vec4 ps_ConstantBufferData0;
     vec4 ps_ConstantBufferData1;

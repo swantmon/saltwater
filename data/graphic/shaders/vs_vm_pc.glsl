@@ -2,12 +2,12 @@
 #ifndef __INCLUDE_VS_VM_PC_GLSL__
 #define __INCLUDE_VS_VM_PC_GLSL__
 
-layout(row_major, std140, binding = 0) uniform UConstantBufferVS0 /* UPerFrameConstantBuffer */
+layout(row_major, std140, binding = 0) uniform UB0
 {
     mat4 m_ViewProjection;
 };
 
-layout(row_major, std140, binding = 1) uniform UConstantBufferVS1 /* UPerDrawCallConstantBuffer */
+layout(row_major, std140, binding = 1) uniform UB1
 {
     mat4 m_ModelMatrix;
 };

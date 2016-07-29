@@ -2,21 +2,20 @@
 #ifndef __INCLUDE_FS_LIGHT_IMAGELIGHT_GLSL__
 #define __INCLUDE_FS_LIGHT_IMAGELIGHT_GLSL__
 
-#include "fs_global.glsl"
-
 #include "common.glsl"
 #include "common_light.glsl"
 #include "common_gbuffer.glsl"
+#include "common_global.glsl"
 
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(std140, binding = 1) uniform UIBLSettingsBuffer
+layout(std140, binding = 1) uniform UB1
 {
     vec4 ps_ConstantBufferData0;
 };
 
-layout(std430, binding = 0) buffer UExposureHistoryBuffer
+layout(std430, binding = 0) buffer BB0
 {
     float ps_ExposureHistory[8];
 };

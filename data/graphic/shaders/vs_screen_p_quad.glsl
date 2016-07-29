@@ -2,7 +2,7 @@
 #ifndef __INCLUDE_VS_SCREEN_P_QUAD_GLSL__
 #define __INCLUDE_VS_SCREEN_P_QUAD_GLSL__
 
-#include "vs_global.glsl"
+#include "common_global.glsl"
 
 layout(location = 0) in vec2 VertexPosition;
 
@@ -19,7 +19,7 @@ void main()
     
     PSTexCoord = vec2(Position.x, 1.0f - Position.y);
 
-	gl_Position = vs_ViewProjectionScreenMatrix * Position;
+	gl_Position = ps_WorldToQuad * Position;
 }
 
 #endif // __INCLUDE_VS_SCREEN_P_QUAD_GLSL__

@@ -7,7 +7,7 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(row_major, std140, binding = 0) uniform UShadingSettings
+layout(row_major, std140, binding = 0) uniform UB0
 {
     mat4 ps_InvertedProjectionMatrix;
     mat4 ps_InvertedViewMatrix;

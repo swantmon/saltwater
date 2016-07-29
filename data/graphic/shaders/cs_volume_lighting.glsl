@@ -1,9 +1,8 @@
 #ifndef __INCLUDE_CS_VOLUME_LIGHTING_GLSL__
 #define __INCLUDE_CS_VOLUME_LIGHTING_GLSL__
 
-#include "fs_global.glsl"
-
 #include "common.glsl"
+#include "common_global.glsl"
 
 // -------------------------------------------------------------------------------------
 // Input from engine
@@ -16,7 +15,7 @@
 #define cs_FogColor                           vec3(1.0f);
 
 
-layout(row_major, std140, binding = 1) uniform USunLightProperties
+layout(row_major, std140, binding = 1) uniform UB1
 {
     mat4   ps_LightViewProjection;
     vec4   ps_LightDirection;
@@ -25,7 +24,7 @@ layout(row_major, std140, binding = 1) uniform USunLightProperties
     uint   ps_ExposureHistoryIndex;
 };
 
-layout(std430, binding = 0) readonly buffer UExposureHistoryBuffer
+layout(std430, binding = 0) readonly buffer BB0
 {
     float ps_ExposureHistory[8];
 };

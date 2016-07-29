@@ -13,8 +13,7 @@
 #include "common.glsl"
 #include "common_light.glsl"
 #include "common_gbuffer.glsl"
-
-#include "fs_global.glsl"
+#include "common_global.glsl"
 
 // -----------------------------------------------------------------------------
 // Defines / Settings
@@ -24,7 +23,7 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(row_major, std140, binding = 1) uniform USSRProperties
+layout(row_major, std140, binding = 1) uniform UB1
 {
     vec4 ps_ConstantBufferData0;
 };

@@ -7,7 +7,7 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(std140, binding = 0) uniform UMaterialSettings
+layout(std140, binding = 0) uniform UB0
 {
     vec4  ps_TilingOffset;
     vec3  ps_Color;

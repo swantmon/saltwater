@@ -24,7 +24,7 @@ layout(triangle_strip, max_vertices = 18) out;
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(row_major, std140, binding = 0) uniform UConstantBufferGS0 /* UPerFrameConstantBufferGS */
+layout(row_major, std140, binding = 0) uniform UB0
 {
     mat4 m_CubeProjectionMatrix;
     mat4 m_CubeViewMatrix[6];

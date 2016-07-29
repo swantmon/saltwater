@@ -1,9 +1,11 @@
 
-#ifndef __INCLUDE_FS_GLOBAL_GLSL__
-#define __INCLUDE_FS_GLOBAL_GLSL__
+#ifndef __INCLUDE_COMMON_GLOBAL_GLSL__
+#define __INCLUDE_COMMON_GLOBAL_GLSL__
 
-layout(row_major, std140, binding = 0) uniform UGlobalPSBuffer
+layout(row_major, std140, binding = 0) uniform UB0
 {
+	mat4 ps_WorldToScreen;
+    mat4 ps_WorldToQuad;
     mat4 ps_WorldToView;
     mat4 ps_ViewToScreen;
     mat4 ps_ScreenToView;
@@ -18,6 +20,10 @@ layout(row_major, std140, binding = 0) uniform UGlobalPSBuffer
     vec4 ps_PreviousViewDirection;
     vec4 ps_InvertedScreensizeAndScreensize;
     vec4 ps_ScreenPositionScaleBias;
+    vec4 ps_CameraParameters0;
 };
 
-#endif // __INCLUDE_FS_GLOBAL_GLSL__
+#define ps_CameraParameterNear ps_CameraParameters0.x
+#define ps_CameraParameterFar  ps_CameraParameters0.y
+
+#endif // __INCLUDE_COMMON_GLOBAL_GLSL__

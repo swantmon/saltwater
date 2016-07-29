@@ -14,7 +14,7 @@ in vec4 gl_FragCoord;
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(row_major, std140, binding = 0) uniform UCameraProperties
+layout(row_major, std140, binding = 0) uniform UB0
 {
     mat4 m_InverseCameraProjection;
     mat4 m_InverseCameraView;
@@ -23,7 +23,7 @@ layout(row_major, std140, binding = 0) uniform UCameraProperties
     uint m_ExposureHistoryIndex;
 };
 
-layout(row_major, std140, binding = 1) uniform USphereLightProperties
+layout(row_major, std140, binding = 1) uniform UB1
 {
     vec4  m_LightPosition;
     vec4  m_LightDirection;

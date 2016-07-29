@@ -2,16 +2,15 @@
 #ifndef __INCLUDE_FS_LIGHT_SUNLIGHT_GLSL__
 #define __INCLUDE_FS_LIGHT_SUNLIGHT_GLSL__
 
-#include "fs_global.glsl"
-
 #include "common.glsl"
 #include "common_light.glsl"
 #include "common_gbuffer.glsl"
+#include "common_global.glsl"
 
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(row_major, std140, binding = 1) uniform USunLightProperties
+layout(row_major, std140, binding = 1) uniform UB1
 {
     mat4   ps_LightViewProjection;
     vec4   ps_LightDirection;
@@ -20,7 +19,7 @@ layout(row_major, std140, binding = 1) uniform USunLightProperties
     uint   ps_ExposureHistoryIndex;
 };
 
-layout(std430, binding = 0) readonly buffer UExposureHistoryBuffer
+layout(std430, binding = 0) readonly buffer BB0
 {
     float ps_ExposureHistory[8];
 };

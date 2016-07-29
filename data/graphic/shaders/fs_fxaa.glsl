@@ -2,7 +2,7 @@
 #ifndef __INCLUDE_FS_FXAA_GLSL__
 #define __INCLUDE_FS_FXAA_GLSL__
 
-#include "fs_global.glsl"
+#include "common_global.glsl"
 
 // -----------------------------------------------------------------------------
 // Defines / Settings
@@ -17,7 +17,7 @@ float FXAA_REDUCE_MIN = 1.0f / 128.0f;
 uniform sampler2D ps_InputTexture;
 uniform sampler2D PSTextureDepth;
 
-layout(binding = 1) uniform UFXAAProperties
+layout(binding = 1) uniform UB1
 {
     vec3 ps_Luma;
 };

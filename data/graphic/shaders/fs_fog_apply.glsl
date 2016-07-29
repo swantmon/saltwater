@@ -2,7 +2,7 @@
 #ifndef __INCLUDE_FS_FOG_APPLY_GLSL__
 #define __INCLUDE_FS_FOG_APPLY_GLSL__
 
-#include "fs_global.glsl"
+#include "common_global.glsl"
 
 // -----------------------------------------------------------------------------
 // Input to fragment from VS

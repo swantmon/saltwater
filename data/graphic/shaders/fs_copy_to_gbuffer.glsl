@@ -1,8 +1,8 @@
 #ifndef __INCLUDE_FS_COPY_TO_GBUFFER_GLSL_
 #define __INCLUDE_FS_COPY_TO_GBUFFER_GLSL_
 
-#include "fs_global.glsl"
 #include "common_gbuffer.glsl"
+#include "common_global.glsl"
 
 // -----------------------------------------------------------------------------
 // Defines

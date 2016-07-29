@@ -2,7 +2,7 @@
 #ifndef __INCLUDE_TES_TEST_GLSL__
 #define __INCLUDE_TES_TEST_GLSL__
 
-#include "tes_global.glsl"
+#include "common_global.glsl"
 
 // -----------------------------------------------------------------------------
 // Built-in variables
@@ -29,7 +29,7 @@ layout(triangles, equal_spacing, ccw) in;
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(binding = 6) uniform sampler2D PSTextureBump;
+layout(binding = 6) uniform sampler2D tes_TextureBump;
 
 float gDispFactor = 0.1f;
 
@@ -86,11 +86,11 @@ void main()
     // -----------------------------------------------------------------------------
     // Displace the vertex along the normal
     // -----------------------------------------------------------------------------
-   	float Displacement = texture(PSTextureBump, out_TexCoord.xy).x;
+   	float Displacement = texture(tes_TextureBump, out_TexCoord.xy).x;
 
    	out_Position += (out_Normal * Displacement * gDispFactor);
 
-   	gl_Position = ds_ViewProjectionMatrix * vec4(out_Position, 1.0f);
+   	gl_Position = ps_WorldToScreen * vec4(out_Position, 1.0f);
 }
 
 #endif // __INCLUDE_TES_TEST_GLSL__

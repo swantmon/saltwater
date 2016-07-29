@@ -7,7 +7,7 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(row_major, std140, binding = 0) uniform UBilateralSettings
+layout(row_major, std140, binding = 0) uniform UB0
 {
     vec2 ps_Direction;
 };
