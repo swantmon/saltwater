@@ -55,9 +55,17 @@ vec3 GetViewSpacePositionFromDepth(in float _Depth, in vec2 _ScreenPosition, in 
 
 float ConvertToLinearDepth(in float _HyperbolicDepth, in float _Near, in float _Far)
 {
-    return (2.0f * _Near) / (_Far + _Near - _HyperbolicDepth * (_Far - _Near));
+    return (2.0f * _Near) / (_Far + _Near - (_HyperbolicDepth * 2.0f - 1.0f) * (_Far - _Near));
 }
 
+// -----------------------------------------------------------------------------
+
+float ConvertToHyperbolicDepth(in float _LinearDepth, in mat4 _ProjectionMatrix)
+{
+    float LinearDepth = -_LinearDepth;
+    
+    return (_ProjectionMatrix[2].z * LinearDepth + _ProjectionMatrix[3].z) / (-LinearDepth);
+}
 
 // -----------------------------------------------------------------------------
 

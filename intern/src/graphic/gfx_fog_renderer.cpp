@@ -86,6 +86,21 @@ namespace
             unsigned int   m_ExposureHistoryIndex;
             float          m_Padding[2];
         };
+
+        struct SVolumeLightingProperties
+        {
+            Base::Float4 m_WindDirection;
+            Base::Float4 m_FogColor;
+            float        m_FrustumDepthInMeter;
+            float        m_ShadowIntensity;
+            float        m_VolumetricFogScatteringCoefficient;
+            float        m_VolumetricFogAbsorptionCoefficient;
+        };
+
+        struct SFogApplyProperties
+        {
+            float m_FrustumDepthInMeter;
+        };
         
     private:
         
@@ -114,7 +129,7 @@ namespace
         CTexture2DPtr m_PermutationTexturePtr;
         CTexture2DPtr m_GradientPermutationTexturePtr;
 
-        CBufferSetPtr m_FogApplypSBufferPtr;
+        CBufferSetPtr m_FogApplyBufferPtr;
 
         CShaderPtr     m_GaussianBlurShaderPtr;
         CBufferSetPtr  m_GaussianBlurPropertiesCSBufferSetPtr;
@@ -152,7 +167,7 @@ namespace
         , m_ApplyTextureSetPtr                  ()
         , m_PermutationTexturePtr               ()
         , m_GradientPermutationTexturePtr       ()
-        , m_FogApplypSBufferPtr                 ()
+        , m_FogApplyBufferPtr                   ()
         , m_GaussianBlurShaderPtr               ()
         , m_GaussianBlurPropertiesCSBufferSetPtr()
         , m_BlurStagesTextureSetPtrs            ()
@@ -196,7 +211,7 @@ namespace
         m_ApplyTextureSetPtr            = 0;
         m_PermutationTexturePtr         = 0;
         m_GradientPermutationTexturePtr = 0;
-        m_FogApplypSBufferPtr           = 0;
+        m_FogApplyBufferPtr             = 0;
 
         m_GaussianBlurShaderPtr                = 0;
         m_GaussianBlurPropertiesCSBufferSetPtr = 0;
@@ -477,14 +492,38 @@ namespace
 
         // -----------------------------------------------------------------------------
 
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SVolumeLightingProperties);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        CBufferPtr VolumeLightingPropertiesBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        
+        // -----------------------------------------------------------------------------
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SFogApplyProperties);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        CBufferPtr FogApplyPropertiesBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+
         CBufferPtr HistogramExposureHistoryBufferPtr = HistogramRenderer::GetExposureHistoryBuffer();
 
         // -----------------------------------------------------------------------------
 
         m_GaussianBlurPropertiesCSBufferSetPtr = BufferManager::CreateBufferSet(GaussianSettingsResourceBuffer);
-        m_VolumeLightingCSBufferSetPtr         = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), SunLightBufferPtr, HistogramExposureHistoryBufferPtr);
+        m_VolumeLightingCSBufferSetPtr         = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), SunLightBufferPtr, VolumeLightingPropertiesBufferPtr, HistogramExposureHistoryBufferPtr);
         m_FullQuadViewVSBufferPtr              = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
-        m_FogApplypSBufferPtr                  = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS());
+        m_FogApplyBufferPtr                  = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), FogApplyPropertiesBufferPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -709,6 +748,21 @@ namespace
 
         // -----------------------------------------------------------------------------
 
+        SVolumeLightingProperties* pVolumeProperties = static_cast<SVolumeLightingProperties*>(BufferManager::MapConstantBuffer(m_VolumeLightingCSBufferSetPtr->GetBuffer(2)));
+
+	    assert(pVolumeProperties != nullptr);
+
+        pVolumeProperties->m_WindDirection                      = Base::Float4(0.0f);
+        pVolumeProperties->m_FogColor                           = Base::Float4(1.0f);
+        pVolumeProperties->m_FrustumDepthInMeter                = 32.0f;
+        pVolumeProperties->m_ShadowIntensity                    = 1.0f;
+        pVolumeProperties->m_VolumetricFogScatteringCoefficient = 0.05f;
+        pVolumeProperties->m_VolumetricFogAbsorptionCoefficient = 0.01f;
+
+        BufferManager::UnmapConstantBuffer(m_VolumeLightingCSBufferSetPtr->GetBuffer(2));
+
+        // -----------------------------------------------------------------------------
+
         ContextManager::SetShaderCS(m_VolumeLightingCSPtr);
 
         ContextManager::SetConstantBufferSetCS(m_VolumeLightingCSBufferSetPtr);
@@ -773,6 +827,17 @@ namespace
         Performance::BeginEvent("Apply");
 
         // -----------------------------------------------------------------------------
+        // Data
+        // -----------------------------------------------------------------------------
+        SFogApplyProperties* pFogApplyProperties = static_cast<SFogApplyProperties*>(BufferManager::MapConstantBuffer(m_FogApplyBufferPtr->GetBuffer(1)));
+
+	    assert(pFogApplyProperties != nullptr);
+
+        pFogApplyProperties->m_FrustumDepthInMeter = 32.0f;
+
+        BufferManager::UnmapConstantBuffer(m_FogApplyBufferPtr->GetBuffer(1));
+
+        // -----------------------------------------------------------------------------
         // Rendering
         // -----------------------------------------------------------------------------
         const unsigned int pOffset[] = { 0, 0 };
@@ -793,7 +858,7 @@ namespace
 
         ContextManager::SetConstantBufferSetVS(m_FullQuadViewVSBufferPtr);
 
-        ContextManager::SetConstantBufferSetPS(m_FogApplypSBufferPtr);
+        ContextManager::SetConstantBufferSetPS(m_FogApplyBufferPtr);
 
         ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
 

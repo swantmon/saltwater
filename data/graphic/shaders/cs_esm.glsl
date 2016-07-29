@@ -10,14 +10,14 @@ layout (binding = 1, r32f) writeonly uniform image2D cs_OutputImage;
 // Main
 // -------------------------------------------------------------------------------------
 
-layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main()
 {
 	uint OutputX = gl_WorkGroupID.x;
 	uint OutputY = gl_WorkGroupID.y;
 	
-	uint InputX = gl_GlobalInvocationID.x;
-    uint InputY = gl_GlobalInvocationID.y;
+	uint InputX = gl_GlobalInvocationID.x * 8;
+    uint InputY = gl_GlobalInvocationID.y * 8;
 	
 	vec2 UVNorm = vec2(InputX, InputY) / textureSize(cs_InputImage, 0);
 	

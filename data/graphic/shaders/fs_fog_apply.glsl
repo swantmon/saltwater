@@ -2,11 +2,17 @@
 #ifndef __INCLUDE_FS_FOG_APPLY_GLSL__
 #define __INCLUDE_FS_FOG_APPLY_GLSL__
 
+#include "common.glsl"
 #include "common_global.glsl"
 
 // -----------------------------------------------------------------------------
-// Input to fragment from VS
+// Input from engine
 // -----------------------------------------------------------------------------
+layout(row_major, std140, binding = 1) uniform UB1
+{
+    float cs_FrustumDepthInMeter;
+};
+
 layout(binding = 0) uniform sampler2D ps_LightAccumulation;
 layout(binding = 1) uniform sampler2D ps_DepthTexture;
 layout(binding = 2) uniform sampler3D ps_VolumeScattering;
@@ -22,13 +28,11 @@ void main(void)
 {
     vec4 Light = texture(ps_LightAccumulation, in_UV);
 
-    float Depth = texture(ps_DepthTexture, in_UV).r;
-    
-    float zNear = ps_CameraParameterNear;
-    float zFar = ps_CameraParameterFar;
-    float LinDepth2 = 2*zFar*zNear / (zFar + zNear - (zFar - zNear)*(2*Depth -1));
+    float LinearDepth = ConvertToLinearDepth(texture(ps_DepthTexture, in_UV).r, ps_CameraParameterNear, ps_CameraParameterFar);
 
-    vec4 Scattering = texture(ps_VolumeScattering, vec3(in_UV, LinDepth2 / 128.0f));
+    float UVz = clamp(LinearDepth * ps_CameraParameterFar / cs_FrustumDepthInMeter, 0.0f, 1.0f);
+
+    vec4 Scattering = texture(ps_VolumeScattering, vec3(in_UV, UVz));
     
     vec3 InScattering = Scattering.rgb;
     

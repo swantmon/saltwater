@@ -7,21 +7,23 @@
 // -------------------------------------------------------------------------------------
 // Input from engine
 // -------------------------------------------------------------------------------------
-#define cs_FrustumDepthInMeter                50.0f
-#define cs_ShadowIntensity                    2.0f
-#define cs_VolumetricFogScatteringCoefficient 0.5f
-#define cs_VolumetricFogAbsorptionCoefficient 0.5f
-#define cs_WindDirection                      vec3(0.0f)
-#define cs_FogColor                           vec3(1.0f);
-
-
 layout(row_major, std140, binding = 1) uniform UB1
 {
-    mat4   ps_LightViewProjection;
-    vec4   ps_LightDirection;
-    vec4   ps_LightColor;
-    float  ps_SunAngularRadius;
-    uint   ps_ExposureHistoryIndex;
+    mat4   cs_LightViewProjection;
+    vec4   cs_LightDirection;
+    vec4   cs_LightColor;
+    float  cs_SunAngularRadius;
+    uint   cs_ExposureHistoryIndex;
+};
+
+layout(row_major, std140, binding = 2) uniform UB2
+{
+    vec4 cs_WindDirection;
+    vec4 cs_FogColor;
+    float cs_FrustumDepthInMeter;
+    float cs_ShadowIntensity;
+    float cs_VolumetricFogScatteringCoefficient;
+    float cs_VolumetricFogAbsorptionCoefficient;
 };
 
 layout(std430, binding = 0) readonly buffer BB0
@@ -106,21 +108,34 @@ void main()
     // World position from frustum
     // -------------------------------------------------------------------------------------
     vec2  TexCoord    = vec2(X / 160.0f, Y / 90.0f);
-    float Near        = ps_CameraParameterNear;
-    float Far         = ps_CameraParameterFar;
-    float LinearDepth = -(max(Z, Near));
+    float LinearDepth = max(Z * cs_FrustumDepthInMeter / 128.0f, 0.00001f);
     
-    float SSDepth = (ps_ViewToScreen[2].z * LinearDepth + ps_ViewToScreen[3].z) / (-LinearDepth);
+    float SSDepth = ConvertToHyperbolicDepth(LinearDepth, ps_ViewToScreen);
     
     SSDepth = SSDepth * 0.5f + 0.5f;
     
     vec3 VSPosition = GetViewSpacePositionFromDepth(SSDepth, TexCoord, ps_ScreenToView);
     vec3 WSPosition = (ps_ViewToWorld * vec4(VSPosition, 1.0f)).xyz;
     
+    // -------------------------------------------------------------------------------------
+    // Mie and Rayleigh scattering
+    // -------------------------------------------------------------------------------------
+    vec3 WSLightDirection = -cs_LightDirection.xyz;
+    vec3 WSViewDirection  = normalize(ps_ViewPosition.xyz - WSPosition);
+    
+    float LdotV  = dot(WSLightDirection, WSViewDirection) / length(WSViewDirection);
+    float LdotV2 = LdotV * LdotV;
+    
+    float Symmetry = -0.95f;
+    float Symmetry2 = Symmetry * Symmetry;
+
+    float RayleighPhase = 0.75f * (1.0f + LdotV2);
+    float MiePhase      = 1.5f * ((1.0f - Symmetry2) / (2.0f + Symmetry2)) * (1.0f + LdotV2) / pow(abs(1.0f + Symmetry2 - 2.0f * Symmetry * LdotV), 1.5f);
+    
     // -----------------------------------------------------------------------------
     // Thickness of slice
     // -----------------------------------------------------------------------------
-    float Thickness = 1.0f / 128.0f;
+    float Thickness = 1.0f / cs_FrustumDepthInMeter;
     
     // -----------------------------------------------------------------------------
     // Density of dust
@@ -128,9 +143,9 @@ void main()
     vec3 Seed;
     
     Seed  = vec3(X / 160.0f, Y / 90.0f, Z / 128.0f);
-    Seed += cs_WindDirection;
+    Seed += cs_WindDirection.xyz;
     
-    float Density = abs(ImprovedPerlinNoise3D(Seed));
+    float Density = abs(ImprovedPerlinNoise3D(Seed)) * (RayleighPhase + MiePhase);
     
     // -----------------------------------------------------------------------------
     // Scattering
@@ -145,12 +160,12 @@ void main()
     // -----------------------------------------------------------------------------
     // Exposure data
     // -----------------------------------------------------------------------------
-    float AverageExposure = ps_ExposureHistory[ps_ExposureHistoryIndex];
+    float AverageExposure = ps_ExposureHistory[cs_ExposureHistoryIndex];
     
     // -----------------------------------------------------------------------------
     // Sun lighting
     // -----------------------------------------------------------------------------
-    vec4 LSPosition = ps_LightViewProjection * vec4(WSPosition, 1.0f);
+    vec4 LSPosition = cs_LightViewProjection * vec4(WSPosition, 1.0f);
    
     LSPosition.xyz /= LSPosition.w;
     
@@ -165,20 +180,9 @@ void main()
         Shadow = DepthValue / cs_ShadowIntensity;
     }
     
-    vec3 WSLightDirection  = -ps_LightDirection.xyz;
-    vec3 WSViewDirection   = normalize(ps_ViewPosition.xyz - WSPosition);
-    
-    float LdotV  = dot(WSLightDirection, WSViewDirection);
-    float LdotV2 = LdotV * LdotV;
-    
-    float d  = cos(ps_SunAngularRadius);
-    float d2 = d * d;
-
-    float MiePhase = 1.5f * ((1.0f - d2) / (2.0f + d2)) * (1.0f + LdotV2) / pow(abs(1.0f + d2 - 2.0f * d * LdotV), 1.5f);
-        
     vec3 Lighting = vec3(0.0f);
     
-    Lighting += AverageExposure * ps_LightColor.xyz * Shadow;
+    Lighting += AverageExposure * cs_LightColor.xyz * Shadow;
 
     // -----------------------------------------------------------------------------
     // Ambient lighting 
@@ -194,7 +198,7 @@ void main()
     // -----------------------------------------------------------------------------
     // Fog color
     // -----------------------------------------------------------------------------
-    Lighting *= cs_FogColor;    
+    Lighting *= cs_FogColor.rgb * cs_FogColor.a;
     
    
     imageStore(cs_OutputImage, ivec3(X, Y, Z), vec4(Lighting * Scattering, Scattering + Absorption));
