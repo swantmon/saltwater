@@ -1232,8 +1232,6 @@ namespace
             Dt::CCameraActorFacet* pFacet = Dt::ActorManager::CreateCameraActor();
 
             pFacet->SetMainCamera(true);
-            pFacet->SetNear(0.01f);
-            pFacet->SetFar(4096.0f);
 
             rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
 
@@ -1363,9 +1361,62 @@ namespace
 
             Dt::EntityManager::MarkEntityAsDirty(rPointLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
+
+        // -----------------------------------------------------------------------------
+        // Setup effects
+        // -----------------------------------------------------------------------------
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::FX;
+            EntityDesc.m_EntityType = Dt::SFXType::FXAA;
+            EntityDesc.m_FacetFlags = 0;
+
+            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            Dt::CFXAAFXFacet* pEffectFacet = Dt::FXManager::CreateFXAAFX();
+
+            rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEffectEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::FX;
+            EntityDesc.m_EntityType = Dt::SFXType::SSR;
+            EntityDesc.m_FacetFlags = 0;
+
+            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            Dt::CSSRFXFacet* pEffectFacet = Dt::FXManager::CreateSSRFX();
+
+            rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEffectEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::FX;
+            EntityDesc.m_EntityType = Dt::SFXType::SSAO;
+            EntityDesc.m_FacetFlags = 0;
+
+            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            Dt::CSSAOFXFacet* pEffectFacet = Dt::FXManager::CreateSSAOFX();
+
+            rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEffectEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
         
         // -----------------------------------------------------------------------------        
-        
+        // Scene
+        // -----------------------------------------------------------------------------
+
         {
             Dt::SSceneDescriptor SceneDesc;
 

@@ -106,8 +106,8 @@ void main()
     // World position from frustum
     // -------------------------------------------------------------------------------------
     vec2  TexCoord    = vec2(X / 160.0f, Y / 90.0f);
-    float Near        = 0.01f;
-    float Far         = 4096.0f;
+    float Near        = ps_CameraParameterNear;
+    float Far         = ps_CameraParameterFar;
     float LinearDepth = -(max(Z, Near));
     
     float SSDepth = (ps_ViewToScreen[2].z * LinearDepth + ps_ViewToScreen[3].z) / (-LinearDepth);

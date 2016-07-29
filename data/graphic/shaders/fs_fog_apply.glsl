@@ -24,8 +24,8 @@ void main(void)
 
     float Depth = texture(ps_DepthTexture, in_UV).r;
     
-    float zNear = 0.01f;
-    float zFar = 4096.0f;
+    float zNear = ps_CameraParameterNear;
+    float zFar = ps_CameraParameterFar;
     float LinDepth2 = 2*zFar*zNear / (zFar + zNear - (zFar - zNear)*(2*Depth -1));
 
     vec4 Scattering = texture(ps_VolumeScattering, vec3(in_UV, LinDepth2 / 128.0f));

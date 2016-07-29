@@ -49,7 +49,7 @@ void main(void)
     // -----------------------------------------------------------------------------
     // Linear depth
     // -----------------------------------------------------------------------------
-    float LinearDepth = ConvertToLinearDepth(Depth, 0.01f, 4096.0f);
+    float LinearDepth = ConvertToLinearDepth(Depth, ps_CameraParameterNear, ps_CameraParameterFar);
     
     // -----------------------------------------------------------------------------
     // Get world-space normal and convert to view-space normal
@@ -104,12 +104,12 @@ void main(void)
         // Sample depth from screen-space texcoord
         // -----------------------------------------------------------------------------
         DepthSample       = texture(ps_Depth, SSOffset.xy).r;
-        LinearDepthSample = ConvertToLinearDepth(DepthSample, 0.01f, 4096.0f);
+        LinearDepthSample = ConvertToLinearDepth(DepthSample, ps_CameraParameterNear, ps_CameraParameterFar);
         
         // -----------------------------------------------------------------------------
         // Range check
         // -----------------------------------------------------------------------------
-        RangeCheck = smoothstep(0.0f, 1.0f, Radius / (abs(LinearDepth - LinearDepthSample) * 4096.0f));
+        RangeCheck = smoothstep(0.0f, 1.0f, Radius / (abs(LinearDepth - LinearDepthSample) * ps_CameraParameterFar));
 
         // -----------------------------------------------------------------------------
         // Occlusion check

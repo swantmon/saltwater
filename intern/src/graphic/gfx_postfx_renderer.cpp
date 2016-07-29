@@ -632,7 +632,7 @@ namespace
         
         m_BaseVSBufferSetPtr                   = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
                                                
-        m_DOFDownPropertiesPSBufferPtr         = BufferManager::CreateBufferSet(DOFDownPropertiesBuffer);
+        m_DOFDownPropertiesPSBufferPtr         = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), DOFDownPropertiesBuffer);
                                                
         m_DOFApplyPropertiesPSBufferPtr        = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), DOFApplyPropertiesBuffer);
                                                

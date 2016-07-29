@@ -114,7 +114,7 @@ namespace
         CTexture2DPtr m_PermutationTexturePtr;
         CTexture2DPtr m_GradientPermutationTexturePtr;
 
-        
+        CBufferSetPtr m_FogApplypSBufferPtr;
 
         CShaderPtr     m_GaussianBlurShaderPtr;
         CBufferSetPtr  m_GaussianBlurPropertiesCSBufferSetPtr;
@@ -152,6 +152,7 @@ namespace
         , m_ApplyTextureSetPtr                  ()
         , m_PermutationTexturePtr               ()
         , m_GradientPermutationTexturePtr       ()
+        , m_FogApplypSBufferPtr                 ()
         , m_GaussianBlurShaderPtr               ()
         , m_GaussianBlurPropertiesCSBufferSetPtr()
         , m_BlurStagesTextureSetPtrs            ()
@@ -195,6 +196,7 @@ namespace
         m_ApplyTextureSetPtr            = 0;
         m_PermutationTexturePtr         = 0;
         m_GradientPermutationTexturePtr = 0;
+        m_FogApplypSBufferPtr           = 0;
 
         m_GaussianBlurShaderPtr                = 0;
         m_GaussianBlurPropertiesCSBufferSetPtr = 0;
@@ -482,7 +484,7 @@ namespace
         m_GaussianBlurPropertiesCSBufferSetPtr = BufferManager::CreateBufferSet(GaussianSettingsResourceBuffer);
         m_VolumeLightingCSBufferSetPtr         = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), SunLightBufferPtr, HistogramExposureHistoryBufferPtr);
         m_FullQuadViewVSBufferPtr              = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
-
+        m_FogApplypSBufferPtr                  = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS());
     }
     
     // -----------------------------------------------------------------------------
@@ -790,6 +792,8 @@ namespace
         ContextManager::SetShaderPS(m_ApplyPSPtr);
 
         ContextManager::SetConstantBufferSetVS(m_FullQuadViewVSBufferPtr);
+
+        ContextManager::SetConstantBufferSetPS(m_FogApplypSBufferPtr);
 
         ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
 

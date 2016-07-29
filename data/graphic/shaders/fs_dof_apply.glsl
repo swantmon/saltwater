@@ -2,6 +2,7 @@
 #ifndef __INCLUDE_FS_DOF_APPLY_GLSL__
 #define __INCLUDE_FS_DOF_APPLY_GLSL__
 
+#include "common.glsl"
 #include "common_global.glsl"
 
 // -----------------------------------------------------------------------------
@@ -32,13 +33,6 @@ layout(location = 0) out vec4 out_Output;
 // -----------------------------------------------------------------------------
 // Function
 // -----------------------------------------------------------------------------
-float ConvertToLinearDepth(float _HyperbolicDepth, float _Near, float _Far)
-{
-    return (2.0f * _Near) / (_Far + _Near - _HyperbolicDepth * (_Far - _Near));
-}
-
-// -----------------------------------------------------------------------------
-
 vec3 GetSmallBlurSample(vec2 _TexCoords)
 {
     const float Weight = 4.0f / 17.0f;
@@ -113,7 +107,7 @@ vec4 ApplyDepthOfField(vec2 _TexCoords)
     // -----------------------------------------------------------------------------
     // Get depth and check value
     // -----------------------------------------------------------------------------
-    Depth = ConvertToLinearDepth(texture(ps_Depth, _TexCoords).r, 0.01f, 4096.0f);
+    Depth = ConvertToLinearDepth(texture(ps_Depth, _TexCoords).r, ps_CameraParameterNear, ps_CameraParameterFar);
     
     if (Depth > 1.0f)
     {
