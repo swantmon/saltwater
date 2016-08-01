@@ -142,8 +142,9 @@ void main()
     // -----------------------------------------------------------------------------
     vec3 Seed;
     
-    Seed  = vec3(X / 160.0f, Y / 90.0f, Z / 128.0f);
+    Seed  = WSPosition.xyz;
     Seed += cs_WindDirection.xyz;
+    Seed *= Thickness;
     
     float Density = abs(ImprovedPerlinNoise3D(Seed)) * (RayleighPhase + MiePhase);
     
