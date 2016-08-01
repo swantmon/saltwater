@@ -24,6 +24,7 @@ namespace FXManager
     CDOFFXFacet* CreateDOFFX();
     CFXAAFXFacet* CreateFXAAFX();
     CSSAOFXFacet* CreateSSAOFX();
+    CVolumeFogFXFacet* CreateVolumeFogFX();
 
     void Update();
 } // namespace FXManager

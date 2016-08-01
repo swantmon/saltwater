@@ -10,6 +10,7 @@
 #include "camera/cam_control_manager.h"
 
 #include "data/data_entity.h"
+#include "data/data_fx_facet.h"
 #include "data/data_light_facet.h"
 #include "data/data_map.h"
 #include "data/data_model_manager.h"
@@ -70,6 +71,11 @@ namespace
 
     private:
 
+        struct SVolumeFogRenderJob
+        {
+            Dt::CVolumeFogFXFacet* m_pDataVolumeFogFacet;
+        };
+
         struct SGaussianShaderProperties
         {
             Base::Int2 m_Direction;
@@ -101,6 +107,10 @@ namespace
         {
             float m_FrustumDepthInMeter;
         };
+
+    private:
+
+        typedef std::vector<SVolumeFogRenderJob> CVolumeFogRenderJobs;
         
     private:
         
@@ -135,12 +145,16 @@ namespace
         CBufferSetPtr  m_GaussianBlurPropertiesCSBufferSetPtr;
         CTextureSetPtr m_BlurStagesTextureSetPtrs[2];
 
+        CVolumeFogRenderJobs m_VolumeFogRenderJobs;
+
     private:
 
         void RenderESM();
         void RenderVolumeLighting();
         void RenderScattering();
         void RenderApply();
+
+        void BuildRenderJobs();
     };
 } // namespace
 
@@ -171,7 +185,9 @@ namespace
         , m_GaussianBlurShaderPtr               ()
         , m_GaussianBlurPropertiesCSBufferSetPtr()
         , m_BlurStagesTextureSetPtrs            ()
+        , m_VolumeFogRenderJobs                 ()
     {
+        m_VolumeFogRenderJobs.reserve(1);
     }
     
     // -----------------------------------------------------------------------------
@@ -217,6 +233,8 @@ namespace
         m_GaussianBlurPropertiesCSBufferSetPtr = 0;
         m_BlurStagesTextureSetPtrs[0]          = 0;
         m_BlurStagesTextureSetPtrs[1]          = 0;
+
+        m_VolumeFogRenderJobs.clear();
     }
     
     // -----------------------------------------------------------------------------
@@ -571,13 +589,15 @@ namespace
     
     void CGfxFogRenderer::Update()
     {
-        
+        BuildRenderJobs();
     }
     
     // -----------------------------------------------------------------------------
     
     void CGfxFogRenderer::Render()
     {
+        if (m_VolumeFogRenderJobs.size() == 0) return;
+
         Performance::BeginEvent("Fog");
 
         RenderESM();
@@ -717,6 +737,17 @@ namespace
     {
         Performance::BeginEvent("Volume Lighting");
 
+        // -----------------------------------------------------------------------------
+        // Getting volume fog informations from render job
+        // TODO: What happens if more then one DOF effect is available?
+        // -----------------------------------------------------------------------------
+        Dt::CVolumeFogFXFacet* pDataVolumeFogFacet = m_VolumeFogRenderJobs[0].m_pDataVolumeFogFacet;
+
+        assert(pDataVolumeFogFacet != 0);
+
+        // -----------------------------------------------------------------------------
+        // Getting sun informations
+        // -----------------------------------------------------------------------------
         Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
         Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
 
@@ -752,12 +783,12 @@ namespace
 
 	    assert(pVolumeProperties != nullptr);
 
-        pVolumeProperties->m_WindDirection                      = Base::Float4(0.0f);
-        pVolumeProperties->m_FogColor                           = Base::Float4(1.0f);
-        pVolumeProperties->m_FrustumDepthInMeter                = 32.0f;
-        pVolumeProperties->m_ShadowIntensity                    = 1.0f;
-        pVolumeProperties->m_VolumetricFogScatteringCoefficient = 0.05f;
-        pVolumeProperties->m_VolumetricFogAbsorptionCoefficient = 0.01f;
+        pVolumeProperties->m_WindDirection                      = pDataVolumeFogFacet->GetWindDirection();
+        pVolumeProperties->m_FogColor                           = pDataVolumeFogFacet->GetFogColor();
+        pVolumeProperties->m_FrustumDepthInMeter                = pDataVolumeFogFacet->GetFrustumDepthInMeter();
+        pVolumeProperties->m_ShadowIntensity                    = pDataVolumeFogFacet->GetShadowIntensity();
+        pVolumeProperties->m_VolumetricFogScatteringCoefficient = pDataVolumeFogFacet->GetVolumetricFogScatteringCoefficient();
+        pVolumeProperties->m_VolumetricFogAbsorptionCoefficient = pDataVolumeFogFacet->GetVolumetricFogAbsorptionCoefficient();
 
         BufferManager::UnmapConstantBuffer(m_VolumeLightingCSBufferSetPtr->GetBuffer(2));
 
@@ -887,6 +918,51 @@ namespace
         ContextManager::ResetRenderContext();
 
         Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxFogRenderer::BuildRenderJobs()
+    {
+        // -----------------------------------------------------------------------------
+        // Clear current render jobs
+        // -----------------------------------------------------------------------------
+        m_VolumeFogRenderJobs.clear();
+
+        // -----------------------------------------------------------------------------
+        // Iterate throw every entity inside this map
+        // -----------------------------------------------------------------------------
+        Dt::Map::CEntityIterator CurrentEffectEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::FX);
+        Dt::Map::CEntityIterator EndOfEffectEntities = Dt::Map::EntitiesEnd();
+
+        for (; CurrentEffectEntity != EndOfEffectEntities; )
+        {
+            Dt::CEntity& rCurrentEntity = *CurrentEffectEntity;
+
+            // -----------------------------------------------------------------------------
+            // Get graphic facet
+            // -----------------------------------------------------------------------------
+            if (rCurrentEntity.GetType() == Dt::SFXType::VolumeFog)
+            {
+                Dt::CVolumeFogFXFacet* pDataSSRFacet = static_cast<Dt::CVolumeFogFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+                assert(pDataSSRFacet != 0);
+
+                // -----------------------------------------------------------------------------
+                // Set sun into a new render job
+                // -----------------------------------------------------------------------------
+                SVolumeFogRenderJob NewRenderJob;
+
+                NewRenderJob.m_pDataVolumeFogFacet = pDataSSRFacet;
+
+                m_VolumeFogRenderJobs.push_back(NewRenderJob);
+            }
+
+            // -----------------------------------------------------------------------------
+            // Next entity
+            // -----------------------------------------------------------------------------
+            CurrentEffectEntity = CurrentEffectEntity.Next(Dt::SEntityCategory::FX);
+        }
     }
 } // namespace
 

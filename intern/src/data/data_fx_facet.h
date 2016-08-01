@@ -23,6 +23,7 @@ namespace Dt
             DOF,
             FXAA,
             SSAO,
+            VolumeFog,
             UndefinedType = -1,
         };
     };
@@ -174,5 +175,45 @@ namespace Dt
 
         CSSAOFXFacet();
         ~CSSAOFXFacet();
+    };
+} // namespace Dt
+
+namespace Dt
+{
+    class CVolumeFogFXFacet
+    {
+    public:
+
+        void SetWindDirection(const Base::Float4& _rWindDirection);
+        Base::Float4& GetWindDirection();
+
+        void SetFogColor(const Base::Float4& _rFogColor);
+        Base::Float4& GetFogColor();
+
+        void SetFrustumDepthInMeter(float _FrustumDepthInMeter);
+        float GetFrustumDepthInMeter();
+
+        void SetShadowIntensity(float _ShadowIntensity);
+        float GetShadowIntensity();
+
+        void SetVolumetricFogScatteringCoefficient(float _VolumetricFogScatteringCoefficient);
+        float GetVolumetricFogScatteringCoefficient();
+
+        void SetVolumetricFogAbsorptionCoefficient(float _VolumetricFogAbsorptionCoefficient);
+        float GetVolumetricFogAbsorptionCoefficient();
+
+    public:
+
+        CVolumeFogFXFacet();
+        ~CVolumeFogFXFacet();
+
+    private:
+
+        Base::Float4 m_WindDirection;                      //< Wind direction of the fog (xyz = direction, w = speed)
+        Base::Float4 m_FogColor;                           //< Overall color of the fog (rgb = color, a = intensity)
+        float        m_FrustumDepthInMeter;                //< Meters of the fog will be calculated
+        float        m_ShadowIntensity;                    //< Intensity of the fog (higher is harder edges)
+        float        m_VolumetricFogScatteringCoefficient; //< Scattering amount of light by the fog
+        float        m_VolumetricFogAbsorptionCoefficient; //< Absorption amount of light by the fog
     };
 } // namespace Dt

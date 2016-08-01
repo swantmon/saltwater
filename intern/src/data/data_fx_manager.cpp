@@ -37,6 +37,7 @@ namespace
         CDOFFXFacet* CreateDOFFX();
         CFXAAFXFacet* CreateFXAAFX();
         CSSAOFXFacet* CreateSSAOFX();
+        CVolumeFogFXFacet* CreateVolumeFogFX();
 
         void Update();
         
@@ -71,22 +72,30 @@ namespace
         private:
             friend class CDtFXManager;
         };
+
+        class CInternVolumeFogFXFacet : public CVolumeFogFXFacet
+        {
+        private:
+            friend class CDtFXManager;
+        };
         
     private:
         
-        typedef Base::CPool<CInternBloomFXFacet, 2> CBloomFXFacetPool;
-        typedef Base::CPool<CInternSSRFXFacet  , 2> CSSRFXFacetPool;
-        typedef Base::CPool<CInternDOFFXFacet  , 2> CDOFFXFacetPool;
-        typedef Base::CPool<CInternFXAAFXFacet , 2> CFXAAFXFacetPool;
-        typedef Base::CPool<CInternSSAOFXFacet , 2> CSSAOFXFacetPool;
+        typedef Base::CPool<CInternBloomFXFacet    , 2> CBloomFXFacetPool;
+        typedef Base::CPool<CInternSSRFXFacet      , 2> CSSRFXFacetPool;
+        typedef Base::CPool<CInternDOFFXFacet      , 2> CDOFFXFacetPool;
+        typedef Base::CPool<CInternFXAAFXFacet     , 2> CFXAAFXFacetPool;
+        typedef Base::CPool<CInternSSAOFXFacet     , 2> CSSAOFXFacetPool;
+        typedef Base::CPool<CInternVolumeFogFXFacet, 2> CVolumeFogFXFacetPool;
 
     private:
         
-        CBloomFXFacetPool m_BloomFXFacets;
-        CSSRFXFacetPool   m_SSRFXFacets;
-        CDOFFXFacetPool   m_DOFFXFacets;
-        CFXAAFXFacetPool  m_FXAAFXFacets;
-        CSSAOFXFacetPool  m_SSAOFXFacets;
+        CBloomFXFacetPool     m_BloomFXFacets;
+        CSSRFXFacetPool       m_SSRFXFacets;
+        CDOFFXFacetPool       m_DOFFXFacets;
+        CFXAAFXFacetPool      m_FXAAFXFacets;
+        CSSAOFXFacetPool      m_SSAOFXFacets;
+        CVolumeFogFXFacetPool m_VolumeFogFXFacetPool;
     };
 } // namespace
 
@@ -178,6 +187,15 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    CVolumeFogFXFacet* CDtFXManager::CreateVolumeFogFX()
+    {
+        CInternVolumeFogFXFacet& rDataVolumeFogFXFacet = m_VolumeFogFXFacetPool.Allocate();
+
+        return &rDataVolumeFogFXFacet;
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CDtFXManager::Update()
     {
 
@@ -240,6 +258,13 @@ namespace FXManager
     CSSAOFXFacet* CreateSSAOFX()
     {
         return CDtFXManager::GetInstance().CreateSSAOFX();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CVolumeFogFXFacet* CreateVolumeFogFX()
+    {
+        return CDtFXManager::GetInstance().CreateVolumeFogFX();
     }
 
     // -----------------------------------------------------------------------------

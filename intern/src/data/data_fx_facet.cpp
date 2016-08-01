@@ -391,3 +391,108 @@ namespace Dt
     {
     }
 } // namespace Dt
+
+namespace Dt
+{
+    CVolumeFogFXFacet::CVolumeFogFXFacet()
+        : m_WindDirection                     (0.0f)
+        , m_FogColor                          (1.0f)
+        , m_FrustumDepthInMeter               (32.0f)
+        , m_ShadowIntensity                   (1.0f)
+        , m_VolumetricFogScatteringCoefficient(0.05f)
+        , m_VolumetricFogAbsorptionCoefficient(0.01f)
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CVolumeFogFXFacet::~CVolumeFogFXFacet()
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CVolumeFogFXFacet::SetWindDirection(const Base::Float4& _rWindDirection)
+    {
+        m_WindDirection = _rWindDirection;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Base::Float4& CVolumeFogFXFacet::GetWindDirection()
+    {
+        return m_WindDirection;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CVolumeFogFXFacet::SetFogColor(const Base::Float4& _rFogColor)
+    {
+        m_FogColor = _rFogColor;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Base::Float4& CVolumeFogFXFacet::GetFogColor()
+    {
+        return m_FogColor;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CVolumeFogFXFacet::SetFrustumDepthInMeter(float _FrustumDepthInMeter)
+    {
+        m_FrustumDepthInMeter = _FrustumDepthInMeter;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CVolumeFogFXFacet::GetFrustumDepthInMeter()
+    {
+        return m_FrustumDepthInMeter;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CVolumeFogFXFacet::SetShadowIntensity(float _ShadowIntensity)
+    {
+        m_ShadowIntensity = _ShadowIntensity;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CVolumeFogFXFacet::GetShadowIntensity()
+    {
+        return m_ShadowIntensity;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CVolumeFogFXFacet::SetVolumetricFogScatteringCoefficient(float _VolumetricFogScatteringCoefficient)
+    {
+        m_VolumetricFogScatteringCoefficient = _VolumetricFogScatteringCoefficient;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CVolumeFogFXFacet::GetVolumetricFogScatteringCoefficient()
+    {
+        return m_VolumetricFogScatteringCoefficient;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CVolumeFogFXFacet::SetVolumetricFogAbsorptionCoefficient(float _VolumetricFogAbsorptionCoefficient)
+    {
+        m_VolumetricFogAbsorptionCoefficient = _VolumetricFogAbsorptionCoefficient;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CVolumeFogFXFacet::GetVolumetricFogAbsorptionCoefficient()
+    {
+        return m_VolumetricFogAbsorptionCoefficient;
+    }
+} // namespace Dt
