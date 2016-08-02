@@ -146,7 +146,8 @@ namespace
             Base::Float4   ps_PreviousViewDirection;
             Base::Float4   ps_InvertedScreensizeAndScreensize;
             Base::Float4   ps_ScreenPositionScaleBias;
-            Base::Float4   ps_CameraParameters;
+            Base::Float4   ps_CameraParameters0;
+            Base::Float4   ps_WorldParameters0;
         };
         
     private:
@@ -529,7 +530,8 @@ namespace
         m_PerFrameConstantBuffer.ps_ViewDirection                  .SetZero();
         m_PerFrameConstantBuffer.ps_InvertedScreensizeAndScreensize.SetZero();
         m_PerFrameConstantBuffer.ps_ScreenPositionScaleBias        .SetZero();
-        m_PerFrameConstantBuffer.ps_CameraParameters               .SetZero();
+        m_PerFrameConstantBuffer.ps_CameraParameters0              .SetZero();
+        m_PerFrameConstantBuffer.ps_WorldParameters0               .SetZero();
         m_PerFrameConstantBuffer.ps_PreviousWorldToView            = m_PerFrameConstantBuffer.ps_WorldToView;
         m_PerFrameConstantBuffer.ps_PreviousViewToScreen           = m_PerFrameConstantBuffer.ps_ViewToScreen;
         m_PerFrameConstantBuffer.ps_PreviousScreenToView           = m_PerFrameConstantBuffer.ps_ScreenToView;
@@ -567,6 +569,9 @@ namespace
         float InvertedScreensizeY;
         float Near;
         float Far;
+        float WorldNumberOfMetersX;
+        float WorldNumberOfMetersY;
+        float WorldNumberOfMetersZ;
         
         CCameraPtr MainCameraPtr   = ViewManager::GetMainCamera ();
         CCameraPtr DecalCameraPtr  = ViewManager::GetDecalCamera();
@@ -590,6 +595,10 @@ namespace
 
         Near = MainCameraPtr->GetNear();
         Far  = MainCameraPtr->GetFar();
+
+        WorldNumberOfMetersX = static_cast<float>(Dt::Map::GetNumberOfMetersX());
+        WorldNumberOfMetersY = static_cast<float>(Dt::Map::GetNumberOfMetersY());
+        WorldNumberOfMetersZ = static_cast<float>(128.0f);
                 
         // -----------------------------------------------------------------------------
         // Map buffer
@@ -619,7 +628,8 @@ namespace
         m_PerFrameConstantBuffer.ps_ViewDirection                  .Set(MainViewPtr->GetViewDirection(), 0.0f);
         m_PerFrameConstantBuffer.ps_InvertedScreensizeAndScreensize.Set(InvertedScreensizeX, InvertedScreensizeY, ScreensizeX, ScreensizeY);
         m_PerFrameConstantBuffer.ps_ScreenPositionScaleBias        .Set(0.5f, 0.5f, 0.5f, 0.5f);
-        m_PerFrameConstantBuffer.ps_CameraParameters               .Set(Near, Far, 0.0f, 0.0f);
+        m_PerFrameConstantBuffer.ps_CameraParameters0              .Set(Near, Far, 0.0f, 0.0f);
+        m_PerFrameConstantBuffer.ps_WorldParameters0               .Set(WorldNumberOfMetersX, WorldNumberOfMetersY, WorldNumberOfMetersZ, 0.0f);
 
         Base::CMemory::Copy(pPerFrameConstantBuffer, &m_PerFrameConstantBuffer, sizeof(SPerFrameConstantBuffer));
         

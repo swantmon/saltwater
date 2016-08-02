@@ -21,9 +21,14 @@ layout(row_major, std140, binding = 0) uniform UB0
     vec4 ps_InvertedScreensizeAndScreensize;
     vec4 ps_ScreenPositionScaleBias;
     vec4 ps_CameraParameters0;
+    vec4 ps_WorldParameters0;
 };
 
 #define ps_CameraParameterNear ps_CameraParameters0.x
 #define ps_CameraParameterFar  ps_CameraParameters0.y
+
+#define ps_WorldSizeX ps_WorldParameters0.x
+#define ps_WorldSizeY ps_WorldParameters0.y
+#define ps_WorldSizeZ ps_WorldParameters0.z
 
 #endif // __INCLUDE_COMMON_GLOBAL_GLSL__

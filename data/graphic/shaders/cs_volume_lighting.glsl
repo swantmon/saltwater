@@ -5,6 +5,11 @@
 #include "common_global.glsl"
 
 // -------------------------------------------------------------------------------------
+// Defines
+// -------------------------------------------------------------------------------------
+#define SCALE_THICKNESS 0.01f
+
+// -------------------------------------------------------------------------------------
 // Input from engine
 // -------------------------------------------------------------------------------------
 layout(row_major, std140, binding = 1) uniform UB1
@@ -135,16 +140,15 @@ void main()
     // -----------------------------------------------------------------------------
     // Thickness of slice
     // -----------------------------------------------------------------------------
-    float Thickness = 1.0f / cs_FrustumDepthInMeter;
+    float Thickness = Z / cs_FrustumDepthInMeter * SCALE_THICKNESS;
     
     // -----------------------------------------------------------------------------
     // Density of dust
     // -----------------------------------------------------------------------------
-    vec3 Seed;
+    vec3 InverseMapSize = vec3(1.0f / ps_WorldSizeX, 1.0f / ps_WorldSizeY, 1.0f / ps_WorldSizeZ);
     
-    Seed  = WSPosition.xyz;
+    vec3 Seed = WSPosition.xyz * InverseMapSize;
     Seed += cs_WindDirection.xyz;
-    Seed *= Thickness;
     
     float Density = abs(ImprovedPerlinNoise3D(Seed)) * (RayleighPhase + MiePhase);
     
