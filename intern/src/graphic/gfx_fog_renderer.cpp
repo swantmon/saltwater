@@ -858,13 +858,21 @@ namespace
         Performance::BeginEvent("Apply");
 
         // -----------------------------------------------------------------------------
+        // Getting volume fog informations from render job
+        // TODO: What happens if more then one DOF effect is available?
+        // -----------------------------------------------------------------------------
+        Dt::CVolumeFogFXFacet* pDataVolumeFogFacet = m_VolumeFogRenderJobs[0].m_pDataVolumeFogFacet;
+
+        assert(pDataVolumeFogFacet != 0);
+
+        // -----------------------------------------------------------------------------
         // Data
         // -----------------------------------------------------------------------------
         SFogApplyProperties* pFogApplyProperties = static_cast<SFogApplyProperties*>(BufferManager::MapConstantBuffer(m_FogApplyBufferPtr->GetBuffer(1)));
 
 	    assert(pFogApplyProperties != nullptr);
 
-        pFogApplyProperties->m_FrustumDepthInMeter = 32.0f;
+        pFogApplyProperties->m_FrustumDepthInMeter = pDataVolumeFogFacet->GetFrustumDepthInMeter();
 
         BufferManager::UnmapConstantBuffer(m_FogApplyBufferPtr->GetBuffer(1));
 
