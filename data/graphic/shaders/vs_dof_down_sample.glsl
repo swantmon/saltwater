@@ -31,17 +31,17 @@ void main()
     
     // -----------------------------------------------------------------------------
     
-    PSTexCoords.m_Color0 = TexCoord + vec2(-1.0f, -1.0f) * ps_InvertedScreensizeAndScreensize.xy;
-    PSTexCoords.m_Color1 = TexCoord + vec2(+1.0f, -1.0f) * ps_InvertedScreensizeAndScreensize.xy;
+    PSTexCoords.m_Color0 = TexCoord + vec2(-1.0f, -1.0f) * g_InvertedScreensizeAndScreensize.xy;
+    PSTexCoords.m_Color1 = TexCoord + vec2(+1.0f, -1.0f) * g_InvertedScreensizeAndScreensize.xy;
     
-    PSTexCoords.m_Depth0 = TexCoord + vec2(-1.5f, -1.5f) * ps_InvertedScreensizeAndScreensize.xy;
-    PSTexCoords.m_Depth1 = TexCoord + vec2(-0.5f, -1.5f) * ps_InvertedScreensizeAndScreensize.xy;
-    PSTexCoords.m_Depth2 = TexCoord + vec2(+0.5f, -1.5f) * ps_InvertedScreensizeAndScreensize.xy;
-    PSTexCoords.m_Depth3 = TexCoord + vec2(+1.5f, -1.5f) * ps_InvertedScreensizeAndScreensize.xy;
+    PSTexCoords.m_Depth0 = TexCoord + vec2(-1.5f, -1.5f) * g_InvertedScreensizeAndScreensize.xy;
+    PSTexCoords.m_Depth1 = TexCoord + vec2(-0.5f, -1.5f) * g_InvertedScreensizeAndScreensize.xy;
+    PSTexCoords.m_Depth2 = TexCoord + vec2(+0.5f, -1.5f) * g_InvertedScreensizeAndScreensize.xy;
+    PSTexCoords.m_Depth3 = TexCoord + vec2(+1.5f, -1.5f) * g_InvertedScreensizeAndScreensize.xy;
     
     // -----------------------------------------------------------------------------
 
-	gl_Position = ps_WorldToQuad * Position;
+	gl_Position = g_WorldToQuad * Position;
 }
 
 #endif // __INCLUDE_VS_DOF_DOWN_SAMPLE_GLSL__

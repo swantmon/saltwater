@@ -28,9 +28,9 @@ void main(void)
 {
     vec4 Light = texture(ps_LightAccumulation, in_UV);
 
-    float LinearDepth = ConvertToLinearDepth(texture(ps_DepthTexture, in_UV).r, ps_CameraParameterNear, ps_CameraParameterFar);
+    float LinearDepth = ConvertToLinearDepth(texture(ps_DepthTexture, in_UV).r, g_CameraParameterNear, g_CameraParameterFar);
 
-    float UVz = clamp(LinearDepth * ps_CameraParameterFar / cs_FrustumDepthInMeter, 0.0f, 1.0f);
+    float UVz = clamp(LinearDepth * g_CameraParameterFar / cs_FrustumDepthInMeter, 0.0f, 1.0f);
 
     vec4 Scattering = texture(ps_VolumeScattering, vec3(in_UV, UVz));
     

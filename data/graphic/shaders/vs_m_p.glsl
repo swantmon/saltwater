@@ -24,7 +24,7 @@ void main(void)
     
     PSPosition = WSPosition.xyz;
     
-    gl_Position = ps_WorldToScreen * WSPosition;
+    gl_Position = g_WorldToScreen * WSPosition;
 }
 
 #endif // __INCLUDE_VS_M_P_GLSL__

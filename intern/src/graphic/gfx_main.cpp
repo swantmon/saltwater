@@ -130,24 +130,24 @@ namespace
         
         struct SPerFrameConstantBuffer
         {
-            Base::Float4x4 ps_WorldToScreen;
-            Base::Float4x4 ps_WorldToQuad;
-            Base::Float4x4 ps_WorldToView;
-            Base::Float4x4 ps_ViewToScreen;
-            Base::Float4x4 ps_ScreenToView;
-            Base::Float4x4 ps_ViewToWorld;
-            Base::Float4   ps_ViewPosition;
-            Base::Float4   ps_ViewDirection;
-            Base::Float4x4 ps_PreviousWorldToView;
-            Base::Float4x4 ps_PreviousViewToScreen;
-            Base::Float4x4 ps_PreviousScreenToView;
-            Base::Float4x4 ps_PreviousViewToWorld;
-            Base::Float4   ps_PreviousViewPosition;
-            Base::Float4   ps_PreviousViewDirection;
-            Base::Float4   ps_InvertedScreensizeAndScreensize;
-            Base::Float4   ps_ScreenPositionScaleBias;
-            Base::Float4   ps_CameraParameters0;
-            Base::Float4   ps_WorldParameters0;
+            Base::Float4x4 m_WorldToScreen;
+            Base::Float4x4 m_WorldToQuad;
+            Base::Float4x4 m_WorldToView;
+            Base::Float4x4 m_ViewToScreen;
+            Base::Float4x4 m_ScreenToView;
+            Base::Float4x4 m_ViewToWorld;
+            Base::Float4   m_ViewPosition;
+            Base::Float4   m_ViewDirection;
+            Base::Float4x4 m_PreviousWorldToView;
+            Base::Float4x4 m_PreviousViewToScreen;
+            Base::Float4x4 m_PreviousScreenToView;
+            Base::Float4x4 m_PreviousViewToWorld;
+            Base::Float4   m_PreviousViewPosition;
+            Base::Float4   m_PreviousViewDirection;
+            Base::Float4   m_InvertedScreensizeAndScreensize;
+            Base::Float4   m_ScreenPositionScaleBias;
+            Base::Float4   m_CameraParameters0;
+            Base::Float4   m_WorldParameters0;
         };
         
     private:
@@ -520,24 +520,24 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup default values
         // -----------------------------------------------------------------------------
-        m_PerFrameConstantBuffer.ps_WorldToScreen                  .SetIdentity();
-        m_PerFrameConstantBuffer.ps_WorldToQuad                    .SetIdentity();
-        m_PerFrameConstantBuffer.ps_WorldToView                    .SetIdentity();
-        m_PerFrameConstantBuffer.ps_ViewToScreen                   .SetIdentity();
-        m_PerFrameConstantBuffer.ps_ScreenToView                   .SetIdentity();
-        m_PerFrameConstantBuffer.ps_ViewToWorld                    .SetIdentity();
-        m_PerFrameConstantBuffer.ps_ViewPosition                   .SetZero();
-        m_PerFrameConstantBuffer.ps_ViewDirection                  .SetZero();
-        m_PerFrameConstantBuffer.ps_InvertedScreensizeAndScreensize.SetZero();
-        m_PerFrameConstantBuffer.ps_ScreenPositionScaleBias        .SetZero();
-        m_PerFrameConstantBuffer.ps_CameraParameters0              .SetZero();
-        m_PerFrameConstantBuffer.ps_WorldParameters0               .SetZero();
-        m_PerFrameConstantBuffer.ps_PreviousWorldToView            = m_PerFrameConstantBuffer.ps_WorldToView;
-        m_PerFrameConstantBuffer.ps_PreviousViewToScreen           = m_PerFrameConstantBuffer.ps_ViewToScreen;
-        m_PerFrameConstantBuffer.ps_PreviousScreenToView           = m_PerFrameConstantBuffer.ps_ScreenToView;
-        m_PerFrameConstantBuffer.ps_PreviousViewToWorld            = m_PerFrameConstantBuffer.ps_ViewToWorld;
-        m_PerFrameConstantBuffer.ps_PreviousViewPosition           = m_PerFrameConstantBuffer.ps_ViewPosition;
-        m_PerFrameConstantBuffer.ps_PreviousViewDirection          = m_PerFrameConstantBuffer.ps_ViewDirection;
+        m_PerFrameConstantBuffer.m_WorldToScreen                  .SetIdentity();
+        m_PerFrameConstantBuffer.m_WorldToQuad                    .SetIdentity();
+        m_PerFrameConstantBuffer.m_WorldToView                    .SetIdentity();
+        m_PerFrameConstantBuffer.m_ViewToScreen                   .SetIdentity();
+        m_PerFrameConstantBuffer.m_ScreenToView                   .SetIdentity();
+        m_PerFrameConstantBuffer.m_ViewToWorld                    .SetIdentity();
+        m_PerFrameConstantBuffer.m_ViewPosition                   .SetZero();
+        m_PerFrameConstantBuffer.m_ViewDirection                  .SetZero();
+        m_PerFrameConstantBuffer.m_InvertedScreensizeAndScreensize.SetZero();
+        m_PerFrameConstantBuffer.m_ScreenPositionScaleBias        .SetZero();
+        m_PerFrameConstantBuffer.m_CameraParameters0              .SetZero();
+        m_PerFrameConstantBuffer.m_WorldParameters0               .SetZero();
+        m_PerFrameConstantBuffer.m_PreviousWorldToView            = m_PerFrameConstantBuffer.m_WorldToView;
+        m_PerFrameConstantBuffer.m_PreviousViewToScreen           = m_PerFrameConstantBuffer.m_ViewToScreen;
+        m_PerFrameConstantBuffer.m_PreviousScreenToView           = m_PerFrameConstantBuffer.m_ScreenToView;
+        m_PerFrameConstantBuffer.m_PreviousViewToWorld            = m_PerFrameConstantBuffer.m_ViewToWorld;
+        m_PerFrameConstantBuffer.m_PreviousViewPosition           = m_PerFrameConstantBuffer.m_ViewPosition;
+        m_PerFrameConstantBuffer.m_PreviousViewDirection          = m_PerFrameConstantBuffer.m_ViewDirection;
 
     }
     
@@ -608,28 +608,28 @@ namespace
         // -----------------------------------------------------------------------------
         // Set previous values
         // -----------------------------------------------------------------------------
-        m_PerFrameConstantBuffer.ps_PreviousWorldToView   = m_PerFrameConstantBuffer.ps_WorldToView;
-        m_PerFrameConstantBuffer.ps_PreviousViewToScreen  = m_PerFrameConstantBuffer.ps_ViewToScreen;
-        m_PerFrameConstantBuffer.ps_PreviousScreenToView  = m_PerFrameConstantBuffer.ps_ScreenToView;
-        m_PerFrameConstantBuffer.ps_PreviousViewToWorld   = m_PerFrameConstantBuffer.ps_ViewToWorld;
-        m_PerFrameConstantBuffer.ps_PreviousViewPosition  = m_PerFrameConstantBuffer.ps_ViewPosition;
-        m_PerFrameConstantBuffer.ps_PreviousViewDirection = m_PerFrameConstantBuffer.ps_ViewDirection;
+        m_PerFrameConstantBuffer.m_PreviousWorldToView   = m_PerFrameConstantBuffer.m_WorldToView;
+        m_PerFrameConstantBuffer.m_PreviousViewToScreen  = m_PerFrameConstantBuffer.m_ViewToScreen;
+        m_PerFrameConstantBuffer.m_PreviousScreenToView  = m_PerFrameConstantBuffer.m_ScreenToView;
+        m_PerFrameConstantBuffer.m_PreviousViewToWorld   = m_PerFrameConstantBuffer.m_ViewToWorld;
+        m_PerFrameConstantBuffer.m_PreviousViewPosition  = m_PerFrameConstantBuffer.m_ViewPosition;
+        m_PerFrameConstantBuffer.m_PreviousViewDirection = m_PerFrameConstantBuffer.m_ViewDirection;
 
         // -----------------------------------------------------------------------------
         // Set new values;
         // -----------------------------------------------------------------------------
-        m_PerFrameConstantBuffer.ps_WorldToScreen                  .Set(MainCameraPtr->GetViewProjectionMatrix());
-        m_PerFrameConstantBuffer.ps_WorldToQuad                    .Set(ScreenCameraPtr->GetViewProjectionMatrix());
-        m_PerFrameConstantBuffer.ps_WorldToView                    .Set(MainViewPtr->GetViewMatrix());
-        m_PerFrameConstantBuffer.ps_ViewToScreen                   .Set(MainCameraPtr->GetProjectionMatrix());
-        m_PerFrameConstantBuffer.ps_ScreenToView                   .Set(MainCameraPtr->GetProjectionMatrix().GetInverted());
-        m_PerFrameConstantBuffer.ps_ViewToWorld                    .Set(MainViewPtr->GetViewMatrix().GetInverted());
-        m_PerFrameConstantBuffer.ps_ViewPosition                   .Set(MainViewPtr->GetPosition(), 1.0f);
-        m_PerFrameConstantBuffer.ps_ViewDirection                  .Set(MainViewPtr->GetViewDirection(), 0.0f);
-        m_PerFrameConstantBuffer.ps_InvertedScreensizeAndScreensize.Set(InvertedScreensizeX, InvertedScreensizeY, ScreensizeX, ScreensizeY);
-        m_PerFrameConstantBuffer.ps_ScreenPositionScaleBias        .Set(0.5f, 0.5f, 0.5f, 0.5f);
-        m_PerFrameConstantBuffer.ps_CameraParameters0              .Set(Near, Far, 0.0f, 0.0f);
-        m_PerFrameConstantBuffer.ps_WorldParameters0               .Set(WorldNumberOfMetersX, WorldNumberOfMetersY, WorldNumberOfMetersZ, 0.0f);
+        m_PerFrameConstantBuffer.m_WorldToScreen                  .Set(MainCameraPtr->GetViewProjectionMatrix());
+        m_PerFrameConstantBuffer.m_WorldToQuad                    .Set(ScreenCameraPtr->GetViewProjectionMatrix());
+        m_PerFrameConstantBuffer.m_WorldToView                    .Set(MainViewPtr->GetViewMatrix());
+        m_PerFrameConstantBuffer.m_ViewToScreen                   .Set(MainCameraPtr->GetProjectionMatrix());
+        m_PerFrameConstantBuffer.m_ScreenToView                   .Set(MainCameraPtr->GetProjectionMatrix().GetInverted());
+        m_PerFrameConstantBuffer.m_ViewToWorld                    .Set(MainViewPtr->GetViewMatrix().GetInverted());
+        m_PerFrameConstantBuffer.m_ViewPosition                   .Set(MainViewPtr->GetPosition(), 1.0f);
+        m_PerFrameConstantBuffer.m_ViewDirection                  .Set(MainViewPtr->GetViewDirection(), 0.0f);
+        m_PerFrameConstantBuffer.m_InvertedScreensizeAndScreensize.Set(InvertedScreensizeX, InvertedScreensizeY, ScreensizeX, ScreensizeY);
+        m_PerFrameConstantBuffer.m_ScreenPositionScaleBias        .Set(0.5f, 0.5f, 0.5f, 0.5f);
+        m_PerFrameConstantBuffer.m_CameraParameters0              .Set(Near, Far, 0.0f, 0.0f);
+        m_PerFrameConstantBuffer.m_WorldParameters0               .Set(WorldNumberOfMetersX, WorldNumberOfMetersY, WorldNumberOfMetersZ, 0.0f);
 
         Base::CMemory::Copy(pPerFrameConstantBuffer, &m_PerFrameConstantBuffer, sizeof(SPerFrameConstantBuffer));
         

@@ -90,7 +90,7 @@ void main()
 
    	out_Position += (out_Normal * Displacement * gDispFactor);
 
-   	gl_Position = ps_WorldToScreen * vec4(out_Position, 1.0f);
+   	gl_Position = g_WorldToScreen * vec4(out_Position, 1.0f);
 }
 
 #endif // __INCLUDE_TES_TEST_GLSL__

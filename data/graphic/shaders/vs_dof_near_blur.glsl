@@ -27,11 +27,11 @@ void main()
     // -----------------------------------------------------------------------------
     
     vec4 HalfPixel          = vec4(-0.5f, 0.5f, -0.5f, 0.5f);
-    PSTexCoords.m_TexCoords = TexCoord.xxyy + HalfPixel * vec4(ps_InvertedScreensizeAndScreensize.xy / 4.0f, ps_InvertedScreensizeAndScreensize.xy / 4.0f);
+    PSTexCoords.m_TexCoords = TexCoord.xxyy + HalfPixel * vec4(g_InvertedScreensizeAndScreensize.xy / 4.0f, g_InvertedScreensizeAndScreensize.xy / 4.0f);
     
     // -----------------------------------------------------------------------------
     
-    gl_Position = ps_WorldToQuad * Position;
+    gl_Position = g_WorldToQuad * Position;
 }
 
 #endif // __INCLUDE_VS_DOF_NEAR_BLUR_GLSL__

@@ -78,9 +78,9 @@ void main()
     // -----------------------------------------------------------------------------
     // Calculate the distance from the camera to the three control points
     // -----------------------------------------------------------------------------
-    float EyeToVertexDistance0 = distance(ps_ViewPosition.xyz, out_Position[0]);
-    float EyeToVertexDistance1 = distance(ps_ViewPosition.xyz, out_Position[1]);
-    float EyeToVertexDistance2 = distance(ps_ViewPosition.xyz, out_Position[2]);
+    float EyeToVertexDistance0 = distance(g_ViewPosition.xyz, out_Position[0]);
+    float EyeToVertexDistance1 = distance(g_ViewPosition.xyz, out_Position[1]);
+    float EyeToVertexDistance2 = distance(g_ViewPosition.xyz, out_Position[2]);
 
     // -----------------------------------------------------------------------------
     // Calculate the tessellation levels

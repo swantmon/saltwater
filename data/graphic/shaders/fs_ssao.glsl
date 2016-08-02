@@ -49,7 +49,7 @@ void main(void)
     // -----------------------------------------------------------------------------
     // Linear depth
     // -----------------------------------------------------------------------------
-    float LinearDepth = ConvertToLinearDepth(Depth, ps_CameraParameterNear, ps_CameraParameterFar);
+    float LinearDepth = ConvertToLinearDepth(Depth, g_CameraParameterNear, g_CameraParameterFar);
     
     // -----------------------------------------------------------------------------
     // Get world-space normal and convert to view-space normal
@@ -60,7 +60,7 @@ void main(void)
     // -----------------------------------------------------------------------------
     // Get view-space position from depth
     // -----------------------------------------------------------------------------
-    vec3 VSPosition = GetViewSpacePositionFromDepth(Depth, in_TexCoord, ps_ScreenToView);
+    vec3 VSPosition = GetViewSpacePositionFromDepth(Depth, in_TexCoord, g_ScreenToView);
     
     vec2  NoiseScale = ps_NoiseScale.xy;
     float Radius     = ps_NoiseScale.z;
@@ -104,12 +104,12 @@ void main(void)
         // Sample depth from screen-space texcoord
         // -----------------------------------------------------------------------------
         DepthSample       = texture(ps_Depth, SSOffset.xy).r;
-        LinearDepthSample = ConvertToLinearDepth(DepthSample, ps_CameraParameterNear, ps_CameraParameterFar);
+        LinearDepthSample = ConvertToLinearDepth(DepthSample, g_CameraParameterNear, g_CameraParameterFar);
         
         // -----------------------------------------------------------------------------
         // Range check
         // -----------------------------------------------------------------------------
-        RangeCheck = smoothstep(0.0f, 1.0f, Radius / (abs(LinearDepth - LinearDepthSample) * ps_CameraParameterFar));
+        RangeCheck = smoothstep(0.0f, 1.0f, Radius / (abs(LinearDepth - LinearDepthSample) * g_CameraParameterFar));
 
         // -----------------------------------------------------------------------------
         // Occlusion check

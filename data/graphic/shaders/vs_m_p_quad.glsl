@@ -24,7 +24,7 @@ void main()
     
     PSTexCoord = vec2(Position.x, 1.0f - Position.y);
 
-	gl_Position = ps_WorldToQuad * m_ModelMatrix * Position;
+	gl_Position = g_WorldToQuad * m_ModelMatrix * Position;
 }
 
 #endif // __INCLUDE_VS_M_P_QUAD_GLSL__

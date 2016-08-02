@@ -101,12 +101,12 @@ void main()
     // -----------------------------------------------------------------------------
     // VS position
     // -----------------------------------------------------------------------------
-    vec3 VSPosition = GetViewSpacePositionFromDepth(VSDepth, in_UV, ps_ScreenToView);
+    vec3 VSPosition = GetViewSpacePositionFromDepth(VSDepth, in_UV, g_ScreenToView);
     
     // -----------------------------------------------------------------------------
     // WS position
     // -----------------------------------------------------------------------------
-    vec3 WSPosition = (ps_ViewToWorld * vec4(VSPosition, 1.0f)).xyz;
+    vec3 WSPosition = (g_ViewToWorld * vec4(VSPosition, 1.0f)).xyz;
 
     // -----------------------------------------------------------------------------
     // Surface data
@@ -123,7 +123,7 @@ void main()
     // -----------------------------------------------------------------------------
     // Compute lighting for sphere lights
     // -----------------------------------------------------------------------------
-    vec3  WSViewDirection = normalize(ps_ViewPosition.xyz - Data.m_WSPosition);
+    vec3  WSViewDirection = normalize(g_ViewPosition.xyz - Data.m_WSPosition);
     vec3  WSReflectVector = normalize(reflect(-WSViewDirection, Data.m_WSNormal));
     float NdotV           = clamp( dot( Data.m_WSNormal, WSViewDirection ), 0.0, 1.0f);
     

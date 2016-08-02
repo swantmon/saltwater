@@ -41,10 +41,10 @@ vec3 GetSmallBlurSample(vec2 _TexCoords)
     
     Blurred = vec3(0.0f);
     
-    Blurred += Weight * texture( ps_Color, _TexCoords + vec2(+0.5f, -1.5f) * ps_InvertedScreensizeAndScreensize.xy).rgb;
-    Blurred += Weight * texture( ps_Color, _TexCoords + vec2(-1.5f, -0.5f) * ps_InvertedScreensizeAndScreensize.xy).rgb;
-    Blurred += Weight * texture( ps_Color, _TexCoords + vec2(-0.5f, +1.5f) * ps_InvertedScreensizeAndScreensize.xy).rgb;
-    Blurred += Weight * texture( ps_Color, _TexCoords + vec2(+1.5f, +0.5f) * ps_InvertedScreensizeAndScreensize.xy).rgb;
+    Blurred += Weight * texture( ps_Color, _TexCoords + vec2(+0.5f, -1.5f) * g_InvertedScreensizeAndScreensize.xy).rgb;
+    Blurred += Weight * texture( ps_Color, _TexCoords + vec2(-1.5f, -0.5f) * g_InvertedScreensizeAndScreensize.xy).rgb;
+    Blurred += Weight * texture( ps_Color, _TexCoords + vec2(-0.5f, +1.5f) * g_InvertedScreensizeAndScreensize.xy).rgb;
+    Blurred += Weight * texture( ps_Color, _TexCoords + vec2(+1.5f, +0.5f) * g_InvertedScreensizeAndScreensize.xy).rgb;
     
     return Blurred;
 }
@@ -107,7 +107,7 @@ vec4 ApplyDepthOfField(vec2 _TexCoords)
     // -----------------------------------------------------------------------------
     // Get depth and check value
     // -----------------------------------------------------------------------------
-    Depth = ConvertToLinearDepth(texture(ps_Depth, _TexCoords).r, ps_CameraParameterNear, ps_CameraParameterFar);
+    Depth = ConvertToLinearDepth(texture(ps_Depth, _TexCoords).r, g_CameraParameterNear, g_CameraParameterFar);
     
     if (Depth > 1.0f)
     {

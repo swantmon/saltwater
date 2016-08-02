@@ -24,7 +24,7 @@ void main()
     
     PSTexCoord = VertexPosition.xy;
 
-	gl_Position = ps_WorldToScreen * WSPosition;
+	gl_Position = g_WorldToScreen * WSPosition;
 }
 
 #endif // __INCLUDE_VS_VM_P_QUAD_GLSL__

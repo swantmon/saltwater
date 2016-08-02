@@ -115,18 +115,18 @@ void main()
     vec2  TexCoord    = vec2(X / 160.0f, Y / 90.0f);
     float LinearDepth = max(Z * cs_FrustumDepthInMeter / 128.0f, 0.00001f);
     
-    float SSDepth = ConvertToHyperbolicDepth(LinearDepth, ps_ViewToScreen);
+    float SSDepth = ConvertToHyperbolicDepth(LinearDepth, g_ViewToScreen);
     
     SSDepth = SSDepth * 0.5f + 0.5f;
     
-    vec3 VSPosition = GetViewSpacePositionFromDepth(SSDepth, TexCoord, ps_ScreenToView);
-    vec3 WSPosition = (ps_ViewToWorld * vec4(VSPosition, 1.0f)).xyz;
+    vec3 VSPosition = GetViewSpacePositionFromDepth(SSDepth, TexCoord, g_ScreenToView);
+    vec3 WSPosition = (g_ViewToWorld * vec4(VSPosition, 1.0f)).xyz;
     
     // -------------------------------------------------------------------------------------
     // Mie and Rayleigh scattering
     // -------------------------------------------------------------------------------------
     vec3 WSLightDirection = -cs_LightDirection.xyz;
-    vec3 WSViewDirection  = normalize(ps_ViewPosition.xyz - WSPosition);
+    vec3 WSViewDirection  = normalize(g_ViewPosition.xyz - WSPosition);
     
     float LdotV  = dot(WSLightDirection, WSViewDirection) / length(WSViewDirection);
     float LdotV2 = LdotV * LdotV;
@@ -145,7 +145,7 @@ void main()
     // -----------------------------------------------------------------------------
     // Density of dust
     // -----------------------------------------------------------------------------
-    vec3 InverseMapSize = vec3(1.0f / ps_WorldSizeX, 1.0f / ps_WorldSizeY, 1.0f / ps_WorldSizeZ);
+    vec3 InverseMapSize = vec3(1.0f / g_WorldSizeX, 1.0f / g_WorldSizeY, 1.0f / g_WorldSizeZ);
     
     vec3 Seed = WSPosition.xyz * InverseMapSize;
     Seed += cs_WindDirection.xyz;

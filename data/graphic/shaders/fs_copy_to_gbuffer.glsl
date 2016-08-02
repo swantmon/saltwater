@@ -43,8 +43,8 @@ vec3 ConvertDepthTo3D(in float _Depth, in vec2 _UV)
     X = _UV.x * 2.0f - 1.0f;
     Y = (1.0f - _UV.y) * 2.0f - 1.0f;
     
-    X /= ps_ViewToScreen[0][0];
-    Y /= ps_ViewToScreen[1][1];
+    X /= g_ViewToScreen[0][0];
+    Y /= g_ViewToScreen[1][1];
 
     Position3D  = vec3(X, Y, -1.0f);
     Position3D  = normalize(Position3D);
@@ -272,7 +272,7 @@ void main()
     // Normal
     // -----------------------------------------------------------------------------
     vec3 VSNormal = GetVSNormal(TexCoord);
-    vec4 WSNormal = ps_ViewToWorld * vec4(VSNormal, 0.0f);
+    vec4 WSNormal = g_ViewToWorld * vec4(VSNormal, 0.0f);
 
     WSNormal.xyz = blend_angle(WSNormal, GBufferWSNormal);
 
@@ -291,8 +291,8 @@ void main()
     // Writing depth to depth buffer manually
     // -----------------------------------------------------------------------------
     float Depth  = SampleDepthTexture(ps_Texture1, TexCoord);
-    float tDepth = Depth * ps_ViewToScreen[2][2] - ps_ViewToScreen[3][2];
-    float hDepth = tDepth / (Depth * ps_ViewToScreen[2][3]);
+    float tDepth = Depth * g_ViewToScreen[2][2] - g_ViewToScreen[3][2];
+    float hDepth = tDepth / (Depth * g_ViewToScreen[2][3]);
     
     gl_FragDepth = hDepth + DEPTH_BIAS;
 }

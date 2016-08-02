@@ -12,7 +12,7 @@ layout(row_major, std140, binding = 0) uniform UB0
     mat4 ps_InvertedProjectionMatrix;
     mat4 ps_InvertedViewMatrix;
     vec4 ps_LightDirection;
-    vec4 ps_ViewDirection;
+    vec4 g_ViewDirection;
     vec2 ps_InvertedScreensize;
 };
 
@@ -101,7 +101,7 @@ void main(void)
     // Calculate diffuse color
     // -----------------------------------------------------------------------------
     vec3  WSLightDirection  = -normalize(ps_LightDirection.xyz);
-    vec3  WSViewDirection   = normalize(ps_ViewDirection.xyz);
+    vec3  WSViewDirection   = normalize(g_ViewDirection.xyz);
     vec3  WSHalfVector      = normalize(WSViewDirection + WSLightDirection);
     
     // -----------------------------------------------------------------------------

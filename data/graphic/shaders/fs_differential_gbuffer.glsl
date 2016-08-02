@@ -48,7 +48,7 @@ void main(void)
     // -----------------------------------------------------------------------------
     // Define tex coords from system input
     // -----------------------------------------------------------------------------
-    vec2 TexCoord = vec2(gl_FragCoord.x * ps_InvertedScreensizeAndScreensize.x, 1.0f - gl_FragCoord.y * ps_InvertedScreensizeAndScreensize.y);
+    vec2 TexCoord = vec2(gl_FragCoord.x * g_InvertedScreensizeAndScreensize.x, 1.0f - gl_FragCoord.y * g_InvertedScreensizeAndScreensize.y);
     
     vec3 Color = texture(ps_BackgroundColor, TexCoord).rgb * ps_Color;
 

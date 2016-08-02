@@ -64,13 +64,13 @@ vec4 SampleLightFromTexture(in sampler2D _Texture, in vec3 _HitUVz, in float _Le
 
     if (ps_PreviousFrame == 1.0f)
     {
-        vec4 HitClip            = vec4((_HitUVz.xy - ps_ScreenPositionScaleBias.zw) / ps_ScreenPositionScaleBias.xy, _HitUVz.z, 1.0f );
-        vec4 HitTranslatedWorld = ps_ViewToWorld * ps_ScreenToView * HitClip;
+        vec4 HitClip            = vec4((_HitUVz.xy - g_ScreenPositionScaleBias.zw) / g_ScreenPositionScaleBias.xy, _HitUVz.z, 1.0f );
+        vec4 HitTranslatedWorld = g_ViewToWorld * g_ScreenToView * HitClip;
             
-        vec4 PreviousTranslatedWorld = vec4(HitTranslatedWorld.xyz + HitTranslatedWorld.w * (ps_PreviousViewPosition.xyz - ps_ViewPosition.xyz), HitTranslatedWorld.w);
-        vec4 PreviousClip            = ps_PreviousViewToScreen * ps_PreviousWorldToView * PreviousTranslatedWorld;
+        vec4 PreviousTranslatedWorld = vec4(HitTranslatedWorld.xyz + HitTranslatedWorld.w * (g_PreviousViewPosition.xyz - g_ViewPosition.xyz), HitTranslatedWorld.w);
+        vec4 PreviousClip            = g_PreviousViewToScreen * g_PreviousWorldToView * PreviousTranslatedWorld;
         vec2 PreviousScreen          = PreviousClip.xy / PreviousClip.w;
-        vec2 PreviousUV              = PreviousScreen.xy * ps_ScreenPositionScaleBias.xy + ps_ScreenPositionScaleBias.zw;
+        vec2 PreviousUV              = PreviousScreen.xy * g_ScreenPositionScaleBias.xy + g_ScreenPositionScaleBias.zw;
         
         OutColor.rgb = textureLod( _Texture, PreviousUV.xy, _Level).rgb;
         OutColor.a = 1;
@@ -132,16 +132,16 @@ void RayCast(
     // -----------------------------------------------------------------------------
     // Transform ray from world to view and from view to screen/clip
     // -----------------------------------------------------------------------------
-    const vec4 RayStartV = ps_WorldToView * vec4(_RayOriginTranslatedWorld, 1.0f);
-    const vec4 RayDirV   = ps_WorldToView * vec4(_RayDirection * _SceneDepth, 0.0f);
+    const vec4 RayStartV = g_WorldToView * vec4(_RayOriginTranslatedWorld, 1.0f);
+    const vec4 RayDirV   = g_WorldToView * vec4(_RayDirection * _SceneDepth, 0.0f);
     const vec4 RayEndV   = RayStartV + RayDirV;
 
     const float RayEndRadiusV = length(RayDirV.xyz) * tan(_ConeAngleWorld * 0.4f);
     const vec2  RayEndBorderV = RayEndV.xy + RayEndRadiusV / sqrt(2.0f);
 
-    const vec4 RayStartClip         = ps_ViewToScreen * RayStartV;
-    const vec4 RayEndClip           = ps_ViewToScreen * RayEndV;
-    const vec4 TempRayEndBorderClip = ps_ViewToScreen * vec4(RayEndBorderV, RayEndV.zw);
+    const vec4 RayStartClip         = g_ViewToScreen * RayStartV;
+    const vec4 RayEndClip           = g_ViewToScreen * RayEndV;
+    const vec4 TempRayEndBorderClip = g_ViewToScreen * vec4(RayEndBorderV, RayEndV.zw);
     const vec2 RayEndBorderClip     = TempRayEndBorderClip.xy;
 
     const vec3 RayStartScreen     = RayStartClip.xyz / RayStartClip.w;
@@ -167,14 +167,14 @@ void RayCast(
     // -----------------------------------------------------------------------------
     // Transform from screen space to UV coordinates
     // -----------------------------------------------------------------------------
-    const vec3 RayStartUVz     = vec3((RayStartScreen.xy * ps_ScreenPositionScaleBias.xy + ps_ScreenPositionScaleBias.zw), RayStartScreen.z);
-    const vec3 RayStepUVz      = vec3(RayStepScreen.xy   * ps_ScreenPositionScaleBias.xy, RayStepScreen.z);
-    const vec2 RayStepRadiusUV = RayStepRadiusScreen.xy  * ps_ScreenPositionScaleBias.xy;
+    const vec3 RayStartUVz     = vec3((RayStartScreen.xy * g_ScreenPositionScaleBias.xy + g_ScreenPositionScaleBias.zw), RayStartScreen.z);
+    const vec3 RayStepUVz      = vec3(RayStepScreen.xy   * g_ScreenPositionScaleBias.xy, RayStepScreen.z);
+    const vec2 RayStepRadiusUV = RayStepRadiusScreen.xy  * g_ScreenPositionScaleBias.xy;
     
     // -----------------------------------------------------------------------------
     // Step width
     // -----------------------------------------------------------------------------
-    const float RayStepRadiusFactor = length(RayStepRadiusUV * ps_InvertedScreensizeAndScreensize.zw);
+    const float RayStepRadiusFactor = length(RayStepRadiusUV * g_InvertedScreensizeAndScreensize.zw);
     const float Step = 1.0f / (_NumSteps + 1);
 
     // -----------------------------------------------------------------------------
@@ -399,8 +399,8 @@ void main(void)
     // Info: screen position in [-1, 1] screen space
     // Info: pixel position in [0,0 -> width-1, height-1]
     // -----------------------------------------------------------------------------
-    ScreenPos.xy = (in_UV - ps_ScreenPositionScaleBias.zw) / ps_ScreenPositionScaleBias.xy;
-    PixelPos.xy  = ScreenPos * ps_InvertedScreensizeAndScreensize.zw + (ps_InvertedScreensizeAndScreensize.zw / vec2(2.0f)) + 0.5f;
+    ScreenPos.xy = (in_UV - g_ScreenPositionScaleBias.zw) / g_ScreenPositionScaleBias.xy;
+    PixelPos.xy  = ScreenPos * g_InvertedScreensizeAndScreensize.zw + (g_InvertedScreensizeAndScreensize.zw / vec2(2.0f)) + 0.5f;
 
     // -----------------------------------------------------------------------------
     // Get data
@@ -413,12 +413,12 @@ void main(void)
     // -----------------------------------------------------------------------------
     // VS position
     // -----------------------------------------------------------------------------
-    vec3 VSPosition = GetViewSpacePositionFromDepth(VSDepth, in_UV, ps_ScreenToView);
+    vec3 VSPosition = GetViewSpacePositionFromDepth(VSDepth, in_UV, g_ScreenToView);
     
     // -----------------------------------------------------------------------------
     // WS position
     // -----------------------------------------------------------------------------
-    vec3 WSPosition = (ps_ViewToWorld * vec4(VSPosition, 1.0f)).xyz;
+    vec3 WSPosition = (g_ViewToWorld * vec4(VSPosition, 1.0f)).xyz;
 
     // -----------------------------------------------------------------------------
     // Surface data
@@ -460,7 +460,7 @@ void main(void)
     // -----------------------------------------------------------------------------
     // Vectors
     // -----------------------------------------------------------------------------
-    const vec3 WSViewDirection = normalize(ps_ViewPosition.xyz - Data.m_WSPosition);
+    const vec3 WSViewDirection = normalize(g_ViewPosition.xyz - Data.m_WSPosition);
     
     // -----------------------------------------------------------------------------
     // Frame
@@ -477,7 +477,7 @@ void main(void)
 #ifdef SSR_CONE_QUALITY
 
 
-    PixelPos.xy  = ScreenPos * ps_InvertedScreensizeAndScreensize.zw + ps_InvertedScreensizeAndScreensize.zw / vec2(2.0f);
+    PixelPos.xy  = ScreenPos * g_InvertedScreensizeAndScreensize.zw + g_InvertedScreensizeAndScreensize.zw / vec2(2.0f);
     const vec2 E = vec2(PseudoRandom(PixelPos + ivec2(FrameRandom, 0)), PseudoRandom(PixelPos + ivec2(0, FrameRandom)));
 
     const float StepOffset = PseudoRandom(PixelPos + FrameRandom);

@@ -44,10 +44,10 @@ void main(void)
     // -----------------------------------------------------------------------------
     // Get a set of neighbor pixels
     // -----------------------------------------------------------------------------
-    vec3 rgbNW = texture(ps_InputTexture, in_UV.xy + (vec2(-1.0f, -1.0f) * ps_InvertedScreensizeAndScreensize.xy)).xyz;
-    vec3 rgbNE = texture(ps_InputTexture, in_UV.xy + (vec2(+1.0f, -1.0f) * ps_InvertedScreensizeAndScreensize.xy)).xyz;
-    vec3 rgbSW = texture(ps_InputTexture, in_UV.xy + (vec2(-1.0f, +1.0f) * ps_InvertedScreensizeAndScreensize.xy)).xyz;
-    vec3 rgbSE = texture(ps_InputTexture, in_UV.xy + (vec2(+1.0f, +1.0f) * ps_InvertedScreensizeAndScreensize.xy)).xyz;
+    vec3 rgbNW = texture(ps_InputTexture, in_UV.xy + (vec2(-1.0f, -1.0f) * g_InvertedScreensizeAndScreensize.xy)).xyz;
+    vec3 rgbNE = texture(ps_InputTexture, in_UV.xy + (vec2(+1.0f, -1.0f) * g_InvertedScreensizeAndScreensize.xy)).xyz;
+    vec3 rgbSW = texture(ps_InputTexture, in_UV.xy + (vec2(-1.0f, +1.0f) * g_InvertedScreensizeAndScreensize.xy)).xyz;
+    vec3 rgbSE = texture(ps_InputTexture, in_UV.xy + (vec2(+1.0f, +1.0f) * g_InvertedScreensizeAndScreensize.xy)).xyz;
     vec3 rgbM  = texture(ps_InputTexture, in_UV.xy).xyz;
     
     // -----------------------------------------------------------------------------
@@ -87,7 +87,7 @@ void main(void)
     // -----------------------------------------------------------------------------
     // Get final direction
     // -----------------------------------------------------------------------------
-    Direction = min( vec2(FXAA_SPAN_MAX, FXAA_SPAN_MAX), max( vec2(-FXAA_SPAN_MAX, -FXAA_SPAN_MAX), Direction * ReciprocalDirection ) ) * ps_InvertedScreensizeAndScreensize.xy;
+    Direction = min( vec2(FXAA_SPAN_MAX, FXAA_SPAN_MAX), max( vec2(-FXAA_SPAN_MAX, -FXAA_SPAN_MAX), Direction * ReciprocalDirection ) ) * g_InvertedScreensizeAndScreensize.xy;
     
     // -----------------------------------------------------------------------------
     // Now we get a interpolation between neighbor pixels

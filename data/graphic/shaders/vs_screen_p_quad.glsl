@@ -19,7 +19,7 @@ void main()
     
     PSTexCoord = vec2(Position.x, 1.0f - Position.y);
 
-	gl_Position = ps_WorldToQuad * Position;
+	gl_Position = g_WorldToQuad * Position;
 }
 
 #endif // __INCLUDE_VS_SCREEN_P_QUAD_GLSL__

@@ -29,7 +29,7 @@ void main(void)
     PSWSPosition = WSPosition.xyz;
     PSTexCoord   = vec2(VertexPosition.xy);
     
-    gl_Position = ps_WorldToScreen * WSPosition;
+    gl_Position = g_WorldToScreen * WSPosition;
 }
 
 #endif // __INCLUDE_VS_LIQUID_PARTICLE_GLSL__

@@ -31,7 +31,7 @@ void main(void)
     PSNormal   = WSNormal.xyz;
     PSTexCoord = VertexTexCoord;
     
-    gl_Position = ps_WorldToScreen * WSPosition;
+    gl_Position = g_WorldToScreen * WSPosition;
 }
 
 #endif // __INCLUDE_VS_M_PNX0_GLSL__

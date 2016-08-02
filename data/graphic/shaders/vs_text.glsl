@@ -19,15 +19,15 @@ out gl_PerVertex
 
 void main(void)
 {
-    vec2 InvertedTextSize     = ps_InvertedScreensizeAndScreensize.xy * TextSettings.x;
-    vec2 InvertedTextPosition = ps_InvertedScreensizeAndScreensize.xy * TextSettings.yz;
+    vec2 InvertedTextSize     = g_InvertedScreensizeAndScreensize.xy * TextSettings.x;
+    vec2 InvertedTextPosition = g_InvertedScreensizeAndScreensize.xy * TextSettings.yz;
 
     vec4 WSPosition = vec4(VertexPosition.xy * InvertedTextSize + InvertedTextPosition, 0.0f, 1.0f);
 
     PSTexCoord = VertexPosition.xy * CharSettings.x + (CharSettings.yz * CharSettings.x);
     PSColor    = CharColor;
     
-    gl_Position = ps_WorldToQuad * WSPosition;
+    gl_Position = g_WorldToQuad * WSPosition;
 }
 
 #endif // __INCLUDE_VS_TEXT_GLSL__

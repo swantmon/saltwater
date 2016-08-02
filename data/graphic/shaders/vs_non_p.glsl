@@ -13,7 +13,7 @@ out gl_PerVertex
 
 void main(void)
 {
-    gl_Position = ps_WorldToScreen * vec4(VertexPosition.xyz, 1.0f);
+    gl_Position = g_WorldToScreen * vec4(VertexPosition.xyz, 1.0f);
 }
 
 #endif // __INCLUDE_VS_NON_P_GLSL__

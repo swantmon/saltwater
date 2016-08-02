@@ -4,31 +4,31 @@
 
 layout(row_major, std140, binding = 0) uniform UB0
 {
-	mat4 ps_WorldToScreen;
-    mat4 ps_WorldToQuad;
-    mat4 ps_WorldToView;
-    mat4 ps_ViewToScreen;
-    mat4 ps_ScreenToView;
-    mat4 ps_ViewToWorld;
-    vec4 ps_ViewPosition;
-    vec4 ps_ViewDirection;
-    mat4 ps_PreviousWorldToView;
-    mat4 ps_PreviousViewToScreen;
-    mat4 ps_PreviousScreenToView;
-    mat4 ps_PreviousViewToWorld;
-    vec4 ps_PreviousViewPosition;
-    vec4 ps_PreviousViewDirection;
-    vec4 ps_InvertedScreensizeAndScreensize;
-    vec4 ps_ScreenPositionScaleBias;
-    vec4 ps_CameraParameters0;
-    vec4 ps_WorldParameters0;
+	mat4 g_WorldToScreen;
+    mat4 g_WorldToQuad;
+    mat4 g_WorldToView;
+    mat4 g_ViewToScreen;
+    mat4 g_ScreenToView;
+    mat4 g_ViewToWorld;
+    vec4 g_ViewPosition;
+    vec4 g_ViewDirection;
+    mat4 g_PreviousWorldToView;
+    mat4 g_PreviousViewToScreen;
+    mat4 g_PreviousScreenToView;
+    mat4 g_PreviousViewToWorld;
+    vec4 g_PreviousViewPosition;
+    vec4 g_PreviousViewDirection;
+    vec4 g_InvertedScreensizeAndScreensize;
+    vec4 g_ScreenPositionScaleBias;
+    vec4 g_CameraParameters0;
+    vec4 g_WorldParameters0;
 };
 
-#define ps_CameraParameterNear ps_CameraParameters0.x
-#define ps_CameraParameterFar  ps_CameraParameters0.y
+#define g_CameraParameterNear g_CameraParameters0.x
+#define g_CameraParameterFar  g_CameraParameters0.y
 
-#define ps_WorldSizeX ps_WorldParameters0.x
-#define ps_WorldSizeY ps_WorldParameters0.y
-#define ps_WorldSizeZ ps_WorldParameters0.z
+#define g_WorldSizeX g_WorldParameters0.x
+#define g_WorldSizeY g_WorldParameters0.y
+#define g_WorldSizeZ g_WorldParameters0.z
 
 #endif // __INCLUDE_COMMON_GLOBAL_GLSL__

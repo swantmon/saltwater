@@ -56,12 +56,12 @@ void main()
     // -----------------------------------------------------------------------------
     // VS position
     // -----------------------------------------------------------------------------
-    vec3 VSPosition = GetViewSpacePositionFromDepth(VSDepth, in_TexCoord, ps_ScreenToView);
+    vec3 VSPosition = GetViewSpacePositionFromDepth(VSDepth, in_TexCoord, g_ScreenToView);
     
     // -----------------------------------------------------------------------------
     // WS position
     // -----------------------------------------------------------------------------
-    vec3 WSPosition = (ps_ViewToWorld * vec4(VSPosition, 1.0f)).xyz;
+    vec3 WSPosition = (g_ViewToWorld * vec4(VSPosition, 1.0f)).xyz;
 
     // -----------------------------------------------------------------------------
     // Surface data
@@ -79,7 +79,7 @@ void main()
     // Compute lighting for sun light
     // -----------------------------------------------------------------------------
     vec3 WSLightDirection  = -ps_LightDirection.xyz;
-    vec3 WSViewDirection   = normalize(ps_ViewPosition.xyz - Data.m_WSPosition);
+    vec3 WSViewDirection   = normalize(g_ViewPosition.xyz - Data.m_WSPosition);
     
     float NdotV = dot(Data.m_WSNormal, WSViewDirection);
     
