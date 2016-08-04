@@ -196,11 +196,17 @@ namespace Dt
         void SetShadowIntensity(float _ShadowIntensity);
         float GetShadowIntensity();
 
-        void SetVolumetricFogScatteringCoefficient(float _VolumetricFogScatteringCoefficient);
-        float GetVolumetricFogScatteringCoefficient();
+        void SetScatteringCoefficient(float _ScatteringCoefficient);
+        float GetScatteringCoefficient();
 
-        void SetVolumetricFogAbsorptionCoefficient(float _VolumetricFogAbsorptionCoefficient);
-        float GetVolumetricFogAbsorptionCoefficient();
+        void SetAbsorptionCoefficient(float _AbsorptionCoefficient);
+        float GetAbsorptionCoefficient();
+
+        void SetDensityLevel(float _DensityLevel);
+        float GetDensityLevel();
+
+        void SetDensityAttenuation(float _DensityAttenuation);
+        float GetDensityAttenuation();
 
     public:
 
@@ -213,7 +219,9 @@ namespace Dt
         Base::Float4 m_FogColor;                           //< Overall color of the fog (rgb = color, a = intensity)
         float        m_FrustumDepthInMeter;                //< Meters of the fog will be calculated
         float        m_ShadowIntensity;                    //< Intensity of the fog (higher is harder edges)
-        float        m_VolumetricFogScatteringCoefficient; //< Scattering amount of light by the fog
-        float        m_VolumetricFogAbsorptionCoefficient; //< Absorption amount of light by the fog
+        float        m_ScatteringCoefficient;              //< Scattering amount of light by the fog
+        float        m_AbsorptionCoefficient;              //< Absorption amount of light by the fog
+        float        m_DensityLevel;                       //< Amount of density at the ground level / sea level
+        float        m_DensityAttenuation;                 //< Attenuation factor for the density at higher level
     };
 } // namespace Dt

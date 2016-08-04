@@ -101,6 +101,9 @@ namespace
             float        m_ShadowIntensity;
             float        m_VolumetricFogScatteringCoefficient;
             float        m_VolumetricFogAbsorptionCoefficient;
+            float        m_DensityLevel;
+            float        m_DensityAttenuation;
+            float        m_Padding[2];
         };
 
         struct SFogApplyProperties
@@ -787,8 +790,10 @@ namespace
         pVolumeProperties->m_FogColor                           = pDataVolumeFogFacet->GetFogColor();
         pVolumeProperties->m_FrustumDepthInMeter                = pDataVolumeFogFacet->GetFrustumDepthInMeter();
         pVolumeProperties->m_ShadowIntensity                    = pDataVolumeFogFacet->GetShadowIntensity();
-        pVolumeProperties->m_VolumetricFogScatteringCoefficient = pDataVolumeFogFacet->GetVolumetricFogScatteringCoefficient();
-        pVolumeProperties->m_VolumetricFogAbsorptionCoefficient = pDataVolumeFogFacet->GetVolumetricFogAbsorptionCoefficient();
+        pVolumeProperties->m_VolumetricFogScatteringCoefficient = pDataVolumeFogFacet->GetScatteringCoefficient();
+        pVolumeProperties->m_VolumetricFogAbsorptionCoefficient = pDataVolumeFogFacet->GetAbsorptionCoefficient();
+        pVolumeProperties->m_DensityLevel                       = pDataVolumeFogFacet->GetDensityLevel();
+        pVolumeProperties->m_DensityAttenuation                 = pDataVolumeFogFacet->GetDensityAttenuation();
 
         BufferManager::UnmapConstantBuffer(m_VolumeLightingCSBufferSetPtr->GetBuffer(2));
 

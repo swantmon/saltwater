@@ -5,11 +5,6 @@
 #include "common_global.glsl"
 
 // -------------------------------------------------------------------------------------
-// Defines
-// -------------------------------------------------------------------------------------
-#define SCALE_THICKNESS 0.01f
-
-// -------------------------------------------------------------------------------------
 // Input from engine
 // -------------------------------------------------------------------------------------
 layout(row_major, std140, binding = 1) uniform UB1
@@ -29,6 +24,8 @@ layout(row_major, std140, binding = 2) uniform UB2
     float cs_ShadowIntensity;
     float cs_VolumetricFogScatteringCoefficient;
     float cs_VolumetricFogAbsorptionCoefficient;
+    float cs_DensityLevel;
+    float cs_DensityAttenuation;
 };
 
 layout(std430, binding = 0) readonly buffer BB0
@@ -53,15 +50,21 @@ vec3 GetFade(in vec3 t)
 //  return t * t * (3 - 2 * t); // old curve
 }
 
+// -------------------------------------------------------------------------------------
+
 vec4 SamplePermutation(in vec2 _UV)
 {
     return imageLoad(cs_PermutationImage, ivec2(_UV * vec2(256.0f)));
 }
 
+// -------------------------------------------------------------------------------------
+
 float SampleGradientPermutation(in float _U, in vec3 _Point)
 {
     return dot(imageLoad(cs_PermutationGradientImage, ivec2(_U * 256, 0)).xyz, _Point);
 }
+
+// -------------------------------------------------------------------------------------
 
 float ImprovedPerlinNoise3D(in vec3 _Seed)
 {
@@ -98,6 +101,85 @@ float ImprovedPerlinNoise3D(in vec3 _Seed)
                           SampleGradientPermutation(Hash.w + One, _Seed + vec3(-1.0f, -1.0f, -1.0f) ), Fade.x), Fade.y), Fade.z);
 }
 
+// -------------------------------------------------------------------------------------
+
+vec3 GetWorldPositionFromThread(in uvec3 _ThreadID)
+{
+    vec2  TexCoord    = vec2(_ThreadID.x / 160.0f, _ThreadID.y / 90.0f);
+    float LinearDepth = max(_ThreadID.z * cs_FrustumDepthInMeter / 128.0f, 0.00001f);
+    
+    float SSDepth = ConvertToHyperbolicDepth(LinearDepth, g_ViewToScreen);
+    
+    SSDepth = SSDepth * 0.5f + 0.5f;
+    
+    vec3 VSPosition = GetViewSpacePositionFromDepth(SSDepth, TexCoord, g_ScreenToView);
+    
+    return (g_ViewToWorld * vec4(VSPosition, 1.0f)).xyz;
+}
+
+// -------------------------------------------------------------------------------------
+
+float GetThicknessOfSlice(in float _Slice)
+{
+    return exp(_Slice / 128.0f);
+}
+
+// -------------------------------------------------------------------------------------
+
+float GetDensityAtPosition(in vec3 _WSPosition)
+{
+    // -------------------------------------------------------------------------------------
+    // Distribution from ground level / sea level
+    // Density = GroundLevel * e^(-Height * ScaleFactor)
+    // -------------------------------------------------------------------------------------
+    float Distribution = cs_DensityLevel * exp(-_WSPosition.z * cs_DensityAttenuation);
+
+    // -------------------------------------------------------------------------------------
+    // Perlin noixe at world position including wind
+    // -------------------------------------------------------------------------------------
+    vec3 InverseMapSize = vec3(1.0f / g_WorldSizeX, 1.0f / g_WorldSizeY, 1.0f / g_WorldSizeZ);
+    
+    vec3 Seed = _WSPosition.xyz * InverseMapSize;
+    Seed += cs_WindDirection.xyz;
+
+    float PerlinNoise = abs(ImprovedPerlinNoise3D(Seed));
+    
+    return Distribution * PerlinNoise;
+}
+
+// ------------------------------------------------------------------------------------
+
+vec3 GetSunLightingRadianceAtPosition(in vec3 _WSPosition)
+{
+    vec4 LSPosition = cs_LightViewProjection * vec4(_WSPosition, 1.0f);
+   
+    LSPosition.xyz /= LSPosition.w;
+    
+    vec3 ShadowCoord = LSPosition.xyz * 0.5f + 0.5f;
+
+    float DepthValue = imageLoad(cs_ESMTexture, ivec2(vec2(ShadowCoord.x, ShadowCoord.y) * vec2(256.0f, 256.0f))).r;
+
+    float Shadow = 1.0f;
+    
+    if (ShadowCoord.z > DepthValue)
+    {
+        Shadow = DepthValue / cs_ShadowIntensity;
+    }
+    
+    vec3 Lighting = vec3(0.0f);
+    
+    return cs_LightColor.xyz * Shadow;
+}
+
+// -------------------------------------------------------------------------------------
+
+vec3 GetAmbientLightingRadianceAtPosition(in vec3 _WSPosition)
+{
+    return vec3(0.0f);
+}
+
+// -------------------------------------------------------------------------------------
+
 layout(local_size_x = 16, local_size_y = 10, local_size_z = 8) in;
 void main()
 {
@@ -108,49 +190,27 @@ void main()
     X = gl_GlobalInvocationID.x;
     Y = gl_GlobalInvocationID.y;
     Z = gl_GlobalInvocationID.z;
-    
+
     // -------------------------------------------------------------------------------------
-    // World position from frustum
+    // World position
     // -------------------------------------------------------------------------------------
-    vec2  TexCoord    = vec2(X / 160.0f, Y / 90.0f);
-    float LinearDepth = max(Z * cs_FrustumDepthInMeter / 128.0f, 0.00001f);
-    
-    float SSDepth = ConvertToHyperbolicDepth(LinearDepth, g_ViewToScreen);
-    
-    SSDepth = SSDepth * 0.5f + 0.5f;
-    
-    vec3 VSPosition = GetViewSpacePositionFromDepth(SSDepth, TexCoord, g_ScreenToView);
-    vec3 WSPosition = (g_ViewToWorld * vec4(VSPosition, 1.0f)).xyz;
-    
+    vec3 WSPosition = GetWorldPositionFromThread(gl_GlobalInvocationID.xyz);
+
     // -------------------------------------------------------------------------------------
-    // Mie and Rayleigh scattering
+    // Preparation
     // -------------------------------------------------------------------------------------
     vec3 WSLightDirection = -cs_LightDirection.xyz;
     vec3 WSViewDirection  = normalize(g_ViewPosition.xyz - WSPosition);
     
-    float LdotV  = dot(WSLightDirection, WSViewDirection) / length(WSViewDirection);
-    float LdotV2 = LdotV * LdotV;
-    
-    float Symmetry = -0.95f;
-    float Symmetry2 = Symmetry * Symmetry;
-
-    float RayleighPhase = 0.75f * (1.0f + LdotV2);
-    float MiePhase      = 1.5f * ((1.0f - Symmetry2) / (2.0f + Symmetry2)) * (1.0f + LdotV2) / pow(abs(1.0f + Symmetry2 - 2.0f * Symmetry * LdotV), 1.5f);
-    
     // -----------------------------------------------------------------------------
     // Thickness of slice
     // -----------------------------------------------------------------------------
-    float Thickness = Z / cs_FrustumDepthInMeter * SCALE_THICKNESS;
+    float Thickness = GetThicknessOfSlice(float(Z));
     
     // -----------------------------------------------------------------------------
     // Density of dust
     // -----------------------------------------------------------------------------
-    vec3 InverseMapSize = vec3(1.0f / g_WorldSizeX, 1.0f / g_WorldSizeY, 1.0f / g_WorldSizeZ);
-    
-    vec3 Seed = WSPosition.xyz * InverseMapSize;
-    Seed += cs_WindDirection.xyz;
-    
-    float Density = abs(ImprovedPerlinNoise3D(Seed)) * (RayleighPhase + MiePhase);
+    float Density = GetDensityAtPosition(WSPosition.xyz);
     
     // -----------------------------------------------------------------------------
     // Scattering
@@ -168,32 +228,17 @@ void main()
     float AverageExposure = ps_ExposureHistory[cs_ExposureHistoryIndex];
     
     // -----------------------------------------------------------------------------
-    // Sun lighting
+    // Lighting
     // -----------------------------------------------------------------------------
-    vec4 LSPosition = cs_LightViewProjection * vec4(WSPosition, 1.0f);
-   
-    LSPosition.xyz /= LSPosition.w;
-    
-    vec3 ShadowCoord = LSPosition.xyz * 0.5f + 0.5f;
-
-    float DepthValue = imageLoad(cs_ESMTexture, ivec2(vec2(ShadowCoord.x, ShadowCoord.y) * vec2(256.0f, 256.0f))).r;
-
-    float Shadow = 1.0f;
-    
-    if (ShadowCoord.z > DepthValue)
-    {
-        Shadow = DepthValue / cs_ShadowIntensity;
-    }
-    
     vec3 Lighting = vec3(0.0f);
     
-    Lighting += AverageExposure * cs_LightColor.xyz * Shadow;
+    Lighting += AverageExposure * GetSunLightingRadianceAtPosition(WSPosition.xyz);
 
     // -----------------------------------------------------------------------------
     // Ambient lighting 
     // TODO: Get ambient light from skybox
     // -----------------------------------------------------------------------------
-    Lighting += vec3(0.0f);
+    Lighting += AverageExposure * GetAmbientLightingRadianceAtPosition(WSPosition.xyz);
 
     // -----------------------------------------------------------------------------
     // Other lights (spot, point, ...)

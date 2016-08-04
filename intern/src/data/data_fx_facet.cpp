@@ -395,12 +395,14 @@ namespace Dt
 namespace Dt
 {
     CVolumeFogFXFacet::CVolumeFogFXFacet()
-        : m_WindDirection                     (0.0f)
-        , m_FogColor                          (1.0f)
-        , m_FrustumDepthInMeter               (32.0f)
-        , m_ShadowIntensity                   (1.0f)
-        , m_VolumetricFogScatteringCoefficient(0.05f)
-        , m_VolumetricFogAbsorptionCoefficient(0.01f)
+        : m_WindDirection        (0.0f)
+        , m_FogColor             (1.0f)
+        , m_FrustumDepthInMeter  (32.0f)
+        , m_ShadowIntensity      (1.0f)
+        , m_ScatteringCoefficient(0.05f)
+        , m_AbsorptionCoefficient(0.01f)
+        , m_DensityLevel         (0.8f)
+        , m_DensityAttenuation   (0.5f)
     {
 
     }
@@ -470,29 +472,57 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CVolumeFogFXFacet::SetVolumetricFogScatteringCoefficient(float _VolumetricFogScatteringCoefficient)
+    void CVolumeFogFXFacet::SetScatteringCoefficient(float _ScatteringCoefficient)
     {
-        m_VolumetricFogScatteringCoefficient = _VolumetricFogScatteringCoefficient;
+        m_ScatteringCoefficient = _ScatteringCoefficient;
     }
 
     // -----------------------------------------------------------------------------
 
-    float CVolumeFogFXFacet::GetVolumetricFogScatteringCoefficient()
+    float CVolumeFogFXFacet::GetScatteringCoefficient()
     {
-        return m_VolumetricFogScatteringCoefficient;
+        return m_ScatteringCoefficient;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CVolumeFogFXFacet::SetVolumetricFogAbsorptionCoefficient(float _VolumetricFogAbsorptionCoefficient)
+    void CVolumeFogFXFacet::SetAbsorptionCoefficient(float _AbsorptionCoefficient)
     {
-        m_VolumetricFogAbsorptionCoefficient = _VolumetricFogAbsorptionCoefficient;
+        m_AbsorptionCoefficient = _AbsorptionCoefficient;
     }
 
     // -----------------------------------------------------------------------------
 
-    float CVolumeFogFXFacet::GetVolumetricFogAbsorptionCoefficient()
+    float CVolumeFogFXFacet::GetAbsorptionCoefficient()
     {
-        return m_VolumetricFogAbsorptionCoefficient;
+        return m_AbsorptionCoefficient;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CVolumeFogFXFacet::SetDensityLevel(float _DensityLevel)
+    {
+        m_DensityLevel = _DensityLevel;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CVolumeFogFXFacet::GetDensityLevel()
+    {
+        return m_DensityLevel;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CVolumeFogFXFacet::SetDensityAttenuation(float _DensityAttenuation)
+    {
+        m_DensityAttenuation = _DensityAttenuation;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CVolumeFogFXFacet::GetDensityAttenuation()
+    {
+        return m_DensityAttenuation;
     }
 } // namespace Dt
