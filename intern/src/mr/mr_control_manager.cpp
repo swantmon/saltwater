@@ -773,9 +773,9 @@ namespace
                 NewMarkerInfo.m_UID          = pMarker->m_pDataInfos->m_UID;
                 NewMarkerInfo.m_FrameCounter = 0;
                 
-                NewMarkerInfo.m_TranslationToCamera[0] = static_cast<float>(PatternTransformation[0][3]) / 1000.0f;
-                NewMarkerInfo.m_TranslationToCamera[1] = static_cast<float>(PatternTransformation[1][3]) / 1000.0f;
-                NewMarkerInfo.m_TranslationToCamera[2] = static_cast<float>(PatternTransformation[2][3]) / 1000.0f;
+                NewMarkerInfo.m_TranslationToCamera[0] = static_cast<float>(PatternTransformation[0][3]) / 10.0f;
+                NewMarkerInfo.m_TranslationToCamera[1] = static_cast<float>(PatternTransformation[1][3]) / 10.0f;
+                NewMarkerInfo.m_TranslationToCamera[2] = static_cast<float>(PatternTransformation[2][3]) / 10.0f;
                 
                 NewMarkerInfo.m_RotationToCamera[0][0] = static_cast<float>(PatternTransformation[0][0]);
                 NewMarkerInfo.m_RotationToCamera[0][1] = static_cast<float>(PatternTransformation[0][1]);

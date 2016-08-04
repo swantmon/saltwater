@@ -69,8 +69,8 @@ namespace
         
 //        CreateSimplePBRTestScene();
 //        CreatePBRTestScene();
-//        CreatePBRARScene();
-        CreatePBRSponzaScene();
+        CreatePBRARScene();
+//        CreatePBRSponzaScene();
 
         BASE_CONSOLE_STREAMINFO("Logic> Loading level finished.");
         
@@ -1144,8 +1144,8 @@ namespace
 
             Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(0.05f, 0.1f, 0.1f));
-            pTransformationFacet->SetScale   (Base::Float3(0.006f));
+            pTransformationFacet->SetPosition(Base::Float3(5.00f, 10.0f, 10.0f));
+            pTransformationFacet->SetScale   (Base::Float3(0.6f));
             pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, 0.0f));
 
             Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
@@ -1178,8 +1178,8 @@ namespace
 
             Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.1f));
-            pTransformationFacet->SetScale   (Base::Float3(0.0005f));
+            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 10.0f));
+            pTransformationFacet->SetScale   (Base::Float3(0.05f));
             pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(35.0f), Base::DegreesToRadians(0.0f), Base::DegreesToRadians(10.0f)));
 
             Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
