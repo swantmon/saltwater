@@ -213,6 +213,8 @@ void main()
     // -----------------------------------------------------------------------------
     // Save adapted exposure
     // -----------------------------------------------------------------------------
+	NextExposure = clamp(NextExposure, -5.0f, 5.0f);
+
     m_ExposureHistory[cs_HistoryIndex] = NextExposure;
 }
 
