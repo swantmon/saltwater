@@ -64,6 +64,8 @@ namespace
         public:
             unsigned int                           m_UID;
             unsigned int                           m_NativeID;
+            bool                                   m_IsVisible;
+            ARdouble                               m_PatternTransformation[3][4];
             Dt::CARControllerPluginFacet::SMarker* m_pDataInfos;
             ARPattHandle*                          m_pPatternHandle;
         };
@@ -670,6 +672,7 @@ namespace
 
             rNewMarker.m_UID        = rCurrentMarker.m_UID;
             rNewMarker.m_pDataInfos = &rCurrentMarker;
+            rNewMarker.m_IsVisible  = false;
             
             rNewMarker.m_pPatternHandle = arPattCreateHandle();
             
@@ -743,8 +746,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Check for pattern visibility
         // -----------------------------------------------------------------------------
-        static ARdouble PatternTransformation[3][4];
-        
         ARMarkerInfo* pMarkerInfos;
         
         pMarkerInfos = arGetMarker(m_pNativeTrackingHandle);
@@ -753,18 +754,37 @@ namespace
         {
             ARMarkerInfo& rCurrentMarkerInfo = pMarkerInfos[IndexOfMarker];
 
+            if (rCurrentMarkerInfo.id == -1)
+            {
+                continue;
+            }
+
+            // -----------------------------------------------------------------------------
+            // Found a marker
+            // -----------------------------------------------------------------------------
+            CInternMarker* pMarker = m_MarkerByIDs.at(rCurrentMarkerInfo.id);
+
+            if (pMarker == nullptr)
+            {
+                continue;
+            }
+
             if (rCurrentMarkerInfo.cf >= 0.7)
             {
                 // -----------------------------------------------------------------------------
-                // Found a marker
-                // -----------------------------------------------------------------------------
-                CInternMarker* pMarker = m_MarkerByIDs.at(rCurrentMarkerInfo.id);
-                
-                // -----------------------------------------------------------------------------
                 // Get transformation of this pattern
                 // -----------------------------------------------------------------------------
-                arGetTransMatSquare(m_pNativeTracking3DHandle, &(rCurrentMarkerInfo), pMarker->m_pDataInfos->m_WidthInMeter * 1000.0f, PatternTransformation);
-                
+                if (pMarker->m_IsVisible == false)
+                {
+                    arGetTransMatSquare(m_pNativeTracking3DHandle, &(rCurrentMarkerInfo), pMarker->m_pDataInfos->m_WidthInMeter * 1000.0f, pMarker->m_PatternTransformation);
+                }
+                else
+                {
+                    arGetTransMatSquareCont(m_pNativeTracking3DHandle, &(rCurrentMarkerInfo), pMarker->m_PatternTransformation, pMarker->m_pDataInfos->m_WidthInMeter * 1000.0f, pMarker->m_PatternTransformation);
+                }   
+
+                pMarker->m_IsVisible = true;
+
                 // -----------------------------------------------------------------------------
                 // Create / Edit marker infos
                 // -----------------------------------------------------------------------------
@@ -773,23 +793,27 @@ namespace
                 NewMarkerInfo.m_UID          = pMarker->m_pDataInfos->m_UID;
                 NewMarkerInfo.m_FrameCounter = 0;
                 
-                NewMarkerInfo.m_TranslationToCamera[0] = static_cast<float>(PatternTransformation[0][3]) / 10.0f;
-                NewMarkerInfo.m_TranslationToCamera[1] = static_cast<float>(PatternTransformation[1][3]) / 10.0f;
-                NewMarkerInfo.m_TranslationToCamera[2] = static_cast<float>(PatternTransformation[2][3]) / 10.0f;
+                NewMarkerInfo.m_TranslationToCamera[0] = static_cast<float>(pMarker->m_PatternTransformation[0][3]) / 10.0f;
+                NewMarkerInfo.m_TranslationToCamera[1] = static_cast<float>(pMarker->m_PatternTransformation[1][3]) / 10.0f;
+                NewMarkerInfo.m_TranslationToCamera[2] = static_cast<float>(pMarker->m_PatternTransformation[2][3]) / 10.0f;
                 
-                NewMarkerInfo.m_RotationToCamera[0][0] = static_cast<float>(PatternTransformation[0][0]);
-                NewMarkerInfo.m_RotationToCamera[0][1] = static_cast<float>(PatternTransformation[0][1]);
-                NewMarkerInfo.m_RotationToCamera[0][2] = static_cast<float>(PatternTransformation[0][2]);
+                NewMarkerInfo.m_RotationToCamera[0][0] = static_cast<float>(pMarker->m_PatternTransformation[0][0]);
+                NewMarkerInfo.m_RotationToCamera[0][1] = static_cast<float>(pMarker->m_PatternTransformation[0][1]);
+                NewMarkerInfo.m_RotationToCamera[0][2] = static_cast<float>(pMarker->m_PatternTransformation[0][2]);
 
-                NewMarkerInfo.m_RotationToCamera[1][0] = static_cast<float>(PatternTransformation[1][0]);
-                NewMarkerInfo.m_RotationToCamera[1][1] = static_cast<float>(PatternTransformation[1][1]);
-                NewMarkerInfo.m_RotationToCamera[1][2] = static_cast<float>(PatternTransformation[1][2]);
+                NewMarkerInfo.m_RotationToCamera[1][0] = static_cast<float>(pMarker->m_PatternTransformation[1][0]);
+                NewMarkerInfo.m_RotationToCamera[1][1] = static_cast<float>(pMarker->m_PatternTransformation[1][1]);
+                NewMarkerInfo.m_RotationToCamera[1][2] = static_cast<float>(pMarker->m_PatternTransformation[1][2]);
 
-                NewMarkerInfo.m_RotationToCamera[2][0] = static_cast<float>(PatternTransformation[2][0]);
-                NewMarkerInfo.m_RotationToCamera[2][1] = static_cast<float>(PatternTransformation[2][1]);
-                NewMarkerInfo.m_RotationToCamera[2][2] = static_cast<float>(PatternTransformation[2][2]);
+                NewMarkerInfo.m_RotationToCamera[2][0] = static_cast<float>(pMarker->m_PatternTransformation[2][0]);
+                NewMarkerInfo.m_RotationToCamera[2][1] = static_cast<float>(pMarker->m_PatternTransformation[2][1]);
+                NewMarkerInfo.m_RotationToCamera[2][2] = static_cast<float>(pMarker->m_PatternTransformation[2][2]);
                 
                 m_TrackedMarker.push_back(NewMarkerInfo);
+            }
+            else
+            {
+                pMarker->m_IsVisible = false;
             }
         }
     }
