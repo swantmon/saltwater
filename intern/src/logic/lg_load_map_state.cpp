@@ -1108,7 +1108,7 @@ namespace
             Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
 
             pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.0f));
-            pTransformationFacet->SetScale   (Base::Float3(1000.0f));
+            pTransformationFacet->SetScale   (Base::Float3(1.0f));
             pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, 0.0f));
 
             Dt::CARActorFacet* pModelActorFacet = Dt::ActorManager::CreateARActor();
