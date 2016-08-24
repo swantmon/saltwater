@@ -62,29 +62,20 @@ namespace
         struct CInternMarker
         {
         public:
-            unsigned int                           m_UID;
-            unsigned int                           m_NativeID;
-            bool                                   m_IsVisible;
-            ARdouble                               m_PatternTransformation[3][4];
             Dt::CARControllerPluginFacet::SMarker* m_pDataInfos;
             ARPattHandle*                          m_pPatternHandle;
-        };
-
-        struct CInternTrackedMarker
-        {
-        public:
-            unsigned int   m_UID;
-            unsigned int   m_FrameCounter;
-            Base::Float3x3 m_RotationToCamera;
-            Base::Float3   m_TranslationToCamera;
+            bool                                   m_IsVisible;
+            unsigned int                           m_UID;
+            unsigned int                           m_NativeID;
+            Base::Float3x3                         m_RotationToCamera;
+            Base::Float3                           m_TranslationToCamera;
+            double                                 m_PatternTransformation[3][4];
         };
 
     private:
 
         typedef Base::CPool<CInternMarker, 8>                    CMarkers;
-
         typedef std::vector<Dt::CEntity*>                        CEntityVector;
-        typedef std::vector<CInternTrackedMarker>                CTrackedMarker;
         typedef std::unordered_map<unsigned int, CInternMarker*> CMarkerByIDs;
 
     private:
@@ -93,7 +84,6 @@ namespace
         AR3DHandle*	                  m_pNativeTracking3DHandle;
         ARParamLT*	                  m_pNativeParameterLT;
         CEntityVector                 m_DirtyEntities;
-        CTrackedMarker                m_TrackedMarker;
         CMarkerByIDs                  m_MarkerByIDs;
         CMarkers                      m_Markers;
         CControl*                     m_pActiveControl;
@@ -129,7 +119,6 @@ namespace
         : m_pNativeTrackingHandle  (0)
         , m_pNativeTracking3DHandle(0)
         , m_pNativeParameterLT     (0)
-        , m_TrackedMarker          ()
         , m_DirtyEntities          ()
         , m_Markers                ()
         , m_MarkerByIDs            ()
@@ -190,10 +179,9 @@ namespace
         m_DirtyEntities.clear();
 
         // -----------------------------------------------------------------------------
-        // Delete tracked marker informations and IDs
+        // Delete tracked marker IDs
         // -----------------------------------------------------------------------------
-        m_TrackedMarker.clear();
-        m_MarkerByIDs  .clear();
+        m_MarkerByIDs.clear();
 
         // -----------------------------------------------------------------------------
         // Delete markers
@@ -714,11 +702,6 @@ namespace
     void CMRControlManager::UpdateTrackerManager()
     {
         if (IsActive() == false) return;
-        
-        // -----------------------------------------------------------------------------
-        // Prepare collections
-        // -----------------------------------------------------------------------------        
-        m_TrackedMarker.clear();
 
         // -----------------------------------------------------------------------------
         // Get image stream for tracking and detect marker in image
@@ -787,29 +770,22 @@ namespace
 
                 // -----------------------------------------------------------------------------
                 // Create / Edit marker infos
-                // -----------------------------------------------------------------------------
-                CInternTrackedMarker NewMarkerInfo;
-
-                NewMarkerInfo.m_UID          = pMarker->m_pDataInfos->m_UID;
-                NewMarkerInfo.m_FrameCounter = 0;
+                // -----------------------------------------------------------------------------                
+                pMarker->m_TranslationToCamera[0] = static_cast<float>(pMarker->m_PatternTransformation[0][3]) / 10.0f;
+                pMarker->m_TranslationToCamera[1] = static_cast<float>(pMarker->m_PatternTransformation[1][3]) / 10.0f;
+                pMarker->m_TranslationToCamera[2] = static_cast<float>(pMarker->m_PatternTransformation[2][3]) / 10.0f;
                 
-                NewMarkerInfo.m_TranslationToCamera[0] = static_cast<float>(pMarker->m_PatternTransformation[0][3]) / 10.0f;
-                NewMarkerInfo.m_TranslationToCamera[1] = static_cast<float>(pMarker->m_PatternTransformation[1][3]) / 10.0f;
-                NewMarkerInfo.m_TranslationToCamera[2] = static_cast<float>(pMarker->m_PatternTransformation[2][3]) / 10.0f;
-                
-                NewMarkerInfo.m_RotationToCamera[0][0] = static_cast<float>(pMarker->m_PatternTransformation[0][0]);
-                NewMarkerInfo.m_RotationToCamera[0][1] = static_cast<float>(pMarker->m_PatternTransformation[0][1]);
-                NewMarkerInfo.m_RotationToCamera[0][2] = static_cast<float>(pMarker->m_PatternTransformation[0][2]);
+                pMarker->m_RotationToCamera[0][0] = static_cast<float>(pMarker->m_PatternTransformation[0][0]);
+                pMarker->m_RotationToCamera[0][1] = static_cast<float>(pMarker->m_PatternTransformation[0][1]);
+                pMarker->m_RotationToCamera[0][2] = static_cast<float>(pMarker->m_PatternTransformation[0][2]);
 
-                NewMarkerInfo.m_RotationToCamera[1][0] = static_cast<float>(pMarker->m_PatternTransformation[1][0]);
-                NewMarkerInfo.m_RotationToCamera[1][1] = static_cast<float>(pMarker->m_PatternTransformation[1][1]);
-                NewMarkerInfo.m_RotationToCamera[1][2] = static_cast<float>(pMarker->m_PatternTransformation[1][2]);
+                pMarker->m_RotationToCamera[1][0] = static_cast<float>(pMarker->m_PatternTransformation[1][0]);
+                pMarker->m_RotationToCamera[1][1] = static_cast<float>(pMarker->m_PatternTransformation[1][1]);
+                pMarker->m_RotationToCamera[1][2] = static_cast<float>(pMarker->m_PatternTransformation[1][2]);
 
-                NewMarkerInfo.m_RotationToCamera[2][0] = static_cast<float>(pMarker->m_PatternTransformation[2][0]);
-                NewMarkerInfo.m_RotationToCamera[2][1] = static_cast<float>(pMarker->m_PatternTransformation[2][1]);
-                NewMarkerInfo.m_RotationToCamera[2][2] = static_cast<float>(pMarker->m_PatternTransformation[2][2]);
-                
-                m_TrackedMarker.push_back(NewMarkerInfo);
+                pMarker->m_RotationToCamera[2][0] = static_cast<float>(pMarker->m_PatternTransformation[2][0]);
+                pMarker->m_RotationToCamera[2][1] = static_cast<float>(pMarker->m_PatternTransformation[2][1]);
+                pMarker->m_RotationToCamera[2][2] = static_cast<float>(pMarker->m_PatternTransformation[2][2]);
             }
             else
             {
@@ -827,12 +803,17 @@ namespace
         // -----------------------------------------------------------------------------
         // Take the first detected marker as origin
         // -----------------------------------------------------------------------------
-        CTrackedMarker::iterator CurrentOfMarkerInfo = m_TrackedMarker.begin();
-        CTrackedMarker::iterator EndOfMarkerInfos    = m_TrackedMarker.end();
+        CMarkerByIDs::iterator CurrentOfMarkerInfo = m_MarkerByIDs.begin();
+        CMarkerByIDs::iterator EndOfMarkerInfos    = m_MarkerByIDs.end();
 
         for (; CurrentOfMarkerInfo != EndOfMarkerInfos; ++ CurrentOfMarkerInfo)
         {
-            CInternTrackedMarker& rMarkerInfo = *CurrentOfMarkerInfo;
+            CInternMarker& rMarkerInfo = *CurrentOfMarkerInfo->second;
+
+            if (rMarkerInfo.m_IsVisible == false)
+            {
+                 continue;
+            }
 
             Base::Float3x3 RotationMatrix(Base::Float3x3::s_Identity);
             Base::Float3   Position;
