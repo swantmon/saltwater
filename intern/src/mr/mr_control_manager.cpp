@@ -855,6 +855,10 @@ namespace
 
             pTransformationFacet->SetRotation(Rotation * -1.0f);
 
+            // -----------------------------------------------------------------------------
+            // Using only the first found marker as camera entity
+            // That is the origin of the world!
+            // -----------------------------------------------------------------------------
             break;
         }
     }
