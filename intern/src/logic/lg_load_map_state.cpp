@@ -1144,7 +1144,7 @@ namespace
 
             Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(5.00f, 10.0f, 10.0f));
+            pTransformationFacet->SetPosition(Base::Float3(10.00f, 10.0f, 10.0f));
             pTransformationFacet->SetScale   (Base::Float3(0.6f));
             pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, 0.0f));
 
@@ -1178,9 +1178,9 @@ namespace
 
             Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 10.0f));
+            pTransformationFacet->SetPosition(Base::Float3(5.0f, 0.0f, 10.0f));
             pTransformationFacet->SetScale   (Base::Float3(0.05f));
-            pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(35.0f), Base::DegreesToRadians(0.0f), Base::DegreesToRadians(10.0f)));
+            pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(40.0f), Base::DegreesToRadians(0.0f), Base::DegreesToRadians(10.0f)));
 
             Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
 
