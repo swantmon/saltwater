@@ -89,6 +89,7 @@ namespace
         {
             float m_SSRIntesity;
             float m_SSRRougnessMaskScale;
+            float m_SSRDistance;
             float m_PreviousFrame;
         };
 
@@ -825,6 +826,7 @@ namespace
 
         pPSBuffer->m_SSRIntesity          = pDataSSRFacet->GetIntensity();
         pPSBuffer->m_SSRRougnessMaskScale = pDataSSRFacet->GetRoughnessMask();
+        pPSBuffer->m_SSRDistance          = pDataSSRFacet->GetDistance();
         pPSBuffer->m_PreviousFrame        = pDataSSRFacet->GetUseLastFrame() ? 1.0f : 0.0f;
 
         BufferManager::UnmapConstantBuffer(m_SSRLightPSBufferSetPtr->GetBuffer(1));

@@ -42,7 +42,8 @@ layout(binding = 5) uniform sampler2D ps_BRDF;
 // -----------------------------------------------------------------------------
 #define ps_SSRIntensity         ps_ConstantBufferData0.x
 #define ps_SSRRougnessMaskScale ps_ConstantBufferData0.y
-#define ps_PreviousFrame        ps_ConstantBufferData0.z
+#define ps_SSRDistance          ps_ConstantBufferData0.z
+#define ps_PreviousFrame        ps_ConstantBufferData0.w
 
 // -----------------------------------------------------------------------------
 // Input to fragment from previous stage
@@ -470,7 +471,7 @@ void main(void)
     const uint RandomizeOverNFrames = 8;
     FrameRandom = (uint(0) % RandomizeOverNFrames) * 1551;
 
-    const int NumSteps = 256;
+    const int NumSteps = 128;
     const int NumRays  = 1;
 
 
@@ -496,7 +497,7 @@ void main(void)
     
     RayCast(
         ps_Depth,
-        Data.m_WSPosition, ViewMirrorUnitDir, Data.m_Roughness, ConeAngleWorld, Data.m_VSDepth,
+        Data.m_WSPosition, ViewMirrorUnitDir, Data.m_Roughness, ConeAngleWorld, ps_SSRDistance,
         NumSteps, StepOffset,
         HitUVzTime, HCBLevel
     );
@@ -544,7 +545,7 @@ void main(void)
 
     RayCast(
         ps_Depth,
-        Data.m_WSPosition, ViewMirrorUnitDir, Data.m_Roughness, 0.001f, Data.m_VSDepth,
+        Data.m_WSPosition, ViewMirrorUnitDir, Data.m_Roughness, 0.001f, ps_SSRDistance,
         NumSteps, StepOffset,
         HitUVzTime, HCBLevel
     );

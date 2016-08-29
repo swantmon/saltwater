@@ -104,6 +104,7 @@ namespace Dt
     CSSRFXFacet::CSSRFXFacet()
         : m_Intensity    (1.0f)
         , m_RoughnessMask(-6.66f)
+        , m_Distance     (1.0f)
         , m_UseLastFrame (true)
     {
     }
@@ -123,7 +124,7 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    float CSSRFXFacet::GetIntensity()
+    float CSSRFXFacet::GetIntensity() const
     {
         return m_Intensity;
     }
@@ -137,9 +138,23 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    float CSSRFXFacet::GetRoughnessMask()
+    float CSSRFXFacet::GetRoughnessMask() const 
     {
         return m_RoughnessMask;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSSRFXFacet::SetDistance(float _Distance)
+    {
+        m_Distance = _Distance;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CSSRFXFacet::GetDistance() const
+    {
+        return m_Distance;
     }
 
     // -----------------------------------------------------------------------------
@@ -151,7 +166,7 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    bool CSSRFXFacet::GetUseLastFrame()
+    bool CSSRFXFacet::GetUseLastFrame() const
     {
         return m_UseLastFrame;
     }

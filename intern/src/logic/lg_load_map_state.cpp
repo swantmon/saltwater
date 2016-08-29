@@ -1016,6 +1016,8 @@ namespace
 
             Dt::CSSRFXFacet* pEffectFacet = Dt::FXManager::CreateSSRFX();
 
+            pEffectFacet->SetDistance(30.0f);
+
             rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
 
             Dt::EntityManager::MarkEntityAsDirty(rEffectEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
