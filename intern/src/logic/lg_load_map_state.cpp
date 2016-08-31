@@ -891,7 +891,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Allocate a map
         // -----------------------------------------------------------------------------
-        Dt::Map::AllocateMap(1, 1);
+        Dt::Map::AllocateMap(2, 2);
 
         // -----------------------------------------------------------------------------
         // Setup cameras
@@ -967,11 +967,11 @@ namespace
             Dt::CARControllerPluginFacet* pFacet = Dt::PluginManager::CreateARControllerPlugin();
 
             pFacet->SetCameraEntity       (pCameraEntity);
-            pFacet->SetCameraParameterFile("ar/configurations/logitech_para.dat");
+            pFacet->SetCameraParameterFile("ar/configurations/kinect_para.dat");
             pFacet->SetDeviceNumber       (1);
             pFacet->SetOutputBackground   (pBackgroundTexture);
             pFacet->SetOutputCubemap      (pTextureCubemap);
-            pFacet->SetDeviceType         (Dt::CARControllerPluginFacet::Webcam);
+            pFacet->SetDeviceType         (Dt::CARControllerPluginFacet::Kinect);
             pFacet->SetNumberOfMarker     (1);
             
             Dt::CARControllerPluginFacet::SMarker& rMarkerOne = pFacet->GetMarker(0);
@@ -1016,7 +1016,7 @@ namespace
 
             Dt::CSSRFXFacet* pEffectFacet = Dt::FXManager::CreateSSRFX();
 
-            pEffectFacet->SetDistance(30.0f);
+            pEffectFacet->SetDistance(100.0f);
 
             rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
 
@@ -1146,8 +1146,8 @@ namespace
 
             Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(10.00f, 10.0f, 10.0f));
-            pTransformationFacet->SetScale   (Base::Float3(0.6f));
+            pTransformationFacet->SetPosition(Base::Float3(30.00f, 30.0f, 20.0f));
+            pTransformationFacet->SetScale   (Base::Float3(1.5f));
             pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, 0.0f));
 
             Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
@@ -1160,6 +1160,7 @@ namespace
             Dt::SMaterialFileDescriptor MaterialFileDesc;
 
             MaterialFileDesc.m_pFileName = "materials/naturals/metals/Gold_Worn_00.mat";
+            MaterialFileDesc.m_pFileName = "materials/naturals/plastics/Plastic_Worn_Rough_00.mat";
 
             pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
             pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
@@ -1176,13 +1177,13 @@ namespace
             EntityDesc.m_EntityType     = Dt::SActorType::Model;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
-            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rPlane = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
+            Dt::CTransformationFacet* pTransformationFacet = rPlane.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(5.0f, 0.0f, 10.0f));
-            pTransformationFacet->SetScale   (Base::Float3(0.05f));
-            pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(40.0f), Base::DegreesToRadians(0.0f), Base::DegreesToRadians(10.0f)));
+            pTransformationFacet->SetPosition(Base::Float3(10.0f, 10.0f, 20.0f));
+            pTransformationFacet->SetScale   (Base::Float3(0.1f));
+            pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(50.0f), Base::DegreesToRadians(0.0f), Base::DegreesToRadians(20.0f)));
 
             Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
 
@@ -1198,9 +1199,43 @@ namespace
             pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
             pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
 
-            rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
+            rPlane.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
 
-            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::EntityManager::MarkEntityAsDirty(rPlane, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
+            EntityDesc.m_EntityType     = Dt::SActorType::Model;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+
+            Dt::CEntity& rMatTester = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            Dt::CTransformationFacet* pTransformationFacet = rMatTester.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(8.0f, 40.0f, 0.0f));
+            pTransformationFacet->SetScale   (Base::Float3(0.5f));
+            pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), Base::DegreesToRadians(0.0f), Base::DegreesToRadians(0.0f)));
+
+            Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
+
+            Dt::SModelFileDescriptor ModelFileDesc;
+
+            ModelFileDesc.m_pFileName = "models/MatTester.obj";
+            ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
+
+            Dt::SMaterialFileDescriptor MaterialFileDesc;
+
+            MaterialFileDesc.m_pFileName = "materials/naturals/metals/Gold_Worn_00.mat";
+
+            pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
+            pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
+
+            rMatTester.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rMatTester, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
     }
     
