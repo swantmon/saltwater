@@ -254,7 +254,7 @@ vec3 blend_angle(in vec4 _Normal1, in vec4 _Normal2)
 void main()
 {
     // -----------------------------------------------------------------------------
-    // TexCoord for kinect textures
+    // TexCoord for Kinect textures
     // -----------------------------------------------------------------------------
     vec2 TexCoord = vec2(fs_Texcoord.x, 1.0f - fs_Texcoord.y);
 
@@ -265,8 +265,8 @@ void main()
     vec2  NormalXY = textureLod(ps_Texture2, TexCoord, 0).rg;
     float NormalZ  = textureLod(ps_Texture3, TexCoord, 0).a;
 
-    // vec4 GBufferWSNormal = vec4(NormalXY, NormalZ, 0);
-    vec4 GBufferWSNormal = vec4(0, 0, 1, 0);
+    vec4 GBufferWSNormal = vec4(NormalXY, NormalZ, 0);
+    // vec4 GBufferWSNormal = vec4(0, 0, 1, 0);
 
     // -----------------------------------------------------------------------------
     // Normal
@@ -291,10 +291,10 @@ void main()
     // Writing depth to depth buffer manually
     // -----------------------------------------------------------------------------
     float Depth  = SampleDepthTexture(ps_Texture1, TexCoord);
-    float tDepth = Depth * g_ViewToScreen[2][2] - g_ViewToScreen[3][2];
-    float hDepth = tDepth / (Depth * g_ViewToScreen[2][3]);
-    
-    gl_FragDepth = hDepth + DEPTH_BIAS;
+
+    Depth = Depth / 0.003f;
+
+    gl_FragDepth = ConvertToHyperbolicDepth(Depth, g_ViewToScreen);
 }
 
 #endif // __INCLUDE_FS_COPY_TO_GBUFFER_GLSL_

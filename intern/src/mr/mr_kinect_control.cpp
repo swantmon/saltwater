@@ -283,7 +283,7 @@ namespace MR
 
         if (SUCCEEDED(Result))
         {
-            pColorFrame->CopyConvertedFrameDataToArray(COLOR_WIDTH * COLOR_HEIGHT * 4, g_pColorFrameDataRAW, ColorImageFormat_Bgra);
+            pColorFrame->CopyConvertedFrameDataToArray(COLOR_WIDTH * COLOR_HEIGHT * 4, g_pColorFrameDataRAW, ColorImageFormat_Rgba);
         }
 
         if (pColorFrame)
@@ -346,13 +346,17 @@ namespace MR
         DepthFC1 = cv::Mat(1080, 1920, CV_32FC1, &g_pDepthFrameDataRAW);
         ColorUC4 = cv::Mat(1080, 1920, CV_8UC4, &g_pColorFrameDataRAW);
 
-        cv::flip(DepthFC1, DepthFC1, 1);
-        cv::flip(ColorUC4, ColorUC4, 1);
+        //cv::flip(DepthFC1, DepthFC1, 1);
+        //cv::flip(ColorUC4, ColorUC4, 1);
 
-        cv::cvtColor(ColorUC4, ColorUC3, CV_BGRA2RGB);
+        cv::cvtColor(ColorUC4, ColorUC3, CV_RGBA2RGB);
 
         ColorUC3(cv::Rect(320, 180, 1280, 720)).copyTo(ColorUC3Crop);
         DepthFC1(cv::Rect(320, 180, 1280, 720)).copyTo(DepthFC1Crop);
+
+        cv::flip(DepthFC1Crop, DepthFC1Crop, 1);
+        cv::flip(ColorUC3Crop, ColorUC3Crop, 1);
+        cv::flip(ColorUC3    , ColorUC3    , 1);
 
         // -----------------------------------------------------------------------------
         // Copy final result to the
