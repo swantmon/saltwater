@@ -967,11 +967,11 @@ namespace
             Dt::CARControllerPluginFacet* pFacet = Dt::PluginManager::CreateARControllerPlugin();
 
             pFacet->SetCameraEntity       (pCameraEntity);
-            pFacet->SetCameraParameterFile("ar/configurations/kinect_para.dat");
+            pFacet->SetCameraParameterFile("ar/configurations/logitech_para.dat");
             pFacet->SetDeviceNumber       (1);
             pFacet->SetOutputBackground   (pBackgroundTexture);
             pFacet->SetOutputCubemap      (pTextureCubemap);
-            pFacet->SetDeviceType         (Dt::CARControllerPluginFacet::Kinect);
+            pFacet->SetDeviceType         (Dt::CARControllerPluginFacet::Webcam);
             pFacet->SetNumberOfMarker     (1);
             
             Dt::CARControllerPluginFacet::SMarker& rMarkerOne = pFacet->GetMarker(0);
@@ -1017,6 +1017,7 @@ namespace
             Dt::CSSRFXFacet* pEffectFacet = Dt::FXManager::CreateSSRFX();
 
             pEffectFacet->SetDistance(100.0f);
+            pEffectFacet->SetIntensity(2.0f);
 
             rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
 
@@ -1088,7 +1089,7 @@ namespace
 
             pGlobalProbeLightFacet->SetType     (Dt::CGlobalProbeLightFacet::Sky);
             pGlobalProbeLightFacet->SetQuality  (Dt::CGlobalProbeLightFacet::PX256);
-            pGlobalProbeLightFacet->SetIntensity(1.0f);
+            pGlobalProbeLightFacet->SetIntensity(10.0f);
 
             rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pGlobalProbeLightFacet);
 
@@ -1135,6 +1136,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Entities
         // -----------------------------------------------------------------------------
+        auto CreateSphere = [&](const Base::Float3& _rPosition, const Base::Float3& _rScale, const char* _pMaterial)->void
         {
             Dt::SEntityDescriptor EntityDesc;
 
@@ -1146,78 +1148,9 @@ namespace
 
             Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(30.00f, 30.0f, 20.0f));
-            pTransformationFacet->SetScale   (Base::Float3(1.5f));
+            pTransformationFacet->SetPosition(_rPosition);
+            pTransformationFacet->SetScale   (_rScale);
             pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, 0.0f));
-
-            Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
-
-            Dt::SModelFileDescriptor ModelFileDesc;
-
-            ModelFileDesc.m_pFileName = "models/sphere.obj";
-            ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
-
-            Dt::SMaterialFileDescriptor MaterialFileDesc;
-
-            MaterialFileDesc.m_pFileName = "materials/naturals/metals/Gold_Worn_00.mat";
-            MaterialFileDesc.m_pFileName = "materials/naturals/plastics/Plastic_Worn_Rough_00.mat";
-
-            pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
-            pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
-
-            rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
-
-            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-        }
-
-        {
-            Dt::SEntityDescriptor EntityDesc;
-
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
-            EntityDesc.m_EntityType     = Dt::SActorType::Model;
-            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
-
-            Dt::CEntity& rPlane = Dt::EntityManager::CreateEntity(EntityDesc);
-
-            Dt::CTransformationFacet* pTransformationFacet = rPlane.GetTransformationFacet();
-
-            pTransformationFacet->SetPosition(Base::Float3(10.0f, 10.0f, 20.0f));
-            pTransformationFacet->SetScale   (Base::Float3(0.1f));
-            pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(50.0f), Base::DegreesToRadians(0.0f), Base::DegreesToRadians(20.0f)));
-
-            Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
-
-            Dt::SModelFileDescriptor ModelFileDesc;
-
-            ModelFileDesc.m_pFileName = "models/plane.obj";
-            ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
-
-            Dt::SMaterialFileDescriptor MaterialFileDesc;
-
-            MaterialFileDesc.m_pFileName = "materials/naturals/metals/Chrome_Glossy_00.mat";
-
-            pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
-            pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
-
-            rPlane.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
-
-            Dt::EntityManager::MarkEntityAsDirty(rPlane, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-        }
-
-        {
-            Dt::SEntityDescriptor EntityDesc;
-
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
-            EntityDesc.m_EntityType     = Dt::SActorType::Model;
-            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
-
-            Dt::CEntity& rMatTester = Dt::EntityManager::CreateEntity(EntityDesc);
-
-            Dt::CTransformationFacet* pTransformationFacet = rMatTester.GetTransformationFacet();
-
-            pTransformationFacet->SetPosition(Base::Float3(8.0f, 40.0f, 0.0f));
-            pTransformationFacet->SetScale   (Base::Float3(0.5f));
-            pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), Base::DegreesToRadians(0.0f), Base::DegreesToRadians(0.0f)));
 
             Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
 
@@ -1228,15 +1161,112 @@ namespace
 
             Dt::SMaterialFileDescriptor MaterialFileDesc;
 
-            MaterialFileDesc.m_pFileName = "materials/naturals/metals/Gold_Worn_00.mat";
+            MaterialFileDesc.m_pFileName = _pMaterial;
 
             pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
             pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
 
-            rMatTester.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
+            rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
 
-            Dt::EntityManager::MarkEntityAsDirty(rMatTester, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-        }
+            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        };
+
+//         CreateSphere(Base::Float3(0.00f, 0.0f, 5.0f), Base::Float3(0.5f), "materials/naturals/plastics/Plastic_Worn_Rough_00.mat");
+// 
+//         CreateSphere(Base::Float3(15.00f, 0.0f, 5.0f), Base::Float3(0.5f), "materials/naturals/metals/Chrome_Rough_Worn_00.mat");
+// 
+//         CreateSphere(Base::Float3(30.00f, 0.0f, 5.0f), Base::Float3(0.5f), "materials/naturals/plastics/Plastic_Glossy_00.mat");
+// 
+//         CreateSphere(Base::Float3(0.00f, 15.0f, 5.0f), Base::Float3(0.5f), "materials/naturals/metals/Chrome_Glossy_00.mat");
+// 
+//         CreateSphere(Base::Float3(20.00f, 15.0f, 5.0f), Base::Float3(0.5f), "materials/naturals/polymers/Zytel_Nylon_00.mat");
+// 
+// 
+//         CreateSphere(Base::Float3(0.00f, 30.0f, 5.0f), Base::Float3(0.5f), "materials/naturals/wood/Wood_Fine_Lacquered_00.mat");
+// 
+//         CreateSphere(Base::Float3(15.00f, 30.0f, 5.0f), Base::Float3(0.5f), "materials/naturals/metals/Steel_Worn_00.mat");
+// 
+//         CreateSphere(Base::Float3(30.00f, 30.0f, 5.0f), Base::Float3(0.5f), "materials/naturals/rust/Rust_00.mat");
+// 
+//         CreateSphere(Base::Float3(10.00f, 45.0f, 5.0f), Base::Float3(0.5f), "materials/naturals/rubber/Rubber_00.mat");
+// 
+//         CreateSphere(Base::Float3(30.00f, 45.0f, 5.0f), Base::Float3(0.5f), "materials/naturals/polymers/Jeans_00.mat");
+
+        // CreateSphere(Base::Float3(0.0f, 0.0f, 10.0f), Base::Float3(1.5f), "materials/naturals/rubber/Rubber_00.mat");
+
+        CreateSphere(Base::Float3(0.0f, 0.0f, 0.0f), Base::Float3(0.8f), "materials/naturals/metals/Gold_Worn_00.mat");
+
+        CreateSphere(Base::Float3(15.0f, 15.0f, 0.0f), Base::Float3(0.6f), "materials/naturals/rubber/Rubber_00.mat");
+
+
+
+//         {
+//             Dt::SEntityDescriptor EntityDesc;
+// 
+//             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
+//             EntityDesc.m_EntityType     = Dt::SActorType::Model;
+//             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+// 
+//             Dt::CEntity& rPlane = Dt::EntityManager::CreateEntity(EntityDesc);
+// 
+//             Dt::CTransformationFacet* pTransformationFacet = rPlane.GetTransformationFacet();
+// 
+//             pTransformationFacet->SetPosition(Base::Float3(10.0f, 10.0f, 10.0f));
+//             pTransformationFacet->SetScale   (Base::Float3(0.08f));
+//             pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(45.0f), Base::DegreesToRadians(0.0f), Base::DegreesToRadians(0.0f)));
+// 
+//             Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
+// 
+//             Dt::SModelFileDescriptor ModelFileDesc;
+// 
+//             ModelFileDesc.m_pFileName = "models/plane.obj";
+//             ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
+// 
+//             Dt::SMaterialFileDescriptor MaterialFileDesc;
+// 
+//             MaterialFileDesc.m_pFileName = "materials/naturals/metals/Chrome_Glossy_00.mat";
+// 
+//             pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
+//             pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
+// 
+//             rPlane.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
+// 
+//             Dt::EntityManager::MarkEntityAsDirty(rPlane, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+//         }
+
+//         {
+//             Dt::SEntityDescriptor EntityDesc;
+// 
+//             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
+//             EntityDesc.m_EntityType     = Dt::SActorType::Model;
+//             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+// 
+//             Dt::CEntity& rMatTester = Dt::EntityManager::CreateEntity(EntityDesc);
+// 
+//             Dt::CTransformationFacet* pTransformationFacet = rMatTester.GetTransformationFacet();
+// 
+//             pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.0f));
+//             pTransformationFacet->SetScale   (Base::Float3(0.4f));
+//             pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), Base::DegreesToRadians(0.0f), Base::DegreesToRadians(0.0f)));
+// 
+//             Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
+// 
+//             Dt::SModelFileDescriptor ModelFileDesc;
+// 
+//             ModelFileDesc.m_pFileName = "models/MatTester.obj";
+//             ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
+// 
+//             Dt::SMaterialFileDescriptor MaterialFileDesc;
+// 
+//             MaterialFileDesc.m_pFileName = "materials/naturals/metals/Gold_Worn_00.mat";
+// 
+//             pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
+//             pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
+// 
+//             rMatTester.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
+// 
+//             Dt::EntityManager::MarkEntityAsDirty(rMatTester, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+//         }
     }
     
     // -----------------------------------------------------------------------------
