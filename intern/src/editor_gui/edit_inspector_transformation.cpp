@@ -30,17 +30,17 @@ namespace Edit
     {
         CMessage NewMessage;
 
-        NewMessage.PutFloat(m_pTransformationPositionX->value());
-        NewMessage.PutFloat(m_pTransformationPositionY->value());
-        NewMessage.PutFloat(m_pTransformationPositionZ->value());
+        NewMessage.PutFloat((float)m_pTransformationPositionX->value());
+        NewMessage.PutFloat((float)m_pTransformationPositionY->value());
+        NewMessage.PutFloat((float)m_pTransformationPositionZ->value());
 
-        NewMessage.PutFloat(m_pTransformationScaleX->value());
-        NewMessage.PutFloat(m_pTransformationScaleY->value());
-        NewMessage.PutFloat(m_pTransformationScaleZ->value());
+        NewMessage.PutFloat((float)m_pTransformationScaleX->value());
+        NewMessage.PutFloat((float)m_pTransformationScaleY->value());
+        NewMessage.PutFloat((float)m_pTransformationScaleZ->value());
 
-        NewMessage.PutFloat(m_pTransformationRotationX->value());
-        NewMessage.PutFloat(m_pTransformationRotationY->value());
-        NewMessage.PutFloat(m_pTransformationRotationZ->value());
+        NewMessage.PutFloat((float)m_pTransformationRotationX->value());
+        NewMessage.PutFloat((float)m_pTransformationRotationY->value());
+        NewMessage.PutFloat((float)m_pTransformationRotationZ->value());
 
         NewMessage.Reset();
 

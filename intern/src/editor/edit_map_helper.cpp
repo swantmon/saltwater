@@ -194,7 +194,7 @@ namespace
             Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
 
             pTransformationFacet->SetPosition(Base::Float3(0.0f));
-            pTransformationFacet->SetScale   (Base::Float3(1.0f));
+            pTransformationFacet->SetScale   (Base::Float3(0.1f));
             pTransformationFacet->SetRotation(Base::Float3(0.0f));
 
             Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
@@ -252,9 +252,9 @@ namespace
                     NewMessage.PutFloat(pTransformationFacet->GetScale()[1]);
                     NewMessage.PutFloat(pTransformationFacet->GetScale()[2]);
 
-                    NewMessage.PutFloat(pTransformationFacet->GetRotation()[0]);
-                    NewMessage.PutFloat(pTransformationFacet->GetRotation()[1]);
-                    NewMessage.PutFloat(pTransformationFacet->GetRotation()[2]);
+                    NewMessage.PutFloat(Base::RadiansToDegree(pTransformationFacet->GetRotation()[0]));
+                    NewMessage.PutFloat(Base::RadiansToDegree(pTransformationFacet->GetRotation()[1]));
+                    NewMessage.PutFloat(Base::RadiansToDegree(pTransformationFacet->GetRotation()[2]));
                 }
                 else
                 {
@@ -268,6 +268,8 @@ namespace
                 NewMessage.Reset();
 
                 Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoTransformation, NewMessage);
+
+                break;
             }
         }
     }
@@ -285,8 +287,8 @@ namespace
             if (pTransformationFacet)
             {
                 Base::Float3 Position(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
-                Base::Float3 Scale(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
-                Base::Float3 Rotation(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+                Base::Float3 Scale   (_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+                Base::Float3 Rotation(Base::DegreesToRadians(_rMessage.GetFloat()), Base::DegreesToRadians(_rMessage.GetFloat()), Base::DegreesToRadians(_rMessage.GetFloat()));
 
                 pTransformationFacet->SetPosition(Position);
                 pTransformationFacet->SetScale(Scale);
@@ -307,7 +309,7 @@ namespace
 
     void CMapHelper::OnDirtyEntity(Dt::CEntity* _pEntity)
     {
-        if (_pEntity->GetDirtyFlags() & Dt::CEntity::DirtyAdd == 0)
+        if (_pEntity->GetDirtyFlags() & Dt::CEntity::DirtyAdd == Dt::CEntity::DirtyAdd)
         {
             Edit::CMessage NewMessage;
 
