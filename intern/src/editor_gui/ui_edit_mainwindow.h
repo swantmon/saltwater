@@ -17,7 +17,6 @@
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLineEdit>
-#include <QtWidgets/QListView>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
@@ -46,7 +45,6 @@ public:
     QHBoxLayout *horizontalLayout;
     Edit::CSceneGraph *m_pScenegraph;
     Edit::CRenderContext *m_pEditorRenderContext;
-    QListView *listView_2;
     QMenuBar *m_pMenuBar;
     QMenu *m_pMenuFile;
     QMenu *m_pMenuEdit;
@@ -98,13 +96,15 @@ public:
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
         horizontalLayout->setContentsMargins(0, 0, 0, 0);
         m_pScenegraph = new Edit::CSceneGraph(horizontalLayoutWidget);
+        QTreeWidgetItem *__qtreewidgetitem = new QTreeWidgetItem(m_pScenegraph);
+        new QTreeWidgetItem(__qtreewidgetitem);
+        new QTreeWidgetItem(m_pScenegraph);
         m_pScenegraph->setObjectName(QStringLiteral("m_pScenegraph"));
         m_pScenegraph->setDragEnabled(false);
         m_pScenegraph->setAlternatingRowColors(true);
         m_pScenegraph->setSelectionMode(QAbstractItemView::ExtendedSelection);
         m_pScenegraph->setSelectionBehavior(QAbstractItemView::SelectRows);
         m_pScenegraph->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
-        m_pScenegraph->setModelColumn(0);
 
         horizontalLayout->addWidget(m_pScenegraph);
 
@@ -115,13 +115,9 @@ public:
         m_pEditorRenderContext->setMouseTracking(true);
         m_pEditorRenderContext->setAutoFillBackground(false);
         m_pEditorRenderContext->setLocale(QLocale(QLocale::English, QLocale::UnitedStates));
+        m_pScenegraph->raise();
 
         horizontalLayout->addWidget(m_pEditorRenderContext);
-
-        listView_2 = new QListView(horizontalLayoutWidget);
-        listView_2->setObjectName(QStringLiteral("listView_2"));
-
-        horizontalLayout->addWidget(listView_2);
 
         CMainWindow->setCentralWidget(m_pCentralWidget);
         m_pMenuBar = new QMenuBar(CMainWindow);
@@ -185,6 +181,27 @@ public:
         m_pPlayButton->setText(QApplication::translate("CMainWindow", "Play", 0));
         m_pScreenshotButton->setText(QApplication::translate("CMainWindow", "Screenshot", 0));
         m_pMailAdressEdit->setPlaceholderText(QApplication::translate("CMainWindow", "max.mustermann@mail.com", 0));
+        QTreeWidgetItem *___qtreewidgetitem = m_pScenegraph->headerItem();
+        ___qtreewidgetitem->setText(2, QApplication::translate("CMainWindow", "Type", 0));
+        ___qtreewidgetitem->setText(1, QApplication::translate("CMainWindow", "Entity", 0));
+        ___qtreewidgetitem->setText(0, QApplication::translate("CMainWindow", "ID", 0));
+
+        const bool __sortingEnabled = m_pScenegraph->isSortingEnabled();
+        m_pScenegraph->setSortingEnabled(false);
+        QTreeWidgetItem *___qtreewidgetitem1 = m_pScenegraph->topLevelItem(0);
+        ___qtreewidgetitem1->setText(2, QApplication::translate("CMainWindow", "Node", 0));
+        ___qtreewidgetitem1->setText(1, QApplication::translate("CMainWindow", "Root", 0));
+        ___qtreewidgetitem1->setText(0, QApplication::translate("CMainWindow", "0", 0));
+        QTreeWidgetItem *___qtreewidgetitem2 = ___qtreewidgetitem1->child(0);
+        ___qtreewidgetitem2->setText(2, QApplication::translate("CMainWindow", "Actor", 0));
+        ___qtreewidgetitem2->setText(1, QApplication::translate("CMainWindow", "Sphere", 0));
+        ___qtreewidgetitem2->setText(0, QApplication::translate("CMainWindow", "2", 0));
+        QTreeWidgetItem *___qtreewidgetitem3 = m_pScenegraph->topLevelItem(1);
+        ___qtreewidgetitem3->setText(2, QApplication::translate("CMainWindow", "Light", 0));
+        ___qtreewidgetitem3->setText(1, QApplication::translate("CMainWindow", "Environment", 0));
+        ___qtreewidgetitem3->setText(0, QApplication::translate("CMainWindow", "1", 0));
+        m_pScenegraph->setSortingEnabled(__sortingEnabled);
+
         m_pMenuFile->setTitle(QApplication::translate("CMainWindow", "File", 0));
         m_pMenuEdit->setTitle(QApplication::translate("CMainWindow", "Edit", 0));
         m_pMenuAssets->setTitle(QApplication::translate("CMainWindow", "Assets", 0));

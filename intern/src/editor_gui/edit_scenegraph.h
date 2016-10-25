@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include <QListView>
+#include <QTreeWidget>
 
 namespace Edit
 {
-    class CSceneGraph : public QListView 
+    class CSceneGraph : public QTreeWidget
     {
 	    Q_OBJECT
 

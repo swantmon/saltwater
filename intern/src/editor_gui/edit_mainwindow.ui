@@ -89,9 +89,54 @@
        <property name="verticalScrollMode">
         <enum>QAbstractItemView::ScrollPerItem</enum>
        </property>
-       <property name="modelColumn">
-        <number>0</number>
-       </property>
+       <column>
+        <property name="text">
+         <string>ID</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Entity</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Type</string>
+        </property>
+       </column>
+       <item>
+        <property name="text">
+         <string>0</string>
+        </property>
+        <property name="text">
+         <string>Empty</string>
+        </property>
+        <property name="text">
+         <string>Node</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>2</string>
+         </property>
+         <property name="text">
+          <string>Sphere</string>
+         </property>
+         <property name="text">
+          <string>Actor</string>
+         </property>
+        </item>
+       </item>
+       <item>
+        <property name="text">
+         <string>1</string>
+        </property>
+        <property name="text">
+         <string>Environment</string>
+        </property>
+        <property name="text">
+         <string>Light</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>
@@ -114,6 +159,7 @@
        <property name="locale">
         <locale language="English" country="UnitedStates"/>
        </property>
+       <zorder>m_pScenegraph</zorder>
       </widget>
      </item>
     </layout>
@@ -230,7 +276,7 @@
   </customwidget>
   <customwidget>
    <class>Edit::CSceneGraph</class>
-   <extends>QListView</extends>
+   <extends>QTreeWidget</extends>
    <header>editor_gui/edit_scenegraph.h</header>
   </customwidget>
  </customwidgets>

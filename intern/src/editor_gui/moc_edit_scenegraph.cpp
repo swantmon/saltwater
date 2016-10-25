@@ -61,7 +61,7 @@ void Edit::CSceneGraph::qt_static_metacall(QObject *_o, QMetaObject::Call _c, in
 }
 
 const QMetaObject Edit::CSceneGraph::staticMetaObject = {
-    { &QListView::staticMetaObject, qt_meta_stringdata_Edit__CSceneGraph.data,
+    { &QTreeWidget::staticMetaObject, qt_meta_stringdata_Edit__CSceneGraph.data,
       qt_meta_data_Edit__CSceneGraph,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
 };
 
@@ -76,12 +76,12 @@ void *Edit::CSceneGraph::qt_metacast(const char *_clname)
     if (!_clname) return Q_NULLPTR;
     if (!strcmp(_clname, qt_meta_stringdata_Edit__CSceneGraph.stringdata0))
         return static_cast<void*>(const_cast< CSceneGraph*>(this));
-    return QListView::qt_metacast(_clname);
+    return QTreeWidget::qt_metacast(_clname);
 }
 
 int Edit::CSceneGraph::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
-    _id = QListView::qt_metacall(_c, _id, _a);
+    _id = QTreeWidget::qt_metacall(_c, _id, _a);
     if (_id < 0)
         return _id;
     return _id;

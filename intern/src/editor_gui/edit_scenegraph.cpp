@@ -4,7 +4,7 @@
 namespace Edit
 {
     CSceneGraph::CSceneGraph(QWidget* _pParent)
-        : QListView(_pParent)
+        : QTreeWidget(_pParent)
     {
         
     }
