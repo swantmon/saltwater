@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1702</width>
-    <height>798</height>
+    <width>1933</width>
+    <height>836</height>
    </rect>
   </property>
   <property name="cursor">
@@ -23,112 +23,179 @@
    <string>Saltwater Editor</string>
   </property>
   <widget class="QWidget" name="m_pCentralWidget">
-   <widget class="QPushButton" name="m_pPlayButton">
+   <widget class="QTabWidget" name="m_pSceneGraphTabWidget">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>75</width>
-      <height>23</height>
+      <x>0</x>
+      <y>0</y>
+      <width>320</width>
+      <height>791</height>
      </rect>
     </property>
-    <property name="text">
-     <string>Play</string>
+    <property name="currentIndex">
+     <number>0</number>
     </property>
+    <widget class="QWidget" name="m_pSceneGraphTab">
+     <attribute name="title">
+      <string>Scene Graph</string>
+     </attribute>
+     <widget class="Edit::CSceneGraph" name="m_pScenegraph">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>311</width>
+        <height>761</height>
+       </rect>
+      </property>
+      <property name="dragEnabled">
+       <bool>false</bool>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>true</bool>
+      </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::ExtendedSelection</enum>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+      <property name="verticalScrollMode">
+       <enum>QAbstractItemView::ScrollPerItem</enum>
+      </property>
+      <column>
+       <property name="text">
+        <string>ID</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Entity</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Type</string>
+       </property>
+      </column>
+     </widget>
+    </widget>
    </widget>
-   <widget class="QPushButton" name="m_pScreenshotButton">
+   <widget class="QTabWidget" name="m_pGameTabWidget">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>0</y>
+      <width>1291</width>
+      <height>791</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <property name="tabBarAutoHide">
+     <bool>false</bool>
+    </property>
+    <widget class="QWidget" name="m_pGameTab">
+     <attribute name="title">
+      <string>Game</string>
+     </attribute>
+     <widget class="QPushButton" name="m_pPlayButton">
+      <property name="geometry">
+       <rect>
+        <x>570</x>
+        <y>10</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Play</string>
+      </property>
+     </widget>
+     <widget class="Edit::CRenderContext" name="m_pEditorRenderContext" native="true">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>40</y>
+        <width>1280</width>
+        <height>720</height>
+       </rect>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>1280</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="cursor">
+       <cursorShape>ArrowCursor</cursorShape>
+      </property>
+      <property name="mouseTracking">
+       <bool>true</bool>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="locale">
+       <locale language="English" country="UnitedStates"/>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="m_pScreenshotButton">
+      <property name="geometry">
+       <rect>
+        <x>1200</x>
+        <y>10</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Screenshot</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="m_pMailAdressEdit">
+      <property name="geometry">
+       <rect>
+        <x>970</x>
+        <y>10</y>
+        <width>221</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="placeholderText">
+       <string>max.mustermann@mail.com</string>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+   <widget class="QTabWidget" name="m_pInspectorTabWidget">
     <property name="geometry">
      <rect>
       <x>1610</x>
-      <y>10</y>
-      <width>75</width>
-      <height>23</height>
+      <y>0</y>
+      <width>320</width>
+      <height>791</height>
      </rect>
     </property>
-    <property name="text">
-     <string>Screenshot</string>
+    <property name="currentIndex">
+     <number>0</number>
     </property>
-   </widget>
-   <widget class="QLineEdit" name="m_pMailAdressEdit">
-    <property name="geometry">
-     <rect>
-      <x>1382</x>
-      <y>10</y>
-      <width>221</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="placeholderText">
-     <string>max.mustermann@mail.com</string>
-    </property>
-   </widget>
-   <widget class="QWidget" name="horizontalLayoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>9</x>
-      <y>39</y>
-      <width>1681</width>
-      <height>711</height>
-     </rect>
-    </property>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="Edit::CSceneGraph" name="m_pScenegraph">
-       <property name="dragEnabled">
-        <bool>false</bool>
-       </property>
-       <property name="alternatingRowColors">
-        <bool>true</bool>
-       </property>
-       <property name="selectionMode">
-        <enum>QAbstractItemView::ExtendedSelection</enum>
-       </property>
-       <property name="selectionBehavior">
-        <enum>QAbstractItemView::SelectRows</enum>
-       </property>
-       <property name="verticalScrollMode">
-        <enum>QAbstractItemView::ScrollPerItem</enum>
-       </property>
-       <column>
-        <property name="text">
-         <string>ID</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Entity</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Type</string>
-        </property>
-       </column>
-      </widget>
-     </item>
-     <item>
-      <widget class="Edit::CRenderContext" name="m_pEditorRenderContext" native="true">
-       <property name="minimumSize">
-        <size>
-         <width>1280</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="cursor">
-        <cursorShape>ArrowCursor</cursorShape>
-       </property>
-       <property name="mouseTracking">
-        <bool>true</bool>
-       </property>
-       <property name="autoFillBackground">
-        <bool>false</bool>
-       </property>
-       <property name="locale">
-        <locale language="English" country="UnitedStates"/>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <widget class="QWidget" name="m_pInspectorTab">
+     <attribute name="title">
+      <string>Inspector</string>
+     </attribute>
+     <widget class="Edit::CInspector" name="m_pInspector" native="true">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>311</width>
+        <height>761</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="m_pMenuBar">
@@ -136,7 +203,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1702</width>
+     <width>1933</width>
      <height>21</height>
     </rect>
    </property>
@@ -247,6 +314,12 @@
    <slots>
     <slot>entitySelected(QTreeWidgetItem*)</slot>
    </slots>
+  </customwidget>
+  <customwidget>
+   <class>Edit::CInspector</class>
+   <extends>QWidget</extends>
+   <header>editor_gui/edit_inspector.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

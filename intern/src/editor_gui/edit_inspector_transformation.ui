@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>InspectorForm</class>
+ <widget class="QWidget" name="InspectorForm">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>310</width>
+    <height>133</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QGroupBox" name="m_pInspectorTransformationGroup">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>310</width>
+     <height>131</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Transformation</string>
+   </property>
+   <widget class="QWidget" name="gridLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>291</width>
+      <height>101</height>
+     </rect>
+    </property>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Scale</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Rotation</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Position</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QDoubleSpinBox" name="m_pTransformationPositionX"/>
+     </item>
+     <item row="0" column="2">
+      <widget class="QDoubleSpinBox" name="m_pTransformationPositionY"/>
+     </item>
+     <item row="0" column="3">
+      <widget class="QDoubleSpinBox" name="m_pTransformationPositionZ"/>
+     </item>
+     <item row="1" column="1">
+      <widget class="QDoubleSpinBox" name="m_pTransformationScaleX"/>
+     </item>
+     <item row="1" column="2">
+      <widget class="QDoubleSpinBox" name="m_pTransformationScaleY"/>
+     </item>
+     <item row="1" column="3">
+      <widget class="QDoubleSpinBox" name="m_pTransformationScaleZ"/>
+     </item>
+     <item row="2" column="1">
+      <widget class="QDoubleSpinBox" name="m_pTransformationRotationX"/>
+     </item>
+     <item row="2" column="2">
+      <widget class="QDoubleSpinBox" name="m_pTransformationRotationY"/>
+     </item>
+     <item row="2" column="3">
+      <widget class="QDoubleSpinBox" name="m_pTransformationRotationZ"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
