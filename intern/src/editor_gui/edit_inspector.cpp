@@ -3,8 +3,6 @@
 
 #include "editor_gui/edit_inspector_transformation.h"
 
-#include "editor_gui/ui_edit_inspector_transformation.h"
-
 namespace Edit
 {
     CInspector::CInspector(QWidget* _pParent)

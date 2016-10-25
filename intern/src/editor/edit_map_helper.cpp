@@ -46,8 +46,13 @@ namespace
 
     private:
 
+        Dt::CEntity* m_pLastRequestedEntity;
+
+    private:
+
         void OnNewMap(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoTransformation(Edit::CMessage& _rMessage);
+        void OnEntityInfoTransformation(Edit::CMessage& _rMessage);
         void OnDirtyEntity(Dt::CEntity* _pEntity);
     };
 } // namespace
@@ -55,6 +60,7 @@ namespace
 namespace
 {
     CMapHelper::CMapHelper()
+        : m_pLastRequestedEntity(nullptr)
     {
         
     }
@@ -80,6 +86,7 @@ namespace
         // -----------------------------------------------------------------------------
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewMap, EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewMap));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoTransformation, EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoTransformation));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoTransformation, EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoTransformation));
     }
 
     // -----------------------------------------------------------------------------
@@ -216,12 +223,16 @@ namespace
     {
         int EntityID = _rMessage.GetInt();
 
+        m_pLastRequestedEntity = nullptr;
+
         Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin();
         Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
 
         for (; CurrentEntity != EndOfEntities; CurrentEntity = CurrentEntity.Next())
         {
             Dt::CEntity& rCurrentEntity = *CurrentEntity;
+
+            m_pLastRequestedEntity = &rCurrentEntity;
 
             if (rCurrentEntity.GetID() == EntityID)
             {
@@ -263,18 +274,52 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CMapHelper::OnEntityInfoTransformation(Edit::CMessage& _rMessage)
+    {
+        if (m_pLastRequestedEntity != nullptr)
+        {
+            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+
+            Dt::CTransformationFacet* pTransformationFacet = rCurrentEntity.GetTransformationFacet();
+
+            if (pTransformationFacet)
+            {
+                Base::Float3 Position(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+                Base::Float3 Scale(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+                Base::Float3 Rotation(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+
+                pTransformationFacet->SetPosition(Position);
+                pTransformationFacet->SetScale(Scale);
+                pTransformationFacet->SetRotation(Rotation);
+            }
+            else
+            {
+                Base::Float3 Position(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+
+                rCurrentEntity.SetWorldPosition(Position);
+            }
+
+            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyMove);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CMapHelper::OnDirtyEntity(Dt::CEntity* _pEntity)
     {
-        Edit::CMessage NewMessage;
+        if (_pEntity->GetDirtyFlags() & Dt::CEntity::DirtyAdd == 0)
+        {
+            Edit::CMessage NewMessage;
 
-        Dt::CEntity& rCurrentEntity = *_pEntity;
+            Dt::CEntity& rCurrentEntity = *_pEntity;
 
-        NewMessage.PutInt(rCurrentEntity.GetID());
-        NewMessage.PutInt(rCurrentEntity.GetCategory());
+            NewMessage.PutInt(rCurrentEntity.GetID());
+            NewMessage.PutInt(rCurrentEntity.GetCategory());
 
-        NewMessage.Reset();
+            NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::SceneGraphChanged, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::SceneGraphChanged, NewMessage);
+        }
     }
 } // namespace
 

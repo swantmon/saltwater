@@ -16,6 +16,9 @@
     <Filter Include="Dialogs">
       <UniqueIdentifier>{d6fff685-65d5-4c1a-89f9-9a757479ecbe}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Widgets\Inspector">
+      <UniqueIdentifier>{38ae8e22-8004-4fed-ac45-11a1a148b7f7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\editor_gui\edit_gui.cpp" />
@@ -44,14 +47,14 @@
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_transformation.cpp">
-      <Filter>Widgets</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_transformation.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_newscenedialog.cpp">
       <Filter>Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_transformation.cpp">
+      <Filter>Widgets\Inspector</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -74,11 +77,11 @@
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector.h">
       <Filter>Widgets</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_transformation.h">
-      <Filter>Widgets</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_newscenedialog.h">
       <Filter>Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_transformation.h">
+      <Filter>Widgets\Inspector</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
