@@ -7,86 +7,244 @@
     <x>0</x>
     <y>0</y>
     <width>310</width>
-    <height>133</height>
+    <height>127</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QGroupBox" name="m_pInspectorTransformationGroup">
+  <widget class="QWidget" name="m_pMainFrame" native="true">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>310</width>
+     <width>311</width>
      <height>131</height>
     </rect>
    </property>
-   <property name="title">
-    <string>Transformation</string>
-   </property>
-   <widget class="QWidget" name="gridLayoutWidget">
+   <widget class="QGroupBox" name="m_pInspectorTransformationGroup">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>20</y>
-      <width>291</width>
-      <height>101</height>
+      <x>0</x>
+      <y>0</y>
+      <width>310</width>
+      <height>131</height>
      </rect>
     </property>
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>Scale</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>Rotation</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Position</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QDoubleSpinBox" name="m_pTransformationPositionX"/>
-     </item>
-     <item row="0" column="2">
-      <widget class="QDoubleSpinBox" name="m_pTransformationPositionY"/>
-     </item>
-     <item row="0" column="3">
-      <widget class="QDoubleSpinBox" name="m_pTransformationPositionZ"/>
-     </item>
-     <item row="1" column="1">
-      <widget class="QDoubleSpinBox" name="m_pTransformationScaleX"/>
-     </item>
-     <item row="1" column="2">
-      <widget class="QDoubleSpinBox" name="m_pTransformationScaleY"/>
-     </item>
-     <item row="1" column="3">
-      <widget class="QDoubleSpinBox" name="m_pTransformationScaleZ"/>
-     </item>
-     <item row="2" column="1">
-      <widget class="QDoubleSpinBox" name="m_pTransformationRotationX"/>
-     </item>
-     <item row="2" column="2">
-      <widget class="QDoubleSpinBox" name="m_pTransformationRotationY"/>
-     </item>
-     <item row="2" column="3">
-      <widget class="QDoubleSpinBox" name="m_pTransformationRotationZ"/>
-     </item>
-    </layout>
+    <property name="title">
+     <string>Transformation</string>
+    </property>
+    <widget class="QWidget" name="gridLayoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>291</width>
+       <height>101</height>
+      </rect>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Scale</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Rotation</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Position</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QDoubleSpinBox" name="m_pTransformationPositionX"/>
+      </item>
+      <item row="0" column="2">
+       <widget class="QDoubleSpinBox" name="m_pTransformationPositionY"/>
+      </item>
+      <item row="0" column="3">
+       <widget class="QDoubleSpinBox" name="m_pTransformationPositionZ"/>
+      </item>
+      <item row="1" column="1">
+       <widget class="QDoubleSpinBox" name="m_pTransformationScaleX"/>
+      </item>
+      <item row="1" column="2">
+       <widget class="QDoubleSpinBox" name="m_pTransformationScaleY"/>
+      </item>
+      <item row="1" column="3">
+       <widget class="QDoubleSpinBox" name="m_pTransformationScaleZ"/>
+      </item>
+      <item row="2" column="1">
+       <widget class="QDoubleSpinBox" name="m_pTransformationRotationX"/>
+      </item>
+      <item row="2" column="2">
+       <widget class="QDoubleSpinBox" name="m_pTransformationRotationY"/>
+      </item>
+      <item row="2" column="3">
+       <widget class="QDoubleSpinBox" name="m_pTransformationRotationZ"/>
+      </item>
+     </layout>
+    </widget>
    </widget>
   </widget>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>m_pTransformationPositionX</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>InspectorForm</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>109</x>
+     <y>34</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>168</x>
+     <y>132</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pTransformationPositionY</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>InspectorForm</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>187</x>
+     <y>30</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>309</x>
+     <y>110</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pTransformationPositionZ</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>InspectorForm</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>269</x>
+     <y>31</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>309</x>
+     <y>48</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pTransformationScaleX</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>InspectorForm</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>126</x>
+     <y>67</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>309</x>
+     <y>74</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pTransformationScaleY</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>InspectorForm</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>193</x>
+     <y>62</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>309</x>
+     <y>132</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pTransformationScaleZ</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>InspectorForm</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>273</x>
+     <y>67</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>309</x>
+     <y>132</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pTransformationRotationX</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>InspectorForm</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>125</x>
+     <y>105</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>85</x>
+     <y>132</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pTransformationRotationY</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>InspectorForm</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>163</x>
+     <y>103</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>142</x>
+     <y>132</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pTransformationRotationZ</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>InspectorForm</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>244</x>
+     <y>101</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>258</x>
+     <y>132</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>valueChanged()</slot>
+ </slots>
 </ui>

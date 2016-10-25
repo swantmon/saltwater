@@ -347,8 +347,8 @@
    <slot>switchPlayingCurrentScene()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>84</x>
-     <y>53</y>
+     <x>966</x>
+     <y>75</y>
     </hint>
     <hint type="destinationlabel">
      <x>736</x>
@@ -363,8 +363,8 @@
    <slot>takeScreenshot()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1610</x>
-     <y>53</y>
+     <x>1522</x>
+     <y>75</y>
     </hint>
     <hint type="destinationlabel">
      <x>1166</x>

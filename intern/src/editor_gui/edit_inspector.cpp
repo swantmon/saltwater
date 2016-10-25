@@ -1,6 +1,8 @@
 ﻿
 #include "editor_gui/edit_inspector.h"
 
+#include "editor_gui/edit_inspector_transformation.h"
+
 #include "editor_gui/ui_edit_inspector_transformation.h"
 
 namespace Edit
@@ -16,11 +18,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create transformation widget and add to layout
         // -----------------------------------------------------------------------------
-        QWidget* pTransformWidget = new QWidget();
-
-        Ui::InspectorForm InspectorUI;
-
-        InspectorUI.setupUi(pTransformWidget); 
+        CInspectorTransformation* pTransformWidget = new CInspectorTransformation();
 
         pInspectorLayout->addWidget(pTransformWidget);
 
@@ -29,6 +27,8 @@ namespace Edit
         // -----------------------------------------------------------------------------
         setLayout(pInspectorLayout);
     }
+
+    // -----------------------------------------------------------------------------
 
     CInspector::~CInspector() 
     {

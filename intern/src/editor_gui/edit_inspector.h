@@ -12,8 +12,5 @@ namespace Edit
 
         CInspector(QWidget* _pParent = Q_NULLPTR);
         ~CInspector();
-
-    private:
-
     };
 } // namespace Edit

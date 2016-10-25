@@ -25,6 +25,7 @@ QT_BEGIN_NAMESPACE
 class Ui_InspectorForm
 {
 public:
+    QWidget *m_pMainFrame;
     QGroupBox *m_pInspectorTransformationGroup;
     QWidget *gridLayoutWidget;
     QGridLayout *gridLayout;
@@ -45,8 +46,11 @@ public:
     {
         if (InspectorForm->objectName().isEmpty())
             InspectorForm->setObjectName(QStringLiteral("InspectorForm"));
-        InspectorForm->resize(310, 133);
-        m_pInspectorTransformationGroup = new QGroupBox(InspectorForm);
+        InspectorForm->resize(310, 127);
+        m_pMainFrame = new QWidget(InspectorForm);
+        m_pMainFrame->setObjectName(QStringLiteral("m_pMainFrame"));
+        m_pMainFrame->setGeometry(QRect(0, 0, 311, 131));
+        m_pInspectorTransformationGroup = new QGroupBox(m_pMainFrame);
         m_pInspectorTransformationGroup->setObjectName(QStringLiteral("m_pInspectorTransformationGroup"));
         m_pInspectorTransformationGroup->setGeometry(QRect(0, 0, 310, 131));
         gridLayoutWidget = new QWidget(m_pInspectorTransformationGroup);
@@ -117,6 +121,15 @@ public:
 
 
         retranslateUi(InspectorForm);
+        QObject::connect(m_pTransformationPositionX, SIGNAL(valueChanged(double)), InspectorForm, SLOT(valueChanged()));
+        QObject::connect(m_pTransformationPositionY, SIGNAL(valueChanged(double)), InspectorForm, SLOT(valueChanged()));
+        QObject::connect(m_pTransformationPositionZ, SIGNAL(valueChanged(double)), InspectorForm, SLOT(valueChanged()));
+        QObject::connect(m_pTransformationScaleX, SIGNAL(valueChanged(double)), InspectorForm, SLOT(valueChanged()));
+        QObject::connect(m_pTransformationScaleY, SIGNAL(valueChanged(double)), InspectorForm, SLOT(valueChanged()));
+        QObject::connect(m_pTransformationScaleZ, SIGNAL(valueChanged(double)), InspectorForm, SLOT(valueChanged()));
+        QObject::connect(m_pTransformationRotationX, SIGNAL(valueChanged(double)), InspectorForm, SLOT(valueChanged()));
+        QObject::connect(m_pTransformationRotationY, SIGNAL(valueChanged(double)), InspectorForm, SLOT(valueChanged()));
+        QObject::connect(m_pTransformationRotationZ, SIGNAL(valueChanged(double)), InspectorForm, SLOT(valueChanged()));
 
         QMetaObject::connectSlotsByName(InspectorForm);
     } // setupUi

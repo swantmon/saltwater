@@ -13,6 +13,9 @@
     <Filter Include="Widgets">
       <UniqueIdentifier>{a5bea1c9-0d0a-4d89-a6cf-ec3d3bd6cdc0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Dialogs">
+      <UniqueIdentifier>{d6fff685-65d5-4c1a-89f9-9a757479ecbe}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\editor_gui\edit_gui.cpp" />
@@ -29,7 +32,6 @@
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_newscenedialog.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\edit_newscenedialog.cpp" />
     <ClCompile Include="..\..\..\src\editor_gui\edit_scenegraph.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
@@ -41,6 +43,15 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector.cpp">
       <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_transformation.cpp">
+      <Filter>Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_transformation.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\edit_newscenedialog.cpp">
+      <Filter>Dialogs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -54,7 +65,6 @@
     <CustomBuild Include="..\..\..\src\editor_gui\edit_newscenedialog.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_newscenedialog.h" />
     <CustomBuild Include="..\..\..\src\editor_gui\edit_scenegraph.h">
       <Filter>Widgets</Filter>
     </CustomBuild>
@@ -63,6 +73,12 @@
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector.h">
       <Filter>Widgets</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_transformation.h">
+      <Filter>Widgets</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_newscenedialog.h">
+      <Filter>Dialogs</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
