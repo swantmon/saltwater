@@ -25,6 +25,7 @@
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QWidget>
 #include "editor_gui/edit_render_context.h"
+#include "editor_gui/edit_scenegraph.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -43,7 +44,7 @@ public:
     QLineEdit *m_pMailAdressEdit;
     QWidget *horizontalLayoutWidget;
     QHBoxLayout *horizontalLayout;
-    QListView *listView;
+    Edit::CSceneGraph *m_pScenegraph;
     Edit::CRenderContext *m_pEditorRenderContext;
     QListView *listView_2;
     QMenuBar *m_pMenuBar;
@@ -96,11 +97,16 @@ public:
         horizontalLayout->setContentsMargins(11, 11, 11, 11);
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
         horizontalLayout->setContentsMargins(0, 0, 0, 0);
-        listView = new QListView(horizontalLayoutWidget);
-        listView->setObjectName(QStringLiteral("listView"));
-        listView->setDragEnabled(false);
+        m_pScenegraph = new Edit::CSceneGraph(horizontalLayoutWidget);
+        m_pScenegraph->setObjectName(QStringLiteral("m_pScenegraph"));
+        m_pScenegraph->setDragEnabled(false);
+        m_pScenegraph->setAlternatingRowColors(true);
+        m_pScenegraph->setSelectionMode(QAbstractItemView::ExtendedSelection);
+        m_pScenegraph->setSelectionBehavior(QAbstractItemView::SelectRows);
+        m_pScenegraph->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
+        m_pScenegraph->setModelColumn(0);
 
-        horizontalLayout->addWidget(listView);
+        horizontalLayout->addWidget(m_pScenegraph);
 
         m_pEditorRenderContext = new Edit::CRenderContext(horizontalLayoutWidget);
         m_pEditorRenderContext->setObjectName(QStringLiteral("m_pEditorRenderContext"));

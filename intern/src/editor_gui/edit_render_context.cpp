@@ -2,8 +2,8 @@
 
 namespace Edit
 {
-    CRenderContext::CRenderContext(QWidget * parent) 
-        : QWidget(parent) 
+    CRenderContext::CRenderContext(QWidget* _pParent)
+        : QWidget(_pParent)
     {
     }
 

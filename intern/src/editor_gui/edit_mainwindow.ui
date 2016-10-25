@@ -73,9 +73,24 @@
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QListView" name="listView">
+      <widget class="Edit::CSceneGraph" name="m_pScenegraph">
        <property name="dragEnabled">
         <bool>false</bool>
+       </property>
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::ExtendedSelection</enum>
+       </property>
+       <property name="selectionBehavior">
+        <enum>QAbstractItemView::SelectRows</enum>
+       </property>
+       <property name="verticalScrollMode">
+        <enum>QAbstractItemView::ScrollPerItem</enum>
+       </property>
+       <property name="modelColumn">
+        <number>0</number>
        </property>
       </widget>
      </item>
@@ -100,9 +115,6 @@
         <locale language="English" country="UnitedStates"/>
        </property>
       </widget>
-     </item>
-     <item>
-      <widget class="QListView" name="listView_2"/>
      </item>
     </layout>
    </widget>
@@ -215,6 +227,11 @@
    <extends>QWidget</extends>
    <header>editor_gui/edit_render_context.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Edit::CSceneGraph</class>
+   <extends>QListView</extends>
+   <header>editor_gui/edit_scenegraph.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
