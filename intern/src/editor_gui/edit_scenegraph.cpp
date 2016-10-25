@@ -23,12 +23,26 @@ namespace Edit
 
     void CSceneGraph::OnSceneGraphChanged(Edit::CMessage& _rMessage)
     {
+        auto GetCategoryName = [&](unsigned int _Category)->const char*
+        {
+            const char* pCategoryStrings[]
+            {
+                "Actor" ,
+                "Light" ,
+                "FX"    ,
+                "Plugin",
+            };
+
+            return pCategoryStrings[_Category];
+        };
+
+
         QTreeWidgetItem* pNewItem = new QTreeWidgetItem();
 
         // -----------------------------------------------------------------------------
         // ID
         // -----------------------------------------------------------------------------
-        pNewItem->setText(0, QString(_rMessage.GetInt()));
+        pNewItem->setText(0, QString::number(_rMessage.GetInt()));
 
         // -----------------------------------------------------------------------------
         // Name
@@ -38,7 +52,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Category
         // -----------------------------------------------------------------------------
-        pNewItem->setText(2, QString(_rMessage.GetInt()));
+        pNewItem->setText(2, QString(GetCategoryName(_rMessage.GetInt())));
 
         addTopLevelItem(pNewItem);
     }

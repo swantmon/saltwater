@@ -104,39 +104,6 @@
          <string>Type</string>
         </property>
        </column>
-       <item>
-        <property name="text">
-         <string>0</string>
-        </property>
-        <property name="text">
-         <string>Empty</string>
-        </property>
-        <property name="text">
-         <string>Node</string>
-        </property>
-        <item>
-         <property name="text">
-          <string>2</string>
-         </property>
-         <property name="text">
-          <string>Sphere</string>
-         </property>
-         <property name="text">
-          <string>Actor</string>
-         </property>
-        </item>
-       </item>
-       <item>
-        <property name="text">
-         <string>1</string>
-        </property>
-        <property name="text">
-         <string>Environment</string>
-        </property>
-        <property name="text">
-         <string>Light</string>
-        </property>
-       </item>
       </widget>
      </item>
      <item>

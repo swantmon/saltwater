@@ -41,10 +41,12 @@ namespace
 
     public:
 
-        void Refresh();
+        void OnStart();
+        void OnExit();
 
     private:
 
+        void OnNewMap(Edit::CMessage& _rMessage);
         void OnDirtyEntity(Dt::CEntity* _pEntity);
     };
 } // namespace
@@ -53,7 +55,7 @@ namespace
 {
     CMapHelper::CMapHelper()
     {
-        Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CMapHelper::OnDirtyEntity));
+        
     }
 
     // -----------------------------------------------------------------------------
@@ -65,9 +67,145 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CMapHelper::Refresh()
+    void CMapHelper::OnStart()
+    {
+        // -----------------------------------------------------------------------------
+        // Entity
+        // -----------------------------------------------------------------------------
+        Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CMapHelper::OnDirtyEntity));
+
+        // -----------------------------------------------------------------------------
+        // Edit
+        // -----------------------------------------------------------------------------
+        Edit::MessageManager::Register(Edit::SGUIMessageType::NewMap, EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewMap));
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnExit()
     {
 
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnNewMap(Edit::CMessage& _rMessage)
+    {
+        // -----------------------------------------------------------------------------
+        // Allocate a map
+        // -----------------------------------------------------------------------------
+        int MapX = _rMessage.GetInt();
+        int MapY = _rMessage.GetInt();
+
+        Dt::Map::AllocateMap(MapX, MapY);
+
+        // -----------------------------------------------------------------------------
+        // Setup cameras
+        // -----------------------------------------------------------------------------
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
+            EntityDesc.m_EntityType     = Dt::SActorType::Camera;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+
+            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc, 0);
+
+            Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 10.0f));
+            pTransformationFacet->SetScale(Base::Float3(1.0f));
+            pTransformationFacet->SetRotation(Base::Float3(0.0f, 0.0f, 0.0f));
+
+            Dt::CCameraActorFacet* pFacet = Dt::ActorManager::CreateCameraActor();
+
+            pFacet->SetMainCamera(true);
+
+            rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
+
+            Dt::CScriptFacet* pScriptFacet = Dt::ScriptManager::CreateScript();
+
+            pScriptFacet->SetScriptFile("scripts/camera_behavior.lua");
+
+            rEntity.SetDetailFacet(Dt::SFacetCategory::Script, pScriptFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Setup environment
+        // -----------------------------------------------------------------------------
+        {
+            Dt::STextureDescriptor TextureDescriptor;
+
+            TextureDescriptor.m_NumberOfPixelsU = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
+            TextureDescriptor.m_NumberOfPixelsV = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
+            TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_Format          = Dt::CTextureBase::R16G16B16_FLOAT;
+            TextureDescriptor.m_Semantic        = Dt::CTextureBase::HDR;
+            TextureDescriptor.m_pPixels         = 0;
+            TextureDescriptor.m_pFileName       = "environments/Ridgecrest_Road_Ref.hdr";
+            TextureDescriptor.m_pIdentifier     = 0;
+
+            Dt::CTexture2D* pPanoramaTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+
+            // -----------------------------------------------------------------------------
+
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
+            EntityDesc.m_EntityType     = Dt::SLightType::Skybox;
+            EntityDesc.m_FacetFlags     = 0;
+
+            Dt::CEntity& rEnvironment = Dt::EntityManager::CreateEntity(EntityDesc, 1);
+
+            Dt::CSkyboxFacet* pSkyboxFacet = Dt::LightManager::CreateSkybox();
+
+            pSkyboxFacet->SetType(Dt::CSkyboxFacet::Panorama);
+            pSkyboxFacet->SetTexture(pPanoramaTexture);
+            pSkyboxFacet->SetIntensity(10000.0f);
+
+            rEnvironment.SetDetailFacet(Dt::SFacetCategory::Data, pSkyboxFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEnvironment, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Setup entities
+        // -----------------------------------------------------------------------------
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
+            EntityDesc.m_EntityType     = Dt::SActorType::Model;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+
+            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntity(EntityDesc, 2);
+
+            Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(0.0f));
+            pTransformationFacet->SetScale   (Base::Float3(1.0f));
+            pTransformationFacet->SetRotation(Base::Float3(0.0f));
+
+            Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
+
+            Dt::SModelFileDescriptor ModelFileDesc;
+
+            ModelFileDesc.m_pFileName = "models/sphere.obj";
+            ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
+
+            Dt::SMaterialFileDescriptor MaterialFileDesc;
+
+            MaterialFileDesc.m_pFileName = "materials/naturals/metals/Gold_Worn_00.mat";
+
+            pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
+            pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
+
+            rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -93,9 +231,16 @@ namespace Helper
 {
 namespace Map
 {
-    void Refresh()
+    void OnStart()
     {
-        CMapHelper::GetInstance().Refresh();
+        CMapHelper::GetInstance().OnStart();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void OnExit()
+    {
+        CMapHelper::GetInstance().OnExit();
     }
 } // namespace Map
 } // namespace Helper

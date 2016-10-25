@@ -7,7 +7,8 @@ namespace Helper
 namespace Map
 {
 	
-    void Refresh();
+    void OnStart();
+    void OnExit();
 
 } // namespace Map
 } // namespace Helper

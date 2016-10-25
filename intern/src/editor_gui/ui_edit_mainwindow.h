@@ -96,9 +96,6 @@ public:
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
         horizontalLayout->setContentsMargins(0, 0, 0, 0);
         m_pScenegraph = new Edit::CSceneGraph(horizontalLayoutWidget);
-        QTreeWidgetItem *__qtreewidgetitem = new QTreeWidgetItem(m_pScenegraph);
-        new QTreeWidgetItem(__qtreewidgetitem);
-        new QTreeWidgetItem(m_pScenegraph);
         m_pScenegraph->setObjectName(QStringLiteral("m_pScenegraph"));
         m_pScenegraph->setDragEnabled(false);
         m_pScenegraph->setAlternatingRowColors(true);
@@ -185,23 +182,6 @@ public:
         ___qtreewidgetitem->setText(2, QApplication::translate("CMainWindow", "Type", 0));
         ___qtreewidgetitem->setText(1, QApplication::translate("CMainWindow", "Entity", 0));
         ___qtreewidgetitem->setText(0, QApplication::translate("CMainWindow", "ID", 0));
-
-        const bool __sortingEnabled = m_pScenegraph->isSortingEnabled();
-        m_pScenegraph->setSortingEnabled(false);
-        QTreeWidgetItem *___qtreewidgetitem1 = m_pScenegraph->topLevelItem(0);
-        ___qtreewidgetitem1->setText(2, QApplication::translate("CMainWindow", "Node", 0));
-        ___qtreewidgetitem1->setText(1, QApplication::translate("CMainWindow", "Empty", 0));
-        ___qtreewidgetitem1->setText(0, QApplication::translate("CMainWindow", "0", 0));
-        QTreeWidgetItem *___qtreewidgetitem2 = ___qtreewidgetitem1->child(0);
-        ___qtreewidgetitem2->setText(2, QApplication::translate("CMainWindow", "Actor", 0));
-        ___qtreewidgetitem2->setText(1, QApplication::translate("CMainWindow", "Sphere", 0));
-        ___qtreewidgetitem2->setText(0, QApplication::translate("CMainWindow", "2", 0));
-        QTreeWidgetItem *___qtreewidgetitem3 = m_pScenegraph->topLevelItem(1);
-        ___qtreewidgetitem3->setText(2, QApplication::translate("CMainWindow", "Light", 0));
-        ___qtreewidgetitem3->setText(1, QApplication::translate("CMainWindow", "Environment", 0));
-        ___qtreewidgetitem3->setText(0, QApplication::translate("CMainWindow", "1", 0));
-        m_pScenegraph->setSortingEnabled(__sortingEnabled);
-
         m_pMenuFile->setTitle(QApplication::translate("CMainWindow", "File", 0));
         m_pMenuEdit->setTitle(QApplication::translate("CMainWindow", "Edit", 0));
         m_pMenuAssets->setTitle(QApplication::translate("CMainWindow", "Assets", 0));
