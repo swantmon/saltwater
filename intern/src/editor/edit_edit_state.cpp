@@ -13,6 +13,7 @@
 #include "data/data_light_manager.h"
 #include "data/data_fx_facet.h"
 #include "data/data_fx_manager.h"
+#include "data/data_hierarchy_facet.h"
 #include "data/data_map.h"
 #include "data/data_material_manager.h"
 #include "data/data_model_manager.h"
@@ -275,6 +276,8 @@ namespace Edit
             pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
 
             rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
     }
 } // namespace Edit

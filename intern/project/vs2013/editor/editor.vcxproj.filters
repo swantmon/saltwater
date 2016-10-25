@@ -4,6 +4,9 @@
     <Filter Include="states">
       <UniqueIdentifier>{7807dec5-a560-497a-89fa-d6fa102e7bc5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="helper">
+      <UniqueIdentifier>{9b8d6b30-5dce-454a-b416-151c86fb5833}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\editor\edit_edit_state.cpp">
@@ -30,6 +33,9 @@
     <ClCompile Include="..\..\..\src\editor\edit_main.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_application.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_precompiled.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_map_helper.cpp">
+      <Filter>helper</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor\edit_edit_state.h">
@@ -58,5 +64,8 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor\edit_application.h" />
     <ClInclude Include="..\..\..\src\editor\edit_precompiled.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_map_helper.h">
+      <Filter>helper</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

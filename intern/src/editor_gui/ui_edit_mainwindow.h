@@ -190,7 +190,7 @@ public:
         m_pScenegraph->setSortingEnabled(false);
         QTreeWidgetItem *___qtreewidgetitem1 = m_pScenegraph->topLevelItem(0);
         ___qtreewidgetitem1->setText(2, QApplication::translate("CMainWindow", "Node", 0));
-        ___qtreewidgetitem1->setText(1, QApplication::translate("CMainWindow", "Root", 0));
+        ___qtreewidgetitem1->setText(1, QApplication::translate("CMainWindow", "Empty", 0));
         ___qtreewidgetitem1->setText(0, QApplication::translate("CMainWindow", "0", 0));
         QTreeWidgetItem *___qtreewidgetitem2 = ___qtreewidgetitem1->child(0);
         ___qtreewidgetitem2->setText(2, QApplication::translate("CMainWindow", "Actor", 0));

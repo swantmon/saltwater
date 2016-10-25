@@ -44,6 +44,7 @@ namespace Edit
         enum Enum 
         {
             FramesPerSecond,
+            SceneGraphChanged,
 
             NumberOfMembers,
             Undefined = -1,

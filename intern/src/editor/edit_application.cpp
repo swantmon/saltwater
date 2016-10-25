@@ -14,6 +14,7 @@
 #include "editor/edit_exit_state.h"
 #include "editor/edit_intro_state.h"
 #include "editor/edit_load_map_state.h"
+#include "editor/edit_map_helper.h"
 #include "editor/edit_play_state.h"
 #include "editor/edit_start_state.h"
 #include "editor/edit_unload_map_state.h"
@@ -199,6 +200,11 @@ namespace
             NewMessage.Reset();
 
             Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::FramesPerSecond, NewMessage);
+
+            // -----------------------------------------------------------------------------
+            // Helper
+            // -----------------------------------------------------------------------------
+            Edit::Helper::Map::Refresh();
 
             // -----------------------------------------------------------------------------
             // State engine
