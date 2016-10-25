@@ -126,7 +126,6 @@
        <property name="locale">
         <locale language="English" country="UnitedStates"/>
        </property>
-       <zorder>m_pScenegraph</zorder>
       </widget>
      </item>
     </layout>
@@ -245,6 +244,9 @@
    <class>Edit::CSceneGraph</class>
    <extends>QTreeWidget</extends>
    <header>editor_gui/edit_scenegraph.h</header>
+   <slots>
+    <slot>entitySelected(QTreeWidgetItem*)</slot>
+   </slots>
   </customwidget>
  </customwidgets>
  <resources/>
@@ -288,8 +290,8 @@
    <slot>takeScreenshot()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1211</x>
-     <y>45</y>
+     <x>1610</x>
+     <y>53</y>
     </hint>
     <hint type="destinationlabel">
      <x>1166</x>
@@ -313,10 +315,27 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_pScenegraph</sender>
+   <signal>itemClicked(QTreeWidgetItem*,int)</signal>
+   <receiver>m_pScenegraph</receiver>
+   <slot>entitySelected(QTreeWidgetItem*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>80</x>
+     <y>320</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>246</x>
+     <y>280</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>switchPlayingCurrentScene()</slot>
   <slot>takeScreenshot()</slot>
   <slot>createNewScene()</slot>
+  <slot>testEntitySelected()</slot>
  </slots>
 </ui>

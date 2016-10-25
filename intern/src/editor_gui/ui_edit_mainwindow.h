@@ -112,7 +112,6 @@ public:
         m_pEditorRenderContext->setMouseTracking(true);
         m_pEditorRenderContext->setAutoFillBackground(false);
         m_pEditorRenderContext->setLocale(QLocale(QLocale::English, QLocale::UnitedStates));
-        m_pScenegraph->raise();
 
         horizontalLayout->addWidget(m_pEditorRenderContext);
 
@@ -160,6 +159,7 @@ public:
         QObject::connect(m_pPlayButton, SIGNAL(clicked()), CMainWindow, SLOT(switchPlayingCurrentScene()));
         QObject::connect(m_pScreenshotButton, SIGNAL(clicked()), CMainWindow, SLOT(takeScreenshot()));
         QObject::connect(m_pActionNew, SIGNAL(triggered()), CMainWindow, SLOT(createNewScene()));
+        QObject::connect(m_pScenegraph, SIGNAL(itemClicked(QTreeWidgetItem*,int)), m_pScenegraph, SLOT(entitySelected(QTreeWidgetItem*)));
 
         QMetaObject::connectSlotsByName(CMainWindow);
     } // setupUi

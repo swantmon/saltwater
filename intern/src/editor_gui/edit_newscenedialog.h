@@ -19,6 +19,5 @@ namespace Edit
 
         void pressOkay();
         void pressCancel();
-
     };
 } // namespace Edit

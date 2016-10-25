@@ -56,4 +56,19 @@ namespace Edit
 
         addTopLevelItem(pNewItem);
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CSceneGraph::entitySelected(QTreeWidgetItem* _pItem)
+    {
+        int EntityID = _pItem->text(0).toInt();
+
+        CMessage NewMessage;
+
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::RequestEntityInfoTransformation, NewMessage);
+    }
 } // namespace Edit

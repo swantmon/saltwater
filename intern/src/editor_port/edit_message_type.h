@@ -30,6 +30,7 @@ namespace Edit
             TakeScreenshot,
             Play,
             Edit,
+            RequestEntityInfoTransformation,
 
             NumberOfMembers,
             Undefined = -1,
@@ -45,6 +46,7 @@ namespace Edit
         {
             FramesPerSecond,
             SceneGraphChanged,
+            EntityInfoTransformation,
 
             NumberOfMembers,
             Undefined = -1,

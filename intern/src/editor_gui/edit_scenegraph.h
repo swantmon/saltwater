@@ -16,6 +16,10 @@ namespace Edit
 	    CSceneGraph(QWidget* _pParent = Q_NULLPTR);
 	    ~CSceneGraph();
 
+    public Q_SLOTS:
+
+        void entitySelected(QTreeWidgetItem* _pItem);
+
     private:
 
         void OnSceneGraphChanged(Edit::CMessage& _rMessage);
