@@ -33,5 +33,6 @@ namespace Edit
 
         void OnExit(Edit::CMessage& _rMessage);
         void OnPlay(Edit::CMessage& _rMessage);
+        void OnNewMap(Edit::CMessage& _rMessage);
     };
 } // namespace Edit

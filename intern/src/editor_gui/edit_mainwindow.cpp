@@ -1,15 +1,22 @@
 ﻿
 #include "editor_gui/edit_mainwindow.h"
+#include "editor_gui/edit_newscenedialog.h"
 
 #include <QString>
 
 namespace Edit
 {
     CMainWindow::CMainWindow(QWidget* _pParent) 
-        : QMainWindow   (_pParent)
-        , m_pStatusLabel(nullptr)
-        , m_IsPlaying   (false)
+        : QMainWindow      (_pParent)
+        , m_pStatusLabel   (nullptr)
+        , m_pNewSceneDialog(nullptr)
+        , m_IsPlaying      (false)
     {
+        // -----------------------------------------------------------------------------
+        // Dialogs
+        // -----------------------------------------------------------------------------
+        m_pNewSceneDialog = new CNewSceneDialog();
+
         // -----------------------------------------------------------------------------
         // Form setup
         // -----------------------------------------------------------------------------
@@ -33,6 +40,11 @@ namespace Edit
 
     CMainWindow::~CMainWindow() 
     {
+        // -----------------------------------------------------------------------------
+        // Delete dialogs
+        // -----------------------------------------------------------------------------
+        delete m_pNewSceneDialog;
+
         // -----------------------------------------------------------------------------
         // Remove user specific UI
         // -----------------------------------------------------------------------------
@@ -88,6 +100,13 @@ namespace Edit
         NewMessage.Reset();
 
         MessageManager::SendMessage(SGUIMessageType::TakeScreenshot, NewMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::createNewScene()
+    {
+        m_pNewSceneDialog->show();
     }
 
     // -----------------------------------------------------------------------------

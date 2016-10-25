@@ -521,8 +521,6 @@ namespace
         // -----------------------------------------------------------------------------
         // We have to find the first non-empty folder.
         // -----------------------------------------------------------------------------
-        assert(m_pRegions != nullptr);
-
         const CRegion* const pRegionEnd = m_pRegions + m_NumberOfRegions;
 
         for (pRegion = m_pRegions; pRegion < pRegionEnd; ++ pRegion)
@@ -550,8 +548,6 @@ namespace
         // -----------------------------------------------------------------------------
         // We have to find the first non-empty folder with the passed category.
         // -----------------------------------------------------------------------------
-        assert(m_pRegions != nullptr);
-
         const CRegion* const pRegionEnd = m_pRegions + m_NumberOfRegions;
 
         for (pRegion = m_pRegions; pRegion < pRegionEnd; ++ pRegion)

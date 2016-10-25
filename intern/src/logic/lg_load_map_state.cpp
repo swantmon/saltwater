@@ -69,7 +69,7 @@ namespace
         
 //        CreateSimplePBRTestScene();
 //        CreatePBRTestScene();
-        CreatePBRARScene();
+//        CreatePBRARScene();
 //        CreatePBRSponzaScene();
 
         BASE_CONSOLE_STREAMINFO("Logic> Loading level finished.");

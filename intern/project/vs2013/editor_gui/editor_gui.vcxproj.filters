@@ -26,6 +26,10 @@
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_render_context.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_newscenedialog.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\edit_newscenedialog.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_mainwindow.ui">
@@ -35,10 +39,17 @@
     <CustomBuild Include="..\..\..\src\editor_gui\edit_render_context.h">
       <Filter>Widgets</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_newscenedialog.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_newscenedialog.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor_gui\edit_gui.h" />
     <ClInclude Include="..\..\..\src\editor_gui\ui_edit_mainwindow.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_newscenedialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,6 +2,7 @@
 #pragma once
 
 #include "editor_gui/ui_edit_mainwindow.h"
+#include "editor_gui/edit_newscenedialog.h"
 
 #include "editor_port/edit_message.h"
 #include "editor_port/edit_message_manager.h"
@@ -29,12 +30,14 @@ namespace Edit
 
         void switchPlayingCurrentScene();
         void takeScreenshot();
+        void createNewScene();
 
     private:
 
-        Ui::CMainWindow m_UserInterface;
-        QLabel*         m_pStatusLabel;
-        bool            m_IsPlaying;
+        Ui::CMainWindow  m_UserInterface;
+        QLabel*          m_pStatusLabel;
+        CNewSceneDialog* m_pNewSceneDialog;
+        bool             m_IsPlaying;
 
     private:
 

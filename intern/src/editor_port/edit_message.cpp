@@ -126,7 +126,7 @@ namespace Edit
     {
         assert(m_Mode == Write);
 
-        m_Bytes.insert(m_Bytes.end(), reinterpret_cast<const Base::U8*>(&_Value), reinterpret_cast<const Base::U8*>(&_Value) + sizeof(_Value));
+        m_Bytes.insert(m_Bytes.end(), reinterpret_cast<const Base::U8*>(&_Value), reinterpret_cast<const Base::U8*>(&_Value) + sizeof(int));
     }
 
     // -----------------------------------------------------------------------------
