@@ -56,9 +56,15 @@ namespace
 
         void OnNewMap(Edit::CMessage& _rMessage);
         void OnNewEntityActor(Edit::CMessage& _rMessage);
+        void OnNewLightDirectional(Edit::CMessage& _rMessage);
+        void OnNewLightPoint(Edit::CMessage& _rMessage);
+        void OnNewLightEnvironment(Edit::CMessage& _rMessage);
+        void OnNewLightReflection(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoTransformation(Edit::CMessage& _rMessage);
         void OnEntityInfoTransformation(Edit::CMessage& _rMessage);
         void OnDirtyEntity(Dt::CEntity* _pEntity);
+
+        std::string CopyFileToAssets(const char* _pAssetFolder, const char* _pPathToFile);
     };
 } // namespace
 
@@ -90,10 +96,14 @@ namespace
         // -----------------------------------------------------------------------------
         // Edit
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewMap, EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewMap));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntityActor, EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntityActor));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::NewMap                         , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewMap));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntityActor                 , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntityActor));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::NewLightDirectional            , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewLightDirectional));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::NewLightPoint                  , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewLightPoint));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::NewLightEnvironment            , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewLightEnvironment));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::NewLightReflection             , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewLightReflection));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoTransformation, EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoTransformation));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoTransformation, EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoTransformation));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoTransformation       , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoTransformation));
     }
 
     // -----------------------------------------------------------------------------
@@ -125,7 +135,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SActorType::Camera;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc, 0);
+            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc, m_EntityID);
 
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
@@ -148,69 +158,13 @@ namespace
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
-        // -----------------------------------------------------------------------------
-        // Setup environment
-        // -----------------------------------------------------------------------------
-        {
-            Dt::STextureDescriptor TextureDescriptor;
-
-            TextureDescriptor.m_NumberOfPixelsU = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
-            TextureDescriptor.m_NumberOfPixelsV = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
-            TextureDescriptor.m_NumberOfPixelsW = 1;
-            TextureDescriptor.m_Format          = Dt::CTextureBase::R16G16B16_FLOAT;
-            TextureDescriptor.m_Semantic        = Dt::CTextureBase::HDR;
-            TextureDescriptor.m_pPixels         = 0;
-            TextureDescriptor.m_pFileName       = "environments/Ridgecrest_Road_Ref.hdr";
-            TextureDescriptor.m_pIdentifier     = 0;
-
-            Dt::CTexture2D* pPanoramaTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
-
-            // -----------------------------------------------------------------------------
-
-            Dt::SEntityDescriptor EntityDesc;
-
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
-            EntityDesc.m_EntityType     = Dt::SLightType::Skybox;
-            EntityDesc.m_FacetFlags     = 0;
-
-            Dt::CEntity& rEnvironment = Dt::EntityManager::CreateEntity(EntityDesc, 1);
-
-            Dt::CSkyboxFacet* pSkyboxFacet = Dt::LightManager::CreateSkybox();
-
-            pSkyboxFacet->SetType(Dt::CSkyboxFacet::Panorama);
-            pSkyboxFacet->SetTexture(pPanoramaTexture);
-            pSkyboxFacet->SetIntensity(10000.0f);
-
-            rEnvironment.SetDetailFacet(Dt::SFacetCategory::Data, pSkyboxFacet);
-
-            Dt::EntityManager::MarkEntityAsDirty(rEnvironment, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-        }
+        ++m_EntityID;
     }
 
     // -----------------------------------------------------------------------------
 
     void CMapHelper::OnNewEntityActor(Edit::CMessage& _rMessage)
     {
-        auto CopyFileToAssets = [&](const char* _pAssetFolder, const char* _pPathToFile)->std::string
-        {
-            char pDrive[4];
-            char pDirectory[512];
-            char pFilename[32]; 
-            char pExtension[12];
-
-            std::string FileExtension;
-            std::string RelativePathToModel;
-            
-            _splitpath_s(_pPathToFile, pDrive, 4, pDirectory, 512, pFilename, 32, pExtension, 12);
-
-            FileExtension       = std::string(pFilename) + std::string(pExtension);
-            RelativePathToModel = std::string(_pAssetFolder) + FileExtension;
-
-            CopyFileA(_pPathToFile, RelativePathToModel.c_str(), true);
-
-            return FileExtension.c_str();
-        };
-
         // -----------------------------------------------------------------------------
         // Create new entity
         // -----------------------------------------------------------------------------
@@ -292,6 +246,149 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CMapHelper::OnNewLightDirectional(Edit::CMessage& _rMessage)
+    {
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
+            EntityDesc.m_EntityType     = Dt::SLightType::Sun;
+            EntityDesc.m_FacetFlags     = 0;
+
+            Dt::CEntity& rSunLight = Dt::EntityManager::CreateEntity(EntityDesc, m_EntityID);
+
+            Dt::CSunLightFacet* pSunLightFacet = Dt::LightManager::CreateSunLight();
+
+            pSunLightFacet->EnableTemperature(false);
+            pSunLightFacet->SetColor(Base::Float3(1.0f, 1.0f, 1.0f));
+            pSunLightFacet->SetDirection(Base::Float3(0.0f, 0.0f, -1.0f));
+            pSunLightFacet->SetIntensity(90600.0f);
+            pSunLightFacet->SetTemperature(0);
+            pSunLightFacet->SetRefreshMode(Dt::CSunLightFacet::Dynamic);
+
+            pSunLightFacet->UpdateLightness();
+
+            rSunLight.SetDetailFacet(Dt::SFacetCategory::Data, pSunLightFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rSunLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        ++m_EntityID;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnNewLightPoint(Edit::CMessage& _rMessage)
+    {
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
+            EntityDesc.m_EntityType     = Dt::SLightType::Point;
+            EntityDesc.m_FacetFlags     = 0;
+
+            Dt::CEntity& rPointLight = Dt::EntityManager::CreateEntity(EntityDesc, m_EntityID);
+
+            rPointLight.SetWorldPosition(Base::Float3(14.0f, 6.0f, 4.0f));
+
+            Dt::CPointLightFacet* pPointLightFacet = Dt::LightManager::CreatePointLight();
+
+            pPointLightFacet->SetRefreshMode      (Dt::CPointLightFacet::Static);
+            pPointLightFacet->SetShadowType       (Dt::CPointLightFacet::HardShadows);
+            pPointLightFacet->SetShadowQuality    (Dt::CPointLightFacet::High);
+            pPointLightFacet->EnableTemperature   (false);
+            pPointLightFacet->SetColor            (Base::Float3(1.0f, 0.0f, 0.0f));
+            pPointLightFacet->SetAttenuationRadius(10.0f);
+            pPointLightFacet->SetInnerConeAngle   (Base::DegreesToRadians(45.0f));
+            pPointLightFacet->SetOuterConeAngle   (Base::DegreesToRadians(90.0f));
+            pPointLightFacet->SetDirection        (Base::Float3(-1.0f, -1.0f, -1.0f));
+            pPointLightFacet->SetIntensity        (1200.0f);
+            pPointLightFacet->SetTemperature      (0);
+
+            pPointLightFacet->UpdateLightness();
+
+            rPointLight.SetDetailFacet(Dt::SFacetCategory::Data, pPointLightFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rPointLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        ++m_EntityID;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnNewLightEnvironment(Edit::CMessage& _rMessage)
+    {
+        // -----------------------------------------------------------------------------
+        // Setup environment
+        // -----------------------------------------------------------------------------
+        {
+            Dt::STextureDescriptor TextureDescriptor;
+
+            TextureDescriptor.m_NumberOfPixelsU = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
+            TextureDescriptor.m_NumberOfPixelsV = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
+            TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_Format          = Dt::CTextureBase::R16G16B16_FLOAT;
+            TextureDescriptor.m_Semantic        = Dt::CTextureBase::HDR;
+            TextureDescriptor.m_pPixels         = 0;
+            TextureDescriptor.m_pFileName       = "environments/PaperMill_E_3k.hdr";
+            TextureDescriptor.m_pIdentifier     = 0;
+
+            Dt::CTexture2D* pPanoramaTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+
+            // -----------------------------------------------------------------------------
+
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
+            EntityDesc.m_EntityType     = Dt::SLightType::Skybox;
+            EntityDesc.m_FacetFlags     = 0;
+
+            Dt::CEntity& rEnvironment = Dt::EntityManager::CreateEntity(EntityDesc, m_EntityID);
+
+            Dt::CSkyboxFacet* pSkyboxFacet = Dt::LightManager::CreateSkybox();
+
+            pSkyboxFacet->SetType     (Dt::CSkyboxFacet::Panorama);
+            pSkyboxFacet->SetTexture  (pPanoramaTexture);
+            pSkyboxFacet->SetIntensity(5000.0f);
+
+            rEnvironment.SetDetailFacet(Dt::SFacetCategory::Data, pSkyboxFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEnvironment, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        ++m_EntityID;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnNewLightReflection(Edit::CMessage& _rMessage)
+    {
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
+            EntityDesc.m_EntityType     = Dt::SLightType::GlobalProbe;
+            EntityDesc.m_FacetFlags     = 0;
+
+            Dt::CEntity& rGlobalProbeLight = Dt::EntityManager::CreateEntity(EntityDesc, m_EntityID);
+
+            Dt::CGlobalProbeLightFacet* pGlobalProbeLightFacet = Dt::LightManager::CreateGlobalProbeLight();
+
+            pGlobalProbeLightFacet->SetType(Dt::CGlobalProbeLightFacet::Sky);
+            pGlobalProbeLightFacet->SetQuality(Dt::CGlobalProbeLightFacet::PX512);
+            pGlobalProbeLightFacet->SetIntensity(1.0f);
+
+            rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pGlobalProbeLightFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rGlobalProbeLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        ++m_EntityID;
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CMapHelper::OnRequestEntityInfoTransformation(Edit::CMessage& _rMessage)
     {
         int EntityID = _rMessage.GetInt();
@@ -305,10 +402,10 @@ namespace
         {
             Dt::CEntity& rCurrentEntity = *CurrentEntity;
 
-            m_pLastRequestedEntity = &rCurrentEntity;
-
             if (rCurrentEntity.GetID() == EntityID)
             {
+                m_pLastRequestedEntity = &rCurrentEntity;
+
                 Edit::CMessage NewMessage;
 
                 Dt::CTransformationFacet* pTransformationFacet = rCurrentEntity.GetTransformationFacet();
@@ -321,13 +418,13 @@ namespace
                     NewMessage.PutFloat(pTransformationFacet->GetPosition()[1]);
                     NewMessage.PutFloat(pTransformationFacet->GetPosition()[2]);
 
-                    NewMessage.PutFloat(pTransformationFacet->GetScale()[0]);
-                    NewMessage.PutFloat(pTransformationFacet->GetScale()[1]);
-                    NewMessage.PutFloat(pTransformationFacet->GetScale()[2]);
-
                     NewMessage.PutFloat(Base::RadiansToDegree(pTransformationFacet->GetRotation()[0]));
                     NewMessage.PutFloat(Base::RadiansToDegree(pTransformationFacet->GetRotation()[1]));
                     NewMessage.PutFloat(Base::RadiansToDegree(pTransformationFacet->GetRotation()[2]));
+
+                    NewMessage.PutFloat(pTransformationFacet->GetScale()[0]);
+                    NewMessage.PutFloat(pTransformationFacet->GetScale()[1]);
+                    NewMessage.PutFloat(pTransformationFacet->GetScale()[2]);
                 }
                 else
                 {
@@ -360,8 +457,8 @@ namespace
             if (pTransformationFacet)
             {
                 Base::Float3 Position(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
-                Base::Float3 Scale   (_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
                 Base::Float3 Rotation(Base::DegreesToRadians(_rMessage.GetFloat()), Base::DegreesToRadians(_rMessage.GetFloat()), Base::DegreesToRadians(_rMessage.GetFloat()));
+                Base::Float3 Scale   (_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
 
                 pTransformationFacet->SetPosition(Position);
                 pTransformationFacet->SetScale(Scale);
@@ -396,6 +493,28 @@ namespace
             Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::SceneGraphChanged, NewMessage);
         }
     }
+
+    // -----------------------------------------------------------------------------
+
+    std::string CMapHelper::CopyFileToAssets(const char* _pAssetFolder, const char* _pPathToFile)
+    {
+        char pDrive[4];
+        char pDirectory[512];
+        char pFilename[32];
+        char pExtension[12];
+
+        std::string FileExtension;
+        std::string RelativePathToModel;
+
+        _splitpath_s(_pPathToFile, pDrive, 4, pDirectory, 512, pFilename, 32, pExtension, 12);
+
+        FileExtension = std::string(pFilename) + std::string(pExtension);
+        RelativePathToModel = std::string(_pAssetFolder) + FileExtension;
+
+        CopyFileA(_pPathToFile, RelativePathToModel.c_str(), true);
+
+        return FileExtension.c_str();
+    };
 } // namespace
 
 namespace Edit

@@ -39,6 +39,12 @@ public:
     QAction *m_pActionReleaseNotes;
     QAction *m_pActionReportBug;
     QAction *m_pActionModel;
+    QAction *actionPoint;
+    QAction *m_pActionPoint;
+    QAction *m_pActionEnvironment;
+    QAction *m_pActionReflection;
+    QAction *m_pActionCamera;
+    QAction *m_pActionDirectional;
     QWidget *m_pCentralWidget;
     QTabWidget *m_pSceneGraphTabWidget;
     QWidget *m_pSceneGraphTab;
@@ -58,6 +64,7 @@ public:
     QMenu *m_pMenuAssets;
     QMenu *m_pMenuEntity;
     QMenu *menuActors;
+    QMenu *menuLights;
     QMenu *m_pMenuComponent;
     QMenu *m_pMenuWindow;
     QMenu *m_pMenuHelp;
@@ -68,7 +75,7 @@ public:
         if (CMainWindow->objectName().isEmpty())
             CMainWindow->setObjectName(QStringLiteral("CMainWindow"));
         CMainWindow->setWindowModality(Qt::NonModal);
-        CMainWindow->resize(1933, 892);
+        CMainWindow->resize(1933, 832);
         CMainWindow->setCursor(QCursor(Qt::ArrowCursor));
         CMainWindow->setMouseTracking(true);
         m_pActionNew = new QAction(CMainWindow);
@@ -86,6 +93,18 @@ public:
         m_pActionReportBug->setObjectName(QStringLiteral("m_pActionReportBug"));
         m_pActionModel = new QAction(CMainWindow);
         m_pActionModel->setObjectName(QStringLiteral("m_pActionModel"));
+        actionPoint = new QAction(CMainWindow);
+        actionPoint->setObjectName(QStringLiteral("actionPoint"));
+        m_pActionPoint = new QAction(CMainWindow);
+        m_pActionPoint->setObjectName(QStringLiteral("m_pActionPoint"));
+        m_pActionEnvironment = new QAction(CMainWindow);
+        m_pActionEnvironment->setObjectName(QStringLiteral("m_pActionEnvironment"));
+        m_pActionReflection = new QAction(CMainWindow);
+        m_pActionReflection->setObjectName(QStringLiteral("m_pActionReflection"));
+        m_pActionCamera = new QAction(CMainWindow);
+        m_pActionCamera->setObjectName(QStringLiteral("m_pActionCamera"));
+        m_pActionDirectional = new QAction(CMainWindow);
+        m_pActionDirectional->setObjectName(QStringLiteral("m_pActionDirectional"));
         m_pCentralWidget = new QWidget(CMainWindow);
         m_pCentralWidget->setObjectName(QStringLiteral("m_pCentralWidget"));
         m_pSceneGraphTabWidget = new QTabWidget(m_pCentralWidget);
@@ -149,6 +168,8 @@ public:
         m_pMenuEntity->setObjectName(QStringLiteral("m_pMenuEntity"));
         menuActors = new QMenu(m_pMenuEntity);
         menuActors->setObjectName(QStringLiteral("menuActors"));
+        menuLights = new QMenu(m_pMenuEntity);
+        menuLights->setObjectName(QStringLiteral("menuLights"));
         m_pMenuComponent = new QMenu(m_pMenuBar);
         m_pMenuComponent->setObjectName(QStringLiteral("m_pMenuComponent"));
         m_pMenuWindow = new QMenu(m_pMenuBar);
@@ -172,7 +193,13 @@ public:
         m_pMenuFile->addSeparator();
         m_pMenuFile->addAction(m_pActionExit);
         m_pMenuEntity->addAction(menuActors->menuAction());
+        m_pMenuEntity->addAction(menuLights->menuAction());
         menuActors->addAction(m_pActionModel);
+        menuActors->addAction(m_pActionCamera);
+        menuLights->addAction(m_pActionDirectional);
+        menuLights->addAction(m_pActionPoint);
+        menuLights->addAction(m_pActionEnvironment);
+        menuLights->addAction(m_pActionReflection);
         m_pMenuHelp->addAction(m_pActionAboutSaltwater);
         m_pMenuHelp->addSeparator();
         m_pMenuHelp->addAction(m_pActionReleaseNotes);
@@ -185,6 +212,10 @@ public:
         QObject::connect(m_pActionNew, SIGNAL(triggered()), CMainWindow, SLOT(openNewSceneDialog()));
         QObject::connect(m_pScenegraph, SIGNAL(itemClicked(QTreeWidgetItem*,int)), m_pScenegraph, SLOT(entitySelected(QTreeWidgetItem*)));
         QObject::connect(m_pActionModel, SIGNAL(triggered()), CMainWindow, SLOT(openNewActorModelDialog()));
+        QObject::connect(m_pActionDirectional, SIGNAL(triggered()), CMainWindow, SLOT(createNewLightDirectional()));
+        QObject::connect(m_pActionEnvironment, SIGNAL(triggered()), CMainWindow, SLOT(createNewLightEnvironment()));
+        QObject::connect(m_pActionPoint, SIGNAL(triggered()), CMainWindow, SLOT(createNewLightPoint()));
+        QObject::connect(m_pActionReflection, SIGNAL(triggered()), CMainWindow, SLOT(createNewLightReflection()));
 
         m_pSceneGraphTabWidget->setCurrentIndex(0);
         m_pGameTabWidget->setCurrentIndex(0);
@@ -206,6 +237,13 @@ public:
         m_pActionReleaseNotes->setText(QApplication::translate("CMainWindow", "Release Notes", 0));
         m_pActionReportBug->setText(QApplication::translate("CMainWindow", "Report a Bug...", 0));
         m_pActionModel->setText(QApplication::translate("CMainWindow", "Model", 0));
+        m_pActionModel->setShortcut(QApplication::translate("CMainWindow", "Ctrl+Shift+N", 0));
+        actionPoint->setText(QApplication::translate("CMainWindow", "Point", 0));
+        m_pActionPoint->setText(QApplication::translate("CMainWindow", "Point", 0));
+        m_pActionEnvironment->setText(QApplication::translate("CMainWindow", "Environment", 0));
+        m_pActionReflection->setText(QApplication::translate("CMainWindow", "Reflection", 0));
+        m_pActionCamera->setText(QApplication::translate("CMainWindow", "Camera", 0));
+        m_pActionDirectional->setText(QApplication::translate("CMainWindow", "Directional", 0));
         QTreeWidgetItem *___qtreewidgetitem = m_pScenegraph->headerItem();
         ___qtreewidgetitem->setText(2, QApplication::translate("CMainWindow", "Type", 0));
         ___qtreewidgetitem->setText(1, QApplication::translate("CMainWindow", "Entity", 0));
@@ -221,6 +259,7 @@ public:
         m_pMenuAssets->setTitle(QApplication::translate("CMainWindow", "Assets", 0));
         m_pMenuEntity->setTitle(QApplication::translate("CMainWindow", "Entity", 0));
         menuActors->setTitle(QApplication::translate("CMainWindow", "Actors", 0));
+        menuLights->setTitle(QApplication::translate("CMainWindow", "Lights", 0));
         m_pMenuComponent->setTitle(QApplication::translate("CMainWindow", "Component", 0));
         m_pMenuWindow->setTitle(QApplication::translate("CMainWindow", "Window", 0));
         m_pMenuHelp->setTitle(QApplication::translate("CMainWindow", "Help", 0));

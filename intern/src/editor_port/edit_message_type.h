@@ -32,6 +32,10 @@ namespace Edit
             Edit,
 
             NewEntityActor,
+            NewLightDirectional,
+            NewLightPoint,
+            NewLightEnvironment,
+            NewLightReflection,
 
             RequestEntityInfoTransformation,
 

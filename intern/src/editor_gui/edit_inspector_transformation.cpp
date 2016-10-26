@@ -30,17 +30,17 @@ namespace Edit
     {
         CMessage NewMessage;
 
-        NewMessage.PutFloat((float)m_pTransformationPositionX->value());
-        NewMessage.PutFloat((float)m_pTransformationPositionY->value());
-        NewMessage.PutFloat((float)m_pTransformationPositionZ->value());
+        NewMessage.PutFloat(m_pTransformationPositionX->text().toFloat());
+        NewMessage.PutFloat(m_pTransformationPositionY->text().toFloat());
+        NewMessage.PutFloat(m_pTransformationPositionZ->text().toFloat());
 
-        NewMessage.PutFloat((float)m_pTransformationScaleX->value());
-        NewMessage.PutFloat((float)m_pTransformationScaleY->value());
-        NewMessage.PutFloat((float)m_pTransformationScaleZ->value());
+        NewMessage.PutFloat(m_pTransformationRotationX->text().toFloat());
+        NewMessage.PutFloat(m_pTransformationRotationY->text().toFloat());
+        NewMessage.PutFloat(m_pTransformationRotationZ->text().toFloat());
 
-        NewMessage.PutFloat((float)m_pTransformationRotationX->value());
-        NewMessage.PutFloat((float)m_pTransformationRotationY->value());
-        NewMessage.PutFloat((float)m_pTransformationRotationZ->value());
+        NewMessage.PutFloat(m_pTransformationScaleX->text().toFloat());
+        NewMessage.PutFloat(m_pTransformationScaleY->text().toFloat());
+        NewMessage.PutFloat(m_pTransformationScaleZ->text().toFloat());
 
         NewMessage.Reset();
 
@@ -55,31 +55,47 @@ namespace Edit
 
         if (HasTransformation)
         {
-            m_pTransformationPositionX->setValue(_rMessage.GetFloat());
-            m_pTransformationPositionY->setValue(_rMessage.GetFloat());
-            m_pTransformationPositionZ->setValue(_rMessage.GetFloat());
+            m_pTransformationPositionX->setText(QString::number(_rMessage.GetFloat()));
+            m_pTransformationPositionY->setText(QString::number(_rMessage.GetFloat()));
+            m_pTransformationPositionZ->setText(QString::number(_rMessage.GetFloat()));
 
-            m_pTransformationScaleX->setValue(_rMessage.GetFloat());
-            m_pTransformationScaleY->setValue(_rMessage.GetFloat());
-            m_pTransformationScaleZ->setValue(_rMessage.GetFloat());
+            m_pTransformationRotationX->setText(QString::number(_rMessage.GetFloat()));
+            m_pTransformationRotationY->setText(QString::number(_rMessage.GetFloat()));
+            m_pTransformationRotationZ->setText(QString::number(_rMessage.GetFloat()));
 
-            m_pTransformationRotationX->setValue(_rMessage.GetFloat());
-            m_pTransformationRotationY->setValue(_rMessage.GetFloat());
-            m_pTransformationRotationZ->setValue(_rMessage.GetFloat());
+            m_pTransformationScaleX->setText(QString::number(_rMessage.GetFloat()));
+            m_pTransformationScaleY->setText(QString::number(_rMessage.GetFloat()));
+            m_pTransformationScaleZ->setText(QString::number(_rMessage.GetFloat()));
+
+            m_pTransformationRotationX->setEnabled(true);
+            m_pTransformationRotationY->setEnabled(true);
+            m_pTransformationRotationZ->setEnabled(true);
+
+            m_pTransformationScaleX->setEnabled(true);
+            m_pTransformationScaleY->setEnabled(true);
+            m_pTransformationScaleZ->setEnabled(true);
         }
         else
         {
-            m_pTransformationPositionX->setValue(_rMessage.GetFloat());
-            m_pTransformationPositionY->setValue(_rMessage.GetFloat());
-            m_pTransformationPositionZ->setValue(_rMessage.GetFloat());
+            m_pTransformationPositionX->setText(QString::number(_rMessage.GetFloat()));
+            m_pTransformationPositionY->setText(QString::number(_rMessage.GetFloat()));
+            m_pTransformationPositionZ->setText(QString::number(_rMessage.GetFloat()));
 
-            m_pTransformationScaleX->setValue(0.0);
-            m_pTransformationScaleY->setValue(0.0);
-            m_pTransformationScaleZ->setValue(0.0);
+            m_pTransformationRotationX->setText("0");
+            m_pTransformationRotationY->setText("0");
+            m_pTransformationRotationZ->setText("0");
 
-            m_pTransformationRotationX->setValue(0.0);
-            m_pTransformationRotationY->setValue(0.0);
-            m_pTransformationRotationZ->setValue(0.0);
+            m_pTransformationScaleX->setText("0");
+            m_pTransformationScaleY->setText("0");
+            m_pTransformationScaleZ->setText("0");            
+
+            m_pTransformationRotationX->setEnabled(false);
+            m_pTransformationRotationY->setEnabled(false);
+            m_pTransformationRotationZ->setEnabled(false);
+
+            m_pTransformationScaleX->setEnabled(false);
+            m_pTransformationScaleY->setEnabled(false);
+            m_pTransformationScaleZ->setEnabled(false);
         }
     }
 } // namespace Edit

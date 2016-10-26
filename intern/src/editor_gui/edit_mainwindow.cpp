@@ -121,6 +121,50 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
+    void CMainWindow::createNewLightDirectional()
+    {
+        CMessage NewMessage(true);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::NewLightDirectional, NewMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::createNewLightPoint()
+    {
+        CMessage NewMessage(true);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::NewLightPoint, NewMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::createNewLightEnvironment()
+    {
+        CMessage NewMessage(true);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::NewLightEnvironment, NewMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::createNewLightReflection()
+    {
+        CMessage NewMessage(true);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::NewLightReflection, NewMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CMainWindow::closeEvent(QCloseEvent* _pEvent)
     {
         CMessage NewMessage(true);

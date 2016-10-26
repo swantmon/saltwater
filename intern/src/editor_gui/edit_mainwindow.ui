@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>1933</width>
-    <height>892</height>
+    <height>832</height>
    </rect>
   </property>
   <property name="cursor">
@@ -241,6 +241,7 @@
      <property name="title">
       <string>Lights</string>
      </property>
+     <addaction name="m_pActionDirectional"/>
      <addaction name="m_pActionPoint"/>
      <addaction name="m_pActionEnvironment"/>
      <addaction name="m_pActionReflection"/>
@@ -346,6 +347,11 @@
   <action name="m_pActionCamera">
    <property name="text">
     <string>Camera</string>
+   </property>
+  </action>
+  <action name="m_pActionDirectional">
+   <property name="text">
+    <string>Directional</string>
    </property>
   </action>
  </widget>
@@ -470,11 +476,79 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_pActionDirectional</sender>
+   <signal>triggered()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>createNewLightDirectional()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>966</x>
+     <y>415</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pActionEnvironment</sender>
+   <signal>triggered()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>createNewLightEnvironment()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>966</x>
+     <y>415</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pActionPoint</sender>
+   <signal>triggered()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>createNewLightPoint()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>966</x>
+     <y>415</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pActionReflection</sender>
+   <signal>triggered()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>createNewLightReflection()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>966</x>
+     <y>415</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>switchPlayingCurrentScene()</slot>
   <slot>takeScreenshot()</slot>
   <slot>openNewSceneDialog()</slot>
   <slot>openNewActorModelDialog()</slot>
+  <slot>createNewLightDirectional()</slot>
+  <slot>createNewLightPoint()</slot>
+  <slot>createNewLightEnvironment()</slot>
+  <slot>createNewLightReflection()</slot>
  </slots>
 </ui>

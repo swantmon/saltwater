@@ -33,6 +33,10 @@ namespace Edit
         void takeScreenshot();
         void openNewSceneDialog();
         void openNewActorModelDialog();
+        void createNewLightDirectional();
+        void createNewLightPoint();
+        void createNewLightEnvironment();
+        void createNewLightReflection();
 
     private:
 

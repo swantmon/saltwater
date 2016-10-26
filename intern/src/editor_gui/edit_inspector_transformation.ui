@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>310</width>
-    <height>127</height>
+    <width>302</width>
+    <height>140</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>311</width>
+     <width>301</width>
      <height>131</height>
     </rect>
    </property>
@@ -27,7 +27,7 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>310</width>
+      <width>301</width>
       <height>131</height>
      </rect>
     </property>
@@ -39,15 +39,36 @@
       <rect>
        <x>10</x>
        <y>20</y>
-       <width>291</width>
+       <width>281</width>
        <height>101</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_2">
+      <item row="0" column="2">
+       <widget class="QLineEdit" name="m_pTransformationPositionX">
         <property name="text">
-         <string>Scale</string>
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="6">
+       <widget class="QLineEdit" name="m_pTransformationPositionZ">
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="4">
+       <widget class="QLineEdit" name="m_pTransformationRotationY">
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QLineEdit" name="m_pTransformationPositionY">
+        <property name="text">
+         <string>0</string>
         </property>
        </widget>
       </item>
@@ -58,6 +79,20 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>X</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="6">
+       <widget class="QLineEdit" name="m_pTransformationRotationZ">
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="label">
         <property name="text">
@@ -65,32 +100,96 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QDoubleSpinBox" name="m_pTransformationPositionX"/>
-      </item>
-      <item row="0" column="2">
-       <widget class="QDoubleSpinBox" name="m_pTransformationPositionY"/>
-      </item>
-      <item row="0" column="3">
-       <widget class="QDoubleSpinBox" name="m_pTransformationPositionZ"/>
-      </item>
-      <item row="1" column="1">
-       <widget class="QDoubleSpinBox" name="m_pTransformationScaleX"/>
-      </item>
-      <item row="1" column="2">
-       <widget class="QDoubleSpinBox" name="m_pTransformationScaleY"/>
-      </item>
-      <item row="1" column="3">
-       <widget class="QDoubleSpinBox" name="m_pTransformationScaleZ"/>
-      </item>
-      <item row="2" column="1">
-       <widget class="QDoubleSpinBox" name="m_pTransformationRotationX"/>
-      </item>
       <item row="2" column="2">
-       <widget class="QDoubleSpinBox" name="m_pTransformationRotationY"/>
+       <widget class="QLineEdit" name="m_pTransformationRotationX">
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
       </item>
       <item row="2" column="3">
-       <widget class="QDoubleSpinBox" name="m_pTransformationRotationZ"/>
+       <widget class="QLabel" name="label_9">
+        <property name="text">
+         <string>Y</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>X</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="5">
+       <widget class="QLabel" name="label_12">
+        <property name="text">
+         <string>Z</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>Y</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="5">
+       <widget class="QLabel" name="label_10">
+        <property name="text">
+         <string>Z</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Scale</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>X</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLineEdit" name="m_pTransformationScaleX">
+        <property name="text">
+         <string>1</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="4">
+       <widget class="QLineEdit" name="m_pTransformationScaleY">
+        <property name="text">
+         <string>1</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="3">
+       <widget class="QLabel" name="label_8">
+        <property name="text">
+         <string>Y</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="6">
+       <widget class="QLineEdit" name="m_pTransformationScaleZ">
+        <property name="text">
+         <string>1</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="5">
+       <widget class="QLabel" name="label_11">
+        <property name="text">
+         <string>Z</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -101,145 +200,145 @@
  <connections>
   <connection>
    <sender>m_pTransformationPositionX</sender>
-   <signal>valueChanged(double)</signal>
+   <signal>textChanged(QString)</signal>
    <receiver>InspectorForm</receiver>
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>109</x>
-     <y>34</y>
+     <x>106</x>
+     <y>43</y>
     </hint>
     <hint type="destinationlabel">
-     <x>168</x>
-     <y>132</y>
+     <x>133</x>
+     <y>136</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>m_pTransformationPositionY</sender>
-   <signal>valueChanged(double)</signal>
+   <signal>textChanged(QString)</signal>
    <receiver>InspectorForm</receiver>
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>187</x>
-     <y>30</y>
+     <x>189</x>
+     <y>41</y>
     </hint>
     <hint type="destinationlabel">
-     <x>309</x>
-     <y>110</y>
+     <x>88</x>
+     <y>136</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>m_pTransformationPositionZ</sender>
-   <signal>valueChanged(double)</signal>
+   <signal>textChanged(QString)</signal>
    <receiver>InspectorForm</receiver>
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>269</x>
-     <y>31</y>
+     <x>260</x>
+     <y>38</y>
     </hint>
     <hint type="destinationlabel">
-     <x>309</x>
-     <y>48</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>m_pTransformationScaleX</sender>
-   <signal>valueChanged(double)</signal>
-   <receiver>InspectorForm</receiver>
-   <slot>valueChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>126</x>
-     <y>67</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>309</x>
-     <y>74</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>m_pTransformationScaleY</sender>
-   <signal>valueChanged(double)</signal>
-   <receiver>InspectorForm</receiver>
-   <slot>valueChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>193</x>
-     <y>62</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>309</x>
-     <y>132</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>m_pTransformationScaleZ</sender>
-   <signal>valueChanged(double)</signal>
-   <receiver>InspectorForm</receiver>
-   <slot>valueChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>273</x>
-     <y>67</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>309</x>
-     <y>132</y>
+     <x>264</x>
+     <y>136</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>m_pTransformationRotationX</sender>
-   <signal>valueChanged(double)</signal>
+   <signal>textChanged(QString)</signal>
    <receiver>InspectorForm</receiver>
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>125</x>
-     <y>105</y>
+     <x>123</x>
+     <y>70</y>
     </hint>
     <hint type="destinationlabel">
-     <x>85</x>
-     <y>132</y>
+     <x>132</x>
+     <y>136</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>m_pTransformationRotationY</sender>
-   <signal>valueChanged(double)</signal>
+   <signal>textChanged(QString)</signal>
    <receiver>InspectorForm</receiver>
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>163</x>
-     <y>103</y>
+     <x>177</x>
+     <y>71</y>
     </hint>
     <hint type="destinationlabel">
-     <x>142</x>
-     <y>132</y>
+     <x>56</x>
+     <y>136</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>m_pTransformationRotationZ</sender>
-   <signal>valueChanged(double)</signal>
+   <signal>textChanged(QString)</signal>
    <receiver>InspectorForm</receiver>
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>244</x>
+     <x>254</x>
+     <y>67</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>246</x>
+     <y>136</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pTransformationScaleX</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>InspectorForm</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>81</x>
      <y>101</y>
     </hint>
     <hint type="destinationlabel">
-     <x>258</x>
-     <y>132</y>
+     <x>40</x>
+     <y>136</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pTransformationScaleY</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>InspectorForm</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>168</x>
+     <y>108</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>144</x>
+     <y>136</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pTransformationScaleZ</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorForm</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>249</x>
+     <y>105</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>301</x>
+     <y>136</y>
     </hint>
    </hints>
   </connection>
