@@ -235,8 +235,18 @@
       <string>Actors</string>
      </property>
      <addaction name="m_pActionModel"/>
+     <addaction name="m_pActionCamera"/>
+    </widget>
+    <widget class="QMenu" name="menuLights">
+     <property name="title">
+      <string>Lights</string>
+     </property>
+     <addaction name="m_pActionPoint"/>
+     <addaction name="m_pActionEnvironment"/>
+     <addaction name="m_pActionReflection"/>
     </widget>
     <addaction name="menuActors"/>
+    <addaction name="menuLights"/>
    </widget>
    <widget class="QMenu" name="m_pMenuComponent">
     <property name="title">
@@ -308,6 +318,34 @@
   <action name="m_pActionModel">
    <property name="text">
     <string>Model</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+N</string>
+   </property>
+  </action>
+  <action name="actionPoint">
+   <property name="text">
+    <string>Point</string>
+   </property>
+  </action>
+  <action name="m_pActionPoint">
+   <property name="text">
+    <string>Point</string>
+   </property>
+  </action>
+  <action name="m_pActionEnvironment">
+   <property name="text">
+    <string>Environment</string>
+   </property>
+  </action>
+  <action name="m_pActionReflection">
+   <property name="text">
+    <string>Reflection</string>
+   </property>
+  </action>
+  <action name="m_pActionCamera">
+   <property name="text">
+    <string>Camera</string>
    </property>
   </action>
  </widget>

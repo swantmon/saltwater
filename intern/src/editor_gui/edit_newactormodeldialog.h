@@ -14,7 +14,16 @@ namespace Edit
         CNewActorModelDialog(QObject* _pParent = Q_NULLPTR);
         ~CNewActorModelDialog();
 
+    public Q_SLOTS:
+
+        void openFileDialogModel();
+        void openFileDialogMaterial();
+        void pressOkay();
+        void pressCancel();
+
     private:
 
+        QString m_ModelFile;
+        QString m_MaterialFile;
     };
 } // namespace Edit

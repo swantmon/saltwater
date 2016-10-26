@@ -46,6 +46,7 @@ public:
     {
         if (CNewSceneDialog->objectName().isEmpty())
             CNewSceneDialog->setObjectName(QStringLiteral("CNewSceneDialog"));
+        CNewSceneDialog->setWindowModality(Qt::ApplicationModal);
         CNewSceneDialog->resize(271, 104);
         CNewSceneDialog->setContextMenuPolicy(Qt::PreventContextMenu);
         CNewSceneDialog->setModal(true);

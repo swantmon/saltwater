@@ -317,7 +317,7 @@ namespace Edit
 
         PutInt(static_cast<int>(NumberOfChars));
 
-        m_Bytes.insert(m_Bytes.end(), reinterpret_cast<const Base::U8*>(_pString), reinterpret_cast<const Base::U8*>(_pString) + NumberOfChars);
+        m_Bytes.insert(m_Bytes.end(), reinterpret_cast<const Base::U8*>(_pString), reinterpret_cast<const Base::U8*>(_pString) + sizeof(Base::Char) * NumberOfChars);
     }
 
     // -----------------------------------------------------------------------------

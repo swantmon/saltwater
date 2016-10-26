@@ -28,6 +28,9 @@
 #include "editor_port/edit_message.h"
 #include "editor_port/edit_message_manager.h"
 
+#include <windows.h>
+#undef SendMessage
+
 namespace
 {
     class CMapHelper : Base::CUncopyable
@@ -47,10 +50,12 @@ namespace
     private:
 
         Dt::CEntity* m_pLastRequestedEntity;
+        unsigned int m_EntityID;
 
     private:
 
         void OnNewMap(Edit::CMessage& _rMessage);
+        void OnNewEntityActor(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoTransformation(Edit::CMessage& _rMessage);
         void OnEntityInfoTransformation(Edit::CMessage& _rMessage);
         void OnDirtyEntity(Dt::CEntity* _pEntity);
@@ -61,6 +66,7 @@ namespace
 {
     CMapHelper::CMapHelper()
         : m_pLastRequestedEntity(nullptr)
+        , m_EntityID            (0)
     {
         
     }
@@ -85,6 +91,7 @@ namespace
         // Edit
         // -----------------------------------------------------------------------------
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewMap, EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewMap));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntityActor, EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntityActor));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoTransformation, EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoTransformation));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoTransformation, EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoTransformation));
     }
@@ -178,43 +185,109 @@ namespace
 
             Dt::EntityManager::MarkEntityAsDirty(rEnvironment, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnNewEntityActor(Edit::CMessage& _rMessage)
+    {
+        auto CopyFileToAssets = [&](const char* _pAssetFolder, const char* _pPathToFile)->std::string
+        {
+            char pDrive[4];
+            char pDirectory[512];
+            char pFilename[32]; 
+            char pExtension[12];
+
+            std::string FileExtension;
+            std::string RelativePathToModel;
+            
+            _splitpath_s(_pPathToFile, pDrive, 4, pDirectory, 512, pFilename, 32, pExtension, 12);
+
+            FileExtension       = std::string(pFilename) + std::string(pExtension);
+            RelativePathToModel = std::string(_pAssetFolder) + FileExtension;
+
+            CopyFileA(_pPathToFile, RelativePathToModel.c_str(), true);
+
+            return FileExtension.c_str();
+        };
 
         // -----------------------------------------------------------------------------
-        // Setup entities
+        // Create new entity
         // -----------------------------------------------------------------------------
+        char        pTmp[512];
+        std::string PathToFile;
+        bool        HasModel;
+
+        HasModel = _rMessage.GetBool();
+
+        if (HasModel)
         {
+            // -----------------------------------------------------------------------------
+            // Entity
+            // -----------------------------------------------------------------------------
             Dt::SEntityDescriptor EntityDesc;
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
             EntityDesc.m_EntityType     = Dt::SActorType::Model;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
-            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntity(EntityDesc, 2);
+            Dt::CEntity& rNewActorModel = Dt::EntityManager::CreateEntity(EntityDesc, m_EntityID);
 
-            Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
+            // -----------------------------------------------------------------------------
+            // Transformation
+            // -----------------------------------------------------------------------------
+            Dt::CTransformationFacet* pTransformationFacet = rNewActorModel.GetTransformationFacet();
 
             pTransformationFacet->SetPosition(Base::Float3(0.0f));
-            pTransformationFacet->SetScale   (Base::Float3(0.1f));
+            pTransformationFacet->SetScale   (Base::Float3(1.0f));
             pTransformationFacet->SetRotation(Base::Float3(0.0f));
 
             Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
 
+            // -----------------------------------------------------------------------------
+            // Model
+            // -----------------------------------------------------------------------------
             Dt::SModelFileDescriptor ModelFileDesc;
 
-            ModelFileDesc.m_pFileName = "models/sphere.obj";
+            const char* pPathToFile = _rMessage.GetString(pTmp, 512);
+
+            PathToFile = "models/" + CopyFileToAssets("../assets/models/", pPathToFile);
+
+            ModelFileDesc.m_pFileName = PathToFile.c_str();
             ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
 
-            Dt::SMaterialFileDescriptor MaterialFileDesc;
-
-            MaterialFileDesc.m_pFileName = "materials/naturals/metals/Gold_Worn_00.mat";
-
             pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
-            pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
 
-            rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
+            // -----------------------------------------------------------------------------
+            // Material
+            // -----------------------------------------------------------------------------
+            bool HasMaterial = _rMessage.GetBool();
 
-            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            if (HasMaterial)
+            {
+                Dt::SMaterialFileDescriptor MaterialFileDesc;
+
+                const char* pPathToFile = _rMessage.GetString(pTmp, 512);
+
+                PathToFile = "materials/" + CopyFileToAssets("../assets/materials/", pPathToFile);
+
+                MaterialFileDesc.m_pFileName = PathToFile.c_str();
+
+                pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
+            }
+
+            rNewActorModel.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
+
+            // -----------------------------------------------------------------------------
+            // Add model to map
+            // -----------------------------------------------------------------------------
+            Dt::EntityManager::MarkEntityAsDirty(rNewActorModel, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
+
+        // -----------------------------------------------------------------------------
+        // Prepare next entity
+        // -----------------------------------------------------------------------------
+        ++m_EntityID;
     }
 
     // -----------------------------------------------------------------------------

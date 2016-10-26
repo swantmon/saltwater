@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>353</width>
+    <height>171</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,57 +19,103 @@
   <property name="modal">
    <bool>true</bool>
   </property>
-  <widget class="QWidget" name="layoutWidget">
+  <widget class="QWidget" name="verticalLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>250</y>
-     <width>351</width>
-     <height>33</height>
+     <x>10</x>
+     <y>10</y>
+     <width>331</width>
+     <height>151</height>
     </rect>
    </property>
-   <layout class="QHBoxLayout">
-    <property name="spacing">
-     <number>6</number>
-    </property>
-    <property name="leftMargin">
-     <number>0</number>
-    </property>
-    <property name="topMargin">
-     <number>0</number>
-    </property>
-    <property name="rightMargin">
-     <number>0</number>
-    </property>
-    <property name="bottomMargin">
-     <number>0</number>
-    </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <spacer>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>131</width>
-        <height>31</height>
-       </size>
-      </property>
-     </spacer>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLineEdit" name="m_pEditModel">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="placeholderText">
+         <string>Model</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="m_pLoadModel">
+        <property name="text">
+         <string>Load</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
-     <widget class="QPushButton" name="okButton">
-      <property name="text">
-       <string>OK</string>
-      </property>
-     </widget>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QLineEdit" name="m_pEditMaterial">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="placeholderText">
+         <string>Material</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="m_pLoadMaterial">
+        <property name="text">
+         <string>Load</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
-     <widget class="QPushButton" name="cancelButton">
-      <property name="text">
-       <string>Cancel</string>
+     <layout class="QHBoxLayout">
+      <property name="spacing">
+       <number>6</number>
       </property>
-     </widget>
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <spacer>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>131</width>
+          <height>31</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="m_pOkButton">
+        <property name="text">
+         <string>OK</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="m_pCancelButton">
+        <property name="text">
+         <string>Cancel</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
@@ -77,36 +123,106 @@
  <resources/>
  <connections>
   <connection>
-   <sender>okButton</sender>
+   <sender>m_pOkButton</sender>
    <signal>clicked()</signal>
    <receiver>CNewActorModelDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>278</x>
-     <y>253</y>
+     <x>257</x>
+     <y>128</y>
     </hint>
     <hint type="destinationlabel">
      <x>96</x>
-     <y>254</y>
+     <y>170</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>cancelButton</sender>
+   <sender>m_pCancelButton</sender>
    <signal>clicked()</signal>
    <receiver>CNewActorModelDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>369</x>
-     <y>253</y>
+     <x>338</x>
+     <y>128</y>
     </hint>
     <hint type="destinationlabel">
      <x>179</x>
-     <y>282</y>
+     <y>170</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pOkButton</sender>
+   <signal>clicked()</signal>
+   <receiver>CNewActorModelDialog</receiver>
+   <slot>pressOkay()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>199</x>
+     <y>135</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>125</x>
+     <y>111</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pCancelButton</sender>
+   <signal>clicked()</signal>
+   <receiver>CNewActorModelDialog</receiver>
+   <slot>pressCancel()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>307</x>
+     <y>139</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>151</x>
+     <y>117</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pLoadModel</sender>
+   <signal>clicked()</signal>
+   <receiver>CNewActorModelDialog</receiver>
+   <slot>openFileDialogModel()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>293</x>
+     <y>38</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>320</x>
+     <y>56</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pLoadMaterial</sender>
+   <signal>clicked()</signal>
+   <receiver>CNewActorModelDialog</receiver>
+   <slot>openFileDialogMaterial()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>290</x>
+     <y>83</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>212</x>
+     <y>52</y>
     </hint>
    </hints>
   </connection>
  </connections>
+ <slots>
+  <slot>openFileDialogModel()</slot>
+  <slot>openFileDialogMaterial()</slot>
+  <slot>pressOkay()</slot>
+  <slot>pressCancel()</slot>
+ </slots>
 </ui>

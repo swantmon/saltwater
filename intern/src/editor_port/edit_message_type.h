@@ -31,6 +31,8 @@ namespace Edit
             Play,
             Edit,
 
+            NewEntityActor,
+
             RequestEntityInfoTransformation,
 
             EntityInfoTransformation,
