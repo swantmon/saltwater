@@ -27,8 +27,8 @@ namespace Edit
         // -----------------------------------------------------------------------------
         CMessage NewMessage;
 
-        int SizeX = m_pEditX->toPlainText().toInt();
-        int SizeY = m_pEditY->toPlainText().toInt();
+        int SizeX = m_pEditX->text().toInt();
+        int SizeY = m_pEditY->text().toInt();
 
         NewMessage.PutInt(SizeX);
         NewMessage.PutInt(SizeY);

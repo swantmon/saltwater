@@ -7,20 +7,22 @@
 namespace Edit
 {
     CMainWindow::CMainWindow(QWidget* _pParent) 
-        : QMainWindow      (_pParent)
-        , m_pStatusLabel   (nullptr)
-        , m_pNewSceneDialog(nullptr)
-        , m_IsPlaying      (false)
+        : QMainWindow           (_pParent)
+        , m_pStatusLabel        (nullptr)
+        , m_pNewActorModelDialog(nullptr)
+        , m_pNewSceneDialog     (nullptr)
+        , m_IsPlaying           (false)
     {
         // -----------------------------------------------------------------------------
         // Dialogs
         // -----------------------------------------------------------------------------
-        m_pNewSceneDialog = new CNewSceneDialog();
+        m_pNewActorModelDialog = new CNewActorModelDialog();
+        m_pNewSceneDialog      = new CNewSceneDialog();
 
         // -----------------------------------------------------------------------------
         // Form setup
         // -----------------------------------------------------------------------------
-        m_UserInterface.setupUi(this);
+        setupUi(this);
 
         // -----------------------------------------------------------------------------
         // User specific setup
@@ -28,7 +30,7 @@ namespace Edit
         m_pStatusLabel = new QLabel();
         m_pStatusLabel->setText("FPS:");
 
-        m_UserInterface.m_pStatusBar->addPermanentWidget(m_pStatusLabel, 1);
+        m_pStatusBar->addPermanentWidget(m_pStatusLabel, 1);
 
         // -----------------------------------------------------------------------------
         // Messages
@@ -43,6 +45,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Delete dialogs
         // -----------------------------------------------------------------------------
+        delete m_pNewActorModelDialog;
         delete m_pNewSceneDialog;
 
         // -----------------------------------------------------------------------------
@@ -55,7 +58,7 @@ namespace Edit
 
     void* CMainWindow::GetEditorWindowHandle()
     {
-        return (HWND)m_UserInterface.m_pEditorRenderContext->winId();
+        return (HWND)m_pEditorRenderContext->winId();
     }
 
     // -----------------------------------------------------------------------------
@@ -89,7 +92,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Prepare image path
         // -----------------------------------------------------------------------------
-        QString    PathToImage       = m_UserInterface.m_pMailAdressEdit->text() + ".png";
+        QString    PathToImage       = m_pMailAdressEdit->text() + ".png";
         QByteArray PathToImageBinary = PathToImage.toLatin1();
 
         // -----------------------------------------------------------------------------
@@ -104,9 +107,16 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CMainWindow::createNewScene()
+    void CMainWindow::openNewSceneDialog()
     {
         m_pNewSceneDialog->show();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::openNewActorModelDialog()
+    {
+        m_pNewActorModelDialog->show();
     }
 
     // -----------------------------------------------------------------------------

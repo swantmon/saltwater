@@ -17,7 +17,7 @@
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
-#include <QtWidgets/QPlainTextEdit>
+#include <QtWidgets/QLineEdit>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSpacerItem>
 #include <QtWidgets/QVBoxLayout>
@@ -28,59 +28,33 @@ QT_BEGIN_NAMESPACE
 class Ui_CNewSceneDialog
 {
 public:
-    QWidget *layoutWidget;
+    QWidget *verticalLayoutWidget;
+    QVBoxLayout *verticalLayout;
+    QHBoxLayout *horizontalLayout;
+    QLabel *label;
+    QLineEdit *m_pEditX;
+    QHBoxLayout *horizontalLayout_2;
+    QLabel *label_2;
+    QLineEdit *m_pEditY;
     QHBoxLayout *hboxLayout;
     QSpacerItem *spacerItem;
     QPushButton *m_pOkButton;
     QPushButton *m_pCancelButton;
-    QWidget *verticalLayoutWidget;
-    QVBoxLayout *verticalLayout;
-    QSpacerItem *verticalSpacer;
-    QHBoxLayout *horizontalLayout;
-    QLabel *label;
-    QPlainTextEdit *m_pEditX;
-    QHBoxLayout *horizontalLayout_2;
-    QLabel *label_2;
-    QPlainTextEdit *m_pEditY;
     QSpacerItem *verticalSpacer_2;
 
     void setupUi(QDialog *CNewSceneDialog)
     {
         if (CNewSceneDialog->objectName().isEmpty())
             CNewSceneDialog->setObjectName(QStringLiteral("CNewSceneDialog"));
-        CNewSceneDialog->resize(271, 134);
+        CNewSceneDialog->resize(271, 104);
         CNewSceneDialog->setContextMenuPolicy(Qt::PreventContextMenu);
-        layoutWidget = new QWidget(CNewSceneDialog);
-        layoutWidget->setObjectName(QStringLiteral("layoutWidget"));
-        layoutWidget->setGeometry(QRect(10, 92, 251, 33));
-        hboxLayout = new QHBoxLayout(layoutWidget);
-        hboxLayout->setSpacing(6);
-        hboxLayout->setObjectName(QStringLiteral("hboxLayout"));
-        hboxLayout->setContentsMargins(0, 0, 0, 0);
-        spacerItem = new QSpacerItem(131, 31, QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-        hboxLayout->addItem(spacerItem);
-
-        m_pOkButton = new QPushButton(layoutWidget);
-        m_pOkButton->setObjectName(QStringLiteral("m_pOkButton"));
-
-        hboxLayout->addWidget(m_pOkButton);
-
-        m_pCancelButton = new QPushButton(layoutWidget);
-        m_pCancelButton->setObjectName(QStringLiteral("m_pCancelButton"));
-
-        hboxLayout->addWidget(m_pCancelButton);
-
+        CNewSceneDialog->setModal(true);
         verticalLayoutWidget = new QWidget(CNewSceneDialog);
         verticalLayoutWidget->setObjectName(QStringLiteral("verticalLayoutWidget"));
-        verticalLayoutWidget->setGeometry(QRect(10, 10, 251, 71));
+        verticalLayoutWidget->setGeometry(QRect(10, 10, 251, 111));
         verticalLayout = new QVBoxLayout(verticalLayoutWidget);
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
         verticalLayout->setContentsMargins(0, 0, 0, 0);
-        verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
-
-        verticalLayout->addItem(verticalSpacer);
-
         horizontalLayout = new QHBoxLayout();
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
         label = new QLabel(verticalLayoutWidget);
@@ -88,7 +62,7 @@ public:
 
         horizontalLayout->addWidget(label);
 
-        m_pEditX = new QPlainTextEdit(verticalLayoutWidget);
+        m_pEditX = new QLineEdit(verticalLayoutWidget);
         m_pEditX->setObjectName(QStringLiteral("m_pEditX"));
 
         horizontalLayout->addWidget(m_pEditX);
@@ -103,13 +77,34 @@ public:
 
         horizontalLayout_2->addWidget(label_2);
 
-        m_pEditY = new QPlainTextEdit(verticalLayoutWidget);
+        m_pEditY = new QLineEdit(verticalLayoutWidget);
         m_pEditY->setObjectName(QStringLiteral("m_pEditY"));
 
         horizontalLayout_2->addWidget(m_pEditY);
 
 
         verticalLayout->addLayout(horizontalLayout_2);
+
+        hboxLayout = new QHBoxLayout();
+        hboxLayout->setSpacing(6);
+        hboxLayout->setObjectName(QStringLiteral("hboxLayout"));
+        hboxLayout->setContentsMargins(0, 0, 0, 0);
+        spacerItem = new QSpacerItem(131, 31, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        hboxLayout->addItem(spacerItem);
+
+        m_pOkButton = new QPushButton(verticalLayoutWidget);
+        m_pOkButton->setObjectName(QStringLiteral("m_pOkButton"));
+
+        hboxLayout->addWidget(m_pOkButton);
+
+        m_pCancelButton = new QPushButton(verticalLayoutWidget);
+        m_pCancelButton->setObjectName(QStringLiteral("m_pCancelButton"));
+
+        hboxLayout->addWidget(m_pCancelButton);
+
+
+        verticalLayout->addLayout(hboxLayout);
 
         verticalSpacer_2 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
@@ -127,11 +122,13 @@ public:
 
     void retranslateUi(QDialog *CNewSceneDialog)
     {
-        CNewSceneDialog->setWindowTitle(QApplication::translate("CNewSceneDialog", "Dialog", 0));
+        CNewSceneDialog->setWindowTitle(QApplication::translate("CNewSceneDialog", "Create new scene.", 0));
+        label->setText(QApplication::translate("CNewSceneDialog", "X", 0));
+        m_pEditX->setPlaceholderText(QApplication::translate("CNewSceneDialog", "Number of regions in X", 0));
+        label_2->setText(QApplication::translate("CNewSceneDialog", "Y", 0));
+        m_pEditY->setPlaceholderText(QApplication::translate("CNewSceneDialog", "Number of regions in Y", 0));
         m_pOkButton->setText(QApplication::translate("CNewSceneDialog", "OK", 0));
         m_pCancelButton->setText(QApplication::translate("CNewSceneDialog", "Cancel", 0));
-        label->setText(QApplication::translate("CNewSceneDialog", "X", 0));
-        label_2->setText(QApplication::translate("CNewSceneDialog", "Y", 0));
     } // retranslateUi
 
 };

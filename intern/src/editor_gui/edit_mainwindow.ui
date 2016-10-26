@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>1933</width>
-    <height>836</height>
+    <height>892</height>
    </rect>
   </property>
   <property name="cursor">
@@ -230,6 +230,13 @@
     <property name="title">
      <string>Entity</string>
     </property>
+    <widget class="QMenu" name="menuActors">
+     <property name="title">
+      <string>Actors</string>
+     </property>
+     <addaction name="m_pActionModel"/>
+    </widget>
+    <addaction name="menuActors"/>
    </widget>
    <widget class="QMenu" name="m_pMenuComponent">
     <property name="title">
@@ -296,6 +303,11 @@
   <action name="m_pActionReportBug">
    <property name="text">
     <string>Report a Bug...</string>
+   </property>
+  </action>
+  <action name="m_pActionModel">
+   <property name="text">
+    <string>Model</string>
    </property>
   </action>
  </widget>
@@ -376,7 +388,7 @@
    <sender>m_pActionNew</sender>
    <signal>triggered()</signal>
    <receiver>CMainWindow</receiver>
-   <slot>createNewScene()</slot>
+   <slot>openNewSceneDialog()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -404,11 +416,27 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_pActionModel</sender>
+   <signal>triggered()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>openNewActorModelDialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>966</x>
+     <y>445</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>switchPlayingCurrentScene()</slot>
   <slot>takeScreenshot()</slot>
-  <slot>createNewScene()</slot>
-  <slot>testEntitySelected()</slot>
+  <slot>openNewSceneDialog()</slot>
+  <slot>openNewActorModelDialog()</slot>
  </slots>
 </ui>

@@ -2,6 +2,7 @@
 #pragma once
 
 #include "editor_gui/ui_edit_mainwindow.h"
+#include "editor_gui/edit_newactormodeldialog.h"
 #include "editor_gui/edit_newscenedialog.h"
 
 #include "editor_port/edit_message.h"
@@ -13,7 +14,7 @@
 
 namespace Edit
 {
-    class CMainWindow : public QMainWindow
+    class CMainWindow : public QMainWindow, public Ui::CMainWindow
     {
         Q_OBJECT
 
@@ -30,14 +31,15 @@ namespace Edit
 
         void switchPlayingCurrentScene();
         void takeScreenshot();
-        void createNewScene();
+        void openNewSceneDialog();
+        void openNewActorModelDialog();
 
     private:
 
-        Ui::CMainWindow  m_UserInterface;
-        QLabel*          m_pStatusLabel;
-        CNewSceneDialog* m_pNewSceneDialog;
-        bool             m_IsPlaying;
+        QLabel*               m_pStatusLabel;
+        CNewActorModelDialog* m_pNewActorModelDialog;
+        CNewSceneDialog*      m_pNewSceneDialog;
+        bool                  m_IsPlaying;
 
     private:
 

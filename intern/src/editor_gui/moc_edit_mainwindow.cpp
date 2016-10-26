@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_Edit__CMainWindow_t {
-    QByteArrayData data[5];
-    char stringdata0[75];
+    QByteArrayData data[6];
+    char stringdata0[103];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -33,11 +33,13 @@ QT_MOC_LITERAL(0, 0, 17), // "Edit::CMainWindow"
 QT_MOC_LITERAL(1, 18, 25), // "switchPlayingCurrentScene"
 QT_MOC_LITERAL(2, 44, 0), // ""
 QT_MOC_LITERAL(3, 45, 14), // "takeScreenshot"
-QT_MOC_LITERAL(4, 60, 14) // "createNewScene"
+QT_MOC_LITERAL(4, 60, 18), // "openNewSceneDialog"
+QT_MOC_LITERAL(5, 79, 23) // "openNewActorModelDialog"
 
     },
     "Edit::CMainWindow\0switchPlayingCurrentScene\0"
-    "\0takeScreenshot\0createNewScene"
+    "\0takeScreenshot\0openNewSceneDialog\0"
+    "openNewActorModelDialog"
 };
 #undef QT_MOC_LITERAL
 
@@ -47,7 +49,7 @@ static const uint qt_meta_data_Edit__CMainWindow[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-       3,   14, // methods
+       4,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -55,11 +57,13 @@ static const uint qt_meta_data_Edit__CMainWindow[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    0,   29,    2, 0x0a /* Public */,
-       3,    0,   30,    2, 0x0a /* Public */,
-       4,    0,   31,    2, 0x0a /* Public */,
+       1,    0,   34,    2, 0x0a /* Public */,
+       3,    0,   35,    2, 0x0a /* Public */,
+       4,    0,   36,    2, 0x0a /* Public */,
+       5,    0,   37,    2, 0x0a /* Public */,
 
  // slots: parameters
+    QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
@@ -75,7 +79,8 @@ void Edit::CMainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, in
         switch (_id) {
         case 0: _t->switchPlayingCurrentScene(); break;
         case 1: _t->takeScreenshot(); break;
-        case 2: _t->createNewScene(); break;
+        case 2: _t->openNewSceneDialog(); break;
+        case 3: _t->openNewActorModelDialog(); break;
         default: ;
         }
     }
@@ -98,6 +103,8 @@ void *Edit::CMainWindow::qt_metacast(const char *_clname)
     if (!_clname) return Q_NULLPTR;
     if (!strcmp(_clname, qt_meta_stringdata_Edit__CMainWindow.stringdata0))
         return static_cast<void*>(const_cast< CMainWindow*>(this));
+    if (!strcmp(_clname, "Ui::CMainWindow"))
+        return static_cast< Ui::CMainWindow*>(const_cast< CMainWindow*>(this));
     return QMainWindow::qt_metacast(_clname);
 }
 
@@ -107,13 +114,13 @@ int Edit::CMainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 3)
+        if (_id < 4)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 3;
+        _id -= 4;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 3)
+        if (_id < 4)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 3;
+        _id -= 4;
     }
     return _id;
 }

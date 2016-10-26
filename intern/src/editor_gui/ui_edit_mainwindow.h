@@ -38,6 +38,7 @@ public:
     QAction *m_pActionAboutSaltwater;
     QAction *m_pActionReleaseNotes;
     QAction *m_pActionReportBug;
+    QAction *m_pActionModel;
     QWidget *m_pCentralWidget;
     QTabWidget *m_pSceneGraphTabWidget;
     QWidget *m_pSceneGraphTab;
@@ -56,6 +57,7 @@ public:
     QMenu *m_pMenuEdit;
     QMenu *m_pMenuAssets;
     QMenu *m_pMenuEntity;
+    QMenu *menuActors;
     QMenu *m_pMenuComponent;
     QMenu *m_pMenuWindow;
     QMenu *m_pMenuHelp;
@@ -66,7 +68,7 @@ public:
         if (CMainWindow->objectName().isEmpty())
             CMainWindow->setObjectName(QStringLiteral("CMainWindow"));
         CMainWindow->setWindowModality(Qt::NonModal);
-        CMainWindow->resize(1933, 836);
+        CMainWindow->resize(1933, 892);
         CMainWindow->setCursor(QCursor(Qt::ArrowCursor));
         CMainWindow->setMouseTracking(true);
         m_pActionNew = new QAction(CMainWindow);
@@ -82,6 +84,8 @@ public:
         m_pActionReleaseNotes->setObjectName(QStringLiteral("m_pActionReleaseNotes"));
         m_pActionReportBug = new QAction(CMainWindow);
         m_pActionReportBug->setObjectName(QStringLiteral("m_pActionReportBug"));
+        m_pActionModel = new QAction(CMainWindow);
+        m_pActionModel->setObjectName(QStringLiteral("m_pActionModel"));
         m_pCentralWidget = new QWidget(CMainWindow);
         m_pCentralWidget->setObjectName(QStringLiteral("m_pCentralWidget"));
         m_pSceneGraphTabWidget = new QTabWidget(m_pCentralWidget);
@@ -143,6 +147,8 @@ public:
         m_pMenuAssets->setObjectName(QStringLiteral("m_pMenuAssets"));
         m_pMenuEntity = new QMenu(m_pMenuBar);
         m_pMenuEntity->setObjectName(QStringLiteral("m_pMenuEntity"));
+        menuActors = new QMenu(m_pMenuEntity);
+        menuActors->setObjectName(QStringLiteral("menuActors"));
         m_pMenuComponent = new QMenu(m_pMenuBar);
         m_pMenuComponent->setObjectName(QStringLiteral("m_pMenuComponent"));
         m_pMenuWindow = new QMenu(m_pMenuBar);
@@ -165,6 +171,8 @@ public:
         m_pMenuFile->addAction(m_pActionOpen);
         m_pMenuFile->addSeparator();
         m_pMenuFile->addAction(m_pActionExit);
+        m_pMenuEntity->addAction(menuActors->menuAction());
+        menuActors->addAction(m_pActionModel);
         m_pMenuHelp->addAction(m_pActionAboutSaltwater);
         m_pMenuHelp->addSeparator();
         m_pMenuHelp->addAction(m_pActionReleaseNotes);
@@ -174,8 +182,9 @@ public:
         QObject::connect(m_pActionExit, SIGNAL(triggered()), CMainWindow, SLOT(close()));
         QObject::connect(m_pPlayButton, SIGNAL(clicked()), CMainWindow, SLOT(switchPlayingCurrentScene()));
         QObject::connect(m_pScreenshotButton, SIGNAL(clicked()), CMainWindow, SLOT(takeScreenshot()));
-        QObject::connect(m_pActionNew, SIGNAL(triggered()), CMainWindow, SLOT(createNewScene()));
+        QObject::connect(m_pActionNew, SIGNAL(triggered()), CMainWindow, SLOT(openNewSceneDialog()));
         QObject::connect(m_pScenegraph, SIGNAL(itemClicked(QTreeWidgetItem*,int)), m_pScenegraph, SLOT(entitySelected(QTreeWidgetItem*)));
+        QObject::connect(m_pActionModel, SIGNAL(triggered()), CMainWindow, SLOT(openNewActorModelDialog()));
 
         m_pSceneGraphTabWidget->setCurrentIndex(0);
         m_pGameTabWidget->setCurrentIndex(0);
@@ -196,6 +205,7 @@ public:
         m_pActionAboutSaltwater->setText(QApplication::translate("CMainWindow", "About Saltwater", 0));
         m_pActionReleaseNotes->setText(QApplication::translate("CMainWindow", "Release Notes", 0));
         m_pActionReportBug->setText(QApplication::translate("CMainWindow", "Report a Bug...", 0));
+        m_pActionModel->setText(QApplication::translate("CMainWindow", "Model", 0));
         QTreeWidgetItem *___qtreewidgetitem = m_pScenegraph->headerItem();
         ___qtreewidgetitem->setText(2, QApplication::translate("CMainWindow", "Type", 0));
         ___qtreewidgetitem->setText(1, QApplication::translate("CMainWindow", "Entity", 0));
@@ -210,6 +220,7 @@ public:
         m_pMenuEdit->setTitle(QApplication::translate("CMainWindow", "Edit", 0));
         m_pMenuAssets->setTitle(QApplication::translate("CMainWindow", "Assets", 0));
         m_pMenuEntity->setTitle(QApplication::translate("CMainWindow", "Entity", 0));
+        menuActors->setTitle(QApplication::translate("CMainWindow", "Actors", 0));
         m_pMenuComponent->setTitle(QApplication::translate("CMainWindow", "Component", 0));
         m_pMenuWindow->setTitle(QApplication::translate("CMainWindow", "Window", 0));
         m_pMenuHelp->setTitle(QApplication::translate("CMainWindow", "Help", 0));
