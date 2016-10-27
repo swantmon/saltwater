@@ -18,9 +18,14 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create transformation widget and add to layout
         // -----------------------------------------------------------------------------
-        m_pTransformWidget = new CInspectorTransformation();
+        m_pPointlightWidget = new CInspectorPointlight();
+        m_pTransformWidget  = new CInspectorTransformation();
 
         m_pInspectorLayout->addWidget(m_pTransformWidget);
+        m_pInspectorLayout->addWidget(m_pPointlightWidget);
+
+        m_pPointlightWidget->setVisible(false);
+        m_pTransformWidget ->setVisible(false);
 
         // -----------------------------------------------------------------------------
         // Set layout
@@ -80,6 +85,8 @@ namespace Edit
 
         if (HasDetailData)
         {
+            m_pPointlightWidget->setVisible(false);
+
             if (Category == 0) // Actors
             {
                 if (Type == 0) // Node
@@ -99,6 +106,7 @@ namespace Edit
             {
                 if (Type == 0) // Point
                 {
+                    m_pPointlightWidget->setVisible(true);
                 }
                 else if (Type == 1) // Sun
                 {

@@ -9,7 +9,7 @@
 
 namespace Edit
 {
-    class CInspectorTransformation : public QWidget , public Ui::InspectorTransformation
+    class CInspectorTransformation : public QWidget, public Ui::InspectorTransformation
     {
 	    Q_OBJECT
 

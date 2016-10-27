@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "editor_gui/edit_inspector_pointlight.h"
 #include "editor_gui/edit_inspector_transformation.h"
 
 #include "editor_port/edit_message.h"
@@ -24,6 +25,7 @@ namespace Edit
     private:
 
         QVBoxLayout*              m_pInspectorLayout;
+        CInspectorPointlight*     m_pPointlightWidget;
         CInspectorTransformation* m_pTransformWidget;
 
     private:
