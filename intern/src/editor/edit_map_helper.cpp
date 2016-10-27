@@ -419,6 +419,9 @@ namespace
 
             Edit::CMessage NewMessage;
 
+            NewMessage.PutInt(rCurrentEntity.GetCategory());
+            NewMessage.PutInt(rCurrentEntity.GetType());
+
             NewMessage.PutBool(rCurrentEntity.GetTransformationFacet() != nullptr);
             NewMessage.PutBool(rCurrentEntity.GetHierarchyFacet()      != nullptr);
 
@@ -494,12 +497,6 @@ namespace
                 pTransformationFacet->SetPosition(Position);
                 pTransformationFacet->SetScale(Scale);
                 pTransformationFacet->SetRotation(Rotation);
-
-                BASE_CONSOLE_INFO("Received values:");
-                BASE_CONSOLE_INFOV("Pos: %f, %f, %f", Position[0], Position[1], Position[2]);
-                BASE_CONSOLE_INFOV("Rot: %f, %f, %f", Rotation[0], Rotation[1], Rotation[2]);
-                BASE_CONSOLE_INFOV("Sca: %f, %f, %f", Scale[0], Scale[1], Scale[2]);
-                BASE_CONSOLE_INFO("--------------------------------");
             }
             else
             {
