@@ -1,4 +1,6 @@
 ﻿
+#include "base/base_console.h"
+
 #include "editor_gui/edit_inspector_transformation.h"
 
 namespace Edit
@@ -30,17 +32,23 @@ namespace Edit
     {
         CMessage NewMessage;
 
-        NewMessage.PutFloat(m_pTransformationPositionX->text().toFloat());
-        NewMessage.PutFloat(m_pTransformationPositionY->text().toFloat());
         NewMessage.PutFloat(m_pTransformationPositionZ->text().toFloat());
+        NewMessage.PutFloat(m_pTransformationPositionY->text().toFloat());
+        NewMessage.PutFloat(m_pTransformationPositionX->text().toFloat());
 
-        NewMessage.PutFloat(m_pTransformationRotationX->text().toFloat());
-        NewMessage.PutFloat(m_pTransformationRotationY->text().toFloat());
         NewMessage.PutFloat(m_pTransformationRotationZ->text().toFloat());
+        NewMessage.PutFloat(m_pTransformationRotationY->text().toFloat());
+        NewMessage.PutFloat(m_pTransformationRotationX->text().toFloat());
 
-        NewMessage.PutFloat(m_pTransformationScaleX->text().toFloat());
-        NewMessage.PutFloat(m_pTransformationScaleY->text().toFloat());
         NewMessage.PutFloat(m_pTransformationScaleZ->text().toFloat());
+        NewMessage.PutFloat(m_pTransformationScaleY->text().toFloat());
+        NewMessage.PutFloat(m_pTransformationScaleX->text().toFloat());
+
+        BASE_CONSOLE_INFO("Send values:");
+        BASE_CONSOLE_INFOV("Pos: %f, %f, %f", m_pTransformationPositionX->text().toFloat(), m_pTransformationPositionY->text().toFloat(), m_pTransformationPositionZ->text().toFloat());
+        BASE_CONSOLE_INFOV("Rot: %f, %f, %f", m_pTransformationRotationX->text().toFloat(), m_pTransformationRotationY->text().toFloat(), m_pTransformationRotationZ->text().toFloat());
+        BASE_CONSOLE_INFOV("Sca: %f, %f, %f", m_pTransformationScaleX->text().toFloat(), m_pTransformationScaleY->text().toFloat(), m_pTransformationScaleZ->text().toFloat());
+        BASE_CONSOLE_INFO("--------------------------------");
 
         NewMessage.Reset();
 

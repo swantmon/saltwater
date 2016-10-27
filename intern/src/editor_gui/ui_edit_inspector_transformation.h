@@ -55,16 +55,16 @@ public:
     {
         if (InspectorForm->objectName().isEmpty())
             InspectorForm->setObjectName(QStringLiteral("InspectorForm"));
-        InspectorForm->resize(302, 140);
+        InspectorForm->resize(393, 137);
         m_pMainFrame = new QWidget(InspectorForm);
         m_pMainFrame->setObjectName(QStringLiteral("m_pMainFrame"));
-        m_pMainFrame->setGeometry(QRect(0, 0, 301, 131));
+        m_pMainFrame->setGeometry(QRect(0, 0, 391, 131));
         m_pInspectorTransformationGroup = new QGroupBox(m_pMainFrame);
         m_pInspectorTransformationGroup->setObjectName(QStringLiteral("m_pInspectorTransformationGroup"));
-        m_pInspectorTransformationGroup->setGeometry(QRect(0, 0, 301, 131));
+        m_pInspectorTransformationGroup->setGeometry(QRect(0, 0, 381, 131));
         gridLayoutWidget = new QWidget(m_pInspectorTransformationGroup);
         gridLayoutWidget->setObjectName(QStringLiteral("gridLayoutWidget"));
-        gridLayoutWidget->setGeometry(QRect(10, 20, 281, 101));
+        gridLayoutWidget->setGeometry(QRect(10, 20, 368, 101));
         gridLayout = new QGridLayout(gridLayoutWidget);
         gridLayout->setObjectName(QStringLiteral("gridLayout"));
         gridLayout->setContentsMargins(0, 0, 0, 0);
@@ -75,6 +75,7 @@ public:
 
         m_pTransformationPositionZ = new QLineEdit(gridLayoutWidget);
         m_pTransformationPositionZ->setObjectName(QStringLiteral("m_pTransformationPositionZ"));
+        m_pTransformationPositionZ->setDragEnabled(false);
 
         gridLayout->addWidget(m_pTransformationPositionZ, 0, 6, 1, 1);
 
@@ -173,16 +174,24 @@ public:
 
         gridLayout->addWidget(label_11, 3, 5, 1, 1);
 
+        QWidget::setTabOrder(m_pTransformationPositionX, m_pTransformationPositionY);
+        QWidget::setTabOrder(m_pTransformationPositionY, m_pTransformationPositionZ);
+        QWidget::setTabOrder(m_pTransformationPositionZ, m_pTransformationRotationX);
+        QWidget::setTabOrder(m_pTransformationRotationX, m_pTransformationRotationY);
+        QWidget::setTabOrder(m_pTransformationRotationY, m_pTransformationRotationZ);
+        QWidget::setTabOrder(m_pTransformationRotationZ, m_pTransformationScaleX);
+        QWidget::setTabOrder(m_pTransformationScaleX, m_pTransformationScaleY);
+        QWidget::setTabOrder(m_pTransformationScaleY, m_pTransformationScaleZ);
 
         retranslateUi(InspectorForm);
-        QObject::connect(m_pTransformationPositionX, SIGNAL(textChanged(QString)), InspectorForm, SLOT(valueChanged()));
-        QObject::connect(m_pTransformationPositionY, SIGNAL(textChanged(QString)), InspectorForm, SLOT(valueChanged()));
-        QObject::connect(m_pTransformationPositionZ, SIGNAL(textChanged(QString)), InspectorForm, SLOT(valueChanged()));
-        QObject::connect(m_pTransformationRotationX, SIGNAL(textChanged(QString)), InspectorForm, SLOT(valueChanged()));
-        QObject::connect(m_pTransformationRotationY, SIGNAL(textChanged(QString)), InspectorForm, SLOT(valueChanged()));
-        QObject::connect(m_pTransformationRotationZ, SIGNAL(textChanged(QString)), InspectorForm, SLOT(valueChanged()));
-        QObject::connect(m_pTransformationScaleX, SIGNAL(textChanged(QString)), InspectorForm, SLOT(valueChanged()));
-        QObject::connect(m_pTransformationScaleY, SIGNAL(textChanged(QString)), InspectorForm, SLOT(valueChanged()));
+        QObject::connect(m_pTransformationPositionX, SIGNAL(textEdited(QString)), InspectorForm, SLOT(valueChanged()));
+        QObject::connect(m_pTransformationPositionY, SIGNAL(textEdited(QString)), InspectorForm, SLOT(valueChanged()));
+        QObject::connect(m_pTransformationPositionZ, SIGNAL(textEdited(QString)), InspectorForm, SLOT(valueChanged()));
+        QObject::connect(m_pTransformationRotationX, SIGNAL(textEdited(QString)), InspectorForm, SLOT(valueChanged()));
+        QObject::connect(m_pTransformationRotationY, SIGNAL(textEdited(QString)), InspectorForm, SLOT(valueChanged()));
+        QObject::connect(m_pTransformationRotationZ, SIGNAL(textEdited(QString)), InspectorForm, SLOT(valueChanged()));
+        QObject::connect(m_pTransformationScaleX, SIGNAL(textEdited(QString)), InspectorForm, SLOT(valueChanged()));
+        QObject::connect(m_pTransformationScaleY, SIGNAL(textEdited(QString)), InspectorForm, SLOT(valueChanged()));
         QObject::connect(m_pTransformationScaleZ, SIGNAL(textEdited(QString)), InspectorForm, SLOT(valueChanged()));
 
         QMetaObject::connectSlotsByName(InspectorForm);

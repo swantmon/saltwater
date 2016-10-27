@@ -1,4 +1,5 @@
 ﻿
+
 #include "editor_gui/edit_inspector.h"
 
 #include "editor_gui/edit_inspector_transformation.h"

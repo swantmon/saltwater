@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>302</width>
-    <height>140</height>
+    <width>393</width>
+    <height>137</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>301</width>
+     <width>391</width>
      <height>131</height>
     </rect>
    </property>
@@ -27,7 +27,7 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>301</width>
+      <width>381</width>
       <height>131</height>
      </rect>
     </property>
@@ -39,7 +39,7 @@
       <rect>
        <x>10</x>
        <y>20</y>
-       <width>281</width>
+       <width>368</width>
        <height>101</height>
       </rect>
      </property>
@@ -55,6 +55,9 @@
        <widget class="QLineEdit" name="m_pTransformationPositionZ">
         <property name="text">
          <string>0</string>
+        </property>
+        <property name="dragEnabled">
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -196,11 +199,22 @@
    </widget>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>m_pTransformationPositionX</tabstop>
+  <tabstop>m_pTransformationPositionY</tabstop>
+  <tabstop>m_pTransformationPositionZ</tabstop>
+  <tabstop>m_pTransformationRotationX</tabstop>
+  <tabstop>m_pTransformationRotationY</tabstop>
+  <tabstop>m_pTransformationRotationZ</tabstop>
+  <tabstop>m_pTransformationScaleX</tabstop>
+  <tabstop>m_pTransformationScaleY</tabstop>
+  <tabstop>m_pTransformationScaleZ</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
    <sender>m_pTransformationPositionX</sender>
-   <signal>textChanged(QString)</signal>
+   <signal>textEdited(QString)</signal>
    <receiver>InspectorForm</receiver>
    <slot>valueChanged()</slot>
    <hints>
@@ -216,7 +230,7 @@
   </connection>
   <connection>
    <sender>m_pTransformationPositionY</sender>
-   <signal>textChanged(QString)</signal>
+   <signal>textEdited(QString)</signal>
    <receiver>InspectorForm</receiver>
    <slot>valueChanged()</slot>
    <hints>
@@ -232,7 +246,7 @@
   </connection>
   <connection>
    <sender>m_pTransformationPositionZ</sender>
-   <signal>textChanged(QString)</signal>
+   <signal>textEdited(QString)</signal>
    <receiver>InspectorForm</receiver>
    <slot>valueChanged()</slot>
    <hints>
@@ -248,7 +262,7 @@
   </connection>
   <connection>
    <sender>m_pTransformationRotationX</sender>
-   <signal>textChanged(QString)</signal>
+   <signal>textEdited(QString)</signal>
    <receiver>InspectorForm</receiver>
    <slot>valueChanged()</slot>
    <hints>
@@ -264,7 +278,7 @@
   </connection>
   <connection>
    <sender>m_pTransformationRotationY</sender>
-   <signal>textChanged(QString)</signal>
+   <signal>textEdited(QString)</signal>
    <receiver>InspectorForm</receiver>
    <slot>valueChanged()</slot>
    <hints>
@@ -280,7 +294,7 @@
   </connection>
   <connection>
    <sender>m_pTransformationRotationZ</sender>
-   <signal>textChanged(QString)</signal>
+   <signal>textEdited(QString)</signal>
    <receiver>InspectorForm</receiver>
    <slot>valueChanged()</slot>
    <hints>
@@ -296,7 +310,7 @@
   </connection>
   <connection>
    <sender>m_pTransformationScaleX</sender>
-   <signal>textChanged(QString)</signal>
+   <signal>textEdited(QString)</signal>
    <receiver>InspectorForm</receiver>
    <slot>valueChanged()</slot>
    <hints>
@@ -312,7 +326,7 @@
   </connection>
   <connection>
    <sender>m_pTransformationScaleY</sender>
-   <signal>textChanged(QString)</signal>
+   <signal>textEdited(QString)</signal>
    <receiver>InspectorForm</receiver>
    <slot>valueChanged()</slot>
    <hints>
