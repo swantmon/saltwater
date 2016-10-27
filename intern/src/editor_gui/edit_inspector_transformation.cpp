@@ -44,15 +44,23 @@ namespace Edit
         NewMessage.PutFloat(m_pTransformationScaleY->text().toFloat());
         NewMessage.PutFloat(m_pTransformationScaleX->text().toFloat());
 
-        BASE_CONSOLE_INFO("Send values:");
-        BASE_CONSOLE_INFOV("Pos: %f, %f, %f", m_pTransformationPositionX->text().toFloat(), m_pTransformationPositionY->text().toFloat(), m_pTransformationPositionZ->text().toFloat());
-        BASE_CONSOLE_INFOV("Rot: %f, %f, %f", m_pTransformationRotationX->text().toFloat(), m_pTransformationRotationY->text().toFloat(), m_pTransformationRotationZ->text().toFloat());
-        BASE_CONSOLE_INFOV("Sca: %f, %f, %f", m_pTransformationScaleX->text().toFloat(), m_pTransformationScaleY->text().toFloat(), m_pTransformationScaleZ->text().toFloat());
-        BASE_CONSOLE_INFO("--------------------------------");
+        // TODO:
+        // Why is the Z before X???
 
         NewMessage.Reset();
 
         MessageManager::SendMessage(SGUIMessageType::EntityInfoTransformation, NewMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorTransformation::RequestInformation()
+    {
+        CMessage NewMessage(true);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::RequestEntityInfoTransformation, NewMessage);
     }
 
     // -----------------------------------------------------------------------------

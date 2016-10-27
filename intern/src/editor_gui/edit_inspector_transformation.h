@@ -22,6 +22,8 @@ namespace Edit
 
         void valueChanged();
 
+        void RequestInformation();
+
     private:
 
         void OnEntityInfoTransformation(Edit::CMessage& _rMessage);

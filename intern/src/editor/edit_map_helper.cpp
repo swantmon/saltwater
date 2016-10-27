@@ -61,6 +61,7 @@ namespace
         void OnNewLightPoint(Edit::CMessage& _rMessage);
         void OnNewLightEnvironment(Edit::CMessage& _rMessage);
         void OnNewLightReflection(Edit::CMessage& _rMessage);
+        void OnRequestEntityInfoFacets(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoTransformation(Edit::CMessage& _rMessage);
         void OnEntityInfoTransformation(Edit::CMessage& _rMessage);
         void OnDirtyEntity(Dt::CEntity* _pEntity);
@@ -103,6 +104,7 @@ namespace
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewLightPoint                  , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewLightPoint));
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewLightEnvironment            , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewLightEnvironment));
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewLightReflection             , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewLightReflection));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoFacets        , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoFacets));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoTransformation, EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoTransformation));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoTransformation       , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoTransformation));
     }
@@ -390,11 +392,11 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CMapHelper::OnRequestEntityInfoTransformation(Edit::CMessage& _rMessage)
+    void CMapHelper::OnRequestEntityInfoFacets(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
-
         m_pLastRequestedEntity = nullptr;
+        
+        int EntityID = _rMessage.GetInt();
 
         Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin();
         Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
@@ -407,41 +409,69 @@ namespace
             {
                 m_pLastRequestedEntity = &rCurrentEntity;
 
-                Edit::CMessage NewMessage;
-
-                Dt::CTransformationFacet* pTransformationFacet = rCurrentEntity.GetTransformationFacet();
-
-                if (pTransformationFacet)
-                {
-                    NewMessage.PutBool(true);
-
-                    NewMessage.PutFloat(pTransformationFacet->GetPosition()[0]);
-                    NewMessage.PutFloat(pTransformationFacet->GetPosition()[1]);
-                    NewMessage.PutFloat(pTransformationFacet->GetPosition()[2]);
-
-                    NewMessage.PutFloat(Base::RadiansToDegree(pTransformationFacet->GetRotation()[0]));
-                    NewMessage.PutFloat(Base::RadiansToDegree(pTransformationFacet->GetRotation()[1]));
-                    NewMessage.PutFloat(Base::RadiansToDegree(pTransformationFacet->GetRotation()[2]));
-
-                    NewMessage.PutFloat(pTransformationFacet->GetScale()[0]);
-                    NewMessage.PutFloat(pTransformationFacet->GetScale()[1]);
-                    NewMessage.PutFloat(pTransformationFacet->GetScale()[2]);
-                }
-                else
-                {
-                    NewMessage.PutBool(false);
-
-                    NewMessage.PutFloat(rCurrentEntity.GetWorldPosition()[0]);
-                    NewMessage.PutFloat(rCurrentEntity.GetWorldPosition()[1]);
-                    NewMessage.PutFloat(rCurrentEntity.GetWorldPosition()[2]);
-                }
-
-                NewMessage.Reset();
-
-                Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoTransformation, NewMessage);
-
                 break;
             }
+        }
+
+        if (m_pLastRequestedEntity != nullptr)
+        {
+            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+
+            Edit::CMessage NewMessage;
+
+            NewMessage.PutBool(rCurrentEntity.GetTransformationFacet() != nullptr);
+            NewMessage.PutBool(rCurrentEntity.GetHierarchyFacet()      != nullptr);
+
+            NewMessage.PutBool(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data)    != nullptr);
+            NewMessage.PutBool(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic) != nullptr);
+            NewMessage.PutBool(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Script)  != nullptr);
+
+            NewMessage.Reset();
+
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoFacets, NewMessage);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnRequestEntityInfoTransformation(Edit::CMessage& _rMessage)
+    {
+        if (m_pLastRequestedEntity != nullptr)
+        {
+            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+
+            Edit::CMessage NewMessage;
+
+            Dt::CTransformationFacet* pTransformationFacet = rCurrentEntity.GetTransformationFacet();
+
+            if (pTransformationFacet)
+            {
+                NewMessage.PutBool(true);
+
+                NewMessage.PutFloat(pTransformationFacet->GetPosition()[0]);
+                NewMessage.PutFloat(pTransformationFacet->GetPosition()[1]);
+                NewMessage.PutFloat(pTransformationFacet->GetPosition()[2]);
+
+                NewMessage.PutFloat(Base::RadiansToDegree(pTransformationFacet->GetRotation()[0]));
+                NewMessage.PutFloat(Base::RadiansToDegree(pTransformationFacet->GetRotation()[1]));
+                NewMessage.PutFloat(Base::RadiansToDegree(pTransformationFacet->GetRotation()[2]));
+
+                NewMessage.PutFloat(pTransformationFacet->GetScale()[0]);
+                NewMessage.PutFloat(pTransformationFacet->GetScale()[1]);
+                NewMessage.PutFloat(pTransformationFacet->GetScale()[2]);
+            }
+            else
+            {
+                NewMessage.PutBool(false);
+
+                NewMessage.PutFloat(rCurrentEntity.GetWorldPosition()[0]);
+                NewMessage.PutFloat(rCurrentEntity.GetWorldPosition()[1]);
+                NewMessage.PutFloat(rCurrentEntity.GetWorldPosition()[2]);
+            }
+
+            NewMessage.Reset();
+
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoTransformation, NewMessage);
         }
     }
 

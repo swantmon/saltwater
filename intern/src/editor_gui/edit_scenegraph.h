@@ -16,9 +16,13 @@ namespace Edit
 	    CSceneGraph(QWidget* _pParent = Q_NULLPTR);
 	    ~CSceneGraph();
 
+    Q_SIGNALS:
+
+        void entitySelected(int _ID);
+
     public Q_SLOTS:
 
-        void entitySelected(QTreeWidgetItem* _pItem);
+        void itemSelected(QTreeWidgetItem* _pItem);
 
     private:
 

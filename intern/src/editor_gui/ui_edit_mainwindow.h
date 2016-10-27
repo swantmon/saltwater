@@ -75,7 +75,7 @@ public:
         if (CMainWindow->objectName().isEmpty())
             CMainWindow->setObjectName(QStringLiteral("CMainWindow"));
         CMainWindow->setWindowModality(Qt::NonModal);
-        CMainWindow->resize(1933, 832);
+        CMainWindow->resize(1933, 916);
         CMainWindow->setCursor(QCursor(Qt::ArrowCursor));
         CMainWindow->setMouseTracking(true);
         m_pActionNew = new QAction(CMainWindow);
@@ -157,7 +157,7 @@ public:
         CMainWindow->setCentralWidget(m_pCentralWidget);
         m_pMenuBar = new QMenuBar(CMainWindow);
         m_pMenuBar->setObjectName(QStringLiteral("m_pMenuBar"));
-        m_pMenuBar->setGeometry(QRect(0, 0, 1933, 21));
+        m_pMenuBar->setGeometry(QRect(0, 0, 1933, 38));
         m_pMenuFile = new QMenu(m_pMenuBar);
         m_pMenuFile->setObjectName(QStringLiteral("m_pMenuFile"));
         m_pMenuEdit = new QMenu(m_pMenuBar);
@@ -210,12 +210,13 @@ public:
         QObject::connect(m_pPlayButton, SIGNAL(clicked()), CMainWindow, SLOT(switchPlayingCurrentScene()));
         QObject::connect(m_pScreenshotButton, SIGNAL(clicked()), CMainWindow, SLOT(takeScreenshot()));
         QObject::connect(m_pActionNew, SIGNAL(triggered()), CMainWindow, SLOT(openNewSceneDialog()));
-        QObject::connect(m_pScenegraph, SIGNAL(itemClicked(QTreeWidgetItem*,int)), m_pScenegraph, SLOT(entitySelected(QTreeWidgetItem*)));
+        QObject::connect(m_pScenegraph, SIGNAL(itemClicked(QTreeWidgetItem*,int)), m_pScenegraph, SLOT(itemSelected(QTreeWidgetItem*)));
         QObject::connect(m_pActionModel, SIGNAL(triggered()), CMainWindow, SLOT(openNewActorModelDialog()));
         QObject::connect(m_pActionDirectional, SIGNAL(triggered()), CMainWindow, SLOT(createNewLightDirectional()));
         QObject::connect(m_pActionEnvironment, SIGNAL(triggered()), CMainWindow, SLOT(createNewLightEnvironment()));
         QObject::connect(m_pActionPoint, SIGNAL(triggered()), CMainWindow, SLOT(createNewLightPoint()));
         QObject::connect(m_pActionReflection, SIGNAL(triggered()), CMainWindow, SLOT(createNewLightReflection()));
+        QObject::connect(m_pScenegraph, SIGNAL(entitySelected(int)), m_pInspector, SLOT(updateContentForEntity(int)));
 
         m_pSceneGraphTabWidget->setCurrentIndex(0);
         m_pGameTabWidget->setCurrentIndex(0);

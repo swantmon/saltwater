@@ -37,6 +37,7 @@ namespace Edit
             NewLightEnvironment,
             NewLightReflection,
 
+            RequestEntityInfoFacets,
             RequestEntityInfoTransformation,
 
             EntityInfoTransformation,
@@ -57,6 +58,7 @@ namespace Edit
 
             SceneGraphChanged,
 
+            EntityInfoFacets,
             EntityInfoTransformation,
 
             NumberOfMembers,

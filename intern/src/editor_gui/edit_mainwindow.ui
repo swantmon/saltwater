@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>1933</width>
-    <height>832</height>
+    <height>916</height>
    </rect>
   </property>
   <property name="cursor">
@@ -204,7 +204,7 @@
      <x>0</x>
      <y>0</y>
      <width>1933</width>
-     <height>21</height>
+     <height>38</height>
     </rect>
    </property>
    <widget class="QMenu" name="m_pMenuFile">
@@ -368,7 +368,8 @@
    <extends>QTreeWidget</extends>
    <header>editor_gui/edit_scenegraph.h</header>
    <slots>
-    <slot>entitySelected(QTreeWidgetItem*)</slot>
+    <signal>entitySelected(int)</signal>
+    <slot>itemSelected(QTreeWidgetItem*)</slot>
    </slots>
   </customwidget>
   <customwidget>
@@ -376,6 +377,9 @@
    <extends>QWidget</extends>
    <header>editor_gui/edit_inspector.h</header>
    <container>1</container>
+   <slots>
+    <slot>updateContentForEntity(int)</slot>
+   </slots>
   </customwidget>
  </customwidgets>
  <resources/>
@@ -404,7 +408,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>966</x>
-     <y>75</y>
+     <y>104</y>
     </hint>
     <hint type="destinationlabel">
      <x>736</x>
@@ -419,8 +423,8 @@
    <slot>takeScreenshot()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1522</x>
-     <y>75</y>
+     <x>1524</x>
+     <y>104</y>
     </hint>
     <hint type="destinationlabel">
      <x>1166</x>
@@ -448,7 +452,7 @@
    <sender>m_pScenegraph</sender>
    <signal>itemClicked(QTreeWidgetItem*,int)</signal>
    <receiver>m_pScenegraph</receiver>
-   <slot>entitySelected(QTreeWidgetItem*)</slot>
+   <slot>itemSelected(QTreeWidgetItem*)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>80</x>
@@ -537,6 +541,22 @@
     <hint type="destinationlabel">
      <x>966</x>
      <y>415</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pScenegraph</sender>
+   <signal>entitySelected(int)</signal>
+   <receiver>m_pInspector</receiver>
+   <slot>updateContentForEntity(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>125</x>
+     <y>503</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1709</x>
+     <y>469</y>
     </hint>
    </hints>
   </connection>

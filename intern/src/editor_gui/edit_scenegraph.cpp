@@ -59,16 +59,10 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CSceneGraph::entitySelected(QTreeWidgetItem* _pItem)
+    void CSceneGraph::itemSelected(QTreeWidgetItem* _pItem)
     {
         int EntityID = _pItem->text(0).toInt();
 
-        CMessage NewMessage;
-
-        NewMessage.PutInt(EntityID);
-
-        NewMessage.Reset();
-
-        MessageManager::SendMessage(SGUIMessageType::RequestEntityInfoTransformation, NewMessage);
+        emit entitySelected(EntityID);
     }
 } // namespace Edit
