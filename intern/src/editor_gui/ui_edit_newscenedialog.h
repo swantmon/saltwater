@@ -52,7 +52,7 @@ public:
         CNewSceneDialog->setModal(true);
         verticalLayoutWidget = new QWidget(CNewSceneDialog);
         verticalLayoutWidget->setObjectName(QStringLiteral("verticalLayoutWidget"));
-        verticalLayoutWidget->setGeometry(QRect(10, 10, 251, 111));
+        verticalLayoutWidget->setGeometry(QRect(10, 10, 316, 152));
         verticalLayout = new QVBoxLayout(verticalLayoutWidget);
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
         verticalLayout->setContentsMargins(0, 0, 0, 0);
@@ -125,8 +125,10 @@ public:
     {
         CNewSceneDialog->setWindowTitle(QApplication::translate("CNewSceneDialog", "Create new scene.", 0));
         label->setText(QApplication::translate("CNewSceneDialog", "X", 0));
+        m_pEditX->setText(QApplication::translate("CNewSceneDialog", "4", 0));
         m_pEditX->setPlaceholderText(QApplication::translate("CNewSceneDialog", "Number of regions in X", 0));
         label_2->setText(QApplication::translate("CNewSceneDialog", "Y", 0));
+        m_pEditY->setText(QApplication::translate("CNewSceneDialog", "4", 0));
         m_pEditY->setPlaceholderText(QApplication::translate("CNewSceneDialog", "Number of regions in Y", 0));
         m_pOkButton->setText(QApplication::translate("CNewSceneDialog", "OK", 0));
         m_pCancelButton->setText(QApplication::translate("CNewSceneDialog", "Cancel", 0));

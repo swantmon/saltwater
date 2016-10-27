@@ -256,9 +256,18 @@ namespace
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
             EntityDesc.m_EntityType     = Dt::SLightType::Sun;
-            EntityDesc.m_FacetFlags     = 0;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
             Dt::CEntity& rSunLight = Dt::EntityManager::CreateEntity(EntityDesc, m_EntityID);
+
+            // -----------------------------------------------------------------------------
+            // Transformation
+            // -----------------------------------------------------------------------------
+            Dt::CTransformationFacet* pTransformationFacet = rSunLight.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(0.0f));
+            pTransformationFacet->SetScale   (Base::Float3(1.0f));
+            pTransformationFacet->SetRotation(Base::Float3(0.0f));
 
             Dt::CSunLightFacet* pSunLightFacet = Dt::LightManager::CreateSunLight();
 
@@ -288,11 +297,18 @@ namespace
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
             EntityDesc.m_EntityType     = Dt::SLightType::Point;
-            EntityDesc.m_FacetFlags     = 0;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
             Dt::CEntity& rPointLight = Dt::EntityManager::CreateEntity(EntityDesc, m_EntityID);
 
-            rPointLight.SetWorldPosition(Base::Float3(14.0f, 6.0f, 4.0f));
+            // -----------------------------------------------------------------------------
+            // Transformation
+            // -----------------------------------------------------------------------------
+            Dt::CTransformationFacet* pTransformationFacet = rPointLight.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(0.0f));
+            pTransformationFacet->SetScale   (Base::Float3(1.0f));
+            pTransformationFacet->SetRotation(Base::Float3(0.0f));
 
             Dt::CPointLightFacet* pPointLightFacet = Dt::LightManager::CreatePointLight();
 
@@ -300,7 +316,7 @@ namespace
             pPointLightFacet->SetShadowType       (Dt::CPointLightFacet::HardShadows);
             pPointLightFacet->SetShadowQuality    (Dt::CPointLightFacet::High);
             pPointLightFacet->EnableTemperature   (false);
-            pPointLightFacet->SetColor            (Base::Float3(1.0f, 0.0f, 0.0f));
+            pPointLightFacet->SetColor            (Base::Float3(1.0f, 1.0f, 1.0f));
             pPointLightFacet->SetAttenuationRadius(10.0f);
             pPointLightFacet->SetInnerConeAngle   (Base::DegreesToRadians(45.0f));
             pPointLightFacet->SetOuterConeAngle   (Base::DegreesToRadians(90.0f));
@@ -345,9 +361,18 @@ namespace
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
             EntityDesc.m_EntityType     = Dt::SLightType::Skybox;
-            EntityDesc.m_FacetFlags     = 0;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
             Dt::CEntity& rEnvironment = Dt::EntityManager::CreateEntity(EntityDesc, m_EntityID);
+
+            // -----------------------------------------------------------------------------
+            // Transformation
+            // -----------------------------------------------------------------------------
+            Dt::CTransformationFacet* pTransformationFacet = rEnvironment.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(0.0f));
+            pTransformationFacet->SetScale   (Base::Float3(1.0f));
+            pTransformationFacet->SetRotation(Base::Float3(0.0f));
 
             Dt::CSkyboxFacet* pSkyboxFacet = Dt::LightManager::CreateSkybox();
 
@@ -372,7 +397,7 @@ namespace
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
             EntityDesc.m_EntityType     = Dt::SLightType::GlobalProbe;
-            EntityDesc.m_FacetFlags     = 0;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy;
 
             Dt::CEntity& rGlobalProbeLight = Dt::EntityManager::CreateEntity(EntityDesc, m_EntityID);
 

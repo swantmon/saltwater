@@ -27,8 +27,8 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>251</width>
-     <height>111</height>
+     <width>316</width>
+     <height>152</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -43,6 +43,9 @@
       </item>
       <item>
        <widget class="QLineEdit" name="m_pEditX">
+        <property name="text">
+         <string>4</string>
+        </property>
         <property name="placeholderText">
          <string>Number of regions in X</string>
         </property>
@@ -61,6 +64,9 @@
       </item>
       <item>
        <widget class="QLineEdit" name="m_pEditY">
+        <property name="text">
+         <string>4</string>
+        </property>
         <property name="placeholderText">
          <string>Number of regions in Y</string>
         </property>
