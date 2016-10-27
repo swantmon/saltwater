@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1933</width>
-    <height>916</height>
+    <width>1924</width>
+    <height>959</height>
    </rect>
   </property>
   <property name="cursor">
@@ -23,188 +23,98 @@
    <string>Saltwater Editor</string>
   </property>
   <widget class="QWidget" name="m_pCentralWidget">
-   <widget class="QTabWidget" name="m_pSceneGraphTabWidget">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>320</width>
-      <height>791</height>
-     </rect>
+   <layout class="QVBoxLayout" name="verticalLayout_3">
+    <property name="sizeConstraint">
+     <enum>QLayout::SetDefaultConstraint</enum>
     </property>
-    <property name="currentIndex">
-     <number>0</number>
-    </property>
-    <widget class="QWidget" name="m_pSceneGraphTab">
-     <attribute name="title">
-      <string>Scene Graph</string>
-     </attribute>
-     <widget class="Edit::CSceneGraph" name="m_pScenegraph">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>311</width>
-        <height>761</height>
-       </rect>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetDefaultConstraint</enum>
       </property>
-      <property name="dragEnabled">
-       <bool>false</bool>
-      </property>
-      <property name="alternatingRowColors">
-       <bool>true</bool>
-      </property>
-      <property name="selectionMode">
-       <enum>QAbstractItemView::ExtendedSelection</enum>
-      </property>
-      <property name="selectionBehavior">
-       <enum>QAbstractItemView::SelectRows</enum>
-      </property>
-      <property name="verticalScrollMode">
-       <enum>QAbstractItemView::ScrollPerItem</enum>
-      </property>
-      <column>
-       <property name="text">
-        <string>ID</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Entity</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Type</string>
-       </property>
-      </column>
-     </widget>
-    </widget>
-   </widget>
-   <widget class="QTabWidget" name="m_pGameTabWidget">
-    <property name="geometry">
-     <rect>
-      <x>320</x>
-      <y>0</y>
-      <width>1291</width>
-      <height>791</height>
-     </rect>
-    </property>
-    <property name="currentIndex">
-     <number>0</number>
-    </property>
-    <property name="tabBarAutoHide">
-     <bool>false</bool>
-    </property>
-    <widget class="QWidget" name="m_pGameTab">
-     <attribute name="title">
-      <string>Game</string>
-     </attribute>
-     <widget class="QPushButton" name="m_pPlayButton">
-      <property name="geometry">
-       <rect>
-        <x>570</x>
-        <y>10</y>
-        <width>75</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Play</string>
-      </property>
-     </widget>
-     <widget class="Edit::CRenderContext" name="m_pEditorRenderContext" native="true">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>40</y>
-        <width>1280</width>
-        <height>720</height>
-       </rect>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>1280</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="cursor">
-       <cursorShape>ArrowCursor</cursorShape>
-      </property>
-      <property name="mouseTracking">
-       <bool>true</bool>
-      </property>
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="locale">
-       <locale language="English" country="UnitedStates"/>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="m_pScreenshotButton">
-      <property name="geometry">
-       <rect>
-        <x>1200</x>
-        <y>10</y>
-        <width>75</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Screenshot</string>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="m_pMailAdressEdit">
-      <property name="geometry">
-       <rect>
-        <x>970</x>
-        <y>10</y>
-        <width>221</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="placeholderText">
-       <string>max.mustermann@mail.com</string>
-      </property>
-     </widget>
-    </widget>
-   </widget>
-   <widget class="QTabWidget" name="m_pInspectorTabWidget">
-    <property name="geometry">
-     <rect>
-      <x>1610</x>
-      <y>0</y>
-      <width>320</width>
-      <height>791</height>
-     </rect>
-    </property>
-    <property name="currentIndex">
-     <number>0</number>
-    </property>
-    <widget class="QWidget" name="m_pInspectorTab">
-     <attribute name="title">
-      <string>Inspector</string>
-     </attribute>
-     <widget class="Edit::CInspector" name="m_pInspector" native="true">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>311</width>
-        <height>761</height>
-       </rect>
-      </property>
-     </widget>
-    </widget>
-   </widget>
+      <item>
+       <widget class="QPushButton" name="m_pPlayButton">
+        <property name="text">
+         <string>Play</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="m_pMailAdressEdit">
+        <property name="maximumSize">
+         <size>
+          <width>200</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="placeholderText">
+         <string>max.mustermann@mail.com</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="m_pScreenshotButton">
+        <property name="text">
+         <string>Screenshot</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="Edit::CRenderContext" name="m_pEditorRenderContext" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>640</width>
+          <height>480</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="cursor">
+         <cursorShape>ArrowCursor</cursorShape>
+        </property>
+        <property name="mouseTracking">
+         <bool>true</bool>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="locale">
+         <locale language="English" country="UnitedStates"/>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="m_pMenuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1933</width>
-     <height>38</height>
+     <width>1924</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="m_pMenuFile">
@@ -277,6 +187,114 @@
    <addaction name="m_pMenuHelp"/>
   </widget>
   <widget class="QStatusBar" name="m_pStatusBar"/>
+  <widget class="QDockWidget" name="m_pSceneGraphDockWidget">
+   <property name="minimumSize">
+    <size>
+     <width>89</width>
+     <height>111</height>
+    </size>
+   </property>
+   <property name="features">
+    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+   </property>
+   <property name="windowTitle">
+    <string>Scene Graph</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="Edit::CSceneGraph" name="m_pScenegraph">
+       <property name="dragEnabled">
+        <bool>false</bool>
+       </property>
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::ExtendedSelection</enum>
+       </property>
+       <property name="selectionBehavior">
+        <enum>QAbstractItemView::SelectRows</enum>
+       </property>
+       <property name="verticalScrollMode">
+        <enum>QAbstractItemView::ScrollPerItem</enum>
+       </property>
+       <column>
+        <property name="text">
+         <string>ID</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Entity</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Type</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="m_pInspectorDockWidget">
+   <property name="minimumSize">
+    <size>
+     <width>80</width>
+     <height>50</height>
+    </size>
+   </property>
+   <property name="features">
+    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+   </property>
+   <property name="windowTitle">
+    <string>Inspector</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_2">
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item alignment="Qt::AlignTop">
+      <widget class="Edit::CInspector" name="m_pInspector" native="true"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="m_pConsoleDockWidget">
+   <property name="windowTitle">
+    <string>Console</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_4">
+    <layout class="QVBoxLayout" name="verticalLayout_4">
+     <item>
+      <widget class="QTextEdit" name="m_pConsoleOutputEdit"/>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QLineEdit" name="m_pConsoleCommandEdit"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="m_pSendCommandButton">
+         <property name="text">
+          <string>Send</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+  </widget>
   <action name="m_pActionNew">
    <property name="text">
     <string>New Scene</string>

@@ -94,8 +94,8 @@ void *Edit::CInspectorTransformation::qt_metacast(const char *_clname)
     if (!_clname) return Q_NULLPTR;
     if (!strcmp(_clname, qt_meta_stringdata_Edit__CInspectorTransformation.stringdata0))
         return static_cast<void*>(const_cast< CInspectorTransformation*>(this));
-    if (!strcmp(_clname, "Ui::InspectorForm"))
-        return static_cast< Ui::InspectorForm*>(const_cast< CInspectorTransformation*>(this));
+    if (!strcmp(_clname, "Ui::InspectorTransformation"))
+        return static_cast< Ui::InspectorTransformation*>(const_cast< CInspectorTransformation*>(this));
     return QWidget::qt_metacast(_clname);
 }
 

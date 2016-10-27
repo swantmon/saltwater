@@ -14,14 +14,18 @@
 #include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QDockWidget>
+#include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QSpacerItem>
 #include <QtWidgets/QStatusBar>
-#include <QtWidgets/QTabWidget>
+#include <QtWidgets/QTextEdit>
+#include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 #include "editor_gui/edit_inspector.h"
 #include "editor_gui/edit_render_context.h"
@@ -46,18 +50,14 @@ public:
     QAction *m_pActionCamera;
     QAction *m_pActionDirectional;
     QWidget *m_pCentralWidget;
-    QTabWidget *m_pSceneGraphTabWidget;
-    QWidget *m_pSceneGraphTab;
-    Edit::CSceneGraph *m_pScenegraph;
-    QTabWidget *m_pGameTabWidget;
-    QWidget *m_pGameTab;
+    QVBoxLayout *verticalLayout_3;
+    QHBoxLayout *horizontalLayout;
     QPushButton *m_pPlayButton;
-    Edit::CRenderContext *m_pEditorRenderContext;
-    QPushButton *m_pScreenshotButton;
+    QSpacerItem *horizontalSpacer;
     QLineEdit *m_pMailAdressEdit;
-    QTabWidget *m_pInspectorTabWidget;
-    QWidget *m_pInspectorTab;
-    Edit::CInspector *m_pInspector;
+    QPushButton *m_pScreenshotButton;
+    QHBoxLayout *horizontalLayout_2;
+    Edit::CRenderContext *m_pEditorRenderContext;
     QMenuBar *m_pMenuBar;
     QMenu *m_pMenuFile;
     QMenu *m_pMenuEdit;
@@ -69,13 +69,28 @@ public:
     QMenu *m_pMenuWindow;
     QMenu *m_pMenuHelp;
     QStatusBar *m_pStatusBar;
+    QDockWidget *m_pSceneGraphDockWidget;
+    QWidget *dockWidgetContents;
+    QVBoxLayout *verticalLayout;
+    Edit::CSceneGraph *m_pScenegraph;
+    QDockWidget *m_pInspectorDockWidget;
+    QWidget *dockWidgetContents_2;
+    QVBoxLayout *verticalLayout_2;
+    Edit::CInspector *m_pInspector;
+    QDockWidget *m_pConsoleDockWidget;
+    QWidget *dockWidgetContents_4;
+    QVBoxLayout *verticalLayout_4;
+    QTextEdit *m_pConsoleOutputEdit;
+    QHBoxLayout *horizontalLayout_3;
+    QLineEdit *m_pConsoleCommandEdit;
+    QPushButton *m_pSendCommandButton;
 
     void setupUi(QMainWindow *CMainWindow)
     {
         if (CMainWindow->objectName().isEmpty())
             CMainWindow->setObjectName(QStringLiteral("CMainWindow"));
         CMainWindow->setWindowModality(Qt::NonModal);
-        CMainWindow->resize(1933, 916);
+        CMainWindow->resize(1924, 959);
         CMainWindow->setCursor(QCursor(Qt::ArrowCursor));
         CMainWindow->setMouseTracking(true);
         m_pActionNew = new QAction(CMainWindow);
@@ -107,57 +122,59 @@ public:
         m_pActionDirectional->setObjectName(QStringLiteral("m_pActionDirectional"));
         m_pCentralWidget = new QWidget(CMainWindow);
         m_pCentralWidget->setObjectName(QStringLiteral("m_pCentralWidget"));
-        m_pSceneGraphTabWidget = new QTabWidget(m_pCentralWidget);
-        m_pSceneGraphTabWidget->setObjectName(QStringLiteral("m_pSceneGraphTabWidget"));
-        m_pSceneGraphTabWidget->setGeometry(QRect(0, 0, 320, 791));
-        m_pSceneGraphTab = new QWidget();
-        m_pSceneGraphTab->setObjectName(QStringLiteral("m_pSceneGraphTab"));
-        m_pScenegraph = new Edit::CSceneGraph(m_pSceneGraphTab);
-        m_pScenegraph->setObjectName(QStringLiteral("m_pScenegraph"));
-        m_pScenegraph->setGeometry(QRect(0, 0, 311, 761));
-        m_pScenegraph->setDragEnabled(false);
-        m_pScenegraph->setAlternatingRowColors(true);
-        m_pScenegraph->setSelectionMode(QAbstractItemView::ExtendedSelection);
-        m_pScenegraph->setSelectionBehavior(QAbstractItemView::SelectRows);
-        m_pScenegraph->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
-        m_pSceneGraphTabWidget->addTab(m_pSceneGraphTab, QString());
-        m_pGameTabWidget = new QTabWidget(m_pCentralWidget);
-        m_pGameTabWidget->setObjectName(QStringLiteral("m_pGameTabWidget"));
-        m_pGameTabWidget->setGeometry(QRect(320, 0, 1291, 791));
-        m_pGameTabWidget->setTabBarAutoHide(false);
-        m_pGameTab = new QWidget();
-        m_pGameTab->setObjectName(QStringLiteral("m_pGameTab"));
-        m_pPlayButton = new QPushButton(m_pGameTab);
+        verticalLayout_3 = new QVBoxLayout(m_pCentralWidget);
+        verticalLayout_3->setSpacing(6);
+        verticalLayout_3->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_3->setObjectName(QStringLiteral("verticalLayout_3"));
+        verticalLayout_3->setSizeConstraint(QLayout::SetDefaultConstraint);
+        horizontalLayout = new QHBoxLayout();
+        horizontalLayout->setSpacing(6);
+        horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
+        horizontalLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
+        m_pPlayButton = new QPushButton(m_pCentralWidget);
         m_pPlayButton->setObjectName(QStringLiteral("m_pPlayButton"));
-        m_pPlayButton->setGeometry(QRect(570, 10, 75, 23));
-        m_pEditorRenderContext = new Edit::CRenderContext(m_pGameTab);
+
+        horizontalLayout->addWidget(m_pPlayButton);
+
+        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        horizontalLayout->addItem(horizontalSpacer);
+
+        m_pMailAdressEdit = new QLineEdit(m_pCentralWidget);
+        m_pMailAdressEdit->setObjectName(QStringLiteral("m_pMailAdressEdit"));
+        m_pMailAdressEdit->setMaximumSize(QSize(200, 16777215));
+
+        horizontalLayout->addWidget(m_pMailAdressEdit);
+
+        m_pScreenshotButton = new QPushButton(m_pCentralWidget);
+        m_pScreenshotButton->setObjectName(QStringLiteral("m_pScreenshotButton"));
+
+        horizontalLayout->addWidget(m_pScreenshotButton);
+
+
+        verticalLayout_3->addLayout(horizontalLayout);
+
+        horizontalLayout_2 = new QHBoxLayout();
+        horizontalLayout_2->setSpacing(6);
+        horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
+        m_pEditorRenderContext = new Edit::CRenderContext(m_pCentralWidget);
         m_pEditorRenderContext->setObjectName(QStringLiteral("m_pEditorRenderContext"));
-        m_pEditorRenderContext->setGeometry(QRect(0, 40, 1280, 720));
-        m_pEditorRenderContext->setMinimumSize(QSize(1280, 0));
+        m_pEditorRenderContext->setMinimumSize(QSize(640, 480));
+        m_pEditorRenderContext->setMaximumSize(QSize(16777215, 16777215));
         m_pEditorRenderContext->setCursor(QCursor(Qt::ArrowCursor));
         m_pEditorRenderContext->setMouseTracking(true);
         m_pEditorRenderContext->setAutoFillBackground(false);
         m_pEditorRenderContext->setLocale(QLocale(QLocale::English, QLocale::UnitedStates));
-        m_pScreenshotButton = new QPushButton(m_pGameTab);
-        m_pScreenshotButton->setObjectName(QStringLiteral("m_pScreenshotButton"));
-        m_pScreenshotButton->setGeometry(QRect(1200, 10, 75, 23));
-        m_pMailAdressEdit = new QLineEdit(m_pGameTab);
-        m_pMailAdressEdit->setObjectName(QStringLiteral("m_pMailAdressEdit"));
-        m_pMailAdressEdit->setGeometry(QRect(970, 10, 221, 20));
-        m_pGameTabWidget->addTab(m_pGameTab, QString());
-        m_pInspectorTabWidget = new QTabWidget(m_pCentralWidget);
-        m_pInspectorTabWidget->setObjectName(QStringLiteral("m_pInspectorTabWidget"));
-        m_pInspectorTabWidget->setGeometry(QRect(1610, 0, 320, 791));
-        m_pInspectorTab = new QWidget();
-        m_pInspectorTab->setObjectName(QStringLiteral("m_pInspectorTab"));
-        m_pInspector = new Edit::CInspector(m_pInspectorTab);
-        m_pInspector->setObjectName(QStringLiteral("m_pInspector"));
-        m_pInspector->setGeometry(QRect(0, 0, 311, 761));
-        m_pInspectorTabWidget->addTab(m_pInspectorTab, QString());
+
+        horizontalLayout_2->addWidget(m_pEditorRenderContext);
+
+
+        verticalLayout_3->addLayout(horizontalLayout_2);
+
         CMainWindow->setCentralWidget(m_pCentralWidget);
         m_pMenuBar = new QMenuBar(CMainWindow);
         m_pMenuBar->setObjectName(QStringLiteral("m_pMenuBar"));
-        m_pMenuBar->setGeometry(QRect(0, 0, 1933, 38));
+        m_pMenuBar->setGeometry(QRect(0, 0, 1924, 21));
         m_pMenuFile = new QMenu(m_pMenuBar);
         m_pMenuFile->setObjectName(QStringLiteral("m_pMenuFile"));
         m_pMenuEdit = new QMenu(m_pMenuBar);
@@ -180,6 +197,76 @@ public:
         m_pStatusBar = new QStatusBar(CMainWindow);
         m_pStatusBar->setObjectName(QStringLiteral("m_pStatusBar"));
         CMainWindow->setStatusBar(m_pStatusBar);
+        m_pSceneGraphDockWidget = new QDockWidget(CMainWindow);
+        m_pSceneGraphDockWidget->setObjectName(QStringLiteral("m_pSceneGraphDockWidget"));
+        m_pSceneGraphDockWidget->setMinimumSize(QSize(89, 111));
+        m_pSceneGraphDockWidget->setFeatures(QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable);
+        dockWidgetContents = new QWidget();
+        dockWidgetContents->setObjectName(QStringLiteral("dockWidgetContents"));
+        verticalLayout = new QVBoxLayout(dockWidgetContents);
+        verticalLayout->setSpacing(6);
+        verticalLayout->setContentsMargins(11, 11, 11, 11);
+        verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
+        m_pScenegraph = new Edit::CSceneGraph(dockWidgetContents);
+        m_pScenegraph->setObjectName(QStringLiteral("m_pScenegraph"));
+        m_pScenegraph->setDragEnabled(false);
+        m_pScenegraph->setAlternatingRowColors(true);
+        m_pScenegraph->setSelectionMode(QAbstractItemView::ExtendedSelection);
+        m_pScenegraph->setSelectionBehavior(QAbstractItemView::SelectRows);
+        m_pScenegraph->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
+
+        verticalLayout->addWidget(m_pScenegraph);
+
+        m_pSceneGraphDockWidget->setWidget(dockWidgetContents);
+        CMainWindow->addDockWidget(static_cast<Qt::DockWidgetArea>(1), m_pSceneGraphDockWidget);
+        m_pInspectorDockWidget = new QDockWidget(CMainWindow);
+        m_pInspectorDockWidget->setObjectName(QStringLiteral("m_pInspectorDockWidget"));
+        m_pInspectorDockWidget->setMinimumSize(QSize(80, 50));
+        m_pInspectorDockWidget->setFeatures(QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable);
+        dockWidgetContents_2 = new QWidget();
+        dockWidgetContents_2->setObjectName(QStringLiteral("dockWidgetContents_2"));
+        verticalLayout_2 = new QVBoxLayout(dockWidgetContents_2);
+        verticalLayout_2->setSpacing(6);
+        verticalLayout_2->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
+        m_pInspector = new Edit::CInspector(dockWidgetContents_2);
+        m_pInspector->setObjectName(QStringLiteral("m_pInspector"));
+
+        verticalLayout_2->addWidget(m_pInspector, 0, Qt::AlignTop);
+
+        m_pInspectorDockWidget->setWidget(dockWidgetContents_2);
+        CMainWindow->addDockWidget(static_cast<Qt::DockWidgetArea>(2), m_pInspectorDockWidget);
+        m_pConsoleDockWidget = new QDockWidget(CMainWindow);
+        m_pConsoleDockWidget->setObjectName(QStringLiteral("m_pConsoleDockWidget"));
+        dockWidgetContents_4 = new QWidget();
+        dockWidgetContents_4->setObjectName(QStringLiteral("dockWidgetContents_4"));
+        verticalLayout_4 = new QVBoxLayout(dockWidgetContents_4);
+        verticalLayout_4->setSpacing(6);
+        verticalLayout_4->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_4->setObjectName(QStringLiteral("verticalLayout_4"));
+        m_pConsoleOutputEdit = new QTextEdit(dockWidgetContents_4);
+        m_pConsoleOutputEdit->setObjectName(QStringLiteral("m_pConsoleOutputEdit"));
+
+        verticalLayout_4->addWidget(m_pConsoleOutputEdit);
+
+        horizontalLayout_3 = new QHBoxLayout();
+        horizontalLayout_3->setSpacing(6);
+        horizontalLayout_3->setObjectName(QStringLiteral("horizontalLayout_3"));
+        m_pConsoleCommandEdit = new QLineEdit(dockWidgetContents_4);
+        m_pConsoleCommandEdit->setObjectName(QStringLiteral("m_pConsoleCommandEdit"));
+
+        horizontalLayout_3->addWidget(m_pConsoleCommandEdit);
+
+        m_pSendCommandButton = new QPushButton(dockWidgetContents_4);
+        m_pSendCommandButton->setObjectName(QStringLiteral("m_pSendCommandButton"));
+
+        horizontalLayout_3->addWidget(m_pSendCommandButton);
+
+
+        verticalLayout_4->addLayout(horizontalLayout_3);
+
+        m_pConsoleDockWidget->setWidget(dockWidgetContents_4);
+        CMainWindow->addDockWidget(static_cast<Qt::DockWidgetArea>(8), m_pConsoleDockWidget);
 
         m_pMenuBar->addAction(m_pMenuFile->menuAction());
         m_pMenuBar->addAction(m_pMenuEdit->menuAction());
@@ -218,11 +305,6 @@ public:
         QObject::connect(m_pActionReflection, SIGNAL(triggered()), CMainWindow, SLOT(createNewLightReflection()));
         QObject::connect(m_pScenegraph, SIGNAL(entitySelected(int)), m_pInspector, SLOT(updateContentForEntity(int)));
 
-        m_pSceneGraphTabWidget->setCurrentIndex(0);
-        m_pGameTabWidget->setCurrentIndex(0);
-        m_pInspectorTabWidget->setCurrentIndex(0);
-
-
         QMetaObject::connectSlotsByName(CMainWindow);
     } // setupUi
 
@@ -245,16 +327,9 @@ public:
         m_pActionReflection->setText(QApplication::translate("CMainWindow", "Reflection", 0));
         m_pActionCamera->setText(QApplication::translate("CMainWindow", "Camera", 0));
         m_pActionDirectional->setText(QApplication::translate("CMainWindow", "Directional", 0));
-        QTreeWidgetItem *___qtreewidgetitem = m_pScenegraph->headerItem();
-        ___qtreewidgetitem->setText(2, QApplication::translate("CMainWindow", "Type", 0));
-        ___qtreewidgetitem->setText(1, QApplication::translate("CMainWindow", "Entity", 0));
-        ___qtreewidgetitem->setText(0, QApplication::translate("CMainWindow", "ID", 0));
-        m_pSceneGraphTabWidget->setTabText(m_pSceneGraphTabWidget->indexOf(m_pSceneGraphTab), QApplication::translate("CMainWindow", "Scene Graph", 0));
         m_pPlayButton->setText(QApplication::translate("CMainWindow", "Play", 0));
-        m_pScreenshotButton->setText(QApplication::translate("CMainWindow", "Screenshot", 0));
         m_pMailAdressEdit->setPlaceholderText(QApplication::translate("CMainWindow", "max.mustermann@mail.com", 0));
-        m_pGameTabWidget->setTabText(m_pGameTabWidget->indexOf(m_pGameTab), QApplication::translate("CMainWindow", "Game", 0));
-        m_pInspectorTabWidget->setTabText(m_pInspectorTabWidget->indexOf(m_pInspectorTab), QApplication::translate("CMainWindow", "Inspector", 0));
+        m_pScreenshotButton->setText(QApplication::translate("CMainWindow", "Screenshot", 0));
         m_pMenuFile->setTitle(QApplication::translate("CMainWindow", "File", 0));
         m_pMenuEdit->setTitle(QApplication::translate("CMainWindow", "Edit", 0));
         m_pMenuAssets->setTitle(QApplication::translate("CMainWindow", "Assets", 0));
@@ -264,6 +339,14 @@ public:
         m_pMenuComponent->setTitle(QApplication::translate("CMainWindow", "Component", 0));
         m_pMenuWindow->setTitle(QApplication::translate("CMainWindow", "Window", 0));
         m_pMenuHelp->setTitle(QApplication::translate("CMainWindow", "Help", 0));
+        m_pSceneGraphDockWidget->setWindowTitle(QApplication::translate("CMainWindow", "Scene Graph", 0));
+        QTreeWidgetItem *___qtreewidgetitem = m_pScenegraph->headerItem();
+        ___qtreewidgetitem->setText(2, QApplication::translate("CMainWindow", "Type", 0));
+        ___qtreewidgetitem->setText(1, QApplication::translate("CMainWindow", "Entity", 0));
+        ___qtreewidgetitem->setText(0, QApplication::translate("CMainWindow", "ID", 0));
+        m_pInspectorDockWidget->setWindowTitle(QApplication::translate("CMainWindow", "Inspector", 0));
+        m_pConsoleDockWidget->setWindowTitle(QApplication::translate("CMainWindow", "Console", 0));
+        m_pSendCommandButton->setText(QApplication::translate("CMainWindow", "Send", 0));
     } // retranslateUi
 
 };
