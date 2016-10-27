@@ -106,6 +106,8 @@ namespace Edit
             {
                 if (Type == 0) // Point
                 {
+                    m_pPointlightWidget->RequestInformation();
+
                     m_pPointlightWidget->setVisible(true);
                 }
                 else if (Type == 1) // Sun

@@ -58,7 +58,7 @@ public:
     QLineEdit *lineEdit_5;
     QHBoxLayout *horizontalLayout_5;
     QPushButton *m_pPickColorButton;
-    QPushButton *pushButton;
+    QPushButton *m_pPickColorButton2;
     QComboBox *comboBox_2;
     QLabel *label_16;
     QLabel *label_15;
@@ -215,11 +215,11 @@ public:
 
         horizontalLayout_5->addWidget(m_pPickColorButton);
 
-        pushButton = new QPushButton(groupBox);
-        pushButton->setObjectName(QStringLiteral("pushButton"));
-        pushButton->setMaximumSize(QSize(30, 23));
+        m_pPickColorButton2 = new QPushButton(groupBox);
+        m_pPickColorButton2->setObjectName(QStringLiteral("m_pPickColorButton2"));
+        m_pPickColorButton2->setMaximumSize(QSize(30, 23));
 
-        horizontalLayout_5->addWidget(pushButton);
+        horizontalLayout_5->addWidget(m_pPickColorButton2);
 
 
         gridLayout->addLayout(horizontalLayout_5, 1, 2, 1, 1);
@@ -265,7 +265,7 @@ public:
 
         retranslateUi(InspectorPointlight);
         QObject::connect(m_pPickColorButton, SIGNAL(clicked()), InspectorPointlight, SLOT(pickColorFromDialog()));
-        QObject::connect(pushButton, SIGNAL(clicked()), InspectorPointlight, SLOT(pickColorFromDialog()));
+        QObject::connect(m_pPickColorButton2, SIGNAL(clicked()), InspectorPointlight, SLOT(pickColorFromDialog()));
 
         m_pPickColorButton->setDefault(false);
 
@@ -303,7 +303,7 @@ public:
         label_11->setText(QApplication::translate("InspectorPointlight", "Z", 0));
         lineEdit_5->setText(QApplication::translate("InspectorPointlight", "-1", 0));
         m_pPickColorButton->setText(QString());
-        pushButton->setText(QApplication::translate("InspectorPointlight", "Pick", 0));
+        m_pPickColorButton2->setText(QApplication::translate("InspectorPointlight", "Pick", 0));
         comboBox_2->clear();
         comboBox_2->insertItems(0, QStringList()
          << QApplication::translate("InspectorPointlight", "No Shadows", 0)

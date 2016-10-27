@@ -39,8 +39,10 @@ namespace Edit
 
             RequestEntityInfoFacets,
             RequestEntityInfoTransformation,
+            RequestEntityInfoPointlight,
 
             EntityInfoTransformation,
+            EntityInfoPointlight,
 
             NumberOfMembers,
             Undefined = -1,
@@ -60,6 +62,7 @@ namespace Edit
 
             EntityInfoFacets,
             EntityInfoTransformation,
+            EntityInfoPointlight,
 
             NumberOfMembers,
             Undefined = -1,

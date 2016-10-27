@@ -1,9 +1,9 @@
 ﻿#pragma once
 
+#include "editor_gui/ui_edit_inspector_transformation.h"
+
 #include "editor_port/edit_message.h"
 #include "editor_port/edit_message_manager.h"
-
-#include "editor_gui/ui_edit_inspector_transformation.h"
 
 #include <QWidget>
 

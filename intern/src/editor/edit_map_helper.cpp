@@ -538,7 +538,7 @@ namespace
 
     void CMapHelper::OnDirtyEntity(Dt::CEntity* _pEntity)
     {
-        if (_pEntity->GetDirtyFlags() & Dt::CEntity::DirtyAdd == Dt::CEntity::DirtyAdd)
+        if ((_pEntity->GetDirtyFlags() & Dt::CEntity::DirtyAdd) == Dt::CEntity::DirtyAdd)
         {
             Edit::CMessage NewMessage;
 

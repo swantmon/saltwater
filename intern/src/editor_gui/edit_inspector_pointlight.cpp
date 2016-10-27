@@ -1,5 +1,7 @@
 ﻿
-#include "edit_inspector_pointlight.h"
+#include "editor_gui/edit_inspector_pointlight.h"
+
+#include "editor_port/edit_message_manager.h"
 
 #include <QColorDialog>
 
@@ -23,6 +25,11 @@ namespace Edit
         m_pPickColorButton->setPalette(ButtonPalette);
 
         m_pPickColorButton->update();
+
+        // -----------------------------------------------------------------------------
+        // Messages
+        // -----------------------------------------------------------------------------
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::EntityInfoPointlight, EDIT_RECEIVE_MESSAGE(&CInspectorPointlight::OnEntityInfoPointlight));
     }
 
     // -----------------------------------------------------------------------------
@@ -30,6 +37,17 @@ namespace Edit
     CInspectorPointlight::~CInspectorPointlight()
     {
 
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorPointlight::valueChanged()
+    {
+        CMessage NewMessage(true);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::EntityInfoPointlight, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -45,5 +63,24 @@ namespace Edit
         m_pPickColorButton->setPalette(ButtonPalette);
 
         m_pPickColorButton->update();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorPointlight::RequestInformation()
+    {
+        CMessage NewMessage(true);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::RequestEntityInfoPointlight, NewMessage);
+
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorPointlight::OnEntityInfoPointlight(Edit::CMessage& _rMessage)
+    {
+
     }
 } // namespace Edit
