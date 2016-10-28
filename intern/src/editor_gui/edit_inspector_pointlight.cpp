@@ -1,9 +1,12 @@
 ﻿
+#include "base/base_vector3.h"
+
 #include "editor_gui/edit_inspector_pointlight.h"
 
 #include "editor_port/edit_message_manager.h"
 
 #include <QColorDialog>
+#include <QRgb>
 
 namespace Edit
 {
@@ -43,11 +46,58 @@ namespace Edit
 
     void CInspectorPointlight::valueChanged()
     {
-        CMessage NewMessage(true);
+        // -----------------------------------------------------------------------------
+        // Read values
+        // -----------------------------------------------------------------------------
+        int ColorMode = m_pColorModeCB->currentIndex();
+
+        QPalette ButtonPalette = m_pPickColorButton->palette();
+
+        QColor RGB = ButtonPalette.color(QPalette::Button);
+
+        Base::Float3 Color = Base::Float3(RGB.blue() / 255.0f, RGB.green() / 255.0f, RGB.red() / 255.0f);
+
+        float Temperature       = m_pTemperatureEdit->text().toFloat();
+        float Intensity         = m_pIntensityEdit->text().toFloat();
+        float AttenuationRadius = m_pAttenuationRadiusEdit->text().toFloat();
+        float InnerConeAngle    = m_pInnerConeAngleEdit->text().toFloat();
+        float OuterConeAngle    = m_pOuterConeAngleEdit->text().toFloat();
+
+        Base::Float3 Direction = Base::Float3(m_pDirectionXEdit->text().toFloat(), m_pDirectionYEdit->text().toFloat(), m_pDirectionZEdit->text().toFloat());
+
+        int ShadowType    = m_pShadowTypeCB->currentIndex();
+        int ShadowQuality = m_pShadowQualityCB->currentIndex();
+        int ShadowRefresh = m_pShadowRefreshCB->currentIndex();
+
+        // -----------------------------------------------------------------------------
+        // Send message
+        // -----------------------------------------------------------------------------
+        Edit::CMessage NewMessage;
+
+        NewMessage.PutInt(ColorMode);
+
+        NewMessage.PutFloat(Color[0]);
+        NewMessage.PutFloat(Color[1]);
+        NewMessage.PutFloat(Color[2]);
+
+        NewMessage.PutFloat(Temperature);
+        NewMessage.PutFloat(Intensity);
+        NewMessage.PutFloat(AttenuationRadius);
+        NewMessage.PutFloat(InnerConeAngle);
+        NewMessage.PutFloat(OuterConeAngle);
+
+        NewMessage.PutFloat(Direction[0]);
+        NewMessage.PutFloat(Direction[1]);
+        NewMessage.PutFloat(Direction[2]);
+
+        NewMessage.PutInt(ShadowType);
+        NewMessage.PutInt(ShadowQuality);
+        NewMessage.PutInt(ShadowRefresh);
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::EntityInfoPointlight, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::EntityInfoPointlight, NewMessage);
+
     }
 
     // -----------------------------------------------------------------------------
@@ -63,6 +113,8 @@ namespace Edit
         m_pPickColorButton->setPalette(ButtonPalette);
 
         m_pPickColorButton->update();
+
+        valueChanged();
     }
 
     // -----------------------------------------------------------------------------
@@ -74,13 +126,60 @@ namespace Edit
         NewMessage.Reset();
 
         MessageManager::SendMessage(SGUIMessageType::RequestEntityInfoPointlight, NewMessage);
-
     }
 
     // -----------------------------------------------------------------------------
 
     void CInspectorPointlight::OnEntityInfoPointlight(Edit::CMessage& _rMessage)
     {
+        // -----------------------------------------------------------------------------
+        // Read values
+        // -----------------------------------------------------------------------------
+        int ColorMode = _rMessage.GetInt();
 
+        Base::Int3 Color = Base::Int3(_rMessage.GetFloat() * 255, _rMessage.GetFloat() * 255, _rMessage.GetFloat() * 255);
+
+        float Temperature       = _rMessage.GetFloat();
+        float Intensity         = _rMessage.GetFloat();
+        float AttenuationRadius = _rMessage.GetFloat();
+        float InnerConeAngle    = _rMessage.GetFloat();
+        float OuterConeAngle    = _rMessage.GetFloat();
+
+        Base::Float3 Direction = Base::Float3(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+
+        int ShadowType    = _rMessage.GetInt();
+        int ShadowQuality = _rMessage.GetInt();
+        int ShadowRefresh = _rMessage.GetInt();
+
+        // -----------------------------------------------------------------------------
+        // Set values
+        // -----------------------------------------------------------------------------
+        blockSignals(true);
+
+        m_pColorModeCB->setCurrentIndex(ColorMode);
+
+        QPalette ButtonPalette = m_pPickColorButton->palette();
+
+        ButtonPalette.setColor(QPalette::Button, QColor(Color[0], Color[1], Color[2]));
+
+        m_pPickColorButton->setPalette(ButtonPalette);
+
+        m_pPickColorButton->update();
+
+        m_pTemperatureEdit      ->setText(QString::number(Temperature));
+        m_pIntensityEdit        ->setText(QString::number(Intensity));
+        m_pAttenuationRadiusEdit->setText(QString::number(AttenuationRadius));
+        m_pInnerConeAngleEdit   ->setText(QString::number(InnerConeAngle));
+        m_pOuterConeAngleEdit   ->setText(QString::number(OuterConeAngle));
+
+        m_pDirectionXEdit->setText(QString::number(Direction[0]));
+        m_pDirectionYEdit->setText(QString::number(Direction[1]));
+        m_pDirectionZEdit->setText(QString::number(Direction[2]));
+
+        m_pShadowTypeCB   ->setCurrentIndex(ShadowType);
+        m_pShadowQualityCB->setCurrentIndex(ShadowQuality);
+        m_pShadowRefreshCB->setCurrentIndex(ShadowRefresh);
+
+        blockSignals(false);
     }
 } // namespace Edit

@@ -63,7 +63,9 @@ namespace
         void OnNewLightReflection(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoFacets(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoTransformation(Edit::CMessage& _rMessage);
+        void OnRequestEntityInfoPointlight(Edit::CMessage& _rMessage);
         void OnEntityInfoTransformation(Edit::CMessage& _rMessage);
+        void OnEntityInfoPointlight(Edit::CMessage& _rMessage);
         void OnDirtyEntity(Dt::CEntity* _pEntity);
 
         std::string CopyFileToAssets(const char* _pAssetFolder, const char* _pPathToFile);
@@ -106,7 +108,9 @@ namespace
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewLightReflection             , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewLightReflection));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoFacets        , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoFacets));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoTransformation, EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoTransformation));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoPointlight    , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoPointlight));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoTransformation       , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoTransformation));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoPointlight           , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoPointlight));
     }
 
     // -----------------------------------------------------------------------------
@@ -505,6 +509,43 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CMapHelper::OnRequestEntityInfoPointlight(Edit::CMessage& _rMessage)
+    {
+        if (m_pLastRequestedEntity != nullptr)
+        {
+            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+
+            Dt::CPointLightFacet* pPointLightFacet = static_cast<Dt::CPointLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Point && pPointLightFacet != nullptr)
+            {
+                Edit::CMessage NewMessage;
+
+                NewMessage.PutInt(static_cast<int>(pPointLightFacet->HasTemperature()));
+                NewMessage.PutFloat(pPointLightFacet->GetColor()[0]);
+                NewMessage.PutFloat(pPointLightFacet->GetColor()[1]);
+                NewMessage.PutFloat(pPointLightFacet->GetColor()[2]);
+                NewMessage.PutFloat(pPointLightFacet->GetTemperature());
+                NewMessage.PutFloat(pPointLightFacet->GetIntensity());
+                NewMessage.PutFloat(pPointLightFacet->GetAttenuationRadius());
+                NewMessage.PutFloat(Base::RadiansToDegree(pPointLightFacet->GetInnerConeAngle()));
+                NewMessage.PutFloat(Base::RadiansToDegree(pPointLightFacet->GetOuterConeAngle()));
+                NewMessage.PutFloat(pPointLightFacet->GetDirection()[0]);
+                NewMessage.PutFloat(pPointLightFacet->GetDirection()[1]);
+                NewMessage.PutFloat(pPointLightFacet->GetDirection()[2]);
+                NewMessage.PutInt(static_cast<int>(pPointLightFacet->GetShadowType()));
+                NewMessage.PutInt(static_cast<int>(pPointLightFacet->GetShadowQuality()));
+                NewMessage.PutInt(static_cast<int>(pPointLightFacet->GetRefreshMode()));
+
+                NewMessage.Reset();
+
+                Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoPointlight, NewMessage);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CMapHelper::OnEntityInfoTransformation(Edit::CMessage& _rMessage)
     {
         if (m_pLastRequestedEntity != nullptr)
@@ -531,6 +572,59 @@ namespace
             }
 
             Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyMove);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnEntityInfoPointlight(Edit::CMessage& _rMessage)
+    {
+        if (m_pLastRequestedEntity != nullptr)
+        {
+            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+
+            Dt::CPointLightFacet* pPointLightFacet = static_cast<Dt::CPointLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Point && pPointLightFacet != nullptr)
+            {
+                // -----------------------------------------------------------------------------
+                // Read values
+                // -----------------------------------------------------------------------------
+                int ColorMode = _rMessage.GetInt();
+
+                Base::Float3 Color = Base::Float3(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+
+                float Temperature       = _rMessage.GetFloat();
+                float Intensity         = _rMessage.GetFloat();
+                float AttenuationRadius = _rMessage.GetFloat();
+                float InnerConeAngle    = Base::DegreesToRadians(_rMessage.GetFloat());
+                float OuterConeAngle    = Base::DegreesToRadians(_rMessage.GetFloat());
+
+                Base::Float3 Direction = Base::Float3(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+
+                int ShadowType    = _rMessage.GetInt();
+                int ShadowQuality = _rMessage.GetInt();
+                int ShadowRefresh = _rMessage.GetInt();
+
+                // -----------------------------------------------------------------------------
+                // Set values
+                // -----------------------------------------------------------------------------
+                pPointLightFacet->EnableTemperature   (ColorMode == 1);
+                pPointLightFacet->SetColor            (Color);
+                pPointLightFacet->SetTemperature      (Temperature);
+                pPointLightFacet->SetIntensity        (Intensity);
+                pPointLightFacet->SetAttenuationRadius(AttenuationRadius);
+                pPointLightFacet->SetInnerConeAngle   (InnerConeAngle);
+                pPointLightFacet->SetOuterConeAngle   (OuterConeAngle);
+                pPointLightFacet->SetDirection        (Direction);
+                pPointLightFacet->SetShadowType       (static_cast<Dt::CPointLightFacet::EShadowType>(ShadowType));
+                pPointLightFacet->SetShadowQuality    (static_cast<Dt::CPointLightFacet::EShadowQuality>(ShadowQuality));
+                pPointLightFacet->SetRefreshMode      (static_cast<Dt::CPointLightFacet::ERefreshMode>(ShadowRefresh));
+            
+                pPointLightFacet->UpdateLightness();
+
+                Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            }
         }
     }
 

@@ -187,6 +187,17 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>m_pTransformationPositionX</tabstop>
+  <tabstop>m_pTransformationPositionY</tabstop>
+  <tabstop>m_pTransformationPositionZ</tabstop>
+  <tabstop>m_pTransformationRotationX</tabstop>
+  <tabstop>m_pTransformationRotationY</tabstop>
+  <tabstop>m_pTransformationRotationZ</tabstop>
+  <tabstop>m_pTransformationScaleX</tabstop>
+  <tabstop>m_pTransformationScaleY</tabstop>
+  <tabstop>m_pTransformationScaleZ</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
