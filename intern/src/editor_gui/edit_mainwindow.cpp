@@ -12,6 +12,7 @@ namespace Edit
         , m_pNewActorModelDialog(nullptr)
         , m_pNewSceneDialog     (nullptr)
         , m_IsPlaying           (false)
+        , m_IsSceneLoaded       (false)
     {
         // -----------------------------------------------------------------------------
         // Dialogs
@@ -36,6 +37,16 @@ namespace Edit
         // Messages
         // -----------------------------------------------------------------------------
         Edit::MessageManager::Register(Edit::SApplicationMessageType::FramesPerSecond, EDIT_RECEIVE_MESSAGE(&CMainWindow::OnFramesPerSecond));
+
+        // -----------------------------------------------------------------------------
+        // Check startup behavior
+        // -----------------------------------------------------------------------------
+        if (m_IsSceneLoaded == false)
+        {
+            m_pNewSceneDialog->exec();
+
+            m_IsSceneLoaded = true;
+        }
     }
 
     // -----------------------------------------------------------------------------

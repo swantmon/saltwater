@@ -44,6 +44,7 @@ namespace Edit
         CNewActorModelDialog* m_pNewActorModelDialog;
         CNewSceneDialog*      m_pNewSceneDialog;
         bool                  m_IsPlaying;
+        bool                  m_IsSceneLoaded;
 
     private:
 
