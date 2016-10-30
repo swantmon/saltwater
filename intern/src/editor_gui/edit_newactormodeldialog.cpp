@@ -48,15 +48,14 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Send message with new scene / map request
         // -----------------------------------------------------------------------------
-        std::string SaveCopy;
         CMessage NewMessage;
 
         if (!m_ModelFile.isEmpty())
         {
-            SaveCopy = m_ModelFile.toStdString();
+            QByteArray ModelFileBinary = m_ModelFile.toLatin1();
 
             NewMessage.PutBool(true);
-            NewMessage.PutString(SaveCopy.c_str());
+            NewMessage.PutString(ModelFileBinary.data());
         }
         else
         {
@@ -65,10 +64,10 @@ namespace Edit
 
         if (!m_MaterialFile.isEmpty())
         {
-            SaveCopy = m_MaterialFile.toStdString();
+            QByteArray MaterialFileBinary = m_MaterialFile.toLatin1();
 
             NewMessage.PutBool(true);
-            NewMessage.PutString(SaveCopy.c_str());
+            NewMessage.PutString(MaterialFileBinary.data());
         }
         else
         {

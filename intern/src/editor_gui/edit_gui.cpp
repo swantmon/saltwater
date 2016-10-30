@@ -65,6 +65,8 @@ namespace
 
     void CEditorGui::Destroy()
     {
+        m_pMainWindow->OnExit();
+
         delete m_pMainWindow;
         delete m_pApplication;
 
@@ -83,6 +85,8 @@ namespace
     void CEditorGui::Show()
     {
         m_pMainWindow->show();
+
+        m_pMainWindow->OnStart();
     }
 
     // -----------------------------------------------------------------------------

@@ -37,15 +37,14 @@ namespace Edit
 
         int Type = m_pTypeCB->currentIndex();
 
-        SaveCopy = m_pTextureEdit->text().toStdString();
-
-        const char* pNewTexture = SaveCopy.c_str();
+        QString    NewEnvironmentTexture       = m_pTextureEdit->text();
+        QByteArray NewEnvironmentTextureBinary = NewEnvironmentTexture.toLatin1();
 
         float Intensity = m_pIntensityEdit->text().toFloat();
 
         NewMessage.PutInt(Type);
 
-        NewMessage.PutString(pNewTexture);
+        NewMessage.PutString(NewEnvironmentTextureBinary.data());
 
         NewMessage.PutFloat(Intensity);
 

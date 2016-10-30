@@ -24,10 +24,6 @@ namespace Edit
 
     private:
 
-        std::string SaveCopy;
-
-    private:
-
         void OnEntityInfoEnvironment(Edit::CMessage& _rMessage);
     };
 } // namespace Edit

@@ -27,6 +27,9 @@ namespace Edit
 
         void* GetEditorWindowHandle();
 
+        void OnStart();
+        void OnExit();
+
     public Q_SLOTS:
 
         void switchPlayingCurrentScene();

@@ -37,16 +37,6 @@ namespace Edit
         // Messages
         // -----------------------------------------------------------------------------
         Edit::MessageManager::Register(Edit::SApplicationMessageType::FramesPerSecond, EDIT_RECEIVE_MESSAGE(&CMainWindow::OnFramesPerSecond));
-
-        // -----------------------------------------------------------------------------
-        // Check startup behavior
-        // -----------------------------------------------------------------------------
-        if (m_IsSceneLoaded == false)
-        {
-            m_pNewSceneDialog->exec();
-
-            m_IsSceneLoaded = true;
-        }
     }
 
     // -----------------------------------------------------------------------------
@@ -70,6 +60,28 @@ namespace Edit
     void* CMainWindow::GetEditorWindowHandle()
     {
         return (HWND)m_pEditorRenderContext->winId();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::OnStart()
+    {
+        // -----------------------------------------------------------------------------
+        // Check startup behavior
+        // -----------------------------------------------------------------------------
+        if (m_IsSceneLoaded == false)
+        {
+            m_pNewSceneDialog->show();
+
+            m_IsSceneLoaded = true;
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::OnExit()
+    {
+
     }
 
     // -----------------------------------------------------------------------------
