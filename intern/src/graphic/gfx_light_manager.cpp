@@ -389,6 +389,7 @@ namespace
 
     void CGfxLightManager::UpdateSkybox(Dt::CEntity& _rEntity)
     {
+        STextureDescriptor  TextureDescriptor;
         Dt::CSkyboxFacet*   pDataSkyboxFacet;
         Gfx::CSkyboxFacet*  pGraphicSkyboxFacet;
 
@@ -400,16 +401,32 @@ namespace
             // -----------------------------------------------------------------------------
             // If skybox is dirty we should update image
             // -----------------------------------------------------------------------------
-            if (pDataSkyboxFacet->GetTexture()->GetPixels() != 0)
+            TextureDescriptor.m_NumberOfPixelsU  = pDataSkyboxFacet->GetTexture()->GetNumberOfPixelsU();
+            TextureDescriptor.m_NumberOfPixelsV  = pDataSkyboxFacet->GetTexture()->GetNumberOfPixelsV();
+            TextureDescriptor.m_NumberOfPixelsW  = 1;
+            TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
+            TextureDescriptor.m_NumberOfTextures = 1;
+            TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
+            TextureDescriptor.m_Usage            = CTextureBase::GPURead;
+            TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+            TextureDescriptor.m_pFileName        = pDataSkyboxFacet->GetTexture()->GetFileName();
+            TextureDescriptor.m_pPixels          = pDataSkyboxFacet->GetTexture()->GetPixels();
+            TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
+
+            if (pDataSkyboxFacet->GetTexture()->GetSemantic() == Dt::CTextureBase::HDR)
             {
-                CTexture2DPtr BackgroundPtr = pGraphicSkyboxFacet->GetPanoramaTexture2D();
-
-                Base::UInt2 TextureResolution = Base::UInt2(pDataSkyboxFacet->GetTexture()->GetNumberOfPixelsU(), pDataSkyboxFacet->GetTexture()->GetNumberOfPixelsV());
-
-                Base::AABB2UInt TargetRect(Base::UInt2(0), TextureResolution);
-
-                TextureManager::CopyToTexture2D(BackgroundPtr, TargetRect, TargetRect[1][0], pDataSkyboxFacet->GetTexture()->GetPixels());
+                TextureDescriptor.m_Format = CTextureBase::R16G16B16_FLOAT;
             }
+            else
+            {
+                TextureDescriptor.m_Format = CTextureBase::R8G8B8_UBYTE;
+            }
+        
+            CTexture2DPtr EnvironmentTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+
+            pGraphicSkyboxFacet->SetPanoramaTexture2D(EnvironmentTexturePtr);
+
+            pGraphicSkyboxFacet->SetPanoramaTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(EnvironmentTexturePtr)));
         }
         else if (pDataSkyboxFacet->GetType() == Dt::CSkyboxFacet::ImageBackground)
         {

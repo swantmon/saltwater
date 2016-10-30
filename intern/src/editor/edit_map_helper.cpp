@@ -64,8 +64,10 @@ namespace
         void OnRequestEntityInfoFacets(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoTransformation(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoPointlight(Edit::CMessage& _rMessage);
+        void OnRequestEntityInfoEnvironment(Edit::CMessage& _rMessage);
         void OnEntityInfoTransformation(Edit::CMessage& _rMessage);
         void OnEntityInfoPointlight(Edit::CMessage& _rMessage);
+        void OnEntityInfoEnvironment(Edit::CMessage& _rMessage);
         void OnDirtyEntity(Dt::CEntity* _pEntity);
 
         std::string CopyFileToAssets(const char* _pAssetFolder, const char* _pPathToFile);
@@ -109,8 +111,10 @@ namespace
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoFacets        , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoFacets));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoTransformation, EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoTransformation));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoPointlight    , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoPointlight));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoEnvironment   , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoEnvironment));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoTransformation       , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoTransformation));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoPointlight           , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoPointlight));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoEnvironment          , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoEnvironment));
     }
 
     // -----------------------------------------------------------------------------
@@ -546,6 +550,31 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CMapHelper::OnRequestEntityInfoEnvironment(Edit::CMessage& _rMessage)
+    {
+        if (m_pLastRequestedEntity != nullptr)
+        {
+            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+
+            Dt::CSkyboxFacet* pLightFacet = static_cast<Dt::CSkyboxFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Skybox && pLightFacet != nullptr)
+            {
+                Edit::CMessage NewMessage;
+
+                NewMessage.PutInt   (static_cast<int>(pLightFacet->GetType()));
+                NewMessage.PutString(pLightFacet->GetTexture()->GetFileName());
+                NewMessage.PutFloat (pLightFacet->GetIntensity());
+                
+                NewMessage.Reset();
+
+                Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoEnvironment, NewMessage);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CMapHelper::OnEntityInfoTransformation(Edit::CMessage& _rMessage)
     {
         if (m_pLastRequestedEntity != nullptr)
@@ -622,6 +651,60 @@ namespace
                 pPointLightFacet->SetRefreshMode      (static_cast<Dt::CPointLightFacet::ERefreshMode>(ShadowRefresh));
             
                 pPointLightFacet->UpdateLightness();
+
+                Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnEntityInfoEnvironment(Edit::CMessage& _rMessage)
+    {
+        if (m_pLastRequestedEntity != nullptr)
+        {
+            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+
+            Dt::CSkyboxFacet* pLightFacet = static_cast<Dt::CSkyboxFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Skybox && pLightFacet != nullptr)
+            {
+                // -----------------------------------------------------------------------------
+                // Read values
+                // -----------------------------------------------------------------------------
+                int Type = _rMessage.GetInt();
+
+                char pTemp[256];
+
+                const char* pTexture = _rMessage.GetString(pTemp, 256);
+
+                float Intensity = _rMessage.GetFloat();
+
+                // -----------------------------------------------------------------------------
+                // Set values
+                // -----------------------------------------------------------------------------
+                pLightFacet->SetType     (static_cast<Dt::CSkyboxFacet::EType>(Type));
+                pLightFacet->SetIntensity(Intensity);
+
+                const char* pCurrentTexture = pLightFacet->GetTexture()->GetFileName();
+                
+                if (strcmp(pCurrentTexture, pTexture))
+                {
+                    Dt::STextureDescriptor TextureDescriptor;
+
+                    TextureDescriptor.m_NumberOfPixelsU = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
+                    TextureDescriptor.m_NumberOfPixelsV = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
+                    TextureDescriptor.m_NumberOfPixelsW = 1;
+                    TextureDescriptor.m_Format          = Dt::CTextureBase::R16G16B16_FLOAT;
+                    TextureDescriptor.m_Semantic        = Dt::CTextureBase::HDR;
+                    TextureDescriptor.m_pPixels         = 0;
+                    TextureDescriptor.m_pFileName       = pTexture;
+                    TextureDescriptor.m_pIdentifier     = 0;
+
+                    Dt::CTexture2D* pPanoramaTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+
+                    pLightFacet->SetTexture(pPanoramaTexture);
+                }
 
                 Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
             }

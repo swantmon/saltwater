@@ -6,7 +6,6 @@
 #include "editor_port/edit_message_manager.h"
 
 #include <QColorDialog>
-#include <QRgb>
 
 namespace Edit
 {

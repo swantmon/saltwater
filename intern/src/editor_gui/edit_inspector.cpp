@@ -7,8 +7,11 @@
 namespace Edit
 {
     CInspector::CInspector(QWidget* _pParent)
-        : QWidget           (_pParent)
-        , m_pInspectorLayout()
+        : QWidget             (_pParent)
+        , m_pInspectorLayout  ()
+        , m_pPointlightWidget ()
+        , m_pTransformWidget  ()
+        , m_pEnvironmentWidget()
     {
         // -----------------------------------------------------------------------------
         // Create layout
@@ -18,14 +21,17 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create transformation widget and add to layout
         // -----------------------------------------------------------------------------
-        m_pPointlightWidget = new CInspectorPointlight();
-        m_pTransformWidget  = new CInspectorTransformation();
+        m_pPointlightWidget  = new CInspectorPointlight();
+        m_pTransformWidget   = new CInspectorTransformation();
+        m_pEnvironmentWidget = new CInspectorEnvironment();
 
         m_pInspectorLayout->addWidget(m_pTransformWidget);
         m_pInspectorLayout->addWidget(m_pPointlightWidget);
+        m_pInspectorLayout->addWidget(m_pEnvironmentWidget);
 
-        m_pPointlightWidget->setVisible(false);
-        m_pTransformWidget ->setVisible(false);
+        m_pPointlightWidget ->setVisible(false);
+        m_pTransformWidget  ->setVisible(false);
+        m_pEnvironmentWidget->setVisible(false);
 
         // -----------------------------------------------------------------------------
         // Set layout
@@ -85,7 +91,8 @@ namespace Edit
 
         if (HasDetailData)
         {
-            m_pPointlightWidget->setVisible(false);
+            m_pPointlightWidget ->setVisible(false);
+            m_pEnvironmentWidget->setVisible(false);
 
             if (Category == 0) // Actors
             {
@@ -116,8 +123,11 @@ namespace Edit
                 else if (Type == 2) // GlobalProbe
                 {
                 }
-                else if (Type == 3) // Skybox
+                else if (Type == 3) // Environment
                 {
+                    m_pEnvironmentWidget->RequestInformation();
+
+                    m_pEnvironmentWidget->setVisible(true);
                 }
             }
             else if (Category == 2) // FX

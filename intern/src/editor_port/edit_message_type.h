@@ -40,9 +40,11 @@ namespace Edit
             RequestEntityInfoFacets,
             RequestEntityInfoTransformation,
             RequestEntityInfoPointlight,
+            RequestEntityInfoEnvironment,
 
             EntityInfoTransformation,
             EntityInfoPointlight,
+            EntityInfoEnvironment,
 
             NumberOfMembers,
             Undefined = -1,
@@ -63,6 +65,7 @@ namespace Edit
             EntityInfoFacets,
             EntityInfoTransformation,
             EntityInfoPointlight,
+            EntityInfoEnvironment,
 
             NumberOfMembers,
             Undefined = -1,

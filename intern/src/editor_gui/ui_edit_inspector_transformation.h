@@ -173,6 +173,14 @@ public:
 
         verticalLayout->addWidget(m_pInspectorTransformationGroup);
 
+        QWidget::setTabOrder(m_pTransformationPositionX, m_pTransformationPositionY);
+        QWidget::setTabOrder(m_pTransformationPositionY, m_pTransformationPositionZ);
+        QWidget::setTabOrder(m_pTransformationPositionZ, m_pTransformationRotationX);
+        QWidget::setTabOrder(m_pTransformationRotationX, m_pTransformationRotationY);
+        QWidget::setTabOrder(m_pTransformationRotationY, m_pTransformationRotationZ);
+        QWidget::setTabOrder(m_pTransformationRotationZ, m_pTransformationScaleX);
+        QWidget::setTabOrder(m_pTransformationScaleX, m_pTransformationScaleY);
+        QWidget::setTabOrder(m_pTransformationScaleY, m_pTransformationScaleZ);
 
         retranslateUi(InspectorTransformation);
         QObject::connect(m_pTransformationPositionX, SIGNAL(textEdited(QString)), InspectorTransformation, SLOT(valueChanged()));

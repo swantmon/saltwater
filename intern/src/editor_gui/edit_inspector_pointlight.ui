@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>401</width>
-    <height>342</height>
+    <width>354</width>
+    <height>348</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,79 +20,12 @@
       <string>Pointlight</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="6" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Attenuation Radius</string>
-        </property>
-       </widget>
-      </item>
       <item row="5" column="0">
        <widget class="QLabel" name="label_7">
         <property name="text">
          <string>Direction</string>
         </property>
        </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QComboBox" name="m_pColorModeCB">
-        <item>
-         <property name="text">
-          <string>Color</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Temperature</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>Temperature</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="0">
-       <widget class="QLabel" name="label_6">
-        <property name="text">
-         <string>Outer Cone Angle</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="2">
-       <widget class="QLineEdit" name="m_pOuterConeAngleEdit">
-        <property name="text">
-         <string>90</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="2">
-       <widget class="QLineEdit" name="m_pInnerConeAngleEdit">
-        <property name="text">
-         <string>45</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2">
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QLineEdit" name="m_pTemperatureEdit">
-          <property name="text">
-           <string>5300</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_10">
-          <property name="text">
-           <string>Kelvin</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
       </item>
       <item row="5" column="2">
        <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -140,76 +73,28 @@
         </item>
        </layout>
       </item>
-      <item row="9" column="2">
-       <widget class="QComboBox" name="m_pShadowTypeCB">
+      <item row="10" column="2">
+       <widget class="QComboBox" name="m_pShadowQualityCB">
         <item>
          <property name="text">
-          <string>No Shadows</string>
+          <string>Low</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Hard Shadows</string>
+          <string>Medium</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>GlobalIllumination</string>
+          <string>High</string>
          </property>
         </item>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>Color</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="2">
-       <widget class="QLineEdit" name="m_pAttenuationRadiusEdit">
-        <property name="text">
-         <string>10</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="2">
-       <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
-         <widget class="QLineEdit" name="m_pIntensityEdit">
-          <property name="text">
-           <string>1200</string>
-          </property>
-         </widget>
+         <property name="text">
+          <string>Very High</string>
+         </property>
         </item>
-        <item>
-         <widget class="QLabel" name="label_9">
-          <property name="text">
-           <string>Lux</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="10" column="0">
-       <widget class="QLabel" name="label_15">
-        <property name="text">
-         <string>Shadow Quality</string>
-        </property>
-       </widget>
-      </item>
-      <item row="11" column="0">
-       <widget class="QLabel" name="label_16">
-        <property name="text">
-         <string>Shadow Refresh</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>Color Mode:</string>
-        </property>
        </widget>
       </item>
       <item row="1" column="2">
@@ -285,11 +170,69 @@
         </item>
        </layout>
       </item>
-      <item row="7" column="0">
-       <widget class="QLabel" name="label_5">
+      <item row="7" column="2">
+       <widget class="QLineEdit" name="m_pInnerConeAngleEdit">
         <property name="text">
-         <string>Inner Cone Angle</string>
+         <string>45</string>
         </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLineEdit" name="m_pTemperatureEdit">
+          <property name="text">
+           <string>5300</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_10">
+          <property name="text">
+           <string>Kelvin</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>Outer Cone Angle</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="2">
+       <widget class="QComboBox" name="m_pShadowTypeCB">
+        <item>
+         <property name="text">
+          <string>No Shadows</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Hard Shadows</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>GlobalIllumination</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QComboBox" name="m_pColorModeCB">
+        <item>
+         <property name="text">
+          <string>Color</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Temperature</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item row="4" column="0">
@@ -313,28 +256,11 @@
         </item>
        </widget>
       </item>
-      <item row="10" column="2">
-       <widget class="QComboBox" name="m_pShadowQualityCB">
-        <item>
-         <property name="text">
-          <string>Low</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Medium</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>High</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Very High</string>
-         </property>
-        </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Temperature</string>
+        </property>
        </widget>
       </item>
       <item row="9" column="0">
@@ -344,8 +270,95 @@
         </property>
        </widget>
       </item>
+      <item row="11" column="0">
+       <widget class="QLabel" name="label_16">
+        <property name="text">
+         <string>Shadow Refresh</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Color</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="2">
+       <widget class="QLineEdit" name="m_pAttenuationRadiusEdit">
+        <property name="text">
+         <string>10</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Attenuation Radius</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QLineEdit" name="m_pIntensityEdit">
+          <property name="text">
+           <string>1200</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_9">
+          <property name="text">
+           <string>Lux</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Inner Cone Angle</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="2">
+       <widget class="QLineEdit" name="m_pOuterConeAngleEdit">
+        <property name="text">
+         <string>90</string>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="0">
+       <widget class="QLabel" name="label_15">
+        <property name="text">
+         <string>Shadow Quality</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Color Mode:</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>
