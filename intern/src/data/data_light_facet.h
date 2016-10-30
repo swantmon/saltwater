@@ -215,7 +215,16 @@ namespace Dt
             PX2048,      //< Use cubemap resolution quality of 2048px
         };
 
+        enum ERefreshMode
+        {
+            Static,         //< Light will be updated at any time the settings has changed
+            Dynamic,        //< Light will be updated at every frame
+        };
+
     public:
+
+        void SetRefreshMode(ERefreshMode _RefreshMode);
+        ERefreshMode GetRefreshMode();
 
         void SetType(EType _Type);
         EType GetType() const;
@@ -237,6 +246,7 @@ namespace Dt
 
     private:
 
+        ERefreshMode      m_RefreshMode;        //< Refresh mode of the gobal light probe
         EType             m_Type;               //< Type of the global probe (@see EType)
         EQuality          m_Quality;            //< Quality of the global probe (@see EQuality)
         Dt::CTextureCube* m_pCubemap;           //< Pointer to cubemap for custom global probe

@@ -35,16 +35,18 @@ namespace Edit
             NewLightDirectional,
             NewLightPoint,
             NewLightEnvironment,
-            NewLightReflection,
+            NewLightGlobalProbe,
 
             RequestEntityInfoFacets,
             RequestEntityInfoTransformation,
             RequestEntityInfoPointlight,
             RequestEntityInfoEnvironment,
+            RequestEntityInfoGlobalProbe,
 
             EntityInfoTransformation,
             EntityInfoPointlight,
             EntityInfoEnvironment,
+            EntityInfoGlobalProbe,
 
             NumberOfMembers,
             Undefined = -1,
@@ -66,6 +68,7 @@ namespace Edit
             EntityInfoTransformation,
             EntityInfoPointlight,
             EntityInfoEnvironment,
+            EntityInfoGlobalProbe,
 
             NumberOfMembers,
             Undefined = -1,

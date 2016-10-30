@@ -153,7 +153,10 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Set values
         // -----------------------------------------------------------------------------
-        blockSignals(true);
+        m_pColorModeCB    ->blockSignals(true);
+        m_pShadowTypeCB   ->blockSignals(true);
+        m_pShadowQualityCB->blockSignals(true);
+        m_pShadowRefreshCB->blockSignals(true);
 
         m_pColorModeCB->setCurrentIndex(ColorMode);
 
@@ -179,6 +182,9 @@ namespace Edit
         m_pShadowQualityCB->setCurrentIndex(ShadowQuality);
         m_pShadowRefreshCB->setCurrentIndex(ShadowRefresh);
 
-        blockSignals(false);
+        m_pColorModeCB    ->blockSignals(false);
+        m_pShadowTypeCB   ->blockSignals(false);
+        m_pShadowQualityCB->blockSignals(false);
+        m_pShadowRefreshCB->blockSignals(false);
     }
 } // namespace Edit

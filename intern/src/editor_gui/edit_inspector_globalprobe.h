@@ -1,0 +1,31 @@
+﻿#pragma once
+
+#include "editor_gui/ui_edit_inspector_globalprobe.h"
+
+#include "editor_port/edit_message.h"
+
+#include <QWidget>
+
+
+namespace Edit
+{
+    class CInspectorGlobalProbe : public QWidget, public Ui::InspectorGlobalProbe
+    {
+        Q_OBJECT
+
+    public:
+        CInspectorGlobalProbe(QWidget* _pParent = Q_NULLPTR);
+        ~CInspectorGlobalProbe();
+
+    public Q_SLOTS:
+
+        void valueChanged();
+
+        void RequestInformation();
+
+    private:
+
+        void OnEntityInfoGlobalProbe(Edit::CMessage& _rMessage);
+    };
+} // namespace Edit
+

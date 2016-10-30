@@ -74,6 +74,12 @@
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_environment.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_globalprobe.cpp">
+      <Filter>Widgets\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_globalprobe.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_mainwindow.ui">
@@ -119,6 +125,12 @@
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_environment.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_globalprobe.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_globalprobe.h">
+      <Filter>Widgets\Inspector</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor_gui\edit_gui.h" />
@@ -138,6 +150,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_environment.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_globalprobe.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

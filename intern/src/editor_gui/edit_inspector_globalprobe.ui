@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>InspectorGlobalProbe</class>
+ <widget class="QWidget" name="InspectorGlobalProbe">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>188</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Global Light Probe</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Refresh Mode:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Type:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>Quality:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>Intensity:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="m_pRefreshModeCB">
+          <item>
+           <property name="text">
+            <string>Static</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Dynamic</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QComboBox" name="m_pTypeCB">
+          <item>
+           <property name="text">
+            <string>Sky</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Custom</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QComboBox" name="m_pQualityCB">
+          <item>
+           <property name="text">
+            <string>128</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>256</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>512</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>1024</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>2048</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QLineEdit" name="m_pIntensityEdit">
+          <property name="text">
+           <string>1.0</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="m_pGenerateButton">
+          <property name="text">
+           <string>Generate</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>m_pGenerateButton</sender>
+   <signal>clicked()</signal>
+   <receiver>InspectorGlobalProbe</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>345</x>
+     <y>155</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>234</x>
+     <y>0</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>valueChanged()</slot>
+ </slots>
+</ui>

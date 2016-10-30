@@ -16,7 +16,7 @@ namespace Edit
         CInspectorEnvironment(QWidget* _pParent = Q_NULLPTR);
         ~CInspectorEnvironment();
 
-        public Q_SLOTS:
+    public Q_SLOTS:
 
         void valueChanged();
 

@@ -60,14 +60,16 @@ namespace
         void OnNewLightDirectional(Edit::CMessage& _rMessage);
         void OnNewLightPoint(Edit::CMessage& _rMessage);
         void OnNewLightEnvironment(Edit::CMessage& _rMessage);
-        void OnNewLightReflection(Edit::CMessage& _rMessage);
+        void OnNewLightGlobalProbe(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoFacets(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoTransformation(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoPointlight(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoEnvironment(Edit::CMessage& _rMessage);
+        void OnRequestEntityInfoGlobalProbe(Edit::CMessage& _rMessage);
         void OnEntityInfoTransformation(Edit::CMessage& _rMessage);
         void OnEntityInfoPointlight(Edit::CMessage& _rMessage);
         void OnEntityInfoEnvironment(Edit::CMessage& _rMessage);
+        void OnEntityInfoGlobalProbe(Edit::CMessage& _rMessage);
         void OnDirtyEntity(Dt::CEntity* _pEntity);
 
         std::string CopyFileToAssets(const char* _pAssetFolder, const char* _pPathToFile);
@@ -107,14 +109,16 @@ namespace
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewLightDirectional            , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewLightDirectional));
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewLightPoint                  , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewLightPoint));
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewLightEnvironment            , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewLightEnvironment));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewLightReflection             , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewLightReflection));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoFacets        , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoFacets));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::NewLightGlobalProbe            , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewLightGlobalProbe));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoTransformation, EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoTransformation));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoPointlight    , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoPointlight));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoEnvironment   , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoEnvironment));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoGlobalProbe   , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoGlobalProbe));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoTransformation       , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoTransformation));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoPointlight           , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoPointlight));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoEnvironment          , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoEnvironment));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoGlobalProbe          , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoGlobalProbe));
     }
 
     // -----------------------------------------------------------------------------
@@ -398,7 +402,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CMapHelper::OnNewLightReflection(Edit::CMessage& _rMessage)
+    void CMapHelper::OnNewLightGlobalProbe(Edit::CMessage& _rMessage)
     {
         {
             Dt::SEntityDescriptor EntityDesc;
@@ -411,9 +415,10 @@ namespace
 
             Dt::CGlobalProbeLightFacet* pGlobalProbeLightFacet = Dt::LightManager::CreateGlobalProbeLight();
 
-            pGlobalProbeLightFacet->SetType(Dt::CGlobalProbeLightFacet::Sky);
-            pGlobalProbeLightFacet->SetQuality(Dt::CGlobalProbeLightFacet::PX512);
-            pGlobalProbeLightFacet->SetIntensity(1.0f);
+            pGlobalProbeLightFacet->SetRefreshMode(Dt::CGlobalProbeLightFacet::Static);
+            pGlobalProbeLightFacet->SetType       (Dt::CGlobalProbeLightFacet::Sky);
+            pGlobalProbeLightFacet->SetQuality    (Dt::CGlobalProbeLightFacet::PX512);
+            pGlobalProbeLightFacet->SetIntensity  (1.0f);
 
             rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pGlobalProbeLightFacet);
 
@@ -574,6 +579,32 @@ namespace
     }
 
     // -----------------------------------------------------------------------------
+    
+    void CMapHelper::OnRequestEntityInfoGlobalProbe(Edit::CMessage& _rMessage)
+    {
+        if (m_pLastRequestedEntity != nullptr)
+        {
+            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+
+            Dt::CGlobalProbeLightFacet* pLightFacet = static_cast<Dt::CGlobalProbeLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::GlobalProbe && pLightFacet != nullptr)
+            {
+                Edit::CMessage NewMessage;
+
+                NewMessage.PutInt(pLightFacet->GetRefreshMode());
+                NewMessage.PutInt(pLightFacet->GetType());
+                NewMessage.PutInt(pLightFacet->GetQuality());
+                NewMessage.PutFloat(pLightFacet->GetIntensity());
+
+                NewMessage.Reset();
+
+                Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoEnvironment, NewMessage);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
 
     void CMapHelper::OnEntityInfoTransformation(Edit::CMessage& _rMessage)
     {
@@ -705,6 +736,45 @@ namespace
 
                     pLightFacet->SetTexture(pPanoramaTexture);
                 }
+
+                Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnEntityInfoGlobalProbe(Edit::CMessage& _rMessage)
+    {
+        if (m_pLastRequestedEntity != nullptr)
+        {
+            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+
+            Dt::CGlobalProbeLightFacet* pLightFacet = static_cast<Dt::CGlobalProbeLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::GlobalProbe && pLightFacet != nullptr)
+            {
+                // -----------------------------------------------------------------------------
+                // Read values
+                // -----------------------------------------------------------------------------
+                int RefreshMode = _rMessage.GetInt();
+
+                int Type = _rMessage.GetInt();
+
+                int Quality = _rMessage.GetInt();
+
+                float Intensity = _rMessage.GetFloat();
+
+                // -----------------------------------------------------------------------------
+                // Set values
+                // -----------------------------------------------------------------------------
+                pLightFacet->SetRefreshMode(static_cast<Dt::CGlobalProbeLightFacet::ERefreshMode>(RefreshMode));
+
+                pLightFacet->SetType(static_cast<Dt::CGlobalProbeLightFacet::EType>(Type));
+
+                pLightFacet->SetQuality(static_cast<Dt::CGlobalProbeLightFacet::EQuality>(Quality));
+
+                pLightFacet->SetIntensity(Intensity);
 
                 Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
             }

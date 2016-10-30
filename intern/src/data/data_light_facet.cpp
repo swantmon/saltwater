@@ -428,7 +428,8 @@ namespace Dt
 namespace Dt
 {
     CGlobalProbeLightFacet::CGlobalProbeLightFacet()
-        : m_Type       (Sky)
+        : m_RefreshMode(Static)
+        , m_Type       (Sky)
         , m_Quality    (PX128)
         , m_pCubemap   ()
         , m_Intensity  (0)
@@ -441,6 +442,20 @@ namespace Dt
     CGlobalProbeLightFacet::~CGlobalProbeLightFacet()
     {
 
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGlobalProbeLightFacet::SetRefreshMode(ERefreshMode _RefreshMode)
+    {
+        m_RefreshMode = _RefreshMode;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CGlobalProbeLightFacet::ERefreshMode CGlobalProbeLightFacet::GetRefreshMode()
+    {
+        return m_RefreshMode;
     }
 
     // -----------------------------------------------------------------------------
