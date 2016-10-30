@@ -599,7 +599,7 @@ namespace
 
                 NewMessage.Reset();
 
-                Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoEnvironment, NewMessage);
+                Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoGlobalProbe, NewMessage);
             }
         }
     }

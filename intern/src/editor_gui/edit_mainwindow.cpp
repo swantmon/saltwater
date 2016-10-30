@@ -177,13 +177,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CMainWindow::createNewLightReflection()
+    void CMainWindow::createNewLightGlobalProbe()
     {
         CMessage NewMessage(true);
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewLightReflection, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::NewLightGlobalProbe, NewMessage);
     }
 
     // -----------------------------------------------------------------------------

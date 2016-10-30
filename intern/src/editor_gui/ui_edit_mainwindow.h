@@ -46,7 +46,7 @@ public:
     QAction *actionPoint;
     QAction *m_pActionPoint;
     QAction *m_pActionEnvironment;
-    QAction *m_pActionReflection;
+    QAction *m_pActionGlobalProbe;
     QAction *m_pActionCamera;
     QAction *m_pActionDirectional;
     QWidget *m_pCentralWidget;
@@ -114,8 +114,8 @@ public:
         m_pActionPoint->setObjectName(QStringLiteral("m_pActionPoint"));
         m_pActionEnvironment = new QAction(CMainWindow);
         m_pActionEnvironment->setObjectName(QStringLiteral("m_pActionEnvironment"));
-        m_pActionReflection = new QAction(CMainWindow);
-        m_pActionReflection->setObjectName(QStringLiteral("m_pActionReflection"));
+        m_pActionGlobalProbe = new QAction(CMainWindow);
+        m_pActionGlobalProbe->setObjectName(QStringLiteral("m_pActionGlobalProbe"));
         m_pActionCamera = new QAction(CMainWindow);
         m_pActionCamera->setObjectName(QStringLiteral("m_pActionCamera"));
         m_pActionDirectional = new QAction(CMainWindow);
@@ -286,7 +286,7 @@ public:
         menuLights->addAction(m_pActionDirectional);
         menuLights->addAction(m_pActionPoint);
         menuLights->addAction(m_pActionEnvironment);
-        menuLights->addAction(m_pActionReflection);
+        menuLights->addAction(m_pActionGlobalProbe);
         m_pMenuHelp->addAction(m_pActionAboutSaltwater);
         m_pMenuHelp->addSeparator();
         m_pMenuHelp->addAction(m_pActionReleaseNotes);
@@ -302,7 +302,7 @@ public:
         QObject::connect(m_pActionDirectional, SIGNAL(triggered()), CMainWindow, SLOT(createNewLightDirectional()));
         QObject::connect(m_pActionEnvironment, SIGNAL(triggered()), CMainWindow, SLOT(createNewLightEnvironment()));
         QObject::connect(m_pActionPoint, SIGNAL(triggered()), CMainWindow, SLOT(createNewLightPoint()));
-        QObject::connect(m_pActionReflection, SIGNAL(triggered()), CMainWindow, SLOT(createNewLightReflection()));
+        QObject::connect(m_pActionGlobalProbe, SIGNAL(triggered()), CMainWindow, SLOT(createNewLightGlobalProbe()));
         QObject::connect(m_pScenegraph, SIGNAL(entitySelected(int)), m_pInspector, SLOT(updateContentForEntity(int)));
 
         QMetaObject::connectSlotsByName(CMainWindow);
@@ -324,7 +324,7 @@ public:
         actionPoint->setText(QApplication::translate("CMainWindow", "Point", 0));
         m_pActionPoint->setText(QApplication::translate("CMainWindow", "Point", 0));
         m_pActionEnvironment->setText(QApplication::translate("CMainWindow", "Environment", 0));
-        m_pActionReflection->setText(QApplication::translate("CMainWindow", "Reflection", 0));
+        m_pActionGlobalProbe->setText(QApplication::translate("CMainWindow", "Global Probe", 0));
         m_pActionCamera->setText(QApplication::translate("CMainWindow", "Camera", 0));
         m_pActionDirectional->setText(QApplication::translate("CMainWindow", "Directional", 0));
         m_pPlayButton->setText(QApplication::translate("CMainWindow", "Play", 0));

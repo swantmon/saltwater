@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "editor_gui/edit_inspector_environment.h"
+#include "editor_gui/edit_inspector_globalprobe.h"
 #include "editor_gui/edit_inspector_pointlight.h"
 #include "editor_gui/edit_inspector_transformation.h"
 
@@ -29,6 +30,7 @@ namespace Edit
         CInspectorPointlight*     m_pPointlightWidget;
         CInspectorTransformation* m_pTransformWidget;
         CInspectorEnvironment*    m_pEnvironmentWidget;
+        CInspectorGlobalProbe*    m_pGlobalProbeWidget;
 
     private:
 

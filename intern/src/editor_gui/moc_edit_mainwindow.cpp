@@ -20,7 +20,7 @@
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_Edit__CMainWindow_t {
     QByteArrayData data[10];
-    char stringdata0[200];
+    char stringdata0[201];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -38,7 +38,7 @@ QT_MOC_LITERAL(5, 79, 23), // "openNewActorModelDialog"
 QT_MOC_LITERAL(6, 103, 25), // "createNewLightDirectional"
 QT_MOC_LITERAL(7, 129, 19), // "createNewLightPoint"
 QT_MOC_LITERAL(8, 149, 25), // "createNewLightEnvironment"
-QT_MOC_LITERAL(9, 175, 24) // "createNewLightReflection"
+QT_MOC_LITERAL(9, 175, 25) // "createNewLightGlobalProbe"
 
     },
     "Edit::CMainWindow\0switchPlayingCurrentScene\0"
@@ -46,7 +46,7 @@ QT_MOC_LITERAL(9, 175, 24) // "createNewLightReflection"
     "openNewActorModelDialog\0"
     "createNewLightDirectional\0createNewLightPoint\0"
     "createNewLightEnvironment\0"
-    "createNewLightReflection"
+    "createNewLightGlobalProbe"
 };
 #undef QT_MOC_LITERAL
 
@@ -99,7 +99,7 @@ void Edit::CMainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, in
         case 4: _t->createNewLightDirectional(); break;
         case 5: _t->createNewLightPoint(); break;
         case 6: _t->createNewLightEnvironment(); break;
-        case 7: _t->createNewLightReflection(); break;
+        case 7: _t->createNewLightGlobalProbe(); break;
         default: ;
         }
     }

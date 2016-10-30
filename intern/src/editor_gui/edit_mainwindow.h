@@ -39,7 +39,7 @@ namespace Edit
         void createNewLightDirectional();
         void createNewLightPoint();
         void createNewLightEnvironment();
-        void createNewLightReflection();
+        void createNewLightGlobalProbe();
 
     private:
 

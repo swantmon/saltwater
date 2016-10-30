@@ -154,7 +154,7 @@
      <addaction name="m_pActionDirectional"/>
      <addaction name="m_pActionPoint"/>
      <addaction name="m_pActionEnvironment"/>
-     <addaction name="m_pActionReflection"/>
+     <addaction name="m_pActionGlobalProbe"/>
     </widget>
     <addaction name="menuActors"/>
     <addaction name="menuLights"/>
@@ -357,9 +357,9 @@
     <string>Environment</string>
    </property>
   </action>
-  <action name="m_pActionReflection">
+  <action name="m_pActionGlobalProbe">
    <property name="text">
-    <string>Reflection</string>
+    <string>Global Probe</string>
    </property>
   </action>
   <action name="m_pActionCamera">
@@ -425,8 +425,8 @@
    <slot>switchPlayingCurrentScene()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>429</x>
-     <y>168</y>
+     <x>362</x>
+     <y>113</y>
     </hint>
     <hint type="destinationlabel">
      <x>736</x>
@@ -441,8 +441,8 @@
    <slot>takeScreenshot()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1579</x>
-     <y>168</y>
+     <x>1829</x>
+     <y>113</y>
     </hint>
     <hint type="destinationlabel">
      <x>1166</x>
@@ -547,10 +547,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>m_pActionReflection</sender>
+   <sender>m_pActionGlobalProbe</sender>
    <signal>triggered()</signal>
    <receiver>CMainWindow</receiver>
-   <slot>createNewLightReflection()</slot>
+   <slot>createNewLightGlobalProbe()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -573,7 +573,7 @@
      <y>503</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1772</x>
+     <x>1914</x>
      <y>61</y>
     </hint>
    </hints>
@@ -587,6 +587,6 @@
   <slot>createNewLightDirectional()</slot>
   <slot>createNewLightPoint()</slot>
   <slot>createNewLightEnvironment()</slot>
-  <slot>createNewLightReflection()</slot>
+  <slot>createNewLightGlobalProbe()</slot>
  </slots>
 </ui>

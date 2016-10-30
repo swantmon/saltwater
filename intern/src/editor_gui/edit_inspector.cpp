@@ -12,6 +12,7 @@ namespace Edit
         , m_pPointlightWidget ()
         , m_pTransformWidget  ()
         , m_pEnvironmentWidget()
+        , m_pGlobalProbeWidget()
     {
         // -----------------------------------------------------------------------------
         // Create layout
@@ -24,14 +25,17 @@ namespace Edit
         m_pPointlightWidget  = new CInspectorPointlight();
         m_pTransformWidget   = new CInspectorTransformation();
         m_pEnvironmentWidget = new CInspectorEnvironment();
+        m_pGlobalProbeWidget = new CInspectorGlobalProbe();
 
         m_pInspectorLayout->addWidget(m_pTransformWidget);
         m_pInspectorLayout->addWidget(m_pPointlightWidget);
         m_pInspectorLayout->addWidget(m_pEnvironmentWidget);
+        m_pInspectorLayout->addWidget(m_pGlobalProbeWidget);
 
         m_pPointlightWidget ->setVisible(false);
         m_pTransformWidget  ->setVisible(false);
         m_pEnvironmentWidget->setVisible(false);
+        m_pGlobalProbeWidget->setVisible(false);
 
         // -----------------------------------------------------------------------------
         // Set layout
@@ -93,6 +97,7 @@ namespace Edit
         {
             m_pPointlightWidget ->setVisible(false);
             m_pEnvironmentWidget->setVisible(false);
+            m_pGlobalProbeWidget->setVisible(false);
 
             if (Category == 0) // Actors
             {
@@ -122,6 +127,9 @@ namespace Edit
                 }
                 else if (Type == 2) // GlobalProbe
                 {
+                    m_pGlobalProbeWidget->RequestInformation();
+
+                    m_pGlobalProbeWidget->setVisible(true);
                 }
                 else if (Type == 3) // Environment
                 {
