@@ -797,7 +797,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
 
-                if (pGraphicGlobalProbeFacet->GetTimeStamp() == FrameTime)
+                if (pGraphicGlobalProbeFacet->GetTimeStamp() == FrameTime || pDataGlobalProbeFacet->GetRefreshMode() == Dt::CGlobalProbeLightFacet::Dynamic)
                 {
                     // -----------------------------------------------------------------------------
                     // Set probe into a new render job
