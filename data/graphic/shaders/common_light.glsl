@@ -343,21 +343,7 @@ vec3 GetFresnelNone(in vec3 _F0)
 
 vec3 GetFresnelSchlick(in vec3 _F0, in float _F90, in float _U)
 {
-    float Fc;
-
-    // -----------------------------------------------------------------------------
-    // [Schlick 1994, "An Inexpensive BRDF Model for Physically-Based Rendering"]
-    // Optimized version inside the Unreal Engine.
-    // Orginal version:
-    // return _F0 + (_F90 - _F0) * pow(1.0f - _U, 5.0f);
-    // -----------------------------------------------------------------------------
-    Fc = pow(1.0f - _U, 5.0f);
-    
-    // -----------------------------------------------------------------------------
-    // Anything less than 2% is physically impossible and is instead considered 
-    // to be shadowing
-    // -----------------------------------------------------------------------------
-    return clamp(50.0f * _F0.g , 0.0f, 1.0f) * Fc + (1 - Fc) * _F0;
+    return _F0 + (_F90 - _F0) * pow(1.0f - _U, 5.0f);
 }
 
 // -----------------------------------------------------------------------------
@@ -528,7 +514,7 @@ float GetVisibility(in float _NdotV, in float _NdotL, in float _Roughness)
 // -----------------------------------------------------------------------------
 // Specular BRDF geometry
 // -----------------------------------------------------------------------------
-float GetGeometrySmithGGXJointApproximation(in float _NdotV, in float _NdotL, in float _Roughness)
+float GetGeometrySmithGGX(in float _NdotV, in float _NdotL, in float _Roughness)
 {
     float Alpha;
     float Alpha2;
@@ -577,11 +563,11 @@ float GetGeometrySmithGGXCorrelated(in float _NdotV, in float _NdotL, in float _
 float GetGeometry(in float _NdotV, in float _NdotL, in float _Roughness)
 {
 #if   BRDF_SPEC_G == 0
-    return GetGeometrySmithGGXJointApproximation(_NdotV, _NdotL, _Roughness);
+    return GetGeometrySmithGGX(_NdotV, _NdotL, _Roughness);
 #elif BRDF_SPEC_G == 1
     return GetGeometrySmithGGXCorrelated(_NdotV, _NdotL, _Roughness);  
 #elif BRDF_SPEC_G == 2
-    return GetGeometrySmithGGXJointApproximation(_NdotV, _NdotL, _Roughness);    
+    return GetGeometrySmithGGX(_NdotV, _NdotL, _Roughness);    
 #endif
 }
 

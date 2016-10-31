@@ -67,7 +67,7 @@ namespace
 
         BASE_CONSOLE_STREAMINFO("Logic> Loading level number " << LevelIndexDebug);
         
-//        CreateSimplePBRTestScene();
+        CreateSimplePBRTestScene();
 //        CreatePBRTestScene();
 //        CreatePBRARScene();
 //        CreatePBRSponzaScene();
@@ -110,7 +110,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SActorType::Camera;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc, 0);
 
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
@@ -158,7 +158,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SLightType::Skybox;
             EntityDesc.m_FacetFlags     = 0;
 
-            Dt::CEntity& rEnvironment = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEnvironment = Dt::EntityManager::CreateEntity(EntityDesc, 1);
 
             Dt::CSkyboxFacet* pSkyboxFacet = Dt::LightManager::CreateSkybox();
 
@@ -181,7 +181,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SFXType::FXAA;
             EntityDesc.m_FacetFlags     = 0;
 
-            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc, 2);
 
             Dt::CFXAAFXFacet* pEffectFacet = Dt::FXManager::CreateFXAAFX();
 
@@ -197,7 +197,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SFXType::SSR;
             EntityDesc.m_FacetFlags     = 0;
 
-            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc, 3);
 
             Dt::CSSRFXFacet* pEffectFacet = Dt::FXManager::CreateSSRFX();
 
@@ -213,7 +213,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SFXType::Bloom;
             EntityDesc.m_FacetFlags     = 0;
 
-            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc, 4);
 
             Dt::CBloomFXFacet* pEffectFacet = Dt::FXManager::CreateBloomFX();
 
@@ -232,7 +232,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SFXType::SSAO;
             EntityDesc.m_FacetFlags     = 0;
 
-            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc, 5);
 
             Dt::CSSAOFXFacet* pEffectFacet = Dt::FXManager::CreateSSAOFX();
 
@@ -251,7 +251,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SLightType::Sun;
             EntityDesc.m_FacetFlags     = 0;
 
-            Dt::CEntity& rSunLight = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rSunLight = Dt::EntityManager::CreateEntity(EntityDesc, 6);
 
             Dt::CSunLightFacet* pSunLightFacet = Dt::LightManager::CreateSunLight();
 
@@ -276,7 +276,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SLightType::GlobalProbe;
             EntityDesc.m_FacetFlags     = 0;
 
-            Dt::CEntity& rGlobalProbeLight = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rGlobalProbeLight = Dt::EntityManager::CreateEntity(EntityDesc, 7);
 
             Dt::CGlobalProbeLightFacet* pGlobalProbeLightFacet = Dt::LightManager::CreateGlobalProbeLight();
 
@@ -299,7 +299,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SActorType::Model;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
-            Dt::CEntity& rPlane = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rPlane = Dt::EntityManager::CreateEntity(EntityDesc, 8);
 
             Dt::CTransformationFacet* pTransformationFacet = rPlane.GetTransformationFacet();
 
@@ -331,7 +331,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SActorType::Model;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
-            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntity(EntityDesc, 9);
 
             Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
 
@@ -373,7 +373,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SActorType::Model;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
-            Dt::CEntity& rPlane = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rPlane = Dt::EntityManager::CreateEntity(EntityDesc, 10);
 
             Dt::CTransformationFacet* pTransformationFacet = rPlane.GetTransformationFacet();
 

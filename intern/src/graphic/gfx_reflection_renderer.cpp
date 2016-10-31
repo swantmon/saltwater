@@ -451,8 +451,8 @@ namespace
     {
         STextureDescriptor RendertargetDescriptor;
         
-        RendertargetDescriptor.m_NumberOfPixelsU  = 128;
-        RendertargetDescriptor.m_NumberOfPixelsV  = 128;
+        RendertargetDescriptor.m_NumberOfPixelsU  = 512;
+        RendertargetDescriptor.m_NumberOfPixelsV  = 512;
         RendertargetDescriptor.m_NumberOfPixelsW  = 1;
         RendertargetDescriptor.m_NumberOfMipMaps  = 1;
         RendertargetDescriptor.m_NumberOfTextures = 1;
@@ -581,7 +581,7 @@ namespace
 
         ContextManager::SetTextureSetCS(m_BRDFTextureSetPtr);
 
-        ContextManager::Dispatch(128, 128, 1);
+        ContextManager::Dispatch(512, 512, 1);
 
         ContextManager::ResetTextureSetCS();
 
