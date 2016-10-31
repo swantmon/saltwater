@@ -43,10 +43,14 @@ namespace Edit
             RequestEntityInfoEnvironment,
             RequestEntityInfoGlobalProbe,
 
+            RequestHistogramInfo,
+
             EntityInfoTransformation,
             EntityInfoPointlight,
             EntityInfoEnvironment,
             EntityInfoGlobalProbe,
+
+            HistogramInfo,
 
             NumberOfMembers,
             Undefined = -1,
@@ -58,7 +62,7 @@ namespace Edit
     // ----------------------------------------------------------------------------------
     struct SApplicationMessageType 
     {
-        enum Enum 
+        enum Enum
         {
             FramesPerSecond,
 
@@ -69,6 +73,8 @@ namespace Edit
             EntityInfoPointlight,
             EntityInfoEnvironment,
             EntityInfoGlobalProbe,
+
+            HistogramInfo,
 
             NumberOfMembers,
             Undefined = -1,

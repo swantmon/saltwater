@@ -22,6 +22,7 @@
     <ClCompile Include="..\..\..\src\editor\edit_application.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_edit_state.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_exit_state.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_graphic_helper.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_intro_state.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_load_map_state.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_main.cpp" />
@@ -40,6 +41,7 @@
     <ClInclude Include="..\..\..\src\editor\edit_application.h" />
     <ClInclude Include="..\..\..\src\editor\edit_edit_state.h" />
     <ClInclude Include="..\..\..\src\editor\edit_exit_state.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_graphic_helper.h" />
     <ClInclude Include="..\..\..\src\editor\edit_intro_state.h" />
     <ClInclude Include="..\..\..\src\editor\edit_load_map_state.h" />
     <ClInclude Include="..\..\..\src\editor\edit_map_helper.h" />

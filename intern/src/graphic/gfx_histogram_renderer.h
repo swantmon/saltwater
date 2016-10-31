@@ -50,6 +50,7 @@ namespace HistogramRenderer
 
     void SetSettings();
     void SetSettings(const SHistogramSettings& _rSettings);
+    SHistogramSettings& GetSettings();
 
     CBufferPtr GetExposureHistoryBuffer();
     unsigned int GetCurrentExposureHistoryIndex();

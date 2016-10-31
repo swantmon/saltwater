@@ -58,6 +58,7 @@ namespace
 
         void SetSettings();
         void SetSettings(const SHistogramSettings& _rSettings);
+        SHistogramSettings& GetSettings();
         
         CBufferPtr GetExposureHistoryBuffer();
 
@@ -125,6 +126,8 @@ namespace
         
     private:
 
+        SHistogramSettings     m_Settings;
+
         SConstantBufferCS      m_ConstantBufferPS;
 
         CBufferPtr             m_ExposureHistoryBufferPtr;
@@ -145,7 +148,8 @@ namespace
 namespace
 {
     CGfxHistogramRenderer::CGfxHistogramRenderer()
-        : m_ConstantBufferPS                 ()
+        : m_Settings                         ()
+        , m_ConstantBufferPS                 ()
         , m_ExposureHistoryBufferPtr         ()
         , m_HistogramShaderPtrs              ()
         , m_HistogramBufferSetPtrs           ()
@@ -503,6 +507,8 @@ namespace
 
     void CGfxHistogramRenderer::SetSettings(const SHistogramSettings& _rSettings)
     {
+        m_Settings = _rSettings;
+
         m_ConstantBufferPS.m_HistogramLowerBound      =  _rSettings.m_HistogramLowerBound;
         m_ConstantBufferPS.m_HistogramUpperBound      =  _rSettings.m_HistogramUpperBound;
         m_ConstantBufferPS.m_HistogramLogMin          =  _rSettings.m_HistogramLogMin;
@@ -517,6 +523,13 @@ namespace
         {
             ResetEyeAdaption();
         }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    SHistogramSettings& CGfxHistogramRenderer::GetSettings()
+    {
+        return m_Settings;
     }
 
     // -----------------------------------------------------------------------------
@@ -674,6 +687,13 @@ namespace HistogramRenderer
     void SetSettings(const SHistogramSettings& _rSettings)
     {
         CGfxHistogramRenderer::GetInstance().SetSettings(_rSettings);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    SHistogramSettings& GetSettings()
+    {
+        return CGfxHistogramRenderer::GetInstance().GetSettings();
     }
 
     // -----------------------------------------------------------------------------

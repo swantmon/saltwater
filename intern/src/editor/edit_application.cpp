@@ -12,6 +12,7 @@
 #include "editor/edit_application.h"
 #include "editor/edit_edit_state.h"
 #include "editor/edit_exit_state.h"
+#include "editor/edit_graphic_helper.h"
 #include "editor/edit_intro_state.h"
 #include "editor/edit_load_map_state.h"
 #include "editor/edit_map_helper.h"
@@ -141,11 +142,6 @@ namespace
         Core::Time::OnStart();
 
         // -----------------------------------------------------------------------------
-        // Helper
-        // -----------------------------------------------------------------------------
-        Edit::Helper::Map::OnStart();
-
-        // -----------------------------------------------------------------------------
         // Register messages
         // -----------------------------------------------------------------------------
         Edit::MessageManager::Register(Edit::SGUIMessageType::KeyPressed         , EDIT_RECEIVE_MESSAGE(&CApplication::OnKeyPressed));
@@ -158,6 +154,12 @@ namespace
         Edit::MessageManager::Register(Edit::SGUIMessageType::MouseRightReleased , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseRightReleased));
         Edit::MessageManager::Register(Edit::SGUIMessageType::MouseMove          , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseMove));
         Edit::MessageManager::Register(Edit::SGUIMessageType::TakeScreenshot     , EDIT_RECEIVE_MESSAGE(&CApplication::OnTakeScreenshot));
+
+        // -----------------------------------------------------------------------------
+        // Helper
+        // -----------------------------------------------------------------------------
+        Edit::Helper::Map::OnStart();
+        Edit::Helper::Graphic::OnStart();
     }
     
     // -----------------------------------------------------------------------------
@@ -172,6 +174,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Helper
         // -----------------------------------------------------------------------------
+        Edit::Helper::Graphic::OnExit();
         Edit::Helper::Map::OnExit();
 
         // -----------------------------------------------------------------------------

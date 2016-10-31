@@ -36,6 +36,9 @@
     <ClCompile Include="..\..\..\src\editor\edit_map_helper.cpp">
       <Filter>helper</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_graphic_helper.cpp">
+      <Filter>helper</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor\edit_edit_state.h">
@@ -65,6 +68,9 @@
     <ClInclude Include="..\..\..\src\editor\edit_application.h" />
     <ClInclude Include="..\..\..\src\editor\edit_precompiled.h" />
     <ClInclude Include="..\..\..\src\editor\edit_map_helper.h">
+      <Filter>helper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_graphic_helper.h">
       <Filter>helper</Filter>
     </ClInclude>
   </ItemGroup>

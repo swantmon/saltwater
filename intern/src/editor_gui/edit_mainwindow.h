@@ -40,6 +40,8 @@ namespace Edit
         void createNewLightPoint();
         void createNewLightEnvironment();
         void createNewLightGlobalProbe();
+        void changeHistogramSettings();
+        void toggleHistogramDock();
 
     private:
 
@@ -57,6 +59,7 @@ namespace Edit
     private:
 
         void OnFramesPerSecond(Edit::CMessage& _rMessage);
+        void OnHistogramInfo(Edit::CMessage& _rMessage);
     };
 } // namespace Edit
 

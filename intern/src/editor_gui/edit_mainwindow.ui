@@ -168,6 +168,7 @@
     <property name="title">
      <string>Window</string>
     </property>
+    <addaction name="m_pActionHistogram"/>
    </widget>
    <widget class="QMenu" name="m_pMenuHelp">
     <property name="title">
@@ -295,6 +296,101 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QDockWidget" name="m_pHistogramDockWidget">
+   <property name="floating">
+    <bool>false</bool>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::AllDockWidgetAreas</set>
+   </property>
+   <property name="windowTitle">
+    <string>Histogram</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_3">
+    <layout class="QVBoxLayout" name="verticalLayout_5">
+     <item>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="5" column="0">
+        <widget class="QLabel" name="label_6">
+         <property name="text">
+          <string>Eye Adaption Down</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="m_pHistogramUpperBoundEdit"/>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="m_pHistogramLogMaxEdit"/>
+       </item>
+       <item row="5" column="1">
+        <widget class="QLineEdit" name="m_pHistogramEyeDownEdit"/>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="m_pHistogramLogMinEdit"/>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="m_pHistogramLowerBoundEdit"/>
+       </item>
+       <item row="4" column="1">
+        <widget class="QLineEdit" name="m_pHistogramEyeUpEdit"/>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Lower Bound</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Log Min</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Log Max</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Upper Bound</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>Eye Adaption Up</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </widget>
+  </widget>
   <action name="m_pActionNew">
    <property name="text">
     <string>New Scene</string>
@@ -370,6 +466,14 @@
   <action name="m_pActionDirectional">
    <property name="text">
     <string>Directional</string>
+   </property>
+  </action>
+  <action name="m_pActionHistogram">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Histogram</string>
    </property>
   </action>
  </widget>
@@ -474,7 +578,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>80</x>
-     <y>320</y>
+     <y>311</y>
     </hint>
     <hint type="destinationlabel">
      <x>246</x>
@@ -570,11 +674,123 @@
    <hints>
     <hint type="sourcelabel">
      <x>125</x>
-     <y>503</y>
+     <y>311</y>
     </hint>
     <hint type="destinationlabel">
      <x>1914</x>
      <y>61</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pHistogramLowerBoundEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>changeHistogramSettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>208</x>
+     <y>370</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>279</x>
+     <y>567</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pHistogramUpperBoundEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>changeHistogramSettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>255</x>
+     <y>398</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>280</x>
+     <y>475</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pHistogramLogMinEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>changeHistogramSettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>216</x>
+     <y>419</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>277</x>
+     <y>440</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pHistogramLogMaxEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>changeHistogramSettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>227</x>
+     <y>441</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>280</x>
+     <y>526</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pHistogramEyeUpEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>changeHistogramSettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>191</x>
+     <y>469</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>274</x>
+     <y>615</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pHistogramEyeDownEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>changeHistogramSettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>170</x>
+     <y>494</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>278</x>
+     <y>600</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pActionHistogram</sender>
+   <signal>triggered()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>toggleHistogramDock()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>961</x>
+     <y>479</y>
     </hint>
    </hints>
   </connection>
@@ -588,5 +804,7 @@
   <slot>createNewLightPoint()</slot>
   <slot>createNewLightEnvironment()</slot>
   <slot>createNewLightGlobalProbe()</slot>
+  <slot>changeHistogramSettings()</slot>
+  <slot>toggleHistogramDock()</slot>
  </slots>
 </ui>

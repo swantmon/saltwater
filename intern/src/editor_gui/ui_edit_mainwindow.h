@@ -15,8 +15,10 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QDockWidget>
+#include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
@@ -49,6 +51,7 @@ public:
     QAction *m_pActionGlobalProbe;
     QAction *m_pActionCamera;
     QAction *m_pActionDirectional;
+    QAction *m_pActionHistogram;
     QWidget *m_pCentralWidget;
     QVBoxLayout *verticalLayout_3;
     QHBoxLayout *horizontalLayout;
@@ -84,6 +87,23 @@ public:
     QHBoxLayout *horizontalLayout_3;
     QLineEdit *m_pConsoleCommandEdit;
     QPushButton *m_pSendCommandButton;
+    QDockWidget *m_pHistogramDockWidget;
+    QWidget *dockWidgetContents_3;
+    QVBoxLayout *verticalLayout_5;
+    QGridLayout *gridLayout;
+    QLabel *label_6;
+    QLineEdit *m_pHistogramUpperBoundEdit;
+    QLineEdit *m_pHistogramLogMaxEdit;
+    QLineEdit *m_pHistogramEyeDownEdit;
+    QLineEdit *m_pHistogramLogMinEdit;
+    QLineEdit *m_pHistogramLowerBoundEdit;
+    QLineEdit *m_pHistogramEyeUpEdit;
+    QLabel *label;
+    QLabel *label_2;
+    QLabel *label_4;
+    QLabel *label_3;
+    QLabel *label_5;
+    QSpacerItem *verticalSpacer;
 
     void setupUi(QMainWindow *CMainWindow)
     {
@@ -120,6 +140,9 @@ public:
         m_pActionCamera->setObjectName(QStringLiteral("m_pActionCamera"));
         m_pActionDirectional = new QAction(CMainWindow);
         m_pActionDirectional->setObjectName(QStringLiteral("m_pActionDirectional"));
+        m_pActionHistogram = new QAction(CMainWindow);
+        m_pActionHistogram->setObjectName(QStringLiteral("m_pActionHistogram"));
+        m_pActionHistogram->setCheckable(true);
         m_pCentralWidget = new QWidget(CMainWindow);
         m_pCentralWidget->setObjectName(QStringLiteral("m_pCentralWidget"));
         verticalLayout_3 = new QVBoxLayout(m_pCentralWidget);
@@ -267,6 +290,88 @@ public:
 
         m_pConsoleDockWidget->setWidget(dockWidgetContents_4);
         CMainWindow->addDockWidget(static_cast<Qt::DockWidgetArea>(8), m_pConsoleDockWidget);
+        m_pHistogramDockWidget = new QDockWidget(CMainWindow);
+        m_pHistogramDockWidget->setObjectName(QStringLiteral("m_pHistogramDockWidget"));
+        m_pHistogramDockWidget->setFloating(false);
+        m_pHistogramDockWidget->setAllowedAreas(Qt::AllDockWidgetAreas);
+        dockWidgetContents_3 = new QWidget();
+        dockWidgetContents_3->setObjectName(QStringLiteral("dockWidgetContents_3"));
+        verticalLayout_5 = new QVBoxLayout(dockWidgetContents_3);
+        verticalLayout_5->setSpacing(6);
+        verticalLayout_5->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_5->setObjectName(QStringLiteral("verticalLayout_5"));
+        gridLayout = new QGridLayout();
+        gridLayout->setSpacing(6);
+        gridLayout->setObjectName(QStringLiteral("gridLayout"));
+        label_6 = new QLabel(dockWidgetContents_3);
+        label_6->setObjectName(QStringLiteral("label_6"));
+
+        gridLayout->addWidget(label_6, 5, 0, 1, 1);
+
+        m_pHistogramUpperBoundEdit = new QLineEdit(dockWidgetContents_3);
+        m_pHistogramUpperBoundEdit->setObjectName(QStringLiteral("m_pHistogramUpperBoundEdit"));
+
+        gridLayout->addWidget(m_pHistogramUpperBoundEdit, 1, 1, 1, 1);
+
+        m_pHistogramLogMaxEdit = new QLineEdit(dockWidgetContents_3);
+        m_pHistogramLogMaxEdit->setObjectName(QStringLiteral("m_pHistogramLogMaxEdit"));
+
+        gridLayout->addWidget(m_pHistogramLogMaxEdit, 3, 1, 1, 1);
+
+        m_pHistogramEyeDownEdit = new QLineEdit(dockWidgetContents_3);
+        m_pHistogramEyeDownEdit->setObjectName(QStringLiteral("m_pHistogramEyeDownEdit"));
+
+        gridLayout->addWidget(m_pHistogramEyeDownEdit, 5, 1, 1, 1);
+
+        m_pHistogramLogMinEdit = new QLineEdit(dockWidgetContents_3);
+        m_pHistogramLogMinEdit->setObjectName(QStringLiteral("m_pHistogramLogMinEdit"));
+
+        gridLayout->addWidget(m_pHistogramLogMinEdit, 2, 1, 1, 1);
+
+        m_pHistogramLowerBoundEdit = new QLineEdit(dockWidgetContents_3);
+        m_pHistogramLowerBoundEdit->setObjectName(QStringLiteral("m_pHistogramLowerBoundEdit"));
+
+        gridLayout->addWidget(m_pHistogramLowerBoundEdit, 0, 1, 1, 1);
+
+        m_pHistogramEyeUpEdit = new QLineEdit(dockWidgetContents_3);
+        m_pHistogramEyeUpEdit->setObjectName(QStringLiteral("m_pHistogramEyeUpEdit"));
+
+        gridLayout->addWidget(m_pHistogramEyeUpEdit, 4, 1, 1, 1);
+
+        label = new QLabel(dockWidgetContents_3);
+        label->setObjectName(QStringLiteral("label"));
+
+        gridLayout->addWidget(label, 0, 0, 1, 1);
+
+        label_2 = new QLabel(dockWidgetContents_3);
+        label_2->setObjectName(QStringLiteral("label_2"));
+
+        gridLayout->addWidget(label_2, 2, 0, 1, 1);
+
+        label_4 = new QLabel(dockWidgetContents_3);
+        label_4->setObjectName(QStringLiteral("label_4"));
+
+        gridLayout->addWidget(label_4, 3, 0, 1, 1);
+
+        label_3 = new QLabel(dockWidgetContents_3);
+        label_3->setObjectName(QStringLiteral("label_3"));
+
+        gridLayout->addWidget(label_3, 1, 0, 1, 1);
+
+        label_5 = new QLabel(dockWidgetContents_3);
+        label_5->setObjectName(QStringLiteral("label_5"));
+
+        gridLayout->addWidget(label_5, 4, 0, 1, 1);
+
+
+        verticalLayout_5->addLayout(gridLayout);
+
+        verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+
+        verticalLayout_5->addItem(verticalSpacer);
+
+        m_pHistogramDockWidget->setWidget(dockWidgetContents_3);
+        CMainWindow->addDockWidget(static_cast<Qt::DockWidgetArea>(1), m_pHistogramDockWidget);
 
         m_pMenuBar->addAction(m_pMenuFile->menuAction());
         m_pMenuBar->addAction(m_pMenuEdit->menuAction());
@@ -287,6 +392,7 @@ public:
         menuLights->addAction(m_pActionPoint);
         menuLights->addAction(m_pActionEnvironment);
         menuLights->addAction(m_pActionGlobalProbe);
+        m_pMenuWindow->addAction(m_pActionHistogram);
         m_pMenuHelp->addAction(m_pActionAboutSaltwater);
         m_pMenuHelp->addSeparator();
         m_pMenuHelp->addAction(m_pActionReleaseNotes);
@@ -304,6 +410,13 @@ public:
         QObject::connect(m_pActionPoint, SIGNAL(triggered()), CMainWindow, SLOT(createNewLightPoint()));
         QObject::connect(m_pActionGlobalProbe, SIGNAL(triggered()), CMainWindow, SLOT(createNewLightGlobalProbe()));
         QObject::connect(m_pScenegraph, SIGNAL(entitySelected(int)), m_pInspector, SLOT(updateContentForEntity(int)));
+        QObject::connect(m_pHistogramLowerBoundEdit, SIGNAL(editingFinished()), CMainWindow, SLOT(changeHistogramSettings()));
+        QObject::connect(m_pHistogramUpperBoundEdit, SIGNAL(editingFinished()), CMainWindow, SLOT(changeHistogramSettings()));
+        QObject::connect(m_pHistogramLogMinEdit, SIGNAL(editingFinished()), CMainWindow, SLOT(changeHistogramSettings()));
+        QObject::connect(m_pHistogramLogMaxEdit, SIGNAL(editingFinished()), CMainWindow, SLOT(changeHistogramSettings()));
+        QObject::connect(m_pHistogramEyeUpEdit, SIGNAL(editingFinished()), CMainWindow, SLOT(changeHistogramSettings()));
+        QObject::connect(m_pHistogramEyeDownEdit, SIGNAL(editingFinished()), CMainWindow, SLOT(changeHistogramSettings()));
+        QObject::connect(m_pActionHistogram, SIGNAL(triggered()), CMainWindow, SLOT(toggleHistogramDock()));
 
         QMetaObject::connectSlotsByName(CMainWindow);
     } // setupUi
@@ -327,6 +440,7 @@ public:
         m_pActionGlobalProbe->setText(QApplication::translate("CMainWindow", "Global Probe", 0));
         m_pActionCamera->setText(QApplication::translate("CMainWindow", "Camera", 0));
         m_pActionDirectional->setText(QApplication::translate("CMainWindow", "Directional", 0));
+        m_pActionHistogram->setText(QApplication::translate("CMainWindow", "Histogram", 0));
         m_pPlayButton->setText(QApplication::translate("CMainWindow", "Play", 0));
         m_pMailAdressEdit->setPlaceholderText(QApplication::translate("CMainWindow", "max.mustermann@mail.com", 0));
         m_pScreenshotButton->setText(QApplication::translate("CMainWindow", "Screenshot", 0));
@@ -347,6 +461,13 @@ public:
         m_pInspectorDockWidget->setWindowTitle(QApplication::translate("CMainWindow", "Inspector", 0));
         m_pConsoleDockWidget->setWindowTitle(QApplication::translate("CMainWindow", "Console", 0));
         m_pSendCommandButton->setText(QApplication::translate("CMainWindow", "Send", 0));
+        m_pHistogramDockWidget->setWindowTitle(QApplication::translate("CMainWindow", "Histogram", 0));
+        label_6->setText(QApplication::translate("CMainWindow", "Eye Adaption Down", 0));
+        label->setText(QApplication::translate("CMainWindow", "Lower Bound", 0));
+        label_2->setText(QApplication::translate("CMainWindow", "Log Min", 0));
+        label_4->setText(QApplication::translate("CMainWindow", "Log Max", 0));
+        label_3->setText(QApplication::translate("CMainWindow", "Upper Bound", 0));
+        label_5->setText(QApplication::translate("CMainWindow", "Eye Adaption Up", 0));
     } // retranslateUi
 
 };
