@@ -32,16 +32,26 @@ namespace Edit
             Edit,
 
             NewEntityActor,
-            NewLightDirectional,
-            NewLightPoint,
-            NewLightEnvironment,
-            NewLightGlobalProbe,
+            NewEntityDirectional,
+            NewEntityPoint,
+            NewEntityEnvironment,
+            NewEntityGlobalProbe,
+            NewEntityBloom,
+            NewEntityDOF,
+            NewEntityFXAA,
+            NewEntitySSR,
+            NewEntityVolumeFog,
 
             RequestEntityInfoFacets,
             RequestEntityInfoTransformation,
             RequestEntityInfoPointlight,
             RequestEntityInfoEnvironment,
             RequestEntityInfoGlobalProbe,
+            RequestEntityInfoBloom,
+            RequestEntityInfoDOF,
+            RequestEntityInfoFXAA,
+            RequestEntityInfoSSR,
+            RequestEntityInfoVolumeFog,
 
             RequestHistogramInfo,
 
@@ -49,6 +59,11 @@ namespace Edit
             EntityInfoPointlight,
             EntityInfoEnvironment,
             EntityInfoGlobalProbe,
+            EntityInfoBloom,
+            EntityInfoDOF,
+            EntityInfoFXAA,
+            EntityInfoSSR,
+            EntityInfoVolumeFog,
 
             HistogramInfo,
 
@@ -73,6 +88,11 @@ namespace Edit
             EntityInfoPointlight,
             EntityInfoEnvironment,
             EntityInfoGlobalProbe,
+            EntityInfoBloom,
+            EntityInfoDOF,
+            EntityInfoFXAA,
+            EntityInfoSSR,
+            EntityInfoVolumeFog,
 
             HistogramInfo,
 

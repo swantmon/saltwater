@@ -156,7 +156,62 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewLightDirectional, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::NewEntityDirectional, NewMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::createNewEntityBloom()
+    {
+        CMessage NewMessage(true);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::NewEntityBloom, NewMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::createNewEntityDOF()
+    {
+        CMessage NewMessage(true);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::NewEntityDOF, NewMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::createNewEntityFXAA()
+    {
+        CMessage NewMessage(true);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::NewEntityFXAA, NewMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::createNewEntitySSR()
+    {
+        CMessage NewMessage(true);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::NewEntitySSR, NewMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::createNewEntityVolumeFog()
+    {
+        CMessage NewMessage(true);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::NewEntityVolumeFog, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -167,7 +222,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewLightPoint, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::NewEntityPoint, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -178,7 +233,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewLightEnvironment, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::NewEntityEnvironment, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -189,7 +244,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewLightGlobalProbe, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::NewEntityGlobalProbe, NewMessage);
     }
 
     // -----------------------------------------------------------------------------

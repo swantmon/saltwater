@@ -40,6 +40,11 @@ namespace Edit
         void createNewLightPoint();
         void createNewLightEnvironment();
         void createNewLightGlobalProbe();
+        void createNewEntityBloom();
+        void createNewEntityDOF();
+        void createNewEntityFXAA();
+        void createNewEntitySSR();
+        void createNewEntityVolumeFog();
         void changeHistogramSettings();
         void toggleHistogramDock();
 

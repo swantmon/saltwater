@@ -51,25 +51,42 @@ namespace
     private:
 
         Dt::CEntity* m_pLastRequestedEntity;
-        unsigned int m_EntityID;
 
     private:
 
         void OnNewMap(Edit::CMessage& _rMessage);
         void OnNewEntityActor(Edit::CMessage& _rMessage);
-        void OnNewLightDirectional(Edit::CMessage& _rMessage);
-        void OnNewLightPoint(Edit::CMessage& _rMessage);
-        void OnNewLightEnvironment(Edit::CMessage& _rMessage);
-        void OnNewLightGlobalProbe(Edit::CMessage& _rMessage);
+        void OnNewEntityDirectional(Edit::CMessage& _rMessage);
+        void OnNewEntityPoint(Edit::CMessage& _rMessage);
+        void OnNewEntityEnvironment(Edit::CMessage& _rMessage);
+        void OnNewEntityGlobalProbe(Edit::CMessage& _rMessage);
+        void OnNewEntityBloom(Edit::CMessage& _rMessage);
+        void OnNewEntityDOF(Edit::CMessage& _rMessage);
+        void OnNewEntityFXAA(Edit::CMessage& _rMessage);
+        void OnNewEntitySSR(Edit::CMessage& _rMessage);
+        void OnNewEntityVolumeFog(Edit::CMessage& _rMessage);
+
         void OnRequestEntityInfoFacets(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoTransformation(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoPointlight(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoEnvironment(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoGlobalProbe(Edit::CMessage& _rMessage);
+        void OnRequestEntityInfoBloom(Edit::CMessage& _rMessage);
+        void OnRequestEntityInfoDOF(Edit::CMessage& _rMessage);
+        void OnRequestEntityInfoFXAA(Edit::CMessage& _rMessage);
+        void OnRequestEntityInfoSSR(Edit::CMessage& _rMessage);
+        void OnRequestEntityInfoVolumeFog(Edit::CMessage& _rMessage);
+
         void OnEntityInfoTransformation(Edit::CMessage& _rMessage);
         void OnEntityInfoPointlight(Edit::CMessage& _rMessage);
         void OnEntityInfoEnvironment(Edit::CMessage& _rMessage);
         void OnEntityInfoGlobalProbe(Edit::CMessage& _rMessage);
+        void OnEntityInfoBloom(Edit::CMessage& _rMessage);
+        void OnEntityInfoDOF(Edit::CMessage& _rMessage);
+        void OnEntityInfoFXAA(Edit::CMessage& _rMessage);
+        void OnEntityInfoSSR(Edit::CMessage& _rMessage);
+        void OnEntityInfoVolumeFog(Edit::CMessage& _rMessage);
+
         void OnDirtyEntity(Dt::CEntity* _pEntity);
 
         std::string CopyFileToAssets(const char* _pAssetFolder, const char* _pPathToFile);
@@ -80,7 +97,6 @@ namespace
 {
     CMapHelper::CMapHelper()
         : m_pLastRequestedEntity(nullptr)
-        , m_EntityID            (0)
     {
         
     }
@@ -106,19 +122,34 @@ namespace
         // -----------------------------------------------------------------------------
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewMap                         , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewMap));
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntityActor                 , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntityActor));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewLightDirectional            , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewLightDirectional));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewLightPoint                  , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewLightPoint));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewLightEnvironment            , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewLightEnvironment));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntityDirectional           , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntityDirectional));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntityPoint                 , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntityPoint));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntityEnvironment           , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntityEnvironment));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntityGlobalProbe           , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntityGlobalProbe));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntityBloom                 , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntityBloom));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntityDOF                   , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntityDOF));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntityFXAA                  , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntityFXAA));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntitySSR                   , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntitySSR));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntityVolumeFog             , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntityVolumeFog));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoFacets        , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoFacets));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewLightGlobalProbe            , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewLightGlobalProbe));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoTransformation, EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoTransformation));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoPointlight    , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoPointlight));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoEnvironment   , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoEnvironment));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoGlobalProbe   , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoGlobalProbe));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoBloom         , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoBloom));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoDOF           , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoDOF));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoFXAA          , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoFXAA));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoSSR           , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoSSR));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoVolumeFog     , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoVolumeFog));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoTransformation       , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoTransformation));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoPointlight           , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoPointlight));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoEnvironment          , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoEnvironment));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoGlobalProbe          , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoGlobalProbe));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoBloom                , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoBloom));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoDOF                  , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoDOF));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoFXAA                 , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoFXAA));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoSSR                  , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoSSR));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoVolumeFog            , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoVolumeFog));
     }
 
     // -----------------------------------------------------------------------------
@@ -150,7 +181,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SActorType::Camera;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc, m_EntityID);
+            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
@@ -172,8 +203,6 @@ namespace
 
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
-
-        ++m_EntityID;
     }
 
     // -----------------------------------------------------------------------------
@@ -200,7 +229,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SActorType::Model;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
-            Dt::CEntity& rNewActorModel = Dt::EntityManager::CreateEntity(EntityDesc, m_EntityID);
+            Dt::CEntity& rNewActorModel = Dt::EntityManager::CreateEntity(EntityDesc);
 
             // -----------------------------------------------------------------------------
             // Transformation
@@ -252,16 +281,11 @@ namespace
             // -----------------------------------------------------------------------------
             Dt::EntityManager::MarkEntityAsDirty(rNewActorModel, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
-
-        // -----------------------------------------------------------------------------
-        // Prepare next entity
-        // -----------------------------------------------------------------------------
-        ++m_EntityID;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMapHelper::OnNewLightDirectional(Edit::CMessage& _rMessage)
+    void CMapHelper::OnNewEntityDirectional(Edit::CMessage& _rMessage)
     {
         {
             Dt::SEntityDescriptor EntityDesc;
@@ -270,7 +294,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SLightType::Sun;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
-            Dt::CEntity& rSunLight = Dt::EntityManager::CreateEntity(EntityDesc, m_EntityID);
+            Dt::CEntity& rSunLight = Dt::EntityManager::CreateEntity(EntityDesc);
 
             // -----------------------------------------------------------------------------
             // Transformation
@@ -296,13 +320,11 @@ namespace
 
             Dt::EntityManager::MarkEntityAsDirty(rSunLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
-
-        ++m_EntityID;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMapHelper::OnNewLightPoint(Edit::CMessage& _rMessage)
+    void CMapHelper::OnNewEntityPoint(Edit::CMessage& _rMessage)
     {
         {
             Dt::SEntityDescriptor EntityDesc;
@@ -311,7 +333,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SLightType::Point;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
-            Dt::CEntity& rPointLight = Dt::EntityManager::CreateEntity(EntityDesc, m_EntityID);
+            Dt::CEntity& rPointLight = Dt::EntityManager::CreateEntity(EntityDesc);
 
             // -----------------------------------------------------------------------------
             // Transformation
@@ -342,13 +364,11 @@ namespace
 
             Dt::EntityManager::MarkEntityAsDirty(rPointLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
-
-        ++m_EntityID;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMapHelper::OnNewLightEnvironment(Edit::CMessage& _rMessage)
+    void CMapHelper::OnNewEntityEnvironment(Edit::CMessage& _rMessage)
     {
         // -----------------------------------------------------------------------------
         // Setup environment
@@ -375,7 +395,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SLightType::Skybox;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
-            Dt::CEntity& rEnvironment = Dt::EntityManager::CreateEntity(EntityDesc, m_EntityID);
+            Dt::CEntity& rEnvironment = Dt::EntityManager::CreateEntity(EntityDesc);
 
             // -----------------------------------------------------------------------------
             // Transformation
@@ -396,13 +416,11 @@ namespace
 
             Dt::EntityManager::MarkEntityAsDirty(rEnvironment, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
-
-        ++m_EntityID;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMapHelper::OnNewLightGlobalProbe(Edit::CMessage& _rMessage)
+    void CMapHelper::OnNewEntityGlobalProbe(Edit::CMessage& _rMessage)
     {
         {
             Dt::SEntityDescriptor EntityDesc;
@@ -411,7 +429,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SLightType::GlobalProbe;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy;
 
-            Dt::CEntity& rGlobalProbeLight = Dt::EntityManager::CreateEntity(EntityDesc, m_EntityID);
+            Dt::CEntity& rGlobalProbeLight = Dt::EntityManager::CreateEntity(EntityDesc);
 
             Dt::CGlobalProbeLightFacet* pGlobalProbeLightFacet = Dt::LightManager::CreateGlobalProbeLight();
 
@@ -424,8 +442,111 @@ namespace
 
             Dt::EntityManager::MarkEntityAsDirty(rGlobalProbeLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
+    }
 
-        ++m_EntityID;
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnNewEntityBloom(Edit::CMessage& _rMessage)
+    {
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::FX;
+            EntityDesc.m_EntityType     = Dt::SFXType::Bloom;
+            EntityDesc.m_FacetFlags     = 0;
+
+            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            Dt::CBloomFXFacet* pEffectFacet = Dt::FXManager::CreateBloomFX();
+
+            rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEffectEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnNewEntityDOF(Edit::CMessage& _rMessage)
+    {
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::FX;
+            EntityDesc.m_EntityType     = Dt::SFXType::DOF;
+            EntityDesc.m_FacetFlags     = 0;
+
+            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            Dt::CDOFFXFacet* pEffectFacet = Dt::FXManager::CreateDOFFX();
+
+            rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEffectEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnNewEntityFXAA(Edit::CMessage& _rMessage)
+    {
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::FX;
+            EntityDesc.m_EntityType     = Dt::SFXType::FXAA;
+            EntityDesc.m_FacetFlags     = 0;
+
+            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            Dt::CFXAAFXFacet* pEffectFacet = Dt::FXManager::CreateFXAAFX();
+
+            rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEffectEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnNewEntitySSR(Edit::CMessage& _rMessage)
+    {
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::FX;
+            EntityDesc.m_EntityType     = Dt::SFXType::SSR;
+            EntityDesc.m_FacetFlags     = 0;
+
+            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            Dt::CSSRFXFacet* pEffectFacet = Dt::FXManager::CreateSSRFX();
+
+            rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEffectEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnNewEntityVolumeFog(Edit::CMessage& _rMessage)
+    {
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::FX;
+            EntityDesc.m_EntityType     = Dt::SFXType::VolumeFog;
+            EntityDesc.m_FacetFlags     = 0;
+
+            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            Dt::CVolumeFogFXFacet* pEffectFacet = Dt::FXManager::CreateVolumeFogFX();
+
+            rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEffectEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -606,6 +727,150 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CMapHelper::OnRequestEntityInfoBloom(Edit::CMessage& _rMessage)
+    {
+        if (m_pLastRequestedEntity != nullptr)
+        {
+            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+
+            Dt::CBloomFXFacet* pFXFacet = static_cast<Dt::CBloomFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::Bloom && pFXFacet != nullptr)
+            {
+                Edit::CMessage NewMessage;
+
+                NewMessage.PutFloat(pFXFacet->GetTint()[0]);
+                NewMessage.PutFloat(pFXFacet->GetTint()[1]);
+                NewMessage.PutFloat(pFXFacet->GetTint()[2]);
+
+                NewMessage.PutFloat(pFXFacet->GetIntensity());
+                NewMessage.PutFloat(pFXFacet->GetTreshhold());
+                NewMessage.PutFloat(pFXFacet->GetExposureScale());
+                NewMessage.PutInt(pFXFacet->GetSize());
+
+                NewMessage.Reset();
+
+                Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoBloom, NewMessage);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnRequestEntityInfoDOF(Edit::CMessage& _rMessage)
+    {
+        if (m_pLastRequestedEntity != nullptr)
+        {
+            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+
+            Dt::CDOFFXFacet* pFXFacet = static_cast<Dt::CDOFFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::DOF && pFXFacet != nullptr)
+            {
+                Edit::CMessage NewMessage;
+
+                NewMessage.PutFloat(pFXFacet->GetNearDistance());
+                NewMessage.PutFloat(pFXFacet->GetFarDistance());
+                NewMessage.PutFloat(pFXFacet->GetNearToFarRatio());
+                NewMessage.PutFloat(pFXFacet->GetFadeUnToSmallBlur());
+                NewMessage.PutFloat(pFXFacet->GetFadeSmallToMediumBlur());
+
+                NewMessage.Reset();
+
+                Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoDOF, NewMessage);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnRequestEntityInfoFXAA(Edit::CMessage& _rMessage)
+    {
+        if (m_pLastRequestedEntity != nullptr)
+        {
+            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+
+            Dt::CFXAAFXFacet* pFXFacet = static_cast<Dt::CFXAAFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::FXAA && pFXFacet != nullptr)
+            {
+                Edit::CMessage NewMessage;
+
+                NewMessage.PutFloat(pFXFacet->GetLuma()[0]);
+                NewMessage.PutFloat(pFXFacet->GetLuma()[1]);
+                NewMessage.PutFloat(pFXFacet->GetLuma()[2]);
+
+                NewMessage.Reset();
+
+                Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoFXAA, NewMessage);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnRequestEntityInfoSSR(Edit::CMessage& _rMessage)
+    {
+        if (m_pLastRequestedEntity != nullptr)
+        {
+            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+
+            Dt::CSSRFXFacet* pFXFacet = static_cast<Dt::CSSRFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::SSR && pFXFacet != nullptr)
+            {
+                Edit::CMessage NewMessage;
+
+                NewMessage.PutFloat(pFXFacet->GetIntensity());
+                NewMessage.PutFloat(pFXFacet->GetRoughnessMask());
+                NewMessage.PutFloat(pFXFacet->GetDistance());
+                NewMessage.PutBool (pFXFacet->GetUseLastFrame());
+
+                NewMessage.Reset();
+
+                Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoSSR, NewMessage);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnRequestEntityInfoVolumeFog(Edit::CMessage& _rMessage)
+    {
+        if (m_pLastRequestedEntity != nullptr)
+        {
+            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+
+            Dt::CVolumeFogFXFacet* pFXFacet = static_cast<Dt::CVolumeFogFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::VolumeFog && pFXFacet != nullptr)
+            {
+                Edit::CMessage NewMessage;
+
+                NewMessage.PutFloat(pFXFacet->GetWindDirection()[0]);
+                NewMessage.PutFloat(pFXFacet->GetWindDirection()[1]);
+                NewMessage.PutFloat(pFXFacet->GetWindDirection()[2]);
+
+                NewMessage.PutFloat(pFXFacet->GetFogColor()[0]);
+                NewMessage.PutFloat(pFXFacet->GetFogColor()[1]);
+                NewMessage.PutFloat(pFXFacet->GetFogColor()[2]);
+
+                NewMessage.PutFloat(pFXFacet->GetFrustumDepthInMeter());
+                NewMessage.PutFloat(pFXFacet->GetShadowIntensity());
+                NewMessage.PutFloat(pFXFacet->GetScatteringCoefficient());
+                NewMessage.PutFloat(pFXFacet->GetAbsorptionCoefficient());
+                NewMessage.PutFloat(pFXFacet->GetDensityLevel());
+                NewMessage.PutFloat(pFXFacet->GetDensityAttenuation());
+
+                NewMessage.Reset();
+
+                Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoVolumeFog, NewMessage);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CMapHelper::OnEntityInfoTransformation(Edit::CMessage& _rMessage)
     {
         if (m_pLastRequestedEntity != nullptr)
@@ -775,6 +1040,202 @@ namespace
                 pLightFacet->SetQuality(static_cast<Dt::CGlobalProbeLightFacet::EQuality>(Quality));
 
                 pLightFacet->SetIntensity(Intensity);
+
+                Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            }
+        }
+    }
+
+    void CMapHelper::OnEntityInfoBloom(Edit::CMessage& _rMessage)
+    {
+        if (m_pLastRequestedEntity != nullptr)
+        {
+            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+
+            Dt::CBloomFXFacet* pFXFacet = static_cast<Dt::CBloomFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::Bloom && pFXFacet != nullptr)
+            {
+                // -----------------------------------------------------------------------------
+                // Read values
+                // -----------------------------------------------------------------------------
+                Base::Float4 Color = Base::Float4(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat(), 1.0f);
+
+                float Intensity     = _rMessage.GetFloat();
+                float Treshhold     = _rMessage.GetFloat();
+                float ExposureScale = _rMessage.GetFloat();
+                int   Size          = _rMessage.GetInt();
+
+                // -----------------------------------------------------------------------------
+                // Set values
+                // -----------------------------------------------------------------------------
+                pFXFacet->SetTint(Color);
+
+                pFXFacet->SetIntensity(Intensity);
+
+                pFXFacet->SetTreshhold(Treshhold);
+
+                pFXFacet->SetExposureScale(ExposureScale);
+
+                pFXFacet->SetSize(Size);
+
+                pFXFacet->UpdateEffect();
+
+                Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnEntityInfoDOF(Edit::CMessage& _rMessage)
+    {
+        if (m_pLastRequestedEntity != nullptr)
+        {
+            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+
+            Dt::CDOFFXFacet* pFXFacet = static_cast<Dt::CDOFFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::DOF && pFXFacet != nullptr)
+            {
+                // -----------------------------------------------------------------------------
+                // Read values
+                // -----------------------------------------------------------------------------               
+                float Near            = _rMessage.GetFloat();
+                float Far             = _rMessage.GetFloat();
+                float NearToFarRatio  = _rMessage.GetFloat();
+                float FadeUnSmall     = _rMessage.GetFloat();
+                float FadeSmallMedium = _rMessage.GetFloat();
+
+                // -----------------------------------------------------------------------------
+                // Set values
+                // -----------------------------------------------------------------------------
+                pFXFacet->SetNearDistance(Near);
+
+                pFXFacet->SetFarDistance(Far);
+
+                pFXFacet->SetNearToFarRatio(NearToFarRatio);
+
+                pFXFacet->SetFadeUnToSmallBlur(FadeUnSmall);
+
+                pFXFacet->SetFadeSmallToMediumBlur(FadeSmallMedium);
+
+                pFXFacet->UpdateEffect();
+
+                Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnEntityInfoFXAA(Edit::CMessage& _rMessage)
+    {
+        if (m_pLastRequestedEntity != nullptr)
+        {
+            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+
+            Dt::CFXAAFXFacet* pFXFacet = static_cast<Dt::CFXAAFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::FXAA && pFXFacet != nullptr)
+            {
+                // -----------------------------------------------------------------------------
+                // Read values
+                // -----------------------------------------------------------------------------               
+                Base::Float3 Color = Base::Float3(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+
+                // -----------------------------------------------------------------------------
+                // Set values
+                // -----------------------------------------------------------------------------
+                pFXFacet->SetLuma(Color);
+
+                pFXFacet->UpdateEffect();
+
+                Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnEntityInfoSSR(Edit::CMessage& _rMessage)
+    {
+        if (m_pLastRequestedEntity != nullptr)
+        {
+            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+
+            Dt::CSSRFXFacet* pFXFacet = static_cast<Dt::CSSRFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::SSR && pFXFacet != nullptr)
+            {
+                // -----------------------------------------------------------------------------
+                // Read values
+                // -----------------------------------------------------------------------------               
+                float Intensity            = _rMessage.GetFloat();
+                float RoughnessMask        = _rMessage.GetFloat();
+                float Distance             = _rMessage.GetFloat();
+                bool  UseDoubleReflections = _rMessage.GetBool();
+
+                // -----------------------------------------------------------------------------
+                // Set values
+                // -----------------------------------------------------------------------------
+                pFXFacet->SetIntensity(Intensity);
+
+                pFXFacet->SetRoughnessMask(RoughnessMask);
+
+                pFXFacet->SetDistance(Distance);
+
+                pFXFacet->SetUseLastFrame(UseDoubleReflections);
+
+                pFXFacet->UpdateEffect();
+
+                Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnEntityInfoVolumeFog(Edit::CMessage& _rMessage)
+    {
+        if (m_pLastRequestedEntity != nullptr)
+        {
+            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+
+            Dt::CVolumeFogFXFacet* pFXFacet = static_cast<Dt::CVolumeFogFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::VolumeFog && pFXFacet != nullptr)
+            {
+                // -----------------------------------------------------------------------------
+                // Read values
+                // -----------------------------------------------------------------------------
+                Base::Float4 WindDirection = Base::Float4(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat(), 0.0f);
+
+                Base::Float4 Color = Base::Float4(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat(), 1.0f);
+
+                float FrustumDepth       = _rMessage.GetFloat();
+                float ShadowIntensity    = _rMessage.GetFloat();
+                float ScatteringCoeff    = _rMessage.GetFloat();
+                float AbsorptionCoeff    = _rMessage.GetFloat();
+                float DensityLevel       = _rMessage.GetFloat();
+                float DensityAttenuation = _rMessage.GetFloat();
+
+                // -----------------------------------------------------------------------------
+                // Set values
+                // -----------------------------------------------------------------------------
+                pFXFacet->SetWindDirection(WindDirection);
+
+                pFXFacet->SetFogColor(Color);
+
+                pFXFacet->SetFrustumDepthInMeter(FrustumDepth);
+
+                pFXFacet->SetScatteringCoefficient(ScatteringCoeff);
+
+                pFXFacet->SetAbsorptionCoefficient(AbsorptionCoeff);
+
+                pFXFacet->SetDensityLevel(DensityLevel);
+
+                pFXFacet->SetDensityAttenuation(DensityAttenuation);
 
                 Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
             }

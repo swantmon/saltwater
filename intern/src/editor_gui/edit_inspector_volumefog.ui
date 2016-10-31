@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>InspectorVolumeFog</class>
+ <widget class="QWidget" name="InspectorVolumeFog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>268</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Volumetric Fog</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QLabel" name="label_11">
+            <property name="text">
+             <string>X</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="m_pWindDirectionXEdit"/>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_10">
+            <property name="text">
+             <string>Y</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="m_pWindDirectionYEdit"/>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_9">
+            <property name="text">
+             <string>Z</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="m_pWindDirectionZEdit"/>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Fog Color</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>Frustum Depth</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>Shadow Intensity</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="0">
+         <widget class="QLabel" name="label_8">
+          <property name="text">
+           <string>Density Attenuation</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Wind Direction</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="1">
+         <widget class="QLineEdit" name="m_pDensityAttenuationEdit"/>
+        </item>
+        <item row="6" column="1">
+         <widget class="QLineEdit" name="m_pDensityLevelEdit"/>
+        </item>
+        <item row="5" column="1">
+         <widget class="QLineEdit" name="m_pAbsorptionCoeffEdit"/>
+        </item>
+        <item row="4" column="1">
+         <widget class="QLineEdit" name="m_pScatteringCoeffEdit"/>
+        </item>
+        <item row="3" column="1">
+         <widget class="QLineEdit" name="m_pShadowIntensityEdit"/>
+        </item>
+        <item row="1" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QPushButton" name="m_pFogColorButton">
+            <property name="palette">
+             <palette>
+              <active>
+               <colorrole role="Button">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>255</red>
+                  <green>0</green>
+                  <blue>255</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </active>
+              <inactive>
+               <colorrole role="Button">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>255</red>
+                  <green>0</green>
+                  <blue>255</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </inactive>
+              <disabled>
+               <colorrole role="Button">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>255</red>
+                  <green>0</green>
+                  <blue>255</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </disabled>
+             </palette>
+            </property>
+            <property name="autoFillBackground">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="m_pFogPickButton">
+            <property name="maximumSize">
+             <size>
+              <width>30</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Pick</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLineEdit" name="m_pFrustumDepthEdit"/>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string>Absorption Coefficient</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>Scattering Coefficient</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0">
+         <widget class="QLabel" name="label_7">
+          <property name="text">
+           <string>Density Level</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>m_pWindDirectionXEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorVolumeFog</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>191</x>
+     <y>39</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>217</x>
+     <y>8</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pWindDirectionYEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorVolumeFog</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>275</x>
+     <y>45</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>393</x>
+     <y>23</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pWindDirectionZEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorVolumeFog</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>339</x>
+     <y>44</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>398</x>
+     <y>79</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pFrustumDepthEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorVolumeFog</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>228</x>
+     <y>102</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>395</x>
+     <y>125</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pShadowIntensityEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorVolumeFog</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>221</x>
+     <y>132</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>395</x>
+     <y>173</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pScatteringCoeffEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorVolumeFog</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>183</x>
+     <y>156</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>400</x>
+     <y>216</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pAbsorptionCoeffEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorVolumeFog</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>148</x>
+     <y>188</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>398</x>
+     <y>242</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pDensityLevelEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorVolumeFog</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>146</x>
+     <y>208</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>107</x>
+     <y>260</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pDensityAttenuationEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorVolumeFog</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>163</x>
+     <y>224</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>261</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pFogColorButton</sender>
+   <signal>clicked()</signal>
+   <receiver>InspectorVolumeFog</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>310</x>
+     <y>66</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>396</x>
+     <y>112</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pFogPickButton</sender>
+   <signal>clicked()</signal>
+   <receiver>InspectorVolumeFog</receiver>
+   <slot>pickColorFromDialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>364</x>
+     <y>70</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>396</x>
+     <y>66</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pFogColorButton</sender>
+   <signal>clicked()</signal>
+   <receiver>InspectorVolumeFog</receiver>
+   <slot>pickColorFromDialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>251</x>
+     <y>73</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>118</x>
+     <y>6</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>valueChanged()</slot>
+  <slot>pickColorFromDialog()</slot>
+ </slots>
+</ui>

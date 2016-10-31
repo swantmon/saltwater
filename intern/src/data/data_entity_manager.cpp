@@ -97,6 +97,7 @@ namespace
         CTransformationFacetPool m_TransformationFacets;
         CEntityVector            m_DirtyEntities;
         CEntityDelegates         m_EntityDelegates;
+        unsigned int             m_EntityID;
 
     private:
 
@@ -117,6 +118,7 @@ namespace
         , m_TransformationFacets()
         , m_DirtyEntities       ()
         , m_EntityDelegates     ()
+        , m_EntityID            (0)
     {
         m_DirtyEntities.reserve(65536);
     }
@@ -267,7 +269,20 @@ namespace
     {
         CInternEntity& rEntity = m_Entities.Allocate();
 
-        rEntity.m_ID               = _ID;
+        CEntity::BID ID = _ID;
+
+        if (ID == CEntity::s_InvalidID)
+        {
+            ID = m_EntityID;
+
+            ++m_EntityID;
+        }
+        else
+        {
+            m_EntityID = Base::Max(ID, m_EntityID + 1);
+        }
+
+        rEntity.m_ID               = ID;
         rEntity.m_Flags.m_Category = _rDescriptor.m_EntityCategory;
         rEntity.m_Flags.m_Type     = _rDescriptor.m_EntityType;
 

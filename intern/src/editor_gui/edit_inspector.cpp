@@ -13,6 +13,13 @@ namespace Edit
         , m_pTransformWidget  ()
         , m_pEnvironmentWidget()
         , m_pGlobalProbeWidget()
+        , m_pBloomWidget      ()
+        , m_pDOFWidget        ()
+        , m_pFXAAWidget       ()
+        , m_pSSRWidget        ()
+        , m_pVolumeFogWidget  ()
+
+
     {
         // -----------------------------------------------------------------------------
         // Create layout
@@ -26,16 +33,31 @@ namespace Edit
         m_pTransformWidget   = new CInspectorTransformation();
         m_pEnvironmentWidget = new CInspectorEnvironment();
         m_pGlobalProbeWidget = new CInspectorGlobalProbe();
+        m_pBloomWidget       = new CInspectorBloom();
+        m_pDOFWidget         = new CInspectorDOF();
+        m_pFXAAWidget        = new CInspectorFXAA();
+        m_pSSRWidget         = new CInspectorSSR();
+        m_pVolumeFogWidget   = new CInspectorVolumeFog();
 
         m_pInspectorLayout->addWidget(m_pTransformWidget);
         m_pInspectorLayout->addWidget(m_pPointlightWidget);
         m_pInspectorLayout->addWidget(m_pEnvironmentWidget);
         m_pInspectorLayout->addWidget(m_pGlobalProbeWidget);
+        m_pInspectorLayout->addWidget(m_pBloomWidget);
+        m_pInspectorLayout->addWidget(m_pDOFWidget);
+        m_pInspectorLayout->addWidget(m_pFXAAWidget);
+        m_pInspectorLayout->addWidget(m_pSSRWidget);
+        m_pInspectorLayout->addWidget(m_pVolumeFogWidget);
 
         m_pPointlightWidget ->setVisible(false);
         m_pTransformWidget  ->setVisible(false);
         m_pEnvironmentWidget->setVisible(false);
         m_pGlobalProbeWidget->setVisible(false);
+        m_pBloomWidget      ->setVisible(false);
+        m_pDOFWidget        ->setVisible(false);
+        m_pFXAAWidget       ->setVisible(false);
+        m_pSSRWidget        ->setVisible(false);
+        m_pVolumeFogWidget  ->setVisible(false);
 
         // -----------------------------------------------------------------------------
         // Set layout
@@ -98,6 +120,11 @@ namespace Edit
             m_pPointlightWidget ->setVisible(false);
             m_pEnvironmentWidget->setVisible(false);
             m_pGlobalProbeWidget->setVisible(false);
+            m_pBloomWidget      ->setVisible(false);
+            m_pDOFWidget        ->setVisible(false);
+            m_pFXAAWidget       ->setVisible(false);
+            m_pSSRWidget        ->setVisible(false);
+            m_pVolumeFogWidget  ->setVisible(false);
 
             if (Category == 0) // Actors
             {
@@ -142,21 +169,36 @@ namespace Edit
             {
                 if (Type == 0) // Bloom
                 {
+                    m_pBloomWidget->RequestInformation();
+
+                    m_pBloomWidget->setVisible(true);
                 }
                 else if (Type == 1) // SSR
                 {
+                    m_pSSRWidget->RequestInformation();
+
+                    m_pSSRWidget->setVisible(true);
                 }
                 else if (Type == 2) // DOF
                 {
+                    m_pDOFWidget->RequestInformation();
+
+                    m_pDOFWidget->setVisible(true);
                 }
                 else if (Type == 3) // FXAA
                 {
+                    m_pFXAAWidget->RequestInformation();
+
+                    m_pFXAAWidget->setVisible(true);
                 }
                 else if (Type == 4) // SSAO
                 {
                 }
                 else if (Type == 5) // VolumeFog
                 {
+                    m_pVolumeFogWidget->RequestInformation();
+
+                    m_pVolumeFogWidget->setVisible(true);
                 }
             }
             else if (Category == 3) // Plugin

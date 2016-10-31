@@ -156,8 +156,19 @@
      <addaction name="m_pActionEnvironment"/>
      <addaction name="m_pActionGlobalProbe"/>
     </widget>
+    <widget class="QMenu" name="menuEffects">
+     <property name="title">
+      <string>Effects</string>
+     </property>
+     <addaction name="m_pActionBloom"/>
+     <addaction name="m_pActionDOF"/>
+     <addaction name="m_pActionFXAA"/>
+     <addaction name="m_pActionSSR"/>
+     <addaction name="m_pActionVolumeFog"/>
+    </widget>
     <addaction name="menuActors"/>
     <addaction name="menuLights"/>
+    <addaction name="menuEffects"/>
    </widget>
    <widget class="QMenu" name="m_pMenuComponent">
     <property name="title">
@@ -316,7 +327,7 @@
        <item row="5" column="0">
         <widget class="QLabel" name="label_6">
          <property name="text">
-          <string>Eye Adaption Down</string>
+          <string>Eye Adaption Down:</string>
          </property>
         </widget>
        </item>
@@ -341,35 +352,35 @@
        <item row="0" column="0">
         <widget class="QLabel" name="label">
          <property name="text">
-          <string>Lower Bound</string>
+          <string>Lower Bound:</string>
          </property>
         </widget>
        </item>
        <item row="2" column="0">
         <widget class="QLabel" name="label_2">
          <property name="text">
-          <string>Log Min</string>
+          <string>Log Min:</string>
          </property>
         </widget>
        </item>
        <item row="3" column="0">
         <widget class="QLabel" name="label_4">
          <property name="text">
-          <string>Log Max</string>
+          <string>Log Max:</string>
          </property>
         </widget>
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="label_3">
          <property name="text">
-          <string>Upper Bound</string>
+          <string>Upper Bound:</string>
          </property>
         </widget>
        </item>
        <item row="4" column="0">
         <widget class="QLabel" name="label_5">
          <property name="text">
-          <string>Eye Adaption Up</string>
+          <string>Eye Adaption Up:</string>
          </property>
         </widget>
        </item>
@@ -470,10 +481,50 @@
   </action>
   <action name="m_pActionHistogram">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Histogram</string>
+   </property>
+  </action>
+  <action name="actionConsole">
+   <property name="text">
+    <string>Console</string>
+   </property>
+  </action>
+  <action name="actionScene_Hraph">
+   <property name="text">
+    <string>Scene Hraph</string>
+   </property>
+  </action>
+  <action name="actionInspector">
+   <property name="text">
+    <string>Inspector</string>
+   </property>
+  </action>
+  <action name="m_pActionBloom">
+   <property name="text">
+    <string>Bloom</string>
+   </property>
+  </action>
+  <action name="m_pActionDOF">
+   <property name="text">
+    <string>DOF</string>
+   </property>
+  </action>
+  <action name="m_pActionFXAA">
+   <property name="text">
+    <string>FXAA</string>
+   </property>
+  </action>
+  <action name="m_pActionSSR">
+   <property name="text">
+    <string>SSR</string>
+   </property>
+  </action>
+  <action name="m_pActionVolumeFog">
+   <property name="text">
+    <string>Volume Fog</string>
    </property>
   </action>
  </widget>
@@ -545,7 +596,7 @@
    <slot>takeScreenshot()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1829</x>
+     <x>1567</x>
      <y>113</y>
     </hint>
     <hint type="destinationlabel">
@@ -689,8 +740,8 @@
    <slot>changeHistogramSettings()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>208</x>
-     <y>370</y>
+     <x>263</x>
+     <y>395</y>
     </hint>
     <hint type="destinationlabel">
      <x>279</x>
@@ -705,8 +756,8 @@
    <slot>changeHistogramSettings()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>255</x>
-     <y>398</y>
+     <x>263</x>
+     <y>421</y>
     </hint>
     <hint type="destinationlabel">
      <x>280</x>
@@ -721,8 +772,8 @@
    <slot>changeHistogramSettings()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>216</x>
-     <y>419</y>
+     <x>263</x>
+     <y>447</y>
     </hint>
     <hint type="destinationlabel">
      <x>277</x>
@@ -737,8 +788,8 @@
    <slot>changeHistogramSettings()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>227</x>
-     <y>441</y>
+     <x>263</x>
+     <y>473</y>
     </hint>
     <hint type="destinationlabel">
      <x>280</x>
@@ -753,8 +804,8 @@
    <slot>changeHistogramSettings()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>191</x>
-     <y>469</y>
+     <x>263</x>
+     <y>499</y>
     </hint>
     <hint type="destinationlabel">
      <x>274</x>
@@ -769,8 +820,8 @@
    <slot>changeHistogramSettings()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>170</x>
-     <y>494</y>
+     <x>263</x>
+     <y>525</y>
     </hint>
     <hint type="destinationlabel">
      <x>278</x>
@@ -794,6 +845,86 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_pActionDOF</sender>
+   <signal>triggered()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>createNewEntityDOF()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>961</x>
+     <y>479</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pActionFXAA</sender>
+   <signal>triggered()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>createNewEntityFXAA()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>961</x>
+     <y>479</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pActionBloom</sender>
+   <signal>triggered()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>createNewEntityBloom()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>961</x>
+     <y>479</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pActionSSR</sender>
+   <signal>triggered()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>createNewEntitySSR()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>961</x>
+     <y>479</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pActionVolumeFog</sender>
+   <signal>triggered()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>createNewEntityVolumeFog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>961</x>
+     <y>479</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>switchPlayingCurrentScene()</slot>
@@ -806,5 +937,10 @@
   <slot>createNewLightGlobalProbe()</slot>
   <slot>changeHistogramSettings()</slot>
   <slot>toggleHistogramDock()</slot>
+  <slot>createNewEntityBloom()</slot>
+  <slot>createNewEntityDOF()</slot>
+  <slot>createNewEntityFXAA()</slot>
+  <slot>createNewEntitySSR()</slot>
+  <slot>createNewEntityVolumeFog()</slot>
  </slots>
 </ui>

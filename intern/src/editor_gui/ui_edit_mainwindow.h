@@ -52,6 +52,14 @@ public:
     QAction *m_pActionCamera;
     QAction *m_pActionDirectional;
     QAction *m_pActionHistogram;
+    QAction *actionConsole;
+    QAction *actionScene_Hraph;
+    QAction *actionInspector;
+    QAction *m_pActionBloom;
+    QAction *m_pActionDOF;
+    QAction *m_pActionFXAA;
+    QAction *m_pActionSSR;
+    QAction *m_pActionVolumeFog;
     QWidget *m_pCentralWidget;
     QVBoxLayout *verticalLayout_3;
     QHBoxLayout *horizontalLayout;
@@ -68,6 +76,7 @@ public:
     QMenu *m_pMenuEntity;
     QMenu *menuActors;
     QMenu *menuLights;
+    QMenu *menuEffects;
     QMenu *m_pMenuComponent;
     QMenu *m_pMenuWindow;
     QMenu *m_pMenuHelp;
@@ -142,7 +151,23 @@ public:
         m_pActionDirectional->setObjectName(QStringLiteral("m_pActionDirectional"));
         m_pActionHistogram = new QAction(CMainWindow);
         m_pActionHistogram->setObjectName(QStringLiteral("m_pActionHistogram"));
-        m_pActionHistogram->setCheckable(true);
+        m_pActionHistogram->setCheckable(false);
+        actionConsole = new QAction(CMainWindow);
+        actionConsole->setObjectName(QStringLiteral("actionConsole"));
+        actionScene_Hraph = new QAction(CMainWindow);
+        actionScene_Hraph->setObjectName(QStringLiteral("actionScene_Hraph"));
+        actionInspector = new QAction(CMainWindow);
+        actionInspector->setObjectName(QStringLiteral("actionInspector"));
+        m_pActionBloom = new QAction(CMainWindow);
+        m_pActionBloom->setObjectName(QStringLiteral("m_pActionBloom"));
+        m_pActionDOF = new QAction(CMainWindow);
+        m_pActionDOF->setObjectName(QStringLiteral("m_pActionDOF"));
+        m_pActionFXAA = new QAction(CMainWindow);
+        m_pActionFXAA->setObjectName(QStringLiteral("m_pActionFXAA"));
+        m_pActionSSR = new QAction(CMainWindow);
+        m_pActionSSR->setObjectName(QStringLiteral("m_pActionSSR"));
+        m_pActionVolumeFog = new QAction(CMainWindow);
+        m_pActionVolumeFog->setObjectName(QStringLiteral("m_pActionVolumeFog"));
         m_pCentralWidget = new QWidget(CMainWindow);
         m_pCentralWidget->setObjectName(QStringLiteral("m_pCentralWidget"));
         verticalLayout_3 = new QVBoxLayout(m_pCentralWidget);
@@ -210,6 +235,8 @@ public:
         menuActors->setObjectName(QStringLiteral("menuActors"));
         menuLights = new QMenu(m_pMenuEntity);
         menuLights->setObjectName(QStringLiteral("menuLights"));
+        menuEffects = new QMenu(m_pMenuEntity);
+        menuEffects->setObjectName(QStringLiteral("menuEffects"));
         m_pMenuComponent = new QMenu(m_pMenuBar);
         m_pMenuComponent->setObjectName(QStringLiteral("m_pMenuComponent"));
         m_pMenuWindow = new QMenu(m_pMenuBar);
@@ -386,12 +413,18 @@ public:
         m_pMenuFile->addAction(m_pActionExit);
         m_pMenuEntity->addAction(menuActors->menuAction());
         m_pMenuEntity->addAction(menuLights->menuAction());
+        m_pMenuEntity->addAction(menuEffects->menuAction());
         menuActors->addAction(m_pActionModel);
         menuActors->addAction(m_pActionCamera);
         menuLights->addAction(m_pActionDirectional);
         menuLights->addAction(m_pActionPoint);
         menuLights->addAction(m_pActionEnvironment);
         menuLights->addAction(m_pActionGlobalProbe);
+        menuEffects->addAction(m_pActionBloom);
+        menuEffects->addAction(m_pActionDOF);
+        menuEffects->addAction(m_pActionFXAA);
+        menuEffects->addAction(m_pActionSSR);
+        menuEffects->addAction(m_pActionVolumeFog);
         m_pMenuWindow->addAction(m_pActionHistogram);
         m_pMenuHelp->addAction(m_pActionAboutSaltwater);
         m_pMenuHelp->addSeparator();
@@ -417,6 +450,11 @@ public:
         QObject::connect(m_pHistogramEyeUpEdit, SIGNAL(editingFinished()), CMainWindow, SLOT(changeHistogramSettings()));
         QObject::connect(m_pHistogramEyeDownEdit, SIGNAL(editingFinished()), CMainWindow, SLOT(changeHistogramSettings()));
         QObject::connect(m_pActionHistogram, SIGNAL(triggered()), CMainWindow, SLOT(toggleHistogramDock()));
+        QObject::connect(m_pActionDOF, SIGNAL(triggered()), CMainWindow, SLOT(createNewEntityDOF()));
+        QObject::connect(m_pActionFXAA, SIGNAL(triggered()), CMainWindow, SLOT(createNewEntityFXAA()));
+        QObject::connect(m_pActionBloom, SIGNAL(triggered()), CMainWindow, SLOT(createNewEntityBloom()));
+        QObject::connect(m_pActionSSR, SIGNAL(triggered()), CMainWindow, SLOT(createNewEntitySSR()));
+        QObject::connect(m_pActionVolumeFog, SIGNAL(triggered()), CMainWindow, SLOT(createNewEntityVolumeFog()));
 
         QMetaObject::connectSlotsByName(CMainWindow);
     } // setupUi
@@ -441,6 +479,14 @@ public:
         m_pActionCamera->setText(QApplication::translate("CMainWindow", "Camera", 0));
         m_pActionDirectional->setText(QApplication::translate("CMainWindow", "Directional", 0));
         m_pActionHistogram->setText(QApplication::translate("CMainWindow", "Histogram", 0));
+        actionConsole->setText(QApplication::translate("CMainWindow", "Console", 0));
+        actionScene_Hraph->setText(QApplication::translate("CMainWindow", "Scene Hraph", 0));
+        actionInspector->setText(QApplication::translate("CMainWindow", "Inspector", 0));
+        m_pActionBloom->setText(QApplication::translate("CMainWindow", "Bloom", 0));
+        m_pActionDOF->setText(QApplication::translate("CMainWindow", "DOF", 0));
+        m_pActionFXAA->setText(QApplication::translate("CMainWindow", "FXAA", 0));
+        m_pActionSSR->setText(QApplication::translate("CMainWindow", "SSR", 0));
+        m_pActionVolumeFog->setText(QApplication::translate("CMainWindow", "Volume Fog", 0));
         m_pPlayButton->setText(QApplication::translate("CMainWindow", "Play", 0));
         m_pMailAdressEdit->setPlaceholderText(QApplication::translate("CMainWindow", "max.mustermann@mail.com", 0));
         m_pScreenshotButton->setText(QApplication::translate("CMainWindow", "Screenshot", 0));
@@ -450,6 +496,7 @@ public:
         m_pMenuEntity->setTitle(QApplication::translate("CMainWindow", "Entity", 0));
         menuActors->setTitle(QApplication::translate("CMainWindow", "Actors", 0));
         menuLights->setTitle(QApplication::translate("CMainWindow", "Lights", 0));
+        menuEffects->setTitle(QApplication::translate("CMainWindow", "Effects", 0));
         m_pMenuComponent->setTitle(QApplication::translate("CMainWindow", "Component", 0));
         m_pMenuWindow->setTitle(QApplication::translate("CMainWindow", "Window", 0));
         m_pMenuHelp->setTitle(QApplication::translate("CMainWindow", "Help", 0));
@@ -462,12 +509,12 @@ public:
         m_pConsoleDockWidget->setWindowTitle(QApplication::translate("CMainWindow", "Console", 0));
         m_pSendCommandButton->setText(QApplication::translate("CMainWindow", "Send", 0));
         m_pHistogramDockWidget->setWindowTitle(QApplication::translate("CMainWindow", "Histogram", 0));
-        label_6->setText(QApplication::translate("CMainWindow", "Eye Adaption Down", 0));
-        label->setText(QApplication::translate("CMainWindow", "Lower Bound", 0));
-        label_2->setText(QApplication::translate("CMainWindow", "Log Min", 0));
-        label_4->setText(QApplication::translate("CMainWindow", "Log Max", 0));
-        label_3->setText(QApplication::translate("CMainWindow", "Upper Bound", 0));
-        label_5->setText(QApplication::translate("CMainWindow", "Eye Adaption Up", 0));
+        label_6->setText(QApplication::translate("CMainWindow", "Eye Adaption Down:", 0));
+        label->setText(QApplication::translate("CMainWindow", "Lower Bound:", 0));
+        label_2->setText(QApplication::translate("CMainWindow", "Log Min:", 0));
+        label_4->setText(QApplication::translate("CMainWindow", "Log Max:", 0));
+        label_3->setText(QApplication::translate("CMainWindow", "Upper Bound:", 0));
+        label_5->setText(QApplication::translate("CMainWindow", "Eye Adaption Up:", 0));
     } // retranslateUi
 
 };

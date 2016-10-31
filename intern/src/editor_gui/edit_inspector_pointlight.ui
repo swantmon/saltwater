@@ -108,7 +108,7 @@
               <brush brushstyle="SolidPattern">
                <color alpha="255">
                 <red>255</red>
-                <green>255</green>
+                <green>0</green>
                 <blue>255</blue>
                </color>
               </brush>
@@ -119,7 +119,7 @@
               <brush brushstyle="SolidPattern">
                <color alpha="255">
                 <red>255</red>
-                <green>255</green>
+                <green>0</green>
                 <blue>255</blue>
                </color>
               </brush>
@@ -130,7 +130,7 @@
               <brush brushstyle="SolidPattern">
                <color alpha="255">
                 <red>255</red>
-                <green>255</green>
+                <green>0</green>
                 <blue>255</blue>
                </color>
               </brush>
@@ -403,8 +403,8 @@
    <slot>pickColorFromDialog()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>363</x>
-     <y>77</y>
+     <x>333</x>
+     <y>81</y>
     </hint>
     <hint type="destinationlabel">
      <x>252</x>
@@ -451,8 +451,8 @@
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>318</x>
-     <y>129</y>
+     <x>310</x>
+     <y>137</y>
     </hint>
     <hint type="destinationlabel">
      <x>396</x>

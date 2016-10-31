@@ -130,7 +130,7 @@ public:
         m_pPickColorButton = new QPushButton(groupBox);
         m_pPickColorButton->setObjectName(QStringLiteral("m_pPickColorButton"));
         QPalette palette;
-        QBrush brush(QColor(255, 255, 255, 255));
+        QBrush brush(QColor(255, 0, 255, 255));
         brush.setStyle(Qt::SolidPattern);
         palette.setBrush(QPalette::Active, QPalette::Button, brush);
         palette.setBrush(QPalette::Inactive, QPalette::Button, brush);

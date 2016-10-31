@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_Edit__CMainWindow_t {
-    QByteArrayData data[12];
-    char stringdata0[245];
+    QByteArrayData data[17];
+    char stringdata0[349];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -39,8 +39,13 @@ QT_MOC_LITERAL(6, 103, 25), // "createNewLightDirectional"
 QT_MOC_LITERAL(7, 129, 19), // "createNewLightPoint"
 QT_MOC_LITERAL(8, 149, 25), // "createNewLightEnvironment"
 QT_MOC_LITERAL(9, 175, 25), // "createNewLightGlobalProbe"
-QT_MOC_LITERAL(10, 201, 23), // "changeHistogramSettings"
-QT_MOC_LITERAL(11, 225, 19) // "toggleHistogramDock"
+QT_MOC_LITERAL(10, 201, 20), // "createNewEntityBloom"
+QT_MOC_LITERAL(11, 222, 18), // "createNewEntityDOF"
+QT_MOC_LITERAL(12, 241, 19), // "createNewEntityFXAA"
+QT_MOC_LITERAL(13, 261, 18), // "createNewEntitySSR"
+QT_MOC_LITERAL(14, 280, 24), // "createNewEntityVolumeFog"
+QT_MOC_LITERAL(15, 305, 23), // "changeHistogramSettings"
+QT_MOC_LITERAL(16, 329, 19) // "toggleHistogramDock"
 
     },
     "Edit::CMainWindow\0switchPlayingCurrentScene\0"
@@ -49,6 +54,9 @@ QT_MOC_LITERAL(11, 225, 19) // "toggleHistogramDock"
     "createNewLightDirectional\0createNewLightPoint\0"
     "createNewLightEnvironment\0"
     "createNewLightGlobalProbe\0"
+    "createNewEntityBloom\0createNewEntityDOF\0"
+    "createNewEntityFXAA\0createNewEntitySSR\0"
+    "createNewEntityVolumeFog\0"
     "changeHistogramSettings\0toggleHistogramDock"
 };
 #undef QT_MOC_LITERAL
@@ -59,7 +67,7 @@ static const uint qt_meta_data_Edit__CMainWindow[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-      10,   14, // methods
+      15,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -67,18 +75,28 @@ static const uint qt_meta_data_Edit__CMainWindow[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    0,   64,    2, 0x0a /* Public */,
-       3,    0,   65,    2, 0x0a /* Public */,
-       4,    0,   66,    2, 0x0a /* Public */,
-       5,    0,   67,    2, 0x0a /* Public */,
-       6,    0,   68,    2, 0x0a /* Public */,
-       7,    0,   69,    2, 0x0a /* Public */,
-       8,    0,   70,    2, 0x0a /* Public */,
-       9,    0,   71,    2, 0x0a /* Public */,
-      10,    0,   72,    2, 0x0a /* Public */,
-      11,    0,   73,    2, 0x0a /* Public */,
+       1,    0,   89,    2, 0x0a /* Public */,
+       3,    0,   90,    2, 0x0a /* Public */,
+       4,    0,   91,    2, 0x0a /* Public */,
+       5,    0,   92,    2, 0x0a /* Public */,
+       6,    0,   93,    2, 0x0a /* Public */,
+       7,    0,   94,    2, 0x0a /* Public */,
+       8,    0,   95,    2, 0x0a /* Public */,
+       9,    0,   96,    2, 0x0a /* Public */,
+      10,    0,   97,    2, 0x0a /* Public */,
+      11,    0,   98,    2, 0x0a /* Public */,
+      12,    0,   99,    2, 0x0a /* Public */,
+      13,    0,  100,    2, 0x0a /* Public */,
+      14,    0,  101,    2, 0x0a /* Public */,
+      15,    0,  102,    2, 0x0a /* Public */,
+      16,    0,  103,    2, 0x0a /* Public */,
 
  // slots: parameters
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
@@ -107,8 +125,13 @@ void Edit::CMainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, in
         case 5: _t->createNewLightPoint(); break;
         case 6: _t->createNewLightEnvironment(); break;
         case 7: _t->createNewLightGlobalProbe(); break;
-        case 8: _t->changeHistogramSettings(); break;
-        case 9: _t->toggleHistogramDock(); break;
+        case 8: _t->createNewEntityBloom(); break;
+        case 9: _t->createNewEntityDOF(); break;
+        case 10: _t->createNewEntityFXAA(); break;
+        case 11: _t->createNewEntitySSR(); break;
+        case 12: _t->createNewEntityVolumeFog(); break;
+        case 13: _t->changeHistogramSettings(); break;
+        case 14: _t->toggleHistogramDock(); break;
         default: ;
         }
     }
@@ -142,13 +165,13 @@ int Edit::CMainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 10)
+        if (_id < 15)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 10;
+        _id -= 15;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 10)
+        if (_id < 15)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 10;
+        _id -= 15;
     }
     return _id;
 }

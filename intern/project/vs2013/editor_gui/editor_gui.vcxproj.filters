@@ -80,6 +80,36 @@
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_globalprobe.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_bloom.cpp">
+      <Filter>Widgets\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_bloom.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_dof.cpp">
+      <Filter>Widgets\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_dof.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_fxaa.cpp">
+      <Filter>Widgets\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_fxaa.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_ssr.cpp">
+      <Filter>Widgets\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_ssr.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_volumefog.cpp">
+      <Filter>Widgets\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_volumefog.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_mainwindow.ui">
@@ -131,6 +161,36 @@
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_globalprobe.h">
       <Filter>Widgets\Inspector</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_bloom.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_ssr.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_dof.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_fxaa.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_volumefog.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_bloom.h">
+      <Filter>Widgets\Inspector</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_dof.h">
+      <Filter>Widgets\Inspector</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_fxaa.h">
+      <Filter>Widgets\Inspector</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_ssr.h">
+      <Filter>Widgets\Inspector</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_volumefog.h">
+      <Filter>Widgets\Inspector</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor_gui\edit_gui.h" />
@@ -153,6 +213,21 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_globalprobe.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_bloom.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_ssr.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_dof.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_fxaa.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_volumefog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
