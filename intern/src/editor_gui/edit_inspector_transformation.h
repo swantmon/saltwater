@@ -22,6 +22,8 @@ namespace Edit
 
         void valueChanged();
 
+        void labelClicked();
+
         void RequestInformation();
 
     private:

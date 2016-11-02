@@ -54,6 +54,12 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
+    void CInspectorTransformation::labelClicked()
+    {
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CInspectorTransformation::RequestInformation()
     {
         CMessage NewMessage(true);

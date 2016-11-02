@@ -110,6 +110,12 @@
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_volumefog.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_clickable_label.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\edit_clickable_label.cpp">
+      <Filter>Widgets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_mainwindow.ui">
@@ -190,6 +196,9 @@
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_volumefog.h">
       <Filter>Widgets\Inspector</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_clickable_label.h">
+      <Filter>Widgets</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
