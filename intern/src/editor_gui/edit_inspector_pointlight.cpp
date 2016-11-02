@@ -62,7 +62,7 @@ namespace Edit
         float InnerConeAngle    = m_pInnerConeAngleEdit->text().toFloat();
         float OuterConeAngle    = m_pOuterConeAngleEdit->text().toFloat();
 
-        Base::Float3 Direction = Base::Float3(m_pDirectionXEdit->text().toFloat(), m_pDirectionYEdit->text().toFloat(), m_pDirectionZEdit->text().toFloat());
+        Base::Float3 Direction = Base::Float3(m_pDirectionZEdit->text().toFloat(), m_pDirectionYEdit->text().toFloat(), m_pDirectionXEdit->text().toFloat());
 
         int ShadowType    = m_pShadowTypeCB->currentIndex();
         int ShadowQuality = m_pShadowQualityCB->currentIndex();
