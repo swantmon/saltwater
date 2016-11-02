@@ -54,9 +54,119 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorTransformation::mousePositionDifference(QPoint _Difference)
+    void CInspectorTransformation::changePositionX(QPoint _Difference)
     {
-        BASE_CONSOLE_INFOV("Pos x=%i, y=%i", _Difference.x(), _Difference.y());
+        float Difference = _Difference.x() / 100.0f;
+
+        float PreviousValue = m_pTransformationPositionX->text().toFloat();
+
+        m_pTransformationPositionX->setText(QString::number(PreviousValue + Difference));
+
+        valueChanged();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorTransformation::changePositionY(QPoint _Difference)
+    {
+        float Difference = _Difference.x() / 100.0f;
+
+        float PreviousValue = m_pTransformationPositionY->text().toFloat();
+
+        m_pTransformationPositionY->setText(QString::number(PreviousValue + Difference));
+
+        valueChanged();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorTransformation::changePositionZ(QPoint _Difference)
+    {
+        float Difference = _Difference.x() / 100.0f;
+
+        float PreviousValue = m_pTransformationPositionZ->text().toFloat();
+
+        m_pTransformationPositionZ->setText(QString::number(PreviousValue + Difference));
+
+        valueChanged();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorTransformation::changeRotationX(QPoint _Difference)
+    {
+        float Difference = _Difference.x() / 10.0f;
+
+        float PreviousValue = m_pTransformationRotationX->text().toFloat();
+
+        m_pTransformationRotationX->setText(QString::number(PreviousValue + Difference));
+
+        valueChanged();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorTransformation::changeRotationY(QPoint _Difference)
+    {
+        float Difference = _Difference.x() / 10.0f;
+
+        float PreviousValue = m_pTransformationRotationY->text().toFloat();
+
+        m_pTransformationRotationY->setText(QString::number(PreviousValue + Difference));
+
+        valueChanged();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorTransformation::changeRotationZ(QPoint _Difference)
+    {
+        float Difference = _Difference.x() / 10.0f;
+
+        float PreviousValue = m_pTransformationRotationZ->text().toFloat();
+
+        m_pTransformationRotationZ->setText(QString::number(PreviousValue + Difference));
+
+        valueChanged();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorTransformation::changeScaleX(QPoint _Difference)
+    {
+        float Difference = _Difference.x() / 1000.0f;
+
+        float PreviousValue = m_pTransformationScaleX->text().toFloat();
+
+        m_pTransformationScaleX->setText(QString::number(PreviousValue + Difference));
+
+        valueChanged();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorTransformation::changeScaleY(QPoint _Difference)
+    {
+        float Difference = _Difference.x() / 1000.0f;
+
+        float PreviousValue = m_pTransformationScaleY->text().toFloat();
+
+        m_pTransformationScaleY->setText(QString::number(PreviousValue + Difference));
+
+        valueChanged();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorTransformation::changeScaleZ(QPoint _Difference)
+    {
+        float Difference = _Difference.x() / 1000.0f;
+
+        float PreviousValue = m_pTransformationScaleZ->text().toFloat();
+
+        m_pTransformationScaleZ->setText(QString::number(PreviousValue + Difference));
+
+        valueChanged();
     }
 
     // -----------------------------------------------------------------------------

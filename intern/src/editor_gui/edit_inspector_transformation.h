@@ -22,7 +22,17 @@ namespace Edit
 
         void valueChanged();
 
-        void mousePositionDifference(QPoint _Difference);
+        void changePositionX(QPoint _Difference);
+        void changePositionY(QPoint _Difference);
+        void changePositionZ(QPoint _Difference);
+
+        void changeRotationX(QPoint _Difference);
+        void changeRotationY(QPoint _Difference);
+        void changeRotationZ(QPoint _Difference);
+
+        void changeScaleX(QPoint _Difference);
+        void changeScaleY(QPoint _Difference);
+        void changeScaleZ(QPoint _Difference);
 
         void RequestInformation();
 

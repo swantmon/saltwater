@@ -35,5 +35,7 @@ namespace Edit
         QPoint CurrentMousePosition = _pEvent->pos();
 
         emit mousePositionDifference(CurrentMousePosition - m_LastMousePosition);
+
+        m_LastMousePosition = _pEvent->pos();
     }
 } // namespace Edit
