@@ -54,8 +54,9 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorTransformation::labelClicked()
+    void CInspectorTransformation::mousePositionDifference(QPoint _Difference)
     {
+        BASE_CONSOLE_INFOV("Pos x=%i, y=%i", _Difference.x(), _Difference.y());
     }
 
     // -----------------------------------------------------------------------------

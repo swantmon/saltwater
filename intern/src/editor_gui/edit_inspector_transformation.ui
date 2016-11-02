@@ -194,6 +194,7 @@
    <header>editor_gui/edit_clickable_label.h</header>
    <slots>
     <signal>clicked()</signal>
+    <signal>mousePositionDifference(QPoint)</signal>
    </slots>
   </customwidget>
  </customwidgets>
@@ -356,16 +357,16 @@
   </connection>
   <connection>
    <sender>m_pPositionXLabel</sender>
-   <signal>clicked()</signal>
+   <signal>mousePositionDifference(QPoint)</signal>
    <receiver>InspectorTransformation</receiver>
-   <slot>labelClicked()</slot>
+   <slot>mousePositionDifference(QPoint)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>67</x>
+     <x>69</x>
      <y>43</y>
     </hint>
     <hint type="destinationlabel">
-     <x>94</x>
+     <x>38</x>
      <y>2</y>
     </hint>
    </hints>
@@ -373,6 +374,6 @@
  </connections>
  <slots>
   <slot>valueChanged()</slot>
-  <slot>labelClicked()</slot>
+  <slot>mousePositionDifference(QPoint)</slot>
  </slots>
 </ui>

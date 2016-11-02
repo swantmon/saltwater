@@ -193,7 +193,7 @@ public:
         QObject::connect(m_pTransformationScaleX, SIGNAL(textEdited(QString)), InspectorTransformation, SLOT(valueChanged()));
         QObject::connect(m_pTransformationScaleY, SIGNAL(textEdited(QString)), InspectorTransformation, SLOT(valueChanged()));
         QObject::connect(m_pTransformationScaleZ, SIGNAL(textEdited(QString)), InspectorTransformation, SLOT(valueChanged()));
-        QObject::connect(m_pPositionXLabel, SIGNAL(clicked()), InspectorTransformation, SLOT(labelClicked()));
+        QObject::connect(m_pPositionXLabel, SIGNAL(mousePositionDifference(QPoint)), InspectorTransformation, SLOT(mousePositionDifference(QPoint)));
 
         QMetaObject::connectSlotsByName(InspectorTransformation);
     } // setupUi

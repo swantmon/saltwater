@@ -22,7 +22,7 @@ namespace Edit
 
         void valueChanged();
 
-        void labelClicked();
+        void mousePositionDifference(QPoint _Difference);
 
         void RequestInformation();
 

@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_Edit__CInspectorTransformation_t {
-    QByteArrayData data[5];
-    char stringdata0[77];
+    QByteArrayData data[6];
+    char stringdata0[100];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -32,13 +32,14 @@ static const qt_meta_stringdata_Edit__CInspectorTransformation_t qt_meta_stringd
 QT_MOC_LITERAL(0, 0, 30), // "Edit::CInspectorTransformation"
 QT_MOC_LITERAL(1, 31, 12), // "valueChanged"
 QT_MOC_LITERAL(2, 44, 0), // ""
-QT_MOC_LITERAL(3, 45, 12), // "labelClicked"
-QT_MOC_LITERAL(4, 58, 18) // "RequestInformation"
+QT_MOC_LITERAL(3, 45, 23), // "mousePositionDifference"
+QT_MOC_LITERAL(4, 69, 11), // "_Difference"
+QT_MOC_LITERAL(5, 81, 18) // "RequestInformation"
 
     },
     "Edit::CInspectorTransformation\0"
-    "valueChanged\0\0labelClicked\0"
-    "RequestInformation"
+    "valueChanged\0\0mousePositionDifference\0"
+    "_Difference\0RequestInformation"
 };
 #undef QT_MOC_LITERAL
 
@@ -57,12 +58,12 @@ static const uint qt_meta_data_Edit__CInspectorTransformation[] = {
 
  // slots: name, argc, parameters, tag, flags
        1,    0,   29,    2, 0x0a /* Public */,
-       3,    0,   30,    2, 0x0a /* Public */,
-       4,    0,   31,    2, 0x0a /* Public */,
+       3,    1,   30,    2, 0x0a /* Public */,
+       5,    0,   33,    2, 0x0a /* Public */,
 
  // slots: parameters
     QMetaType::Void,
-    QMetaType::Void,
+    QMetaType::Void, QMetaType::QPoint,    4,
     QMetaType::Void,
 
        0        // eod
@@ -75,12 +76,11 @@ void Edit::CInspectorTransformation::qt_static_metacall(QObject *_o, QMetaObject
         Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->valueChanged(); break;
-        case 1: _t->labelClicked(); break;
+        case 1: _t->mousePositionDifference((*reinterpret_cast< QPoint(*)>(_a[1]))); break;
         case 2: _t->RequestInformation(); break;
         default: ;
         }
     }
-    Q_UNUSED(_a);
 }
 
 const QMetaObject Edit::CInspectorTransformation::staticMetaObject = {
