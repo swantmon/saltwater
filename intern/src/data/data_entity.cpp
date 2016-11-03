@@ -338,6 +338,9 @@ namespace Dt
 
         NewMatrix.GetTranslation(Translation);
         NewMatrix.GetRotation(Rotation);
+
+        Rotation *= Base::Float3(-1, 1, 1);
+
         NewMatrix.GetScale(Scale);
 
         pChildTransformationFacet->SetPosition(Translation);
@@ -366,5 +369,44 @@ namespace Dt
         m_pHierarchyFacet->SetParent(nullptr);
 
         m_pHierarchyFacet->SetSibling(nullptr);
+
+        // -----------------------------------------------------------------------------
+        // Transformation
+        // -----------------------------------------------------------------------------
+        Dt::CTransformationFacet* pParentTransformationFacet;
+
+        pParentTransformationFacet = pParent->GetTransformationFacet();
+
+        if (m_pTransformationFacet == nullptr || pParentTransformationFacet == nullptr)
+        {
+            return;
+        }
+
+        Base::Float4x4 NewMatrix;
+        Base::Float4x4 RotationMatrix;
+
+        Base::Float3 Translation;
+        Base::Float3 Rotation;
+        Base::Float3 Scale;
+
+        NewMatrix = m_pTransformationFacet->GetWorldMatrix();
+
+        NewMatrix.GetTranslation(Translation);
+
+        NewMatrix.GetRotation(Rotation);
+
+        // TODO by tschwandt
+        // is it necessary to do this?
+        Rotation *= Base::Float3(-1, 1, 1);
+
+        RotationMatrix.SetRotation(Rotation[0], Rotation[1], Rotation[2]);
+
+        NewMatrix = RotationMatrix.GetInverted() * NewMatrix;
+
+        NewMatrix.GetScale(Scale);
+
+        m_pTransformationFacet->SetPosition(Translation);
+        m_pTransformationFacet->SetRotation(Rotation);
+        m_pTransformationFacet->SetScale(Scale);
     }
 } // namespace Dt
