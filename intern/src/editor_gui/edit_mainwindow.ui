@@ -151,8 +151,8 @@
      <property name="title">
       <string>Lights</string>
      </property>
-     <addaction name="m_pActionDirectional"/>
      <addaction name="m_pActionPoint"/>
+     <addaction name="m_pActionSun"/>
      <addaction name="m_pActionEnvironment"/>
      <addaction name="m_pActionGlobalProbe"/>
     </widget>
@@ -474,9 +474,9 @@
     <string>Camera</string>
    </property>
   </action>
-  <action name="m_pActionDirectional">
+  <action name="m_pActionSun">
    <property name="text">
-    <string>Directional</string>
+    <string>Sun</string>
    </property>
   </action>
   <action name="m_pActionHistogram">
@@ -596,7 +596,7 @@
    <slot>takeScreenshot()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1567</x>
+     <x>1829</x>
      <y>113</y>
     </hint>
     <hint type="destinationlabel">
@@ -654,10 +654,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>m_pActionDirectional</sender>
+   <sender>m_pActionSun</sender>
    <signal>triggered()</signal>
    <receiver>CMainWindow</receiver>
-   <slot>createNewLightDirectional()</slot>
+   <slot>createNewLightSun()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -931,7 +931,7 @@
   <slot>takeScreenshot()</slot>
   <slot>openNewSceneDialog()</slot>
   <slot>openNewActorModelDialog()</slot>
-  <slot>createNewLightDirectional()</slot>
+  <slot>createNewLightSun()</slot>
   <slot>createNewLightPoint()</slot>
   <slot>createNewLightEnvironment()</slot>
   <slot>createNewLightGlobalProbe()</slot>

@@ -20,7 +20,7 @@
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_Edit__CMainWindow_t {
     QByteArrayData data[17];
-    char stringdata0[349];
+    char stringdata0[341];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -35,24 +35,23 @@ QT_MOC_LITERAL(2, 44, 0), // ""
 QT_MOC_LITERAL(3, 45, 14), // "takeScreenshot"
 QT_MOC_LITERAL(4, 60, 18), // "openNewSceneDialog"
 QT_MOC_LITERAL(5, 79, 23), // "openNewActorModelDialog"
-QT_MOC_LITERAL(6, 103, 25), // "createNewLightDirectional"
-QT_MOC_LITERAL(7, 129, 19), // "createNewLightPoint"
-QT_MOC_LITERAL(8, 149, 25), // "createNewLightEnvironment"
-QT_MOC_LITERAL(9, 175, 25), // "createNewLightGlobalProbe"
-QT_MOC_LITERAL(10, 201, 20), // "createNewEntityBloom"
-QT_MOC_LITERAL(11, 222, 18), // "createNewEntityDOF"
-QT_MOC_LITERAL(12, 241, 19), // "createNewEntityFXAA"
-QT_MOC_LITERAL(13, 261, 18), // "createNewEntitySSR"
-QT_MOC_LITERAL(14, 280, 24), // "createNewEntityVolumeFog"
-QT_MOC_LITERAL(15, 305, 23), // "changeHistogramSettings"
-QT_MOC_LITERAL(16, 329, 19) // "toggleHistogramDock"
+QT_MOC_LITERAL(6, 103, 19), // "createNewLightPoint"
+QT_MOC_LITERAL(7, 123, 17), // "createNewLightSun"
+QT_MOC_LITERAL(8, 141, 25), // "createNewLightEnvironment"
+QT_MOC_LITERAL(9, 167, 25), // "createNewLightGlobalProbe"
+QT_MOC_LITERAL(10, 193, 20), // "createNewEntityBloom"
+QT_MOC_LITERAL(11, 214, 18), // "createNewEntityDOF"
+QT_MOC_LITERAL(12, 233, 19), // "createNewEntityFXAA"
+QT_MOC_LITERAL(13, 253, 18), // "createNewEntitySSR"
+QT_MOC_LITERAL(14, 272, 24), // "createNewEntityVolumeFog"
+QT_MOC_LITERAL(15, 297, 23), // "changeHistogramSettings"
+QT_MOC_LITERAL(16, 321, 19) // "toggleHistogramDock"
 
     },
     "Edit::CMainWindow\0switchPlayingCurrentScene\0"
     "\0takeScreenshot\0openNewSceneDialog\0"
-    "openNewActorModelDialog\0"
-    "createNewLightDirectional\0createNewLightPoint\0"
-    "createNewLightEnvironment\0"
+    "openNewActorModelDialog\0createNewLightPoint\0"
+    "createNewLightSun\0createNewLightEnvironment\0"
     "createNewLightGlobalProbe\0"
     "createNewEntityBloom\0createNewEntityDOF\0"
     "createNewEntityFXAA\0createNewEntitySSR\0"
@@ -121,8 +120,8 @@ void Edit::CMainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, in
         case 1: _t->takeScreenshot(); break;
         case 2: _t->openNewSceneDialog(); break;
         case 3: _t->openNewActorModelDialog(); break;
-        case 4: _t->createNewLightDirectional(); break;
-        case 5: _t->createNewLightPoint(); break;
+        case 4: _t->createNewLightPoint(); break;
+        case 5: _t->createNewLightSun(); break;
         case 6: _t->createNewLightEnvironment(); break;
         case 7: _t->createNewLightGlobalProbe(); break;
         case 8: _t->createNewEntityBloom(); break;

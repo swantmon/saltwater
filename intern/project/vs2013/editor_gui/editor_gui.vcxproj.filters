@@ -19,6 +19,9 @@
     <Filter Include="Widgets\Inspector">
       <UniqueIdentifier>{38ae8e22-8004-4fed-ac45-11a1a148b7f7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Form Files\Inspector">
+      <UniqueIdentifier>{6b50727c-1fa1-4ff6-86dd-c95526cdcb5d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\editor_gui\edit_gui.cpp" />
@@ -116,6 +119,12 @@
     <ClCompile Include="..\..\..\src\editor_gui\edit_clickable_label.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_sun.cpp">
+      <Filter>Widgets\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_sun.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_mainwindow.ui">
@@ -130,9 +139,6 @@
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_scenegraph.h">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_transformation.ui">
-      <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector.h">
       <Filter>Widgets</Filter>
@@ -152,35 +158,11 @@
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_pointlight.h">
       <Filter>Widgets\Inspector</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_pointlight.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_environment.h">
       <Filter>Widgets\Inspector</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_environment.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_globalprobe.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_globalprobe.h">
       <Filter>Widgets\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_bloom.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_ssr.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_dof.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_fxaa.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_volumefog.ui">
-      <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_bloom.h">
       <Filter>Widgets\Inspector</Filter>
@@ -199,6 +181,39 @@
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_clickable_label.h">
       <Filter>Widgets</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_bloom.ui">
+      <Filter>Form Files\Inspector</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_dof.ui">
+      <Filter>Form Files\Inspector</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_environment.ui">
+      <Filter>Form Files\Inspector</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_fxaa.ui">
+      <Filter>Form Files\Inspector</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_globalprobe.ui">
+      <Filter>Form Files\Inspector</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_pointlight.ui">
+      <Filter>Form Files\Inspector</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_ssr.ui">
+      <Filter>Form Files\Inspector</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_sun.ui">
+      <Filter>Form Files\Inspector</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_transformation.ui">
+      <Filter>Form Files\Inspector</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_volumefog.ui">
+      <Filter>Form Files\Inspector</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_sun.h">
+      <Filter>Widgets\Inspector</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -237,6 +252,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_volumefog.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_sun.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -36,8 +36,8 @@ namespace Edit
         void takeScreenshot();
         void openNewSceneDialog();
         void openNewActorModelDialog();
-        void createNewLightDirectional();
         void createNewLightPoint();
+        void createNewLightSun();
         void createNewLightEnvironment();
         void createNewLightGlobalProbe();
         void createNewEntityBloom();

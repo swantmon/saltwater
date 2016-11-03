@@ -6,8 +6,9 @@
 #include "editor_gui/edit_inspector_fxaa.h"
 #include "editor_gui/edit_inspector_globalprobe.h"
 #include "editor_gui/edit_inspector_pointlight.h"
-#include "editor_gui/edit_inspector_transformation.h"
+#include "editor_gui/edit_inspector_sun.h"
 #include "editor_gui/edit_inspector_ssr.h"
+#include "editor_gui/edit_inspector_transformation.h"
 #include "editor_gui/edit_inspector_volumefog.h"
 
 #include "editor_port/edit_message.h"
@@ -33,6 +34,7 @@ namespace Edit
 
         QVBoxLayout*              m_pInspectorLayout;
         CInspectorPointlight*     m_pPointlightWidget;
+        CInspectorSun*            m_pSunWidget;
         CInspectorTransformation* m_pTransformWidget;
         CInspectorEnvironment*    m_pEnvironmentWidget;
         CInspectorGlobalProbe*    m_pGlobalProbeWidget;

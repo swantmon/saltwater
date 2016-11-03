@@ -10,6 +10,7 @@ namespace Edit
         : QWidget             (_pParent)
         , m_pInspectorLayout  ()
         , m_pPointlightWidget ()
+        , m_pSunWidget        ()
         , m_pTransformWidget  ()
         , m_pEnvironmentWidget()
         , m_pGlobalProbeWidget()
@@ -30,6 +31,7 @@ namespace Edit
         // Create transformation widget and add to layout
         // -----------------------------------------------------------------------------
         m_pPointlightWidget  = new CInspectorPointlight();
+        m_pSunWidget         = new CInspectorSun();
         m_pTransformWidget   = new CInspectorTransformation();
         m_pEnvironmentWidget = new CInspectorEnvironment();
         m_pGlobalProbeWidget = new CInspectorGlobalProbe();
@@ -41,6 +43,7 @@ namespace Edit
 
         m_pInspectorLayout->addWidget(m_pTransformWidget);
         m_pInspectorLayout->addWidget(m_pPointlightWidget);
+        m_pInspectorLayout->addWidget(m_pSunWidget);
         m_pInspectorLayout->addWidget(m_pEnvironmentWidget);
         m_pInspectorLayout->addWidget(m_pGlobalProbeWidget);
         m_pInspectorLayout->addWidget(m_pBloomWidget);
@@ -50,6 +53,7 @@ namespace Edit
         m_pInspectorLayout->addWidget(m_pVolumeFogWidget);
 
         m_pPointlightWidget ->setVisible(false);
+        m_pSunWidget        ->setVisible(false);
         m_pTransformWidget  ->setVisible(false);
         m_pEnvironmentWidget->setVisible(false);
         m_pGlobalProbeWidget->setVisible(false);
@@ -74,7 +78,27 @@ namespace Edit
 
     CInspector::~CInspector() 
     {
+        delete m_pPointlightWidget;
+        delete m_pSunWidget;
+        delete m_pTransformWidget;
+        delete m_pEnvironmentWidget;
+        delete m_pGlobalProbeWidget;
+        delete m_pBloomWidget;
+        delete m_pDOFWidget;
+        delete m_pFXAAWidget;
+        delete m_pSSRWidget;
+        delete m_pVolumeFogWidget;
 
+        m_pPointlightWidget  = 0;
+        m_pSunWidget         = 0;
+        m_pTransformWidget   = 0;
+        m_pEnvironmentWidget = 0;
+        m_pGlobalProbeWidget = 0;
+        m_pBloomWidget       = 0;
+        m_pDOFWidget         = 0;
+        m_pFXAAWidget        = 0;
+        m_pSSRWidget         = 0;
+        m_pVolumeFogWidget   = 0;
     }
 
     // -----------------------------------------------------------------------------
@@ -118,6 +142,7 @@ namespace Edit
         if (HasDetailData)
         {
             m_pPointlightWidget ->setVisible(false);
+            m_pSunWidget        ->setVisible(false);
             m_pEnvironmentWidget->setVisible(false);
             m_pGlobalProbeWidget->setVisible(false);
             m_pBloomWidget      ->setVisible(false);
@@ -151,6 +176,9 @@ namespace Edit
                 }
                 else if (Type == 1) // Sun
                 {
+                    m_pSunWidget->RequestInformation();
+
+                    m_pSunWidget->setVisible(true);
                 }
                 else if (Type == 2) // GlobalProbe
                 {

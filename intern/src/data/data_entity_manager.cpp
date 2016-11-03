@@ -279,7 +279,9 @@ namespace
         }
         else
         {
-            m_EntityID = Base::Max(ID, m_EntityID + 1);
+            m_EntityID = Base::Max(ID, m_EntityID);
+
+            ++ m_EntityID;
         }
 
         rEntity.m_ID               = ID;

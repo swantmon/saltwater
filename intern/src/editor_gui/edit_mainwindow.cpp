@@ -150,13 +150,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CMainWindow::createNewLightDirectional()
+    void CMainWindow::createNewLightSun()
     {
         CMessage NewMessage(true);
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewEntityDirectional, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::NewEntitySun, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -222,7 +222,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewEntityPoint, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::NewEntityPointlight, NewMessage);
     }
 
     // -----------------------------------------------------------------------------

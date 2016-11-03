@@ -291,26 +291,8 @@ namespace
 
         Base::Float3x3 RotationMatrix = Base::Float3x3::s_Identity;
 
-        Base::Float3 SunPosition;
+        Base::Float3 SunPosition = _rEntity.GetWorldPosition();
         Base::Float3 SunRotation = pDataSunLightFacet->GetDirection();
-
-        // -----------------------------------------------------------------------------
-        // Calculation based on thales' theorem
-        // -----------------------------------------------------------------------------
-        float MetersX = static_cast<float>(Dt::Map::GetNumberOfMetersX());
-        float MetersY = static_cast<float>(Dt::Map::GetNumberOfMetersY());
-        float MetersZ = 30.0f;
-
-        Base::AABB3Float  MapBox(Base::Float3(0.0f), Base::Float3(MetersX, MetersY, MetersZ));
-        Base::SphereFloat MapSphere(MapBox.GetCenter(), MapBox.GetSize().Length() / 2.0f);
-
-        Base::Float3 Baseline = Base::Float3::s_AxisX;
-
-        Baseline = Baseline.Normalize();
-
-        float Radius = MapSphere.GetRadius();
-
-        SunPosition = Base::Float3(MetersX / 2.0f, MetersY / 2.0f, MetersZ / 2.0f) - SunRotation * Base::Float3(Radius);
 
         // -----------------------------------------------------------------------------
         // Set view
@@ -323,6 +305,8 @@ namespace
         // -----------------------------------------------------------------------------
         // Calculate near and far plane
         // -----------------------------------------------------------------------------
+        float Radius = 30.0f;
+
         float Near = 1.0f;
         float Far = Radius * 2.0f;
 

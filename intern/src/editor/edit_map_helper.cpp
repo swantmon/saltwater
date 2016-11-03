@@ -56,8 +56,8 @@ namespace
 
         void OnNewMap(Edit::CMessage& _rMessage);
         void OnNewEntityActor(Edit::CMessage& _rMessage);
-        void OnNewEntityDirectional(Edit::CMessage& _rMessage);
-        void OnNewEntityPoint(Edit::CMessage& _rMessage);
+        void OnNewEntityPointlight(Edit::CMessage& _rMessage);
+        void OnNewEntitySun(Edit::CMessage& _rMessage);
         void OnNewEntityEnvironment(Edit::CMessage& _rMessage);
         void OnNewEntityGlobalProbe(Edit::CMessage& _rMessage);
         void OnNewEntityBloom(Edit::CMessage& _rMessage);
@@ -69,6 +69,7 @@ namespace
         void OnRequestEntityInfoFacets(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoTransformation(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoPointlight(Edit::CMessage& _rMessage);
+        void OnRequestEntityInfoSun(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoEnvironment(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoGlobalProbe(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoBloom(Edit::CMessage& _rMessage);
@@ -79,6 +80,7 @@ namespace
 
         void OnEntityInfoTransformation(Edit::CMessage& _rMessage);
         void OnEntityInfoPointlight(Edit::CMessage& _rMessage);
+        void OnEntityInfoSun(Edit::CMessage& _rMessage);
         void OnEntityInfoEnvironment(Edit::CMessage& _rMessage);
         void OnEntityInfoGlobalProbe(Edit::CMessage& _rMessage);
         void OnEntityInfoBloom(Edit::CMessage& _rMessage);
@@ -122,8 +124,8 @@ namespace
         // -----------------------------------------------------------------------------
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewMap                         , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewMap));
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntityActor                 , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntityActor));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntityDirectional           , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntityDirectional));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntityPoint                 , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntityPoint));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntityPointlight            , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntityPointlight));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntitySun                   , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntitySun));
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntityEnvironment           , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntityEnvironment));
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntityGlobalProbe           , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntityGlobalProbe));
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntityBloom                 , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntityBloom));
@@ -131,9 +133,11 @@ namespace
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntityFXAA                  , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntityFXAA));
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntitySSR                   , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntitySSR));
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntityVolumeFog             , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntityVolumeFog));
+
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoFacets        , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoFacets));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoTransformation, EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoTransformation));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoPointlight    , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoPointlight));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoSun           , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoSun));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoEnvironment   , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoEnvironment));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoGlobalProbe   , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoGlobalProbe));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoBloom         , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoBloom));
@@ -141,8 +145,10 @@ namespace
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoFXAA          , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoFXAA));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoSSR           , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoSSR));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoVolumeFog     , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoVolumeFog));
+
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoTransformation       , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoTransformation));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoPointlight           , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoPointlight));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoSun                  , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoSun));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoEnvironment          , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoEnvironment));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoGlobalProbe          , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoGlobalProbe));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoBloom                , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoBloom));
@@ -285,46 +291,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CMapHelper::OnNewEntityDirectional(Edit::CMessage& _rMessage)
-    {
-        {
-            Dt::SEntityDescriptor EntityDesc;
-
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
-            EntityDesc.m_EntityType     = Dt::SLightType::Sun;
-            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
-
-            Dt::CEntity& rSunLight = Dt::EntityManager::CreateEntity(EntityDesc);
-
-            // -----------------------------------------------------------------------------
-            // Transformation
-            // -----------------------------------------------------------------------------
-            Dt::CTransformationFacet* pTransformationFacet = rSunLight.GetTransformationFacet();
-
-            pTransformationFacet->SetPosition(Base::Float3(0.0f));
-            pTransformationFacet->SetScale   (Base::Float3(1.0f));
-            pTransformationFacet->SetRotation(Base::Float3(0.0f));
-
-            Dt::CSunLightFacet* pSunLightFacet = Dt::LightManager::CreateSunLight();
-
-            pSunLightFacet->EnableTemperature(false);
-            pSunLightFacet->SetColor(Base::Float3(1.0f, 1.0f, 1.0f));
-            pSunLightFacet->SetDirection(Base::Float3(0.0f, 0.0f, -1.0f));
-            pSunLightFacet->SetIntensity(90600.0f);
-            pSunLightFacet->SetTemperature(0);
-            pSunLightFacet->SetRefreshMode(Dt::CSunLightFacet::Dynamic);
-
-            pSunLightFacet->UpdateLightness();
-
-            rSunLight.SetDetailFacet(Dt::SFacetCategory::Data, pSunLightFacet);
-
-            Dt::EntityManager::MarkEntityAsDirty(rSunLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-        }
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMapHelper::OnNewEntityPoint(Edit::CMessage& _rMessage)
+    void CMapHelper::OnNewEntityPointlight(Edit::CMessage& _rMessage)
     {
         {
             Dt::SEntityDescriptor EntityDesc;
@@ -363,6 +330,45 @@ namespace
             rPointLight.SetDetailFacet(Dt::SFacetCategory::Data, pPointLightFacet);
 
             Dt::EntityManager::MarkEntityAsDirty(rPointLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnNewEntitySun(Edit::CMessage& _rMessage)
+    {
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
+            EntityDesc.m_EntityType     = Dt::SLightType::Sun;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+
+            Dt::CEntity& rSunLight = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            // -----------------------------------------------------------------------------
+            // Transformation
+            // -----------------------------------------------------------------------------
+            Dt::CTransformationFacet* pTransformationFacet = rSunLight.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(0.0f));
+            pTransformationFacet->SetScale   (Base::Float3(1.0f));
+            pTransformationFacet->SetRotation(Base::Float3(0.0f));
+
+            Dt::CSunLightFacet* pSunLightFacet = Dt::LightManager::CreateSunLight();
+
+            pSunLightFacet->EnableTemperature(false);
+            pSunLightFacet->SetColor         (Base::Float3(1.0f, 1.0f, 1.0f));
+            pSunLightFacet->SetDirection     (Base::Float3(0.0f, 0.0f, -1.0f));
+            pSunLightFacet->SetIntensity     (90600.0f);
+            pSunLightFacet->SetTemperature   (0);
+            pSunLightFacet->SetRefreshMode   (Dt::CSunLightFacet::Dynamic);
+
+            pSunLightFacet->UpdateLightness();
+
+            rSunLight.SetDetailFacet(Dt::SFacetCategory::Data, pSunLightFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rSunLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
     }
 
@@ -676,6 +682,38 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CMapHelper::OnRequestEntityInfoSun(Edit::CMessage& _rMessage)
+    {
+        if (m_pLastRequestedEntity != nullptr)
+        {
+            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+
+            Dt::CSunLightFacet* pLightFacet = static_cast<Dt::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Sun && pLightFacet != nullptr)
+            {
+                Edit::CMessage NewMessage;
+
+                NewMessage.PutInt(static_cast<int>(pLightFacet->HasTemperature()));
+                NewMessage.PutFloat(pLightFacet->GetColor()[0]);
+                NewMessage.PutFloat(pLightFacet->GetColor()[1]);
+                NewMessage.PutFloat(pLightFacet->GetColor()[2]);
+                NewMessage.PutFloat(pLightFacet->GetTemperature());
+                NewMessage.PutFloat(pLightFacet->GetIntensity());
+                NewMessage.PutFloat(pLightFacet->GetDirection()[0]);
+                NewMessage.PutFloat(pLightFacet->GetDirection()[1]);
+                NewMessage.PutFloat(pLightFacet->GetDirection()[2]);
+                NewMessage.PutInt(static_cast<int>(pLightFacet->GetRefreshMode()));
+
+                NewMessage.Reset();
+
+                Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoSun, NewMessage);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CMapHelper::OnRequestEntityInfoEnvironment(Edit::CMessage& _rMessage)
     {
         if (m_pLastRequestedEntity != nullptr)
@@ -947,6 +985,49 @@ namespace
                 pPointLightFacet->SetRefreshMode      (static_cast<Dt::CPointLightFacet::ERefreshMode>(ShadowRefresh));
             
                 pPointLightFacet->UpdateLightness();
+
+                Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnEntityInfoSun(Edit::CMessage& _rMessage)
+    {
+        if (m_pLastRequestedEntity != nullptr)
+        {
+            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+
+            Dt::CSunLightFacet* pLightFacet = static_cast<Dt::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Sun && pLightFacet != nullptr)
+            {
+                // -----------------------------------------------------------------------------
+                // Read values
+                // -----------------------------------------------------------------------------
+                int ColorMode = _rMessage.GetInt();
+
+                Base::Float3 Color = Base::Float3(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+
+                float Temperature = _rMessage.GetFloat();
+                float Intensity = _rMessage.GetFloat();
+
+                Base::Float3 Direction = Base::Float3(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+
+                int ShadowRefresh = _rMessage.GetInt();
+
+                // -----------------------------------------------------------------------------
+                // Set values
+                // -----------------------------------------------------------------------------
+                pLightFacet->EnableTemperature(ColorMode == 1);
+                pLightFacet->SetColor(Color);
+                pLightFacet->SetTemperature(Temperature);
+                pLightFacet->SetIntensity(Intensity);
+                pLightFacet->SetDirection(Direction);
+                pLightFacet->SetRefreshMode(static_cast<Dt::CSunLightFacet::ERefreshMode>(ShadowRefresh));
+
+                pLightFacet->UpdateLightness();
 
                 Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
             }

@@ -248,31 +248,6 @@ namespace
             Dt::SEntityDescriptor EntityDesc;
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
-            EntityDesc.m_EntityType     = Dt::SLightType::Sun;
-            EntityDesc.m_FacetFlags     = 0;
-
-            Dt::CEntity& rSunLight = Dt::EntityManager::CreateEntity(EntityDesc, 6);
-
-            Dt::CSunLightFacet* pSunLightFacet = Dt::LightManager::CreateSunLight();
-
-            pSunLightFacet->EnableTemperature(false);
-            pSunLightFacet->SetColor(Base::Float3(1.0f, 1.0f, 1.0f));
-            pSunLightFacet->SetDirection(Base::Float3(0.0f, 0.0f, -1.0f));
-            pSunLightFacet->SetIntensity(90600.0f);
-            pSunLightFacet->SetTemperature(0);
-            pSunLightFacet->SetRefreshMode(Dt::CSunLightFacet::Dynamic);
-
-            pSunLightFacet->UpdateLightness();
-
-            rSunLight.SetDetailFacet(Dt::SFacetCategory::Data, pSunLightFacet);
-
-            Dt::EntityManager::MarkEntityAsDirty(rSunLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-        }
-
-        {
-            Dt::SEntityDescriptor EntityDesc;
-
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
             EntityDesc.m_EntityType     = Dt::SLightType::GlobalProbe;
             EntityDesc.m_FacetFlags     = 0;
 

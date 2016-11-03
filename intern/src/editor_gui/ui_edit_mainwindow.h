@@ -50,7 +50,7 @@ public:
     QAction *m_pActionEnvironment;
     QAction *m_pActionGlobalProbe;
     QAction *m_pActionCamera;
-    QAction *m_pActionDirectional;
+    QAction *m_pActionSun;
     QAction *m_pActionHistogram;
     QAction *actionConsole;
     QAction *actionScene_Hraph;
@@ -147,8 +147,8 @@ public:
         m_pActionGlobalProbe->setObjectName(QStringLiteral("m_pActionGlobalProbe"));
         m_pActionCamera = new QAction(CMainWindow);
         m_pActionCamera->setObjectName(QStringLiteral("m_pActionCamera"));
-        m_pActionDirectional = new QAction(CMainWindow);
-        m_pActionDirectional->setObjectName(QStringLiteral("m_pActionDirectional"));
+        m_pActionSun = new QAction(CMainWindow);
+        m_pActionSun->setObjectName(QStringLiteral("m_pActionSun"));
         m_pActionHistogram = new QAction(CMainWindow);
         m_pActionHistogram->setObjectName(QStringLiteral("m_pActionHistogram"));
         m_pActionHistogram->setCheckable(false);
@@ -416,8 +416,8 @@ public:
         m_pMenuEntity->addAction(menuEffects->menuAction());
         menuActors->addAction(m_pActionModel);
         menuActors->addAction(m_pActionCamera);
-        menuLights->addAction(m_pActionDirectional);
         menuLights->addAction(m_pActionPoint);
+        menuLights->addAction(m_pActionSun);
         menuLights->addAction(m_pActionEnvironment);
         menuLights->addAction(m_pActionGlobalProbe);
         menuEffects->addAction(m_pActionBloom);
@@ -438,7 +438,7 @@ public:
         QObject::connect(m_pActionNew, SIGNAL(triggered()), CMainWindow, SLOT(openNewSceneDialog()));
         QObject::connect(m_pScenegraph, SIGNAL(itemClicked(QTreeWidgetItem*,int)), m_pScenegraph, SLOT(itemSelected(QTreeWidgetItem*)));
         QObject::connect(m_pActionModel, SIGNAL(triggered()), CMainWindow, SLOT(openNewActorModelDialog()));
-        QObject::connect(m_pActionDirectional, SIGNAL(triggered()), CMainWindow, SLOT(createNewLightDirectional()));
+        QObject::connect(m_pActionSun, SIGNAL(triggered()), CMainWindow, SLOT(createNewLightSun()));
         QObject::connect(m_pActionEnvironment, SIGNAL(triggered()), CMainWindow, SLOT(createNewLightEnvironment()));
         QObject::connect(m_pActionPoint, SIGNAL(triggered()), CMainWindow, SLOT(createNewLightPoint()));
         QObject::connect(m_pActionGlobalProbe, SIGNAL(triggered()), CMainWindow, SLOT(createNewLightGlobalProbe()));
@@ -477,7 +477,7 @@ public:
         m_pActionEnvironment->setText(QApplication::translate("CMainWindow", "Environment", 0));
         m_pActionGlobalProbe->setText(QApplication::translate("CMainWindow", "Global Probe", 0));
         m_pActionCamera->setText(QApplication::translate("CMainWindow", "Camera", 0));
-        m_pActionDirectional->setText(QApplication::translate("CMainWindow", "Directional", 0));
+        m_pActionSun->setText(QApplication::translate("CMainWindow", "Sun", 0));
         m_pActionHistogram->setText(QApplication::translate("CMainWindow", "Histogram", 0));
         actionConsole->setText(QApplication::translate("CMainWindow", "Console", 0));
         actionScene_Hraph->setText(QApplication::translate("CMainWindow", "Scene Hraph", 0));
