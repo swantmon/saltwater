@@ -298,6 +298,8 @@ namespace
         RegionY  = static_cast<Base::Size>(_Y) / CRegion::s_NumberOfMetersY;
         RegionID = RegionX + RegionY * m_NumberOfRegionsX;
 
+        RegionID = Base::Clamp(RegionID, 0u, m_NumberOfRegionsX * m_NumberOfRegionsY - 1u);
+
         return m_pRegions[RegionID];
     }
 

@@ -315,6 +315,34 @@ namespace Dt
         }
 
         m_pHierarchyFacet->SetFirstChild(&_rEntity);
+
+        // -----------------------------------------------------------------------------
+        // Transformation
+        // -----------------------------------------------------------------------------
+        Dt::CTransformationFacet* pChildTransformationFacet;
+
+        pChildTransformationFacet = _rEntity.GetTransformationFacet();
+
+        if (m_pTransformationFacet == nullptr || pChildTransformationFacet == nullptr)
+        {
+            return;
+        }
+
+        Base::Float4x4 NewMatrix;
+
+        Base::Float3 Translation;
+        Base::Float3 Rotation;
+        Base::Float3 Scale;
+
+        NewMatrix = m_pTransformationFacet->GetWorldMatrix().GetInverted() * pChildTransformationFacet->GetWorldMatrix();
+
+        NewMatrix.GetTranslation(Translation);
+        NewMatrix.GetRotation(Rotation);
+        NewMatrix.GetScale(Scale);
+
+        pChildTransformationFacet->SetPosition(Translation);
+        pChildTransformationFacet->SetRotation(Rotation);
+        pChildTransformationFacet->SetScale(Scale);
     }
 
     // -----------------------------------------------------------------------------

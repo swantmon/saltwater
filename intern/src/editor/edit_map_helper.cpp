@@ -916,9 +916,6 @@ namespace
         int EntityIDSource      = _rMessage.GetInt();
         int EntityIDDestination = _rMessage.GetInt();
 
-        BASE_CONSOLE_INFOV("Source %i", EntityIDSource);
-        BASE_CONSOLE_INFOV("Destination %i", EntityIDDestination);
-
         assert(EntityIDSource != -1);
 
         // -----------------------------------------------------------------------------
@@ -934,6 +931,8 @@ namespace
 
             rDestinationEntity.Attach(rSourceEntity);
         }
+
+        Dt::EntityManager::MarkEntityAsDirty(rSourceEntity, Dt::CEntity::DirtyMove);
     }
 
     // -----------------------------------------------------------------------------
