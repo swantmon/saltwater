@@ -42,6 +42,8 @@ namespace Edit
             NewEntitySSR,
             NewEntityVolumeFog,
 
+            RemoveEntity,
+
             RequestEntityInfoFacets,
             RequestEntityInfoTransformation,
             RequestEntityInfoPointlight,

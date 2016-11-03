@@ -219,6 +219,9 @@
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="Edit::CSceneGraph" name="m_pScenegraph">
+       <property name="tabKeyNavigation">
+        <bool>true</bool>
+       </property>
        <property name="dragEnabled">
         <bool>false</bool>
        </property>

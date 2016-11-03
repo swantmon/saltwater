@@ -29,6 +29,7 @@ namespace Edit
     protected:
 
         void dropEvent(QDropEvent* _pEvent);
+        void keyReleaseEvent(QKeyEvent* _pEvent);
 
     private:
 

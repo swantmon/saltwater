@@ -66,6 +66,8 @@ namespace
         void OnNewEntitySSR(Edit::CMessage& _rMessage);
         void OnNewEntityVolumeFog(Edit::CMessage& _rMessage);
 
+        void OnRemoveEntity(Edit::CMessage& _rMessage);
+
         void OnRequestEntityInfoFacets(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoTransformation(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoPointlight(Edit::CMessage& _rMessage);
@@ -134,6 +136,8 @@ namespace
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntityFXAA                  , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntityFXAA));
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntitySSR                   , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntitySSR));
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntityVolumeFog             , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnNewEntityVolumeFog));
+
+        Edit::MessageManager::Register(Edit::SGUIMessageType::RemoveEntity                   , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRemoveEntity));
 
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoFacets        , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoFacets));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoTransformation, EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoTransformation));
@@ -559,31 +563,33 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CMapHelper::OnRemoveEntity(Edit::CMessage& _rMessage)
+    {
+        int EntityID = _rMessage.GetInt();
+
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+
+        Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyRemove | Dt::CEntity::DirtyDestroy);
+
+        _rMessage.SetResult(100);
+
+        m_pLastRequestedEntity = nullptr;
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CMapHelper::OnRequestEntityInfoFacets(Edit::CMessage& _rMessage)
     {
         m_pLastRequestedEntity = nullptr;
         
         int EntityID = _rMessage.GetInt();
 
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin();
-        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        for (; CurrentEntity != EndOfEntities; CurrentEntity = CurrentEntity.Next())
-        {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
-
-            if (rCurrentEntity.GetID() == EntityID)
-            {
-                m_pLastRequestedEntity = &rCurrentEntity;
-
-                break;
-            }
-        }
+        m_pLastRequestedEntity = &rCurrentEntity;
 
         if (m_pLastRequestedEntity != nullptr)
         {
-            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
-
             Edit::CMessage NewMessage;
 
             NewMessage.PutInt(rCurrentEntity.GetCategory());

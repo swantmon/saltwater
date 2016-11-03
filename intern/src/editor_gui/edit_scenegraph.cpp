@@ -87,6 +87,35 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
+    void CSceneGraph::keyReleaseEvent(QKeyEvent* _pEvent)
+    {
+        if (_pEvent->key() == Qt::Key_Delete)
+        {
+            QList<QTreeWidgetItem*> SelectedItems = this->selectedItems();
+
+            if (SelectedItems.size() == 0) return;
+
+            QTreeWidgetItem* pSource = SelectedItems.at(0);
+
+            int EntityID = pSource->text(1).toInt();
+
+            Edit::CMessage NewMessage;
+
+            NewMessage.PutInt(EntityID);
+
+            NewMessage.Reset();
+
+            int Result = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::RemoveEntity, NewMessage);
+
+            if (Result == 100)
+            {
+                delete pSource;
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CSceneGraph::OnSceneGraphChanged(Edit::CMessage& _rMessage)
     {
         auto GetCategoryName = [&](unsigned int _Category)->const char*

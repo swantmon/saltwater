@@ -263,6 +263,7 @@ public:
         __qtreewidgetitem->setText(0, QStringLiteral("1"));
         m_pScenegraph->setHeaderItem(__qtreewidgetitem);
         m_pScenegraph->setObjectName(QStringLiteral("m_pScenegraph"));
+        m_pScenegraph->setTabKeyNavigation(true);
         m_pScenegraph->setDragEnabled(false);
         m_pScenegraph->setDragDropMode(QAbstractItemView::InternalMove);
         m_pScenegraph->setAlternatingRowColors(false);
