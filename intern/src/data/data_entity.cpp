@@ -3,6 +3,7 @@
 
 #include "data/data_entity.h"
 #include "data/data_hierarchy_facet.h"
+#include "data/data_transformation_facet.h"
 
 namespace Dt
 {
@@ -314,5 +315,28 @@ namespace Dt
         }
 
         m_pHierarchyFacet->SetFirstChild(&_rEntity);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEntity::Detach()
+    {
+        CEntity*         pParent;
+        CHierarchyFacet* pParentHierarchyFacet;
+
+        pParent = m_pHierarchyFacet->GetParent();
+
+        if (pParent == nullptr)
+        {
+            return;
+        }
+
+        pParentHierarchyFacet = pParent->GetHierarchyFacet();
+
+        pParentHierarchyFacet->SetFirstChild(m_pHierarchyFacet->GetSibling());
+
+        m_pHierarchyFacet->SetParent(nullptr);
+
+        m_pHierarchyFacet->SetSibling(nullptr);
     }
 } // namespace Dt

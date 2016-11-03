@@ -78,6 +78,7 @@ namespace
         void OnRequestEntityInfoSSR(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoVolumeFog(Edit::CMessage& _rMessage);
 
+        void OnEntityInfoHierarchie(Edit::CMessage& _rMessage);
         void OnEntityInfoTransformation(Edit::CMessage& _rMessage);
         void OnEntityInfoPointlight(Edit::CMessage& _rMessage);
         void OnEntityInfoSun(Edit::CMessage& _rMessage);
@@ -146,6 +147,7 @@ namespace
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoSSR           , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoSSR));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoVolumeFog     , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoVolumeFog));
 
+        Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoHierarchie           , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoHierarchie));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoTransformation       , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoTransformation));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoPointlight           , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoPointlight));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoSun                  , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoSun));
@@ -904,6 +906,33 @@ namespace
 
                 Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoVolumeFog, NewMessage);
             }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnEntityInfoHierarchie(Edit::CMessage& _rMessage)
+    {
+        int EntityIDSource      = _rMessage.GetInt();
+        int EntityIDDestination = _rMessage.GetInt();
+
+        BASE_CONSOLE_INFOV("Source %i", EntityIDSource);
+        BASE_CONSOLE_INFOV("Destination %i", EntityIDDestination);
+
+        assert(EntityIDSource != -1);
+
+        // -----------------------------------------------------------------------------
+        // Get source entity and hierarchy facet
+        // -----------------------------------------------------------------------------
+        Dt::CEntity& rSourceEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityIDSource));
+
+        rSourceEntity.Detach();
+
+        if (EntityIDDestination != -1)
+        {
+            Dt::CEntity& rDestinationEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityIDDestination));
+
+            rDestinationEntity.Attach(rSourceEntity);
         }
     }
 

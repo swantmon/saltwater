@@ -175,6 +175,7 @@ namespace Dt
     public:
 
         void Attach(CEntity& _rEntity);
+        void Detach();
 
     protected:
         

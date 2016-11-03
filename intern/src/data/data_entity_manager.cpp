@@ -22,6 +22,7 @@
 #include "assimp/scene.h"
 
 #include <assert.h>
+#include <unordered_map>
 #include <vector>
 
 using namespace Dt;
@@ -55,6 +56,8 @@ namespace
         CEntity& CreateEntity(const SEntityDescriptor& _rDescriptor, CEntity::BID _ID = CEntity::s_InvalidID);
 
         void FreeEntity(CEntity& _rEntity);
+
+        CEntity& GetEntityByID(CEntity::BID _ID);
 
         void MarkEntityAsDirty(CEntity& _rEntity, unsigned int _DirtyFlags);
 
@@ -90,6 +93,9 @@ namespace
         typedef std::vector<CEntity*>                         CEntityVector;
         typedef std::vector<CEntityDelegate>                  CEntityDelegates;
 
+        typedef std::unordered_map<unsigned int, CInternEntity*> CEntityByIDs;
+        typedef CEntityByIDs::iterator                           CEntityByIDPair;
+
     private:
         
         CEntityPool              m_Entities;
@@ -97,6 +103,7 @@ namespace
         CTransformationFacetPool m_TransformationFacets;
         CEntityVector            m_DirtyEntities;
         CEntityDelegates         m_EntityDelegates;
+        CEntityByIDs             m_EntityByID;
         unsigned int             m_EntityID;
 
     private:
@@ -118,6 +125,7 @@ namespace
         , m_TransformationFacets()
         , m_DirtyEntities       ()
         , m_EntityDelegates     ()
+        , m_EntityByID          ()
         , m_EntityID            (0)
     {
         m_DirtyEntities.reserve(65536);
@@ -151,6 +159,8 @@ namespace
         m_TransformationFacets.Clear();
 
         m_DirtyEntities.clear();
+
+        m_EntityByID.clear();
     }
 
     // -----------------------------------------------------------------------------
@@ -274,15 +284,13 @@ namespace
         if (ID == CEntity::s_InvalidID)
         {
             ID = m_EntityID;
-
-            ++m_EntityID;
         }
         else
         {
             m_EntityID = Base::Max(ID, m_EntityID);
-
-            ++ m_EntityID;
         }
+
+        ++m_EntityID;
 
         rEntity.m_ID               = ID;
         rEntity.m_Flags.m_Category = _rDescriptor.m_EntityCategory;
@@ -297,6 +305,8 @@ namespace
         {
             rEntity.m_pTransformationFacet = &m_TransformationFacets.Allocate();
         }
+
+        m_EntityByID[rEntity.m_ID] = &rEntity;
 
         return rEntity;
     }
@@ -318,6 +328,13 @@ namespace
         }
 
         m_Entities.Free(&rInternEntity);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CEntity& CDtLvlEntityManager::GetEntityByID(CEntity::BID _ID)
+    {
+        return *m_EntityByID[_ID];
     }
 
     // -----------------------------------------------------------------------------
@@ -454,6 +471,8 @@ namespace
         {
             Map::MoveEntity(_rEntity);
         }
+
+        _rEntity.SetDirtyFlags(0);
     }
 
     // -----------------------------------------------------------------------------
@@ -509,7 +528,7 @@ namespace
 
         RotationMatrix.SetRotation(rRotation[0], rRotation[1], rRotation[2]);
 
-        WorldMatrix *= RotationMatrix;
+        WorldMatrix = RotationMatrix * WorldMatrix;
 
         // -----------------------------------------------------------------------------
         // Check for an animation hierarchy.
@@ -536,7 +555,7 @@ namespace
 
                 pParentTransformationFacet = pParentEntity->GetTransformationFacet();
 
-                WorldMatrix *= pParentTransformationFacet->GetWorldMatrix();
+                WorldMatrix = pParentTransformationFacet->GetWorldMatrix() * WorldMatrix;
             }
         }
         else
@@ -602,6 +621,13 @@ namespace EntityManager
     void FreeEntity(CEntity& _rEntity)
     {
         CDtLvlEntityManager::GetInstance().FreeEntity(_rEntity);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CEntity& GetEntityByID(CEntity::BID _ID)
+    {
+        return CDtLvlEntityManager::GetInstance().GetEntityByID(_ID);
     }
 
     // -----------------------------------------------------------------------------

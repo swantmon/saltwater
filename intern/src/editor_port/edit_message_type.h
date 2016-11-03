@@ -56,6 +56,7 @@ namespace Edit
 
             RequestHistogramInfo,
 
+            EntityInfoHierarchie,
             EntityInfoTransformation,
             EntityInfoPointlight,
             EntityInfoSun,

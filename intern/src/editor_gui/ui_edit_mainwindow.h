@@ -258,12 +258,20 @@ public:
         verticalLayout->setContentsMargins(11, 11, 11, 11);
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
         m_pScenegraph = new Edit::CSceneGraph(dockWidgetContents);
+        QTreeWidgetItem *__qtreewidgetitem = new QTreeWidgetItem();
+        __qtreewidgetitem->setText(1, QStringLiteral("2"));
+        __qtreewidgetitem->setText(0, QStringLiteral("1"));
+        m_pScenegraph->setHeaderItem(__qtreewidgetitem);
         m_pScenegraph->setObjectName(QStringLiteral("m_pScenegraph"));
         m_pScenegraph->setDragEnabled(false);
-        m_pScenegraph->setAlternatingRowColors(true);
+        m_pScenegraph->setDragDropMode(QAbstractItemView::InternalMove);
+        m_pScenegraph->setAlternatingRowColors(false);
         m_pScenegraph->setSelectionMode(QAbstractItemView::ExtendedSelection);
         m_pScenegraph->setSelectionBehavior(QAbstractItemView::SelectRows);
         m_pScenegraph->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
+        m_pScenegraph->setUniformRowHeights(true);
+        m_pScenegraph->setColumnCount(2);
+        m_pScenegraph->header()->setVisible(false);
 
         verticalLayout->addWidget(m_pScenegraph);
 
@@ -501,20 +509,16 @@ public:
         m_pMenuWindow->setTitle(QApplication::translate("CMainWindow", "Window", 0));
         m_pMenuHelp->setTitle(QApplication::translate("CMainWindow", "Help", 0));
         m_pSceneGraphDockWidget->setWindowTitle(QApplication::translate("CMainWindow", "Scene Graph", 0));
-        QTreeWidgetItem *___qtreewidgetitem = m_pScenegraph->headerItem();
-        ___qtreewidgetitem->setText(2, QApplication::translate("CMainWindow", "Type", 0));
-        ___qtreewidgetitem->setText(1, QApplication::translate("CMainWindow", "Entity", 0));
-        ___qtreewidgetitem->setText(0, QApplication::translate("CMainWindow", "ID", 0));
         m_pInspectorDockWidget->setWindowTitle(QApplication::translate("CMainWindow", "Inspector", 0));
         m_pConsoleDockWidget->setWindowTitle(QApplication::translate("CMainWindow", "Console", 0));
         m_pSendCommandButton->setText(QApplication::translate("CMainWindow", "Send", 0));
         m_pHistogramDockWidget->setWindowTitle(QApplication::translate("CMainWindow", "Histogram", 0));
-        label_6->setText(QApplication::translate("CMainWindow", "Eye Adaption Down:", 0));
-        label->setText(QApplication::translate("CMainWindow", "Lower Bound:", 0));
-        label_2->setText(QApplication::translate("CMainWindow", "Log Min:", 0));
-        label_4->setText(QApplication::translate("CMainWindow", "Log Max:", 0));
-        label_3->setText(QApplication::translate("CMainWindow", "Upper Bound:", 0));
-        label_5->setText(QApplication::translate("CMainWindow", "Eye Adaption Up:", 0));
+        label_6->setText(QApplication::translate("CMainWindow", "Eye Adaption Down", 0));
+        label->setText(QApplication::translate("CMainWindow", "Lower Bound", 0));
+        label_2->setText(QApplication::translate("CMainWindow", "Log Min", 0));
+        label_4->setText(QApplication::translate("CMainWindow", "Log Max", 0));
+        label_3->setText(QApplication::translate("CMainWindow", "Upper Bound", 0));
+        label_5->setText(QApplication::translate("CMainWindow", "Eye Adaption Up", 0));
     } // retranslateUi
 
 };

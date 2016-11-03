@@ -131,6 +131,8 @@ namespace
         m_Models   .Clear();
         m_LODs     .Clear();
         m_Surfaces .Clear();
+
+        m_ModelByID.clear();
     }
     
     // -----------------------------------------------------------------------------

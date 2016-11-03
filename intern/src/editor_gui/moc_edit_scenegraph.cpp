@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_Edit__CSceneGraph_t {
-    QByteArrayData data[7];
-    char stringdata0[75];
+    QByteArrayData data[10];
+    char stringdata0[118];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -33,13 +33,18 @@ QT_MOC_LITERAL(0, 0, 17), // "Edit::CSceneGraph"
 QT_MOC_LITERAL(1, 18, 14), // "entitySelected"
 QT_MOC_LITERAL(2, 33, 0), // ""
 QT_MOC_LITERAL(3, 34, 3), // "_ID"
-QT_MOC_LITERAL(4, 38, 12), // "itemSelected"
-QT_MOC_LITERAL(5, 51, 16), // "QTreeWidgetItem*"
-QT_MOC_LITERAL(6, 68, 6) // "_pItem"
+QT_MOC_LITERAL(4, 38, 20), // "childDragedAndDroped"
+QT_MOC_LITERAL(5, 59, 16), // "QTreeWidgetItem*"
+QT_MOC_LITERAL(6, 76, 8), // "_pSource"
+QT_MOC_LITERAL(7, 85, 12), // "_Destination"
+QT_MOC_LITERAL(8, 98, 12), // "itemSelected"
+QT_MOC_LITERAL(9, 111, 6) // "_pItem"
 
     },
     "Edit::CSceneGraph\0entitySelected\0\0_ID\0"
-    "itemSelected\0QTreeWidgetItem*\0_pItem"
+    "childDragedAndDroped\0QTreeWidgetItem*\0"
+    "_pSource\0_Destination\0itemSelected\0"
+    "_pItem"
 };
 #undef QT_MOC_LITERAL
 
@@ -49,24 +54,26 @@ static const uint qt_meta_data_Edit__CSceneGraph[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-       2,   14, // methods
+       3,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
-       1,       // signalCount
+       2,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    1,   24,    2, 0x06 /* Public */,
+       1,    1,   29,    2, 0x06 /* Public */,
+       4,    2,   32,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-       4,    1,   27,    2, 0x0a /* Public */,
+       8,    1,   37,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void, QMetaType::Int,    3,
+    QMetaType::Void, 0x80000000 | 5, 0x80000000 | 5,    6,    7,
 
  // slots: parameters
-    QMetaType::Void, 0x80000000 | 5,    6,
+    QMetaType::Void, 0x80000000 | 5,    9,
 
        0        // eod
 };
@@ -78,7 +85,8 @@ void Edit::CSceneGraph::qt_static_metacall(QObject *_o, QMetaObject::Call _c, in
         Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->entitySelected((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 1: _t->itemSelected((*reinterpret_cast< QTreeWidgetItem*(*)>(_a[1]))); break;
+        case 1: _t->childDragedAndDroped((*reinterpret_cast< QTreeWidgetItem*(*)>(_a[1])),(*reinterpret_cast< QTreeWidgetItem*(*)>(_a[2]))); break;
+        case 2: _t->itemSelected((*reinterpret_cast< QTreeWidgetItem*(*)>(_a[1]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
@@ -88,6 +96,13 @@ void Edit::CSceneGraph::qt_static_metacall(QObject *_o, QMetaObject::Call _c, in
             typedef void (CSceneGraph::*_t)(int );
             if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&CSceneGraph::entitySelected)) {
                 *result = 0;
+                return;
+            }
+        }
+        {
+            typedef void (CSceneGraph::*_t)(QTreeWidgetItem * , QTreeWidgetItem * );
+            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&CSceneGraph::childDragedAndDroped)) {
+                *result = 1;
                 return;
             }
         }
@@ -119,13 +134,13 @@ int Edit::CSceneGraph::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 2)
+        if (_id < 3)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 2;
+        _id -= 3;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 2)
+        if (_id < 3)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 2;
+        _id -= 3;
     }
     return _id;
 }
@@ -135,5 +150,12 @@ void Edit::CSceneGraph::entitySelected(int _t1)
 {
     void *_a[] = { Q_NULLPTR, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
     QMetaObject::activate(this, &staticMetaObject, 0, _a);
+}
+
+// SIGNAL 1
+void Edit::CSceneGraph::childDragedAndDroped(QTreeWidgetItem * _t1, QTreeWidgetItem * _t2)
+{
+    void *_a[] = { Q_NULLPTR, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
+    QMetaObject::activate(this, &staticMetaObject, 1, _a);
 }
 QT_END_MOC_NAMESPACE

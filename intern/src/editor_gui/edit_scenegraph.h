@@ -20,9 +20,15 @@ namespace Edit
 
         void entitySelected(int _ID);
 
+        void childDragedAndDroped(QTreeWidgetItem* _pSource, QTreeWidgetItem* _Destination);
+
     public Q_SLOTS:
 
         void itemSelected(QTreeWidgetItem* _pItem);
+
+    protected:
+
+        void dropEvent(QDropEvent* _pEvent);
 
     private:
 

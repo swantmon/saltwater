@@ -222,8 +222,11 @@
        <property name="dragEnabled">
         <bool>false</bool>
        </property>
+       <property name="dragDropMode">
+        <enum>QAbstractItemView::InternalMove</enum>
+       </property>
        <property name="alternatingRowColors">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="selectionMode">
         <enum>QAbstractItemView::ExtendedSelection</enum>
@@ -234,19 +237,23 @@
        <property name="verticalScrollMode">
         <enum>QAbstractItemView::ScrollPerItem</enum>
        </property>
+       <property name="uniformRowHeights">
+        <bool>true</bool>
+       </property>
+       <property name="columnCount">
+        <number>2</number>
+       </property>
+       <attribute name="headerVisible">
+        <bool>false</bool>
+       </attribute>
        <column>
         <property name="text">
-         <string>ID</string>
+         <string notr="true">1</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Entity</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Type</string>
+         <string notr="true">2</string>
         </property>
        </column>
       </widget>
@@ -327,7 +334,7 @@
        <item row="5" column="0">
         <widget class="QLabel" name="label_6">
          <property name="text">
-          <string>Eye Adaption Down:</string>
+          <string>Eye Adaption Down</string>
          </property>
         </widget>
        </item>
@@ -352,35 +359,35 @@
        <item row="0" column="0">
         <widget class="QLabel" name="label">
          <property name="text">
-          <string>Lower Bound:</string>
+          <string>Lower Bound</string>
          </property>
         </widget>
        </item>
        <item row="2" column="0">
         <widget class="QLabel" name="label_2">
          <property name="text">
-          <string>Log Min:</string>
+          <string>Log Min</string>
          </property>
         </widget>
        </item>
        <item row="3" column="0">
         <widget class="QLabel" name="label_4">
          <property name="text">
-          <string>Log Max:</string>
+          <string>Log Max</string>
          </property>
         </widget>
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="label_3">
          <property name="text">
-          <string>Upper Bound:</string>
+          <string>Upper Bound</string>
          </property>
         </widget>
        </item>
        <item row="4" column="0">
         <widget class="QLabel" name="label_5">
          <property name="text">
-          <string>Eye Adaption Up:</string>
+          <string>Eye Adaption Up</string>
          </property>
         </widget>
        </item>

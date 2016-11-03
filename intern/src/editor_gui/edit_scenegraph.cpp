@@ -1,11 +1,19 @@
 ﻿
-#include "edit_scenegraph.h"
+#include "editor_gui/edit_scenegraph.h"
+
+#include <QDropEvent>
+#include <QHeaderView>
 
 namespace Edit
 {
     CSceneGraph::CSceneGraph(QWidget* _pParent)
         : QTreeWidget(_pParent)
     {
+        // -----------------------------------------------------------------------------
+        // Special GUI behavior
+        // -----------------------------------------------------------------------------
+        header()->hideSection(1);
+
         // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
@@ -17,6 +25,64 @@ namespace Edit
     CSceneGraph::~CSceneGraph() 
     {
 	
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSceneGraph::itemSelected(QTreeWidgetItem* _pItem)
+    {
+        int EntityID = _pItem->text(1).toInt();
+
+        emit entitySelected(EntityID);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSceneGraph::dropEvent(QDropEvent* _pEvent)
+    {
+        QList<QTreeWidgetItem*> SelectedItems = this->selectedItems();
+
+        if (SelectedItems.size() == 0) return;
+
+        QTreeWidgetItem* pSource = SelectedItems.at(0);
+
+        // -----------------------------------------------------------------------------
+        // Perform the default drag & drop implementation
+        // -----------------------------------------------------------------------------
+        QTreeWidget::dropEvent(_pEvent);
+
+        QTreeWidgetItem* pDestination = SelectedItems.at(0)->parent();
+
+        int EntityIDSource      = -1;
+        int EntityIDDestination = -1;
+
+        if (pSource == Q_NULLPTR)
+        {
+            _pEvent->setDropAction(Qt::IgnoreAction);
+
+            return;
+        }
+
+        EntityIDSource = pSource->text(1).toInt();
+
+        if (pDestination != Q_NULLPTR)
+        {
+            EntityIDDestination = pDestination->text(1).toInt();
+        }
+
+        Edit::CMessage NewMessage;
+
+        NewMessage.PutInt(EntityIDSource);
+        NewMessage.PutInt(EntityIDDestination);
+
+        NewMessage.Reset();
+
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::EntityInfoHierarchie, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Emit signal
+        // -----------------------------------------------------------------------------
+        emit childDragedAndDroped(pSource, pDestination);
     }
 
     // -----------------------------------------------------------------------------
@@ -42,27 +108,18 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // ID
         // -----------------------------------------------------------------------------
-        pNewItem->setText(0, QString::number(_rMessage.GetInt()));
+        pNewItem->setText(1, QString::number(_rMessage.GetInt()));
 
         // -----------------------------------------------------------------------------
         // Name
         // -----------------------------------------------------------------------------
-        pNewItem->setText(1, "New entity");
-
-        // -----------------------------------------------------------------------------
-        // Category
-        // -----------------------------------------------------------------------------
-        pNewItem->setText(2, QString(GetCategoryName(_rMessage.GetInt())));
+        pNewItem->setText(0, "Entity (" + QString(GetCategoryName(_rMessage.GetInt())) + ")");
 
         addTopLevelItem(pNewItem);
-    }
 
-    // -----------------------------------------------------------------------------
-
-    void CSceneGraph::itemSelected(QTreeWidgetItem* _pItem)
-    {
-        int EntityID = _pItem->text(0).toInt();
-
-        emit entitySelected(EntityID);
+        // -----------------------------------------------------------------------------
+        // hide columns
+        // -----------------------------------------------------------------------------
+        header()->hideSection(1);
     }
 } // namespace Edit
