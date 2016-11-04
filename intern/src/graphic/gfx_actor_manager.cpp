@@ -228,31 +228,28 @@ namespace
 
         CLODPtr ModelLODPtr = NewModelPtr->GetLOD(0);
 
-        for (unsigned int NumberOfSurface = 0; NumberOfSurface < ModelLODPtr->GetNumberOfSurfaces(); ++NumberOfSurface)
+        Dt::CMaterial* pDataMaterial = pDataActorModelFacet->GetMaterial();
+
+        if (pDataMaterial != 0)
         {
-            Dt::CMaterial* pDataMaterial = pDataActorModelFacet->GetMaterial(NumberOfSurface);
+            // -----------------------------------------------------------------------------
+            // Get key of surface
+            // -----------------------------------------------------------------------------
+            CSurface::SSurfaceKey SurfaceKey = ModelLODPtr->GetSurface(0)->GetKey();
 
-            if (pDataMaterial != 0)
-            {
-                // -----------------------------------------------------------------------------
-                // Get key of surface
-                // -----------------------------------------------------------------------------
-                CSurface::SSurfaceKey SurfaceKey = ModelLODPtr->GetSurface(NumberOfSurface)->GetKey();
+            // -----------------------------------------------------------------------------
+            // Material description
+            // -----------------------------------------------------------------------------
+            MaterialDesc.m_ID = SurfaceKey.m_Key;
+            MaterialDesc.m_pMaterial = pDataMaterial;
 
-                // -----------------------------------------------------------------------------
-                // Material description
-                // -----------------------------------------------------------------------------
-                MaterialDesc.m_ID        = SurfaceKey.m_Key;
-                MaterialDesc.m_pMaterial = pDataMaterial;
+            // -----------------------------------------------------------------------------
+            // Create and set material
+            // -----------------------------------------------------------------------------
+            CMaterialPtr NewMaterialPtr = MaterialManager::CreateMaterial(MaterialDesc);
 
-                // -----------------------------------------------------------------------------
-                // Create and set material
-                // -----------------------------------------------------------------------------
-                CMaterialPtr NewMaterialPtr = MaterialManager::CreateMaterial(MaterialDesc);
-
-                rGraphicActorModelFacet.SetMaterial(NumberOfSurface, NewMaterialPtr);
-            }
-        }        
+            rGraphicActorModelFacet.SetMaterial(NewMaterialPtr);
+        }
 
         // -----------------------------------------------------------------------------
         // Save facet
@@ -296,30 +293,27 @@ namespace
 
         CLODPtr ModelLODPtr = NewModelPtr->GetLOD(0);
 
-        for (unsigned int NumberOfSurface = 0; NumberOfSurface < ModelLODPtr->GetNumberOfSurfaces(); ++NumberOfSurface)
+        Dt::CMaterial* pDataMaterial = pDataActorModelFacet->GetMaterial();
+
+        if (pDataMaterial != 0)
         {
-            Dt::CMaterial* pDataMaterial = pDataActorModelFacet->GetMaterial(NumberOfSurface);
+            // -----------------------------------------------------------------------------
+            // Get key of surface
+            // -----------------------------------------------------------------------------
+            CSurface::SSurfaceKey SurfaceKey = ModelLODPtr->GetSurface(0)->GetKey();
 
-            if (pDataMaterial != 0)
-            {
-                // -----------------------------------------------------------------------------
-                // Get key of surface
-                // -----------------------------------------------------------------------------
-                CSurface::SSurfaceKey SurfaceKey = ModelLODPtr->GetSurface(NumberOfSurface)->GetKey();
+            // -----------------------------------------------------------------------------
+            // Material description
+            // -----------------------------------------------------------------------------
+            MaterialDesc.m_ID = SurfaceKey.m_Key;
+            MaterialDesc.m_pMaterial = pDataMaterial;
 
-                // -----------------------------------------------------------------------------
-                // Material description
-                // -----------------------------------------------------------------------------
-                MaterialDesc.m_ID = SurfaceKey.m_Key;
-                MaterialDesc.m_pMaterial = pDataMaterial;
+            // -----------------------------------------------------------------------------
+            // Create and set material
+            // -----------------------------------------------------------------------------
+            CMaterialPtr NewMaterialPtr = MaterialManager::CreateMaterial(MaterialDesc);
 
-                // -----------------------------------------------------------------------------
-                // Create and set material
-                // -----------------------------------------------------------------------------
-                CMaterialPtr NewMaterialPtr = MaterialManager::CreateMaterial(MaterialDesc);
-
-                rGraphicActorARFacet.SetMaterial(NumberOfSurface, NewMaterialPtr);
-            }
+            rGraphicActorARFacet.SetMaterial(NewMaterialPtr);
         }
 
         // -----------------------------------------------------------------------------

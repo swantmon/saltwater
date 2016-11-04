@@ -8,13 +8,10 @@
 
 #pragma once
 
-#include "data/data_lod.h"
-#include "data/data_model.h"
-#include "data/data_surface.h"
-
 namespace Dt
 {
     class CEntity;
+    class CModel;
 } // namespace Dt
 
 namespace Dt
@@ -34,16 +31,10 @@ namespace Dt
 
 namespace Dt
 {
-    struct SModelFileDescriptor
+    struct SModelDescriptor
     {
         const Base::Char* m_pFileName;
         unsigned int      m_GenFlag;
-    };
-
-    struct SModelSceneDescriptor
-    {
-        const void* m_pNode;
-        const void* m_pScene;
     };
 } // namespace Dt
 
@@ -56,8 +47,7 @@ namespace ModelManager
 
     void Clear();
 
-    CModel& CreateModel(const SModelFileDescriptor& _rDescriptor);
-    CModel& CreateModel(const SModelSceneDescriptor& _rDescriptor);
+    CModel& CreateModel(const SModelDescriptor& _rDescriptor);
     CModel& CreateBox(float _Width, float _Height, float _Depth);
     CModel& CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices);
     CModel& CreateCone(float _Radius, float _Height, unsigned int _Slices);

@@ -32,8 +32,9 @@ namespace ModelManager
     void Clear();
     
     CModelPtr CreateModel(const SModelDescriptor& _rDescriptor);
-    
+    CModelPtr CreateBox(float _Width, float _Height, float _Depth);
     CModelPtr CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices);
+    CModelPtr CreateCone(float _Radius, float _Height, unsigned int _Slices);
     CModelPtr CreateRectangle(float _X, float _Y, float _Width, float _Height);
 } // namespace ModelManager
 } // namespace Gfx

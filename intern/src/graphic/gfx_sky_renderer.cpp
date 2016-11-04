@@ -562,16 +562,12 @@ namespace
     void CGfxSkyRenderer::OnSetupModels()
     {
         SModelDescriptor ModelDescr;
-        
-        Dt::CModel& rBoxModel = Dt::ModelManager::CreateBox(2.0f, 2.0f, 2.0f);
-        
-        ModelDescr.m_pModel = &rBoxModel;
-        
-        m_SkyboxBoxPtr = ModelManager::CreateModel(ModelDescr);
+               
+        m_SkyboxBoxPtr = ModelManager::CreateBox(2.0f, 2.0f, 2.0f);
                
         // -----------------------------------------------------------------------------
         
-        Dt::SModelFileDescriptor ModelFileDesc;
+        Dt::SModelDescriptor ModelFileDesc;
 
         ModelFileDesc.m_pFileName = "envsphere.obj";
         ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::Nothing;

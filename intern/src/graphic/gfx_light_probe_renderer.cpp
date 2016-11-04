@@ -395,7 +395,7 @@ namespace
 
     void CGfxLightProbeRenderer::OnSetupModels()
     {
-        Dt::SModelFileDescriptor ModelFileDesc;
+        Dt::SModelDescriptor ModelFileDesc;
 
         ModelFileDesc.m_pFileName = "envsphere.obj";
         ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::Nothing;

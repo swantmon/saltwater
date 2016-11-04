@@ -9,8 +9,9 @@ namespace Gfx
 {
     CModelActorFacet::CModelActorFacet()
         : m_ModelPtr()
+        , m_MaterialPtr()
     {
-        Base::CMemory::Zero(m_MaterialPtrs, sizeof(CMaterialPtr) * CLOD::s_NumberOfSurfaces);
+
     }
 
     // -----------------------------------------------------------------------------
@@ -36,27 +37,26 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    void CModelActorFacet::SetMaterial(unsigned int _Surface, CMaterialPtr _MaterialPtr)
+    void CModelActorFacet::SetMaterial(CMaterialPtr _MaterialPtr)
     {
-        assert(_Surface >= 0 && _Surface < CLOD::s_NumberOfSurfaces);
-
-        m_MaterialPtrs[_Surface] = _MaterialPtr;
+        m_MaterialPtr = _MaterialPtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    CMaterialPtr CModelActorFacet::GetMaterial(unsigned int _Surface)
+    CMaterialPtr CModelActorFacet::GetMaterial()
     {
-        return m_MaterialPtrs[_Surface];
+        return m_MaterialPtr;
     }
 } // namespace Gfx
 
 namespace Gfx
 {
     CARActorFacet::CARActorFacet()
-        : m_ModelPtr()
+        : m_ModelPtr   ()
+        , m_MaterialPtr()
     {
-        Base::CMemory::Zero(m_MaterialPtrs, sizeof(CMaterialPtr) * CLOD::s_NumberOfSurfaces);
+
     }
 
     // -----------------------------------------------------------------------------
@@ -82,17 +82,15 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    void CARActorFacet::SetMaterial(unsigned int _Surface, CMaterialPtr _MaterialPtr)
+    void CARActorFacet::SetMaterial(CMaterialPtr _MaterialPtr)
     {
-        assert(_Surface >= 0 && _Surface < CLOD::s_NumberOfSurfaces);
-
-        m_MaterialPtrs[_Surface] = _MaterialPtr;
+        m_MaterialPtr = _MaterialPtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    CMaterialPtr CARActorFacet::GetMaterial(unsigned int _Surface)
+    CMaterialPtr CARActorFacet::GetMaterial()
     {
-        return m_MaterialPtrs[_Surface];
+        return m_MaterialPtr;
     }
 } // namespace Gfx

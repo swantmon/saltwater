@@ -8,9 +8,9 @@
 namespace Dt
 {
     CModelActorFacet::CModelActorFacet()
-        : m_pModel(nullptr)
+        : m_pModel   (nullptr)
+        , m_pMaterial(nullptr)
     {
-        Base::CMemory::Zero(m_pMaterial, sizeof(CMaterial*) * CLOD::s_NumberOfSurfaces);
     }
 
     // -----------------------------------------------------------------------------
@@ -37,29 +37,25 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CModelActorFacet::SetMaterial(unsigned int _Surface, CMaterial* _pMaterial)
+    void CModelActorFacet::SetMaterial(CMaterial* _pMaterial)
     {
-        assert(_Surface >= 0 && _Surface < CLOD::s_NumberOfSurfaces);
-
-        m_pMaterial[_Surface] = _pMaterial;
+        m_pMaterial = _pMaterial;
     }
 
     // -----------------------------------------------------------------------------
 
-    CMaterial* CModelActorFacet::GetMaterial(unsigned int _Surface)
+    CMaterial* CModelActorFacet::GetMaterial()
     {
-        assert(_Surface >= 0 && _Surface < CLOD::s_NumberOfSurfaces);
-
-        return m_pMaterial[_Surface];
+        return m_pMaterial;
     }
 } // namespace Dt
 
 namespace Dt
 {
     CARActorFacet::CARActorFacet()
-        : m_pModel(nullptr)
+        : m_pModel   (nullptr)
+        , m_pMaterial(nullptr)
     {
-        Base::CMemory::Zero(m_pMaterial, sizeof(CMaterial*) * CLOD::s_NumberOfSurfaces);
     }
 
     // -----------------------------------------------------------------------------
@@ -86,20 +82,16 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CARActorFacet::SetMaterial(unsigned int _Surface, CMaterial* _pMaterial)
+    void CARActorFacet::SetMaterial(CMaterial* _pMaterial)
     {
-        assert(_Surface >= 0 && _Surface < CLOD::s_NumberOfSurfaces);
-
-        m_pMaterial[_Surface] = _pMaterial;
+        m_pMaterial = _pMaterial;
     }
 
     // -----------------------------------------------------------------------------
 
-    CMaterial* CARActorFacet::GetMaterial(unsigned int _Surface)
+    CMaterial* CARActorFacet::GetMaterial()
     {
-        assert(_Surface >= 0 && _Surface < CLOD::s_NumberOfSurfaces);
-
-        return m_pMaterial[_Surface];
+        return m_pMaterial;
     }
 } // namespace Dt
 
