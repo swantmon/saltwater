@@ -227,8 +227,10 @@ public:
         m_pMenuFile->setObjectName(QStringLiteral("m_pMenuFile"));
         m_pMenuEdit = new QMenu(m_pMenuBar);
         m_pMenuEdit->setObjectName(QStringLiteral("m_pMenuEdit"));
+        m_pMenuEdit->setEnabled(false);
         m_pMenuAssets = new QMenu(m_pMenuBar);
         m_pMenuAssets->setObjectName(QStringLiteral("m_pMenuAssets"));
+        m_pMenuAssets->setEnabled(false);
         m_pMenuEntity = new QMenu(m_pMenuBar);
         m_pMenuEntity->setObjectName(QStringLiteral("m_pMenuEntity"));
         menuActors = new QMenu(m_pMenuEntity);
@@ -239,6 +241,7 @@ public:
         menuEffects->setObjectName(QStringLiteral("menuEffects"));
         m_pMenuComponent = new QMenu(m_pMenuBar);
         m_pMenuComponent->setObjectName(QStringLiteral("m_pMenuComponent"));
+        m_pMenuComponent->setEnabled(false);
         m_pMenuWindow = new QMenu(m_pMenuBar);
         m_pMenuWindow->setObjectName(QStringLiteral("m_pMenuWindow"));
         m_pMenuHelp = new QMenu(m_pMenuBar);

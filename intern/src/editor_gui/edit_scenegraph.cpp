@@ -44,45 +44,55 @@ namespace Edit
 
         if (SelectedItems.size() == 0) return;
 
-        QTreeWidgetItem* pSource = SelectedItems.at(0);
-
         // -----------------------------------------------------------------------------
         // Perform the default drag & drop implementation
         // -----------------------------------------------------------------------------
         QTreeWidget::dropEvent(_pEvent);
 
-        QTreeWidgetItem* pDestination = SelectedItems.at(0)->parent();
-
-        int EntityIDSource      = -1;
+        // -----------------------------------------------------------------------------
+        // Destination (this could be only one single element)
+        // -----------------------------------------------------------------------------
         int EntityIDDestination = -1;
 
-        if (pSource == Q_NULLPTR)
-        {
-            _pEvent->setDropAction(Qt::IgnoreAction);
-
-            return;
-        }
-
-        EntityIDSource = pSource->text(1).toInt();
+        QTreeWidgetItem* pDestination = SelectedItems.at(0)->parent();
 
         if (pDestination != Q_NULLPTR)
         {
             EntityIDDestination = pDestination->text(1).toInt();
         }
 
-        Edit::CMessage NewMessage;
-
-        NewMessage.PutInt(EntityIDSource);
-        NewMessage.PutInt(EntityIDDestination);
-
-        NewMessage.Reset();
-
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::EntityInfoHierarchie, NewMessage);
-
         // -----------------------------------------------------------------------------
-        // Emit signal
+        // Move all selected items
         // -----------------------------------------------------------------------------
-        emit childDragedAndDroped(pSource, pDestination);
+        for (unsigned int IndexOfSelectedItem = 0; IndexOfSelectedItem < SelectedItems.length(); ++IndexOfSelectedItem)
+        {
+            QTreeWidgetItem* pSource = SelectedItems.at(IndexOfSelectedItem);
+
+            int EntityIDSource = -1;
+            
+            if (pSource == Q_NULLPTR)
+            {
+                _pEvent->setDropAction(Qt::IgnoreAction);
+
+                continue;
+            }
+
+            EntityIDSource = pSource->text(1).toInt();
+
+            Edit::CMessage NewMessage;
+
+            NewMessage.PutInt(EntityIDSource);
+            NewMessage.PutInt(EntityIDDestination);
+
+            NewMessage.Reset();
+
+            Edit::MessageManager::SendMessage(Edit::SGUIMessageType::EntityInfoHierarchie, NewMessage);
+
+            // -----------------------------------------------------------------------------
+            // Emit signal
+            // -----------------------------------------------------------------------------
+            emit childDragedAndDroped(pSource, pDestination);
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -95,21 +105,24 @@ namespace Edit
 
             if (SelectedItems.size() == 0) return;
 
-            QTreeWidgetItem* pSource = SelectedItems.at(0);
-
-            int EntityID = pSource->text(1).toInt();
-
-            Edit::CMessage NewMessage;
-
-            NewMessage.PutInt(EntityID);
-
-            NewMessage.Reset();
-
-            int Result = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::RemoveEntity, NewMessage);
-
-            if (Result == 100)
+            for (unsigned int IndexOfSelectedItem = 0; IndexOfSelectedItem < SelectedItems.length(); ++IndexOfSelectedItem)
             {
-                delete pSource;
+                QTreeWidgetItem* pSource = SelectedItems.at(IndexOfSelectedItem);
+
+                int EntityID = pSource->text(1).toInt();
+
+                Edit::CMessage NewMessage;
+
+                NewMessage.PutInt(EntityID);
+
+                NewMessage.Reset();
+
+                int Result = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::RemoveEntity, NewMessage);
+
+                if (Result == 100)
+                {
+                    delete pSource;
+                }
             }
         }
     }

@@ -127,11 +127,17 @@
     <addaction name="m_pActionExit"/>
    </widget>
    <widget class="QMenu" name="m_pMenuEdit">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Edit</string>
     </property>
    </widget>
    <widget class="QMenu" name="m_pMenuAssets">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Assets</string>
     </property>
@@ -171,6 +177,9 @@
     <addaction name="menuEffects"/>
    </widget>
    <widget class="QMenu" name="m_pMenuComponent">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Component</string>
     </property>
