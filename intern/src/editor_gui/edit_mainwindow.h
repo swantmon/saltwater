@@ -2,7 +2,6 @@
 #pragma once
 
 #include "editor_gui/ui_edit_mainwindow.h"
-#include "editor_gui/edit_newactormodeldialog.h"
 #include "editor_gui/edit_newscenedialog.h"
 
 #include "editor_port/edit_message.h"
@@ -51,7 +50,6 @@ namespace Edit
     private:
 
         QLabel*               m_pStatusLabel;
-        CNewActorModelDialog* m_pNewActorModelDialog;
         CNewSceneDialog*      m_pNewSceneDialog;
         bool                  m_IsPlaying;
         bool                  m_IsSceneLoaded;

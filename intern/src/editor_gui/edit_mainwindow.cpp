@@ -2,6 +2,7 @@
 #include "editor_gui/edit_mainwindow.h"
 #include "editor_gui/edit_newscenedialog.h"
 
+#include <QFileDialog>
 #include <QString>
 
 namespace Edit
@@ -9,7 +10,6 @@ namespace Edit
     CMainWindow::CMainWindow(QWidget* _pParent) 
         : QMainWindow           (_pParent)
         , m_pStatusLabel        (nullptr)
-        , m_pNewActorModelDialog(nullptr)
         , m_pNewSceneDialog     (nullptr)
         , m_IsPlaying           (false)
         , m_IsSceneLoaded       (false)
@@ -17,8 +17,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Dialogs
         // -----------------------------------------------------------------------------
-        m_pNewActorModelDialog = new CNewActorModelDialog();
-        m_pNewSceneDialog      = new CNewSceneDialog();
+        m_pNewSceneDialog = new CNewSceneDialog();
 
         // -----------------------------------------------------------------------------
         // Form setup
@@ -52,7 +51,6 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Delete dialogs
         // -----------------------------------------------------------------------------
-        delete m_pNewActorModelDialog;
         delete m_pNewSceneDialog;
 
         // -----------------------------------------------------------------------------
@@ -145,7 +143,28 @@ namespace Edit
 
     void CMainWindow::openNewActorModelDialog()
     {
-        m_pNewActorModelDialog->show();
+        QString ModelFile = QFileDialog::getOpenFileName(this, tr("Load model file"), tr(""), tr("Object files (*.obj *.dae)"));
+
+        // -----------------------------------------------------------------------------
+        // Send message with new scene / map request
+        // -----------------------------------------------------------------------------
+        CMessage NewMessage;
+
+        if (!ModelFile.isEmpty())
+        {
+            QByteArray ModelFileBinary = ModelFile.toLatin1();
+
+            NewMessage.PutBool(true);
+            NewMessage.PutString(ModelFileBinary.data());
+        }
+        else
+        {
+            NewMessage.PutBool(false);
+        }
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::NewEntityActor, NewMessage);
     }
 
     // -----------------------------------------------------------------------------

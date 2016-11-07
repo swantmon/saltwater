@@ -25,6 +25,7 @@ namespace Edit
     {
 
     }
+
     // -----------------------------------------------------------------------------
 
     void CInspectorEntity::valueChanged()
@@ -40,7 +41,16 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
-        NewMessage.PutString(NewEntityNameBinary.data());
+        if (NewEntityName.length() > 0)
+        {
+            NewMessage.PutBool(true);
+
+            NewMessage.PutString(NewEntityNameBinary.data());
+        }
+        else
+        {
+            NewMessage.PutBool(false);
+        }
 
         NewMessage.Reset();
 

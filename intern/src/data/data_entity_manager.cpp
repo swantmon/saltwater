@@ -225,6 +225,11 @@ namespace
                 // -----------------------------------------------------------------------------
                 Dt::CEntity& rChildEntity = CreateEntity(EntityDesc);
 
+                if (pChildren->mName.length > 0)
+                {
+                    rChildEntity.SetName(pChildren->mName.C_Str());
+                }
+
                 Dt::CTransformationFacet* pTransformationFacet = rChildEntity.GetTransformationFacet();
 
                 pTransformationFacet->SetPosition(Base::Float3(NodePosition.x, NodePosition.y, NodePosition.z));

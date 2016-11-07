@@ -59,12 +59,6 @@
     <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_transformation.cpp">
       <Filter>Widgets\Inspector</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\edit_newactormodeldialog.cpp">
-      <Filter>Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_newactormodeldialog.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_pointlight.cpp">
       <Filter>Widgets\Inspector</Filter>
     </ClCompile>
@@ -155,12 +149,6 @@
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_transformation.h">
       <Filter>Widgets\Inspector</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_newactormodeldialog.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_newactormodeldialog.h">
-      <Filter>Dialogs</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_pointlight.h">
       <Filter>Widgets\Inspector</Filter>
     </CustomBuild>
@@ -237,9 +225,6 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_transformation.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_newactormodeldialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_pointlight.h">

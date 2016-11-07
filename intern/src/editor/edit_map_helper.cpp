@@ -917,11 +917,16 @@ namespace
         {
             Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
 
-            char NewEntityName[256];
+            bool HasName = _rMessage.GetBool();
 
-            _rMessage.GetString(NewEntityName, 256);
+            if (HasName)
+            {
+                char NewEntityName[256];
 
-            rCurrentEntity.SetName(NewEntityName);
+                _rMessage.GetString(NewEntityName, 256);
+
+                rCurrentEntity.SetName(NewEntityName);
+            }
         }
     }
 

@@ -119,7 +119,7 @@ public:
         if (CMainWindow->objectName().isEmpty())
             CMainWindow->setObjectName(QStringLiteral("CMainWindow"));
         CMainWindow->setWindowModality(Qt::NonModal);
-        CMainWindow->resize(1924, 959);
+        CMainWindow->resize(1924, 981);
         CMainWindow->setCursor(QCursor(Qt::ArrowCursor));
         CMainWindow->setMouseTracking(true);
         m_pActionNew = new QAction(CMainWindow);

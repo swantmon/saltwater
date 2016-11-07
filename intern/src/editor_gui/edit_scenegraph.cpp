@@ -37,6 +37,17 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
+    void CSceneGraph::changeNameOfSelectedItem(QString _Name)
+    {
+        QList<QTreeWidgetItem*> SelectedItems = this->selectedItems();
+
+        if (SelectedItems.size() == 0) return;
+
+        SelectedItems.at(0)->setText(0, _Name);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CSceneGraph::dropEvent(QDropEvent* _pEvent)
     {
         QList<QTreeWidgetItem*> SelectedItems = this->selectedItems();

@@ -26,6 +26,8 @@ namespace Edit
 
         void itemSelected(QTreeWidgetItem* _pItem);
 
+        void changeNameOfSelectedItem(QString _Name);
+
     protected:
 
         void dropEvent(QDropEvent* _pEvent);
