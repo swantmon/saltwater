@@ -45,6 +45,7 @@ namespace Edit
             RemoveEntity,
 
             RequestEntityInfoFacets,
+            RequestEntityInfoEntity,
             RequestEntityInfoTransformation,
             RequestEntityInfoPointlight,
             RequestEntityInfoSun,
@@ -58,6 +59,7 @@ namespace Edit
 
             RequestHistogramInfo,
 
+            EntityInfoEntity,
             EntityInfoHierarchie,
             EntityInfoTransformation,
             EntityInfoPointlight,
@@ -89,6 +91,7 @@ namespace Edit
             SceneGraphChanged,
 
             EntityInfoFacets,
+            EntityInfoEntity,
             EntityInfoTransformation,
             EntityInfoPointlight,
             EntityInfoSun,

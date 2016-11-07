@@ -22,7 +22,6 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-
     void CModelActorFacet::SetModel(CModel* _pModel)
     {
         m_pModel = _pModel;

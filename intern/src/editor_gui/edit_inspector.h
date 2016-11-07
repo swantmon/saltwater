@@ -2,6 +2,7 @@
 
 #include "editor_gui/edit_inspector_bloom.h"
 #include "editor_gui/edit_inspector_dof.h"
+#include "editor_gui/edit_inspector_entity.h"
 #include "editor_gui/edit_inspector_environment.h"
 #include "editor_gui/edit_inspector_fxaa.h"
 #include "editor_gui/edit_inspector_globalprobe.h"
@@ -33,6 +34,7 @@ namespace Edit
     private:
 
         QVBoxLayout*              m_pInspectorLayout;
+        CInspectorEntity*         m_pEntityWidget;
         CInspectorPointlight*     m_pPointlightWidget;
         CInspectorSun*            m_pSunWidget;
         CInspectorTransformation* m_pTransformWidget;

@@ -130,19 +130,6 @@ namespace Edit
 
     void CSceneGraph::OnSceneGraphChanged(Edit::CMessage& _rMessage)
     {
-        auto GetCategoryName = [&](unsigned int _Category)->const char*
-        {
-            const char* pCategoryStrings[]
-            {
-                "Actor" ,
-                "Light" ,
-                "FX"    ,
-                "Plugin",
-            };
-
-            return pCategoryStrings[_Category];
-        };
-
         QTreeWidgetItem* pNewItem = new QTreeWidgetItem();
 
         // -----------------------------------------------------------------------------
@@ -153,7 +140,20 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Name
         // -----------------------------------------------------------------------------
-        pNewItem->setText(0, "Entity (" + QString(GetCategoryName(_rMessage.GetInt())) + ")");
+        bool HasName = _rMessage.GetBool();
+
+        if (HasName)
+        {
+            char pEntityName[256];
+
+            _rMessage.GetString(pEntityName, 256);
+
+            pNewItem->setText(0, QString(pEntityName));
+        }
+        else
+        {
+            pNewItem->setText(0, "Unnamed entity");
+        }
 
         // -----------------------------------------------------------------------------
         // Hierarchy

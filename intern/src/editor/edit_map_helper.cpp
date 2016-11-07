@@ -69,6 +69,7 @@ namespace
         void OnRemoveEntity(Edit::CMessage& _rMessage);
 
         void OnRequestEntityInfoFacets(Edit::CMessage& _rMessage);
+        void OnRequestEntityInfoEntity(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoTransformation(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoPointlight(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoSun(Edit::CMessage& _rMessage);
@@ -80,6 +81,7 @@ namespace
         void OnRequestEntityInfoSSR(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoVolumeFog(Edit::CMessage& _rMessage);
 
+        void OnEntityInfoEntity(Edit::CMessage& _rMessage);
         void OnEntityInfoHierarchie(Edit::CMessage& _rMessage);
         void OnEntityInfoTransformation(Edit::CMessage& _rMessage);
         void OnEntityInfoPointlight(Edit::CMessage& _rMessage);
@@ -140,6 +142,7 @@ namespace
         Edit::MessageManager::Register(Edit::SGUIMessageType::RemoveEntity                   , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRemoveEntity));
 
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoFacets        , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoFacets));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoEntity        , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoEntity));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoTransformation, EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoTransformation));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoPointlight    , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoPointlight));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoSun           , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoSun));
@@ -151,6 +154,7 @@ namespace
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoSSR           , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoSSR));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoVolumeFog     , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoVolumeFog));
 
+        Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoEntity               , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoEntity));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoHierarchie           , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoHierarchie));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoTransformation       , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoTransformation));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoPointlight           , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoPointlight));
@@ -567,6 +571,39 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CMapHelper::OnRequestEntityInfoEntity(Edit::CMessage& _rMessage)
+    {
+        if (m_pLastRequestedEntity != nullptr)
+        {
+            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+
+            Edit::CMessage NewMessage;
+
+            NewMessage.PutInt(rCurrentEntity.GetID());
+
+            NewMessage.PutInt(rCurrentEntity.GetCategory());
+
+            NewMessage.PutInt(rCurrentEntity.GetType());
+
+            if (rCurrentEntity.GetName().GetLength() > 0)
+            {
+                NewMessage.PutBool(true);
+
+                NewMessage.PutString(rCurrentEntity.GetName().GetConst());
+            }
+            else
+            {
+                NewMessage.PutBool(false);
+            }
+
+            NewMessage.Reset();
+
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoEntity, NewMessage);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CMapHelper::OnRequestEntityInfoTransformation(Edit::CMessage& _rMessage)
     {
         if (m_pLastRequestedEntity != nullptr)
@@ -869,6 +906,22 @@ namespace
 
                 Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoVolumeFog, NewMessage);
             }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnEntityInfoEntity(Edit::CMessage& _rMessage)
+    {
+        if (m_pLastRequestedEntity != nullptr)
+        {
+            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+
+            char NewEntityName[256];
+
+            _rMessage.GetString(NewEntityName, 256);
+
+            rCurrentEntity.SetName(NewEntityName);
         }
     }
 
@@ -1324,9 +1377,29 @@ namespace
 
             Dt::CEntity& rCurrentEntity = *_pEntity;
 
+            // -----------------------------------------------------------------------------
+            // ID
+            // -----------------------------------------------------------------------------
             NewMessage.PutInt(rCurrentEntity.GetID());
-            NewMessage.PutInt(rCurrentEntity.GetCategory());
 
+            // -----------------------------------------------------------------------------
+            // Name
+            // -----------------------------------------------------------------------------
+            Base::CharString& rEntityName = rCurrentEntity.GetName();
+
+            if (rEntityName.GetLength() > 0)
+            {
+                NewMessage.PutBool(true);
+                NewMessage.PutString(rEntityName.GetConst());
+            }
+            else
+            {
+                NewMessage.PutBool(false);
+            }
+
+            // -----------------------------------------------------------------------------
+            // Hierarchy
+            // -----------------------------------------------------------------------------
             Dt::CHierarchyFacet* pHierarchyFacet = rCurrentEntity.GetHierarchyFacet();
 
             if (pHierarchyFacet)

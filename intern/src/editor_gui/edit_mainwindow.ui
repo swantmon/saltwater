@@ -277,7 +277,7 @@
    <property name="minimumSize">
     <size>
      <width>80</width>
-     <height>50</height>
+     <height>58</height>
     </size>
    </property>
    <property name="features">

@@ -9,6 +9,7 @@
 #pragma once
 
 #include "base/base_aabb3.h"
+#include "base/base_string.h"
 #include "base/base_typedef.h"
 #include "base/base_vector3.h"
 
@@ -123,6 +124,10 @@ namespace Dt
 
         unsigned int GetCategory() const;
 
+        void SetName(const Base::CharString& _rName);
+        Base::CharString& GetName();
+        const Base::CharString& GetName() const;
+
         void SetDynamic(bool _Flag);
         bool IsDynamic() const;
 
@@ -186,6 +191,7 @@ namespace Dt
         CTransformationFacet* m_pTransformationFacet;                                             //< Contains transformation informations depending on hierarchy
         void*                 m_pDetailFacets[SFacetCategory::NumberOfCategories];                //< Contains detail informations of the entity (@see EFacetFlags::FacetDetail)
         BID                   m_ID;                                                               //< A specific unique id of this entity inside the map
+        Base::CharString      m_Name;                                                             //< A name of the entity to search for inside scripts
         Base::AABB3Float      m_WorldAABB;                                                        //< Axis Aligned Bounding Box (AABB) of the entity in map for region bounding box calculations
         Base::Float3          m_WorldPosition;                                                    //< World position of the entity
         SFlags                m_Flags;                                                            //< Set of possible states of the entity (dirty, type, level, ... -> @see SFlags)

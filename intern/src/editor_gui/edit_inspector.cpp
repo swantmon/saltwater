@@ -9,6 +9,7 @@ namespace Edit
     CInspector::CInspector(QWidget* _pParent)
         : QWidget             (_pParent)
         , m_pInspectorLayout  ()
+        , m_pEntityWidget     ()
         , m_pPointlightWidget ()
         , m_pSunWidget        ()
         , m_pTransformWidget  ()
@@ -30,6 +31,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create transformation widget and add to layout
         // -----------------------------------------------------------------------------
+        m_pEntityWidget      = new CInspectorEntity();
         m_pPointlightWidget  = new CInspectorPointlight();
         m_pSunWidget         = new CInspectorSun();
         m_pTransformWidget   = new CInspectorTransformation();
@@ -41,6 +43,7 @@ namespace Edit
         m_pSSRWidget         = new CInspectorSSR();
         m_pVolumeFogWidget   = new CInspectorVolumeFog();
 
+        m_pInspectorLayout->addWidget(m_pEntityWidget);
         m_pInspectorLayout->addWidget(m_pTransformWidget);
         m_pInspectorLayout->addWidget(m_pPointlightWidget);
         m_pInspectorLayout->addWidget(m_pSunWidget);
@@ -52,6 +55,7 @@ namespace Edit
         m_pInspectorLayout->addWidget(m_pSSRWidget);
         m_pInspectorLayout->addWidget(m_pVolumeFogWidget);
 
+        m_pEntityWidget     ->setVisible(false);
         m_pPointlightWidget ->setVisible(false);
         m_pSunWidget        ->setVisible(false);
         m_pTransformWidget  ->setVisible(false);
@@ -78,6 +82,7 @@ namespace Edit
 
     CInspector::~CInspector() 
     {
+        delete m_pEntityWidget;
         delete m_pPointlightWidget;
         delete m_pSunWidget;
         delete m_pTransformWidget;
@@ -89,6 +94,7 @@ namespace Edit
         delete m_pSSRWidget;
         delete m_pVolumeFogWidget;
 
+        m_pEntityWidget      = 0;
         m_pPointlightWidget  = 0;
         m_pSunWidget         = 0;
         m_pTransformWidget   = 0;
@@ -118,6 +124,9 @@ namespace Edit
 
     void CInspector::OnEntityInfoFacets(Edit::CMessage& _rMessage)
     {
+        // -----------------------------------------------------------------------------
+        // Read data
+        // -----------------------------------------------------------------------------
         int Category = _rMessage.GetInt();
         int Type     = _rMessage.GetInt();
 
@@ -128,6 +137,16 @@ namespace Edit
         bool HasDetailGraphic = _rMessage.GetBool();
         bool HasDetailScript  = _rMessage.GetBool();
 
+        // -----------------------------------------------------------------------------
+        // General informations
+        // -----------------------------------------------------------------------------
+        m_pEntityWidget->RequestInformation();
+
+        m_pEntityWidget->setVisible(true);
+
+        // -----------------------------------------------------------------------------
+        // Transformation
+        // -----------------------------------------------------------------------------
         if (HasTransformation)
         {
             m_pTransformWidget->RequestInformation();
@@ -139,6 +158,9 @@ namespace Edit
             m_pTransformWidget->setVisible(false);
         }
 
+        // -----------------------------------------------------------------------------
+        // Details
+        // -----------------------------------------------------------------------------
         if (HasDetailData)
         {
             m_pPointlightWidget ->setVisible(false);

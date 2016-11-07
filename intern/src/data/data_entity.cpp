@@ -14,6 +14,7 @@ namespace Dt
         , m_pHierarchyFacet     (nullptr)
         , m_pTransformationFacet(nullptr)
         , m_ID                  (s_InvalidID)
+        , m_Name                ()
         , m_WorldAABB           ()
         , m_WorldPosition       ()
         , m_Flags               ()
@@ -29,7 +30,7 @@ namespace Dt
 
     CEntity::~CEntity()
     {
-
+        m_Name.Clear();
     }
 
     // -----------------------------------------------------------------------------
@@ -44,6 +45,28 @@ namespace Dt
     unsigned int CEntity::GetCategory() const
     {
         return m_Flags.m_Category;
+    }
+
+    // -----------------------------------------------------------------------------
+
+
+    void CEntity::SetName(const Base::CharString& _rName)
+    {
+        m_Name = _rName;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Base::CharString& CEntity::GetName()
+    {
+        return m_Name;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const Base::CharString& CEntity::GetName() const
+    {
+        return m_Name;
     }
 
     // -----------------------------------------------------------------------------

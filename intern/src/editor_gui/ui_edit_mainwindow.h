@@ -283,7 +283,7 @@ public:
         CMainWindow->addDockWidget(static_cast<Qt::DockWidgetArea>(1), m_pSceneGraphDockWidget);
         m_pInspectorDockWidget = new QDockWidget(CMainWindow);
         m_pInspectorDockWidget->setObjectName(QStringLiteral("m_pInspectorDockWidget"));
-        m_pInspectorDockWidget->setMinimumSize(QSize(80, 50));
+        m_pInspectorDockWidget->setMinimumSize(QSize(80, 58));
         m_pInspectorDockWidget->setFeatures(QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable);
         dockWidgetContents_2 = new QWidget();
         dockWidgetContents_2->setObjectName(QStringLiteral("dockWidgetContents_2"));
