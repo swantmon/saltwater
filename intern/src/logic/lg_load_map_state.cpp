@@ -1495,11 +1495,11 @@ namespace
         // -----------------------------------------------------------------------------
 
         {
-            Dt::SSceneDescriptor SceneDesc;
+            Dt::SAssimpDescriptor SceneDesc;
 
-            SceneDesc.m_pSceneName = "scenes/sponza_crytek_pbr.obj";
+            SceneDesc.m_pPathToFile = "scenes/sponza_crytek_pbr.obj";
 
-            Dt::CEntity& rSceneEntity = Dt::EntityManager::CreateEntities(SceneDesc);
+            Dt::CEntity& rSceneEntity = Dt::EntityManager::CreateEntityFromFile(SceneDesc);
 
             Dt::CTransformationFacet* pTransformationFacet = rSceneEntity.GetTransformationFacet();
 

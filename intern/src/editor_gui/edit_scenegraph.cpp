@@ -24,7 +24,6 @@ namespace Edit
 
     CSceneGraph::~CSceneGraph() 
     {
-	
     }
 
     // -----------------------------------------------------------------------------
@@ -144,7 +143,6 @@ namespace Edit
             return pCategoryStrings[_Category];
         };
 
-
         QTreeWidgetItem* pNewItem = new QTreeWidgetItem();
 
         // -----------------------------------------------------------------------------
@@ -157,7 +155,39 @@ namespace Edit
         // -----------------------------------------------------------------------------
         pNewItem->setText(0, "Entity (" + QString(GetCategoryName(_rMessage.GetInt())) + ")");
 
-        addTopLevelItem(pNewItem);
+        // -----------------------------------------------------------------------------
+        // Hierarchy
+        // -----------------------------------------------------------------------------
+        bool HasHierachy = _rMessage.GetBool();
+
+        if (HasHierachy)
+        {
+            bool HasParent = _rMessage.GetBool();
+
+            if (HasParent)
+            {
+                int ParentID = _rMessage.GetInt();
+
+                QList<QTreeWidgetItem*> ListOfEntities = findItems(QString::number(ParentID), Qt::MatchContains | Qt::MatchRecursive, 1);
+
+                if (ListOfEntities.size() > 0)
+                {
+                    ListOfEntities[0]->addChild(pNewItem);
+                }
+                else
+                {
+                    addTopLevelItem(pNewItem);
+                }
+            }
+            else
+            {
+                addTopLevelItem(pNewItem);
+            }
+        }
+        else
+        {
+            addTopLevelItem(pNewItem);
+        }
 
         // -----------------------------------------------------------------------------
         // hide columns

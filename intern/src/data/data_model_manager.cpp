@@ -60,7 +60,7 @@ namespace
         void Clear();
         
         CModel& CreateModel(const SModelFileDescriptor& _rDescriptor);
-        CModel& CreateModel(const SModelSceneDescriptor& _rDescriptor);
+        CModel& CreateModel(const SModelAssimpDescriptor& _rDescriptor);
 
         CModel& CreateBox(float _Width, float _Height, float _Depth);
         CModel& CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices);
@@ -517,7 +517,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CModel& CDtModelManager::CreateModel(const SModelSceneDescriptor& _rDescriptor)
+    CModel& CDtModelManager::CreateModel(const SModelAssimpDescriptor& _rDescriptor)
     {
         const aiNode*  pNode  = static_cast<const aiNode*>(_rDescriptor.m_pNode);
         const aiScene* pScene = static_cast<const aiScene*>(_rDescriptor.m_pScene);
@@ -1343,7 +1343,7 @@ namespace ModelManager
 
     // -----------------------------------------------------------------------------
 
-    CModel& CreateModel(const SModelSceneDescriptor& _rDescriptor)
+    CModel& CreateModel(const SModelAssimpDescriptor& _rDescriptor)
     {
         return CDtModelManager::GetInstance().CreateModel(_rDescriptor);
     }

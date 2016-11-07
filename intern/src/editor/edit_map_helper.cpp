@@ -233,65 +233,22 @@ namespace
         if (HasModel)
         {
             // -----------------------------------------------------------------------------
-            // Entity
-            // -----------------------------------------------------------------------------
-            Dt::SEntityDescriptor EntityDesc;
-
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
-            EntityDesc.m_EntityType     = Dt::SActorType::Model;
-            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
-
-            Dt::CEntity& rNewActorModel = Dt::EntityManager::CreateEntity(EntityDesc);
-
-            // -----------------------------------------------------------------------------
-            // Transformation
-            // -----------------------------------------------------------------------------
-            Dt::CTransformationFacet* pTransformationFacet = rNewActorModel.GetTransformationFacet();
-
-            pTransformationFacet->SetPosition(Base::Float3(0.0f));
-            pTransformationFacet->SetScale   (Base::Float3(1.0f));
-            pTransformationFacet->SetRotation(Base::Float3(0.0f));
-
-            Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
-
-            // -----------------------------------------------------------------------------
             // Model
             // -----------------------------------------------------------------------------
-            Dt::SModelFileDescriptor ModelFileDesc;
+            Dt::SAssimpDescriptor ModelFileDesc;
 
             const char* pPathToFile = _rMessage.GetString(pTmp, 512);
 
             PathToFile = "models/" + CopyFileToAssets("../assets/models/", pPathToFile);
 
-            ModelFileDesc.m_pFileName = PathToFile.c_str();
-            ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
+            ModelFileDesc.m_pPathToFile = PathToFile.c_str();
 
-            pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
-
-            // -----------------------------------------------------------------------------
-            // Material
-            // -----------------------------------------------------------------------------
-            bool HasMaterial = _rMessage.GetBool();
-
-            if (HasMaterial)
-            {
-                Dt::SMaterialFileDescriptor MaterialFileDesc;
-
-                const char* pPathToFile = _rMessage.GetString(pTmp, 512);
-
-                PathToFile = "materials/" + CopyFileToAssets("../assets/materials/", pPathToFile);
-
-                MaterialFileDesc.m_pFileName = PathToFile.c_str();
-
-                pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
-            }
-
-            rNewActorModel.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
+            Dt::CEntity& rNewEntity = Dt::EntityManager::CreateEntityFromFile(ModelFileDesc);
 
             // -----------------------------------------------------------------------------
             // Add model to map
             // -----------------------------------------------------------------------------
-            Dt::EntityManager::MarkEntityAsDirty(rNewActorModel, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::EntityManager::MarkEntityAsDirty(rNewEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
     }
 
@@ -1369,6 +1326,31 @@ namespace
 
             NewMessage.PutInt(rCurrentEntity.GetID());
             NewMessage.PutInt(rCurrentEntity.GetCategory());
+
+            Dt::CHierarchyFacet* pHierarchyFacet = rCurrentEntity.GetHierarchyFacet();
+
+            if (pHierarchyFacet)
+            {
+                NewMessage.PutBool(true);
+
+                Dt::CEntity* pParentEntity = pHierarchyFacet->GetParent();
+
+                if (pParentEntity)
+                {
+                    NewMessage.PutBool(true);
+
+                    NewMessage.PutInt(pParentEntity->GetID());
+                }
+                else
+                {
+                    NewMessage.PutBool(false);
+                }
+            }
+            else
+            {
+                NewMessage.PutBool(false);
+            }
+
 
             NewMessage.Reset();
 

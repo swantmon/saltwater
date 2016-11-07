@@ -51,7 +51,7 @@ namespace
 
         void Clear();
 
-        CEntity& CreateEntities(const SSceneDescriptor& _rDescriptor);
+        CEntity& CreateEntityFromFile(const SAssimpDescriptor& _rDescriptor);
 
         CEntity& CreateEntity(const SEntityDescriptor& _rDescriptor, CEntity::BID _ID = CEntity::s_InvalidID);
 
@@ -165,9 +165,9 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CEntity& CDtLvlEntityManager::CreateEntities(const SSceneDescriptor& _rDescriptor)
+    CEntity& CDtLvlEntityManager::CreateEntityFromFile(const SAssimpDescriptor& _rDescriptor)
     {
-        assert(_rDescriptor.m_pSceneName != 0);
+        assert(_rDescriptor.m_pPathToFile != 0);
 
         SEntityDescriptor EntityDesc;
 
@@ -186,7 +186,7 @@ namespace
             // -----------------------------------------------------------------------------
             if (_pNode->mNumMeshes > 0)
             {
-                SModelSceneDescriptor ModelSceneDesc;
+                SModelAssimpDescriptor ModelSceneDesc;
 
                 ModelSceneDesc.m_pNode  = _pNode;
                 ModelSceneDesc.m_pScene = _pScene;
@@ -244,7 +244,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Build path to scenes in file system
         // -----------------------------------------------------------------------------
-		std::string PathToModel = g_PathToAssets + _rDescriptor.m_pSceneName;
+		std::string PathToModel = g_PathToAssets + _rDescriptor.m_pPathToFile;
 
         // -----------------------------------------------------------------------------
         // Load file with ASSIMP asset importer
@@ -257,7 +257,7 @@ namespace
 
         if (!pScene)
         {
-            BASE_THROWV("Can't load scene file %s; Code: %s", _rDescriptor.m_pSceneName, Importer.GetErrorString());
+            BASE_THROWV("Can't load scene file %s; Code: %s", _rDescriptor.m_pPathToFile, Importer.GetErrorString());
         }
 
         // -----------------------------------------------------------------------------
@@ -604,9 +604,9 @@ namespace EntityManager
 
     // -----------------------------------------------------------------------------
 
-    CEntity& CreateEntities(const SSceneDescriptor& _rDescriptor)
+    CEntity& CreateEntityFromFile(const SAssimpDescriptor& _rDescriptor)
     {
-        return CDtLvlEntityManager::GetInstance().CreateEntities(_rDescriptor);
+        return CDtLvlEntityManager::GetInstance().CreateEntityFromFile(_rDescriptor);
     }
 
     // -----------------------------------------------------------------------------

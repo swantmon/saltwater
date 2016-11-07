@@ -30,9 +30,9 @@ namespace EntityManager
 
 namespace Dt
 {
-    struct SSceneDescriptor
+    struct SAssimpDescriptor
     {
-        const Base::Char* m_pSceneName;
+        const Base::Char* m_pPathToFile;
     };
 
     struct SEntityDescriptor
@@ -52,7 +52,7 @@ namespace EntityManager
 
     void Clear();
 
-    CEntity& CreateEntities(const SSceneDescriptor& _rDescriptor);
+    CEntity& CreateEntityFromFile(const SAssimpDescriptor& _rDescriptor);
 
     CEntity& CreateEntity(const SEntityDescriptor& _rDescriptor, CEntity::BID _ID = CEntity::s_InvalidID);
 
