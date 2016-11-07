@@ -183,16 +183,16 @@ namespace Edit
                 if (Type == 0) // Node
                 {
                 }
-                else if (Type == 0) // Model
+                else if (Type == 1) // Model
                 {
                     m_pMaterialWidget->RequestInformation();
 
                     m_pMaterialWidget->setVisible(true);
                 }
-                else if (Type == 1) // AR
+                else if (Type == 2) // AR
                 {
                 }
-                else if (Type == 2) // Camera
+                else if (Type == 3) // Camera
                 {
                 }
             }
