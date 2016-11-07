@@ -30,10 +30,12 @@
     <ClInclude Include="..\..\..\src\data\data_hierarchy_facet.h" />
     <ClInclude Include="..\..\..\src\data\data_light_facet.h" />
     <ClInclude Include="..\..\..\src\data\data_light_manager.h" />
+    <ClInclude Include="..\..\..\src\data\data_lod.h" />
     <ClInclude Include="..\..\..\src\data\data_map.h" />
     <ClInclude Include="..\..\..\src\data\data_material.h" />
     <ClInclude Include="..\..\..\src\data\data_material_manager.h" />
     <ClInclude Include="..\..\..\src\data\data_model.h" />
+    <ClInclude Include="..\..\..\src\data\data_model_facet.h" />
     <ClInclude Include="..\..\..\src\data\data_model_manager.h" />
     <ClInclude Include="..\..\..\src\data\data_plugin_facet.h" />
     <ClInclude Include="..\..\..\src\data\data_plugin_manager.h" />
@@ -42,6 +44,7 @@
     <ClInclude Include="..\..\..\src\data\data_script_interface.h" />
     <ClInclude Include="..\..\..\src\data\data_script_facet.h" />
     <ClInclude Include="..\..\..\src\data\data_script_manager.h" />
+    <ClInclude Include="..\..\..\src\data\data_surface.h" />
     <ClInclude Include="..\..\..\src\data\data_texture_1d.h" />
     <ClInclude Include="..\..\..\src\data\data_texture_2d.h" />
     <ClInclude Include="..\..\..\src\data\data_texture_base.h" />

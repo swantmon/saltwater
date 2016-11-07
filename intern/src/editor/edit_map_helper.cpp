@@ -257,7 +257,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Model
             // -----------------------------------------------------------------------------
-            Dt::SModelDescriptor ModelFileDesc;
+            Dt::SModelFileDescriptor ModelFileDesc;
 
             const char* pPathToFile = _rMessage.GetString(pTmp, 512);
 
@@ -283,7 +283,7 @@ namespace
 
                 MaterialFileDesc.m_pFileName = PathToFile.c_str();
 
-                pModelActorFacet->SetMaterial(&Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
+                pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
             }
 
             rNewActorModel.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);

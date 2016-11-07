@@ -1132,9 +1132,9 @@ namespace
                     // -----------------------------------------------------------------------------
                     CMaterialPtr MaterialPtr;
 
-                    if (pGraphicModelActorFacet->GetMaterial() != 0)
+                    if (pGraphicModelActorFacet->GetMaterial(IndexOfSurface) != 0)
                     {
-                        MaterialPtr = pGraphicModelActorFacet->GetMaterial();
+                        MaterialPtr = pGraphicModelActorFacet->GetMaterial(IndexOfSurface);
                     }
                     else
                     {

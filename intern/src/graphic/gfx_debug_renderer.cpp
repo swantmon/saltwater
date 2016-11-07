@@ -475,7 +475,7 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        Dt::SModelDescriptor ModelFileDesc;
+        Dt::SModelFileDescriptor ModelFileDesc;
 
         ModelFileDesc.m_pFileName = "gizmo.obj";
         ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;

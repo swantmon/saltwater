@@ -11,6 +11,8 @@
 #include "base/base_aabb2.h"
 #include "base/base_matrix3x3.h"
 
+#include "data/data_lod.h"
+
 namespace Dt
 {
     class CModel;
@@ -42,8 +44,8 @@ namespace Dt
         void SetModel(CModel* _pModel);
         CModel* GetModel();
 
-        void SetMaterial(CMaterial* _pMaterial);
-        CMaterial* GetMaterial();
+        void SetMaterial(unsigned int _Surface, CMaterial* _pMaterial);
+        CMaterial* GetMaterial(unsigned int _Surface);
 
     public:
 
@@ -53,7 +55,7 @@ namespace Dt
     private:
 
         CModel*    m_pModel;
-        CMaterial* m_pMaterial;
+        CMaterial* m_pMaterial[CLOD::s_NumberOfSurfaces];
     };
 } // namespace Dt
 
@@ -66,8 +68,8 @@ namespace Dt
         void SetModel(CModel* _pModel);
         CModel* GetModel();
 
-        void SetMaterial(CMaterial* _pMaterial);
-        CMaterial* GetMaterial();
+        void SetMaterial(unsigned int _Surface, CMaterial* _pMaterial);
+        CMaterial* GetMaterial(unsigned int _Surface);
 
     public:
 
@@ -77,7 +79,7 @@ namespace Dt
     private:
 
         CModel*    m_pModel;
-        CMaterial* m_pMaterial;
+        CMaterial* m_pMaterial[CLOD::s_NumberOfSurfaces];
     };
 } // namespace Dt
 

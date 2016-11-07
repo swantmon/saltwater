@@ -14,8 +14,8 @@ namespace Gfx
         void SetModel(CModelPtr _ModelPtr);
         CModelPtr GetModel();
 
-        void SetMaterial(CMaterialPtr _MaterialPtr);
-        CMaterialPtr GetMaterial();
+        void SetMaterial(unsigned int _Surface, CMaterialPtr _MaterialPtr);
+        CMaterialPtr GetMaterial(unsigned int _Surface);
 
     public:
 
@@ -25,7 +25,7 @@ namespace Gfx
     protected:
 
         CModelPtr    m_ModelPtr;
-        CMaterialPtr m_MaterialPtr;
+        CMaterialPtr m_MaterialPtrs[CLOD::s_NumberOfSurfaces];
     };
 } // namespace Gfx
 
@@ -38,8 +38,8 @@ namespace Gfx
         void SetModel(CModelPtr _ModelPtr);
         CModelPtr GetModel();
 
-        void SetMaterial(CMaterialPtr _MaterialPtr);
-        CMaterialPtr GetMaterial();
+        void SetMaterial(unsigned int _Surface, CMaterialPtr _MaterialPtr);
+        CMaterialPtr GetMaterial(unsigned int _Surface);
 
     public:
 
@@ -49,6 +49,6 @@ namespace Gfx
     protected:
 
         CModelPtr    m_ModelPtr;
-        CMaterialPtr m_MaterialPtr;
+        CMaterialPtr m_MaterialPtrs[CLOD::s_NumberOfSurfaces];
     };
 } // namespace Gfx

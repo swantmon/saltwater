@@ -19,6 +19,15 @@
     <ClInclude Include="..\..\..\src\data\data_region.h">
       <Filter>map</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_model.h">
+      <Filter>models</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_model_facet.h">
+      <Filter>models</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_model_manager.h">
+      <Filter>models</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_material.h">
       <Filter>materials</Filter>
     </ClInclude>
@@ -33,6 +42,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_hierarchy_facet.h">
       <Filter>map\entity\facets\hierarchy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_lod.h">
+      <Filter>models</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_surface.h">
+      <Filter>models</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_actor_manager.h">
       <Filter>map\actors</Filter>
@@ -80,12 +95,6 @@
     <ClInclude Include="..\..\..\src\data\data_script_interface.h">
       <Filter>interface\script</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_model_manager.h">
-      <Filter>models</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_model.h">
-      <Filter>models</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\data\data_entity_manager.cpp">
@@ -93,6 +102,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_map.cpp">
       <Filter>map</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_model_manager.cpp">
+      <Filter>models</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_material_manager.cpp">
       <Filter>materials</Filter>
@@ -152,9 +164,6 @@
     <ClCompile Include="..\..\..\src\data\data_script_facet.cpp">
       <Filter>map\scripts</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_model_manager.cpp">
-      <Filter>models</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="map">
@@ -174,6 +183,9 @@
     </Filter>
     <Filter Include="materials">
       <UniqueIdentifier>{ccc2916e-d14c-45a4-ae67-e8fe96b262ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="models">
+      <UniqueIdentifier>{07e34a49-6329-43c1-9b85-20225bbfc5ef}</UniqueIdentifier>
     </Filter>
     <Filter Include="map\actors">
       <UniqueIdentifier>{d34f13b4-e357-49b8-8290-e4c854b0353f}</UniqueIdentifier>
@@ -198,9 +210,6 @@
     </Filter>
     <Filter Include="map\scripts">
       <UniqueIdentifier>{a0851fd6-c93a-42c8-a39a-0062d242c79b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="models">
-      <UniqueIdentifier>{67c4a2e8-4333-4367-b340-21812ead74fa}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

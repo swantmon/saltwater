@@ -788,9 +788,9 @@ namespace
 
                 CMaterialPtr MaterialPtr;
 
-                if (pGraphicARActorFacet->GetMaterial() != 0)
+                if (pGraphicARActorFacet->GetMaterial(IndexOfSurface) != 0)
                 {
-                    MaterialPtr = pGraphicARActorFacet->GetMaterial();
+                    MaterialPtr = pGraphicARActorFacet->GetMaterial(IndexOfSurface);
                 }
                 else
                 {

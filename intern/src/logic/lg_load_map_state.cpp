@@ -284,7 +284,7 @@ namespace
 
             Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
 
-            Dt::SModelDescriptor ModelFileDesc;
+            Dt::SModelFileDescriptor ModelFileDesc;
 
             ModelFileDesc.m_pFileName = "models/plane.obj";
             ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
@@ -316,7 +316,7 @@ namespace
 
             Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
 
-            Dt::SModelDescriptor ModelFileDesc;
+            Dt::SModelFileDescriptor ModelFileDesc;
 
             ModelFileDesc.m_pFileName = "models/sphere.obj";
             ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
@@ -326,7 +326,7 @@ namespace
             MaterialFileDesc.m_pFileName = "materials/naturals/metals/Gold_Worn_00.mat";
 
             pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
-            pModelActorFacet->SetMaterial(&Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
+            pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
 
             rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
 
@@ -358,7 +358,7 @@ namespace
 
             Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
 
-            Dt::SModelDescriptor ModelFileDesc;
+            Dt::SModelFileDescriptor ModelFileDesc;
 
             ModelFileDesc.m_pFileName = "models/plane.obj";
             ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
@@ -368,7 +368,7 @@ namespace
             MaterialFileDesc.m_pFileName = "materials/tests/checker.mat";
 
             pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
-            pModelActorFacet->SetMaterial(&Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
+            pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
 
             rPlane.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
 
@@ -575,7 +575,7 @@ namespace
 
             Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
 
-            Dt::SModelDescriptor ModelFileDesc;
+            Dt::SModelFileDescriptor ModelFileDesc;
 
             ModelFileDesc.m_pFileName = "models/plane.obj";
             ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
@@ -622,7 +622,7 @@ namespace
 
             Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
 
-            Dt::SModelDescriptor ModelFileDesc;
+            Dt::SModelFileDescriptor ModelFileDesc;
 
             ModelFileDesc.m_pFileName = "models/sphere.obj";
             ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
@@ -632,7 +632,7 @@ namespace
             MaterialFileDesc.m_pFileName = pMaterials[IndexOfMatTester];
 
             pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
-            pModelActorFacet->SetMaterial(&Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
+            pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
 
             rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
 
@@ -679,7 +679,7 @@ namespace
 
             Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
 
-            Dt::SModelDescriptor ModelFileDesc;
+            Dt::SModelFileDescriptor ModelFileDesc;
 
             ModelFileDesc.m_pFileName = "models/sphere.obj";
             ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
@@ -689,7 +689,7 @@ namespace
             MaterialFileDesc.m_pFileName = pMaterials[IndexOfMatTester];
 
             pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
-            pModelActorFacet->SetMaterial(&Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
+            pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
 
             rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
 
@@ -718,7 +718,7 @@ namespace
 
             Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
 
-            Dt::SModelDescriptor ModelFileDesc;
+            Dt::SModelFileDescriptor ModelFileDesc;
 
             ModelFileDesc.m_pFileName = "models/sphere.obj";
             ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
@@ -731,7 +731,7 @@ namespace
             rMaterial.m_MetalMask   = 1.0f;
 
             pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
-            pModelActorFacet->SetMaterial(&rMaterial);
+            pModelActorFacet->SetMaterial(0, &rMaterial);
 
             rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
 
@@ -760,7 +760,7 @@ namespace
 
             Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
 
-            Dt::SModelDescriptor ModelFileDesc;
+            Dt::SModelFileDescriptor ModelFileDesc;
 
             ModelFileDesc.m_pFileName = "models/sphere.obj";
             ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
@@ -773,7 +773,7 @@ namespace
             rMaterial.m_MetalMask   = 1.0f;
 
             pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
-            pModelActorFacet->SetMaterial(&rMaterial);
+            pModelActorFacet->SetMaterial(0, &rMaterial);
 
             rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
 
@@ -802,7 +802,7 @@ namespace
 
             Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
 
-            Dt::SModelDescriptor ModelFileDesc;
+            Dt::SModelFileDescriptor ModelFileDesc;
 
             ModelFileDesc.m_pFileName = "models/sphere.obj";
             ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
@@ -815,7 +815,7 @@ namespace
             rMaterial.m_MetalMask   = 0.0f;
 
             pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
-            pModelActorFacet->SetMaterial(&rMaterial);
+            pModelActorFacet->SetMaterial(0, &rMaterial);
 
             rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
 
@@ -841,7 +841,7 @@ namespace
 
             Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
 
-            Dt::SModelDescriptor ModelFileDesc;
+            Dt::SModelFileDescriptor ModelFileDesc;
 
             ModelFileDesc.m_pFileName = "models/plane.obj";
             ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
@@ -851,7 +851,7 @@ namespace
             MaterialFileDesc.m_pFileName = "materials/tests/checker.mat";
 
             pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
-            pModelActorFacet->SetMaterial(&Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
+            pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
 
             rPlane.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
 
@@ -1091,7 +1091,7 @@ namespace
 
             Dt::CARActorFacet* pModelActorFacet = Dt::ActorManager::CreateARActor();
 
-            Dt::SModelDescriptor ModelFileDesc;
+            Dt::SModelFileDescriptor ModelFileDesc;
 
             ModelFileDesc.m_pFileName = "models/plane.obj";
             ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
@@ -1101,7 +1101,7 @@ namespace
             MaterialFileDesc.m_pFileName = "materials/tests/background.mat";
 
             pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
-            pModelActorFacet->SetMaterial(&Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
+            pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
 
             rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
 
@@ -1129,7 +1129,7 @@ namespace
 
             Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
 
-            Dt::SModelDescriptor ModelFileDesc;
+            Dt::SModelFileDescriptor ModelFileDesc;
 
             ModelFileDesc.m_pFileName = "models/MatTester.obj";
             ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
@@ -1139,7 +1139,7 @@ namespace
             MaterialFileDesc.m_pFileName = _pMaterial;
 
             pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
-            pModelActorFacet->SetMaterial(&Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
+            pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
 
             rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
 
@@ -1192,7 +1192,7 @@ namespace
 // 
 //             Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
 // 
-//             Dt::SModelDescriptor ModelFileDesc;
+//             Dt::SModelFileDescriptor ModelFileDesc;
 // 
 //             ModelFileDesc.m_pFileName = "models/plane.obj";
 //             ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
@@ -1202,7 +1202,7 @@ namespace
 //             MaterialFileDesc.m_pFileName = "materials/naturals/metals/Chrome_Glossy_00.mat";
 // 
 //             pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
-//             pModelActorFacet->SetMaterial(&Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
+//             pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
 // 
 //             rPlane.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
 // 
@@ -1226,7 +1226,7 @@ namespace
 // 
 //             Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
 // 
-//             Dt::SModelDescriptor ModelFileDesc;
+//             Dt::SModelFileDescriptor ModelFileDesc;
 // 
 //             ModelFileDesc.m_pFileName = "models/MatTester.obj";
 //             ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
@@ -1236,7 +1236,7 @@ namespace
 //             MaterialFileDesc.m_pFileName = "materials/naturals/metals/Gold_Worn_00.mat";
 // 
 //             pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
-//             pModelActorFacet->SetMaterial(&Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
+//             pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
 // 
 //             rMatTester.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
 // 

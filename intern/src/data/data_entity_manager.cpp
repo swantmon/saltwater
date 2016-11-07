@@ -186,23 +186,20 @@ namespace
             // -----------------------------------------------------------------------------
             if (_pNode->mNumMeshes > 0)
             {
-                // TODO by tschwandt
-                // Do this not here. To many logic
+                SModelSceneDescriptor ModelSceneDesc;
 
-//                 SModelDescriptor ModelSceneDesc;
-// 
-//                 ModelSceneDesc.m_pNode  = _pNode;
-//                 ModelSceneDesc.m_pScene = _pScene;
-// 
-//                 CModel& rModel = ModelManager::CreateModel(ModelSceneDesc);
-// 
-//                 Dt::CModelActorFacet* pModelActorFacet = ActorManager::CreateModelActor();
-// 
-//                 pModelActorFacet->SetModel(&rModel);
-// 
-//                 _pParentEntity->SetDetailFacet(SFacetCategory::Data, pModelActorFacet);
-// 
-//                 _pParentEntity->SetType(SActorType::Model);
+                ModelSceneDesc.m_pNode  = _pNode;
+                ModelSceneDesc.m_pScene = _pScene;
+
+                CModel& rModel = ModelManager::CreateModel(ModelSceneDesc);
+
+                Dt::CModelActorFacet* pModelActorFacet = ActorManager::CreateModelActor();
+
+                pModelActorFacet->SetModel(&rModel);
+
+                _pParentEntity->SetDetailFacet(SFacetCategory::Data, pModelActorFacet);
+
+                _pParentEntity->SetType(SActorType::Model);
             }
 
             // -----------------------------------------------------------------------------
