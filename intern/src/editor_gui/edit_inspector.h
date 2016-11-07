@@ -6,6 +6,7 @@
 #include "editor_gui/edit_inspector_environment.h"
 #include "editor_gui/edit_inspector_fxaa.h"
 #include "editor_gui/edit_inspector_globalprobe.h"
+#include "editor_gui/edit_inspector_material.h"
 #include "editor_gui/edit_inspector_pointlight.h"
 #include "editor_gui/edit_inspector_sun.h"
 #include "editor_gui/edit_inspector_ssr.h"
@@ -45,6 +46,7 @@ namespace Edit
         CInspectorFXAA*           m_pFXAAWidget;
         CInspectorSSR*            m_pSSRWidget;
         CInspectorVolumeFog*      m_pVolumeFogWidget;
+        CInspectorMaterial*       m_pMaterialWidget;
 
     private:
 

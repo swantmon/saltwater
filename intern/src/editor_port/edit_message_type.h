@@ -56,6 +56,7 @@ namespace Edit
             RequestEntityInfoFXAA,
             RequestEntityInfoSSR,
             RequestEntityInfoVolumeFog,
+            RequestEntityInfoMaterial,
 
             RequestHistogramInfo,
 
@@ -71,6 +72,7 @@ namespace Edit
             EntityInfoFXAA,
             EntityInfoSSR,
             EntityInfoVolumeFog,
+            EntityInfoMaterial,
 
             HistogramInfo,
 
@@ -102,6 +104,7 @@ namespace Edit
             EntityInfoFXAA,
             EntityInfoSSR,
             EntityInfoVolumeFog,
+            EntityInfoMaterial,
 
             HistogramInfo,
 

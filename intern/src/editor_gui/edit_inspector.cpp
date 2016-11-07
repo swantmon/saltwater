@@ -20,8 +20,7 @@ namespace Edit
         , m_pFXAAWidget       ()
         , m_pSSRWidget        ()
         , m_pVolumeFogWidget  ()
-
-
+        , m_pMaterialWidget   ()
     {
         // -----------------------------------------------------------------------------
         // Create layout
@@ -42,6 +41,7 @@ namespace Edit
         m_pFXAAWidget        = new CInspectorFXAA();
         m_pSSRWidget         = new CInspectorSSR();
         m_pVolumeFogWidget   = new CInspectorVolumeFog();
+        m_pMaterialWidget    = new CInspectorMaterial();
 
         m_pInspectorLayout->addWidget(m_pEntityWidget);
         m_pInspectorLayout->addWidget(m_pTransformWidget);
@@ -54,6 +54,7 @@ namespace Edit
         m_pInspectorLayout->addWidget(m_pFXAAWidget);
         m_pInspectorLayout->addWidget(m_pSSRWidget);
         m_pInspectorLayout->addWidget(m_pVolumeFogWidget);
+        m_pInspectorLayout->addWidget(m_pMaterialWidget);
 
         m_pEntityWidget     ->setVisible(false);
         m_pPointlightWidget ->setVisible(false);
@@ -66,6 +67,7 @@ namespace Edit
         m_pFXAAWidget       ->setVisible(false);
         m_pSSRWidget        ->setVisible(false);
         m_pVolumeFogWidget  ->setVisible(false);
+        m_pMaterialWidget   ->setVisible(false);
 
         // -----------------------------------------------------------------------------
         // Set layout
@@ -93,6 +95,7 @@ namespace Edit
         delete m_pFXAAWidget;
         delete m_pSSRWidget;
         delete m_pVolumeFogWidget;
+        delete m_pMaterialWidget;
 
         m_pEntityWidget      = 0;
         m_pPointlightWidget  = 0;
@@ -105,6 +108,7 @@ namespace Edit
         m_pFXAAWidget        = 0;
         m_pSSRWidget         = 0;
         m_pVolumeFogWidget   = 0;
+        m_pMaterialWidget    = 0;
     }
 
     // -----------------------------------------------------------------------------
@@ -161,18 +165,19 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Details
         // -----------------------------------------------------------------------------
+        m_pPointlightWidget ->setVisible(false);
+        m_pSunWidget        ->setVisible(false);
+        m_pEnvironmentWidget->setVisible(false);
+        m_pGlobalProbeWidget->setVisible(false);
+        m_pBloomWidget      ->setVisible(false);
+        m_pDOFWidget        ->setVisible(false);
+        m_pFXAAWidget       ->setVisible(false);
+        m_pSSRWidget        ->setVisible(false);
+        m_pVolumeFogWidget  ->setVisible(false);
+        m_pMaterialWidget   ->setVisible(false);
+
         if (HasDetailData)
         {
-            m_pPointlightWidget ->setVisible(false);
-            m_pSunWidget        ->setVisible(false);
-            m_pEnvironmentWidget->setVisible(false);
-            m_pGlobalProbeWidget->setVisible(false);
-            m_pBloomWidget      ->setVisible(false);
-            m_pDOFWidget        ->setVisible(false);
-            m_pFXAAWidget       ->setVisible(false);
-            m_pSSRWidget        ->setVisible(false);
-            m_pVolumeFogWidget  ->setVisible(false);
-
             if (Category == 0) // Actors
             {
                 if (Type == 0) // Node
@@ -180,6 +185,9 @@ namespace Edit
                 }
                 else if (Type == 0) // Model
                 {
+                    m_pMaterialWidget->RequestInformation();
+
+                    m_pMaterialWidget->setVisible(true);
                 }
                 else if (Type == 1) // AR
                 {
