@@ -9,11 +9,15 @@
 #include "core/core_time.h"
 #include "core/core_config.h"
 
+#include "editor/edit_actor_helper.h"
 #include "editor/edit_application.h"
 #include "editor/edit_edit_state.h"
+#include "editor/edit_effect_helper.h"
+#include "editor/edit_entity_helper.h"
 #include "editor/edit_exit_state.h"
 #include "editor/edit_graphic_helper.h"
 #include "editor/edit_intro_state.h"
+#include "editor/edit_light_helper.h"
 #include "editor/edit_load_map_state.h"
 #include "editor/edit_map_helper.h"
 #include "editor/edit_play_state.h"
@@ -157,9 +161,14 @@ namespace
 
         // -----------------------------------------------------------------------------
         // Helper
+        // TODO: some tasks should be done inside the states
         // -----------------------------------------------------------------------------
-        Edit::Helper::Map::OnStart();
+        Edit::Helper::Actor  ::OnStart();
+        Edit::Helper::Effect ::OnStart();
+        Edit::Helper::Entity ::OnStart();
         Edit::Helper::Graphic::OnStart();
+        Edit::Helper::Light  ::OnStart();
+        Edit::Helper::Map    ::OnStart();
     }
     
     // -----------------------------------------------------------------------------
@@ -174,8 +183,12 @@ namespace
         // -----------------------------------------------------------------------------
         // Helper
         // -----------------------------------------------------------------------------
+        Edit::Helper::Actor  ::OnExit();
+        Edit::Helper::Effect ::OnExit();
+        Edit::Helper::Entity ::OnExit();
         Edit::Helper::Graphic::OnExit();
-        Edit::Helper::Map::OnExit();
+        Edit::Helper::Light  ::OnExit();
+        Edit::Helper::Map    ::OnExit();
 
         // -----------------------------------------------------------------------------
         // At the end we have to clean our context and windows.
