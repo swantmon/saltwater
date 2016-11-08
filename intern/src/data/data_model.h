@@ -16,20 +16,31 @@
 
 namespace Dt
 {
-    // TODO by tschwandt
-    // add getter and setter including surface + LOD
-
     class CModel
     {
     public:
         
         static const unsigned int s_NumberOfLODs = 4;
-        
+
     public:
+
+        CModel();
+        ~CModel();
+
+        void SetModelname(const char* _pModelname);
+        const char* GetModelname() const;
+
+        void SetNumberOfLODs(unsigned int _NumberOfLODs);
+        unsigned int GetNumberOfLODs() const;
+
+        void SetLOD(unsigned int _Index, CLOD* _pLOD);
+        CLOD* GetLOD(unsigned int _Index);
+        const CLOD* GetLOD(unsigned int _Index) const;
+        
+    protected:
         
         Base::CharString m_Modelname;
         unsigned int     m_NumberOfLODs;
         CLOD*            m_LODs[s_NumberOfLODs];
-        Base::AABB3Float m_AABB;
     };
 } // namespace Dt

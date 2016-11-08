@@ -147,9 +147,9 @@ namespace
         // -----------------------------------------------------------------------------
         unsigned int Hash = 0;
         
-        if (rDataModel.m_Modelname != "")
+        if (rDataModel.GetModelname() != "")
         {
-            Hash = Base::CRC32(rDataModel.m_Modelname.GetConst(), static_cast<unsigned int>(rDataModel.m_Modelname.GetLength()));
+            Hash = Base::CRC32(rDataModel.GetModelname(), strlen(rDataModel.GetModelname()));
             
             if (m_ModelByID.find(Hash) != m_ModelByID.end())
             {
@@ -164,31 +164,31 @@ namespace
         
         CInternModel& rModel = *ModelPtr;
         
-        rModel.m_NumberOfLODs = rDataModel.m_NumberOfLODs;
+        rModel.m_NumberOfLODs = rDataModel.GetNumberOfLODs();
         
         // -----------------------------------------------------------------------------
         // For every LOD we have to create everything (data, material, informations,
         // ...)
         // -----------------------------------------------------------------------------
-        for (unsigned int IndexOfLOD = 0; IndexOfLOD < rDataModel.m_NumberOfLODs; ++IndexOfLOD)
+        for (unsigned int IndexOfLOD = 0; IndexOfLOD < rDataModel.GetNumberOfLODs(); ++IndexOfLOD)
         {
-            const Dt::CLOD& rCurrentLOD = *rDataModel.m_LODs[IndexOfLOD];
+            const Dt::CLOD& rCurrentLOD = *rDataModel.GetLOD(IndexOfLOD);
             
             CLODs::CPtr LODPtr = m_LODs.Allocate();
             
             CInternLOD& rLOD = *LODPtr;
             
-            rLOD.m_NumberOfSurfaces = rCurrentLOD.m_NumberOfSurfaces;
+            rLOD.m_NumberOfSurfaces = rCurrentLOD.GetNumberOfSurfaces();
             
             // -----------------------------------------------------------------------------
             // For every surface in model create material and surface informations
             // -----------------------------------------------------------------------------
-            for (unsigned int IndexOfSurface = 0; IndexOfSurface < rCurrentLOD.m_NumberOfSurfaces; ++IndexOfSurface)
+            for (unsigned int IndexOfSurface = 0; IndexOfSurface < rCurrentLOD.GetNumberOfSurfaces(); ++IndexOfSurface)
             {
                 // -----------------------------------------------------------------------------
                 // Create surface depending on data
                 // -----------------------------------------------------------------------------
-                const Dt::CSurface& rCurrentSurface = *rCurrentLOD.m_Surfaces[IndexOfSurface];
+                const Dt::CSurface& rCurrentSurface = *rCurrentLOD.GetSurface(IndexOfSurface);
                 
                 CSurfaces::CPtr SurfacePtr = m_Surfaces.Allocate();
                 
@@ -198,19 +198,19 @@ namespace
                 // Surface attributes
                 // -----------------------------------------------------------------------------
                 rSurface.m_SurfaceKey.m_HasPosition  = true;
-                rSurface.m_SurfaceKey.m_HasNormal    = ((rCurrentSurface.m_Elements & Dt::CSurface::Normal)     == Dt::CSurface::Normal);
-                rSurface.m_SurfaceKey.m_HasTangent   = ((rCurrentSurface.m_Elements & Dt::CSurface::Tangent)    == Dt::CSurface::Tangent);
-                rSurface.m_SurfaceKey.m_HasBitangent = ((rCurrentSurface.m_Elements & Dt::CSurface::Tangent)    == Dt::CSurface::Tangent);
-                rSurface.m_SurfaceKey.m_HasTexCoords = ((rCurrentSurface.m_Elements & Dt::CSurface::TexCoord0)  == Dt::CSurface::TexCoord0);
-                
+                rSurface.m_SurfaceKey.m_HasNormal    = ((rCurrentSurface.GetElements() & Dt::CSurface::Normal)     == Dt::CSurface::Normal);
+                rSurface.m_SurfaceKey.m_HasTangent   = ((rCurrentSurface.GetElements() & Dt::CSurface::Tangent)    == Dt::CSurface::Tangent);
+                rSurface.m_SurfaceKey.m_HasBitangent = ((rCurrentSurface.GetElements() & Dt::CSurface::Tangent)    == Dt::CSurface::Tangent);
+                rSurface.m_SurfaceKey.m_HasTexCoords = ((rCurrentSurface.GetElements() & Dt::CSurface::TexCoord0)  == Dt::CSurface::TexCoord0);
+
                 // -----------------------------------------------------------------------------
                 // Prepare mesh data for data alignment
                 // -----------------------------------------------------------------------------
-                unsigned int NumberOfVertices           = rCurrentSurface.m_NumberOfVertices * rSurface.m_SurfaceKey.m_HasPosition;
-                unsigned int NumberOfNormals            = rCurrentSurface.m_NumberOfVertices * rSurface.m_SurfaceKey.m_HasNormal;
-                unsigned int NumberOfTagents            = rCurrentSurface.m_NumberOfVertices * rSurface.m_SurfaceKey.m_HasTangent;
-                unsigned int NumberOfBitangents         = rCurrentSurface.m_NumberOfVertices * rSurface.m_SurfaceKey.m_HasBitangent;
-                unsigned int NumberOfTexCoords          = rCurrentSurface.m_NumberOfVertices * (rSurface.m_SurfaceKey.m_HasTexCoords >= 1);
+                unsigned int NumberOfVertices           = rCurrentSurface.GetNumberOfVertices() * rSurface.m_SurfaceKey.m_HasPosition;
+                unsigned int NumberOfNormals            = rCurrentSurface.GetNumberOfVertices() * rSurface.m_SurfaceKey.m_HasNormal;
+                unsigned int NumberOfTagents            = rCurrentSurface.GetNumberOfVertices() * rSurface.m_SurfaceKey.m_HasTangent;
+                unsigned int NumberOfBitangents         = rCurrentSurface.GetNumberOfVertices() * rSurface.m_SurfaceKey.m_HasBitangent;
+                unsigned int NumberOfTexCoords          = rCurrentSurface.GetNumberOfVertices() * (rSurface.m_SurfaceKey.m_HasTexCoords >= 1);
                 unsigned int NumberOfVerticeElements    = 3 * rSurface.m_SurfaceKey.m_HasPosition;
                 unsigned int NumberOfNormalElements     = 3 * rSurface.m_SurfaceKey.m_HasNormal;
                 unsigned int NumberOfTagentsElements    = 3 * rSurface.m_SurfaceKey.m_HasTangent;
@@ -218,20 +218,36 @@ namespace
                 unsigned int NumberOfTexCoordElements   = 2 * (rSurface.m_SurfaceKey.m_HasTexCoords >= 1);
                 unsigned int NumberOfVertexElements     = NumberOfVertices * NumberOfVerticeElements + NumberOfNormals * NumberOfNormalElements + NumberOfTagents * NumberOfTagentsElements + NumberOfBitangents * NumberOfBitangentsElements + NumberOfTexCoords * NumberOfTexCoordElements;
                 unsigned int NumberOfElementsPerVertex  = NumberOfVerticeElements + NumberOfNormalElements + NumberOfTagentsElements + NumberOfBitangentsElements + NumberOfTexCoordElements;
-                unsigned int NumberOfIndices            = rCurrentSurface.m_NumberOfIndices;
+                unsigned int NumberOfIndices            = rCurrentSurface.GetNumberOfIndices();
                 
                 // -----------------------------------------------------------------------------
                 // Prepare upload data of vertices
                 // -----------------------------------------------------------------------------
+                unsigned int* pUploadIndexData = static_cast<unsigned int* >(Base::CMemory::Allocate(sizeof(unsigned int) * NumberOfIndices));
                 float* pUploadVertexData = static_cast<float* >(Base::CMemory::Allocate(sizeof(float) * NumberOfVertexElements));
-                
+
+                // -----------------------------------------------------------------------------
+                // Get data from data model
+                // -----------------------------------------------------------------------------
+                const Base::Float3* pPosition   = rCurrentSurface.GetPositions();
+                const Base::Float3* pNormals    = rCurrentSurface.GetNormals();
+                const Base::Float3* pTangents   = rCurrentSurface.GetTangents();
+                const Base::Float3* pBitangents = rCurrentSurface.GetBitangents();
+                const Base::Float2* pTexCoords  = rCurrentSurface.GetTexCoords();
+                const unsigned int* pIndices    = rCurrentSurface.GetIndices();
+
                 // -----------------------------------------------------------------------------
                 // Prepare AABB
                 // -----------------------------------------------------------------------------
-                Base::Float3 StartPosition(rCurrentSurface.m_pPositions[0][0], rCurrentSurface.m_pPositions[0][1], rCurrentSurface.m_pPositions[0][2]);
-                
+                Base::Float3 StartPosition(pPosition[0][0], pPosition[0][1], pPosition[0][2]);
+
                 rModel.m_AABB.SetMin(StartPosition);
                 rModel.m_AABB.SetMax(StartPosition);
+
+                // -----------------------------------------------------------------------------
+                // Copy indices
+                // -----------------------------------------------------------------------------
+                Base::CMemory::Copy(pUploadIndexData, pIndices, sizeof(unsigned int) * NumberOfIndices);
                 
                 // -----------------------------------------------------------------------------
                 // Iterate throw every vertex and put it into upload data
@@ -240,47 +256,47 @@ namespace
                 {
                     unsigned int CurrentAlignIndex = CurrentVertex * NumberOfElementsPerVertex;
                     
-                    Base::Float3 CurrentPosition(rCurrentSurface.m_pPositions[CurrentVertex][0], rCurrentSurface.m_pPositions[CurrentVertex][1], rCurrentSurface.m_pPositions[CurrentVertex][2]);
+                    Base::Float3 CurrentPosition(pPosition[CurrentVertex][0], pPosition[CurrentVertex][1], pPosition[CurrentVertex][2]);
                     
                     rModel.m_AABB.Extend(CurrentPosition);
                     
-                    pUploadVertexData[CurrentAlignIndex + 0] = rCurrentSurface.m_pPositions[CurrentVertex][0];
-                    pUploadVertexData[CurrentAlignIndex + 1] = rCurrentSurface.m_pPositions[CurrentVertex][1];
-                    pUploadVertexData[CurrentAlignIndex + 2] = rCurrentSurface.m_pPositions[CurrentVertex][2];
+                    pUploadVertexData[CurrentAlignIndex + 0] = pPosition[CurrentVertex][0];
+                    pUploadVertexData[CurrentAlignIndex + 1] = pPosition[CurrentVertex][1];
+                    pUploadVertexData[CurrentAlignIndex + 2] = pPosition[CurrentVertex][2];
                     
                     CurrentAlignIndex += 3;
                     
                     if (rSurface.m_SurfaceKey.m_HasNormal)
                     {
-                        pUploadVertexData[CurrentAlignIndex + 0] = rCurrentSurface.m_pNormals[CurrentVertex][0];
-                        pUploadVertexData[CurrentAlignIndex + 1] = rCurrentSurface.m_pNormals[CurrentVertex][1];
-                        pUploadVertexData[CurrentAlignIndex + 2] = rCurrentSurface.m_pNormals[CurrentVertex][2];
+                        pUploadVertexData[CurrentAlignIndex + 0] = pNormals[CurrentVertex][0];
+                        pUploadVertexData[CurrentAlignIndex + 1] = pNormals[CurrentVertex][1];
+                        pUploadVertexData[CurrentAlignIndex + 2] = pNormals[CurrentVertex][2];
                         
                         CurrentAlignIndex += 3;
                     }
                     
                     if (rSurface.m_SurfaceKey.m_HasTangent)
                     {
-                        pUploadVertexData[CurrentAlignIndex + 0] = rCurrentSurface.m_pTangents[CurrentVertex][0];
-                        pUploadVertexData[CurrentAlignIndex + 1] = rCurrentSurface.m_pTangents[CurrentVertex][1];
-                        pUploadVertexData[CurrentAlignIndex + 2] = rCurrentSurface.m_pTangents[CurrentVertex][2];
+                        pUploadVertexData[CurrentAlignIndex + 0] = pTangents[CurrentVertex][0];
+                        pUploadVertexData[CurrentAlignIndex + 1] = pTangents[CurrentVertex][1];
+                        pUploadVertexData[CurrentAlignIndex + 2] = pTangents[CurrentVertex][2];
                         
                         CurrentAlignIndex += 3;
                     }
                     
                     if (rSurface.m_SurfaceKey.m_HasBitangent)
                     {
-                        pUploadVertexData[CurrentAlignIndex + 0] = rCurrentSurface.m_pBitangents[CurrentVertex][0];
-                        pUploadVertexData[CurrentAlignIndex + 1] = rCurrentSurface.m_pBitangents[CurrentVertex][1];
-                        pUploadVertexData[CurrentAlignIndex + 2] = rCurrentSurface.m_pBitangents[CurrentVertex][2];
+                        pUploadVertexData[CurrentAlignIndex + 0] = pBitangents[CurrentVertex][0];
+                        pUploadVertexData[CurrentAlignIndex + 1] = pBitangents[CurrentVertex][1];
+                        pUploadVertexData[CurrentAlignIndex + 2] = pBitangents[CurrentVertex][2];
                         
                         CurrentAlignIndex += 3;
                     }
                     
                     if (rSurface.m_SurfaceKey.m_HasTexCoords >= 1)
                     {
-                        pUploadVertexData[CurrentAlignIndex + 0] = rCurrentSurface.m_pTexCoords[CurrentVertex][0];
-                        pUploadVertexData[CurrentAlignIndex + 1] = rCurrentSurface.m_pTexCoords[CurrentVertex][1];
+                        pUploadVertexData[CurrentAlignIndex + 0] = pTexCoords[CurrentVertex][0];
+                        pUploadVertexData[CurrentAlignIndex + 1] = pTexCoords[CurrentVertex][1];
                         
                         CurrentAlignIndex += 2;
                     }
@@ -312,7 +328,7 @@ namespace
                 IndexBufferDesc.m_Binding       = CBuffer::IndexBuffer;
                 IndexBufferDesc.m_Access        = CBuffer::CPUWrite;
                 IndexBufferDesc.m_NumberOfBytes = sizeof(unsigned int) * NumberOfIndices;
-                IndexBufferDesc.m_pBytes        = rCurrentSurface.m_pIndices;
+                IndexBufferDesc.m_pBytes        = pUploadIndexData;
                 IndexBufferDesc.m_pClassKey     = 0;
                 
                 rSurface.m_IndexBuffer = BufferManager::CreateBuffer(IndexBufferDesc);
@@ -326,17 +342,18 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Delete allocated memory
                 // -----------------------------------------------------------------------------
+                Base::CMemory::Free(pUploadIndexData);
                 Base::CMemory::Free(pUploadVertexData);
                 
                 // -----------------------------------------------------------------------------
                 // Materials
                 // -----------------------------------------------------------------------------
-                if (rCurrentSurface.m_pDefaultMaterial)
+                if (rCurrentSurface.GetMaterial())
                 {
                     Gfx::SMaterialDescriptor MaterialDesc;
                     
                     MaterialDesc.m_ID        = rSurface.m_SurfaceKey.m_Key;
-                    MaterialDesc.m_pMaterial = rCurrentSurface.m_pDefaultMaterial;
+                    MaterialDesc.m_pMaterial = rCurrentSurface.GetMaterial();
                     
                     rSurface.m_MaterialPtr = Gfx::MaterialManager::CreateMaterial(MaterialDesc);
                 }

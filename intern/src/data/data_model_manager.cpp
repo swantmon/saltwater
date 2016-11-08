@@ -251,7 +251,7 @@ namespace
             // Iterate throw the mesh data of current LOD and create a surface for every
             // mesh
             // -----------------------------------------------------------------------------
-            std::function<void(const aiNode*, const aiScene*, Dt::CLOD&, unsigned int, unsigned int&)> CreateSurfaceFromNode = [&](const aiNode* _pNode, const aiScene* _pScene, Dt::CLOD& _rModelLOD, unsigned int _LODLevel, unsigned int& _rSurfaceNumber)->void
+            std::function<void(const aiNode*, const aiScene*, CInternLOD&, unsigned int, unsigned int&)> CreateSurfaceFromNode = [&](const aiNode* _pNode, const aiScene* _pScene, CInternLOD& _rModelLOD, unsigned int _LODLevel, unsigned int& _rSurfaceNumber)->void
             {
                 // -----------------------------------------------------------------------------
                 // If we have some mesh data send this mesh to graphic and set facet on entity.
@@ -259,7 +259,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 if (_pNode->mNumMeshes > 0)
                 {
-                    assert(_rSurfaceNumber + _pNode->mNumMeshes < Dt::CLOD::s_NumberOfSurfaces);
+                    assert(_rSurfaceNumber + _pNode->mNumMeshes <= Dt::CLOD::s_NumberOfSurfaces);
                     
                     // -----------------------------------------------------------------------------
                     // Create surface data
@@ -317,17 +317,10 @@ namespace
                                 rNewSurface.m_pIndices[IndexOfFace * NumberOfIndicesPerFace + IndexOfIndice] = CurrentFace.mIndices[IndexOfIndice];
                             }
                         }
-                        
-                        Base::Float3 StartPosition(pVertexData[0].x, pVertexData[0].y, pVertexData[0].z);
-                        
-                        rNewModel.m_AABB.SetMin(StartPosition);
-                        rNewModel.m_AABB.SetMax(StartPosition);
-                        
+                       
                         for (unsigned int CurrentVertex = 0; CurrentVertex < NumberOfVertices; ++CurrentVertex)
                         {
                             Base::Float3 CurrentPosition(pVertexData[CurrentVertex].x, pVertexData[CurrentVertex].y, pVertexData[CurrentVertex].z);
-                            
-                            rNewModel.m_AABB.Extend(CurrentPosition);
                             
                             rNewSurface.m_pPositions[CurrentVertex][0] = pVertexData[CurrentVertex].x;
                             rNewSurface.m_pPositions[CurrentVertex][1] = pVertexData[CurrentVertex].y;
@@ -391,7 +384,7 @@ namespace
 
                                 MaterialFileDesc.m_pFileName = MaterialExaminer.c_str();
 
-                                rNewSurface.m_pDefaultMaterial = &MaterialManager::CreateMaterial(MaterialFileDesc);
+                                rNewSurface.m_pMaterial = &MaterialManager::CreateMaterial(MaterialFileDesc);
                             }
                         }
                         else
@@ -404,7 +397,7 @@ namespace
                             // -----------------------------------------------------------------------------
                             // Link
                             // -----------------------------------------------------------------------------
-                            rNewSurface.m_pDefaultMaterial = &rNewMaterial;
+                            rNewSurface.m_pMaterial = &rNewMaterial;
                             
                             // -----------------------------------------------------------------------------
                             // Get model specific attributes
@@ -613,18 +606,11 @@ namespace
                             rNewSurface.m_pIndices[IndexOfFace * NumberOfIndicesPerFace + IndexOfIndice] = CurrentFace.mIndices[IndexOfIndice];
                         }
                     }
-                            
-                    Base::Float3 StartPosition(pVertexData[0].x, pVertexData[0].y, pVertexData[0].z);
-                            
-                    rNewModel.m_AABB.SetMin(StartPosition);
-                    rNewModel.m_AABB.SetMax(StartPosition);
-                            
+          
                     for (unsigned int CurrentVertex = 0; CurrentVertex < NumberOfVertices; ++CurrentVertex)
                     {
                         Base::Float3 CurrentPosition(pVertexData[CurrentVertex].x, pVertexData[CurrentVertex].y, pVertexData[CurrentVertex].z);
-                                
-                        rNewModel.m_AABB.Extend(CurrentPosition);
-                                
+                                  
                         rNewSurface.m_pPositions[CurrentVertex][0] = pVertexData[CurrentVertex].x;
                         rNewSurface.m_pPositions[CurrentVertex][1] = pVertexData[CurrentVertex].y;
                         rNewSurface.m_pPositions[CurrentVertex][2] = pVertexData[CurrentVertex].z;
@@ -687,7 +673,7 @@ namespace
 
                             MaterialFileDesc.m_pFileName = MaterialExaminer.c_str();
 
-                            rNewSurface.m_pDefaultMaterial = &MaterialManager::CreateMaterial(MaterialFileDesc);
+                            rNewSurface.m_pMaterial = &MaterialManager::CreateMaterial(MaterialFileDesc);
                         }
                     }
                     else
@@ -700,7 +686,7 @@ namespace
                         // -----------------------------------------------------------------------------
                         // Link
                         // -----------------------------------------------------------------------------
-                        rNewSurface.m_pDefaultMaterial = &rNewMaterial;
+                        rNewSurface.m_pMaterial = &rNewMaterial;
                                 
                         // -----------------------------------------------------------------------------
                         // Get model specific attributes
@@ -1137,7 +1123,7 @@ namespace
                 
                 rInternSurface.m_NumberOfVertices = 0;
                 rInternSurface.m_NumberOfIndices  = 0;
-                rInternSurface.m_pDefaultMaterial = 0;
+                rInternSurface.m_pMaterial        = 0;
                 
                 m_Surfaces.Free(&rInternSurface);
             }
@@ -1227,7 +1213,7 @@ namespace
         rNewSurface.m_NumberOfIndices  = _NumberOfIndices;
         rNewSurface.m_NumberOfVertices = _NumberOfVertices;
         rNewSurface.m_Elements         = _Elements;
-        rNewSurface.m_pDefaultMaterial = 0;
+        rNewSurface.m_pMaterial        = 0;
         
         // -----------------------------------------------------------------------------
         // Indices

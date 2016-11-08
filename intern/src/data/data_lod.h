@@ -17,8 +17,20 @@ namespace Dt
     public:
         
         static const unsigned int s_NumberOfSurfaces = 16;
-        
+
     public:
+
+        CLOD();
+        ~CLOD();
+
+        void SetNumberOfSurfaces(unsigned int _NumberOfSurfaces);
+        unsigned int GetNumberOfSurfaces() const;
+
+        void SetSurface(unsigned int _Index, CSurface* _pSurface);
+        CSurface* GetSurface(unsigned int _Index);
+        const CSurface* GetSurface(unsigned int _Index) const;
+        
+    protected:
         
         unsigned int m_NumberOfSurfaces;
         CSurface*    m_Surfaces[s_NumberOfSurfaces];

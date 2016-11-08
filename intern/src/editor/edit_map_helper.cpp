@@ -935,7 +935,7 @@ namespace
 
                 if (pMaterial == nullptr)
                 {
-                    pMaterial = pFacet->GetModel()->m_LODs[0]->m_Surfaces[0]->m_pDefaultMaterial;
+                    pMaterial = pFacet->GetModel()->GetLOD(0)->GetSurface(0)->GetMaterial();
                 }
 
                 Edit::CMessage NewMessage;
@@ -1508,7 +1508,7 @@ namespace
 
                 if (pMaterial == nullptr)
                 {
-                    pMaterial = pFacet->GetModel()->m_LODs[0]->m_Surfaces[0]->m_pDefaultMaterial;
+                    pMaterial = pFacet->GetModel()->GetLOD(0)->GetSurface(0)->GetMaterial();
                 }
 
                 // -----------------------------------------------------------------------------

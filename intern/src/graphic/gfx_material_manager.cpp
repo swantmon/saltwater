@@ -322,7 +322,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Get data material
         // -----------------------------------------------------------------------------
-        Dt::CMaterial& rDataMaterial = *_rDescriptor.m_pMaterial;
+        const Dt::CMaterial& rDataMaterial = *_rDescriptor.m_pMaterial;
         
         // -----------------------------------------------------------------------------
         // Create material

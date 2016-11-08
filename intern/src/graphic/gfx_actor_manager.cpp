@@ -214,7 +214,7 @@ namespace
 
             if (pDataMaterial == nullptr)
             {
-                pDataMaterial = pDataActorModelFacet->GetModel()->m_LODs[0]->m_Surfaces[0]->m_pDefaultMaterial;
+                pDataMaterial = pDataActorModelFacet->GetModel()->GetLOD(0)->GetSurface(0)->GetMaterial();
             }
 
             if (pDataMaterial != 0)

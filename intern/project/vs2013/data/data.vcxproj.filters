@@ -164,6 +164,15 @@
     <ClCompile Include="..\..\..\src\data\data_script_facet.cpp">
       <Filter>map\scripts</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_model.cpp">
+      <Filter>models</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_lod.cpp">
+      <Filter>models</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_surface.cpp">
+      <Filter>models</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="map">
