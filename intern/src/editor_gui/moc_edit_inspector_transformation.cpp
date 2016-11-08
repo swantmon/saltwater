@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_Edit__CInspectorTransformation_t {
-    QByteArrayData data[14];
-    char stringdata0[211];
+    QByteArrayData data[15];
+    char stringdata0[221];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -42,7 +42,8 @@ QT_MOC_LITERAL(9, 137, 15), // "changeRotationZ"
 QT_MOC_LITERAL(10, 153, 12), // "changeScaleX"
 QT_MOC_LITERAL(11, 166, 12), // "changeScaleY"
 QT_MOC_LITERAL(12, 179, 12), // "changeScaleZ"
-QT_MOC_LITERAL(13, 192, 18) // "RequestInformation"
+QT_MOC_LITERAL(13, 192, 18), // "RequestInformation"
+QT_MOC_LITERAL(14, 211, 9) // "_EntityID"
 
     },
     "Edit::CInspectorTransformation\0"
@@ -50,7 +51,8 @@ QT_MOC_LITERAL(13, 192, 18) // "RequestInformation"
     "changePositionY\0changePositionZ\0"
     "changeRotationX\0changeRotationY\0"
     "changeRotationZ\0changeScaleX\0changeScaleY\0"
-    "changeScaleZ\0RequestInformation"
+    "changeScaleZ\0RequestInformation\0"
+    "_EntityID"
 };
 #undef QT_MOC_LITERAL
 
@@ -78,7 +80,7 @@ static const uint qt_meta_data_Edit__CInspectorTransformation[] = {
       10,    1,   88,    2, 0x0a /* Public */,
       11,    1,   91,    2, 0x0a /* Public */,
       12,    1,   94,    2, 0x0a /* Public */,
-      13,    0,   97,    2, 0x0a /* Public */,
+      13,    1,   97,    2, 0x0a /* Public */,
 
  // slots: parameters
     QMetaType::Void,
@@ -91,7 +93,7 @@ static const uint qt_meta_data_Edit__CInspectorTransformation[] = {
     QMetaType::Void, QMetaType::QPoint,    4,
     QMetaType::Void, QMetaType::QPoint,    4,
     QMetaType::Void, QMetaType::QPoint,    4,
-    QMetaType::Void,
+    QMetaType::Void, QMetaType::UInt,   14,
 
        0        // eod
 };
@@ -112,7 +114,7 @@ void Edit::CInspectorTransformation::qt_static_metacall(QObject *_o, QMetaObject
         case 7: _t->changeScaleX((*reinterpret_cast< QPoint(*)>(_a[1]))); break;
         case 8: _t->changeScaleY((*reinterpret_cast< QPoint(*)>(_a[1]))); break;
         case 9: _t->changeScaleZ((*reinterpret_cast< QPoint(*)>(_a[1]))); break;
-        case 10: _t->RequestInformation(); break;
+        case 10: _t->RequestInformation((*reinterpret_cast< uint(*)>(_a[1]))); break;
         default: ;
         }
     }

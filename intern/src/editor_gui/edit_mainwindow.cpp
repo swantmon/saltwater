@@ -148,23 +148,18 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Send message with new scene / map request
         // -----------------------------------------------------------------------------
-        CMessage NewMessage;
-
         if (!ModelFile.isEmpty())
         {
             QByteArray ModelFileBinary = ModelFile.toLatin1();
 
-            NewMessage.PutBool(true);
+            CMessage NewMessage;
+
             NewMessage.PutString(ModelFileBinary.data());
-        }
-        else
-        {
-            NewMessage.PutBool(false);
-        }
 
-        NewMessage.Reset();
+            NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewEntityActor, NewMessage);
+            MessageManager::SendMessage(SGUIMessageType::NewEntityActor, NewMessage);
+        }
     }
 
     // -----------------------------------------------------------------------------

@@ -47,6 +47,7 @@ namespace Edit
         CInspectorSSR*            m_pSSRWidget;
         CInspectorVolumeFog*      m_pVolumeFogWidget;
         CInspectorMaterial*       m_pMaterialWidget;
+        unsigned int              m_ActiveEntityID;
 
     private:
 

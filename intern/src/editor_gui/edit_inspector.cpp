@@ -21,6 +21,7 @@ namespace Edit
         , m_pSSRWidget        ()
         , m_pVolumeFogWidget  ()
         , m_pMaterialWidget   ()
+        , m_ActiveEntityID    (-1)
     {
         // -----------------------------------------------------------------------------
         // Create layout
@@ -115,9 +116,14 @@ namespace Edit
 
     void CInspector::updateContentForEntity(int _ID)
     {
+        m_ActiveEntityID = _ID;
+
+        // -----------------------------------------------------------------------------
+        // Send messages
+        // -----------------------------------------------------------------------------
         CMessage NewMessage;
 
-        NewMessage.PutInt(_ID);
+        NewMessage.PutInt(m_ActiveEntityID);
 
         NewMessage.Reset();
 
@@ -131,6 +137,8 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read data
         // -----------------------------------------------------------------------------
+        unsigned int EntityID = static_cast<unsigned int>(_rMessage.GetInt());
+
         int Category = _rMessage.GetInt();
         int Type     = _rMessage.GetInt();
 
@@ -144,7 +152,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // General informations
         // -----------------------------------------------------------------------------
-        m_pEntityWidget->RequestInformation();
+        m_pEntityWidget->RequestInformation(EntityID);
 
         m_pEntityWidget->setVisible(true);
 
@@ -153,7 +161,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         if (HasTransformation)
         {
-            m_pTransformWidget->RequestInformation();
+            m_pTransformWidget->RequestInformation(EntityID);
 
             m_pTransformWidget->setVisible(true);
         }
@@ -185,7 +193,7 @@ namespace Edit
                 }
                 else if (Type == 1) // Model
                 {
-                    m_pMaterialWidget->RequestInformation();
+                    m_pMaterialWidget->RequestInformation(EntityID);
 
                     m_pMaterialWidget->setVisible(true);
                 }
@@ -200,25 +208,25 @@ namespace Edit
             {
                 if (Type == 0) // Point
                 {
-                    m_pPointlightWidget->RequestInformation();
+                    m_pPointlightWidget->RequestInformation(EntityID);
 
                     m_pPointlightWidget->setVisible(true);
                 }
                 else if (Type == 1) // Sun
                 {
-                    m_pSunWidget->RequestInformation();
+                    m_pSunWidget->RequestInformation(EntityID);
 
                     m_pSunWidget->setVisible(true);
                 }
                 else if (Type == 2) // GlobalProbe
                 {
-                    m_pGlobalProbeWidget->RequestInformation();
+                    m_pGlobalProbeWidget->RequestInformation(EntityID);
 
                     m_pGlobalProbeWidget->setVisible(true);
                 }
                 else if (Type == 3) // Environment
                 {
-                    m_pEnvironmentWidget->RequestInformation();
+                    m_pEnvironmentWidget->RequestInformation(EntityID);
 
                     m_pEnvironmentWidget->setVisible(true);
                 }
@@ -227,25 +235,25 @@ namespace Edit
             {
                 if (Type == 0) // Bloom
                 {
-                    m_pBloomWidget->RequestInformation();
+                    m_pBloomWidget->RequestInformation(EntityID);
 
                     m_pBloomWidget->setVisible(true);
                 }
                 else if (Type == 1) // SSR
                 {
-                    m_pSSRWidget->RequestInformation();
+                    m_pSSRWidget->RequestInformation(EntityID);
 
                     m_pSSRWidget->setVisible(true);
                 }
                 else if (Type == 2) // DOF
                 {
-                    m_pDOFWidget->RequestInformation();
+                    m_pDOFWidget->RequestInformation(EntityID);
 
                     m_pDOFWidget->setVisible(true);
                 }
                 else if (Type == 3) // FXAA
                 {
-                    m_pFXAAWidget->RequestInformation();
+                    m_pFXAAWidget->RequestInformation(EntityID);
 
                     m_pFXAAWidget->setVisible(true);
                 }
@@ -254,7 +262,7 @@ namespace Edit
                 }
                 else if (Type == 5) // VolumeFog
                 {
-                    m_pVolumeFogWidget->RequestInformation();
+                    m_pVolumeFogWidget->RequestInformation(EntityID);
 
                     m_pVolumeFogWidget->setVisible(true);
                 }

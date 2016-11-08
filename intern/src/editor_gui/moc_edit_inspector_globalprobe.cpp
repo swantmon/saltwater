@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_Edit__CInspectorGlobalProbe_t {
-    QByteArrayData data[4];
-    char stringdata0[61];
+    QByteArrayData data[5];
+    char stringdata0[71];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -32,11 +32,12 @@ static const qt_meta_stringdata_Edit__CInspectorGlobalProbe_t qt_meta_stringdata
 QT_MOC_LITERAL(0, 0, 27), // "Edit::CInspectorGlobalProbe"
 QT_MOC_LITERAL(1, 28, 12), // "valueChanged"
 QT_MOC_LITERAL(2, 41, 0), // ""
-QT_MOC_LITERAL(3, 42, 18) // "RequestInformation"
+QT_MOC_LITERAL(3, 42, 18), // "RequestInformation"
+QT_MOC_LITERAL(4, 61, 9) // "_EntityID"
 
     },
     "Edit::CInspectorGlobalProbe\0valueChanged\0"
-    "\0RequestInformation"
+    "\0RequestInformation\0_EntityID"
 };
 #undef QT_MOC_LITERAL
 
@@ -55,11 +56,11 @@ static const uint qt_meta_data_Edit__CInspectorGlobalProbe[] = {
 
  // slots: name, argc, parameters, tag, flags
        1,    0,   24,    2, 0x0a /* Public */,
-       3,    0,   25,    2, 0x0a /* Public */,
+       3,    1,   25,    2, 0x0a /* Public */,
 
  // slots: parameters
     QMetaType::Void,
-    QMetaType::Void,
+    QMetaType::Void, QMetaType::UInt,    4,
 
        0        // eod
 };
@@ -71,11 +72,10 @@ void Edit::CInspectorGlobalProbe::qt_static_metacall(QObject *_o, QMetaObject::C
         Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->valueChanged(); break;
-        case 1: _t->RequestInformation(); break;
+        case 1: _t->RequestInformation((*reinterpret_cast< uint(*)>(_a[1]))); break;
         default: ;
         }
     }
-    Q_UNUSED(_a);
 }
 
 const QMetaObject Edit::CInspectorGlobalProbe::staticMetaObject = {

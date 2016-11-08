@@ -28,7 +28,11 @@ namespace Edit
 
         void reflectanceValueChanged(int _Value);
 
-        void RequestInformation();
+        void RequestInformation(unsigned int _EntityID);
+
+    private:
+
+        unsigned int m_CurrentEntityID;
 
     private:
 

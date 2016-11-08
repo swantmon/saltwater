@@ -39,10 +39,6 @@ namespace
 
     private:
 
-        Dt::CEntity* m_pLastRequestedEntity;
-
-    private:
-
         void OnRemoveEntity(Edit::CMessage& _rMessage);
 
         void OnRequestEntityInfoFacets(Edit::CMessage& _rMessage);
@@ -60,7 +56,6 @@ namespace
 namespace
 {
     CEntityHelper::CEntityHelper()
-        : m_pLastRequestedEntity(nullptr)
     {
         
     }
@@ -113,136 +108,128 @@ namespace
         Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyRemove | Dt::CEntity::DirtyDestroy);
 
         _rMessage.SetResult(100);
-
-        m_pLastRequestedEntity = nullptr;
     }
 
     // -----------------------------------------------------------------------------
 
     void CEntityHelper::OnRequestEntityInfoFacets(Edit::CMessage& _rMessage)
     {
-        m_pLastRequestedEntity = nullptr;
-        
         int EntityID = _rMessage.GetInt();
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        m_pLastRequestedEntity = &rCurrentEntity;
+        Edit::CMessage NewMessage;
 
-        if (m_pLastRequestedEntity != nullptr)
-        {
-            Edit::CMessage NewMessage;
+        NewMessage.PutInt(rCurrentEntity.GetID());
 
-            NewMessage.PutInt(rCurrentEntity.GetCategory());
-            NewMessage.PutInt(rCurrentEntity.GetType());
+        NewMessage.PutInt(rCurrentEntity.GetCategory());
+        NewMessage.PutInt(rCurrentEntity.GetType());
 
-            NewMessage.PutBool(rCurrentEntity.GetTransformationFacet() != nullptr);
-            NewMessage.PutBool(rCurrentEntity.GetHierarchyFacet()      != nullptr);
+        NewMessage.PutBool(rCurrentEntity.GetTransformationFacet() != nullptr);
+        NewMessage.PutBool(rCurrentEntity.GetHierarchyFacet()      != nullptr);
 
-            NewMessage.PutBool(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data)    != nullptr);
-            NewMessage.PutBool(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic) != nullptr);
-            NewMessage.PutBool(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Script)  != nullptr);
+        NewMessage.PutBool(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data)    != nullptr);
+        NewMessage.PutBool(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic) != nullptr);
+        NewMessage.PutBool(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Script)  != nullptr);
 
-            NewMessage.Reset();
+        NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoFacets, NewMessage);
-        }
+        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoFacets, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
 
     void CEntityHelper::OnRequestEntityInfoEntity(Edit::CMessage& _rMessage)
     {
-        if (m_pLastRequestedEntity != nullptr)
+        int EntityID = _rMessage.GetInt();
+
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+           
+        Edit::CMessage NewMessage;
+
+        NewMessage.PutInt(rCurrentEntity.GetID());
+
+        NewMessage.PutInt(rCurrentEntity.GetCategory());
+
+        NewMessage.PutInt(rCurrentEntity.GetType());
+
+        if (rCurrentEntity.GetName().GetLength() > 0)
         {
-            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+            NewMessage.PutBool(true);
 
-            Edit::CMessage NewMessage;
-
-            NewMessage.PutInt(rCurrentEntity.GetID());
-
-            NewMessage.PutInt(rCurrentEntity.GetCategory());
-
-            NewMessage.PutInt(rCurrentEntity.GetType());
-
-            if (rCurrentEntity.GetName().GetLength() > 0)
-            {
-                NewMessage.PutBool(true);
-
-                NewMessage.PutString(rCurrentEntity.GetName().GetConst());
-            }
-            else
-            {
-                NewMessage.PutBool(false);
-            }
-
-            NewMessage.Reset();
-
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoEntity, NewMessage);
+            NewMessage.PutString(rCurrentEntity.GetName().GetConst());
         }
+        else
+        {
+            NewMessage.PutBool(false);
+        }
+
+        NewMessage.Reset();
+
+        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoEntity, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
 
     void CEntityHelper::OnRequestEntityInfoTransformation(Edit::CMessage& _rMessage)
     {
-        if (m_pLastRequestedEntity != nullptr)
+        int EntityID = _rMessage.GetInt();
+
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+
+        Edit::CMessage NewMessage;
+
+        Dt::CTransformationFacet* pTransformationFacet = rCurrentEntity.GetTransformationFacet();
+
+        NewMessage.PutInt(rCurrentEntity.GetID());
+
+        if (pTransformationFacet)
         {
-            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+            NewMessage.PutBool(true);
 
-            Edit::CMessage NewMessage;
+            NewMessage.PutFloat(pTransformationFacet->GetPosition()[0]);
+            NewMessage.PutFloat(pTransformationFacet->GetPosition()[1]);
+            NewMessage.PutFloat(pTransformationFacet->GetPosition()[2]);
 
-            Dt::CTransformationFacet* pTransformationFacet = rCurrentEntity.GetTransformationFacet();
+            NewMessage.PutFloat(Base::RadiansToDegree(pTransformationFacet->GetRotation()[0]));
+            NewMessage.PutFloat(Base::RadiansToDegree(pTransformationFacet->GetRotation()[1]));
+            NewMessage.PutFloat(Base::RadiansToDegree(pTransformationFacet->GetRotation()[2]));
 
-            if (pTransformationFacet)
-            {
-                NewMessage.PutBool(true);
-
-                NewMessage.PutFloat(pTransformationFacet->GetPosition()[0]);
-                NewMessage.PutFloat(pTransformationFacet->GetPosition()[1]);
-                NewMessage.PutFloat(pTransformationFacet->GetPosition()[2]);
-
-                NewMessage.PutFloat(Base::RadiansToDegree(pTransformationFacet->GetRotation()[0]));
-                NewMessage.PutFloat(Base::RadiansToDegree(pTransformationFacet->GetRotation()[1]));
-                NewMessage.PutFloat(Base::RadiansToDegree(pTransformationFacet->GetRotation()[2]));
-
-                NewMessage.PutFloat(pTransformationFacet->GetScale()[0]);
-                NewMessage.PutFloat(pTransformationFacet->GetScale()[1]);
-                NewMessage.PutFloat(pTransformationFacet->GetScale()[2]);
-            }
-            else
-            {
-                NewMessage.PutBool(false);
-
-                NewMessage.PutFloat(rCurrentEntity.GetWorldPosition()[0]);
-                NewMessage.PutFloat(rCurrentEntity.GetWorldPosition()[1]);
-                NewMessage.PutFloat(rCurrentEntity.GetWorldPosition()[2]);
-            }
-
-            NewMessage.Reset();
-
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoTransformation, NewMessage);
+            NewMessage.PutFloat(pTransformationFacet->GetScale()[0]);
+            NewMessage.PutFloat(pTransformationFacet->GetScale()[1]);
+            NewMessage.PutFloat(pTransformationFacet->GetScale()[2]);
         }
+        else
+        {
+            NewMessage.PutBool(false);
+
+            NewMessage.PutFloat(rCurrentEntity.GetWorldPosition()[0]);
+            NewMessage.PutFloat(rCurrentEntity.GetWorldPosition()[1]);
+            NewMessage.PutFloat(rCurrentEntity.GetWorldPosition()[2]);
+        }
+
+        NewMessage.Reset();
+
+        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoTransformation, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
 
     void CEntityHelper::OnEntityInfoEntity(Edit::CMessage& _rMessage)
     {
-        if (m_pLastRequestedEntity != nullptr)
+        int EntityID = _rMessage.GetInt();
+
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+
+        bool HasName = _rMessage.GetBool();
+
+        if (HasName)
         {
-            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+            char NewEntityName[256];
 
-            bool HasName = _rMessage.GetBool();
+            _rMessage.GetString(NewEntityName, 256);
 
-            if (HasName)
-            {
-                char NewEntityName[256];
-
-                _rMessage.GetString(NewEntityName, 256);
-
-                rCurrentEntity.SetName(NewEntityName);
-            }
+            rCurrentEntity.SetName(NewEntityName);
         }
     }
 
@@ -286,44 +273,43 @@ namespace
         float ScaleY;
         float ScaleZ;
 
-        if (m_pLastRequestedEntity != nullptr)
+        int EntityID = _rMessage.GetInt();
+
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+
+        Dt::CTransformationFacet* pTransformationFacet = rCurrentEntity.GetTransformationFacet();
+
+        TranslationX = _rMessage.GetFloat();
+        TranslationY = _rMessage.GetFloat();
+        TranslationZ = _rMessage.GetFloat();
+
+        if (pTransformationFacet)
         {
-            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+            RotationX = _rMessage.GetFloat();
+            RotationY = _rMessage.GetFloat();
+            RotationZ = _rMessage.GetFloat();
 
-            Dt::CTransformationFacet* pTransformationFacet = rCurrentEntity.GetTransformationFacet();
-
-            TranslationX = _rMessage.GetFloat();
-            TranslationY = _rMessage.GetFloat();
-            TranslationZ = _rMessage.GetFloat();
-
-            if (pTransformationFacet)
-            {
-                RotationX = _rMessage.GetFloat();
-                RotationY = _rMessage.GetFloat();
-                RotationZ = _rMessage.GetFloat();
-
-                ScaleX = _rMessage.GetFloat();
-                ScaleY = _rMessage.GetFloat();
-                ScaleZ = _rMessage.GetFloat();
+            ScaleX = _rMessage.GetFloat();
+            ScaleY = _rMessage.GetFloat();
+            ScaleZ = _rMessage.GetFloat();
 
 
-                Base::Float3 Position(TranslationX, TranslationY, TranslationZ);
-                Base::Float3 Rotation(Base::DegreesToRadians(RotationX), Base::DegreesToRadians(RotationY), Base::DegreesToRadians(RotationZ));
-                Base::Float3 Scale(ScaleX, ScaleY, ScaleZ);
+            Base::Float3 Position(TranslationX, TranslationY, TranslationZ);
+            Base::Float3 Rotation(Base::DegreesToRadians(RotationX), Base::DegreesToRadians(RotationY), Base::DegreesToRadians(RotationZ));
+            Base::Float3 Scale(ScaleX, ScaleY, ScaleZ);
 
-                pTransformationFacet->SetPosition(Position);
-                pTransformationFacet->SetScale(Scale);
-                pTransformationFacet->SetRotation(Rotation);
-            }
-            else
-            {
-                Base::Float3 Position(TranslationX, TranslationY, TranslationZ);
-
-                rCurrentEntity.SetWorldPosition(Position);
-            }
-
-            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyMove);
+            pTransformationFacet->SetPosition(Position);
+            pTransformationFacet->SetScale(Scale);
+            pTransformationFacet->SetRotation(Rotation);
         }
+        else
+        {
+            Base::Float3 Position(TranslationX, TranslationY, TranslationZ);
+
+            rCurrentEntity.SetWorldPosition(Position);
+        }
+
+        Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyMove);
     }
 
     // -----------------------------------------------------------------------------

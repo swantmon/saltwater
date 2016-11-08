@@ -11,7 +11,8 @@
 namespace Edit
 {
     CInspectorMaterial::CInspectorMaterial(QWidget* _pParent)
-        : QWidget(_pParent)
+        : QWidget          (_pParent)
+        , m_CurrentEntityID(-1)
     {
         // -----------------------------------------------------------------------------
         // Setup UI
@@ -108,6 +109,8 @@ namespace Edit
         // Send message
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
+
+        NewMessage.PutInt(m_CurrentEntityID);
 
         NewMessage.PutFloat(AlbedoColor[0]);
         NewMessage.PutFloat(AlbedoColor[1]);
@@ -213,9 +216,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorMaterial::RequestInformation()
+    void CInspectorMaterial::RequestInformation(unsigned int _EntityID)
     {
-        CMessage NewMessage(true);
+        m_CurrentEntityID = _EntityID;
+
+        CMessage NewMessage;
+
+        NewMessage.PutInt(m_CurrentEntityID);
 
         NewMessage.Reset();
 
@@ -229,6 +236,10 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
+        int EntityID = _rMessage.GetInt();
+
+        if (EntityID != m_CurrentEntityID) return;
+
         bool HasMaterial = _rMessage.GetBool();
 
         if (HasMaterial == false)

@@ -22,7 +22,11 @@ namespace Edit
 
         void pickColorFromDialog();
 
-        void RequestInformation();
+        void RequestInformation(unsigned int _EntityID);
+
+    private:
+
+        unsigned int m_CurrentEntityID;
 
     private:
 

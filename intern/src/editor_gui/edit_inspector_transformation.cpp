@@ -6,7 +6,8 @@
 namespace Edit
 {
     CInspectorTransformation::CInspectorTransformation(QWidget* _pParent)
-        : QWidget(_pParent)
+        : QWidget          (_pParent)
+        , m_CurrentEntityID(-1)
     {
         // -----------------------------------------------------------------------------
         // Setup UI
@@ -30,17 +31,19 @@ namespace Edit
 
     void CInspectorTransformation::valueChanged()
     {
-        float    TranslationX;
-        float    TranslationY;
-        float    TranslationZ;
-        float    RotationX;
-        float    RotationY;
-        float    RotationZ;
-        float    ScaleX;
-        float    ScaleY;
-        float    ScaleZ;
-        CMessage NewMessage;
+        float TranslationX;
+        float TranslationY;
+        float TranslationZ;
+        float RotationX;
+        float RotationY;
+        float RotationZ;
+        float ScaleX;
+        float ScaleY;
+        float ScaleZ;
 
+        // -----------------------------------------------------------------------------
+        // Read value
+        // -----------------------------------------------------------------------------
         TranslationX = m_pTransformationPositionX->text().toFloat();
         TranslationY = m_pTransformationPositionY->text().toFloat();
         TranslationZ = m_pTransformationPositionZ->text().toFloat();
@@ -52,6 +55,13 @@ namespace Edit
         ScaleX = m_pTransformationScaleX->text().toFloat();
         ScaleY = m_pTransformationScaleY->text().toFloat();
         ScaleZ = m_pTransformationScaleZ->text().toFloat();
+
+        // -----------------------------------------------------------------------------
+        // Send message
+        // -----------------------------------------------------------------------------
+        CMessage NewMessage;
+
+        NewMessage.PutInt(m_CurrentEntityID);
 
         NewMessage.PutFloat(TranslationX);
         NewMessage.PutFloat(TranslationY);
@@ -189,9 +199,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorTransformation::RequestInformation()
+    void CInspectorTransformation::RequestInformation(unsigned int _EntityID)
     {
-        CMessage NewMessage(true);
+        m_CurrentEntityID = _EntityID;
+
+        CMessage NewMessage;
+
+        NewMessage.PutInt(m_CurrentEntityID);
 
         NewMessage.Reset();
 
@@ -211,7 +225,17 @@ namespace Edit
         float ScaleX;
         float ScaleY;
         float ScaleZ;
-        bool  HasTransformation = _rMessage.GetBool();
+
+        bool  HasTransformation;
+        
+        int EntityID = _rMessage.GetInt();
+
+        if (EntityID != m_CurrentEntityID)
+        {
+            return;
+        }
+
+        HasTransformation = _rMessage.GetBool();
 
         if (HasTransformation)
         {

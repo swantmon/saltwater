@@ -6,7 +6,8 @@
 namespace Edit
 {
     CInspectorEnvironment::CInspectorEnvironment(QWidget* _pParent)
-        : QWidget(_pParent)
+        : QWidget          (_pParent)
+        , m_CurrentEntityID(-1)
     {
         // -----------------------------------------------------------------------------
         // Setup UI
@@ -31,16 +32,21 @@ namespace Edit
     void CInspectorEnvironment::valueChanged()
     {
         // -----------------------------------------------------------------------------
-        // Send message
+        // Read values
         // -----------------------------------------------------------------------------
-        Edit::CMessage NewMessage;
-
         int Type = m_pTypeCB->currentIndex();
 
         QString    NewEnvironmentTexture       = m_pTextureEdit->text();
         QByteArray NewEnvironmentTextureBinary = NewEnvironmentTexture.toLatin1();
 
         float Intensity = m_pIntensityEdit->text().toFloat();
+
+        // -----------------------------------------------------------------------------
+        // Send message
+        // -----------------------------------------------------------------------------
+        Edit::CMessage NewMessage;
+
+        NewMessage.PutInt(m_CurrentEntityID);
 
         NewMessage.PutInt(Type);
 
@@ -55,9 +61,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorEnvironment::RequestInformation()
+    void CInspectorEnvironment::RequestInformation(unsigned int _EntityID)
     {
-        CMessage NewMessage(true);
+        m_CurrentEntityID = _EntityID;
+
+        CMessage NewMessage;
+
+        NewMessage.PutInt(m_CurrentEntityID);
 
         NewMessage.Reset();
 
@@ -71,6 +81,10 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
+        int EntityID = _rMessage.GetInt();
+
+        if (EntityID != m_CurrentEntityID) return;
+
         int Type = _rMessage.GetInt();
 
         char pTemp[256];

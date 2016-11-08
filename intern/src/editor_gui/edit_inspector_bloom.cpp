@@ -10,7 +10,8 @@
 namespace Edit
 {
     CInspectorBloom::CInspectorBloom(QWidget* _pParent)
-        : QWidget(_pParent)
+        : QWidget          (_pParent)
+        , m_CurrentEntityID(-1)
     {
         // -----------------------------------------------------------------------------
         // Setup UI
@@ -64,6 +65,8 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
+        NewMessage.PutInt(m_CurrentEntityID);
+
         NewMessage.PutFloat(Color[0]);
         NewMessage.PutFloat(Color[1]);
         NewMessage.PutFloat(Color[2]);
@@ -98,9 +101,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorBloom::RequestInformation()
+    void CInspectorBloom::RequestInformation(unsigned int _EntityID)
     {
-        CMessage NewMessage(true);
+        m_CurrentEntityID = _EntityID;
+
+        CMessage NewMessage;
+
+        NewMessage.PutInt(m_CurrentEntityID);
 
         NewMessage.Reset();
 
@@ -114,6 +121,10 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
+        int EntityID = _rMessage.GetInt();
+
+        if (EntityID != m_CurrentEntityID) return;
+
         Base::Int3 Color = Base::Int3(_rMessage.GetFloat() * 255, _rMessage.GetFloat() * 255, _rMessage.GetFloat() * 255);
 
         float Intensity     = _rMessage.GetFloat();

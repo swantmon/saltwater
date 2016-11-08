@@ -40,10 +40,6 @@ namespace
 
     private:
 
-        Dt::CEntity* m_pLastRequestedEntity;
-
-    private:
-
         void OnNewEntityPointlight(Edit::CMessage& _rMessage);
         void OnNewEntitySun(Edit::CMessage& _rMessage);
         void OnNewEntityEnvironment(Edit::CMessage& _rMessage);
@@ -66,7 +62,6 @@ namespace
 namespace
 {
     CLightHelper::CLightHelper()
-        : m_pLastRequestedEntity(nullptr)
     {
         
     }
@@ -278,36 +273,36 @@ namespace
 
     void CLightHelper::OnRequestEntityInfoPointlight(Edit::CMessage& _rMessage)
     {
-        if (m_pLastRequestedEntity != nullptr)
+        int EntityID = _rMessage.GetInt();
+
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+
+        Dt::CPointLightFacet* pPointLightFacet = static_cast<Dt::CPointLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Point && pPointLightFacet != nullptr)
         {
-            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+            Edit::CMessage NewMessage;
 
-            Dt::CPointLightFacet* pPointLightFacet = static_cast<Dt::CPointLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+            NewMessage.PutInt(rCurrentEntity.GetID());
+            NewMessage.PutInt(static_cast<int>(pPointLightFacet->HasTemperature()));
+            NewMessage.PutFloat(pPointLightFacet->GetColor()[0]);
+            NewMessage.PutFloat(pPointLightFacet->GetColor()[1]);
+            NewMessage.PutFloat(pPointLightFacet->GetColor()[2]);
+            NewMessage.PutFloat(pPointLightFacet->GetTemperature());
+            NewMessage.PutFloat(pPointLightFacet->GetIntensity());
+            NewMessage.PutFloat(pPointLightFacet->GetAttenuationRadius());
+            NewMessage.PutFloat(Base::RadiansToDegree(pPointLightFacet->GetInnerConeAngle()));
+            NewMessage.PutFloat(Base::RadiansToDegree(pPointLightFacet->GetOuterConeAngle()));
+            NewMessage.PutFloat(pPointLightFacet->GetDirection()[0]);
+            NewMessage.PutFloat(pPointLightFacet->GetDirection()[1]);
+            NewMessage.PutFloat(pPointLightFacet->GetDirection()[2]);
+            NewMessage.PutInt(static_cast<int>(pPointLightFacet->GetShadowType()));
+            NewMessage.PutInt(static_cast<int>(pPointLightFacet->GetShadowQuality()));
+            NewMessage.PutInt(static_cast<int>(pPointLightFacet->GetRefreshMode()));
 
-            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Point && pPointLightFacet != nullptr)
-            {
-                Edit::CMessage NewMessage;
+            NewMessage.Reset();
 
-                NewMessage.PutInt(static_cast<int>(pPointLightFacet->HasTemperature()));
-                NewMessage.PutFloat(pPointLightFacet->GetColor()[0]);
-                NewMessage.PutFloat(pPointLightFacet->GetColor()[1]);
-                NewMessage.PutFloat(pPointLightFacet->GetColor()[2]);
-                NewMessage.PutFloat(pPointLightFacet->GetTemperature());
-                NewMessage.PutFloat(pPointLightFacet->GetIntensity());
-                NewMessage.PutFloat(pPointLightFacet->GetAttenuationRadius());
-                NewMessage.PutFloat(Base::RadiansToDegree(pPointLightFacet->GetInnerConeAngle()));
-                NewMessage.PutFloat(Base::RadiansToDegree(pPointLightFacet->GetOuterConeAngle()));
-                NewMessage.PutFloat(pPointLightFacet->GetDirection()[0]);
-                NewMessage.PutFloat(pPointLightFacet->GetDirection()[1]);
-                NewMessage.PutFloat(pPointLightFacet->GetDirection()[2]);
-                NewMessage.PutInt(static_cast<int>(pPointLightFacet->GetShadowType()));
-                NewMessage.PutInt(static_cast<int>(pPointLightFacet->GetShadowQuality()));
-                NewMessage.PutInt(static_cast<int>(pPointLightFacet->GetRefreshMode()));
-
-                NewMessage.Reset();
-
-                Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoPointlight, NewMessage);
-            }
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoPointlight, NewMessage);
         }
     }
 
@@ -315,31 +310,31 @@ namespace
 
     void CLightHelper::OnRequestEntityInfoSun(Edit::CMessage& _rMessage)
     {
-        if (m_pLastRequestedEntity != nullptr)
+        int EntityID = _rMessage.GetInt();
+
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+
+        Dt::CSunLightFacet* pLightFacet = static_cast<Dt::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Sun && pLightFacet != nullptr)
         {
-            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+            Edit::CMessage NewMessage;
 
-            Dt::CSunLightFacet* pLightFacet = static_cast<Dt::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+            NewMessage.PutInt(rCurrentEntity.GetID());
+            NewMessage.PutInt(static_cast<int>(pLightFacet->HasTemperature()));
+            NewMessage.PutFloat(pLightFacet->GetColor()[0]);
+            NewMessage.PutFloat(pLightFacet->GetColor()[1]);
+            NewMessage.PutFloat(pLightFacet->GetColor()[2]);
+            NewMessage.PutFloat(pLightFacet->GetTemperature());
+            NewMessage.PutFloat(pLightFacet->GetIntensity());
+            NewMessage.PutFloat(pLightFacet->GetDirection()[0]);
+            NewMessage.PutFloat(pLightFacet->GetDirection()[1]);
+            NewMessage.PutFloat(pLightFacet->GetDirection()[2]);
+            NewMessage.PutInt(static_cast<int>(pLightFacet->GetRefreshMode()));
 
-            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Sun && pLightFacet != nullptr)
-            {
-                Edit::CMessage NewMessage;
+            NewMessage.Reset();
 
-                NewMessage.PutInt(static_cast<int>(pLightFacet->HasTemperature()));
-                NewMessage.PutFloat(pLightFacet->GetColor()[0]);
-                NewMessage.PutFloat(pLightFacet->GetColor()[1]);
-                NewMessage.PutFloat(pLightFacet->GetColor()[2]);
-                NewMessage.PutFloat(pLightFacet->GetTemperature());
-                NewMessage.PutFloat(pLightFacet->GetIntensity());
-                NewMessage.PutFloat(pLightFacet->GetDirection()[0]);
-                NewMessage.PutFloat(pLightFacet->GetDirection()[1]);
-                NewMessage.PutFloat(pLightFacet->GetDirection()[2]);
-                NewMessage.PutInt(static_cast<int>(pLightFacet->GetRefreshMode()));
-
-                NewMessage.Reset();
-
-                Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoSun, NewMessage);
-            }
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoSun, NewMessage);
         }
     }
 
@@ -347,24 +342,24 @@ namespace
 
     void CLightHelper::OnRequestEntityInfoEnvironment(Edit::CMessage& _rMessage)
     {
-        if (m_pLastRequestedEntity != nullptr)
+        int EntityID = _rMessage.GetInt();
+
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+
+        Dt::CSkyboxFacet* pLightFacet = static_cast<Dt::CSkyboxFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Skybox && pLightFacet != nullptr)
         {
-            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+            Edit::CMessage NewMessage;
 
-            Dt::CSkyboxFacet* pLightFacet = static_cast<Dt::CSkyboxFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-
-            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Skybox && pLightFacet != nullptr)
-            {
-                Edit::CMessage NewMessage;
-
-                NewMessage.PutInt   (static_cast<int>(pLightFacet->GetType()));
-                NewMessage.PutString(pLightFacet->GetTexture()->GetFileName());
-                NewMessage.PutFloat (pLightFacet->GetIntensity());
+            NewMessage.PutInt   (rCurrentEntity.GetID());
+            NewMessage.PutInt   (static_cast<int>(pLightFacet->GetType()));
+            NewMessage.PutString(pLightFacet->GetTexture()->GetFileName());
+            NewMessage.PutFloat (pLightFacet->GetIntensity());
                 
-                NewMessage.Reset();
+            NewMessage.Reset();
 
-                Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoEnvironment, NewMessage);
-            }
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoEnvironment, NewMessage);
         }
     }
 
@@ -372,25 +367,25 @@ namespace
     
     void CLightHelper::OnRequestEntityInfoGlobalProbe(Edit::CMessage& _rMessage)
     {
-        if (m_pLastRequestedEntity != nullptr)
+        int EntityID = _rMessage.GetInt();
+
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+
+        Dt::CGlobalProbeLightFacet* pLightFacet = static_cast<Dt::CGlobalProbeLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::GlobalProbe && pLightFacet != nullptr)
         {
-            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+            Edit::CMessage NewMessage;
 
-            Dt::CGlobalProbeLightFacet* pLightFacet = static_cast<Dt::CGlobalProbeLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+            NewMessage.PutInt(rCurrentEntity.GetID());
+            NewMessage.PutInt(pLightFacet->GetRefreshMode());
+            NewMessage.PutInt(pLightFacet->GetType());
+            NewMessage.PutInt(pLightFacet->GetQuality());
+            NewMessage.PutFloat(pLightFacet->GetIntensity());
 
-            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::GlobalProbe && pLightFacet != nullptr)
-            {
-                Edit::CMessage NewMessage;
+            NewMessage.Reset();
 
-                NewMessage.PutInt(pLightFacet->GetRefreshMode());
-                NewMessage.PutInt(pLightFacet->GetType());
-                NewMessage.PutInt(pLightFacet->GetQuality());
-                NewMessage.PutFloat(pLightFacet->GetIntensity());
-
-                NewMessage.Reset();
-
-                Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoGlobalProbe, NewMessage);
-            }
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoGlobalProbe, NewMessage);
         }
     }
 
@@ -398,52 +393,50 @@ namespace
 
     void CLightHelper::OnEntityInfoPointlight(Edit::CMessage& _rMessage)
     {
-        if (m_pLastRequestedEntity != nullptr)
+        int EntityID = _rMessage.GetInt();
+
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CPointLightFacet* pPointLightFacet = static_cast<Dt::CPointLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Point && pPointLightFacet != nullptr)
         {
-            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+            // -----------------------------------------------------------------------------
+            // Read values
+            // -----------------------------------------------------------------------------
+            int ColorMode = _rMessage.GetInt();
 
-            Dt::CPointLightFacet* pPointLightFacet = static_cast<Dt::CPointLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+            Base::Float3 Color = Base::Float3(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
 
-            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Point && pPointLightFacet != nullptr)
-            {
-                // -----------------------------------------------------------------------------
-                // Read values
-                // -----------------------------------------------------------------------------
-                int ColorMode = _rMessage.GetInt();
+            float Temperature       = _rMessage.GetFloat();
+            float Intensity         = _rMessage.GetFloat();
+            float AttenuationRadius = _rMessage.GetFloat();
+            float InnerConeAngle    = Base::DegreesToRadians(_rMessage.GetFloat());
+            float OuterConeAngle    = Base::DegreesToRadians(_rMessage.GetFloat());
 
-                Base::Float3 Color = Base::Float3(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+            Base::Float3 Direction = Base::Float3(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
 
-                float Temperature       = _rMessage.GetFloat();
-                float Intensity         = _rMessage.GetFloat();
-                float AttenuationRadius = _rMessage.GetFloat();
-                float InnerConeAngle    = Base::DegreesToRadians(_rMessage.GetFloat());
-                float OuterConeAngle    = Base::DegreesToRadians(_rMessage.GetFloat());
+            int ShadowType    = _rMessage.GetInt();
+            int ShadowQuality = _rMessage.GetInt();
+            int ShadowRefresh = _rMessage.GetInt();
 
-                Base::Float3 Direction = Base::Float3(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
-
-                int ShadowType    = _rMessage.GetInt();
-                int ShadowQuality = _rMessage.GetInt();
-                int ShadowRefresh = _rMessage.GetInt();
-
-                // -----------------------------------------------------------------------------
-                // Set values
-                // -----------------------------------------------------------------------------
-                pPointLightFacet->EnableTemperature   (ColorMode == 1);
-                pPointLightFacet->SetColor            (Color);
-                pPointLightFacet->SetTemperature      (Temperature);
-                pPointLightFacet->SetIntensity        (Intensity);
-                pPointLightFacet->SetAttenuationRadius(AttenuationRadius);
-                pPointLightFacet->SetInnerConeAngle   (InnerConeAngle);
-                pPointLightFacet->SetOuterConeAngle   (OuterConeAngle);
-                pPointLightFacet->SetDirection        (Direction);
-                pPointLightFacet->SetShadowType       (static_cast<Dt::CPointLightFacet::EShadowType>(ShadowType));
-                pPointLightFacet->SetShadowQuality    (static_cast<Dt::CPointLightFacet::EShadowQuality>(ShadowQuality));
-                pPointLightFacet->SetRefreshMode      (static_cast<Dt::CPointLightFacet::ERefreshMode>(ShadowRefresh));
+            // -----------------------------------------------------------------------------
+            // Set values
+            // -----------------------------------------------------------------------------
+            pPointLightFacet->EnableTemperature   (ColorMode == 1);
+            pPointLightFacet->SetColor            (Color);
+            pPointLightFacet->SetTemperature      (Temperature);
+            pPointLightFacet->SetIntensity        (Intensity);
+            pPointLightFacet->SetAttenuationRadius(AttenuationRadius);
+            pPointLightFacet->SetInnerConeAngle   (InnerConeAngle);
+            pPointLightFacet->SetOuterConeAngle   (OuterConeAngle);
+            pPointLightFacet->SetDirection        (Direction);
+            pPointLightFacet->SetShadowType       (static_cast<Dt::CPointLightFacet::EShadowType>(ShadowType));
+            pPointLightFacet->SetShadowQuality    (static_cast<Dt::CPointLightFacet::EShadowQuality>(ShadowQuality));
+            pPointLightFacet->SetRefreshMode      (static_cast<Dt::CPointLightFacet::ERefreshMode>(ShadowRefresh));
             
-                pPointLightFacet->UpdateLightness();
+            pPointLightFacet->UpdateLightness();
 
-                Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
-            }
+            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
         }
     }
 
@@ -451,42 +444,41 @@ namespace
 
     void CLightHelper::OnEntityInfoSun(Edit::CMessage& _rMessage)
     {
-        if (m_pLastRequestedEntity != nullptr)
+        int EntityID = _rMessage.GetInt();
+
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+
+        Dt::CSunLightFacet* pLightFacet = static_cast<Dt::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Sun && pLightFacet != nullptr)
         {
-            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+            // -----------------------------------------------------------------------------
+            // Read values
+            // -----------------------------------------------------------------------------
+            int ColorMode = _rMessage.GetInt();
 
-            Dt::CSunLightFacet* pLightFacet = static_cast<Dt::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+            Base::Float3 Color = Base::Float3(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
 
-            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Sun && pLightFacet != nullptr)
-            {
-                // -----------------------------------------------------------------------------
-                // Read values
-                // -----------------------------------------------------------------------------
-                int ColorMode = _rMessage.GetInt();
+            float Temperature = _rMessage.GetFloat();
+            float Intensity = _rMessage.GetFloat();
 
-                Base::Float3 Color = Base::Float3(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+            Base::Float3 Direction = Base::Float3(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
 
-                float Temperature = _rMessage.GetFloat();
-                float Intensity = _rMessage.GetFloat();
+            int ShadowRefresh = _rMessage.GetInt();
 
-                Base::Float3 Direction = Base::Float3(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+            // -----------------------------------------------------------------------------
+            // Set values
+            // -----------------------------------------------------------------------------
+            pLightFacet->EnableTemperature(ColorMode == 1);
+            pLightFacet->SetColor(Color);
+            pLightFacet->SetTemperature(Temperature);
+            pLightFacet->SetIntensity(Intensity);
+            pLightFacet->SetDirection(Direction);
+            pLightFacet->SetRefreshMode(static_cast<Dt::CSunLightFacet::ERefreshMode>(ShadowRefresh));
 
-                int ShadowRefresh = _rMessage.GetInt();
+            pLightFacet->UpdateLightness();
 
-                // -----------------------------------------------------------------------------
-                // Set values
-                // -----------------------------------------------------------------------------
-                pLightFacet->EnableTemperature(ColorMode == 1);
-                pLightFacet->SetColor(Color);
-                pLightFacet->SetTemperature(Temperature);
-                pLightFacet->SetIntensity(Intensity);
-                pLightFacet->SetDirection(Direction);
-                pLightFacet->SetRefreshMode(static_cast<Dt::CSunLightFacet::ERefreshMode>(ShadowRefresh));
-
-                pLightFacet->UpdateLightness();
-
-                Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
-            }
+            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
         }
     }
 
@@ -494,53 +486,51 @@ namespace
 
     void CLightHelper::OnEntityInfoEnvironment(Edit::CMessage& _rMessage)
     {
-        if (m_pLastRequestedEntity != nullptr)
+        int EntityID = _rMessage.GetInt();
+
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CSkyboxFacet* pLightFacet = static_cast<Dt::CSkyboxFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Skybox && pLightFacet != nullptr)
         {
-            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+            // -----------------------------------------------------------------------------
+            // Read values
+            // -----------------------------------------------------------------------------
+            int Type = _rMessage.GetInt();
 
-            Dt::CSkyboxFacet* pLightFacet = static_cast<Dt::CSkyboxFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+            char pTemp[256];
 
-            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Skybox && pLightFacet != nullptr)
-            {
-                // -----------------------------------------------------------------------------
-                // Read values
-                // -----------------------------------------------------------------------------
-                int Type = _rMessage.GetInt();
+            const char* pTexture = _rMessage.GetString(pTemp, 256);
 
-                char pTemp[256];
+            float Intensity = _rMessage.GetFloat();
 
-                const char* pTexture = _rMessage.GetString(pTemp, 256);
+            // -----------------------------------------------------------------------------
+            // Set values
+            // -----------------------------------------------------------------------------
+            pLightFacet->SetType     (static_cast<Dt::CSkyboxFacet::EType>(Type));
+            pLightFacet->SetIntensity(Intensity);
 
-                float Intensity = _rMessage.GetFloat();
-
-                // -----------------------------------------------------------------------------
-                // Set values
-                // -----------------------------------------------------------------------------
-                pLightFacet->SetType     (static_cast<Dt::CSkyboxFacet::EType>(Type));
-                pLightFacet->SetIntensity(Intensity);
-
-                const char* pCurrentTexture = pLightFacet->GetTexture()->GetFileName();
+            const char* pCurrentTexture = pLightFacet->GetTexture()->GetFileName();
                 
-                if (strcmp(pCurrentTexture, pTexture))
-                {
-                    Dt::STextureDescriptor TextureDescriptor;
+            if (strcmp(pCurrentTexture, pTexture))
+            {
+                Dt::STextureDescriptor TextureDescriptor;
 
-                    TextureDescriptor.m_NumberOfPixelsU = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
-                    TextureDescriptor.m_NumberOfPixelsV = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
-                    TextureDescriptor.m_NumberOfPixelsW = 1;
-                    TextureDescriptor.m_Format          = Dt::CTextureBase::R16G16B16_FLOAT;
-                    TextureDescriptor.m_Semantic        = Dt::CTextureBase::HDR;
-                    TextureDescriptor.m_pPixels         = 0;
-                    TextureDescriptor.m_pFileName       = pTexture;
-                    TextureDescriptor.m_pIdentifier     = 0;
+                TextureDescriptor.m_NumberOfPixelsU = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
+                TextureDescriptor.m_NumberOfPixelsV = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
+                TextureDescriptor.m_NumberOfPixelsW = 1;
+                TextureDescriptor.m_Format          = Dt::CTextureBase::R16G16B16_FLOAT;
+                TextureDescriptor.m_Semantic        = Dt::CTextureBase::HDR;
+                TextureDescriptor.m_pPixels         = 0;
+                TextureDescriptor.m_pFileName       = pTexture;
+                TextureDescriptor.m_pIdentifier     = 0;
 
-                    Dt::CTexture2D* pPanoramaTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+                Dt::CTexture2D* pPanoramaTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
 
-                    pLightFacet->SetTexture(pPanoramaTexture);
-                }
-
-                Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+                pLightFacet->SetTexture(pPanoramaTexture);
             }
+
+            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
         }
     }
 
@@ -548,38 +538,37 @@ namespace
 
     void CLightHelper::OnEntityInfoGlobalProbe(Edit::CMessage& _rMessage)
     {
-        if (m_pLastRequestedEntity != nullptr)
+        int EntityID = _rMessage.GetInt();
+
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+
+        Dt::CGlobalProbeLightFacet* pLightFacet = static_cast<Dt::CGlobalProbeLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::GlobalProbe && pLightFacet != nullptr)
         {
-            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+            // -----------------------------------------------------------------------------
+            // Read values
+            // -----------------------------------------------------------------------------
+            int RefreshMode = _rMessage.GetInt();
 
-            Dt::CGlobalProbeLightFacet* pLightFacet = static_cast<Dt::CGlobalProbeLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+            int Type = _rMessage.GetInt();
 
-            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::GlobalProbe && pLightFacet != nullptr)
-            {
-                // -----------------------------------------------------------------------------
-                // Read values
-                // -----------------------------------------------------------------------------
-                int RefreshMode = _rMessage.GetInt();
+            int Quality = _rMessage.GetInt();
 
-                int Type = _rMessage.GetInt();
+            float Intensity = _rMessage.GetFloat();
 
-                int Quality = _rMessage.GetInt();
+            // -----------------------------------------------------------------------------
+            // Set values
+            // -----------------------------------------------------------------------------
+            pLightFacet->SetRefreshMode(static_cast<Dt::CGlobalProbeLightFacet::ERefreshMode>(RefreshMode));
 
-                float Intensity = _rMessage.GetFloat();
+            pLightFacet->SetType(static_cast<Dt::CGlobalProbeLightFacet::EType>(Type));
 
-                // -----------------------------------------------------------------------------
-                // Set values
-                // -----------------------------------------------------------------------------
-                pLightFacet->SetRefreshMode(static_cast<Dt::CGlobalProbeLightFacet::ERefreshMode>(RefreshMode));
+            pLightFacet->SetQuality(static_cast<Dt::CGlobalProbeLightFacet::EQuality>(Quality));
 
-                pLightFacet->SetType(static_cast<Dt::CGlobalProbeLightFacet::EType>(Type));
+            pLightFacet->SetIntensity(Intensity);
 
-                pLightFacet->SetQuality(static_cast<Dt::CGlobalProbeLightFacet::EQuality>(Quality));
-
-                pLightFacet->SetIntensity(Intensity);
-
-                Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
-            }
+            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
         }
     }
 

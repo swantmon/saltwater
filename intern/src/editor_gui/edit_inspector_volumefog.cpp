@@ -10,7 +10,8 @@
 namespace Edit
 {
     CInspectorVolumeFog::CInspectorVolumeFog(QWidget* _pParent)
-        : QWidget(_pParent)
+        : QWidget          (_pParent)
+        , m_CurrentEntityID(-1)
     {
         // -----------------------------------------------------------------------------
         // Setup UI
@@ -69,6 +70,8 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
+        NewMessage.PutInt(m_CurrentEntityID);
+
         NewMessage.PutFloat(WindDirection[0]);
         NewMessage.PutFloat(WindDirection[1]);
         NewMessage.PutFloat(WindDirection[2]);
@@ -109,9 +112,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorVolumeFog::RequestInformation()
+    void CInspectorVolumeFog::RequestInformation(unsigned int _EntityID)
     {
-        CMessage NewMessage(true);
+        m_CurrentEntityID = _EntityID;
+
+        CMessage NewMessage;
+
+        NewMessage.PutInt(m_CurrentEntityID);
 
         NewMessage.Reset();
 
@@ -125,6 +132,10 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
+        int EntityID = _rMessage.GetInt();
+
+        if (EntityID != m_CurrentEntityID) return;
+
         Base::Float3 Direction = Base::Float3(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
         
         Base::Int3 Color = Base::Int3(_rMessage.GetFloat() * 255, _rMessage.GetFloat() * 255, _rMessage.GetFloat() * 255);

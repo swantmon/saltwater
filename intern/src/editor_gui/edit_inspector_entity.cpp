@@ -6,7 +6,8 @@
 namespace Edit
 {
     CInspectorEntity::CInspectorEntity(QWidget* _pParent)
-        : QWidget(_pParent)
+        : QWidget          (_pParent)
+        , m_CurrentEntityID(-1)
     {
         // -----------------------------------------------------------------------------
         // Setup UI
@@ -41,6 +42,8 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
+        NewMessage.PutInt(m_CurrentEntityID);
+
         if (NewEntityName.length() > 0)
         {
             NewMessage.PutBool(true);
@@ -59,9 +62,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorEntity::RequestInformation()
+    void CInspectorEntity::RequestInformation(unsigned int _EntityID)
     {
-        CMessage NewMessage(true);
+        m_CurrentEntityID = _EntityID;
+
+        CMessage NewMessage;
+
+        NewMessage.PutInt(m_CurrentEntityID);
 
         NewMessage.Reset();
 
@@ -90,7 +97,10 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        int ID       = _rMessage.GetInt();
+        int EntityID = _rMessage.GetInt();
+
+        if (EntityID != m_CurrentEntityID) return;
+
         int Category = _rMessage.GetInt();
         int Type     = _rMessage.GetInt();
 
@@ -104,7 +114,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Set values
         // -----------------------------------------------------------------------------
-        m_pEntityIDEdit->setText(QString::number(ID));
+        m_pEntityIDEdit->setText(QString::number(EntityID));
 
         if (HasName)
         {

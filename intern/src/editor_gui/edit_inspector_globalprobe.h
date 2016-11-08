@@ -21,7 +21,11 @@ namespace Edit
 
         void valueChanged();
 
-        void RequestInformation();
+        void RequestInformation(unsigned int _EntityID);
+
+    private:
+
+        unsigned int m_CurrentEntityID;
 
     private:
 

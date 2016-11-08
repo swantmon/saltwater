@@ -10,7 +10,8 @@
 namespace Edit
 {
     CInspectorSun::CInspectorSun(QWidget* _pParent)
-        : QWidget(_pParent)
+        : QWidget          (_pParent)
+        , m_CurrentEntityID(-1)
     {
         // -----------------------------------------------------------------------------
         // Setup UI
@@ -68,6 +69,8 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
+        NewMessage.PutInt(m_CurrentEntityID);
+
         NewMessage.PutInt(ColorMode);
 
         NewMessage.PutFloat(Color[0]);
@@ -108,9 +111,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorSun::RequestInformation()
+    void CInspectorSun::RequestInformation(unsigned int _EntityID)
     {
-        CMessage NewMessage(true);
+        m_CurrentEntityID = _EntityID;
+
+        CMessage NewMessage;
+
+        NewMessage.PutInt(m_CurrentEntityID);
 
         NewMessage.Reset();
 
@@ -124,6 +131,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
+        int EntityID = _rMessage.GetInt();
         int ColorMode = _rMessage.GetInt();
 
         Base::Int3 Color = Base::Int3(_rMessage.GetFloat() * 255, _rMessage.GetFloat() * 255, _rMessage.GetFloat() * 255);

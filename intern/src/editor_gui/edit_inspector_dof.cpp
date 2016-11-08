@@ -10,7 +10,8 @@
 namespace Edit
 {
     CInspectorDOF::CInspectorDOF(QWidget* _pParent)
-        : QWidget(_pParent)
+        : QWidget          (_pParent)
+        , m_CurrentEntityID(-1)
     {
         // -----------------------------------------------------------------------------
         // Setup UI
@@ -48,6 +49,8 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
+        NewMessage.PutInt(m_CurrentEntityID);
+
         NewMessage.PutFloat(Near);
         NewMessage.PutFloat(Far);
         NewMessage.PutFloat(NearToFarRatio);
@@ -62,9 +65,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorDOF::RequestInformation()
+    void CInspectorDOF::RequestInformation(unsigned int _EntityID)
     {
-        CMessage NewMessage(true);
+        m_CurrentEntityID = _EntityID;
+
+        CMessage NewMessage;
+
+        NewMessage.PutInt(m_CurrentEntityID);
 
         NewMessage.Reset();
 
@@ -78,6 +85,10 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
+        int EntityID = _rMessage.GetInt();
+
+        if (EntityID != m_CurrentEntityID) return;
+
         float Near            = _rMessage.GetFloat();
         float Far             = _rMessage.GetFloat();
         float NearToFarRatio  = _rMessage.GetFloat();

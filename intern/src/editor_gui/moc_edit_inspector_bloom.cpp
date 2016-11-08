@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_Edit__CInspectorBloom_t {
-    QByteArrayData data[5];
-    char stringdata0[75];
+    QByteArrayData data[6];
+    char stringdata0[85];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -33,11 +33,13 @@ QT_MOC_LITERAL(0, 0, 21), // "Edit::CInspectorBloom"
 QT_MOC_LITERAL(1, 22, 12), // "valueChanged"
 QT_MOC_LITERAL(2, 35, 0), // ""
 QT_MOC_LITERAL(3, 36, 19), // "pickColorFromDialog"
-QT_MOC_LITERAL(4, 56, 18) // "RequestInformation"
+QT_MOC_LITERAL(4, 56, 18), // "RequestInformation"
+QT_MOC_LITERAL(5, 75, 9) // "_EntityID"
 
     },
     "Edit::CInspectorBloom\0valueChanged\0\0"
-    "pickColorFromDialog\0RequestInformation"
+    "pickColorFromDialog\0RequestInformation\0"
+    "_EntityID"
 };
 #undef QT_MOC_LITERAL
 
@@ -57,12 +59,12 @@ static const uint qt_meta_data_Edit__CInspectorBloom[] = {
  // slots: name, argc, parameters, tag, flags
        1,    0,   29,    2, 0x0a /* Public */,
        3,    0,   30,    2, 0x0a /* Public */,
-       4,    0,   31,    2, 0x0a /* Public */,
+       4,    1,   31,    2, 0x0a /* Public */,
 
  // slots: parameters
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void,
+    QMetaType::Void, QMetaType::UInt,    5,
 
        0        // eod
 };
@@ -75,11 +77,10 @@ void Edit::CInspectorBloom::qt_static_metacall(QObject *_o, QMetaObject::Call _c
         switch (_id) {
         case 0: _t->valueChanged(); break;
         case 1: _t->pickColorFromDialog(); break;
-        case 2: _t->RequestInformation(); break;
+        case 2: _t->RequestInformation((*reinterpret_cast< uint(*)>(_a[1]))); break;
         default: ;
         }
     }
-    Q_UNUSED(_a);
 }
 
 const QMetaObject Edit::CInspectorBloom::staticMetaObject = {

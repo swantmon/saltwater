@@ -6,7 +6,8 @@
 namespace Edit
 {
     CInspectorGlobalProbe::CInspectorGlobalProbe(QWidget* _pParent) 
-        : QWidget(_pParent)
+        : QWidget          (_pParent)
+        , m_CurrentEntityID(-1)
     {
         // -----------------------------------------------------------------------------
         // Setup UI
@@ -29,10 +30,8 @@ namespace Edit
     void CInspectorGlobalProbe::valueChanged()
     {
         // -----------------------------------------------------------------------------
-        // Send message
+        // read values
         // -----------------------------------------------------------------------------
-        Edit::CMessage NewMessage;
-
         int RefreshMode = m_pRefreshModeCB->currentIndex();
 
         int Type = m_pTypeCB->currentIndex();
@@ -40,6 +39,13 @@ namespace Edit
         int Quality = m_pQualityCB->currentIndex();
 
         float Intensity = m_pIntensityEdit->text().toFloat();
+
+        // -----------------------------------------------------------------------------
+        // Send message
+        // -----------------------------------------------------------------------------
+        Edit::CMessage NewMessage;
+
+        NewMessage.PutInt(m_CurrentEntityID);
 
         NewMessage.PutInt(RefreshMode);
 
@@ -56,9 +62,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorGlobalProbe::RequestInformation()
+    void CInspectorGlobalProbe::RequestInformation(unsigned int _EntityID)
     {
-        CMessage NewMessage(true);
+        m_CurrentEntityID = _EntityID;
+
+        CMessage NewMessage;
+
+        NewMessage.PutInt(m_CurrentEntityID);
 
         NewMessage.Reset();
 
@@ -72,6 +82,10 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
+        int EntityID = _rMessage.GetInt();
+
+        if (EntityID != m_CurrentEntityID) return;
+
         int RefreshMode = _rMessage.GetInt();
 
         int Type = _rMessage.GetInt();

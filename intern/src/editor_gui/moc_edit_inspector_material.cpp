@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_Edit__CInspectorMaterial_t {
-    QByteArrayData data[9];
-    char stringdata0[152];
+    QByteArrayData data[10];
+    char stringdata0[162];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -37,13 +37,15 @@ QT_MOC_LITERAL(4, 59, 21), // "roughnessValueChanged"
 QT_MOC_LITERAL(5, 81, 6), // "_Value"
 QT_MOC_LITERAL(6, 88, 20), // "metallicValueChanged"
 QT_MOC_LITERAL(7, 109, 23), // "reflectanceValueChanged"
-QT_MOC_LITERAL(8, 133, 18) // "RequestInformation"
+QT_MOC_LITERAL(8, 133, 18), // "RequestInformation"
+QT_MOC_LITERAL(9, 152, 9) // "_EntityID"
 
     },
     "Edit::CInspectorMaterial\0valueChanged\0"
     "\0pickColorFromDialog\0roughnessValueChanged\0"
     "_Value\0metallicValueChanged\0"
-    "reflectanceValueChanged\0RequestInformation"
+    "reflectanceValueChanged\0RequestInformation\0"
+    "_EntityID"
 };
 #undef QT_MOC_LITERAL
 
@@ -66,7 +68,7 @@ static const uint qt_meta_data_Edit__CInspectorMaterial[] = {
        4,    1,   46,    2, 0x0a /* Public */,
        6,    1,   49,    2, 0x0a /* Public */,
        7,    1,   52,    2, 0x0a /* Public */,
-       8,    0,   55,    2, 0x0a /* Public */,
+       8,    1,   55,    2, 0x0a /* Public */,
 
  // slots: parameters
     QMetaType::Void,
@@ -74,7 +76,7 @@ static const uint qt_meta_data_Edit__CInspectorMaterial[] = {
     QMetaType::Void, QMetaType::Int,    5,
     QMetaType::Void, QMetaType::Int,    5,
     QMetaType::Void, QMetaType::Int,    5,
-    QMetaType::Void,
+    QMetaType::Void, QMetaType::UInt,    9,
 
        0        // eod
 };
@@ -90,7 +92,7 @@ void Edit::CInspectorMaterial::qt_static_metacall(QObject *_o, QMetaObject::Call
         case 2: _t->roughnessValueChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 3: _t->metallicValueChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 4: _t->reflectanceValueChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 5: _t->RequestInformation(); break;
+        case 5: _t->RequestInformation((*reinterpret_cast< uint(*)>(_a[1]))); break;
         default: ;
         }
     }
