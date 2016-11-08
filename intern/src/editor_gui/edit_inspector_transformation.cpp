@@ -30,22 +30,40 @@ namespace Edit
 
     void CInspectorTransformation::valueChanged()
     {
+        float    TranslationX;
+        float    TranslationY;
+        float    TranslationZ;
+        float    RotationX;
+        float    RotationY;
+        float    RotationZ;
+        float    ScaleX;
+        float    ScaleY;
+        float    ScaleZ;
         CMessage NewMessage;
 
-        NewMessage.PutFloat(m_pTransformationPositionZ->text().toFloat());
-        NewMessage.PutFloat(m_pTransformationPositionY->text().toFloat());
-        NewMessage.PutFloat(m_pTransformationPositionX->text().toFloat());
+        TranslationX = m_pTransformationPositionX->text().toFloat();
+        TranslationY = m_pTransformationPositionY->text().toFloat();
+        TranslationZ = m_pTransformationPositionZ->text().toFloat();
 
-        NewMessage.PutFloat(m_pTransformationRotationZ->text().toFloat());
-        NewMessage.PutFloat(m_pTransformationRotationY->text().toFloat());
-        NewMessage.PutFloat(m_pTransformationRotationX->text().toFloat());
+        RotationX = m_pTransformationRotationX->text().toFloat();
+        RotationY = m_pTransformationRotationY->text().toFloat();
+        RotationZ = m_pTransformationRotationZ->text().toFloat();
 
-        NewMessage.PutFloat(m_pTransformationScaleZ->text().toFloat());
-        NewMessage.PutFloat(m_pTransformationScaleY->text().toFloat());
-        NewMessage.PutFloat(m_pTransformationScaleX->text().toFloat());
+        ScaleX = m_pTransformationScaleX->text().toFloat();
+        ScaleY = m_pTransformationScaleY->text().toFloat();
+        ScaleZ = m_pTransformationScaleZ->text().toFloat();
 
-        // TODO:
-        // Why is the Z before X???
+        NewMessage.PutFloat(TranslationX);
+        NewMessage.PutFloat(TranslationY);
+        NewMessage.PutFloat(TranslationZ);
+
+        NewMessage.PutFloat(RotationX);
+        NewMessage.PutFloat(RotationY);
+        NewMessage.PutFloat(RotationZ);
+
+        NewMessage.PutFloat(ScaleX);
+        NewMessage.PutFloat(ScaleY);
+        NewMessage.PutFloat(ScaleZ);
 
         NewMessage.Reset();
 
@@ -184,21 +202,30 @@ namespace Edit
 
     void CInspectorTransformation::OnEntityInfoTransformation(Edit::CMessage& _rMessage)
     {
-        bool HasTransformation = _rMessage.GetBool();
+        float TranslationX;
+        float TranslationY;
+        float TranslationZ;
+        float RotationX;
+        float RotationY;
+        float RotationZ;
+        float ScaleX;
+        float ScaleY;
+        float ScaleZ;
+        bool  HasTransformation = _rMessage.GetBool();
 
         if (HasTransformation)
         {
-            m_pTransformationPositionX->setText(QString::number(_rMessage.GetFloat()));
-            m_pTransformationPositionY->setText(QString::number(_rMessage.GetFloat()));
-            m_pTransformationPositionZ->setText(QString::number(_rMessage.GetFloat()));
+            TranslationX = _rMessage.GetFloat();
+            TranslationY = _rMessage.GetFloat();
+            TranslationZ = _rMessage.GetFloat();
 
-            m_pTransformationRotationX->setText(QString::number(_rMessage.GetFloat()));
-            m_pTransformationRotationY->setText(QString::number(_rMessage.GetFloat()));
-            m_pTransformationRotationZ->setText(QString::number(_rMessage.GetFloat()));
+            RotationX = _rMessage.GetFloat();
+            RotationY = _rMessage.GetFloat();
+            RotationZ = _rMessage.GetFloat();
 
-            m_pTransformationScaleX->setText(QString::number(_rMessage.GetFloat()));
-            m_pTransformationScaleY->setText(QString::number(_rMessage.GetFloat()));
-            m_pTransformationScaleZ->setText(QString::number(_rMessage.GetFloat()));
+            ScaleX = _rMessage.GetFloat();
+            ScaleY = _rMessage.GetFloat();
+            ScaleZ = _rMessage.GetFloat();
 
             m_pTransformationRotationX->setEnabled(true);
             m_pTransformationRotationY->setEnabled(true);
@@ -210,17 +237,17 @@ namespace Edit
         }
         else
         {
-            m_pTransformationPositionX->setText(QString::number(_rMessage.GetFloat()));
-            m_pTransformationPositionY->setText(QString::number(_rMessage.GetFloat()));
-            m_pTransformationPositionZ->setText(QString::number(_rMessage.GetFloat()));
+            TranslationX = _rMessage.GetFloat();
+            TranslationY = _rMessage.GetFloat();
+            TranslationZ = _rMessage.GetFloat();
 
-            m_pTransformationRotationX->setText("0");
-            m_pTransformationRotationY->setText("0");
-            m_pTransformationRotationZ->setText("0");
+            RotationX = 0.0f;
+            RotationY = 0.0f;
+            RotationZ = 0.0f;
 
-            m_pTransformationScaleX->setText("0");
-            m_pTransformationScaleY->setText("0");
-            m_pTransformationScaleZ->setText("0");            
+            ScaleX = 0.0f;
+            ScaleY = 0.0f;
+            ScaleZ = 0.0f;
 
             m_pTransformationRotationX->setEnabled(false);
             m_pTransformationRotationY->setEnabled(false);
@@ -230,5 +257,17 @@ namespace Edit
             m_pTransformationScaleY->setEnabled(false);
             m_pTransformationScaleZ->setEnabled(false);
         }
+
+        m_pTransformationPositionX->setText(QString::number(TranslationX));
+        m_pTransformationPositionY->setText(QString::number(TranslationY));
+        m_pTransformationPositionZ->setText(QString::number(TranslationZ));
+
+        m_pTransformationRotationX->setText(QString::number(RotationX));
+        m_pTransformationRotationY->setText(QString::number(RotationY));
+        m_pTransformationRotationZ->setText(QString::number(RotationZ));
+
+        m_pTransformationScaleX->setText(QString::number(ScaleX));
+        m_pTransformationScaleY->setText(QString::number(ScaleY));
+        m_pTransformationScaleZ->setText(QString::number(ScaleZ));
     }
 } // namespace Edit

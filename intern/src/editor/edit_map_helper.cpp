@@ -1064,17 +1064,39 @@ namespace
 
     void CMapHelper::OnEntityInfoTransformation(Edit::CMessage& _rMessage)
     {
+        float TranslationX;
+        float TranslationY;
+        float TranslationZ;
+        float RotationX;
+        float RotationY;
+        float RotationZ;
+        float ScaleX;
+        float ScaleY;
+        float ScaleZ;
+
         if (m_pLastRequestedEntity != nullptr)
         {
             Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
 
             Dt::CTransformationFacet* pTransformationFacet = rCurrentEntity.GetTransformationFacet();
 
+            TranslationX = _rMessage.GetFloat();
+            TranslationY = _rMessage.GetFloat();
+            TranslationZ = _rMessage.GetFloat();
+
             if (pTransformationFacet)
             {
-                Base::Float3 Position(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
-                Base::Float3 Rotation(Base::DegreesToRadians(_rMessage.GetFloat()), Base::DegreesToRadians(_rMessage.GetFloat()), Base::DegreesToRadians(_rMessage.GetFloat()));
-                Base::Float3 Scale   (_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+                RotationX = _rMessage.GetFloat();
+                RotationY = _rMessage.GetFloat();
+                RotationZ = _rMessage.GetFloat();
+
+                ScaleX = _rMessage.GetFloat();
+                ScaleY = _rMessage.GetFloat();
+                ScaleZ = _rMessage.GetFloat();
+
+                Base::Float3 Position(TranslationX, TranslationY, TranslationZ);
+                Base::Float3 Rotation(Base::DegreesToRadians(RotationX), Base::DegreesToRadians(RotationY), Base::DegreesToRadians(RotationZ));
+                Base::Float3 Scale   (ScaleX, ScaleY, ScaleZ);
 
                 pTransformationFacet->SetPosition(Position);
                 pTransformationFacet->SetScale(Scale);
@@ -1082,7 +1104,7 @@ namespace
             }
             else
             {
-                Base::Float3 Position(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+                Base::Float3 Position(TranslationX, TranslationY, TranslationZ);
 
                 rCurrentEntity.SetWorldPosition(Position);
             }
