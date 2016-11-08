@@ -17,6 +17,12 @@
 
 namespace Dt
 {
+    // TODO by tschwandt
+    // add getter and setter
+
+    // TODO by tschwandt
+    // remove reflectance texture
+
     class CMaterial
     {
     public:

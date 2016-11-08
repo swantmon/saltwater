@@ -16,6 +16,9 @@
 
 namespace Dt
 {
+    // TODO by tschwandt
+    // add getter and setter including surface + LOD
+
     class CModel
     {
     public:

@@ -80,6 +80,7 @@ namespace
         void OnRequestEntityInfoFXAA(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoSSR(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoVolumeFog(Edit::CMessage& _rMessage);
+        void OnRequestEntityInfoMaterial(Edit::CMessage& _rMessage);
 
         void OnEntityInfoEntity(Edit::CMessage& _rMessage);
         void OnEntityInfoHierarchie(Edit::CMessage& _rMessage);
@@ -93,6 +94,7 @@ namespace
         void OnEntityInfoFXAA(Edit::CMessage& _rMessage);
         void OnEntityInfoSSR(Edit::CMessage& _rMessage);
         void OnEntityInfoVolumeFog(Edit::CMessage& _rMessage);
+        void OnEntityInfoMaterial(Edit::CMessage& _rMessage);
 
         void OnDirtyEntity(Dt::CEntity* _pEntity);
 
@@ -153,6 +155,7 @@ namespace
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoFXAA          , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoFXAA));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoSSR           , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoSSR));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoVolumeFog     , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoVolumeFog));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoMaterial      , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnRequestEntityInfoMaterial));
 
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoEntity               , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoEntity));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoHierarchie           , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoHierarchie));
@@ -166,6 +169,7 @@ namespace
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoFXAA                 , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoFXAA));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoSSR                  , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoSSR));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoVolumeFog            , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoVolumeFog));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoMaterial             , EDIT_RECEIVE_MESSAGE(&CMapHelper::OnEntityInfoMaterial));
     }
 
     // -----------------------------------------------------------------------------
@@ -911,6 +915,106 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CMapHelper::OnRequestEntityInfoMaterial(Edit::CMessage& _rMessage)
+    {
+        if (m_pLastRequestedEntity != nullptr)
+        {
+            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+
+            Dt::CModelActorFacet* pFacet = static_cast<Dt::CModelActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Actor && rCurrentEntity.GetType() == Dt::SActorType::Model && pFacet != nullptr)
+            {
+                // TODO by tschwandt
+                // different surfaces necessary?
+
+                Dt::CMaterial* pMaterial = pFacet->GetMaterial(0);
+
+                // TODO by tschwandt
+                // default material necessary?
+
+                if (pMaterial == nullptr)
+                {
+                    pMaterial = pFacet->GetModel()->m_LODs[0]->m_Surfaces[0]->m_pDefaultMaterial;
+                }
+
+                Edit::CMessage NewMessage;
+
+                if (pMaterial)
+                {
+                    NewMessage.PutBool(true);
+
+                    NewMessage.PutFloat(pMaterial->m_Color[0]);
+                    NewMessage.PutFloat(pMaterial->m_Color[1]);
+                    NewMessage.PutFloat(pMaterial->m_Color[2]);
+
+                    NewMessage.PutFloat(pMaterial->m_TilingOffset[0]);
+                    NewMessage.PutFloat(pMaterial->m_TilingOffset[1]);
+                    NewMessage.PutFloat(pMaterial->m_TilingOffset[2]);
+                    NewMessage.PutFloat(pMaterial->m_TilingOffset[3]);
+
+                    NewMessage.PutFloat(pMaterial->m_Roughness);
+                    NewMessage.PutFloat(pMaterial->m_Reflectance);
+                    NewMessage.PutFloat(pMaterial->m_MetalMask);
+
+                    if (pMaterial->m_pColorMap)
+                    {
+                        NewMessage.PutBool(true);
+
+                        NewMessage.PutString(pMaterial->m_pColorMap->GetFileName());
+                    }
+                    else
+                    {
+                        NewMessage.PutBool(false);
+                    }
+
+                    if (pMaterial->m_pNormalMap)
+                    {
+                        NewMessage.PutBool(true);
+
+                        NewMessage.PutString(pMaterial->m_pNormalMap->GetFileName());
+                    }
+                    else
+                    {
+                        NewMessage.PutBool(false);
+                    }
+
+                    if (pMaterial->m_pRoughnessMap)
+                    {
+                        NewMessage.PutBool(true);
+
+                        NewMessage.PutString(pMaterial->m_pRoughnessMap->GetFileName());
+                    }
+                    else
+                    {
+                        NewMessage.PutBool(false);
+                    }
+
+                    if (pMaterial->m_pMetalMaskMap)
+                    {
+                        NewMessage.PutBool(true);
+
+                        NewMessage.PutString(pMaterial->m_pMetalMaskMap->GetFileName());
+                    }
+                    else
+                    {
+                        NewMessage.PutBool(false);
+                    }
+                }
+                else
+                {
+                    NewMessage.PutBool(false);
+                }
+
+                NewMessage.Reset();
+
+                Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoMaterial, NewMessage);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CMapHelper::OnEntityInfoEntity(Edit::CMessage& _rMessage)
     {
         if (m_pLastRequestedEntity != nullptr)
@@ -1366,6 +1470,156 @@ namespace
                 pFXFacet->SetDensityLevel(DensityLevel);
 
                 pFXFacet->SetDensityAttenuation(DensityAttenuation);
+
+                Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMapHelper::OnEntityInfoMaterial(Edit::CMessage& _rMessage)
+    {
+        if (m_pLastRequestedEntity != nullptr)
+        {
+            Dt::CEntity& rCurrentEntity = *m_pLastRequestedEntity;
+
+            Dt::CModelActorFacet* pFacet = static_cast<Dt::CModelActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+            if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Actor && rCurrentEntity.GetType() == Dt::SActorType::Model && pFacet != nullptr)
+            {
+                bool HasColorMap = false;
+                bool HasNormalMap = false;
+                bool HasRoughnessMap = false;
+                bool HasMetalnessMap = false;
+
+                char ColorMapName[256];
+                char NormalMapName[256];
+                char RoughnessMapName[256];
+                char MetalMapName[256];
+
+                // TODO by tschwandt
+                // different surfaces necessary?
+
+                Dt::CMaterial* pMaterial = pFacet->GetMaterial(0);
+
+                // TODO by tschwandt
+                // default material necessary?
+
+                if (pMaterial == nullptr)
+                {
+                    pMaterial = pFacet->GetModel()->m_LODs[0]->m_Surfaces[0]->m_pDefaultMaterial;
+                }
+
+                // -----------------------------------------------------------------------------
+                // Read values
+                // -----------------------------------------------------------------------------
+                Base::Float3 Color = Base::Float3(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+
+                Base::Float4 TilingOffset = Base::Float4(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+
+                float Roughness = _rMessage.GetFloat();
+
+                float Reflectance = _rMessage.GetFloat();
+
+                float Metalness = _rMessage.GetFloat();
+
+                HasColorMap = _rMessage.GetBool();
+
+                if (HasColorMap)
+                {
+                    _rMessage.GetString(ColorMapName, 256);
+                }
+
+                HasNormalMap = _rMessage.GetBool();
+
+                if (HasNormalMap)
+                {
+                    _rMessage.GetString(NormalMapName, 256);
+                }
+
+                HasRoughnessMap = _rMessage.GetBool();
+
+                if (HasRoughnessMap)
+                {
+                    _rMessage.GetString(RoughnessMapName, 256);
+                }
+
+                HasMetalnessMap = _rMessage.GetBool();
+
+                if (HasMetalnessMap)
+                {
+                    _rMessage.GetString(MetalMapName, 256);
+                }
+                
+                // -----------------------------------------------------------------------------
+                // Set values
+                // -----------------------------------------------------------------------------
+                if (!pMaterial)
+                {
+                    return;
+                }
+
+                pMaterial->m_Color        = Color;
+                pMaterial->m_TilingOffset = TilingOffset;
+                pMaterial->m_Roughness    = Roughness;
+                pMaterial->m_Reflectance  = Reflectance;
+                pMaterial->m_MetalMask    = Metalness;
+
+                Dt::STextureDescriptor TextureDescriptor;
+
+                TextureDescriptor.m_NumberOfPixelsU  = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
+                TextureDescriptor.m_NumberOfPixelsV  = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
+                TextureDescriptor.m_NumberOfPixelsW  = 1;
+                TextureDescriptor.m_Format           = Dt::CTextureBase::R8G8B8_UBYTE;
+                TextureDescriptor.m_Semantic         = Dt::CTextureBase::Diffuse;
+                TextureDescriptor.m_pPixels          = 0;
+                TextureDescriptor.m_pFileName        = 0;
+                TextureDescriptor.m_pIdentifier      = 0;
+
+                if (HasColorMap && (pMaterial->m_pColorMap == nullptr || strcmp(pMaterial->m_pColorMap->GetFileName(), ColorMapName)))
+                {
+                    TextureDescriptor.m_pFileName = ColorMapName;
+
+                    pMaterial->m_pColorMap = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+                }
+                else if (HasColorMap == false)
+                {
+                    pMaterial->m_pColorMap = 0;
+                }
+
+                if (HasNormalMap && (pMaterial->m_pNormalMap == nullptr || strcmp(pMaterial->m_pNormalMap->GetFileName(), NormalMapName)))
+                {
+                    TextureDescriptor.m_pFileName = NormalMapName;
+
+                    pMaterial->m_pNormalMap = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+                }
+                else if (HasNormalMap == false)
+                {
+                    pMaterial->m_pNormalMap = 0;
+                }
+
+                if (HasRoughnessMap && (pMaterial->m_pRoughnessMap == nullptr || strcmp(pMaterial->m_pRoughnessMap->GetFileName(), RoughnessMapName)))
+                {
+                    TextureDescriptor.m_pFileName = RoughnessMapName;
+
+                    pMaterial->m_pRoughnessMap = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+                }
+                else if (HasRoughnessMap == false)
+                {
+                    pMaterial->m_pRoughnessMap = 0;
+                }
+
+                if (HasMetalnessMap && (pMaterial->m_pMetalMaskMap == nullptr || strcmp(pMaterial->m_pMetalMaskMap->GetFileName(), MetalMapName)))
+                {
+                    TextureDescriptor.m_pFileName = MetalMapName;
+
+                    pMaterial->m_pMetalMaskMap = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+                }
+                else if (HasMetalnessMap == false)
+                {
+                    pMaterial->m_pMetalMaskMap = 0;
+                }
 
                 Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
             }

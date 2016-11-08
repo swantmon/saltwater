@@ -182,7 +182,69 @@ namespace
 
     void CGfxActorManager::UpdateActorModel(Dt::CEntity& _rEntity)
     {
-        BASE_UNUSED(_rEntity);
+        Dt::CModelActorFacet* pDataActorModelFacet;
+
+        // -----------------------------------------------------------------------------
+        // Get data
+        // -----------------------------------------------------------------------------
+        pDataActorModelFacet = static_cast<Dt::CModelActorFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+        assert(pDataActorModelFacet);
+
+        // -----------------------------------------------------------------------------
+        // Get facet
+        // -----------------------------------------------------------------------------
+        CInternModelActorFacet* pGraphicActorModelFacet = static_cast<CInternModelActorFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+
+        // -----------------------------------------------------------------------------
+        // Model
+        // -----------------------------------------------------------------------------
+        CModelPtr ModelPtr = pGraphicActorModelFacet->GetModel();
+
+        // -----------------------------------------------------------------------------
+        // Material
+        // -----------------------------------------------------------------------------
+        SMaterialDescriptor MaterialDesc;
+
+        CLODPtr ModelLODPtr = ModelPtr->GetLOD(0);
+
+        for (unsigned int NumberOfSurface = 0; NumberOfSurface < ModelLODPtr->GetNumberOfSurfaces(); ++NumberOfSurface)
+        {
+            Dt::CMaterial* pDataMaterial = pDataActorModelFacet->GetMaterial(NumberOfSurface);
+
+            if (pDataMaterial == nullptr)
+            {
+                pDataMaterial = pDataActorModelFacet->GetModel()->m_LODs[0]->m_Surfaces[0]->m_pDefaultMaterial;
+            }
+
+            if (pDataMaterial != 0)
+            {
+                // -----------------------------------------------------------------------------
+                // Remove old material
+                // -----------------------------------------------------------------------------
+                CMaterialPtr MaterialPtr = pGraphicActorModelFacet->GetMaterial(NumberOfSurface);
+
+                MaterialPtr = 0;
+
+                // -----------------------------------------------------------------------------
+                // Get key of surface
+                // -----------------------------------------------------------------------------
+                CSurface::SSurfaceKey SurfaceKey = ModelLODPtr->GetSurface(NumberOfSurface)->GetKey();
+
+                // -----------------------------------------------------------------------------
+                // Material description
+                // -----------------------------------------------------------------------------
+                MaterialDesc.m_ID        = SurfaceKey.m_Key;
+                MaterialDesc.m_pMaterial = pDataMaterial;
+
+                // -----------------------------------------------------------------------------
+                // Create and set material
+                // -----------------------------------------------------------------------------
+                CMaterialPtr NewMaterialPtr = MaterialManager::CreateMaterial(MaterialDesc);
+
+                pGraphicActorModelFacet->SetMaterial(NumberOfSurface, NewMaterialPtr);
+            }
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -199,7 +261,7 @@ namespace
         Dt::CModelActorFacet* pDataActorModelFacet;
 
         // -----------------------------------------------------------------------------
-        // Get data point light
+        // Get data
         // -----------------------------------------------------------------------------
         pDataActorModelFacet = static_cast<Dt::CModelActorFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Data));
 
@@ -267,7 +329,7 @@ namespace
         Dt::CModelActorFacet* pDataActorModelFacet;
 
         // -----------------------------------------------------------------------------
-        // Get data point light
+        // Get data
         // -----------------------------------------------------------------------------
         pDataActorModelFacet = static_cast<Dt::CModelActorFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Data));
 
