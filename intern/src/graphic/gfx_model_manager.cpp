@@ -140,16 +140,16 @@ namespace
     
     CModelPtr CGfxModelManager::CreateModel(const Gfx::SModelDescriptor& _rDescriptor)
     {
-        const Dt::CModel& rDataModel = *_rDescriptor.m_pModel;
+        Dt::CModel& rDataModel = *_rDescriptor.m_pModel;
         
         // -----------------------------------------------------------------------------
         // Check existing model
         // -----------------------------------------------------------------------------
         unsigned int Hash = 0;
         
-        if (rDataModel.GetModelname() != "")
+        if (rDataModel.GetModelname() != 0)
         {
-            Hash = Base::CRC32(rDataModel.GetModelname(), strlen(rDataModel.GetModelname()));
+            Hash = Base::CRC32(rDataModel.GetModelname(), static_cast<unsigned int>(strlen(rDataModel.GetModelname())));
             
             if (m_ModelByID.find(Hash) != m_ModelByID.end())
             {
@@ -172,7 +172,7 @@ namespace
         // -----------------------------------------------------------------------------
         for (unsigned int IndexOfLOD = 0; IndexOfLOD < rDataModel.GetNumberOfLODs(); ++IndexOfLOD)
         {
-            const Dt::CLOD& rCurrentLOD = *rDataModel.GetLOD(IndexOfLOD);
+            Dt::CLOD& rCurrentLOD = *rDataModel.GetLOD(IndexOfLOD);
             
             CLODs::CPtr LODPtr = m_LODs.Allocate();
             
@@ -188,7 +188,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Create surface depending on data
                 // -----------------------------------------------------------------------------
-                const Dt::CSurface& rCurrentSurface = *rCurrentLOD.GetSurface(IndexOfSurface);
+                Dt::CSurface& rCurrentSurface = *rCurrentLOD.GetSurface(IndexOfSurface);
                 
                 CSurfaces::CPtr SurfacePtr = m_Surfaces.Allocate();
                 

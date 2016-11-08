@@ -75,10 +75,6 @@ namespace
     private:
         
         CMaterials m_Materials;
-
-    private:
-
-        CMaterial& AllocateMaterial(const Base::Char* _pMaterialname);
     };
 } // namespace
 
@@ -122,7 +118,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Create Material
         // -----------------------------------------------------------------------------
-        CInternMaterial& rNewMaterial = static_cast<CInternMaterial&>(AllocateMaterial(""));
+        CInternMaterial& rNewMaterial = m_Materials.Allocate();
+
+        rNewMaterial.m_Materialname = "";
 
         return rNewMaterial;
     }
@@ -139,7 +137,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Create Material
         // -----------------------------------------------------------------------------
-        CInternMaterial& rNewMaterial = static_cast<CInternMaterial&>(AllocateMaterial(_rDescriptor.m_pFileName));
+        CInternMaterial& rNewMaterial = m_Materials.Allocate();
+
+        rNewMaterial.m_Materialname = _rDescriptor.m_pFileName;
         
         // -----------------------------------------------------------------------------
         // Build path to texture in file system
@@ -269,20 +269,12 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup material
         // -----------------------------------------------------------------------------
-        rNewMaterial.m_Materialname    = pMaterialName;
-        rNewMaterial.m_Color           = Base::Float3(ColorR, ColorG, ColorB);
-        rNewMaterial.m_Roughness       = Roughness;
-        rNewMaterial.m_Reflectance     = Reflectance;
-        rNewMaterial.m_MetalMask       = MetalMask;
-
-        rNewMaterial.m_pColorMap       = 0;
-        rNewMaterial.m_pNormalMap      = 0;
-        rNewMaterial.m_pRoughnessMap   = 0;
-        rNewMaterial.m_pReflectanceMap = 0;
-        rNewMaterial.m_pMetalMaskMap   = 0;
-        rNewMaterial.m_pAOMap          = 0;
-        rNewMaterial.m_pBumpMap        = 0;
-        rNewMaterial.m_TilingOffset    = TilingOffset;
+        rNewMaterial.m_Materialname = pMaterialName;
+        rNewMaterial.m_Color        = Base::Float3(ColorR, ColorG, ColorB);
+        rNewMaterial.m_Roughness    = Roughness;
+        rNewMaterial.m_Reflectance  = Reflectance;
+        rNewMaterial.m_MetalMask    = MetalMask;
+        rNewMaterial.m_TilingOffset = TilingOffset;
 
         // -----------------------------------------------------------------------------
         // Setup material textures
@@ -302,21 +294,21 @@ namespace
         {
             TextureDescriptor.m_pFileName = pColorMap;
 
-            rNewMaterial.m_pColorMap = TextureManager::CreateTexture2D(TextureDescriptor);
+            rNewMaterial.m_pColorTexture = TextureManager::CreateTexture2D(TextureDescriptor);
         }
 
         if (pNormalMap)
         {
             TextureDescriptor.m_pFileName = pNormalMap;
 
-            rNewMaterial.m_pNormalMap = TextureManager::CreateTexture2D(TextureDescriptor);
+            rNewMaterial.m_pNormalTexture = TextureManager::CreateTexture2D(TextureDescriptor);
         }
 
         if (pRoughnessMap)
         {
             TextureDescriptor.m_pFileName = pRoughnessMap;
 
-            rNewMaterial.m_pRoughnessMap = TextureManager::CreateTexture2D(TextureDescriptor);
+            rNewMaterial.m_pRoughnessTexture = TextureManager::CreateTexture2D(TextureDescriptor);
         }
 
         if (pReflectanceMap)
@@ -330,14 +322,14 @@ namespace
         {
             TextureDescriptor.m_pFileName = pMetalMaskMap;
 
-            rNewMaterial.m_pMetalMaskMap = TextureManager::CreateTexture2D(TextureDescriptor);
+            rNewMaterial.m_pMetalTexture = TextureManager::CreateTexture2D(TextureDescriptor);
         }
 
         if (pAOMap)
         {
             TextureDescriptor.m_pFileName = pAOMap;
 
-            rNewMaterial.m_pAOMap = TextureManager::CreateTexture2D(TextureDescriptor);
+            rNewMaterial.m_pAOTexture = TextureManager::CreateTexture2D(TextureDescriptor);
         }
 
         if (pBumpMap)
@@ -345,7 +337,7 @@ namespace
             TextureDescriptor.m_Format    = CTextureBase::R8_UBYTE;
             TextureDescriptor.m_pFileName = pBumpMap;
 
-            rNewMaterial.m_pBumpMap = TextureManager::CreateTexture2D(TextureDescriptor);
+            rNewMaterial.m_pBumpTexture = TextureManager::CreateTexture2D(TextureDescriptor);
         }
 
         MaterialFile.Clear();
@@ -360,34 +352,6 @@ namespace
         CInternMaterial& rMaterial = static_cast<CInternMaterial&>(_rMaterial);
         
         m_Materials.Free(&rMaterial);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CMaterial& CDtMaterialManager::AllocateMaterial(const Base::Char* _pMaterialname)
-    {
-        assert(_pMaterialname);
-
-        // -----------------------------------------------------------------------------
-        // Create new Material
-        // -----------------------------------------------------------------------------
-        CInternMaterial& rNewMaterial = m_Materials.Allocate();
-
-        rNewMaterial.m_Materialname    = _pMaterialname;
-        rNewMaterial.m_Color           = Base::Float3(1.0f);
-        rNewMaterial.m_Roughness       = 0.0f;
-        rNewMaterial.m_Reflectance     = 0.0f;
-        rNewMaterial.m_MetalMask       = 0.0f;
-        rNewMaterial.m_pColorMap       = 0;
-        rNewMaterial.m_pNormalMap      = 0;
-        rNewMaterial.m_pRoughnessMap   = 0;
-        rNewMaterial.m_pReflectanceMap = 0;
-        rNewMaterial.m_pMetalMaskMap   = 0;
-        rNewMaterial.m_pAOMap          = 0;
-        rNewMaterial.m_pBumpMap        = 0;
-        rNewMaterial.m_TilingOffset    = Base::Float4(1.0f, 1.0f, 0.0f, 0.0f);
-
-        return rNewMaterial;
     }
 } // namespace
 

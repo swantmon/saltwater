@@ -173,6 +173,9 @@
     <ClCompile Include="..\..\..\src\data\data_surface.cpp">
       <Filter>models</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_material.cpp">
+      <Filter>materials</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="map">

@@ -64,6 +64,7 @@
     <ClCompile Include="..\..\..\src\data\data_light_manager.cpp" />
     <ClCompile Include="..\..\..\src\data\data_lod.cpp" />
     <ClCompile Include="..\..\..\src\data\data_map.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_material.cpp" />
     <ClCompile Include="..\..\..\src\data\data_material_manager.cpp" />
     <ClCompile Include="..\..\..\src\data\data_model.cpp" />
     <ClCompile Include="..\..\..\src\data\data_model_manager.cpp" />

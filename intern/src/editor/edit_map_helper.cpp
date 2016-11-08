@@ -944,57 +944,57 @@ namespace
                 {
                     NewMessage.PutBool(true);
 
-                    NewMessage.PutFloat(pMaterial->m_Color[0]);
-                    NewMessage.PutFloat(pMaterial->m_Color[1]);
-                    NewMessage.PutFloat(pMaterial->m_Color[2]);
+                    NewMessage.PutFloat(pMaterial->GetColor()[0]);
+                    NewMessage.PutFloat(pMaterial->GetColor()[1]);
+                    NewMessage.PutFloat(pMaterial->GetColor()[2]);
 
-                    NewMessage.PutFloat(pMaterial->m_TilingOffset[0]);
-                    NewMessage.PutFloat(pMaterial->m_TilingOffset[1]);
-                    NewMessage.PutFloat(pMaterial->m_TilingOffset[2]);
-                    NewMessage.PutFloat(pMaterial->m_TilingOffset[3]);
+                    NewMessage.PutFloat(pMaterial->GetTilingOffset()[0]);
+                    NewMessage.PutFloat(pMaterial->GetTilingOffset()[1]);
+                    NewMessage.PutFloat(pMaterial->GetTilingOffset()[2]);
+                    NewMessage.PutFloat(pMaterial->GetTilingOffset()[3]);
 
-                    NewMessage.PutFloat(pMaterial->m_Roughness);
-                    NewMessage.PutFloat(pMaterial->m_Reflectance);
-                    NewMessage.PutFloat(pMaterial->m_MetalMask);
+                    NewMessage.PutFloat(pMaterial->GetRoughness());
+                    NewMessage.PutFloat(pMaterial->GetReflectance());
+                    NewMessage.PutFloat(pMaterial->GetMetalness());
 
-                    if (pMaterial->m_pColorMap)
+                    if (pMaterial->GetColorTexture())
                     {
                         NewMessage.PutBool(true);
 
-                        NewMessage.PutString(pMaterial->m_pColorMap->GetFileName());
+                        NewMessage.PutString(pMaterial->GetColorTexture()->GetFileName());
                     }
                     else
                     {
                         NewMessage.PutBool(false);
                     }
 
-                    if (pMaterial->m_pNormalMap)
+                    if (pMaterial->GetNormalTexture())
                     {
                         NewMessage.PutBool(true);
 
-                        NewMessage.PutString(pMaterial->m_pNormalMap->GetFileName());
+                        NewMessage.PutString(pMaterial->GetNormalTexture()->GetFileName());
                     }
                     else
                     {
                         NewMessage.PutBool(false);
                     }
 
-                    if (pMaterial->m_pRoughnessMap)
+                    if (pMaterial->GetRoughnessTexture())
                     {
                         NewMessage.PutBool(true);
 
-                        NewMessage.PutString(pMaterial->m_pRoughnessMap->GetFileName());
+                        NewMessage.PutString(pMaterial->GetRoughnessTexture()->GetFileName());
                     }
                     else
                     {
                         NewMessage.PutBool(false);
                     }
 
-                    if (pMaterial->m_pMetalMaskMap)
+                    if (pMaterial->GetMetalTexture())
                     {
                         NewMessage.PutBool(true);
 
-                        NewMessage.PutString(pMaterial->m_pMetalMaskMap->GetFileName());
+                        NewMessage.PutString(pMaterial->GetMetalTexture()->GetFileName());
                     }
                     else
                     {
@@ -1560,11 +1560,11 @@ namespace
                     return;
                 }
 
-                pMaterial->m_Color        = Color;
-                pMaterial->m_TilingOffset = TilingOffset;
-                pMaterial->m_Roughness    = Roughness;
-                pMaterial->m_Reflectance  = Reflectance;
-                pMaterial->m_MetalMask    = Metalness;
+                pMaterial->SetColor       (Color);
+                pMaterial->SetTilingOffset(TilingOffset);
+                pMaterial->SetRoughness   (Roughness);
+                pMaterial->SetReflectance (Reflectance);
+                pMaterial->SetMetalness   (Metalness);
 
                 Dt::STextureDescriptor TextureDescriptor;
 
@@ -1577,48 +1577,48 @@ namespace
                 TextureDescriptor.m_pFileName        = 0;
                 TextureDescriptor.m_pIdentifier      = 0;
 
-                if (HasColorMap && (pMaterial->m_pColorMap == nullptr || strcmp(pMaterial->m_pColorMap->GetFileName(), ColorMapName)))
+                if (HasColorMap && (pMaterial->GetColorTexture() == nullptr || strcmp(pMaterial->GetColorTexture()->GetFileName(), ColorMapName)))
                 {
                     TextureDescriptor.m_pFileName = ColorMapName;
 
-                    pMaterial->m_pColorMap = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+                    pMaterial->SetColorTexture(Dt::TextureManager::CreateTexture2D(TextureDescriptor));
                 }
                 else if (HasColorMap == false)
                 {
-                    pMaterial->m_pColorMap = 0;
+                    pMaterial->SetColorTexture(0);
                 }
 
-                if (HasNormalMap && (pMaterial->m_pNormalMap == nullptr || strcmp(pMaterial->m_pNormalMap->GetFileName(), NormalMapName)))
+                if (HasNormalMap && (pMaterial->GetNormalTexture() == nullptr || strcmp(pMaterial->GetNormalTexture()->GetFileName(), NormalMapName)))
                 {
                     TextureDescriptor.m_pFileName = NormalMapName;
 
-                    pMaterial->m_pNormalMap = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+                    pMaterial->SetNormalTexture(Dt::TextureManager::CreateTexture2D(TextureDescriptor));
                 }
                 else if (HasNormalMap == false)
                 {
-                    pMaterial->m_pNormalMap = 0;
+                    pMaterial->SetNormalTexture(0);
                 }
 
-                if (HasRoughnessMap && (pMaterial->m_pRoughnessMap == nullptr || strcmp(pMaterial->m_pRoughnessMap->GetFileName(), RoughnessMapName)))
+                if (HasRoughnessMap && (pMaterial->GetRoughnessTexture() == nullptr || strcmp(pMaterial->GetRoughnessTexture()->GetFileName(), RoughnessMapName)))
                 {
                     TextureDescriptor.m_pFileName = RoughnessMapName;
 
-                    pMaterial->m_pRoughnessMap = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+                    pMaterial->SetRoughnessTexture(Dt::TextureManager::CreateTexture2D(TextureDescriptor));
                 }
                 else if (HasRoughnessMap == false)
                 {
-                    pMaterial->m_pRoughnessMap = 0;
+                    pMaterial->SetRoughnessTexture(0);
                 }
 
-                if (HasMetalnessMap && (pMaterial->m_pMetalMaskMap == nullptr || strcmp(pMaterial->m_pMetalMaskMap->GetFileName(), MetalMapName)))
+                if (HasMetalnessMap && (pMaterial->GetMetalTexture() == nullptr || strcmp(pMaterial->GetMetalTexture()->GetFileName(), MetalMapName)))
                 {
                     TextureDescriptor.m_pFileName = MetalMapName;
 
-                    pMaterial->m_pMetalMaskMap = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+                    pMaterial->SetMetalTexture(Dt::TextureManager::CreateTexture2D(TextureDescriptor));
                 }
                 else if (HasMetalnessMap == false)
                 {
-                    pMaterial->m_pMetalMaskMap = 0;
+                    pMaterial->SetMetalTexture(0);
                 }
 
                 Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);

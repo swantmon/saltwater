@@ -21,7 +21,7 @@ namespace Gfx
     struct SMaterialDescriptor
     {
         CSurface::SSurfaceKey::BSurfaceID m_ID;
-        const Dt::CMaterial*              m_pMaterial;
+        Dt::CMaterial*                    m_pMaterial;
     };
 } // namespace Gfx
 

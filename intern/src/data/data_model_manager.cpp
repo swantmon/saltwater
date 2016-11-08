@@ -436,19 +436,8 @@ namespace
                             // -----------------------------------------------------------------------------
                             // Setup material
                             // -----------------------------------------------------------------------------
-                            rNewMaterial.m_Materialname    = "";
-                            rNewMaterial.m_Color           = Base::Float3(ColorR, ColorG, ColorB);
-                            rNewMaterial.m_Roughness       = 0.0f;
-                            rNewMaterial.m_Reflectance     = 0.0f;
-                            rNewMaterial.m_MetalMask       = 0.0f;
-                            rNewMaterial.m_pColorMap       = 0;
-                            rNewMaterial.m_pNormalMap      = 0;
-                            rNewMaterial.m_pRoughnessMap   = 0;
-                            rNewMaterial.m_pReflectanceMap = 0;
-                            rNewMaterial.m_pMetalMaskMap   = 0;
-                            rNewMaterial.m_pAOMap          = 0;
-                            rNewMaterial.m_pBumpMap        = 0;
-
+                            rNewMaterial.SetColor(Base::Float3(ColorR, ColorG, ColorB));
+    
                             // -----------------------------------------------------------------------------
                             // Setup material textures
                             // -----------------------------------------------------------------------------
@@ -467,14 +456,14 @@ namespace
                             {
                                 TextureDescriptor.m_pFileName = pColorMap;
 
-                                rNewMaterial.m_pColorMap = TextureManager::CreateTexture2D(TextureDescriptor);
+                                rNewMaterial.SetColorTexture(TextureManager::CreateTexture2D(TextureDescriptor));
                             }
 
                             if (pNormalMap)
                             {
                                 TextureDescriptor.m_pFileName = pNormalMap;
 
-                                rNewMaterial.m_pNormalMap = TextureManager::CreateTexture2D(TextureDescriptor);
+                                rNewMaterial.SetNormalTexture(TextureManager::CreateTexture2D(TextureDescriptor));
                             }
                         }
                         
@@ -725,19 +714,8 @@ namespace
                         // -----------------------------------------------------------------------------
                         // Setup material
                         // -----------------------------------------------------------------------------
-                        rNewMaterial.m_Materialname    = "";
-                        rNewMaterial.m_Color           = Base::Float3(ColorR, ColorG, ColorB);
-                        rNewMaterial.m_Roughness       = 0.0f;
-                        rNewMaterial.m_Reflectance     = 0.0f;
-                        rNewMaterial.m_MetalMask       = 0.0f;
-                        rNewMaterial.m_pColorMap       = 0;
-                        rNewMaterial.m_pNormalMap      = 0;
-                        rNewMaterial.m_pRoughnessMap   = 0;
-                        rNewMaterial.m_pReflectanceMap = 0;
-                        rNewMaterial.m_pMetalMaskMap   = 0;
-                        rNewMaterial.m_pAOMap          = 0;
-                        rNewMaterial.m_pBumpMap        = 0;
-
+                        rNewMaterial.SetColor(Base::Float3(ColorR, ColorG, ColorB));
+    
                         // -----------------------------------------------------------------------------
                         // Setup material textures
                         // -----------------------------------------------------------------------------
@@ -756,14 +734,14 @@ namespace
                         {
                             TextureDescriptor.m_pFileName = pColorMap;
 
-                            rNewMaterial.m_pColorMap = TextureManager::CreateTexture2D(TextureDescriptor);
+                            rNewMaterial.SetColorTexture(TextureManager::CreateTexture2D(TextureDescriptor));
                         }
 
                         if (pNormalMap)
                         {
                             TextureDescriptor.m_pFileName = pNormalMap;
 
-                            rNewMaterial.m_pNormalMap = TextureManager::CreateTexture2D(TextureDescriptor);
+                            rNewMaterial.SetNormalTexture(TextureManager::CreateTexture2D(TextureDescriptor));
                         }
                     }
                 }
