@@ -391,6 +391,24 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>m_pAlbedoTextureEdit</tabstop>
+  <tabstop>m_pAlbedoColorButton</tabstop>
+  <tabstop>m_pAlbedoPickButton</tabstop>
+  <tabstop>m_pNormalTextureEdit</tabstop>
+  <tabstop>m_pRoughnessTextureEdit</tabstop>
+  <tabstop>m_pRoughnessSlider</tabstop>
+  <tabstop>m_pRoughnessEdit</tabstop>
+  <tabstop>m_pMetallicTextureEdit</tabstop>
+  <tabstop>m_pMetallicSlider</tabstop>
+  <tabstop>m_pMetallicEdit</tabstop>
+  <tabstop>m_pReflectanceSlider</tabstop>
+  <tabstop>m_pReflectanceEdit</tabstop>
+  <tabstop>m_pTilingXEdit</tabstop>
+  <tabstop>m_pTilingYEdit</tabstop>
+  <tabstop>m_pOffsetXEdit</tabstop>
+  <tabstop>m_pOffsetYEdit</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
