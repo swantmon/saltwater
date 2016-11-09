@@ -36,46 +36,48 @@ public:
     QGroupBox *groupBox;
     QVBoxLayout *verticalLayout_2;
     QGridLayout *gridLayout;
+    QLineEdit *lineEdit_13;
+    QCheckBox *checkBox;
+    QLineEdit *lineEdit_12;
+    QLabel *label_16;
+    QLabel *label_21;
     QLabel *label_3;
-    QLabel *label_2;
-    QComboBox *comboBox_2;
-    QComboBox *comboBox;
-    QLabel *label;
     QLabel *label_5;
-    QLabel *label_4;
-    QHBoxLayout *horizontalLayout_2;
-    QSlider *horizontalSlider;
-    QLineEdit *lineEdit;
+    QLabel *label_2;
     QHBoxLayout *horizontalLayout;
     QPushButton *pushButton;
     QPushButton *pushButton_2;
-    QLabel *label_21;
+    QComboBox *comboBox;
     QLineEdit *lineEdit_9;
-    QLineEdit *lineEdit_13;
-    QLineEdit *lineEdit_12;
+    QComboBox *comboBox_2;
+    QLabel *label;
     QLabel *label_8;
     QLabel *label_9;
     QCheckBox *checkBox_2;
     QLabel *label_10;
-    QCheckBox *checkBox;
     QLineEdit *lineEdit_4;
-    QLabel *label_16;
     QComboBox *comboBox_3;
-    QLabel *label_18;
-    QLabel *label_19;
+    QHBoxLayout *horizontalLayout_2;
+    QSlider *horizontalSlider;
+    QLineEdit *lineEdit;
+    QLabel *label_4;
     QLabel *label_17;
+    QLabel *label_19;
+    QHBoxLayout *horizontalLayout_4;
+    QLineEdit *lineEdit_11;
+    QLabel *label_23;
     QLabel *label_20;
     QHBoxLayout *horizontalLayout_3;
     QLineEdit *lineEdit_10;
     QLabel *label_22;
+    QLabel *label_18;
     QGridLayout *gridLayout_2;
     QLabel *label_6;
     QLabel *label_7;
     QLineEdit *lineEdit_2;
     QLineEdit *lineEdit_3;
-    QHBoxLayout *horizontalLayout_4;
-    QLineEdit *lineEdit_11;
-    QLabel *label_23;
+    QLabel *label_24;
+    QLineEdit *lineEdit_14;
     QVBoxLayout *verticalLayout_3;
     QLabel *label_11;
     QGridLayout *gridLayout_3;
@@ -102,61 +104,47 @@ public:
         verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
         gridLayout = new QGridLayout();
         gridLayout->setObjectName(QStringLiteral("gridLayout"));
+        lineEdit_13 = new QLineEdit(groupBox);
+        lineEdit_13->setObjectName(QStringLiteral("lineEdit_13"));
+
+        gridLayout->addWidget(lineEdit_13, 14, 1, 1, 1);
+
+        checkBox = new QCheckBox(groupBox);
+        checkBox->setObjectName(QStringLiteral("checkBox"));
+        checkBox->setChecked(true);
+
+        gridLayout->addWidget(checkBox, 8, 1, 1, 1);
+
+        lineEdit_12 = new QLineEdit(groupBox);
+        lineEdit_12->setObjectName(QStringLiteral("lineEdit_12"));
+
+        gridLayout->addWidget(lineEdit_12, 13, 1, 1, 1);
+
+        label_16 = new QLabel(groupBox);
+        label_16->setObjectName(QStringLiteral("label_16"));
+
+        gridLayout->addWidget(label_16, 9, 0, 1, 1);
+
+        label_21 = new QLabel(groupBox);
+        label_21->setObjectName(QStringLiteral("label_21"));
+
+        gridLayout->addWidget(label_21, 14, 0, 1, 1);
+
         label_3 = new QLabel(groupBox);
         label_3->setObjectName(QStringLiteral("label_3"));
 
-        gridLayout->addWidget(label_3, 3, 0, 1, 1);
-
-        label_2 = new QLabel(groupBox);
-        label_2->setObjectName(QStringLiteral("label_2"));
-
-        gridLayout->addWidget(label_2, 2, 0, 1, 1);
-
-        comboBox_2 = new QComboBox(groupBox);
-        comboBox_2->setObjectName(QStringLiteral("comboBox_2"));
-
-        gridLayout->addWidget(comboBox_2, 3, 1, 1, 1);
-
-        comboBox = new QComboBox(groupBox);
-        comboBox->setObjectName(QStringLiteral("comboBox"));
-
-        gridLayout->addWidget(comboBox, 1, 1, 1, 1);
-
-        label = new QLabel(groupBox);
-        label->setObjectName(QStringLiteral("label"));
-
-        gridLayout->addWidget(label, 1, 0, 1, 1);
+        gridLayout->addWidget(label_3, 4, 0, 1, 1);
 
         label_5 = new QLabel(groupBox);
         label_5->setObjectName(QStringLiteral("label_5"));
         label_5->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop);
 
-        gridLayout->addWidget(label_5, 6, 0, 1, 1);
+        gridLayout->addWidget(label_5, 7, 0, 1, 1);
 
-        label_4 = new QLabel(groupBox);
-        label_4->setObjectName(QStringLiteral("label_4"));
+        label_2 = new QLabel(groupBox);
+        label_2->setObjectName(QStringLiteral("label_2"));
 
-        gridLayout->addWidget(label_4, 4, 0, 1, 1);
-
-        horizontalLayout_2 = new QHBoxLayout();
-        horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
-        horizontalSlider = new QSlider(groupBox);
-        horizontalSlider->setObjectName(QStringLiteral("horizontalSlider"));
-        horizontalSlider->setMinimum(1);
-        horizontalSlider->setMaximum(179);
-        horizontalSlider->setValue(60);
-        horizontalSlider->setOrientation(Qt::Horizontal);
-
-        horizontalLayout_2->addWidget(horizontalSlider);
-
-        lineEdit = new QLineEdit(groupBox);
-        lineEdit->setObjectName(QStringLiteral("lineEdit"));
-        lineEdit->setMaximumSize(QSize(30, 16777215));
-
-        horizontalLayout_2->addWidget(lineEdit);
-
-
-        gridLayout->addLayout(horizontalLayout_2, 4, 1, 1, 1);
+        gridLayout->addWidget(label_2, 2, 0, 1, 1);
 
         horizontalLayout = new QHBoxLayout();
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
@@ -183,30 +171,30 @@ public:
 
         gridLayout->addLayout(horizontalLayout, 2, 1, 1, 1);
 
-        label_21 = new QLabel(groupBox);
-        label_21->setObjectName(QStringLiteral("label_21"));
+        comboBox = new QComboBox(groupBox);
+        comboBox->setObjectName(QStringLiteral("comboBox"));
 
-        gridLayout->addWidget(label_21, 13, 0, 1, 1);
+        gridLayout->addWidget(comboBox, 1, 1, 1, 1);
 
         lineEdit_9 = new QLineEdit(groupBox);
         lineEdit_9->setObjectName(QStringLiteral("lineEdit_9"));
 
-        gridLayout->addWidget(lineEdit_9, 8, 1, 1, 1);
+        gridLayout->addWidget(lineEdit_9, 9, 1, 1, 1);
 
-        lineEdit_13 = new QLineEdit(groupBox);
-        lineEdit_13->setObjectName(QStringLiteral("lineEdit_13"));
+        comboBox_2 = new QComboBox(groupBox);
+        comboBox_2->setObjectName(QStringLiteral("comboBox_2"));
 
-        gridLayout->addWidget(lineEdit_13, 13, 1, 1, 1);
+        gridLayout->addWidget(comboBox_2, 4, 1, 1, 1);
 
-        lineEdit_12 = new QLineEdit(groupBox);
-        lineEdit_12->setObjectName(QStringLiteral("lineEdit_12"));
+        label = new QLabel(groupBox);
+        label->setObjectName(QStringLiteral("label"));
 
-        gridLayout->addWidget(lineEdit_12, 12, 1, 1, 1);
+        gridLayout->addWidget(label, 1, 0, 1, 1);
 
         label_8 = new QLabel(groupBox);
         label_8->setObjectName(QStringLiteral("label_8"));
 
-        gridLayout->addWidget(label_8, 7, 0, 1, 1);
+        gridLayout->addWidget(label_8, 8, 0, 1, 1);
 
         label_9 = new QLabel(groupBox);
         label_9->setObjectName(QStringLiteral("label_9"));
@@ -221,48 +209,72 @@ public:
         label_10 = new QLabel(groupBox);
         label_10->setObjectName(QStringLiteral("label_10"));
 
-        gridLayout->addWidget(label_10, 5, 0, 1, 1);
-
-        checkBox = new QCheckBox(groupBox);
-        checkBox->setObjectName(QStringLiteral("checkBox"));
-        checkBox->setChecked(true);
-
-        gridLayout->addWidget(checkBox, 7, 1, 1, 1);
+        gridLayout->addWidget(label_10, 6, 0, 1, 1);
 
         lineEdit_4 = new QLineEdit(groupBox);
         lineEdit_4->setObjectName(QStringLiteral("lineEdit_4"));
 
-        gridLayout->addWidget(lineEdit_4, 5, 1, 1, 1);
-
-        label_16 = new QLabel(groupBox);
-        label_16->setObjectName(QStringLiteral("label_16"));
-
-        gridLayout->addWidget(label_16, 8, 0, 1, 1);
+        gridLayout->addWidget(lineEdit_4, 6, 1, 1, 1);
 
         comboBox_3 = new QComboBox(groupBox);
         comboBox_3->setObjectName(QStringLiteral("comboBox_3"));
 
-        gridLayout->addWidget(comboBox_3, 9, 1, 1, 1);
+        gridLayout->addWidget(comboBox_3, 10, 1, 1, 1);
 
-        label_18 = new QLabel(groupBox);
-        label_18->setObjectName(QStringLiteral("label_18"));
+        horizontalLayout_2 = new QHBoxLayout();
+        horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
+        horizontalSlider = new QSlider(groupBox);
+        horizontalSlider->setObjectName(QStringLiteral("horizontalSlider"));
+        horizontalSlider->setMinimum(1);
+        horizontalSlider->setMaximum(179);
+        horizontalSlider->setValue(60);
+        horizontalSlider->setOrientation(Qt::Horizontal);
 
-        gridLayout->addWidget(label_18, 10, 0, 1, 1);
+        horizontalLayout_2->addWidget(horizontalSlider);
 
-        label_19 = new QLabel(groupBox);
-        label_19->setObjectName(QStringLiteral("label_19"));
+        lineEdit = new QLineEdit(groupBox);
+        lineEdit->setObjectName(QStringLiteral("lineEdit"));
+        lineEdit->setMaximumSize(QSize(30, 16777215));
 
-        gridLayout->addWidget(label_19, 11, 0, 1, 1);
+        horizontalLayout_2->addWidget(lineEdit);
+
+
+        gridLayout->addLayout(horizontalLayout_2, 5, 1, 1, 1);
+
+        label_4 = new QLabel(groupBox);
+        label_4->setObjectName(QStringLiteral("label_4"));
+
+        gridLayout->addWidget(label_4, 5, 0, 1, 1);
 
         label_17 = new QLabel(groupBox);
         label_17->setObjectName(QStringLiteral("label_17"));
 
-        gridLayout->addWidget(label_17, 9, 0, 1, 1);
+        gridLayout->addWidget(label_17, 10, 0, 1, 1);
+
+        label_19 = new QLabel(groupBox);
+        label_19->setObjectName(QStringLiteral("label_19"));
+
+        gridLayout->addWidget(label_19, 12, 0, 1, 1);
+
+        horizontalLayout_4 = new QHBoxLayout();
+        horizontalLayout_4->setObjectName(QStringLiteral("horizontalLayout_4"));
+        lineEdit_11 = new QLineEdit(groupBox);
+        lineEdit_11->setObjectName(QStringLiteral("lineEdit_11"));
+
+        horizontalLayout_4->addWidget(lineEdit_11);
+
+        label_23 = new QLabel(groupBox);
+        label_23->setObjectName(QStringLiteral("label_23"));
+
+        horizontalLayout_4->addWidget(label_23);
+
+
+        gridLayout->addLayout(horizontalLayout_4, 12, 1, 1, 1);
 
         label_20 = new QLabel(groupBox);
         label_20->setObjectName(QStringLiteral("label_20"));
 
-        gridLayout->addWidget(label_20, 12, 0, 1, 1);
+        gridLayout->addWidget(label_20, 13, 0, 1, 1);
 
         horizontalLayout_3 = new QHBoxLayout();
         horizontalLayout_3->setObjectName(QStringLiteral("horizontalLayout_3"));
@@ -277,7 +289,12 @@ public:
         horizontalLayout_3->addWidget(label_22);
 
 
-        gridLayout->addLayout(horizontalLayout_3, 10, 1, 1, 1);
+        gridLayout->addLayout(horizontalLayout_3, 11, 1, 1, 1);
+
+        label_18 = new QLabel(groupBox);
+        label_18->setObjectName(QStringLiteral("label_18"));
+
+        gridLayout->addWidget(label_18, 11, 0, 1, 1);
 
         gridLayout_2 = new QGridLayout();
         gridLayout_2->setObjectName(QStringLiteral("gridLayout_2"));
@@ -302,22 +319,17 @@ public:
         gridLayout_2->addWidget(lineEdit_3, 1, 1, 1, 1);
 
 
-        gridLayout->addLayout(gridLayout_2, 6, 1, 1, 1);
+        gridLayout->addLayout(gridLayout_2, 7, 1, 1, 1);
 
-        horizontalLayout_4 = new QHBoxLayout();
-        horizontalLayout_4->setObjectName(QStringLiteral("horizontalLayout_4"));
-        lineEdit_11 = new QLineEdit(groupBox);
-        lineEdit_11->setObjectName(QStringLiteral("lineEdit_11"));
+        label_24 = new QLabel(groupBox);
+        label_24->setObjectName(QStringLiteral("label_24"));
 
-        horizontalLayout_4->addWidget(lineEdit_11);
+        gridLayout->addWidget(label_24, 3, 0, 1, 1);
 
-        label_23 = new QLabel(groupBox);
-        label_23->setObjectName(QStringLiteral("label_23"));
+        lineEdit_14 = new QLineEdit(groupBox);
+        lineEdit_14->setObjectName(QStringLiteral("lineEdit_14"));
 
-        horizontalLayout_4->addWidget(label_23);
-
-
-        gridLayout->addLayout(horizontalLayout_4, 11, 1, 1, 1);
+        gridLayout->addWidget(lineEdit_14, 3, 1, 1, 1);
 
 
         verticalLayout_2->addLayout(gridLayout);
@@ -395,13 +407,16 @@ public:
     {
         InspectorCamera->setWindowTitle(QApplication::translate("InspectorCamera", "Form", 0));
         groupBox->setTitle(QApplication::translate("InspectorCamera", "Camera", 0));
+        lineEdit_13->setText(QApplication::translate("InspectorCamera", "0", 0));
+        checkBox->setText(QString());
+        lineEdit_12->setText(QApplication::translate("InspectorCamera", "100", 0));
+        label_16->setText(QApplication::translate("InspectorCamera", "Depth", 0));
+        label_21->setText(QApplication::translate("InspectorCamera", "EC", 0));
         label_3->setText(QApplication::translate("InspectorCamera", "Projection", 0));
+        label_5->setText(QApplication::translate("InspectorCamera", "Clipping Planes", 0));
         label_2->setText(QApplication::translate("InspectorCamera", "Solid Color", 0));
-        comboBox_2->clear();
-        comboBox_2->insertItems(0, QStringList()
-         << QApplication::translate("InspectorCamera", "Perspective", 0)
-         << QApplication::translate("InspectorCamera", "Orthographic", 0)
-        );
+        pushButton->setText(QString());
+        pushButton_2->setText(QApplication::translate("InspectorCamera", "Pick", 0));
         comboBox->clear();
         comboBox->insertItems(0, QStringList()
          << QApplication::translate("InspectorCamera", "Skybox", 0)
@@ -409,39 +424,37 @@ public:
          << QApplication::translate("InspectorCamera", "Solid Color", 0)
          << QApplication::translate("InspectorCamera", "No clear", 0)
         );
-        label->setText(QApplication::translate("InspectorCamera", "Clear Flags", 0));
-        label_5->setText(QApplication::translate("InspectorCamera", "Clipping Planes", 0));
-        label_4->setText(QApplication::translate("InspectorCamera", "Field of View", 0));
-        lineEdit->setText(QApplication::translate("InspectorCamera", "60", 0));
-        pushButton->setText(QString());
-        pushButton_2->setText(QApplication::translate("InspectorCamera", "Pick", 0));
-        label_21->setText(QApplication::translate("InspectorCamera", "EC", 0));
         lineEdit_9->setText(QApplication::translate("InspectorCamera", "-1", 0));
-        lineEdit_13->setText(QApplication::translate("InspectorCamera", "0", 0));
-        lineEdit_12->setText(QApplication::translate("InspectorCamera", "100", 0));
+        comboBox_2->clear();
+        comboBox_2->insertItems(0, QStringList()
+         << QApplication::translate("InspectorCamera", "Perspective", 0)
+         << QApplication::translate("InspectorCamera", "Orthographic", 0)
+        );
+        label->setText(QApplication::translate("InspectorCamera", "Clear Flags", 0));
         label_8->setText(QApplication::translate("InspectorCamera", "Occlusion Culling", 0));
         label_9->setText(QApplication::translate("InspectorCamera", "Main Camera", 0));
         checkBox_2->setText(QString());
         label_10->setText(QApplication::translate("InspectorCamera", "Size", 0));
-        checkBox->setText(QString());
-        label_16->setText(QApplication::translate("InspectorCamera", "Depth", 0));
         comboBox_3->clear();
         comboBox_3->insertItems(0, QStringList()
          << QApplication::translate("InspectorCamera", "Auto", 0)
          << QApplication::translate("InspectorCamera", "Manual", 0)
         );
-        label_18->setText(QApplication::translate("InspectorCamera", "Shutter Speed", 0));
-        label_19->setText(QApplication::translate("InspectorCamera", "Aperture", 0));
+        lineEdit->setText(QApplication::translate("InspectorCamera", "60", 0));
+        label_4->setText(QApplication::translate("InspectorCamera", "Field of View", 0));
         label_17->setText(QApplication::translate("InspectorCamera", "Camera Mode", 0));
+        label_19->setText(QApplication::translate("InspectorCamera", "Aperture", 0));
+        lineEdit_11->setText(QApplication::translate("InspectorCamera", "16", 0));
+        label_23->setText(QApplication::translate("InspectorCamera", "flops", 0));
         label_20->setText(QApplication::translate("InspectorCamera", "ISO", 0));
         lineEdit_10->setText(QApplication::translate("InspectorCamera", "0.01", 0));
         label_22->setText(QApplication::translate("InspectorCamera", "seconds", 0));
+        label_18->setText(QApplication::translate("InspectorCamera", "Shutter Speed", 0));
         label_6->setText(QApplication::translate("InspectorCamera", "Near", 0));
         label_7->setText(QApplication::translate("InspectorCamera", "Far", 0));
         lineEdit_2->setText(QApplication::translate("InspectorCamera", "0.3", 0));
         lineEdit_3->setText(QApplication::translate("InspectorCamera", "1024", 0));
-        lineEdit_11->setText(QApplication::translate("InspectorCamera", "16", 0));
-        label_23->setText(QApplication::translate("InspectorCamera", "flops", 0));
+        label_24->setText(QApplication::translate("InspectorCamera", "Backround Texture", 0));
         label_11->setText(QApplication::translate("InspectorCamera", "Viewport Rect", 0));
         label_14->setText(QApplication::translate("InspectorCamera", "Y", 0));
         label_12->setText(QApplication::translate("InspectorCamera", "X", 0));

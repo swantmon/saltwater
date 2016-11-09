@@ -1,5 +1,5 @@
 ﻿
-#include "base/base_vector3.h"
+#include "base/base_vector4.h"
 
 #include "editor_gui/edit_inspector_volumefog.h"
 
@@ -49,13 +49,13 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        Base::Float3 WindDirection = Base::Float3(m_pWindDirectionXEdit->text().toFloat(), m_pWindDirectionYEdit->text().toFloat(), m_pWindDirectionZEdit->text().toFloat());
+        Base::Float4 WindDirection = Base::Float4(m_pWindDirectionXEdit->text().toFloat(), m_pWindDirectionYEdit->text().toFloat(), m_pWindDirectionZEdit->text().toFloat(), 0.0f);
 
         QPalette ButtonPalette = m_pFogColorButton->palette();
 
         QColor RGB = ButtonPalette.color(QPalette::Button);
 
-        Base::Float3 Color = Base::Float3(RGB.blue() / 255.0f, RGB.green() / 255.0f, RGB.red() / 255.0f);
+        Base::Float4 Color = Base::Float4(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f, RGB.alpha() / 255.0f);
 
         float FrustumDepth       = m_pFrustumDepthEdit      ->text().toFloat();
         float ShadowIntensity    = m_pShadowIntensityEdit   ->text().toFloat();
@@ -75,10 +75,12 @@ namespace Edit
         NewMessage.PutFloat(WindDirection[0]);
         NewMessage.PutFloat(WindDirection[1]);
         NewMessage.PutFloat(WindDirection[2]);
+        NewMessage.PutFloat(WindDirection[3]);
 
         NewMessage.PutFloat(Color[0]);
         NewMessage.PutFloat(Color[1]);
         NewMessage.PutFloat(Color[2]);
+        NewMessage.PutFloat(Color[3]);
 
         NewMessage.PutFloat(FrustumDepth);
         NewMessage.PutFloat(ShadowIntensity);
@@ -90,16 +92,17 @@ namespace Edit
         NewMessage.Reset();
 
         Edit::MessageManager::SendMessage(Edit::SGUIMessageType::EntityInfoVolumeFog, NewMessage);
-
     }
 
     // -----------------------------------------------------------------------------
 
     void CInspectorVolumeFog::pickColorFromDialog()
     {
-        QColor NewColor = QColorDialog::getColor();
-
         QPalette ButtonPalette = m_pFogColorButton->palette();
+
+        QColor RGB = ButtonPalette.color(QPalette::Button);
+
+        QColor NewColor = QColorDialog::getColor(RGB);
 
         ButtonPalette.setColor(QPalette::Button, NewColor);
 
@@ -129,6 +132,9 @@ namespace Edit
 
     void CInspectorVolumeFog::OnEntityInfoVolumeFog(Edit::CMessage& _rMessage)
     {
+        float X, Y, Z, W;
+        float R, G, B, A;
+
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
@@ -136,9 +142,19 @@ namespace Edit
 
         if (EntityID != m_CurrentEntityID) return;
 
-        Base::Float3 Direction = Base::Float3(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+        X = _rMessage.GetFloat();
+        Y = _rMessage.GetFloat();
+        Z = _rMessage.GetFloat();
+        W = _rMessage.GetFloat();
+
+        Base::Float4 Direction = Base::Float4(X, Y, Z, W);
+
+        R = _rMessage.GetFloat();
+        G = _rMessage.GetFloat();
+        B = _rMessage.GetFloat();
+        A = _rMessage.GetFloat();
         
-        Base::Int3 Color = Base::Int3(_rMessage.GetFloat() * 255, _rMessage.GetFloat() * 255, _rMessage.GetFloat() * 255);
+        Base::Int4 Color = Base::Int4(R * 255, G * 255, B * 255, A * 255);
 
         float FrustumDepth       = _rMessage.GetFloat();
         float ShadowIntensity    = _rMessage.GetFloat();
@@ -156,7 +172,7 @@ namespace Edit
 
         QPalette ButtonPalette = m_pFogColorButton->palette();
 
-        ButtonPalette.setColor(QPalette::Button, QColor(Color[2], Color[1], Color[0]));
+        ButtonPalette.setColor(QPalette::Button, QColor(Color[0], Color[1], Color[2], Color[3]));
 
         m_pFogColorButton->setPalette(ButtonPalette);
 

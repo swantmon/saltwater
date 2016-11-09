@@ -235,6 +235,8 @@ namespace
 
         if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Actor && rCurrentEntity.GetType() == Dt::SActorType::Model && pFacet != nullptr)
         {
+            float X, Y, Z, W;
+
             bool HasColorMap = false;
             bool HasNormalMap = false;
             bool HasRoughnessMap = false;
@@ -261,9 +263,18 @@ namespace
             // -----------------------------------------------------------------------------
             // Read values
             // -----------------------------------------------------------------------------
-            Base::Float3 Color = Base::Float3(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+            X = _rMessage.GetFloat();
+            Y = _rMessage.GetFloat();
+            Z = _rMessage.GetFloat();
 
-            Base::Float4 TilingOffset = Base::Float4(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+            Base::Float3 Color = Base::Float3(X, Y, Z);
+
+            X = _rMessage.GetFloat();
+            Y = _rMessage.GetFloat();
+            Z = _rMessage.GetFloat();
+            W = _rMessage.GetFloat();
+
+            Base::Float4 TilingOffset = Base::Float4(X, Y, Z, W);
 
             float Roughness = _rMessage.GetFloat();
 

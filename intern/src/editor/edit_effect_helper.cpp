@@ -236,6 +236,7 @@ namespace
             NewMessage.PutFloat(pFXFacet->GetTint()[0]);
             NewMessage.PutFloat(pFXFacet->GetTint()[1]);
             NewMessage.PutFloat(pFXFacet->GetTint()[2]);
+            NewMessage.PutFloat(pFXFacet->GetTint()[3]);
 
             NewMessage.PutFloat(pFXFacet->GetIntensity());
             NewMessage.PutFloat(pFXFacet->GetTreshhold());
@@ -348,10 +349,12 @@ namespace
             NewMessage.PutFloat(pFXFacet->GetWindDirection()[0]);
             NewMessage.PutFloat(pFXFacet->GetWindDirection()[1]);
             NewMessage.PutFloat(pFXFacet->GetWindDirection()[2]);
+            NewMessage.PutFloat(pFXFacet->GetWindDirection()[3]);
 
             NewMessage.PutFloat(pFXFacet->GetFogColor()[0]);
             NewMessage.PutFloat(pFXFacet->GetFogColor()[1]);
             NewMessage.PutFloat(pFXFacet->GetFogColor()[2]);
+            NewMessage.PutFloat(pFXFacet->GetFogColor()[3]);
 
             NewMessage.PutFloat(pFXFacet->GetFrustumDepthInMeter());
             NewMessage.PutFloat(pFXFacet->GetShadowIntensity());
@@ -378,10 +381,17 @@ namespace
 
         if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::Bloom && pFXFacet != nullptr)
         {
+            float R, G, B, A;
+
             // -----------------------------------------------------------------------------
             // Read values
             // -----------------------------------------------------------------------------
-            Base::Float4 Color = Base::Float4(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat(), 1.0f);
+            R = _rMessage.GetFloat();
+            G = _rMessage.GetFloat();
+            B = _rMessage.GetFloat();
+            A = _rMessage.GetFloat();
+
+            Base::Float4 Color = Base::Float4(R, G, B, A);
 
             float Intensity     = _rMessage.GetFloat();
             float Treshhold     = _rMessage.GetFloat();
@@ -459,10 +469,16 @@ namespace
 
         if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::FXAA && pFXFacet != nullptr)
         {
+            float R, G, B;
+
             // -----------------------------------------------------------------------------
             // Read values
-            // -----------------------------------------------------------------------------               
-            Base::Float3 Color = Base::Float3(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+            // -----------------------------------------------------------------------------          
+            R = _rMessage.GetFloat();
+            G = _rMessage.GetFloat();
+            B = _rMessage.GetFloat();
+
+            Base::Float3 Color = Base::Float3(R, G, B);
 
             // -----------------------------------------------------------------------------
             // Set values
@@ -524,12 +540,25 @@ namespace
 
         if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::VolumeFog && pFXFacet != nullptr)
         {
+            float R, G, B, A;
+            float X, Y, Z, W;
+
             // -----------------------------------------------------------------------------
             // Read values
             // -----------------------------------------------------------------------------
-            Base::Float4 WindDirection = Base::Float4(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat(), 0.0f);
+            X = _rMessage.GetFloat();
+            Y = _rMessage.GetFloat();
+            Z = _rMessage.GetFloat();
+            W = _rMessage.GetFloat();
 
-            Base::Float4 Color = Base::Float4(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat(), 1.0f);
+            Base::Float4 WindDirection = Base::Float4(X, Y, Z, W);
+
+            R = _rMessage.GetFloat();
+            G = _rMessage.GetFloat();
+            B = _rMessage.GetFloat();
+            A = _rMessage.GetFloat();
+
+            Base::Float4 Color = Base::Float4(R, G, B, A);
 
             float FrustumDepth       = _rMessage.GetFloat();
             float ShadowIntensity    = _rMessage.GetFloat();

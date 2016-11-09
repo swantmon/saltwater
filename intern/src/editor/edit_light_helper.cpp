@@ -400,12 +400,19 @@ namespace
 
         if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Point && pPointLightFacet != nullptr)
         {
+            float R, G, B;
+            float X, Y, Z;
+
             // -----------------------------------------------------------------------------
             // Read values
             // -----------------------------------------------------------------------------
             int ColorMode = _rMessage.GetInt();
 
-            Base::Float3 Color = Base::Float3(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+            R = _rMessage.GetFloat();
+            G = _rMessage.GetFloat();
+            B = _rMessage.GetFloat();
+
+            Base::Float3 Color = Base::Float3(R, G, B);
 
             float Temperature       = _rMessage.GetFloat();
             float Intensity         = _rMessage.GetFloat();
@@ -413,7 +420,11 @@ namespace
             float InnerConeAngle    = Base::DegreesToRadians(_rMessage.GetFloat());
             float OuterConeAngle    = Base::DegreesToRadians(_rMessage.GetFloat());
 
-            Base::Float3 Direction = Base::Float3(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+            X = _rMessage.GetFloat();
+            Y = _rMessage.GetFloat();
+            Z = _rMessage.GetFloat();
+
+            Base::Float3 Direction = Base::Float3(X, Y, Z);
 
             int ShadowType    = _rMessage.GetInt();
             int ShadowQuality = _rMessage.GetInt();
@@ -452,17 +463,28 @@ namespace
 
         if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Sun && pLightFacet != nullptr)
         {
+            float R, G, B;
+            float X, Y, Z;
+
             // -----------------------------------------------------------------------------
             // Read values
             // -----------------------------------------------------------------------------
             int ColorMode = _rMessage.GetInt();
 
-            Base::Float3 Color = Base::Float3(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+            R = _rMessage.GetFloat();
+            G = _rMessage.GetFloat();
+            B = _rMessage.GetFloat();
+
+            Base::Float3 Color = Base::Float3(R, G, B);
 
             float Temperature = _rMessage.GetFloat();
             float Intensity = _rMessage.GetFloat();
 
-            Base::Float3 Direction = Base::Float3(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+            X = _rMessage.GetFloat();
+            Y = _rMessage.GetFloat();
+            Z = _rMessage.GetFloat();
+
+            Base::Float3 Direction = Base::Float3(X, Y, Z);
 
             int ShadowRefresh = _rMessage.GetInt();
 

@@ -55,12 +55,12 @@ namespace Edit
 
         QColor RGB = ButtonPalette.color(QPalette::Button);
 
-        Base::Float3 Color = Base::Float3(RGB.blue() / 255.0f, RGB.green() / 255.0f, RGB.red() / 255.0f);
+        Base::Float3 Color = Base::Float3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
 
         float Temperature = m_pTemperatureEdit->text().toFloat();
         float Intensity   = m_pIntensityEdit->text().toFloat();
 
-        Base::Float3 Direction = Base::Float3(m_pDirectionZEdit->text().toFloat(), m_pDirectionYEdit->text().toFloat(), m_pDirectionXEdit->text().toFloat());
+        Base::Float3 Direction = Base::Float3(m_pDirectionXEdit->text().toFloat(), m_pDirectionYEdit->text().toFloat(), m_pDirectionZEdit->text().toFloat());
 
         int ShadowRefresh = m_pShadowRefreshCB->currentIndex();
 
@@ -128,18 +128,28 @@ namespace Edit
 
     void CInspectorSun::OnEntityInfoSun(Edit::CMessage& _rMessage)
     {
+        float X, Y, Z;
+
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
         int EntityID = _rMessage.GetInt();
         int ColorMode = _rMessage.GetInt();
 
-        Base::Int3 Color = Base::Int3(_rMessage.GetFloat() * 255, _rMessage.GetFloat() * 255, _rMessage.GetFloat() * 255);
+        X = _rMessage.GetFloat();
+        Y = _rMessage.GetFloat();
+        Z = _rMessage.GetFloat();
+
+        Base::Int3 Color = Base::Int3(X * 255, Y * 255, Z * 255);
 
         float Temperature = _rMessage.GetFloat();
         float Intensity   = _rMessage.GetFloat();
 
-        Base::Float3 Direction = Base::Float3(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+        X = _rMessage.GetFloat();
+        Y = _rMessage.GetFloat();
+        Z = _rMessage.GetFloat();
+
+        Base::Float3 Direction = Base::Float3(X, Y, Z);
 
         int ShadowRefresh = _rMessage.GetInt();
 

@@ -54,7 +54,7 @@ namespace Edit
 
         QColor RGB = ButtonPalette.color(QPalette::Button);
 
-        Base::Float3 AlbedoColor = Base::Float3(RGB.blue() / 255.0f, RGB.green() / 255.0f, RGB.red() / 255.0f);
+        Base::Float3 AlbedoColor = Base::Float3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
 
         QString    NewColorTexture = m_pAlbedoTextureEdit->text();
         QByteArray NewColorTextureBinary = NewColorTexture.toLatin1();
@@ -201,9 +201,11 @@ namespace Edit
 
     void CInspectorMaterial::pickColorFromDialog()
     {
-        QColor NewColor = QColorDialog::getColor();
-
         QPalette ButtonPalette = m_pAlbedoColorButton->palette();
+
+        QColor RGB = ButtonPalette.color(QPalette::Button);
+
+        QColor NewColor = QColorDialog::getColor(RGB);
 
         ButtonPalette.setColor(QPalette::Button, NewColor);
 
@@ -233,6 +235,9 @@ namespace Edit
 
     void CInspectorMaterial::OnEntityInfoMaterial(Edit::CMessage& _rMessage)
     {
+        float R, G, B;
+        float X, Y, Z, W;
+
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
@@ -257,9 +262,18 @@ namespace Edit
         char RoughnessMapName[256];
         char MetalMapName[256];
 
-        Base::Float3 AlbedoColor = Base::Float3(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+        R = _rMessage.GetFloat();
+        G = _rMessage.GetFloat();
+        B = _rMessage.GetFloat();
 
-        Base::Float4 TilingOffset = Base::Float4(_rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat(), _rMessage.GetFloat());
+        Base::Float3 AlbedoColor = Base::Float3(R, G, B);
+
+        X = _rMessage.GetFloat();
+        Y = _rMessage.GetFloat();
+        Z = _rMessage.GetFloat();
+        W = _rMessage.GetFloat();
+
+        Base::Float4 TilingOffset = Base::Float4(X, Y, Z, W);
 
         float Roughness   = _rMessage.GetFloat();
         float Reflectance = _rMessage.GetFloat();
@@ -312,7 +326,7 @@ namespace Edit
 
         QPalette ButtonPalette = m_pAlbedoColorButton->palette();
 
-        ButtonPalette.setColor(QPalette::Button, QColor(AlbedoColor[2] * 255.0f, AlbedoColor[1] * 255.0f, AlbedoColor[0] * 255.0f));
+        ButtonPalette.setColor(QPalette::Button, QColor(AlbedoColor[0] * 255.0f, AlbedoColor[1] * 255.0f, AlbedoColor[2] * 255.0f));
 
         m_pAlbedoColorButton->setPalette(ButtonPalette);
 

@@ -53,7 +53,7 @@ namespace Edit
 
         QColor RGB = ButtonPalette.color(QPalette::Button);
 
-        Base::Float3 Color = Base::Float3(RGB.blue() / 255.0f, RGB.green() / 255.0f, RGB.red() / 255.0f);
+        Base::Float3 Color = Base::Float3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
 
         // -----------------------------------------------------------------------------
         // Send message
@@ -75,9 +75,11 @@ namespace Edit
 
     void CInspectorFXAA::pickColorFromDialog()
     {
-        QColor NewColor = QColorDialog::getColor();
-
         QPalette ButtonPalette = m_pLumaColorButton->palette();
+
+        QColor RGB = ButtonPalette.color(QPalette::Button);
+
+        QColor NewColor = QColorDialog::getColor(RGB);
 
         ButtonPalette.setColor(QPalette::Button, NewColor);
 
@@ -107,6 +109,8 @@ namespace Edit
 
     void CInspectorFXAA::OnEntityInfoFXAA(Edit::CMessage& _rMessage)
     {
+        float R, G, B;
+
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
@@ -114,7 +118,11 @@ namespace Edit
 
         if (EntityID != m_CurrentEntityID) return;
 
-        Base::Int3 Color = Base::Int3(_rMessage.GetFloat() * 255, _rMessage.GetFloat() * 255, _rMessage.GetFloat() * 255);
+        R = _rMessage.GetFloat();
+        G = _rMessage.GetFloat();
+        B = _rMessage.GetFloat();
+
+        Base::Int3 Color = Base::Int3(R * 255, G * 255, B * 255);
 
         // -----------------------------------------------------------------------------
         // Set values
