@@ -230,6 +230,15 @@
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_camera.ui">
       <Filter>Form Files\Inspector</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_arcontroller.ui">
+      <Filter>Form Files\Inspector</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_arcontroller_marker.ui">
+      <Filter>Form Files\Inspector</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_artrackedobject.ui">
+      <Filter>Form Files\Inspector</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor_gui\edit_gui.h" />
@@ -276,6 +285,15 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_camera.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_arcontroller.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_arcontroller_marker.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_artrackedobject.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
