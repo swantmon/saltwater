@@ -1,6 +1,7 @@
 
 #include "editor/edit_precompiled.h"
 
+#include "base/base_aabb2.h"
 #include "base/base_console.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
@@ -274,6 +275,42 @@ namespace
 
             NewMessage.PutInt(rCurrentEntity.GetID());
 
+            NewMessage.PutBool(pFacet->IsMainCamera());
+
+            NewMessage.PutInt(pFacet->GetClearFlag());
+
+            NewMessage.PutFloat(pFacet->GetBackgroundColor()[0]);
+            NewMessage.PutFloat(pFacet->GetBackgroundColor()[1]);
+            NewMessage.PutFloat(pFacet->GetBackgroundColor()[2]);
+
+            NewMessage.PutInt(pFacet->GetCullingMask());
+
+            NewMessage.PutInt(pFacet->GetProjectionType());
+
+            NewMessage.PutFloat(pFacet->GetSize());
+
+            NewMessage.PutFloat(pFacet->GetFoV());
+
+            NewMessage.PutFloat(pFacet->GetNear());
+
+            NewMessage.PutFloat(pFacet->GetFar());
+
+            NewMessage.PutFloat(pFacet->GetViewportRect()[0][0]);
+            NewMessage.PutFloat(pFacet->GetViewportRect()[0][1]);
+            NewMessage.PutFloat(pFacet->GetViewportRect()[1][0]);
+            NewMessage.PutFloat(pFacet->GetViewportRect()[1][1]);
+
+            NewMessage.PutFloat(pFacet->GetDepth());
+
+            NewMessage.PutInt(pFacet->GetCameraMode());
+
+            NewMessage.PutFloat(pFacet->GetShutterSpeed());
+
+            NewMessage.PutFloat(pFacet->GetAperture());
+
+            NewMessage.PutFloat(pFacet->GetISO());
+
+            NewMessage.PutFloat(pFacet->GetEC());
             
             NewMessage.Reset();
 
@@ -453,6 +490,83 @@ namespace
 
         if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Actor && rCurrentEntity.GetType() == Dt::SActorType::Camera && pFacet != nullptr)
         {
+            float R, G, B;
+            float X, Y, W, H;
+
+            // -----------------------------------------------------------------------------
+            // Get values
+            // -----------------------------------------------------------------------------
+            bool IsMainCamera = _rMessage.GetBool();
+
+            Dt::CCameraActorFacet::EClearFlag ClearFlag = static_cast<Dt::CCameraActorFacet::EClearFlag >(_rMessage.GetInt());
+
+            R = _rMessage.GetFloat();
+            G = _rMessage.GetFloat();
+            B = _rMessage.GetFloat();
+
+            int CullingMask = _rMessage.GetInt();
+
+            Dt::CCameraActorFacet::EProjectionType ProjectionType = static_cast<Dt::CCameraActorFacet::EProjectionType>(_rMessage.GetInt());
+
+            float Size = _rMessage.GetFloat();
+
+            float FOV = _rMessage.GetFloat();
+
+            float Near = _rMessage.GetFloat();
+
+            float Far = _rMessage.GetFloat();
+
+            X = _rMessage.GetFloat();
+            Y = _rMessage.GetFloat();
+            W = _rMessage.GetFloat();
+            H = _rMessage.GetFloat();
+
+            float Depth = _rMessage.GetFloat();
+
+            Dt::CCameraActorFacet::ECameraMode CameraMode = static_cast<Dt::CCameraActorFacet::ECameraMode>(_rMessage.GetInt());
+
+            float ShutterSpeed = _rMessage.GetFloat();
+
+            float Aperture = _rMessage.GetFloat();
+
+            float ISO = _rMessage.GetFloat();
+
+            float EC = _rMessage.GetFloat();
+
+            // -----------------------------------------------------------------------------
+            // Set values
+            // -----------------------------------------------------------------------------
+            pFacet->SetMainCamera(IsMainCamera);
+
+            pFacet->SetClearFlag(ClearFlag);
+
+            pFacet->SetBackgroundColor(Base::Float3(R, G, B));
+
+            pFacet->SetCullingMask(CullingMask);
+
+            pFacet->SetProjectionType(ProjectionType);
+
+            pFacet->SetSize(Size);
+
+            pFacet->SetFoV(FOV);
+
+            pFacet->SetNear(Near);
+
+            pFacet->SetFar(Far);
+
+            pFacet->SetViewportRect(Base::AABB2Float(Base::Float2(X, Y), Base::Float2(W, H)));
+            
+            pFacet->SetDepth(Depth);
+
+            pFacet->SetCameraMode(CameraMode);
+
+            pFacet->SetShutterSpeed(ShutterSpeed);
+
+            pFacet->SetAperture(Aperture);
+
+            pFacet->SetISO(ISO);
+
+            pFacet->SetEC(EC);
 
             Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
         }

@@ -44,16 +44,49 @@ namespace Edit
 
     void CInspectorCamera::valueChanged()
     {
+        float X, Y, W, H;
+
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
+        bool IsMainCamera = m_pIsMainCameraCB->isChecked();
+
+        int ClearFlag = m_pClearFlagCS->currentIndex();
+
         QPalette ButtonPalette = m_pSolidColorButton->palette();
 
         QColor RGB = ButtonPalette.color(QPalette::Button);
 
         Base::Float3 AlbedoColor = Base::Float3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
 
+        int CullingMask = 0;
+
+        int ProjectionType = m_pProjectionCB->currentIndex();
+
+        float Size = m_pOrthographicSizeEdit->text().toFloat();
+
         float FOV = m_pFieldOfViewEdit->text().toFloat();
+
+        float Near = m_pClippingPlaneNearEdit->text().toFloat();
+
+        float Far = m_pClippingPlaneFarEdit->text().toFloat();
+
+        X = m_pViewportXEdit->text().toFloat();
+        Y = m_pViewportYEdit->text().toFloat();
+        W = m_pViewportWEdit->text().toFloat();
+        H = m_pViewportHEdit->text().toFloat();
+
+        float Depth = m_pClearDepthEdit->text().toFloat();
+
+        int CameraMode = m_pCameraModeCB->currentIndex();
+
+        float ShutterSpeed = m_pShutterSpeedEdit->text().toFloat();
+
+        float Aperture = m_pApertureEdit->text().toFloat();
+
+        float ISO = m_pISOEdit->text().toFloat();
+
+        float EC = m_pECEdit->text().toFloat();
 
         // -----------------------------------------------------------------------------
         // Update related GUI
@@ -64,7 +97,6 @@ namespace Edit
 
         m_pFieldOfViewSlider->blockSignals(false);
 
-
         // -----------------------------------------------------------------------------
         // Send message
         // -----------------------------------------------------------------------------
@@ -72,6 +104,42 @@ namespace Edit
 
         NewMessage.PutInt(m_CurrentEntityID);
 
+        NewMessage.PutBool(IsMainCamera);
+
+        NewMessage.PutInt(ClearFlag);
+
+        NewMessage.PutFloat(AlbedoColor[0]);
+        NewMessage.PutFloat(AlbedoColor[1]);
+        NewMessage.PutFloat(AlbedoColor[2]);
+
+        NewMessage.PutInt(CullingMask);
+
+        NewMessage.PutInt(ProjectionType);
+
+        NewMessage.PutFloat(Size);
+
+        NewMessage.PutFloat(FOV);
+
+        NewMessage.PutFloat(Near);
+
+        NewMessage.PutFloat(Far);
+
+        NewMessage.PutFloat(X);
+        NewMessage.PutFloat(Y);
+        NewMessage.PutFloat(W);
+        NewMessage.PutFloat(H);
+
+        NewMessage.PutFloat(Depth);
+
+        NewMessage.PutInt(CameraMode);
+
+        NewMessage.PutFloat(ShutterSpeed);
+
+        NewMessage.PutFloat(Aperture);
+
+        NewMessage.PutFloat(ISO);
+
+        NewMessage.PutFloat(EC);
 
         NewMessage.Reset();
 
@@ -123,6 +191,9 @@ namespace Edit
 
     void CInspectorCamera::OnEntityInfoCamera(Edit::CMessage& _rMessage)
     {
+        float R, G, B;
+        float X, Y, W, H;
+
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
@@ -130,10 +201,103 @@ namespace Edit
 
         if (EntityID != m_CurrentEntityID) return;
 
+        // -----------------------------------------------------------------------------
+        // Get values
+        // -----------------------------------------------------------------------------
+        bool IsMainCamera = _rMessage.GetBool();
 
+        int ClearFlag = _rMessage.GetInt();
+
+        R = _rMessage.GetFloat();
+        G = _rMessage.GetFloat();
+        B = _rMessage.GetFloat();
+
+        int CullingMask = _rMessage.GetInt();
+
+        int ProjectionType = _rMessage.GetInt();
+
+        float Size = _rMessage.GetFloat();
+
+        float FOV = _rMessage.GetFloat();
+
+        float Near = _rMessage.GetFloat();
+
+        float Far = _rMessage.GetFloat();
+
+        X = _rMessage.GetFloat();
+        Y = _rMessage.GetFloat();
+        W = _rMessage.GetFloat();
+        H = _rMessage.GetFloat();
+
+        float Depth = _rMessage.GetFloat();
+
+        int CameraMode = _rMessage.GetInt();
+
+        float ShutterSpeed = _rMessage.GetFloat();
+
+        float Aperture = _rMessage.GetFloat();
+
+        float ISO = _rMessage.GetFloat();
+
+        float EC = _rMessage.GetFloat();
 
         // -----------------------------------------------------------------------------
         // Set values
         // -----------------------------------------------------------------------------
+        m_pFieldOfViewSlider->blockSignals(true);
+        m_pFieldOfViewEdit  ->blockSignals(true);
+        m_pClearFlagCS      ->blockSignals(true);
+        m_pProjectionCB     ->blockSignals(true);
+        m_pCameraModeCB     ->blockSignals(true);
+
+        m_pIsMainCameraCB->setChecked(IsMainCamera);
+
+        m_pClearFlagCS->setCurrentIndex(ClearFlag);
+
+        QPalette ButtonPalette = m_pSolidColorButton->palette();
+
+        ButtonPalette.setColor(QPalette::Button, QColor(R * 255.0f, G * 255.0f, B * 255.0f));
+
+        m_pSolidColorButton->setPalette(ButtonPalette);
+
+        m_pSolidColorButton->update();
+
+        m_pProjectionCB->setCurrentIndex(ProjectionType);
+
+        m_pFieldOfViewSlider->setValue(FOV);
+
+        m_pFieldOfViewEdit->setText(QString::number(FOV));
+
+        m_pOrthographicSizeEdit->setText(QString::number(Size));
+
+        m_pClippingPlaneNearEdit->setText(QString::number(Near));
+
+        m_pClippingPlaneFarEdit->setText(QString::number(Far));
+
+        m_pClearDepthEdit->setText(QString::number(Depth));
+       
+        m_pCameraModeCB->setCurrentIndex(CameraMode);
+
+        m_pShutterSpeedEdit->setText(QString::number(ShutterSpeed));
+
+        m_pApertureEdit->setText(QString::number(Aperture));
+
+        m_pISOEdit->setText(QString::number(ISO));
+
+        m_pECEdit->setText(QString::number(EC));
+
+        m_pViewportXEdit->setText(QString::number(X));
+
+        m_pViewportYEdit->setText(QString::number(Y));
+
+        m_pViewportWEdit->setText(QString::number(W));
+
+        m_pViewportHEdit->setText(QString::number(H));
+
+        m_pFieldOfViewSlider->blockSignals(false);
+        m_pFieldOfViewEdit  ->blockSignals(false);
+        m_pClearFlagCS      ->blockSignals(false);
+        m_pProjectionCB     ->blockSignals(false);
+        m_pCameraModeCB     ->blockSignals(false);
     }
 } // namespace Edit
