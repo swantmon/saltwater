@@ -37,7 +37,7 @@
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QComboBox" name="comboBox">
+         <widget class="QComboBox" name="m_pDeviceCB">
           <item>
            <property name="text">
             <string>Webcam</string>
@@ -86,28 +86,28 @@
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QLineEdit" name="lineEdit">
+         <widget class="QLineEdit" name="m_pParameterFile">
           <property name="text">
            <string>../assets/</string>
           </property>
          </widget>
         </item>
         <item row="2" column="1">
-         <widget class="QLineEdit" name="lineEdit_2">
+         <widget class="QLineEdit" name="m_pDeviceNumberEdit">
           <property name="text">
            <string>0</string>
           </property>
          </widget>
         </item>
         <item row="3" column="1">
-         <widget class="QLineEdit" name="lineEdit_3">
+         <widget class="QLineEdit" name="m_pCameraEntityIDEdit">
           <property name="text">
            <string>0</string>
           </property>
          </widget>
         </item>
         <item row="4" column="1">
-         <widget class="QLineEdit" name="lineEdit_4">
+         <widget class="QLineEdit" name="m_pOutputBackgroundEdit">
           <property name="text">
            <string>0</string>
           </property>
@@ -117,7 +117,7 @@
          </widget>
         </item>
         <item row="5" column="1">
-         <widget class="QLineEdit" name="lineEdit_5">
+         <widget class="QLineEdit" name="m_pOutputCubemapEdit">
           <property name="text">
            <string>0</string>
           </property>
@@ -127,7 +127,7 @@
          </widget>
         </item>
         <item row="6" column="1">
-         <widget class="QLineEdit" name="lineEdit_6">
+         <widget class="QLineEdit" name="m_pNumberOfMarkerEdit">
           <property name="text">
            <string>0</string>
           </property>
