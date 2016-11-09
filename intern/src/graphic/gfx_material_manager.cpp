@@ -256,6 +256,8 @@ namespace
 
         CMaterialPtr CreateMaterial(const SMaterialDescriptor& _rDescriptor);
 
+        void UpdateMaterial(CMaterialPtr _MaterialPtr, const SMaterialDescriptor& _rDescriptor);
+
     private:
 
         class CInternMaterial : public CMaterial
@@ -474,6 +476,161 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxMaterialManager::UpdateMaterial(CMaterialPtr _MaterialPtr, const SMaterialDescriptor& _rDescriptor)
+    {
+        // -----------------------------------------------------------------------------
+        // Get data material
+        // -----------------------------------------------------------------------------
+        Dt::CMaterial& rDataMaterial = *_rDescriptor.m_pMaterial;
+        
+        // -----------------------------------------------------------------------------
+        // Get internal material
+        // -----------------------------------------------------------------------------
+        assert(_MaterialPtr.IsValid());
+
+        CInternMaterial& rMaterial = *static_cast<CInternMaterial*>(_MaterialPtr.GetPtr());
+
+        // -----------------------------------------------------------------------------
+        // Key estimation
+        // -----------------------------------------------------------------------------
+        rMaterial.m_MaterialKey.m_HasDiffuseTex     = rDataMaterial.GetColorTexture()            != 0;
+        rMaterial.m_MaterialKey.m_HasNormalTex      = rDataMaterial.GetNormalTexture()           != 0;
+        rMaterial.m_MaterialKey.m_HasRoughnessTex   = rDataMaterial.GetRoughnessTexture()        != 0;
+        rMaterial.m_MaterialKey.m_HasReflectanceTex = rDataMaterial.GetReflectanceTexture()      != 0;
+        rMaterial.m_MaterialKey.m_HasMetallicTex    = rDataMaterial.GetMetalTexture()            != 0;
+        rMaterial.m_MaterialKey.m_HasAOTex          = rDataMaterial.GetAmbientOcclusionTexture() != 0;
+        rMaterial.m_MaterialKey.m_HasBumpTex        = rDataMaterial.GetBumpTexture()             != 0;
+
+        // -----------------------------------------------------------------------------
+        // Shader estimation depending on key
+        // -----------------------------------------------------------------------------
+        OnNewMaterial(_rDescriptor.m_ID, rMaterial);
+
+        // -----------------------------------------------------------------------------
+        // Set definitions
+        // -----------------------------------------------------------------------------
+        rMaterial.m_HasAlpha = false;
+        rMaterial.m_HasBump  = rDataMaterial.GetBumpTexture() != 0;
+
+        // -----------------------------------------------------------------------------
+        // Set attributes
+        // -----------------------------------------------------------------------------
+        rMaterial.m_MaterialAttributes.m_Color        = rDataMaterial.GetColor();
+        rMaterial.m_MaterialAttributes.m_Roughness    = rDataMaterial.GetRoughness();
+        rMaterial.m_MaterialAttributes.m_Reflectance  = rDataMaterial.GetReflectance();
+        rMaterial.m_MaterialAttributes.m_MetalMask    = rDataMaterial.GetMetalness();
+        rMaterial.m_MaterialAttributes.m_TilingOffset = rDataMaterial.GetTilingOffset();
+
+        // -----------------------------------------------------------------------------
+        // Create and setup shader, texture and sampler (setup material)
+        // -----------------------------------------------------------------------------
+        CTextureBasePtr    TexturePtrs[CMaterial::SMaterialKey::s_NumberOfTextures];
+        STextureDescriptor TextureDescriptor;
+
+        TextureDescriptor.m_NumberOfPixelsU  = STextureDescriptor::s_NumberOfPixelsFromSource;
+        TextureDescriptor.m_NumberOfPixelsV  = STextureDescriptor::s_NumberOfPixelsFromSource;
+        TextureDescriptor.m_NumberOfPixelsW  = STextureDescriptor::s_NumberOfPixelsFromSource;
+        TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
+        TextureDescriptor.m_NumberOfTextures = STextureDescriptor::s_NumberOfTexturesFromSource;
+        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
+        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
+        TextureDescriptor.m_Format           = CTextureBase::R8G8B8_UBYTE;
+        TextureDescriptor.m_Usage            = CTextureBase::GPURead;
+        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        TextureDescriptor.m_pPixels          = 0;
+        TextureDescriptor.m_pFileName        = 0;
+
+        TexturePtrs[0] = 0;
+        TexturePtrs[1] = 0;
+        TexturePtrs[2] = 0;
+        TexturePtrs[3] = 0;
+        TexturePtrs[4] = 0;
+        TexturePtrs[5] = 0;
+        TexturePtrs[6] = 0;
+
+        if (rMaterial.m_MaterialKey.m_HasDiffuseTex)
+        {
+            TextureDescriptor.m_NumberOfPixelsU = rDataMaterial.GetColorTexture()->GetNumberOfPixelsU();
+            TextureDescriptor.m_NumberOfPixelsV = rDataMaterial.GetColorTexture()->GetNumberOfPixelsV();
+            TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_pFileName       = rDataMaterial.GetColorTexture()->GetFileName();
+            TextureDescriptor.m_pPixels         = rDataMaterial.GetColorTexture()->GetPixels();
+
+            TexturePtrs[0]    = TextureManager::CreateTexture2D(TextureDescriptor);
+        }
+
+        if (rMaterial.m_MaterialKey.m_HasNormalTex)
+        {
+            TextureDescriptor.m_NumberOfPixelsU = rDataMaterial.GetNormalTexture()->GetNumberOfPixelsU();
+            TextureDescriptor.m_NumberOfPixelsV = rDataMaterial.GetNormalTexture()->GetNumberOfPixelsV();
+            TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_pFileName       = rDataMaterial.GetNormalTexture()->GetFileName();
+            TextureDescriptor.m_pPixels         = rDataMaterial.GetNormalTexture()->GetPixels();
+
+            TexturePtrs[1]    = TextureManager::CreateTexture2D(TextureDescriptor);
+        }
+
+        if (rMaterial.m_MaterialKey.m_HasRoughnessTex)
+        {
+            TextureDescriptor.m_NumberOfPixelsU = rDataMaterial.GetRoughnessTexture()->GetNumberOfPixelsU();
+            TextureDescriptor.m_NumberOfPixelsV = rDataMaterial.GetRoughnessTexture()->GetNumberOfPixelsV();
+            TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_pFileName       = rDataMaterial.GetRoughnessTexture()->GetFileName();
+            TextureDescriptor.m_pPixels         = rDataMaterial.GetRoughnessTexture()->GetPixels();
+
+            TexturePtrs[2] = TextureManager::CreateTexture2D(TextureDescriptor);
+        }
+
+        if (rMaterial.m_MaterialKey.m_HasReflectanceTex)
+        {
+            TextureDescriptor.m_NumberOfPixelsU = rDataMaterial.GetReflectanceTexture()->GetNumberOfPixelsU();
+            TextureDescriptor.m_NumberOfPixelsV = rDataMaterial.GetReflectanceTexture()->GetNumberOfPixelsV();
+            TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_pFileName       = rDataMaterial.GetReflectanceTexture()->GetFileName();
+            TextureDescriptor.m_pPixels         = rDataMaterial.GetReflectanceTexture()->GetPixels();
+
+            TexturePtrs[3] = TextureManager::CreateTexture2D(TextureDescriptor);
+        }
+
+        if (rMaterial.m_MaterialKey.m_HasMetallicTex)
+        {
+            TextureDescriptor.m_NumberOfPixelsU = rDataMaterial.GetMetalTexture()->GetNumberOfPixelsU();
+            TextureDescriptor.m_NumberOfPixelsV = rDataMaterial.GetMetalTexture()->GetNumberOfPixelsV();
+            TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_pFileName       = rDataMaterial.GetMetalTexture()->GetFileName();
+            TextureDescriptor.m_pPixels         = rDataMaterial.GetMetalTexture()->GetPixels();
+
+            TexturePtrs[4] = TextureManager::CreateTexture2D(TextureDescriptor);
+        }
+
+        if (rMaterial.m_MaterialKey.m_HasAOTex)
+        {
+            TextureDescriptor.m_NumberOfPixelsU = rDataMaterial.GetAmbientOcclusionTexture()->GetNumberOfPixelsU();
+            TextureDescriptor.m_NumberOfPixelsV = rDataMaterial.GetAmbientOcclusionTexture()->GetNumberOfPixelsV();
+            TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_pFileName       = rDataMaterial.GetAmbientOcclusionTexture()->GetFileName();
+            TextureDescriptor.m_pPixels         = rDataMaterial.GetAmbientOcclusionTexture()->GetPixels();
+
+            TexturePtrs[5] = TextureManager::CreateTexture2D(TextureDescriptor);
+        }
+
+        if (rMaterial.m_MaterialKey.m_HasBumpTex)
+        {
+            TextureDescriptor.m_NumberOfPixelsU = rDataMaterial.GetBumpTexture()->GetNumberOfPixelsU();
+            TextureDescriptor.m_NumberOfPixelsV = rDataMaterial.GetBumpTexture()->GetNumberOfPixelsV();
+            TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_Format          = CTextureBase::R8_UBYTE;
+            TextureDescriptor.m_pFileName       = rDataMaterial.GetBumpTexture()->GetFileName();
+            TextureDescriptor.m_pPixels         = rDataMaterial.GetBumpTexture()->GetPixels();
+
+            TexturePtrs[6] = TextureManager::CreateTexture2D(TextureDescriptor);
+        }
+
+        rMaterial.m_TextureSetPtrs[CShader::Pixel] = TextureManager::CreateTextureSet(TexturePtrs, CMaterial::SMaterialKey::s_NumberOfTextures);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxMaterialManager::OnNewMaterial(CSurface::SSurfaceKey::BSurfaceID _ID, CInternMaterial& _rMaterial) const
     {
         unsigned int ShaderLinkIndex = 0;
@@ -618,6 +775,13 @@ namespace MaterialManager
     CMaterialPtr CreateMaterial(const SMaterialDescriptor& _rDescriptor)
     {
         return CGfxMaterialManager::GetInstance().CreateMaterial(_rDescriptor);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void UpdateMaterial(CMaterialPtr _MaterialPtr, const SMaterialDescriptor& _rDescriptor)
+    {
+        CGfxMaterialManager::GetInstance().UpdateMaterial(_MaterialPtr, _rDescriptor);
     }
 } // namespace MaterialManager
 } // namespace Gfx

@@ -35,5 +35,7 @@ namespace MaterialManager
     void Clear();
 
     CMaterialPtr CreateMaterial(const SMaterialDescriptor& _rDescriptor);
+
+    void UpdateMaterial(CMaterialPtr _MaterialPtr, const SMaterialDescriptor& _rDescriptor);
 } // namespace MaterialManager
 } // namespace Gfx

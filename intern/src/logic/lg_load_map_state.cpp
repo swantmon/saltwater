@@ -105,7 +105,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SActorType::Camera;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc, 0);
+            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
             rEntity.SetName("Main Camera");
 
@@ -155,7 +155,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SLightType::Skybox;
             EntityDesc.m_FacetFlags     = 0;
 
-            Dt::CEntity& rEnvironment = Dt::EntityManager::CreateEntity(EntityDesc, 1);
+            Dt::CEntity& rEnvironment = Dt::EntityManager::CreateEntity(EntityDesc);
 
             rEnvironment.SetName("Environment");
 
@@ -180,7 +180,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SFXType::FXAA;
             EntityDesc.m_FacetFlags     = 0;
 
-            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc, 2);
+            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
             rEffectEntity.SetName("FXAA");
 
@@ -198,7 +198,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SFXType::SSR;
             EntityDesc.m_FacetFlags     = 0;
 
-            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc, 3);
+            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
             rEffectEntity.SetName("SSR");
 
@@ -216,7 +216,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SFXType::Bloom;
             EntityDesc.m_FacetFlags     = 0;
 
-            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc, 4);
+            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
             rEffectEntity.SetName("Bloom");
 
@@ -237,7 +237,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SFXType::SSAO;
             EntityDesc.m_FacetFlags     = 0;
 
-            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc, 5);
+            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
             rEffectEntity.SetName("SSAO");
 
@@ -258,7 +258,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SLightType::GlobalProbe;
             EntityDesc.m_FacetFlags     = 0;
 
-            Dt::CEntity& rGlobalProbeLight = Dt::EntityManager::CreateEntity(EntityDesc, 7);
+            Dt::CEntity& rGlobalProbeLight = Dt::EntityManager::CreateEntity(EntityDesc);
 
             rGlobalProbeLight.SetName("Global light probe");
 
@@ -273,6 +273,42 @@ namespace
             Dt::EntityManager::MarkEntityAsDirty(rGlobalProbeLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
+            EntityDesc.m_EntityType     = Dt::SLightType::Sun;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+
+            Dt::CEntity& rSunLight = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            rSunLight.SetName("Sun");
+
+            // -----------------------------------------------------------------------------
+            // Transformation
+            // -----------------------------------------------------------------------------
+            Dt::CTransformationFacet* pTransformationFacet = rSunLight.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 20.0f));
+            pTransformationFacet->SetScale   (Base::Float3(1.0f));
+            pTransformationFacet->SetRotation(Base::Float3(0.0f));
+
+            Dt::CSunLightFacet* pSunLightFacet = Dt::LightManager::CreateSunLight();
+
+            pSunLightFacet->EnableTemperature(false);
+            pSunLightFacet->SetColor         (Base::Float3(1.0f, 1.0f, 1.0f));
+            pSunLightFacet->SetDirection     (Base::Float3(0.0f, 0.0f, -1.0f));
+            pSunLightFacet->SetIntensity     (90600.0f);
+            pSunLightFacet->SetTemperature   (0);
+            pSunLightFacet->SetRefreshMode   (Dt::CSunLightFacet::Dynamic);
+
+            pSunLightFacet->UpdateLightness();
+
+            rSunLight.SetDetailFacet(Dt::SFacetCategory::Data, pSunLightFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rSunLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
         // -----------------------------------------------------------------------------
         // Setup entities
         // -----------------------------------------------------------------------------
@@ -283,7 +319,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SActorType::Model;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
-            Dt::CEntity& rPlane = Dt::EntityManager::CreateEntity(EntityDesc, 8);
+            Dt::CEntity& rPlane = Dt::EntityManager::CreateEntity(EntityDesc);
 
             rPlane.SetName("Plane");
 
@@ -317,7 +353,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SActorType::Model;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
-            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntity(EntityDesc, 9);
+            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntity(EntityDesc);
 
             rSphere.SetName("Sphere");
 
@@ -361,7 +397,7 @@ namespace
             EntityDesc.m_EntityType     = Dt::SActorType::Model;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
-            Dt::CEntity& rPlane = Dt::EntityManager::CreateEntity(EntityDesc, 10);
+            Dt::CEntity& rPlane = Dt::EntityManager::CreateEntity(EntityDesc);
 
             Dt::CTransformationFacet* pTransformationFacet = rPlane.GetTransformationFacet();
 

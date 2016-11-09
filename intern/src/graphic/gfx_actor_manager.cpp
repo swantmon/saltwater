@@ -160,8 +160,10 @@ namespace
             case Dt::SActorType::AR:    CreateActorAR(*_pEntity); break;
             }
         }
-
-        m_DirtyEntities.push_back(_pEntity);
+        else if ((DirtyFlags & Dt::CEntity::DirtyDetail) != 0)
+        {
+            m_DirtyEntities.push_back(_pEntity);
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -210,40 +212,41 @@ namespace
 
         for (unsigned int NumberOfSurface = 0; NumberOfSurface < ModelLODPtr->GetNumberOfSurfaces(); ++NumberOfSurface)
         {
+            CSurfacePtr SurfacePtr = ModelLODPtr->GetSurface(NumberOfSurface);
+
             Dt::CMaterial* pDataMaterial = pDataActorModelFacet->GetMaterial(NumberOfSurface);
+            CMaterialPtr MaterialPtr = pGraphicActorModelFacet->GetMaterial(NumberOfSurface);
 
             if (pDataMaterial == nullptr)
             {
-                pDataMaterial = pDataActorModelFacet->GetModel()->GetLOD(0)->GetSurface(0)->GetMaterial();
+                pDataMaterial = pDataActorModelFacet->GetModel()->GetLOD(0)->GetSurface(NumberOfSurface)->GetMaterial();
             }
 
-            if (pDataMaterial != 0)
+            if (MaterialPtr == nullptr)
             {
-                // -----------------------------------------------------------------------------
-                // Remove old material
-                // -----------------------------------------------------------------------------
-                CMaterialPtr MaterialPtr = pGraphicActorModelFacet->GetMaterial(NumberOfSurface);
-
-                MaterialPtr = 0;
-
-                // -----------------------------------------------------------------------------
-                // Get key of surface
-                // -----------------------------------------------------------------------------
-                CSurface::SSurfaceKey SurfaceKey = ModelLODPtr->GetSurface(NumberOfSurface)->GetKey();
-
-                // -----------------------------------------------------------------------------
-                // Material description
-                // -----------------------------------------------------------------------------
-                MaterialDesc.m_ID        = SurfaceKey.m_Key;
-                MaterialDesc.m_pMaterial = pDataMaterial;
-
-                // -----------------------------------------------------------------------------
-                // Create and set material
-                // -----------------------------------------------------------------------------
-                CMaterialPtr NewMaterialPtr = MaterialManager::CreateMaterial(MaterialDesc);
-
-                pGraphicActorModelFacet->SetMaterial(NumberOfSurface, NewMaterialPtr);
+                MaterialPtr = SurfacePtr->GetMaterial();
             }
+
+            if (pDataMaterial == nullptr || MaterialPtr == nullptr)
+            {
+                continue;
+            }
+
+            // -----------------------------------------------------------------------------
+            // Get key of surface
+            // -----------------------------------------------------------------------------
+            CSurface::SSurfaceKey SurfaceKey = SurfacePtr->GetKey();
+
+            // -----------------------------------------------------------------------------
+            // Material description
+            // -----------------------------------------------------------------------------
+            MaterialDesc.m_ID        = SurfaceKey.m_Key;
+            MaterialDesc.m_pMaterial = pDataMaterial;
+
+            // -----------------------------------------------------------------------------
+            // Update material
+            // -----------------------------------------------------------------------------
+            MaterialManager::UpdateMaterial(MaterialPtr, MaterialDesc);
         }
     }
 
