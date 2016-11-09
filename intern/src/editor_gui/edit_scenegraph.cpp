@@ -17,7 +17,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::SceneGraphChanged, EDIT_RECEIVE_MESSAGE(&CSceneGraph::OnSceneGraphChanged));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::EntityInfoHierarchy, EDIT_RECEIVE_MESSAGE(&CSceneGraph::OnSceneGraphChanged));
     }
 
     // -----------------------------------------------------------------------------

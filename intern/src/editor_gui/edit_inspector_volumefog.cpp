@@ -32,7 +32,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::EntityInfoVolumeFog, EDIT_RECEIVE_MESSAGE(&CInspectorVolumeFog::OnEntityInfoVolumeFog));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::EffectInfoVolumeFog, EDIT_RECEIVE_MESSAGE(&CInspectorVolumeFog::OnEntityInfoVolumeFog));
     }
 
     // -----------------------------------------------------------------------------
@@ -91,7 +91,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::EntityInfoVolumeFog, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::EffectInfoVolumeFog, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -125,7 +125,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::RequestEntityInfoVolumeFog, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::RequestEffectInfoVolumeFog, NewMessage);
     }
 
     // -----------------------------------------------------------------------------

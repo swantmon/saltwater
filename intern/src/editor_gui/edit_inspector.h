@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "editor_gui/edit_inspector_bloom.h"
+#include "editor_gui/edit_inspector_camera.h"
 #include "editor_gui/edit_inspector_dof.h"
 #include "editor_gui/edit_inspector_entity.h"
 #include "editor_gui/edit_inspector_environment.h"
@@ -47,6 +48,7 @@ namespace Edit
         CInspectorSSR*            m_pSSRWidget;
         CInspectorVolumeFog*      m_pVolumeFogWidget;
         CInspectorMaterial*       m_pMaterialWidget;
+        CInspectorCamera*         m_pCameraWidget;
         unsigned int              m_ActiveEntityID;
 
     private:

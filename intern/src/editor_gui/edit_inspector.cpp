@@ -21,6 +21,7 @@ namespace Edit
         , m_pSSRWidget        ()
         , m_pVolumeFogWidget  ()
         , m_pMaterialWidget   ()
+        , m_pCameraWidget     ()
         , m_ActiveEntityID    (-1)
     {
         // -----------------------------------------------------------------------------
@@ -43,6 +44,7 @@ namespace Edit
         m_pSSRWidget         = new CInspectorSSR();
         m_pVolumeFogWidget   = new CInspectorVolumeFog();
         m_pMaterialWidget    = new CInspectorMaterial();
+        m_pCameraWidget      = new CInspectorCamera();
 
         m_pInspectorLayout->addWidget(m_pEntityWidget);
         m_pInspectorLayout->addWidget(m_pTransformWidget);
@@ -56,6 +58,7 @@ namespace Edit
         m_pInspectorLayout->addWidget(m_pSSRWidget);
         m_pInspectorLayout->addWidget(m_pVolumeFogWidget);
         m_pInspectorLayout->addWidget(m_pMaterialWidget);
+        m_pInspectorLayout->addWidget(m_pCameraWidget);
 
         m_pEntityWidget     ->setVisible(false);
         m_pPointlightWidget ->setVisible(false);
@@ -69,6 +72,7 @@ namespace Edit
         m_pSSRWidget        ->setVisible(false);
         m_pVolumeFogWidget  ->setVisible(false);
         m_pMaterialWidget   ->setVisible(false);
+        m_pCameraWidget     ->setVisible(false);
 
         // -----------------------------------------------------------------------------
         // Set layout
@@ -97,6 +101,7 @@ namespace Edit
         delete m_pSSRWidget;
         delete m_pVolumeFogWidget;
         delete m_pMaterialWidget;
+        delete m_pCameraWidget;
 
         m_pEntityWidget      = 0;
         m_pPointlightWidget  = 0;
@@ -110,6 +115,7 @@ namespace Edit
         m_pSSRWidget         = 0;
         m_pVolumeFogWidget   = 0;
         m_pMaterialWidget    = 0;
+        m_pCameraWidget      = 0;
     }
 
     // -----------------------------------------------------------------------------
@@ -183,6 +189,7 @@ namespace Edit
         m_pSSRWidget        ->setVisible(false);
         m_pVolumeFogWidget  ->setVisible(false);
         m_pMaterialWidget   ->setVisible(false);
+        m_pCameraWidget     ->setVisible(false);
 
         if (HasDetailData)
         {
@@ -202,6 +209,9 @@ namespace Edit
                 }
                 else if (Type == 3) // Camera
                 {
+                    m_pCameraWidget->RequestInformation(EntityID);
+
+                    m_pCameraWidget->setVisible(true);
                 }
             }
             else if (Category == 1) // Light

@@ -17,7 +17,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::EntityInfoEnvironment, EDIT_RECEIVE_MESSAGE(&CInspectorEnvironment::OnEntityInfoEnvironment));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::LightInfoEnvironment, EDIT_RECEIVE_MESSAGE(&CInspectorEnvironment::OnEntityInfoEnvironment));
     }
 
     // -----------------------------------------------------------------------------
@@ -56,7 +56,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::EntityInfoEnvironment, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::LightInfoEnvironment, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -71,7 +71,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::RequestEntityInfoEnvironment, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::RequestLightInfoEnvironment, NewMessage);
     }
 
     // -----------------------------------------------------------------------------

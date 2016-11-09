@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>792</width>
-    <height>876</height>
+    <width>369</width>
+    <height>539</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,14 +23,14 @@
       <item>
        <layout class="QGridLayout" name="gridLayout">
         <item row="14" column="1">
-         <widget class="QLineEdit" name="lineEdit_13">
+         <widget class="QLineEdit" name="m_pECEdit">
           <property name="text">
            <string>0</string>
           </property>
          </widget>
         </item>
         <item row="8" column="1">
-         <widget class="QCheckBox" name="checkBox">
+         <widget class="QCheckBox" name="m_pOcclusionCullingCB">
           <property name="text">
            <string/>
           </property>
@@ -40,7 +40,7 @@
          </widget>
         </item>
         <item row="13" column="1">
-         <widget class="QLineEdit" name="lineEdit_12">
+         <widget class="QLineEdit" name="m_pISOEdit">
           <property name="text">
            <string>100</string>
           </property>
@@ -87,7 +87,7 @@
         <item row="2" column="1">
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
-           <widget class="QPushButton" name="pushButton">
+           <widget class="QPushButton" name="m_pSolidColorButton">
             <property name="palette">
              <palette>
               <active>
@@ -137,7 +137,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_2">
+           <widget class="QPushButton" name="m_pSolidColorPickButton">
             <property name="maximumSize">
              <size>
               <width>30</width>
@@ -152,7 +152,7 @@
          </layout>
         </item>
         <item row="1" column="1">
-         <widget class="QComboBox" name="comboBox">
+         <widget class="QComboBox" name="m_pClearFlagCS">
           <item>
            <property name="text">
             <string>Skybox</string>
@@ -176,14 +176,14 @@
          </widget>
         </item>
         <item row="9" column="1">
-         <widget class="QLineEdit" name="lineEdit_9">
+         <widget class="QLineEdit" name="m_pClearDepthEdit">
           <property name="text">
            <string>-1</string>
           </property>
          </widget>
         </item>
         <item row="4" column="1">
-         <widget class="QComboBox" name="comboBox_2">
+         <widget class="QComboBox" name="m_pProjectionCB">
           <item>
            <property name="text">
             <string>Perspective</string>
@@ -218,7 +218,7 @@
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QCheckBox" name="checkBox_2">
+         <widget class="QCheckBox" name="m_pIsMainCameraCB">
           <property name="text">
            <string/>
           </property>
@@ -232,10 +232,10 @@
          </widget>
         </item>
         <item row="6" column="1">
-         <widget class="QLineEdit" name="lineEdit_4"/>
+         <widget class="QLineEdit" name="m_pOrthographicSizeEdit"/>
         </item>
         <item row="10" column="1">
-         <widget class="QComboBox" name="comboBox_3">
+         <widget class="QComboBox" name="m_pCameraModeCB">
           <item>
            <property name="text">
             <string>Auto</string>
@@ -251,7 +251,7 @@
         <item row="5" column="1">
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
-           <widget class="QSlider" name="horizontalSlider">
+           <widget class="QSlider" name="m_pFieldOfViewSlider">
             <property name="minimum">
              <number>1</number>
             </property>
@@ -267,7 +267,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="lineEdit">
+           <widget class="QLineEdit" name="m_pFieldOfViewEdit">
             <property name="maximumSize">
              <size>
               <width>30</width>
@@ -305,7 +305,7 @@
         <item row="12" column="1">
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
-           <widget class="QLineEdit" name="lineEdit_11">
+           <widget class="QLineEdit" name="m_pApertureEdit">
             <property name="text">
              <string>16</string>
             </property>
@@ -330,7 +330,7 @@
         <item row="11" column="1">
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
-           <widget class="QLineEdit" name="lineEdit_10">
+           <widget class="QLineEdit" name="m_pShutterSpeedEdit">
             <property name="text">
              <string>0.01</string>
             </property>
@@ -369,14 +369,14 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLineEdit" name="lineEdit_2">
+           <widget class="QLineEdit" name="m_pClippingPlaneNearEdit">
             <property name="text">
              <string>0.3</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QLineEdit" name="lineEdit_3">
+           <widget class="QLineEdit" name="m_pClippingPlaneFarEdit">
             <property name="text">
              <string>1024</string>
             </property>
@@ -392,7 +392,7 @@
          </widget>
         </item>
         <item row="3" column="1">
-         <widget class="QLineEdit" name="lineEdit_14"/>
+         <widget class="QLineEdit" name="m_pBackgroundTextureEdit"/>
         </item>
        </layout>
       </item>
@@ -439,28 +439,28 @@
            </widget>
           </item>
           <item row="0" column="2">
-           <widget class="QLineEdit" name="lineEdit_5">
+           <widget class="QLineEdit" name="m_pViewportXEdit">
             <property name="text">
              <string>0</string>
             </property>
            </widget>
           </item>
           <item row="1" column="2">
-           <widget class="QLineEdit" name="lineEdit_6">
+           <widget class="QLineEdit" name="m_pViewportWEdit">
             <property name="text">
              <string>1</string>
             </property>
            </widget>
           </item>
           <item row="0" column="4">
-           <widget class="QLineEdit" name="lineEdit_7">
+           <widget class="QLineEdit" name="m_pViewportYEdit">
             <property name="text">
              <string>0</string>
             </property>
            </widget>
           </item>
           <item row="1" column="4">
-           <widget class="QLineEdit" name="lineEdit_8">
+           <widget class="QLineEdit" name="m_pViewportHEdit">
             <property name="text">
              <string>1</string>
             </property>
@@ -492,5 +492,363 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>m_pIsMainCameraCB</sender>
+   <signal>clicked()</signal>
+   <receiver>InspectorCamera</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>122</x>
+     <y>38</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>170</x>
+     <y>4</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pSolidColorPickButton</sender>
+   <signal>clicked()</signal>
+   <receiver>InspectorCamera</receiver>
+   <slot>pickColorFromDialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>336</x>
+     <y>92</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>366</x>
+     <y>92</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pFieldOfViewSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>InspectorCamera</receiver>
+   <slot>fieldOfViewValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>192</x>
+     <y>172</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>368</x>
+     <y>181</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pClearFlagCS</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>InspectorCamera</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>216</x>
+     <y>63</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>367</x>
+     <y>58</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pSolidColorButton</sender>
+   <signal>clicked()</signal>
+   <receiver>InspectorCamera</receiver>
+   <slot>pickColorFromDialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>205</x>
+     <y>90</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>363</x>
+     <y>22</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pBackgroundTextureEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorCamera</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>277</x>
+     <y>114</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>366</x>
+     <y>133</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pProjectionCB</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>InspectorCamera</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>282</x>
+     <y>148</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>364</x>
+     <y>6</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pOrthographicSizeEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>InspectorCamera</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>200</x>
+     <y>202</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>365</x>
+     <y>235</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pClippingPlaneNearEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorCamera</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>181</x>
+     <y>227</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>365</x>
+     <y>218</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pClippingPlaneFarEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorCamera</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>238</x>
+     <y>249</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>364</x>
+     <y>269</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pOcclusionCullingCB</sender>
+   <signal>clicked()</signal>
+   <receiver>InspectorCamera</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>125</x>
+     <y>276</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>366</x>
+     <y>313</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pClearDepthEdit</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>InspectorCamera</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>309</x>
+     <y>296</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>367</x>
+     <y>346</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pCameraModeCB</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>InspectorCamera</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>247</x>
+     <y>326</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>367</x>
+     <y>302</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pShutterSpeedEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorCamera</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>263</x>
+     <y>353</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>364</x>
+     <y>378</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pApertureEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorCamera</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>191</x>
+     <y>381</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>364</x>
+     <y>413</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pISOEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorCamera</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>336</x>
+     <y>407</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>345</x>
+     <y>1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pECEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorCamera</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>207</x>
+     <y>434</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>303</x>
+     <y>-2</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pViewportXEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorCamera</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>176</x>
+     <y>476</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>276</x>
+     <y>4</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pViewportYEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorCamera</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>265</x>
+     <y>476</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>369</x>
+     <y>455</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pViewportWEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorCamera</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>195</x>
+     <y>509</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>367</x>
+     <y>509</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pViewportHEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorCamera</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>321</x>
+     <y>511</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>366</x>
+     <y>484</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pFieldOfViewEdit</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>InspectorCamera</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>169</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>365</x>
+     <y>170</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>valueChanged()</slot>
+  <slot>pickColorFromDialog()</slot>
+  <slot>fieldOfViewValueChanged(int)</slot>
+ </slots>
 </ui>

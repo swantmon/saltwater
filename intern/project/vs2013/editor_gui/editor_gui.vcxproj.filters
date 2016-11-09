@@ -131,6 +131,12 @@
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_material.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_camera.cpp">
+      <Filter>Widgets\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_camera.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_mainwindow.ui">
@@ -238,6 +244,9 @@
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_artrackedobject.ui">
       <Filter>Form Files\Inspector</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_camera.h">
+      <Filter>Widgets\Inspector</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

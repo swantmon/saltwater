@@ -79,7 +79,7 @@ public:
     {
         if (InspectorMaterial->objectName().isEmpty())
             InspectorMaterial->setObjectName(QStringLiteral("InspectorMaterial"));
-        InspectorMaterial->resize(442, 485);
+        InspectorMaterial->resize(343, 485);
         verticalLayout = new QVBoxLayout(InspectorMaterial);
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
         groupBox = new QGroupBox(InspectorMaterial);
@@ -328,6 +328,21 @@ public:
 
         verticalLayout->addWidget(groupBox);
 
+        QWidget::setTabOrder(m_pAlbedoTextureEdit, m_pAlbedoColorButton);
+        QWidget::setTabOrder(m_pAlbedoColorButton, m_pAlbedoPickButton);
+        QWidget::setTabOrder(m_pAlbedoPickButton, m_pNormalTextureEdit);
+        QWidget::setTabOrder(m_pNormalTextureEdit, m_pRoughnessTextureEdit);
+        QWidget::setTabOrder(m_pRoughnessTextureEdit, m_pRoughnessSlider);
+        QWidget::setTabOrder(m_pRoughnessSlider, m_pRoughnessEdit);
+        QWidget::setTabOrder(m_pRoughnessEdit, m_pMetallicTextureEdit);
+        QWidget::setTabOrder(m_pMetallicTextureEdit, m_pMetallicSlider);
+        QWidget::setTabOrder(m_pMetallicSlider, m_pMetallicEdit);
+        QWidget::setTabOrder(m_pMetallicEdit, m_pReflectanceSlider);
+        QWidget::setTabOrder(m_pReflectanceSlider, m_pReflectanceEdit);
+        QWidget::setTabOrder(m_pReflectanceEdit, m_pTilingXEdit);
+        QWidget::setTabOrder(m_pTilingXEdit, m_pTilingYEdit);
+        QWidget::setTabOrder(m_pTilingYEdit, m_pOffsetXEdit);
+        QWidget::setTabOrder(m_pOffsetXEdit, m_pOffsetYEdit);
 
         retranslateUi(InspectorMaterial);
         QObject::connect(m_pAlbedoPickButton, SIGNAL(clicked()), InspectorMaterial, SLOT(pickColorFromDialog()));

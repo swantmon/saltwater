@@ -1,7 +1,7 @@
 ﻿
 #include "base/base_vector3.h"
 
-#include "editor_gui/edit_inspector_fxaa.h"
+#include "editor_gui/edit_inspector_camera.h"
 
 #include "editor_port/edit_message_manager.h"
 
@@ -9,9 +9,8 @@
 
 namespace Edit
 {
-    CInspectorFXAA::CInspectorFXAA(QWidget* _pParent)
-        : QWidget          (_pParent)
-        , m_CurrentEntityID(-1)
+    CInspectorCamera::CInspectorCamera(QWidget* _pParent)
+        : QWidget(_pParent)
     {
         // -----------------------------------------------------------------------------
         // Setup UI
@@ -21,39 +20,50 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Color picker
         // -----------------------------------------------------------------------------
-        QPalette ButtonPalette = m_pLumaColorButton->palette();
+        QPalette ButtonPalette = m_pSolidColorButton->palette();
 
         ButtonPalette.setColor(QPalette::Button, QColor(Qt::white));
 
-        m_pLumaColorButton->setPalette(ButtonPalette);
+        m_pSolidColorButton->setPalette(ButtonPalette);
 
-        m_pLumaColorButton->update();
+        m_pSolidColorButton->update();
 
         // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::EffectInfoFXAA, EDIT_RECEIVE_MESSAGE(&CInspectorFXAA::OnEntityInfoFXAA));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::ActorInfoCamera, EDIT_RECEIVE_MESSAGE(&CInspectorCamera::OnEntityInfoCamera));
     }
 
     // -----------------------------------------------------------------------------
 
-    CInspectorFXAA::~CInspectorFXAA()
+    CInspectorCamera::~CInspectorCamera() 
     {
 
     }
-
     // -----------------------------------------------------------------------------
 
-    void CInspectorFXAA::valueChanged()
+    void CInspectorCamera::valueChanged()
     {
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        QPalette ButtonPalette = m_pLumaColorButton->palette();
+        QPalette ButtonPalette = m_pSolidColorButton->palette();
 
         QColor RGB = ButtonPalette.color(QPalette::Button);
 
-        Base::Float3 Color = Base::Float3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
+        Base::Float3 AlbedoColor = Base::Float3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
+
+        float FOV = m_pFieldOfViewEdit->text().toFloat();
+
+        // -----------------------------------------------------------------------------
+        // Update related GUI
+        // -----------------------------------------------------------------------------
+        m_pFieldOfViewSlider->blockSignals(true);
+
+        m_pFieldOfViewSlider->setValue(static_cast<int>(FOV));
+
+        m_pFieldOfViewSlider->blockSignals(false);
+
 
         // -----------------------------------------------------------------------------
         // Send message
@@ -62,20 +72,24 @@ namespace Edit
 
         NewMessage.PutInt(m_CurrentEntityID);
 
-        NewMessage.PutFloat(Color[0]);
-        NewMessage.PutFloat(Color[1]);
-        NewMessage.PutFloat(Color[2]);
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::EffectInfoFXAA, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::ActorInfoCamera, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorFXAA::pickColorFromDialog()
+    void CInspectorCamera::fieldOfViewValueChanged(int _Value)
     {
-        QPalette ButtonPalette = m_pLumaColorButton->palette();
+        m_pFieldOfViewEdit->setText(QString::number(_Value));
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorCamera::pickColorFromDialog()
+    {
+        QPalette ButtonPalette = m_pSolidColorButton->palette();
 
         QColor RGB = ButtonPalette.color(QPalette::Button);
 
@@ -83,16 +97,16 @@ namespace Edit
 
         ButtonPalette.setColor(QPalette::Button, NewColor);
 
-        m_pLumaColorButton->setPalette(ButtonPalette);
+        m_pSolidColorButton->setPalette(ButtonPalette);
 
-        m_pLumaColorButton->update();
+        m_pSolidColorButton->update();
 
         valueChanged();
     }
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorFXAA::RequestInformation(unsigned int _EntityID)
+    void CInspectorCamera::RequestInformation(unsigned int _EntityID)
     {
         m_CurrentEntityID = _EntityID;
 
@@ -102,15 +116,13 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::RequestEffectInfoFXAA, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::RequestActorInfoCamera, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorFXAA::OnEntityInfoFXAA(Edit::CMessage& _rMessage)
+    void CInspectorCamera::OnEntityInfoCamera(Edit::CMessage& _rMessage)
     {
-        float R, G, B;
-
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
@@ -118,21 +130,10 @@ namespace Edit
 
         if (EntityID != m_CurrentEntityID) return;
 
-        R = _rMessage.GetFloat();
-        G = _rMessage.GetFloat();
-        B = _rMessage.GetFloat();
 
-        Base::Int3 Color = Base::Int3(R * 255, G * 255, B * 255);
 
         // -----------------------------------------------------------------------------
         // Set values
         // -----------------------------------------------------------------------------
-        QPalette ButtonPalette = m_pLumaColorButton->palette();
-
-        ButtonPalette.setColor(QPalette::Button, QColor(Color[0], Color[1], Color[2]));
-
-        m_pLumaColorButton->setPalette(ButtonPalette);
-
-        m_pLumaColorButton->update();
     }
 } // namespace Edit

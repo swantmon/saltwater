@@ -41,11 +41,14 @@ namespace
 
     private:
 
-        void OnNewEntityActor(Edit::CMessage& _rMessage);
+        void OnNewActorModel(Edit::CMessage& _rMessage);
+        void OnNewActorCamera(Edit::CMessage& _rMessage);
 
-        void OnRequestEntityInfoMaterial(Edit::CMessage& _rMessage);
+        void OnRequestActorInfoMaterial(Edit::CMessage& _rMessage);
+        void OnRequestActorInfoCamera(Edit::CMessage& _rMessage);
 
-        void OnEntityInfoMaterial(Edit::CMessage& _rMessage);
+        void OnActorInfoMaterial(Edit::CMessage& _rMessage);
+        void OnActorInfoCamera(Edit::CMessage& _rMessage);
 
         void OnDirtyEntity(Dt::CEntity* _pEntity);
 
@@ -79,11 +82,14 @@ namespace
         // -----------------------------------------------------------------------------
         // Edit
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewEntityActor           , EDIT_RECEIVE_MESSAGE(&CActorHelper::OnNewEntityActor));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::NewActorModel, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnNewActorModel));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::NewActorCamera, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnNewActorCamera));
         
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoMaterial, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnRequestEntityInfoMaterial));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestActorInfoMaterial, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnRequestActorInfoMaterial));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestActorInfoCamera, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnRequestActorInfoCamera));
 
-        Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoMaterial       , EDIT_RECEIVE_MESSAGE(&CActorHelper::OnEntityInfoMaterial));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::ActorInfoMaterial, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnActorInfoMaterial));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::ActorInfoCamera, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnActorInfoCamera));
     }
 
     // -----------------------------------------------------------------------------
@@ -95,7 +101,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CActorHelper::OnNewEntityActor(Edit::CMessage& _rMessage)
+    void CActorHelper::OnNewActorModel(Edit::CMessage& _rMessage)
     {
         // -----------------------------------------------------------------------------
         // Create new entity
@@ -116,6 +122,8 @@ namespace
 
         Dt::CEntity& rNewEntity = Dt::EntityManager::CreateEntityFromFile(ModelFileDesc);
 
+        rNewEntity.SetName("New Model");
+
         // -----------------------------------------------------------------------------
         // Add model to map
         // -----------------------------------------------------------------------------
@@ -124,7 +132,34 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CActorHelper::OnRequestEntityInfoMaterial(Edit::CMessage& _rMessage)
+    void CActorHelper::OnNewActorCamera(Edit::CMessage& _rMessage)
+    {
+        Dt::SEntityDescriptor EntityDesc;
+
+        EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
+        EntityDesc.m_EntityType = Dt::SActorType::Camera;
+        EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+
+        Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+        rEntity.SetName("New Camera");
+
+        Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
+
+        pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 10.0f));
+        pTransformationFacet->SetScale   (Base::Float3(1.0f));
+        pTransformationFacet->SetRotation(Base::Float3(0.0f, 0.0f, 0.0f));
+
+        Dt::CCameraActorFacet* pFacet = Dt::ActorManager::CreateCameraActor();
+
+        rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
+
+        Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CActorHelper::OnRequestActorInfoMaterial(Edit::CMessage& _rMessage)
     {
         int EntityID = _rMessage.GetInt();
 
@@ -219,13 +254,36 @@ namespace
 
             NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoMaterial, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::ActorInfoMaterial, NewMessage);
         }
     }
 
     // -----------------------------------------------------------------------------
 
-    void CActorHelper::OnEntityInfoMaterial(Edit::CMessage& _rMessage)
+    void CActorHelper::OnRequestActorInfoCamera(Edit::CMessage& _rMessage)
+    {
+        int EntityID = _rMessage.GetInt();
+
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+
+        Dt::CCameraActorFacet* pFacet = static_cast<Dt::CCameraActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Actor && rCurrentEntity.GetType() == Dt::SActorType::Camera && pFacet != nullptr)
+        {
+            Edit::CMessage NewMessage;
+
+            NewMessage.PutInt(rCurrentEntity.GetID());
+
+            
+            NewMessage.Reset();
+
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::ActorInfoCamera, NewMessage);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CActorHelper::OnActorInfoMaterial(Edit::CMessage& _rMessage)
     {
         int EntityID = _rMessage.GetInt();
 
@@ -378,6 +436,23 @@ namespace
             {
                 pMaterial->SetMetalTexture(0);
             }
+
+            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CActorHelper::OnActorInfoCamera(Edit::CMessage& _rMessage)
+    {
+        int EntityID = _rMessage.GetInt();
+
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+
+        Dt::CCameraActorFacet* pFacet = static_cast<Dt::CCameraActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Actor && rCurrentEntity.GetType() == Dt::SActorType::Camera && pFacet != nullptr)
+        {
 
             Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
         }

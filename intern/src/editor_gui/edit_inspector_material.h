@@ -13,6 +13,7 @@ namespace Edit
         Q_OBJECT
 
     public:
+
         CInspectorMaterial(QWidget* _pParent = Q_NULLPTR);
         ~CInspectorMaterial();
 

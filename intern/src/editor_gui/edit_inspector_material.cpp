@@ -33,7 +33,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::EntityInfoMaterial, EDIT_RECEIVE_MESSAGE(&CInspectorMaterial::OnEntityInfoMaterial));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::ActorInfoMaterial, EDIT_RECEIVE_MESSAGE(&CInspectorMaterial::OnEntityInfoMaterial));
     }
 
     // -----------------------------------------------------------------------------
@@ -171,7 +171,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::EntityInfoMaterial, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::ActorInfoMaterial, NewMessage);
 
     }
 
@@ -228,7 +228,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::RequestEntityInfoMaterial, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::RequestActorInfoMaterial, NewMessage);
     }
 
     // -----------------------------------------------------------------------------

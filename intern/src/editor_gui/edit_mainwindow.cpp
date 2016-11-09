@@ -158,7 +158,7 @@ namespace Edit
 
             NewMessage.Reset();
 
-            MessageManager::SendMessage(SGUIMessageType::NewEntityActor, NewMessage);
+            MessageManager::SendMessage(SGUIMessageType::NewActorModel, NewMessage);
         }
     }
 
@@ -170,7 +170,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewEntitySun, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::NewLightSun, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -181,7 +181,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewEntityBloom, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::NewEffectBloom, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -192,7 +192,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewEntityDOF, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::NewEffectDOF, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -203,7 +203,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewEntityFXAA, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::NewEffectFXAA, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -214,7 +214,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewEntitySSR, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::NewEffectSSR, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -225,7 +225,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewEntityVolumeFog, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::NewEffectVolumeFog, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -236,7 +236,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewEntityPointlight, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::NewLightPointlight, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -247,7 +247,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewEntityEnvironment, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::NewLightEnvironment, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -258,7 +258,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewEntityGlobalProbe, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::NewLightGlobalProbe, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -285,7 +285,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::HistogramInfo, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::GraphicHistogramInfo, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -300,7 +300,7 @@ namespace Edit
 
             NewMessage.Reset();
 
-            MessageManager::SendMessage(SGUIMessageType::RequestHistogramInfo, NewMessage);
+            MessageManager::SendMessage(SGUIMessageType::RequestGraphicHistogramInfo, NewMessage);
         }
     }
 

@@ -36,48 +36,48 @@ public:
     QGroupBox *groupBox;
     QVBoxLayout *verticalLayout_2;
     QGridLayout *gridLayout;
-    QLineEdit *lineEdit_13;
-    QCheckBox *checkBox;
-    QLineEdit *lineEdit_12;
+    QLineEdit *m_pECEdit;
+    QCheckBox *m_pOcclusionCullingCB;
+    QLineEdit *m_pISOEdit;
     QLabel *label_16;
     QLabel *label_21;
     QLabel *label_3;
     QLabel *label_5;
     QLabel *label_2;
     QHBoxLayout *horizontalLayout;
-    QPushButton *pushButton;
-    QPushButton *pushButton_2;
-    QComboBox *comboBox;
-    QLineEdit *lineEdit_9;
-    QComboBox *comboBox_2;
+    QPushButton *m_pSolidColorButton;
+    QPushButton *m_pSolidColorPickButton;
+    QComboBox *m_pClearFlagCS;
+    QLineEdit *m_pClearDepthEdit;
+    QComboBox *m_pProjectionCB;
     QLabel *label;
     QLabel *label_8;
     QLabel *label_9;
-    QCheckBox *checkBox_2;
+    QCheckBox *m_pIsMainCameraCB;
     QLabel *label_10;
-    QLineEdit *lineEdit_4;
-    QComboBox *comboBox_3;
+    QLineEdit *m_pOrthographicSizeEdit;
+    QComboBox *m_pCameraModeCB;
     QHBoxLayout *horizontalLayout_2;
-    QSlider *horizontalSlider;
-    QLineEdit *lineEdit;
+    QSlider *m_pFieldOfViewSlider;
+    QLineEdit *m_pFieldOfViewEdit;
     QLabel *label_4;
     QLabel *label_17;
     QLabel *label_19;
     QHBoxLayout *horizontalLayout_4;
-    QLineEdit *lineEdit_11;
+    QLineEdit *m_pApertureEdit;
     QLabel *label_23;
     QLabel *label_20;
     QHBoxLayout *horizontalLayout_3;
-    QLineEdit *lineEdit_10;
+    QLineEdit *m_pShutterSpeedEdit;
     QLabel *label_22;
     QLabel *label_18;
     QGridLayout *gridLayout_2;
     QLabel *label_6;
     QLabel *label_7;
-    QLineEdit *lineEdit_2;
-    QLineEdit *lineEdit_3;
+    QLineEdit *m_pClippingPlaneNearEdit;
+    QLineEdit *m_pClippingPlaneFarEdit;
     QLabel *label_24;
-    QLineEdit *lineEdit_14;
+    QLineEdit *m_pBackgroundTextureEdit;
     QVBoxLayout *verticalLayout_3;
     QLabel *label_11;
     QGridLayout *gridLayout_3;
@@ -85,17 +85,17 @@ public:
     QLabel *label_12;
     QLabel *label_13;
     QLabel *label_15;
-    QLineEdit *lineEdit_5;
-    QLineEdit *lineEdit_6;
-    QLineEdit *lineEdit_7;
-    QLineEdit *lineEdit_8;
+    QLineEdit *m_pViewportXEdit;
+    QLineEdit *m_pViewportWEdit;
+    QLineEdit *m_pViewportYEdit;
+    QLineEdit *m_pViewportHEdit;
     QSpacerItem *horizontalSpacer;
 
     void setupUi(QWidget *InspectorCamera)
     {
         if (InspectorCamera->objectName().isEmpty())
             InspectorCamera->setObjectName(QStringLiteral("InspectorCamera"));
-        InspectorCamera->resize(792, 876);
+        InspectorCamera->resize(369, 539);
         verticalLayout = new QVBoxLayout(InspectorCamera);
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
         groupBox = new QGroupBox(InspectorCamera);
@@ -104,21 +104,21 @@ public:
         verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
         gridLayout = new QGridLayout();
         gridLayout->setObjectName(QStringLiteral("gridLayout"));
-        lineEdit_13 = new QLineEdit(groupBox);
-        lineEdit_13->setObjectName(QStringLiteral("lineEdit_13"));
+        m_pECEdit = new QLineEdit(groupBox);
+        m_pECEdit->setObjectName(QStringLiteral("m_pECEdit"));
 
-        gridLayout->addWidget(lineEdit_13, 14, 1, 1, 1);
+        gridLayout->addWidget(m_pECEdit, 14, 1, 1, 1);
 
-        checkBox = new QCheckBox(groupBox);
-        checkBox->setObjectName(QStringLiteral("checkBox"));
-        checkBox->setChecked(true);
+        m_pOcclusionCullingCB = new QCheckBox(groupBox);
+        m_pOcclusionCullingCB->setObjectName(QStringLiteral("m_pOcclusionCullingCB"));
+        m_pOcclusionCullingCB->setChecked(true);
 
-        gridLayout->addWidget(checkBox, 8, 1, 1, 1);
+        gridLayout->addWidget(m_pOcclusionCullingCB, 8, 1, 1, 1);
 
-        lineEdit_12 = new QLineEdit(groupBox);
-        lineEdit_12->setObjectName(QStringLiteral("lineEdit_12"));
+        m_pISOEdit = new QLineEdit(groupBox);
+        m_pISOEdit->setObjectName(QStringLiteral("m_pISOEdit"));
 
-        gridLayout->addWidget(lineEdit_12, 13, 1, 1, 1);
+        gridLayout->addWidget(m_pISOEdit, 13, 1, 1, 1);
 
         label_16 = new QLabel(groupBox);
         label_16->setObjectName(QStringLiteral("label_16"));
@@ -148,43 +148,43 @@ public:
 
         horizontalLayout = new QHBoxLayout();
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
-        pushButton = new QPushButton(groupBox);
-        pushButton->setObjectName(QStringLiteral("pushButton"));
+        m_pSolidColorButton = new QPushButton(groupBox);
+        m_pSolidColorButton->setObjectName(QStringLiteral("m_pSolidColorButton"));
         QPalette palette;
         QBrush brush(QColor(255, 255, 255, 255));
         brush.setStyle(Qt::SolidPattern);
         palette.setBrush(QPalette::Active, QPalette::Button, brush);
         palette.setBrush(QPalette::Inactive, QPalette::Button, brush);
         palette.setBrush(QPalette::Disabled, QPalette::Button, brush);
-        pushButton->setPalette(palette);
-        pushButton->setAutoFillBackground(true);
-        pushButton->setFlat(true);
+        m_pSolidColorButton->setPalette(palette);
+        m_pSolidColorButton->setAutoFillBackground(true);
+        m_pSolidColorButton->setFlat(true);
 
-        horizontalLayout->addWidget(pushButton);
+        horizontalLayout->addWidget(m_pSolidColorButton);
 
-        pushButton_2 = new QPushButton(groupBox);
-        pushButton_2->setObjectName(QStringLiteral("pushButton_2"));
-        pushButton_2->setMaximumSize(QSize(30, 16777215));
+        m_pSolidColorPickButton = new QPushButton(groupBox);
+        m_pSolidColorPickButton->setObjectName(QStringLiteral("m_pSolidColorPickButton"));
+        m_pSolidColorPickButton->setMaximumSize(QSize(30, 16777215));
 
-        horizontalLayout->addWidget(pushButton_2);
+        horizontalLayout->addWidget(m_pSolidColorPickButton);
 
 
         gridLayout->addLayout(horizontalLayout, 2, 1, 1, 1);
 
-        comboBox = new QComboBox(groupBox);
-        comboBox->setObjectName(QStringLiteral("comboBox"));
+        m_pClearFlagCS = new QComboBox(groupBox);
+        m_pClearFlagCS->setObjectName(QStringLiteral("m_pClearFlagCS"));
 
-        gridLayout->addWidget(comboBox, 1, 1, 1, 1);
+        gridLayout->addWidget(m_pClearFlagCS, 1, 1, 1, 1);
 
-        lineEdit_9 = new QLineEdit(groupBox);
-        lineEdit_9->setObjectName(QStringLiteral("lineEdit_9"));
+        m_pClearDepthEdit = new QLineEdit(groupBox);
+        m_pClearDepthEdit->setObjectName(QStringLiteral("m_pClearDepthEdit"));
 
-        gridLayout->addWidget(lineEdit_9, 9, 1, 1, 1);
+        gridLayout->addWidget(m_pClearDepthEdit, 9, 1, 1, 1);
 
-        comboBox_2 = new QComboBox(groupBox);
-        comboBox_2->setObjectName(QStringLiteral("comboBox_2"));
+        m_pProjectionCB = new QComboBox(groupBox);
+        m_pProjectionCB->setObjectName(QStringLiteral("m_pProjectionCB"));
 
-        gridLayout->addWidget(comboBox_2, 4, 1, 1, 1);
+        gridLayout->addWidget(m_pProjectionCB, 4, 1, 1, 1);
 
         label = new QLabel(groupBox);
         label->setObjectName(QStringLiteral("label"));
@@ -201,42 +201,42 @@ public:
 
         gridLayout->addWidget(label_9, 0, 0, 1, 1);
 
-        checkBox_2 = new QCheckBox(groupBox);
-        checkBox_2->setObjectName(QStringLiteral("checkBox_2"));
+        m_pIsMainCameraCB = new QCheckBox(groupBox);
+        m_pIsMainCameraCB->setObjectName(QStringLiteral("m_pIsMainCameraCB"));
 
-        gridLayout->addWidget(checkBox_2, 0, 1, 1, 1);
+        gridLayout->addWidget(m_pIsMainCameraCB, 0, 1, 1, 1);
 
         label_10 = new QLabel(groupBox);
         label_10->setObjectName(QStringLiteral("label_10"));
 
         gridLayout->addWidget(label_10, 6, 0, 1, 1);
 
-        lineEdit_4 = new QLineEdit(groupBox);
-        lineEdit_4->setObjectName(QStringLiteral("lineEdit_4"));
+        m_pOrthographicSizeEdit = new QLineEdit(groupBox);
+        m_pOrthographicSizeEdit->setObjectName(QStringLiteral("m_pOrthographicSizeEdit"));
 
-        gridLayout->addWidget(lineEdit_4, 6, 1, 1, 1);
+        gridLayout->addWidget(m_pOrthographicSizeEdit, 6, 1, 1, 1);
 
-        comboBox_3 = new QComboBox(groupBox);
-        comboBox_3->setObjectName(QStringLiteral("comboBox_3"));
+        m_pCameraModeCB = new QComboBox(groupBox);
+        m_pCameraModeCB->setObjectName(QStringLiteral("m_pCameraModeCB"));
 
-        gridLayout->addWidget(comboBox_3, 10, 1, 1, 1);
+        gridLayout->addWidget(m_pCameraModeCB, 10, 1, 1, 1);
 
         horizontalLayout_2 = new QHBoxLayout();
         horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
-        horizontalSlider = new QSlider(groupBox);
-        horizontalSlider->setObjectName(QStringLiteral("horizontalSlider"));
-        horizontalSlider->setMinimum(1);
-        horizontalSlider->setMaximum(179);
-        horizontalSlider->setValue(60);
-        horizontalSlider->setOrientation(Qt::Horizontal);
+        m_pFieldOfViewSlider = new QSlider(groupBox);
+        m_pFieldOfViewSlider->setObjectName(QStringLiteral("m_pFieldOfViewSlider"));
+        m_pFieldOfViewSlider->setMinimum(1);
+        m_pFieldOfViewSlider->setMaximum(179);
+        m_pFieldOfViewSlider->setValue(60);
+        m_pFieldOfViewSlider->setOrientation(Qt::Horizontal);
 
-        horizontalLayout_2->addWidget(horizontalSlider);
+        horizontalLayout_2->addWidget(m_pFieldOfViewSlider);
 
-        lineEdit = new QLineEdit(groupBox);
-        lineEdit->setObjectName(QStringLiteral("lineEdit"));
-        lineEdit->setMaximumSize(QSize(30, 16777215));
+        m_pFieldOfViewEdit = new QLineEdit(groupBox);
+        m_pFieldOfViewEdit->setObjectName(QStringLiteral("m_pFieldOfViewEdit"));
+        m_pFieldOfViewEdit->setMaximumSize(QSize(30, 16777215));
 
-        horizontalLayout_2->addWidget(lineEdit);
+        horizontalLayout_2->addWidget(m_pFieldOfViewEdit);
 
 
         gridLayout->addLayout(horizontalLayout_2, 5, 1, 1, 1);
@@ -258,10 +258,10 @@ public:
 
         horizontalLayout_4 = new QHBoxLayout();
         horizontalLayout_4->setObjectName(QStringLiteral("horizontalLayout_4"));
-        lineEdit_11 = new QLineEdit(groupBox);
-        lineEdit_11->setObjectName(QStringLiteral("lineEdit_11"));
+        m_pApertureEdit = new QLineEdit(groupBox);
+        m_pApertureEdit->setObjectName(QStringLiteral("m_pApertureEdit"));
 
-        horizontalLayout_4->addWidget(lineEdit_11);
+        horizontalLayout_4->addWidget(m_pApertureEdit);
 
         label_23 = new QLabel(groupBox);
         label_23->setObjectName(QStringLiteral("label_23"));
@@ -278,10 +278,10 @@ public:
 
         horizontalLayout_3 = new QHBoxLayout();
         horizontalLayout_3->setObjectName(QStringLiteral("horizontalLayout_3"));
-        lineEdit_10 = new QLineEdit(groupBox);
-        lineEdit_10->setObjectName(QStringLiteral("lineEdit_10"));
+        m_pShutterSpeedEdit = new QLineEdit(groupBox);
+        m_pShutterSpeedEdit->setObjectName(QStringLiteral("m_pShutterSpeedEdit"));
 
-        horizontalLayout_3->addWidget(lineEdit_10);
+        horizontalLayout_3->addWidget(m_pShutterSpeedEdit);
 
         label_22 = new QLabel(groupBox);
         label_22->setObjectName(QStringLiteral("label_22"));
@@ -308,15 +308,15 @@ public:
 
         gridLayout_2->addWidget(label_7, 1, 0, 1, 1);
 
-        lineEdit_2 = new QLineEdit(groupBox);
-        lineEdit_2->setObjectName(QStringLiteral("lineEdit_2"));
+        m_pClippingPlaneNearEdit = new QLineEdit(groupBox);
+        m_pClippingPlaneNearEdit->setObjectName(QStringLiteral("m_pClippingPlaneNearEdit"));
 
-        gridLayout_2->addWidget(lineEdit_2, 0, 1, 1, 1);
+        gridLayout_2->addWidget(m_pClippingPlaneNearEdit, 0, 1, 1, 1);
 
-        lineEdit_3 = new QLineEdit(groupBox);
-        lineEdit_3->setObjectName(QStringLiteral("lineEdit_3"));
+        m_pClippingPlaneFarEdit = new QLineEdit(groupBox);
+        m_pClippingPlaneFarEdit->setObjectName(QStringLiteral("m_pClippingPlaneFarEdit"));
 
-        gridLayout_2->addWidget(lineEdit_3, 1, 1, 1, 1);
+        gridLayout_2->addWidget(m_pClippingPlaneFarEdit, 1, 1, 1, 1);
 
 
         gridLayout->addLayout(gridLayout_2, 7, 1, 1, 1);
@@ -326,10 +326,10 @@ public:
 
         gridLayout->addWidget(label_24, 3, 0, 1, 1);
 
-        lineEdit_14 = new QLineEdit(groupBox);
-        lineEdit_14->setObjectName(QStringLiteral("lineEdit_14"));
+        m_pBackgroundTextureEdit = new QLineEdit(groupBox);
+        m_pBackgroundTextureEdit->setObjectName(QStringLiteral("m_pBackgroundTextureEdit"));
 
-        gridLayout->addWidget(lineEdit_14, 3, 1, 1, 1);
+        gridLayout->addWidget(m_pBackgroundTextureEdit, 3, 1, 1, 1);
 
 
         verticalLayout_2->addLayout(gridLayout);
@@ -364,25 +364,25 @@ public:
 
         gridLayout_3->addWidget(label_15, 1, 3, 1, 1);
 
-        lineEdit_5 = new QLineEdit(groupBox);
-        lineEdit_5->setObjectName(QStringLiteral("lineEdit_5"));
+        m_pViewportXEdit = new QLineEdit(groupBox);
+        m_pViewportXEdit->setObjectName(QStringLiteral("m_pViewportXEdit"));
 
-        gridLayout_3->addWidget(lineEdit_5, 0, 2, 1, 1);
+        gridLayout_3->addWidget(m_pViewportXEdit, 0, 2, 1, 1);
 
-        lineEdit_6 = new QLineEdit(groupBox);
-        lineEdit_6->setObjectName(QStringLiteral("lineEdit_6"));
+        m_pViewportWEdit = new QLineEdit(groupBox);
+        m_pViewportWEdit->setObjectName(QStringLiteral("m_pViewportWEdit"));
 
-        gridLayout_3->addWidget(lineEdit_6, 1, 2, 1, 1);
+        gridLayout_3->addWidget(m_pViewportWEdit, 1, 2, 1, 1);
 
-        lineEdit_7 = new QLineEdit(groupBox);
-        lineEdit_7->setObjectName(QStringLiteral("lineEdit_7"));
+        m_pViewportYEdit = new QLineEdit(groupBox);
+        m_pViewportYEdit->setObjectName(QStringLiteral("m_pViewportYEdit"));
 
-        gridLayout_3->addWidget(lineEdit_7, 0, 4, 1, 1);
+        gridLayout_3->addWidget(m_pViewportYEdit, 0, 4, 1, 1);
 
-        lineEdit_8 = new QLineEdit(groupBox);
-        lineEdit_8->setObjectName(QStringLiteral("lineEdit_8"));
+        m_pViewportHEdit = new QLineEdit(groupBox);
+        m_pViewportHEdit->setObjectName(QStringLiteral("m_pViewportHEdit"));
 
-        gridLayout_3->addWidget(lineEdit_8, 1, 4, 1, 1);
+        gridLayout_3->addWidget(m_pViewportHEdit, 1, 4, 1, 1);
 
         horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Minimum, QSizePolicy::Minimum);
 
@@ -399,6 +399,28 @@ public:
 
 
         retranslateUi(InspectorCamera);
+        QObject::connect(m_pIsMainCameraCB, SIGNAL(clicked()), InspectorCamera, SLOT(valueChanged()));
+        QObject::connect(m_pSolidColorPickButton, SIGNAL(clicked()), InspectorCamera, SLOT(pickColorFromDialog()));
+        QObject::connect(m_pFieldOfViewSlider, SIGNAL(valueChanged(int)), InspectorCamera, SLOT(fieldOfViewValueChanged(int)));
+        QObject::connect(m_pClearFlagCS, SIGNAL(currentIndexChanged(int)), InspectorCamera, SLOT(valueChanged()));
+        QObject::connect(m_pSolidColorButton, SIGNAL(clicked()), InspectorCamera, SLOT(pickColorFromDialog()));
+        QObject::connect(m_pBackgroundTextureEdit, SIGNAL(textEdited(QString)), InspectorCamera, SLOT(valueChanged()));
+        QObject::connect(m_pProjectionCB, SIGNAL(currentIndexChanged(int)), InspectorCamera, SLOT(valueChanged()));
+        QObject::connect(m_pOrthographicSizeEdit, SIGNAL(editingFinished()), InspectorCamera, SLOT(valueChanged()));
+        QObject::connect(m_pClippingPlaneNearEdit, SIGNAL(textEdited(QString)), InspectorCamera, SLOT(valueChanged()));
+        QObject::connect(m_pClippingPlaneFarEdit, SIGNAL(textEdited(QString)), InspectorCamera, SLOT(valueChanged()));
+        QObject::connect(m_pOcclusionCullingCB, SIGNAL(clicked()), InspectorCamera, SLOT(valueChanged()));
+        QObject::connect(m_pClearDepthEdit, SIGNAL(textChanged(QString)), InspectorCamera, SLOT(valueChanged()));
+        QObject::connect(m_pCameraModeCB, SIGNAL(currentIndexChanged(int)), InspectorCamera, SLOT(valueChanged()));
+        QObject::connect(m_pShutterSpeedEdit, SIGNAL(textEdited(QString)), InspectorCamera, SLOT(valueChanged()));
+        QObject::connect(m_pApertureEdit, SIGNAL(textEdited(QString)), InspectorCamera, SLOT(valueChanged()));
+        QObject::connect(m_pISOEdit, SIGNAL(textEdited(QString)), InspectorCamera, SLOT(valueChanged()));
+        QObject::connect(m_pECEdit, SIGNAL(textEdited(QString)), InspectorCamera, SLOT(valueChanged()));
+        QObject::connect(m_pViewportXEdit, SIGNAL(textEdited(QString)), InspectorCamera, SLOT(valueChanged()));
+        QObject::connect(m_pViewportYEdit, SIGNAL(textEdited(QString)), InspectorCamera, SLOT(valueChanged()));
+        QObject::connect(m_pViewportWEdit, SIGNAL(textEdited(QString)), InspectorCamera, SLOT(valueChanged()));
+        QObject::connect(m_pViewportHEdit, SIGNAL(textEdited(QString)), InspectorCamera, SLOT(valueChanged()));
+        QObject::connect(m_pFieldOfViewEdit, SIGNAL(textChanged(QString)), InspectorCamera, SLOT(valueChanged()));
 
         QMetaObject::connectSlotsByName(InspectorCamera);
     } // setupUi
@@ -407,63 +429,63 @@ public:
     {
         InspectorCamera->setWindowTitle(QApplication::translate("InspectorCamera", "Form", 0));
         groupBox->setTitle(QApplication::translate("InspectorCamera", "Camera", 0));
-        lineEdit_13->setText(QApplication::translate("InspectorCamera", "0", 0));
-        checkBox->setText(QString());
-        lineEdit_12->setText(QApplication::translate("InspectorCamera", "100", 0));
+        m_pECEdit->setText(QApplication::translate("InspectorCamera", "0", 0));
+        m_pOcclusionCullingCB->setText(QString());
+        m_pISOEdit->setText(QApplication::translate("InspectorCamera", "100", 0));
         label_16->setText(QApplication::translate("InspectorCamera", "Depth", 0));
         label_21->setText(QApplication::translate("InspectorCamera", "EC", 0));
         label_3->setText(QApplication::translate("InspectorCamera", "Projection", 0));
         label_5->setText(QApplication::translate("InspectorCamera", "Clipping Planes", 0));
         label_2->setText(QApplication::translate("InspectorCamera", "Solid Color", 0));
-        pushButton->setText(QString());
-        pushButton_2->setText(QApplication::translate("InspectorCamera", "Pick", 0));
-        comboBox->clear();
-        comboBox->insertItems(0, QStringList()
+        m_pSolidColorButton->setText(QString());
+        m_pSolidColorPickButton->setText(QApplication::translate("InspectorCamera", "Pick", 0));
+        m_pClearFlagCS->clear();
+        m_pClearFlagCS->insertItems(0, QStringList()
          << QApplication::translate("InspectorCamera", "Skybox", 0)
          << QApplication::translate("InspectorCamera", "Texture", 0)
          << QApplication::translate("InspectorCamera", "Solid Color", 0)
          << QApplication::translate("InspectorCamera", "No clear", 0)
         );
-        lineEdit_9->setText(QApplication::translate("InspectorCamera", "-1", 0));
-        comboBox_2->clear();
-        comboBox_2->insertItems(0, QStringList()
+        m_pClearDepthEdit->setText(QApplication::translate("InspectorCamera", "-1", 0));
+        m_pProjectionCB->clear();
+        m_pProjectionCB->insertItems(0, QStringList()
          << QApplication::translate("InspectorCamera", "Perspective", 0)
          << QApplication::translate("InspectorCamera", "Orthographic", 0)
         );
         label->setText(QApplication::translate("InspectorCamera", "Clear Flags", 0));
         label_8->setText(QApplication::translate("InspectorCamera", "Occlusion Culling", 0));
         label_9->setText(QApplication::translate("InspectorCamera", "Main Camera", 0));
-        checkBox_2->setText(QString());
+        m_pIsMainCameraCB->setText(QString());
         label_10->setText(QApplication::translate("InspectorCamera", "Size", 0));
-        comboBox_3->clear();
-        comboBox_3->insertItems(0, QStringList()
+        m_pCameraModeCB->clear();
+        m_pCameraModeCB->insertItems(0, QStringList()
          << QApplication::translate("InspectorCamera", "Auto", 0)
          << QApplication::translate("InspectorCamera", "Manual", 0)
         );
-        lineEdit->setText(QApplication::translate("InspectorCamera", "60", 0));
+        m_pFieldOfViewEdit->setText(QApplication::translate("InspectorCamera", "60", 0));
         label_4->setText(QApplication::translate("InspectorCamera", "Field of View", 0));
         label_17->setText(QApplication::translate("InspectorCamera", "Camera Mode", 0));
         label_19->setText(QApplication::translate("InspectorCamera", "Aperture", 0));
-        lineEdit_11->setText(QApplication::translate("InspectorCamera", "16", 0));
+        m_pApertureEdit->setText(QApplication::translate("InspectorCamera", "16", 0));
         label_23->setText(QApplication::translate("InspectorCamera", "flops", 0));
         label_20->setText(QApplication::translate("InspectorCamera", "ISO", 0));
-        lineEdit_10->setText(QApplication::translate("InspectorCamera", "0.01", 0));
+        m_pShutterSpeedEdit->setText(QApplication::translate("InspectorCamera", "0.01", 0));
         label_22->setText(QApplication::translate("InspectorCamera", "seconds", 0));
         label_18->setText(QApplication::translate("InspectorCamera", "Shutter Speed", 0));
         label_6->setText(QApplication::translate("InspectorCamera", "Near", 0));
         label_7->setText(QApplication::translate("InspectorCamera", "Far", 0));
-        lineEdit_2->setText(QApplication::translate("InspectorCamera", "0.3", 0));
-        lineEdit_3->setText(QApplication::translate("InspectorCamera", "1024", 0));
+        m_pClippingPlaneNearEdit->setText(QApplication::translate("InspectorCamera", "0.3", 0));
+        m_pClippingPlaneFarEdit->setText(QApplication::translate("InspectorCamera", "1024", 0));
         label_24->setText(QApplication::translate("InspectorCamera", "Backround Texture", 0));
         label_11->setText(QApplication::translate("InspectorCamera", "Viewport Rect", 0));
         label_14->setText(QApplication::translate("InspectorCamera", "Y", 0));
         label_12->setText(QApplication::translate("InspectorCamera", "X", 0));
         label_13->setText(QApplication::translate("InspectorCamera", "W", 0));
         label_15->setText(QApplication::translate("InspectorCamera", "H", 0));
-        lineEdit_5->setText(QApplication::translate("InspectorCamera", "0", 0));
-        lineEdit_6->setText(QApplication::translate("InspectorCamera", "1", 0));
-        lineEdit_7->setText(QApplication::translate("InspectorCamera", "0", 0));
-        lineEdit_8->setText(QApplication::translate("InspectorCamera", "1", 0));
+        m_pViewportXEdit->setText(QApplication::translate("InspectorCamera", "0", 0));
+        m_pViewportWEdit->setText(QApplication::translate("InspectorCamera", "1", 0));
+        m_pViewportYEdit->setText(QApplication::translate("InspectorCamera", "0", 0));
+        m_pViewportHEdit->setText(QApplication::translate("InspectorCamera", "1", 0));
     } // retranslateUi
 
 };

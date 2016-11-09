@@ -59,8 +59,8 @@ namespace
         // -----------------------------------------------------------------------------
         // Edit
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestHistogramInfo, EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnRequestHistogramInfo));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::HistogramInfo       , EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnHistogramInfo));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestGraphicHistogramInfo, EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnRequestHistogramInfo));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::GraphicHistogramInfo       , EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnHistogramInfo));
     }
 
     // -----------------------------------------------------------------------------

@@ -372,7 +372,7 @@ namespace
 
             NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::SceneGraphChanged, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoHierarchy, NewMessage);
         }
     }
 } // namespace

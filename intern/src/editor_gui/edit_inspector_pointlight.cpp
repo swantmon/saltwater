@@ -32,7 +32,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::EntityInfoPointlight, EDIT_RECEIVE_MESSAGE(&CInspectorPointlight::OnEntityInfoPointlight));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::LightInfoPointlight, EDIT_RECEIVE_MESSAGE(&CInspectorPointlight::OnEntityInfoPointlight));
     }
 
     // -----------------------------------------------------------------------------
@@ -96,7 +96,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::EntityInfoPointlight, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::LightInfoPointlight, NewMessage);
 
     }
 
@@ -129,7 +129,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::RequestEntityInfoPointlight, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::RequestLightInfoPointlight, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
