@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>369</width>
-    <height>539</height>
+    <width>448</width>
+    <height>919</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -491,6 +491,30 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>m_pIsMainCameraCB</tabstop>
+  <tabstop>m_pClearFlagCS</tabstop>
+  <tabstop>m_pSolidColorButton</tabstop>
+  <tabstop>m_pSolidColorPickButton</tabstop>
+  <tabstop>m_pBackgroundTextureEdit</tabstop>
+  <tabstop>m_pProjectionCB</tabstop>
+  <tabstop>m_pFieldOfViewSlider</tabstop>
+  <tabstop>m_pFieldOfViewEdit</tabstop>
+  <tabstop>m_pOrthographicSizeEdit</tabstop>
+  <tabstop>m_pClippingPlaneNearEdit</tabstop>
+  <tabstop>m_pClippingPlaneFarEdit</tabstop>
+  <tabstop>m_pOcclusionCullingCB</tabstop>
+  <tabstop>m_pClearDepthEdit</tabstop>
+  <tabstop>m_pCameraModeCB</tabstop>
+  <tabstop>m_pShutterSpeedEdit</tabstop>
+  <tabstop>m_pApertureEdit</tabstop>
+  <tabstop>m_pISOEdit</tabstop>
+  <tabstop>m_pECEdit</tabstop>
+  <tabstop>m_pViewportXEdit</tabstop>
+  <tabstop>m_pViewportYEdit</tabstop>
+  <tabstop>m_pViewportWEdit</tabstop>
+  <tabstop>m_pViewportHEdit</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
