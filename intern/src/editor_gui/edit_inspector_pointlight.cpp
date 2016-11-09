@@ -74,6 +74,8 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
+        NewMessage.PutInt(m_CurrentEntityID);
+
         NewMessage.PutInt(ColorMode);
 
         NewMessage.PutFloat(Color[0]);
