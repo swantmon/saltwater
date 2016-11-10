@@ -8,25 +8,25 @@
 
 #include "graphic/gfx_precompiled.h"
 
-#include "gfx_model.h"
+#include "gfx_mesh.h"
 
 namespace Gfx
 {
-    CModel::CModel()
+    CMesh::CMesh()
         : m_NumberOfLODs(0)
     {
     }
     
     // -----------------------------------------------------------------------------
     
-    unsigned int CModel::GetNumberOfLODs() const
+    unsigned int CMesh::GetNumberOfLODs() const
     {
         return m_NumberOfLODs;
     }
     
     // -----------------------------------------------------------------------------
     
-    CLODPtr CModel::GetLOD(unsigned int _Index) const
+    CLODPtr CMesh::GetLOD(unsigned int _Index) const
     {
         assert(_Index < s_NumberOfLODs);
         
@@ -35,7 +35,7 @@ namespace Gfx
     
     // -----------------------------------------------------------------------------
     
-    Base::AABB3Float CModel::GetAABB() const
+    Base::AABB3Float CMesh::GetAABB() const
     {
         return m_AABB;
     }

@@ -16,8 +16,8 @@
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_main.h"
-#include "graphic/gfx_model.h"
-#include "graphic/gfx_model_manager.h"
+#include "graphic/gfx_mesh.h"
+#include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_state_manager.h"
 #include "graphic/gfx_sampler_manager.h"
@@ -552,25 +552,25 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() != Dt::SActorType::Model)
+            if (rCurrentEntity.GetType() != Dt::SActorType::Mesh)
             {
                 CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor);
 
                 continue;
             }
 
-            CModelActorFacet* pGraphicModelActorFacet = static_cast<CModelActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+            CMeshActorFacet* pGraphicModelActorFacet = static_cast<CMeshActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
 
-            CModelPtr ModelPtr = pGraphicModelActorFacet->GetModel();
+            CMeshPtr MeshPtr = pGraphicModelActorFacet->GetMesh();
 
             // -----------------------------------------------------------------------------
             // Set every surface of this entity into a new render job
             // -----------------------------------------------------------------------------
-            unsigned int NumberOfSurfaces = ModelPtr->GetLOD(0)->GetNumberOfSurfaces();
+            unsigned int NumberOfSurfaces = MeshPtr->GetLOD(0)->GetNumberOfSurfaces();
 
             for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurfaces; ++ IndexOfSurface)
             {
-                CSurfacePtr SurfacePtr = ModelPtr->GetLOD(0)->GetSurface(IndexOfSurface);
+                CSurfacePtr SurfacePtr = MeshPtr->GetLOD(0)->GetSurface(IndexOfSurface);
 
                 if (SurfacePtr == nullptr)
                 {

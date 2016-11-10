@@ -9,8 +9,8 @@
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_main.h"
-#include "graphic/gfx_model.h"
-#include "graphic/gfx_model_manager.h"
+#include "graphic/gfx_mesh.h"
+#include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
@@ -76,7 +76,7 @@ namespace
         
         SConstantBufferPS      m_ConstantBufferPS;
 
-        CModelPtr              m_QuadModelPtr;
+        CMeshPtr              m_QuadModelPtr;
         
         CBufferSetPtr          m_QuadVSBufferSetPtr;
 
@@ -252,7 +252,7 @@ namespace
     
     void CGfxShadingRenderer::OnSetupModels()
     {
-        m_QuadModelPtr = ModelManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
+        m_QuadModelPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
     }
     
     // -----------------------------------------------------------------------------

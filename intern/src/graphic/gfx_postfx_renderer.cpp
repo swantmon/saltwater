@@ -12,7 +12,7 @@
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_main.h"
-#include "graphic/gfx_model_manager.h"
+#include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_postfx_renderer.h"
 #include "graphic/gfx_sampler_manager.h"
@@ -114,7 +114,7 @@ namespace
         
     private:
         
-        CModelPtr         m_QuadModelPtr;
+        CMeshPtr          m_QuadModelPtr;
         
         CBufferSetPtr     m_BaseVSBufferSetPtr;
         CBufferSetPtr     m_DOFVSBufferSetPtr;
@@ -652,7 +652,7 @@ namespace
     
     void CGfxPostFXRenderer::OnSetupModels()
     {
-        m_QuadModelPtr = ModelManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
+        m_QuadModelPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
     }
     
     // -----------------------------------------------------------------------------

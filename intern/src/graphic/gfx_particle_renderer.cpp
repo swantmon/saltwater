@@ -14,7 +14,7 @@
 #include "graphic/gfx_particle_renderer.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_main.h"
-#include "graphic/gfx_model_manager.h"
+#include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_state_manager.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
@@ -128,8 +128,8 @@ namespace
         
     private:
         
-        CModelPtr         m_ParticleModelPtr;
-        CModelPtr         m_QuadModelPtr;
+        CMeshPtr          m_ParticleModelPtr;
+        CMeshPtr          m_QuadModelPtr;
         
         CBufferSetPtr     m_LiquidVSBufferPtr;
         CBufferSetPtr     m_LiquidPSBufferPtr;
@@ -580,9 +580,9 @@ namespace
     
     void CGfxParticleRenderer::OnSetupModels()
     {
-        m_ParticleModelPtr = ModelManager::CreateRectangle(-0.5f, -0.5f, 1.0f, 1.0f);
+        m_ParticleModelPtr = MeshManager::CreateRectangle(-0.5f, -0.5f, 1.0f, 1.0f);
         
-        m_QuadModelPtr     = ModelManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
+        m_QuadModelPtr     = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
         
         m_ParticleInstanceBufferSetPtr = BufferManager::CreateVertexBufferSet(m_ParticleModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer()->GetBuffer(0), m_ParticleInstanceBufferPtr);
     }

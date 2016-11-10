@@ -19,8 +19,8 @@
 #include "graphic/gfx_light_facet.h"
 #include "graphic/gfx_light_point_renderer.h"
 #include "graphic/gfx_main.h"
-#include "graphic/gfx_model.h"
-#include "graphic/gfx_model_manager.h"
+#include "graphic/gfx_mesh.h"
+#include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
@@ -107,7 +107,7 @@ namespace
         
     private:
         
-        CModelPtr         m_SphereModelPtr;
+        CMeshPtr          m_SphereModelPtr;
         
         CBufferSetPtr     m_MainVSBufferPtr;
         CBufferSetPtr     m_PunctualLightPSBufferPtr;
@@ -324,7 +324,7 @@ namespace
     
     void CGfxPointLightRenderer::OnSetupModels()
     {
-        m_SphereModelPtr = ModelManager::CreateSphere(1.0f, 8, 8);
+        m_SphereModelPtr = MeshManager::CreateSphere(1.0f, 8, 8);
     }
     
     // -----------------------------------------------------------------------------

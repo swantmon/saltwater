@@ -194,7 +194,7 @@ namespace
             // Create entity
             // -----------------------------------------------------------------------------
             EntityDesc.m_EntityCategory = SEntityCategory::Actor;
-            EntityDesc.m_EntityType     = SActorType::Model;
+            EntityDesc.m_EntityType     = SActorType::Mesh;
             EntityDesc.m_FacetFlags     = CEntity::FacetTransformation | CEntity::FacetHierarchy;
 
             Dt::CEntity& rChildEntity = CreateEntity(EntityDesc);
@@ -210,9 +210,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
-            Dt::CModelActorFacet* pModelActorFacet = ActorManager::CreateModelActor();
+            Dt::CMeshActorFacet* pModelActorFacet = ActorManager::CreateModelActor();
 
-            pModelActorFacet->SetModel(&rMesh);
+            pModelActorFacet->SetMesh(&rMesh);
 
             rChildEntity.SetDetailFacet(SFacetCategory::Data, pModelActorFacet);
 

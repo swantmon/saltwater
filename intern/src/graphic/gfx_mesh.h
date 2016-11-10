@@ -15,7 +15,7 @@
 
 namespace Gfx
 {
-    class CModel : public Base::CManagedPoolItemBase
+    class CMesh : public Base::CManagedPoolItemBase
     {
     public:
         
@@ -31,7 +31,7 @@ namespace Gfx
 
     public:
 
-        CModel();
+        CMesh();
         
     protected:
         
@@ -43,5 +43,5 @@ namespace Gfx
 
 namespace Gfx
 {
-    typedef Base::CManagedPoolItemPtr<CModel> CModelPtr;
+    typedef Base::CManagedPoolItemPtr<CMesh> CMeshPtr;
 } // namespace Gfx

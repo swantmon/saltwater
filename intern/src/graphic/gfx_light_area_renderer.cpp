@@ -18,8 +18,8 @@
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_facet.h"
 #include "graphic/gfx_main.h"
-#include "graphic/gfx_model.h"
-#include "graphic/gfx_model_manager.h"
+#include "graphic/gfx_mesh.h"
+#include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
@@ -113,8 +113,8 @@ namespace
         
     private:
         
-        CModelPtr         m_SphereModelPtr;
-        CModelPtr         m_LightBulbModelPtr;
+        CMeshPtr          m_SphereModelPtr;
+        CMeshPtr          m_LightBulbModelPtr;
         
         CBufferSetPtr     m_MainVSBufferPtr;
         CBufferSetPtr     m_SphereLightPSBufferPtr;
@@ -140,8 +140,8 @@ namespace
         CRenderContextPtr m_DefaultRenderContextPtr;
         CRenderContextPtr m_LightRenderContextPtr;
 
-        CRenderJobs            m_SphereLightRenderJobs;
-        CRenderJobs            m_DiskLightRenderJobs;
+        CRenderJobs       m_SphereLightRenderJobs;
+        CRenderJobs       m_DiskLightRenderJobs;
         
     private:
         
@@ -420,9 +420,9 @@ namespace
     
     void CGfxAreaLightRenderer::OnSetupModels()
     {
-        m_SphereModelPtr    = ModelManager::CreateSphere(1.0f, 8, 8);
+        m_SphereModelPtr    = MeshManager::CreateSphere(1.0f, 8, 8);
 
-        m_LightBulbModelPtr = ModelManager::CreateRectangle(-1.0f, -1.0f, 2.0f, 2.0f);
+        m_LightBulbModelPtr = MeshManager::CreateRectangle(-1.0f, -1.0f, 2.0f, 2.0f);
     }
     
     // -----------------------------------------------------------------------------

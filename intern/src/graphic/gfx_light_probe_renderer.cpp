@@ -16,7 +16,7 @@
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_light_facet.h"
 #include "graphic/gfx_light_probe_renderer.h"
-#include "graphic/gfx_model_manager.h"
+#include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
@@ -100,7 +100,7 @@ namespace
         
     private:
         
-        CModelPtr m_EnvironmentSpherePtr;
+        CMeshPtr m_EnvironmentSpherePtr;
         
         CShaderPtr m_FilteringVSPtr;
         CShaderPtr m_FilteringGSPtr;
@@ -402,11 +402,11 @@ namespace
 
         Dt::CModel& rSphereModel = Dt::ModelManager::CreateModel(ModelFileDesc);
 
-        SModelDescriptor ModelDesc;
+        SMeshDescriptor ModelDesc;
 
         ModelDesc.m_pModel = &rSphereModel.GetMesh(0);
 
-        m_EnvironmentSpherePtr = ModelManager::CreateModel(ModelDesc);
+        m_EnvironmentSpherePtr = MeshManager::CreateMesh(ModelDesc);
     }
 
     // -----------------------------------------------------------------------------

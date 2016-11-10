@@ -20,8 +20,8 @@
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_main.h"
-#include "graphic/gfx_model.h"
-#include "graphic/gfx_model_manager.h"
+#include "graphic/gfx_mesh.h"
+#include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_state_manager.h"
 #include "graphic/gfx_sampler_manager.h"
@@ -96,37 +96,37 @@ namespace
 
     private:
 
-        CModelPtr         m_QuadModelPtr;
+        CMeshPtr m_QuadModelPtr;
 
-        CInputLayoutPtr   m_FullQuadInputLayoutPtr;
+        CInputLayoutPtr m_FullQuadInputLayoutPtr;
 
-        CBufferSetPtr     m_ViewVSBufferSetPtr;
-        CBufferSetPtr     m_BaseVSBufferSetPtr;
-        CBufferSetPtr     m_BasePSBufferSetPtr;
-        CBufferSetPtr     m_MaterialPSBufferSetPtr;
-        CBufferSetPtr     m_BilateralBlurCSBufferSetPtr;
+        CBufferSetPtr m_ViewVSBufferSetPtr;
+        CBufferSetPtr m_BaseVSBufferSetPtr;
+        CBufferSetPtr m_BasePSBufferSetPtr;
+        CBufferSetPtr m_MaterialPSBufferSetPtr;
+        CBufferSetPtr m_BilateralBlurCSBufferSetPtr;
 
         CRenderContextPtr m_DeferredRenderContextPtr;
 
-        CShaderPtr        m_RectangleShaderVSPtr;
-        CShaderPtr        m_BilateralBlurShaderCSPtr;
-        CShaderPtr        m_CopyToGBufferShaderPSPtr;
-        CShaderPtr        m_DifferentialGBufferShaderPSPtr;
+        CShaderPtr m_RectangleShaderVSPtr;
+        CShaderPtr m_BilateralBlurShaderCSPtr;
+        CShaderPtr m_CopyToGBufferShaderPSPtr;
+        CShaderPtr m_DifferentialGBufferShaderPSPtr;
 
-        CTexture2DPtr     m_BackgroundTexturePtr;
-        CTexture2DPtr     m_VSPositionTexturePtr;
-        CTexture2DPtr     m_VSPositionTempTexturePtr;
-        CTexture2DPtr     m_CubemapTexturePtr;
-        CTexture2DPtr     m_WebcamTexturePtr;
+        CTexture2DPtr m_BackgroundTexturePtr;
+        CTexture2DPtr m_VSPositionTexturePtr;
+        CTexture2DPtr m_VSPositionTempTexturePtr;
+        CTexture2DPtr m_CubemapTexturePtr;
+        CTexture2DPtr m_WebcamTexturePtr;
 
-        CTextureSetPtr    m_BilateralBlurTextureSetPtr;
-        CTextureSetPtr    m_BilateralBlurTempTextureSetPtr;
-        CTextureSetPtr    m_CopyToGBufferTextureSetPtr;
-        CTextureSetPtr    m_DifferentualGBufferTextureSetPtr;
+        CTextureSetPtr m_BilateralBlurTextureSetPtr;
+        CTextureSetPtr m_BilateralBlurTempTextureSetPtr;
+        CTextureSetPtr m_CopyToGBufferTextureSetPtr;
+        CTextureSetPtr m_DifferentualGBufferTextureSetPtr;
 
-        CSamplerSetPtr    m_PSSamplerSetPtr;
+        CSamplerSetPtr m_PSSamplerSetPtr;
 
-        CRenderJobs       m_RenderJobs;
+        CRenderJobs m_RenderJobs;
 
     private:
 
@@ -440,7 +440,7 @@ namespace
 
     void CGfxARRenderer::OnSetupModels()
     {
-        m_QuadModelPtr = ModelManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
+        m_QuadModelPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
     }
 
     // -----------------------------------------------------------------------------
@@ -770,7 +770,7 @@ namespace
 
             CARActorFacet* pGraphicARActorFacet = static_cast<CARActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
 
-            CModelPtr ModelPtr = pGraphicARActorFacet->GetModel();
+            CMeshPtr ModelPtr = pGraphicARActorFacet->GetMesh();
 
             // -----------------------------------------------------------------------------
             // Set every surface of this entity into a new render job

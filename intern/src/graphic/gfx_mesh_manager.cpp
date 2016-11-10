@@ -18,7 +18,7 @@
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_input_layout.h"
 #include "graphic/gfx_material_manager.h"
-#include "graphic/gfx_model_manager.h"
+#include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_shader.h"
 #include "graphic/gfx_shader_manager.h"
 
@@ -26,18 +26,18 @@
 #include <functional>
 
 using namespace Gfx;
-using namespace Gfx::ModelManager;
+using namespace Gfx::MeshManager;
 
 namespace
 {
-    class CGfxModelManager : private Base::CUncopyable
+    class CGfxMeshManager : private Base::CUncopyable
     {
-        BASE_SINGLETON_FUNC(CGfxModelManager)
+        BASE_SINGLETON_FUNC(CGfxMeshManager)
         
     public:
 
-        CGfxModelManager();
-        ~CGfxModelManager();
+        CGfxMeshManager();
+        ~CGfxMeshManager();
         
     public:
         
@@ -46,33 +46,33 @@ namespace
 
         void Clear();
         
-        CModelPtr CreateModel(const SModelDescriptor& _rDescriptor);
-        CModelPtr CreateBox(float _Width, float _Height, float _Depth);
-        CModelPtr CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices);
-        CModelPtr CreateCone(float _Radius, float _Height, unsigned int _Slices);
-        CModelPtr CreateRectangle(float _X, float _Y, float _Width, float _Height);
+        CMeshPtr CreateMesh(const SMeshDescriptor& _rDescriptor);
+        CMeshPtr CreateBox(float _Width, float _Height, float _Depth);
+        CMeshPtr CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices);
+        CMeshPtr CreateCone(float _Radius, float _Height, unsigned int _Slices);
+        CMeshPtr CreateRectangle(float _X, float _Y, float _Width, float _Height);
 
     private:
         
-        class CInternModel : public CModel
+        class CInternModel : public CMesh
         {
         private:
             
-            friend class CGfxModelManager;
+            friend class CGfxMeshManager;
         };
         
         class CInternLOD : public CLOD
         {
         private:
             
-            friend class CGfxModelManager;
+            friend class CGfxMeshManager;
         };
         
         class CInternSurface : public CSurface
         {
         private:
             
-            friend class CGfxModelManager;
+            friend class CGfxMeshManager;
         };
         
     private:
@@ -96,7 +96,7 @@ namespace
 
 namespace
 {
-    CGfxModelManager::CGfxModelManager()
+    CGfxMeshManager::CGfxMeshManager()
         : m_Models   ()
         , m_LODs     ()
         , m_Surfaces ()
@@ -107,27 +107,27 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    CGfxModelManager::~CGfxModelManager()
+    CGfxMeshManager::~CGfxMeshManager()
     {
         
     }
     
     // -----------------------------------------------------------------------------
     
-    void CGfxModelManager::OnStart()
+    void CGfxMeshManager::OnStart()
     {
     }
     
     // -----------------------------------------------------------------------------
     
-    void CGfxModelManager::OnExit()
+    void CGfxMeshManager::OnExit()
     {
         Clear();
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxModelManager::Clear()
+    void CGfxMeshManager::Clear()
     {
         m_Models   .Clear();
         m_LODs     .Clear();
@@ -138,7 +138,7 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    CModelPtr CGfxModelManager::CreateModel(const Gfx::SModelDescriptor& _rDescriptor)
+    CMeshPtr CGfxMeshManager::CreateMesh(const Gfx::SMeshDescriptor& _rDescriptor)
     {
         Dt::CMesh& rDataModel = *_rDescriptor.m_pModel;
         
@@ -153,7 +153,7 @@ namespace
             
             if (m_ModelByID.find(Hash) != m_ModelByID.end())
             {
-                return CModelPtr(m_ModelByID.at(Hash));
+                return CMeshPtr(m_ModelByID.at(Hash));
             }
         }
         
@@ -378,12 +378,12 @@ namespace
             m_ModelByID[Hash] = &rModel;
         }
         
-        return CModelPtr(ModelPtr);
+        return CMeshPtr(ModelPtr);
     }
 
     // -----------------------------------------------------------------------------
 
-    CModelPtr CGfxModelManager::CreateBox(float _Width, float _Height, float _Depth)
+    CMeshPtr CGfxMeshManager::CreateBox(float _Width, float _Height, float _Depth)
     {
         // -----------------------------------------------------------------------------
         // Create model with LOD, surface and materials
@@ -519,12 +519,12 @@ namespace
         Base::CMemory::Free(pVertices);
         Base::CMemory::Free(pIndices);
         
-        return CModelPtr(ModelPtr);
+        return CMeshPtr(ModelPtr);
     }
     
     // -----------------------------------------------------------------------------
     
-    CModelPtr CGfxModelManager::CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices)
+    CMeshPtr CGfxMeshManager::CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices)
     {
         // -----------------------------------------------------------------------------
         // Create model with LOD, surface and materials
@@ -666,12 +666,12 @@ namespace
         Base::CMemory::Free(pVertices);
         Base::CMemory::Free(pIndices);
         
-        return CModelPtr(ModelPtr);
+        return CMeshPtr(ModelPtr);
     }
 
     // -----------------------------------------------------------------------------
 
-    CModelPtr CGfxModelManager::CreateCone(float _Radius, float _Height, unsigned int _Slices)
+    CMeshPtr CGfxMeshManager::CreateCone(float _Radius, float _Height, unsigned int _Slices)
     {
         // -----------------------------------------------------------------------------
         // Create model with LOD, surface and materials
@@ -798,12 +798,12 @@ namespace
         Base::CMemory::Free(pVertices);
         Base::CMemory::Free(pIndices);
         
-        return CModelPtr(ModelPtr);
+        return CMeshPtr(ModelPtr);
     }
     
     // -----------------------------------------------------------------------------
     
-    CModelPtr CGfxModelManager::CreateRectangle(float _X, float _Y, float _Width, float _Height)
+    CMeshPtr CGfxMeshManager::CreateRectangle(float _X, float _Y, float _Width, float _Height)
     {
         // -----------------------------------------------------------------------------
         // Create model with LOD, surface and materials
@@ -903,66 +903,66 @@ namespace
         Base::CMemory::Free(pVertices);
         Base::CMemory::Free(pIndices);
         
-        return CModelPtr(ModelPtr);
+        return CMeshPtr(ModelPtr);
     }
 } // namespace
 
 namespace Gfx
 {
-namespace ModelManager
+namespace MeshManager
 {
     void OnStart()
     {
-        CGfxModelManager::GetInstance().OnStart();
+        CGfxMeshManager::GetInstance().OnStart();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnExit()
     {
-        CGfxModelManager::GetInstance().OnExit();
+        CGfxMeshManager::GetInstance().OnExit();
     }
 
     // -----------------------------------------------------------------------------
 
     void Clear()
     {
-        CGfxModelManager::GetInstance().Clear();
+        CGfxMeshManager::GetInstance().Clear();
     }
     
     // -----------------------------------------------------------------------------
     
-    CModelPtr CreateModel(const SModelDescriptor& _rDescriptor)
+    CMeshPtr CreateMesh(const SMeshDescriptor& _rDescriptor)
     {
-        return CGfxModelManager::GetInstance().CreateModel(_rDescriptor);
+        return CGfxMeshManager::GetInstance().CreateMesh(_rDescriptor);
     }
 
     // -----------------------------------------------------------------------------
 
-    CModelPtr CreateBox(float _Width, float _Height, float _Depth)
+    CMeshPtr CreateBox(float _Width, float _Height, float _Depth)
     {
-        return CGfxModelManager::GetInstance().CreateBox(_Width, _Height, _Depth);
+        return CGfxMeshManager::GetInstance().CreateBox(_Width, _Height, _Depth);
     }
     
     // -----------------------------------------------------------------------------
     
-    CModelPtr CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices)
+    CMeshPtr CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices)
     {
-        return CGfxModelManager::GetInstance().CreateSphere(_Radius, _Stacks, _Slices);
+        return CGfxMeshManager::GetInstance().CreateSphere(_Radius, _Stacks, _Slices);
     }
 
     // -----------------------------------------------------------------------------
 
-    CModelPtr CreateCone(float _Radius, float _Height, unsigned int _Slices)
+    CMeshPtr CreateCone(float _Radius, float _Height, unsigned int _Slices)
     {
-        return CGfxModelManager::GetInstance().CreateCone(_Radius, _Height, _Slices);
+        return CGfxMeshManager::GetInstance().CreateCone(_Radius, _Height, _Slices);
     }
     
     // -----------------------------------------------------------------------------
     
-    CModelPtr CreateRectangle(float _X, float _Y, float _Width, float _Height)
+    CMeshPtr CreateRectangle(float _X, float _Y, float _Width, float _Height)
     {
-        return CGfxModelManager::GetInstance().CreateRectangle(_X, _Y, _Width, _Height);
+        return CGfxMeshManager::GetInstance().CreateRectangle(_X, _Y, _Width, _Height);
     }
-} // namespace ModelManager
+} // namespace MeshManager
 } // namespace Gfx

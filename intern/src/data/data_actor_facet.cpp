@@ -7,7 +7,7 @@
 
 namespace Dt
 {
-    CModelActorFacet::CModelActorFacet()
+    CMeshActorFacet::CMeshActorFacet()
         : m_pModel(nullptr)
     {
         Base::CMemory::Zero(m_pMaterial, sizeof(CMaterial*) * CLOD::s_NumberOfSurfaces);
@@ -15,28 +15,28 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    CModelActorFacet::~CModelActorFacet()
+    CMeshActorFacet::~CMeshActorFacet()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    void CModelActorFacet::SetModel(CMesh* _pModel)
+    void CMeshActorFacet::SetMesh(CMesh* _pModel)
     {
         m_pModel = _pModel;
     }
 
     // -----------------------------------------------------------------------------
 
-    CMesh* CModelActorFacet::GetModel()
+    CMesh* CMeshActorFacet::GetMesh()
     {
         return m_pModel;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CModelActorFacet::SetMaterial(unsigned int _Surface, CMaterial* _pMaterial)
+    void CMeshActorFacet::SetMaterial(unsigned int _Surface, CMaterial* _pMaterial)
     {
         assert(_Surface >= 0 && _Surface < CLOD::s_NumberOfSurfaces);
 
@@ -45,7 +45,7 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    CMaterial* CModelActorFacet::GetMaterial(unsigned int _Surface)
+    CMaterial* CMeshActorFacet::GetMaterial(unsigned int _Surface)
     {
         assert(_Surface >= 0 && _Surface < CLOD::s_NumberOfSurfaces);
 

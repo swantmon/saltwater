@@ -61,8 +61,8 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_main.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_main_menu_state.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_material.cpp" />
-    <ClCompile Include="..\..\..\src\graphic\gfx_model.cpp" />
-    <ClCompile Include="..\..\..\src\graphic\gfx_model_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_mesh.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_mesh_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_actor_renderer.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_particle_renderer.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_play_state.cpp" />
@@ -137,8 +137,8 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_main.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_main_menu_state.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_material.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_model.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_model_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_mesh.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_mesh_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_actor_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_native_buffer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_native_buffer_set.h" />

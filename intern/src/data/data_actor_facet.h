@@ -26,7 +26,7 @@ namespace Dt
         enum Enum
         {
             Node,
-            Model,
+            Mesh,
             AR,
             Camera,
             NumberOfTypes,
@@ -37,20 +37,20 @@ namespace Dt
 
 namespace Dt
 {
-    class CModelActorFacet
+    class CMeshActorFacet
     {
     public:
 
-        void SetModel(CMesh* _pModel);
-        CMesh* GetModel();
+        void SetMesh(CMesh* _pModel);
+        CMesh* GetMesh();
 
         void SetMaterial(unsigned int _Surface, CMaterial* _pMaterial);
         CMaterial* GetMaterial(unsigned int _Surface);
 
     public:
 
-        CModelActorFacet();
-        ~CModelActorFacet();
+        CMeshActorFacet();
+        ~CMeshActorFacet();
 
     private:
 

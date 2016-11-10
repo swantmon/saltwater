@@ -32,7 +32,7 @@ namespace
 
         void Clear();
 
-        CModelActorFacet* CreateModelActor();
+        CMeshActorFacet* CreateModelActor();
         CARActorFacet* CreateARActor();
         CCameraActorFacet* CreateCameraActor();
 
@@ -40,7 +40,7 @@ namespace
         
     private:
         
-        class CInternModelActorFacet : public CModelActorFacet
+        class CInternModelActorFacet : public CMeshActorFacet
         {
         private:
             friend class CDtActorManager;
@@ -111,7 +111,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CModelActorFacet* CDtActorManager::CreateModelActor()
+    CMeshActorFacet* CDtActorManager::CreateModelActor()
     {
         CInternModelActorFacet& rDataModelActorFacet = m_ModelActorFacets.Allocate();
 
@@ -169,7 +169,7 @@ namespace ActorManager
 
     // -----------------------------------------------------------------------------
 
-    CModelActorFacet* CreateModelActor()
+    CMeshActorFacet* CreateModelActor()
     {
         return CDtActorManager::GetInstance().CreateModelActor();
     }

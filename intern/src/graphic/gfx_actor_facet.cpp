@@ -7,7 +7,7 @@
 
 namespace Gfx
 {
-    CModelActorFacet::CModelActorFacet()
+    CMeshActorFacet::CMeshActorFacet()
         : m_ModelPtr()
     {
         Base::CMemory::Zero(m_MaterialPtrs, sizeof(CMaterialPtr) * CLOD::s_NumberOfSurfaces);
@@ -15,28 +15,28 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    CModelActorFacet::~CModelActorFacet()
+    CMeshActorFacet::~CMeshActorFacet()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    void CModelActorFacet::SetModel(CModelPtr _ModelPtr)
+    void CMeshActorFacet::SetMesh(CMeshPtr _ModelPtr)
     {
         m_ModelPtr = _ModelPtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    CModelPtr CModelActorFacet::GetModel()
+    CMeshPtr CMeshActorFacet::GetMesh()
     {
         return m_ModelPtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CModelActorFacet::SetMaterial(unsigned int _Surface, CMaterialPtr _MaterialPtr)
+    void CMeshActorFacet::SetMaterial(unsigned int _Surface, CMaterialPtr _MaterialPtr)
     {
         assert(_Surface >= 0 && _Surface < CLOD::s_NumberOfSurfaces);
 
@@ -45,7 +45,7 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    CMaterialPtr CModelActorFacet::GetMaterial(unsigned int _Surface)
+    CMaterialPtr CMeshActorFacet::GetMaterial(unsigned int _Surface)
     {
         return m_MaterialPtrs[_Surface];
     }
@@ -68,14 +68,14 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    void CARActorFacet::SetModel(CModelPtr _ModelPtr)
+    void CARActorFacet::SetMesh(CMeshPtr _ModelPtr)
     {
         m_ModelPtr = _ModelPtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    CModelPtr CARActorFacet::GetModel()
+    CMeshPtr CARActorFacet::GetMesh()
     {
         return m_ModelPtr;
     }

@@ -169,9 +169,9 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CModelActorFacet* pFacet = static_cast<Dt::CModelActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CMeshActorFacet* pFacet = static_cast<Dt::CMeshActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Actor && rCurrentEntity.GetType() == Dt::SActorType::Model && pFacet != nullptr)
+        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Actor && rCurrentEntity.GetType() == Dt::SActorType::Mesh && pFacet != nullptr)
         {
             // TODO by tschwandt
             // different surfaces necessary?
@@ -183,7 +183,7 @@ namespace
 
             if (pMaterial == nullptr)
             {
-                pMaterial = pFacet->GetModel()->GetLOD(0)->GetSurface(0)->GetMaterial();
+                pMaterial = pFacet->GetMesh()->GetLOD(0)->GetSurface(0)->GetMaterial();
             }
 
             Edit::CMessage NewMessage;
@@ -329,9 +329,9 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CModelActorFacet* pFacet = static_cast<Dt::CModelActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CMeshActorFacet* pFacet = static_cast<Dt::CMeshActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Actor && rCurrentEntity.GetType() == Dt::SActorType::Model && pFacet != nullptr)
+        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Actor && rCurrentEntity.GetType() == Dt::SActorType::Mesh && pFacet != nullptr)
         {
             float X, Y, Z, W;
 
@@ -355,7 +355,7 @@ namespace
 
             if (pMaterial == nullptr)
             {
-                pMaterial = pFacet->GetModel()->GetLOD(0)->GetSurface(0)->GetMaterial();
+                pMaterial = pFacet->GetMesh()->GetLOD(0)->GetSurface(0)->GetMaterial();
             }
 
             // -----------------------------------------------------------------------------

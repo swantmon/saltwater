@@ -15,7 +15,7 @@
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_main.h"
-#include "graphic/gfx_model_manager.h"
+#include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_state_manager.h"
 #include "graphic/gfx_sampler_manager.h"
@@ -125,8 +125,8 @@ namespace
         
     private:
         
-        CModelPtr         m_QuadModelPtr;
-        CModelPtr         m_GizmoModelPtr;
+        CMeshPtr m_QuadModelPtr;
+        CMeshPtr m_GizmoModelPtr;
 
         CBufferSetPtr     m_BaseVSBuffer;
         CBufferSetPtr     m_ViewModelVSBuffer;
@@ -466,10 +466,10 @@ namespace
     
     void CGfxDebugRenderer::OnSetupModels()
     {
-        SModelDescriptor  ModelDesc;
+        SMeshDescriptor  ModelDesc;
         SBufferDescriptor BufferDesc;
 
-        m_QuadModelPtr = ModelManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
+        m_QuadModelPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
 
         m_TextInstanceBufferSetPtr = BufferManager::CreateVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer()->GetBuffer(0), m_TextInstanceBufferPtr);
 
@@ -484,7 +484,7 @@ namespace
 
         ModelDesc.m_pModel = &rModel.GetMesh(0);
 
-        m_GizmoModelPtr = ModelManager::CreateModel(ModelDesc);
+        m_GizmoModelPtr = MeshManager::CreateMesh(ModelDesc);
 
         // -----------------------------------------------------------------------------
 

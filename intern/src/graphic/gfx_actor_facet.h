@@ -3,28 +3,28 @@
 
 #include "graphic/gfx_lod.h"
 #include "graphic/gfx_material.h"
-#include "graphic/gfx_model.h"
+#include "graphic/gfx_mesh.h"
 
 namespace Gfx
 {
-    class CModelActorFacet
+    class CMeshActorFacet
     {
     public:
 
-        void SetModel(CModelPtr _ModelPtr);
-        CModelPtr GetModel();
+        void SetMesh(CMeshPtr _ModelPtr);
+        CMeshPtr GetMesh();
 
         void SetMaterial(unsigned int _Surface, CMaterialPtr _MaterialPtr);
         CMaterialPtr GetMaterial(unsigned int _Surface);
 
     public:
 
-        CModelActorFacet();
-        ~CModelActorFacet();
+        CMeshActorFacet();
+        ~CMeshActorFacet();
 
     protected:
 
-        CModelPtr    m_ModelPtr;
+        CMeshPtr    m_ModelPtr;
         CMaterialPtr m_MaterialPtrs[CLOD::s_NumberOfSurfaces];
     };
 } // namespace Gfx
@@ -35,8 +35,8 @@ namespace Gfx
     {
     public:
 
-        void SetModel(CModelPtr _ModelPtr);
-        CModelPtr GetModel();
+        void SetMesh(CMeshPtr _ModelPtr);
+        CMeshPtr GetMesh();
 
         void SetMaterial(unsigned int _Surface, CMaterialPtr _MaterialPtr);
         CMaterialPtr GetMaterial(unsigned int _Surface);
@@ -48,7 +48,7 @@ namespace Gfx
 
     protected:
 
-        CModelPtr    m_ModelPtr;
+        CMeshPtr    m_ModelPtr;
         CMaterialPtr m_MaterialPtrs[CLOD::s_NumberOfSurfaces];
     };
 } // namespace Gfx

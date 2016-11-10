@@ -19,7 +19,7 @@
 #include "graphic/gfx_light_point_renderer.h"
 #include "graphic/gfx_light_sun_renderer.h"
 #include "graphic/gfx_main.h"
-#include "graphic/gfx_model_manager.h"
+#include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_particle_renderer.h"
 #include "graphic/gfx_postfx_renderer.h"
 #include "graphic/gfx_postfx_hdr_renderer.h"
@@ -71,7 +71,7 @@ namespace
         ShaderManager         ::OnStart();
         TargetSetManager      ::OnStart();
         LightManager          ::OnStart();
-        ModelManager          ::OnStart();
+        MeshManager           ::OnStart();
         ActorManager          ::OnStart();
 
         BASE_CONSOLE_STREAMINFO("Gfx> Finished starting manager.");

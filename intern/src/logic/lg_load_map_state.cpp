@@ -363,7 +363,7 @@ namespace
 
             Dt::CEntity* pSubEntity = rSphere.GetHierarchyFacet()->GetFirstChild();
 
-            Dt::CModelActorFacet* pModelActorFacet = static_cast<Dt::CModelActorFacet*>(pSubEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+            Dt::CMeshActorFacet* pModelActorFacet = static_cast<Dt::CMeshActorFacet*>(pSubEntity->GetDetailFacet(Dt::SFacetCategory::Data));
 
             Dt::SMaterialFileDescriptor MaterialFileDesc;
 
@@ -409,7 +409,7 @@ namespace
 
             Dt::CEntity* pSubEntity = rPlane.GetHierarchyFacet()->GetFirstChild();
 
-            Dt::CModelActorFacet* pModelActorFacet = static_cast<Dt::CModelActorFacet*>(pSubEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+            Dt::CMeshActorFacet* pModelActorFacet = static_cast<Dt::CMeshActorFacet*>(pSubEntity->GetDetailFacet(Dt::SFacetCategory::Data));
 
             Dt::SMaterialFileDescriptor MaterialFileDesc;
 

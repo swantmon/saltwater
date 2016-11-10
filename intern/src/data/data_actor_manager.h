@@ -19,7 +19,7 @@ namespace ActorManager
 
     void Clear();
 
-    CModelActorFacet* CreateModelActor();
+    CMeshActorFacet* CreateModelActor();
     CARActorFacet* CreateARActor();
     CCameraActorFacet* CreateCameraActor();
 

@@ -15,7 +15,7 @@
 #include "graphic/gfx_actor_facet.h"
 #include "graphic/gfx_actor_manager.h"
 #include "graphic/gfx_material_manager.h"
-#include "graphic/gfx_model_manager.h"
+#include "graphic/gfx_mesh_manager.h"
 
 using namespace Gfx;
 
@@ -41,7 +41,7 @@ namespace
 
     private:
 
-        class CInternModelActorFacet : public CModelActorFacet
+        class CInternModelActorFacet : public CMeshActorFacet
         {
         private:
 
@@ -73,10 +73,10 @@ namespace
         void OnDirtyEntity(Dt::CEntity* _pEntity);
 
         void UpdateActor(Dt::CEntity& _rEntity);
-        void UpdateActorModel(Dt::CEntity& _rEntity);
+        void UpdateActorMesh(Dt::CEntity& _rEntity);
         void UpdateActorAR(Dt::CEntity& _rEntity);
 
-        void CreateActorModel(Dt::CEntity& _rEntity);
+        void CreateActorMesh(Dt::CEntity& _rEntity);
         void CreateActorAR(Dt::CEntity& _rEntity);
     };
 } // namespace
@@ -156,8 +156,8 @@ namespace
             // -----------------------------------------------------------------------------
             switch (_pEntity->GetType())
             {
-            case Dt::SActorType::Model: CreateActorModel(*_pEntity); break;
-            case Dt::SActorType::AR:    CreateActorAR(*_pEntity); break;
+            case Dt::SActorType::Mesh: CreateActorMesh(*_pEntity); break;
+            case Dt::SActorType::AR:   CreateActorAR(*_pEntity); break;
             }
         }
         else if ((DirtyFlags & Dt::CEntity::DirtyDetail) != 0)
@@ -175,21 +175,21 @@ namespace
         // -----------------------------------------------------------------------------
         switch (_rEntity.GetType())
         {
-        case Dt::SActorType::Model: UpdateActorModel(_rEntity); break;
-        case Dt::SActorType::AR:    UpdateActorAR(_rEntity); break;
+        case Dt::SActorType::Mesh: UpdateActorMesh(_rEntity); break;
+        case Dt::SActorType::AR:   UpdateActorAR(_rEntity); break;
         }
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxActorManager::UpdateActorModel(Dt::CEntity& _rEntity)
+    void CGfxActorManager::UpdateActorMesh(Dt::CEntity& _rEntity)
     {
-        Dt::CModelActorFacet* pDataActorModelFacet;
+        Dt::CMeshActorFacet* pDataActorModelFacet;
 
         // -----------------------------------------------------------------------------
         // Get data
         // -----------------------------------------------------------------------------
-        pDataActorModelFacet = static_cast<Dt::CModelActorFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        pDataActorModelFacet = static_cast<Dt::CMeshActorFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Data));
 
         assert(pDataActorModelFacet);
 
@@ -201,7 +201,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Model
         // -----------------------------------------------------------------------------
-        CModelPtr ModelPtr = pGraphicActorModelFacet->GetModel();
+        CMeshPtr ModelPtr = pGraphicActorModelFacet->GetMesh();
 
         // -----------------------------------------------------------------------------
         // Material
@@ -219,7 +219,7 @@ namespace
 
             if (pDataMaterial == nullptr)
             {
-                pDataMaterial = pDataActorModelFacet->GetModel()->GetLOD(0)->GetSurface(NumberOfSurface)->GetMaterial();
+                pDataMaterial = pDataActorModelFacet->GetMesh()->GetLOD(0)->GetSurface(NumberOfSurface)->GetMaterial();
             }
 
             if (MaterialPtr == nullptr)
@@ -259,14 +259,14 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxActorManager::CreateActorModel(Dt::CEntity& _rEntity)
+    void CGfxActorManager::CreateActorMesh(Dt::CEntity& _rEntity)
     {
-        Dt::CModelActorFacet* pDataActorModelFacet;
+        Dt::CMeshActorFacet* pDataActorModelFacet;
 
         // -----------------------------------------------------------------------------
         // Get data
         // -----------------------------------------------------------------------------
-        pDataActorModelFacet = static_cast<Dt::CModelActorFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        pDataActorModelFacet = static_cast<Dt::CMeshActorFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Data));
 
         assert(pDataActorModelFacet);
 
@@ -278,13 +278,13 @@ namespace
         // -----------------------------------------------------------------------------
         // Prepare storage data : Model
         // -----------------------------------------------------------------------------
-        SModelDescriptor ModelDesc;
+        SMeshDescriptor ModelDesc;
 
-        ModelDesc.m_pModel = pDataActorModelFacet->GetModel();
+        ModelDesc.m_pModel = pDataActorModelFacet->GetMesh();
 
-        CModelPtr NewModelPtr = ModelManager::CreateModel(ModelDesc);
+        CMeshPtr NewModelPtr = MeshManager::CreateMesh(ModelDesc);
 
-        rGraphicActorModelFacet.SetModel(NewModelPtr);
+        rGraphicActorModelFacet.SetMesh(NewModelPtr);
 
         // -----------------------------------------------------------------------------
         // Prepare storage data : Material
@@ -329,12 +329,12 @@ namespace
 
     void CGfxActorManager::CreateActorAR(Dt::CEntity& _rEntity)
     {
-        Dt::CModelActorFacet* pDataActorModelFacet;
+        Dt::CMeshActorFacet* pDataActorModelFacet;
 
         // -----------------------------------------------------------------------------
         // Get data
         // -----------------------------------------------------------------------------
-        pDataActorModelFacet = static_cast<Dt::CModelActorFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        pDataActorModelFacet = static_cast<Dt::CMeshActorFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Data));
 
         assert(pDataActorModelFacet);
 
@@ -346,13 +346,13 @@ namespace
         // -----------------------------------------------------------------------------
         // Prepare storage data : Model
         // -----------------------------------------------------------------------------
-        SModelDescriptor ModelDesc;
+        SMeshDescriptor ModelDesc;
 
-        ModelDesc.m_pModel = pDataActorModelFacet->GetModel();
+        ModelDesc.m_pModel = pDataActorModelFacet->GetMesh();
 
-        CModelPtr NewModelPtr = ModelManager::CreateModel(ModelDesc);
+        CMeshPtr NewModelPtr = MeshManager::CreateMesh(ModelDesc);
 
-        rGraphicActorARFacet.SetModel(NewModelPtr);
+        rGraphicActorARFacet.SetMesh(NewModelPtr);
 
         // -----------------------------------------------------------------------------
         // Prepare storage data : Material

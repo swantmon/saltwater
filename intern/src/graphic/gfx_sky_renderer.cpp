@@ -22,7 +22,7 @@
 #include "graphic/gfx_light_facet.h"
 #include "graphic/gfx_light_manager.h"
 #include "graphic/gfx_main.h"
-#include "graphic/gfx_model_manager.h"
+#include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
@@ -127,9 +127,9 @@ namespace
         CInputLayoutPtr   m_P3SkyboxLayoutPtr;
         CInputLayoutPtr   m_P3N3T2CubemapInputLayoutPtr;
         CInputLayoutPtr   m_P2SkytextureLayoutPtr;
-        CModelPtr         m_SkyboxBoxPtr;
-        CModelPtr         m_CubemapTextureSpherePtr;
-        CModelPtr         m_QuadModelPtr;
+        CMeshPtr          m_SkyboxBoxPtr;
+        CMeshPtr          m_CubemapTextureSpherePtr;
+        CMeshPtr          m_QuadModelPtr;
         CRenderContextPtr m_SkyRenderContextPtr;
         CRenderContextPtr m_CubemapRenderContextPtr;
         CShaderPtr        m_SkyboxVSPtr;
@@ -561,9 +561,9 @@ namespace
     
     void CGfxSkyRenderer::OnSetupModels()
     {
-        SModelDescriptor ModelDescr;
+        SMeshDescriptor ModelDescr;
                
-        m_SkyboxBoxPtr = ModelManager::CreateBox(2.0f, 2.0f, 2.0f);
+        m_SkyboxBoxPtr = MeshManager::CreateBox(2.0f, 2.0f, 2.0f);
                
         // -----------------------------------------------------------------------------
         
@@ -576,11 +576,11 @@ namespace
         
         ModelDescr.m_pModel = &rSphereModel.GetMesh(0);
         
-        m_CubemapTextureSpherePtr = ModelManager::CreateModel(ModelDescr);
+        m_CubemapTextureSpherePtr = MeshManager::CreateMesh(ModelDescr);
 
         // -----------------------------------------------------------------------------
 
-        m_QuadModelPtr = ModelManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
+        m_QuadModelPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
     }
     
     // -----------------------------------------------------------------------------

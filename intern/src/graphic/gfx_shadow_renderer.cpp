@@ -21,8 +21,8 @@
 #include "graphic/gfx_light_facet.h"
 #include "graphic/gfx_light_manager.h"
 #include "graphic/gfx_main.h"
-#include "graphic/gfx_model.h"
-#include "graphic/gfx_model_manager.h"
+#include "graphic/gfx_mesh.h"
+#include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
@@ -133,7 +133,7 @@ namespace
         
     private:
         
-        CModelPtr         m_QuadModelPtr;
+        CMeshPtr          m_QuadModelPtr;
         
         CBufferSetPtr     m_LightCameraVSBufferPtr;
         CBufferSetPtr     m_MainVSBufferPtr;
@@ -607,7 +607,7 @@ namespace
     
     void CGfxShadowRenderer::OnSetupModels()
     {
-        m_QuadModelPtr = ModelManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
+        m_QuadModelPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
     }
     
     // -----------------------------------------------------------------------------
@@ -931,7 +931,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Get graphic facet
                 // -----------------------------------------------------------------------------
-                if (rCurrentEntity.GetType() != Dt::SActorType::Model)
+                if (rCurrentEntity.GetType() != Dt::SActorType::Mesh)
                 {
                     CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor);
 
@@ -941,9 +941,9 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Set other graphic data of this entity
                 // -----------------------------------------------------------------------------
-                CModelActorFacet* pActorModelFacet = static_cast<CModelActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+                CMeshActorFacet* pActorModelFacet = static_cast<CMeshActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
 
-                CModelPtr ModelPtr = pActorModelFacet->GetModel();
+                CMeshPtr ModelPtr = pActorModelFacet->GetMesh();
                 
                 // -----------------------------------------------------------------------------
                 // Upload model matrix to buffer
@@ -1088,7 +1088,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Get graphic facet
                 // -----------------------------------------------------------------------------
-                if (rCurrentEntity.GetType() != Dt::SActorType::Model)
+                if (rCurrentEntity.GetType() != Dt::SActorType::Mesh)
                 {
                     CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor);
 
@@ -1098,9 +1098,9 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Set other graphic data of this entity
                 // -----------------------------------------------------------------------------
-                CModelActorFacet* pGraphicModelActorFacet = static_cast<CModelActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+                CMeshActorFacet* pGraphicModelActorFacet = static_cast<CMeshActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
 
-                CModelPtr ModelPtr = pGraphicModelActorFacet->GetModel();
+                CMeshPtr ModelPtr = pGraphicModelActorFacet->GetMesh();
                 
                 // -----------------------------------------------------------------------------
                 // Upload model matrix to buffer

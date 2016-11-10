@@ -21,7 +21,7 @@
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_facet.h"
 #include "graphic/gfx_main.h"
-#include "graphic/gfx_model_manager.h"
+#include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
@@ -117,7 +117,7 @@ namespace
         
     private:
         
-        CModelPtr         m_QuadModelPtr;
+        CMeshPtr          m_QuadModelPtr;
         CBufferSetPtr     m_FullQuadViewVSBufferPtr;
         CBufferSetPtr     m_VolumeLightingCSBufferSetPtr;
         CInputLayoutPtr   m_P2InputLayoutPtr;
@@ -558,7 +558,7 @@ namespace
     
     void CGfxFogRenderer::OnSetupModels()
     {
-        m_QuadModelPtr = ModelManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
+        m_QuadModelPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
     }
     
     // -----------------------------------------------------------------------------
