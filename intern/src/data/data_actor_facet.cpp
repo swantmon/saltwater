@@ -22,14 +22,14 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CModelActorFacet::SetModel(CModel* _pModel)
+    void CModelActorFacet::SetModel(CMesh* _pModel)
     {
         m_pModel = _pModel;
     }
 
     // -----------------------------------------------------------------------------
 
-    CModel* CModelActorFacet::GetModel()
+    CMesh* CModelActorFacet::GetModel()
     {
         return m_pModel;
     }
@@ -71,14 +71,14 @@ namespace Dt
     // -----------------------------------------------------------------------------
 
 
-    void CARActorFacet::SetModel(CModel* _pAR)
+    void CARActorFacet::SetModel(CMesh* _pAR)
     {
         m_pModel = _pAR;
     }
 
     // -----------------------------------------------------------------------------
 
-    CModel* CARActorFacet::GetModel()
+    CMesh* CARActorFacet::GetModel()
     {
         return m_pModel;
     }

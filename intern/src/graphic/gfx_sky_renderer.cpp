@@ -574,7 +574,7 @@ namespace
 
         Dt::CModel& rSphereModel = Dt::ModelManager::CreateModel(ModelFileDesc);
         
-        ModelDescr.m_pModel = &rSphereModel;
+        ModelDescr.m_pModel = &rSphereModel.GetMesh(0);
         
         m_CubemapTextureSpherePtr = ModelManager::CreateModel(ModelDescr);
 

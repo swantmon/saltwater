@@ -51,7 +51,7 @@ namespace
 
         void Clear();
 
-        CEntity& CreateEntityFromFile(const SAssimpDescriptor& _rDescriptor);
+        CEntity& CreateEntityFromModel(const CModel& _rModel);
 
         CEntity& CreateEntity(const SEntityDescriptor& _rDescriptor, CEntity::BID _ID = CEntity::s_InvalidID);
 
@@ -165,10 +165,8 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CEntity& CDtLvlEntityManager::CreateEntityFromFile(const SAssimpDescriptor& _rDescriptor)
+    CEntity& CDtLvlEntityManager::CreateEntityFromModel(const CModel& _rModel)
     {
-        assert(_rDescriptor.m_pPathToFile != 0);
-
         SEntityDescriptor EntityDesc;
 
         EntityDesc.m_EntityCategory = SEntityCategory::Actor;
@@ -176,104 +174,53 @@ namespace
         EntityDesc.m_FacetFlags     = CEntity::FacetTransformation | CEntity::FacetHierarchy;
 
         // -----------------------------------------------------------------------------
-        // Recursive construction of scene entities
-        // -----------------------------------------------------------------------------
-        std::function<void(const aiNode*, Dt::CEntity*, const aiScene*)> CreateEntitiesFromScene = [&](const aiNode* _pNode, Dt::CEntity* _pParentEntity, const aiScene* _pScene)
-        {
-            // -----------------------------------------------------------------------------
-            // If we have some mesh data send this mesh to graphic and set facet on entity.
-            // This collection of mesh is a model with different surfaces!
-            // -----------------------------------------------------------------------------
-            if (_pNode->mNumMeshes > 0)
-            {
-                SModelAssimpDescriptor ModelSceneDesc;
-
-                ModelSceneDesc.m_pNode  = _pNode;
-                ModelSceneDesc.m_pScene = _pScene;
-
-                CModel& rModel = ModelManager::CreateModel(ModelSceneDesc);
-
-                Dt::CModelActorFacet* pModelActorFacet = ActorManager::CreateModelActor();
-
-                pModelActorFacet->SetModel(&rModel);
-
-                _pParentEntity->SetDetailFacet(SFacetCategory::Data, pModelActorFacet);
-
-                _pParentEntity->SetType(SActorType::Model);
-            }
-
-            // -----------------------------------------------------------------------------
-            // Check sub entities
-            // -----------------------------------------------------------------------------
-            unsigned int NumberOfEntities = _pNode->mNumChildren;
-
-            for (unsigned int IndexOfEntity = 0; IndexOfEntity < NumberOfEntities; ++IndexOfEntity)
-            {
-                aiNode* pChildren = _pNode->mChildren[IndexOfEntity];
-
-                // -----------------------------------------------------------------------------
-                // Prepare data
-                // -----------------------------------------------------------------------------
-                aiVector3D   NodePosition;
-                aiVector3D   NodeScale;
-                aiQuaternion NodeRotation;
-
-                pChildren->mTransformation.Decompose(NodeScale, NodeRotation, NodePosition);
-
-                // -----------------------------------------------------------------------------
-                // Create an child entity
-                // -----------------------------------------------------------------------------
-                Dt::CEntity& rChildEntity = CreateEntity(EntityDesc);
-
-                if (pChildren->mName.length > 0)
-                {
-                    rChildEntity.SetName(pChildren->mName.C_Str());
-                }
-
-                Dt::CTransformationFacet* pTransformationFacet = rChildEntity.GetTransformationFacet();
-
-                pTransformationFacet->SetPosition(Base::Float3(NodePosition.x, NodePosition.y, NodePosition.z));
-                pTransformationFacet->SetRotation(Base::Float3(NodeRotation.x, NodeRotation.y, NodeRotation.z));
-                pTransformationFacet->SetScale   (Base::Float3(NodeScale.x,    NodeScale.y,    NodeScale.z));
-
-                _pParentEntity->Attach(rChildEntity);
-
-                // -----------------------------------------------------------------------------
-                // Check this new child on new child and important data like meshes, lights,
-                // ...
-                // -----------------------------------------------------------------------------
-                CreateEntitiesFromScene(pChildren, &rChildEntity, _pScene);
-            }
-        };
-
-        // -----------------------------------------------------------------------------
-        // Build path to scenes in file system
-        // -----------------------------------------------------------------------------
-		std::string PathToModel = g_PathToAssets + _rDescriptor.m_pPathToFile;
-
-        // -----------------------------------------------------------------------------
-        // Load file with ASSIMP asset importer
-        // -----------------------------------------------------------------------------
-        Assimp::Importer Importer;
-
-        unsigned int Flags = aiProcess_CalcTangentSpace | aiProcess_GenNormals | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices;
-
-        const aiScene* pScene = Importer.ReadFile(PathToModel.c_str(), Flags);
-
-        if (!pScene)
-        {
-            BASE_THROWV("Can't load scene file %s; Code: %s", _rDescriptor.m_pPathToFile, Importer.GetErrorString());
-        }
-
-        // -----------------------------------------------------------------------------
         // Create root node
         // -----------------------------------------------------------------------------
         Dt::CEntity& rRootEntity = CreateEntity(EntityDesc);
 
         // -----------------------------------------------------------------------------
-        // Entities with model data
+        // Iterate throw the meshes
         // -----------------------------------------------------------------------------
-        CreateEntitiesFromScene(pScene->mRootNode, &rRootEntity, pScene);
+        unsigned int NumberOfMeshes = _rModel.GetNumberOfMeshes();
+
+        for (unsigned int IndexOfMesh = 0; IndexOfMesh < NumberOfMeshes; ++ IndexOfMesh)
+        {
+            // -----------------------------------------------------------------------------
+            // Get mesh
+            // -----------------------------------------------------------------------------
+            CMesh& rMesh = _rModel.GetMesh(IndexOfMesh);
+
+            // -----------------------------------------------------------------------------
+            // Create entity
+            // -----------------------------------------------------------------------------
+            EntityDesc.m_EntityCategory = SEntityCategory::Actor;
+            EntityDesc.m_EntityType     = SActorType::Model;
+            EntityDesc.m_FacetFlags     = CEntity::FacetTransformation | CEntity::FacetHierarchy;
+
+            Dt::CEntity& rChildEntity = CreateEntity(EntityDesc);
+
+            // -----------------------------------------------------------------------------
+            // Set name
+            // -----------------------------------------------------------------------------
+            if (strlen(rMesh.GetMeshname()) > 0)
+            {
+                rChildEntity.SetName(rMesh.GetMeshname());
+            }
+
+            // -----------------------------------------------------------------------------
+            // Create facet
+            // -----------------------------------------------------------------------------
+            Dt::CModelActorFacet* pModelActorFacet = ActorManager::CreateModelActor();
+
+            pModelActorFacet->SetModel(&rMesh);
+
+            rChildEntity.SetDetailFacet(SFacetCategory::Data, pModelActorFacet);
+
+            // -----------------------------------------------------------------------------
+            // Attach mesh to entity
+            // -----------------------------------------------------------------------------
+            rRootEntity.Attach(rChildEntity);
+        }
 
         return rRootEntity;
     }
@@ -609,9 +556,9 @@ namespace EntityManager
 
     // -----------------------------------------------------------------------------
 
-    CEntity& CreateEntityFromFile(const SAssimpDescriptor& _rDescriptor)
+    CEntity& CreateEntityFromModel(const CModel& _rModel)
     {
-        return CDtLvlEntityManager::GetInstance().CreateEntityFromFile(_rDescriptor);
+        return CDtLvlEntityManager::GetInstance().CreateEntityFromModel(_rModel);
     }
 
     // -----------------------------------------------------------------------------

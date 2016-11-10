@@ -404,7 +404,7 @@ namespace
 
         SModelDescriptor ModelDesc;
 
-        ModelDesc.m_pModel = &rSphereModel;
+        ModelDesc.m_pModel = &rSphereModel.GetMesh(0);
 
         m_EnvironmentSpherePtr = ModelManager::CreateModel(ModelDesc);
     }

@@ -8,11 +8,10 @@
 
 #pragma once
 
-#include "base/base_aabb3.h"
 #include "base/base_string.h"
 #include "base/base_typedef.h"
 
-#include "data/data_lod.h"
+#include "data/data_mesh.h"
 
 namespace Dt
 {
@@ -20,7 +19,7 @@ namespace Dt
     {
     public:
         
-        static const unsigned int s_NumberOfLODs = 4;
+        typedef std::vector<CMesh*> CMeshContainer;
 
     public:
 
@@ -30,17 +29,14 @@ namespace Dt
         void SetModelname(const char* _pModelname);
         const char* GetModelname() const;
 
-        void SetNumberOfLODs(unsigned int _NumberOfLODs);
-        unsigned int GetNumberOfLODs() const;
+        unsigned int GetNumberOfMeshes() const;
 
-        void SetLOD(unsigned int _Index, CLOD* _pLOD);
-        CLOD* GetLOD(unsigned int _Index);
-        const CLOD* GetLOD(unsigned int _Index) const;
+        CMesh& GetMesh(unsigned int _ID);
+        CMesh& GetMesh(unsigned int _ID) const;
         
     protected:
         
         Base::CharString m_Modelname;
-        unsigned int     m_NumberOfLODs;
-        CLOD*            m_LODs[s_NumberOfLODs];
+        CMeshContainer   m_Meshes;
     };
 } // namespace Dt

@@ -95,6 +95,9 @@
     <ClInclude Include="..\..\..\src\data\data_script_interface.h">
       <Filter>interface\script</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_mesh.h">
+      <Filter>models</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\data\data_entity_manager.cpp">
@@ -175,6 +178,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_material.cpp">
       <Filter>materials</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_mesh.cpp">
+      <Filter>models</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

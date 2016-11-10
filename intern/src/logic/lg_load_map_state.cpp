@@ -14,6 +14,7 @@
 #include "data/data_actor_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
+#include "data/data_hierarchy_facet.h"
 #include "data/data_light_facet.h"
 #include "data/data_light_manager.h"
 #include "data/data_fx_facet.h"
@@ -313,13 +314,16 @@ namespace
         // Setup entities
         // -----------------------------------------------------------------------------
         {
-            Dt::SEntityDescriptor EntityDesc;
+            Dt::SModelFileDescriptor ModelFileDesc;
 
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
-            EntityDesc.m_EntityType     = Dt::SActorType::Model;
-            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+            ModelFileDesc.m_pFileName = "models/plane.obj";
+            ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
 
-            Dt::CEntity& rPlane = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
+
+            // -----------------------------------------------------------------------------
+
+            Dt::CEntity& rPlane = Dt::EntityManager::CreateEntityFromModel(rModel);
 
             rPlane.SetName("Plane");
 
@@ -329,17 +333,6 @@ namespace
             pTransformationFacet->SetScale(Base::Float3(0.01f));
             pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, 0.0f));
 
-            Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
-
-            Dt::SModelFileDescriptor ModelFileDesc;
-
-            ModelFileDesc.m_pFileName = "models/plane.obj";
-            ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
-
-            pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
-
-            rPlane.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
-
             Dt::EntityManager::MarkEntityAsDirty(rPlane, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
@@ -347,13 +340,16 @@ namespace
         // -----------------------------------------------------------------------------
 
         {
-            Dt::SEntityDescriptor EntityDesc;
+            Dt::SModelFileDescriptor ModelFileDesc;
 
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
-            EntityDesc.m_EntityType     = Dt::SActorType::Model;
-            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+            ModelFileDesc.m_pFileName = "models/sphere.obj";
+            ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::DefaultFlipUVs;
 
-            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
+
+            // -----------------------------------------------------------------------------
+
+            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntityFromModel(rModel);
 
             rSphere.SetName("Sphere");
 
@@ -363,41 +359,45 @@ namespace
             pTransformationFacet->SetScale(Base::Float3(0.1f));
             pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, 0.0f));
 
-            Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
+            // -----------------------------------------------------------------------------
 
-            Dt::SModelFileDescriptor ModelFileDesc;
+            Dt::CEntity* pSubEntity = rSphere.GetHierarchyFacet()->GetFirstChild();
 
-            ModelFileDesc.m_pFileName = "models/sphere.obj";
-            ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
+            Dt::CModelActorFacet* pModelActorFacet = static_cast<Dt::CModelActorFacet*>(pSubEntity->GetDetailFacet(Dt::SFacetCategory::Data));
 
             Dt::SMaterialFileDescriptor MaterialFileDesc;
 
             MaterialFileDesc.m_pFileName = "materials/naturals/metals/Gold_Worn_00.mat";
 
-            pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
             pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
 
-            rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
+            // -----------------------------------------------------------------------------
+
+            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+
 
 //             Dt::CScriptFacet* pScriptFacet = Dt::ScriptManager::CreateScript();
 // 
 //             pScriptFacet->SetScriptFile("scripts/move_circle.lua");
 // 
 //             rSphere.SetDetailFacet(Dt::SFacetCategory::Script, pScriptFacet);
-
-            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         // -----------------------------------------------------------------------------
 
         {
-            Dt::SEntityDescriptor EntityDesc;
+            Dt::SModelFileDescriptor ModelFileDesc;
 
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
-            EntityDesc.m_EntityType     = Dt::SActorType::Model;
-            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+            ModelFileDesc.m_pFileName = "models/plane.obj";
+            ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::DefaultFlipUVs;
 
-            Dt::CEntity& rPlane = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
+
+            // -----------------------------------------------------------------------------
+
+            Dt::CEntity& rPlane = Dt::EntityManager::CreateEntityFromModel(rModel);
+
+            rPlane.SetName("Sphere");
 
             Dt::CTransformationFacet* pTransformationFacet = rPlane.GetTransformationFacet();
 
@@ -405,21 +405,19 @@ namespace
             pTransformationFacet->SetScale(Base::Float3(0.1f));
             pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, 0.0f));
 
-            Dt::CModelActorFacet* pModelActorFacet = Dt::ActorManager::CreateModelActor();
+            // -----------------------------------------------------------------------------
 
-            Dt::SModelFileDescriptor ModelFileDesc;
+            Dt::CEntity* pSubEntity = rPlane.GetHierarchyFacet()->GetFirstChild();
 
-            ModelFileDesc.m_pFileName = "models/plane.obj";
-            ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
+            Dt::CModelActorFacet* pModelActorFacet = static_cast<Dt::CModelActorFacet*>(pSubEntity->GetDetailFacet(Dt::SFacetCategory::Data));
 
             Dt::SMaterialFileDescriptor MaterialFileDesc;
 
             MaterialFileDesc.m_pFileName = "materials/tests/checker.mat";
 
-            pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
             pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
 
-            rPlane.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
+            // -----------------------------------------------------------------------------
 
             Dt::EntityManager::MarkEntityAsDirty(rPlane, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
@@ -641,37 +639,37 @@ namespace
         // AR
         // -----------------------------------------------------------------------------
         {
-            Dt::SEntityDescriptor EntityDesc;
-
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
-            EntityDesc.m_EntityType     = Dt::SActorType::AR;
-            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
-
-            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntity(EntityDesc);
-
-            Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
-
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.0f));
-            pTransformationFacet->SetScale   (Base::Float3(1.0f));
-            pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, 0.0f));
-
-            Dt::CARActorFacet* pModelActorFacet = Dt::ActorManager::CreateARActor();
-
-            Dt::SModelFileDescriptor ModelFileDesc;
-
-            ModelFileDesc.m_pFileName = "models/plane.obj";
-            ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
-
-            Dt::SMaterialFileDescriptor MaterialFileDesc;
-
-            MaterialFileDesc.m_pFileName = "materials/tests/background.mat";
-
-            pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
-            pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
-
-            rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
-
-            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+//             Dt::SEntityDescriptor EntityDesc;
+// 
+//             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
+//             EntityDesc.m_EntityType     = Dt::SActorType::AR;
+//             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+// 
+//             Dt::CEntity& rSphere = Dt::EntityManager::CreateEntity(EntityDesc);
+// 
+//             Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
+// 
+//             pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.0f));
+//             pTransformationFacet->SetScale   (Base::Float3(1.0f));
+//             pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, 0.0f));
+// 
+//             Dt::CARActorFacet* pModelActorFacet = Dt::ActorManager::CreateARActor();
+// 
+//             Dt::SModelFileDescriptor ModelFileDesc;
+// 
+//             ModelFileDesc.m_pFileName = "models/plane.obj";
+//             ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
+// 
+//             Dt::SMaterialFileDescriptor MaterialFileDesc;
+// 
+//             MaterialFileDesc.m_pFileName = "materials/tests/background.mat";
+// 
+//             pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
+//             pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
+// 
+//             rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
+// 
+//             Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
        }
    }
 } // namespace

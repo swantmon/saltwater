@@ -15,7 +15,7 @@
 
 namespace Dt
 {
-    class CModel;
+    class CMesh;
     class CMaterial;
 } // namespace Dt
 
@@ -41,8 +41,8 @@ namespace Dt
     {
     public:
 
-        void SetModel(CModel* _pModel);
-        CModel* GetModel();
+        void SetModel(CMesh* _pModel);
+        CMesh* GetModel();
 
         void SetMaterial(unsigned int _Surface, CMaterial* _pMaterial);
         CMaterial* GetMaterial(unsigned int _Surface);
@@ -54,7 +54,7 @@ namespace Dt
 
     private:
 
-        CModel*    m_pModel;
+        CMesh*     m_pModel;
         CMaterial* m_pMaterial[CLOD::s_NumberOfSurfaces];
     };
 } // namespace Dt
@@ -65,8 +65,8 @@ namespace Dt
     {
     public:
 
-        void SetModel(CModel* _pModel);
-        CModel* GetModel();
+        void SetModel(CMesh* _pModel);
+        CMesh* GetModel();
 
         void SetMaterial(unsigned int _Surface, CMaterial* _pMaterial);
         CMaterial* GetMaterial(unsigned int _Surface);
@@ -78,7 +78,7 @@ namespace Dt
 
     private:
 
-        CModel*    m_pModel;
+        CMesh*     m_pModel;
         CMaterial* m_pMaterial[CLOD::s_NumberOfSurfaces];
     };
 } // namespace Dt

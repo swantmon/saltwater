@@ -39,12 +39,6 @@ namespace Dt
         const Base::Char* m_pFileName;
         unsigned int      m_GenFlag;
     };
-
-    struct SModelAssimpDescriptor
-    {
-        const void* m_pNode;
-        const void* m_pScene;
-    };
 } // namespace Dt
 
 namespace Dt
@@ -57,7 +51,6 @@ namespace ModelManager
     void Clear();
 
     CModel& CreateModel(const SModelFileDescriptor& _rDescriptor);
-    CModel& CreateModel(const SModelAssimpDescriptor& _rDescriptor);
     CModel& CreateBox(float _Width, float _Height, float _Depth);
     CModel& CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices);
     CModel& CreateCone(float _Radius, float _Height, unsigned int _Slices);

@@ -18,7 +18,7 @@ namespace Gfx
 {
     struct SModelDescriptor
     {
-        Dt::CModel* m_pModel;
+        Dt::CMesh* m_pModel;
     };
 } // namespace Gfx
 

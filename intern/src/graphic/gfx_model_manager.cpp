@@ -140,16 +140,16 @@ namespace
     
     CModelPtr CGfxModelManager::CreateModel(const Gfx::SModelDescriptor& _rDescriptor)
     {
-        Dt::CModel& rDataModel = *_rDescriptor.m_pModel;
+        Dt::CMesh& rDataModel = *_rDescriptor.m_pModel;
         
         // -----------------------------------------------------------------------------
         // Check existing model
         // -----------------------------------------------------------------------------
         unsigned int Hash = 0;
         
-        if (rDataModel.GetModelname() != 0)
+        if (rDataModel.GetMeshname() != 0)
         {
-            Hash = Base::CRC32(rDataModel.GetModelname(), static_cast<unsigned int>(strlen(rDataModel.GetModelname())));
+            Hash = Base::CRC32(rDataModel.GetMeshname(), static_cast<unsigned int>(strlen(rDataModel.GetMeshname())));
             
             if (m_ModelByID.find(Hash) != m_ModelByID.end())
             {

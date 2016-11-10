@@ -480,7 +480,9 @@ namespace
         ModelFileDesc.m_pFileName = "gizmo.obj";
         ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
 
-        ModelDesc.m_pModel = &Dt::ModelManager::CreateModel(ModelFileDesc);
+        Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
+
+        ModelDesc.m_pModel = &rModel.GetMesh(0);
 
         m_GizmoModelPtr = ModelManager::CreateModel(ModelDesc);
 

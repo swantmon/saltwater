@@ -15,7 +15,7 @@
 
 namespace Dt
 {
-    class CEntity;
+    class CModel;
 } // namespace Dt
 
 namespace Dt
@@ -30,11 +30,6 @@ namespace EntityManager
 
 namespace Dt
 {
-    struct SAssimpDescriptor
-    {
-        const Base::Char* m_pPathToFile;
-    };
-
     struct SEntityDescriptor
     {
         unsigned int m_EntityCategory;
@@ -52,7 +47,7 @@ namespace EntityManager
 
     void Clear();
 
-    CEntity& CreateEntityFromFile(const SAssimpDescriptor& _rDescriptor);
+    CEntity& CreateEntityFromModel(const CModel& _rModel);
 
     CEntity& CreateEntity(const SEntityDescriptor& _rDescriptor, CEntity::BID _ID = CEntity::s_InvalidID);
 

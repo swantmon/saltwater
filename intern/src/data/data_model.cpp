@@ -6,10 +6,8 @@
 namespace Dt
 {
     CModel::CModel()
-        : m_Modelname   ()
-        , m_NumberOfLODs(0)
+        : m_Modelname()
     {
-        Base::CMemory::Zero(&m_LODs, s_NumberOfLODs * sizeof(CLOD*));
     }
 
     // -----------------------------------------------------------------------------
@@ -35,44 +33,26 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CModel::SetNumberOfLODs(unsigned int _NumberOfLODs)
+    unsigned int CModel::GetNumberOfMeshes() const
     {
-        assert(_NumberOfLODs >= 0 && _NumberOfLODs < s_NumberOfLODs);
-
-        m_NumberOfLODs = _NumberOfLODs;
+        return static_cast<unsigned int>(m_Meshes.size());
     }
 
     // -----------------------------------------------------------------------------
 
-    unsigned int CModel::GetNumberOfLODs() const
+    CMesh& CModel::GetMesh(unsigned int _ID)
     {
-        return m_NumberOfLODs;
+        assert(_ID >= 0 && _ID < m_Meshes.size());
+
+        return *m_Meshes.at(_ID);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CModel::SetLOD(unsigned int _Index, CLOD* _pLOD)
+    CMesh& CModel::GetMesh(unsigned int _ID) const
     {
-        assert(_Index >= 0 && _Index < s_NumberOfLODs);
+        assert(_ID >= 0 && _ID < m_Meshes.size());
 
-        m_LODs[_Index] = _pLOD;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CLOD* CModel::GetLOD(unsigned int _Index)
-    {
-        assert(_Index >= 0 && _Index < s_NumberOfLODs);
-
-        return m_LODs[_Index];
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const CLOD* CModel::GetLOD(unsigned int _Index) const
-    {
-        assert(_Index >= 0 && _Index < s_NumberOfLODs);
-
-        return m_LODs[_Index];
+        return *m_Meshes.at(_ID);
     }
 } // namespace Dt

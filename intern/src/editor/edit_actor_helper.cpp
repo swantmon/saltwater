@@ -113,15 +113,18 @@ namespace
         // -----------------------------------------------------------------------------
         // Model
         // -----------------------------------------------------------------------------
-        Dt::SAssimpDescriptor ModelFileDesc;
+        Dt::SModelFileDescriptor ModelFileDesc;
 
         const char* pPathToFile = _rMessage.GetString(pTmp, 512);
 
         PathToFile = "models/" + CopyFileToAssets("../assets/models/", pPathToFile);
 
-        ModelFileDesc.m_pPathToFile = PathToFile.c_str();
+        ModelFileDesc.m_pFileName = PathToFile.c_str();
+        ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::Default;
 
-        Dt::CEntity& rNewEntity = Dt::EntityManager::CreateEntityFromFile(ModelFileDesc);
+        Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
+
+        Dt::CEntity& rNewEntity = Dt::EntityManager::CreateEntityFromModel(rModel);
 
         rNewEntity.SetName("New Model");
 
