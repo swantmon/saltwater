@@ -162,6 +162,27 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
+    void CCameraActorFacet::SetTexture(Dt::CTexture2D* _pTexture2D)
+    {
+        m_pTexture2D = _pTexture2D;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Dt::CTexture2D* CCameraActorFacet::GetTexture()
+    {
+        return m_pTexture2D;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CCameraActorFacet::GetHasTexture() const
+    {
+        return m_pTexture2D != 0;
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CCameraActorFacet::SetBackgroundColor(Base::Float3& _rBackgroundColor)
     {
         m_BackgroundColor = _rBackgroundColor;

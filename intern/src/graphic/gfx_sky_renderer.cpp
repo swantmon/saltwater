@@ -11,8 +11,9 @@
 
 #include "core/core_time.h"
 
-#include "data/data_light_facet.h"
+#include "data/data_actor_facet.h"
 #include "data/data_entity.h"
+#include "data/data_light_facet.h"
 #include "data/data_map.h"
 #include "data/data_model_manager.h"
 
@@ -81,6 +82,11 @@ namespace
             Gfx::CSkyboxFacet* m_pGraphicSkybox;
         };
 
+        struct SCameraRenderJob
+        {
+            Dt::CCameraActorFacet* m_pDataCamera;
+        };
+
         struct SSkytextureBufferPS
         {
             float m_HDRFactor;
@@ -115,6 +121,7 @@ namespace
     private:
 
         typedef std::vector<SSkyboxRenderJob> CSkyboxRenderJobs;
+        typedef std::vector<SCameraRenderJob> CCameraRenderJobs;
         
     private:
     
@@ -147,7 +154,8 @@ namespace
         CSamplerSetPtr    m_PSSamplerSetPtr;
         CViewPortSetPtr   m_CubemapViewPortSetPtr;
 
-        CSkyboxRenderJobs     m_SkyboxRenderJobs;
+        CSkyboxRenderJobs m_SkyboxRenderJobs;
+        CCameraRenderJobs m_CameraRenderJobs;
         
     private:
         
@@ -195,6 +203,7 @@ namespace
         , m_PSSamplerSetPtr            ()
         , m_CubemapViewPortSetPtr      ()
         , m_SkyboxRenderJobs           ()
+        , m_CameraRenderJobs           ()
     {
     }
     
@@ -243,7 +252,8 @@ namespace
         m_PSSamplerSetPtr             = 0;
         m_CubemapViewPortSetPtr       = 0;
 
-        m_SkyboxRenderJobs    .clear();
+        m_SkyboxRenderJobs.clear();
+        m_CameraRenderJobs.clear();
     }
     
     // -----------------------------------------------------------------------------
@@ -621,26 +631,47 @@ namespace
     
     void CGfxSkyRenderer::Render()
     {
-        if (m_SkyboxRenderJobs.size() == 0) return;
-
-        SSkyboxRenderJob& rRenderJob = m_SkyboxRenderJobs[0];
-
-        Performance::BeginEvent("Sky");
-
-        if (rRenderJob.m_pDataSkybox->GetType() == Dt::CSkyboxFacet::Panorama)
+        if (m_SkyboxRenderJobs.size() != 0)
         {
-            RenderSkyboxFromPanorama();
+            SSkyboxRenderJob& rRenderJob = m_SkyboxRenderJobs[0];
 
-            RenderBackgroundFromSkybox();
+            Performance::BeginEvent("Sky");
+
+            if (rRenderJob.m_pDataSkybox->GetType() == Dt::CSkyboxFacet::Panorama)
+            {
+                RenderSkyboxFromPanorama();
+            }
+            else if (rRenderJob.m_pDataSkybox->GetType() == Dt::CSkyboxFacet::ImageBackground)
+            {
+                RenderSkyboxFromCubemap();
+            }
+
+            Performance::EndEvent();
         }
-        else if (rRenderJob.m_pDataSkybox->GetType() == Dt::CSkyboxFacet::ImageBackground)
+
+        if (m_CameraRenderJobs.size() != 0)
         {
-            RenderSkyboxFromCubemap();
+            SCameraRenderJob& rRenderJob = m_CameraRenderJobs[0];
 
-            RenderBackgroundFromTexture();
+            Performance::BeginEvent("Clear");
+
+            if (rRenderJob.m_pDataCamera->GetClearFlag() == Dt::CCameraActorFacet::Skybox)
+            {
+                RenderBackgroundFromSkybox();
+            }
+            else if (rRenderJob.m_pDataCamera->GetClearFlag() == Dt::CCameraActorFacet::Texture)
+            {
+                RenderBackgroundFromTexture();
+            }
+            else
+            {
+                // RenderBackgroundFromColor();
+            }
+
+            Performance::EndEvent();
         }
 
-        Performance::EndEvent();
+        
     }
 
     // -----------------------------------------------------------------------------
@@ -1021,6 +1052,7 @@ namespace
         // Clear current render jobs
         // -----------------------------------------------------------------------------
         m_SkyboxRenderJobs.clear();
+        m_CameraRenderJobs.clear();
 
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
@@ -1055,6 +1087,36 @@ namespace
             // Next entity
             // -----------------------------------------------------------------------------
             CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
+        }
+
+        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Actor);
+        EndOfEntities = Dt::Map::EntitiesEnd();
+
+        for (; CurrentEntity != EndOfEntities; )
+        {
+            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+
+            // -----------------------------------------------------------------------------
+            // Get graphic facet
+            // -----------------------------------------------------------------------------
+            if (rCurrentEntity.GetType() == Dt::SActorType::Camera)
+            {
+                Dt::CCameraActorFacet* pDataCameraFacet = static_cast<Dt::CCameraActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+                if (pDataCameraFacet->IsMainCamera())
+                {
+                    SCameraRenderJob NewRenderJob;
+
+                    NewRenderJob.m_pDataCamera = pDataCameraFacet;
+
+                    m_CameraRenderJobs.push_back(NewRenderJob);
+                }
+            }
+
+            // -----------------------------------------------------------------------------
+            // Next entity
+            // -----------------------------------------------------------------------------
+            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor);
         }
     }
 } // namespace
