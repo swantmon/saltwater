@@ -34,15 +34,15 @@ public:
     QLabel *label_3;
     QLabel *label_2;
     QLabel *label;
-    QLineEdit *lineEdit;
-    QLineEdit *lineEdit_2;
-    QCheckBox *checkBox;
+    QLineEdit *m_pUIDEdit;
+    QLineEdit *m_pAppearCounterEdit;
+    QCheckBox *m_pIsFoundCB;
 
     void setupUi(QWidget *Form)
     {
         if (Form->objectName().isEmpty())
             Form->setObjectName(QStringLiteral("Form"));
-        Form->resize(400, 213);
+        Form->resize(201, 118);
         verticalLayout = new QVBoxLayout(Form);
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
         groupBox = new QGroupBox(Form);
@@ -66,21 +66,21 @@ public:
 
         gridLayout->addWidget(label, 0, 0, 1, 1);
 
-        lineEdit = new QLineEdit(groupBox);
-        lineEdit->setObjectName(QStringLiteral("lineEdit"));
+        m_pUIDEdit = new QLineEdit(groupBox);
+        m_pUIDEdit->setObjectName(QStringLiteral("m_pUIDEdit"));
 
-        gridLayout->addWidget(lineEdit, 0, 1, 1, 1);
+        gridLayout->addWidget(m_pUIDEdit, 0, 1, 1, 1);
 
-        lineEdit_2 = new QLineEdit(groupBox);
-        lineEdit_2->setObjectName(QStringLiteral("lineEdit_2"));
-        lineEdit_2->setReadOnly(true);
+        m_pAppearCounterEdit = new QLineEdit(groupBox);
+        m_pAppearCounterEdit->setObjectName(QStringLiteral("m_pAppearCounterEdit"));
+        m_pAppearCounterEdit->setReadOnly(true);
 
-        gridLayout->addWidget(lineEdit_2, 1, 1, 1, 1);
+        gridLayout->addWidget(m_pAppearCounterEdit, 1, 1, 1, 1);
 
-        checkBox = new QCheckBox(groupBox);
-        checkBox->setObjectName(QStringLiteral("checkBox"));
+        m_pIsFoundCB = new QCheckBox(groupBox);
+        m_pIsFoundCB->setObjectName(QStringLiteral("m_pIsFoundCB"));
 
-        gridLayout->addWidget(checkBox, 2, 1, 1, 1);
+        gridLayout->addWidget(m_pIsFoundCB, 2, 1, 1, 1);
 
 
         verticalLayout_2->addLayout(gridLayout);
@@ -101,9 +101,9 @@ public:
         label_3->setText(QApplication::translate("Form", "Is Found", 0));
         label_2->setText(QApplication::translate("Form", "Appear Counter", 0));
         label->setText(QApplication::translate("Form", "UID", 0));
-        lineEdit->setText(QApplication::translate("Form", "0", 0));
-        lineEdit_2->setText(QApplication::translate("Form", "0", 0));
-        checkBox->setText(QString());
+        m_pUIDEdit->setText(QApplication::translate("Form", "0", 0));
+        m_pAppearCounterEdit->setText(QApplication::translate("Form", "0", 0));
+        m_pIsFoundCB->setText(QString());
     } // retranslateUi
 
 };

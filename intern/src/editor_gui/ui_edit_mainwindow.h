@@ -60,6 +60,7 @@ public:
     QAction *m_pActionFXAA;
     QAction *m_pActionSSR;
     QAction *m_pActionVolumeFog;
+    QAction *m_pActionARController;
     QWidget *m_pCentralWidget;
     QVBoxLayout *verticalLayout_3;
     QHBoxLayout *horizontalLayout;
@@ -77,7 +78,7 @@ public:
     QMenu *menuActors;
     QMenu *menuLights;
     QMenu *menuEffects;
-    QMenu *m_pMenuComponent;
+    QMenu *menuPlugins;
     QMenu *m_pMenuWindow;
     QMenu *m_pMenuHelp;
     QStatusBar *m_pStatusBar;
@@ -168,6 +169,8 @@ public:
         m_pActionSSR->setObjectName(QStringLiteral("m_pActionSSR"));
         m_pActionVolumeFog = new QAction(CMainWindow);
         m_pActionVolumeFog->setObjectName(QStringLiteral("m_pActionVolumeFog"));
+        m_pActionARController = new QAction(CMainWindow);
+        m_pActionARController->setObjectName(QStringLiteral("m_pActionARController"));
         m_pCentralWidget = new QWidget(CMainWindow);
         m_pCentralWidget->setObjectName(QStringLiteral("m_pCentralWidget"));
         verticalLayout_3 = new QVBoxLayout(m_pCentralWidget);
@@ -239,9 +242,8 @@ public:
         menuLights->setObjectName(QStringLiteral("menuLights"));
         menuEffects = new QMenu(m_pMenuEntity);
         menuEffects->setObjectName(QStringLiteral("menuEffects"));
-        m_pMenuComponent = new QMenu(m_pMenuBar);
-        m_pMenuComponent->setObjectName(QStringLiteral("m_pMenuComponent"));
-        m_pMenuComponent->setEnabled(false);
+        menuPlugins = new QMenu(m_pMenuEntity);
+        menuPlugins->setObjectName(QStringLiteral("menuPlugins"));
         m_pMenuWindow = new QMenu(m_pMenuBar);
         m_pMenuWindow->setObjectName(QStringLiteral("m_pMenuWindow"));
         m_pMenuHelp = new QMenu(m_pMenuBar);
@@ -416,7 +418,6 @@ public:
         m_pMenuBar->addAction(m_pMenuEdit->menuAction());
         m_pMenuBar->addAction(m_pMenuAssets->menuAction());
         m_pMenuBar->addAction(m_pMenuEntity->menuAction());
-        m_pMenuBar->addAction(m_pMenuComponent->menuAction());
         m_pMenuBar->addAction(m_pMenuWindow->menuAction());
         m_pMenuBar->addAction(m_pMenuHelp->menuAction());
         m_pMenuFile->addAction(m_pActionNew);
@@ -426,6 +427,7 @@ public:
         m_pMenuEntity->addAction(menuActors->menuAction());
         m_pMenuEntity->addAction(menuLights->menuAction());
         m_pMenuEntity->addAction(menuEffects->menuAction());
+        m_pMenuEntity->addAction(menuPlugins->menuAction());
         menuActors->addAction(m_pActionModel);
         menuActors->addAction(m_pActionCamera);
         menuLights->addAction(m_pActionPoint);
@@ -437,6 +439,7 @@ public:
         menuEffects->addAction(m_pActionFXAA);
         menuEffects->addAction(m_pActionSSR);
         menuEffects->addAction(m_pActionVolumeFog);
+        menuPlugins->addAction(m_pActionARController);
         m_pMenuWindow->addAction(m_pActionHistogram);
         m_pMenuHelp->addAction(m_pActionAboutSaltwater);
         m_pMenuHelp->addSeparator();
@@ -467,6 +470,7 @@ public:
         QObject::connect(m_pActionBloom, SIGNAL(triggered()), CMainWindow, SLOT(createNewEntityBloom()));
         QObject::connect(m_pActionSSR, SIGNAL(triggered()), CMainWindow, SLOT(createNewEntitySSR()));
         QObject::connect(m_pActionVolumeFog, SIGNAL(triggered()), CMainWindow, SLOT(createNewEntityVolumeFog()));
+        QObject::connect(m_pActionARController, SIGNAL(triggered()), CMainWindow, SLOT(createNewPluginARController()));
 
         QMetaObject::connectSlotsByName(CMainWindow);
     } // setupUi
@@ -499,6 +503,7 @@ public:
         m_pActionFXAA->setText(QApplication::translate("CMainWindow", "FXAA", 0));
         m_pActionSSR->setText(QApplication::translate("CMainWindow", "SSR", 0));
         m_pActionVolumeFog->setText(QApplication::translate("CMainWindow", "Volume Fog", 0));
+        m_pActionARController->setText(QApplication::translate("CMainWindow", "AR Controller", 0));
         m_pPlayButton->setText(QApplication::translate("CMainWindow", "Play", 0));
         m_pMailAdressEdit->setPlaceholderText(QApplication::translate("CMainWindow", "max.mustermann@mail.com", 0));
         m_pScreenshotButton->setText(QApplication::translate("CMainWindow", "Screenshot", 0));
@@ -509,7 +514,7 @@ public:
         menuActors->setTitle(QApplication::translate("CMainWindow", "Actors", 0));
         menuLights->setTitle(QApplication::translate("CMainWindow", "Lights", 0));
         menuEffects->setTitle(QApplication::translate("CMainWindow", "Effects", 0));
-        m_pMenuComponent->setTitle(QApplication::translate("CMainWindow", "Component", 0));
+        menuPlugins->setTitle(QApplication::translate("CMainWindow", "Plugins", 0));
         m_pMenuWindow->setTitle(QApplication::translate("CMainWindow", "Window", 0));
         m_pMenuHelp->setTitle(QApplication::translate("CMainWindow", "Help", 0));
         m_pSceneGraphDockWidget->setWindowTitle(QApplication::translate("CMainWindow", "Scene Graph", 0));

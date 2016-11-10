@@ -31,26 +31,27 @@ public:
     QGroupBox *groupBox;
     QVBoxLayout *verticalLayout_3;
     QGridLayout *gridLayout_2;
-    QLabel *label_6;
-    QLabel *label_3;
-    QComboBox *comboBox;
-    QLabel *label_4;
     QLabel *label_2;
+    QLineEdit *m_pDeviceNumberEdit;
     QLabel *label;
     QLabel *label_5;
+    QLineEdit *m_pParameterFile;
+    QLineEdit *m_pNumberOfMarkerEdit;
+    QLabel *label_3;
+    QComboBox *m_pDeviceCB;
+    QLabel *label_4;
     QLabel *label_7;
-    QLineEdit *lineEdit;
-    QLineEdit *lineEdit_2;
-    QLineEdit *lineEdit_3;
-    QLineEdit *lineEdit_4;
-    QLineEdit *lineEdit_5;
-    QLineEdit *lineEdit_6;
+    QLineEdit *m_pCameraEntityIDEdit;
+    QLineEdit *m_pOutputBackgroundEdit;
+    QLineEdit *m_pOutputCubemapEdit;
+    QLabel *label_6;
+    QVBoxLayout *m_pMarkerLayout;
 
     void setupUi(QWidget *InspectorARController)
     {
         if (InspectorARController->objectName().isEmpty())
             InspectorARController->setObjectName(QStringLiteral("InspectorARController"));
-        InspectorARController->resize(526, 390);
+        InspectorARController->resize(303, 237);
         verticalLayout = new QVBoxLayout(InspectorARController);
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
         groupBox = new QGroupBox(InspectorARController);
@@ -59,30 +60,15 @@ public:
         verticalLayout_3->setObjectName(QStringLiteral("verticalLayout_3"));
         gridLayout_2 = new QGridLayout();
         gridLayout_2->setObjectName(QStringLiteral("gridLayout_2"));
-        label_6 = new QLabel(groupBox);
-        label_6->setObjectName(QStringLiteral("label_6"));
-
-        gridLayout_2->addWidget(label_6, 5, 0, 1, 1);
-
-        label_3 = new QLabel(groupBox);
-        label_3->setObjectName(QStringLiteral("label_3"));
-
-        gridLayout_2->addWidget(label_3, 1, 0, 1, 1);
-
-        comboBox = new QComboBox(groupBox);
-        comboBox->setObjectName(QStringLiteral("comboBox"));
-
-        gridLayout_2->addWidget(comboBox, 0, 1, 1, 1);
-
-        label_4 = new QLabel(groupBox);
-        label_4->setObjectName(QStringLiteral("label_4"));
-
-        gridLayout_2->addWidget(label_4, 2, 0, 1, 1);
-
         label_2 = new QLabel(groupBox);
         label_2->setObjectName(QStringLiteral("label_2"));
 
         gridLayout_2->addWidget(label_2, 0, 0, 1, 1);
+
+        m_pDeviceNumberEdit = new QLineEdit(groupBox);
+        m_pDeviceNumberEdit->setObjectName(QStringLiteral("m_pDeviceNumberEdit"));
+
+        gridLayout_2->addWidget(m_pDeviceNumberEdit, 2, 1, 1, 1);
 
         label = new QLabel(groupBox);
         label->setObjectName(QStringLiteral("label"));
@@ -94,51 +80,80 @@ public:
 
         gridLayout_2->addWidget(label_5, 4, 0, 1, 1);
 
+        m_pParameterFile = new QLineEdit(groupBox);
+        m_pParameterFile->setObjectName(QStringLiteral("m_pParameterFile"));
+
+        gridLayout_2->addWidget(m_pParameterFile, 1, 1, 1, 1);
+
+        m_pNumberOfMarkerEdit = new QLineEdit(groupBox);
+        m_pNumberOfMarkerEdit->setObjectName(QStringLiteral("m_pNumberOfMarkerEdit"));
+
+        gridLayout_2->addWidget(m_pNumberOfMarkerEdit, 6, 1, 1, 1);
+
+        label_3 = new QLabel(groupBox);
+        label_3->setObjectName(QStringLiteral("label_3"));
+
+        gridLayout_2->addWidget(label_3, 1, 0, 1, 1);
+
+        m_pDeviceCB = new QComboBox(groupBox);
+        m_pDeviceCB->setObjectName(QStringLiteral("m_pDeviceCB"));
+
+        gridLayout_2->addWidget(m_pDeviceCB, 0, 1, 1, 1);
+
+        label_4 = new QLabel(groupBox);
+        label_4->setObjectName(QStringLiteral("label_4"));
+
+        gridLayout_2->addWidget(label_4, 2, 0, 1, 1);
+
         label_7 = new QLabel(groupBox);
         label_7->setObjectName(QStringLiteral("label_7"));
 
         gridLayout_2->addWidget(label_7, 6, 0, 1, 1);
 
-        lineEdit = new QLineEdit(groupBox);
-        lineEdit->setObjectName(QStringLiteral("lineEdit"));
+        m_pCameraEntityIDEdit = new QLineEdit(groupBox);
+        m_pCameraEntityIDEdit->setObjectName(QStringLiteral("m_pCameraEntityIDEdit"));
 
-        gridLayout_2->addWidget(lineEdit, 1, 1, 1, 1);
+        gridLayout_2->addWidget(m_pCameraEntityIDEdit, 3, 1, 1, 1);
 
-        lineEdit_2 = new QLineEdit(groupBox);
-        lineEdit_2->setObjectName(QStringLiteral("lineEdit_2"));
+        m_pOutputBackgroundEdit = new QLineEdit(groupBox);
+        m_pOutputBackgroundEdit->setObjectName(QStringLiteral("m_pOutputBackgroundEdit"));
+        m_pOutputBackgroundEdit->setReadOnly(true);
 
-        gridLayout_2->addWidget(lineEdit_2, 2, 1, 1, 1);
+        gridLayout_2->addWidget(m_pOutputBackgroundEdit, 4, 1, 1, 1);
 
-        lineEdit_3 = new QLineEdit(groupBox);
-        lineEdit_3->setObjectName(QStringLiteral("lineEdit_3"));
+        m_pOutputCubemapEdit = new QLineEdit(groupBox);
+        m_pOutputCubemapEdit->setObjectName(QStringLiteral("m_pOutputCubemapEdit"));
+        m_pOutputCubemapEdit->setReadOnly(true);
 
-        gridLayout_2->addWidget(lineEdit_3, 3, 1, 1, 1);
+        gridLayout_2->addWidget(m_pOutputCubemapEdit, 5, 1, 1, 1);
 
-        lineEdit_4 = new QLineEdit(groupBox);
-        lineEdit_4->setObjectName(QStringLiteral("lineEdit_4"));
-        lineEdit_4->setReadOnly(true);
+        label_6 = new QLabel(groupBox);
+        label_6->setObjectName(QStringLiteral("label_6"));
 
-        gridLayout_2->addWidget(lineEdit_4, 4, 1, 1, 1);
-
-        lineEdit_5 = new QLineEdit(groupBox);
-        lineEdit_5->setObjectName(QStringLiteral("lineEdit_5"));
-        lineEdit_5->setReadOnly(true);
-
-        gridLayout_2->addWidget(lineEdit_5, 5, 1, 1, 1);
-
-        lineEdit_6 = new QLineEdit(groupBox);
-        lineEdit_6->setObjectName(QStringLiteral("lineEdit_6"));
-
-        gridLayout_2->addWidget(lineEdit_6, 6, 1, 1, 1);
+        gridLayout_2->addWidget(label_6, 5, 0, 1, 1);
 
 
         verticalLayout_3->addLayout(gridLayout_2);
+
+        m_pMarkerLayout = new QVBoxLayout();
+        m_pMarkerLayout->setSpacing(6);
+        m_pMarkerLayout->setObjectName(QStringLiteral("m_pMarkerLayout"));
+
+        verticalLayout_3->addLayout(m_pMarkerLayout);
 
 
         verticalLayout->addWidget(groupBox);
 
 
         retranslateUi(InspectorARController);
+        QObject::connect(m_pDeviceCB, SIGNAL(currentIndexChanged(int)), InspectorARController, SLOT(valueChanged()));
+        QObject::connect(m_pParameterFile, SIGNAL(textEdited(QString)), InspectorARController, SLOT(valueChanged()));
+        QObject::connect(m_pDeviceNumberEdit, SIGNAL(textEdited(QString)), InspectorARController, SLOT(valueChanged()));
+        QObject::connect(m_pCameraEntityIDEdit, SIGNAL(textEdited(QString)), InspectorARController, SLOT(valueChanged()));
+        QObject::connect(m_pOutputBackgroundEdit, SIGNAL(textEdited(QString)), InspectorARController, SLOT(valueChanged()));
+        QObject::connect(m_pOutputCubemapEdit, SIGNAL(textEdited(QString)), InspectorARController, SLOT(valueChanged()));
+        QObject::connect(m_pNumberOfMarkerEdit, SIGNAL(textEdited(QString)), InspectorARController, SLOT(valueChanged()));
+        QObject::connect(m_pNumberOfMarkerEdit, SIGNAL(textChanged(QString)), InspectorARController, SLOT(numberOfMarkerChanged()));
 
         QMetaObject::connectSlotsByName(InspectorARController);
     } // setupUi
@@ -147,24 +162,24 @@ public:
     {
         InspectorARController->setWindowTitle(QApplication::translate("InspectorARController", "Form", 0));
         groupBox->setTitle(QApplication::translate("InspectorARController", "AR Controller", 0));
-        label_6->setText(QApplication::translate("InspectorARController", "Output Cubemap", 0));
+        label_2->setText(QApplication::translate("InspectorARController", "Device", 0));
+        m_pDeviceNumberEdit->setText(QString());
+        label->setText(QApplication::translate("InspectorARController", "Camera Entity ID", 0));
+        label_5->setText(QApplication::translate("InspectorARController", "Output Background", 0));
+        m_pParameterFile->setText(QApplication::translate("InspectorARController", "../assets/", 0));
+        m_pNumberOfMarkerEdit->setText(QString());
         label_3->setText(QApplication::translate("InspectorARController", "Parameter File", 0));
-        comboBox->clear();
-        comboBox->insertItems(0, QStringList()
+        m_pDeviceCB->clear();
+        m_pDeviceCB->insertItems(0, QStringList()
          << QApplication::translate("InspectorARController", "Webcam", 0)
          << QApplication::translate("InspectorARController", "Kinect", 0)
         );
         label_4->setText(QApplication::translate("InspectorARController", "Device Number", 0));
-        label_2->setText(QApplication::translate("InspectorARController", "Device", 0));
-        label->setText(QApplication::translate("InspectorARController", "Camera Entity ID", 0));
-        label_5->setText(QApplication::translate("InspectorARController", "Output Background", 0));
         label_7->setText(QApplication::translate("InspectorARController", "Number of Marker", 0));
-        lineEdit->setText(QApplication::translate("InspectorARController", "../assets/", 0));
-        lineEdit_2->setText(QApplication::translate("InspectorARController", "0", 0));
-        lineEdit_3->setText(QApplication::translate("InspectorARController", "0", 0));
-        lineEdit_4->setText(QApplication::translate("InspectorARController", "0", 0));
-        lineEdit_5->setText(QApplication::translate("InspectorARController", "0", 0));
-        lineEdit_6->setText(QApplication::translate("InspectorARController", "0", 0));
+        m_pCameraEntityIDEdit->setText(QString());
+        m_pOutputBackgroundEdit->setText(QString());
+        m_pOutputCubemapEdit->setText(QString());
+        label_6->setText(QApplication::translate("InspectorARController", "Output Cubemap", 0));
     } // retranslateUi
 
 };

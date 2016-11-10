@@ -172,17 +172,16 @@
      <addaction name="m_pActionSSR"/>
      <addaction name="m_pActionVolumeFog"/>
     </widget>
+    <widget class="QMenu" name="menuPlugins">
+     <property name="title">
+      <string>Plugins</string>
+     </property>
+     <addaction name="m_pActionARController"/>
+    </widget>
     <addaction name="menuActors"/>
     <addaction name="menuLights"/>
     <addaction name="menuEffects"/>
-   </widget>
-   <widget class="QMenu" name="m_pMenuComponent">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="title">
-     <string>Component</string>
-    </property>
+    <addaction name="menuPlugins"/>
    </widget>
    <widget class="QMenu" name="m_pMenuWindow">
     <property name="title">
@@ -203,7 +202,6 @@
    <addaction name="m_pMenuEdit"/>
    <addaction name="m_pMenuAssets"/>
    <addaction name="m_pMenuEntity"/>
-   <addaction name="m_pMenuComponent"/>
    <addaction name="m_pMenuWindow"/>
    <addaction name="m_pMenuHelp"/>
   </widget>
@@ -544,6 +542,11 @@
   <action name="m_pActionVolumeFog">
    <property name="text">
     <string>Volume Fog</string>
+   </property>
+  </action>
+  <action name="m_pActionARController">
+   <property name="text">
+    <string>AR Controller</string>
    </property>
   </action>
  </widget>
@@ -944,6 +947,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_pActionARController</sender>
+   <signal>triggered()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>createNewPluginARController()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>961</x>
+     <y>490</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>switchPlayingCurrentScene()</slot>
@@ -961,5 +980,6 @@
   <slot>createNewEntityFXAA()</slot>
   <slot>createNewEntitySSR()</slot>
   <slot>createNewEntityVolumeFog()</slot>
+  <slot>createNewPluginARController()</slot>
  </slots>
 </ui>

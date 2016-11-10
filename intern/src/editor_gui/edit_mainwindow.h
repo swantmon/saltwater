@@ -44,6 +44,7 @@ namespace Edit
         void createNewEntityFXAA();
         void createNewEntitySSR();
         void createNewEntityVolumeFog();
+        void createNewPluginARController();
         void changeHistogramSettings();
         void toggleHistogramDock();
 

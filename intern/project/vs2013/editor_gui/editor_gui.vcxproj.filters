@@ -137,6 +137,18 @@
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_camera.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_arcontroller.cpp">
+      <Filter>Widgets\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_arcontroller.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_arcontroller_marker.cpp">
+      <Filter>Widgets\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_arcontroller_marker.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_mainwindow.ui">
@@ -246,6 +258,12 @@
       <Filter>Form Files\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_camera.h">
+      <Filter>Widgets\Inspector</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_arcontroller.h">
+      <Filter>Widgets\Inspector</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_arcontroller_marker.h">
       <Filter>Widgets\Inspector</Filter>
     </CustomBuild>
   </ItemGroup>

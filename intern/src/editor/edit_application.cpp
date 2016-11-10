@@ -21,6 +21,7 @@
 #include "editor/edit_load_map_state.h"
 #include "editor/edit_map_helper.h"
 #include "editor/edit_play_state.h"
+#include "editor/edit_plugin_helper.h"
 #include "editor/edit_start_state.h"
 #include "editor/edit_unload_map_state.h"
 
@@ -169,6 +170,7 @@ namespace
         Edit::Helper::Graphic::OnStart();
         Edit::Helper::Light  ::OnStart();
         Edit::Helper::Map    ::OnStart();
+        Edit::Helper::Plugin ::OnStart();
     }
     
     // -----------------------------------------------------------------------------
@@ -189,6 +191,7 @@ namespace
         Edit::Helper::Graphic::OnExit();
         Edit::Helper::Light  ::OnExit();
         Edit::Helper::Map    ::OnExit();
+        Edit::Helper::Plugin ::OnExit();
 
         // -----------------------------------------------------------------------------
         // At the end we have to clean our context and windows.

@@ -22,6 +22,7 @@ namespace Edit
         , m_pVolumeFogWidget  ()
         , m_pMaterialWidget   ()
         , m_pCameraWidget     ()
+        , m_pARController     ()
         , m_ActiveEntityID    (-1)
     {
         // -----------------------------------------------------------------------------
@@ -45,6 +46,7 @@ namespace Edit
         m_pVolumeFogWidget   = new CInspectorVolumeFog();
         m_pMaterialWidget    = new CInspectorMaterial();
         m_pCameraWidget      = new CInspectorCamera();
+        m_pARController      = new CInspectorARController();
 
         m_pInspectorLayout->addWidget(m_pEntityWidget);
         m_pInspectorLayout->addWidget(m_pTransformWidget);
@@ -59,6 +61,7 @@ namespace Edit
         m_pInspectorLayout->addWidget(m_pVolumeFogWidget);
         m_pInspectorLayout->addWidget(m_pMaterialWidget);
         m_pInspectorLayout->addWidget(m_pCameraWidget);
+        m_pInspectorLayout->addWidget(m_pARController);
 
         m_pEntityWidget     ->setVisible(false);
         m_pPointlightWidget ->setVisible(false);
@@ -73,6 +76,7 @@ namespace Edit
         m_pVolumeFogWidget  ->setVisible(false);
         m_pMaterialWidget   ->setVisible(false);
         m_pCameraWidget     ->setVisible(false);
+        m_pARController     ->setVisible(false);
 
         // -----------------------------------------------------------------------------
         // Set layout
@@ -190,6 +194,7 @@ namespace Edit
         m_pVolumeFogWidget  ->setVisible(false);
         m_pMaterialWidget   ->setVisible(false);
         m_pCameraWidget     ->setVisible(false);
+        m_pARController     ->setVisible(false);
 
         if (HasDetailData)
         {
@@ -281,6 +286,9 @@ namespace Edit
             {
                 if (Type == 0) // ARControlManager
                 {
+                    m_pARController->RequestInformation(EntityID);
+
+                    m_pARController->setVisible(true);
                 }
                 else if (Type == 1) // ARTrackedObject
                 {

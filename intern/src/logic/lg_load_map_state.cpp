@@ -397,8 +397,6 @@ namespace
 
             Dt::CEntity& rPlane = Dt::EntityManager::CreateEntityFromModel(rModel);
 
-            rPlane.SetName("Sphere");
-
             Dt::CTransformationFacet* pTransformationFacet = rPlane.GetTransformationFacet();
 
             pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.0f));

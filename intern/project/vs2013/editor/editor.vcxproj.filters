@@ -51,6 +51,9 @@
     <ClCompile Include="..\..\..\src\editor\edit_entity_helper.cpp">
       <Filter>helper</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_plugin_helper.cpp">
+      <Filter>helper</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor\edit_edit_state.h">
@@ -95,6 +98,9 @@
       <Filter>helper</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor\edit_entity_helper.h">
+      <Filter>helper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_plugin_helper.h">
       <Filter>helper</Filter>
     </ClInclude>
   </ItemGroup>

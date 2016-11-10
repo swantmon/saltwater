@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>526</width>
-    <height>390</height>
+    <width>303</width>
+    <height>237</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,10 +22,45 @@
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
        <layout class="QGridLayout" name="gridLayout_2">
-        <item row="5" column="0">
-         <widget class="QLabel" name="label_6">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_2">
           <property name="text">
-           <string>Output Cubemap</string>
+           <string>Device</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLineEdit" name="m_pDeviceNumberEdit">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Camera Entity ID</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>Output Background</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="m_pParameterFile">
+          <property name="text">
+           <string>../assets/</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="1">
+         <widget class="QLineEdit" name="m_pNumberOfMarkerEdit">
+          <property name="text">
+           <string/>
           </property>
          </widget>
         </item>
@@ -57,27 +92,6 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Device</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>Camera Entity ID</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="label_5">
-          <property name="text">
-           <string>Output Background</string>
-          </property>
-         </widget>
-        </item>
         <item row="6" column="0">
          <widget class="QLabel" name="label_7">
           <property name="text">
@@ -85,31 +99,17 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QLineEdit" name="m_pParameterFile">
-          <property name="text">
-           <string>../assets/</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QLineEdit" name="m_pDeviceNumberEdit">
-          <property name="text">
-           <string>0</string>
-          </property>
-         </widget>
-        </item>
         <item row="3" column="1">
          <widget class="QLineEdit" name="m_pCameraEntityIDEdit">
           <property name="text">
-           <string>0</string>
+           <string/>
           </property>
          </widget>
         </item>
         <item row="4" column="1">
          <widget class="QLineEdit" name="m_pOutputBackgroundEdit">
           <property name="text">
-           <string>0</string>
+           <string/>
           </property>
           <property name="readOnly">
            <bool>true</bool>
@@ -119,20 +119,27 @@
         <item row="5" column="1">
          <widget class="QLineEdit" name="m_pOutputCubemapEdit">
           <property name="text">
-           <string>0</string>
+           <string/>
           </property>
           <property name="readOnly">
            <bool>true</bool>
           </property>
          </widget>
         </item>
-        <item row="6" column="1">
-         <widget class="QLineEdit" name="m_pNumberOfMarkerEdit">
+        <item row="5" column="0">
+         <widget class="QLabel" name="label_6">
           <property name="text">
-           <string>0</string>
+           <string>Output Cubemap</string>
           </property>
          </widget>
         </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="m_pMarkerLayout">
+        <property name="spacing">
+         <number>6</number>
+        </property>
        </layout>
       </item>
      </layout>
@@ -141,5 +148,138 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>m_pDeviceCB</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>InspectorARController</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>177</x>
+     <y>41</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>299</x>
+     <y>46</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pParameterFile</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorARController</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>197</x>
+     <y>68</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>300</x>
+     <y>87</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pDeviceNumberEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorARController</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>198</x>
+     <y>93</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>300</x>
+     <y>122</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pCameraEntityIDEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorARController</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>164</x>
+     <y>124</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>304</x>
+     <y>159</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pOutputBackgroundEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorARController</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>265</x>
+     <y>149</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>299</x>
+     <y>196</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pOutputCubemapEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorARController</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>169</x>
+     <y>175</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>276</x>
+     <y>228</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pNumberOfMarkerEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorARController</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>142</x>
+     <y>197</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>92</x>
+     <y>227</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pNumberOfMarkerEdit</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>InspectorARController</receiver>
+   <slot>numberOfMarkerChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>219</x>
+     <y>191</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>241</x>
+     <y>224</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>valueChanged()</slot>
+  <slot>numberOfMarkerChanged()</slot>
+ </slots>
 </ui>

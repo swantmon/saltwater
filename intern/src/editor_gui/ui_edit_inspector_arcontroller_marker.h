@@ -31,18 +31,18 @@ public:
     QLabel *label_2;
     QLabel *label_4;
     QLabel *label;
-    QLineEdit *lineEdit;
-    QComboBox *comboBox;
-    QLineEdit *lineEdit_2;
+    QLineEdit *m_pUIDEdit;
+    QComboBox *m_pTypeCB;
+    QLineEdit *m_pPatternFileEdit;
     QHBoxLayout *horizontalLayout;
-    QLineEdit *lineEdit_3;
+    QLineEdit *m_pWidthEdit;
     QLabel *label_5;
 
     void setupUi(QWidget *InspectorARControllerMarker)
     {
         if (InspectorARControllerMarker->objectName().isEmpty())
             InspectorARControllerMarker->setObjectName(QStringLiteral("InspectorARControllerMarker"));
-        InspectorARControllerMarker->resize(400, 198);
+        InspectorARControllerMarker->resize(181, 118);
         gridLayout = new QGridLayout(InspectorARControllerMarker);
         gridLayout->setObjectName(QStringLiteral("gridLayout"));
         label_3 = new QLabel(InspectorARControllerMarker);
@@ -65,27 +65,27 @@ public:
 
         gridLayout->addWidget(label, 0, 0, 1, 1);
 
-        lineEdit = new QLineEdit(InspectorARControllerMarker);
-        lineEdit->setObjectName(QStringLiteral("lineEdit"));
+        m_pUIDEdit = new QLineEdit(InspectorARControllerMarker);
+        m_pUIDEdit->setObjectName(QStringLiteral("m_pUIDEdit"));
 
-        gridLayout->addWidget(lineEdit, 0, 1, 1, 1);
+        gridLayout->addWidget(m_pUIDEdit, 0, 1, 1, 1);
 
-        comboBox = new QComboBox(InspectorARControllerMarker);
-        comboBox->setObjectName(QStringLiteral("comboBox"));
+        m_pTypeCB = new QComboBox(InspectorARControllerMarker);
+        m_pTypeCB->setObjectName(QStringLiteral("m_pTypeCB"));
 
-        gridLayout->addWidget(comboBox, 1, 1, 1, 1);
+        gridLayout->addWidget(m_pTypeCB, 1, 1, 1, 1);
 
-        lineEdit_2 = new QLineEdit(InspectorARControllerMarker);
-        lineEdit_2->setObjectName(QStringLiteral("lineEdit_2"));
+        m_pPatternFileEdit = new QLineEdit(InspectorARControllerMarker);
+        m_pPatternFileEdit->setObjectName(QStringLiteral("m_pPatternFileEdit"));
 
-        gridLayout->addWidget(lineEdit_2, 2, 1, 1, 1);
+        gridLayout->addWidget(m_pPatternFileEdit, 2, 1, 1, 1);
 
         horizontalLayout = new QHBoxLayout();
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
-        lineEdit_3 = new QLineEdit(InspectorARControllerMarker);
-        lineEdit_3->setObjectName(QStringLiteral("lineEdit_3"));
+        m_pWidthEdit = new QLineEdit(InspectorARControllerMarker);
+        m_pWidthEdit->setObjectName(QStringLiteral("m_pWidthEdit"));
 
-        horizontalLayout->addWidget(lineEdit_3);
+        horizontalLayout->addWidget(m_pWidthEdit);
 
         label_5 = new QLabel(InspectorARControllerMarker);
         label_5->setObjectName(QStringLiteral("label_5"));
@@ -97,6 +97,10 @@ public:
 
 
         retranslateUi(InspectorARControllerMarker);
+        QObject::connect(m_pUIDEdit, SIGNAL(textEdited(QString)), InspectorARControllerMarker, SLOT(valueChanged()));
+        QObject::connect(m_pTypeCB, SIGNAL(currentIndexChanged(int)), InspectorARControllerMarker, SLOT(valueChanged()));
+        QObject::connect(m_pPatternFileEdit, SIGNAL(textEdited(QString)), InspectorARControllerMarker, SLOT(valueChanged()));
+        QObject::connect(m_pWidthEdit, SIGNAL(textEdited(QString)), InspectorARControllerMarker, SLOT(valueChanged()));
 
         QMetaObject::connectSlotsByName(InspectorARControllerMarker);
     } // setupUi
@@ -108,15 +112,15 @@ public:
         label_2->setText(QApplication::translate("InspectorARControllerMarker", "Type", 0));
         label_4->setText(QApplication::translate("InspectorARControllerMarker", "Width", 0));
         label->setText(QApplication::translate("InspectorARControllerMarker", "UID", 0));
-        lineEdit->setText(QApplication::translate("InspectorARControllerMarker", "0", 0));
-        comboBox->clear();
-        comboBox->insertItems(0, QStringList()
+        m_pUIDEdit->setText(QApplication::translate("InspectorARControllerMarker", "0", 0));
+        m_pTypeCB->clear();
+        m_pTypeCB->insertItems(0, QStringList()
          << QApplication::translate("InspectorARControllerMarker", "Square", 0)
          << QApplication::translate("InspectorARControllerMarker", "Square Barcode", 0)
          << QApplication::translate("InspectorARControllerMarker", "Multimarker", 0)
          << QApplication::translate("InspectorARControllerMarker", "NFT", 0)
         );
-        lineEdit_3->setText(QApplication::translate("InspectorARControllerMarker", "0.06", 0));
+        m_pWidthEdit->setText(QApplication::translate("InspectorARControllerMarker", "0.06", 0));
         label_5->setText(QApplication::translate("InspectorARControllerMarker", "m", 0));
     } // retranslateUi
 

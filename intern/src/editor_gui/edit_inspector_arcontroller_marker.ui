@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>198</height>
+    <width>181</width>
+    <height>118</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -97,5 +97,73 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>m_pUIDEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorARControllerMarker</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>100</x>
+     <y>19</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>181</x>
+     <y>16</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pTypeCB</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>InspectorARControllerMarker</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>130</x>
+     <y>46</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>180</x>
+     <y>48</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pPatternFileEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorARControllerMarker</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>98</x>
+     <y>66</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>179</x>
+     <y>80</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pWidthEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorARControllerMarker</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>124</x>
+     <y>105</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>180</x>
+     <y>112</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>valueChanged()</slot>
+ </slots>
 </ui>

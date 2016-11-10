@@ -263,6 +263,16 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
+    void CMainWindow::createNewPluginARController()
+    {
+        CMessage NewMessage(true);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::NewPluginARController, NewMessage);
+    }
+    // -----------------------------------------------------------------------------
+
     void CMainWindow::changeHistogramSettings()
     {
         float LowerBound = m_pHistogramLowerBoundEdit->text().toFloat();

@@ -44,8 +44,8 @@ namespace Dt
 
         enum EType
         {
-            Kinect,
             Webcam,
+            Kinect,
             NumberOfControls,
             Undefined = -1,
         };
