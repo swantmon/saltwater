@@ -338,6 +338,14 @@ namespace
     {
         assert (m_pControllerPlugin != nullptr);
 
+        if (m_pActiveControl != nullptr && m_pActiveControl->IsStarted())
+        {
+            // TODO by tschwandt
+            // Fix problem with multiple dirty entities. Maybe use the last one?
+
+            return;
+        }
+
         // -----------------------------------------------------------------------------
         // Create control
         // -----------------------------------------------------------------------------

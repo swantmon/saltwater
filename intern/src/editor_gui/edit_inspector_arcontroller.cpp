@@ -40,7 +40,7 @@ namespace Edit
         QString ParameterFile = m_pParameterFile->text();
         QByteArray ParameterFileBinary = ParameterFile.toLatin1();
 
-        unsigned int DeviceNumber = m_pParameterFile->text().toUInt();
+        unsigned int DeviceNumber = m_pDeviceNumberEdit->text().toUInt();
 
         unsigned int CameraEntityID = m_pCameraEntityIDEdit->text().toUInt();
 

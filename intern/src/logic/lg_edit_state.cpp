@@ -52,7 +52,7 @@ namespace
         Dt::ActorManager ::Update();
         Dt::EntityManager::Update();
         Dt::LightManager ::Update();    
-        Dt::ScriptManager ::Update();
+        Dt::ScriptManager::Update();
         
         // -----------------------------------------------------------------------------
         // Return state changes
