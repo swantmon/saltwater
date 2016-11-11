@@ -282,7 +282,7 @@ namespace
 
             NewMessage.PutInt(pFacet->GetClearFlag());
 
-            if (pFacet->GetTexture() != nullptr)
+            if (pFacet->GetHasTexture())
             {
                 NewMessage.PutBool(true);
 

@@ -43,10 +43,12 @@ namespace TextureManager
     CTextureCube* CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::Listen);
 
     CTexture2D* GetTexture2DByHash(unsigned int _Hash);
+    CTextureCube* GetTextureCubeByHash(unsigned int _Hash);
 
     void CopyToTexture2D(CTexture2D* _pTexture2D, void* _pPixels);
     void CopyToTexture2D(CTexture2D* _pTexture2D, CTexture2D* _pTexture);
 
+    void CopyToTextureCube(CTextureCube* _pTextureCube, CTextureCube::EFace _Face, void* _pPixels);
     void CopyToTextureCube(CTextureCube* _pTextureCube, CTextureCube::EFace _Face, CTexture2D* _pTexture);
 
     void SaveTexture2DToFile(CTexture2D* _pTexture2D, const Base::Char* _pPathToFile);

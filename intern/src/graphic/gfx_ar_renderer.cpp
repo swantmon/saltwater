@@ -504,6 +504,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Upload to texture on graphic card
             // TODO: Target rectangle should be variable
+            // TODO: Use image from main camera?
             // -----------------------------------------------------------------------------
             Base::AABB2UInt TargetRect(Base::UInt2(0), Base::UInt2(1280, 720));
 

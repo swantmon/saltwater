@@ -34,20 +34,22 @@ public:
     QVBoxLayout *verticalLayout_2;
     QGridLayout *gridLayout;
     QLabel *label_2;
-    QComboBox *m_pTypeCB;
     QLabel *label;
+    QComboBox *m_pTypeCB;
     QLabel *label_3;
     QLineEdit *m_pTextureEdit;
     QHBoxLayout *horizontalLayout;
     QLineEdit *m_pIntensityEdit;
     QLabel *label_4;
+    QLabel *label_5;
+    QLineEdit *m_pCubemapHashEdit;
     QSpacerItem *verticalSpacer;
 
     void setupUi(QWidget *InspectorEnvironment)
     {
         if (InspectorEnvironment->objectName().isEmpty())
             InspectorEnvironment->setObjectName(QStringLiteral("InspectorEnvironment"));
-        InspectorEnvironment->resize(400, 133);
+        InspectorEnvironment->resize(400, 159);
         verticalLayout = new QVBoxLayout(InspectorEnvironment);
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
         groupBox = new QGroupBox(InspectorEnvironment);
@@ -61,20 +63,20 @@ public:
 
         gridLayout->addWidget(label_2, 1, 0, 1, 1);
 
-        m_pTypeCB = new QComboBox(groupBox);
-        m_pTypeCB->setObjectName(QStringLiteral("m_pTypeCB"));
-
-        gridLayout->addWidget(m_pTypeCB, 0, 1, 1, 1);
-
         label = new QLabel(groupBox);
         label->setObjectName(QStringLiteral("label"));
 
         gridLayout->addWidget(label, 0, 0, 1, 1);
 
+        m_pTypeCB = new QComboBox(groupBox);
+        m_pTypeCB->setObjectName(QStringLiteral("m_pTypeCB"));
+
+        gridLayout->addWidget(m_pTypeCB, 0, 1, 1, 1);
+
         label_3 = new QLabel(groupBox);
         label_3->setObjectName(QStringLiteral("label_3"));
 
-        gridLayout->addWidget(label_3, 2, 0, 1, 1);
+        gridLayout->addWidget(label_3, 3, 0, 1, 1);
 
         m_pTextureEdit = new QLineEdit(groupBox);
         m_pTextureEdit->setObjectName(QStringLiteral("m_pTextureEdit"));
@@ -94,7 +96,17 @@ public:
         horizontalLayout->addWidget(label_4);
 
 
-        gridLayout->addLayout(horizontalLayout, 2, 1, 1, 1);
+        gridLayout->addLayout(horizontalLayout, 3, 1, 1, 1);
+
+        label_5 = new QLabel(groupBox);
+        label_5->setObjectName(QStringLiteral("label_5"));
+
+        gridLayout->addWidget(label_5, 2, 0, 1, 1);
+
+        m_pCubemapHashEdit = new QLineEdit(groupBox);
+        m_pCubemapHashEdit->setObjectName(QStringLiteral("m_pCubemapHashEdit"));
+
+        gridLayout->addWidget(m_pCubemapHashEdit, 2, 1, 1, 1);
 
 
         verticalLayout_2->addLayout(gridLayout);
@@ -111,6 +123,7 @@ public:
         QObject::connect(m_pTypeCB, SIGNAL(currentIndexChanged(int)), InspectorEnvironment, SLOT(valueChanged()));
         QObject::connect(m_pTextureEdit, SIGNAL(textEdited(QString)), InspectorEnvironment, SLOT(valueChanged()));
         QObject::connect(m_pIntensityEdit, SIGNAL(textEdited(QString)), InspectorEnvironment, SLOT(valueChanged()));
+        QObject::connect(m_pCubemapHashEdit, SIGNAL(textEdited(QString)), InspectorEnvironment, SLOT(valueChanged()));
 
         QMetaObject::connectSlotsByName(InspectorEnvironment);
     } // setupUi
@@ -120,15 +133,16 @@ public:
         InspectorEnvironment->setWindowTitle(QApplication::translate("InspectorEnvironment", "Form", 0));
         groupBox->setTitle(QApplication::translate("InspectorEnvironment", "Environment", 0));
         label_2->setText(QApplication::translate("InspectorEnvironment", "Texture", 0));
+        label->setText(QApplication::translate("InspectorEnvironment", "Type", 0));
         m_pTypeCB->clear();
         m_pTypeCB->insertItems(0, QStringList()
          << QApplication::translate("InspectorEnvironment", "Procedural", 0)
          << QApplication::translate("InspectorEnvironment", "Panorama", 0)
-         << QApplication::translate("InspectorEnvironment", "Image", 0)
+         << QApplication::translate("InspectorEnvironment", "Cubemap", 0)
         );
-        label->setText(QApplication::translate("InspectorEnvironment", "Type", 0));
         label_3->setText(QApplication::translate("InspectorEnvironment", "Intensity", 0));
         label_4->setText(QApplication::translate("InspectorEnvironment", "Lux", 0));
+        label_5->setText(QApplication::translate("InspectorEnvironment", "Cubemap Hash", 0));
     } // retranslateUi
 
 };

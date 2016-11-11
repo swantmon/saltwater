@@ -47,10 +47,12 @@ namespace
         CTextureCube* CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
 
         CTexture2D* GetTexture2DByHash(unsigned int _Hash);
+        CTextureCube* GetTextureCubeByHash(unsigned int _Hash);
 
         void CopyToTexture2D(CTexture2D* _pTexture2D, void* _pPixels);
         void CopyToTexture2D(CTexture2D* _pTexture2D, CTexture2D* _pTexture);
 
+        void CopyToTextureCube(CTextureCube* _pTextureCube, CTextureCube::EFace _Face, void* _pPixels);
         void CopyToTextureCube(CTextureCube* _pTextureCube, CTextureCube::EFace _Face, CTexture2D* _pTexture);
 
         void SaveTexture2DToFile(CTexture2D* _pTexture2D, const Base::Char* _pPathToFile);
@@ -571,7 +573,16 @@ namespace
                     BASE_CONSOLE_STREAMWARNING("Undefined texture data behavior while creating an texture.");
                     break;
             }
-            
+
+            // -----------------------------------------------------------------------------
+            // Create faces
+            // -----------------------------------------------------------------------------
+            rTexture.m_pFaces[Dt::CTextureCube::Right ] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior);
+            rTexture.m_pFaces[Dt::CTextureCube::Left  ] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior);
+            rTexture.m_pFaces[Dt::CTextureCube::Top   ] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior);
+            rTexture.m_pFaces[Dt::CTextureCube::Bottom] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior);
+            rTexture.m_pFaces[Dt::CTextureCube::Front ] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior);
+            rTexture.m_pFaces[Dt::CTextureCube::Back  ] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior);
         }
         catch (...)
         {
@@ -588,6 +599,18 @@ namespace
         if (m_Textures2DByHash.find(_Hash) != m_Textures2DByHash.end())
         {
             return m_Textures2DByHash.at(_Hash);
+        }
+
+        return nullptr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTextureCube* CDtTextureManager::GetTextureCubeByHash(unsigned int _Hash)
+    {
+        if (m_TexturesCubeByHash.find(_Hash) != m_TexturesCubeByHash.end())
+        {
+            return m_TexturesCubeByHash.at(_Hash);
         }
 
         return nullptr;
@@ -670,6 +693,30 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CDtTextureManager::CopyToTextureCube(CTextureCube* _pTextureCube, CTextureCube::EFace _Face, void* _pPixels)
+    {
+        assert(_pTextureCube != 0);
+
+        // -----------------------------------------------------------------------------
+        // Get internal texture
+        // -----------------------------------------------------------------------------
+        CInternTextureCube* pInternTextureCube = static_cast<CInternTextureCube*>(_pTextureCube);
+
+        // -----------------------------------------------------------------------------
+        // Copy texture
+        // -----------------------------------------------------------------------------
+        CopyToTexture2D(pInternTextureCube->m_pFaces[_Face], _pPixels);
+
+        // -----------------------------------------------------------------------------
+        // Dirty set
+        // -----------------------------------------------------------------------------
+        Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
+
+        pInternTextureCube->m_DirtyTime = FrameTime;
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CDtTextureManager::CopyToTextureCube(CTextureCube* _pTextureCube, CTextureCube::EFace _Face, CTexture2D* _pTexture)
     {
         assert(_pTextureCube != 0);
@@ -680,9 +727,9 @@ namespace
         CInternTextureCube* pInternTextureCube = static_cast<CInternTextureCube*>(_pTextureCube);
 
         // -----------------------------------------------------------------------------
-        // Set texture
+        // Copy texture
         // -----------------------------------------------------------------------------
-        pInternTextureCube->m_pFaces[_Face] = _pTexture;
+        CopyToTexture2D(pInternTextureCube->m_pFaces[_Face], _pTexture);
 
         // -----------------------------------------------------------------------------
         // Dirty set
@@ -1187,6 +1234,13 @@ namespace TextureManager
 
     // -----------------------------------------------------------------------------
 
+    CTextureCube* GetTextureCubeByHash(unsigned int _Hash)
+    {
+        return CDtTextureManager::GetInstance().GetTextureCubeByHash(_Hash);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CopyToTexture2D(CTexture2D* _pTexture2D, void* _pPixels)
     {
         CDtTextureManager::GetInstance().CopyToTexture2D(_pTexture2D, _pPixels);
@@ -1197,6 +1251,13 @@ namespace TextureManager
     void CopyToTexture2D(CTexture2D* _pTexture2D, CTexture2D* _pTexture)
     {
         CDtTextureManager::GetInstance().CopyToTexture2D(_pTexture2D, _pTexture);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CopyToTextureCube(CTextureCube* _pTextureCube, CTextureCube::EFace _Face, void* _pPixels)
+    {
+        CDtTextureManager::GetInstance().CopyToTextureCube(_pTextureCube, _Face, _pPixels);
     }
 
     // -----------------------------------------------------------------------------

@@ -784,9 +784,27 @@ namespace
     {
         SSkyboxRenderJob& rRenderJob = m_SkyboxRenderJobs[0];
 
-        if (rRenderJob.m_pGraphicSkybox->GetTimeStamp() != Core::Time::GetNumberOfFrame())
+        if (!rRenderJob.m_pDataSkybox->GetHasCubemap() || rRenderJob.m_pDataSkybox->GetCubemap()->GetDirtyTime() != Core::Time::GetNumberOfFrame())
         {
             return;
+        }
+
+        if (rRenderJob.m_pDataSkybox->GetHasCubemap() && rRenderJob.m_pDataSkybox->GetCubemap()->GetFace(Dt::CTextureCube::Right)->GetPixels() != 0)
+        {
+            CTexture2DPtr CustomCubemapTexturePtr = rRenderJob.m_pGraphicSkybox->GetCustomTexture2D();
+
+            Base::UInt2 CubemapResolution = Base::UInt2(rRenderJob.m_pDataSkybox->GetCubemap()->GetNumberOfPixelsU(), rRenderJob.m_pDataSkybox->GetCubemap()->GetNumberOfPixelsV());
+
+            Base::AABB2UInt CubemapRect(Base::UInt2(0), CubemapResolution);
+
+            TextureManager::CopyToTextureArray2D(CustomCubemapTexturePtr, 0, CubemapRect, CubemapRect[1][0], rRenderJob.m_pDataSkybox->GetCubemap()->GetFace(Dt::CTextureCube::Right)->GetPixels(), false);
+            TextureManager::CopyToTextureArray2D(CustomCubemapTexturePtr, 1, CubemapRect, CubemapRect[1][0], rRenderJob.m_pDataSkybox->GetCubemap()->GetFace(Dt::CTextureCube::Left)->GetPixels(), false);
+            TextureManager::CopyToTextureArray2D(CustomCubemapTexturePtr, 2, CubemapRect, CubemapRect[1][0], rRenderJob.m_pDataSkybox->GetCubemap()->GetFace(Dt::CTextureCube::Top)->GetPixels(), false);
+            TextureManager::CopyToTextureArray2D(CustomCubemapTexturePtr, 3, CubemapRect, CubemapRect[1][0], rRenderJob.m_pDataSkybox->GetCubemap()->GetFace(Dt::CTextureCube::Bottom)->GetPixels(), false);
+            TextureManager::CopyToTextureArray2D(CustomCubemapTexturePtr, 4, CubemapRect, CubemapRect[1][0], rRenderJob.m_pDataSkybox->GetCubemap()->GetFace(Dt::CTextureCube::Front)->GetPixels(), false);
+            TextureManager::CopyToTextureArray2D(CustomCubemapTexturePtr, 5, CubemapRect, CubemapRect[1][0], rRenderJob.m_pDataSkybox->GetCubemap()->GetFace(Dt::CTextureCube::Back)->GetPixels(), false);
+
+            TextureManager::UpdateMipmap(CustomCubemapTexturePtr);
         }
 
         Performance::BeginEvent("Skybox from Cubemap");
@@ -980,7 +998,7 @@ namespace
         // -----------------------------------------------------------------------------
         Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
 
-        if (rRenderJob.m_pDataCamera->GetTexture()->GetDirtyTime() == FrameTime)
+        if (rRenderJob.m_pDataCamera->GetHasTexture() && rRenderJob.m_pDataCamera->GetTexture()->GetDirtyTime() == FrameTime)
         {
             // -----------------------------------------------------------------------------
             // Copy image data to background image

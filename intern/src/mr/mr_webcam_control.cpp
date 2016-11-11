@@ -636,11 +636,11 @@ namespace MR
         CombinedTop    = CombineTopFaces(FrontTopPart, BackTopPart);
         CombinedBottom = CombineBottomFaces(FrontBottomPart, BackBottomPart);
 
-        Dt::TextureManager::CopyToTexture2D(m_pCubemap->GetFace(Dt::CTextureCube::Right),  CombinedRight.data);
-        Dt::TextureManager::CopyToTexture2D(m_pCubemap->GetFace(Dt::CTextureCube::Left),   CombinedLeft.data);
-        Dt::TextureManager::CopyToTexture2D(m_pCubemap->GetFace(Dt::CTextureCube::Top),    CombinedTop.data);
-        Dt::TextureManager::CopyToTexture2D(m_pCubemap->GetFace(Dt::CTextureCube::Bottom), CombinedBottom.data);
-        Dt::TextureManager::CopyToTexture2D(m_pCubemap->GetFace(Dt::CTextureCube::Front),  FrontCroped.data);
-        Dt::TextureManager::CopyToTexture2D(m_pCubemap->GetFace(Dt::CTextureCube::Back),   BackCroped.data);
+        Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Right,  CombinedRight.data);
+        Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Left,   CombinedLeft.data);
+        Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Top,    CombinedTop.data);
+        Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Bottom, CombinedBottom.data);
+        Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Front,  FrontCroped.data);
+        Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Back,   BackCroped.data);
     }
 } // namespace MR

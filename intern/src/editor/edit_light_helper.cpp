@@ -355,6 +355,18 @@ namespace
             NewMessage.PutInt   (rCurrentEntity.GetID());
             NewMessage.PutInt   (static_cast<int>(pLightFacet->GetType()));
             NewMessage.PutString(pLightFacet->GetPanorama()->GetFileName());
+
+            if (pLightFacet->GetHasCubemap())
+            {
+                NewMessage.PutBool(true);
+
+                NewMessage.PutInt(pLightFacet->GetCubemap()->GetHash());
+            }
+            else
+            {
+                NewMessage.PutBool(false);
+            }
+
             NewMessage.PutFloat (pLightFacet->GetIntensity());
                 
             NewMessage.Reset();
@@ -524,6 +536,15 @@ namespace
 
             const char* pTexture = _rMessage.GetString(pTemp, 256);
 
+            bool HasCubemap = _rMessage.GetBool();
+
+            unsigned int CubemapHash = 0;
+
+            if (HasCubemap)
+            {
+                CubemapHash = _rMessage.GetInt();
+            }
+
             float Intensity = _rMessage.GetFloat();
 
             // -----------------------------------------------------------------------------
@@ -534,6 +555,8 @@ namespace
 
             const char* pCurrentTexture = pLightFacet->GetPanorama()->GetFileName();
                 
+            // TODO by tschwandt
+            // This should be done by an hash code; loading image should be done by asset manager
             if (strcmp(pCurrentTexture, pTexture))
             {
                 Dt::STextureDescriptor TextureDescriptor;
@@ -550,6 +573,17 @@ namespace
                 Dt::CTexture2D* pPanoramaTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
 
                 pLightFacet->SetPanorama(pPanoramaTexture);
+            }
+
+            if (HasCubemap)
+            {
+                Dt::CTextureCube* pCubemapTexture = Dt::TextureManager::GetTextureCubeByHash(CubemapHash);
+
+                pLightFacet->SetCubemap(pCubemapTexture);
+            }
+            else
+            {
+                pLightFacet->SetCubemap(nullptr);
             }
 
             Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
