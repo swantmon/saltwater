@@ -345,7 +345,7 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    CTexture2DPtr CSkyboxFacet::GetCustomTexture2D()
+    CTexture2DPtr CSkyboxFacet::GetCubemapTexture2D()
     {
         return m_CubemapTexture2DPtr;
     }

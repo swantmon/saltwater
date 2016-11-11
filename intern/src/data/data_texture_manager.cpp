@@ -41,10 +41,10 @@ namespace
 
     public:
 
-        CTexture1D* CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
-        CTexture2D* CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
+        CTexture1D* CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _GenerateHash = true);
+        CTexture2D* CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _GenerateHash = true);
 
-        CTextureCube* CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
+        CTextureCube* CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _GenerateHash = true);
 
         CTexture2D* GetTexture2DByHash(unsigned int _Hash);
         CTextureCube* GetTextureCubeByHash(unsigned int _Hash);
@@ -180,18 +180,19 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CTexture1D* CDtTextureManager::CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
+    CTexture1D* CDtTextureManager::CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _GenerateHash)
     {
         BASE_UNUSED(_rDescriptor);
         BASE_UNUSED(_IsDeleteable);
         BASE_UNUSED(_Behavior);
+        BASE_UNUSED(_GenerateHash);
 
         return nullptr;
     }
 
     // -----------------------------------------------------------------------------
 
-    CTexture2D* CDtTextureManager::CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
+    CTexture2D* CDtTextureManager::CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _GenerateHash)
     {
         const Base::Char* pHashIdentifier;
         void*             pBytes;
@@ -216,7 +217,7 @@ namespace
         // -----------------------------------------------------------------------------
         pHashIdentifier = _rDescriptor.m_pIdentifier != 0 ? _rDescriptor.m_pIdentifier : _rDescriptor.m_pFileName;
 
-        if (pHashIdentifier != nullptr)
+        if (pHashIdentifier != nullptr && _GenerateHash == true)
         {
             const void* pData;
 
@@ -418,7 +419,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CTextureCube* CDtTextureManager::CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
+    CTextureCube* CDtTextureManager::CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _GenerateHash)
     {
         const Base::Char* pHashIdentifier;
         void*             pBytes;
@@ -439,7 +440,7 @@ namespace
         // -----------------------------------------------------------------------------
         pHashIdentifier = _rDescriptor.m_pIdentifier != 0 ? _rDescriptor.m_pIdentifier : _rDescriptor.m_pFileName;
 
-        if (pHashIdentifier != nullptr)
+        if (pHashIdentifier != nullptr && _GenerateHash == true)
         {
             const void* pData;
 
@@ -577,12 +578,12 @@ namespace
             // -----------------------------------------------------------------------------
             // Create faces
             // -----------------------------------------------------------------------------
-            rTexture.m_pFaces[Dt::CTextureCube::Right ] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior);
-            rTexture.m_pFaces[Dt::CTextureCube::Left  ] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior);
-            rTexture.m_pFaces[Dt::CTextureCube::Top   ] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior);
-            rTexture.m_pFaces[Dt::CTextureCube::Bottom] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior);
-            rTexture.m_pFaces[Dt::CTextureCube::Front ] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior);
-            rTexture.m_pFaces[Dt::CTextureCube::Back  ] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior);
+            rTexture.m_pFaces[Dt::CTextureCube::Right ] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior, false);
+            rTexture.m_pFaces[Dt::CTextureCube::Left  ] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior, false);
+            rTexture.m_pFaces[Dt::CTextureCube::Top   ] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior, false);
+            rTexture.m_pFaces[Dt::CTextureCube::Bottom] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior, false);
+            rTexture.m_pFaces[Dt::CTextureCube::Front ] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior, false);
+            rTexture.m_pFaces[Dt::CTextureCube::Back  ] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior, false);
         }
         catch (...)
         {

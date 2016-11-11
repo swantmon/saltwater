@@ -633,7 +633,10 @@ namespace
     
     void CGfxSkyRenderer::Render()
     {
-        if (m_SkyboxRenderJobs.size() != 0)
+        bool HasEnvironmentSkybox = m_SkyboxRenderJobs.size() != 0;
+        bool HasMainCamera        = m_CameraRenderJobs.size() != 0;
+
+        if (HasEnvironmentSkybox)
         {
             SSkyboxRenderJob& rRenderJob = m_SkyboxRenderJobs[0];
 
@@ -651,13 +654,13 @@ namespace
             Performance::EndEvent();
         }
 
-        if (m_CameraRenderJobs.size() != 0)
+        if (HasMainCamera)
         {
             SCameraRenderJob& rRenderJob = m_CameraRenderJobs[0];
 
-            Performance::BeginEvent("Clear");
+            Performance::BeginEvent("Background");
 
-            if (rRenderJob.m_pDataCamera->GetClearFlag() == Dt::CCameraActorFacet::Skybox)
+            if (HasEnvironmentSkybox != 0 && rRenderJob.m_pDataCamera->GetClearFlag() == Dt::CCameraActorFacet::Skybox)
             {
                 RenderBackgroundFromSkybox();
             }
@@ -791,7 +794,7 @@ namespace
 
         if (rRenderJob.m_pDataSkybox->GetHasCubemap() && rRenderJob.m_pDataSkybox->GetCubemap()->GetFace(Dt::CTextureCube::Right)->GetPixels() != 0)
         {
-            CTexture2DPtr CustomCubemapTexturePtr = rRenderJob.m_pGraphicSkybox->GetCustomTexture2D();
+            CTexture2DPtr CustomCubemapTexturePtr = rRenderJob.m_pGraphicSkybox->GetCubemapTexture2D();
 
             Base::UInt2 CubemapResolution = Base::UInt2(rRenderJob.m_pDataSkybox->GetCubemap()->GetNumberOfPixelsU(), rRenderJob.m_pDataSkybox->GetCubemap()->GetNumberOfPixelsV());
 
@@ -985,11 +988,23 @@ namespace
 
     void CGfxSkyRenderer::RenderBackgroundFromTexture()
     {
-        SCameraRenderJob& rRenderJob = m_CameraRenderJobs[0];
+        SCameraRenderJob& rRenderJob         = m_CameraRenderJobs[0];
 
         if (rRenderJob.m_pGraphicCamera->GetBackgroundTexture2D() == nullptr)
         {
             return;
+        }
+
+        // -----------------------------------------------------------------------------
+        // Prepare value from sky / environment
+        // -----------------------------------------------------------------------------
+        float HDRIntensity = 1.0f;
+
+        if (m_SkyboxRenderJobs.size() > 0)
+        {
+            SSkyboxRenderJob& rEnvironmentSkyJob = m_SkyboxRenderJobs[0];
+
+            HDRIntensity = rEnvironmentSkyJob.m_pDataSkybox->GetIntensity();
         }
 
         // -----------------------------------------------------------------------------
@@ -1022,7 +1037,7 @@ namespace
         // -----------------------------------------------------------------------------
         SSkytextureBufferPS* pPSBuffer = static_cast<SSkytextureBufferPS*>(BufferManager::MapConstantBuffer(m_SkytexturePSBufferSetPtr->GetBuffer(0)));
 
-        pPSBuffer->m_HDRFactor     = 10000.0f; //rRenderJob.m_pGraphicCamera->GetIntensity();
+        pPSBuffer->m_HDRFactor     = HDRIntensity;
         pPSBuffer->m_IsHDR         = rRenderJob.m_pGraphicCamera->GetBackgroundTexture2D()->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
         pPSBuffer->m_ExposureIndex = static_cast<float>(HistogramRenderer::GetLastExposureHistoryIndex());
 

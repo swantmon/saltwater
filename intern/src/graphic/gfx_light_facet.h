@@ -145,7 +145,7 @@ namespace Gfx
     public:
 
         void SetCubemapTexture2D(CTexture2DPtr _CustomTexture2DPtr);
-        CTexture2DPtr GetCustomTexture2D();
+        CTexture2DPtr GetCubemapTexture2D();
 
         void SetCubemapTextureSet(CTextureSetPtr _CustomTextureSetPtr);
         CTextureSetPtr GetCubemapTextureSet();

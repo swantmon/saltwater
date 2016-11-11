@@ -416,7 +416,7 @@ namespace
         {
             // TODO by tschwandt
             // What happens if size changes!!!
-            if (pGraphicSkyboxFacet->GetCustomTexture2D() == nullptr && pDataSkyboxFacet->GetHasCubemap())
+            if (pGraphicSkyboxFacet->GetCubemapTexture2D() == nullptr && pDataSkyboxFacet->GetHasCubemap())
             {
                 unsigned int SizeOfCustomCubemap = pDataSkyboxFacet->GetCubemap()->GetNumberOfPixelsU();
 

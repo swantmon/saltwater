@@ -134,34 +134,6 @@ namespace
                 }
             }
         }
-
-        // -----------------------------------------------------------------------------
-        // Update some lights if AR is enabled
-        // This means, we have changing backgrounds and light conditions
-        // -----------------------------------------------------------------------------  
-        if (MR::ControlManager::IsActive())
-        {
-            Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
-            Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
-
-            for (; CurrentEntity != EndOfEntities; )
-            {
-                Dt::CEntity& rCurrentEntity = *CurrentEntity;
-
-                // -----------------------------------------------------------------------------
-                // Get graphic facet
-                // -----------------------------------------------------------------------------
-                if (rCurrentEntity.GetType() == Dt::SLightType::GlobalProbe || rCurrentEntity.GetType() == Dt::SLightType::Skybox)
-                {
-                    Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
-                }
-
-                // -----------------------------------------------------------------------------
-                // Next entity
-                // -----------------------------------------------------------------------------
-                CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
-            }
-        }  
         
         // -----------------------------------------------------------------------------
         // Return state changes

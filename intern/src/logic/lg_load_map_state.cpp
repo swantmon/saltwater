@@ -483,13 +483,6 @@ namespace
 
         Dt::CTextureCube* pTextureCubemap = Dt::TextureManager::CreateCubeTexture(TextureDescriptor);
 
-        Dt::TextureManager::CopyToTextureCube(pTextureCubemap, Dt::CTextureCube::Right,  Dt::TextureManager::CreateTexture2D(TextureDescriptor));
-        Dt::TextureManager::CopyToTextureCube(pTextureCubemap, Dt::CTextureCube::Left,   Dt::TextureManager::CreateTexture2D(TextureDescriptor));
-        Dt::TextureManager::CopyToTextureCube(pTextureCubemap, Dt::CTextureCube::Top,    Dt::TextureManager::CreateTexture2D(TextureDescriptor));
-        Dt::TextureManager::CopyToTextureCube(pTextureCubemap, Dt::CTextureCube::Bottom, Dt::TextureManager::CreateTexture2D(TextureDescriptor));
-        Dt::TextureManager::CopyToTextureCube(pTextureCubemap, Dt::CTextureCube::Front,  Dt::TextureManager::CreateTexture2D(TextureDescriptor));
-        Dt::TextureManager::CopyToTextureCube(pTextureCubemap, Dt::CTextureCube::Back,   Dt::TextureManager::CreateTexture2D(TextureDescriptor));
-
         {
             Dt::SEntityDescriptor EntityDesc;
 

@@ -636,6 +636,13 @@ namespace MR
         CombinedTop    = CombineTopFaces(FrontTopPart, BackTopPart);
         CombinedBottom = CombineBottomFaces(FrontBottomPart, BackBottomPart);
 
+//         imshow("CombinedRight", CombinedRight);
+//         imshow("CombinedLeft", CombinedLeft);
+//         imshow("CombinedTop", CombinedTop);
+//         imshow("CombinedBottom", CombinedBottom);
+//         imshow("FrontCroped", FrontCroped);
+//         imshow("BackCroped", BackCroped);
+
         Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Right,  CombinedRight.data);
         Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Left,   CombinedLeft.data);
         Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Top,    CombinedTop.data);
