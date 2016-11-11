@@ -366,34 +366,6 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    void CSkyboxFacet::SetBackgroundTexture2D(CTexture2DPtr _Texture2DPtr)
-    {
-        m_BackgroundPanoramaTexture2DPtr = _Texture2DPtr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CTexture2DPtr CSkyboxFacet::GetBackgroundTexture2D()
-    {
-        return m_BackgroundPanoramaTexture2DPtr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CSkyboxFacet::SetBackgroundTextureSet(CTextureSetPtr _TextureSetPtr)
-    {
-        m_BackgroundPanoramaTextureSetPtr = _TextureSetPtr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CTextureSetPtr CSkyboxFacet::GetBackgroundTextureSet()
-    {
-        return m_BackgroundPanoramaTextureSetPtr;
-    }
-
-    // -----------------------------------------------------------------------------
-
     void CSkyboxFacet::SetPanoramaTexture2D(CTexture2DPtr _Texture2DPtr)
     {
         m_BackgroundPanoramaTexture2DPtr = _Texture2DPtr;

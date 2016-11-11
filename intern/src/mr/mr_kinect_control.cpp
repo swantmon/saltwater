@@ -359,7 +359,7 @@ namespace MR
         cv::flip(ColorUC3    , ColorUC3    , 1);
 
         // -----------------------------------------------------------------------------
-        // Copy final result to the
+        // Copy final result to the textures
         // -----------------------------------------------------------------------------
         Dt::TextureManager::CopyToTexture2D(m_pOriginalFrame, static_cast<void*>(static_cast<Base::Ptr>(ColorUC3.data)));
 

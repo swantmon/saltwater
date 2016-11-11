@@ -530,7 +530,7 @@ namespace Dt
         : m_Type      (Procedural)
         , m_HasHDR    (true)
         , m_pCubemap  (0)
-        , m_pTexture2D(0)
+        , m_pPanoramaTexture(0)
         , m_Intensity (0.0f)
     {
 
@@ -573,16 +573,16 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CSkyboxFacet::SetTexture(Dt::CTexture2D* _pTexture2D)
+    void CSkyboxFacet::SetPanorama(Dt::CTexture2D* _pTexture2D)
     {
-        m_pTexture2D = _pTexture2D;
+        m_pPanoramaTexture = _pTexture2D;
     }
 
     // -----------------------------------------------------------------------------
 
-    Dt::CTexture2D* CSkyboxFacet::GetTexture()
+    Dt::CTexture2D* CSkyboxFacet::GetPanorama()
     {
-        return m_pTexture2D;
+        return m_pPanoramaTexture;
     }
 
     // -----------------------------------------------------------------------------
@@ -594,9 +594,9 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    bool CSkyboxFacet::GetHasTexture() const
+    bool CSkyboxFacet::GetHasPanorama() const
     {
-        return m_pTexture2D != 0;
+        return m_pPanoramaTexture != 0;
     }
 
     // -----------------------------------------------------------------------------

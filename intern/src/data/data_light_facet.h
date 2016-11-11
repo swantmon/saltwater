@@ -264,7 +264,7 @@ namespace Dt
         {
             Procedural,      //< Skybox is a procedural generated HDR depending on settings
             Panorama,        //< Skybox will be created from panorama image
-            ImageBackground, //< Skybox is generated from given cubemap and background is from stream image
+            Cubemap,         //< Skybox is generated from given cubemap
         };
 
     public:
@@ -275,11 +275,11 @@ namespace Dt
         void SetCubemap(Dt::CTextureCube* _rCubemap);
         Dt::CTextureCube* GetCubemap();        
 
-        void SetTexture(Dt::CTexture2D* _pTexture2D);
-        Dt::CTexture2D* GetTexture();
+        void SetPanorama(Dt::CTexture2D* _pTexture2D);
+        Dt::CTexture2D* GetPanorama();
 
         bool GetHasCubemap() const;
-        bool GetHasTexture() const;
+        bool GetHasPanorama() const;
 
         void SetIntensity(float _Intensity);
         float GetIntensity();
@@ -291,10 +291,10 @@ namespace Dt
 
     private:
 
-        EType             m_Type;               //< Type of the skybox for image, procedural or stream
+        EType             m_Type;               //< Type of the skybox for procedural panorama or cubemap
         bool              m_HasHDR;             //< Declares either the image consists of HDR values
         Dt::CTextureCube* m_pCubemap;           //< Pointer to cubemap for cubemap skybox
-        Dt::CTexture2D*   m_pTexture2D;         //< Pointer to a texture that is displayed in background or panorama
+        Dt::CTexture2D*   m_pPanoramaTexture;   //< Pointer to a panorama texture
         float             m_Intensity;          //< Intensity of sky that is freely adjustable by artist (multiplier on the image)
     };
 } // namespace Dt

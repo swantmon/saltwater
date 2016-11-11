@@ -8,6 +8,8 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_time.h"
+
 #include "data/data_texture_manager.h"
 
 #include "IL/il.h"
@@ -43,6 +45,8 @@ namespace
         CTexture2D* CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
 
         CTextureCube* CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
+
+        CTexture2D* GetTexture2DByHash(unsigned int _Hash);
 
         void CopyToTexture2D(CTexture2D* _pTexture2D, void* _pPixels);
         void CopyToTexture2D(CTexture2D* _pTexture2D, CTexture2D* _pTexture);
@@ -323,6 +327,13 @@ namespace
             rTexture.m_Info.m_IsDummyTexture   = false;
             rTexture.m_Info.m_Semantic         = _rDescriptor.m_Semantic;
             rTexture.m_Info.m_NumberOfTextures = 1;
+
+            // -----------------------------------------------------------------------------
+            // Dirty set
+            // -----------------------------------------------------------------------------
+            Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
+
+            rTexture.m_DirtyTime = FrameTime;
             
             // -----------------------------------------------------------------------------
             // Set hash to map
@@ -492,6 +503,13 @@ namespace
             rTexture.m_Info.m_IsDummyTexture   = false;
             rTexture.m_Info.m_Semantic         = _rDescriptor.m_Semantic;
             rTexture.m_Info.m_NumberOfTextures = 6;
+
+            // -----------------------------------------------------------------------------
+            // Dirty set
+            // -----------------------------------------------------------------------------
+            Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
+
+            rTexture.m_DirtyTime = FrameTime;
             
             // -----------------------------------------------------------------------------
             // Set hash to map
@@ -499,7 +517,7 @@ namespace
             if (Hash != 0)
             {
                 m_TexturesCubeByHash[Hash] = &rTexture;
-            }
+            }   
             
             // -----------------------------------------------------------------------------
             // Check the behavior.
@@ -565,6 +583,18 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    CTexture2D* CDtTextureManager::GetTexture2DByHash(unsigned int _Hash)
+    {
+        if (m_Textures2DByHash.find(_Hash) != m_Textures2DByHash.end())
+        {
+            return m_Textures2DByHash.at(_Hash);
+        }
+
+        return nullptr;
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CDtTextureManager::CopyToTexture2D(CTexture2D* _pTexture2D, void* _pPixels)
     {
         assert(_pTexture2D != 0);
@@ -591,6 +621,14 @@ namespace
         {
             pInternTexture2D->m_pPixels = _pPixels;
         }
+
+        // -----------------------------------------------------------------------------
+        // Dirty set
+        // -----------------------------------------------------------------------------
+        Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
+
+        pInternTexture2D->m_DirtyTime = FrameTime;
+
     }
 
     // -----------------------------------------------------------------------------
@@ -621,6 +659,13 @@ namespace
         {
             pInternTexture2D->m_pPixels = _pTexture->GetPixels();
         }
+
+        // -----------------------------------------------------------------------------
+        // Dirty set
+        // -----------------------------------------------------------------------------
+        Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
+
+        pInternTexture2D->m_DirtyTime = FrameTime;
     }
 
     // -----------------------------------------------------------------------------
@@ -638,6 +683,13 @@ namespace
         // Set texture
         // -----------------------------------------------------------------------------
         pInternTextureCube->m_pFaces[_Face] = _pTexture;
+
+        // -----------------------------------------------------------------------------
+        // Dirty set
+        // -----------------------------------------------------------------------------
+        Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
+
+        pInternTextureCube->m_DirtyTime = FrameTime;
     }
 
     // -----------------------------------------------------------------------------
@@ -1124,6 +1176,13 @@ namespace TextureManager
     CTextureCube* CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
         return CDtTextureManager::GetInstance().CreateCubeTexture(_rDescriptor, _IsDeleteable, _Behavior);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTexture2D* GetTexture2DByHash(unsigned int _Hash)
+    {
+        return CDtTextureManager::GetInstance().GetTexture2DByHash(_Hash);
     }
 
     // -----------------------------------------------------------------------------

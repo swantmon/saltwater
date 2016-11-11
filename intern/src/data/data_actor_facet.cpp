@@ -117,6 +117,7 @@ namespace Dt
         , m_Near            (0.3f)
         , m_Far             (1000.0f)
         , m_BackgroundColor (Base::Float3::s_One)
+        , m_pTexture2D      (nullptr)
         , m_ProjectionMatrix(Base::Float3x3::s_Identity)
         , m_ViewportRect    ()
         , m_ClearFlag       (Skybox)

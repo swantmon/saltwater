@@ -7,15 +7,19 @@
 #include "base/base_sphere.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_time.h"
+
 #include "data/data_actor_facet.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
+#include "data/data_texture_2d.h"
 
 #include "graphic/gfx_actor_facet.h"
 #include "graphic/gfx_actor_manager.h"
 #include "graphic/gfx_material_manager.h"
 #include "graphic/gfx_mesh_manager.h"
+#include "graphic/gfx_texture_manager.h"
 
 using namespace Gfx;
 
@@ -41,7 +45,7 @@ namespace
 
     private:
 
-        class CInternModelActorFacet : public CMeshActorFacet
+        class CInternMeshActorFacet : public CMeshActorFacet
         {
         private:
 
@@ -55,18 +59,27 @@ namespace
             friend class CGfxActorManager;
         };
 
+        class CInternCameraActorFacet : public CCameraActorFacet
+        {
+        private:
+
+            friend class CGfxActorManager;
+        };
+
     private:
 
-        typedef Base::CPool<CInternModelActorFacet, 1024> CActorModels;
-        typedef Base::CPool<CInternARActorFacet, 32> CActorARs;
+        typedef Base::CPool<CInternMeshActorFacet  , 1024> CActorMeshes;
+        typedef Base::CPool<CInternARActorFacet    , 32  > CActorARs;
+        typedef Base::CPool<CInternCameraActorFacet, 8   > CActorCameras;
 
         typedef std::vector<Dt::CEntity*> CEntityVector;
 
     private:
 
         CEntityVector m_DirtyEntities;
-        CActorModels  m_ActorModels;
+        CActorMeshes  m_ActorMeshes;
         CActorARs     m_ActorARs;
+        CActorCameras m_ActorCameras;
         
     private:
 
@@ -75,9 +88,11 @@ namespace
         void UpdateActor(Dt::CEntity& _rEntity);
         void UpdateActorMesh(Dt::CEntity& _rEntity);
         void UpdateActorAR(Dt::CEntity& _rEntity);
+        void UpdateActorCamera(Dt::CEntity& _rEntity);
 
         void CreateActorMesh(Dt::CEntity& _rEntity);
         void CreateActorAR(Dt::CEntity& _rEntity);
+        void CreateActorCamera(Dt::CEntity& _rEntity);
     };
 } // namespace
 
@@ -85,8 +100,9 @@ namespace
 {
     CGfxActorManager::CGfxActorManager()
         : m_DirtyEntities()
-        , m_ActorModels  ()
+        , m_ActorMeshes  ()
         , m_ActorARs     ()
+        , m_ActorCameras ()
     {
         m_DirtyEntities.reserve(65536);
     }
@@ -113,8 +129,9 @@ namespace
 
     void CGfxActorManager::Clear()
     {
-        m_ActorModels.Clear();
-        m_ActorARs   .Clear();
+        m_ActorMeshes .Clear();
+        m_ActorARs    .Clear();
+        m_ActorCameras.Clear();
 
         m_DirtyEntities.clear();
     }
@@ -152,12 +169,13 @@ namespace
         if ((DirtyFlags & Dt::CEntity::DirtyCreate) != 0)
         {
             // -----------------------------------------------------------------------------
-            // Create a light
+            // Create a actor
             // -----------------------------------------------------------------------------
             switch (_pEntity->GetType())
             {
-            case Dt::SActorType::Mesh: CreateActorMesh(*_pEntity); break;
-            case Dt::SActorType::AR:   CreateActorAR(*_pEntity); break;
+            case Dt::SActorType::Mesh:   CreateActorMesh(*_pEntity); break;
+            case Dt::SActorType::AR:     CreateActorAR(*_pEntity); break;
+            case Dt::SActorType::Camera: CreateActorCamera(*_pEntity); break;
             }
         }
         else if ((DirtyFlags & Dt::CEntity::DirtyDetail) != 0)
@@ -175,8 +193,9 @@ namespace
         // -----------------------------------------------------------------------------
         switch (_rEntity.GetType())
         {
-        case Dt::SActorType::Mesh: UpdateActorMesh(_rEntity); break;
-        case Dt::SActorType::AR:   UpdateActorAR(_rEntity); break;
+        case Dt::SActorType::Mesh:   UpdateActorMesh(_rEntity); break;
+        case Dt::SActorType::AR:     UpdateActorAR(_rEntity); break;
+        case Dt::SActorType::Camera: UpdateActorCamera(_rEntity); break;
         }
     }
 
@@ -196,7 +215,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Get facet
         // -----------------------------------------------------------------------------
-        CInternModelActorFacet* pGraphicActorModelFacet = static_cast<CInternModelActorFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+        CInternMeshActorFacet* pGraphicActorModelFacet = static_cast<CInternMeshActorFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
 
         // -----------------------------------------------------------------------------
         // Model
@@ -259,6 +278,67 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxActorManager::UpdateActorCamera(Dt::CEntity& _rEntity)
+    {
+        STextureDescriptor       TextureDescriptor;
+        Dt::CCameraActorFacet*   pDataCamera;
+        Gfx::CCameraActorFacet*  pGraphicCamera;
+
+        pDataCamera    = static_cast<Dt::CCameraActorFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        pGraphicCamera = static_cast<Gfx::CCameraActorFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+
+        // -----------------------------------------------------------------------------
+        // Background
+        // -----------------------------------------------------------------------------
+        if (pDataCamera->GetClearFlag() == Dt::CCameraActorFacet::Texture)
+        {
+            if (pDataCamera->GetTexture() != nullptr)
+            {
+                // -----------------------------------------------------------------------------
+                // If no background image exists we create one
+                // -----------------------------------------------------------------------------
+                if (pGraphicCamera->GetBackgroundTexture2D() == nullptr)
+                {
+                    TextureDescriptor.m_NumberOfPixelsU  = pDataCamera->GetTexture()->GetNumberOfPixelsU();
+                    TextureDescriptor.m_NumberOfPixelsV  = pDataCamera->GetTexture()->GetNumberOfPixelsV();
+                    TextureDescriptor.m_NumberOfPixelsW  = 1;
+                    TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
+                    TextureDescriptor.m_NumberOfTextures = 1;
+                    TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
+                    TextureDescriptor.m_Usage            = CTextureBase::GPURead;
+                    TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+                    TextureDescriptor.m_pFileName        = pDataCamera->GetTexture()->GetFileName();
+                    TextureDescriptor.m_pPixels          = pDataCamera->GetTexture()->GetPixels();
+                    TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
+
+                    if (pDataCamera->GetTexture()->GetSemantic() == Dt::CTextureBase::HDR)
+                    {
+                        TextureDescriptor.m_Format = CTextureBase::R16G16B16_FLOAT;
+                    }
+                    else
+                    {
+                        TextureDescriptor.m_Format = CTextureBase::R8G8B8_UBYTE;
+                    }
+
+                    CTexture2DPtr BackgroundTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+
+                    pGraphicCamera->SetBackgroundTexture2D(BackgroundTexturePtr);
+
+                    pGraphicCamera->SetBackgroundTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(BackgroundTexturePtr)));
+                }
+            }
+        }        
+
+        // -----------------------------------------------------------------------------
+        // Other data
+        // -----------------------------------------------------------------------------
+        Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
+
+        pGraphicCamera->SetTimeStamp(FrameTime);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxActorManager::CreateActorMesh(Dt::CEntity& _rEntity)
     {
         Dt::CMeshActorFacet* pDataActorModelFacet;
@@ -273,7 +353,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Create facet
         // -----------------------------------------------------------------------------
-        CInternModelActorFacet& rGraphicActorModelFacet = m_ActorModels.Allocate();
+        CInternMeshActorFacet& rGraphicActorModelFacet = m_ActorMeshes.Allocate();
 
         // -----------------------------------------------------------------------------
         // Prepare storage data : Model
@@ -391,6 +471,64 @@ namespace
         // Save facet
         // -----------------------------------------------------------------------------
         _rEntity.SetDetailFacet(Dt::SFacetCategory::Graphic, &rGraphicActorARFacet);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxActorManager::CreateActorCamera(Dt::CEntity& _rEntity)
+    {
+        STextureDescriptor      TextureDescriptor;
+        Dt::CCameraActorFacet*  pDataCamera;
+
+        // -----------------------------------------------------------------------------
+        // Get sun data informations
+        // -----------------------------------------------------------------------------
+        pDataCamera = static_cast<Dt::CCameraActorFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+        assert(pDataCamera);
+
+        // -----------------------------------------------------------------------------
+        // Create facet
+        // -----------------------------------------------------------------------------
+        CInternCameraActorFacet& rGraphicCamera = m_ActorCameras.Allocate();
+
+        if (pDataCamera->GetClearFlag() == Dt::CCameraActorFacet::Texture)
+        {
+            // -----------------------------------------------------------------------------
+            // Background = Texture
+            // -----------------------------------------------------------------------------
+            TextureDescriptor.m_NumberOfPixelsU  = pDataCamera->GetTexture()->GetNumberOfPixelsU();
+            TextureDescriptor.m_NumberOfPixelsV  = pDataCamera->GetTexture()->GetNumberOfPixelsV();
+            TextureDescriptor.m_NumberOfPixelsW  = 1;
+            TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
+            TextureDescriptor.m_NumberOfTextures = 1;
+            TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
+            TextureDescriptor.m_Usage            = CTextureBase::GPURead;
+            TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+            TextureDescriptor.m_pFileName        = pDataCamera->GetTexture()->GetFileName();
+            TextureDescriptor.m_pPixels          = pDataCamera->GetTexture()->GetPixels();
+            TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
+
+            if (pDataCamera->GetTexture()->GetSemantic() == Dt::CTextureBase::HDR)
+            {
+                TextureDescriptor.m_Format = CTextureBase::R16G16B16_FLOAT;
+            }
+            else
+            {
+                TextureDescriptor.m_Format = CTextureBase::R8G8B8_UBYTE;
+            }
+
+            CTexture2DPtr BackgroundTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+
+            rGraphicCamera.SetBackgroundTexture2D(BackgroundTexturePtr);
+
+            rGraphicCamera.SetBackgroundTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(BackgroundTexturePtr)));
+        }
+
+        // -----------------------------------------------------------------------------
+        // Save facet
+        // -----------------------------------------------------------------------------
+        _rEntity.SetDetailFacet(Dt::SFacetCategory::Graphic, &rGraphicCamera);
     }
 } // namespace
 

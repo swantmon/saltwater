@@ -370,7 +370,7 @@ namespace
     }
 
     // -----------------------------------------------------------------------------
-
+    
     void CGfxLightManager::UpdateSkybox(Dt::CEntity& _rEntity)
     {
         STextureDescriptor  TextureDescriptor;
@@ -385,19 +385,19 @@ namespace
             // -----------------------------------------------------------------------------
             // If skybox is dirty we should update image
             // -----------------------------------------------------------------------------
-            TextureDescriptor.m_NumberOfPixelsU  = pDataSkyboxFacet->GetTexture()->GetNumberOfPixelsU();
-            TextureDescriptor.m_NumberOfPixelsV  = pDataSkyboxFacet->GetTexture()->GetNumberOfPixelsV();
+            TextureDescriptor.m_NumberOfPixelsU  = pDataSkyboxFacet->GetPanorama()->GetNumberOfPixelsU();
+            TextureDescriptor.m_NumberOfPixelsV  = pDataSkyboxFacet->GetPanorama()->GetNumberOfPixelsV();
             TextureDescriptor.m_NumberOfPixelsW  = 1;
             TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
             TextureDescriptor.m_NumberOfTextures = 1;
             TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
             TextureDescriptor.m_Usage            = CTextureBase::GPURead;
             TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-            TextureDescriptor.m_pFileName        = pDataSkyboxFacet->GetTexture()->GetFileName();
-            TextureDescriptor.m_pPixels          = pDataSkyboxFacet->GetTexture()->GetPixels();
+            TextureDescriptor.m_pFileName        = pDataSkyboxFacet->GetPanorama()->GetFileName();
+            TextureDescriptor.m_pPixels          = pDataSkyboxFacet->GetPanorama()->GetPixels();
             TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
 
-            if (pDataSkyboxFacet->GetTexture()->GetSemantic() == Dt::CTextureBase::HDR)
+            if (pDataSkyboxFacet->GetPanorama()->GetSemantic() == Dt::CTextureBase::HDR)
             {
                 TextureDescriptor.m_Format = CTextureBase::R16G16B16_FLOAT;
             }
@@ -412,22 +412,8 @@ namespace
 
             pGraphicSkyboxFacet->SetPanoramaTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(EnvironmentTexturePtr)));
         }
-        else if (pDataSkyboxFacet->GetType() == Dt::CSkyboxFacet::ImageBackground)
+        else if (pDataSkyboxFacet->GetType() == Dt::CSkyboxFacet::Cubemap)
         {
-            // -----------------------------------------------------------------------------
-            // Background
-            // -----------------------------------------------------------------------------
-            if (pDataSkyboxFacet->GetTexture()->GetPixels() != 0)
-            {
-                CTexture2DPtr BackgroundPtr = pGraphicSkyboxFacet->GetBackgroundTexture2D();
-
-                Base::UInt2 TextureResolution = Base::UInt2(pDataSkyboxFacet->GetTexture()->GetNumberOfPixelsU(), pDataSkyboxFacet->GetTexture()->GetNumberOfPixelsV());
-
-                Base::AABB2UInt TargetRect(Base::UInt2(0), TextureResolution);
-
-                TextureManager::CopyToTexture2D(BackgroundPtr, TargetRect, TargetRect[1][0], pDataSkyboxFacet->GetTexture()->GetPixels());
-            }
-
             // -----------------------------------------------------------------------------
             // Cubemap
             // -----------------------------------------------------------------------------
@@ -794,19 +780,19 @@ namespace
             // -----------------------------------------------------------------------------
             // Input image
             // -----------------------------------------------------------------------------
-            TextureDescriptor.m_NumberOfPixelsU  = pDataSkyboxFacet->GetTexture()->GetNumberOfPixelsU();
-            TextureDescriptor.m_NumberOfPixelsV  = pDataSkyboxFacet->GetTexture()->GetNumberOfPixelsV();
+            TextureDescriptor.m_NumberOfPixelsU  = pDataSkyboxFacet->GetPanorama()->GetNumberOfPixelsU();
+            TextureDescriptor.m_NumberOfPixelsV  = pDataSkyboxFacet->GetPanorama()->GetNumberOfPixelsV();
             TextureDescriptor.m_NumberOfPixelsW  = 1;
             TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
             TextureDescriptor.m_NumberOfTextures = 1;
             TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
             TextureDescriptor.m_Usage            = CTextureBase::GPURead;
             TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-            TextureDescriptor.m_pFileName        = pDataSkyboxFacet->GetTexture()->GetFileName();
-            TextureDescriptor.m_pPixels          = pDataSkyboxFacet->GetTexture()->GetPixels();
+            TextureDescriptor.m_pFileName        = pDataSkyboxFacet->GetPanorama()->GetFileName();
+            TextureDescriptor.m_pPixels          = pDataSkyboxFacet->GetPanorama()->GetPixels();
             TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
 
-            if (pDataSkyboxFacet->GetTexture()->GetSemantic() == Dt::CTextureBase::HDR)
+            if (pDataSkyboxFacet->GetPanorama()->GetSemantic() == Dt::CTextureBase::HDR)
             {
                 TextureDescriptor.m_Format = CTextureBase::R16G16B16_FLOAT;
             }
@@ -821,38 +807,8 @@ namespace
 
             rGraphicSkyboxFacet.SetPanoramaTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(EnvironmentTexturePtr)));
         }
-        else if (pDataSkyboxFacet->GetType() == Dt::CSkyboxFacet::ImageBackground)
+        else if (pDataSkyboxFacet->GetType() == Dt::CSkyboxFacet::Cubemap)
         {
-            // -----------------------------------------------------------------------------
-            // Background
-            // -----------------------------------------------------------------------------
-            TextureDescriptor.m_NumberOfPixelsU  = pDataSkyboxFacet->GetTexture()->GetNumberOfPixelsU();
-            TextureDescriptor.m_NumberOfPixelsV  = pDataSkyboxFacet->GetTexture()->GetNumberOfPixelsV();
-            TextureDescriptor.m_NumberOfPixelsW  = 1;
-            TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
-            TextureDescriptor.m_NumberOfTextures = 1;
-            TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-            TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-            TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-            TextureDescriptor.m_pFileName        = pDataSkyboxFacet->GetTexture()->GetFileName();
-            TextureDescriptor.m_pPixels          = pDataSkyboxFacet->GetTexture()->GetPixels();
-            TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
-
-            if (pDataSkyboxFacet->GetTexture()->GetSemantic() == Dt::CTextureBase::HDR)
-            {
-                TextureDescriptor.m_Format = CTextureBase::R16G16B16_FLOAT;
-            }
-            else
-            {
-                TextureDescriptor.m_Format = CTextureBase::R8G8B8_UBYTE;
-            }
-        
-            CTexture2DPtr EnvironmentTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
-
-            rGraphicSkyboxFacet.SetBackgroundTexture2D(EnvironmentTexturePtr);
-
-            rGraphicSkyboxFacet.SetBackgroundTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(EnvironmentTexturePtr)));
-
             // -----------------------------------------------------------------------------
             // Cubemap
             // -----------------------------------------------------------------------------

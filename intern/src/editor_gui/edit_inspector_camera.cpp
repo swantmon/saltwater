@@ -53,6 +53,8 @@ namespace Edit
 
         int ClearFlag = m_pClearFlagCS->currentIndex();
 
+        int Hash = m_pBackgroundTextureEdit->text().toInt();
+
         QPalette ButtonPalette = m_pSolidColorButton->palette();
 
         QColor RGB = ButtonPalette.color(QPalette::Button);
@@ -107,6 +109,17 @@ namespace Edit
         NewMessage.PutBool(IsMainCamera);
 
         NewMessage.PutInt(ClearFlag);
+
+        if (Hash != 0)
+        {
+            NewMessage.PutBool(true);
+
+            NewMessage.PutInt(Hash);
+        }
+        else
+        {
+            NewMessage.PutBool(false);
+        }
 
         NewMessage.PutFloat(AlbedoColor[0]);
         NewMessage.PutFloat(AlbedoColor[1]);
@@ -208,6 +221,15 @@ namespace Edit
 
         int ClearFlag = _rMessage.GetInt();
 
+        bool HasTexture = _rMessage.GetBool();
+
+        int TextureHash = -1;
+
+        if (HasTexture)
+        {
+            TextureHash = _rMessage.GetInt();
+        }
+
         R = _rMessage.GetFloat();
         G = _rMessage.GetFloat();
         B = _rMessage.GetFloat();
@@ -253,6 +275,15 @@ namespace Edit
         m_pIsMainCameraCB->setChecked(IsMainCamera);
 
         m_pClearFlagCS->setCurrentIndex(ClearFlag);
+
+        if (HasTexture)
+        {
+            m_pBackgroundTextureEdit->setText(QString::number(TextureHash));
+        }
+        else
+        {
+            m_pBackgroundTextureEdit->setText(QString::number(0));
+        }
 
         QPalette ButtonPalette = m_pSolidColorButton->palette();
 

@@ -95,7 +95,7 @@ public:
     {
         if (InspectorCamera->objectName().isEmpty())
             InspectorCamera->setObjectName(QStringLiteral("InspectorCamera"));
-        InspectorCamera->resize(369, 539);
+        InspectorCamera->resize(448, 539);
         verticalLayout = new QVBoxLayout(InspectorCamera);
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
         groupBox = new QGroupBox(InspectorCamera);
@@ -397,6 +397,27 @@ public:
 
         verticalLayout->addWidget(groupBox);
 
+        QWidget::setTabOrder(m_pIsMainCameraCB, m_pClearFlagCS);
+        QWidget::setTabOrder(m_pClearFlagCS, m_pSolidColorButton);
+        QWidget::setTabOrder(m_pSolidColorButton, m_pSolidColorPickButton);
+        QWidget::setTabOrder(m_pSolidColorPickButton, m_pBackgroundTextureEdit);
+        QWidget::setTabOrder(m_pBackgroundTextureEdit, m_pProjectionCB);
+        QWidget::setTabOrder(m_pProjectionCB, m_pFieldOfViewSlider);
+        QWidget::setTabOrder(m_pFieldOfViewSlider, m_pFieldOfViewEdit);
+        QWidget::setTabOrder(m_pFieldOfViewEdit, m_pOrthographicSizeEdit);
+        QWidget::setTabOrder(m_pOrthographicSizeEdit, m_pClippingPlaneNearEdit);
+        QWidget::setTabOrder(m_pClippingPlaneNearEdit, m_pClippingPlaneFarEdit);
+        QWidget::setTabOrder(m_pClippingPlaneFarEdit, m_pOcclusionCullingCB);
+        QWidget::setTabOrder(m_pOcclusionCullingCB, m_pClearDepthEdit);
+        QWidget::setTabOrder(m_pClearDepthEdit, m_pCameraModeCB);
+        QWidget::setTabOrder(m_pCameraModeCB, m_pShutterSpeedEdit);
+        QWidget::setTabOrder(m_pShutterSpeedEdit, m_pApertureEdit);
+        QWidget::setTabOrder(m_pApertureEdit, m_pISOEdit);
+        QWidget::setTabOrder(m_pISOEdit, m_pECEdit);
+        QWidget::setTabOrder(m_pECEdit, m_pViewportXEdit);
+        QWidget::setTabOrder(m_pViewportXEdit, m_pViewportYEdit);
+        QWidget::setTabOrder(m_pViewportYEdit, m_pViewportWEdit);
+        QWidget::setTabOrder(m_pViewportWEdit, m_pViewportHEdit);
 
         retranslateUi(InspectorCamera);
         QObject::connect(m_pIsMainCameraCB, SIGNAL(clicked()), InspectorCamera, SLOT(valueChanged()));

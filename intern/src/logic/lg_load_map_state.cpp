@@ -163,7 +163,7 @@ namespace
             Dt::CSkyboxFacet* pSkyboxFacet = Dt::LightManager::CreateSkybox();
 
             pSkyboxFacet->SetType(Dt::CSkyboxFacet::Panorama);
-            pSkyboxFacet->SetTexture(pPanoramaTexture);
+            pSkyboxFacet->SetPanorama(pPanoramaTexture);
             pSkyboxFacet->SetIntensity(10000.0f);
 
             rEnvironment.SetDetailFacet(Dt::SFacetCategory::Data, pSkyboxFacet);
@@ -575,8 +575,8 @@ namespace
 
             Dt::CSkyboxFacet* pSkyboxFacet = Dt::LightManager::CreateSkybox();
 
-            pSkyboxFacet->SetType     (Dt::CSkyboxFacet::ImageBackground);
-            pSkyboxFacet->SetTexture  (pBackgroundTexture);
+            pSkyboxFacet->SetType     (Dt::CSkyboxFacet::Cubemap);
+            pSkyboxFacet->SetPanorama  (pBackgroundTexture);
             pSkyboxFacet->SetCubemap  (pTextureCubemap);
             pSkyboxFacet->SetIntensity(20000.0f);
 

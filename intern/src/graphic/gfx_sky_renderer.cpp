@@ -17,6 +17,7 @@
 #include "data/data_map.h"
 #include "data/data_model_manager.h"
 
+#include "graphic/gfx_actor_facet.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_histogram_renderer.h"
@@ -85,6 +86,7 @@ namespace
         struct SCameraRenderJob
         {
             Dt::CCameraActorFacet* m_pDataCamera;
+            Gfx::CCameraActorFacet* m_pGraphicCamera;
         };
 
         struct SSkytextureBufferPS
@@ -641,7 +643,7 @@ namespace
             {
                 RenderSkyboxFromPanorama();
             }
-            else if (rRenderJob.m_pDataSkybox->GetType() == Dt::CSkyboxFacet::ImageBackground)
+            else if (rRenderJob.m_pDataSkybox->GetType() == Dt::CSkyboxFacet::Cubemap)
             {
                 RenderSkyboxFromCubemap();
             }
@@ -700,7 +702,7 @@ namespace
         SCubemapBufferPS* pPSBuffer = static_cast<SCubemapBufferPS*>(BufferManager::MapConstantBuffer(m_CubemapPSBufferSetPtr->GetBuffer(0)));
 
         pPSBuffer->m_HDRFactor = rRenderJob.m_pDataSkybox->GetIntensity();
-        pPSBuffer->m_IsHDR     = rRenderJob.m_pDataSkybox->GetTexture()->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
+        pPSBuffer->m_IsHDR     = rRenderJob.m_pDataSkybox->GetPanorama()->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
 
         BufferManager::UnmapConstantBuffer(m_CubemapPSBufferSetPtr->GetBuffer(0));
 
@@ -965,11 +967,31 @@ namespace
 
     void CGfxSkyRenderer::RenderBackgroundFromTexture()
     {
-        SSkyboxRenderJob& rRenderJob = m_SkyboxRenderJobs[0];
+        SCameraRenderJob& rRenderJob = m_CameraRenderJobs[0];
 
-        if (rRenderJob.m_pGraphicSkybox->GetTimeStamp() != Core::Time::GetNumberOfFrame())
+        if (rRenderJob.m_pGraphicCamera->GetBackgroundTexture2D() == nullptr)
         {
             return;
+        }
+
+        // -----------------------------------------------------------------------------
+        // Check if data image is dirty
+        // TODO: do this somewhere else maybe?
+        // -----------------------------------------------------------------------------
+        Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
+
+        if (rRenderJob.m_pDataCamera->GetTexture()->GetDirtyTime() == FrameTime)
+        {
+            // -----------------------------------------------------------------------------
+            // Copy image data to background image
+            // -----------------------------------------------------------------------------
+            CTexture2DPtr BackgroundPtr = rRenderJob.m_pGraphicCamera->GetBackgroundTexture2D();
+
+            Base::UInt2 TextureResolution = Base::UInt2(rRenderJob.m_pDataCamera->GetTexture()->GetNumberOfPixelsU(), rRenderJob.m_pDataCamera->GetTexture()->GetNumberOfPixelsV());
+
+            Base::AABB2UInt TargetRect(Base::UInt2(0), TextureResolution);
+
+            TextureManager::CopyToTexture2D(BackgroundPtr, TargetRect, TargetRect[1][0], rRenderJob.m_pDataCamera->GetTexture()->GetPixels());
         }
 
         // -----------------------------------------------------------------------------
@@ -982,8 +1004,8 @@ namespace
         // -----------------------------------------------------------------------------
         SSkytextureBufferPS* pPSBuffer = static_cast<SSkytextureBufferPS*>(BufferManager::MapConstantBuffer(m_SkytexturePSBufferSetPtr->GetBuffer(0)));
 
-        pPSBuffer->m_HDRFactor     = rRenderJob.m_pDataSkybox->GetIntensity();
-        pPSBuffer->m_IsHDR         = rRenderJob.m_pDataSkybox->GetTexture()->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
+        pPSBuffer->m_HDRFactor     = 10000.0f; //rRenderJob.m_pGraphicCamera->GetIntensity();
+        pPSBuffer->m_IsHDR         = rRenderJob.m_pGraphicCamera->GetBackgroundTexture2D()->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
         pPSBuffer->m_ExposureIndex = static_cast<float>(HistogramRenderer::GetLastExposureHistoryIndex());
 
         BufferManager::UnmapConstantBuffer(m_SkytexturePSBufferSetPtr->GetBuffer(0));
@@ -1013,7 +1035,7 @@ namespace
 
         ContextManager::SetConstantBufferSetPS(m_SkytexturePSBufferSetPtr);
 
-        ContextManager::SetTextureSetPS(rRenderJob.m_pGraphicSkybox->GetBackgroundTextureSet());
+        ContextManager::SetTextureSetPS(rRenderJob.m_pGraphicCamera->GetBackgroundTextureSet());
 
         ContextManager::SetTextureSetPS(m_DepthTextureSetPtr);
 
@@ -1102,12 +1124,14 @@ namespace
             if (rCurrentEntity.GetType() == Dt::SActorType::Camera)
             {
                 Dt::CCameraActorFacet* pDataCameraFacet = static_cast<Dt::CCameraActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+                Gfx::CCameraActorFacet* pGraphicCameraFacet = static_cast<Gfx::CCameraActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
 
                 if (pDataCameraFacet->IsMainCamera())
                 {
                     SCameraRenderJob NewRenderJob;
 
-                    NewRenderJob.m_pDataCamera = pDataCameraFacet;
+                    NewRenderJob.m_pDataCamera    = pDataCameraFacet;
+                    NewRenderJob.m_pGraphicCamera = pGraphicCameraFacet;
 
                     m_CameraRenderJobs.push_back(NewRenderJob);
                 }

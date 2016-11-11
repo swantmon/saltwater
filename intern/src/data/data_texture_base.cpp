@@ -91,4 +91,11 @@ namespace Dt
     {
         return m_Hash;
     }
+
+    // -----------------------------------------------------------------------------
+
+    Base::U64 CTextureBase::GetDirtyTime() const
+    {
+        return m_DirtyTime;
+    }
 } // namespace Dt

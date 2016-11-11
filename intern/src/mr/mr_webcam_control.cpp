@@ -282,6 +282,8 @@ namespace MR
 #endif
 
         cvResize(m_OriginalColorFrameRGB, m_ConvertedColorFrame);
+
+        Dt::TextureManager::CopyToTexture2D(m_pConvertedFrame, static_cast<IplImage*>(m_ConvertedColorFrame)->imageData);
     }
 
     // -----------------------------------------------------------------------------

@@ -127,6 +127,8 @@ namespace Dt
 
             unsigned int GetHash() const;
 
+            Base::U64 GetDirtyTime() const;
+
         protected:
 
             enum EUninitialized
@@ -155,6 +157,7 @@ namespace Dt
             Base::CharString m_FileName;
             Base::CharString m_Identifier;
             unsigned int     m_Hash;
+            Base::U64        m_DirtyTime;
 
         protected:
 

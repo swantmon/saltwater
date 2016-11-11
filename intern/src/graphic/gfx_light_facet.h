@@ -150,12 +150,6 @@ namespace Gfx
         void SetCubemapTextureSet(CTextureSetPtr _CustomTextureSetPtr);
         CTextureSetPtr GetCubemapTextureSet();
 
-        void SetBackgroundTexture2D(CTexture2DPtr _Texture2DPtr);
-        CTexture2DPtr GetBackgroundTexture2D();
-
-        void SetBackgroundTextureSet(CTextureSetPtr _TextureSetPtr);
-        CTextureSetPtr GetBackgroundTextureSet();
-
         void SetPanoramaTexture2D(CTexture2DPtr _Texture2DPtr);
         CTexture2DPtr GetPanoramaTexture2D();
 

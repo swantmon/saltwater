@@ -282,6 +282,17 @@ namespace
 
             NewMessage.PutInt(pFacet->GetClearFlag());
 
+            if (pFacet->GetTexture() != nullptr)
+            {
+                NewMessage.PutBool(true);
+
+                NewMessage.PutInt(pFacet->GetTexture()->GetHash());
+            }
+            else
+            {
+                NewMessage.PutBool(false);
+            }
+
             NewMessage.PutFloat(pFacet->GetBackgroundColor()[0]);
             NewMessage.PutFloat(pFacet->GetBackgroundColor()[1]);
             NewMessage.PutFloat(pFacet->GetBackgroundColor()[2]);
@@ -503,6 +514,15 @@ namespace
 
             Dt::CCameraActorFacet::EClearFlag ClearFlag = static_cast<Dt::CCameraActorFacet::EClearFlag >(_rMessage.GetInt());
 
+            bool HasTexture = _rMessage.GetBool();
+
+            int TextureHash = -1;
+
+            if (HasTexture)
+            {
+                TextureHash = _rMessage.GetInt();
+            }
+
             R = _rMessage.GetFloat();
             G = _rMessage.GetFloat();
             B = _rMessage.GetFloat();
@@ -542,6 +562,17 @@ namespace
             pFacet->SetMainCamera(IsMainCamera);
 
             pFacet->SetClearFlag(ClearFlag);
+
+            if (HasTexture)
+            {
+                Dt::CTexture2D* pBackgroundTexture = Dt::TextureManager::GetTexture2DByHash(TextureHash);
+
+                pFacet->SetTexture(pBackgroundTexture);
+            }
+            else
+            {
+                pFacet->SetTexture(nullptr);
+            }
 
             pFacet->SetBackgroundColor(Base::Float3(R, G, B));
 
