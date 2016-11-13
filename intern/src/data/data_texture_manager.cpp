@@ -17,6 +17,7 @@
 #include <unordered_map>
 
 using namespace Dt;
+using namespace Dt::TextureManager;
 
 namespace
 {
@@ -57,7 +58,26 @@ namespace
 
         void SaveTexture2DToFile(CTexture2D* _pTexture2D, const Base::Char* _pPathToFile);
 
+        void MarkTextureAsDirty(CTextureBase* _pTextureBase, unsigned int _DirtyFlags);
+
+        void RegisterDirtyTextureHandler(CTextureDelegate _NewDelegate);
+
     private:
+
+        // -----------------------------------------------------------------------------
+        // Represents a base texture.
+        // -----------------------------------------------------------------------------
+        class CInternTextureBase : public CTextureBase
+        {
+        public:
+
+            CInternTextureBase();
+            ~CInternTextureBase();
+
+        private:
+
+            friend class  CDtTextureManager;
+        };
 
         // -----------------------------------------------------------------------------
         // Represents a 1D texture.
@@ -119,6 +139,9 @@ namespace
         typedef std::unordered_map<unsigned int, CInternTexture2D*> CTexture2DByHashs;
         typedef std::unordered_map<unsigned int, CInternTextureCube*> CTextureCubeByHashs;
 
+
+        typedef std::vector<CTextureDelegate> CTextureDelegates;
+
     private:
 
         CTexture1Ds          m_Textures1D;
@@ -127,6 +150,7 @@ namespace
         CTexture1DByHashs    m_Textures1DByHash;
         CTexture2DByHashs    m_Textures2DByHash;
         CTextureCubeByHashs  m_TexturesCubeByHash;
+        CTextureDelegates    m_TextureDelegates;
 
     private:
 
@@ -147,6 +171,7 @@ namespace
         , m_Textures1DByHash  ()
         , m_Textures2DByHash  ()
         , m_TexturesCubeByHash()
+        , m_TextureDelegates  ()
     {
     }
 
@@ -176,6 +201,12 @@ namespace
         m_Textures1D  .Clear();
         m_Textures2D  .Clear();
         m_TexturesCube.Clear();
+
+        m_Textures1DByHash.clear();
+        m_Textures2DByHash.clear();
+        m_TexturesCubeByHash.clear();
+
+        m_TextureDelegates.clear();
     }
 
     // -----------------------------------------------------------------------------
@@ -330,13 +361,6 @@ namespace
             rTexture.m_Info.m_IsDummyTexture   = false;
             rTexture.m_Info.m_Semantic         = _rDescriptor.m_Semantic;
             rTexture.m_Info.m_NumberOfTextures = 1;
-
-            // -----------------------------------------------------------------------------
-            // Dirty set
-            // -----------------------------------------------------------------------------
-            Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
-
-            rTexture.m_DirtyTime = FrameTime;
             
             // -----------------------------------------------------------------------------
             // Set hash to map
@@ -506,13 +530,6 @@ namespace
             rTexture.m_Info.m_IsDummyTexture   = false;
             rTexture.m_Info.m_Semantic         = _rDescriptor.m_Semantic;
             rTexture.m_Info.m_NumberOfTextures = 6;
-
-            // -----------------------------------------------------------------------------
-            // Dirty set
-            // -----------------------------------------------------------------------------
-            Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
-
-            rTexture.m_DirtyTime = FrameTime;
             
             // -----------------------------------------------------------------------------
             // Set hash to map
@@ -645,14 +662,6 @@ namespace
         {
             pInternTexture2D->m_pPixels = _pPixels;
         }
-
-        // -----------------------------------------------------------------------------
-        // Dirty set
-        // -----------------------------------------------------------------------------
-        Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
-
-        pInternTexture2D->m_DirtyTime = FrameTime;
-
     }
 
     // -----------------------------------------------------------------------------
@@ -683,13 +692,6 @@ namespace
         {
             pInternTexture2D->m_pPixels = _pTexture->GetPixels();
         }
-
-        // -----------------------------------------------------------------------------
-        // Dirty set
-        // -----------------------------------------------------------------------------
-        Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
-
-        pInternTexture2D->m_DirtyTime = FrameTime;
     }
 
     // -----------------------------------------------------------------------------
@@ -707,13 +709,6 @@ namespace
         // Copy texture
         // -----------------------------------------------------------------------------
         CopyToTexture2D(pInternTextureCube->m_pFaces[_Face], _pPixels);
-
-        // -----------------------------------------------------------------------------
-        // Dirty set
-        // -----------------------------------------------------------------------------
-        Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
-
-        pInternTextureCube->m_DirtyTime = FrameTime;
     }
 
     // -----------------------------------------------------------------------------
@@ -731,13 +726,6 @@ namespace
         // Copy texture
         // -----------------------------------------------------------------------------
         CopyToTexture2D(pInternTextureCube->m_pFaces[_Face], _pTexture);
-
-        // -----------------------------------------------------------------------------
-        // Dirty set
-        // -----------------------------------------------------------------------------
-        Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
-
-        pInternTextureCube->m_DirtyTime = FrameTime;
     }
 
     // -----------------------------------------------------------------------------
@@ -776,6 +764,43 @@ namespace
         // Save image on file system
         // -----------------------------------------------------------------------------
         ilSave(IL_PNG, (const ILstring)_pPathToFile);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CDtTextureManager::MarkTextureAsDirty(CTextureBase* _pTextureBase, unsigned int _DirtyFlags)
+    {
+        CInternTextureBase* pInternTextureBase = static_cast<CInternTextureBase*>(_pTextureBase);
+
+        // -----------------------------------------------------------------------------
+        // Flag
+        // -----------------------------------------------------------------------------
+        pInternTextureBase->m_DirtyFlags = _DirtyFlags;
+
+        // -----------------------------------------------------------------------------
+        // Dirty time
+        // -----------------------------------------------------------------------------
+        Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
+
+        pInternTextureBase->m_DirtyTime = FrameTime;
+
+        // -----------------------------------------------------------------------------
+        // Send new dirty entity to all handler
+        // -----------------------------------------------------------------------------
+        CTextureDelegates::iterator CurrentDirtyDelegate = m_TextureDelegates.begin();
+        CTextureDelegates::iterator EndOfDirtyDelegates  = m_TextureDelegates.end();
+
+        for (; CurrentDirtyDelegate != EndOfDirtyDelegates; ++CurrentDirtyDelegate)
+        {
+            (*CurrentDirtyDelegate)(pInternTextureBase);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CDtTextureManager::RegisterDirtyTextureHandler(CTextureDelegate _NewDelegate)
+    {
+        m_TextureDelegates.push_back(_NewDelegate);
     }
     
     // -----------------------------------------------------------------------------
@@ -1109,6 +1134,20 @@ namespace
 
 namespace
 {
+    CDtTextureManager::CInternTextureBase::CInternTextureBase()
+        : CTextureBase()
+    {
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CDtTextureManager::CInternTextureBase::~CInternTextureBase()
+    {
+    }
+} // namespace
+
+namespace
+{
     CDtTextureManager::CInternTexture1D::CInternTexture1D()
         : CTexture1D()
     {
@@ -1273,6 +1312,20 @@ namespace TextureManager
     void SaveTexture2DToFile(CTexture2D* _pTexture2D, const Base::Char* _pPathToFile)
     {
         CDtTextureManager::GetInstance().SaveTexture2DToFile(_pTexture2D, _pPathToFile);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void MarkTextureAsDirty(CTextureBase* _pTextureBase, unsigned int _DirtyFlags)
+    {
+        CDtTextureManager::GetInstance().MarkTextureAsDirty(_pTextureBase, _DirtyFlags);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void RegisterDirtyTextureHandler(CTextureDelegate _NewDelegate)
+    {
+        CDtTextureManager::GetInstance().RegisterDirtyTextureHandler(_NewDelegate);
     }
 } // namespace TextureManager
 } // namespace Dt

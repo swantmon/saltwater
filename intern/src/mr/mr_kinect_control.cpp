@@ -365,6 +365,9 @@ namespace MR
 
         Dt::TextureManager::CopyToTexture2D(m_pConvertedFrame, static_cast<void*>(static_cast<Base::Ptr>(ColorUC3Crop.data)));
 
+
+        Dt::TextureManager::MarkTextureAsDirty(m_pConvertedFrame, Dt::CTextureBase::DirtyData);
+
         // -----------------------------------------------------------------------------
         // Environment approximation
         // -----------------------------------------------------------------------------
@@ -725,5 +728,7 @@ namespace MR
         Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Bottom, g_CombinedBottom.data);
         Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Front, g_FrontCroped.data);
         Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Back, g_BackCroped.data);
-	}
+	
+        Dt::TextureManager::MarkTextureAsDirty(m_pCubemap, Dt::CTextureBase::DirtyData);
+    }
 } // namespace MR

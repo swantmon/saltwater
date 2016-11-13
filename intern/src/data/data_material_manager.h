@@ -10,6 +10,18 @@
 
 #include "data/data_material.h"
 
+#include <functional>
+
+namespace Dt
+{
+namespace MaterialManager
+{
+    typedef std::function<void(Dt::CMaterial* _pMaterial)> CMaterialDelegate;
+} // namespace MaterialManager
+} // namespace Dt
+
+#define DATA_DIRTY_MATERIAL_METHOD(_Method) std::bind(_Method, this, std::placeholders::_1)
+
 namespace Dt
 {
 	struct SMaterialFileDescriptor 
@@ -31,5 +43,9 @@ namespace MaterialManager
     CMaterial& CreateMaterial(const SMaterialFileDescriptor& _rDescriptor);
     
     void FreeMaterial(CMaterial& _rMaterial);
+
+    void MarkMaterialAsDirty(CMaterial& _rMaterial, unsigned int _DirtyFlags);
+
+    void RegisterDirtyMaterialHandler(CMaterialDelegate _NewDelegate);
 } // namespace MaterialManager
 } // namespace Dt

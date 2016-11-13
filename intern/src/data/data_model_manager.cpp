@@ -401,6 +401,8 @@ namespace
                                     MaterialFileDesc.m_pFileName = MaterialExaminer.c_str();
 
                                     rNewSurface.m_pMaterial = &MaterialManager::CreateMaterial(MaterialFileDesc);
+                                
+                                    MaterialManager::MarkMaterialAsDirty(*rNewSurface.m_pMaterial, CMaterial::DirtyCreate);
                                 }
                             }
                             else
@@ -481,6 +483,8 @@ namespace
 
                                     rNewMaterial.SetNormalTexture(TextureManager::CreateTexture2D(TextureDescriptor));
                                 }
+
+                                MaterialManager::MarkMaterialAsDirty(rNewMaterial, CMaterial::DirtyCreate);
                             }
                         }
                     }

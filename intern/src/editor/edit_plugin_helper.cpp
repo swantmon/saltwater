@@ -114,11 +114,15 @@ namespace
 
         Dt::CTexture2D* pBackgroundTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
 
+        Dt::TextureManager::MarkTextureAsDirty(pBackgroundTexture, Dt::CTextureBase::DirtyCreate);
+
         TextureDescriptor.m_NumberOfPixelsU = 512;
         TextureDescriptor.m_NumberOfPixelsV = 512;
         TextureDescriptor.m_pIdentifier     = "AR_ENV_CUBEMAP_TEXTURE";
 
         Dt::CTextureCube* pTextureCubemap = Dt::TextureManager::CreateCubeTexture(TextureDescriptor);
+
+        Dt::TextureManager::MarkTextureAsDirty(pTextureCubemap, Dt::CTextureBase::DirtyCreate);
 
         // -----------------------------------------------------------------------------
 

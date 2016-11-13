@@ -19,6 +19,9 @@ namespace Dt
         , m_Roughness        (1.0f)
         , m_Reflectance      (0.0f)
         , m_MetalMask        (0.0f)
+        , m_Hash             (0)
+        , m_DirtyFlags       (0)
+        , m_DirtyTime        (0)
     {
 
     }
@@ -273,5 +276,26 @@ namespace Dt
     float CMaterial::GetMetalness() const
     {
         return m_MetalMask;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    unsigned int CMaterial::GetHash() const
+    {
+        return m_Hash;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    unsigned int CMaterial::GetDirtyFlags() const
+    {
+        return m_DirtyFlags;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Base::U64 CMaterial::GetDirtyTime() const
+    {
+        return m_DirtyTime;
     }
 } // namespace Dt

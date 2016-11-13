@@ -6,6 +6,13 @@
 namespace Dt
 {
     CTextureBase::CTextureBase()
+        : m_Info      ()
+        , m_pPixels   (0)
+        , m_FileName  (0)
+        , m_Identifier(0)
+        , m_Hash      (0)
+        , m_DirtyFlags(0)
+        , m_DirtyTime (0)
     {
     }
 
@@ -90,6 +97,13 @@ namespace Dt
     unsigned int CTextureBase::GetHash() const
     {
         return m_Hash;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    unsigned int CTextureBase::GetDirtyFlags() const
+    {
+        return m_DirtyFlags;
     }
 
     // -----------------------------------------------------------------------------

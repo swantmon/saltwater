@@ -104,6 +104,15 @@ namespace Dt
                 UndefinedSemantic = -1,
             };
 
+            enum EDirtyFlags
+            {
+                DirtyCreate  = 0x01,
+                DirtyFile    = 0x02,
+                DirtyData    = 0x04,
+                DirtyInfo    = 0x08,
+                DirtyDestroy = 0x10,
+            };
+
         public:
 
             typedef Base::U16 BPixels;
@@ -126,6 +135,8 @@ namespace Dt
             const Base::Char* GetIdentifier() const;
 
             unsigned int GetHash() const;
+
+            unsigned int GetDirtyFlags() const;
 
             Base::U64 GetDirtyTime() const;
 
@@ -157,6 +168,7 @@ namespace Dt
             Base::CharString m_FileName;
             Base::CharString m_Identifier;
             unsigned int     m_Hash;
+            unsigned int     m_DirtyFlags;
             Base::U64        m_DirtyTime;
 
         protected:

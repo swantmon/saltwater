@@ -30,11 +30,6 @@ using namespace Dt::EntityManager;
 
 namespace
 {
-	std::string g_PathToAssets = "../assets/";
-} // namespace 
-
-namespace
-{
     class CDtLvlEntityManager : private Base::CUncopyable
     {
         BASE_SINGLETON_FUNC(CDtLvlEntityManager);

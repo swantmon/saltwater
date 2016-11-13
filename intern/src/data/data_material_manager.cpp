@@ -14,6 +14,8 @@
 #include "base/base_vector3.h"
 #include "base/base_pool.h"
 
+#include "core/core_time.h"
+
 #include "data/data_entity.h"
 #include "data/data_lod.h"
 #include "data/data_map.h"
@@ -58,6 +60,10 @@ namespace
         CMaterial& CreateMaterial(const SMaterialFileDescriptor& _rDescriptor);
         
         void FreeMaterial(CMaterial& _rMaterial);
+
+        void MarkMaterialAsDirty(CMaterial& _rMaterial, unsigned int _DirtyFlags);
+
+        void RegisterDirtyMaterialHandler(CMaterialDelegate _NewDelegate);
         
     private:
         
@@ -71,17 +77,21 @@ namespace
     private:
         
         typedef Base::CPool<CInternMaterial, 1024> CMaterials;
+
+        typedef std::vector<CMaterialDelegate> CMaterialDelegates;
         
     private:
         
-        CMaterials m_Materials;
+        CMaterials         m_Materials;
+        CMaterialDelegates m_MaterialDelegates;
     };
 } // namespace
 
 namespace
 {
     CDtMaterialManager::CDtMaterialManager()
-        : m_Materials()
+        : m_Materials        ()
+        , m_MaterialDelegates()
     {
     }
     
@@ -109,6 +119,8 @@ namespace
     void CDtMaterialManager::Clear()
     {
         m_Materials.Clear();
+
+        m_MaterialDelegates.clear();
     }
 
     // -----------------------------------------------------------------------------
@@ -295,6 +307,8 @@ namespace
             TextureDescriptor.m_pFileName = pColorMap;
 
             rNewMaterial.m_pColorTexture = TextureManager::CreateTexture2D(TextureDescriptor);
+
+            TextureManager::MarkTextureAsDirty(rNewMaterial.m_pColorTexture, CTextureBase::DirtyCreate);
         }
 
         if (pNormalMap)
@@ -302,6 +316,8 @@ namespace
             TextureDescriptor.m_pFileName = pNormalMap;
 
             rNewMaterial.m_pNormalTexture = TextureManager::CreateTexture2D(TextureDescriptor);
+
+            TextureManager::MarkTextureAsDirty(rNewMaterial.m_pNormalTexture, CTextureBase::DirtyCreate);
         }
 
         if (pRoughnessMap)
@@ -309,6 +325,8 @@ namespace
             TextureDescriptor.m_pFileName = pRoughnessMap;
 
             rNewMaterial.m_pRoughnessTexture = TextureManager::CreateTexture2D(TextureDescriptor);
+        
+            TextureManager::MarkTextureAsDirty(rNewMaterial.m_pRoughnessTexture, CTextureBase::DirtyCreate);
         }
 
         if (pReflectanceMap)
@@ -316,6 +334,8 @@ namespace
             TextureDescriptor.m_pFileName = pReflectanceMap;
 
             rNewMaterial.m_pReflectanceMap = TextureManager::CreateTexture2D(TextureDescriptor);
+
+            TextureManager::MarkTextureAsDirty(rNewMaterial.m_pReflectanceMap, CTextureBase::DirtyCreate);
         }
 
         if (pMetalMaskMap)
@@ -323,6 +343,8 @@ namespace
             TextureDescriptor.m_pFileName = pMetalMaskMap;
 
             rNewMaterial.m_pMetalTexture = TextureManager::CreateTexture2D(TextureDescriptor);
+
+            TextureManager::MarkTextureAsDirty(rNewMaterial.m_pMetalTexture, CTextureBase::DirtyCreate);
         }
 
         if (pAOMap)
@@ -330,6 +352,8 @@ namespace
             TextureDescriptor.m_pFileName = pAOMap;
 
             rNewMaterial.m_pAOTexture = TextureManager::CreateTexture2D(TextureDescriptor);
+
+            TextureManager::MarkTextureAsDirty(rNewMaterial.m_pAOTexture, CTextureBase::DirtyCreate);
         }
 
         if (pBumpMap)
@@ -338,6 +362,8 @@ namespace
             TextureDescriptor.m_pFileName = pBumpMap;
 
             rNewMaterial.m_pBumpTexture = TextureManager::CreateTexture2D(TextureDescriptor);
+
+            TextureManager::MarkTextureAsDirty(rNewMaterial.m_pBumpTexture, CTextureBase::DirtyCreate);
         }
 
         MaterialFile.Clear();
@@ -352,6 +378,43 @@ namespace
         CInternMaterial& rMaterial = static_cast<CInternMaterial&>(_rMaterial);
         
         m_Materials.Free(&rMaterial);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CDtMaterialManager::MarkMaterialAsDirty(CMaterial& _rMaterial, unsigned int _DirtyFlags)
+    {
+        CInternMaterial& rMaterial = static_cast<CInternMaterial&>(_rMaterial);
+
+        // -----------------------------------------------------------------------------
+        // Flag
+        // -----------------------------------------------------------------------------
+        rMaterial.m_DirtyFlags = _DirtyFlags;
+
+        // -----------------------------------------------------------------------------
+        // Dirty time
+        // -----------------------------------------------------------------------------
+        Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
+
+        rMaterial.m_DirtyTime = FrameTime;
+
+        // -----------------------------------------------------------------------------
+        // Send new dirty entity to all handler
+        // -----------------------------------------------------------------------------
+        CMaterialDelegates::iterator CurrentDirtyDelegate = m_MaterialDelegates.begin();
+        CMaterialDelegates::iterator EndOfDirtyDelegates = m_MaterialDelegates.end();
+
+        for (; CurrentDirtyDelegate != EndOfDirtyDelegates; ++CurrentDirtyDelegate)
+        {
+            (*CurrentDirtyDelegate)(&rMaterial);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CDtMaterialManager::RegisterDirtyMaterialHandler(CMaterialDelegate _NewDelegate)
+    {
+        m_MaterialDelegates.push_back(_NewDelegate);
     }
 } // namespace
 
@@ -397,6 +460,20 @@ namespace MaterialManager
     void FreeMaterial(CMaterial& _rMaterial)
     {
         CDtMaterialManager::GetInstance().FreeMaterial(_rMaterial);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void MarkMaterialAsDirty(CMaterial& _rMaterial, unsigned int _DirtyFlags)
+    {
+        CDtMaterialManager::GetInstance().MarkMaterialAsDirty(_rMaterial, _DirtyFlags);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void RegisterDirtyMaterialHandler(CMaterialDelegate _NewDelegate)
+    {
+        CDtMaterialManager::GetInstance().RegisterDirtyMaterialHandler(_NewDelegate);
     }
 } // namespace MaterialManager
 } // namespace Dt

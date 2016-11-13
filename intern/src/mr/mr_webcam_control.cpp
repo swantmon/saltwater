@@ -284,6 +284,8 @@ namespace MR
         cvResize(m_OriginalColorFrameRGB, m_ConvertedColorFrame);
 
         Dt::TextureManager::CopyToTexture2D(m_pConvertedFrame, static_cast<IplImage*>(m_ConvertedColorFrame)->imageData);
+
+        Dt::TextureManager::MarkTextureAsDirty(m_pConvertedFrame, Dt::CTextureBase::DirtyData);
     }
 
     // -----------------------------------------------------------------------------
@@ -649,5 +651,7 @@ namespace MR
         Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Bottom, CombinedBottom.data);
         Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Front,  FrontCroped.data);
         Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Back,   BackCroped.data);
+    
+        Dt::TextureManager::MarkTextureAsDirty(m_pCubemap, Dt::CTextureBase::DirtyData);
     }
 } // namespace MR

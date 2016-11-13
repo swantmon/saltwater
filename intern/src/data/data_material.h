@@ -18,10 +18,22 @@
 namespace Dt
 {
     // TODO by tschwandt
-    // remove reflectance texture
+    // - remove reflectance texture
+    // - add filename instead of materialname
 
     class CMaterial
     {
+    public:
+
+        enum EDirtyFlags
+        {
+            DirtyCreate  = 0x01,
+            DirtyFile    = 0x02,
+            DirtyData    = 0x04,
+            DirtyTexture = 0x08,
+            DirtyDestroy = 0x10,
+        };
+
     public:
 
         CMaterial();
@@ -76,6 +88,12 @@ namespace Dt
         void SetMetalness(float _Metalness);
         float GetMetalness() const;
 
+        unsigned int GetHash() const;
+
+        unsigned int GetDirtyFlags() const;
+
+        Base::U64 GetDirtyTime() const;
+
     protected:
         
         Base::CharString m_Materialname;
@@ -91,5 +109,9 @@ namespace Dt
         float            m_Roughness;
         float            m_Reflectance;
         float            m_MetalMask;
+
+        unsigned int     m_Hash;
+        unsigned int     m_DirtyFlags;
+        Base::U64        m_DirtyTime;
     };
 } // namespace Dt

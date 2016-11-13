@@ -11,6 +11,18 @@
 #include "data/data_texture_2d.h"
 #include "data/data_texture_cube.h"
 
+#include <functional>
+
+namespace Dt
+{
+namespace TextureManager
+{
+    typedef std::function<void(Dt::CTextureBase* _pTexture)> CTextureDelegate;
+} // namespace TextureManager
+} // namespace Dt
+
+#define DATA_DIRTY_TEXTURE_METHOD(_Method) std::bind(_Method, this, std::placeholders::_1)
+
 namespace Dt
 {
     struct STextureDescriptor
@@ -52,5 +64,9 @@ namespace TextureManager
     void CopyToTextureCube(CTextureCube* _pTextureCube, CTextureCube::EFace _Face, CTexture2D* _pTexture);
 
     void SaveTexture2DToFile(CTexture2D* _pTexture2D, const Base::Char* _pPathToFile);
+
+    void MarkTextureAsDirty(CTextureBase* _pTextureBase, unsigned int _DirtyFlags);
+
+    void RegisterDirtyTextureHandler(CTextureDelegate _NewDelegate);
 } // namespace TextureManager
 } // namespace Dt
