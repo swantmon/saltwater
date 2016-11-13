@@ -54,12 +54,8 @@ namespace
         void OnStart();
         void OnExit();
 
-        void Clear();
-
         CMaterial& CreateEmptyMaterial();
         CMaterial& CreateMaterial(const SMaterialFileDescriptor& _rDescriptor);
-        
-        void FreeMaterial(CMaterial& _rMaterial);
 
         void MarkMaterialAsDirty(CMaterial& _rMaterial, unsigned int _DirtyFlags);
 
@@ -84,6 +80,10 @@ namespace
         
         CMaterials         m_Materials;
         CMaterialDelegates m_MaterialDelegates;
+
+    private:
+
+        void FreeMaterial(CInternMaterial& _rMaterial);
     };
 } // namespace
 
@@ -110,13 +110,6 @@ namespace
     // -----------------------------------------------------------------------------
 
     void CDtMaterialManager::OnExit()
-    {
-        Clear();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CDtMaterialManager::Clear()
     {
         m_Materials.Clear();
 
@@ -370,15 +363,6 @@ namespace
         
         return rNewMaterial;
     }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CDtMaterialManager::FreeMaterial(CMaterial& _rMaterial)
-    {
-        CInternMaterial& rMaterial = static_cast<CInternMaterial&>(_rMaterial);
-        
-        m_Materials.Free(&rMaterial);
-    }
 
     // -----------------------------------------------------------------------------
 
@@ -408,6 +392,14 @@ namespace
         {
             (*CurrentDirtyDelegate)(&rMaterial);
         }
+
+        // -----------------------------------------------------------------------------
+        // Handle dirty flag
+        // -----------------------------------------------------------------------------
+        if ((_DirtyFlags & Dt::CMaterial::DirtyDestroy) != 0)
+        {
+            FreeMaterial(rMaterial);
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -415,6 +407,15 @@ namespace
     void CDtMaterialManager::RegisterDirtyMaterialHandler(CMaterialDelegate _NewDelegate)
     {
         m_MaterialDelegates.push_back(_NewDelegate);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CDtMaterialManager::FreeMaterial(CInternMaterial& _rMaterial)
+    {
+        CInternMaterial& rMaterial = static_cast<CInternMaterial&>(_rMaterial);
+
+        m_Materials.Free(&rMaterial);
     }
 } // namespace
 
@@ -436,13 +437,6 @@ namespace MaterialManager
 
     // -----------------------------------------------------------------------------
 
-    void Clear()
-    {
-        CDtMaterialManager::GetInstance().Clear();
-    }
-
-    // -----------------------------------------------------------------------------
-
     CMaterial& CreateEmptyMaterial()
     {
         return CDtMaterialManager::GetInstance().CreateEmptyMaterial();
@@ -453,13 +447,6 @@ namespace MaterialManager
     CMaterial& CreateMaterial(const SMaterialFileDescriptor& _rDescriptor)
     {
         return CDtMaterialManager::GetInstance().CreateMaterial(_rDescriptor);
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void FreeMaterial(CMaterial& _rMaterial)
-    {
-        CDtMaterialManager::GetInstance().FreeMaterial(_rMaterial);
     }
 
     // -----------------------------------------------------------------------------

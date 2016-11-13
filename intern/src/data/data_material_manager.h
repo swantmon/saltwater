@@ -37,12 +37,8 @@ namespace MaterialManager
     void OnStart();
     void OnExit();
 
-    void Clear();
-
     CMaterial& CreateEmptyMaterial();
     CMaterial& CreateMaterial(const SMaterialFileDescriptor& _rDescriptor);
-    
-    void FreeMaterial(CMaterial& _rMaterial);
 
     void MarkMaterialAsDirty(CMaterial& _rMaterial, unsigned int _DirtyFlags);
 

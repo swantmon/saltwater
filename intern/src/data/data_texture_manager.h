@@ -46,6 +46,9 @@ namespace Dt
 {
 namespace TextureManager
 {
+    // TODO by tschwandt
+    // return references instead of pointer
+
     void OnStart();
     void OnExit();
 
