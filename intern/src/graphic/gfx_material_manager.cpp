@@ -11,6 +11,8 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "data/data_material_manager.h"
+
 #include "graphic/gfx_material_manager.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_shader.h"
@@ -252,8 +254,6 @@ namespace
         void OnStart();
         void OnExit();
 
-        void Clear();
-
         CMaterialPtr CreateMaterial(const SMaterialDescriptor& _rDescriptor);
 
         void UpdateMaterial(CMaterialPtr _MaterialPtr, const SMaterialDescriptor& _rDescriptor);
@@ -276,6 +276,8 @@ namespace
         CMaterials m_Materials;
 
     private:
+
+        void OnDirtyMaterial(Dt::CMaterial* _Material);
 
         void OnNewMaterial(CSurface::SSurfaceKey::BSurfaceID _ID, CInternMaterial& _rMaterial) const;
     };
@@ -300,19 +302,15 @@ namespace
 
     void CGfxMaterialManager::OnStart()
     {
-
+        // -----------------------------------------------------------------------------
+        // Set dirty handler of data textures
+        // -----------------------------------------------------------------------------
+        Dt::MaterialManager::RegisterDirtyMaterialHandler(DATA_DIRTY_MATERIAL_METHOD(&CGfxMaterialManager::OnDirtyMaterial));
     }
 
     // -----------------------------------------------------------------------------
 
     void CGfxMaterialManager::OnExit()
-    {
-        Clear();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxMaterialManager::Clear()
     {
         m_Materials.Clear();
     }
@@ -631,6 +629,24 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxMaterialManager::OnDirtyMaterial(Dt::CMaterial* _Material)
+    {
+        if (_Material == nullptr) return;
+
+        unsigned int DirtyFlags = _Material->GetDirtyFlags();
+        unsigned int Hash       = _Material->GetHash();
+
+        if ((DirtyFlags & Dt::CTextureBase::DirtyCreate) != 0)
+        {
+        }
+
+        if ((DirtyFlags & Dt::CTextureBase::DirtyData) != 0)
+        {
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxMaterialManager::OnNewMaterial(CSurface::SSurfaceKey::BSurfaceID _ID, CInternMaterial& _rMaterial) const
     {
         unsigned int ShaderLinkIndex = 0;
@@ -761,13 +777,6 @@ namespace MaterialManager
     void OnExit()
     {
         CGfxMaterialManager::GetInstance().OnExit();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void Clear()
-    {
-        CGfxMaterialManager::GetInstance().Clear();
     }
 
     // -----------------------------------------------------------------------------
