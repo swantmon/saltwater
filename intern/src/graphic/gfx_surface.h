@@ -46,6 +46,7 @@ namespace Gfx
         CBufferSetPtr GetVertexBuffer() const;
         CBufferPtr    GetIndexBuffer() const;
         CMaterialPtr  GetMaterial() const;
+        CShaderPtr    GetVertexShader() const;
         unsigned int  GetNumberOfIndices() const;
         unsigned int  GetNumberOfVertices() const;
         
@@ -61,6 +62,8 @@ namespace Gfx
         CBufferSetPtr m_VertexBuffer;
         CBufferPtr    m_IndexBuffer;
         CMaterialPtr  m_MaterialPtr;
+
+        CShaderPtr m_VertexShader;
         
         unsigned int m_NumberOfIndices;
         unsigned int m_NumberOfVertices;

@@ -166,15 +166,22 @@ namespace Gfx
     
     // -----------------------------------------------------------------------------
     
-    const bool CMaterial::GetHasAlpha() const
+    bool CMaterial::GetHasAlpha() const
     {
         return m_HasAlpha;
     }    
 
     // -----------------------------------------------------------------------------
 
-    const bool CMaterial::GetHasBump() const
+    bool CMaterial::GetHasBump() const
     {
         return m_HasBump;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    unsigned int CMaterial::GetHash() const
+    {
+        return m_Hash;
     }
 } // namespace Gfx

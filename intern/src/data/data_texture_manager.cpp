@@ -139,7 +139,6 @@ namespace
         typedef std::unordered_map<unsigned int, CInternTexture2D*> CTexture2DByHashs;
         typedef std::unordered_map<unsigned int, CInternTextureCube*> CTextureCubeByHashs;
 
-
         typedef std::vector<CTextureDelegate> CTextureDelegates;
 
     private:

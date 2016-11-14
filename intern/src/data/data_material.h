@@ -42,6 +42,9 @@ namespace Dt
         void SetMaterialname(const char* _pMaterialname);
         const char* GetMaterialname() const;
 
+        void SetFilename(const char* _pFilename);
+        const char* GetFileName() const;
+
         void SetColorTexture(Dt::CTexture2D* _pColorTexture);
         Dt::CTexture2D* GetColorTexture();
         const Dt::CTexture2D* GetColorTexture() const;
@@ -97,6 +100,7 @@ namespace Dt
     protected:
         
         Base::CharString m_Materialname;
+        Base::CharString m_FileName;
         Dt::CTexture2D*  m_pColorTexture;
         Dt::CTexture2D*  m_pNormalTexture;
         Dt::CTexture2D*  m_pRoughnessTexture;

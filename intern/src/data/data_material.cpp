@@ -7,6 +7,7 @@ namespace Dt
 {
     CMaterial::CMaterial()
         : m_Materialname     ()
+        , m_FileName         ()
         , m_pColorTexture    (0)
         , m_pNormalTexture   (0)
         , m_pRoughnessTexture(0)
@@ -45,6 +46,20 @@ namespace Dt
     const char* CMaterial::GetMaterialname() const
     {
         return m_Materialname.GetConst();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMaterial::SetFilename(const char* _pFilename)
+    {
+        m_FileName = _pFilename;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const char* CMaterial::GetFileName() const
+    {
+        return m_FileName.GetConst();
     }
 
     // -----------------------------------------------------------------------------

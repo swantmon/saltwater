@@ -28,6 +28,86 @@
 using namespace Gfx;
 using namespace Gfx::MeshManager;
 
+// -----------------------------------------------------------------------------
+// Here we define the some vertex shader:
+// -----------------------------------------------------------------------------
+namespace
+{
+    // -----------------------------------------------------------------------------
+    // Define shader combinations
+    // -----------------------------------------------------------------------------
+    static const unsigned int s_NumberOfVertexShader = 3;
+
+    // -----------------------------------------------------------------------------
+    // Define all vertex shader needed inside this renderer
+    // -----------------------------------------------------------------------------
+    const Base::Char* g_pShaderFilenameVS[] =
+    {
+        "vs_m_pn.glsl",
+        "vs_m_pnx0.glsl",
+        "vs_m_pntbx0.glsl",
+    };
+
+    const Base::Char* g_pShaderNamesVS[] =
+    {
+        "VSShaderPN",
+        "VSShaderPNX0",
+        "VSShaderPNTBX0",
+    };
+
+    // -----------------------------------------------------------------------------
+    // Define input layouts depending on vertex shader
+    // -----------------------------------------------------------------------------
+    struct SInputElementDescriptorSetting
+    {
+        unsigned int m_Offset;
+        unsigned int m_NumberOfElements;
+    };
+
+    const SInputElementDescriptorSetting g_InputLayoutDescriptor[] =
+    {
+        { 0, 2 },
+        { 2, 3 },
+        { 5, 5 },
+    };
+
+    const Gfx::SInputElementDescriptor g_InputLayouts[] =
+    {
+        // VSShaderBlankPN
+        { "POSITION", 0, Gfx::CInputLayout::Float3Format, 0,  0, 24, Gfx::CInputLayout::PerVertex, 0 },
+        { "NORMAL"  , 0, Gfx::CInputLayout::Float3Format, 0, 12, 24, Gfx::CInputLayout::PerVertex, 0 },
+        // VSShaderDiffusePNX0
+        { "POSITION", 0, Gfx::CInputLayout::Float3Format, 0,  0, 32, Gfx::CInputLayout::PerVertex, 0 },
+        { "NORMAL"  , 0, Gfx::CInputLayout::Float3Format, 0, 12, 32, Gfx::CInputLayout::PerVertex, 0 },
+        { "TEXCOORD", 0, Gfx::CInputLayout::Float2Format, 0, 24, 32, Gfx::CInputLayout::PerVertex, 0 },
+        // VSShaderBumpedPNX0
+        { "POSITION" , 0, Gfx::CInputLayout::Float3Format, 0,  0, 56, Gfx::CInputLayout::PerVertex, 0 },
+        { "NORMAL"   , 0, Gfx::CInputLayout::Float3Format, 0, 12, 56, Gfx::CInputLayout::PerVertex, 0 },
+        { "TANGENT"  , 0, Gfx::CInputLayout::Float3Format, 0, 24, 56, Gfx::CInputLayout::PerVertex, 0 },
+        { "BITANGENT", 0, Gfx::CInputLayout::Float3Format, 0, 36, 56, Gfx::CInputLayout::PerVertex, 0 },
+        { "TEXCOORD" , 0, Gfx::CInputLayout::Float2Format, 0, 48, 56, Gfx::CInputLayout::PerVertex, 0 },
+    };
+
+    // -----------------------------------------------------------------------------
+    // Define shader combinations
+    // -----------------------------------------------------------------------------
+    const Gfx::CSurface::SSurfaceKey g_SurfaceCombinations[s_NumberOfVertexShader] =
+    {
+        // -----------------------------------------------------------------------------
+        // 01. Attribute: HasPosition
+        // 02. Attribute: HasNormal
+        // 04. Attribute: HasTangent
+        // 05. Attribute: HasBitangent
+        // 06. Attribute: HasTexCoords
+        // -----------------------------------------------------------------------------
+
+        // 01  , 02   , 03   , 04   , 05
+        { true, true, false, false, false },
+        { true, true, false, false, true },
+        { true, true, true,  true,  true },
+    };
+}
+
 namespace
 {
     class CGfxMeshManager : private Base::CUncopyable
@@ -91,6 +171,10 @@ namespace
         CSurfaces  m_Surfaces;
         
         CModelByIDs m_ModelByID;
+
+    private:
+
+        void SetVertexShaderOfSurface(CInternSurface& _rSurface);
     };
 } // namespace
 
@@ -202,6 +286,11 @@ namespace
                 rSurface.m_SurfaceKey.m_HasTangent   = ((rCurrentSurface.GetElements() & Dt::CSurface::Tangent)    == Dt::CSurface::Tangent);
                 rSurface.m_SurfaceKey.m_HasBitangent = ((rCurrentSurface.GetElements() & Dt::CSurface::Tangent)    == Dt::CSurface::Tangent);
                 rSurface.m_SurfaceKey.m_HasTexCoords = ((rCurrentSurface.GetElements() & Dt::CSurface::TexCoord0)  == Dt::CSurface::TexCoord0);
+
+                // -----------------------------------------------------------------------------
+                // Set vertex shader
+                // -----------------------------------------------------------------------------
+                SetVertexShaderOfSurface(rSurface);
 
                 // -----------------------------------------------------------------------------
                 // Prepare mesh data for data alignment
@@ -906,6 +995,64 @@ namespace
         Base::CMemory::Free(pIndices);
         
         return CMeshPtr(ModelPtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxMeshManager::SetVertexShaderOfSurface(CInternSurface& _rSurface)
+    {
+        unsigned int ShaderLinkIndex = 0;
+
+        // -----------------------------------------------------------------------------
+        // Try to find the right shader for that surface
+        // If no shader was found we use a blank shader with pink color.
+        // -----------------------------------------------------------------------------
+        for (unsigned int IndexOfShader = 0; IndexOfShader < s_NumberOfVertexShader; ++IndexOfShader)
+        {
+            Gfx::CSurface::SSurfaceKey::BSurfaceID TempMostReliableKey = g_SurfaceCombinations[IndexOfShader].m_Key & _rSurface.m_SurfaceKey.m_Key;
+
+            if (g_SurfaceCombinations[IndexOfShader].m_Key == TempMostReliableKey)
+            {
+                ShaderLinkIndex = IndexOfShader;
+            }
+        }
+
+        // -----------------------------------------------------------------------------
+        // Now we get the index of the real vertex and pixel shader
+        // -----------------------------------------------------------------------------
+        const unsigned int VSIndex = ShaderLinkIndex;
+
+        // -----------------------------------------------------------------------------
+        // Compile shader
+        // -----------------------------------------------------------------------------
+        Gfx::CShaderPtr VSShader = Gfx::ShaderManager::CompileVS(g_pShaderFilenameVS[VSIndex], g_pShaderNamesVS[VSIndex]);
+
+        assert(VSShader != 0);
+
+        // -----------------------------------------------------------------------------
+        // Set input layout if vertex shader has no input layout
+        // -----------------------------------------------------------------------------
+        if (VSShader->GetInputLayout() == nullptr)
+        {
+            SInputElementDescriptorSetting InputLayoutDesc = g_InputLayoutDescriptor[VSIndex];
+
+            Gfx::SInputElementDescriptor* pDescriptor = static_cast<Gfx::SInputElementDescriptor*>(Base::CMemory::Allocate(sizeof(Gfx::SInputElementDescriptor) * InputLayoutDesc.m_NumberOfElements));
+
+            unsigned int IndexOfRenderInputDesc = InputLayoutDesc.m_Offset;
+
+            for (unsigned int IndexOfElement = 0; IndexOfElement < InputLayoutDesc.m_NumberOfElements; ++IndexOfElement)
+            {
+                pDescriptor[IndexOfElement] = g_InputLayouts[IndexOfRenderInputDesc];
+
+                ++IndexOfRenderInputDesc;
+            }
+
+            Gfx::CInputLayoutPtr LayoutPtr = Gfx::ShaderManager::CreateInputLayout(pDescriptor, InputLayoutDesc.m_NumberOfElements, VSShader);
+
+            Base::CMemory::Free(pDescriptor);
+        }
+
+        _rSurface.m_VertexShader = VSShader;
     }
 } // namespace
 

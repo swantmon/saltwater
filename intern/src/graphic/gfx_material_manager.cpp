@@ -8,6 +8,8 @@
 
 #include "graphic/gfx_precompiled.h"
 
+#include "base/base_console.h"
+#include "base/base_crc.h"
 #include "base/base_exception.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
@@ -34,80 +36,6 @@ namespace
     // Define shader combinations
     // -----------------------------------------------------------------------------
     static const unsigned int s_NoShader = static_cast<unsigned int>(-1);
-
-    // -----------------------------------------------------------------------------
-    // Define shader combinations
-    // -----------------------------------------------------------------------------
-    static const unsigned int s_NumberOfVertexShader = 3;
-
-    // -----------------------------------------------------------------------------
-    // Define all vertex shader needed inside this renderer
-    // -----------------------------------------------------------------------------
-    const Base::Char* g_pShaderFilenameVS[] =
-    {
-        "vs_m_pn.glsl",
-        "vs_m_pnx0.glsl",
-        "vs_m_pntbx0.glsl",
-    };
-
-    const Base::Char* g_pShaderNamesVS[] =
-    {
-        "VSShaderPN",
-        "VSShaderPNX0",
-        "VSShaderPNTBX0",
-    };
-
-    // -----------------------------------------------------------------------------
-    // Define input layouts depending on vertex shader
-    // -----------------------------------------------------------------------------
-    struct SInputElementDescriptorSetting
-    {
-        unsigned int m_Offset;
-        unsigned int m_NumberOfElements;
-    };
-
-    const SInputElementDescriptorSetting g_InputLayoutDescriptor[] =
-    {
-        { 0, 2 },
-        { 2, 3 },
-        { 5, 5 },
-    };
-
-    const Gfx::SInputElementDescriptor g_InputLayouts[] =
-    {
-        // VSShaderBlankPN
-        { "POSITION", 0, Gfx::CInputLayout::Float3Format, 0,  0, 24, Gfx::CInputLayout::PerVertex, 0 },
-        { "NORMAL"  , 0, Gfx::CInputLayout::Float3Format, 0, 12, 24, Gfx::CInputLayout::PerVertex, 0 },
-        // VSShaderDiffusePNX0
-        { "POSITION", 0, Gfx::CInputLayout::Float3Format, 0,  0, 32, Gfx::CInputLayout::PerVertex, 0 },
-        { "NORMAL"  , 0, Gfx::CInputLayout::Float3Format, 0, 12, 32, Gfx::CInputLayout::PerVertex, 0 },
-        { "TEXCOORD", 0, Gfx::CInputLayout::Float2Format, 0, 24, 32, Gfx::CInputLayout::PerVertex, 0 },
-        // VSShaderBumpedPNX0
-        { "POSITION" , 0, Gfx::CInputLayout::Float3Format, 0,  0, 56, Gfx::CInputLayout::PerVertex, 0 },
-        { "NORMAL"   , 0, Gfx::CInputLayout::Float3Format, 0, 12, 56, Gfx::CInputLayout::PerVertex, 0 },
-        { "TANGENT"  , 0, Gfx::CInputLayout::Float3Format, 0, 24, 56, Gfx::CInputLayout::PerVertex, 0 },
-        { "BITANGENT", 0, Gfx::CInputLayout::Float3Format, 0, 36, 56, Gfx::CInputLayout::PerVertex, 0 },
-        { "TEXCOORD" , 0, Gfx::CInputLayout::Float2Format, 0, 48, 56, Gfx::CInputLayout::PerVertex, 0 },
-    };
-
-    // -----------------------------------------------------------------------------
-    // Define shader combinations
-    // -----------------------------------------------------------------------------
-    const Gfx::CSurface::SSurfaceKey g_SurfaceCombinations[s_NumberOfVertexShader] =
-    {
-        // -----------------------------------------------------------------------------
-        // 01. Attribute: HasPosition
-        // 02. Attribute: HasNormal
-        // 04. Attribute: HasTangent
-        // 05. Attribute: HasBitangent
-        // 06. Attribute: HasTexCoords
-        // -----------------------------------------------------------------------------
-
-        // 01  , 02   , 03   , 04   , 05
-        { true, true, false, false, false },
-        { true, true, false, false, true  },
-        { true, true, true,  true,  true  },
-    };
 
     // -----------------------------------------------------------------------------
     // Define all hull shader needed inside this renderer
@@ -185,7 +113,6 @@ namespace
         {
             struct
             {
-                unsigned int m_pShaderNamesVS;
                 unsigned int m_pShaderNamesHS;
                 unsigned int m_pShaderNamesDS;
                 unsigned int m_pShaderNamesGS;
@@ -200,16 +127,16 @@ namespace
 
     const SShaderShaderLink g_ShaderShaderLinks[s_NumberOfShaderMaterialCombinations] =
     {
-        { 0, s_NoShader, s_NoShader, s_NoShader, 0 },
-        { 0, s_NoShader, s_NoShader, s_NoShader, 1 },
-        { 0, s_NoShader, s_NoShader, s_NoShader, 2 },
-        { 0, s_NoShader, s_NoShader, s_NoShader, 3 },
-        { 0, s_NoShader, s_NoShader, s_NoShader, 4 },
-        { 0, s_NoShader, s_NoShader, s_NoShader, 5 },
-        { 0, s_NoShader, s_NoShader, s_NoShader, 6 },
-        { 0, s_NoShader, s_NoShader, s_NoShader, 7 },
-        { 0, 0         , 0         , s_NoShader, 2 },
-        { 0, 0         , 0         , s_NoShader, 3 },
+        { s_NoShader, s_NoShader, s_NoShader, 0 },
+        { s_NoShader, s_NoShader, s_NoShader, 1 },
+        { s_NoShader, s_NoShader, s_NoShader, 2 },
+        { s_NoShader, s_NoShader, s_NoShader, 3 },
+        { s_NoShader, s_NoShader, s_NoShader, 4 },
+        { s_NoShader, s_NoShader, s_NoShader, 5 },
+        { s_NoShader, s_NoShader, s_NoShader, 6 },
+        { s_NoShader, s_NoShader, s_NoShader, 7 },
+        { 0         , 0         , s_NoShader, 2 },
+        { 0         , 0         , s_NoShader, 3 },
     };
 
     // -----------------------------------------------------------------------------
@@ -296,7 +223,7 @@ namespace
 
         CInternMaterial* InternCreateMaterial(const SMaterialDescriptor& _rDescriptor);
 
-        void OnNewMaterial(CInternMaterial& _rMaterial) const;
+        void SetShaderOfMaterial(CInternMaterial& _rMaterial) const;
     };
 } // namespace
 
@@ -324,7 +251,11 @@ namespace
         // -----------------------------------------------------------------------------
         // Create default material
         // -----------------------------------------------------------------------------
-        m_DefaultMaterialPtr = m_Materials.Allocate();
+        CInternMaterial* pDefaultMaterial = m_Materials.Allocate();
+
+        SetShaderOfMaterial(*pDefaultMaterial);
+
+        m_DefaultMaterialPtr = CMaterialPtr(pDefaultMaterial);
 
         // -----------------------------------------------------------------------------
         // Set dirty handler of data textures
@@ -345,11 +276,42 @@ namespace
 
     CMaterialPtr CGfxMaterialManager::CreateMaterial(const SMaterialDescriptor& _rDescriptor)
     {
+        int          NumberOfBytes;
+        unsigned int Hash;
+
+        Hash = 0;
+
+        // -----------------------------------------------------------------------------
+        // Create hash value over filename
+        // -----------------------------------------------------------------------------
+        if (_rDescriptor.m_pFileName != nullptr && strlen(_rDescriptor.m_pFileName))
+        {
+            NumberOfBytes = static_cast<unsigned int>(strlen(_rDescriptor.m_pFileName) * sizeof(char));
+            const void* pData = static_cast<const void*>(_rDescriptor.m_pFileName);
+
+            Hash = Base::CRC32(pData, NumberOfBytes);
+
+            if (m_MaterialByHash.find(Hash) != m_MaterialByHash.end())
+            {
+                return CMaterialPtr(m_MaterialByHash.at(Hash));
+            }
+        }
+
+        // -----------------------------------------------------------------------------
+        // Material
+        // -----------------------------------------------------------------------------
         CInternMaterial* pInternMaterial = InternCreateMaterial(_rDescriptor);
 
         if (pInternMaterial == nullptr)
         {
             return m_DefaultMaterialPtr;
+        }
+
+        if (Hash != 0)
+        {
+            pInternMaterial->m_Hash = Hash;
+
+            m_MaterialByHash[Hash] = pInternMaterial;
         }
 
         return CMaterialPtr(pInternMaterial);
@@ -385,6 +347,31 @@ namespace
 
         if ((DirtyFlags & Dt::CTextureBase::DirtyCreate) != 0)
         {
+            SMaterialDescriptor MaterialDescriptor;
+
+            MaterialDescriptor.m_pMaterialName   = _Material->GetMaterialname();
+            MaterialDescriptor.m_pColorMap       = _Material->GetColorTexture()->GetFileName();
+            MaterialDescriptor.m_pNormalMap      = _Material->GetNormalTexture()->GetFileName();
+            MaterialDescriptor.m_pRoughnessMap   = _Material->GetRoughnessTexture()->GetFileName();
+            MaterialDescriptor.m_pReflectanceMap = _Material->GetReflectanceTexture()->GetFileName();
+            MaterialDescriptor.m_pMetalMaskMap   = _Material->GetMetalTexture()->GetFileName();
+            MaterialDescriptor.m_pAOMap          = _Material->GetAmbientOcclusionTexture()->GetFileName();
+            MaterialDescriptor.m_pBumpMap        = _Material->GetBumpTexture()->GetFileName();
+            MaterialDescriptor.m_Roughness       = _Material->GetRoughness();
+            MaterialDescriptor.m_Reflectance     = _Material->GetReflectance();
+            MaterialDescriptor.m_MetalMask       = _Material->GetMetalness();
+            MaterialDescriptor.m_AlbedoColor     = _Material->GetColor();
+            MaterialDescriptor.m_TilingOffset    = _Material->GetTilingOffset();
+            MaterialDescriptor.m_pFileName       = _Material->GetFileName();
+
+            CInternMaterial* pInternMaterial = InternCreateMaterial(MaterialDescriptor);
+
+            if (pInternMaterial != nullptr && Hash != 0)
+            {
+                pInternMaterial->m_Hash = Hash;
+
+                m_MaterialByHash[Hash] = pInternMaterial;
+            }
         }
 
         if ((DirtyFlags & Dt::CTextureBase::DirtyData) != 0)
@@ -394,6 +381,13 @@ namespace
             // -----------------------------------------------------------------------------
             Dt::CMaterial&   rDataMaterial    = *_Material;
             CInternMaterial* pGraphicMaterial = m_MaterialByHash.at(Hash);
+
+            if (pGraphicMaterial == nullptr)
+            {
+                BASE_CONSOLE_STREAMWARNING("Update of data material failed because it is not created!");
+
+                return;
+            }
 
             CInternMaterial& rMaterial = *pGraphicMaterial;
 
@@ -407,11 +401,6 @@ namespace
             rMaterial.m_MaterialKey.m_HasMetallicTex    = rDataMaterial.GetMetalTexture()            != 0;
             rMaterial.m_MaterialKey.m_HasAOTex          = rDataMaterial.GetAmbientOcclusionTexture() != 0;
             rMaterial.m_MaterialKey.m_HasBumpTex        = rDataMaterial.GetBumpTexture()             != 0;
-
-            // -----------------------------------------------------------------------------
-            // Shader estimation depending on key
-            // -----------------------------------------------------------------------------
-            OnNewMaterial(rMaterial);
 
             // -----------------------------------------------------------------------------
             // Set definitions
@@ -429,23 +418,14 @@ namespace
             rMaterial.m_MaterialAttributes.m_TilingOffset = rDataMaterial.GetTilingOffset();
 
             // -----------------------------------------------------------------------------
+            // Shader
+            // -----------------------------------------------------------------------------
+            SetShaderOfMaterial(rMaterial);
+
+            // -----------------------------------------------------------------------------
             // Create and setup shader, texture and sampler (setup material)
             // -----------------------------------------------------------------------------
             CTextureBasePtr    TexturePtrs[CMaterial::SMaterialKey::s_NumberOfTextures];
-            STextureDescriptor TextureDescriptor;
-
-            TextureDescriptor.m_NumberOfPixelsU  = STextureDescriptor::s_NumberOfPixelsFromSource;
-            TextureDescriptor.m_NumberOfPixelsV  = STextureDescriptor::s_NumberOfPixelsFromSource;
-            TextureDescriptor.m_NumberOfPixelsW  = STextureDescriptor::s_NumberOfPixelsFromSource;
-            TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
-            TextureDescriptor.m_NumberOfTextures = STextureDescriptor::s_NumberOfTexturesFromSource;
-            TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
-            TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-            TextureDescriptor.m_Format           = CTextureBase::R8G8B8_UBYTE;
-            TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-            TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-            TextureDescriptor.m_pPixels          = 0;
-            TextureDescriptor.m_pFileName        = 0;
 
             TexturePtrs[0] = 0;
             TexturePtrs[1] = 0;
@@ -457,80 +437,51 @@ namespace
 
             if (rMaterial.m_MaterialKey.m_HasDiffuseTex)
             {
-                TextureDescriptor.m_NumberOfPixelsU = rDataMaterial.GetColorTexture()->GetNumberOfPixelsU();
-                TextureDescriptor.m_NumberOfPixelsV = rDataMaterial.GetColorTexture()->GetNumberOfPixelsV();
-                TextureDescriptor.m_NumberOfPixelsW = 1;
-                TextureDescriptor.m_pFileName       = rDataMaterial.GetColorTexture()->GetFileName();
-                TextureDescriptor.m_pPixels         = rDataMaterial.GetColorTexture()->GetPixels();
+                unsigned int Hash = rDataMaterial.GetColorTexture()->GetHash();
 
-                TexturePtrs[0]    = TextureManager::CreateTexture2D(TextureDescriptor);
+                TexturePtrs[0] = TextureManager::GetTexture2DByHash(Hash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasNormalTex)
             {
-                TextureDescriptor.m_NumberOfPixelsU = rDataMaterial.GetNormalTexture()->GetNumberOfPixelsU();
-                TextureDescriptor.m_NumberOfPixelsV = rDataMaterial.GetNormalTexture()->GetNumberOfPixelsV();
-                TextureDescriptor.m_NumberOfPixelsW = 1;
-                TextureDescriptor.m_pFileName       = rDataMaterial.GetNormalTexture()->GetFileName();
-                TextureDescriptor.m_pPixels         = rDataMaterial.GetNormalTexture()->GetPixels();
+                unsigned int Hash = rDataMaterial.GetNormalTexture()->GetHash();
 
-                TexturePtrs[1]    = TextureManager::CreateTexture2D(TextureDescriptor);
+                TexturePtrs[0] = TextureManager::GetTexture2DByHash(Hash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasRoughnessTex)
             {
-                TextureDescriptor.m_NumberOfPixelsU = rDataMaterial.GetRoughnessTexture()->GetNumberOfPixelsU();
-                TextureDescriptor.m_NumberOfPixelsV = rDataMaterial.GetRoughnessTexture()->GetNumberOfPixelsV();
-                TextureDescriptor.m_NumberOfPixelsW = 1;
-                TextureDescriptor.m_pFileName       = rDataMaterial.GetRoughnessTexture()->GetFileName();
-                TextureDescriptor.m_pPixels         = rDataMaterial.GetRoughnessTexture()->GetPixels();
+                unsigned int Hash = rDataMaterial.GetRoughnessTexture()->GetHash();
 
-                TexturePtrs[2] = TextureManager::CreateTexture2D(TextureDescriptor);
+                TexturePtrs[0] = TextureManager::GetTexture2DByHash(Hash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasReflectanceTex)
             {
-                TextureDescriptor.m_NumberOfPixelsU = rDataMaterial.GetReflectanceTexture()->GetNumberOfPixelsU();
-                TextureDescriptor.m_NumberOfPixelsV = rDataMaterial.GetReflectanceTexture()->GetNumberOfPixelsV();
-                TextureDescriptor.m_NumberOfPixelsW = 1;
-                TextureDescriptor.m_pFileName       = rDataMaterial.GetReflectanceTexture()->GetFileName();
-                TextureDescriptor.m_pPixels         = rDataMaterial.GetReflectanceTexture()->GetPixels();
+                unsigned int Hash = rDataMaterial.GetReflectanceTexture()->GetHash();
 
-                TexturePtrs[3] = TextureManager::CreateTexture2D(TextureDescriptor);
+                TexturePtrs[0] = TextureManager::GetTexture2DByHash(Hash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasMetallicTex)
             {
-                TextureDescriptor.m_NumberOfPixelsU = rDataMaterial.GetMetalTexture()->GetNumberOfPixelsU();
-                TextureDescriptor.m_NumberOfPixelsV = rDataMaterial.GetMetalTexture()->GetNumberOfPixelsV();
-                TextureDescriptor.m_NumberOfPixelsW = 1;
-                TextureDescriptor.m_pFileName       = rDataMaterial.GetMetalTexture()->GetFileName();
-                TextureDescriptor.m_pPixels         = rDataMaterial.GetMetalTexture()->GetPixels();
+                unsigned int Hash = rDataMaterial.GetMetalTexture()->GetHash();
 
-                TexturePtrs[4] = TextureManager::CreateTexture2D(TextureDescriptor);
+                TexturePtrs[0] = TextureManager::GetTexture2DByHash(Hash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasAOTex)
             {
-                TextureDescriptor.m_NumberOfPixelsU = rDataMaterial.GetAmbientOcclusionTexture()->GetNumberOfPixelsU();
-                TextureDescriptor.m_NumberOfPixelsV = rDataMaterial.GetAmbientOcclusionTexture()->GetNumberOfPixelsV();
-                TextureDescriptor.m_NumberOfPixelsW = 1;
-                TextureDescriptor.m_pFileName       = rDataMaterial.GetAmbientOcclusionTexture()->GetFileName();
-                TextureDescriptor.m_pPixels         = rDataMaterial.GetAmbientOcclusionTexture()->GetPixels();
+                unsigned int Hash = rDataMaterial.GetAmbientOcclusionTexture()->GetHash();
 
-                TexturePtrs[5] = TextureManager::CreateTexture2D(TextureDescriptor);
+                TexturePtrs[0] = TextureManager::GetTexture2DByHash(Hash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasBumpTex)
             {
-                TextureDescriptor.m_NumberOfPixelsU = rDataMaterial.GetBumpTexture()->GetNumberOfPixelsU();
-                TextureDescriptor.m_NumberOfPixelsV = rDataMaterial.GetBumpTexture()->GetNumberOfPixelsV();
-                TextureDescriptor.m_NumberOfPixelsW = 1;
-                TextureDescriptor.m_Format          = CTextureBase::R8_UBYTE;
-                TextureDescriptor.m_pFileName       = rDataMaterial.GetBumpTexture()->GetFileName();
-                TextureDescriptor.m_pPixels         = rDataMaterial.GetBumpTexture()->GetPixels();
+                unsigned int Hash = rDataMaterial.GetBumpTexture()->GetHash();
 
-                TexturePtrs[6] = TextureManager::CreateTexture2D(TextureDescriptor);
+                TexturePtrs[0] = TextureManager::GetTexture2DByHash(Hash);
             }
 
             rMaterial.m_TextureSetPtrs[CShader::Pixel] = TextureManager::CreateTextureSet(TexturePtrs, CMaterial::SMaterialKey::s_NumberOfTextures);
@@ -714,18 +665,13 @@ namespace
         // -----------------------------------------------------------------------------
         // Key estimation
         // -----------------------------------------------------------------------------
-        rMaterial.m_MaterialKey.m_HasDiffuseTex     = pColorMap     != 0;
-        rMaterial.m_MaterialKey.m_HasNormalTex      = pNormalMap    != 0;
-        rMaterial.m_MaterialKey.m_HasRoughnessTex   = pRoughnessMap != 0;
-        rMaterial.m_MaterialKey.m_HasReflectanceTex = 0;
-        rMaterial.m_MaterialKey.m_HasMetallicTex    = pMetalMaskMap != 0;
-        rMaterial.m_MaterialKey.m_HasAOTex          = pAOMap        != 0;
-        rMaterial.m_MaterialKey.m_HasBumpTex        = pBumpMap      != 0;
-
-        // -----------------------------------------------------------------------------
-        // Shader estimation depending on key
-        // -----------------------------------------------------------------------------
-        OnNewMaterial(rMaterial);
+        rMaterial.m_MaterialKey.m_HasDiffuseTex     = pColorMap       != 0;
+        rMaterial.m_MaterialKey.m_HasNormalTex      = pNormalMap      != 0;
+        rMaterial.m_MaterialKey.m_HasRoughnessTex   = pRoughnessMap   != 0;
+        rMaterial.m_MaterialKey.m_HasReflectanceTex = pReflectanceMap != 0;
+        rMaterial.m_MaterialKey.m_HasMetallicTex    = pMetalMaskMap   != 0;
+        rMaterial.m_MaterialKey.m_HasAOTex          = pAOMap          != 0;
+        rMaterial.m_MaterialKey.m_HasBumpTex        = pBumpMap        != 0;
 
         // -----------------------------------------------------------------------------
         // Set definitions
@@ -741,6 +687,11 @@ namespace
         rMaterial.m_MaterialAttributes.m_Reflectance  = Reflectance;
         rMaterial.m_MaterialAttributes.m_MetalMask    = MetalMask;
         rMaterial.m_MaterialAttributes.m_TilingOffset = TilingOffset;
+
+        // -----------------------------------------------------------------------------
+        // Shader
+        // -----------------------------------------------------------------------------
+        SetShaderOfMaterial(rMaterial);
 
         // -----------------------------------------------------------------------------
         // Create and setup shader, texture and sampler (setup material)
@@ -827,60 +778,9 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxMaterialManager::OnNewMaterial(CInternMaterial& _rMaterial) const
+    void CGfxMaterialManager::SetShaderOfMaterial(CInternMaterial& _rMaterial) const
     {
         unsigned int ShaderLinkIndex = 0;
-
-        // -----------------------------------------------------------------------------
-        // Try to find the right shader for that surface
-        // If no shader was found we use a blank shader with pink color.
-        // -----------------------------------------------------------------------------
-        for (unsigned int IndexOfShader = 0; IndexOfShader < s_NumberOfVertexShader; ++IndexOfShader)
-        {
-            Gfx::CSurface::SSurfaceKey::BSurfaceID TempMostReliableKey = g_SurfaceCombinations[IndexOfShader].m_Key;
-
-            if (g_SurfaceCombinations[IndexOfShader].m_Key == TempMostReliableKey)
-            {
-                ShaderLinkIndex = IndexOfShader;
-            }
-        }
-
-        // -----------------------------------------------------------------------------
-        // Now we get the index of the real vertex and pixel shader
-        // -----------------------------------------------------------------------------
-        const unsigned int VSIndex = ShaderLinkIndex;
-
-        // -----------------------------------------------------------------------------
-        // Compile shader
-        // -----------------------------------------------------------------------------
-        Gfx::CShaderPtr VSShader = Gfx::ShaderManager::CompileVS(g_pShaderFilenameVS[VSIndex], g_pShaderNamesVS[VSIndex]);
-
-        assert(VSShader != 0);
-
-        // -----------------------------------------------------------------------------
-        // Set input layout if vertex shader has no input layout
-        // -----------------------------------------------------------------------------
-        if (VSShader->GetInputLayout() == nullptr)
-        {
-            SInputElementDescriptorSetting InputLayoutDesc = g_InputLayoutDescriptor[VSIndex];
-
-            Gfx::SInputElementDescriptor* pDescriptor = static_cast<Gfx::SInputElementDescriptor*>(Base::CMemory::Allocate(sizeof(Gfx::SInputElementDescriptor) * InputLayoutDesc.m_NumberOfElements));
-
-            unsigned int IndexOfRenderInputDesc = InputLayoutDesc.m_Offset;
-
-            for (unsigned int IndexOfElement = 0; IndexOfElement < InputLayoutDesc.m_NumberOfElements; ++IndexOfElement)
-            {
-                pDescriptor[IndexOfElement] = g_InputLayouts[IndexOfRenderInputDesc];
-
-                ++IndexOfRenderInputDesc;
-            }
-
-            Gfx::CInputLayoutPtr LayoutPtr = Gfx::ShaderManager::CreateInputLayout(pDescriptor, InputLayoutDesc.m_NumberOfElements, VSShader);
-
-            Base::CMemory::Free(pDescriptor);
-        }
-
-        _rMaterial.m_ShaderPtrs[CShader::Vertex] = VSShader;
 
         // -----------------------------------------------------------------------------
         // Try to find the right shader for that surface

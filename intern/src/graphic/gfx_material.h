@@ -84,8 +84,10 @@ namespace Gfx
         
         const SMaterialKey& GetKey() const;
         
-        const bool GetHasAlpha() const;
-        const bool GetHasBump() const;
+        bool GetHasAlpha() const;
+        bool GetHasBump() const;
+
+        unsigned int GetHash() const;
 
     protected:
         
@@ -105,6 +107,8 @@ namespace Gfx
         
         bool m_HasAlpha;
         bool m_HasBump;
+
+        unsigned int m_Hash;
     };
 } // namespace Gfx
 

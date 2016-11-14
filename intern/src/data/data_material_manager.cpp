@@ -75,11 +75,14 @@ namespace
         typedef Base::CPool<CInternMaterial, 1024> CMaterials;
 
         typedef std::vector<CMaterialDelegate> CMaterialDelegates;
+
+        typedef std::unordered_map<unsigned int, CInternMaterial*> CMaterialByHashs;
         
     private:
         
         CMaterials         m_Materials;
         CMaterialDelegates m_MaterialDelegates;
+        CMaterialByHashs   m_MaterialByHashs;
 
     private:
 
@@ -92,6 +95,7 @@ namespace
     CDtMaterialManager::CDtMaterialManager()
         : m_Materials        ()
         , m_MaterialDelegates()
+        , m_MaterialByHashs  ()
     {
     }
     
@@ -114,6 +118,8 @@ namespace
         m_Materials.Clear();
 
         m_MaterialDelegates.clear();
+
+        m_MaterialByHashs.clear();
     }
 
     // -----------------------------------------------------------------------------
@@ -126,6 +132,7 @@ namespace
         CInternMaterial& rNewMaterial = m_Materials.Allocate();
 
         rNewMaterial.m_Materialname = "";
+        rNewMaterial.m_FileName     = "";
 
         return rNewMaterial;
     }
@@ -134,11 +141,32 @@ namespace
     
     CMaterial& CDtMaterialManager::CreateMaterial(const SMaterialFileDescriptor& _rDescriptor)
     {
+        int          NumberOfBytes;
+        unsigned int Hash;
+
+        Hash = 0;
+
         if (_rDescriptor.m_pFileName == 0)
         {
             BASE_THROWM("Can't create material because of invalid informations.");
         }
-        
+
+        // -----------------------------------------------------------------------------
+        // Create hash value over filename
+        // -----------------------------------------------------------------------------
+        if (_rDescriptor.m_pFileName != nullptr && strlen(_rDescriptor.m_pFileName))
+        {
+            NumberOfBytes = static_cast<unsigned int>(strlen(_rDescriptor.m_pFileName) * sizeof(char));
+            const void* pData = static_cast<const void*>(_rDescriptor.m_pFileName);
+
+            Hash = Base::CRC32(pData, NumberOfBytes);
+
+            if (m_MaterialByHashs.find(Hash) != m_MaterialByHashs.end())
+            {
+                return *m_MaterialByHashs.at(Hash);
+            }
+        }
+
         // -----------------------------------------------------------------------------
         // Create Material
         // -----------------------------------------------------------------------------
@@ -361,7 +389,18 @@ namespace
         }
 
         MaterialFile.Clear();
-        
+
+        // -----------------------------------------------------------------------------
+        // Set hash
+        // -----------------------------------------------------------------------------
+        rNewMaterial.m_Hash     = Hash;
+        rNewMaterial.m_FileName = _rDescriptor.m_pFileName;
+
+        if (Hash != 0)
+        {
+            m_MaterialByHashs[Hash] = &rNewMaterial;
+        }
+
         return rNewMaterial;
     }
 
