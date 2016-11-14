@@ -16,12 +16,27 @@
 #include "graphic/gfx_material.h"
 #include "graphic/gfx_surface.h"
 
+// TODO by tschwandt
+// CHECK "MATERIAL COMMENT"
+
 namespace Gfx
 {
     struct SMaterialDescriptor
     {
-        CSurface::SSurfaceKey::BSurfaceID m_ID;
-        Dt::CMaterial*                    m_pMaterial;
+        const char*       m_pMaterialName;
+        const char*       m_pColorMap;
+        const char*       m_pNormalMap;
+        const char*       m_pRoughnessMap;
+        const char*       m_pReflectanceMap;
+        const char*       m_pMetalMaskMap;
+        const char*       m_pAOMap;
+        const char*       m_pBumpMap;
+        float             m_Roughness;
+        float             m_Reflectance;
+        float             m_MetalMask;
+        Base::Float3      m_AlbedoColor;
+        Base::Float4      m_TilingOffset;
+        const Base::Char* m_pFileName;
     };
 } // namespace Gfx
 
@@ -34,6 +49,8 @@ namespace MaterialManager
 
     CMaterialPtr CreateMaterial(const SMaterialDescriptor& _rDescriptor);
 
-    void UpdateMaterial(CMaterialPtr _MaterialPtr, const SMaterialDescriptor& _rDescriptor);
+    CMaterialPtr GetDefaultMaterialByHash();
+
+    CMaterialPtr GetMaterialByHash(unsigned int _Hash);
 } // namespace MaterialManager
 } // namespace Gfx

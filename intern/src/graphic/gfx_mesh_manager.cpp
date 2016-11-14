@@ -352,8 +352,10 @@ namespace
                 {
                     Gfx::SMaterialDescriptor MaterialDesc;
                     
-                    MaterialDesc.m_ID        = rSurface.m_SurfaceKey.m_Key;
-                    MaterialDesc.m_pMaterial = rCurrentSurface.GetMaterial();
+                    // TODO by tschwandt
+                    // MATERIAL COMMENT
+                    // MaterialDesc.m_ID        = rSurface.m_SurfaceKey.m_Key;
+                    // MaterialDesc.m_pMaterial = rCurrentSurface.GetMaterial();
                     
                     rSurface.m_MaterialPtr = Gfx::MaterialManager::CreateMaterial(MaterialDesc);
                 }

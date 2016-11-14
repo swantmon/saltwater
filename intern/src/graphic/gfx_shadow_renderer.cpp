@@ -980,7 +980,9 @@ namespace
                     // -----------------------------------------------------------------------------
                     assert(SurfacePtr->GetKey().m_HasPosition);
                     
-                    CInputLayoutPtr LayoutPtr = SurfacePtr->GetMaterial()->GetShaderVS()->GetInputLayout();
+                    // TODO by tschwandt
+                    // MATERIAL COMMENT
+                    // CInputLayoutPtr LayoutPtr = SurfacePtr->GetMaterial()->GetShaderVS()->GetInputLayout();
                     
                     // -----------------------------------------------------------------------------
                     // Set items to context manager
@@ -989,7 +991,9 @@ namespace
                     
                     ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
                     
-                    ContextManager::SetInputLayout(LayoutPtr);
+                    // TODO by tschwandt
+                    // MATERIAL COMMENT
+                    // ContextManager::SetInputLayout(LayoutPtr);
                     
                     ContextManager::SetTopology(STopology::TriangleList);
                     
@@ -1146,7 +1150,9 @@ namespace
                     // -----------------------------------------------------------------------------
                     assert(SurfacePtr->GetKey().m_HasPosition);
                     
-                    CInputLayoutPtr LayoutPtr = MaterialPtr->GetShaderVS()->GetInputLayout();
+                    // TODO by tschwandt
+                    // MATERIAL COMMENT
+                    // CInputLayoutPtr LayoutPtr = MaterialPtr->GetShaderVS()->GetInputLayout();
                     
                     // -----------------------------------------------------------------------------
                     // Set items to context manager
@@ -1155,7 +1161,9 @@ namespace
                     
                     ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
                     
-                    ContextManager::SetInputLayout(LayoutPtr);
+                    // TODO by tschwandt
+                    // MATERIAL COMMENT
+                    // ContextManager::SetInputLayout(LayoutPtr);
                     
                     ContextManager::SetTopology(STopology::TriangleList);
                     

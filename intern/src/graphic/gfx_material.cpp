@@ -67,13 +67,6 @@ namespace Gfx
     }
 
     // -----------------------------------------------------------------------------
-
-    CShaderPtr CMaterial::GetShaderVS() const
-    {
-        return m_ShaderPtrs[CShader::Vertex];
-    }
-
-    // -----------------------------------------------------------------------------
     
     CShaderPtr CMaterial::GetShaderHS() const
     {
@@ -103,13 +96,6 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    CSamplerSetPtr CMaterial::GetSamplerSetVS() const
-    {
-        return m_SamplerSetPtrs[CShader::Vertex];
-    }
-
-    // -----------------------------------------------------------------------------
-
     CSamplerSetPtr CMaterial::GetSamplerSetHS() const
     {
         return m_SamplerSetPtrs[CShader::Hull];
@@ -134,13 +120,6 @@ namespace Gfx
     CSamplerSetPtr CMaterial::GetSamplerSetPS() const
     {
         return m_SamplerSetPtrs[CShader::Pixel];
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CTextureSetPtr CMaterial::GetTextureSetVS() const
-    {
-        return m_TextureSetPtrs[CShader::Vertex];
     }
 
     // -----------------------------------------------------------------------------

@@ -432,7 +432,9 @@ namespace
             // -----------------------------------------------------------------------------
             ContextManager::SetTopology(STopology::TriangleList);
 
-            ContextManager::SetShaderVS(MaterialPtr->GetShaderVS());
+            // TODO by tschwandt
+            // MATERIAL COMMENT
+            // ContextManager::SetShaderVS(MaterialPtr->GetShaderVS());
 
             ContextManager::SetShaderGS(MaterialPtr->GetShaderGS());
 
@@ -473,7 +475,9 @@ namespace
 
             ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
 
-            ContextManager::SetInputLayout(MaterialPtr->GetShaderVS()->GetInputLayout());
+            // TODO by tschwandt
+            // MATERIAL COMMENT
+            // ContextManager::SetInputLayout(MaterialPtr->GetShaderVS()->GetInputLayout());
 
             ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
 

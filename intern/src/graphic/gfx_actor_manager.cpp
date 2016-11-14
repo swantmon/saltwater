@@ -259,13 +259,17 @@ namespace
             // -----------------------------------------------------------------------------
             // Material description
             // -----------------------------------------------------------------------------
-            MaterialDesc.m_ID        = SurfaceKey.m_Key;
-            MaterialDesc.m_pMaterial = pDataMaterial;
+            // TODO by tschwandt
+            // MATERIAL COMMENT
+            // MaterialDesc.m_ID        = SurfaceKey.m_Key;
+            // MaterialDesc.m_pMaterial = pDataMaterial;
 
             // -----------------------------------------------------------------------------
             // Update material
             // -----------------------------------------------------------------------------
-            MaterialManager::UpdateMaterial(MaterialPtr, MaterialDesc);
+            // TODO by tschwandt
+            // MATERIAL COMMENT
+            // MaterialManager::UpdateMaterial(MaterialPtr, MaterialDesc);
         }
     }
 
@@ -365,8 +369,10 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Material description
                 // -----------------------------------------------------------------------------
-                MaterialDesc.m_ID        = SurfaceKey.m_Key;
-                MaterialDesc.m_pMaterial = pDataMaterial;
+                // TODO by tschwandt
+                // MATERIAL COMMENT
+                // MaterialDesc.m_ID        = SurfaceKey.m_Key;
+                // MaterialDesc.m_pMaterial = pDataMaterial;
 
                 // -----------------------------------------------------------------------------
                 // Create and set material
@@ -433,8 +439,10 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Material description
                 // -----------------------------------------------------------------------------
-                MaterialDesc.m_ID = SurfaceKey.m_Key;
-                MaterialDesc.m_pMaterial = pDataMaterial;
+                // TODO by tschwandt
+                // MATERIAL COMMENT
+                // MaterialDesc.m_ID = SurfaceKey.m_Key;
+                // MaterialDesc.m_pMaterial = pDataMaterial;
 
                 // -----------------------------------------------------------------------------
                 // Create and set material

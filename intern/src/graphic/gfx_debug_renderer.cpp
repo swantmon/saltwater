@@ -757,7 +757,9 @@ namespace
 
             ContextManager::SetIndexBuffer(m_GizmoModelPtr->GetLOD(0)->GetSurface(IndexOfSurface)->GetIndexBuffer(), 0);
 
-            ContextManager::SetInputLayout(m_GizmoModelPtr->GetLOD(0)->GetSurface(IndexOfSurface)->GetMaterial()->GetShaderVS()->GetInputLayout());
+            // TODO by tschwandt
+            // MATERIAL COMMENT
+            // ContextManager::SetInputLayout(m_GizmoModelPtr->GetLOD(0)->GetSurface(IndexOfSurface)->GetMaterial()->GetShaderVS()->GetInputLayout());
 
             ContextManager::SetTopology(STopology::TriangleList);
 

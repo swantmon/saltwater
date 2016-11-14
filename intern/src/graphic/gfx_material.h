@@ -58,8 +58,7 @@ namespace Gfx
         };
         
     public:
-        
-        CShaderPtr GetShaderVS() const;
+
         CShaderPtr GetShaderHS() const;
         CShaderPtr GetShaderDS() const;
         CShaderPtr GetShaderGS() const;
@@ -67,15 +66,13 @@ namespace Gfx
 
     public:
 
-        CSamplerSetPtr GetSamplerSetVS() const;
         CSamplerSetPtr GetSamplerSetHS() const;
         CSamplerSetPtr GetSamplerSetDS() const;
         CSamplerSetPtr GetSamplerSetGS() const;
         CSamplerSetPtr GetSamplerSetPS() const;
 
     public:
-        
-        CTextureSetPtr GetTextureSetVS() const;
+
         CTextureSetPtr GetTextureSetHS() const;
         CTextureSetPtr GetTextureSetDS() const;
         CTextureSetPtr GetTextureSetGS() const;
