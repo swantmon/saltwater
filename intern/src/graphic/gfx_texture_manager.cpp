@@ -182,6 +182,16 @@ namespace
 
         void OnDirtyTexture(Dt::CTextureBase* _pTexture);
 
+        CInternTexture1D* InternCreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
+        CInternTexture2D* InternCreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
+        CInternTexture3D* InternCreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
+
+        CInternTexture1D* InternCreateTextureArray1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
+        CInternTexture2D* InternCreateTextureArray2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
+        CInternTexture3D* InternCreateTextureArray3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
+
+        CInternTexture2D* InternCreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
+
         int ConvertGLFormatToBytesPerPixel(Gfx::CTextureBase::EFormat _Format) const;
         int ConvertGLImageUsage(Gfx::CTextureBase::EUsage _Usage) const;
         int ConvertGLInternalImageFormat(Gfx::CTextureBase::EFormat _Format) const;
@@ -190,6 +200,10 @@ namespace
 
         ILenum ConvertILImageFormat(Gfx::CTextureBase::EFormat _Format) const;
         ILenum ConvertILImageType(Gfx::CTextureBase::EFormat _Format) const;
+
+        Gfx::CTextureBase::EDimension ConvertDataDimension(Dt::CTextureBase::EDimension _Dimension);
+        Gfx::CTextureBase::EFormat ConvertDataFormat(Dt::CTextureBase::EFormat _Format);
+        Gfx::CTextureBase::ESemantic ConvertDataSemantic(Dt::CTextureBase::ESemantic _Semantic);
 
     private:
 
@@ -352,38 +366,24 @@ namespace
 
     CTexture1DPtr CGfxTextureManager::CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
-        BASE_UNUSED(_rDescriptor);
-        BASE_UNUSED(_IsDeleteable);
-        BASE_UNUSED(_Behavior);
+        CInternTexture1D* pInternTexture1D = InternCreateTexture1D(_rDescriptor, _IsDeleteable, _Behavior);
 
-        return nullptr;
+        if (pInternTexture1D == nullptr)
+        {
+            return GetDummyTexture1D();
+        }
+
+        return CTexture1DPtr(pInternTexture1D);
     }
 
     // -----------------------------------------------------------------------------
 
     CTexture2DPtr CGfxTextureManager::CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
-        bool         Result;
-        void*        pBytes;
-        void*        pTextureData;
-        unsigned int Hash;
-        unsigned int NativeImageName;
-        GLuint       NativeTextureHandle;
-        int          ImageWidth;
-        int          ImageHeight;
-        int          NumberOfPixel;
         int          NumberOfBytes;
-        int          NumberOfMipmaps;
-        int          GLInternalFormat;
-        int          GLFormat;
-        int          GLUsage;
-        int          GLType;
-        ILenum       NativeILFormat;
-        ILenum       NativeILType;
+        unsigned int Hash;
 
-        pBytes       = nullptr;
-        pTextureData = nullptr;
-        Hash         = 0;
+        Hash = 0;
 
         // -----------------------------------------------------------------------------
         // Create hash value over filename
@@ -399,568 +399,76 @@ namespace
             {
                 return CTexture2DPtr(m_Textures2DByHash.at(Hash));
             }
+        }            
+
+        // -----------------------------------------------------------------------------
+        // Texture
+        // -----------------------------------------------------------------------------
+        CInternTexture2D* pInternTexture2D = InternCreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior);
+
+        if (pInternTexture2D == nullptr)
+        {
+            return GetDummyTexture2D();
+        }
+
+        if (Hash != 0)
+        {
+            m_Textures2DByHash[Hash] = pInternTexture2D;
         }
         
-        // -----------------------------------------------------------------------------
-        // Setup variables
-        // -----------------------------------------------------------------------------
-        ImageWidth       = _rDescriptor.m_NumberOfPixelsU;
-        ImageHeight      = _rDescriptor.m_NumberOfPixelsV;
-        pBytes           = nullptr;
-        pTextureData     = _rDescriptor.m_pPixels;
-        NumberOfPixel    = ImageWidth * ImageHeight;
-        NumberOfMipmaps  = _rDescriptor.m_NumberOfMipMaps;
-        NumberOfBytes    = ConvertGLFormatToBytesPerPixel(_rDescriptor.m_Format) * NumberOfPixel;
-        GLInternalFormat = ConvertGLInternalImageFormat(_rDescriptor.m_Format);
-        GLFormat         = ConvertGLImageFormat(_rDescriptor.m_Format);
-        GLType           = ConvertGLImageType(_rDescriptor.m_Format);
-        GLUsage          = ConvertGLImageUsage(_rDescriptor.m_Usage);
-
-        NativeILFormat  = ConvertILImageFormat(_rDescriptor.m_Format);
-        NativeILType    = ConvertILImageType(_rDescriptor.m_Format);
-
-        NativeImageName = 0;
-
-        // -----------------------------------------------------------------------------
-        // Load texture from file if one is set in descriptor
-        // -----------------------------------------------------------------------------
-        if (_rDescriptor.m_pFileName != nullptr && _rDescriptor.m_pPixels == nullptr)
-        {
-            // -----------------------------------------------------------------------------
-            // Create and bin texture on DevIL
-            // -----------------------------------------------------------------------------
-            NativeImageName = ilGenImage();
-
-            ilBindImage(NativeImageName);
-
-            // -----------------------------------------------------------------------------
-            // Load texture from file (either in assets or data)
-            // -----------------------------------------------------------------------------
-            std::string    PathToTexture;
-			const wchar_t* pPathToTexture = 0;
-
-			PathToTexture = g_PathToAssets + _rDescriptor.m_pFileName;
-
-            pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
-            
-            Result = ilLoadImage(pPathToTexture) == IL_TRUE;
-
-			if (!Result)
-			{
-				PathToTexture = g_PathToDataTextures + _rDescriptor.m_pFileName;
-
-				pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
-
-				Result = ilLoadImage(pPathToTexture) == IL_TRUE;
-			}
-            
-            if (Result)
-            {
-                ILenum CheckILFormat = ilGetInteger(IL_IMAGE_FORMAT);
-                ILenum CheckILType   = ilGetInteger(IL_IMAGE_TYPE);
-
-                if (CheckILFormat != NativeILFormat || CheckILType != NativeILType)
-                {
-                    ilConvertImage(NativeILFormat, NativeILType);
-                }
-                
-                pTextureData = ilGetData();
-                
-                ImageWidth    = ilGetInteger(IL_IMAGE_WIDTH);
-                ImageHeight   = ilGetInteger(IL_IMAGE_HEIGHT);
-                NumberOfBytes = ilGetInteger(IL_IMAGE_SIZE_OF_DATA);
-                
-                assert(ImageWidth    > 0);
-                assert(ImageHeight   > 0);
-                assert(NumberOfBytes > 0);
-            }
-            else
-            {
-                BASE_CONSOLE_STREAMERROR("Failed loading image '" << PathToTexture.c_str() << "' from file.");
-
-                ilDeleteImage(NativeImageName);
-                
-                return GetDummyTexture2D();
-            }
-        }
-
-        if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
-        {
-            NumberOfMipmaps = static_cast<int>(Base::Log2(static_cast<float>(Base::Max(ImageWidth, ImageHeight)))) + 1;
-        }
-        
-        // -----------------------------------------------------------------------------
-        // Generate OpenGL texture or render buffer
-        // -----------------------------------------------------------------------------
-        glGenTextures(1, &NativeTextureHandle);
-
-        glBindTexture(GL_TEXTURE_2D, NativeTextureHandle);
-
-        // -----------------------------------------------------------------------------
-        // Binding
-        // -----------------------------------------------------------------------------
-        if (_rDescriptor.m_Binding & Gfx::CTextureBase::DepthStencilTarget)
-        {
-            glTexStorage2D(GL_TEXTURE_2D, NumberOfMipmaps, GL_DEPTH_COMPONENT32F, ImageWidth, ImageHeight);
-        }
-        else if (_rDescriptor.m_Binding & Gfx::CTextureBase::RenderTarget)
-        {   
-            glTexStorage2D(GL_TEXTURE_2D, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
-        }
-        else
-        {
-            glTexStorage2D(GL_TEXTURE_2D, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
-        }
-
-        // -----------------------------------------------------------------------------
-        // Is data available, then upload it to graphic card
-        // -----------------------------------------------------------------------------
-        if (pTextureData != 0)
-        {
-            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, ImageWidth, ImageHeight, GLFormat, GLType, pTextureData);
-        }
-
-        // -----------------------------------------------------------------------------
-        // Create mipmaps depending on uploaded data
-        // -----------------------------------------------------------------------------
-        if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
-        {
-            glGenerateMipmap(GL_TEXTURE_2D);
-        }
-
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        // -----------------------------------------------------------------------------
-        // Generate texture inside texture manager
-        // -----------------------------------------------------------------------------
-        CTexture2Ds::CPtr Texture2DPtr;
-        
-        assert(NumberOfBytes > 0);
-        
-        try
-        {
-            Texture2DPtr = m_Textures2D.Allocate();
-            
-            CInternTexture2D& rTexture = *Texture2DPtr;
-            
-            // -----------------------------------------------------------------------------
-            // Setup the new texture inside manager
-            // -----------------------------------------------------------------------------
-            rTexture.m_FileName          = _rDescriptor.m_pFileName;
-            rTexture.m_pPixels           = _rDescriptor.m_pPixels;
-            rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTextureBase::BPixels>(ImageWidth);
-            rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTextureBase::BPixels>(ImageHeight);
-            
-            rTexture.m_Info.m_Access            = _rDescriptor.m_Access;
-            rTexture.m_Info.m_Binding           = _rDescriptor.m_Binding;
-            rTexture.m_Info.m_Dimension         = CTextureBase::Dim2D;
-            rTexture.m_Info.m_Format            = _rDescriptor.m_Format;
-            rTexture.m_Info.m_IsCubeTexture     = false;
-            rTexture.m_Info.m_IsDeletable       = _IsDeleteable;
-            rTexture.m_Info.m_IsDummyTexture    = false;
-            rTexture.m_Info.m_NumberOfTextures  = _rDescriptor.m_NumberOfTextures;
-            rTexture.m_Info.m_NumberOfMipLevels = NumberOfMipmaps;
-            rTexture.m_Info.m_CurrentMipLevel   = 0;
-            rTexture.m_Info.m_Semantic          = _rDescriptor.m_Semantic;
-            rTexture.m_Info.m_Usage             = _rDescriptor.m_Usage;
-            
-            rTexture.m_NativeTexture        = NativeTextureHandle;
-            rTexture.m_NativeUsage          = GLUsage;
-            rTexture.m_NativeInternalFormat = GLInternalFormat;
-            rTexture.m_NativeDimension      = GL_TEXTURE_2D;
-            
-            // -----------------------------------------------------------------------------
-            // Set hash to map
-            // -----------------------------------------------------------------------------
-            if (Hash != 0)
-            {
-                m_Textures2DByHash[Hash] = &rTexture;
-            }
-            
-            // -----------------------------------------------------------------------------
-            // Check the behavior.
-            // -----------------------------------------------------------------------------
-            if (_Behavior == SDataBehavior::Copy || _Behavior == SDataBehavior::CopyAndDelete)
-            {
-                pBytes = Base::CMemory::Allocate(NumberOfBytes);
-                
-                if (pTextureData)
-                {
-                    pBytes = Base::CMemory::Copy(NumberOfBytes, pTextureData);
-                }
-                else if (_rDescriptor.m_pPixels)
-                {
-                    pBytes = Base::CMemory::Copy(NumberOfBytes, _rDescriptor.m_pPixels);
-                }
-            }
-            
-            switch (_Behavior)
-            {
-                case SDataBehavior::LeftAlone:
-                {
-                    rTexture.m_Info.m_IsPixelOwner = false;
-                    rTexture.m_pPixels             = nullptr;
-                }
-                break;
-                    
-                case SDataBehavior::DeleteAfterUpload:
-                {
-                    rTexture.m_Info.m_IsPixelOwner = false;
-                    rTexture.m_pPixels             = nullptr;
-                    
-                    Base::CMemory::Free(_rDescriptor.m_pPixels);
-                }
-                break;
-                    
-                case SDataBehavior::TakeOwnerShip:
-                {
-                    rTexture.m_Info.m_IsPixelOwner = true;
-                    rTexture.m_pPixels             = _rDescriptor.m_pPixels;
-                }
-                break;
-                    
-                case SDataBehavior::Copy:
-                {
-                    rTexture.m_Info.m_IsPixelOwner = true;
-                    rTexture.m_pPixels             = pBytes;
-                }
-                break;
-                    
-                case SDataBehavior::CopyAndDelete:
-                {
-                    rTexture.m_Info.m_IsPixelOwner = true;
-                    rTexture.m_pPixels             = pBytes;
-                    
-                    Base::CMemory::Free(_rDescriptor.m_pPixels);
-                }
-                break;
-                    
-                default:
-                    BASE_CONSOLE_STREAMWARNING("Undefined texture data behavior while creating an texture.");
-                    break;
-            }
-
-            // -----------------------------------------------------------------------------
-            // Delete image on DevIL because it isn't needed anymore
-            // -----------------------------------------------------------------------------
-            if (_rDescriptor.m_pFileName != nullptr && _rDescriptor.m_pPixels == nullptr)
-            {
-                ilDeleteImage(NativeImageName);
-
-                ilBindImage(0);
-            }
-        }
-        catch (...)
-        {
-            BASE_THROWM("Error creating texture in texture manager.");
-        }
-        
-        return CTexture2DPtr(Texture2DPtr);
+        return CTexture2DPtr(pInternTexture2D);
     }
 
     // -----------------------------------------------------------------------------
 
     CTexture3DPtr CGfxTextureManager::CreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
-        void*        pBytes;
-        void*        pTextureData;
-        GLuint       NativeTextureHandle;
-        int          ImageWidth;
-        int          ImageHeight;
-        int          ImageDepth;
-        int          NumberOfPixel;
-        int          NumberOfBytes;
-        int          NumberOfMipmaps;
-        int          GLInternalFormat;
-        int          GLFormat;
-        int          GLUsage;
-        int          GLType;
-        ILenum       NativeILFormat;
-        ILenum       NativeILType;
+        CInternTexture3D* pInternTexture3D = InternCreateTexture3D(_rDescriptor, _IsDeleteable, _Behavior);
 
-        pBytes       = nullptr;
-        pTextureData = nullptr;
-
-        // -----------------------------------------------------------------------------
-        // Setup variables
-        // -----------------------------------------------------------------------------
-        ImageWidth       = _rDescriptor.m_NumberOfPixelsU;
-        ImageHeight      = _rDescriptor.m_NumberOfPixelsV;
-        ImageDepth       = _rDescriptor.m_NumberOfPixelsW;
-        pBytes           = nullptr;
-        pTextureData     = _rDescriptor.m_pPixels;
-        NumberOfPixel    = ImageWidth * ImageHeight;
-        NumberOfMipmaps  = _rDescriptor.m_NumberOfMipMaps;
-        NumberOfBytes    = ConvertGLFormatToBytesPerPixel(_rDescriptor.m_Format) * NumberOfPixel;
-        GLInternalFormat = ConvertGLInternalImageFormat(_rDescriptor.m_Format);
-        GLFormat         = ConvertGLImageFormat(_rDescriptor.m_Format);
-        GLType           = ConvertGLImageType(_rDescriptor.m_Format);
-        GLUsage          = ConvertGLImageUsage(_rDescriptor.m_Usage);
-
-        NativeILFormat  = ConvertILImageFormat(_rDescriptor.m_Format);
-        NativeILType    = ConvertILImageType(_rDescriptor.m_Format);
-
-        if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
+        if (pInternTexture3D == nullptr)
         {
-            NumberOfMipmaps = static_cast<int>(Base::Log2(static_cast<float>(Base::Max(ImageWidth, ImageHeight)))) + 1;
+            return GetDummyTexture3D();
         }
         
-        // -----------------------------------------------------------------------------
-        // Generate OpenGL texture or render buffer
-        // -----------------------------------------------------------------------------
-        glGenTextures(1, &NativeTextureHandle);
-
-        glBindTexture(GL_TEXTURE_3D, NativeTextureHandle);
-
-        // -----------------------------------------------------------------------------
-        // Binding
-        // -----------------------------------------------------------------------------
-        assert(!(_rDescriptor.m_Binding & Gfx::CTextureBase::DepthStencilTarget || _rDescriptor.m_Binding & Gfx::CTextureBase::RenderTarget));
-
-        glTexStorage3D(GL_TEXTURE_3D, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight, ImageDepth);
-
-        // -----------------------------------------------------------------------------
-        // Is data available, then upload it to graphic card
-        // -----------------------------------------------------------------------------
-        if (pTextureData != 0)
-        {
-            glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, ImageWidth, ImageHeight, ImageDepth, GLFormat, GLType, pTextureData);
-        }
-
-        // -----------------------------------------------------------------------------
-        // Create mipmaps depending on uploaded data
-        // -----------------------------------------------------------------------------
-        if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
-        {
-            glGenerateMipmap(GL_TEXTURE_3D);
-        }
-
-        glBindTexture(GL_TEXTURE_3D, 0);
-
-        // -----------------------------------------------------------------------------
-        // Generate texture inside texture manager
-        // -----------------------------------------------------------------------------
-        CTexture3Ds::CPtr Texture3DPtr;
-        
-        assert(NumberOfBytes > 0);
-        
-        try
-        {
-            Texture3DPtr = m_Textures3D.Allocate();
-            
-            CInternTexture3D& rTexture = *Texture3DPtr;
-            
-            // -----------------------------------------------------------------------------
-            // Setup the new texture inside manager
-            // -----------------------------------------------------------------------------
-            rTexture.m_FileName          = _rDescriptor.m_pFileName;
-            rTexture.m_pPixels           = _rDescriptor.m_pPixels;
-            rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTextureBase::BPixels>(ImageWidth);
-            rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTextureBase::BPixels>(ImageHeight);
-            rTexture.m_NumberOfPixels[2] = static_cast<Gfx::CTextureBase::BPixels>(ImageDepth);
-            
-            rTexture.m_Info.m_Access            = _rDescriptor.m_Access;
-            rTexture.m_Info.m_Binding           = _rDescriptor.m_Binding;
-            rTexture.m_Info.m_Dimension         = CTextureBase::Dim3D;
-            rTexture.m_Info.m_Format            = _rDescriptor.m_Format;
-            rTexture.m_Info.m_IsCubeTexture     = false;
-            rTexture.m_Info.m_IsDeletable       = _IsDeleteable;
-            rTexture.m_Info.m_IsDummyTexture    = false;
-            rTexture.m_Info.m_NumberOfTextures  = _rDescriptor.m_NumberOfTextures;
-            rTexture.m_Info.m_NumberOfMipLevels = NumberOfMipmaps;
-            rTexture.m_Info.m_CurrentMipLevel   = 0;
-            rTexture.m_Info.m_Semantic          = _rDescriptor.m_Semantic;
-            rTexture.m_Info.m_Usage             = _rDescriptor.m_Usage;
-            
-            rTexture.m_NativeTexture        = NativeTextureHandle;
-            rTexture.m_NativeUsage          = GLUsage;
-            rTexture.m_NativeInternalFormat = GLInternalFormat;
-            rTexture.m_NativeDimension      = GL_TEXTURE_3D;
-            
-            // -----------------------------------------------------------------------------
-            // Check the behavior.
-            // -----------------------------------------------------------------------------
-            if (_Behavior == SDataBehavior::Copy || _Behavior == SDataBehavior::CopyAndDelete)
-            {
-                pBytes = Base::CMemory::Allocate(NumberOfBytes);
-                
-                if (pTextureData)
-                {
-                    pBytes = Base::CMemory::Copy(NumberOfBytes, pTextureData);
-                }
-                else if (_rDescriptor.m_pPixels)
-                {
-                    pBytes = Base::CMemory::Copy(NumberOfBytes, _rDescriptor.m_pPixels);
-                }
-            }
-            
-            switch (_Behavior)
-            {
-                case SDataBehavior::LeftAlone:
-                {
-                    rTexture.m_Info.m_IsPixelOwner = false;
-                    rTexture.m_pPixels             = nullptr;
-                }
-                break;
-                    
-                case SDataBehavior::DeleteAfterUpload:
-                {
-                    rTexture.m_Info.m_IsPixelOwner = false;
-                    rTexture.m_pPixels             = nullptr;
-                    
-                    Base::CMemory::Free(_rDescriptor.m_pPixels);
-                }
-                break;
-                    
-                case SDataBehavior::TakeOwnerShip:
-                {
-                    rTexture.m_Info.m_IsPixelOwner = true;
-                    rTexture.m_pPixels             = _rDescriptor.m_pPixels;
-                }
-                break;
-                    
-                case SDataBehavior::Copy:
-                {
-                    rTexture.m_Info.m_IsPixelOwner = true;
-                    rTexture.m_pPixels             = pBytes;
-                }
-                break;
-                    
-                case SDataBehavior::CopyAndDelete:
-                {
-                    rTexture.m_Info.m_IsPixelOwner = true;
-                    rTexture.m_pPixels             = pBytes;
-                    
-                    Base::CMemory::Free(_rDescriptor.m_pPixels);
-                }
-                break;
-                    
-                default:
-                    BASE_CONSOLE_STREAMWARNING("Undefined texture data behavior while creating an texture.");
-                    break;
-            }
-        }
-        catch (...)
-        {
-            BASE_THROWM("Error creating texture in texture manager.");
-        }
-        
-        return CTexture3DPtr(Texture3DPtr);
+        return CTexture3DPtr(pInternTexture3D);
     }
 
     // -----------------------------------------------------------------------------
 
     CTexture1DPtr CGfxTextureManager::CreateTextureArray1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
-        BASE_UNUSED(_rDescriptor);
-        BASE_UNUSED(_IsDeleteable);
-        BASE_UNUSED(_Behavior);
+        CInternTexture1D* pInternTexture = InternCreateTextureArray1D(_rDescriptor, _IsDeleteable, _Behavior);
 
-        return nullptr;
+        return CTexture1DPtr(pInternTexture);
     }
 
     // -----------------------------------------------------------------------------
 
     CTexture2DPtr CGfxTextureManager::CreateTextureArray2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
-        BASE_UNUSED(_rDescriptor);
-        BASE_UNUSED(_IsDeleteable);
-        BASE_UNUSED(_Behavior);
+        CInternTexture2D* pInternTexture = InternCreateTextureArray2D(_rDescriptor, _IsDeleteable, _Behavior);
 
-        return nullptr;
+        return CTexture2DPtr(pInternTexture);
     }
 
     // -----------------------------------------------------------------------------
 
     CTexture3DPtr CGfxTextureManager::CreateTextureArray3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
-        BASE_UNUSED(_rDescriptor);
-        BASE_UNUSED(_IsDeleteable);
-        BASE_UNUSED(_Behavior);
+        CInternTexture3D* pInternTexture = InternCreateTextureArray3D(_rDescriptor, _IsDeleteable, _Behavior);
 
-        return nullptr;
+        return CTexture3DPtr(pInternTexture);
     }
 
     // -----------------------------------------------------------------------------
 
     CTexture2DPtr CGfxTextureManager::CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
-        BASE_UNUSED(_Behavior);
+        CInternTexture2D* pInternTextureCube = InternCreateCubeTexture(_rDescriptor, _IsDeleteable, _Behavior);
 
-        assert(_rDescriptor.m_NumberOfTextures == 6 && _rDescriptor.m_NumberOfPixelsW == 1 && _rDescriptor.m_pPixels == 0);
+        assert(pInternTextureCube);
         
-        // -----------------------------------------------------------------------------
-        // Variables
-        // -----------------------------------------------------------------------------
-        void*  pBytes;
-        void*  pTextureData;
-        GLuint NativeTextureHandle;
-        int    ImageWidth;
-        int    ImageHeight;
-        int    NumberOfPixel;
-        int    NumberOfBytes;
-        int    NumberOfMipmaps;
-        int    InternalFormat;
-        int    Format;
-        int    Type;
-        
-        // -----------------------------------------------------------------------------
-        // Generate texture inside texture manager
-        // -----------------------------------------------------------------------------
-        CTexture2Ds::CPtr Texture2DPtr;
-        
-        Texture2DPtr = m_Textures2D.Allocate();
-        
-        CInternTexture2D& rTexture = *Texture2DPtr;
-        
-        // -----------------------------------------------------------------------------
-        // Setup variables
-        // -----------------------------------------------------------------------------
-        ImageWidth      = _rDescriptor.m_NumberOfPixelsU;
-        ImageHeight     = _rDescriptor.m_NumberOfPixelsV;
-        pBytes          = nullptr;
-        pTextureData    = 0;
-        NumberOfPixel   = ImageWidth * ImageHeight;
-        NumberOfMipmaps = _rDescriptor.m_NumberOfMipMaps;
-        NumberOfBytes   = ConvertGLFormatToBytesPerPixel(_rDescriptor.m_Format) * NumberOfPixel;
-        InternalFormat  = ConvertGLInternalImageFormat(_rDescriptor.m_Format);
-        Format          = ConvertGLImageFormat(_rDescriptor.m_Format);
-        Type            = ConvertGLImageType(_rDescriptor.m_Format);
-        
-        // -----------------------------------------------------------------------------
-        // Creation
-        // -----------------------------------------------------------------------------
-        glGenTextures(1, &NativeTextureHandle);
-        
-        if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
-        {
-            NumberOfMipmaps = static_cast<int>(Base::Log2(static_cast<float>(Base::Max(ImageWidth, ImageHeight)))) + 1;
-        }
-        
-        // -----------------------------------------------------------------------------
-        // Setup the new texture inside manager
-        // -----------------------------------------------------------------------------
-        rTexture.m_FileName          = _rDescriptor.m_pFileName;
-        rTexture.m_pPixels           = _rDescriptor.m_pPixels;
-        rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTextureBase::BPixels>(_rDescriptor.m_NumberOfPixelsU);
-        rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTextureBase::BPixels>(_rDescriptor.m_NumberOfPixelsV);
-        
-        rTexture.m_Info.m_Access            = _rDescriptor.m_Access;
-        rTexture.m_Info.m_Binding           = _rDescriptor.m_Binding;
-        rTexture.m_Info.m_Dimension         = CTextureBase::Dim2D;
-        rTexture.m_Info.m_Format            = _rDescriptor.m_Format;
-        rTexture.m_Info.m_IsCubeTexture     = true;
-        rTexture.m_Info.m_IsDeletable       = _IsDeleteable;
-        rTexture.m_Info.m_IsDummyTexture    = false;
-        rTexture.m_Info.m_NumberOfTextures  = _rDescriptor.m_NumberOfTextures;
-        rTexture.m_Info.m_NumberOfMipLevels = NumberOfMipmaps;
-        rTexture.m_Info.m_CurrentMipLevel   = 0; 
-        rTexture.m_Info.m_Semantic          = _rDescriptor.m_Semantic;
-        rTexture.m_Info.m_Usage             = _rDescriptor.m_Usage;
-        
-        rTexture.m_NativeTexture = NativeTextureHandle;
-        
-        return CTexture2DPtr(Texture2DPtr);
+        return CTexture2DPtr(pInternTextureCube);
     }
 
     // -----------------------------------------------------------------------------
@@ -1219,32 +727,72 @@ namespace
         // -----------------------------------------------------------------------------
         if ((DirtyFlags & Dt::CTextureBase::DirtyCreate) != 0)
         {
-//             Dt::CTexture2D*  pDataTexture    = static_cast<Dt::CTexture2D*>(_pTexture);
-// 
-//             STextureDescriptor TextureDescriptor;
-// 
-//             TextureDescriptor.m_NumberOfPixelsU  = pDataTexture->GetNumberOfPixelsU();
-//             TextureDescriptor.m_NumberOfPixelsV  = pDataTexture->GetNumberOfPixelsV();
-//             TextureDescriptor.m_NumberOfPixelsW  = 1;
-//             TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
-//             TextureDescriptor.m_NumberOfTextures = 1;
-//             TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-//             TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-//             TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-//             TextureDescriptor.m_pFileName        = pDataTexture->GetFileName();
-//             TextureDescriptor.m_pPixels          = pDataTexture->GetPixels();
-//             TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
-// 
-//             if (pDataTexture->GetSemantic() == Dt::CTextureBase::HDR)
-//             {
-//                 TextureDescriptor.m_Format = CTextureBase::R16G16B16_FLOAT;
-//             }
-//             else
-//             {
-//                 TextureDescriptor.m_Format = CTextureBase::R8G8B8_UBYTE;
-//             }
-// 
-//             CreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
+            STextureDescriptor TextureDescriptor;
+
+            TextureDescriptor.m_NumberOfPixelsU  = 1;
+            TextureDescriptor.m_NumberOfPixelsV  = 1;
+            TextureDescriptor.m_NumberOfPixelsW  = 1;
+            TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
+            TextureDescriptor.m_NumberOfTextures = 1;
+            TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
+            TextureDescriptor.m_Usage            = CTextureBase::GPURead;
+            TextureDescriptor.m_Semantic         = ConvertDataSemantic(_pTexture->GetSemantic());
+            TextureDescriptor.m_pFileName        = _pTexture->GetFileName();
+            TextureDescriptor.m_pPixels          = _pTexture->GetPixels();
+            TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
+            TextureDescriptor.m_Format           = ConvertDataFormat(_pTexture->GetFormat());
+
+            if (_pTexture->GetDimension() == Dt::CTextureBase::Dim1D)
+            {
+                Dt::CTexture1D* pDataTexture = static_cast<Dt::CTexture1D*>(_pTexture);
+
+                TextureDescriptor.m_NumberOfPixelsU = pDataTexture->GetNumberOfPixelsU();
+
+                InternCreateTexture1D(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
+            }
+            else if (_pTexture->GetDimension() == Dt::CTextureBase::Dim2D)
+            {
+                CInternTexture2D* pInternTexture2D = nullptr;
+
+                if (m_Textures2DByHash.find(Hash) != m_Textures2DByHash.end())
+                {
+                    BASE_CONSOLE_STREAMWARNING("Trying to re-create an already created data texture in graphics texture manager. Creation aborted...");
+
+                    return ;
+                }
+
+                if (_pTexture->IsCube())
+                {
+                    Dt::CTextureCube* pDataTexture = static_cast<Dt::CTextureCube*>(_pTexture);
+
+                    TextureDescriptor.m_NumberOfPixelsU  = pDataTexture->GetNumberOfPixelsU();
+                    TextureDescriptor.m_NumberOfPixelsU  = pDataTexture->GetNumberOfPixelsV();
+                    TextureDescriptor.m_NumberOfTextures = 6;
+
+                    pInternTexture2D = InternCreateCubeTexture(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
+                }
+                else
+                {
+                    Dt::CTexture2D* pDataTexture = static_cast<Dt::CTexture2D*>(_pTexture);
+
+                    TextureDescriptor.m_NumberOfPixelsU = pDataTexture->GetNumberOfPixelsU();
+                    TextureDescriptor.m_NumberOfPixelsU = pDataTexture->GetNumberOfPixelsV();
+
+                    pInternTexture2D = InternCreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
+                }
+
+                if (Hash != 0)
+                {
+                    m_Textures2DByHash[Hash] = pInternTexture2D;
+                }
+            }
+            else if (_pTexture->GetDimension() == Dt::CTextureBase::Dim3D)
+            {
+                // TODO by tschwandt
+                // Not implemented yet
+
+                BASE_CONSOLE_STREAMWARNING("Texture 3D from data textures is not yet supported!");
+            }
         }
 
         // -----------------------------------------------------------------------------
@@ -1252,18 +800,624 @@ namespace
         // -----------------------------------------------------------------------------
         if ((DirtyFlags & Dt::CTextureBase::DirtyData) != 0)
         {
-//             Gfx::CTexture2D* pGraphicTexture = m_Textures2DByHash.at(Hash);
-//             Dt::CTexture2D*  pDataTexture    = static_cast<Dt::CTexture2D*>(_pTexture);
-// 
-//             // -----------------------------------------------------------------------------
-//             // Copy image data to background image
-//             // -----------------------------------------------------------------------------
-//             Base::UInt2 TextureResolution = Base::UInt2(pDataTexture->GetNumberOfPixelsU(), pDataTexture->GetNumberOfPixelsV());
-// 
-//             Base::AABB2UInt TargetRect(Base::UInt2(0), TextureResolution);
-// 
-//             CopyToTexture2D(pGraphicTexture, TargetRect, TargetRect[1][0], pDataTexture->GetPixels(), true);
+            if (_pTexture->GetDimension() == Dt::CTextureBase::Dim2D)
+            {
+                CInternTexture2D* pInternTexture2D = nullptr;
+
+                if (m_Textures2DByHash.find(Hash) == m_Textures2DByHash.end())
+                {
+                    BASE_CONSOLE_STREAMWARNING("Data texture manager tried to update data from non-created graphic texture.");
+
+                    return;
+                }
+
+                if (_pTexture->IsCube())
+                {
+                    
+                }
+                else
+                {
+                    Gfx::CTexture2D* pGraphicTexture = m_Textures2DByHash.at(Hash);
+                    Dt::CTexture2D*  pDataTexture    = static_cast<Dt::CTexture2D*>(_pTexture);
+
+                    // -----------------------------------------------------------------------------
+                    // Copy image data to background image
+                    // -----------------------------------------------------------------------------
+                    Base::UInt2 TextureResolution = Base::UInt2(pDataTexture->GetNumberOfPixelsU(), pDataTexture->GetNumberOfPixelsV());
+
+                    Base::AABB2UInt TargetRect(Base::UInt2(0), TextureResolution);
+
+                    CopyToTexture2D(pGraphicTexture, TargetRect, TargetRect[1][0], pDataTexture->GetPixels(), true);
+                }
+            }
         }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CGfxTextureManager::CInternTexture1D* CGfxTextureManager::InternCreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
+    {
+        BASE_UNUSED(_rDescriptor);
+        BASE_UNUSED(_IsDeleteable);
+        BASE_UNUSED(_Behavior);
+
+        return nullptr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CGfxTextureManager::CInternTexture2D* CGfxTextureManager::InternCreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
+    {
+        bool         Result;
+        void*        pBytes;
+        void*        pTextureData;
+        unsigned int NativeImageName;
+        GLuint       NativeTextureHandle;
+        int          ImageWidth;
+        int          ImageHeight;
+        int          NumberOfPixel;
+        int          NumberOfBytes;
+        int          NumberOfMipmaps;
+        int          GLInternalFormat;
+        int          GLFormat;
+        int          GLUsage;
+        int          GLType;
+        ILenum       NativeILFormat;
+        ILenum       NativeILType;
+
+        pBytes       = nullptr;
+        pTextureData = nullptr;
+        
+        // -----------------------------------------------------------------------------
+        // Setup variables
+        // -----------------------------------------------------------------------------
+        ImageWidth       = _rDescriptor.m_NumberOfPixelsU;
+        ImageHeight      = _rDescriptor.m_NumberOfPixelsV;
+        pBytes           = nullptr;
+        pTextureData     = _rDescriptor.m_pPixels;
+        NumberOfPixel    = ImageWidth * ImageHeight;
+        NumberOfMipmaps  = _rDescriptor.m_NumberOfMipMaps;
+        NumberOfBytes    = ConvertGLFormatToBytesPerPixel(_rDescriptor.m_Format) * NumberOfPixel;
+        GLInternalFormat = ConvertGLInternalImageFormat(_rDescriptor.m_Format);
+        GLFormat         = ConvertGLImageFormat(_rDescriptor.m_Format);
+        GLType           = ConvertGLImageType(_rDescriptor.m_Format);
+        GLUsage          = ConvertGLImageUsage(_rDescriptor.m_Usage);
+
+        NativeILFormat  = ConvertILImageFormat(_rDescriptor.m_Format);
+        NativeILType    = ConvertILImageType(_rDescriptor.m_Format);
+
+        NativeImageName = 0;
+
+        // -----------------------------------------------------------------------------
+        // Load texture from file if one is set in descriptor
+        // -----------------------------------------------------------------------------
+        if (_rDescriptor.m_pFileName != nullptr && _rDescriptor.m_pPixels == nullptr)
+        {
+            // -----------------------------------------------------------------------------
+            // Create and bin texture on DevIL
+            // -----------------------------------------------------------------------------
+            NativeImageName = ilGenImage();
+
+            ilBindImage(NativeImageName);
+
+            // -----------------------------------------------------------------------------
+            // Load texture from file (either in assets or data)
+            // -----------------------------------------------------------------------------
+            std::string    PathToTexture;
+			const wchar_t* pPathToTexture = 0;
+
+			PathToTexture = g_PathToAssets + _rDescriptor.m_pFileName;
+
+            pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
+            
+            Result = ilLoadImage(pPathToTexture) == IL_TRUE;
+
+			if (!Result)
+			{
+				PathToTexture = g_PathToDataTextures + _rDescriptor.m_pFileName;
+
+				pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
+
+				Result = ilLoadImage(pPathToTexture) == IL_TRUE;
+			}
+            
+            if (Result)
+            {
+                ILenum CheckILFormat = ilGetInteger(IL_IMAGE_FORMAT);
+                ILenum CheckILType   = ilGetInteger(IL_IMAGE_TYPE);
+
+                if (CheckILFormat != NativeILFormat || CheckILType != NativeILType)
+                {
+                    ilConvertImage(NativeILFormat, NativeILType);
+                }
+                
+                pTextureData = ilGetData();
+                
+                ImageWidth    = ilGetInteger(IL_IMAGE_WIDTH);
+                ImageHeight   = ilGetInteger(IL_IMAGE_HEIGHT);
+                NumberOfBytes = ilGetInteger(IL_IMAGE_SIZE_OF_DATA);
+                
+                assert(ImageWidth    > 0);
+                assert(ImageHeight   > 0);
+                assert(NumberOfBytes > 0);
+            }
+            else
+            {
+                BASE_CONSOLE_STREAMERROR("Failed loading image '" << PathToTexture.c_str() << "' from file.");
+
+                ilDeleteImage(NativeImageName);
+
+                return nullptr;
+            }
+        }
+
+        if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
+        {
+            NumberOfMipmaps = static_cast<int>(Base::Log2(static_cast<float>(Base::Max(ImageWidth, ImageHeight)))) + 1;
+        }
+        
+        // -----------------------------------------------------------------------------
+        // Generate OpenGL texture or render buffer
+        // -----------------------------------------------------------------------------
+        glGenTextures(1, &NativeTextureHandle);
+
+        glBindTexture(GL_TEXTURE_2D, NativeTextureHandle);
+
+        // -----------------------------------------------------------------------------
+        // Binding
+        // -----------------------------------------------------------------------------
+        if (_rDescriptor.m_Binding & Gfx::CTextureBase::DepthStencilTarget)
+        {
+            glTexStorage2D(GL_TEXTURE_2D, NumberOfMipmaps, GL_DEPTH_COMPONENT32F, ImageWidth, ImageHeight);
+        }
+        else if (_rDescriptor.m_Binding & Gfx::CTextureBase::RenderTarget)
+        {   
+            glTexStorage2D(GL_TEXTURE_2D, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
+        }
+        else
+        {
+            glTexStorage2D(GL_TEXTURE_2D, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Is data available, then upload it to graphic card
+        // -----------------------------------------------------------------------------
+        if (pTextureData != 0)
+        {
+            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, ImageWidth, ImageHeight, GLFormat, GLType, pTextureData);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Create mipmaps depending on uploaded data
+        // -----------------------------------------------------------------------------
+        if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
+        {
+            glGenerateMipmap(GL_TEXTURE_2D);
+        }
+
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        // -----------------------------------------------------------------------------
+        // Generate texture inside texture manager
+        // -----------------------------------------------------------------------------
+        CInternTexture2D* pInternTexture2D;
+        
+        assert(NumberOfBytes > 0);
+        
+        try
+        {
+            pInternTexture2D = m_Textures2D.Allocate();
+            
+            CInternTexture2D& rTexture = *pInternTexture2D;
+            
+            // -----------------------------------------------------------------------------
+            // Setup the new texture inside manager
+            // -----------------------------------------------------------------------------
+            rTexture.m_FileName          = _rDescriptor.m_pFileName;
+            rTexture.m_pPixels           = _rDescriptor.m_pPixels;
+            rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTextureBase::BPixels>(ImageWidth);
+            rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTextureBase::BPixels>(ImageHeight);
+            
+            rTexture.m_Info.m_Access            = _rDescriptor.m_Access;
+            rTexture.m_Info.m_Binding           = _rDescriptor.m_Binding;
+            rTexture.m_Info.m_Dimension         = CTextureBase::Dim2D;
+            rTexture.m_Info.m_Format            = _rDescriptor.m_Format;
+            rTexture.m_Info.m_IsCubeTexture     = false;
+            rTexture.m_Info.m_IsDeletable       = _IsDeleteable;
+            rTexture.m_Info.m_IsDummyTexture    = false;
+            rTexture.m_Info.m_NumberOfTextures  = _rDescriptor.m_NumberOfTextures;
+            rTexture.m_Info.m_NumberOfMipLevels = NumberOfMipmaps;
+            rTexture.m_Info.m_CurrentMipLevel   = 0;
+            rTexture.m_Info.m_Semantic          = _rDescriptor.m_Semantic;
+            rTexture.m_Info.m_Usage             = _rDescriptor.m_Usage;
+            
+            rTexture.m_NativeTexture        = NativeTextureHandle;
+            rTexture.m_NativeUsage          = GLUsage;
+            rTexture.m_NativeInternalFormat = GLInternalFormat;
+            rTexture.m_NativeDimension      = GL_TEXTURE_2D;
+            
+            // -----------------------------------------------------------------------------
+            // Check the behavior.
+            // -----------------------------------------------------------------------------
+            if (_Behavior == SDataBehavior::Copy || _Behavior == SDataBehavior::CopyAndDelete)
+            {
+                pBytes = Base::CMemory::Allocate(NumberOfBytes);
+                
+                if (pTextureData)
+                {
+                    pBytes = Base::CMemory::Copy(NumberOfBytes, pTextureData);
+                }
+                else if (_rDescriptor.m_pPixels)
+                {
+                    pBytes = Base::CMemory::Copy(NumberOfBytes, _rDescriptor.m_pPixels);
+                }
+            }
+            
+            switch (_Behavior)
+            {
+                case SDataBehavior::LeftAlone:
+                {
+                    rTexture.m_Info.m_IsPixelOwner = false;
+                    rTexture.m_pPixels             = nullptr;
+                }
+                break;
+                    
+                case SDataBehavior::DeleteAfterUpload:
+                {
+                    rTexture.m_Info.m_IsPixelOwner = false;
+                    rTexture.m_pPixels             = nullptr;
+                    
+                    Base::CMemory::Free(_rDescriptor.m_pPixels);
+                }
+                break;
+                    
+                case SDataBehavior::TakeOwnerShip:
+                {
+                    rTexture.m_Info.m_IsPixelOwner = true;
+                    rTexture.m_pPixels             = _rDescriptor.m_pPixels;
+                }
+                break;
+                    
+                case SDataBehavior::Copy:
+                {
+                    rTexture.m_Info.m_IsPixelOwner = true;
+                    rTexture.m_pPixels             = pBytes;
+                }
+                break;
+                    
+                case SDataBehavior::CopyAndDelete:
+                {
+                    rTexture.m_Info.m_IsPixelOwner = true;
+                    rTexture.m_pPixels             = pBytes;
+                    
+                    Base::CMemory::Free(_rDescriptor.m_pPixels);
+                }
+                break;
+                    
+                default:
+                    BASE_CONSOLE_STREAMWARNING("Undefined texture data behavior while creating an texture.");
+                    break;
+            }
+
+            // -----------------------------------------------------------------------------
+            // Delete image on DevIL because it isn't needed anymore
+            // -----------------------------------------------------------------------------
+            if (_rDescriptor.m_pFileName != nullptr && _rDescriptor.m_pPixels == nullptr)
+            {
+                ilDeleteImage(NativeImageName);
+
+                ilBindImage(0);
+            }
+        }
+        catch (...)
+        {
+            BASE_THROWM("Error creating texture in texture manager.");
+        }
+        
+        return pInternTexture2D;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CGfxTextureManager::CInternTexture3D* CGfxTextureManager::InternCreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
+    {
+        void*        pBytes;
+        void*        pTextureData;
+        GLuint       NativeTextureHandle;
+        int          ImageWidth;
+        int          ImageHeight;
+        int          ImageDepth;
+        int          NumberOfPixel;
+        int          NumberOfBytes;
+        int          NumberOfMipmaps;
+        int          GLInternalFormat;
+        int          GLFormat;
+        int          GLUsage;
+        int          GLType;
+        ILenum       NativeILFormat;
+        ILenum       NativeILType;
+
+        pBytes       = nullptr;
+        pTextureData = nullptr;
+
+        // -----------------------------------------------------------------------------
+        // Setup variables
+        // -----------------------------------------------------------------------------
+        ImageWidth       = _rDescriptor.m_NumberOfPixelsU;
+        ImageHeight      = _rDescriptor.m_NumberOfPixelsV;
+        ImageDepth       = _rDescriptor.m_NumberOfPixelsW;
+        pBytes           = nullptr;
+        pTextureData     = _rDescriptor.m_pPixels;
+        NumberOfPixel    = ImageWidth * ImageHeight;
+        NumberOfMipmaps  = _rDescriptor.m_NumberOfMipMaps;
+        NumberOfBytes    = ConvertGLFormatToBytesPerPixel(_rDescriptor.m_Format) * NumberOfPixel;
+        GLInternalFormat = ConvertGLInternalImageFormat(_rDescriptor.m_Format);
+        GLFormat         = ConvertGLImageFormat(_rDescriptor.m_Format);
+        GLType           = ConvertGLImageType(_rDescriptor.m_Format);
+        GLUsage          = ConvertGLImageUsage(_rDescriptor.m_Usage);
+
+        NativeILFormat  = ConvertILImageFormat(_rDescriptor.m_Format);
+        NativeILType    = ConvertILImageType(_rDescriptor.m_Format);
+
+        if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
+        {
+            NumberOfMipmaps = static_cast<int>(Base::Log2(static_cast<float>(Base::Max(ImageWidth, ImageHeight)))) + 1;
+        }
+        
+        // -----------------------------------------------------------------------------
+        // Generate OpenGL texture or render buffer
+        // -----------------------------------------------------------------------------
+        glGenTextures(1, &NativeTextureHandle);
+
+        glBindTexture(GL_TEXTURE_3D, NativeTextureHandle);
+
+        // -----------------------------------------------------------------------------
+        // Binding
+        // -----------------------------------------------------------------------------
+        assert(!(_rDescriptor.m_Binding & Gfx::CTextureBase::DepthStencilTarget || _rDescriptor.m_Binding & Gfx::CTextureBase::RenderTarget));
+
+        glTexStorage3D(GL_TEXTURE_3D, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight, ImageDepth);
+
+        // -----------------------------------------------------------------------------
+        // Is data available, then upload it to graphic card
+        // -----------------------------------------------------------------------------
+        if (pTextureData != 0)
+        {
+            glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, ImageWidth, ImageHeight, ImageDepth, GLFormat, GLType, pTextureData);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Create mipmaps depending on uploaded data
+        // -----------------------------------------------------------------------------
+        if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
+        {
+            glGenerateMipmap(GL_TEXTURE_3D);
+        }
+
+        glBindTexture(GL_TEXTURE_3D, 0);
+
+        // -----------------------------------------------------------------------------
+        // Generate texture inside texture manager
+        // -----------------------------------------------------------------------------
+        CInternTexture3D* pInternTexture3D = nullptr;
+        
+        assert(NumberOfBytes > 0);
+        
+        try
+        {
+            pInternTexture3D = m_Textures3D.Allocate();
+            
+            CInternTexture3D& rTexture = *pInternTexture3D;
+            
+            // -----------------------------------------------------------------------------
+            // Setup the new texture inside manager
+            // -----------------------------------------------------------------------------
+            rTexture.m_FileName          = _rDescriptor.m_pFileName;
+            rTexture.m_pPixels           = _rDescriptor.m_pPixels;
+            rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTextureBase::BPixels>(ImageWidth);
+            rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTextureBase::BPixels>(ImageHeight);
+            rTexture.m_NumberOfPixels[2] = static_cast<Gfx::CTextureBase::BPixels>(ImageDepth);
+            
+            rTexture.m_Info.m_Access            = _rDescriptor.m_Access;
+            rTexture.m_Info.m_Binding           = _rDescriptor.m_Binding;
+            rTexture.m_Info.m_Dimension         = CTextureBase::Dim3D;
+            rTexture.m_Info.m_Format            = _rDescriptor.m_Format;
+            rTexture.m_Info.m_IsCubeTexture     = false;
+            rTexture.m_Info.m_IsDeletable       = _IsDeleteable;
+            rTexture.m_Info.m_IsDummyTexture    = false;
+            rTexture.m_Info.m_NumberOfTextures  = _rDescriptor.m_NumberOfTextures;
+            rTexture.m_Info.m_NumberOfMipLevels = NumberOfMipmaps;
+            rTexture.m_Info.m_CurrentMipLevel   = 0;
+            rTexture.m_Info.m_Semantic          = _rDescriptor.m_Semantic;
+            rTexture.m_Info.m_Usage             = _rDescriptor.m_Usage;
+            
+            rTexture.m_NativeTexture        = NativeTextureHandle;
+            rTexture.m_NativeUsage          = GLUsage;
+            rTexture.m_NativeInternalFormat = GLInternalFormat;
+            rTexture.m_NativeDimension      = GL_TEXTURE_3D;
+            
+            // -----------------------------------------------------------------------------
+            // Check the behavior.
+            // -----------------------------------------------------------------------------
+            if (_Behavior == SDataBehavior::Copy || _Behavior == SDataBehavior::CopyAndDelete)
+            {
+                pBytes = Base::CMemory::Allocate(NumberOfBytes);
+                
+                if (pTextureData)
+                {
+                    pBytes = Base::CMemory::Copy(NumberOfBytes, pTextureData);
+                }
+                else if (_rDescriptor.m_pPixels)
+                {
+                    pBytes = Base::CMemory::Copy(NumberOfBytes, _rDescriptor.m_pPixels);
+                }
+            }
+            
+            switch (_Behavior)
+            {
+                case SDataBehavior::LeftAlone:
+                {
+                    rTexture.m_Info.m_IsPixelOwner = false;
+                    rTexture.m_pPixels             = nullptr;
+                }
+                break;
+                    
+                case SDataBehavior::DeleteAfterUpload:
+                {
+                    rTexture.m_Info.m_IsPixelOwner = false;
+                    rTexture.m_pPixels             = nullptr;
+                    
+                    Base::CMemory::Free(_rDescriptor.m_pPixels);
+                }
+                break;
+                    
+                case SDataBehavior::TakeOwnerShip:
+                {
+                    rTexture.m_Info.m_IsPixelOwner = true;
+                    rTexture.m_pPixels             = _rDescriptor.m_pPixels;
+                }
+                break;
+                    
+                case SDataBehavior::Copy:
+                {
+                    rTexture.m_Info.m_IsPixelOwner = true;
+                    rTexture.m_pPixels             = pBytes;
+                }
+                break;
+                    
+                case SDataBehavior::CopyAndDelete:
+                {
+                    rTexture.m_Info.m_IsPixelOwner = true;
+                    rTexture.m_pPixels             = pBytes;
+                    
+                    Base::CMemory::Free(_rDescriptor.m_pPixels);
+                }
+                break;
+                    
+                default:
+                    BASE_CONSOLE_STREAMWARNING("Undefined texture data behavior while creating an texture.");
+                    break;
+            }
+        }
+        catch (...)
+        {
+            BASE_THROWM("Error creating texture in texture manager.");
+        }
+        
+        return pInternTexture3D;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CGfxTextureManager::CInternTexture1D* CGfxTextureManager::InternCreateTextureArray1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
+    {
+        BASE_UNUSED(_rDescriptor);
+        BASE_UNUSED(_IsDeleteable);
+        BASE_UNUSED(_Behavior);
+
+        return nullptr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CGfxTextureManager::CInternTexture2D* CGfxTextureManager::InternCreateTextureArray2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
+    {
+        BASE_UNUSED(_rDescriptor);
+        BASE_UNUSED(_IsDeleteable);
+        BASE_UNUSED(_Behavior);
+
+        return nullptr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CGfxTextureManager::CInternTexture3D* CGfxTextureManager::InternCreateTextureArray3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
+    {
+        BASE_UNUSED(_rDescriptor);
+        BASE_UNUSED(_IsDeleteable);
+        BASE_UNUSED(_Behavior);
+
+        return nullptr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CGfxTextureManager::CInternTexture2D* CGfxTextureManager::InternCreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
+    {
+        BASE_UNUSED(_Behavior);
+
+        assert(_rDescriptor.m_NumberOfTextures == 6 && _rDescriptor.m_NumberOfPixelsW == 1 && _rDescriptor.m_pPixels == 0);
+        
+        // -----------------------------------------------------------------------------
+        // Variables
+        // -----------------------------------------------------------------------------
+        void*  pBytes;
+        void*  pTextureData;
+        GLuint NativeTextureHandle;
+        int    ImageWidth;
+        int    ImageHeight;
+        int    NumberOfPixel;
+        int    NumberOfBytes;
+        int    NumberOfMipmaps;
+        int    InternalFormat;
+        int    Format;
+        int    Type;
+        
+        // -----------------------------------------------------------------------------
+        // Generate texture inside texture manager
+        // -----------------------------------------------------------------------------
+        CInternTexture2D* pTextureCube = m_Textures2D.Allocate();
+        
+        CInternTexture2D& rTexture = *pTextureCube;
+        
+        // -----------------------------------------------------------------------------
+        // Setup variables
+        // -----------------------------------------------------------------------------
+        ImageWidth      = _rDescriptor.m_NumberOfPixelsU;
+        ImageHeight     = _rDescriptor.m_NumberOfPixelsV;
+        pBytes          = nullptr;
+        pTextureData    = 0;
+        NumberOfPixel   = ImageWidth * ImageHeight;
+        NumberOfMipmaps = _rDescriptor.m_NumberOfMipMaps;
+        NumberOfBytes   = ConvertGLFormatToBytesPerPixel(_rDescriptor.m_Format) * NumberOfPixel;
+        InternalFormat  = ConvertGLInternalImageFormat(_rDescriptor.m_Format);
+        Format          = ConvertGLImageFormat(_rDescriptor.m_Format);
+        Type            = ConvertGLImageType(_rDescriptor.m_Format);
+        
+        // -----------------------------------------------------------------------------
+        // Creation
+        // -----------------------------------------------------------------------------
+        glGenTextures(1, &NativeTextureHandle);
+        
+        if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
+        {
+            NumberOfMipmaps = static_cast<int>(Base::Log2(static_cast<float>(Base::Max(ImageWidth, ImageHeight)))) + 1;
+        }
+        
+        // -----------------------------------------------------------------------------
+        // Setup the new texture inside manager
+        // -----------------------------------------------------------------------------
+        rTexture.m_FileName          = _rDescriptor.m_pFileName;
+        rTexture.m_pPixels           = _rDescriptor.m_pPixels;
+        rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTextureBase::BPixels>(_rDescriptor.m_NumberOfPixelsU);
+        rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTextureBase::BPixels>(_rDescriptor.m_NumberOfPixelsV);
+        
+        rTexture.m_Info.m_Access            = _rDescriptor.m_Access;
+        rTexture.m_Info.m_Binding           = _rDescriptor.m_Binding;
+        rTexture.m_Info.m_Dimension         = CTextureBase::Dim2D;
+        rTexture.m_Info.m_Format            = _rDescriptor.m_Format;
+        rTexture.m_Info.m_IsCubeTexture     = true;
+        rTexture.m_Info.m_IsDeletable       = _IsDeleteable;
+        rTexture.m_Info.m_IsDummyTexture    = false;
+        rTexture.m_Info.m_NumberOfTextures  = _rDescriptor.m_NumberOfTextures;
+        rTexture.m_Info.m_NumberOfMipLevels = NumberOfMipmaps;
+        rTexture.m_Info.m_CurrentMipLevel   = 0; 
+        rTexture.m_Info.m_Semantic          = _rDescriptor.m_Semantic;
+        rTexture.m_Info.m_Usage             = _rDescriptor.m_Usage;
+        
+        rTexture.m_NativeTexture = NativeTextureHandle;
+        
+        return pTextureCube;
     }
     
     // -----------------------------------------------------------------------------
@@ -1771,6 +1925,117 @@ namespace
         };
 
         return s_NativeType[_Format];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Gfx::CTextureBase::EDimension CGfxTextureManager::ConvertDataDimension(Dt::CTextureBase::EDimension _Dimension)
+    {
+        static Gfx::CTextureBase::EDimension s_Types[] =
+        {
+            Gfx::CTextureBase::Dim1D,
+            Gfx::CTextureBase::Dim2D,
+            Gfx::CTextureBase::Dim3D,
+        };
+
+        return s_Types[_Dimension];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Gfx::CTextureBase::EFormat CGfxTextureManager::ConvertDataFormat(Dt::CTextureBase::EFormat _Format)
+    {
+        static Gfx::CTextureBase::EFormat s_Types[] =
+        {
+            Gfx::CTextureBase::R8_BYTE,
+            Gfx::CTextureBase::R8G8_BYTE,
+            Gfx::CTextureBase::R8G8B8_BYTE,
+            Gfx::CTextureBase::R8G8B8A8_BYTE,
+            Gfx::CTextureBase::R8_UBYTE,
+            Gfx::CTextureBase::R8G8_UBYTE,
+            Gfx::CTextureBase::R8G8B8_UBYTE,
+            Gfx::CTextureBase::R8G8B8A8_UBYTE,
+            Gfx::CTextureBase::R8_SHORT,
+            Gfx::CTextureBase::R8G8_SHORT,
+            Gfx::CTextureBase::R8G8B8_SHORT,
+            Gfx::CTextureBase::R8G8B8A8_SHORT,
+            Gfx::CTextureBase::R8_USHORT,
+            Gfx::CTextureBase::R8G8_USHORT,
+            Gfx::CTextureBase::R8G8B8_USHORT,
+            Gfx::CTextureBase::R8G8B8A8_USHORT,
+            Gfx::CTextureBase::R8_INT,
+            Gfx::CTextureBase::R8G8_INT,
+            Gfx::CTextureBase::R8G8B8_INT,
+            Gfx::CTextureBase::R8G8B8A8_INT,
+            Gfx::CTextureBase::R8_UINT,
+            Gfx::CTextureBase::R8G8_UINT,
+            Gfx::CTextureBase::R8G8B8_UINT,
+            Gfx::CTextureBase::R8G8B8A8_UINT,
+
+            Gfx::CTextureBase::R16_BYTE,
+            Gfx::CTextureBase::R16G16_BYTE,
+            Gfx::CTextureBase::R16G16B16_BYTE,
+            Gfx::CTextureBase::R16G16B16A16_BYTE,
+            Gfx::CTextureBase::R16_UBYTE,
+            Gfx::CTextureBase::R16G16_UBYTE,
+            Gfx::CTextureBase::R16G16B16_UBYTE,
+            Gfx::CTextureBase::R16G16B16A16_UBYTE,
+            Gfx::CTextureBase::R16_SHORT,
+            Gfx::CTextureBase::R16G16_SHORT,
+            Gfx::CTextureBase::R16G16B16_SHORT,
+            Gfx::CTextureBase::R16G16B16A16_SHORT,
+            Gfx::CTextureBase::R16_USHORT,
+            Gfx::CTextureBase::R16G16_USHORT,
+            Gfx::CTextureBase::R16G16B16_USHORT,
+            Gfx::CTextureBase::R16G16B16A16_USHORT,
+            Gfx::CTextureBase::R16_INT,
+            Gfx::CTextureBase::R16G16_INT,
+            Gfx::CTextureBase::R16G16B16_INT,
+            Gfx::CTextureBase::R16G16B16A16_INT,
+            Gfx::CTextureBase::R16_UINT,
+            Gfx::CTextureBase::R16G16_UINT,
+            Gfx::CTextureBase::R16G16B16_UINT,
+            Gfx::CTextureBase::R16G16B16A16_UINT,
+            Gfx::CTextureBase::R16_FLOAT,
+            Gfx::CTextureBase::R16G16_FLOAT,
+            Gfx::CTextureBase::R16G16B16_FLOAT,
+            Gfx::CTextureBase::R16G16B16A16_FLOAT,
+
+            Gfx::CTextureBase::R32_INT,
+            Gfx::CTextureBase::R32G32_INT,
+            Gfx::CTextureBase::R32G32B32_INT,
+            Gfx::CTextureBase::R32G32B32A32_INT,
+            Gfx::CTextureBase::R32_UINT,
+            Gfx::CTextureBase::R32G32_UINT,
+            Gfx::CTextureBase::R32G32B32_UINT,
+            Gfx::CTextureBase::R32G32B32A32_UINT,
+            Gfx::CTextureBase::R32_FLOAT,
+            Gfx::CTextureBase::R32G32_FLOAT,
+            Gfx::CTextureBase::R32G32B32_FLOAT,
+            Gfx::CTextureBase::R32G32B32A32_FLOAT,
+
+            Gfx::CTextureBase::R3G3B2_UBYTE,
+            Gfx::CTextureBase::R4G4B4A4_USHORT,
+            Gfx::CTextureBase::R5G5G5A1_USHORT,
+            Gfx::CTextureBase::R10G10B10A2_UINT,
+        };
+
+        return s_Types[_Format];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Gfx::CTextureBase::ESemantic CGfxTextureManager::ConvertDataSemantic(Dt::CTextureBase::ESemantic _Semantic)
+    {
+        static Gfx::CTextureBase::ESemantic s_Types[] =
+        {
+            Gfx::CTextureBase::Diffuse,
+            Gfx::CTextureBase::Normal,
+            Gfx::CTextureBase::Height,
+            Gfx::CTextureBase::Diffuse,
+        };
+
+        return s_Types[_Semantic];
     }
 } // namespace
 
