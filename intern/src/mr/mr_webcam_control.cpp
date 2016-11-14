@@ -217,10 +217,6 @@ namespace MR
         m_pOriginalFrame = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
 
         // -----------------------------------------------------------------------------
-
-        Dt::TextureManager::CopyToTexture2D(m_pConvertedFrame, static_cast<IplImage*>(m_ConvertedColorFrame)->imageData);
-
-        // -----------------------------------------------------------------------------
         // Set data of original video / image
         // -----------------------------------------------------------------------------
         ARUint8* pVideoData = arVideoGetImage();

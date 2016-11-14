@@ -382,80 +382,34 @@ namespace
 
         if (pDataSkyboxFacet->GetType() == Dt::CSkyboxFacet::Panorama)
         {
-            // -----------------------------------------------------------------------------
-            // If skybox is dirty we should re-create image
-            // -----------------------------------------------------------------------------
-            TextureDescriptor.m_NumberOfPixelsU  = pDataSkyboxFacet->GetPanorama()->GetNumberOfPixelsU();
-            TextureDescriptor.m_NumberOfPixelsV  = pDataSkyboxFacet->GetPanorama()->GetNumberOfPixelsV();
-            TextureDescriptor.m_NumberOfPixelsW  = 1;
-            TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
-            TextureDescriptor.m_NumberOfTextures = 1;
-            TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-            TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-            TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-            TextureDescriptor.m_pFileName        = pDataSkyboxFacet->GetPanorama()->GetFileName();
-            TextureDescriptor.m_pPixels          = pDataSkyboxFacet->GetPanorama()->GetPixels();
-            TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
-
-            if (pDataSkyboxFacet->GetPanorama()->GetSemantic() == Dt::CTextureBase::HDR)
+            if (pDataSkyboxFacet->GetHasPanorama())
             {
-                TextureDescriptor.m_Format = CTextureBase::R16G16B16_FLOAT;
-            }
-            else
-            {
-                TextureDescriptor.m_Format = CTextureBase::R8G8B8_UBYTE;
-            }
-        
-            CTexture2DPtr EnvironmentTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+                unsigned int Hash = pDataSkyboxFacet->GetPanorama()->GetHash();
 
-            pGraphicSkyboxFacet->SetPanoramaTexture2D(EnvironmentTexturePtr);
+                CTexture2DPtr PanoramaPtr = TextureManager::GetTexture2DByHash(Hash);
 
-            pGraphicSkyboxFacet->SetPanoramaTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(EnvironmentTexturePtr)));
+                if (PanoramaPtr.IsValid())
+                {
+                    pGraphicSkyboxFacet->SetPanoramaTexture2D(PanoramaPtr);
+
+                    pGraphicSkyboxFacet->SetPanoramaTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(PanoramaPtr)));
+                }
+            }
         }
         else if (pDataSkyboxFacet->GetType() == Dt::CSkyboxFacet::Cubemap)
         {
-            // TODO by tschwandt
-            // What happens if size changes!!!
-            if (pGraphicSkyboxFacet->GetCubemapTexture2D() == nullptr && pDataSkyboxFacet->GetHasCubemap())
+            if (pDataSkyboxFacet->GetHasCubemap())
             {
-                unsigned int SizeOfCustomCubemap = pDataSkyboxFacet->GetCubemap()->GetNumberOfPixelsU();
+                unsigned int Hash = pDataSkyboxFacet->GetCubemap()->GetHash();
 
-                TextureDescriptor.m_NumberOfPixelsU  = SizeOfCustomCubemap;
-                TextureDescriptor.m_NumberOfPixelsV  = SizeOfCustomCubemap;
-                TextureDescriptor.m_NumberOfPixelsW  = 1;
-                TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
-                TextureDescriptor.m_NumberOfTextures = 6;
-                TextureDescriptor.m_Binding          = CTextureBase::ShaderResource | CTextureBase::RenderTarget;
-                TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-                TextureDescriptor.m_Format           = CTextureBase::Unknown;
-                TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-                TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-                TextureDescriptor.m_pFileName        = 0;
-                TextureDescriptor.m_pPixels          = 0;
-        
-                if (pDataSkyboxFacet->GetCubemap()->GetSemantic() == Dt::CTextureBase::HDR)
+                CTexture2DPtr CubemapPtr = TextureManager::GetTexture2DByHash(Hash);
+
+                if (CubemapPtr.IsValid())
                 {
-                    TextureDescriptor.m_Format = CTextureBase::R16G16B16_FLOAT;
-                }
-                else
-                {
-                    TextureDescriptor.m_Format = CTextureBase::R8G8B8_UBYTE;
-                }
-        
-                CTexture2DPtr CustomCubemap = TextureManager::CreateCubeTexture(TextureDescriptor);
+                    pGraphicSkyboxFacet->SetCubemapTexture2D(CubemapPtr);
 
-                for (unsigned int IndexOfCubemapLayer = 0; IndexOfCubemapLayer < 6; ++IndexOfCubemapLayer)
-                {
-                    CTexture2DPtr CubeLayer = TextureManager::CreateTexture2D(TextureDescriptor);
-            
-                    TextureManager::CopyToTextureArray2D(CustomCubemap, IndexOfCubemapLayer, CubeLayer, false);
+                    pGraphicSkyboxFacet->SetCubemapTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(CubemapPtr)));
                 }
-        
-                TextureManager::UpdateMipmap(CustomCubemap);
-
-                pGraphicSkyboxFacet->SetCubemapTexture2D(CustomCubemap);
-
-                pGraphicSkyboxFacet->SetCubemapTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(CustomCubemap)));
             }
         }
 
@@ -800,79 +754,35 @@ namespace
 
         if (pDataSkyboxFacet->GetType() == Dt::CSkyboxFacet::Panorama)
         {
-            // -----------------------------------------------------------------------------
-            // Input image
-            // -----------------------------------------------------------------------------
-            TextureDescriptor.m_NumberOfPixelsU  = pDataSkyboxFacet->GetPanorama()->GetNumberOfPixelsU();
-            TextureDescriptor.m_NumberOfPixelsV  = pDataSkyboxFacet->GetPanorama()->GetNumberOfPixelsV();
-            TextureDescriptor.m_NumberOfPixelsW  = 1;
-            TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
-            TextureDescriptor.m_NumberOfTextures = 1;
-            TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-            TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-            TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-            TextureDescriptor.m_pFileName        = pDataSkyboxFacet->GetPanorama()->GetFileName();
-            TextureDescriptor.m_pPixels          = pDataSkyboxFacet->GetPanorama()->GetPixels();
-            TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
-
-            if (pDataSkyboxFacet->GetPanorama()->GetSemantic() == Dt::CTextureBase::HDR)
+            if (pDataSkyboxFacet->GetHasPanorama())
             {
-                TextureDescriptor.m_Format = CTextureBase::R16G16B16_FLOAT;
-            }
-            else
-            {
-                TextureDescriptor.m_Format = CTextureBase::R8G8B8_UBYTE;
-            }
-        
-            CTexture2DPtr EnvironmentTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+                unsigned int Hash = pDataSkyboxFacet->GetPanorama()->GetHash();
 
-            rGraphicSkyboxFacet.SetPanoramaTexture2D(EnvironmentTexturePtr);
+                CTexture2DPtr PanoramaPtr = TextureManager::GetTexture2DByHash(Hash);
 
-            rGraphicSkyboxFacet.SetPanoramaTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(EnvironmentTexturePtr)));
+                if (PanoramaPtr.IsValid())
+                {
+                    rGraphicSkyboxFacet.SetPanoramaTexture2D(PanoramaPtr);
+
+                    rGraphicSkyboxFacet.SetPanoramaTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(PanoramaPtr)));
+                }
+            }
         }
         else if (pDataSkyboxFacet->GetType() == Dt::CSkyboxFacet::Cubemap)
         {
-            // -----------------------------------------------------------------------------
-            // Cubemap
-            // -----------------------------------------------------------------------------
-            unsigned int SizeOfCustomCubemap = pDataSkyboxFacet->GetCubemap()->GetNumberOfPixelsU();
-
-            TextureDescriptor.m_NumberOfPixelsU  = SizeOfCustomCubemap;
-            TextureDescriptor.m_NumberOfPixelsV  = SizeOfCustomCubemap;
-            TextureDescriptor.m_NumberOfPixelsW  = 1;
-            TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
-            TextureDescriptor.m_NumberOfTextures = 6;
-            TextureDescriptor.m_Binding          = CTextureBase::ShaderResource | CTextureBase::RenderTarget;
-            TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-            TextureDescriptor.m_Format           = CTextureBase::Unknown;
-            TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-            TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-            TextureDescriptor.m_pFileName        = 0;
-            TextureDescriptor.m_pPixels          = 0;
-        
-            if (pDataSkyboxFacet->GetCubemap()->GetSemantic() == Dt::CTextureBase::HDR)
+            if (pDataSkyboxFacet->GetHasCubemap())
             {
-                TextureDescriptor.m_Format = CTextureBase::R16G16B16_FLOAT;
-            }
-            else
-            {
-                TextureDescriptor.m_Format = CTextureBase::R8G8B8_UBYTE;
-            }
-        
-            CTexture2DPtr CustomCubemap = TextureManager::CreateCubeTexture(TextureDescriptor);
+                unsigned int Hash = pDataSkyboxFacet->GetCubemap()->GetHash();
 
-            for (unsigned int IndexOfCubemapLayer = 0; IndexOfCubemapLayer < 6; ++IndexOfCubemapLayer)
-            {
-                CTexture2DPtr CubeLayer = TextureManager::CreateTexture2D(TextureDescriptor);
-            
-                TextureManager::CopyToTextureArray2D(CustomCubemap, IndexOfCubemapLayer, CubeLayer, false);
+                CTexture2DPtr CubemapPtr = TextureManager::GetTexture2DByHash(Hash);
+
+                if (CubemapPtr.IsValid())
+                {
+                    rGraphicSkyboxFacet.SetCubemapTexture2D(CubemapPtr);
+
+                    rGraphicSkyboxFacet.SetCubemapTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(CubemapPtr)));
+                }
             }
-        
-            TextureManager::UpdateMipmap(CustomCubemap);
-
-            rGraphicSkyboxFacet.SetCubemapTexture2D(CustomCubemap);
-
-            rGraphicSkyboxFacet.SetCubemapTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(CustomCubemap)));
         }
 
         // -----------------------------------------------------------------------------

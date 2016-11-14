@@ -69,6 +69,10 @@ namespace
 
         CTextureSetPtr CreateTextureSet(CTextureBasePtr* _pTexturePtrs, unsigned int _NumberOfTextures);
 
+        CTexture1DPtr GetTexture1DByHash(unsigned int _Hash);
+        CTexture2DPtr GetTexture2DByHash(unsigned int _Hash);
+        CTexture3DPtr GetTexture3DByHash(unsigned int _Hash);
+
         void ClearTexture1D(CTexture1DPtr _TexturePtr, const Base::Float4& _rColor);
         void ClearTexture2D(CTexture2DPtr _TexturePtr, const Base::Float4& _rColor);
         void ClearTexture3D(CTexture3DPtr _TexturePtr, const Base::Float4& _rColor);
@@ -388,7 +392,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Create hash value over filename
         // -----------------------------------------------------------------------------
-        if (_rDescriptor.m_pFileName != nullptr)
+        if (_rDescriptor.m_pFileName != nullptr && strlen(_rDescriptor.m_pFileName))
         {
             NumberOfBytes     = static_cast<unsigned int>(strlen(_rDescriptor.m_pFileName) * sizeof(char));
             const void* pData = static_cast<const void*>(_rDescriptor.m_pFileName);
@@ -497,6 +501,32 @@ namespace
         }
         
         return CTextureSetPtr(TextureSetPtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTexture1DPtr CGfxTextureManager::GetTexture1DByHash(unsigned int _Hash)
+    {
+        return nullptr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTexture2DPtr CGfxTextureManager::GetTexture2DByHash(unsigned int _Hash)
+    {
+        if (m_Textures2DByHash.find(_Hash) != m_Textures2DByHash.end())
+        {
+            return m_Textures2DByHash.at(_Hash);
+        }
+
+        return nullptr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTexture3DPtr CGfxTextureManager::GetTexture3DByHash(unsigned int _Hash)
+    {
+        return nullptr;
     }
 
     // -----------------------------------------------------------------------------
@@ -765,18 +795,115 @@ namespace
                 {
                     Dt::CTextureCube* pDataTexture = static_cast<Dt::CTextureCube*>(_pTexture);
 
+                    // TODO by tschwandt
+                    // get binding from data texture
+
+                    TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
                     TextureDescriptor.m_NumberOfPixelsU  = pDataTexture->GetNumberOfPixelsU();
-                    TextureDescriptor.m_NumberOfPixelsU  = pDataTexture->GetNumberOfPixelsV();
+                    TextureDescriptor.m_NumberOfPixelsV  = pDataTexture->GetNumberOfPixelsV();
                     TextureDescriptor.m_NumberOfTextures = 6;
 
                     pInternTexture2D = InternCreateCubeTexture(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
+
+                    for (unsigned int IndexOfCubemapLayer = 0; IndexOfCubemapLayer < 6; ++IndexOfCubemapLayer)
+                    {
+                        CInternTexture2D* pCubeLayer = InternCreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
+
+                        CopyToTextureArray2D(pInternTexture2D, IndexOfCubemapLayer, pCubeLayer, false);
+                    }
+
+                    UpdateMipmap(pInternTexture2D);
                 }
                 else
                 {
                     Dt::CTexture2D* pDataTexture = static_cast<Dt::CTexture2D*>(_pTexture);
 
                     TextureDescriptor.m_NumberOfPixelsU = pDataTexture->GetNumberOfPixelsU();
-                    TextureDescriptor.m_NumberOfPixelsU = pDataTexture->GetNumberOfPixelsV();
+                    TextureDescriptor.m_NumberOfPixelsV = pDataTexture->GetNumberOfPixelsV();
+
+                    pInternTexture2D = InternCreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
+                }
+
+                if (Hash != 0)
+                {
+                    m_Textures2DByHash[Hash] = pInternTexture2D;
+                }
+            }
+            else if (_pTexture->GetDimension() == Dt::CTextureBase::Dim3D)
+            {
+                // TODO by tschwandt
+                // Not implemented yet
+
+                BASE_CONSOLE_STREAMWARNING("Texture 3D from data textures is not yet supported!");
+            }
+        }
+
+        // -----------------------------------------------------------------------------
+        // File
+        // -----------------------------------------------------------------------------
+        if ((DirtyFlags & Dt::CTextureBase::DirtyFile) != 0)
+        {
+            STextureDescriptor TextureDescriptor;
+
+            TextureDescriptor.m_NumberOfPixelsU  = 1;
+            TextureDescriptor.m_NumberOfPixelsV  = 1;
+            TextureDescriptor.m_NumberOfPixelsW  = 1;
+            TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
+            TextureDescriptor.m_NumberOfTextures = 1;
+            TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
+            TextureDescriptor.m_Usage            = CTextureBase::GPURead;
+            TextureDescriptor.m_Semantic         = ConvertDataSemantic(_pTexture->GetSemantic());
+            TextureDescriptor.m_pFileName        = _pTexture->GetFileName();
+            TextureDescriptor.m_pPixels          = _pTexture->GetPixels();
+            TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
+            TextureDescriptor.m_Format           = ConvertDataFormat(_pTexture->GetFormat());
+
+            if (_pTexture->GetDimension() == Dt::CTextureBase::Dim1D)
+            {
+                Dt::CTexture1D* pDataTexture = static_cast<Dt::CTexture1D*>(_pTexture);
+
+                TextureDescriptor.m_NumberOfPixelsU = pDataTexture->GetNumberOfPixelsU();
+
+                InternCreateTexture1D(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
+            }
+            else if (_pTexture->GetDimension() == Dt::CTextureBase::Dim2D)
+            {
+                CInternTexture2D* pInternTexture2D = nullptr;
+
+                if (m_Textures2DByHash.find(Hash) != m_Textures2DByHash.end())
+                {
+                    return;
+                }
+
+                if (_pTexture->IsCube())
+                {
+                    Dt::CTextureCube* pDataTexture = static_cast<Dt::CTextureCube*>(_pTexture);
+
+                    // TODO by tschwandt
+                    // get binding from data texture
+
+                    TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
+                    TextureDescriptor.m_NumberOfPixelsU  = pDataTexture->GetNumberOfPixelsU();
+                    TextureDescriptor.m_NumberOfPixelsV  = pDataTexture->GetNumberOfPixelsV();
+                    TextureDescriptor.m_NumberOfTextures = 6;
+
+                    pInternTexture2D = InternCreateCubeTexture(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
+
+                    for (unsigned int IndexOfCubemapLayer = 0; IndexOfCubemapLayer < 6; ++IndexOfCubemapLayer)
+                    {
+                        CInternTexture2D* pCubeLayer = InternCreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
+
+                        CopyToTextureArray2D(pInternTexture2D, IndexOfCubemapLayer, pCubeLayer, false);
+                    }
+
+                    UpdateMipmap(pInternTexture2D);
+                }
+                else
+                {
+                    Dt::CTexture2D* pDataTexture = static_cast<Dt::CTexture2D*>(_pTexture);
+
+                    TextureDescriptor.m_NumberOfPixelsU = pDataTexture->GetNumberOfPixelsU();
+                    TextureDescriptor.m_NumberOfPixelsV = pDataTexture->GetNumberOfPixelsV();
 
                     pInternTexture2D = InternCreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
                 }
@@ -813,21 +940,63 @@ namespace
 
                 if (_pTexture->IsCube())
                 {
-                    
+                    Gfx::CTexture2D*  pGraphicTexture = m_Textures2DByHash.at(Hash);
+                    Dt::CTextureCube* pDataTexture = static_cast<Dt::CTextureCube*>(_pTexture);
+
+                    Base::UInt2 CubemapResolution = Base::UInt2(pDataTexture->GetNumberOfPixelsU(), pDataTexture->GetNumberOfPixelsV());
+
+                    Base::AABB2UInt CubemapRect(Base::UInt2(0), CubemapResolution);
+
+                    CopyToTextureArray2D(pGraphicTexture, 0, CubemapRect, CubemapRect[1][0], pDataTexture->GetFace(Dt::CTextureCube::Right)->GetPixels(), false);
+                    CopyToTextureArray2D(pGraphicTexture, 1, CubemapRect, CubemapRect[1][0], pDataTexture->GetFace(Dt::CTextureCube::Left)->GetPixels(), false);
+                    CopyToTextureArray2D(pGraphicTexture, 2, CubemapRect, CubemapRect[1][0], pDataTexture->GetFace(Dt::CTextureCube::Top)->GetPixels(), false);
+                    CopyToTextureArray2D(pGraphicTexture, 3, CubemapRect, CubemapRect[1][0], pDataTexture->GetFace(Dt::CTextureCube::Bottom)->GetPixels(), false);
+                    CopyToTextureArray2D(pGraphicTexture, 4, CubemapRect, CubemapRect[1][0], pDataTexture->GetFace(Dt::CTextureCube::Front)->GetPixels(), false);
+                    CopyToTextureArray2D(pGraphicTexture, 5, CubemapRect, CubemapRect[1][0], pDataTexture->GetFace(Dt::CTextureCube::Back)->GetPixels(), false);
+
+                    UpdateMipmap(pGraphicTexture);
                 }
                 else
                 {
                     Gfx::CTexture2D* pGraphicTexture = m_Textures2DByHash.at(Hash);
-                    Dt::CTexture2D*  pDataTexture    = static_cast<Dt::CTexture2D*>(_pTexture);
+                    Dt::CTexture2D*  pDataTexture = static_cast<Dt::CTexture2D*>(_pTexture);
 
-                    // -----------------------------------------------------------------------------
-                    // Copy image data to background image
-                    // -----------------------------------------------------------------------------
-                    Base::UInt2 TextureResolution = Base::UInt2(pDataTexture->GetNumberOfPixelsU(), pDataTexture->GetNumberOfPixelsV());
+                    if (pDataTexture->GetPixels() != nullptr)
+                    {   
+                        Base::UInt2 TextureResolution = Base::UInt2(pDataTexture->GetNumberOfPixelsU(), pDataTexture->GetNumberOfPixelsV());
 
-                    Base::AABB2UInt TargetRect(Base::UInt2(0), TextureResolution);
+                        Base::AABB2UInt TargetRect(Base::UInt2(0), TextureResolution);
 
-                    CopyToTexture2D(pGraphicTexture, TargetRect, TargetRect[1][0], pDataTexture->GetPixels(), true);
+                        // CopyToTexture2D(pGraphicTexture, TargetRect, TargetRect[1][0], pDataTexture->GetPixels(), true);
+
+
+                        Base::UInt2 Offset = TargetRect[0];
+                        Base::UInt2 UpdateSize = TargetRect[1] - TargetRect[0];
+
+                        assert(pGraphicTexture->GetNumberOfPixelsU() <= UpdateSize[0] + Offset[0]);
+                        assert(pGraphicTexture->GetNumberOfPixelsV() <= UpdateSize[1] + Offset[1]);
+
+                        CInternTexture2D* pInternTexture = static_cast<CInternTexture2D*>(pGraphicTexture);
+
+                        Gfx::CNativeTextureHandle TextureHandle = pInternTexture->m_NativeTexture;
+
+                        int Format = ConvertGLImageFormat(pInternTexture->GetFormat());
+                        int Type = ConvertGLImageType(pInternTexture->GetFormat());
+
+                        // -----------------------------------------------------------------------------
+                        // Upload data to texture
+                        // -----------------------------------------------------------------------------
+                        glBindTexture(GL_TEXTURE_2D, TextureHandle);
+
+                        glTexSubImage2D(GL_TEXTURE_2D, 0, Offset[0], Offset[1], UpdateSize[0], UpdateSize[1], Format, Type, pDataTexture->GetPixels());
+
+                        if (true)
+                        {
+                            glGenerateMipmap(GL_TEXTURE_2D);
+                        }
+
+                        glBindTexture(GL_TEXTURE_2D, 0);
+                    }                    
                 }
             }
         }
@@ -2319,6 +2488,27 @@ namespace TextureManager
         return CGfxTextureManager::GetInstance().CreateTextureSet(_pTexturePtrs, _NumberOfTextures);
     }
 
+    // -----------------------------------------------------------------------------
+
+    CTexture1DPtr GetTexture1DByHash(unsigned int _Hash)
+    {
+        return CGfxTextureManager::GetInstance().GetTexture1DByHash(_Hash);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTexture2DPtr GetTexture2DByHash(unsigned int _Hash)
+    {
+        return CGfxTextureManager::GetInstance().GetTexture2DByHash(_Hash);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTexture3DPtr GetTexture3DByHash(unsigned int _Hash)
+    {
+        return CGfxTextureManager::GetInstance().GetTexture3DByHash(_Hash);
+    }
+    
     // -----------------------------------------------------------------------------
 
     void ClearTexture1D(CTexture1DPtr _TexturePtr, const Base::Float4& _rColor)

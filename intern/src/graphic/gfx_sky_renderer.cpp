@@ -792,24 +792,6 @@ namespace
             return;
         }
 
-        if (rRenderJob.m_pDataSkybox->GetHasCubemap() && rRenderJob.m_pDataSkybox->GetCubemap()->GetFace(Dt::CTextureCube::Right)->GetPixels() != 0)
-        {
-            CTexture2DPtr CustomCubemapTexturePtr = rRenderJob.m_pGraphicSkybox->GetCubemapTexture2D();
-
-            Base::UInt2 CubemapResolution = Base::UInt2(rRenderJob.m_pDataSkybox->GetCubemap()->GetNumberOfPixelsU(), rRenderJob.m_pDataSkybox->GetCubemap()->GetNumberOfPixelsV());
-
-            Base::AABB2UInt CubemapRect(Base::UInt2(0), CubemapResolution);
-
-            TextureManager::CopyToTextureArray2D(CustomCubemapTexturePtr, 0, CubemapRect, CubemapRect[1][0], rRenderJob.m_pDataSkybox->GetCubemap()->GetFace(Dt::CTextureCube::Right)->GetPixels(), false);
-            TextureManager::CopyToTextureArray2D(CustomCubemapTexturePtr, 1, CubemapRect, CubemapRect[1][0], rRenderJob.m_pDataSkybox->GetCubemap()->GetFace(Dt::CTextureCube::Left)->GetPixels(), false);
-            TextureManager::CopyToTextureArray2D(CustomCubemapTexturePtr, 2, CubemapRect, CubemapRect[1][0], rRenderJob.m_pDataSkybox->GetCubemap()->GetFace(Dt::CTextureCube::Top)->GetPixels(), false);
-            TextureManager::CopyToTextureArray2D(CustomCubemapTexturePtr, 3, CubemapRect, CubemapRect[1][0], rRenderJob.m_pDataSkybox->GetCubemap()->GetFace(Dt::CTextureCube::Bottom)->GetPixels(), false);
-            TextureManager::CopyToTextureArray2D(CustomCubemapTexturePtr, 4, CubemapRect, CubemapRect[1][0], rRenderJob.m_pDataSkybox->GetCubemap()->GetFace(Dt::CTextureCube::Front)->GetPixels(), false);
-            TextureManager::CopyToTextureArray2D(CustomCubemapTexturePtr, 5, CubemapRect, CubemapRect[1][0], rRenderJob.m_pDataSkybox->GetCubemap()->GetFace(Dt::CTextureCube::Back)->GetPixels(), false);
-
-            TextureManager::UpdateMipmap(CustomCubemapTexturePtr);
-        }
-
         Performance::BeginEvent("Skybox from Cubemap");
 
         // -----------------------------------------------------------------------------
@@ -1005,26 +987,6 @@ namespace
             SSkyboxRenderJob& rEnvironmentSkyJob = m_SkyboxRenderJobs[0];
 
             HDRIntensity = rEnvironmentSkyJob.m_pDataSkybox->GetIntensity();
-        }
-
-        // -----------------------------------------------------------------------------
-        // Check if data image is dirty
-        // TODO: do this somewhere else maybe?
-        // -----------------------------------------------------------------------------
-        Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
-
-        if (rRenderJob.m_pDataCamera->GetHasTexture() && rRenderJob.m_pDataCamera->GetTexture()->GetDirtyTime() == FrameTime)
-        {
-            // -----------------------------------------------------------------------------
-            // Copy image data to background image
-            // -----------------------------------------------------------------------------
-            CTexture2DPtr BackgroundPtr = rRenderJob.m_pGraphicCamera->GetBackgroundTexture2D();
-
-            Base::UInt2 TextureResolution = Base::UInt2(rRenderJob.m_pDataCamera->GetTexture()->GetNumberOfPixelsU(), rRenderJob.m_pDataCamera->GetTexture()->GetNumberOfPixelsV());
-
-            Base::AABB2UInt TargetRect(Base::UInt2(0), TextureResolution);
-
-            TextureManager::CopyToTexture2D(BackgroundPtr, TargetRect, TargetRect[1][0], rRenderJob.m_pDataCamera->GetTexture()->GetPixels());
         }
 
         // -----------------------------------------------------------------------------

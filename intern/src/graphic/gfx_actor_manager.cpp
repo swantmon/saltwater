@@ -294,34 +294,12 @@ namespace
         {
             if (pDataCamera->GetTexture() != nullptr)
             {
-                // -----------------------------------------------------------------------------
-                // If no background image exists we create one
-                // -----------------------------------------------------------------------------
-                if (pGraphicCamera->GetBackgroundTexture2D() == nullptr)
+                unsigned int Hash = pDataCamera->GetTexture()->GetHash();
+
+                CTexture2DPtr BackgroundTexturePtr = TextureManager::GetTexture2DByHash(Hash);
+
+                if (BackgroundTexturePtr.IsValid())
                 {
-                    TextureDescriptor.m_NumberOfPixelsU  = pDataCamera->GetTexture()->GetNumberOfPixelsU();
-                    TextureDescriptor.m_NumberOfPixelsV  = pDataCamera->GetTexture()->GetNumberOfPixelsV();
-                    TextureDescriptor.m_NumberOfPixelsW  = 1;
-                    TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
-                    TextureDescriptor.m_NumberOfTextures = 1;
-                    TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-                    TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-                    TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-                    TextureDescriptor.m_pFileName        = pDataCamera->GetTexture()->GetFileName();
-                    TextureDescriptor.m_pPixels          = pDataCamera->GetTexture()->GetPixels();
-                    TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
-
-                    if (pDataCamera->GetTexture()->GetSemantic() == Dt::CTextureBase::HDR)
-                    {
-                        TextureDescriptor.m_Format = CTextureBase::R16G16B16_FLOAT;
-                    }
-                    else
-                    {
-                        TextureDescriptor.m_Format = CTextureBase::R8G8B8_UBYTE;
-                    }
-
-                    CTexture2DPtr BackgroundTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
-
                     pGraphicCamera->SetBackgroundTexture2D(BackgroundTexturePtr);
 
                     pGraphicCamera->SetBackgroundTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(BackgroundTexturePtr)));
@@ -494,35 +472,16 @@ namespace
 
         if (pDataCamera->GetClearFlag() == Dt::CCameraActorFacet::Texture)
         {
-            // -----------------------------------------------------------------------------
-            // Background = Texture
-            // -----------------------------------------------------------------------------
-            TextureDescriptor.m_NumberOfPixelsU  = pDataCamera->GetTexture()->GetNumberOfPixelsU();
-            TextureDescriptor.m_NumberOfPixelsV  = pDataCamera->GetTexture()->GetNumberOfPixelsV();
-            TextureDescriptor.m_NumberOfPixelsW  = 1;
-            TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
-            TextureDescriptor.m_NumberOfTextures = 1;
-            TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-            TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-            TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-            TextureDescriptor.m_pFileName        = pDataCamera->GetTexture()->GetFileName();
-            TextureDescriptor.m_pPixels          = pDataCamera->GetTexture()->GetPixels();
-            TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
+            unsigned int Hash = pDataCamera->GetTexture()->GetHash();
 
-            if (pDataCamera->GetTexture()->GetSemantic() == Dt::CTextureBase::HDR)
+            CTexture2DPtr BackgroundTexturePtr = TextureManager::GetTexture2DByHash(Hash);
+
+            if (BackgroundTexturePtr.IsValid())
             {
-                TextureDescriptor.m_Format = CTextureBase::R16G16B16_FLOAT;
+                rGraphicCamera.SetBackgroundTexture2D(BackgroundTexturePtr);
+
+                rGraphicCamera.SetBackgroundTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(BackgroundTexturePtr)));
             }
-            else
-            {
-                TextureDescriptor.m_Format = CTextureBase::R8G8B8_UBYTE;
-            }
-
-            CTexture2DPtr BackgroundTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
-
-            rGraphicCamera.SetBackgroundTexture2D(BackgroundTexturePtr);
-
-            rGraphicCamera.SetBackgroundTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(BackgroundTexturePtr)));
         }
 
         // -----------------------------------------------------------------------------

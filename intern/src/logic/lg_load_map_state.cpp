@@ -148,6 +148,8 @@ namespace
 
             Dt::CTexture2D* pPanoramaTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
 
+            Dt::TextureManager::MarkTextureAsDirty(pPanoramaTexture, Dt::CTextureBase::DirtyCreate);
+
             // -----------------------------------------------------------------------------
 
             Dt::SEntityDescriptor EntityDesc;

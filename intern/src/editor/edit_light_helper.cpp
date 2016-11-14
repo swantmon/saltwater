@@ -212,6 +212,8 @@ namespace
 
             Dt::CTexture2D* pPanoramaTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
 
+            Dt::TextureManager::MarkTextureAsDirty(pPanoramaTexture, Dt::CTextureBase::DirtyCreate);
+
             // -----------------------------------------------------------------------------
 
             Dt::SEntityDescriptor EntityDesc;
@@ -234,7 +236,7 @@ namespace
             Dt::CSkyboxFacet* pSkyboxFacet = Dt::LightManager::CreateSkybox();
 
             pSkyboxFacet->SetType     (Dt::CSkyboxFacet::Panorama);
-            pSkyboxFacet->SetPanorama  (pPanoramaTexture);
+            pSkyboxFacet->SetPanorama (pPanoramaTexture);
             pSkyboxFacet->SetIntensity(5000.0f);
 
             rEnvironment.SetDetailFacet(Dt::SFacetCategory::Data, pSkyboxFacet);
@@ -571,6 +573,8 @@ namespace
                 TextureDescriptor.m_pIdentifier     = 0;
 
                 Dt::CTexture2D* pPanoramaTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+
+                Dt::TextureManager::MarkTextureAsDirty(pPanoramaTexture, Dt::CTextureBase::DirtyFile);
 
                 pLightFacet->SetPanorama(pPanoramaTexture);
             }

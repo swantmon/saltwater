@@ -68,6 +68,10 @@ namespace TextureManager
     CTextureSetPtr CreateTextureSet(CTextureBasePtr _Texture1Ptr, CTextureBasePtr _Texture2Ptr, CTextureBasePtr _Texture3Ptr, CTextureBasePtr _Texture4Ptr);
     CTextureSetPtr CreateTextureSet(CTextureBasePtr* _pTexturePtrs, unsigned int _NumberOfTextures);
 
+    CTexture1DPtr GetTexture1DByHash(unsigned int _Hash);
+    CTexture2DPtr GetTexture2DByHash(unsigned int _Hash);
+    CTexture3DPtr GetTexture3DByHash(unsigned int _Hash);
+
     void ClearTexture1D(CTexture1DPtr _TexturePtr, const Base::Float4& _rColor);
     void ClearTexture2D(CTexture2DPtr _TexturePtr, const Base::Float4& _rColor);
     void ClearTexture3D(CTexture3DPtr _TexturePtr, const Base::Float4& _rColor);

@@ -395,12 +395,13 @@ namespace
         // -----------------------------------------------------------------------------
         Dt::CEntity* pCameraEntity = m_pControllerPlugin->GetCameraEntity();
 
-        assert(pCameraEntity != nullptr);
+        if (pCameraEntity != nullptr)
+        {
+            Dt::CCameraActorFacet* pCameraActorFacet = static_cast<Dt::CCameraActorFacet*>(pCameraEntity->GetDetailFacet(Dt::SFacetCategory::Data));
 
-        Dt::CCameraActorFacet* pCameraActorFacet = static_cast<Dt::CCameraActorFacet*>(pCameraEntity->GetDetailFacet(Dt::SFacetCategory::Data));
-
-        pCameraActorFacet->SetProjectionType(Dt::CCameraActorFacet::RAW);
-        pCameraActorFacet->SetProjectionMatrix(m_pActiveControl->GetProjectionMatrix());
+            pCameraActorFacet->SetProjectionType(Dt::CCameraActorFacet::RAW);
+            pCameraActorFacet->SetProjectionMatrix(m_pActiveControl->GetProjectionMatrix());
+        }
     }
 
     // -----------------------------------------------------------------------------
