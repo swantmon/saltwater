@@ -456,6 +456,7 @@ namespace
         TextureDesc.m_NumberOfTextures = 1;
         TextureDesc.m_Format           = Dt::CTextureBase::R8G8B8_UBYTE;
         TextureDesc.m_Semantic         = Dt::CTextureBase::Diffuse;
+        TextureDesc.m_Binding          = Dt::CTextureBase::CPU;
         TextureDesc.m_pFileName        = 0;
         TextureDesc.m_pPixels          = pPixels;
 

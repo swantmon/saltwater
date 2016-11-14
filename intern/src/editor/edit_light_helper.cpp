@@ -206,6 +206,7 @@ namespace
             TextureDescriptor.m_NumberOfPixelsW = 1;
             TextureDescriptor.m_Format          = Dt::CTextureBase::R16G16B16_FLOAT;
             TextureDescriptor.m_Semantic        = Dt::CTextureBase::HDR;
+            TextureDescriptor.m_Binding         = Dt::CTextureBase::ShaderResource;
             TextureDescriptor.m_pPixels         = 0;
             TextureDescriptor.m_pFileName       = "environments/PaperMill_E_3k.hdr";
             TextureDescriptor.m_pIdentifier     = 0;
@@ -557,8 +558,6 @@ namespace
 
             const char* pCurrentTexture = pLightFacet->GetPanorama()->GetFileName();
                 
-            // TODO by tschwandt
-            // This should be done by an hash code; loading image should be done by asset manager
             if (strcmp(pCurrentTexture, pTexture))
             {
                 Dt::STextureDescriptor TextureDescriptor;
@@ -568,6 +567,7 @@ namespace
                 TextureDescriptor.m_NumberOfPixelsW = 1;
                 TextureDescriptor.m_Format          = Dt::CTextureBase::R16G16B16_FLOAT;
                 TextureDescriptor.m_Semantic        = Dt::CTextureBase::HDR;
+                TextureDescriptor.m_Binding         = Dt::CTextureBase::ShaderResource;
                 TextureDescriptor.m_pPixels         = 0;
                 TextureDescriptor.m_pFileName       = pTexture;
                 TextureDescriptor.m_pIdentifier     = 0;

@@ -291,6 +291,7 @@ namespace
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_Format           = Dt::CTextureBase::R8G8B8_UBYTE;
         TextureDescriptor.m_Semantic         = Dt::CTextureBase::Diffuse;
+        TextureDescriptor.m_Binding          = Dt::CTextureBase::ShaderResource;
         TextureDescriptor.m_pPixels          = 0;
         TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pIdentifier      = 0;

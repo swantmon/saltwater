@@ -142,9 +142,11 @@ namespace
             TextureDescriptor.m_NumberOfPixelsW = 1;
             TextureDescriptor.m_Format          = Dt::CTextureBase::R16G16B16_FLOAT;
             TextureDescriptor.m_Semantic        = Dt::CTextureBase::HDR;
+            TextureDescriptor.m_Binding         = Dt::CTextureBase::ShaderResource;
             TextureDescriptor.m_pPixels         = 0;
             TextureDescriptor.m_pFileName       = "environments/Ridgecrest_Road_Ref.hdr";
             TextureDescriptor.m_pIdentifier     = 0;
+            
 
             Dt::CTexture2D* pPanoramaTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
 
@@ -474,12 +476,14 @@ namespace
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_Format           = Dt::CTextureBase::R8G8B8A8_UBYTE;
         TextureDescriptor.m_Semantic         = Dt::CTextureBase::Diffuse;
+        TextureDescriptor.m_Binding          = Dt::CTextureBase::ShaderResource;
         TextureDescriptor.m_pPixels          = 0;
         TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pIdentifier      = 0;
 
         Dt::CTexture2D* pBackgroundTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
 
+        TextureDescriptor.m_Binding          = Dt::CTextureBase::ShaderResource | Dt::CTextureBase::RenderTarget;
         TextureDescriptor.m_NumberOfPixelsU = 512;
         TextureDescriptor.m_NumberOfPixelsV = 512;
 

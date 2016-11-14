@@ -210,11 +210,14 @@ namespace MR
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_Format           = Dt::CTextureBase::R8G8B8_UBYTE;
         TextureDescriptor.m_Semantic         = Dt::CTextureBase::Diffuse;
+        TextureDescriptor.m_Binding          = Dt::CTextureBase::CPU;
         TextureDescriptor.m_pPixels          = static_cast<IplImage*>(m_OriginalColorFrameRGB)->imageData;
         TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pIdentifier      = "ID_Webcam_RGB_Original_Output";
 
         m_pOriginalFrame = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+
+        Dt::TextureManager::MarkTextureAsDirty(m_pOriginalFrame, Dt::CTextureBase::DirtyCreate);
 
         // -----------------------------------------------------------------------------
         // Set data of original video / image

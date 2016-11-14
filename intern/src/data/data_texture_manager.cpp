@@ -202,8 +202,8 @@ namespace
         m_Textures2D  .Clear();
         m_TexturesCube.Clear();
 
-        m_Textures1DByHash.clear();
-        m_Textures2DByHash.clear();
+        m_Textures1DByHash  .clear();
+        m_Textures2DByHash  .clear();
         m_TexturesCubeByHash.clear();
 
         m_TextureDelegates.clear();
@@ -354,6 +354,7 @@ namespace
             rTexture.m_NumberOfPixels[0] = static_cast<Dt::CTextureBase::BPixels>(ImageWidth);
             rTexture.m_NumberOfPixels[1] = static_cast<Dt::CTextureBase::BPixels>(ImageHeight);
             
+            rTexture.m_Info.m_Binding          = _rDescriptor.m_Binding;
             rTexture.m_Info.m_Dimension        = CTextureBase::Dim2D;
             rTexture.m_Info.m_Format           = _rDescriptor.m_Format;
             rTexture.m_Info.m_IsCubeTexture    = false;
@@ -523,6 +524,7 @@ namespace
             rTexture.m_NumberOfPixels[0] = static_cast<Dt::CTextureBase::BPixels>(ImageWidth);
             rTexture.m_NumberOfPixels[1] = static_cast<Dt::CTextureBase::BPixels>(ImageHeight);
             
+            rTexture.m_Info.m_Binding          = _rDescriptor.m_Binding;
             rTexture.m_Info.m_Dimension        = CTextureBase::Dim2D;
             rTexture.m_Info.m_Format           = _rDescriptor.m_Format;
             rTexture.m_Info.m_IsCubeTexture    = true;

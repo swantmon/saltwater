@@ -151,6 +151,8 @@ namespace Gfx
 
             const Base::Char* GetFileName() const;
 
+            unsigned int GetHash() const;
+
         protected:
 
             enum EUninitialized
@@ -182,6 +184,7 @@ namespace Gfx
             SInfo            m_Info;
             void*            m_pPixels;
             Base::CharString m_FileName;
+            unsigned int     m_Hash;
 
         protected:
 

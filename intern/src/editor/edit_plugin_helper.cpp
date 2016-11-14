@@ -108,6 +108,7 @@ namespace
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_Format           = Dt::CTextureBase::R8G8B8_UBYTE;
         TextureDescriptor.m_Semantic         = Dt::CTextureBase::Diffuse;
+        TextureDescriptor.m_Binding          = Dt::CTextureBase::ShaderResource;
         TextureDescriptor.m_pPixels          = 0;
         TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pIdentifier      = "AR_BACKGROUND_TEXTURE";
@@ -118,6 +119,7 @@ namespace
 
         TextureDescriptor.m_NumberOfPixelsU = 512;
         TextureDescriptor.m_NumberOfPixelsV = 512;
+        TextureDescriptor.m_Binding         = Dt::CTextureBase::ShaderResource | Dt::CTextureBase::RenderTarget;
         TextureDescriptor.m_pIdentifier     = "AR_ENV_CUBEMAP_TEXTURE";
 
         Dt::CTextureCube* pTextureCubemap = Dt::TextureManager::CreateCubeTexture(TextureDescriptor);

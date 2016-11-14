@@ -119,4 +119,11 @@ namespace Gfx
     {
         return m_FileName.GetConst();
     }
+
+    // -----------------------------------------------------------------------------
+
+    unsigned int CTextureBase::GetHash() const
+    {
+        return m_Hash;
+    }
 } // namespace Gfx

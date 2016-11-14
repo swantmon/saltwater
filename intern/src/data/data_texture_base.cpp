@@ -31,6 +31,13 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
+    unsigned int CTextureBase::GetBinding() const
+    {
+        return m_Info.m_Binding;
+    }
+
+    // -----------------------------------------------------------------------------
+
     CTextureBase::EDimension CTextureBase::GetDimension() const
     {
         return static_cast<EDimension>(m_Info.m_Dimension);

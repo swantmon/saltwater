@@ -34,6 +34,7 @@ namespace Dt
         unsigned int            m_NumberOfPixelsV;
         unsigned int            m_NumberOfPixelsW;
         unsigned int            m_NumberOfTextures;
+        unsigned int            m_Binding;
         CTextureBase::EFormat   m_Format;
         CTextureBase::ESemantic m_Semantic;
         const Base::Char*       m_pFileName;

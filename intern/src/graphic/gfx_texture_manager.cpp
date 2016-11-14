@@ -208,6 +208,7 @@ namespace
         Gfx::CTextureBase::EDimension ConvertDataDimension(Dt::CTextureBase::EDimension _Dimension);
         Gfx::CTextureBase::EFormat ConvertDataFormat(Dt::CTextureBase::EFormat _Format);
         Gfx::CTextureBase::ESemantic ConvertDataSemantic(Dt::CTextureBase::ESemantic _Semantic);
+        unsigned int ConvertDataBinding(unsigned int _Binding);
 
     private:
 
@@ -417,6 +418,8 @@ namespace
 
         if (Hash != 0)
         {
+            pInternTexture2D->m_Hash = Hash;
+
             m_Textures2DByHash[Hash] = pInternTexture2D;
         }
         
@@ -507,6 +510,8 @@ namespace
 
     CTexture1DPtr CGfxTextureManager::GetTexture1DByHash(unsigned int _Hash)
     {
+        BASE_UNUSED(_Hash);
+
         return nullptr;
     }
 
@@ -526,6 +531,8 @@ namespace
 
     CTexture3DPtr CGfxTextureManager::GetTexture3DByHash(unsigned int _Hash)
     {
+        BASE_UNUSED(_Hash);
+
         return nullptr;
     }
 
@@ -751,6 +758,12 @@ namespace
 
         unsigned int DirtyFlags = _pTexture->GetDirtyFlags();
         unsigned int Hash       = _pTexture->GetHash();
+        unsigned int Binding    = _pTexture->GetBinding();
+
+        // -----------------------------------------------------------------------------
+        // Check if binding is realted to graphics
+        // -----------------------------------------------------------------------------
+        if (Binding == Dt::CTextureBase::CPU) return;
 
         // -----------------------------------------------------------------------------
         // Create
@@ -769,7 +782,7 @@ namespace
             TextureDescriptor.m_Semantic         = ConvertDataSemantic(_pTexture->GetSemantic());
             TextureDescriptor.m_pFileName        = _pTexture->GetFileName();
             TextureDescriptor.m_pPixels          = _pTexture->GetPixels();
-            TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
+            TextureDescriptor.m_Binding          = ConvertDataBinding(_pTexture->GetBinding());
             TextureDescriptor.m_Format           = ConvertDataFormat(_pTexture->GetFormat());
 
             if (_pTexture->GetDimension() == Dt::CTextureBase::Dim1D)
@@ -795,10 +808,6 @@ namespace
                 {
                     Dt::CTextureCube* pDataTexture = static_cast<Dt::CTextureCube*>(_pTexture);
 
-                    // TODO by tschwandt
-                    // get binding from data texture
-
-                    TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
                     TextureDescriptor.m_NumberOfPixelsU  = pDataTexture->GetNumberOfPixelsU();
                     TextureDescriptor.m_NumberOfPixelsV  = pDataTexture->GetNumberOfPixelsV();
                     TextureDescriptor.m_NumberOfTextures = 6;
@@ -826,6 +835,8 @@ namespace
 
                 if (Hash != 0)
                 {
+                    pInternTexture2D->m_Hash = Hash;
+
                     m_Textures2DByHash[Hash] = pInternTexture2D;
                 }
             }
@@ -855,7 +866,7 @@ namespace
             TextureDescriptor.m_Semantic         = ConvertDataSemantic(_pTexture->GetSemantic());
             TextureDescriptor.m_pFileName        = _pTexture->GetFileName();
             TextureDescriptor.m_pPixels          = _pTexture->GetPixels();
-            TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
+            TextureDescriptor.m_Binding          = ConvertDataBinding(_pTexture->GetBinding());
             TextureDescriptor.m_Format           = ConvertDataFormat(_pTexture->GetFormat());
 
             if (_pTexture->GetDimension() == Dt::CTextureBase::Dim1D)
@@ -879,10 +890,6 @@ namespace
                 {
                     Dt::CTextureCube* pDataTexture = static_cast<Dt::CTextureCube*>(_pTexture);
 
-                    // TODO by tschwandt
-                    // get binding from data texture
-
-                    TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
                     TextureDescriptor.m_NumberOfPixelsU  = pDataTexture->GetNumberOfPixelsU();
                     TextureDescriptor.m_NumberOfPixelsV  = pDataTexture->GetNumberOfPixelsV();
                     TextureDescriptor.m_NumberOfTextures = 6;
@@ -1186,6 +1193,7 @@ namespace
             rTexture.m_pPixels           = _rDescriptor.m_pPixels;
             rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTextureBase::BPixels>(ImageWidth);
             rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTextureBase::BPixels>(ImageHeight);
+            rTexture.m_Hash              = 0;
             
             rTexture.m_Info.m_Access            = _rDescriptor.m_Access;
             rTexture.m_Info.m_Binding           = _rDescriptor.m_Binding;
@@ -1386,6 +1394,7 @@ namespace
             rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTextureBase::BPixels>(ImageWidth);
             rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTextureBase::BPixels>(ImageHeight);
             rTexture.m_NumberOfPixels[2] = static_cast<Gfx::CTextureBase::BPixels>(ImageDepth);
+            rTexture.m_Hash              = 0;
             
             rTexture.m_Info.m_Access            = _rDescriptor.m_Access;
             rTexture.m_Info.m_Binding           = _rDescriptor.m_Binding;
@@ -1570,6 +1579,7 @@ namespace
         rTexture.m_pPixels           = _rDescriptor.m_pPixels;
         rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTextureBase::BPixels>(_rDescriptor.m_NumberOfPixelsU);
         rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTextureBase::BPixels>(_rDescriptor.m_NumberOfPixelsV);
+        rTexture.m_Hash              = 0;
         
         rTexture.m_Info.m_Access            = _rDescriptor.m_Access;
         rTexture.m_Info.m_Binding           = _rDescriptor.m_Binding;
@@ -2205,6 +2215,30 @@ namespace
         };
 
         return s_Types[_Semantic];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    unsigned int CGfxTextureManager::ConvertDataBinding(unsigned int _Binding)
+    {
+        unsigned int Binding = 0;
+
+        if ((_Binding & Dt::CTextureBase::ShaderResource) != 0)
+        {
+            Binding |= Gfx::CTextureBase::ShaderResource;
+        }
+        
+        if ((_Binding & Dt::CTextureBase::RenderTarget) != 0)
+        {
+            Binding |= Gfx::CTextureBase::RenderTarget;
+        }
+
+        if ((_Binding & Dt::CTextureBase::DepthStencilTarget) != 0)
+        {
+            Binding |= Gfx::CTextureBase::DepthStencilTarget;
+        }
+
+        return Binding;
     }
 } // namespace
 

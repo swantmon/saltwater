@@ -354,9 +354,8 @@ namespace
     
     void CGfxLightManager::UpdateSkybox(Dt::CEntity& _rEntity)
     {
-        STextureDescriptor  TextureDescriptor;
-        Dt::CSkyboxFacet*   pDataSkyboxFacet;
-        Gfx::CSkyboxFacet*  pGraphicSkyboxFacet;
+        Dt::CSkyboxFacet*  pDataSkyboxFacet;
+        Gfx::CSkyboxFacet* pGraphicSkyboxFacet;
 
         pDataSkyboxFacet    = static_cast<Dt::CSkyboxFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Data));
         pGraphicSkyboxFacet = static_cast<Gfx::CSkyboxFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));

@@ -104,6 +104,14 @@ namespace Dt
                 UndefinedSemantic = -1,
             };
 
+            enum EBinding
+            {
+                CPU                = 0x00,
+                ShaderResource     = 0x01,
+                RenderTarget       = 0x02,
+                DepthStencilTarget = 0x04,
+            };
+
             enum EDirtyFlags
             {
                 DirtyCreate  = 0x01,
@@ -122,6 +130,7 @@ namespace Dt
             EDimension GetDimension() const;
             EFormat GetFormat() const;
             ESemantic GetSemantic() const;
+            unsigned int GetBinding() const;
 
             bool IsArray() const;
             bool IsCube() const;
@@ -158,6 +167,7 @@ namespace Dt
                 Base::U32 m_IsPixelOwner      : 1;   ///< Defines if the texture or an extern module is the owner of the CPU pixel data.
                 Base::U32 m_IsCubeTexture     : 1;   ///< Defines if the texture is a cube texture.
                 Base::U32 m_IsDummyTexture    : 1;   ///< Defines if the texture is a dummy returned if the creation of the real texture has fails.
+                Base::U32 m_Binding           : 3;   ///< Defines if the texture can be bound as shader resource, render target, depth stencil target or CPU only.
                 Base::U32 m_Semantic          : 8;   ///< Defines the semantic meaning of the texture if used for further optimization (maybe shader, converting, ...).
             };
         
