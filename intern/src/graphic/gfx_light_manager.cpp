@@ -339,26 +339,7 @@ namespace
         // -----------------------------------------------------------------------------
         if (pDataGlobalProbeLightFacet->GetType() == Dt::CGlobalProbeLightFacet::Custom)
         {
-            // -----------------------------------------------------------------------------
-            // If cubemap data exists and we want to use custom environment
-            // -----------------------------------------------------------------------------
-            if (pDataGlobalProbeLightFacet->GetCubemap()->GetFace(Dt::CTextureCube::Right)->GetPixels())
-            {
-                CTexture2DPtr CustomCubemapTexturePtr = pGraphicGlobalProbeLightFacet->GetCustomTexture2D();
 
-                Base::UInt2 CubemapResolution = Base::UInt2(pDataGlobalProbeLightFacet->GetCubemap()->GetNumberOfPixelsU(), pDataGlobalProbeLightFacet->GetCubemap()->GetNumberOfPixelsV());
-
-                Base::AABB2UInt CubemapRect(Base::UInt2(0), CubemapResolution);
-
-                TextureManager::CopyToTextureArray2D(CustomCubemapTexturePtr, 0, CubemapRect, CubemapRect[1][0], pDataGlobalProbeLightFacet->GetCubemap()->GetFace(Dt::CTextureCube::Right)->GetPixels(), false);
-                TextureManager::CopyToTextureArray2D(CustomCubemapTexturePtr, 1, CubemapRect, CubemapRect[1][0], pDataGlobalProbeLightFacet->GetCubemap()->GetFace(Dt::CTextureCube::Left)->GetPixels(), false);
-                TextureManager::CopyToTextureArray2D(CustomCubemapTexturePtr, 2, CubemapRect, CubemapRect[1][0], pDataGlobalProbeLightFacet->GetCubemap()->GetFace(Dt::CTextureCube::Top)->GetPixels(), false);
-                TextureManager::CopyToTextureArray2D(CustomCubemapTexturePtr, 3, CubemapRect, CubemapRect[1][0], pDataGlobalProbeLightFacet->GetCubemap()->GetFace(Dt::CTextureCube::Bottom)->GetPixels(), false);
-                TextureManager::CopyToTextureArray2D(CustomCubemapTexturePtr, 4, CubemapRect, CubemapRect[1][0], pDataGlobalProbeLightFacet->GetCubemap()->GetFace(Dt::CTextureCube::Front)->GetPixels(), false);
-                TextureManager::CopyToTextureArray2D(CustomCubemapTexturePtr, 5, CubemapRect, CubemapRect[1][0], pDataGlobalProbeLightFacet->GetCubemap()->GetFace(Dt::CTextureCube::Back)->GetPixels(), false);
-
-                TextureManager::UpdateMipmap(CustomCubemapTexturePtr);
-            }
         }
 
         // -----------------------------------------------------------------------------
@@ -513,105 +494,6 @@ namespace
         // -----------------------------------------------------------------------------
         if (pDataGlobalProbeEnvironmentFacet->GetType() == Dt::CGlobalProbeLightFacet::Custom)
         {
-            unsigned int SizeOfCustomCubemap = pDataGlobalProbeEnvironmentFacet->GetCubemap()->GetNumberOfPixelsU();
-
-            // -----------------------------------------------------------------------------
-            // Input
-            // -----------------------------------------------------------------------------
-            TextureDescriptor.m_NumberOfPixelsU  = SizeOfCustomCubemap;
-            TextureDescriptor.m_NumberOfPixelsV  = SizeOfCustomCubemap;
-            TextureDescriptor.m_NumberOfPixelsW  = 1;
-            TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
-            TextureDescriptor.m_NumberOfTextures = 6;
-            TextureDescriptor.m_Binding          = CTextureBase::ShaderResource | CTextureBase::RenderTarget;
-            TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-            TextureDescriptor.m_Format           = CTextureBase::Unknown;
-            TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-            TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-            TextureDescriptor.m_pFileName        = 0;
-            TextureDescriptor.m_pPixels          = 0;
-        
-            if (pDataGlobalProbeEnvironmentFacet->GetCubemap()->GetSemantic() == Dt::CTextureBase::HDR)
-            {
-                TextureDescriptor.m_Format = CTextureBase::R16G16B16_FLOAT;
-            }
-            else
-            {
-                TextureDescriptor.m_Format = CTextureBase::R8G8B8_UBYTE;
-            }
-        
-            CTexture2DPtr CustomCubemap = TextureManager::CreateCubeTexture(TextureDescriptor);
-
-            for (unsigned int IndexOfCubemapLayer = 0; IndexOfCubemapLayer < 6; ++IndexOfCubemapLayer)
-            {
-                CTexture2DPtr CubeLayer = TextureManager::CreateTexture2D(TextureDescriptor);
-            
-                TextureManager::CopyToTextureArray2D(CustomCubemap, IndexOfCubemapLayer, CubeLayer, false);
-            }
-        
-            TextureManager::UpdateMipmap(CustomCubemap);
-
-            rGraphicGlobalProbeLightFacet.SetCustomTexture2D(CustomCubemap);
-
-            rGraphicGlobalProbeLightFacet.SetCustomTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(CustomCubemap)));
-
-            // -----------------------------------------------------------------------------
-            // Output
-            // -----------------------------------------------------------------------------
-            TextureDescriptor.m_NumberOfPixelsU  = SizeOfCustomCubemap;
-            TextureDescriptor.m_NumberOfPixelsV  = SizeOfCustomCubemap;
-            TextureDescriptor.m_NumberOfPixelsW  = 1;
-            TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
-            TextureDescriptor.m_NumberOfTextures = 6;
-            TextureDescriptor.m_Binding          = CTextureBase::ShaderResource | CTextureBase::RenderTarget;
-            TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-            TextureDescriptor.m_Format           = CTextureBase::Unknown;
-            TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-            TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-            TextureDescriptor.m_pFileName        = 0;
-            TextureDescriptor.m_pPixels          = 0;
-            TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
-        
-            CTexture2DPtr CustomCubemapHDR = TextureManager::CreateCubeTexture(TextureDescriptor);
-        
-            for (unsigned int IndexOfCubemapLayer = 0; IndexOfCubemapLayer < 6; ++IndexOfCubemapLayer)
-            {
-                CTexture2DPtr CubeLayer = TextureManager::CreateTexture2D(TextureDescriptor);
-            
-                TextureManager::CopyToTextureArray2D(CustomCubemapHDR, IndexOfCubemapLayer, CubeLayer, false);
-            }
-        
-            TextureManager::UpdateMipmap(CustomCubemapHDR);
-
-            rGraphicGlobalProbeLightFacet.SetCustomHDRTexture2D(CustomCubemapHDR);
-
-            rGraphicGlobalProbeLightFacet.SetCustomHDRTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(CustomCubemapHDR)));
-
-            CTexture2DPtr CustomCubemapHDRFirstMipmapTexturePtr = TextureManager::GetMipmapFromTexture2D(CustomCubemapHDR, 0);
-
-            CTargetSetPtr CustomHDRTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(CustomCubemapHDRFirstMipmapTexturePtr));
-
-            // -----------------------------------------------------------------------------
-            // View port
-            // -----------------------------------------------------------------------------
-            ViewPortDesc.m_TopLeftX = 0.0f;
-            ViewPortDesc.m_TopLeftY = 0.0f;
-            ViewPortDesc.m_MinDepth = 0.0f;
-            ViewPortDesc.m_MaxDepth = 1.0f;
-
-            ViewPortDesc.m_Width  = static_cast<float>(SizeOfCustomCubemap);
-            ViewPortDesc.m_Height = static_cast<float>(SizeOfCustomCubemap);
-
-            CViewPortPtr MipMapViewPort = ViewManager::CreateViewPort(ViewPortDesc);
-
-            CViewPortSetPtr CustomViewPortSetPtr = ViewManager::CreateViewPortSet(MipMapViewPort);
-
-            // -----------------------------------------------------------------------------
-            // Put into light probe
-            // -----------------------------------------------------------------------------
-            rGraphicGlobalProbeLightFacet.SetCustomHDRTargetSet(CustomHDRTargetSetPtr);
-            rGraphicGlobalProbeLightFacet.SetCustomViewPortSet(CustomViewPortSetPtr);
-
         }
         
         // -----------------------------------------------------------------------------
