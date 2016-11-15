@@ -65,7 +65,7 @@ void PSShaderMaterialDisney(void)
 #endif // USE_TEX_NORMAL
 
 #ifdef USE_TEX_ROUGHNESS
-    Roughness *= texture(PSTextureRoughness, UV).r
+    Roughness *= texture(PSTextureRoughness, UV).r;
 #endif // USE_TEX_ROUGHNESS
 
 #ifdef USE_TEX_METALLIC
@@ -73,9 +73,8 @@ void PSShaderMaterialDisney(void)
 #endif // USE_TEX_METALLIC
 
 #ifdef USE_TEX_AO
-    AO  *= texture(PSTextureAO, UV).r;
+    AO *= texture(PSTextureAO, UV).r;
 #endif // USE_TEX_AO
-
 
     PackGBuffer(Color, WSNormal, Roughness, vec3(ps_Reflectance), MetalMask, AO, GBuffer);
 

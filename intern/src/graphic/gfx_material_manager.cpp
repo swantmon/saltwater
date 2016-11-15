@@ -384,7 +384,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Create and setup shader, texture and sampler (setup material)
             // -----------------------------------------------------------------------------
-            CTextureBasePtr    TexturePtrs[CMaterial::SMaterialKey::s_NumberOfTextures];
+            CTextureBasePtr TexturePtrs[CMaterial::SMaterialKey::s_NumberOfTextures];
 
             TexturePtrs[0] = 0;
             TexturePtrs[1] = 0;

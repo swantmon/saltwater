@@ -304,6 +304,14 @@ namespace
         Hash              = Base::CRC32(Hash, _pShaderName, static_cast<unsigned int>(strlen(_pShaderName)));
         Hash              = Base::CRC32(Hash, &_Type, sizeof(CShader::EType));
 
+        if (_NumberOfDefines > 0)
+        {
+            for (unsigned int IndexOfShaderDefine = 0; IndexOfShaderDefine < _NumberOfDefines; ++IndexOfShaderDefine)
+            {
+                Hash = Base::CRC32(Hash, _ppShaderDefines[IndexOfShaderDefine], static_cast<unsigned int>(strlen(_ppShaderDefines[IndexOfShaderDefine])));
+            }
+        }
+
         if (m_ShaderByID.find(Hash) != m_ShaderByID.end())
         {
             return CShaderPtr(m_ShaderByID[Hash]);
@@ -318,21 +326,21 @@ namespace
 
         assert(ShaderFile.is_open());
 
-        std::string ShaderFileContent((std::istreambuf_iterator<char>(ShaderFile)), std::istreambuf_iterator<char>());        
-
-        ShaderFileContent = "#define " + std::string(_pShaderName) + " main\n" + ShaderFileContent;
+        std::string ShaderFileContent((std::istreambuf_iterator<char>(ShaderFile)), std::istreambuf_iterator<char>());  
 
         if (_NumberOfDefines > 0)
         {
             std::string ShaderDefines;
 
-            for (unsigned int IndexOfShaderDefine = 0; IndexOfShaderDefine < _NumberOfDefines; ++ IndexOfShaderDefine)
+            for (unsigned int IndexOfShaderDefine = 0; IndexOfShaderDefine < _NumberOfDefines; ++IndexOfShaderDefine)
             {
-                ShaderFileContent = "#define " + std::string(_ppShaderDefines[IndexOfShaderDefine]) + "\n";
+                ShaderDefines += "#define " + std::string(_ppShaderDefines[IndexOfShaderDefine]) + "\n";
             }
 
             ShaderFileContent = ShaderDefines + ShaderFileContent;
         }
+
+        ShaderFileContent = "#define " + std::string(_pShaderName) + " main\n" + ShaderFileContent;
 
         PreprocessorShader(ShaderFileContent);
 
