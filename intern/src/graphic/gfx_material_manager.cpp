@@ -206,7 +206,7 @@ namespace
 
     private:
 
-        typedef Base::CManagedPool<CInternMaterial, 1024> CMaterials;
+        typedef Base::CManagedPool<CInternMaterial, 1024, 1> CMaterials;
 
         typedef std::unordered_map<unsigned int, CInternMaterial*> CMaterialByHashs;
 
@@ -286,15 +286,22 @@ namespace
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_pFileName != nullptr && strlen(_rDescriptor.m_pFileName))
         {
-            NumberOfBytes = static_cast<unsigned int>(strlen(_rDescriptor.m_pFileName) * sizeof(char));
+            NumberOfBytes     = static_cast<unsigned int>(strlen(_rDescriptor.m_pFileName) * sizeof(char));
             const void* pData = static_cast<const void*>(_rDescriptor.m_pFileName);
 
             Hash = Base::CRC32(pData, NumberOfBytes);
+        }
+        else if (_rDescriptor.m_pMaterialName != nullptr && strlen(_rDescriptor.m_pMaterialName))
+        {
+            NumberOfBytes     = static_cast<unsigned int>(strlen(_rDescriptor.m_pMaterialName) * sizeof(char));
+            const void* pData = static_cast<const void*>(_rDescriptor.m_pMaterialName);
 
-            if (m_MaterialByHash.find(Hash) != m_MaterialByHash.end())
-            {
-                return CMaterialPtr(m_MaterialByHash.at(Hash));
-            }
+            Hash = Base::CRC32(pData, NumberOfBytes);
+        }
+
+        if (m_MaterialByHash.find(Hash) != m_MaterialByHash.end())
+        {
+            return CMaterialPtr(m_MaterialByHash.at(Hash));
         }
 
         // -----------------------------------------------------------------------------
@@ -345,18 +352,22 @@ namespace
         unsigned int DirtyFlags = _Material->GetDirtyFlags();
         unsigned int Hash       = _Material->GetHash();
 
+        assert(Hash != 0);
+
         if ((DirtyFlags & Dt::CTextureBase::DirtyCreate) != 0)
         {
             SMaterialDescriptor MaterialDescriptor;
 
+            // TODO by tschwandt
+            // Do not use filename of texture; use texture instead
             MaterialDescriptor.m_pMaterialName   = _Material->GetMaterialname();
-            MaterialDescriptor.m_pColorMap       = _Material->GetColorTexture()->GetFileName();
-            MaterialDescriptor.m_pNormalMap      = _Material->GetNormalTexture()->GetFileName();
-            MaterialDescriptor.m_pRoughnessMap   = _Material->GetRoughnessTexture()->GetFileName();
-            MaterialDescriptor.m_pReflectanceMap = _Material->GetReflectanceTexture()->GetFileName();
-            MaterialDescriptor.m_pMetalMaskMap   = _Material->GetMetalTexture()->GetFileName();
-            MaterialDescriptor.m_pAOMap          = _Material->GetAmbientOcclusionTexture()->GetFileName();
-            MaterialDescriptor.m_pBumpMap        = _Material->GetBumpTexture()->GetFileName();
+            MaterialDescriptor.m_pColorMap       = _Material->GetColorTexture()            != 0 ? _Material->GetColorTexture()->GetFileName()            : 0;
+            MaterialDescriptor.m_pNormalMap      = _Material->GetNormalTexture()           != 0 ? _Material->GetNormalTexture()->GetFileName()           : 0;
+            MaterialDescriptor.m_pRoughnessMap   = _Material->GetRoughnessTexture()        != 0 ? _Material->GetRoughnessTexture()->GetFileName()        : 0;
+            MaterialDescriptor.m_pReflectanceMap = _Material->GetReflectanceTexture()      != 0 ? _Material->GetReflectanceTexture()->GetFileName()      : 0;
+            MaterialDescriptor.m_pMetalMaskMap   = _Material->GetMetalTexture()            != 0 ? _Material->GetMetalTexture()->GetFileName()            : 0;
+            MaterialDescriptor.m_pAOMap          = _Material->GetAmbientOcclusionTexture() != 0 ? _Material->GetAmbientOcclusionTexture()->GetFileName() : 0;
+            MaterialDescriptor.m_pBumpMap        = _Material->GetBumpTexture()             != 0 ? _Material->GetBumpTexture()->GetFileName()             : 0;
             MaterialDescriptor.m_Roughness       = _Material->GetRoughness();
             MaterialDescriptor.m_Reflectance     = _Material->GetReflectance();
             MaterialDescriptor.m_MetalMask       = _Material->GetMetalness();
@@ -366,7 +377,7 @@ namespace
 
             CInternMaterial* pInternMaterial = InternCreateMaterial(MaterialDescriptor);
 
-            if (pInternMaterial != nullptr && Hash != 0)
+            if (pInternMaterial != nullptr)
             {
                 pInternMaterial->m_Hash = Hash;
 
@@ -497,19 +508,20 @@ namespace
 
     CGfxMaterialManager::CInternMaterial* CGfxMaterialManager::InternCreateMaterial(const SMaterialDescriptor& _rDescriptor)
     {
-        const char*  pMaterialName;
-        const char*  pColorMap;
-        const char*  pNormalMap;
-        const char*  pRoughnessMap;
-        const char*  pReflectanceMap;
-        const char*  pMetalMaskMap;
-        const char*  pAOMap;
-        const char*  pBumpMap;
-        float        Roughness;
-        float        Reflectance;
-        float        MetalMask;
-        Base::Float3 AlbedoColor;
-        Base::Float4 TilingOffset;
+        const char*           pMaterialName;
+        const char*           pColorMap;
+        const char*           pNormalMap;
+        const char*           pRoughnessMap;
+        const char*           pReflectanceMap;
+        const char*           pMetalMaskMap;
+        const char*           pAOMap;
+        const char*           pBumpMap;
+        float                 Roughness;
+        float                 Reflectance;
+        float                 MetalMask;
+        Base::Float3          AlbedoColor;
+        Base::Float4          TilingOffset;
+        tinyxml2::XMLDocument MaterialFile;
 
         pMaterialName   = _rDescriptor.m_pMaterialName;
         pColorMap       = _rDescriptor.m_pColorMap;
@@ -535,8 +547,6 @@ namespace
             // -----------------------------------------------------------------------------
             // Load material file
             // -----------------------------------------------------------------------------
-            tinyxml2::XMLDocument MaterialFile;
-        
             int Error = MaterialFile.LoadFile(PathToMaterial.c_str());
 
             if (Error != tinyxml2::XML_NO_ERROR)
@@ -772,6 +782,11 @@ namespace
         }
 
         rMaterial.m_TextureSetPtrs[CShader::Pixel] = TextureManager::CreateTextureSet(TexturePtrs, CMaterial::SMaterialKey::s_NumberOfTextures);
+
+        if (_rDescriptor.m_pFileName != 0)
+        {
+            MaterialFile.Clear();
+        }
 
         return pInternMaterial;
     }

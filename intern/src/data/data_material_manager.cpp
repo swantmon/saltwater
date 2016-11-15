@@ -154,40 +154,53 @@ namespace
     
     CMaterial& CDtMaterialManager::CreateMaterial(const SMaterialDescriptor& _rDescriptor)
     {
-        const char*  pMaterialName;
-        const char*  pColorMap;
-        const char*  pNormalMap;
-        const char*  pRoughnessMap;
-        const char*  pReflectanceMap;
-        const char*  pMetalMaskMap;
-        const char*  pAOMap;
-        const char*  pBumpMap;
-        float        Roughness;
-        float        Reflectance;
-        float        MetalMask;
-        Base::Float3 AlbedoColor;
-        Base::Float4 TilingOffset;
-        int          NumberOfBytes;
-        unsigned int Hash;
+        const char*           pMaterialName;
+        const char*           pColorMap;
+        const char*           pNormalMap;
+        const char*           pRoughnessMap;
+        const char*           pReflectanceMap;
+        const char*           pMetalMaskMap;
+        const char*           pAOMap;
+        const char*           pBumpMap;
+        float                 Roughness;
+        float                 Reflectance;
+        float                 MetalMask;
+        Base::Float3          AlbedoColor;
+        Base::Float4          TilingOffset;
+        int                   NumberOfBytes;
+        unsigned int          Hash;
+        tinyxml2::XMLDocument MaterialFile;
 
         Hash = 0;
 
         // -----------------------------------------------------------------------------
-        // Create hash value over filename
+        // Create hash value
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_pFileName != nullptr && strlen(_rDescriptor.m_pFileName))
         {
-            NumberOfBytes = static_cast<unsigned int>(strlen(_rDescriptor.m_pFileName) * sizeof(char));
+            NumberOfBytes     = static_cast<unsigned int>(strlen(_rDescriptor.m_pFileName) * sizeof(char));
             const void* pData = static_cast<const void*>(_rDescriptor.m_pFileName);
 
             Hash = Base::CRC32(pData, NumberOfBytes);
+        }
+        else if (_rDescriptor.m_pMaterialName != nullptr && strlen(_rDescriptor.m_pMaterialName))
+        {
+            NumberOfBytes     = static_cast<unsigned int>(strlen(_rDescriptor.m_pMaterialName) * sizeof(char));
+            const void* pData = static_cast<const void*>(_rDescriptor.m_pMaterialName);
 
-            if (m_MaterialByHashs.find(Hash) != m_MaterialByHashs.end())
-            {
-                return *m_MaterialByHashs.at(Hash);
-            }
+            Hash = Base::CRC32(pData, NumberOfBytes);
         }
 
+        assert (Hash != 0);
+
+        if (m_MaterialByHashs.find(Hash) != m_MaterialByHashs.end())
+        {
+            return *m_MaterialByHashs.at(Hash);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Setup default values
+        // -----------------------------------------------------------------------------
         pMaterialName   = _rDescriptor.m_pMaterialName;
         pColorMap       = _rDescriptor.m_pColorMap;
         pNormalMap      = _rDescriptor.m_pNormalMap;
@@ -212,8 +225,6 @@ namespace
             // -----------------------------------------------------------------------------
             // Load material file
             // -----------------------------------------------------------------------------
-            tinyxml2::XMLDocument MaterialFile;
-        
             int Error = MaterialFile.LoadFile(PathToMaterial.c_str());
 
             if (Error != tinyxml2::XML_NO_ERROR)
@@ -442,6 +453,11 @@ namespace
             BASE_CONSOLE_STREAMERROR("Failed create an material.");
 
             return *m_pDefaultMaterial;
+        }
+
+        if (_rDescriptor.m_pFileName != nullptr)
+        {
+            MaterialFile.Clear();
         }
 
         return *pInternMaterial;

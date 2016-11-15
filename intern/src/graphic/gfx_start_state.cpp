@@ -19,6 +19,7 @@
 #include "graphic/gfx_light_point_renderer.h"
 #include "graphic/gfx_light_sun_renderer.h"
 #include "graphic/gfx_main.h"
+#include "graphic/gfx_material_manager.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_particle_renderer.h"
 #include "graphic/gfx_postfx_renderer.h"
@@ -62,17 +63,18 @@ namespace
         // Start manager. We have to take care on a specific order because of
         // dependencies.
         // -----------------------------------------------------------------------------
-        ViewManager           ::OnStart();
-        StateManager          ::OnStart();
-        ContextManager        ::OnStart();
-        SamplerManager        ::OnStart();
-        TextureManager        ::OnStart();
-        BufferManager         ::OnStart();
-        ShaderManager         ::OnStart();
-        TargetSetManager      ::OnStart();
-        LightManager          ::OnStart();
-        MeshManager           ::OnStart();
-        ActorManager          ::OnStart();
+        ViewManager     ::OnStart();
+        StateManager    ::OnStart();
+        ContextManager  ::OnStart();
+        SamplerManager  ::OnStart();
+        TextureManager  ::OnStart();
+        BufferManager   ::OnStart();
+        ShaderManager   ::OnStart();
+        TargetSetManager::OnStart();
+        LightManager    ::OnStart();
+        MeshManager     ::OnStart();
+        ActorManager    ::OnStart();
+        MaterialManager ::OnStart();
 
         BASE_CONSOLE_STREAMINFO("Gfx> Finished starting manager.");
 

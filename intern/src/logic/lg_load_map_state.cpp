@@ -373,7 +373,11 @@ namespace
 
             MaterialFileDesc.m_pFileName = "materials/naturals/metals/Gold_Worn_00.mat";
 
-            pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
+            Dt::CMaterial& rMaterial = Dt::MaterialManager::CreateMaterial(MaterialFileDesc);
+
+            pModelActorFacet->SetMaterial(0, &rMaterial);
+
+            Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyCreate);
 
             // -----------------------------------------------------------------------------
 
@@ -417,7 +421,11 @@ namespace
 
             MaterialFileDesc.m_pFileName = "materials/tests/checker.mat";
 
-            pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
+            Dt::CMaterial& rMaterial = Dt::MaterialManager::CreateMaterial(MaterialFileDesc);
+
+            pModelActorFacet->SetMaterial(0, &rMaterial);
+
+            Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyCreate);
 
             // -----------------------------------------------------------------------------
 

@@ -16,6 +16,7 @@
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_main.h"
+#include "graphic/gfx_material_manager.h"
 #include "graphic/gfx_mesh.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
@@ -591,6 +592,8 @@ namespace
                 {
                     MaterialPtr = SurfacePtr->GetMaterial();
                 }
+
+                assert(MaterialPtr != 0 && MaterialPtr.IsValid());
 
                 // -----------------------------------------------------------------------------
                 // Set informations to render job

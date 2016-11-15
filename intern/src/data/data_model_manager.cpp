@@ -409,7 +409,7 @@ namespace
                             {
                                 SMaterialDescriptor MaterialDescriptor;
 
-                                MaterialDescriptor.m_pMaterialName   = "STATIC DEFAULT MATERIAL";
+                                MaterialDescriptor.m_pMaterialName   = "DEFAULT MATERIAL";
                                 MaterialDescriptor.m_pColorMap       = 0;
                                 MaterialDescriptor.m_pNormalMap      = 0;
                                 MaterialDescriptor.m_pRoughnessMap   = 0;
@@ -421,14 +421,21 @@ namespace
                                 MaterialDescriptor.m_Reflectance     = 0.0f;
                                 MaterialDescriptor.m_MetalMask       = 0.0f;
                                 MaterialDescriptor.m_AlbedoColor     = Base::Float3(1.0f);
-                                MaterialDescriptor.m_TilingOffset    = Base::Float4(0.0f);
+                                MaterialDescriptor.m_TilingOffset    = Base::Float4(1.0f, 1.0f, 0.0f, 0.0f);
                                 MaterialDescriptor.m_pFileName       = 0;
 
                                 // -----------------------------------------------------------------------------
                                 // Get model specific attributes
                                 // -----------------------------------------------------------------------------
-                                aiString  TextureName;
+                                aiString  NativeString;
                                 aiColor4D DiffuseColor;
+
+                                if (pMaterial->Get(AI_MATKEY_NAME, NativeString) == AI_SUCCESS)
+                                {
+                                    // TODO by tschwandt
+                                    // What is to do if no name exists? Create new material or use the default one?
+                                    MaterialDescriptor.m_pMaterialName = NativeString.data;
+                                }
                                 
                                 if (pMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, DiffuseColor) == AI_SUCCESS)
                                 {
@@ -437,17 +444,17 @@ namespace
                                     MaterialDescriptor.m_AlbedoColor[2] = DiffuseColor.b;
                                 }
 
-                                if (pMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &TextureName) == AI_SUCCESS)
+                                if (pMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &NativeString) == AI_SUCCESS)
                                 {
-                                    MaterialDescriptor.m_pColorMap = TextureName.data;
+                                    MaterialDescriptor.m_pColorMap = NativeString.data;
                                 }
                                 
                                 // -----------------------------------------------------------------------------
                                 // Normal
                                 // -----------------------------------------------------------------------------
-                                if (pMaterial->GetTexture(aiTextureType_HEIGHT, 0, &TextureName) == AI_SUCCESS)
+                                if (pMaterial->GetTexture(aiTextureType_HEIGHT, 0, &NativeString) == AI_SUCCESS)
                                 {
-                                    MaterialDescriptor.m_pNormalMap = TextureName.data;
+                                    MaterialDescriptor.m_pNormalMap = NativeString.data;
                                 }
 
                                 // -----------------------------------------------------------------------------
