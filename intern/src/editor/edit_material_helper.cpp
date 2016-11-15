@@ -208,8 +208,8 @@ namespace
 
         float X, Y, Z, W;
 
-        bool HasColorMap = false;
-        bool HasNormalMap = false;
+        bool HasColorMap     = false;
+        bool HasNormalMap    = false;
         bool HasRoughnessMap = false;
         bool HasMetalnessMap = false;
 
@@ -286,44 +286,116 @@ namespace
         TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pIdentifier      = 0;
 
-        if (HasColorMap && (rMaterial.GetColorTexture() == nullptr || strcmp(rMaterial.GetColorTexture()->GetFileName(), ColorMapName)))
+        if (HasColorMap)
         {
-            TextureDescriptor.m_pFileName = ColorMapName;
+            Dt::CTexture2D* pTexture = rMaterial.GetColorTexture();
 
-            rMaterial.SetColorTexture(Dt::TextureManager::CreateTexture2D(TextureDescriptor));
+            if (pTexture != nullptr && strcmp(pTexture->GetFileName(), ColorMapName))
+            {
+                Dt::TextureManager::CopyToTexture2D(pTexture, ColorMapName);
+
+                Dt::TextureManager::MarkTextureAsDirty(pTexture, Dt::CTextureBase::DirtyFile);
+            }
+            else
+            {
+                TextureDescriptor.m_pFileName = ColorMapName;
+
+                pTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+
+                if (pTexture != nullptr)
+                {
+                    rMaterial.SetColorTexture(pTexture);
+
+                    Dt::TextureManager::MarkTextureAsDirty(pTexture, Dt::CTextureBase::DirtyCreate);
+                }
+            }
         }
         else if (HasColorMap == false)
         {
             rMaterial.SetColorTexture(0);
         }
 
-        if (HasNormalMap && (rMaterial.GetNormalTexture() == nullptr || strcmp(rMaterial.GetNormalTexture()->GetFileName(), NormalMapName)))
+        if (HasNormalMap)
         {
-            TextureDescriptor.m_pFileName = NormalMapName;
+            Dt::CTexture2D* pTexture = rMaterial.GetNormalTexture();
 
-            rMaterial.SetNormalTexture(Dt::TextureManager::CreateTexture2D(TextureDescriptor));
+            if (pTexture != nullptr && strcmp(pTexture->GetFileName(), NormalMapName))
+            {
+                Dt::TextureManager::CopyToTexture2D(pTexture, NormalMapName);
+
+                Dt::TextureManager::MarkTextureAsDirty(pTexture, Dt::CTextureBase::DirtyFile);
+            }
+            else
+            {
+                TextureDescriptor.m_pFileName = NormalMapName;
+
+                pTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+
+                if (pTexture != nullptr)
+                {
+                    rMaterial.SetNormalTexture(pTexture);
+
+                    Dt::TextureManager::MarkTextureAsDirty(pTexture, Dt::CTextureBase::DirtyCreate);
+                }
+            }
         }
         else if (HasNormalMap == false)
         {
             rMaterial.SetNormalTexture(0);
         }
 
-        if (HasRoughnessMap && (rMaterial.GetRoughnessTexture() == nullptr || strcmp(rMaterial.GetRoughnessTexture()->GetFileName(), RoughnessMapName)))
+        if (HasRoughnessMap)
         {
-            TextureDescriptor.m_pFileName = RoughnessMapName;
+            Dt::CTexture2D* pTexture = rMaterial.GetRoughnessTexture();
 
-            rMaterial.SetRoughnessTexture(Dt::TextureManager::CreateTexture2D(TextureDescriptor));
+            if (pTexture != nullptr && strcmp(pTexture->GetFileName(), RoughnessMapName))
+            {
+                Dt::TextureManager::CopyToTexture2D(pTexture, RoughnessMapName);
+
+                Dt::TextureManager::MarkTextureAsDirty(pTexture, Dt::CTextureBase::DirtyFile);
+            }
+            else
+            {
+                TextureDescriptor.m_pFileName = RoughnessMapName;
+
+                pTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+
+                if (pTexture != nullptr)
+                {
+                    rMaterial.SetRoughnessTexture(pTexture);
+
+                    Dt::TextureManager::MarkTextureAsDirty(pTexture, Dt::CTextureBase::DirtyCreate);
+                }
+            }
         }
         else if (HasRoughnessMap == false)
         {
             rMaterial.SetRoughnessTexture(0);
         }
 
-        if (HasMetalnessMap && (rMaterial.GetMetalTexture() == nullptr || strcmp(rMaterial.GetMetalTexture()->GetFileName(), MetalMapName)))
+        if (HasMetalnessMap)
         {
-            TextureDescriptor.m_pFileName = MetalMapName;
+            Dt::CTexture2D* pTexture = rMaterial.GetMetalTexture();
 
-            rMaterial.SetMetalTexture(Dt::TextureManager::CreateTexture2D(TextureDescriptor));
+            if (pTexture != nullptr && strcmp(pTexture->GetFileName(), MetalMapName))
+            {
+                Dt::TextureManager::CopyToTexture2D(pTexture, MetalMapName);
+
+                Dt::TextureManager::MarkTextureAsDirty(pTexture, Dt::CTextureBase::DirtyFile);
+            }
+            else
+            {
+                TextureDescriptor.m_pFileName = MetalMapName;
+
+                pTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+
+                if (pTexture != nullptr)
+                {
+                    rMaterial.SetMetalTexture(pTexture);
+
+                    Dt::TextureManager::MarkTextureAsDirty(pTexture, Dt::CTextureBase::DirtyCreate);
+                }
+            }
         }
         else if (HasMetalnessMap == false)
         {

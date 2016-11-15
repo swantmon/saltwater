@@ -61,6 +61,7 @@ namespace TextureManager
     CTexture2D* GetTexture2DByHash(unsigned int _Hash);
     CTextureCube* GetTextureCubeByHash(unsigned int _Hash);
 
+    void CopyToTexture2D(CTexture2D* _pTexture2D, const Base::Char* _pFile);
     void CopyToTexture2D(CTexture2D* _pTexture2D, void* _pPixels);
     void CopyToTexture2D(CTexture2D* _pTexture2D, CTexture2D* _pTexture);
 

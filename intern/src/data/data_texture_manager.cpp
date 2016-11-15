@@ -50,6 +50,7 @@ namespace
         CTexture2D* GetTexture2DByHash(unsigned int _Hash);
         CTextureCube* GetTextureCubeByHash(unsigned int _Hash);
 
+        void CopyToTexture2D(CTexture2D* _pTexture2D, const Base::Char* _pFile);
         void CopyToTexture2D(CTexture2D* _pTexture2D, void* _pPixels);
         void CopyToTexture2D(CTexture2D* _pTexture2D, CTexture2D* _pTexture);
 
@@ -633,6 +634,62 @@ namespace
         }
 
         return nullptr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CDtTextureManager::CopyToTexture2D(CTexture2D* _pTexture2D, const Base::Char* _pFile)
+    {
+        assert(_pTexture2D != 0);
+        assert(_pFile != 0);
+
+        unsigned int      NumberOfPixel;
+        unsigned int      NumberOfBytes;
+        const Base::Char* pHashIdentifier;
+        unsigned int      Hash;
+        const void*       pData;
+
+        // -----------------------------------------------------------------------------
+        // Get internal texture
+        // -----------------------------------------------------------------------------
+        CInternTexture2D* pInternTexture2D = static_cast<CInternTexture2D*>(_pTexture2D);
+
+        // -----------------------------------------------------------------------------
+        // Prepare
+        // -----------------------------------------------------------------------------
+        pHashIdentifier = nullptr;
+        Hash            = pInternTexture2D->m_Hash;
+
+        // -----------------------------------------------------------------------------
+        // Create hash value over filename if no identifier is set
+        // -----------------------------------------------------------------------------
+        if (pInternTexture2D->m_Identifier.GetLength() == 0)
+        {
+            NumberOfBytes = static_cast<unsigned int>(strlen(_pFile) * sizeof(char));
+            pData = static_cast<const void*>(_pFile);
+
+            Hash = Base::CRC32(pData, NumberOfBytes);
+
+            if (m_Textures2DByHash.find(Hash) != m_Textures2DByHash.end())
+            {
+                _pTexture2D = m_Textures2DByHash.at(Hash);
+            }
+        }
+
+        // -----------------------------------------------------------------------------
+        // Set texture
+        // -----------------------------------------------------------------------------
+        if (pInternTexture2D->m_Info.m_IsPixelOwner)
+        {
+            // TODO by tschwandt
+            // Load file and copy data
+        }
+        else
+        {
+            pInternTexture2D->m_FileName = _pFile;
+
+            pInternTexture2D->m_Hash = Hash;
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -1278,6 +1335,13 @@ namespace TextureManager
     CTextureCube* GetTextureCubeByHash(unsigned int _Hash)
     {
         return CDtTextureManager::GetInstance().GetTextureCubeByHash(_Hash);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CopyToTexture2D(CTexture2D* _pTexture2D, const Base::Char* _pFile)
+    {
+        CDtTextureManager::GetInstance().CopyToTexture2D(_pTexture2D, _pFile);
     }
 
     // -----------------------------------------------------------------------------

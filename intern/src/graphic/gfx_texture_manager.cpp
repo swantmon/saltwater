@@ -831,6 +831,11 @@ namespace
                     TextureDescriptor.m_NumberOfPixelsV = pDataTexture->GetNumberOfPixelsV();
 
                     pInternTexture2D = InternCreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
+
+                    if (pInternTexture2D == nullptr)
+                    {
+                        pInternTexture2D = static_cast<CInternTexture2D*>(m_Texture2DPtr.GetPtr());
+                    }
                 }
 
                 if (Hash != 0)
@@ -881,11 +886,6 @@ namespace
             {
                 CInternTexture2D* pInternTexture2D = nullptr;
 
-                if (m_Textures2DByHash.find(Hash) != m_Textures2DByHash.end())
-                {
-                    return;
-                }
-
                 if (_pTexture->IsCube())
                 {
                     Dt::CTextureCube* pDataTexture = static_cast<Dt::CTextureCube*>(_pTexture);
@@ -913,9 +913,14 @@ namespace
                     TextureDescriptor.m_NumberOfPixelsV = pDataTexture->GetNumberOfPixelsV();
 
                     pInternTexture2D = InternCreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
+
+                    if (pInternTexture2D == nullptr)
+                    {
+                        pInternTexture2D = static_cast<CInternTexture2D*>(m_Texture2DPtr.GetPtr());
+                    }
                 }
 
-                if (Hash != 0)
+                if (Hash != 0 && pInternTexture2D != nullptr)
                 {
                     m_Textures2DByHash[Hash] = pInternTexture2D;
                 }
