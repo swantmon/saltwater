@@ -23,7 +23,10 @@ namespace Gfx
     
     CSurface::~CSurface()
     {
-        
+        m_VertexBuffer = 0;
+        m_IndexBuffer  = 0;
+        m_MaterialPtr  = 0;
+        m_VertexShader = 0;
     }
     
     CBufferSetPtr CSurface::GetVertexBuffer() const

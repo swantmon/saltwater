@@ -95,10 +95,11 @@ namespace
         // -----------------------------------------------------------------------------
         BASE_CONSOLE_STREAMINFO("Gfx> Exit manager...");
 
-        MaterialManager ::OnExit();
         ActorManager    ::OnExit();
         LightManager    ::OnExit();
         MeshManager     ::OnExit();
+        MaterialManager ::OnExit();
+
         TargetSetManager::OnExit();
         ContextManager  ::OnExit();
         StateManager    ::OnExit();

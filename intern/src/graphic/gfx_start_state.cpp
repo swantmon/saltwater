@@ -71,9 +71,10 @@ namespace
         BufferManager   ::OnStart();
         ShaderManager   ::OnStart();
         TargetSetManager::OnStart();
+
+        ActorManager    ::OnStart();
         LightManager    ::OnStart();
         MeshManager     ::OnStart();
-        ActorManager    ::OnStart();
         MaterialManager ::OnStart();
 
         BASE_CONSOLE_STREAMINFO("Gfx> Finished starting manager.");

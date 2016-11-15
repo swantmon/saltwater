@@ -251,11 +251,24 @@ namespace
         // -----------------------------------------------------------------------------
         // Create default material
         // -----------------------------------------------------------------------------
-        CInternMaterial* pDefaultMaterial = m_Materials.Allocate();
+        SMaterialDescriptor MaterialDescriptor;
 
-        SetShaderOfMaterial(*pDefaultMaterial);
+        MaterialDescriptor.m_pMaterialName   = "STATIC DEFAULT MATERIAL";
+        MaterialDescriptor.m_pColorMap       = 0;
+        MaterialDescriptor.m_pNormalMap      = 0;
+        MaterialDescriptor.m_pRoughnessMap   = 0;
+        MaterialDescriptor.m_pReflectanceMap = 0;
+        MaterialDescriptor.m_pMetalMaskMap   = 0;
+        MaterialDescriptor.m_pAOMap          = 0;
+        MaterialDescriptor.m_pBumpMap        = 0;
+        MaterialDescriptor.m_Roughness       = 1.0f;
+        MaterialDescriptor.m_Reflectance     = 0.0f;
+        MaterialDescriptor.m_MetalMask       = 0.0f;
+        MaterialDescriptor.m_AlbedoColor     = Base::Float3(1.0f);
+        MaterialDescriptor.m_TilingOffset    = Base::Float4(0.0f);
+        MaterialDescriptor.m_pFileName       = 0;
 
-        m_DefaultMaterialPtr = CMaterialPtr(pDefaultMaterial);
+        m_DefaultMaterialPtr = CreateMaterial(MaterialDescriptor);
 
         // -----------------------------------------------------------------------------
         // Set dirty handler of data textures
@@ -267,8 +280,16 @@ namespace
 
     void CGfxMaterialManager::OnExit()
     {
+        m_DefaultMaterialPtr = 0;
+
+        // -----------------------------------------------------------------------------
+        // Clear materials
+        // -----------------------------------------------------------------------------
         m_Materials.Clear();
 
+        // -----------------------------------------------------------------------------
+        // Clear hashes
+        // -----------------------------------------------------------------------------
         m_MaterialByHash.clear();
     }
 

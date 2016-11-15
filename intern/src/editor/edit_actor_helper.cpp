@@ -489,7 +489,7 @@ namespace
                 pMaterial->SetMetalTexture(0);
             }
 
-            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            Dt::MaterialManager::MarkMaterialAsDirty(*pMaterial, Dt::CMaterial::DirtyData);
         }
     }
 

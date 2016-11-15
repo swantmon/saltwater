@@ -17,7 +17,12 @@ namespace Gfx
 
     CMeshActorFacet::~CMeshActorFacet()
     {
+        m_ModelPtr = 0;
 
+        for (unsigned int IndexOfMaterial = 0; IndexOfMaterial < CLOD::s_NumberOfSurfaces; ++IndexOfMaterial)
+        {
+            m_MaterialPtrs[IndexOfMaterial] = 0;
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -63,7 +68,12 @@ namespace Gfx
 
     CARActorFacet::~CARActorFacet()
     {
+        m_ModelPtr = 0;
 
+        for (unsigned int IndexOfMaterial = 0; IndexOfMaterial < CLOD::s_NumberOfSurfaces; ++IndexOfMaterial)
+        {
+            m_MaterialPtrs[IndexOfMaterial] = 0;
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -111,7 +121,8 @@ namespace Gfx
 
     CCameraActorFacet::~CCameraActorFacet()
     {
-
+        m_BackgroundTexture2DPtr  = 0;
+        m_BackgroundTextureSetPtr = 0;
     }
 
     // -----------------------------------------------------------------------------
