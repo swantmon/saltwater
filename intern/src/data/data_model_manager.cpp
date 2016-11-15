@@ -396,97 +396,66 @@ namespace
                                 
                                 if (MaterialExaminer.find(".mat") != std::string::npos)
                                 {
-                                    SMaterialFileDescriptor MaterialFileDesc;
+                                    SMaterialDescriptor MaterialDesc;
 
-                                    MaterialFileDesc.m_pFileName = MaterialExaminer.c_str();
+                                    MaterialDesc.m_pFileName = MaterialExaminer.c_str();
 
-                                    rNewSurface.m_pMaterial = &MaterialManager::CreateMaterial(MaterialFileDesc);
+                                    rNewSurface.m_pMaterial = &MaterialManager::CreateMaterial(MaterialDesc);
                                 
                                     MaterialManager::MarkMaterialAsDirty(*rNewSurface.m_pMaterial, CMaterial::DirtyCreate);
                                 }
                             }
                             else
                             {
-                                // TODO by tschwandt
-                                // load an material with descriptor; not an empty material
+                                SMaterialDescriptor MaterialDescriptor;
 
-                                // -----------------------------------------------------------------------------
-                                // Create new material and load with model file settings
-                                // -----------------------------------------------------------------------------
-                                CMaterial& rNewMaterial = MaterialManager::CreateEmptyMaterial();
-                                
-                                // -----------------------------------------------------------------------------
-                                // Link
-                                // -----------------------------------------------------------------------------
-                                rNewSurface.m_pMaterial = &rNewMaterial;
-                                
+                                MaterialDescriptor.m_pMaterialName   = "STATIC DEFAULT MATERIAL";
+                                MaterialDescriptor.m_pColorMap       = 0;
+                                MaterialDescriptor.m_pNormalMap      = 0;
+                                MaterialDescriptor.m_pRoughnessMap   = 0;
+                                MaterialDescriptor.m_pReflectanceMap = 0;
+                                MaterialDescriptor.m_pMetalMaskMap   = 0;
+                                MaterialDescriptor.m_pAOMap          = 0;
+                                MaterialDescriptor.m_pBumpMap        = 0;
+                                MaterialDescriptor.m_Roughness       = 1.0f;
+                                MaterialDescriptor.m_Reflectance     = 0.0f;
+                                MaterialDescriptor.m_MetalMask       = 0.0f;
+                                MaterialDescriptor.m_AlbedoColor     = Base::Float3(1.0f);
+                                MaterialDescriptor.m_TilingOffset    = Base::Float4(0.0f);
+                                MaterialDescriptor.m_pFileName       = 0;
+
                                 // -----------------------------------------------------------------------------
                                 // Get model specific attributes
                                 // -----------------------------------------------------------------------------
                                 aiString  TextureName;
                                 aiColor4D DiffuseColor;
                                 
-                                float ColorR = 1.0f;
-                                float ColorG = 1.0f;
-                                float ColorB = 1.0f;
-                                
-                                const char* pColorMap = "";
-                                
                                 if (pMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, DiffuseColor) == AI_SUCCESS)
                                 {
-                                    ColorR = DiffuseColor.r;
-                                    ColorG = DiffuseColor.g;
-                                    ColorB = DiffuseColor.b;
+                                    MaterialDescriptor.m_AlbedoColor[0] = DiffuseColor.r;
+                                    MaterialDescriptor.m_AlbedoColor[1] = DiffuseColor.g;
+                                    MaterialDescriptor.m_AlbedoColor[2] = DiffuseColor.b;
                                 }
-                                
+
                                 if (pMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &TextureName) == AI_SUCCESS)
                                 {
-                                    pColorMap = TextureName.data;
+                                    MaterialDescriptor.m_pColorMap = TextureName.data;
                                 }
                                 
                                 // -----------------------------------------------------------------------------
                                 // Normal
                                 // -----------------------------------------------------------------------------
-                                const char* pNormalMap = "";
-                                
                                 if (pMaterial->GetTexture(aiTextureType_HEIGHT, 0, &TextureName) == AI_SUCCESS)
                                 {
-                                    pNormalMap = TextureName.data;
-                                }
-                                
-                                // -----------------------------------------------------------------------------
-                                // Setup material
-                                // -----------------------------------------------------------------------------
-                                rNewMaterial.SetColor(Base::Float3(ColorR, ColorG, ColorB));
-    
-                                // -----------------------------------------------------------------------------
-                                // Setup material textures
-                                // -----------------------------------------------------------------------------
-                                STextureDescriptor TextureDescriptor;
-
-                                TextureDescriptor.m_NumberOfPixelsU  = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
-                                TextureDescriptor.m_NumberOfPixelsV  = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
-                                TextureDescriptor.m_NumberOfPixelsW  = 1;
-                                TextureDescriptor.m_Format           = Dt::CTextureBase::R8G8B8_UBYTE;
-                                TextureDescriptor.m_Semantic         = Dt::CTextureBase::Diffuse;
-                                TextureDescriptor.m_Binding          = Dt::CTextureBase::ShaderResource;
-                                TextureDescriptor.m_pPixels          = 0;
-                                TextureDescriptor.m_pFileName        = 0;
-                                TextureDescriptor.m_pIdentifier      = 0;
-
-                                if (pColorMap)
-                                {
-                                    TextureDescriptor.m_pFileName = pColorMap;
-
-                                    rNewMaterial.SetColorTexture(TextureManager::CreateTexture2D(TextureDescriptor));
+                                    MaterialDescriptor.m_pNormalMap = TextureName.data;
                                 }
 
-                                if (pNormalMap)
-                                {
-                                    TextureDescriptor.m_pFileName = pNormalMap;
+                                // -----------------------------------------------------------------------------
+                                // Create and link
+                                // -----------------------------------------------------------------------------
+                                CMaterial& rNewMaterial = MaterialManager::CreateMaterial(MaterialDescriptor);
 
-                                    rNewMaterial.SetNormalTexture(TextureManager::CreateTexture2D(TextureDescriptor));
-                                }
+                                rNewSurface.m_pMaterial = &rNewMaterial;
 
                                 MaterialManager::MarkMaterialAsDirty(rNewMaterial, CMaterial::DirtyCreate);
                             }

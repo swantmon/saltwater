@@ -54,8 +54,9 @@ namespace
         void OnStart();
         void OnExit();
 
-        CMaterial& CreateEmptyMaterial();
-        CMaterial& CreateMaterial(const SMaterialFileDescriptor& _rDescriptor);
+        CMaterial& CreateMaterial(const SMaterialDescriptor& _rDescriptor);
+
+        CMaterial& GetDefaultMaterial();
 
         void MarkMaterialAsDirty(CMaterial& _rMaterial, unsigned int _DirtyFlags);
 
@@ -84,6 +85,8 @@ namespace
         CMaterialDelegates m_MaterialDelegates;
         CMaterialByHashs   m_MaterialByHashs;
 
+        CInternMaterial* m_pDefaultMaterial;
+
     private:
 
         void FreeMaterial(CInternMaterial& _rMaterial);
@@ -96,6 +99,7 @@ namespace
         : m_Materials        ()
         , m_MaterialDelegates()
         , m_MaterialByHashs  ()
+        , m_pDefaultMaterial (0)
     {
     }
     
@@ -109,47 +113,64 @@ namespace
 
     void CDtMaterialManager::OnStart()
     {
+        SMaterialDescriptor MaterialDescriptor;
+
+        MaterialDescriptor.m_pMaterialName   = "STATIC DEFAULT MATERIAL";
+        MaterialDescriptor.m_pColorMap       = 0;
+        MaterialDescriptor.m_pNormalMap      = 0;
+        MaterialDescriptor.m_pRoughnessMap   = 0;
+        MaterialDescriptor.m_pReflectanceMap = 0;
+        MaterialDescriptor.m_pMetalMaskMap   = 0;
+        MaterialDescriptor.m_pAOMap          = 0;
+        MaterialDescriptor.m_pBumpMap        = 0;
+        MaterialDescriptor.m_Roughness       = 1.0f;
+        MaterialDescriptor.m_Reflectance     = 0.0f;
+        MaterialDescriptor.m_MetalMask       = 0.0f;
+        MaterialDescriptor.m_AlbedoColor     = Base::Float3(1.0f);
+        MaterialDescriptor.m_TilingOffset    = Base::Float4(0.0f);
+        MaterialDescriptor.m_pFileName       = 0;
+
+        m_pDefaultMaterial = &static_cast<CInternMaterial&>(CreateMaterial(MaterialDescriptor));
     }
 
     // -----------------------------------------------------------------------------
 
     void CDtMaterialManager::OnExit()
     {
+        m_Materials.Free(m_pDefaultMaterial);
+
+        m_pDefaultMaterial = 0;
+
+        // -----------------------------------------------------------------------------
+
         m_Materials.Clear();
 
         m_MaterialDelegates.clear();
 
         m_MaterialByHashs.clear();
     }
-
-    // -----------------------------------------------------------------------------
-
-    CMaterial& CDtMaterialManager::CreateEmptyMaterial()
-    {
-        // -----------------------------------------------------------------------------
-        // Create Material
-        // -----------------------------------------------------------------------------
-        CInternMaterial& rNewMaterial = m_Materials.Allocate();
-
-        rNewMaterial.m_Materialname = "";
-        rNewMaterial.m_FileName     = "";
-
-        return rNewMaterial;
-    }
     
     // -----------------------------------------------------------------------------
     
-    CMaterial& CDtMaterialManager::CreateMaterial(const SMaterialFileDescriptor& _rDescriptor)
+    CMaterial& CDtMaterialManager::CreateMaterial(const SMaterialDescriptor& _rDescriptor)
     {
+        const char*  pMaterialName;
+        const char*  pColorMap;
+        const char*  pNormalMap;
+        const char*  pRoughnessMap;
+        const char*  pReflectanceMap;
+        const char*  pMetalMaskMap;
+        const char*  pAOMap;
+        const char*  pBumpMap;
+        float        Roughness;
+        float        Reflectance;
+        float        MetalMask;
+        Base::Float3 AlbedoColor;
+        Base::Float4 TilingOffset;
         int          NumberOfBytes;
         unsigned int Hash;
 
         Hash = 0;
-
-        if (_rDescriptor.m_pFileName == 0)
-        {
-            BASE_THROWM("Can't create material because of invalid informations.");
-        }
 
         // -----------------------------------------------------------------------------
         // Create hash value over filename
@@ -167,241 +188,270 @@ namespace
             }
         }
 
-        // -----------------------------------------------------------------------------
-        // Create Material
-        // -----------------------------------------------------------------------------
-        CInternMaterial& rNewMaterial = m_Materials.Allocate();
+        pMaterialName   = _rDescriptor.m_pMaterialName;
+        pColorMap       = _rDescriptor.m_pColorMap;
+        pNormalMap      = _rDescriptor.m_pNormalMap;
+        pRoughnessMap   = _rDescriptor.m_pRoughnessMap;
+        pReflectanceMap = _rDescriptor.m_pReflectanceMap;
+        pMetalMaskMap   = _rDescriptor.m_pMetalMaskMap;
+        pAOMap          = _rDescriptor.m_pAOMap;
+        pBumpMap        = _rDescriptor.m_pBumpMap;
+        Roughness       = _rDescriptor.m_Roughness;
+        Reflectance     = _rDescriptor.m_Reflectance;
+        MetalMask       = _rDescriptor.m_MetalMask;
+        AlbedoColor     = _rDescriptor.m_AlbedoColor;
+        TilingOffset    = _rDescriptor.m_TilingOffset;
 
-        rNewMaterial.m_Materialname = _rDescriptor.m_pFileName;
-        
-        // -----------------------------------------------------------------------------
-        // Build path to texture in file system
-        // -----------------------------------------------------------------------------
-		std::string PathToMaterial = g_PathToAssets + _rDescriptor.m_pFileName;
-        
-        // -----------------------------------------------------------------------------
-        // Load material file
-        // -----------------------------------------------------------------------------
-        tinyxml2::XMLDocument MaterialFile;
-        
-        int Error = MaterialFile.LoadFile(PathToMaterial.c_str());
-
-        if (Error != tinyxml2::XML_NO_ERROR)
+        if (_rDescriptor.m_pFileName != nullptr)
         {
-            BASE_THROWV("Error loading material file '%s'.", PathToMaterial.c_str());
-        }
+            // -----------------------------------------------------------------------------
+            // Build path to texture in file system
+            // -----------------------------------------------------------------------------
+		    std::string PathToMaterial = g_PathToAssets + _rDescriptor.m_pFileName;
         
-        tinyxml2::XMLElement* pMaterialDefinition = MaterialFile.FirstChildElement("MaterialDefinition");
+            // -----------------------------------------------------------------------------
+            // Load material file
+            // -----------------------------------------------------------------------------
+            tinyxml2::XMLDocument MaterialFile;
         
-        // -----------------------------------------------------------------------------
-        // Pull general informations from file
-        // -----------------------------------------------------------------------------
-        const char* pMaterialName = pMaterialDefinition->Attribute("Name");
-        
-        assert(pMaterialName != 0);
-        
-        // -----------------------------------------------------------------------------
-        // Color
-        // -----------------------------------------------------------------------------
-        tinyxml2::XMLElement* pMaterialColor = pMaterialDefinition->FirstChildElement("Color");
-        
-        assert(pMaterialColor != 0);
-        
-        float ColorR = pMaterialColor->FloatAttribute("R");
-        float ColorG = pMaterialColor->FloatAttribute("G");
-        float ColorB = pMaterialColor->FloatAttribute("B");
-        
-        const char* pColorMap = pMaterialColor->Attribute("Map");
-        
-        // -----------------------------------------------------------------------------
-        // Normal
-        // -----------------------------------------------------------------------------
-        tinyxml2::XMLElement* pMaterialNormal = pMaterialDefinition->FirstChildElement("Normal");
-        
-        assert(pMaterialNormal != 0);
-        
-        const char* pNormalMap = pMaterialNormal->Attribute("Map");
-        
-        // -----------------------------------------------------------------------------
-        // Roughness
-        // -----------------------------------------------------------------------------
-        tinyxml2::XMLElement* pMaterialRoughness = pMaterialDefinition->FirstChildElement("Roughness");
-        
-        assert(pMaterialRoughness != 0);
-        
-        float Roughness = pMaterialRoughness->FloatAttribute("V");
-        
-        const char* pRoughnessMap = pMaterialRoughness->Attribute("Map");
-        
-        // -----------------------------------------------------------------------------
-        // Reflectance
-        // -----------------------------------------------------------------------------
-        tinyxml2::XMLElement* pMaterialReflectance = pMaterialDefinition->FirstChildElement("Reflectance");
-        
-        assert(pMaterialReflectance != 0);
-        
-        float Reflectance = pMaterialReflectance->FloatAttribute("V");
-        
-        const char* pReflectanceMap = pMaterialReflectance->Attribute("Map");
-        
-        // -----------------------------------------------------------------------------
-        // Metallic
-        // -----------------------------------------------------------------------------
-        tinyxml2::XMLElement* pMaterialMetallic = pMaterialDefinition->FirstChildElement("Metallic");
-        
-        assert(pMaterialMetallic != 0);
-        
-        float MetalMask = pMaterialMetallic->FloatAttribute("V");
-        
-        const char* pMetalMaskMap = pMaterialMetallic->Attribute("Map");
-        
-        // -----------------------------------------------------------------------------
-        // Ambient Occlusion
-        // -----------------------------------------------------------------------------
-        tinyxml2::XMLElement* pAO = pMaterialDefinition->FirstChildElement("AO");
-        
-        const char* pAOMap = 0;
-        
-        if (pAO != 0)
-        {
-            pAOMap = pAO->Attribute("Map");
-        }
-        
-        // -----------------------------------------------------------------------------
-        // Bump
-        // -----------------------------------------------------------------------------
-        tinyxml2::XMLElement* pBump = pMaterialDefinition->FirstChildElement("Bump");
-        
-        const char* pBumpMap = 0;
-        
-        if (pBump != 0)
-        {
-            pBumpMap = pBump->Attribute("Map");
-        }
-        
-        // -----------------------------------------------------------------------------
-        // Tiling & offset
-        // -----------------------------------------------------------------------------
-        tinyxml2::XMLElement* pTiling = pMaterialDefinition->FirstChildElement("Tiling");
-        tinyxml2::XMLElement* pOffset = pMaterialDefinition->FirstChildElement("Offset");
-        
-        Base::Float4 TilingOffset(1.0f, 1.0f, 0.0f, 0.0f);
-        
-        if (pTiling)
-        {
-            TilingOffset[0] = pTiling->FloatAttribute("X");
-            TilingOffset[1] = pTiling->FloatAttribute("Y");
-        }
-        
-        if (pOffset)
-        {
-            TilingOffset[2] = pOffset->FloatAttribute("X");
-            TilingOffset[3] = pOffset->FloatAttribute("Y");
-        }
-        
-        // -----------------------------------------------------------------------------
-        // Setup material
-        // -----------------------------------------------------------------------------
-        rNewMaterial.m_Materialname = pMaterialName;
-        rNewMaterial.m_Color        = Base::Float3(ColorR, ColorG, ColorB);
-        rNewMaterial.m_Roughness    = Roughness;
-        rNewMaterial.m_Reflectance  = Reflectance;
-        rNewMaterial.m_MetalMask    = MetalMask;
-        rNewMaterial.m_TilingOffset = TilingOffset;
+            int Error = MaterialFile.LoadFile(PathToMaterial.c_str());
 
-        // -----------------------------------------------------------------------------
-        // Setup material textures
-        // -----------------------------------------------------------------------------
-        STextureDescriptor TextureDescriptor;
+            if (Error != tinyxml2::XML_NO_ERROR)
+            {
+                BASE_THROWV("Error loading material file '%s'.", PathToMaterial.c_str());
+            }
+        
+            tinyxml2::XMLElement* pMaterialDefinition = MaterialFile.FirstChildElement("MaterialDefinition");
+        
+            // -----------------------------------------------------------------------------
+            // Pull general informations from file
+            // -----------------------------------------------------------------------------
+            pMaterialName = pMaterialDefinition->Attribute("Name");
+        
+            assert(pMaterialName != 0);
+        
+            // -----------------------------------------------------------------------------
+            // Color
+            // -----------------------------------------------------------------------------
+            tinyxml2::XMLElement* pMaterialColor = pMaterialDefinition->FirstChildElement("Color");
+        
+            assert(pMaterialColor != 0);
+        
+            float ColorR = pMaterialColor->FloatAttribute("R");
+            float ColorG = pMaterialColor->FloatAttribute("G");
+            float ColorB = pMaterialColor->FloatAttribute("B");
 
-        TextureDescriptor.m_NumberOfPixelsU  = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
-        TextureDescriptor.m_NumberOfPixelsV  = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
-        TextureDescriptor.m_NumberOfPixelsW  = 1;
-        TextureDescriptor.m_Format           = Dt::CTextureBase::R8G8B8_UBYTE;
-        TextureDescriptor.m_Semantic         = Dt::CTextureBase::Diffuse;
-        TextureDescriptor.m_Binding          = Dt::CTextureBase::ShaderResource;
-        TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_pFileName        = 0;
-        TextureDescriptor.m_pIdentifier      = 0;
-
-        if (pColorMap)
-        {
-            TextureDescriptor.m_pFileName = pColorMap;
-
-            rNewMaterial.m_pColorTexture = TextureManager::CreateTexture2D(TextureDescriptor);
-
-            TextureManager::MarkTextureAsDirty(rNewMaterial.m_pColorTexture, CTextureBase::DirtyCreate);
+            AlbedoColor = Base::Float3(ColorR, ColorG, ColorB);
+        
+            pColorMap = pMaterialColor->Attribute("Map");
+        
+            // -----------------------------------------------------------------------------
+            // Normal
+            // -----------------------------------------------------------------------------
+            tinyxml2::XMLElement* pMaterialNormal = pMaterialDefinition->FirstChildElement("Normal");
+        
+            assert(pMaterialNormal != 0);
+        
+            pNormalMap = pMaterialNormal->Attribute("Map");
+        
+            // -----------------------------------------------------------------------------
+            // Roughness
+            // -----------------------------------------------------------------------------
+            tinyxml2::XMLElement* pMaterialRoughness = pMaterialDefinition->FirstChildElement("Roughness");
+        
+            assert(pMaterialRoughness != 0);
+        
+            Roughness = pMaterialRoughness->FloatAttribute("V");
+        
+            pRoughnessMap = pMaterialRoughness->Attribute("Map");
+        
+            // -----------------------------------------------------------------------------
+            // Reflectance
+            // -----------------------------------------------------------------------------
+            tinyxml2::XMLElement* pMaterialReflectance = pMaterialDefinition->FirstChildElement("Reflectance");
+        
+            assert(pMaterialReflectance != 0);
+        
+            Reflectance = pMaterialReflectance->FloatAttribute("V");
+        
+            pReflectanceMap = pMaterialReflectance->Attribute("Map");
+        
+            // -----------------------------------------------------------------------------
+            // Metallic
+            // -----------------------------------------------------------------------------
+            tinyxml2::XMLElement* pMaterialMetallic = pMaterialDefinition->FirstChildElement("Metallic");
+        
+            assert(pMaterialMetallic != 0);
+        
+            MetalMask = pMaterialMetallic->FloatAttribute("V");
+        
+            pMetalMaskMap = pMaterialMetallic->Attribute("Map");
+        
+            // -----------------------------------------------------------------------------
+            // Ambient Occlusion
+            // -----------------------------------------------------------------------------
+            tinyxml2::XMLElement* pAO = pMaterialDefinition->FirstChildElement("AO");
+        
+            pAOMap = 0;
+        
+            if (pAO != 0)
+            {
+                pAOMap = pAO->Attribute("Map");
+            }
+        
+            // -----------------------------------------------------------------------------
+            // Bump
+            // -----------------------------------------------------------------------------
+            tinyxml2::XMLElement* pBump = pMaterialDefinition->FirstChildElement("Bump");
+        
+            pBumpMap = 0;
+        
+            if (pBump != 0)
+            {
+                pBumpMap = pBump->Attribute("Map");
+            }
+        
+            // -----------------------------------------------------------------------------
+            // Tiling & offset
+            // -----------------------------------------------------------------------------
+            tinyxml2::XMLElement* pTiling = pMaterialDefinition->FirstChildElement("Tiling");
+            tinyxml2::XMLElement* pOffset = pMaterialDefinition->FirstChildElement("Offset");
+        
+            if (pTiling)
+            {
+                TilingOffset[0] = pTiling->FloatAttribute("X");
+                TilingOffset[1] = pTiling->FloatAttribute("Y");
+            }
+        
+            if (pOffset)
+            {
+                TilingOffset[2] = pOffset->FloatAttribute("X");
+                TilingOffset[3] = pOffset->FloatAttribute("Y");
+            }
         }
 
-        if (pNormalMap)
+        CInternMaterial* pInternMaterial = 0;
+
+        try
         {
-            TextureDescriptor.m_pFileName = pNormalMap;
+            // -----------------------------------------------------------------------------
+            // Create Material
+            // -----------------------------------------------------------------------------
+            CInternMaterial& rNewMaterial = m_Materials.Allocate();
 
-            rNewMaterial.m_pNormalTexture = TextureManager::CreateTexture2D(TextureDescriptor);
-
-            TextureManager::MarkTextureAsDirty(rNewMaterial.m_pNormalTexture, CTextureBase::DirtyCreate);
-        }
-
-        if (pRoughnessMap)
-        {
-            TextureDescriptor.m_pFileName = pRoughnessMap;
-
-            rNewMaterial.m_pRoughnessTexture = TextureManager::CreateTexture2D(TextureDescriptor);
+            pInternMaterial = &rNewMaterial;
         
-            TextureManager::MarkTextureAsDirty(rNewMaterial.m_pRoughnessTexture, CTextureBase::DirtyCreate);
-        }
+            // -----------------------------------------------------------------------------
+            // Setup material
+            // -----------------------------------------------------------------------------
+            rNewMaterial.m_Materialname = pMaterialName;
+            rNewMaterial.m_Color        = AlbedoColor;
+            rNewMaterial.m_Roughness    = Roughness;
+            rNewMaterial.m_Reflectance  = Reflectance;
+            rNewMaterial.m_MetalMask    = MetalMask;
+            rNewMaterial.m_TilingOffset = TilingOffset;
+            rNewMaterial.m_Hash         = Hash;
+            rNewMaterial.m_FileName     = _rDescriptor.m_pFileName;
 
-        if (pReflectanceMap)
+            // -----------------------------------------------------------------------------
+            // Setup material textures
+            // -----------------------------------------------------------------------------
+            STextureDescriptor TextureDescriptor;
+
+            TextureDescriptor.m_NumberOfPixelsU  = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
+            TextureDescriptor.m_NumberOfPixelsV  = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
+            TextureDescriptor.m_NumberOfPixelsW  = 1;
+            TextureDescriptor.m_Format           = Dt::CTextureBase::R8G8B8_UBYTE;
+            TextureDescriptor.m_Semantic         = Dt::CTextureBase::Diffuse;
+            TextureDescriptor.m_Binding          = Dt::CTextureBase::ShaderResource;
+            TextureDescriptor.m_pPixels          = 0;
+            TextureDescriptor.m_pFileName        = 0;
+            TextureDescriptor.m_pIdentifier      = 0;
+
+            if (pColorMap)
+            {
+                TextureDescriptor.m_pFileName = pColorMap;
+
+                rNewMaterial.m_pColorTexture = TextureManager::CreateTexture2D(TextureDescriptor);
+
+                TextureManager::MarkTextureAsDirty(rNewMaterial.m_pColorTexture, CTextureBase::DirtyCreate);
+            }
+
+            if (pNormalMap)
+            {
+                TextureDescriptor.m_pFileName = pNormalMap;
+
+                rNewMaterial.m_pNormalTexture = TextureManager::CreateTexture2D(TextureDescriptor);
+
+                TextureManager::MarkTextureAsDirty(rNewMaterial.m_pNormalTexture, CTextureBase::DirtyCreate);
+            }
+
+            if (pRoughnessMap)
+            {
+                TextureDescriptor.m_pFileName = pRoughnessMap;
+
+                rNewMaterial.m_pRoughnessTexture = TextureManager::CreateTexture2D(TextureDescriptor);
+        
+                TextureManager::MarkTextureAsDirty(rNewMaterial.m_pRoughnessTexture, CTextureBase::DirtyCreate);
+            }
+
+            if (pReflectanceMap)
+            {
+                TextureDescriptor.m_pFileName = pReflectanceMap;
+
+                rNewMaterial.m_pReflectanceMap = TextureManager::CreateTexture2D(TextureDescriptor);
+
+                TextureManager::MarkTextureAsDirty(rNewMaterial.m_pReflectanceMap, CTextureBase::DirtyCreate);
+            }
+
+            if (pMetalMaskMap)
+            {
+                TextureDescriptor.m_pFileName = pMetalMaskMap;
+
+                rNewMaterial.m_pMetalTexture = TextureManager::CreateTexture2D(TextureDescriptor);
+
+                TextureManager::MarkTextureAsDirty(rNewMaterial.m_pMetalTexture, CTextureBase::DirtyCreate);
+            }
+
+            if (pAOMap)
+            {
+                TextureDescriptor.m_pFileName = pAOMap;
+
+                rNewMaterial.m_pAOTexture = TextureManager::CreateTexture2D(TextureDescriptor);
+
+                TextureManager::MarkTextureAsDirty(rNewMaterial.m_pAOTexture, CTextureBase::DirtyCreate);
+            }
+
+            if (pBumpMap)
+            {
+                TextureDescriptor.m_Format    = CTextureBase::R8_UBYTE;
+                TextureDescriptor.m_pFileName = pBumpMap;
+
+                rNewMaterial.m_pBumpTexture = TextureManager::CreateTexture2D(TextureDescriptor);
+
+                TextureManager::MarkTextureAsDirty(rNewMaterial.m_pBumpTexture, CTextureBase::DirtyCreate);
+            }
+
+            if (Hash != 0)
+            {
+                m_MaterialByHashs[Hash] = &rNewMaterial;
+            }
+        }
+        catch (...)
         {
-            TextureDescriptor.m_pFileName = pReflectanceMap;
+            BASE_CONSOLE_STREAMERROR("Failed create an material.");
 
-            rNewMaterial.m_pReflectanceMap = TextureManager::CreateTexture2D(TextureDescriptor);
-
-            TextureManager::MarkTextureAsDirty(rNewMaterial.m_pReflectanceMap, CTextureBase::DirtyCreate);
+            return *m_pDefaultMaterial;
         }
 
-        if (pMetalMaskMap)
-        {
-            TextureDescriptor.m_pFileName = pMetalMaskMap;
+        return *pInternMaterial;
+    }
 
-            rNewMaterial.m_pMetalTexture = TextureManager::CreateTexture2D(TextureDescriptor);
+    // -----------------------------------------------------------------------------
 
-            TextureManager::MarkTextureAsDirty(rNewMaterial.m_pMetalTexture, CTextureBase::DirtyCreate);
-        }
-
-        if (pAOMap)
-        {
-            TextureDescriptor.m_pFileName = pAOMap;
-
-            rNewMaterial.m_pAOTexture = TextureManager::CreateTexture2D(TextureDescriptor);
-
-            TextureManager::MarkTextureAsDirty(rNewMaterial.m_pAOTexture, CTextureBase::DirtyCreate);
-        }
-
-        if (pBumpMap)
-        {
-            TextureDescriptor.m_Format    = CTextureBase::R8_UBYTE;
-            TextureDescriptor.m_pFileName = pBumpMap;
-
-            rNewMaterial.m_pBumpTexture = TextureManager::CreateTexture2D(TextureDescriptor);
-
-            TextureManager::MarkTextureAsDirty(rNewMaterial.m_pBumpTexture, CTextureBase::DirtyCreate);
-        }
-
-        MaterialFile.Clear();
-
-        // -----------------------------------------------------------------------------
-        // Set hash
-        // -----------------------------------------------------------------------------
-        rNewMaterial.m_Hash     = Hash;
-        rNewMaterial.m_FileName = _rDescriptor.m_pFileName;
-
-        if (Hash != 0)
-        {
-            m_MaterialByHashs[Hash] = &rNewMaterial;
-        }
-
-        return rNewMaterial;
+    CMaterial& CDtMaterialManager::GetDefaultMaterial()
+    {
+        return *m_pDefaultMaterial;
     }
 
     // -----------------------------------------------------------------------------
@@ -477,16 +527,16 @@ namespace MaterialManager
 
     // -----------------------------------------------------------------------------
 
-    CMaterial& CreateEmptyMaterial()
+    CMaterial& CreateMaterial(const SMaterialDescriptor& _rDescriptor)
     {
-        return CDtMaterialManager::GetInstance().CreateEmptyMaterial();
+        return CDtMaterialManager::GetInstance().CreateMaterial(_rDescriptor);
     }
 
     // -----------------------------------------------------------------------------
 
-    CMaterial& CreateMaterial(const SMaterialFileDescriptor& _rDescriptor)
+    CMaterial& GetDefaultMaterial()
     {
-        return CDtMaterialManager::GetInstance().CreateMaterial(_rDescriptor);
+        return CDtMaterialManager::GetInstance().GetDefaultMaterial();
     }
 
     // -----------------------------------------------------------------------------

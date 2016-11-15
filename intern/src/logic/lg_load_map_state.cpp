@@ -369,7 +369,7 @@ namespace
 
             Dt::CMeshActorFacet* pModelActorFacet = static_cast<Dt::CMeshActorFacet*>(pSubEntity->GetDetailFacet(Dt::SFacetCategory::Data));
 
-            Dt::SMaterialFileDescriptor MaterialFileDesc;
+            Dt::SMaterialDescriptor MaterialFileDesc;
 
             MaterialFileDesc.m_pFileName = "materials/naturals/metals/Gold_Worn_00.mat";
 
@@ -413,7 +413,7 @@ namespace
 
             Dt::CMeshActorFacet* pModelActorFacet = static_cast<Dt::CMeshActorFacet*>(pSubEntity->GetDetailFacet(Dt::SFacetCategory::Data));
 
-            Dt::SMaterialFileDescriptor MaterialFileDesc;
+            Dt::SMaterialDescriptor MaterialFileDesc;
 
             MaterialFileDesc.m_pFileName = "materials/tests/checker.mat";
 
