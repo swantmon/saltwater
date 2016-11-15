@@ -13,6 +13,7 @@ namespace Edit
     CInspectorMaterial::CInspectorMaterial(QWidget* _pParent)
         : QWidget          (_pParent)
         , m_CurrentEntityID(-1)
+        , m_MaterialHash   (0)
     {
         // -----------------------------------------------------------------------------
         // Setup UI
@@ -34,6 +35,7 @@ namespace Edit
         // Messages
         // -----------------------------------------------------------------------------
         Edit::MessageManager::Register(Edit::SApplicationMessageType::ActorInfoMaterial, EDIT_RECEIVE_MESSAGE(&CInspectorMaterial::OnEntityInfoMaterial));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::MaterialInfo     , EDIT_RECEIVE_MESSAGE(&CInspectorMaterial::OnMaterialInfo));
     }
 
     // -----------------------------------------------------------------------------
@@ -110,7 +112,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.PutInt(m_MaterialHash);
 
         NewMessage.PutFloat(AlbedoColor[0]);
         NewMessage.PutFloat(AlbedoColor[1]);
@@ -171,7 +173,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::ActorInfoMaterial, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::MaterialInfo, NewMessage);
 
     }
 
@@ -251,6 +253,33 @@ namespace Edit
         {
             return;
         }
+
+        int MaterialHash = _rMessage.GetInt();
+
+        m_MaterialHash = static_cast<unsigned int>(MaterialHash);
+
+        CMessage NewMessage;
+
+        NewMessage.PutInt(MaterialHash);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::RequestMaterialInfo, NewMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorMaterial::OnMaterialInfo(Edit::CMessage& _rMessage)
+    {
+        float R, G, B;
+        float X, Y, Z, W;
+
+        // -----------------------------------------------------------------------------
+        // Read values
+        // -----------------------------------------------------------------------------
+        int MaterialHash = _rMessage.GetInt();
+
+        if (MaterialHash != m_MaterialHash) return;
 
         bool HasColorMap     = false;
         bool HasNormalMap    = false;

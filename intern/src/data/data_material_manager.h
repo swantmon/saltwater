@@ -54,6 +54,8 @@ namespace MaterialManager
 
     CMaterial& GetDefaultMaterial();
 
+    CMaterial& GetMaterialByHash(unsigned int _Hash);
+
     void MarkMaterialAsDirty(CMaterial& _rMaterial, unsigned int _DirtyFlags);
 
     void RegisterDirtyMaterialHandler(CMaterialDelegate _NewDelegate);

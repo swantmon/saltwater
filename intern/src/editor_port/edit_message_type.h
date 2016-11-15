@@ -45,6 +45,8 @@ namespace Edit
             NewEffectSSR,
             NewEffectVolumeFog,
 
+            NewMaterial,
+
             NewPluginARController,
 
             RemoveEntity,
@@ -66,6 +68,8 @@ namespace Edit
 
             RequestActorInfoMaterial,
             RequestActorInfoCamera,
+
+            RequestMaterialInfo,
 
             RequestPluginInfoARController,
             RequestPluginInfoARControllerMarker,
@@ -89,6 +93,8 @@ namespace Edit
 
             ActorInfoMaterial,
             ActorInfoCamera,
+
+            MaterialInfo,
 
             PluginInfoARController,
             PluginInfoARControllerMarker,
@@ -127,6 +133,8 @@ namespace Edit
 
             ActorInfoMaterial,
             ActorInfoCamera,
+
+            MaterialInfo,
 
             PluginInfoARController,
             PluginInfoARControllerMarker,

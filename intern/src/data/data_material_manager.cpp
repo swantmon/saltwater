@@ -58,6 +58,8 @@ namespace
 
         CMaterial& GetDefaultMaterial();
 
+        CMaterial& GetMaterialByHash(unsigned int _Hash);
+
         void MarkMaterialAsDirty(CMaterial& _rMaterial, unsigned int _DirtyFlags);
 
         void RegisterDirtyMaterialHandler(CMaterialDelegate _NewDelegate);
@@ -472,6 +474,18 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    CMaterial& CDtMaterialManager::GetMaterialByHash(unsigned int _Hash)
+    {
+        if (m_MaterialByHashs.find(_Hash) != m_MaterialByHashs.end())
+        {
+            return *m_MaterialByHashs.at(_Hash);
+        }
+
+        return GetDefaultMaterial();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CDtMaterialManager::MarkMaterialAsDirty(CMaterial& _rMaterial, unsigned int _DirtyFlags)
     {
         CInternMaterial& rMaterial = static_cast<CInternMaterial&>(_rMaterial);
@@ -492,7 +506,7 @@ namespace
         // Send new dirty entity to all handler
         // -----------------------------------------------------------------------------
         CMaterialDelegates::iterator CurrentDirtyDelegate = m_MaterialDelegates.begin();
-        CMaterialDelegates::iterator EndOfDirtyDelegates = m_MaterialDelegates.end();
+        CMaterialDelegates::iterator EndOfDirtyDelegates  = m_MaterialDelegates.end();
 
         for (; CurrentDirtyDelegate != EndOfDirtyDelegates; ++CurrentDirtyDelegate)
         {
@@ -553,6 +567,13 @@ namespace MaterialManager
     CMaterial& GetDefaultMaterial()
     {
         return CDtMaterialManager::GetInstance().GetDefaultMaterial();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CMaterial& GetMaterialByHash(unsigned int _Hash)
+    {
+        return CDtMaterialManager::GetInstance().GetMaterialByHash(_Hash);
     }
 
     // -----------------------------------------------------------------------------

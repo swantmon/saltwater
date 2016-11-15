@@ -31,6 +31,7 @@
     <ClCompile Include="..\..\..\src\editor\edit_load_map_state.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_main.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_map_helper.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_material_helper.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_play_state.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_plugin_helper.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_precompiled.cpp">
@@ -54,6 +55,7 @@
     <ClInclude Include="..\..\..\src\editor\edit_light_helper.h" />
     <ClInclude Include="..\..\..\src\editor\edit_load_map_state.h" />
     <ClInclude Include="..\..\..\src\editor\edit_map_helper.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_material_helper.h" />
     <ClInclude Include="..\..\..\src\editor\edit_play_state.h" />
     <ClInclude Include="..\..\..\src\editor\edit_plugin_helper.h" />
     <ClInclude Include="..\..\..\src\editor\edit_precompiled.h" />

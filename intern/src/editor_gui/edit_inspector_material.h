@@ -34,10 +34,12 @@ namespace Edit
     private:
 
         unsigned int m_CurrentEntityID;
+        unsigned int m_MaterialHash;
 
     private:
 
         void OnEntityInfoMaterial(Edit::CMessage& _rMessage);
+        void OnMaterialInfo(Edit::CMessage& _rMessage);
     };
 } // namespace Edit
 
