@@ -22,9 +22,8 @@ layout(std140, binding = 0) uniform UB0
 layout(binding = 0) uniform sampler2D PSTextureDiffuse;
 layout(binding = 1) uniform sampler2D PSTextureNormal;
 layout(binding = 2) uniform sampler2D PSTextureRoughness;
-layout(binding = 3) uniform sampler2D PSTextureReflectance;
-layout(binding = 4) uniform sampler2D PSTextureMetallic;
-layout(binding = 5) uniform sampler2D PSTextureAO;
+layout(binding = 3) uniform sampler2D PSTextureMetallic;
+layout(binding = 4) uniform sampler2D PSTextureAO;
 
 // -----------------------------------------------------------------------------
 // Input to fragment from VS
@@ -170,29 +169,6 @@ void PSShaderMaterialDisneyCNRMAX0(void)
     float AO        = texture(PSTextureAO       , in_PSTexCoord * ps_TilingOffset.xy + ps_TilingOffset.zw).r;
     
     PackGBuffer(Color, WSNormal, Roughness, vec3(ps_Reflectance), MetalMask, AO, GBuffer);
-
-    out_GBuffer0 = GBuffer.m_Color0;
-    out_GBuffer1 = GBuffer.m_Color1;
-    out_GBuffer2 = GBuffer.m_Color2;
-}
-
-// -----------------------------------------------------------------------------
-// Name:   PSShaderMaterialDisneyCNRRMX0
-// Alias:  Disney Material
-// Desc.:  Physically-based shaded material with color, normal, roughness, 
-//         reflectance and metalness texture
-// -----------------------------------------------------------------------------
-void PSShaderMaterialDisneyCNRRMX0(void)
-{
-    SGBuffer GBuffer;
-
-    vec3  WSNormal    = in_PSWSNormalMatrix * (texture(PSTextureNormal, in_PSTexCoord * ps_TilingOffset.xy + ps_TilingOffset.zw).rgb * 2.0f - 1.0f);
-    vec3  Color       = texture(PSTextureDiffuse    , in_PSTexCoord * ps_TilingOffset.xy + ps_TilingOffset.zw).rgb * ps_Color.xyz;
-    float Roughness   = texture(PSTextureRoughness  , in_PSTexCoord * ps_TilingOffset.xy + ps_TilingOffset.zw).r   * ps_Roughness;
-    vec3  Reflectance = texture(PSTextureReflectance, in_PSTexCoord * ps_TilingOffset.xy + ps_TilingOffset.zw).rgb * ps_Reflectance;
-    float MetalMask   = texture(PSTextureMetallic   , in_PSTexCoord * ps_TilingOffset.xy + ps_TilingOffset.zw).r   * ps_MetalMask;
-
-    PackGBuffer(Color, WSNormal, Roughness, Reflectance, MetalMask, 1.0f, GBuffer);
 
     out_GBuffer0 = GBuffer.m_Color0;
     out_GBuffer1 = GBuffer.m_Color1;

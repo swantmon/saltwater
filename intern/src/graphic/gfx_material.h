@@ -26,7 +26,7 @@ namespace Gfx
 #pragma warning(disable:4201)
         struct SMaterialKey
         {
-            static const unsigned int s_NumberOfTextures = 7;
+            static const unsigned int s_NumberOfTextures = 6;
             
             typedef unsigned char BMaterialID;
             
@@ -37,7 +37,6 @@ namespace Gfx
                     BMaterialID m_HasDiffuseTex         :  1;        //< Defines either a diffuse texture is set
                     BMaterialID m_HasNormalTex          :  1;        //< Defines either a normal texture is set
                     BMaterialID m_HasRoughnessTex       :  1;        //< Defines either a roughness texture is set
-                    BMaterialID m_HasReflectanceTex     :  1;        //< Defines either a reflectance texture is set
                     BMaterialID m_HasMetallicTex        :  1;        //< Defines either a metallic texture is set
                     BMaterialID m_HasAOTex              :  1;        //< Defines either a ambient occlusion texture is set
                     BMaterialID m_HasBumpTex            :  1;        //< Defines either a height/bump/displacement texture is set

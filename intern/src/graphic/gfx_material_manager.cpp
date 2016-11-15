@@ -100,7 +100,6 @@ namespace
         "PSShaderMaterialDisneyCNRX0"  ,
         "PSShaderMaterialDisneyCNRMX0" ,
         "PSShaderMaterialDisneyCNRMAX0",
-        "PSShaderMaterialDisneyCNRRMX0",
     };
 
     // -----------------------------------------------------------------------------
@@ -123,7 +122,7 @@ namespace
     };
 #pragma warning(default:4201)
 
-    static const unsigned int s_NumberOfShaderMaterialCombinations = 10;
+    static const unsigned int s_NumberOfShaderMaterialCombinations = 9;
 
     const SShaderShaderLink g_ShaderShaderLinks[s_NumberOfShaderMaterialCombinations] =
     {
@@ -134,7 +133,6 @@ namespace
         { s_NoShader, s_NoShader, s_NoShader, 4 },
         { s_NoShader, s_NoShader, s_NoShader, 5 },
         { s_NoShader, s_NoShader, s_NoShader, 6 },
-        { s_NoShader, s_NoShader, s_NoShader, 7 },
         { 0         , 0         , s_NoShader, 2 },
         { 0         , 0         , s_NoShader, 3 },
     };
@@ -148,23 +146,21 @@ namespace
         // 01. Attribute: HasDiffuseTex
         // 02. Attribute: HasNormalTex
         // 03. Attribute: HasRoughnessTex
-        // 04. Attribute: HasReflectanceTex
         // 05. Attribute: HasMetallicTex
         // 06. Attribute: HasAOTex
         // 07. Attribute: HasBumpTex
         // -----------------------------------------------------------------------------
 
-        // 01  , 02   , 03   , 04   , 05   , 06,    07
-        { false, false, false, false, false, false, false },
-        { false, true , false, false, false, false, false },
-        { true , false, false, false, false, false, false },
-        { true , true , false, false, false, false, false },
-        { true , true , true , false, false, false, false },
-        { true , true , true , false, true , false, false },
-        { true , true , true , false, true , true , false },
-        { true , true , true , true , true , false, false },
-        { true , false, false, false, false, false, true  },
-        { true , true , false, false, false, false, true  },
+        // 01  , 02   , 03   , 04   , 05,    06
+        { false, false, false, false, false, false },
+        { false, true , false, false, false, false },
+        { true , false, false, false, false, false },
+        { true , true , false, false, false, false },
+        { true , true , true , false, false, false },
+        { true , true , true , true , false, false },
+        { true , true , true , true , true , false },
+        { true , false, false, false, false, true  },
+        { true , true , false, false, false, true  },
     };
 } // namespace
 
@@ -257,7 +253,6 @@ namespace
         MaterialDescriptor.m_pColorMap       = 0;
         MaterialDescriptor.m_pNormalMap      = 0;
         MaterialDescriptor.m_pRoughnessMap   = 0;
-        MaterialDescriptor.m_pReflectanceMap = 0;
         MaterialDescriptor.m_pMetalMaskMap   = 0;
         MaterialDescriptor.m_pAOMap          = 0;
         MaterialDescriptor.m_pBumpMap        = 0;
@@ -385,7 +380,6 @@ namespace
             MaterialDescriptor.m_pColorMap       = _Material->GetColorTexture()            != 0 ? _Material->GetColorTexture()->GetFileName()            : 0;
             MaterialDescriptor.m_pNormalMap      = _Material->GetNormalTexture()           != 0 ? _Material->GetNormalTexture()->GetFileName()           : 0;
             MaterialDescriptor.m_pRoughnessMap   = _Material->GetRoughnessTexture()        != 0 ? _Material->GetRoughnessTexture()->GetFileName()        : 0;
-            MaterialDescriptor.m_pReflectanceMap = _Material->GetReflectanceTexture()      != 0 ? _Material->GetReflectanceTexture()->GetFileName()      : 0;
             MaterialDescriptor.m_pMetalMaskMap   = _Material->GetMetalTexture()            != 0 ? _Material->GetMetalTexture()->GetFileName()            : 0;
             MaterialDescriptor.m_pAOMap          = _Material->GetAmbientOcclusionTexture() != 0 ? _Material->GetAmbientOcclusionTexture()->GetFileName() : 0;
             MaterialDescriptor.m_pBumpMap        = _Material->GetBumpTexture()             != 0 ? _Material->GetBumpTexture()->GetFileName()             : 0;
@@ -429,7 +423,6 @@ namespace
             rMaterial.m_MaterialKey.m_HasDiffuseTex     = rDataMaterial.GetColorTexture()            != 0;
             rMaterial.m_MaterialKey.m_HasNormalTex      = rDataMaterial.GetNormalTexture()           != 0;
             rMaterial.m_MaterialKey.m_HasRoughnessTex   = rDataMaterial.GetRoughnessTexture()        != 0;
-            rMaterial.m_MaterialKey.m_HasReflectanceTex = rDataMaterial.GetReflectanceTexture()      != 0;
             rMaterial.m_MaterialKey.m_HasMetallicTex    = rDataMaterial.GetMetalTexture()            != 0;
             rMaterial.m_MaterialKey.m_HasAOTex          = rDataMaterial.GetAmbientOcclusionTexture() != 0;
             rMaterial.m_MaterialKey.m_HasBumpTex        = rDataMaterial.GetBumpTexture()             != 0;
@@ -465,7 +458,6 @@ namespace
             TexturePtrs[3] = 0;
             TexturePtrs[4] = 0;
             TexturePtrs[5] = 0;
-            TexturePtrs[6] = 0;
 
             if (rMaterial.m_MaterialKey.m_HasDiffuseTex)
             {
@@ -488,32 +480,25 @@ namespace
                 TexturePtrs[2] = TextureManager::GetTexture2DByHash(Hash);
             }
 
-            if (rMaterial.m_MaterialKey.m_HasReflectanceTex)
-            {
-                unsigned int Hash = rDataMaterial.GetReflectanceTexture()->GetHash();
-
-                TexturePtrs[3] = TextureManager::GetTexture2DByHash(Hash);
-            }
-
             if (rMaterial.m_MaterialKey.m_HasMetallicTex)
             {
                 unsigned int Hash = rDataMaterial.GetMetalTexture()->GetHash();
 
-                TexturePtrs[4] = TextureManager::GetTexture2DByHash(Hash);
+                TexturePtrs[3] = TextureManager::GetTexture2DByHash(Hash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasAOTex)
             {
                 unsigned int Hash = rDataMaterial.GetAmbientOcclusionTexture()->GetHash();
 
-                TexturePtrs[5] = TextureManager::GetTexture2DByHash(Hash);
+                TexturePtrs[4] = TextureManager::GetTexture2DByHash(Hash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasBumpTex)
             {
                 unsigned int Hash = rDataMaterial.GetBumpTexture()->GetHash();
 
-                TexturePtrs[6] = TextureManager::GetTexture2DByHash(Hash);
+                TexturePtrs[5] = TextureManager::GetTexture2DByHash(Hash);
             }
 
             rMaterial.m_TextureSetPtrs[CShader::Pixel] = TextureManager::CreateTextureSet(TexturePtrs, CMaterial::SMaterialKey::s_NumberOfTextures);
@@ -533,7 +518,6 @@ namespace
         const char*           pColorMap;
         const char*           pNormalMap;
         const char*           pRoughnessMap;
-        const char*           pReflectanceMap;
         const char*           pMetalMaskMap;
         const char*           pAOMap;
         const char*           pBumpMap;
@@ -548,7 +532,6 @@ namespace
         pColorMap       = _rDescriptor.m_pColorMap;
         pNormalMap      = _rDescriptor.m_pNormalMap;
         pRoughnessMap   = _rDescriptor.m_pRoughnessMap;
-        pReflectanceMap = _rDescriptor.m_pReflectanceMap;
         pMetalMaskMap   = _rDescriptor.m_pMetalMaskMap;
         pAOMap          = _rDescriptor.m_pAOMap;
         pBumpMap        = _rDescriptor.m_pBumpMap;
@@ -628,8 +611,6 @@ namespace
         
             Reflectance = pMaterialReflectance->FloatAttribute("V");
         
-            pReflectanceMap = pMaterialReflectance->Attribute("Map");
-        
             // -----------------------------------------------------------------------------
             // Metallic
             // -----------------------------------------------------------------------------
@@ -699,7 +680,6 @@ namespace
         rMaterial.m_MaterialKey.m_HasDiffuseTex     = pColorMap       != 0;
         rMaterial.m_MaterialKey.m_HasNormalTex      = pNormalMap      != 0;
         rMaterial.m_MaterialKey.m_HasRoughnessTex   = pRoughnessMap   != 0;
-        rMaterial.m_MaterialKey.m_HasReflectanceTex = pReflectanceMap != 0;
         rMaterial.m_MaterialKey.m_HasMetallicTex    = pMetalMaskMap   != 0;
         rMaterial.m_MaterialKey.m_HasAOTex          = pAOMap          != 0;
         rMaterial.m_MaterialKey.m_HasBumpTex        = pBumpMap        != 0;
@@ -749,7 +729,6 @@ namespace
         TexturePtrs[3] = 0;
         TexturePtrs[4] = 0;
         TexturePtrs[5] = 0;
-        TexturePtrs[6] = 0;
 
         if (rMaterial.m_MaterialKey.m_HasDiffuseTex)
         {
@@ -772,25 +751,18 @@ namespace
             TexturePtrs[2] = TextureManager::CreateTexture2D(TextureDescriptor);
         }
 
-        if (rMaterial.m_MaterialKey.m_HasReflectanceTex)
-        {
-            TextureDescriptor.m_pFileName = pReflectanceMap;
-
-            TexturePtrs[3] = TextureManager::CreateTexture2D(TextureDescriptor);
-        }
-
         if (rMaterial.m_MaterialKey.m_HasMetallicTex)
         {
             TextureDescriptor.m_pFileName = pMetalMaskMap;
 
-            TexturePtrs[4] = TextureManager::CreateTexture2D(TextureDescriptor);
+            TexturePtrs[3] = TextureManager::CreateTexture2D(TextureDescriptor);
         }
 
         if (rMaterial.m_MaterialKey.m_HasAOTex)
         {
             TextureDescriptor.m_pFileName = pAOMap;
 
-            TexturePtrs[5] = TextureManager::CreateTexture2D(TextureDescriptor);
+            TexturePtrs[4] = TextureManager::CreateTexture2D(TextureDescriptor);
         }
 
         if (rMaterial.m_MaterialKey.m_HasBumpTex)
@@ -799,7 +771,7 @@ namespace
             TextureDescriptor.m_Format          = CTextureBase::R8_UBYTE;
             TextureDescriptor.m_pFileName       = pBumpMap;
 
-            TexturePtrs[6] = TextureManager::CreateTexture2D(TextureDescriptor);
+            TexturePtrs[5] = TextureManager::CreateTexture2D(TextureDescriptor);
         }
 
         rMaterial.m_TextureSetPtrs[CShader::Pixel] = TextureManager::CreateTextureSet(TexturePtrs, CMaterial::SMaterialKey::s_NumberOfTextures);

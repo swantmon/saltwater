@@ -29,7 +29,7 @@ layout(triangles, equal_spacing, ccw) in;
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(binding = 6) uniform sampler2D tes_TextureBump;
+layout(binding = 5) uniform sampler2D tes_TextureBump;
 
 float gDispFactor = 0.1f;
 

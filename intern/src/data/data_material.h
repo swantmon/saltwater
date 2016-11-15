@@ -18,8 +18,7 @@
 namespace Dt
 {
     // TODO by tschwandt
-    // - remove reflectance texture
-    // - add filename instead of materialname
+    // - Materialname necessary; is filename not enough?
 
     class CMaterial
     {
@@ -56,10 +55,6 @@ namespace Dt
         void SetRoughnessTexture(Dt::CTexture2D* _pRoughnessTexture);
         Dt::CTexture2D* GetRoughnessTexture();
         const Dt::CTexture2D* GetRoughnessTexture() const;
-
-        void SetReflectanceTexture(Dt::CTexture2D* _pReflectanceTexture);
-        Dt::CTexture2D* GetReflectanceTexture();
-        const Dt::CTexture2D* GetReflectanceTexture() const;
 
         void SetMetalTexture(Dt::CTexture2D* _pMetalTexture);
         Dt::CTexture2D* GetMetalTexture();
@@ -104,7 +99,6 @@ namespace Dt
         Dt::CTexture2D*  m_pColorTexture;
         Dt::CTexture2D*  m_pNormalTexture;
         Dt::CTexture2D*  m_pRoughnessTexture;
-        Dt::CTexture2D*  m_pReflectanceMap;
         Dt::CTexture2D*  m_pMetalTexture;
         Dt::CTexture2D*  m_pAOTexture;
         Dt::CTexture2D*  m_pBumpTexture;

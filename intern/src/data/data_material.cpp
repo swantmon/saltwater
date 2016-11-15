@@ -11,7 +11,6 @@ namespace Dt
         , m_pColorTexture    (0)
         , m_pNormalTexture   (0)
         , m_pRoughnessTexture(0)
-        , m_pReflectanceMap  (0)
         , m_pMetalTexture    (0)
         , m_pAOTexture       (0)
         , m_pBumpTexture     (0)
@@ -123,27 +122,6 @@ namespace Dt
     const Dt::CTexture2D* CMaterial::GetRoughnessTexture() const
     {
         return m_pRoughnessTexture;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMaterial::SetReflectanceTexture(Dt::CTexture2D* _pReflectanceTexture)
-    {
-        m_pReflectanceMap = _pReflectanceTexture;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Dt::CTexture2D* CMaterial::GetReflectanceTexture()
-    {
-        return m_pReflectanceMap;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const Dt::CTexture2D* CMaterial::GetReflectanceTexture() const
-    {
-        return m_pReflectanceMap;
     }
 
     // -----------------------------------------------------------------------------

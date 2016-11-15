@@ -99,7 +99,6 @@ namespace
         MaterialDescriptor.m_pColorMap       = 0;
         MaterialDescriptor.m_pNormalMap      = 0;
         MaterialDescriptor.m_pRoughnessMap   = 0;
-        MaterialDescriptor.m_pReflectanceMap = 0;
         MaterialDescriptor.m_pMetalMaskMap   = 0;
         MaterialDescriptor.m_pAOMap          = 0;
         MaterialDescriptor.m_pBumpMap        = 0;

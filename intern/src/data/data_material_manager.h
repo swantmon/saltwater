@@ -30,7 +30,6 @@ namespace Dt
         const char*       m_pColorMap;
         const char*       m_pNormalMap;
         const char*       m_pRoughnessMap;
-        const char*       m_pReflectanceMap;
         const char*       m_pMetalMaskMap;
         const char*       m_pAOMap;
         const char*       m_pBumpMap;

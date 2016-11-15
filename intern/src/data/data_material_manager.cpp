@@ -121,7 +121,6 @@ namespace
         MaterialDescriptor.m_pColorMap       = 0;
         MaterialDescriptor.m_pNormalMap      = 0;
         MaterialDescriptor.m_pRoughnessMap   = 0;
-        MaterialDescriptor.m_pReflectanceMap = 0;
         MaterialDescriptor.m_pMetalMaskMap   = 0;
         MaterialDescriptor.m_pAOMap          = 0;
         MaterialDescriptor.m_pBumpMap        = 0;
@@ -160,7 +159,6 @@ namespace
         const char*           pColorMap;
         const char*           pNormalMap;
         const char*           pRoughnessMap;
-        const char*           pReflectanceMap;
         const char*           pMetalMaskMap;
         const char*           pAOMap;
         const char*           pBumpMap;
@@ -207,7 +205,6 @@ namespace
         pColorMap       = _rDescriptor.m_pColorMap;
         pNormalMap      = _rDescriptor.m_pNormalMap;
         pRoughnessMap   = _rDescriptor.m_pRoughnessMap;
-        pReflectanceMap = _rDescriptor.m_pReflectanceMap;
         pMetalMaskMap   = _rDescriptor.m_pMetalMaskMap;
         pAOMap          = _rDescriptor.m_pAOMap;
         pBumpMap        = _rDescriptor.m_pBumpMap;
@@ -286,8 +283,6 @@ namespace
             assert(pMaterialReflectance != 0);
         
             Reflectance = pMaterialReflectance->FloatAttribute("V");
-        
-            pReflectanceMap = pMaterialReflectance->Attribute("Map");
         
             // -----------------------------------------------------------------------------
             // Metallic
@@ -406,15 +401,6 @@ namespace
                 rNewMaterial.m_pRoughnessTexture = TextureManager::CreateTexture2D(TextureDescriptor);
         
                 TextureManager::MarkTextureAsDirty(rNewMaterial.m_pRoughnessTexture, CTextureBase::DirtyCreate);
-            }
-
-            if (pReflectanceMap)
-            {
-                TextureDescriptor.m_pFileName = pReflectanceMap;
-
-                rNewMaterial.m_pReflectanceMap = TextureManager::CreateTexture2D(TextureDescriptor);
-
-                TextureManager::MarkTextureAsDirty(rNewMaterial.m_pReflectanceMap, CTextureBase::DirtyCreate);
             }
 
             if (pMetalMaskMap)
