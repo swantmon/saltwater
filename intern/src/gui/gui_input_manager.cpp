@@ -231,6 +231,8 @@ namespace
 
     bool CGuiInputManager::GetMouseButton(Base::CInputEvent::EKey _Key)
     {
+        BASE_UNUSED(_Key);
+
         return m_Mouse.m_ButtonLeft >= 0;
     }
 
@@ -238,6 +240,8 @@ namespace
 
     bool CGuiInputManager::GetMouseButtonDown(Base::CInputEvent::EKey _Key)
     {
+        BASE_UNUSED(_Key);
+
         return m_Mouse.m_ButtonLeft == 0;
     }
 
@@ -245,6 +249,8 @@ namespace
 
     bool CGuiInputManager::GetMouseButtonUp(Base::CInputEvent::EKey _Key)
     {
+        BASE_UNUSED(_Key);
+
         bool Return = m_Mouse.m_ButtonLeft == -1;
 
         if (Return)
@@ -304,7 +310,7 @@ namespace
         }
         else if (_rEvent.GetAction() == Base::CInputEvent::MouseWheel)
         {
-            m_Mouse.m_ScrollDelta = _rEvent.GetWheelDelta();
+            m_Mouse.m_ScrollDelta = static_cast<float>(_rEvent.GetWheelDelta());
         }
         else if (_rEvent.GetAction() == Base::CInputEvent::MouseMove)
         {

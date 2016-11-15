@@ -344,7 +344,7 @@ namespace
 
             _rMessage.GetString(Text, 256);
 
-            unsigned int Width = _rMessage.GetFloat();
+            float Width = _rMessage.GetFloat();
 
             // -----------------------------------------------------------------------------
             // Set values

@@ -283,9 +283,8 @@ namespace
 
     void CGfxActorManager::UpdateActorCamera(Dt::CEntity& _rEntity)
     {
-        STextureDescriptor       TextureDescriptor;
-        Dt::CCameraActorFacet*   pDataCamera;
-        Gfx::CCameraActorFacet*  pGraphicCamera;
+        Dt::CCameraActorFacet*  pDataCamera;
+        Gfx::CCameraActorFacet* pGraphicCamera;
 
         pDataCamera    = static_cast<Dt::CCameraActorFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Data));
         pGraphicCamera = static_cast<Gfx::CCameraActorFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
@@ -420,19 +419,6 @@ namespace
             if (pDataMaterial != 0)
             {
                 // -----------------------------------------------------------------------------
-                // Get key of surface
-                // -----------------------------------------------------------------------------
-                CSurface::SSurfaceKey SurfaceKey = ModelLODPtr->GetSurface(NumberOfSurface)->GetKey();
-
-                // -----------------------------------------------------------------------------
-                // Material description
-                // -----------------------------------------------------------------------------
-                // TODO by tschwandt
-                // MATERIAL COMMENT CREATION
-                // MaterialDesc.m_ID = SurfaceKey.m_Key;
-                // MaterialDesc.m_pMaterial = pDataMaterial;
-
-                // -----------------------------------------------------------------------------
                 // Create and set material
                 // -----------------------------------------------------------------------------
                 unsigned int Hash = pDataMaterial->GetHash();
@@ -459,8 +445,7 @@ namespace
 
     void CGfxActorManager::CreateActorCamera(Dt::CEntity& _rEntity)
     {
-        STextureDescriptor      TextureDescriptor;
-        Dt::CCameraActorFacet*  pDataCamera;
+        Dt::CCameraActorFacet* pDataCamera;
 
         // -----------------------------------------------------------------------------
         // Get sun data informations

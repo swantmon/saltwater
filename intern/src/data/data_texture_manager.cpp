@@ -643,7 +643,6 @@ namespace
         assert(_pTexture2D != 0);
         assert(_pFile != 0);
 
-        unsigned int      NumberOfPixel;
         unsigned int      NumberOfBytes;
         const Base::Char* pHashIdentifier;
         unsigned int      Hash;

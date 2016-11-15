@@ -618,8 +618,7 @@ namespace
 
     void CGfxLightManager::CreateSkybox(Dt::CEntity& _rEntity)
     {
-        STextureDescriptor TextureDescriptor;
-        Dt::CSkyboxFacet*  pDataSkyboxFacet;
+        Dt::CSkyboxFacet* pDataSkyboxFacet;
 
         // -----------------------------------------------------------------------------
         // Get sun data informations

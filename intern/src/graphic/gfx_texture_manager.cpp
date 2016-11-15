@@ -941,8 +941,6 @@ namespace
         {
             if (_pTexture->GetDimension() == Dt::CTextureBase::Dim2D)
             {
-                CInternTexture2D* pInternTexture2D = nullptr;
-
                 if (m_Textures2DByHash.find(Hash) == m_Textures2DByHash.end())
                 {
                     BASE_CONSOLE_STREAMWARNING("Data texture manager tried to update data from non-created graphic texture.");
@@ -1002,7 +1000,7 @@ namespace
 
                         glTexSubImage2D(GL_TEXTURE_2D, 0, Offset[0], Offset[1], UpdateSize[0], UpdateSize[1], Format, Type, pDataTexture->GetPixels());
 
-                        if (true)
+                        if (pInternTexture->GetNumberOfMipLevels() > 0)
                         {
                             glGenerateMipmap(GL_TEXTURE_2D);
                         }

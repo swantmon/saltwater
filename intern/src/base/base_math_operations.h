@@ -191,6 +191,13 @@ namespace MATH
     {
         return std::max(_Min, std::min(_Source, _Max));
     }
+
+    // -----------------------------------------------------------------------------
+
+    inline size_t Clamp(size_t _Source, size_t _Min, size_t _Max)
+    {
+        return std::max(_Min, std::min(_Source, _Max));
+    }
     
     // -----------------------------------------------------------------------------
     
