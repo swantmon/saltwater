@@ -46,12 +46,12 @@ namespace
 
     public:
 
-        CShaderPtr CompileVS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderAlias, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug);
-        CShaderPtr CompileGS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderAlias, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug);
-        CShaderPtr CompileDS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderAlias, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug);
-        CShaderPtr CompileHS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderAlias, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug);
-        CShaderPtr CompilePS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderAlias, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug);
-        CShaderPtr CompileCS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderAlias, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug);
+        CShaderPtr CompileVS(const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines, const Base::Char** _ppShaderDefines, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug);
+        CShaderPtr CompileGS(const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines, const Base::Char** _ppShaderDefines, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug);
+        CShaderPtr CompileDS(const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines, const Base::Char** _ppShaderDefines, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug);
+        CShaderPtr CompileHS(const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines, const Base::Char** _ppShaderDefines, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug);
+        CShaderPtr CompilePS(const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines, const Base::Char** _ppShaderDefines, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug);
+        CShaderPtr CompileCS(const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines, const Base::Char** _ppShaderDefines, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug);
 
     public:
 
@@ -120,7 +120,7 @@ namespace
 
     private:
 
-        CShaderPtr InternCompileShader(CShader::EType _Type, const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderAlias, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug);
+        CShaderPtr InternCompileShader(CShader::EType _Type, const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines, const Base::Char** _ppShaderDefines, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug);
 
         void PreprocessorShader(std::string& _rShaderContent);
 
@@ -170,44 +170,44 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CShaderPtr CGfxShaderManager::CompileVS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderAlias, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
+    CShaderPtr CGfxShaderManager::CompileVS(const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines, const Base::Char** _ppShaderDefines, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
     {
-        return InternCompileShader(Gfx::CShader::Vertex, _pFileName, _pShaderName, _pShaderAlias, _pShaderDescription, _Categories, _HasAlpha, _Debug);
+        return InternCompileShader(Gfx::CShader::Vertex, _pFileName, _pShaderName, _NumberOfDefines, _ppShaderDefines, _pShaderDescription, _Categories, _HasAlpha, _Debug);
     }
 
     // -----------------------------------------------------------------------------
 
-    CShaderPtr CGfxShaderManager::CompileGS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderAlias, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
+    CShaderPtr CGfxShaderManager::CompileGS(const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines, const Base::Char** _ppShaderDefines, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
     {
-        return InternCompileShader(Gfx::CShader::Geometry, _pFileName, _pShaderName, _pShaderAlias, _pShaderDescription, _Categories, _HasAlpha, _Debug);
+        return InternCompileShader(Gfx::CShader::Geometry, _pFileName, _pShaderName, _NumberOfDefines, _ppShaderDefines, _pShaderDescription, _Categories, _HasAlpha, _Debug);
     }
 
     // -----------------------------------------------------------------------------
 
-    CShaderPtr CGfxShaderManager::CompileDS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderAlias, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
+    CShaderPtr CGfxShaderManager::CompileDS(const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines, const Base::Char** _ppShaderDefines, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
     {
-        return InternCompileShader(Gfx::CShader::Domain, _pFileName, _pShaderName, _pShaderAlias, _pShaderDescription, _Categories, _HasAlpha, _Debug);
+        return InternCompileShader(Gfx::CShader::Domain, _pFileName, _pShaderName, _NumberOfDefines, _ppShaderDefines, _pShaderDescription, _Categories, _HasAlpha, _Debug);
     }
 
     // -----------------------------------------------------------------------------
 
-    CShaderPtr CGfxShaderManager::CompileHS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderAlias, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
+    CShaderPtr CGfxShaderManager::CompileHS(const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines, const Base::Char** _ppShaderDefines, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
     {
-        return InternCompileShader(Gfx::CShader::Hull, _pFileName, _pShaderName, _pShaderAlias, _pShaderDescription, _Categories, _HasAlpha, _Debug);
+        return InternCompileShader(Gfx::CShader::Hull, _pFileName, _pShaderName, _NumberOfDefines, _ppShaderDefines, _pShaderDescription, _Categories, _HasAlpha, _Debug);
     }
 
     // -----------------------------------------------------------------------------
 
-    CShaderPtr CGfxShaderManager::CompilePS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderAlias, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
+    CShaderPtr CGfxShaderManager::CompilePS(const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines, const Base::Char** _ppShaderDefines, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
     {
-        return InternCompileShader(Gfx::CShader::Pixel, _pFileName, _pShaderName, _pShaderAlias, _pShaderDescription, _Categories, _HasAlpha, _Debug);
+        return InternCompileShader(Gfx::CShader::Pixel, _pFileName, _pShaderName, _NumberOfDefines, _ppShaderDefines, _pShaderDescription, _Categories, _HasAlpha, _Debug);
     }
 
     // -----------------------------------------------------------------------------
 
-    CShaderPtr CGfxShaderManager::CompileCS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderAlias, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
+    CShaderPtr CGfxShaderManager::CompileCS(const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines, const Base::Char** _ppShaderDefines, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
     {
-       return InternCompileShader(Gfx::CShader::Compute, _pFileName, _pShaderName, _pShaderAlias, _pShaderDescription, _Categories, _HasAlpha, _Debug);
+       return InternCompileShader(Gfx::CShader::Compute, _pFileName, _pShaderName, _NumberOfDefines, _ppShaderDefines, _pShaderDescription, _Categories, _HasAlpha, _Debug);
     }
 
     // -----------------------------------------------------------------------------
@@ -283,9 +283,8 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CShaderPtr CGfxShaderManager::InternCompileShader(CShader::EType _Type, const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderAlias, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
+    CShaderPtr CGfxShaderManager::InternCompileShader(CShader::EType _Type, const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines, const Base::Char** _ppShaderDefines, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
     {
-        BASE_UNUSED(_pShaderAlias);
         BASE_UNUSED(_pShaderDescription);
         BASE_UNUSED(_Categories);
 
@@ -322,6 +321,18 @@ namespace
         std::string ShaderFileContent((std::istreambuf_iterator<char>(ShaderFile)), std::istreambuf_iterator<char>());        
 
         ShaderFileContent = "#define " + std::string(_pShaderName) + " main\n" + ShaderFileContent;
+
+        if (_NumberOfDefines > 0)
+        {
+            std::string ShaderDefines;
+
+            for (unsigned int IndexOfShaderDefine = 0; IndexOfShaderDefine < _NumberOfDefines; ++ IndexOfShaderDefine)
+            {
+                ShaderFileContent = "#define " + std::string(_ppShaderDefines[IndexOfShaderDefine]) + "\n";
+            }
+
+            ShaderFileContent = ShaderDefines + ShaderFileContent;
+        }
 
         PreprocessorShader(ShaderFileContent);
 
@@ -534,44 +545,44 @@ namespace ShaderManager
 
     // -----------------------------------------------------------------------------
 
-    CShaderPtr CompileVS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderAlias, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
+    CShaderPtr CompileVS(const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines, const Base::Char** _ppShaderDefines, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
     {
-        return CGfxShaderManager::GetInstance().CompileVS(_pFileName, _pShaderName, _pShaderAlias, _pShaderDescription, _Categories, _HasAlpha, _Debug);
+        return CGfxShaderManager::GetInstance().CompileVS(_pFileName, _pShaderName, _NumberOfDefines, _ppShaderDefines, _pShaderDescription, _Categories, _HasAlpha, _Debug);
     }
 
     // -----------------------------------------------------------------------------
 
-    CShaderPtr CompileGS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderAlias, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
+    CShaderPtr CompileGS(const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines, const Base::Char** _ppShaderDefines, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
     {
-        return CGfxShaderManager::GetInstance().CompileGS(_pFileName, _pShaderName, _pShaderAlias, _pShaderDescription, _Categories, _HasAlpha, _Debug);
+        return CGfxShaderManager::GetInstance().CompileGS(_pFileName, _pShaderName, _NumberOfDefines, _ppShaderDefines, _pShaderDescription, _Categories, _HasAlpha, _Debug);
     }
 
     // -----------------------------------------------------------------------------
 
-    CShaderPtr CompileDS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderAlias, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
+    CShaderPtr CompileDS(const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines, const Base::Char** _ppShaderDefines, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
     {
-        return CGfxShaderManager::GetInstance().CompileDS(_pFileName, _pShaderName, _pShaderAlias, _pShaderDescription, _Categories, _HasAlpha, _Debug);
+        return CGfxShaderManager::GetInstance().CompileDS(_pFileName, _pShaderName, _NumberOfDefines, _ppShaderDefines, _pShaderDescription, _Categories, _HasAlpha, _Debug);
     }
 
     // -----------------------------------------------------------------------------
 
-    CShaderPtr CompileHS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderAlias, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
+    CShaderPtr CompileHS(const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines, const Base::Char** _ppShaderDefines, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
     {
-        return CGfxShaderManager::GetInstance().CompileHS(_pFileName, _pShaderName, _pShaderAlias, _pShaderDescription, _Categories, _HasAlpha, _Debug);
+        return CGfxShaderManager::GetInstance().CompileHS(_pFileName, _pShaderName, _NumberOfDefines, _ppShaderDefines, _pShaderDescription, _Categories, _HasAlpha, _Debug);
     }
 
     // -----------------------------------------------------------------------------
 
-    CShaderPtr CompilePS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderAlias, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
+    CShaderPtr CompilePS(const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines, const Base::Char** _ppShaderDefines, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
     {
-        return CGfxShaderManager::GetInstance().CompilePS(_pFileName, _pShaderName, _pShaderAlias, _pShaderDescription, _Categories, _HasAlpha, _Debug);
+        return CGfxShaderManager::GetInstance().CompilePS(_pFileName, _pShaderName, _NumberOfDefines, _ppShaderDefines, _pShaderDescription, _Categories, _HasAlpha, _Debug);
     }
 
     // -----------------------------------------------------------------------------
 
-    CShaderPtr CompileCS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderAlias, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
+    CShaderPtr CompileCS(const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines, const Base::Char** _ppShaderDefines, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
     {
-        return CGfxShaderManager::GetInstance().CompileCS(_pFileName, _pShaderName, _pShaderAlias, _pShaderDescription, _Categories, _HasAlpha, _Debug);
+        return CGfxShaderManager::GetInstance().CompileCS(_pFileName, _pShaderName, _NumberOfDefines, _ppShaderDefines, _pShaderDescription, _Categories, _HasAlpha, _Debug);
     }
 
     // -----------------------------------------------------------------------------

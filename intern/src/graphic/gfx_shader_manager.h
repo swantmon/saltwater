@@ -28,12 +28,12 @@ namespace ShaderManager
     void OnStart();
     void OnExit();
 
-    CShaderPtr CompileVS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderAlias = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false);
-    CShaderPtr CompileGS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderAlias = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false);
-    CShaderPtr CompileDS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderAlias = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false);
-    CShaderPtr CompileHS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderAlias = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false);
-    CShaderPtr CompilePS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderAlias = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false);
-    CShaderPtr CompileCS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderAlias = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false);
+    CShaderPtr CompileVS(const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines = 0, const Base::Char** _ppShaderDefines = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false);
+    CShaderPtr CompileGS(const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines = 0, const Base::Char** _ppShaderDefines = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false);
+    CShaderPtr CompileDS(const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines = 0, const Base::Char** _ppShaderDefines = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false);
+    CShaderPtr CompileHS(const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines = 0, const Base::Char** _ppShaderDefines = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false);
+    CShaderPtr CompilePS(const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines = 0, const Base::Char** _ppShaderDefines = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false);
+    CShaderPtr CompileCS(const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines = 0, const Base::Char** _ppShaderDefines = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false);
 
     void ReloadAllShaders();
 

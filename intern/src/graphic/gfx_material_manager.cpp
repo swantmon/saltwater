@@ -33,11 +33,6 @@ using namespace Gfx;
 namespace
 {
     // -----------------------------------------------------------------------------
-    // Define shader combinations
-    // -----------------------------------------------------------------------------
-    static const unsigned int s_NoShader = static_cast<unsigned int>(-1);
-
-    // -----------------------------------------------------------------------------
     // Define all hull shader needed inside this renderer
     // -----------------------------------------------------------------------------
     const Base::Char* g_pShaderFilenameHS[] =
@@ -82,85 +77,24 @@ namespace
     const char* g_pShaderFilenamePS[] =
     {
         "fs_material.glsl",
-        "fs_material.glsl",
-        "fs_material.glsl",
-        "fs_material.glsl",
-        "fs_material.glsl",
-        "fs_material.glsl",
-        "fs_material.glsl",
-        "fs_material.glsl",
     };
 
     const char* g_pShaderNamesPS[] =
     {
-        "PSShaderMaterialDisneyBlank"  ,
-        "PSShaderMaterialDisneyNX0"    ,
-        "PSShaderMaterialDisneyCX0"    ,
-        "PSShaderMaterialDisneyCNX0"   ,
-        "PSShaderMaterialDisneyCNRX0"  ,
-        "PSShaderMaterialDisneyCNRMX0" ,
-        "PSShaderMaterialDisneyCNRMAX0",
+        "PSShaderMaterialDisney",
     };
 
     // -----------------------------------------------------------------------------
-    // Define shader combinations
+    // Define shader defines
     // -----------------------------------------------------------------------------
-#pragma warning(disable:4201)
-    struct SShaderShaderLink
+    const char* g_pShaderAttributeDefines[] =
     {
-        union
-        {
-            struct
-            {
-                unsigned int m_pShaderNamesHS;
-                unsigned int m_pShaderNamesDS;
-                unsigned int m_pShaderNamesGS;
-                unsigned int m_pShaderNamesPS;
-            };
-            unsigned int m_ShaderType[5];
-        };
-    };
-#pragma warning(default:4201)
-
-    static const unsigned int s_NumberOfShaderMaterialCombinations = 9;
-
-    const SShaderShaderLink g_ShaderShaderLinks[s_NumberOfShaderMaterialCombinations] =
-    {
-        { s_NoShader, s_NoShader, s_NoShader, 0 },
-        { s_NoShader, s_NoShader, s_NoShader, 1 },
-        { s_NoShader, s_NoShader, s_NoShader, 2 },
-        { s_NoShader, s_NoShader, s_NoShader, 3 },
-        { s_NoShader, s_NoShader, s_NoShader, 4 },
-        { s_NoShader, s_NoShader, s_NoShader, 5 },
-        { s_NoShader, s_NoShader, s_NoShader, 6 },
-        { 0         , 0         , s_NoShader, 2 },
-        { 0         , 0         , s_NoShader, 3 },
-    };
-
-    // -----------------------------------------------------------------------------
-    // Material combinations
-    // -----------------------------------------------------------------------------
-    const Gfx::CMaterial::SMaterialKey g_MaterialCombinations[s_NumberOfShaderMaterialCombinations] =
-    {
-        // -----------------------------------------------------------------------------
-        // 01. Attribute: HasDiffuseTex
-        // 02. Attribute: HasNormalTex
-        // 03. Attribute: HasRoughnessTex
-        // 05. Attribute: HasMetallicTex
-        // 06. Attribute: HasAOTex
-        // 07. Attribute: HasBumpTex
-        // -----------------------------------------------------------------------------
-
-        // 01  , 02   , 03   , 04   , 05,    06
-        { false, false, false, false, false, false },
-        { false, true , false, false, false, false },
-        { true , false, false, false, false, false },
-        { true , true , false, false, false, false },
-        { true , true , true , false, false, false },
-        { true , true , true , true , false, false },
-        { true , true , true , true , true , false },
-        { true , false, false, false, false, true  },
-        { true , true , false, false, false, true  },
+        "USE_TEX_DIFFUSE"  ,
+        "USE_TEX_NORMAL"   ,
+        "USE_TEX_ROUGHNESS",
+        "USE_TEX_METALLIC" ,
+        "USE_TEX_AO"       ,
+        "USE_TEX_BUMP"     ,
     };
 } // namespace
 
@@ -788,66 +722,30 @@ namespace
 
     void CGfxMaterialManager::SetShaderOfMaterial(CInternMaterial& _rMaterial) const
     {
-        unsigned int ShaderLinkIndex = 0;
+        unsigned int NumberOfDefines = 0;
+        const char*  ppShaderDefines[5];
+          
+        if (_rMaterial.m_MaterialKey.m_HasDiffuseTex)   ppShaderDefines[NumberOfDefines++] = g_pShaderAttributeDefines[0];
+        if (_rMaterial.m_MaterialKey.m_HasNormalTex)    ppShaderDefines[NumberOfDefines++] = g_pShaderAttributeDefines[1];
+        if (_rMaterial.m_MaterialKey.m_HasRoughnessTex) ppShaderDefines[NumberOfDefines++] = g_pShaderAttributeDefines[2];
+        if (_rMaterial.m_MaterialKey.m_HasMetallicTex)  ppShaderDefines[NumberOfDefines++] = g_pShaderAttributeDefines[3];
+        if (_rMaterial.m_MaterialKey.m_HasAOTex)        ppShaderDefines[NumberOfDefines++] = g_pShaderAttributeDefines[4];
+        if (_rMaterial.m_MaterialKey.m_HasBumpTex)      ppShaderDefines[NumberOfDefines++] = g_pShaderAttributeDefines[5];
 
         // -----------------------------------------------------------------------------
-        // Try to find the right shader for that surface
-        // If no shader was found we use a blank shader with pink color.
+        // Bump Mapping
         // -----------------------------------------------------------------------------
-        const Gfx::CMaterial::SMaterialKey & rModelAttributes = _rMaterial.m_MaterialKey;
-        Gfx::CMaterial::SMaterialKey::BMaterialID MostReliableKey = 0;
-
-        for (unsigned int IndexOfShader = 0; IndexOfShader < s_NumberOfShaderMaterialCombinations; ++IndexOfShader)
+        if (_rMaterial.m_HasBump)
         {
-            Gfx::CMaterial::SMaterialKey::BMaterialID TempMostReliableKey = g_MaterialCombinations[IndexOfShader].m_Key & rModelAttributes.m_Key;
+            _rMaterial.m_ShaderPtrs[CShader::Hull] = Gfx::ShaderManager::CompileHS(g_pShaderFilenameHS[0], g_pShaderNamesHS[0], NumberOfDefines, ppShaderDefines);
 
-            if (g_MaterialCombinations[IndexOfShader].m_Key == TempMostReliableKey)
-            {
-                ShaderLinkIndex = IndexOfShader;
-                MostReliableKey = TempMostReliableKey;
-            }
+            _rMaterial.m_ShaderPtrs[CShader::Domain] = Gfx::ShaderManager::CompileDS(g_pShaderFilenameDS[0], g_pShaderNamesDS[0], NumberOfDefines, ppShaderDefines);
         }
 
         // -----------------------------------------------------------------------------
-        // Reset key
+        // Disney
         // -----------------------------------------------------------------------------
-        _rMaterial.m_MaterialKey.m_Key = MostReliableKey;
-
-        // -----------------------------------------------------------------------------
-        // Now we get the names of the pixel shader
-        // -----------------------------------------------------------------------------
-        const unsigned int HSIndex = g_ShaderShaderLinks[ShaderLinkIndex].m_pShaderNamesHS;
-        const unsigned int DSIndex = g_ShaderShaderLinks[ShaderLinkIndex].m_pShaderNamesDS;
-        const unsigned int GSIndex = g_ShaderShaderLinks[ShaderLinkIndex].m_pShaderNamesGS;
-        const unsigned int PSIndex = g_ShaderShaderLinks[ShaderLinkIndex].m_pShaderNamesPS;
-
-        // -----------------------------------------------------------------------------
-        // Compile shader
-        // -----------------------------------------------------------------------------
-        if (HSIndex != s_NoShader)
-        {
-            _rMaterial.m_ShaderPtrs[CShader::Hull] = Gfx::ShaderManager::CompileHS(g_pShaderFilenameHS[HSIndex], g_pShaderNamesHS[HSIndex]);
-        }
-
-        if (DSIndex != s_NoShader)
-        {
-            _rMaterial.m_ShaderPtrs[CShader::Domain] = Gfx::ShaderManager::CompileDS(g_pShaderFilenameDS[DSIndex], g_pShaderNamesDS[DSIndex]);
-        }
-
-        if (GSIndex != s_NoShader)
-        {
-            _rMaterial.m_ShaderPtrs[CShader::Geometry] = Gfx::ShaderManager::CompileGS(g_pShaderFilenameGS[GSIndex], g_pShaderNamesGS[GSIndex]);
-        }
-
-        assert(PSIndex != s_NoShader);
-
-        if (PSIndex != s_NoShader)
-        {
-            const Base::Char* pShaderfileGb = g_pShaderFilenamePS[PSIndex];
-            const Base::Char* pShadernameGb = g_pShaderNamesPS[PSIndex];
-
-            _rMaterial.m_ShaderPtrs[CShader::Pixel] = Gfx::ShaderManager::CompilePS(pShaderfileGb, pShadernameGb);
-        }
+        _rMaterial.m_ShaderPtrs[CShader::Pixel] = Gfx::ShaderManager::CompilePS(g_pShaderFilenamePS[0], g_pShaderNamesPS[0], NumberOfDefines, ppShaderDefines);
     }
 } // namespace
 
