@@ -86,6 +86,16 @@ namespace Edit
 
         // -----------------------------------------------------------------------------
 
+        QString    NewBumpTexture = m_pBumpTextureEdit->text();
+        QByteArray NewBumpTextureBinary = NewBumpTexture.toLatin1();
+
+        // -----------------------------------------------------------------------------
+
+        QString    NewAOTexture = m_pAOTextureEdit->text();
+        QByteArray NewAOTextureBinary = NewAOTexture.toLatin1();
+
+        // -----------------------------------------------------------------------------
+
         float TilingX = m_pTilingXEdit->text().toFloat();
         float TilingY = m_pTilingYEdit->text().toFloat();
         float OffsetX = m_pOffsetXEdit->text().toFloat();
@@ -165,6 +175,28 @@ namespace Edit
             NewMessage.PutBool(true);
 
             NewMessage.PutString(NewMetalicTextureBinary.data());
+        }
+        else
+        {
+            NewMessage.PutBool(false);
+        }
+
+        if (NewBumpTextureBinary.length() > 0)
+        {
+            NewMessage.PutBool(true);
+
+            NewMessage.PutString(NewBumpTextureBinary.data());
+        }
+        else
+        {
+            NewMessage.PutBool(false);
+        }
+
+        if (NewAOTextureBinary.length() > 0)
+        {
+            NewMessage.PutBool(true);
+
+            NewMessage.PutString(NewAOTextureBinary.data());
         }
         else
         {
@@ -285,11 +317,15 @@ namespace Edit
         bool HasNormalMap    = false;
         bool HasRoughnessMap = false;
         bool HasMetalnessMap = false;
+        bool HasBumpMap      = false;
+        bool HasAOMap        = false;
 
         char ColorMapName[256];
         char NormalMapName[256];
         char RoughnessMapName[256];
         char MetalMapName[256];
+        char BumpMapName[256];
+        char AOMapName[256];
 
         R = _rMessage.GetFloat();
         G = _rMessage.GetFloat();
@@ -334,6 +370,20 @@ namespace Edit
         if (HasMetalnessMap)
         {
             _rMessage.GetString(MetalMapName, 256);
+        }
+
+        HasBumpMap = _rMessage.GetBool();
+
+        if (HasBumpMap)
+        {
+            _rMessage.GetString(BumpMapName, 256);
+        }
+
+        HasAOMap = _rMessage.GetBool();
+
+        if (HasAOMap)
+        {
+            _rMessage.GetString(AOMapName, 256);
         }
 
         // -----------------------------------------------------------------------------
@@ -392,6 +442,18 @@ namespace Edit
         m_pReflectanceSlider->setValue(static_cast<int>(Reflectance * 100.0f));
 
         m_pReflectanceEdit->setText(QString::number(Reflectance));
+
+        // -----------------------------------------------------------------------------
+
+        m_pBumpTextureEdit->setText("");
+
+        if (HasBumpMap) m_pBumpTextureEdit->setText(BumpMapName);
+
+        // -----------------------------------------------------------------------------
+
+        m_pAOTextureEdit->setText("");
+
+        if (HasAOMap) m_pAOTextureEdit->setText(AOMapName);
 
         // -----------------------------------------------------------------------------
 

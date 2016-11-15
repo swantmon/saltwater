@@ -32,54 +32,60 @@ public:
     QVBoxLayout *verticalLayout;
     QGroupBox *groupBox;
     QGridLayout *gridLayout;
-    QLabel *label_13;
-    QHBoxLayout *horizontalLayout_4;
-    QLabel *label_15;
-    QLineEdit *m_pTilingXEdit;
-    QLabel *label_16;
-    QLineEdit *m_pTilingYEdit;
+    QLabel *label_21;
+    QLabel *label_23;
+    QLabel *label_22;
+    QLineEdit *m_pBumpTextureEdit;
     QLabel *label_8;
-    QLabel *label_7;
+    QLabel *label_9;
+    QLabel *label_5;
+    QLineEdit *m_pNormalTextureEdit;
+    QLabel *label_6;
+    QLabel *label_4;
     QHBoxLayout *horizontalLayout_2;
     QSlider *m_pRoughnessSlider;
     QLineEdit *m_pRoughnessEdit;
-    QLabel *label_9;
-    QLabel *label_5;
-    QLabel *label_4;
-    QHBoxLayout *horizontalLayout_3;
-    QSlider *m_pReflectanceSlider;
-    QLineEdit *m_pReflectanceEdit;
     QHBoxLayout *horizontalLayout_5;
     QLabel *label_17;
     QLineEdit *m_pOffsetXEdit;
     QLabel *label_18;
     QLineEdit *m_pOffsetYEdit;
     QLabel *label;
-    QLineEdit *m_pNormalTextureEdit;
+    QHBoxLayout *horizontalLayout_4;
+    QLabel *label_15;
+    QLineEdit *m_pTilingXEdit;
+    QLabel *label_16;
+    QLineEdit *m_pTilingYEdit;
+    QHBoxLayout *horizontalLayout_3;
+    QSlider *m_pReflectanceSlider;
+    QLineEdit *m_pReflectanceEdit;
+    QLabel *label_7;
     QLineEdit *m_pAlbedoTextureEdit;
-    QLabel *label_6;
     QLineEdit *m_pRoughnessTextureEdit;
     QLabel *label_2;
     QLabel *label_3;
-    QLabel *label_11;
+    QLabel *label_13;
     QHBoxLayout *horizontalLayout;
     QPushButton *m_pAlbedoColorButton;
     QPushButton *m_pAlbedoPickButton;
-    QLineEdit *m_pMetallicTextureEdit;
     QLabel *label_19;
+    QLabel *label_14;
+    QLineEdit *m_pMetallicTextureEdit;
     QHBoxLayout *horizontalLayout_6;
     QSlider *m_pMetallicSlider;
     QLineEdit *m_pMetallicEdit;
-    QLabel *label_14;
     QLabel *label_10;
     QLabel *label_12;
+    QLabel *label_11;
     QLabel *label_20;
+    QLabel *label_24;
+    QLineEdit *m_pAOTextureEdit;
 
     void setupUi(QWidget *InspectorMaterial)
     {
         if (InspectorMaterial->objectName().isEmpty())
             InspectorMaterial->setObjectName(QStringLiteral("InspectorMaterial"));
-        InspectorMaterial->resize(343, 485);
+        InspectorMaterial->resize(343, 530);
         verticalLayout = new QVBoxLayout(InspectorMaterial);
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
         groupBox = new QGroupBox(InspectorMaterial);
@@ -87,45 +93,60 @@ public:
         groupBox->setCheckable(false);
         gridLayout = new QGridLayout(groupBox);
         gridLayout->setObjectName(QStringLiteral("gridLayout"));
-        label_13 = new QLabel(groupBox);
-        label_13->setObjectName(QStringLiteral("label_13"));
+        label_21 = new QLabel(groupBox);
+        label_21->setObjectName(QStringLiteral("label_21"));
+        label_21->setStyleSheet(QStringLiteral("font-weight: bold;"));
 
-        gridLayout->addWidget(label_13, 19, 0, 1, 1);
+        gridLayout->addWidget(label_21, 17, 0, 1, 1);
 
-        horizontalLayout_4 = new QHBoxLayout();
-        horizontalLayout_4->setObjectName(QStringLiteral("horizontalLayout_4"));
-        label_15 = new QLabel(groupBox);
-        label_15->setObjectName(QStringLiteral("label_15"));
+        label_23 = new QLabel(groupBox);
+        label_23->setObjectName(QStringLiteral("label_23"));
+        label_23->setStyleSheet(QStringLiteral("font-weight: bold;"));
 
-        horizontalLayout_4->addWidget(label_15);
+        gridLayout->addWidget(label_23, 19, 0, 1, 1);
 
-        m_pTilingXEdit = new QLineEdit(groupBox);
-        m_pTilingXEdit->setObjectName(QStringLiteral("m_pTilingXEdit"));
+        label_22 = new QLabel(groupBox);
+        label_22->setObjectName(QStringLiteral("label_22"));
 
-        horizontalLayout_4->addWidget(m_pTilingXEdit);
+        gridLayout->addWidget(label_22, 18, 0, 1, 1);
 
-        label_16 = new QLabel(groupBox);
-        label_16->setObjectName(QStringLiteral("label_16"));
+        m_pBumpTextureEdit = new QLineEdit(groupBox);
+        m_pBumpTextureEdit->setObjectName(QStringLiteral("m_pBumpTextureEdit"));
 
-        horizontalLayout_4->addWidget(label_16);
-
-        m_pTilingYEdit = new QLineEdit(groupBox);
-        m_pTilingYEdit->setObjectName(QStringLiteral("m_pTilingYEdit"));
-
-        horizontalLayout_4->addWidget(m_pTilingYEdit);
-
-
-        gridLayout->addLayout(horizontalLayout_4, 19, 1, 1, 1);
+        gridLayout->addWidget(m_pBumpTextureEdit, 18, 1, 1, 1);
 
         label_8 = new QLabel(groupBox);
         label_8->setObjectName(QStringLiteral("label_8"));
 
         gridLayout->addWidget(label_8, 11, 0, 1, 1);
 
-        label_7 = new QLabel(groupBox);
-        label_7->setObjectName(QStringLiteral("label_7"));
+        label_9 = new QLabel(groupBox);
+        label_9->setObjectName(QStringLiteral("label_9"));
+        label_9->setStyleSheet(QStringLiteral("font-weight:bold;"));
 
-        gridLayout->addWidget(label_7, 10, 0, 1, 1);
+        gridLayout->addWidget(label_9, 12, 0, 1, 1);
+
+        label_5 = new QLabel(groupBox);
+        label_5->setObjectName(QStringLiteral("label_5"));
+
+        gridLayout->addWidget(label_5, 8, 0, 1, 1);
+
+        m_pNormalTextureEdit = new QLineEdit(groupBox);
+        m_pNormalTextureEdit->setObjectName(QStringLiteral("m_pNormalTextureEdit"));
+
+        gridLayout->addWidget(m_pNormalTextureEdit, 8, 1, 1, 1);
+
+        label_6 = new QLabel(groupBox);
+        label_6->setObjectName(QStringLiteral("label_6"));
+        label_6->setStyleSheet(QStringLiteral("font-weight:bold;"));
+
+        gridLayout->addWidget(label_6, 9, 0, 1, 1);
+
+        label_4 = new QLabel(groupBox);
+        label_4->setObjectName(QStringLiteral("label_4"));
+        label_4->setStyleSheet(QStringLiteral("font-weight:bold;"));
+
+        gridLayout->addWidget(label_4, 7, 0, 1, 1);
 
         horizontalLayout_2 = new QHBoxLayout();
         horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
@@ -145,42 +166,6 @@ public:
 
 
         gridLayout->addLayout(horizontalLayout_2, 11, 1, 1, 1);
-
-        label_9 = new QLabel(groupBox);
-        label_9->setObjectName(QStringLiteral("label_9"));
-        label_9->setStyleSheet(QStringLiteral("font-weight:bold;"));
-
-        gridLayout->addWidget(label_9, 12, 0, 1, 1);
-
-        label_5 = new QLabel(groupBox);
-        label_5->setObjectName(QStringLiteral("label_5"));
-
-        gridLayout->addWidget(label_5, 8, 0, 1, 1);
-
-        label_4 = new QLabel(groupBox);
-        label_4->setObjectName(QStringLiteral("label_4"));
-        label_4->setStyleSheet(QStringLiteral("font-weight:bold;"));
-
-        gridLayout->addWidget(label_4, 7, 0, 1, 1);
-
-        horizontalLayout_3 = new QHBoxLayout();
-        horizontalLayout_3->setObjectName(QStringLiteral("horizontalLayout_3"));
-        m_pReflectanceSlider = new QSlider(groupBox);
-        m_pReflectanceSlider->setObjectName(QStringLiteral("m_pReflectanceSlider"));
-        m_pReflectanceSlider->setMaximum(100);
-        m_pReflectanceSlider->setOrientation(Qt::Horizontal);
-        m_pReflectanceSlider->setTickPosition(QSlider::NoTicks);
-
-        horizontalLayout_3->addWidget(m_pReflectanceSlider);
-
-        m_pReflectanceEdit = new QLineEdit(groupBox);
-        m_pReflectanceEdit->setObjectName(QStringLiteral("m_pReflectanceEdit"));
-        m_pReflectanceEdit->setMaximumSize(QSize(30, 16777215));
-
-        horizontalLayout_3->addWidget(m_pReflectanceEdit);
-
-
-        gridLayout->addLayout(horizontalLayout_3, 16, 1, 1, 1);
 
         horizontalLayout_5 = new QHBoxLayout();
         horizontalLayout_5->setObjectName(QStringLiteral("horizontalLayout_5"));
@@ -205,7 +190,7 @@ public:
         horizontalLayout_5->addWidget(m_pOffsetYEdit);
 
 
-        gridLayout->addLayout(horizontalLayout_5, 20, 1, 1, 1);
+        gridLayout->addLayout(horizontalLayout_5, 23, 1, 1, 1);
 
         label = new QLabel(groupBox);
         label->setObjectName(QStringLiteral("label"));
@@ -213,21 +198,59 @@ public:
 
         gridLayout->addWidget(label, 0, 0, 1, 1);
 
-        m_pNormalTextureEdit = new QLineEdit(groupBox);
-        m_pNormalTextureEdit->setObjectName(QStringLiteral("m_pNormalTextureEdit"));
+        horizontalLayout_4 = new QHBoxLayout();
+        horizontalLayout_4->setObjectName(QStringLiteral("horizontalLayout_4"));
+        label_15 = new QLabel(groupBox);
+        label_15->setObjectName(QStringLiteral("label_15"));
 
-        gridLayout->addWidget(m_pNormalTextureEdit, 8, 1, 1, 1);
+        horizontalLayout_4->addWidget(label_15);
+
+        m_pTilingXEdit = new QLineEdit(groupBox);
+        m_pTilingXEdit->setObjectName(QStringLiteral("m_pTilingXEdit"));
+
+        horizontalLayout_4->addWidget(m_pTilingXEdit);
+
+        label_16 = new QLabel(groupBox);
+        label_16->setObjectName(QStringLiteral("label_16"));
+
+        horizontalLayout_4->addWidget(label_16);
+
+        m_pTilingYEdit = new QLineEdit(groupBox);
+        m_pTilingYEdit->setObjectName(QStringLiteral("m_pTilingYEdit"));
+
+        horizontalLayout_4->addWidget(m_pTilingYEdit);
+
+
+        gridLayout->addLayout(horizontalLayout_4, 22, 1, 1, 1);
+
+        horizontalLayout_3 = new QHBoxLayout();
+        horizontalLayout_3->setObjectName(QStringLiteral("horizontalLayout_3"));
+        m_pReflectanceSlider = new QSlider(groupBox);
+        m_pReflectanceSlider->setObjectName(QStringLiteral("m_pReflectanceSlider"));
+        m_pReflectanceSlider->setMaximum(100);
+        m_pReflectanceSlider->setOrientation(Qt::Horizontal);
+        m_pReflectanceSlider->setTickPosition(QSlider::NoTicks);
+
+        horizontalLayout_3->addWidget(m_pReflectanceSlider);
+
+        m_pReflectanceEdit = new QLineEdit(groupBox);
+        m_pReflectanceEdit->setObjectName(QStringLiteral("m_pReflectanceEdit"));
+        m_pReflectanceEdit->setMaximumSize(QSize(30, 16777215));
+
+        horizontalLayout_3->addWidget(m_pReflectanceEdit);
+
+
+        gridLayout->addLayout(horizontalLayout_3, 16, 1, 1, 1);
+
+        label_7 = new QLabel(groupBox);
+        label_7->setObjectName(QStringLiteral("label_7"));
+
+        gridLayout->addWidget(label_7, 10, 0, 1, 1);
 
         m_pAlbedoTextureEdit = new QLineEdit(groupBox);
         m_pAlbedoTextureEdit->setObjectName(QStringLiteral("m_pAlbedoTextureEdit"));
 
         gridLayout->addWidget(m_pAlbedoTextureEdit, 2, 1, 1, 1);
-
-        label_6 = new QLabel(groupBox);
-        label_6->setObjectName(QStringLiteral("label_6"));
-        label_6->setStyleSheet(QStringLiteral("font-weight:bold;"));
-
-        gridLayout->addWidget(label_6, 9, 0, 1, 1);
 
         m_pRoughnessTextureEdit = new QLineEdit(groupBox);
         m_pRoughnessTextureEdit->setObjectName(QStringLiteral("m_pRoughnessTextureEdit"));
@@ -244,10 +267,10 @@ public:
 
         gridLayout->addWidget(label_3, 3, 0, 1, 1);
 
-        label_11 = new QLabel(groupBox);
-        label_11->setObjectName(QStringLiteral("label_11"));
+        label_13 = new QLabel(groupBox);
+        label_13->setObjectName(QStringLiteral("label_13"));
 
-        gridLayout->addWidget(label_11, 13, 0, 1, 1);
+        gridLayout->addWidget(label_13, 22, 0, 1, 1);
 
         horizontalLayout = new QHBoxLayout();
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
@@ -275,15 +298,20 @@ public:
 
         gridLayout->addLayout(horizontalLayout, 3, 1, 1, 1);
 
-        m_pMetallicTextureEdit = new QLineEdit(groupBox);
-        m_pMetallicTextureEdit->setObjectName(QStringLiteral("m_pMetallicTextureEdit"));
-
-        gridLayout->addWidget(m_pMetallicTextureEdit, 13, 1, 1, 1);
-
         label_19 = new QLabel(groupBox);
         label_19->setObjectName(QStringLiteral("label_19"));
 
         gridLayout->addWidget(label_19, 16, 0, 1, 1);
+
+        label_14 = new QLabel(groupBox);
+        label_14->setObjectName(QStringLiteral("label_14"));
+
+        gridLayout->addWidget(label_14, 23, 0, 1, 1);
+
+        m_pMetallicTextureEdit = new QLineEdit(groupBox);
+        m_pMetallicTextureEdit->setObjectName(QStringLiteral("m_pMetallicTextureEdit"));
+
+        gridLayout->addWidget(m_pMetallicTextureEdit, 13, 1, 1, 1);
 
         horizontalLayout_6 = new QHBoxLayout();
         horizontalLayout_6->setObjectName(QStringLiteral("horizontalLayout_6"));
@@ -303,11 +331,6 @@ public:
 
         gridLayout->addLayout(horizontalLayout_6, 14, 1, 1, 1);
 
-        label_14 = new QLabel(groupBox);
-        label_14->setObjectName(QStringLiteral("label_14"));
-
-        gridLayout->addWidget(label_14, 20, 0, 1, 1);
-
         label_10 = new QLabel(groupBox);
         label_10->setObjectName(QStringLiteral("label_10"));
         label_10->setStyleSheet(QStringLiteral("font-weight:bold;"));
@@ -318,12 +341,27 @@ public:
         label_12->setObjectName(QStringLiteral("label_12"));
         label_12->setStyleSheet(QStringLiteral("font-weight:bold;"));
 
-        gridLayout->addWidget(label_12, 18, 0, 1, 1);
+        gridLayout->addWidget(label_12, 21, 0, 1, 1);
+
+        label_11 = new QLabel(groupBox);
+        label_11->setObjectName(QStringLiteral("label_11"));
+
+        gridLayout->addWidget(label_11, 13, 0, 1, 1);
 
         label_20 = new QLabel(groupBox);
         label_20->setObjectName(QStringLiteral("label_20"));
 
         gridLayout->addWidget(label_20, 14, 0, 1, 1);
+
+        label_24 = new QLabel(groupBox);
+        label_24->setObjectName(QStringLiteral("label_24"));
+
+        gridLayout->addWidget(label_24, 20, 0, 1, 1);
+
+        m_pAOTextureEdit = new QLineEdit(groupBox);
+        m_pAOTextureEdit->setObjectName(QStringLiteral("m_pAOTextureEdit"));
+
+        gridLayout->addWidget(m_pAOTextureEdit, 20, 1, 1, 1);
 
 
         verticalLayout->addWidget(groupBox);
@@ -339,7 +377,9 @@ public:
         QWidget::setTabOrder(m_pMetallicSlider, m_pMetallicEdit);
         QWidget::setTabOrder(m_pMetallicEdit, m_pReflectanceSlider);
         QWidget::setTabOrder(m_pReflectanceSlider, m_pReflectanceEdit);
-        QWidget::setTabOrder(m_pReflectanceEdit, m_pTilingXEdit);
+        QWidget::setTabOrder(m_pReflectanceEdit, m_pBumpTextureEdit);
+        QWidget::setTabOrder(m_pBumpTextureEdit, m_pAOTextureEdit);
+        QWidget::setTabOrder(m_pAOTextureEdit, m_pTilingXEdit);
         QWidget::setTabOrder(m_pTilingXEdit, m_pTilingYEdit);
         QWidget::setTabOrder(m_pTilingYEdit, m_pOffsetXEdit);
         QWidget::setTabOrder(m_pOffsetXEdit, m_pOffsetYEdit);
@@ -361,6 +401,8 @@ public:
         QObject::connect(m_pRoughnessSlider, SIGNAL(valueChanged(int)), InspectorMaterial, SLOT(roughnessValueChanged(int)));
         QObject::connect(m_pMetallicSlider, SIGNAL(valueChanged(int)), InspectorMaterial, SLOT(metallicValueChanged(int)));
         QObject::connect(m_pReflectanceSlider, SIGNAL(valueChanged(int)), InspectorMaterial, SLOT(reflectanceValueChanged(int)));
+        QObject::connect(m_pBumpTextureEdit, SIGNAL(textEdited(QString)), InspectorMaterial, SLOT(valueChanged()));
+        QObject::connect(m_pAOTextureEdit, SIGNAL(textEdited(QString)), InspectorMaterial, SLOT(valueChanged()));
 
         QMetaObject::connectSlotsByName(InspectorMaterial);
     } // setupUi
@@ -369,35 +411,39 @@ public:
     {
         InspectorMaterial->setWindowTitle(QApplication::translate("InspectorMaterial", "Material", 0));
         groupBox->setTitle(QApplication::translate("InspectorMaterial", "Material", 0));
-        label_13->setText(QApplication::translate("InspectorMaterial", "Tiling", 0));
-        label_15->setText(QApplication::translate("InspectorMaterial", "X", 0));
-        m_pTilingXEdit->setText(QApplication::translate("InspectorMaterial", "0", 0));
-        label_16->setText(QApplication::translate("InspectorMaterial", "Y", 0));
-        m_pTilingYEdit->setText(QApplication::translate("InspectorMaterial", "0", 0));
+        label_21->setText(QApplication::translate("InspectorMaterial", "Bump", 0));
+        label_23->setText(QApplication::translate("InspectorMaterial", "AO", 0));
+        label_22->setText(QApplication::translate("InspectorMaterial", "Texture", 0));
         label_8->setText(QApplication::translate("InspectorMaterial", "Value", 0));
-        label_7->setText(QApplication::translate("InspectorMaterial", "Texture", 0));
-        m_pRoughnessEdit->setText(QApplication::translate("InspectorMaterial", "1", 0));
         label_9->setText(QApplication::translate("InspectorMaterial", "Metallic", 0));
         label_5->setText(QApplication::translate("InspectorMaterial", "Texture", 0));
+        label_6->setText(QApplication::translate("InspectorMaterial", "Roughness", 0));
         label_4->setText(QApplication::translate("InspectorMaterial", "Normal", 0));
-        m_pReflectanceEdit->setText(QApplication::translate("InspectorMaterial", "0", 0));
+        m_pRoughnessEdit->setText(QApplication::translate("InspectorMaterial", "1", 0));
         label_17->setText(QApplication::translate("InspectorMaterial", "X", 0));
         m_pOffsetXEdit->setText(QApplication::translate("InspectorMaterial", "1", 0));
         label_18->setText(QApplication::translate("InspectorMaterial", "Y", 0));
         m_pOffsetYEdit->setText(QApplication::translate("InspectorMaterial", "1", 0));
         label->setText(QApplication::translate("InspectorMaterial", "Albedo", 0));
-        label_6->setText(QApplication::translate("InspectorMaterial", "Roughness", 0));
+        label_15->setText(QApplication::translate("InspectorMaterial", "X", 0));
+        m_pTilingXEdit->setText(QApplication::translate("InspectorMaterial", "0", 0));
+        label_16->setText(QApplication::translate("InspectorMaterial", "Y", 0));
+        m_pTilingYEdit->setText(QApplication::translate("InspectorMaterial", "0", 0));
+        m_pReflectanceEdit->setText(QApplication::translate("InspectorMaterial", "0", 0));
+        label_7->setText(QApplication::translate("InspectorMaterial", "Texture", 0));
         label_2->setText(QApplication::translate("InspectorMaterial", "Texture", 0));
         label_3->setText(QApplication::translate("InspectorMaterial", "Color", 0));
-        label_11->setText(QApplication::translate("InspectorMaterial", "Texture", 0));
+        label_13->setText(QApplication::translate("InspectorMaterial", "Tiling", 0));
         m_pAlbedoColorButton->setText(QString());
         m_pAlbedoPickButton->setText(QApplication::translate("InspectorMaterial", "Pick", 0));
         label_19->setText(QApplication::translate("InspectorMaterial", "Value", 0));
-        m_pMetallicEdit->setText(QApplication::translate("InspectorMaterial", "0", 0));
         label_14->setText(QApplication::translate("InspectorMaterial", "Offset", 0));
+        m_pMetallicEdit->setText(QApplication::translate("InspectorMaterial", "0", 0));
         label_10->setText(QApplication::translate("InspectorMaterial", "Reflectance", 0));
         label_12->setText(QApplication::translate("InspectorMaterial", "Tiling & Offset", 0));
+        label_11->setText(QApplication::translate("InspectorMaterial", "Texture", 0));
         label_20->setText(QApplication::translate("InspectorMaterial", "Value", 0));
+        label_24->setText(QApplication::translate("InspectorMaterial", "Texture", 0));
     } // retranslateUi
 
 };

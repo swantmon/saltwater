@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>343</width>
-    <height>485</height>
+    <height>530</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,44 +23,35 @@
       <bool>false</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="19" column="0">
-       <widget class="QLabel" name="label_13">
+      <item row="17" column="0">
+       <widget class="QLabel" name="label_21">
+        <property name="styleSheet">
+         <string notr="true">font-weight: bold;</string>
+        </property>
         <property name="text">
-         <string>Tiling</string>
+         <string>Bump</string>
         </property>
        </widget>
       </item>
-      <item row="19" column="1">
-       <layout class="QHBoxLayout" name="horizontalLayout_4">
-        <item>
-         <widget class="QLabel" name="label_15">
-          <property name="text">
-           <string>X</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="m_pTilingXEdit">
-          <property name="text">
-           <string>0</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_16">
-          <property name="text">
-           <string>Y</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="m_pTilingYEdit">
-          <property name="text">
-           <string>0</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+      <item row="19" column="0">
+       <widget class="QLabel" name="label_23">
+        <property name="styleSheet">
+         <string notr="true">font-weight: bold;</string>
+        </property>
+        <property name="text">
+         <string>AO</string>
+        </property>
+       </widget>
+      </item>
+      <item row="18" column="0">
+       <widget class="QLabel" name="label_22">
+        <property name="text">
+         <string>Texture</string>
+        </property>
+       </widget>
+      </item>
+      <item row="18" column="1">
+       <widget class="QLineEdit" name="m_pBumpTextureEdit"/>
       </item>
       <item row="11" column="0">
        <widget class="QLabel" name="label_8">
@@ -69,10 +60,43 @@
         </property>
        </widget>
       </item>
-      <item row="10" column="0">
-       <widget class="QLabel" name="label_7">
+      <item row="12" column="0">
+       <widget class="QLabel" name="label_9">
+        <property name="styleSheet">
+         <string notr="true">font-weight:bold;</string>
+        </property>
+        <property name="text">
+         <string>Metallic</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="label_5">
         <property name="text">
          <string>Texture</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="1">
+       <widget class="QLineEdit" name="m_pNormalTextureEdit"/>
+      </item>
+      <item row="9" column="0">
+       <widget class="QLabel" name="label_6">
+        <property name="styleSheet">
+         <string notr="true">font-weight:bold;</string>
+        </property>
+        <property name="text">
+         <string>Roughness</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="styleSheet">
+         <string notr="true">font-weight:bold;</string>
+        </property>
+        <property name="text">
+         <string>Normal</string>
         </property>
        </widget>
       </item>
@@ -106,64 +130,7 @@
         </item>
        </layout>
       </item>
-      <item row="12" column="0">
-       <widget class="QLabel" name="label_9">
-        <property name="styleSheet">
-         <string notr="true">font-weight:bold;</string>
-        </property>
-        <property name="text">
-         <string>Metallic</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="0">
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string>Texture</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="styleSheet">
-         <string notr="true">font-weight:bold;</string>
-        </property>
-        <property name="text">
-         <string>Normal</string>
-        </property>
-       </widget>
-      </item>
-      <item row="16" column="1">
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
-        <item>
-         <widget class="QSlider" name="m_pReflectanceSlider">
-          <property name="maximum">
-           <number>100</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="tickPosition">
-           <enum>QSlider::NoTicks</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="m_pReflectanceEdit">
-          <property name="maximumSize">
-           <size>
-            <width>30</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="20" column="1">
+      <item row="23" column="1">
        <layout class="QHBoxLayout" name="horizontalLayout_5">
         <item>
          <widget class="QLabel" name="label_17">
@@ -205,21 +172,77 @@
         </property>
        </widget>
       </item>
-      <item row="8" column="1">
-       <widget class="QLineEdit" name="m_pNormalTextureEdit"/>
+      <item row="22" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QLabel" name="label_15">
+          <property name="text">
+           <string>X</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="m_pTilingXEdit">
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_16">
+          <property name="text">
+           <string>Y</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="m_pTilingYEdit">
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="16" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QSlider" name="m_pReflectanceSlider">
+          <property name="maximum">
+           <number>100</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="tickPosition">
+           <enum>QSlider::NoTicks</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="m_pReflectanceEdit">
+          <property name="maximumSize">
+           <size>
+            <width>30</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="10" column="0">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>Texture</string>
+        </property>
+       </widget>
       </item>
       <item row="2" column="1">
        <widget class="QLineEdit" name="m_pAlbedoTextureEdit"/>
-      </item>
-      <item row="9" column="0">
-       <widget class="QLabel" name="label_6">
-        <property name="styleSheet">
-         <string notr="true">font-weight:bold;</string>
-        </property>
-        <property name="text">
-         <string>Roughness</string>
-        </property>
-       </widget>
       </item>
       <item row="10" column="1">
        <widget class="QLineEdit" name="m_pRoughnessTextureEdit"/>
@@ -238,10 +261,10 @@
         </property>
        </widget>
       </item>
-      <item row="13" column="0">
-       <widget class="QLabel" name="label_11">
+      <item row="22" column="0">
+       <widget class="QLabel" name="label_13">
         <property name="text">
-         <string>Texture</string>
+         <string>Tiling</string>
         </property>
        </widget>
       </item>
@@ -315,15 +338,22 @@
         </item>
        </layout>
       </item>
-      <item row="13" column="1">
-       <widget class="QLineEdit" name="m_pMetallicTextureEdit"/>
-      </item>
       <item row="16" column="0">
        <widget class="QLabel" name="label_19">
         <property name="text">
          <string>Value</string>
         </property>
        </widget>
+      </item>
+      <item row="23" column="0">
+       <widget class="QLabel" name="label_14">
+        <property name="text">
+         <string>Offset</string>
+        </property>
+       </widget>
+      </item>
+      <item row="13" column="1">
+       <widget class="QLineEdit" name="m_pMetallicTextureEdit"/>
       </item>
       <item row="14" column="1">
        <layout class="QHBoxLayout" name="horizontalLayout_6">
@@ -352,13 +382,6 @@
         </item>
        </layout>
       </item>
-      <item row="20" column="0">
-       <widget class="QLabel" name="label_14">
-        <property name="text">
-         <string>Offset</string>
-        </property>
-       </widget>
-      </item>
       <item row="15" column="0">
        <widget class="QLabel" name="label_10">
         <property name="styleSheet">
@@ -369,7 +392,7 @@
         </property>
        </widget>
       </item>
-      <item row="18" column="0">
+      <item row="21" column="0">
        <widget class="QLabel" name="label_12">
         <property name="styleSheet">
          <string notr="true">font-weight:bold;</string>
@@ -379,12 +402,29 @@
         </property>
        </widget>
       </item>
+      <item row="13" column="0">
+       <widget class="QLabel" name="label_11">
+        <property name="text">
+         <string>Texture</string>
+        </property>
+       </widget>
+      </item>
       <item row="14" column="0">
        <widget class="QLabel" name="label_20">
         <property name="text">
          <string>Value</string>
         </property>
        </widget>
+      </item>
+      <item row="20" column="0">
+       <widget class="QLabel" name="label_24">
+        <property name="text">
+         <string>Texture</string>
+        </property>
+       </widget>
+      </item>
+      <item row="20" column="1">
+       <widget class="QLineEdit" name="m_pAOTextureEdit"/>
       </item>
      </layout>
     </widget>
@@ -404,6 +444,8 @@
   <tabstop>m_pMetallicEdit</tabstop>
   <tabstop>m_pReflectanceSlider</tabstop>
   <tabstop>m_pReflectanceEdit</tabstop>
+  <tabstop>m_pBumpTextureEdit</tabstop>
+  <tabstop>m_pAOTextureEdit</tabstop>
   <tabstop>m_pTilingXEdit</tabstop>
   <tabstop>m_pTilingYEdit</tabstop>
   <tabstop>m_pOffsetXEdit</tabstop>
@@ -418,11 +460,11 @@
    <slot>pickColorFromDialog()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>547</x>
-     <y>158</y>
+     <x>322</x>
+     <y>98</y>
     </hint>
     <hint type="destinationlabel">
-     <x>587</x>
+     <x>342</x>
      <y>162</y>
     </hint>
    </hints>
@@ -434,11 +476,11 @@
    <slot>pickColorFromDialog()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>477</x>
-     <y>146</y>
+     <x>286</x>
+     <y>100</y>
     </hint>
     <hint type="destinationlabel">
-     <x>593</x>
+     <x>342</x>
      <y>214</y>
     </hint>
    </hints>
@@ -450,11 +492,11 @@
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>379</x>
-     <y>114</y>
+     <x>323</x>
+     <y>70</y>
     </hint>
     <hint type="destinationlabel">
-     <x>593</x>
+     <x>342</x>
      <y>64</y>
     </hint>
    </hints>
@@ -466,11 +508,11 @@
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>473</x>
-     <y>264</y>
+     <x>323</x>
+     <y>146</y>
     </hint>
     <hint type="destinationlabel">
-     <x>589</x>
+     <x>342</x>
      <y>270</y>
     </hint>
    </hints>
@@ -482,11 +524,11 @@
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>433</x>
-     <y>366</y>
+     <x>323</x>
+     <y>191</y>
     </hint>
     <hint type="destinationlabel">
-     <x>591</x>
+     <x>342</x>
      <y>398</y>
     </hint>
    </hints>
@@ -498,11 +540,11 @@
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>351</x>
-     <y>507</y>
+     <x>323</x>
+     <y>266</y>
     </hint>
     <hint type="destinationlabel">
-     <x>595</x>
+     <x>342</x>
      <y>476</y>
     </hint>
    </hints>
@@ -514,12 +556,12 @@
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>329</x>
-     <y>731</y>
+     <x>210</x>
+     <y>481</y>
     </hint>
     <hint type="destinationlabel">
-     <x>595</x>
-     <y>668</y>
+     <x>342</x>
+     <y>529</y>
     </hint>
    </hints>
   </connection>
@@ -530,12 +572,12 @@
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>489</x>
-     <y>743</y>
+     <x>322</x>
+     <y>481</y>
     </hint>
     <hint type="destinationlabel">
-     <x>591</x>
-     <y>630</y>
+     <x>342</x>
+     <y>529</y>
     </hint>
    </hints>
   </connection>
@@ -546,12 +588,12 @@
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>307</x>
-     <y>785</y>
+     <x>210</x>
+     <y>509</y>
     </hint>
     <hint type="destinationlabel">
-     <x>591</x>
-     <y>714</y>
+     <x>342</x>
+     <y>529</y>
     </hint>
    </hints>
   </connection>
@@ -562,12 +604,12 @@
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>471</x>
-     <y>779</y>
+     <x>322</x>
+     <y>509</y>
     </hint>
     <hint type="destinationlabel">
-     <x>591</x>
-     <y>576</y>
+     <x>342</x>
+     <y>529</y>
     </hint>
    </hints>
   </connection>
@@ -578,11 +620,11 @@
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>543</x>
-     <y>404</y>
+     <x>322</x>
+     <y>219</y>
     </hint>
     <hint type="destinationlabel">
-     <x>593</x>
+     <x>342</x>
      <y>336</y>
     </hint>
    </hints>
@@ -594,11 +636,11 @@
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>557</x>
-     <y>544</y>
+     <x>322</x>
+     <y>294</y>
     </hint>
     <hint type="destinationlabel">
-     <x>599</x>
+     <x>342</x>
      <y>514</y>
     </hint>
    </hints>
@@ -610,12 +652,12 @@
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>543</x>
-     <y>638</y>
+     <x>322</x>
+     <y>343</y>
     </hint>
     <hint type="destinationlabel">
-     <x>591</x>
-     <y>606</y>
+     <x>342</x>
+     <y>529</y>
     </hint>
    </hints>
   </connection>
@@ -626,11 +668,11 @@
    <slot>roughnessValueChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>337</x>
-     <y>402</y>
+     <x>286</x>
+     <y>220</y>
     </hint>
     <hint type="destinationlabel">
-     <x>595</x>
+     <x>342</x>
      <y>106</y>
     </hint>
    </hints>
@@ -642,11 +684,11 @@
    <slot>metallicValueChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>413</x>
-     <y>550</y>
+     <x>286</x>
+     <y>295</y>
     </hint>
     <hint type="destinationlabel">
-     <x>595</x>
+     <x>342</x>
      <y>440</y>
     </hint>
    </hints>
@@ -658,12 +700,44 @@
    <slot>reflectanceValueChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>307</x>
-     <y>640</y>
+     <x>286</x>
+     <y>344</y>
     </hint>
     <hint type="destinationlabel">
-     <x>589</x>
-     <y>766</y>
+     <x>342</x>
+     <y>529</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pBumpTextureEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorMaterial</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>253</x>
+     <y>380</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>341</x>
+     <y>370</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pAOTextureEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorMaterial</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>272</x>
+     <y>427</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>339</x>
+     <y>362</y>
     </hint>
    </hints>
   </connection>

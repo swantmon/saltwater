@@ -187,6 +187,28 @@ namespace
             NewMessage.PutBool(false);
         }
 
+        if (rMaterial.GetBumpTexture())
+        {
+            NewMessage.PutBool(true);
+
+            NewMessage.PutString(rMaterial.GetBumpTexture()->GetFileName());
+        }
+        else
+        {
+            NewMessage.PutBool(false);
+        }
+
+        if (rMaterial.GetAmbientOcclusionTexture())
+        {
+            NewMessage.PutBool(true);
+
+            NewMessage.PutString(rMaterial.GetAmbientOcclusionTexture()->GetFileName());
+        }
+        else
+        {
+            NewMessage.PutBool(false);
+        }
+
         NewMessage.Reset();
 
         Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::MaterialInfo, NewMessage);
@@ -206,11 +228,15 @@ namespace
         bool HasNormalMap    = false;
         bool HasRoughnessMap = false;
         bool HasMetalnessMap = false;
+        bool HasBumpMap      = false;
+        bool HasAOMap        = false;
 
         char ColorMapName[256];
         char NormalMapName[256];
         char RoughnessMapName[256];
         char MetalMapName[256];
+        char BumpMapName[256];
+        char AOMapName[256];
 
         // -----------------------------------------------------------------------------
         // Read values
@@ -262,6 +288,20 @@ namespace
             _rMessage.GetString(MetalMapName, 256);
         }
 
+        HasBumpMap = _rMessage.GetBool();
+
+        if (HasBumpMap)
+        {
+            _rMessage.GetString(BumpMapName, 256);
+        }
+
+        HasAOMap = _rMessage.GetBool();
+
+        if (HasAOMap)
+        {
+            _rMessage.GetString(AOMapName, 256);
+        }
+
         rMaterial.SetColor       (Color);
         rMaterial.SetTilingOffset(TilingOffset);
         rMaterial.SetRoughness   (Roughness);
@@ -304,7 +344,7 @@ namespace
                 }
             }
         }
-        else if (HasColorMap == false)
+        else
         {
             rMaterial.SetColorTexture(0);
         }
@@ -333,7 +373,7 @@ namespace
                 }
             }
         }
-        else if (HasNormalMap == false)
+        else
         {
             rMaterial.SetNormalTexture(0);
         }
@@ -362,7 +402,7 @@ namespace
                 }
             }
         }
-        else if (HasRoughnessMap == false)
+        else
         {
             rMaterial.SetRoughnessTexture(0);
         }
@@ -391,9 +431,67 @@ namespace
                 }
             }
         }
-        else if (HasMetalnessMap == false)
+        else
         {
             rMaterial.SetMetalTexture(0);
+        }
+
+        if (HasBumpMap)
+        {
+            Dt::CTexture2D* pTexture = rMaterial.GetBumpTexture();
+
+            if (pTexture != nullptr && strcmp(pTexture->GetFileName(), BumpMapName))
+            {
+                Dt::TextureManager::CopyToTexture2D(pTexture, BumpMapName);
+
+                Dt::TextureManager::MarkTextureAsDirty(pTexture, Dt::CTextureBase::DirtyFile);
+            }
+            else
+            {
+                TextureDescriptor.m_pFileName = BumpMapName;
+
+                pTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+
+                if (pTexture != nullptr)
+                {
+                    rMaterial.SetBumpTexture(pTexture);
+
+                    Dt::TextureManager::MarkTextureAsDirty(pTexture, Dt::CTextureBase::DirtyCreate);
+                }
+            }
+        }
+        else
+        {
+            rMaterial.SetBumpTexture(0);
+        }
+
+        if (HasAOMap)
+        {
+            Dt::CTexture2D* pTexture = rMaterial.GetAmbientOcclusionTexture();
+
+            if (pTexture != nullptr && strcmp(pTexture->GetFileName(), AOMapName))
+            {
+                Dt::TextureManager::CopyToTexture2D(pTexture, AOMapName);
+
+                Dt::TextureManager::MarkTextureAsDirty(pTexture, Dt::CTextureBase::DirtyFile);
+            }
+            else
+            {
+                TextureDescriptor.m_pFileName = AOMapName;
+
+                pTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+
+                if (pTexture != nullptr)
+                {
+                    rMaterial.SetAmbientOcclusionTexture(pTexture);
+
+                    Dt::TextureManager::MarkTextureAsDirty(pTexture, Dt::CTextureBase::DirtyCreate);
+                }
+            }
+        }
+        else
+        {
+            rMaterial.SetAmbientOcclusionTexture(0);
         }
 
         Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyData);
