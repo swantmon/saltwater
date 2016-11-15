@@ -191,7 +191,7 @@ namespace
 
         CMaterialPtr CreateMaterial(const SMaterialDescriptor& _rDescriptor);
 
-        CMaterialPtr GetDefaultMaterialByHash();
+        CMaterialPtr GetDefaultMaterial();
 
         CMaterialPtr GetMaterialByHash(unsigned int _Hash);
 
@@ -319,7 +319,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CMaterialPtr CGfxMaterialManager::GetDefaultMaterialByHash()
+    CMaterialPtr CGfxMaterialManager::GetDefaultMaterial()
     {
         return m_DefaultMaterialPtr;
     }
@@ -868,9 +868,9 @@ namespace MaterialManager
 
     // -----------------------------------------------------------------------------
 
-    CMaterialPtr GetDefaultMaterialByHash()
+    CMaterialPtr GetDefaultMaterial()
     {
-        return CGfxMaterialManager::GetInstance().GetDefaultMaterialByHash();
+        return CGfxMaterialManager::GetInstance().GetDefaultMaterial();
     }
 
     // -----------------------------------------------------------------------------

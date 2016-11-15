@@ -407,6 +407,9 @@ namespace
                             }
                             else
                             {
+                                // TODO by tschwandt
+                                // load an material with descriptor; not an empty material
+
                                 // -----------------------------------------------------------------------------
                                 // Create new material and load with model file settings
                                 // -----------------------------------------------------------------------------

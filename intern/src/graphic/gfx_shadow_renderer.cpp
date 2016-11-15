@@ -982,7 +982,7 @@ namespace
                     
                     // TODO by tschwandt
                     // MATERIAL COMMENT
-                    // CInputLayoutPtr LayoutPtr = SurfacePtr->GetMaterial()->GetShaderVS()->GetInputLayout();
+                    CInputLayoutPtr LayoutPtr = SurfacePtr->GetShaderVS()->GetInputLayout();
                     
                     // -----------------------------------------------------------------------------
                     // Set items to context manager
@@ -991,9 +991,7 @@ namespace
                     
                     ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
                     
-                    // TODO by tschwandt
-                    // MATERIAL COMMENT
-                    // ContextManager::SetInputLayout(LayoutPtr);
+                    ContextManager::SetInputLayout(LayoutPtr);
                     
                     ContextManager::SetTopology(STopology::TriangleList);
                     
@@ -1151,8 +1149,8 @@ namespace
                     assert(SurfacePtr->GetKey().m_HasPosition);
                     
                     // TODO by tschwandt
-                    // MATERIAL COMMENT
-                    // CInputLayoutPtr LayoutPtr = MaterialPtr->GetShaderVS()->GetInputLayout();
+                    // MATERIAL COMMENT SHADER
+                    CInputLayoutPtr LayoutPtr = SurfacePtr->GetShaderVS()->GetInputLayout();
                     
                     // -----------------------------------------------------------------------------
                     // Set items to context manager
@@ -1161,9 +1159,7 @@ namespace
                     
                     ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
                     
-                    // TODO by tschwandt
-                    // MATERIAL COMMENT
-                    // ContextManager::SetInputLayout(LayoutPtr);
+                    ContextManager::SetInputLayout(LayoutPtr);
                     
                     ContextManager::SetTopology(STopology::TriangleList);
                     

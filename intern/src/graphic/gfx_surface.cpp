@@ -47,7 +47,7 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    CShaderPtr CSurface::GetVertexShader() const
+    CShaderPtr CSurface::GetShaderVS() const
     {
         return m_VertexShader;
     }

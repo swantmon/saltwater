@@ -37,7 +37,11 @@ namespace MaterialManager
     void OnStart();
     void OnExit();
 
+    // TODO by tschwandt
+    // Remove creation of empty material
     CMaterial& CreateEmptyMaterial();
+
+
     CMaterial& CreateMaterial(const SMaterialFileDescriptor& _rDescriptor);
 
     void MarkMaterialAsDirty(CMaterial& _rMaterial, unsigned int _DirtyFlags);

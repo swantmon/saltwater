@@ -17,7 +17,7 @@
 #include "graphic/gfx_surface.h"
 
 // TODO by tschwandt
-// CHECK "MATERIAL COMMENT"
+// CHECK "MATERIAL COMMENT SHADER" and "MATERIAL COMMENT CREATION"
 
 namespace Gfx
 {
@@ -49,7 +49,7 @@ namespace MaterialManager
 
     CMaterialPtr CreateMaterial(const SMaterialDescriptor& _rDescriptor);
 
-    CMaterialPtr GetDefaultMaterialByHash();
+    CMaterialPtr GetDefaultMaterial();
 
     CMaterialPtr GetMaterialByHash(unsigned int _Hash);
 } // namespace MaterialManager

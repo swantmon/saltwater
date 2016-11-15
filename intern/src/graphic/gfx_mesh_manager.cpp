@@ -442,11 +442,17 @@ namespace
                     Gfx::SMaterialDescriptor MaterialDesc;
                     
                     // TODO by tschwandt
-                    // MATERIAL COMMENT
+                    // MATERIAL COMMENT CREATION
                     // MaterialDesc.m_ID        = rSurface.m_SurfaceKey.m_Key;
                     // MaterialDesc.m_pMaterial = rCurrentSurface.GetMaterial();
+
+                    unsigned int Hash = rCurrentSurface.GetMaterial()->GetHash();
                     
-                    rSurface.m_MaterialPtr = Gfx::MaterialManager::CreateMaterial(MaterialDesc);
+                    rSurface.m_MaterialPtr = Gfx::MaterialManager::GetMaterialByHash(Hash);
+                }
+                else
+                {
+                    rSurface.m_MaterialPtr = Gfx::MaterialManager::GetDefaultMaterial();
                 }
                 
                 // -----------------------------------------------------------------------------

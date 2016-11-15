@@ -260,7 +260,7 @@ namespace
             // Material description
             // -----------------------------------------------------------------------------
             // TODO by tschwandt
-            // MATERIAL COMMENT
+            // MATERIAL COMMENT CREATION
             // MaterialDesc.m_ID        = SurfaceKey.m_Key;
             // MaterialDesc.m_pMaterial = pDataMaterial;
 
@@ -268,7 +268,7 @@ namespace
             // Update material
             // -----------------------------------------------------------------------------
             // TODO by tschwandt
-            // MATERIAL COMMENT
+            // MATERIAL COMMENT CREATION
             // MaterialManager::UpdateMaterial(MaterialPtr, MaterialDesc);
         }
     }
@@ -370,14 +370,22 @@ namespace
                 // Material description
                 // -----------------------------------------------------------------------------
                 // TODO by tschwandt
-                // MATERIAL COMMENT
+                // MATERIAL COMMENT CREATION
                 // MaterialDesc.m_ID        = SurfaceKey.m_Key;
                 // MaterialDesc.m_pMaterial = pDataMaterial;
 
                 // -----------------------------------------------------------------------------
                 // Create and set material
                 // -----------------------------------------------------------------------------
-                CMaterialPtr NewMaterialPtr = MaterialManager::CreateMaterial(MaterialDesc);
+                unsigned int Hash = pDataMaterial->GetHash();
+
+                CMaterialPtr NewMaterialPtr = MaterialManager::GetMaterialByHash(Hash);
+
+                rGraphicActorModelFacet.SetMaterial(NumberOfSurface, NewMaterialPtr);
+            }
+            else
+            {
+                CMaterialPtr NewMaterialPtr = MaterialManager::GetDefaultMaterial();
 
                 rGraphicActorModelFacet.SetMaterial(NumberOfSurface, NewMaterialPtr);
             }
@@ -440,14 +448,22 @@ namespace
                 // Material description
                 // -----------------------------------------------------------------------------
                 // TODO by tschwandt
-                // MATERIAL COMMENT
+                // MATERIAL COMMENT CREATION
                 // MaterialDesc.m_ID = SurfaceKey.m_Key;
                 // MaterialDesc.m_pMaterial = pDataMaterial;
 
                 // -----------------------------------------------------------------------------
                 // Create and set material
                 // -----------------------------------------------------------------------------
-                CMaterialPtr NewMaterialPtr = MaterialManager::CreateMaterial(MaterialDesc);
+                unsigned int Hash = pDataMaterial->GetHash();
+
+                CMaterialPtr NewMaterialPtr = MaterialManager::GetMaterialByHash(Hash);
+
+                rGraphicActorARFacet.SetMaterial(NumberOfSurface, NewMaterialPtr);
+            }
+            else
+            {
+                CMaterialPtr NewMaterialPtr = MaterialManager::GetDefaultMaterial();
 
                 rGraphicActorARFacet.SetMaterial(NumberOfSurface, NewMaterialPtr);
             }
