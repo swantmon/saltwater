@@ -396,11 +396,24 @@ namespace
                                 
                                 if (MaterialExaminer.find(".mat") != std::string::npos)
                                 {
-                                    SMaterialDescriptor MaterialDesc;
+                                    SMaterialDescriptor MaterialDescriptor;
 
-                                    MaterialDesc.m_pFileName = MaterialExaminer.c_str();
+                                    MaterialDescriptor.m_pMaterialName   = 0;
+                                    MaterialDescriptor.m_pColorMap       = 0;
+                                    MaterialDescriptor.m_pNormalMap      = 0;
+                                    MaterialDescriptor.m_pRoughnessMap   = 0;
+                                    MaterialDescriptor.m_pReflectanceMap = 0;
+                                    MaterialDescriptor.m_pMetalMaskMap   = 0;
+                                    MaterialDescriptor.m_pAOMap          = 0;
+                                    MaterialDescriptor.m_pBumpMap        = 0;
+                                    MaterialDescriptor.m_Roughness       = 1.0f;
+                                    MaterialDescriptor.m_Reflectance     = 0.0f;
+                                    MaterialDescriptor.m_MetalMask       = 0.0f;
+                                    MaterialDescriptor.m_AlbedoColor     = Base::Float3(1.0f);
+                                    MaterialDescriptor.m_TilingOffset    = Base::Float4(1.0f, 1.0f, 0.0f, 0.0f);
+                                    MaterialDescriptor.m_pFileName       = MaterialExaminer.c_str();
 
-                                    rNewSurface.m_pMaterial = &MaterialManager::CreateMaterial(MaterialDesc);
+                                    rNewSurface.m_pMaterial = &MaterialManager::CreateMaterial(MaterialDescriptor);
                                 
                                     MaterialManager::MarkMaterialAsDirty(*rNewSurface.m_pMaterial, CMaterial::DirtyCreate);
                                 }

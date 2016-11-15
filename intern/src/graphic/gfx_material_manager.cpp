@@ -457,42 +457,42 @@ namespace
             {
                 unsigned int Hash = rDataMaterial.GetNormalTexture()->GetHash();
 
-                TexturePtrs[0] = TextureManager::GetTexture2DByHash(Hash);
+                TexturePtrs[1] = TextureManager::GetTexture2DByHash(Hash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasRoughnessTex)
             {
                 unsigned int Hash = rDataMaterial.GetRoughnessTexture()->GetHash();
 
-                TexturePtrs[0] = TextureManager::GetTexture2DByHash(Hash);
+                TexturePtrs[2] = TextureManager::GetTexture2DByHash(Hash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasReflectanceTex)
             {
                 unsigned int Hash = rDataMaterial.GetReflectanceTexture()->GetHash();
 
-                TexturePtrs[0] = TextureManager::GetTexture2DByHash(Hash);
+                TexturePtrs[3] = TextureManager::GetTexture2DByHash(Hash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasMetallicTex)
             {
                 unsigned int Hash = rDataMaterial.GetMetalTexture()->GetHash();
 
-                TexturePtrs[0] = TextureManager::GetTexture2DByHash(Hash);
+                TexturePtrs[4] = TextureManager::GetTexture2DByHash(Hash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasAOTex)
             {
                 unsigned int Hash = rDataMaterial.GetAmbientOcclusionTexture()->GetHash();
 
-                TexturePtrs[0] = TextureManager::GetTexture2DByHash(Hash);
+                TexturePtrs[5] = TextureManager::GetTexture2DByHash(Hash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasBumpTex)
             {
                 unsigned int Hash = rDataMaterial.GetBumpTexture()->GetHash();
 
-                TexturePtrs[0] = TextureManager::GetTexture2DByHash(Hash);
+                TexturePtrs[6] = TextureManager::GetTexture2DByHash(Hash);
             }
 
             rMaterial.m_TextureSetPtrs[CShader::Pixel] = TextureManager::CreateTextureSet(TexturePtrs, CMaterial::SMaterialKey::s_NumberOfTextures);

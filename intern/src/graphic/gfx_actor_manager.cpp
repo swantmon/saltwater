@@ -369,12 +369,6 @@ namespace
 
                 rGraphicActorModelFacet.SetMaterial(NumberOfSurface, NewMaterialPtr);
             }
-            else
-            {
-                CMaterialPtr NewMaterialPtr = MaterialManager::GetDefaultMaterial();
-
-                rGraphicActorModelFacet.SetMaterial(NumberOfSurface, NewMaterialPtr);
-            }
         }        
 
         // -----------------------------------------------------------------------------
