@@ -980,8 +980,6 @@ namespace
                     // -----------------------------------------------------------------------------
                     assert(SurfacePtr->GetKey().m_HasPosition);
                     
-                    // TODO by tschwandt
-                    // MATERIAL COMMENT
                     CInputLayoutPtr LayoutPtr = SurfacePtr->GetShaderVS()->GetInputLayout();
                     
                     // -----------------------------------------------------------------------------
@@ -1148,8 +1146,6 @@ namespace
                     // -----------------------------------------------------------------------------
                     assert(SurfacePtr->GetKey().m_HasPosition);
                     
-                    // TODO by tschwandt
-                    // MATERIAL COMMENT SHADER
                     CInputLayoutPtr LayoutPtr = SurfacePtr->GetShaderVS()->GetInputLayout();
                     
                     // -----------------------------------------------------------------------------

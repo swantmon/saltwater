@@ -16,9 +16,6 @@
 #include "graphic/gfx_material.h"
 #include "graphic/gfx_surface.h"
 
-// TODO by tschwandt
-// CHECK "MATERIAL COMMENT SHADER" and "MATERIAL COMMENT CREATION"
-
 namespace Gfx
 {
     struct SMaterialDescriptor

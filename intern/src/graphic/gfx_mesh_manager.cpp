@@ -440,11 +440,6 @@ namespace
                 if (rCurrentSurface.GetMaterial())
                 {
                     Gfx::SMaterialDescriptor MaterialDesc;
-                    
-                    // TODO by tschwandt
-                    // MATERIAL COMMENT CREATION
-                    // MaterialDesc.m_ID        = rSurface.m_SurfaceKey.m_Key;
-                    // MaterialDesc.m_pMaterial = rCurrentSurface.GetMaterial();
 
                     unsigned int Hash = rCurrentSurface.GetMaterial()->GetHash();
                     

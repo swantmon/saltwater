@@ -203,73 +203,7 @@ namespace
 
     void CGfxActorManager::UpdateActorMesh(Dt::CEntity& _rEntity)
     {
-        Dt::CMeshActorFacet* pDataActorModelFacet;
-
-        // -----------------------------------------------------------------------------
-        // Get data
-        // -----------------------------------------------------------------------------
-        pDataActorModelFacet = static_cast<Dt::CMeshActorFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-
-        assert(pDataActorModelFacet);
-
-        // -----------------------------------------------------------------------------
-        // Get facet
-        // -----------------------------------------------------------------------------
-        CInternMeshActorFacet* pGraphicActorModelFacet = static_cast<CInternMeshActorFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
-
-        // -----------------------------------------------------------------------------
-        // Model
-        // -----------------------------------------------------------------------------
-        CMeshPtr ModelPtr = pGraphicActorModelFacet->GetMesh();
-
-        // -----------------------------------------------------------------------------
-        // Material
-        // -----------------------------------------------------------------------------
-        SMaterialDescriptor MaterialDesc;
-
-        CLODPtr ModelLODPtr = ModelPtr->GetLOD(0);
-
-        for (unsigned int NumberOfSurface = 0; NumberOfSurface < ModelLODPtr->GetNumberOfSurfaces(); ++NumberOfSurface)
-        {
-            CSurfacePtr SurfacePtr = ModelLODPtr->GetSurface(NumberOfSurface);
-
-            Dt::CMaterial* pDataMaterial = pDataActorModelFacet->GetMaterial(NumberOfSurface);
-            CMaterialPtr MaterialPtr = pGraphicActorModelFacet->GetMaterial(NumberOfSurface);
-
-            if (pDataMaterial == nullptr)
-            {
-                pDataMaterial = pDataActorModelFacet->GetMesh()->GetLOD(0)->GetSurface(NumberOfSurface)->GetMaterial();
-            }
-
-            if (MaterialPtr == nullptr)
-            {
-                MaterialPtr = SurfacePtr->GetMaterial();
-            }
-
-            if (pDataMaterial == nullptr || MaterialPtr == nullptr)
-            {
-                continue;
-            }
-
-            // -----------------------------------------------------------------------------
-            // Get key of surface
-            // -----------------------------------------------------------------------------
-
-            // -----------------------------------------------------------------------------
-            // Material description
-            // -----------------------------------------------------------------------------
-            // TODO by tschwandt
-            // MATERIAL COMMENT CREATION
-            // MaterialDesc.m_ID        = SurfaceKey.m_Key;
-            // MaterialDesc.m_pMaterial = pDataMaterial;
-
-            // -----------------------------------------------------------------------------
-            // Update material
-            // -----------------------------------------------------------------------------
-            // TODO by tschwandt
-            // MATERIAL COMMENT CREATION
-            // MaterialManager::UpdateMaterial(MaterialPtr, MaterialDesc);
-        }
+        BASE_UNUSED(_rEntity);
     }
 
     // -----------------------------------------------------------------------------

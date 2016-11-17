@@ -578,8 +578,6 @@ namespace
                 // -----------------------------------------------------------------------------
                 ContextManager::SetTopology(STopology::TriangleList);
 
-                // TODO by tschwandt
-                // MATERIAL COMMENT SHADER
                 ContextManager::SetShaderVS(SurfacePtr->GetShaderVS());
 
                 ContextManager::SetShaderPS(m_DifferentialGBufferShaderPSPtr);
@@ -595,8 +593,6 @@ namespace
 
                 ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
 
-                // TODO by tschwandt
-                // MATERIAL COMMENT SHADER
                 ContextManager::SetInputLayout(SurfacePtr->GetShaderVS()->GetInputLayout());
 
                 ContextManager::SetTextureSetPS(m_DifferentualGBufferTextureSetPtr);
