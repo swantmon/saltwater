@@ -485,32 +485,23 @@ namespace
         
         std::function<void(Dt::CEntity*)> NavigateToNextEntity = [&](Dt::CEntity* _pRootEntity) -> void
         {
-            Dt::CHierarchyFacet* pHierarchyFacet = _pRootEntity->GetHierarchyFacet();
+            Dt::CEntity* pSiblingEntity = _pRootEntity;
 
-            if (pHierarchyFacet)
+            for (; pSiblingEntity != nullptr; )
             {
-                Dt::CEntity* pFirstChild = pHierarchyFacet->GetFirstChild();
+                assert(pSiblingEntity->GetHierarchyFacet());
+
+                Dt::CEntity* pFirstChild = pSiblingEntity->GetHierarchyFacet()->GetFirstChild();
 
                 if (pFirstChild != nullptr)
                 {
                     NavigateToNextEntity(pFirstChild);
                 }
 
-                // -----------------------------------------------------------------------------
+                AddEntityToJobs(pSiblingEntity);
 
-                Dt::CEntity* pSiblingEntity = pHierarchyFacet->GetSibling();
-
-                for (; pSiblingEntity != nullptr; )
-                {
-                    NavigateToNextEntity(pSiblingEntity);
-
-                    assert(pSiblingEntity->GetHierarchyFacet());
-
-                    pSiblingEntity = pSiblingEntity->GetHierarchyFacet()->GetSibling();
-                }
+                pSiblingEntity = pSiblingEntity->GetHierarchyFacet()->GetSibling();
             }
-
-            AddEntityToJobs(_pRootEntity);
         };
 
         if (m_pSelectedEntity != nullptr)
