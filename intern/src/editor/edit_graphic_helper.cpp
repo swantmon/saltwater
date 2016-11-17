@@ -6,6 +6,7 @@
 #include "base/base_uncopyable.h"
 
 #include "graphic/gfx_histogram_renderer.h"
+#include "graphic/gfx_selection_renderer.h"
 
 #include "editor/edit_graphic_helper.h"
 
@@ -35,6 +36,7 @@ namespace
 
         void OnRequestHistogramInfo(Edit::CMessage& _rMessage);
         void OnHistogramInfo(Edit::CMessage& _rMessage);
+        void OnHighlightEntity(Edit::CMessage& _rMessage);
     };
 } // namespace
 
@@ -60,7 +62,10 @@ namespace
         // Edit
         // -----------------------------------------------------------------------------
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestGraphicHistogramInfo, EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnRequestHistogramInfo));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::GraphicHistogramInfo       , EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnHistogramInfo));
+
+        Edit::MessageManager::Register(Edit::SGUIMessageType::GraphicHistogramInfo, EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnHistogramInfo));
+
+        Edit::MessageManager::Register(Edit::SGUIMessageType::GraphicHighlightEntity, EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnHighlightEntity));
     }
 
     // -----------------------------------------------------------------------------
@@ -104,6 +109,24 @@ namespace
         Settings.m_EyeAdaptionSpeedDown = _rMessage.GetFloat();
 
         Gfx::HistogramRenderer::SetSettings(Settings);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGraphicHelper::OnHighlightEntity(Edit::CMessage& _rMessage)
+    {
+        int EntityID = _rMessage.GetInt();
+
+        if (EntityID >= 0)
+        {
+            unsigned int SelectedEntity = static_cast<unsigned int>(EntityID);
+
+            Gfx::SelectionRenderer::SelectEntity(SelectedEntity);
+        }
+        else
+        {
+            Gfx::SelectionRenderer::UnselectEntity();
+        }
     }
 } // namespace
 

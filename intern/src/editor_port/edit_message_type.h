@@ -101,6 +101,8 @@ namespace Edit
 
             GraphicHistogramInfo,
 
+            GraphicHighlightEntity,
+
             NumberOfMembers,
             Undefined = -1,
         };

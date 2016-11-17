@@ -28,12 +28,13 @@
 #include "graphic/gfx_reflection_renderer.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
-#include "graphic/gfx_tonemapping_renderer.h"
+#include "graphic/gfx_selection_renderer.h"
 #include "graphic/gfx_state_manager.h"
 #include "graphic/gfx_shadow_renderer.h"
 #include "graphic/gfx_sky_renderer.h"
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_manager.h"
+#include "graphic/gfx_tonemapping_renderer.h"
 #include "graphic/gfx_view_manager.h"
 
 using namespace Gfx;
@@ -64,6 +65,7 @@ namespace
 
         SkyRenderer        ::OnExit();
         DebugRenderer      ::OnExit();
+        SelectionRenderer  ::OnExit();
         LightAreaRenderer  ::OnExit();
         ReflectionRenderer ::OnExit();
         LightPointRenderer ::OnExit();

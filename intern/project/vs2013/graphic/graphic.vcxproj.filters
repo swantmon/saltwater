@@ -209,6 +209,9 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_mesh_manager.cpp">
       <Filter>engine\models</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_selection_renderer.cpp">
+      <Filter>engine\renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\graphic\gfx_debug_interface.h">
@@ -463,6 +466,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_mesh_manager.h">
       <Filter>engine\models</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_selection_renderer.h">
+      <Filter>engine\renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

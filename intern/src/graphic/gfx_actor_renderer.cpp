@@ -433,8 +433,6 @@ namespace
             // -----------------------------------------------------------------------------
             ContextManager::SetTopology(STopology::TriangleList);
 
-            // TODO by tschwandt
-            // MATERIAL COMMENT SHADER
             ContextManager::SetShaderVS(SurfacePtr->GetShaderVS());
 
             ContextManager::SetShaderGS(MaterialPtr->GetShaderGS());
@@ -476,8 +474,6 @@ namespace
 
             ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
 
-            // TODO by tschwandt
-            // MATERIAL COMMENT SHADER
             ContextManager::SetInputLayout(SurfacePtr->GetShaderVS()->GetInputLayout());
 
             ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);

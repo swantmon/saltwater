@@ -129,15 +129,25 @@ namespace Edit
         m_ActiveEntityID = _ID;
 
         // -----------------------------------------------------------------------------
-        // Send messages
+        // Send messages: Selection and facet infos
         // -----------------------------------------------------------------------------
-        CMessage NewMessage;
+        Edit::CMessage SelectionMessage;
 
-        NewMessage.PutInt(m_ActiveEntityID);
+        SelectionMessage.PutInt(m_ActiveEntityID);
 
-        NewMessage.Reset();
+        SelectionMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::RequestEntityInfoFacets, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::GraphicHighlightEntity, SelectionMessage);
+
+        // -----------------------------------------------------------------------------
+
+        CMessage FacetMessage;
+
+        FacetMessage.PutInt(m_ActiveEntityID);
+
+        FacetMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::RequestEntityInfoFacets, FacetMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -295,5 +305,18 @@ namespace Edit
                 }
             }
         }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspector::mousePressEvent(QMouseEvent* _pEvent)
+    {
+        Edit::CMessage NewMessage;
+
+        NewMessage.PutInt(-1);
+
+        NewMessage.Reset();
+
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::GraphicHighlightEntity, NewMessage);
     }
 } // namespace Edit

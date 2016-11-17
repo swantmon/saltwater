@@ -34,6 +34,10 @@ namespace Edit
 
         void updateContentForEntity(int _ID);
 
+    protected:
+
+        void mousePressEvent(QMouseEvent* _pEvent);
+
     private:
 
         QVBoxLayout*              m_pInspectorLayout;

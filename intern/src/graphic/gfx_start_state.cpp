@@ -25,15 +25,16 @@
 #include "graphic/gfx_postfx_renderer.h"
 #include "graphic/gfx_postfx_hdr_renderer.h"
 #include "graphic/gfx_reflection_renderer.h"
+#include "graphic/gfx_selection_renderer.h"
 #include "graphic/gfx_start_state.h"
 #include "graphic/gfx_shader_manager.h"
-#include "graphic/gfx_tonemapping_renderer.h"
 #include "graphic/gfx_shadow_renderer.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_sky_renderer.h"
 #include "graphic/gfx_state_manager.h"
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_manager.h"
+#include "graphic/gfx_tonemapping_renderer.h"
 #include "graphic/gfx_view_manager.h"
 
 using namespace Gfx;
@@ -117,6 +118,7 @@ namespace
         PostFXHDR          ::OnStart();
         PostFX             ::OnStart();
         DebugRenderer      ::OnStart();
+        SelectionRenderer  ::OnStart();
         TonemappingRenderer::OnStart();
         
         
@@ -138,6 +140,7 @@ namespace
         PostFXHDR          ::OnSetupShader();
         PostFX             ::OnSetupShader();
         DebugRenderer      ::OnSetupShader();
+        SelectionRenderer  ::OnSetupShader();
         TonemappingRenderer::OnSetupShader();
         
         // -----------------------------------------------------------------------------
@@ -158,6 +161,7 @@ namespace
         PostFXHDR          ::OnSetupKernels();
         PostFX             ::OnSetupKernels();
         DebugRenderer      ::OnSetupKernels();
+        SelectionRenderer  ::OnSetupKernels();
         TonemappingRenderer::OnSetupKernels();
         
         // -----------------------------------------------------------------------------
@@ -178,6 +182,7 @@ namespace
         PostFXHDR          ::OnSetupRenderTargets();
         PostFX             ::OnSetupRenderTargets();
         DebugRenderer      ::OnSetupRenderTargets();
+        SelectionRenderer  ::OnSetupRenderTargets();
         TonemappingRenderer::OnSetupRenderTargets();
         
         // -----------------------------------------------------------------------------
@@ -198,6 +203,7 @@ namespace
         PostFXHDR          ::OnSetupStates();
         PostFX             ::OnSetupStates();
         DebugRenderer      ::OnSetupStates();
+        SelectionRenderer  ::OnSetupStates();
         TonemappingRenderer::OnSetupStates();
         
         // -----------------------------------------------------------------------------
@@ -218,6 +224,7 @@ namespace
         PostFXHDR          ::OnSetupTextures();
         PostFX             ::OnSetupTextures();
         DebugRenderer      ::OnSetupTextures();
+        SelectionRenderer  ::OnSetupTextures();
         TonemappingRenderer::OnSetupTextures();
         
         // -----------------------------------------------------------------------------
@@ -238,6 +245,7 @@ namespace
         PostFXHDR          ::OnSetupBuffers();
         PostFX             ::OnSetupBuffers();
         DebugRenderer      ::OnSetupBuffers();
+        SelectionRenderer  ::OnSetupBuffers();
         TonemappingRenderer::OnSetupBuffers();
         
         // -----------------------------------------------------------------------------
@@ -258,6 +266,7 @@ namespace
         PostFXHDR          ::OnSetupResources();
         PostFX             ::OnSetupResources();
         DebugRenderer      ::OnSetupResources();
+        SelectionRenderer  ::OnSetupResources();
         TonemappingRenderer::OnSetupResources();
         
         // -----------------------------------------------------------------------------
@@ -278,6 +287,7 @@ namespace
         PostFXHDR          ::OnSetupModels();
         PostFX             ::OnSetupModels();
         DebugRenderer      ::OnSetupModels();
+        SelectionRenderer  ::OnSetupModels();
         TonemappingRenderer::OnSetupModels();
         
         // -----------------------------------------------------------------------------
@@ -298,6 +308,7 @@ namespace
         PostFXHDR          ::OnSetupEnd();
         PostFX             ::OnSetupEnd();
         DebugRenderer      ::OnSetupEnd();
+        SelectionRenderer  ::OnSetupEnd();
         TonemappingRenderer::OnSetupEnd();
 
         BASE_CONSOLE_STREAMINFO("Gfx> Finished renderer starting.");
