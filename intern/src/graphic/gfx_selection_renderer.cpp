@@ -430,53 +430,106 @@ namespace
         // -----------------------------------------------------------------------------
         // Add current entity depending on type
         // -----------------------------------------------------------------------------
-        if (m_pSelectedEntity->GetCategory() == Dt::SEntityCategory::Actor && m_pSelectedEntity->GetType() == Dt::SActorType::Mesh)
+        auto AddEntityToJobs = [&](Dt::CEntity* _pEntity)
         {
-            CMeshActorFacet* pGraphicModelActorFacet = static_cast<CMeshActorFacet*>(m_pSelectedEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
+            assert(_pEntity);
 
-            CMeshPtr MeshPtr = pGraphicModelActorFacet->GetMesh();
-
-            assert(pGraphicModelActorFacet != nullptr);
-            assert(MeshPtr.IsValid());
-
-            // -----------------------------------------------------------------------------
-            // Set every surface of this entity into a new render job
-            // -----------------------------------------------------------------------------
-            unsigned int NumberOfSurfaces = MeshPtr->GetLOD(0)->GetNumberOfSurfaces();
-
-            for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurfaces; ++IndexOfSurface)
+            if (_pEntity->GetCategory() == Dt::SEntityCategory::Actor && _pEntity->GetType() == Dt::SActorType::Mesh)
             {
-                CSurfacePtr SurfacePtr = MeshPtr->GetLOD(0)->GetSurface(IndexOfSurface);
+                CMeshActorFacet* pGraphicModelActorFacet = static_cast<CMeshActorFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
 
-                if (SurfacePtr == nullptr)
-                {
-                    break;
-                }
+                CMeshPtr MeshPtr = pGraphicModelActorFacet->GetMesh();
 
-                CMaterialPtr MaterialPtr;
-
-                if (pGraphicModelActorFacet->GetMaterial(IndexOfSurface) != 0)
-                {
-                    MaterialPtr = pGraphicModelActorFacet->GetMaterial(IndexOfSurface);
-                }
-                else
-                {
-                    MaterialPtr = SurfacePtr->GetMaterial();
-                }
-
-                assert(MaterialPtr != 0 && MaterialPtr.IsValid());
+                assert(pGraphicModelActorFacet != nullptr);
+                assert(MeshPtr.IsValid());
 
                 // -----------------------------------------------------------------------------
-                // Set informations to render job
+                // Set every surface of this entity into a new render job
                 // -----------------------------------------------------------------------------
-                SRenderJob NewRenderJob;
+                unsigned int NumberOfSurfaces = MeshPtr->GetLOD(0)->GetNumberOfSurfaces();
 
-                NewRenderJob.m_SurfacePtr = SurfacePtr;
-                NewRenderJob.m_ModelMatrix = m_pSelectedEntity->GetTransformationFacet()->GetWorldMatrix();
+                for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurfaces; ++IndexOfSurface)
+                {
+                    CSurfacePtr SurfacePtr = MeshPtr->GetLOD(0)->GetSurface(IndexOfSurface);
 
-                m_RenderJobs.push_back(NewRenderJob);
+                    if (SurfacePtr == nullptr)
+                    {
+                        break;
+                    }
+
+                    CMaterialPtr MaterialPtr;
+
+                    if (pGraphicModelActorFacet->GetMaterial(IndexOfSurface) != 0)
+                    {
+                        MaterialPtr = pGraphicModelActorFacet->GetMaterial(IndexOfSurface);
+                    }
+                    else
+                    {
+                        MaterialPtr = SurfacePtr->GetMaterial();
+                    }
+
+                    assert(MaterialPtr != 0 && MaterialPtr.IsValid());
+
+                    // -----------------------------------------------------------------------------
+                    // Set informations to render job
+                    // -----------------------------------------------------------------------------
+                    SRenderJob NewRenderJob;
+
+                    NewRenderJob.m_SurfacePtr  = SurfacePtr;
+                    NewRenderJob.m_ModelMatrix = _pEntity->GetTransformationFacet()->GetWorldMatrix();
+
+                    m_RenderJobs.push_back(NewRenderJob);
+                }
             }
+        };
+        
+        std::function<void(Dt::CEntity*)> NavigateToNextEntity = [&](Dt::CEntity* _pRootEntity) -> void
+        {
+            Dt::CHierarchyFacet* pHierarchyFacet = _pRootEntity->GetHierarchyFacet();
+
+            if (pHierarchyFacet)
+            {
+                Dt::CEntity* pFirstChild = pHierarchyFacet->GetFirstChild();
+
+                if (pFirstChild != nullptr)
+                {
+                    NavigateToNextEntity(pFirstChild);
+                }
+
+                // -----------------------------------------------------------------------------
+
+                Dt::CEntity* pSiblingEntity = pHierarchyFacet->GetSibling();
+
+                for (; pSiblingEntity != nullptr; )
+                {
+                    NavigateToNextEntity(pSiblingEntity);
+
+                    assert(pSiblingEntity->GetHierarchyFacet());
+
+                    pSiblingEntity = pSiblingEntity->GetHierarchyFacet()->GetSibling();
+                }
+            }
+
+            AddEntityToJobs(_pRootEntity);
+        };
+
+        if (m_pSelectedEntity != nullptr)
+        {
+            Dt::CHierarchyFacet* pHierarchyFacet = m_pSelectedEntity->GetHierarchyFacet();
+
+            if (pHierarchyFacet)
+            {
+                Dt::CEntity* pFirstChild = pHierarchyFacet->GetFirstChild();
+
+                if (pFirstChild != nullptr)
+                {
+                    NavigateToNextEntity(pFirstChild);
+                }
+            }
+
+            AddEntityToJobs(m_pSelectedEntity);
         }
+        
     }
 } // namespace
 
