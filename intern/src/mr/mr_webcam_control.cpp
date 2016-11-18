@@ -282,7 +282,7 @@ namespace MR
 
         cvResize(m_OriginalColorFrameRGB, m_ConvertedColorFrame);
 
-        Dt::TextureManager::CopyToTexture2D(m_pConvertedFrame, static_cast<IplImage*>(m_ConvertedColorFrame)->imageData);
+        Dt::TextureManager::CopyToTexture2D(m_pConvertedFrame, static_cast<void*>(static_cast<IplImage*>(m_ConvertedColorFrame)->imageData));
 
         Dt::TextureManager::MarkTextureAsDirty(m_pConvertedFrame, Dt::CTextureBase::DirtyData);
     }

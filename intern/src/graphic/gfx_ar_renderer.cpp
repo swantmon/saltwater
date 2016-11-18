@@ -501,14 +501,17 @@ namespace
         {
             MR::CWebcamControl& rWebcamControl = static_cast<MR::CWebcamControl&>(*pControl);
 
-            // -----------------------------------------------------------------------------
-            // Upload to texture on graphic card
-            // TODO: Target rectangle should be variable
-            // TODO: Use image from main camera?
-            // -----------------------------------------------------------------------------
-            Base::AABB2UInt TargetRect(Base::UInt2(0), Base::UInt2(1280, 720));
+            if (rWebcamControl.GetConvertedFrame()->GetPixels() != nullptr)
+            {
+                // -----------------------------------------------------------------------------
+                // Upload to texture on graphic card
+                // TODO: Target rectangle should be variable
+                // TODO: Use image from main camera?
+                // -----------------------------------------------------------------------------
+                Base::AABB2UInt TargetRect(Base::UInt2(0), Base::UInt2(1280, 720));
 
-            TextureManager::CopyToTexture2D(m_WebcamTexturePtr, TargetRect, TargetRect[1][0], rWebcamControl.GetConvertedFrame()->GetPixels());
+                TextureManager::CopyToTexture2D(m_WebcamTexturePtr, TargetRect, TargetRect[1][0], rWebcamControl.GetConvertedFrame()->GetPixels());
+            }
         }
         else if (pControl != nullptr && pControl->GetType() == MR::CControl::Kinect)
         {

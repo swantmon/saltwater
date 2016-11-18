@@ -977,35 +977,7 @@ namespace
 
                         Base::AABB2UInt TargetRect(Base::UInt2(0), TextureResolution);
 
-                        // CopyToTexture2D(pGraphicTexture, TargetRect, TargetRect[1][0], pDataTexture->GetPixels(), true);
-
-
-                        Base::UInt2 Offset = TargetRect[0];
-                        Base::UInt2 UpdateSize = TargetRect[1] - TargetRect[0];
-
-                        assert(pGraphicTexture->GetNumberOfPixelsU() <= UpdateSize[0] + Offset[0]);
-                        assert(pGraphicTexture->GetNumberOfPixelsV() <= UpdateSize[1] + Offset[1]);
-
-                        CInternTexture2D* pInternTexture = static_cast<CInternTexture2D*>(pGraphicTexture);
-
-                        Gfx::CNativeTextureHandle TextureHandle = pInternTexture->m_NativeTexture;
-
-                        int Format = ConvertGLImageFormat(pInternTexture->GetFormat());
-                        int Type = ConvertGLImageType(pInternTexture->GetFormat());
-
-                        // -----------------------------------------------------------------------------
-                        // Upload data to texture
-                        // -----------------------------------------------------------------------------
-                        glBindTexture(GL_TEXTURE_2D, TextureHandle);
-
-                        glTexSubImage2D(GL_TEXTURE_2D, 0, Offset[0], Offset[1], UpdateSize[0], UpdateSize[1], Format, Type, pDataTexture->GetPixels());
-
-                        if (pInternTexture->GetNumberOfMipLevels() > 0)
-                        {
-                            glGenerateMipmap(GL_TEXTURE_2D);
-                        }
-
-                        glBindTexture(GL_TEXTURE_2D, 0);
+                        CopyToTexture2D(pGraphicTexture, TargetRect, TargetRect[1][0], pDataTexture->GetPixels(), true);
                     }                    
                 }
             }
