@@ -37,6 +37,9 @@ namespace Edit
         // -----------------------------------------------------------------------------
         m_pHistogramDockWidget->setVisible(false);
         m_pConsoleDockWidget  ->setVisible(false);
+        m_pAssetsDockWidget   ->setVisible(false);
+
+        tabifyDockWidget(m_pAssetsDockWidget, m_pConsoleDockWidget);
 
         // -----------------------------------------------------------------------------
         // Messages
@@ -334,6 +337,13 @@ namespace Edit
     void CMainWindow::toggleConsoleDock()
     {
         m_pConsoleDockWidget->setVisible(!m_pConsoleDockWidget->isVisible());
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::toggleAssetsDock()
+    {
+        m_pAssetsDockWidget->setVisible(!m_pAssetsDockWidget->isVisible());
     }
 
     // -----------------------------------------------------------------------------

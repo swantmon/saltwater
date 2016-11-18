@@ -64,6 +64,7 @@ public:
     QAction *m_pActionConsole;
     QAction *m_pActionSceneGraph;
     QAction *m_pActionInspector;
+    QAction *m_pActionAssets;
     QWidget *m_pCentralWidget;
     QVBoxLayout *verticalLayout_3;
     QHBoxLayout *horizontalLayout;
@@ -117,6 +118,8 @@ public:
     QLabel *label_3;
     QLabel *label_5;
     QSpacerItem *verticalSpacer;
+    QDockWidget *m_pAssetsDockWidget;
+    QWidget *dockWidgetContents_5;
 
     void setupUi(QMainWindow *CMainWindow)
     {
@@ -180,6 +183,8 @@ public:
         m_pActionSceneGraph->setObjectName(QStringLiteral("m_pActionSceneGraph"));
         m_pActionInspector = new QAction(CMainWindow);
         m_pActionInspector->setObjectName(QStringLiteral("m_pActionInspector"));
+        m_pActionAssets = new QAction(CMainWindow);
+        m_pActionAssets->setObjectName(QStringLiteral("m_pActionAssets"));
         m_pCentralWidget = new QWidget(CMainWindow);
         m_pCentralWidget->setObjectName(QStringLiteral("m_pCentralWidget"));
         verticalLayout_3 = new QVBoxLayout(m_pCentralWidget);
@@ -422,6 +427,12 @@ public:
 
         m_pHistogramDockWidget->setWidget(dockWidgetContents_3);
         CMainWindow->addDockWidget(static_cast<Qt::DockWidgetArea>(1), m_pHistogramDockWidget);
+        m_pAssetsDockWidget = new QDockWidget(CMainWindow);
+        m_pAssetsDockWidget->setObjectName(QStringLiteral("m_pAssetsDockWidget"));
+        dockWidgetContents_5 = new QWidget();
+        dockWidgetContents_5->setObjectName(QStringLiteral("dockWidgetContents_5"));
+        m_pAssetsDockWidget->setWidget(dockWidgetContents_5);
+        CMainWindow->addDockWidget(static_cast<Qt::DockWidgetArea>(8), m_pAssetsDockWidget);
 
         m_pMenuBar->addAction(m_pMenuFile->menuAction());
         m_pMenuBar->addAction(m_pMenuEdit->menuAction());
@@ -451,6 +462,7 @@ public:
         menuPlugins->addAction(m_pActionARController);
         m_pMenuWindow->addAction(m_pActionSceneGraph);
         m_pMenuWindow->addAction(m_pActionInspector);
+        m_pMenuWindow->addAction(m_pActionAssets);
         m_pMenuWindow->addAction(m_pActionHistogram);
         m_pMenuWindow->addSeparator();
         m_pMenuWindow->addAction(m_pActionConsole);
@@ -487,6 +499,7 @@ public:
         QObject::connect(m_pActionConsole, SIGNAL(triggered()), CMainWindow, SLOT(toggleConsoleDock()));
         QObject::connect(m_pActionInspector, SIGNAL(triggered()), CMainWindow, SLOT(toggleInspectorDock()));
         QObject::connect(m_pActionSceneGraph, SIGNAL(triggered()), CMainWindow, SLOT(toggleSceneGraphDock()));
+        QObject::connect(m_pActionAssets, SIGNAL(triggered()), CMainWindow, SLOT(toggleAssetsDock()));
 
         QMetaObject::connectSlotsByName(CMainWindow);
     } // setupUi
@@ -511,7 +524,7 @@ public:
         m_pActionCamera->setText(QApplication::translate("CMainWindow", "Camera", 0));
         m_pActionSun->setText(QApplication::translate("CMainWindow", "Sun", 0));
         m_pActionHistogram->setText(QApplication::translate("CMainWindow", "Histogram", 0));
-        m_pActionHistogram->setShortcut(QApplication::translate("CMainWindow", "Ctrl+2", 0));
+        m_pActionHistogram->setShortcut(QApplication::translate("CMainWindow", "Ctrl+3", 0));
         actionConsole->setText(QApplication::translate("CMainWindow", "Console", 0));
         actionScene_Hraph->setText(QApplication::translate("CMainWindow", "Scene Hraph", 0));
         actionInspector->setText(QApplication::translate("CMainWindow", "Inspector", 0));
@@ -527,6 +540,8 @@ public:
         m_pActionSceneGraph->setShortcut(QApplication::translate("CMainWindow", "Ctrl+0", 0));
         m_pActionInspector->setText(QApplication::translate("CMainWindow", "Inspector", 0));
         m_pActionInspector->setShortcut(QApplication::translate("CMainWindow", "Ctrl+1", 0));
+        m_pActionAssets->setText(QApplication::translate("CMainWindow", "Assets", 0));
+        m_pActionAssets->setShortcut(QApplication::translate("CMainWindow", "Ctrl+2", 0));
         m_pPlayButton->setText(QApplication::translate("CMainWindow", "Play", 0));
         m_pMailAdressEdit->setPlaceholderText(QApplication::translate("CMainWindow", "max.mustermann@mail.com", 0));
         m_pScreenshotButton->setText(QApplication::translate("CMainWindow", "Screenshot", 0));
@@ -551,6 +566,7 @@ public:
         label_4->setText(QApplication::translate("CMainWindow", "Log Max", 0));
         label_3->setText(QApplication::translate("CMainWindow", "Upper Bound", 0));
         label_5->setText(QApplication::translate("CMainWindow", "Eye Adaption Up", 0));
+        m_pAssetsDockWidget->setWindowTitle(QApplication::translate("CMainWindow", "Assets", 0));
     } // retranslateUi
 
 };

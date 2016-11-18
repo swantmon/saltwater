@@ -189,6 +189,7 @@
     </property>
     <addaction name="m_pActionSceneGraph"/>
     <addaction name="m_pActionInspector"/>
+    <addaction name="m_pActionAssets"/>
     <addaction name="m_pActionHistogram"/>
     <addaction name="separator"/>
     <addaction name="m_pActionConsole"/>
@@ -423,6 +424,15 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QDockWidget" name="m_pAssetsDockWidget">
+   <property name="windowTitle">
+    <string>Assets</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_5"/>
+  </widget>
   <action name="m_pActionNew">
    <property name="text">
     <string>New Scene</string>
@@ -508,7 +518,7 @@
     <string>Histogram</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+2</string>
+    <string>Ctrl+3</string>
    </property>
   </action>
   <action name="actionConsole">
@@ -578,6 +588,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+1</string>
+   </property>
+  </action>
+  <action name="m_pActionAssets">
+   <property name="text">
+    <string>Assets</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+2</string>
    </property>
   </action>
  </widget>
@@ -1042,6 +1060,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_pActionAssets</sender>
+   <signal>triggered()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>toggleAssetsDock()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>961</x>
+     <y>490</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>switchPlayingCurrentScene()</slot>
@@ -1063,5 +1097,6 @@
   <slot>toggleSceneGraphDock()</slot>
   <slot>toggleInspectorDock()</slot>
   <slot>toggleConsoleDock()</slot>
+  <slot>toggleAssetsDock()</slot>
  </slots>
 </ui>

@@ -50,6 +50,7 @@ namespace Edit
         void toggleSceneGraphDock();
         void toggleInspectorDock();
         void toggleConsoleDock();
+        void toggleAssetsDock();
 
     private:
 
