@@ -61,6 +61,9 @@ public:
     QAction *m_pActionSSR;
     QAction *m_pActionVolumeFog;
     QAction *m_pActionARController;
+    QAction *m_pActionConsole;
+    QAction *m_pActionSceneGraph;
+    QAction *m_pActionInspector;
     QWidget *m_pCentralWidget;
     QVBoxLayout *verticalLayout_3;
     QHBoxLayout *horizontalLayout;
@@ -171,6 +174,12 @@ public:
         m_pActionVolumeFog->setObjectName(QStringLiteral("m_pActionVolumeFog"));
         m_pActionARController = new QAction(CMainWindow);
         m_pActionARController->setObjectName(QStringLiteral("m_pActionARController"));
+        m_pActionConsole = new QAction(CMainWindow);
+        m_pActionConsole->setObjectName(QStringLiteral("m_pActionConsole"));
+        m_pActionSceneGraph = new QAction(CMainWindow);
+        m_pActionSceneGraph->setObjectName(QStringLiteral("m_pActionSceneGraph"));
+        m_pActionInspector = new QAction(CMainWindow);
+        m_pActionInspector->setObjectName(QStringLiteral("m_pActionInspector"));
         m_pCentralWidget = new QWidget(CMainWindow);
         m_pCentralWidget->setObjectName(QStringLiteral("m_pCentralWidget"));
         verticalLayout_3 = new QVBoxLayout(m_pCentralWidget);
@@ -255,7 +264,7 @@ public:
         m_pSceneGraphDockWidget = new QDockWidget(CMainWindow);
         m_pSceneGraphDockWidget->setObjectName(QStringLiteral("m_pSceneGraphDockWidget"));
         m_pSceneGraphDockWidget->setMinimumSize(QSize(89, 111));
-        m_pSceneGraphDockWidget->setFeatures(QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable);
+        m_pSceneGraphDockWidget->setFeatures(QDockWidget::AllDockWidgetFeatures);
         dockWidgetContents = new QWidget();
         dockWidgetContents->setObjectName(QStringLiteral("dockWidgetContents"));
         verticalLayout = new QVBoxLayout(dockWidgetContents);
@@ -286,7 +295,7 @@ public:
         m_pInspectorDockWidget = new QDockWidget(CMainWindow);
         m_pInspectorDockWidget->setObjectName(QStringLiteral("m_pInspectorDockWidget"));
         m_pInspectorDockWidget->setMinimumSize(QSize(80, 58));
-        m_pInspectorDockWidget->setFeatures(QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable);
+        m_pInspectorDockWidget->setFeatures(QDockWidget::AllDockWidgetFeatures);
         dockWidgetContents_2 = new QWidget();
         dockWidgetContents_2->setObjectName(QStringLiteral("dockWidgetContents_2"));
         verticalLayout_2 = new QVBoxLayout(dockWidgetContents_2);
@@ -440,7 +449,11 @@ public:
         menuEffects->addAction(m_pActionSSR);
         menuEffects->addAction(m_pActionVolumeFog);
         menuPlugins->addAction(m_pActionARController);
+        m_pMenuWindow->addAction(m_pActionSceneGraph);
+        m_pMenuWindow->addAction(m_pActionInspector);
         m_pMenuWindow->addAction(m_pActionHistogram);
+        m_pMenuWindow->addSeparator();
+        m_pMenuWindow->addAction(m_pActionConsole);
         m_pMenuHelp->addAction(m_pActionAboutSaltwater);
         m_pMenuHelp->addSeparator();
         m_pMenuHelp->addAction(m_pActionReleaseNotes);
@@ -471,6 +484,9 @@ public:
         QObject::connect(m_pActionSSR, SIGNAL(triggered()), CMainWindow, SLOT(createNewEntitySSR()));
         QObject::connect(m_pActionVolumeFog, SIGNAL(triggered()), CMainWindow, SLOT(createNewEntityVolumeFog()));
         QObject::connect(m_pActionARController, SIGNAL(triggered()), CMainWindow, SLOT(createNewPluginARController()));
+        QObject::connect(m_pActionConsole, SIGNAL(triggered()), CMainWindow, SLOT(toggleConsoleDock()));
+        QObject::connect(m_pActionInspector, SIGNAL(triggered()), CMainWindow, SLOT(toggleInspectorDock()));
+        QObject::connect(m_pActionSceneGraph, SIGNAL(triggered()), CMainWindow, SLOT(toggleSceneGraphDock()));
 
         QMetaObject::connectSlotsByName(CMainWindow);
     } // setupUi
@@ -495,6 +511,7 @@ public:
         m_pActionCamera->setText(QApplication::translate("CMainWindow", "Camera", 0));
         m_pActionSun->setText(QApplication::translate("CMainWindow", "Sun", 0));
         m_pActionHistogram->setText(QApplication::translate("CMainWindow", "Histogram", 0));
+        m_pActionHistogram->setShortcut(QApplication::translate("CMainWindow", "Ctrl+2", 0));
         actionConsole->setText(QApplication::translate("CMainWindow", "Console", 0));
         actionScene_Hraph->setText(QApplication::translate("CMainWindow", "Scene Hraph", 0));
         actionInspector->setText(QApplication::translate("CMainWindow", "Inspector", 0));
@@ -504,6 +521,12 @@ public:
         m_pActionSSR->setText(QApplication::translate("CMainWindow", "SSR", 0));
         m_pActionVolumeFog->setText(QApplication::translate("CMainWindow", "Volume Fog", 0));
         m_pActionARController->setText(QApplication::translate("CMainWindow", "AR Controller", 0));
+        m_pActionConsole->setText(QApplication::translate("CMainWindow", "Console", 0));
+        m_pActionConsole->setShortcut(QApplication::translate("CMainWindow", "Ctrl+Shift+C", 0));
+        m_pActionSceneGraph->setText(QApplication::translate("CMainWindow", "Scene Graph", 0));
+        m_pActionSceneGraph->setShortcut(QApplication::translate("CMainWindow", "Ctrl+0", 0));
+        m_pActionInspector->setText(QApplication::translate("CMainWindow", "Inspector", 0));
+        m_pActionInspector->setShortcut(QApplication::translate("CMainWindow", "Ctrl+1", 0));
         m_pPlayButton->setText(QApplication::translate("CMainWindow", "Play", 0));
         m_pMailAdressEdit->setPlaceholderText(QApplication::translate("CMainWindow", "max.mustermann@mail.com", 0));
         m_pScreenshotButton->setText(QApplication::translate("CMainWindow", "Screenshot", 0));

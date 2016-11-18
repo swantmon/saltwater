@@ -187,7 +187,11 @@
     <property name="title">
      <string>Window</string>
     </property>
+    <addaction name="m_pActionSceneGraph"/>
+    <addaction name="m_pActionInspector"/>
     <addaction name="m_pActionHistogram"/>
+    <addaction name="separator"/>
+    <addaction name="m_pActionConsole"/>
    </widget>
    <widget class="QMenu" name="m_pMenuHelp">
     <property name="title">
@@ -214,7 +218,7 @@
     </size>
    </property>
    <property name="features">
-    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+    <set>QDockWidget::AllDockWidgetFeatures</set>
    </property>
    <property name="windowTitle">
     <string>Scene Graph</string>
@@ -279,7 +283,7 @@
     </size>
    </property>
    <property name="features">
-    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+    <set>QDockWidget::AllDockWidgetFeatures</set>
    </property>
    <property name="windowTitle">
     <string>Inspector</string>
@@ -503,6 +507,9 @@
    <property name="text">
     <string>Histogram</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+2</string>
+   </property>
   </action>
   <action name="actionConsole">
    <property name="text">
@@ -547,6 +554,30 @@
   <action name="m_pActionARController">
    <property name="text">
     <string>AR Controller</string>
+   </property>
+  </action>
+  <action name="m_pActionConsole">
+   <property name="text">
+    <string>Console</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+C</string>
+   </property>
+  </action>
+  <action name="m_pActionSceneGraph">
+   <property name="text">
+    <string>Scene Graph</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+0</string>
+   </property>
+  </action>
+  <action name="m_pActionInspector">
+   <property name="text">
+    <string>Inspector</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+1</string>
    </property>
   </action>
  </widget>
@@ -963,6 +994,54 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_pActionConsole</sender>
+   <signal>triggered()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>toggleConsoleDock()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>961</x>
+     <y>490</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pActionInspector</sender>
+   <signal>triggered()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>toggleInspectorDock()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>961</x>
+     <y>490</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pActionSceneGraph</sender>
+   <signal>triggered()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>toggleSceneGraphDock()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>961</x>
+     <y>490</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>switchPlayingCurrentScene()</slot>
@@ -981,5 +1060,8 @@
   <slot>createNewEntitySSR()</slot>
   <slot>createNewEntityVolumeFog()</slot>
   <slot>createNewPluginARController()</slot>
+  <slot>toggleSceneGraphDock()</slot>
+  <slot>toggleInspectorDock()</slot>
+  <slot>toggleConsoleDock()</slot>
  </slots>
 </ui>

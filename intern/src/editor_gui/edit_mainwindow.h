@@ -47,6 +47,9 @@ namespace Edit
         void createNewPluginARController();
         void changeHistogramSettings();
         void toggleHistogramDock();
+        void toggleSceneGraphDock();
+        void toggleInspectorDock();
+        void toggleConsoleDock();
 
     private:
 

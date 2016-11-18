@@ -36,6 +36,7 @@ namespace Edit
         // Dock widgets setup
         // -----------------------------------------------------------------------------
         m_pHistogramDockWidget->setVisible(false);
+        m_pConsoleDockWidget  ->setVisible(false);
 
         // -----------------------------------------------------------------------------
         // Messages
@@ -312,6 +313,27 @@ namespace Edit
 
             MessageManager::SendMessage(SGUIMessageType::RequestGraphicHistogramInfo, NewMessage);
         }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::toggleSceneGraphDock()
+    {
+        m_pSceneGraphDockWidget->setVisible(!m_pSceneGraphDockWidget->isVisible());
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::toggleInspectorDock()
+    {
+        m_pInspectorDockWidget->setVisible(!m_pInspectorDockWidget->isVisible());
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::toggleConsoleDock()
+    {
+        m_pConsoleDockWidget->setVisible(!m_pConsoleDockWidget->isVisible());
     }
 
     // -----------------------------------------------------------------------------
