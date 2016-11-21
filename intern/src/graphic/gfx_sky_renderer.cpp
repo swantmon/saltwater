@@ -547,7 +547,7 @@ namespace
         
         SCubemapBufferGS DefaultGSValues;
         
-        DefaultGSValues.m_CubeProjectionMatrix.SetRHFieldOfView(Base::RadiansToDegree(Base::SConstants<float>::s_Pi * 0.5f), 1.0f, 1.0f, 20000.0f);
+        DefaultGSValues.m_CubeProjectionMatrix.SetRHFieldOfView(Base::RadiansToDegree(Base::SConstants<float>::s_Pi * 0.5f), 1.0f, 0.3f, 20000.0f);
         
         // -----------------------------------------------------------------------------
         
@@ -778,7 +778,7 @@ namespace
 
             Performance::BeginEvent("Sky");
 
-#if 0
+#if 1
             RenderSkyboxFromTexture();
 #else
             if (rRenderJob.m_pDataSkybox->GetType() == Dt::CSkyboxFacet::Panorama)
@@ -1076,9 +1076,28 @@ namespace
         // -----------------------------------------------------------------------------
         SSkyboxFromTextureVSBuffer* pViewBuffer = static_cast<SSkyboxFromTextureVSBuffer*>(BufferManager::MapConstantBuffer(VSBufferSetPtr->GetBuffer(0)));
 
+//         Base::Float4x4 Test;
+// 
+//         Test  = Base::Float4x4::s_Identity;
+//         Test *= ViewManager::GetMainCamera()->GetView()->GetRotationMatrix();
+//         Test *= Base::Float4x4().SetTranslation(0.0f, 1.0f, 0.0f);
+// 
+//         float D = Base::Sqrt(Test[0][0] * Test[0][0] + Test[1][0] * Test[1][0] + Test[2][0] * Test[2][0]);
+// 
+//         pViewBuffer->m_ModelMatrix = Base::Float4x4::s_Identity;
+//         pViewBuffer->m_ModelMatrix.InjectScale(D);
+//         pViewBuffer->m_ModelMatrix.InjectTranslation(Test[0][3], Test[1][3], Test[2][3]);
+
+//         //pViewBuffer->m_ModelMatrix *= ViewManager::GetMainCamera()->GetView()->GetRotationMatrix();
+//         //pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetRotationX(Base::DegreesToRadians(-90.0f));
+//         pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(0.0f, 1.0f, 0.0f);
+
+//         pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetRotationX(Base::DegreesToRadians(-90.0f));
+
         pViewBuffer->m_ModelMatrix  = Base::Float4x4::s_Identity;
-        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(0.0f, 0.0f, -1.0f);
-        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(1.0f) * ViewManager::GetMainCamera()->GetView()->GetRotationMatrix();
+        pViewBuffer->m_ModelMatrix *= ViewManager::GetMainCamera()->GetView()->GetRotationMatrix();
+        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(0.0f, 1.0f, 0.0f);
+        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetRotationX(Base::DegreesToRadians(-90.0f));
 
         BufferManager::UnmapConstantBuffer(VSBufferSetPtr->GetBuffer(0));
 
