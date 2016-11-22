@@ -141,7 +141,7 @@ namespace
         Dt::CARControllerPluginFacet* pFacet = Dt::PluginManager::CreateARControllerPlugin();
 
         pFacet->SetCameraEntity       (0);
-        pFacet->SetConfiguration      ("-device=WinDS -flipV -showDialog -devNum=0");
+        pFacet->SetConfiguration      ("-device=WinDS -flipV");
         pFacet->SetCameraParameterFile("ar/configurations/logitech_para.dat");
         pFacet->SetOutputBackground   (pBackgroundTexture);
         pFacet->SetOutputCubemap      (pTextureCubemap);

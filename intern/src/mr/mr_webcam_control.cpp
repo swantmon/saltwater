@@ -34,7 +34,7 @@ namespace MR
 {
     CWebcamControl::CWebcamControl()
         : CControl               (CControl::Webcam)
-        , m_pConfiguration       ("-device=WinDS -flipV -showDialog -devNum=0")
+        , m_pConfiguration       ("-device=WinDS -flipV")
         , m_OriginalColorFrame   ()
         , m_OriginalColorFrameRGB()
         , m_ConvertedColorFrame  ()
