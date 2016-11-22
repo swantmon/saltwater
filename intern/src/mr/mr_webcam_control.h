@@ -15,15 +15,15 @@ namespace MR
 
     public:
 
-        void SetDeviceNumber(unsigned int _DeviceNumber);
-        unsigned int GetDeviceNumber() const;
+        void SetConfiguration(const Base::Char* _pConfiguration);
+        const Base::Char* GetConfiguration() const;
 
     private:
 
-        unsigned int m_DeviceNumber;
-        void*        m_OriginalColorFrame;
-        void*        m_OriginalColorFrameRGB;
-        void*        m_ConvertedColorFrame;
+        const Base::Char* m_pConfiguration;
+        void*             m_OriginalColorFrame;
+        void*             m_OriginalColorFrameRGB;
+        void*             m_ConvertedColorFrame;
 
     private:
 

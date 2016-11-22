@@ -22,17 +22,13 @@
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
        <layout class="QGridLayout" name="gridLayout_2">
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Device</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QLineEdit" name="m_pDeviceNumberEdit">
+        <item row="5" column="1">
+         <widget class="QLineEdit" name="m_pOutputCubemapEdit">
           <property name="text">
            <string/>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -43,6 +39,34 @@
           </property>
          </widget>
         </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Device</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLineEdit" name="m_pParameterFile">
+          <property name="text">
+           <string>../assets/</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QLineEdit" name="m_pCameraEntityIDEdit">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>Parameter File</string>
+          </property>
+         </widget>
+        </item>
         <item row="4" column="0">
          <widget class="QLabel" name="label_5">
           <property name="text">
@@ -50,10 +74,20 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QLineEdit" name="m_pParameterFile">
+        <item row="6" column="0">
+         <widget class="QLabel" name="label_7">
           <property name="text">
-           <string>../assets/</string>
+           <string>Number of Marker</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QLineEdit" name="m_pOutputBackgroundEdit">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -65,9 +99,16 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="label_3">
+         <widget class="QLabel" name="label_8">
           <property name="text">
-           <string>Parameter File</string>
+           <string>Configuration</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="m_pConfigurationEdit">
+          <property name="text">
+           <string>-device=WinDS -showDialog -flipV -devNum=1</string>
           </property>
          </widget>
         </item>
@@ -83,47 +124,6 @@
             <string>Kinect</string>
            </property>
           </item>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_4">
-          <property name="text">
-           <string>Device Number</string>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="0">
-         <widget class="QLabel" name="label_7">
-          <property name="text">
-           <string>Number of Marker</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1">
-         <widget class="QLineEdit" name="m_pCameraEntityIDEdit">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1">
-         <widget class="QLineEdit" name="m_pOutputBackgroundEdit">
-          <property name="text">
-           <string/>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="1">
-         <widget class="QLineEdit" name="m_pOutputCubemapEdit">
-          <property name="text">
-           <string/>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
          </widget>
         </item>
         <item row="5" column="0">
@@ -147,6 +147,15 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>m_pDeviceCB</tabstop>
+  <tabstop>m_pConfigurationEdit</tabstop>
+  <tabstop>m_pParameterFile</tabstop>
+  <tabstop>m_pCameraEntityIDEdit</tabstop>
+  <tabstop>m_pOutputBackgroundEdit</tabstop>
+  <tabstop>m_pOutputCubemapEdit</tabstop>
+  <tabstop>m_pNumberOfMarkerEdit</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
@@ -172,28 +181,12 @@
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>197</x>
-     <y>68</y>
+     <x>282</x>
+     <y>104</y>
     </hint>
     <hint type="destinationlabel">
      <x>300</x>
      <y>87</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>m_pDeviceNumberEdit</sender>
-   <signal>textEdited(QString)</signal>
-   <receiver>InspectorARController</receiver>
-   <slot>valueChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>198</x>
-     <y>93</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>300</x>
-     <y>122</y>
     </hint>
    </hints>
   </connection>
@@ -208,7 +201,7 @@
      <y>124</y>
     </hint>
     <hint type="destinationlabel">
-     <x>304</x>
+     <x>302</x>
      <y>159</y>
     </hint>
    </hints>
@@ -274,6 +267,22 @@
     <hint type="destinationlabel">
      <x>241</x>
      <y>224</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pConfigurationEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>InspectorARController</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>210</x>
+     <y>64</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>301</x>
+     <y>72</y>
     </hint>
    </hints>
   </connection>

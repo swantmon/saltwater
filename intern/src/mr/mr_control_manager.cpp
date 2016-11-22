@@ -362,7 +362,7 @@ namespace
             // -----------------------------------------------------------------------------
             CWebcamControl* pWebcamControl = static_cast<CWebcamControl*>(m_pActiveControl);
 
-            pWebcamControl->SetDeviceNumber(m_pControllerPlugin->GetDeviceNumber());
+            pWebcamControl->SetConfiguration(m_pControllerPlugin->GetConfiguration());
         }
         break;
         case Dt::CARControllerPluginFacet::Kinect:

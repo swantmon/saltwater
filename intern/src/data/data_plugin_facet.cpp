@@ -13,8 +13,8 @@ namespace Dt
         , m_pOutputCubemap     (nullptr)
         , m_DeviceType         (Undefined)
         , m_NumberOfMarker     (0)
-        , m_DeviceNumber       (0)
         , m_CameraParameterFile()
+        , m_Configuration      ()
         , m_Marker             ()
     {
     }
@@ -23,6 +23,8 @@ namespace Dt
 
     CARControllerPluginFacet::~CARControllerPluginFacet()
     {
+        m_CameraParameterFile.Clear();
+        m_Configuration.Clear();
     }
 
     // -----------------------------------------------------------------------------
@@ -76,16 +78,16 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CARControllerPluginFacet::SetDeviceNumber(unsigned int _DeviceNumber)
+    void CARControllerPluginFacet::SetConfiguration(const Base::Char* _pConfiguration)
     {
-        m_DeviceNumber = _DeviceNumber;
+        m_Configuration = _pConfiguration;
     }
 
     // -----------------------------------------------------------------------------
 
-    unsigned int CARControllerPluginFacet::GetDeviceNumber() const
+    const Base::Char* CARControllerPluginFacet::GetConfiguration() const
     {
-        return m_DeviceNumber;
+        return m_Configuration.GetConst();
     }
 
     // -----------------------------------------------------------------------------

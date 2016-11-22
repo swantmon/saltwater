@@ -79,11 +79,11 @@ namespace Dt
         void SetDeviceType(EType _DeviceType);
         EType GetDeviceType() const;
 
+        void SetConfiguration(const Base::Char* _pConfiguration);
+        const Base::Char* GetConfiguration() const;
+
         void SetCameraParameterFile(const Base::Char* _pCameraParameterFile);
         const Base::Char* GetCameraParameterFile() const;
-
-        void SetDeviceNumber(unsigned int _DeviceNumber);
-        unsigned int GetDeviceNumber() const;
 
         void SetOutputBackground(Dt::CTexture2D* _pOutputBackground);
         Dt::CTexture2D* GetOutputBackground();
@@ -111,8 +111,8 @@ namespace Dt
         Dt::CTextureCube* m_pOutputCubemap;
         EType             m_DeviceType;
         unsigned int      m_NumberOfMarker;
-        unsigned int      m_DeviceNumber;
         Base::CharString  m_CameraParameterFile;
+        Base::CharString  m_Configuration;
         SMarker           m_Marker[s_MaxNumberOfMarker];
     };
 } // namespace Dt

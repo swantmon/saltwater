@@ -37,10 +37,11 @@ namespace Edit
         // -----------------------------------------------------------------------------
         int Device = m_pDeviceCB->currentIndex();
 
+        QString Configuration = m_pConfigurationEdit->text();
+        QByteArray ConfigurationFileBinary = Configuration.toLatin1();
+
         QString ParameterFile = m_pParameterFile->text();
         QByteArray ParameterFileBinary = ParameterFile.toLatin1();
-
-        unsigned int DeviceNumber = m_pDeviceNumberEdit->text().toUInt();
 
         unsigned int CameraEntityID = m_pCameraEntityIDEdit->text().toUInt();
 
@@ -55,9 +56,9 @@ namespace Edit
 
         NewMessage.PutInt(Device);
 
-        NewMessage.PutString(ParameterFileBinary.data());
+        NewMessage.PutString(ConfigurationFileBinary.data());
 
-        NewMessage.PutInt(DeviceNumber);
+        NewMessage.PutString(ParameterFileBinary.data());
 
         NewMessage.PutInt(CameraEntityID);
 
@@ -136,11 +137,13 @@ namespace Edit
 
         int Device = _rMessage.GetInt();
 
-        char Text[256];
+        char Configuration[256];
 
-        _rMessage.GetString(Text, 256);
+        _rMessage.GetString(Configuration, 256);
 
-        unsigned int DeviceNumber = _rMessage.GetInt();
+        char ParameterFile[256];
+
+        _rMessage.GetString(ParameterFile, 256);
 
         int CameraEntityID = _rMessage.GetInt();
 
@@ -157,9 +160,9 @@ namespace Edit
 
         m_pDeviceCB->setCurrentIndex(Device);
 
-        m_pParameterFile->setText(Text);
+        m_pConfigurationEdit->setText(Configuration);
 
-        m_pDeviceNumberEdit->setText(QString::number(DeviceNumber));
+        m_pParameterFile->setText(ParameterFile);
 
         if (CameraEntityID >= 0)
         {

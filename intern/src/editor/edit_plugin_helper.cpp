@@ -141,8 +141,8 @@ namespace
         Dt::CARControllerPluginFacet* pFacet = Dt::PluginManager::CreateARControllerPlugin();
 
         pFacet->SetCameraEntity       (0);
+        pFacet->SetConfiguration      ("-device=WinDS -flipV -showDialog -devNum=0");
         pFacet->SetCameraParameterFile("ar/configurations/logitech_para.dat");
-        pFacet->SetDeviceNumber       (1);
         pFacet->SetOutputBackground   (pBackgroundTexture);
         pFacet->SetOutputCubemap      (pTextureCubemap);
         pFacet->SetDeviceType         (Dt::CARControllerPluginFacet::Webcam);
@@ -177,9 +177,9 @@ namespace
             // -----------------------------------------------------------------------------
             int Device = pFacet->GetDeviceType();
 
-            const char* pParameterFile = pFacet->GetCameraParameterFile();
+            const char* pConfiguration = pFacet->GetConfiguration();
 
-            unsigned int DeviceNumber = pFacet->GetDeviceNumber();
+            const char* pParameterFile = pFacet->GetCameraParameterFile();
 
             int CameraEntityID = -1;
 
@@ -202,10 +202,10 @@ namespace
             NewMessage.PutInt(rCurrentEntity.GetID());
 
             NewMessage.PutInt(Device);
+
+            NewMessage.PutString(pConfiguration);
            
             NewMessage.PutString(pParameterFile);
-
-            NewMessage.PutInt(DeviceNumber);
 
             NewMessage.PutInt(CameraEntityID);
 
@@ -287,11 +287,13 @@ namespace
             // -----------------------------------------------------------------------------
             int Device = _rMessage.GetInt();
 
-            char Text[256];
+            char Configuration[256];
 
-            _rMessage.GetString(Text, 256);
+            _rMessage.GetString(Configuration, 256);
 
-            unsigned int DeviceNumber = _rMessage.GetInt();
+            char ParameterFile[256];
+
+            _rMessage.GetString(ParameterFile, 256);
 
             unsigned int CameraEntityID = _rMessage.GetInt();
 
@@ -304,9 +306,9 @@ namespace
             // -----------------------------------------------------------------------------
             pFacet->SetDeviceType(static_cast<Dt::CARControllerPluginFacet::EType>(Device));
 
-            pFacet->SetCameraParameterFile(Text);
+            pFacet->SetConfiguration(Configuration);
 
-            pFacet->SetDeviceNumber(DeviceNumber);
+            pFacet->SetCameraParameterFile(ParameterFile);
 
             if (rCameraEntity.GetCategory() == Dt::SEntityCategory::Actor && rCameraEntity.GetType() == Dt::SActorType::Camera)
             {

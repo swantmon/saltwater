@@ -34,7 +34,7 @@ namespace MR
 {
     CWebcamControl::CWebcamControl()
         : CControl               (CControl::Webcam)
-        , m_DeviceNumber         (0)
+        , m_pConfiguration       ("-device=WinDS -flipV -showDialog -devNum=0")
         , m_OriginalColorFrame   ()
         , m_OriginalColorFrameRGB()
         , m_ConvertedColorFrame  ()
@@ -49,16 +49,16 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CWebcamControl::SetDeviceNumber(unsigned int _DeviceNumber)
+    void CWebcamControl::SetConfiguration(const Base::Char* _pConfiguration)
     {
-        m_DeviceNumber = _DeviceNumber;
+        m_pConfiguration = _pConfiguration;
     }
 
     // -----------------------------------------------------------------------------
 
-    unsigned int CWebcamControl::GetDeviceNumber() const
+    const Base::Char* CWebcamControl::GetConfiguration() const
     {
-        return m_DeviceNumber;
+        return m_pConfiguration;
     }
 
     // -----------------------------------------------------------------------------
@@ -81,15 +81,9 @@ namespace MR
         // -----------------------------------------------------------------------------
         // Setup camera parameters and open video
         // -----------------------------------------------------------------------------
-        std::stringstream VideoParameter;
+        assert(m_pConfiguration != nullptr);
 
-#ifdef __APPLE__
-        VideoParameter << "-source=" << _rDescriptor.m_DeviceNumber;
-#else
-        VideoParameter << "-device=WinDS -showDialog -flipV -devNum=" << m_DeviceNumber;
-#endif  
-
-        Error = arVideoOpen(VideoParameter.str().c_str());
+        Error = arVideoOpen(m_pConfiguration);
 
         assert(Error >= 0);
 
