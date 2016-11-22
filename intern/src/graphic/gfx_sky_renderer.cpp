@@ -543,59 +543,63 @@ namespace
         Base::Float3 UpDirection;
         Base::Float3 LookDirection;
         
-        float lookAt =  1.5f;
-        
         SCubemapBufferGS DefaultGSValues;
         
         DefaultGSValues.m_CubeProjectionMatrix.SetRHFieldOfView(Base::RadiansToDegree(Base::SConstants<float>::s_Pi * 0.5f), 1.0f, 0.3f, 20000.0f);
         
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition + Base::Float3(lookAt, 0.0f, 0.0f);
-        UpDirection   = Base::Float3(0.0f, -1.0f, 0.0f);
+        // Right; +X
+        LookDirection = EyePosition + Base::Float3::s_AxisX;
+        UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[0].LookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition + Base::Float3(-lookAt, 0.0f, 0.0f);
-        UpDirection   = Base::Float3(0.0f, -1.0f, 0.0f);
+        // Left; -X
+        LookDirection = EyePosition - Base::Float3::s_AxisX;
+        UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[1].LookAt(EyePosition, LookDirection, UpDirection);
-        
+
         // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition + Base::Float3(0.0f, lookAt, 0.0f);
-        UpDirection = Base::Float3(0.0f, 0.0f, 1.0f);
-        
-        DefaultGSValues.m_CubeViewMatrix[3].LookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition + Base::Float3(0.0f, -lookAt, 0.0f);
-        UpDirection = Base::Float3(0.0f, 0.0f, -1.0f);
-        
+
+        // Front; +Y
+        LookDirection = EyePosition + Base::Float3::s_AxisY;
+        UpDirection = Base::Float3::s_AxisZ;
+
         DefaultGSValues.m_CubeViewMatrix[2].LookAt(EyePosition, LookDirection, UpDirection);
-        
+
+        // -----------------------------------------------------------------------------
+
+        // Back; -Y
+        LookDirection = EyePosition - Base::Float3::s_AxisY;
+        UpDirection = Base::Float3::s_Zero - Base::Float3::s_AxisZ;
+
+        DefaultGSValues.m_CubeViewMatrix[3].LookAt(EyePosition, LookDirection, UpDirection);
+
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition + Base::Float3(0.0f, 0.0f, lookAt);
-        UpDirection   = Base::Float3(0.0f, -1.0f, 0.0f);
+        // Top; +Z
+        LookDirection = EyePosition - Base::Float3::s_AxisZ;
+        UpDirection = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[4].LookAt(EyePosition, LookDirection, UpDirection);
-        
+
         // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition + Base::Float3(0.0f, 0.0f, -lookAt);
-        UpDirection   = Base::Float3(0.0f, -1.0f, 0.0f);
-        
+
+        // Bottom; -Z
+        LookDirection = EyePosition + Base::Float3::s_AxisZ;
+        UpDirection = Base::Float3::s_AxisY;
+
         DefaultGSValues.m_CubeViewMatrix[5].LookAt(EyePosition, LookDirection, UpDirection);
-        
+
         // -----------------------------------------------------------------------------
         
         for (unsigned int IndexOfCubeface = 0; IndexOfCubeface < 6; ++ IndexOfCubeface)
         {
-            DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface] *= Base::Float4x4().SetRotationX(Base::DegreesToRadians(-90.0f));
+            DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface] *= Base::Float4x4().SetRotationX(Base::DegreesToRadians(90.0f));
         }
         
         // -----------------------------------------------------------------------------
@@ -778,7 +782,7 @@ namespace
 
             Performance::BeginEvent("Sky");
 
-#if 1
+#if 0
             RenderSkyboxFromTexture();
 #else
             if (rRenderJob.m_pDataSkybox->GetType() == Dt::CSkyboxFacet::Panorama)
