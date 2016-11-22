@@ -12,7 +12,7 @@ namespace Edit
         , m_pStatusLabel        (nullptr)
         , m_pNewSceneDialog     (nullptr)
         , m_IsPlaying           (false)
-        , m_IsSceneLoaded       (false)
+        , m_IsSceneLoaded       (true)           //< TODO: Check if scene is loaded or not; should be done in load map state!
     {
         // -----------------------------------------------------------------------------
         // Dialogs
