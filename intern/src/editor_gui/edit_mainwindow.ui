@@ -119,7 +119,7 @@
    </property>
    <widget class="QMenu" name="m_pMenuFile">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <addaction name="m_pActionNew"/>
     <addaction name="m_pActionOpen"/>
@@ -131,7 +131,7 @@
      <bool>false</bool>
     </property>
     <property name="title">
-     <string>Edit</string>
+     <string>&amp;Edit</string>
     </property>
    </widget>
    <widget class="QMenu" name="m_pMenuAssets">
@@ -139,23 +139,23 @@
      <bool>false</bool>
     </property>
     <property name="title">
-     <string>Assets</string>
+     <string>&amp;Assets</string>
     </property>
    </widget>
    <widget class="QMenu" name="m_pMenuEntity">
     <property name="title">
-     <string>Entity</string>
+     <string>&amp;Entity</string>
     </property>
     <widget class="QMenu" name="menuActors">
      <property name="title">
-      <string>Actors</string>
+      <string>&amp;Actors</string>
      </property>
      <addaction name="m_pActionModel"/>
      <addaction name="m_pActionCamera"/>
     </widget>
     <widget class="QMenu" name="menuLights">
      <property name="title">
-      <string>Lights</string>
+      <string>&amp;Lights</string>
      </property>
      <addaction name="m_pActionPoint"/>
      <addaction name="m_pActionSun"/>
@@ -164,7 +164,7 @@
     </widget>
     <widget class="QMenu" name="menuEffects">
      <property name="title">
-      <string>Effects</string>
+      <string>&amp;Effects</string>
      </property>
      <addaction name="m_pActionBloom"/>
      <addaction name="m_pActionDOF"/>
@@ -174,7 +174,7 @@
     </widget>
     <widget class="QMenu" name="menuPlugins">
      <property name="title">
-      <string>Plugins</string>
+      <string>&amp;Plugins</string>
      </property>
      <addaction name="m_pActionARController"/>
     </widget>
@@ -185,7 +185,7 @@
    </widget>
    <widget class="QMenu" name="m_pMenuWindow">
     <property name="title">
-     <string>Window</string>
+     <string>&amp;Window</string>
     </property>
     <addaction name="m_pActionSceneGraph"/>
     <addaction name="m_pActionInspector"/>
@@ -196,7 +196,7 @@
    </widget>
    <widget class="QMenu" name="m_pMenuHelp">
     <property name="title">
-     <string>Help</string>
+     <string>&amp;Help</string>
     </property>
     <addaction name="m_pActionAboutSaltwater"/>
     <addaction name="separator"/>
@@ -435,7 +435,7 @@
   </widget>
   <action name="m_pActionNew">
    <property name="text">
-    <string>New Scene</string>
+    <string>&amp;New Scene</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
@@ -446,7 +446,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Open Scene</string>
+    <string>&amp;Open Scene</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -454,27 +454,27 @@
   </action>
   <action name="m_pActionExit">
    <property name="text">
-    <string>Exit</string>
+    <string>&amp;Exit</string>
    </property>
   </action>
   <action name="m_pActionAboutSaltwater">
    <property name="text">
-    <string>About Saltwater</string>
+    <string>&amp;About Saltwater</string>
    </property>
   </action>
   <action name="m_pActionReleaseNotes">
    <property name="text">
-    <string>Release Notes</string>
+    <string>&amp;Release Notes</string>
    </property>
   </action>
   <action name="m_pActionReportBug">
    <property name="text">
-    <string>Report a Bug...</string>
+    <string>Report a &amp;Bug...</string>
    </property>
   </action>
   <action name="m_pActionModel">
    <property name="text">
-    <string>Model</string>
+    <string>&amp;Model</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+N</string>
@@ -487,27 +487,27 @@
   </action>
   <action name="m_pActionPoint">
    <property name="text">
-    <string>Point</string>
+    <string>&amp;Point</string>
    </property>
   </action>
   <action name="m_pActionEnvironment">
    <property name="text">
-    <string>Environment</string>
+    <string>&amp;Environment</string>
    </property>
   </action>
   <action name="m_pActionGlobalProbe">
    <property name="text">
-    <string>Global Probe</string>
+    <string>&amp;Global Probe</string>
    </property>
   </action>
   <action name="m_pActionCamera">
    <property name="text">
-    <string>Camera</string>
+    <string>&amp;Camera</string>
    </property>
   </action>
   <action name="m_pActionSun">
    <property name="text">
-    <string>Sun</string>
+    <string>&amp;Sun</string>
    </property>
   </action>
   <action name="m_pActionHistogram">
@@ -515,7 +515,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Histogram</string>
+    <string>&amp;Histogram</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+3</string>
@@ -538,37 +538,37 @@
   </action>
   <action name="m_pActionBloom">
    <property name="text">
-    <string>Bloom</string>
+    <string>&amp;Bloom</string>
    </property>
   </action>
   <action name="m_pActionDOF">
    <property name="text">
-    <string>DOF</string>
+    <string>&amp;DOF</string>
    </property>
   </action>
   <action name="m_pActionFXAA">
    <property name="text">
-    <string>FXAA</string>
+    <string>&amp;FXAA</string>
    </property>
   </action>
   <action name="m_pActionSSR">
    <property name="text">
-    <string>SSR</string>
+    <string>&amp;SSR</string>
    </property>
   </action>
   <action name="m_pActionVolumeFog">
    <property name="text">
-    <string>Volume Fog</string>
+    <string>&amp;Volume Fog</string>
    </property>
   </action>
   <action name="m_pActionARController">
    <property name="text">
-    <string>AR Controller</string>
+    <string>&amp;AR Controller</string>
    </property>
   </action>
   <action name="m_pActionConsole">
    <property name="text">
-    <string>Console</string>
+    <string>&amp;Console</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+C</string>
@@ -576,7 +576,7 @@
   </action>
   <action name="m_pActionSceneGraph">
    <property name="text">
-    <string>Scene Graph</string>
+    <string>&amp;Scene Graph</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+0</string>
@@ -584,7 +584,7 @@
   </action>
   <action name="m_pActionInspector">
    <property name="text">
-    <string>Inspector</string>
+    <string>&amp;Inspector</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+1</string>
@@ -592,7 +592,7 @@
   </action>
   <action name="m_pActionAssets">
    <property name="text">
-    <string>Assets</string>
+    <string>&amp;Assets</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+2</string>
