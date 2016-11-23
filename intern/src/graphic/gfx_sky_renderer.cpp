@@ -385,8 +385,8 @@ namespace
         // -----------------------------------------------------------------------------
         STextureDescriptor TextureDescriptor;
 
-        TextureDescriptor.m_NumberOfPixelsU  = 2048;
-        TextureDescriptor.m_NumberOfPixelsV  = 2048;
+        TextureDescriptor.m_NumberOfPixelsU  = STextureDescriptor::s_NumberOfPixelsFromSource;
+        TextureDescriptor.m_NumberOfPixelsV  = STextureDescriptor::s_NumberOfPixelsFromSource;
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
         TextureDescriptor.m_NumberOfTextures = 6;
@@ -395,9 +395,9 @@ namespace
         TextureDescriptor.m_Format           = CTextureBase::Unknown;
         TextureDescriptor.m_Usage            = CTextureBase::GPURead;
         TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-        TextureDescriptor.m_pFileName        = 0;
+        TextureDescriptor.m_pFileName        = "environments/OutputCube.dds";
         TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        TextureDescriptor.m_Format           = CTextureBase::R8G8B8A8_UBYTE;
         
         m_CubemapTexture2DPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
@@ -767,8 +767,6 @@ namespace
         bool HasEnvironmentSkybox = m_SkyboxRenderJobs.size() != 0;
         bool HasMainCamera        = m_CameraRenderJobs.size() != 0;
 
-        RenderSkyboxFromPanorama();
-
         if (HasEnvironmentSkybox)
         {
             SSkyboxRenderJob& rRenderJob = m_SkyboxRenderJobs[0];
@@ -778,14 +776,14 @@ namespace
 #if 0
             RenderSkyboxFromTexture();
 #else
-            if (rRenderJob.m_pDataSkybox->GetType() == Dt::CSkyboxFacet::Panorama)
-            {
-                RenderSkyboxFromPanorama();
-            }
-            else if (rRenderJob.m_pDataSkybox->GetType() == Dt::CSkyboxFacet::Cubemap)
-            {
-                RenderSkyboxFromCubemap();
-            }
+//             if (rRenderJob.m_pDataSkybox->GetType() == Dt::CSkyboxFacet::Panorama)
+//             {
+//                 RenderSkyboxFromPanorama();
+//             }
+//             else if (rRenderJob.m_pDataSkybox->GetType() == Dt::CSkyboxFacet::Cubemap)
+//             {
+//                 RenderSkyboxFromCubemap();
+//             }
 #endif
 
             Performance::EndEvent();
@@ -829,10 +827,10 @@ namespace
     {
         SSkyboxRenderJob& rRenderJob = m_SkyboxRenderJobs[0];
 
-//         if (rRenderJob.m_pGraphicSkybox->GetTimeStamp() != Core::Time::GetNumberOfFrame())
-//         {
-//             return;
-//         }
+        if (rRenderJob.m_pGraphicSkybox->GetTimeStamp() != Core::Time::GetNumberOfFrame())
+        {
+            return;
+        }
 
         CRenderContextPtr RenderContextPtr = m_SkyboxFromPanorama.m_RenderContextPtr;
         CShaderPtr        VSPtr            = m_SkyboxFromPanorama.m_VSPtr;

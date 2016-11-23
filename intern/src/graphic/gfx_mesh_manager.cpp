@@ -552,23 +552,23 @@ namespace
         // -----------------------------------------------------------------------------
         // Create indices of box
         // -----------------------------------------------------------------------------
-        pIndices[0] = 0; pIndices[1] = 1; pIndices[2] = 2;
-        pIndices[3] = 2; pIndices[4] = 3; pIndices[5] = 0;
+        pIndices[0] = 4; pIndices[1] = 0; pIndices[2] = 3;
+        pIndices[3] = 3; pIndices[4] = 7; pIndices[5] = 4;
 
-        pIndices[6] = 3; pIndices[7] = 2; pIndices[8] = 6;
-        pIndices[9] = 6; pIndices[10] = 7; pIndices[11] = 3;
+        pIndices[6] = 1; pIndices[7]  = 0; pIndices[8]  = 4;
+        pIndices[9] = 4; pIndices[10] = 5; pIndices[11] = 1;
 
-        pIndices[12] = 5; pIndices[13] = 4; pIndices[14] = 7;
-        pIndices[15] = 7; pIndices[16] = 6; pIndices[17] = 5;
+        pIndices[12] = 3; pIndices[13] = 2; pIndices[14] = 6;
+        pIndices[15] = 6; pIndices[16] = 7; pIndices[17] = 3;
 
-        pIndices[18] = 4; pIndices[19] = 5; pIndices[20] = 1;
-        pIndices[21] = 1; pIndices[22] = 0; pIndices[23] = 4;
+        pIndices[18] = 1; pIndices[19] = 5; pIndices[20] = 6;
+        pIndices[21] = 6; pIndices[22] = 2; pIndices[23] = 1;
 
-        pIndices[24] = 1; pIndices[25] = 5; pIndices[26] = 6;
-        pIndices[27] = 6; pIndices[28] = 2; pIndices[29] = 1;
+        pIndices[24] = 4; pIndices[25] = 7; pIndices[26] = 6;
+        pIndices[27] = 6; pIndices[28] = 5; pIndices[29] = 4;
 
-        pIndices[30] = 4; pIndices[31] = 0; pIndices[32] = 3;
-        pIndices[33] = 3; pIndices[34] = 7; pIndices[35] = 4;
+        pIndices[30] = 0; pIndices[31] = 1; pIndices[32] = 3;
+        pIndices[33] = 3; pIndices[34] = 1; pIndices[35] = 2;
 
         
         // -----------------------------------------------------------------------------
