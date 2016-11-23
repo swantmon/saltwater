@@ -42,10 +42,10 @@ namespace
 
     public:
 
-        CTexture1D* CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _GenerateHash = true);
-        CTexture2D* CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _GenerateHash = true);
+        CTexture1D* CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _IsInternal = false);
+        CTexture2D* CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _IsInternal = false);
 
-        CTextureCube* CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _GenerateHash = true);
+        CTextureCube* CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _IsInternal = false);
 
         CTexture2D* GetTexture2DByHash(unsigned int _Hash);
         CTextureCube* GetTextureCubeByHash(unsigned int _Hash);
@@ -211,19 +211,19 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CTexture1D* CDtTextureManager::CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _GenerateHash)
+    CTexture1D* CDtTextureManager::CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _IsInternal)
     {
         BASE_UNUSED(_rDescriptor);
         BASE_UNUSED(_IsDeleteable);
         BASE_UNUSED(_Behavior);
-        BASE_UNUSED(_GenerateHash);
+        BASE_UNUSED(_IsInternal);
 
         return nullptr;
     }
 
     // -----------------------------------------------------------------------------
 
-    CTexture2D* CDtTextureManager::CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _GenerateHash)
+    CTexture2D* CDtTextureManager::CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _IsInternal)
     {
         const Base::Char* pHashIdentifier;
         void*             pBytes;
@@ -248,7 +248,7 @@ namespace
         // -----------------------------------------------------------------------------
         pHashIdentifier = _rDescriptor.m_pIdentifier != 0 ? _rDescriptor.m_pIdentifier : _rDescriptor.m_pFileName;
 
-        if (pHashIdentifier != nullptr && _GenerateHash == true)
+        if (pHashIdentifier != nullptr && _IsInternal == false)
         {
             const void* pData;
 
@@ -278,7 +278,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Load texture from file if one is set in descriptor
         // -----------------------------------------------------------------------------
-        if (_rDescriptor.m_pFileName != nullptr && _rDescriptor.m_pPixels == nullptr && _Behavior != SDataBehavior::Listen)
+        if (_rDescriptor.m_pFileName != nullptr && _rDescriptor.m_pPixels == nullptr && _Behavior != SDataBehavior::Listen && _IsInternal == false)
         {
             // -----------------------------------------------------------------------------
             // Create and bin texture on DevIL
@@ -444,7 +444,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CTextureCube* CDtTextureManager::CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _GenerateHash)
+    CTextureCube* CDtTextureManager::CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _IsInternal)
     {
         const Base::Char* pHashIdentifier;
         void*             pBytes;
@@ -454,18 +454,26 @@ namespace
         int               ImageHeight;
         int               NumberOfPixel;
         int               NumberOfBytes;
+        unsigned int      NativeImageName;
+        bool              ImageIsLoaded;
+        ILenum            NativeILFormat;
+        ILenum            NativeILType;
+        unsigned int      NumberOfFaces;
 
+        NumberOfFaces   = 1;
+        ImageIsLoaded   = false;
         pHashIdentifier = nullptr;
         pBytes          = nullptr;
         pTextureData    = nullptr;
         Hash            = 0;
+        NativeImageName = 0;
         
         // -----------------------------------------------------------------------------
         // Create hash value over user identifier or filename
         // -----------------------------------------------------------------------------
         pHashIdentifier = _rDescriptor.m_pIdentifier != 0 ? _rDescriptor.m_pIdentifier : _rDescriptor.m_pFileName;
 
-        if (pHashIdentifier != nullptr && _GenerateHash == true)
+        if (pHashIdentifier != nullptr && _IsInternal == false)
         {
             const void* pData;
 
@@ -490,6 +498,7 @@ namespace
         NumberOfPixel   = ImageWidth * ImageHeight;
         NumberOfBytes   = ConvertFormatToBytesPerPixel(_rDescriptor.m_Format) * NumberOfPixel;
 
+
         // -----------------------------------------------------------------------------
         // Build path to texture in file system
         // -----------------------------------------------------------------------------
@@ -498,8 +507,64 @@ namespace
         
         // -----------------------------------------------------------------------------
         // Load texture from file if one is set in descriptor
-        // TODO: Load form file
         // -----------------------------------------------------------------------------
+        if (_rDescriptor.m_pFileName != nullptr && _rDescriptor.m_pPixels == nullptr && _Behavior != SDataBehavior::Listen && _IsInternal == false)
+        {
+            // -----------------------------------------------------------------------------
+            // Create and bin texture on DevIL
+            // -----------------------------------------------------------------------------
+            NativeImageName = ilGenImage();
+
+            ilBindImage(NativeImageName);
+
+            // -----------------------------------------------------------------------------
+            // Load texture from file (either in assets or data)
+            // -----------------------------------------------------------------------------
+            std::string PathToTexture;
+
+            PathToTexture = g_PathToAssets + _rDescriptor.m_pFileName;
+
+            NativeILFormat = ConvertILImageFormat(_rDescriptor.m_Format);
+            NativeILType   = ConvertILImageType(_rDescriptor.m_Format);
+
+            const wchar_t* pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
+
+            ImageIsLoaded = ilLoadImage(pPathToTexture) == IL_TRUE;
+
+            if (ImageIsLoaded)
+            {
+                NumberOfFaces = ilGetInteger(IL_NUM_FACES);
+            }
+
+            if (NumberOfFaces == 6)
+            {
+                ILenum CheckILFormat = ilGetInteger(IL_IMAGE_FORMAT);
+                ILenum CheckILType = ilGetInteger(IL_IMAGE_TYPE);
+
+                if (CheckILFormat != NativeILFormat || CheckILType != NativeILType)
+                {
+                    ilConvertImage(NativeILFormat, NativeILType);
+                }
+
+                pTextureData = ilGetData();
+
+                ImageWidth = ilGetInteger(IL_IMAGE_WIDTH);
+                ImageHeight = ilGetInteger(IL_IMAGE_HEIGHT);
+                NumberOfBytes = ilGetInteger(IL_IMAGE_SIZE_OF_DATA);
+
+                assert(ImageWidth > 0);
+                assert(ImageHeight > 0);
+                assert(NumberOfBytes > 0);
+            }
+            else
+            {
+                BASE_CONSOLE_STREAMERROR("Failed loading image '" << PathToTexture.c_str() << "' from file.");
+
+                ilDeleteImage(NativeImageName);
+
+                return nullptr;
+            }
+        }
 
         // -----------------------------------------------------------------------------
         // Generate texture inside texture manager
@@ -597,12 +662,27 @@ namespace
             // -----------------------------------------------------------------------------
             // Create faces
             // -----------------------------------------------------------------------------
-            rTexture.m_pFaces[Dt::CTextureCube::Right ] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior, false);
-            rTexture.m_pFaces[Dt::CTextureCube::Left  ] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior, false);
-            rTexture.m_pFaces[Dt::CTextureCube::Top   ] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior, false);
-            rTexture.m_pFaces[Dt::CTextureCube::Bottom] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior, false);
-            rTexture.m_pFaces[Dt::CTextureCube::Front ] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior, false);
-            rTexture.m_pFaces[Dt::CTextureCube::Back  ] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior, false);
+            rTexture.m_pFaces[Dt::CTextureCube::Right ] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior, true);
+            rTexture.m_pFaces[Dt::CTextureCube::Left  ] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior, true);
+            rTexture.m_pFaces[Dt::CTextureCube::Top   ] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior, true);
+            rTexture.m_pFaces[Dt::CTextureCube::Bottom] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior, true);
+            rTexture.m_pFaces[Dt::CTextureCube::Front ] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior, true);
+            rTexture.m_pFaces[Dt::CTextureCube::Back  ] = CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior, true);
+
+            // -----------------------------------------------------------------------------
+            // Copy data if image is loaded from file
+            // -----------------------------------------------------------------------------
+            if (ImageIsLoaded)
+            {
+                for (unsigned int IndexOfFace = 0; IndexOfFace < NumberOfFaces; IndexOfFace++)
+                {
+                    ilActiveImage(IndexOfFace);
+
+                    pTextureData = ilGetData();
+
+                    CopyToTexture2D(rTexture.m_pFaces[IndexOfFace], pTextureData);
+                }
+            }
         }
         catch (...)
         {
