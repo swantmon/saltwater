@@ -400,15 +400,6 @@ namespace
         TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
         
         m_CubemapTexture2DPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
-        
-        for (unsigned int IndexOfCubemapLayer = 0; IndexOfCubemapLayer < 6; ++IndexOfCubemapLayer)
-        {
-            CTexture2DPtr CubeLayer = TextureManager::CreateTexture2D(TextureDescriptor);
-            
-            TextureManager::CopyToTextureArray2D(m_CubemapTexture2DPtr, IndexOfCubemapLayer, CubeLayer, false);
-        }
-        
-        TextureManager::UpdateMipmap(m_CubemapTexture2DPtr);
 
         m_CubemapTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_CubemapTexture2DPtr));
 
@@ -566,16 +557,16 @@ namespace
         // -----------------------------------------------------------------------------
 
         // Front; +Y
-        LookDirection = EyePosition + Base::Float3::s_AxisY;
-        UpDirection = Base::Float3::s_AxisZ;
+        LookDirection = EyePosition - Base::Float3::s_AxisY;
+        UpDirection = Base::Float3::s_Zero - Base::Float3::s_AxisZ;
 
         DefaultGSValues.m_CubeViewMatrix[2].LookAt(EyePosition, LookDirection, UpDirection);
 
         // -----------------------------------------------------------------------------
 
         // Back; -Y
-        LookDirection = EyePosition - Base::Float3::s_AxisY;
-        UpDirection = Base::Float3::s_Zero - Base::Float3::s_AxisZ;
+        LookDirection = EyePosition + Base::Float3::s_AxisY;
+        UpDirection = Base::Float3::s_AxisZ;
 
         DefaultGSValues.m_CubeViewMatrix[3].LookAt(EyePosition, LookDirection, UpDirection);
 
@@ -776,6 +767,8 @@ namespace
         bool HasEnvironmentSkybox = m_SkyboxRenderJobs.size() != 0;
         bool HasMainCamera        = m_CameraRenderJobs.size() != 0;
 
+        RenderSkyboxFromPanorama();
+
         if (HasEnvironmentSkybox)
         {
             SSkyboxRenderJob& rRenderJob = m_SkyboxRenderJobs[0];
@@ -836,10 +829,10 @@ namespace
     {
         SSkyboxRenderJob& rRenderJob = m_SkyboxRenderJobs[0];
 
-        if (rRenderJob.m_pGraphicSkybox->GetTimeStamp() != Core::Time::GetNumberOfFrame())
-        {
-            return;
-        }
+//         if (rRenderJob.m_pGraphicSkybox->GetTimeStamp() != Core::Time::GetNumberOfFrame())
+//         {
+//             return;
+//         }
 
         CRenderContextPtr RenderContextPtr = m_SkyboxFromPanorama.m_RenderContextPtr;
         CShaderPtr        VSPtr            = m_SkyboxFromPanorama.m_VSPtr;

@@ -331,13 +331,6 @@ namespace
 
         m_CubemapTexturePtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
-        for (unsigned int IndexOfCubemapLayer = 0; IndexOfCubemapLayer < 6; ++IndexOfCubemapLayer)
-        {
-            CTexture2DPtr CubemapFaceTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
-
-            TextureManager::CopyToTextureArray2D(m_CubemapTexturePtr, IndexOfCubemapLayer, CubemapFaceTexturePtr, false);
-        }
-
         // -----------------------------------------------------------------------------
 
         TextureDescriptor.m_NumberOfPixelsU  = 1280;

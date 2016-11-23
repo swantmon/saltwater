@@ -606,10 +606,7 @@ namespace
     {
         BASE_UNUSED(_UpdateMipLevels);
         BASE_UNUSED(_NumberOfBytesPerLine);
-        
-        // TODO by tschwandt
-        // Do this not only for cubemaps!
-        
+                
         // -----------------------------------------------------------------------------
         // Get informations
         // -----------------------------------------------------------------------------
@@ -625,22 +622,32 @@ namespace
         assert(Size[0] <= UpdateSize[0] + Offset[0]);
         assert(Size[1] <= UpdateSize[1] + Offset[1]);
         
-        CInternTexture2D* pInternCubemap = static_cast<CInternTexture2D*>(_TextureArrayPtr.GetPtr());
-        
-        Gfx::CNativeTextureHandle CubemapHandle = pInternCubemap->m_NativeTexture;
-        
-        int InternalFormat = ConvertGLInternalImageFormat(pInternCubemap->GetFormat());
-        int Format         = ConvertGLImageFormat(pInternCubemap->GetFormat());
-        int Type           = ConvertGLImageType  (pInternCubemap->GetFormat());
+        CInternTexture2D* pInternTextureArray = static_cast<CInternTexture2D*>(_TextureArrayPtr.GetPtr());
+
+        Gfx::CNativeTextureHandle TextureHandle = pInternTextureArray->m_NativeTexture;
+
+        int InternalFormat = ConvertGLInternalImageFormat(pInternTextureArray->GetFormat());
+        int Format         = ConvertGLImageFormat(pInternTextureArray->GetFormat());
+        int Type           = ConvertGLImageType  (pInternTextureArray->GetFormat());
         
         // -----------------------------------------------------------------------------
         // Upload data to texture
         // -----------------------------------------------------------------------------
-        glBindTexture(GL_TEXTURE_CUBE_MAP, CubemapHandle);
-        
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + _IndexOfSlice, 0, InternalFormat, UpdateSize[0], UpdateSize[1], 0, Format, Type, _pBytes);
-        
-        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+        if (pInternTextureArray->m_Info.m_IsCubeTexture)
+        {
+            glBindTexture(GL_TEXTURE_CUBE_MAP, TextureHandle);
+
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + _IndexOfSlice, 0, InternalFormat, UpdateSize[0], UpdateSize[1], 0, Format, Type, _pBytes);
+
+            glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+        }
+        else
+        {
+            // TODO by tschwandt
+            // Do this not only for cubemaps!
+
+            BASE_CONSOLE_STREAMWARNING("Copy to texture array is actually not supported.");
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -648,10 +655,7 @@ namespace
     void CGfxTextureManager::CopyToTextureArray2D(CTexture2DPtr _TextureArrayPtr, unsigned int _IndexOfSlice, CTexture2DPtr _TexturePtr, bool _UpdateMipLevels)
     {
         BASE_UNUSED(_UpdateMipLevels);
-        
-        // TODO by tschwandt
-        // Do this not only for cubemaps!
-        
+
         // -----------------------------------------------------------------------------
         // Get informations
         // -----------------------------------------------------------------------------
@@ -665,23 +669,33 @@ namespace
         assert(_TexturePtr->GetNumberOfPixelsU() <= UpdateSize[0] + Offset[0]);
         assert(_TexturePtr->GetNumberOfPixelsV() <= UpdateSize[1] + Offset[1]);
         
-        CInternTexture2D* pInternCubemap = static_cast<CInternTexture2D*>(_TextureArrayPtr.GetPtr());
+        CInternTexture2D* pInternTextureArray = static_cast<CInternTexture2D*>(_TextureArrayPtr.GetPtr());
         CInternTexture2D* pInternTexture = static_cast<CInternTexture2D*>(_TexturePtr.GetPtr());
         
-        Gfx::CNativeTextureHandle CubemapHandle = pInternCubemap->m_NativeTexture;
+        Gfx::CNativeTextureHandle TextureHandle = pInternTextureArray->m_NativeTexture;
         
-        int InternalFormat = ConvertGLInternalImageFormat(pInternCubemap->GetFormat());
-        int Format         = ConvertGLImageFormat(pInternCubemap->GetFormat());
-        int Type           = ConvertGLImageType  (pInternCubemap->GetFormat());
+        int InternalFormat = ConvertGLInternalImageFormat(pInternTextureArray->GetFormat());
+        int Format         = ConvertGLImageFormat(pInternTextureArray->GetFormat());
+        int Type           = ConvertGLImageType  (pInternTextureArray->GetFormat());
         
         // -----------------------------------------------------------------------------
         // Upload data to texture
         // -----------------------------------------------------------------------------
-        glBindTexture(GL_TEXTURE_CUBE_MAP, CubemapHandle);
-        
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + _IndexOfSlice, 0, InternalFormat, UpdateSize[0], UpdateSize[1], 0, Format, Type, pInternTexture->GetPixels());
-        
-        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+        if (pInternTextureArray->m_Info.m_IsCubeTexture)
+        {
+            glBindTexture(GL_TEXTURE_CUBE_MAP, TextureHandle);
+
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + _IndexOfSlice, 0, InternalFormat, UpdateSize[0], UpdateSize[1], 0, Format, Type, pInternTexture->GetPixels());
+
+            glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+        }
+        else
+        {
+            // TODO by tschwandt
+            // Do this not only for cubemaps!
+
+            BASE_CONSOLE_STREAMWARNING("Copy to texture array is actually not supported.");
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -886,15 +900,6 @@ namespace
                     TextureDescriptor.m_NumberOfTextures = 6;
 
                     pInternTexture2D = InternCreateCubeTexture(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
-
-                    for (unsigned int IndexOfCubemapLayer = 0; IndexOfCubemapLayer < 6; ++IndexOfCubemapLayer)
-                    {
-                        CInternTexture2D* pCubeLayer = InternCreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
-
-                        CopyToTextureArray2D(pInternTexture2D, IndexOfCubemapLayer, pCubeLayer, false);
-                    }
-
-                    UpdateMipmap(pInternTexture2D);
                 }
                 else
                 {
@@ -1506,6 +1511,9 @@ namespace
         ILenum       NativeILFormat;
         ILenum       NativeILType;
 
+        assert(_rDescriptor.m_NumberOfTextures == 6 && _rDescriptor.m_NumberOfPixelsW == 1 && _rDescriptor.m_pPixels == 0);
+
+        ImageIsLoaded = false;
         NumberOfFaces = 1;
         pBytes        = nullptr;
         pTextureData  = nullptr;
@@ -1536,7 +1544,7 @@ namespace
         if (_rDescriptor.m_pFileName != nullptr && _rDescriptor.m_pPixels == nullptr)
         {
             // -----------------------------------------------------------------------------
-            // Create and bin texture on DevIL
+            // Create and bind texture on DevIL
             // -----------------------------------------------------------------------------
             NativeImageName = ilGenImage();
 
@@ -1568,7 +1576,7 @@ namespace
                 NumberOfFaces = ilGetInteger(IL_NUM_FACES);
             }
             
-            if (NumberOfFaces == 6)
+            if (ImageIsLoaded && NumberOfFaces == 5)
             {
                 ILenum CheckILFormat = ilGetInteger(IL_IMAGE_FORMAT);
                 ILenum CheckILType   = ilGetInteger(IL_IMAGE_TYPE);
@@ -1594,6 +1602,8 @@ namespace
 
                 ilDeleteImage(NativeImageName);
 
+                ilBindImage(0);
+
                 return nullptr;
             }
         }
@@ -1607,6 +1617,62 @@ namespace
         // Generate OpenGL texture or render buffer
         // -----------------------------------------------------------------------------
         glGenTextures(1, &NativeTextureHandle);
+
+        glBindTexture(GL_TEXTURE_CUBE_MAP, NativeTextureHandle);
+
+        // -----------------------------------------------------------------------------
+        // Binding
+        // -----------------------------------------------------------------------------
+        if (_rDescriptor.m_Binding & Gfx::CTextureBase::DepthStencilTarget)
+        {
+            glTexStorage2D(GL_TEXTURE_CUBE_MAP, NumberOfMipmaps, GL_DEPTH_COMPONENT32F, ImageWidth, ImageHeight);
+        }
+        else if (_rDescriptor.m_Binding & Gfx::CTextureBase::RenderTarget)
+        {
+            glTexStorage2D(GL_TEXTURE_CUBE_MAP, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
+        }
+        else
+        {
+            glTexStorage2D(GL_TEXTURE_CUBE_MAP, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Is data available, then upload it to graphic card
+        // -----------------------------------------------------------------------------
+        if (ImageIsLoaded)
+        {
+            for (unsigned int IndexOfFace = 0; IndexOfFace <= NumberOfFaces; ++IndexOfFace)
+            {
+                ilBindImage(NativeImageName);
+
+                ilActiveFace(IndexOfFace);
+
+                ILenum CheckILFormat = ilGetInteger(IL_IMAGE_FORMAT);
+                ILenum CheckILType   = ilGetInteger(IL_IMAGE_TYPE);
+
+                if (CheckILFormat != NativeILFormat || CheckILType != NativeILType)
+                {
+                    ilConvertImage(NativeILFormat, NativeILType);
+                }
+
+                pTextureData = ilGetData();
+
+                glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + IndexOfFace, 0, 0, 0, ImageWidth, ImageHeight, GLFormat, GLType, pTextureData);
+            }
+        }
+
+        // -----------------------------------------------------------------------------
+        // Create mipmaps depending on uploaded data
+        // -----------------------------------------------------------------------------
+        if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
+        {
+            glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Unbind texture
+        // -----------------------------------------------------------------------------
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
         // -----------------------------------------------------------------------------
         // Generate texture inside texture manager
@@ -1711,19 +1777,10 @@ namespace
                     break;
             }
 
-            for (unsigned int IndexOfCubemapLayer = 0; IndexOfCubemapLayer < NumberOfFaces; ++IndexOfCubemapLayer)
-            {
-                CInternTexture2D* pCubeLayer = InternCreateTexture2D(_rDescriptor, true, Gfx::SDataBehavior::LeftAlone);
-
-                CopyToTextureArray2D(pInternTexture2D, IndexOfCubemapLayer, pCubeLayer, false);
-            }
-
-            UpdateMipmap(pInternTexture2D);
-
             // -----------------------------------------------------------------------------
             // Delete image on DevIL because it isn't needed anymore
             // -----------------------------------------------------------------------------
-            if (_rDescriptor.m_pFileName != nullptr && _rDescriptor.m_pPixels == nullptr)
+            if (ImageIsLoaded)
             {
                 ilDeleteImage(NativeImageName);
 

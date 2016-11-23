@@ -316,19 +316,8 @@ namespace
             
         if(Status != GL_FRAMEBUFFER_COMPLETE)
         {
-            BASE_THROWM("Can't create an accepted frame buffer.");
+            BASE_THROWM("Can't create an acceptable frame buffer.");
         }
-        
-        // -----------------------------------------------------------------------------
-        // Clear render target
-        // -----------------------------------------------------------------------------
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glClearDepth(0.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            
-        glBindTexture(GL_TEXTURE_2D, 0);
         
         return CTargetSetPtr(TargetSetPtr);
     }

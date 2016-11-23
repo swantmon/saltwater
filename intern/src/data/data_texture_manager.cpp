@@ -536,10 +536,10 @@ namespace
                 NumberOfFaces = ilGetInteger(IL_NUM_FACES);
             }
 
-            if (NumberOfFaces == 6)
+            if (ImageIsLoaded && NumberOfFaces == 5)
             {
                 ILenum CheckILFormat = ilGetInteger(IL_IMAGE_FORMAT);
-                ILenum CheckILType = ilGetInteger(IL_IMAGE_TYPE);
+                ILenum CheckILType   = ilGetInteger(IL_IMAGE_TYPE);
 
                 if (CheckILFormat != NativeILFormat || CheckILType != NativeILType)
                 {
@@ -548,8 +548,8 @@ namespace
 
                 pTextureData = ilGetData();
 
-                ImageWidth = ilGetInteger(IL_IMAGE_WIDTH);
-                ImageHeight = ilGetInteger(IL_IMAGE_HEIGHT);
+                ImageWidth    = ilGetInteger(IL_IMAGE_WIDTH);
+                ImageHeight   = ilGetInteger(IL_IMAGE_HEIGHT);
                 NumberOfBytes = ilGetInteger(IL_IMAGE_SIZE_OF_DATA);
 
                 assert(ImageWidth > 0);
@@ -558,9 +558,11 @@ namespace
             }
             else
             {
-                BASE_CONSOLE_STREAMERROR("Failed loading image '" << PathToTexture.c_str() << "' from file.");
+                BASE_CONSOLE_STREAMERROR("Failed loading cubemap '" << PathToTexture.c_str() << "' from file.");
 
                 ilDeleteImage(NativeImageName);
+
+                ilBindImage(0);
 
                 return nullptr;
             }
@@ -676,12 +678,32 @@ namespace
             {
                 for (unsigned int IndexOfFace = 0; IndexOfFace < NumberOfFaces; IndexOfFace++)
                 {
-                    ilActiveImage(IndexOfFace);
+                    ilBindImage(NativeImageName);
+
+                    ilActiveFace(IndexOfFace);
+
+                    ILenum CheckILFormat = ilGetInteger(IL_IMAGE_FORMAT);
+                    ILenum CheckILType = ilGetInteger(IL_IMAGE_TYPE);
+
+                    if (CheckILFormat != NativeILFormat || CheckILType != NativeILType)
+                    {
+                        ilConvertImage(NativeILFormat, NativeILType);
+                    }
 
                     pTextureData = ilGetData();
 
                     CopyToTexture2D(rTexture.m_pFaces[IndexOfFace], pTextureData);
                 }
+            }
+
+            // -----------------------------------------------------------------------------
+            // Delete image on DevIL because it isn't needed anymore
+            // -----------------------------------------------------------------------------
+            if (ImageIsLoaded)
+            {
+                ilDeleteImage(NativeImageName);
+
+                ilBindImage(0);
             }
         }
         catch (...)

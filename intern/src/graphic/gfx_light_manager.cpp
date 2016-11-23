@@ -518,15 +518,6 @@ namespace
         
         CTexture2DPtr SpecularCube = TextureManager::CreateCubeTexture(TextureDescriptor);
         
-        for (unsigned int IndexOfCubemapLayer = 0; IndexOfCubemapLayer < 6; ++IndexOfCubemapLayer)
-        {
-            CTexture2DPtr CubeLayer = TextureManager::CreateTexture2D(TextureDescriptor);
-            
-            TextureManager::CopyToTextureArray2D(SpecularCube, IndexOfCubemapLayer, CubeLayer, false);
-        }
-        
-        TextureManager::UpdateMipmap(SpecularCube);
-        
         // -----------------------------------------------------------------------------
         
         TextureDescriptor.m_NumberOfPixelsU  = SizeOfDiffuseCubemap;
@@ -534,15 +525,6 @@ namespace
         TextureDescriptor.m_NumberOfMipMaps  = 1;
         
         CTexture2DPtr DiffuseCube = TextureManager::CreateCubeTexture(TextureDescriptor);
-        
-        for (unsigned int IndexOfCubemapLayer = 0; IndexOfCubemapLayer < 6; ++IndexOfCubemapLayer)
-        {
-            CTexture2DPtr CubeLayer = TextureManager::CreateTexture2D(TextureDescriptor);
-            
-            TextureManager::CopyToTextureArray2D(DiffuseCube, IndexOfCubemapLayer, CubeLayer, false);
-        }
-        
-        TextureManager::UpdateMipmap(DiffuseCube);
         
         rGraphicGlobalProbeLightFacet.SetFilteredTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(SpecularCube), static_cast<CTextureBasePtr>(DiffuseCube)));
         
