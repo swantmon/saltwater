@@ -40,7 +40,7 @@
 
 using namespace Gfx;
 
-#define LOAD_CUBEMAP_FROM_FILE 0
+#define LOAD_CUBEMAP_FROM_FILE 1
 
 namespace
 {
@@ -163,6 +163,10 @@ namespace
 
         CSkyboxRenderJobs m_SkyboxRenderJobs;
         CCameraRenderJobs m_CameraRenderJobs;
+
+#if LOAD_CUBEMAP_FROM_FILE == 1
+        CTextureSetPtr m_CubemapTestTextureSetPtr;
+#endif
         
     private:
         
@@ -286,6 +290,10 @@ namespace
 
         m_SkyboxRenderJobs.clear();
         m_CameraRenderJobs.clear();
+
+#if LOAD_CUBEMAP_FROM_FILE == 1
+        m_CubemapTestTextureSetPtr = 0;
+#endif
     }
     
     // -----------------------------------------------------------------------------
@@ -400,18 +408,22 @@ namespace
         TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pPixels          = 0;
         TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
-
-#if LOAD_CUBEMAP_FROM_FILE == 1
-        TextureDescriptor.m_NumberOfPixelsU = STextureDescriptor::s_NumberOfPixelsFromSource;
-        TextureDescriptor.m_NumberOfPixelsV = STextureDescriptor::s_NumberOfPixelsFromSource;
-        TextureDescriptor.m_pFileName       = "environments/OutputCube.dds";
-        TextureDescriptor.m_Format          = CTextureBase::R8G8B8A8_UBYTE;
-#endif
-
         
         m_CubemapTexture2DPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
         m_CubemapTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_CubemapTexture2DPtr));
+
+#if LOAD_CUBEMAP_FROM_FILE == 1
+        TextureDescriptor.m_NumberOfPixelsU = STextureDescriptor::s_NumberOfPixelsFromSource;
+        TextureDescriptor.m_NumberOfPixelsV = STextureDescriptor::s_NumberOfPixelsFromSource;
+        TextureDescriptor.m_Binding         = CTextureBase::ShaderResource;
+        TextureDescriptor.m_pFileName       = "environments/OutputCube.dds";
+        TextureDescriptor.m_Format          = CTextureBase::R8G8B8A8_UBYTE;
+
+        CTexture2DPtr TestCubemapPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
+
+        m_CubemapTestTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(TestCubemapPtr));
+#endif
 
         // -----------------------------------------------------------------------------
         // Target Set
@@ -789,7 +801,7 @@ namespace
             Performance::BeginEvent("Sky");
 
 #if LOAD_CUBEMAP_FROM_FILE == 1
-            // ...
+            RenderSkyboxFromCubemap();
 #else
             if (rRenderJob.m_pDataSkybox->GetType() == Dt::CSkyboxFacet::Panorama)
             {
@@ -949,10 +961,12 @@ namespace
     {
         SSkyboxRenderJob& rRenderJob = m_SkyboxRenderJobs[0];
 
+#if LOAD_CUBEMAP_FROM_FILE == 0
         if (!rRenderJob.m_pDataSkybox->GetHasCubemap() || rRenderJob.m_pDataSkybox->GetCubemap()->GetDirtyTime() != Core::Time::GetNumberOfFrame())
         {
             return;
         }
+#endif
 
         CRenderContextPtr RenderContextPtr = m_SkyboxFromCubemap.m_RenderContextPtr;
         CShaderPtr        VSPtr            = m_SkyboxFromCubemap.m_VSPtr;
@@ -974,7 +988,11 @@ namespace
         SCubemapBufferPS* pPSBuffer = static_cast<SCubemapBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(0)));
 
         pPSBuffer->m_HDRFactor = rRenderJob.m_pDataSkybox->GetIntensity();
-        pPSBuffer->m_IsHDR     = rRenderJob.m_pDataSkybox->GetCubemap()->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
+#if LOAD_CUBEMAP_FROM_FILE == 1
+        pPSBuffer->m_IsHDR     = 0.0f;
+#else
+        pPSBuffer->m_IsHDR = rRenderJob.m_pDataSkybox->GetCubemap()->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
+#endif
 
         BufferManager::UnmapConstantBuffer(PSBufferSetPtr->GetBuffer(0));
 
@@ -1008,7 +1026,11 @@ namespace
 
         ContextManager::SetConstantBufferSetPS(PSBufferSetPtr);
 
-        ContextManager::SetTextureSetPS(rRenderJob.m_pGraphicSkybox->GetCubemapTextureSet());
+#if LOAD_CUBEMAP_FROM_FILE == 1
+        ContextManager::SetTextureSetPS(m_CubemapTestTextureSetPtr);
+#else
+        ContextManager::SetTextureSetPS(rRenderJob.m_pGraphicSkybox->m_CubemapTextureSetPtr);
+#endif
 
         // -----------------------------------------------------------------------------
         // Draw
