@@ -17,6 +17,7 @@
 #include "GL/glew.h"
 
 #include "IL/il.h"
+#include "IL/ilu.h"
 
 #include <unordered_map>
 
@@ -1510,6 +1511,7 @@ namespace
         int          GLType;
         ILenum       NativeILFormat;
         ILenum       NativeILType;
+        ILinfo       NativeILImageInfo;
 
         assert(_rDescriptor.m_NumberOfTextures == 6 && _rDescriptor.m_NumberOfPixelsW == 1 && _rDescriptor.m_pPixels == 0);
 
@@ -1653,6 +1655,13 @@ namespace
                 if (CheckILFormat != NativeILFormat || CheckILType != NativeILType)
                 {
                     ilConvertImage(NativeILFormat, NativeILType);
+                }
+
+                iluGetImageInfo(&NativeILImageInfo);
+
+                if (NativeILImageInfo.Origin == IL_ORIGIN_UPPER_LEFT)
+                {
+                    iluFlipImage();
                 }
 
                 pTextureData = ilGetData();
