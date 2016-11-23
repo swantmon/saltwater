@@ -40,6 +40,8 @@
 
 using namespace Gfx;
 
+#define LOAD_CUBEMAP_FROM_FILE 0
+
 namespace
 {
     class CGfxSkyRenderer : private Base::CUncopyable
@@ -385,8 +387,8 @@ namespace
         // -----------------------------------------------------------------------------
         STextureDescriptor TextureDescriptor;
 
-        TextureDescriptor.m_NumberOfPixelsU  = STextureDescriptor::s_NumberOfPixelsFromSource;
-        TextureDescriptor.m_NumberOfPixelsV  = STextureDescriptor::s_NumberOfPixelsFromSource;
+        TextureDescriptor.m_NumberOfPixelsU  = 2048;
+        TextureDescriptor.m_NumberOfPixelsV  = 2048;
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
         TextureDescriptor.m_NumberOfTextures = 6;
@@ -395,9 +397,17 @@ namespace
         TextureDescriptor.m_Format           = CTextureBase::Unknown;
         TextureDescriptor.m_Usage            = CTextureBase::GPURead;
         TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-        TextureDescriptor.m_pFileName        = "environments/OutputCube.dds";
+        TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = CTextureBase::R8G8B8A8_UBYTE;
+        TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+
+#if LOAD_CUBEMAP_FROM_FILE == 1
+        TextureDescriptor.m_NumberOfPixelsU = STextureDescriptor::s_NumberOfPixelsFromSource;
+        TextureDescriptor.m_NumberOfPixelsV = STextureDescriptor::s_NumberOfPixelsFromSource;
+        TextureDescriptor.m_pFileName       = "environments/OutputCube.dds";
+        TextureDescriptor.m_Format          = CTextureBase::R8G8B8A8_UBYTE;
+#endif
+
         
         m_CubemapTexture2DPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
@@ -539,7 +549,12 @@ namespace
         DefaultGSValues.m_CubeProjectionMatrix.SetRHFieldOfView(Base::RadiansToDegree(Base::SConstants<float>::s_Pi * 0.5f), 1.0f, 0.3f, 20000.0f);
         
         // -----------------------------------------------------------------------------
-        
+        // By creating a cube map in OpenGL, several facts should be considered:
+        //  1. OpenGL cubemaps has an right handed coord system
+        //  2. Texcoords starts in the upper left corner (normally in the lower left 
+        //     corner)
+        // -----------------------------------------------------------------------------
+
         // Right; +X
         LookDirection = EyePosition + Base::Float3::s_AxisX;
         UpDirection   = Base::Float3::s_AxisY;
@@ -557,16 +572,16 @@ namespace
         // -----------------------------------------------------------------------------
 
         // Front; +Y
-        LookDirection = EyePosition - Base::Float3::s_AxisY;
-        UpDirection = Base::Float3::s_Zero - Base::Float3::s_AxisZ;
+        LookDirection = EyePosition + Base::Float3::s_AxisY;
+        UpDirection = Base::Float3::s_AxisZ;
 
         DefaultGSValues.m_CubeViewMatrix[2].LookAt(EyePosition, LookDirection, UpDirection);
 
         // -----------------------------------------------------------------------------
 
         // Back; -Y
-        LookDirection = EyePosition + Base::Float3::s_AxisY;
-        UpDirection = Base::Float3::s_AxisZ;
+        LookDirection = EyePosition - Base::Float3::s_AxisY;
+        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisZ;
 
         DefaultGSValues.m_CubeViewMatrix[3].LookAt(EyePosition, LookDirection, UpDirection);
 
@@ -773,17 +788,17 @@ namespace
 
             Performance::BeginEvent("Sky");
 
-#if 0
-            RenderSkyboxFromTexture();
+#if LOAD_CUBEMAP_FROM_FILE == 1
+            // ...
 #else
-//             if (rRenderJob.m_pDataSkybox->GetType() == Dt::CSkyboxFacet::Panorama)
-//             {
-//                 RenderSkyboxFromPanorama();
-//             }
-//             else if (rRenderJob.m_pDataSkybox->GetType() == Dt::CSkyboxFacet::Cubemap)
-//             {
-//                 RenderSkyboxFromCubemap();
-//             }
+            if (rRenderJob.m_pDataSkybox->GetType() == Dt::CSkyboxFacet::Panorama)
+            {
+                RenderSkyboxFromPanorama();
+            }
+            else if (rRenderJob.m_pDataSkybox->GetType() == Dt::CSkyboxFacet::Cubemap)
+            {
+                RenderSkyboxFromCubemap();
+            }
 #endif
 
             Performance::EndEvent();
