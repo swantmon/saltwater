@@ -33,7 +33,5 @@ namespace SkyRenderer
     
     void Update();
     void Render();
-
-    CTextureSetPtr GetCubemap();
 } // namespace SkyRenderer
 } // namespace Gfx

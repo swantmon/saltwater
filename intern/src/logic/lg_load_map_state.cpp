@@ -164,9 +164,9 @@ namespace
 
             rEnvironment.SetName("Environment");
 
-            Dt::CSkyboxFacet* pSkyboxFacet = Dt::LightManager::CreateSkybox();
+            Dt::CSkyFacet* pSkyboxFacet = Dt::LightManager::CreateSky();
 
-            pSkyboxFacet->SetType(Dt::CSkyboxFacet::Panorama);
+            pSkyboxFacet->SetType(Dt::CSkyFacet::Panorama);
             pSkyboxFacet->SetPanorama(pPanoramaTexture);
             pSkyboxFacet->SetIntensity(10000.0f);
 

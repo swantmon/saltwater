@@ -192,6 +192,9 @@ namespace Dt
 
 namespace Dt
 {
+    // -----------------------------------------------------------------------------
+    // Add generic light probe
+    // -----------------------------------------------------------------------------
     class CGlobalProbeLightFacet
     {
     public:
@@ -256,7 +259,7 @@ namespace Dt
 
 namespace Dt
 {
-    class CSkyboxFacet
+    class CSkyFacet
     {
     public:
 
@@ -282,12 +285,12 @@ namespace Dt
         bool GetHasPanorama() const;
 
         void SetIntensity(float _Intensity);
-        float GetIntensity();
+        float GetIntensity() const;
 
     public:
 
-        CSkyboxFacet();
-        ~CSkyboxFacet();
+        CSkyFacet();
+        ~CSkyFacet();
 
     private:
 

@@ -15,7 +15,7 @@
 #include "graphic/gfx_fog_renderer.h"
 #include "graphic/gfx_light_manager.h"
 #include "graphic/gfx_light_area_renderer.h"
-#include "graphic/gfx_light_probe_renderer.h"
+#include "graphic/gfx_light_probe_manager.h"
 #include "graphic/gfx_light_point_renderer.h"
 #include "graphic/gfx_light_sun_renderer.h"
 #include "graphic/gfx_exit_state.h"
@@ -31,6 +31,7 @@
 #include "graphic/gfx_selection_renderer.h"
 #include "graphic/gfx_state_manager.h"
 #include "graphic/gfx_shadow_renderer.h"
+#include "graphic/gfx_sky_manager.h"
 #include "graphic/gfx_sky_renderer.h"
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_manager.h"
@@ -69,7 +70,6 @@ namespace
         LightAreaRenderer  ::OnExit();
         ReflectionRenderer ::OnExit();
         LightPointRenderer ::OnExit();
-        LightProbeRenderer ::OnExit();
         LightSunRenderer   ::OnExit();
         ShadowRenderer     ::OnExit();
         FogRenderer        ::OnExit();
@@ -97,10 +97,12 @@ namespace
         // -----------------------------------------------------------------------------
         BASE_CONSOLE_STREAMINFO("Gfx> Exit manager...");
 
-        ActorManager    ::OnExit();
-        LightManager    ::OnExit();
-        MeshManager     ::OnExit();
-        MaterialManager ::OnExit();
+        LightProbeManager::OnExit();
+        SkyManager       ::OnExit();
+        ActorManager     ::OnExit();
+        LightManager     ::OnExit();
+        MeshManager      ::OnExit();
+        MaterialManager  ::OnExit();
 
         TargetSetManager::OnExit();
         ContextManager  ::OnExit();

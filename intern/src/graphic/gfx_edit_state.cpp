@@ -11,7 +11,7 @@
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_area_renderer.h"
 #include "graphic/gfx_light_manager.h"
-#include "graphic/gfx_light_probe_renderer.h"
+#include "graphic/gfx_light_probe_manager.h"
 #include "graphic/gfx_light_point_renderer.h"
 #include "graphic/gfx_light_sun_renderer.h"
 #include "graphic/gfx_main.h"
@@ -23,6 +23,7 @@
 #include "graphic/gfx_reflection_renderer.h"
 #include "graphic/gfx_selection_renderer.h"
 #include "graphic/gfx_shadow_renderer.h"
+#include "graphic/gfx_sky_manager.h"
 #include "graphic/gfx_sky_renderer.h"
 #include "graphic/gfx_tonemapping_renderer.h"
 
@@ -67,8 +68,10 @@ namespace
         // -----------------------------------------------------------------------------
         // Update graphic entities
         // -----------------------------------------------------------------------------
-        ActorManager::Update();
-        LightManager::Update();
+        ActorManager     ::Update();
+        LightManager     ::Update();
+        SkyManager       ::Update();
+        LightProbeManager::Update();
 
         // -----------------------------------------------------------------------------
         // Update graphic
@@ -84,7 +87,6 @@ namespace
         ShadowRenderer     ::Update();
         LightAreaRenderer  ::Update();
         LightPointRenderer ::Update();   
-        LightProbeRenderer ::Update();
         LightSunRenderer   ::Update();   
         ReflectionRenderer ::Update();    
         SkyRenderer        ::Update();
@@ -114,7 +116,6 @@ namespace
         LightAreaRenderer ::Render();
         LightPointRenderer::Render();
         SkyRenderer       ::Render();
-        LightProbeRenderer::Render();
         ReflectionRenderer::Render();
         FogRenderer       ::Render();
 

@@ -18,7 +18,7 @@
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_reflection_renderer.h"
 #include "graphic/gfx_light_facet.h"
-#include "graphic/gfx_light_probe_renderer.h"
+#include "graphic/gfx_light_probe_manager.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh.h"
 #include "graphic/gfx_mesh_manager.h"
@@ -72,7 +72,7 @@ namespace
         struct SGlobalProbeRenderJob
         {
             Dt::CGlobalProbeLightFacet*  m_pDataGlobalProbe;
-            Gfx::CGlobalProbeLightFacet* m_pGraphicGlobalProbe;
+            Gfx::CLightProbeFacet* m_pGraphicGlobalProbe;
         };
 
         struct SSSRRenderJob
@@ -641,7 +641,7 @@ namespace
         // activate multiple global probes
         SGlobalProbeRenderJob& rRenderJob = m_GlobalProbeRenderJobs[0];
 
-        Gfx::CGlobalProbeLightFacet* pGraphicProbeFacet = rRenderJob.m_pGraphicGlobalProbe;
+        Gfx::CLightProbeFacet* pGraphicProbeFacet = rRenderJob.m_pGraphicGlobalProbe;
 
         Performance::BeginEvent("IBL");
 
@@ -677,7 +677,7 @@ namespace
         // -----------------------------------------------------------------------------
         SIBLSettings* pIBLSettings = static_cast<SIBLSettings*>(BufferManager::MapConstantBuffer(m_ImageLightPSBufferSetPtr->GetBuffer(1)));
             
-        pIBLSettings->m_NumberOfMiplevelsSpecularIBL = static_cast<float>(pGraphicProbeFacet->GetFilteredTextureSet()->GetTexture(0)->GetNumberOfMipLevels() - 1);
+        pIBLSettings->m_NumberOfMiplevelsSpecularIBL = static_cast<float>(pGraphicProbeFacet->GetFilteredSetPtr()->GetTexture(0)->GetNumberOfMipLevels() - 1);
         pIBLSettings->m_ExposureHistoryIndex         = static_cast<float>(HistogramRenderer::GetLastExposureHistoryIndex());
             
         BufferManager::UnmapConstantBuffer(m_ImageLightPSBufferSetPtr->GetBuffer(1));
@@ -685,7 +685,7 @@ namespace
         // -----------------------------------------------------------------------------
         // IBL textures
         // -----------------------------------------------------------------------------            
-        ContextManager::SetTextureSetPS(pGraphicProbeFacet->GetFilteredTextureSet());
+        ContextManager::SetTextureSetPS(pGraphicProbeFacet->GetFilteredSetPtr());
             
         // -----------------------------------------------------------------------------
         // Draw
@@ -964,7 +964,7 @@ namespace
             if (rCurrentEntity.GetType() == Dt::SLightType::GlobalProbe)
             {
                 Dt::CGlobalProbeLightFacet*  pDataGlobalProbeFacet = static_cast<Dt::CGlobalProbeLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-                Gfx::CGlobalProbeLightFacet* pGraphicGlobalProbeFacet = static_cast<Gfx::CGlobalProbeLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+                Gfx::CLightProbeFacet* pGraphicGlobalProbeFacet = static_cast<Gfx::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
 
                 assert(pDataGlobalProbeFacet != 0 && pGraphicGlobalProbeFacet != 0);
 

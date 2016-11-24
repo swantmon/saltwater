@@ -62,36 +62,18 @@ namespace
             friend class CGfxLightManager;
         };
 
-        class CInternGlobalProbeLightFacet : public CGlobalProbeLightFacet
-        {
-        private:
-
-            friend class CGfxLightManager;
-        };
-
-        class CInternSkyboxFacet : public CSkyboxFacet
-        {
-        private:
-
-            friend class CGfxLightManager;
-        };
-
     private:
 
         typedef Base::CPool<CInternPointLightFacet, 64>       CPointLights;
         typedef Base::CPool<CInternSunLightFacet, 64>         CSunLights;
-        typedef Base::CPool<CInternGlobalProbeLightFacet, 64> CGlobalProbeLights;
-        typedef Base::CPool<CInternSkyboxFacet, 1>            CSkyboxes;
-
+        
         typedef std::vector<Dt::CEntity*>  CEntityVector;
 
     private:
 
-        CEntityVector      m_DirtyEntities;
-        CPointLights       m_PointLights;
-        CSunLights         m_SunLights;
-        CGlobalProbeLights m_GlobalProbeLights;
-        CSkyboxes          m_Skyboxes;
+        CEntityVector m_DirtyEntities;
+        CPointLights  m_PointLights;
+        CSunLights    m_SunLights;
         
     private:
 
@@ -101,12 +83,10 @@ namespace
         void UpdatePointLight(Dt::CEntity& _rEntity);
         void UpdateSunLight(Dt::CEntity& _rEntity);
         void UpdateGlobalProbeLight(Dt::CEntity& _rEntity);
-        void UpdateSkybox(Dt::CEntity& _rEntity);
 
         void CreatePointLight(Dt::CEntity& _rEntity);
         void CreateSunLight(Dt::CEntity& _rEntity);
         void CreateGlobalProbeLight(Dt::CEntity& _rEntity);
-        void CreateSkybox(Dt::CEntity& _rEntity);
 
         template<class TShadowLight>
         void CreateRSM(unsigned int _Size, TShadowLight& _rInternLight);
@@ -121,8 +101,6 @@ namespace
     CGfxLightManager::CGfxLightManager()
         : m_PointLights      ()
         , m_SunLights        ()
-        , m_GlobalProbeLights()
-        , m_Skyboxes         ()
     {
         m_DirtyEntities.reserve(65536);
     }
@@ -149,10 +127,8 @@ namespace
 
     void CGfxLightManager::Clear()
     {
-        m_PointLights      .Clear();
-        m_SunLights        .Clear();
-        m_GlobalProbeLights.Clear();
-        m_Skyboxes         .Clear();
+        m_PointLights.Clear();
+        m_SunLights  .Clear();
 
         m_DirtyEntities.clear();
     }
@@ -191,10 +167,8 @@ namespace
             // -----------------------------------------------------------------------------
             switch (_pEntity->GetType())
             {
-            case Dt::SLightType::Point:       CreatePointLight(*_pEntity); break;
-            case Dt::SLightType::Sun:         CreateSunLight(*_pEntity); break;
-            case Dt::SLightType::GlobalProbe: CreateGlobalProbeLight(*_pEntity); break;
-            case Dt::SLightType::Skybox:      CreateSkybox(*_pEntity); break;
+            case Dt::SLightType::Point: CreatePointLight(*_pEntity); break;
+            case Dt::SLightType::Sun:   CreateSunLight(*_pEntity); break;
             }
         }
 
@@ -210,10 +184,8 @@ namespace
         // -----------------------------------------------------------------------------
         switch (_rEntity.GetType())
         {
-        case Dt::SLightType::Point:       UpdatePointLight(_rEntity); break;
-        case Dt::SLightType::Sun:         UpdateSunLight(_rEntity); break;
-        case Dt::SLightType::GlobalProbe: UpdateGlobalProbeLight(_rEntity); break;
-        case Dt::SLightType::Skybox:      UpdateSkybox(_rEntity); break;
+        case Dt::SLightType::Point: UpdatePointLight(_rEntity); break;
+        case Dt::SLightType::Sun:   UpdateSunLight(_rEntity); break;
         }
     }
 
@@ -326,83 +298,6 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxLightManager::UpdateGlobalProbeLight(Dt::CEntity& _rEntity)
-    {
-        Dt::CGlobalProbeLightFacet*   pDataGlobalProbeLightFacet;
-        Gfx::CGlobalProbeLightFacet*  pGraphicGlobalProbeLightFacet;
-
-        pDataGlobalProbeLightFacet    = static_cast<Dt::CGlobalProbeLightFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-        pGraphicGlobalProbeLightFacet = static_cast<Gfx::CGlobalProbeLightFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
-
-        // -----------------------------------------------------------------------------
-        // Update custom global probe
-        // -----------------------------------------------------------------------------
-        if (pDataGlobalProbeLightFacet->GetType() == Dt::CGlobalProbeLightFacet::Custom)
-        {
-
-        }
-
-        // -----------------------------------------------------------------------------
-        // Other data
-        // -----------------------------------------------------------------------------
-        Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
-
-        pGraphicGlobalProbeLightFacet->SetTimeStamp(FrameTime);
-    }
-
-    // -----------------------------------------------------------------------------
-    
-    void CGfxLightManager::UpdateSkybox(Dt::CEntity& _rEntity)
-    {
-        Dt::CSkyboxFacet*  pDataSkyboxFacet;
-        Gfx::CSkyboxFacet* pGraphicSkyboxFacet;
-
-        pDataSkyboxFacet    = static_cast<Dt::CSkyboxFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-        pGraphicSkyboxFacet = static_cast<Gfx::CSkyboxFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
-
-        if (pDataSkyboxFacet->GetType() == Dt::CSkyboxFacet::Panorama)
-        {
-            if (pDataSkyboxFacet->GetHasPanorama())
-            {
-                unsigned int Hash = pDataSkyboxFacet->GetPanorama()->GetHash();
-
-                CTexture2DPtr PanoramaPtr = TextureManager::GetTexture2DByHash(Hash);
-
-                if (PanoramaPtr.IsValid())
-                {
-                    pGraphicSkyboxFacet->SetPanoramaTexture2D(PanoramaPtr);
-
-                    pGraphicSkyboxFacet->SetPanoramaTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(PanoramaPtr)));
-                }
-            }
-        }
-        else if (pDataSkyboxFacet->GetType() == Dt::CSkyboxFacet::Cubemap)
-        {
-            if (pDataSkyboxFacet->GetHasCubemap())
-            {
-                unsigned int Hash = pDataSkyboxFacet->GetCubemap()->GetHash();
-
-                CTexture2DPtr CubemapPtr = TextureManager::GetTexture2DByHash(Hash);
-
-                if (CubemapPtr.IsValid())
-                {
-                    pGraphicSkyboxFacet->SetCubemapTexture2D(CubemapPtr);
-
-                    pGraphicSkyboxFacet->SetCubemapTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(CubemapPtr)));
-                }
-            }
-        }
-
-        // -----------------------------------------------------------------------------
-        // Other data
-        // -----------------------------------------------------------------------------
-        Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
-
-        pGraphicSkyboxFacet->SetTimeStamp(FrameTime);
-    }
-
-    // -----------------------------------------------------------------------------
-
     void CGfxLightManager::CreatePointLight(Dt::CEntity& _rEntity)
     {
         unsigned int ShadowmapSizes[Dt::CPointLightFacet::NumberOfQualities] = { 256, 512, 1024, 2048 };
@@ -466,191 +361,6 @@ namespace
         // Save facet
         // -----------------------------------------------------------------------------
         _rEntity.SetDetailFacet(Dt::SFacetCategory::Graphic, &rGraphicSunLightFacet);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxLightManager::CreateGlobalProbeLight(Dt::CEntity& _rEntity)
-    {
-        STextureDescriptor          TextureDescriptor;
-        SViewPortDescriptor         ViewPortDesc;
-        Dt::CGlobalProbeLightFacet* pDataGlobalProbeEnvironmentFacet;
-
-        // -----------------------------------------------------------------------------
-        // Get sun data informations
-        // -----------------------------------------------------------------------------
-        pDataGlobalProbeEnvironmentFacet = static_cast<Dt::CGlobalProbeLightFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-
-        assert(pDataGlobalProbeEnvironmentFacet);
-
-        // -----------------------------------------------------------------------------
-        // Create facet
-        // -----------------------------------------------------------------------------
-        CInternGlobalProbeLightFacet& rGraphicGlobalProbeLightFacet = m_GlobalProbeLights.Allocate();
-
-        // -----------------------------------------------------------------------------
-        // Create custom global probe part
-        // -----------------------------------------------------------------------------
-        if (pDataGlobalProbeEnvironmentFacet->GetType() == Dt::CGlobalProbeLightFacet::Custom)
-        {
-        }
-        
-        // -----------------------------------------------------------------------------
-        // Create rest of the global probe that is available at any type
-        // -> specular and diffuse cubemap
-        // -----------------------------------------------------------------------------
-        unsigned int SizeOfSpecularCubemap = pDataGlobalProbeEnvironmentFacet->GetQualityInPixel();
-        unsigned int SizeOfDiffuseCubemap  = SizeOfSpecularCubemap / 2;
-
-        TextureDescriptor.m_NumberOfPixelsU  = SizeOfSpecularCubemap;
-        TextureDescriptor.m_NumberOfPixelsV  = SizeOfSpecularCubemap;
-        TextureDescriptor.m_NumberOfPixelsW  = 1;
-        TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
-        TextureDescriptor.m_NumberOfTextures = 6;
-        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource | CTextureBase::RenderTarget;
-        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-        TextureDescriptor.m_Format           = CTextureBase::Unknown;
-        TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-        TextureDescriptor.m_pFileName        = 0;
-        TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
-        
-        CTexture2DPtr SpecularCube = TextureManager::CreateCubeTexture(TextureDescriptor);
-        
-        // -----------------------------------------------------------------------------
-        
-        TextureDescriptor.m_NumberOfPixelsU  = SizeOfDiffuseCubemap;
-        TextureDescriptor.m_NumberOfPixelsV  = SizeOfDiffuseCubemap;
-        TextureDescriptor.m_NumberOfMipMaps  = 1;
-        
-        CTexture2DPtr DiffuseCube = TextureManager::CreateCubeTexture(TextureDescriptor);
-        
-        rGraphicGlobalProbeLightFacet.SetFilteredTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(SpecularCube), static_cast<CTextureBasePtr>(DiffuseCube)));
-        
-        // -----------------------------------------------------------------------------
-        // For all cube maps create a render target for every mip map
-        // -----------------------------------------------------------------------------        
-        ViewPortDesc.m_TopLeftX = 0.0f;
-        ViewPortDesc.m_TopLeftY = 0.0f;
-        ViewPortDesc.m_MinDepth = 0.0f;
-        ViewPortDesc.m_MaxDepth = 1.0f;
-
-        CGlobalProbeLightFacet::CTargetSets&   rSpecularTargetSets   = rGraphicGlobalProbeLightFacet.GetSpecularHDRTargetSets();
-        CGlobalProbeLightFacet::CViewPortSets& rSpecularViewPortSets = rGraphicGlobalProbeLightFacet.GetSpecularViewPortSets();
-
-        for (unsigned int IndexOfMipmap = 0; IndexOfMipmap < SpecularCube->GetNumberOfMipLevels(); ++ IndexOfMipmap)
-        {
-            // -----------------------------------------------------------------------------
-            // Target set
-            // -----------------------------------------------------------------------------
-            CTexture2DPtr MipmapCubeTexture = TextureManager::GetMipmapFromTexture2D(SpecularCube, IndexOfMipmap);
-            
-            CTargetSetPtr SpecularMipmapTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(MipmapCubeTexture));
-            
-            // -----------------------------------------------------------------------------
-            // View port
-            // -----------------------------------------------------------------------------
-            ViewPortDesc.m_Width    = static_cast<float>(MipmapCubeTexture->GetNumberOfPixelsU());
-            ViewPortDesc.m_Height   = static_cast<float>(MipmapCubeTexture->GetNumberOfPixelsV());
-            
-            CViewPortPtr SpecularMipmapViewPort = ViewManager::CreateViewPort(ViewPortDesc);
-            
-            CViewPortSetPtr SpecularViewPortSetPtr = ViewManager::CreateViewPortSet(SpecularMipmapViewPort);
-            
-            // -----------------------------------------------------------------------------
-            // Put into light probe
-            // -----------------------------------------------------------------------------
-            rSpecularTargetSets  .push_back(SpecularMipmapTargetSetPtr);
-            rSpecularViewPortSets.push_back(SpecularViewPortSetPtr);
-        }
-        
-        // -----------------------------------------------------------------------------
-        
-        {
-            // -----------------------------------------------------------------------------
-            // Target set
-            // -----------------------------------------------------------------------------
-            CTargetSetPtr DiffuseMipmapTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(DiffuseCube));
-            
-            // -----------------------------------------------------------------------------
-            // View port
-            // -----------------------------------------------------------------------------
-            ViewPortDesc.m_Width    = static_cast<float>(DiffuseCube->GetNumberOfPixelsU());
-            ViewPortDesc.m_Height   = static_cast<float>(DiffuseCube->GetNumberOfPixelsV());
-            
-            CViewPortPtr DiffuseMipmapViewPort = ViewManager::CreateViewPort(ViewPortDesc);
-            
-            CViewPortSetPtr DiffuseViewPortSetPtr = ViewManager::CreateViewPortSet(DiffuseMipmapViewPort);
-            
-            // -----------------------------------------------------------------------------
-            // Put into light probe
-            // -----------------------------------------------------------------------------
-            rGraphicGlobalProbeLightFacet.SetDiffuseHDRTargetSet(DiffuseMipmapTargetSetPtr);
-            rGraphicGlobalProbeLightFacet.SetDiffuseViewPortSet(DiffuseViewPortSetPtr);
-        }
-
-        // -----------------------------------------------------------------------------
-        // Save facet
-        // -----------------------------------------------------------------------------
-        _rEntity.SetDetailFacet(Dt::SFacetCategory::Graphic, &rGraphicGlobalProbeLightFacet);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxLightManager::CreateSkybox(Dt::CEntity& _rEntity)
-    {
-        Dt::CSkyboxFacet* pDataSkyboxFacet;
-
-        // -----------------------------------------------------------------------------
-        // Get sun data informations
-        // -----------------------------------------------------------------------------
-        pDataSkyboxFacet = static_cast<Dt::CSkyboxFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-
-        assert(pDataSkyboxFacet);
-
-        // -----------------------------------------------------------------------------
-        // Create facet
-        // -----------------------------------------------------------------------------
-        CInternSkyboxFacet& rGraphicSkyboxFacet = m_Skyboxes.Allocate();
-
-        if (pDataSkyboxFacet->GetType() == Dt::CSkyboxFacet::Panorama)
-        {
-            if (pDataSkyboxFacet->GetHasPanorama())
-            {
-                unsigned int Hash = pDataSkyboxFacet->GetPanorama()->GetHash();
-
-                CTexture2DPtr PanoramaPtr = TextureManager::GetTexture2DByHash(Hash);
-
-                if (PanoramaPtr.IsValid())
-                {
-                    rGraphicSkyboxFacet.SetPanoramaTexture2D(PanoramaPtr);
-
-                    rGraphicSkyboxFacet.SetPanoramaTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(PanoramaPtr)));
-                }
-            }
-        }
-        else if (pDataSkyboxFacet->GetType() == Dt::CSkyboxFacet::Cubemap)
-        {
-            if (pDataSkyboxFacet->GetHasCubemap())
-            {
-                unsigned int Hash = pDataSkyboxFacet->GetCubemap()->GetHash();
-
-                CTexture2DPtr CubemapPtr = TextureManager::GetTexture2DByHash(Hash);
-
-                if (CubemapPtr.IsValid())
-                {
-                    rGraphicSkyboxFacet.SetCubemapTexture2D(CubemapPtr);
-
-                    rGraphicSkyboxFacet.SetCubemapTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(CubemapPtr)));
-                }
-            }
-        }
-
-        // -----------------------------------------------------------------------------
-        // Save facet
-        // -----------------------------------------------------------------------------
-        _rEntity.SetDetailFacet(Dt::SFacetCategory::Graphic, &rGraphicSkyboxFacet);
     }
 
     // -----------------------------------------------------------------------------

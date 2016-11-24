@@ -234,9 +234,9 @@ namespace
             pTransformationFacet->SetScale   (Base::Float3(1.0f));
             pTransformationFacet->SetRotation(Base::Float3(0.0f));
 
-            Dt::CSkyboxFacet* pSkyboxFacet = Dt::LightManager::CreateSkybox();
+            Dt::CSkyFacet* pSkyboxFacet = Dt::LightManager::CreateSky();
 
-            pSkyboxFacet->SetType     (Dt::CSkyboxFacet::Panorama);
+            pSkyboxFacet->SetType     (Dt::CSkyFacet::Panorama);
             pSkyboxFacet->SetPanorama (pPanoramaTexture);
             pSkyboxFacet->SetIntensity(5000.0f);
 
@@ -349,7 +349,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CSkyboxFacet* pLightFacet = static_cast<Dt::CSkyboxFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CSkyFacet* pLightFacet = static_cast<Dt::CSkyFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
 
         if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Skybox && pLightFacet != nullptr)
         {
@@ -526,7 +526,7 @@ namespace
         int EntityID = _rMessage.GetInt();
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
-        Dt::CSkyboxFacet* pLightFacet = static_cast<Dt::CSkyboxFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CSkyFacet* pLightFacet = static_cast<Dt::CSkyFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
 
         if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Skybox && pLightFacet != nullptr)
         {
@@ -553,7 +553,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Set values
             // -----------------------------------------------------------------------------
-            pLightFacet->SetType     (static_cast<Dt::CSkyboxFacet::EType>(Type));
+            pLightFacet->SetType     (static_cast<Dt::CSkyFacet::EType>(Type));
             pLightFacet->SetIntensity(Intensity);
 
             const char* pCurrentTexture = pLightFacet->GetPanorama()->GetFileName();

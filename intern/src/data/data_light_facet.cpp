@@ -526,7 +526,7 @@ namespace Dt
 
 namespace Dt
 {
-    CSkyboxFacet::CSkyboxFacet()
+    CSkyFacet::CSkyFacet()
         : m_Type      (Procedural)
         , m_HasHDR    (true)
         , m_pCubemap  (0)
@@ -538,77 +538,77 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    CSkyboxFacet::~CSkyboxFacet()
+    CSkyFacet::~CSkyFacet()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    void CSkyboxFacet::SetType(EType _Type)
+    void CSkyFacet::SetType(EType _Type)
     {
         m_Type = _Type;
     }
 
     // -----------------------------------------------------------------------------
 
-    CSkyboxFacet::EType CSkyboxFacet::GetType() const
+    CSkyFacet::EType CSkyFacet::GetType() const
     {
         return m_Type;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CSkyboxFacet::SetCubemap(Dt::CTextureCube* _rCubemap)
+    void CSkyFacet::SetCubemap(Dt::CTextureCube* _rCubemap)
     {
         m_pCubemap = _rCubemap;
     }
 
     // -----------------------------------------------------------------------------
 
-    Dt::CTextureCube* CSkyboxFacet::GetCubemap()
+    Dt::CTextureCube* CSkyFacet::GetCubemap()
     {
         return m_pCubemap;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CSkyboxFacet::SetPanorama(Dt::CTexture2D* _pTexture2D)
+    void CSkyFacet::SetPanorama(Dt::CTexture2D* _pTexture2D)
     {
         m_pPanoramaTexture = _pTexture2D;
     }
 
     // -----------------------------------------------------------------------------
 
-    Dt::CTexture2D* CSkyboxFacet::GetPanorama()
+    Dt::CTexture2D* CSkyFacet::GetPanorama()
     {
         return m_pPanoramaTexture;
     }
 
     // -----------------------------------------------------------------------------
 
-    bool CSkyboxFacet::GetHasCubemap() const
+    bool CSkyFacet::GetHasCubemap() const
     {
         return m_pCubemap != 0;
     }
 
     // -----------------------------------------------------------------------------
 
-    bool CSkyboxFacet::GetHasPanorama() const
+    bool CSkyFacet::GetHasPanorama() const
     {
         return m_pPanoramaTexture != 0;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CSkyboxFacet::SetIntensity(float _Intensity)
+    void CSkyFacet::SetIntensity(float _Intensity)
     {
         m_Intensity = _Intensity;
     }
 
     // -----------------------------------------------------------------------------
 
-    float CSkyboxFacet::GetIntensity()
+    float CSkyFacet::GetIntensity() const
     {
         return m_Intensity;
     }

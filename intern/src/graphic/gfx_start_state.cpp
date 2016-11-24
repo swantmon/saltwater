@@ -15,7 +15,7 @@
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_manager.h"
 #include "graphic/gfx_light_area_renderer.h"
-#include "graphic/gfx_light_probe_renderer.h"
+#include "graphic/gfx_light_probe_manager.h"
 #include "graphic/gfx_light_point_renderer.h"
 #include "graphic/gfx_light_sun_renderer.h"
 #include "graphic/gfx_main.h"
@@ -30,6 +30,7 @@
 #include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_shadow_renderer.h"
 #include "graphic/gfx_sampler_manager.h"
+#include "graphic/gfx_sky_manager.h"
 #include "graphic/gfx_sky_renderer.h"
 #include "graphic/gfx_state_manager.h"
 #include "graphic/gfx_target_set_manager.h"
@@ -73,10 +74,12 @@ namespace
         ShaderManager   ::OnStart();
         TargetSetManager::OnStart();
 
-        ActorManager    ::OnStart();
-        LightManager    ::OnStart();
-        MeshManager     ::OnStart();
-        MaterialManager ::OnStart();
+        ActorManager     ::OnStart();
+        LightManager     ::OnStart();
+        MeshManager      ::OnStart();
+        MaterialManager  ::OnStart();
+        SkyManager       ::OnStart();
+        LightProbeManager::OnStart();
 
         BASE_CONSOLE_STREAMINFO("Gfx> Finished starting manager.");
 
@@ -108,7 +111,6 @@ namespace
         LightAreaRenderer  ::OnStart();
         ReflectionRenderer ::OnStart();
         LightPointRenderer ::OnStart();
-        LightProbeRenderer ::OnStart();
         LightSunRenderer   ::OnStart();
         ShadowRenderer     ::OnStart();
         FogRenderer        ::OnStart();
@@ -130,7 +132,6 @@ namespace
         LightAreaRenderer  ::OnSetupShader();
         ReflectionRenderer ::OnSetupShader();
         LightPointRenderer ::OnSetupShader();
-        LightProbeRenderer ::OnSetupShader();
         LightSunRenderer   ::OnSetupShader();
         ShadowRenderer     ::OnSetupShader();
         FogRenderer        ::OnSetupShader();
@@ -151,7 +152,6 @@ namespace
         LightAreaRenderer  ::OnSetupKernels();
         ReflectionRenderer ::OnSetupKernels();
         LightPointRenderer ::OnSetupKernels();
-        LightProbeRenderer ::OnSetupKernels();
         LightSunRenderer   ::OnSetupKernels();
         ShadowRenderer     ::OnSetupKernels();
         FogRenderer        ::OnSetupKernels();
@@ -172,7 +172,6 @@ namespace
         LightAreaRenderer  ::OnSetupRenderTargets();
         ReflectionRenderer ::OnSetupRenderTargets();
         LightPointRenderer ::OnSetupRenderTargets();
-        LightProbeRenderer ::OnSetupRenderTargets();
         LightSunRenderer   ::OnSetupRenderTargets();
         ShadowRenderer     ::OnSetupRenderTargets();
         FogRenderer        ::OnSetupRenderTargets();
@@ -193,7 +192,6 @@ namespace
         LightAreaRenderer  ::OnSetupStates();
         ReflectionRenderer ::OnSetupStates();
         LightPointRenderer ::OnSetupStates();
-        LightProbeRenderer ::OnSetupStates();
         LightSunRenderer   ::OnSetupStates();
         ShadowRenderer     ::OnSetupStates();
         FogRenderer        ::OnSetupStates();
@@ -214,7 +212,6 @@ namespace
         LightAreaRenderer  ::OnSetupTextures();
         ReflectionRenderer ::OnSetupTextures();
         LightPointRenderer ::OnSetupTextures();
-        LightProbeRenderer ::OnSetupTextures();
         LightSunRenderer   ::OnSetupTextures();
         ShadowRenderer     ::OnSetupTextures();
         FogRenderer        ::OnSetupTextures();
@@ -235,7 +232,6 @@ namespace
         LightAreaRenderer  ::OnSetupBuffers();
         ReflectionRenderer ::OnSetupBuffers();
         LightPointRenderer ::OnSetupBuffers();
-        LightProbeRenderer ::OnSetupBuffers();
         LightSunRenderer   ::OnSetupBuffers();
         ShadowRenderer     ::OnSetupBuffers();
         FogRenderer        ::OnSetupBuffers();
@@ -256,7 +252,6 @@ namespace
         LightAreaRenderer  ::OnSetupResources();
         ReflectionRenderer ::OnSetupResources();
         LightPointRenderer ::OnSetupResources();
-        LightProbeRenderer ::OnSetupResources();
         LightSunRenderer   ::OnSetupResources();
         ShadowRenderer     ::OnSetupResources();
         FogRenderer        ::OnSetupResources();
@@ -277,7 +272,6 @@ namespace
         LightAreaRenderer  ::OnSetupModels();
         ReflectionRenderer ::OnSetupModels();
         LightPointRenderer ::OnSetupModels();
-        LightProbeRenderer ::OnSetupModels();
         LightSunRenderer   ::OnSetupModels();
         ShadowRenderer     ::OnSetupModels();
         FogRenderer        ::OnSetupModels();
@@ -298,7 +292,6 @@ namespace
         LightAreaRenderer  ::OnSetupEnd();
         ReflectionRenderer ::OnSetupEnd();
         LightPointRenderer ::OnSetupEnd();
-        LightProbeRenderer ::OnSetupEnd();
         LightSunRenderer   ::OnSetupEnd();
         ShadowRenderer     ::OnSetupEnd();
         FogRenderer        ::OnSetupEnd();

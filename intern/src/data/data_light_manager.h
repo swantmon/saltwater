@@ -22,7 +22,7 @@ namespace LightManager
     CPointLightFacet* CreatePointLight();
     CSunLightFacet* CreateSunLight();
     CGlobalProbeLightFacet* CreateGlobalProbeLight();
-    CSkyboxFacet* CreateSkybox();
+    CSkyFacet* CreateSky();
 
     void Update();
 } // namespace LightManager

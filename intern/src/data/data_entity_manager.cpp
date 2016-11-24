@@ -296,6 +296,14 @@ namespace
         m_DirtyEntities.push_back(&_rEntity);
 
         // -----------------------------------------------------------------------------
+        // Add entity to map
+        // -----------------------------------------------------------------------------
+        if ((_DirtyFlags & CEntity::DirtyAdd) != 0 && (_DirtyFlags & CEntity::DirtyRemove) == 0)
+        {
+            Map::AddEntity(_rEntity);
+        }
+
+        // -----------------------------------------------------------------------------
         // Send new dirty entity to all handler
         // -----------------------------------------------------------------------------
         CEntityDelegates::iterator CurrentDirtyEntityDelegate = m_EntityDelegates.begin();
@@ -401,11 +409,7 @@ namespace
         // -----------------------------------------------------------------------------
         DirtyFlags = _rEntity.GetDirtyFlags();
 
-        if ((DirtyFlags & CEntity::DirtyAdd) != 0 && (DirtyFlags & CEntity::DirtyRemove) == 0)
-        {
-            Map::AddEntity(_rEntity);
-        }
-        else if ((DirtyFlags & CEntity::DirtyRemove) != 0)
+        if ((DirtyFlags & CEntity::DirtyRemove) != 0)
         {
             Map::RemoveEntity(_rEntity);
 

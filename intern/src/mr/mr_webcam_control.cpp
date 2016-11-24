@@ -260,7 +260,7 @@ namespace MR
             // -----------------------------------------------------------------------------
             // Environment approximation
             // -----------------------------------------------------------------------------
-            ProcessEnvironmentApproximation();
+            // ProcessEnvironmentApproximation();
         }
     }
 

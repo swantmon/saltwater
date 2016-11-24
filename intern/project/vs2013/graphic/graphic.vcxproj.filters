@@ -163,15 +163,6 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_postfx_renderer.cpp">
       <Filter>engine\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_light_probe_renderer.cpp">
-      <Filter>engine\renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_light_manager.cpp">
-      <Filter>engine\map\lights</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_light_facet.cpp">
-      <Filter>engine\map\lights</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_material_manager.cpp">
       <Filter>engine\materials</Filter>
     </ClCompile>
@@ -211,6 +202,24 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_selection_renderer.cpp">
       <Filter>engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_sky_manager.cpp">
+      <Filter>engine\map\lights\sky</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_sky_facet.cpp">
+      <Filter>engine\map\lights\sky</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_light_probe_facet.cpp">
+      <Filter>engine\map\lights\light probe</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_light_probe_manager.cpp">
+      <Filter>engine\map\lights\light probe</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_light_facet.cpp">
+      <Filter>engine\map\lights\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_light_manager.cpp">
+      <Filter>engine\map\lights\legacy</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -418,15 +427,6 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_postfx_renderer.h">
       <Filter>engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_renderer.h">
-      <Filter>engine\renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_light_manager.h">
-      <Filter>engine\map\lights</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_light_facet.h">
-      <Filter>engine\map\lights</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_material_manager.h">
       <Filter>engine\materials</Filter>
     </ClInclude>
@@ -469,6 +469,24 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_selection_renderer.h">
       <Filter>engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_sky_manager.h">
+      <Filter>engine\map\lights\sky</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_sky_facet.h">
+      <Filter>engine\map\lights\sky</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_facet.h">
+      <Filter>engine\map\lights\light probe</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_manager.h">
+      <Filter>engine\map\lights\light probe</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_light_facet.h">
+      <Filter>engine\map\lights\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_light_manager.h">
+      <Filter>engine\map\lights\legacy</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -612,6 +630,15 @@
     </Filter>
     <Filter Include="interface\app">
       <UniqueIdentifier>{d2d6b2f8-bc87-4bab-a774-595fc150e167}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\map\lights\sky">
+      <UniqueIdentifier>{e368e615-e6ff-4088-91bb-c8f8c4579806}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\map\lights\light probe">
+      <UniqueIdentifier>{a475361d-5742-4a44-b188-1c76dd2ce874}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\map\lights\legacy">
+      <UniqueIdentifier>{59d2ea69-e5bd-4d75-aab2-af517bb02d7e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
