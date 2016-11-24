@@ -157,7 +157,7 @@ namespace
             Dt::SEntityDescriptor EntityDesc;
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
-            EntityDesc.m_EntityType     = Dt::SLightType::Skybox;
+            EntityDesc.m_EntityType     = Dt::SLightType::Sky;
             EntityDesc.m_FacetFlags     = 0;
 
             Dt::CEntity& rEnvironment = Dt::EntityManager::CreateEntity(EntityDesc);
@@ -260,17 +260,17 @@ namespace
             Dt::SEntityDescriptor EntityDesc;
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
-            EntityDesc.m_EntityType     = Dt::SLightType::GlobalProbe;
+            EntityDesc.m_EntityType     = Dt::SLightType::LightProbe;
             EntityDesc.m_FacetFlags     = 0;
 
             Dt::CEntity& rGlobalProbeLight = Dt::EntityManager::CreateEntity(EntityDesc);
 
             rGlobalProbeLight.SetName("Global light probe");
 
-            Dt::CGlobalProbeLightFacet* pGlobalProbeLightFacet = Dt::LightManager::CreateGlobalProbeLight();
+            Dt::CLightProbeFacet* pGlobalProbeLightFacet = Dt::LightManager::CreateLightProbe();
 
-            pGlobalProbeLightFacet->SetType(Dt::CGlobalProbeLightFacet::Sky);
-            pGlobalProbeLightFacet->SetQuality(Dt::CGlobalProbeLightFacet::PX512);
+            pGlobalProbeLightFacet->SetType(Dt::CLightProbeFacet::Sky);
+            pGlobalProbeLightFacet->SetQuality(Dt::CLightProbeFacet::PX512);
             pGlobalProbeLightFacet->SetIntensity(1.0f);
 
             rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pGlobalProbeLightFacet);

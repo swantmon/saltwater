@@ -23,8 +23,8 @@ namespace Dt
         {
             Point,
             Sun,
-            GlobalProbe,
-            Skybox,
+            LightProbe,
+            Sky,
             NumberOfTypes,
             UndefinedType = -1,
         };
@@ -195,7 +195,7 @@ namespace Dt
     // -----------------------------------------------------------------------------
     // Add generic light probe
     // -----------------------------------------------------------------------------
-    class CGlobalProbeLightFacet
+    class CLightProbeFacet
     {
     public:
 
@@ -244,16 +244,16 @@ namespace Dt
 
     public:
 
-        CGlobalProbeLightFacet();
-        ~CGlobalProbeLightFacet();
+        CLightProbeFacet();
+        ~CLightProbeFacet();
 
     private:
 
-        ERefreshMode      m_RefreshMode;        //< Refresh mode of the gobal light probe
-        EType             m_Type;               //< Type of the global probe (@see EType)
-        EQuality          m_Quality;            //< Quality of the global probe (@see EQuality)
-        Dt::CTextureCube* m_pCubemap;           //< Pointer to cubemap for custom global probe
-        float             m_Intensity;          //< Intensity of the global light probe
+        ERefreshMode      m_RefreshMode;        //< Refresh mode of the light probe
+        EType             m_Type;               //< Type of the probe (@see EType)
+        EQuality          m_Quality;            //< Quality of the probe (@see EQuality)
+        Dt::CTextureCube* m_pCubemap;           //< Pointer to cubemap for custom probe
+        float             m_Intensity;          //< Intensity of the light probe
     };
 } // namespace Dt
 
@@ -265,9 +265,9 @@ namespace Dt
 
         enum EType
         {
-            Procedural,      //< Skybox is a procedural generated HDR depending on settings
-            Panorama,        //< Skybox will be created from panorama image
-            Cubemap,         //< Skybox is generated from given cubemap
+            Procedural,      //< Sky is a procedural generated HDR depending on settings
+            Panorama,        //< Sky will be created from panorama image
+            Cubemap,         //< Sky is generated from given cubemap
         };
 
     public:

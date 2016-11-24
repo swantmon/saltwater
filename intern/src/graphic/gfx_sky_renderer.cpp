@@ -489,7 +489,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() == Dt::SLightType::Skybox)
+            if (rCurrentEntity.GetType() == Dt::SLightType::Sky)
             {
                 pSkyEntity = &rCurrentEntity;
             }

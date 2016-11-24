@@ -220,7 +220,7 @@ namespace
             Dt::SEntityDescriptor EntityDesc;
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
-            EntityDesc.m_EntityType     = Dt::SLightType::Skybox;
+            EntityDesc.m_EntityType     = Dt::SLightType::Sky;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
             Dt::CEntity& rEnvironment = Dt::EntityManager::CreateEntity(EntityDesc);
@@ -254,16 +254,16 @@ namespace
             Dt::SEntityDescriptor EntityDesc;
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
-            EntityDesc.m_EntityType     = Dt::SLightType::GlobalProbe;
+            EntityDesc.m_EntityType     = Dt::SLightType::LightProbe;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy;
 
             Dt::CEntity& rGlobalProbeLight = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            Dt::CGlobalProbeLightFacet* pGlobalProbeLightFacet = Dt::LightManager::CreateGlobalProbeLight();
+            Dt::CLightProbeFacet* pGlobalProbeLightFacet = Dt::LightManager::CreateLightProbe();
 
-            pGlobalProbeLightFacet->SetRefreshMode(Dt::CGlobalProbeLightFacet::Static);
-            pGlobalProbeLightFacet->SetType       (Dt::CGlobalProbeLightFacet::Sky);
-            pGlobalProbeLightFacet->SetQuality    (Dt::CGlobalProbeLightFacet::PX512);
+            pGlobalProbeLightFacet->SetRefreshMode(Dt::CLightProbeFacet::Static);
+            pGlobalProbeLightFacet->SetType       (Dt::CLightProbeFacet::Sky);
+            pGlobalProbeLightFacet->SetQuality    (Dt::CLightProbeFacet::PX512);
             pGlobalProbeLightFacet->SetIntensity  (1.0f);
 
             rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pGlobalProbeLightFacet);
@@ -351,7 +351,7 @@ namespace
 
         Dt::CSkyFacet* pLightFacet = static_cast<Dt::CSkyFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Skybox && pLightFacet != nullptr)
+        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Sky && pLightFacet != nullptr)
         {
             Edit::CMessage NewMessage;
 
@@ -386,9 +386,9 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CGlobalProbeLightFacet* pLightFacet = static_cast<Dt::CGlobalProbeLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CLightProbeFacet* pLightFacet = static_cast<Dt::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::GlobalProbe && pLightFacet != nullptr)
+        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::LightProbe && pLightFacet != nullptr)
         {
             Edit::CMessage NewMessage;
 
@@ -528,7 +528,7 @@ namespace
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
         Dt::CSkyFacet* pLightFacet = static_cast<Dt::CSkyFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Skybox && pLightFacet != nullptr)
+        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Sky && pLightFacet != nullptr)
         {
             // -----------------------------------------------------------------------------
             // Read values
@@ -602,9 +602,9 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CGlobalProbeLightFacet* pLightFacet = static_cast<Dt::CGlobalProbeLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CLightProbeFacet* pLightFacet = static_cast<Dt::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::GlobalProbe && pLightFacet != nullptr)
+        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::LightProbe && pLightFacet != nullptr)
         {
             // -----------------------------------------------------------------------------
             // Read values
@@ -620,11 +620,11 @@ namespace
             // -----------------------------------------------------------------------------
             // Set values
             // -----------------------------------------------------------------------------
-            pLightFacet->SetRefreshMode(static_cast<Dt::CGlobalProbeLightFacet::ERefreshMode>(RefreshMode));
+            pLightFacet->SetRefreshMode(static_cast<Dt::CLightProbeFacet::ERefreshMode>(RefreshMode));
 
-            pLightFacet->SetType(static_cast<Dt::CGlobalProbeLightFacet::EType>(Type));
+            pLightFacet->SetType(static_cast<Dt::CLightProbeFacet::EType>(Type));
 
-            pLightFacet->SetQuality(static_cast<Dt::CGlobalProbeLightFacet::EQuality>(Quality));
+            pLightFacet->SetQuality(static_cast<Dt::CLightProbeFacet::EQuality>(Quality));
 
             pLightFacet->SetIntensity(Intensity);
 

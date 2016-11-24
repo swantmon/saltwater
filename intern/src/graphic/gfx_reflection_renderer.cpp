@@ -71,7 +71,7 @@ namespace
 
         struct SGlobalProbeRenderJob
         {
-            Dt::CGlobalProbeLightFacet*  m_pDataGlobalProbe;
+            Dt::CLightProbeFacet*  m_pDataGlobalProbe;
             Gfx::CLightProbeFacet* m_pGraphicGlobalProbe;
         };
 
@@ -961,9 +961,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() == Dt::SLightType::GlobalProbe)
+            if (rCurrentEntity.GetType() == Dt::SLightType::LightProbe)
             {
-                Dt::CGlobalProbeLightFacet*  pDataGlobalProbeFacet = static_cast<Dt::CGlobalProbeLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+                Dt::CLightProbeFacet*  pDataGlobalProbeFacet = static_cast<Dt::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
                 Gfx::CLightProbeFacet* pGraphicGlobalProbeFacet = static_cast<Gfx::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
 
                 assert(pDataGlobalProbeFacet != 0 && pGraphicGlobalProbeFacet != 0);

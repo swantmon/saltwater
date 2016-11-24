@@ -427,7 +427,7 @@ namespace Dt
 
 namespace Dt
 {
-    CGlobalProbeLightFacet::CGlobalProbeLightFacet()
+    CLightProbeFacet::CLightProbeFacet()
         : m_RefreshMode(Static)
         , m_Type       (Sky)
         , m_Quality    (PX128)
@@ -439,56 +439,56 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    CGlobalProbeLightFacet::~CGlobalProbeLightFacet()
+    CLightProbeFacet::~CLightProbeFacet()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGlobalProbeLightFacet::SetRefreshMode(ERefreshMode _RefreshMode)
+    void CLightProbeFacet::SetRefreshMode(ERefreshMode _RefreshMode)
     {
         m_RefreshMode = _RefreshMode;
     }
 
     // -----------------------------------------------------------------------------
 
-    CGlobalProbeLightFacet::ERefreshMode CGlobalProbeLightFacet::GetRefreshMode()
+    CLightProbeFacet::ERefreshMode CLightProbeFacet::GetRefreshMode()
     {
         return m_RefreshMode;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGlobalProbeLightFacet::SetType(EType _Type)
+    void CLightProbeFacet::SetType(EType _Type)
     {
         m_Type = _Type;
     }
 
     // -----------------------------------------------------------------------------
 
-    CGlobalProbeLightFacet::EType CGlobalProbeLightFacet::GetType() const
+    CLightProbeFacet::EType CLightProbeFacet::GetType() const
     {
         return m_Type;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGlobalProbeLightFacet::SetQuality(EQuality _Quality)
+    void CLightProbeFacet::SetQuality(EQuality _Quality)
     {
         m_Quality = _Quality;
     }
 
     // -----------------------------------------------------------------------------
 
-    CGlobalProbeLightFacet::EQuality CGlobalProbeLightFacet::GetQuality() const
+    CLightProbeFacet::EQuality CLightProbeFacet::GetQuality() const
     {
         return m_Quality;
     }
 
     // -----------------------------------------------------------------------------
 
-    unsigned int CGlobalProbeLightFacet::GetQualityInPixel() const
+    unsigned int CLightProbeFacet::GetQualityInPixel() const
     {
         static unsigned int s_QualityInPixel[s_NumberOfQualities] = { 128, 256, 512, 1024, 2048 };
 
@@ -497,28 +497,28 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CGlobalProbeLightFacet::SetCubemap(Dt::CTextureCube* _pCubemap)
+    void CLightProbeFacet::SetCubemap(Dt::CTextureCube* _pCubemap)
     {
         m_pCubemap = _pCubemap;
     }
 
     // -----------------------------------------------------------------------------
 
-    Dt::CTextureCube* CGlobalProbeLightFacet::GetCubemap()
+    Dt::CTextureCube* CLightProbeFacet::GetCubemap()
     {
         return m_pCubemap;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGlobalProbeLightFacet::SetIntensity(float _Intensity)
+    void CLightProbeFacet::SetIntensity(float _Intensity)
     {
         m_Intensity = _Intensity;
     }
 
     // -----------------------------------------------------------------------------
 
-    float CGlobalProbeLightFacet::GetIntensity()
+    float CLightProbeFacet::GetIntensity()
     {
         return m_Intensity;
     }

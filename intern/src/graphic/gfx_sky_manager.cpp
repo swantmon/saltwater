@@ -440,7 +440,7 @@ namespace
         // Entity check
         // -----------------------------------------------------------------------------
         if (_pEntity->GetCategory() != Dt::SEntityCategory::Light) return;
-        if (_pEntity->GetType()     != Dt::SLightType::Skybox) return;
+        if (_pEntity->GetType()     != Dt::SLightType::Sky) return;
 
         // -----------------------------------------------------------------------------
         // Get data

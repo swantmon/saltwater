@@ -34,7 +34,7 @@ namespace
 
         CPointLightFacet* CreatePointLight();
 	    CSunLightFacet* CreateSunLight();
-	    CGlobalProbeLightFacet* CreateGlobalProbeLight();
+	    CLightProbeFacet* CreateLightProbe();
 	    CSkyFacet* CreateSky();
 
         void Update();
@@ -53,7 +53,7 @@ namespace
             friend class CDtLightManager;
         };
 
-        class CInternGlobalProbeLightFacet : public CGlobalProbeLightFacet
+        class CInternGlobalProbeLightFacet : public CLightProbeFacet
         {
         private:
             friend class CDtLightManager;
@@ -140,7 +140,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CGlobalProbeLightFacet* CDtLightManager::CreateGlobalProbeLight()
+    CLightProbeFacet* CDtLightManager::CreateLightProbe()
     {
         CInternGlobalProbeLightFacet& rDataGlobalProbeLightFacet = m_GlobalProbeLightFacets.Allocate();
 
@@ -203,9 +203,9 @@ namespace LightManager
 
     // -----------------------------------------------------------------------------
 
-    CGlobalProbeLightFacet* CreateGlobalProbeLight()
+    CLightProbeFacet* CreateLightProbe()
     {
-        return CDtLightManager::GetInstance().CreateGlobalProbeLight();
+        return CDtLightManager::GetInstance().CreateLightProbe();
     }
 
     // -----------------------------------------------------------------------------

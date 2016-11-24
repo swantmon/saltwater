@@ -436,9 +436,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() == Dt::SLightType::GlobalProbe)
+            if (rCurrentEntity.GetType() == Dt::SLightType::LightProbe)
             {
-                Dt::CGlobalProbeLightFacet*  pDataGlobalProbeFacet    = static_cast<Dt::CGlobalProbeLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+                Dt::CLightProbeFacet*  pDataGlobalProbeFacet    = static_cast<Dt::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
                 CInternLightProbeFacet*      pGraphicGlobalProbeFacet = static_cast<CInternLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
 
                 // -----------------------------------------------------------------------------
@@ -446,7 +446,7 @@ namespace
                 // TODO by tschwandt
                 // check dynamic mode on dirty entity and add entities to list -> performance
                 // -----------------------------------------------------------------------------
-                if (pDataGlobalProbeFacet->GetRefreshMode() == Dt::CGlobalProbeLightFacet::Dynamic)
+                if (pDataGlobalProbeFacet->GetRefreshMode() == Dt::CLightProbeFacet::Dynamic)
                 {
                     RenderEnvironment(*pGraphicGlobalProbeFacet);
 
@@ -471,12 +471,12 @@ namespace
         // Entity check
         // -----------------------------------------------------------------------------
         if (_pEntity->GetCategory() != Dt::SEntityCategory::Light) return;
-        if (_pEntity->GetType()     != Dt::SLightType::GlobalProbe) return;
+        if (_pEntity->GetType()     != Dt::SLightType::LightProbe) return;
 
         // -----------------------------------------------------------------------------
         // Get data
         // -----------------------------------------------------------------------------
-        Dt::CGlobalProbeLightFacet* pDataGlobalLightProbeFacet = static_cast<Dt::CGlobalProbeLightFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CLightProbeFacet* pDataGlobalLightProbeFacet = static_cast<Dt::CLightProbeFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Data));
 
         if (pDataGlobalLightProbeFacet == nullptr) return;
 
@@ -513,10 +513,10 @@ namespace
         }
         else if ((DirtyFlags & Dt::CEntity::DirtyDetail) != 0)
         {
-            Dt::CGlobalProbeLightFacet*   pDataGlobalProbeLightFacet;
+            Dt::CLightProbeFacet*   pDataGlobalProbeLightFacet;
             CInternLightProbeFacet*  pGraphicGlobalProbeLightFacet;
 
-            pDataGlobalProbeLightFacet    = static_cast<Dt::CGlobalProbeLightFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+            pDataGlobalProbeLightFacet    = static_cast<Dt::CLightProbeFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Data));
             pGraphicGlobalProbeLightFacet = static_cast<CInternLightProbeFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
 
             // TODO by tschwandt
@@ -670,7 +670,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() == Dt::SLightType::Skybox)
+            if (rCurrentEntity.GetType() == Dt::SLightType::Sky)
             {
                 pSkyEntity = &rCurrentEntity;
 
