@@ -403,6 +403,64 @@ namespace
         ConstanteBufferDesc.m_pClassKey     = 0;
         
         CBufferPtr CubemapGSCubemapBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+        // Creating VS matrix for world space to cube map:
+        // -> Orientation of every side is flipped
+        // -> Mirroring isn't necessary because it is done inside the cubemap
+        // -----------------------------------------------------------------------------
+        
+        LookDirection = EyePosition - Base::Float3::s_AxisX;
+        UpDirection   = Base::Float3::s_AxisY;
+        
+        DefaultGSValues.m_CubeViewMatrix[0].LookAt(EyePosition, LookDirection, UpDirection);
+        
+        // -----------------------------------------------------------------------------
+        
+        LookDirection = EyePosition + Base::Float3::s_AxisX;
+        UpDirection   = Base::Float3::s_AxisY;
+        
+        DefaultGSValues.m_CubeViewMatrix[1].LookAt(EyePosition, LookDirection, UpDirection);
+        
+        // -----------------------------------------------------------------------------
+        
+        LookDirection = EyePosition + Base::Float3::s_AxisY;
+        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisZ;
+        
+        DefaultGSValues.m_CubeViewMatrix[2].LookAt(EyePosition, LookDirection, UpDirection);
+        
+        // -----------------------------------------------------------------------------
+        
+        LookDirection = EyePosition - Base::Float3::s_AxisY;
+        UpDirection   = Base::Float3::s_AxisZ;
+        
+        DefaultGSValues.m_CubeViewMatrix[3].LookAt(EyePosition, LookDirection, UpDirection);
+        
+        // -----------------------------------------------------------------------------
+        
+        LookDirection = EyePosition + Base::Float3::s_AxisZ;
+        UpDirection   = Base::Float3::s_AxisY;
+        
+        DefaultGSValues.m_CubeViewMatrix[4].LookAt(EyePosition, LookDirection, UpDirection);
+        
+        // -----------------------------------------------------------------------------
+        
+        LookDirection = EyePosition - Base::Float3::s_AxisZ;
+        UpDirection   = Base::Float3::s_AxisY;
+        
+        DefaultGSValues.m_CubeViewMatrix[5].LookAt(EyePosition, LookDirection, UpDirection);
+        
+        // -----------------------------------------------------------------------------
+        
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SCubemapBufferGS);
+        ConstanteBufferDesc.m_pBytes        = &DefaultGSValues;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        CBufferPtr CubemapGSWorldBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
                
         // -----------------------------------------------------------------------------
 
@@ -439,7 +497,7 @@ namespace
         m_SkyboxFromCubemap.m_PSBufferSetPtr = BufferManager::CreateBufferSet(CubemapPSBuffer);
 
         m_SkyboxFromTexture.m_VSBufferSetPtr = BufferManager::CreateBufferSet(SkyboxFromTextureVSBufferPtr);
-        m_SkyboxFromTexture.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSCubemapBuffer);
+        m_SkyboxFromTexture.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSWorldBuffer);
         m_SkyboxFromTexture.m_PSBufferSetPtr = BufferManager::CreateBufferSet(CubemapPSBuffer);
 
         // -----------------------------------------------------------------------------
@@ -1071,9 +1129,14 @@ namespace
         //         pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetRotationX(Base::DegreesToRadians(-90.0f));
 
         pViewBuffer->m_ModelMatrix  = Base::Float4x4::s_Identity;
-        pViewBuffer->m_ModelMatrix *= ViewManager::GetMainCamera()->GetView()->GetRotationMatrix();
-        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(0.0f, 1.0f, 0.0f);
-        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetRotationX(Base::DegreesToRadians(-90.0f));
+        
+        pViewBuffer->m_ModelMatrix *= ViewManager::GetMainCamera()->GetView()->GetRotationMatrix().GetTransposed();
+       
+        //pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetRotationX(Base::DegreesToRadians(45.0f));
+        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(0.0f, 0.0f, -1.0f);
+        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(-0.5f, -0.5f, 0.0f);
+        //pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetRotationY(Base::DegreesToRadians(45.0f));
+       
 
         BufferManager::UnmapConstantBuffer(VSBufferSetPtr->GetBuffer(0));
 
