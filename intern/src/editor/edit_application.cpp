@@ -24,6 +24,7 @@
 #include "editor/edit_play_state.h"
 #include "editor/edit_plugin_helper.h"
 #include "editor/edit_start_state.h"
+#include "editor/edit_texture_helper.h"
 #include "editor/edit_unload_map_state.h"
 
 #include "editor_gui/edit_gui.h"
@@ -173,6 +174,7 @@ namespace
         Edit::Helper::Map     ::OnStart();
         Edit::Helper::Material::OnStart();
         Edit::Helper::Plugin  ::OnStart();
+        Edit::Helper::Texture ::OnStart();
     }
     
     // -----------------------------------------------------------------------------
@@ -195,6 +197,7 @@ namespace
         Edit::Helper::Map     ::OnExit();
         Edit::Helper::Material::OnExit();
         Edit::Helper::Plugin  ::OnExit();
+        Edit::Helper::Texture ::OnExit();
 
         // -----------------------------------------------------------------------------
         // At the end we have to clean our context and windows.
