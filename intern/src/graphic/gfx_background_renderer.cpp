@@ -18,6 +18,7 @@
 #include "data/data_model_manager.h"
 
 #include "graphic/gfx_actor_facet.h"
+#include "graphic/gfx_background_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_histogram_renderer.h"
@@ -27,7 +28,6 @@
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_sky_facet.h"
-#include "graphic/gfx_sky_renderer.h"
 #include "graphic/gfx_state_manager.h"
 #include "graphic/gfx_sun_facet.h"
 #include "graphic/gfx_sun_manager.h"
@@ -43,14 +43,14 @@ using namespace Gfx;
 
 namespace
 {
-    class CGfxSkyRenderer : private Base::CUncopyable
+    class CGfxBackgroundRenderer : private Base::CUncopyable
     {
-        BASE_SINGLETON_FUNC(CGfxSkyRenderer)
+        BASE_SINGLETON_FUNC(CGfxBackgroundRenderer)
         
     public:
 
-        CGfxSkyRenderer();
-        ~CGfxSkyRenderer();
+        CGfxBackgroundRenderer();
+        ~CGfxBackgroundRenderer();
         
     public:
 
@@ -144,7 +144,7 @@ namespace
 
 namespace
 {
-    CGfxSkyRenderer::CGfxSkyRenderer()
+    CGfxBackgroundRenderer::CGfxBackgroundRenderer()
         : m_BackgroundFromSkybox       ()
         , m_BackgroundFromTexture      ()
         , m_CameraRenderJobs           ()
@@ -153,19 +153,19 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    CGfxSkyRenderer::~CGfxSkyRenderer()
+    CGfxBackgroundRenderer::~CGfxBackgroundRenderer()
     {
     }
     
     // -----------------------------------------------------------------------------
     
-    void CGfxSkyRenderer::OnStart()
+    void CGfxBackgroundRenderer::OnStart()
     {
     }
     
     // -----------------------------------------------------------------------------
     
-    void CGfxSkyRenderer::OnExit()
+    void CGfxBackgroundRenderer::OnExit()
     {
         m_BackgroundFromSkybox.m_RenderContextPtr = 0;
         m_BackgroundFromSkybox.m_VSPtr            = 0;
@@ -196,7 +196,7 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    void CGfxSkyRenderer::OnSetupShader()
+    void CGfxBackgroundRenderer::OnSetupShader()
     {
         CShaderPtr SkytextureVSPtr = ShaderManager::CompileVS("vs_screen_p_quad.glsl", "main");;
 
@@ -239,21 +239,21 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    void CGfxSkyRenderer::OnSetupKernels()
+    void CGfxBackgroundRenderer::OnSetupKernels()
     {
         
     }
     
     // -----------------------------------------------------------------------------
     
-    void CGfxSkyRenderer::OnSetupRenderTargets()
+    void CGfxBackgroundRenderer::OnSetupRenderTargets()
     {
 
     }
     
     // -----------------------------------------------------------------------------
     
-    void CGfxSkyRenderer::OnSetupStates()
+    void CGfxBackgroundRenderer::OnSetupStates()
     {
         CCameraPtr          CameraPtr          = ViewManager     ::GetMainCamera();
         CCameraPtr          QuadCameraPtr      = ViewManager     ::GetFullQuadCamera();
@@ -284,7 +284,7 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    void CGfxSkyRenderer::OnSetupTextures()
+    void CGfxBackgroundRenderer::OnSetupTextures()
     {
         CTextureSetPtr DepthTextureSetPtr = TextureManager::CreateTextureSet(TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
 
@@ -295,7 +295,7 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    void CGfxSkyRenderer::OnSetupBuffers()
+    void CGfxBackgroundRenderer::OnSetupBuffers()
     {
         SBufferDescriptor ConstanteBufferDesc;
         
@@ -370,14 +370,14 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    void CGfxSkyRenderer::OnSetupResources()
+    void CGfxBackgroundRenderer::OnSetupResources()
     {
         
     }
     
     // -----------------------------------------------------------------------------
     
-    void CGfxSkyRenderer::OnSetupModels()
+    void CGfxBackgroundRenderer::OnSetupModels()
     {
         CMeshPtr SkyboxBoxPtr = MeshManager::CreateBox(2.0f, 2.0f, 2.0f);
                
@@ -394,41 +394,41 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    void CGfxSkyRenderer::OnSetupEnd()
+    void CGfxBackgroundRenderer::OnSetupEnd()
     {
     }
     
     // -----------------------------------------------------------------------------
     
-    void CGfxSkyRenderer::OnReload()
-    {
-        
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGfxSkyRenderer::OnNewMap()
+    void CGfxBackgroundRenderer::OnReload()
     {
         
     }
     
     // -----------------------------------------------------------------------------
     
-    void CGfxSkyRenderer::OnUnloadMap()
+    void CGfxBackgroundRenderer::OnNewMap()
     {
         
     }
     
     // -----------------------------------------------------------------------------
     
-    void CGfxSkyRenderer::Update()
+    void CGfxBackgroundRenderer::OnUnloadMap()
+    {
+        
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CGfxBackgroundRenderer::Update()
     {
         BuildRenderJobs();
     }
     
     // -----------------------------------------------------------------------------
     
-    void CGfxSkyRenderer::Render()
+    void CGfxBackgroundRenderer::Render()
     {
         bool HasMainCamera = m_CameraRenderJobs.size() != 0;
 
@@ -457,7 +457,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSkyRenderer::RenderBackgroundFromSkybox()
+    void CGfxBackgroundRenderer::RenderBackgroundFromSkybox()
     {
         CRenderContextPtr RenderContextPtr = m_BackgroundFromSkybox.m_RenderContextPtr;
         CShaderPtr        VSPtr            = m_BackgroundFromSkybox.m_VSPtr;
@@ -597,7 +597,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSkyRenderer::RenderBackgroundFromTexture()
+    void CGfxBackgroundRenderer::RenderBackgroundFromTexture()
     {
         SCameraRenderJob& rRenderJob = m_CameraRenderJobs[0];
 
@@ -698,7 +698,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSkyRenderer::BuildRenderJobs()
+    void CGfxBackgroundRenderer::BuildRenderJobs()
     {
         // -----------------------------------------------------------------------------
         // Clear current render jobs
@@ -747,116 +747,116 @@ namespace
 
 namespace Gfx
 {
-namespace SkyRenderer
+namespace BackgroundRenderer
 {
     void OnStart()
     {
-        CGfxSkyRenderer::GetInstance().OnStart();
+        CGfxBackgroundRenderer::GetInstance().OnStart();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnExit()
     {
-        CGfxSkyRenderer::GetInstance().OnExit();
+        CGfxBackgroundRenderer::GetInstance().OnExit();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnSetupShader()
     {
-        CGfxSkyRenderer::GetInstance().OnSetupShader();
+        CGfxBackgroundRenderer::GetInstance().OnSetupShader();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnSetupKernels()
     {
-        CGfxSkyRenderer::GetInstance().OnSetupKernels();
+        CGfxBackgroundRenderer::GetInstance().OnSetupKernels();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnSetupRenderTargets()
     {
-        CGfxSkyRenderer::GetInstance().OnSetupRenderTargets();
+        CGfxBackgroundRenderer::GetInstance().OnSetupRenderTargets();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnSetupStates()
     {
-        CGfxSkyRenderer::GetInstance().OnSetupStates();
+        CGfxBackgroundRenderer::GetInstance().OnSetupStates();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnSetupTextures()
     {
-        CGfxSkyRenderer::GetInstance().OnSetupTextures();
+        CGfxBackgroundRenderer::GetInstance().OnSetupTextures();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnSetupBuffers()
     {
-        CGfxSkyRenderer::GetInstance().OnSetupBuffers();
+        CGfxBackgroundRenderer::GetInstance().OnSetupBuffers();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnSetupResources()
     {
-        CGfxSkyRenderer::GetInstance().OnSetupResources();
+        CGfxBackgroundRenderer::GetInstance().OnSetupResources();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnSetupModels()
     {
-        CGfxSkyRenderer::GetInstance().OnSetupModels();
+        CGfxBackgroundRenderer::GetInstance().OnSetupModels();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnSetupEnd()
     {
-        CGfxSkyRenderer::GetInstance().OnSetupEnd();
+        CGfxBackgroundRenderer::GetInstance().OnSetupEnd();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnReload()
     {
-        CGfxSkyRenderer::GetInstance().OnReload();
+        CGfxBackgroundRenderer::GetInstance().OnReload();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnNewMap()
     {
-        CGfxSkyRenderer::GetInstance().OnNewMap();
+        CGfxBackgroundRenderer::GetInstance().OnNewMap();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnUnloadMap()
     {
-        CGfxSkyRenderer::GetInstance().OnUnloadMap();
+        CGfxBackgroundRenderer::GetInstance().OnUnloadMap();
     }
     
     // -----------------------------------------------------------------------------
     
     void Update()
     {
-        CGfxSkyRenderer::GetInstance().Update();
+        CGfxBackgroundRenderer::GetInstance().Update();
     }
     
     // -----------------------------------------------------------------------------
     
     void Render()
     {
-        CGfxSkyRenderer::GetInstance().Render();
+        CGfxBackgroundRenderer::GetInstance().Render();
     }
-} // namespace SkyRenderer
+} // namespace BackgroundRenderer
 } // namespace Gfx

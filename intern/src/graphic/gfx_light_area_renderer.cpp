@@ -10,12 +10,11 @@
 #include "data/data_light_facet.h"
 #include "data/data_map.h"
 
-#include "graphic/gfx_light_area_renderer.h"
-#include "graphic/gfx_sky_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
+#include "graphic/gfx_light_area_renderer.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh.h"
 #include "graphic/gfx_mesh_manager.h"

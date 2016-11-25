@@ -6,6 +6,7 @@
 
 #include "graphic/gfx_actor_manager.h"
 #include "graphic/gfx_actor_renderer.h"
+#include "graphic/gfx_background_renderer.h"
 #include "graphic/gfx_edit_state.h"
 #include "graphic/gfx_fog_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
@@ -24,7 +25,6 @@
 #include "graphic/gfx_selection_renderer.h"
 #include "graphic/gfx_shadow_renderer.h"
 #include "graphic/gfx_sky_manager.h"
-#include "graphic/gfx_sky_renderer.h"
 #include "graphic/gfx_sun_manager.h"
 #include "graphic/gfx_tonemapping_renderer.h"
 
@@ -91,7 +91,7 @@ namespace
         LightPointRenderer ::Update();   
         LightSunRenderer   ::Update();   
         ReflectionRenderer ::Update();    
-        SkyRenderer        ::Update();
+        BackgroundRenderer ::Update();
         HistogramRenderer  ::Update(); 
         TonemappingRenderer::Update();
         PostFXHDR          ::Update();
@@ -117,7 +117,7 @@ namespace
         LightSunRenderer  ::Render();
         LightAreaRenderer ::Render();
         LightPointRenderer::Render();
-        SkyRenderer       ::Render();
+        BackgroundRenderer::Render();
         ReflectionRenderer::Render();
         FogRenderer       ::Render();
 

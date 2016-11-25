@@ -1,18 +1,9 @@
-//
-//  gfx_sky_renderer.h
-//  graphic
-//
-//  Created by Tobias Schwandt on 02/03/15.
-//  Copyright (c) 2015 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
 
-#include "graphic/gfx_texture_set.h"
-
 namespace Gfx
 {
-namespace SkyRenderer
+namespace BackgroundRenderer
 {
     void OnStart();
     void OnExit();
@@ -33,5 +24,5 @@ namespace SkyRenderer
     
     void Update();
     void Render();
-} // namespace SkyRenderer
+} // namespace BackgroundRenderer
 } // namespace Gfx

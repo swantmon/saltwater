@@ -8,32 +8,32 @@
 #include "graphic/gfx_actor_manager.h"
 #include "graphic/gfx_actor_renderer.h"
 #include "graphic/gfx_ar_renderer.h"
+#include "graphic/gfx_background_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_fog_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_area_renderer.h"
-#include "graphic/gfx_light_probe_manager.h"
 #include "graphic/gfx_light_point_renderer.h"
+#include "graphic/gfx_light_probe_manager.h"
 #include "graphic/gfx_light_sun_renderer.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_material_manager.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_particle_renderer.h"
 #include "graphic/gfx_point_light_manager.h"
-#include "graphic/gfx_postfx_renderer.h"
 #include "graphic/gfx_postfx_hdr_renderer.h"
+#include "graphic/gfx_postfx_renderer.h"
 #include "graphic/gfx_reflection_renderer.h"
+#include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_selection_renderer.h"
-#include "graphic/gfx_start_state.h"
 #include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_shadow_renderer.h"
-#include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_sky_manager.h"
-#include "graphic/gfx_sky_renderer.h"
-#include "graphic/gfx_sun_manager.h"
+#include "graphic/gfx_start_state.h"
 #include "graphic/gfx_state_manager.h"
+#include "graphic/gfx_sun_manager.h"
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_tonemapping_renderer.h"
@@ -109,7 +109,7 @@ namespace
         BASE_CONSOLE_STREAMINFO("Gfx> Start renderer...");
 
         HistogramRenderer  ::OnStart();
-        SkyRenderer        ::OnStart();
+        BackgroundRenderer ::OnStart();
         LightAreaRenderer  ::OnStart();
         ReflectionRenderer ::OnStart();
         LightPointRenderer ::OnStart();
@@ -130,7 +130,7 @@ namespace
         // Setup the shader of all renderer
         // -----------------------------------------------------------------------------
         HistogramRenderer  ::OnSetupShader();
-        SkyRenderer        ::OnSetupShader();
+        BackgroundRenderer ::OnSetupShader();
         LightAreaRenderer  ::OnSetupShader();
         ReflectionRenderer ::OnSetupShader();
         LightPointRenderer ::OnSetupShader();
@@ -150,7 +150,7 @@ namespace
         // Setup the kernels of all renderer
         // -----------------------------------------------------------------------------
         HistogramRenderer  ::OnSetupKernels();
-        SkyRenderer        ::OnSetupKernels();
+        BackgroundRenderer ::OnSetupKernels();
         LightAreaRenderer  ::OnSetupKernels();
         ReflectionRenderer ::OnSetupKernels();
         LightPointRenderer ::OnSetupKernels();
@@ -170,7 +170,7 @@ namespace
         // Setup the render targets of all renderer
         // -----------------------------------------------------------------------------
         HistogramRenderer  ::OnSetupRenderTargets();
-        SkyRenderer        ::OnSetupRenderTargets();
+        BackgroundRenderer ::OnSetupRenderTargets();
         LightAreaRenderer  ::OnSetupRenderTargets();
         ReflectionRenderer ::OnSetupRenderTargets();
         LightPointRenderer ::OnSetupRenderTargets();
@@ -190,7 +190,7 @@ namespace
         // Setup the states of all renderer
         // -----------------------------------------------------------------------------
         HistogramRenderer  ::OnSetupStates();
-        SkyRenderer        ::OnSetupStates();
+        BackgroundRenderer ::OnSetupStates();
         LightAreaRenderer  ::OnSetupStates();
         ReflectionRenderer ::OnSetupStates();
         LightPointRenderer ::OnSetupStates();
@@ -210,7 +210,7 @@ namespace
         // Setup the textures of all renderer
         // -----------------------------------------------------------------------------
         HistogramRenderer  ::OnSetupTextures();
-        SkyRenderer        ::OnSetupTextures();
+        BackgroundRenderer ::OnSetupTextures();
         LightAreaRenderer  ::OnSetupTextures();
         ReflectionRenderer ::OnSetupTextures();
         LightPointRenderer ::OnSetupTextures();
@@ -230,7 +230,7 @@ namespace
         // Setup the buffers of all renderer
         // -----------------------------------------------------------------------------
         HistogramRenderer  ::OnSetupBuffers();
-        SkyRenderer        ::OnSetupBuffers();
+        BackgroundRenderer ::OnSetupBuffers();
         LightAreaRenderer  ::OnSetupBuffers();
         ReflectionRenderer ::OnSetupBuffers();
         LightPointRenderer ::OnSetupBuffers();
@@ -250,7 +250,7 @@ namespace
         // Setup the resources of all renderer
         // -----------------------------------------------------------------------------
         HistogramRenderer  ::OnSetupResources();
-        SkyRenderer        ::OnSetupResources();
+        BackgroundRenderer ::OnSetupResources();
         LightAreaRenderer  ::OnSetupResources();
         ReflectionRenderer ::OnSetupResources();
         LightPointRenderer ::OnSetupResources();
@@ -270,7 +270,7 @@ namespace
         // Setup the models of all renderer
         // -----------------------------------------------------------------------------
         HistogramRenderer  ::OnSetupModels();
-        SkyRenderer        ::OnSetupModels();
+        BackgroundRenderer ::OnSetupModels();
         LightAreaRenderer  ::OnSetupModels();
         ReflectionRenderer ::OnSetupModels();
         LightPointRenderer ::OnSetupModels();
@@ -290,7 +290,7 @@ namespace
         // Setup ends with a last call
         // -----------------------------------------------------------------------------
         HistogramRenderer  ::OnSetupEnd();
-        SkyRenderer        ::OnSetupEnd();
+        BackgroundRenderer ::OnSetupEnd();
         LightAreaRenderer  ::OnSetupEnd();
         ReflectionRenderer ::OnSetupEnd();
         LightPointRenderer ::OnSetupEnd();

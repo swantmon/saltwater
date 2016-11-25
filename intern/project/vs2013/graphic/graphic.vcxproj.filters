@@ -142,9 +142,6 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_shadow_renderer.cpp">
       <Filter>engine\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_sky_renderer.cpp">
-      <Filter>engine\renderer</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_tonemapping_renderer.cpp">
       <Filter>engine\renderer</Filter>
     </ClCompile>
@@ -226,6 +223,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_sun_manager.cpp">
       <Filter>engine\map\lights\sun</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_background_renderer.cpp">
+      <Filter>engine\renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -412,9 +412,6 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_shadow_renderer.h">
       <Filter>engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_sky_renderer.h">
-      <Filter>engine\renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_tonemapping_renderer.h">
       <Filter>engine\renderer</Filter>
     </ClInclude>
@@ -499,6 +496,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_sun_manager.h">
       <Filter>engine\map\lights\sun</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_background_renderer.h">
+      <Filter>engine\renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -8,31 +8,31 @@
 #include "graphic/gfx_actor_manager.h"
 #include "graphic/gfx_actor_renderer.h"
 #include "graphic/gfx_ar_renderer.h"
+#include "graphic/gfx_background_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
-#include "graphic/gfx_histogram_renderer.h"
-#include "graphic/gfx_fog_renderer.h"
-#include "graphic/gfx_light_area_renderer.h"
-#include "graphic/gfx_light_probe_manager.h"
-#include "graphic/gfx_light_point_renderer.h"
-#include "graphic/gfx_light_sun_renderer.h"
 #include "graphic/gfx_exit_state.h"
+#include "graphic/gfx_fog_renderer.h"
+#include "graphic/gfx_histogram_renderer.h"
+#include "graphic/gfx_light_area_renderer.h"
+#include "graphic/gfx_light_point_renderer.h"
+#include "graphic/gfx_light_probe_manager.h"
+#include "graphic/gfx_light_sun_renderer.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_material_manager.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_particle_renderer.h"
 #include "graphic/gfx_point_light_manager.h"
-#include "graphic/gfx_postfx_renderer.h"
 #include "graphic/gfx_postfx_hdr_renderer.h"
+#include "graphic/gfx_postfx_renderer.h"
 #include "graphic/gfx_reflection_renderer.h"
 #include "graphic/gfx_sampler_manager.h"
-#include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_selection_renderer.h"
-#include "graphic/gfx_state_manager.h"
+#include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_shadow_renderer.h"
 #include "graphic/gfx_sky_manager.h"
-#include "graphic/gfx_sky_renderer.h"
+#include "graphic/gfx_state_manager.h"
 #include "graphic/gfx_sun_manager.h"
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_manager.h"
@@ -65,7 +65,7 @@ namespace
         // -----------------------------------------------------------------------------
         BASE_CONSOLE_STREAMINFO("Gfx> Exit renderer...");
 
-        SkyRenderer        ::OnExit();
+        BackgroundRenderer ::OnExit();
         DebugRenderer      ::OnExit();
         SelectionRenderer  ::OnExit();
         LightAreaRenderer  ::OnExit();

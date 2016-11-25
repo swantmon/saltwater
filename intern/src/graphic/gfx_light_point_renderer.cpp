@@ -11,7 +11,6 @@
 #include "data/data_map.h"
 #include "data/data_transformation_facet.h"
 
-#include "graphic/gfx_sky_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
@@ -20,8 +19,8 @@
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh.h"
 #include "graphic/gfx_mesh_manager.h"
-#include "graphic/gfx_point_light_facet.h"
 #include "graphic/gfx_performance.h"
+#include "graphic/gfx_point_light_facet.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_state_manager.h"

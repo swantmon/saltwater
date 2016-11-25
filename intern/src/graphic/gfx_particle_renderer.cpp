@@ -9,7 +9,6 @@
 #include "data/data_entity.h"
 #include "data/data_map.h"
 
-#include "graphic/gfx_sky_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_particle_renderer.h"
 #include "graphic/gfx_context_manager.h"
