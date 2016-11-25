@@ -843,26 +843,31 @@ namespace
             Position[1] =  rMarkerInfo.m_TranslationToCamera[1];
             Position[2] =  rMarkerInfo.m_TranslationToCamera[2];
 
-            Position = RotationMatrix.GetInverted() * Position;
+            Position = RotationMatrix.GetTransposed() * Position;
 
             // -----------------------------------------------------------------------------
             // Marker Found: Now search for entity with AR facet
             // -----------------------------------------------------------------------------
             Dt::CEntity* pCameraEntity = m_pControllerPlugin->GetCameraEntity();
 
-            assert(pCameraEntity != nullptr);
+            if (pCameraEntity != nullptr)
+            {
+                pCameraEntity->SetWorldPosition(Position);
 
-            pCameraEntity->SetWorldPosition(Position);
+                Dt::CTransformationFacet* pTransformationFacet = pCameraEntity->GetTransformationFacet();
 
-            Dt::CTransformationFacet* pTransformationFacet = pCameraEntity->GetTransformationFacet();
+                assert(pTransformationFacet != nullptr);
 
-            assert(pTransformationFacet != nullptr);
+                Base::Float3 Rotation;
 
-            Base::Float3 Rotation;
+                RotationMatrix.GetRotation(Rotation);
 
-            RotationMatrix.GetRotation(Rotation);
-
-            pTransformationFacet->SetRotation(Rotation * -1.0f);
+                pTransformationFacet->SetRotation(Rotation * -1.0f);
+            }
+            else
+            {
+                BASE_CONSOLE_STREAMWARNING("Origin marker found but no camera entity is set!");
+            }
 
             // -----------------------------------------------------------------------------
             // Using only the first found marker as camera entity
