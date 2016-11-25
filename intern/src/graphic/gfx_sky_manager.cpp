@@ -57,7 +57,6 @@ namespace
             CShaderPtr        m_VSPtr;
             CShaderPtr        m_GSPtr;
             CShaderPtr        m_PSPtr;
-            CBufferSetPtr     m_VSBufferSetPtr;
             CBufferSetPtr     m_GSBufferSetPtr;
             CBufferSetPtr     m_PSBufferSetPtr;
             CInputLayoutPtr   m_InputLayoutPtr;
@@ -166,7 +165,6 @@ namespace
         m_SkyboxFromPanorama.m_VSPtr          = 0;
         m_SkyboxFromPanorama.m_GSPtr          = 0;
         m_SkyboxFromPanorama.m_PSPtr          = 0;
-        m_SkyboxFromPanorama.m_VSBufferSetPtr = 0;
         m_SkyboxFromPanorama.m_GSBufferSetPtr = 0;
         m_SkyboxFromPanorama.m_PSBufferSetPtr = 0;
         m_SkyboxFromPanorama.m_InputLayoutPtr = 0;
@@ -177,7 +175,6 @@ namespace
         m_SkyboxFromCubemap.m_VSPtr          = 0;
         m_SkyboxFromCubemap.m_GSPtr          = 0;
         m_SkyboxFromCubemap.m_PSPtr          = 0;
-        m_SkyboxFromCubemap.m_VSBufferSetPtr = 0;
         m_SkyboxFromCubemap.m_GSBufferSetPtr = 0;
         m_SkyboxFromCubemap.m_PSBufferSetPtr = 0;
         m_SkyboxFromCubemap.m_InputLayoutPtr = 0;
@@ -241,7 +238,11 @@ namespace
         //  1. OpenGL cubemaps has an left handed coord system
         //  2. Texcoords starts in the upper left corner (normally in the lower left 
         //     corner)
-        // -> y-Axis is mirrored
+        // -----------------------------------------------------------------------------
+
+        // -----------------------------------------------------------------------------
+        // Creating VS matrix for spherical image to cube map:
+        // -> y-Axis is mirrored (normally "z" but we will rotate cube later) 
         // -> Orientation of every side is flipped
         // -> At the end we rotate the matrix because the spherical image is y-up
         // -----------------------------------------------------------------------------
@@ -302,7 +303,67 @@ namespace
         ConstanteBufferDesc.m_pBytes        = &DefaultGSValues;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr CubemapGSBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        CBufferPtr CubemapGSSphericalBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+
+        // -----------------------------------------------------------------------------
+        // Creating VS matrix for cube map to cube map:
+        // -> Orientation of every side is flipped
+        // -> Mirroring isn't necessary because it is done inside the cubemap
+        // -----------------------------------------------------------------------------
+        
+        LookDirection = EyePosition - Base::Float3::s_AxisX;
+        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        
+        DefaultGSValues.m_CubeViewMatrix[0].LookAt(EyePosition, LookDirection, UpDirection);
+        
+        // -----------------------------------------------------------------------------
+        
+        LookDirection = EyePosition + Base::Float3::s_AxisX;
+        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        
+        DefaultGSValues.m_CubeViewMatrix[1].LookAt(EyePosition, LookDirection, UpDirection);
+        
+        // -----------------------------------------------------------------------------
+        
+        LookDirection = EyePosition - Base::Float3::s_AxisY;
+        UpDirection   = Base::Float3::s_AxisZ;
+        
+        DefaultGSValues.m_CubeViewMatrix[2].LookAt(EyePosition, LookDirection, UpDirection);
+        
+        // -----------------------------------------------------------------------------
+        
+        LookDirection = EyePosition + Base::Float3::s_AxisY;
+        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisZ;
+        
+        DefaultGSValues.m_CubeViewMatrix[3].LookAt(EyePosition, LookDirection, UpDirection);
+        
+        // -----------------------------------------------------------------------------
+        
+        LookDirection = EyePosition - Base::Float3::s_AxisZ;
+        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        
+        DefaultGSValues.m_CubeViewMatrix[4].LookAt(EyePosition, LookDirection, UpDirection);
+        
+        // -----------------------------------------------------------------------------
+        
+        LookDirection = EyePosition + Base::Float3::s_AxisZ;
+        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        
+        DefaultGSValues.m_CubeViewMatrix[5].LookAt(EyePosition, LookDirection, UpDirection);
+        
+        // -----------------------------------------------------------------------------
+        
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SCubemapBufferGS);
+        ConstanteBufferDesc.m_pBytes        = &DefaultGSValues;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        CBufferPtr CubemapGSCubemapBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
                
         // -----------------------------------------------------------------------------
 
@@ -318,16 +379,11 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        CBufferSetPtr CubemapGSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSBuffer);
-        CBufferSetPtr CubemapPSBufferSetPtr = BufferManager::CreateBufferSet(CubemapPSBuffer);
+        m_SkyboxFromPanorama.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSSphericalBuffer);
+        m_SkyboxFromPanorama.m_PSBufferSetPtr = BufferManager::CreateBufferSet(CubemapPSBuffer);
 
-        m_SkyboxFromPanorama.m_VSBufferSetPtr = 0;
-        m_SkyboxFromPanorama.m_GSBufferSetPtr = CubemapGSBufferSetPtr;
-        m_SkyboxFromPanorama.m_PSBufferSetPtr = CubemapPSBufferSetPtr;
-
-        m_SkyboxFromCubemap.m_VSBufferSetPtr = 0;
-        m_SkyboxFromCubemap.m_GSBufferSetPtr = CubemapGSBufferSetPtr;
-        m_SkyboxFromCubemap.m_PSBufferSetPtr = CubemapPSBufferSetPtr;
+        m_SkyboxFromCubemap.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSCubemapBuffer);
+        m_SkyboxFromCubemap.m_PSBufferSetPtr = BufferManager::CreateBufferSet(CubemapPSBuffer);
 
         // -----------------------------------------------------------------------------
         // Models
@@ -361,7 +417,6 @@ namespace
         m_SkyboxFromPanorama.m_VSPtr          = 0;
         m_SkyboxFromPanorama.m_GSPtr          = 0;
         m_SkyboxFromPanorama.m_PSPtr          = 0;
-        m_SkyboxFromPanorama.m_VSBufferSetPtr = 0;
         m_SkyboxFromPanorama.m_GSBufferSetPtr = 0;
         m_SkyboxFromPanorama.m_PSBufferSetPtr = 0;
         m_SkyboxFromPanorama.m_InputLayoutPtr = 0;
@@ -372,7 +427,6 @@ namespace
         m_SkyboxFromCubemap.m_VSPtr          = 0;
         m_SkyboxFromCubemap.m_GSPtr          = 0;
         m_SkyboxFromCubemap.m_PSPtr          = 0;
-        m_SkyboxFromCubemap.m_VSBufferSetPtr = 0;
         m_SkyboxFromCubemap.m_GSBufferSetPtr = 0;
         m_SkyboxFromCubemap.m_PSBufferSetPtr = 0;
         m_SkyboxFromCubemap.m_InputLayoutPtr = 0;
@@ -650,7 +704,6 @@ namespace
         CShaderPtr        VSPtr            = m_SkyboxFromPanorama.m_VSPtr;
         CShaderPtr        GSPtr            = m_SkyboxFromPanorama.m_GSPtr;
         CShaderPtr        PSPtr            = m_SkyboxFromPanorama.m_PSPtr;
-        CBufferSetPtr     VSBufferSetPtr   = m_SkyboxFromPanorama.m_VSBufferSetPtr;
         CBufferSetPtr     GSBufferSetPtr   = m_SkyboxFromPanorama.m_GSBufferSetPtr;
         CBufferSetPtr     PSBufferSetPtr   = m_SkyboxFromPanorama.m_PSBufferSetPtr;
         CInputLayoutPtr   InputLayoutPtr   = m_SkyboxFromPanorama.m_InputLayoutPtr;
@@ -750,7 +803,6 @@ namespace
         CShaderPtr        VSPtr            = m_SkyboxFromCubemap.m_VSPtr;
         CShaderPtr        GSPtr            = m_SkyboxFromCubemap.m_GSPtr;
         CShaderPtr        PSPtr            = m_SkyboxFromCubemap.m_PSPtr;
-        CBufferSetPtr     VSBufferSetPtr   = m_SkyboxFromCubemap.m_VSBufferSetPtr;
         CBufferSetPtr     GSBufferSetPtr   = m_SkyboxFromCubemap.m_GSBufferSetPtr;
         CBufferSetPtr     PSBufferSetPtr   = m_SkyboxFromCubemap.m_PSBufferSetPtr;
         CInputLayoutPtr   InputLayoutPtr   = m_SkyboxFromCubemap.m_InputLayoutPtr;
