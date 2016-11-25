@@ -71,11 +71,11 @@ namespace
         // -----------------------------------------------------------------------------
         // Edit
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewMaterial, EDIT_RECEIVE_MESSAGE(&CTextureHelper::OnNewTexture));
-
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestMaterialInfo, EDIT_RECEIVE_MESSAGE(&CTextureHelper::OnRequestTextureInfo));
-
-        Edit::MessageManager::Register(Edit::SGUIMessageType::MaterialInfo, EDIT_RECEIVE_MESSAGE(&CTextureHelper::OnTextureInfo));
+//         Edit::MessageManager::Register(Edit::SGUIMessageType::NewMaterial, EDIT_RECEIVE_MESSAGE(&CTextureHelper::OnNewTexture));
+// 
+//         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestMaterialInfo, EDIT_RECEIVE_MESSAGE(&CTextureHelper::OnRequestTextureInfo));
+// 
+//         Edit::MessageManager::Register(Edit::SGUIMessageType::MaterialInfo, EDIT_RECEIVE_MESSAGE(&CTextureHelper::OnTextureInfo));
     }
 
     // -----------------------------------------------------------------------------
