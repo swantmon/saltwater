@@ -16,11 +16,11 @@
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
-#include "graphic/gfx_light_facet.h"
 #include "graphic/gfx_light_point_renderer.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh.h"
 #include "graphic/gfx_mesh_manager.h"
+#include "graphic/gfx_point_light_facet.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
@@ -94,7 +94,7 @@ namespace
             Dt::CPointLightFacet* m_pDataLightFacet;
             Dt::CEntity*          m_pLevelEntity;
             
-            Gfx::CPointLightFacet* m_pGraphicLightFacet;
+            Gfx::CPointLightFacet* m_pGfxLightFacet;
             CShaderPtr  m_ShadowVS;
             CShaderPtr  m_ShadowPS;
             CShaderPtr  m_LightVS;
@@ -441,10 +441,10 @@ namespace
 
         for (; CurrentRenderJob != EndOfRenderJobs; ++ CurrentRenderJob)
         {
-            Dt::CPointLightFacet* pDataLightFacet    = static_cast<Dt::CPointLightFacet*>(CurrentRenderJob->m_pDataLightFacet);
+            Dt::CPointLightFacet* pDtLightFacet    = static_cast<Dt::CPointLightFacet*>(CurrentRenderJob->m_pDataLightFacet);
             Dt::CEntity*          pEntity            = CurrentRenderJob->m_pLevelEntity;
             
-            assert(pDataLightFacet    != nullptr);
+            assert(pDtLightFacet    != nullptr);
             
             // -----------------------------------------------------------------------------
             // Upload model matrix to buffer
@@ -455,7 +455,7 @@ namespace
             
             pModelBuffer->m_ModelMatrix = Base::Float4x4::s_Identity;
             pModelBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(pEntity->GetWorldPosition());
-            pModelBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(pDataLightFacet->GetAttenuationRadius());
+            pModelBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(pDtLightFacet->GetAttenuationRadius());
             
             BufferManager::UnmapConstantBuffer(m_MainVSBufferPtr->GetBuffer(1));
             
@@ -466,31 +466,31 @@ namespace
             
             assert(pLightBuffer != nullptr);
             
-            float InvSqrAttenuationRadius = pDataLightFacet->GetReciprocalSquaredAttenuationRadius();
-            float AngleScale              = pDataLightFacet->GetAngleScale();
-            float AngleOffset             = pDataLightFacet->GetAngleOffset();
-            float HasShadows              = pDataLightFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows ? 1.0f : 0.0f;
+            float InvSqrAttenuationRadius = pDtLightFacet->GetReciprocalSquaredAttenuationRadius();
+            float AngleScale              = pDtLightFacet->GetAngleScale();
+            float AngleOffset             = pDtLightFacet->GetAngleOffset();
+            float HasShadows              = pDtLightFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows ? 1.0f : 0.0f;
             
             pLightBuffer->m_LightPosition       = Base::Float4(pEntity->GetWorldPosition(), 1.0f);
-            pLightBuffer->m_LightDirection      = Base::Float4(pDataLightFacet->GetDirection(), 0.0f);
-            pLightBuffer->m_LightColor          = Base::Float4(pDataLightFacet->GetLightness(), 1.0f);
+            pLightBuffer->m_LightDirection      = Base::Float4(pDtLightFacet->GetDirection(), 0.0f);
+            pLightBuffer->m_LightColor          = Base::Float4(pDtLightFacet->GetLightness(), 1.0f);
             pLightBuffer->m_LightSettings       = Base::Float4(InvSqrAttenuationRadius, AngleScale, AngleOffset, HasShadows);
 
-            if (pDataLightFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows)
+            if (pDtLightFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows)
             {
-                assert(CurrentRenderJob->m_pGraphicLightFacet->GetRenderContext() != 0);
+                assert(CurrentRenderJob->m_pGfxLightFacet->GetCamera().IsValid());
 
-                pLightBuffer->m_LightViewProjection = CurrentRenderJob->m_pGraphicLightFacet->GetRenderContext()->GetCamera()->GetViewProjectionMatrix();
+                pLightBuffer->m_LightViewProjection = CurrentRenderJob->m_pGfxLightFacet->GetCamera()->GetViewProjectionMatrix();
             }
             
             BufferManager::UnmapConstantBuffer(m_PunctualLightPSBufferPtr->GetBuffer(1));
             
             // -----------------------------------------------------------------------------
-            // Set shadowmap
+            // Set shadow map
             // -----------------------------------------------------------------------------
-            if (pDataLightFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows)
+            if (pDtLightFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows)
             {
-                ContextManager::SetTextureSetPS(CurrentRenderJob->m_pGraphicLightFacet->GetTextureSMSet());
+                ContextManager::SetTextureSetPS(CurrentRenderJob->m_pGfxLightFacet->GetTextureSMSet());
             }
             
             // -----------------------------------------------------------------------------
@@ -558,7 +558,7 @@ namespace
                 
             NewRenderJob.m_pDataLightFacet        = pDataLightFacet;
             NewRenderJob.m_pLevelEntity           = &rCurrentEntity;
-            NewRenderJob.m_pGraphicLightFacet     = pGraphicLightFacet;
+            NewRenderJob.m_pGfxLightFacet     = pGraphicLightFacet;
                 
             NewRenderJob.m_LightVS = m_ModelVSPtr;
             NewRenderJob.m_LightPS = m_PunctualLightShaderPSPtr;

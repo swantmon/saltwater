@@ -26,10 +26,12 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_edit_state.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_light_probe_facet.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_light_probe_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_point_light_facet.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_point_light_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_sky_facet.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_sky_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_light_area_renderer.cpp" />
-    <ClCompile Include="..\..\..\src\graphic\gfx_light_facet.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_sun_facet.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_light_sun_renderer.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_fog_renderer.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_performance.cpp" />
@@ -56,7 +58,7 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_debug_renderer.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_debug_state.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_depth_stencil_state.cpp" />
-    <ClCompile Include="..\..\..\src\graphic\gfx_light_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_sun_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_exit_state.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_input_layout.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_intro_state.cpp" />
@@ -106,10 +108,12 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_edit_state.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_point_light_facet.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_point_light_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_sky_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_sky_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_area_renderer.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_light_facet.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_sun_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_ar_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_sun_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_fog_renderer.h" />
@@ -136,7 +140,7 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_debug_state.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_depth_description.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_depth_stencil_state.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_light_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_sun_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_exit_state.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_input_layout.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_intro_state.h" />

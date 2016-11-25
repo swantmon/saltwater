@@ -3,11 +3,11 @@
 
 namespace Gfx
 {
-namespace LightProbeManager
+namespace SunManager
 {
     void OnStart();
     void OnExit();
 
     void Update();
-} // namespace LightProbeManager
+} // namespace SunManager
 } // namespace Gfx

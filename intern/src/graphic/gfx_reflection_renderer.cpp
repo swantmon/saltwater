@@ -17,7 +17,7 @@
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_reflection_renderer.h"
-#include "graphic/gfx_light_facet.h"
+#include "graphic/gfx_light_probe_facet.h"
 #include "graphic/gfx_light_probe_manager.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh.h"
@@ -26,6 +26,7 @@
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_state_manager.h"
+#include "graphic/gfx_sun_facet.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_2d.h"
@@ -69,10 +70,10 @@ namespace
         
     private:
 
-        struct SGlobalProbeRenderJob
+        struct SLightProbeRenderJob
         {
-            Dt::CLightProbeFacet*  m_pDataGlobalProbe;
-            Gfx::CLightProbeFacet* m_pGraphicGlobalProbe;
+            Dt::CLightProbeFacet*  m_pDataLightProbe;
+            Gfx::CLightProbeFacet* m_pGraphicLightProbe;
         };
 
         struct SSSRRenderJob
@@ -108,8 +109,8 @@ namespace
 
     private:
 
-        typedef std::vector<SGlobalProbeRenderJob> CGlobalProbeRenderJobs;
-        typedef std::vector<SSSRRenderJob>         CSSRRenderJobs;
+        typedef std::vector<SLightProbeRenderJob> CLightProbeRenderJobs;
+        typedef std::vector<SSSRRenderJob>        CSSRRenderJobs;
         
     private:
         
@@ -166,7 +167,7 @@ namespace
 
         std::vector<CViewPortSetPtr>   m_HCBViewPortSetPtrs;
 
-        CGlobalProbeRenderJobs m_GlobalProbeRenderJobs;
+        CLightProbeRenderJobs m_LightProbeRenderJobs;
         CSSRRenderJobs         m_SSRRenderJobs;
         
     private:
@@ -205,11 +206,11 @@ namespace
         , m_LightAccumulationRenderContextPtr()
         , m_SSRRenderContextPtr              ()
         , m_HCBRenderContextPtr              ()
-        , m_GlobalProbeRenderJobs            ()
+        , m_LightProbeRenderJobs             ()
         , m_SSRRenderJobs                    ()
     {
-        m_GlobalProbeRenderJobs.reserve(1);
-        m_SSRRenderJobs        .reserve(1);
+        m_LightProbeRenderJobs.reserve(1);
+        m_SSRRenderJobs       .reserve(1);
     }
     
     // -----------------------------------------------------------------------------
@@ -263,7 +264,7 @@ namespace
         m_HCBTargetSetPtrs  .clear();
         m_HCBViewPortSetPtrs.clear();
 
-        m_GlobalProbeRenderJobs.clear();
+        m_LightProbeRenderJobs.clear();
         m_SSRRenderJobs        .clear();
     }
     
@@ -635,13 +636,13 @@ namespace
     
     void CGfxReflectionRenderer::RenderIBL()
     {
-        if (m_GlobalProbeRenderJobs.size() == 0) return;
+        if (m_LightProbeRenderJobs.size() == 0) return;
 
         // TODO:
         // activate multiple global probes
-        SGlobalProbeRenderJob& rRenderJob = m_GlobalProbeRenderJobs[0];
+        SLightProbeRenderJob& rRenderJob = m_LightProbeRenderJobs[0];
 
-        Gfx::CLightProbeFacet* pGraphicProbeFacet = rRenderJob.m_pGraphicGlobalProbe;
+        Gfx::CLightProbeFacet* pGraphicProbeFacet = rRenderJob.m_pGraphicLightProbe;
 
         Performance::BeginEvent("IBL");
 
@@ -945,7 +946,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Clear current render jobs
         // -----------------------------------------------------------------------------
-        m_GlobalProbeRenderJobs.clear();
+        m_LightProbeRenderJobs.clear();
         m_SSRRenderJobs        .clear();
 
         // -----------------------------------------------------------------------------
@@ -963,20 +964,20 @@ namespace
             // -----------------------------------------------------------------------------
             if (rCurrentEntity.GetType() == Dt::SLightType::LightProbe)
             {
-                Dt::CLightProbeFacet*  pDataGlobalProbeFacet = static_cast<Dt::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-                Gfx::CLightProbeFacet* pGraphicGlobalProbeFacet = static_cast<Gfx::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+                Dt::CLightProbeFacet*  pDataLightProbeFacet = static_cast<Dt::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+                Gfx::CLightProbeFacet* pGraphicLightProbeFacet = static_cast<Gfx::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
 
-                assert(pDataGlobalProbeFacet != 0 && pGraphicGlobalProbeFacet != 0);
+                assert(pDataLightProbeFacet != 0 && pGraphicLightProbeFacet != 0);
 
                 // -----------------------------------------------------------------------------
                 // Set sun into a new render job
                 // -----------------------------------------------------------------------------
-                SGlobalProbeRenderJob NewRenderJob;
+                SLightProbeRenderJob NewRenderJob;
 
-                NewRenderJob.m_pDataGlobalProbe = pDataGlobalProbeFacet;
-                NewRenderJob.m_pGraphicGlobalProbe = pGraphicGlobalProbeFacet;
+                NewRenderJob.m_pDataLightProbe = pDataLightProbeFacet;
+                NewRenderJob.m_pGraphicLightProbe = pGraphicLightProbeFacet;
 
-                m_GlobalProbeRenderJobs.push_back(NewRenderJob);
+                m_LightProbeRenderJobs.push_back(NewRenderJob);
             }
 
             // -----------------------------------------------------------------------------

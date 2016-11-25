@@ -3,11 +3,11 @@
 
 namespace Gfx
 {
-namespace LightProbeManager
+namespace PointLightManager
 {
     void OnStart();
     void OnExit();
 
     void Update();
-} // namespace LightProbeManager
+} // namespace PointLightManager
 } // namespace Gfx

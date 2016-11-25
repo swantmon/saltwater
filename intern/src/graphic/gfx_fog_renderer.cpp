@@ -19,13 +19,13 @@
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_fog_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
-#include "graphic/gfx_light_facet.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_state_manager.h"
+#include "graphic/gfx_sun_facet.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_2d.h"
@@ -629,7 +629,7 @@ namespace
         Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
         Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
 
-        Gfx::CSunLightFacet* pGraphicSunFacet = 0;
+        Gfx::CSunFacet* pGraphicSunFacet = 0;
 
         for (; CurrentEntity != EndOfEntities; CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light))
         {
@@ -637,11 +637,11 @@ namespace
 
             if (rCurrentEntity.GetType() == Dt::SLightType::Sun)
             {
-                pGraphicSunFacet = static_cast<Gfx::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+                pGraphicSunFacet = static_cast<Gfx::CSunFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
             }
         }
 
-        CTextureBasePtr ShadowMapPtr = pGraphicSunFacet->GetRenderContext()->GetTargetSet()->GetDepthStencilTarget();
+        CTextureBasePtr ShadowMapPtr = pGraphicSunFacet->GetTextureSMSet()->GetTexture(0);
 
         m_ESMTextureSetPtr = TextureManager::CreateTextureSet(ShadowMapPtr, static_cast<CTextureBasePtr>(m_ESMTexturePtr));
 
@@ -754,7 +754,7 @@ namespace
         Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
         Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
 
-        Gfx::CSunLightFacet* pGraphicSunFacet = 0;
+        Gfx::CSunFacet* pGraphicSunFacet = 0;
         Dt::CSunLightFacet* pDataSunFacet = 0;
 
         for (; CurrentEntity != EndOfEntities; CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light))
@@ -764,7 +764,7 @@ namespace
             if (rCurrentEntity.GetType() == Dt::SLightType::Sun)
             {
                 pDataSunFacet = static_cast<Dt::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-                pGraphicSunFacet = static_cast<Gfx::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+                pGraphicSunFacet = static_cast<Gfx::CSunFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
             }
         }
 
@@ -772,7 +772,7 @@ namespace
 
 	    assert(pLightBuffer != nullptr);
 
-	    pLightBuffer->m_LightViewProjection  = pGraphicSunFacet->GetRenderContext()->GetCamera()->GetViewProjectionMatrix();
+	    pLightBuffer->m_LightViewProjection  = pGraphicSunFacet->GetCamera()->GetViewProjectionMatrix();
 	    pLightBuffer->m_LightDirection       = Base::Float4(pDataSunFacet->GetDirection(), 0.0f).Normalize();
 	    pLightBuffer->m_LightColor           = Base::Float4(pDataSunFacet->GetLightness(), 1.0f);
 	    pLightBuffer->m_SunAngularRadius     = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;

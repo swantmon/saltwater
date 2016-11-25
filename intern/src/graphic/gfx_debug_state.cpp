@@ -16,18 +16,19 @@
 #include "graphic/gfx_fog_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_area_renderer.h"
-#include "graphic/gfx_light_manager.h"
 #include "graphic/gfx_light_probe_manager.h"
 #include "graphic/gfx_light_point_renderer.h"
 #include "graphic/gfx_light_sun_renderer.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_particle_renderer.h"
 #include "graphic/gfx_performance.h"
+#include "graphic/gfx_point_light_manager.h"
 #include "graphic/gfx_postfx_renderer.h"
 #include "graphic/gfx_postfx_hdr_renderer.h"
 #include "graphic/gfx_reflection_renderer.h"
 #include "graphic/gfx_render_context.h"
 #include "graphic/gfx_tonemapping_renderer.h"
+#include "graphic/gfx_sun_manager.h"
 #include "graphic/gfx_shadow_renderer.h"
 #include "graphic/gfx_sky_manager.h"
 #include "graphic/gfx_sky_renderer.h"
@@ -72,9 +73,10 @@ namespace
         Main::BeginFrame();
 
         ActorManager     ::Update();
-        LightManager     ::Update();
+        SunManager       ::Update();
         SkyManager       ::Update();
         LightProbeManager::Update();
+        PointLightManager::Update();
 
         Main::UploadPerFrameConstantBuffers();
         

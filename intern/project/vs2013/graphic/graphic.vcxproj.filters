@@ -215,11 +215,17 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_light_probe_manager.cpp">
       <Filter>engine\map\lights\light probe</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_light_facet.cpp">
-      <Filter>engine\map\lights\legacy</Filter>
+    <ClCompile Include="..\..\..\src\graphic\gfx_point_light_manager.cpp">
+      <Filter>engine\map\lights\point light</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_light_manager.cpp">
-      <Filter>engine\map\lights\legacy</Filter>
+    <ClCompile Include="..\..\..\src\graphic\gfx_point_light_facet.cpp">
+      <Filter>engine\map\lights\point light</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_sun_facet.cpp">
+      <Filter>engine\map\lights\sun</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_sun_manager.cpp">
+      <Filter>engine\map\lights\sun</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -482,11 +488,17 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_manager.h">
       <Filter>engine\map\lights\light probe</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_light_facet.h">
-      <Filter>engine\map\lights\legacy</Filter>
+    <ClInclude Include="..\..\..\src\graphic\gfx_point_light_manager.h">
+      <Filter>engine\map\lights\point light</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_light_manager.h">
-      <Filter>engine\map\lights\legacy</Filter>
+    <ClInclude Include="..\..\..\src\graphic\gfx_point_light_facet.h">
+      <Filter>engine\map\lights\point light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_sun_facet.h">
+      <Filter>engine\map\lights\sun</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_sun_manager.h">
+      <Filter>engine\map\lights\sun</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -637,8 +649,11 @@
     <Filter Include="engine\map\lights\light probe">
       <UniqueIdentifier>{a475361d-5742-4a44-b188-1c76dd2ce874}</UniqueIdentifier>
     </Filter>
-    <Filter Include="engine\map\lights\legacy">
-      <UniqueIdentifier>{59d2ea69-e5bd-4d75-aab2-af517bb02d7e}</UniqueIdentifier>
+    <Filter Include="engine\map\lights\point light">
+      <UniqueIdentifier>{26d9f37c-3192-4a47-863f-54b5d9663a1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\map\lights\sun">
+      <UniqueIdentifier>{fd022fc1-0bf0-4614-b478-05be935c009c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

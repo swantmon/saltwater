@@ -17,8 +17,6 @@
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_histogram_renderer.h"
-#include "graphic/gfx_light_facet.h"
-#include "graphic/gfx_light_manager.h"
 #include "graphic/gfx_light_sun_renderer.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh_manager.h"
@@ -26,6 +24,8 @@
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_state_manager.h"
+#include "graphic/gfx_sun_facet.h"
+#include "graphic/gfx_sun_manager.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_2d.h"
@@ -79,7 +79,7 @@ namespace
         struct SRenderJob
         {
             Dt::CSunLightFacet*  m_pDataSunLightFacet;
-            Gfx::CSunLightFacet* m_pGraphicSunLightFacet;
+            Gfx::CSunFacet* m_pGraphicSunLightFacet;
         };
 
     private:
@@ -343,7 +343,7 @@ namespace
         for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
         {
         	Dt::CSunLightFacet*  pDataSunFacet    = CurrentRenderJob->m_pDataSunLightFacet;
-        	Gfx::CSunLightFacet* pGraphicSunFacet = CurrentRenderJob->m_pGraphicSunLightFacet;
+        	Gfx::CSunFacet* pGraphicSunFacet = CurrentRenderJob->m_pGraphicSunLightFacet;
 
         	// -----------------------------------------------------------------------------
 	        // Upload buffer data
@@ -352,7 +352,7 @@ namespace
 
 	        assert(pLightBuffer != nullptr);
 
-	        pLightBuffer->m_LightViewProjection = pGraphicSunFacet->GetRenderContext()->GetCamera()->GetViewProjectionMatrix();
+	        pLightBuffer->m_LightViewProjection = pGraphicSunFacet->GetCamera()->GetViewProjectionMatrix();
 	        pLightBuffer->m_LightDirection      = Base::Float4(pDataSunFacet->GetDirection(), 0.0f).Normalize();
 	        pLightBuffer->m_LightColor          = Base::Float4(pDataSunFacet->GetLightness(), 1.0f);
 	        pLightBuffer->m_SunAngularRadius    = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
@@ -426,7 +426,7 @@ namespace
             }
 
             Dt::CSunLightFacet*  pDataSunFacet    = static_cast<Dt::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-            Gfx::CSunLightFacet* pGraphicSunFacet = static_cast<Gfx::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+            Gfx::CSunFacet* pGraphicSunFacet = static_cast<Gfx::CSunFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
 
             // -----------------------------------------------------------------------------
             // Set sun into a new render job

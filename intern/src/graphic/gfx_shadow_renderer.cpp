@@ -18,8 +18,8 @@
 #include "graphic/gfx_actor_facet.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
-#include "graphic/gfx_light_facet.h"
-#include "graphic/gfx_light_manager.h"
+#include "graphic/gfx_sun_facet.h"
+#include "graphic/gfx_sun_manager.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh.h"
 #include "graphic/gfx_mesh_manager.h"
@@ -84,31 +84,11 @@ namespace
         
     private:
 
-        struct SSunLightRenderJob
-        {
-            Gfx::CSunLightFacet* m_pGraphicSunLightFacet;
-        };
-
-        struct SPointLightRenderJob
-        {
-            Gfx::CPointLightFacet* m_pGraphicPointLightFacet;
-        };
-
         struct SSSAORenderJob
         {
             Dt::CSSAOFXFacet* m_pDataSSAOFacet;
         };
         
-        struct SPerLightConstantBuffer
-        {
-            Base::Float4x4 vs_ViewProjectionMatrix;
-        };
-        
-        struct SPerDrawCallConstantBuffer
-        {
-            Base::Float4x4 m_ModelMatrix;
-        };
-
         struct SGaussianSettings
         {
             Base::Int2 m_Direction;
@@ -127,55 +107,43 @@ namespace
 
     private:
 
-        typedef std::vector<SSunLightRenderJob>   CSunLightRenderJobs;
-        typedef std::vector<SPointLightRenderJob> CPointLightRenderJobs;
-        typedef std::vector<SSSAORenderJob>       CSSAORenderJobs;
+        typedef std::vector<SSSAORenderJob> CSSAORenderJobs;
         
     private:
         
-        CMeshPtr          m_QuadModelPtr;
-        
-        CBufferSetPtr     m_LightCameraVSBufferPtr;
-        CBufferSetPtr     m_MainVSBufferPtr;
-        CBufferSetPtr     m_QuadVSBufferPtr;
-        CBufferSetPtr     m_GaussianBlurPropertiesCSBufferPtr;
-        CBufferSetPtr     m_SSAOPropertiesPSBufferPtr;
-        
-        CInputLayoutPtr   m_QuadInputLayoutPtr;
-        
-        CShaderPtr        m_FullquadShaderVSPtr;
-        CShaderPtr        m_ShadowShaderVSPtr;
-        
-        CShaderPtr        m_SSAOShaderPSPtrs[NumberOfSSAOs];
-        
-        CShaderPtr        m_ShadowSMShaderPSPtr;
+       
 
-        CShaderPtr        m_BilateralBlurShaderCSPtr;
+        CMeshPtr m_QuadModelPtr;
         
-        CTextureSetPtr    m_SSAOTextureSets[NumberOfSSAOs];
         
-        CSamplerSetPtr    m_PSSamplerSetPtr;
+        CBufferSetPtr  m_QuadVSBufferPtr;
+        CBufferSetPtr  m_GaussianBlurPropertiesCSBufferPtr;
+        CBufferSetPtr  m_SSAOPropertiesPSBufferPtr;
         
-        CTargetSetPtr     m_HalfRenderbufferPtr;
+        CInputLayoutPtr m_QuadInputLayoutPtr;
+
+        CShaderPtr m_FullquadShaderVSPtr;
+        CShaderPtr m_SSAOShaderPSPtrs[NumberOfSSAOs];
+        CShaderPtr m_BilateralBlurShaderCSPtr;
+
+        CTextureSetPtr m_SSAOTextureSets[NumberOfSSAOs];
+        CTextureSetPtr m_HalfTexturePtrs[2];
+        CTextureSetPtr m_BilateralBlurHTextureSetPtr;
+        CTextureSetPtr m_BilateralBlurVTextureSetPtr;
+
+        CSamplerSetPtr m_PSSamplerSetPtr;
+
+        CTargetSetPtr m_HalfRenderbufferPtr;
 
         CRenderContextPtr m_DeferredRenderContextPtr;
         CRenderContextPtr m_HalfContextPtr;
-        
-        CTextureSetPtr    m_HalfTexturePtrs[2];
-
-        CTextureSetPtr    m_BilateralBlurHTextureSetPtr;
-        CTextureSetPtr    m_BilateralBlurVTextureSetPtr;
 
         Base::Float4 m_Kernel[s_SSAOKernelSize];
 
-        CSunLightRenderJobs   m_SunLightRenderJobs;
-        CPointLightRenderJobs m_PointLightRenderJobs;
-        CSSAORenderJobs       m_SSAORenderJobs;
+        CSSAORenderJobs m_SSAORenderJobs;
 
     private:
-        
-        void RenderShadowFromLightsources();
-        void RenderCascadedShadowFromSun();
+
         void RenderSSAO();
 
         void BuildRenderJobs();
@@ -186,27 +154,19 @@ namespace
 {
     CGfxShadowRenderer::CGfxShadowRenderer()
         : m_QuadModelPtr                     ()
-        , m_LightCameraVSBufferPtr           ()
-        , m_MainVSBufferPtr                  ()
         , m_QuadVSBufferPtr                  ()
         , m_SSAOPropertiesPSBufferPtr        ()
         , m_GaussianBlurPropertiesCSBufferPtr()
         , m_QuadInputLayoutPtr               ()
         , m_FullquadShaderVSPtr              ()
-        , m_ShadowShaderVSPtr                ()
-        , m_ShadowSMShaderPSPtr              ()
         , m_BilateralBlurShaderCSPtr         ()
         , m_BilateralBlurHTextureSetPtr      ()
         , m_BilateralBlurVTextureSetPtr      ()
         , m_SSAOTextureSets                  ()
         , m_PSSamplerSetPtr                  ()
         , m_DeferredRenderContextPtr         ()
-        , m_SunLightRenderJobs               ()
-        , m_PointLightRenderJobs             ()
         , m_SSAORenderJobs                   ()
     {
-        m_SunLightRenderJobs  .reserve(1);
-        m_PointLightRenderJobs.reserve(16);
         m_SSAORenderJobs      .reserve(1);
     }
     
@@ -249,15 +209,11 @@ namespace
     void CGfxShadowRenderer::OnExit()
     {
         m_QuadModelPtr                      = 0;
-        m_LightCameraVSBufferPtr            = 0;
-        m_MainVSBufferPtr                   = 0;
         m_QuadVSBufferPtr                   = 0;
         m_GaussianBlurPropertiesCSBufferPtr = 0;
         m_SSAOPropertiesPSBufferPtr         = 0;
         m_QuadInputLayoutPtr                = 0;
         m_FullquadShaderVSPtr               = 0;
-        m_ShadowShaderVSPtr                 = 0;
-        m_ShadowSMShaderPSPtr               = 0;
         m_BilateralBlurShaderCSPtr          = 0;
         m_BilateralBlurHTextureSetPtr       = 0;
         m_BilateralBlurVTextureSetPtr       = 0;
@@ -274,9 +230,6 @@ namespace
         
         m_HalfTexturePtrs[0] = 0;
         m_HalfTexturePtrs[1] = 0;
-
-        m_SunLightRenderJobs  .clear();
-        m_PointLightRenderJobs.clear();
     }
     
     // -----------------------------------------------------------------------------
@@ -284,9 +237,7 @@ namespace
     void CGfxShadowRenderer::OnSetupShader()
     {
         m_FullquadShaderVSPtr = ShaderManager::CompileVS("vs_screen_p_quad.glsl", "main");
-        m_ShadowShaderVSPtr   = ShaderManager::CompileVS("vs_vm_pnx0.glsl", "main");
 
-        m_ShadowSMShaderPSPtr         = ShaderManager::CompilePS("fs_shadow.glsl"    , "main");
         m_SSAOShaderPSPtrs[SSAO]      = ShaderManager::CompilePS("fs_ssao.glsl"      , "main");
         m_SSAOShaderPSPtrs[SSAOApply] = ShaderManager::CompilePS("fs_ssao_apply.glsl", "main");
 
@@ -299,7 +250,7 @@ namespace
             { "POSITION", 0, CInputLayout::Float2Format, 0, 0, 8, CInputLayout::PerVertex, 0, },
         };
         
-        m_QuadInputLayoutPtr       = ShaderManager::CreateInputLayout(QuadInputLayout, 1, m_FullquadShaderVSPtr);
+        m_QuadInputLayoutPtr = ShaderManager::CreateInputLayout(QuadInputLayout, 1, m_FullquadShaderVSPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -339,23 +290,6 @@ namespace
 
         CTexture2DPtr HalfTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
         
-        // -----------------------------------------------------------------------------
-        
-        RendertargetDescriptor.m_NumberOfPixelsU  = 2048;
-        RendertargetDescriptor.m_NumberOfPixelsV  = 2048;
-        RendertargetDescriptor.m_NumberOfPixelsW  = 1;
-        RendertargetDescriptor.m_NumberOfMipMaps  = 1;
-        RendertargetDescriptor.m_NumberOfTextures = 1;
-        RendertargetDescriptor.m_Binding          = CTextureBase::RenderTarget;
-        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
-        RendertargetDescriptor.m_Format           = CTextureBase::R8G8B8A8_UBYTE;
-        RendertargetDescriptor.m_Usage            = CTextureBase::GPURead;
-        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
-        RendertargetDescriptor.m_pFileName        = 0;
-        RendertargetDescriptor.m_pPixels          = 0;
-        
-        CTexture2DPtr SunShadowmapTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
-
         // -----------------------------------------------------------------------------
         // Create render target
         // -----------------------------------------------------------------------------
@@ -540,30 +474,6 @@ namespace
         
         ConstanteBufferDesc.m_Stride        = 0;
         ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
-        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
-        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SPerLightConstantBuffer);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
-        
-        CBufferPtr PerLightConstantBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
-        
-        // -----------------------------------------------------------------------------
-        
-        ConstanteBufferDesc.m_Stride        = 0;
-        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
-        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
-        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SPerDrawCallConstantBuffer);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
-        
-        CBufferPtr PerDrawCallConstantBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
-
-        // -----------------------------------------------------------------------------
-        
-        ConstanteBufferDesc.m_Stride        = 0;
-        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
         ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(SGaussianSettings);
@@ -585,10 +495,6 @@ namespace
         CBufferPtr SSAOBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
         
         // -----------------------------------------------------------------------------
-        
-        m_LightCameraVSBufferPtr            = BufferManager::CreateBufferSet(PerLightConstantBuffer, PerDrawCallConstantBuffer);
-        
-        m_MainVSBufferPtr                   = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS(), PerDrawCallConstantBuffer);
         
         m_QuadVSBufferPtr                   = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
 
@@ -652,10 +558,6 @@ namespace
         Performance::BeginEvent("Shadows");
 
         RenderSSAO();
-
-        RenderShadowFromLightsources();
-
-        RenderCascadedShadowFromSun();
 
         Performance::EndEvent();
     }
@@ -864,329 +766,6 @@ namespace
 
         Performance::EndEvent();
     }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGfxShadowRenderer::RenderShadowFromLightsources()
-    {
-        if (m_PointLightRenderJobs.size() == 0) return;
-
-        Performance::BeginEvent("Point Light Shadows");
-
-        // -----------------------------------------------------------------------------
-        // Prepare renderer
-        // -----------------------------------------------------------------------------
-        const unsigned int pOffset[] = {0, 0};
-        
-        CPointLightRenderJobs::const_iterator CurrentRenderJob = m_PointLightRenderJobs.begin();
-        CPointLightRenderJobs::const_iterator EndOfRenderJobs  = m_PointLightRenderJobs.end();
-
-        for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
-        {
-            Gfx::CPointLightFacet* pGraphicPointFacet = CurrentRenderJob->m_pGraphicPointLightFacet;
-
-            // -----------------------------------------------------------------------------
-            // Prepare shadow
-            // -----------------------------------------------------------------------------
-            TargetSetManager::ClearTargetSet(pGraphicPointFacet->GetRenderContext()->GetTargetSet());
-            
-            // -----------------------------------------------------------------------------
-            // Set light as render target
-            // -----------------------------------------------------------------------------
-            ContextManager::SetRenderContext(pGraphicPointFacet->GetRenderContext());
-            
-            // -----------------------------------------------------------------------------
-            // Set shader
-            // -----------------------------------------------------------------------------
-            ContextManager::SetShaderVS(m_ShadowShaderVSPtr);
-            
-            ContextManager::SetShaderPS(m_ShadowSMShaderPSPtr);
-            
-            // -----------------------------------------------------------------------------
-            // Set constant buffer
-            // -----------------------------------------------------------------------------
-            ContextManager::SetConstantBufferSetVS(m_LightCameraVSBufferPtr);
-            
-            // -----------------------------------------------------------------------------
-            // Upload data light view projection matrix
-            // -----------------------------------------------------------------------------
-            SPerLightConstantBuffer* pViewBuffer = static_cast<SPerLightConstantBuffer*>(BufferManager::MapConstantBuffer(m_LightCameraVSBufferPtr->GetBuffer(0)));
-            
-            assert(pViewBuffer != nullptr);
-            
-            pViewBuffer->vs_ViewProjectionMatrix = pGraphicPointFacet->GetRenderContext()->GetCamera()->GetViewProjectionMatrix();
-            
-            BufferManager::UnmapConstantBuffer(m_LightCameraVSBufferPtr->GetBuffer(0));
-            
-            // -----------------------------------------------------------------------------
-            // Iterate throw every entity inside this map
-            // -----------------------------------------------------------------------------
-            Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Actor);
-            Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
-            
-            for (; CurrentEntity != EndOfEntities; )
-            {
-                Dt::CEntity& rCurrentEntity = *CurrentEntity;
-                
-                // -----------------------------------------------------------------------------
-                // Get graphic facet
-                // -----------------------------------------------------------------------------
-                if (rCurrentEntity.GetType() != Dt::SActorType::Mesh)
-                {
-                    CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor);
-
-                    continue;
-                }
-                
-                // -----------------------------------------------------------------------------
-                // Set other graphic data of this entity
-                // -----------------------------------------------------------------------------
-                CMeshActorFacet* pActorModelFacet = static_cast<CMeshActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
-
-                CMeshPtr ModelPtr = pActorModelFacet->GetMesh();
-                
-                // -----------------------------------------------------------------------------
-                // Upload model matrix to buffer
-                // -----------------------------------------------------------------------------
-                SPerDrawCallConstantBuffer* pModelBuffer = static_cast<SPerDrawCallConstantBuffer*>(BufferManager::MapConstantBuffer(m_LightCameraVSBufferPtr->GetBuffer(1)));
-                
-                assert(pModelBuffer != nullptr);
-                
-                pModelBuffer->m_ModelMatrix = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
-                
-                BufferManager::UnmapConstantBuffer(m_LightCameraVSBufferPtr->GetBuffer(1));
-                
-                // -----------------------------------------------------------------------------
-                // Render every surface of this entity
-                // -----------------------------------------------------------------------------
-                unsigned int NumberOfSurfaces = ModelPtr->GetLOD(0)->GetNumberOfSurfaces();
-                
-                for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurfaces; ++ IndexOfSurface)
-                {
-                    CSurfacePtr SurfacePtr = ModelPtr->GetLOD(0)->GetSurface(IndexOfSurface);
-                    
-                    if (SurfacePtr == nullptr)
-                    {
-                        continue;
-                    }
-                    
-                    // -----------------------------------------------------------------------------
-                    // Set material
-                    // -----------------------------------------------------------------------------
-                    CMaterialPtr MaterialPtr = SurfacePtr->GetMaterial();
-                    
-                    // -----------------------------------------------------------------------------
-                    // Get input layout from optimal shader
-                    // -----------------------------------------------------------------------------
-                    assert(SurfacePtr->GetKey().m_HasPosition);
-                    
-                    CInputLayoutPtr LayoutPtr = SurfacePtr->GetShaderVS()->GetInputLayout();
-                    
-                    // -----------------------------------------------------------------------------
-                    // Set items to context manager
-                    // -----------------------------------------------------------------------------
-                    ContextManager::SetVertexBufferSet(SurfacePtr->GetVertexBuffer(), pOffset);
-                    
-                    ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
-                    
-                    ContextManager::SetInputLayout(LayoutPtr);
-                    
-                    ContextManager::SetTopology(STopology::TriangleList);
-                    
-                    ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
-                    
-                    ContextManager::ResetTopology();
-                    
-                    ContextManager::ResetInputLayout();
-                    
-                    ContextManager::ResetIndexBuffer();
-                    
-                    ContextManager::ResetVertexBufferSet();
-                }
-                
-                // -----------------------------------------------------------------------------
-                // Next entity
-                // -----------------------------------------------------------------------------
-                CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor);
-            }
-            
-            ContextManager::ResetConstantBufferSetVS();
-
-            ContextManager::ResetShaderVS();
-            
-            ContextManager::ResetShaderPS();
-            
-            ContextManager::ResetRenderContext();
-        }
-
-        Performance::EndEvent();
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGfxShadowRenderer::RenderCascadedShadowFromSun()
-    {
-        if (m_SunLightRenderJobs.size() == 0) return;
-
-        Performance::BeginEvent("Sun Shadows");
-
-        // -----------------------------------------------------------------------------
-        // Prepare renderer
-        // -----------------------------------------------------------------------------
-        const unsigned int pOffset[] = {0, 0};
-        
-        CSunLightRenderJobs::const_iterator CurrentRenderJob = m_SunLightRenderJobs.begin();
-        CSunLightRenderJobs::const_iterator EndOfRenderJobs  = m_SunLightRenderJobs.end();
-
-        for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
-        {
-            Gfx::CSunLightFacet* pGraphicSunFacet = CurrentRenderJob->m_pGraphicSunLightFacet;
-
-            // -----------------------------------------------------------------------------
-            // Prepare shadow
-            // -----------------------------------------------------------------------------
-            TargetSetManager::ClearTargetSet(pGraphicSunFacet->GetRenderContext()->GetTargetSet());
-            
-            // -----------------------------------------------------------------------------
-            // Set light as render target
-            // -----------------------------------------------------------------------------
-            ContextManager::SetRenderContext(pGraphicSunFacet->GetRenderContext());
-            
-            // -----------------------------------------------------------------------------
-            // Set shader
-            // -----------------------------------------------------------------------------
-            ContextManager::SetShaderVS(m_ShadowShaderVSPtr);
-            
-            ContextManager::SetShaderPS(m_ShadowSMShaderPSPtr);
-            
-            // -----------------------------------------------------------------------------
-            // Set constant buffer
-            // -----------------------------------------------------------------------------
-            ContextManager::SetConstantBufferSetVS(m_LightCameraVSBufferPtr);
-            
-            // -----------------------------------------------------------------------------
-            // Upload data light view projection matrix
-            // -----------------------------------------------------------------------------
-            SPerLightConstantBuffer* pViewBuffer = static_cast<SPerLightConstantBuffer*>(BufferManager::MapConstantBuffer(m_LightCameraVSBufferPtr->GetBuffer(0)));
-            
-            assert(pViewBuffer != nullptr);
-            
-            pViewBuffer->vs_ViewProjectionMatrix = pGraphicSunFacet->GetRenderContext()->GetCamera()->GetViewProjectionMatrix();
-            
-            BufferManager::UnmapConstantBuffer(m_LightCameraVSBufferPtr->GetBuffer(0));
-            
-            // -----------------------------------------------------------------------------
-            // Iterate throw every entity inside this map
-            // -----------------------------------------------------------------------------
-            Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Actor);
-            Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
-            
-            for (; CurrentEntity != EndOfEntities; )
-            {
-                Dt::CEntity& rCurrentEntity = *CurrentEntity;
-                
-                // -----------------------------------------------------------------------------
-                // Get graphic facet
-                // -----------------------------------------------------------------------------
-                if (rCurrentEntity.GetType() != Dt::SActorType::Mesh)
-                {
-                    CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor);
-
-                    continue;
-                }
-                
-                // -----------------------------------------------------------------------------
-                // Set other graphic data of this entity
-                // -----------------------------------------------------------------------------
-                CMeshActorFacet* pGraphicModelActorFacet = static_cast<CMeshActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
-
-                CMeshPtr ModelPtr = pGraphicModelActorFacet->GetMesh();
-                
-                // -----------------------------------------------------------------------------
-                // Upload model matrix to buffer
-                // -----------------------------------------------------------------------------
-                SPerDrawCallConstantBuffer* pModelBuffer = static_cast<SPerDrawCallConstantBuffer*>(BufferManager::MapConstantBuffer(m_LightCameraVSBufferPtr->GetBuffer(1)));
-                
-                assert(pModelBuffer != nullptr);
-                
-                pModelBuffer->m_ModelMatrix = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
-                
-                BufferManager::UnmapConstantBuffer(m_LightCameraVSBufferPtr->GetBuffer(1));
-                
-                // -----------------------------------------------------------------------------
-                // Render every surface of this entity
-                // -----------------------------------------------------------------------------
-                unsigned int NumberOfSurfaces = ModelPtr->GetLOD(0)->GetNumberOfSurfaces();
-                
-                for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurfaces; ++ IndexOfSurface)
-                {
-                    CSurfacePtr SurfacePtr = ModelPtr->GetLOD(0)->GetSurface(IndexOfSurface);
-                    
-                    if (SurfacePtr == nullptr)
-                    {
-                        continue;
-                    }
-                    
-                    // -----------------------------------------------------------------------------
-                    // Set material
-                    // -----------------------------------------------------------------------------
-                    CMaterialPtr MaterialPtr;
-
-                    if (pGraphicModelActorFacet->GetMaterial(IndexOfSurface) != 0)
-                    {
-                        MaterialPtr = pGraphicModelActorFacet->GetMaterial(IndexOfSurface);
-                    }
-                    else
-                    {
-                        MaterialPtr = SurfacePtr->GetMaterial();
-                    }
-                    
-                    // -----------------------------------------------------------------------------
-                    // Get input layout from optimal shader
-                    // -----------------------------------------------------------------------------
-                    assert(SurfacePtr->GetKey().m_HasPosition);
-                    
-                    CInputLayoutPtr LayoutPtr = SurfacePtr->GetShaderVS()->GetInputLayout();
-                    
-                    // -----------------------------------------------------------------------------
-                    // Set items to context manager
-                    // -----------------------------------------------------------------------------
-                    ContextManager::SetVertexBufferSet(SurfacePtr->GetVertexBuffer(), pOffset);
-                    
-                    ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
-                    
-                    ContextManager::SetInputLayout(LayoutPtr);
-                    
-                    ContextManager::SetTopology(STopology::TriangleList);
-                    
-                    ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
-                    
-                    ContextManager::ResetTopology();
-                    
-                    ContextManager::ResetInputLayout();
-                    
-                    ContextManager::ResetIndexBuffer();
-                    
-                    ContextManager::ResetVertexBufferSet();
-                }
-                
-                // -----------------------------------------------------------------------------
-                // Next entity
-                // -----------------------------------------------------------------------------
-                CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor);
-            }
-            
-            ContextManager::ResetConstantBufferSetVS();
-
-            ContextManager::ResetShaderVS();
-            
-            ContextManager::ResetShaderPS();
-            
-            ContextManager::ResetRenderContext();
-        }
-
-        Performance::EndEvent();
-    }
 
     // -----------------------------------------------------------------------------
 
@@ -1195,69 +774,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Clear current render jobs
         // -----------------------------------------------------------------------------
-        m_SunLightRenderJobs  .clear();
-        m_PointLightRenderJobs.clear();
-
-        // -----------------------------------------------------------------------------
-        // Iterate throw every entity inside this map
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
-        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
-
-        for (; CurrentEntity != EndOfEntities; )
-        {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
-
-            if (rCurrentEntity.GetType() == Dt::SLightType::Sun)
-            {
-                Dt::CSunLightFacet*  pDataSunFacet    = static_cast<Dt::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-                Gfx::CSunLightFacet* pGraphicSunFacet = static_cast<Gfx::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
-
-                // -----------------------------------------------------------------------------
-                // If update is needed
-                // -----------------------------------------------------------------------------
-                Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
-
-                if (pGraphicSunFacet->GetTimeStamp() == FrameTime || pDataSunFacet->GetRefreshMode() == Dt::CSunLightFacet::Dynamic)
-                {
-                    // -----------------------------------------------------------------------------
-                    // Set sun into a new render job
-                    // -----------------------------------------------------------------------------
-                    SSunLightRenderJob NewRenderJob;
-
-                    NewRenderJob.m_pGraphicSunLightFacet = pGraphicSunFacet;
-
-                    m_SunLightRenderJobs.push_back(NewRenderJob);
-                }
-            }
-            else if (rCurrentEntity.GetType() == Dt::SLightType::Point)
-            {
-                Dt::CPointLightFacet*  pDataPointFacet    = static_cast<Dt::CPointLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-                Gfx::CPointLightFacet* pGraphicPointFacet = static_cast<Gfx::CPointLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
-
-                // -----------------------------------------------------------------------------
-                // If update is needed
-                // -----------------------------------------------------------------------------
-                Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
-
-                if (pGraphicPointFacet->GetTimeStamp() == FrameTime || pDataPointFacet->GetRefreshMode() == Dt::CPointLightFacet::Dynamic)
-                {
-                    // -----------------------------------------------------------------------------
-                    // Set sun into a new render job
-                    // -----------------------------------------------------------------------------
-                    SPointLightRenderJob NewRenderJob;
-
-                    NewRenderJob.m_pGraphicPointLightFacet = pGraphicPointFacet;
-
-                    m_PointLightRenderJobs.push_back(NewRenderJob);
-                }
-            }
-
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
-        }
+        m_SSAORenderJobs.clear();
 
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map

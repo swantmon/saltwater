@@ -13,7 +13,6 @@
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_fog_renderer.h"
-#include "graphic/gfx_light_manager.h"
 #include "graphic/gfx_light_area_renderer.h"
 #include "graphic/gfx_light_probe_manager.h"
 #include "graphic/gfx_light_point_renderer.h"
@@ -23,6 +22,7 @@
 #include "graphic/gfx_material_manager.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_particle_renderer.h"
+#include "graphic/gfx_point_light_manager.h"
 #include "graphic/gfx_postfx_renderer.h"
 #include "graphic/gfx_postfx_hdr_renderer.h"
 #include "graphic/gfx_reflection_renderer.h"
@@ -33,6 +33,7 @@
 #include "graphic/gfx_shadow_renderer.h"
 #include "graphic/gfx_sky_manager.h"
 #include "graphic/gfx_sky_renderer.h"
+#include "graphic/gfx_sun_manager.h"
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_tonemapping_renderer.h"
@@ -97,10 +98,11 @@ namespace
         // -----------------------------------------------------------------------------
         BASE_CONSOLE_STREAMINFO("Gfx> Exit manager...");
 
+        PointLightManager::OnExit();
         LightProbeManager::OnExit();
         SkyManager       ::OnExit();
         ActorManager     ::OnExit();
-        LightManager     ::OnExit();
+        SunManager       ::OnExit();
         MeshManager      ::OnExit();
         MaterialManager  ::OnExit();
 
