@@ -135,6 +135,54 @@ namespace
         // Setup environment
         // -----------------------------------------------------------------------------
         {
+//             Dt::STextureDescriptor TextureDescriptor;
+// 
+//             TextureDescriptor.m_NumberOfPixelsU = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
+//             TextureDescriptor.m_NumberOfPixelsV = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
+//             TextureDescriptor.m_NumberOfPixelsW = 1;
+//             TextureDescriptor.m_Format          = Dt::CTextureBase::R16G16B16_FLOAT;
+//             TextureDescriptor.m_Semantic        = Dt::CTextureBase::HDR;
+//             TextureDescriptor.m_Binding         = Dt::CTextureBase::ShaderResource;
+//             TextureDescriptor.m_pPixels         = 0;
+//             TextureDescriptor.m_pFileName       = "environments/OutputCube.dds";
+//             TextureDescriptor.m_pIdentifier     = 0;
+// 
+//             Dt::CTextureCube* pPanoramaTexture = Dt::TextureManager::CreateCubeTexture(TextureDescriptor);
+// 
+//             Dt::TextureManager::MarkTextureAsDirty(pPanoramaTexture, Dt::CTextureBase::DirtyCreate);
+// 
+//             // -----------------------------------------------------------------------------
+// 
+//             Dt::SEntityDescriptor EntityDesc;
+// 
+//             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
+//             EntityDesc.m_EntityType     = Dt::SLightType::Sky;
+//             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+// 
+//             Dt::CEntity& rEnvironment = Dt::EntityManager::CreateEntity(EntityDesc);
+// 
+//             rEnvironment.SetName("Environment");
+// 
+//             // -----------------------------------------------------------------------------
+//             // Transformation
+//             // -----------------------------------------------------------------------------
+//             Dt::CTransformationFacet* pTransformationFacet = rEnvironment.GetTransformationFacet();
+// 
+//             pTransformationFacet->SetPosition(Base::Float3(0.0f));
+//             pTransformationFacet->SetScale   (Base::Float3(1.0f));
+//             pTransformationFacet->SetRotation(Base::Float3(0.0f));
+// 
+//             Dt::CSkyFacet* pSkyboxFacet = Dt::LightManager::CreateSky();
+// 
+//             pSkyboxFacet->SetType     (Dt::CSkyFacet::Cubemap);
+//             pSkyboxFacet->SetCubemap  (pPanoramaTexture);
+//             pSkyboxFacet->SetIntensity(10000.0f);
+// 
+//             rEnvironment.SetDetailFacet(Dt::SFacetCategory::Data, pSkyboxFacet);
+// 
+//             Dt::EntityManager::MarkEntityAsDirty(rEnvironment, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+
+
             Dt::STextureDescriptor TextureDescriptor;
 
             TextureDescriptor.m_NumberOfPixelsU = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;

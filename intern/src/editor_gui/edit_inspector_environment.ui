@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>159</height>
+    <height>138</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,12 +22,19 @@
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
        <layout class="QGridLayout" name="gridLayout">
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Texture</string>
-          </property>
-         </widget>
+        <item row="1" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QLineEdit" name="m_pTextureEdit"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="m_pTextureLoad">
+            <property name="text">
+             <string>Load</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item row="0" column="0">
          <widget class="QLabel" name="label">
@@ -35,6 +42,27 @@
            <string>Type</string>
           </property>
          </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>Intensity</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QLineEdit" name="m_pIntensityEdit"/>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Lux</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item row="0" column="1">
          <widget class="QComboBox" name="m_pTypeCB">
@@ -53,41 +81,19 @@
             <string>Cubemap</string>
            </property>
           </item>
+          <item>
+           <property name="text">
+            <string>Texture</string>
+           </property>
+          </item>
          </widget>
         </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="label_3">
-          <property name="text">
-           <string>Intensity</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QLineEdit" name="m_pTextureEdit"/>
-        </item>
-        <item row="3" column="1">
-         <layout class="QHBoxLayout" name="horizontalLayout">
-          <item>
-           <widget class="QLineEdit" name="m_pIntensityEdit"/>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Lux</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item row="2" column="0">
+        <item row="1" column="0">
          <widget class="QLabel" name="label_5">
           <property name="text">
-           <string>Cubemap Hash</string>
+           <string>Texture</string>
           </property>
          </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QLineEdit" name="m_pCubemapHashEdit"/>
         </item>
        </layout>
       </item>
@@ -150,8 +156,8 @@
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>184</x>
-     <y>131</y>
+     <x>254</x>
+     <y>110</y>
     </hint>
     <hint type="destinationlabel">
      <x>98</x>
@@ -160,23 +166,24 @@
    </hints>
   </connection>
   <connection>
-   <sender>m_pCubemapHashEdit</sender>
-   <signal>textEdited(QString)</signal>
+   <sender>m_pTextureLoad</sender>
+   <signal>clicked()</signal>
    <receiver>InspectorEnvironment</receiver>
-   <slot>valueChanged()</slot>
+   <slot>loadTextureFromDialog()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>279</x>
-     <y>90</y>
+     <x>347</x>
+     <y>70</y>
     </hint>
     <hint type="destinationlabel">
-     <x>396</x>
-     <y>86</y>
+     <x>398</x>
+     <y>69</y>
     </hint>
    </hints>
   </connection>
  </connections>
  <slots>
   <slot>valueChanged()</slot>
+  <slot>loadTextureFromDialog()</slot>
  </slots>
 </ui>

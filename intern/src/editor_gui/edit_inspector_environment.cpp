@@ -1,13 +1,18 @@
 ﻿
+#include "base/base_crc.h"
+
 #include "editor_gui/edit_inspector_environment.h"
 
 #include "editor_port/edit_message_manager.h"
+
+#include <QFileDialog>
 
 namespace Edit
 {
     CInspectorEnvironment::CInspectorEnvironment(QWidget* _pParent)
         : QWidget          (_pParent)
         , m_CurrentEntityID(-1)
+        , m_TextureFileName()
     {
         // -----------------------------------------------------------------------------
         // Setup UI
@@ -36,10 +41,9 @@ namespace Edit
         // -----------------------------------------------------------------------------
         int Type = m_pTypeCB->currentIndex();
 
-        QString    NewEnvironmentTexture       = m_pTextureEdit->text();
-        QByteArray NewEnvironmentTextureBinary = NewEnvironmentTexture.toLatin1();
+        QByteArray NewTextureBinary = m_TextureFileName.toLatin1();
 
-        unsigned int CubemapHash = m_pCubemapHashEdit->text().toUInt();
+        unsigned int TextureHash = m_pTextureEdit->text().toUInt();
 
         float Intensity = m_pIntensityEdit->text().toFloat();
 
@@ -52,24 +56,53 @@ namespace Edit
 
         NewMessage.PutInt(Type);
 
-        NewMessage.PutString(NewEnvironmentTextureBinary.data());
+        NewMessage.PutString(NewTextureBinary);
 
-        if (CubemapHash != 0)
-        {
-            NewMessage.PutBool(true);
-
-            NewMessage.PutInt(CubemapHash);
-        }
-        else
-        {
-            NewMessage.PutBool(false);
-        }
+        NewMessage.PutInt(TextureHash);
 
         NewMessage.PutFloat(Intensity);
 
         NewMessage.Reset();
 
         Edit::MessageManager::SendMessage(Edit::SGUIMessageType::LightInfoEnvironment, NewMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorEnvironment::loadTextureFromDialog()
+    {
+        QString TextureFile = QFileDialog::getOpenFileName(this, tr("Load environment file"), tr(""), tr("Environment files (*.dds *.hdr)"));
+
+        // -----------------------------------------------------------------------------
+        // Send message with new scene / map request
+        // -----------------------------------------------------------------------------
+        if (!TextureFile.isEmpty())
+        {
+            QDir dir("../assets/");
+
+            m_TextureFileName = dir.relativeFilePath(TextureFile);
+
+            // -----------------------------------------------------------------------------
+            // Create hash
+            // TODO: Should be done by a texture manager
+            // -----------------------------------------------------------------------------
+            QByteArray NewTextureBinary = m_TextureFileName.toLatin1();
+
+            const char*  pHashIdentifier = NewTextureBinary.data();
+            unsigned int NumberOfBytes;
+            unsigned int Hash;
+
+            const void* pData;
+
+            NumberOfBytes = static_cast<unsigned int>(strlen(pHashIdentifier) * sizeof(char));
+            pData = static_cast<const void*>(pHashIdentifier);
+
+            Hash = Base::CRC32(pData, NumberOfBytes);
+
+            m_pTextureEdit->setText(QString::number(Hash));
+
+            valueChanged();
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -104,14 +137,7 @@ namespace Edit
 
         const char* pTexture = _rMessage.GetString(pTemp, 256);
 
-        bool HasCubemap = _rMessage.GetBool();
-
-        int CubemapHash = -1;
-
-        if (HasCubemap)
-        {
-            CubemapHash = _rMessage.GetInt();
-        }
+        unsigned int TextureHash = _rMessage.GetInt();
 
         float Intensity = _rMessage.GetFloat();
 
@@ -124,16 +150,9 @@ namespace Edit
 
         m_pTypeCB->blockSignals(false);
 
-        m_pTextureEdit->setText(pTexture);
+        m_TextureFileName = pTexture;
 
-        if (HasCubemap)
-        {
-            m_pCubemapHashEdit->setText(QString::number(CubemapHash));
-        }
-        else
-        {
-            m_pCubemapHashEdit->setText(QString::number(0));
-        }
+        m_pTextureEdit->setText(QString::number(TextureHash));
 
         m_pIntensityEdit->setText(QString::number(Intensity));
     }
