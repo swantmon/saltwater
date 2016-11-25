@@ -1130,13 +1130,10 @@ namespace
 
         pViewBuffer->m_ModelMatrix  = Base::Float4x4::s_Identity;
         
+        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(-1.0f, 1.0f, 1.0f);
         pViewBuffer->m_ModelMatrix *= ViewManager::GetMainCamera()->GetView()->GetRotationMatrix().GetTransposed();
-       
-        //pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetRotationX(Base::DegreesToRadians(45.0f));
         pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(0.0f, 0.0f, -1.0f);
-        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(-0.5f, -0.5f, 0.0f);
-        //pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetRotationY(Base::DegreesToRadians(45.0f));
-       
+        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(-0.5f, -0.5f, 0.0f);       
 
         BufferManager::UnmapConstantBuffer(VSBufferSetPtr->GetBuffer(0));
 
