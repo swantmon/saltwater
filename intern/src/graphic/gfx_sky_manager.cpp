@@ -163,27 +163,27 @@ namespace
 
     void CGfxSkyManager::OnStart()
     {
-        m_SkyboxFromPanorama.m_VSPtr            = 0;
-        m_SkyboxFromPanorama.m_GSPtr            = 0;
-        m_SkyboxFromPanorama.m_PSPtr            = 0;
-        m_SkyboxFromPanorama.m_VSBufferSetPtr   = 0;
-        m_SkyboxFromPanorama.m_GSBufferSetPtr   = 0;
-        m_SkyboxFromPanorama.m_PSBufferSetPtr   = 0;
-        m_SkyboxFromPanorama.m_InputLayoutPtr   = 0;
-        m_SkyboxFromPanorama.m_MeshPtr          = 0;
-        m_SkyboxFromPanorama.m_TextureSetPtr    = 0;
-        m_SkyboxFromPanorama.m_SamplerSetPtr    = 0;
+        m_SkyboxFromPanorama.m_VSPtr          = 0;
+        m_SkyboxFromPanorama.m_GSPtr          = 0;
+        m_SkyboxFromPanorama.m_PSPtr          = 0;
+        m_SkyboxFromPanorama.m_VSBufferSetPtr = 0;
+        m_SkyboxFromPanorama.m_GSBufferSetPtr = 0;
+        m_SkyboxFromPanorama.m_PSBufferSetPtr = 0;
+        m_SkyboxFromPanorama.m_InputLayoutPtr = 0;
+        m_SkyboxFromPanorama.m_MeshPtr        = 0;
+        m_SkyboxFromPanorama.m_TextureSetPtr  = 0;
+        m_SkyboxFromPanorama.m_SamplerSetPtr  = 0;
 
-        m_SkyboxFromCubemap.m_VSPtr            = 0;
-        m_SkyboxFromCubemap.m_GSPtr            = 0;
-        m_SkyboxFromCubemap.m_PSPtr            = 0;
-        m_SkyboxFromCubemap.m_VSBufferSetPtr   = 0;
-        m_SkyboxFromCubemap.m_GSBufferSetPtr   = 0;
-        m_SkyboxFromCubemap.m_PSBufferSetPtr   = 0;
-        m_SkyboxFromCubemap.m_InputLayoutPtr   = 0;
-        m_SkyboxFromCubemap.m_MeshPtr          = 0;
-        m_SkyboxFromCubemap.m_TextureSetPtr    = 0;
-        m_SkyboxFromCubemap.m_SamplerSetPtr    = 0;
+        m_SkyboxFromCubemap.m_VSPtr          = 0;
+        m_SkyboxFromCubemap.m_GSPtr          = 0;
+        m_SkyboxFromCubemap.m_PSPtr          = 0;
+        m_SkyboxFromCubemap.m_VSBufferSetPtr = 0;
+        m_SkyboxFromCubemap.m_GSBufferSetPtr = 0;
+        m_SkyboxFromCubemap.m_PSBufferSetPtr = 0;
+        m_SkyboxFromCubemap.m_InputLayoutPtr = 0;
+        m_SkyboxFromCubemap.m_MeshPtr        = 0;
+        m_SkyboxFromCubemap.m_TextureSetPtr  = 0;
+        m_SkyboxFromCubemap.m_SamplerSetPtr  = 0;
 
         // -----------------------------------------------------------------------------
         // Shader
@@ -228,7 +228,7 @@ namespace
         // -----------------------------------------------------------------------------
         SBufferDescriptor ConstanteBufferDesc;
 
-        Base::Float3 EyePosition = Base::Float3(0.0f);
+        Base::Float3 EyePosition = Base::Float3::s_Zero;
         Base::Float3 UpDirection;
         Base::Float3 LookDirection;
         
@@ -238,56 +238,59 @@ namespace
         
         // -----------------------------------------------------------------------------
         // By creating a cube map in OpenGL, several facts should be considered:
-        //  1. OpenGL cubemaps has an right handed coord system
+        //  1. OpenGL cubemaps has an left handed coord system
         //  2. Texcoords starts in the upper left corner (normally in the lower left 
         //     corner)
+        // -> y-Axis is mirrored
+        // -> Orientation of every side is flipped
+        // -> At the end we rotate the matrix because the spherical image is y-up
         // -----------------------------------------------------------------------------
-
-        // Right; +X
         LookDirection = EyePosition + Base::Float3::s_AxisX;
+        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        
+        DefaultGSValues.m_CubeViewMatrix[0].LookAt(EyePosition, LookDirection, UpDirection);
+        
+        // -----------------------------------------------------------------------------
+        
+        LookDirection = EyePosition - Base::Float3::s_AxisX;
         UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[1].LookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        // Left; -X
-        LookDirection = EyePosition - Base::Float3::s_AxisX;
+        LookDirection = EyePosition - Base::Float3::s_AxisY;
+        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisZ;
+        
+        DefaultGSValues.m_CubeViewMatrix[2].LookAt(EyePosition, LookDirection, UpDirection);
+        
+        // -----------------------------------------------------------------------------
+        
+        LookDirection = EyePosition + Base::Float3::s_AxisY;
+        UpDirection   = Base::Float3::s_AxisZ;
+        
+        DefaultGSValues.m_CubeViewMatrix[3].LookAt(EyePosition, LookDirection, UpDirection);
+        
+        // -----------------------------------------------------------------------------
+        
+        LookDirection = EyePosition + Base::Float3::s_AxisZ;
         UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
         
-        DefaultGSValues.m_CubeViewMatrix[0].LookAt(EyePosition, LookDirection, UpDirection);
-
-        // -----------------------------------------------------------------------------
-
-        // Front; +Y
-        LookDirection = EyePosition + Base::Float3::s_AxisY;
-        UpDirection = Base::Float3::s_Zero - Base::Float3::s_AxisZ;
-
-        DefaultGSValues.m_CubeViewMatrix[3].LookAt(EyePosition, LookDirection, UpDirection);
-
-        // -----------------------------------------------------------------------------
-
-        // Back; -Y
-        LookDirection = EyePosition - Base::Float3::s_AxisY;
-        UpDirection   = Base::Float3::s_AxisZ;
-
-        DefaultGSValues.m_CubeViewMatrix[2].LookAt(EyePosition, LookDirection, UpDirection);
-
-        // -----------------------------------------------------------------------------
-        
-        // Top; +Z
-        LookDirection = EyePosition - Base::Float3::s_AxisZ;
-        UpDirection = Base::Float3::s_Zero - Base::Float3::s_AxisY;
-        
         DefaultGSValues.m_CubeViewMatrix[4].LookAt(EyePosition, LookDirection, UpDirection);
-
+        
         // -----------------------------------------------------------------------------
-
-        // Bottom; -Z
-        LookDirection = EyePosition + Base::Float3::s_AxisZ;
-        UpDirection = Base::Float3::s_Zero - Base::Float3::s_AxisY;
-
+        
+        LookDirection = EyePosition - Base::Float3::s_AxisZ;
+        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        
         DefaultGSValues.m_CubeViewMatrix[5].LookAt(EyePosition, LookDirection, UpDirection);
+        
+        // -----------------------------------------------------------------------------
+        
+        for (unsigned int IndexOfCubeface = 0; IndexOfCubeface < 6; ++ IndexOfCubeface)
+        {
+            DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface] *= Base::Float4x4().SetRotationX(Base::DegreesToRadians(-90.0f));
+        }
         
         // -----------------------------------------------------------------------------
         
