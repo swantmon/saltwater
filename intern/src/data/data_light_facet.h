@@ -252,7 +252,7 @@ namespace Dt
         ERefreshMode      m_RefreshMode;        //< Refresh mode of the light probe
         EType             m_Type;               //< Type of the probe (@see EType)
         EQuality          m_Quality;            //< Quality of the probe (@see EQuality)
-        Dt::CTextureCube* m_pCubemap;           //< Pointer to cubemap for custom probe
+        Dt::CTextureCube* m_pCubemap;           //< Pointer to cube map for custom probe
         float             m_Intensity;          //< Intensity of the light probe
     };
 } // namespace Dt
@@ -267,7 +267,8 @@ namespace Dt
         {
             Procedural,      //< Sky is a procedural generated HDR depending on settings
             Panorama,        //< Sky will be created from panorama image
-            Cubemap,         //< Sky is generated from given cubemap
+            Cubemap,         //< Sky is generated from given cube map
+            Texture,         //< Sky is generated from given texture
         };
 
     public:
@@ -281,8 +282,12 @@ namespace Dt
         void SetPanorama(Dt::CTexture2D* _pTexture2D);
         Dt::CTexture2D* GetPanorama();
 
+        void SetTexture(Dt::CTexture2D* _pTexture2D);
+        Dt::CTexture2D* GetTexture();
+
         bool GetHasCubemap() const;
         bool GetHasPanorama() const;
+        bool GetHasTexture() const;
 
         void SetIntensity(float _Intensity);
         float GetIntensity() const;
@@ -298,6 +303,7 @@ namespace Dt
         bool              m_HasHDR;             //< Declares either the image consists of HDR values
         Dt::CTextureCube* m_pCubemap;           //< Pointer to cubemap for cubemap skybox
         Dt::CTexture2D*   m_pPanoramaTexture;   //< Pointer to a panorama texture
+        Dt::CTexture2D*   m_pTexture;           //< Pointer to a texture
         float             m_Intensity;          //< Intensity of sky that is freely adjustable by artist (multiplier on the image)
     };
 } // namespace Dt

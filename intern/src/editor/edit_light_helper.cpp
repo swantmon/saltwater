@@ -577,7 +577,7 @@ namespace
 
                 pLightFacet->SetCubemap(pTextureCube);
             }
-            else
+            else if (pLightFacet->GetType() == Dt::CSkyFacet::Panorama)
             {
                 Dt::CTexture2D* pTexturePanorama = Dt::TextureManager::GetTexture2DByHash(TextureHash);
 
@@ -601,6 +601,31 @@ namespace
                 }
 
                 pLightFacet->SetPanorama(pTexturePanorama);
+            }
+            else if (pLightFacet->GetType() == Dt::CSkyFacet::Texture)
+            {
+                Dt::CTexture2D* pTexture = Dt::TextureManager::GetTexture2DByHash(TextureHash);
+
+                if (pTexture == nullptr && pTextureName != nullptr)
+                {
+                    Dt::STextureDescriptor TextureDescriptor;
+
+                    TextureDescriptor.m_NumberOfPixelsU = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
+                    TextureDescriptor.m_NumberOfPixelsV = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
+                    TextureDescriptor.m_NumberOfPixelsW = 1;
+                    TextureDescriptor.m_Format          = Dt::CTextureBase::R16G16B16_FLOAT;
+                    TextureDescriptor.m_Semantic        = Dt::CTextureBase::HDR;
+                    TextureDescriptor.m_Binding         = Dt::CTextureBase::ShaderResource;
+                    TextureDescriptor.m_pPixels         = 0;
+                    TextureDescriptor.m_pFileName       = pTextureName;
+                    TextureDescriptor.m_pIdentifier     = 0;
+
+                    pTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+
+                    Dt::TextureManager::MarkTextureAsDirty(pTexture, Dt::CTextureBase::DirtyFile);
+                }
+                
+                pLightFacet->SetTexture(pTexture);
             }
 
             Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
