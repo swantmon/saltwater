@@ -5,8 +5,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_actor_facet.h"
-#include "data/data_actor_manager.h"
+#include "data/data_actor_type.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_hierarchy_facet.h"

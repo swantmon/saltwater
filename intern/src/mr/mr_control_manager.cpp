@@ -8,12 +8,13 @@
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
-#include "data/data_actor_facet.h"
+#include "data/data_actor_type.h"
 #include "data/data_ar_controller_facet.h"
-#include "data/data_plugin_type.h"
+#include "data/data_camera_facet.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
+#include "data/data_plugin_type.h"
 #include "data/data_transformation_facet.h"
 
 #include "mr/mr_control_manager.h"

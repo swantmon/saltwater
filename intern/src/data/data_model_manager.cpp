@@ -14,7 +14,7 @@
 #include "base/base_vector3.h"
 #include "base/base_pool.h"
 
-#include "data/data_actor_facet.h"
+#include "data/data_actor_type.h"
 #include "data/data_lod.h"
 #include "data/data_map.h"
 #include "data/data_material.h"

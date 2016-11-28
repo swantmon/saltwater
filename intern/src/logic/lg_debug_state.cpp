@@ -5,15 +5,6 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "camera/cam_control_manager.h"
-
-#include "data/data_actor_manager.h"
-#include "data/data_entity.h"
-#include "data/data_entity_manager.h"
-#include "data/data_map.h"
-#include "data/data_material_manager.h"
-#include "data/data_model_manager.h"
-
 #include "graphic/gfx_debug_interface.h"
 
 #include "gui/gui_event_handler.h"

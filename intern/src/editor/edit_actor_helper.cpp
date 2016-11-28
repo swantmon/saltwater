@@ -6,12 +6,13 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_actor_facet.h"
-#include "data/data_actor_manager.h"
+#include "data/data_actor_type.h"
+#include "data/data_camera_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
 #include "data/data_material_manager.h"
+#include "data/data_mesh_facet.h"
 #include "data/data_model_manager.h"
 #include "data/data_texture_manager.h"
 #include "data/data_transformation_facet.h"
@@ -154,7 +155,7 @@ namespace
         pTransformationFacet->SetScale   (Base::Float3(1.0f));
         pTransformationFacet->SetRotation(Base::Float3(0.0f, 0.0f, 0.0f));
 
-        Dt::CCameraActorFacet* pFacet = Dt::ActorManager::CreateCameraActor();
+        Dt::CCameraActorFacet* pFacet = Dt::CameraManager::CreateCameraActor();
 
         rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
 

@@ -10,8 +10,7 @@
 #include "camera/cam_control_manager.h"
 #include "camera/cam_game_control.h"
 
-#include "data/data_actor_facet.h"
-#include "data/data_actor_manager.h"
+#include "data/data_actor_type.h"
 #include "data/data_ar_controller_manager.h"
 #include "data/data_bloom_manager.h"
 #include "data/data_dof_manager.h"
@@ -23,6 +22,9 @@
 #include "data/data_light_type.h"
 #include "data/data_map.h"
 #include "data/data_material_manager.h"
+#include "data/data_mesh_manager.h"
+#include "data/data_ar_mesh_manager.h"
+#include "data/data_camera_manager.h"
 #include "data/data_model_manager.h"
 #include "data/data_plugin_type.h"
 #include "data/data_point_light_manager.h"
@@ -124,7 +126,7 @@ namespace
             pTransformationFacet->SetScale(Base::Float3(1.0f));
             pTransformationFacet->SetRotation(Base::Float3(0.0f, 0.0f, 0.0f));
 
-            Dt::CCameraActorFacet* pFacet = Dt::ActorManager::CreateCameraActor();
+            Dt::CCameraActorFacet* pFacet = Dt::CameraManager::CreateCameraActor();
 
             pFacet->SetMainCamera(true);
 

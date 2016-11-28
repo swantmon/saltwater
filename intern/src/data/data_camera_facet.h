@@ -1,86 +1,12 @@
-//
-//  data_actor_facet.h
-//  data
-//
-//  Created by Tobias Schwandt on 23/03/16.
-//  Copyright © 2016 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
 
 #include "base/base_aabb2.h"
 #include "base/base_matrix3x3.h"
 
-#include "data/data_lod.h"
-
 namespace Dt
 {
-    class CMesh;
-    class CMaterial;
-} // namespace Dt
-
-namespace Dt
-{
-    struct SActorType
-    {
-        enum Enum
-        {
-            Node,
-            Mesh,
-            AR,
-            Camera,
-            NumberOfTypes,
-            UndefinedType = -1,
-        };
-    };
-} // namespace Dt
-
-namespace Dt
-{
-    class CMeshActorFacet
-    {
-    public:
-
-        void SetMesh(CMesh* _pModel);
-        CMesh* GetMesh();
-
-        void SetMaterial(unsigned int _Surface, CMaterial* _pMaterial);
-        CMaterial* GetMaterial(unsigned int _Surface);
-
-    public:
-
-        CMeshActorFacet();
-        ~CMeshActorFacet();
-
-    private:
-
-        CMesh*     m_pModel;
-        CMaterial* m_pMaterial[CLOD::s_NumberOfSurfaces];
-    };
-} // namespace Dt
-
-namespace Dt
-{
-    class CARActorFacet
-    {
-    public:
-
-        void SetModel(CMesh* _pModel);
-        CMesh* GetModel();
-
-        void SetMaterial(unsigned int _Surface, CMaterial* _pMaterial);
-        CMaterial* GetMaterial(unsigned int _Surface);
-
-    public:
-
-        CARActorFacet();
-        ~CARActorFacet();
-
-    private:
-
-        CMesh*     m_pModel;
-        CMaterial* m_pMaterial[CLOD::s_NumberOfSurfaces];
-    };
+    class CTexture2D;
 } // namespace Dt
 
 namespace Dt

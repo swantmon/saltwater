@@ -19,9 +19,6 @@
     <ClInclude Include="..\..\..\src\data\data_model.h">
       <Filter>models</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_model_facet.h">
-      <Filter>models</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_model_manager.h">
       <Filter>models</Filter>
     </ClInclude>
@@ -34,9 +31,6 @@
     <ClInclude Include="..\..\..\src\data\data_transformation_facet.h">
       <Filter>map\entity\facets\transformation</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_actor_facet.h">
-      <Filter>map\actors</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_hierarchy_facet.h">
       <Filter>map\entity\facets\hierarchy</Filter>
     </ClInclude>
@@ -45,9 +39,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_surface.h">
       <Filter>models</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_actor_manager.h">
-      <Filter>map\actors</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_texture_1d.h">
       <Filter>textures</Filter>
@@ -161,6 +152,27 @@
     <ClInclude Include="..\..\..\src\data\data_fx_type.h">
       <Filter>map\fx</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_mesh_manager.h">
+      <Filter>map\actors\mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_mesh_facet.h">
+      <Filter>map\actors\mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_camera_manager.h">
+      <Filter>map\actors\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_ar_mesh_manager.h">
+      <Filter>map\actors\ar mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_ar_mesh_facet.h">
+      <Filter>map\actors\ar mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_camera_facet.h">
+      <Filter>map\actors\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_actor_type.h">
+      <Filter>map\actors</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\data\data_entity_manager.cpp">
@@ -178,14 +190,8 @@
     <ClCompile Include="..\..\..\src\data\data_transformation_facet.cpp">
       <Filter>map\entity\facets\transformation</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_actor_facet.cpp">
-      <Filter>map\actors</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_hierarchy_facet.cpp">
       <Filter>map\entity\facets\hierarchy</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_actor_manager.cpp">
-      <Filter>map\actors</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_entity.cpp">
       <Filter>map\entity</Filter>
@@ -299,6 +305,24 @@
     <ClCompile Include="..\..\..\src\data\data_bloom_manager.cpp">
       <Filter>map\fx\bloom</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_mesh_manager.cpp">
+      <Filter>map\actors\mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_mesh_facet.cpp">
+      <Filter>map\actors\mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_camera_manager.cpp">
+      <Filter>map\actors\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_ar_mesh_manager.cpp">
+      <Filter>map\actors\ar mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_ar_mesh_facet.cpp">
+      <Filter>map\actors\ar mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_camera_facet.cpp">
+      <Filter>map\actors\camera</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="map">
@@ -378,6 +402,18 @@
     </Filter>
     <Filter Include="map\fx\volume fog">
       <UniqueIdentifier>{0456c7d1-ffb4-4a56-916b-44ea551038cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\actors\node">
+      <UniqueIdentifier>{d838610a-1186-493d-8adf-b3078c1c2f14}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\actors\mesh">
+      <UniqueIdentifier>{4810099f-6ede-482d-b04b-ad6e69f2d148}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\actors\ar mesh">
+      <UniqueIdentifier>{274cc1ac-0109-4d18-8e61-0cf6e4c713f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\actors\camera">
+      <UniqueIdentifier>{e6e96045-c296-40c6-b9f2-1f9f46701d11}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

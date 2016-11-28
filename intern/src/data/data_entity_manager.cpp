@@ -8,12 +8,13 @@
 
 #include "core/core_time.h"
 
-#include "data/data_actor_facet.h"
-#include "data/data_actor_manager.h"
+#include "data/data_actor_type.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_hierarchy_facet.h"
 #include "data/data_map.h"
+#include "data/data_mesh_facet.h"
+#include "data/data_mesh_manager.h"
 #include "data/data_model_manager.h"
 #include "data/data_transformation_facet.h"
 
@@ -205,7 +206,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
-            Dt::CMeshActorFacet* pModelActorFacet = ActorManager::CreateModelActor();
+            Dt::CMeshActorFacet* pModelActorFacet = MeshManager::CreateModelActor();
 
             pModelActorFacet->SetMesh(&rMesh);
 

@@ -5,14 +5,16 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_actor_manager.h"
+#include "data/data_ar_mesh_manager.h"
 #include "data/data_bloom_manager.h"
+#include "data/data_camera_manager.h"
 #include "data/data_dof_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_fxaa_manager.h"
 #include "data/data_light_probe_manager.h"
 #include "data/data_material_manager.h"
+#include "data/data_mesh_manager.h"
 #include "data/data_model_manager.h"
 #include "data/data_point_light_manager.h"
 #include "data/data_script_manager.h"
@@ -69,7 +71,9 @@ namespace
         Dt::SSAOManager      ::OnExit();
         Dt::SSRFXManager     ::OnExit();
         Dt::VolumeFogManager ::OnExit();
-        Dt::ActorManager     ::OnExit();
+        Dt::MeshManager      ::OnExit();
+        Dt::ARMeshManager    ::OnExit();
+        Dt::CameraManager    ::OnExit();
         Dt::EntityManager    ::OnExit();
         Dt::SunManager       ::OnExit();
         Dt::LightProbeManager::OnExit();

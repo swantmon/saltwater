@@ -4,9 +4,11 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_actor_manager.h"
+#include "data/data_ar_mesh_manager.h"
+#include "data/data_camera_manager.h"
 #include "data/data_entity_manager.h"
 #include "data/data_light_probe_manager.h"
+#include "data/data_mesh_manager.h"
 #include "data/data_point_light_manager.h"
 #include "data/data_script_manager.h"
 #include "data/data_sky_manager.h"
@@ -52,7 +54,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Update data manager
         // -----------------------------------------------------------------------------
-        Dt::ActorManager     ::Update();
+        Dt::MeshManager      ::Update();
+        Dt::ARMeshManager    ::Update();
+        Dt::CameraManager    ::Update();
         Dt::EntityManager    ::Update();
         Dt::SunManager       ::Update();
         Dt::LightProbeManager::Update();

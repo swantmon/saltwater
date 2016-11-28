@@ -4,7 +4,8 @@
 #include "camera/cam_control_manager.h"
 #include "camera/cam_game_control.h"
 
-#include "data/data_actor_facet.h"
+#include "data/data_actor_type.h"
+#include "data/data_camera_facet.h"
 #include "data/data_entity.h"
 #include "data/data_transformation_facet.h"
 

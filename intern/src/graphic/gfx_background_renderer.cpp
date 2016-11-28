@@ -11,7 +11,8 @@
 
 #include "core/core_time.h"
 
-#include "data/data_actor_facet.h"
+#include "data/data_actor_type.h"
+#include "data/data_camera_facet.h"
 #include "data/data_entity.h"
 #include "data/data_light_type.h"
 #include "data/data_map.h"

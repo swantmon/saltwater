@@ -6,7 +6,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_actor_facet.h"
+#include "data/data_actor_type.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
 #include "data/data_transformation_facet.h"
