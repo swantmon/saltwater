@@ -1,10 +1,3 @@
-//
-//  data_plugin_facet.h
-//  data
-//
-//  Created by Tobias Schwandt on 22/04/16.
-//  Copyright © 2016 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
 
@@ -18,19 +11,6 @@ namespace Dt
     class CTextureCube;
 } // namespace Dt
 
-namespace Dt
-{
-    struct SPluginType
-    {
-        enum Enum
-        {
-            ARControlManager,
-            ARTrackedObject,
-            NumberOfTypes,
-            UndefinedType = -1,
-        };
-    };
-} // namespace Dt
 
 namespace Dt
 {
@@ -114,33 +94,5 @@ namespace Dt
         Base::CharString  m_CameraParameterFile;
         Base::CharString  m_Configuration;
         SMarker           m_Marker[s_MaxNumberOfMarker];
-    };
-} // namespace Dt
-
-namespace Dt
-{
-    class CARTrackedObjectPluginFacet
-    {
-    public:
-
-        void SetUID(unsigned int _UID);
-        unsigned int GetUID() const;
-
-        void SetAppearCounter(unsigned int _AppearCounter);
-        unsigned int GetAppearCounter() const;
-
-        void SetIsFound(bool _Flag);
-        bool IsFound() const;
-
-    public:
-
-        CARTrackedObjectPluginFacet();
-        ~CARTrackedObjectPluginFacet();
-
-    private:
-
-        bool         m_IsFound;
-        unsigned int m_UID;
-        unsigned int m_AppearCounter;
     };
 } // namespace Dt

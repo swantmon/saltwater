@@ -73,12 +73,6 @@
     <ClInclude Include="..\..\..\src\data\data_data_behavior.h">
       <Filter>textures</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_plugin_facet.h">
-      <Filter>map\plugins</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_plugin_manager.h">
-      <Filter>map\plugins</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_precompiled.h" />
     <ClInclude Include="..\..\..\src\data\data_script_facet.h">
       <Filter>map\scripts</Filter>
@@ -118,6 +112,21 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_light_type.h">
       <Filter>map\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_ar_controller_facet.h">
+      <Filter>map\plugins\AR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_ar_controller_manager.h">
+      <Filter>map\plugins\AR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_ar_tracked_object_facet.h">
+      <Filter>map\plugins\AR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_ar_tracked_object_manager.h">
+      <Filter>map\plugins\AR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_plugin_type.h">
+      <Filter>map\plugins</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -169,12 +178,6 @@
     <ClCompile Include="..\..\..\src\data\data_texture_manager.cpp">
       <Filter>textures</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_plugin_facet.cpp">
-      <Filter>map\plugins</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_plugin_manager.cpp">
-      <Filter>map\plugins</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_precompiled.cpp" />
     <ClCompile Include="..\..\..\src\data\data_script_manager.cpp">
       <Filter>map\scripts</Filter>
@@ -220,6 +223,18 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_sky_manager.cpp">
       <Filter>map\lights\sky</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_ar_controller_facet.cpp">
+      <Filter>map\plugins\AR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_ar_controller_manager.cpp">
+      <Filter>map\plugins\AR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_ar_tracked_object_manager.cpp">
+      <Filter>map\plugins\AR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_ar_tracked_object_facet.cpp">
+      <Filter>map\plugins\AR</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -279,6 +294,9 @@
     </Filter>
     <Filter Include="map\lights\sun">
       <UniqueIdentifier>{e0f2f524-9458-45f1-8368-558fbbe75641}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\plugins\AR">
+      <UniqueIdentifier>{d67d8b33-b962-4ca4-945b-f24048380089}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

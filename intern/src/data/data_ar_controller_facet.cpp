@@ -3,7 +3,7 @@
 
 #include "base/base_memory.h"
 
-#include "data/data_Plugin_facet.h"
+#include "data/data_ar_controller_facet.h"
 
 namespace Dt
 {
@@ -162,63 +162,5 @@ namespace Dt
         assert(_Number >= 0 && _Number < s_MaxNumberOfMarker);
 
         return m_Marker[_Number];
-    }
-} // namespace Dt
-
-namespace Dt
-{
-    CARTrackedObjectPluginFacet::CARTrackedObjectPluginFacet()
-        : m_IsFound      (false)
-        , m_UID          (0)
-        , m_AppearCounter(0)
-    {
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CARTrackedObjectPluginFacet::~CARTrackedObjectPluginFacet()
-    {
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CARTrackedObjectPluginFacet::SetUID(unsigned int _UID)
-    {
-        m_UID = _UID;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    unsigned int CARTrackedObjectPluginFacet::GetUID() const
-    {
-        return m_UID;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CARTrackedObjectPluginFacet::SetAppearCounter(unsigned int _AppearCounter)
-    {
-        m_AppearCounter = _AppearCounter;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    unsigned int CARTrackedObjectPluginFacet::GetAppearCounter() const
-    {
-        return m_AppearCounter;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CARTrackedObjectPluginFacet::SetIsFound(bool _Flag)
-    {
-        m_IsFound = _Flag;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    bool CARTrackedObjectPluginFacet::IsFound() const
-    {
-        return m_IsFound;
     }
 } // namespace Dt

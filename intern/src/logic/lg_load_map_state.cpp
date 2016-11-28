@@ -12,6 +12,7 @@
 
 #include "data/data_actor_facet.h"
 #include "data/data_actor_manager.h"
+#include "data/data_ar_controller_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_fx_facet.h"
@@ -21,8 +22,7 @@
 #include "data/data_map.h"
 #include "data/data_material_manager.h"
 #include "data/data_model_manager.h"
-#include "data/data_plugin_facet.h"
-#include "data/data_plugin_manager.h"
+#include "data/data_plugin_type.h"
 #include "data/data_point_light_manager.h"
 #include "data/data_light_probe_manager.h"
 #include "data/data_sun_manager.h"

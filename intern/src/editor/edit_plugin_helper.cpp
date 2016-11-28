@@ -6,10 +6,10 @@
 #include "base/base_uncopyable.h"
 
 #include "data/data_actor_facet.h"
+#include "data/data_ar_controller_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
-#include "data/data_plugin_facet.h"
-#include "data/data_plugin_manager.h"
+#include "data/data_plugin_type.h"
 #include "data/data_texture_manager.h"
 
 #include "editor/edit_plugin_helper.h"
@@ -138,7 +138,7 @@ namespace
 
         rEntity.SetWorldPosition(Base::Float3(0.0f, 0.0f, 0.0f));
 
-        Dt::CARControllerPluginFacet* pFacet = Dt::PluginManager::CreateARControllerPlugin();
+        Dt::CARControllerPluginFacet* pFacet = Dt::ARControllerManager::CreateARControllerPlugin();
 
         pFacet->SetCameraEntity       (0);
         pFacet->SetConfiguration      ("-device=WinDS -flipV");
