@@ -5,9 +5,9 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_ar_mesh_manager.h"
+#include "data/data_ar_actor_manager.h"
 #include "data/data_bloom_manager.h"
-#include "data/data_camera_manager.h"
+#include "data/data_camera_actor_manager.h"
 #include "data/data_dof_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
@@ -62,24 +62,24 @@ namespace
         // -----------------------------------------------------------------------------
         // Data
         // -----------------------------------------------------------------------------
-        Dt::TextureManager   ::OnExit();
-        Dt::MaterialManager  ::OnExit();
-        Dt::ModelManager     ::OnExit();
-        Dt::BloomManager     ::OnExit();
-        Dt::DOFManager       ::OnExit();
-        Dt::FXAAManager      ::OnExit();
-        Dt::SSAOManager      ::OnExit();
-        Dt::SSRFXManager     ::OnExit();
-        Dt::VolumeFogManager ::OnExit();
-        Dt::MeshManager      ::OnExit();
-        Dt::ARMeshManager    ::OnExit();
-        Dt::CameraManager    ::OnExit();
-        Dt::EntityManager    ::OnExit();
-        Dt::SunManager       ::OnExit();
-        Dt::LightProbeManager::OnExit();
-        Dt::PointLightManager::OnExit();
-        Dt::SkyManager       ::OnExit();
-        Dt::ScriptManager    ::OnExit();
+        Dt::TextureManager    ::OnExit();
+        Dt::MaterialManager   ::OnExit();
+        Dt::ModelManager      ::OnExit();
+        Dt::BloomManager      ::OnExit();
+        Dt::DOFManager        ::OnExit();
+        Dt::FXAAManager       ::OnExit();
+        Dt::SSAOManager       ::OnExit();
+        Dt::SSRFXManager      ::OnExit();
+        Dt::VolumeFogManager  ::OnExit();
+        Dt::MeshActorManager  ::OnExit();
+        Dt::ARActorManager    ::OnExit();
+        Dt::CameraActorManager::OnExit();
+        Dt::EntityManager     ::OnExit();
+        Dt::SunManager        ::OnExit();
+        Dt::LightProbeManager ::OnExit();
+        Dt::PointLightManager ::OnExit();
+        Dt::SkyManager        ::OnExit();
+        Dt::ScriptManager     ::OnExit();
 
         return Lg::Exit::SResult::Exit;
     }

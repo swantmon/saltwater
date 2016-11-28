@@ -5,9 +5,9 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_ar_mesh_manager.h"
+#include "data/data_ar_actor_manager.h"
 #include "data/data_bloom_manager.h"
-#include "data/data_camera_manager.h"
+#include "data/data_camera_actor_manager.h"
 #include "data/data_dof_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
@@ -52,24 +52,24 @@ namespace
         // -----------------------------------------------------------------------------
         // Data
         // -----------------------------------------------------------------------------
-        Dt::MeshManager::OnStart();
-        Dt::ARMeshManager::OnStart();
-        Dt::CameraManager::OnStart();
-        Dt::EntityManager    ::OnStart();
-        Dt::SunManager       ::OnStart();
-        Dt::LightProbeManager::OnStart();
-        Dt::PointLightManager::OnStart();
-        Dt::SkyManager       ::OnStart();
-        Dt::BloomManager     ::OnStart();
-        Dt::DOFManager       ::OnStart();
-        Dt::FXAAManager      ::OnStart();
-        Dt::SSAOManager      ::OnStart();
-        Dt::SSRFXManager     ::OnStart();
-        Dt::VolumeFogManager ::OnStart();
-        Dt::ModelManager     ::OnStart();
-        Dt::MaterialManager  ::OnStart();
-        Dt::ScriptManager    ::OnStart();
-        Dt::TextureManager   ::OnStart();
+        Dt::MeshActorManager  ::OnStart();
+        Dt::ARActorManager     ::OnStart();
+        Dt::CameraActorManager::OnStart();
+        Dt::EntityManager     ::OnStart();
+        Dt::SunManager        ::OnStart();
+        Dt::LightProbeManager ::OnStart();
+        Dt::PointLightManager ::OnStart();
+        Dt::SkyManager        ::OnStart();
+        Dt::BloomManager      ::OnStart();
+        Dt::DOFManager        ::OnStart();
+        Dt::FXAAManager       ::OnStart();
+        Dt::SSAOManager       ::OnStart();
+        Dt::SSRFXManager      ::OnStart();
+        Dt::VolumeFogManager  ::OnStart();
+        Dt::ModelManager      ::OnStart();
+        Dt::MaterialManager   ::OnStart();
+        Dt::ScriptManager     ::OnStart();
+        Dt::TextureManager    ::OnStart();
 
         // -----------------------------------------------------------------------------
         // Logic

@@ -4,8 +4,8 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_ar_mesh_manager.h"
-#include "data/data_camera_manager.h"
+#include "data/data_ar_actor_manager.h"
+#include "data/data_camera_actor_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_light_probe_manager.h"
@@ -46,14 +46,14 @@ namespace
         // -----------------------------------------------------------------------------
         // Clear entities
         // -----------------------------------------------------------------------------
-        Dt::MeshManager      ::Clear();
-        Dt::ARMeshManager    ::Clear();
-        Dt::CameraManager    ::Clear();
-        Dt::EntityManager    ::Clear();
-        Dt::SunManager       ::Clear();
-        Dt::LightProbeManager::Clear();
-        Dt::PointLightManager::Clear();
-        Dt::SkyManager       ::Clear();
+        Dt::MeshActorManager       ::Clear();
+        Dt::ARActorManager     ::Clear();
+        Dt::CameraActorManager::Clear();
+        Dt::EntityManager     ::Clear();
+        Dt::SunManager        ::Clear();
+        Dt::LightProbeManager ::Clear();
+        Dt::PointLightManager ::Clear();
+        Dt::SkyManager        ::Clear();
         
         return Lg::UnloadMap::SResult::UnloadMap;
     }

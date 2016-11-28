@@ -1,11 +1,11 @@
 
 #pragma once
 
-#include "data/data_camera_facet.h"
+#include "data/data_camera_actor_facet.h"
 
 namespace Dt
 {
-namespace CameraManager
+namespace CameraActorManager
 {
     void OnStart();
     void OnExit();
@@ -15,5 +15,5 @@ namespace CameraManager
     CCameraActorFacet* CreateCameraActor();
 
     void Update();
-} // namespace CameraManager
+} // namespace CameraActorManager
 } // namespace Dt

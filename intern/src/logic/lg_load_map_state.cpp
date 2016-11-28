@@ -23,8 +23,8 @@
 #include "data/data_map.h"
 #include "data/data_material_manager.h"
 #include "data/data_mesh_manager.h"
-#include "data/data_ar_mesh_manager.h"
-#include "data/data_camera_manager.h"
+#include "data/data_ar_actor_manager.h"
+#include "data/data_camera_actor_manager.h"
 #include "data/data_model_manager.h"
 #include "data/data_plugin_type.h"
 #include "data/data_point_light_manager.h"
@@ -126,7 +126,7 @@ namespace
             pTransformationFacet->SetScale(Base::Float3(1.0f));
             pTransformationFacet->SetRotation(Base::Float3(0.0f, 0.0f, 0.0f));
 
-            Dt::CCameraActorFacet* pFacet = Dt::CameraManager::CreateCameraActor();
+            Dt::CCameraActorFacet* pFacet = Dt::CameraActorManager::CreateCameraActor();
 
             pFacet->SetMainCamera(true);
 

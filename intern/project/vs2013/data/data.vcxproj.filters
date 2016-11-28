@@ -155,23 +155,23 @@
     <ClInclude Include="..\..\..\src\data\data_mesh_manager.h">
       <Filter>map\actors\mesh</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_mesh_facet.h">
-      <Filter>map\actors\mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_camera_manager.h">
-      <Filter>map\actors\camera</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_ar_mesh_manager.h">
-      <Filter>map\actors\ar mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_ar_mesh_facet.h">
-      <Filter>map\actors\ar mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_camera_facet.h">
-      <Filter>map\actors\camera</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_actor_type.h">
       <Filter>map\actors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_ar_actor_facet.h">
+      <Filter>map\actors\ar mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_ar_actor_manager.h">
+      <Filter>map\actors\ar mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_camera_actor_facet.h">
+      <Filter>map\actors\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_camera_actor_manager.h">
+      <Filter>map\actors\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_mesh_actor_facet.h">
+      <Filter>map\actors\mesh</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -308,20 +308,20 @@
     <ClCompile Include="..\..\..\src\data\data_mesh_manager.cpp">
       <Filter>map\actors\mesh</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_mesh_facet.cpp">
+    <ClCompile Include="..\..\..\src\data\data_ar_actor_facet.cpp">
+      <Filter>map\actors\ar mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_ar_actor_manager.cpp">
+      <Filter>map\actors\ar mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_camera_actor_facet.cpp">
+      <Filter>map\actors\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_camera_actor_manager.cpp">
+      <Filter>map\actors\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_mesh_actor_facet.cpp">
       <Filter>map\actors\mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_camera_manager.cpp">
-      <Filter>map\actors\camera</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_ar_mesh_manager.cpp">
-      <Filter>map\actors\ar mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_ar_mesh_facet.cpp">
-      <Filter>map\actors\ar mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_camera_facet.cpp">
-      <Filter>map\actors\camera</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -13,7 +13,7 @@
 #include "data/data_entity_manager.h"
 #include "data/data_hierarchy_facet.h"
 #include "data/data_map.h"
-#include "data/data_mesh_facet.h"
+#include "data/data_mesh_actor_facet.h"
 #include "data/data_mesh_manager.h"
 #include "data/data_model_manager.h"
 #include "data/data_transformation_facet.h"
@@ -206,7 +206,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
-            Dt::CMeshActorFacet* pModelActorFacet = MeshManager::CreateModelActor();
+            Dt::CMeshActorFacet* pModelActorFacet = MeshActorManager::CreateMeshActor();
 
             pModelActorFacet->SetMesh(&rMesh);
 

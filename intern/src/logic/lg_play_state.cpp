@@ -13,8 +13,8 @@
 #include "core/core_time.h"
 
 #include "data/data_actor_type.h"
-#include "data/data_ar_mesh_manager.h"
-#include "data/data_camera_manager.h"
+#include "data/data_ar_actor_manager.h"
+#include "data/data_camera_actor_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_light_probe_manager.h"
@@ -99,15 +99,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Update data manager
         // -----------------------------------------------------------------------------
-        Dt::MeshManager      ::Update();
-        Dt::ARMeshManager    ::Update();
-        Dt::CameraManager    ::Update();
-        Dt::EntityManager    ::Update();
-        Dt::SunManager       ::Update();
-        Dt::LightProbeManager::Update();
-        Dt::PointLightManager::Update();
-        Dt::SkyManager       ::Update();
-        Dt::ScriptManager    ::Update();
+        Dt::MeshActorManager  ::Update();
+        Dt::ARActorManager    ::Update();
+        Dt::CameraActorManager::Update();
+        Dt::EntityManager     ::Update();
+        Dt::SunManager        ::Update();
+        Dt::LightProbeManager ::Update();
+        Dt::PointLightManager ::Update();
+        Dt::SkyManager        ::Update();
+        Dt::ScriptManager     ::Update();
 
         Lg::ScriptManager::Update();
 

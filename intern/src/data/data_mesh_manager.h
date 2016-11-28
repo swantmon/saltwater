@@ -1,18 +1,18 @@
 
 #pragma once
 
-#include "data/data_mesh_facet.h"
+#include "data/data_mesh_actor_facet.h"
 
 namespace Dt
 {
-namespace MeshManager
+namespace MeshActorManager
 {
     void OnStart();
     void OnExit();
 
     void Clear();
 
-    CMeshActorFacet* CreateModelActor();
+    CMeshActorFacet* CreateMeshActor();
 
     void Update();
 } // namespace MeshManager

@@ -5,22 +5,22 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_camera_facet.h"
-#include "data/data_camera_manager.h"
+#include "data/data_ar_actor_facet.h"
+#include "data/data_ar_actor_manager.h"
 
 using namespace Dt;
-using namespace Dt::CameraManager;
+using namespace Dt::ARActorManager;
 
 namespace
 {
-    class CDtCameraManager : private Base::CUncopyable
+    class CDtARMeshManager : private Base::CUncopyable
     {
-        BASE_SINGLETON_FUNC(CDtCameraManager);
+        BASE_SINGLETON_FUNC(CDtARMeshManager);
         
     public:
         
-        CDtCameraManager();
-        ~CDtCameraManager();
+        CDtARMeshManager();
+        ~CDtARMeshManager();
         
     public:
         
@@ -29,73 +29,73 @@ namespace
 
         void Clear();
 
-        CCameraActorFacet* CreateCameraActor();
+        CARActorFacet* CreateARActor();
 
         void Update();
         
     private:
         
-        class CInternCameraActorFacet : public CCameraActorFacet
+        class CInternARActorFacet : public CARActorFacet
         {
         private:
-            friend class CDtCameraManager;
+            friend class CDtARMeshManager;
         };
         
     private:
-
-        typedef Base::CPool<CInternCameraActorFacet, 8> CCameraActorFacetPool;
+        
+        typedef Base::CPool<CInternARActorFacet, 8> CARActorFacetPool;
 
     private:
         
-        CCameraActorFacetPool m_CameraActorFacets;
+        CARActorFacetPool     m_ARActorFacets;
     };
 } // namespace
 
 namespace
 {
-    CDtCameraManager::CDtCameraManager()
-        : m_CameraActorFacets()
+    CDtARMeshManager::CDtARMeshManager()
+        : m_ARActorFacets()
     {
     }
     
     // -----------------------------------------------------------------------------
     
-    CDtCameraManager::~CDtCameraManager()
+    CDtARMeshManager::~CDtARMeshManager()
     {
     }
 
     // -----------------------------------------------------------------------------
 
-    void CDtCameraManager::OnStart()
+    void CDtARMeshManager::OnStart()
     {
     }
 
     // -----------------------------------------------------------------------------
 
-    void CDtCameraManager::OnExit()
+    void CDtARMeshManager::OnExit()
     {
         Clear();
     }
 
     // -----------------------------------------------------------------------------
 
-    void CDtCameraManager::Clear()
+    void CDtARMeshManager::Clear()
     {
-        m_CameraActorFacets.Clear();
+        m_ARActorFacets.Clear();
     }
 
     // -----------------------------------------------------------------------------
 
-    CCameraActorFacet* CDtCameraManager::CreateCameraActor()
+    CARActorFacet* CDtARMeshManager::CreateARActor()
     {
-        CInternCameraActorFacet& rDataCameraActorFacet = m_CameraActorFacets.Allocate();
+        CInternARActorFacet& rDataARActorFacet = m_ARActorFacets.Allocate();
 
-        return &rDataCameraActorFacet;
+        return &rDataARActorFacet;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CDtCameraManager::Update()
+    void CDtARMeshManager::Update()
     {
 
     }
@@ -103,39 +103,39 @@ namespace
 
 namespace Dt
 {
-namespace CameraManager
+namespace ARActorManager
 {
     void OnStart()
     {
-        CDtCameraManager::GetInstance().OnStart();
+        CDtARMeshManager::GetInstance().OnStart();
     }
 
     // -----------------------------------------------------------------------------
 
     void OnExit()
     {
-        CDtCameraManager::GetInstance().OnExit();
+        CDtARMeshManager::GetInstance().OnExit();
     }
 
     // -----------------------------------------------------------------------------
 
     void Clear()
     {
-        CDtCameraManager::GetInstance().Clear();
+        CDtARMeshManager::GetInstance().Clear();
     }
 
     // -----------------------------------------------------------------------------
 
-    CCameraActorFacet* CreateCameraActor()
+    CARActorFacet* CreateARActor()
     {
-        return CDtCameraManager::GetInstance().CreateCameraActor();
+        return CDtARMeshManager::GetInstance().CreateARActor();
     }
     
     // -----------------------------------------------------------------------------
 
     void Update()
     {
-    	CDtCameraManager::GetInstance().Update();
+    	CDtARMeshManager::GetInstance().Update();
     }
-} // namespace CameraManager
+} // namespace ARMeshManager
 } // namespace Dt

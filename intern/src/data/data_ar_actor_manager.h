@@ -1,11 +1,11 @@
 
 #pragma once
 
-#include "data/data_ar_mesh_facet.h"
+#include "data/data_ar_actor_facet.h"
 
 namespace Dt
 {
-namespace ARMeshManager
+namespace ARActorManager
 {
     void OnStart();
     void OnExit();

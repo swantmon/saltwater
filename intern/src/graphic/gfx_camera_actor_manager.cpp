@@ -10,12 +10,12 @@
 #include "core/core_time.h"
 
 #include "data/data_actor_type.h"
-#include "data/data_ar_mesh_facet.h"
-#include "data/data_camera_facet.h"
+#include "data/data_ar_actor_facet.h"
+#include "data/data_camera_actor_facet.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
-#include "data/data_mesh_facet.h"
+#include "data/data_mesh_actor_facet.h"
 #include "data/data_texture_2d.h"
 
 #include "graphic/gfx_camera_actor_facet.h"

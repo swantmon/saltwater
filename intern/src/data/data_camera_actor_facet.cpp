@@ -1,7 +1,7 @@
 
 #include "data/data_precompiled.h"
 
-#include "data/data_camera_facet.h"
+#include "data/data_camera_actor_facet.h"
 
 namespace Dt
 {

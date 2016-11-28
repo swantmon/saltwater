@@ -5,14 +5,14 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_mesh_facet.h"
+#include "data/data_mesh_actor_facet.h"
 #include "data/data_mesh_manager.h"
 
 #include <assert.h>
 #include <vector>
 
 using namespace Dt;
-using namespace Dt::MeshManager;
+using namespace Dt::MeshActorManager;
 
 namespace
 {
@@ -106,7 +106,7 @@ namespace
 
 namespace Dt
 {
-namespace MeshManager
+namespace MeshActorManager
 {
     void OnStart()
     {
@@ -129,7 +129,7 @@ namespace MeshManager
 
     // -----------------------------------------------------------------------------
 
-    CMeshActorFacet* CreateModelActor()
+    CMeshActorFacet* CreateMeshActor()
     {
         return CDtMeshManager::GetInstance().CreateModelActor();
     }
