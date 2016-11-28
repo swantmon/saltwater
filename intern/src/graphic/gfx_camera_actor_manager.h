@@ -3,7 +3,7 @@
 
 namespace Gfx
 {
-namespace ARMeshFacetManager
+namespace CameraActorManager
 {
     void OnStart();
     void OnExit();
@@ -11,5 +11,5 @@ namespace ARMeshFacetManager
     void Clear();
 
     void Update();
-} // namespace ARMeshFacetManager
+} // namespace CameraActorManager
 } // namespace Gfx

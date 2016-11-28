@@ -6,11 +6,11 @@
 #include "base/base_uncopyable.h"
 
 #include "graphic/gfx_actor_renderer.h"
-#include "graphic/gfx_ar_mesh_facet_manager.h"
+#include "graphic/gfx_ar_actor_manager.h"
 #include "graphic/gfx_ar_renderer.h"
 #include "graphic/gfx_background_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_camera_facet_manager.h"
+#include "graphic/gfx_camera_actor_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_exit_state.h"
@@ -22,7 +22,7 @@
 #include "graphic/gfx_light_sun_renderer.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_material_manager.h"
-#include "graphic/gfx_mesh_facet_manager.h"
+#include "graphic/gfx_mesh_actor_manager.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_particle_renderer.h"
 #include "graphic/gfx_point_light_manager.h"
@@ -103,9 +103,9 @@ namespace
         PointLightManager ::OnExit();
         LightProbeManager ::OnExit();
         SkyManager        ::OnExit();
-        ARMeshFacetManager::OnExit();
-        MeshFacetManager  ::OnExit();
-        CameraFacetManager::OnExit();
+        ARActorManager    ::OnExit();
+        MeshActorManager  ::OnExit();
+        CameraActorManager::OnExit();
         SunManager        ::OnExit();
         MeshManager       ::OnExit();
         MaterialManager   ::OnExit();

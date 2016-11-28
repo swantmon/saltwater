@@ -3,7 +3,7 @@
 
 namespace Gfx
 {
-namespace CameraFacetManager
+namespace ARActorManager
 {
     void OnStart();
     void OnExit();
@@ -11,5 +11,5 @@ namespace CameraFacetManager
     void Clear();
 
     void Update();
-} // namespace CameraFacetManager
+} // namespace ARActorManager
 } // namespace Gfx

@@ -3,11 +3,11 @@
 
 #include "base/base_memory.h"
 
-#include "graphic/gfx_ar_mesh_facet.h"
+#include "graphic/gfx_mesh_actor_facet.h"
 
 namespace Gfx
 {
-    CARActorFacet::CARActorFacet()
+    CMeshActorFacet::CMeshActorFacet()
         : m_ModelPtr()
     {
         Base::CMemory::Zero(m_MaterialPtrs, sizeof(CMaterialPtr) * CLOD::s_NumberOfSurfaces);
@@ -15,7 +15,7 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    CARActorFacet::~CARActorFacet()
+    CMeshActorFacet::~CMeshActorFacet()
     {
         m_ModelPtr = 0;
 
@@ -27,21 +27,21 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    void CARActorFacet::SetMesh(CMeshPtr _ModelPtr)
+    void CMeshActorFacet::SetMesh(CMeshPtr _ModelPtr)
     {
         m_ModelPtr = _ModelPtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    CMeshPtr CARActorFacet::GetMesh()
+    CMeshPtr CMeshActorFacet::GetMesh()
     {
         return m_ModelPtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CARActorFacet::SetMaterial(unsigned int _Surface, CMaterialPtr _MaterialPtr)
+    void CMeshActorFacet::SetMaterial(unsigned int _Surface, CMaterialPtr _MaterialPtr)
     {
         assert(_Surface >= 0 && _Surface < CLOD::s_NumberOfSurfaces);
 
@@ -50,7 +50,7 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    CMaterialPtr CARActorFacet::GetMaterial(unsigned int _Surface)
+    CMaterialPtr CMeshActorFacet::GetMaterial(unsigned int _Surface)
     {
         return m_MaterialPtrs[_Surface];
     }

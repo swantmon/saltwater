@@ -1,7 +1,7 @@
 
 #include "graphic/gfx_precompiled.h"
 
-#include "graphic/gfx_camera_facet.h"
+#include "graphic/gfx_camera_actor_facet.h"
 
 namespace Gfx
 {

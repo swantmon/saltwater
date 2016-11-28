@@ -18,8 +18,8 @@
 #include "data/data_mesh_facet.h"
 #include "data/data_texture_2d.h"
 
-#include "graphic/gfx_camera_facet.h"
-#include "graphic/gfx_camera_facet_manager.h"
+#include "graphic/gfx_camera_actor_facet.h"
+#include "graphic/gfx_camera_actor_manager.h"
 #include "graphic/gfx_texture_manager.h"
 
 using namespace Gfx;
@@ -248,7 +248,7 @@ namespace
 
 namespace Gfx
 {
-namespace CameraFacetManager
+namespace CameraActorManager
 {
     void OnStart()
     {
@@ -275,5 +275,5 @@ namespace CameraFacetManager
     {
         CGfxCameraFacetManager::GetInstance().Update();
     }
-} // namespace CameraFacetManager
+} // namespace CameraActorManager
 } // namespace Gfx

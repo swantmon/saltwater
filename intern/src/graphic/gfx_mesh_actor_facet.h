@@ -24,7 +24,7 @@ namespace Gfx
 
     protected:
 
-        CMeshPtr    m_ModelPtr;
+        CMeshPtr     m_ModelPtr;
         CMaterialPtr m_MaterialPtrs[CLOD::s_NumberOfSurfaces];
     };
 } // namespace Gfx

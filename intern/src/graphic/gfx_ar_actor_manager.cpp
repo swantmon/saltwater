@@ -18,8 +18,8 @@
 #include "data/data_mesh_facet.h"
 #include "data/data_texture_2d.h"
 
-#include "graphic/gfx_ar_mesh_facet.h"
-#include "graphic/gfx_ar_mesh_facet_manager.h"
+#include "graphic/gfx_ar_actor_facet.h"
+#include "graphic/gfx_ar_actor_manager.h"
 #include "graphic/gfx_material_manager.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_texture_manager.h"
@@ -247,7 +247,7 @@ namespace
 
 namespace Gfx
 {
-namespace ARMeshFacetManager
+namespace ARActorManager
 {
     void OnStart()
     {
@@ -274,5 +274,5 @@ namespace ARMeshFacetManager
     {
         CGfxARMeshManager::GetInstance().Update();
     }
-} // namespace ARMeshFacetManager
+} // namespace ARActorManager
 } // namespace Gfx

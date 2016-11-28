@@ -221,22 +221,22 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_background_renderer.cpp">
       <Filter>engine\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_ar_mesh_facet.cpp">
+    <ClCompile Include="..\..\..\src\graphic\gfx_ar_actor_facet.cpp">
       <Filter>engine\map\actors\ar mesh</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_ar_mesh_facet_manager.cpp">
+    <ClCompile Include="..\..\..\src\graphic\gfx_camera_actor_facet.cpp">
+      <Filter>engine\map\actors\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_camera_actor_manager.cpp">
+      <Filter>engine\map\actors\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_ar_actor_manager.cpp">
       <Filter>engine\map\actors\ar mesh</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_camera_facet.cpp">
-      <Filter>engine\map\actors\camera</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_camera_facet_manager.cpp">
-      <Filter>engine\map\actors\camera</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_mesh_facet.cpp">
+    <ClCompile Include="..\..\..\src\graphic\gfx_mesh_actor_manager.cpp">
       <Filter>engine\map\actors\mesh</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_mesh_facet_manager.cpp">
+    <ClCompile Include="..\..\..\src\graphic\gfx_mesh_actor_facet.cpp">
       <Filter>engine\map\actors\mesh</Filter>
     </ClCompile>
   </ItemGroup>
@@ -506,22 +506,22 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_background_renderer.h">
       <Filter>engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_ar_mesh_facet.h">
+    <ClInclude Include="..\..\..\src\graphic\gfx_ar_actor_facet.h">
       <Filter>engine\map\actors\ar mesh</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_ar_mesh_facet_manager.h">
+    <ClInclude Include="..\..\..\src\graphic\gfx_camera_actor_facet.h">
+      <Filter>engine\map\actors\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_camera_actor_manager.h">
+      <Filter>engine\map\actors\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_ar_actor_manager.h">
       <Filter>engine\map\actors\ar mesh</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_camera_facet.h">
-      <Filter>engine\map\actors\camera</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_camera_facet_manager.h">
-      <Filter>engine\map\actors\camera</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_mesh_facet.h">
+    <ClInclude Include="..\..\..\src\graphic\gfx_mesh_actor_manager.h">
       <Filter>engine\map\actors\mesh</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_mesh_facet_manager.h">
+    <ClInclude Include="..\..\..\src\graphic\gfx_mesh_actor_facet.h">
       <Filter>engine\map\actors\mesh</Filter>
     </ClInclude>
   </ItemGroup>

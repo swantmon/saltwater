@@ -3,7 +3,7 @@
 
 namespace Gfx
 {
-namespace MeshFacetManager
+namespace MeshActorManager
 {
     void OnStart();
     void OnExit();
@@ -11,5 +11,5 @@ namespace MeshFacetManager
     void Clear();
 
     void Update();
-} // namespace MeshFacetManager
+} // namespace MeshActorManager
 } // namespace Gfx

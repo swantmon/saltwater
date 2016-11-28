@@ -16,7 +16,7 @@
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_main.h"
-#include "graphic/gfx_mesh_facet.h"
+#include "graphic/gfx_mesh_actor_facet.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_sampler_manager.h"
