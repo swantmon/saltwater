@@ -166,12 +166,6 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_material.cpp">
       <Filter>engine\materials</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_actor_facet.cpp">
-      <Filter>engine\map\actors</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_actor_manager.cpp">
-      <Filter>engine\map\actors</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_light_sun_renderer.cpp">
       <Filter>engine\renderer</Filter>
     </ClCompile>
@@ -226,6 +220,24 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_background_renderer.cpp">
       <Filter>engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_ar_mesh_facet.cpp">
+      <Filter>engine\map\actors\ar mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_ar_mesh_facet_manager.cpp">
+      <Filter>engine\map\actors\ar mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_camera_facet.cpp">
+      <Filter>engine\map\actors\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_camera_facet_manager.cpp">
+      <Filter>engine\map\actors\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_mesh_facet.cpp">
+      <Filter>engine\map\actors\mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_mesh_facet_manager.cpp">
+      <Filter>engine\map\actors\mesh</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -436,12 +448,6 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_material.h">
       <Filter>engine\materials</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_actor_facet.h">
-      <Filter>engine\map\actors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_actor_manager.h">
-      <Filter>engine\map\actors</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_light_sun_renderer.h">
       <Filter>engine\renderer</Filter>
     </ClInclude>
@@ -499,6 +505,24 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_background_renderer.h">
       <Filter>engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_ar_mesh_facet.h">
+      <Filter>engine\map\actors\ar mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_ar_mesh_facet_manager.h">
+      <Filter>engine\map\actors\ar mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_camera_facet.h">
+      <Filter>engine\map\actors\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_camera_facet_manager.h">
+      <Filter>engine\map\actors\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_mesh_facet.h">
+      <Filter>engine\map\actors\mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_mesh_facet_manager.h">
+      <Filter>engine\map\actors\mesh</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -654,6 +678,15 @@
     </Filter>
     <Filter Include="engine\map\lights\sun">
       <UniqueIdentifier>{fd022fc1-0bf0-4614-b478-05be935c009c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\map\actors\ar mesh">
+      <UniqueIdentifier>{a77d8a36-61aa-4dc5-81a3-382c74614c84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\map\actors\mesh">
+      <UniqueIdentifier>{0443e64d-1c8b-4e07-86ed-68412f045b36}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\map\actors\camera">
+      <UniqueIdentifier>{9e400c53-a975-4c85-9026-d24010c20ccc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

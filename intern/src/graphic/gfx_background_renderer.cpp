@@ -18,9 +18,9 @@
 #include "data/data_map.h"
 #include "data/data_model_manager.h"
 
-#include "graphic/gfx_actor_facet.h"
 #include "graphic/gfx_background_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
+#include "graphic/gfx_camera_facet.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_main.h"

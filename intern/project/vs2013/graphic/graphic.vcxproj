@@ -19,13 +19,17 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\graphic\gfx_actor_facet.cpp" />
-    <ClCompile Include="..\..\..\src\graphic\gfx_actor_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_application_interface.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_ar_mesh_facet.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_ar_mesh_facet_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_ar_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_camera_facet.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_camera_facet_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_edit_state.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_light_probe_facet.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_light_probe_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_mesh_facet.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_mesh_facet_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_point_light_facet.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_point_light_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_sky_facet.cpp" />
@@ -102,12 +106,16 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_view_port_set.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\graphic\gfx_actor_facet.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_actor_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_application_interface.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_ar_mesh_facet.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_ar_mesh_facet_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_camera_facet.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_camera_facet_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_edit_state.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_mesh_facet.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_mesh_facet_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_point_light_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_point_light_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_sky_facet.h" />

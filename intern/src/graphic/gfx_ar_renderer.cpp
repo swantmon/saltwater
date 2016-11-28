@@ -15,7 +15,7 @@
 #include "data/data_map.h"
 #include "data/data_transformation_facet.h"
 
-#include "graphic/gfx_actor_facet.h"
+#include "graphic/gfx_ar_mesh_facet.h"
 #include "graphic/gfx_ar_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"

@@ -4,10 +4,11 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "graphic/gfx_actor_manager.h"
 #include "graphic/gfx_actor_renderer.h"
+#include "graphic/gfx_ar_mesh_facet_manager.h"
 #include "graphic/gfx_ar_renderer.h"
 #include "graphic/gfx_background_renderer.h"
+#include "graphic/gfx_camera_facet_manager.h"
 #include "graphic/gfx_fog_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_area_renderer.h"
@@ -15,6 +16,7 @@
 #include "graphic/gfx_light_probe_manager.h"
 #include "graphic/gfx_light_sun_renderer.h"
 #include "graphic/gfx_main.h"
+#include "graphic/gfx_mesh_facet_manager.h"
 #include "graphic/gfx_particle_renderer.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_play_state.h"
@@ -68,11 +70,13 @@ namespace
         // -----------------------------------------------------------------------------
         // Update graphic entities
         // -----------------------------------------------------------------------------
-        ActorManager     ::Update();
-        SunManager       ::Update();
-        SkyManager       ::Update();
-        LightProbeManager::Update();
-        PointLightManager::Update();
+        ARMeshFacetManager::Update();
+        MeshFacetManager  ::Update();
+        CameraFacetManager::Update();
+        SunManager        ::Update();
+        SkyManager        ::Update();
+        LightProbeManager ::Update();
+        PointLightManager ::Update();
 
         // -----------------------------------------------------------------------------
         // Update graphic
