@@ -222,7 +222,7 @@
       <Filter>engine\renderer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_ar_actor_facet.cpp">
-      <Filter>engine\map\actors\ar mesh</Filter>
+      <Filter>engine\map\actors\ar</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_camera_actor_facet.cpp">
       <Filter>engine\map\actors\camera</Filter>
@@ -231,7 +231,7 @@
       <Filter>engine\map\actors\camera</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_ar_actor_manager.cpp">
-      <Filter>engine\map\actors\ar mesh</Filter>
+      <Filter>engine\map\actors\ar</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_mesh_actor_manager.cpp">
       <Filter>engine\map\actors\mesh</Filter>
@@ -507,7 +507,7 @@
       <Filter>engine\renderer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_ar_actor_facet.h">
-      <Filter>engine\map\actors\ar mesh</Filter>
+      <Filter>engine\map\actors\ar</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_camera_actor_facet.h">
       <Filter>engine\map\actors\camera</Filter>
@@ -516,7 +516,7 @@
       <Filter>engine\map\actors\camera</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_ar_actor_manager.h">
-      <Filter>engine\map\actors\ar mesh</Filter>
+      <Filter>engine\map\actors\ar</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_mesh_actor_manager.h">
       <Filter>engine\map\actors\mesh</Filter>
@@ -679,14 +679,14 @@
     <Filter Include="engine\map\lights\sun">
       <UniqueIdentifier>{fd022fc1-0bf0-4614-b478-05be935c009c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="engine\map\actors\ar mesh">
-      <UniqueIdentifier>{a77d8a36-61aa-4dc5-81a3-382c74614c84}</UniqueIdentifier>
-    </Filter>
     <Filter Include="engine\map\actors\mesh">
       <UniqueIdentifier>{0443e64d-1c8b-4e07-86ed-68412f045b36}</UniqueIdentifier>
     </Filter>
     <Filter Include="engine\map\actors\camera">
       <UniqueIdentifier>{9e400c53-a975-4c85-9026-d24010c20ccc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\map\actors\ar">
+      <UniqueIdentifier>{a77d8a36-61aa-4dc5-81a3-382c74614c84}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

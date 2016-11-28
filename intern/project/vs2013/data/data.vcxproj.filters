@@ -159,10 +159,10 @@
       <Filter>map\actors</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_ar_actor_facet.h">
-      <Filter>map\actors\ar mesh</Filter>
+      <Filter>map\actors\ar</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_ar_actor_manager.h">
-      <Filter>map\actors\ar mesh</Filter>
+      <Filter>map\actors\ar</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_camera_actor_facet.h">
       <Filter>map\actors\camera</Filter>
@@ -309,10 +309,10 @@
       <Filter>map\actors\mesh</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_ar_actor_facet.cpp">
-      <Filter>map\actors\ar mesh</Filter>
+      <Filter>map\actors\ar</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_ar_actor_manager.cpp">
-      <Filter>map\actors\ar mesh</Filter>
+      <Filter>map\actors\ar</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_camera_actor_facet.cpp">
       <Filter>map\actors\camera</Filter>
@@ -409,11 +409,11 @@
     <Filter Include="map\actors\mesh">
       <UniqueIdentifier>{4810099f-6ede-482d-b04b-ad6e69f2d148}</UniqueIdentifier>
     </Filter>
-    <Filter Include="map\actors\ar mesh">
-      <UniqueIdentifier>{274cc1ac-0109-4d18-8e61-0cf6e4c713f3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="map\actors\camera">
       <UniqueIdentifier>{e6e96045-c296-40c6-b9f2-1f9f46701d11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\actors\ar">
+      <UniqueIdentifier>{274cc1ac-0109-4d18-8e61-0cf6e4c713f3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
