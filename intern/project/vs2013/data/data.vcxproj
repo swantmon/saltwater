@@ -28,8 +28,9 @@
     <ClInclude Include="..\..\..\src\data\data_fx_facet.h" />
     <ClInclude Include="..\..\..\src\data\data_fx_manager.h" />
     <ClInclude Include="..\..\..\src\data\data_hierarchy_facet.h" />
-    <ClInclude Include="..\..\..\src\data\data_light_facet.h" />
-    <ClInclude Include="..\..\..\src\data\data_light_manager.h" />
+    <ClInclude Include="..\..\..\src\data\data_light_type.h" />
+    <ClInclude Include="..\..\..\src\data\data_light_probe_facet.h" />
+    <ClInclude Include="..\..\..\src\data\data_light_probe_manager.h" />
     <ClInclude Include="..\..\..\src\data\data_lod.h" />
     <ClInclude Include="..\..\..\src\data\data_map.h" />
     <ClInclude Include="..\..\..\src\data\data_material.h" />
@@ -40,11 +41,17 @@
     <ClInclude Include="..\..\..\src\data\data_model_manager.h" />
     <ClInclude Include="..\..\..\src\data\data_plugin_facet.h" />
     <ClInclude Include="..\..\..\src\data\data_plugin_manager.h" />
+    <ClInclude Include="..\..\..\src\data\data_point_light_facet.h" />
+    <ClInclude Include="..\..\..\src\data\data_point_light_manager.h" />
     <ClInclude Include="..\..\..\src\data\data_precompiled.h" />
     <ClInclude Include="..\..\..\src\data\data_region.h" />
     <ClInclude Include="..\..\..\src\data\data_script_interface.h" />
     <ClInclude Include="..\..\..\src\data\data_script_facet.h" />
     <ClInclude Include="..\..\..\src\data\data_script_manager.h" />
+    <ClInclude Include="..\..\..\src\data\data_sky_facet.h" />
+    <ClInclude Include="..\..\..\src\data\data_sky_manager.h" />
+    <ClInclude Include="..\..\..\src\data\data_sun_facet.h" />
+    <ClInclude Include="..\..\..\src\data\data_sun_manager.h" />
     <ClInclude Include="..\..\..\src\data\data_surface.h" />
     <ClInclude Include="..\..\..\src\data\data_texture_1d.h" />
     <ClInclude Include="..\..\..\src\data\data_texture_2d.h" />
@@ -61,8 +68,8 @@
     <ClCompile Include="..\..\..\src\data\data_fx_facet.cpp" />
     <ClCompile Include="..\..\..\src\data\data_fx_manager.cpp" />
     <ClCompile Include="..\..\..\src\data\data_hierarchy_facet.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_light_facet.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_light_manager.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_light_probe_facet.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_light_probe_manager.cpp" />
     <ClCompile Include="..\..\..\src\data\data_lod.cpp" />
     <ClCompile Include="..\..\..\src\data\data_map.cpp" />
     <ClCompile Include="..\..\..\src\data\data_material.cpp" />
@@ -72,6 +79,8 @@
     <ClCompile Include="..\..\..\src\data\data_model_manager.cpp" />
     <ClCompile Include="..\..\..\src\data\data_plugin_facet.cpp" />
     <ClCompile Include="..\..\..\src\data\data_plugin_manager.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_point_light_facet.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_point_light_manager.cpp" />
     <ClCompile Include="..\..\..\src\data\data_precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -80,6 +89,10 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_script_facet.cpp" />
     <ClCompile Include="..\..\..\src\data\data_script_manager.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_sky_facet.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_sky_manager.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_sun_facet.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_sun_manager.cpp" />
     <ClCompile Include="..\..\..\src\data\data_surface.cpp" />
     <ClCompile Include="..\..\..\src\data\data_texture_1d.cpp" />
     <ClCompile Include="..\..\..\src\data\data_texture_2d.cpp" />

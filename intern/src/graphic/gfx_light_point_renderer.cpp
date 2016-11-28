@@ -7,9 +7,10 @@
 #include "base/base_uncopyable.h"
 
 #include "data/data_entity.h"
-#include "data/data_light_facet.h"
+#include "data/data_light_type.h"
 #include "data/data_map.h"
 #include "data/data_transformation_facet.h"
+#include "data/data_point_light_facet.h"
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"

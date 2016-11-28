@@ -6,7 +6,8 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_light_facet.h"
+#include "data/data_light_probe_facet.h"
+#include "data/data_light_type.h"
 #include "data/data_entity.h"
 #include "data/data_fx_facet.h"
 #include "data/data_map.h"

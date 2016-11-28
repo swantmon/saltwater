@@ -15,9 +15,12 @@
 #include "data/data_actor_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
-#include "data/data_light_facet.h"
-#include "data/data_light_manager.h"
+#include "data/data_light_type.h"
 #include "data/data_map.h"
+#include "data/data_point_light_manager.h"
+#include "data/data_light_probe_manager.h"
+#include "data/data_sun_manager.h"
+#include "data/data_sky_manager.h"
 #include "data/data_script_manager.h"
 
 #include "gui/gui_event_handler.h"
@@ -93,10 +96,13 @@ namespace
         // -----------------------------------------------------------------------------
         // Update data manager
         // -----------------------------------------------------------------------------
-        Dt::ActorManager ::Update();
-        Dt::EntityManager::Update();
-        Dt::LightManager ::Update();
-        Dt::ScriptManager::Update();
+        Dt::ActorManager     ::Update();
+        Dt::EntityManager    ::Update();
+        Dt::SunManager       ::Update();
+        Dt::LightProbeManager::Update();
+        Dt::PointLightManager::Update();
+        Dt::SkyManager       ::Update();
+        Dt::ScriptManager    ::Update();
 
         Lg::ScriptManager::Update();
 

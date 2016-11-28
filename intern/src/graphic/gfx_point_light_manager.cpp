@@ -10,9 +10,10 @@
 #include "data/data_actor_facet.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
-#include "data/data_light_facet.h"
+#include "data/data_light_type.h"
 #include "data/data_map.h"
 #include "data/data_model_manager.h"
+#include "data/data_point_light_facet.h"
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_actor_facet.h"

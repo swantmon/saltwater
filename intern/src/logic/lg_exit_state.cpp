@@ -9,10 +9,13 @@
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_fx_manager.h"
-#include "data/data_light_manager.h"
+#include "data/data_light_probe_manager.h"
 #include "data/data_material_manager.h"
 #include "data/data_model_manager.h"
+#include "data/data_point_light_manager.h"
 #include "data/data_script_manager.h"
+#include "data/data_sky_manager.h"
+#include "data/data_sun_manager.h"
 #include "data/data_texture_manager.h"
 
 #include "logic/lg_exit_state.h"
@@ -52,14 +55,17 @@ namespace
         // -----------------------------------------------------------------------------
         // Data
         // -----------------------------------------------------------------------------
-        Dt::TextureManager ::OnExit();
-        Dt::MaterialManager::OnExit();
-        Dt::ModelManager   ::OnExit();
-        Dt::FXManager      ::OnExit();
-        Dt::ActorManager   ::OnExit();
-        Dt::EntityManager  ::OnExit();
-        Dt::LightManager   ::OnExit();
-        Dt::ScriptManager   ::OnExit();
+        Dt::TextureManager   ::OnExit();
+        Dt::MaterialManager  ::OnExit();
+        Dt::ModelManager     ::OnExit();
+        Dt::FXManager        ::OnExit();
+        Dt::ActorManager     ::OnExit();
+        Dt::EntityManager    ::OnExit();
+        Dt::SunManager       ::OnExit();
+        Dt::LightProbeManager::OnExit();
+        Dt::PointLightManager::OnExit();
+        Dt::SkyManager       ::OnExit();
+        Dt::ScriptManager    ::OnExit();
 
         return Lg::Exit::SResult::Exit;
     }

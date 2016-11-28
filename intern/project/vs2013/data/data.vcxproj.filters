@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\data\data_light_facet.h">
-      <Filter>map\lights</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_entity.h">
       <Filter>map\entity</Filter>
     </ClInclude>
@@ -52,9 +49,6 @@
     <ClInclude Include="..\..\..\src\data\data_actor_manager.h">
       <Filter>map\actors</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_light_manager.h">
-      <Filter>map\lights</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_fx_manager.h">
       <Filter>map\fx</Filter>
     </ClInclude>
@@ -98,6 +92,33 @@
     <ClInclude Include="..\..\..\src\data\data_mesh.h">
       <Filter>models</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_point_light_facet.h">
+      <Filter>map\lights\point light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_point_light_manager.h">
+      <Filter>map\lights\point light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_light_probe_facet.h">
+      <Filter>map\lights\light probe</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_light_probe_manager.h">
+      <Filter>map\lights\light probe</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_sun_facet.h">
+      <Filter>map\lights\sun</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_sun_manager.h">
+      <Filter>map\lights\sun</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_sky_facet.h">
+      <Filter>map\lights\sky</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_sky_manager.h">
+      <Filter>map\lights\sky</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_light_type.h">
+      <Filter>map\lights</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\data\data_entity_manager.cpp">
@@ -118,17 +139,11 @@
     <ClCompile Include="..\..\..\src\data\data_actor_facet.cpp">
       <Filter>map\actors</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_light_facet.cpp">
-      <Filter>map\lights</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_hierarchy_facet.cpp">
       <Filter>map\entity\facets\hierarchy</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_actor_manager.cpp">
       <Filter>map\actors</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_light_manager.cpp">
-      <Filter>map\lights</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_entity.cpp">
       <Filter>map\entity</Filter>
@@ -182,6 +197,30 @@
     <ClCompile Include="..\..\..\src\data\data_mesh.cpp">
       <Filter>models</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_point_light_facet.cpp">
+      <Filter>map\lights\point light</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_point_light_manager.cpp">
+      <Filter>map\lights\point light</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_light_probe_facet.cpp">
+      <Filter>map\lights\light probe</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_light_probe_manager.cpp">
+      <Filter>map\lights\light probe</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_sun_facet.cpp">
+      <Filter>map\lights\sun</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_sun_manager.cpp">
+      <Filter>map\lights\sun</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_sky_facet.cpp">
+      <Filter>map\lights\sky</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_sky_manager.cpp">
+      <Filter>map\lights\sky</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="map">
@@ -228,6 +267,18 @@
     </Filter>
     <Filter Include="map\scripts">
       <UniqueIdentifier>{a0851fd6-c93a-42c8-a39a-0062d242c79b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\lights\light probe">
+      <UniqueIdentifier>{dd3080f5-fba1-4d78-b7d9-1aee5fc0d0c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\lights\point light">
+      <UniqueIdentifier>{8eda5cad-d4bb-458b-8e6b-178dda009f9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\lights\sky">
+      <UniqueIdentifier>{0ce16624-8746-4388-91ee-c41ffe8cb4d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\lights\sun">
+      <UniqueIdentifier>{e0f2f524-9458-45f1-8368-558fbbe75641}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

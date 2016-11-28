@@ -7,10 +7,13 @@
 
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
-#include "data/data_light_facet.h"
-#include "data/data_light_manager.h"
 #include "data/data_hierarchy_facet.h"
+#include "data/data_light_probe_manager.h"
+#include "data/data_light_type.h"
 #include "data/data_map.h"
+#include "data/data_point_light_manager.h"
+#include "data/data_sky_manager.h"
+#include "data/data_sun_manager.h"
 #include "data/data_texture_manager.h"
 #include "data/data_transformation_facet.h"
 
@@ -130,7 +133,7 @@ namespace
             pTransformationFacet->SetScale   (Base::Float3(1.0f));
             pTransformationFacet->SetRotation(Base::Float3(0.0f));
 
-            Dt::CPointLightFacet* pPointLightFacet = Dt::LightManager::CreatePointLight();
+            Dt::CPointLightFacet* pPointLightFacet = Dt::PointLightManager::CreatePointLight();
 
             pPointLightFacet->SetRefreshMode      (Dt::CPointLightFacet::Static);
             pPointLightFacet->SetShadowType       (Dt::CPointLightFacet::HardShadows);
@@ -174,7 +177,7 @@ namespace
             pTransformationFacet->SetScale   (Base::Float3(1.0f));
             pTransformationFacet->SetRotation(Base::Float3(0.0f));
 
-            Dt::CSunLightFacet* pSunLightFacet = Dt::LightManager::CreateSunLight();
+            Dt::CSunLightFacet* pSunLightFacet = Dt::SunManager::CreateSunLight();
 
             pSunLightFacet->EnableTemperature(false);
             pSunLightFacet->SetColor         (Base::Float3(1.0f, 1.0f, 1.0f));
@@ -234,7 +237,7 @@ namespace
             pTransformationFacet->SetScale   (Base::Float3(1.0f));
             pTransformationFacet->SetRotation(Base::Float3(0.0f));
 
-            Dt::CSkyFacet* pSkyboxFacet = Dt::LightManager::CreateSky();
+            Dt::CSkyFacet* pSkyboxFacet = Dt::SkyManager::CreateSky();
 
             pSkyboxFacet->SetType     (Dt::CSkyFacet::Panorama);
             pSkyboxFacet->SetPanorama (pPanoramaTexture);
@@ -259,14 +262,14 @@ namespace
 
             Dt::CEntity& rGlobalProbeLight = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            Dt::CLightProbeFacet* pGlobalProbeLightFacet = Dt::LightManager::CreateLightProbe();
+            Dt::CLightProbeFacet* pLightProbeFacet = Dt::LightProbeManager::CreateLightProbe();
 
-            pGlobalProbeLightFacet->SetRefreshMode(Dt::CLightProbeFacet::Static);
-            pGlobalProbeLightFacet->SetType       (Dt::CLightProbeFacet::Sky);
-            pGlobalProbeLightFacet->SetQuality    (Dt::CLightProbeFacet::PX512);
-            pGlobalProbeLightFacet->SetIntensity  (1.0f);
+            pLightProbeFacet->SetRefreshMode(Dt::CLightProbeFacet::Static);
+            pLightProbeFacet->SetType       (Dt::CLightProbeFacet::Sky);
+            pLightProbeFacet->SetQuality    (Dt::CLightProbeFacet::PX512);
+            pLightProbeFacet->SetIntensity  (1.0f);
 
-            rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pGlobalProbeLightFacet);
+            rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pLightProbeFacet);
 
             Dt::EntityManager::MarkEntityAsDirty(rGlobalProbeLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }

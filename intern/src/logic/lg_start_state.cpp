@@ -9,10 +9,13 @@
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_fx_manager.h"
-#include "data/data_light_manager.h"
+#include "data/data_light_probe_manager.h"
 #include "data/data_material_manager.h"
 #include "data/data_model_manager.h"
+#include "data/data_point_light_manager.h"
 #include "data/data_script_manager.h"
+#include "data/data_sky_manager.h"
+#include "data/data_sun_manager.h"
 #include "data/data_texture_manager.h"
 
 #include "logic/lg_script_manager.h"
@@ -42,14 +45,17 @@ namespace
         // -----------------------------------------------------------------------------
         // Data
         // -----------------------------------------------------------------------------
-        Dt::ActorManager   ::OnStart();
-        Dt::EntityManager  ::OnStart();
-        Dt::LightManager   ::OnStart();
-        Dt::FXManager      ::OnStart();
-        Dt::ModelManager   ::OnStart();
-        Dt::MaterialManager::OnStart();
-        Dt::ScriptManager   ::OnStart();
-        Dt::TextureManager ::OnStart();
+        Dt::ActorManager     ::OnStart();
+        Dt::EntityManager    ::OnStart();
+        Dt::SunManager       ::OnStart();
+        Dt::LightProbeManager::OnStart();
+        Dt::PointLightManager::OnStart();
+        Dt::SkyManager       ::OnStart();
+        Dt::FXManager        ::OnStart();
+        Dt::ModelManager     ::OnStart();
+        Dt::MaterialManager  ::OnStart();
+        Dt::ScriptManager    ::OnStart();
+        Dt::TextureManager   ::OnStart();
 
         // -----------------------------------------------------------------------------
         // Logic

@@ -14,16 +14,19 @@
 #include "data/data_actor_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
-#include "data/data_hierarchy_facet.h"
-#include "data/data_light_facet.h"
-#include "data/data_light_manager.h"
 #include "data/data_fx_facet.h"
 #include "data/data_fx_manager.h"
+#include "data/data_hierarchy_facet.h"
+#include "data/data_light_type.h"
 #include "data/data_map.h"
 #include "data/data_material_manager.h"
 #include "data/data_model_manager.h"
 #include "data/data_plugin_facet.h"
 #include "data/data_plugin_manager.h"
+#include "data/data_point_light_manager.h"
+#include "data/data_light_probe_manager.h"
+#include "data/data_sun_manager.h"
+#include "data/data_sky_manager.h"
 #include "data/data_script_facet.h"
 #include "data/data_script_manager.h"
 #include "data/data_texture_manager.h"
@@ -212,7 +215,7 @@ namespace
 
             rEnvironment.SetName("Environment");
 
-            Dt::CSkyFacet* pSkyboxFacet = Dt::LightManager::CreateSky();
+            Dt::CSkyFacet* pSkyboxFacet = Dt::SkyManager::CreateSky();
 
             pSkyboxFacet->SetType(Dt::CSkyFacet::Panorama);
             pSkyboxFacet->SetPanorama(pPanoramaTexture);
@@ -313,15 +316,15 @@ namespace
 
             Dt::CEntity& rGlobalProbeLight = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            rGlobalProbeLight.SetName("Global light probe");
+            rGlobalProbeLight.SetName("Light probe");
 
-            Dt::CLightProbeFacet* pGlobalProbeLightFacet = Dt::LightManager::CreateLightProbe();
+            Dt::CLightProbeFacet* pProbeLightFacet = Dt::LightProbeManager::CreateLightProbe();
 
-            pGlobalProbeLightFacet->SetType(Dt::CLightProbeFacet::Sky);
-            pGlobalProbeLightFacet->SetQuality(Dt::CLightProbeFacet::PX512);
-            pGlobalProbeLightFacet->SetIntensity(1.0f);
+            pProbeLightFacet->SetType(Dt::CLightProbeFacet::Sky);
+            pProbeLightFacet->SetQuality(Dt::CLightProbeFacet::PX512);
+            pProbeLightFacet->SetIntensity(1.0f);
 
-            rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pGlobalProbeLightFacet);
+            rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pProbeLightFacet);
 
             Dt::EntityManager::MarkEntityAsDirty(rGlobalProbeLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
@@ -346,7 +349,7 @@ namespace
             pTransformationFacet->SetScale   (Base::Float3(1.0f));
             pTransformationFacet->SetRotation(Base::Float3(0.0f));
 
-            Dt::CSunLightFacet* pSunLightFacet = Dt::LightManager::CreateSunLight();
+            Dt::CSunLightFacet* pSunLightFacet = Dt::SunManager::CreateSunLight();
 
             pSunLightFacet->EnableTemperature(false);
             pSunLightFacet->SetColor         (Base::Float3(1.0f, 1.0f, 1.0f));
