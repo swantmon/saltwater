@@ -5,8 +5,9 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "data/data_bloom_facet.h"
 #include "data/data_entity.h"
-#include "data/data_fx_facet.h"
+#include "data/data_fx_type.h"
 #include "data/data_map.h"
 
 #include "graphic/gfx_buffer_manager.h"

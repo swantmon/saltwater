@@ -5,12 +5,17 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "data/data_bloom_manager.h"
+#include "data/data_dof_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
-#include "data/data_fx_facet.h"
-#include "data/data_fx_manager.h"
+#include "data/data_fx_type.h"
+#include "data/data_fxaa_manager.h"
 #include "data/data_map.h"
+#include "data/data_ssao_manager.h"
+#include "data/data_ssr_manager.h"
 #include "data/data_transformation_facet.h"
+#include "data/data_volume_fog_manager.h"
 
 #include "editor/edit_effect_helper.h"
 
@@ -125,7 +130,7 @@ namespace
 
             Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            Dt::CBloomFXFacet* pEffectFacet = Dt::FXManager::CreateBloomFX();
+            Dt::CBloomFXFacet* pEffectFacet = Dt::BloomManager::CreateBloomFX();
 
             rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
 
@@ -146,7 +151,7 @@ namespace
 
             Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            Dt::CDOFFXFacet* pEffectFacet = Dt::FXManager::CreateDOFFX();
+            Dt::CDOFFXFacet* pEffectFacet = Dt::DOFManager::CreateDOFFX();
 
             rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
 
@@ -167,7 +172,7 @@ namespace
 
             Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            Dt::CFXAAFXFacet* pEffectFacet = Dt::FXManager::CreateFXAAFX();
+            Dt::CFXAAFXFacet* pEffectFacet = Dt::FXAAManager::CreateFXAAFX();
 
             rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
 
@@ -188,7 +193,7 @@ namespace
 
             Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            Dt::CSSRFXFacet* pEffectFacet = Dt::FXManager::CreateSSRFX();
+            Dt::CSSRFXFacet* pEffectFacet = Dt::SSRFXManager::CreateSSRFX();
 
             rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
 
@@ -209,7 +214,7 @@ namespace
 
             Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            Dt::CVolumeFogFXFacet* pEffectFacet = Dt::FXManager::CreateVolumeFogFX();
+            Dt::CVolumeFogFXFacet* pEffectFacet = Dt::VolumeFogManager::CreateVolumeFogFX();
 
             rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
 

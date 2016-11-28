@@ -6,17 +6,22 @@
 #include "base/base_uncopyable.h"
 
 #include "data/data_actor_manager.h"
+#include "data/data_bloom_manager.h"
+#include "data/data_dof_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
-#include "data/data_fx_manager.h"
+#include "data/data_fxaa_manager.h"
 #include "data/data_light_probe_manager.h"
 #include "data/data_material_manager.h"
 #include "data/data_model_manager.h"
 #include "data/data_point_light_manager.h"
 #include "data/data_script_manager.h"
 #include "data/data_sky_manager.h"
+#include "data/data_ssao_manager.h"
+#include "data/data_ssr_manager.h"
 #include "data/data_sun_manager.h"
 #include "data/data_texture_manager.h"
+#include "data/data_volume_fog_manager.h"
 
 #include "logic/lg_script_manager.h"
 #include "logic/lg_start_state.h"
@@ -51,7 +56,12 @@ namespace
         Dt::LightProbeManager::OnStart();
         Dt::PointLightManager::OnStart();
         Dt::SkyManager       ::OnStart();
-        Dt::FXManager        ::OnStart();
+        Dt::BloomManager     ::OnStart();
+        Dt::DOFManager       ::OnStart();
+        Dt::FXAAManager      ::OnStart();
+        Dt::SSAOManager      ::OnStart();
+        Dt::SSRFXManager     ::OnStart();
+        Dt::VolumeFogManager ::OnStart();
         Dt::ModelManager     ::OnStart();
         Dt::MaterialManager  ::OnStart();
         Dt::ScriptManager    ::OnStart();

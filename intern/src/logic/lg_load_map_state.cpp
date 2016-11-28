@@ -13,10 +13,12 @@
 #include "data/data_actor_facet.h"
 #include "data/data_actor_manager.h"
 #include "data/data_ar_controller_manager.h"
+#include "data/data_bloom_manager.h"
+#include "data/data_dof_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
-#include "data/data_fx_facet.h"
-#include "data/data_fx_manager.h"
+#include "data/data_fx_type.h"
+#include "data/data_fxaa_manager.h"
 #include "data/data_hierarchy_facet.h"
 #include "data/data_light_type.h"
 #include "data/data_map.h"
@@ -29,8 +31,11 @@
 #include "data/data_sky_manager.h"
 #include "data/data_script_facet.h"
 #include "data/data_script_manager.h"
+#include "data/data_ssao_manager.h"
+#include "data/data_ssr_manager.h"
 #include "data/data_texture_manager.h"
 #include "data/data_transformation_facet.h"
+#include "data/data_volume_fog_manager.h"
 
 #include "logic/lg_load_map_state.h"
 
@@ -240,7 +245,7 @@ namespace
 
             rEffectEntity.SetName("FXAA");
 
-            Dt::CFXAAFXFacet* pEffectFacet = Dt::FXManager::CreateFXAAFX();
+            Dt::CFXAAFXFacet* pEffectFacet = Dt::FXAAManager::CreateFXAAFX();
 
             rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
 
@@ -258,7 +263,7 @@ namespace
 
             rEffectEntity.SetName("SSR");
 
-            Dt::CSSRFXFacet* pEffectFacet = Dt::FXManager::CreateSSRFX();
+            Dt::CSSRFXFacet* pEffectFacet = Dt::SSRFXManager::CreateSSRFX();
 
             rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
 
@@ -276,7 +281,7 @@ namespace
 
             rEffectEntity.SetName("Bloom");
 
-            Dt::CBloomFXFacet* pEffectFacet = Dt::FXManager::CreateBloomFX();
+            Dt::CBloomFXFacet* pEffectFacet = Dt::BloomManager::CreateBloomFX();
 
             pEffectFacet->SetSize(1);
             pEffectFacet->SetIntensity(0.5f);
@@ -297,7 +302,7 @@ namespace
 
             rEffectEntity.SetName("SSAO");
 
-            Dt::CSSAOFXFacet* pEffectFacet = Dt::FXManager::CreateSSAOFX();
+            Dt::CSSAOFXFacet* pEffectFacet = Dt::SSAOManager::CreateSSAOFX();
 
             rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
 

@@ -6,17 +6,22 @@
 #include "base/base_uncopyable.h"
 
 #include "data/data_actor_manager.h"
+#include "data/data_bloom_manager.h"
+#include "data/data_dof_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
-#include "data/data_fx_manager.h"
+#include "data/data_fxaa_manager.h"
 #include "data/data_light_probe_manager.h"
 #include "data/data_material_manager.h"
 #include "data/data_model_manager.h"
 #include "data/data_point_light_manager.h"
 #include "data/data_script_manager.h"
 #include "data/data_sky_manager.h"
+#include "data/data_ssao_manager.h"
+#include "data/data_ssr_manager.h"
 #include "data/data_sun_manager.h"
 #include "data/data_texture_manager.h"
+#include "data/data_volume_fog_manager.h"
 
 #include "logic/lg_exit_state.h"
 #include "logic/lg_script_manager.h"
@@ -58,7 +63,12 @@ namespace
         Dt::TextureManager   ::OnExit();
         Dt::MaterialManager  ::OnExit();
         Dt::ModelManager     ::OnExit();
-        Dt::FXManager        ::OnExit();
+        Dt::BloomManager     ::OnExit();
+        Dt::DOFManager       ::OnExit();
+        Dt::FXAAManager      ::OnExit();
+        Dt::SSAOManager      ::OnExit();
+        Dt::SSRFXManager     ::OnExit();
+        Dt::VolumeFogManager ::OnExit();
         Dt::ActorManager     ::OnExit();
         Dt::EntityManager    ::OnExit();
         Dt::SunManager       ::OnExit();

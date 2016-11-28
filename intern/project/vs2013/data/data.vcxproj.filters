@@ -49,12 +49,6 @@
     <ClInclude Include="..\..\..\src\data\data_actor_manager.h">
       <Filter>map\actors</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_fx_manager.h">
-      <Filter>map\fx</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_fx_facet.h">
-      <Filter>map\fx</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_texture_1d.h">
       <Filter>textures</Filter>
     </ClInclude>
@@ -128,6 +122,45 @@
     <ClInclude Include="..\..\..\src\data\data_plugin_type.h">
       <Filter>map\plugins</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_volume_fog_manager.h">
+      <Filter>map\fx\volume fog</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_volume_fog_facet.h">
+      <Filter>map\fx\volume fog</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_ssr_manager.h">
+      <Filter>map\fx\ssr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_ssr_facet.h">
+      <Filter>map\fx\ssr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_ssao_manager.h">
+      <Filter>map\fx\ssao</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_ssao_facet.h">
+      <Filter>map\fx\ssao</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_fxaa_manager.h">
+      <Filter>map\fx\fxaa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_fxaa_facet.h">
+      <Filter>map\fx\fxaa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_dof_manager.h">
+      <Filter>map\fx\dof</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_dof_facet.h">
+      <Filter>map\fx\dof</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_bloom_manager.h">
+      <Filter>map\fx\bloom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_bloom_facet.h">
+      <Filter>map\fx\bloom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_fx_type.h">
+      <Filter>map\fx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\data\data_entity_manager.cpp">
@@ -156,12 +189,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_entity.cpp">
       <Filter>map\entity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_fx_facet.cpp">
-      <Filter>map\fx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_fx_manager.cpp">
-      <Filter>map\fx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_texture_1d.cpp">
       <Filter>textures</Filter>
@@ -236,6 +263,42 @@
     <ClCompile Include="..\..\..\src\data\data_ar_tracked_object_facet.cpp">
       <Filter>map\plugins\AR</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_volume_fog_facet.cpp">
+      <Filter>map\fx\volume fog</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_volume_fog_manager.cpp">
+      <Filter>map\fx\volume fog</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_ssr_facet.cpp">
+      <Filter>map\fx\ssr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_ssr_manager.cpp">
+      <Filter>map\fx\ssr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_ssao_facet.cpp">
+      <Filter>map\fx\ssao</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_ssao_manager.cpp">
+      <Filter>map\fx\ssao</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_fxaa_facet.cpp">
+      <Filter>map\fx\fxaa</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_fxaa_manager.cpp">
+      <Filter>map\fx\fxaa</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_dof_facet.cpp">
+      <Filter>map\fx\dof</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_dof_manager.cpp">
+      <Filter>map\fx\dof</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_bloom_facet.cpp">
+      <Filter>map\fx\bloom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_bloom_manager.cpp">
+      <Filter>map\fx\bloom</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="map">
@@ -297,6 +360,24 @@
     </Filter>
     <Filter Include="map\plugins\AR">
       <UniqueIdentifier>{d67d8b33-b962-4ca4-945b-f24048380089}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\fx\bloom">
+      <UniqueIdentifier>{3a7ffc7a-f08e-47b5-a9fe-e4d2c6579b1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\fx\dof">
+      <UniqueIdentifier>{dc4a0cbe-7703-497d-973f-49ed484d2443}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\fx\fxaa">
+      <UniqueIdentifier>{cc4d74eb-3e0b-4be2-b81b-8ce81125f7f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\fx\ssao">
+      <UniqueIdentifier>{82c81c63-4158-48e8-9ee4-6dc0558f41de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\fx\ssr">
+      <UniqueIdentifier>{22d3eaa0-0bc0-4be8-8182-1f5a4a7b79ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\fx\volume fog">
+      <UniqueIdentifier>{0456c7d1-ffb4-4a56-916b-44ea551038cd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

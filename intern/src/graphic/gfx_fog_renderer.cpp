@@ -10,11 +10,12 @@
 #include "camera/cam_control_manager.h"
 
 #include "data/data_entity.h"
-#include "data/data_fx_facet.h"
+#include "data/data_fx_type.h"
 #include "data/data_light_type.h"
 #include "data/data_map.h"
 #include "data/data_model_manager.h"
 #include "data/data_sun_facet.h"
+#include "data/data_volume_fog_facet.h"
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"

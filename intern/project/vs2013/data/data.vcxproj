@@ -25,12 +25,17 @@
     <ClInclude Include="..\..\..\src\data\data_ar_controller_manager.h" />
     <ClInclude Include="..\..\..\src\data\data_ar_tracked_object_facet.h" />
     <ClInclude Include="..\..\..\src\data\data_ar_tracked_object_manager.h" />
+    <ClInclude Include="..\..\..\src\data\data_bloom_facet.h" />
+    <ClInclude Include="..\..\..\src\data\data_bloom_manager.h" />
     <ClInclude Include="..\..\..\src\data\data_data_behavior.h" />
+    <ClInclude Include="..\..\..\src\data\data_dof_facet.h" />
+    <ClInclude Include="..\..\..\src\data\data_dof_manager.h" />
     <ClInclude Include="..\..\..\src\data\data_entity.h" />
     <ClInclude Include="..\..\..\src\data\data_entity_folder.h" />
     <ClInclude Include="..\..\..\src\data\data_entity_manager.h" />
-    <ClInclude Include="..\..\..\src\data\data_fx_facet.h" />
-    <ClInclude Include="..\..\..\src\data\data_fx_manager.h" />
+    <ClInclude Include="..\..\..\src\data\data_fxaa_facet.h" />
+    <ClInclude Include="..\..\..\src\data\data_fxaa_manager.h" />
+    <ClInclude Include="..\..\..\src\data\data_fx_type.h" />
     <ClInclude Include="..\..\..\src\data\data_hierarchy_facet.h" />
     <ClInclude Include="..\..\..\src\data\data_light_type.h" />
     <ClInclude Include="..\..\..\src\data\data_light_probe_facet.h" />
@@ -53,6 +58,10 @@
     <ClInclude Include="..\..\..\src\data\data_script_manager.h" />
     <ClInclude Include="..\..\..\src\data\data_sky_facet.h" />
     <ClInclude Include="..\..\..\src\data\data_sky_manager.h" />
+    <ClInclude Include="..\..\..\src\data\data_ssao_facet.h" />
+    <ClInclude Include="..\..\..\src\data\data_ssao_manager.h" />
+    <ClInclude Include="..\..\..\src\data\data_ssr_facet.h" />
+    <ClInclude Include="..\..\..\src\data\data_ssr_manager.h" />
     <ClInclude Include="..\..\..\src\data\data_sun_facet.h" />
     <ClInclude Include="..\..\..\src\data\data_sun_manager.h" />
     <ClInclude Include="..\..\..\src\data\data_surface.h" />
@@ -62,6 +71,8 @@
     <ClInclude Include="..\..\..\src\data\data_texture_cube.h" />
     <ClInclude Include="..\..\..\src\data\data_texture_manager.h" />
     <ClInclude Include="..\..\..\src\data\data_transformation_facet.h" />
+    <ClInclude Include="..\..\..\src\data\data_volume_fog_facet.h" />
+    <ClInclude Include="..\..\..\src\data\data_volume_fog_manager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\data\data_actor_facet.cpp" />
@@ -70,10 +81,14 @@
     <ClCompile Include="..\..\..\src\data\data_ar_controller_manager.cpp" />
     <ClCompile Include="..\..\..\src\data\data_ar_tracked_object_facet.cpp" />
     <ClCompile Include="..\..\..\src\data\data_ar_tracked_object_manager.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_bloom_facet.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_bloom_manager.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_dof_facet.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_dof_manager.cpp" />
     <ClCompile Include="..\..\..\src\data\data_entity.cpp" />
     <ClCompile Include="..\..\..\src\data\data_entity_manager.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_fx_facet.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_fx_manager.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_fxaa_facet.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_fxaa_manager.cpp" />
     <ClCompile Include="..\..\..\src\data\data_hierarchy_facet.cpp" />
     <ClCompile Include="..\..\..\src\data\data_light_probe_facet.cpp" />
     <ClCompile Include="..\..\..\src\data\data_light_probe_manager.cpp" />
@@ -96,6 +111,10 @@
     <ClCompile Include="..\..\..\src\data\data_script_manager.cpp" />
     <ClCompile Include="..\..\..\src\data\data_sky_facet.cpp" />
     <ClCompile Include="..\..\..\src\data\data_sky_manager.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_ssao_facet.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_ssao_manager.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_ssr_facet.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_ssr_manager.cpp" />
     <ClCompile Include="..\..\..\src\data\data_sun_facet.cpp" />
     <ClCompile Include="..\..\..\src\data\data_sun_manager.cpp" />
     <ClCompile Include="..\..\..\src\data\data_surface.cpp" />
@@ -105,6 +124,8 @@
     <ClCompile Include="..\..\..\src\data\data_texture_cube.cpp" />
     <ClCompile Include="..\..\..\src\data\data_texture_manager.cpp" />
     <ClCompile Include="..\..\..\src\data\data_transformation_facet.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_volume_fog_facet.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_volume_fog_manager.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{969D14C4-1E9D-4FEB-BA0A-247F244871E6}</ProjectGuid>
