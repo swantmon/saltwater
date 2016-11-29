@@ -374,7 +374,7 @@ namespace MR
         // -----------------------------------------------------------------------------
         // Environment approximation
         // -----------------------------------------------------------------------------
-        ProcessEnvironmentApproximation();
+        // ProcessEnvironmentApproximation();
     }
 
 	void CKinectControl::ProcessEnvironmentApproximation()

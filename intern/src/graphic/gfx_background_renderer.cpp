@@ -17,6 +17,7 @@
 #include "data/data_light_type.h"
 #include "data/data_map.h"
 #include "data/data_model_manager.h"
+#include "data/data_sky_facet.h"
 
 #include "graphic/gfx_background_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
@@ -608,11 +609,48 @@ namespace
         }
 
         // -----------------------------------------------------------------------------
-        // Prepare value from sky / environment
-        // TODO: Get intensity from camera or environment
+        // Find sky entity
         // -----------------------------------------------------------------------------
         float HDRIntensity = 1.0f;
 
+        Dt::Map::CEntityIterator CurrentEntity;
+        Dt::Map::CEntityIterator EndOfEntities;
+
+        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
+        EndOfEntities = Dt::Map::EntitiesEnd();
+
+        Dt::CEntity* pSkyEntity = 0;
+
+        for (; CurrentEntity != EndOfEntities; )
+        {
+            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+
+            // -----------------------------------------------------------------------------
+            // Get graphic facet
+            // -----------------------------------------------------------------------------
+            if (rCurrentEntity.GetType() == Dt::SLightType::Sky)
+            {
+                pSkyEntity = &rCurrentEntity;
+            }
+
+            // -----------------------------------------------------------------------------
+            // Next entity
+            // -----------------------------------------------------------------------------
+            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
+        }
+
+        if (pSkyEntity != 0)
+        {
+            Dt::CSkyFacet* pSkyFacet = static_cast<Dt::CSkyFacet*>(pSkyEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+
+            assert(pSkyFacet);
+
+            HDRIntensity = pSkyFacet->GetIntensity();
+        }
+
+        // -----------------------------------------------------------------------------
+        // Prepare value from sky / environment
+        // -----------------------------------------------------------------------------
         CRenderContextPtr RenderContextPtr = m_BackgroundFromTexture.m_RenderContextPtr;
         CShaderPtr        VSPtr            = m_BackgroundFromTexture.m_VSPtr;
         CShaderPtr        GSPtr            = m_BackgroundFromTexture.m_GSPtr;
