@@ -22,8 +22,6 @@
     <ClInclude Include="..\..\..\src\data\data_actor_type.h" />
     <ClInclude Include="..\..\..\src\data\data_ar_controller_facet.h" />
     <ClInclude Include="..\..\..\src\data\data_ar_controller_manager.h" />
-    <ClInclude Include="..\..\..\src\data\data_ar_actor_facet.h" />
-    <ClInclude Include="..\..\..\src\data\data_ar_actor_manager.h" />
     <ClInclude Include="..\..\..\src\data\data_ar_tracked_object_facet.h" />
     <ClInclude Include="..\..\..\src\data\data_ar_tracked_object_manager.h" />
     <ClInclude Include="..\..\..\src\data\data_bloom_facet.h" />
@@ -81,8 +79,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\src\data\data_ar_controller_facet.cpp" />
     <ClCompile Include="..\..\..\src\data\data_ar_controller_manager.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_ar_actor_facet.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_ar_actor_manager.cpp" />
     <ClCompile Include="..\..\..\src\data\data_ar_tracked_object_facet.cpp" />
     <ClCompile Include="..\..\..\src\data\data_ar_tracked_object_manager.cpp" />
     <ClCompile Include="..\..\..\src\data\data_bloom_facet.cpp" />

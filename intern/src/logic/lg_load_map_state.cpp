@@ -23,7 +23,6 @@
 #include "data/data_map.h"
 #include "data/data_material_manager.h"
 #include "data/data_mesh_manager.h"
-#include "data/data_ar_actor_manager.h"
 #include "data/data_camera_actor_manager.h"
 #include "data/data_model_manager.h"
 #include "data/data_plugin_type.h"

@@ -15,12 +15,12 @@
 #include "data/data_map.h"
 #include "data/data_transformation_facet.h"
 
-#include "graphic/gfx_ar_actor_facet.h"
 #include "graphic/gfx_ar_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh.h"
+#include "graphic/gfx_mesh_actor_facet.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_state_manager.h"
@@ -758,14 +758,14 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() != Dt::SActorType::AR)
+            if (rCurrentEntity.GetLayer() != Dt::SEntityLayer::AR)
             {
                 CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor);
 
                 continue;
             }
 
-            CARActorFacet* pGraphicARActorFacet = static_cast<CARActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+            CMeshActorFacet* pGraphicARActorFacet = static_cast<CMeshActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
 
             CMeshPtr ModelPtr = pGraphicARActorFacet->GetMesh();
 

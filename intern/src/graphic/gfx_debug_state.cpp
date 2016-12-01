@@ -9,7 +9,6 @@
 #include "data/data_map.h"
 
 #include "graphic/gfx_actor_renderer.h"
-#include "graphic/gfx_ar_actor_manager.h"
 #include "graphic/gfx_ar_renderer.h"
 #include "graphic/gfx_background_renderer.h"
 #include "graphic/gfx_camera_actor_manager.h"
@@ -74,7 +73,6 @@ namespace
     {
         Main::BeginFrame();
 
-        ARActorManager    ::Update();
         MeshActorManager  ::Update();
         CameraActorManager::Update();
         SunManager        ::Update();

@@ -6,7 +6,6 @@
 #include "base/base_uncopyable.h"
 
 #include "graphic/gfx_actor_renderer.h"
-#include "graphic/gfx_ar_actor_manager.h"
 #include "graphic/gfx_ar_renderer.h"
 #include "graphic/gfx_background_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
@@ -103,7 +102,6 @@ namespace
         PointLightManager ::OnExit();
         LightProbeManager ::OnExit();
         SkyManager        ::OnExit();
-        ARActorManager    ::OnExit();
         MeshActorManager  ::OnExit();
         CameraActorManager::OnExit();
         SunManager        ::OnExit();

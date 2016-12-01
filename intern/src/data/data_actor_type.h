@@ -9,7 +9,6 @@ namespace Dt
         {
             Node,
             Mesh,
-            AR,
             Camera,
             NumberOfTypes,
             UndefinedType = -1,

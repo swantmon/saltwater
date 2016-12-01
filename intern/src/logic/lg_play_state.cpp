@@ -13,7 +13,6 @@
 #include "core/core_time.h"
 
 #include "data/data_actor_type.h"
-#include "data/data_ar_actor_manager.h"
 #include "data/data_camera_actor_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
@@ -100,7 +99,6 @@ namespace
         // Update data manager
         // -----------------------------------------------------------------------------
         Dt::MeshActorManager  ::Update();
-        Dt::ARActorManager    ::Update();
         Dt::CameraActorManager::Update();
         Dt::EntityManager     ::Update();
         Dt::SunManager        ::Update();

@@ -4,7 +4,6 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_ar_actor_manager.h"
 #include "data/data_camera_actor_manager.h"
 #include "data/data_entity_manager.h"
 #include "data/data_light_probe_manager.h"
@@ -55,7 +54,6 @@ namespace
         // Update data manager
         // -----------------------------------------------------------------------------
         Dt::MeshActorManager  ::Update();
-        Dt::ARActorManager    ::Update();
         Dt::CameraActorManager::Update();
         Dt::EntityManager     ::Update();
         Dt::SunManager        ::Update();

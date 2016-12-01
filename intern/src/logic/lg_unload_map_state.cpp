@@ -4,7 +4,6 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_ar_actor_manager.h"
 #include "data/data_camera_actor_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
@@ -46,8 +45,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Clear entities
         // -----------------------------------------------------------------------------
-        Dt::MeshActorManager       ::Clear();
-        Dt::ARActorManager     ::Clear();
+        Dt::MeshActorManager  ::Clear();
         Dt::CameraActorManager::Clear();
         Dt::EntityManager     ::Clear();
         Dt::SunManager        ::Clear();

@@ -5,7 +5,6 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_ar_actor_manager.h"
 #include "data/data_bloom_manager.h"
 #include "data/data_camera_actor_manager.h"
 #include "data/data_dof_manager.h"
@@ -53,7 +52,6 @@ namespace
         // Data
         // -----------------------------------------------------------------------------
         Dt::MeshActorManager  ::OnStart();
-        Dt::ARActorManager     ::OnStart();
         Dt::CameraActorManager::OnStart();
         Dt::EntityManager     ::OnStart();
         Dt::SunManager        ::OnStart();

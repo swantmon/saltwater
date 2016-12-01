@@ -5,7 +5,6 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_ar_actor_manager.h"
 #include "data/data_bloom_manager.h"
 #include "data/data_camera_actor_manager.h"
 #include "data/data_dof_manager.h"
@@ -72,7 +71,6 @@ namespace
         Dt::SSRFXManager      ::OnExit();
         Dt::VolumeFogManager  ::OnExit();
         Dt::MeshActorManager  ::OnExit();
-        Dt::ARActorManager    ::OnExit();
         Dt::CameraActorManager::OnExit();
         Dt::EntityManager     ::OnExit();
         Dt::SunManager        ::OnExit();
