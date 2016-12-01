@@ -219,10 +219,7 @@ namespace Edit
 
                     m_pMaterialWidget->setVisible(true);
                 }
-                else if (Type == 2) // AR
-                {
-                }
-                else if (Type == 3) // Camera
+                else if (Type == 2) // Camera
                 {
                     m_pCameraWidget->RequestInformation(EntityID);
 
@@ -243,7 +240,7 @@ namespace Edit
 
                     m_pSunWidget->setVisible(true);
                 }
-                else if (Type == 2) // GlobalProbe
+                else if (Type == 2) // Probe
                 {
                     m_pGlobalProbeWidget->RequestInformation(EntityID);
 
