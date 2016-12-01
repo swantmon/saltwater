@@ -331,16 +331,8 @@ namespace
         glBindFramebuffer(GL_FRAMEBUFFER, rNativeTargetSet.m_NativeTargetSet);
         
         glClearColor(_rColor[0], _rColor[1], _rColor[2], _rColor[3]);
-
-        if (_Depth != -1)
-        {
-            glClearDepth(_Depth);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        }
-        else
-        {
-            glClear(GL_COLOR_BUFFER_BIT);
-        }
+        glClearDepth(_Depth);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
