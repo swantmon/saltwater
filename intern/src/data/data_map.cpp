@@ -219,8 +219,33 @@ namespace
         {
             Dt::CEntity& rCurrentEntity = *CurrentEntity;
 
-            RemoveEntity(rCurrentEntity);
+            // -----------------------------------------------------------------------------
+            // Re-link entity
+            // -----------------------------------------------------------------------------
+            assert(rCurrentEntity.GetFolder() != nullptr);
 
+            if (rCurrentEntity.GetPrevious() != nullptr)
+            {
+                rCurrentEntity.GetPrevious()->SetNext(rCurrentEntity.GetNext());
+            }
+            else
+            {
+                rCurrentEntity.GetFolder()->m_pEntities = rCurrentEntity.GetNext();
+            }
+
+            if (rCurrentEntity.GetNext() != nullptr)
+            {
+                rCurrentEntity.GetNext()->SetPrevious(rCurrentEntity.GetPrevious());
+            }
+
+            // -----------------------------------------------------------------------------
+            // Decrease entity counter
+            // -----------------------------------------------------------------------------
+            --m_NumberOfEntities;
+
+            // -----------------------------------------------------------------------------
+            // Set next entity
+            // -----------------------------------------------------------------------------
             CurrentEntity = CurrentEntity.Next();
         }
         
@@ -253,7 +278,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Reset all entities in map
         // -----------------------------------------------------------------------------
-        m_NumberOfEntities       = 0;
+        m_NumberOfEntities = 0;
 
         m_HasMap = false;
     }
@@ -457,6 +482,8 @@ namespace
         {
             _rEntity.GetNext()->SetPrevious(_rEntity.GetPrevious());
         }
+
+        _rEntity.SetFolder(0);
         
         // -----------------------------------------------------------------------------
         // Decrease entity counter

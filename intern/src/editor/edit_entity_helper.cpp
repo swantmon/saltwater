@@ -148,9 +148,11 @@ namespace
 
         NewMessage.PutInt(rCurrentEntity.GetID());
 
-        NewMessage.PutInt(rCurrentEntity.GetCategory());
+        NewMessage.PutBool(rCurrentEntity.IsInMap());
 
-        NewMessage.PutInt(rCurrentEntity.GetType());
+        NewMessage.PutInt(rCurrentEntity.GetLayer());
+
+        NewMessage.PutInt(rCurrentEntity.GetCategory());
 
         if (rCurrentEntity.GetName().GetLength() > 0)
         {
@@ -219,6 +221,25 @@ namespace
         int EntityID = _rMessage.GetInt();
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+
+        bool IsEnabled = _rMessage.GetBool();
+
+        if (IsEnabled == true && rCurrentEntity.IsInMap() == false)
+        {
+            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyAdd);
+        }
+        else if (IsEnabled == false && rCurrentEntity.IsInMap() == true)
+        {
+            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyRemove);
+        }
+
+        int Layer = _rMessage.GetInt();
+
+        rCurrentEntity.SetLayer(Layer);
+
+        int Category = _rMessage.GetInt();
+
+        assert(Category == rCurrentEntity.GetCategory());
 
         bool HasName = _rMessage.GetBool();
 
@@ -315,7 +336,7 @@ namespace
 
     void CEntityHelper::OnDirtyEntity(Dt::CEntity* _pEntity)
     {
-        if ((_pEntity->GetDirtyFlags() & Dt::CEntity::DirtyAdd) == Dt::CEntity::DirtyAdd)
+        if ((_pEntity->GetDirtyFlags() & Dt::CEntity::DirtyCreate) == Dt::CEntity::DirtyCreate)
         {
             Edit::CMessage NewMessage;
 

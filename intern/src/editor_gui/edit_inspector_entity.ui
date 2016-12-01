@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>70</height>
+    <height>72</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -35,10 +35,17 @@
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QLineEdit" name="m_pEntityNameEdit"/>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QCheckBox" name="m_pEnabledCB">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="m_pEntityNameEdit"/>
+         </item>
          <item>
           <widget class="QLabel" name="label">
            <property name="text">
@@ -64,6 +71,108 @@
          </item>
         </layout>
        </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Layer</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="m_pLayerCB">
+           <item>
+            <property name="text">
+             <string>Default</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>AR</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>TransparentFX</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>IgnoreRaycast</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Water</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>UI</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="Line" name="line">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Category</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="m_pCategoryCB">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="editable">
+            <bool>false</bool>
+           </property>
+           <item>
+            <property name="text">
+             <string>Actor</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Light</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>FX</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Plugin</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </item>
       </layout>
      </item>
     </layout>
@@ -85,6 +194,54 @@
     <hint type="destinationlabel">
      <x>50</x>
      <y>3</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pEnabledCB</sender>
+   <signal>clicked()</signal>
+   <receiver>InspectorEntity</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>76</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>397</x>
+     <y>15</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pCategoryCB</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>InspectorEntity</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>363</x>
+     <y>53</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>49</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pLayerCB</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>InspectorEntity</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>214</x>
+     <y>47</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>236</x>
+     <y>66</y>
     </hint>
    </hints>
   </connection>

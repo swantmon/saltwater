@@ -37,12 +37,24 @@ namespace Edit
         QString    NewEntityName       = m_pEntityNameEdit->text();
         QByteArray NewEntityNameBinary = NewEntityName.toLatin1();
 
+        int Layer = m_pLayerCB->currentIndex();
+
+        int Category = m_pCategoryCB->currentIndex();
+
+        bool IsEnabled = m_pEnabledCB->isChecked();
+
         // -----------------------------------------------------------------------------
         // Send message
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
         NewMessage.PutInt(m_CurrentEntityID);
+
+        NewMessage.PutBool(IsEnabled);
+
+        NewMessage.PutInt(Layer);
+
+        NewMessage.PutInt(Category);
 
         if (NewEntityName.length() > 0)
         {
@@ -79,30 +91,19 @@ namespace Edit
 
     void CInspectorEntity::OnEntityInfoEntity(Edit::CMessage& _rMessage)
     {
-        auto GetCategoryName = [&](unsigned int _Category)->const char*
-        {
-            const char* pCategoryStrings[]
-            {
-                "Actor" ,
-                "Light" ,
-                "FX"    ,
-                "Plugin",
-            };
-
-            return pCategoryStrings[_Category];
-        };
-
-        char EntityName[256];
-
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
+        char EntityName[256];
+
         int EntityID = _rMessage.GetInt();
 
         if (EntityID != m_CurrentEntityID) return;
 
+        bool IsEnabled = _rMessage.GetBool();
+
+        int Layer    = _rMessage.GetInt();
         int Category = _rMessage.GetInt();
-        int Type     = _rMessage.GetInt();
 
         bool HasName = _rMessage.GetBool();
 
@@ -114,6 +115,10 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Set values
         // -----------------------------------------------------------------------------
+        m_pEnabledCB ->blockSignals(true);
+        m_pLayerCB   ->blockSignals(true);
+        m_pCategoryCB->blockSignals(true);
+
         m_pEntityIDEdit->setText(QString::number(EntityID));
 
         if (HasName)
@@ -124,6 +129,16 @@ namespace Edit
         {
             m_pEntityNameEdit->setText("Unnamed entity");
         }
+
+        m_pEnabledCB->setChecked(IsEnabled);
+
+        m_pLayerCB->setCurrentIndex(Layer);
+
+        m_pCategoryCB->setCurrentIndex(Category);
+
+        m_pEnabledCB ->blockSignals(false);
+        m_pLayerCB   ->blockSignals(false);
+        m_pCategoryCB->blockSignals(false);
     }
 } // namespace Edit
 

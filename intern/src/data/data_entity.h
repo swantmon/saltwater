@@ -52,12 +52,14 @@ namespace Dt
     {
         enum
         {
-            Default,
-            TransparentFX,
-            IgnoreRaycast,
-            UI,
-            NumberOfLayers,
-            UndefinedLayer = -1
+            Default         = 0x00,
+            AR              = 0x01,
+            TransparentFX   = 0x02,
+            IgnoreRaycast   = 0x04,
+            Water           = 0x08,
+            UI              = 0x10,
+            NumberOfLayers  = 6,
+            UndefinedLayer  = -1
         };
     };
 } // namespace Dt
@@ -106,10 +108,10 @@ namespace Dt
                     unsigned int m_DirtyFlags   : 8;        //< Dirty flags if something happens
                     unsigned int m_Category     : 4;        //< Category of entity (@see SEntitycategories)
                     unsigned int m_Type         : 8;        //< Specific type of the category (e.g.: light -> point, spot, probe, ...)
-                    unsigned int m_Layer        : 4;        //< Layer of the entity needed for special culling techniques
+                    unsigned int m_Layer        : 8;        //< Layer of the entity needed for special culling techniques
                     unsigned int m_IsDynamic    : 1;        //< Either the entity can be moved in game and editor
                     unsigned int m_IsSelectable : 1;        //< Either the entity is selectable in editor
-                    unsigned int m_Padding      : 10;
+                    unsigned int m_Padding      : 2;
                 };
 
                 unsigned int m_Key;
