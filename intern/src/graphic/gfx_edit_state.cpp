@@ -105,7 +105,6 @@ namespace
         // -----------------------------------------------------------------------------
         Performance::BeginEvent("Creation Pass");
 
-        ARRenderer   ::Render();
         ActorRenderer::Render();
 
         Performance::EndEvent();
@@ -119,8 +118,9 @@ namespace
         LightSunRenderer  ::Render();
         LightAreaRenderer ::Render();
         LightPointRenderer::Render();
-        BackgroundRenderer::Render();
         ReflectionRenderer::Render();
+        ARRenderer        ::Render();
+        BackgroundRenderer::Render();
         FogRenderer       ::Render();
 
         HistogramRenderer::Render();
