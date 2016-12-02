@@ -54,6 +54,7 @@ namespace
         
     private:
         
+        void CreateEmptyScene();
         void CreateDefaultScene();
         void CreatePBRARScene();        
     };
@@ -74,8 +75,8 @@ namespace
 
         BASE_CONSOLE_STREAMINFO("Logic> Loading level number " << LevelIndexDebug);
         
-        CreateDefaultScene();
-//        CreatePBRARScene();
+        CreateEmptyScene();
+        //CreateDefaultScene();
 
         BASE_CONSOLE_STREAMINFO("Logic> Loading level finished.");
         
@@ -94,6 +95,51 @@ namespace
     int CLgLoadMapState::OnRun()
     {
         return Lg::LoadMap::SResult::Play;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CLgLoadMapState::CreateEmptyScene()
+    {
+        // -----------------------------------------------------------------------------
+        // Allocate a map
+        // -----------------------------------------------------------------------------
+        Dt::Map::AllocateMap(1, 1);
+
+        // -----------------------------------------------------------------------------
+        // Setup cameras
+        // -----------------------------------------------------------------------------
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
+            EntityDesc.m_EntityType = Dt::SActorType::Camera;
+            EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+
+            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            rEntity.SetName("Main Camera");
+
+            Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 10.0f));
+            pTransformationFacet->SetScale(Base::Float3(1.0f));
+            pTransformationFacet->SetRotation(Base::Float3(0.0f, 0.0f, 0.0f));
+
+            Dt::CCameraActorFacet* pFacet = Dt::CameraActorManager::CreateCameraActor();
+
+            pFacet->SetMainCamera(true);
+
+            rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
+
+            Dt::CScriptFacet* pScriptFacet = Dt::ScriptManager::CreateScript();
+
+            pScriptFacet->SetScriptFile("scripts/camera_behavior.lua");
+
+            rEntity.SetDetailFacet(Dt::SFacetCategory::Script, pScriptFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -144,54 +190,6 @@ namespace
         // Setup environment
         // -----------------------------------------------------------------------------
         {
-//             Dt::STextureDescriptor TextureDescriptor;
-// 
-//             TextureDescriptor.m_NumberOfPixelsU = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
-//             TextureDescriptor.m_NumberOfPixelsV = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
-//             TextureDescriptor.m_NumberOfPixelsW = 1;
-//             TextureDescriptor.m_Format          = Dt::CTextureBase::R16G16B16_FLOAT;
-//             TextureDescriptor.m_Semantic        = Dt::CTextureBase::HDR;
-//             TextureDescriptor.m_Binding         = Dt::CTextureBase::ShaderResource;
-//             TextureDescriptor.m_pPixels         = 0;
-//             TextureDescriptor.m_pFileName       = "environments/OutputCube.dds";
-//             TextureDescriptor.m_pIdentifier     = 0;
-// 
-//             Dt::CTextureCube* pPanoramaTexture = Dt::TextureManager::CreateCubeTexture(TextureDescriptor);
-// 
-//             Dt::TextureManager::MarkTextureAsDirty(pPanoramaTexture, Dt::CTextureBase::DirtyCreate);
-// 
-//             // -----------------------------------------------------------------------------
-// 
-//             Dt::SEntityDescriptor EntityDesc;
-// 
-//             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
-//             EntityDesc.m_EntityType     = Dt::SLightType::Sky;
-//             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
-// 
-//             Dt::CEntity& rEnvironment = Dt::EntityManager::CreateEntity(EntityDesc);
-// 
-//             rEnvironment.SetName("Environment");
-// 
-//             // -----------------------------------------------------------------------------
-//             // Transformation
-//             // -----------------------------------------------------------------------------
-//             Dt::CTransformationFacet* pTransformationFacet = rEnvironment.GetTransformationFacet();
-// 
-//             pTransformationFacet->SetPosition(Base::Float3(0.0f));
-//             pTransformationFacet->SetScale   (Base::Float3(1.0f));
-//             pTransformationFacet->SetRotation(Base::Float3(0.0f));
-// 
-//             Dt::CSkyFacet* pSkyboxFacet = Dt::LightManager::CreateSky();
-// 
-//             pSkyboxFacet->SetType     (Dt::CSkyFacet::Cubemap);
-//             pSkyboxFacet->SetCubemap  (pPanoramaTexture);
-//             pSkyboxFacet->SetIntensity(10000.0f);
-// 
-//             rEnvironment.SetDetailFacet(Dt::SFacetCategory::Data, pSkyboxFacet);
-// 
-//             Dt::EntityManager::MarkEntityAsDirty(rEnvironment, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-
-
             Dt::STextureDescriptor TextureDescriptor;
 
             TextureDescriptor.m_NumberOfPixelsU = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
@@ -359,7 +357,7 @@ namespace
 
             pSunLightFacet->EnableTemperature(false);
             pSunLightFacet->SetColor         (Base::Float3(1.0f, 1.0f, 1.0f));
-            pSunLightFacet->SetDirection     (Base::Float3(0.0f, 0.0f, -1.0f));
+            pSunLightFacet->SetDirection     (Base::Float3(0.0f, 0.01f, -1.0f));
             pSunLightFacet->SetIntensity     (90600.0f);
             pSunLightFacet->SetTemperature   (0);
             pSunLightFacet->SetRefreshMode   (Dt::CSunLightFacet::Dynamic);
@@ -488,45 +486,6 @@ namespace
 
             Dt::EntityManager::MarkEntityAsDirty(rPlane, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
-    }
-
-    // -----------------------------------------------------------------------------
-    
-    void CLgLoadMapState::CreatePBRARScene()
-    {
-        {
-//             Dt::SEntityDescriptor EntityDesc;
-// 
-//             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
-//             EntityDesc.m_EntityType     = Dt::SActorType::AR;
-//             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
-// 
-//             Dt::CEntity& rSphere = Dt::EntityManager::CreateEntity(EntityDesc);
-// 
-//             Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
-// 
-//             pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.0f));
-//             pTransformationFacet->SetScale   (Base::Float3(1.0f));
-//             pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, 0.0f));
-// 
-//             Dt::CARActorFacet* pModelActorFacet = Dt::ActorManager::CreateARActor();
-// 
-//             Dt::SModelFileDescriptor ModelFileDesc;
-// 
-//             ModelFileDesc.m_pFileName = "models/plane.obj";
-//             ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
-// 
-//             Dt::SMaterialFileDescriptor MaterialFileDesc;
-// 
-//             MaterialFileDesc.m_pFileName = "materials/tests/background.mat";
-// 
-//             pModelActorFacet->SetModel(&Dt::ModelManager::CreateModel(ModelFileDesc));
-//             pModelActorFacet->SetMaterial(0, &Dt::MaterialManager::CreateMaterial(MaterialFileDesc));
-// 
-//             rSphere.SetDetailFacet(Dt::SFacetCategory::Data, pModelActorFacet);
-// 
-//             Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-       }
    }
 } // namespace
 
