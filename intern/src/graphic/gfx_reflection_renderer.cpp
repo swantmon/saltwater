@@ -402,6 +402,8 @@ namespace
         
         CTargetSetPtr       LightTargetSetPtr  = TargetSetManager::GetLightAccumulationTargetSet();
         
+        // TODO by tschwandt
+        // Addional Blend work as well; Why destination blend?
         CRenderStatePtr     LightStatePtr      = StateManager::GetRenderState(CRenderState::DestinationBlend);
 
         CRenderStatePtr     DefaultStatePtr    = StateManager::GetRenderState(0);

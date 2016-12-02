@@ -12,6 +12,7 @@
 #include "graphic/gfx_fog_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_area_renderer.h"
+#include "graphic/gfx_light_indirect_renderer.h"
 #include "graphic/gfx_light_point_renderer.h"
 #include "graphic/gfx_light_probe_manager.h"
 #include "graphic/gfx_light_sun_renderer.h"
@@ -85,26 +86,28 @@ namespace
         // -----------------------------------------------------------------------------
         // Update renderer to prepare for rendering
         // -----------------------------------------------------------------------------
-        ARRenderer         ::Update();
-        ActorRenderer      ::Update();
-        FogRenderer        ::Update();
-        ShadowRenderer     ::Update();
-        LightAreaRenderer  ::Update();
-        LightPointRenderer ::Update();   
-        LightSunRenderer   ::Update();   
-        ReflectionRenderer ::Update();    
-        BackgroundRenderer ::Update();
-        HistogramRenderer  ::Update(); 
-        TonemappingRenderer::Update();
-        PostFXHDR          ::Update();
-        PostFX             ::Update();
-        SelectionRenderer  ::Update();
+        ARRenderer           ::Update();
+        ActorRenderer        ::Update();
+        FogRenderer          ::Update();
+        ShadowRenderer       ::Update();
+        LightAreaRenderer    ::Update();
+        LightPointRenderer   ::Update();   
+        LightSunRenderer     ::Update();   
+        LightIndirectRenderer::Update();
+        ReflectionRenderer   ::Update();    
+        BackgroundRenderer   ::Update();
+        HistogramRenderer    ::Update(); 
+        TonemappingRenderer  ::Update();
+        PostFXHDR            ::Update();
+        PostFX               ::Update();
+        SelectionRenderer    ::Update();
 
         // -----------------------------------------------------------------------------
         // Creation Pass
         // -----------------------------------------------------------------------------
         Performance::BeginEvent("Creation Pass");
 
+        ARRenderer   ::Render();
         ActorRenderer::Render();
 
         Performance::EndEvent();
@@ -114,14 +117,14 @@ namespace
         // -----------------------------------------------------------------------------
         Performance::BeginEvent("Lighting Pass");
 
-        ShadowRenderer    ::Render();
-        LightSunRenderer  ::Render();
-        LightAreaRenderer ::Render();
-        LightPointRenderer::Render();
-        ReflectionRenderer::Render();
-        ARRenderer        ::Render();
-        BackgroundRenderer::Render();
-        FogRenderer       ::Render();
+        ShadowRenderer       ::Render();
+        LightSunRenderer     ::Render();
+        LightAreaRenderer    ::Render();
+        LightPointRenderer   ::Render();
+        LightIndirectRenderer::Render();
+        ReflectionRenderer   ::Render();
+        BackgroundRenderer   ::Render();
+        FogRenderer          ::Render();
 
         HistogramRenderer::Render();
 

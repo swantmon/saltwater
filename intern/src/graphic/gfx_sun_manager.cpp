@@ -149,7 +149,7 @@ namespace
         // Shader
         // -----------------------------------------------------------------------------
         m_ShadowShaderVSPtr   = ShaderManager::CompileVS("vs_vm_pnx0.glsl", "main");
-        m_ShadowSMShaderPSPtr = ShaderManager::CompilePS("fs_shadow.glsl", "main");
+        m_ShadowSMShaderPSPtr = ShaderManager::CompilePS("fs_shadow.glsl", "SM");
 
 
         // -----------------------------------------------------------------------------

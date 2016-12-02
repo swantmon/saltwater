@@ -6,9 +6,11 @@
 namespace Gfx
 {
     CPointLightFacet::CPointLightFacet()
-        : m_TextureSMPtr()
-        , m_CameraPtr   (0)
-        , m_TimeStamp   (static_cast<Base::U64>(-1))
+        : m_TextureSMPtr ()
+        , m_TextureRSMPtr()
+        , m_CameraPtr    (0)
+        , m_ShadowmapSize(0)
+        , m_TimeStamp    (static_cast<Base::U64>(-1))
     {
 
     }
@@ -30,9 +32,23 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
+    CTextureSetPtr CPointLightFacet::GetTextureRSMSet() const
+    {
+        return m_TextureRSMPtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
     CCameraPtr CPointLightFacet::GetCamera() const
     {
         return m_CameraPtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    unsigned int CPointLightFacet::GetShadowmapSize() const
+    {
+        return m_ShadowmapSize;
     }
 
     // -----------------------------------------------------------------------------

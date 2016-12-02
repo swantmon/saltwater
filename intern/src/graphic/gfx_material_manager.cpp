@@ -18,6 +18,7 @@
 
 #include "graphic/gfx_material_manager.h"
 #include "graphic/gfx_texture_manager.h"
+#include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader.h"
 #include "graphic/gfx_shader_manager.h"
 
@@ -642,6 +643,7 @@ namespace
         // Create and setup shader, texture and sampler (setup material)
         // -----------------------------------------------------------------------------
         CTextureBasePtr    TexturePtrs[CMaterial::SMaterialKey::s_NumberOfTextures];
+        CSamplerPtr        SamplerPtrs[CMaterial::SMaterialKey::s_NumberOfTextures];
         STextureDescriptor TextureDescriptor;
 
         TextureDescriptor.m_NumberOfPixelsU  = STextureDescriptor::s_NumberOfPixelsFromSource;
@@ -657,6 +659,9 @@ namespace
         TextureDescriptor.m_pPixels          = 0;
         TextureDescriptor.m_pFileName        = 0;
 
+        // -----------------------------------------------------------------------------
+        // Textures
+        // -----------------------------------------------------------------------------
         TexturePtrs[0] = 0;
         TexturePtrs[1] = 0;
         TexturePtrs[2] = 0;
@@ -714,6 +719,18 @@ namespace
         {
             MaterialFile.Clear();
         }
+
+        // -----------------------------------------------------------------------------
+        // Sampler
+        // -----------------------------------------------------------------------------
+        SamplerPtrs[0] = SamplerManager::GetSampler(CSampler::MinMagMipLinearWrap);
+        SamplerPtrs[1] = SamplerManager::GetSampler(CSampler::MinMagMipLinearWrap);
+        SamplerPtrs[2] = SamplerManager::GetSampler(CSampler::MinMagMipLinearWrap);
+        SamplerPtrs[3] = SamplerManager::GetSampler(CSampler::MinMagMipLinearWrap);
+        SamplerPtrs[4] = SamplerManager::GetSampler(CSampler::MinMagMipLinearWrap);
+        SamplerPtrs[5] = SamplerManager::GetSampler(CSampler::MinMagMipLinearWrap);
+
+        rMaterial.m_SamplerSetPtrs[CShader::Pixel] = SamplerManager::CreateSamplerSet(SamplerPtrs, CMaterial::SMaterialKey::s_NumberOfTextures);
 
         return pInternMaterial;
     }

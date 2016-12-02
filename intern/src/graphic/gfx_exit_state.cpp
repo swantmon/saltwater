@@ -16,6 +16,7 @@
 #include "graphic/gfx_fog_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_area_renderer.h"
+#include "graphic/gfx_light_indirect_renderer.h"
 #include "graphic/gfx_light_point_renderer.h"
 #include "graphic/gfx_light_probe_manager.h"
 #include "graphic/gfx_light_sun_renderer.h"
@@ -66,22 +67,23 @@ namespace
         // -----------------------------------------------------------------------------
         BASE_CONSOLE_STREAMINFO("Gfx> Exit renderer...");
 
-        BackgroundRenderer ::OnExit();
-        DebugRenderer      ::OnExit();
-        SelectionRenderer  ::OnExit();
-        LightAreaRenderer  ::OnExit();
-        ReflectionRenderer ::OnExit();
-        LightPointRenderer ::OnExit();
-        LightSunRenderer   ::OnExit();
-        ShadowRenderer     ::OnExit();
-        FogRenderer        ::OnExit();
-        HistogramRenderer  ::OnExit();
-        ActorRenderer      ::OnExit();
-        ARRenderer         ::OnExit();
-        ParticleRenderer   ::OnExit();
-        PostFXHDR          ::OnExit();
-        PostFX             ::OnExit();
-        TonemappingRenderer::OnExit();
+        BackgroundRenderer   ::OnExit();
+        DebugRenderer        ::OnExit();
+        SelectionRenderer    ::OnExit();
+        LightAreaRenderer    ::OnExit();
+        ReflectionRenderer   ::OnExit();
+        LightPointRenderer   ::OnExit();
+        LightSunRenderer     ::OnExit();
+        LightIndirectRenderer::OnExit();
+        ShadowRenderer       ::OnExit();
+        FogRenderer          ::OnExit();
+        HistogramRenderer    ::OnExit();
+        ActorRenderer        ::OnExit();
+        ARRenderer           ::OnExit();
+        ParticleRenderer     ::OnExit();
+        PostFXHDR            ::OnExit();
+        PostFX               ::OnExit();
+        TonemappingRenderer  ::OnExit();
 
         BASE_CONSOLE_STREAMINFO("Gfx> Finished exit of renderer.");
         

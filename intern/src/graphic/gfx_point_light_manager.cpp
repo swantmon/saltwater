@@ -75,6 +75,7 @@ namespace
         public:
 
             CRenderContextPtr m_RenderContextPtr;
+            Dt::CPointLightFacet::EShadowType m_CurrentShadowType;
 
         private:
 
@@ -87,9 +88,8 @@ namespace
 
     private:
 
-        CShaderPtr m_ShadowShaderVSPtr;
         CShaderPtr m_ShadowSMShaderPSPtr;
-        CSamplerSetPtr m_PSSamplerSetPtr;
+        CShaderPtr m_ShadowRSMShaderPSPtr;
         CBufferSetPtr m_LightCameraVSBufferPtr;
         CBufferSetPtr m_MainVSBufferPtr;
 
@@ -129,9 +129,8 @@ namespace
 namespace 
 {
     CGfxPointLightManager::CGfxPointLightManager()
-        : m_ShadowShaderVSPtr     ()
-        , m_ShadowSMShaderPSPtr   ()
-        , m_PSSamplerSetPtr       ()
+        : m_ShadowSMShaderPSPtr   ()
+        , m_ShadowRSMShaderPSPtr  ()
         , m_LightCameraVSBufferPtr()
         , m_MainVSBufferPtr       ()
         , m_PointLightFacets      ()
@@ -153,19 +152,8 @@ namespace
         // -----------------------------------------------------------------------------
         // Shader
         // -----------------------------------------------------------------------------
-        m_ShadowShaderVSPtr   = ShaderManager::CompileVS("vs_vm_pnx0.glsl", "main");
-        m_ShadowSMShaderPSPtr = ShaderManager::CompilePS("fs_shadow.glsl", "main");
-
-        // -----------------------------------------------------------------------------
-        // Sampler
-        // -----------------------------------------------------------------------------
-        CSamplerPtr Sampler[3];
-
-        Sampler[0] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[1] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[2] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-
-        m_PSSamplerSetPtr = SamplerManager::CreateSamplerSet(Sampler, 3);
+        m_ShadowSMShaderPSPtr  = ShaderManager::CompilePS("fs_shadow.glsl", "SM");
+        m_ShadowRSMShaderPSPtr = ShaderManager::CompilePS("fs_shadow.glsl", "RSM");
 
         // -----------------------------------------------------------------------------
         // Buffer
@@ -208,9 +196,8 @@ namespace
 
     void CGfxPointLightManager::OnExit()
     {
-        m_ShadowShaderVSPtr      = 0;
         m_ShadowSMShaderPSPtr    = 0;
-        m_PSSamplerSetPtr        = 0;
+        m_ShadowRSMShaderPSPtr   = 0;
         m_LightCameraVSBufferPtr = 0;
         m_MainVSBufferPtr        = 0;
 
@@ -285,6 +272,12 @@ namespace
 
     void CGfxPointLightManager::OnDirtyEntity(Dt::CEntity* _pEntity)
     {
+        CInternPointLightFacet* pGfxPointLightFacet = 0;
+
+        Dt::CPointLightFacet::EShadowType ShadowType;
+        unsigned int ShadowmapSizes[Dt::CPointLightFacet::NumberOfQualities] = { 256, 512, 1024, 2048 };
+        unsigned int ShadowmapSize = 0;
+
         assert(_pEntity != 0);
 
         // -----------------------------------------------------------------------------
@@ -309,9 +302,6 @@ namespace
 
         if ((DirtyFlags & Dt::CEntity::DirtyCreate) != 0)
         {
-            unsigned int ShadowmapSizes[Dt::CPointLightFacet::NumberOfQualities] = { 256, 512, 1024, 2048 };
-            unsigned int ShadowmapSize;
-
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
@@ -322,7 +312,9 @@ namespace
             // -----------------------------------------------------------------------------
             ShadowmapSize = ShadowmapSizes[pDataPointLightFacet->GetShadowQuality()];
 
-            switch (pDataPointLightFacet->GetShadowType())
+            ShadowType = pDataPointLightFacet->GetShadowType();
+
+            switch (ShadowType)
             {
             case Dt::CPointLightFacet::HardShadows:        CreateSM(ShadowmapSize, rGfxPointLightFacet); break;
             case Dt::CPointLightFacet::GlobalIllumination: CreateRSM(ShadowmapSize, rGfxPointLightFacet); break;
@@ -331,66 +323,93 @@ namespace
             // -----------------------------------------------------------------------------
             // Set variables
             // -----------------------------------------------------------------------------
-            rGfxPointLightFacet.m_CameraPtr = rGfxPointLightFacet.m_RenderContextPtr->GetCamera();
+            rGfxPointLightFacet.m_ShadowmapSize = ShadowmapSize;
 
-            // -----------------------------------------------------------------------------
-            // Render shadows
-            // -----------------------------------------------------------------------------
-            RenderShadows(rGfxPointLightFacet);
+            rGfxPointLightFacet.m_CurrentShadowType = ShadowType;
 
             // -----------------------------------------------------------------------------
             // Save facet
             // -----------------------------------------------------------------------------
             _pEntity->SetDetailFacet(Dt::SFacetCategory::Graphic, &rGfxPointLightFacet);
+
+            // -----------------------------------------------------------------------------
+            // pGfxPointLightFacet
+            // -----------------------------------------------------------------------------
+            pGfxPointLightFacet = &rGfxPointLightFacet;
+        }
+        else if ((DirtyFlags & Dt::CEntity::DirtyDetail) != 0)
+        {
+            pGfxPointLightFacet = static_cast<CInternPointLightFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
+
+            assert(pGfxPointLightFacet);
+
+            ShadowmapSize = ShadowmapSizes[pDataPointLightFacet->GetShadowQuality()];
+
+            ShadowType = pDataPointLightFacet->GetShadowType();
+
+            if (ShadowmapSize != pGfxPointLightFacet->m_ShadowmapSize || ShadowType != pGfxPointLightFacet->m_CurrentShadowType)
+            {
+                pGfxPointLightFacet->m_ShadowmapSize = ShadowmapSize;
+
+                pGfxPointLightFacet->m_CurrentShadowType = ShadowType;
+
+                switch (ShadowType)
+                {
+                case Dt::CPointLightFacet::HardShadows:        CreateSM(ShadowmapSize, *pGfxPointLightFacet); break;
+                case Dt::CPointLightFacet::GlobalIllumination: CreateRSM(ShadowmapSize, *pGfxPointLightFacet); break;
+                }
+            }
         }
         else
         {
-            CInternPointLightFacet* pGfxPointLightFacet = static_cast<CInternPointLightFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
-
-            // -----------------------------------------------------------------------------
-            // Update views
-            // -----------------------------------------------------------------------------
-            Gfx::CViewPtr   ShadowViewPtr   = pGfxPointLightFacet->m_RenderContextPtr->GetCamera()->GetView();
-            Gfx::CCameraPtr ShadowCameraPtr = pGfxPointLightFacet->m_RenderContextPtr->GetCamera();
-
-            Base::Float3 LightPosition  = _pEntity->GetWorldPosition();
-            Base::Float3 LightDirection = pDataPointLightFacet->GetDirection();
-
-            // -----------------------------------------------------------------------------
-            // Set view
-            // -----------------------------------------------------------------------------
-            Base::Float3x3 RotationMatrix = Base::Float3x3::s_Identity;
-
-            RotationMatrix.LookAt(LightPosition, LightPosition - LightDirection, Base::Float3(0.0f, 1.0f, 0.0f));
-
-            ShadowViewPtr->SetPosition(LightPosition);
-            ShadowViewPtr->SetRotationMatrix(RotationMatrix);
-
-            // -----------------------------------------------------------------------------
-            // Calculate near and far plane
-            // -----------------------------------------------------------------------------
-            float Near = 0.1f;
-            float Far = pDataPointLightFacet->GetAttenuationRadius() + Near;
-
-            // -----------------------------------------------------------------------------
-            // Set matrix
-            // -----------------------------------------------------------------------------
-            ShadowCameraPtr->SetFieldOfView(Base::RadiansToDegree(pDataPointLightFacet->GetOuterConeAngle()), 1.0f, Near, Far);
-
-            ShadowViewPtr->Update();
-
-            // -----------------------------------------------------------------------------
-            // Render shadows
-            // -----------------------------------------------------------------------------
-            RenderShadows(*pGfxPointLightFacet);
-
-            // -----------------------------------------------------------------------------
-            // Set time
-            // -----------------------------------------------------------------------------
-            Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
-
-            pGfxPointLightFacet->m_TimeStamp = FrameTime;
+            pGfxPointLightFacet = static_cast<CInternPointLightFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
         }
+        
+        assert(pGfxPointLightFacet);
+
+        // -----------------------------------------------------------------------------
+        // Update views
+        // -----------------------------------------------------------------------------
+        Gfx::CViewPtr   ShadowViewPtr   = pGfxPointLightFacet->m_RenderContextPtr->GetCamera()->GetView();
+        Gfx::CCameraPtr ShadowCameraPtr = pGfxPointLightFacet->m_RenderContextPtr->GetCamera();
+
+        Base::Float3 LightPosition  = _pEntity->GetWorldPosition();
+        Base::Float3 LightDirection = pDataPointLightFacet->GetDirection();
+
+        // -----------------------------------------------------------------------------
+        // Set view
+        // -----------------------------------------------------------------------------
+        Base::Float3x3 RotationMatrix = Base::Float3x3::s_Identity;
+
+        RotationMatrix.LookAt(LightPosition, LightPosition - LightDirection, Base::Float3(0.0f, 1.0f, 0.0f));
+
+        ShadowViewPtr->SetPosition(LightPosition);
+        ShadowViewPtr->SetRotationMatrix(RotationMatrix);
+
+        // -----------------------------------------------------------------------------
+        // Calculate near and far plane
+        // -----------------------------------------------------------------------------
+        float Near = 0.1f;
+        float Far = pDataPointLightFacet->GetAttenuationRadius() + Near;
+
+        // -----------------------------------------------------------------------------
+        // Set matrix
+        // -----------------------------------------------------------------------------
+        ShadowCameraPtr->SetFieldOfView(Base::RadiansToDegree(pDataPointLightFacet->GetOuterConeAngle()), 1.0f, Near, Far);
+
+        ShadowViewPtr->Update();
+
+        // -----------------------------------------------------------------------------
+        // Render shadows
+        // -----------------------------------------------------------------------------
+        RenderShadows(*pGfxPointLightFacet);
+
+        // -----------------------------------------------------------------------------
+        // Set time
+        // -----------------------------------------------------------------------------
+        Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
+
+        pGfxPointLightFacet->m_TimeStamp = FrameTime;
     }
 
     // -----------------------------------------------------------------------------
@@ -452,7 +471,9 @@ namespace
         
         ShadowRenderbuffer[3] = TextureManager::CreateTexture2D(RendertargetDescriptor); // Depth
         
-        _rInternLight.m_TextureSMPtr = TextureManager::CreateTextureSet(ShadowRenderbuffer, 4);
+        _rInternLight.m_TextureSMPtr = TextureManager::CreateTextureSet(ShadowRenderbuffer[3]);
+
+        _rInternLight.m_TextureRSMPtr = TextureManager::CreateTextureSet(ShadowRenderbuffer, 4);
         
         // -----------------------------------------------------------------------------
         // Create target set for shadow mapping
@@ -481,7 +502,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Create render context with all informations
         // -----------------------------------------------------------------------------
-        
         CCameraPtr      CameraPtr      = ViewManager::CreateCamera(ShadowViewPtr);
         CViewPortSetPtr ViewPortSetPtr = ViewManager::CreateViewPortSet(ShadowViewPort);
         CRenderStatePtr RenderStatePtr = StateManager::GetRenderState(0);
@@ -489,12 +509,19 @@ namespace
         
         _rInternLight.m_RenderContextPtr = ContextManager::CreateRenderContext();
         
+        assert(_rInternLight.m_RenderContextPtr.IsValid());
+
         _rInternLight.m_RenderContextPtr->SetCamera(CameraPtr);
         _rInternLight.m_RenderContextPtr->SetViewPortSet(ViewPortSetPtr);
         _rInternLight.m_RenderContextPtr->SetTargetSet(TargetSetPtr);
         _rInternLight.m_RenderContextPtr->SetRenderState(RenderStatePtr);
+
+        // -----------------------------------------------------------------------------
+        // Save camera
+        // -----------------------------------------------------------------------------
+        _rInternLight.m_CameraPtr = CameraPtr;
     }
-    
+
     // -----------------------------------------------------------------------------
     
     void CGfxPointLightManager::CreateSM(unsigned int _Size, CInternPointLightFacet& _rInternLight)
@@ -524,6 +551,8 @@ namespace
         ShadowRenderbuffer[0] = TextureManager::CreateTexture2D(RendertargetDescriptor); // Depth only
         
         _rInternLight.m_TextureSMPtr  = TextureManager::CreateTextureSet(ShadowRenderbuffer, 1);
+
+        _rInternLight.m_TextureRSMPtr = 0;
         
         // -----------------------------------------------------------------------------
         // Create target set for shadow mapping
@@ -563,12 +592,19 @@ namespace
         _rInternLight.m_RenderContextPtr->SetViewPortSet(ViewPortSetPtr);
         _rInternLight.m_RenderContextPtr->SetTargetSet(TargetSetPtr);
         _rInternLight.m_RenderContextPtr->SetRenderState(RenderStatePtr);
+
+        // -----------------------------------------------------------------------------
+        // Save camera
+        // -----------------------------------------------------------------------------
+        _rInternLight.m_CameraPtr = CameraPtr;
     }
 
     // -----------------------------------------------------------------------------
 
     void CGfxPointLightManager::RenderShadows(CInternPointLightFacet& _rInternLight)
     {
+        if (_rInternLight.m_CurrentShadowType == Dt::CPointLightFacet::NoShadows) return;
+
         Performance::BeginEvent("Point Light Shadows");
 
         // -----------------------------------------------------------------------------
@@ -585,19 +621,7 @@ namespace
         // Set light as render target
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(_rInternLight.m_RenderContextPtr);
-            
-        // -----------------------------------------------------------------------------
-        // Set shader
-        // -----------------------------------------------------------------------------
-        ContextManager::SetShaderVS(m_ShadowShaderVSPtr);
-            
-        ContextManager::SetShaderPS(m_ShadowSMShaderPSPtr);
-            
-        // -----------------------------------------------------------------------------
-        // Set constant buffer
-        // -----------------------------------------------------------------------------
-        ContextManager::SetConstantBufferSetVS(m_LightCameraVSBufferPtr);
-            
+   
         // -----------------------------------------------------------------------------
         // Upload data light view projection matrix
         // -----------------------------------------------------------------------------
@@ -665,6 +689,29 @@ namespace
                 // Set material
                 // -----------------------------------------------------------------------------
                 CMaterialPtr MaterialPtr = SurfacePtr->GetMaterial();
+
+                // -----------------------------------------------------------------------------
+                // Set shader
+                // -----------------------------------------------------------------------------
+                ContextManager::SetShaderVS(SurfacePtr->GetShaderVS());
+
+                if (_rInternLight.m_CurrentShadowType == Dt::CPointLightFacet::GlobalIllumination)
+                {
+                    ContextManager::SetShaderPS(m_ShadowRSMShaderPSPtr);
+
+                    ContextManager::SetTextureSetPS(MaterialPtr->GetTextureSetPS());
+
+                    ContextManager::SetSamplerSetPS(MaterialPtr->GetSamplerSetPS());
+                }
+                else
+                {
+                    ContextManager::SetShaderPS(m_ShadowSMShaderPSPtr);
+                }
+
+                // -----------------------------------------------------------------------------
+                // Set constant buffer
+                // -----------------------------------------------------------------------------
+                ContextManager::SetConstantBufferSetVS(m_LightCameraVSBufferPtr);
                     
                 // -----------------------------------------------------------------------------
                 // Get input layout from optimal shader

@@ -283,7 +283,7 @@ namespace
     {
         CCameraPtr      QuadCameraPtr  = ViewManager     ::GetFullQuadCamera();
         CViewPortSetPtr ViewPortSetPtr = ViewManager     ::GetViewPortSet();
-        CRenderStatePtr LightStatePtr  = StateManager    ::GetRenderState(0);
+        CRenderStatePtr LightStatePtr  = StateManager    ::GetRenderState(CRenderState::AdditionBlend);
         CTargetSetPtr   TargetSetPtr   = TargetSetManager::GetLightAccumulationTargetSet();
        
         // -----------------------------------------------------------------------------

@@ -9,11 +9,11 @@
 
 #include "camera/cam_control_manager.h"
 
-#include "data/data_light_type.h"
 #include "data/data_entity.h"
+#include "data/data_light_type.h"
 #include "data/data_map.h"
 #include "data/data_model_manager.h"
-#include "data/data_sun_facet.h"
+#include "data/data_point_light_facet.h"
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
@@ -22,11 +22,11 @@
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
+#include "graphic/gfx_point_light_facet.h"
+#include "graphic/gfx_point_light_manager.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_state_manager.h"
-#include "graphic/gfx_sun_facet.h"
-#include "graphic/gfx_sun_manager.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_2d.h"
@@ -37,13 +37,13 @@ using namespace Gfx;
 
 namespace
 {
-    class CGfxLightSunRenderer : private Base::CUncopyable
+    class CGfxLightIndirectRenderer : private Base::CUncopyable
     {
-        BASE_SINGLETON_FUNC(CGfxLightSunRenderer)
+        BASE_SINGLETON_FUNC(CGfxLightIndirectRenderer)
         
     public:
-        CGfxLightSunRenderer();
-        ~CGfxLightSunRenderer();
+        CGfxLightIndirectRenderer();
+        ~CGfxLightIndirectRenderer();
         
     public:
         void OnStart();
@@ -70,17 +70,14 @@ namespace
 
         struct SSunLightProperties
         {
-            Base::Float4x4 m_LightViewProjection;
-            Base::Float4   m_LightDirection;
-            Base::Float4   m_LightColor;
-            float          m_SunAngularRadius;
-            unsigned int   m_ExposureHistoryIndex;
+            Base::Float4 m_RSMSettings;
+            unsigned int m_ExposureHistoryIndex;
         };
 
         struct SRenderJob
         {
-            Dt::CSunLightFacet*  m_pDataSunLightFacet;
-            Gfx::CSunFacet* m_pGraphicSunLightFacet;
+            Dt::CPointLightFacet* m_pDataPointLightFacet;
+            Gfx::CPointLightFacet* m_pGraphicPointLightFacet;
         };
 
     private:
@@ -94,7 +91,7 @@ namespace
         CBufferSetPtr     m_SunLightPSBufferPtr;
         CInputLayoutPtr   m_P2InputLayoutPtr;
         CShaderPtr        m_RectangleShaderVSPtr;
-        CShaderPtr        m_SunLightShaderPSPtr;
+        CShaderPtr        m_IndirectLightShaderPSPtr;
         CSamplerSetPtr    m_PSSamplerSetPtr;
         CSamplerSetPtr    m_PSSunSamplerSetPtr;
         CRenderContextPtr m_LightRenderContextPtr;
@@ -109,58 +106,58 @@ namespace
 
 namespace
 {
-    CGfxLightSunRenderer::CGfxLightSunRenderer()
-        : m_QuadModelPtr           ()
-        , m_FullQuadViewVSBufferPtr()
-        , m_SunLightPSBufferPtr    ()
-        , m_P2InputLayoutPtr       ()
-        , m_SunLightShaderPSPtr    ()
-        , m_RectangleShaderVSPtr   ()
-        , m_PSSamplerSetPtr        ()
-        , m_PSSunSamplerSetPtr     ()
-        , m_LightRenderContextPtr  ()
-        , m_SunLightTextureSetPtr  ()
-        , m_RenderJobs		       ()
+    CGfxLightIndirectRenderer::CGfxLightIndirectRenderer()
+        : m_QuadModelPtr            ()
+        , m_FullQuadViewVSBufferPtr ()
+        , m_SunLightPSBufferPtr     ()
+        , m_P2InputLayoutPtr        ()
+        , m_IndirectLightShaderPSPtr()
+        , m_RectangleShaderVSPtr    ()
+        , m_PSSamplerSetPtr         ()
+        , m_PSSunSamplerSetPtr      ()
+        , m_LightRenderContextPtr   ()
+        , m_SunLightTextureSetPtr   ()
+        , m_RenderJobs		        ()
     {
         m_RenderJobs.reserve(4);
     }
     
     // -----------------------------------------------------------------------------
     
-    CGfxLightSunRenderer::~CGfxLightSunRenderer()
+    CGfxLightIndirectRenderer::~CGfxLightIndirectRenderer()
     {
     	
     }
     
     // -----------------------------------------------------------------------------
     
-    void CGfxLightSunRenderer::OnStart()
+    void CGfxLightIndirectRenderer::OnStart()
     {
     }
     
     // -----------------------------------------------------------------------------
     
-    void CGfxLightSunRenderer::OnExit()
+    void CGfxLightIndirectRenderer::OnExit()
     {
-        m_QuadModelPtr            = 0;
-        m_FullQuadViewVSBufferPtr = 0;
-        m_SunLightPSBufferPtr     = 0;
-        m_P2InputLayoutPtr        = 0;
-        m_SunLightShaderPSPtr     = 0;
-        m_RectangleShaderVSPtr    = 0;
-        m_PSSamplerSetPtr         = 0;
-        m_PSSunSamplerSetPtr      = 0;
-        m_LightRenderContextPtr   = 0;
-        m_SunLightTextureSetPtr   = 0;
+        m_QuadModelPtr             = 0;
+        m_FullQuadViewVSBufferPtr  = 0;
+        m_SunLightPSBufferPtr      = 0;
+        m_P2InputLayoutPtr         = 0;
+        m_IndirectLightShaderPSPtr = 0;
+        m_RectangleShaderVSPtr     = 0;
+        m_PSSamplerSetPtr          = 0;
+        m_PSSunSamplerSetPtr       = 0;
+        m_LightRenderContextPtr    = 0;
+        m_SunLightTextureSetPtr    = 0;
     }
     
     // -----------------------------------------------------------------------------
     
-    void CGfxLightSunRenderer::OnSetupShader()
+    void CGfxLightIndirectRenderer::OnSetupShader()
     {       
         m_RectangleShaderVSPtr = ShaderManager::CompileVS("vs_screen_p_quad.glsl", "main");
         
-        m_SunLightShaderPSPtr  = ShaderManager::CompilePS("fs_light_sunlight.glsl", "main");
+        m_IndirectLightShaderPSPtr = ShaderManager::CompilePS("fs_light_indirectlight.glsl", "main");
         
         // -----------------------------------------------------------------------------
         
@@ -174,21 +171,21 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    void CGfxLightSunRenderer::OnSetupKernels()
+    void CGfxLightIndirectRenderer::OnSetupKernels()
     {
         
     }
     
     // -----------------------------------------------------------------------------
     
-    void CGfxLightSunRenderer::OnSetupRenderTargets()
+    void CGfxLightIndirectRenderer::OnSetupRenderTargets()
     {
 
     }
     
     // -----------------------------------------------------------------------------
     
-    void CGfxLightSunRenderer::OnSetupStates()
+    void CGfxLightIndirectRenderer::OnSetupStates()
     {
         CCameraPtr      QuadCameraPtr  = ViewManager     ::GetFullQuadCamera();
         CViewPortSetPtr ViewPortSetPtr = ViewManager     ::GetViewPortSet();
@@ -206,7 +203,7 @@ namespace
         
         // -----------------------------------------------------------------------------
         
-        CSamplerPtr Sampler[6];
+        CSamplerPtr Sampler[8];
 
         Sampler[0] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
         Sampler[1] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
@@ -214,13 +211,15 @@ namespace
         Sampler[3] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
         Sampler[4] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
         Sampler[5] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
+        Sampler[6] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
+        Sampler[7] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
 
-        m_PSSunSamplerSetPtr = SamplerManager::CreateSamplerSet(Sampler, 6);
+        m_PSSunSamplerSetPtr = SamplerManager::CreateSamplerSet(Sampler, 8);
     }
     
     // -----------------------------------------------------------------------------
     
-    void CGfxLightSunRenderer::OnSetupTextures()
+    void CGfxLightIndirectRenderer::OnSetupTextures()
     {
         CTextureBasePtr GBuffer0TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0);
         CTextureBasePtr GBuffer1TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1);
@@ -232,7 +231,7 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    void CGfxLightSunRenderer::OnSetupBuffers()
+    void CGfxLightIndirectRenderer::OnSetupBuffers()
     {
         SBufferDescriptor ConstanteBufferDesc;
         
@@ -261,59 +260,59 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    void CGfxLightSunRenderer::OnSetupResources()
+    void CGfxLightIndirectRenderer::OnSetupResources()
     {
         
     }
     
     // -----------------------------------------------------------------------------
     
-    void CGfxLightSunRenderer::OnSetupModels()
+    void CGfxLightIndirectRenderer::OnSetupModels()
     {
         m_QuadModelPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
     }
     
     // -----------------------------------------------------------------------------
     
-    void CGfxLightSunRenderer::OnSetupEnd()
+    void CGfxLightIndirectRenderer::OnSetupEnd()
     {
     }
     
     // -----------------------------------------------------------------------------
     
-    void CGfxLightSunRenderer::OnReload()
-    {
-        
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGfxLightSunRenderer::OnNewMap()
+    void CGfxLightIndirectRenderer::OnReload()
     {
         
     }
     
     // -----------------------------------------------------------------------------
     
-    void CGfxLightSunRenderer::OnUnloadMap()
+    void CGfxLightIndirectRenderer::OnNewMap()
     {
         
     }
     
     // -----------------------------------------------------------------------------
     
-    void CGfxLightSunRenderer::Update()
+    void CGfxLightIndirectRenderer::OnUnloadMap()
+    {
+        
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CGfxLightIndirectRenderer::Update()
     {
         BuildRenderJobs();
     }
     
     // -----------------------------------------------------------------------------
     
-    void CGfxLightSunRenderer::Render()
+    void CGfxLightIndirectRenderer::Render()
     {
         if (m_RenderJobs.size() == 0) return;
 
-        Performance::BeginEvent("Sun");
+        Performance::BeginEvent("Indirect Lights");
 
         // -----------------------------------------------------------------------------
         // Rendering
@@ -332,9 +331,11 @@ namespace
 
         ContextManager::SetShaderVS(m_RectangleShaderVSPtr);
 
-        ContextManager::SetShaderPS(m_SunLightShaderPSPtr);
+        ContextManager::SetShaderPS(m_IndirectLightShaderPSPtr);
 
         ContextManager::SetConstantBufferSetVS(m_FullQuadViewVSBufferPtr);
+
+        ContextManager::SetConstantBufferSetPS(m_SunLightPSBufferPtr);
 
         ContextManager::SetSamplerSetPS(m_PSSunSamplerSetPtr);
 
@@ -343,40 +344,49 @@ namespace
 
         for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
         {
-        	Dt::CSunLightFacet*  pDataSunFacet    = CurrentRenderJob->m_pDataSunLightFacet;
-        	Gfx::CSunFacet* pGraphicSunFacet = CurrentRenderJob->m_pGraphicSunLightFacet;
+            Dt::CPointLightFacet* pDtPointLight = CurrentRenderJob->m_pDataPointLightFacet;
+            Gfx::CPointLightFacet* pGfxPointLight = CurrentRenderJob->m_pGraphicPointLightFacet;
 
-        	// -----------------------------------------------------------------------------
-	        // Upload buffer data
-	        // -----------------------------------------------------------------------------
-	        SSunLightProperties* pLightBuffer = static_cast<SSunLightProperties*>(BufferManager::MapConstantBuffer(m_SunLightPSBufferPtr->GetBuffer(1)));
+            assert(pDtPointLight != nullptr);
+            assert(pGfxPointLight != nullptr);
 
-	        assert(pLightBuffer != nullptr);
+            // -----------------------------------------------------------------------------
+            // Set shadow map
+            // -----------------------------------------------------------------------------
+            Gfx::ContextManager::SetTextureSetPS(m_SunLightTextureSetPtr);
 
-	        pLightBuffer->m_LightViewProjection = pGraphicSunFacet->GetCamera()->GetViewProjectionMatrix();
-	        pLightBuffer->m_LightDirection      = Base::Float4(pDataSunFacet->GetDirection(), 0.0f).Normalize();
-	        pLightBuffer->m_LightColor          = Base::Float4(pDataSunFacet->GetLightness(), 1.0f);
-	        pLightBuffer->m_SunAngularRadius    = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
-	        pLightBuffer->m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
+            Gfx::ContextManager::SetTextureSetPS(pGfxPointLight->GetTextureRSMSet());
 
-	        BufferManager::UnmapConstantBuffer(m_SunLightPSBufferPtr->GetBuffer(1));
+            unsigned int WidthOfShadowmap = static_cast<unsigned int>(pGfxPointLight->GetShadowmapSize()) / 16;
 
-	        // -----------------------------------------------------------------------------
+            for (unsigned int IndexOfShadowCluster = 0; IndexOfShadowCluster < WidthOfShadowmap; ++IndexOfShadowCluster)
+            {
+                // -----------------------------------------------------------------------------
+                // Upload buffer data
+                // -----------------------------------------------------------------------------
+                SSunLightProperties* pLightBuffer = static_cast<SSunLightProperties*>(Gfx::BufferManager::MapConstantBuffer(m_SunLightPSBufferPtr->GetBuffer(1)));
 
-	        ContextManager::SetConstantBufferSetPS(m_SunLightPSBufferPtr);
+                assert(pLightBuffer != nullptr);
 
-	        ContextManager::SetTextureSetPS(m_SunLightTextureSetPtr);
-	        
-	        ContextManager::SetTextureSetPS(pGraphicSunFacet->GetTextureSMSet());
+                float SSWidthOfShadowmap = static_cast<float>(WidthOfShadowmap);
 
-	        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+                pLightBuffer->m_RSMSettings[0] = 1.0f / SSWidthOfShadowmap;
+                pLightBuffer->m_RSMSettings[1] = static_cast<float>(IndexOfShadowCluster)* 1.0f / SSWidthOfShadowmap;
+                pLightBuffer->m_RSMSettings[2] = pDtPointLight->GetIntensity();
+                pLightBuffer->m_RSMSettings[3] = 0.0f;
+                pLightBuffer->m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
-        	ContextManager::ResetTextureSetPS();
+                Gfx::BufferManager::UnmapConstantBuffer(m_SunLightPSBufferPtr->GetBuffer(1));
 
-	        ContextManager::ResetConstantBufferSetPS();
+                Gfx::ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+            }
+
+            Gfx::ContextManager::ResetTextureSetPS();
         }
 
         ContextManager::ResetConstantBufferSetVS(); 
+
+        ContextManager::ResetConstantBufferSetPS();
 
         ContextManager::ResetTopology();
 
@@ -399,7 +409,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxLightSunRenderer::BuildRenderJobs()
+    void CGfxLightIndirectRenderer::BuildRenderJobs()
     {
         // -----------------------------------------------------------------------------
         // Clear current render jobs
@@ -419,25 +429,28 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() != Dt::SLightType::Sun)
+            if (rCurrentEntity.GetType() != Dt::SLightType::Point)
             {
                 CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
 
                 continue;
             }
 
-            Dt::CSunLightFacet*  pDataSunFacet    = static_cast<Dt::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-            Gfx::CSunFacet* pGraphicSunFacet = static_cast<Gfx::CSunFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+            Dt::CPointLightFacet*  pDataPointFacet    = static_cast<Dt::CPointLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+            Gfx::CPointLightFacet* pGraphicPointFacet = static_cast<Gfx::CPointLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
 
             // -----------------------------------------------------------------------------
             // Set sun into a new render job
             // -----------------------------------------------------------------------------
-            SRenderJob NewRenderJob;
+            if (pDataPointFacet->GetShadowType() == Dt::CPointLightFacet::GlobalIllumination)
+            {
+                SRenderJob NewRenderJob;
 
-            NewRenderJob.m_pDataSunLightFacet    = pDataSunFacet;
-            NewRenderJob.m_pGraphicSunLightFacet = pGraphicSunFacet;
+                NewRenderJob.m_pDataPointLightFacet    = pDataPointFacet;
+                NewRenderJob.m_pGraphicPointLightFacet = pGraphicPointFacet;
 
-            m_RenderJobs.push_back(NewRenderJob);
+                m_RenderJobs.push_back(NewRenderJob);
+            }
 
             // -----------------------------------------------------------------------------
             // Next entity
@@ -449,117 +462,117 @@ namespace
 
 namespace Gfx
 {
-namespace LightSunRenderer
+namespace LightIndirectRenderer
 {
     void OnStart()
     {
-        CGfxLightSunRenderer::GetInstance().OnStart();
+        CGfxLightIndirectRenderer::GetInstance().OnStart();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnExit()
     {
-        CGfxLightSunRenderer::GetInstance().OnExit();
+        CGfxLightIndirectRenderer::GetInstance().OnExit();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnSetupShader()
     {
-        CGfxLightSunRenderer::GetInstance().OnSetupShader();
+        CGfxLightIndirectRenderer::GetInstance().OnSetupShader();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnSetupKernels()
     {
-        CGfxLightSunRenderer::GetInstance().OnSetupKernels();
+        CGfxLightIndirectRenderer::GetInstance().OnSetupKernels();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnSetupRenderTargets()
     {
-        CGfxLightSunRenderer::GetInstance().OnSetupRenderTargets();
+        CGfxLightIndirectRenderer::GetInstance().OnSetupRenderTargets();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnSetupStates()
     {
-        CGfxLightSunRenderer::GetInstance().OnSetupStates();
+        CGfxLightIndirectRenderer::GetInstance().OnSetupStates();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnSetupTextures()
     {
-        CGfxLightSunRenderer::GetInstance().OnSetupTextures();
+        CGfxLightIndirectRenderer::GetInstance().OnSetupTextures();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnSetupBuffers()
     {
-        CGfxLightSunRenderer::GetInstance().OnSetupBuffers();
+        CGfxLightIndirectRenderer::GetInstance().OnSetupBuffers();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnSetupResources()
     {
-        CGfxLightSunRenderer::GetInstance().OnSetupResources();
+        CGfxLightIndirectRenderer::GetInstance().OnSetupResources();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnSetupModels()
     {
-        CGfxLightSunRenderer::GetInstance().OnSetupModels();
+        CGfxLightIndirectRenderer::GetInstance().OnSetupModels();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnSetupEnd()
     {
-        CGfxLightSunRenderer::GetInstance().OnSetupEnd();
+        CGfxLightIndirectRenderer::GetInstance().OnSetupEnd();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnReload()
     {
-        CGfxLightSunRenderer::GetInstance().OnReload();
+        CGfxLightIndirectRenderer::GetInstance().OnReload();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnNewMap()
     {
-        CGfxLightSunRenderer::GetInstance().OnNewMap();
+        CGfxLightIndirectRenderer::GetInstance().OnNewMap();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnUnloadMap()
     {
-        CGfxLightSunRenderer::GetInstance().OnUnloadMap();
+        CGfxLightIndirectRenderer::GetInstance().OnUnloadMap();
     }
     
     // -----------------------------------------------------------------------------
     
     void Update()
     {
-        CGfxLightSunRenderer::GetInstance().Update();
+        CGfxLightIndirectRenderer::GetInstance().Update();
     }
     
     // -----------------------------------------------------------------------------
     
     void Render()
     {
-        CGfxLightSunRenderer::GetInstance().Render();
+        CGfxLightIndirectRenderer::GetInstance().Render();
     }
-} // namespace LightSunRenderer
+} // namespace LightIndirectRenderer
 } // namespace Gfx
 

@@ -233,6 +233,9 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_mesh_actor_facet.cpp">
       <Filter>engine\map\actors\mesh</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_light_indirect_renderer.cpp">
+      <Filter>engine\renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\graphic\gfx_debug_interface.h">
@@ -511,6 +514,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_mesh_actor_facet.h">
       <Filter>engine\map\actors\mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_light_indirect_renderer.h">
+      <Filter>engine\renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
