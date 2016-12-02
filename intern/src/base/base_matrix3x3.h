@@ -906,7 +906,7 @@ namespace MATH
         // This is from:
         // https://msdn.microsoft.com/en-us/library/windows/desktop/bb281711(v=vs.85).aspx
         // -----------------------------------------------------------------------------
-        Base::Float3 LookDirection = (_rEye - _rTarget).Normalize();
+        Base::Float3 LookDirection = (_rTarget - _rEye).Normalize();
         Base::Float3 Up            = _rUp.Normalize();
         Base::Float3 Right         = LookDirection.CrossProduct(Up).Normalize();
 

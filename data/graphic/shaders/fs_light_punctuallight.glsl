@@ -100,7 +100,7 @@ void main()
     // Compute lighting for punctual lights
     // -----------------------------------------------------------------------------
     vec3 UnnormalizedLightVector = ps_LightPosition.xyz - Data.m_WSPosition;
-    vec3 WSLightDirection        = normalize(UnnormalizedLightVector);
+    vec3 NormalizedLightVector   = normalize(UnnormalizedLightVector);
     vec3 WSViewDirection         = normalize(ps_CameraPosition.xyz - Data.m_WSPosition);
 
     // -----------------------------------------------------------------------------
@@ -109,7 +109,7 @@ void main()
     float Attenuation = 1.0f;
 
     Attenuation *= GetDistanceAttenuation(UnnormalizedLightVector, LightInvSqrAttenuationRadius);
-    Attenuation *= GetAngleAttenuation(WSLightDirection, -ps_LightDirection.xyz, LightAngleScale, LightAngleOffset);
+    Attenuation *= GetAngleAttenuation(NormalizedLightVector, -ps_LightDirection.xyz, LightAngleScale, LightAngleOffset);
 
     // -----------------------------------------------------------------------------
     // Shadowing
@@ -120,7 +120,7 @@ void main()
     // -----------------------------------------------------------------------------
     // Apply light luminance and shading
     // -----------------------------------------------------------------------------
-    vec3 Luminance = BRDF(WSLightDirection, WSViewDirection, Data.m_WSNormal, Data) * clamp(dot(Data.m_WSNormal, WSLightDirection), 0.0f, 1.0f) * ps_LightColor.xyz * Attenuation;
+    vec3 Luminance = BRDF(NormalizedLightVector, WSViewDirection, Data.m_WSNormal, Data) * clamp(dot(Data.m_WSNormal, NormalizedLightVector), 0.0f, 1.0f) * ps_LightColor.xyz * Attenuation;
 
 //    AverageExposure = 0.0f;
 

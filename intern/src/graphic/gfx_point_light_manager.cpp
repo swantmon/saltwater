@@ -88,6 +88,7 @@ namespace
 
     private:
 
+        CShaderPtr m_ShadowShaderVSPtr;
         CShaderPtr m_ShadowSMShaderPSPtr;
         CShaderPtr m_ShadowRSMShaderPSPtr;
         CBufferSetPtr m_LightCameraVSBufferPtr;
@@ -129,7 +130,8 @@ namespace
 namespace 
 {
     CGfxPointLightManager::CGfxPointLightManager()
-        : m_ShadowSMShaderPSPtr   ()
+        : m_ShadowShaderVSPtr     ()
+        , m_ShadowSMShaderPSPtr   ()
         , m_ShadowRSMShaderPSPtr  ()
         , m_LightCameraVSBufferPtr()
         , m_MainVSBufferPtr       ()
@@ -152,6 +154,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Shader
         // -----------------------------------------------------------------------------
+        m_ShadowShaderVSPtr    = ShaderManager::CompileVS("vs_vm_pnx0.glsl", "main");
         m_ShadowSMShaderPSPtr  = ShaderManager::CompilePS("fs_shadow.glsl", "SM");
         m_ShadowRSMShaderPSPtr = ShaderManager::CompilePS("fs_shadow.glsl", "RSM");
 
@@ -196,6 +199,7 @@ namespace
 
     void CGfxPointLightManager::OnExit()
     {
+        m_ShadowShaderVSPtr      = 0;
         m_ShadowSMShaderPSPtr    = 0;
         m_ShadowRSMShaderPSPtr   = 0;
         m_LightCameraVSBufferPtr = 0;
@@ -228,10 +232,10 @@ namespace
                     // -----------------------------------------------------------------------------
                     // Update views
                     // -----------------------------------------------------------------------------
-                    Gfx::CViewPtr   ShadowViewPtr   = pGfxPointLightFacet->m_RenderContextPtr->GetCamera()->GetView();
+                    Gfx::CViewPtr   ShadowViewPtr = pGfxPointLightFacet->m_RenderContextPtr->GetCamera()->GetView();
                     Gfx::CCameraPtr ShadowCameraPtr = pGfxPointLightFacet->m_RenderContextPtr->GetCamera();
 
-                    Base::Float3 LightPosition  = rCurrentEntity.GetWorldPosition();
+                    Base::Float3 LightPosition = rCurrentEntity.GetWorldPosition();
                     Base::Float3 LightDirection = pDtPointLightFacet->GetDirection();
 
                     // -----------------------------------------------------------------------------
@@ -239,7 +243,7 @@ namespace
                     // -----------------------------------------------------------------------------
                     Base::Float3x3 RotationMatrix = Base::Float3x3::s_Identity;
 
-                    RotationMatrix.LookAt(LightPosition, LightPosition - LightDirection, Base::Float3(0.0f, 1.0f, 0.0f));
+                    RotationMatrix.LookAt(LightPosition, LightPosition + LightDirection, Base::Float3::s_AxisZ);
 
                     ShadowViewPtr->SetPosition(LightPosition);
                     ShadowViewPtr->SetRotationMatrix(RotationMatrix);
@@ -257,6 +261,9 @@ namespace
 
                     ShadowViewPtr->Update();
 
+                    // -----------------------------------------------------------------------------
+                    // Render
+                    // -----------------------------------------------------------------------------
                     RenderShadows(*pGfxPointLightFacet);
                 }
             }
@@ -381,7 +388,7 @@ namespace
         // -----------------------------------------------------------------------------
         Base::Float3x3 RotationMatrix = Base::Float3x3::s_Identity;
 
-        RotationMatrix.LookAt(LightPosition, LightPosition - LightDirection, Base::Float3(0.0f, 1.0f, 0.0f));
+        RotationMatrix.LookAt(LightPosition, LightPosition + LightDirection, Base::Float3::s_AxisZ);
 
         ShadowViewPtr->SetPosition(LightPosition);
         ShadowViewPtr->SetRotationMatrix(RotationMatrix);
@@ -693,7 +700,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Set shader
                 // -----------------------------------------------------------------------------
-                ContextManager::SetShaderVS(SurfacePtr->GetShaderVS());
+                ContextManager::SetShaderVS(m_ShadowShaderVSPtr);
 
                 if (_rInternLight.m_CurrentShadowType == Dt::CPointLightFacet::GlobalIllumination)
                 {

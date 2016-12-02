@@ -472,7 +472,7 @@ namespace
             float HasShadows              = pDtLightFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows ? 1.0f : 0.0f;
             
             pLightBuffer->m_LightPosition       = Base::Float4(pEntity->GetWorldPosition(), 1.0f);
-            pLightBuffer->m_LightDirection      = Base::Float4(pDtLightFacet->GetDirection(), 0.0f);
+            pLightBuffer->m_LightDirection      = Base::Float4(pDtLightFacet->GetDirection(), 0.0f).Normalize();
             pLightBuffer->m_LightColor          = Base::Float4(pDtLightFacet->GetLightness(), 1.0f);
             pLightBuffer->m_LightSettings       = Base::Float4(InvSqrAttenuationRadius, AngleScale, AngleOffset, HasShadows);
 

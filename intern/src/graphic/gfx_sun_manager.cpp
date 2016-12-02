@@ -237,7 +237,7 @@ namespace
                     // -----------------------------------------------------------------------------
                     // Update views
                     // -----------------------------------------------------------------------------
-                    Gfx::CViewPtr   ShadowViewPtr   = pGfxSunFacet->m_RenderContextPtr->GetCamera()->GetView();
+                    Gfx::CViewPtr   ShadowViewPtr = pGfxSunFacet->m_RenderContextPtr->GetCamera()->GetView();
                     Gfx::CCameraPtr ShadowCameraPtr = pGfxSunFacet->m_RenderContextPtr->GetCamera();
 
                     Base::Float3x3 RotationMatrix = Base::Float3x3::s_Identity;
@@ -248,7 +248,7 @@ namespace
                     // -----------------------------------------------------------------------------
                     // Set view
                     // -----------------------------------------------------------------------------
-                    RotationMatrix.LookAt(SunPosition, SunPosition - SunRotation, Base::Float3(0.0f, 1.0f, 0.0f));
+                    RotationMatrix.LookAt(SunPosition, SunPosition + SunRotation, Base::Float3::s_AxisZ);
 
                     ShadowViewPtr->SetPosition(SunPosition);
                     ShadowViewPtr->SetRotationMatrix(RotationMatrix);
@@ -267,6 +267,9 @@ namespace
                     ShadowCameraPtr->SetOrthographic(-Radius, Radius, -Radius, Radius, Near, Far);
                     ShadowViewPtr->Update();
 
+                    // -----------------------------------------------------------------------------
+                    // Render
+                    // -----------------------------------------------------------------------------
                     RenderShadows(*pGfxSunFacet);
                 }
             }
@@ -326,57 +329,55 @@ namespace
             // -----------------------------------------------------------------------------
             _pEntity->SetDetailFacet(Dt::SFacetCategory::Graphic, &rGfxSunFacet);
         }
-        else
-        {
-            CInternSunFacet* pGfxSunFacet;
+
+        CInternSunFacet* pGfxSunFacet;
             
-            pGfxSunFacet = static_cast<CInternSunFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
+        pGfxSunFacet = static_cast<CInternSunFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
 
-            // -----------------------------------------------------------------------------
-            // Update views
-            // -----------------------------------------------------------------------------
-            Gfx::CViewPtr   ShadowViewPtr   = pGfxSunFacet->m_RenderContextPtr->GetCamera()->GetView();
-            Gfx::CCameraPtr ShadowCameraPtr = pGfxSunFacet->m_RenderContextPtr->GetCamera();
+        // -----------------------------------------------------------------------------
+        // Update views
+        // -----------------------------------------------------------------------------
+        Gfx::CViewPtr   ShadowViewPtr   = pGfxSunFacet->m_RenderContextPtr->GetCamera()->GetView();
+        Gfx::CCameraPtr ShadowCameraPtr = pGfxSunFacet->m_RenderContextPtr->GetCamera();
 
-            Base::Float3x3 RotationMatrix = Base::Float3x3::s_Identity;
+        Base::Float3x3 RotationMatrix = Base::Float3x3::s_Identity;
 
-            Base::Float3 SunPosition = _pEntity->GetWorldPosition();
-            Base::Float3 SunRotation = pDtSunFacet->GetDirection();
+        Base::Float3 SunPosition = _pEntity->GetWorldPosition();
+        Base::Float3 SunRotation = pDtSunFacet->GetDirection();
 
-            // -----------------------------------------------------------------------------
-            // Set view
-            // -----------------------------------------------------------------------------
-            RotationMatrix.LookAt(SunPosition, SunPosition - SunRotation, Base::Float3(0.0f, 1.0f, 0.0f));
+        // -----------------------------------------------------------------------------
+        // Set view
+        // -----------------------------------------------------------------------------
+        RotationMatrix.LookAt(SunPosition, SunPosition + SunRotation, Base::Float3::s_AxisZ);
 
-            ShadowViewPtr->SetPosition(SunPosition);
-            ShadowViewPtr->SetRotationMatrix(RotationMatrix);
+        ShadowViewPtr->SetPosition(SunPosition);
+        ShadowViewPtr->SetRotationMatrix(RotationMatrix);
 
-            // -----------------------------------------------------------------------------
-            // Calculate near and far plane
-            // -----------------------------------------------------------------------------
-            float Radius = 30.0f;
+        // -----------------------------------------------------------------------------
+        // Calculate near and far plane
+        // -----------------------------------------------------------------------------
+        float Radius = 30.0f;
 
-            float Near = 1.0f;
-            float Far = Radius * 2.0f;
+        float Near = 1.0f;
+        float Far = Radius * 2.0f;
 
-            // -----------------------------------------------------------------------------
-            // Set matrix
-            // -----------------------------------------------------------------------------
-            ShadowCameraPtr->SetOrthographic(-Radius, Radius, -Radius, Radius, Near, Far);
-            ShadowViewPtr->Update();
+        // -----------------------------------------------------------------------------
+        // Set matrix
+        // -----------------------------------------------------------------------------
+        ShadowCameraPtr->SetOrthographic(-Radius, Radius, -Radius, Radius, Near, Far);
+        ShadowViewPtr->Update();
 
-            // -----------------------------------------------------------------------------
-            // Render shadows
-            // -----------------------------------------------------------------------------
-            RenderShadows(*pGfxSunFacet);
+        // -----------------------------------------------------------------------------
+        // Render shadows
+        // -----------------------------------------------------------------------------
+        RenderShadows(*pGfxSunFacet);
 
-            // -----------------------------------------------------------------------------
-            // Set time
-            // -----------------------------------------------------------------------------
-            Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
+        // -----------------------------------------------------------------------------
+        // Set time
+        // -----------------------------------------------------------------------------
+        Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
 
-            pGfxSunFacet->m_TimeStamp = FrameTime;
-        }
+        pGfxSunFacet->m_TimeStamp = FrameTime;
     }
 
     // -----------------------------------------------------------------------------
