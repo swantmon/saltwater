@@ -1,6 +1,6 @@
 
-#ifndef __INCLUDE_FS_LIGHT_PUNCTUALLIGHT_GLSL__
-#define __INCLUDE_FS_LIGHT_PUNCTUALLIGHT_GLSL__
+#ifndef __INCLUDE_FS_LIGHT_INDIRECTLIGHT_GLSL__
+#define __INCLUDE_FS_LIGHT_INDIRECTLIGHT_GLSL__
 
 #include "common.glsl"
 #include "common_global.glsl"
@@ -89,7 +89,7 @@ void main()
     
     vec3 WSViewDirection = normalize(g_ViewPosition.xyz - Data.m_WSPosition);
     
-    float IndirectLightIntensity = m_RSMSettings.z;
+    float IndirectLightIntensity =  m_RSMSettings.z;
 
     float SpecularExponent = 1.0f;
     
@@ -123,7 +123,7 @@ void main()
         // -----------------------------------------------------------------------------
         // Build normal angles
         // -----------------------------------------------------------------------------
-        float CosThetaI = clamp(dot(LightNormal, -Reflection), 0.0f, 1.0f);
+        float CosThetaI = clamp(dot(LightNormal, Reflection), 0.0f, 1.0f);
         float CosThetaJ = clamp(dot(Data.m_WSNormal, Reflection), 0.0f, 1.0f);
         
         float Fij = CosThetaI * CosThetaJ * lR;
@@ -156,4 +156,4 @@ void main()
     out_Output = vec4((Diffuse + Specular) * IndirectLightIntensity * AverageExposure, 0.0f);
 }
 
-#endif // __INCLUDE_FS_LIGHT_PUNCTUALLIGHT_GLSL__
+#endif // __INCLUDE_FS_LIGHT_INDIRECTLIGHT_GLSL__
