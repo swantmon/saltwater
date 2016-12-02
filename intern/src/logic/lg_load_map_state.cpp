@@ -56,7 +56,7 @@ namespace
         
         void CreateEmptyScene();
         void CreateDefaultScene();
-        void CreatePBRARScene();        
+     
     };
 } // namespace
 
