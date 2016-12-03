@@ -91,8 +91,10 @@ namespace
         CShaderPtr m_ShadowShaderVSPtr;
         CShaderPtr m_ShadowSMShaderPSPtr;
         CShaderPtr m_ShadowRSMShaderPSPtr;
+        CShaderPtr m_ShadowRSMTexShaderPSPtr;
         CBufferSetPtr m_LightCameraVSBufferPtr;
         CBufferSetPtr m_MainVSBufferPtr;
+        CBufferSetPtr m_RSMPSBuffer;
 
         CPointLightFacets m_PointLightFacets;
 
@@ -130,12 +132,14 @@ namespace
 namespace 
 {
     CGfxPointLightManager::CGfxPointLightManager()
-        : m_ShadowShaderVSPtr     ()
-        , m_ShadowSMShaderPSPtr   ()
-        , m_ShadowRSMShaderPSPtr  ()
-        , m_LightCameraVSBufferPtr()
-        , m_MainVSBufferPtr       ()
-        , m_PointLightFacets      ()
+        : m_ShadowShaderVSPtr      ()
+        , m_ShadowSMShaderPSPtr    ()
+        , m_ShadowRSMShaderPSPtr   ()
+        , m_ShadowRSMTexShaderPSPtr()
+        , m_LightCameraVSBufferPtr ()
+        , m_MainVSBufferPtr        ()
+        , m_RSMPSBuffer            ()
+        , m_PointLightFacets       ()
     {
 
     }
@@ -154,9 +158,10 @@ namespace
         // -----------------------------------------------------------------------------
         // Shader
         // -----------------------------------------------------------------------------
-        m_ShadowShaderVSPtr    = ShaderManager::CompileVS("vs_vm_pnx0.glsl", "main");
-        m_ShadowSMShaderPSPtr  = ShaderManager::CompilePS("fs_shadow.glsl", "SM");
-        m_ShadowRSMShaderPSPtr = ShaderManager::CompilePS("fs_shadow.glsl", "RSM");
+        m_ShadowShaderVSPtr       = ShaderManager::CompileVS("vs_vm_pnx0.glsl", "main");
+        m_ShadowSMShaderPSPtr     = ShaderManager::CompilePS("fs_shadow.glsl", "SM");
+        m_ShadowRSMShaderPSPtr    = ShaderManager::CompilePS("fs_shadow.glsl", "RSM_COLOR");
+        m_ShadowRSMTexShaderPSPtr = ShaderManager::CompilePS("fs_shadow.glsl", "RSM_TEX");
 
         // -----------------------------------------------------------------------------
         // Buffer
@@ -185,6 +190,22 @@ namespace
         
         CBufferPtr PerDrawCallConstantBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
+        // -----------------------------------------------------------------------------
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(CMaterial::SMaterialAttributes);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+
+        CBufferPtr MaterialBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+
+        m_RSMPSBuffer   = BufferManager::CreateBufferSet(MaterialBuffer);
+
         m_LightCameraVSBufferPtr = BufferManager::CreateBufferSet(PerLightConstantBuffer, PerDrawCallConstantBuffer);
         
         m_MainVSBufferPtr        = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS(), PerDrawCallConstantBuffer);
@@ -199,11 +220,13 @@ namespace
 
     void CGfxPointLightManager::OnExit()
     {
-        m_ShadowShaderVSPtr      = 0;
-        m_ShadowSMShaderPSPtr    = 0;
-        m_ShadowRSMShaderPSPtr   = 0;
-        m_LightCameraVSBufferPtr = 0;
-        m_MainVSBufferPtr        = 0;
+        m_ShadowShaderVSPtr       = 0;
+        m_ShadowSMShaderPSPtr     = 0;
+        m_ShadowRSMShaderPSPtr    = 0;
+        m_ShadowRSMTexShaderPSPtr = 0;
+        m_LightCameraVSBufferPtr  = 0;
+        m_MainVSBufferPtr         = 0;
+        m_RSMPSBuffer             = 0;
 
         m_PointLightFacets.Clear();
     }
@@ -698,27 +721,39 @@ namespace
                 CMaterialPtr MaterialPtr = SurfacePtr->GetMaterial();
 
                 // -----------------------------------------------------------------------------
-                // Set shader
+                // Set shader + buffer
                 // -----------------------------------------------------------------------------
                 ContextManager::SetShaderVS(m_ShadowShaderVSPtr);
 
+                ContextManager::SetConstantBufferSetVS(m_LightCameraVSBufferPtr);
+
                 if (_rInternLight.m_CurrentShadowType == Dt::CPointLightFacet::GlobalIllumination)
                 {
-                    ContextManager::SetShaderPS(m_ShadowRSMShaderPSPtr);
+                    if (MaterialPtr->GetKey().m_HasDiffuseTex)
+                    {
+                        ContextManager::SetShaderPS(m_ShadowRSMTexShaderPSPtr);
 
-                    ContextManager::SetTextureSetPS(MaterialPtr->GetTextureSetPS());
+                        ContextManager::SetTextureSetPS(MaterialPtr->GetTextureSetPS());
 
-                    ContextManager::SetSamplerSetPS(MaterialPtr->GetSamplerSetPS());
+                        ContextManager::SetSamplerSetPS(MaterialPtr->GetSamplerSetPS());
+                    }
+                    else
+                    {
+                        ContextManager::SetShaderPS(m_ShadowRSMShaderPSPtr);
+                    }
+
+                    CMaterial::SMaterialAttributes* pMaterialBuffer = static_cast<CMaterial::SMaterialAttributes*>(BufferManager::MapConstantBuffer(m_RSMPSBuffer->GetBuffer(0)));
+
+                    Base::CMemory::Copy(pMaterialBuffer, &MaterialPtr->GetMaterialAttributes(), sizeof(CMaterial::SMaterialAttributes));
+
+                    BufferManager::UnmapConstantBuffer(m_RSMPSBuffer->GetBuffer(0));
+
+                    ContextManager::SetConstantBufferSetPS(m_RSMPSBuffer);
                 }
                 else
                 {
                     ContextManager::SetShaderPS(m_ShadowSMShaderPSPtr);
                 }
-
-                // -----------------------------------------------------------------------------
-                // Set constant buffer
-                // -----------------------------------------------------------------------------
-                ContextManager::SetConstantBufferSetVS(m_LightCameraVSBufferPtr);
                     
                 // -----------------------------------------------------------------------------
                 // Get input layout from optimal shader
