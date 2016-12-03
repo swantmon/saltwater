@@ -720,6 +720,11 @@ namespace
                 // -----------------------------------------------------------------------------
                 CMaterialPtr MaterialPtr = SurfacePtr->GetMaterial();
 
+                if (pActorModelFacet->GetMaterial(IndexOfSurface) != 0)
+                {
+                    MaterialPtr = pActorModelFacet->GetMaterial(IndexOfSurface);
+                }
+
                 // -----------------------------------------------------------------------------
                 // Set shader + buffer
                 // -----------------------------------------------------------------------------
