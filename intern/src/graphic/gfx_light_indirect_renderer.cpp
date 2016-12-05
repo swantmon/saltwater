@@ -68,16 +68,25 @@ namespace
         
     private:
 
-        struct SSunLightProperties
+        struct SIndirectLightProperties
         {
             Base::Float4 m_RSMSettings;
             unsigned int m_ExposureHistoryIndex;
         };
 
+        struct SPunctualLightProperties
+        {
+            Base::Float4 m_LightPosition;
+            Base::Float4 m_LightDirection;
+            Base::Float4 m_LightColor;
+            Base::Float4 m_LightSettings; // InvSqrAttenuationRadius, AngleScale, AngleOffset, Unused
+        };
+
         struct SRenderJob
         {
-            Dt::CPointLightFacet* m_pDataPointLightFacet;
+            Dt::CPointLightFacet*  m_pDataPointLightFacet;
             Gfx::CPointLightFacet* m_pGraphicPointLightFacet;
+            Base::Float3           m_EntityPosition;
         };
 
     private:
@@ -88,7 +97,7 @@ namespace
         
         CMeshPtr          m_QuadModelPtr;
         CBufferSetPtr     m_FullQuadViewVSBufferPtr;
-        CBufferSetPtr     m_SunLightPSBufferPtr;
+        CBufferSetPtr     m_IndirectLightPSBufferPtr;
         CInputLayoutPtr   m_P2InputLayoutPtr;
         CShaderPtr        m_RectangleShaderVSPtr;
         CShaderPtr        m_IndirectLightShaderPSPtr;
@@ -109,7 +118,7 @@ namespace
     CGfxLightIndirectRenderer::CGfxLightIndirectRenderer()
         : m_QuadModelPtr            ()
         , m_FullQuadViewVSBufferPtr ()
-        , m_SunLightPSBufferPtr     ()
+        , m_IndirectLightPSBufferPtr     ()
         , m_P2InputLayoutPtr        ()
         , m_IndirectLightShaderPSPtr()
         , m_RectangleShaderVSPtr    ()
@@ -141,7 +150,7 @@ namespace
     {
         m_QuadModelPtr             = 0;
         m_FullQuadViewVSBufferPtr  = 0;
-        m_SunLightPSBufferPtr      = 0;
+        m_IndirectLightPSBufferPtr      = 0;
         m_P2InputLayoutPtr         = 0;
         m_IndirectLightShaderPSPtr = 0;
         m_RectangleShaderVSPtr     = 0;
@@ -241,11 +250,23 @@ namespace
         ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSunLightProperties);
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SIndirectLightProperties);
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr SunLightBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        CBufferPtr IndirectLightBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+        
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPUReadWrite;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SPunctualLightProperties);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        CBufferPtr PointLightBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
         
         // -----------------------------------------------------------------------------
         
@@ -253,9 +274,9 @@ namespace
         
         // -----------------------------------------------------------------------------
         
-        m_FullQuadViewVSBufferPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
+        m_FullQuadViewVSBufferPtr  = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
 
-        m_SunLightPSBufferPtr     = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), SunLightBuffer, HistogramExposureHistoryBufferPtr);
+        m_IndirectLightPSBufferPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), IndirectLightBufferPtr, PointLightBufferPtr, HistogramExposureHistoryBufferPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -335,7 +356,7 @@ namespace
 
         ContextManager::SetConstantBufferSetVS(m_FullQuadViewVSBufferPtr);
 
-        ContextManager::SetConstantBufferSetPS(m_SunLightPSBufferPtr);
+        ContextManager::SetConstantBufferSetPS(m_IndirectLightPSBufferPtr);
 
         ContextManager::SetSamplerSetPS(m_PSSunSamplerSetPtr);
 
@@ -364,20 +385,40 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Upload buffer data
                 // -----------------------------------------------------------------------------
-                SSunLightProperties* pLightBuffer = static_cast<SSunLightProperties*>(Gfx::BufferManager::MapConstantBuffer(m_SunLightPSBufferPtr->GetBuffer(1)));
+                SIndirectLightProperties* pIndirectLightBuffer = static_cast<SIndirectLightProperties*>(Gfx::BufferManager::MapConstantBuffer(m_IndirectLightPSBufferPtr->GetBuffer(1)));
 
-                assert(pLightBuffer != nullptr);
+                assert(pIndirectLightBuffer != nullptr);
 
                 float SSWidthOfShadowmap = static_cast<float>(WidthOfShadowmap);
 
-                pLightBuffer->m_RSMSettings[0] = 1.0f / SSWidthOfShadowmap;
-                pLightBuffer->m_RSMSettings[1] = static_cast<float>(IndexOfShadowCluster)* 1.0f / SSWidthOfShadowmap;
-                pLightBuffer->m_RSMSettings[2] = pDtPointLight->GetIntensity();
-                pLightBuffer->m_RSMSettings[3] = 0.0f;
-                pLightBuffer->m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
+                pIndirectLightBuffer->m_RSMSettings[0] = 1.0f / SSWidthOfShadowmap;
+                pIndirectLightBuffer->m_RSMSettings[1] = static_cast<float>(IndexOfShadowCluster) * 1.0f / SSWidthOfShadowmap;
+                pIndirectLightBuffer->m_RSMSettings[2] = SSWidthOfShadowmap;
+                pIndirectLightBuffer->m_RSMSettings[3] = 0.0f;
+                pIndirectLightBuffer->m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
-                Gfx::BufferManager::UnmapConstantBuffer(m_SunLightPSBufferPtr->GetBuffer(1));
+                Gfx::BufferManager::UnmapConstantBuffer(m_IndirectLightPSBufferPtr->GetBuffer(1));
 
+                // -----------------------------------------------------------------------------
+
+                SPunctualLightProperties* pLightBuffer = static_cast<SPunctualLightProperties*>(BufferManager::MapConstantBuffer(m_IndirectLightPSBufferPtr->GetBuffer(2)));
+
+                assert(pLightBuffer != nullptr);
+
+                float InvSqrAttenuationRadius = pDtPointLight->GetReciprocalSquaredAttenuationRadius();
+                float AngleScale              = pDtPointLight->GetAngleScale();
+                float AngleOffset             = pDtPointLight->GetAngleOffset();
+
+                pLightBuffer->m_LightPosition  = Base::Float4(CurrentRenderJob->m_EntityPosition, 1.0f);
+                pLightBuffer->m_LightDirection = Base::Float4(pDtPointLight->GetDirection(), 0.0f).Normalize();
+                pLightBuffer->m_LightColor     = Base::Float4(pDtPointLight->GetLightness(), 1.0f);
+                pLightBuffer->m_LightSettings  = Base::Float4(InvSqrAttenuationRadius, AngleScale, AngleOffset, 0.0f);
+
+                BufferManager::UnmapConstantBuffer(m_IndirectLightPSBufferPtr->GetBuffer(2));
+
+                // -----------------------------------------------------------------------------
+                // Draw
+                // -----------------------------------------------------------------------------
                 Gfx::ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
             }
 
@@ -448,6 +489,7 @@ namespace
 
                 NewRenderJob.m_pDataPointLightFacet    = pDataPointFacet;
                 NewRenderJob.m_pGraphicPointLightFacet = pGraphicPointFacet;
+                NewRenderJob.m_EntityPosition          = CurrentEntity->GetWorldPosition();
 
                 m_RenderJobs.push_back(NewRenderJob);
             }
