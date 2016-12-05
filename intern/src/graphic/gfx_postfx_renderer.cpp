@@ -19,6 +19,7 @@
 #include "graphic/gfx_postfx_renderer.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
+#include "graphic/gfx_smaa_look_up_textures.h"
 #include "graphic/gfx_state_manager.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
@@ -69,6 +70,9 @@ namespace
             DOFApply,
             GaussianBlur,
             FXAA,
+            SMAAEdgeDetect,
+            SMAAWeightsCalc,
+            SMAABlending,
             NumberOfPostEffects,
             UndefinedPostEffect = -1
         };
@@ -151,6 +155,12 @@ namespace
         CRenderContextPtr m_QuarterRenderContextPtrs[3];
         CTargetSetPtr     m_QuarterTargetSetPtrs[3];
 
+        CTextureSetPtr    m_SMAATextureSetPtr[2];
+        CRenderContextPtr m_SMAAEdgeDetectContextPtr;
+        CRenderContextPtr m_SMAAWeightCalcContextPtr;
+        CTargetSetPtr     m_SMAAEdgeTargetSetPtr;
+        CTargetSetPtr     m_SMAAWeightsCalcTargetSetPtr;
+
         CFXAARenderJobs m_FXAARenderJobs;
         CDOFRenderJobs  m_DOFRenderJobs;
         
@@ -160,6 +170,7 @@ namespace
         
         void RenderDOF();
         void RenderFXAA();
+		void RenderSMAA();
         void RenderToSystem();
 
         void BuildRenderJobs();
@@ -241,6 +252,12 @@ namespace
         m_QuarterTargetSetPtrs[0]           = 0;
         m_QuarterTargetSetPtrs[1]           = 0;
         m_QuarterTargetSetPtrs[2]           = 0;
+        m_SMAATextureSetPtr[0]              = 0;
+        m_SMAATextureSetPtr[1]              = 0;
+        m_SMAAEdgeDetectContextPtr          = 0;
+        m_SMAAWeightCalcContextPtr          = 0;
+        m_SMAAEdgeTargetSetPtr              = 0;
+        m_SMAAWeightsCalcTargetSetPtr       = 0;
         
         for (unsigned int IndexOfPostEffectShader = 0; IndexOfPostEffectShader < NumberOfPostEffects; ++ IndexOfPostEffectShader)
         {
@@ -263,6 +280,13 @@ namespace
         CShaderPtr ShaderDOFApplyPSPtr        = ShaderManager::CompilePS("fs_dof_apply.glsl"        , "main");
         CShaderPtr ShaderGaussianBlurPSPtr    = ShaderManager::CompilePS("fs_gaussian_blur.glsl"    , "main");
         CShaderPtr ShaderFXAAPSPtr            = ShaderManager::CompilePS("fs_fxaa.glsl"             , "main");
+
+        CShaderPtr ShaderSMAAEdgeDetectVSPtr  = ShaderManager::CompileVS("vs_smaa_edge_detect.glsl" , "main");
+        CShaderPtr ShaderSMAAEdgeDetectPSPtr  = ShaderManager::CompilePS("fs_smaa_edge_detect.glsl" , "main");
+        CShaderPtr ShaderSMAAWeightsCalcVSPtr = ShaderManager::CompileVS("vs_smaa_weights_calc.glsl", "main");
+        CShaderPtr ShaderSMAAWeightsCalcPSPtr = ShaderManager::CompilePS("fs_smaa_weights_calc.glsl", "main");
+        CShaderPtr ShaderSMAABlendingVSPtr    = ShaderManager::CompileVS("vs_smaa_blending.glsl"    , "main");
+        CShaderPtr ShaderSMAABlendingPSPtr    = ShaderManager::CompilePS("fs_smaa_blending.glsl"    , "main");
         
         m_RectangleShaderVSPtr   = ShaderVSPtr;
         m_PassThroughShaderPSPtr = PassThroughPSPtr;
@@ -284,6 +308,15 @@ namespace
         
         m_PostEffectShaderVSPtrs[FXAA] = ShaderVSPtr;
         m_PostEffectShaderPSPtrs[FXAA] = ShaderFXAAPSPtr;
+
+        m_PostEffectShaderVSPtrs[SMAAEdgeDetect] = ShaderSMAAEdgeDetectVSPtr;
+        m_PostEffectShaderPSPtrs[SMAAEdgeDetect] = ShaderSMAAEdgeDetectPSPtr;
+
+        m_PostEffectShaderVSPtrs[SMAAWeightsCalc] = ShaderSMAAWeightsCalcVSPtr;
+        m_PostEffectShaderPSPtrs[SMAAWeightsCalc] = ShaderSMAAWeightsCalcPSPtr;
+
+        m_PostEffectShaderVSPtrs[SMAABlending] = ShaderSMAABlendingVSPtr;
+        m_PostEffectShaderPSPtrs[SMAABlending] = ShaderSMAABlendingPSPtr;
         
         // -----------------------------------------------------------------------------
         
@@ -395,6 +428,33 @@ namespace
         m_QuarterTargetSetPtrs[0] = TargetSetManager::CreateTargetSet(QuarterOneRenderbuffer  , 1);
         m_QuarterTargetSetPtrs[1] = TargetSetManager::CreateTargetSet(QuarterTwoRenderbuffer  , 1);
         m_QuarterTargetSetPtrs[2] = TargetSetManager::CreateTargetSet(QuarterThreeRenderbuffer, 1);
+
+        //////////////////////////////////////////////////////////
+        // SMAA Render Targets
+        //////////////////////////////////////////////////////////
+
+        RendertargetDescriptor.m_NumberOfPixelsU = Size[0];
+        RendertargetDescriptor.m_NumberOfPixelsV = Size[1];
+        RendertargetDescriptor.m_NumberOfPixelsW = 1;
+        RendertargetDescriptor.m_NumberOfMipMaps = 1;
+        RendertargetDescriptor.m_NumberOfTextures = 1;
+        RendertargetDescriptor.m_Binding = CTextureBase::RenderTarget | CTextureBase::ShaderResource;
+        RendertargetDescriptor.m_Access = CTextureBase::CPUWrite;
+        RendertargetDescriptor.m_Format = CTextureBase::Unknown;
+        RendertargetDescriptor.m_Usage = CTextureBase::GPURead;
+        RendertargetDescriptor.m_Semantic = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_pFileName = 0;
+        RendertargetDescriptor.m_pPixels = 0;
+        RendertargetDescriptor.m_Format = CTextureBase::R8G8_UBYTE;
+
+        CTextureBasePtr EdgesTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
+
+        RendertargetDescriptor.m_Format = CTextureBase::R8G8B8A8_UBYTE;
+
+        CTextureBasePtr BlendWeightsTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
+
+        m_SMAAEdgeTargetSetPtr = TargetSetManager::CreateTargetSet(EdgesTexturePtr);
+        m_SMAAWeightsCalcTargetSetPtr = TargetSetManager::CreateTargetSet(BlendWeightsTexturePtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -535,6 +595,22 @@ namespace
         m_PSSamplerSetPtr = SamplerManager::CreateSamplerSet(LinearFilter, LinearFilter, LinearFilter, LinearFilter);
         
         m_PSSamplerWrapSetPtr =  SamplerManager::CreateSamplerSet(LinearFilter, PointFilter, LinearFilter);
+
+        // -----------------------------------------------------------------------------
+
+        m_SMAAEdgeDetectContextPtr = ContextManager::CreateRenderContext();
+
+        m_SMAAEdgeDetectContextPtr->SetCamera(CameraPtr);
+        m_SMAAEdgeDetectContextPtr->SetViewPortSet(ViewPortSetPtr);
+        m_SMAAEdgeDetectContextPtr->SetTargetSet(m_SMAAEdgeTargetSetPtr);
+        m_SMAAEdgeDetectContextPtr->SetRenderState(RenderStatePtr);
+
+        m_SMAAWeightCalcContextPtr = ContextManager::CreateRenderContext();
+
+        m_SMAAWeightCalcContextPtr->SetCamera(CameraPtr);
+        m_SMAAWeightCalcContextPtr->SetViewPortSet(ViewPortSetPtr);
+        m_SMAAWeightCalcContextPtr->SetTargetSet(m_SMAAWeightsCalcTargetSetPtr);
+        m_SMAAWeightCalcContextPtr->SetRenderState(RenderStatePtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -561,6 +637,47 @@ namespace
         m_QuarterTextureSetPtrs[0] = TextureManager::CreateTextureSet(QuarterOneTexturePtr);
         m_QuarterTextureSetPtrs[1] = TextureManager::CreateTextureSet(QuarterTwoTexturePtr);
         m_QuarterTextureSetPtrs[2] = TextureManager::CreateTextureSet(QuarterThreeTexturePtr);
+
+        //////////////////////////////////////////////////////////////////
+        // Setting up SMAA look up textures
+        //////////////////////////////////////////////////////////////////
+
+        STextureDescriptor AreaTexDescriptor = {};
+
+        AreaTexDescriptor.m_NumberOfPixelsU = AREATEX_WIDTH;
+        AreaTexDescriptor.m_NumberOfPixelsV = AREATEX_HEIGHT;
+        AreaTexDescriptor.m_NumberOfPixelsW = 1;
+        AreaTexDescriptor.m_NumberOfMipMaps = 1;
+        AreaTexDescriptor.m_NumberOfTextures = 1;
+        AreaTexDescriptor.m_Binding = CTextureBase::ShaderResource;
+        AreaTexDescriptor.m_Access = CTextureBase::CPUWrite;
+        AreaTexDescriptor.m_Format = CTextureBase::R8G8_UBYTE;
+        AreaTexDescriptor.m_Usage = CTextureBase::GPURead;
+        AreaTexDescriptor.m_Semantic = CTextureBase::UndefinedSemantic;
+        AreaTexDescriptor.m_pFileName = 0;
+        AreaTexDescriptor.m_pPixels = const_cast<void*>(static_cast<const void*>(&areaTexBytes[0]));
+
+        CTextureBasePtr SMAAAreaTexture = TextureManager::CreateTexture2D(AreaTexDescriptor);
+
+        STextureDescriptor SearchTexDescriptor = {};
+
+        SearchTexDescriptor.m_NumberOfPixelsU = SEARCHTEX_WIDTH;
+        SearchTexDescriptor.m_NumberOfPixelsV = SEARCHTEX_HEIGHT;
+        SearchTexDescriptor.m_NumberOfPixelsW = 1;
+        SearchTexDescriptor.m_NumberOfMipMaps = 1;
+        SearchTexDescriptor.m_NumberOfTextures = 1;
+        SearchTexDescriptor.m_Binding = CTextureBase::ShaderResource;
+        SearchTexDescriptor.m_Access = CTextureBase::CPUWrite;
+        SearchTexDescriptor.m_Format = CTextureBase::R8_UBYTE;
+        SearchTexDescriptor.m_Usage = CTextureBase::GPURead;
+        SearchTexDescriptor.m_Semantic = CTextureBase::UndefinedSemantic;
+        SearchTexDescriptor.m_pFileName = 0;
+        SearchTexDescriptor.m_pPixels = const_cast<void*>(static_cast<const void*>(&searchTexBytes[0]));
+
+        CTextureBasePtr SMAASearchTexture = TextureManager::CreateTexture2D(SearchTexDescriptor);
+
+        m_SMAATextureSetPtr[0] = TextureManager::CreateTextureSet(ColorOneTexturePtr, SMAAAreaTexture, SMAASearchTexture);
+        m_SMAATextureSetPtr[1] = TextureManager::CreateTextureSet(ColorTwoTexturePtr, SMAAAreaTexture, SMAASearchTexture);
     }
     
     // -----------------------------------------------------------------------------
@@ -702,6 +819,7 @@ namespace
         
         RenderDOF();
         RenderFXAA();
+		RenderSMAA();
 
         RenderToSystem();
 
@@ -1213,6 +1331,76 @@ namespace
     }
     
     // -----------------------------------------------------------------------------
+
+	void CGfxPostFXRenderer::RenderSMAA()
+	{
+		Performance::BeginEvent("SMAA");
+
+		// -----------------------------------------------------------------------------
+		// Set current swap buffer count
+		// -----------------------------------------------------------------------------
+		int CurrentSwapBufferCount = m_SwapCounter % 2;
+		int NextSwapBufferCount = (m_SwapCounter += 1) % 2;
+
+        TargetSetManager::ClearTargetSet(m_SMAAEdgeTargetSetPtr);
+        TargetSetManager::ClearTargetSet(m_SMAAWeightsCalcTargetSetPtr);
+
+		// -----------------------------------------------------------------------------
+		// Edge detection
+		// -----------------------------------------------------------------------------
+
+        const unsigned int pOffset[] = { 0, 0 };
+
+        ContextManager::SetRenderContext(m_SMAAEdgeDetectContextPtr);
+
+        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
+
+        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+
+		ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
+
+		ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
+
+		ContextManager::SetTopology(STopology::TriangleStrip);
+
+		ContextManager::SetShaderVS(m_PostEffectShaderVSPtrs[SMAAEdgeDetect]);
+
+		ContextManager::SetShaderPS(m_PostEffectShaderPSPtrs[SMAAEdgeDetect]);
+
+		//ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
+
+		//ContextManager::SetConstantBufferSetPS(m_SMAAPropertiesPSBufferPtr);
+
+		ContextManager::SetTextureSetPS(m_SMAATextureSetPtr[CurrentSwapBufferCount]);
+
+		ContextManager::Draw(3, 0);
+
+		ContextManager::ResetTextureSetPS();
+
+		ContextManager::ResetConstantBufferSetPS();
+
+		ContextManager::ResetConstantBufferSetVS();
+
+		ContextManager::ResetTopology();
+
+		ContextManager::ResetInputLayout();
+
+		ContextManager::ResetIndexBuffer();
+
+		ContextManager::ResetVertexBufferSet();
+
+		ContextManager::ResetSamplerSetPS();
+
+		ContextManager::ResetShaderVS();
+
+		ContextManager::ResetShaderPS();
+
+		ContextManager::ResetRenderContext();
+
+		Performance::EndEvent();
+	}
+
+	// -----------------------------------------------------------------------------
     
     void CGfxPostFXRenderer::RenderToSystem()
     {

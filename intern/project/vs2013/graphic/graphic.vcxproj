@@ -119,6 +119,7 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_sky_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_sky_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_area_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_smaa_look_up_textures.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_sun_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_ar_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_sun_renderer.h" />

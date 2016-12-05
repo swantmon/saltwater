@@ -1333,7 +1333,7 @@ namespace
     void CGfxContextManager::SetInputLayout(CInputLayoutPtr _InputLayoutPtr)
     {
         assert(_InputLayoutPtr      != nullptr);
-        assert(m_VertexBufferSetPtr != nullptr);
+        //assert(m_VertexBufferSetPtr != nullptr);
         
         if (m_InputLayoutPtr != _InputLayoutPtr)
         {
@@ -1352,9 +1352,16 @@ namespace
                 
                 if (IndexOfVB != LastIndexOfVB)
                 {
-                    Gfx::CNativeBuffer& rNativeSingleBuffer = *static_cast<Gfx::CNativeBuffer*>(m_VertexBufferSetPtr->GetBuffer(IndexOfVB).GetPtr());
-                    
-                    glBindBuffer(GL_ARRAY_BUFFER, rNativeSingleBuffer.m_NativeBuffer);
+                    if (m_VertexBufferSetPtr == nullptr)
+                    {
+                        glBindBuffer(GL_ARRAY_BUFFER, 0);
+                    }
+                    else
+                    {
+                        Gfx::CNativeBuffer& rNativeSingleBuffer = *static_cast<Gfx::CNativeBuffer*>(m_VertexBufferSetPtr->GetBuffer(IndexOfVB).GetPtr());
+
+                        glBindBuffer(GL_ARRAY_BUFFER, rNativeSingleBuffer.m_NativeBuffer);
+                    }
                     
                     LastIndexOfVB = IndexOfVB;
                 }
