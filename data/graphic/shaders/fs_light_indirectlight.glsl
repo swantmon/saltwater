@@ -86,7 +86,7 @@ void main()
     vec3 DiffuseColor  = vec3(0.0);
     vec3 SpecularColor = vec3(0.0);
 
-    float SpecularExponent = 1.0f / (Data.m_Roughness) * 12.0f;
+    float SpecularExponent = 1.0f / max(Data.m_Roughness, 0.001f);
 
     vec3 WSViewDirection = normalize(Data.m_WSPosition - g_ViewPosition.xyz);
     
@@ -101,7 +101,7 @@ void main()
         vec2 TexCoordOffset = vec2(m_RSMSettings.x * float(IndexOfSample), m_RSMSettings.y);
         
         vec3  LightNormal     = texture(ps_ShadowmapNormal  , TexCoordOffset).rgb;
-        vec3  LightFlux       = texture(ps_ShadowmapFlux    , TexCoordOffset).rgb * AverageExposure;
+        vec3  LightFlux       = texture(ps_ShadowmapFlux    , TexCoordOffset).rgb;
         vec3  WSLightPosition = texture(ps_ShadowmapPosition, TexCoordOffset).rgb;
         float LightDepth      = texture(ps_ShadowmapDepth   , TexCoordOffset).r;
         
@@ -128,7 +128,7 @@ void main()
         // -----------------------------------------------------------------------------
         // Compute flux/color
         // -----------------------------------------------------------------------------
-        DiffuseColor += LightFlux * Fij * 0.4f;
+        DiffuseColor += LightFlux * Fij * 0.1f;
         
         // -----------------------------------------------------------------------------
         // Compute specular
@@ -137,7 +137,7 @@ void main()
         
         Fij = CosThetaI * CosThetaJ * lR;
         
-        SpecularColor += LightFlux * Fij * 0.1f * (SpecularExponent + 1.0f);
+        SpecularColor += LightFlux * Fij * 0.01f * (SpecularExponent + 1.0f);
     }
     
     // -----------------------------------------------------------------------------
@@ -150,7 +150,7 @@ void main()
     // -----------------------------------------------------------------------------
     // Output final color
     // -----------------------------------------------------------------------------
-    out_Output = vec4((Diffuse + Specular), 0.0f);
+    out_Output = vec4((Diffuse + Specular) * AverageExposure, 0.0f);
 }
 
 #endif // __INCLUDE_FS_LIGHT_INDIRECTLIGHT_GLSL__
