@@ -80,6 +80,7 @@ namespace
         void OnMouseMove(Edit::CMessage& _rMessage);
         
         void OnTakeScreenshot(Edit::CMessage& _rMessage);
+        void OnResize(Edit::CMessage& _rMessage);
     };
 } // namespace
 
@@ -161,6 +162,7 @@ namespace
         Edit::MessageManager::Register(Edit::SGUIMessageType::MouseRightReleased , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseRightReleased));
         Edit::MessageManager::Register(Edit::SGUIMessageType::MouseMove          , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseMove));
         Edit::MessageManager::Register(Edit::SGUIMessageType::TakeScreenshot     , EDIT_RECEIVE_MESSAGE(&CApplication::OnTakeScreenshot));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::ResizeMapEditWindow, EDIT_RECEIVE_MESSAGE(&CApplication::OnResize));
 
         // -----------------------------------------------------------------------------
         // Helper
@@ -415,6 +417,16 @@ namespace
         _rMessage.GetString(pPathToSave, 256);
 
         Gfx::App::TakeScreenshot(m_EditWindowID, pPathToSave);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CApplication::OnResize(Edit::CMessage& _rMessage)
+    {
+        int Width  = _rMessage.GetInt();
+        int Height = _rMessage.GetInt();
+
+        Gfx::App::OnResize(m_EditWindowID, 1280, 720);
     }
 }
 
