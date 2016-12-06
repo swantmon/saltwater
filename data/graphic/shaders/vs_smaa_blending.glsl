@@ -1,12 +1,18 @@
 
-#ifndef __INCLUDE_VS_SMAA_GLSL__
-#define __INCLUDE_VS_SMAA_GLSL__
+#ifndef __INCLUDE_VS_SMAA_BLENDING_GLSL__
+#define __INCLUDE_VS_SMAA_BLENDING_GLSL__
 
-const vec2 Vertices[3] = vec2[3]
+#define SMAA_RT_METRICS vec4(1.0 / 1280.0, 1.0 / 720.0, 1280.0, 720.0)
+#define SMAA_GLSL_4
+#define SMAA_PRESET_ULTRA
+#define SMAA_INCLUDE_PS 0
+#include "smaa.glsl"
+
+const vec4 VertexData[3] = vec4[3]
 (
-	vec2(-1.0, -1.0),
-	vec2( 3.0, -1.0),
-	vec2(-1.0,  3.0)
+	vec4(-1.0, -1.0, 0.0, 0.0),
+	vec4( 3.0, -1.0, 0.0, 2.0),
+	vec4(-1.0,  3.0, 2.0, 0.0)
 );
 
 out gl_PerVertex
@@ -14,9 +20,18 @@ out gl_PerVertex
     vec4 gl_Position;
 };
 
-void main(void)
+vec4 mad(vec4 x, vec4 y, vec4 z)
 {
-    gl_Position = vec4(Vertices[gl_VertexID], 0.0, 1.0);
+	return x * y + z;
 }
 
-#endif // __INCLUDE_VS_SMAA_GLSL__
+layout(location = 0) out vec2 out_UV;
+layout(location = 1) out vec4 out_Offset;
+
+void main(void) {
+    gl_Position = vec4(VertexData[gl_VertexID].xy, 0.0, 1.0);
+	out_UV = VertexData[gl_VertexID].xy * 0.5 + 0.5;
+    SMAANeighborhoodBlendingVS(out_UV, out_Offset);
+}
+
+#endif // __INCLUDE_VS_SMAA_BLENDING_GLSL__

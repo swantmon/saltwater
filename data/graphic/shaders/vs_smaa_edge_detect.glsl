@@ -1,12 +1,14 @@
 
-#ifndef __INCLUDE_VS_SMAA_GLSL__
-#define __INCLUDE_VS_SMAA_GLSL__
+#ifndef __INCLUDE_VS_SMAA_EDGE_DETECT_GLSL__
+#define __INCLUDE_VS_SMAA_EDGE_DETECT_GLSL__
 
 #define SMAA_RT_METRICS vec4(1.0 / 1280.0, 1.0 / 720.0, 1280.0, 720.0)
 #define SMAA_GLSL_4
-#define SMAA_PRESET_HIGH
+#define SMAA_PRESET_ULTRA
+#define SMAA_INCLUDE_PS 0
+#include "smaa.glsl"
 
-const vec4 Vertices[3] = vec4[3]
+const vec4 VertexData[3] = vec4[3]
 (
 	vec4(-1.0, -1.0, 0.0, 0.0),
 	vec4( 3.0, -1.0, 0.0, 2.0),
@@ -24,20 +26,13 @@ vec4 mad(vec4 x, vec4 y, vec4 z)
 }
 
 layout(location = 0) out vec2 out_UV;
-layout(location = 1) out vec4 offset[3];
-
-void SMAAEdgeDetectionVS(vec2 texcoord, out vec4 offset[3])
-{
-    offset[0] = mad(SMAA_RT_METRICS.xyxy, vec4(-1.0, 0.0, 0.0, -1.0), texcoord.xyxy);
-    offset[1] = mad(SMAA_RT_METRICS.xyxy, vec4( 1.0, 0.0, 0.0,  1.0), texcoord.xyxy);
-    offset[2] = mad(SMAA_RT_METRICS.xyxy, vec4(-2.0, 0.0, 0.0, -2.0), texcoord.xyxy);
-}
+layout(location = 1) out vec4 out_Offset[3];
 
 void main(void)
 {
-    gl_Position = vec4(Vertices[gl_VertexID].xy, 0.0, 1.0);
-	out_UV = Vertices[gl_VertexID].xy * 0.5 + 0.5;
-    SMAAEdgeDetectionVS(out_UV, offset);
+    gl_Position = vec4(VertexData[gl_VertexID].xy, 0.0, 1.0);
+	out_UV = VertexData[gl_VertexID].xy * 0.5 + 0.5;
+    SMAAEdgeDetectionVS(out_UV, out_Offset);
 }
 
-#endif // __INCLUDE_VS_SMAA_GLSL__
+#endif // __INCLUDE_VS_SMAA_EDGE_DETECT_GLSL__

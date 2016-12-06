@@ -676,8 +676,17 @@ namespace
 
         CTextureBasePtr SMAASearchTexture = TextureManager::CreateTexture2D(SearchTexDescriptor);
 
-        m_SMAATextureSetPtr[0] = TextureManager::CreateTextureSet(ColorOneTexturePtr, SMAAAreaTexture, SMAASearchTexture);
-        m_SMAATextureSetPtr[1] = TextureManager::CreateTextureSet(ColorTwoTexturePtr, SMAAAreaTexture, SMAASearchTexture);
+        auto EdgesTexPtr = m_SMAAEdgeTargetSetPtr->GetRenderTarget(0);
+        auto WeightsTexPtr = m_SMAAWeightsCalcTargetSetPtr->GetRenderTarget(0);
+
+        CTextureBasePtr TexturePtrs[2][5] =
+        {
+            { ColorOneTexturePtr, EdgesTexPtr, WeightsTexPtr, SMAAAreaTexture, SMAASearchTexture },
+            { ColorTwoTexturePtr, EdgesTexPtr, WeightsTexPtr, SMAAAreaTexture, SMAASearchTexture }
+        };
+
+        m_SMAATextureSetPtr[0] = TextureManager::CreateTextureSet(TexturePtrs[0], 5);
+        m_SMAATextureSetPtr[1] = TextureManager::CreateTextureSet(TexturePtrs[1], 5);
     }
     
     // -----------------------------------------------------------------------------
@@ -818,7 +827,7 @@ namespace
         m_SwapCounter = 0;
         
         RenderDOF();
-        RenderFXAA();
+        // RenderFXAA();
 		RenderSMAA();
 
         RenderToSystem();
@@ -1345,11 +1354,11 @@ namespace
         TargetSetManager::ClearTargetSet(m_SMAAEdgeTargetSetPtr);
         TargetSetManager::ClearTargetSet(m_SMAAWeightsCalcTargetSetPtr);
 
+        const unsigned int pOffset[] = { 0, 0 };
+
 		// -----------------------------------------------------------------------------
 		// Edge detection
 		// -----------------------------------------------------------------------------
-
-        const unsigned int pOffset[] = { 0, 0 };
 
         ContextManager::SetRenderContext(m_SMAAEdgeDetectContextPtr);
 
@@ -1374,6 +1383,66 @@ namespace
 		ContextManager::SetTextureSetPS(m_SMAATextureSetPtr[CurrentSwapBufferCount]);
 
 		ContextManager::Draw(3, 0);
+
+        // -----------------------------------------------------------------------------
+        // Blending weights calculation
+        // -----------------------------------------------------------------------------
+
+        ContextManager::SetRenderContext(m_SMAAWeightCalcContextPtr);
+
+        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
+
+        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+
+        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
+
+        ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
+
+        ContextManager::SetTopology(STopology::TriangleStrip);
+
+        ContextManager::SetShaderVS(m_PostEffectShaderVSPtrs[SMAAWeightsCalc]);
+
+        ContextManager::SetShaderPS(m_PostEffectShaderPSPtrs[SMAAWeightsCalc]);
+
+        //ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
+
+        //ContextManager::SetConstantBufferSetPS(m_SMAAPropertiesPSBufferPtr);
+
+        ContextManager::SetTextureSetPS(m_SMAATextureSetPtr[CurrentSwapBufferCount]);
+
+        ContextManager::Draw(3, 0);
+
+        // -----------------------------------------------------------------------------
+        // Neighbourhood blending
+        // -----------------------------------------------------------------------------
+
+        ContextManager::SetRenderContext(m_SwapRenderContextPtrs[NextSwapBufferCount]);
+
+        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
+
+        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+
+        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
+
+        ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
+
+        ContextManager::SetTopology(STopology::TriangleStrip);
+
+        ContextManager::SetShaderVS(m_PostEffectShaderVSPtrs[SMAABlending]);
+
+        ContextManager::SetShaderPS(m_PostEffectShaderPSPtrs[SMAABlending]);
+
+        //ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
+
+        //ContextManager::SetConstantBufferSetPS(m_SMAAPropertiesPSBufferPtr);
+
+        ContextManager::SetTextureSetPS(m_SMAATextureSetPtr[CurrentSwapBufferCount]);
+
+        ContextManager::Draw(3, 0);
+
+        // -----------------------------------------------------------------------------
+        // Reset
+        // -----------------------------------------------------------------------------
 
 		ContextManager::ResetTextureSetPS();
 
