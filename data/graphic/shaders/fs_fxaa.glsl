@@ -17,11 +17,6 @@ float FXAA_REDUCE_MIN = 1.0f / 128.0f;
 uniform sampler2D ps_InputTexture;
 uniform sampler2D PSTextureDepth;
 
-layout(binding = 1) uniform UB1
-{
-    vec3 ps_Luma;
-};
-
 // -----------------------------------------------------------------------------
 // Input to fragment from VS
 // -----------------------------------------------------------------------------
@@ -53,7 +48,7 @@ void main(void)
     // -----------------------------------------------------------------------------
     // Calculate luminanz on pixels
     // -----------------------------------------------------------------------------
-    vec3 Luma = ps_Luma;
+    vec3 Luma = vec3(0.299, 0.587, 0.144);
     
     float LumaNW = dot(rgbNW, Luma);
     float LumaNE = dot(rgbNE, Luma);
