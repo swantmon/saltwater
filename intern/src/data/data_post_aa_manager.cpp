@@ -5,22 +5,22 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_fxaa_facet.h"
-#include "data/data_fxaa_manager.h"
+#include "data/data_post_aa_facet.h"
+#include "data/data_post_aa_manager.h"
 
 using namespace Dt;
-using namespace Dt::FXAAManager;
+using namespace Dt::PostAAManager;
 
 namespace
 {
-    class CDtFXAAManager : private Base::CUncopyable
+    class CDtPostAAManager : private Base::CUncopyable
     {
-        BASE_SINGLETON_FUNC(CDtFXAAManager);
+        BASE_SINGLETON_FUNC(CDtPostAAManager);
         
     public:
         
-        CDtFXAAManager();
-        ~CDtFXAAManager();
+        CDtPostAAManager();
+        ~CDtPostAAManager();
         
     public:
         
@@ -29,73 +29,73 @@ namespace
 
         void Clear();
 
-        CFXAAFXFacet* CreateFXAAFX();
+        CPostAAFXFacet* CreatePostAAFX();
 
         void Update();
         
     private:
 
-        class CInternFXAAFXFacet : public CFXAAFXFacet
+        class CInternPostAAFXFacet : public CPostAAFXFacet
         {
         private:
-            friend class CDtFXAAManager;
+            friend class CDtPostAAManager;
         };
         
     private:
 
-        typedef Base::CPool<CInternFXAAFXFacet, 2> CFXAAFXFacetPool;
+        typedef Base::CPool<CInternPostAAFXFacet, 2> CPostAAFXFacetPool;
 
     private:
         
-        CFXAAFXFacetPool m_FXAAFXFacets;
+        CPostAAFXFacetPool m_PostAAFXFacets;
     };
 } // namespace
 
 namespace
 {
-    CDtFXAAManager::CDtFXAAManager()
-        : m_FXAAFXFacets()
+    CDtPostAAManager::CDtPostAAManager()
+        : m_PostAAFXFacets()
     {
     }
     
     // -----------------------------------------------------------------------------
     
-    CDtFXAAManager::~CDtFXAAManager()
+    CDtPostAAManager::~CDtPostAAManager()
     {
     }
 
     // -----------------------------------------------------------------------------
 
-    void CDtFXAAManager::OnStart()
+    void CDtPostAAManager::OnStart()
     {
     }
 
     // -----------------------------------------------------------------------------
 
-    void CDtFXAAManager::OnExit()
+    void CDtPostAAManager::OnExit()
     {
         Clear();
     }
 
     // -----------------------------------------------------------------------------
 
-    void CDtFXAAManager::Clear()
+    void CDtPostAAManager::Clear()
     {
-        m_FXAAFXFacets.Clear();
+        m_PostAAFXFacets.Clear();
     }
 
     // -----------------------------------------------------------------------------
 
-    CFXAAFXFacet* CDtFXAAManager::CreateFXAAFX()
+    CPostAAFXFacet* CDtPostAAManager::CreatePostAAFX()
     {
-        CInternFXAAFXFacet& rDataFXAAFXFacet = m_FXAAFXFacets.Allocate();
+        CInternPostAAFXFacet& rDataFXAAFXFacet = m_PostAAFXFacets.Allocate();
 
         return &rDataFXAAFXFacet;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CDtFXAAManager::Update()
+    void CDtPostAAManager::Update()
     {
 
     }
@@ -103,39 +103,39 @@ namespace
 
 namespace Dt
 {
-namespace FXAAManager
+namespace PostAAManager
 {
     void OnStart()
     {
-        CDtFXAAManager::GetInstance().OnStart();
+        CDtPostAAManager::GetInstance().OnStart();
     }
 
     // -----------------------------------------------------------------------------
 
     void OnExit()
     {
-        CDtFXAAManager::GetInstance().OnExit();
+        CDtPostAAManager::GetInstance().OnExit();
     }
 
     // -----------------------------------------------------------------------------
 
     void Clear()
     {
-        CDtFXAAManager::GetInstance().Clear();
+        CDtPostAAManager::GetInstance().Clear();
     }
 
     // -----------------------------------------------------------------------------
 
-    CFXAAFXFacet* CreateFXAAFX()
+    CPostAAFXFacet* CreatePostAAFX()
     {
-        return CDtFXAAManager::GetInstance().CreateFXAAFX();
+        return CDtPostAAManager::GetInstance().CreatePostAAFX();
     }
 
     // -----------------------------------------------------------------------------
 
     void Update()
     {
-    	CDtFXAAManager::GetInstance().Update();
+    	CDtPostAAManager::GetInstance().Update();
     }
-} // namespace FXAAManager
+} // namespace PostAAManager
 } // namespace Dt

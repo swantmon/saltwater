@@ -41,7 +41,7 @@ namespace Edit
         void createNewLightGlobalProbe();
         void createNewEntityBloom();
         void createNewEntityDOF();
-        void createNewEntityFXAA();
+        void createNewEntityPostAA();
         void createNewEntitySSR();
         void createNewEntityVolumeFog();
         void createNewPluginARController();

@@ -201,13 +201,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CMainWindow::createNewEntityFXAA()
+    void CMainWindow::createNewEntityPostAA()
     {
         CMessage NewMessage(true);
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewEffectFXAA, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::NewEffectPostAA, NewMessage);
     }
 
     // -----------------------------------------------------------------------------

@@ -6,7 +6,7 @@
 #include "editor_gui/edit_inspector_dof.h"
 #include "editor_gui/edit_inspector_entity.h"
 #include "editor_gui/edit_inspector_environment.h"
-#include "editor_gui/edit_inspector_fxaa.h"
+#include "editor_gui/edit_inspector_post_aa.h"
 #include "editor_gui/edit_inspector_globalprobe.h"
 #include "editor_gui/edit_inspector_material.h"
 #include "editor_gui/edit_inspector_pointlight.h"
@@ -49,7 +49,7 @@ namespace Edit
         CInspectorGlobalProbe*    m_pGlobalProbeWidget;
         CInspectorBloom*          m_pBloomWidget;
         CInspectorDOF*            m_pDOFWidget;
-        CInspectorFXAA*           m_pFXAAWidget;
+        CInspectorPostAA*         m_pFXAAWidget;
         CInspectorSSR*            m_pSSRWidget;
         CInspectorVolumeFog*      m_pVolumeFogWidget;
         CInspectorMaterial*       m_pMaterialWidget;

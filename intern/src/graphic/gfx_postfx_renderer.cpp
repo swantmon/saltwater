@@ -8,7 +8,7 @@
 #include "data/data_dof_facet.h"
 #include "data/data_entity.h"
 #include "data/data_fx_type.h"
-#include "data/data_fxaa_facet.h"
+#include "data/data_post_aa_facet.h"
 #include "data/data_map.h"
 
 #include "graphic/gfx_buffer_manager.h"
@@ -79,9 +79,9 @@ namespace
 
     private:
 
-        struct SFXAARenderJob
+        struct SPostAARenderJob
         {
-            Dt::CFXAAFXFacet* m_pDataFXAAFacet;
+            Dt::CPostAAFXFacet* m_pDataPostAAFacet;
         };
 
         struct SDOFRenderJob
@@ -115,7 +115,7 @@ namespace
 
     private:
 
-        typedef std::vector<SFXAARenderJob> CFXAARenderJobs;
+        typedef std::vector<SPostAARenderJob> CPostAARenderJobs;
         typedef std::vector<SDOFRenderJob> CDOFRenderJobs;
         
     private:
@@ -161,7 +161,7 @@ namespace
         CTargetSetPtr     m_SMAAEdgeTargetSetPtr;
         CTargetSetPtr     m_SMAAWeightsCalcTargetSetPtr;
 
-        CFXAARenderJobs m_FXAARenderJobs;
+        CPostAARenderJobs m_PostAARenderJobs;
         CDOFRenderJobs  m_DOFRenderJobs;
         
         unsigned int m_SwapCounter;
@@ -169,6 +169,7 @@ namespace
     private:
         
         void RenderDOF();
+        void RenderPostAA();
         void RenderFXAA();
 		void RenderSMAA();
         void RenderToSystem();
@@ -194,11 +195,11 @@ namespace
         , m_SwapTargetSetPtrs                ()
         , m_PSSamplerSetPtr                  ()
         , m_PSSamplerWrapSetPtr              ()
-        , m_FXAARenderJobs                   ()
+        , m_PostAARenderJobs                   ()
         , m_DOFRenderJobs                    ()
         , m_SwapCounter                      (0)
     {
-        m_FXAARenderJobs.reserve(2);
+        m_PostAARenderJobs.reserve(2);
         m_DOFRenderJobs .reserve(2);
     }
     
@@ -827,8 +828,7 @@ namespace
         m_SwapCounter = 0;
         
         RenderDOF();
-        // RenderFXAA();
-		RenderSMAA();
+        RenderPostAA();
 
         RenderToSystem();
 
@@ -1259,31 +1259,39 @@ namespace
     
     // -----------------------------------------------------------------------------
     
+    void CGfxPostFXRenderer::RenderPostAA()
+    {
+        if (m_PostAARenderJobs.size() == 0) return;
+
+        // TODO: What happens if more then one PostAA effect is available?
+        Dt::CPostAAFXFacet* pDataPostAAFacet = m_PostAARenderJobs[0].m_pDataPostAAFacet;
+
+        assert(pDataPostAAFacet != 0);
+
+        switch (pDataPostAAFacet->GetType())
+        {
+        case Dt::CPostAAFXFacet::FXAA:
+            RenderFXAA();
+            break;
+        case Dt::CPostAAFXFacet::SMAA:
+            RenderSMAA();
+            break;
+        default:
+            break;
+        }        
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxPostFXRenderer::RenderFXAA()
     {
-        if (m_FXAARenderJobs.size() == 0) return;
-
         Performance::BeginEvent("FXAA");
 
-        // TODO: What happens if more then one FXAA effect is available?
-        Dt::CFXAAFXFacet* pDataFXAAFacet = m_FXAARenderJobs[0].m_pDataFXAAFacet;
-
-        assert(pDataFXAAFacet != 0);
-        
         // -----------------------------------------------------------------------------
         // Set current swap buffer count
         // -----------------------------------------------------------------------------
         int CurrentSwapBufferCount = m_SwapCounter        % 2;
         int NextSwapBufferCount    = (m_SwapCounter += 1) % 2;
-
-        // -----------------------------------------------------------------------------
-        // Data
-        // -----------------------------------------------------------------------------
-        SFXAAProperties* pFXAAProperties = static_cast<SFXAAProperties*>(BufferManager::MapConstantBuffer(m_FXAAPropertiesPSBufferPtr->GetBuffer(1)));
-
-        pFXAAProperties->m_Luma = pDataFXAAFacet->GetLuma();
-
-        BufferManager::UnmapConstantBuffer(m_FXAAPropertiesPSBufferPtr->GetBuffer(1));
 
         // -----------------------------------------------------------------------------
         // Rendering
@@ -1537,7 +1545,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Clear current render jobs
         // -----------------------------------------------------------------------------
-        m_FXAARenderJobs.clear();
+        m_PostAARenderJobs.clear();
         m_DOFRenderJobs .clear();
 
         // -----------------------------------------------------------------------------
@@ -1553,20 +1561,20 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() == Dt::SFXType::FXAA)
+            if (rCurrentEntity.GetType() == Dt::SFXType::PostAA)
             {
-                Dt::CFXAAFXFacet* pDataFXAAFacet = static_cast<Dt::CFXAAFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+                Dt::CPostAAFXFacet* pDataPostAAFacet = static_cast<Dt::CPostAAFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
 
-                assert(pDataFXAAFacet != 0);
+                assert(pDataPostAAFacet != 0);
 
                 // -----------------------------------------------------------------------------
                 // Set sun into a new render job
                 // -----------------------------------------------------------------------------
-                SFXAARenderJob NewRenderJob;
+                SPostAARenderJob NewRenderJob;
 
-                NewRenderJob.m_pDataFXAAFacet = pDataFXAAFacet;
+                NewRenderJob.m_pDataPostAAFacet = pDataPostAAFacet;
 
-                m_FXAARenderJobs.push_back(NewRenderJob);
+                m_PostAARenderJobs.push_back(NewRenderJob);
             }
             else if (rCurrentEntity.GetType() == Dt::SFXType::DOF)
             {

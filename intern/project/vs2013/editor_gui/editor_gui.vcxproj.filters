@@ -89,12 +89,6 @@
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_dof.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_fxaa.cpp">
-      <Filter>Widgets\Inspector</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_fxaa.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_ssr.cpp">
       <Filter>Widgets\Inspector</Filter>
     </ClCompile>
@@ -149,6 +143,12 @@
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_arcontroller_marker.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_post_aa.cpp">
+      <Filter>Widgets\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_post_aa.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_mainwindow.ui">
@@ -188,9 +188,6 @@
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_dof.h">
       <Filter>Widgets\Inspector</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_fxaa.h">
-      <Filter>Widgets\Inspector</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_ssr.h">
       <Filter>Widgets\Inspector</Filter>
     </CustomBuild>
@@ -207,9 +204,6 @@
       <Filter>Form Files\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_environment.ui">
-      <Filter>Form Files\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_fxaa.ui">
       <Filter>Form Files\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_globalprobe.ui">
@@ -266,6 +260,12 @@
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_arcontroller_marker.h">
       <Filter>Widgets\Inspector</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_post_aa.h">
+      <Filter>Widgets\Inspector</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_post_aa.ui">
+      <Filter>Form Files\Inspector</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor_gui\edit_gui.h" />
@@ -296,9 +296,6 @@
     <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_dof.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_fxaa.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_volumefog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -321,6 +318,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_artrackedobject.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_post_aa.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -10,7 +10,7 @@
 #include "data/data_dof_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
-#include "data/data_fxaa_manager.h"
+#include "data/data_post_aa_manager.h"
 #include "data/data_light_probe_manager.h"
 #include "data/data_material_manager.h"
 #include "data/data_mesh_manager.h"
@@ -66,7 +66,7 @@ namespace
         Dt::ModelManager      ::OnExit();
         Dt::BloomManager      ::OnExit();
         Dt::DOFManager        ::OnExit();
-        Dt::FXAAManager       ::OnExit();
+        Dt::PostAAManager       ::OnExit();
         Dt::SSAOManager       ::OnExit();
         Dt::SSRFXManager      ::OnExit();
         Dt::VolumeFogManager  ::OnExit();

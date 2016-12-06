@@ -17,7 +17,7 @@
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_fx_type.h"
-#include "data/data_fxaa_manager.h"
+#include "data/data_post_aa_manager.h"
 #include "data/data_hierarchy_facet.h"
 #include "data/data_light_type.h"
 #include "data/data_map.h"
@@ -75,8 +75,8 @@ namespace
 
         BASE_CONSOLE_STREAMINFO("Logic> Loading level number " << LevelIndexDebug);
         
-        CreateEmptyScene();
-        //CreateDefaultScene();
+        //CreateEmptyScene();
+        CreateDefaultScene();
 
         BASE_CONSOLE_STREAMINFO("Logic> Loading level finished.");
         
@@ -237,14 +237,14 @@ namespace
             Dt::SEntityDescriptor EntityDesc;
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::FX;
-            EntityDesc.m_EntityType     = Dt::SFXType::FXAA;
+            EntityDesc.m_EntityType     = Dt::SFXType::PostAA;
             EntityDesc.m_FacetFlags     = 0;
 
             Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            rEffectEntity.SetName("FXAA");
+            rEffectEntity.SetName("PostAA");
 
-            Dt::CFXAAFXFacet* pEffectFacet = Dt::FXAAManager::CreateFXAAFX();
+            Dt::CPostAAFXFacet* pEffectFacet = Dt::PostAAManager::CreatePostAAFX();
 
             rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
 

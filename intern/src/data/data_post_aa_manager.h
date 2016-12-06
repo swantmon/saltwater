@@ -1,19 +1,19 @@
 
 #pragma once
 
-#include "data/data_fxaa_facet.h"
+#include "data/data_post_aa_facet.h"
 
 namespace Dt
 {
-namespace FXAAManager
+namespace PostAAManager
 {
     void OnStart();
     void OnExit();
 
     void Clear();
 
-    CFXAAFXFacet* CreateFXAAFX();
+    CPostAAFXFacet* CreatePostAAFX();
 
     void Update();
-} // namespace FXAAManager
+} // namespace PostAAManager
 } // namespace Dt

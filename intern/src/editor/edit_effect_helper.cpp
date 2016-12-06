@@ -10,7 +10,7 @@
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_fx_type.h"
-#include "data/data_fxaa_manager.h"
+#include "data/data_post_aa_manager.h"
 #include "data/data_map.h"
 #include "data/data_ssao_manager.h"
 #include "data/data_ssr_manager.h"
@@ -45,19 +45,19 @@ namespace
 
         void OnNewEntityBloom(Edit::CMessage& _rMessage);
         void OnNewEntityDOF(Edit::CMessage& _rMessage);
-        void OnNewEntityFXAA(Edit::CMessage& _rMessage);
+        void OnNewEntityPostAA(Edit::CMessage& _rMessage);
         void OnNewEntitySSR(Edit::CMessage& _rMessage);
         void OnNewEntityVolumeFog(Edit::CMessage& _rMessage);
 
         void OnRequestEntityInfoBloom(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoDOF(Edit::CMessage& _rMessage);
-        void OnRequestEntityInfoFXAA(Edit::CMessage& _rMessage);
+        void OnRequestEntityInfoPostAA(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoSSR(Edit::CMessage& _rMessage);
         void OnRequestEntityInfoVolumeFog(Edit::CMessage& _rMessage);
 
         void OnEntityInfoBloom(Edit::CMessage& _rMessage);
         void OnEntityInfoDOF(Edit::CMessage& _rMessage);
-        void OnEntityInfoFXAA(Edit::CMessage& _rMessage);
+        void OnEntityInfoPostAA(Edit::CMessage& _rMessage);
         void OnEntityInfoSSR(Edit::CMessage& _rMessage);
         void OnEntityInfoVolumeFog(Edit::CMessage& _rMessage);
 
@@ -93,19 +93,19 @@ namespace
         // -----------------------------------------------------------------------------
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewEffectBloom                 , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnNewEntityBloom));
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewEffectDOF                   , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnNewEntityDOF));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewEffectFXAA                  , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnNewEntityFXAA));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::NewEffectPostAA                  , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnNewEntityPostAA));
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewEffectSSR                   , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnNewEntitySSR));
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewEffectVolumeFog             , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnNewEntityVolumeFog));
 
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEffectInfoBloom         , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnRequestEntityInfoBloom));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEffectInfoDOF           , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnRequestEntityInfoDOF));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEffectInfoFXAA          , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnRequestEntityInfoFXAA));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEffectInfoPostAA          , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnRequestEntityInfoPostAA));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEffectInfoSSR           , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnRequestEntityInfoSSR));
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEffectInfoVolumeFog     , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnRequestEntityInfoVolumeFog));
         
         Edit::MessageManager::Register(Edit::SGUIMessageType::EffectInfoBloom                , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnEntityInfoBloom));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EffectInfoDOF                  , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnEntityInfoDOF));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::EffectInfoFXAA                 , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnEntityInfoFXAA));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::EffectInfoPostAA                 , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnEntityInfoPostAA));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EffectInfoSSR                  , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnEntityInfoSSR));
         Edit::MessageManager::Register(Edit::SGUIMessageType::EffectInfoVolumeFog            , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnEntityInfoVolumeFog));
     }
@@ -161,18 +161,18 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CEffectHelper::OnNewEntityFXAA(Edit::CMessage& _rMessage)
+    void CEffectHelper::OnNewEntityPostAA(Edit::CMessage& _rMessage)
     {
         {
             Dt::SEntityDescriptor EntityDesc;
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::FX;
-            EntityDesc.m_EntityType     = Dt::SFXType::FXAA;
+            EntityDesc.m_EntityType     = Dt::SFXType::PostAA;
             EntityDesc.m_FacetFlags     = 0;
 
             Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            Dt::CFXAAFXFacet* pEffectFacet = Dt::FXAAManager::CreateFXAAFX();
+            Dt::CPostAAFXFacet* pEffectFacet = Dt::PostAAManager::CreatePostAAFX();
 
             rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
 
@@ -284,27 +284,25 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CEffectHelper::OnRequestEntityInfoFXAA(Edit::CMessage& _rMessage)
+    void CEffectHelper::OnRequestEntityInfoPostAA(Edit::CMessage& _rMessage)
     {
         int EntityID = _rMessage.GetInt();
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CFXAAFXFacet* pFXFacet = static_cast<Dt::CFXAAFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CPostAAFXFacet* pFXFacet = static_cast<Dt::CPostAAFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::FXAA && pFXFacet != nullptr)
+        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::PostAA && pFXFacet != nullptr)
         {
             Edit::CMessage NewMessage;
 
             NewMessage.PutInt(rCurrentEntity.GetID());
 
-            NewMessage.PutFloat(pFXFacet->GetLuma()[0]);
-            NewMessage.PutFloat(pFXFacet->GetLuma()[1]);
-            NewMessage.PutFloat(pFXFacet->GetLuma()[2]);
+            NewMessage.PutInt(pFXFacet->GetType());
 
             NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EffectInfoFXAA, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EffectInfoPostAA, NewMessage);
         }
     }
 
@@ -464,31 +462,27 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CEffectHelper::OnEntityInfoFXAA(Edit::CMessage& _rMessage)
+    void CEffectHelper::OnEntityInfoPostAA(Edit::CMessage& _rMessage)
     {
         int EntityID = _rMessage.GetInt();
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CFXAAFXFacet* pFXFacet = static_cast<Dt::CFXAAFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CPostAAFXFacet* pFXFacet = static_cast<Dt::CPostAAFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::FXAA && pFXFacet != nullptr)
+        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::PostAA && pFXFacet != nullptr)
         {
-            float R, G, B;
+            Dt::CPostAAFXFacet::EType Type;
 
             // -----------------------------------------------------------------------------
             // Read values
             // -----------------------------------------------------------------------------          
-            R = _rMessage.GetFloat();
-            G = _rMessage.GetFloat();
-            B = _rMessage.GetFloat();
-
-            Base::Float3 Color = Base::Float3(R, G, B);
+            Type = static_cast<Dt::CPostAAFXFacet::EType>(_rMessage.GetInt());
 
             // -----------------------------------------------------------------------------
             // Set values
             // -----------------------------------------------------------------------------
-            pFXFacet->SetLuma(Color);
+            pFXFacet->SetType(Type);
 
             pFXFacet->UpdateEffect();
 

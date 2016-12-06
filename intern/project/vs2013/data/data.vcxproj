@@ -34,8 +34,8 @@
     <ClInclude Include="..\..\..\src\data\data_entity.h" />
     <ClInclude Include="..\..\..\src\data\data_entity_folder.h" />
     <ClInclude Include="..\..\..\src\data\data_entity_manager.h" />
-    <ClInclude Include="..\..\..\src\data\data_fxaa_facet.h" />
-    <ClInclude Include="..\..\..\src\data\data_fxaa_manager.h" />
+    <ClInclude Include="..\..\..\src\data\data_post_aa_facet.h" />
+    <ClInclude Include="..\..\..\src\data\data_post_aa_manager.h" />
     <ClInclude Include="..\..\..\src\data\data_fx_type.h" />
     <ClInclude Include="..\..\..\src\data\data_hierarchy_facet.h" />
     <ClInclude Include="..\..\..\src\data\data_light_type.h" />
@@ -89,8 +89,8 @@
     <ClCompile Include="..\..\..\src\data\data_dof_manager.cpp" />
     <ClCompile Include="..\..\..\src\data\data_entity.cpp" />
     <ClCompile Include="..\..\..\src\data\data_entity_manager.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_fxaa_facet.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_fxaa_manager.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_post_aa_facet.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_post_aa_manager.cpp" />
     <ClCompile Include="..\..\..\src\data\data_hierarchy_facet.cpp" />
     <ClCompile Include="..\..\..\src\data\data_light_probe_facet.cpp" />
     <ClCompile Include="..\..\..\src\data\data_light_probe_manager.cpp" />

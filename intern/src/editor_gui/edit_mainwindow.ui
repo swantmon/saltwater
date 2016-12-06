@@ -168,7 +168,7 @@
      </property>
      <addaction name="m_pActionBloom"/>
      <addaction name="m_pActionDOF"/>
-     <addaction name="m_pActionFXAA"/>
+     <addaction name="m_pActionPostAA"/>
      <addaction name="m_pActionSSR"/>
      <addaction name="m_pActionVolumeFog"/>
     </widget>
@@ -215,7 +215,7 @@
    <property name="minimumSize">
     <size>
      <width>89</width>
-     <height>111</height>
+     <height>113</height>
     </size>
    </property>
    <property name="features">
@@ -279,7 +279,7 @@
   <widget class="QDockWidget" name="m_pInspectorDockWidget">
    <property name="minimumSize">
     <size>
-     <width>80</width>
+     <width>82</width>
      <height>58</height>
     </size>
    </property>
@@ -546,7 +546,7 @@
     <string>&amp;DOF</string>
    </property>
   </action>
-  <action name="m_pActionFXAA">
+  <action name="m_pActionPostAA">
    <property name="text">
     <string>&amp;FXAA</string>
    </property>
@@ -933,10 +933,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>m_pActionFXAA</sender>
+   <sender>m_pActionPostAA</sender>
    <signal>triggered()</signal>
    <receiver>CMainWindow</receiver>
-   <slot>createNewEntityFXAA()</slot>
+   <slot>createNewEntityPostAA()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -1090,7 +1090,7 @@
   <slot>toggleHistogramDock()</slot>
   <slot>createNewEntityBloom()</slot>
   <slot>createNewEntityDOF()</slot>
-  <slot>createNewEntityFXAA()</slot>
+  <slot>createNewEntityPostAA()</slot>
   <slot>createNewEntitySSR()</slot>
   <slot>createNewEntityVolumeFog()</slot>
   <slot>createNewPluginARController()</slot>

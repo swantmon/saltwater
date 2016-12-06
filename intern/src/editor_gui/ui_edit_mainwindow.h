@@ -57,7 +57,7 @@ public:
     QAction *actionInspector;
     QAction *m_pActionBloom;
     QAction *m_pActionDOF;
-    QAction *m_pActionFXAA;
+    QAction *m_pActionPostAA;
     QAction *m_pActionSSR;
     QAction *m_pActionVolumeFog;
     QAction *m_pActionARController;
@@ -169,8 +169,8 @@ public:
         m_pActionBloom->setObjectName(QStringLiteral("m_pActionBloom"));
         m_pActionDOF = new QAction(CMainWindow);
         m_pActionDOF->setObjectName(QStringLiteral("m_pActionDOF"));
-        m_pActionFXAA = new QAction(CMainWindow);
-        m_pActionFXAA->setObjectName(QStringLiteral("m_pActionFXAA"));
+        m_pActionPostAA = new QAction(CMainWindow);
+        m_pActionPostAA->setObjectName(QStringLiteral("m_pActionPostAA"));
         m_pActionSSR = new QAction(CMainWindow);
         m_pActionSSR->setObjectName(QStringLiteral("m_pActionSSR"));
         m_pActionVolumeFog = new QAction(CMainWindow);
@@ -268,7 +268,7 @@ public:
         CMainWindow->setStatusBar(m_pStatusBar);
         m_pSceneGraphDockWidget = new QDockWidget(CMainWindow);
         m_pSceneGraphDockWidget->setObjectName(QStringLiteral("m_pSceneGraphDockWidget"));
-        m_pSceneGraphDockWidget->setMinimumSize(QSize(89, 111));
+        m_pSceneGraphDockWidget->setMinimumSize(QSize(89, 113));
         m_pSceneGraphDockWidget->setFeatures(QDockWidget::AllDockWidgetFeatures);
         dockWidgetContents = new QWidget();
         dockWidgetContents->setObjectName(QStringLiteral("dockWidgetContents"));
@@ -299,7 +299,7 @@ public:
         CMainWindow->addDockWidget(static_cast<Qt::DockWidgetArea>(1), m_pSceneGraphDockWidget);
         m_pInspectorDockWidget = new QDockWidget(CMainWindow);
         m_pInspectorDockWidget->setObjectName(QStringLiteral("m_pInspectorDockWidget"));
-        m_pInspectorDockWidget->setMinimumSize(QSize(80, 58));
+        m_pInspectorDockWidget->setMinimumSize(QSize(82, 58));
         m_pInspectorDockWidget->setFeatures(QDockWidget::AllDockWidgetFeatures);
         dockWidgetContents_2 = new QWidget();
         dockWidgetContents_2->setObjectName(QStringLiteral("dockWidgetContents_2"));
@@ -456,7 +456,7 @@ public:
         menuLights->addAction(m_pActionGlobalProbe);
         menuEffects->addAction(m_pActionBloom);
         menuEffects->addAction(m_pActionDOF);
-        menuEffects->addAction(m_pActionFXAA);
+        menuEffects->addAction(m_pActionPostAA);
         menuEffects->addAction(m_pActionSSR);
         menuEffects->addAction(m_pActionVolumeFog);
         menuPlugins->addAction(m_pActionARController);
@@ -491,7 +491,7 @@ public:
         QObject::connect(m_pHistogramEyeDownEdit, SIGNAL(editingFinished()), CMainWindow, SLOT(changeHistogramSettings()));
         QObject::connect(m_pActionHistogram, SIGNAL(triggered()), CMainWindow, SLOT(toggleHistogramDock()));
         QObject::connect(m_pActionDOF, SIGNAL(triggered()), CMainWindow, SLOT(createNewEntityDOF()));
-        QObject::connect(m_pActionFXAA, SIGNAL(triggered()), CMainWindow, SLOT(createNewEntityFXAA()));
+        QObject::connect(m_pActionPostAA, SIGNAL(triggered()), CMainWindow, SLOT(createNewEntityPostAA()));
         QObject::connect(m_pActionBloom, SIGNAL(triggered()), CMainWindow, SLOT(createNewEntityBloom()));
         QObject::connect(m_pActionSSR, SIGNAL(triggered()), CMainWindow, SLOT(createNewEntitySSR()));
         QObject::connect(m_pActionVolumeFog, SIGNAL(triggered()), CMainWindow, SLOT(createNewEntityVolumeFog()));
@@ -530,7 +530,7 @@ public:
         actionInspector->setText(QApplication::translate("CMainWindow", "Inspector", 0));
         m_pActionBloom->setText(QApplication::translate("CMainWindow", "&Bloom", 0));
         m_pActionDOF->setText(QApplication::translate("CMainWindow", "&DOF", 0));
-        m_pActionFXAA->setText(QApplication::translate("CMainWindow", "&FXAA", 0));
+        m_pActionPostAA->setText(QApplication::translate("CMainWindow", "&FXAA", 0));
         m_pActionSSR->setText(QApplication::translate("CMainWindow", "&SSR", 0));
         m_pActionVolumeFog->setText(QApplication::translate("CMainWindow", "&Volume Fog", 0));
         m_pActionARController->setText(QApplication::translate("CMainWindow", "&AR Controller", 0));

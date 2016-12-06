@@ -131,12 +131,6 @@
     <ClInclude Include="..\..\..\src\data\data_ssao_facet.h">
       <Filter>map\fx\ssao</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_fxaa_manager.h">
-      <Filter>map\fx\fxaa</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_fxaa_facet.h">
-      <Filter>map\fx\fxaa</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_dof_manager.h">
       <Filter>map\fx\dof</Filter>
     </ClInclude>
@@ -166,6 +160,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_mesh_actor_facet.h">
       <Filter>map\actors\mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_post_aa_facet.h">
+      <Filter>map\fx\post_aa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_post_aa_manager.h">
+      <Filter>map\fx\post_aa</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -281,12 +281,6 @@
     <ClCompile Include="..\..\..\src\data\data_ssao_manager.cpp">
       <Filter>map\fx\ssao</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_fxaa_facet.cpp">
-      <Filter>map\fx\fxaa</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_fxaa_manager.cpp">
-      <Filter>map\fx\fxaa</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_dof_facet.cpp">
       <Filter>map\fx\dof</Filter>
     </ClCompile>
@@ -310,6 +304,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_mesh_actor_facet.cpp">
       <Filter>map\actors\mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_post_aa_facet.cpp">
+      <Filter>map\fx\post_aa</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_post_aa_manager.cpp">
+      <Filter>map\fx\post_aa</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -379,9 +379,6 @@
     <Filter Include="map\fx\dof">
       <UniqueIdentifier>{dc4a0cbe-7703-497d-973f-49ed484d2443}</UniqueIdentifier>
     </Filter>
-    <Filter Include="map\fx\fxaa">
-      <UniqueIdentifier>{cc4d74eb-3e0b-4be2-b81b-8ce81125f7f1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="map\fx\ssao">
       <UniqueIdentifier>{82c81c63-4158-48e8-9ee4-6dc0558f41de}</UniqueIdentifier>
     </Filter>
@@ -399,6 +396,9 @@
     </Filter>
     <Filter Include="map\actors\camera">
       <UniqueIdentifier>{e6e96045-c296-40c6-b9f2-1f9f46701d11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\fx\post_aa">
+      <UniqueIdentifier>{cc4d74eb-3e0b-4be2-b81b-8ce81125f7f1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

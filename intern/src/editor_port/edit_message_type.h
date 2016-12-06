@@ -41,7 +41,7 @@ namespace Edit
 
             NewEffectBloom,
             NewEffectDOF,
-            NewEffectFXAA,
+            NewEffectPostAA,
             NewEffectSSR,
             NewEffectVolumeFog,
 
@@ -62,7 +62,7 @@ namespace Edit
 
             RequestEffectInfoBloom,
             RequestEffectInfoDOF,
-            RequestEffectInfoFXAA,
+            RequestEffectInfoPostAA,
             RequestEffectInfoSSR,
             RequestEffectInfoVolumeFog,
 
@@ -87,7 +87,7 @@ namespace Edit
 
             EffectInfoBloom,
             EffectInfoDOF,
-            EffectInfoFXAA,
+            EffectInfoPostAA,
             EffectInfoSSR,
             EffectInfoVolumeFog,
 
@@ -129,7 +129,7 @@ namespace Edit
 
             EffectInfoBloom,
             EffectInfoDOF,
-            EffectInfoFXAA,
+            EffectInfoPostAA,
             EffectInfoSSR,
             EffectInfoVolumeFog,
 

@@ -20,7 +20,7 @@
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_Edit__CMainWindow_t {
     QByteArrayData data[22];
-    char stringdata0[445];
+    char stringdata0[447];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -41,16 +41,16 @@ QT_MOC_LITERAL(8, 141, 25), // "createNewLightEnvironment"
 QT_MOC_LITERAL(9, 167, 25), // "createNewLightGlobalProbe"
 QT_MOC_LITERAL(10, 193, 20), // "createNewEntityBloom"
 QT_MOC_LITERAL(11, 214, 18), // "createNewEntityDOF"
-QT_MOC_LITERAL(12, 233, 19), // "createNewEntityFXAA"
-QT_MOC_LITERAL(13, 253, 18), // "createNewEntitySSR"
-QT_MOC_LITERAL(14, 272, 24), // "createNewEntityVolumeFog"
-QT_MOC_LITERAL(15, 297, 27), // "createNewPluginARController"
-QT_MOC_LITERAL(16, 325, 23), // "changeHistogramSettings"
-QT_MOC_LITERAL(17, 349, 19), // "toggleHistogramDock"
-QT_MOC_LITERAL(18, 369, 20), // "toggleSceneGraphDock"
-QT_MOC_LITERAL(19, 390, 19), // "toggleInspectorDock"
-QT_MOC_LITERAL(20, 410, 17), // "toggleConsoleDock"
-QT_MOC_LITERAL(21, 428, 16) // "toggleAssetsDock"
+QT_MOC_LITERAL(12, 233, 21), // "createNewEntityPostAA"
+QT_MOC_LITERAL(13, 255, 18), // "createNewEntitySSR"
+QT_MOC_LITERAL(14, 274, 24), // "createNewEntityVolumeFog"
+QT_MOC_LITERAL(15, 299, 27), // "createNewPluginARController"
+QT_MOC_LITERAL(16, 327, 23), // "changeHistogramSettings"
+QT_MOC_LITERAL(17, 351, 19), // "toggleHistogramDock"
+QT_MOC_LITERAL(18, 371, 20), // "toggleSceneGraphDock"
+QT_MOC_LITERAL(19, 392, 19), // "toggleInspectorDock"
+QT_MOC_LITERAL(20, 412, 17), // "toggleConsoleDock"
+QT_MOC_LITERAL(21, 430, 16) // "toggleAssetsDock"
 
     },
     "Edit::CMainWindow\0switchPlayingCurrentScene\0"
@@ -59,7 +59,7 @@ QT_MOC_LITERAL(21, 428, 16) // "toggleAssetsDock"
     "createNewLightSun\0createNewLightEnvironment\0"
     "createNewLightGlobalProbe\0"
     "createNewEntityBloom\0createNewEntityDOF\0"
-    "createNewEntityFXAA\0createNewEntitySSR\0"
+    "createNewEntityPostAA\0createNewEntitySSR\0"
     "createNewEntityVolumeFog\0"
     "createNewPluginARController\0"
     "changeHistogramSettings\0toggleHistogramDock\0"
@@ -144,7 +144,7 @@ void Edit::CMainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, in
         case 7: _t->createNewLightGlobalProbe(); break;
         case 8: _t->createNewEntityBloom(); break;
         case 9: _t->createNewEntityDOF(); break;
-        case 10: _t->createNewEntityFXAA(); break;
+        case 10: _t->createNewEntityPostAA(); break;
         case 11: _t->createNewEntitySSR(); break;
         case 12: _t->createNewEntityVolumeFog(); break;
         case 13: _t->createNewPluginARController(); break;

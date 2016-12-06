@@ -10,7 +10,7 @@ namespace Dt
             Bloom,
             SSR,
             DOF,
-            FXAA,
+            PostAA,
             SSAO,
             VolumeFog,
             UndefinedType = -1,

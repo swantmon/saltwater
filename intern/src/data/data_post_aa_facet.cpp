@@ -1,38 +1,38 @@
 
 #include "data/data_precompiled.h"
 
-#include "data/data_fxaa_facet.h"
+#include "data/data_post_aa_facet.h"
 
 namespace Dt
 {
-    CFXAAFXFacet::CFXAAFXFacet()
-        : m_Luma(Base::Float3(0.299f, 0.587f, 0.144f))
+    CPostAAFXFacet::CPostAAFXFacet()
+        : m_Type(SMAA)
     {
     }
 
     // -----------------------------------------------------------------------------
 
-    CFXAAFXFacet::~CFXAAFXFacet()
+    CPostAAFXFacet::~CPostAAFXFacet()
     {
     }
 
     // -----------------------------------------------------------------------------
 
-    void CFXAAFXFacet::SetLuma(Base::Float3& _rLuma)
+    void CPostAAFXFacet::SetType(EType _Type)
     {
-        m_Luma = _rLuma;
+        m_Type = _Type;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float3& CFXAAFXFacet::GetLuma()
+    CPostAAFXFacet::EType CPostAAFXFacet::GetType()
     {
-        return m_Luma;
+        return m_Type;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CFXAAFXFacet::UpdateEffect()
+    void CPostAAFXFacet::UpdateEffect()
     {
     }
 } // namespace Dt

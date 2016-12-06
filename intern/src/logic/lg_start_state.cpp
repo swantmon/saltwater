@@ -10,7 +10,7 @@
 #include "data/data_dof_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
-#include "data/data_fxaa_manager.h"
+#include "data/data_post_aa_manager.h"
 #include "data/data_light_probe_manager.h"
 #include "data/data_material_manager.h"
 #include "data/data_mesh_manager.h"
@@ -60,7 +60,7 @@ namespace
         Dt::SkyManager        ::OnStart();
         Dt::BloomManager      ::OnStart();
         Dt::DOFManager        ::OnStart();
-        Dt::FXAAManager       ::OnStart();
+        Dt::PostAAManager       ::OnStart();
         Dt::SSAOManager       ::OnStart();
         Dt::SSRFXManager      ::OnStart();
         Dt::VolumeFogManager  ::OnStart();

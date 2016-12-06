@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "editor_gui/ui_edit_inspector_fxaa.h"
+#include "editor_gui/ui_edit_inspector_post_aa.h"
 
 #include "editor_port/edit_message.h"
 
@@ -8,19 +8,17 @@
 
 namespace Edit
 {
-    class CInspectorFXAA : public QWidget, public Ui::InspectorFXAA
+    class CInspectorPostAA : public QWidget, public Ui::InspectorPostAA
     {
 	    Q_OBJECT
 
     public:
-	    CInspectorFXAA(QWidget* _pParent = Q_NULLPTR);
-	    ~CInspectorFXAA();
+	    CInspectorPostAA(QWidget* _pParent = Q_NULLPTR);
+	    ~CInspectorPostAA();
 
     public Q_SLOTS:
 
         void valueChanged();
-
-        void pickColorFromDialog();
 
         void RequestInformation(unsigned int _EntityID);
 
@@ -30,6 +28,6 @@ namespace Edit
 
     private:
 
-        void OnEntityInfoFXAA(Edit::CMessage& _rMessage);
+        void OnEntityInfoPostAA(Edit::CMessage& _rMessage);
     };
 } // namespace Edit

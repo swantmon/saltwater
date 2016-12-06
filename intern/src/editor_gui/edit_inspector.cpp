@@ -41,7 +41,7 @@ namespace Edit
         m_pGlobalProbeWidget = new CInspectorGlobalProbe();
         m_pBloomWidget       = new CInspectorBloom();
         m_pDOFWidget         = new CInspectorDOF();
-        m_pFXAAWidget        = new CInspectorFXAA();
+        m_pFXAAWidget        = new CInspectorPostAA();
         m_pSSRWidget         = new CInspectorSSR();
         m_pVolumeFogWidget   = new CInspectorVolumeFog();
         m_pMaterialWidget    = new CInspectorMaterial();
