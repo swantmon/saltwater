@@ -86,9 +86,9 @@ void main()
     vec3 DiffuseColor  = vec3(0.0);
     vec3 SpecularColor = vec3(0.0);
 
-    float SpecularExponent = 0.2f;
+    float SpecularExponent = 1.0f / (Data.m_Roughness) * 12.0f;
 
-    vec3 WSViewDirection = normalize(g_ViewPosition.xyz - Data.m_WSPosition);
+    vec3 WSViewDirection = normalize(Data.m_WSPosition - g_ViewPosition.xyz);
     
     // -----------------------------------------------------------------------------
     // Create an spectrum of light sending from the current world-space position
@@ -128,16 +128,16 @@ void main()
         // -----------------------------------------------------------------------------
         // Compute flux/color
         // -----------------------------------------------------------------------------
-        DiffuseColor += LightFlux * Fij;
+        DiffuseColor += LightFlux * Fij * 0.4f;
         
         // -----------------------------------------------------------------------------
         // Compute specular
         // -----------------------------------------------------------------------------
-        CosThetaJ = pow( clamp(dot(WSViewDirection, reflect( -Reflection, Data.m_WSNormal.xyz )), 0.0f, 1.0f), SpecularExponent);
+        CosThetaJ = pow( clamp(dot(WSViewDirection, reflect(Reflection, Data.m_WSNormal.xyz)), 0.0f, 1.0f), SpecularExponent);
         
         Fij = CosThetaI * CosThetaJ * lR;
         
-        SpecularColor += LightFlux * Fij * GLOSSY_NORMALIZATION_CONSTANT * (SpecularExponent + 1.0f);
+        SpecularColor += LightFlux * Fij * 0.1f * (SpecularExponent + 1.0f);
     }
     
     // -----------------------------------------------------------------------------
