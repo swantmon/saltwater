@@ -27,6 +27,8 @@
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
 
+#include <sstream>
+
 using namespace Gfx;
 
 namespace
@@ -56,6 +58,8 @@ namespace
         void OnReload();
         void OnNewMap();
         void OnUnloadMap();
+
+        void OnResize(unsigned int _Width, unsigned int _Height);
         
         void Update();
         void Render();
@@ -201,6 +205,7 @@ namespace
     {
         m_PostAARenderJobs.reserve(2);
         m_DOFRenderJobs .reserve(2);
+        Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxPostFXRenderer::OnResize));
     }
     
     // -----------------------------------------------------------------------------
@@ -282,12 +287,24 @@ namespace
         CShaderPtr ShaderGaussianBlurPSPtr    = ShaderManager::CompilePS("fs_gaussian_blur.glsl"    , "main");
         CShaderPtr ShaderFXAAPSPtr            = ShaderManager::CompilePS("fs_fxaa.glsl"             , "main");
 
-        CShaderPtr ShaderSMAAEdgeDetectVSPtr  = ShaderManager::CompileVS("vs_smaa_edge_detect.glsl" , "main");
-        CShaderPtr ShaderSMAAEdgeDetectPSPtr  = ShaderManager::CompilePS("fs_smaa_edge_detect.glsl" , "main");
-        CShaderPtr ShaderSMAAWeightsCalcVSPtr = ShaderManager::CompileVS("vs_smaa_weights_calc.glsl", "main");
-        CShaderPtr ShaderSMAAWeightsCalcPSPtr = ShaderManager::CompilePS("fs_smaa_weights_calc.glsl", "main");
-        CShaderPtr ShaderSMAABlendingVSPtr    = ShaderManager::CompileVS("vs_smaa_blending.glsl"    , "main");
-        CShaderPtr ShaderSMAABlendingPSPtr    = ShaderManager::CompilePS("fs_smaa_blending.glsl"    , "main");
+        Base::Int2 WindowSize = Gfx::Main::GetActiveWindowSize();
+
+        std::stringstream SMAADefineStream;
+
+        SMAADefineStream << "SMAA_RT_METRICS " << "vec4(1.0 / "
+            << WindowSize[0] << ", 1.0 / " << WindowSize[1] << ", "
+            << WindowSize[0] << ", " << WindowSize[1] << ")";
+
+        std::string SMAADefineString = SMAADefineStream.str();
+        
+        const char* pDefine = SMAADefineString.c_str();
+
+        CShaderPtr ShaderSMAAEdgeDetectVSPtr  = ShaderManager::CompileVS("vs_smaa_edge_detect.glsl" , "main", 1, &pDefine);
+        CShaderPtr ShaderSMAAEdgeDetectPSPtr  = ShaderManager::CompilePS("fs_smaa_edge_detect.glsl" , "main", 1, &pDefine);
+        CShaderPtr ShaderSMAAWeightsCalcVSPtr = ShaderManager::CompileVS("vs_smaa_weights_calc.glsl", "main", 1, &pDefine);
+        CShaderPtr ShaderSMAAWeightsCalcPSPtr = ShaderManager::CompilePS("fs_smaa_weights_calc.glsl", "main", 1, &pDefine);
+        CShaderPtr ShaderSMAABlendingVSPtr    = ShaderManager::CompileVS("vs_smaa_blending.glsl"    , "main", 1, &pDefine);
+        CShaderPtr ShaderSMAABlendingPSPtr    = ShaderManager::CompilePS("fs_smaa_blending.glsl"    , "main", 1, &pDefine);
         
         m_RectangleShaderVSPtr   = ShaderVSPtr;
         m_PassThroughShaderPSPtr = PassThroughPSPtr;
@@ -810,6 +827,28 @@ namespace
     void CGfxPostFXRenderer::OnUnloadMap()
     {
         
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxPostFXRenderer::OnResize(unsigned int _Width, unsigned int _Height)
+    {
+        std::stringstream SMAADefineStream;
+
+        SMAADefineStream << "SMAA_RT_METRICS " << "vec4(1.0 / "
+            << _Width << ", 1.0 / " << _Height  << ", "
+            << _Width << ", " << _Height << ")";
+
+        std::string SMAADefineString = SMAADefineStream.str();
+
+        const char* pDefine = SMAADefineString.c_str();
+
+        CShaderPtr ShaderSMAAEdgeDetectVSPtr  = ShaderManager::CompileVS("vs_smaa_edge_detect.glsl" , "main", 1, &pDefine);
+        CShaderPtr ShaderSMAAEdgeDetectPSPtr  = ShaderManager::CompilePS("fs_smaa_edge_detect.glsl" , "main", 1, &pDefine);
+        CShaderPtr ShaderSMAAWeightsCalcVSPtr = ShaderManager::CompileVS("vs_smaa_weights_calc.glsl", "main", 1, &pDefine);
+        CShaderPtr ShaderSMAAWeightsCalcPSPtr = ShaderManager::CompilePS("fs_smaa_weights_calc.glsl", "main", 1, &pDefine);
+        CShaderPtr ShaderSMAABlendingVSPtr    = ShaderManager::CompileVS("vs_smaa_blending.glsl"    , "main", 1, &pDefine);
+        CShaderPtr ShaderSMAABlendingPSPtr    = ShaderManager::CompilePS("fs_smaa_blending.glsl"    , "main", 1, &pDefine);
     }
     
     // -----------------------------------------------------------------------------
