@@ -1,5 +1,7 @@
 ﻿#include "edit_render_context.h"
 
+#include <QResizeEvent>
+
 namespace Edit
 {
     CRenderContext::CRenderContext(QWidget* _pParent)
@@ -116,5 +118,19 @@ namespace Edit
             MessageManager::SendMessage(SGUIMessageType::MouseRightReleased, NewMessage);
             break;
         }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CRenderContext::resizeEvent(QResizeEvent* _pResizeEvent)
+    {
+        CMessage NewMessage;
+
+        NewMessage.PutInt(_pResizeEvent->size().width());
+        NewMessage.PutInt(_pResizeEvent->size().height());
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::ResizeMapEditWindow, NewMessage);
     }
 } // namespace Edit

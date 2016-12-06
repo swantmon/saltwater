@@ -530,7 +530,7 @@ public:
         actionInspector->setText(QApplication::translate("CMainWindow", "Inspector", 0));
         m_pActionBloom->setText(QApplication::translate("CMainWindow", "&Bloom", 0));
         m_pActionDOF->setText(QApplication::translate("CMainWindow", "&DOF", 0));
-        m_pActionPostAA->setText(QApplication::translate("CMainWindow", "&FXAA", 0));
+        m_pActionPostAA->setText(QApplication::translate("CMainWindow", "&PostAA", 0));
         m_pActionSSR->setText(QApplication::translate("CMainWindow", "&SSR", 0));
         m_pActionVolumeFog->setText(QApplication::translate("CMainWindow", "&Volume Fog", 0));
         m_pActionARController->setText(QApplication::translate("CMainWindow", "&AR Controller", 0));

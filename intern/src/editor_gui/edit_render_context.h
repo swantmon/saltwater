@@ -25,5 +25,6 @@ namespace Edit
         void mouseMoveEvent(QMouseEvent* _pMouseEvent);
         void mousePressEvent(QMouseEvent* _pMouseEvent);
         void mouseReleaseEvent(QMouseEvent* _pMouseEvent);
+        void resizeEvent(QResizeEvent* _pResizeEvent);
     };
 } // namespace Edit
