@@ -2,6 +2,8 @@
 #ifndef __INCLUDE_FS_SHADOW_GLSL__
 #define __INCLUDE_FS_SHADOW_GLSL__
 
+#include "common_light.glsl"
+
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
@@ -13,6 +15,18 @@ layout(std140, binding = 0) uniform UB0
     float ps_Reflectance;
     float ps_MetalMask;
 };
+
+layout(row_major, std140, binding = 1) uniform UB1
+{
+    vec4 ps_LightPosition;
+    vec4 ps_LightDirection;
+    vec4 ps_LightColor;
+    vec4 ps_LightSettings; // InvSqrAttenuationRadius, AngleScale, AngleOffset, Unused
+};
+
+#define LightInvSqrAttenuationRadius ps_LightSettings.x
+#define LightAngleScale              ps_LightSettings.y
+#define LightAngleOffset             ps_LightSettings.z
 
 layout(binding = 0) uniform sampler2D in_PSTextureDiffuse;
 
@@ -44,6 +58,25 @@ void RSM_COLOR(void)
 {
     vec3 Color = ps_Color.xyz;
 
+    // -----------------------------------------------------------------------------
+    // Compute lighting for punctual lights
+    // -----------------------------------------------------------------------------
+    vec3 UnnormalizedLightVector = ps_LightPosition.xyz - in_WSPosition;
+    vec3 NormalizedLightVector   = normalize(UnnormalizedLightVector);
+
+    // -----------------------------------------------------------------------------
+    // Compute attenuation
+    // -----------------------------------------------------------------------------
+    float Attenuation = 1.0f;
+
+    Attenuation *= GetDistanceAttenuation(UnnormalizedLightVector, LightInvSqrAttenuationRadius);
+    Attenuation *= GetAngleAttenuation(NormalizedLightVector, -ps_LightDirection.xyz, LightAngleScale, LightAngleOffset);
+
+    Color *= ps_LightColor.xyz * Attenuation;
+
+    // -----------------------------------------------------------------------------
+    // Save
+    // -----------------------------------------------------------------------------
     out_Position = vec4(in_WSPosition, 1.0f);
     out_Normal   = vec4(normalize(in_WSNormal), 0.0f);
     out_Flux     = vec4(Color, 1.0f);
@@ -58,6 +91,25 @@ void RSM_TEX(void)
 
     Color *= texture(in_PSTextureDiffuse, UV).rgb;
 
+    // -----------------------------------------------------------------------------
+    // Compute lighting for punctual lights
+    // -----------------------------------------------------------------------------
+    vec3 UnnormalizedLightVector = ps_LightPosition.xyz - in_WSPosition;
+    vec3 NormalizedLightVector   = normalize(UnnormalizedLightVector);
+
+    // -----------------------------------------------------------------------------
+    // Compute attenuation
+    // -----------------------------------------------------------------------------
+    float Attenuation = 1.0f;
+
+    Attenuation *= GetDistanceAttenuation(UnnormalizedLightVector, LightInvSqrAttenuationRadius);
+    Attenuation *= GetAngleAttenuation(NormalizedLightVector, -ps_LightDirection.xyz, LightAngleScale, LightAngleOffset);
+
+    Color *= ps_LightColor.xyz * Attenuation;
+
+    // -----------------------------------------------------------------------------
+    // Save
+    // -----------------------------------------------------------------------------
     out_Position = vec4(in_WSPosition, 1.0f);
     out_Normal   = vec4(normalize(in_WSNormal), 0.0f);
     out_Flux     = vec4(Color, 1.0f);

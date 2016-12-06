@@ -74,19 +74,9 @@ namespace
             unsigned int m_ExposureHistoryIndex;
         };
 
-        struct SPunctualLightProperties
-        {
-            Base::Float4 m_LightPosition;
-            Base::Float4 m_LightDirection;
-            Base::Float4 m_LightColor;
-            Base::Float4 m_LightSettings; // InvSqrAttenuationRadius, AngleScale, AngleOffset, Unused
-        };
-
         struct SRenderJob
         {
-            Dt::CPointLightFacet*  m_pDataPointLightFacet;
             Gfx::CPointLightFacet* m_pGraphicPointLightFacet;
-            Base::Float3           m_EntityPosition;
         };
 
     private:
@@ -150,7 +140,7 @@ namespace
     {
         m_QuadModelPtr             = 0;
         m_FullQuadViewVSBufferPtr  = 0;
-        m_IndirectLightPSBufferPtr      = 0;
+        m_IndirectLightPSBufferPtr = 0;
         m_P2InputLayoutPtr         = 0;
         m_IndirectLightShaderPSPtr = 0;
         m_RectangleShaderVSPtr     = 0;
@@ -255,18 +245,6 @@ namespace
         ConstanteBufferDesc.m_pClassKey     = 0;
         
         CBufferPtr IndirectLightBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
-
-        // -----------------------------------------------------------------------------
-        
-        ConstanteBufferDesc.m_Stride        = 0;
-        ConstanteBufferDesc.m_Usage         = CBuffer::GPUReadWrite;
-        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
-        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SPunctualLightProperties);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
-        
-        CBufferPtr PointLightBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
         
         // -----------------------------------------------------------------------------
         
@@ -276,7 +254,7 @@ namespace
         
         m_FullQuadViewVSBufferPtr  = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
 
-        m_IndirectLightPSBufferPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), IndirectLightBufferPtr, PointLightBufferPtr, HistogramExposureHistoryBufferPtr);
+        m_IndirectLightPSBufferPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), IndirectLightBufferPtr, HistogramExposureHistoryBufferPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -365,10 +343,8 @@ namespace
 
         for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
         {
-            Dt::CPointLightFacet* pDtPointLight = CurrentRenderJob->m_pDataPointLightFacet;
             Gfx::CPointLightFacet* pGfxPointLight = CurrentRenderJob->m_pGraphicPointLightFacet;
 
-            assert(pDtPointLight != nullptr);
             assert(pGfxPointLight != nullptr);
 
             // -----------------------------------------------------------------------------
@@ -398,23 +374,6 @@ namespace
                 pIndirectLightBuffer->m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
                 Gfx::BufferManager::UnmapConstantBuffer(m_IndirectLightPSBufferPtr->GetBuffer(1));
-
-                // -----------------------------------------------------------------------------
-
-                SPunctualLightProperties* pLightBuffer = static_cast<SPunctualLightProperties*>(BufferManager::MapConstantBuffer(m_IndirectLightPSBufferPtr->GetBuffer(2)));
-
-                assert(pLightBuffer != nullptr);
-
-                float InvSqrAttenuationRadius = pDtPointLight->GetReciprocalSquaredAttenuationRadius();
-                float AngleScale              = pDtPointLight->GetAngleScale();
-                float AngleOffset             = pDtPointLight->GetAngleOffset();
-
-                pLightBuffer->m_LightPosition  = Base::Float4(CurrentRenderJob->m_EntityPosition, 1.0f);
-                pLightBuffer->m_LightDirection = Base::Float4(pDtPointLight->GetDirection(), 0.0f).Normalize();
-                pLightBuffer->m_LightColor     = Base::Float4(pDtPointLight->GetLightness(), 1.0f);
-                pLightBuffer->m_LightSettings  = Base::Float4(InvSqrAttenuationRadius, AngleScale, AngleOffset, 0.0f);
-
-                BufferManager::UnmapConstantBuffer(m_IndirectLightPSBufferPtr->GetBuffer(2));
 
                 // -----------------------------------------------------------------------------
                 // Draw
@@ -487,9 +446,7 @@ namespace
             {
                 SRenderJob NewRenderJob;
 
-                NewRenderJob.m_pDataPointLightFacet    = pDataPointFacet;
                 NewRenderJob.m_pGraphicPointLightFacet = pGraphicPointFacet;
-                NewRenderJob.m_EntityPosition          = CurrentEntity->GetWorldPosition();
 
                 m_RenderJobs.push_back(NewRenderJob);
             }

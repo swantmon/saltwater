@@ -21,14 +21,6 @@ layout(row_major, std140, binding = 1) uniform UB1
     uint ps_ExposureHistoryIndex;
 };
 
-layout(row_major, std140, binding = 2) uniform UB2
-{
-    vec4 ps_LightPosition;
-    vec4 ps_LightDirection;
-    vec4 ps_LightColor;
-    vec4 ps_LightSettings; // InvSqrAttenuationRadius, AngleScale, AngleOffset, Unused
-};
-
 layout(std430, binding = 0) buffer UExposureHistoryBuffer
 {
     float ps_ExposureHistory[8];
@@ -87,13 +79,6 @@ void main()
     // Exposure data
     // -----------------------------------------------------------------------------
     float AverageExposure = ps_ExposureHistory[ps_ExposureHistoryIndex];
-
-    // -----------------------------------------------------------------------------
-    // Light data
-    // -----------------------------------------------------------------------------
-    float LightInvSqrAttenuationRadius = ps_LightSettings.x;
-    float LightAngleScale              = ps_LightSettings.y;
-    float LightAngleOffset             = ps_LightSettings.z;
     
     // -----------------------------------------------------------------------------
     // Compute indirect lieghting in screen space for given reflective shadow map
@@ -101,7 +86,9 @@ void main()
     vec3 DiffuseColor  = vec3(0.0);
     vec3 SpecularColor = vec3(0.0);
 
-    float SpecularExponent = 1.0f;
+    float SpecularExponent = 0.2f;
+
+    vec3 WSViewDirection = normalize(g_ViewPosition.xyz - Data.m_WSPosition);
     
     // -----------------------------------------------------------------------------
     // Create an spectrum of light sending from the current world-space position
@@ -114,27 +101,9 @@ void main()
         vec2 TexCoordOffset = vec2(m_RSMSettings.x * float(IndexOfSample), m_RSMSettings.y);
         
         vec3  LightNormal     = texture(ps_ShadowmapNormal  , TexCoordOffset).rgb;
-        vec3  LightFlux       = texture(ps_ShadowmapFlux    , TexCoordOffset).rgb;
+        vec3  LightFlux       = texture(ps_ShadowmapFlux    , TexCoordOffset).rgb * AverageExposure;
         vec3  WSLightPosition = texture(ps_ShadowmapPosition, TexCoordOffset).rgb;
         float LightDepth      = texture(ps_ShadowmapDepth   , TexCoordOffset).r;
-
-        // -----------------------------------------------------------------------------
-        // Compute lighting for punctual lights
-        // TODO: maybe it is better to compute this on RSM path
-        // -----------------------------------------------------------------------------
-        vec3 UnnormalizedLightVector = ps_LightPosition.xyz - WSLightPosition;
-        vec3 NormalizedLightVector   = normalize(UnnormalizedLightVector);
-        vec3 WSViewDirection         = normalize(g_ViewPosition.xyz - WSLightPosition);
-
-        // -----------------------------------------------------------------------------
-        // Compute attenuation & final color
-        // -----------------------------------------------------------------------------
-        float Attenuation = 1.0f;
-
-        Attenuation *= GetDistanceAttenuation(UnnormalizedLightVector, LightInvSqrAttenuationRadius);
-        Attenuation *= GetAngleAttenuation(NormalizedLightVector, -ps_LightDirection.xyz, LightAngleScale, LightAngleOffset);
-
-        LightFlux *= ps_LightColor.xyz * Attenuation;
         
         // -----------------------------------------------------------------------------
         // Build reflection vector
@@ -181,7 +150,7 @@ void main()
     // -----------------------------------------------------------------------------
     // Output final color
     // -----------------------------------------------------------------------------
-    out_Output = vec4((Diffuse + Specular) * AverageExposure, 0.0f);
+    out_Output = vec4((Diffuse + Specular), 0.0f);
 }
 
 #endif // __INCLUDE_FS_LIGHT_INDIRECTLIGHT_GLSL__

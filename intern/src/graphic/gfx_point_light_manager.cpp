@@ -65,6 +65,14 @@ namespace
             Base::Float4x4 m_ModelMatrix;
         };
 
+        struct SPunctualLightProperties
+        {
+            Base::Float4 m_LightPosition;
+            Base::Float4 m_LightDirection;
+            Base::Float4 m_LightColor;
+            Base::Float4 m_LightSettings; // InvSqrAttenuationRadius, AngleScale, AngleOffset, Has shadows
+        };
+
         class CInternPointLightFacet : public CPointLightFacet
         {
         public:
@@ -108,7 +116,7 @@ namespace
 
         void CreateSM(unsigned int _Size, CInternPointLightFacet& _rInternLight);
 
-        void RenderShadows(CInternPointLightFacet& _rInternLight);
+        void RenderShadows(CInternPointLightFacet& _rInternLight, const Dt::CPointLightFacet* _pDtPointLight, const Base::Float3& _rLightPosition);
     };
 } // namespace 
 
@@ -203,8 +211,20 @@ namespace
         CBufferPtr MaterialBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
+        
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPUReadWrite;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SPunctualLightProperties);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        CBufferPtr PointLightBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
-        m_RSMPSBuffer   = BufferManager::CreateBufferSet(MaterialBuffer);
+        // -----------------------------------------------------------------------------
+
+        m_RSMPSBuffer            = BufferManager::CreateBufferSet(MaterialBuffer, PointLightBufferPtr);
 
         m_LightCameraVSBufferPtr = BufferManager::CreateBufferSet(PerLightConstantBuffer, PerDrawCallConstantBuffer);
         
@@ -287,7 +307,7 @@ namespace
                     // -----------------------------------------------------------------------------
                     // Render
                     // -----------------------------------------------------------------------------
-                    RenderShadows(*pGfxPointLightFacet);
+                    RenderShadows(*pGfxPointLightFacet, pDtPointLightFacet, LightPosition);
                 }
             }
 
@@ -319,9 +339,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Get data
         // -----------------------------------------------------------------------------
-        Dt::CPointLightFacet* pDataPointLightFacet = static_cast<Dt::CPointLightFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CPointLightFacet* pDtPointLightFacet = static_cast<Dt::CPointLightFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Data));
 
-        if (pDataPointLightFacet == nullptr) return;
+        if (pDtPointLightFacet == nullptr) return;
 
         // -----------------------------------------------------------------------------
         // Dirty check
@@ -340,9 +360,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Set shadow data
             // -----------------------------------------------------------------------------
-            ShadowmapSize = ShadowmapSizes[pDataPointLightFacet->GetShadowQuality()];
+            ShadowmapSize = ShadowmapSizes[pDtPointLightFacet->GetShadowQuality()];
 
-            ShadowType = pDataPointLightFacet->GetShadowType();
+            ShadowType = pDtPointLightFacet->GetShadowType();
 
             switch (ShadowType)
             {
@@ -373,9 +393,9 @@ namespace
 
             assert(pGfxPointLightFacet);
 
-            ShadowmapSize = ShadowmapSizes[pDataPointLightFacet->GetShadowQuality()];
+            ShadowmapSize = ShadowmapSizes[pDtPointLightFacet->GetShadowQuality()];
 
-            ShadowType = pDataPointLightFacet->GetShadowType();
+            ShadowType = pDtPointLightFacet->GetShadowType();
 
             if (ShadowmapSize != pGfxPointLightFacet->m_ShadowmapSize || ShadowType != pGfxPointLightFacet->m_CurrentShadowType)
             {
@@ -404,7 +424,7 @@ namespace
         Gfx::CCameraPtr ShadowCameraPtr = pGfxPointLightFacet->m_RenderContextPtr->GetCamera();
 
         Base::Float3 LightPosition  = _pEntity->GetWorldPosition();
-        Base::Float3 LightDirection = pDataPointLightFacet->GetDirection();
+        Base::Float3 LightDirection = pDtPointLightFacet->GetDirection();
 
         // -----------------------------------------------------------------------------
         // Set view
@@ -420,19 +440,19 @@ namespace
         // Calculate near and far plane
         // -----------------------------------------------------------------------------
         float Near = 0.1f;
-        float Far = pDataPointLightFacet->GetAttenuationRadius() + Near;
+        float Far = pDtPointLightFacet->GetAttenuationRadius() + Near;
 
         // -----------------------------------------------------------------------------
         // Set matrix
         // -----------------------------------------------------------------------------
-        ShadowCameraPtr->SetFieldOfView(Base::RadiansToDegree(pDataPointLightFacet->GetOuterConeAngle()), 1.0f, Near, Far);
+        ShadowCameraPtr->SetFieldOfView(Base::RadiansToDegree(pDtPointLightFacet->GetOuterConeAngle()), 1.0f, Near, Far);
 
         ShadowViewPtr->Update();
 
         // -----------------------------------------------------------------------------
         // Render shadows
         // -----------------------------------------------------------------------------
-        RenderShadows(*pGfxPointLightFacet);
+        RenderShadows(*pGfxPointLightFacet, pDtPointLightFacet, LightPosition);
 
         // -----------------------------------------------------------------------------
         // Set time
@@ -492,7 +512,7 @@ namespace
         ShadowRenderbuffer[1] = TextureManager::CreateTexture2D(RendertargetDescriptor); // Normal
         
         RendertargetDescriptor.m_Binding = CTextureBase::RenderTarget;
-        RendertargetDescriptor.m_Format  = CTextureBase::R8G8B8A8_UBYTE;
+        RendertargetDescriptor.m_Format  = CTextureBase::R16G16B16A16_FLOAT;
         
         ShadowRenderbuffer[2] = TextureManager::CreateTexture2D(RendertargetDescriptor); // Flux
         
@@ -631,7 +651,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxPointLightManager::RenderShadows(CInternPointLightFacet& _rInternLight)
+    void CGfxPointLightManager::RenderShadows(CInternPointLightFacet& _rInternLight, const Dt::CPointLightFacet* _pDtPointLight, const Base::Float3& _rLightPosition)
     {
         if (_rInternLight.m_CurrentShadowType == Dt::CPointLightFacet::NoShadows) return;
 
@@ -752,6 +772,23 @@ namespace
                     Base::CMemory::Copy(pMaterialBuffer, &MaterialPtr->GetMaterialAttributes(), sizeof(CMaterial::SMaterialAttributes));
 
                     BufferManager::UnmapConstantBuffer(m_RSMPSBuffer->GetBuffer(0));
+
+                    // -----------------------------------------------------------------------------
+
+                    SPunctualLightProperties* pLightBuffer = static_cast<SPunctualLightProperties*>(BufferManager::MapConstantBuffer(m_RSMPSBuffer->GetBuffer(1)));
+
+                    assert(pLightBuffer != nullptr);
+
+                    float InvSqrAttenuationRadius = _pDtPointLight->GetReciprocalSquaredAttenuationRadius();
+                    float AngleScale              = _pDtPointLight->GetAngleScale();
+                    float AngleOffset             = _pDtPointLight->GetAngleOffset();
+
+                    pLightBuffer->m_LightPosition  = Base::Float4(_rLightPosition, 1.0f);
+                    pLightBuffer->m_LightDirection = Base::Float4(_pDtPointLight->GetDirection(), 0.0f).Normalize();
+                    pLightBuffer->m_LightColor     = Base::Float4(_pDtPointLight->GetLightness(), 1.0f);
+                    pLightBuffer->m_LightSettings  = Base::Float4(InvSqrAttenuationRadius, AngleScale, AngleOffset, 0.0f);
+
+                    BufferManager::UnmapConstantBuffer(m_RSMPSBuffer->GetBuffer(1));
 
                     ContextManager::SetConstantBufferSetPS(m_RSMPSBuffer);
                 }
