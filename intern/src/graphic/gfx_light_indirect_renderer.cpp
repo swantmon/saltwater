@@ -354,9 +354,10 @@ namespace
 
             Gfx::ContextManager::SetTextureSetPS(pGfxPointLight->GetTextureRSMSet());
 
-            unsigned int WidthOfShadowmap = static_cast<unsigned int>(pGfxPointLight->GetShadowmapSize()) / 16;
+            unsigned int HeightOfShadowmap = static_cast<unsigned int>(pGfxPointLight->GetShadowmapSize()) / 8;
+            unsigned int WidthOfShadowmap  = static_cast<unsigned int>(pGfxPointLight->GetShadowmapSize()) / 8;
 
-            for (unsigned int IndexOfShadowCluster = 0; IndexOfShadowCluster < WidthOfShadowmap; ++IndexOfShadowCluster)
+            for (unsigned int IndexOfRSMDataY = 0; IndexOfRSMDataY < HeightOfShadowmap; ++IndexOfRSMDataY)
             {
                 // -----------------------------------------------------------------------------
                 // Upload buffer data
@@ -368,7 +369,7 @@ namespace
                 float SSWidthOfShadowmap = static_cast<float>(WidthOfShadowmap);
 
                 pIndirectLightBuffer->m_RSMSettings[0] = 1.0f / SSWidthOfShadowmap;
-                pIndirectLightBuffer->m_RSMSettings[1] = static_cast<float>(IndexOfShadowCluster) * 1.0f / SSWidthOfShadowmap;
+                pIndirectLightBuffer->m_RSMSettings[1] = static_cast<float>(IndexOfRSMDataY) * 1.0f / SSWidthOfShadowmap;
                 pIndirectLightBuffer->m_RSMSettings[2] = SSWidthOfShadowmap;
                 pIndirectLightBuffer->m_RSMSettings[3] = 0.0f;
                 pIndirectLightBuffer->m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();

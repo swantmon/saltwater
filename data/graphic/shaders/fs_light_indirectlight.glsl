@@ -86,7 +86,8 @@ void main()
     vec3 DiffuseColor  = vec3(0.0);
     vec3 SpecularColor = vec3(0.0);
 
-    float SpecularExponent = 1.0f / max(Data.m_Roughness, 0.001f);
+    float PerceptuallyLinearRoughness = GetPerceptuallyLinearRoughness(Data.m_Roughness);
+    float SpecularExponent = 1.0f / max(PerceptuallyLinearRoughness, 0.001f);
 
     vec3 WSViewDirection = normalize(Data.m_WSPosition - g_ViewPosition.xyz);
     
@@ -101,7 +102,7 @@ void main()
         vec2 TexCoordOffset = vec2(m_RSMSettings.x * float(IndexOfSample), m_RSMSettings.y);
         
         vec3  LightNormal     = texture(ps_ShadowmapNormal  , TexCoordOffset).rgb;
-        vec3  LightFlux       = texture(ps_ShadowmapFlux    , TexCoordOffset).rgb;
+        vec3  LightFlux       = texture(ps_ShadowmapFlux    , TexCoordOffset).rgb * AverageExposure;
         vec3  WSLightPosition = texture(ps_ShadowmapPosition, TexCoordOffset).rgb;
         float LightDepth      = texture(ps_ShadowmapDepth   , TexCoordOffset).r;
         
@@ -113,7 +114,6 @@ void main()
         float l2    = dot(Reflection, Reflection);
         
         Reflection *= inversesqrt(l2);
-        l2          = sqrt(l2);
         
         float lR = (LightDepth / (LightDepth + l2));
         
@@ -150,7 +150,7 @@ void main()
     // -----------------------------------------------------------------------------
     // Output final color
     // -----------------------------------------------------------------------------
-    out_Output = vec4((Diffuse + Specular) * AverageExposure, 0.0f);
+    out_Output = vec4((Diffuse + Specular), 0.0f);
 }
 
 #endif // __INCLUDE_FS_LIGHT_INDIRECTLIGHT_GLSL__

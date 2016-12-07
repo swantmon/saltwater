@@ -56,7 +56,7 @@ void SM(void)
 
 void RSM_COLOR(void)
 {
-    vec3 Color = ps_Color.xyz;
+    vec3 BaseColor = ps_Color.xyz;
 
     // -----------------------------------------------------------------------------
     // Compute lighting for punctual lights
@@ -72,24 +72,24 @@ void RSM_COLOR(void)
     Attenuation *= GetDistanceAttenuation(UnnormalizedLightVector, LightInvSqrAttenuationRadius);
     Attenuation *= GetAngleAttenuation(NormalizedLightVector, -ps_LightDirection.xyz, LightAngleScale, LightAngleOffset);
 
-    Color *= ps_LightColor.xyz * Attenuation;
+    BaseColor *= ps_LightColor.xyz * Attenuation;
 
     // -----------------------------------------------------------------------------
     // Save
     // -----------------------------------------------------------------------------
     out_Position = vec4(in_WSPosition, 1.0f);
     out_Normal   = vec4(normalize(in_WSNormal), 0.0f);
-    out_Flux     = vec4(Color, 1.0f);
+    out_Flux     = vec4(BaseColor, 1.0f);
 }
 
 // -----------------------------------------------------------------------------
 
 void RSM_TEX(void)
 {
-    vec2 UV    = in_UV * ps_TilingOffset.xy + ps_TilingOffset.zw;
-    vec3 Color = ps_Color.xyz;
+    vec2 UV         = in_UV * ps_TilingOffset.xy + ps_TilingOffset.zw;
+    vec3 BaseColor  = ps_Color.xyz;
 
-    Color *= texture(in_PSTextureDiffuse, UV).rgb;
+    BaseColor *= texture(in_PSTextureDiffuse, UV).rgb;
 
     // -----------------------------------------------------------------------------
     // Compute lighting for punctual lights
@@ -105,14 +105,14 @@ void RSM_TEX(void)
     Attenuation *= GetDistanceAttenuation(UnnormalizedLightVector, LightInvSqrAttenuationRadius);
     Attenuation *= GetAngleAttenuation(NormalizedLightVector, -ps_LightDirection.xyz, LightAngleScale, LightAngleOffset);
 
-    Color *= ps_LightColor.xyz * Attenuation;
+    BaseColor *= ps_LightColor.xyz * Attenuation;
 
     // -----------------------------------------------------------------------------
     // Save
     // -----------------------------------------------------------------------------
     out_Position = vec4(in_WSPosition, 1.0f);
     out_Normal   = vec4(normalize(in_WSNormal), 0.0f);
-    out_Flux     = vec4(Color, 1.0f);
+    out_Flux     = vec4(BaseColor, 1.0f);
 }
 
 #endif // __INCLUDE_FS_SHADOW_GLSL__
