@@ -111,11 +111,6 @@ namespace
             Base::Float2 m_Direction;
             float        m_Weights[7];
         };
-        
-        struct SFXAAProperties
-        {
-            Base::Float3 m_Luma;
-        };
 
     private:
 
@@ -199,7 +194,7 @@ namespace
         , m_SwapTargetSetPtrs                ()
         , m_PSSamplerSetPtr                  ()
         , m_PSSamplerWrapSetPtr              ()
-        , m_PostAARenderJobs                   ()
+        , m_PostAARenderJobs                 ()
         , m_DOFRenderJobs                    ()
         , m_SwapCounter                      (0)
     {
@@ -764,18 +759,6 @@ namespace
         
         // -----------------------------------------------------------------------------
         
-        ConstanteBufferDesc.m_Stride        = 0;
-        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
-        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
-        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SFXAAProperties);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
-        
-        CBufferPtr FXAABuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
-        
-        // -----------------------------------------------------------------------------
-        
         m_BaseVSBufferSetPtr                   = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
                                                
         m_DOFDownPropertiesPSBufferPtr         = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), DOFDownPropertiesBuffer);
@@ -784,7 +767,7 @@ namespace
                                                
         m_GaussianBlurPropertiesPSBufferPtr    = BufferManager::CreateBufferSet(GaussianSettingsBuffer);
         
-        m_FXAAPropertiesPSBufferPtr            = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), FXAABuffer);
+        m_FXAAPropertiesPSBufferPtr            = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS());
     }
     
     // -----------------------------------------------------------------------------
