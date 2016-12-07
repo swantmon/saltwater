@@ -2,8 +2,6 @@
 #ifndef __INCLUDE_FS_SMAA_BLENDING_GLSL__
 #define __INCLUDE_FS_SMAA_BLENDING_GLSL__
 
-#include "common_global.glsl"
-
 #define SMAA_GLSL_4
 #define SMAA_PRESET_ULTRA
 #define SMAA_INCLUDE_PS 1

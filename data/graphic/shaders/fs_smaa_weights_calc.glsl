@@ -2,10 +2,8 @@
 #ifndef __INCLUDE_FS_SMAA_WEIGHTS_CALC_GLSL__
 #define __INCLUDE_FS_SMAA_WEIGHTS_CALC_GLSL__
 
-#include "common_global.glsl"
-
 #define SMAA_GLSL_4
-#define SMAA_PRESET_HIGH
+#define SMAA_PRESET_ULTRA
 #define SMAA_INCLUDE_PS 1
 #include "smaa.glsl"
 
