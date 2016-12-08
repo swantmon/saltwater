@@ -95,6 +95,7 @@ namespace Edit
             ActorInfoCamera,
 
             MaterialInfo,
+            MaterialLoad,
 
             PluginInfoARController,
             PluginInfoARControllerMarker,

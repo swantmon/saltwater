@@ -284,13 +284,19 @@ namespace
     {
         int EntityID = _rMessage.GetInt();
 
+        int MaterialHash = _rMessage.GetInt();
+
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
         Dt::CMeshActorFacet* pFacet = static_cast<Dt::CMeshActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
 
         if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Actor && rCurrentEntity.GetType() == Dt::SActorType::Mesh && pFacet != nullptr)
         {
-            
+            Dt::CMaterial& rDtMaterial = Dt::MaterialManager::GetMaterialByHash(MaterialHash);
+
+            pFacet->SetMaterial(0, &rDtMaterial);
+
+            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
         }
     }
 

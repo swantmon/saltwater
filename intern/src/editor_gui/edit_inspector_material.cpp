@@ -1,4 +1,5 @@
 ﻿
+#include "base/base_crc.h"
 #include "base/base_vector3.h"
 #include "base/base_vector4.h"
 
@@ -7,6 +8,7 @@
 #include "editor_port/edit_message_manager.h"
 
 #include <QColorDialog>
+#include <QFileDialog>
 
 namespace Edit
 {
@@ -229,6 +231,49 @@ namespace Edit
     void CInspectorMaterial::reflectanceValueChanged(int _Value)
     {
         m_pReflectanceEdit->setText(QString::number(_Value / 100.0f));
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorMaterial::loadMaterial()
+    {
+        QString TextureFile = QFileDialog::getOpenFileName(this, tr("Load material file"), tr(""), tr("Material files (*.mat)"));
+
+        // -----------------------------------------------------------------------------
+        // Send message with new scene / map request
+        // -----------------------------------------------------------------------------
+        if (!TextureFile.isEmpty())
+        {
+            // -----------------------------------------------------------------------------
+            // Load new material
+            // -----------------------------------------------------------------------------
+            QByteArray NewFileNameBinary = TextureFile.toLatin1();
+
+            Edit::CMessage NewLoadMaterialMessage;
+
+            NewLoadMaterialMessage.PutString(NewFileNameBinary.data());
+
+            NewLoadMaterialMessage.Reset();
+
+            int HashOfMaterial = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::MaterialLoad, NewLoadMaterialMessage);
+
+            if (HashOfMaterial == -1) return;
+
+            // -----------------------------------------------------------------------------
+            // Set material to entity
+            // -----------------------------------------------------------------------------
+            Edit::CMessage NewApplyMessage;
+
+            NewApplyMessage.PutInt(m_CurrentEntityID);
+
+            NewApplyMessage.PutInt(HashOfMaterial);
+
+            NewApplyMessage.Reset();
+
+            Edit::MessageManager::SendMessage(Edit::SGUIMessageType::ActorInfoMaterial, NewApplyMessage);
+
+            RequestInformation(m_CurrentEntityID);
+        }
     }
 
     // -----------------------------------------------------------------------------

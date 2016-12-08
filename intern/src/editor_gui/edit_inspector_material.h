@@ -21,13 +21,15 @@ namespace Edit
 
         void valueChanged();
 
-        void pickColorFromDialog();
-
         void roughnessValueChanged(int _Value);
 
         void metallicValueChanged(int _Value);
 
         void reflectanceValueChanged(int _Value);
+
+        void pickColorFromDialog();
+
+        void loadMaterial();
 
         void RequestInformation(unsigned int _EntityID);
 

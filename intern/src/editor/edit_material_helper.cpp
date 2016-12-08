@@ -36,6 +36,8 @@ namespace
 
         void OnNewMaterial(Edit::CMessage& _rMessage);
 
+        void OnLoadMaterial(Edit::CMessage& _rMessage);
+
         void OnRequestMaterialInfo(Edit::CMessage& _rMessage);
 
         void OnMaterialInfo(Edit::CMessage& _rMessage);
@@ -74,6 +76,8 @@ namespace
         // -----------------------------------------------------------------------------
         Edit::MessageManager::Register(Edit::SGUIMessageType::NewMaterial, EDIT_RECEIVE_MESSAGE(&CMaterialHelper::OnNewMaterial));
 
+        Edit::MessageManager::Register(Edit::SGUIMessageType::MaterialLoad, EDIT_RECEIVE_MESSAGE(&CMaterialHelper::OnLoadMaterial));
+
         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestMaterialInfo, EDIT_RECEIVE_MESSAGE(&CMaterialHelper::OnRequestMaterialInfo));
 
         Edit::MessageManager::Register(Edit::SGUIMessageType::MaterialInfo, EDIT_RECEIVE_MESSAGE(&CMaterialHelper::OnMaterialInfo));
@@ -91,7 +95,7 @@ namespace
     void CMaterialHelper::OnNewMaterial(Edit::CMessage& _rMessage)
     {
         // -----------------------------------------------------------------------------
-        // Model
+        // Material
         // -----------------------------------------------------------------------------
         Dt::SMaterialDescriptor MaterialDescriptor;
 
@@ -113,6 +117,52 @@ namespace
 
         // -----------------------------------------------------------------------------
         // Add model to map
+        // -----------------------------------------------------------------------------
+        Dt::MaterialManager::MarkMaterialAsDirty(rNewMaterial, Dt::CMaterial::DirtyCreate);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMaterialHelper::OnLoadMaterial(Edit::CMessage& _rMessage)
+    {
+        char        pTmp[512];
+        std::string PathToFile;
+
+        // -----------------------------------------------------------------------------
+        // Read values
+        // -----------------------------------------------------------------------------
+        const char* pPathToFile = _rMessage.GetString(pTmp, 512);
+
+        PathToFile = "materials/" + CopyFileToAssets("../assets/materials/", pPathToFile);
+
+        // -----------------------------------------------------------------------------
+        // Material
+        // -----------------------------------------------------------------------------
+        Dt::SMaterialDescriptor MaterialDescriptor;
+
+        MaterialDescriptor.m_pMaterialName   = 0;
+        MaterialDescriptor.m_pColorMap       = 0;
+        MaterialDescriptor.m_pNormalMap      = 0;
+        MaterialDescriptor.m_pRoughnessMap   = 0;
+        MaterialDescriptor.m_pMetalMaskMap   = 0;
+        MaterialDescriptor.m_pAOMap          = 0;
+        MaterialDescriptor.m_pBumpMap        = 0;
+        MaterialDescriptor.m_Roughness       = 1.0f;
+        MaterialDescriptor.m_Reflectance     = 0.0f;
+        MaterialDescriptor.m_MetalMask       = 0.0f;
+        MaterialDescriptor.m_AlbedoColor     = Base::Float3(1.0f);
+        MaterialDescriptor.m_TilingOffset    = Base::Float4(1.0f, 1.0f, 0.0f, 0.0f);
+        MaterialDescriptor.m_pFileName       = PathToFile.c_str();
+        
+        Dt::CMaterial& rNewMaterial = Dt::MaterialManager::CreateMaterial(MaterialDescriptor);
+
+        // -----------------------------------------------------------------------------
+        // Set result as hash
+        // -----------------------------------------------------------------------------
+        _rMessage.SetResult(rNewMaterial.GetHash());
+
+        // -----------------------------------------------------------------------------
+        // Mark material as dirty
         // -----------------------------------------------------------------------------
         Dt::MaterialManager::MarkMaterialAsDirty(rNewMaterial, Dt::CMaterial::DirtyCreate);
     }
