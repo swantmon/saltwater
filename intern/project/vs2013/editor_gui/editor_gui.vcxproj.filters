@@ -278,6 +278,9 @@
     <CustomBuild Include="..\..\..\src\editor_gui\edit_asset_browser.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor_gui\edit_gui.h" />
@@ -336,6 +339,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor_gui\ui_edit_asset_browser.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

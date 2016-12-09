@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "editor_gui/ui_edit_inspector.h"
+
 #include "editor_gui/edit_inspector_arcontroller.h"
 #include "editor_gui/edit_inspector_bloom.h"
 #include "editor_gui/edit_inspector_camera.h"
@@ -21,7 +23,7 @@
 
 namespace Edit
 {
-    class CInspector : public QWidget
+    class CInspector : public QWidget, public Ui::Inspector
     {
         Q_OBJECT
 

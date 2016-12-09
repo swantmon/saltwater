@@ -26,9 +26,9 @@ namespace Edit
         , m_ActiveEntityID    (-1)
     {
         // -----------------------------------------------------------------------------
-        // Create layout
+        // Setup
         // -----------------------------------------------------------------------------
-        m_pInspectorLayout = new QVBoxLayout();
+        setupUi(this);
 
         // -----------------------------------------------------------------------------
         // Create transformation widget and add to layout
@@ -48,20 +48,20 @@ namespace Edit
         m_pCameraWidget      = new CInspectorCamera();
         m_pARController      = new CInspectorARController();
 
-        m_pInspectorLayout->addWidget(m_pEntityWidget);
-        m_pInspectorLayout->addWidget(m_pTransformWidget);
-        m_pInspectorLayout->addWidget(m_pPointlightWidget);
-        m_pInspectorLayout->addWidget(m_pSunWidget);
-        m_pInspectorLayout->addWidget(m_pEnvironmentWidget);
-        m_pInspectorLayout->addWidget(m_pGlobalProbeWidget);
-        m_pInspectorLayout->addWidget(m_pBloomWidget);
-        m_pInspectorLayout->addWidget(m_pDOFWidget);
-        m_pInspectorLayout->addWidget(m_pFXAAWidget);
-        m_pInspectorLayout->addWidget(m_pSSRWidget);
-        m_pInspectorLayout->addWidget(m_pVolumeFogWidget);
-        m_pInspectorLayout->addWidget(m_pMaterialWidget);
-        m_pInspectorLayout->addWidget(m_pCameraWidget);
-        m_pInspectorLayout->addWidget(m_pARController);
+        m_pInspectorContent->addWidget(m_pEntityWidget);
+        m_pInspectorContent->addWidget(m_pTransformWidget);
+        m_pInspectorContent->addWidget(m_pPointlightWidget);
+        m_pInspectorContent->addWidget(m_pSunWidget);
+        m_pInspectorContent->addWidget(m_pEnvironmentWidget);
+        m_pInspectorContent->addWidget(m_pGlobalProbeWidget);
+        m_pInspectorContent->addWidget(m_pBloomWidget);
+        m_pInspectorContent->addWidget(m_pDOFWidget);
+        m_pInspectorContent->addWidget(m_pFXAAWidget);
+        m_pInspectorContent->addWidget(m_pSSRWidget);
+        m_pInspectorContent->addWidget(m_pVolumeFogWidget);
+        m_pInspectorContent->addWidget(m_pMaterialWidget);
+        m_pInspectorContent->addWidget(m_pCameraWidget);
+        m_pInspectorContent->addWidget(m_pARController);
 
         m_pEntityWidget     ->setVisible(false);
         m_pPointlightWidget ->setVisible(false);
@@ -77,11 +77,6 @@ namespace Edit
         m_pMaterialWidget   ->setVisible(false);
         m_pCameraWidget     ->setVisible(false);
         m_pARController     ->setVisible(false);
-
-        // -----------------------------------------------------------------------------
-        // Set layout
-        // -----------------------------------------------------------------------------
-        setLayout(m_pInspectorLayout);
 
         // -----------------------------------------------------------------------------
         // Register messages
