@@ -282,7 +282,7 @@
   <widget class="QDockWidget" name="m_pInspectorDockWidget">
    <property name="minimumSize">
     <size>
-     <width>111</width>
+     <width>380</width>
      <height>617</height>
     </size>
    </property>
