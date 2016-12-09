@@ -32,7 +32,6 @@ namespace Edit
     public Q_SLOTS:
 
         void switchPlayingCurrentScene();
-        void takeScreenshot();
         void openNewSceneDialog();
         void createNewLightPoint();
         void createNewLightSun();

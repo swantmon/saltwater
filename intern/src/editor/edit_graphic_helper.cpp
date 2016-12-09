@@ -61,11 +61,11 @@ namespace
         // -----------------------------------------------------------------------------
         // Edit
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestGraphicHistogramInfo, EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnRequestHistogramInfo));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Graphic_Histogram_Info, EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnRequestHistogramInfo));
 
-        Edit::MessageManager::Register(Edit::SGUIMessageType::GraphicHistogramInfo, EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnHistogramInfo));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Graphic_Histogram_Update, EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnHistogramInfo));
 
-        Edit::MessageManager::Register(Edit::SGUIMessageType::GraphicHighlightEntity, EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnHighlightEntity));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Graphic_HighlightEntity, EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnHighlightEntity));
     }
 
     // -----------------------------------------------------------------------------
@@ -92,7 +92,7 @@ namespace
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::HistogramInfo, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Graphic_Histogram_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------

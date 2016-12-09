@@ -32,7 +32,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::EffectInfoBloom, EDIT_RECEIVE_MESSAGE(&CInspectorBloom::OnEntityInfoBloom));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Effect_Bloom_Info, EDIT_RECEIVE_MESSAGE(&CInspectorBloom::OnEntityInfoBloom));
     }
 
     // -----------------------------------------------------------------------------
@@ -79,7 +79,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::EffectInfoBloom, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Effect_Bloom_Update, NewMessage);
 
     }
 
@@ -114,7 +114,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::RequestEffectInfoBloom, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Effect_Bloom_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------

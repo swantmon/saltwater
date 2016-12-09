@@ -31,7 +31,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::ActorInfoCamera, EDIT_RECEIVE_MESSAGE(&CInspectorCamera::OnEntityInfoCamera));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Actor_Camera_Info, EDIT_RECEIVE_MESSAGE(&CInspectorCamera::OnEntityInfoCamera));
     }
 
     // -----------------------------------------------------------------------------
@@ -156,7 +156,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::ActorInfoCamera, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Actor_Camera_Update, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -197,7 +197,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::RequestActorInfoCamera, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Actor_Camera_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------

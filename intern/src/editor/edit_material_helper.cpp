@@ -74,13 +74,13 @@ namespace
         // -----------------------------------------------------------------------------
         // Edit
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewMaterial, EDIT_RECEIVE_MESSAGE(&CMaterialHelper::OnNewMaterial));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Material_New, EDIT_RECEIVE_MESSAGE(&CMaterialHelper::OnNewMaterial));
 
-        Edit::MessageManager::Register(Edit::SGUIMessageType::MaterialLoad, EDIT_RECEIVE_MESSAGE(&CMaterialHelper::OnLoadMaterial));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Material_Load, EDIT_RECEIVE_MESSAGE(&CMaterialHelper::OnLoadMaterial));
 
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestMaterialInfo, EDIT_RECEIVE_MESSAGE(&CMaterialHelper::OnRequestMaterialInfo));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Material_Info, EDIT_RECEIVE_MESSAGE(&CMaterialHelper::OnRequestMaterialInfo));
 
-        Edit::MessageManager::Register(Edit::SGUIMessageType::MaterialInfo, EDIT_RECEIVE_MESSAGE(&CMaterialHelper::OnMaterialInfo));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Material_Update, EDIT_RECEIVE_MESSAGE(&CMaterialHelper::OnMaterialInfo));
     }
 
     // -----------------------------------------------------------------------------
@@ -260,7 +260,7 @@ namespace
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::MaterialInfo, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Material_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------

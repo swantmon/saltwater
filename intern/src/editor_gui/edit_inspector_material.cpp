@@ -36,8 +36,8 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::ActorInfoMaterial, EDIT_RECEIVE_MESSAGE(&CInspectorMaterial::OnEntityInfoMaterial));
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::MaterialInfo     , EDIT_RECEIVE_MESSAGE(&CInspectorMaterial::OnMaterialInfo));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Actor_Model_Info, EDIT_RECEIVE_MESSAGE(&CInspectorMaterial::OnEntityInfoMaterial));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Material_Info   , EDIT_RECEIVE_MESSAGE(&CInspectorMaterial::OnMaterialInfo));
     }
 
     // -----------------------------------------------------------------------------
@@ -207,7 +207,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::MaterialInfo, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Material_Update, NewMessage);
 
     }
 
@@ -255,7 +255,7 @@ namespace Edit
 
             NewLoadMaterialMessage.Reset();
 
-            int HashOfMaterial = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::MaterialLoad, NewLoadMaterialMessage);
+            int HashOfMaterial = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Material_Load, NewLoadMaterialMessage);
 
             if (HashOfMaterial == -1) return;
 
@@ -270,7 +270,7 @@ namespace Edit
 
             NewApplyMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SGUIMessageType::ActorInfoMaterial, NewApplyMessage);
+            Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Actor_Model_Update, NewApplyMessage);
 
             RequestInformation(m_CurrentEntityID);
         }
@@ -307,7 +307,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::RequestActorInfoMaterial, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Actor_Model_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -341,7 +341,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::RequestMaterialInfo, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Material_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------

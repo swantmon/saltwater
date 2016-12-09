@@ -52,26 +52,6 @@
         </property>
        </spacer>
       </item>
-      <item>
-       <widget class="QLineEdit" name="m_pMailAdressEdit">
-        <property name="maximumSize">
-         <size>
-          <width>200</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="placeholderText">
-         <string>max.mustermann@mail.com</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="m_pScreenshotButton">
-        <property name="text">
-         <string>Screenshot</string>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
     <item>
@@ -689,22 +669,6 @@
     <hint type="destinationlabel">
      <x>736</x>
      <y>41</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>m_pScreenshotButton</sender>
-   <signal>clicked()</signal>
-   <receiver>CMainWindow</receiver>
-   <slot>takeScreenshot()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>1829</x>
-     <y>113</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>1166</x>
-     <y>44</y>
     </hint>
    </hints>
   </connection>

@@ -18,7 +18,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::PluginInfoARController, EDIT_RECEIVE_MESSAGE(&CInspectorARController::OnEntityInfoARController));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Plugin_ARController_Info, EDIT_RECEIVE_MESSAGE(&CInspectorARController::OnEntityInfoARController));
     }
 
     // -----------------------------------------------------------------------------
@@ -66,7 +66,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::PluginInfoARController, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Plugin_ARConroller_Update, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -121,7 +121,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::RequestPluginInfoARController, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Plugin_ARConroller_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------

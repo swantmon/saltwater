@@ -91,23 +91,23 @@ namespace
         // -----------------------------------------------------------------------------
         // Edit
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewEffectBloom                 , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnNewEntityBloom));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewEffectDOF                   , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnNewEntityDOF));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewEffectPostAA                  , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnNewEntityPostAA));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewEffectSSR                   , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnNewEntitySSR));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewEffectVolumeFog             , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnNewEntityVolumeFog));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Effect_Bloom_New                 , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnNewEntityBloom));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Effect_DOF_New                   , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnNewEntityDOF));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Effect_PostAA_New                  , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnNewEntityPostAA));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Effect_SSR_New                   , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnNewEntitySSR));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Effect_VolumeFog_New             , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnNewEntityVolumeFog));
 
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEffectInfoBloom         , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnRequestEntityInfoBloom));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEffectInfoDOF           , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnRequestEntityInfoDOF));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEffectInfoPostAA          , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnRequestEntityInfoPostAA));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEffectInfoSSR           , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnRequestEntityInfoSSR));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEffectInfoVolumeFog     , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnRequestEntityInfoVolumeFog));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Effect_Bloom_Info         , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnRequestEntityInfoBloom));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Effect_DOF_Info           , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnRequestEntityInfoDOF));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Effect_PostAA_Info          , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnRequestEntityInfoPostAA));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Effect_SSR_Info           , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnRequestEntityInfoSSR));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Effect_VolumeFog_Info     , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnRequestEntityInfoVolumeFog));
         
-        Edit::MessageManager::Register(Edit::SGUIMessageType::EffectInfoBloom                , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnEntityInfoBloom));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::EffectInfoDOF                  , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnEntityInfoDOF));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::EffectInfoPostAA                 , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnEntityInfoPostAA));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::EffectInfoSSR                  , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnEntityInfoSSR));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::EffectInfoVolumeFog            , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnEntityInfoVolumeFog));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Effect_Bloom_Update                , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnEntityInfoBloom));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Effect_DOF_Update                  , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnEntityInfoDOF));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Effect_PostAA_Update                 , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnEntityInfoPostAA));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Effect_SSR_Update                  , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnEntityInfoSSR));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Effect_VolumeFog_Update            , EDIT_RECEIVE_MESSAGE(&CEffectHelper::OnEntityInfoVolumeFog));
     }
 
     // -----------------------------------------------------------------------------
@@ -250,7 +250,7 @@ namespace
 
             NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EffectInfoBloom, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Effect_Bloom_Info, NewMessage);
         }
     }
 
@@ -278,7 +278,7 @@ namespace
 
             NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EffectInfoDOF, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Effect_DOF_Info, NewMessage);
         }
     }
 
@@ -302,7 +302,7 @@ namespace
 
             NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EffectInfoPostAA, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Effect_PostAA_Info, NewMessage);
         }
     }
 
@@ -329,7 +329,7 @@ namespace
 
             NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EffectInfoSSR, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Effect_SSR_Info, NewMessage);
         }
             }
 
@@ -368,7 +368,7 @@ namespace
 
             NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EffectInfoVolumeFog, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Effect_VolumeFog_Info, NewMessage);
         }
     }
 

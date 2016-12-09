@@ -22,7 +22,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::LightInfoEnvironment, EDIT_RECEIVE_MESSAGE(&CInspectorEnvironment::OnEntityInfoEnvironment));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Light_Environment_Info, EDIT_RECEIVE_MESSAGE(&CInspectorEnvironment::OnEntityInfoEnvironment));
     }
 
     // -----------------------------------------------------------------------------
@@ -64,7 +64,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::LightInfoEnvironment, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Light_Environment_Update, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -117,7 +117,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::RequestLightInfoEnvironment, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Light_Environment_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------

@@ -86,20 +86,20 @@ namespace
         // -----------------------------------------------------------------------------
         // Edit
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewLightPointlight            , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnNewEntityPointlight));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewLightSun                   , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnNewEntitySun));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewLightEnvironment           , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnNewEntityEnvironment));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewLightGlobalProbe           , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnNewEntityGlobalProbe));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Pointlight_New            , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnNewEntityPointlight));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Sun_New                   , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnNewEntitySun));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Environment_New           , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnNewEntityEnvironment));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Probe_New           , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnNewEntityGlobalProbe));
         
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestLightInfoPointlight    , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnRequestEntityInfoPointlight));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestLightInfoSun           , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnRequestEntityInfoSun));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestLightInfoEnvironment   , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnRequestEntityInfoEnvironment));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestLightInfoGlobalProbe   , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnRequestEntityInfoGlobalProbe));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Pointlight_Info    , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnRequestEntityInfoPointlight));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Sun_Info           , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnRequestEntityInfoSun));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Environment_Info   , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnRequestEntityInfoEnvironment));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Probe_Info   , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnRequestEntityInfoGlobalProbe));
        
-        Edit::MessageManager::Register(Edit::SGUIMessageType::LightInfoPointlight           , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnEntityInfoPointlight));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::LightInfoSun                  , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnEntityInfoSun));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::LightInfoEnvironment          , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnEntityInfoEnvironment));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::LightInfoGlobalProbe          , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnEntityInfoGlobalProbe));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Pointlight_Update           , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnEntityInfoPointlight));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Sun_Update                  , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnEntityInfoSun));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Environment_Update          , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnEntityInfoEnvironment));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Probe_Update          , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnEntityInfoGlobalProbe));
     }
 
     // -----------------------------------------------------------------------------
@@ -306,7 +306,7 @@ namespace
 
             NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::LightInfoPointlight, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Light_Pointlight_Info, NewMessage);
         }
     }
 
@@ -338,7 +338,7 @@ namespace
 
             NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::LightInfoSun, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Light_Sun_Info, NewMessage);
         }
     }
 
@@ -376,7 +376,7 @@ namespace
                 
             NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::LightInfoEnvironment, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Light_Environment_Info, NewMessage);
         }
     }
 
@@ -402,7 +402,7 @@ namespace
 
             NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::LightInfoGlobalProbe, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Light_Probe_Info, NewMessage);
         }
     }
 

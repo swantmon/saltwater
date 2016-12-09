@@ -43,9 +43,9 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::AppStateChange , EDIT_RECEIVE_MESSAGE(&CMainWindow::OnStateChange));
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::FramesPerSecond, EDIT_RECEIVE_MESSAGE(&CMainWindow::OnFramesPerSecond));
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::HistogramInfo  , EDIT_RECEIVE_MESSAGE(&CMainWindow::OnHistogramInfo));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::App_State_Change      , EDIT_RECEIVE_MESSAGE(&CMainWindow::OnStateChange));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Graphic_FPS_Info      , EDIT_RECEIVE_MESSAGE(&CMainWindow::OnFramesPerSecond));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Graphic_Histogram_Info, EDIT_RECEIVE_MESSAGE(&CMainWindow::OnHistogramInfo));
     }
 
     // -----------------------------------------------------------------------------
@@ -94,38 +94,16 @@ namespace Edit
 
         if (m_IsPlaying == false)
         {
-            MessageManager::SendMessage(SGUIMessageType::Play, NewMessage);
+            MessageManager::SendMessage(SGUIMessageType::App_Play, NewMessage);
 
             m_IsPlaying = true;
         }
         else
         {
-            MessageManager::SendMessage(SGUIMessageType::Edit, NewMessage);
+            MessageManager::SendMessage(SGUIMessageType::App_Edit, NewMessage);
             
             m_IsPlaying = false;
         }
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMainWindow::takeScreenshot()
-    {
-        CMessage NewMessage;
-
-        // -----------------------------------------------------------------------------
-        // Prepare image path
-        // -----------------------------------------------------------------------------
-        QString    PathToImage       = m_pMailAdressEdit->text() + ".png";
-        QByteArray PathToImageBinary = PathToImage.toLatin1();
-
-        // -----------------------------------------------------------------------------
-        // Compare message
-        // -----------------------------------------------------------------------------
-        NewMessage.PutString(PathToImageBinary.data());
-
-        NewMessage.Reset();
-
-        MessageManager::SendMessage(SGUIMessageType::TakeScreenshot, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -143,7 +121,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewLightSun, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Light_Sun_New, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -154,7 +132,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewEffectBloom, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Effect_Bloom_New, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -165,7 +143,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewEffectDOF, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Effect_DOF_New, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -176,7 +154,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewEffectPostAA, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Effect_PostAA_New, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -187,7 +165,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewEffectSSR, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Effect_SSR_New, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -198,7 +176,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewEffectVolumeFog, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Effect_VolumeFog_New, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -209,7 +187,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewLightPointlight, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Light_Pointlight_New, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -220,7 +198,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewLightEnvironment, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Light_Environment_New, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -231,7 +209,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewLightGlobalProbe, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Light_Probe_New, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -242,7 +220,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewPluginARController, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Plugin_ARConroller_New, NewMessage);
     }
     // -----------------------------------------------------------------------------
 
@@ -268,7 +246,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::GraphicHistogramInfo, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Graphic_Histogram_Update, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -283,7 +261,7 @@ namespace Edit
 
             NewMessage.Reset();
 
-            MessageManager::SendMessage(SGUIMessageType::RequestGraphicHistogramInfo, NewMessage);
+            MessageManager::SendMessage(SGUIMessageType::Graphic_Histogram_Info, NewMessage);
         }
     }
 
@@ -323,7 +301,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::Exit, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::App_Exit, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -359,7 +337,7 @@ namespace Edit
 
                 NewMessage.Reset();
 
-                MessageManager::SendMessage(SGUIMessageType::LoadMap, NewMessage);
+                MessageManager::SendMessage(SGUIMessageType::App_LoadMap, NewMessage);
             }
         }
         else if (NewState == 3) // Edit

@@ -28,8 +28,8 @@ namespace Edit
     CIntroState::CIntroState()
         : m_CurrentState(EStateType::Intro)
     {
-        MessageManager::Register(SGUIMessageType::LoadMap, EDIT_RECEIVE_MESSAGE(&CIntroState::OnLoadMap));
-        MessageManager::Register(Edit::SGUIMessageType::NewMap, EDIT_RECEIVE_MESSAGE(&CIntroState::OnNewMap));
+        MessageManager::Register(SGUIMessageType::App_LoadMap, EDIT_RECEIVE_MESSAGE(&CIntroState::OnLoadMap));
+        MessageManager::Register(Edit::SGUIMessageType::App_NewMap, EDIT_RECEIVE_MESSAGE(&CIntroState::OnNewMap));
     }
     
     // -----------------------------------------------------------------------------

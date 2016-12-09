@@ -21,7 +21,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::EffectInfoSSR, EDIT_RECEIVE_MESSAGE(&CInspectorSSR::OnEntityInfoSSR));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Effect_SSR_Info, EDIT_RECEIVE_MESSAGE(&CInspectorSSR::OnEntityInfoSSR));
     }
 
     // -----------------------------------------------------------------------------
@@ -56,7 +56,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::EffectInfoSSR, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Effect_SSR_Update, NewMessage);
 
     }
 
@@ -72,7 +72,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::RequestEffectInfoSSR, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Effect_SSR_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------

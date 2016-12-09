@@ -77,8 +77,7 @@ namespace
         void OnMouseRightPressed(Edit::CMessage& _rMessage);
         void OnMouseRightReleased(Edit::CMessage& _rMessage);
         void OnMouseMove(Edit::CMessage& _rMessage);
-        
-        void OnTakeScreenshot(Edit::CMessage& _rMessage);
+
         void OnResize(Edit::CMessage& _rMessage);
     };
 } // namespace
@@ -151,17 +150,16 @@ namespace
         // -----------------------------------------------------------------------------
         // Register messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SGUIMessageType::KeyPressed         , EDIT_RECEIVE_MESSAGE(&CApplication::OnKeyPressed));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::KeyReleased        , EDIT_RECEIVE_MESSAGE(&CApplication::OnKeyReleased));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::MouseLeftPressed   , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseLeftPressed));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::MouseLeftReleased  , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseLeftReleased));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::MouseMiddlePressed , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseMiddlePressed));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::MouseMiddleReleased, EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseMiddleReleased));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::MouseRightPressed  , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseRightPressed));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::MouseRightReleased , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseRightReleased));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::MouseMove          , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseMove));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::TakeScreenshot     , EDIT_RECEIVE_MESSAGE(&CApplication::OnTakeScreenshot));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::ResizeMapEditWindow, EDIT_RECEIVE_MESSAGE(&CApplication::OnResize));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Input_KeyPressed         , EDIT_RECEIVE_MESSAGE(&CApplication::OnKeyPressed));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Input_KeyReleased        , EDIT_RECEIVE_MESSAGE(&CApplication::OnKeyReleased));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Input_MouseLeftPressed   , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseLeftPressed));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Input_MouseLeftReleased  , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseLeftReleased));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Input_MouseMiddlePressed , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseMiddlePressed));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Input_MouseMiddleReleased, EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseMiddleReleased));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Input_MouseRightPressed  , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseRightPressed));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Input_MouseRightReleased , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseRightReleased));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Input_MouseMove          , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseMove));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Window_Resize, EDIT_RECEIVE_MESSAGE(&CApplication::OnResize));
 
         // -----------------------------------------------------------------------------
         // Helper
@@ -233,7 +231,7 @@ namespace
 
             NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::FramesPerSecond, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Graphic_FPS_Info, NewMessage);
 
             // -----------------------------------------------------------------------------
             // State engine
@@ -287,7 +285,7 @@ namespace
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::AppStateChange, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::App_State_Change, NewMessage);
 
         // -----------------------------------------------------------------------------
         // Save new state
@@ -422,17 +420,6 @@ namespace
         Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseMove, Base::CInputEvent::Mouse, m_LatestMousePosition);
 
         Gui::EventHandler::OnUserEvent(NewInput);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CApplication::OnTakeScreenshot(Edit::CMessage& _rMessage)
-    {
-        char pPathToSave[256];
-
-        _rMessage.GetString(pPathToSave, 256);
-
-        Gfx::App::TakeScreenshot(m_EditWindowID, pPathToSave);
     }
 
     // -----------------------------------------------------------------------------

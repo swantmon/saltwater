@@ -35,8 +35,8 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Register messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SGUIMessageType::Exit, EDIT_RECEIVE_MESSAGE(&CPlayState::OnExit));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::Edit, EDIT_RECEIVE_MESSAGE(&CPlayState::OnEdit));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::App_Exit, EDIT_RECEIVE_MESSAGE(&CPlayState::OnExit));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::App_Edit, EDIT_RECEIVE_MESSAGE(&CPlayState::OnEdit));
     }
     
     // -----------------------------------------------------------------------------

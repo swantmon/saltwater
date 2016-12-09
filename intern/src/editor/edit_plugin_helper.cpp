@@ -81,13 +81,13 @@ namespace
         // -----------------------------------------------------------------------------
         // Edit
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewPluginARController, EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnNewPluginARController));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Plugin_ARConroller_New, EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnNewPluginARController));
 
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestPluginInfoARController      , EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnRequestPluginInfoARController));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestPluginInfoARControllerMarker, EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnRequestPluginInfoARControllerMarker));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Plugin_ARConroller_Info      , EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnRequestPluginInfoARController));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Plugin_ARConroller_Marker_Info, EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnRequestPluginInfoARControllerMarker));
 
-        Edit::MessageManager::Register(Edit::SGUIMessageType::PluginInfoARController      , EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnPluginInfoARController));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::PluginInfoARControllerMarker, EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnPluginInfoARControllerMarker));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Plugin_ARConroller_Update      , EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnPluginInfoARController));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Plugin_ARConroller_Marker_Update, EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnPluginInfoARControllerMarker));
     }
 
     // -----------------------------------------------------------------------------
@@ -217,7 +217,7 @@ namespace
 
             NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::PluginInfoARController, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Plugin_ARController_Info, NewMessage);
         }
     }
 
@@ -267,7 +267,7 @@ namespace
 
             NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::PluginInfoARControllerMarker, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Plugin_ARController_Marker_Info, NewMessage);
         }
     }
 

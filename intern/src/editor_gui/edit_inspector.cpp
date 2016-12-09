@@ -83,7 +83,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Register messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::EntityInfoFacets, EDIT_RECEIVE_MESSAGE(&CInspector::OnEntityInfoFacets));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Entity_Facets_Info, EDIT_RECEIVE_MESSAGE(&CInspector::OnEntityInfoFacets));
     }
 
     // -----------------------------------------------------------------------------
@@ -134,7 +134,7 @@ namespace Edit
 
         SelectionMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::GraphicHighlightEntity, SelectionMessage);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Graphic_HighlightEntity, SelectionMessage);
 
         // -----------------------------------------------------------------------------
 
@@ -144,7 +144,7 @@ namespace Edit
 
         FacetMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::RequestEntityInfoFacets, FacetMessage);
+        MessageManager::SendMessage(SGUIMessageType::Entity_Facets_Info, FacetMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -311,6 +311,6 @@ namespace Edit
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::GraphicHighlightEntity, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Graphic_HighlightEntity, NewMessage);
     }
 } // namespace Edit

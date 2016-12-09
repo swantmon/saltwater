@@ -38,7 +38,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::KeyPressed, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Input_KeyPressed, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -54,7 +54,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::KeyReleased, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Input_KeyReleased, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -70,7 +70,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::MouseMove, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Input_MouseMove, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -91,13 +91,13 @@ namespace Edit
         switch (_pMouseEvent->button())
         {
         case Qt::LeftButton:
-            MessageManager::SendMessage(SGUIMessageType::MouseLeftPressed, NewMessage);
+            MessageManager::SendMessage(SGUIMessageType::Input_MouseLeftPressed, NewMessage);
             break;
         case Qt::MiddleButton:
-            MessageManager::SendMessage(SGUIMessageType::MouseMiddlePressed, NewMessage);
+            MessageManager::SendMessage(SGUIMessageType::Input_MouseMiddlePressed, NewMessage);
             break;
         case Qt::RightButton:
-            MessageManager::SendMessage(SGUIMessageType::MouseRightPressed, NewMessage);
+            MessageManager::SendMessage(SGUIMessageType::Input_MouseRightPressed, NewMessage);
             break;
         }
     }
@@ -118,13 +118,13 @@ namespace Edit
         switch (_pMouseEvent->button())
         {
         case Qt::LeftButton:
-            MessageManager::SendMessage(SGUIMessageType::MouseLeftReleased, NewMessage);
+            MessageManager::SendMessage(SGUIMessageType::Input_MouseLeftReleased, NewMessage);
             break;
         case Qt::MiddleButton:
-            MessageManager::SendMessage(SGUIMessageType::MouseMiddleReleased, NewMessage);
+            MessageManager::SendMessage(SGUIMessageType::Input_MouseMiddleReleased, NewMessage);
             break;
         case Qt::RightButton:
-            MessageManager::SendMessage(SGUIMessageType::MouseRightReleased, NewMessage);
+            MessageManager::SendMessage(SGUIMessageType::Input_MouseRightReleased, NewMessage);
             break;
         }
     }
@@ -140,7 +140,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::ResizeMapEditWindow, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Window_Resize, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -188,7 +188,7 @@ namespace Edit
 
                 NewMessage.Reset();
 
-                MessageManager::SendMessage(SGUIMessageType::NewActorModel, NewMessage);
+                MessageManager::SendMessage(SGUIMessageType::Actor_Model_New, NewMessage);
             }
         }
     }

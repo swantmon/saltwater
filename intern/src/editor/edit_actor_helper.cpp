@@ -84,14 +84,14 @@ namespace
         // -----------------------------------------------------------------------------
         // Edit
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewActorModel, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnNewActorModel));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewActorCamera, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnNewActorCamera));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Actor_Model_New, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnNewActorModel));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Actor_Camera_New, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnNewActorCamera));
         
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestActorInfoMaterial, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnRequestActorInfoMaterial));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestActorInfoCamera, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnRequestActorInfoCamera));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Actor_Model_Info, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnRequestActorInfoMaterial));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Actor_Camera_Info, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnRequestActorInfoCamera));
 
-        Edit::MessageManager::Register(Edit::SGUIMessageType::ActorInfoMaterial, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnActorInfoMaterial));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::ActorInfoCamera, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnActorInfoCamera));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Actor_Model_Update, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnActorInfoMaterial));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Actor_Camera_Update, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnActorInfoCamera));
     }
 
     // -----------------------------------------------------------------------------
@@ -202,7 +202,7 @@ namespace
 
             NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::ActorInfoMaterial, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Actor_Model_Info, NewMessage);
         }
     }
 
@@ -272,7 +272,7 @@ namespace
             
             NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::ActorInfoCamera, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Actor_Camera_Info, NewMessage);
         }
     }
 

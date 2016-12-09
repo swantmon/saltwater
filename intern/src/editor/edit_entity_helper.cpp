@@ -78,15 +78,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Edit
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RemoveEntity                   , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnRemoveEntity));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Entity_Remove                   , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnRemoveEntity));
 
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoFacets        , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnRequestEntityInfoFacets));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoEntity        , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnRequestEntityInfoEntity));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoTransformation, EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnRequestEntityInfoTransformation));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Entity_Facets_Info        , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnRequestEntityInfoFacets));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Entity_Info        , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnRequestEntityInfoEntity));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Entity_Transformation_Info, EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnRequestEntityInfoTransformation));
         
-        Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoEntity               , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnEntityInfoEntity));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoHierarchie           , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnEntityInfoHierarchie));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoTransformation       , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnEntityInfoTransformation));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Entity_Info_Update               , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnEntityInfoEntity));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Entity_Hierarchy_Update           , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnEntityInfoHierarchie));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Entity_Transformation_Update       , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnEntityInfoTransformation));
     }
 
     // -----------------------------------------------------------------------------
@@ -133,7 +133,7 @@ namespace
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoFacets, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Entity_Facets_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -167,7 +167,7 @@ namespace
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoEntity, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Entity_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -211,7 +211,7 @@ namespace
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoTransformation, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Entity_Transformation_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -392,7 +392,7 @@ namespace
 
             NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoHierarchy, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Entity_Hierarchy_Info, NewMessage);
         }
     }
 } // namespace
