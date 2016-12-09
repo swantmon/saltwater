@@ -17,8 +17,6 @@
 #include "data/data_texture_manager.h"
 #include "data/data_transformation_facet.h"
 
-#include "editor/edit_map_helper.h"
-
 #include "editor_port/edit_message.h"
 #include "editor_port/edit_message_manager.h"
 

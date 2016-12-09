@@ -74,20 +74,7 @@ namespace Edit
 
     void CMainWindow::OnStart()
     {
-        // -----------------------------------------------------------------------------
-        // Check startup behavior
-        // -----------------------------------------------------------------------------
-        if (m_IsSceneLoaded == false)
-        {
-            m_pNewSceneDialog->show();
-
-            m_IsSceneLoaded = true;
-        }
-
-        // -----------------------------------------------------------------------------
-        // Set focus of edit window
-        // -----------------------------------------------------------------------------
-        m_pEditorRenderContext->setFocus();
+        
     }
 
     // -----------------------------------------------------------------------------
@@ -353,9 +340,39 @@ namespace Edit
         int OldState = _rMessage.GetInt();
         int NewState = _rMessage.GetInt();
 
-        if (NewState == 3)
+        // TODO by tschwandt
+        // Find a better solution to handle different states
+        if (NewState == 1) // Intro
         {
+            // -----------------------------------------------------------------------------
+            // Check startup behavior
+            // -----------------------------------------------------------------------------
+            if (m_IsSceneLoaded == false)
+            {
+                m_pNewSceneDialog->show();
+
+                m_IsSceneLoaded = true;
+            }
+            else
+            {
+                CMessage NewMessage(true);
+
+                NewMessage.Reset();
+
+                MessageManager::SendMessage(SGUIMessageType::LoadMap, NewMessage);
+            }
+        }
+        else if (NewState == 3) // Edit
+        {
+            // -----------------------------------------------------------------------------
+            // Reset all content widgets
+            // -----------------------------------------------------------------------------
             m_pAssetBrowserWidget->Reset();
+
+            // -----------------------------------------------------------------------------
+            // Set focus of edit window
+            // -----------------------------------------------------------------------------
+            m_pEditorRenderContext->setFocus();
         }
     }
 
