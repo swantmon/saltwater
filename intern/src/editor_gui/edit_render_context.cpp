@@ -1,12 +1,21 @@
 ﻿#include "edit_render_context.h"
 
+#include <QDir>
+#include <QDragEnterEvent>
+#include <QDropEvent>
+#include <QFile>
+#include <QFileInfo>
+#include <QKeyEvent>
+#include <QMimeData>
 #include <QResizeEvent>
+#include <QUrl>
 
 namespace Edit
 {
     CRenderContext::CRenderContext(QWidget* _pParent)
         : QWidget(_pParent)
     {
+        setAcceptDrops(true);
     }
 
     // -----------------------------------------------------------------------------
@@ -132,5 +141,55 @@ namespace Edit
         NewMessage.Reset();
 
         MessageManager::SendMessage(SGUIMessageType::ResizeMapEditWindow, NewMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CRenderContext::dragEnterEvent(QDragEnterEvent* _pEvent)
+    {
+        const QMimeData* pMimeData = _pEvent->mimeData();
+
+        if (pMimeData->hasText())
+        {
+            QString Text = pMimeData->text();
+
+            QFileInfo FileInfo(Text);
+
+            if (FileInfo.completeSuffix() == "dae" || FileInfo.completeSuffix() == "obj")
+            {
+                _pEvent->acceptProposedAction();
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CRenderContext::dropEvent(QDropEvent* _pEvent)
+    {
+        const QMimeData* pMimeData = _pEvent->mimeData();
+
+        if (pMimeData->hasUrls())
+        {
+            QUrl Url = pMimeData->urls()[0];
+
+            QFileInfo FileInfo(Url.toLocalFile());
+
+            if (FileInfo.completeSuffix() == "dae" || FileInfo.completeSuffix() == "obj")
+            {
+                QDir Directory("../assets/");
+
+                QString AbsPath = FileInfo.absoluteFilePath();
+
+                QByteArray ModelFileBinary = Directory.relativeFilePath(AbsPath).toLatin1();
+
+                CMessage NewMessage;
+
+                NewMessage.PutString(ModelFileBinary.data());
+
+                NewMessage.Reset();
+
+                MessageManager::SendMessage(SGUIMessageType::NewActorModel, NewMessage);
+            }
+        }
     }
 } // namespace Edit

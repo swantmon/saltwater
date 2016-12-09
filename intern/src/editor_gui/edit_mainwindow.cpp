@@ -150,29 +150,6 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CMainWindow::openNewActorModelDialog()
-    {
-        QString ModelFile = QFileDialog::getOpenFileName(this, tr("Load model file"), tr(""), tr("Object files (*.obj *.dae)"));
-
-        // -----------------------------------------------------------------------------
-        // Send message with new scene / map request
-        // -----------------------------------------------------------------------------
-        if (!ModelFile.isEmpty())
-        {
-            QByteArray ModelFileBinary = ModelFile.toLatin1();
-
-            CMessage NewMessage;
-
-            NewMessage.PutString(ModelFileBinary.data());
-
-            NewMessage.Reset();
-
-            MessageManager::SendMessage(SGUIMessageType::NewActorModel, NewMessage);
-        }
-    }
-
-    // -----------------------------------------------------------------------------
-
     void CMainWindow::createNewLightSun()
     {
         CMessage NewMessage(true);

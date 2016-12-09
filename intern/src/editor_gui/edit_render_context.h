@@ -5,7 +5,7 @@
 #include "editor_port/edit_message_manager.h"
 
 #include <QWidget>
-#include <QKeyEvent>
+#include <QDragMoveEvent>
 
 namespace Edit
 {
@@ -26,5 +26,8 @@ namespace Edit
         void mousePressEvent(QMouseEvent* _pMouseEvent);
         void mouseReleaseEvent(QMouseEvent* _pMouseEvent);
         void resizeEvent(QResizeEvent* _pResizeEvent);
+
+        void dragEnterEvent(QDragEnterEvent* _pEvent);
+        void dropEvent(QDropEvent* _pEvent);
     };
 } // namespace Edit

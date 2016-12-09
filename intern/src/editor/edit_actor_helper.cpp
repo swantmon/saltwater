@@ -118,9 +118,7 @@ namespace
 
         const char* pPathToFile = _rMessage.GetString(pTmp, 512);
 
-        PathToFile = "models/" + CopyFileToAssets("../assets/models/", pPathToFile);
-
-        ModelFileDesc.m_pFileName = PathToFile.c_str();
+        ModelFileDesc.m_pFileName = pPathToFile;
         ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::Default;
 
         Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);

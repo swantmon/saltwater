@@ -96,6 +96,9 @@
         <property name="mouseTracking">
          <bool>true</bool>
         </property>
+        <property name="acceptDrops">
+         <bool>true</bool>
+        </property>
         <property name="autoFillBackground">
          <bool>false</bool>
         </property>
@@ -150,7 +153,7 @@
      <property name="title">
       <string>&amp;Actors</string>
      </property>
-     <addaction name="m_pActionModel"/>
+     <addaction name="m_pActionEmpty"/>
      <addaction name="m_pActionCamera"/>
     </widget>
     <widget class="QMenu" name="menuLights">
@@ -478,14 +481,6 @@
     <string>Report a &amp;Bug...</string>
    </property>
   </action>
-  <action name="m_pActionModel">
-   <property name="text">
-    <string>&amp;Model</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+N</string>
-   </property>
-  </action>
   <action name="actionPoint">
    <property name="text">
     <string>Point</string>
@@ -604,6 +599,14 @@
     <string>Ctrl+2</string>
    </property>
   </action>
+  <action name="m_pActionEmpty">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Empty</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -717,22 +720,6 @@
     <hint type="destinationlabel">
      <x>246</x>
      <y>280</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>m_pActionModel</sender>
-   <signal>triggered()</signal>
-   <receiver>CMainWindow</receiver>
-   <slot>openNewActorModelDialog()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>966</x>
-     <y>445</y>
     </hint>
    </hints>
   </connection>

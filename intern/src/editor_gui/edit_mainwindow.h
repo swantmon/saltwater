@@ -34,7 +34,6 @@ namespace Edit
         void switchPlayingCurrentScene();
         void takeScreenshot();
         void openNewSceneDialog();
-        void openNewActorModelDialog();
         void createNewLightPoint();
         void createNewLightSun();
         void createNewLightEnvironment();

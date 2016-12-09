@@ -20,7 +20,11 @@
       <widget class="QTreeView" name="m_pDirectoryTreeView"/>
      </item>
      <item>
-      <widget class="QListView" name="m_pFileTreeView"/>
+      <widget class="QListView" name="m_pFileTreeView">
+       <property name="dragEnabled">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

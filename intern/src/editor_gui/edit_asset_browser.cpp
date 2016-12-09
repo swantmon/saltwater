@@ -4,11 +4,11 @@
 namespace Edit
 {
     CAssetBrowser::CAssetBrowser(QWidget* _pParent)
-        : QWidget          (_pParent)
-        , m_pDirectoryModel(0)
-        , m_pFileModel     (0)
-        , m_RootPath       ("../assets/")
-        , m_CurrentPath    ("../assets/")
+        : QWidget             (_pParent)
+        , m_pDirectoryModel   (0)
+        , m_pFileModel        (0)
+        , m_RootPath          ("../assets/")
+        , m_CurrentPath       ("../assets/")
     {
         // -----------------------------------------------------------------------------
         // Setup UI
@@ -32,6 +32,22 @@ namespace Edit
 
         m_pDirectoryModel = 0;
         m_pFileModel      = 0;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CAssetBrowser::OnStart()
+    {
+        // -----------------------------------------------------------------------------
+        // Load every file inside assets
+        // -----------------------------------------------------------------------------
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CAssetBrowser::OnExit()
+    {
+
     }
 
     // -----------------------------------------------------------------------------
