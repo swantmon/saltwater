@@ -272,10 +272,29 @@ namespace
     
     void CApplication::OnTranslation(Edit::CState::EStateType _NewState)
     {
+        // -----------------------------------------------------------------------------
+        // Do state switch
+        // -----------------------------------------------------------------------------
         s_pStates[m_CurrentState]->OnLeave();
         
         s_pStates[_NewState]->OnEnter();
-        
+
+        // -----------------------------------------------------------------------------
+        // Send message
+        // -----------------------------------------------------------------------------
+        Edit::CMessage NewMessage;
+
+        NewMessage.PutInt(m_CurrentState);
+
+        NewMessage.PutInt(_NewState);
+
+        NewMessage.Reset();
+
+        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::AppStateChange, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Save new state
+        // -----------------------------------------------------------------------------
         m_CurrentState = _NewState;
     }
 

@@ -37,15 +37,15 @@ namespace Edit
         // -----------------------------------------------------------------------------
         m_pHistogramDockWidget->setVisible(false);
         m_pConsoleDockWidget  ->setVisible(false);
-        m_pAssetsDockWidget   ->setVisible(false);
 
         tabifyDockWidget(m_pAssetsDockWidget, m_pConsoleDockWidget);
 
         // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::AppStateChange , EDIT_RECEIVE_MESSAGE(&CMainWindow::OnStateChange));
         Edit::MessageManager::Register(Edit::SApplicationMessageType::FramesPerSecond, EDIT_RECEIVE_MESSAGE(&CMainWindow::OnFramesPerSecond));
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::HistogramInfo, EDIT_RECEIVE_MESSAGE(&CMainWindow::OnHistogramInfo));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::HistogramInfo  , EDIT_RECEIVE_MESSAGE(&CMainWindow::OnHistogramInfo));
     }
 
     // -----------------------------------------------------------------------------
@@ -326,8 +326,6 @@ namespace Edit
     void CMainWindow::toggleAssetsDock()
     {
         m_pAssetsDockWidget->setVisible(!m_pAssetsDockWidget->isVisible());
-
-        m_pAssetBrowserWidget->Reset();
     }
 
     // -----------------------------------------------------------------------------
@@ -346,6 +344,19 @@ namespace Edit
     void CMainWindow::mousePressEvent(QMouseEvent* _pMouseEvent)
     {
         setFocus();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::OnStateChange(Edit::CMessage& _rMessage)
+    {
+        int OldState = _rMessage.GetInt();
+        int NewState = _rMessage.GetInt();
+
+        if (NewState == 3)
+        {
+            m_pAssetBrowserWidget->Reset();
+        }
     }
 
     // -----------------------------------------------------------------------------

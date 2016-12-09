@@ -65,6 +65,7 @@ namespace Edit
 
     private:
 
+        void OnStateChange(Edit::CMessage& _rMessage);
         void OnFramesPerSecond(Edit::CMessage& _rMessage);
         void OnHistogramInfo(Edit::CMessage& _rMessage);
     };

@@ -116,6 +116,8 @@ namespace Edit
     {
         enum Enum
         {
+            AppStateChange,
+
             FramesPerSecond,
 
             EntityInfoFacets,
