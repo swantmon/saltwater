@@ -349,6 +349,8 @@ namespace Edit
     void CMainWindow::toggleAssetsDock()
     {
         m_pAssetsDockWidget->setVisible(!m_pAssetsDockWidget->isVisible());
+
+        m_pAssetBrowserWidget->Reset();
     }
 
     // -----------------------------------------------------------------------------

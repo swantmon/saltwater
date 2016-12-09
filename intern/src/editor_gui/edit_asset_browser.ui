@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>AssetBrowser</class>
+ <widget class="QWidget" name="AssetBrowser">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>672</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_2">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QTreeView" name="m_pDirectoryTreeView"/>
+     </item>
+     <item>
+      <widget class="QListView" name="m_pFileTreeView"/>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>m_pDirectoryTreeView</sender>
+   <signal>clicked(QModelIndex)</signal>
+   <receiver>AssetBrowser</receiver>
+   <slot>directoryClicked(QModelIndex)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>171</x>
+     <y>180</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>325</x>
+     <y>296</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>directoryClicked(QModelIndex)</slot>
+ </slots>
+</ui>
