@@ -173,7 +173,7 @@ namespace
 
             NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Actor_Model_Info, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Actor_Material_Info, NewMessage);
         }
     }
 

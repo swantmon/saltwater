@@ -137,7 +137,7 @@ namespace Edit
 
             Actor_Camera_Info,
 
-            Actor_Model_Info,
+            Actor_Material_Info,
 
             Light_Pointlight_Info,
             Light_Sun_Info,

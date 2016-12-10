@@ -36,8 +36,8 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::Actor_Model_Info, EDIT_RECEIVE_MESSAGE(&CInspectorMaterial::OnEntityInfoMaterial));
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::Material_Info   , EDIT_RECEIVE_MESSAGE(&CInspectorMaterial::OnMaterialInfo));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Actor_Material_Info, EDIT_RECEIVE_MESSAGE(&CInspectorMaterial::OnEntityInfoMaterial));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Material_Info      , EDIT_RECEIVE_MESSAGE(&CInspectorMaterial::OnMaterialInfo));
     }
 
     // -----------------------------------------------------------------------------
