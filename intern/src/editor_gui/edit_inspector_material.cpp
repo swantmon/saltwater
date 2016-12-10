@@ -270,7 +270,7 @@ namespace Edit
 
             NewApplyMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Actor_Model_Update, NewApplyMessage);
+            Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Actor_Material_Update, NewApplyMessage);
 
             RequestInformation(m_CurrentEntityID);
         }
@@ -307,7 +307,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::Actor_Model_Info, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Actor_Material_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------

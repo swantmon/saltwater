@@ -124,6 +124,7 @@ namespace Dt
 
         BID GetID() const;
 
+        void SetCategory(unsigned int _Category);
         unsigned int GetCategory() const;
 
         void SetName(const Base::CharString& _rName);

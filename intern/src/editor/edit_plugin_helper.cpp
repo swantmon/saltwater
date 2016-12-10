@@ -83,10 +83,10 @@ namespace
         // -----------------------------------------------------------------------------
         Edit::MessageManager::Register(Edit::SGUIMessageType::Plugin_ARConroller_New, EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnNewPluginARController));
 
-        Edit::MessageManager::Register(Edit::SGUIMessageType::Plugin_ARConroller_Info      , EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnRequestPluginInfoARController));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Plugin_ARConroller_Info       , EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnRequestPluginInfoARController));
         Edit::MessageManager::Register(Edit::SGUIMessageType::Plugin_ARConroller_Marker_Info, EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnRequestPluginInfoARControllerMarker));
 
-        Edit::MessageManager::Register(Edit::SGUIMessageType::Plugin_ARConroller_Update      , EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnPluginInfoARController));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Plugin_ARConroller_Update       , EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnPluginInfoARController));
         Edit::MessageManager::Register(Edit::SGUIMessageType::Plugin_ARConroller_Marker_Update, EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnPluginInfoARControllerMarker));
     }
 
@@ -101,6 +101,19 @@ namespace
 
     void CPluginHelper::OnNewPluginARController(Edit::CMessage& _rMessage)
     {
+        // -----------------------------------------------------------------------------
+        // Get entity and set type + category
+        // -----------------------------------------------------------------------------
+        int EntityID = _rMessage.GetInt();
+
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+
+        rCurrentEntity.SetCategory(Dt::SEntityCategory::Plugin);
+        rCurrentEntity.SetType(Dt::SPluginType::ARControlManager);
+
+        // -----------------------------------------------------------------------------
+        // Create facet and set it
+        // -----------------------------------------------------------------------------
         Dt::STextureDescriptor TextureDescriptor;
 
         TextureDescriptor.m_NumberOfPixelsU  = 1280;
@@ -128,16 +141,6 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        Dt::SEntityDescriptor EntityDesc;
-
-        EntityDesc.m_EntityCategory = Dt::SEntityCategory::Plugin;
-        EntityDesc.m_EntityType     = Dt::SPluginType::ARControlManager;
-        EntityDesc.m_FacetFlags     = 0;
-
-        Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
-
-        rEntity.SetWorldPosition(Base::Float3(0.0f, 0.0f, 0.0f));
-
         Dt::CARControllerPluginFacet* pFacet = Dt::ARControllerManager::CreateARControllerPlugin();
 
         pFacet->SetCameraEntity       (0);
@@ -155,9 +158,7 @@ namespace
         rMarkerOne.m_WidthInMeter = 0.08f;
         rMarkerOne.m_PatternFile  = "ar/patterns/patt.hiro";
 
-        rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
-
-        Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
     }
 
     // -----------------------------------------------------------------------------

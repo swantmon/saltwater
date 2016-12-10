@@ -40,7 +40,7 @@ namespace
 
         void OnRequestMaterialInfo(Edit::CMessage& _rMessage);
 
-        void OnMaterialInfo(Edit::CMessage& _rMessage);
+        void OnMaterialUpdate(Edit::CMessage& _rMessage);
 
         void OnDirtyMaterial(Dt::CMaterial* _pMaterial);
 
@@ -80,7 +80,7 @@ namespace
 
         Edit::MessageManager::Register(Edit::SGUIMessageType::Material_Info, EDIT_RECEIVE_MESSAGE(&CMaterialHelper::OnRequestMaterialInfo));
 
-        Edit::MessageManager::Register(Edit::SGUIMessageType::Material_Update, EDIT_RECEIVE_MESSAGE(&CMaterialHelper::OnMaterialInfo));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Material_Update, EDIT_RECEIVE_MESSAGE(&CMaterialHelper::OnMaterialUpdate));
     }
 
     // -----------------------------------------------------------------------------
@@ -265,7 +265,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CMaterialHelper::OnMaterialInfo(Edit::CMessage& _rMessage)
+    void CMaterialHelper::OnMaterialUpdate(Edit::CMessage& _rMessage)
     {
         int MaterialHash = _rMessage.GetInt();
 

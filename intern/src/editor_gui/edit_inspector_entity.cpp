@@ -41,16 +41,12 @@ namespace Edit
 
         int Category = m_pCategoryCB->currentIndex();
 
-        bool IsEnabled = m_pEnabledCB->isChecked();
-
         // -----------------------------------------------------------------------------
         // Send message
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
         NewMessage.PutInt(m_CurrentEntityID);
-
-        NewMessage.PutBool(IsEnabled);
 
         NewMessage.PutInt(Layer);
 
@@ -70,6 +66,26 @@ namespace Edit
         NewMessage.Reset();
 
         Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Entity_Info_Update, NewMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorEntity::enableEntity(bool _Flag)
+    {
+        Edit::CMessage NewMessage;
+
+        NewMessage.PutInt(m_CurrentEntityID);
+
+        NewMessage.Reset();
+
+        if (_Flag)
+        {
+            Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Entity_Add, NewMessage);
+        }
+        else
+        {
+            Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Entity_Remove, NewMessage);
+        }
     }
 
     // -----------------------------------------------------------------------------

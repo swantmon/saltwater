@@ -42,6 +42,13 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
+    void CEntity::SetCategory(unsigned int _Category)
+    {
+        m_Flags.m_Category = _Category;
+    }
+
+    // -----------------------------------------------------------------------------
+
     unsigned int CEntity::GetCategory() const
     {
         return m_Flags.m_Category;

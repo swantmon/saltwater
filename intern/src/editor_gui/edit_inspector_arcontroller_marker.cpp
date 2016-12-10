@@ -18,7 +18,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::Plugin_ARController_Marker_Info, EDIT_RECEIVE_MESSAGE(&CInspectorARControllerMarker::OnEntityInfoARControllerMarker));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Plugin_ARController_Marker_Info, EDIT_RECEIVE_MESSAGE(&CInspectorARControllerMarker::OnInfoARControllerMarker));
     }
 
     // -----------------------------------------------------------------------------
@@ -83,7 +83,7 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorARControllerMarker::OnEntityInfoARControllerMarker(Edit::CMessage& _rMessage)
+    void CInspectorARControllerMarker::OnInfoARControllerMarker(Edit::CMessage& _rMessage)
     {
         // -----------------------------------------------------------------------------
         // Read values

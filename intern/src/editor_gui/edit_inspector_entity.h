@@ -20,6 +20,8 @@ namespace Edit
 
         void valueChanged();
 
+        void enableEntity(bool _Flag);
+
         void RequestInformation(unsigned int _EntityID);
 
     private:

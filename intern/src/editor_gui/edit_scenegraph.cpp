@@ -127,9 +127,9 @@ namespace Edit
 
                 NewMessage.Reset();
 
-                int Result = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Entity_Remove, NewMessage);
+                int Result = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Entity_Destroy, NewMessage);
 
-                if (Result == 100)
+                if (Result == 1)
                 {
                     delete pSource;
                 }

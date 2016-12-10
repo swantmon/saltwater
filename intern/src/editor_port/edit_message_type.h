@@ -31,26 +31,27 @@ namespace Edit
             App_Play,
             App_Edit,
 
-            Entity_New,                                 //< TODO
-            Entity_Remove,                              //< TODO
-            Entity_Info,                                //< TODO
-            Entity_Info_Update,                         //< TODO    
-            Entity_Facets_Info,                         //< TODO
-            Entity_Facets_Add,                          //< TODO
-            Entity_Facets_Remove,                       //< TODO
-            Entity_Transformation_Info,                 //< TODO
-            Entity_Transformation_Update,               //< TODO
-            Entity_Hierarchy_Info,                      //< TODO
-            Entity_Hierarchy_Update,                    //< TODO
+            Entity_New,
+            Entity_Load,
+            Entity_Create,
+            Entity_Add,
+            Entity_Remove, 
+            Entity_Destroy,
+            Entity_Info,
+            Entity_Info_Update,
+            Entity_Facets_Info,
+            Entity_Transformation_Info,
+            Entity_Transformation_Update,
+            Entity_Hierarchy_Info,
+            Entity_Hierarchy_Update,
             
             Actor_Camera_New,
             Actor_Camera_Info,
             Actor_Camera_Update,
 
-
-            Actor_Model_New,
-            Actor_Model_Info,
-            Actor_Model_Update,
+            Actor_Mesh_New,
+            Actor_Material_Info,
+            Actor_Material_Update,
 
             Light_Pointlight_New,
             Light_Pointlight_Info,

@@ -188,7 +188,7 @@ namespace Edit
 
                 NewMessage.Reset();
 
-                MessageManager::SendMessage(SGUIMessageType::Actor_Model_New, NewMessage);
+                MessageManager::SendMessage(SGUIMessageType::Entity_Load, NewMessage);
             }
         }
     }
