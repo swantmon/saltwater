@@ -155,6 +155,12 @@
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_asset_browser.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\edit_texture_value.cpp">
+      <Filter>Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_texture_value.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_mainwindow.ui">
@@ -281,6 +287,12 @@
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_texture_value.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_texture_value.h">
+      <Filter>Widgets</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor_gui\edit_gui.h" />
@@ -342,6 +354,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_texture_value.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
