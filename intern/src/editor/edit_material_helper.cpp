@@ -13,9 +13,6 @@
 #include "editor_port/edit_message.h"
 #include "editor_port/edit_message_manager.h"
 
-#include <windows.h>
-#undef SendMessage
-
 namespace
 {
     class CMaterialHelper : Base::CUncopyable
@@ -43,8 +40,6 @@ namespace
         void OnMaterialUpdate(Edit::CMessage& _rMessage);
 
         void OnDirtyMaterial(Dt::CMaterial* _pMaterial);
-
-        std::string CopyFileToAssets(const char* _pAssetFolder, const char* _pPathToFile);
     };
 } // namespace
 

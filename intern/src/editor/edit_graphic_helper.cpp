@@ -13,9 +13,6 @@
 #include "editor_port/edit_message.h"
 #include "editor_port/edit_message_manager.h"
 
-#include <windows.h>
-#undef SendMessage
-
 namespace
 {
     class CGraphicHelper : Base::CUncopyable
