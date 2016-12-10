@@ -133,8 +133,6 @@ namespace
         // -----------------------------------------------------------------------------
         const char* pPathToFile = _rMessage.GetString(pTmp, 512);
 
-        PathToFile = "materials/" + CopyFileToAssets("../assets/materials/", pPathToFile);
-
         // -----------------------------------------------------------------------------
         // Material
         // -----------------------------------------------------------------------------
@@ -152,7 +150,7 @@ namespace
         MaterialDescriptor.m_MetalMask       = 0.0f;
         MaterialDescriptor.m_AlbedoColor     = Base::Float3(1.0f);
         MaterialDescriptor.m_TilingOffset    = Base::Float4(1.0f, 1.0f, 0.0f, 0.0f);
-        MaterialDescriptor.m_pFileName       = PathToFile.c_str();
+        MaterialDescriptor.m_pFileName       = pPathToFile;
         
         Dt::CMaterial& rNewMaterial = Dt::MaterialManager::CreateMaterial(MaterialDescriptor);
 
@@ -558,28 +556,6 @@ namespace
             
         }
     }
-
-    // -----------------------------------------------------------------------------
-
-    std::string CMaterialHelper::CopyFileToAssets(const char* _pAssetFolder, const char* _pPathToFile)
-    {
-        char pDrive[4];
-        char pDirectory[512];
-        char pFilename[32];
-        char pExtension[12];
-
-        std::string FileExtension;
-        std::string RelativePathToModel;
-
-        _splitpath_s(_pPathToFile, pDrive, 4, pDirectory, 512, pFilename, 32, pExtension, 12);
-
-        FileExtension = std::string(pFilename) + std::string(pExtension);
-        RelativePathToModel = std::string(_pAssetFolder) + FileExtension;
-
-        CopyFileA(_pPathToFile, RelativePathToModel.c_str(), true);
-
-        return FileExtension.c_str();
-    };
 } // namespace
 
 namespace Edit

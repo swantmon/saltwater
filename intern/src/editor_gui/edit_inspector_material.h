@@ -29,14 +29,17 @@ namespace Edit
 
         void pickColorFromDialog();
 
-        void loadMaterial();
-
         void RequestInformation(unsigned int _EntityID);
 
     private:
 
         unsigned int m_CurrentEntityID;
         unsigned int m_MaterialHash;
+
+    private:
+
+        void dragEnterEvent(QDragEnterEvent* _pEvent);
+        void dropEvent(QDropEvent* _pEvent);
 
     private:
 

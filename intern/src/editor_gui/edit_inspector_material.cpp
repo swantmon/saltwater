@@ -8,7 +8,16 @@
 #include "editor_port/edit_message_manager.h"
 
 #include <QColorDialog>
+#include <QDir>
+#include <QDragEnterEvent>
+#include <QDropEvent>
+#include <QFile>
 #include <QFileDialog>
+#include <QFileInfo>
+#include <QKeyEvent>
+#include <QMimeData>
+#include <QResizeEvent>
+#include <QUrl>
 
 namespace Edit
 {
@@ -235,49 +244,6 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorMaterial::loadMaterial()
-    {
-        QString TextureFile = QFileDialog::getOpenFileName(this, tr("Load material file"), tr(""), tr("Material files (*.mat)"));
-
-        // -----------------------------------------------------------------------------
-        // Send message with new scene / map request
-        // -----------------------------------------------------------------------------
-        if (!TextureFile.isEmpty())
-        {
-            // -----------------------------------------------------------------------------
-            // Load new material
-            // -----------------------------------------------------------------------------
-            QByteArray NewFileNameBinary = TextureFile.toLatin1();
-
-            Edit::CMessage NewLoadMaterialMessage;
-
-            NewLoadMaterialMessage.PutString(NewFileNameBinary.data());
-
-            NewLoadMaterialMessage.Reset();
-
-            int HashOfMaterial = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Material_Load, NewLoadMaterialMessage);
-
-            if (HashOfMaterial == -1) return;
-
-            // -----------------------------------------------------------------------------
-            // Set material to entity
-            // -----------------------------------------------------------------------------
-            Edit::CMessage NewApplyMessage;
-
-            NewApplyMessage.PutInt(m_CurrentEntityID);
-
-            NewApplyMessage.PutInt(HashOfMaterial);
-
-            NewApplyMessage.Reset();
-
-            Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Actor_Material_Update, NewApplyMessage);
-
-            RequestInformation(m_CurrentEntityID);
-        }
-    }
-
-    // -----------------------------------------------------------------------------
-
     void CInspectorMaterial::pickColorFromDialog()
     {
         QPalette ButtonPalette = m_pAlbedoColorButton->palette();
@@ -308,6 +274,73 @@ namespace Edit
         NewMessage.Reset();
 
         MessageManager::SendMessage(SGUIMessageType::Actor_Material_Info, NewMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorMaterial::dragEnterEvent(QDragEnterEvent* _pEvent)
+    {
+        const QMimeData* pMimeData = _pEvent->mimeData();
+
+        if (pMimeData->hasText())
+        {
+            QString Text = pMimeData->text();
+
+            QFileInfo FileInfo(Text);
+
+            if (FileInfo.completeSuffix() == "mat")
+            {
+                _pEvent->acceptProposedAction();
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorMaterial::dropEvent(QDropEvent* _pEvent)
+    {
+        const QMimeData* pMimeData = _pEvent->mimeData();
+
+        if (pMimeData->hasUrls())
+        {
+            QUrl Url = pMimeData->urls()[0];
+
+            QFileInfo FileInfo(Url.toLocalFile());
+
+            if (FileInfo.completeSuffix() == "mat")
+            {
+                QDir Directory("../assets/");
+
+                QString AbsPath = FileInfo.absoluteFilePath();
+
+                QByteArray ModelFileBinary = Directory.relativeFilePath(AbsPath).toLatin1();
+
+                CMessage NewLoadMaterialMessage;
+
+                NewLoadMaterialMessage.PutString(ModelFileBinary.data());
+
+                NewLoadMaterialMessage.Reset();
+
+                int HashOfMaterial = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Material_Load, NewLoadMaterialMessage);
+
+                if (HashOfMaterial == -1) return;
+
+                // -----------------------------------------------------------------------------
+                // Set material to entity
+                // -----------------------------------------------------------------------------
+                Edit::CMessage NewApplyMessage;
+
+                NewApplyMessage.PutInt(m_CurrentEntityID);
+
+                NewApplyMessage.PutInt(HashOfMaterial);
+
+                NewApplyMessage.Reset();
+
+                Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Actor_Material_Update, NewApplyMessage);
+
+                RequestInformation(m_CurrentEntityID);
+            }
+        }
     }
 
     // -----------------------------------------------------------------------------

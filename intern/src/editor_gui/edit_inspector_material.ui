@@ -7,24 +7,16 @@
     <x>0</x>
     <y>0</y>
     <width>343</width>
-    <height>561</height>
+    <height>530</height>
    </rect>
+  </property>
+  <property name="acceptDrops">
+   <bool>true</bool>
   </property>
   <property name="windowTitle">
    <string>Material</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_8">
-     <item>
-      <widget class="QPushButton" name="m_pLoadButton">
-       <property name="text">
-        <string>Load</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
@@ -749,22 +741,6 @@
     <hint type="destinationlabel">
      <x>339</x>
      <y>362</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>m_pLoadButton</sender>
-   <signal>clicked()</signal>
-   <receiver>InspectorMaterial</receiver>
-   <slot>loadMaterial()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>268</x>
-     <y>17</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>338</x>
-     <y>23</y>
     </hint>
    </hints>
   </connection>

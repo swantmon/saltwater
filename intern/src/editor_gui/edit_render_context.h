@@ -5,7 +5,6 @@
 #include "editor_port/edit_message_manager.h"
 
 #include <QWidget>
-#include <QDragMoveEvent>
 
 namespace Edit
 {
