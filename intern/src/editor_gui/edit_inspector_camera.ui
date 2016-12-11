@@ -387,12 +387,12 @@
         <item row="3" column="0">
          <widget class="QLabel" name="label_24">
           <property name="text">
-           <string>Backround Texture</string>
+           <string>Background Texture</string>
           </property>
          </widget>
         </item>
         <item row="3" column="1">
-         <widget class="QLineEdit" name="m_pBackgroundTextureEdit"/>
+         <widget class="Edit::CTextureValue" name="m_pBackgroundTextureEdit" native="true"/>
         </item>
        </layout>
       </item>
@@ -491,12 +491,19 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Edit::CTextureValue</class>
+   <extends>QWidget</extends>
+   <header>edit_texture_value.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>m_pIsMainCameraCB</tabstop>
   <tabstop>m_pClearFlagCS</tabstop>
   <tabstop>m_pSolidColorButton</tabstop>
   <tabstop>m_pSolidColorPickButton</tabstop>
-  <tabstop>m_pBackgroundTextureEdit</tabstop>
   <tabstop>m_pProjectionCB</tabstop>
   <tabstop>m_pFieldOfViewSlider</tabstop>
   <tabstop>m_pFieldOfViewEdit</tabstop>
@@ -594,22 +601,6 @@
     <hint type="destinationlabel">
      <x>363</x>
      <y>22</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>m_pBackgroundTextureEdit</sender>
-   <signal>textEdited(QString)</signal>
-   <receiver>InspectorCamera</receiver>
-   <slot>valueChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>277</x>
-     <y>114</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>366</x>
-     <y>133</y>
     </hint>
    </hints>
   </connection>

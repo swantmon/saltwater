@@ -19,7 +19,7 @@ namespace Edit
 {
     CTextureValue::CTextureValue(QWidget* _pParent)
         : QWidget         (_pParent)
-        , m_SupportedFiles("(dds)|(hdr)|(jpg)|(jpeg)|(png)|(tga)", QRegularExpression::MultilineOption | QRegularExpression::CaseInsensitiveOption)
+        , m_SupportedFiles("(dds)|(hdr)|(jpg)|(jpeg)|(png)|(tga)", QRegularExpression::CaseInsensitiveOption)
         , m_File          ()
         , m_Hash          ()
     {
@@ -178,6 +178,8 @@ namespace Edit
                 // Emit info
                 // -----------------------------------------------------------------------------
                 emit fileChanged(m_File);
+
+                emit hashChanged(m_Hash);
             }
         }
 
@@ -194,6 +196,8 @@ namespace Edit
             // Emit info
             // -----------------------------------------------------------------------------
             emit fileChanged(m_File);
+
+            emit hashChanged(m_Hash);
         }
     }
 
