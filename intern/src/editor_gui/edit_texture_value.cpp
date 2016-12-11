@@ -13,15 +13,15 @@
 #include <QFileInfo>
 #include <QKeyEvent>
 #include <QMimeData>
-#include <QResizeEvent>
 #include <QUrl>
 
 namespace Edit
 {
     CTextureValue::CTextureValue(QWidget* _pParent)
-        : QWidget             (_pParent)
-        , m_CurrentTextureFile()
-        , m_CurrentTextureHash()
+        : QWidget         (_pParent)
+        , m_SupportedFiles("(dds)|(hdr)|(jpg)|(jpeg)|(png)|(tga)", QRegularExpression::MultilineOption | QRegularExpression::CaseInsensitiveOption)
+        , m_File          ()
+        , m_Hash          ()
     {
         // -----------------------------------------------------------------------------
         // Setup UI
@@ -44,47 +44,88 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CTextureValue::SetTextureFile(const QString& _rTextureFile)
+    void CTextureValue::SetLayout(unsigned int _Layout)
     {
-        m_CurrentTextureFile = _rTextureFile;
+        // -----------------------------------------------------------------------------
+        // Reset default style
+        // -----------------------------------------------------------------------------
+        m_pPreviewGV->setVisible(true);
+        m_pHashLabel->setVisible(true);
+        m_pHashEdit ->setVisible(true);
+        m_pFileLabel->setVisible(true);
+        m_pFileEdit ->setVisible(true);
 
-        m_pFileEdit->setText(m_CurrentTextureFile);
+        // -----------------------------------------------------------------------------
+        // Set style
+        // -----------------------------------------------------------------------------
+        if ((_Layout & ELayout::NoPreview) != 0)
+        {
+            m_pPreviewGV->setVisible(false);
+        }
+
+        if ((_Layout & ELayout::NoHash) != 0)
+        {
+            m_pHashLabel->setVisible(false);
+            m_pHashEdit ->setVisible(false);
+        }
+
+        if ((_Layout & ELayout::NoFile) != 0)
+        {
+            m_pFileLabel->setVisible(false);
+            m_pFileEdit ->setVisible(false);
+        }
     }
 
     // -----------------------------------------------------------------------------
 
-    const QString& CTextureValue::GetTextureFile()
+    void CTextureValue::SetSupportedFiles(const QString& _rSupportedFiles)
     {
-        return m_CurrentTextureFile;
+        m_SupportedFiles.setPattern(_rSupportedFiles);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CTextureValue::SetTextureFile(const QString& _rTextureFile)
+    {
+        m_File = _rTextureFile;
+
+        m_pFileEdit->setText(m_File);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const QString& CTextureValue::GetTextureFile() const
+    {
+        return m_File;
     }
 
     // -----------------------------------------------------------------------------
 
     void CTextureValue::SetTextureHash(unsigned int _Hash)
     {
-        m_CurrentTextureHash = _Hash;
+        m_Hash = _Hash;
 
-        m_pHashEdit->setText(QString::number(m_CurrentTextureHash));
+        m_pHashEdit->setText(QString::number(m_Hash));
     }
 
     // -----------------------------------------------------------------------------
 
-    unsigned int CTextureValue::GetTextureHash()
+    unsigned int CTextureValue::GetTextureHash() const
     {
-        return m_CurrentTextureHash;
+        return m_Hash;
     }
 
     // -----------------------------------------------------------------------------
 
     void CTextureValue::hashValueChanged()
     {
-        m_CurrentTextureHash = m_pHashEdit->text().toInt();
+        m_Hash = m_pHashEdit->text().toInt();
 
-        m_CurrentTextureFile = "";
+        m_File = "";
 
-        m_pFileEdit->setText(m_CurrentTextureFile);
+        m_pFileEdit->setText(m_File);
 
-        emit hashChanged(m_CurrentTextureHash);
+        emit hashChanged(m_Hash);
     }
 
     // -----------------------------------------------------------------------------
@@ -107,21 +148,15 @@ namespace Edit
 
         if (FileInfo.exists())
         {
-            if (   FileInfo.completeSuffix() == "dds"
-                || FileInfo.completeSuffix() == "hdr"
-                || FileInfo.completeSuffix() == "tga"
-                || FileInfo.completeSuffix() == "png"
-                || FileInfo.completeSuffix() == "jpg"
-                || FileInfo.completeSuffix() == "JPG"
-                || FileInfo.completeSuffix() == "jpeg")
+            if (m_SupportedFiles.match(FileInfo.completeSuffix()).hasMatch())
             {
-                m_CurrentTextureFile = NewTextureFile;
+                m_File = NewTextureFile;
 
                 // -----------------------------------------------------------------------------
                 // Create hash
                 // TODO: Hash should be requested by a message to editor
                 // -----------------------------------------------------------------------------
-                QByteArray NewTextureBinary = m_CurrentTextureFile.toLatin1();
+                QByteArray NewTextureBinary = m_File.toLatin1();
 
                 const char*  pHashIdentifier = NewTextureBinary.data();
                 unsigned int NumberOfBytes;
@@ -132,33 +167,33 @@ namespace Edit
                 NumberOfBytes = static_cast<unsigned int>(strlen(pHashIdentifier) * sizeof(char));
                 pData = static_cast<const void*>(pHashIdentifier);
 
-                m_CurrentTextureHash = Base::CRC32(pData, NumberOfBytes);
+                m_Hash = Base::CRC32(pData, NumberOfBytes);
 
                 // -----------------------------------------------------------------------------
                 // Set UI
                 // -----------------------------------------------------------------------------
-                m_pHashEdit->setText(QString::number(m_CurrentTextureHash));
+                m_pHashEdit->setText(QString::number(m_Hash));
 
                 // -----------------------------------------------------------------------------
                 // Emit info
                 // -----------------------------------------------------------------------------
-                emit fileChanged(m_CurrentTextureFile);
+                emit fileChanged(m_File);
             }
         }
 
         if (NewTextureFile == "")
         {
-            m_CurrentTextureFile = "";
-            m_CurrentTextureHash = 0;
+            m_File = "";
+            m_Hash = 0;
 
-            m_pFileEdit->setText(m_CurrentTextureFile);
+            m_pFileEdit->setText(m_File);
 
-            m_pHashEdit->setText(QString::number(m_CurrentTextureHash));
+            m_pHashEdit->setText(QString::number(m_Hash));
 
             // -----------------------------------------------------------------------------
             // Emit info
             // -----------------------------------------------------------------------------
-            emit fileChanged(m_CurrentTextureFile);
+            emit fileChanged(m_File);
         }
     }
 
@@ -174,13 +209,7 @@ namespace Edit
 
             QFileInfo FileInfo(Text);
 
-            if (   FileInfo.completeSuffix() == "dds" 
-                || FileInfo.completeSuffix() == "hdr" 
-                || FileInfo.completeSuffix() == "tga" 
-                || FileInfo.completeSuffix() == "png" 
-                || FileInfo.completeSuffix() == "jpg" 
-                || FileInfo.completeSuffix() == "JPG" 
-                || FileInfo.completeSuffix() == "jpeg")
+            if (m_SupportedFiles.match(FileInfo.completeSuffix()).hasMatch())
             {
                 _pEvent->acceptProposedAction();
             }
@@ -199,13 +228,7 @@ namespace Edit
 
             QFileInfo FileInfo(Url.toLocalFile());
 
-            if (   FileInfo.completeSuffix() == "dds"
-                || FileInfo.completeSuffix() == "hdr"
-                || FileInfo.completeSuffix() == "tga"
-                || FileInfo.completeSuffix() == "png"
-                || FileInfo.completeSuffix() == "jpg"
-                || FileInfo.completeSuffix() == "JPG"
-                || FileInfo.completeSuffix() == "jpeg")
+            if (m_SupportedFiles.match(FileInfo.completeSuffix()).hasMatch())
             {
                 // -----------------------------------------------------------------------------
                 // Create path
@@ -214,13 +237,13 @@ namespace Edit
 
                 QString AbsPath = FileInfo.absoluteFilePath();
 
-                m_CurrentTextureFile = Directory.relativeFilePath(AbsPath);
+                m_File = Directory.relativeFilePath(AbsPath);
 
                 // -----------------------------------------------------------------------------
                 // Create hash
                 // TODO: Hash should be requested by a message to editor
                 // -----------------------------------------------------------------------------
-                QByteArray NewTextureBinary = m_CurrentTextureFile.toLatin1();
+                QByteArray NewTextureBinary = m_File.toLatin1();
 
                 const char*  pHashIdentifier = NewTextureBinary.data();
                 unsigned int NumberOfBytes;
@@ -231,21 +254,21 @@ namespace Edit
                 NumberOfBytes = static_cast<unsigned int>(strlen(pHashIdentifier) * sizeof(char));
                 pData = static_cast<const void*>(pHashIdentifier);
 
-                m_CurrentTextureHash = Base::CRC32(pData, NumberOfBytes);
+                m_Hash = Base::CRC32(pData, NumberOfBytes);
 
                 // -----------------------------------------------------------------------------
                 // Set UI
                 // -----------------------------------------------------------------------------
-                m_pFileEdit->setText(m_CurrentTextureFile);
+                m_pFileEdit->setText(m_File);
 
-                m_pHashEdit->setText(QString::number(m_CurrentTextureHash));
+                m_pHashEdit->setText(QString::number(m_Hash));
 
                 // -----------------------------------------------------------------------------
                 // Emit signals
                 // -----------------------------------------------------------------------------
-                emit fileChanged(m_CurrentTextureFile);
+                emit fileChanged(m_File);
 
-                emit hashChanged(m_CurrentTextureHash);
+                emit hashChanged(m_Hash);
             }
         }
     }

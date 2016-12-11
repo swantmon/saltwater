@@ -4,6 +4,7 @@
 #include "base/base_vector4.h"
 
 #include "editor_gui/edit_inspector_material.h"
+#include "editor_gui/edit_texture_value.h"
 
 #include "editor_port/edit_message_manager.h"
 
@@ -30,6 +31,16 @@ namespace Edit
         // Setup UI
         // -----------------------------------------------------------------------------
         setupUi(this);
+
+        // -----------------------------------------------------------------------------
+        // User UI
+        // -----------------------------------------------------------------------------
+        m_pAlbedoTextureEdit   ->SetLayout((CTextureValue::NoPreview | CTextureValue::NoHash));
+        m_pNormalTextureEdit   ->SetLayout((CTextureValue::NoPreview | CTextureValue::NoHash));
+        m_pRoughnessTextureEdit->SetLayout((CTextureValue::NoPreview | CTextureValue::NoHash));
+        m_pMetallicTextureEdit ->SetLayout((CTextureValue::NoPreview | CTextureValue::NoHash));
+        m_pBumpTextureEdit     ->SetLayout((CTextureValue::NoPreview | CTextureValue::NoHash));
+        m_pAOTextureEdit       ->SetLayout((CTextureValue::NoPreview | CTextureValue::NoHash));
 
         // -----------------------------------------------------------------------------
         // Signal / slots

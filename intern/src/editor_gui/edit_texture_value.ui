@@ -35,7 +35,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QGraphicsView" name="graphicsView">
+      <widget class="QGraphicsView" name="m_pPreviewGV">
        <property name="maximumSize">
         <size>
          <width>50</width>
@@ -47,21 +47,21 @@
      <item>
       <layout class="QGridLayout" name="gridLayout">
        <item row="0" column="0">
-        <widget class="QLabel" name="label">
+        <widget class="QLabel" name="m_pFileLabel">
          <property name="text">
-          <string>Path</string>
+          <string>File</string>
          </property>
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QLabel" name="label_2">
+        <widget class="QLabel" name="m_pHashLabel">
          <property name="text">
           <string>Hash</string>
          </property>
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QLineEdit" name="m_pPathEdit"/>
+        <widget class="QLineEdit" name="m_pFileEdit"/>
        </item>
        <item row="1" column="1">
         <widget class="QLineEdit" name="m_pHashEdit"/>

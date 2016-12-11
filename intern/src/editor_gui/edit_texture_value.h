@@ -2,6 +2,7 @@
 
 #include "editor_gui/ui_edit_texture_value.h"
 
+#include <QRegularExpression>
 #include <QWidget>
 
 // TODO by tschwandt
@@ -16,16 +17,30 @@ namespace Edit
 
     public:
 
+        enum ELayout
+        {
+            All       = 0,
+            NoPreview = 1,
+            NoHash    = 2,
+            NoFile    = 4,
+        };
+
+    public:
+
         CTextureValue(QWidget* _pParent = Q_NULLPTR);
         ~CTextureValue();
 
     public:
 
+        void SetLayout(unsigned int _Layout);
+
+        void SetSupportedFiles(const QString& _rSupportedFiles);
+
         void SetTextureFile(const QString& _rTextureFile);
-        const QString& GetTextureFile();
+        const QString& GetTextureFile() const;
 
         void SetTextureHash(unsigned int _Hash);
-        unsigned int GetTextureHash();
+        unsigned int GetTextureHash() const;
 
     Q_SIGNALS:
 
@@ -39,8 +54,9 @@ namespace Edit
 
     private:
 
-        QString m_CurrentTextureFile;
-        unsigned int m_CurrentTextureHash;
+        QRegularExpression m_SupportedFiles;
+        QString            m_File;
+        unsigned int       m_Hash;
 
     private:
 

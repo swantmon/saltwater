@@ -19,6 +19,12 @@ namespace Edit
         setupUi(this);
 
         // -----------------------------------------------------------------------------
+        // Setup user UI
+        // -----------------------------------------------------------------------------
+        m_pTextureValue->SetLayout(CTextureValue::NoPreview);
+        m_pTextureValue->SetSupportedFiles("(hdr)|(dds)");
+
+        // -----------------------------------------------------------------------------
         // Signal / slots
         // -----------------------------------------------------------------------------
         connect(m_pTextureValue, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
