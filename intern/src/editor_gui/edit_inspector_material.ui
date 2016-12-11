@@ -58,12 +58,6 @@
         </item>
        </layout>
       </item>
-      <item row="10" column="1">
-       <widget class="QLineEdit" name="m_pRoughnessTextureEdit"/>
-      </item>
-      <item row="18" column="1">
-       <widget class="QLineEdit" name="m_pBumpTextureEdit"/>
-      </item>
       <item row="11" column="1">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
@@ -100,9 +94,6 @@
          <string>Texture</string>
         </property>
        </widget>
-      </item>
-      <item row="13" column="1">
-       <widget class="QLineEdit" name="m_pMetallicTextureEdit"/>
       </item>
       <item row="12" column="0">
        <widget class="QLabel" name="label_9">
@@ -219,9 +210,6 @@
         </property>
        </widget>
       </item>
-      <item row="8" column="1">
-       <widget class="QLineEdit" name="m_pNormalTextureEdit"/>
-      </item>
       <item row="16" column="0">
        <widget class="QLabel" name="label_19">
         <property name="text">
@@ -265,9 +253,6 @@
          <string>Texture</string>
         </property>
        </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="m_pAlbedoTextureEdit"/>
       </item>
       <item row="10" column="0">
        <widget class="QLabel" name="label_7">
@@ -426,29 +411,46 @@
         </property>
        </widget>
       </item>
+      <item row="2" column="1">
+       <widget class="Edit::CTextureValue" name="m_pAlbedoTextureEdit" native="true"/>
+      </item>
+      <item row="8" column="1">
+       <widget class="Edit::CTextureValue" name="m_pNormalTextureEdit" native="true"/>
+      </item>
+      <item row="10" column="1">
+       <widget class="Edit::CTextureValue" name="m_pRoughnessTextureEdit" native="true"/>
+      </item>
+      <item row="13" column="1">
+       <widget class="Edit::CTextureValue" name="m_pMetallicTextureEdit" native="true"/>
+      </item>
+      <item row="18" column="1">
+       <widget class="Edit::CTextureValue" name="m_pBumpTextureEdit" native="true"/>
+      </item>
       <item row="20" column="1">
-       <widget class="QLineEdit" name="m_pAOTextureEdit"/>
+       <widget class="Edit::CTextureValue" name="m_pAOTextureEdit" native="true"/>
       </item>
      </layout>
     </widget>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Edit::CTextureValue</class>
+   <extends>QWidget</extends>
+   <header>edit_texture_value.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <tabstops>
-  <tabstop>m_pAlbedoTextureEdit</tabstop>
   <tabstop>m_pAlbedoColorButton</tabstop>
   <tabstop>m_pAlbedoPickButton</tabstop>
-  <tabstop>m_pNormalTextureEdit</tabstop>
-  <tabstop>m_pRoughnessTextureEdit</tabstop>
   <tabstop>m_pRoughnessSlider</tabstop>
   <tabstop>m_pRoughnessEdit</tabstop>
-  <tabstop>m_pMetallicTextureEdit</tabstop>
   <tabstop>m_pMetallicSlider</tabstop>
   <tabstop>m_pMetallicEdit</tabstop>
   <tabstop>m_pReflectanceSlider</tabstop>
   <tabstop>m_pReflectanceEdit</tabstop>
-  <tabstop>m_pBumpTextureEdit</tabstop>
-  <tabstop>m_pAOTextureEdit</tabstop>
   <tabstop>m_pTilingXEdit</tabstop>
   <tabstop>m_pTilingYEdit</tabstop>
   <tabstop>m_pOffsetXEdit</tabstop>
@@ -485,70 +487,6 @@
     <hint type="destinationlabel">
      <x>342</x>
      <y>214</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>m_pAlbedoTextureEdit</sender>
-   <signal>textEdited(QString)</signal>
-   <receiver>InspectorMaterial</receiver>
-   <slot>valueChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>323</x>
-     <y>101</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>342</x>
-     <y>64</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>m_pNormalTextureEdit</sender>
-   <signal>textEdited(QString)</signal>
-   <receiver>InspectorMaterial</receiver>
-   <slot>valueChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>323</x>
-     <y>177</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>342</x>
-     <y>270</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>m_pRoughnessTextureEdit</sender>
-   <signal>textEdited(QString)</signal>
-   <receiver>InspectorMaterial</receiver>
-   <slot>valueChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>323</x>
-     <y>222</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>342</x>
-     <y>398</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>m_pMetallicTextureEdit</sender>
-   <signal>textEdited(QString)</signal>
-   <receiver>InspectorMaterial</receiver>
-   <slot>valueChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>323</x>
-     <y>297</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>342</x>
-     <y>476</y>
     </hint>
    </hints>
   </connection>
@@ -709,38 +647,6 @@
     <hint type="destinationlabel">
      <x>342</x>
      <y>529</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>m_pBumpTextureEdit</sender>
-   <signal>textEdited(QString)</signal>
-   <receiver>InspectorMaterial</receiver>
-   <slot>valueChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>323</x>
-     <y>421</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>341</x>
-     <y>370</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>m_pAOTextureEdit</sender>
-   <signal>textEdited(QString)</signal>
-   <receiver>InspectorMaterial</receiver>
-   <slot>valueChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>323</x>
-     <y>466</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>339</x>
-     <y>362</y>
     </hint>
    </hints>
   </connection>

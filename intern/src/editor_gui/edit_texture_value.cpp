@@ -105,30 +105,54 @@ namespace Edit
         // -----------------------------------------------------------------------------
         QFileInfo FileInfo(AbsolutePathToFile);
 
-        if (FileInfo.exists() && (FileInfo.completeSuffix() == "dds" || FileInfo.completeSuffix() == "hdr"))
+        if (FileInfo.exists())
         {
-            m_CurrentTextureFile = NewTextureFile;
+            if (   FileInfo.completeSuffix() == "dds"
+                || FileInfo.completeSuffix() == "hdr"
+                || FileInfo.completeSuffix() == "tga"
+                || FileInfo.completeSuffix() == "png"
+                || FileInfo.completeSuffix() == "jpg"
+                || FileInfo.completeSuffix() == "JPG"
+                || FileInfo.completeSuffix() == "jpeg")
+            {
+                m_CurrentTextureFile = NewTextureFile;
 
-            // -----------------------------------------------------------------------------
-            // Create hash
-            // TODO: Hash should be requested by a message to editor
-            // -----------------------------------------------------------------------------
-            QByteArray NewTextureBinary = m_CurrentTextureFile.toLatin1();
+                // -----------------------------------------------------------------------------
+                // Create hash
+                // TODO: Hash should be requested by a message to editor
+                // -----------------------------------------------------------------------------
+                QByteArray NewTextureBinary = m_CurrentTextureFile.toLatin1();
 
-            const char*  pHashIdentifier = NewTextureBinary.data();
-            unsigned int NumberOfBytes;
-            unsigned int Hash;
+                const char*  pHashIdentifier = NewTextureBinary.data();
+                unsigned int NumberOfBytes;
+                unsigned int Hash;
 
-            const void* pData;
+                const void* pData;
 
-            NumberOfBytes = static_cast<unsigned int>(strlen(pHashIdentifier) * sizeof(char));
-            pData         = static_cast<const void*>(pHashIdentifier);
+                NumberOfBytes = static_cast<unsigned int>(strlen(pHashIdentifier) * sizeof(char));
+                pData = static_cast<const void*>(pHashIdentifier);
 
-            m_CurrentTextureHash = Base::CRC32(pData, NumberOfBytes);
+                m_CurrentTextureHash = Base::CRC32(pData, NumberOfBytes);
 
-            // -----------------------------------------------------------------------------
-            // Set UI
-            // -----------------------------------------------------------------------------
+                // -----------------------------------------------------------------------------
+                // Set UI
+                // -----------------------------------------------------------------------------
+                m_pHashEdit->setText(QString::number(m_CurrentTextureHash));
+
+                // -----------------------------------------------------------------------------
+                // Emit info
+                // -----------------------------------------------------------------------------
+                emit fileChanged(m_CurrentTextureFile);
+            }
+        }
+
+        if (NewTextureFile == "")
+        {
+            m_CurrentTextureFile = "";
+            m_CurrentTextureHash = 0;
+
+            m_pFileEdit->setText(m_CurrentTextureFile);
+
             m_pHashEdit->setText(QString::number(m_CurrentTextureHash));
 
             // -----------------------------------------------------------------------------
@@ -150,7 +174,13 @@ namespace Edit
 
             QFileInfo FileInfo(Text);
 
-            if (FileInfo.completeSuffix() == "dds" || FileInfo.completeSuffix() == "hdr")
+            if (   FileInfo.completeSuffix() == "dds" 
+                || FileInfo.completeSuffix() == "hdr" 
+                || FileInfo.completeSuffix() == "tga" 
+                || FileInfo.completeSuffix() == "png" 
+                || FileInfo.completeSuffix() == "jpg" 
+                || FileInfo.completeSuffix() == "JPG" 
+                || FileInfo.completeSuffix() == "jpeg")
             {
                 _pEvent->acceptProposedAction();
             }
@@ -169,7 +199,13 @@ namespace Edit
 
             QFileInfo FileInfo(Url.toLocalFile());
 
-            if (FileInfo.completeSuffix() == "dds" || FileInfo.completeSuffix() == "hdr")
+            if (   FileInfo.completeSuffix() == "dds"
+                || FileInfo.completeSuffix() == "hdr"
+                || FileInfo.completeSuffix() == "tga"
+                || FileInfo.completeSuffix() == "png"
+                || FileInfo.completeSuffix() == "jpg"
+                || FileInfo.completeSuffix() == "JPG"
+                || FileInfo.completeSuffix() == "jpeg")
             {
                 // -----------------------------------------------------------------------------
                 // Create path

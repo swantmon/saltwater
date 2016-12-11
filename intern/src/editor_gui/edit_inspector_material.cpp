@@ -32,6 +32,27 @@ namespace Edit
         setupUi(this);
 
         // -----------------------------------------------------------------------------
+        // Signal / slots
+        // -----------------------------------------------------------------------------
+        connect(m_pAlbedoTextureEdit, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
+        connect(m_pAlbedoTextureEdit, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
+
+        connect(m_pNormalTextureEdit, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
+        connect(m_pNormalTextureEdit, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
+
+        connect(m_pRoughnessTextureEdit, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
+        connect(m_pRoughnessTextureEdit, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
+
+        connect(m_pMetallicTextureEdit, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
+        connect(m_pMetallicTextureEdit, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
+
+        connect(m_pBumpTextureEdit, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
+        connect(m_pBumpTextureEdit, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
+
+        connect(m_pAOTextureEdit, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
+        connect(m_pAOTextureEdit, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
+
+        // -----------------------------------------------------------------------------
         // Color picker
         // -----------------------------------------------------------------------------
         QPalette ButtonPalette = m_pAlbedoColorButton->palette();
@@ -69,24 +90,24 @@ namespace Edit
 
         Base::Float3 AlbedoColor = Base::Float3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
 
-        QString    NewColorTexture = m_pAlbedoTextureEdit->text();
+        QString    NewColorTexture = m_pAlbedoTextureEdit->GetTextureFile();
         QByteArray NewColorTextureBinary = NewColorTexture.toLatin1();
 
         // -----------------------------------------------------------------------------
 
-        QString    NewNormalTexture = m_pNormalTextureEdit->text();
+        QString    NewNormalTexture = m_pNormalTextureEdit->GetTextureFile();
         QByteArray NewNormalTextureBinary = NewNormalTexture.toLatin1();
 
         // -----------------------------------------------------------------------------
 
-        QString    NewRoughnessTexture = m_pRoughnessTextureEdit->text();
+        QString    NewRoughnessTexture = m_pRoughnessTextureEdit->GetTextureFile();
         QByteArray NewRoughnessTextureBinary = NewRoughnessTexture.toLatin1();
 
         float RoughnessValue = m_pRoughnessEdit  ->text().toFloat();
 
         // -----------------------------------------------------------------------------
 
-        QString    NewMetalicTexture = m_pMetallicTextureEdit->text();
+        QString    NewMetalicTexture = m_pMetallicTextureEdit->GetTextureFile();
         QByteArray NewMetalicTextureBinary = NewMetalicTexture.toLatin1();
 
         float MetallicValue = m_pMetallicEdit->text().toFloat();
@@ -97,12 +118,12 @@ namespace Edit
 
         // -----------------------------------------------------------------------------
 
-        QString    NewBumpTexture = m_pBumpTextureEdit->text();
+        QString    NewBumpTexture = m_pBumpTextureEdit->GetTextureFile();
         QByteArray NewBumpTextureBinary = NewBumpTexture.toLatin1();
 
         // -----------------------------------------------------------------------------
 
-        QString    NewAOTexture = m_pAOTextureEdit->text();
+        QString    NewAOTexture = m_pAOTextureEdit->GetTextureFile();
         QByteArray NewAOTextureBinary = NewAOTexture.toLatin1();
 
         // -----------------------------------------------------------------------------
@@ -477,9 +498,9 @@ namespace Edit
 
         // -----------------------------------------------------------------------------
 
-        m_pAlbedoTextureEdit->setText("");
+        m_pAlbedoTextureEdit->SetTextureFile("");
 
-        if (HasColorMap) m_pAlbedoTextureEdit->setText(ColorMapName);
+        if (HasColorMap) m_pAlbedoTextureEdit->SetTextureFile(ColorMapName);
 
         QPalette ButtonPalette = m_pAlbedoColorButton->palette();
 
@@ -491,15 +512,15 @@ namespace Edit
 
         // -----------------------------------------------------------------------------
 
-        m_pNormalTextureEdit->setText("");
+        m_pNormalTextureEdit->SetTextureFile("");
 
-        if (HasNormalMap) m_pNormalTextureEdit->setText(NormalMapName);
+        if (HasNormalMap) m_pNormalTextureEdit->SetTextureFile(NormalMapName);
 
         // -----------------------------------------------------------------------------
 
-        m_pRoughnessTextureEdit->setText("");
+        m_pRoughnessTextureEdit->SetTextureFile("");
 
-        if (HasRoughnessMap) m_pRoughnessTextureEdit->setText(RoughnessMapName);
+        if (HasRoughnessMap) m_pRoughnessTextureEdit->SetTextureFile(RoughnessMapName);
 
         m_pRoughnessSlider->setValue(static_cast<int>(Roughness * 100.0f));
 
@@ -507,9 +528,9 @@ namespace Edit
 
         // -----------------------------------------------------------------------------
 
-        m_pMetallicTextureEdit->setText("");
+        m_pMetallicTextureEdit->SetTextureFile("");
 
-        if (HasMetalnessMap) m_pMetallicTextureEdit->setText(MetalMapName);
+        if (HasMetalnessMap) m_pMetallicTextureEdit->SetTextureFile(MetalMapName);
 
         m_pMetallicSlider->setValue(static_cast<int>(Metalness * 100.0f));
 
@@ -523,15 +544,15 @@ namespace Edit
 
         // -----------------------------------------------------------------------------
 
-        m_pBumpTextureEdit->setText("");
+        m_pBumpTextureEdit->SetTextureFile("");
 
-        if (HasBumpMap) m_pBumpTextureEdit->setText(BumpMapName);
+        if (HasBumpMap) m_pBumpTextureEdit->SetTextureFile(BumpMapName);
 
         // -----------------------------------------------------------------------------
 
-        m_pAOTextureEdit->setText("");
+        m_pAOTextureEdit->SetTextureFile("");
 
-        if (HasAOMap) m_pAOTextureEdit->setText(AOMapName);
+        if (HasAOMap) m_pAOTextureEdit->SetTextureFile(AOMapName);
 
         // -----------------------------------------------------------------------------
 

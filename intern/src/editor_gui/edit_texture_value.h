@@ -4,6 +4,10 @@
 
 #include <QWidget>
 
+// TODO by tschwandt
+// - Add remove texture possibility
+// - Setup style
+
 namespace Edit
 {
     class CTextureValue : public QWidget, public Ui::TextureValue
