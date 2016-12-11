@@ -15,6 +15,24 @@ namespace Edit
         CTextureValue(QWidget* _pParent = Q_NULLPTR);
         ~CTextureValue();
 
+    public:
+
+        void SetTextureFile(const QString& _rTextureFile);
+        const QString& GetTextureFile();
+
+        void SetTextureHash(unsigned int _Hash);
+        unsigned int GetTextureHash();
+
+    Q_SIGNALS:
+
+        void hashChanged(unsigned int _Hash);
+        void fileChanged(const QString& _rFile);
+
+    public Q_SLOTS:
+
+        void hashValueChanged();
+        void fileValueChanged();
+
     private:
 
         QString m_CurrentTextureFile;

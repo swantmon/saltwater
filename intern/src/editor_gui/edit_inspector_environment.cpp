@@ -12,12 +12,17 @@ namespace Edit
     CInspectorEnvironment::CInspectorEnvironment(QWidget* _pParent)
         : QWidget          (_pParent)
         , m_CurrentEntityID(-1)
-        , m_TextureFileName()
     {
         // -----------------------------------------------------------------------------
         // Setup UI
         // -----------------------------------------------------------------------------
         setupUi(this);
+
+        // -----------------------------------------------------------------------------
+        // Signal / slots
+        // -----------------------------------------------------------------------------
+        connect(m_pTextureValue, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
+        connect(m_pTextureValue, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
 
         // -----------------------------------------------------------------------------
         // Messages
@@ -41,9 +46,9 @@ namespace Edit
         // -----------------------------------------------------------------------------
         int Type = m_pTypeCB->currentIndex();
 
-        QByteArray NewTextureBinary = m_TextureFileName.toLatin1();
+        QByteArray NewTextureBinary = m_pTextureValue->GetTextureFile().toLatin1();
 
-        unsigned int TextureHash = m_pTextureEdit->text().toUInt();
+        unsigned int TextureHash = m_pTextureValue->GetTextureHash();
 
         float Intensity = m_pIntensityEdit->text().toFloat();
 
@@ -56,7 +61,7 @@ namespace Edit
 
         NewMessage.PutInt(Type);
 
-        NewMessage.PutString(NewTextureBinary);
+        NewMessage.PutString(NewTextureBinary.data());
 
         NewMessage.PutInt(TextureHash);
 
@@ -65,44 +70,6 @@ namespace Edit
         NewMessage.Reset();
 
         Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Light_Environment_Update, NewMessage);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CInspectorEnvironment::loadTextureFromDialog()
-    {
-        QString TextureFile = QFileDialog::getOpenFileName(this, tr("Load environment file"), tr(""), tr("Environment files (*.dds *.hdr)"));
-
-        // -----------------------------------------------------------------------------
-        // Send message with new scene / map request
-        // -----------------------------------------------------------------------------
-        if (!TextureFile.isEmpty())
-        {
-            QDir dir("../assets/");
-
-            m_TextureFileName = dir.relativeFilePath(TextureFile);
-
-            // -----------------------------------------------------------------------------
-            // Create hash
-            // TODO: Should be done by a texture manager
-            // -----------------------------------------------------------------------------
-            QByteArray NewTextureBinary = m_TextureFileName.toLatin1();
-
-            const char*  pHashIdentifier = NewTextureBinary.data();
-            unsigned int NumberOfBytes;
-            unsigned int Hash;
-
-            const void* pData;
-
-            NumberOfBytes = static_cast<unsigned int>(strlen(pHashIdentifier) * sizeof(char));
-            pData = static_cast<const void*>(pHashIdentifier);
-
-            Hash = Base::CRC32(pData, NumberOfBytes);
-
-            m_pTextureEdit->setText(QString::number(Hash));
-
-            valueChanged();
-        }
     }
 
     // -----------------------------------------------------------------------------
@@ -150,9 +117,9 @@ namespace Edit
 
         m_pTypeCB->blockSignals(false);
 
-        m_TextureFileName = pTexture;
+        m_pTextureValue->SetTextureFile(pTexture);
 
-        m_pTextureEdit->setText(QString::number(TextureHash));
+        m_pTextureValue->SetTextureHash(TextureHash);
 
         m_pIntensityEdit->setText(QString::number(Intensity));
     }

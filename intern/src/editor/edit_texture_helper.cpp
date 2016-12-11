@@ -30,11 +30,13 @@ namespace
 
     private:
 
-        void OnNewTexture(Edit::CMessage& _rMessage);
+        void OnTextureNew(Edit::CMessage& _rMessage);
 
-        void OnRequestTextureInfo(Edit::CMessage& _rMessage);
+        void OnTextureLoad(Edit::CMessage& _rMessage);
 
         void OnTextureInfo(Edit::CMessage& _rMessage);
+
+        void OnTextureUpdate(Edit::CMessage& _rMessage);
 
         void OnDirtyTexture(Dt::CTextureBase* _pTexture);
     };
@@ -66,11 +68,13 @@ namespace
         // -----------------------------------------------------------------------------
         // Edit
         // -----------------------------------------------------------------------------
-//         Edit::MessageManager::Register(Edit::SGUIMessageType::NewMaterial, EDIT_RECEIVE_MESSAGE(&CTextureHelper::OnNewTexture));
-// 
-//         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestMaterialInfo, EDIT_RECEIVE_MESSAGE(&CTextureHelper::OnRequestTextureInfo));
-// 
-//         Edit::MessageManager::Register(Edit::SGUIMessageType::MaterialInfo, EDIT_RECEIVE_MESSAGE(&CTextureHelper::OnTextureInfo));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Texture_New, EDIT_RECEIVE_MESSAGE(&CTextureHelper::OnTextureNew));
+
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Texture_Load, EDIT_RECEIVE_MESSAGE(&CTextureHelper::OnTextureLoad));
+
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Texture_Info, EDIT_RECEIVE_MESSAGE(&CTextureHelper::OnTextureInfo));
+
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Texture_Update, EDIT_RECEIVE_MESSAGE(&CTextureHelper::OnTextureUpdate));
     }
 
     // -----------------------------------------------------------------------------
@@ -82,14 +86,14 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CTextureHelper::OnNewTexture(Edit::CMessage& _rMessage)
+    void CTextureHelper::OnTextureNew(Edit::CMessage& _rMessage)
     {
         BASE_UNUSED(_rMessage);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CTextureHelper::OnRequestTextureInfo(Edit::CMessage& _rMessage)
+    void CTextureHelper::OnTextureLoad(Edit::CMessage& _rMessage)
     {
         BASE_UNUSED(_rMessage);
     }
@@ -97,6 +101,13 @@ namespace
     // -----------------------------------------------------------------------------
 
     void CTextureHelper::OnTextureInfo(Edit::CMessage& _rMessage)
+    {
+        BASE_UNUSED(_rMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CTextureHelper::OnTextureUpdate(Edit::CMessage& _rMessage)
     {
         BASE_UNUSED(_rMessage);
     }
