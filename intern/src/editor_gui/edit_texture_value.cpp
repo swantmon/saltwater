@@ -33,6 +33,11 @@ namespace Edit
         // -----------------------------------------------------------------------------
         connect(m_pHashEdit, SIGNAL(textEdited(QString)), SLOT(hashValueChanged()));
         connect(m_pFileEdit, SIGNAL(textEdited(QString)), SLOT(fileValueChanged()));
+
+        // -----------------------------------------------------------------------------
+        // Messages
+        // -----------------------------------------------------------------------------
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Texture_Info, EDIT_RECEIVE_MESSAGE(&CTextureValue::OnTextureInfo));
     }
 
     // -----------------------------------------------------------------------------
@@ -137,68 +142,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         QString NewTextureFile = m_pFileEdit->text();
 
-        QDir Directory("../assets/");
-
-        QString AbsolutePathToFile = Directory.absoluteFilePath(NewTextureFile);
-
-        // -----------------------------------------------------------------------------
-        // Check if new input is a file and an image
-        // -----------------------------------------------------------------------------
-        QFileInfo FileInfo(AbsolutePathToFile);
-
-        if (FileInfo.exists())
-        {
-            if (m_SupportedFiles.match(FileInfo.completeSuffix()).hasMatch())
-            {
-                m_File = NewTextureFile;
-
-                // -----------------------------------------------------------------------------
-                // Create hash
-                // TODO: Hash should be requested by a message to editor
-                // -----------------------------------------------------------------------------
-                QByteArray NewTextureBinary = m_File.toLatin1();
-
-                const char*  pHashIdentifier = NewTextureBinary.data();
-                unsigned int NumberOfBytes;
-                unsigned int Hash;
-
-                const void* pData;
-
-                NumberOfBytes = static_cast<unsigned int>(strlen(pHashIdentifier) * sizeof(char));
-                pData = static_cast<const void*>(pHashIdentifier);
-
-                m_Hash = Base::CRC32(pData, NumberOfBytes);
-
-                // -----------------------------------------------------------------------------
-                // Set UI
-                // -----------------------------------------------------------------------------
-                m_pHashEdit->setText(QString::number(m_Hash));
-
-                // -----------------------------------------------------------------------------
-                // Emit info
-                // -----------------------------------------------------------------------------
-                emit fileChanged(m_File);
-
-                emit hashChanged(m_Hash);
-            }
-        }
-
-        if (NewTextureFile == "")
-        {
-            m_File = "";
-            m_Hash = 0;
-
-            m_pFileEdit->setText(m_File);
-
-            m_pHashEdit->setText(QString::number(m_Hash));
-
-            // -----------------------------------------------------------------------------
-            // Emit info
-            // -----------------------------------------------------------------------------
-            emit fileChanged(m_File);
-
-            emit hashChanged(m_Hash);
-        }
+        LoadTexture(NewTextureFile);
     }
 
     // -----------------------------------------------------------------------------
@@ -230,50 +174,108 @@ namespace Edit
         {
             QUrl Url = pMimeData->urls()[0];
 
-            QFileInfo FileInfo(Url.toLocalFile());
+            LoadTexture(Url.toLocalFile());
+        }
+    }
 
-            if (m_SupportedFiles.match(FileInfo.completeSuffix()).hasMatch())
-            {
-                // -----------------------------------------------------------------------------
-                // Create path
-                // -----------------------------------------------------------------------------
-                QDir Directory("../assets/");
+    // -----------------------------------------------------------------------------
 
-                QString AbsPath = FileInfo.absoluteFilePath();
+    void CTextureValue::OnTextureInfo(Edit::CMessage& _rMessage)
+    {
+        int Hash = _rMessage.GetInt();
 
-                m_File = Directory.relativeFilePath(AbsPath);
+        if (Hash == m_Hash)
+        {
+            // ...
+        }
+    }
 
-                // -----------------------------------------------------------------------------
-                // Create hash
-                // TODO: Hash should be requested by a message to editor
-                // -----------------------------------------------------------------------------
-                QByteArray NewTextureBinary = m_File.toLatin1();
+    // -----------------------------------------------------------------------------
 
-                const char*  pHashIdentifier = NewTextureBinary.data();
-                unsigned int NumberOfBytes;
-                unsigned int Hash;
+    void CTextureValue::LoadTexture(const QString& _rPathToTexture)
+    {
+        QDir      Directory("../assets/");
+        QString   AbsolutePathToTexture;
+        QString   RelativePathToTexture;
+        QFileInfo FileInfo;
 
-                const void* pData;
+        // -----------------------------------------------------------------------------
+        // Check emptiness
+        // -----------------------------------------------------------------------------
+        if (_rPathToTexture == "")
+        {
+            m_File = "";
+            m_Hash = 0;
 
-                NumberOfBytes = static_cast<unsigned int>(strlen(pHashIdentifier) * sizeof(char));
-                pData = static_cast<const void*>(pHashIdentifier);
+            m_pFileEdit->setText(m_File);
 
-                m_Hash = Base::CRC32(pData, NumberOfBytes);
+            m_pHashEdit->setText(QString::number(m_Hash));
 
-                // -----------------------------------------------------------------------------
-                // Set UI
-                // -----------------------------------------------------------------------------
-                m_pFileEdit->setText(m_File);
+            // -----------------------------------------------------------------------------
+            // Emit info
+            // -----------------------------------------------------------------------------
+            emit fileChanged(m_File);
 
-                m_pHashEdit->setText(QString::number(m_Hash));
+            emit hashChanged(m_Hash);
 
-                // -----------------------------------------------------------------------------
-                // Emit signals
-                // -----------------------------------------------------------------------------
-                emit fileChanged(m_File);
+            return;
+        }
 
-                emit hashChanged(m_Hash);
-            }
+        // -----------------------------------------------------------------------------
+        // Check relative vs. absolute
+        // -----------------------------------------------------------------------------
+        FileInfo.setFile(_rPathToTexture);
+
+        if (FileInfo.isRelative())
+        {
+            RelativePathToTexture = _rPathToTexture;
+
+            AbsolutePathToTexture = Directory.absoluteFilePath(_rPathToTexture);
+        }
+        else
+        {
+            RelativePathToTexture = Directory.relativeFilePath(_rPathToTexture);
+
+            AbsolutePathToTexture = _rPathToTexture;
+        }
+
+        // -----------------------------------------------------------------------------
+        // Check texture
+        // -----------------------------------------------------------------------------
+        FileInfo.setFile(AbsolutePathToTexture);
+
+        if (FileInfo.exists() && m_SupportedFiles.match(FileInfo.completeSuffix()).hasMatch())
+        {
+            m_File = RelativePathToTexture;
+
+            // -----------------------------------------------------------------------------
+            // Create hash
+            // TODO: Hash should be requested by a message to editor
+            // -----------------------------------------------------------------------------
+            QByteArray NewTextureBinary = m_File.toLatin1();
+
+            const char*  pHashIdentifier = NewTextureBinary.data();
+            unsigned int NumberOfBytes;
+            unsigned int Hash;
+
+            const void* pData;
+
+            NumberOfBytes = static_cast<unsigned int>(strlen(pHashIdentifier) * sizeof(char));
+            pData = static_cast<const void*>(pHashIdentifier);
+
+            m_Hash = Base::CRC32(pData, NumberOfBytes);
+
+            // -----------------------------------------------------------------------------
+            // Set UI
+            // -----------------------------------------------------------------------------
+            m_pHashEdit->setText(QString::number(m_Hash));
+
+            // -----------------------------------------------------------------------------
+            // Emit info
+            // -----------------------------------------------------------------------------
+            emit fileChanged(m_File);
+
+            emit hashChanged(m_Hash);
         }
     }
 } // namespace Edit

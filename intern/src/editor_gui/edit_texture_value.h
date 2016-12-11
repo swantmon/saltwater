@@ -2,12 +2,10 @@
 
 #include "editor_gui/ui_edit_texture_value.h"
 
+#include "editor_port/edit_message.h"
+
 #include <QRegularExpression>
 #include <QWidget>
-
-// TODO by tschwandt
-// - Add remove texture possibility
-// - Setup style
 
 namespace Edit
 {
@@ -62,5 +60,13 @@ namespace Edit
 
         void dragEnterEvent(QDragEnterEvent* _pEvent);
         void dropEvent(QDropEvent* _pEvent);
+
+    private:
+
+        void OnTextureInfo(Edit::CMessage& _rMessage);
+
+    private:
+
+        void LoadTexture(const QString& _rPathToTexture);
     };
 } // namespace Edit
