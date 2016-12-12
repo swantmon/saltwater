@@ -409,33 +409,17 @@ namespace
         BufferManager::UnmapConstantBuffer(m_PunctualLightPSBufferPtr->GetBuffer(0));
         
         // -----------------------------------------------------------------------------
-        // Rendering of light probes
+        // Rendering of light sources point
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(m_LightRenderContextPtr);
-        
+
         ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
-        
+
         ContextManager::SetTopology(STopology::TriangleList);
-        
+
         // -----------------------------------------------------------------------------
-        // Punctual lights
+        // Iterate over every point light
         // -----------------------------------------------------------------------------
-        ContextManager::SetShaderVS(m_ModelVSPtr);
-        
-        ContextManager::SetShaderPS(m_PunctualLightShaderPSPtr);
-        
-        ContextManager::SetVertexBufferSet(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
-        
-        ContextManager::SetIndexBuffer(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
-        
-        ContextManager::SetInputLayout(m_LightProbeInputLayoutPtr);
-        
-        ContextManager::SetConstantBufferSetPS(m_PunctualLightPSBufferPtr);
-        
-        ContextManager::SetConstantBufferSetVS(m_MainVSBufferPtr);
-        
-        ContextManager::SetTextureSetPS(m_PunctualLightTextureSetPtr);
-        
         CurrentRenderJob = m_PunctualLightRenderJobs.begin();
         EndOfRenderJobs  = m_PunctualLightRenderJobs.end();
 
@@ -445,7 +429,7 @@ namespace
             Dt::CEntity*          pEntity            = CurrentRenderJob->m_pLevelEntity;
             
             assert(pDtLightFacet    != nullptr);
-            
+
             // -----------------------------------------------------------------------------
             // Upload model matrix to buffer
             // -----------------------------------------------------------------------------
@@ -484,6 +468,25 @@ namespace
             }
             
             BufferManager::UnmapConstantBuffer(m_PunctualLightPSBufferPtr->GetBuffer(1));
+
+            // -----------------------------------------------------------------------------
+            // Render punctual lights
+            // -----------------------------------------------------------------------------
+            ContextManager::SetShaderVS(m_ModelVSPtr);
+
+            ContextManager::SetShaderPS(m_PunctualLightShaderPSPtr);
+
+            ContextManager::SetVertexBufferSet(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+
+            ContextManager::SetIndexBuffer(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+
+            ContextManager::SetInputLayout(m_LightProbeInputLayoutPtr);
+
+            ContextManager::SetConstantBufferSetPS(m_PunctualLightPSBufferPtr);
+
+            ContextManager::SetConstantBufferSetVS(m_MainVSBufferPtr);
+
+            ContextManager::SetTextureSetPS(m_PunctualLightTextureSetPtr);
             
             // -----------------------------------------------------------------------------
             // Set shadow map
@@ -497,23 +500,23 @@ namespace
             // Draw light
             // -----------------------------------------------------------------------------
             ContextManager::DrawIndexed(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+
+            ContextManager::ResetTextureSetPS();
+
+            ContextManager::ResetInputLayout();
+
+            ContextManager::ResetConstantBufferSetPS();
+
+            ContextManager::ResetConstantBufferSetVS();
+
+            ContextManager::ResetIndexBuffer();
+
+            ContextManager::ResetVertexBufferSet();
+
+            ContextManager::ResetShaderVS();
+
+            ContextManager::ResetShaderPS();
         }
-        
-        ContextManager::ResetTextureSetPS();
-        
-        ContextManager::ResetInputLayout();
-        
-        ContextManager::ResetConstantBufferSetPS();
-        
-        ContextManager::ResetConstantBufferSetVS();
-        
-        ContextManager::ResetIndexBuffer();
-        
-        ContextManager::ResetVertexBufferSet();
-        
-        ContextManager::ResetShaderVS();
-        
-        ContextManager::ResetShaderPS();
         
         // -----------------------------------------------------------------------------
         // Reset non-dynamic objects
