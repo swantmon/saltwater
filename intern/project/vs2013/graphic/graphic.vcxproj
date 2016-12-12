@@ -103,6 +103,7 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_view_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_view_port.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_view_port_set.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_voxel_renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\graphic\gfx_application_interface.h" />
@@ -200,6 +201,7 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_view_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_view_port.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_view_port_set.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_voxel_renderer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\data\graphic\shaders\cs_brdf.glsl" />

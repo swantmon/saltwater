@@ -236,6 +236,9 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_light_indirect_renderer.cpp">
       <Filter>engine\renderer</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_voxel_renderer.cpp">
+      <Filter>engine\renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\graphic\gfx_debug_interface.h">
@@ -519,6 +522,9 @@
       <Filter>engine\renderer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_smaa_look_up_textures.h">
+      <Filter>engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_voxel_renderer.h">
       <Filter>engine\renderer</Filter>
     </ClInclude>
   </ItemGroup>
