@@ -250,9 +250,17 @@ namespace
         // -----------------------------------------------------------------------------
 
         CSamplerPtr LinearFilter = SamplerManager::GetSampler(CSampler::MinMagMipLinearWrap);
-        CSamplerPtr PointFilter  = SamplerManager::GetSampler(CSampler::MinMagMipPointWrap);
 
-        m_PSSamplerSet = SamplerManager::CreateSamplerSet(LinearFilter, LinearFilter, LinearFilter, LinearFilter);
+        CSamplerPtr SamplerList[] =
+        {
+            LinearFilter,
+            LinearFilter,
+            LinearFilter,
+            LinearFilter,
+            LinearFilter,
+        };
+
+        m_PSSamplerSet = SamplerManager::CreateSamplerSet(SamplerList, 5);
     }
 
     // -----------------------------------------------------------------------------
