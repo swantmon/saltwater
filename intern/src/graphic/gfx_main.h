@@ -34,7 +34,7 @@ namespace Main
 
     void RegisterResizeHandler(CResizeDelegate _NewDelgate);
 
-    unsigned int RegisterWindow(void* _pWindow);
+    unsigned int RegisterWindow(void* _pWindow, unsigned int _VSync = true);
 
     unsigned int GetNumberOfWindows();
 
