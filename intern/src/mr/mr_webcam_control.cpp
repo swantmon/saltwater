@@ -39,6 +39,40 @@ namespace MR
         , m_OriginalColorFrameRGB()
         , m_ConvertedColorFrame  ()
     {
+        using namespace cv;
+
+        m_ConvertedColorFrame = cvCreateImage(cvSize(1280, 720), IPL_DEPTH_8U, 3);
+
+        IplImage* pConvertedColorFrame = static_cast<IplImage*>(m_ConvertedColorFrame);
+
+        OriginalFrontImage = cv::cvarrToMat(pConvertedColorFrame, true);
+
+        for (float y = 0; y < OriginalFrontImage.rows; y++)
+        {
+            for (float x = 0; x < OriginalFrontImage.cols; x++)
+            {
+                // set pixel
+                OriginalFrontImage.at<Vec3b>(Point(x, y)) = cv::Vec3b(x / 1280 * 255, y / 720 * 255, 0);
+            }
+        }
+
+        imshow("Input", OriginalFrontImage);
+
+        CombinedRight .create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
+        CombinedLeft  .create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
+        CombinedTop   .create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
+        CombinedBottom.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
+        FrontCroped   .create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
+        BackCroped    .create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
+
+        ProcessEnvironmentApproximation();
+
+        imshow("CombinedRight", CombinedRight);
+        imshow("CombinedLeft", CombinedLeft);
+        imshow("CombinedTop", CombinedTop);
+        imshow("CombinedBottom", CombinedBottom);
+        imshow("FrontCroped", FrontCroped);
+        imshow("BackCroped", BackCroped);
     }
 
     // -----------------------------------------------------------------------------
@@ -605,10 +639,6 @@ namespace MR
 
         // -----------------------------------------------------------------------------
 
-        IplImage* pConvertedColorFrame = static_cast<IplImage*>(m_ConvertedColorFrame);
-
-        OriginalFrontImage = cvarrToMat(pConvertedColorFrame, true);
-
         flip(OriginalFrontImage, OriginalBackImage, 1);
 
         // -----------------------------------------------------------------------------
@@ -631,20 +661,13 @@ namespace MR
         CombinedTop    = CombineTopFaces(FrontTopPart, BackTopPart);
         CombinedBottom = CombineBottomFaces(FrontBottomPart, BackBottomPart);
 
-//         imshow("CombinedRight", CombinedRight);
-//         imshow("CombinedLeft", CombinedLeft);
-//         imshow("CombinedTop", CombinedTop);
-//         imshow("CombinedBottom", CombinedBottom);
-//         imshow("FrontCroped", FrontCroped);
-//         imshow("BackCroped", BackCroped);
-
-        Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Right,  CombinedRight.data);
-        Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Left,   CombinedLeft.data);
-        Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Top,    CombinedTop.data);
-        Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Bottom, CombinedBottom.data);
-        Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Front,  FrontCroped.data);
-        Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Back,   BackCroped.data);
-    
-        Dt::TextureManager::MarkTextureAsDirty(m_pCubemap, Dt::CTextureBase::DirtyData);
+//         Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Right,  CombinedRight.data);
+//         Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Left,   CombinedLeft.data);
+//         Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Top,    CombinedTop.data);
+//         Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Bottom, CombinedBottom.data);
+//         Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Front,  FrontCroped.data);
+//         Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Back,   BackCroped.data);
+//     
+//         Dt::TextureManager::MarkTextureAsDirty(m_pCubemap, Dt::CTextureBase::DirtyData);
     }
 } // namespace MR
