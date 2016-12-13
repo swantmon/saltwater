@@ -758,7 +758,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetLayer() != Dt::SEntityLayer::AR)
+            if (rCurrentEntity.GetType() != Dt::SActorType::Mesh || rCurrentEntity.GetLayer() != Dt::SEntityLayer::AR)
             {
                 CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor);
 
