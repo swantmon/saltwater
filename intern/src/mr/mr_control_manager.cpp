@@ -143,7 +143,10 @@ namespace
         Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CMRControlManager::OnDirtyEntity));
 
         m_pControls[CControl::Webcam] = Base::CMemory::NewObject<CWebcamControl>();
-        m_pControls[CControl::Kinect] = Base::CMemory::NewObject<CKinectControl>();
+        
+		// TODO: implement kinect
+		
+		//m_pControls[CControl::Kinect] = Base::CMemory::NewObject<CKinectControl>();
     }
 
     // -----------------------------------------------------------------------------

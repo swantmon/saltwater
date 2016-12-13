@@ -5,7 +5,7 @@
 
 namespace MR
 {
-    class CKinectControl : public CControl
+    class CKinectControl
     {
     public:
 
@@ -14,16 +14,9 @@ namespace MR
 
     public:
 
-        void* GetOriginalDepthFrame() const;
-        void* GetConvertedDepthFrame() const;
+        void Start();
+        void Stop();
 
-    private:
-
-        virtual void InternStart(const Base::Char* _pCameraParameterFile);
-        virtual void InternStop();
-
-        virtual void InternUpdate();
-
-        void ProcessEnvironmentApproximation();
+        void Update();
     };
 } // namespace MR

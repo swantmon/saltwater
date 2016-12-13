@@ -508,15 +508,7 @@ namespace
         }
         else if (pControl != nullptr && pControl->GetType() == MR::CControl::Kinect)
         {
-            MR::CKinectControl& rKinectControl = static_cast<MR::CKinectControl&>(*pControl);
-
-            Base::AABB2UInt TargetRect(Base::UInt2(0), Base::UInt2(1280, 720));
-
-            TextureManager::CopyToTexture2D(m_BackgroundTexturePtr, TargetRect, TargetRect[1][0], rKinectControl.GetConvertedFrame()->GetPixels());
-
-            TextureManager::CopyToTexture2D(m_VSPositionTexturePtr, TargetRect, TargetRect[1][0], rKinectControl.GetConvertedDepthFrame());
-
-            TextureManager::CopyToTexture2D(m_WebcamTexturePtr, TargetRect, TargetRect[1][0], rKinectControl.GetConvertedFrame()->GetPixels());
+            // TODO: integrate kinect data
         }
     }
 

@@ -12,7 +12,6 @@ out gl_PerVertex
 layout(row_major, std140, binding = 1) uniform PerDrawCall
 {
 	float Scale;
-	vec3 Padding;
 };
 
 layout(binding = 0, r32f) readonly uniform image3D vs_VoxelData;

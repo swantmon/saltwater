@@ -29,6 +29,7 @@
 #include "gfx_native_buffer.h"
 #include "gfx_native_shader.h"
 #include "gfx_native_target_set.h"
+#include "mr/mr_kinect_control.h"
 
 #include <gl/glew.h>
 
@@ -43,11 +44,11 @@ namespace
     struct SDrawCallBufferData
     {
         float m_CubeScale;
-        Base::Float3 Padding;
+        Base::Float3 Padding1;
     };
 
     const float CubeWidth = 20.0f;
-    const int CubeVoxelWidth = 256;
+    const int CubeVoxelWidth = 512;
     const int VoxelCount = CubeVoxelWidth * CubeVoxelWidth * CubeVoxelWidth;
 
     const unsigned int TileSize = 8;
@@ -93,6 +94,8 @@ namespace
         CShaderPtr m_VertexShader;
         CShaderPtr m_FragmentShader;
         CShaderPtr m_ComputeShader;
+
+		MR::CKinectControl m_KinectControl;
     };
 } // namespace
 
@@ -153,12 +156,16 @@ namespace
 
         glBindVertexArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+		m_KinectControl.Start();
     }
     
     // -----------------------------------------------------------------------------
     
     void CGfxVoxelRenderer::OnExit()
     {
+		m_KinectControl.Stop();
+
         m_VertexShader = 0;
         m_FragmentShader = 0;
         m_ComputeShader = 0;
@@ -209,7 +216,7 @@ namespace
     
     void CGfxVoxelRenderer::OnSetupTextures()
     {
-        int VoxelCount = 256 * 256 * 256;
+        /*const unsigned int VoxelCount = CubeVoxelWidth * CubeVoxelWidth * CubeVoxelWidth;
 
         float* pVoxelData = new float[VoxelCount];
 
@@ -217,13 +224,13 @@ namespace
         VoxelFile.open("kinect_voxel_data.txt", std::ios::in);
 
         short Value;
-        int Index = 0;
+		unsigned int Index = 0;
         while (VoxelFile >> Value)
         {
             pVoxelData[Index++] = Value < 0 ? 0.0f : 1.0f;
         }
 
-        VoxelFile.close();
+        VoxelFile.close();*/
 
         glGenTextures(1, &m_VoxelDataBuffer);
 
@@ -234,9 +241,9 @@ namespace
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, CubeVoxelWidth, CubeVoxelWidth, CubeVoxelWidth, 0, GL_RED, GL_FLOAT, pVoxelData);
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, CubeVoxelWidth, CubeVoxelWidth, CubeVoxelWidth, 0, GL_RED, GL_FLOAT, nullptr);
 
-        delete[] pVoxelData;
+        //delete[] pVoxelData;
     }
     
     // -----------------------------------------------------------------------------
@@ -303,7 +310,7 @@ namespace
     
     void CGfxVoxelRenderer::Update()
     {
-
+		m_KinectControl.Update();
     }
     
     // -----------------------------------------------------------------------------
@@ -318,9 +325,9 @@ namespace
 
         Gfx::ContextManager::SetShaderCS(m_ComputeShader);
 
-        glBindImageTexture(0, m_VoxelDataBuffer, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R32F);
+        glBindImageTexture(0, m_VoxelDataBuffer, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_R32F);
 
-        //glDispatchCompute(CubeVoxelWidth / TileSize, CubeVoxelWidth / TileSize, CubeVoxelWidth / TileSize);
+        glDispatchCompute(CubeVoxelWidth / TileSize, CubeVoxelWidth / TileSize, CubeVoxelWidth / TileSize);
 
         //////////////////////////////////////////////////////////////////////////////////////
         // Rendering
@@ -339,16 +346,16 @@ namespace
         glBindVertexArray(m_VertexArray);
 
         CBufferPtr FrameConstantBufferPtr = Gfx::Main::GetPerFrameConstantBufferVS();
-        CNativeBuffer NativeBufer = *static_cast<CNativeBuffer*>(FrameConstantBufferPtr.GetPtr());
+        CNativeBuffer FrameConstantBuffer = *static_cast<CNativeBuffer*>(FrameConstantBufferPtr.GetPtr());
 
         SDrawCallBufferData* pBuffer = static_cast<SDrawCallBufferData*>(glMapNamedBuffer(m_DrawCallConstantBuffer, GL_WRITE_ONLY));
         pBuffer->m_CubeScale = CubeWidth / CubeVoxelWidth;
         glUnmapNamedBuffer(m_DrawCallConstantBuffer);
 
-        glBindBufferBase(GL_UNIFORM_BUFFER, 0, NativeBufer.m_NativeBuffer);
+        glBindBufferBase(GL_UNIFORM_BUFFER, 0, FrameConstantBuffer.m_NativeBuffer);
         glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_DrawCallConstantBuffer);
 
-        glBindImageTexture(0, m_VoxelDataBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32F);
+        glBindImageTexture(0, m_VoxelDataBuffer, 0, GL_TRUE, 0, GL_READ_ONLY, GL_R32F);
 
         glDrawArrays(GL_POINTS, 0, VoxelCount);
 

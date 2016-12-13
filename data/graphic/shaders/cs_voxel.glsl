@@ -21,6 +21,7 @@ void main()
 	float Distance = length(gl_GlobalInvocationID - vec3(CUBE_WIDTH / 2.0));
 	
     imageStore(cs_OutputTexture, ivec3(gl_GlobalInvocationID), vec4(Distance > CUBE_WIDTH / 2.0 ? 0.0 : 1.0));
+	//imageStore(cs_OutputTexture, ivec3(gl_GlobalInvocationID), vec4(1.0, 1.0, 1.0, 1.0));
 }
 
 #endif // __INCLUDE_CS_VOXEL_GLSL__
