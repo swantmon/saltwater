@@ -338,17 +338,23 @@ namespace
             NewMessage.PutInt   (rCurrentEntity.GetID());
             NewMessage.PutInt   (static_cast<int>(pLightFacet->GetType()));
 
-            if (pLightFacet->GetHasCubemap())
+            if (pLightFacet->GetType() == Dt::CSkyFacet::Cubemap)
             {
                 NewMessage.PutString(pLightFacet->GetCubemap()->GetFileName());
 
                 NewMessage.PutInt(pLightFacet->GetCubemap()->GetHash());
             }
-            else
+            else if (pLightFacet->GetType() == Dt::CSkyFacet::Panorama)
             {
                 NewMessage.PutString(pLightFacet->GetPanorama()->GetFileName());
 
                 NewMessage.PutInt(pLightFacet->GetPanorama()->GetHash());
+            }
+            else if (pLightFacet->GetType() == Dt::CSkyFacet::Texture)
+            {
+                NewMessage.PutString(pLightFacet->GetTexture()->GetFileName());
+
+                NewMessage.PutInt(pLightFacet->GetTexture()->GetHash());
             }
 
             NewMessage.PutFloat (pLightFacet->GetIntensity());
