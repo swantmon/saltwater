@@ -134,7 +134,9 @@ namespace
         // Now we get the information of the window handle and set this to
         // the graphic part and active this window.
         // -----------------------------------------------------------------------------
-        m_EditWindowID = Gfx::App::RegisterWindow(Edit::GUI::GetEditorWindowHandle());
+        unsigned int VSync = 0;
+
+        m_EditWindowID = Gfx::App::RegisterWindow(Edit::GUI::GetEditorWindowHandle(), VSync);
 
         Gfx::App::ActivateWindow(m_EditWindowID);
 

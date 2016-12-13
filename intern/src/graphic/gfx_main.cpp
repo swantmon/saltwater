@@ -88,7 +88,7 @@ namespace
 
     public:
 
-        unsigned int RegisterWindow(void* _pWindow);
+        unsigned int RegisterWindow(void* _pWindow, unsigned int _VSync);
 
         unsigned int GetNumberOfWindows();
 
@@ -122,10 +122,11 @@ namespace
 
         struct SWindowInfo
         {
-            HWND       m_pNativeWindowHandle;
-            HDC        m_pNativeDeviceContextHandle;
-            HGLRC      m_pNativeOpenGLContextHandle;
-            Base::Int2 m_WindowSize;
+            HWND         m_pNativeWindowHandle;
+            HDC          m_pNativeDeviceContextHandle;
+            HGLRC        m_pNativeOpenGLContextHandle;
+            Base::Int2   m_WindowSize;
+            unsigned int m_VSync;
         };
         
         struct SPerFrameConstantBuffer
@@ -286,13 +287,23 @@ namespace
             wglMakeCurrent(pNativeDeviceContextHandle, pNativeOpenGLContextHandle);
 
             // -----------------------------------------------------------------------------
+            // VSync
+            // -----------------------------------------------------------------------------
+            wglSwapIntervalEXT(rWindowInfo.m_VSync);
+
+            // -----------------------------------------------------------------------------
             // Check specific OpenGL versions and availability
             // -----------------------------------------------------------------------------
+            char VSyncInvertal[33];
+
+            itoa(rWindowInfo.m_VSync, VSyncInvertal, 10);
+
             const unsigned char* pInfoGLEWVersion   = glewGetString(GLEW_VERSION);
-            const unsigned char* pInfoGLVersion     = glGetString(GL_VERSION);                      //< Returns a version or release number.
-            const unsigned char* pInfoGLVendor      = glGetString(GL_VENDOR);                       //< Returns the company responsible for this GL implementation. This name does not change from release to release.
-            const unsigned char* pInfoGLRenderer    = glGetString(GL_RENDERER);                     //< Returns the name of the renderer. This name is typically specific to a particular configuration of a hardware platform. It does not change from release to release.
-            const unsigned char* pInfoGLGLSLVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);     //< Returns a version or release number for the shading language.
+            const unsigned char* pInfoGLVersion     = glGetString(GL_VERSION);                  //< Returns a version or release number.
+            const unsigned char* pInfoGLVendor      = glGetString(GL_VENDOR);                   //< Returns the company responsible for this GL implementation. This name does not change from release to release.
+            const unsigned char* pInfoGLRenderer    = glGetString(GL_RENDERER);                 //< Returns the name of the renderer. This name is typically specific to a particular configuration of a hardware platform. It does not change from release to release.
+            const unsigned char* pInfoGLGLSLVersion = glGetString(GL_SHADING_LANGUAGE_VERSION); //< Returns a version or release number for the shading language.
+            const char*          pInfoVSync         = VSyncInvertal;                            //< Indicates the minimal interval of buffer swaps
 
             assert(pInfoGLEWVersion && pInfoGLVersion && pInfoGLGLSLVersion && pInfoGLVendor && pInfoGLRenderer);
 
@@ -307,6 +318,7 @@ namespace
             BASE_CONSOLE_INFOV("GLSL:      %s", pInfoGLGLSLVersion);
             BASE_CONSOLE_INFOV("Vendor:    %s", pInfoGLVendor);
             BASE_CONSOLE_INFOV("Renderer:  %s", pInfoGLRenderer);
+            BASE_CONSOLE_INFOV("VSync:     %s", pInfoVSync);
 
 #if APP_DEBUG_MODE == 1
             glDebugMessageCallback(OpenGLDebugCallback, NULL);
@@ -338,7 +350,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    unsigned int CGfxMain::RegisterWindow(void* _pWindow)
+    unsigned int CGfxMain::RegisterWindow(void* _pWindow, unsigned int _VSync)
     {
         if (_pWindow == 0 || m_NumberOfWindows == s_MaxNumberOfWindows) return 0;
 
@@ -357,6 +369,7 @@ namespace
         rNewWindow.m_pNativeWindowHandle        = pNativeWindowHandle;
         rNewWindow.m_pNativeDeviceContextHandle = 0;
         rNewWindow.m_pNativeOpenGLContextHandle = 0;
+        rNewWindow.m_VSync                      = _VSync;
 
         ++ m_NumberOfWindows;
 
@@ -670,9 +683,9 @@ namespace Main
 
     // -----------------------------------------------------------------------------
 
-    unsigned int RegisterWindow(void* _pWindow)
+    unsigned int RegisterWindow(void* _pWindow, unsigned int _VSync)
     {
-        return CGfxMain::GetInstance().RegisterWindow(_pWindow);
+        return CGfxMain::GetInstance().RegisterWindow(_pWindow, _VSync);
     }
 
     // -----------------------------------------------------------------------------

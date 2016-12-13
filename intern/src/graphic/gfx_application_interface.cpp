@@ -8,11 +8,11 @@ namespace Gfx
 {
 namespace App
 {
-    unsigned int RegisterWindow(void* _pWindow)
+    unsigned int RegisterWindow(void* _pWindow, unsigned int _VSync)
     {
         assert(_pWindow != 0);
 
-        return Gfx::Main::RegisterWindow(_pWindow);
+        return Gfx::Main::RegisterWindow(_pWindow, _VSync);
     }
 
     // -----------------------------------------------------------------------------
