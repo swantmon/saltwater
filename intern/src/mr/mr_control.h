@@ -4,7 +4,6 @@
 #include "base/base_matrix3x3.h"
 
 #include "data/data_texture_2d.h"
-#include "data/data_texture_cube.h"
 
 namespace MR
 {
@@ -53,10 +52,7 @@ namespace MR
         EType GetType() const;
 
         void SetConvertedFrame(Dt::CTexture2D* _pTexture);
-        Dt::CTexture2D* GetConvertedFrame();
-
-        void SetCubemap(Dt::CTextureCube* _pTexture);
-        Dt::CTextureCube* GetCubemap();        
+        Dt::CTexture2D* GetConvertedFrame();     
 
     public:
 
@@ -68,7 +64,6 @@ namespace MR
 
         EType             m_Type;
         bool              m_IsStarted;
-        Dt::CTextureCube* m_pCubemap;
         Dt::CTexture2D*   m_pOriginalFrame;
         Dt::CTexture2D*   m_pConvertedFrame;
         SDeviceParameter  m_CameraParameters;

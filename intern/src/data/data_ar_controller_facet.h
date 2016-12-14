@@ -69,10 +69,6 @@ namespace Dt
         Dt::CTexture2D* GetOutputBackground();
         const Dt::CTexture2D* GetOutputBackground() const;
 
-        void SetOutputCubemap(Dt::CTextureCube* _pOutputCubemap);
-        Dt::CTextureCube* GetOutputCubemap();
-        const Dt::CTextureCube* GetOutputCubemap() const;
-
         void SetNumberOfMarker(unsigned int _NumberOfMarker);
         unsigned int GetNumberOfMarker() const;
 
@@ -88,7 +84,6 @@ namespace Dt
 
         Dt::CEntity*      m_pCameraEntity;
         Dt::CTexture2D*   m_pOutputBackground;
-        Dt::CTextureCube* m_pOutputCubemap;
         EType             m_DeviceType;
         unsigned int      m_NumberOfMarker;
         Base::CharString  m_CameraParameterFile;
