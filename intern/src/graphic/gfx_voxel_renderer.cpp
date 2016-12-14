@@ -26,6 +26,7 @@
 // only for testing
 // http://www.busydevelopers.com/article/44073720/What+does+the+unsgned+short+value+in+INuiFusionColorReconstruction%3A%3AExportVolumeBlock+represent%3F
 
+#include "base/base_console.h"
 #include "gfx_native_buffer.h"
 #include "gfx_native_shader.h"
 #include "gfx_native_target_set.h"
@@ -35,6 +36,7 @@
 
 #include <array>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 
 using namespace Gfx;
@@ -48,7 +50,7 @@ namespace
     };
 
     const float CubeWidth = 20.0f;
-    const int CubeVoxelWidth = 512;
+    const int CubeVoxelWidth = 256;
     const int VoxelCount = CubeVoxelWidth * CubeVoxelWidth * CubeVoxelWidth;
 
     const unsigned int TileSize = 8;
@@ -84,9 +86,10 @@ namespace
         void Update();
         void Render();
 
-    private:
+	private:
 
-        std::vector<float> m_Voxels;
+		short* m_pVolumeBlock;
+
         GLuint m_VertexArray;
         GLuint m_VoxelDataBuffer;
         GLuint m_DrawCallConstantBuffer;
@@ -94,7 +97,7 @@ namespace
         CShaderPtr m_VertexShader;
         CShaderPtr m_FragmentShader;
         CShaderPtr m_ComputeShader;
-
+        
 		MR::CKinectControl m_KinectControl;
     };
 } // namespace
@@ -123,8 +126,6 @@ namespace
 
         float Translation = - CubeVoxelWidth / 2.0f;
 
-        m_Voxels.reserve(VoxelCount);
-
         std::vector<Float3> Vertices;
 
         for (int i = 0; i < CubeVoxelWidth; ++i)
@@ -133,7 +134,6 @@ namespace
             {
                 for (int k = 0; k < CubeVoxelWidth; ++k)
                 {
-                    m_Voxels.push_back(static_cast<float>(i * j * k) / VoxelCount);
                     Vertices.push_back(Float3(static_cast<float>(i) + Translation - 50.0f,
                                               static_cast<float>(j) + Translation,
                                               static_cast<float>(k) + Translation));
@@ -157,6 +157,8 @@ namespace
         glBindVertexArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+		m_pVolumeBlock = new short[VoxelCount];
+
 		m_KinectControl.Start();
     }
     
@@ -164,6 +166,7 @@ namespace
     
     void CGfxVoxelRenderer::OnExit()
     {
+		delete[] m_pVolumeBlock;
 		m_KinectControl.Stop();
 
         m_VertexShader = 0;
@@ -216,9 +219,21 @@ namespace
     
     void CGfxVoxelRenderer::OnSetupTextures()
     {
-        /*const unsigned int VoxelCount = CubeVoxelWidth * CubeVoxelWidth * CubeVoxelWidth;
+		glGenTextures(1, &m_VoxelDataBuffer);
 
-        float* pVoxelData = new float[VoxelCount];
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_3D, m_VoxelDataBuffer);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		
+		glTexImage3D(GL_TEXTURE_3D, 0, GL_R16, CubeVoxelWidth, CubeVoxelWidth, CubeVoxelWidth, 0, GL_RED, GL_SHORT, nullptr);
+
+		/*const unsigned int VoxelCount = CubeVoxelWidth * CubeVoxelWidth * CubeVoxelWidth;
+
+		std::vector<float> VoxelData(VoxelCount);
 
         std::fstream VoxelFile;
         VoxelFile.open("kinect_voxel_data.txt", std::ios::in);
@@ -227,23 +242,12 @@ namespace
 		unsigned int Index = 0;
         while (VoxelFile >> Value)
         {
-            pVoxelData[Index++] = Value < 0 ? 0.0f : 1.0f;
+			VoxelData[Index++] = Value < 0 ? 0.0f : 1.0f;
         }
 
-        VoxelFile.close();*/
+        VoxelFile.close();
 
-        glGenTextures(1, &m_VoxelDataBuffer);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_3D, m_VoxelDataBuffer);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, CubeVoxelWidth, CubeVoxelWidth, CubeVoxelWidth, 0, GL_RED, GL_FLOAT, nullptr);
-
-        //delete[] pVoxelData;
+		glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, CubeVoxelWidth, CubeVoxelWidth, CubeVoxelWidth, 0, GL_RED, GL_FLOAT, VoxelData.data());*/
     }
     
     // -----------------------------------------------------------------------------
@@ -311,6 +315,28 @@ namespace
     void CGfxVoxelRenderer::Update()
     {
 		m_KinectControl.Update();
+
+		static int FrameCount = 0;
+
+		if (FrameCount++ % 200 == 0)
+		{
+			BASE_CONSOLE_INFO("Exporting volume block");
+
+			m_KinectControl.ExportVolumeBlock(m_pVolumeBlock);
+
+            for (int i = 0; i < VoxelCount; ++ i)
+            {
+                if (m_pVolumeBlock[i] > -32767)
+                {
+                    std::cout << m_pVolumeBlock[i] << '\n';
+                }
+            }
+
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_3D, m_VoxelDataBuffer);
+			glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, CubeVoxelWidth, CubeVoxelWidth, CubeVoxelWidth, GL_RED, GL_SHORT, m_pVolumeBlock);
+            glBindTexture(GL_TEXTURE_3D, 0);
+		}
     }
     
     // -----------------------------------------------------------------------------
@@ -323,11 +349,9 @@ namespace
         // Compute shader
         //////////////////////////////////////////////////////////////////////////////////////
 
-        Gfx::ContextManager::SetShaderCS(m_ComputeShader);
-
-        glBindImageTexture(0, m_VoxelDataBuffer, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_R32F);
-
-        glDispatchCompute(CubeVoxelWidth / TileSize, CubeVoxelWidth / TileSize, CubeVoxelWidth / TileSize);
+        //Gfx::ContextManager::SetShaderCS(m_ComputeShader);
+        //glBindImageTexture(0, m_VoxelDataBuffer, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_R16);
+        //glDispatchCompute(CubeVoxelWidth / TileSize, CubeVoxelWidth / TileSize, CubeVoxelWidth / TileSize);
 
         //////////////////////////////////////////////////////////////////////////////////////
         // Rendering
@@ -355,7 +379,7 @@ namespace
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, FrameConstantBuffer.m_NativeBuffer);
         glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_DrawCallConstantBuffer);
 
-        glBindImageTexture(0, m_VoxelDataBuffer, 0, GL_TRUE, 0, GL_READ_ONLY, GL_R32F);
+        glBindImageTexture(0, m_VoxelDataBuffer, 0, GL_TRUE, 0, GL_READ_ONLY, GL_R16);
 
         glDrawArrays(GL_POINTS, 0, VoxelCount);
 

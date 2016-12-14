@@ -14,7 +14,7 @@ layout(row_major, std140, binding = 1) uniform PerDrawCall
 	float Scale;
 };
 
-layout(binding = 0, r32f) readonly uniform image3D vs_VoxelData;
+layout(binding = 0, r16_snorm) readonly uniform image3D vs_VoxelData;
 
 layout(location = 0) in vec3 VertexPosition;
 
@@ -27,7 +27,8 @@ void main(void)
 	uint Index = gl_VertexID - (VoxelPosition.x * CUBE_WIDTH * CUBE_WIDTH);
 	VoxelPosition.y = Index / CUBE_WIDTH;
 	VoxelPosition.z = Index % CUBE_WIDTH;
-	out_Color = imageLoad(vs_VoxelData, ivec3(VoxelPosition)).r;
+	float Voxel = imageLoad(vs_VoxelData, ivec3(VoxelPosition)).r;
+	out_Color = Voxel > 0.0 ? 1.0 : 0.0;
     gl_Position = g_WorldToScreen * vec4(VertexPosition * Scale, 1.0);
 }
 

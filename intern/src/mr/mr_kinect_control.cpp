@@ -9,22 +9,60 @@
 #include "mr/mr_control_manager.h"
 #include "mr/mr_kinect_control.h"
 
-#include <Kinect.h>
-#include <NuiKinectFusionApi.h>
-
 #define COLOR_WIDTH  1920
 #define COLOR_HEIGHT 1080
 #define DEPTH_WIDTH  512
 #define DEPTH_HEIGHT 424
 
+#define NOMINMAX
+#include <windows.h>
+#include <Kinect.h>
+#include <NuiKinectFusionApi.h>
+
+#pragma comment(lib,"Kinect20.lib")
+#pragma comment(lib,"Kinect20.fusion.lib")
+
 namespace
 {
-    std::string g_PathToAssets = "../assets/";
-} // namespace
+    void CheckResult(HRESULT Result, char* pMessage)
+    {
+        if (Result != S_OK)
+        {
+            BASE_CONSOLE_ERROR(pMessage);
+            throw std::exception(pMessage);
+        }
+    }
+
+    template<typename T>
+    void SafeRelease(T*& rInterface)
+    {
+        if (rInterface != nullptr)
+        {
+            rInterface->Release();
+            rInterface = nullptr;
+        }
+    }
+
+    template<>
+    void SafeRelease(NUI_FUSION_IMAGE_FRAME*& rFrame)
+    {
+        if (rFrame != nullptr)
+        {
+            NuiFusionReleaseImageFrame(rFrame);
+            rFrame = nullptr;
+        }
+    }
+}
 
 namespace MR
 {
     CKinectControl::CKinectControl()
+        : m_pKinect          (nullptr)
+        , m_pVolume          (nullptr)
+        , m_pDepthFrameReader(nullptr)
+        , m_pDepthImageFrame (nullptr)
+        , m_pPointCloud      (nullptr)
+        , m_pShadedSurface   (nullptr)
     {
     }
 
@@ -38,150 +76,135 @@ namespace MR
 
     void CKinectControl::Start()
     {
-		HRESULT hr = S_OK;
+        m_pTransform = new Matrix4();
 
-		_NUI_FUSION_RECONSTRUCTION_PROCESSOR_TYPE ProcessorType = NUI_FUSION_RECONSTRUCTION_PROCESSOR_TYPE_AMP;
-		int Index;
-		PWSTR Description;
-		PWSTR InstancePath;
-		unsigned int DescriptionSize;
-		unsigned int InstancePathSize;
+        m_pTransform->M11 = 1; m_pTransform->M12 = 0; m_pTransform->M13 = 0; m_pTransform->M14 = 0;
+        m_pTransform->M21 = 0; m_pTransform->M22 = 1; m_pTransform->M23 = 0; m_pTransform->M24 = 0;
+        m_pTransform->M31 = 0; m_pTransform->M32 = 0; m_pTransform->M33 = 1; m_pTransform->M34 = 0;
+        m_pTransform->M41 = 0; m_pTransform->M42 = 0; m_pTransform->M43 = 0; m_pTransform->M44 = 1;
 
-		NuiFusionGetDeviceInfo(ProcessorType, Index, &Description[0], DescriptionSize, &InstancePath[0], InstancePathSize, nullptr);
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        // Initialize kinect
+        ////////////////////////////////////////////////////////////////////////////////////////////
 
-		NUI_FUSION_RECONSTRUCTION_PARAMETERS ReconstructionParams = {};
-		ReconstructionParams.voxelCountX = 256;
-		ReconstructionParams.voxelCountY = 256;
-		ReconstructionParams.voxelCountZ = 256;
-		ReconstructionParams.voxelsPerMeter = 256;
+        CheckResult(GetDefaultKinectSensor(&m_pKinect), "Failed to get default kinect");
 
-		// Create the Kinect Fusion Reconstruction Volume
-		hr = NuiFusionCreateReconstruction(
-			&ReconstructionParams,
-			m_processorType, m_deviceIndex,
-			&m_worldToCameraTransform,
-			&m_pVolume);
+        // Initialize the Kinect and get the depth reader
+        IDepthFrameSource* pDepthFrameSource = nullptr;
 
-		if (FAILED(hr))
-		{
-			if (E_NUI_GPU_FAIL == hr)
-			{
-				WCHAR buf[MAX_PATH];
-				swprintf_s(buf, ARRAYSIZE(buf), L"Device %d not able to run Kinect Fusion, or error initializing.", m_deviceIndex);
-				SetStatusMessage(buf);
-			}
-			else if (E_NUI_GPU_OUTOFMEMORY == hr)
-			{
-				WCHAR buf[MAX_PATH];
-				swprintf_s(buf, ARRAYSIZE(buf), L"Device %d out of memory error initializing reconstruction - try a smaller reconstruction volume.", m_deviceIndex);
-				SetStatusMessage(buf);
-			}
-			else if (NUI_FUSION_RECONSTRUCTION_PROCESSOR_TYPE_CPU != m_processorType)
-			{
-				WCHAR buf[MAX_PATH];
-				swprintf_s(buf, ARRAYSIZE(buf), L"Failed to initialize Kinect Fusion reconstruction volume on device %d.", m_deviceIndex);
-				SetStatusMessage(buf);
-			}
-			else
-			{
-				SetStatusMessage(L"Failed to initialize Kinect Fusion reconstruction volume on CPU.");
-			}
+        CheckResult(m_pKinect->Open(), "failed to open kinect");
 
-			return hr;
-		}
+        CheckResult(m_pKinect->get_DepthFrameSource(&pDepthFrameSource), "Failed to get depth frame source");
 
-		// Save the default world to volume transformation to be optionally used in ResetReconstruction
-		hr = m_pVolume->GetCurrentWorldToVolumeTransform(&m_defaultWorldToVolumeTransform);
-		if (FAILED(hr))
-		{
-			SetStatusMessage(L"Failed in call to GetCurrentWorldToVolumeTransform.");
-			return hr;
-		}
+        CheckResult(pDepthFrameSource->OpenReader(&m_pDepthFrameReader), "Failed to open depth frame reader");
 
-		if (m_bTranslateResetPoseByMinDepthThreshold)
-		{
-			// This call will set the world-volume transformation
-			hr = ResetReconstruction();
-			if (FAILED(hr))
-			{
-				return hr;
-			}
-		}
+        pDepthFrameSource->Release();
 
-		// Frames generated from the depth input
-		hr = NuiFusionCreateImageFrame(NUI_FUSION_IMAGE_TYPE_FLOAT, m_cDepthWidth, m_cDepthHeight, &m_cameraParameters, &m_pDepthFloatImage);
-		if (FAILED(hr))
-		{
-			SetStatusMessage(L"Failed to initialize Kinect Fusion image.");
-			return hr;
-		}
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        // Create reconstruction
+        ////////////////////////////////////////////////////////////////////////////////////////////
 
-		// Create images to raycast the Reconstruction Volume
-		hr = NuiFusionCreateImageFrame(NUI_FUSION_IMAGE_TYPE_POINT_CLOUD, m_cDepthWidth, m_cDepthHeight, &m_cameraParameters, &m_pPointCloud);
-		if (FAILED(hr))
-		{
-			SetStatusMessage(L"Failed to initialize Kinect Fusion image.");
-			return hr;
-		}
+        _NUI_FUSION_RECONSTRUCTION_PROCESSOR_TYPE ProcessorType = NUI_FUSION_RECONSTRUCTION_PROCESSOR_TYPE_AMP;
+        int Index = -1;
+        WCHAR Description[MAX_PATH];
+        WCHAR InstancePath[MAX_PATH];
 
-		// Create images to raycast the Reconstruction Volume
-		hr = NuiFusionCreateImageFrame(NUI_FUSION_IMAGE_TYPE_COLOR, m_cDepthWidth, m_cDepthHeight, &m_cameraParameters, &m_pShadedSurface);
-		if (FAILED(hr))
-		{
-			SetStatusMessage(L"Failed to initialize Kinect Fusion image.");
-			return hr;
-		}
+        CheckResult(NuiFusionGetDeviceInfo(ProcessorType, Index, &Description[0], MAX_PATH, &InstancePath[0], MAX_PATH, nullptr), "Failed to get fusion device info");
 
-		_ASSERT(m_pDepthImagePixelBuffer == nullptr);
-		m_pDepthImagePixelBuffer = new(std::nothrow) UINT16[m_cDepthImagePixels];
-		if (nullptr == m_pDepthImagePixelBuffer)
-		{
-			SetStatusMessage(L"Failed to initialize Kinect Fusion depth image pixel buffer.");
-			return hr;
-		}
+        NUI_FUSION_RECONSTRUCTION_PARAMETERS ReconstructionParams = {};
+        ReconstructionParams.voxelCountX = VoxelCountX;
+        ReconstructionParams.voxelCountY = VoxelCountY;
+        ReconstructionParams.voxelCountZ = VoxelCountZ;
+        ReconstructionParams.voxelsPerMeter = 256;
 
-		_ASSERT(m_pDepthDistortionMap == nullptr);
-		m_pDepthDistortionMap = new(std::nothrow) DepthSpacePoint[m_cDepthImagePixels];
-		if (nullptr == m_pDepthDistortionMap)
-		{
-			SetStatusMessage(L"Failed to initialize Kinect Fusion depth image distortion buffer.");
-			return E_OUTOFMEMORY;
-		}
+        // Create the Kinect Fusion Reconstruction Volume
+        CheckResult(NuiFusionCreateReconstruction(&ReconstructionParams, ProcessorType, -1, m_pTransform, &m_pVolume), "Failed to create reconstruction");
 
-		SAFE_DELETE_ARRAY(m_pDepthDistortionLT);
-		m_pDepthDistortionLT = new(std::nothrow) UINT[m_cDepthImagePixels];
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        // Create reconstruction resources
+        ////////////////////////////////////////////////////////////////////////////////////////////
 
-		if (nullptr == m_pDepthDistortionLT)
-		{
-			SetStatusMessage(L"Failed to initialize Kinect Fusion depth image distortion Lookup Table.");
-			return E_OUTOFMEMORY;
-		}
+        NUI_FUSION_CAMERA_PARAMETERS CameraParameters;
 
-		// If we have valid parameters, let's go ahead and use them.
-		if (m_cameraParameters.focalLengthX != 0)
-		{
-			SetupUndistortion();
-		}
+        CameraParameters.focalLengthX = NUI_KINECT_DEPTH_NORM_FOCAL_LENGTH_X;
+        CameraParameters.focalLengthY = NUI_KINECT_DEPTH_NORM_FOCAL_LENGTH_Y;
+        CameraParameters.principalPointX = NUI_KINECT_DEPTH_NORM_PRINCIPAL_POINT_X;
+        CameraParameters.principalPointY = NUI_KINECT_DEPTH_NORM_PRINCIPAL_POINT_Y;
 
-		m_fStartTime = m_timer.AbsoluteTime();
+        // Frames generated from the depth input
+        CheckResult(NuiFusionCreateImageFrame(NUI_FUSION_IMAGE_TYPE_FLOAT, NUI_DEPTH_RAW_WIDTH, NUI_DEPTH_RAW_HEIGHT, &CameraParameters, &m_pDepthImageFrame),
+            "Failed to create depth image frame for kinect");
 
-		// Set an introductory message
-		SetStatusMessage(L"Click ‘Reset Reconstruction' to clear!");
+        // Create images to raycast the Reconstruction Volume
+        CheckResult(NuiFusionCreateImageFrame(NUI_FUSION_IMAGE_TYPE_POINT_CLOUD, NUI_DEPTH_RAW_WIDTH, NUI_DEPTH_RAW_HEIGHT, &CameraParameters, &m_pPointCloud),
+            "Failed to create point cloud for kinect");
 
-		return hr;
+        // Create images to raycast the Reconstruction Volume
+        CheckResult(NuiFusionCreateImageFrame(NUI_FUSION_IMAGE_TYPE_COLOR, NUI_DEPTH_RAW_WIDTH, NUI_DEPTH_RAW_HEIGHT, &CameraParameters, &m_pShadedSurface),
+            "Failed to create shaded surface for kinect");
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CKinectControl::ExportVolumeBlock(short* pVolumeBlock)
+    {
+        assert(m_pVolume != nullptr);
+
+        HRESULT Result = m_pVolume->ExportVolumeBlock(0, 0, 0, VoxelCountX, VoxelCountY, VoxelCountZ, 1, VoxelCount * sizeof(short), pVolumeBlock);
+
+        CheckResult(Result, "Failed to export volume block");
     }
 
     // -----------------------------------------------------------------------------
 
     void CKinectControl::Stop()
     {
-       
+        delete m_pTransform;
+        SafeRelease(m_pVolume);
+        SafeRelease(m_pDepthImageFrame);
+        SafeRelease(m_pPointCloud);
+        SafeRelease(m_pShadedSurface);
+        SafeRelease(m_pDepthFrameReader);
+        if (m_pKinect != nullptr)
+        {
+            m_pKinect->Close();
+        }
+        SafeRelease(m_pKinect);
     }
 
     // -----------------------------------------------------------------------------
 
     void CKinectControl::Update()
     {
+        BOOLEAN available;
+        m_pKinect->get_IsAvailable(&available);
+        if (!available)
+        {
+            BASE_CONSOLE_INFO("Kinect not available");
+        }
+
+        IDepthFrame* pDepthFrame;
+
+        m_pDepthFrameReader->AcquireLatestFrame(&pDepthFrame);
+
+        SafeRelease(pDepthFrame);
+
+        if (m_pVolume == nullptr)
+        {
+            BASE_CONSOLE_ERROR("Kinect volume is not initialized");
+            return;
+        }
+
+        HRESULT Result = m_pVolume->ProcessFrame(m_pDepthImageFrame, NUI_FUSION_DEFAULT_ALIGN_ITERATION_COUNT, NUI_FUSION_DEFAULT_INTEGRATION_WEIGHT, nullptr, m_pTransform);
+        if (Result == E_NUI_FUSION_TRACKING_ERROR)
+        {
+            BASE_CONSOLE_INFO("Kinect fusion tracking failed");
+        }
+        else
+        {
+            CheckResult(Result, "Failed to process kinect volume frame");
+        }
         
+        CheckResult(m_pVolume->CalculatePointCloud(m_pPointCloud, nullptr), "Failed to calculate point cloud");
     }
 } // namespace MR

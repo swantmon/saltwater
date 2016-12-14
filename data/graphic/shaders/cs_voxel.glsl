@@ -10,7 +10,7 @@
 // Input from engine
 // -----------------------------------------------------------------------------
 
-layout (binding = 0, r32f) writeonly uniform image3D cs_OutputTexture;
+layout (binding = 0, r16) writeonly uniform image3D cs_OutputTexture;
 
 // -------------------------------------------------------------------------------------
 // Functions
