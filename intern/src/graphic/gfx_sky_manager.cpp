@@ -30,6 +30,21 @@
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
 
+#include "opencv2/opencv.hpp"
+
+#define CROP_PERCENTAGE 0.8f
+#define IMAGE_EDGE_LENGTH 512
+#define IMAGE_SPACE 0
+#define USE_INPAINTING 0
+#define INPAINT_RADIUS 0
+#define INPAINT_METHOD INPAINT_TELEA
+
+cv::Mat RedImage;
+cv::Mat OriginalFrontImage, FrontCroped, FrontLeftPart, FrontRightPart, FrontTopPart, FrontBottomPart;
+cv::Mat OriginalBackImage, BackCroped, BackLeftPart, BackRightPart, BackTopPart, BackBottomPart;
+
+cv::Mat CombinedRight, CombinedLeft, CombinedTop, CombinedBottom;
+
 using namespace Gfx;
 
 namespace 
@@ -114,6 +129,9 @@ namespace
         SRenderContext m_SkyboxFromPanorama;
         SRenderContext m_SkyboxFromCubemap;
         SRenderContext m_SkyboxFromTexture;
+        SRenderContext m_SkyboxFromLUT;
+        CTexture2DPtr  m_LookUpTexturePtr;
+        CTextureSetPtr m_LookupTextureSetPtr;
         CSkyfacets     m_Skyfacets;
 
     private:
@@ -127,6 +145,10 @@ namespace
         void RenderSkyboxFromCubemap(CInternSkyFacet* _pOutput, float _Intensity = 1.0f);
 
         void RenderSkyboxFromTexture(CInternSkyFacet* _pOutput, float _Intensity = 1.0f);
+
+        void RenderSkyboxFromLUT(CInternSkyFacet* _pOutput, float _Intensity = 1.0f);
+
+        void PrecomputeLUT();
     };
 } // namespace 
 
@@ -215,6 +237,7 @@ namespace
         CShaderPtr CubemapPanoramaPSPtr = ShaderManager::CompilePS("fs_spherical_env_cubemap_generation.glsl", "main");
         CShaderPtr CubemapCubemapPSPtr  = ShaderManager::CompilePS("fs_cubemap_env_cubemap_generation.glsl", "main");
         CShaderPtr CubemapTexturePSPtr  = ShaderManager::CompilePS("fs_texture_env_cubemap_generation.glsl", "main");
+        CShaderPtr CubemapLUTPSPtr      = ShaderManager::CompilePS("fs_lut_env_cubemap_generation.glsl", "main");
 
         const SInputElementDescriptor PositionInputLayout[] =
         {
@@ -247,6 +270,11 @@ namespace
         m_SkyboxFromTexture.m_PSPtr          = CubemapTexturePSPtr;
         m_SkyboxFromTexture.m_InputLayoutPtr = P2SkytextureLayoutPtr;
 
+        m_SkyboxFromLUT.m_VSPtr          = CubemapVSPtr;
+        m_SkyboxFromLUT.m_GSPtr          = CubemapGSPtr;
+        m_SkyboxFromLUT.m_PSPtr          = CubemapLUTPSPtr;
+        m_SkyboxFromLUT.m_InputLayoutPtr = P3N3T2CubemapInputLayoutPtr;
+
         // -----------------------------------------------------------------------------
         // Sampler
         // -----------------------------------------------------------------------------
@@ -259,6 +287,8 @@ namespace
         m_SkyboxFromCubemap.m_SamplerSetPtr = SamplerSetPtr;
 
         m_SkyboxFromTexture.m_SamplerSetPtr = SamplerSetPtr;
+
+        m_SkyboxFromLUT.m_SamplerSetPtr = SamplerSetPtr;
 
         // -----------------------------------------------------------------------------
         // Buffer
@@ -501,6 +531,10 @@ namespace
         m_SkyboxFromTexture.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSWorldBuffer);
         m_SkyboxFromTexture.m_PSBufferSetPtr = BufferManager::CreateBufferSet(CubemapPSBuffer);
 
+        m_SkyboxFromLUT.m_VSBufferSetPtr = 0;
+        m_SkyboxFromLUT.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSCubemapBuffer);
+        m_SkyboxFromLUT.m_PSBufferSetPtr = BufferManager::CreateBufferSet(CubemapPSBuffer);
+
         // -----------------------------------------------------------------------------
         // Models
         // -----------------------------------------------------------------------------
@@ -524,10 +558,18 @@ namespace
 
         m_SkyboxFromTexture.m_MeshPtr = QuadModelPtr;
 
+        m_SkyboxFromLUT.m_MeshPtr = CubemapTextureSpherePtr;
+
         // -----------------------------------------------------------------------------
         // Register dirty entity handler for automatic sky creation
         // -----------------------------------------------------------------------------
         Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CGfxSkyManager::OnDirtyEntity));
+
+
+        // -----------------------------------------------------------------------------
+        // Generate LUT
+        // -----------------------------------------------------------------------------
+        PrecomputeLUT();
     }
 
     // -----------------------------------------------------------------------------
@@ -567,6 +609,20 @@ namespace
         m_SkyboxFromTexture.m_TextureSetPtr  = 0;
         m_SkyboxFromTexture.m_SamplerSetPtr  = 0;
 
+        m_SkyboxFromLUT.m_VSPtr          = 0;
+        m_SkyboxFromLUT.m_GSPtr          = 0;
+        m_SkyboxFromLUT.m_PSPtr          = 0;
+        m_SkyboxFromLUT.m_VSBufferSetPtr = 0;
+        m_SkyboxFromLUT.m_GSBufferSetPtr = 0;
+        m_SkyboxFromLUT.m_PSBufferSetPtr = 0;
+        m_SkyboxFromLUT.m_InputLayoutPtr = 0;
+        m_SkyboxFromLUT.m_MeshPtr        = 0;
+        m_SkyboxFromLUT.m_TextureSetPtr  = 0;
+        m_SkyboxFromLUT.m_SamplerSetPtr  = 0;
+
+        m_LookUpTexturePtr    = 0;
+        m_LookupTextureSetPtr = 0;
+
         m_Skyfacets.Clear();
     }
 
@@ -591,7 +647,7 @@ namespace
 
                 if (pDataSkyboxFacet->GetType() == Dt::CSkyFacet::Texture)
                 {
-                    RenderSkyboxFromTexture(pGraphicSkyboxFacet, pDataSkyboxFacet->GetIntensity());
+                    RenderSkyboxFromLUT(pGraphicSkyboxFacet, pDataSkyboxFacet->GetIntensity());
                 }
             }
 
@@ -731,7 +787,7 @@ namespace
 
                         rGraphicSkyboxFacet.m_InputTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(TexturePtr));
 
-                        RenderSkyboxFromTexture(&rGraphicSkyboxFacet, pDataSkyboxFacet->GetIntensity());
+                        RenderSkyboxFromLUT(&rGraphicSkyboxFacet, pDataSkyboxFacet->GetIntensity());
                     }
                 }
             }
@@ -1163,6 +1219,8 @@ namespace
 
         ContextManager::SetTextureSetPS(_pOutput->m_InputTextureSetPtr);
 
+        ContextManager::SetTextureSetPS(m_LookupTextureSetPtr);
+
         // -----------------------------------------------------------------------------
         // Draw
         // -----------------------------------------------------------------------------
@@ -1203,6 +1261,512 @@ namespace
         TextureManager::UpdateMipmap(_pOutput->m_CubemapPtr);
 
         Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxSkyManager::RenderSkyboxFromLUT(CInternSkyFacet* _pOutput, float _Intensity)
+    {
+        CRenderContextPtr RenderContextPtr = _pOutput->m_RenderContextPtr;
+        CShaderPtr        VSPtr            = m_SkyboxFromLUT.m_VSPtr;
+        CShaderPtr        GSPtr            = m_SkyboxFromLUT.m_GSPtr;
+        CShaderPtr        PSPtr            = m_SkyboxFromLUT.m_PSPtr;
+        CBufferSetPtr     GSBufferSetPtr   = m_SkyboxFromLUT.m_GSBufferSetPtr;
+        CBufferSetPtr     PSBufferSetPtr   = m_SkyboxFromLUT.m_PSBufferSetPtr;
+        CInputLayoutPtr   InputLayoutPtr   = m_SkyboxFromLUT.m_InputLayoutPtr;
+        CMeshPtr          MeshPtr          = m_SkyboxFromLUT.m_MeshPtr;
+        CTextureSetPtr    TextureSetPtr    = m_SkyboxFromLUT.m_TextureSetPtr;
+        CSamplerSetPtr    SamplerSetPtr    = m_SkyboxFromLUT.m_SamplerSetPtr;
+
+        Performance::BeginEvent("Skybox from LUT");
+
+        // -----------------------------------------------------------------------------
+        // Setup constant buffer
+        // -----------------------------------------------------------------------------
+        SCubemapBufferPS* pPSBuffer = static_cast<SCubemapBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(0)));
+
+        pPSBuffer->m_HDRFactor = _Intensity;
+        pPSBuffer->m_IsHDR = _pOutput->m_InputTexture2DPtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
+
+        BufferManager::UnmapConstantBuffer(PSBufferSetPtr->GetBuffer(0));
+
+        // -----------------------------------------------------------------------------
+        // Environment to cube map
+        // -----------------------------------------------------------------------------           
+        const unsigned int pOffset[] = { 0, 0 };
+
+        // -----------------------------------------------------------------------------
+        // Setup
+        // -----------------------------------------------------------------------------
+        ContextManager::SetRenderContext(RenderContextPtr);
+
+        ContextManager::SetSamplerSetPS(SamplerSetPtr);
+
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        ContextManager::SetShaderVS(VSPtr);
+
+        ContextManager::SetShaderGS(GSPtr);
+
+        ContextManager::SetShaderPS(PSPtr);
+
+        ContextManager::SetVertexBufferSet(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+
+        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+
+        ContextManager::SetInputLayout(InputLayoutPtr);
+
+        ContextManager::SetConstantBufferSetGS(GSBufferSetPtr);
+
+        ContextManager::SetConstantBufferSetPS(PSBufferSetPtr);
+
+        ContextManager::SetTextureSetPS(_pOutput->m_InputTextureSetPtr);
+
+        // -----------------------------------------------------------------------------
+        // Draw
+        // -----------------------------------------------------------------------------
+        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+
+        // -----------------------------------------------------------------------------
+        // Reset
+        // -----------------------------------------------------------------------------
+        ContextManager::ResetTextureSetPS();
+
+        ContextManager::ResetConstantBufferSetPS();
+
+        ContextManager::ResetConstantBufferSetGS();
+
+        ContextManager::ResetInputLayout();
+
+        ContextManager::ResetIndexBuffer();
+
+        ContextManager::ResetVertexBufferSet();
+
+        ContextManager::ResetShaderVS();
+
+        ContextManager::ResetShaderGS();
+
+        ContextManager::ResetShaderPS();
+
+        ContextManager::ResetTopology();
+
+        ContextManager::ResetSamplerSetPS();
+
+        ContextManager::ResetRenderContext();
+
+        // -----------------------------------------------------------------------------
+        // Update mip maps
+        // -----------------------------------------------------------------------------
+        TextureManager::UpdateMipmap(_pOutput->m_CubemapPtr);
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxSkyManager::PrecomputeLUT()
+    {
+        using namespace cv;
+
+        auto CropImage = [&](const Mat& _rOriginal, Mat& _rCroppedImage, Mat& _rLeftPart, Mat& _rRightPart, Mat& _rTopPart, Mat& _rBottomPart)
+        {
+            int LengthX;
+            int LengthY;
+            int ShortedLength;
+            int PercentualShortedLength;
+
+            LengthX = _rOriginal.size[0];
+            LengthY = _rOriginal.size[1];
+
+            ShortedLength = LengthX < LengthY ? LengthX : LengthY;
+
+            PercentualShortedLength = static_cast<int>(static_cast<float>(ShortedLength) * CROP_PERCENTAGE);
+
+            unsigned int X = (LengthX - PercentualShortedLength) / 2;
+            unsigned int Y = (LengthY - PercentualShortedLength) / 2;
+
+            Rect CroppedRectangel(Y, X, PercentualShortedLength, PercentualShortedLength);
+
+            _rCroppedImage = _rOriginal(CroppedRectangel);
+
+            resize(_rCroppedImage, _rCroppedImage, Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH));
+
+            // -----------------------------------------------------------------------------
+
+            _rLeftPart   = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, _rOriginal.type());
+            _rRightPart  = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, _rOriginal.type());
+            _rTopPart    = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, _rOriginal.type());
+            _rBottomPart = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, _rOriginal.type());
+
+            // -----------------------------------------------------------------------------
+
+            Point2f MaskPoints[4];
+            Point2f DestPoints[4];
+            Mat     WarpMat;
+
+            DestPoints[0] = Point2f(static_cast<float>(0)                    , static_cast<float>(0));
+            DestPoints[1] = Point2f(static_cast<float>(0)                    , static_cast<float>(IMAGE_EDGE_LENGTH - 1));
+            DestPoints[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH - 1), static_cast<float>(IMAGE_EDGE_LENGTH - 1));
+            DestPoints[3] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH - 1), static_cast<float>(0));
+
+            // -----------------------------------------------------------------------------
+
+            MaskPoints[0] = Point2f(static_cast<float>(0)    , static_cast<float>(0));
+            MaskPoints[1] = Point2f(static_cast<float>(0)    , static_cast<float>(LengthX - 1));
+            MaskPoints[2] = Point2f(static_cast<float>(Y - 1), static_cast<float>(X + PercentualShortedLength - 1));
+            MaskPoints[3] = Point2f(static_cast<float>(Y - 1), static_cast<float>(X - 1));
+
+            WarpMat = getPerspectiveTransform(MaskPoints, DestPoints);
+
+            warpPerspective(_rOriginal, _rLeftPart, WarpMat, _rLeftPart.size());
+
+            // -----------------------------------------------------------------------------
+
+            MaskPoints[0] = Point2f(static_cast<float>(Y + PercentualShortedLength - 1), static_cast<float>(X - 1));
+            MaskPoints[1] = Point2f(static_cast<float>(Y + PercentualShortedLength - 1), static_cast<float>(X + PercentualShortedLength - 1));
+            MaskPoints[2] = Point2f(static_cast<float>(LengthY - 1)                    , static_cast<float>(LengthX - 1));
+            MaskPoints[3] = Point2f(static_cast<float>(LengthY - 1)                    , static_cast<float>(0));
+
+            WarpMat = getPerspectiveTransform(MaskPoints, DestPoints);
+
+            warpPerspective(_rOriginal, _rRightPart, WarpMat, _rRightPart.size());
+
+            // -----------------------------------------------------------------------------
+
+            MaskPoints[0] = Point2f(static_cast<float>(0)                              , static_cast<float>(0));
+            MaskPoints[1] = Point2f(static_cast<float>(Y - 1)                          , static_cast<float>(X - 1));
+            MaskPoints[2] = Point2f(static_cast<float>(Y + PercentualShortedLength - 1), static_cast<float>(X - 1));
+            MaskPoints[3] = Point2f(static_cast<float>(LengthY - 1)                    , static_cast<float>(0));
+
+            WarpMat = getPerspectiveTransform(MaskPoints, DestPoints);
+
+            warpPerspective(_rOriginal, _rTopPart, WarpMat, _rTopPart.size());
+
+            // -----------------------------------------------------------------------------
+
+            MaskPoints[0] = Point2f(static_cast<float>(Y - 1)                          , static_cast<float>(X + PercentualShortedLength - 1));
+            MaskPoints[1] = Point2f(static_cast<float>(0)                              , static_cast<float>(LengthX - 1));
+            MaskPoints[2] = Point2f(static_cast<float>(LengthY - 1)                    , static_cast<float>(LengthX - 1));
+            MaskPoints[3] = Point2f(static_cast<float>(Y + PercentualShortedLength - 1), static_cast<float>(X + PercentualShortedLength - 1));
+
+            WarpMat = getPerspectiveTransform(MaskPoints, DestPoints);
+
+            warpPerspective(_rOriginal, _rBottomPart, WarpMat, _rBottomPart.size());
+        };
+
+        // -----------------------------------------------------------------------------
+
+        auto CombineFaces = [&](const Mat& _rOne, const Mat& _rTwo, const Point2f* _pDestinationOne, const Point2f* _pDestinationTwo)->cv::Mat
+        {
+            Mat CombinedOne, CombinedTwo;
+
+            CombinedOne = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, _rOne.type());
+            CombinedTwo = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, _rOne.type());
+
+            // -----------------------------------------------------------------------------
+
+            Point2f MaskPoints[3];
+
+            MaskPoints[0] = Point2f(static_cast<float>(0)                , static_cast<float>(0));
+            MaskPoints[1] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH));
+            MaskPoints[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH));
+
+            Mat WarpMat;
+
+            // -----------------------------------------------------------------------------
+
+            WarpMat = getAffineTransform(MaskPoints, _pDestinationOne);
+
+            warpAffine(_rOne, CombinedOne, WarpMat, CombinedOne.size());
+
+            // -----------------------------------------------------------------------------
+
+            WarpMat = getAffineTransform(MaskPoints, _pDestinationTwo);
+
+            warpAffine(_rTwo, CombinedTwo, WarpMat, CombinedTwo.size());
+
+            return CombinedOne + CombinedTwo;
+        };
+
+        // -----------------------------------------------------------------------------
+
+        auto CombineRightFaces = [&](const Mat& _rOne, const Mat& _rTwo)->cv::Mat
+        {
+            Point2f DestPointsOne[3];
+            Point2f DestPointsTwo[3];
+
+            DestPointsOne[0] = Point2f(static_cast<float>(0)                                  , static_cast<float>(0));
+            DestPointsOne[1] = Point2f(static_cast<float>(0)                                  , static_cast<float>(IMAGE_EDGE_LENGTH));
+            DestPointsOne[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE), static_cast<float>(IMAGE_EDGE_LENGTH));
+
+            DestPointsTwo[0] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE), static_cast<float>(0));
+            DestPointsTwo[1] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE), static_cast<float>(IMAGE_EDGE_LENGTH));
+            DestPointsTwo[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH)                  , static_cast<float>(IMAGE_EDGE_LENGTH));
+
+            Mat Combination = CombineFaces(_rOne, _rTwo, DestPointsOne, DestPointsTwo);
+
+#if USE_INPAINTING == 0
+            return Combination;
+#else
+            Mat Mask   = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, CV_8U);
+            Mat Result = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, Combination.type());
+
+            Point MaskPoints[3];
+
+            MaskPoints[0] = Point(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2, 0);
+            MaskPoints[1] = Point(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2, IMAGE_EDGE_LENGTH);
+            MaskPoints[2] = Point(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2, 0);
+
+            Scalar Color = Scalar(255, 255, 255);
+
+            fillConvexPoly(Mask, MaskPoints, 3, Color);
+
+            MaskPoints[0] = Point(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2, IMAGE_EDGE_LENGTH);
+            MaskPoints[1] = Point(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2, 0);
+            MaskPoints[2] = Point(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2, IMAGE_EDGE_LENGTH);
+
+            fillConvexPoly(Mask, MaskPoints, 3, Color);
+
+            // -----------------------------------------------------------------------------
+
+            inpaint(Combination, Mask, Result, INPAINT_RADIUS, INPAINT_METHOD);
+
+            // -----------------------------------------------------------------------------
+
+            return Result;
+#endif
+        };
+
+        // -----------------------------------------------------------------------------
+
+        auto CombineLeftFaces = [&](const Mat& _rOne, const Mat& _rTwo)->cv::Mat
+        {
+            Point2f DestPointsOne[3];
+            Point2f DestPointsTwo[3];
+
+            DestPointsOne[0] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE), static_cast<float>(0));
+            DestPointsOne[1] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE), static_cast<float>(IMAGE_EDGE_LENGTH));
+            DestPointsOne[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH)                  , static_cast<float>(IMAGE_EDGE_LENGTH));
+
+            DestPointsTwo[0] = Point2f(static_cast<float>(0)                                  , static_cast<float>(0));
+            DestPointsTwo[1] = Point2f(static_cast<float>(0)                                  , static_cast<float>(IMAGE_EDGE_LENGTH));
+            DestPointsTwo[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE), static_cast<float>(IMAGE_EDGE_LENGTH));
+
+            Mat Combination = CombineFaces(_rOne, _rTwo, DestPointsOne, DestPointsTwo);
+
+#if USE_INPAINTING == 0
+            return Combination;
+#else
+            Mat Mask   = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, CV_8U);
+            Mat Result = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, Combination.type());
+
+            Point MaskPoints[3];
+
+            MaskPoints[0] = Point(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2, 0);
+            MaskPoints[1] = Point(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2, IMAGE_EDGE_LENGTH);
+            MaskPoints[2] = Point(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2, 0);
+
+            Scalar Color = Scalar(255, 255, 255);
+
+            fillConvexPoly(Mask, MaskPoints, 3, Color);
+
+            MaskPoints[0] = Point(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2, IMAGE_EDGE_LENGTH);
+            MaskPoints[1] = Point(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2, 0);
+            MaskPoints[2] = Point(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2, IMAGE_EDGE_LENGTH);
+
+            fillConvexPoly(Mask, MaskPoints, 3, Color);
+
+            // -----------------------------------------------------------------------------
+
+            inpaint(Combination, Mask, Result, INPAINT_RADIUS, INPAINT_METHOD);
+
+            // -----------------------------------------------------------------------------
+
+            return Result;
+#endif
+        };
+
+        // -----------------------------------------------------------------------------
+
+        auto CombineTopFaces = [&](const Mat& _rOne, const Mat& _rTwo)->cv::Mat
+        {
+            Point2f DestPointsOne[3];
+            Point2f DestPointsTwo[3];
+
+            DestPointsOne[0] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE));
+            DestPointsOne[1] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH));
+            DestPointsOne[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH));
+
+            DestPointsTwo[0] = Point2f(static_cast<float>(0)                , static_cast<float>(0));
+            DestPointsTwo[1] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE));
+            DestPointsTwo[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE));
+
+            Mat Combination = CombineFaces(_rOne, _rTwo, DestPointsOne, DestPointsTwo);
+
+#if USE_INPAINTING == 0
+            return Combination;
+#else
+            Mat Mask   = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, CV_8U);
+            Mat Result = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, Combination.type());
+
+            Point MaskPoints[3];
+
+            MaskPoints[0] = Point(0, IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2);
+            MaskPoints[1] = Point(0, IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2);
+            MaskPoints[2] = Point(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2);
+
+            Scalar Color = Scalar(255, 255, 255);
+
+            fillConvexPoly(Mask, MaskPoints, 3, Color);
+
+            MaskPoints[0] = Point(0, IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2);
+            MaskPoints[1] = Point(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2);
+            MaskPoints[2] = Point(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2);
+
+            fillConvexPoly(Mask, MaskPoints, 3, Color);
+
+            // -----------------------------------------------------------------------------
+
+            inpaint(Combination, Mask, Result, INPAINT_RADIUS, INPAINT_METHOD);
+
+            // -----------------------------------------------------------------------------
+
+            return Result;
+#endif
+        };
+
+        // -----------------------------------------------------------------------------
+
+        auto CombineBottomFaces = [&](const Mat& _rOne, const Mat& _rTwo)->cv::Mat
+        {
+            Point2f DestPointsOne[3];
+            Point2f DestPointsTwo[3];
+
+            DestPointsOne[0] = Point2f(static_cast<float>(0)                , static_cast<float>(0));
+            DestPointsOne[1] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE));
+            DestPointsOne[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE));
+
+            DestPointsTwo[0] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE));
+            DestPointsTwo[1] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH));
+            DestPointsTwo[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH));
+
+            Mat Combination = CombineFaces(_rOne, _rTwo, DestPointsOne, DestPointsTwo);
+
+#if USE_INPAINTING == 0
+            return Combination;
+#else
+            Mat Mask   = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, CV_8U);
+            Mat Result = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, Combination.type());
+
+            Point MaskPoints[3];
+
+            MaskPoints[0] = Point(0, IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2);
+            MaskPoints[1] = Point(0, IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2);
+            MaskPoints[2] = Point(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2);
+
+            Scalar Color = Scalar(255, 255, 255);
+
+            fillConvexPoly(Mask, MaskPoints, 3, Color);
+
+            MaskPoints[0] = Point(0, IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2);
+            MaskPoints[1] = Point(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2);
+            MaskPoints[2] = Point(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2);
+
+            fillConvexPoly(Mask, MaskPoints, 3, Color);
+
+            // -----------------------------------------------------------------------------
+
+            inpaint(Combination, Mask, Result, INPAINT_RADIUS, INPAINT_METHOD);
+
+            // -----------------------------------------------------------------------------
+
+            return Result;
+#endif
+        };
+
+
+        CombinedRight.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
+        CombinedLeft.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
+        CombinedTop.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
+        CombinedBottom.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
+        FrontCroped.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
+        BackCroped.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
+
+        cv::Mat OriginalFrontImage;
+
+        OriginalFrontImage.create(cv::Size(1280, 720), CV_8UC3);
+
+        for (float y = 0; y < OriginalFrontImage.rows; y++)
+        {
+            for (float x = 0; x < OriginalFrontImage.cols; x++)
+            {
+                // set pixel
+                OriginalFrontImage.at<Vec3b>(Point(x, y)) = cv::Vec3b(x / (float)(OriginalFrontImage.cols) * 255, y / (float)(OriginalFrontImage.rows) * 255, 0);
+            }
+        }
+
+        // -----------------------------------------------------------------------------
+
+        flip(OriginalFrontImage, OriginalBackImage, 1);
+
+        // -----------------------------------------------------------------------------
+        // Crop front image
+        // -----------------------------------------------------------------------------
+        CropImage(OriginalFrontImage, FrontCroped, FrontLeftPart, FrontRightPart, FrontTopPart, FrontBottomPart);
+        CropImage(OriginalBackImage, BackCroped, BackLeftPart, BackRightPart, BackTopPart, BackBottomPart);
+
+        // -----------------------------------------------------------------------------
+        // Flip back images because of negative direction on back face
+        // -----------------------------------------------------------------------------
+        flip(BackTopPart, BackTopPart, -1);
+        flip(BackBottomPart, BackBottomPart, -1);
+
+        // -----------------------------------------------------------------------------
+        // Fill Images
+        // -----------------------------------------------------------------------------
+        CombinedRight  = CombineRightFaces(FrontRightPart, BackLeftPart);
+        CombinedLeft   = CombineLeftFaces(FrontLeftPart, BackRightPart);
+        CombinedTop    = CombineTopFaces(FrontTopPart, BackTopPart);
+        CombinedBottom = CombineBottomFaces(FrontBottomPart, BackBottomPart);
+
+
+        // -----------------------------------------------------------------------------
+        // Create and update texture
+        // -----------------------------------------------------------------------------
+
+        STextureDescriptor TextureDescriptor;
+        
+        TextureDescriptor.m_NumberOfPixelsU  = 512;
+        TextureDescriptor.m_NumberOfPixelsV  = 512;
+        TextureDescriptor.m_NumberOfPixelsW  = 1;
+        TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
+        TextureDescriptor.m_NumberOfTextures = 6;
+        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
+        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
+        TextureDescriptor.m_Format           = CTextureBase::Unknown;
+        TextureDescriptor.m_Usage            = CTextureBase::GPURead;
+        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        TextureDescriptor.m_pFileName        = 0;
+        TextureDescriptor.m_pPixels          = 0;
+        TextureDescriptor.m_Format           = CTextureBase::R8G8B8_UBYTE;
+        
+        m_LookUpTexturePtr = TextureManager::CreateCubeTexture(TextureDescriptor);
+
+        m_LookupTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_LookUpTexturePtr));
+
+
+        Base::UInt2 CubemapResolution = Base::UInt2(512, 512);
+
+        Base::AABB2UInt CubemapRect(Base::UInt2(0), CubemapResolution);
+
+        Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 0, CubemapRect, CubemapRect[1][0], CombinedRight.data, false);
+        Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 1, CubemapRect, CubemapRect[1][0], CombinedLeft.data, false);
+        Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 2, CubemapRect, CubemapRect[1][0], CombinedTop.data, false);
+        Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 3, CubemapRect, CubemapRect[1][0], CombinedBottom.data, false);
+        Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 4, CubemapRect, CubemapRect[1][0], FrontCroped.data, false);
+        Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 5, CubemapRect, CubemapRect[1][0], BackCroped.data, false);
+
+        Gfx::TextureManager::UpdateMipmap(m_LookUpTexturePtr);
     }
 } // namespace 
 
