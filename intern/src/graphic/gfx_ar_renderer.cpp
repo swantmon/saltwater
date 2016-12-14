@@ -116,7 +116,6 @@ namespace
         CTexture2DPtr m_BackgroundTexturePtr;
         CTexture2DPtr m_VSPositionTexturePtr;
         CTexture2DPtr m_VSPositionTempTexturePtr;
-        CTexture2DPtr m_CubemapTexturePtr;
         CTexture2DPtr m_WebcamTexturePtr;
 
         CTextureSetPtr m_BilateralBlurTextureSetPtr;
@@ -152,14 +151,13 @@ namespace
         , m_BackgroundTexturePtr             ()
         , m_VSPositionTexturePtr             ()
         , m_VSPositionTempTexturePtr         ()
-        , m_CubemapTexturePtr                ()
         , m_WebcamTexturePtr                 ()
         , m_BilateralBlurTextureSetPtr       ()
         , m_BilateralBlurTempTextureSetPtr   ()
         , m_CopyToGBufferTextureSetPtr       ()
         , m_DifferentualGBufferTextureSetPtr ()
         , m_PSSamplerSetPtr                  ()
-        , m_RenderJobs               ()
+        , m_RenderJobs                       ()
     {
         // -----------------------------------------------------------------------------
         // Register resize delegate
@@ -204,7 +202,6 @@ namespace
         m_BackgroundTexturePtr             = 0;
         m_VSPositionTexturePtr             = 0;
         m_VSPositionTempTexturePtr         = 0;
-        m_CubemapTexturePtr                = 0;
         m_WebcamTexturePtr                 = 0;
         m_BilateralBlurTextureSetPtr       = 0;
         m_BilateralBlurTempTextureSetPtr   = 0;
@@ -312,24 +309,6 @@ namespace
         m_WebcamTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
         m_DifferentualGBufferTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_WebcamTexturePtr));
-
-        // -----------------------------------------------------------------------------
-
-        TextureDescriptor.m_NumberOfPixelsU  = 512;
-        TextureDescriptor.m_NumberOfPixelsV  = 512;
-        TextureDescriptor.m_NumberOfPixelsW  = 1;
-        TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
-        TextureDescriptor.m_NumberOfTextures = 6;
-        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
-        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-        TextureDescriptor.m_Format           = CTextureBase::Unknown;
-        TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-        TextureDescriptor.m_pFileName        = 0;
-        TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = CTextureBase::R8G8B8_UBYTE;
-
-        m_CubemapTexturePtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
         // -----------------------------------------------------------------------------
 

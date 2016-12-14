@@ -1,4 +1,4 @@
-
+﻿
 #include "graphic/gfx_precompiled.h"
 
 #include "base/base_crc.h"
@@ -638,7 +638,7 @@ namespace
         {
             glBindTexture(GL_TEXTURE_CUBE_MAP, TextureHandle);
 
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + _IndexOfSlice, 0, InternalFormat, UpdateSize[0], UpdateSize[1], 0, Format, Type, _pBytes);
+            glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + _IndexOfSlice, 0, Offset[0], Offset[1], UpdateSize[0], UpdateSize[1], Format, Type, _pBytes);
 
             glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
         }
@@ -776,7 +776,7 @@ namespace
         unsigned int Binding    = _pTexture->GetBinding();
 
         // -----------------------------------------------------------------------------
-        // Check if binding is realted to graphics
+        // Check if binding is related to graphics
         // -----------------------------------------------------------------------------
         if (Binding == Dt::CTextureBase::CPU) return;
 
