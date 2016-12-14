@@ -686,7 +686,7 @@ namespace
         {
             glBindTexture(GL_TEXTURE_CUBE_MAP, TextureHandle);
 
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + _IndexOfSlice, 0, InternalFormat, UpdateSize[0], UpdateSize[1], 0, Format, Type, pInternTexture->GetPixels());
+            glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + _IndexOfSlice, 0, Offset[0], Offset[1], UpdateSize[0], UpdateSize[1], Format, Type, pInternTexture->GetPixels());
 
             glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
         }
