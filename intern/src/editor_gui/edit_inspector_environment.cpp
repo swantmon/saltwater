@@ -97,6 +97,9 @@ namespace Edit
 
     void CInspectorEnvironment::OnEntityInfoEnvironment(Edit::CMessage& _rMessage)
     {
+        char pTemp[256];
+        const char* pTexture = nullptr;
+
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
@@ -106,9 +109,12 @@ namespace Edit
 
         int Type = _rMessage.GetInt();
 
-        char pTemp[256];
+        bool HasTexture = _rMessage.GetBool();
 
-        const char* pTexture = _rMessage.GetString(pTemp, 256);
+        if (HasTexture)
+        {
+            pTexture = _rMessage.GetString(pTemp, 256);
+        }
 
         unsigned int TextureHash = _rMessage.GetInt();
 
@@ -123,7 +129,10 @@ namespace Edit
 
         m_pTypeCB->blockSignals(false);
 
-        m_pTextureValue->SetTextureFile(pTexture);
+        if (HasTexture)
+        {
+            m_pTextureValue->SetTextureFile(pTexture);
+        }
 
         m_pTextureValue->SetTextureHash(TextureHash);
 
