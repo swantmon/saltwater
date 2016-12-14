@@ -280,7 +280,7 @@ namespace
         // -----------------------------------------------------------------------------
         CSamplerPtr LinearFilter = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
 
-        CSamplerSetPtr SamplerSetPtr = SamplerManager::CreateSamplerSet(LinearFilter);
+        CSamplerSetPtr SamplerSetPtr = SamplerManager::CreateSamplerSet(LinearFilter, LinearFilter);
 
         m_SkyboxFromPanorama.m_SamplerSetPtr = SamplerSetPtr;
 
@@ -532,7 +532,7 @@ namespace
         m_SkyboxFromTexture.m_PSBufferSetPtr = BufferManager::CreateBufferSet(CubemapPSBuffer);
 
         m_SkyboxFromLUT.m_VSBufferSetPtr = 0;
-        m_SkyboxFromLUT.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSCubemapBuffer);
+        m_SkyboxFromLUT.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSSphericalBuffer);
         m_SkyboxFromLUT.m_PSBufferSetPtr = BufferManager::CreateBufferSet(CubemapPSBuffer);
 
         // -----------------------------------------------------------------------------
@@ -860,7 +860,7 @@ namespace
 
                         pGraphicSkyboxFacet->m_InputTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(TexturePtr));
 
-                        RenderSkyboxFromTexture(pGraphicSkyboxFacet, pDataSkyboxFacet->GetIntensity());
+                        RenderSkyboxFromLUT(pGraphicSkyboxFacet, pDataSkyboxFacet->GetIntensity());
                     }
                 }
             }
@@ -1219,8 +1219,6 @@ namespace
 
         ContextManager::SetTextureSetPS(_pOutput->m_InputTextureSetPtr);
 
-        ContextManager::SetTextureSetPS(m_LookupTextureSetPtr);
-
         // -----------------------------------------------------------------------------
         // Draw
         // -----------------------------------------------------------------------------
@@ -1321,6 +1319,8 @@ namespace
         ContextManager::SetConstantBufferSetPS(PSBufferSetPtr);
 
         ContextManager::SetTextureSetPS(_pOutput->m_InputTextureSetPtr);
+
+        ContextManager::SetTextureSetPS(m_LookupTextureSetPtr);
 
         // -----------------------------------------------------------------------------
         // Draw
