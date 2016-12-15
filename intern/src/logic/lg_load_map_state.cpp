@@ -269,45 +269,6 @@ namespace
             Dt::EntityManager::MarkEntityAsDirty(rEffectEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
-        {
-            Dt::SEntityDescriptor EntityDesc;
-
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::FX;
-            EntityDesc.m_EntityType     = Dt::SFXType::Bloom;
-            EntityDesc.m_FacetFlags     = 0;
-
-            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
-
-            rEffectEntity.SetName("Bloom");
-
-            Dt::CBloomFXFacet* pEffectFacet = Dt::BloomManager::CreateBloomFX();
-
-            pEffectFacet->SetSize(1);
-            pEffectFacet->SetIntensity(0.5f);
-
-            rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
-
-            Dt::EntityManager::MarkEntityAsDirty(rEffectEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-        }
-
-        {
-            Dt::SEntityDescriptor EntityDesc;
-
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::FX;
-            EntityDesc.m_EntityType     = Dt::SFXType::SSAO;
-            EntityDesc.m_FacetFlags     = 0;
-
-            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
-
-            rEffectEntity.SetName("SSAO");
-
-            Dt::CSSAOFXFacet* pEffectFacet = Dt::SSAOManager::CreateSSAOFX();
-
-            rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
-
-            Dt::EntityManager::MarkEntityAsDirty(rEffectEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-        }
-
         // -----------------------------------------------------------------------------
         // Setup light
         // -----------------------------------------------------------------------------
@@ -327,6 +288,7 @@ namespace
             pProbeLightFacet->SetType(Dt::CLightProbeFacet::Sky);
             pProbeLightFacet->SetQuality(Dt::CLightProbeFacet::PX512);
             pProbeLightFacet->SetIntensity(1.0f);
+            pProbeLightFacet->SetRefreshMode(Dt::CLightProbeFacet::Dynamic);
 
             rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pProbeLightFacet);
 
@@ -375,32 +337,6 @@ namespace
         {
             Dt::SModelFileDescriptor ModelFileDesc;
 
-            ModelFileDesc.m_pFileName = "models/plane.obj";
-            ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
-
-            Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
-
-            // -----------------------------------------------------------------------------
-
-            Dt::CEntity& rPlane = Dt::EntityManager::CreateEntityFromModel(rModel);
-
-            rPlane.SetName("Plane");
-
-            Dt::CTransformationFacet* pTransformationFacet = rPlane.GetTransformationFacet();
-
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.1f));
-            pTransformationFacet->SetScale(Base::Float3(0.01f));
-            pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, 0.0f));
-
-            Dt::EntityManager::MarkEntityAsDirty(rPlane, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-        }
-
-
-        // -----------------------------------------------------------------------------
-
-        {
-            Dt::SModelFileDescriptor ModelFileDesc;
-
             ModelFileDesc.m_pFileName = "models/sphere.obj";
             ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::DefaultFlipUVs;
 
@@ -414,8 +350,8 @@ namespace
 
             Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(4.0f, 4.0f, 1.0f));
-            pTransformationFacet->SetScale(Base::Float3(0.1f));
+            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 1.0f));
+            pTransformationFacet->SetScale(Base::Float3(1.0f));
             pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, 0.0f));
 
             // -----------------------------------------------------------------------------
@@ -444,47 +380,6 @@ namespace
 //             pScriptFacet->SetScriptFile("scripts/move_circle.lua");
 // 
 //             rSphere.SetDetailFacet(Dt::SFacetCategory::Script, pScriptFacet);
-        }
-
-        // -----------------------------------------------------------------------------
-
-        {
-            Dt::SModelFileDescriptor ModelFileDesc;
-
-            ModelFileDesc.m_pFileName = "models/plane.obj";
-            ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::DefaultFlipUVs;
-
-            Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
-
-            // -----------------------------------------------------------------------------
-
-            Dt::CEntity& rPlane = Dt::EntityManager::CreateEntityFromModel(rModel);
-
-            Dt::CTransformationFacet* pTransformationFacet = rPlane.GetTransformationFacet();
-
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.0f));
-            pTransformationFacet->SetScale(Base::Float3(0.1f));
-            pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, 0.0f));
-
-            // -----------------------------------------------------------------------------
-
-            Dt::CEntity* pSubEntity = rPlane.GetHierarchyFacet()->GetFirstChild();
-
-            Dt::CMeshActorFacet* pModelActorFacet = static_cast<Dt::CMeshActorFacet*>(pSubEntity->GetDetailFacet(Dt::SFacetCategory::Data));
-
-            Dt::SMaterialDescriptor MaterialFileDesc;
-
-            MaterialFileDesc.m_pFileName = "materials/tests/checker.mat";
-
-            Dt::CMaterial& rMaterial = Dt::MaterialManager::CreateMaterial(MaterialFileDesc);
-
-            pModelActorFacet->SetMaterial(0, &rMaterial);
-
-            Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyCreate);
-
-            // -----------------------------------------------------------------------------
-
-            Dt::EntityManager::MarkEntityAsDirty(rPlane, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
    }
 } // namespace
