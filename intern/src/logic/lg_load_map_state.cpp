@@ -154,6 +154,8 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup cameras
         // -----------------------------------------------------------------------------
+        Dt::CEntity* pCamera = nullptr;
+
         {
             Dt::SEntityDescriptor EntityDesc;
 
@@ -164,6 +166,8 @@ namespace
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
             rEntity.SetName("Main Camera");
+
+            pCamera = &rEntity;
 
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
@@ -380,6 +384,67 @@ namespace
 //             pScriptFacet->SetScriptFile("scripts/move_circle.lua");
 // 
 //             rSphere.SetDetailFacet(Dt::SFacetCategory::Script, pScriptFacet);
+        }
+
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Plugin;
+            EntityDesc.m_EntityType     = Dt::SPluginType::ARControlManager;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+
+            Dt::CEntity& rCurrentEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            rCurrentEntity.SetName("Plugin");
+
+            Dt::CTransformationFacet* pTransformationFacet = rCurrentEntity.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(0.0f));
+            pTransformationFacet->SetScale(Base::Float3(1.0f));
+            pTransformationFacet->SetRotation(0.0f);
+
+            // -----------------------------------------------------------------------------
+            // Create facet and set it
+            // -----------------------------------------------------------------------------
+            Dt::STextureDescriptor TextureDescriptor;
+
+            TextureDescriptor.m_NumberOfPixelsU  = 1280;
+            TextureDescriptor.m_NumberOfPixelsV  = 720;
+            TextureDescriptor.m_NumberOfPixelsW  = 1;
+            TextureDescriptor.m_Format           = Dt::CTextureBase::R8G8B8_UBYTE;
+            TextureDescriptor.m_Semantic         = Dt::CTextureBase::Diffuse;
+            TextureDescriptor.m_Binding          = Dt::CTextureBase::ShaderResource;
+            TextureDescriptor.m_pPixels          = 0;
+            TextureDescriptor.m_pFileName        = 0;
+            TextureDescriptor.m_pIdentifier      = "AR_BACKGROUND_TEXTURE";
+
+            Dt::CTexture2D* pBackgroundTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+
+            Dt::TextureManager::MarkTextureAsDirty(pBackgroundTexture, Dt::CTextureBase::DirtyCreate);
+
+            // -----------------------------------------------------------------------------
+
+            Dt::CARControllerPluginFacet* pFacet = Dt::ARControllerManager::CreateARControllerPlugin();
+
+            pFacet->SetCameraEntity       (pCamera);
+            pFacet->SetConfiguration      ("-device=WinDS -flipV -showDialog");
+            pFacet->SetCameraParameterFile("ar/configurations/logitech_para.dat");
+            pFacet->SetOutputBackground   (pBackgroundTexture);
+            pFacet->SetDeviceType         (Dt::CARControllerPluginFacet::Webcam);
+            pFacet->SetNumberOfMarker     (1);
+            
+            Dt::CARControllerPluginFacet::SMarker& rMarkerOne = pFacet->GetMarker(0);
+
+            rMarkerOne.m_UID          = 0;
+            rMarkerOne.m_Type         = Dt::CARControllerPluginFacet::SMarker::Square;
+            rMarkerOne.m_WidthInMeter = 0.08f;
+            rMarkerOne.m_PatternFile  = "ar/patterns/patt.hiro";
+
+            rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
+
+            // -----------------------------------------------------------------------------
+
+            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
    }
 } // namespace
