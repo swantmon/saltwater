@@ -234,6 +234,7 @@ namespace
         CShaderPtr CubemapVSPtr         = ShaderManager::CompileVS("vs_spherical_env_cubemap_generation.glsl", "main");
         CShaderPtr CubemapTextureVSPtr  = ShaderManager::CompileVS("vs_texture_env_cubemap_generation.glsl", "main");
         CShaderPtr CubemapGSPtr         = ShaderManager::CompileGS("gs_spherical_env_cubemap_generation.glsl", "main");
+        CShaderPtr CubemapRotateGSPtr   = ShaderManager::CompileGS("gs_spherical_rotate_env_cubemap_generation.glsl", "main");
         CShaderPtr CubemapPanoramaPSPtr = ShaderManager::CompilePS("fs_spherical_env_cubemap_generation.glsl", "main");
         CShaderPtr CubemapCubemapPSPtr  = ShaderManager::CompilePS("fs_cubemap_env_cubemap_generation.glsl", "main");
         CShaderPtr CubemapTexturePSPtr  = ShaderManager::CompilePS("fs_texture_env_cubemap_generation.glsl", "main");
@@ -271,7 +272,7 @@ namespace
         m_SkyboxFromTexture.m_InputLayoutPtr = P2SkytextureLayoutPtr;
 
         m_SkyboxFromLUT.m_VSPtr          = CubemapVSPtr;
-        m_SkyboxFromLUT.m_GSPtr          = CubemapGSPtr;
+        m_SkyboxFromLUT.m_GSPtr          = CubemapRotateGSPtr;
         m_SkyboxFromLUT.m_PSPtr          = CubemapLUTPSPtr;
         m_SkyboxFromLUT.m_InputLayoutPtr = P3N3T2CubemapInputLayoutPtr;
 
@@ -532,7 +533,7 @@ namespace
         m_SkyboxFromTexture.m_PSBufferSetPtr = BufferManager::CreateBufferSet(CubemapPSBuffer);
 
         m_SkyboxFromLUT.m_VSBufferSetPtr = 0;
-        m_SkyboxFromLUT.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSSphericalBuffer);
+        m_SkyboxFromLUT.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSSphericalBuffer, SkyboxFromTextureVSBufferPtr);
         m_SkyboxFromLUT.m_PSBufferSetPtr = BufferManager::CreateBufferSet(CubemapPSBuffer);
 
         // -----------------------------------------------------------------------------
@@ -1309,6 +1310,7 @@ namespace
         CShaderPtr        VSPtr            = m_SkyboxFromLUT.m_VSPtr;
         CShaderPtr        GSPtr            = m_SkyboxFromLUT.m_GSPtr;
         CShaderPtr        PSPtr            = m_SkyboxFromLUT.m_PSPtr;
+        CBufferSetPtr     VSBufferSetPtr   = m_SkyboxFromLUT.m_VSBufferSetPtr;
         CBufferSetPtr     GSBufferSetPtr   = m_SkyboxFromLUT.m_GSBufferSetPtr;
         CBufferSetPtr     PSBufferSetPtr   = m_SkyboxFromLUT.m_PSBufferSetPtr;
         CInputLayoutPtr   InputLayoutPtr   = m_SkyboxFromLUT.m_InputLayoutPtr;
@@ -1317,6 +1319,18 @@ namespace
         CSamplerSetPtr    SamplerSetPtr    = m_SkyboxFromLUT.m_SamplerSetPtr;
 
         Performance::BeginEvent("Skybox from LUT");
+
+        // -----------------------------------------------------------------------------
+        // Setup constant buffer
+        // -----------------------------------------------------------------------------
+        SSkyboxFromTextureVSBuffer* pViewBuffer = static_cast<SSkyboxFromTextureVSBuffer*>(BufferManager::MapConstantBuffer(GSBufferSetPtr->GetBuffer(1)));
+
+        pViewBuffer->m_ModelMatrix  = Base::Float4x4::s_Identity;
+        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(-1.0f, 1.0f, 1.0f);
+        pViewBuffer->m_ModelMatrix *= ViewManager::GetMainCamera()->GetView()->GetRotationMatrix();
+        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetRotationX(Base::DegreesToRadians(-90.0f));
+
+        BufferManager::UnmapConstantBuffer(GSBufferSetPtr->GetBuffer(1));
 
         // -----------------------------------------------------------------------------
         // Setup constant buffer
@@ -1354,6 +1368,8 @@ namespace
 
         ContextManager::SetInputLayout(InputLayoutPtr);
 
+        ContextManager::SetConstantBufferSetVS(VSBufferSetPtr);
+
         ContextManager::SetConstantBufferSetGS(GSBufferSetPtr);
 
         ContextManager::SetConstantBufferSetPS(PSBufferSetPtr);
@@ -1375,6 +1391,8 @@ namespace
         ContextManager::ResetConstantBufferSetPS();
 
         ContextManager::ResetConstantBufferSetGS();
+
+        ContextManager::ResetConstantBufferSetVS();
 
         ContextManager::ResetInputLayout();
 
