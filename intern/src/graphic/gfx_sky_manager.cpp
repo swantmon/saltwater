@@ -1322,13 +1322,18 @@ namespace
 
         // -----------------------------------------------------------------------------
         // Setup constant buffer
+        // TODO: Currently it is not totally clear how to rotate the sphere
+        // to get a proper environment without env. rotation. Now the rotation works 
+        // only if the camera is inside the playing area.
+        // Otherwise we have an gimbal lock.
         // -----------------------------------------------------------------------------
         SSkyboxFromTextureVSBuffer* pViewBuffer = static_cast<SSkyboxFromTextureVSBuffer*>(BufferManager::MapConstantBuffer(GSBufferSetPtr->GetBuffer(1)));
 
+        Base::Float3 Rotation;
+        ViewManager::GetMainCamera()->GetView()->GetRotationMatrix().GetRotation(Rotation);
+
         pViewBuffer->m_ModelMatrix  = Base::Float4x4::s_Identity;
-        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(-1.0f, 1.0f, 1.0f);
-        pViewBuffer->m_ModelMatrix *= ViewManager::GetMainCamera()->GetView()->GetRotationMatrix();
-        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetRotationX(Base::DegreesToRadians(-90.0f));
+        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetRotationY(Rotation[1]);
 
         BufferManager::UnmapConstantBuffer(GSBufferSetPtr->GetBuffer(1));
 
