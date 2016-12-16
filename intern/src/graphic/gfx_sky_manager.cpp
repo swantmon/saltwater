@@ -1746,21 +1746,20 @@ namespace
 
         cv::Mat CombinedRight, CombinedLeft, CombinedTop, CombinedBottom;
 
-        CombinedRight .create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
-        CombinedLeft  .create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
-        CombinedTop   .create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
-        CombinedBottom.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
-        FrontCroped   .create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
-        BackCroped    .create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
+        CombinedRight .create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_32FC2);
+        CombinedLeft  .create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_32FC2);
+        CombinedTop   .create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_32FC2);
+        CombinedBottom.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_32FC2);
+        FrontCroped   .create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_32FC2);
+        BackCroped    .create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_32FC2);
 
-        OriginalFrontImage.create(cv::Size(1280, 720), CV_8UC3);
+        OriginalFrontImage.create(cv::Size(1280, 720), CV_32FC2);
 
-        for (float y = 0; y < OriginalFrontImage.rows; y++)
+        for (int CurrentY = 0; CurrentY < OriginalFrontImage.rows; CurrentY++)
         {
-            for (float x = 0; x < OriginalFrontImage.cols; x++)
+            for (int CurrentX = 0; CurrentX < OriginalFrontImage.cols; CurrentX++)
             {
-                // set pixel
-                OriginalFrontImage.at<Vec3b>(Point(x, y)) = cv::Vec3b(x / (float)(OriginalFrontImage.cols) * 255, y / (float)(OriginalFrontImage.rows) * 255, 0);
+                OriginalFrontImage.at<Vec2f>(Point(CurrentX, CurrentY)) = cv::Vec2f(static_cast<float>(CurrentX) / static_cast<float>(OriginalFrontImage.cols), static_cast<float>(CurrentY) / static_cast<float>(OriginalFrontImage.rows));
             }
         }
 
@@ -1807,7 +1806,7 @@ namespace
         TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
         TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = CTextureBase::R8G8B8_UBYTE;
+        TextureDescriptor.m_Format           = CTextureBase::R32G32_FLOAT;
         
         m_LookUpTexturePtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
