@@ -32,19 +32,6 @@
 
 #include "opencv2/opencv.hpp"
 
-#define CROP_PERCENTAGE 0.8f
-#define IMAGE_EDGE_LENGTH 512
-#define IMAGE_SPACE 0
-#define USE_INPAINTING 0
-#define INPAINT_RADIUS 0
-#define INPAINT_METHOD INPAINT_TELEA
-
-cv::Mat RedImage;
-cv::Mat OriginalFrontImage, FrontCroped, FrontLeftPart, FrontRightPart, FrontTopPart, FrontBottomPart;
-cv::Mat OriginalBackImage, BackCroped, BackLeftPart, BackRightPart, BackTopPart, BackBottomPart;
-
-cv::Mat CombinedRight, CombinedLeft, CombinedTop, CombinedBottom;
-
 using namespace Gfx;
 
 namespace 
@@ -1431,6 +1418,13 @@ namespace
     {
         using namespace cv;
 
+        #define CROP_PERCENTAGE 0.8f
+        #define IMAGE_EDGE_LENGTH 512
+        #define IMAGE_SPACE 0
+        #define USE_INPAINTING 0
+        #define INPAINT_RADIUS 0
+        #define INPAINT_METHOD INPAINT_TELEA
+
         auto CropImage = [&](const Mat& _rOriginal, Mat& _rCroppedImage, Mat& _rLeftPart, Mat& _rRightPart, Mat& _rTopPart, Mat& _rBottomPart)
         {
             int LengthX;
@@ -1747,15 +1741,17 @@ namespace
 #endif
         };
 
+        cv::Mat OriginalFrontImage, FrontCroped, FrontLeftPart, FrontRightPart, FrontTopPart, FrontBottomPart;
+        cv::Mat OriginalBackImage, BackCroped, BackLeftPart, BackRightPart, BackTopPart, BackBottomPart;
 
-        CombinedRight.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
-        CombinedLeft.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
-        CombinedTop.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
+        cv::Mat CombinedRight, CombinedLeft, CombinedTop, CombinedBottom;
+
+        CombinedRight .create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
+        CombinedLeft  .create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
+        CombinedTop   .create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
         CombinedBottom.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
-        FrontCroped.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
-        BackCroped.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
-
-        cv::Mat OriginalFrontImage;
+        FrontCroped   .create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
+        BackCroped    .create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
 
         OriginalFrontImage.create(cv::Size(1280, 720), CV_8UC3);
 
@@ -1799,8 +1795,8 @@ namespace
 
         STextureDescriptor TextureDescriptor;
         
-        TextureDescriptor.m_NumberOfPixelsU  = 512;
-        TextureDescriptor.m_NumberOfPixelsV  = 512;
+        TextureDescriptor.m_NumberOfPixelsU  = IMAGE_EDGE_LENGTH;
+        TextureDescriptor.m_NumberOfPixelsV  = IMAGE_EDGE_LENGTH;
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
         TextureDescriptor.m_NumberOfTextures = 6;
@@ -1818,7 +1814,7 @@ namespace
         m_LookupTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_LookUpTexturePtr));
 
 
-        Base::UInt2 CubemapResolution = Base::UInt2(512, 512);
+        Base::UInt2 CubemapResolution = Base::UInt2(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH);
 
         Base::AABB2UInt CubemapRect(Base::UInt2(0), CubemapResolution);
 
