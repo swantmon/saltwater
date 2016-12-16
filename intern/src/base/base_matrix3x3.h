@@ -143,7 +143,7 @@ namespace MATH
 
         inline void GetRotation(CMatrix3x3<T>& _rRotationMatrix) const;
         
-        inline void GetRotation(CVector3<T>& _rRotation);
+        inline void GetRotation(CVector3<T>& _rRotation) const;
         
     public:
         
@@ -890,7 +890,7 @@ namespace MATH
     // -----------------------------------------------------------------------------
     
     template<typename T>
-    inline void CMatrix3x3<T>::GetRotation(CVector3<T>& _rRotation)
+    inline void CMatrix3x3<T>::GetRotation(CVector3<T>& _rRotation) const
     {
         _rRotation[0] = atan2(m_V[A32], m_V[A33]);
         _rRotation[1] = atan2(-m_V[A31], sqrt(m_V[A32] * m_V[A32] + m_V[A33] * m_V[A33]));

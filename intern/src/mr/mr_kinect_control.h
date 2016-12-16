@@ -23,7 +23,5 @@ namespace MR
         virtual void InternStop();
 
         virtual void InternUpdate();
-
-        void ProcessEnvironmentApproximation();
     };
 } // namespace MR

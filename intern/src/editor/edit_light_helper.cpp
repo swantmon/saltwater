@@ -340,19 +340,23 @@ namespace
 
             if (pLightFacet->GetType() == Dt::CSkyFacet::Cubemap)
             {
+                NewMessage.PutBool(true);
+
                 NewMessage.PutString(pLightFacet->GetCubemap()->GetFileName());
 
                 NewMessage.PutInt(pLightFacet->GetCubemap()->GetHash());
             }
             else if (pLightFacet->GetType() == Dt::CSkyFacet::Panorama)
             {
+                NewMessage.PutBool(true);
+
                 NewMessage.PutString(pLightFacet->GetPanorama()->GetFileName());
 
                 NewMessage.PutInt(pLightFacet->GetPanorama()->GetHash());
             }
-            else if (pLightFacet->GetType() == Dt::CSkyFacet::Texture)
+            else if (pLightFacet->GetType() == Dt::CSkyFacet::Texture || pLightFacet->GetType() == Dt::CSkyFacet::TextureLUT)
             {
-                NewMessage.PutString(pLightFacet->GetTexture()->GetFileName());
+                NewMessage.PutBool(false);
 
                 NewMessage.PutInt(pLightFacet->GetTexture()->GetHash());
             }
@@ -588,7 +592,7 @@ namespace
 
                 pLightFacet->SetPanorama(pTexturePanorama);
             }
-            else if (pLightFacet->GetType() == Dt::CSkyFacet::Texture)
+            else if (pLightFacet->GetType() == Dt::CSkyFacet::Texture || pLightFacet->GetType() == Dt::CSkyFacet::TextureLUT)
             {
                 Dt::CTexture2D* pTexture = Dt::TextureManager::GetTexture2DByHash(TextureHash);
 

@@ -380,7 +380,6 @@ namespace
         // Update general stuff
         // -----------------------------------------------------------------------------
         m_pActiveControl->SetConvertedFrame(m_pControllerPlugin->GetOutputBackground());
-        m_pActiveControl->SetCubemap(m_pControllerPlugin->GetOutputCubemap());
 
         m_pActiveControl->Start(m_pControllerPlugin->GetCameraParameterFile());
     }

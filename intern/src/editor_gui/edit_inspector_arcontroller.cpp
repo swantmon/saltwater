@@ -149,8 +149,6 @@ namespace Edit
 
         unsigned int OutputBackground = _rMessage.GetInt();
 
-        unsigned int OutputCubemap = _rMessage.GetInt();
-
         unsigned int NumberOfMarker = _rMessage.GetInt();
 
         // -----------------------------------------------------------------------------
@@ -170,8 +168,6 @@ namespace Edit
         }
 
         m_pOutputBackgroundEdit->setText(QString::number(OutputBackground));
-
-        m_pOutputCubemapEdit->setText(QString::number(OutputCubemap));
 
         m_pNumberOfMarkerEdit->setText(QString::number(NumberOfMarker));
 

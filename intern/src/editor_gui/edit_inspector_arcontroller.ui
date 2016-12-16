@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>303</width>
-    <height>237</height>
+    <height>211</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,13 +22,10 @@
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
        <layout class="QGridLayout" name="gridLayout_2">
-        <item row="5" column="1">
-         <widget class="QLineEdit" name="m_pOutputCubemapEdit">
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_8">
           <property name="text">
-           <string/>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
+           <string>Configuration</string>
           </property>
          </widget>
         </item>
@@ -46,17 +43,17 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="1">
-         <widget class="QLineEdit" name="m_pParameterFile">
-          <property name="text">
-           <string>../assets/</string>
-          </property>
-         </widget>
-        </item>
         <item row="3" column="1">
          <widget class="QLineEdit" name="m_pCameraEntityIDEdit">
           <property name="text">
            <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="label_7">
+          <property name="text">
+           <string>Number of Marker</string>
           </property>
          </widget>
         </item>
@@ -74,34 +71,10 @@
           </property>
          </widget>
         </item>
-        <item row="6" column="0">
-         <widget class="QLabel" name="label_7">
+        <item row="2" column="1">
+         <widget class="QLineEdit" name="m_pParameterFile">
           <property name="text">
-           <string>Number of Marker</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1">
-         <widget class="QLineEdit" name="m_pOutputBackgroundEdit">
-          <property name="text">
-           <string/>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="1">
-         <widget class="QLineEdit" name="m_pNumberOfMarkerEdit">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_8">
-          <property name="text">
-           <string>Configuration</string>
+           <string>../assets/</string>
           </property>
          </widget>
         </item>
@@ -126,10 +99,20 @@
           </item>
          </widget>
         </item>
-        <item row="5" column="0">
-         <widget class="QLabel" name="label_6">
+        <item row="5" column="1">
+         <widget class="QLineEdit" name="m_pNumberOfMarkerEdit">
           <property name="text">
-           <string>Output Cubemap</string>
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QLineEdit" name="m_pOutputBackgroundEdit">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -153,7 +136,6 @@
   <tabstop>m_pParameterFile</tabstop>
   <tabstop>m_pCameraEntityIDEdit</tabstop>
   <tabstop>m_pOutputBackgroundEdit</tabstop>
-  <tabstop>m_pOutputCubemapEdit</tabstop>
   <tabstop>m_pNumberOfMarkerEdit</tabstop>
  </tabstops>
  <resources/>
@@ -219,22 +201,6 @@
     <hint type="destinationlabel">
      <x>299</x>
      <y>196</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>m_pOutputCubemapEdit</sender>
-   <signal>textEdited(QString)</signal>
-   <receiver>InspectorARController</receiver>
-   <slot>valueChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>169</x>
-     <y>175</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>276</x>
-     <y>228</y>
     </hint>
    </hints>
   </connection>

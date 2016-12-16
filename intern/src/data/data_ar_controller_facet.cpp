@@ -10,7 +10,6 @@ namespace Dt
     CARControllerPluginFacet::CARControllerPluginFacet()
         : m_pCameraEntity      (nullptr)
         , m_pOutputBackground  (nullptr)
-        , m_pOutputCubemap     (nullptr)
         , m_DeviceType         (Undefined)
         , m_NumberOfMarker     (0)
         , m_CameraParameterFile()
@@ -109,27 +108,6 @@ namespace Dt
     const Dt::CTexture2D* CARControllerPluginFacet::GetOutputBackground() const
     {
         return m_pOutputBackground;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CARControllerPluginFacet::SetOutputCubemap(Dt::CTextureCube* _pOutputCubemap)
-    {
-        m_pOutputCubemap = _pOutputCubemap;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Dt::CTextureCube* CARControllerPluginFacet::GetOutputCubemap()
-    {
-        return m_pOutputCubemap;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const Dt::CTextureCube* CARControllerPluginFacet::GetOutputCubemap() const
-    {
-        return m_pOutputCubemap;
     }
 
     // -----------------------------------------------------------------------------

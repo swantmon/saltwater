@@ -36,6 +36,5 @@ namespace MR
     private:
 
         void ConvertOriginalToOutput();
-        void ProcessEnvironmentApproximation();
     };
 } // namespace MR
