@@ -592,7 +592,7 @@ namespace
 
                 pLightFacet->SetPanorama(pTexturePanorama);
             }
-            else if (pLightFacet->GetType() == Dt::CSkyFacet::Texture)
+            else if (pLightFacet->GetType() == Dt::CSkyFacet::Texture || pLightFacet->GetType() == Dt::CSkyFacet::TextureLUT)
             {
                 Dt::CTexture2D* pTexture = Dt::TextureManager::GetTexture2DByHash(TextureHash);
 
