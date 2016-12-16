@@ -11,7 +11,7 @@ out gl_PerVertex
 
 layout(row_major, std140, binding = 1) uniform PerDrawCall
 {
-	float Scale;
+	mat4 g_WorldMatrix;
 };
 
 layout(binding = 0, r16_snorm) readonly uniform image3D vs_VoxelData;
@@ -29,7 +29,7 @@ void main(void)
 	VoxelPosition.z = Index % CUBE_WIDTH;
 	float Voxel = imageLoad(vs_VoxelData, ivec3(VoxelPosition)).r;
 	out_Color = Voxel > 0.0 ? 1.0 : 0.0;
-    gl_Position = g_WorldToScreen * vec4(VertexPosition * Scale, 1.0);
+    gl_Position = g_WorldToScreen * g_WorldMatrix * vec4(VertexPosition, 1.0);
 }
 
 #endif // __INCLUDE_VS_VOXEL_GLSL__

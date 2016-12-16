@@ -10,6 +10,8 @@ struct _Matrix4;
 typedef _Matrix4 Matrix4;
 struct _NUI_FUSION_IMAGE_FRAME;
 typedef _NUI_FUSION_IMAGE_FRAME NUI_FUSION_IMAGE_FRAME;
+struct _DepthSpacePoint;
+typedef _DepthSpacePoint DepthSpacePoint;
 
 namespace MR
 {
@@ -17,24 +19,24 @@ namespace MR
     {
     public:
 
-		static const int VoxelCountX = 256;
-		static const int VoxelCountY = 256;
-		static const int VoxelCountZ = 256;
-		static const int VoxelsPerMeter = 256;
-		static const int VoxelCount = VoxelCountX * VoxelCountY * VoxelCountZ;
-
         CKinectControl();
         ~CKinectControl();
 
     public:
 
-        void Start();
+        void Start(int VoxelCountX, int VoxelCountY, int VoxelCountZ, float VoxelsPerMeter);
         void Stop();
 
         void Update();
 		void ExportVolumeBlock(short* pVolumeBlock);
 
 	private:
+
+        int m_VoxelCountX;
+        int m_VoxelCountY;
+        int m_VoxelCountZ;
+        float m_VoxelsPerMeter;
+        int m_VoxelCount;
 
 		IKinectSensor*            m_pKinect;
 		INuiFusionReconstruction* m_pVolume;
@@ -43,5 +45,14 @@ namespace MR
 		NUI_FUSION_IMAGE_FRAME*   m_pPointCloud;
 		NUI_FUSION_IMAGE_FRAME*   m_pShadedSurface;
 		Matrix4*                  m_pTransform;
+
+        unsigned short* m_pDepthImagePixelBuffer;
+        DepthSpacePoint* m_pDepthDistortionMap;
+        unsigned int* m_pDepthDistortionLT;
+        
+        __int64 m_CoordinateMappingChangedEvent;
+
+        double m_TimeSinceLastUpdate;
+        bool m_VolumeExported;
     };
 } // namespace MR

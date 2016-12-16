@@ -6,6 +6,8 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_time.h"
+
 #include "data/data_map.h"
 
 #include "graphic/gfx_buffer_manager.h"
@@ -33,11 +35,14 @@
 #include "mr/mr_kinect_control.h"
 
 #include <gl/glew.h>
+#include <gl/wglew.h>
 
-#include <array>
+#include <atomic>
 #include <fstream>
 #include <iostream>
+#include <mutex>
 #include <sstream>
+#include <thread>
 
 using namespace Gfx;
 
@@ -45,12 +50,14 @@ namespace
 {
     struct SDrawCallBufferData
     {
-        float m_CubeScale;
-        Base::Float3 Padding1;
+        Base::Float4x4 m_WorldMatrix;
     };
 
-    const float CubeWidth = 20.0f;
+    const float CubeWidth = 15.0f;
+
     const int CubeVoxelWidth = 256;
+    const float VoxelsPerMeter = 256.0f;
+
     const int VoxelCount = CubeVoxelWidth * CubeVoxelWidth * CubeVoxelWidth;
 
     const unsigned int TileSize = 8;
@@ -88,17 +95,34 @@ namespace
 
 	private:
 
+        std::thread StartKinectThread();
+        void UpdateKinectVoxelData();
+
+        Base::Float4x4 m_WorldMatrix;
+
 		short* m_pVolumeBlock;
 
         GLuint m_VertexArray;
         GLuint m_VoxelDataBuffer;
         GLuint m_DrawCallConstantBuffer;
 
+        GLuint m_VoxelDataPBOs[2];
+        int m_WritablePBOIndex;
+        std::atomic_bool m_NewVolumeExported;
+
         CShaderPtr m_VertexShader;
         CShaderPtr m_FragmentShader;
         CShaderPtr m_ComputeShader;
         
 		MR::CKinectControl m_KinectControl;
+
+        double m_TimeSinceLastVoxelUpdate;
+
+        short* m_pVolumeData;
+
+        std::thread m_KinectThread;
+        std::atomic_bool m_KinectThreadStopped;
+        std::mutex m_VolumeBlockMutex;
     };
 } // namespace
 
@@ -122,6 +146,8 @@ namespace
     
     void CGfxVoxelRenderer::OnStart()
     {
+        m_TimeSinceLastVoxelUpdate = 0.0;
+
         Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxVoxelRenderer::OnResize));
 
         float Translation = - CubeVoxelWidth / 2.0f;
@@ -159,15 +185,54 @@ namespace
 
 		m_pVolumeBlock = new short[VoxelCount];
 
-		m_KinectControl.Start();
+        glGenBuffers(2, m_VoxelDataPBOs);
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_VoxelDataPBOs[0]);
+        glBufferData(GL_PIXEL_UNPACK_BUFFER, VoxelCount * sizeof(short), nullptr, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_VoxelDataPBOs[1]);
+        glBufferData(GL_PIXEL_UNPACK_BUFFER, VoxelCount * sizeof(short), nullptr, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+        m_WritablePBOIndex = 0;
+
+        m_pVolumeData = static_cast<short*>(glMapNamedBuffer(m_VoxelDataPBOs[m_WritablePBOIndex], GL_WRITE_ONLY));
+
+        m_NewVolumeExported = false;
+        m_KinectThreadStopped = true;
+        m_KinectThread = StartKinectThread();
     }
     
     // -----------------------------------------------------------------------------
     
+
+    std::thread CGfxVoxelRenderer::StartKinectThread()
+    {
+        auto ThreadFunctor = [this]
+        {
+            m_KinectControl.Start(CubeVoxelWidth, CubeVoxelWidth, CubeVoxelWidth, VoxelsPerMeter);
+
+            m_KinectThreadStopped = false;
+
+            while (!m_KinectThreadStopped)
+            {
+                this->UpdateKinectVoxelData();
+            }
+
+            m_KinectControl.Stop();
+        };
+
+        std::thread WorkerThread(ThreadFunctor);
+
+        return WorkerThread;
+    }
+
+    // -----------------------------------------------------------------------------
+    
     void CGfxVoxelRenderer::OnExit()
     {
+        m_KinectThreadStopped = true;
+        m_KinectThread.join();
+
 		delete[] m_pVolumeBlock;
-		m_KinectControl.Stop();
 
         m_VertexShader = 0;
         m_FragmentShader = 0;
@@ -219,17 +284,17 @@ namespace
     
     void CGfxVoxelRenderer::OnSetupTextures()
     {
-		glGenTextures(1, &m_VoxelDataBuffer);
+        glGenTextures(1, &m_VoxelDataBuffer);
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_3D, m_VoxelDataBuffer);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		
-		glTexImage3D(GL_TEXTURE_3D, 0, GL_R16, CubeVoxelWidth, CubeVoxelWidth, CubeVoxelWidth, 0, GL_RED, GL_SHORT, nullptr);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_3D, m_VoxelDataBuffer);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_R16, CubeVoxelWidth, CubeVoxelWidth, CubeVoxelWidth, 0, GL_RED, GL_SHORT, nullptr);
 
 		/*const unsigned int VoxelCount = CubeVoxelWidth * CubeVoxelWidth * CubeVoxelWidth;
 
@@ -312,31 +377,39 @@ namespace
     
     // -----------------------------------------------------------------------------
     
+    void CGfxVoxelRenderer::UpdateKinectVoxelData()
+    {
+        m_KinectControl.Update();
+
+        m_TimeSinceLastVoxelUpdate += Core::Time::GetDeltaTimeLastFrame();
+
+        if (!m_NewVolumeExported)
+        {
+            m_KinectControl.ExportVolumeBlock(m_pVolumeData);
+            
+            m_NewVolumeExported = true;
+            m_TimeSinceLastVoxelUpdate = 0.0;
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxVoxelRenderer::Update()
     {
-		m_KinectControl.Update();
+        if (m_KinectThreadStopped)
+        {
+            return;
+        }
 
-		static int FrameCount = 0;
+        const float Scale = CubeWidth / CubeVoxelWidth;
 
-		if (FrameCount++ % 200 == 0)
-		{
-			BASE_CONSOLE_INFO("Exporting volume block");
+        Base::Float4x4 ScalingMatrix;
+        Base::Float4x4 RotationMatrix;
 
-			m_KinectControl.ExportVolumeBlock(m_pVolumeBlock);
+        ScalingMatrix.SetScale(Scale, Scale, -Scale);
+        RotationMatrix.SetRotation(0.0f, 0.0f, 3.14f);
 
-            for (int i = 0; i < VoxelCount; ++ i)
-            {
-                if (m_pVolumeBlock[i] > -32767)
-                {
-                    std::cout << m_pVolumeBlock[i] << '\n';
-                }
-            }
-
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_3D, m_VoxelDataBuffer);
-			glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, CubeVoxelWidth, CubeVoxelWidth, CubeVoxelWidth, GL_RED, GL_SHORT, m_pVolumeBlock);
-            glBindTexture(GL_TEXTURE_3D, 0);
-		}
+        m_WorldMatrix = RotationMatrix * ScalingMatrix;
     }
     
     // -----------------------------------------------------------------------------
@@ -373,11 +446,31 @@ namespace
         CNativeBuffer FrameConstantBuffer = *static_cast<CNativeBuffer*>(FrameConstantBufferPtr.GetPtr());
 
         SDrawCallBufferData* pBuffer = static_cast<SDrawCallBufferData*>(glMapNamedBuffer(m_DrawCallConstantBuffer, GL_WRITE_ONLY));
-        pBuffer->m_CubeScale = CubeWidth / CubeVoxelWidth;
+        pBuffer->m_WorldMatrix = m_WorldMatrix;
         glUnmapNamedBuffer(m_DrawCallConstantBuffer);
 
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, FrameConstantBuffer.m_NativeBuffer);
         glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_DrawCallConstantBuffer);
+
+        if (m_NewVolumeExported)
+        {
+            glUnmapNamedBuffer(m_VoxelDataPBOs[m_WritablePBOIndex]);
+
+            glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_VoxelDataPBOs[m_WritablePBOIndex]);
+
+            m_WritablePBOIndex = (m_WritablePBOIndex + 1) % 2;
+
+            m_pVolumeData = static_cast<short*>(glMapNamedBuffer(m_VoxelDataPBOs[m_WritablePBOIndex], GL_WRITE_ONLY));
+
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_3D, m_VoxelDataBuffer);
+            glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, CubeVoxelWidth, CubeVoxelWidth, CubeVoxelWidth, GL_RED, GL_SHORT, 0);
+            glBindTexture(GL_TEXTURE_3D, 0);
+
+            glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+            m_NewVolumeExported = false;
+        }
 
         glBindImageTexture(0, m_VoxelDataBuffer, 0, GL_TRUE, 0, GL_READ_ONLY, GL_R16);
 
