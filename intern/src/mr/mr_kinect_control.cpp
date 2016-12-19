@@ -85,7 +85,6 @@ namespace MR
         m_VoxelsPerMeter = VoxelsPerMeter;
         m_VoxelCount = VoxelCountX * VoxelCountY * VoxelCountZ;
 
-        m_TimeSinceLastUpdate = 0.0;
         m_VolumeExported = true;
 
         m_pTransform = new Matrix4();
@@ -181,6 +180,17 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
+    Base::Float4x4 CKinectControl::GetWorldToCameraMatrix()
+    {
+        Base::Float4x4 WorldToCamera;
+
+        CheckResult(m_pVolume->GetCurrentWorldToCameraTransform(reinterpret_cast<Matrix4*>(&WorldToCamera)), "Failed to get current world to camera transform");
+
+        return WorldToCamera;
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CKinectControl::Stop()
     {
         delete[] m_pDepthImagePixelBuffer;
@@ -247,6 +257,7 @@ namespace MR
             m_pDepthImageFrame, NUI_FUSION_DEFAULT_MINIMUM_DEPTH, NUI_FUSION_DEFAULT_MAXIMUM_DEPTH, false);
 
         Result = m_pVolume->ProcessFrame(m_pDepthImageFrame, NUI_FUSION_DEFAULT_ALIGN_ITERATION_COUNT, NUI_FUSION_DEFAULT_INTEGRATION_WEIGHT, nullptr, m_pTransform);
+
         if (Result == E_NUI_FUSION_TRACKING_ERROR)
         {
             BASE_CONSOLE_INFO("Kinect fusion tracking failed");
@@ -256,7 +267,15 @@ namespace MR
             m_pTransform->M31 = 0; m_pTransform->M32 = 0; m_pTransform->M33 = 1; m_pTransform->M34 = 0;
             m_pTransform->M41 = 0; m_pTransform->M42 = 0; m_pTransform->M43 = 0; m_pTransform->M44 = 1;
             
-            m_pVolume->ResetReconstruction(m_pTransform, nullptr);
+            Matrix4 worldToVolumeTransform = *m_pTransform;
+
+            float minDist = NUI_FUSION_DEFAULT_MINIMUM_DEPTH;
+            worldToVolumeTransform.M43 -= (minDist * m_VoxelsPerMeter);
+
+            m_pVolume->ResetReconstruction(m_pTransform, &worldToVolumeTransform);
+
+            //m_pVolume->ResetReconstruction(m_pTransform, nullptr);
+
         }
         else
         {
@@ -268,7 +287,5 @@ namespace MR
         CheckResult(m_pVolume->CalculatePointCloud(m_pPointCloud, m_pTransform), "Failed to calculate point cloud");
 
         m_VolumeExported = false;
-
-        m_TimeSinceLastUpdate = 0.0;
     }
 } // namespace MR

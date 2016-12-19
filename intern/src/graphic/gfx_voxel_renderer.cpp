@@ -51,9 +51,10 @@ namespace
     struct SDrawCallBufferData
     {
         Base::Float4x4 m_WorldMatrix;
+        Base::Float4x4 m_WorldToCameraMatrix;
     };
 
-    const float CubeWidth = 15.0f;
+    const float CubeWidth = 10.0f;
 
     const int CubeVoxelWidth = 256;
     const float VoxelsPerMeter = 256.0f;
@@ -401,15 +402,17 @@ namespace
             return;
         }
 
-        const float Scale = CubeWidth / CubeVoxelWidth;
+        const float Scale = CubeWidth / CubeVoxelWidth * 0.2f;
 
         Base::Float4x4 ScalingMatrix;
         Base::Float4x4 RotationMatrix;
 
-        ScalingMatrix.SetScale(Scale, Scale, -Scale);
+        ScalingMatrix.SetScale(-Scale, Scale, -Scale);
+
+        //RotationMatrix.SetIdentity();
         RotationMatrix.SetRotation(0.0f, 0.0f, 3.14f);
 
-        m_WorldMatrix = RotationMatrix * ScalingMatrix;
+        m_WorldMatrix = ScalingMatrix * RotationMatrix;
     }
     
     // -----------------------------------------------------------------------------
@@ -447,6 +450,7 @@ namespace
 
         SDrawCallBufferData* pBuffer = static_cast<SDrawCallBufferData*>(glMapNamedBuffer(m_DrawCallConstantBuffer, GL_WRITE_ONLY));
         pBuffer->m_WorldMatrix = m_WorldMatrix;
+        pBuffer->m_WorldToCameraMatrix = m_KinectControl.GetWorldToCameraMatrix();
         glUnmapNamedBuffer(m_DrawCallConstantBuffer);
 
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, FrameConstantBuffer.m_NativeBuffer);

@@ -3,6 +3,8 @@
 
 #include "mr/mr_control.h"
 
+#include "base/base_matrix4x4.h"
+
 struct INuiFusionReconstruction;
 struct IKinectSensor;
 struct IDepthFrameReader;
@@ -30,6 +32,8 @@ namespace MR
         void Update();
 		void ExportVolumeBlock(short* pVolumeBlock);
 
+        Base::Float4x4 GetWorldToCameraMatrix();
+
 	private:
 
         int m_VoxelCountX;
@@ -52,7 +56,6 @@ namespace MR
         
         __int64 m_CoordinateMappingChangedEvent;
 
-        double m_TimeSinceLastUpdate;
         bool m_VolumeExported;
     };
 } // namespace MR
