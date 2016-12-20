@@ -202,21 +202,15 @@ namespace Edit
         }
 
         // -----------------------------------------------------------------------------
-        // Create hash
-        // TODO: Hash should be requested by a message to editor
+        // Load texture
         // -----------------------------------------------------------------------------
-        QByteArray NewTextureBinary = _rPathToTexture.toLatin1();
+        Edit::CMessage NewMessage;
 
-        const char*  pHashIdentifier = NewTextureBinary.data();
-        unsigned int NumberOfBytes;
-        unsigned int Hash;
+        NewMessage.PutString(_rPathToTexture.toLatin1().data());
 
-        const void* pData;
+        NewMessage.Reset();
 
-        NumberOfBytes = static_cast<unsigned int>(strlen(pHashIdentifier) * sizeof(char));
-        pData = static_cast<const void*>(pHashIdentifier);
-
-        m_Hash = Base::CRC32(pData, NumberOfBytes);
+        m_Hash = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Texture_Load, NewMessage);
 
         // -----------------------------------------------------------------------------
         // Set UI
