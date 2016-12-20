@@ -30,6 +30,9 @@
        <property name="dragEnabled">
         <bool>true</bool>
        </property>
+       <property name="dragDropMode">
+        <enum>QAbstractItemView::DragOnly</enum>
+       </property>
       </widget>
      </item>
     </layout>
@@ -41,6 +44,9 @@
    <class>Edit::CAssetFileList</class>
    <extends>QListView</extends>
    <header>edit_asset_file_list.h</header>
+   <slots>
+    <slot>fileClicked(QModelIndex)</slot>
+   </slots>
   </customwidget>
  </customwidgets>
  <resources/>
@@ -58,6 +64,22 @@
     <hint type="destinationlabel">
      <x>325</x>
      <y>296</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pFileTreeView</sender>
+   <signal>clicked(QModelIndex)</signal>
+   <receiver>m_pFileTreeView</receiver>
+   <slot>fileClicked(QModelIndex)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>487</x>
+     <y>107</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>558</x>
+     <y>160</y>
     </hint>
    </hints>
   </connection>

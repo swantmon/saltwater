@@ -50,7 +50,7 @@ namespace Edit
 
         // ----------------------------------------------------------------------------- 
 
-        m_pFileTreeView->SetDictionary(m_CurrentPath);
+        m_pFileTreeView->setDictionary(m_CurrentPath);
     }
 
     // -----------------------------------------------------------------------------
@@ -59,6 +59,6 @@ namespace Edit
     {
         m_CurrentPath = m_pDirectoryModel->fileInfo(_rModelIndex).absoluteFilePath();
 
-        m_pFileTreeView->SetDictionary(m_CurrentPath);
+        m_pFileTreeView->setDictionary(m_CurrentPath);
     }
 } // namespace Edit

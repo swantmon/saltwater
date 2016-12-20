@@ -35,7 +35,7 @@ namespace Edit
     public Q_SLOTS:
 
         void updateContentForEntity(int _ID);
-        void updateContentForTexture(int _Hash);
+        void updateContentForTexture(const QString& _rRelPath);
 
     protected:
 

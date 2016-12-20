@@ -35,13 +35,43 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CAssetFileList::SetDictionary(const QString& _rCurrentPath)
+    void CAssetFileList::setDictionary(const QString& _rCurrentPath)
     {
         m_pFileModel->setFilter(QDir::NoDotAndDotDot | QDir::Files);
 
         m_pFileModel->setRootPath(_rCurrentPath);
 
         setRootIndex(m_pFileModel->index(_rCurrentPath));
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CAssetFileList::fileClicked(const QModelIndex& _rModelIndex)
+    {
+        m_CurrentFile = m_pFileModel->fileInfo(_rModelIndex).absoluteFilePath();
+
+        // -----------------------------------------------------------------------------
+        // Set data
+        // -----------------------------------------------------------------------------
+        QFileInfo FileInfo(m_CurrentFile);
+        QDir      Directory("../assets/");
+
+        QString AbsPath = FileInfo.absoluteFilePath();
+
+        QString RelPath = Directory.relativeFilePath(AbsPath);
+
+        if (m_SupportedTextureFiles.match(FileInfo.completeSuffix()).hasMatch())
+        {
+            emit textureClicked(RelPath);
+        }
+        else if (m_SupportedMaterialFiles.match(FileInfo.completeSuffix()).hasMatch())
+        {
+            emit materialClicked(RelPath);
+        }
+        else if (m_SupportedModelFiles.match(FileInfo.completeSuffix()).hasMatch())
+        {
+            emit modelClicked(RelPath);
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -56,6 +86,8 @@ namespace Edit
 
             m_CurrentFile = m_pFileModel->fileInfo(Index).absoluteFilePath();
         }
+
+        QListView::mousePressEvent(_pEvent);
     }
 
     // -----------------------------------------------------------------------------
@@ -107,5 +139,7 @@ namespace Edit
         // Execute drag action
         // -----------------------------------------------------------------------------
         Qt::DropAction pDropAction = pDrag->exec(Qt::CopyAction | Qt::MoveAction);
+
+        QListView::mouseMoveEvent(_pEvent);
     }
 } // namespace Edit

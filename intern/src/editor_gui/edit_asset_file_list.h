@@ -2,6 +2,7 @@
 #pragma once
 
 #include <QFileSystemModel>
+#include <QModelIndex>
 #include <QRegularExpression>
 #include <QListView>
 
@@ -16,9 +17,17 @@ namespace Edit
         CAssetFileList(QWidget* _pParent = Q_NULLPTR);
         ~CAssetFileList();
 
-    public:
+    Q_SIGNALS:
 
-        void SetDictionary(const QString& _rCurrentPath);
+        void modelClicked(const QString& _rRelPath);
+        void materialClicked(const QString& _rRelPath);
+        void textureClicked(const QString& _rRelPath);
+
+    public Q_SLOTS:
+
+        void setDictionary(const QString& _rCurrentPath);
+
+        void fileClicked(const QModelIndex& _rModelIndex);
 
     private:
 

@@ -144,19 +144,19 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspector::updateContentForTexture(int _Hash)
+    void CInspector::updateContentForTexture(const QString& _rRelPath)
     {
         ResetHighlight();
 
         // -----------------------------------------------------------------------------
 
-        CMessage FacetMessage;
-
-        FacetMessage.PutInt(_Hash);
-
-        FacetMessage.Reset();
-
-        MessageManager::SendMessage(SGUIMessageType::Texture_Info, FacetMessage);
+//         CMessage FacetMessage;
+// 
+//         FacetMessage.PutString(_rRelPath.toLatin1().data());
+// 
+//         FacetMessage.Reset();
+// 
+//         MessageManager::SendMessage(SGUIMessageType::Texture_Info, FacetMessage);
     }
 
     // -----------------------------------------------------------------------------
