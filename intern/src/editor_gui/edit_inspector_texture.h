@@ -27,7 +27,7 @@ namespace Edit
 
     private:
 
-        int m_TextureHash;
+        unsigned int m_TextureHash;
 
     private:
 

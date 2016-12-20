@@ -94,10 +94,12 @@ namespace Edit
 
         NewMessage.Reset();
 
-        m_TextureHash = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Texture_Load, NewMessage);
+        int Hash = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Texture_Load, NewMessage);
 
-        if (m_TextureHash > 0)
+        if (Hash != -1)
         {
+            m_TextureHash = static_cast<unsigned int>(Hash);
+
             // -----------------------------------------------------------------------------
             // Request info of texture
             // -----------------------------------------------------------------------------
@@ -115,13 +117,60 @@ namespace Edit
 
     void CInspectorTexture::OnTextureInfo(Edit::CMessage& _rMessage)
     {
+        unsigned int Hash = _rMessage.GetInt();
+
+        if (Hash != m_TextureHash) return;
+
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
+        int Dimension = _rMessage.GetInt();
+        int Format    = _rMessage.GetInt();
+        int Semantic  = _rMessage.GetInt();
+        int Binding   = _rMessage.GetInt();
+
+        bool IsArray = _rMessage.GetBool();
+        bool IsCube  = _rMessage.GetBool();
+        bool IsDummy = _rMessage.GetBool();
+
+        char Filename[256];
+        char Identifier[256];
+
+        bool HasFilename = _rMessage.GetBool();
         
+        if (HasFilename) _rMessage.GetString(Filename, 256);
+
+        bool HasIdentifier = _rMessage.GetBool();
+
+        if (HasIdentifier) _rMessage.GetString(Identifier, 256);
 
         // -----------------------------------------------------------------------------
         // Set values
         // -----------------------------------------------------------------------------
+        m_pDimensionCB->blockSignals(true);
+        m_pFormatCB   ->blockSignals(true);
+        m_pSemanticCB ->blockSignals(true);
+        m_pBindingCB  ->blockSignals(true);
+
+        m_pDimensionCB->setCurrentIndex(Dimension);
+        m_pFormatCB   ->setCurrentIndex(Format);
+        m_pSemanticCB ->setCurrentIndex(Semantic);
+        m_pBindingCB  ->setCurrentIndex(Binding);
+
+        if (HasFilename)
+        {
+            m_pFilenameEdit->setText(Filename);
+        }
+        else
+        {
+            m_pFilenameEdit->setText("");
+        }
+
+        m_pHashEdit->setText(QString::number(Hash));
+
+        m_pDimensionCB->blockSignals(false);
+        m_pFormatCB   ->blockSignals(false);
+        m_pSemanticCB ->blockSignals(false);
+        m_pBindingCB  ->blockSignals(false);
     }
 } // namespace Edit

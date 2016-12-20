@@ -43,12 +43,12 @@ namespace
     public:
 
         CTextureBase* CreateTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::Listen, bool _IsInternal = false);
-
         CTexture1D* CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _IsInternal = false);
         CTexture2D* CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _IsInternal = false);
 
         CTextureCube* CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _IsInternal = false);
 
+        CTextureBase* GetTextureByHash(unsigned int _Hash);
         CTexture2D* GetTexture2DByHash(unsigned int _Hash);
         CTextureCube* GetTextureCubeByHash(unsigned int _Hash);
 
@@ -871,6 +871,28 @@ namespace
         }
         
         return pTexture;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTextureBase* CDtTextureManager::GetTextureByHash(unsigned int _Hash)
+    {
+        if (m_Textures1DByHash.find(_Hash) != m_Textures1DByHash.end())
+        {
+            return m_Textures1DByHash.at(_Hash);
+        }
+
+        if (m_Textures2DByHash.find(_Hash) != m_Textures2DByHash.end())
+        {
+            return m_Textures2DByHash.at(_Hash);
+        }
+
+        if (m_TexturesCubeByHash.find(_Hash) != m_TexturesCubeByHash.end())
+        {
+            return m_TexturesCubeByHash.at(_Hash);
+        }
+
+        return nullptr;
     }
 
     // -----------------------------------------------------------------------------
@@ -1717,6 +1739,13 @@ namespace TextureManager
     CTextureCube* CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
         return CDtTextureManager::GetInstance().CreateCubeTexture(_rDescriptor, _IsDeleteable, _Behavior);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTextureBase* GetTextureByHash(unsigned int _Hash)
+    {
+        return CDtTextureManager::GetInstance().GetTextureByHash(_Hash);
     }
 
     // -----------------------------------------------------------------------------
