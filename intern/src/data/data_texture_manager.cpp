@@ -42,6 +42,8 @@ namespace
 
     public:
 
+        CTextureBase* CreateTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::Listen, bool _IsInternal = false);
+
         CTexture1D* CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _IsInternal = false);
         CTexture2D* CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _IsInternal = false);
 
@@ -156,6 +158,8 @@ namespace
 
         int ConvertFormatToBytesPerPixel(Dt::CTextureBase::EFormat _Format) const;
 
+        Dt::CTextureBase::EFormat ConvertImageFormat(ILenum _ILFormat, ILenum _ILType) const;
+
         ILenum ConvertILImageFormat(Dt::CTextureBase::EFormat _Format) const;
         ILenum ConvertILImageType(Dt::CTextureBase::EFormat _Format) const;
         ILubyte ConvertILImageChannels(Dt::CTextureBase::EFormat _Format) const;
@@ -207,6 +211,161 @@ namespace
         m_TexturesCubeByHash.clear();
 
         m_TextureDelegates.clear();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTextureBase* CDtTextureManager::CreateTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _IsInternal)
+    {
+        const Base::Char* pHashIdentifier;
+        void*             pBytes;
+        void*             pTextureData;
+        unsigned int      Hash;
+        unsigned int      NativeImageName;
+        int               NumberOfPixelsU;
+        int               NumberOfPixelsV;
+        int               NumberOfPixelsW;
+        int               NumberOfFaces;
+        unsigned int      NumberOfBytes;
+        bool              Result;
+        ILenum            NativeILFormat;
+        ILenum            NativeILType;
+
+        pHashIdentifier = nullptr;
+        pBytes          = nullptr;
+        pTextureData    = nullptr;
+        Hash            = 0;
+
+        // -----------------------------------------------------------------------------
+        // Create hash value over user identifier or filename
+        // -----------------------------------------------------------------------------
+        pHashIdentifier = _rDescriptor.m_pIdentifier != 0 ? _rDescriptor.m_pIdentifier : _rDescriptor.m_pFileName;
+
+        if (pHashIdentifier != nullptr && _IsInternal == false)
+        {
+            const void* pData;
+
+            NumberOfBytes = static_cast<unsigned int>(strlen(pHashIdentifier) * sizeof(char));
+            pData = static_cast<const void*>(pHashIdentifier);
+
+            Hash = Base::CRC32(pData, NumberOfBytes);
+
+            if (m_Textures1DByHash.find(Hash) != m_Textures1DByHash.end())
+            {
+                return m_Textures1DByHash.at(Hash);
+            }
+
+            if (m_Textures2DByHash.find(Hash) != m_Textures2DByHash.end())
+            {
+                return m_Textures2DByHash.at(Hash);
+            }
+
+            if (m_TexturesCubeByHash.find(Hash) != m_TexturesCubeByHash.end())
+            {
+                return m_TexturesCubeByHash.at(Hash);
+            }
+        }
+
+        // -----------------------------------------------------------------------------
+        // If format is undefined and texture is set, then we extract information from
+        // file and call internal function.
+        // -----------------------------------------------------------------------------
+        if (_rDescriptor.m_Format == CTextureBase::UndefinedFormat && _rDescriptor.m_pFileName != nullptr)
+        {
+            Dt::STextureDescriptor TextureDescriptor;
+
+            TextureDescriptor.m_NumberOfPixelsU  = _rDescriptor.m_NumberOfPixelsU;
+            TextureDescriptor.m_NumberOfPixelsV  = _rDescriptor.m_NumberOfPixelsV;
+            TextureDescriptor.m_NumberOfPixelsW  = _rDescriptor.m_NumberOfPixelsW;
+            TextureDescriptor.m_Format           = _rDescriptor.m_Format;
+            TextureDescriptor.m_Semantic         = _rDescriptor.m_Semantic;
+            TextureDescriptor.m_Binding          = _rDescriptor.m_Binding;
+            TextureDescriptor.m_pPixels          = 0;
+            TextureDescriptor.m_pFileName        = _rDescriptor.m_pFileName;
+            TextureDescriptor.m_pIdentifier      = _rDescriptor.m_pIdentifier;
+
+            // -----------------------------------------------------------------------------
+            // Create and bin texture on DevIL
+            // -----------------------------------------------------------------------------
+            NativeImageName = ilGenImage();
+
+            ilBindImage(NativeImageName);
+
+            // -----------------------------------------------------------------------------
+            // Load texture from file (either in assets or data)
+            // -----------------------------------------------------------------------------
+            std::string PathToTexture;
+
+            PathToTexture = g_PathToAssets + _rDescriptor.m_pFileName;
+
+            const wchar_t* pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
+
+            Result = ilLoadImage(pPathToTexture) == IL_TRUE;
+
+            if (Result)
+            {
+                NativeILFormat  = ilGetInteger(IL_IMAGE_FORMAT);
+                NativeILType    = ilGetInteger(IL_IMAGE_TYPE);
+                NumberOfPixelsU = ilGetInteger(IL_IMAGE_WIDTH);
+                NumberOfPixelsV = ilGetInteger(IL_IMAGE_HEIGHT);
+                NumberOfPixelsW = ilGetInteger(IL_IMAGE_DEPTH);
+                NumberOfFaces   = ilGetInteger(IL_NUM_FACES);
+
+                CTextureBase::EFormat Format = ConvertImageFormat(NativeILFormat, NativeILType);
+
+                TextureDescriptor.m_NumberOfPixelsU  = NumberOfPixelsU;
+                TextureDescriptor.m_NumberOfPixelsV  = NumberOfPixelsV;
+                TextureDescriptor.m_NumberOfPixelsW  = NumberOfPixelsW;
+                TextureDescriptor.m_Format           = Format;
+
+                ilDeleteImage(NativeImageName);
+
+                ilBindImage(0);
+
+                if (NumberOfFaces == 5)
+                {
+                    return CreateCubeTexture(TextureDescriptor, _IsDeleteable, _Behavior, _IsInternal);
+                }
+                else if (NumberOfPixelsW > 1)
+                {
+                    // return CreateTexture3D(TextureDescriptor, _IsDeleteable, _Behavior, _IsInternal);
+                }
+                else if (NumberOfPixelsV > 1)
+                {
+                    return CreateTexture2D(TextureDescriptor, _IsDeleteable, _Behavior, _IsInternal);
+                }
+                else if (NumberOfPixelsU > 1)
+                {
+                    return CreateTexture1D(TextureDescriptor, _IsDeleteable, _Behavior, _IsInternal);
+                }
+            }
+            else
+            {
+                BASE_CONSOLE_STREAMERROR("Failed loading image '" << PathToTexture.c_str() << "' from file.");
+
+                ilDeleteImage(NativeImageName);
+
+                return nullptr;
+            }
+        }
+
+        // -----------------------------------------------------------------------------
+        // Else, we create the texture depending on specified number of pixels.
+        // -----------------------------------------------------------------------------
+        if (_rDescriptor.m_NumberOfPixelsW > 1 && _rDescriptor.m_NumberOfPixelsW != Dt::STextureDescriptor::s_NumberOfPixelsFromSource)
+        {
+            // return CreateTexture3D(_rDescriptor, _IsDeleteable, _Behavior, _IsInternal);
+        }
+        else if (_rDescriptor.m_NumberOfPixelsV > 1 && _rDescriptor.m_NumberOfPixelsV != Dt::STextureDescriptor::s_NumberOfPixelsFromSource)
+        {
+            return CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior, _IsInternal);
+        }
+        else if (_rDescriptor.m_NumberOfPixelsU > 1 && _rDescriptor.m_NumberOfPixelsU != Dt::STextureDescriptor::s_NumberOfPixelsFromSource)
+        {
+            return CreateTexture1D(_rDescriptor, _IsDeleteable, _Behavior, _IsInternal);
+        }
+
+        return nullptr;
     }
 
     // -----------------------------------------------------------------------------
@@ -1046,6 +1205,135 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    Dt::CTextureBase::EFormat CDtTextureManager::ConvertImageFormat(ILenum _ILFormat, ILenum _ILType) const
+    {
+        // -----------------------------------------------------------------------------
+        // Format
+        // -----------------------------------------------------------------------------
+        unsigned int Index = 0;
+
+        if (_ILFormat == IL_LUMINANCE)
+        {
+            Index = 0;
+        }
+        else if (_ILFormat == IL_LUMINANCE_ALPHA)
+        {
+            Index = 1;
+        }
+        else if (_ILFormat == IL_RGB)
+        {
+            Index = 2;
+        }
+        else // (_ILFormat == IL_RGBA)
+        {
+            Index = 3;
+        }
+
+        // -----------------------------------------------------------------------------
+        // Type
+        // -----------------------------------------------------------------------------
+        if (_ILType == IL_BYTE)
+        {
+            static Dt::CTextureBase::EFormat s_Formats[] =
+            {
+                Dt::CTextureBase::R8_BYTE,
+                Dt::CTextureBase::R8G8_BYTE,
+                Dt::CTextureBase::R8G8B8_BYTE,
+                Dt::CTextureBase::R8G8B8A8_BYTE,
+            };
+            
+            return s_Formats[Index];
+        }
+        else if (_ILType == IL_UNSIGNED_BYTE)
+        {
+            static Dt::CTextureBase::EFormat s_Formats[] =
+            {
+                Dt::CTextureBase::R8_UBYTE,
+                Dt::CTextureBase::R8G8_UBYTE,
+                Dt::CTextureBase::R8G8B8_UBYTE,
+                Dt::CTextureBase::R8G8B8A8_UBYTE,
+            };
+
+            return s_Formats[Index];
+        }
+        else if (_ILType == IL_SHORT)
+        {
+            static Dt::CTextureBase::EFormat s_Formats[] =
+            {
+                Dt::CTextureBase::R8_SHORT,
+                Dt::CTextureBase::R8G8_SHORT,
+                Dt::CTextureBase::R8G8B8_SHORT,
+                Dt::CTextureBase::R8G8B8A8_SHORT,
+            };
+
+            return s_Formats[Index];
+        }
+        else if (_ILType == IL_UNSIGNED_SHORT)
+        {
+            static Dt::CTextureBase::EFormat s_Formats[] =
+            {
+                Dt::CTextureBase::R8_USHORT,
+                Dt::CTextureBase::R8G8_USHORT,
+                Dt::CTextureBase::R8G8B8_USHORT,
+                Dt::CTextureBase::R8G8B8A8_USHORT,
+            };
+
+            return s_Formats[Index];
+        }
+        else if (_ILType == IL_INT)
+        {
+            static Dt::CTextureBase::EFormat s_Formats[] =
+            {
+                Dt::CTextureBase::R8_INT,
+                Dt::CTextureBase::R8G8_INT,
+                Dt::CTextureBase::R8G8B8_INT,
+                Dt::CTextureBase::R8G8B8A8_INT,
+            };
+
+            return s_Formats[Index];
+        }
+        else if (_ILType == IL_UNSIGNED_INT)
+        {
+            static Dt::CTextureBase::EFormat s_Formats[] =
+            {
+                Dt::CTextureBase::R8_UINT,
+                Dt::CTextureBase::R8G8_UINT,
+                Dt::CTextureBase::R8G8B8_UINT,
+                Dt::CTextureBase::R8G8B8A8_UINT,
+            };
+
+            return s_Formats[Index];
+        }
+        else if (_ILType == IL_HALF)
+        {
+            static Dt::CTextureBase::EFormat s_Formats[] =
+            {
+                Dt::CTextureBase::R16_FLOAT,
+                Dt::CTextureBase::R16G16_FLOAT,
+                Dt::CTextureBase::R16G16B16_FLOAT,
+                Dt::CTextureBase::R16G16B16A16_FLOAT,
+            };
+
+            return s_Formats[Index];
+        }
+        else if (_ILType == IL_FLOAT || _ILType == IL_DOUBLE)
+        {
+            static Dt::CTextureBase::EFormat s_Formats[] =
+            {
+                Dt::CTextureBase::R32_FLOAT,
+                Dt::CTextureBase::R32G32_FLOAT,
+                Dt::CTextureBase::R32G32B32_FLOAT,
+                Dt::CTextureBase::R32G32B32A32_FLOAT,
+            };
+
+            return s_Formats[Index];
+        }
+
+        return Dt::CTextureBase::UndefinedFormat;
+    }
+
+    // -----------------------------------------------------------------------------
+
     ILenum CDtTextureManager::ConvertILImageFormat(Dt::CTextureBase::EFormat _Format) const
     {
         static ILenum s_NativeFormat[] =
@@ -1401,6 +1689,13 @@ namespace TextureManager
     void OnExit()
     {
         CDtTextureManager::GetInstance().OnExit();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTextureBase* CreateTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
+    {
+        return CDtTextureManager::GetInstance().CreateTexture(_rDescriptor, _IsDeleteable, _Behavior);
     }
     
     // -----------------------------------------------------------------------------

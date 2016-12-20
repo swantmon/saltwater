@@ -95,7 +95,41 @@ namespace
 
     void CTextureHelper::OnTextureLoad(Edit::CMessage& _rMessage)
     {
-        BASE_UNUSED(_rMessage);
+        // -----------------------------------------------------------------------------
+        // Read
+        // -----------------------------------------------------------------------------
+        char TextureName[256];
+
+        _rMessage.GetString(TextureName, 256);
+
+        // -----------------------------------------------------------------------------
+        // Load
+        // -----------------------------------------------------------------------------
+        Dt::STextureDescriptor TextureDescriptor;
+
+        TextureDescriptor.m_NumberOfPixelsU  = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
+        TextureDescriptor.m_NumberOfPixelsV  = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
+        TextureDescriptor.m_NumberOfPixelsW  = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
+        TextureDescriptor.m_Format           = Dt::STextureDescriptor::s_FormatFromSource;
+        TextureDescriptor.m_Semantic         = Dt::CTextureBase::Diffuse;
+        TextureDescriptor.m_Binding          = Dt::CTextureBase::CPU;
+        TextureDescriptor.m_pPixels          = 0;
+        TextureDescriptor.m_pFileName        = TextureName;
+        TextureDescriptor.m_pIdentifier      = 0;
+
+        Dt::CTextureBase* pLoadedTexture = Dt::TextureManager::CreateTexture(TextureDescriptor);
+
+        // -----------------------------------------------------------------------------
+        // Set hash
+        // -----------------------------------------------------------------------------
+        if (pLoadedTexture)
+        {
+            _rMessage.SetResult(pLoadedTexture->GetHash());
+        }
+        else
+        {
+            _rMessage.SetResult(-1);
+        }
     }
 
     // -----------------------------------------------------------------------------

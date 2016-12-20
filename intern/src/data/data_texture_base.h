@@ -91,7 +91,7 @@ namespace Dt
                 R5G5G5A1_USHORT,
                 R10G10B10A2_UINT,
                 
-                Unknown = -1,
+                UndefinedFormat = -1,
             };
 
             enum ESemantic
@@ -100,8 +100,6 @@ namespace Dt
                 Normal,
                 Height,
                 HDR,
-                NumberOfSemantics,
-                UndefinedSemantic = -1,
             };
 
             enum EBinding
