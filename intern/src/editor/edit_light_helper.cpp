@@ -526,10 +526,6 @@ namespace
             // -----------------------------------------------------------------------------
             int Type = _rMessage.GetInt();
 
-            char pTemp[256];
-
-            const char* pTextureName = _rMessage.GetString(pTemp, 256);
-
             unsigned int TextureHash = _rMessage.GetInt();
 
             float Intensity = _rMessage.GetFloat();
@@ -544,78 +540,28 @@ namespace
             {
                 Dt::CTextureCube* pTextureCube = Dt::TextureManager::GetTextureCubeByHash(TextureHash);
 
-                if (pTextureCube == nullptr)
+                if (pTextureCube != nullptr)
                 {
-                    // TODO by tschwandt
-                    // Do this inside a texture manager
-                    Dt::STextureDescriptor TextureDescriptor;
-
-                    TextureDescriptor.m_NumberOfPixelsU = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
-                    TextureDescriptor.m_NumberOfPixelsV = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
-                    TextureDescriptor.m_NumberOfPixelsW = 1;
-                    TextureDescriptor.m_Format          = Dt::CTextureBase::R16G16B16_FLOAT;
-                    TextureDescriptor.m_Semantic        = Dt::CTextureBase::HDR;
-                    TextureDescriptor.m_Binding         = Dt::CTextureBase::ShaderResource;
-                    TextureDescriptor.m_pPixels         = 0;
-                    TextureDescriptor.m_pFileName       = pTextureName;
-                    TextureDescriptor.m_pIdentifier     = 0;
-
-                    pTextureCube = Dt::TextureManager::CreateCubeTexture(TextureDescriptor);
-
-                    Dt::TextureManager::MarkTextureAsDirty(pTextureCube, Dt::CTextureBase::DirtyFile);
+                    pLightFacet->SetCubemap(pTextureCube);
                 }
-
-                pLightFacet->SetCubemap(pTextureCube);
             }
             else if (pLightFacet->GetType() == Dt::CSkyFacet::Panorama)
             {
                 Dt::CTexture2D* pTexturePanorama = Dt::TextureManager::GetTexture2DByHash(TextureHash);
 
-                if (pTexturePanorama == nullptr)
+                if (pTexturePanorama != nullptr)
                 {
-                    Dt::STextureDescriptor TextureDescriptor;
-
-                    TextureDescriptor.m_NumberOfPixelsU = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
-                    TextureDescriptor.m_NumberOfPixelsV = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
-                    TextureDescriptor.m_NumberOfPixelsW = 1;
-                    TextureDescriptor.m_Format          = Dt::CTextureBase::R16G16B16_FLOAT;
-                    TextureDescriptor.m_Semantic        = Dt::CTextureBase::HDR;
-                    TextureDescriptor.m_Binding         = Dt::CTextureBase::ShaderResource;
-                    TextureDescriptor.m_pPixels         = 0;
-                    TextureDescriptor.m_pFileName       = pTextureName;
-                    TextureDescriptor.m_pIdentifier     = 0;
-
-                    pTexturePanorama = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
-
-                    Dt::TextureManager::MarkTextureAsDirty(pTexturePanorama, Dt::CTextureBase::DirtyFile);
+                    pLightFacet->SetPanorama(pTexturePanorama);
                 }
-
-                pLightFacet->SetPanorama(pTexturePanorama);
             }
             else if (pLightFacet->GetType() == Dt::CSkyFacet::Texture || pLightFacet->GetType() == Dt::CSkyFacet::TextureLUT)
             {
                 Dt::CTexture2D* pTexture = Dt::TextureManager::GetTexture2DByHash(TextureHash);
 
-                if (pTexture == nullptr && pTextureName != nullptr)
+                if (pTexture != nullptr)
                 {
-                    Dt::STextureDescriptor TextureDescriptor;
-
-                    TextureDescriptor.m_NumberOfPixelsU = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
-                    TextureDescriptor.m_NumberOfPixelsV = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
-                    TextureDescriptor.m_NumberOfPixelsW = 1;
-                    TextureDescriptor.m_Format          = Dt::CTextureBase::R16G16B16_FLOAT;
-                    TextureDescriptor.m_Semantic        = Dt::CTextureBase::HDR;
-                    TextureDescriptor.m_Binding         = Dt::CTextureBase::ShaderResource;
-                    TextureDescriptor.m_pPixels         = 0;
-                    TextureDescriptor.m_pFileName       = pTextureName;
-                    TextureDescriptor.m_pIdentifier     = 0;
-
-                    pTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
-
-                    Dt::TextureManager::MarkTextureAsDirty(pTexture, Dt::CTextureBase::DirtyFile);
+                    pLightFacet->SetTexture(pTexture);
                 }
-                
-                pLightFacet->SetTexture(pTexture);
             }
 
             Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);

@@ -119,6 +119,8 @@ namespace
 
         Dt::CTextureBase* pLoadedTexture = Dt::TextureManager::CreateTexture(TextureDescriptor);
 
+        Dt::TextureManager::MarkTextureAsDirty(pLoadedTexture, Dt::CTextureBase::DirtyCreate | Dt::CTextureBase::DirtyFile);
+
         // -----------------------------------------------------------------------------
         // Set hash
         // -----------------------------------------------------------------------------
@@ -136,7 +138,7 @@ namespace
 
     void CTextureHelper::OnTextureInfo(Edit::CMessage& _rMessage)
     {
-        int TextureHash = _rMessage.GetInt();
+        unsigned int TextureHash = _rMessage.GetInt();
 
         Dt::CTextureBase* pTexture = Dt::TextureManager::GetTextureByHash(static_cast<unsigned int>(TextureHash));
 
