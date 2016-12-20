@@ -152,7 +152,15 @@ namespace Edit
         m_pSemanticCB ->blockSignals(true);
         m_pBindingCB  ->blockSignals(true);
 
-        m_pDimensionCB->setCurrentIndex(Dimension);
+        if (IsCube)
+        {
+            m_pDimensionCB->setCurrentIndex(3);
+        }
+        else
+        {
+            m_pDimensionCB->setCurrentIndex(Dimension);
+        }
+
         m_pFormatCB   ->setCurrentIndex(Format);
         m_pSemanticCB ->setCurrentIndex(Semantic);
         m_pBindingCB  ->setCurrentIndex(Binding);

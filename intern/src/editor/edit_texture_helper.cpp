@@ -112,7 +112,7 @@ namespace
         TextureDescriptor.m_NumberOfPixelsW  = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
         TextureDescriptor.m_Format           = Dt::STextureDescriptor::s_FormatFromSource;
         TextureDescriptor.m_Semantic         = Dt::CTextureBase::Diffuse;
-        TextureDescriptor.m_Binding          = Dt::CTextureBase::CPU;
+        TextureDescriptor.m_Binding          = Dt::CTextureBase::ShaderResource;
         TextureDescriptor.m_pPixels          = 0;
         TextureDescriptor.m_pFileName        = TextureName;
         TextureDescriptor.m_pIdentifier      = 0;
