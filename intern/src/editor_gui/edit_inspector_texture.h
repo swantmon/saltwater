@@ -21,6 +21,8 @@ namespace Edit
 
         void valueChanged();
 
+        void RequestInformation(int _Hash);
+
         void RequestInformation(const QString& _rRelPathToTexture);
 
     private:

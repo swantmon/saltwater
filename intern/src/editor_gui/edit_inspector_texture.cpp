@@ -68,9 +68,47 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
+    void CInspectorTexture::RequestInformation(int _Hash)
+    {
+        m_TextureHash = _Hash;
+
+        Edit::CMessage NewMessage;
+
+        NewMessage.PutInt(m_TextureHash);
+
+        NewMessage.Reset();
+
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Texture_Info, NewMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CInspectorTexture::RequestInformation(const QString& _rRelPathToTexture)
     {
-        m_TextureHash = 0;
+        // -----------------------------------------------------------------------------
+        // Load texture
+        // -----------------------------------------------------------------------------
+        Edit::CMessage NewMessage;
+
+        NewMessage.PutString(_rRelPathToTexture.toLatin1().data());
+
+        NewMessage.Reset();
+
+        m_TextureHash = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Texture_Load, NewMessage);
+
+        if (m_TextureHash > 0)
+        {
+            // -----------------------------------------------------------------------------
+            // Request info of texture
+            // -----------------------------------------------------------------------------
+            Edit::CMessage NewMessage;
+
+            NewMessage.PutInt(m_TextureHash);
+
+            NewMessage.Reset();
+
+            Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Texture_Info, NewMessage);
+        }
     }
 
     // -----------------------------------------------------------------------------
