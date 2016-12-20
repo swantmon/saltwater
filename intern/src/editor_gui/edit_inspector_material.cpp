@@ -101,43 +101,16 @@ namespace Edit
 
         Base::Float3 AlbedoColor = Base::Float3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
 
-        QString    NewColorTexture = m_pAlbedoTextureEdit->GetTextureFile();
-        QByteArray NewColorTextureBinary = NewColorTexture.toLatin1();
+        QString NewColorTexture     = m_pAlbedoTextureEdit->GetTextureFile();
+        QString NewNormalTexture    = m_pNormalTextureEdit->GetTextureFile();
+        QString NewRoughnessTexture = m_pRoughnessTextureEdit->GetTextureFile();
+        QString NewMetalicTexture   = m_pMetallicTextureEdit->GetTextureFile();
+        QString NewBumpTexture      = m_pBumpTextureEdit->GetTextureFile();
+        QString NewAOTexture        = m_pAOTextureEdit->GetTextureFile();
 
-        // -----------------------------------------------------------------------------
-
-        QString    NewNormalTexture = m_pNormalTextureEdit->GetTextureFile();
-        QByteArray NewNormalTextureBinary = NewNormalTexture.toLatin1();
-
-        // -----------------------------------------------------------------------------
-
-        QString    NewRoughnessTexture = m_pRoughnessTextureEdit->GetTextureFile();
-        QByteArray NewRoughnessTextureBinary = NewRoughnessTexture.toLatin1();
-
-        float RoughnessValue = m_pRoughnessEdit  ->text().toFloat();
-
-        // -----------------------------------------------------------------------------
-
-        QString    NewMetalicTexture = m_pMetallicTextureEdit->GetTextureFile();
-        QByteArray NewMetalicTextureBinary = NewMetalicTexture.toLatin1();
-
-        float MetallicValue = m_pMetallicEdit->text().toFloat();
-
-        // -----------------------------------------------------------------------------
-
+        float RoughnessValue   = m_pRoughnessEdit  ->text().toFloat();
+        float MetallicValue    = m_pMetallicEdit->text().toFloat();
         float ReflectanceValue = m_pReflectanceEdit->text().toFloat();
-
-        // -----------------------------------------------------------------------------
-
-        QString    NewBumpTexture = m_pBumpTextureEdit->GetTextureFile();
-        QByteArray NewBumpTextureBinary = NewBumpTexture.toLatin1();
-
-        // -----------------------------------------------------------------------------
-
-        QString    NewAOTexture = m_pAOTextureEdit->GetTextureFile();
-        QByteArray NewAOTextureBinary = NewAOTexture.toLatin1();
-
-        // -----------------------------------------------------------------------------
 
         float TilingX = m_pTilingXEdit->text().toFloat();
         float TilingY = m_pTilingYEdit->text().toFloat();
@@ -180,66 +153,66 @@ namespace Edit
         NewMessage.PutFloat(ReflectanceValue);
         NewMessage.PutFloat(MetallicValue);
 
-        if (NewColorTextureBinary.length() > 0)
+        if (NewColorTexture.length() > 0)
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(NewColorTextureBinary.data());
+            NewMessage.PutInt(m_pAlbedoTextureEdit->GetTextureHash());
         }
         else
         {
             NewMessage.PutBool(false);
         }
 
-        if (NewNormalTextureBinary.length() > 0)
+        if (NewNormalTexture.length() > 0)
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(NewNormalTextureBinary.data());
+            NewMessage.PutInt(m_pNormalTextureEdit->GetTextureHash());
         }
         else
         {
             NewMessage.PutBool(false);
         }
 
-        if (NewRoughnessTextureBinary.length() > 0)
+        if (NewRoughnessTexture.length() > 0)
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(NewRoughnessTextureBinary.data());
+            NewMessage.PutInt(m_pRoughnessTextureEdit->GetTextureHash());
         }
         else
         {
             NewMessage.PutBool(false);
         }
 
-        if (NewMetalicTextureBinary.length() > 0)
+        if (NewMetalicTexture.length() > 0)
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(NewMetalicTextureBinary.data());
+            NewMessage.PutInt(m_pMetallicTextureEdit->GetTextureHash());
         }
         else
         {
             NewMessage.PutBool(false);
         }
 
-        if (NewBumpTextureBinary.length() > 0)
+        if (NewBumpTexture.length() > 0)
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(NewBumpTextureBinary.data());
+            NewMessage.PutInt(m_pBumpTextureEdit->GetTextureHash());
         }
         else
         {
             NewMessage.PutBool(false);
         }
 
-        if (NewAOTextureBinary.length() > 0)
+        if (NewAOTexture.length() > 0)
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(NewAOTextureBinary.data());
+            NewMessage.PutInt(m_pAOTextureEdit->GetTextureHash());
         }
         else
         {
