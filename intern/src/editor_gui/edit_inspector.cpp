@@ -74,8 +74,6 @@ namespace Edit
         // Register messages
         // -----------------------------------------------------------------------------
         Edit::MessageManager::Register(Edit::SApplicationMessageType::Entity_Facets_Info, EDIT_RECEIVE_MESSAGE(&CInspector::OnEntityInfoFacets));
-
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::Texture_Info, EDIT_RECEIVE_MESSAGE(&CInspector::OnTextureInfo));
     }
 
     // -----------------------------------------------------------------------------
@@ -136,6 +134,8 @@ namespace Edit
 
     void CInspector::updateContentForTexture(const QString& _rRelPath)
     {
+        ResetLayout();
+
         ResetHighlight();
 
         m_pTextureWidget->RequestInformation(_rRelPath);
@@ -290,16 +290,6 @@ namespace Edit
                 }
             }
         }
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CInspector::OnTextureInfo(Edit::CMessage& _rMessage)
-    {
-        // -----------------------------------------------------------------------------
-        // Reset
-        // -----------------------------------------------------------------------------
-        ResetLayout();
     }
 
     // -----------------------------------------------------------------------------

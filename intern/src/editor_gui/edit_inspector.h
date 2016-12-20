@@ -65,7 +65,6 @@ namespace Edit
     private:
 
         void OnEntityInfoFacets(Edit::CMessage& _rMessage);
-        void OnTextureInfo(Edit::CMessage& _rMessage);
 
         void ResetLayout();
 
