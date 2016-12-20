@@ -7,23 +7,24 @@
 namespace Edit
 {
     CInspector::CInspector(QWidget* _pParent)
-        : QWidget             (_pParent)
-        , m_pInspectorLayout  ()
-        , m_pEntityWidget     ()
-        , m_pPointlightWidget ()
-        , m_pSunWidget        ()
-        , m_pTransformWidget  ()
-        , m_pEnvironmentWidget()
-        , m_pGlobalProbeWidget()
-        , m_pBloomWidget      ()
-        , m_pDOFWidget        ()
-        , m_pFXAAWidget       ()
-        , m_pSSRWidget        ()
-        , m_pVolumeFogWidget  ()
-        , m_pMaterialWidget   ()
-        , m_pCameraWidget     ()
-        , m_pARController     ()
-        , m_ActiveEntityID    (-1)
+        : QWidget              (_pParent)
+        , m_pInspectorLayout   ()
+        , m_pEntityWidget      ()
+        , m_pPointlightWidget  ()
+        , m_pSunWidget         ()
+        , m_pTransformWidget   ()
+        , m_pEnvironmentWidget ()
+        , m_pGlobalProbeWidget ()
+        , m_pBloomWidget       ()
+        , m_pDOFWidget         ()
+        , m_pFXAAWidget        ()
+        , m_pSSRWidget         ()
+        , m_pVolumeFogWidget   ()
+        , m_pMaterialWidget    ()
+        , m_pCameraWidget      ()
+        , m_pARControllerWidget()
+        , m_pTextureWidget     ()
+        , m_ActiveEntityID     (-1)
     {
         // -----------------------------------------------------------------------------
         // Setup
@@ -35,20 +36,21 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create transformation widget and add to layout
         // -----------------------------------------------------------------------------
-        m_pEntityWidget      = new CInspectorEntity();
-        m_pPointlightWidget  = new CInspectorPointlight();
-        m_pSunWidget         = new CInspectorSun();
-        m_pTransformWidget   = new CInspectorTransformation();
-        m_pEnvironmentWidget = new CInspectorEnvironment();
-        m_pGlobalProbeWidget = new CInspectorGlobalProbe();
-        m_pBloomWidget       = new CInspectorBloom();
-        m_pDOFWidget         = new CInspectorDOF();
-        m_pFXAAWidget        = new CInspectorPostAA();
-        m_pSSRWidget         = new CInspectorSSR();
-        m_pVolumeFogWidget   = new CInspectorVolumeFog();
-        m_pMaterialWidget    = new CInspectorMaterial();
-        m_pCameraWidget      = new CInspectorCamera();
-        m_pARController      = new CInspectorARController();
+        m_pEntityWidget       = new CInspectorEntity();
+        m_pPointlightWidget   = new CInspectorPointlight();
+        m_pSunWidget          = new CInspectorSun();
+        m_pTransformWidget    = new CInspectorTransformation();
+        m_pEnvironmentWidget  = new CInspectorEnvironment();
+        m_pGlobalProbeWidget  = new CInspectorGlobalProbe();
+        m_pBloomWidget        = new CInspectorBloom();
+        m_pDOFWidget          = new CInspectorDOF();
+        m_pFXAAWidget         = new CInspectorPostAA();
+        m_pSSRWidget          = new CInspectorSSR();
+        m_pVolumeFogWidget    = new CInspectorVolumeFog();
+        m_pMaterialWidget     = new CInspectorMaterial();
+        m_pCameraWidget       = new CInspectorCamera();
+        m_pARControllerWidget = new CInspectorARController();
+        m_pTextureWidget      = new CInspectorTexture();
 
         m_pInspectorContent->addWidget(m_pEntityWidget);
         m_pInspectorContent->addWidget(m_pTransformWidget);
@@ -63,22 +65,10 @@ namespace Edit
         m_pInspectorContent->addWidget(m_pVolumeFogWidget);
         m_pInspectorContent->addWidget(m_pMaterialWidget);
         m_pInspectorContent->addWidget(m_pCameraWidget);
-        m_pInspectorContent->addWidget(m_pARController);
+        m_pInspectorContent->addWidget(m_pARControllerWidget);
+        m_pInspectorContent->addWidget(m_pTextureWidget);
 
-        m_pEntityWidget     ->setVisible(false);
-        m_pPointlightWidget ->setVisible(false);
-        m_pSunWidget        ->setVisible(false);
-        m_pTransformWidget  ->setVisible(false);
-        m_pEnvironmentWidget->setVisible(false);
-        m_pGlobalProbeWidget->setVisible(false);
-        m_pBloomWidget      ->setVisible(false);
-        m_pDOFWidget        ->setVisible(false);
-        m_pFXAAWidget       ->setVisible(false);
-        m_pSSRWidget        ->setVisible(false);
-        m_pVolumeFogWidget  ->setVisible(false);
-        m_pMaterialWidget   ->setVisible(false);
-        m_pCameraWidget     ->setVisible(false);
-        m_pARController     ->setVisible(false);
+        ResetLayout();
 
         // -----------------------------------------------------------------------------
         // Register messages
@@ -148,15 +138,9 @@ namespace Edit
     {
         ResetHighlight();
 
-        // -----------------------------------------------------------------------------
+        m_pTextureWidget->RequestInformation(_rRelPath);
 
-//         CMessage FacetMessage;
-// 
-//         FacetMessage.PutString(_rRelPath.toLatin1().data());
-// 
-//         FacetMessage.Reset();
-// 
-//         MessageManager::SendMessage(SGUIMessageType::Texture_Info, FacetMessage);
+        m_pTextureWidget->setVisible(true);
     }
 
     // -----------------------------------------------------------------------------
@@ -297,9 +281,9 @@ namespace Edit
             {
                 if (Type == 0) // ARControlManager
                 {
-                    m_pARController->RequestInformation(EntityID);
+                    m_pARControllerWidget->RequestInformation(EntityID);
 
-                    m_pARController->setVisible(true);
+                    m_pARControllerWidget->setVisible(true);
                 }
                 else if (Type == 1) // ARTrackedObject
                 {
@@ -322,20 +306,21 @@ namespace Edit
 
     void CInspector::ResetLayout()
     {
-        m_pEntityWidget     ->setVisible(false);
-        m_pTransformWidget  ->setVisible(false);
-        m_pPointlightWidget ->setVisible(false);
-        m_pSunWidget        ->setVisible(false);
-        m_pEnvironmentWidget->setVisible(false);
-        m_pGlobalProbeWidget->setVisible(false);
-        m_pBloomWidget      ->setVisible(false);
-        m_pDOFWidget        ->setVisible(false);
-        m_pFXAAWidget       ->setVisible(false);
-        m_pSSRWidget        ->setVisible(false);
-        m_pVolumeFogWidget  ->setVisible(false);
-        m_pMaterialWidget   ->setVisible(false);
-        m_pCameraWidget     ->setVisible(false);
-        m_pARController     ->setVisible(false);
+        m_pEntityWidget      ->setVisible(false);
+        m_pTransformWidget   ->setVisible(false);
+        m_pPointlightWidget  ->setVisible(false);
+        m_pSunWidget         ->setVisible(false);
+        m_pEnvironmentWidget ->setVisible(false);
+        m_pGlobalProbeWidget ->setVisible(false);
+        m_pBloomWidget       ->setVisible(false);
+        m_pDOFWidget         ->setVisible(false);
+        m_pFXAAWidget        ->setVisible(false);
+        m_pSSRWidget         ->setVisible(false);
+        m_pVolumeFogWidget   ->setVisible(false);
+        m_pMaterialWidget    ->setVisible(false);
+        m_pCameraWidget      ->setVisible(false);
+        m_pARControllerWidget->setVisible(false);
+        m_pTextureWidget     ->setVisible(false);
     }
 
     // -----------------------------------------------------------------------------

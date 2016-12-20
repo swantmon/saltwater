@@ -14,6 +14,7 @@
 #include "editor_gui/edit_inspector_pointlight.h"
 #include "editor_gui/edit_inspector_sun.h"
 #include "editor_gui/edit_inspector_ssr.h"
+#include "editor_gui/edit_inspector_texture.h"
 #include "editor_gui/edit_inspector_transformation.h"
 #include "editor_gui/edit_inspector_volumefog.h"
 
@@ -57,7 +58,8 @@ namespace Edit
         CInspectorVolumeFog*      m_pVolumeFogWidget;
         CInspectorMaterial*       m_pMaterialWidget;
         CInspectorCamera*         m_pCameraWidget;
-        CInspectorARController*   m_pARController;
+        CInspectorARController*   m_pARControllerWidget;
+        CInspectorTexture*        m_pTextureWidget;
         unsigned int              m_ActiveEntityID;
 
     private:
