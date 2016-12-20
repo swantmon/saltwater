@@ -10,6 +10,9 @@
     <height>300</height>
    </rect>
   </property>
+  <property name="mouseTracking">
+   <bool>false</bool>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -20,7 +23,10 @@
       <widget class="QTreeView" name="m_pDirectoryTreeView"/>
      </item>
      <item>
-      <widget class="QListView" name="m_pFileTreeView">
+      <widget class="Edit::CAssetFileList" name="m_pFileTreeView">
+       <property name="mouseTracking">
+        <bool>false</bool>
+       </property>
        <property name="dragEnabled">
         <bool>true</bool>
        </property>
@@ -30,6 +36,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Edit::CAssetFileList</class>
+   <extends>QListView</extends>
+   <header>edit_asset_file_list.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>
@@ -51,5 +64,6 @@
  </connections>
  <slots>
   <slot>directoryClicked(QModelIndex)</slot>
+  <slot>fileClicked(QModelIndex)</slot>
  </slots>
 </ui>

@@ -22,7 +22,6 @@ namespace Edit
         // Setup user UI
         // -----------------------------------------------------------------------------
         m_pTextureValue->SetLayout(CTextureValue::NoPreview);
-        m_pTextureValue->SetSupportedFiles("(hdr)|(dds)");
 
         // -----------------------------------------------------------------------------
         // Signal / slots

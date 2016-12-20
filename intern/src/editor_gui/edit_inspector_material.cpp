@@ -314,17 +314,9 @@ namespace Edit
     {
         const QMimeData* pMimeData = _pEvent->mimeData();
 
-        if (pMimeData->hasText())
-        {
-            QString Text = pMimeData->text();
+        if (pMimeData->hasFormat("SW_MATERIAL_REL_PATH") == false) return;
 
-            QFileInfo FileInfo(Text);
-
-            if (FileInfo.completeSuffix() == "mat")
-            {
-                _pEvent->acceptProposedAction();
-            }
-        }
+        _pEvent->acceptProposedAction();
     }
 
     // -----------------------------------------------------------------------------
@@ -333,46 +325,36 @@ namespace Edit
     {
         const QMimeData* pMimeData = _pEvent->mimeData();
 
-        if (pMimeData->hasUrls())
-        {
-            QUrl Url = pMimeData->urls()[0];
+        assert(pMimeData->hasFormat("SW_MATERIAL_REL_PATH"));
 
-            QFileInfo FileInfo(Url.toLocalFile());
+        QString RelativePathToFile = pMimeData->data("SW_MATERIAL_REL_PATH");
 
-            if (FileInfo.completeSuffix() == "mat")
-            {
-                QDir Directory("../assets/");
+        QByteArray ModelFileBinary = RelativePathToFile.toLatin1();
 
-                QString AbsPath = FileInfo.absoluteFilePath();
+        CMessage NewLoadMaterialMessage;
 
-                QByteArray ModelFileBinary = Directory.relativeFilePath(AbsPath).toLatin1();
+        NewLoadMaterialMessage.PutString(ModelFileBinary.data());
 
-                CMessage NewLoadMaterialMessage;
+        NewLoadMaterialMessage.Reset();
 
-                NewLoadMaterialMessage.PutString(ModelFileBinary.data());
+        int HashOfMaterial = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Material_Load, NewLoadMaterialMessage);
 
-                NewLoadMaterialMessage.Reset();
+        if (HashOfMaterial == -1) return;
 
-                int HashOfMaterial = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Material_Load, NewLoadMaterialMessage);
+        // -----------------------------------------------------------------------------
+        // Set material to entity
+        // -----------------------------------------------------------------------------
+        Edit::CMessage NewApplyMessage;
 
-                if (HashOfMaterial == -1) return;
+        NewApplyMessage.PutInt(m_CurrentEntityID);
 
-                // -----------------------------------------------------------------------------
-                // Set material to entity
-                // -----------------------------------------------------------------------------
-                Edit::CMessage NewApplyMessage;
+        NewApplyMessage.PutInt(HashOfMaterial);
 
-                NewApplyMessage.PutInt(m_CurrentEntityID);
+        NewApplyMessage.Reset();
 
-                NewApplyMessage.PutInt(HashOfMaterial);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Actor_Material_Update, NewApplyMessage);
 
-                NewApplyMessage.Reset();
-
-                Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Actor_Material_Update, NewApplyMessage);
-
-                RequestInformation(m_CurrentEntityID);
-            }
-        }
+        RequestInformation(m_CurrentEntityID);
     }
 
     // -----------------------------------------------------------------------------

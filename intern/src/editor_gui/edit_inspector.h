@@ -35,6 +35,7 @@ namespace Edit
     public Q_SLOTS:
 
         void updateContentForEntity(int _ID);
+        void updateContentForTexture(int _Hash);
 
     protected:
 
@@ -62,5 +63,11 @@ namespace Edit
     private:
 
         void OnEntityInfoFacets(Edit::CMessage& _rMessage);
+        void OnTextureInfo(Edit::CMessage& _rMessage);
+
+        void ResetLayout();
+
+        void HighlightEntity(int _ID);
+        void ResetHighlight();
     };
 } // namespace Edit

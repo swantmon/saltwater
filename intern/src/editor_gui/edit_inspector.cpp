@@ -84,6 +84,8 @@ namespace Edit
         // Register messages
         // -----------------------------------------------------------------------------
         Edit::MessageManager::Register(Edit::SApplicationMessageType::Entity_Facets_Info, EDIT_RECEIVE_MESSAGE(&CInspector::OnEntityInfoFacets));
+
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Texture_Info, EDIT_RECEIVE_MESSAGE(&CInspector::OnTextureInfo));
     }
 
     // -----------------------------------------------------------------------------
@@ -126,15 +128,8 @@ namespace Edit
         m_ActiveEntityID = _ID;
 
         // -----------------------------------------------------------------------------
-        // Send messages: Selection and facet infos
-        // -----------------------------------------------------------------------------
-        Edit::CMessage SelectionMessage;
 
-        SelectionMessage.PutInt(m_ActiveEntityID);
-
-        SelectionMessage.Reset();
-
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Graphic_HighlightEntity, SelectionMessage);
+        HighlightEntity(m_ActiveEntityID);
 
         // -----------------------------------------------------------------------------
 
@@ -149,8 +144,37 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
+    void CInspector::updateContentForTexture(int _Hash)
+    {
+        ResetHighlight();
+
+        // -----------------------------------------------------------------------------
+
+        CMessage FacetMessage;
+
+        FacetMessage.PutInt(_Hash);
+
+        FacetMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Texture_Info, FacetMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspector::mousePressEvent(QMouseEvent* _pEvent)
+    {
+        ResetHighlight();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CInspector::OnEntityInfoFacets(Edit::CMessage& _rMessage)
     {
+        // -----------------------------------------------------------------------------
+        // Reset
+        // -----------------------------------------------------------------------------
+        ResetLayout();
+
         // -----------------------------------------------------------------------------
         // Read data
         // -----------------------------------------------------------------------------
@@ -182,27 +206,10 @@ namespace Edit
 
             m_pTransformWidget->setVisible(true);
         }
-        else
-        {
-            m_pTransformWidget->setVisible(false);
-        }
 
         // -----------------------------------------------------------------------------
         // Details
         // -----------------------------------------------------------------------------
-        m_pPointlightWidget ->setVisible(false);
-        m_pSunWidget        ->setVisible(false);
-        m_pEnvironmentWidget->setVisible(false);
-        m_pGlobalProbeWidget->setVisible(false);
-        m_pBloomWidget      ->setVisible(false);
-        m_pDOFWidget        ->setVisible(false);
-        m_pFXAAWidget       ->setVisible(false);
-        m_pSSRWidget        ->setVisible(false);
-        m_pVolumeFogWidget  ->setVisible(false);
-        m_pMaterialWidget   ->setVisible(false);
-        m_pCameraWidget     ->setVisible(false);
-        m_pARController     ->setVisible(false);
-
         if (HasDetailData)
         {
             if (Category == 0) // Actors
@@ -303,7 +310,53 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspector::mousePressEvent(QMouseEvent* _pEvent)
+    void CInspector::OnTextureInfo(Edit::CMessage& _rMessage)
+    {
+        // -----------------------------------------------------------------------------
+        // Reset
+        // -----------------------------------------------------------------------------
+        ResetLayout();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspector::ResetLayout()
+    {
+        m_pEntityWidget     ->setVisible(false);
+        m_pTransformWidget  ->setVisible(false);
+        m_pPointlightWidget ->setVisible(false);
+        m_pSunWidget        ->setVisible(false);
+        m_pEnvironmentWidget->setVisible(false);
+        m_pGlobalProbeWidget->setVisible(false);
+        m_pBloomWidget      ->setVisible(false);
+        m_pDOFWidget        ->setVisible(false);
+        m_pFXAAWidget       ->setVisible(false);
+        m_pSSRWidget        ->setVisible(false);
+        m_pVolumeFogWidget  ->setVisible(false);
+        m_pMaterialWidget   ->setVisible(false);
+        m_pCameraWidget     ->setVisible(false);
+        m_pARController     ->setVisible(false);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspector::HighlightEntity(int _ID)
+    {
+        // -----------------------------------------------------------------------------
+        // Send messages: Selection and facet infos
+        // -----------------------------------------------------------------------------
+        Edit::CMessage SelectionMessage;
+
+        SelectionMessage.PutInt(_ID);
+
+        SelectionMessage.Reset();
+
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Graphic_HighlightEntity, SelectionMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspector::ResetHighlight()
     {
         Edit::CMessage NewMessage;
 
