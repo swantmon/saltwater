@@ -434,7 +434,7 @@ namespace
             rMaterial.SetAmbientOcclusionTexture(0);
         }
 
-        Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyData);
+        Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyData | Dt::CMaterial::DirtyTexture);
     }
 
 

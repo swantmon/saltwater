@@ -27,10 +27,9 @@ namespace Dt
         enum EDirtyFlags
         {
             DirtyCreate  = 0x01,
-            DirtyFile    = 0x02,
-            DirtyData    = 0x04,
-            DirtyTexture = 0x08,
-            DirtyDestroy = 0x10,
+            DirtyData    = 0x02,
+            DirtyTexture = 0x04,
+            DirtyDestroy = 0x08,
         };
 
     public:

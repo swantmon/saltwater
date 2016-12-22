@@ -365,17 +365,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Set definitions
             // -----------------------------------------------------------------------------
-            rMaterial.m_HasAlpha = false;
             rMaterial.m_HasBump  = rDataMaterial.GetBumpTexture() != 0;
-
-            // -----------------------------------------------------------------------------
-            // Set attributes
-            // -----------------------------------------------------------------------------
-            rMaterial.m_MaterialAttributes.m_Color        = rDataMaterial.GetColor();
-            rMaterial.m_MaterialAttributes.m_Roughness    = rDataMaterial.GetRoughness();
-            rMaterial.m_MaterialAttributes.m_Reflectance  = rDataMaterial.GetReflectance();
-            rMaterial.m_MaterialAttributes.m_MetalMask    = rDataMaterial.GetMetalness();
-            rMaterial.m_MaterialAttributes.m_TilingOffset = rDataMaterial.GetTilingOffset();
 
             // -----------------------------------------------------------------------------
             // Shader
@@ -437,11 +427,38 @@ namespace
             }
 
             rMaterial.m_TextureSetPtrs[CShader::Pixel] = TextureManager::CreateTextureSet(TexturePtrs, CMaterial::SMaterialKey::s_NumberOfTextures);
+        }
 
-            if (Hash != 0)
+        if ((DirtyFlags & Dt::CMaterial::DirtyData) != 0)
+        {
+            // -----------------------------------------------------------------------------
+            // Get data material
+            // -----------------------------------------------------------------------------
+            Dt::CMaterial&   rDataMaterial    = *_Material;
+            CInternMaterial* pGraphicMaterial = m_MaterialByHash.at(Hash);
+
+            if (pGraphicMaterial == nullptr)
             {
-                m_MaterialByHash[Hash] = pGraphicMaterial;
+                BASE_CONSOLE_STREAMWARNING("Update of data material failed because it is not created!");
+
+                return;
             }
+
+            CInternMaterial& rMaterial = *pGraphicMaterial;
+
+            // -----------------------------------------------------------------------------
+            // Set definitions
+            // -----------------------------------------------------------------------------
+            rMaterial.m_HasAlpha = false;
+
+            // -----------------------------------------------------------------------------
+            // Set attributes
+            // -----------------------------------------------------------------------------
+            rMaterial.m_MaterialAttributes.m_Color        = rDataMaterial.GetColor();
+            rMaterial.m_MaterialAttributes.m_Roughness    = rDataMaterial.GetRoughness();
+            rMaterial.m_MaterialAttributes.m_Reflectance  = rDataMaterial.GetReflectance();
+            rMaterial.m_MaterialAttributes.m_MetalMask    = rDataMaterial.GetMetalness();
+            rMaterial.m_MaterialAttributes.m_TilingOffset = rDataMaterial.GetTilingOffset();
         }
     }
 
