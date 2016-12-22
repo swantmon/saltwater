@@ -104,6 +104,7 @@ namespace
 
         // -----------------------------------------------------------------------------
         // Load
+        // Check if texture is really created or only loaded!
         // -----------------------------------------------------------------------------
         Dt::STextureDescriptor TextureDescriptor;
 
@@ -119,7 +120,7 @@ namespace
 
         Dt::CTextureBase* pLoadedTexture = Dt::TextureManager::CreateTexture(TextureDescriptor);
 
-        Dt::TextureManager::MarkTextureAsDirty(pLoadedTexture, Dt::CTextureBase::DirtyCreate | Dt::CTextureBase::DirtyFile);
+        Dt::TextureManager::MarkTextureAsDirty(pLoadedTexture, Dt::CTextureBase::DirtyCreate);
 
         // -----------------------------------------------------------------------------
         // Set hash

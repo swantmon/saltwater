@@ -627,9 +627,8 @@ namespace
 
         Gfx::CNativeTextureHandle TextureHandle = pInternTextureArray->m_NativeTexture;
 
-        int InternalFormat = ConvertGLInternalImageFormat(pInternTextureArray->GetFormat());
-        int Format         = ConvertGLImageFormat(pInternTextureArray->GetFormat());
-        int Type           = ConvertGLImageType  (pInternTextureArray->GetFormat());
+        int Format = ConvertGLImageFormat(pInternTextureArray->GetFormat());
+        int Type   = ConvertGLImageType  (pInternTextureArray->GetFormat());
         
         // -----------------------------------------------------------------------------
         // Upload data to texture
@@ -675,9 +674,8 @@ namespace
         
         Gfx::CNativeTextureHandle TextureHandle = pInternTextureArray->m_NativeTexture;
         
-        int InternalFormat = ConvertGLInternalImageFormat(pInternTextureArray->GetFormat());
-        int Format         = ConvertGLImageFormat(pInternTextureArray->GetFormat());
-        int Type           = ConvertGLImageType  (pInternTextureArray->GetFormat());
+        int Format = ConvertGLImageFormat(pInternTextureArray->GetFormat());
+        int Type   = ConvertGLImageType  (pInternTextureArray->GetFormat());
         
         // -----------------------------------------------------------------------------
         // Upload data to texture
@@ -848,77 +846,6 @@ namespace
                 {
                     pInternTexture2D->m_Hash = Hash;
 
-                    m_Textures2DByHash[Hash] = pInternTexture2D;
-                }
-            }
-            else if (_pTexture->GetDimension() == Dt::CTextureBase::Dim3D)
-            {
-                // TODO by tschwandt
-                // Not implemented yet
-
-                BASE_CONSOLE_STREAMWARNING("Texture 3D from data textures is not yet supported!");
-            }
-        }
-
-        // -----------------------------------------------------------------------------
-        // File
-        // -----------------------------------------------------------------------------
-        if ((DirtyFlags & Dt::CTextureBase::DirtyFile) != 0)
-        {
-            STextureDescriptor TextureDescriptor;
-
-            TextureDescriptor.m_NumberOfPixelsU  = 1;
-            TextureDescriptor.m_NumberOfPixelsV  = 1;
-            TextureDescriptor.m_NumberOfPixelsW  = 1;
-            TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
-            TextureDescriptor.m_NumberOfTextures = 1;
-            TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-            TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-            TextureDescriptor.m_Semantic         = ConvertDataSemantic(_pTexture->GetSemantic());
-            TextureDescriptor.m_pFileName        = _pTexture->GetFileName();
-            TextureDescriptor.m_pPixels          = _pTexture->GetPixels();
-            TextureDescriptor.m_Binding          = ConvertDataBinding(_pTexture->GetBinding());
-            TextureDescriptor.m_Format           = ConvertDataFormat(_pTexture->GetFormat());
-
-            if (_pTexture->GetDimension() == Dt::CTextureBase::Dim1D)
-            {
-                Dt::CTexture1D* pDataTexture = static_cast<Dt::CTexture1D*>(_pTexture);
-
-                TextureDescriptor.m_NumberOfPixelsU = pDataTexture->GetNumberOfPixelsU();
-
-                InternCreateTexture1D(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
-            }
-            else if (_pTexture->GetDimension() == Dt::CTextureBase::Dim2D)
-            {
-                CInternTexture2D* pInternTexture2D = nullptr;
-
-                if (_pTexture->IsCube())
-                {
-                    Dt::CTextureCube* pDataTexture = static_cast<Dt::CTextureCube*>(_pTexture);
-
-                    TextureDescriptor.m_NumberOfPixelsU  = pDataTexture->GetNumberOfPixelsU();
-                    TextureDescriptor.m_NumberOfPixelsV  = pDataTexture->GetNumberOfPixelsV();
-                    TextureDescriptor.m_NumberOfTextures = 6;
-
-                    pInternTexture2D = InternCreateCubeTexture(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
-                }
-                else
-                {
-                    Dt::CTexture2D* pDataTexture = static_cast<Dt::CTexture2D*>(_pTexture);
-
-                    TextureDescriptor.m_NumberOfPixelsU = pDataTexture->GetNumberOfPixelsU();
-                    TextureDescriptor.m_NumberOfPixelsV = pDataTexture->GetNumberOfPixelsV();
-
-                    pInternTexture2D = InternCreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
-
-                    if (pInternTexture2D == nullptr)
-                    {
-                        pInternTexture2D = static_cast<CInternTexture2D*>(m_Texture2DPtr.GetPtr());
-                    }
-                }
-
-                if (Hash != 0 && pInternTexture2D != nullptr)
-                {
                     m_Textures2DByHash[Hash] = pInternTexture2D;
                 }
             }

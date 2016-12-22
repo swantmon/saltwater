@@ -626,6 +626,8 @@ namespace
         pTextureData    = nullptr;
         Hash            = 0;
         NativeImageName = 0;
+        NativeILFormat  = 0;
+        NativeILType    = 0;
         
         // -----------------------------------------------------------------------------
         // Create hash value over user identifier or filename
