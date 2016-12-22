@@ -270,6 +270,14 @@ namespace Edit
 
     void CInspectorMaterial::RequestInformation(unsigned int _EntityID)
     {
+        // -----------------------------------------------------------------------------
+        // Behavior
+        // -----------------------------------------------------------------------------
+        setAcceptDrops(true);
+
+        // -----------------------------------------------------------------------------
+        // Load material from entity
+        // -----------------------------------------------------------------------------
         m_CurrentEntityID = _EntityID;
 
         CMessage NewMessage;
@@ -286,7 +294,12 @@ namespace Edit
     void CInspectorMaterial::RequestInformation(const QString& _rRelPathToTexture)
     {
         // -----------------------------------------------------------------------------
-        // Load texture
+        // Behavior
+        // -----------------------------------------------------------------------------
+        setAcceptDrops(false);
+
+        // -----------------------------------------------------------------------------
+        // Load material from file
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
