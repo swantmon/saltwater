@@ -305,7 +305,7 @@ namespace
 
         assert(Hash != 0);
 
-        if ((DirtyFlags & Dt::CTextureBase::DirtyCreate) != 0)
+        if ((DirtyFlags & Dt::CMaterial::DirtyCreate) != 0)
         {
             SMaterialDescriptor MaterialDescriptor;
 
@@ -335,7 +335,7 @@ namespace
             }
         }
 
-        if ((DirtyFlags & Dt::CTextureBase::DirtyData) != 0)
+        if ((DirtyFlags & Dt::CMaterial::DirtyData) != 0)
         {
             // -----------------------------------------------------------------------------
             // Get data material
