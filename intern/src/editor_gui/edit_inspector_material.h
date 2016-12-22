@@ -31,6 +31,8 @@ namespace Edit
 
         void RequestInformation(unsigned int _EntityID);
 
+        void RequestInformation(const QString& _rRelPathToTexture);
+
     private:
 
         unsigned int m_CurrentEntityID;

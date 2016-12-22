@@ -145,6 +145,32 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
+    void CInspector::updateContentForMaterial(const QString& _rRelPath)
+    {
+        ResetLayout();
+
+        ResetHighlight();
+
+        m_pMaterialWidget->RequestInformation(_rRelPath);
+
+        m_pMaterialWidget->setVisible(true);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspector::updateContentForModel(const QString& _rRelPath)
+    {
+        ResetLayout();
+
+        ResetHighlight();
+
+//         m_pModelWidget->RequestInformation(_rRelPath);
+// 
+//         m_pModelWidget->setVisible(true);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CInspector::mousePressEvent(QMouseEvent* _pEvent)
     {
         ResetHighlight();

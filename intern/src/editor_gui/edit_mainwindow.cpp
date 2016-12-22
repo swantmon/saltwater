@@ -44,6 +44,7 @@ namespace Edit
         // Signal / slots
         // -----------------------------------------------------------------------------
         connect(m_pAssetBrowserWidget->m_pFileTreeView, SIGNAL(textureClicked(const QString&)), m_pInspector, SLOT(updateContentForTexture(const QString&)));
+        connect(m_pAssetBrowserWidget->m_pFileTreeView, SIGNAL(materialClicked(const QString&)), m_pInspector, SLOT(updateContentForMaterial(const QString&)));
 
         // -----------------------------------------------------------------------------
         // Messages

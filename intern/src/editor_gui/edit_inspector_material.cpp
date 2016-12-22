@@ -283,6 +283,38 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
+    void CInspectorMaterial::RequestInformation(const QString& _rRelPathToTexture)
+    {
+        // -----------------------------------------------------------------------------
+        // Load texture
+        // -----------------------------------------------------------------------------
+        Edit::CMessage NewMessage;
+
+        NewMessage.PutString(_rRelPathToTexture.toLatin1().data());
+
+        NewMessage.Reset();
+
+        int Hash = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Material_Load, NewMessage);
+
+        if (Hash != -1)
+        {
+            m_MaterialHash = static_cast<unsigned int>(Hash);
+
+            // -----------------------------------------------------------------------------
+            // Request info of texture
+            // -----------------------------------------------------------------------------
+            Edit::CMessage NewMessage;
+
+            NewMessage.PutInt(m_MaterialHash);
+
+            NewMessage.Reset();
+
+            Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Material_Info, NewMessage);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CInspectorMaterial::dragEnterEvent(QDragEnterEvent* _pEvent)
     {
         const QMimeData* pMimeData = _pEvent->mimeData();

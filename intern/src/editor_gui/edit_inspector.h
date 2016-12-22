@@ -37,6 +37,8 @@ namespace Edit
 
         void updateContentForEntity(int _ID);
         void updateContentForTexture(const QString& _rRelPath);
+        void updateContentForMaterial(const QString& _rRelPath);
+        void updateContentForModel(const QString& _rRelPath);
 
     protected:
 
