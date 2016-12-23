@@ -15,11 +15,12 @@
 #include <QMimeData>
 #include <QUrl>
 
+#include <assert.h>
+
 namespace Edit
 {
     CTextureValue::CTextureValue(QWidget* _pParent)
         : QWidget         (_pParent)
-        , m_SupportedFiles("(dds)|(hdr)|(jpg)|(jpeg)|(png)|(tga)", QRegularExpression::CaseInsensitiveOption)
         , m_File          ()
         , m_Hash          ()
     {
@@ -79,13 +80,6 @@ namespace Edit
             m_pFileLabel->setVisible(false);
             m_pFileEdit ->setVisible(false);
         }
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CTextureValue::SetSupportedFiles(const QString& _rSupportedFiles)
-    {
-        m_SupportedFiles.setPattern(_rSupportedFiles);
     }
 
     // -----------------------------------------------------------------------------
@@ -151,17 +145,9 @@ namespace Edit
     {
         const QMimeData* pMimeData = _pEvent->mimeData();
 
-        if (pMimeData->hasText())
-        {
-            QString Text = pMimeData->text();
+        if (pMimeData->hasFormat("SW_TEXTURE_REL_PATH") == false) return;
 
-            QFileInfo FileInfo(Text);
-
-            if (m_SupportedFiles.match(FileInfo.completeSuffix()).hasMatch())
-            {
-                _pEvent->acceptProposedAction();
-            }
-        }
+        _pEvent->acceptProposedAction();
     }
 
     // -----------------------------------------------------------------------------
@@ -170,12 +156,11 @@ namespace Edit
     {
         const QMimeData* pMimeData = _pEvent->mimeData();
 
-        if (pMimeData->hasUrls())
-        {
-            QUrl Url = pMimeData->urls()[0];
+        assert(pMimeData->hasFormat("SW_TEXTURE_REL_PATH"));
 
-            LoadTexture(Url.toLocalFile());
-        }
+        QString RelativePathToFile = pMimeData->data("SW_TEXTURE_REL_PATH");
+
+        LoadTexture(RelativePathToFile);
     }
 
     // -----------------------------------------------------------------------------
@@ -194,19 +179,14 @@ namespace Edit
 
     void CTextureValue::LoadTexture(const QString& _rPathToTexture)
     {
-        QDir      Directory("../assets/");
-        QString   AbsolutePathToTexture;
-        QString   RelativePathToTexture;
-        QFileInfo FileInfo;
+        m_File = _rPathToTexture;
+        m_Hash = 0;
 
         // -----------------------------------------------------------------------------
         // Check emptiness
         // -----------------------------------------------------------------------------
         if (_rPathToTexture == "")
         {
-            m_File = "";
-            m_Hash = 0;
-
             m_pFileEdit->setText(m_File);
 
             m_pHashEdit->setText(QString::number(m_Hash));
@@ -222,60 +202,28 @@ namespace Edit
         }
 
         // -----------------------------------------------------------------------------
-        // Check relative vs. absolute
+        // Load texture
         // -----------------------------------------------------------------------------
-        FileInfo.setFile(_rPathToTexture);
+        Edit::CMessage NewMessage;
 
-        if (FileInfo.isRelative())
-        {
-            RelativePathToTexture = _rPathToTexture;
+        NewMessage.PutString(_rPathToTexture.toLatin1().data());
 
-            AbsolutePathToTexture = Directory.absoluteFilePath(_rPathToTexture);
-        }
-        else
-        {
-            RelativePathToTexture = Directory.relativeFilePath(_rPathToTexture);
+        NewMessage.Reset();
 
-            AbsolutePathToTexture = _rPathToTexture;
-        }
+        m_Hash = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Texture_Load, NewMessage);
 
         // -----------------------------------------------------------------------------
-        // Check texture
+        // Set UI
         // -----------------------------------------------------------------------------
-        FileInfo.setFile(AbsolutePathToTexture);
+        m_pFileEdit->setText(m_File);
 
-        if (FileInfo.exists() && m_SupportedFiles.match(FileInfo.completeSuffix()).hasMatch())
-        {
-            m_File = RelativePathToTexture;
+        m_pHashEdit->setText(QString::number(m_Hash));
 
-            // -----------------------------------------------------------------------------
-            // Create hash
-            // TODO: Hash should be requested by a message to editor
-            // -----------------------------------------------------------------------------
-            QByteArray NewTextureBinary = m_File.toLatin1();
+        // -----------------------------------------------------------------------------
+        // Emit info
+        // -----------------------------------------------------------------------------
+        emit fileChanged(m_File);
 
-            const char*  pHashIdentifier = NewTextureBinary.data();
-            unsigned int NumberOfBytes;
-            unsigned int Hash;
-
-            const void* pData;
-
-            NumberOfBytes = static_cast<unsigned int>(strlen(pHashIdentifier) * sizeof(char));
-            pData = static_cast<const void*>(pHashIdentifier);
-
-            m_Hash = Base::CRC32(pData, NumberOfBytes);
-
-            // -----------------------------------------------------------------------------
-            // Set UI
-            // -----------------------------------------------------------------------------
-            m_pHashEdit->setText(QString::number(m_Hash));
-
-            // -----------------------------------------------------------------------------
-            // Emit info
-            // -----------------------------------------------------------------------------
-            emit fileChanged(m_File);
-
-            emit hashChanged(m_Hash);
-        }
+        emit hashChanged(m_Hash);
     }
 } // namespace Edit

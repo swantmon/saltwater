@@ -22,7 +22,6 @@ namespace Edit
         // Setup user UI
         // -----------------------------------------------------------------------------
         m_pTextureValue->SetLayout(CTextureValue::NoPreview);
-        m_pTextureValue->SetSupportedFiles("(hdr)|(dds)");
 
         // -----------------------------------------------------------------------------
         // Signal / slots
@@ -52,8 +51,6 @@ namespace Edit
         // -----------------------------------------------------------------------------
         int Type = m_pTypeCB->currentIndex();
 
-        QByteArray NewTextureBinary = m_pTextureValue->GetTextureFile().toLatin1();
-
         unsigned int TextureHash = m_pTextureValue->GetTextureHash();
 
         float Intensity = m_pIntensityEdit->text().toFloat();
@@ -66,8 +63,6 @@ namespace Edit
         NewMessage.PutInt(m_CurrentEntityID);
 
         NewMessage.PutInt(Type);
-
-        NewMessage.PutString(NewTextureBinary.data());
 
         NewMessage.PutInt(TextureHash);
 

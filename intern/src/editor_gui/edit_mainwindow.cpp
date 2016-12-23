@@ -41,6 +41,12 @@ namespace Edit
         tabifyDockWidget(m_pAssetsDockWidget, m_pConsoleDockWidget);
 
         // -----------------------------------------------------------------------------
+        // Signal / slots
+        // -----------------------------------------------------------------------------
+        connect(m_pAssetBrowserWidget->m_pFileTreeView, SIGNAL(textureClicked(const QString&)), m_pInspector, SLOT(updateContentForTexture(const QString&)));
+        connect(m_pAssetBrowserWidget->m_pFileTreeView, SIGNAL(materialClicked(const QString&)), m_pInspector, SLOT(updateContentForMaterial(const QString&)));
+
+        // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
         Edit::MessageManager::Register(Edit::SApplicationMessageType::App_State_Change      , EDIT_RECEIVE_MESSAGE(&CMainWindow::OnStateChange));

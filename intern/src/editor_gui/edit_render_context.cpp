@@ -10,6 +10,8 @@
 #include <QResizeEvent>
 #include <QUrl>
 
+#include <assert.h>
+
 namespace Edit
 {
     CRenderContext::CRenderContext(QWidget* _pParent)
@@ -149,17 +151,9 @@ namespace Edit
     {
         const QMimeData* pMimeData = _pEvent->mimeData();
 
-        if (pMimeData->hasText())
-        {
-            QString Text = pMimeData->text();
+        if (pMimeData->hasFormat("SW_MODEL_REL_PATH") == false) return;
 
-            QFileInfo FileInfo(Text);
-
-            if (FileInfo.completeSuffix() == "dae" || FileInfo.completeSuffix() == "obj")
-            {
-                _pEvent->acceptProposedAction();
-            }
-        }
+        _pEvent->acceptProposedAction();
     }
 
     // -----------------------------------------------------------------------------
@@ -168,28 +162,18 @@ namespace Edit
     {
         const QMimeData* pMimeData = _pEvent->mimeData();
 
-        if (pMimeData->hasUrls())
-        {
-            QUrl Url = pMimeData->urls()[0];
+        assert(pMimeData->hasFormat("SW_MODEL_REL_PATH"));
 
-            QFileInfo FileInfo(Url.toLocalFile());
+        QString RelativePathToFile = pMimeData->data("SW_MODEL_REL_PATH");
 
-            if (FileInfo.completeSuffix() == "dae" || FileInfo.completeSuffix() == "obj")
-            {
-                QDir Directory("../assets/");
+        QByteArray ModelFileBinary = RelativePathToFile.toLatin1();
 
-                QString AbsPath = FileInfo.absoluteFilePath();
+        CMessage NewMessage;
 
-                QByteArray ModelFileBinary = Directory.relativeFilePath(AbsPath).toLatin1();
+        NewMessage.PutString(ModelFileBinary.data());
 
-                CMessage NewMessage;
+        NewMessage.Reset();
 
-                NewMessage.PutString(ModelFileBinary.data());
-
-                NewMessage.Reset();
-
-                MessageManager::SendMessage(SGUIMessageType::Entity_Load, NewMessage);
-            }
-        }
+        MessageManager::SendMessage(SGUIMessageType::Entity_Load, NewMessage);
     }
 } // namespace Edit

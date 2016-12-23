@@ -4,7 +4,6 @@
 
 #include "editor_port/edit_message.h"
 
-#include <QRegularExpression>
 #include <QWidget>
 
 namespace Edit
@@ -32,8 +31,6 @@ namespace Edit
 
         void SetLayout(unsigned int _Layout);
 
-        void SetSupportedFiles(const QString& _rSupportedFiles);
-
         void SetTextureFile(const QString& _rTextureFile);
         const QString& GetTextureFile() const;
 
@@ -52,9 +49,8 @@ namespace Edit
 
     private:
 
-        QRegularExpression m_SupportedFiles;
-        QString            m_File;
-        unsigned int       m_Hash;
+        QString      m_File;
+        unsigned int m_Hash;
 
     private:
 

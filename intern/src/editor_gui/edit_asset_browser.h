@@ -7,7 +7,6 @@
 #include "editor_port/edit_message_manager.h"
 
 #include <QFileSystemModel>
-#include <QFileSystemWatcher>
 #include <QWidget>
 
 namespace Edit
@@ -23,9 +22,6 @@ namespace Edit
 
     public:
 
-        void OnStart();
-        void OnExit();
-
         void Reset();
 
     public Q_SLOTS:
@@ -35,7 +31,6 @@ namespace Edit
     private:
 
         QFileSystemModel* m_pDirectoryModel;
-        QFileSystemModel* m_pFileModel;
 
         QString m_RootPath;
         QString m_CurrentPath;
