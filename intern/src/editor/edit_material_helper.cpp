@@ -370,7 +370,7 @@ namespace
 
             if (pTexture != nullptr)
             {
-                rMaterial.SetColorTexture(pTexture);
+                rMaterial.SetNormalTexture(pTexture);
             }
         }
         else
@@ -384,7 +384,7 @@ namespace
 
             if (pTexture != nullptr)
             {
-                rMaterial.SetColorTexture(pTexture);
+                rMaterial.SetRoughnessTexture(pTexture);
             }
         }
         else
@@ -398,7 +398,7 @@ namespace
 
             if (pTexture != nullptr)
             {
-                rMaterial.SetColorTexture(pTexture);
+                rMaterial.SetMetalTexture(pTexture);
             }
         }
         else
@@ -412,7 +412,7 @@ namespace
 
             if (pTexture != nullptr)
             {
-                rMaterial.SetColorTexture(pTexture);
+                rMaterial.SetBumpTexture(pTexture);
             }
         }
         else
@@ -426,7 +426,7 @@ namespace
 
             if (pTexture != nullptr)
             {
-                rMaterial.SetColorTexture(pTexture);
+                rMaterial.SetAmbientOcclusionTexture(pTexture);
             }
         }
         else
