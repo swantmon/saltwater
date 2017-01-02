@@ -36,11 +36,10 @@ layout(std140, binding = 1) uniform UB1
     float ps_Roughness;
     float ps_Reflectance;
     float ps_MetalMask;
+    float ps_Displacement;
 };
 
 layout(binding = 5) uniform sampler2D tes_TextureBump;
-
-float gDispFactor = 0.1f;
 
 // -----------------------------------------------------------------------------
 // Input from previous stage
@@ -94,7 +93,7 @@ void main()
 
    	float Displacement = texture(tes_TextureBump, UV.xy).x;
 
-   	out_Position += (out_Normal * Displacement * gDispFactor);
+   	out_Position += (out_Normal * Displacement * ps_Displacement);
 
    	gl_Position = g_WorldToScreen * vec4(out_Position, 1.0f);
 }

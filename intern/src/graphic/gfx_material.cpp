@@ -17,6 +17,7 @@ namespace Gfx
         m_MaterialAttributes.m_Roughness       = 0.0f;
         m_MaterialAttributes.m_Reflectance     = 0.0f;
         m_MaterialAttributes.m_MetalMask       = 0.0f;
+        m_MaterialAttributes.m_Displacement    = 0.1f;
         m_MaterialAttributes.m_TilingOffset[0] = 1.0f;
         m_MaterialAttributes.m_TilingOffset[1] = 1.0f;
         m_MaterialAttributes.m_TilingOffset[2] = 0.0f;

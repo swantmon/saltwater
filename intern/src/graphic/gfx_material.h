@@ -54,6 +54,7 @@ namespace Gfx
             float         m_Roughness;
             float         m_Reflectance;
             float         m_MetalMask;
+            float         m_Displacement;
         };
         
     public:
