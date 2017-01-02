@@ -194,6 +194,7 @@ namespace
         MaterialDescriptor.m_Roughness       = 1.0f;
         MaterialDescriptor.m_Reflectance     = 0.0f;
         MaterialDescriptor.m_MetalMask       = 0.0f;
+        MaterialDescriptor.m_Displacement    = 0.0f;
         MaterialDescriptor.m_AlbedoColor     = Base::Float3(1.0f);
         MaterialDescriptor.m_TilingOffset    = Base::Float4(0.0f);
         MaterialDescriptor.m_pFileName       = 0;
@@ -323,6 +324,7 @@ namespace
                 MaterialDescriptor.m_Roughness       = _Material->GetRoughness();
                 MaterialDescriptor.m_Reflectance     = _Material->GetReflectance();
                 MaterialDescriptor.m_MetalMask       = _Material->GetMetalness();
+                MaterialDescriptor.m_Displacement    = _Material->GetDisplacement();
                 MaterialDescriptor.m_AlbedoColor     = _Material->GetColor();
                 MaterialDescriptor.m_TilingOffset    = _Material->GetTilingOffset();
                 MaterialDescriptor.m_pFileName       = _Material->GetFileName();
@@ -465,6 +467,7 @@ namespace
             rMaterial.m_MaterialAttributes.m_Roughness    = rDataMaterial.GetRoughness();
             rMaterial.m_MaterialAttributes.m_Reflectance  = rDataMaterial.GetReflectance();
             rMaterial.m_MaterialAttributes.m_MetalMask    = rDataMaterial.GetMetalness();
+            rMaterial.m_MaterialAttributes.m_Displacement = rDataMaterial.GetDisplacement();
             rMaterial.m_MaterialAttributes.m_TilingOffset = rDataMaterial.GetTilingOffset();
         }
     }
@@ -483,6 +486,7 @@ namespace
         float                 Roughness;
         float                 Reflectance;
         float                 MetalMask;
+        float                 Displacement;
         Base::Float3          AlbedoColor;
         Base::Float4          TilingOffset;
         tinyxml2::XMLDocument MaterialFile;
@@ -497,6 +501,7 @@ namespace
         Roughness       = _rDescriptor.m_Roughness;
         Reflectance     = _rDescriptor.m_Reflectance;
         MetalMask       = _rDescriptor.m_MetalMask;
+        Displacement    = _rDescriptor.m_Displacement;
         AlbedoColor     = _rDescriptor.m_AlbedoColor;
         TilingOffset    = _rDescriptor.m_TilingOffset;
 
@@ -656,6 +661,7 @@ namespace
         rMaterial.m_MaterialAttributes.m_Roughness    = Roughness;
         rMaterial.m_MaterialAttributes.m_Reflectance  = Reflectance;
         rMaterial.m_MaterialAttributes.m_MetalMask    = MetalMask;
+        rMaterial.m_MaterialAttributes.m_Displacement = Displacement;
         rMaterial.m_MaterialAttributes.m_TilingOffset = TilingOffset;
 
         // -----------------------------------------------------------------------------

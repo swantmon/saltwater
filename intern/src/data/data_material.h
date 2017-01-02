@@ -85,6 +85,9 @@ namespace Dt
         void SetMetalness(float _Metalness);
         float GetMetalness() const;
 
+        void SetDisplacement(float _Displacement);
+        float GetDisplacement() const;
+
         unsigned int GetHash() const;
 
         unsigned int GetDirtyFlags() const;
@@ -106,6 +109,7 @@ namespace Dt
         float            m_Roughness;
         float            m_Reflectance;
         float            m_MetalMask;
+        float            m_Displacement;
 
         unsigned int     m_Hash;
         unsigned int     m_DirtyFlags;

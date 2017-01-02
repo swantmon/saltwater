@@ -104,6 +104,7 @@ namespace
         MaterialDescriptor.m_Roughness       = 1.0f;
         MaterialDescriptor.m_Reflectance     = 0.0f;
         MaterialDescriptor.m_MetalMask       = 0.0f;
+        MaterialDescriptor.m_Displacement    = 0.0f;
         MaterialDescriptor.m_AlbedoColor     = Base::Float3(1.0f);
         MaterialDescriptor.m_TilingOffset    = Base::Float4(1.0f, 1.0f, 0.0f, 0.0f);
         MaterialDescriptor.m_pFileName       = 0;
@@ -143,6 +144,7 @@ namespace
         MaterialDescriptor.m_Roughness       = 1.0f;
         MaterialDescriptor.m_Reflectance     = 0.0f;
         MaterialDescriptor.m_MetalMask       = 0.0f;
+        MaterialDescriptor.m_Displacement    = 0.0f;
         MaterialDescriptor.m_AlbedoColor     = Base::Float3(1.0f);
         MaterialDescriptor.m_TilingOffset    = Base::Float4(1.0f, 1.0f, 0.0f, 0.0f);
         MaterialDescriptor.m_pFileName       = pPathToFile;
@@ -184,6 +186,7 @@ namespace
         NewMessage.PutFloat(rMaterial.GetRoughness());
         NewMessage.PutFloat(rMaterial.GetReflectance());
         NewMessage.PutFloat(rMaterial.GetMetalness());
+        NewMessage.PutFloat(rMaterial.GetDisplacement());
 
         if (rMaterial.GetColorTexture())
         {
@@ -302,6 +305,8 @@ namespace
 
         float Metalness = _rMessage.GetFloat();
 
+        float Displacement = _rMessage.GetFloat();
+
         HasColorMap = _rMessage.GetBool();
 
         if (HasColorMap)
@@ -349,6 +354,7 @@ namespace
         rMaterial.SetRoughness   (Roughness);
         rMaterial.SetReflectance (Reflectance);
         rMaterial.SetMetalness   (Metalness);
+        rMaterial.SetDisplacement(Displacement);
 
         if (HasColorMap)
         {

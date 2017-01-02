@@ -127,6 +127,7 @@ namespace
         MaterialDescriptor.m_Roughness       = 1.0f;
         MaterialDescriptor.m_Reflectance     = 0.0f;
         MaterialDescriptor.m_MetalMask       = 0.0f;
+        MaterialDescriptor.m_Displacement    = 0.0f;
         MaterialDescriptor.m_AlbedoColor     = Base::Float3(1.0f);
         MaterialDescriptor.m_TilingOffset    = Base::Float4(0.0f);
         MaterialDescriptor.m_pFileName       = 0;
