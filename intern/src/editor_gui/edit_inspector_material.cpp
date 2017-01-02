@@ -111,6 +111,7 @@ namespace Edit
         float RoughnessValue   = m_pRoughnessEdit  ->text().toFloat();
         float MetallicValue    = m_pMetallicEdit->text().toFloat();
         float ReflectanceValue = m_pReflectanceEdit->text().toFloat();
+        float BumpValue        = m_pBumpEdit->text().toFloat();
 
         float TilingX = m_pTilingXEdit->text().toFloat();
         float TilingY = m_pTilingYEdit->text().toFloat();
@@ -152,6 +153,7 @@ namespace Edit
         NewMessage.PutFloat(RoughnessValue);
         NewMessage.PutFloat(ReflectanceValue);
         NewMessage.PutFloat(MetallicValue);
+        NewMessage.PutFloat(BumpValue);
 
         if (NewColorTexture.length() > 0)
         {
@@ -453,6 +455,7 @@ namespace Edit
         float Roughness   = _rMessage.GetFloat();
         float Reflectance = _rMessage.GetFloat();
         float Metalness   = _rMessage.GetFloat();
+        float BumpFactor  = _rMessage.GetFloat();
 
         HasColorMap = _rMessage.GetBool();
 
@@ -558,6 +561,8 @@ namespace Edit
         m_pBumpTextureEdit->SetTextureFile("");
 
         if (HasBumpMap) m_pBumpTextureEdit->SetTextureFile(BumpMapName);
+
+        m_pBumpEdit->setText(QString::number(BumpFactor));
 
         // -----------------------------------------------------------------------------
 

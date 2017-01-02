@@ -328,7 +328,7 @@ namespace
         
         m_HSBuffer             = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferHS());
         
-        m_DSBuffer             = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferDS());
+        m_DSBuffer             = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferDS(), MaterialBuffer);
 
         m_ForwardPassPSBuffer  = BufferManager::CreateBufferSet(MaterialBuffer, LightPropertiesBuffer);
     }

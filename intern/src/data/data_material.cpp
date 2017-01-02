@@ -19,6 +19,7 @@ namespace Dt
         , m_Roughness        (1.0f)
         , m_Reflectance      (0.0f)
         , m_MetalMask        (0.0f)
+        , m_Displacement     (0.0f)
         , m_Hash             (0)
         , m_DirtyFlags       (0)
         , m_DirtyTime        (0)
@@ -269,6 +270,20 @@ namespace Dt
     float CMaterial::GetMetalness() const
     {
         return m_MetalMask;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMaterial::SetDisplacement(float _Displacement)
+    {
+        m_Displacement = _Displacement;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CMaterial::GetDisplacement() const
+    {
+        return m_Displacement;
     }
 
     // -----------------------------------------------------------------------------

@@ -29,9 +29,17 @@ layout(triangles, equal_spacing, ccw) in;
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(binding = 5) uniform sampler2D tes_TextureBump;
+layout(std140, binding = 1) uniform UB1
+{
+    vec4  ps_TilingOffset;
+    vec3  ps_Color;
+    float ps_Roughness;
+    float ps_Reflectance;
+    float ps_MetalMask;
+    float ps_Displacement;
+};
 
-float gDispFactor = 0.1f;
+layout(binding = 5) uniform sampler2D tes_TextureBump;
 
 // -----------------------------------------------------------------------------
 // Input from previous stage
@@ -72,23 +80,20 @@ void main()
     // Interpolate the attributes of the output vertex using the barycentric
     // coordinates
     // -----------------------------------------------------------------------------
-   	out_TexCoord = interpolate2D(in_TexCoord[0], in_TexCoord[1], in_TexCoord[2]);
-   	out_Normal   = interpolate3D(in_Normal[0], in_Normal[1], in_Normal[2]);
-   	out_Normal   = normalize(out_Normal);
-   	out_Position = interpolate3D(in_Position[0], in_Position[1], in_Position[2]);
+   	out_TexCoord       = interpolate2D(in_TexCoord[0], in_TexCoord[1], in_TexCoord[2]);
+   	out_Normal         = interpolate3D(in_Normal[0], in_Normal[1], in_Normal[2]);
+   	out_Normal         = normalize(out_Normal);
+   	out_Position       = interpolate3D(in_Position[0], in_Position[1], in_Position[2]);
     out_WSNormalMatrix = in_WSNormalMatrix[0];
-    
-    // TODO by tschwandt (13.08.2015)
-    // Normal matrix has to be computed here in this shader
-    // -> therefore we have to change automatic shader loading in
-    //    model and material manager
 
     // -----------------------------------------------------------------------------
     // Displace the vertex along the normal
     // -----------------------------------------------------------------------------
-   	float Displacement = texture(tes_TextureBump, out_TexCoord.xy).x;
+    vec2 UV = out_TexCoord * ps_TilingOffset.xy + ps_TilingOffset.zw;
 
-   	out_Position += (out_Normal * Displacement * gDispFactor);
+   	float Displacement = texture(tes_TextureBump, UV.xy).x;
+
+   	out_Position += (out_Normal * Displacement * ps_Displacement);
 
    	gl_Position = g_WorldToScreen * vec4(out_Position, 1.0f);
 }

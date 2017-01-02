@@ -30,6 +30,7 @@ namespace Gfx
         float             m_Roughness;
         float             m_Reflectance;
         float             m_MetalMask;
+        float             m_Displacement;
         Base::Float3      m_AlbedoColor;
         Base::Float4      m_TilingOffset;
         const Base::Char* m_pFileName;
