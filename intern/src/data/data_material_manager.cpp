@@ -166,6 +166,7 @@ namespace
         float                 Roughness;
         float                 Reflectance;
         float                 MetalMask;
+        float                 Displacement;
         Base::Float3          AlbedoColor;
         Base::Float4          TilingOffset;
         int                   NumberOfBytes;
@@ -212,6 +213,7 @@ namespace
         Roughness       = _rDescriptor.m_Roughness;
         Reflectance     = _rDescriptor.m_Reflectance;
         MetalMask       = _rDescriptor.m_MetalMask;
+        Displacement    = _rDescriptor.m_Displacement;
         AlbedoColor     = _rDescriptor.m_AlbedoColor;
         TilingOffset    = _rDescriptor.m_TilingOffset;
 
@@ -318,6 +320,8 @@ namespace
             if (pBump != 0)
             {
                 pBumpMap = pBump->Attribute("Map");
+
+                Displacement = pBump->FloatAttribute("V");
             }
         
             // -----------------------------------------------------------------------------
@@ -358,6 +362,7 @@ namespace
             rNewMaterial.m_Roughness    = Roughness;
             rNewMaterial.m_Reflectance  = Reflectance;
             rNewMaterial.m_MetalMask    = MetalMask;
+            rNewMaterial.m_Displacement = Displacement;
             rNewMaterial.m_TilingOffset = TilingOffset;
             rNewMaterial.m_Hash         = Hash;
             rNewMaterial.m_FileName     = _rDescriptor.m_pFileName;
