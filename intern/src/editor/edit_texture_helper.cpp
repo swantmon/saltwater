@@ -120,13 +120,13 @@ namespace
 
         Dt::CTextureBase* pLoadedTexture = Dt::TextureManager::CreateTexture(TextureDescriptor);
 
-        Dt::TextureManager::MarkTextureAsDirty(pLoadedTexture, Dt::CTextureBase::DirtyCreate);
-
         // -----------------------------------------------------------------------------
         // Set hash
         // -----------------------------------------------------------------------------
         if (pLoadedTexture)
         {
+            Dt::TextureManager::MarkTextureAsDirty(pLoadedTexture, Dt::CTextureBase::DirtyCreate);
+
             _rMessage.SetResult(pLoadedTexture->GetHash());
         }
         else
@@ -143,42 +143,51 @@ namespace
 
         Dt::CTextureBase* pTexture = Dt::TextureManager::GetTextureByHash(static_cast<unsigned int>(TextureHash));
 
-        Edit::CMessage NewMessage;
-
-        NewMessage.PutInt(pTexture->GetHash());
-        NewMessage.PutInt(pTexture->GetDimension());
-        NewMessage.PutInt(pTexture->GetFormat());
-        NewMessage.PutInt(pTexture->GetSemantic());
-        NewMessage.PutInt(pTexture->GetBinding());
-        NewMessage.PutBool(pTexture->IsArray());
-        NewMessage.PutBool(pTexture->IsCube());
-        NewMessage.PutBool(pTexture->IsDummy());
-
-        if (pTexture->GetFileName() != nullptr)
+        if (pTexture != nullptr)
         {
-            NewMessage.PutBool(true);
+            Edit::CMessage NewMessage;
 
-            NewMessage.PutString(pTexture->GetFileName());
+            NewMessage.PutInt(pTexture->GetHash());
+            NewMessage.PutInt(pTexture->GetDimension());
+            NewMessage.PutInt(pTexture->GetFormat());
+            NewMessage.PutInt(pTexture->GetSemantic());
+            NewMessage.PutInt(pTexture->GetBinding());
+            NewMessage.PutBool(pTexture->IsArray());
+            NewMessage.PutBool(pTexture->IsCube());
+            NewMessage.PutBool(pTexture->IsDummy());
+
+            if (pTexture->GetFileName() != nullptr)
+            {
+                NewMessage.PutBool(true);
+
+                NewMessage.PutString(pTexture->GetFileName());
+            }
+            else
+            {
+                NewMessage.PutBool(false);
+            }
+
+            if (pTexture->GetIdentifier() != nullptr)
+            {
+                NewMessage.PutBool(true);
+
+                NewMessage.PutString(pTexture->GetIdentifier());
+            }
+            else
+            {
+                NewMessage.PutBool(false);
+            }
+
+            NewMessage.Reset();
+
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Texture_Info, NewMessage);
+
+            _rMessage.SetResult(pTexture->GetHash());
         }
         else
         {
-            NewMessage.PutBool(false);
+            _rMessage.SetResult(-1);
         }
-
-        if (pTexture->GetIdentifier() != nullptr)
-        {
-            NewMessage.PutBool(true);
-
-            NewMessage.PutString(pTexture->GetIdentifier());
-        }
-        else
-        {
-            NewMessage.PutBool(false);
-        }
-
-        NewMessage.Reset();
-
-        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Texture_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
