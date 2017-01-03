@@ -24,6 +24,7 @@ namespace Edit
         void mouseMoveEvent(QMouseEvent* _pMouseEvent);
         void mousePressEvent(QMouseEvent* _pMouseEvent);
         void mouseReleaseEvent(QMouseEvent* _pMouseEvent);
+        void wheelEvent(QWheelEvent* _pWheelEvent);
         void resizeEvent(QResizeEvent* _pResizeEvent);
 
         void dragEnterEvent(QDragEnterEvent* _pEvent);

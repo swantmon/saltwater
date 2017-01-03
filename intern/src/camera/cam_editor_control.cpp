@@ -1,6 +1,8 @@
 
 #include "camera/cam_precompiled.h"
 
+#include "core/core_time.h"
+
 #include "base/base_input_event.h"
 #include "base/base_math_operations.h"
 
@@ -14,7 +16,7 @@
 
 namespace Cam
 {
-    const float CEditorControl::s_MoveVelocityBorder[] =  { 0.001f, 1.0f, 0.008f };
+    const float CEditorControl::s_MoveVelocityBorder[] =  { 0.1f, 100.0f, 0.008f };
     const float CEditorControl::s_RotationVelocity     =  0.35f;
 } // namespace Cam
 
@@ -120,13 +122,15 @@ namespace Cam
         Base::Float3 Forward(0.0f, 0.0f, -1.0f);
         Base::Float3 Right  (1.0f, 0.0f,  0.0f);
 
-        Forward      = Forward * m_RotationMatrix;
-        Right        = Right   * m_RotationMatrix;
+        float DeltaTime = static_cast<float>(Core::Time::GetDeltaTimeLastFrame());
 
-        if (m_MoveDirection & 0x01) m_Position += (Forward * m_MoveVelocity);
-        if (m_MoveDirection & 0x02) m_Position -= (Forward * m_MoveVelocity);
-        if (m_MoveDirection & 0x04) m_Position -= (Right   * m_MoveVelocity);
-        if (m_MoveDirection & 0x08) m_Position += (Right   * m_MoveVelocity);
+        Forward = Forward * m_RotationMatrix;
+        Right   = Right   * m_RotationMatrix;
+
+        if (m_MoveDirection & 0x01) m_Position += (Forward * m_MoveVelocity * DeltaTime);
+        if (m_MoveDirection & 0x02) m_Position -= (Forward * m_MoveVelocity * DeltaTime);
+        if (m_MoveDirection & 0x04) m_Position -= (Right   * m_MoveVelocity * DeltaTime);
+        if (m_MoveDirection & 0x08) m_Position += (Right   * m_MoveVelocity * DeltaTime);
 
         Gfx::Cam::SetPosition(m_Position);
         Gfx::Cam::SetRotationMatrix(m_RotationMatrix);
