@@ -77,6 +77,7 @@ namespace
         void OnMouseRightPressed(Edit::CMessage& _rMessage);
         void OnMouseRightReleased(Edit::CMessage& _rMessage);
         void OnMouseMove(Edit::CMessage& _rMessage);
+        void OnWheel(Edit::CMessage& _rMessage);
 
         void OnResize(Edit::CMessage& _rMessage);
     };
@@ -161,7 +162,8 @@ namespace
         Edit::MessageManager::Register(Edit::SGUIMessageType::Input_MouseRightPressed  , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseRightPressed));
         Edit::MessageManager::Register(Edit::SGUIMessageType::Input_MouseRightReleased , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseRightReleased));
         Edit::MessageManager::Register(Edit::SGUIMessageType::Input_MouseMove          , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseMove));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::Window_Resize, EDIT_RECEIVE_MESSAGE(&CApplication::OnResize));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Input_MouseWheel         , EDIT_RECEIVE_MESSAGE(&CApplication::OnWheel));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Window_Resize            , EDIT_RECEIVE_MESSAGE(&CApplication::OnResize));
 
         // -----------------------------------------------------------------------------
         // Helper
@@ -420,6 +422,18 @@ namespace
         m_LatestMousePosition[1] = MousePositionY;
 
         Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseMove, Base::CInputEvent::Mouse, m_LatestMousePosition);
+
+        Gui::EventHandler::OnUserEvent(NewInput);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CApplication::OnWheel(Edit::CMessage& _rMessage)
+    {
+        bool IsVertically = _rMessage.GetBool();
+        int WheelDelta    = _rMessage.GetInt();
+
+        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseWheel, Base::CInputEvent::Mouse, m_LatestMousePosition, WheelDelta);
 
         Gui::EventHandler::OnUserEvent(NewInput);
     }

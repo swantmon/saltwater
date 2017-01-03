@@ -1,4 +1,5 @@
-﻿#include "edit_render_context.h"
+﻿
+#include "edit_render_context.h"
 
 #include <QDir>
 #include <QDragEnterEvent>
@@ -129,6 +130,20 @@ namespace Edit
             MessageManager::SendMessage(SGUIMessageType::Input_MouseRightReleased, NewMessage);
             break;
         }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CRenderContext::wheelEvent(QWheelEvent* _pWheelEvent)
+    {
+        CMessage NewMessage;
+
+        NewMessage.PutBool(_pWheelEvent->orientation() == Qt::Vertical);
+        NewMessage.PutInt(_pWheelEvent->delta());
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Input_MouseWheel, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
