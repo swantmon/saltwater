@@ -16,7 +16,7 @@
 
 namespace Cam
 {
-    const float CEditorControl::s_MoveVelocityBorder[] =  { 0.001f, 1.0f, 0.008f };
+    const float CEditorControl::s_MoveVelocityBorder[] =  { 0.1f, 100.0f, 0.008f };
     const float CEditorControl::s_RotationVelocity     =  0.35f;
 } // namespace Cam
 

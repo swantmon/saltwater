@@ -9,7 +9,7 @@ namespace Cam
         : m_Type                  (_Type)
         , m_Position              (Base::Float3::s_Zero)
         , m_RotationMatrix        (Base::Float3x3::s_Identity)
-        , m_MoveVelocity          (0.1f)
+        , m_MoveVelocity          (10.0f)
         , m_HasPositionChanged    (false)
         , m_HasRotationChanged    (false)
         , m_HasMoveVelocityChanged(false)
