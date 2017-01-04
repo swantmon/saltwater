@@ -18,7 +18,9 @@ out gl_PerVertex
 // -----------------------------------------------------------------------------
 // Input from buffer
 // -----------------------------------------------------------------------------
-layout(location = 0) in vec2 VertexPosition;
+layout(location = 0) in vec3 VertexPosition;
+layout(location = 1) in vec3 VertexNormal;
+layout(location = 2) in vec2 VertexTexCoord;
 
 // -----------------------------------------------------------------------------
 // Output to next stage
@@ -31,13 +33,11 @@ layout(location = 1) out vec2 out_UV;
 // -----------------------------------------------------------------------------
 void main(void)
 {
-    vec4 Position = vec4(VertexPosition.xy, 0.0f, 1.0f);
+    out_UV = vec2(VertexTexCoord.x, 1.0f - VertexTexCoord.y);
 
-    out_UV = vec2(Position.x, 1.0f - Position.y);
-
-    vec4 WSPosition = m_ModelMatrix * vec4(Position.xyz, 1.0f);
+    vec4 WSPosition = m_ModelMatrix * vec4(VertexPosition.xyz, 1.0f);
     
-    out_Normal = normalize(WSPosition.xyz);
+    out_Normal = normalize(VertexNormal.xyz);
     
     gl_Position = WSPosition;
 }

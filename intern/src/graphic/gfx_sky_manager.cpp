@@ -256,7 +256,7 @@ namespace
         m_SkyboxFromTexture.m_VSPtr          = CubemapTextureVSPtr;
         m_SkyboxFromTexture.m_GSPtr          = CubemapGSPtr;
         m_SkyboxFromTexture.m_PSPtr          = CubemapTexturePSPtr;
-        m_SkyboxFromTexture.m_InputLayoutPtr = P2SkytextureLayoutPtr;
+        m_SkyboxFromTexture.m_InputLayoutPtr = P3N3T2CubemapInputLayoutPtr;
 
         m_SkyboxFromLUT.m_VSPtr          = CubemapVSPtr;
         m_SkyboxFromLUT.m_GSPtr          = CubemapRotateGSPtr;
@@ -538,13 +538,28 @@ namespace
 
         CMeshPtr CubemapTextureSpherePtr = MeshManager::CreateMesh(ModelDescr);
 
+        // -----------------------------------------------------------------------------
+
+        ModelFileDesc.m_pFileName = "test/untitled_nuv.obj";
+        ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::Nothing;
+
+        Dt::CModel& rCurvedPlaneModel = Dt::ModelManager::CreateModel(ModelFileDesc);
+
+        ModelDescr.m_pModel = &rCurvedPlaneModel.GetMesh(0);
+
+        CMeshPtr CurvedPlanePtr = MeshManager::CreateMesh(ModelDescr);
+
+        // -----------------------------------------------------------------------------
+
         CMeshPtr QuadModelPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
+
+        // -----------------------------------------------------------------------------
 
         m_SkyboxFromPanorama.m_MeshPtr = CubemapTextureSpherePtr;
 
         m_SkyboxFromCubemap.m_MeshPtr  = CubemapTextureSpherePtr;
 
-        m_SkyboxFromTexture.m_MeshPtr = QuadModelPtr;
+        m_SkyboxFromTexture.m_MeshPtr = CurvedPlanePtr;
 
         m_SkyboxFromLUT.m_MeshPtr = CubemapTextureSpherePtr;
 
@@ -1200,7 +1215,7 @@ namespace
         pViewBuffer->m_ModelMatrix *= ViewManager::GetMainCamera()->GetView()->GetRotationMatrix().GetTransposed();
         pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(0.0f, 0.0f, -1.0f);
         pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(1.77f, 1.0f, 1.0f);
-        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(-0.5f, -0.5f, 0.0f);   
+        //pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(-0.5f, -0.5f, 0.0f);   
 
         BufferManager::UnmapConstantBuffer(VSBufferSetPtr->GetBuffer(0));
 
