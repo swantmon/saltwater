@@ -46,7 +46,7 @@ void main(void)
         FinalColor = InverseToneMapping(FinalColor);
     }
     
-    out_Output = FinalColor * m_HDRConvertFactor;
+    out_Output = vec4(FinalColor.xyz * m_HDRConvertFactor, 1.0f);
 }
 
 #endif // __INCLUDE_FS_LUT_ENV_CUBEMAP_GENERATION_GLSL__
