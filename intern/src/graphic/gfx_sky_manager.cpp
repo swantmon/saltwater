@@ -1215,7 +1215,6 @@ namespace
         pViewBuffer->m_ModelMatrix *= ViewManager::GetMainCamera()->GetView()->GetRotationMatrix().GetTransposed();
         pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(0.0f, 0.0f, -1.0f);
         pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(1.77f, 1.0f, 1.0f);
-        //pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(-0.5f, -0.5f, 0.0f);   
 
         BufferManager::UnmapConstantBuffer(VSBufferSetPtr->GetBuffer(0));
 
