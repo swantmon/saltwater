@@ -36,10 +36,8 @@ layout(location = 0) out vec4 out_Output;
 // -----------------------------------------------------------------------------
 void main(void)
 {
-	vec2 p = -1.0 + 2.0 * in_UV;
-  	float Radius = sqrt(dot(p,p));
-
-    if (Radius > 1.0f) Radius = 1.0f;
+	vec2  SSUV   = -1.0f + 2.0f * in_UV;
+  	float Radius = min(sqrt(dot(SSUV, SSUV)), 1.0f);
 
     vec4 FinalColor = texture(PSBackgroundTexture, in_UV);
     
