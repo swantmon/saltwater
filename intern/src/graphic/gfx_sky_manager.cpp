@@ -1210,11 +1210,14 @@ namespace
         // -----------------------------------------------------------------------------
         SModelMatrixBuffer* pViewBuffer = static_cast<SModelMatrixBuffer*>(BufferManager::MapConstantBuffer(VSBufferSetPtr->GetBuffer(0)));
 
+        float ScaleY = 1.0f / Base::Tan(Base::DegreesToRadians(78.0f) / 2.0f);
+        float ScaleX = ScaleY / (1280.0f / 720.0f);
+
         pViewBuffer->m_ModelMatrix  = Base::Float4x4::s_Identity;
         pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(-1.0f, 1.0f, 1.0f);
         pViewBuffer->m_ModelMatrix *= ViewManager::GetMainCamera()->GetView()->GetRotationMatrix().GetTransposed();
-        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(0.0f, 0.0f, -1.0f);
-        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(1.77f, 1.0f, 1.0f);
+        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(0.0f, 0.0f, -0.1f);
+        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(ScaleX, ScaleY, 1.0f);
 
         BufferManager::UnmapConstantBuffer(VSBufferSetPtr->GetBuffer(0));
 
