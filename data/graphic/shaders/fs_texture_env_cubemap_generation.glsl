@@ -36,6 +36,11 @@ layout(location = 0) out vec4 out_Output;
 // -----------------------------------------------------------------------------
 void main(void)
 {
+	vec2 p = -1.0 + 2.0 * in_UV;
+  	float Radius = sqrt(dot(p,p));
+
+    if (Radius > 1.0f) Radius = 1.0f;
+
     vec4 FinalColor = texture(PSBackgroundTexture, in_UV);
     
     if (m_IsHDR == 0.0f)
@@ -43,7 +48,7 @@ void main(void)
         FinalColor = InverseToneMapping(FinalColor);
     }
     
-    out_Output = FinalColor * m_HDRConvertFactor;
+    out_Output = vec4(FinalColor.xyz * m_HDRConvertFactor, 1.0f - Radius);
 }
 
 #endif // __INCLUDE_FS_TEXTURE_ENV_CUBEMAP_GENERATION_GLSL__

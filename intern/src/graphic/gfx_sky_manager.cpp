@@ -975,7 +975,7 @@ namespace
         // Render context
         // -----------------------------------------------------------------------------
         CCameraPtr          CameraPtr       = ViewManager::GetMainCamera();
-        CRenderStatePtr     NoDepthStatePtr = StateManager::GetRenderState(CRenderState::NoDepth | CRenderState::NoCull);
+        CRenderStatePtr     NoDepthStatePtr = StateManager::GetRenderState(CRenderState::NoDepth | CRenderState::NoCull | CRenderState::AlphaBlend);
 
         CRenderContextPtr CubemapRenderContextPtr = ContextManager::CreateRenderContext();
 
