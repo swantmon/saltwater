@@ -236,13 +236,6 @@ namespace
 
         CInputLayoutPtr P3N3T2CubemapInputLayoutPtr = ShaderManager::CreateInputLayout(PositionInputLayout, 3, CubemapVSPtr);
 
-        const SInputElementDescriptor InputLayout[] =
-        {
-            { "POSITION", 0, CInputLayout::Float2Format, 0, 0, 8, CInputLayout::PerVertex, 0, },
-        };
-
-        CInputLayoutPtr P2SkytextureLayoutPtr = ShaderManager::CreateInputLayout(InputLayout, 1, CubemapTextureVSPtr);
-
         m_SkyboxFromPanorama.m_VSPtr          = CubemapVSPtr;
         m_SkyboxFromPanorama.m_GSPtr          = CubemapGSPtr;
         m_SkyboxFromPanorama.m_PSPtr          = CubemapPanoramaPSPtr;
@@ -540,7 +533,7 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        ModelFileDesc.m_pFileName = "test/untitled_nuv.obj";
+        ModelFileDesc.m_pFileName = "curvedplane.obj";
         ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::Nothing;
 
         Dt::CModel& rCurvedPlaneModel = Dt::ModelManager::CreateModel(ModelFileDesc);
@@ -548,10 +541,6 @@ namespace
         ModelDescr.m_pModel = &rCurvedPlaneModel.GetMesh(0);
 
         CMeshPtr CurvedPlanePtr = MeshManager::CreateMesh(ModelDescr);
-
-        // -----------------------------------------------------------------------------
-
-        CMeshPtr QuadModelPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
 
         // -----------------------------------------------------------------------------
 
