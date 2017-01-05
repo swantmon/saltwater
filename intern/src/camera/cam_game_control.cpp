@@ -59,15 +59,13 @@ namespace Cam
     
     void CGameControl::InternUpdate()
     {
-        assert(m_pMainCameraEntity != 0);
+        if (m_pMainCameraEntity == 0) return;
 
-        if (m_pMainCameraEntity != 0 && m_pMainCameraEntity->GetDirtyFlags() != 0)
+        if (m_pMainCameraEntity->GetDirtyFlags() & Dt::CEntity::DirtyMove)
         {
             Dt::CTransformationFacet* pTransformationFacet = m_pMainCameraEntity->GetTransformationFacet();
-            Dt::CCameraActorFacet*    pCameraFacet         = static_cast<Dt::CCameraActorFacet*>(m_pMainCameraEntity->GetDetailFacet(Dt::SFacetCategory::Data));
 
             assert(pTransformationFacet != nullptr);
-            assert(pCameraFacet         != nullptr);
 
             // -----------------------------------------------------------------------------
             // Position
@@ -80,6 +78,16 @@ namespace Cam
             Base::Float3& rRotationInDegree = pTransformationFacet->GetRotation();
 
             m_RotationMatrix.SetRotation(rRotationInDegree[0], rRotationInDegree[1], rRotationInDegree[2]);
+
+            Gfx::Cam::SetPosition(m_Position);
+            Gfx::Cam::SetRotationMatrix(m_RotationMatrix);
+        }
+
+        if (m_pMainCameraEntity->GetDirtyFlags()  & Dt::CEntity::DirtyDetail)
+        {
+            Dt::CCameraActorFacet*    pCameraFacet = static_cast<Dt::CCameraActorFacet*>(m_pMainCameraEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+
+            assert(pCameraFacet != nullptr);
 
             // -----------------------------------------------------------------------------
             // Projection
@@ -139,8 +147,6 @@ namespace Cam
             Gfx::Cam::SetDepth(pCameraFacet->GetDepth());
         }
 
-        Gfx::Cam::SetPosition(m_Position);
-        Gfx::Cam::SetRotationMatrix(m_RotationMatrix);
         Gfx::Cam::Update();
     }
 } // namespace Cam
