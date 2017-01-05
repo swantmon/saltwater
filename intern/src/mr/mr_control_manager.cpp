@@ -57,6 +57,8 @@ namespace
 
         bool IsActive();
 
+        bool IsOriginTracked();
+
         CControl* GetActiveControl();
 
     private:
@@ -82,6 +84,7 @@ namespace
 
     private:
 
+        bool                          m_IsOriginTracked;
         ARHandle*	                  m_pNativeTrackingHandle;
         AR3DHandle*	                  m_pNativeTracking3DHandle;
         ARParamLT*	                  m_pNativeParameterLT;
@@ -118,7 +121,8 @@ namespace
 namespace
 {
     CMRControlManager::CMRControlManager()
-        : m_pNativeTrackingHandle  (0)
+        : m_IsOriginTracked        (false)
+        , m_pNativeTrackingHandle  (0)
         , m_pNativeTracking3DHandle(0)
         , m_pNativeParameterLT     (0)
         , m_DirtyEntities          ()
@@ -241,6 +245,13 @@ namespace
     bool CMRControlManager::IsActive()
     {
         return (m_pControllerPlugin != nullptr && m_pActiveControl != nullptr && m_pActiveControl->IsStarted());
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CMRControlManager::IsOriginTracked()
+    {
+        return m_IsOriginTracked;
     }
 
     // -----------------------------------------------------------------------------
@@ -808,6 +819,8 @@ namespace
 
     void CMRControlManager::UpdateCameraEntity()
     {
+        m_IsOriginTracked = false;
+
         if (IsActive() == false) return;
 
         // -----------------------------------------------------------------------------
@@ -847,7 +860,7 @@ namespace
             Position = RotationMatrix.GetTransposed() * Position;
 
             // -----------------------------------------------------------------------------
-            // Marker Found: Now search for entity with AR facet
+            // Set camera entity to the first found marker
             // -----------------------------------------------------------------------------
             Dt::CEntity* pCameraEntity = m_pControllerPlugin->GetCameraEntity();
 
@@ -864,10 +877,12 @@ namespace
                 RotationMatrix.GetRotation(Rotation);
 
                 pTransformationFacet->SetRotation(Rotation * -1.0f);
+
+                m_IsOriginTracked = true;
             }
             else
             {
-                BASE_CONSOLE_STREAMWARNING("Origin marker found but no camera entity is set!");
+                BASE_CONSOLE_WARNING("Origin marker found but no camera entity is set!");
             }
 
             // -----------------------------------------------------------------------------
@@ -922,6 +937,13 @@ namespace ControlManager
     bool IsActive()
     {
         return CMRControlManager::GetInstance().IsActive();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool IsOriginTracked()
+    {
+        return CMRControlManager::GetInstance().IsOriginTracked();
     }
 
     // -----------------------------------------------------------------------------
