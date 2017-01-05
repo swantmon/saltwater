@@ -8,6 +8,7 @@ namespace MR
     CControl::CControl(EType _Type)
         : m_Type            (_Type)
         , m_IsStarted       (false)
+        , m_IsFreezed       (false)
         , m_pOriginalFrame  (nullptr)
         , m_pConvertedFrame (nullptr)
         , m_CameraParameters()
@@ -44,6 +45,13 @@ namespace MR
     void CControl::Update()
     {
         InternUpdate();
+    }
+
+    // -----------------------------------------------------------------------------
+    
+    void CControl::FreezeOuput(bool _Flag)
+    {
+        m_IsFreezed = _Flag;
     }
 
     // -----------------------------------------------------------------------------

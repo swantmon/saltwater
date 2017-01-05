@@ -721,6 +721,13 @@ namespace
     {
         if (IsActive() == false) return;
 
+        m_pActiveControl->FreezeOuput(false);
+
+        if (m_IsOriginTracked == false)
+        {
+            m_pActiveControl->FreezeOuput(true);
+        }
+
         m_pActiveControl->Update();
     }
 

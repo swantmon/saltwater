@@ -21,7 +21,7 @@ namespace MR
     private:
 
         const Base::Char* m_pConfiguration;
-        void*             m_OriginalColorFrame;
+        void*             m_OriginalColorFrameBGR;
         void*             m_OriginalColorFrameRGB;
         void*             m_ConvertedColorFrame;
 
