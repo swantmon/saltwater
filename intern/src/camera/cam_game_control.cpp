@@ -6,7 +6,7 @@
 
 #include "data/data_actor_type.h"
 #include "data/data_camera_actor_facet.h"
-#include "data/data_entity_manager.h"
+#include "data/data_entity.h"
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_camera_interface.h"
@@ -17,7 +17,7 @@ namespace Cam
         : CControl           (CControl::GameControl)
         , m_pMainCameraEntity(nullptr)
     {
-        Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CGameControl::OnDirtyEntity));
+        
     }
     
     // -----------------------------------------------------------------------------
@@ -57,20 +57,10 @@ namespace Cam
     {
         BASE_UNUSED(_rEvent);
     }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGameControl::InternUpdate()
-    {
-        Gfx::Cam::SetPosition(m_Position);
-        Gfx::Cam::SetRotationMatrix(m_RotationMatrix);
-
-        Gfx::Cam::Update();
-    }
 
     // -----------------------------------------------------------------------------
 
-    void CGameControl::OnDirtyEntity(Dt::CEntity* _pEntity)
+    void CGameControl::InternOnDirtyEntity(Dt::CEntity* _pEntity)
     {
         assert(_pEntity != 0);
 
@@ -158,5 +148,15 @@ namespace Cam
 
             Gfx::Cam::SetDepth(pCameraFacet->GetDepth());
         }
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CGameControl::InternUpdate()
+    {
+        Gfx::Cam::SetPosition(m_Position);
+        Gfx::Cam::SetRotationMatrix(m_RotationMatrix);
+
+        Gfx::Cam::Update();
     }
 } // namespace Cam

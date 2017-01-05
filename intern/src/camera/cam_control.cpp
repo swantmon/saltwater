@@ -31,6 +31,13 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
+    void CControl::OnDirtyEntity(Dt::CEntity* _pEntity)
+    {
+        InternOnDirtyEntity(_pEntity);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CControl::Update()
     {
         m_HasPositionChanged     = false;

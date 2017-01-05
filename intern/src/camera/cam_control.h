@@ -5,6 +5,11 @@
 #include "base/base_matrix3x3.h"
 #include "base/base_vector3.h"
 
+namespace Dt
+{
+    class CEntity;
+} // namespace Dt
+
 namespace Cam
 {
 	class CControl
@@ -25,13 +30,14 @@ namespace Cam
 
         public:
 
-			void OnEvent(const Base::CInputEvent& _rEvent);
+            void OnEvent(const Base::CInputEvent& _rEvent);
+            void OnDirtyEntity(Dt::CEntity* _pEntity);
 
         public:
 
-			void Update();
-		
-		public:
+            void Update();
+
+        public:
 
             EType GetType() const;
 
@@ -41,10 +47,10 @@ namespace Cam
             float GetMoveVelocity() const;
 
             void SetPosition(const Base::Float3& _rPosition);
-			const Base::Float3& GetPosition() const;
+            const Base::Float3& GetPosition() const;
 
             void SetRotation(const Base::Float3x3& _rMatrix);
-			const Base::Float3x3& GetRotation() const;
+            const Base::Float3x3& GetRotation() const;
 
         public:
 
@@ -69,6 +75,8 @@ namespace Cam
         private:
 
             virtual void InternOnEvent(const Base::CInputEvent& _rEvent) = 0;
+
+            virtual void InternOnDirtyEntity(Dt::CEntity* _pEntity) = 0;
 
         private:
 
