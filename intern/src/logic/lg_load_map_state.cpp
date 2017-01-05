@@ -181,11 +181,11 @@ namespace
 
             rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
 
-            Dt::CScriptFacet* pScriptFacet = Dt::ScriptManager::CreateScript();
-
-            pScriptFacet->SetScriptFile("scripts/camera_behavior.lua");
-
-            rEntity.SetDetailFacet(Dt::SFacetCategory::Script, pScriptFacet);
+//             Dt::CScriptFacet* pScriptFacet = Dt::ScriptManager::CreateScript();
+// 
+//             pScriptFacet->SetScriptFile("scripts/camera_behavior.lua");
+// 
+//             rEntity.SetDetailFacet(Dt::SFacetCategory::Script, pScriptFacet);
 
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
