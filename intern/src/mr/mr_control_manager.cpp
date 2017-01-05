@@ -725,6 +725,17 @@ namespace
         if (IsActive() == false) return;
 
         // -----------------------------------------------------------------------------
+        // Reset all marker visibility
+        // -----------------------------------------------------------------------------
+        CMarkerByIDs::iterator CurrentOfMarkerInfo = m_MarkerByIDs.begin();
+        CMarkerByIDs::iterator EndOfMarkerInfos = m_MarkerByIDs.end();
+
+        for (; CurrentOfMarkerInfo != EndOfMarkerInfos; ++CurrentOfMarkerInfo)
+        {
+            CurrentOfMarkerInfo->second->m_IsVisible = false;
+        }
+
+        // -----------------------------------------------------------------------------
         // Get image stream for tracking and detect marker in image
         // -----------------------------------------------------------------------------
         ARUint8* pImagedata;
@@ -838,6 +849,15 @@ namespace
                  continue;
             }
 
+            Dt::CEntity* pCameraEntity = m_pControllerPlugin->GetCameraEntity();
+
+            if (pCameraEntity == nullptr)
+            {
+                BASE_CONSOLE_WARNING("Origin marker found but no camera entity is set!");
+
+                break;
+            }
+
             Base::Float3x3 RotationMatrix(Base::Float3x3::s_Identity);
             Base::Float3   Position;
 
@@ -862,28 +882,21 @@ namespace
             // -----------------------------------------------------------------------------
             // Set camera entity to the first found marker
             // -----------------------------------------------------------------------------
-            Dt::CEntity* pCameraEntity = m_pControllerPlugin->GetCameraEntity();
+            Dt::CTransformationFacet* pTransformationFacet = pCameraEntity->GetTransformationFacet();
 
-            if (pCameraEntity != nullptr)
-            {
-                pCameraEntity->SetWorldPosition(Position);
+            assert(pTransformationFacet != nullptr);
 
-                Dt::CTransformationFacet* pTransformationFacet = pCameraEntity->GetTransformationFacet();
+            Base::Float3 Rotation;
 
-                assert(pTransformationFacet != nullptr);
+            RotationMatrix.GetRotation(Rotation);
 
-                Base::Float3 Rotation;
+            pTransformationFacet->SetRotation(Rotation * -1.0f);
 
-                RotationMatrix.GetRotation(Rotation);
+            pTransformationFacet->SetPosition(Position);
 
-                pTransformationFacet->SetRotation(Rotation * -1.0f);
+            Dt::EntityManager::MarkEntityAsDirty(*pCameraEntity, Dt::CEntity::DirtyMove);
 
-                m_IsOriginTracked = true;
-            }
-            else
-            {
-                BASE_CONSOLE_WARNING("Origin marker found but no camera entity is set!");
-            }
+            m_IsOriginTracked = true;
 
             // -----------------------------------------------------------------------------
             // Using only the first found marker as camera entity
