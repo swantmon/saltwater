@@ -42,6 +42,10 @@ namespace
     class CMRControlManager : private Base::CUncopyable
     {
         BASE_SINGLETON_FUNC(CMRControlManager);
+
+    public:
+
+        static const unsigned int s_NumberOfFramesUntilCameraIsInvisible = 0;
         
     public:
 
@@ -838,7 +842,7 @@ namespace
         {
             CInternMarker& rMarkerInfo = *CurrentOfMarkerInfo->second;
 
-            if (rMarkerInfo.m_VisbilityFrame < Core::Time::GetNumberOfFrame() - 1)
+            if (rMarkerInfo.m_VisbilityFrame < Core::Time::GetNumberOfFrame() - s_NumberOfFramesUntilCameraIsInvisible)
             {
                  continue;
             }
