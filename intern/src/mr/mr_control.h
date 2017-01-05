@@ -45,7 +45,7 @@ namespace MR
 
         void Update();
 
-        void FreezeOuput(bool _Flag = true);
+        void FreezeLastFrame(bool _Flag = true);
 
         bool IsStarted() const;
 
@@ -66,7 +66,7 @@ namespace MR
 
         EType             m_Type;
         bool              m_IsStarted;
-        bool              m_IsFreezed;
+        bool              m_FreezeLastFrame;
         Dt::CTexture2D*   m_pOriginalFrame;
         Dt::CTexture2D*   m_pConvertedFrame;
         SDeviceParameter  m_CameraParameters;

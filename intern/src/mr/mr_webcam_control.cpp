@@ -241,7 +241,7 @@ namespace MR
             // -----------------------------------------------------------------------------
             // Convert to output
             // -----------------------------------------------------------------------------
-            if (m_IsFreezed == false)
+            if (m_FreezeLastFrame == false)
             {
                 ConvertOriginalToOutput();
             }

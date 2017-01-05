@@ -137,6 +137,7 @@ namespace
         pFacet->SetOutputBackground   (pBackgroundTexture);
         pFacet->SetDeviceType         (Dt::CARControllerPluginFacet::Webcam);
         pFacet->SetNumberOfMarker     (1);
+        pFacet->SetFreezeOutput       (false);
             
         Dt::CARControllerPluginFacet::SMarker& rMarkerOne = pFacet->GetMarker(0);
 
@@ -165,6 +166,8 @@ namespace
             // -----------------------------------------------------------------------------
             int Device = pFacet->GetDeviceType();
 
+            bool FreezeOutput = pFacet->GetFreezeLastFrame();
+
             const char* pConfiguration = pFacet->GetConfiguration();
 
             const char* pParameterFile = pFacet->GetCameraParameterFile();
@@ -188,6 +191,8 @@ namespace
             NewMessage.PutInt(rCurrentEntity.GetID());
 
             NewMessage.PutInt(Device);
+
+            NewMessage.PutBool(FreezeOutput);
 
             NewMessage.PutString(pConfiguration);
            
@@ -271,6 +276,8 @@ namespace
             // -----------------------------------------------------------------------------
             int Device = _rMessage.GetInt();
 
+            bool FreezeOutput = _rMessage.GetBool();
+
             char Configuration[256];
 
             _rMessage.GetString(Configuration, 256);
@@ -289,6 +296,8 @@ namespace
             // Set values
             // -----------------------------------------------------------------------------
             pFacet->SetDeviceType(static_cast<Dt::CARControllerPluginFacet::EType>(Device));
+
+            pFacet->SetFreezeOutput(FreezeOutput);
 
             pFacet->SetConfiguration(Configuration);
 

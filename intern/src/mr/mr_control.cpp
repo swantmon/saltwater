@@ -8,7 +8,7 @@ namespace MR
     CControl::CControl(EType _Type)
         : m_Type            (_Type)
         , m_IsStarted       (false)
-        , m_IsFreezed       (false)
+        , m_FreezeLastFrame (false)
         , m_pOriginalFrame  (nullptr)
         , m_pConvertedFrame (nullptr)
         , m_CameraParameters()
@@ -49,9 +49,9 @@ namespace MR
 
     // -----------------------------------------------------------------------------
     
-    void CControl::FreezeOuput(bool _Flag)
+    void CControl::FreezeLastFrame(bool _Flag)
     {
-        m_IsFreezed = _Flag;
+        m_FreezeLastFrame = _Flag;
     }
 
     // -----------------------------------------------------------------------------

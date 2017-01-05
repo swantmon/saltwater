@@ -721,11 +721,11 @@ namespace
     {
         if (IsActive() == false) return;
 
-        m_pActiveControl->FreezeOuput(false);
+        m_pActiveControl->FreezeLastFrame(false);
 
-        if (m_IsOriginTracked == false)
+        if (m_IsOriginTracked == false && m_pControllerPlugin->GetFreezeLastFrame())
         {
-            m_pActiveControl->FreezeOuput(true);
+            m_pActiveControl->FreezeLastFrame(true);
         }
 
         m_pActiveControl->Update();

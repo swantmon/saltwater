@@ -11,6 +11,7 @@ namespace Dt
         : m_pCameraEntity      (nullptr)
         , m_pOutputBackground  (nullptr)
         , m_DeviceType         (Undefined)
+        , m_FreezeOutput       (false)
         , m_NumberOfMarker     (0)
         , m_CameraParameterFile()
         , m_Configuration      ()
@@ -59,6 +60,20 @@ namespace Dt
     CARControllerPluginFacet::EType CARControllerPluginFacet::GetDeviceType() const
     {
         return m_DeviceType;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CARControllerPluginFacet::SetFreezeOutput(bool _Flag)
+    {
+        m_FreezeOutput = _Flag;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CARControllerPluginFacet::GetFreezeLastFrame() const
+    {
+        return m_FreezeOutput;
     }
 
     // -----------------------------------------------------------------------------
