@@ -888,7 +888,7 @@ namespace
 
             pTransformationFacet->SetPosition(Position);
 
-            Dt::EntityManager::MarkEntityAsDirty(*pCameraEntity, Dt::CEntity::DirtyMove);
+            Dt::EntityManager::MarkEntityAsDirty(*pCameraEntity, Dt::CEntity::DirtyMove | Dt::CEntity::DirtyDetail);
 
             m_IsOriginTracked = true;
 

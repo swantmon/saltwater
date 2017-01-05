@@ -6,7 +6,7 @@
 
 #include "data/data_actor_type.h"
 #include "data/data_camera_actor_facet.h"
-#include "data/data_entity.h"
+#include "data/data_entity_manager.h"
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_camera_interface.h"
@@ -17,6 +17,7 @@ namespace Cam
         : CControl           (CControl::GameControl)
         , m_pMainCameraEntity(nullptr)
     {
+        Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CGameControl::OnDirtyEntity));
     }
     
     // -----------------------------------------------------------------------------
@@ -32,6 +33,8 @@ namespace Cam
     void CGameControl::SetEntity(Dt::CEntity& _rEntity)
     {
         m_pMainCameraEntity = &_rEntity;
+
+        OnDirtyEntity(m_pMainCameraEntity);
     }
 
     // -----------------------------------------------------------------------------
@@ -59,7 +62,19 @@ namespace Cam
     
     void CGameControl::InternUpdate()
     {
-        if (m_pMainCameraEntity == 0) return;
+        Gfx::Cam::SetPosition(m_Position);
+        Gfx::Cam::SetRotationMatrix(m_RotationMatrix);
+
+        Gfx::Cam::Update();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGameControl::OnDirtyEntity(Dt::CEntity* _pEntity)
+    {
+        assert(_pEntity != 0);
+
+        if (m_pMainCameraEntity != _pEntity) return;
 
         if (m_pMainCameraEntity->GetDirtyFlags() & Dt::CEntity::DirtyMove)
         {
@@ -78,12 +93,9 @@ namespace Cam
             Base::Float3& rRotationInDegree = pTransformationFacet->GetRotation();
 
             m_RotationMatrix.SetRotation(rRotationInDegree[0], rRotationInDegree[1], rRotationInDegree[2]);
-
-            Gfx::Cam::SetPosition(m_Position);
-            Gfx::Cam::SetRotationMatrix(m_RotationMatrix);
         }
 
-        if (m_pMainCameraEntity->GetDirtyFlags()  & Dt::CEntity::DirtyDetail)
+        if (m_pMainCameraEntity->GetDirtyFlags() & Dt::CEntity::DirtyDetail)
         {
             Dt::CCameraActorFacet*    pCameraFacet = static_cast<Dt::CCameraActorFacet*>(m_pMainCameraEntity->GetDetailFacet(Dt::SFacetCategory::Data));
 
@@ -146,7 +158,5 @@ namespace Cam
 
             Gfx::Cam::SetDepth(pCameraFacet->GetDepth());
         }
-
-        Gfx::Cam::Update();
     }
 } // namespace Cam

@@ -34,5 +34,9 @@ namespace Cam
     private:
         
         virtual void InternUpdate();
+
+    private:
+
+        void OnDirtyEntity(Dt::CEntity* _pEntity);
     };
 }
