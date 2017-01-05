@@ -876,6 +876,8 @@ namespace
             // -----------------------------------------------------------------------------
             // Set camera entity to the first found marker
             // -----------------------------------------------------------------------------
+            pCameraEntity->SetWorldPosition(Position);
+
             Dt::CTransformationFacet* pTransformationFacet = pCameraEntity->GetTransformationFacet();
 
             assert(pTransformationFacet != nullptr);
