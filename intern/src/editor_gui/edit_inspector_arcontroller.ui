@@ -146,6 +146,7 @@
  </widget>
  <tabstops>
   <tabstop>m_pDeviceCB</tabstop>
+  <tabstop>m_pFreezeLastFrameCB</tabstop>
   <tabstop>m_pConfigurationEdit</tabstop>
   <tabstop>m_pParameterFile</tabstop>
   <tabstop>m_pCameraEntityIDEdit</tabstop>

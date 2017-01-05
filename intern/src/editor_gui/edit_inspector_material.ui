@@ -462,6 +462,7 @@
  <tabstops>
   <tabstop>m_pAlbedoColorButton</tabstop>
   <tabstop>m_pAlbedoPickButton</tabstop>
+  <tabstop>m_pBumpEdit</tabstop>
   <tabstop>m_pRoughnessSlider</tabstop>
   <tabstop>m_pRoughnessEdit</tabstop>
   <tabstop>m_pMetallicSlider</tabstop>
