@@ -30,8 +30,6 @@
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
 
-#include "mr/mr_control_manager.h"
-
 #include "opencv2/opencv.hpp"
 
 using namespace Gfx;
@@ -1182,11 +1180,6 @@ namespace
 
     void CGfxSkyManager::RenderSkyboxFromTexture(CInternSkyFacet* _pOutput, float _Intensity)
     {
-        if (MR::ControlManager::IsActive() && !MR::ControlManager::IsOriginTracked())
-        {
-            return;
-        }
-
         CRenderContextPtr RenderContextPtr = _pOutput->m_RenderContextPtr;
         CShaderPtr        VSPtr            = m_SkyboxFromTexture.m_VSPtr;
         CShaderPtr        GSPtr            = m_SkyboxFromTexture.m_GSPtr;
