@@ -8,6 +8,8 @@
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
+#include "core/core_time.h"
+
 #include "data/data_actor_type.h"
 #include "data/data_ar_controller_facet.h"
 #include "data/data_camera_actor_facet.h"
@@ -68,7 +70,7 @@ namespace
         public:
             Dt::CARControllerPluginFacet::SMarker* m_pDataInfos;
             ARPattHandle*                          m_pPatternHandle;
-            bool                                   m_IsVisible;
+            Base::U64                              m_VisbilityFrame;
             unsigned int                           m_UID;
             unsigned int                           m_NativeID;
             Base::Float3x3                         m_RotationToCamera;
@@ -679,9 +681,9 @@ namespace
             // -----------------------------------------------------------------------------
             CInternMarker& rNewMarker = m_Markers.Allocate();
 
-            rNewMarker.m_UID        = rCurrentMarker.m_UID;
-            rNewMarker.m_pDataInfos = &rCurrentMarker;
-            rNewMarker.m_IsVisible  = false;
+            rNewMarker.m_UID            = rCurrentMarker.m_UID;
+            rNewMarker.m_pDataInfos     = &rCurrentMarker;
+            rNewMarker.m_VisbilityFrame = 0;
             
             rNewMarker.m_pPatternHandle = arPattCreateHandle();
             
@@ -723,17 +725,6 @@ namespace
     void CMRControlManager::UpdateTrackerManager()
     {
         if (IsActive() == false) return;
-
-        // -----------------------------------------------------------------------------
-        // Reset all marker visibility
-        // -----------------------------------------------------------------------------
-        CMarkerByIDs::iterator CurrentOfMarkerInfo = m_MarkerByIDs.begin();
-        CMarkerByIDs::iterator EndOfMarkerInfos = m_MarkerByIDs.end();
-
-        for (; CurrentOfMarkerInfo != EndOfMarkerInfos; ++CurrentOfMarkerInfo)
-        {
-            CurrentOfMarkerInfo->second->m_IsVisible = false;
-        }
 
         // -----------------------------------------------------------------------------
         // Get image stream for tracking and detect marker in image
@@ -789,16 +780,23 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Get transformation of this pattern
                 // -----------------------------------------------------------------------------
-                if (pMarker->m_IsVisible == false)
+                if (pMarker->m_VisbilityFrame >= Core::Time::GetNumberOfFrame() - 1)
                 {
-                    arGetTransMatSquare(m_pNativeTracking3DHandle, &(rCurrentMarkerInfo), pMarker->m_pDataInfos->m_WidthInMeter * 1000.0f, pMarker->m_PatternTransformation);
+                    // -----------------------------------------------------------------------------
+                    // Marker was visible in last frame
+                    // -> reuse last transformation
+                    // -----------------------------------------------------------------------------
+                    arGetTransMatSquareCont(m_pNativeTracking3DHandle, &(rCurrentMarkerInfo), pMarker->m_PatternTransformation, pMarker->m_pDataInfos->m_WidthInMeter * 1000.0f, pMarker->m_PatternTransformation);
                 }
                 else
                 {
-                    arGetTransMatSquareCont(m_pNativeTracking3DHandle, &(rCurrentMarkerInfo), pMarker->m_PatternTransformation, pMarker->m_pDataInfos->m_WidthInMeter * 1000.0f, pMarker->m_PatternTransformation);
+                    // -----------------------------------------------------------------------------
+                    // Marker wasn't visible for a longer time
+                    // -----------------------------------------------------------------------------
+                    arGetTransMatSquare(m_pNativeTracking3DHandle, &(rCurrentMarkerInfo), pMarker->m_pDataInfos->m_WidthInMeter * 1000.0f, pMarker->m_PatternTransformation);
                 }   
 
-                pMarker->m_IsVisible = true;
+                pMarker->m_VisbilityFrame = Core::Time::GetNumberOfFrame();
 
                 // -----------------------------------------------------------------------------
                 // Create / Edit marker infos
@@ -818,10 +816,6 @@ namespace
                 pMarker->m_RotationToCamera[2][0] = static_cast<float>(pMarker->m_PatternTransformation[2][0]);
                 pMarker->m_RotationToCamera[2][1] = static_cast<float>(pMarker->m_PatternTransformation[2][1]);
                 pMarker->m_RotationToCamera[2][2] = static_cast<float>(pMarker->m_PatternTransformation[2][2]);
-            }
-            else
-            {
-                pMarker->m_IsVisible = false;
             }
         }
     }
@@ -844,7 +838,7 @@ namespace
         {
             CInternMarker& rMarkerInfo = *CurrentOfMarkerInfo->second;
 
-            if (rMarkerInfo.m_IsVisible == false)
+            if (rMarkerInfo.m_VisbilityFrame < Core::Time::GetNumberOfFrame() - 1)
             {
                  continue;
             }
