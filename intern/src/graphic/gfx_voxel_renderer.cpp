@@ -53,15 +53,8 @@ namespace
         Base::Float4x4 m_WorldMatrix;
         Base::Float4x4 m_WorldToCameraMatrix;
     };
-
-    const float CubeWidth = 10.0f;
-
-    const int CubeVoxelWidth = 256;
-    const float VoxelsPerMeter = 256.0f;
-
-    const int VoxelCount = CubeVoxelWidth * CubeVoxelWidth * CubeVoxelWidth;
-
-    const unsigned int TileSize = 8;
+    
+    const unsigned int TileSize = 16;
 
     class CGfxVoxelRenderer : private Base::CUncopyable
     {
@@ -96,34 +89,15 @@ namespace
 
 	private:
 
-        std::thread StartKinectThread();
-        void UpdateKinectVoxelData();
-
-        Base::Float4x4 m_WorldMatrix;
-
-		short* m_pVolumeBlock;
-
-        GLuint m_VertexArray;
-        GLuint m_VoxelDataBuffer;
-        GLuint m_DrawCallConstantBuffer;
-
-        GLuint m_VoxelDataPBOs[2];
-        int m_WritablePBOIndex;
-        std::atomic_bool m_NewVolumeExported;
+		GLuint m_DrawCallConstantBuffer;
 
         CShaderPtr m_VertexShader;
         CShaderPtr m_FragmentShader;
         CShaderPtr m_ComputeShader;
+
+        GLuint m_KinectDepthBuffer[2];
         
 		MR::CKinectControl m_KinectControl;
-
-        double m_TimeSinceLastVoxelUpdate;
-
-        short* m_pVolumeData;
-
-        std::thread m_KinectThread;
-        std::atomic_bool m_KinectThreadStopped;
-        std::mutex m_VolumeBlockMutex;
     };
 } // namespace
 
@@ -147,94 +121,15 @@ namespace
     
     void CGfxVoxelRenderer::OnStart()
     {
-        m_TimeSinceLastVoxelUpdate = 0.0;
-
         Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxVoxelRenderer::OnResize));
 
-        float Translation = - CubeVoxelWidth / 2.0f;
-
-        std::vector<Float3> Vertices;
-
-        for (int i = 0; i < CubeVoxelWidth; ++i)
-        {
-            for (int j = 0; j < CubeVoxelWidth; ++j)
-            {
-                for (int k = 0; k < CubeVoxelWidth; ++k)
-                {
-                    Vertices.push_back(Float3(static_cast<float>(i) + Translation - 50.0f,
-                                              static_cast<float>(j) + Translation,
-                                              static_cast<float>(k) + Translation));
-                }
-            }
-        }
-
-        GLuint VertexBuffer;
-
-        glGenBuffers(1, &VertexBuffer);
-        glGenVertexArrays(1, &m_VertexArray);
-
-        glBindVertexArray(m_VertexArray);
-
-        glBindBuffer(GL_ARRAY_BUFFER, VertexBuffer);
-        glBufferData(GL_ARRAY_BUFFER, Vertices.size() * sizeof(Vertices[0]), Vertices.data(), GL_STATIC_DRAW);
-
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Float3), 0);
-
-        glBindVertexArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-		m_pVolumeBlock = new short[VoxelCount];
-
-        glGenBuffers(2, m_VoxelDataPBOs);
-        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_VoxelDataPBOs[0]);
-        glBufferData(GL_PIXEL_UNPACK_BUFFER, VoxelCount * sizeof(short), nullptr, GL_DYNAMIC_DRAW);
-        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_VoxelDataPBOs[1]);
-        glBufferData(GL_PIXEL_UNPACK_BUFFER, VoxelCount * sizeof(short), nullptr, GL_DYNAMIC_DRAW);
-        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-
-        m_WritablePBOIndex = 0;
-
-        m_pVolumeData = static_cast<short*>(glMapNamedBuffer(m_VoxelDataPBOs[m_WritablePBOIndex], GL_WRITE_ONLY));
-
-        m_NewVolumeExported = false;
-        m_KinectThreadStopped = true;
-        m_KinectThread = StartKinectThread();
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-
-    std::thread CGfxVoxelRenderer::StartKinectThread()
-    {
-        auto ThreadFunctor = [this]
-        {
-            m_KinectControl.Start(CubeVoxelWidth, CubeVoxelWidth, CubeVoxelWidth, VoxelsPerMeter);
-
-            m_KinectThreadStopped = false;
-
-            while (!m_KinectThreadStopped)
-            {
-                this->UpdateKinectVoxelData();
-            }
-
-            m_KinectControl.Stop();
-        };
-
-        std::thread WorkerThread(ThreadFunctor);
-
-        return WorkerThread;
+        m_KinectControl.Start();
     }
 
     // -----------------------------------------------------------------------------
     
     void CGfxVoxelRenderer::OnExit()
     {
-        m_KinectThreadStopped = true;
-        m_KinectThread.join();
-
-		delete[] m_pVolumeBlock;
-
         m_VertexShader = 0;
         m_FragmentShader = 0;
         m_ComputeShader = 0;
@@ -245,19 +140,13 @@ namespace
     void CGfxVoxelRenderer::OnSetupShader()
     {
         std::stringstream TileSizeDefineStream;
-        std::stringstream CubeWidthDefineStream;
-
         TileSizeDefineStream << "TILE_SIZE " << TileSize << '\n';
-        CubeWidthDefineStream << "CUBE_WIDTH " << CubeVoxelWidth << '\n';
-
         std::string TileSizeDefine = TileSizeDefineStream.str();
-        std::string CubeWidthDefine = CubeWidthDefineStream.str();
+        const char* pDefines[] = { TileSizeDefine.c_str() };
 
-        const char* pDefines[] = { TileSizeDefine.c_str(), CubeWidthDefine.c_str() };
-
-        m_VertexShader = ShaderManager::CompileVS("vs_voxel.glsl", "main", 1, pDefines + 1);
-        m_FragmentShader = ShaderManager::CompilePS("fs_voxel.glsl", "main");
-        m_ComputeShader = ShaderManager::CompileCS("cs_voxel.glsl", "main", 2, pDefines);
+        m_VertexShader = ShaderManager::CompileVS("vs_kinect.glsl", "main");
+        m_FragmentShader = ShaderManager::CompilePS("fs_kinect.glsl", "main");
+        m_ComputeShader = ShaderManager::CompileCS("cs_kinect.glsl", "main", 1, pDefines);
     }
     
     // -----------------------------------------------------------------------------
@@ -285,7 +174,21 @@ namespace
     
     void CGfxVoxelRenderer::OnSetupTextures()
     {
-        glGenTextures(1, &m_VoxelDataBuffer);
+        glCreateTextures(GL_TEXTURE_2D, 2, m_KinectDepthBuffer);
+		        
+		glTextureStorage2D(m_KinectDepthBuffer[0], 1, GL_R16, MR::CKinectControl::DepthImageWidth, MR::CKinectControl::DepthImageHeight);
+		glTextureParameteri(m_KinectDepthBuffer[0], GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTextureParameteri(m_KinectDepthBuffer[0], GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTextureParameteri(m_KinectDepthBuffer[0], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTextureParameteri(m_KinectDepthBuffer[0], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+		glTextureStorage2D(m_KinectDepthBuffer[1], 1, GL_R16, MR::CKinectControl::DepthImageWidth, MR::CKinectControl::DepthImageHeight);
+		glTextureParameteri(m_KinectDepthBuffer[1], GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTextureParameteri(m_KinectDepthBuffer[1], GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTextureParameteri(m_KinectDepthBuffer[1], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTextureParameteri(m_KinectDepthBuffer[1], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+        /*glGenTextures(1, &m_VoxelDataBuffer);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_3D, m_VoxelDataBuffer);
@@ -297,7 +200,7 @@ namespace
 
         glTexImage3D(GL_TEXTURE_3D, 0, GL_R16, CubeVoxelWidth, CubeVoxelWidth, CubeVoxelWidth, 0, GL_RED, GL_SHORT, nullptr);
 
-		/*const unsigned int VoxelCount = CubeVoxelWidth * CubeVoxelWidth * CubeVoxelWidth;
+		const unsigned int VoxelCount = CubeVoxelWidth * CubeVoxelWidth * CubeVoxelWidth;
 
 		std::vector<float> VoxelData(VoxelCount);
 
@@ -321,9 +224,7 @@ namespace
     void CGfxVoxelRenderer::OnSetupBuffers()
     {
         glGenBuffers(1, &m_DrawCallConstantBuffer);
-        glBindBuffer(GL_UNIFORM_BUFFER, m_DrawCallConstantBuffer);
-        glBufferData(GL_UNIFORM_BUFFER, sizeof(SDrawCallBufferData), nullptr, GL_DYNAMIC_DRAW);
-        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        glNamedBufferData(m_DrawCallConstantBuffer, sizeof(SDrawCallBufferData), nullptr, GL_DYNAMIC_DRAW);
     }
     
     // -----------------------------------------------------------------------------
@@ -375,44 +276,23 @@ namespace
         BASE_UNUSED(_Width);
         BASE_UNUSED(_Height);
     }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGfxVoxelRenderer::UpdateKinectVoxelData()
-    {
-        m_KinectControl.Update();
-
-        m_TimeSinceLastVoxelUpdate += Core::Time::GetDeltaTimeLastFrame();
-
-        if (!m_NewVolumeExported)
-        {
-            m_KinectControl.ExportVolumeBlock(m_pVolumeData);
-            
-            m_NewVolumeExported = true;
-            m_TimeSinceLastVoxelUpdate = 0.0;
-        }
-    }
 
     // -----------------------------------------------------------------------------
 
     void CGfxVoxelRenderer::Update()
     {
-        if (m_KinectThreadStopped)
+        //////////////////////////////////////////////////////////////////////////////////////
+        // Get Kinect Data
+        //////////////////////////////////////////////////////////////////////////////////////
+
+        std::vector<unsigned short> DepthPixels(MR::CKinectControl::DepthImagePixelsCount);
+
+        if (m_KinectControl.GetDepthBuffer(DepthPixels.data()))
         {
-            return;
+            glTextureSubImage2D(m_KinectDepthBuffer[0], 0, 0, 0,
+                MR::CKinectControl::DepthImageWidth, MR::CKinectControl::DepthImageHeight,
+                GL_RED, GL_UNSIGNED_SHORT, DepthPixels.data());
         }
-
-        const float Scale = CubeWidth / CubeVoxelWidth * 0.2f;
-
-        Base::Float4x4 ScalingMatrix;
-        Base::Float4x4 RotationMatrix;
-
-        ScalingMatrix.SetScale(-Scale, Scale, -Scale);
-
-        //RotationMatrix.SetIdentity();
-        RotationMatrix.SetRotation(0.0f, 0.0f, 3.14f);
-
-        m_WorldMatrix = ScalingMatrix * RotationMatrix;
     }
     
     // -----------------------------------------------------------------------------
@@ -424,10 +304,16 @@ namespace
         //////////////////////////////////////////////////////////////////////////////////////
         // Compute shader
         //////////////////////////////////////////////////////////////////////////////////////
+        
+        const int WorkGroupsX = (MR::CKinectControl::DepthImageWidth / TileSize) + 1;
+        const int WorkGroupsY = (MR::CKinectControl::DepthImageHeight / TileSize) + 1;
 
-        //Gfx::ContextManager::SetShaderCS(m_ComputeShader);
-        //glBindImageTexture(0, m_VoxelDataBuffer, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_R16);
-        //glDispatchCompute(CubeVoxelWidth / TileSize, CubeVoxelWidth / TileSize, CubeVoxelWidth / TileSize);
+        Gfx::ContextManager::SetShaderCS(m_ComputeShader);
+        glBindImageTexture(0, m_KinectDepthBuffer[0], 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
+        glBindImageTexture(1, m_KinectDepthBuffer[1], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16UI);
+        glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
+
+        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
         //////////////////////////////////////////////////////////////////////////////////////
         // Rendering
@@ -443,43 +329,15 @@ namespace
         Gfx::ContextManager::SetShaderVS(m_VertexShader);
         Gfx::ContextManager::SetShaderPS(m_FragmentShader);
 
-        glBindVertexArray(m_VertexArray);
+        glBindVertexArray(1);
 
-        CBufferPtr FrameConstantBufferPtr = Gfx::Main::GetPerFrameConstantBufferVS();
-        CNativeBuffer FrameConstantBuffer = *static_cast<CNativeBuffer*>(FrameConstantBufferPtr.GetPtr());
-
-        SDrawCallBufferData* pBuffer = static_cast<SDrawCallBufferData*>(glMapNamedBuffer(m_DrawCallConstantBuffer, GL_WRITE_ONLY));
-        pBuffer->m_WorldMatrix = m_WorldMatrix;
-        pBuffer->m_WorldToCameraMatrix = m_KinectControl.GetWorldToCameraMatrix();
-        glUnmapNamedBuffer(m_DrawCallConstantBuffer);
-
-        glBindBufferBase(GL_UNIFORM_BUFFER, 0, FrameConstantBuffer.m_NativeBuffer);
-        glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_DrawCallConstantBuffer);
-
-        if (m_NewVolumeExported)
-        {
-            glUnmapNamedBuffer(m_VoxelDataPBOs[m_WritablePBOIndex]);
-
-            glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_VoxelDataPBOs[m_WritablePBOIndex]);
-
-            m_WritablePBOIndex = (m_WritablePBOIndex + 1) % 2;
-
-            m_pVolumeData = static_cast<short*>(glMapNamedBuffer(m_VoxelDataPBOs[m_WritablePBOIndex], GL_WRITE_ONLY));
-
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_3D, m_VoxelDataBuffer);
-            glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, CubeVoxelWidth, CubeVoxelWidth, CubeVoxelWidth, GL_RED, GL_SHORT, 0);
-            glBindTexture(GL_TEXTURE_3D, 0);
-
-            glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-
-            m_NewVolumeExported = false;
-        }
-
-        glBindImageTexture(0, m_VoxelDataBuffer, 0, GL_TRUE, 0, GL_READ_ONLY, GL_R16);
-
-        glDrawArrays(GL_POINTS, 0, VoxelCount);
-
+        glViewport(0, 0, 640, 720);
+        glBindImageTexture(0, m_KinectDepthBuffer[0], 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 3);
+        glViewport(640, 0, 640, 720);
+        glBindImageTexture(0, m_KinectDepthBuffer[1], 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 3);
+        
         glBindVertexArray(0);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

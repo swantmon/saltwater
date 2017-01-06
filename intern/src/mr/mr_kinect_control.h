@@ -4,16 +4,15 @@
 #include "mr/mr_control.h"
 
 #include "base/base_matrix4x4.h"
+#include "base/base_console.h"
 
-struct INuiFusionReconstruction;
-struct IKinectSensor;
-struct IDepthFrameReader;
-struct _Matrix4;
-typedef _Matrix4 Matrix4;
-struct _NUI_FUSION_IMAGE_FRAME;
-typedef _NUI_FUSION_IMAGE_FRAME NUI_FUSION_IMAGE_FRAME;
-struct _DepthSpacePoint;
-typedef _DepthSpacePoint DepthSpacePoint;
+#define NOMINMAX
+#include <windows.h>
+#include <Kinect.h>
+#include <NuiKinectFusionApi.h>
+
+#include <cassert>
+#include <mutex>
 
 namespace MR
 {
@@ -26,29 +25,50 @@ namespace MR
 
     public:
 
-        void Start(int VoxelCountX, int VoxelCountY, int VoxelCountZ, float VoxelsPerMeter);
+        void Start();
         void Stop();
 
-        void Update();
-		void ExportVolumeBlock(short* pVolumeBlock);
+        template<typename T>
+        bool GetDepthBuffer(T* pBuffer)
+        {
+            static_assert(std::is_arithmetic<T>::value, "T is not arithmetic");
 
-        Base::Float4x4 GetWorldToCameraMatrix();
+            IDepthFrame* pDepthFrame = nullptr;
+            unsigned int BufferSize;
+            unsigned short* pShortBuffer;
+
+            if (m_pDepthFrameReader->AcquireLatestFrame(&pDepthFrame) != S_OK)
+            {
+                return false;
+            }
+
+            if (pDepthFrame->AccessUnderlyingBuffer(&BufferSize, &pShortBuffer) != S_OK)
+            {
+                BASE_CONSOLE_ERROR("Failed to access underlying buffer");
+                return false;
+            }
+
+            for (int i = 0; i < DepthImagePixelsCount; ++i)
+            {
+                pBuffer[i] = static_cast<T>(pShortBuffer[i]);
+            }
+
+            if (pDepthFrame != nullptr)
+            {
+                pDepthFrame->Release();
+            }
+
+            return true;
+        }
+
+        static const int DepthImageWidth;
+        static const int DepthImageHeight;
+        static const int DepthImagePixelsCount;
 
 	private:
 
-        int m_VoxelCountX;
-        int m_VoxelCountY;
-        int m_VoxelCountZ;
-        float m_VoxelsPerMeter;
-        int m_VoxelCount;
-
 		IKinectSensor*            m_pKinect;
-		INuiFusionReconstruction* m_pVolume;
 		IDepthFrameReader*        m_pDepthFrameReader;
-		NUI_FUSION_IMAGE_FRAME*   m_pDepthImageFrame;
-		NUI_FUSION_IMAGE_FRAME*   m_pPointCloud;
-		NUI_FUSION_IMAGE_FRAME*   m_pShadedSurface;
-		Matrix4*                  m_pTransform;
 
         unsigned short* m_pDepthImagePixelBuffer;
         DepthSpacePoint* m_pDepthDistortionMap;
