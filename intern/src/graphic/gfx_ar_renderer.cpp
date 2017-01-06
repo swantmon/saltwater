@@ -328,7 +328,7 @@ namespace
         
         m_BackgroundTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
-        TextureDescriptor.m_Format           = CTextureBase::R32_FLOAT;
+        TextureDescriptor.m_Format           = CTextureBase::R32G32B32_FLOAT;
 
         m_VSPositionTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
