@@ -1426,10 +1426,6 @@ namespace
 
         #define CROP_PERCENTAGE 0.8f
         #define IMAGE_EDGE_LENGTH 512
-        #define IMAGE_SPACE 0
-        #define USE_INPAINTING 0
-        #define INPAINT_RADIUS 0
-        #define INPAINT_METHOD INPAINT_TELEA
 
         auto CropImage = [&](const Mat& _rOriginal, Mat& _rCroppedImage, Mat& _rLeftPart, Mat& _rRightPart, Mat& _rTopPart, Mat& _rBottomPart)
         {
@@ -1558,46 +1554,17 @@ namespace
             Point2f DestPointsOne[3];
             Point2f DestPointsTwo[3];
 
-            DestPointsOne[0] = Point2f(static_cast<float>(0)                                  , static_cast<float>(0));
-            DestPointsOne[1] = Point2f(static_cast<float>(0)                                  , static_cast<float>(IMAGE_EDGE_LENGTH));
-            DestPointsOne[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE), static_cast<float>(IMAGE_EDGE_LENGTH));
+            DestPointsOne[0] = Point2f(static_cast<float>(0)                    , static_cast<float>(0));
+            DestPointsOne[1] = Point2f(static_cast<float>(0)                    , static_cast<float>(IMAGE_EDGE_LENGTH));
+            DestPointsOne[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2), static_cast<float>(IMAGE_EDGE_LENGTH));
 
-            DestPointsTwo[0] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE), static_cast<float>(0));
-            DestPointsTwo[1] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE), static_cast<float>(IMAGE_EDGE_LENGTH));
-            DestPointsTwo[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH)                  , static_cast<float>(IMAGE_EDGE_LENGTH));
+            DestPointsTwo[0] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2), static_cast<float>(0));
+            DestPointsTwo[1] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2), static_cast<float>(IMAGE_EDGE_LENGTH));
+            DestPointsTwo[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH)    , static_cast<float>(IMAGE_EDGE_LENGTH));
 
             Mat Combination = CombineFaces(_rOne, _rTwo, DestPointsOne, DestPointsTwo);
 
-#if USE_INPAINTING == 0
             return Combination;
-#else
-            Mat Mask   = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, CV_8U);
-            Mat Result = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, Combination.type());
-
-            Point MaskPoints[3];
-
-            MaskPoints[0] = Point(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2, 0);
-            MaskPoints[1] = Point(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2, IMAGE_EDGE_LENGTH);
-            MaskPoints[2] = Point(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2, 0);
-
-            Scalar Color = Scalar(255, 255, 255);
-
-            fillConvexPoly(Mask, MaskPoints, 3, Color);
-
-            MaskPoints[0] = Point(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2, IMAGE_EDGE_LENGTH);
-            MaskPoints[1] = Point(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2, 0);
-            MaskPoints[2] = Point(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2, IMAGE_EDGE_LENGTH);
-
-            fillConvexPoly(Mask, MaskPoints, 3, Color);
-
-            // -----------------------------------------------------------------------------
-
-            inpaint(Combination, Mask, Result, INPAINT_RADIUS, INPAINT_METHOD);
-
-            // -----------------------------------------------------------------------------
-
-            return Result;
-#endif
         };
 
         // -----------------------------------------------------------------------------
@@ -1607,46 +1574,17 @@ namespace
             Point2f DestPointsOne[3];
             Point2f DestPointsTwo[3];
 
-            DestPointsOne[0] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE), static_cast<float>(0));
-            DestPointsOne[1] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE), static_cast<float>(IMAGE_EDGE_LENGTH));
-            DestPointsOne[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH)                  , static_cast<float>(IMAGE_EDGE_LENGTH));
+            DestPointsOne[0] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2), static_cast<float>(0));
+            DestPointsOne[1] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2), static_cast<float>(IMAGE_EDGE_LENGTH));
+            DestPointsOne[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH)    , static_cast<float>(IMAGE_EDGE_LENGTH));
 
-            DestPointsTwo[0] = Point2f(static_cast<float>(0)                                  , static_cast<float>(0));
-            DestPointsTwo[1] = Point2f(static_cast<float>(0)                                  , static_cast<float>(IMAGE_EDGE_LENGTH));
-            DestPointsTwo[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE), static_cast<float>(IMAGE_EDGE_LENGTH));
+            DestPointsTwo[0] = Point2f(static_cast<float>(0)                    , static_cast<float>(0));
+            DestPointsTwo[1] = Point2f(static_cast<float>(0)                    , static_cast<float>(IMAGE_EDGE_LENGTH));
+            DestPointsTwo[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2), static_cast<float>(IMAGE_EDGE_LENGTH));
 
             Mat Combination = CombineFaces(_rOne, _rTwo, DestPointsOne, DestPointsTwo);
 
-#if USE_INPAINTING == 0
             return Combination;
-#else
-            Mat Mask   = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, CV_8U);
-            Mat Result = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, Combination.type());
-
-            Point MaskPoints[3];
-
-            MaskPoints[0] = Point(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2, 0);
-            MaskPoints[1] = Point(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2, IMAGE_EDGE_LENGTH);
-            MaskPoints[2] = Point(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2, 0);
-
-            Scalar Color = Scalar(255, 255, 255);
-
-            fillConvexPoly(Mask, MaskPoints, 3, Color);
-
-            MaskPoints[0] = Point(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2, IMAGE_EDGE_LENGTH);
-            MaskPoints[1] = Point(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2, 0);
-            MaskPoints[2] = Point(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2, IMAGE_EDGE_LENGTH);
-
-            fillConvexPoly(Mask, MaskPoints, 3, Color);
-
-            // -----------------------------------------------------------------------------
-
-            inpaint(Combination, Mask, Result, INPAINT_RADIUS, INPAINT_METHOD);
-
-            // -----------------------------------------------------------------------------
-
-            return Result;
-#endif
         };
 
         // -----------------------------------------------------------------------------
@@ -1656,46 +1594,17 @@ namespace
             Point2f DestPointsOne[3];
             Point2f DestPointsTwo[3];
 
-            DestPointsOne[0] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE));
+            DestPointsOne[0] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH / 2));
             DestPointsOne[1] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH));
             DestPointsOne[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH));
 
             DestPointsTwo[0] = Point2f(static_cast<float>(0)                , static_cast<float>(0));
-            DestPointsTwo[1] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE));
-            DestPointsTwo[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE));
+            DestPointsTwo[1] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH / 2));
+            DestPointsTwo[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH / 2));
 
             Mat Combination = CombineFaces(_rOne, _rTwo, DestPointsOne, DestPointsTwo);
 
-#if USE_INPAINTING == 0
             return Combination;
-#else
-            Mat Mask   = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, CV_8U);
-            Mat Result = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, Combination.type());
-
-            Point MaskPoints[3];
-
-            MaskPoints[0] = Point(0, IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2);
-            MaskPoints[1] = Point(0, IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2);
-            MaskPoints[2] = Point(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2);
-
-            Scalar Color = Scalar(255, 255, 255);
-
-            fillConvexPoly(Mask, MaskPoints, 3, Color);
-
-            MaskPoints[0] = Point(0, IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2);
-            MaskPoints[1] = Point(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2);
-            MaskPoints[2] = Point(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2);
-
-            fillConvexPoly(Mask, MaskPoints, 3, Color);
-
-            // -----------------------------------------------------------------------------
-
-            inpaint(Combination, Mask, Result, INPAINT_RADIUS, INPAINT_METHOD);
-
-            // -----------------------------------------------------------------------------
-
-            return Result;
-#endif
         };
 
         // -----------------------------------------------------------------------------
@@ -1706,45 +1615,16 @@ namespace
             Point2f DestPointsTwo[3];
 
             DestPointsOne[0] = Point2f(static_cast<float>(0)                , static_cast<float>(0));
-            DestPointsOne[1] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE));
-            DestPointsOne[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE));
+            DestPointsOne[1] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH / 2));
+            DestPointsOne[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH / 2));
 
-            DestPointsTwo[0] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE));
+            DestPointsTwo[0] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH / 2));
             DestPointsTwo[1] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH));
             DestPointsTwo[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH));
 
             Mat Combination = CombineFaces(_rOne, _rTwo, DestPointsOne, DestPointsTwo);
 
-#if USE_INPAINTING == 0
             return Combination;
-#else
-            Mat Mask   = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, CV_8U);
-            Mat Result = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, Combination.type());
-
-            Point MaskPoints[3];
-
-            MaskPoints[0] = Point(0, IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2);
-            MaskPoints[1] = Point(0, IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2);
-            MaskPoints[2] = Point(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2);
-
-            Scalar Color = Scalar(255, 255, 255);
-
-            fillConvexPoly(Mask, MaskPoints, 3, Color);
-
-            MaskPoints[0] = Point(0, IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2);
-            MaskPoints[1] = Point(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2);
-            MaskPoints[2] = Point(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2);
-
-            fillConvexPoly(Mask, MaskPoints, 3, Color);
-
-            // -----------------------------------------------------------------------------
-
-            inpaint(Combination, Mask, Result, INPAINT_RADIUS, INPAINT_METHOD);
-
-            // -----------------------------------------------------------------------------
-
-            return Result;
-#endif
         };
 
         cv::Mat OriginalFrontImage, FrontCroped, FrontLeftPart, FrontRightPart, FrontTopPart, FrontBottomPart;
@@ -1768,6 +1648,10 @@ namespace
                 OriginalFrontImage.at<Vec2f>(Point(CurrentX, CurrentY)) = cv::Vec2f(static_cast<float>(CurrentX) / static_cast<float>(OriginalFrontImage.cols), static_cast<float>(CurrentY) / static_cast<float>(OriginalFrontImage.rows));
             }
         }
+
+        // -----------------------------------------------------------------------------
+
+
 
         // -----------------------------------------------------------------------------
 
