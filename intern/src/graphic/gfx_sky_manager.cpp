@@ -1,6 +1,7 @@
 
 #include "graphic/gfx_precompiled.h"
 
+#include "base/base_console.h"
 #include "base/base_pool.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
@@ -1197,16 +1198,25 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup constant buffer
         // -----------------------------------------------------------------------------
+        CCameraPtr MainCameraPtr = ViewManager::GetMainCamera();
+        CViewPtr   MainViewPtr   = MainCameraPtr->GetView();
+
         SModelMatrixBuffer* pViewBuffer = static_cast<SModelMatrixBuffer*>(BufferManager::MapConstantBuffer(VSBufferSetPtr->GetBuffer(0)));
 
-        float ScaleY = 1.0f / Base::Tan(Base::DegreesToRadians(78.0f) / 2.0f);
-        float ScaleX = ScaleY / (1280.0f / 720.0f);
+        float ScaleY = MainCameraPtr->GetProjectionMatrix()[1][1];
+        float ScaleX = MainCameraPtr->GetProjectionMatrix()[0][0];
+
+        float DistanceFromOrigin = MainViewPtr->GetPosition().Length();
+
+        float PerceptualDistance = 1.0f - Base::Clamp(DistanceFromOrigin / 100.0f, 0.0f, 0.99f);
+
+        BASE_CONSOLE_INFOV("X: %f, Y: %f, Distance: %f (%f)", ScaleX, ScaleY, DistanceFromOrigin, PerceptualDistance);
 
         pViewBuffer->m_ModelMatrix  = Base::Float4x4::s_Identity;
         pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(-1.0f, 1.0f, 1.0f);
-        pViewBuffer->m_ModelMatrix *= ViewManager::GetMainCamera()->GetView()->GetRotationMatrix().GetTransposed();
-        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(0.0f, 0.0f, -0.1f);
-        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(ScaleX, ScaleY, 1.0f);
+        pViewBuffer->m_ModelMatrix *= MainViewPtr->GetRotationMatrix().GetTransposed();
+        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(0.0f, 0.0f, -PerceptualDistance);
+        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(ScaleY, ScaleX, 1.0f + PerceptualDistance);
 
         BufferManager::UnmapConstantBuffer(VSBufferSetPtr->GetBuffer(0));
 
