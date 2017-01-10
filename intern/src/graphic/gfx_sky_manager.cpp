@@ -1651,10 +1651,6 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-
-
-        // -----------------------------------------------------------------------------
-
         flip(OriginalFrontImage, OriginalBackImage, 1);
 
         // -----------------------------------------------------------------------------
@@ -1681,7 +1677,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Create and update texture
         // -----------------------------------------------------------------------------
-
         STextureDescriptor TextureDescriptor;
         
         TextureDescriptor.m_NumberOfPixelsU  = IMAGE_EDGE_LENGTH;
@@ -1701,7 +1696,6 @@ namespace
         m_LookUpTexturePtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
         m_LookupTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_LookUpTexturePtr));
-
 
         Base::UInt2 CubemapResolution = Base::UInt2(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH);
 
