@@ -292,6 +292,7 @@ namespace
             pProbeLightFacet->SetType(Dt::CLightProbeFacet::Sky);
             pProbeLightFacet->SetQuality(Dt::CLightProbeFacet::PX512);
             pProbeLightFacet->SetIntensity(1.0f);
+            pProbeLightFacet->SetRefreshMode(Dt::CLightProbeFacet::Dynamic);
 
             rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pProbeLightFacet);
 

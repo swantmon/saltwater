@@ -1196,11 +1196,28 @@ namespace
         Performance::BeginEvent("Skybox from Texture");
 
         // -----------------------------------------------------------------------------
-        // Setup constant buffer
+        // Calculate distance
         // -----------------------------------------------------------------------------
         CCameraPtr MainCameraPtr = ViewManager::GetMainCamera();
         CViewPtr   MainViewPtr   = MainCameraPtr->GetView();
 
+        Base::Float3 Origin = Base::Float3::s_Zero;
+        Base::Float3 WS;
+        Base::Float3 Rotation;
+
+        float FarHeight = MainCameraPtr->GetHeight() * 720.0f / 2.0f;
+        float FarWidth  = MainCameraPtr->GetWidth() * 1280.0f / 2.0f;
+        float Angle     = -MainViewPtr->GetViewDirection().DotProduct(Base::Float3::s_AxisZ);
+
+        WS[0] = Base::Cos(Angle) * FarHeight;
+        WS[1] = Base::Sin(Angle) * FarWidth;
+
+        BASE_CONSOLE_INFOV("Angle: %f, WSx: %f, WSy: %f", Angle, WS[0], WS[1]);
+
+
+        // -----------------------------------------------------------------------------
+        // Setup constant buffer
+        // -----------------------------------------------------------------------------
         SModelMatrixBuffer* pViewBuffer = static_cast<SModelMatrixBuffer*>(BufferManager::MapConstantBuffer(VSBufferSetPtr->GetBuffer(0)));
 
         float ScaleY = MainCameraPtr->GetProjectionMatrix()[1][1];
@@ -1210,7 +1227,7 @@ namespace
 
         float PerceptualDistance = 1.0f - Base::Clamp(DistanceFromOrigin / 100.0f, 0.0f, 0.99f);
 
-        BASE_CONSOLE_INFOV("X: %f, Y: %f, Distance: %f (%f)", ScaleX, ScaleY, DistanceFromOrigin, PerceptualDistance);
+        // BASE_CONSOLE_INFOV("X: %f, Y: %f, Height: %f, Distance: %f (%f)", ScaleX, ScaleY, FarHeight, DistanceFromOrigin, PerceptualDistance);
 
         pViewBuffer->m_ModelMatrix  = Base::Float4x4::s_Identity;
         pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(-1.0f, 1.0f, 1.0f);
