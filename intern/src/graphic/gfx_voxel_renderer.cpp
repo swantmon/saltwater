@@ -48,6 +48,19 @@ using namespace Gfx;
 
 namespace
 {
+	const float KinectFocalLengthX = 0.72113f;
+	const float KinectFocalLengthY = 0.870799f;
+	const float KinectFocalPointX = 0.50602675f;
+	const float KinectFocalPointY = 0.499133f;
+
+	struct SIntrinsics
+	{
+		Base::Float2 m_FocalPoint;
+		Base::Float2 m_FocalLength;
+		Base::Float2 m_InvFocalLength;
+		Base::Float2 Padding;
+	};
+
     struct SDrawCallBufferData
     {
         Base::Float4x4 m_WorldMatrix;
@@ -90,13 +103,23 @@ namespace
 	private:
 
 		GLuint m_DrawCallConstantBuffer;
+		GLuint m_IntrinsicsConstantBuffer;
 
-        CShaderPtr m_VertexShader;
-        CShaderPtr m_FragmentShader;
-        CShaderPtr m_ComputeShader;
+        CShaderPtr m_VSVisualizeDepth;
+        CShaderPtr m_FSVisualizeDepth;
 
-        GLuint m_KinectDepthBuffer[2];
-        
+		CShaderPtr m_VSVisualizeVertexMap;
+		CShaderPtr m_FSVisualizeVertexMap;
+
+        CShaderPtr m_CSBilateralFilter;
+		CShaderPtr m_CSVertexMap;
+		CShaderPtr m_CSNormalMap;
+
+        GLuint m_KinectSmoothDepthBuffer;
+		GLuint m_KinectRawDepthBuffer;
+		GLuint m_KinectVertexMap;
+		GLuint m_KinectNormalMap;
+
 		MR::CKinectControl m_KinectControl;
     };
 } // namespace
@@ -130,9 +153,20 @@ namespace
     
     void CGfxVoxelRenderer::OnExit()
     {
-        m_VertexShader = 0;
-        m_FragmentShader = 0;
-        m_ComputeShader = 0;
+        m_VSVisualizeDepth = 0;
+        m_FSVisualizeDepth = 0;
+		m_VSVisualizeVertexMap = 0;
+		m_FSVisualizeVertexMap = 0;
+        m_CSBilateralFilter = 0;
+		m_CSVertexMap = 0;
+		m_CSNormalMap = 0;
+
+		glDeleteTextures(1, &m_KinectRawDepthBuffer);
+		glDeleteTextures(1, &m_KinectSmoothDepthBuffer);
+		glDeleteTextures(1, &m_KinectVertexMap);
+		glDeleteTextures(1, &m_KinectNormalMap);
+		glDeleteBuffers(1, &m_DrawCallConstantBuffer);
+		glDeleteBuffers(1, &m_IntrinsicsConstantBuffer);
     }
     
     // -----------------------------------------------------------------------------
@@ -144,9 +178,14 @@ namespace
         std::string TileSizeDefine = TileSizeDefineStream.str();
         const char* pDefines[] = { TileSizeDefine.c_str() };
 
-        m_VertexShader = ShaderManager::CompileVS("vs_kinect.glsl", "main");
-        m_FragmentShader = ShaderManager::CompilePS("fs_kinect.glsl", "main");
-        m_ComputeShader = ShaderManager::CompileCS("cs_kinect.glsl", "main", 1, pDefines);
+        m_VSVisualizeDepth = ShaderManager::CompileVS("vs_kinect_visualize_depth.glsl", "main");
+        m_FSVisualizeDepth = ShaderManager::CompilePS("fs_kinect_visualize_depth.glsl", "main");
+		m_VSVisualizeVertexMap = ShaderManager::CompileVS("vs_kinect_visualize_vertex_map.glsl", "main");
+		m_FSVisualizeVertexMap = ShaderManager::CompilePS("fs_kinect_visualize_vertex_map.glsl", "main");
+
+        m_CSBilateralFilter = ShaderManager::CompileCS("cs_kinect_bilateral_filter.glsl", "main", 1, pDefines);
+		m_CSVertexMap = ShaderManager::CompileCS("cs_kinect_vertex_map.glsl", "main", 1, pDefines);
+		m_CSNormalMap = ShaderManager::CompileCS("cs_kinect_normal_map.glsl", "main", 1, pDefines);
     }
     
     // -----------------------------------------------------------------------------
@@ -174,57 +213,32 @@ namespace
     
     void CGfxVoxelRenderer::OnSetupTextures()
     {
-        glCreateTextures(GL_TEXTURE_2D, 2, m_KinectDepthBuffer);
-		        
-		glTextureStorage2D(m_KinectDepthBuffer[0], 1, GL_R16, MR::CKinectControl::DepthImageWidth, MR::CKinectControl::DepthImageHeight);
-		glTextureParameteri(m_KinectDepthBuffer[0], GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTextureParameteri(m_KinectDepthBuffer[0], GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTextureParameteri(m_KinectDepthBuffer[0], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTextureParameteri(m_KinectDepthBuffer[0], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glCreateTextures(GL_TEXTURE_2D, 1, &m_KinectRawDepthBuffer);
+		glCreateTextures(GL_TEXTURE_2D, 1, &m_KinectSmoothDepthBuffer);
+		glCreateTextures(GL_TEXTURE_2D, 1, &m_KinectVertexMap);
+		glCreateTextures(GL_TEXTURE_2D, 1, &m_KinectNormalMap);
 
-		glTextureStorage2D(m_KinectDepthBuffer[1], 1, GL_R16, MR::CKinectControl::DepthImageWidth, MR::CKinectControl::DepthImageHeight);
-		glTextureParameteri(m_KinectDepthBuffer[1], GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTextureParameteri(m_KinectDepthBuffer[1], GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTextureParameteri(m_KinectDepthBuffer[1], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTextureParameteri(m_KinectDepthBuffer[1], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-        /*glGenTextures(1, &m_VoxelDataBuffer);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_3D, m_VoxelDataBuffer);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-        glTexImage3D(GL_TEXTURE_3D, 0, GL_R16, CubeVoxelWidth, CubeVoxelWidth, CubeVoxelWidth, 0, GL_RED, GL_SHORT, nullptr);
-
-		const unsigned int VoxelCount = CubeVoxelWidth * CubeVoxelWidth * CubeVoxelWidth;
-
-		std::vector<float> VoxelData(VoxelCount);
-
-        std::fstream VoxelFile;
-        VoxelFile.open("kinect_voxel_data.txt", std::ios::in);
-
-        short Value;
-		unsigned int Index = 0;
-        while (VoxelFile >> Value)
-        {
-			VoxelData[Index++] = Value < 0 ? 0.0f : 1.0f;
-        }
-
-        VoxelFile.close();
-
-		glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, CubeVoxelWidth, CubeVoxelWidth, CubeVoxelWidth, 0, GL_RED, GL_FLOAT, VoxelData.data());*/
+		glTextureStorage2D(m_KinectRawDepthBuffer, 1, GL_R16UI, MR::CKinectControl::DepthImageWidth, MR::CKinectControl::DepthImageHeight);
+		glTextureStorage2D(m_KinectSmoothDepthBuffer, 1, GL_R16UI, MR::CKinectControl::DepthImageWidth, MR::CKinectControl::DepthImageHeight);
+		glTextureStorage2D(m_KinectVertexMap, 1, GL_RGBA32F, MR::CKinectControl::DepthImageWidth, MR::CKinectControl::DepthImageHeight);
+		glTextureStorage2D(m_KinectNormalMap, 1, GL_RGBA32F, MR::CKinectControl::DepthImageWidth, MR::CKinectControl::DepthImageHeight);
     }
     
     // -----------------------------------------------------------------------------
     
     void CGfxVoxelRenderer::OnSetupBuffers()
     {
-        glGenBuffers(1, &m_DrawCallConstantBuffer);
+		glCreateBuffers(1, &m_DrawCallConstantBuffer);
         glNamedBufferData(m_DrawCallConstantBuffer, sizeof(SDrawCallBufferData), nullptr, GL_DYNAMIC_DRAW);
+
+		SIntrinsics Intrinsics;
+
+		Intrinsics.m_FocalPoint = Base::Float2(KinectFocalPointX, KinectFocalPointY);
+		Intrinsics.m_FocalLength = Base::Float2(KinectFocalLengthX, KinectFocalLengthY);
+		Intrinsics.m_InvFocalLength = Base::Float2(1.0f / KinectFocalLengthX, 1.0f / KinectFocalLengthY);
+
+		glCreateBuffers(1, &m_IntrinsicsConstantBuffer);
+		glNamedBufferData(m_IntrinsicsConstantBuffer, sizeof(SIntrinsics), &Intrinsics, GL_STATIC_DRAW);
     }
     
     // -----------------------------------------------------------------------------
@@ -289,9 +303,9 @@ namespace
 
         if (m_KinectControl.GetDepthBuffer(DepthPixels.data()))
         {
-            glTextureSubImage2D(m_KinectDepthBuffer[0], 0, 0, 0,
+            glTextureSubImage2D(m_KinectRawDepthBuffer, 0, 0, 0,
                 MR::CKinectControl::DepthImageWidth, MR::CKinectControl::DepthImageHeight,
-                GL_RED, GL_UNSIGNED_SHORT, DepthPixels.data());
+				GL_RED_INTEGER, GL_UNSIGNED_SHORT, DepthPixels.data());
         }
     }
     
@@ -301,19 +315,35 @@ namespace
     {
         Performance::BeginEvent("Voxel Rendering");
 
-        //////////////////////////////////////////////////////////////////////////////////////
-        // Compute shader
-        //////////////////////////////////////////////////////////////////////////////////////
-        
-        const int WorkGroupsX = (MR::CKinectControl::DepthImageWidth / TileSize) + 1;
-        const int WorkGroupsY = (MR::CKinectControl::DepthImageHeight / TileSize) + 1;
+		const int WorkGroupsX = (MR::CKinectControl::DepthImageWidth / TileSize);
+		const int WorkGroupsY = (MR::CKinectControl::DepthImageHeight / TileSize);
 
-        Gfx::ContextManager::SetShaderCS(m_ComputeShader);
-        glBindImageTexture(0, m_KinectDepthBuffer[0], 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
-        glBindImageTexture(1, m_KinectDepthBuffer[1], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16UI);
+        //////////////////////////////////////////////////////////////////////////////////////
+        // Bilateral Filter
+        //////////////////////////////////////////////////////////////////////////////////////
+
+        Gfx::ContextManager::SetShaderCS(m_CSBilateralFilter);
+        glBindImageTexture(0, m_KinectRawDepthBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
+        glBindImageTexture(1, m_KinectSmoothDepthBuffer, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16UI);
         glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
 
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		//////////////////////////////////////////////////////////////////////////////////////
+		// Generate vertex and normal map
+		//////////////////////////////////////////////////////////////////////////////////////
+
+		glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_IntrinsicsConstantBuffer);
+
+		Gfx::ContextManager::SetShaderCS(m_CSVertexMap);
+		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);		
+		glBindImageTexture(0, m_KinectSmoothDepthBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
+		glBindImageTexture(1, m_KinectVertexMap, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+		glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
+
+		Gfx::ContextManager::SetShaderCS(m_CSNormalMap);
+		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		glBindImageTexture(0, m_KinectVertexMap, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+		glBindImageTexture(1, m_KinectNormalMap, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+		glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
 
         //////////////////////////////////////////////////////////////////////////////////////
         // Rendering
@@ -326,18 +356,30 @@ namespace
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        Gfx::ContextManager::SetShaderVS(m_VertexShader);
-        Gfx::ContextManager::SetShaderPS(m_FragmentShader);
+		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
-        glBindVertexArray(1);
+		glBindVertexArray(1); // dummy vao because opengl needs vertex data even when it does not use it
+
+		/*Gfx::ContextManager::SetShaderVS(m_VSVisualizeDepth);
+        Gfx::ContextManager::SetShaderPS(m_FSVisualizeDepth);
 
         glViewport(0, 0, 640, 720);
-        glBindImageTexture(0, m_KinectDepthBuffer[0], 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
+        glBindImageTexture(0, m_KinectDepthBuffers[0], 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 3);
         glViewport(640, 0, 640, 720);
-        glBindImageTexture(0, m_KinectDepthBuffer[1], 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 3);
+        glBindImageTexture(0, m_KinectDepthBuffers[1], 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 3);*/
+
+		glBindImageTexture(0, m_KinectVertexMap, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
         
+		CBufferPtr FrameConstantBufferPtr = Gfx::Main::GetPerFrameConstantBufferVS();
+		CNativeBuffer NativeBufer = *static_cast<CNativeBuffer*>(FrameConstantBufferPtr.GetPtr());
+		glBindBufferBase(GL_UNIFORM_BUFFER, 0, NativeBufer.m_NativeBuffer);
+		Gfx::ContextManager::SetShaderVS(m_VSVisualizeVertexMap);
+		Gfx::ContextManager::SetShaderPS(m_FSVisualizeVertexMap);
+
+		glDrawArrays(GL_POINTS, 0, MR::CKinectControl::DepthImagePixelsCount);
+
         glBindVertexArray(0);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
