@@ -1204,9 +1204,43 @@ namespace
         float ScaleY = MainCameraPtr->GetProjectionMatrix()[1][1] * 0.5f;
         float ScaleX = MainCameraPtr->GetProjectionMatrix()[0][0] * 0.5f;
 
-        float DistanceFromOrigin = MainViewPtr->GetPosition().Length();
+        {
+            // Test 1
+            float DistanceFromOrigin = MainViewPtr->GetPosition().Length();
 
-        float ScaleZ = 1.0f - Base::Clamp(DistanceFromOrigin / 100.0f, 0.01f, 0.99f);
+            Base::Float3 CamPosition = MainViewPtr->GetPosition();
+            Base::Float3 CamViewDir = MainViewPtr->GetViewDirection();
+
+            Base::Float3 CamUpDir = MainViewPtr->GetUpDirection();
+            Base::Float3 CamRightDir = MainViewPtr->GetRightDirection();
+
+            float Near = MainCameraPtr->GetNear();
+            float Far = MainCameraPtr->GetFar();
+
+            float FOV = Base::ATan(ScaleY * 2.0f);
+
+            float AspectRatio = MainCameraPtr->GetAspectRatio();
+
+            float Hnear = 2.0f * Base::Tan(FOV / 2.0f) * Near;
+            float Wnear = Hnear * AspectRatio;
+
+            float Hfar = 2.0f * Base::Tan(FOV / 2.0f) * Far;
+            float Wfar = Hfar * AspectRatio;
+
+            Base::Float3 CenterNear = CamPosition + CamViewDir * Near;
+            Base::Float3 CenterFar  = CamPosition + CamViewDir * Far;
+
+            BASE_CONSOLE_INFOV("FOV = %f", Base::RadiansToDegree(FOV));
+        }
+
+//         {
+//             // Test 2
+//             Base::Float3 FarPlane = MainCameraPtr->GetWorldSpaceFrustum()[CCamera::SFace::Far];
+// 
+//             FarPlane = FarPlane.Normalize();
+// 
+//             BASE_CONSOLE_INFOV("Far plane: %fx + %fy + %fz = 0", FarPlane[0], FarPlane[1], FarPlane[2]);
+//         }
 
         // -----------------------------------------------------------------------------
         // Setup constant buffer
