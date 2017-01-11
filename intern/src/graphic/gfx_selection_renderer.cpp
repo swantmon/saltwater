@@ -20,6 +20,7 @@
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_sampler_manager.h"
+#include "graphic/gfx_selection_renderer.h"
 #include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_state_manager.h"
 #include "graphic/gfx_target_set_manager.h"
@@ -62,6 +63,8 @@ namespace
 
         void SelectEntity(unsigned int _EntityID);
         void UnselectEntity();
+
+        SPickingInfo& Pick(const Base::Float2& _rUV, bool _IsHomogeneous = true);
         
     private:
 
@@ -308,6 +311,25 @@ namespace
     void CGfxSelectionRenderer::UnselectEntity()
     {
         m_pSelectedEntity = nullptr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    SPickingInfo& CGfxSelectionRenderer::Pick(const Base::Float2& _rUV, bool _IsHomogeneous)
+    {
+        BASE_UNUSED(_rUV);
+        BASE_UNUSED(_IsHomogeneous);
+
+        SPickingInfo NewPickingInfo;
+
+        NewPickingInfo.m_Flags      = SPickingInfo::Nothing;
+        NewPickingInfo.m_WSPosition = Base::Float3::s_Zero;
+        NewPickingInfo.m_WSNormal   = Base::Float3::s_Zero;
+        NewPickingInfo.m_Depth      = 1.0f;
+        NewPickingInfo.m_pEntity    = 0;
+        NewPickingInfo.m_pRegion    = 0;
+
+        return NewPickingInfo;
     }
     
     // -----------------------------------------------------------------------------
@@ -638,6 +660,13 @@ namespace SelectionRenderer
     void UnselectEntity()
     {
         CGfxSelectionRenderer::GetInstance().UnselectEntity();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    SPickingInfo& Pick(const Base::Float2& _rUV, bool _IsHomogeneous)
+    {
+        return CGfxSelectionRenderer::GetInstance().Pick(_rUV, _IsHomogeneous);
     }
 } // namespace SelectionRenderer
 } // namespace Gfx
