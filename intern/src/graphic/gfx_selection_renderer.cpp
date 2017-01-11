@@ -64,7 +64,7 @@ namespace
         void SelectEntity(unsigned int _EntityID);
         void UnselectEntity();
 
-        SPickingInfo& Pick(const Base::Float2& _rUV, bool _IsHomogeneous = true);
+        SPickingInfo Pick(const Base::Float2& _rUV, bool _IsHomogeneous = true);
         
     private:
 
@@ -315,7 +315,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    SPickingInfo& CGfxSelectionRenderer::Pick(const Base::Float2& _rUV, bool _IsHomogeneous)
+    SPickingInfo CGfxSelectionRenderer::Pick(const Base::Float2& _rUV, bool _IsHomogeneous)
     {
         BASE_UNUSED(_rUV);
         BASE_UNUSED(_IsHomogeneous);
@@ -664,7 +664,7 @@ namespace SelectionRenderer
 
     // -----------------------------------------------------------------------------
 
-    SPickingInfo& Pick(const Base::Float2& _rUV, bool _IsHomogeneous)
+    SPickingInfo Pick(const Base::Float2& _rUV, bool _IsHomogeneous)
     {
         return CGfxSelectionRenderer::GetInstance().Pick(_rUV, _IsHomogeneous);
     }

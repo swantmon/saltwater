@@ -66,6 +66,6 @@ namespace SelectionRenderer
     void SelectEntity(unsigned int _EntityID);
     void UnselectEntity();
 
-    SPickingInfo& Pick(const Base::Float2& _rUV, bool _IsHomogeneous = true);
+    SPickingInfo Pick(const Base::Float2& _rUV, bool _IsHomogeneous = true);
 } // namespace SelectionRenderer
 } // namespace Gfx
