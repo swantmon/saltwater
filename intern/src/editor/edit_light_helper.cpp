@@ -342,7 +342,16 @@ namespace
             {
                 NewMessage.PutBool(true);
 
-                NewMessage.PutString(pLightFacet->GetCubemap()->GetFileName());
+                if (pLightFacet->GetCubemap()->GetFileName() != nullptr)
+                {
+                    NewMessage.PutBool(true);
+
+                    NewMessage.PutString(pLightFacet->GetCubemap()->GetFileName());
+                }
+                else
+                {
+                    NewMessage.PutBool(false);
+                }
 
                 NewMessage.PutInt(pLightFacet->GetCubemap()->GetHash());
             }
@@ -350,7 +359,16 @@ namespace
             {
                 NewMessage.PutBool(true);
 
-                NewMessage.PutString(pLightFacet->GetPanorama()->GetFileName());
+                if (pLightFacet->GetPanorama()->GetFileName() != nullptr)
+                {
+                    NewMessage.PutBool(true);
+
+                    NewMessage.PutString(pLightFacet->GetPanorama()->GetFileName());
+                }
+                else
+                {
+                    NewMessage.PutBool(false);
+                }
 
                 NewMessage.PutInt(pLightFacet->GetPanorama()->GetHash());
             }

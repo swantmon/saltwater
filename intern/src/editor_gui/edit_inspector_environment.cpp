@@ -108,7 +108,12 @@ namespace Edit
 
         if (HasTexture)
         {
-            pTexture = _rMessage.GetString(pTemp, 256);
+            bool HasName = _rMessage.GetBool();
+
+            if (HasName)
+            {
+                pTexture = _rMessage.GetString(pTemp, 256);
+            }
         }
 
         unsigned int TextureHash = _rMessage.GetInt();
