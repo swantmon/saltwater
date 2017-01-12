@@ -68,6 +68,18 @@ namespace
         
     private:
 
+        struct SPickingSettings
+        {
+            Base::UInt2 m_UV;
+        };
+
+        struct SPickingOutput
+        {
+            Base::Float4 m_WSPosition;
+            Base::Float4 m_WSNormal;
+            float        m_Depth;
+        };
+
         struct SPerDrawCallConstantBufferVS
         {
             Base::Float4x4 m_ModelMatrix;
@@ -94,6 +106,9 @@ namespace
         CBufferSetPtr     m_SelectionPSBufferSetPtr;
         CRenderContextPtr m_RenderContextPtr;
         CShaderPtr        m_SelectionPSPtr;
+        CShaderPtr        m_PickingCSPtr;
+        CBufferSetPtr     m_PickingBufferSetPtr;
+        CTextureSetPtr    m_GBufferTextureSetPtr;
 
         CRenderJobs       m_RenderJobs;
 
@@ -114,6 +129,8 @@ namespace
         , m_SelectionPSBufferSetPtr()
         , m_RenderContextPtr       ()
         , m_SelectionPSPtr         ()
+        , m_PickingBufferSetPtr    ()
+        , m_GBufferTextureSetPtr   ()
         , m_RenderJobs             ()
         , m_pSelectedEntity        (0)
     {
@@ -145,6 +162,9 @@ namespace
         m_SelectionPSBufferSetPtr = 0;
         m_RenderContextPtr        = 0;
         m_SelectionPSPtr          = 0;
+        m_PickingCSPtr            = 0;
+        m_PickingBufferSetPtr     = 0;
+        m_GBufferTextureSetPtr    = 0;
         m_pSelectedEntity         = 0;
 
         // -----------------------------------------------------------------------------
@@ -167,6 +187,7 @@ namespace
     void CGfxSelectionRenderer::OnSetupShader()
     {
         m_SelectionPSPtr = ShaderManager::CompilePS("fs_selection.glsl", "main");
+        m_PickingCSPtr   = ShaderManager::CompileCS("cs_picking.glsl", "main");
     }
     
     // -----------------------------------------------------------------------------
@@ -205,7 +226,9 @@ namespace
     
     void CGfxSelectionRenderer::OnSetupTextures()
     {
+        CTargetSetPtr DeferredTargetSetPtr = TargetSetManager::GetDeferredTargetSet();
 
+        m_GBufferTextureSetPtr = TextureManager::CreateTextureSet(DeferredTargetSetPtr->GetRenderTarget(0), DeferredTargetSetPtr->GetRenderTarget(1), DeferredTargetSetPtr->GetRenderTarget(2), DeferredTargetSetPtr->GetDepthStencilTarget());
     }
     
     // -----------------------------------------------------------------------------
@@ -226,8 +249,6 @@ namespace
         
         CBufferPtr ViewBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
-        m_ViewModelVSBuffer = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS(), ViewBuffer);
-
         // -----------------------------------------------------------------------------
 
         ConstanteBufferDesc.m_Stride        = 0;
@@ -239,6 +260,36 @@ namespace
         ConstanteBufferDesc.m_pClassKey     = 0;
 
         CBufferPtr SelectionBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPUReadWrite;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SPickingSettings);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+
+        CBufferPtr PickingBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPUReadWrite;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPURead;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SPickingOutput);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+
+        CBufferPtr PickingOuputBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+
+        m_PickingBufferSetPtr     = BufferManager::CreateBufferSet(PickingBufferPtr, PickingOuputBufferPtr);
+
+        m_ViewModelVSBuffer       = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS(), ViewBuffer);
 
         m_SelectionPSBufferSetPtr = BufferManager::CreateBufferSet(SelectionBufferPtr);
     }
@@ -319,6 +370,36 @@ namespace
     {
         BASE_UNUSED(_rUV);
         BASE_UNUSED(_IsHomogeneous);
+
+        // -----------------------------------------------------------------------------
+
+        SPickingSettings* pSettings = static_cast<SPickingSettings*>(BufferManager::MapConstantBuffer(m_PickingBufferSetPtr->GetBuffer(0)));
+
+        pSettings->m_UV = Base::UInt2(_rUV[0] * 1280.0f, _rUV[1] * 720.0f);
+
+        BufferManager::UnmapConstantBuffer(m_PickingBufferSetPtr->GetBuffer(0));
+
+        // -----------------------------------------------------------------------------
+
+        Performance::BeginEvent("Picking");
+
+        ContextManager::SetShaderCS(m_PickingCSPtr);
+
+        ContextManager::SetConstantBufferSetCS(m_PickingBufferSetPtr);
+
+        ContextManager::SetTextureSetCS(m_GBufferTextureSetPtr);
+
+        ContextManager::Dispatch(1, 1, 1);
+
+        ContextManager::ResetTextureSetCS();
+
+        ContextManager::ResetConstantBufferSetCS();
+
+        ContextManager::ResetShaderCS();
+
+        Performance::EndEvent();
+
+        // -----------------------------------------------------------------------------
 
         SPickingInfo NewPickingInfo;
 

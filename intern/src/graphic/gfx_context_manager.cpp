@@ -2028,21 +2028,12 @@ namespace
                     Access = rNativeTexture.m_NativeUsage;
                     Format = rNativeTexture.m_NativeInternalFormat;
 
-                    if ((rBaseTexture.GetBinding() & CTextureBase::EBinding::DepthStencilTarget) == CTextureBase::EBinding::DepthStencilTarget)
+                    if (rNativeTexture.IsCube())
                     {
-                        glActiveTexture(GL_TEXTURE0 + m_IndexOfTextureBinding);
-
-                        glBindTexture(TextureBinding, TextureHandle);
+                        TextureBinding = GL_TEXTURE_CUBE_MAP;
                     }
-                    else
-                    {
-                        if (rNativeTexture.IsCube())
-                        {
-                            TextureBinding = GL_TEXTURE_CUBE_MAP;
-                        }
 
-                        glBindImageTexture(m_IndexOfTextureBinding, TextureHandle, 0, GL_FALSE, 0, Access, Format);
-                    }
+                    glBindImageTexture(m_IndexOfTextureBinding, TextureHandle, 0, GL_FALSE, 0, Access, Format);
                 }
 
                 ++ m_IndexOfTextureBinding;
