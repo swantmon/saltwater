@@ -60,6 +60,11 @@
           </item>
           <item>
            <property name="text">
+            <string>Texture Geometry</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
             <string>Texture LUT</string>
            </property>
           </item>

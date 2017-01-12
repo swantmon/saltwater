@@ -18,6 +18,7 @@ namespace Dt
             Panorama,        //< Sky will be created from panorama image
             Cubemap,         //< Sky is generated from given cube map
             Texture,         //< Sky is generated from given texture
+            TextureGeometry, //< Sky is generated from given texture by using a geometry
             TextureLUT,      //< Sky is generated from given texture by using a LUT
         };
 

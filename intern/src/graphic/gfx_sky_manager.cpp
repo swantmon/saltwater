@@ -769,6 +769,10 @@ namespace
 
                 if (pDataSkyboxFacet->GetType() == Dt::CSkyFacet::Texture)
                 {
+                    RenderSkyboxFromTexture(pGraphicSkyboxFacet, pDataSkyboxFacet->GetIntensity());
+                }
+                else if (pDataSkyboxFacet->GetType() == Dt::CSkyFacet::TextureGeometry)
+                {
                     RenderSkyboxFromGeometry(pGraphicSkyboxFacet, pDataSkyboxFacet->GetIntensity());
                 }
                 else if (pDataSkyboxFacet->GetType() == Dt::CSkyFacet::TextureLUT)
@@ -899,7 +903,7 @@ namespace
                     }
                 }
             }
-            else if (pDataSkyboxFacet->GetType() == Dt::CSkyFacet::Texture)
+            else if (pDataSkyboxFacet->GetType() == Dt::CSkyFacet::Texture || pDataSkyboxFacet->GetType() == Dt::CSkyFacet::TextureGeometry || pDataSkyboxFacet->GetType() == Dt::CSkyFacet::TextureLUT)
             {
                 if (pDataSkyboxFacet->GetHasTexture())
                 {
@@ -913,25 +917,12 @@ namespace
 
                         rGraphicSkyboxFacet.m_InputTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(TexturePtr));
 
-                        RenderSkyboxFromTexture(&rGraphicSkyboxFacet, pDataSkyboxFacet->GetIntensity());
-                    }
-                }
-            }
-            else if (pDataSkyboxFacet->GetType() == Dt::CSkyFacet::TextureLUT)
-            {
-                if (pDataSkyboxFacet->GetHasTexture())
-                {
-                    unsigned int Hash = pDataSkyboxFacet->GetTexture()->GetHash();
-
-                    CTexture2DPtr TexturePtr = TextureManager::GetTexture2DByHash(Hash);
-
-                    if (TexturePtr.IsValid())
-                    {
-                        rGraphicSkyboxFacet.m_InputTexture2DPtr = TexturePtr;
-
-                        rGraphicSkyboxFacet.m_InputTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(TexturePtr));
-
-                        RenderSkyboxFromLUT(&rGraphicSkyboxFacet, pDataSkyboxFacet->GetIntensity());
+                        switch (pDataSkyboxFacet->GetType())
+                        {
+                        case Dt::CSkyFacet::Texture:         RenderSkyboxFromTexture(&rGraphicSkyboxFacet, pDataSkyboxFacet->GetIntensity());  break;
+                        case Dt::CSkyFacet::TextureGeometry: RenderSkyboxFromGeometry(&rGraphicSkyboxFacet, pDataSkyboxFacet->GetIntensity()); break;
+                        case Dt::CSkyFacet::TextureLUT:      RenderSkyboxFromLUT(&rGraphicSkyboxFacet, pDataSkyboxFacet->GetIntensity());      break;
+                        }
                     }
                 }
             }
@@ -990,7 +981,7 @@ namespace
                     }
                 }
             }
-            else if (pDataSkyboxFacet->GetType() == Dt::CSkyFacet::Texture)
+            else if (pDataSkyboxFacet->GetType() == Dt::CSkyFacet::Texture || pDataSkyboxFacet->GetType() == Dt::CSkyFacet::TextureGeometry || pDataSkyboxFacet->GetType() == Dt::CSkyFacet::TextureLUT)
             {
                 if (pDataSkyboxFacet->GetHasTexture())
                 {
@@ -1004,25 +995,12 @@ namespace
 
                         pGraphicSkyboxFacet->m_InputTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(TexturePtr));
 
-                        RenderSkyboxFromTexture(pGraphicSkyboxFacet, pDataSkyboxFacet->GetIntensity());
-                    }
-                }
-            }
-            else if (pDataSkyboxFacet->GetType() == Dt::CSkyFacet::TextureLUT)
-            {
-                if (pDataSkyboxFacet->GetHasTexture())
-                {
-                    unsigned int Hash = pDataSkyboxFacet->GetTexture()->GetHash();
-
-                    CTexture2DPtr TexturePtr = TextureManager::GetTexture2DByHash(Hash);
-
-                    if (TexturePtr.IsValid())
-                    {
-                        pGraphicSkyboxFacet->m_InputTexture2DPtr = TexturePtr;
-
-                        pGraphicSkyboxFacet->m_InputTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(TexturePtr));
-
-                        RenderSkyboxFromLUT(pGraphicSkyboxFacet, pDataSkyboxFacet->GetIntensity());
+                        switch (pDataSkyboxFacet->GetType())
+                        {
+                        case Dt::CSkyFacet::Texture:         RenderSkyboxFromTexture(pGraphicSkyboxFacet, pDataSkyboxFacet->GetIntensity());  break;
+                        case Dt::CSkyFacet::TextureGeometry: RenderSkyboxFromGeometry(pGraphicSkyboxFacet, pDataSkyboxFacet->GetIntensity()); break;
+                        case Dt::CSkyFacet::TextureLUT:      RenderSkyboxFromLUT(pGraphicSkyboxFacet, pDataSkyboxFacet->GetIntensity());      break;
+                        }
                     }
                 }
             }
