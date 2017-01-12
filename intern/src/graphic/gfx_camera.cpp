@@ -174,16 +174,6 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    void CCamera::SetProjection(const Base::Float4x4& _rProjectionMatrix)
-    {
-        m_ProjectionMatrix = _rProjectionMatrix;
-
-        // TODO by tschwandt
-        // Extract member variables from matrix
-    }
-
-    // -----------------------------------------------------------------------------
-
     void CCamera::SetAspectRatio(float _Aspect)
     {
         float Left;

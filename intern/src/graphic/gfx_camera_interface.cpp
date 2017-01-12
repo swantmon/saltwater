@@ -27,20 +27,20 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
+    void SetPerspective(float _Left, float _Right, float _Bottom, float _Top, float _Near, float _Far)
+    {
+        CCamera& rCamera = *ViewManager::GetMainCamera();
+
+        return rCamera.SetPerspective(_Left, _Right, _Bottom, _Top, _Near, _Far);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void SetOrthographic(float _Left, float _Right, float _Bottom, float _Top, float _Near, float _Far)
     {
         CCamera& rCamera = *ViewManager::GetMainCamera();
 
         return rCamera.SetOrthographic(_Left, _Right, _Bottom, _Top, _Near, _Far);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SetProjection(const Base::Float4x4& _rProjectionMatrix)
-    {
-        CCamera& rCamera = *ViewManager::GetMainCamera();
-
-        return rCamera.SetProjection(_rProjectionMatrix);
     }
 
     // -----------------------------------------------------------------------------

@@ -116,7 +116,18 @@ namespace Cam
 
                 ProjectionMatrix.SetRHPerspective(Near, Far, pCameraFacet->GetProjectionMatrix());
 
-                Gfx::Cam::SetProjection(ProjectionMatrix);
+                // -----------------------------------------------------------------------------
+                // Decompose left, right, top, bottom, near and far from projection
+                // matrix:
+                // Near = ProjectionMatrix[2][3] / (ProjectionMatrix[2][2] - 1);
+                // Far  = ProjectionMatrix[2][3] / (ProjectionMatrix[2][2] + 1);
+                // -----------------------------------------------------------------------------
+                float Bottom = Near * (ProjectionMatrix[1][2] - 1.0f) / ProjectionMatrix[1][1];
+                float Top    = Near * (ProjectionMatrix[1][2] + 1.0f) / ProjectionMatrix[1][1];
+                float Left   = Near * (ProjectionMatrix[0][2] - 1.0f) / ProjectionMatrix[0][0];
+                float Right  = Near * (ProjectionMatrix[0][2] + 1.0f) / ProjectionMatrix[0][0];
+
+                Gfx::Cam::SetPerspective(Left, Right, Bottom, Top, Near, Far);
             }
 
             // -----------------------------------------------------------------------------
