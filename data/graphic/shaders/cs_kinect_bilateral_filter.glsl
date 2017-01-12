@@ -3,15 +3,24 @@
 #define __INCLUDE_CS_KINECT_BILATERAL_FILTER_GLSL__
 
 // -----------------------------------------------------------------------------
-// Defines
+// Constants
 // -----------------------------------------------------------------------------
+
+const float g_SigmaColor = 30.0 * 1000 / 65336; // in mm
+const float g_SigmaSpace = 4.5; //in pixels
+
+const float g_SigmaColor2 = g_SigmaColor * g_SigmaColor;
+const float g_SigmaSpace2 = g_SigmaSpace * g_SigmaSpace;
+
+const float g_SigmaColor2_inv = 1.0 / g_SigmaColor2;
+const float g_SigmaSpace2_inv = 1.0 / g_SigmaSpace2;
 
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
 
-layout (binding = 0, r16ui) readonly uniform uimage2D cs_InputTexture;
-layout (binding = 1, r16ui) writeonly uniform uimage2D cs_OutputTexture;
+layout (binding = 0, r16) readonly uniform image2D cs_InputTexture;
+layout (binding = 1, r16) writeonly uniform image2D cs_OutputTexture;
 
 // -------------------------------------------------------------------------------------
 // Functions
@@ -23,41 +32,34 @@ void main()
 	
 	const int x = int(gl_GlobalInvocationID.x);
 	const int y = int(gl_GlobalInvocationID.y);
-	
-	const float sigmaColor = 30.0; // in mm
-	const float sigmaSpace = 4.5; //in pixels
 
-	const float sigmaColor2_inv = 1.0 / (sigmaColor * sigmaColor);
-	const float sigmaSpace2_inv = 1.0 / (sigmaSpace * sigmaSpace);
-
-	const int R = 6; // int(sigmaSpace * 1,5)
+	const int R = 6; // int(g_SigmaSpace * 1,5)
 	const int D = R * 2 + 1;
 
-	const int Depth = int(imageLoad(cs_InputTexture, ivec2(x, y)).r);
-		
-	const int tx = min(x - D / 2 + D, ImageSize.x - 1);
-	const int ty = min(y - D / 2 + D, ImageSize.y - 1);
+	const float Depth = imageLoad(cs_InputTexture, ivec2(x, y)).x;
 
-	float Normalization = 1.0;
-	float Result = 0.0;
+	float Normalization = 0.0;
+	float Sum = 0.0;
 
-	for (int cy = -R; cy < R; ++ cy)
+	for (int cx = -R; cx < R; ++ cx)
 	{
-		for (int cx = -R; cx < R; ++ cx)
+		for (int cy = -R; cy < R; ++ cy)
 		{
-			const ivec2 SamplePos = ivec2(cx + x, cy + y);
-			const int SampleDepth = int(imageLoad(cs_InputTexture, SamplePos).r);
+			const ivec2 SamplePos = ivec2(x + cx, y + cy);
+			const float SampleDepth = imageLoad(cs_InputTexture, SamplePos).x;
+
+			const float Weight = (SampleDepth - Depth) * (SampleDepth - Depth) > g_SigmaColor2 ? 0.0 : 1.0;
 			
-			const float Closeness = 1.0;//exp(-((SampleDepth - Depth) * (SampleDepth - Depth) * sigmaColor2_inv));
-			
-			Normalization += Closeness;
-			Result += Closeness * SampleDepth;
+			Normalization += Weight;
+			Sum += SampleDepth * Weight;
 		}
 	}
 
-	const int result = int(Result / Normalization);
-	imageStore(cs_OutputTexture, ivec2(x, y), ivec4(Depth, 0, 0, 0));
-	//imageStore(cs_OutputTexture, ivec2(x, y), ivec4(max(0, min(result, 32767))));
+	const float Result = Sum / Normalization;
+	
+	imageStore(cs_OutputTexture, ivec2(x, y), vec4(Result));
+	//imageStore(cs_OutputTexture, ivec2(x, y), vec4(Sum));
+	//imageStore(cs_OutputTexture, ivec2(x, y), vec4(Depth));
 }
 
 #endif // __INCLUDE_CS_KINECT_BILATERAL_FILTER_GLSL__

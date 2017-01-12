@@ -64,7 +64,6 @@ namespace
     struct SDrawCallBufferData
     {
         Base::Float4x4 m_WorldMatrix;
-        Base::Float4x4 m_WorldToCameraMatrix;
     };
     
     const unsigned int TileSize = 16;
@@ -228,8 +227,17 @@ namespace
     
     void CGfxVoxelRenderer::OnSetupBuffers()
     {
+		Base::Float4x4 WorldMatrix;
+		Base::Float4x4 RotationMatrix;
+		Base::Float4x4 ScalingMatrix;
+
+		RotationMatrix.SetRotationX(3.14f);
+		ScalingMatrix.SetScale(0.005f);
+
+		WorldMatrix = RotationMatrix * ScalingMatrix;
+
 		glCreateBuffers(1, &m_DrawCallConstantBuffer);
-        glNamedBufferData(m_DrawCallConstantBuffer, sizeof(SDrawCallBufferData), nullptr, GL_DYNAMIC_DRAW);
+        glNamedBufferData(m_DrawCallConstantBuffer, sizeof(SDrawCallBufferData), &WorldMatrix, GL_DYNAMIC_DRAW);
 
 		SIntrinsics Intrinsics;
 
@@ -323,8 +331,8 @@ namespace
         //////////////////////////////////////////////////////////////////////////////////////
 
         Gfx::ContextManager::SetShaderCS(m_CSBilateralFilter);
-        glBindImageTexture(0, m_KinectRawDepthBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
-        glBindImageTexture(1, m_KinectSmoothDepthBuffer, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16UI);
+        glBindImageTexture(0, m_KinectRawDepthBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16);
+        glBindImageTexture(1, m_KinectSmoothDepthBuffer, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16);
         glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
 
 		//////////////////////////////////////////////////////////////////////////////////////
@@ -360,21 +368,22 @@ namespace
 
 		glBindVertexArray(1); // dummy vao because opengl needs vertex data even when it does not use it
 
-		/*Gfx::ContextManager::SetShaderVS(m_VSVisualizeDepth);
+		Gfx::ContextManager::SetShaderVS(m_VSVisualizeDepth);
         Gfx::ContextManager::SetShaderPS(m_FSVisualizeDepth);
 
         glViewport(0, 0, 640, 720);
-        glBindImageTexture(0, m_KinectDepthBuffers[0], 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
+        glBindImageTexture(0, m_KinectRawDepthBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 3);
         glViewport(640, 0, 640, 720);
-        glBindImageTexture(0, m_KinectDepthBuffers[1], 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 3);*/
+        glBindImageTexture(0, m_KinectSmoothDepthBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 3);
 
+		glViewport(0, 0, 1280, 720);
 		glBindImageTexture(0, m_KinectVertexMap, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
         
 		CBufferPtr FrameConstantBufferPtr = Gfx::Main::GetPerFrameConstantBufferVS();
 		CNativeBuffer NativeBufer = *static_cast<CNativeBuffer*>(FrameConstantBufferPtr.GetPtr());
-		glBindBufferBase(GL_UNIFORM_BUFFER, 0, NativeBufer.m_NativeBuffer);
+		glBindBufferBase(GL_UNIFORM_BUFFER, 0, NativeBufer.m_NativeBuffer);		glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_DrawCallConstantBuffer);
 		Gfx::ContextManager::SetShaderVS(m_VSVisualizeVertexMap);
 		Gfx::ContextManager::SetShaderPS(m_FSVisualizeVertexMap);
 

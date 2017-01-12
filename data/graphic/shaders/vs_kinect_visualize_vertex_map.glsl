@@ -6,6 +6,11 @@
 
 layout(binding = 0, rgba32f) readonly uniform image2D vs_VertexMap;
 
+layout(row_major, std140, binding = 1) uniform PerDrawCallData
+{
+	mat4 g_WorldMatrix;
+};
+
 out gl_PerVertex
 {
     vec4 gl_Position;
@@ -19,14 +24,13 @@ void main(void)
 	
 	ivec2 VertexMapPosition;
 	VertexMapPosition.x = gl_VertexID / ImageSize.x;
-	VertexMapPosition.y = gl_VertexID % ImageSize.y;
+	VertexMapPosition.y = gl_VertexID % ImageSize.x;
 	
-	vec4 Vertex = vec4(imageLoad(vs_VertexMap, VertexMapPosition).xyz * 0.01, 1.0);
+	vec4 Vertex = vec4(imageLoad(vs_VertexMap, VertexMapPosition).xyz, 1.0);
 	
 	IsValid = Vertex.x != 0.0 ? 1 : 0;
 	
-	gl_Position = g_WorldToScreen * Vertex;
-	//gl_Position = vec4(VertexMapPosition, 0.0, 1.0);
+	gl_Position = g_WorldToScreen * g_WorldMatrix * Vertex;
 }
 
 #endif // __INCLUDE_VS_KINECT_VISUALIZE_VERTEX_MAP_GLSL__
