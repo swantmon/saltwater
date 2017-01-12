@@ -1206,6 +1206,7 @@ namespace
 
         {
             // Test 1
+            // http://gamedev.stackexchange.com/questions/19774/determine-corners-of-a-specific-plane-in-the-frustum
             float DistanceFromOrigin = MainViewPtr->GetPosition().Length();
 
             Base::Float3 CamPosition = MainViewPtr->GetPosition();
@@ -1221,8 +1222,10 @@ namespace
 
             float AspectRatio = MainCameraPtr->GetAspectRatio();
 
-            float Hnear = 2.0f * Base::Tan(FOV / 2.0f) * Near;
-            float Wnear = Hnear * AspectRatio;
+            float Hnear = MainCameraPtr->GetHeight();
+            float Wnear = MainCameraPtr->GetWidth();
+
+            FOV = Base::ATan(Hnear / Near / 2.0f) * 2.0f;
 
             float Hfar = 2.0f * Base::Tan(FOV / 2.0f) * Far;
             float Wfar = Hfar * AspectRatio;
@@ -1230,7 +1233,10 @@ namespace
             Base::Float3 CenterNear = CamPosition + CamViewDir * Near;
             Base::Float3 CenterFar  = CamPosition + CamViewDir * Far;
 
-            BASE_CONSOLE_INFOV("FOV = %f", Base::RadiansToDegree(FOV));
+            Base::Float3 FarBottomLeft = CenterFar - (CamUpDir * (Hfar / 2.0f)) - (CamRightDir * (Wfar / 2.0f));
+            Base::Float3 FarTopRight   = CenterFar + (CamUpDir * (Hfar / 2.0f)) + (CamRightDir * (Wfar / 2.0f));
+
+            BASE_CONSOLE_INFOV("fbl = (%f, %f, %f); ftr = (%f, %f, %f)", FarBottomLeft[0], FarBottomLeft[1], FarBottomLeft[2], FarTopRight[0], FarTopRight[1], FarTopRight[2]);
         }
 
 //         {
