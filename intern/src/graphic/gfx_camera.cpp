@@ -188,6 +188,9 @@ namespace Gfx
     void CCamera::SetProjection(const Base::Float4x4& _rProjectionMatrix)
     {
         m_ProjectionMatrix = _rProjectionMatrix;
+
+        // TODO by tschwandt
+        // Extract member variables from matrix
     }
 
     // -----------------------------------------------------------------------------
@@ -415,6 +418,13 @@ namespace Gfx
     float CCamera::GetFar() const
     {
         return m_Far;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CCamera::GetFOVY() const
+    {
+        return Base::ATan((m_Top - m_Bottom) / m_Near / 2.0f) * 2.0f;
     }
 
     // --------------------------------------------------------------------------------

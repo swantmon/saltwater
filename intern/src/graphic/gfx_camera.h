@@ -92,6 +92,8 @@ namespace Gfx
         float GetNear() const;
         float GetFar() const;
 
+        float GetFOVY() const;
+
         const Base::Float4x4& GetProjectionMatrix() const;
         const Base::Float4x4& GetViewProjectionMatrix() const;
 
