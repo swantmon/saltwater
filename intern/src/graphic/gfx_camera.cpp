@@ -42,17 +42,6 @@ namespace Gfx
     {
     }
 
-    // -----------------------------------------------------------------------------
-
-    void CCamera::SetFieldOfView(float _FOVY, float _Near, float _Far)
-    {
-        float Aspect;
-
-        Aspect = m_Left / m_Bottom;
-
-        SetFieldOfView(_FOVY, Aspect, _Near, _Far);
-    }
-
     // --------------------------------------------------------------------------------
 
     void CCamera::SetFieldOfView(float _FOVY, float _Aspect, float _Near, float _Far)

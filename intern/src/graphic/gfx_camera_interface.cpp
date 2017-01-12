@@ -2,6 +2,7 @@
 #include "graphic/gfx_precompiled.h"
 
 #include "graphic/gfx_camera.h"
+#include "graphic/gfx_main.h"
 #include "graphic/gfx_render_state.h"
 #include "graphic/gfx_state_manager.h"
 #include "graphic/gfx_view_manager.h"
@@ -14,7 +15,14 @@ namespace Cam
     {
         CCamera& rCamera = *ViewManager::GetMainCamera();
 
-        return rCamera.SetFieldOfView(_FOVY, _Near, _Far);
+        Base::Int2 ScreenSize = Main::GetActiveWindowSize();
+
+        float Width  = static_cast<float>(ScreenSize[0]);
+        float Height = static_cast<float>(ScreenSize[1]);
+
+        float AspectRatio = Width / Height;
+
+        return rCamera.SetFieldOfView(_FOVY, AspectRatio, _Near, _Far);
     }
 
     // -----------------------------------------------------------------------------
