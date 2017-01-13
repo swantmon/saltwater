@@ -3,6 +3,7 @@
 
 #include "base/base_console.h"
 #include "base/base_matrix4x4.h"
+#include "base/base_math_limits.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -99,7 +100,6 @@ namespace
         struct SRequest
         {
             Base::Int2       m_Cursor;
-            unsigned int     m_Extra;
             Base::U64        m_TimeStamp;
             SSelectionOutput m_Result;
         };
@@ -108,7 +108,7 @@ namespace
         {
         public:
 
-            static const unsigned int s_MaxNumberOfRequests = 0 + 2;
+            static const unsigned int s_MaxNumberOfRequests = 2;
 
         public:
 
@@ -535,33 +535,25 @@ namespace
         }
 
         // -----------------------------------------------------------------------------
-        // Avoid CPU-GPU stalls by resolving to a circular set of resources.
-        // -----------------------------------------------------------------------------
-        assert(rTicket.m_NumberOfRequests < CInternSelectionTicket::s_MaxNumberOfRequests);
-
-        // -----------------------------------------------------------------------------
         // Setup request
         // -----------------------------------------------------------------------------
         SRequest& rRequest = rTicket.m_Requests[rTicket.m_IndexOfPushRequest];
 
         rRequest.m_Cursor    = _rCursor;
-        rRequest.m_TimeStamp = Core::Time::GetNumberOfFrame() + 1;
+        rRequest.m_TimeStamp = Base::SLimits<Base::U64>::s_Max;
 
         // -----------------------------------------------------------------------------
         // Set push index
         // -----------------------------------------------------------------------------
         rTicket.m_IndexOfPushRequest = (rTicket.m_IndexOfPushRequest + 1) % CInternSelectionTicket::s_MaxNumberOfRequests;
         
-        ++ rTicket.m_NumberOfRequests;
+        rTicket.m_NumberOfRequests = Base::Clamp(rTicket.m_NumberOfRequests + 1, 0u, CInternSelectionTicket::s_MaxNumberOfRequests);
     }
 
     // -----------------------------------------------------------------------------
 
     bool CGfxSelectionRenderer::PopPick(CSelectionTicket& _rTicket)
     {
-        unsigned int IndexOfTicket;
-        unsigned int IndexOfResult;
-
         CInternSelectionTicket& rTicket = static_cast<CInternSelectionTicket&>(_rTicket);
 
         if (rTicket.m_NumberOfRequests == 0)
@@ -574,13 +566,10 @@ namespace
         // -----------------------------------------------------------------------------
         SRequest& rRequest = rTicket.m_Requests[rTicket.m_IndexOfPopRequest];
 
-        if (Core::Time::GetNumberOfFrame() < rRequest.m_TimeStamp)
+        if (Core::Time::GetNumberOfFrame() >= rRequest.m_TimeStamp + 2)
         {
             return false;
         }
-
-        IndexOfTicket = static_cast<unsigned int>(&rTicket - &m_SelectionTickets[0]);
-        IndexOfResult = IndexOfTicket * CInternSelectionTicket::s_MaxNumberOfRequests + rTicket.m_IndexOfPopRequest;
 
         // -----------------------------------------------------------------------------
         // Forward to the next request.
@@ -601,6 +590,12 @@ namespace
         rTicket.m_WSPosition = Base::Float3(rRequest.m_Result.m_WSPosition[0], rRequest.m_Result.m_WSPosition[1], rRequest.m_Result.m_WSPosition[2]);
         rTicket.m_WSNormal   = Base::Float3(rRequest.m_Result.m_WSNormal[0], rRequest.m_Result.m_WSNormal[1], rRequest.m_Result.m_WSNormal[2]);
         rTicket.m_Depth      = rRequest.m_Result.m_Depth;
+
+        if (rRequest.m_Result.m_EntityID != -1)
+        {
+            rTicket.m_HitFlag = SHitFlag::Entity;
+            rTicket.m_pObject = &Dt::EntityManager::GetEntityByID(rRequest.m_Result.m_EntityID);
+        }
 
         return true;
     }
