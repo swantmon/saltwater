@@ -1432,7 +1432,14 @@ namespace
         // -----------------------------------------------------------------------------
         // Test
         // -----------------------------------------------------------------------------
-        Gfx::CSelectionTicket& rSelectionTicket = SelectionRenderer::AcquireTicket(0, 0, 1, 1);
+        static Gfx::CSelectionTicket* pSelectionTicket = 0;
+
+        if (pSelectionTicket == 0)
+        {
+            pSelectionTicket = &SelectionRenderer::AcquireTicket(0, 0, 1, 1);
+        }
+
+        Gfx::CSelectionTicket& rSelectionTicket = *pSelectionTicket;
 
         SelectionRenderer::PushPick(rSelectionTicket, Base::UInt2(640, 360));
 
