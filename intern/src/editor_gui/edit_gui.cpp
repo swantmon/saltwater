@@ -78,6 +78,7 @@ namespace
 
     void CEditorGui::Setup(int _Width, int _Height)
     {
+        m_pMainWindow->SetRenderSize(_Width, _Height);
     }
 
     // -----------------------------------------------------------------------------
