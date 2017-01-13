@@ -148,6 +148,9 @@ namespace Edit
                 Dt::CEntity* pEntity = (Dt::CEntity*)rSelectionTicket.m_pObject;
 
                 Gfx::SelectionRenderer::SelectEntity(pEntity->GetID());
+
+                // TODO by tschwandt
+                // Show selection in GUI scene graph and select entity
             }
         }
 
@@ -213,11 +216,13 @@ namespace Edit
 
     void CEditState::OnMouseLeftReleased(Edit::CMessage& _rMessage)
     {
-        int MousePositionX = _rMessage.GetInt();
-        int MousePositionY = _rMessage.GetInt();
+        int GlobalMousePositionX = _rMessage.GetInt();
+        int GlobalMousePositionY = _rMessage.GetInt();
+        int LocalMousePositionX  = _rMessage.GetInt();
+        int LocalMousePositionY  = _rMessage.GetInt();
 
         assert(m_pSelectionTicket != 0);
 
-        Gfx::SelectionRenderer::PushPick(*m_pSelectionTicket, Base::Int2(MousePositionX, MousePositionY));
+        Gfx::SelectionRenderer::PushPick(*m_pSelectionTicket, Base::Int2(LocalMousePositionX, LocalMousePositionY));
     }
 } // namespace Edit

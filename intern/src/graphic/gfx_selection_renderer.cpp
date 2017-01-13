@@ -772,7 +772,7 @@ namespace
         {
             CInternSelectionTicket& rTicket = m_SelectionTickets[IndexOfTicket];
 
-            if (rTicket.m_IsValid && (rTicket.m_NumberOfRequests > 0) && (rTicket.m_Frame == Core::Time::GetNumberOfFrame()))
+            if (rTicket.m_IsValid && (rTicket.m_NumberOfRequests > 0) && (rTicket.m_Frame <= Core::Time::GetNumberOfFrame()))
             {
                 IndexOfLastRequest = (rTicket.m_IndexOfPushRequest > 0) ? rTicket.m_IndexOfPushRequest - 1 : CInternSelectionTicket::s_MaxNumberOfRequests - 1;
 

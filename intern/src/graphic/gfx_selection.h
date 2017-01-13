@@ -37,7 +37,6 @@ namespace Gfx
     public:
 
         SHitFlag::Enum m_HitFlag;
-        unsigned int   m_HitLayer;
         Base::Float3   m_WSPosition;
         Base::Float3   m_WSNormal;
         float          m_Depth;
