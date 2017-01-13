@@ -1450,11 +1450,13 @@ namespace
         // -----------------------------------------------------------------------------
         Gfx::CSelectionTicket& rSelectionTicket = *m_pSelectionTicket;
 
-        SelectionRenderer::PushPick(rSelectionTicket, Base::Int2(640, 360));
-
         if (SelectionRenderer::PopPick(rSelectionTicket))
         {
             BASE_CONSOLE_INFOV("Depth: %f", rSelectionTicket.m_Depth);
+        }
+        else
+        {
+            SelectionRenderer::PushPick(rSelectionTicket, Base::Int2(640, 360));
         }
 
         // -----------------------------------------------------------------------------
