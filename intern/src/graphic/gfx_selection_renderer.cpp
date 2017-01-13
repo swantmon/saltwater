@@ -496,23 +496,14 @@ namespace
 
         CInternSelectionTicket& rTicket = m_SelectionTickets[IndexOfTicket];
 
-        rTicket.m_IsValid  = true;
-        rTicket.m_OffsetX  = _OffsetX;
-        rTicket.m_OffsetY  = _OffsetY;
-        rTicket.m_SizeX    = _SizeX;
-        rTicket.m_SizeY    = _SizeY;
-        rTicket.m_Frame    = Core::Time::GetNumberOfFrame() - 1;
+        rTicket.m_IsValid = true;
+        rTicket.m_HitFlag = SHitFlag::Nothing;
+        rTicket.m_OffsetX = _OffsetX;
+        rTicket.m_OffsetY = _OffsetY;
+        rTicket.m_SizeX   = _SizeX;
+        rTicket.m_SizeY   = _SizeY;
+        rTicket.m_Frame   = Core::Time::GetNumberOfFrame() - 1;
         
-
-
-
-
-        // For testing:
-        rTicket.m_HitFlag = SHitFlag::Entity;
-
-
-
-
         Clear(rTicket);
 
         return rTicket;
