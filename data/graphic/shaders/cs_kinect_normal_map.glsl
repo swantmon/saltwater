@@ -6,6 +6,8 @@
 // Defines
 // -----------------------------------------------------------------------------
 
+const float NaN = 0.0 / 0.0;
+
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
@@ -31,7 +33,11 @@ void main()
 	vec3 Normal = cross(Vertex1 - Vertex0, Vertex2 - Vertex0);
 	Normal = normalize(Normal);
 	
-	imageStore(cs_NormalMap, ivec2(x, y), vec4(Normal, 1.0));
+	vec3 One = vec3(1.0);
+	
+	bool IsValid = dot(Vertex0, One) != 0.0 && dot(Vertex1, One) != 0.0 && dot(Vertex2, One) != 0.0;
+	
+	imageStore(cs_NormalMap, ivec2(x, y), IsValid ? vec4(Normal, 0.0) : vec4(0.0));
 }
 
 #endif // __INCLUDE_CS_NORMAL_MAP_GLSL__

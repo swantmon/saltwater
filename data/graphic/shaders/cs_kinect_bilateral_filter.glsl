@@ -6,7 +6,7 @@
 // Constants
 // -----------------------------------------------------------------------------
 
-const float g_SigmaColor = 30.0 * 1000 / 65336; // in mm
+const float g_SigmaColor = 30.0; // in mm
 const float g_SigmaSpace = 4.5; //in pixels
 
 const float g_SigmaColor2 = g_SigmaColor * g_SigmaColor;
@@ -19,8 +19,8 @@ const float g_SigmaSpace2_inv = 1.0 / g_SigmaSpace2;
 // Input from engine
 // -----------------------------------------------------------------------------
 
-layout (binding = 0, r16) readonly uniform image2D cs_InputTexture;
-layout (binding = 1, r16) writeonly uniform image2D cs_OutputTexture;
+layout (binding = 0, r16ui) readonly uniform uimage2D cs_InputTexture;
+layout (binding = 1, r16ui) writeonly uniform uimage2D cs_OutputTexture;
 
 // -------------------------------------------------------------------------------------
 // Functions
@@ -36,7 +36,7 @@ void main()
 	const int R = 6; // int(g_SigmaSpace * 1,5)
 	const int D = R * 2 + 1;
 
-	const float Depth = imageLoad(cs_InputTexture, ivec2(x, y)).x;
+	const float Depth = float(imageLoad(cs_InputTexture, ivec2(x, y)).x);
 
 	float Normalization = 0.0;
 	float Sum = 0.0;
@@ -46,7 +46,7 @@ void main()
 		for (int cy = -R; cy < R; ++ cy)
 		{
 			const ivec2 SamplePos = ivec2(x + cx, y + cy);
-			const float SampleDepth = imageLoad(cs_InputTexture, SamplePos).x;
+			const float SampleDepth = float(imageLoad(cs_InputTexture, SamplePos).x);
 
 			const float Weight = (SampleDepth - Depth) * (SampleDepth - Depth) > g_SigmaColor2 ? 0.0 : 1.0;
 			
@@ -57,9 +57,9 @@ void main()
 
 	const float Result = Sum / Normalization;
 	
-	imageStore(cs_OutputTexture, ivec2(x, y), vec4(Result));
-	//imageStore(cs_OutputTexture, ivec2(x, y), vec4(Sum));
-	//imageStore(cs_OutputTexture, ivec2(x, y), vec4(Depth));
+	imageStore(cs_OutputTexture, ivec2(x, y), ivec4(Result));
+	//imageStore(cs_OutputTexture, ivec2(x, y), ivec4(Sum));
+	//imageStore(cs_OutputTexture, ivec2(x, y), ivec4(Depth));
 }
 
 #endif // __INCLUDE_CS_KINECT_BILATERAL_FILTER_GLSL__
