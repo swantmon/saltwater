@@ -496,13 +496,17 @@ namespace
 
         CInternSelectionTicket& rTicket = m_SelectionTickets[IndexOfTicket];
 
-        rTicket.m_IsValid = true;
-        rTicket.m_HitFlag = SHitFlag::Nothing;
-        rTicket.m_OffsetX = _OffsetX;
-        rTicket.m_OffsetY = _OffsetY;
-        rTicket.m_SizeX   = _SizeX;
-        rTicket.m_SizeY   = _SizeY;
-        rTicket.m_Frame   = Core::Time::GetNumberOfFrame() - 1;
+        rTicket.m_IsValid    = true;
+        rTicket.m_HitFlag    = SHitFlag::Nothing;
+        rTicket.m_OffsetX    = _OffsetX;
+        rTicket.m_OffsetY    = _OffsetY;
+        rTicket.m_SizeX      = _SizeX;
+        rTicket.m_SizeY      = _SizeY;
+        rTicket.m_WSPosition = Base::Float3::s_Zero;
+        rTicket.m_WSNormal   = Base::Float3::s_Zero;
+        rTicket.m_Depth      = -1.0f;
+        rTicket.m_pObject    = 0;
+        rTicket.m_Frame      = Core::Time::GetNumberOfFrame() - 1;
         
         Clear(rTicket);
 
@@ -593,12 +597,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Read values from GPU to CPU and fill data
         // -----------------------------------------------------------------------------
-        rTicket.m_HitFlag    = SHitFlag::Nothing;
-        rTicket.m_WSPosition = Base::Float3::s_Zero;
-        rTicket.m_WSNormal   = Base::Float3::s_Zero;
-        rTicket.m_Depth      = 1.0f;
-        rTicket.m_pObject    = 0;
-
         rTicket.m_WSPosition = Base::Float3(rRequest.m_Result.m_WSPosition[0], rRequest.m_Result.m_WSPosition[1], rRequest.m_Result.m_WSPosition[2]);
         rTicket.m_WSNormal   = Base::Float3(rRequest.m_Result.m_WSNormal[0], rRequest.m_Result.m_WSNormal[1], rRequest.m_Result.m_WSNormal[2]);
         rTicket.m_Depth      = rRequest.m_Result.m_Depth;
