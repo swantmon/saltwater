@@ -345,6 +345,8 @@ namespace
 
         RenderSelection();
 
+        Pick(Base::Float2(0.5f, 0.5f));
+
         Performance::EndEvent();
     }
 
@@ -372,15 +374,19 @@ namespace
         BASE_UNUSED(_IsHomogeneous);
 
         // -----------------------------------------------------------------------------
+        // Upload input data
+        // -----------------------------------------------------------------------------
+        Base::Int2 ActiveWindowSize = Gfx::Main::GetActiveWindowSize();
 
         SPickingSettings* pSettings = static_cast<SPickingSettings*>(BufferManager::MapConstantBuffer(m_PickingBufferSetPtr->GetBuffer(0)));
 
-        pSettings->m_UV = Base::UInt2(_rUV[0] * 1280.0f, _rUV[1] * 720.0f);
+        pSettings->m_UV = Base::UInt2(static_cast<unsigned int>(_rUV[0] * ActiveWindowSize[0]), static_cast<unsigned int>(_rUV[1] * ActiveWindowSize[1]));
 
         BufferManager::UnmapConstantBuffer(m_PickingBufferSetPtr->GetBuffer(0));
 
         // -----------------------------------------------------------------------------
-
+        // Execute
+        // -----------------------------------------------------------------------------
         Performance::BeginEvent("Picking");
 
         ContextManager::SetShaderCS(m_PickingCSPtr);
@@ -400,7 +406,8 @@ namespace
         Performance::EndEvent();
 
         // -----------------------------------------------------------------------------
-
+        // Read values from GPU to CPU and fill data
+        // -----------------------------------------------------------------------------
         SPickingInfo NewPickingInfo;
 
         NewPickingInfo.m_Flags      = SPickingInfo::Nothing;
@@ -410,6 +417,17 @@ namespace
         NewPickingInfo.m_pEntity    = 0;
         NewPickingInfo.m_pRegion    = 0;
 
+        SPickingOutput* pOutput = static_cast<SPickingOutput*>(BufferManager::MapConstantBuffer(m_PickingBufferSetPtr->GetBuffer(1)));
+
+        NewPickingInfo.m_WSPosition = Base::Float3(pOutput->m_WSPosition[0], pOutput->m_WSPosition[1], pOutput->m_WSPosition[2]);
+        NewPickingInfo.m_WSNormal   = Base::Float3(pOutput->m_WSNormal[0], pOutput->m_WSNormal[1], pOutput->m_WSNormal[2]);
+        NewPickingInfo.m_Depth      = pOutput->m_Depth;
+
+        BufferManager::UnmapConstantBuffer(m_PickingBufferSetPtr->GetBuffer(1));
+
+        // -----------------------------------------------------------------------------
+        // Return picking info
+        // -----------------------------------------------------------------------------
         return NewPickingInfo;
     }
     
