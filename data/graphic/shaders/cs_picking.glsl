@@ -42,9 +42,9 @@ void main()
     uint X = gl_GlobalInvocationID.x;
     uint Y = gl_GlobalInvocationID.y;
 
-    int2 UV = int2(m_MinX, m_MinY);
+    ivec2 UV = ivec2(m_MinX, m_MinY);
 
-    HomogeneousUV = UV / vec2(1280.0f, 720.0f);
+    vec2 HomogeneousUV = UV / vec2(1280.0f, 720.0f);
 
     // -----------------------------------------------------------------------------
     // Get data
