@@ -42,9 +42,36 @@ void main()
     uint X = gl_GlobalInvocationID.x;
     uint Y = gl_GlobalInvocationID.y;
 
+
+    // -----------------------------------------------------------------------------
+    // Check the current pixel and find information about this including:
+    // 1. GBuffer data
+    // 2. Entity ID
+    // -----------------------------------------------------------------------------
+
+    // ...
+
+    // -----------------------------------------------------------------------------
+    // Wait until every compute unit has finished.
+    // -----------------------------------------------------------------------------
+    
+    // memoryBarrier();
+    
+
+    // -----------------------------------------------------------------------------
+    // Use the best result from the compute units.
+    // -----------------------------------------------------------------------------
+
+    // ...
+
+
+    // -----------------------------------------------------------------------------
+    // That implementation is for a first test and will be replaced as soon
+    // as needed.
+    // -----------------------------------------------------------------------------
     ivec2 UV = ivec2(m_MinX, m_MinY);
 
-    vec2 HomogeneousUV = UV / vec2(1280.0f, 720.0f);
+    vec2 HomogeneousUV = UV * g_InvertedScreensizeAndScreensize.xy;
 
     // -----------------------------------------------------------------------------
     // Get data
