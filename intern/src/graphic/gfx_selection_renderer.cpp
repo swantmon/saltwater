@@ -115,7 +115,7 @@ namespace
         {
         public:
 
-            static const unsigned int s_MaxNumberOfRequests = 2;
+            static const unsigned int s_MaxNumberOfRequests = 0 + 2;
 
         public:
 
@@ -771,6 +771,10 @@ namespace
         unsigned int IndexOfResult;
         unsigned int IndexOfLastRequest;
         unsigned int IndexOfTicket;
+        unsigned int MinX;
+        unsigned int MinY;
+        unsigned int MaxX;
+        unsigned int MaxY;
 
         for (IndexOfTicket = 0; IndexOfTicket < s_MaxNumberOfTickets; ++IndexOfTicket)
         {
@@ -787,12 +791,24 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Setup buffer
                 // -----------------------------------------------------------------------------
+                Base::Int2 ActiveWindowSize = Gfx::Main::GetActiveWindowSize();
+
                 SSelectionRequest* pSettings = static_cast<SSelectionRequest*>(BufferManager::MapConstantBuffer(rRequest.m_BufferSetPtr->GetBuffer(1)));
 
-                pSettings->m_MinX = rRequest.m_Cursor[0] + rTicket.m_OffsetX;
-                pSettings->m_MinY = rRequest.m_Cursor[1] + rTicket.m_OffsetY;
-                pSettings->m_MaxX = rRequest.m_Cursor[0] + rTicket.m_OffsetX + rTicket.m_SizeX;
-                pSettings->m_MaxY = rRequest.m_Cursor[0] + rTicket.m_OffsetY + rTicket.m_SizeY;
+                MinX = rRequest.m_Cursor[0] + rTicket.m_OffsetX;
+                MinY = rRequest.m_Cursor[1] + rTicket.m_OffsetY;
+                MaxX = MinX + rTicket.m_SizeX;
+                MaxY = MinY + rTicket.m_SizeY;
+
+                if (MinX < 0) MinX = 0;
+                if (MinY < 0) MinY = 0;
+                if (MaxX > static_cast<int>(ActiveWindowSize[0])) MaxX = ActiveWindowSize[0];
+                if (MaxY > static_cast<int>(ActiveWindowSize[1])) MaxY = ActiveWindowSize[1];
+
+                pSettings->m_MinX = MinX;
+                pSettings->m_MinY = MinY;
+                pSettings->m_MaxX = MaxX;
+                pSettings->m_MaxY = MaxY;
 
                 BufferManager::UnmapConstantBuffer(rRequest.m_BufferSetPtr->GetBuffer(1));
 
