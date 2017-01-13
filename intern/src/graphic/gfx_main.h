@@ -59,5 +59,6 @@ namespace Main
     CBufferPtr GetPerFrameConstantBufferDS();
     CBufferPtr GetPerFrameConstantBufferGS();
     CBufferPtr GetPerFrameConstantBufferPS();
+    CBufferPtr GetPerFrameConstantBufferCS();
 } // namespace Main
 } // namespace Gfx

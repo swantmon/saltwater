@@ -799,5 +799,12 @@ namespace Main
     {
         return CGfxMain::GetInstance().GetPerFrameConstantBuffer();
     }
+
+    // -----------------------------------------------------------------------------
+
+    CBufferPtr GetPerFrameConstantBufferCS()
+    {
+        return CGfxMain::GetInstance().GetPerFrameConstantBuffer();
+    }
 } // namespace Main
 } // namespace Gfx

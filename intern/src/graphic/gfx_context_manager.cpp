@@ -2033,7 +2033,16 @@ namespace
                         TextureBinding = GL_TEXTURE_CUBE_MAP;
                     }
 
-                    glBindImageTexture(m_IndexOfTextureBinding, TextureHandle, 0, GL_FALSE, 0, Access, Format);
+                    if (rBaseTexture.GetBinding() & CTextureBase::EBinding::DepthStencilTarget)
+                    {
+                        glActiveTexture(GL_TEXTURE0 + m_IndexOfTextureBinding);
+
+                        glBindTexture(TextureBinding, TextureHandle);
+                    }
+                    else
+                    {
+                        glBindImageTexture(m_IndexOfTextureBinding, TextureHandle, 0, GL_FALSE, 0, Access, Format);
+                    }
                 }
 
                 ++ m_IndexOfTextureBinding;
