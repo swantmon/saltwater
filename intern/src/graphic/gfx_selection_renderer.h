@@ -11,35 +11,7 @@
 #include "base/base_vector2.h"
 #include "base/base_vector3.h"
 
-namespace Dt
-{
-    class CEntity;
-    class CRegion;
-} // namespace Dt
-
-namespace Gfx
-{
-    struct SPickingInfo
-    {
-        enum EFlag
-        {
-            Nothing = 0x00,
-            Entity  = 0x01,
-            Terrain = 0x02,
-        };
-
-        unsigned int m_Flags;
-        Base::Float3 m_WSPosition;
-        Base::Float3 m_WSNormal;
-        float        m_Depth;
-
-        union 
-        {
-            Dt::CEntity* m_pEntity;
-            Dt::CRegion* m_pRegion;
-        };
-    };
-} // namespace Gfx
+#include "graphic/gfx_selection.h"
 
 namespace Gfx
 {
@@ -66,8 +38,16 @@ namespace SelectionRenderer
     void SelectEntity(unsigned int _EntityID);
     void UnselectEntity();
 
-    unsigned int AddPickingJob(const Base::Float2& _rUV, bool _IsHomogeneous = true);
-    const SPickingInfo* GetInfoOfPickingJob(unsigned int _JobID);
-    void RemovePickingJob(unsigned int _JobID);
+    CSelectionTicket& AcquireTicket(int _OffsetX, int _OffsetY, int _SizeX, int _SizeY);
+    void ReleaseTicket(CSelectionTicket& _rTicket);
+
+    void PushPick(CSelectionTicket& _rTicket, const Base::UInt2& _rCursor);
+    bool PopPick(CSelectionTicket& _rTicket);
+
+    void Clear(CSelectionTicket& _rTicket);
+
+    bool IsEmpty(const CSelectionTicket& _rTicket);
+
+    bool IsValid(const CSelectionTicket& _rTicket);
 } // namespace SelectionRenderer
 } // namespace Gfx

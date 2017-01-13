@@ -14,8 +14,10 @@
 // -----------------------------------------------------------------------------
 layout(std430, binding = 0) readonly buffer USettingBuffer
 {
-    ivec2 in_UV;
-    vec2  in_HomogeneousUV;
+    uint m_MinX;
+    uint m_MinY;
+    uint m_MaxX;
+    uint m_MaxY;
 };
 
 layout(std430, binding = 1) writeonly buffer UOutput
@@ -40,18 +42,22 @@ void main()
     uint X = gl_GlobalInvocationID.x;
     uint Y = gl_GlobalInvocationID.y;
 
+    int2 UV = int2(m_MinX, m_MinY);
+
+    HomogeneousUV = UV / vec2(1280.0f, 720.0f);
+
     // -----------------------------------------------------------------------------
     // Get data
     // -----------------------------------------------------------------------------
-    vec4  GBuffer0 = imageLoad(cs_GBuffer0, in_UV);
-    vec4  GBuffer1 = imageLoad(cs_GBuffer1, in_UV);
-    vec4  GBuffer2 = imageLoad(cs_GBuffer2, in_UV);
-    float VSDepth  = texture2D(cs_Depth   , in_HomogeneousUV).x;
+    vec4  GBuffer0 = imageLoad(cs_GBuffer0, UV);
+    vec4  GBuffer1 = imageLoad(cs_GBuffer1, UV);
+    vec4  GBuffer2 = imageLoad(cs_GBuffer2, UV);
+    float VSDepth  = texture2D(cs_Depth   , HomogeneousUV).x;
 
     // -----------------------------------------------------------------------------
     // VS position
     // -----------------------------------------------------------------------------
-    vec3 VSPosition = GetViewSpacePositionFromDepth(VSDepth, in_HomogeneousUV, g_ScreenToView);
+    vec3 VSPosition = GetViewSpacePositionFromDepth(VSDepth, HomogeneousUV, g_ScreenToView);
     
     // -----------------------------------------------------------------------------
     // WS position

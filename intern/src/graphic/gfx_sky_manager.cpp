@@ -1432,25 +1432,16 @@ namespace
         // -----------------------------------------------------------------------------
         // Test
         // -----------------------------------------------------------------------------
-        static unsigned int PickingJob = -1;
+        Gfx::CSelectionTicket& rSelectionTicket = SelectionRenderer::AcquireTicket(0, 0, 1, 1);
 
-        const Gfx::SPickingInfo* pPickingInfo = nullptr;
+        SelectionRenderer::PushPick(rSelectionTicket, Base::UInt2(640, 360));
 
-        if (PickingJob == -1)
+        SelectionRenderer::PopPick(rSelectionTicket);
+
+        if (SelectionRenderer::IsValid(rSelectionTicket))
         {
-            PickingJob = SelectionRenderer::AddPickingJob(Base::Float2(0.5f, 0.5f));
+            BASE_CONSOLE_INFOV("Depth: %f", rSelectionTicket.m_Depth);
         }
-
-        pPickingInfo = SelectionRenderer::GetInfoOfPickingJob(PickingJob);
-
-        if (pPickingInfo != nullptr)
-        {
-            BASE_CONSOLE_INFOV("Job: %i, Depth: %f", PickingJob, pPickingInfo->m_Depth);
-        }
-
-        SelectionRenderer::RemovePickingJob(PickingJob);
-
-        PickingJob = -1;
 
         // -----------------------------------------------------------------------------
         // Calculate far plane and setup plane

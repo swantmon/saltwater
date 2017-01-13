@@ -6,6 +6,8 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_time.h"
+
 #include "data/data_actor_type.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
@@ -66,24 +68,83 @@ namespace
         void SelectEntity(unsigned int _EntityID);
         void UnselectEntity();
 
-        unsigned int AddPickingJob(const Base::Float2& _rUV, bool _IsHomogeneous = true);
-        const SPickingInfo* GetInfoOfPickingJob(unsigned int _JobID);
-        void RemovePickingJob(unsigned int _JobID);
-        
+        CSelectionTicket& AcquireTicket(int _OffsetX, int _OffsetY, int _SizeX, int _SizeY);
+        void ReleaseTicket(CSelectionTicket& _rTicket);
+
+        void PushPick(CSelectionTicket& _rTicket, const Base::UInt2& _rCursor);
+        bool PopPick(CSelectionTicket& _rTicket);
+
+        void Clear(CSelectionTicket& _rTicket);
+
+        bool IsEmpty(const CSelectionTicket& _rTicket);
+
+        bool IsValid(const CSelectionTicket& _rTicket);
+
     private:
 
-        struct SPickingSettings
+        static const unsigned int s_MaxNumberOfTickets = 16;
+        static const unsigned int s_MaxSizeX           = 16;
+        static const unsigned int s_MaxSizeY           = 16;
+
+    private:
+
+        struct SRequest
         {
-            Base::UInt2  m_UV;
-            Base::Float2 m_HomogeneousUV;
+            Base::UInt2   m_Cursor;
+            unsigned int  m_Extra;
+            Base::U64     m_TimeStamp;
+            CBufferSetPtr m_BufferSetPtr;
         };
 
-        struct SPickingOutput
+        struct SSelectionRequest
+        {
+            unsigned int m_MinX;
+            unsigned int m_MinY;
+            unsigned int m_MaxX;
+            unsigned int m_MaxY;
+        };
+
+        struct SSelectionOutput
         {
             Base::Float4 m_WSPosition;
             Base::Float4 m_WSNormal;
             float        m_Depth;
         };
+
+        class CInternSelectionTicket : CSelectionTicket
+        {
+        public:
+
+            static const unsigned int s_MaxNumberOfRequests = 2;
+
+        public:
+
+            CInternSelectionTicket();
+            ~CInternSelectionTicket();
+
+        public:
+
+            void Reset();
+
+        private:
+
+            bool         m_IsValid;
+            int          m_OffsetX;
+            int          m_OffsetY;
+            int          m_SizeX;
+            int          m_SizeY;
+            unsigned int m_NumberOfRequests;
+            unsigned int m_IndexOfPushRequest;
+            unsigned int m_IndexOfPopRequest;
+            Base::U64    m_Frame;
+            SRequest     m_Requests[s_MaxNumberOfRequests];
+
+        private:
+
+            friend class CGfxSelectionRenderer;
+        };
+        
+    private:
 
         struct SPerDrawCallConstantBufferVS
         {
@@ -101,35 +162,27 @@ namespace
             Base::Float4x4 m_ModelMatrix;
         };
 
-        struct SPickingJob
-        {
-            Base::UInt2  m_UV;
-            Base::Float2 m_HomogeneousUV;
-        };
-
     private:
 
-        typedef std::vector<SRenderJob>  CRenderJobs;
-        typedef std::vector<SPickingJob> CPickingJobs;
-        typedef std::map<unsigned int, SPickingInfo> CPickingInfos;
+        typedef std::vector<SRenderJob> CRenderJobs;
         
     private:
         
-        CBufferSetPtr     m_ViewModelVSBuffer;
-        CBufferSetPtr     m_SelectionPSBufferSetPtr;
-        CRenderContextPtr m_RenderContextPtr;
-        CShaderPtr        m_SelectionPSPtr;
-        CShaderPtr        m_PickingCSPtr;
-        CBufferSetPtr     m_PickingBufferSetPtr;
-        CTextureSetPtr    m_GBufferTextureSetPtr;
-
-        CRenderJobs       m_RenderJobs;
-        CPickingJobs      m_PickingJobs;
-        CPickingInfos     m_PickingInfos;
+        CBufferSetPtr          m_ViewModelVSBuffer;
+        CBufferSetPtr          m_SelectionPSBufferSetPtr;
+        CBufferPtr             m_PickingBufferPtr;
+        CRenderContextPtr      m_RenderContextPtr;
+        CShaderPtr             m_SelectionPSPtr;
+        CShaderPtr             m_PickingCSPtr;
+        CTextureSetPtr         m_GBufferTextureSetPtr;
+        CRenderJobs            m_RenderJobs;
+        CInternSelectionTicket m_SelectionTickets[s_MaxNumberOfTickets];
 
         Dt::CEntity* m_pSelectedEntity;
         
     private:
+
+        void ResetTickets();
     
         void RenderSelection();
 
@@ -139,20 +192,42 @@ namespace
     };
 } // namespace
 
+namespace 
+{
+    CGfxSelectionRenderer::CInternSelectionTicket::CInternSelectionTicket()
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CGfxSelectionRenderer::CInternSelectionTicket::~CInternSelectionTicket()
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxSelectionRenderer::CInternSelectionTicket::Reset()
+    {
+
+    }
+} // namespace 
+
 namespace
 {
     CGfxSelectionRenderer::CGfxSelectionRenderer()
         : m_ViewModelVSBuffer      ()
         , m_SelectionPSBufferSetPtr()
+        , m_PickingBufferPtr       ()
         , m_RenderContextPtr       ()
         , m_SelectionPSPtr         ()
-        , m_PickingBufferSetPtr    ()
         , m_GBufferTextureSetPtr   ()
         , m_RenderJobs             ()
-        , m_PickingJobs            ()
-        , m_PickingInfos           ()
         , m_pSelectedEntity        (0)
     {
+        ResetTickets();
+
         // -----------------------------------------------------------------------------
         // Register resize delegate
         // -----------------------------------------------------------------------------
@@ -163,7 +238,7 @@ namespace
     
     CGfxSelectionRenderer::~CGfxSelectionRenderer()
     {
-        
+
     }
     
     // -----------------------------------------------------------------------------
@@ -179,12 +254,15 @@ namespace
     {
         m_ViewModelVSBuffer       = 0;
         m_SelectionPSBufferSetPtr = 0;
+        m_PickingBufferPtr        = 0;
+        m_PickingBufferPtr        = 0;
         m_RenderContextPtr        = 0;
         m_SelectionPSPtr          = 0;
         m_PickingCSPtr            = 0;
-        m_PickingBufferSetPtr     = 0;
         m_GBufferTextureSetPtr    = 0;
         m_pSelectedEntity         = 0;
+
+        ResetTickets();
 
         // -----------------------------------------------------------------------------
         // Iterate throw render jobs to release managed pointer
@@ -199,8 +277,6 @@ namespace
         }
 
         m_RenderJobs.clear();
-        m_PickingJobs.clear();
-        m_PickingInfos.clear();
     }
     
     // -----------------------------------------------------------------------------
@@ -288,27 +364,13 @@ namespace
         ConstanteBufferDesc.m_Usage         = CBuffer::GPUReadWrite;
         ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SPickingSettings);
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSelectionRequest);
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
 
-        CBufferPtr PickingBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        m_PickingBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
-
-        ConstanteBufferDesc.m_Stride        = 0;
-        ConstanteBufferDesc.m_Usage         = CBuffer::GPUToCPU;
-        ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
-        ConstanteBufferDesc.m_Access        = CBuffer::CPURead;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SPickingOutput);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
-
-        CBufferPtr PickingOuputBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
-
-        // -----------------------------------------------------------------------------
-
-        m_PickingBufferSetPtr     = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferCS(), PickingBufferPtr, PickingOuputBufferPtr);
 
         m_ViewModelVSBuffer       = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS(), ViewBuffer);
 
@@ -389,40 +451,216 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    unsigned int CGfxSelectionRenderer::AddPickingJob(const Base::Float2& _rUV, bool _IsHomogeneous)
+    CSelectionTicket& CGfxSelectionRenderer::AcquireTicket(int _OffsetX, int _OffsetY, int _SizeX, int _SizeY)
     {
-        SPickingJob NewPickingJob;
+        unsigned int IndexOfTicket;
 
-        Base::Int2 ActiveWindowSize = Gfx::Main::GetActiveWindowSize();
+        assert((_SizeX <= s_MaxSizeX) && (_SizeY <= s_MaxSizeY));
 
-        NewPickingJob.m_UV            = Base::UInt2(static_cast<unsigned int>(_rUV[0] * ActiveWindowSize[0]), static_cast<unsigned int>(_rUV[1] * ActiveWindowSize[1]));
-        NewPickingJob.m_HomogeneousUV = _rUV;
-
-        m_PickingJobs.push_back(NewPickingJob);
-
-        return m_PickingJobs.size() - 1;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const SPickingInfo* CGfxSelectionRenderer::GetInfoOfPickingJob(unsigned int _JobID)
-    {
-        if (m_PickingInfos.find(_JobID) == m_PickingInfos.end())
+        for (IndexOfTicket = 0; IndexOfTicket < s_MaxNumberOfTickets; ++IndexOfTicket)
         {
-            return 0;
+            CInternSelectionTicket& rTicket = m_SelectionTickets[IndexOfTicket];
+
+            if ((!rTicket.m_IsValid) && (rTicket.m_NumberOfRequests == 0))
+            {
+                break;
+            }
         }
 
-        return &m_PickingInfos[_JobID];
+        assert(IndexOfTicket < s_MaxNumberOfTickets);
+
+        CInternSelectionTicket& rTicket = m_SelectionTickets[IndexOfTicket];
+
+        rTicket.m_IsValid  = true;
+        rTicket.m_OffsetX  = _OffsetX;
+        rTicket.m_OffsetY  = _OffsetY;
+        rTicket.m_SizeX    = _SizeX;
+        rTicket.m_SizeY    = _SizeY;
+        rTicket.m_Frame    = Core::Time::GetNumberOfFrame() - 1;
+
+        Clear(rTicket);
+
+        return rTicket;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSelectionRenderer::RemovePickingJob(unsigned int _JobID)
+    void CGfxSelectionRenderer::ReleaseTicket(CSelectionTicket& _rTicket)
     {
-        m_PickingInfos.erase(_JobID);
-        m_PickingJobs.erase(m_PickingJobs.begin() + _JobID);
+        CInternSelectionTicket& rTicket = static_cast<CInternSelectionTicket&>(_rTicket);
+
+        rTicket.m_IsValid = false;
     }
-    
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxSelectionRenderer::PushPick(CSelectionTicket& _rTicket, const Base::UInt2& _rCursor)
+    {
+        CInternSelectionTicket& rTicket = static_cast<CInternSelectionTicket&>(_rTicket);
+
+        assert(rTicket.m_IsValid);
+
+        // -----------------------------------------------------------------------------
+        // Only allow one push request per frame.
+        // -----------------------------------------------------------------------------
+        if (rTicket.m_Frame == Core::Time::GetNumberOfFrame())
+        {
+            return;
+        }
+
+        rTicket.m_Frame = Core::Time::GetNumberOfFrame();
+
+        // -----------------------------------------------------------------------------
+        // Take care that the cursor position is within the window.
+        // -----------------------------------------------------------------------------
+        Base::Int2 ActiveWindowSize = Gfx::Main::GetActiveWindowSize();
+
+        if ((_rCursor[0] < 0) || (_rCursor[1] < 0) || (_rCursor[0] >= static_cast<short>(ActiveWindowSize[0])) || (_rCursor[1] >= static_cast<short>(ActiveWindowSize[1])))
+        {
+            return;
+        }
+
+        // -----------------------------------------------------------------------------
+        // Avoid CPU-GPU stalls by resolving to a circular set of resources.
+        // -----------------------------------------------------------------------------
+        assert(rTicket.m_NumberOfRequests < CInternSelectionTicket::s_MaxNumberOfRequests);
+
+        // -----------------------------------------------------------------------------
+        // Setup request
+        // -----------------------------------------------------------------------------
+        SRequest& rRequest = rTicket.m_Requests[rTicket.m_IndexOfPushRequest];
+
+        rRequest.m_Cursor    = _rCursor;
+        rRequest.m_TimeStamp = Core::Time::GetNumberOfFrame() + 1;
+
+        Gfx::SBufferDescriptor ConstanteBufferDesc;
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPUToCPU;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPURead;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSelectionOutput);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+
+        CBufferPtr PickingOuputBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+
+        rRequest.m_BufferSetPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferCS(), m_PickingBufferPtr, PickingOuputBufferPtr);
+
+        // -----------------------------------------------------------------------------
+        // Set push index
+        // -----------------------------------------------------------------------------
+        rTicket.m_IndexOfPushRequest = (rTicket.m_IndexOfPushRequest + 1) % CInternSelectionTicket::s_MaxNumberOfRequests;
+        
+        ++ rTicket.m_NumberOfRequests;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CGfxSelectionRenderer::PopPick(CSelectionTicket& _rTicket)
+    {
+        Base::Size   ResultBegin;
+        Base::Size   ResultEnd;
+        unsigned int IndexOfTicket;
+        unsigned int IndexOfResult;
+
+        CInternSelectionTicket& rTicket = static_cast<CInternSelectionTicket&>(_rTicket);
+
+        if (rTicket.m_NumberOfRequests == 0)
+        {
+            return false;
+        }
+
+        // ----------------------------------------------------------------------------- 
+        // The request should be at least 2 frames old to avoid stalls.
+        // -----------------------------------------------------------------------------
+        SRequest& rRequest = rTicket.m_Requests[rTicket.m_IndexOfPopRequest];
+
+        if (Core::Time::GetNumberOfFrame() < rRequest.m_TimeStamp)
+        {
+            return false;
+        }
+
+        IndexOfTicket = static_cast<unsigned int>(&rTicket - &m_SelectionTickets[0]);
+        IndexOfResult = IndexOfTicket * CInternSelectionTicket::s_MaxNumberOfRequests + rTicket.m_IndexOfPopRequest;
+
+        // -----------------------------------------------------------------------------
+        // Forward to the next request.
+        // -----------------------------------------------------------------------------
+        rTicket.m_IndexOfPopRequest = (rTicket.m_IndexOfPopRequest + 1) % CInternSelectionTicket::s_MaxNumberOfRequests;
+        
+        -- rTicket.m_NumberOfRequests;
+
+        // -----------------------------------------------------------------------------
+        // Read values from GPU to CPU and fill data
+        // -----------------------------------------------------------------------------
+        rTicket.m_HitFlag    = SHitFlag::Nothing;
+        rTicket.m_WSPosition = Base::Float3::s_Zero;
+        rTicket.m_WSNormal   = Base::Float3::s_Zero;
+        rTicket.m_Depth      = 1.0f;
+        rTicket.m_pObject    = 0;
+
+        SSelectionOutput* pOutput = static_cast<SSelectionOutput*>(BufferManager::MapConstantBuffer(rRequest.m_BufferSetPtr->GetBuffer(2)));
+
+        rTicket.m_WSPosition = Base::Float3(pOutput->m_WSPosition[0], pOutput->m_WSPosition[1], pOutput->m_WSPosition[2]);
+        rTicket.m_WSNormal   = Base::Float3(pOutput->m_WSNormal[0], pOutput->m_WSNormal[1], pOutput->m_WSNormal[2]);
+        rTicket.m_Depth      = pOutput->m_Depth;
+
+        BufferManager::UnmapConstantBuffer(rRequest.m_BufferSetPtr->GetBuffer(2));
+
+        // -----------------------------------------------------------------------------
+        // Release data
+        // -----------------------------------------------------------------------------
+        rRequest.m_BufferSetPtr = 0;
+
+        return true;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxSelectionRenderer::Clear(CSelectionTicket& _rTicket)
+    {
+        CInternSelectionTicket& rTicket = static_cast<CInternSelectionTicket&>(_rTicket);
+
+        rTicket.m_IndexOfPushRequest = 0;
+        rTicket.m_IndexOfPopRequest  = 0;
+        rTicket.m_NumberOfRequests   = 0;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CGfxSelectionRenderer::IsEmpty(const CSelectionTicket& _rTicket)
+    {
+        const CInternSelectionTicket& rTicket = static_cast<const CInternSelectionTicket&>(_rTicket);
+
+        return rTicket.m_NumberOfRequests == 0;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CGfxSelectionRenderer::IsValid(const CSelectionTicket& _rTicket)
+    {
+        const CInternSelectionTicket& rTicket = static_cast<const CInternSelectionTicket&>(_rTicket);
+
+        return rTicket.m_IsValid;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxSelectionRenderer::ResetTickets()
+    {
+        unsigned int IndexOfTicket;
+
+        for (IndexOfTicket = 0; IndexOfTicket < CInternSelectionTicket::s_MaxNumberOfRequests; ++IndexOfTicket)
+        {
+            CInternSelectionTicket& rTicket = m_SelectionTickets[IndexOfTicket];
+
+            rTicket.Reset();
+        }
+    }
+
     // -----------------------------------------------------------------------------
     
     void CGfxSelectionRenderer::RenderSelection()
@@ -530,74 +768,60 @@ namespace
 
     void CGfxSelectionRenderer::RenderPickingJobs()
     {
-        CPickingJobs::const_iterator EndOfJobs = m_PickingJobs.end();
+        unsigned int IndexOfResult;
+        unsigned int IndexOfLastRequest;
+        unsigned int IndexOfTicket;
 
-        unsigned int RenderIndex = 0;
-
-        for (CPickingJobs::const_iterator CurrentJob = m_PickingJobs.begin(); CurrentJob != EndOfJobs; ++CurrentJob)
+        for (IndexOfTicket = 0; IndexOfTicket < s_MaxNumberOfTickets; ++IndexOfTicket)
         {
-             // -----------------------------------------------------------------------------
-            // Upload input data
-            // -----------------------------------------------------------------------------
-            Base::Int2 ActiveWindowSize = Gfx::Main::GetActiveWindowSize();
+            CInternSelectionTicket& rTicket = m_SelectionTickets[IndexOfTicket];
 
-            SPickingSettings* pSettings = static_cast<SPickingSettings*>(BufferManager::MapConstantBuffer(m_PickingBufferSetPtr->GetBuffer(1)));
+            if (rTicket.m_IsValid && (rTicket.m_NumberOfRequests > 0) && (rTicket.m_Frame == Core::Time::GetNumberOfFrame()))
+            {
+                IndexOfLastRequest = (rTicket.m_IndexOfPushRequest > 0) ? rTicket.m_IndexOfPushRequest - 1 : CInternSelectionTicket::s_MaxNumberOfRequests - 1;
 
-            pSettings->m_UV            = CurrentJob->m_UV;
-            pSettings->m_HomogeneousUV = CurrentJob->m_HomogeneousUV;
+                SRequest& rRequest = rTicket.m_Requests[IndexOfLastRequest];
 
-            BufferManager::UnmapConstantBuffer(m_PickingBufferSetPtr->GetBuffer(1));
+                IndexOfResult = IndexOfTicket * CInternSelectionTicket::s_MaxNumberOfRequests + IndexOfLastRequest;
 
-            // -----------------------------------------------------------------------------
-            // Execute
-            // -----------------------------------------------------------------------------
-            Performance::BeginEvent("Picking");
+                // -----------------------------------------------------------------------------
+                // Setup buffer
+                // -----------------------------------------------------------------------------
+                SSelectionRequest* pSettings = static_cast<SSelectionRequest*>(BufferManager::MapConstantBuffer(rRequest.m_BufferSetPtr->GetBuffer(1)));
 
-            ContextManager::SetShaderCS(m_PickingCSPtr);
+                pSettings->m_MinX = rRequest.m_Cursor[0] + rTicket.m_OffsetX;
+                pSettings->m_MinY = rRequest.m_Cursor[1] + rTicket.m_OffsetY;
+                pSettings->m_MaxX = rRequest.m_Cursor[0] + rTicket.m_OffsetX + rTicket.m_SizeX;
+                pSettings->m_MaxY = rRequest.m_Cursor[0] + rTicket.m_OffsetY + rTicket.m_SizeY;
 
-            ContextManager::SetConstantBufferSetCS(m_PickingBufferSetPtr);
+                BufferManager::UnmapConstantBuffer(rRequest.m_BufferSetPtr->GetBuffer(1));
 
-            ContextManager::SetTextureSetCS(m_GBufferTextureSetPtr);
+                // -----------------------------------------------------------------------------
+                // Execute
+                // -----------------------------------------------------------------------------
+                Performance::BeginEvent("Picking");
 
-            ContextManager::Dispatch(1, 1, 1);
+                ContextManager::SetShaderCS(m_PickingCSPtr);
 
-            ContextManager::ResetTextureSetCS();
+                ContextManager::SetConstantBufferSetCS(rRequest.m_BufferSetPtr);
 
-            ContextManager::ResetConstantBufferSetCS();
+                ContextManager::SetTextureSetCS(m_GBufferTextureSetPtr);
 
-            ContextManager::ResetShaderCS();
+                ContextManager::Dispatch(1, 1, 1);
 
-            Performance::EndEvent();
+                ContextManager::ResetTextureSetCS();
 
-            // -----------------------------------------------------------------------------
-            // Read values from GPU to CPU and fill data
-            // -----------------------------------------------------------------------------
-            SPickingInfo NewPickingInfo;
+                ContextManager::ResetConstantBufferSetCS();
 
-            NewPickingInfo.m_Flags      = SPickingInfo::Nothing;
-            NewPickingInfo.m_WSPosition = Base::Float3::s_Zero;
-            NewPickingInfo.m_WSNormal   = Base::Float3::s_Zero;
-            NewPickingInfo.m_Depth      = 1.0f;
-            NewPickingInfo.m_pEntity    = 0;
-            NewPickingInfo.m_pRegion    = 0;
+                ContextManager::ResetShaderCS();
 
-            SPickingOutput* pOutput = static_cast<SPickingOutput*>(BufferManager::MapConstantBuffer(m_PickingBufferSetPtr->GetBuffer(2)));
+                Performance::EndEvent();
 
-            NewPickingInfo.m_WSPosition = Base::Float3(pOutput->m_WSPosition[0], pOutput->m_WSPosition[1], pOutput->m_WSPosition[2]);
-            NewPickingInfo.m_WSNormal   = Base::Float3(pOutput->m_WSNormal[0], pOutput->m_WSNormal[1], pOutput->m_WSNormal[2]);
-            NewPickingInfo.m_Depth      = pOutput->m_Depth;
-
-            BufferManager::UnmapConstantBuffer(m_PickingBufferSetPtr->GetBuffer(2));
-
-            // -----------------------------------------------------------------------------
-            // Put new info into map
-            // -----------------------------------------------------------------------------
-            m_PickingInfos[RenderIndex] = NewPickingInfo;
-
-            // -----------------------------------------------------------------------------
-            // Increase index
-            // -----------------------------------------------------------------------------
-            ++RenderIndex;
+                // -----------------------------------------------------------------------------
+                // Set request
+                // -----------------------------------------------------------------------------
+                rRequest.m_TimeStamp = Core::Time::GetNumberOfFrame();
+            }
         }
     }
 
@@ -830,23 +1054,51 @@ namespace SelectionRenderer
 
     // -----------------------------------------------------------------------------
 
-    unsigned int AddPickingJob(const Base::Float2& _rUV, bool _IsHomogeneous)
+    CSelectionTicket& AcquireTicket(int _OffsetX, int _OffsetY, int _SizeX, int _SizeY)
     {
-        return CGfxSelectionRenderer::GetInstance().AddPickingJob(_rUV, _IsHomogeneous);
+        return CGfxSelectionRenderer::GetInstance().AcquireTicket(_OffsetX, _OffsetY, _SizeX, _SizeY);
     }
 
     // -----------------------------------------------------------------------------
 
-    const SPickingInfo* GetInfoOfPickingJob(unsigned int _JobID)
+    void ReleaseTicket(CSelectionTicket& _rTicket)
     {
-        return CGfxSelectionRenderer::GetInstance().GetInfoOfPickingJob(_JobID);
+        return CGfxSelectionRenderer::GetInstance().ReleaseTicket(_rTicket);
     }
 
     // -----------------------------------------------------------------------------
 
-    void RemovePickingJob(unsigned int _JobID)
+    void PushPick(CSelectionTicket& _rTicket, const Base::UInt2& _rCursor)
     {
-        CGfxSelectionRenderer::GetInstance().RemovePickingJob(_JobID);
+        CGfxSelectionRenderer::GetInstance().PushPick(_rTicket, _rCursor);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool PopPick(CSelectionTicket& _rTicket)
+    {
+        return CGfxSelectionRenderer::GetInstance().PopPick(_rTicket);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void Clear(CSelectionTicket& _rTicket)
+    {
+        CGfxSelectionRenderer::GetInstance().Clear(_rTicket);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool IsEmpty(const CSelectionTicket& _rTicket)
+    {
+        return CGfxSelectionRenderer::GetInstance().IsEmpty(_rTicket);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool IsValid(const CSelectionTicket& _rTicket)
+    {
+        return CGfxSelectionRenderer::GetInstance().IsValid(_rTicket);
     }
 } // namespace SelectionRenderer
 } // namespace Gfx
