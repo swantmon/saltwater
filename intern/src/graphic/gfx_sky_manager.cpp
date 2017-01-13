@@ -1455,13 +1455,6 @@ namespace
         if (SelectionRenderer::PopPick(rSelectionTicket))
         {
             BASE_CONSOLE_INFOV("Depth: %f", rSelectionTicket.m_Depth);
-
-            if (rSelectionTicket.m_HitFlag == SHitFlag::Entity && rSelectionTicket.m_pObject != nullptr)
-            {
-                Dt::CEntity* pEntity = (Dt::CEntity*)rSelectionTicket.m_pObject;
-
-                SelectionRenderer::SelectEntity(pEntity->GetID());
-            }
         }
 
         // -----------------------------------------------------------------------------

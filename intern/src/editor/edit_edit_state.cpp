@@ -5,6 +5,8 @@
 
 #include "camera/cam_control_manager.h"
 
+#include "data/data_entity.h"
+
 #include "editor/edit_edit_state.h"
 #include "editor/edit_unload_map_state.h"
 
@@ -12,6 +14,7 @@
 #include "editor_port/edit_message_manager.h"
 
 #include "graphic/gfx_edit_state.h"
+#include "graphic/gfx_selection_renderer.h"
 
 #include "gui/gui_edit_state.h"
 
@@ -37,6 +40,11 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::MessageManager::Register(Edit::SGUIMessageType::App_Exit  , EDIT_RECEIVE_MESSAGE(&CEditState::OnExit));
         Edit::MessageManager::Register(Edit::SGUIMessageType::App_Play  , EDIT_RECEIVE_MESSAGE(&CEditState::OnPlay));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::App_NewMap, EDIT_RECEIVE_MESSAGE(&CEditState::OnNewMap));
+
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Graphic_HighlightEntity, EDIT_RECEIVE_MESSAGE(&CEditState::OnHighlightEntity));
+
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Input_MouseLeftReleased, EDIT_RECEIVE_MESSAGE(&CEditState::OnMouseLeftReleased));
     }
     
     // -----------------------------------------------------------------------------
@@ -51,6 +59,13 @@ namespace Edit
     CState::EStateType CEditState::InternOnEnter()
     {
         BASE_CONSOLE_STREAMINFO("Edit> Enter edit state.");
+
+        // -----------------------------------------------------------------------------
+        // Acquire an selection ticket at selection renderer
+        // -----------------------------------------------------------------------------
+        assert(m_pSelectionTicket == 0);
+
+        m_pSelectionTicket = &Gfx::SelectionRenderer::AcquireTicket(-1, -1, 2, 2, Gfx::SPickFlag::Actor);
 
         // -----------------------------------------------------------------------------
         // Set editor camera in edit state
@@ -73,6 +88,18 @@ namespace Edit
     
     CState::EStateType CEditState::InternOnLeave()
     {
+        // -----------------------------------------------------------------------------
+        // Clear ticket
+        // -----------------------------------------------------------------------------
+        Gfx::SelectionRenderer::Clear(*m_pSelectionTicket);
+
+        m_pSelectionTicket = 0;
+
+        // -----------------------------------------------------------------------------
+        // Unselect entity
+        // -----------------------------------------------------------------------------
+        Gfx::SelectionRenderer::UnselectEntity();
+
         // -----------------------------------------------------------------------------
         // Reset action
         // -----------------------------------------------------------------------------
@@ -108,6 +135,23 @@ namespace Edit
         }
 
         // -----------------------------------------------------------------------------
+        // Selection
+        // -----------------------------------------------------------------------------
+        assert(m_pSelectionTicket != 0);
+
+        Gfx::CSelectionTicket& rSelectionTicket = *m_pSelectionTicket;
+
+        if (Gfx::SelectionRenderer::PopPick(rSelectionTicket))
+        {
+            if (rSelectionTicket.m_HitFlag == Gfx::SHitFlag::Entity && rSelectionTicket.m_pObject != nullptr)
+            {
+                Dt::CEntity* pEntity = (Dt::CEntity*)rSelectionTicket.m_pObject;
+
+                Gfx::SelectionRenderer::SelectEntity(pEntity->GetID());
+            }
+        }
+
+        // -----------------------------------------------------------------------------
         // Update logic
         // -----------------------------------------------------------------------------
         Lg::Edit::OnRun();
@@ -138,5 +182,42 @@ namespace Edit
     void CEditState::OnPlay(Edit::CMessage& _rMessage)
     {
         m_Action = CState::Play;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEditState::OnNewMap(Edit::CMessage& _rMessage)
+    {
+        m_Action = CState::Intro;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEditState::OnHighlightEntity(Edit::CMessage& _rMessage)
+    {
+        int EntityID = _rMessage.GetInt();
+
+        if (EntityID >= 0)
+        {
+            unsigned int SelectedEntity = static_cast<unsigned int>(EntityID);
+
+            Gfx::SelectionRenderer::SelectEntity(SelectedEntity);
+        }
+        else
+        {
+            Gfx::SelectionRenderer::UnselectEntity();
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEditState::OnMouseLeftReleased(Edit::CMessage& _rMessage)
+    {
+        int MousePositionX = _rMessage.GetInt();
+        int MousePositionY = _rMessage.GetInt();
+
+        assert(m_pSelectionTicket != 0);
+
+        Gfx::SelectionRenderer::PushPick(*m_pSelectionTicket, Base::Int2(MousePositionX, MousePositionY));
     }
 } // namespace Edit
