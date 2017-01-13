@@ -149,8 +149,16 @@ namespace Edit
 
                 Gfx::SelectionRenderer::SelectEntity(pEntity->GetID());
 
-                // TODO by tschwandt
-                // Show selection in GUI scene graph and select entity
+                // -----------------------------------------------------------------------------
+                // Send entity to editor
+                // -----------------------------------------------------------------------------
+                Edit::CMessage NewMessage;
+
+                NewMessage.PutInt(pEntity->GetID());
+
+                NewMessage.Reset();
+
+                Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Entity_Selected, NewMessage);
             }
         }
 

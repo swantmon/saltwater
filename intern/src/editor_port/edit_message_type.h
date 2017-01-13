@@ -134,6 +134,7 @@ namespace Edit
             Entity_Facets_Info,
             Entity_Transformation_Info,
             Entity_Hierarchy_Info,
+            Entity_Selected,
 
             Actor_Camera_Info,
 

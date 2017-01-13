@@ -18,6 +18,7 @@ namespace Edit
         // Messages
         // -----------------------------------------------------------------------------
         Edit::MessageManager::Register(Edit::SApplicationMessageType::Entity_Hierarchy_Info, EDIT_RECEIVE_MESSAGE(&CSceneGraph::OnSceneGraphChanged));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Entity_Selected, EDIT_RECEIVE_MESSAGE(&CSceneGraph::OnEntitySelected));
     }
 
     // -----------------------------------------------------------------------------
@@ -204,5 +205,21 @@ namespace Edit
         // hide columns
         // -----------------------------------------------------------------------------
         header()->hideSection(1);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSceneGraph::OnEntitySelected(Edit::CMessage& _rMessage)
+    {
+        int EntityID = _rMessage.GetInt();
+
+        QList<QTreeWidgetItem*> ListOfEntities = findItems(QString::number(EntityID), Qt::MatchContains | Qt::MatchRecursive, 1);
+
+        foreach(QTreeWidgetItem* pEntity, ListOfEntities)
+        {
+            setCurrentItem(pEntity);
+
+            itemSelected(pEntity);
+        }
     }
 } // namespace Edit
