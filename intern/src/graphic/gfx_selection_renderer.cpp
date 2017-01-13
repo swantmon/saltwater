@@ -93,6 +93,7 @@ namespace
             Base::Float4 m_WSPosition;
             Base::Float4 m_WSNormal;
             float        m_Depth;
+            unsigned int m_EntityID;
         };
 
         struct SRequest
@@ -821,6 +822,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 SSelectionOutput* pOutput = static_cast<SSelectionOutput*>(BufferManager::MapConstantBuffer(m_SelectionBufferSetPtr->GetBuffer(2)));
 
+                rRequest.m_Result.m_EntityID   = pOutput->m_EntityID;
                 rRequest.m_Result.m_WSPosition = pOutput->m_WSPosition;
                 rRequest.m_Result.m_WSNormal   = pOutput->m_WSNormal;
                 rRequest.m_Result.m_Depth      = pOutput->m_Depth;

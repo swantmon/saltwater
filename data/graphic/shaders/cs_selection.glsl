@@ -25,6 +25,7 @@ layout(std430, binding = 1) writeonly buffer UOutput
     vec4  out_WSPosition;
     vec4  out_WSNormal;
     float out_Depth;
+    uint  out_EntityID;
 };
 
 layout (binding = 0, rgba8) readonly uniform image2D cs_GBuffer0;
@@ -104,6 +105,7 @@ void main()
     out_WSPosition = vec4(Data.m_WSPosition, 1.0f);
     out_WSNormal   = vec4(Data.m_WSNormal, 0.0f);
     out_Depth      = Data.m_VSDepth;
+    out_EntityID   = -1;
 }
 
 #endif // __INCLUDE_CS_PICKING_BLUR_GLSL__
