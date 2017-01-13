@@ -21,6 +21,7 @@
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_sampler_manager.h"
+#include "graphic/gfx_selection_renderer.h"
 #include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_sky_facet.h"
 #include "graphic/gfx_sky_manager.h"
@@ -1429,6 +1430,29 @@ namespace
         Performance::BeginEvent("Skybox from Geometry");
 
         // -----------------------------------------------------------------------------
+        // Test
+        // -----------------------------------------------------------------------------
+        static unsigned int PickingJob = -1;
+
+        const Gfx::SPickingInfo* pPickingInfo = nullptr;
+
+        if (PickingJob == -1)
+        {
+            PickingJob = SelectionRenderer::AddPickingJob(Base::Float2(0.5f, 0.5f));
+        }
+
+        pPickingInfo = SelectionRenderer::GetInfoOfPickingJob(PickingJob);
+
+        if (pPickingInfo != nullptr)
+        {
+            BASE_CONSOLE_INFOV("Job: %i, Depth: %f", PickingJob, pPickingInfo->m_Depth);
+        }
+
+        SelectionRenderer::RemovePickingJob(PickingJob);
+
+        PickingJob = -1;
+
+        // -----------------------------------------------------------------------------
         // Calculate far plane and setup plane
         // -----------------------------------------------------------------------------
         CCameraPtr MainCameraPtr = ViewManager::GetMainCamera();
@@ -1436,10 +1460,10 @@ namespace
 
         const Base::Float3* pWorldSpaceCameraFrustum = MainCameraPtr->GetWorldSpaceFrustum();
 
-        Base::Float3 FarBottomLeft = pWorldSpaceCameraFrustum[4];
-        Base::Float3 FarTopLeft = pWorldSpaceCameraFrustum[5];
+        Base::Float3 FarBottomLeft  = pWorldSpaceCameraFrustum[4];
+        Base::Float3 FarTopLeft     = pWorldSpaceCameraFrustum[5];
         Base::Float3 FarBottomRight = pWorldSpaceCameraFrustum[6];
-        Base::Float3 FarTopRight = pWorldSpaceCameraFrustum[7];
+        Base::Float3 FarTopRight    = pWorldSpaceCameraFrustum[7];
 
         float* pPlaneGeometryBuffer = static_cast<float*>(BufferManager::MapVertexBuffer(VertexBufferSetPtr->GetBuffer(0), CBuffer::Write));
 

@@ -27,6 +27,8 @@
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
 
+#include <map>
+
 using namespace Gfx;
 
 namespace
@@ -64,13 +66,16 @@ namespace
         void SelectEntity(unsigned int _EntityID);
         void UnselectEntity();
 
-        SPickingInfo Pick(const Base::Float2& _rUV, bool _IsHomogeneous = true);
+        unsigned int AddPickingJob(const Base::Float2& _rUV, bool _IsHomogeneous = true);
+        const SPickingInfo* GetInfoOfPickingJob(unsigned int _JobID);
+        void RemovePickingJob(unsigned int _JobID);
         
     private:
 
         struct SPickingSettings
         {
-            Base::UInt2 m_UV;
+            Base::UInt2  m_UV;
+            Base::Float2 m_HomogeneousUV;
         };
 
         struct SPickingOutput
@@ -96,9 +101,17 @@ namespace
             Base::Float4x4 m_ModelMatrix;
         };
 
+        struct SPickingJob
+        {
+            Base::UInt2  m_UV;
+            Base::Float2 m_HomogeneousUV;
+        };
+
     private:
 
-        typedef std::vector<SRenderJob> CRenderJobs;
+        typedef std::vector<SRenderJob>  CRenderJobs;
+        typedef std::vector<SPickingJob> CPickingJobs;
+        typedef std::map<unsigned int, SPickingInfo> CPickingInfos;
         
     private:
         
@@ -111,12 +124,16 @@ namespace
         CTextureSetPtr    m_GBufferTextureSetPtr;
 
         CRenderJobs       m_RenderJobs;
+        CPickingJobs      m_PickingJobs;
+        CPickingInfos     m_PickingInfos;
 
         Dt::CEntity* m_pSelectedEntity;
         
     private:
     
         void RenderSelection();
+
+        void RenderPickingJobs();
 
         void BuildRenderJobs();
     };
@@ -132,6 +149,8 @@ namespace
         , m_PickingBufferSetPtr    ()
         , m_GBufferTextureSetPtr   ()
         , m_RenderJobs             ()
+        , m_PickingJobs            ()
+        , m_PickingInfos           ()
         , m_pSelectedEntity        (0)
     {
         // -----------------------------------------------------------------------------
@@ -180,6 +199,8 @@ namespace
         }
 
         m_RenderJobs.clear();
+        m_PickingJobs.clear();
+        m_PickingInfos.clear();
     }
     
     // -----------------------------------------------------------------------------
@@ -276,7 +297,7 @@ namespace
         // -----------------------------------------------------------------------------
 
         ConstanteBufferDesc.m_Stride        = 0;
-        ConstanteBufferDesc.m_Usage         = CBuffer::GPUReadWrite;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPUToCPU;
         ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPURead;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(SPickingOutput);
@@ -287,7 +308,7 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        m_PickingBufferSetPtr     = BufferManager::CreateBufferSet(PickingBufferPtr, PickingOuputBufferPtr);
+        m_PickingBufferSetPtr     = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferCS(), PickingBufferPtr, PickingOuputBufferPtr);
 
         m_ViewModelVSBuffer       = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS(), ViewBuffer);
 
@@ -345,7 +366,7 @@ namespace
 
         RenderSelection();
 
-        Pick(Base::Float2(0.5f, 0.5f));
+        RenderPickingJobs();
 
         Performance::EndEvent();
     }
@@ -368,67 +389,38 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    SPickingInfo CGfxSelectionRenderer::Pick(const Base::Float2& _rUV, bool _IsHomogeneous)
+    unsigned int CGfxSelectionRenderer::AddPickingJob(const Base::Float2& _rUV, bool _IsHomogeneous)
     {
-        BASE_UNUSED(_rUV);
-        BASE_UNUSED(_IsHomogeneous);
+        SPickingJob NewPickingJob;
 
-        // -----------------------------------------------------------------------------
-        // Upload input data
-        // -----------------------------------------------------------------------------
         Base::Int2 ActiveWindowSize = Gfx::Main::GetActiveWindowSize();
 
-        SPickingSettings* pSettings = static_cast<SPickingSettings*>(BufferManager::MapConstantBuffer(m_PickingBufferSetPtr->GetBuffer(0)));
+        NewPickingJob.m_UV            = Base::UInt2(static_cast<unsigned int>(_rUV[0] * ActiveWindowSize[0]), static_cast<unsigned int>(_rUV[1] * ActiveWindowSize[1]));
+        NewPickingJob.m_HomogeneousUV = _rUV;
 
-        pSettings->m_UV = Base::UInt2(static_cast<unsigned int>(_rUV[0] * ActiveWindowSize[0]), static_cast<unsigned int>(_rUV[1] * ActiveWindowSize[1]));
+        m_PickingJobs.push_back(NewPickingJob);
 
-        BufferManager::UnmapConstantBuffer(m_PickingBufferSetPtr->GetBuffer(0));
+        return m_PickingJobs.size() - 1;
+    }
 
-        // -----------------------------------------------------------------------------
-        // Execute
-        // -----------------------------------------------------------------------------
-        Performance::BeginEvent("Picking");
+    // -----------------------------------------------------------------------------
 
-        ContextManager::SetShaderCS(m_PickingCSPtr);
+    const SPickingInfo* CGfxSelectionRenderer::GetInfoOfPickingJob(unsigned int _JobID)
+    {
+        if (m_PickingInfos.find(_JobID) == m_PickingInfos.end())
+        {
+            return 0;
+        }
 
-        ContextManager::SetConstantBufferSetCS(m_PickingBufferSetPtr);
+        return &m_PickingInfos[_JobID];
+    }
 
-        ContextManager::SetTextureSetCS(m_GBufferTextureSetPtr);
+    // -----------------------------------------------------------------------------
 
-        ContextManager::Dispatch(1, 1, 1);
-
-        ContextManager::ResetTextureSetCS();
-
-        ContextManager::ResetConstantBufferSetCS();
-
-        ContextManager::ResetShaderCS();
-
-        Performance::EndEvent();
-
-        // -----------------------------------------------------------------------------
-        // Read values from GPU to CPU and fill data
-        // -----------------------------------------------------------------------------
-        SPickingInfo NewPickingInfo;
-
-        NewPickingInfo.m_Flags      = SPickingInfo::Nothing;
-        NewPickingInfo.m_WSPosition = Base::Float3::s_Zero;
-        NewPickingInfo.m_WSNormal   = Base::Float3::s_Zero;
-        NewPickingInfo.m_Depth      = 1.0f;
-        NewPickingInfo.m_pEntity    = 0;
-        NewPickingInfo.m_pRegion    = 0;
-
-        SPickingOutput* pOutput = static_cast<SPickingOutput*>(BufferManager::MapConstantBuffer(m_PickingBufferSetPtr->GetBuffer(1)));
-
-        NewPickingInfo.m_WSPosition = Base::Float3(pOutput->m_WSPosition[0], pOutput->m_WSPosition[1], pOutput->m_WSPosition[2]);
-        NewPickingInfo.m_WSNormal   = Base::Float3(pOutput->m_WSNormal[0], pOutput->m_WSNormal[1], pOutput->m_WSNormal[2]);
-        NewPickingInfo.m_Depth      = pOutput->m_Depth;
-
-        BufferManager::UnmapConstantBuffer(m_PickingBufferSetPtr->GetBuffer(1));
-
-        // -----------------------------------------------------------------------------
-        // Return picking info
-        // -----------------------------------------------------------------------------
-        return NewPickingInfo;
+    void CGfxSelectionRenderer::RemovePickingJob(unsigned int _JobID)
+    {
+        m_PickingInfos.erase(_JobID);
+        m_PickingJobs.erase(m_PickingJobs.begin() + _JobID);
     }
     
     // -----------------------------------------------------------------------------
@@ -532,6 +524,81 @@ namespace
         ContextManager::ResetTopology();
 
         Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxSelectionRenderer::RenderPickingJobs()
+    {
+        CPickingJobs::const_iterator EndOfJobs = m_PickingJobs.end();
+
+        unsigned int RenderIndex = 0;
+
+        for (CPickingJobs::const_iterator CurrentJob = m_PickingJobs.begin(); CurrentJob != EndOfJobs; ++CurrentJob)
+        {
+             // -----------------------------------------------------------------------------
+            // Upload input data
+            // -----------------------------------------------------------------------------
+            Base::Int2 ActiveWindowSize = Gfx::Main::GetActiveWindowSize();
+
+            SPickingSettings* pSettings = static_cast<SPickingSettings*>(BufferManager::MapConstantBuffer(m_PickingBufferSetPtr->GetBuffer(1)));
+
+            pSettings->m_UV            = CurrentJob->m_UV;
+            pSettings->m_HomogeneousUV = CurrentJob->m_HomogeneousUV;
+
+            BufferManager::UnmapConstantBuffer(m_PickingBufferSetPtr->GetBuffer(1));
+
+            // -----------------------------------------------------------------------------
+            // Execute
+            // -----------------------------------------------------------------------------
+            Performance::BeginEvent("Picking");
+
+            ContextManager::SetShaderCS(m_PickingCSPtr);
+
+            ContextManager::SetConstantBufferSetCS(m_PickingBufferSetPtr);
+
+            ContextManager::SetTextureSetCS(m_GBufferTextureSetPtr);
+
+            ContextManager::Dispatch(1, 1, 1);
+
+            ContextManager::ResetTextureSetCS();
+
+            ContextManager::ResetConstantBufferSetCS();
+
+            ContextManager::ResetShaderCS();
+
+            Performance::EndEvent();
+
+            // -----------------------------------------------------------------------------
+            // Read values from GPU to CPU and fill data
+            // -----------------------------------------------------------------------------
+            SPickingInfo NewPickingInfo;
+
+            NewPickingInfo.m_Flags      = SPickingInfo::Nothing;
+            NewPickingInfo.m_WSPosition = Base::Float3::s_Zero;
+            NewPickingInfo.m_WSNormal   = Base::Float3::s_Zero;
+            NewPickingInfo.m_Depth      = 1.0f;
+            NewPickingInfo.m_pEntity    = 0;
+            NewPickingInfo.m_pRegion    = 0;
+
+            SPickingOutput* pOutput = static_cast<SPickingOutput*>(BufferManager::MapConstantBuffer(m_PickingBufferSetPtr->GetBuffer(2)));
+
+            NewPickingInfo.m_WSPosition = Base::Float3(pOutput->m_WSPosition[0], pOutput->m_WSPosition[1], pOutput->m_WSPosition[2]);
+            NewPickingInfo.m_WSNormal   = Base::Float3(pOutput->m_WSNormal[0], pOutput->m_WSNormal[1], pOutput->m_WSNormal[2]);
+            NewPickingInfo.m_Depth      = pOutput->m_Depth;
+
+            BufferManager::UnmapConstantBuffer(m_PickingBufferSetPtr->GetBuffer(2));
+
+            // -----------------------------------------------------------------------------
+            // Put new info into map
+            // -----------------------------------------------------------------------------
+            m_PickingInfos[RenderIndex] = NewPickingInfo;
+
+            // -----------------------------------------------------------------------------
+            // Increase index
+            // -----------------------------------------------------------------------------
+            ++RenderIndex;
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -763,9 +830,23 @@ namespace SelectionRenderer
 
     // -----------------------------------------------------------------------------
 
-    SPickingInfo Pick(const Base::Float2& _rUV, bool _IsHomogeneous)
+    unsigned int AddPickingJob(const Base::Float2& _rUV, bool _IsHomogeneous)
     {
-        return CGfxSelectionRenderer::GetInstance().Pick(_rUV, _IsHomogeneous);
+        return CGfxSelectionRenderer::GetInstance().AddPickingJob(_rUV, _IsHomogeneous);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const SPickingInfo* GetInfoOfPickingJob(unsigned int _JobID)
+    {
+        return CGfxSelectionRenderer::GetInstance().GetInfoOfPickingJob(_JobID);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void RemovePickingJob(unsigned int _JobID)
+    {
+        CGfxSelectionRenderer::GetInstance().RemovePickingJob(_JobID);
     }
 } // namespace SelectionRenderer
 } // namespace Gfx
