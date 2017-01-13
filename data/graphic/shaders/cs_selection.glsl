@@ -32,6 +32,7 @@ layout (binding = 0, rgba8) readonly uniform image2D cs_GBuffer0;
 layout (binding = 1, rgba8) readonly uniform image2D cs_GBuffer1;
 layout (binding = 2, rgba8) readonly uniform image2D cs_GBuffer2;
 layout (binding = 3) uniform sampler2D cs_Depth;
+layout (binding = 4, r8ui) readonly uniform uimage2D cs_HitProxy;
 
 // -------------------------------------------------------------------------------------
 // Main
@@ -81,6 +82,7 @@ void main()
     vec4  GBuffer1 = imageLoad(cs_GBuffer1, UV);
     vec4  GBuffer2 = imageLoad(cs_GBuffer2, UV);
     float VSDepth  = texture2D(cs_Depth   , HomogeneousUV).x;
+    uint  ID       = imageLoad(cs_HitProxy, UV).x;
 
     // -----------------------------------------------------------------------------
     // VS position
@@ -105,7 +107,7 @@ void main()
     out_WSPosition = vec4(Data.m_WSPosition, 1.0f);
     out_WSNormal   = vec4(Data.m_WSNormal, 0.0f);
     out_Depth      = Data.m_VSDepth;
-    out_EntityID   = -1;
+    out_EntityID   = ID;
 }
 
 #endif // __INCLUDE_CS_PICKING_BLUR_GLSL__

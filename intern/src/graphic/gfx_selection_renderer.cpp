@@ -15,6 +15,7 @@
 #include "data/data_hierarchy_facet.h"
 #include "data/data_transformation_facet.h"
 
+#include "graphic/gfx_actor_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
@@ -324,8 +325,18 @@ namespace
     void CGfxSelectionRenderer::OnSetupTextures()
     {
         CTargetSetPtr DeferredTargetSetPtr = TargetSetManager::GetDeferredTargetSet();
+        CTargetSetPtr HitProxyTargetSetPtr = TargetSetManager::GetHitProxyTargetSet();
 
-        m_GBufferTextureSetPtr = TextureManager::CreateTextureSet(DeferredTargetSetPtr->GetRenderTarget(0), DeferredTargetSetPtr->GetRenderTarget(1), DeferredTargetSetPtr->GetRenderTarget(2), DeferredTargetSetPtr->GetDepthStencilTarget());
+        CTextureBasePtr TextureBasePtrs[] =
+        {
+            DeferredTargetSetPtr->GetRenderTarget(0), 
+            DeferredTargetSetPtr->GetRenderTarget(1), 
+            DeferredTargetSetPtr->GetRenderTarget(2), 
+            DeferredTargetSetPtr->GetDepthStencilTarget(), 
+            HitProxyTargetSetPtr->GetRenderTarget(0)
+        };
+
+        m_GBufferTextureSetPtr = TextureManager::CreateTextureSet(TextureBasePtrs, 5);
     }
     
     // -----------------------------------------------------------------------------
@@ -491,6 +502,16 @@ namespace
         rTicket.m_SizeX    = _SizeX;
         rTicket.m_SizeY    = _SizeY;
         rTicket.m_Frame    = Core::Time::GetNumberOfFrame() - 1;
+        
+
+
+
+
+        // For testing:
+        rTicket.m_HitFlag = SHitFlag::Entity;
+
+
+
 
         Clear(rTicket);
 
@@ -766,6 +787,16 @@ namespace
                 IndexOfLastRequest = (rTicket.m_IndexOfPushRequest > 0) ? rTicket.m_IndexOfPushRequest - 1 : CInternSelectionTicket::s_MaxNumberOfRequests - 1;
 
                 SRequest& rRequest = rTicket.m_Requests[IndexOfLastRequest];
+
+                // -----------------------------------------------------------------------------
+                // Render hit proxies depending on flag
+                // -----------------------------------------------------------------------------
+                TargetSetManager::ClearTargetSet(TargetSetManager::GetHitProxyTargetSet());
+
+                switch (rTicket.m_HitFlag)
+                {
+                    case SHitFlag::Entity: ActorRenderer::RenderHitProxy();
+                }
 
                 // -----------------------------------------------------------------------------
                 // Setup buffer

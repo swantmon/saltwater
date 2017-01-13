@@ -37,6 +37,8 @@ namespace
         CTargetSetPtr GetDefaultTargetSet();
         CTargetSetPtr GetDeferredTargetSet();
         CTargetSetPtr GetLightAccumulationTargetSet();
+        CTargetSetPtr GetHitProxyTargetSet();
+
         CTargetSetPtr CreateTargetSet(CTextureBasePtr* _pTargetPtrs, unsigned int _NumberOfTargets);
         
         void ClearTargetSet(CTargetSetPtr _TargetPtr, const Base::Float4& _rColor, float _Depth);
@@ -73,6 +75,7 @@ namespace
         CTargetSetPtr m_DefaultTargetSet;
         CTargetSetPtr m_DeferredTargetSet;
         CTargetSetPtr m_LightAccumulationTargetSet;
+        CTargetSetPtr m_HitProxyTargetSet;
         
     private:
         
@@ -88,6 +91,7 @@ namespace
         , m_DefaultTargetSet          ()
         , m_DeferredTargetSet         ()
         , m_LightAccumulationTargetSet()
+        , m_HitProxyTargetSet         ()
     {
         // -----------------------------------------------------------------------------
         // Register for resizing events
@@ -166,6 +170,13 @@ namespace
         
         // -----------------------------------------------------------------------------
         
+        RendertargetDescriptor.m_Binding       = CTextureBase::RenderTarget;
+        RendertargetDescriptor.m_Format        = CTextureBase::R32_UINT;
+
+        CTexture2DPtr HitProxyTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Hit Proxy (ID)
+        
+        // -----------------------------------------------------------------------------
+        
         RendertargetDescriptor.m_Binding       = CTextureBase::DepthStencilTarget | CTextureBase::RenderTarget;
         RendertargetDescriptor.m_Format        = CTextureBase::R32_FLOAT;
         
@@ -205,7 +216,6 @@ namespace
         
         m_DeferredTargetSet = CreateTargetSet(DeferredRenderbuffer, 4);
         
-        
         // -----------------------------------------------------------------------------
         // Create light accumulation target set
         // -----------------------------------------------------------------------------
@@ -214,6 +224,15 @@ namespace
         LightAccumulationRenderbuffer[0] = LightAccumulationTexturePtr;
 
         m_LightAccumulationTargetSet = CreateTargetSet(LightAccumulationRenderbuffer, 1);
+
+        // -----------------------------------------------------------------------------
+        // Create hit proxy target set
+        // -----------------------------------------------------------------------------
+        CTextureBasePtr HitProxyRenderbuffer[1];
+
+        HitProxyRenderbuffer[0] = HitProxyTexturePtr;
+
+        m_HitProxyTargetSet = CreateTargetSet(HitProxyRenderbuffer, 1);
     }
     
     // -----------------------------------------------------------------------------
@@ -224,6 +243,7 @@ namespace
         m_DefaultTargetSet           = nullptr;
         m_DeferredTargetSet          = nullptr;
         m_LightAccumulationTargetSet = nullptr;
+        m_HitProxyTargetSet          = nullptr;
         
         m_TargetSets.Clear();
     }
@@ -254,6 +274,13 @@ namespace
     CTargetSetPtr CGfxTargetSetManager::GetLightAccumulationTargetSet()
     {
         return m_LightAccumulationTargetSet;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTargetSetPtr CGfxTargetSetManager::GetHitProxyTargetSet()
+    {
+        return m_HitProxyTargetSet;
     }
     
     // -----------------------------------------------------------------------------
@@ -458,6 +485,13 @@ namespace TargetSetManager
     CTargetSetPtr GetLightAccumulationTargetSet()
     {
         return CGfxTargetSetManager::GetInstance().GetLightAccumulationTargetSet();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTargetSetPtr GetHitProxyTargetSet()
+    {
+        return CGfxTargetSetManager::GetInstance().GetHitProxyTargetSet();
     }
     
     // -----------------------------------------------------------------------------
