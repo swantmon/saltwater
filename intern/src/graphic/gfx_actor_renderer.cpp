@@ -530,6 +530,8 @@ namespace
 
         ContextManager::SetRenderContext(m_HitProxyContextPtr);
 
+        ContextManager::SetTopology(STopology::TriangleList);
+
         // -----------------------------------------------------------------------------
         // First pass: iterate throw render jobs and compute all meshes
         // -----------------------------------------------------------------------------
@@ -552,6 +554,8 @@ namespace
 
             SHitProxyProperties* pHitProxyProperties = static_cast<SHitProxyProperties*>(BufferManager::MapConstantBuffer(m_HitProxyPassPSBuffer->GetBuffer(0)));
 
+            assert(pHitProxyProperties != nullptr);
+
             pHitProxyProperties->m_ID = CurrentRenderJob->m_EntityID;
 
             BufferManager::UnmapConstantBuffer(m_HitProxyPassPSBuffer->GetBuffer(0));
@@ -559,8 +563,6 @@ namespace
             // -----------------------------------------------------------------------------
             // Render
             // -----------------------------------------------------------------------------
-            ContextManager::SetTopology(STopology::TriangleList);
-
             ContextManager::SetShaderVS(SurfacePtr->GetShaderVS());
 
             ContextManager::SetShaderPS(m_HitProxyShaderPtr);
@@ -585,30 +587,16 @@ namespace
 
             ContextManager::ResetConstantBufferSetPS();
 
-            ContextManager::ResetConstantBufferSetDS();
-
-            ContextManager::ResetConstantBufferSetHS();
-
             ContextManager::ResetConstantBufferSetVS();
+
+            ContextManager::ResetShaderPS();
+
+            ContextManager::ResetShaderVS();
         }
 
-        ContextManager::ResetTextureSetDS();
-
-        ContextManager::ResetTextureSetHS();
-
-        ContextManager::ResetShaderVS();
-
-        ContextManager::ResetShaderDS();
-
-        ContextManager::ResetShaderHS();
-
-        ContextManager::ResetShaderGS();
-
-        ContextManager::ResetShaderPS();
+        ContextManager::ResetTopology();
 
         ContextManager::ResetRenderContext();
-
-        ContextManager::ResetTopology();
 
         Performance::EndEvent();
     }

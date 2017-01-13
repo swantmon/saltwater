@@ -70,7 +70,7 @@ namespace
         void SelectEntity(unsigned int _EntityID);
         void UnselectEntity();
 
-        CSelectionTicket& AcquireTicket(int _OffsetX, int _OffsetY, int _SizeX, int _SizeY);
+        CSelectionTicket& AcquireTicket(int _OffsetX, int _OffsetY, int _SizeX, int _SizeY, unsigned int _Flags = SPickFlag::Nothing);
         void ReleaseTicket(CSelectionTicket& _rTicket);
 
         void PushPick(CSelectionTicket& _rTicket, const Base::Int2& _rCursor);
@@ -130,6 +130,7 @@ namespace
             unsigned int m_NumberOfRequests;
             unsigned int m_IndexOfPushRequest;
             unsigned int m_IndexOfPopRequest;
+            unsigned int m_Flags;
             Base::U64    m_Frame;
             SRequest     m_Requests[s_MaxNumberOfRequests];
 
@@ -449,13 +450,9 @@ namespace
     
     void CGfxSelectionRenderer::Render()
     {
-        Performance::BeginEvent("Selection");
-
         RenderHighlight();
 
         RenderSelection();
-
-        Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------
@@ -476,7 +473,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CSelectionTicket& CGfxSelectionRenderer::AcquireTicket(int _OffsetX, int _OffsetY, int _SizeX, int _SizeY)
+    CSelectionTicket& CGfxSelectionRenderer::AcquireTicket(int _OffsetX, int _OffsetY, int _SizeX, int _SizeY, unsigned int _Flags)
     {
         unsigned int IndexOfTicket;
 
@@ -502,6 +499,7 @@ namespace
         rTicket.m_OffsetY    = _OffsetY;
         rTicket.m_SizeX      = _SizeX;
         rTicket.m_SizeY      = _SizeY;
+        rTicket.m_Flags      = _Flags;
         rTicket.m_WSPosition = Base::Float3::s_Zero;
         rTicket.m_WSNormal   = Base::Float3::s_Zero;
         rTicket.m_Depth      = -1.0f;
@@ -601,9 +599,10 @@ namespace
         rTicket.m_WSNormal   = Base::Float3(rRequest.m_Result.m_WSNormal[0], rRequest.m_Result.m_WSNormal[1], rRequest.m_Result.m_WSNormal[2]);
         rTicket.m_Depth      = rRequest.m_Result.m_Depth;
 
-        if (rRequest.m_Result.m_EntityID != -1)
+        if (rRequest.m_Result.m_EntityID > 0)
         {
             rTicket.m_HitFlag = SHitFlag::Entity;
+
             rTicket.m_pObject = &Dt::EntityManager::GetEntityByID(rRequest.m_Result.m_EntityID);
         }
 
@@ -659,7 +658,7 @@ namespace
     {
         if (m_RenderJobs.size() == 0) return;
 
-        Performance::BeginEvent("Actors");
+        Performance::BeginEvent("Highlight");
 
         // -----------------------------------------------------------------------------
         // Prepare renderer
@@ -767,6 +766,8 @@ namespace
         unsigned int MaxX;
         unsigned int MaxY;
 
+        Performance::BeginEvent("Picking");
+
         for (IndexOfTicket = 0; IndexOfTicket < s_MaxNumberOfTickets; ++IndexOfTicket)
         {
             CInternSelectionTicket& rTicket = m_SelectionTickets[IndexOfTicket];
@@ -780,11 +781,11 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Render hit proxies depending on flag
                 // -----------------------------------------------------------------------------
-                TargetSetManager::ClearTargetSet(TargetSetManager::GetHitProxyTargetSet());
-
-                switch (rTicket.m_HitFlag)
+                if (rTicket.m_Flags != SPickFlag::Nothing)
                 {
-                    case SHitFlag::Entity: ActorRenderer::RenderHitProxy();
+                    TargetSetManager::ClearTargetSet(TargetSetManager::GetHitProxyTargetSet());
+
+                    if (rTicket.m_Flags & SPickFlag::Actor) ActorRenderer::RenderHitProxy();
                 }
 
                 // -----------------------------------------------------------------------------
@@ -814,8 +815,6 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Execute
                 // -----------------------------------------------------------------------------
-                Performance::BeginEvent("Picking");
-
                 ContextManager::SetShaderCS(m_SelectionCSPtr);
 
                 ContextManager::SetConstantBufferSetCS(m_SelectionBufferSetPtr);
@@ -829,8 +828,6 @@ namespace
                 ContextManager::ResetConstantBufferSetCS();
 
                 ContextManager::ResetShaderCS();
-
-                Performance::EndEvent();
 
                 // -----------------------------------------------------------------------------
                 // Copy output of selection
@@ -850,6 +847,8 @@ namespace
                 rRequest.m_TimeStamp = Core::Time::GetNumberOfFrame();
             }
         }
+
+        Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------
@@ -1081,9 +1080,9 @@ namespace SelectionRenderer
 
     // -----------------------------------------------------------------------------
 
-    CSelectionTicket& AcquireTicket(int _OffsetX, int _OffsetY, int _SizeX, int _SizeY)
+    CSelectionTicket& AcquireTicket(int _OffsetX, int _OffsetY, int _SizeX, int _SizeY, unsigned int _Flags)
     {
-        return CGfxSelectionRenderer::GetInstance().AcquireTicket(_OffsetX, _OffsetY, _SizeX, _SizeY);
+        return CGfxSelectionRenderer::GetInstance().AcquireTicket(_OffsetX, _OffsetY, _SizeX, _SizeY, _Flags);
     }
 
     // -----------------------------------------------------------------------------

@@ -4,13 +4,28 @@
 
 namespace Gfx
 {
+    struct SPickFlag
+    {
+        enum Enum
+        {
+            Nothing = 0x00,
+            Actor   = 0x01,
+            AR      = 0x02,
+            Gizmo   = 0x04,
+        };
+    };
+} // namespace Gfx
+
+
+namespace Gfx
+{
     struct SHitFlag
     {
         enum Enum
         {
             Nothing,
             Entity,
-            Terrain,
+            Gizmo,
         };
     };
 } // namespace Gfx
@@ -22,6 +37,7 @@ namespace Gfx
     public:
 
         SHitFlag::Enum m_HitFlag;
+        unsigned int   m_HitLayer;
         Base::Float3   m_WSPosition;
         Base::Float3   m_WSNormal;
         float          m_Depth;
