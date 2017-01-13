@@ -236,9 +236,6 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_light_indirect_renderer.cpp">
       <Filter>engine\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_selection.cpp">
-      <Filter>engine\renderer</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\graphic\gfx_debug_interface.h">

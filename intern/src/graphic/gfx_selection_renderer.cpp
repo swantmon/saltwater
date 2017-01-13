@@ -88,22 +88,6 @@ namespace
 
     private:
 
-        struct SRequest
-        {
-            Base::UInt2   m_Cursor;
-            unsigned int  m_Extra;
-            Base::U64     m_TimeStamp;
-            CBufferSetPtr m_BufferSetPtr;
-        };
-
-        struct SSelectionRequest
-        {
-            unsigned int m_MinX;
-            unsigned int m_MinY;
-            unsigned int m_MaxX;
-            unsigned int m_MaxY;
-        };
-
         struct SSelectionOutput
         {
             Base::Float4 m_WSPosition;
@@ -111,6 +95,14 @@ namespace
             float        m_Depth;
         };
 
+        struct SRequest
+        {
+            Base::UInt2      m_Cursor;
+            unsigned int     m_Extra;
+            Base::U64        m_TimeStamp;
+            SSelectionOutput m_Result;
+        };
+        
         class CInternSelectionTicket : CSelectionTicket
         {
         public:
@@ -150,8 +142,16 @@ namespace
         {
             Base::Float4x4 m_ModelMatrix;
         };
-        
+
         struct SSelectionSettings
+        {
+            unsigned int m_MinX;
+            unsigned int m_MinY;
+            unsigned int m_MaxX;
+            unsigned int m_MaxY;
+        };
+        
+        struct SHighlightSettings
         {
             Base::Float4 m_ColorAlpha;
         };
@@ -169,11 +169,11 @@ namespace
     private:
         
         CBufferSetPtr          m_ViewModelVSBuffer;
-        CBufferSetPtr          m_SelectionPSBufferSetPtr;
-        CBufferPtr             m_PickingBufferPtr;
+        CBufferSetPtr          m_HighlightPSBufferSetPtr;
+        CBufferSetPtr          m_SelectionBufferSetPtr;
         CRenderContextPtr      m_RenderContextPtr;
-        CShaderPtr             m_SelectionPSPtr;
-        CShaderPtr             m_PickingCSPtr;
+        CShaderPtr             m_HighlightPSPtr;
+        CShaderPtr             m_SelectionCSPtr;
         CTextureSetPtr         m_GBufferTextureSetPtr;
         CRenderJobs            m_RenderJobs;
         CInternSelectionTicket m_SelectionTickets[s_MaxNumberOfTickets];
@@ -184,9 +184,9 @@ namespace
 
         void ResetTickets();
     
-        void RenderSelection();
+        void RenderHighlight();
 
-        void RenderPickingJobs();
+        void RenderSelection();
 
         void BuildRenderJobs();
     };
@@ -218,10 +218,10 @@ namespace
 {
     CGfxSelectionRenderer::CGfxSelectionRenderer()
         : m_ViewModelVSBuffer      ()
-        , m_SelectionPSBufferSetPtr()
-        , m_PickingBufferPtr       ()
+        , m_HighlightPSBufferSetPtr()
+        , m_SelectionBufferSetPtr  ()
         , m_RenderContextPtr       ()
-        , m_SelectionPSPtr         ()
+        , m_HighlightPSPtr         ()
         , m_GBufferTextureSetPtr   ()
         , m_RenderJobs             ()
         , m_pSelectedEntity        (0)
@@ -253,12 +253,11 @@ namespace
     void CGfxSelectionRenderer::OnExit()
     {
         m_ViewModelVSBuffer       = 0;
-        m_SelectionPSBufferSetPtr = 0;
-        m_PickingBufferPtr        = 0;
-        m_PickingBufferPtr        = 0;
+        m_HighlightPSBufferSetPtr = 0;
+        m_SelectionBufferSetPtr   = 0;
         m_RenderContextPtr        = 0;
-        m_SelectionPSPtr          = 0;
-        m_PickingCSPtr            = 0;
+        m_HighlightPSPtr          = 0;
+        m_SelectionCSPtr          = 0;
         m_GBufferTextureSetPtr    = 0;
         m_pSelectedEntity         = 0;
 
@@ -283,8 +282,8 @@ namespace
     
     void CGfxSelectionRenderer::OnSetupShader()
     {
-        m_SelectionPSPtr = ShaderManager::CompilePS("fs_selection.glsl", "main");
-        m_PickingCSPtr   = ShaderManager::CompileCS("cs_picking.glsl", "main");
+        m_HighlightPSPtr = ShaderManager::CompilePS("fs_highlight.glsl", "main");
+        m_SelectionCSPtr = ShaderManager::CompileCS("cs_selection.glsl", "main");
     }
     
     // -----------------------------------------------------------------------------
@@ -352,11 +351,11 @@ namespace
         ConstanteBufferDesc.m_Usage         = CBuffer::GPUReadWrite;
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSelectionSettings);
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SHighlightSettings);
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
 
-        CBufferPtr SelectionBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        CBufferPtr HighlightBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
 
@@ -364,17 +363,31 @@ namespace
         ConstanteBufferDesc.m_Usage         = CBuffer::GPUReadWrite;
         ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSelectionRequest);
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSelectionSettings);
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
 
-        m_PickingBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        CBufferPtr SelectionRequestBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
 
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPUToCPU;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPURead;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSelectionOutput);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+
+        CBufferPtr SelectionOuputBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+
+        m_SelectionBufferSetPtr   = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferCS(), SelectionRequestBufferPtr, SelectionOuputBufferPtr);
+
         m_ViewModelVSBuffer       = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS(), ViewBuffer);
 
-        m_SelectionPSBufferSetPtr = BufferManager::CreateBufferSet(SelectionBufferPtr);
+        m_HighlightPSBufferSetPtr = BufferManager::CreateBufferSet(HighlightBufferPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -426,9 +439,9 @@ namespace
     {
         Performance::BeginEvent("Selection");
 
-        RenderSelection();
+        RenderHighlight();
 
-        RenderPickingJobs();
+        RenderSelection();
 
         Performance::EndEvent();
     }
@@ -533,22 +546,6 @@ namespace
         rRequest.m_Cursor    = _rCursor;
         rRequest.m_TimeStamp = Core::Time::GetNumberOfFrame() + 1;
 
-        Gfx::SBufferDescriptor ConstanteBufferDesc;
-
-        ConstanteBufferDesc.m_Stride        = 0;
-        ConstanteBufferDesc.m_Usage         = CBuffer::GPUToCPU;
-        ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
-        ConstanteBufferDesc.m_Access        = CBuffer::CPURead;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSelectionOutput);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
-
-        CBufferPtr PickingOuputBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
-
-        // -----------------------------------------------------------------------------
-
-        rRequest.m_BufferSetPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferCS(), m_PickingBufferPtr, PickingOuputBufferPtr);
-
         // -----------------------------------------------------------------------------
         // Set push index
         // -----------------------------------------------------------------------------
@@ -602,18 +599,9 @@ namespace
         rTicket.m_Depth      = 1.0f;
         rTicket.m_pObject    = 0;
 
-        SSelectionOutput* pOutput = static_cast<SSelectionOutput*>(BufferManager::MapConstantBuffer(rRequest.m_BufferSetPtr->GetBuffer(2)));
-
-        rTicket.m_WSPosition = Base::Float3(pOutput->m_WSPosition[0], pOutput->m_WSPosition[1], pOutput->m_WSPosition[2]);
-        rTicket.m_WSNormal   = Base::Float3(pOutput->m_WSNormal[0], pOutput->m_WSNormal[1], pOutput->m_WSNormal[2]);
-        rTicket.m_Depth      = pOutput->m_Depth;
-
-        BufferManager::UnmapConstantBuffer(rRequest.m_BufferSetPtr->GetBuffer(2));
-
-        // -----------------------------------------------------------------------------
-        // Release data
-        // -----------------------------------------------------------------------------
-        rRequest.m_BufferSetPtr = 0;
+        rTicket.m_WSPosition = Base::Float3(rRequest.m_Result.m_WSPosition[0], rRequest.m_Result.m_WSPosition[1], rRequest.m_Result.m_WSPosition[2]);
+        rTicket.m_WSNormal   = Base::Float3(rRequest.m_Result.m_WSNormal[0], rRequest.m_Result.m_WSNormal[1], rRequest.m_Result.m_WSNormal[2]);
+        rTicket.m_Depth      = rRequest.m_Result.m_Depth;
 
         return true;
     }
@@ -663,7 +651,7 @@ namespace
 
     // -----------------------------------------------------------------------------
     
-    void CGfxSelectionRenderer::RenderSelection()
+    void CGfxSelectionRenderer::RenderHighlight()
     {
         if (m_RenderJobs.size() == 0) return;
 
@@ -696,11 +684,11 @@ namespace
 
             BufferManager::UnmapConstantBuffer(m_ViewModelVSBuffer->GetBuffer(1));
 
-            SSelectionSettings* pSelectionSettings = static_cast<SSelectionSettings*>(BufferManager::MapConstantBuffer(m_SelectionPSBufferSetPtr->GetBuffer(0)));
+            SHighlightSettings* pSelectionSettings = static_cast<SHighlightSettings*>(BufferManager::MapConstantBuffer(m_HighlightPSBufferSetPtr->GetBuffer(0)));
 
             pSelectionSettings->m_ColorAlpha = Base::Float4(0.31f, 0.45f, 0.64f, 0.4f);
 
-            BufferManager::UnmapConstantBuffer(m_SelectionPSBufferSetPtr->GetBuffer(0));
+            BufferManager::UnmapConstantBuffer(m_HighlightPSBufferSetPtr->GetBuffer(0));
 
             // -----------------------------------------------------------------------------
             // Render
@@ -709,11 +697,11 @@ namespace
 
             ContextManager::SetShaderVS(SurfacePtr->GetShaderVS());
 
-            ContextManager::SetShaderPS(m_SelectionPSPtr);
+            ContextManager::SetShaderPS(m_HighlightPSPtr);
 
             ContextManager::SetConstantBufferSetVS(m_ViewModelVSBuffer);
 
-            ContextManager::SetConstantBufferSetPS(m_SelectionPSBufferSetPtr);
+            ContextManager::SetConstantBufferSetPS(m_HighlightPSBufferSetPtr);
 
             // -----------------------------------------------------------------------------
             // Set items to context manager
@@ -766,9 +754,8 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSelectionRenderer::RenderPickingJobs()
+    void CGfxSelectionRenderer::RenderSelection()
     {
-        unsigned int IndexOfResult;
         unsigned int IndexOfLastRequest;
         unsigned int IndexOfTicket;
         unsigned int MinX;
@@ -786,14 +773,12 @@ namespace
 
                 SRequest& rRequest = rTicket.m_Requests[IndexOfLastRequest];
 
-                IndexOfResult = IndexOfTicket * CInternSelectionTicket::s_MaxNumberOfRequests + IndexOfLastRequest;
-
                 // -----------------------------------------------------------------------------
                 // Setup buffer
                 // -----------------------------------------------------------------------------
                 Base::Int2 ActiveWindowSize = Gfx::Main::GetActiveWindowSize();
 
-                SSelectionRequest* pSettings = static_cast<SSelectionRequest*>(BufferManager::MapConstantBuffer(rRequest.m_BufferSetPtr->GetBuffer(1)));
+                SSelectionSettings* pSettings = static_cast<SSelectionSettings*>(BufferManager::MapConstantBuffer(m_SelectionBufferSetPtr->GetBuffer(1)));
 
                 MinX = rRequest.m_Cursor[0] + rTicket.m_OffsetX;
                 MinY = rRequest.m_Cursor[1] + rTicket.m_OffsetY;
@@ -810,16 +795,16 @@ namespace
                 pSettings->m_MaxX = MaxX;
                 pSettings->m_MaxY = MaxY;
 
-                BufferManager::UnmapConstantBuffer(rRequest.m_BufferSetPtr->GetBuffer(1));
+                BufferManager::UnmapConstantBuffer(m_SelectionBufferSetPtr->GetBuffer(1));
 
                 // -----------------------------------------------------------------------------
                 // Execute
                 // -----------------------------------------------------------------------------
                 Performance::BeginEvent("Picking");
 
-                ContextManager::SetShaderCS(m_PickingCSPtr);
+                ContextManager::SetShaderCS(m_SelectionCSPtr);
 
-                ContextManager::SetConstantBufferSetCS(rRequest.m_BufferSetPtr);
+                ContextManager::SetConstantBufferSetCS(m_SelectionBufferSetPtr);
 
                 ContextManager::SetTextureSetCS(m_GBufferTextureSetPtr);
 
@@ -832,6 +817,17 @@ namespace
                 ContextManager::ResetShaderCS();
 
                 Performance::EndEvent();
+
+                // -----------------------------------------------------------------------------
+                // Copy output of selection
+                // -----------------------------------------------------------------------------
+                SSelectionOutput* pOutput = static_cast<SSelectionOutput*>(BufferManager::MapConstantBuffer(m_SelectionBufferSetPtr->GetBuffer(2)));
+
+                rRequest.m_Result.m_WSPosition = pOutput->m_WSPosition;
+                rRequest.m_Result.m_WSNormal   = pOutput->m_WSNormal;
+                rRequest.m_Result.m_Depth      = pOutput->m_Depth;
+
+                BufferManager::UnmapConstantBuffer(m_SelectionBufferSetPtr->GetBuffer(2));
 
                 // -----------------------------------------------------------------------------
                 // Set request

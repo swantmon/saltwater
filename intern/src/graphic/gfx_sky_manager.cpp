@@ -117,14 +117,15 @@ namespace
 
     private:
 
-        SRenderContext m_SkyboxFromPanorama;
-        SRenderContext m_SkyboxFromCubemap;
-        SRenderContext m_SkyboxFromTexture;
-        SRenderContext m_SkyboxFromGeometry;
-        SRenderContext m_SkyboxFromLUT;
-        CTexture2DPtr  m_LookUpTexturePtr;
-        CTextureSetPtr m_LookupTextureSetPtr;
-        CSkyfacets     m_Skyfacets;
+        SRenderContext    m_SkyboxFromPanorama;
+        SRenderContext    m_SkyboxFromCubemap;
+        SRenderContext    m_SkyboxFromTexture;
+        SRenderContext    m_SkyboxFromGeometry;
+        SRenderContext    m_SkyboxFromLUT;
+        CTexture2DPtr     m_LookUpTexturePtr;
+        CTextureSetPtr    m_LookupTextureSetPtr;
+        CSelectionTicket* m_pSelectionTicket;
+        CSkyfacets        m_Skyfacets;
 
     private:
 
@@ -174,6 +175,15 @@ namespace
 namespace 
 {
     CGfxSkyManager::CGfxSkyManager()
+        : m_SkyboxFromPanorama ()
+        , m_SkyboxFromCubemap  ()
+        , m_SkyboxFromTexture  ()
+        , m_SkyboxFromGeometry ()
+        , m_SkyboxFromLUT      ()
+        , m_LookUpTexturePtr   (0)
+        , m_LookupTextureSetPtr(0)
+        , m_pSelectionTicket   (0)
+        , m_Skyfacets          ()
     {
 
     }
@@ -656,7 +666,7 @@ namespace
 
         m_SkyboxFromGeometry.m_MeshPtr            = 0;
         m_SkyboxFromGeometry.m_VertexBufferSetPtr = BufferManager::CreateVertexBufferSet(PlanePositionBufferPtr);;
-        m_SkyboxFromGeometry.m_IndexBufferPtr  = PlaneIndexBufferPtr;
+        m_SkyboxFromGeometry.m_IndexBufferPtr     = PlaneIndexBufferPtr;
 
         m_SkyboxFromLUT.m_MeshPtr            = CubemapTextureSpherePtr;
         m_SkyboxFromLUT.m_VertexBufferSetPtr = 0;
@@ -667,6 +677,10 @@ namespace
         // -----------------------------------------------------------------------------
         Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CGfxSkyManager::OnDirtyEntity));
 
+        // -----------------------------------------------------------------------------
+        // Acquire an selection ticket at selection renderer
+        // -----------------------------------------------------------------------------
+        m_pSelectionTicket = &SelectionRenderer::AcquireTicket(0, 0, 1, 1);
 
         // -----------------------------------------------------------------------------
         // Generate LUT
@@ -678,6 +692,8 @@ namespace
 
     void CGfxSkyManager::OnExit()
     {
+        SelectionRenderer::Clear(*m_pSelectionTicket);
+
         m_SkyboxFromPanorama.m_VSPtr              = 0;
         m_SkyboxFromPanorama.m_GSPtr              = 0;
         m_SkyboxFromPanorama.m_PSPtr              = 0;
@@ -1432,20 +1448,11 @@ namespace
         // -----------------------------------------------------------------------------
         // Test
         // -----------------------------------------------------------------------------
-        static Gfx::CSelectionTicket* pSelectionTicket = 0;
-
-        if (pSelectionTicket == 0)
-        {
-            pSelectionTicket = &SelectionRenderer::AcquireTicket(0, 0, 1, 1);
-        }
-
-        Gfx::CSelectionTicket& rSelectionTicket = *pSelectionTicket;
+        Gfx::CSelectionTicket& rSelectionTicket = *m_pSelectionTicket;
 
         SelectionRenderer::PushPick(rSelectionTicket, Base::UInt2(640, 360));
 
-        SelectionRenderer::PopPick(rSelectionTicket);
-
-        if (SelectionRenderer::IsValid(rSelectionTicket))
+        if (SelectionRenderer::PopPick(rSelectionTicket))
         {
             BASE_CONSOLE_INFOV("Depth: %f", rSelectionTicket.m_Depth);
         }
