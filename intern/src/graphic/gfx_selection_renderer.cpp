@@ -71,7 +71,7 @@ namespace
         CSelectionTicket& AcquireTicket(int _OffsetX, int _OffsetY, int _SizeX, int _SizeY);
         void ReleaseTicket(CSelectionTicket& _rTicket);
 
-        void PushPick(CSelectionTicket& _rTicket, const Base::UInt2& _rCursor);
+        void PushPick(CSelectionTicket& _rTicket, const Base::Int2& _rCursor);
         bool PopPick(CSelectionTicket& _rTicket);
 
         void Clear(CSelectionTicket& _rTicket);
@@ -97,7 +97,7 @@ namespace
 
         struct SRequest
         {
-            Base::UInt2      m_Cursor;
+            Base::Int2       m_Cursor;
             unsigned int     m_Extra;
             Base::U64        m_TimeStamp;
             SSelectionOutput m_Result;
@@ -507,7 +507,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSelectionRenderer::PushPick(CSelectionTicket& _rTicket, const Base::UInt2& _rCursor)
+    void CGfxSelectionRenderer::PushPick(CSelectionTicket& _rTicket, const Base::Int2& _rCursor)
     {
         CInternSelectionTicket& rTicket = static_cast<CInternSelectionTicket&>(_rTicket);
 
@@ -558,8 +558,6 @@ namespace
 
     bool CGfxSelectionRenderer::PopPick(CSelectionTicket& _rTicket)
     {
-        Base::Size   ResultBegin;
-        Base::Size   ResultEnd;
         unsigned int IndexOfTicket;
         unsigned int IndexOfResult;
 
@@ -787,8 +785,8 @@ namespace
 
                 if (MinX < 0) MinX = 0;
                 if (MinY < 0) MinY = 0;
-                if (MaxX > static_cast<int>(ActiveWindowSize[0])) MaxX = ActiveWindowSize[0];
-                if (MaxY > static_cast<int>(ActiveWindowSize[1])) MaxY = ActiveWindowSize[1];
+                if (MaxX > static_cast<unsigned int>(ActiveWindowSize[0])) MaxX = ActiveWindowSize[0];
+                if (MaxY > static_cast<unsigned int>(ActiveWindowSize[1])) MaxY = ActiveWindowSize[1];
 
                 pSettings->m_MinX = MinX;
                 pSettings->m_MinY = MinY;
@@ -808,7 +806,7 @@ namespace
 
                 ContextManager::SetTextureSetCS(m_GBufferTextureSetPtr);
 
-                ContextManager::Dispatch(1, 1, 1);
+                ContextManager::Dispatch(rTicket.m_SizeX, rTicket.m_SizeY, 1);
 
                 ContextManager::ResetTextureSetCS();
 
@@ -1080,7 +1078,7 @@ namespace SelectionRenderer
 
     // -----------------------------------------------------------------------------
 
-    void PushPick(CSelectionTicket& _rTicket, const Base::UInt2& _rCursor)
+    void PushPick(CSelectionTicket& _rTicket, const Base::Int2& _rCursor)
     {
         CGfxSelectionRenderer::GetInstance().PushPick(_rTicket, _rCursor);
     }

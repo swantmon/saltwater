@@ -1450,7 +1450,7 @@ namespace
         // -----------------------------------------------------------------------------
         Gfx::CSelectionTicket& rSelectionTicket = *m_pSelectionTicket;
 
-        SelectionRenderer::PushPick(rSelectionTicket, Base::UInt2(640, 360));
+        SelectionRenderer::PushPick(rSelectionTicket, Base::Int2(640, 360));
 
         if (SelectionRenderer::PopPick(rSelectionTicket))
         {

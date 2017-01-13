@@ -41,7 +41,7 @@ namespace SelectionRenderer
     CSelectionTicket& AcquireTicket(int _OffsetX, int _OffsetY, int _SizeX, int _SizeY);
     void ReleaseTicket(CSelectionTicket& _rTicket);
 
-    void PushPick(CSelectionTicket& _rTicket, const Base::UInt2& _rCursor);
+    void PushPick(CSelectionTicket& _rTicket, const Base::Int2& _rCursor);
     bool PopPick(CSelectionTicket& _rTicket);
 
     void Clear(CSelectionTicket& _rTicket);
