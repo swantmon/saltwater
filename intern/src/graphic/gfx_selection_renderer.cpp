@@ -779,12 +779,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Render hit proxies depending on flag
                 // -----------------------------------------------------------------------------
-                if (rTicket.m_Flags != SPickFlag::Nothing)
-                {
-                    TargetSetManager::ClearTargetSet(TargetSetManager::GetHitProxyTargetSet());
-
-                    if (rTicket.m_Flags & SPickFlag::Actor) ActorRenderer::RenderHitProxy();
-                }
+                if (rTicket.m_Flags & SPickFlag::Actor) ActorRenderer::RenderHitProxy();
 
                 // -----------------------------------------------------------------------------
                 // Setup buffer
@@ -826,6 +821,11 @@ namespace
                 ContextManager::ResetConstantBufferSetCS();
 
                 ContextManager::ResetShaderCS();
+
+                // -----------------------------------------------------------------------------
+                // Clear hit proxy target set
+                // -----------------------------------------------------------------------------
+                TargetSetManager::ClearTargetSet(TargetSetManager::GetHitProxyTargetSet());
 
                 // -----------------------------------------------------------------------------
                 // Copy output of selection
