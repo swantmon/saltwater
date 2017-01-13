@@ -66,7 +66,8 @@ void main()
     // That implementation is for a first test and will be replaced as soon
     // as needed.
     // -----------------------------------------------------------------------------
-    ivec2 UV = ivec2(m_MinX, m_MinY);
+    ivec2 UV = ivec2(m_MinX, g_InvertedScreensizeAndScreensize.w - m_MinY);
+
 
     vec2 HomogeneousUV = UV * g_InvertedScreensizeAndScreensize.xy;
 

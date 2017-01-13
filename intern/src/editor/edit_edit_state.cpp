@@ -65,7 +65,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         assert(m_pSelectionTicket == 0);
 
-        m_pSelectionTicket = &Gfx::SelectionRenderer::AcquireTicket(-1, -1, 2, 2, Gfx::SPickFlag::Actor);
+        m_pSelectionTicket = &Gfx::SelectionRenderer::AcquireTicket(-1, -1, 1, 1, Gfx::SPickFlag::Actor);
 
         // -----------------------------------------------------------------------------
         // Set editor camera in edit state

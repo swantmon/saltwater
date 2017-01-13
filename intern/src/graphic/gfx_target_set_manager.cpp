@@ -228,11 +228,12 @@ namespace
         // -----------------------------------------------------------------------------
         // Create hit proxy target set
         // -----------------------------------------------------------------------------
-        CTextureBasePtr HitProxyRenderbuffer[1];
+        CTextureBasePtr HitProxyRenderbuffer[2];
 
         HitProxyRenderbuffer[0] = HitProxyTexturePtr;
+        HitProxyRenderbuffer[1] = DepthTexturePtr;
 
-        m_HitProxyTargetSet = CreateTargetSet(HitProxyRenderbuffer, 1);
+        m_HitProxyTargetSet = CreateTargetSet(HitProxyRenderbuffer, 2);
     }
     
     // -----------------------------------------------------------------------------

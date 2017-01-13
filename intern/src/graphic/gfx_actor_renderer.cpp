@@ -213,6 +213,7 @@ namespace
         CCameraPtr      CameraPtr              = ViewManager     ::GetMainCamera ();
         CViewPortSetPtr ViewPortSetPtr         = ViewManager     ::GetViewPortSet();
         CRenderStatePtr DeferredRenderStatePtr = StateManager    ::GetRenderState(0);
+        CRenderStatePtr HitProxyRenderStatePtr = StateManager    ::GetRenderState(CRenderState::EqualDepth);
         CTargetSetPtr   DeferredTargetSetPtr   = TargetSetManager::GetDeferredTargetSet();
         CTargetSetPtr   HitProxyTargetSetPtr   = TargetSetManager::GetHitProxyTargetSet();
 
@@ -232,7 +233,7 @@ namespace
         RenderContextPtr->SetCamera(CameraPtr);
         RenderContextPtr->SetViewPortSet(ViewPortSetPtr);
         RenderContextPtr->SetTargetSet(HitProxyTargetSetPtr);
-        RenderContextPtr->SetRenderState(DeferredRenderStatePtr);
+        RenderContextPtr->SetRenderState(HitProxyRenderStatePtr);
 
         m_HitProxyContextPtr = RenderContextPtr;
 
