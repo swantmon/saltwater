@@ -141,6 +141,13 @@ namespace
 
         PostFX::Render();
 
+        Performance::EndEvent();
+
+        // -----------------------------------------------------------------------------
+        // Interaction
+        // -----------------------------------------------------------------------------
+        Performance::BeginEvent("Interaction Pass");
+
         SelectionRenderer::Render();
 
         Performance::EndEvent();

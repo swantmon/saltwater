@@ -229,8 +229,9 @@ namespace Edit
         int LocalMousePositionX  = _rMessage.GetInt();
         int LocalMousePositionY  = _rMessage.GetInt();
 
-        assert(m_pSelectionTicket != 0);
-
-        Gfx::SelectionRenderer::PushPick(*m_pSelectionTicket, Base::Int2(LocalMousePositionX, LocalMousePositionY));
+        if (m_pSelectionTicket != 0)
+        {
+            Gfx::SelectionRenderer::PushPick(*m_pSelectionTicket, Base::Int2(LocalMousePositionX, LocalMousePositionY));
+        }
     }
 } // namespace Edit

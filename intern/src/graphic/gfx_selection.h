@@ -8,10 +8,11 @@ namespace Gfx
     {
         enum Enum
         {
-            Nothing = 0x00,
-            Actor   = 0x01,
-            AR      = 0x02,
-            Gizmo   = 0x04,
+            Nothing    = 0x00,
+            Actor      = 0x01,
+            AR         = 0x02,
+            Gizmo      = 0x04,
+            Everything = 0xF
         };
     };
 } // namespace Gfx

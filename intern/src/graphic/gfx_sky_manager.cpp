@@ -680,7 +680,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Acquire an selection ticket at selection renderer
         // -----------------------------------------------------------------------------
-        m_pSelectionTicket = &SelectionRenderer::AcquireTicket(0, 0, 1, 1);
+        m_pSelectionTicket = &SelectionRenderer::AcquireTicket(0, 0, 1, 1, SPickFlag::AR);
 
         // -----------------------------------------------------------------------------
         // Generate LUT

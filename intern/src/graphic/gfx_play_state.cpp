@@ -24,6 +24,7 @@
 #include "graphic/gfx_postfx_hdr_renderer.h"
 #include "graphic/gfx_postfx_renderer.h"
 #include "graphic/gfx_reflection_renderer.h"
+#include "graphic/gfx_selection_renderer.h"
 #include "graphic/gfx_shadow_renderer.h"
 #include "graphic/gfx_sky_manager.h"
 #include "graphic/gfx_sun_manager.h"
@@ -99,6 +100,7 @@ namespace
         TonemappingRenderer  ::Update();
         PostFXHDR            ::Update();
         PostFX               ::Update();
+        SelectionRenderer    ::Update();
 
         // -----------------------------------------------------------------------------
         // Creation Pass
@@ -138,6 +140,15 @@ namespace
         TonemappingRenderer::Render();
 
         PostFX::Render();
+
+        Performance::EndEvent();
+
+        // -----------------------------------------------------------------------------
+        // Interaction
+        // -----------------------------------------------------------------------------
+        Performance::BeginEvent("Interaction Pass");
+
+        SelectionRenderer::Render();
 
         Performance::EndEvent();
 
