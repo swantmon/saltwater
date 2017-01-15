@@ -16,6 +16,7 @@
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_actor_renderer.h"
+#include "graphic/gfx_ar_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
@@ -780,6 +781,7 @@ namespace
                 // Render hit proxies depending on flag
                 // -----------------------------------------------------------------------------
                 if (rTicket.m_Flags & SPickFlag::Actor) ActorRenderer::RenderHitProxy();
+                if (rTicket.m_Flags & SPickFlag::AR)    ARRenderer   ::RenderHitProxy();
 
                 // -----------------------------------------------------------------------------
                 // Setup buffer
