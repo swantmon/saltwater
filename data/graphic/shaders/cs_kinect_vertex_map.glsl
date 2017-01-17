@@ -2,16 +2,11 @@
 #ifndef __INCLUDE_CS_VERTEX_MAP_GLSL__
 #define __INCLUDE_CS_VERTEX_MAP_GLSL__
 
+#include "tracking_common.glsl"
+
 // -----------------------------------------------------------------------------
 // Defines
 // -----------------------------------------------------------------------------
-
-layout(row_major, std140, binding = 0) uniform Intrinsics
-{
-	vec2 FocalPoint;
-	vec2 FocalLength;
-	vec2 InvFocalLength;
-};
 
 // -----------------------------------------------------------------------------
 // Input from engine
@@ -35,7 +30,7 @@ void main()
 	
 	vec4 Vertex;
 	
-	Vertex.xy = float(Depth) * (ImagePos / vec2(ImageSize) - FocalPoint) * InvFocalLength;
+	Vertex.xy = float(Depth) * (ImagePos / vec2(ImageSize) - g_FocalPoint) * g_InvFocalLength;
 	Vertex.z = float(Depth);
 	Vertex.w = 1.0;
 	
