@@ -49,6 +49,8 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
+        int RefreshMode = m_pRefreshModeCB->currentIndex();
+        
         int Type = m_pTypeCB->currentIndex();
 
         unsigned int TextureHash = m_pTextureValue->GetTextureHash();
@@ -61,6 +63,8 @@ namespace Edit
         Edit::CMessage NewMessage;
 
         NewMessage.PutInt(m_CurrentEntityID);
+
+        NewMessage.PutInt(RefreshMode);
 
         NewMessage.PutInt(Type);
 
@@ -102,6 +106,8 @@ namespace Edit
 
         if (EntityID != m_CurrentEntityID) return;
 
+        int RefreshMode = _rMessage.GetInt();
+
         int Type = _rMessage.GetInt();
 
         bool HasTexture = _rMessage.GetBool();
@@ -123,11 +129,12 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Set values
         // -----------------------------------------------------------------------------
+        m_pRefreshModeCB->blockSignals(true);
         m_pTypeCB->blockSignals(true);
 
-        m_pTypeCB->setCurrentIndex(Type);
+        m_pRefreshModeCB->setCurrentIndex(RefreshMode);
 
-        m_pTypeCB->blockSignals(false);
+        m_pTypeCB->setCurrentIndex(Type);
 
         if (HasTexture)
         {
@@ -137,6 +144,9 @@ namespace Edit
         m_pTextureValue->SetTextureHash(TextureHash);
 
         m_pIntensityEdit->setText(QString::number(Intensity));
+
+        m_pTypeCB->blockSignals(false);
+        m_pRefreshModeCB->blockSignals(false);
     }
 } // namespace Edit
 

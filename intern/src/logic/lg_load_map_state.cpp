@@ -225,6 +225,7 @@ namespace
 
             Dt::CSkyFacet* pSkyboxFacet = Dt::SkyManager::CreateSky();
 
+            pSkyboxFacet->SetRefreshMode(Dt::CSkyFacet::Dynamic);
             pSkyboxFacet->SetType(Dt::CSkyFacet::Panorama);
             pSkyboxFacet->SetPanorama(pPanoramaTexture);
             pSkyboxFacet->SetIntensity(10000.0f);

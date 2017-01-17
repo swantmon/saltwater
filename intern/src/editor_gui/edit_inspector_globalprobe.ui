@@ -25,28 +25,28 @@
         <item row="0" column="0">
          <widget class="QLabel" name="label">
           <property name="text">
-           <string>Refresh Mode:</string>
+           <string>Refresh Mode</string>
           </property>
          </widget>
         </item>
         <item row="1" column="0">
          <widget class="QLabel" name="label_2">
           <property name="text">
-           <string>Type:</string>
+           <string>Type</string>
           </property>
          </widget>
         </item>
         <item row="2" column="0">
          <widget class="QLabel" name="label_3">
           <property name="text">
-           <string>Quality:</string>
+           <string>Quality</string>
           </property>
          </widget>
         </item>
         <item row="3" column="0">
          <widget class="QLabel" name="label_4">
           <property name="text">
-           <string>Intensity:</string>
+           <string>Intensity</string>
           </property>
          </widget>
         </item>

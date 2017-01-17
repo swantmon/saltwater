@@ -22,7 +22,16 @@ namespace Dt
             TextureLUT,      //< Sky is generated from given texture by using a LUT
         };
 
+        enum ERefreshMode
+        {
+            Static,         //< Sky will be updated at any time the settings has changed
+            Dynamic,        //< Sky will be updated at every frame (can be used for dynamic images)
+        };
+
     public:
+
+        void SetRefreshMode(ERefreshMode _RefreshMode);
+        ERefreshMode GetRefreshMode();
 
         void SetType(EType _Type);
         EType GetType() const;
@@ -50,6 +59,7 @@ namespace Dt
 
     private:
 
+        ERefreshMode      m_RefreshMode;        //< Refresh mode of the sky
         EType             m_Type;               //< Type of the skybox for procedural panorama or cubemap
         bool              m_HasHDR;             //< Declares either the image consists of HDR values
         Dt::CTextureCube* m_pCubemap;           //< Pointer to cubemap for cubemap skybox
