@@ -585,6 +585,7 @@ namespace
     {
         unsigned int IndexOfLastRequest;
         unsigned int IndexOfBuffer;
+
         CInternSelectionTicket& rTicket = static_cast<CInternSelectionTicket&>(_rTicket);
 
         if (rTicket.m_NumberOfRequests == 0)
@@ -620,6 +621,8 @@ namespace
         rTicket.m_WSPosition = Base::Float3(pOutput->m_WSPosition[0], pOutput->m_WSPosition[1], pOutput->m_WSPosition[2]);
         rTicket.m_WSNormal   = Base::Float3(pOutput->m_WSNormal[0], pOutput->m_WSNormal[1], pOutput->m_WSNormal[2]);
         rTicket.m_Depth      = pOutput->m_Depth;
+        rTicket.m_HitFlag    = SHitFlag::Nothing;
+        rTicket.m_pObject    = nullptr;
 
         if (pOutput->m_EntityID > 0)
         {
