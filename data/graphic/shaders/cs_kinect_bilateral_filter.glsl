@@ -48,8 +48,8 @@ void main()
 			const ivec2 SamplePos = ivec2(x + cx, y + cy);
 			const float SampleDepth = float(imageLoad(cs_InputTexture, SamplePos).x);
 
-			const float Weight = (SampleDepth - Depth) * (SampleDepth - Depth) > g_SigmaColor2 ? 0.0 : 1.0;
-			
+			const float Weight = abs(SampleDepth - Depth) > 30.0 ? 0.0 : 1.0;
+
 			Normalization += Weight;
 			Sum += SampleDepth * Weight;
 		}
@@ -57,7 +57,8 @@ void main()
 
 	const float Result = Sum / Normalization;
 	
-	imageStore(cs_OutputTexture, ivec2(x, y), ivec4(Result));
+	imageStore(cs_OutputTexture, ivec2(x, y), ivec4(Depth));
+	//imageStore(cs_OutputTexture, ivec2(x, y), ivec4(Normalization));
 	//imageStore(cs_OutputTexture, ivec2(x, y), ivec4(Sum));
 	//imageStore(cs_OutputTexture, ivec2(x, y), ivec4(Depth));
 }
