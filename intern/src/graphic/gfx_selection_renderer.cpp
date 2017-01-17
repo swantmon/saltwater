@@ -99,9 +99,8 @@ namespace
 
         struct SRequest
         {
-            Base::Int2       m_Cursor;
-            Base::U64        m_TimeStamp;
-            SSelectionOutput m_Result;
+            Base::Int2 m_Cursor;
+            Base::U64  m_TimeStamp;
         };
         
         class CInternSelectionTicket : CSelectionTicket
@@ -129,6 +128,7 @@ namespace
             unsigned int m_NumberOfRequests;
             unsigned int m_IndexOfPushRequest;
             unsigned int m_IndexOfPopRequest;
+            unsigned int m_IndexOfTicket;
             unsigned int m_Flags;
             Base::U64    m_Frame;
             SRequest     m_Requests[s_MaxNumberOfRequests];
@@ -507,18 +507,19 @@ namespace
 
         CInternSelectionTicket& rTicket = m_SelectionTickets[IndexOfTicket];
 
-        rTicket.m_IsValid    = true;
-        rTicket.m_HitFlag    = SHitFlag::Nothing;
-        rTicket.m_OffsetX    = _OffsetX;
-        rTicket.m_OffsetY    = _OffsetY;
-        rTicket.m_SizeX      = _SizeX;
-        rTicket.m_SizeY      = _SizeY;
-        rTicket.m_Flags      = _Flags;
-        rTicket.m_WSPosition = Base::Float3::s_Zero;
-        rTicket.m_WSNormal   = Base::Float3::s_Zero;
-        rTicket.m_Depth      = -1.0f;
-        rTicket.m_pObject    = 0;
-        rTicket.m_Frame      = Core::Time::GetNumberOfFrame() - 1;
+        rTicket.m_IsValid       = true;
+        rTicket.m_HitFlag       = SHitFlag::Nothing;
+        rTicket.m_OffsetX       = _OffsetX;
+        rTicket.m_OffsetY       = _OffsetY;
+        rTicket.m_SizeX         = _SizeX;
+        rTicket.m_SizeY         = _SizeY;
+        rTicket.m_IndexOfTicket = IndexOfTicket;
+        rTicket.m_Flags         = _Flags;
+        rTicket.m_WSPosition    = Base::Float3::s_Zero;
+        rTicket.m_WSNormal      = Base::Float3::s_Zero;
+        rTicket.m_Depth         = -1.0f;
+        rTicket.m_pObject       = 0;
+        rTicket.m_Frame         = Core::Time::GetNumberOfFrame() - 1;
         
         Clear(rTicket);
 
@@ -582,6 +583,8 @@ namespace
 
     bool CGfxSelectionRenderer::PopPick(CSelectionTicket& _rTicket)
     {
+        unsigned int IndexOfLastRequest;
+        unsigned int IndexOfBuffer;
         CInternSelectionTicket& rTicket = static_cast<CInternSelectionTicket&>(_rTicket);
 
         if (rTicket.m_NumberOfRequests == 0)
@@ -609,16 +612,23 @@ namespace
         // -----------------------------------------------------------------------------
         // Read values from GPU to CPU and fill data
         // -----------------------------------------------------------------------------
-        rTicket.m_WSPosition = Base::Float3(rRequest.m_Result.m_WSPosition[0], rRequest.m_Result.m_WSPosition[1], rRequest.m_Result.m_WSPosition[2]);
-        rTicket.m_WSNormal   = Base::Float3(rRequest.m_Result.m_WSNormal[0], rRequest.m_Result.m_WSNormal[1], rRequest.m_Result.m_WSNormal[2]);
-        rTicket.m_Depth      = rRequest.m_Result.m_Depth;
+        IndexOfLastRequest = (rTicket.m_IndexOfPopRequest > 0) ? rTicket.m_IndexOfPopRequest - 1 : CInternSelectionTicket::s_MaxNumberOfRequests - 1;
+        IndexOfBuffer      = rTicket.m_IndexOfTicket * s_MaxNumberOfTickets + IndexOfLastRequest;
 
-        if (rRequest.m_Result.m_EntityID > 0)
+        SSelectionOutput* pOutput = static_cast<SSelectionOutput*>(BufferManager::MapConstantBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(2)));
+
+        rTicket.m_WSPosition = Base::Float3(pOutput->m_WSPosition[0], pOutput->m_WSPosition[1], pOutput->m_WSPosition[2]);
+        rTicket.m_WSNormal   = Base::Float3(pOutput->m_WSNormal[0], pOutput->m_WSNormal[1], pOutput->m_WSNormal[2]);
+        rTicket.m_Depth      = pOutput->m_Depth;
+
+        if (pOutput->m_EntityID > 0)
         {
             rTicket.m_HitFlag = SHitFlag::Entity;
 
-            rTicket.m_pObject = &Dt::EntityManager::GetEntityByID(rRequest.m_Result.m_EntityID);
+            rTicket.m_pObject = &Dt::EntityManager::GetEntityByID(pOutput->m_EntityID);
         }
+
+        BufferManager::UnmapConstantBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(2));
 
         return true;
     }
@@ -845,18 +855,6 @@ namespace
                 // Clear hit proxy target set
                 // -----------------------------------------------------------------------------
                 TargetSetManager::ClearTargetSet(TargetSetManager::GetHitProxyTargetSet(), Base::Float4(0.0f));
-
-                // -----------------------------------------------------------------------------
-                // Copy output of selection
-                // -----------------------------------------------------------------------------
-                SSelectionOutput* pOutput = static_cast<SSelectionOutput*>(BufferManager::MapConstantBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(2)));
-
-                rRequest.m_Result.m_EntityID   = pOutput->m_EntityID;
-                rRequest.m_Result.m_WSPosition = pOutput->m_WSPosition;
-                rRequest.m_Result.m_WSNormal   = pOutput->m_WSNormal;
-                rRequest.m_Result.m_Depth      = pOutput->m_Depth;
-
-                BufferManager::UnmapConstantBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(2));
 
                 // -----------------------------------------------------------------------------
                 // Set request
