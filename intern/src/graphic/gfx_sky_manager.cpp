@@ -34,6 +34,8 @@
 
 #include "opencv2/opencv.hpp"
 
+#define USE_AR_GEOMETRY 0
+
 using namespace Gfx;
 
 namespace 
@@ -1455,6 +1457,7 @@ namespace
         Base::Float3 FarBottomRight = pWorldSpaceCameraFrustum[6];
         Base::Float3 FarTopRight    = pWorldSpaceCameraFrustum[7];
 
+#if USE_AR_GEOMETRY == 1
         // -----------------------------------------------------------------------------
         // Test
         // -----------------------------------------------------------------------------
@@ -1505,6 +1508,7 @@ namespace
             FarBottomRight = TestFarBottomRight;
             FarTopRight    = TestFarTopRight   ;
         }
+#endif
 
         // -----------------------------------------------------------------------------
         // Calculate far plane and setup plane
@@ -1544,7 +1548,10 @@ namespace
 
         pViewBuffer->m_ModelMatrix  = Base::Float4x4::s_Identity;
         pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(-1.0f, 1.0f, 1.0f);
-        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(MainViewPtr->GetPosition() * Base::Float3(0.0f, 0.0f, -1.0f));
+
+#if USE_AR_GEOMETRY == 1
+        if (m_DetectedCorners == 4) pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(MainViewPtr->GetPosition() * Base::Float3(0.0f, 0.0f, -1.0f));
+#endif
 
         BufferManager::UnmapConstantBuffer(VSBufferSetPtr->GetBuffer(0));
 
