@@ -213,7 +213,7 @@ namespace Edit
     {
         int EntityID = _rMessage.GetInt();
 
-        QList<QTreeWidgetItem*> ListOfEntities = findItems(QString::number(EntityID), Qt::MatchContains | Qt::MatchRecursive, 1);
+        QList<QTreeWidgetItem*> ListOfEntities = findItems(QString::number(EntityID), Qt::MatchExactly | Qt::MatchRecursive, 1);
 
         foreach(QTreeWidgetItem* pEntity, ListOfEntities)
         {
