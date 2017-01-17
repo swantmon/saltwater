@@ -1445,26 +1445,6 @@ namespace
 
         Performance::BeginEvent("Skybox from Geometry");
 
-        // -----------------------------------------------------------------------------
-        // Test
-        // -----------------------------------------------------------------------------
-        Gfx::CSelectionTicket& rSelectionTicket = *m_pSelectionTicket;
-
-        if (SelectionRenderer::PopPick(rSelectionTicket))
-        {
-            if (rSelectionTicket.m_HitFlag == SHitFlag::Entity && rSelectionTicket.m_pObject != nullptr) 
-            {
-                BASE_CONSOLE_INFOV("Depth: %f", rSelectionTicket.m_Depth);
-            }
-        }
-        else
-        {
-            SelectionRenderer::PushPick(rSelectionTicket, Base::Int2(640, 360));
-        }
-
-        // -----------------------------------------------------------------------------
-        // Calculate far plane and setup plane
-        // -----------------------------------------------------------------------------
         CCameraPtr MainCameraPtr = ViewManager::GetMainCamera();
         CViewPtr   MainViewPtr = MainCameraPtr->GetView();
 
@@ -1475,29 +1455,85 @@ namespace
         Base::Float3 FarBottomRight = pWorldSpaceCameraFrustum[6];
         Base::Float3 FarTopRight    = pWorldSpaceCameraFrustum[7];
 
+        // -----------------------------------------------------------------------------
+        // Test
+        // -----------------------------------------------------------------------------
+        static unsigned int m_Index = 0;
+
+        static Base::Float3 TestFarBottomLeft   = FarBottomLeft;
+        static Base::Float3 TestFarTopLeft      = FarTopLeft;
+        static Base::Float3 TestFarBottomRight  = FarBottomRight;
+        static Base::Float3 TestFarTopRight     = FarTopRight;
+
+        Gfx::CSelectionTicket& rSelectionTicket = *m_pSelectionTicket;
+
+        if (SelectionRenderer::PopPick(rSelectionTicket))
+        {
+            if (rSelectionTicket.m_HitFlag == SHitFlag::Entity && rSelectionTicket.m_pObject != nullptr) 
+            {
+                switch (m_Index)
+                {
+                case 0: TestFarBottomLeft  = rSelectionTicket.m_WSPosition; break;
+                case 1: TestFarTopLeft     = rSelectionTicket.m_WSPosition; break;
+                case 2: TestFarBottomRight = rSelectionTicket.m_WSPosition; break;
+                case 3: TestFarTopRight    = rSelectionTicket.m_WSPosition; break;
+                }
+            }
+            else
+            {
+                switch (m_Index)
+                {
+                case 0: TestFarBottomLeft  = FarBottomLeft; break;
+                case 1: TestFarTopLeft     = FarTopLeft; break;
+                case 2: TestFarBottomRight = FarBottomRight; break;
+                case 3: TestFarTopRight    = FarTopRight; break;
+                }
+            }
+
+            m_Index = (m_Index + 1) % 4;
+        }
+        else
+        {
+            switch (m_Index)
+            {
+            case 0: SelectionRenderer::PushPick(rSelectionTicket, Base::Int2(1, 719)); break;
+            case 1: SelectionRenderer::PushPick(rSelectionTicket, Base::Int2(1, 1)); break;
+            case 2: SelectionRenderer::PushPick(rSelectionTicket, Base::Int2(1279, 719)); break;
+            case 3: SelectionRenderer::PushPick(rSelectionTicket, Base::Int2(1279, 1)); break;
+            }
+        }
+
+//         BASE_CONSOLE_INFOV("Pos TL: %f, %f, %f", TestFarTopLeft[0], TestFarTopLeft[1], TestFarTopLeft[2]);
+//         BASE_CONSOLE_INFOV("Pos TR: %f, %f, %f", TestFarTopRight[0], TestFarTopRight[1], TestFarTopRight[2]);
+//         BASE_CONSOLE_INFOV("Pos BL: %f, %f, %f", TestFarBottomLeft[0], TestFarBottomLeft[1], TestFarBottomLeft[2]);
+//         BASE_CONSOLE_INFOV("Pos BR: %f, %f, %f", TestFarBottomRight[0], TestFarBottomRight[1], TestFarBottomRight[2]);
+
+        // -----------------------------------------------------------------------------
+        // Calculate far plane and setup plane
+        // -----------------------------------------------------------------------------
         float* pPlaneGeometryBuffer = static_cast<float*>(BufferManager::MapVertexBuffer(VertexBufferSetPtr->GetBuffer(0), CBuffer::Write));
 
-        pPlaneGeometryBuffer[0] = FarTopLeft[0];
-        pPlaneGeometryBuffer[1] = FarTopLeft[1];
-        pPlaneGeometryBuffer[2] = FarTopLeft[2];
+        pPlaneGeometryBuffer[0] = TestFarTopLeft[0];
+        pPlaneGeometryBuffer[1] = TestFarTopLeft[1];
+        pPlaneGeometryBuffer[2] = TestFarTopLeft[2];
         pPlaneGeometryBuffer[3] = 0.0f;
         pPlaneGeometryBuffer[4] = 1.0f;
 
-        pPlaneGeometryBuffer[5] = FarTopRight[0];
-        pPlaneGeometryBuffer[6] = FarTopRight[1];
-        pPlaneGeometryBuffer[7] = FarTopRight[2];
+        pPlaneGeometryBuffer[5] = TestFarTopRight[0];
+        pPlaneGeometryBuffer[6] = TestFarTopRight[1];
+        pPlaneGeometryBuffer[7] = TestFarTopRight[2];
         pPlaneGeometryBuffer[8] = 1.0f;
         pPlaneGeometryBuffer[9] = 1.0f;
 
-        pPlaneGeometryBuffer[10] = FarBottomRight[0];
-        pPlaneGeometryBuffer[11] = FarBottomRight[1];
-        pPlaneGeometryBuffer[12] = FarBottomRight[2];
+        pPlaneGeometryBuffer[10] = TestFarBottomRight[0];
+        pPlaneGeometryBuffer[11] = TestFarBottomRight[1];
+        pPlaneGeometryBuffer[12] = TestFarBottomRight[2];
         pPlaneGeometryBuffer[13] = 1.0f;
         pPlaneGeometryBuffer[14] = 0.0f;
 
-        pPlaneGeometryBuffer[15] = FarBottomLeft[0];
-        pPlaneGeometryBuffer[16] = FarBottomLeft[1];
-        pPlaneGeometryBuffer[17] = FarBottomLeft[2];
+        pPlaneGeometryBuffer[15] = TestFarBottomLeft[0];
+        pPlaneGeometryBuffer[16] = TestFarBottomLeft[1];
+        pPlaneGeometryBuffer[17] = TestFarBottomLeft[2];
         pPlaneGeometryBuffer[18] = 0.0f;
         pPlaneGeometryBuffer[19] = 0.0f;
 
@@ -1508,8 +1544,9 @@ namespace
         // -----------------------------------------------------------------------------
         SModelMatrixBuffer* pViewBuffer = static_cast<SModelMatrixBuffer*>(BufferManager::MapConstantBuffer(VSBufferSetPtr->GetBuffer(0)));
 
-        pViewBuffer->m_ModelMatrix = Base::Float4x4::s_Identity;
+        pViewBuffer->m_ModelMatrix  = Base::Float4x4::s_Identity;
         pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(-1.0f, 1.0f, 1.0f);
+        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(MainViewPtr->GetPosition() * Base::Float3(0.0f, 0.0f, -1.0f));
 
         BufferManager::UnmapConstantBuffer(VSBufferSetPtr->GetBuffer(0));
 
