@@ -140,6 +140,10 @@ namespace
         
     private:
 
+        static const unsigned int s_MaxNumberOfBuffer = s_MaxNumberOfTickets * CInternSelectionTicket::s_MaxNumberOfRequests;
+
+    private:
+
         struct SPerDrawCallConstantBufferVS
         {
             Base::Float4x4 m_ModelMatrix;
@@ -172,7 +176,7 @@ namespace
         
         CBufferSetPtr          m_ViewModelVSBuffer;
         CBufferSetPtr          m_HighlightPSBufferSetPtr;
-        CBufferSetPtr          m_SelectionBufferSetPtr;
+        CBufferSetPtr          m_SelectionBufferSetPtrs[s_MaxNumberOfBuffer];
         CRenderContextPtr      m_RenderContextPtr;
         CShaderPtr             m_HighlightPSPtr;
         CShaderPtr             m_SelectionCSPtr;
@@ -221,11 +225,12 @@ namespace
     CGfxSelectionRenderer::CGfxSelectionRenderer()
         : m_ViewModelVSBuffer      ()
         , m_HighlightPSBufferSetPtr()
-        , m_SelectionBufferSetPtr  ()
+        , m_SelectionBufferSetPtrs ()
         , m_RenderContextPtr       ()
         , m_HighlightPSPtr         ()
         , m_GBufferTextureSetPtr   ()
         , m_RenderJobs             ()
+        , m_SelectionTickets       ()
         , m_pSelectedEntity        (0)
     {
         ResetTickets();
@@ -256,7 +261,6 @@ namespace
     {
         m_ViewModelVSBuffer       = 0;
         m_HighlightPSBufferSetPtr = 0;
-        m_SelectionBufferSetPtr   = 0;
         m_RenderContextPtr        = 0;
         m_HighlightPSPtr          = 0;
         m_SelectionCSPtr          = 0;
@@ -264,6 +268,14 @@ namespace
         m_pSelectedEntity         = 0;
 
         ResetTickets();
+
+        // -----------------------------------------------------------------------------
+        // Reset buffer
+        // -----------------------------------------------------------------------------
+        for (unsigned int IndexOfBuffer = 0; IndexOfBuffer < s_MaxNumberOfBuffer; ++IndexOfBuffer)
+        {
+            m_SelectionBufferSetPtrs[IndexOfBuffer] = 0;
+        }
 
         // -----------------------------------------------------------------------------
         // Iterate throw render jobs to release managed pointer
@@ -371,31 +383,34 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        ConstanteBufferDesc.m_Stride        = 0;
-        ConstanteBufferDesc.m_Usage         = CBuffer::GPUReadWrite;
-        ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
-        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSelectionSettings);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        for (unsigned int IndexOfBuffer = 0; IndexOfBuffer < s_MaxNumberOfBuffer; ++IndexOfBuffer)
+        {
+            ConstanteBufferDesc.m_Stride        = 0;
+            ConstanteBufferDesc.m_Usage         = CBuffer::GPUReadWrite;
+            ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
+            ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+            ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSelectionSettings);
+            ConstanteBufferDesc.m_pBytes        = 0;
+            ConstanteBufferDesc.m_pClassKey     = 0;
 
-        CBufferPtr SelectionRequestBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+            CBufferPtr SelectionRequestBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+            // -----------------------------------------------------------------------------
+
+            ConstanteBufferDesc.m_Stride        = 0;
+            ConstanteBufferDesc.m_Usage         = CBuffer::GPUToCPU;
+            ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
+            ConstanteBufferDesc.m_Access        = CBuffer::CPURead;
+            ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSelectionOutput);
+            ConstanteBufferDesc.m_pBytes        = 0;
+            ConstanteBufferDesc.m_pClassKey     = 0;
+
+            CBufferPtr SelectionOuputBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+            m_SelectionBufferSetPtrs[IndexOfBuffer] = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferCS(), SelectionRequestBufferPtr, SelectionOuputBufferPtr);;
+        }
 
         // -----------------------------------------------------------------------------
-
-        ConstanteBufferDesc.m_Stride        = 0;
-        ConstanteBufferDesc.m_Usage         = CBuffer::GPUToCPU;
-        ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
-        ConstanteBufferDesc.m_Access        = CBuffer::CPURead;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSelectionOutput);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
-
-        CBufferPtr SelectionOuputBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
-
-        // -----------------------------------------------------------------------------
-
-        m_SelectionBufferSetPtr   = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferCS(), SelectionRequestBufferPtr, SelectionOuputBufferPtr);
 
         m_ViewModelVSBuffer       = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS(), ViewBuffer);
 
@@ -760,6 +775,7 @@ namespace
     {
         unsigned int IndexOfLastRequest;
         unsigned int IndexOfTicket;
+        unsigned int IndexOfBuffer;
         unsigned int MinX;
         unsigned int MinY;
         unsigned int MaxX;
@@ -774,6 +790,7 @@ namespace
             if (rTicket.m_IsValid && (rTicket.m_NumberOfRequests > 0) && (rTicket.m_Frame <= Core::Time::GetNumberOfFrame()))
             {
                 IndexOfLastRequest = (rTicket.m_IndexOfPushRequest > 0) ? rTicket.m_IndexOfPushRequest - 1 : CInternSelectionTicket::s_MaxNumberOfRequests - 1;
+                IndexOfBuffer      = IndexOfTicket * s_MaxNumberOfTickets + IndexOfLastRequest;
 
                 SRequest& rRequest = rTicket.m_Requests[IndexOfLastRequest];
 
@@ -788,7 +805,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 Base::Int2 ActiveWindowSize = Gfx::Main::GetActiveWindowSize();
 
-                SSelectionSettings* pSettings = static_cast<SSelectionSettings*>(BufferManager::MapConstantBuffer(m_SelectionBufferSetPtr->GetBuffer(1)));
+                SSelectionSettings* pSettings = static_cast<SSelectionSettings*>(BufferManager::MapConstantBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1)));
 
                 MinX = rRequest.m_Cursor[0] + rTicket.m_OffsetX;
                 MinY = rRequest.m_Cursor[1] + rTicket.m_OffsetY;
@@ -805,14 +822,14 @@ namespace
                 pSettings->m_MaxX = MaxX;
                 pSettings->m_MaxY = MaxY;
 
-                BufferManager::UnmapConstantBuffer(m_SelectionBufferSetPtr->GetBuffer(1));
+                BufferManager::UnmapConstantBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1));
 
                 // -----------------------------------------------------------------------------
                 // Execute
                 // -----------------------------------------------------------------------------
                 ContextManager::SetShaderCS(m_SelectionCSPtr);
 
-                ContextManager::SetConstantBufferSetCS(m_SelectionBufferSetPtr);
+                ContextManager::SetConstantBufferSetCS(m_SelectionBufferSetPtrs[IndexOfBuffer]);
 
                 ContextManager::SetTextureSetCS(m_GBufferTextureSetPtr);
 
@@ -832,14 +849,14 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Copy output of selection
                 // -----------------------------------------------------------------------------
-                SSelectionOutput* pOutput = static_cast<SSelectionOutput*>(BufferManager::MapConstantBuffer(m_SelectionBufferSetPtr->GetBuffer(2)));
+                SSelectionOutput* pOutput = static_cast<SSelectionOutput*>(BufferManager::MapConstantBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(2)));
 
                 rRequest.m_Result.m_EntityID   = pOutput->m_EntityID;
                 rRequest.m_Result.m_WSPosition = pOutput->m_WSPosition;
                 rRequest.m_Result.m_WSNormal   = pOutput->m_WSNormal;
                 rRequest.m_Result.m_Depth      = pOutput->m_Depth;
 
-                BufferManager::UnmapConstantBuffer(m_SelectionBufferSetPtr->GetBuffer(2));
+                BufferManager::UnmapConstantBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(2));
 
                 // -----------------------------------------------------------------------------
                 // Set request
