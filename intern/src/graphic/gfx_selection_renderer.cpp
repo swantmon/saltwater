@@ -844,7 +844,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Clear hit proxy target set
                 // -----------------------------------------------------------------------------
-                TargetSetManager::ClearTargetSet(TargetSetManager::GetHitProxyTargetSet());
+                TargetSetManager::ClearTargetSet(TargetSetManager::GetHitProxyTargetSet(), Base::Float4(0.0f));
 
                 // -----------------------------------------------------------------------------
                 // Copy output of selection

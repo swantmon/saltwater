@@ -41,6 +41,8 @@ namespace
 
         CTargetSetPtr CreateTargetSet(CTextureBasePtr* _pTargetPtrs, unsigned int _NumberOfTargets);
         
+        void ClearTargetSet(CTargetSetPtr _TargetPtr, float _Depth);
+        void ClearTargetSet(CTargetSetPtr _TargetPtr, const Base::Float4& _rColor);
         void ClearTargetSet(CTargetSetPtr _TargetPtr, const Base::Float4& _rColor, float _Depth);
         
     private:
@@ -349,6 +351,34 @@ namespace
         
         return CTargetSetPtr(TargetSetPtr);
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxTargetSetManager::ClearTargetSet(CTargetSetPtr _TargetPtr, float _Depth)
+    {
+        CNativeTargetSet& rNativeTargetSet = *static_cast<CNativeTargetSet*>(_TargetPtr.GetPtr());
+
+        glBindFramebuffer(GL_FRAMEBUFFER, rNativeTargetSet.m_NativeTargetSet);
+
+        glClearDepth(_Depth);
+        glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxTargetSetManager::ClearTargetSet(CTargetSetPtr _TargetPtr, const Base::Float4& _rColor)
+    {
+        CNativeTargetSet& rNativeTargetSet = *static_cast<CNativeTargetSet*>(_TargetPtr.GetPtr());
+
+        glBindFramebuffer(GL_FRAMEBUFFER, rNativeTargetSet.m_NativeTargetSet);
+
+        glClearColor(_rColor[0], _rColor[1], _rColor[2], _rColor[3]);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
     
     // -----------------------------------------------------------------------------
     
@@ -357,7 +387,7 @@ namespace
         CNativeTargetSet& rNativeTargetSet = *static_cast<CNativeTargetSet*>(_TargetPtr.GetPtr());
         
         glBindFramebuffer(GL_FRAMEBUFFER, rNativeTargetSet.m_NativeTargetSet);
-        
+
         glClearColor(_rColor[0], _rColor[1], _rColor[2], _rColor[3]);
         glClearDepth(_Depth);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -549,14 +579,14 @@ namespace TargetSetManager
     
     void ClearTargetSet(CTargetSetPtr _TargetPtr, const Base::Float4& _rColor)
     {
-        CGfxTargetSetManager::GetInstance().ClearTargetSet(_TargetPtr, _rColor, 1.0f);
+        CGfxTargetSetManager::GetInstance().ClearTargetSet(_TargetPtr, _rColor);
     }
     
     // -----------------------------------------------------------------------------
     
     void ClearTargetSet(CTargetSetPtr _TargetPtr, float _Depth)
     {
-        CGfxTargetSetManager::GetInstance().ClearTargetSet(_TargetPtr, Base::Float4(0.0f), _Depth);
+        CGfxTargetSetManager::GetInstance().ClearTargetSet(_TargetPtr, _Depth);
     }
     
     // -----------------------------------------------------------------------------
