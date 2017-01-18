@@ -57,7 +57,7 @@ namespace IO
         
     private:
         
-        static const unsigned int s_MaxNumberOfFormatCharacters = 2048;
+        static const unsigned int s_MaxNumberOfFormatCharacters = 4096;
 
     private:
 

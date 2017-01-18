@@ -56,6 +56,15 @@ namespace
     const int g_PyramidLevels = 3;
 
     const int g_VolumeSize = 256;
+    const float g_VoxelSize = 2.048f / g_VolumeSize;
+
+    const float g_IntegrationWeight = 100.0f;
+
+    const int g_ICPIterations[g_PyramidLevels] = { 10, 5, 4 };
+    const float g_EpsilonVertex = 0.1f;
+    const float g_EpsilonNormal = 0.342f;
+    const float g_TruncatedDistance = 30.0f;
+    const int g_GridResolution[2][3] = { { 4, 4, 4 },{ 4, 4, 4 } };
 
     struct SIntrinsics
     {
@@ -228,27 +237,34 @@ namespace
     void CGfxVoxelRenderer::OnSetupShader()
     {
         std::stringstream VolumeSizeDefineStream;
-        VolumeSizeDefineStream << "VOLUME_SIZE " << g_VolumeSize << '\n';
-        std::string VolumeSizeDefine = VolumeSizeDefineStream.str();
-        const char* pDefines[] = { VolumeSizeDefine.c_str() };
+        std::stringstream TileSizeDefineStream;
+        std::stringstream VoxelSizeDefineStream;
 
+        VolumeSizeDefineStream << "VOLUME_SIZE " << g_VolumeSize << '\n';
+        TileSizeDefineStream << "TILE_SIZE " << g_TileSize2D << '\n';
+        VoxelSizeDefineStream << "VOXEL_SIZE " << g_VoxelSize << '\n';
+
+        std::string VolumeSizeDefine = VolumeSizeDefineStream.str();
+        std::string TileSizeDefine = TileSizeDefineStream.str();
+        std::string VoxelSizeDefine = VoxelSizeDefineStream.str();
+
+        const char* pVolumeSizeDefines[] = { VolumeSizeDefine.c_str() };
+        const char* pTile2DSizeDefines[] = { TileSizeDefine.c_str() };
+        const char* pVolumeIntegrationDefines[] = { VolumeSizeDefine.c_str(), TileSizeDefine.c_str(), VoxelSizeDefine.c_str() };
+        
         m_VSVisualizeDepth = ShaderManager::CompileVS("vs_kinect_visualize_depth.glsl", "main");
         m_FSVisualizeDepth = ShaderManager::CompilePS("fs_kinect_visualize_depth.glsl", "main");
         m_VSVisualizeVertexMap = ShaderManager::CompileVS("vs_kinect_visualize_vertex_map.glsl", "main");
         m_FSVisualizeVertexMap = ShaderManager::CompilePS("fs_kinect_visualize_vertex_map.glsl", "main");
-        m_VSVisualizeVolume = ShaderManager::CompileVS("vs_kinect_visualize_volume.glsl", "main", 1, pDefines);
+        m_VSVisualizeVolume = ShaderManager::CompileVS("vs_kinect_visualize_volume.glsl", "main", 1, pVolumeSizeDefines);
         m_FSVisualizeVolume = ShaderManager::CompilePS("fs_kinect_visualize_volume.glsl", "main");
 
-        std::stringstream TileSizeDefineStream;
-        TileSizeDefineStream << "TILE_SIZE " << g_TileSize2D << '\n';
-        std::string TileSizeDefine = TileSizeDefineStream.str();
-        pDefines[0] = { TileSizeDefine.c_str() };
+        m_CSBilateralFilter = ShaderManager::CompileCS("cs_kinect_bilateral_filter.glsl", "main", 1, pTile2DSizeDefines);
+        m_CSVertexMap = ShaderManager::CompileCS("cs_kinect_vertex_map.glsl", "main", 1, pTile2DSizeDefines);
+        m_CSNormalMap = ShaderManager::CompileCS("cs_kinect_normal_map.glsl", "main", 1, pTile2DSizeDefines);
+        m_CSDownSample = ShaderManager::CompileCS("cs_kinect_downsample.glsl", "main", 1, pTile2DSizeDefines);
 
-        m_CSBilateralFilter = ShaderManager::CompileCS("cs_kinect_bilateral_filter.glsl", "main", 1, pDefines);
-        m_CSVertexMap = ShaderManager::CompileCS("cs_kinect_vertex_map.glsl", "main", 1, pDefines);
-        m_CSNormalMap = ShaderManager::CompileCS("cs_kinect_normal_map.glsl", "main", 1, pDefines);
-        m_CSDownSample = ShaderManager::CompileCS("cs_kinect_downsample.glsl", "main", 1, pDefines);
-        m_CSVolumeIntegration = ShaderManager::CompileCS("cs_kinect_integrate_volume.glsl", "main", 1, pDefines);
+        m_CSVolumeIntegration = ShaderManager::CompileCS("cs_kinect_integrate_volume.glsl", "main", 3, pVolumeIntegrationDefines);
     }
     
     // -----------------------------------------------------------------------------
@@ -330,6 +346,10 @@ namespace
         STrackingData TrackingData;
         TrackingData.m_PoseMatrix.SetIdentity();
         TrackingData.m_InvPoseMatrix.SetIdentity();
+        TrackingData.m_PoseRotationMatrix.SetIdentity();
+        TrackingData.m_InvPoseRotationMatrix.SetIdentity();
+        TrackingData.m_PoseTranslationMatrix.SetIdentity();
+        TrackingData.m_InvPoseTranslationMatrix.SetIdentity();
 
         glCreateBuffers(1, &m_TrackingDataConstantBuffer);
         glNamedBufferData(m_TrackingDataConstantBuffer, sizeof(STrackingData), &TrackingData, GL_DYNAMIC_COPY);
@@ -481,8 +501,10 @@ namespace
     void CGfxVoxelRenderer::Integrate()
     {
         Gfx::ContextManager::SetShaderCS(m_CSVolumeIntegration);
-        glBindImageTexture(0, m_Volume, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RG16UI);
+
+        glBindImageTexture(0, m_Volume, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RG16UI);
         glBindImageTexture(1, m_KinectRawDepthBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
+        glBindImageTexture(2, m_KinectVertexMap[0], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
 
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_IntrinsicsConstantBuffer);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_TrackingDataConstantBuffer);
@@ -595,6 +617,8 @@ namespace
         glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_DrawCallConstantBuffer);
 
         glBindImageTexture(0, m_Volume, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RG16UI);
+
+        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
         glDrawArrays(GL_POINTS, 0, g_VolumeSize * g_VolumeSize * g_VolumeSize);
 
