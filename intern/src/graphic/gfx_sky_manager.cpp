@@ -580,11 +580,11 @@ namespace
 
         m_SkyboxFromTexture.m_VSBufferSetPtr = BufferManager::CreateBufferSet(ModelMatrixBufferPtr);
         m_SkyboxFromTexture.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSWorldBuffer);
-        m_SkyboxFromTexture.m_PSBufferSetPtr = BufferManager::CreateBufferSet(OuputPSBufferPtr);
+        m_SkyboxFromTexture.m_PSBufferSetPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), OuputPSBufferPtr);
 
         m_SkyboxFromGeometry.m_VSBufferSetPtr = BufferManager::CreateBufferSet(ModelMatrixBufferPtr);
         m_SkyboxFromGeometry.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSWorldBuffer);
-        m_SkyboxFromGeometry.m_PSBufferSetPtr = BufferManager::CreateBufferSet(OuputPSBufferPtr);
+        m_SkyboxFromGeometry.m_PSBufferSetPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), OuputPSBufferPtr);
 
         m_SkyboxFromLUT.m_VSBufferSetPtr = 0;
         m_SkyboxFromLUT.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSSphericalBuffer, ModelMatrixBufferPtr);
@@ -1283,12 +1283,12 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        SOutputBufferPS* pPSBuffer = static_cast<SOutputBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(0)));
+        SOutputBufferPS* pPSBuffer = static_cast<SOutputBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(1)));
 
         pPSBuffer->m_HDRFactor = _Intensity;
         pPSBuffer->m_IsHDR     = _pOutput->m_InputTexture2DPtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
 
-        BufferManager::UnmapConstantBuffer(PSBufferSetPtr->GetBuffer(0));
+        BufferManager::UnmapConstantBuffer(PSBufferSetPtr->GetBuffer(1));
 
         // -----------------------------------------------------------------------------
         // Environment to cube map
@@ -1495,12 +1495,12 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        SOutputBufferPS* pPSBuffer = static_cast<SOutputBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(0)));
+        SOutputBufferPS* pPSBuffer = static_cast<SOutputBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(1)));
 
         pPSBuffer->m_HDRFactor = _Intensity;
         pPSBuffer->m_IsHDR = _pOutput->m_InputTexture2DPtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
 
-        BufferManager::UnmapConstantBuffer(PSBufferSetPtr->GetBuffer(0));
+        BufferManager::UnmapConstantBuffer(PSBufferSetPtr->GetBuffer(1));
 
         // -----------------------------------------------------------------------------
         // Environment to cube map
