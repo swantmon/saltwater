@@ -21,10 +21,10 @@ layout(location = 0) out vec4 out_Color;
 void main(void)
 {
 	uvec3 VoxelPosition; 
-	VoxelPosition.x = gl_VertexID / (VOLUME_SIZE * VOLUME_SIZE);
-	uint Index = gl_VertexID - (VoxelPosition.x * VOLUME_SIZE * VOLUME_SIZE);
-	VoxelPosition.y = Index / VOLUME_SIZE;
-	VoxelPosition.z = Index % VOLUME_SIZE;
+	VoxelPosition.x = gl_VertexID / (VOLUME_RESOLUTION * VOLUME_RESOLUTION);
+	uint Index = gl_VertexID - (VoxelPosition.x * VOLUME_RESOLUTION * VOLUME_RESOLUTION);
+	VoxelPosition.y = Index / VOLUME_RESOLUTION;
+	VoxelPosition.z = Index % VOLUME_RESOLUTION;
     gl_Position = g_WorldToScreen * g_WorldMatrix * vec4(VoxelPosition, 1.0);
 	out_Color = vec4(imageLoad(vs_Volume, ivec3(VoxelPosition)));
 }

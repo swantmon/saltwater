@@ -18,7 +18,7 @@ layout (binding = 1, rgba32f) writeonly uniform image2D cs_NormalMap;
 // -------------------------------------------------------------------------------------
 // Functions
 // -------------------------------------------------------------------------------------
-layout (local_size_x = TILE_SIZE, local_size_y = TILE_SIZE, local_size_z = 1) in;
+layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
 void main()
 {
 	const ivec2 ImageSize = imageSize(cs_VertexMap);

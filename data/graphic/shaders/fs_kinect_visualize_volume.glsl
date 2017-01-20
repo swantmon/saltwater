@@ -2,8 +2,6 @@
 #ifndef __INCLUDE_FS_KINECT_VISUALIZE_VOLUME_GLSL__
 #define __INCLUDE_FS_KINECT_VISUALIZE_VOLUME_GLSL__
 
-#define SHORT_MAX 65535.0
-
 // -----------------------------------------------------------------------------
 // Output to fragment
 // -----------------------------------------------------------------------------
@@ -13,7 +11,11 @@ layout(location = 0) out vec4 out_Color;
 
 void main(void)
 {
-    out_Color = vec4(in_Color);
+	if (in_Color.r == 0.0)
+	{
+		discard;
+	}
+    out_Color = vec4(0.0, 1.0, 0.0, 1.0);
 }
 
 #endif // __INCLUDE_FS_KINECT_VISUALIZE_VOLUME_GLSL__

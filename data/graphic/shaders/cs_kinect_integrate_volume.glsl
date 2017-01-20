@@ -4,8 +4,6 @@
 
 #include "tracking_common.glsl"
 
-#define UINT16_MAX 65535
-
 // -----------------------------------------------------------------------------
 // Constants
 // -----------------------------------------------------------------------------
@@ -35,7 +33,7 @@ float sq(float value)
 	return value * value;
 }
 
-layout (local_size_x = TILE_SIZE, local_size_y = TILE_SIZE, local_size_z = 1) in;
+layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
 void main()
 {
 	ivec2 ImageSize = imageSize(cs_Vertex);
@@ -50,8 +48,8 @@ void main()
     vec3 Delta = mat3(g_InvPoseMatrix) * vec3(0.0, 0.0, VOXEL_SIZE);
     vec3 CameraDelta = mat3(g_KMatrix) * Delta;
 
-    for(PixelPosition.z = 0; PixelPosition.z < VOLUME_SIZE; ++ PixelPosition.z, Position += Delta, CameraX += CameraDelta)
-	{
+    for(PixelPosition.z = 0; PixelPosition.z < VOLUME_RESOLUTION; ++ PixelPosition.z, Position += Delta, CameraX += CameraDelta)
+	{		
 		if(Position.z < 0.0001)
         {
 			continue;

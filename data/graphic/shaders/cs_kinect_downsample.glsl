@@ -16,7 +16,7 @@ layout (binding = 1, r16ui) writeonly uniform uimage2D cs_OutputTexture;
 // -------------------------------------------------------------------------------------
 // Functions
 // -------------------------------------------------------------------------------------
-layout (local_size_x = TILE_SIZE, local_size_y = TILE_SIZE, local_size_z = 1) in;
+layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
 void main()
 {
 	const vec2 InputImageSize = imageSize(cs_InputTexture);
