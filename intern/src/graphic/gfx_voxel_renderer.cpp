@@ -56,9 +56,9 @@ namespace
 
     const int g_PyramidLevels = 3;
 
+    const float g_VolumeSize = 2.0f;
     const int g_VolumeResolution = 256;
-    const float g_VoxelSize = 2.048f / g_VolumeResolution;
-    const float g_VolumeSize = g_VolumeResolution * g_VoxelSize;
+    const float g_VoxelSize = g_VolumeSize / g_VolumeResolution;
 
     const float g_IntegrationWeight = 100.0f;
 
@@ -66,8 +66,6 @@ namespace
     const float g_EpsilonVertex = 0.1f;
     const float g_EpsilonNormal = 0.342f;
     const float g_TruncatedDistance = 30.0f;
-
-    const int g_GridResolution[2][3] = { { 4, 4, 4 },{ 4, 4, 4 } };
 
     struct SIntrinsics
     {
