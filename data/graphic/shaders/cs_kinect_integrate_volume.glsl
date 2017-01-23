@@ -55,7 +55,7 @@ void main()
 			continue;
 		}
         vec2 Pixel = vec2(CameraX.x / CameraX.z + 0.5, CameraX.y / CameraX.z + 0.5);
-        if(Pixel.x < 0 || Pixel.x > ImageSize.x || Pixel.y < 0 || Pixel.y > ImageSize.y)
+        if(Pixel.x < 0.0 || Pixel.x > ImageSize.x || Pixel.y < 0.0 || Pixel.y > ImageSize.y)
         {
 			continue;
 		}

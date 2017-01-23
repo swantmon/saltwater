@@ -54,12 +54,13 @@ void main()
 
     const ivec2 VertexMapPosition = ivec2(gl_GlobalInvocationID.xy);
     
-    vec3 VertexPosition = vec3(vec2(VertexMapPosition) / VertexMapSize.xy, 0.0);
-    VertexPosition.xy -= vec2(0.5);
-    VertexPosition.xy *= vec2(5.0);
+    vec3 VertexPixelPosition = vec3(vec2(VertexMapPosition) / VertexMapSize.xy, 0.0);
+    VertexPixelPosition.xy -= vec2(0.5);
+    VertexPixelPosition.xy *= vec2(10.0);
+    VertexPixelPosition.z = 8.0;
 
-    vec3 CameraPosition = vec3(0.0, 0.0, 10.0);
-    vec3 RayDirection = normalize(VertexPosition - CameraPosition);
+    vec3 CameraPosition = vec3(0.0, 0.0, 15.0);
+    vec3 RayDirection = normalize(VertexPixelPosition - CameraPosition);
 
     RayDirection.x = RayDirection.x == 0.0 ? 1e-15 : RayDirection.x;
     RayDirection.y = RayDirection.y == 0.0 ? 1e-15 : RayDirection.y;
@@ -69,13 +70,13 @@ void main()
     float EndLength = GetEndLength(CameraPosition, RayDirection);
 
     float Step = VOXEL_SIZE;
-    float Ray = StartLength;
+    float RayLength = StartLength;
 
     vec3 Vertex = vec3(0.0);
 
-    while (Ray <= EndLength)
+    while (RayLength <= EndLength)
     {
-        vec3 CurrentPosition = CameraPosition + Ray * RayDirection;
+        vec3 CurrentPosition = CameraPosition + RayLength * RayDirection;
 
         uvec2 Voxel = GetVoxel(CurrentPosition);
         if (Voxel.x > 0)
@@ -84,7 +85,7 @@ void main()
             break;
         }
 
-        Ray += Step;
+        RayLength += Step;
     }
 
     imageStore(cs_Vertex, VertexMapPosition, vec4(Vertex, 1.0));

@@ -53,10 +53,8 @@ namespace MR
                 pBuffer[i] = static_cast<T>(pShortBuffer[i]);
             }
 
-            if (pDepthFrame != nullptr)
-            {
-                pDepthFrame->Release();
-            }
+            
+            pDepthFrame->Release();
 
             return true;
         }

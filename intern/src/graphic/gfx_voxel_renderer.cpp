@@ -44,7 +44,7 @@ namespace
 
     const int g_PyramidLevels = 3;
 
-    const float g_VolumeSize = 2.0f;
+    const float g_VolumeSize = 10.0f;
     const int g_VolumeResolution = 256;
     const float g_VoxelSize = g_VolumeSize / g_VolumeResolution;
 
@@ -120,6 +120,7 @@ namespace
         void PerformTracking();
         void Integrate();
         void Raycast();
+        void DownSample();
 
         // Just for debugging
 
@@ -237,7 +238,7 @@ namespace
     
     void CGfxVoxelRenderer::OnSetupShader()
     {
-        unsigned int NumberOfDefines = 6;
+        int NumberOfDefines = 6;
 
         std::vector<std::stringstream> DefineStreams(NumberOfDefines);
 
@@ -248,10 +249,10 @@ namespace
         DefineStreams[4] << "TILE_SIZE3D " << g_TileSize3D;
         DefineStreams[5] << "UINT16_MAX " << 65535;
 
-        std::vector<std::string> DefineStrings(DefineStreams.size());
-        std::vector<const char*> Defines(DefineStreams.size());
+        std::vector<std::string> DefineStrings(NumberOfDefines);
+        std::vector<const char*> Defines(NumberOfDefines);
 
-        for (int i = 0; i < DefineStreams.size(); ++ i)
+        for (int i = 0; i < NumberOfDefines; ++ i)
         {
             DefineStrings[i] = DefineStreams[i].str();
 
@@ -476,14 +477,14 @@ namespace
             glDispatchCompute(WorkGroupsX >> PyramidLevel, WorkGroupsY >> PyramidLevel, 1);
         }
 
+        /////////////////////////////////////////////////////////////////////////////////////
+        // Generate vertex and normal map
+        /////////////////////////////////////////////////////////////////////////////////////
+
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_IntrinsicsConstantBuffer);
 
         for (int PyramidLevel = 0; PyramidLevel < g_PyramidLevels; ++ PyramidLevel)
         {
-            //////////////////////////////////////////////////////////////////////////////////////
-            // Generate vertex and normal map
-            //////////////////////////////////////////////////////////////////////////////////////
-
             Gfx::ContextManager::SetShaderCS(m_CSVertexMap);
             glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
             glBindImageTexture(0, m_KinectSmoothDepthBuffer[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
@@ -528,6 +529,14 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxVoxelRenderer::DownSample()
+    {
+        //const int WorkGroupsX = (MR::CKinectControl::DepthImageWidth / g_TileSize2D);
+        //const int WorkGroupsY = (MR::CKinectControl::DepthImageHeight / g_TileSize2D);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxVoxelRenderer::Raycast()
     {
         Gfx::ContextManager::SetShaderCS(m_CSRaycast);
@@ -558,6 +567,7 @@ namespace
             SetSphere(); // debugging
 
             Raycast();
+            DownSample();
 
             Performance::EndEvent();
         }
