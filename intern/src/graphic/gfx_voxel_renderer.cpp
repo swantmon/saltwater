@@ -8,8 +8,6 @@
 
 #include "core/core_time.h"
 
-#include "data/data_map.h"
-
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_main.h"
@@ -25,9 +23,6 @@
 #include "graphic/gfx_view_manager.h"
 #include "graphic/gfx_voxel_renderer.h"
 
-// only for testing
-// http://www.busydevelopers.com/article/44073720/What+does+the+unsgned+short+value+in+INuiFusionColorReconstruction%3A%3AExportVolumeBlock+represent%3F
-
 #include "base/base_console.h"
 #include "gfx_native_buffer.h"
 #include "gfx_native_shader.h"
@@ -35,15 +30,8 @@
 #include "mr/mr_kinect_control.h"
 
 #include <gl/glew.h>
-#include <gl/wglew.h>
 
-#include <atomic>
-#include <array>
-#include <fstream>
-#include <iostream>
-#include <mutex>
 #include <sstream>
-#include <thread>
 
 using namespace Gfx;
 
@@ -443,7 +431,7 @@ namespace
 
         ScalingMatrix.SetScale(0.005f);
         RotationMatrix.SetRotationX(3.14f);
-
+        
         m_VertexMapWorldMatrix = RotationMatrix * ScalingMatrix;
 
         ScalingMatrix.SetScale(10.0f / static_cast<float>(g_VolumeResolution));
