@@ -1396,33 +1396,33 @@ namespace
         // -----------------------------------------------------------------------------
         // Calculate far plane and setup plane
         // -----------------------------------------------------------------------------
-        float* pPlaneGeometryBuffer = static_cast<float*>(BufferManager::MapVertexBuffer(VertexBufferSetPtr->GetBuffer(0), CBuffer::Write));
+        float PlaneGeometryBuffer[20];
 
-        pPlaneGeometryBuffer[0] = FarTopLeft[0];
-        pPlaneGeometryBuffer[1] = FarTopLeft[1];
-        pPlaneGeometryBuffer[2] = FarTopLeft[2];
-        pPlaneGeometryBuffer[3] = 0.0f;
-        pPlaneGeometryBuffer[4] = 1.0f;
+        PlaneGeometryBuffer[0] = FarTopLeft[0];
+        PlaneGeometryBuffer[1] = FarTopLeft[1];
+        PlaneGeometryBuffer[2] = FarTopLeft[2];
+        PlaneGeometryBuffer[3] = 0.0f;
+        PlaneGeometryBuffer[4] = 1.0f;
 
-        pPlaneGeometryBuffer[5] = FarTopRight[0];
-        pPlaneGeometryBuffer[6] = FarTopRight[1];
-        pPlaneGeometryBuffer[7] = FarTopRight[2];
-        pPlaneGeometryBuffer[8] = 1.0f;
-        pPlaneGeometryBuffer[9] = 1.0f;
+        PlaneGeometryBuffer[5] = FarTopRight[0];
+        PlaneGeometryBuffer[6] = FarTopRight[1];
+        PlaneGeometryBuffer[7] = FarTopRight[2];
+        PlaneGeometryBuffer[8] = 1.0f;
+        PlaneGeometryBuffer[9] = 1.0f;
 
-        pPlaneGeometryBuffer[10] = FarBottomRight[0];
-        pPlaneGeometryBuffer[11] = FarBottomRight[1];
-        pPlaneGeometryBuffer[12] = FarBottomRight[2];
-        pPlaneGeometryBuffer[13] = 1.0f;
-        pPlaneGeometryBuffer[14] = 0.0f;
+        PlaneGeometryBuffer[10] = FarBottomRight[0];
+        PlaneGeometryBuffer[11] = FarBottomRight[1];
+        PlaneGeometryBuffer[12] = FarBottomRight[2];
+        PlaneGeometryBuffer[13] = 1.0f;
+        PlaneGeometryBuffer[14] = 0.0f;
 
-        pPlaneGeometryBuffer[15] = FarBottomLeft[0];
-        pPlaneGeometryBuffer[16] = FarBottomLeft[1];
-        pPlaneGeometryBuffer[17] = FarBottomLeft[2];
-        pPlaneGeometryBuffer[18] = 0.0f;
-        pPlaneGeometryBuffer[19] = 0.0f;
+        PlaneGeometryBuffer[15] = FarBottomLeft[0];
+        PlaneGeometryBuffer[16] = FarBottomLeft[1];
+        PlaneGeometryBuffer[17] = FarBottomLeft[2];
+        PlaneGeometryBuffer[18] = 0.0f;
+        PlaneGeometryBuffer[19] = 0.0f;
 
-        BufferManager::UnmapVertexBuffer(VertexBufferSetPtr->GetBuffer(0));
+        BufferManager::UploadVertexBufferData(VertexBufferSetPtr->GetBuffer(0), &PlaneGeometryBuffer);
 
         // -----------------------------------------------------------------------------
         // Setup constant buffer

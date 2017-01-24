@@ -598,25 +598,25 @@ namespace
     {
         auto RenderFrustumPlane = [&](const Base::Float3& _rTopLeft, const Base::Float3& _rTopRight, const Base::Float3& _rBottomRight, const Base::Float3& _rBottomLeft, const Base::Float3& _rColor)
         {
-            float* pViewBuffer = static_cast<float*>(BufferManager::MapVertexBuffer(m_PlaneBuffer->GetBuffer(0), CBuffer::Write));
+            float ViewBuffer[12];
 
-            pViewBuffer[0] = _rTopLeft[0];
-            pViewBuffer[1] = _rTopLeft[1];
-            pViewBuffer[2] = _rTopLeft[2];
+            ViewBuffer[0] = _rTopLeft[0];
+            ViewBuffer[1] = _rTopLeft[1];
+            ViewBuffer[2] = _rTopLeft[2];
 
-            pViewBuffer[3] = _rTopRight[0];
-            pViewBuffer[4] = _rTopRight[1];
-            pViewBuffer[5] = _rTopRight[2];
+            ViewBuffer[3] = _rTopRight[0];
+            ViewBuffer[4] = _rTopRight[1];
+            ViewBuffer[5] = _rTopRight[2];
 
-            pViewBuffer[6] = _rBottomRight[0];
-            pViewBuffer[7] = _rBottomRight[1];
-            pViewBuffer[8] = _rBottomRight[2];
+            ViewBuffer[6] = _rBottomRight[0];
+            ViewBuffer[7] = _rBottomRight[1];
+            ViewBuffer[8] = _rBottomRight[2];
 
-            pViewBuffer[9] = _rBottomLeft[0];
-            pViewBuffer[10] = _rBottomLeft[1];
-            pViewBuffer[11] = _rBottomLeft[2];
+            ViewBuffer[9] = _rBottomLeft[0];
+            ViewBuffer[10] = _rBottomLeft[1];
+            ViewBuffer[11] = _rBottomLeft[2];
 
-            BufferManager::UnmapVertexBuffer(m_PlaneBuffer->GetBuffer(0));
+            BufferManager::UploadVertexBufferData(m_PlaneBuffer->GetBuffer(0), ViewBuffer);
 
             // -----------------------------------------------------------------------------
 
