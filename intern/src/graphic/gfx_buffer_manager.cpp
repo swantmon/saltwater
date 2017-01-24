@@ -566,6 +566,8 @@ namespace
     {
         CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
 
+        assert(pBuffer != nullptr);
+
         if (pBuffer->m_Info.m_Binding == CBuffer::ResourceBuffer && (pBuffer->m_Info.m_Access == CBuffer::CPURead || pBuffer->m_Info.m_Access == CBuffer::CPUReadWrite))
         {
             glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
@@ -574,8 +576,6 @@ namespace
         }
 
         GLenum Binding = pBuffer->m_NativeBinding;
-
-        assert(pBuffer != nullptr);
 
         glBindBuffer(Binding, pBuffer->m_NativeBuffer);
 

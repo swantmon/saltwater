@@ -144,6 +144,8 @@ namespace MATH
     {
         m_Center = _rCpy.m_Center;
         m_Radius = _rCpy.m_Radius;
+
+        return *this;
     }
     
     // -----------------------------------------------------------------------------

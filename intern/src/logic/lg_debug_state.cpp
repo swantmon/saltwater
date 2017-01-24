@@ -49,7 +49,8 @@ namespace
 namespace
 {
     CLgDebugState::CLgDebugState()
-        : m_IsGizmoVisible        (false)
+        : m_State                 (0)
+        , m_IsGizmoVisible        (false)
         , m_IsShadowVisible       (true)
         , m_IsShadowFrustumVisible(false)
         , m_IsCameraFrustumVisible(false)

@@ -123,8 +123,9 @@ namespace
 namespace 
 {
     CGfxPointLightManager::CInternPointLightFacet::CInternPointLightFacet()
-        : CPointLightFacet  ()
-        , m_RenderContextPtr()
+        : CPointLightFacet   ()
+        , m_RenderContextPtr ()
+        , m_CurrentShadowType(Dt::CPointLightFacet::NoShadows)
     {
 
     }

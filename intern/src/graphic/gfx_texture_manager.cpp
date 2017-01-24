@@ -754,7 +754,7 @@ namespace
         
         Gfx::CNativeTextureHandle TextureHandle = pInternTexture->m_NativeTexture;
         
-        GLenum TextureTarget = pInternTexture->m_Info.m_IsCubeTexture == true ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D;
+        GLenum TextureTarget = (pInternTexture->m_Info.m_IsCubeTexture == true) ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D;
         
         glBindTexture(TextureTarget, TextureHandle);
         

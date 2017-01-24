@@ -171,7 +171,7 @@ namespace MATH
     
     // -----------------------------------------------------------------------------
     
-    inline float IsEqual(float _Value1, float _Value2, float _Epsilon)
+    inline bool IsEqual(float _Value1, float _Value2, float _Epsilon)
     {
         float Difference = _Value1 - _Value2;
         

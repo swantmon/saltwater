@@ -186,13 +186,16 @@ namespace MR
 
         g_pSensor->get_DepthFrameSource(&pDepthFrameSource);
 
-        pDepthFrameSource->OpenReader(&g_pDepthFrameReader);
-
         if (pDepthFrameSource != 0)
         {
-            pDepthFrameSource->Release();
+            pDepthFrameSource->OpenReader(&g_pDepthFrameReader);
 
-            pDepthFrameSource = 0;
+            if (g_pDepthFrameReader != 0)
+            {
+                g_pDepthFrameReader->Release();
+
+                g_pDepthFrameReader = 0;
+            }
         }
 
         // -----------------------------------------------------------------------------
@@ -231,7 +234,7 @@ namespace MR
 
         // -----------------------------------------------------------------------------
 
-        if (g_pDepthFrameReader == 0)
+        if (g_pDepthFrameReader != 0)
         {
             g_pDepthFrameReader->Release();
 
@@ -241,7 +244,7 @@ namespace MR
         // -----------------------------------------------------------------------------
         // Shutdown device
         // -----------------------------------------------------------------------------
-        if (!g_pSensor)
+        if (g_pSensor != 0)
         {
             g_pSensor->Close();
 
@@ -263,6 +266,8 @@ namespace MR
 
         if (SUCCEEDED(Result))
         {
+            assert(pColorFrame);
+
             pColorFrame->CopyConvertedFrameDataToArray(COLOR_WIDTH * COLOR_HEIGHT * 4, g_pColorFrameDataRAW, ColorImageFormat_Rgba);
         }
 
@@ -281,6 +286,8 @@ namespace MR
 
         if (SUCCEEDED(Result))
         {
+            assert(pDepthFrame);
+
             unsigned int Capacity;
             unsigned short* pBuffer;
 

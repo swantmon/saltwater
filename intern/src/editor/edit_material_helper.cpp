@@ -121,8 +121,7 @@ namespace
 
     void CMaterialHelper::OnLoadMaterial(Edit::CMessage& _rMessage)
     {
-        char        pTmp[512];
-        std::string PathToFile;
+        char pTmp[512];
 
         // -----------------------------------------------------------------------------
         // Read values
