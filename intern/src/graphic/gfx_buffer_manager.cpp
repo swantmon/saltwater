@@ -67,8 +67,8 @@ namespace
         void* MapConstantBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map);
         void UnmapConstantBuffer(CBufferPtr _BufferPtr);
 
-        void UploadVertexBufferData(CBufferPtr _BufferPtr, void* _pData);
-        void UploadConstantBufferData(CBufferPtr _BufferPtr, void* _pData);
+        void UploadVertexBufferData(CBufferPtr _BufferPtr, const void* _pData);
+        void UploadConstantBufferData(CBufferPtr _BufferPtr, const void* _pData);
 
     private:
 
@@ -521,7 +521,7 @@ namespace
 
         GLenum Binding = pBuffer->m_NativeBinding;
 
-        glUnmapBuffer(GL_ARRAY_BUFFER);
+        glUnmapBuffer(Binding);
     }
 
     // -----------------------------------------------------------------------------
@@ -578,7 +578,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxBufferManager::UploadVertexBufferData(CBufferPtr _BufferPtr, void* _pData)
+    void CGfxBufferManager::UploadVertexBufferData(CBufferPtr _BufferPtr, const void* _pData)
     {
         assert(_BufferPtr != nullptr && _BufferPtr.IsValid());
 
@@ -597,7 +597,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxBufferManager::UploadConstantBufferData(CBufferPtr _BufferPtr, void* _pData)
+    void CGfxBufferManager::UploadConstantBufferData(CBufferPtr _BufferPtr, const void* _pData)
     {
         assert(_BufferPtr != nullptr && _BufferPtr.IsValid() && _pData);
 
@@ -879,14 +879,14 @@ namespace BufferManager
 
     // -----------------------------------------------------------------------------
 
-    void UploadVertexBufferData(CBufferPtr _BufferPtr, void* _pData)
+    void UploadVertexBufferData(CBufferPtr _BufferPtr, const void* _pData)
     {
         CGfxBufferManager::GetInstance().UploadVertexBufferData(_BufferPtr, _pData);
     }
 
     // -----------------------------------------------------------------------------
 
-    void UploadConstantBufferData(CBufferPtr _BufferPtr, void* _pData)
+    void UploadConstantBufferData(CBufferPtr _BufferPtr, const void* _pData)
     {
         CGfxBufferManager::GetInstance().UploadConstantBufferData(_BufferPtr, _pData);
     }

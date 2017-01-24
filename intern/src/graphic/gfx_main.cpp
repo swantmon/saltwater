@@ -620,12 +620,7 @@ namespace
 
         FrameNumber    = static_cast<float>(Core::Time::GetNumberOfFrame());
         FrameDeltaTime = static_cast<float>(Core::Time::GetDeltaTimeLastFrame());
-                
-        // -----------------------------------------------------------------------------
-        // Map buffer
-        // -----------------------------------------------------------------------------
-        SPerFrameConstantBuffer* pPerFrameConstantBuffer = static_cast<SPerFrameConstantBuffer*>(BufferManager::MapConstantBuffer(m_PerFrameConstantBufferBufferPtr, CBuffer::Write));
-        
+
         // -----------------------------------------------------------------------------
         // Set previous values
         // -----------------------------------------------------------------------------
@@ -652,10 +647,8 @@ namespace
         m_PerFrameConstantBuffer.m_CameraParameters0              .Set(Near, Far, 0.0f, 0.0f);
         m_PerFrameConstantBuffer.m_WorldParameters0               .Set(WorldNumberOfMetersX, WorldNumberOfMetersY, WorldNumberOfMetersZ, 0.0f);
         m_PerFrameConstantBuffer.m_FrameParameters0               .Set(FrameNumber, FrameDeltaTime, 0.0f, 0.0f);
-
-        Base::CMemory::Copy(pPerFrameConstantBuffer, &m_PerFrameConstantBuffer, sizeof(SPerFrameConstantBuffer));
         
-        BufferManager::UnmapConstantBuffer(m_PerFrameConstantBufferBufferPtr);
+        BufferManager::UploadConstantBufferData(m_PerFrameConstantBufferBufferPtr, &m_PerFrameConstantBuffer);
     }
     
     // -----------------------------------------------------------------------------
