@@ -706,19 +706,17 @@ namespace
             // -----------------------------------------------------------------------------
             // Upload data to buffer
             // -----------------------------------------------------------------------------
-            SPerDrawCallConstantBufferVS* pModelBuffer = static_cast<SPerDrawCallConstantBufferVS*>(BufferManager::MapConstantBuffer(m_ViewModelVSBuffer->GetBuffer(1), CBuffer::Write));
+            SPerDrawCallConstantBufferVS ModelBuffer;
 
-            assert(pModelBuffer != nullptr);
+            ModelBuffer.m_ModelMatrix = CurrentRenderJob->m_ModelMatrix;
 
-            pModelBuffer->m_ModelMatrix = CurrentRenderJob->m_ModelMatrix;
+            BufferManager::UploadConstantBufferData(m_ViewModelVSBuffer->GetBuffer(1), &ModelBuffer);
 
-            BufferManager::UnmapConstantBuffer(m_ViewModelVSBuffer->GetBuffer(1));
+            SHighlightSettings SelectionSettings;
 
-            SHighlightSettings* pSelectionSettings = static_cast<SHighlightSettings*>(BufferManager::MapConstantBuffer(m_HighlightPSBufferSetPtr->GetBuffer(0), CBuffer::Write));
+            SelectionSettings.m_ColorAlpha = Base::Float4(0.31f, 0.45f, 0.64f, 0.4f);
 
-            pSelectionSettings->m_ColorAlpha = Base::Float4(0.31f, 0.45f, 0.64f, 0.4f);
-
-            BufferManager::UnmapConstantBuffer(m_HighlightPSBufferSetPtr->GetBuffer(0));
+            BufferManager::UploadConstantBufferData(m_HighlightPSBufferSetPtr->GetBuffer(0), &SelectionSettings);
 
             // -----------------------------------------------------------------------------
             // Render
@@ -818,7 +816,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 Base::Int2 ActiveWindowSize = Gfx::Main::GetActiveWindowSize();
 
-                SSelectionSettings* pSettings = static_cast<SSelectionSettings*>(BufferManager::MapConstantBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1), CBuffer::Write));
+                SSelectionSettings Settings;
 
                 MinX = rRequest.m_Cursor[0] + rTicket.m_OffsetX;
                 MinY = rRequest.m_Cursor[1] + rTicket.m_OffsetY;
@@ -830,12 +828,12 @@ namespace
                 if (MinX > MaxX) MinX = 0;
                 if (MinY > MaxY) MinY = 0;
 
-                pSettings->m_MinX = MinX;
-                pSettings->m_MinY = MinY;
-                pSettings->m_MaxX = MaxX;
-                pSettings->m_MaxY = MaxY;
+                Settings.m_MinX = MinX;
+                Settings.m_MinY = MinY;
+                Settings.m_MaxX = MaxX;
+                Settings.m_MaxY = MaxY;
 
-                BufferManager::UnmapConstantBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1));
+                BufferManager::UploadConstantBufferData(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1), &Settings);
 
                 // -----------------------------------------------------------------------------
                 // Execute

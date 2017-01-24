@@ -1061,12 +1061,12 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup constant buffer
         // -----------------------------------------------------------------------------
-        SOutputBufferPS* pPSBuffer = static_cast<SOutputBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(0), CBuffer::Write));
+        SOutputBufferPS PSBuffer;
 
-        pPSBuffer->m_HDRFactor = _Intensity;
-        pPSBuffer->m_IsHDR     = _pOutput->m_InputTexture2DPtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
+        PSBuffer.m_HDRFactor = _Intensity;
+        PSBuffer.m_IsHDR     = _pOutput->m_InputTexture2DPtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
 
-        BufferManager::UnmapConstantBuffer(PSBufferSetPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
 
         // -----------------------------------------------------------------------------
         // Environment to cube map
@@ -1160,12 +1160,12 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup constant buffer
         // -----------------------------------------------------------------------------
-        SOutputBufferPS* pPSBuffer = static_cast<SOutputBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(0), CBuffer::Write));
+        SOutputBufferPS PSBuffer;
 
-        pPSBuffer->m_HDRFactor = _Intensity;
-        pPSBuffer->m_IsHDR     = _pOutput->m_InputTexture2DPtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
+        PSBuffer.m_HDRFactor = _Intensity;
+        PSBuffer.m_IsHDR     = _pOutput->m_InputTexture2DPtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
 
-        BufferManager::UnmapConstantBuffer(PSBufferSetPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
 
         // -----------------------------------------------------------------------------
         // Environment to cube map
@@ -1269,24 +1269,24 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup constant buffer
         // -----------------------------------------------------------------------------
-        SModelMatrixBuffer* pViewBuffer = static_cast<SModelMatrixBuffer*>(BufferManager::MapConstantBuffer(VSBufferSetPtr->GetBuffer(0), CBuffer::Write));
+        SModelMatrixBuffer ViewBuffer;
 
-        pViewBuffer->m_ModelMatrix  = Base::Float4x4::s_Identity;
-        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(-1.0f, 1.0f, 1.0f);
-        pViewBuffer->m_ModelMatrix *= MainViewPtr->GetRotationMatrix().GetTransposed();
-        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(0.0f, 0.0f, -0.1f);
-        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(ScaleY, ScaleX, 1.0f);
+        ViewBuffer.m_ModelMatrix  = Base::Float4x4::s_Identity;
+        ViewBuffer.m_ModelMatrix *= Base::Float4x4().SetScale(-1.0f, 1.0f, 1.0f);
+        ViewBuffer.m_ModelMatrix *= MainViewPtr->GetRotationMatrix().GetTransposed();
+        ViewBuffer.m_ModelMatrix *= Base::Float4x4().SetTranslation(0.0f, 0.0f, -0.1f);
+        ViewBuffer.m_ModelMatrix *= Base::Float4x4().SetScale(ScaleY, ScaleX, 1.0f);
 
-        BufferManager::UnmapConstantBuffer(VSBufferSetPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(VSBufferSetPtr->GetBuffer(0), &ViewBuffer);
 
         // -----------------------------------------------------------------------------
 
-        SOutputBufferPS* pPSBuffer = static_cast<SOutputBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(1), CBuffer::Write));
+        SOutputBufferPS PSBuffer;
 
-        pPSBuffer->m_HDRFactor = _Intensity;
-        pPSBuffer->m_IsHDR     = _pOutput->m_InputTexture2DPtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
+        PSBuffer.m_HDRFactor = _Intensity;
+        PSBuffer.m_IsHDR     = _pOutput->m_InputTexture2DPtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
 
-        BufferManager::UnmapConstantBuffer(PSBufferSetPtr->GetBuffer(1));
+        BufferManager::UploadConstantBufferData(PSBufferSetPtr->GetBuffer(1), &PSBuffer);
 
         // -----------------------------------------------------------------------------
         // Environment to cube map
@@ -1427,21 +1427,21 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup constant buffer
         // -----------------------------------------------------------------------------
-        SModelMatrixBuffer* pViewBuffer = static_cast<SModelMatrixBuffer*>(BufferManager::MapConstantBuffer(VSBufferSetPtr->GetBuffer(0), CBuffer::Write));
+        SModelMatrixBuffer ViewBuffer;
 
-        pViewBuffer->m_ModelMatrix  = Base::Float4x4::s_Identity;
-        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(-1.0f, 1.0f, 1.0f);
+        ViewBuffer.m_ModelMatrix  = Base::Float4x4::s_Identity;
+        ViewBuffer.m_ModelMatrix *= Base::Float4x4().SetScale(-1.0f, 1.0f, 1.0f);
 
-        BufferManager::UnmapConstantBuffer(VSBufferSetPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(VSBufferSetPtr->GetBuffer(0), &ViewBuffer);
 
         // -----------------------------------------------------------------------------
 
-        SOutputBufferPS* pPSBuffer = static_cast<SOutputBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(1), CBuffer::Write));
+        SOutputBufferPS PSBuffer;
 
-        pPSBuffer->m_HDRFactor = _Intensity;
-        pPSBuffer->m_IsHDR = _pOutput->m_InputTexture2DPtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
+        PSBuffer.m_HDRFactor = _Intensity;
+        PSBuffer.m_IsHDR = _pOutput->m_InputTexture2DPtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
 
-        BufferManager::UnmapConstantBuffer(PSBufferSetPtr->GetBuffer(1));
+        BufferManager::UploadConstantBufferData(PSBufferSetPtr->GetBuffer(1), &PSBuffer);
 
         // -----------------------------------------------------------------------------
         // Environment to cube map
@@ -1544,25 +1544,25 @@ namespace
         // only if the camera is inside the playing area.
         // Otherwise we have an gimbal lock.
         // -----------------------------------------------------------------------------
-        SModelMatrixBuffer* pViewBuffer = static_cast<SModelMatrixBuffer*>(BufferManager::MapConstantBuffer(GSBufferSetPtr->GetBuffer(1), CBuffer::Write));
+        SModelMatrixBuffer ViewBuffer;
 
         Base::Float3 Rotation;
         ViewManager::GetMainCamera()->GetView()->GetRotationMatrix().GetRotation(Rotation);
 
-        pViewBuffer->m_ModelMatrix  = Base::Float4x4::s_Identity;
-        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetRotationY(Rotation[1]);
+        ViewBuffer.m_ModelMatrix  = Base::Float4x4::s_Identity;
+        ViewBuffer.m_ModelMatrix *= Base::Float4x4().SetRotationY(Rotation[1]);
 
-        BufferManager::UnmapConstantBuffer(GSBufferSetPtr->GetBuffer(1));
+        BufferManager::UploadConstantBufferData(GSBufferSetPtr->GetBuffer(1), &ViewBuffer);
 
         // -----------------------------------------------------------------------------
         // Setup constant buffer
         // -----------------------------------------------------------------------------
-        SOutputBufferPS* pPSBuffer = static_cast<SOutputBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(0), CBuffer::Write));
+        SOutputBufferPS PSBuffer;
 
-        pPSBuffer->m_HDRFactor = _Intensity;
-        pPSBuffer->m_IsHDR = _pOutput->m_InputTexture2DPtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
+        PSBuffer.m_HDRFactor = _Intensity;
+        PSBuffer.m_IsHDR     = _pOutput->m_InputTexture2DPtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
 
-        BufferManager::UnmapConstantBuffer(PSBufferSetPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
 
         // -----------------------------------------------------------------------------
         // Environment to cube map
