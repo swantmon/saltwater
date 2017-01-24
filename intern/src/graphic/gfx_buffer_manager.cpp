@@ -138,7 +138,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Check if the buffer is the owner of CPU pixel data.
         // -----------------------------------------------------------------------------
-        if (m_Info.m_IsBytesOwner || m_pBytes != nullptr)
+        if (m_Info.m_IsBytesOwner)
         {
             assert(m_pBytes != nullptr);
 
