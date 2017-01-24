@@ -394,7 +394,7 @@ namespace
         // -----------------------------------------------------------------------------
         CCameraPtr CameraPtr = ViewManager::GetMainCamera();
         
-        SCameraProperties* pPSBuffer = static_cast<SCameraProperties*>(BufferManager::MapConstantBuffer(m_PunctualLightPSBufferPtr->GetBuffer(0)));
+        SCameraProperties* pPSBuffer = static_cast<SCameraProperties*>(BufferManager::MapConstantBuffer(m_PunctualLightPSBufferPtr->GetBuffer(0), CBuffer::Write));
         
         assert(pPSBuffer != nullptr);
         
@@ -433,7 +433,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Upload model matrix to buffer
             // -----------------------------------------------------------------------------
-            SPerDrawCallConstantBuffer* pModelBuffer = static_cast<SPerDrawCallConstantBuffer*>(BufferManager::MapConstantBuffer(m_MainVSBufferPtr->GetBuffer(1)));
+            SPerDrawCallConstantBuffer* pModelBuffer = static_cast<SPerDrawCallConstantBuffer*>(BufferManager::MapConstantBuffer(m_MainVSBufferPtr->GetBuffer(1), CBuffer::Write));
             
             assert(pModelBuffer != nullptr);
             
@@ -446,7 +446,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Upload buffer data
             // -----------------------------------------------------------------------------
-            SPunctualLightProperties* pLightBuffer = static_cast<SPunctualLightProperties*>(BufferManager::MapConstantBuffer(m_PunctualLightPSBufferPtr->GetBuffer(1)));
+            SPunctualLightProperties* pLightBuffer = static_cast<SPunctualLightProperties*>(BufferManager::MapConstantBuffer(m_PunctualLightPSBufferPtr->GetBuffer(1), CBuffer::Write));
             
             assert(pLightBuffer != nullptr);
             

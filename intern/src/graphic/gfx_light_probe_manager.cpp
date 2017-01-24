@@ -738,7 +738,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Upload per mipmap changing data
             // -----------------------------------------------------------------------------
-            SSpecularCubemapSettings& rSpecularCubemapSettings = *static_cast<SSpecularCubemapSettings*>(BufferManager::MapConstantBuffer(m_FilteringPSBufferSetPtr->GetBuffer(0)));
+            SSpecularCubemapSettings& rSpecularCubemapSettings = *static_cast<SSpecularCubemapSettings*>(BufferManager::MapConstantBuffer(m_FilteringPSBufferSetPtr->GetBuffer(0), CBuffer::Write));
 
             rSpecularCubemapSettings.m_LinearRoughness = MipmapRoughness;
             rSpecularCubemapSettings.m_NumberOfMiplevels = NumberOfMiplevels - 1.0f;

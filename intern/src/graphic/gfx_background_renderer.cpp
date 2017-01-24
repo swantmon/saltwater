@@ -521,7 +521,7 @@ namespace
         // -----------------------------------------------------------------------------
         CCameraPtr CameraPtr = RenderContextPtr->GetCamera();
 
-        SSkyboxVSBuffer* pViewBuffer = static_cast<SSkyboxVSBuffer*>(BufferManager::MapConstantBuffer(VSBufferSetPtr->GetBuffer(0)));
+        SSkyboxVSBuffer* pViewBuffer = static_cast<SSkyboxVSBuffer*>(BufferManager::MapConstantBuffer(VSBufferSetPtr->GetBuffer(0), CBuffer::Write));
 
         pViewBuffer->m_View       = CameraPtr->GetView()->GetViewMatrix();
         pViewBuffer->m_Projection = CameraPtr->GetProjectionMatrix();
@@ -532,7 +532,7 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        SSkyboxBufferPS* pPSBuffer = static_cast<SSkyboxBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(0)));
+        SSkyboxBufferPS* pPSBuffer = static_cast<SSkyboxBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(0), CBuffer::Write));
         
         assert(pPSBuffer != nullptr);
     
@@ -671,7 +671,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Data
         // -----------------------------------------------------------------------------
-        SSkytextureBufferPS* pPSBuffer = static_cast<SSkytextureBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(0)));
+        SSkytextureBufferPS* pPSBuffer = static_cast<SSkytextureBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(0), CBuffer::Write));
 
         pPSBuffer->m_HDRFactor     = HDRIntensity;
         pPSBuffer->m_IsHDR         = rRenderJob.m_pGraphicCamera->GetBackgroundTexture2D()->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;

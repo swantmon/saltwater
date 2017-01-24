@@ -54,7 +54,9 @@ namespace BufferManager
     void* MapIndexBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map);
     void UnmapIndexBuffer(CBufferPtr _BufferPtr);
 
-    void* MapConstantBuffer(CBufferPtr _BufferPtr);
+    void* MapConstantBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map);
     void UnmapConstantBuffer(CBufferPtr _BufferPtr);
+
+    void UploadConstantBufferData(CBufferPtr _BufferPtr, void* _pData);
 } // namespace BufferManager
 } // namespace Gfx

@@ -64,8 +64,10 @@ namespace
         void* MapIndexBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map);
         void UnmapIndexBuffer(CBufferPtr _BufferPtr);
 
-        void* MapConstantBuffer(CBufferPtr _BufferPtr);
+        void* MapConstantBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map);
         void UnmapConstantBuffer(CBufferPtr _BufferPtr);
+
+        void UploadConstantBufferData(CBufferPtr _BufferPtr, void* _pData);
 
     private:
 
@@ -539,25 +541,19 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void* CGfxBufferManager::MapConstantBuffer(CBufferPtr _BufferPtr)
+    void* CGfxBufferManager::MapConstantBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map)
     {
         CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
 
-        assert(pBuffer != nullptr);
+        assert(pBuffer != nullptr && _BufferPtr.IsValid());
 
-        if (pBuffer->m_Info.m_Binding == CBuffer::ResourceBuffer && (pBuffer->m_Info.m_Access == CBuffer::CPURead || pBuffer->m_Info.m_Access == CBuffer::CPUReadWrite))
-        {
-            glBindBuffer(GL_SHADER_STORAGE_BUFFER, pBuffer->m_NativeBuffer);
+        GLenum Binding = pBuffer->m_NativeBinding;
 
-            return glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-        }
-        
-        if (!pBuffer->m_Info.m_IsBytesOwner && pBuffer->m_pBytes == 0)
-        {
-            pBuffer->m_pBytes = Base::CMemory::Allocate(_BufferPtr->GetNumberOfBytes());
-        }
+        glBindBuffer(Binding, pBuffer->m_NativeBuffer);
 
-        return pBuffer->m_pBytes;
+        int NativeMap = ConvertMap(_Map);
+
+        return glMapBuffer(Binding, NativeMap);
     }
 
     // -----------------------------------------------------------------------------
@@ -568,20 +564,27 @@ namespace
 
         assert(pBuffer != nullptr);
 
-        if (pBuffer->m_Info.m_Binding == CBuffer::ResourceBuffer && (pBuffer->m_Info.m_Access == CBuffer::CPURead || pBuffer->m_Info.m_Access == CBuffer::CPUReadWrite))
-        {
-            glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+        GLenum Binding = pBuffer->m_NativeBinding;
 
-            return;
-        }
+        glUnmapBuffer(Binding);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxBufferManager::UploadConstantBufferData(CBufferPtr _BufferPtr, void* _pData)
+    {
+        assert(_BufferPtr != nullptr && _BufferPtr.IsValid() && _pData);
+
+        CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
 
         GLenum Binding = pBuffer->m_NativeBinding;
 
         glBindBuffer(Binding, pBuffer->m_NativeBuffer);
 
-        glBufferSubData(Binding, 0, pBuffer->m_NumberOfBytes, pBuffer->m_pBytes);
+        glBufferSubData(Binding, 0, pBuffer->m_NumberOfBytes, _pData);
 
         glBindBuffer(Binding, 0);
+
     }
 
     // -----------------------------------------------------------------------------
@@ -834,9 +837,9 @@ namespace BufferManager
 
     // -----------------------------------------------------------------------------
 
-    void* MapConstantBuffer(CBufferPtr _BufferPtr)
+    void* MapConstantBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map)
     {
-        return CGfxBufferManager::GetInstance().MapConstantBuffer(_BufferPtr);
+        return CGfxBufferManager::GetInstance().MapConstantBuffer(_BufferPtr, _Map);
     }
 
     // -----------------------------------------------------------------------------
@@ -844,6 +847,13 @@ namespace BufferManager
     void UnmapConstantBuffer(CBufferPtr _BufferPtr)
     {
         CGfxBufferManager::GetInstance().UnmapConstantBuffer(_BufferPtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void UploadConstantBufferData(CBufferPtr _BufferPtr, void* _pData)
+    {
+        CGfxBufferManager::GetInstance().UploadConstantBufferData(_BufferPtr, _pData);
     }
 } // namespace BufferManager
 } // namespace Gfx

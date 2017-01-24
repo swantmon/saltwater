@@ -887,7 +887,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Data
         // -----------------------------------------------------------------------------
-        SDOFDownProperties* pDOFDownProperties = static_cast<SDOFDownProperties*>(BufferManager::MapConstantBuffer(m_DOFDownPropertiesPSBufferPtr->GetBuffer(0)));
+        SDOFDownProperties* pDOFDownProperties = static_cast<SDOFDownProperties*>(BufferManager::MapConstantBuffer(m_DOFDownPropertiesPSBufferPtr->GetBuffer(0), CBuffer::Write));
 
         pDOFDownProperties->m_DofNear     = pDataDOFFacet->GetNear();
         pDOFDownProperties->m_DofRowDelta = Base::Float2(1.0f, 0.25f / Size[1]);
@@ -896,7 +896,7 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        SDOFApplyProperties* pDOFApplyProperties = static_cast<SDOFApplyProperties*>(BufferManager::MapConstantBuffer(m_DOFApplyPropertiesPSBufferPtr->GetBuffer(1)));
+        SDOFApplyProperties* pDOFApplyProperties = static_cast<SDOFApplyProperties*>(BufferManager::MapConstantBuffer(m_DOFApplyPropertiesPSBufferPtr->GetBuffer(1), CBuffer::Write));
 
         pDOFApplyProperties->m_DofEqFar     = pDataDOFFacet->GetEqFar();
         pDOFApplyProperties->m_DofLerpBias  = pDataDOFFacet->GetLerpBias();
@@ -1025,7 +1025,7 @@ namespace
         
         ContextManager::SetConstantBufferSetPS(m_GaussianBlurPropertiesPSBufferPtr);
         
-        pGaussianSettings = static_cast<SGaussianSettings*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesPSBufferPtr->GetBuffer(0)));
+        pGaussianSettings = static_cast<SGaussianSettings*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesPSBufferPtr->GetBuffer(0), CBuffer::Write));
         
         pGaussianSettings->m_Direction[0]          = 1.0f * 1.0f / static_cast<float>(QuarterSize[0]);
         pGaussianSettings->m_Direction[1]          = 0.0f * 1.0f / static_cast<float>(QuarterSize[1]);
@@ -1087,7 +1087,7 @@ namespace
         
         ContextManager::SetConstantBufferSetPS(m_GaussianBlurPropertiesPSBufferPtr);
         
-        pGaussianSettings = static_cast<SGaussianSettings*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesPSBufferPtr->GetBuffer(0)));
+        pGaussianSettings = static_cast<SGaussianSettings*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesPSBufferPtr->GetBuffer(0), CBuffer::Write));
         
         pGaussianSettings->m_Direction[0]          = 0.0f * 1.0f / static_cast<float>(QuarterSize[0]);
         pGaussianSettings->m_Direction[1]          = 1.0f * 1.0f / static_cast<float>(QuarterSize[1]);

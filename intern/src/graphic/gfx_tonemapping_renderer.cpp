@@ -298,7 +298,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Upload data
         // -----------------------------------------------------------------------------
-        SConstantBufferPS* pConstantBufferPS = static_cast<SConstantBufferPS*>(BufferManager::MapConstantBuffer(m_ConstantBufferSetPSPtr->GetBuffer(0)));
+        SConstantBufferPS* pConstantBufferPS = static_cast<SConstantBufferPS*>(BufferManager::MapConstantBuffer(m_ConstantBufferSetPSPtr->GetBuffer(0), CBuffer::Write));
 
         pConstantBufferPS->m_ColorMatrixR_ColorCurveCd1       = m_ConstantBufferPS.m_ColorMatrixR_ColorCurveCd1;
         pConstantBufferPS->m_ColorMatrixG_ColorCurveCd3Cm3    = m_ConstantBufferPS.m_ColorMatrixG_ColorCurveCd3Cm3;

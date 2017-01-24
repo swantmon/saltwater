@@ -669,7 +669,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Blur
         // -----------------------------------------------------------------------------
-        SGaussianShaderProperties* pGaussianSettings = static_cast<SGaussianShaderProperties*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0)));
+        SGaussianShaderProperties* pGaussianSettings = static_cast<SGaussianShaderProperties*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0), CBuffer::Write));
 
         pGaussianSettings->m_Direction[0] = 1;
         pGaussianSettings->m_Direction[1] = 0;
@@ -703,7 +703,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Blur
         // -----------------------------------------------------------------------------
-        pGaussianSettings = static_cast<SGaussianShaderProperties*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0)));
+        pGaussianSettings = static_cast<SGaussianShaderProperties*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0), CBuffer::Write));
 
         pGaussianSettings->m_Direction[0] = 0;
         pGaussianSettings->m_Direction[1] = 1;
@@ -770,7 +770,7 @@ namespace
             }
         }
 
-        SSunLightProperties* pLightBuffer = static_cast<SSunLightProperties*>(BufferManager::MapConstantBuffer(m_VolumeLightingCSBufferSetPtr->GetBuffer(1)));
+        SSunLightProperties* pLightBuffer = static_cast<SSunLightProperties*>(BufferManager::MapConstantBuffer(m_VolumeLightingCSBufferSetPtr->GetBuffer(1), CBuffer::Write));
 
 	    assert(pLightBuffer != nullptr);
 
@@ -784,7 +784,7 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        SVolumeLightingProperties* pVolumeProperties = static_cast<SVolumeLightingProperties*>(BufferManager::MapConstantBuffer(m_VolumeLightingCSBufferSetPtr->GetBuffer(2)));
+        SVolumeLightingProperties* pVolumeProperties = static_cast<SVolumeLightingProperties*>(BufferManager::MapConstantBuffer(m_VolumeLightingCSBufferSetPtr->GetBuffer(2), CBuffer::Write));
 
 	    assert(pVolumeProperties != nullptr);
 
@@ -875,7 +875,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Data
         // -----------------------------------------------------------------------------
-        SFogApplyProperties* pFogApplyProperties = static_cast<SFogApplyProperties*>(BufferManager::MapConstantBuffer(m_FogApplyBufferPtr->GetBuffer(1)));
+        SFogApplyProperties* pFogApplyProperties = static_cast<SFogApplyProperties*>(BufferManager::MapConstantBuffer(m_FogApplyBufferPtr->GetBuffer(1), CBuffer::Write));
 
 	    assert(pFogApplyProperties != nullptr);
 

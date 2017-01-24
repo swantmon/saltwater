@@ -605,7 +605,7 @@ namespace
         // -----------------------------------------------------------------------------
         for (unsigned int IndexOfDownSample = 0; IndexOfDownSample < pDataBloomFacet->GetSize(); ++IndexOfDownSample)
         {
-            SDownSampleShaderProperties* pDownSampleSettings = static_cast<SDownSampleShaderProperties*>(BufferManager::MapConstantBuffer(m_DownSamplePropertiesPSBufferSetPtr->GetBuffer(0)));
+            SDownSampleShaderProperties* pDownSampleSettings = static_cast<SDownSampleShaderProperties*>(BufferManager::MapConstantBuffer(m_DownSamplePropertiesPSBufferSetPtr->GetBuffer(0), CBuffer::Write));
 
             pDownSampleSettings->m_InvertTexturesize[0] = 1.0f / static_cast<float>(m_DownSampleSizes[IndexOfDownSample][0] * 2);
             pDownSampleSettings->m_InvertTexturesize[1] = 1.0f / static_cast<float>(m_DownSampleSizes[IndexOfDownSample][1] * 2);
@@ -675,7 +675,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Blur
             // -----------------------------------------------------------------------------
-            SGaussianShaderProperties* pGaussianSettings = static_cast<SGaussianShaderProperties*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0)));
+            SGaussianShaderProperties* pGaussianSettings = static_cast<SGaussianShaderProperties*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0), CBuffer::Write));
 
             pGaussianSettings->m_Direction[0] = 1;
             pGaussianSettings->m_Direction[1] = 0;
@@ -711,7 +711,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Blur
             // -----------------------------------------------------------------------------
-            pGaussianSettings = static_cast<SGaussianShaderProperties*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0)));
+            pGaussianSettings = static_cast<SGaussianShaderProperties*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0), CBuffer::Write));
 
             pGaussianSettings->m_Direction[0] = 0;
             pGaussianSettings->m_Direction[1] = 1;
@@ -753,7 +753,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Buffer
         // -----------------------------------------------------------------------------
-        SBloomShaderProperties* pBloomShaderProperties = static_cast<SBloomShaderProperties*>(BufferManager::MapConstantBuffer(m_BloomPropertiesPSBufferSetPtr->GetBuffer(0)));
+        SBloomShaderProperties* pBloomShaderProperties = static_cast<SBloomShaderProperties*>(BufferManager::MapConstantBuffer(m_BloomPropertiesPSBufferSetPtr->GetBuffer(0), CBuffer::Write));
 
         pBloomShaderProperties->m_BloomThresholdValue = Base::Float4(static_cast<float>(pDataBloomFacet->GetTreshhold()), 0, 0, pDataBloomFacet->GetExposureScale());
         pBloomShaderProperties->m_BloomTintIntensity  = pDataBloomFacet->GetTint() * pDataBloomFacet->GetIntensity();

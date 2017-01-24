@@ -17,8 +17,8 @@ namespace Gfx
     {
     public:
         
-        Gfx::CNativeBufferHandle m_NativeBuffer;     ///< Indicates the current native buffer handle
-        int m_NativeBinding;                         ///< Indicates the current native binding
-        int m_NativeUsage;                           ///< Indicates the current native usage
+        Gfx::CNativeBufferHandle m_NativeBuffer;     ///< Indicates the native buffer handle
+        int m_NativeBinding;                         ///< Indicates the native binding
+        int m_NativeUsage;                           ///< Indicates the native usage
     };
 } // namespace Gfx

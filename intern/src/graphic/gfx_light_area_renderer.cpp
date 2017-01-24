@@ -507,7 +507,7 @@ namespace
         // -----------------------------------------------------------------------------
         CCameraPtr CameraPtr = ViewManager::GetMainCamera();
 
-        SCameraProperties* pPSBuffer = static_cast<SCameraProperties*>(BufferManager::MapConstantBuffer(m_SphereLightPSBufferPtr->GetBuffer(0)));
+        SCameraProperties* pPSBuffer = static_cast<SCameraProperties*>(BufferManager::MapConstantBuffer(m_SphereLightPSBufferPtr->GetBuffer(0), CBuffer::Write));
 
         assert(pPSBuffer != nullptr);
 

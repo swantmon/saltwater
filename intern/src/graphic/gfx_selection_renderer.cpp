@@ -616,7 +616,7 @@ namespace
         IndexOfLastRequest = (rTicket.m_IndexOfPopRequest > 0) ? rTicket.m_IndexOfPopRequest - 1 : CInternSelectionTicket::s_MaxNumberOfRequests - 1;
         IndexOfBuffer      = rTicket.m_IndexOfTicket * s_MaxNumberOfTickets + IndexOfLastRequest;
 
-        SSelectionOutput* pOutput = static_cast<SSelectionOutput*>(BufferManager::MapConstantBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(2)));
+        SSelectionOutput* pOutput = static_cast<SSelectionOutput*>(BufferManager::MapConstantBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(2), CBuffer::Read));
 
         rTicket.m_WSPosition = Base::Float3(pOutput->m_WSPosition[0], pOutput->m_WSPosition[1], pOutput->m_WSPosition[2]);
         rTicket.m_WSNormal   = Base::Float3(pOutput->m_WSNormal[0], pOutput->m_WSNormal[1], pOutput->m_WSNormal[2]);
@@ -706,7 +706,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Upload data to buffer
             // -----------------------------------------------------------------------------
-            SPerDrawCallConstantBufferVS* pModelBuffer = static_cast<SPerDrawCallConstantBufferVS*>(BufferManager::MapConstantBuffer(m_ViewModelVSBuffer->GetBuffer(1)));
+            SPerDrawCallConstantBufferVS* pModelBuffer = static_cast<SPerDrawCallConstantBufferVS*>(BufferManager::MapConstantBuffer(m_ViewModelVSBuffer->GetBuffer(1), CBuffer::Write));
 
             assert(pModelBuffer != nullptr);
 
@@ -714,7 +714,7 @@ namespace
 
             BufferManager::UnmapConstantBuffer(m_ViewModelVSBuffer->GetBuffer(1));
 
-            SHighlightSettings* pSelectionSettings = static_cast<SHighlightSettings*>(BufferManager::MapConstantBuffer(m_HighlightPSBufferSetPtr->GetBuffer(0)));
+            SHighlightSettings* pSelectionSettings = static_cast<SHighlightSettings*>(BufferManager::MapConstantBuffer(m_HighlightPSBufferSetPtr->GetBuffer(0), CBuffer::Write));
 
             pSelectionSettings->m_ColorAlpha = Base::Float4(0.31f, 0.45f, 0.64f, 0.4f);
 
@@ -818,7 +818,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 Base::Int2 ActiveWindowSize = Gfx::Main::GetActiveWindowSize();
 
-                SSelectionSettings* pSettings = static_cast<SSelectionSettings*>(BufferManager::MapConstantBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1)));
+                SSelectionSettings* pSettings = static_cast<SSelectionSettings*>(BufferManager::MapConstantBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1), CBuffer::Write));
 
                 MinX = rRequest.m_Cursor[0] + rTicket.m_OffsetX;
                 MinY = rRequest.m_Cursor[1] + rTicket.m_OffsetY;

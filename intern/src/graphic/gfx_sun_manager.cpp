@@ -498,7 +498,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Upload data light view projection matrix
         // -----------------------------------------------------------------------------
-        SPerLightConstantBuffer* pViewBuffer = static_cast<SPerLightConstantBuffer*>(BufferManager::MapConstantBuffer(m_LightCameraVSBufferPtr->GetBuffer(0)));
+        SPerLightConstantBuffer* pViewBuffer = static_cast<SPerLightConstantBuffer*>(BufferManager::MapConstantBuffer(m_LightCameraVSBufferPtr->GetBuffer(0), CBuffer::Write));
             
         assert(pViewBuffer != nullptr);
             
@@ -536,7 +536,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Upload model matrix to buffer
             // -----------------------------------------------------------------------------
-            SPerDrawCallConstantBuffer* pModelBuffer = static_cast<SPerDrawCallConstantBuffer*>(BufferManager::MapConstantBuffer(m_LightCameraVSBufferPtr->GetBuffer(1)));
+            SPerDrawCallConstantBuffer* pModelBuffer = static_cast<SPerDrawCallConstantBuffer*>(BufferManager::MapConstantBuffer(m_LightCameraVSBufferPtr->GetBuffer(1), CBuffer::Write));
                 
             assert(pModelBuffer != nullptr);
                 

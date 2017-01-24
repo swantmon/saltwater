@@ -620,7 +620,7 @@ namespace
 
             // -----------------------------------------------------------------------------
 
-            SProperties* pProperties = static_cast<SProperties*>(BufferManager::MapConstantBuffer(m_ViewPSBuffer->GetBuffer(0)));
+            SProperties* pProperties = static_cast<SProperties*>(BufferManager::MapConstantBuffer(m_ViewPSBuffer->GetBuffer(0), CBuffer::Write));
 
             pProperties->m_Color[0] = _rColor[0];
             pProperties->m_Color[1] = _rColor[1];
@@ -722,7 +722,7 @@ namespace
         // -----------------------------------------------------------------------------
         CCameraPtr CameraPtr = m_RenderContextPtr->GetCamera();
 
-        SPerFrameConstantBuffer* pViewBuffer = static_cast<SPerFrameConstantBuffer*>(BufferManager::MapConstantBuffer(m_ViewModelVSBuffer->GetBuffer(0)));
+        SPerFrameConstantBuffer* pViewBuffer = static_cast<SPerFrameConstantBuffer*>(BufferManager::MapConstantBuffer(m_ViewModelVSBuffer->GetBuffer(0), CBuffer::Write));
 
         pViewBuffer->m_ViewProjection = CameraPtr->GetProjectionMatrix();
         pViewBuffer->m_ModelMatrix  = Base::Float4x4::s_Identity;
@@ -742,7 +742,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Buffer
             // -----------------------------------------------------------------------------
-            CMaterial::SMaterialAttributes* pMaterialBuffer = static_cast<CMaterial::SMaterialAttributes*>(BufferManager::MapConstantBuffer(m_DeferredPassPSBuffer->GetBuffer(0)));
+            CMaterial::SMaterialAttributes* pMaterialBuffer = static_cast<CMaterial::SMaterialAttributes*>(BufferManager::MapConstantBuffer(m_DeferredPassPSBuffer->GetBuffer(0), CBuffer::Write));
 
             Base::CMemory::Copy(pMaterialBuffer, &m_GizmoModelPtr->GetLOD(0)->GetSurface(IndexOfSurface)->GetMaterial()->GetMaterialAttributes(), sizeof(CMaterial::SMaterialAttributes));
 
@@ -828,7 +828,7 @@ namespace
 
         for (; CurrentTexture != EndOfTextures; ++ CurrentTexture)
         {
-            SPerDrawCallConstantBuffer* pModelBuffer = static_cast<SPerDrawCallConstantBuffer*>(BufferManager::MapConstantBuffer(m_BaseModelVSBuffer->GetBuffer(1)));
+            SPerDrawCallConstantBuffer* pModelBuffer = static_cast<SPerDrawCallConstantBuffer*>(BufferManager::MapConstantBuffer(m_BaseModelVSBuffer->GetBuffer(1), CBuffer::Write));
 
             assert(pModelBuffer != nullptr);
 

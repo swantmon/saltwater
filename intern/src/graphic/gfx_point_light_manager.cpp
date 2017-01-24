@@ -676,7 +676,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Upload data light view projection matrix
         // -----------------------------------------------------------------------------
-        SPerLightConstantBuffer* pViewBuffer = static_cast<SPerLightConstantBuffer*>(BufferManager::MapConstantBuffer(m_LightCameraVSBufferPtr->GetBuffer(0)));
+        SPerLightConstantBuffer* pViewBuffer = static_cast<SPerLightConstantBuffer*>(BufferManager::MapConstantBuffer(m_LightCameraVSBufferPtr->GetBuffer(0), CBuffer::Write));
             
         assert(pViewBuffer != nullptr);
             
@@ -714,7 +714,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Upload model matrix to buffer
             // -----------------------------------------------------------------------------
-            SPerDrawCallConstantBuffer* pModelBuffer = static_cast<SPerDrawCallConstantBuffer*>(BufferManager::MapConstantBuffer(m_LightCameraVSBufferPtr->GetBuffer(1)));
+            SPerDrawCallConstantBuffer* pModelBuffer = static_cast<SPerDrawCallConstantBuffer*>(BufferManager::MapConstantBuffer(m_LightCameraVSBufferPtr->GetBuffer(1), CBuffer::Write));
                 
             assert(pModelBuffer != nullptr);
                 
@@ -768,7 +768,7 @@ namespace
                         ContextManager::SetShaderPS(m_ShadowRSMShaderPSPtr);
                     }
 
-                    CMaterial::SMaterialAttributes* pMaterialBuffer = static_cast<CMaterial::SMaterialAttributes*>(BufferManager::MapConstantBuffer(m_RSMPSBuffer->GetBuffer(0)));
+                    CMaterial::SMaterialAttributes* pMaterialBuffer = static_cast<CMaterial::SMaterialAttributes*>(BufferManager::MapConstantBuffer(m_RSMPSBuffer->GetBuffer(0), CBuffer::Write));
 
                     Base::CMemory::Copy(pMaterialBuffer, &MaterialPtr->GetMaterialAttributes(), sizeof(CMaterial::SMaterialAttributes));
 
@@ -776,7 +776,7 @@ namespace
 
                     // -----------------------------------------------------------------------------
 
-                    SPunctualLightProperties* pLightBuffer = static_cast<SPunctualLightProperties*>(BufferManager::MapConstantBuffer(m_RSMPSBuffer->GetBuffer(1)));
+                    SPunctualLightProperties* pLightBuffer = static_cast<SPunctualLightProperties*>(BufferManager::MapConstantBuffer(m_RSMPSBuffer->GetBuffer(1), CBuffer::Write));
 
                     assert(pLightBuffer != nullptr);
 

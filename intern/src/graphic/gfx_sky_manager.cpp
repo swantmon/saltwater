@@ -1061,7 +1061,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup constant buffer
         // -----------------------------------------------------------------------------
-        SOutputBufferPS* pPSBuffer = static_cast<SOutputBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(0)));
+        SOutputBufferPS* pPSBuffer = static_cast<SOutputBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(0), CBuffer::Write));
 
         pPSBuffer->m_HDRFactor = _Intensity;
         pPSBuffer->m_IsHDR     = _pOutput->m_InputTexture2DPtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
@@ -1160,7 +1160,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup constant buffer
         // -----------------------------------------------------------------------------
-        SOutputBufferPS* pPSBuffer = static_cast<SOutputBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(0)));
+        SOutputBufferPS* pPSBuffer = static_cast<SOutputBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(0), CBuffer::Write));
 
         pPSBuffer->m_HDRFactor = _Intensity;
         pPSBuffer->m_IsHDR     = _pOutput->m_InputTexture2DPtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
@@ -1269,7 +1269,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup constant buffer
         // -----------------------------------------------------------------------------
-        SModelMatrixBuffer* pViewBuffer = static_cast<SModelMatrixBuffer*>(BufferManager::MapConstantBuffer(VSBufferSetPtr->GetBuffer(0)));
+        SModelMatrixBuffer* pViewBuffer = static_cast<SModelMatrixBuffer*>(BufferManager::MapConstantBuffer(VSBufferSetPtr->GetBuffer(0), CBuffer::Write));
 
         pViewBuffer->m_ModelMatrix  = Base::Float4x4::s_Identity;
         pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(-1.0f, 1.0f, 1.0f);
@@ -1281,7 +1281,7 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        SOutputBufferPS* pPSBuffer = static_cast<SOutputBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(1)));
+        SOutputBufferPS* pPSBuffer = static_cast<SOutputBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(1), CBuffer::Write));
 
         pPSBuffer->m_HDRFactor = _Intensity;
         pPSBuffer->m_IsHDR     = _pOutput->m_InputTexture2DPtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
@@ -1427,7 +1427,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup constant buffer
         // -----------------------------------------------------------------------------
-        SModelMatrixBuffer* pViewBuffer = static_cast<SModelMatrixBuffer*>(BufferManager::MapConstantBuffer(VSBufferSetPtr->GetBuffer(0)));
+        SModelMatrixBuffer* pViewBuffer = static_cast<SModelMatrixBuffer*>(BufferManager::MapConstantBuffer(VSBufferSetPtr->GetBuffer(0), CBuffer::Write));
 
         pViewBuffer->m_ModelMatrix  = Base::Float4x4::s_Identity;
         pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(-1.0f, 1.0f, 1.0f);
@@ -1436,7 +1436,7 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        SOutputBufferPS* pPSBuffer = static_cast<SOutputBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(1)));
+        SOutputBufferPS* pPSBuffer = static_cast<SOutputBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(1), CBuffer::Write));
 
         pPSBuffer->m_HDRFactor = _Intensity;
         pPSBuffer->m_IsHDR = _pOutput->m_InputTexture2DPtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
@@ -1544,7 +1544,7 @@ namespace
         // only if the camera is inside the playing area.
         // Otherwise we have an gimbal lock.
         // -----------------------------------------------------------------------------
-        SModelMatrixBuffer* pViewBuffer = static_cast<SModelMatrixBuffer*>(BufferManager::MapConstantBuffer(GSBufferSetPtr->GetBuffer(1)));
+        SModelMatrixBuffer* pViewBuffer = static_cast<SModelMatrixBuffer*>(BufferManager::MapConstantBuffer(GSBufferSetPtr->GetBuffer(1), CBuffer::Write));
 
         Base::Float3 Rotation;
         ViewManager::GetMainCamera()->GetView()->GetRotationMatrix().GetRotation(Rotation);
@@ -1557,7 +1557,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup constant buffer
         // -----------------------------------------------------------------------------
-        SOutputBufferPS* pPSBuffer = static_cast<SOutputBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(0)));
+        SOutputBufferPS* pPSBuffer = static_cast<SOutputBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(0), CBuffer::Write));
 
         pPSBuffer->m_HDRFactor = _Intensity;
         pPSBuffer->m_IsHDR = _pOutput->m_InputTexture2DPtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;

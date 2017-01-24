@@ -629,7 +629,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Upload some frame data to graphic device
         // -----------------------------------------------------------------------------
-        SPerFrameConstantBuffer* pPerFrameConstantBuffer = static_cast<SPerFrameConstantBuffer*>(BufferManager::MapConstantBuffer(m_LiquidVSBufferPtr->GetBuffer(1)));
+        SPerFrameConstantBuffer* pPerFrameConstantBuffer = static_cast<SPerFrameConstantBuffer*>(BufferManager::MapConstantBuffer(m_LiquidVSBufferPtr->GetBuffer(1), CBuffer::Write));
         
         assert(pPerFrameConstantBuffer != nullptr);
         
@@ -684,7 +684,7 @@ namespace
 
         ContextManager::SetConstantBufferSetPS(m_LiquidPSBufferPtr);
 
-        SLiquidSettings* pLiquidBuffer = static_cast<SLiquidSettings*>(BufferManager::MapConstantBuffer(m_LiquidPSBufferPtr->GetBuffer(0)));
+        SLiquidSettings* pLiquidBuffer = static_cast<SLiquidSettings*>(BufferManager::MapConstantBuffer(m_LiquidPSBufferPtr->GetBuffer(0), CBuffer::Write));
 
         assert(pLiquidBuffer != nullptr);
 
@@ -837,7 +837,7 @@ namespace
 
         ContextManager::SetConstantBufferSetPS(m_BilateralPSBufferPtr);
 
-        SBilateralSettings* pBilateralSettings = static_cast<SBilateralSettings*>(BufferManager::MapConstantBuffer(m_BilateralPSBufferPtr->GetBuffer(0)));
+        SBilateralSettings* pBilateralSettings = static_cast<SBilateralSettings*>(BufferManager::MapConstantBuffer(m_BilateralPSBufferPtr->GetBuffer(0), CBuffer::Write));
 
         pBilateralSettings->m_Direction[0] = 1.0f * 1.0f / static_cast<float>(1280.0f);
         pBilateralSettings->m_Direction[1] = 0.0f * 1.0f / static_cast<float>(800.0f);
@@ -892,7 +892,7 @@ namespace
 
         ContextManager::SetConstantBufferSetPS(m_BilateralPSBufferPtr);
 
-        pBilateralSettings = static_cast<SBilateralSettings*>(BufferManager::MapConstantBuffer(m_BilateralPSBufferPtr->GetBuffer(0)));
+        pBilateralSettings = static_cast<SBilateralSettings*>(BufferManager::MapConstantBuffer(m_BilateralPSBufferPtr->GetBuffer(0), CBuffer::Write));
 
         pBilateralSettings->m_Direction[0] = 0.0f * 1.0f / static_cast<float>(1280.0f);
         pBilateralSettings->m_Direction[1] = 1.0f * 1.0f / static_cast<float>(800.0f);
@@ -952,7 +952,7 @@ namespace
 
         ContextManager::SetConstantBufferSetPS(m_GaussianPSBufferPtr);
 
-        pGaussianSettings = static_cast<SGaussianSettings*>(BufferManager::MapConstantBuffer(m_GaussianPSBufferPtr->GetBuffer(0)));
+        pGaussianSettings = static_cast<SGaussianSettings*>(BufferManager::MapConstantBuffer(m_GaussianPSBufferPtr->GetBuffer(0), CBuffer::Write));
 
         pGaussianSettings->m_Direction[0] = 1.0f * 1.0f / static_cast<float>(1280);
         pGaussianSettings->m_Direction[1] = 0.0f * 1.0f / static_cast<float>(800);
@@ -1014,7 +1014,7 @@ namespace
 
         ContextManager::SetConstantBufferSetPS(m_GaussianPSBufferPtr);
 
-        pGaussianSettings = static_cast<SGaussianSettings*>(BufferManager::MapConstantBuffer(m_GaussianPSBufferPtr->GetBuffer(0)));
+        pGaussianSettings = static_cast<SGaussianSettings*>(BufferManager::MapConstantBuffer(m_GaussianPSBufferPtr->GetBuffer(0), CBuffer::Write));
 
         pGaussianSettings->m_Direction[0] = 0.0f * 1.0f / static_cast<float>(1280);
         pGaussianSettings->m_Direction[1] = 1.0f * 1.0f / static_cast<float>(800);
@@ -1057,7 +1057,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Final water shading
         // -----------------------------------------------------------------------------
-        SShadingSettings* pShadingSettings = static_cast<SShadingSettings*>(BufferManager::MapConstantBuffer(m_ShadingPSBufferPtr->GetBuffer(0)));
+        SShadingSettings* pShadingSettings = static_cast<SShadingSettings*>(BufferManager::MapConstantBuffer(m_ShadingPSBufferPtr->GetBuffer(0), CBuffer::Write));
 
         pShadingSettings->m_InvertedProjectionMatrix = ViewManager::GetMainCamera()->GetProjectionMatrix().GetInverted();
         pShadingSettings->m_InvertedViewMatrix = ViewManager::GetMainCamera()->GetView()->GetViewMatrix().GetInverted();

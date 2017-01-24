@@ -396,7 +396,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Upload data to buffer
         // -----------------------------------------------------------------------------
-        SConstantBufferCS* pHistogramSettings = static_cast<SConstantBufferCS*>(BufferManager::MapConstantBuffer(m_HistogramBufferSetPtrs[HistogramEvaluate]->GetBuffer(2)));
+        SConstantBufferCS* pHistogramSettings = static_cast<SConstantBufferCS*>(BufferManager::MapConstantBuffer(m_HistogramBufferSetPtrs[HistogramEvaluate]->GetBuffer(2), CBuffer::Write));
         
         assert(pHistogramSettings != nullptr);
         

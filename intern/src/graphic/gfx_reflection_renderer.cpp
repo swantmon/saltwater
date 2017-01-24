@@ -679,7 +679,7 @@ namespace
         // -----------------------------------------------------------------------------
         // IBL data
         // -----------------------------------------------------------------------------
-        SIBLSettings* pIBLSettings = static_cast<SIBLSettings*>(BufferManager::MapConstantBuffer(m_ImageLightPSBufferSetPtr->GetBuffer(1)));
+        SIBLSettings* pIBLSettings = static_cast<SIBLSettings*>(BufferManager::MapConstantBuffer(m_ImageLightPSBufferSetPtr->GetBuffer(1), CBuffer::Write));
             
         pIBLSettings->m_NumberOfMiplevelsSpecularIBL = static_cast<float>(pGraphicProbeFacet->GetFilteredSetPtr()->GetTexture(0)->GetNumberOfMipLevels() - 1);
         pIBLSettings->m_ExposureHistoryIndex         = static_cast<float>(HistogramRenderer::GetLastExposureHistoryIndex());
@@ -734,7 +734,7 @@ namespace
 
         for (unsigned int IndexOfMipmap = 0; IndexOfMipmap < m_HCBTexture2DPtr->GetNumberOfMipLevels(); ++ IndexOfMipmap)
         {
-            SHCBProperties* pPSBuffer = static_cast<SHCBProperties*>(BufferManager::MapConstantBuffer(m_HCBPSBufferSetPtr->GetBuffer(0)));
+            SHCBProperties* pPSBuffer = static_cast<SHCBProperties*>(BufferManager::MapConstantBuffer(m_HCBPSBufferSetPtr->GetBuffer(0), CBuffer::Write));
 
             assert(pPSBuffer != nullptr);
 
@@ -822,7 +822,7 @@ namespace
         // -----------------------------------------------------------------------------
         CCameraPtr CameraPtr = ViewManager::GetMainCamera();
 
-        SSSRProperties* pPSBuffer = static_cast<SSSRProperties*>(BufferManager::MapConstantBuffer(m_SSRLightPSBufferSetPtr->GetBuffer(1)));
+        SSSRProperties* pPSBuffer = static_cast<SSSRProperties*>(BufferManager::MapConstantBuffer(m_SSRLightPSBufferSetPtr->GetBuffer(1), CBuffer::Write));
 
         assert(pPSBuffer != nullptr);
 

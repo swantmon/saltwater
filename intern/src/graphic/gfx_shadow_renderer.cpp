@@ -604,7 +604,7 @@ namespace
 
         ContextManager::SetConstantBufferSetPS(m_SSAOPropertiesPSBufferPtr);
 
-        pSSAOSettings = static_cast<SSSAOProperties*>(BufferManager::MapConstantBuffer(m_SSAOPropertiesPSBufferPtr->GetBuffer(1)));
+        pSSAOSettings = static_cast<SSSAOProperties*>(BufferManager::MapConstantBuffer(m_SSAOPropertiesPSBufferPtr->GetBuffer(1), CBuffer::Write));
         
         assert(pSSAOSettings != 0);
 
@@ -662,7 +662,7 @@ namespace
 
             // -----------------------------------------------------------------------------
 
-            SGaussianSettings* pGaussianSettings = static_cast<SGaussianSettings*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesCSBufferPtr->GetBuffer(0)));
+            SGaussianSettings* pGaussianSettings = static_cast<SGaussianSettings*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesCSBufferPtr->GetBuffer(0), CBuffer::Write));
 
             pGaussianSettings->m_Direction[0]     = 1;
             pGaussianSettings->m_Direction[1]     = 0;
@@ -686,7 +686,7 @@ namespace
 
             // -----------------------------------------------------------------------------
 
-            pGaussianSettings = static_cast<SGaussianSettings*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesCSBufferPtr->GetBuffer(0)));
+            pGaussianSettings = static_cast<SGaussianSettings*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesCSBufferPtr->GetBuffer(0), CBuffer::Write));
 
             pGaussianSettings->m_Direction[0]     = 0;
             pGaussianSettings->m_Direction[1]     = 1;

@@ -362,7 +362,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Upload buffer data
                 // -----------------------------------------------------------------------------
-                SIndirectLightProperties* pIndirectLightBuffer = static_cast<SIndirectLightProperties*>(Gfx::BufferManager::MapConstantBuffer(m_IndirectLightPSBufferPtr->GetBuffer(1)));
+                SIndirectLightProperties* pIndirectLightBuffer = static_cast<SIndirectLightProperties*>(Gfx::BufferManager::MapConstantBuffer(m_IndirectLightPSBufferPtr->GetBuffer(1), CBuffer::Write));
 
                 assert(pIndirectLightBuffer != nullptr);
 

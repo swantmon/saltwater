@@ -349,7 +349,7 @@ namespace
         	// -----------------------------------------------------------------------------
 	        // Upload buffer data
 	        // -----------------------------------------------------------------------------
-	        SSunLightProperties* pLightBuffer = static_cast<SSunLightProperties*>(BufferManager::MapConstantBuffer(m_SunLightPSBufferPtr->GetBuffer(1)));
+	        SSunLightProperties* pLightBuffer = static_cast<SSunLightProperties*>(BufferManager::MapConstantBuffer(m_SunLightPSBufferPtr->GetBuffer(1), CBuffer::Write));
 
 	        assert(pLightBuffer != nullptr);
 

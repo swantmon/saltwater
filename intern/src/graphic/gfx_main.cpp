@@ -624,7 +624,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Map buffer
         // -----------------------------------------------------------------------------
-        SPerFrameConstantBuffer* pPerFrameConstantBuffer = static_cast<SPerFrameConstantBuffer*>(BufferManager::MapConstantBuffer(m_PerFrameConstantBufferBufferPtr));
+        SPerFrameConstantBuffer* pPerFrameConstantBuffer = static_cast<SPerFrameConstantBuffer*>(BufferManager::MapConstantBuffer(m_PerFrameConstantBufferBufferPtr, CBuffer::Write));
         
         // -----------------------------------------------------------------------------
         // Set previous values

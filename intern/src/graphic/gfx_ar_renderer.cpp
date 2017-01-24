@@ -581,7 +581,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Upload data to buffer
                 // -----------------------------------------------------------------------------
-                SPerDrawCallConstantBufferVS* pModelBuffer = static_cast<SPerDrawCallConstantBufferVS*>(BufferManager::MapConstantBuffer(m_ViewVSBufferSetPtr->GetBuffer(1)));
+                SPerDrawCallConstantBufferVS* pModelBuffer = static_cast<SPerDrawCallConstantBufferVS*>(BufferManager::MapConstantBuffer(m_ViewVSBufferSetPtr->GetBuffer(1), CBuffer::Write));
 
                 assert(pModelBuffer != nullptr);
 
@@ -589,7 +589,7 @@ namespace
 
                 BufferManager::UnmapConstantBuffer(m_ViewVSBufferSetPtr->GetBuffer(1));
 
-                CMaterial::SMaterialAttributes* pMaterialBuffer = static_cast<CMaterial::SMaterialAttributes*>(BufferManager::MapConstantBuffer(m_MaterialPSBufferSetPtr->GetBuffer(1)));
+                CMaterial::SMaterialAttributes* pMaterialBuffer = static_cast<CMaterial::SMaterialAttributes*>(BufferManager::MapConstantBuffer(m_MaterialPSBufferSetPtr->GetBuffer(1), CBuffer::Write));
 
                 Base::CMemory::Copy(pMaterialBuffer, &CurrentRenderJob->m_SurfaceMaterialPtr->GetMaterialAttributes(), sizeof(CMaterial::SMaterialAttributes));
 
@@ -790,7 +790,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Upload data to buffer
             // -----------------------------------------------------------------------------
-            SPerDrawCallConstantBufferVS* pModelBuffer = static_cast<SPerDrawCallConstantBufferVS*>(BufferManager::MapConstantBuffer(m_ViewVSBufferSetPtr->GetBuffer(1)));
+            SPerDrawCallConstantBufferVS* pModelBuffer = static_cast<SPerDrawCallConstantBufferVS*>(BufferManager::MapConstantBuffer(m_ViewVSBufferSetPtr->GetBuffer(1), CBuffer::Write));
 
             assert(pModelBuffer != nullptr);
 
@@ -798,7 +798,7 @@ namespace
 
             BufferManager::UnmapConstantBuffer(m_ViewVSBufferSetPtr->GetBuffer(1));
 
-            SHitProxyProperties* pHitProxyProperties = static_cast<SHitProxyProperties*>(BufferManager::MapConstantBuffer(m_HitProxyPassPSBuffer->GetBuffer(0)));
+            SHitProxyProperties* pHitProxyProperties = static_cast<SHitProxyProperties*>(BufferManager::MapConstantBuffer(m_HitProxyPassPSBuffer->GetBuffer(0), CBuffer::Write));
 
             assert(pHitProxyProperties != nullptr);
 
