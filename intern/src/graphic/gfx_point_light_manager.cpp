@@ -676,13 +676,11 @@ namespace
         // -----------------------------------------------------------------------------
         // Upload data light view projection matrix
         // -----------------------------------------------------------------------------
-        SPerLightConstantBuffer* pViewBuffer = static_cast<SPerLightConstantBuffer*>(BufferManager::MapConstantBuffer(m_LightCameraVSBufferPtr->GetBuffer(0)));
+        SPerLightConstantBuffer ViewBuffer;
             
-        assert(pViewBuffer != nullptr);
+        ViewBuffer.vs_ViewProjectionMatrix = _rInternLight.m_RenderContextPtr->GetCamera()->GetViewProjectionMatrix();
             
-        pViewBuffer->vs_ViewProjectionMatrix = _rInternLight.m_RenderContextPtr->GetCamera()->GetViewProjectionMatrix();
-            
-        BufferManager::UnmapConstantBuffer(m_LightCameraVSBufferPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(m_LightCameraVSBufferPtr->GetBuffer(0), &ViewBuffer);
             
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
@@ -714,13 +712,11 @@ namespace
             // -----------------------------------------------------------------------------
             // Upload model matrix to buffer
             // -----------------------------------------------------------------------------
-            SPerDrawCallConstantBuffer* pModelBuffer = static_cast<SPerDrawCallConstantBuffer*>(BufferManager::MapConstantBuffer(m_LightCameraVSBufferPtr->GetBuffer(1)));
+            SPerDrawCallConstantBuffer ModelBuffer;
                 
-            assert(pModelBuffer != nullptr);
+            ModelBuffer.m_ModelMatrix = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
                 
-            pModelBuffer->m_ModelMatrix = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
-                
-            BufferManager::UnmapConstantBuffer(m_LightCameraVSBufferPtr->GetBuffer(1));
+            BufferManager::UploadConstantBufferData(m_LightCameraVSBufferPtr->GetBuffer(1), &ModelBuffer);
                 
             // -----------------------------------------------------------------------------
             // Render every surface of this entity
@@ -768,28 +764,22 @@ namespace
                         ContextManager::SetShaderPS(m_ShadowRSMShaderPSPtr);
                     }
 
-                    CMaterial::SMaterialAttributes* pMaterialBuffer = static_cast<CMaterial::SMaterialAttributes*>(BufferManager::MapConstantBuffer(m_RSMPSBuffer->GetBuffer(0)));
-
-                    Base::CMemory::Copy(pMaterialBuffer, &MaterialPtr->GetMaterialAttributes(), sizeof(CMaterial::SMaterialAttributes));
-
-                    BufferManager::UnmapConstantBuffer(m_RSMPSBuffer->GetBuffer(0));
+                    BufferManager::UploadConstantBufferData(m_RSMPSBuffer->GetBuffer(0), &MaterialPtr->GetMaterialAttributes());
 
                     // -----------------------------------------------------------------------------
 
-                    SPunctualLightProperties* pLightBuffer = static_cast<SPunctualLightProperties*>(BufferManager::MapConstantBuffer(m_RSMPSBuffer->GetBuffer(1)));
-
-                    assert(pLightBuffer != nullptr);
+                    SPunctualLightProperties PunctualLightProperties;
 
                     float InvSqrAttenuationRadius = _pDtPointLight->GetReciprocalSquaredAttenuationRadius();
                     float AngleScale              = _pDtPointLight->GetAngleScale();
                     float AngleOffset             = _pDtPointLight->GetAngleOffset();
 
-                    pLightBuffer->m_LightPosition  = Base::Float4(_rLightPosition, 1.0f);
-                    pLightBuffer->m_LightDirection = Base::Float4(_pDtPointLight->GetDirection(), 0.0f).Normalize();
-                    pLightBuffer->m_LightColor     = Base::Float4(_pDtPointLight->GetLightness(), 1.0f);
-                    pLightBuffer->m_LightSettings  = Base::Float4(InvSqrAttenuationRadius, AngleScale, AngleOffset, 0.0f);
+                    PunctualLightProperties.m_LightPosition  = Base::Float4(_rLightPosition, 1.0f);
+                    PunctualLightProperties.m_LightDirection = Base::Float4(_pDtPointLight->GetDirection(), 0.0f).Normalize();
+                    PunctualLightProperties.m_LightColor     = Base::Float4(_pDtPointLight->GetLightness(), 1.0f);
+                    PunctualLightProperties.m_LightSettings  = Base::Float4(InvSqrAttenuationRadius, AngleScale, AngleOffset, 0.0f);
 
-                    BufferManager::UnmapConstantBuffer(m_RSMPSBuffer->GetBuffer(1));
+                    BufferManager::UploadConstantBufferData(m_RSMPSBuffer->GetBuffer(1), &PunctualLightProperties);
 
                     ContextManager::SetConstantBufferSetPS(m_RSMPSBuffer);
                 }

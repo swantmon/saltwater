@@ -498,13 +498,11 @@ namespace
         // -----------------------------------------------------------------------------
         // Upload data light view projection matrix
         // -----------------------------------------------------------------------------
-        SPerLightConstantBuffer* pViewBuffer = static_cast<SPerLightConstantBuffer*>(BufferManager::MapConstantBuffer(m_LightCameraVSBufferPtr->GetBuffer(0)));
+        SPerLightConstantBuffer ViewBuffer;
+
+        ViewBuffer.vs_ViewProjectionMatrix = _rInternLight.m_RenderContextPtr->GetCamera()->GetViewProjectionMatrix();
             
-        assert(pViewBuffer != nullptr);
-            
-        pViewBuffer->vs_ViewProjectionMatrix = _rInternLight.m_RenderContextPtr->GetCamera()->GetViewProjectionMatrix();
-            
-        BufferManager::UnmapConstantBuffer(m_LightCameraVSBufferPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(m_LightCameraVSBufferPtr->GetBuffer(0), &ViewBuffer);
             
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
@@ -536,13 +534,11 @@ namespace
             // -----------------------------------------------------------------------------
             // Upload model matrix to buffer
             // -----------------------------------------------------------------------------
-            SPerDrawCallConstantBuffer* pModelBuffer = static_cast<SPerDrawCallConstantBuffer*>(BufferManager::MapConstantBuffer(m_LightCameraVSBufferPtr->GetBuffer(1)));
+            SPerDrawCallConstantBuffer ModelBuffer;
                 
-            assert(pModelBuffer != nullptr);
+            ModelBuffer.m_ModelMatrix = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
                 
-            pModelBuffer->m_ModelMatrix = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
-                
-            BufferManager::UnmapConstantBuffer(m_LightCameraVSBufferPtr->GetBuffer(1));
+            BufferManager::UploadConstantBufferData(m_LightCameraVSBufferPtr->GetBuffer(1), &ModelBuffer);
                 
             // -----------------------------------------------------------------------------
             // Render every surface of this entity

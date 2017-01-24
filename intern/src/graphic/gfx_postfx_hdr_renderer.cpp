@@ -605,12 +605,12 @@ namespace
         // -----------------------------------------------------------------------------
         for (unsigned int IndexOfDownSample = 0; IndexOfDownSample < pDataBloomFacet->GetSize(); ++IndexOfDownSample)
         {
-            SDownSampleShaderProperties* pDownSampleSettings = static_cast<SDownSampleShaderProperties*>(BufferManager::MapConstantBuffer(m_DownSamplePropertiesPSBufferSetPtr->GetBuffer(0)));
+            SDownSampleShaderProperties DownSampleSettings;
 
-            pDownSampleSettings->m_InvertTexturesize[0] = 1.0f / static_cast<float>(m_DownSampleSizes[IndexOfDownSample][0] * 2);
-            pDownSampleSettings->m_InvertTexturesize[1] = 1.0f / static_cast<float>(m_DownSampleSizes[IndexOfDownSample][1] * 2);
+            DownSampleSettings.m_InvertTexturesize[0] = 1.0f / static_cast<float>(m_DownSampleSizes[IndexOfDownSample][0] * 2);
+            DownSampleSettings.m_InvertTexturesize[1] = 1.0f / static_cast<float>(m_DownSampleSizes[IndexOfDownSample][1] * 2);
 
-            BufferManager::UnmapConstantBuffer(m_DownSamplePropertiesPSBufferSetPtr->GetBuffer(0));
+            BufferManager::UploadConstantBufferData(m_DownSamplePropertiesPSBufferSetPtr->GetBuffer(0), &DownSampleSettings);
 
             const unsigned int pOffset[] = { 0, 0 };
 
@@ -672,26 +672,27 @@ namespace
             NumberOfThreadGroupsX = (m_DownSampleSizes[IndexOfBlurStage][0] + s_BlurTileSize - 1) / (s_BlurTileSize);
             NumberOfThreadGroupsY = (m_DownSampleSizes[IndexOfBlurStage][1] + s_BlurTileSize - 1) / (s_BlurTileSize);
 
+            SGaussianShaderProperties GaussianSettings;
+
+            GaussianSettings.m_Direction[0] = 1;
+            GaussianSettings.m_Direction[1] = 0;
+            GaussianSettings.m_MaxPixelCoord[0] = m_DownSampleSizes[IndexOfBlurStage][0];
+            GaussianSettings.m_MaxPixelCoord[1] = m_DownSampleSizes[IndexOfBlurStage][1];
+            GaussianSettings.m_Weights[0] = 0.018816f;
+            GaussianSettings.m_Weights[1] = 0.034474f;
+            GaussianSettings.m_Weights[2] = 0.056577f;
+            GaussianSettings.m_Weights[3] = 0.083173f;
+            GaussianSettings.m_Weights[4] = 0.109523f;
+            GaussianSettings.m_Weights[5] = 0.129188f;
+            GaussianSettings.m_Weights[6] = 0.136498f;
+
             // -----------------------------------------------------------------------------
             // Blur
             // -----------------------------------------------------------------------------
-            SGaussianShaderProperties* pGaussianSettings = static_cast<SGaussianShaderProperties*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0)));
+            GaussianSettings.m_Direction[0] = 1;
+            GaussianSettings.m_Direction[1] = 0;
 
-            pGaussianSettings->m_Direction[0] = 1;
-            pGaussianSettings->m_Direction[1] = 0;
-            pGaussianSettings->m_MaxPixelCoord[0] = m_DownSampleSizes[IndexOfBlurStage][0];
-            pGaussianSettings->m_MaxPixelCoord[1] = m_DownSampleSizes[IndexOfBlurStage][1];
-            pGaussianSettings->m_Weights[0] = 0.018816f;
-            pGaussianSettings->m_Weights[1] = 0.034474f;
-            pGaussianSettings->m_Weights[2] = 0.056577f;
-            pGaussianSettings->m_Weights[3] = 0.083173f;
-            pGaussianSettings->m_Weights[4] = 0.109523f;
-            pGaussianSettings->m_Weights[5] = 0.129188f;
-            pGaussianSettings->m_Weights[6] = 0.136498f;
-
-            BufferManager::UnmapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0));
-
-
+            BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0), &GaussianSettings);
 
             ContextManager::SetShaderCS(m_GaussianBlurShaderPtr);
 
@@ -707,27 +708,13 @@ namespace
 
             ContextManager::ResetShaderCS();
 
-
             // -----------------------------------------------------------------------------
             // Blur
             // -----------------------------------------------------------------------------
-            pGaussianSettings = static_cast<SGaussianShaderProperties*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0)));
+            GaussianSettings.m_Direction[0] = 0;
+            GaussianSettings.m_Direction[1] = 1;
 
-            pGaussianSettings->m_Direction[0] = 0;
-            pGaussianSettings->m_Direction[1] = 1;
-            pGaussianSettings->m_MaxPixelCoord[0] = m_DownSampleSizes[IndexOfBlurStage][0];
-            pGaussianSettings->m_MaxPixelCoord[1] = m_DownSampleSizes[IndexOfBlurStage][1];
-            pGaussianSettings->m_Weights[0] = 0.018816f;
-            pGaussianSettings->m_Weights[1] = 0.034474f;
-            pGaussianSettings->m_Weights[2] = 0.056577f;
-            pGaussianSettings->m_Weights[3] = 0.083173f;
-            pGaussianSettings->m_Weights[4] = 0.109523f;
-            pGaussianSettings->m_Weights[5] = 0.129188f;
-            pGaussianSettings->m_Weights[6] = 0.136498f;
-
-            BufferManager::UnmapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0));
-
-
+            BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0), &GaussianSettings);
 
             ContextManager::SetShaderCS(m_GaussianBlurShaderPtr);
 
@@ -753,12 +740,12 @@ namespace
         // -----------------------------------------------------------------------------
         // Buffer
         // -----------------------------------------------------------------------------
-        SBloomShaderProperties* pBloomShaderProperties = static_cast<SBloomShaderProperties*>(BufferManager::MapConstantBuffer(m_BloomPropertiesPSBufferSetPtr->GetBuffer(0)));
+        SBloomShaderProperties BloomShaderProperties;
 
-        pBloomShaderProperties->m_BloomThresholdValue = Base::Float4(static_cast<float>(pDataBloomFacet->GetTreshhold()), 0, 0, pDataBloomFacet->GetExposureScale());
-        pBloomShaderProperties->m_BloomTintIntensity  = pDataBloomFacet->GetTint() * pDataBloomFacet->GetIntensity();
+        BloomShaderProperties.m_BloomThresholdValue = Base::Float4(static_cast<float>(pDataBloomFacet->GetTreshhold()), 0, 0, pDataBloomFacet->GetExposureScale());
+        BloomShaderProperties.m_BloomTintIntensity  = pDataBloomFacet->GetTint() * pDataBloomFacet->GetIntensity();
 
-        BufferManager::UnmapConstantBuffer(m_BloomPropertiesPSBufferSetPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(m_BloomPropertiesPSBufferSetPtr->GetBuffer(0), &BloomShaderProperties);
 
         // -----------------------------------------------------------------------------
         // Rendering

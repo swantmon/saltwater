@@ -616,7 +616,7 @@ namespace
         IndexOfLastRequest = (rTicket.m_IndexOfPopRequest > 0) ? rTicket.m_IndexOfPopRequest - 1 : CInternSelectionTicket::s_MaxNumberOfRequests - 1;
         IndexOfBuffer      = rTicket.m_IndexOfTicket * s_MaxNumberOfTickets + IndexOfLastRequest;
 
-        SSelectionOutput* pOutput = static_cast<SSelectionOutput*>(BufferManager::MapConstantBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(2)));
+        SSelectionOutput* pOutput = static_cast<SSelectionOutput*>(BufferManager::MapConstantBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(2), CBuffer::Read));
 
         rTicket.m_WSPosition = Base::Float3(pOutput->m_WSPosition[0], pOutput->m_WSPosition[1], pOutput->m_WSPosition[2]);
         rTicket.m_WSNormal   = Base::Float3(pOutput->m_WSNormal[0], pOutput->m_WSNormal[1], pOutput->m_WSNormal[2]);
@@ -706,19 +706,17 @@ namespace
             // -----------------------------------------------------------------------------
             // Upload data to buffer
             // -----------------------------------------------------------------------------
-            SPerDrawCallConstantBufferVS* pModelBuffer = static_cast<SPerDrawCallConstantBufferVS*>(BufferManager::MapConstantBuffer(m_ViewModelVSBuffer->GetBuffer(1)));
+            SPerDrawCallConstantBufferVS ModelBuffer;
 
-            assert(pModelBuffer != nullptr);
+            ModelBuffer.m_ModelMatrix = CurrentRenderJob->m_ModelMatrix;
 
-            pModelBuffer->m_ModelMatrix = CurrentRenderJob->m_ModelMatrix;
+            BufferManager::UploadConstantBufferData(m_ViewModelVSBuffer->GetBuffer(1), &ModelBuffer);
 
-            BufferManager::UnmapConstantBuffer(m_ViewModelVSBuffer->GetBuffer(1));
+            SHighlightSettings SelectionSettings;
 
-            SHighlightSettings* pSelectionSettings = static_cast<SHighlightSettings*>(BufferManager::MapConstantBuffer(m_HighlightPSBufferSetPtr->GetBuffer(0)));
+            SelectionSettings.m_ColorAlpha = Base::Float4(0.31f, 0.45f, 0.64f, 0.4f);
 
-            pSelectionSettings->m_ColorAlpha = Base::Float4(0.31f, 0.45f, 0.64f, 0.4f);
-
-            BufferManager::UnmapConstantBuffer(m_HighlightPSBufferSetPtr->GetBuffer(0));
+            BufferManager::UploadConstantBufferData(m_HighlightPSBufferSetPtr->GetBuffer(0), &SelectionSettings);
 
             // -----------------------------------------------------------------------------
             // Render
@@ -818,7 +816,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 Base::Int2 ActiveWindowSize = Gfx::Main::GetActiveWindowSize();
 
-                SSelectionSettings* pSettings = static_cast<SSelectionSettings*>(BufferManager::MapConstantBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1)));
+                SSelectionSettings Settings;
 
                 MinX = rRequest.m_Cursor[0] + rTicket.m_OffsetX;
                 MinY = rRequest.m_Cursor[1] + rTicket.m_OffsetY;
@@ -830,12 +828,12 @@ namespace
                 if (MinX > MaxX) MinX = 0;
                 if (MinY > MaxY) MinY = 0;
 
-                pSettings->m_MinX = MinX;
-                pSettings->m_MinY = MinY;
-                pSettings->m_MaxX = MaxX;
-                pSettings->m_MaxY = MaxY;
+                Settings.m_MinX = MinX;
+                Settings.m_MinY = MinY;
+                Settings.m_MaxX = MaxX;
+                Settings.m_MaxY = MaxY;
 
-                BufferManager::UnmapConstantBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1));
+                BufferManager::UploadConstantBufferData(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1), &Settings);
 
                 // -----------------------------------------------------------------------------
                 // Execute

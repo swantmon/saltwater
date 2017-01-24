@@ -76,7 +76,7 @@ namespace
         BASE_CONSOLE_STREAMINFO("Logic> Loading level number " << LevelIndexDebug);
         
         CreateEmptyScene();
-        //CreateDefaultScene();
+        // CreateDefaultScene();
 
         BASE_CONSOLE_STREAMINFO("Logic> Loading level finished.");
         

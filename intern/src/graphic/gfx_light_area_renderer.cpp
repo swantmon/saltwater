@@ -507,20 +507,18 @@ namespace
         // -----------------------------------------------------------------------------
         CCameraPtr CameraPtr = ViewManager::GetMainCamera();
 
-        SCameraProperties* pPSBuffer = static_cast<SCameraProperties*>(BufferManager::MapConstantBuffer(m_SphereLightPSBufferPtr->GetBuffer(0)));
-
-        assert(pPSBuffer != nullptr);
+        SCameraProperties PSBuffer;
 
         Base::Float3 Position = CameraPtr->GetView()->GetPosition();
         Base::Float3 ViewDirection = CameraPtr->GetView()->GetViewDirection();
 
-        pPSBuffer->m_InverseCameraProjection = CameraPtr->GetProjectionMatrix().GetInverted();
-        pPSBuffer->m_InverseCameraView       = CameraPtr->GetView()->GetViewMatrix().GetInverted();
-        pPSBuffer->m_CameraPosition          = Base::Float4(Position[0], Position[1], Position[2], 1.0f);
-        pPSBuffer->m_InvertedScreenSize      = Base::Float4(1.0f / Main::GetActiveWindowSize()[0], 1.0f / Main::GetActiveWindowSize()[1], 0, 0);
-        pPSBuffer->m_ExposureHistoryIndex    = HistogramRenderer::GetLastExposureHistoryIndex();
+        PSBuffer.m_InverseCameraProjection = CameraPtr->GetProjectionMatrix().GetInverted();
+        PSBuffer.m_InverseCameraView       = CameraPtr->GetView()->GetViewMatrix().GetInverted();
+        PSBuffer.m_CameraPosition          = Base::Float4(Position[0], Position[1], Position[2], 1.0f);
+        PSBuffer.m_InvertedScreenSize      = Base::Float4(1.0f / Main::GetActiveWindowSize()[0], 1.0f / Main::GetActiveWindowSize()[1], 0, 0);
+        PSBuffer.m_ExposureHistoryIndex    = HistogramRenderer::GetLastExposureHistoryIndex();
 
-        BufferManager::UnmapConstantBuffer(m_SphereLightPSBufferPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(m_SphereLightPSBufferPtr->GetBuffer(0), &PSBuffer);
         
         // -----------------------------------------------------------------------------
         // Rendering of light probes

@@ -394,19 +394,17 @@ namespace
         // -----------------------------------------------------------------------------
         CCameraPtr CameraPtr = ViewManager::GetMainCamera();
         
-        SCameraProperties* pPSBuffer = static_cast<SCameraProperties*>(BufferManager::MapConstantBuffer(m_PunctualLightPSBufferPtr->GetBuffer(0)));
-        
-        assert(pPSBuffer != nullptr);
+        SCameraProperties CameraProperties;
         
         Base::Float3 Position = CameraPtr->GetView()->GetPosition();
         
-        pPSBuffer->m_InverseCameraProjection = CameraPtr->GetProjectionMatrix().GetInverted();
-        pPSBuffer->m_InverseCameraView       = CameraPtr->GetView()->GetViewMatrix().GetInverted();
-        pPSBuffer->m_CameraPosition          = Base::Float4(Position[0], Position[1], Position[2], 1.0f);
-        pPSBuffer->m_InvertedScreenSize      = Base::Float4(1.0f / Main::GetActiveWindowSize()[0], 1.0f / Main::GetActiveWindowSize()[1], 0, 0);
-        pPSBuffer->m_ExposureHistoryIndex    = HistogramRenderer::GetLastExposureHistoryIndex();
+        CameraProperties.m_InverseCameraProjection = CameraPtr->GetProjectionMatrix().GetInverted();
+        CameraProperties.m_InverseCameraView       = CameraPtr->GetView()->GetViewMatrix().GetInverted();
+        CameraProperties.m_CameraPosition          = Base::Float4(Position[0], Position[1], Position[2], 1.0f);
+        CameraProperties.m_InvertedScreenSize      = Base::Float4(1.0f / Main::GetActiveWindowSize()[0], 1.0f / Main::GetActiveWindowSize()[1], 0, 0);
+        CameraProperties.m_ExposureHistoryIndex    = HistogramRenderer::GetLastExposureHistoryIndex();
         
-        BufferManager::UnmapConstantBuffer(m_PunctualLightPSBufferPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(m_PunctualLightPSBufferPtr->GetBuffer(0), &CameraProperties);
         
         // -----------------------------------------------------------------------------
         // Rendering of light sources point
@@ -433,41 +431,39 @@ namespace
             // -----------------------------------------------------------------------------
             // Upload model matrix to buffer
             // -----------------------------------------------------------------------------
-            SPerDrawCallConstantBuffer* pModelBuffer = static_cast<SPerDrawCallConstantBuffer*>(BufferManager::MapConstantBuffer(m_MainVSBufferPtr->GetBuffer(1)));
+            SPerDrawCallConstantBuffer ModelBuffer;
             
-            assert(pModelBuffer != nullptr);
+            ModelBuffer.m_ModelMatrix = Base::Float4x4::s_Identity;
+            ModelBuffer.m_ModelMatrix *= Base::Float4x4().SetTranslation(pEntity->GetWorldPosition());
+            ModelBuffer.m_ModelMatrix *= Base::Float4x4().SetScale(pDtLightFacet->GetAttenuationRadius());
             
-            pModelBuffer->m_ModelMatrix = Base::Float4x4::s_Identity;
-            pModelBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(pEntity->GetWorldPosition());
-            pModelBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(pDtLightFacet->GetAttenuationRadius());
-            
-            BufferManager::UnmapConstantBuffer(m_MainVSBufferPtr->GetBuffer(1));
+            BufferManager::UploadConstantBufferData(m_MainVSBufferPtr->GetBuffer(1), &ModelBuffer);
             
             // -----------------------------------------------------------------------------
             // Upload buffer data
             // -----------------------------------------------------------------------------
-            SPunctualLightProperties* pLightBuffer = static_cast<SPunctualLightProperties*>(BufferManager::MapConstantBuffer(m_PunctualLightPSBufferPtr->GetBuffer(1)));
-            
-            assert(pLightBuffer != nullptr);
+            SPunctualLightProperties LightBuffer;
             
             float InvSqrAttenuationRadius = pDtLightFacet->GetReciprocalSquaredAttenuationRadius();
             float AngleScale              = pDtLightFacet->GetAngleScale();
             float AngleOffset             = pDtLightFacet->GetAngleOffset();
             float HasShadows              = pDtLightFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows ? 1.0f : 0.0f;
             
-            pLightBuffer->m_LightPosition       = Base::Float4(pEntity->GetWorldPosition(), 1.0f);
-            pLightBuffer->m_LightDirection      = Base::Float4(pDtLightFacet->GetDirection(), 0.0f).Normalize();
-            pLightBuffer->m_LightColor          = Base::Float4(pDtLightFacet->GetLightness(), 1.0f);
-            pLightBuffer->m_LightSettings       = Base::Float4(InvSqrAttenuationRadius, AngleScale, AngleOffset, HasShadows);
+            LightBuffer.m_LightPosition  = Base::Float4(pEntity->GetWorldPosition(), 1.0f);
+            LightBuffer.m_LightDirection = Base::Float4(pDtLightFacet->GetDirection(), 0.0f).Normalize();
+            LightBuffer.m_LightColor     = Base::Float4(pDtLightFacet->GetLightness(), 1.0f);
+            LightBuffer.m_LightSettings  = Base::Float4(InvSqrAttenuationRadius, AngleScale, AngleOffset, HasShadows);
+
+            LightBuffer.m_LightViewProjection.SetIdentity();
 
             if (pDtLightFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows)
             {
                 assert(CurrentRenderJob->m_pGfxLightFacet->GetCamera().IsValid());
 
-                pLightBuffer->m_LightViewProjection = CurrentRenderJob->m_pGfxLightFacet->GetCamera()->GetViewProjectionMatrix();
+                LightBuffer.m_LightViewProjection = CurrentRenderJob->m_pGfxLightFacet->GetCamera()->GetViewProjectionMatrix();
             }
             
-            BufferManager::UnmapConstantBuffer(m_PunctualLightPSBufferPtr->GetBuffer(1));
+            BufferManager::UploadConstantBufferData(m_PunctualLightPSBufferPtr->GetBuffer(1), &LightBuffer);
 
             // -----------------------------------------------------------------------------
             // Render punctual lights

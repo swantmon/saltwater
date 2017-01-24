@@ -414,19 +414,13 @@ namespace
             // -----------------------------------------------------------------------------
             // Upload data to buffer
             // -----------------------------------------------------------------------------
-            SPerDrawCallConstantBufferVS* pModelBuffer = static_cast<SPerDrawCallConstantBufferVS*>(BufferManager::MapConstantBuffer(m_ViewVSBuffer->GetBuffer(1)));
+            SPerDrawCallConstantBufferVS ModelBuffer;
 
-            assert(pModelBuffer != nullptr);
+            ModelBuffer.m_ModelMatrix = CurrentRenderJob->m_ModelMatrix;
 
-            pModelBuffer->m_ModelMatrix = CurrentRenderJob->m_ModelMatrix;
+            BufferManager::UploadConstantBufferData(m_ViewVSBuffer->GetBuffer(1), &ModelBuffer);
 
-            BufferManager::UnmapConstantBuffer(m_ViewVSBuffer->GetBuffer(1));
-
-            CMaterial::SMaterialAttributes* pMaterialBuffer = static_cast<CMaterial::SMaterialAttributes*>(BufferManager::MapConstantBuffer(m_DeferredPassPSBuffer->GetBuffer(0)));
-
-            Base::CMemory::Copy(pMaterialBuffer, &MaterialPtr->GetMaterialAttributes(), sizeof(CMaterial::SMaterialAttributes));
-
-            BufferManager::UnmapConstantBuffer(m_DeferredPassPSBuffer->GetBuffer(0));
+            BufferManager::UploadConstantBufferData(m_DeferredPassPSBuffer->GetBuffer(0), &MaterialPtr->GetMaterialAttributes());
 
             // -----------------------------------------------------------------------------
             // Render
@@ -545,21 +539,17 @@ namespace
             // -----------------------------------------------------------------------------
             // Upload data to buffer
             // -----------------------------------------------------------------------------
-            SPerDrawCallConstantBufferVS* pModelBuffer = static_cast<SPerDrawCallConstantBufferVS*>(BufferManager::MapConstantBuffer(m_ViewVSBuffer->GetBuffer(1)));
+            SPerDrawCallConstantBufferVS ModelBuffer;
 
-            assert(pModelBuffer != nullptr);
+            ModelBuffer.m_ModelMatrix = CurrentRenderJob->m_ModelMatrix;
 
-            pModelBuffer->m_ModelMatrix = CurrentRenderJob->m_ModelMatrix;
+            BufferManager::UploadConstantBufferData(m_ViewVSBuffer->GetBuffer(1), &ModelBuffer);
 
-            BufferManager::UnmapConstantBuffer(m_ViewVSBuffer->GetBuffer(1));
+            SHitProxyProperties HitProxyProperties;
 
-            SHitProxyProperties* pHitProxyProperties = static_cast<SHitProxyProperties*>(BufferManager::MapConstantBuffer(m_HitProxyPassPSBuffer->GetBuffer(0)));
+            HitProxyProperties.m_ID = CurrentRenderJob->m_EntityID;
 
-            assert(pHitProxyProperties != nullptr);
-
-            pHitProxyProperties->m_ID = CurrentRenderJob->m_EntityID;
-
-            BufferManager::UnmapConstantBuffer(m_HitProxyPassPSBuffer->GetBuffer(0));
+            BufferManager::UploadConstantBufferData(m_HitProxyPassPSBuffer->GetBuffer(0), &HitProxyProperties);
 
             // -----------------------------------------------------------------------------
             // Render

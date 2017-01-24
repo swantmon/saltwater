@@ -738,12 +738,12 @@ namespace
             // -----------------------------------------------------------------------------
             // Upload per mipmap changing data
             // -----------------------------------------------------------------------------
-            SSpecularCubemapSettings& rSpecularCubemapSettings = *static_cast<SSpecularCubemapSettings*>(BufferManager::MapConstantBuffer(m_FilteringPSBufferSetPtr->GetBuffer(0)));
+            SSpecularCubemapSettings SpecularCubemapSettings;
 
-            rSpecularCubemapSettings.m_LinearRoughness = MipmapRoughness;
-            rSpecularCubemapSettings.m_NumberOfMiplevels = NumberOfMiplevels - 1.0f;
+            SpecularCubemapSettings.m_LinearRoughness = MipmapRoughness;
+            SpecularCubemapSettings.m_NumberOfMiplevels = NumberOfMiplevels - 1.0f;
 
-            BufferManager::UnmapConstantBuffer(m_FilteringPSBufferSetPtr->GetBuffer(0));
+            BufferManager::UploadConstantBufferData(m_FilteringPSBufferSetPtr->GetBuffer(0), &SpecularCubemapSettings);
 
             // -----------------------------------------------------------------------------
 

@@ -362,19 +362,17 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Upload buffer data
                 // -----------------------------------------------------------------------------
-                SIndirectLightProperties* pIndirectLightBuffer = static_cast<SIndirectLightProperties*>(Gfx::BufferManager::MapConstantBuffer(m_IndirectLightPSBufferPtr->GetBuffer(1)));
-
-                assert(pIndirectLightBuffer != nullptr);
+                SIndirectLightProperties IndirectLightBuffer;
 
                 float SSWidthOfShadowmap = static_cast<float>(WidthOfShadowmap);
 
-                pIndirectLightBuffer->m_RSMSettings[0] = 1.0f / SSWidthOfShadowmap;
-                pIndirectLightBuffer->m_RSMSettings[1] = static_cast<float>(IndexOfRSMDataY) * 1.0f / SSWidthOfShadowmap;
-                pIndirectLightBuffer->m_RSMSettings[2] = SSWidthOfShadowmap;
-                pIndirectLightBuffer->m_RSMSettings[3] = 0.0f;
-                pIndirectLightBuffer->m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
+                IndirectLightBuffer.m_RSMSettings[0] = 1.0f / SSWidthOfShadowmap;
+                IndirectLightBuffer.m_RSMSettings[1] = static_cast<float>(IndexOfRSMDataY) * 1.0f / SSWidthOfShadowmap;
+                IndirectLightBuffer.m_RSMSettings[2] = SSWidthOfShadowmap;
+                IndirectLightBuffer.m_RSMSettings[3] = 0.0f;
+                IndirectLightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
-                Gfx::BufferManager::UnmapConstantBuffer(m_IndirectLightPSBufferPtr->GetBuffer(1));
+                Gfx::BufferManager::UploadConstantBufferData(m_IndirectLightPSBufferPtr->GetBuffer(1), &IndirectLightBuffer);
 
                 // -----------------------------------------------------------------------------
                 // Draw
