@@ -67,6 +67,7 @@ namespace
         void* MapConstantBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map);
         void UnmapConstantBuffer(CBufferPtr _BufferPtr);
 
+        void UploadVertexBufferData(CBufferPtr _BufferPtr, void* _pData);
         void UploadConstantBufferData(CBufferPtr _BufferPtr, void* _pData);
 
     private:
@@ -493,40 +494,42 @@ namespace
 
     void* CGfxBufferManager::MapVertexBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map)
     {
-        BASE_UNUSED(_Map);
+        assert(_BufferPtr != nullptr && _BufferPtr.IsValid());
 
         CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
-        
+
         assert(pBuffer != nullptr);
-        
-        if (!pBuffer->m_Info.m_IsBytesOwner && pBuffer->m_pBytes == 0)
-        {
-            pBuffer->m_pBytes = Base::CMemory::Allocate(_BufferPtr->GetNumberOfBytes());
-        }
-        
-        return pBuffer->m_pBytes;
+
+        GLenum Binding = pBuffer->m_NativeBinding;
+
+        glBindBuffer(Binding, pBuffer->m_NativeBuffer);
+
+        int NativeMap = ConvertMap(_Map);
+
+        return glMapBuffer(Binding, NativeMap);
     }
 
     // -----------------------------------------------------------------------------
 
     void CGfxBufferManager::UnmapVertexBuffer(CBufferPtr _BufferPtr)
     {
-        GLenum Binding         = ConvertBindFlag(_BufferPtr->GetBinding());
+        assert(_BufferPtr != nullptr && _BufferPtr.IsValid());
+
         CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
-        
+
         assert(pBuffer != nullptr);
-        
-        glBindBuffer(Binding, pBuffer->m_NativeBuffer);
-        
-        glBufferSubData(Binding, 0, pBuffer->m_NumberOfBytes, pBuffer->m_pBytes);
-        
-        glBindBuffer(Binding, 0);
+
+        GLenum Binding = pBuffer->m_NativeBinding;
+
+        glUnmapBuffer(GL_ARRAY_BUFFER);
     }
 
     // -----------------------------------------------------------------------------
 
     void* CGfxBufferManager::MapIndexBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map)
     {
+        assert(_BufferPtr != nullptr && _BufferPtr.IsValid());
+
         BASE_UNUSED(_Map);
 
         return nullptr;
@@ -536,16 +539,18 @@ namespace
 
     void CGfxBufferManager::UnmapIndexBuffer(CBufferPtr _BufferPtr)
     {
-        
+        assert(_BufferPtr != nullptr && _BufferPtr.IsValid());
     }
 
     // -----------------------------------------------------------------------------
 
     void* CGfxBufferManager::MapConstantBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map)
     {
+        assert(_BufferPtr != nullptr && _BufferPtr.IsValid());
+
         CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
 
-        assert(pBuffer != nullptr && _BufferPtr.IsValid());
+        assert(pBuffer != nullptr);
 
         GLenum Binding = pBuffer->m_NativeBinding;
 
@@ -560,6 +565,8 @@ namespace
 
     void CGfxBufferManager::UnmapConstantBuffer(CBufferPtr _BufferPtr)
     {
+        assert(_BufferPtr != nullptr && _BufferPtr.IsValid());
+
         CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
 
         assert(pBuffer != nullptr);
@@ -571,11 +578,32 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxBufferManager::UploadVertexBufferData(CBufferPtr _BufferPtr, void* _pData)
+    {
+        assert(_BufferPtr != nullptr && _BufferPtr.IsValid());
+
+        GLenum Binding = ConvertBindFlag(_BufferPtr->GetBinding());
+
+        CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
+
+        assert(pBuffer != nullptr);
+
+        glBindBuffer(Binding, pBuffer->m_NativeBuffer);
+
+        glBufferSubData(Binding, 0, pBuffer->m_NumberOfBytes, _pData);
+
+        glBindBuffer(Binding, 0);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxBufferManager::UploadConstantBufferData(CBufferPtr _BufferPtr, void* _pData)
     {
         assert(_BufferPtr != nullptr && _BufferPtr.IsValid() && _pData);
 
         CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
+
+        assert(pBuffer != nullptr);
 
         GLenum Binding = pBuffer->m_NativeBinding;
 
@@ -847,6 +875,13 @@ namespace BufferManager
     void UnmapConstantBuffer(CBufferPtr _BufferPtr)
     {
         CGfxBufferManager::GetInstance().UnmapConstantBuffer(_BufferPtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void UploadVertexBufferData(CBufferPtr _BufferPtr, void* _pData)
+    {
+        CGfxBufferManager::GetInstance().UploadVertexBufferData(_BufferPtr, _pData);
     }
 
     // -----------------------------------------------------------------------------
