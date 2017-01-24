@@ -32,11 +32,7 @@
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
 
-#include "mr/mr_control_manager.h"
-
 #include "opencv2/opencv.hpp"
-
-#define USE_AR_GEOMETRY 0
 
 using namespace Gfx;
 
@@ -1372,116 +1368,6 @@ namespace
 
     void CGfxSkyManager::RenderSkyboxFromGeometry(CInternSkyFacet* _pOutput, float _Intensity)
     {
-//         CCameraPtr TestCameraPtr = ViewManager::GetMainCamera();
-// 
-//         static cv::Mat InputFrame     = cv::Mat(cv::Size(1280, 720), CV_8UC3);
-//         static cv::Mat OutputPanorama = cv::Mat(cv::Size(1280, 720), CV_8UC3);
-//         static cv::Mat InputArray     = cv::Mat::eye(3, 3, CV_64F);
-// 
-//         // -----------------------------------------------------------------------------
-//         // Input
-//         // -----------------------------------------------------------------------------    
-//         InputFrame.data = (uchar*)(MR::ControlManager::GetActiveControl()->GetOriginalFrame()->GetPixels());
-// 
-//         cv::imshow("Input", InputFrame);
-// 
-//         // -----------------------------------------------------------------------------
-//         // Matrix
-//         // -----------------------------------------------------------------------------
-// //         InputArray = (cv::Mat_<float>(4, 4) << 
-// //               TestCameraPtr->GetViewProjectionMatrix()[0][0] , TestCameraPtr->GetViewProjectionMatrix()[1][0] , TestCameraPtr->GetViewProjectionMatrix()[2][0], TestCameraPtr->GetViewProjectionMatrix()[3][0]
-// //             , TestCameraPtr->GetViewProjectionMatrix()[0][1] , TestCameraPtr->GetViewProjectionMatrix()[1][1] , TestCameraPtr->GetViewProjectionMatrix()[2][1], TestCameraPtr->GetViewProjectionMatrix()[3][1]
-// //             , TestCameraPtr->GetViewProjectionMatrix()[0][2] , TestCameraPtr->GetViewProjectionMatrix()[1][2] , TestCameraPtr->GetViewProjectionMatrix()[2][2], TestCameraPtr->GetViewProjectionMatrix()[3][2]
-// //             , TestCameraPtr->GetViewProjectionMatrix()[0][3] , TestCameraPtr->GetViewProjectionMatrix()[1][3] , TestCameraPtr->GetViewProjectionMatrix()[2][3], TestCameraPtr->GetViewProjectionMatrix()[3][3]);
-// 
-//         InputArray = (cv::Mat_<float>(3, 3) << 
-//               TestCameraPtr->GetViewProjectionMatrix()[0][0] , TestCameraPtr->GetViewProjectionMatrix()[1][0] , TestCameraPtr->GetViewProjectionMatrix()[2][0]
-//             , TestCameraPtr->GetViewProjectionMatrix()[0][1] , TestCameraPtr->GetViewProjectionMatrix()[1][1] , TestCameraPtr->GetViewProjectionMatrix()[2][1]
-//             , TestCameraPtr->GetViewProjectionMatrix()[0][2] , TestCameraPtr->GetViewProjectionMatrix()[1][2] , TestCameraPtr->GetViewProjectionMatrix()[2][2]);
-// 
-//         const Base::Float3* pTestWorldSpaceCameraFrustum = TestCameraPtr->GetWorldSpaceFrustum();
-// 
-//         Base::Float3 TFarBottomLeft  = pTestWorldSpaceCameraFrustum[4];
-//         Base::Float3 TFarTopLeft     = pTestWorldSpaceCameraFrustum[5];
-//         Base::Float3 TFarBottomRight = pTestWorldSpaceCameraFrustum[6];
-//         Base::Float3 TFarTopRight    = pTestWorldSpaceCameraFrustum[7];
-// 
-//         Base::Float3 TUVFarBottomLeft  = TFarBottomLeft  * TestCameraPtr->GetViewProjectionMatrix();
-//         Base::Float3 TUVFarTopLeft     = TFarTopLeft     * TestCameraPtr->GetViewProjectionMatrix();
-//         Base::Float3 TUVFarBottomRight = TFarBottomRight * TestCameraPtr->GetViewProjectionMatrix();
-//         Base::Float3 TUVFarTopRight    = TFarTopRight    * TestCameraPtr->GetViewProjectionMatrix();
-// 
-// 
-//         cv::Point2f MaskPoints[4];
-//         cv::Point2f DestPoints[4];
-//         cv::Mat     WarpMat;
-// 
-//         DestPoints[0] = cv::Point2f(static_cast<float>(0), static_cast<float>(0));
-//         DestPoints[1] = cv::Point2f(static_cast<float>(0), static_cast<float>(720 - 1));
-//         DestPoints[2] = cv::Point2f(static_cast<float>(1280 - 1), static_cast<float>(720 - 1));
-//         DestPoints[3] = cv::Point2f(static_cast<float>(1280 - 1), static_cast<float>(0));
-// 
-//         MaskPoints[1] = cv::Point2f(TUVFarBottomLeft[0]  + 0.5f * 1280.0f, TUVFarBottomLeft[1]  + 0.5f * 720.0f);
-//         MaskPoints[0] = cv::Point2f(TUVFarTopLeft[0]     + 0.5f * 1280.0f, TUVFarTopLeft[1]     + 0.5f * 720.0f);
-//         MaskPoints[3] = cv::Point2f(TUVFarTopRight[0]    + 0.5f * 1280.0f, TUVFarTopRight[1]    + 0.5f * 720.0f);
-//         MaskPoints[2] = cv::Point2f(TUVFarBottomRight[0] + 0.5f * 1280.0f, TUVFarBottomRight[1] + 0.5f * 720.0f);
-// 
-//         WarpMat = cv::getPerspectiveTransform(MaskPoints, DestPoints);
-// 
-//         // -----------------------------------------------------------------------------
-//         // Output
-//         // -----------------------------------------------------------------------------
-//         // cv::warpPerspective(InputFrame, OutputPanorama, InputArray, cv::Size(1280, 720));
-// 
-//         cv::warpPerspective(InputFrame, OutputPanorama, WarpMat, OutputPanorama.size());
-// 
-//         cv::imshow("Output", OutputPanorama);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         CRenderContextPtr RenderContextPtr   = _pOutput->m_RenderContextPtr;
         CShaderPtr        VSPtr              = m_SkyboxFromGeometry.m_VSPtr;
         CShaderPtr        GSPtr              = m_SkyboxFromGeometry.m_GSPtr;
@@ -1506,66 +1392,6 @@ namespace
         Base::Float3 FarTopLeft     = pWorldSpaceCameraFrustum[5];
         Base::Float3 FarBottomRight = pWorldSpaceCameraFrustum[6];
         Base::Float3 FarTopRight    = pWorldSpaceCameraFrustum[7];
-
-#if USE_AR_GEOMETRY == 1
-        // -----------------------------------------------------------------------------
-        // Test
-        // -----------------------------------------------------------------------------
-        static unsigned int m_Index = 0;
-
-        static Base::Float3 TestFarBottomLeft   = Base::Float3::s_Zero;
-        static Base::Float3 TestFarTopLeft      = Base::Float3::s_Zero;
-        static Base::Float3 TestFarBottomRight  = Base::Float3::s_Zero;
-        static Base::Float3 TestFarTopRight     = Base::Float3::s_Zero;
-
-        Gfx::CSelectionTicket& rSelectionTicket = *m_pSelectionTicket;
-
-        if (SelectionRenderer::PopPick(rSelectionTicket))
-        {
-            if (rSelectionTicket.m_HitFlag == SHitFlag::Entity && rSelectionTicket.m_pObject != nullptr) 
-            {
-                switch (m_Index)
-                {
-                case 0: TestFarBottomLeft  = rSelectionTicket.m_WSPosition; break;
-                case 1: TestFarTopLeft     = rSelectionTicket.m_WSPosition; break;
-                case 2: TestFarBottomRight = rSelectionTicket.m_WSPosition; break;
-                case 3: TestFarTopRight    = rSelectionTicket.m_WSPosition; break;
-                }
-            }
-            else
-            {
-                switch (m_Index)
-                {
-                case 0: TestFarBottomLeft.SetZero(); break;
-                case 1: TestFarTopLeft.SetZero();  break;
-                case 2: TestFarBottomRight.SetZero();  break;
-                case 3: TestFarTopRight.SetZero();  break;
-                }
-            }
-
-            m_Index = (m_Index + 1) % 4;
-        }
-
-        switch (m_Index)
-        {
-        case 0: SelectionRenderer::PushPick(rSelectionTicket, Base::Int2(1, 719)); break;
-        case 1: SelectionRenderer::PushPick(rSelectionTicket, Base::Int2(1, 1)); break;
-        case 2: SelectionRenderer::PushPick(rSelectionTicket, Base::Int2(1279, 719)); break;
-        case 3: SelectionRenderer::PushPick(rSelectionTicket, Base::Int2(1279, 1)); break;
-        }
-
-        if (TestFarBottomLeft.Length() != 0) FarBottomLeft = TestFarBottomLeft;
-        if (TestFarTopLeft.Length() != 0) FarTopLeft = TestFarTopLeft;
-        if (TestFarBottomRight.Length() != 0) FarBottomRight = TestFarBottomRight;
-        if (TestFarTopRight.Length() != 0) FarTopRight = TestFarTopRight;
-
-
-        BASE_CONSOLE_INFOV("BL: %f, %f, %f || TL: %f, %f, %f || BR: %f, %f, %f || TR: %f, %f, %f"
-            , FarBottomLeft[0], FarBottomLeft[1], FarBottomLeft[2]
-            , FarTopLeft[0], FarTopLeft[1], FarTopLeft[2]
-            , FarBottomRight[0], FarBottomRight[1], FarBottomRight[2]
-            , FarTopRight[0], FarTopRight[1], FarTopRight[2]);
-#endif
 
         // -----------------------------------------------------------------------------
         // Calculate far plane and setup plane
@@ -1605,11 +1431,6 @@ namespace
 
         pViewBuffer->m_ModelMatrix  = Base::Float4x4::s_Identity;
         pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(-1.0f, 1.0f, 1.0f);
-
-#if USE_AR_GEOMETRY == 1
-        //pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(MainViewPtr->GetPosition() * Base::Float3(1.0f, 1.0f, 1.0f)).GetInverted();
-        //pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(-MainViewPtr->GetPosition()[0], -MainViewPtr->GetPosition()[1], -MainViewPtr->GetPosition()[2]);
-#endif
 
         BufferManager::UnmapConstantBuffer(VSBufferSetPtr->GetBuffer(0));
 
