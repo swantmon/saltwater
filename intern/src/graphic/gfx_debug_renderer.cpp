@@ -620,14 +620,14 @@ namespace
 
             // -----------------------------------------------------------------------------
 
-            SProperties* pProperties = static_cast<SProperties*>(BufferManager::MapConstantBuffer(m_ViewPSBuffer->GetBuffer(0), CBuffer::Write));
+            SProperties Properties;
 
-            pProperties->m_Color[0] = _rColor[0];
-            pProperties->m_Color[1] = _rColor[1];
-            pProperties->m_Color[2] = _rColor[2];
-            pProperties->m_Color[3] = 0.5f;
+            Properties.m_Color[0] = _rColor[0];
+            Properties.m_Color[1] = _rColor[1];
+            Properties.m_Color[2] = _rColor[2];
+            Properties.m_Color[3] = 0.5f;
 
-            BufferManager::UnmapConstantBuffer(m_ViewPSBuffer->GetBuffer(0));
+            BufferManager::UploadConstantBufferData(m_ViewPSBuffer->GetBuffer(0), &Properties);
 
             // -----------------------------------------------------------------------------
 
@@ -722,14 +722,14 @@ namespace
         // -----------------------------------------------------------------------------
         CCameraPtr CameraPtr = m_RenderContextPtr->GetCamera();
 
-        SPerFrameConstantBuffer* pViewBuffer = static_cast<SPerFrameConstantBuffer*>(BufferManager::MapConstantBuffer(m_ViewModelVSBuffer->GetBuffer(0), CBuffer::Write));
+        SPerFrameConstantBuffer ViewBuffer;
 
-        pViewBuffer->m_ViewProjection = CameraPtr->GetProjectionMatrix();
-        pViewBuffer->m_ModelMatrix  = Base::Float4x4::s_Identity;
-        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(0.0f, 0.0f, -1.0f);
-        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(0.1f) * ViewManager::GetMainCamera()->GetView()->GetRotationMatrix();
+        ViewBuffer.m_ViewProjection = CameraPtr->GetProjectionMatrix();
+        ViewBuffer.m_ModelMatrix  = Base::Float4x4::s_Identity;
+        ViewBuffer.m_ModelMatrix *= Base::Float4x4().SetTranslation(0.0f, 0.0f, -1.0f);
+        ViewBuffer.m_ModelMatrix *= Base::Float4x4().SetScale(0.1f) * ViewManager::GetMainCamera()->GetView()->GetRotationMatrix();
 
-        BufferManager::UnmapConstantBuffer(m_ViewModelVSBuffer->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(m_ViewModelVSBuffer->GetBuffer(0), &ViewBuffer);
 
         // -----------------------------------------------------------------------------
         // Per surface
@@ -742,11 +742,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Buffer
             // -----------------------------------------------------------------------------
-            CMaterial::SMaterialAttributes* pMaterialBuffer = static_cast<CMaterial::SMaterialAttributes*>(BufferManager::MapConstantBuffer(m_DeferredPassPSBuffer->GetBuffer(0), CBuffer::Write));
-
-            Base::CMemory::Copy(pMaterialBuffer, &m_GizmoModelPtr->GetLOD(0)->GetSurface(IndexOfSurface)->GetMaterial()->GetMaterialAttributes(), sizeof(CMaterial::SMaterialAttributes));
-
-            BufferManager::UnmapConstantBuffer(m_DeferredPassPSBuffer->GetBuffer(0));
+            BufferManager::UploadConstantBufferData(m_DeferredPassPSBuffer->GetBuffer(0), &m_GizmoModelPtr->GetLOD(0)->GetSurface(IndexOfSurface)->GetMaterial()->GetMaterialAttributes());
 
             // -----------------------------------------------------------------------------
             // Render
@@ -828,10 +824,6 @@ namespace
 
         for (; CurrentTexture != EndOfTextures; ++ CurrentTexture)
         {
-            SPerDrawCallConstantBuffer* pModelBuffer = static_cast<SPerDrawCallConstantBuffer*>(BufferManager::MapConstantBuffer(m_BaseModelVSBuffer->GetBuffer(1), CBuffer::Write));
-
-            assert(pModelBuffer != nullptr);
-
             // -----------------------------------------------------------------------------
             // 
             //   0,0                      1,0
@@ -849,12 +841,13 @@ namespace
             Base::Float2 MaxPoint   = CurrentTexture->m_ScreenRegion.GetMax();
             Base::Float2 Difference = MaxPoint - MinPoint;
 
-            pModelBuffer->m_ModelMatrix = Base::Float4x4::s_Identity;
+            SPerDrawCallConstantBuffer ModelBuffer;
 
-            pModelBuffer->m_ModelMatrix.SetScale(Difference[0], Difference[1], 1.0f);
-            pModelBuffer->m_ModelMatrix.InjectTranslation(MinPoint[0], MinPoint[1], 1.0f);
+            ModelBuffer.m_ModelMatrix = Base::Float4x4::s_Identity;
+            ModelBuffer.m_ModelMatrix.SetScale(Difference[0], Difference[1], 1.0f);
+            ModelBuffer.m_ModelMatrix.InjectTranslation(MinPoint[0], MinPoint[1], 1.0f);
 
-            BufferManager::UnmapConstantBuffer(m_BaseModelVSBuffer->GetBuffer(1));
+            BufferManager::UploadConstantBufferData(m_BaseModelVSBuffer->GetBuffer(1), &ModelBuffer);
 
             // -----------------------------------------------------------------------------
 

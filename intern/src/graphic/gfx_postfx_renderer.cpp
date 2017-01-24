@@ -887,22 +887,22 @@ namespace
         // -----------------------------------------------------------------------------
         // Data
         // -----------------------------------------------------------------------------
-        SDOFDownProperties* pDOFDownProperties = static_cast<SDOFDownProperties*>(BufferManager::MapConstantBuffer(m_DOFDownPropertiesPSBufferPtr->GetBuffer(0), CBuffer::Write));
+        SDOFDownProperties DOFDownProperties;
 
-        pDOFDownProperties->m_DofNear     = pDataDOFFacet->GetNear();
-        pDOFDownProperties->m_DofRowDelta = Base::Float2(1.0f, 0.25f / Size[1]);
+        DOFDownProperties.m_DofNear     = pDataDOFFacet->GetNear();
+        DOFDownProperties.m_DofRowDelta = Base::Float2(1.0f, 0.25f / Size[1]);
 
-        BufferManager::UnmapConstantBuffer(m_DOFDownPropertiesPSBufferPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(m_DOFDownPropertiesPSBufferPtr->GetBuffer(0), &DOFDownProperties);
 
         // -----------------------------------------------------------------------------
 
-        SDOFApplyProperties* pDOFApplyProperties = static_cast<SDOFApplyProperties*>(BufferManager::MapConstantBuffer(m_DOFApplyPropertiesPSBufferPtr->GetBuffer(1), CBuffer::Write));
+        SDOFApplyProperties DOFApplyProperties;
 
-        pDOFApplyProperties->m_DofEqFar     = pDataDOFFacet->GetEqFar();
-        pDOFApplyProperties->m_DofLerpBias  = pDataDOFFacet->GetLerpBias();
-        pDOFApplyProperties->m_DofLerpScale = pDataDOFFacet->GetLerpScale();
+        DOFApplyProperties.m_DofEqFar     = pDataDOFFacet->GetEqFar();
+        DOFApplyProperties.m_DofLerpBias  = pDataDOFFacet->GetLerpBias();
+        DOFApplyProperties.m_DofLerpScale = pDataDOFFacet->GetLerpScale();
 
-        BufferManager::UnmapConstantBuffer(m_DOFApplyPropertiesPSBufferPtr->GetBuffer(1));
+        BufferManager::UploadConstantBufferData(m_DOFApplyPropertiesPSBufferPtr->GetBuffer(1), &DOFApplyProperties);
         
         // -----------------------------------------------------------------------------
         // Rendering: Copy from one swap buffer to the other one
@@ -1003,7 +1003,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Rendering: Do gaussian blur with down sampled image
         // -----------------------------------------------------------------------------
-        SGaussianSettings* pGaussianSettings;
+        SGaussianSettings GaussianSettings;
+
+        GaussianSettings.m_Weights[0] = 0.0f;
+        GaussianSettings.m_Weights[1] = 0.000003f;
+        GaussianSettings.m_Weights[2] = 0.000229f;
+        GaussianSettings.m_Weights[3] = 0.005977f;
+        GaussianSettings.m_Weights[4] = 0.060598f;
+        GaussianSettings.m_Weights[5] = 0.241730f;
+        GaussianSettings.m_Weights[6] = 0.382925f;
         
         ContextManager::SetRenderContext(m_QuarterRenderContextPtrs[1]);
         
@@ -1025,19 +1033,10 @@ namespace
         
         ContextManager::SetConstantBufferSetPS(m_GaussianBlurPropertiesPSBufferPtr);
         
-        pGaussianSettings = static_cast<SGaussianSettings*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesPSBufferPtr->GetBuffer(0), CBuffer::Write));
+        GaussianSettings.m_Direction[0] = 1.0f * 1.0f / static_cast<float>(QuarterSize[0]);
+        GaussianSettings.m_Direction[1] = 0.0f * 1.0f / static_cast<float>(QuarterSize[1]);
         
-        pGaussianSettings->m_Direction[0]          = 1.0f * 1.0f / static_cast<float>(QuarterSize[0]);
-        pGaussianSettings->m_Direction[1]          = 0.0f * 1.0f / static_cast<float>(QuarterSize[1]);
-        pGaussianSettings->m_Weights[0]            = 0.0f;
-        pGaussianSettings->m_Weights[1]            = 0.000003f;
-        pGaussianSettings->m_Weights[2]            = 0.000229f;
-        pGaussianSettings->m_Weights[3]            = 0.005977f;
-        pGaussianSettings->m_Weights[4]            = 0.060598f;
-        pGaussianSettings->m_Weights[5]            = 0.241730f;
-        pGaussianSettings->m_Weights[6]            = 0.382925f;
-        
-        BufferManager::UnmapConstantBuffer(m_GaussianBlurPropertiesPSBufferPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesPSBufferPtr->GetBuffer(0), &GaussianSettings);
         
         ContextManager::SetTextureSetPS(m_QuarterTextureSetPtrs[0]);
         
@@ -1087,19 +1086,10 @@ namespace
         
         ContextManager::SetConstantBufferSetPS(m_GaussianBlurPropertiesPSBufferPtr);
         
-        pGaussianSettings = static_cast<SGaussianSettings*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesPSBufferPtr->GetBuffer(0), CBuffer::Write));
+        GaussianSettings.m_Direction[0] = 0.0f * 1.0f / static_cast<float>(QuarterSize[0]);
+        GaussianSettings.m_Direction[1] = 1.0f * 1.0f / static_cast<float>(QuarterSize[1]);
         
-        pGaussianSettings->m_Direction[0]          = 0.0f * 1.0f / static_cast<float>(QuarterSize[0]);
-        pGaussianSettings->m_Direction[1]          = 1.0f * 1.0f / static_cast<float>(QuarterSize[1]);
-        pGaussianSettings->m_Weights[0]            = 0.0f;
-        pGaussianSettings->m_Weights[1]            = 0.000003f;
-        pGaussianSettings->m_Weights[2]            = 0.000229f;
-        pGaussianSettings->m_Weights[3]            = 0.005977f;
-        pGaussianSettings->m_Weights[4]            = 0.060598f;
-        pGaussianSettings->m_Weights[5]            = 0.241730f;
-        pGaussianSettings->m_Weights[6]            = 0.382925f;
-        
-        BufferManager::UnmapConstantBuffer(m_GaussianBlurPropertiesPSBufferPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesPSBufferPtr->GetBuffer(0), &GaussianSettings);
         
         ContextManager::SetTextureSetPS(m_QuarterTextureSetPtrs[1]);
         

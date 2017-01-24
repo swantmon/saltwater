@@ -298,18 +298,18 @@ namespace
         // -----------------------------------------------------------------------------
         // Upload data
         // -----------------------------------------------------------------------------
-        SConstantBufferPS* pConstantBufferPS = static_cast<SConstantBufferPS*>(BufferManager::MapConstantBuffer(m_ConstantBufferSetPSPtr->GetBuffer(0), CBuffer::Write));
+        SConstantBufferPS ConstantBufferPS;
 
-        pConstantBufferPS->m_ColorMatrixR_ColorCurveCd1       = m_ConstantBufferPS.m_ColorMatrixR_ColorCurveCd1;
-        pConstantBufferPS->m_ColorMatrixG_ColorCurveCd3Cm3    = m_ConstantBufferPS.m_ColorMatrixG_ColorCurveCd3Cm3;
-        pConstantBufferPS->m_ColorMatrixB_ColorCurveCm2       = m_ConstantBufferPS.m_ColorMatrixB_ColorCurveCm2;
-        pConstantBufferPS->m_ColorCurve_Cm0Cd0_Cd2_Ch0Cm1_Ch3 = m_ConstantBufferPS.m_ColorCurve_Cm0Cd0_Cd2_Ch0Cm1_Ch3;
-        pConstantBufferPS->m_ColorCurve_Ch1_Ch2               = m_ConstantBufferPS.m_ColorCurve_Ch1_Ch2;
-        pConstantBufferPS->m_ColorShadow_Luma                 = m_ConstantBufferPS.m_ColorShadow_Luma;
-        pConstantBufferPS->m_ColorShadow_Tint1                = m_ConstantBufferPS.m_ColorShadow_Tint1;
-        pConstantBufferPS->m_ColorShadow_Tint2                = m_ConstantBufferPS.m_ColorShadow_Tint2;
+        ConstantBufferPS.m_ColorMatrixR_ColorCurveCd1       = m_ConstantBufferPS.m_ColorMatrixR_ColorCurveCd1;
+        ConstantBufferPS.m_ColorMatrixG_ColorCurveCd3Cm3    = m_ConstantBufferPS.m_ColorMatrixG_ColorCurveCd3Cm3;
+        ConstantBufferPS.m_ColorMatrixB_ColorCurveCm2       = m_ConstantBufferPS.m_ColorMatrixB_ColorCurveCm2;
+        ConstantBufferPS.m_ColorCurve_Cm0Cd0_Cd2_Ch0Cm1_Ch3 = m_ConstantBufferPS.m_ColorCurve_Cm0Cd0_Cd2_Ch0Cm1_Ch3;
+        ConstantBufferPS.m_ColorCurve_Ch1_Ch2               = m_ConstantBufferPS.m_ColorCurve_Ch1_Ch2;
+        ConstantBufferPS.m_ColorShadow_Luma                 = m_ConstantBufferPS.m_ColorShadow_Luma;
+        ConstantBufferPS.m_ColorShadow_Tint1                = m_ConstantBufferPS.m_ColorShadow_Tint1;
+        ConstantBufferPS.m_ColorShadow_Tint2                = m_ConstantBufferPS.m_ColorShadow_Tint2;
 
-        BufferManager::UnmapConstantBuffer(m_ConstantBufferSetPSPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(m_ConstantBufferSetPSPtr->GetBuffer(0), &ConstantBufferPS);
 
         // -----------------------------------------------------------------------------
         // Prepare renderer

@@ -347,33 +347,31 @@ namespace
         	Gfx::CSunFacet* pGraphicSunFacet = CurrentRenderJob->m_pGraphicSunLightFacet;
 
         	// -----------------------------------------------------------------------------
-	        // Upload buffer data
-	        // -----------------------------------------------------------------------------
-	        SSunLightProperties* pLightBuffer = static_cast<SSunLightProperties*>(BufferManager::MapConstantBuffer(m_SunLightPSBufferPtr->GetBuffer(1), CBuffer::Write));
-
-	        assert(pLightBuffer != nullptr);
-
-	        pLightBuffer->m_LightViewProjection = pGraphicSunFacet->GetCamera()->GetViewProjectionMatrix();
-	        pLightBuffer->m_LightDirection      = Base::Float4(pDataSunFacet->GetDirection(), 0.0f).Normalize();
-	        pLightBuffer->m_LightColor          = Base::Float4(pDataSunFacet->GetLightness(), 1.0f);
-	        pLightBuffer->m_SunAngularRadius    = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
-	        pLightBuffer->m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
-
-	        BufferManager::UnmapConstantBuffer(m_SunLightPSBufferPtr->GetBuffer(1));
-
-	        // -----------------------------------------------------------------------------
-
-	        ContextManager::SetConstantBufferSetPS(m_SunLightPSBufferPtr);
-
-	        ContextManager::SetTextureSetPS(m_SunLightTextureSetPtr);
-	        
-	        ContextManager::SetTextureSetPS(pGraphicSunFacet->GetTextureSMSet());
-
-	        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
-
-        	ContextManager::ResetTextureSetPS();
-
-	        ContextManager::ResetConstantBufferSetPS();
+            // Upload buffer data
+            // -----------------------------------------------------------------------------
+            SSunLightProperties LightBuffer;
+    
+            LightBuffer.m_LightViewProjection = pGraphicSunFacet->GetCamera()->GetViewProjectionMatrix();
+            LightBuffer.m_LightDirection      = Base::Float4(pDataSunFacet->GetDirection(), 0.0f).Normalize();
+            LightBuffer.m_LightColor          = Base::Float4(pDataSunFacet->GetLightness(), 1.0f);
+            LightBuffer.m_SunAngularRadius    = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
+            LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
+    
+            BufferManager::UploadConstantBufferData(m_SunLightPSBufferPtr->GetBuffer(1), &LightBuffer);
+    
+            // -----------------------------------------------------------------------------
+    
+            ContextManager::SetConstantBufferSetPS(m_SunLightPSBufferPtr);
+    
+            ContextManager::SetTextureSetPS(m_SunLightTextureSetPtr);
+            
+            ContextManager::SetTextureSetPS(pGraphicSunFacet->GetTextureSMSet());
+    
+            ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+    
+            ContextManager::ResetTextureSetPS();
+    
+            ContextManager::ResetConstantBufferSetPS();
         }
 
         ContextManager::ResetConstantBufferSetVS(); 

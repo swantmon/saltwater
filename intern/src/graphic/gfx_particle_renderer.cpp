@@ -629,16 +629,14 @@ namespace
         // -----------------------------------------------------------------------------
         // Upload some frame data to graphic device
         // -----------------------------------------------------------------------------
-        SPerFrameConstantBuffer* pPerFrameConstantBuffer = static_cast<SPerFrameConstantBuffer*>(BufferManager::MapConstantBuffer(m_LiquidVSBufferPtr->GetBuffer(1), CBuffer::Write));
+        SPerFrameConstantBuffer PerFrameConstantBuffer;
         
-        assert(pPerFrameConstantBuffer != nullptr);
+        PerFrameConstantBuffer.m_LiquidMatrix = Base::Float4x4::s_Identity;
+        PerFrameConstantBuffer.m_LiquidMatrix *= ViewManager::GetMainCamera()->GetView()->GetRotationMatrix().GetTransposed();
+        PerFrameConstantBuffer.m_LiquidMatrix *= Base::Float4x4().SetRotation(Base::DegreesToRadians(-180.0f), 0.0f, 0.0f);
+        PerFrameConstantBuffer.m_LiquidMatrix *= Base::Float4x4().SetScale(0.3f);
         
-        pPerFrameConstantBuffer->m_LiquidMatrix = Base::Float4x4::s_Identity;
-        pPerFrameConstantBuffer->m_LiquidMatrix *= ViewManager::GetMainCamera()->GetView()->GetRotationMatrix().GetTransposed();
-        pPerFrameConstantBuffer->m_LiquidMatrix *= Base::Float4x4().SetRotation(Base::DegreesToRadians(-180.0f), 0.0f, 0.0f);
-        pPerFrameConstantBuffer->m_LiquidMatrix *= Base::Float4x4().SetScale(0.3f);
-        
-        BufferManager::UnmapConstantBuffer(m_LiquidVSBufferPtr->GetBuffer(1));
+        BufferManager::UploadConstantBufferData(m_LiquidVSBufferPtr->GetBuffer(1), &PerFrameConstantBuffer);
         
         // -----------------------------------------------------------------------------
         // Clear render targets
@@ -684,17 +682,15 @@ namespace
 
         ContextManager::SetConstantBufferSetPS(m_LiquidPSBufferPtr);
 
-        SLiquidSettings* pLiquidBuffer = static_cast<SLiquidSettings*>(BufferManager::MapConstantBuffer(m_LiquidPSBufferPtr->GetBuffer(0), CBuffer::Write));
+        SLiquidSettings LiquidBuffer;
 
-        assert(pLiquidBuffer != nullptr);
+        LiquidBuffer.m_ViewMatrix = ViewManager::GetMainCamera()->GetView()->GetViewMatrix();
+        LiquidBuffer.m_ProjectionMatrix = ViewManager::GetMainCamera()->GetProjectionMatrix();
+        LiquidBuffer.m_LightDirection = Base::Float4(-0.4f, -0.3f, -1.0f, 0.0f);
+        LiquidBuffer.m_Color = Base::Float4(0.0f, 0.0f, 1.0f, 1.0f);
+        LiquidBuffer.m_SphereRadius = 0.3f;
 
-        pLiquidBuffer->m_ViewMatrix = ViewManager::GetMainCamera()->GetView()->GetViewMatrix();
-        pLiquidBuffer->m_ProjectionMatrix = ViewManager::GetMainCamera()->GetProjectionMatrix();
-        pLiquidBuffer->m_LightDirection = Base::Float4(-0.4f, -0.3f, -1.0f, 0.0f);
-        pLiquidBuffer->m_Color = Base::Float4(0.0f, 0.0f, 1.0f, 1.0f);
-        pLiquidBuffer->m_SphereRadius = 0.3f;
-
-        BufferManager::UnmapConstantBuffer(m_LiquidPSBufferPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(m_LiquidPSBufferPtr->GetBuffer(0), &LiquidBuffer);
 
         pInstances = BufferManager::MapVertexBuffer(m_ParticleInstanceBufferSetPtr->GetBuffer(1), CBuffer::Write);
 
@@ -819,6 +815,8 @@ namespace
         // -----------------------------------------------------------------------------
         // Bileteral Filter
         // -----------------------------------------------------------------------------
+        SBilateralSettings BilateralSettings;
+
         ContextManager::SetRenderContext(m_LiquidContextPtrs[2]);
 
         ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
@@ -837,12 +835,10 @@ namespace
 
         ContextManager::SetConstantBufferSetPS(m_BilateralPSBufferPtr);
 
-        SBilateralSettings* pBilateralSettings = static_cast<SBilateralSettings*>(BufferManager::MapConstantBuffer(m_BilateralPSBufferPtr->GetBuffer(0), CBuffer::Write));
+        BilateralSettings.m_Direction[0] = 1.0f * 1.0f / static_cast<float>(1280.0f);
+        BilateralSettings.m_Direction[1] = 0.0f * 1.0f / static_cast<float>(800.0f);
 
-        pBilateralSettings->m_Direction[0] = 1.0f * 1.0f / static_cast<float>(1280.0f);
-        pBilateralSettings->m_Direction[1] = 0.0f * 1.0f / static_cast<float>(800.0f);
-
-        BufferManager::UnmapConstantBuffer(m_BilateralPSBufferPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(m_BilateralPSBufferPtr->GetBuffer(0), &BilateralSettings);
 
         ContextManager::SetTextureSetPS(m_TextureSetPtrs[0]);
 
@@ -892,12 +888,10 @@ namespace
 
         ContextManager::SetConstantBufferSetPS(m_BilateralPSBufferPtr);
 
-        pBilateralSettings = static_cast<SBilateralSettings*>(BufferManager::MapConstantBuffer(m_BilateralPSBufferPtr->GetBuffer(0), CBuffer::Write));
+        BilateralSettings.m_Direction[0] = 0.0f * 1.0f / static_cast<float>(1280.0f);
+        BilateralSettings.m_Direction[1] = 1.0f * 1.0f / static_cast<float>(800.0f);
 
-        pBilateralSettings->m_Direction[0] = 0.0f * 1.0f / static_cast<float>(1280.0f);
-        pBilateralSettings->m_Direction[1] = 1.0f * 1.0f / static_cast<float>(800.0f);
-
-        BufferManager::UnmapConstantBuffer(m_BilateralPSBufferPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(m_BilateralPSBufferPtr->GetBuffer(0), &BilateralSettings);
 
         ContextManager::SetTextureSetPS(m_TextureSetPtrs[2]);
 
@@ -930,7 +924,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Rendering: Do gaussian blur
         // -----------------------------------------------------------------------------
-        SGaussianSettings* pGaussianSettings;
+        SGaussianSettings GaussianSettings;
+
+        GaussianSettings.m_Weights[0] = 0.064493f;
+        GaussianSettings.m_Weights[1] = 0.070273f;
+        GaussianSettings.m_Weights[2] = 0.075385f;
+        GaussianSettings.m_Weights[3] = 0.079617f;
+        GaussianSettings.m_Weights[4] = 0.082784f;
+        GaussianSettings.m_Weights[5] = 0.084745f;
+        GaussianSettings.m_Weights[6] = 0.085408f;
 
         ContextManager::SetRenderContext(m_LiquidContextPtrs[2]);
 
@@ -952,19 +954,10 @@ namespace
 
         ContextManager::SetConstantBufferSetPS(m_GaussianPSBufferPtr);
 
-        pGaussianSettings = static_cast<SGaussianSettings*>(BufferManager::MapConstantBuffer(m_GaussianPSBufferPtr->GetBuffer(0), CBuffer::Write));
+        GaussianSettings.m_Direction[0] = 1.0f * 1.0f / static_cast<float>(1280);
+        GaussianSettings.m_Direction[1] = 0.0f * 1.0f / static_cast<float>(800);
 
-        pGaussianSettings->m_Direction[0] = 1.0f * 1.0f / static_cast<float>(1280);
-        pGaussianSettings->m_Direction[1] = 0.0f * 1.0f / static_cast<float>(800);
-        pGaussianSettings->m_Weights[0] = 0.064493f;
-        pGaussianSettings->m_Weights[1] = 0.070273f;
-        pGaussianSettings->m_Weights[2] = 0.075385f;
-        pGaussianSettings->m_Weights[3] = 0.079617f;
-        pGaussianSettings->m_Weights[4] = 0.082784f;
-        pGaussianSettings->m_Weights[5] = 0.084745f;
-        pGaussianSettings->m_Weights[6] = 0.085408f;
-
-        BufferManager::UnmapConstantBuffer(m_GaussianPSBufferPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(m_GaussianPSBufferPtr->GetBuffer(0), &GaussianSettings);
 
         ContextManager::SetTextureSetPS(m_TextureSetPtrs[1]);
 
@@ -1014,19 +1007,10 @@ namespace
 
         ContextManager::SetConstantBufferSetPS(m_GaussianPSBufferPtr);
 
-        pGaussianSettings = static_cast<SGaussianSettings*>(BufferManager::MapConstantBuffer(m_GaussianPSBufferPtr->GetBuffer(0), CBuffer::Write));
+        GaussianSettings.m_Direction[0] = 0.0f * 1.0f / static_cast<float>(1280);
+        GaussianSettings.m_Direction[1] = 1.0f * 1.0f / static_cast<float>(800);
 
-        pGaussianSettings->m_Direction[0] = 0.0f * 1.0f / static_cast<float>(1280);
-        pGaussianSettings->m_Direction[1] = 1.0f * 1.0f / static_cast<float>(800);
-        pGaussianSettings->m_Weights[0] = 0.064493f;
-        pGaussianSettings->m_Weights[1] = 0.070273f;
-        pGaussianSettings->m_Weights[2] = 0.075385f;
-        pGaussianSettings->m_Weights[3] = 0.079617f;
-        pGaussianSettings->m_Weights[4] = 0.082784f;
-        pGaussianSettings->m_Weights[5] = 0.084745f;
-        pGaussianSettings->m_Weights[6] = 0.085408f;
-
-        BufferManager::UnmapConstantBuffer(m_GaussianPSBufferPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(m_GaussianPSBufferPtr->GetBuffer(0), &GaussianSettings);
 
         ContextManager::SetTextureSetPS(m_TextureSetPtrs[2]);
 
@@ -1057,16 +1041,16 @@ namespace
         // -----------------------------------------------------------------------------
         // Final water shading
         // -----------------------------------------------------------------------------
-        SShadingSettings* pShadingSettings = static_cast<SShadingSettings*>(BufferManager::MapConstantBuffer(m_ShadingPSBufferPtr->GetBuffer(0), CBuffer::Write));
+        SShadingSettings ShadingSettings;
 
-        pShadingSettings->m_InvertedProjectionMatrix = ViewManager::GetMainCamera()->GetProjectionMatrix().GetInverted();
-        pShadingSettings->m_InvertedViewMatrix = ViewManager::GetMainCamera()->GetView()->GetViewMatrix().GetInverted();
-        pShadingSettings->m_LightDirection = Base::Float4(-0.4f, -0.3f, -1.0f, 0.0f);
-        pShadingSettings->m_ViewDirection = Base::Float4(ViewManager::GetMainCamera()->GetView()->GetViewDirection(), 0.0f);
-        pShadingSettings->m_InvertedScreensize[0] = 1.0f / static_cast<float>(1280.0f);
-        pShadingSettings->m_InvertedScreensize[1] = 1.0f / static_cast<float>(800.0f);
+        ShadingSettings.m_InvertedProjectionMatrix = ViewManager::GetMainCamera()->GetProjectionMatrix().GetInverted();
+        ShadingSettings.m_InvertedViewMatrix = ViewManager::GetMainCamera()->GetView()->GetViewMatrix().GetInverted();
+        ShadingSettings.m_LightDirection = Base::Float4(-0.4f, -0.3f, -1.0f, 0.0f);
+        ShadingSettings.m_ViewDirection = Base::Float4(ViewManager::GetMainCamera()->GetView()->GetViewDirection(), 0.0f);
+        ShadingSettings.m_InvertedScreensize[0] = 1.0f / static_cast<float>(1280.0f);
+        ShadingSettings.m_InvertedScreensize[1] = 1.0f / static_cast<float>(800.0f);
 
-        BufferManager::UnmapConstantBuffer(m_ShadingPSBufferPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(m_ShadingPSBufferPtr->GetBuffer(0), &ShadingSettings);
 
         ContextManager::SetRenderContext(m_LiquidContextPtrs[5]);
 

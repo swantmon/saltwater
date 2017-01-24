@@ -679,12 +679,12 @@ namespace
         // -----------------------------------------------------------------------------
         // IBL data
         // -----------------------------------------------------------------------------
-        SIBLSettings* pIBLSettings = static_cast<SIBLSettings*>(BufferManager::MapConstantBuffer(m_ImageLightPSBufferSetPtr->GetBuffer(1), CBuffer::Write));
+        SIBLSettings IBLSettings;
             
-        pIBLSettings->m_NumberOfMiplevelsSpecularIBL = static_cast<float>(pGraphicProbeFacet->GetFilteredSetPtr()->GetTexture(0)->GetNumberOfMipLevels() - 1);
-        pIBLSettings->m_ExposureHistoryIndex         = static_cast<float>(HistogramRenderer::GetLastExposureHistoryIndex());
+        IBLSettings.m_NumberOfMiplevelsSpecularIBL = static_cast<float>(pGraphicProbeFacet->GetFilteredSetPtr()->GetTexture(0)->GetNumberOfMipLevels() - 1);
+        IBLSettings.m_ExposureHistoryIndex         = static_cast<float>(HistogramRenderer::GetLastExposureHistoryIndex());
             
-        BufferManager::UnmapConstantBuffer(m_ImageLightPSBufferSetPtr->GetBuffer(1));
+        BufferManager::UploadConstantBufferData(m_ImageLightPSBufferSetPtr->GetBuffer(1), &IBLSettings);
             
         // -----------------------------------------------------------------------------
         // IBL textures
@@ -734,20 +734,18 @@ namespace
 
         for (unsigned int IndexOfMipmap = 0; IndexOfMipmap < m_HCBTexture2DPtr->GetNumberOfMipLevels(); ++ IndexOfMipmap)
         {
-            SHCBProperties* pPSBuffer = static_cast<SHCBProperties*>(BufferManager::MapConstantBuffer(m_HCBPSBufferSetPtr->GetBuffer(0), CBuffer::Write));
+            SHCBProperties HCBProperties;
 
-            assert(pPSBuffer != nullptr);
-
-            pPSBuffer->m_UVBoundaries       = Base::Float4(0.0f, 0.0f, 1.0f, 1.0f);
-            pPSBuffer->m_InverseTextureSize = Base::Float2(1.0f, 1.0f);
-            pPSBuffer->m_MipmapLevel        = static_cast<float>(IndexOfMipmap);
+            HCBProperties.m_UVBoundaries       = Base::Float4(0.0f, 0.0f, 1.0f, 1.0f);
+            HCBProperties.m_InverseTextureSize = Base::Float2(1.0f, 1.0f);
+            HCBProperties.m_MipmapLevel        = static_cast<float>(IndexOfMipmap);
 
             if (IndexOfMipmap > 0)
             {
-                pPSBuffer->m_InverseTextureSize = Base::Float2(1.0f / m_HCBViewPortSetPtrs[IndexOfMipmap - 1]->GetViewPorts()[0]->GetWidth(), 1.0f / m_HCBViewPortSetPtrs[IndexOfMipmap - 1]->GetViewPorts()[0]->GetHeight());
+                HCBProperties.m_InverseTextureSize = Base::Float2(1.0f / m_HCBViewPortSetPtrs[IndexOfMipmap - 1]->GetViewPorts()[0]->GetWidth(), 1.0f / m_HCBViewPortSetPtrs[IndexOfMipmap - 1]->GetViewPorts()[0]->GetHeight());
             }
 
-            BufferManager::UnmapConstantBuffer(m_HCBPSBufferSetPtr->GetBuffer(0));
+            BufferManager::UploadConstantBufferData(m_HCBPSBufferSetPtr->GetBuffer(0), &HCBProperties);
 
             // -----------------------------------------------------------------------------
 
@@ -822,18 +820,16 @@ namespace
         // -----------------------------------------------------------------------------
         CCameraPtr CameraPtr = ViewManager::GetMainCamera();
 
-        SSSRProperties* pPSBuffer = static_cast<SSSRProperties*>(BufferManager::MapConstantBuffer(m_SSRLightPSBufferSetPtr->GetBuffer(1), CBuffer::Write));
-
-        assert(pPSBuffer != nullptr);
+        SSSRProperties SSRProperties;
 
         Base::Float3 Position = CameraPtr->GetView()->GetPosition();
 
-        pPSBuffer->m_SSRIntesity          = pDataSSRFacet->GetIntensity();
-        pPSBuffer->m_SSRRougnessMaskScale = pDataSSRFacet->GetRoughnessMask();
-        pPSBuffer->m_SSRDistance          = pDataSSRFacet->GetDistance();
-        pPSBuffer->m_PreviousFrame        = pDataSSRFacet->GetUseLastFrame() ? 1.0f : 0.0f;
+        SSRProperties.m_SSRIntesity          = pDataSSRFacet->GetIntensity();
+        SSRProperties.m_SSRRougnessMaskScale = pDataSSRFacet->GetRoughnessMask();
+        SSRProperties.m_SSRDistance          = pDataSSRFacet->GetDistance();
+        SSRProperties.m_PreviousFrame        = pDataSSRFacet->GetUseLastFrame() ? 1.0f : 0.0f;
 
-        BufferManager::UnmapConstantBuffer(m_SSRLightPSBufferSetPtr->GetBuffer(1));
+        BufferManager::UploadConstantBufferData(m_SSRLightPSBufferSetPtr->GetBuffer(1), &SSRProperties);
 
         // -----------------------------------------------------------------------------
         // Screen Space Reflections

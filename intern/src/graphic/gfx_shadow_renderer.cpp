@@ -582,7 +582,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Rendering: SSAO
         // -----------------------------------------------------------------------------
-        SSSAOProperties* pSSAOSettings;
+        SSSAOProperties SSAOSettings;
         
         ContextManager::SetRenderContext(m_HalfContextPtr);
 
@@ -604,21 +604,17 @@ namespace
 
         ContextManager::SetConstantBufferSetPS(m_SSAOPropertiesPSBufferPtr);
 
-        pSSAOSettings = static_cast<SSSAOProperties*>(BufferManager::MapConstantBuffer(m_SSAOPropertiesPSBufferPtr->GetBuffer(1), CBuffer::Write));
-        
-        assert(pSSAOSettings != 0);
-
-        pSSAOSettings->m_InverseCameraProjection = ViewManager::GetMainCamera()->GetProjectionMatrix().GetInverted();
-        pSSAOSettings->m_CameraProjection        = ViewManager::GetMainCamera()->GetProjectionMatrix();
-        pSSAOSettings->m_CameraView              = ViewManager::GetMainCamera()->GetView()->GetViewMatrix();
-        pSSAOSettings->m_NoiseScale              = Base::Float4(static_cast<float>(HalfSize[0]), static_cast<float>(HalfSize[1]), 0.08f, 0.0f);
+        SSAOSettings.m_InverseCameraProjection = ViewManager::GetMainCamera()->GetProjectionMatrix().GetInverted();
+        SSAOSettings.m_CameraProjection        = ViewManager::GetMainCamera()->GetProjectionMatrix();
+        SSAOSettings.m_CameraView              = ViewManager::GetMainCamera()->GetView()->GetViewMatrix();
+        SSAOSettings.m_NoiseScale              = Base::Float4(static_cast<float>(HalfSize[0]), static_cast<float>(HalfSize[1]), 0.08f, 0.0f);
         
         for (unsigned int IndexOfNoiseSeq = 0; IndexOfNoiseSeq < s_SSAOKernelSize; ++ IndexOfNoiseSeq)
         {
-            pSSAOSettings->m_Kernel[IndexOfNoiseSeq] = m_Kernel[IndexOfNoiseSeq];
+            SSAOSettings.m_Kernel[IndexOfNoiseSeq] = m_Kernel[IndexOfNoiseSeq];
         }
 
-        BufferManager::UnmapConstantBuffer(m_SSAOPropertiesPSBufferPtr->GetBuffer(1));
+        BufferManager::UploadConstantBufferData(m_SSAOPropertiesPSBufferPtr->GetBuffer(1), &SSAOSettings);
 
         ContextManager::SetTextureSetPS(m_SSAOTextureSets[SSAO]);
 
@@ -656,27 +652,26 @@ namespace
             NumberOfThreadGroupsX = (HalfSize[0] + s_BlurTileSize - 1) / (s_BlurTileSize);
             NumberOfThreadGroupsY = (HalfSize[1] + s_BlurTileSize - 1) / (s_BlurTileSize);
 
+            SGaussianSettings GaussianSettings;
+
+            GaussianSettings.m_MaxPixelCoord[0] = HalfSize[0];
+            GaussianSettings.m_MaxPixelCoord[1] = HalfSize[1];
+            GaussianSettings.m_Weights[0] = 0.036262f;
+            GaussianSettings.m_Weights[1] = 0.051046f;
+            GaussianSettings.m_Weights[2] = 0.067526f;
+            GaussianSettings.m_Weights[3] = 0.083942f;
+            GaussianSettings.m_Weights[4] = 0.098059f;
+            GaussianSettings.m_Weights[5] = 0.107644f;
+            GaussianSettings.m_Weights[6] = 0.111043f;
+
             ContextManager::SetShaderCS(m_BilateralBlurShaderCSPtr);
 
             ContextManager::SetConstantBufferSetCS(m_GaussianBlurPropertiesCSBufferPtr);
 
-            // -----------------------------------------------------------------------------
+            GaussianSettings.m_Direction[0] = 1;
+            GaussianSettings.m_Direction[1] = 0;
 
-            SGaussianSettings* pGaussianSettings = static_cast<SGaussianSettings*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesCSBufferPtr->GetBuffer(0), CBuffer::Write));
-
-            pGaussianSettings->m_Direction[0]     = 1;
-            pGaussianSettings->m_Direction[1]     = 0;
-            pGaussianSettings->m_MaxPixelCoord[0] = HalfSize[0];
-            pGaussianSettings->m_MaxPixelCoord[1] = HalfSize[1];
-            pGaussianSettings->m_Weights[0]       = 0.036262f;
-            pGaussianSettings->m_Weights[1]       = 0.051046f;
-            pGaussianSettings->m_Weights[2]       = 0.067526f;
-            pGaussianSettings->m_Weights[3]       = 0.083942f;
-            pGaussianSettings->m_Weights[4]       = 0.098059f;
-            pGaussianSettings->m_Weights[5]       = 0.107644f;
-            pGaussianSettings->m_Weights[6]       = 0.111043f;
-
-            BufferManager::UnmapConstantBuffer(m_GaussianBlurPropertiesCSBufferPtr->GetBuffer(0));
+            BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesCSBufferPtr->GetBuffer(0), &GaussianSettings);
 
             ContextManager::SetTextureSetCS(m_BilateralBlurHTextureSetPtr);
 
@@ -684,23 +679,10 @@ namespace
 
             ContextManager::ResetTextureSetCS();
 
-            // -----------------------------------------------------------------------------
+            GaussianSettings.m_Direction[0] = 0;
+            GaussianSettings.m_Direction[1] = 1;
 
-            pGaussianSettings = static_cast<SGaussianSettings*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesCSBufferPtr->GetBuffer(0), CBuffer::Write));
-
-            pGaussianSettings->m_Direction[0]     = 0;
-            pGaussianSettings->m_Direction[1]     = 1;
-            pGaussianSettings->m_MaxPixelCoord[0] = HalfSize[0];
-            pGaussianSettings->m_MaxPixelCoord[1] = HalfSize[1];
-            pGaussianSettings->m_Weights[0]       = 0.036262f;
-            pGaussianSettings->m_Weights[1]       = 0.051046f;
-            pGaussianSettings->m_Weights[2]       = 0.067526f;
-            pGaussianSettings->m_Weights[3]       = 0.083942f;
-            pGaussianSettings->m_Weights[4]       = 0.098059f;
-            pGaussianSettings->m_Weights[5]       = 0.107644f;
-            pGaussianSettings->m_Weights[6]       = 0.111043f;
-
-            BufferManager::UnmapConstantBuffer(m_GaussianBlurPropertiesCSBufferPtr->GetBuffer(0));
+            BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesCSBufferPtr->GetBuffer(0), &GaussianSettings);
 
             ContextManager::SetTextureSetCS(m_BilateralBlurVTextureSetPtr);
 

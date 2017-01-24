@@ -521,25 +521,23 @@ namespace
         // -----------------------------------------------------------------------------
         CCameraPtr CameraPtr = RenderContextPtr->GetCamera();
 
-        SSkyboxVSBuffer* pViewBuffer = static_cast<SSkyboxVSBuffer*>(BufferManager::MapConstantBuffer(VSBufferSetPtr->GetBuffer(0), CBuffer::Write));
+        SSkyboxVSBuffer ViewBuffer;
 
-        pViewBuffer->m_View       = CameraPtr->GetView()->GetViewMatrix();
-        pViewBuffer->m_Projection = CameraPtr->GetProjectionMatrix();
+        ViewBuffer.m_View       = CameraPtr->GetView()->GetViewMatrix();
+        ViewBuffer.m_Projection = CameraPtr->GetProjectionMatrix();
 
-        pViewBuffer->m_View.InjectTranslation(0.0f, 0.0f, 0.0f);
+        ViewBuffer.m_View.InjectTranslation(0.0f, 0.0f, 0.0f);
 
-        BufferManager::UnmapConstantBuffer(VSBufferSetPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(VSBufferSetPtr->GetBuffer(0), &ViewBuffer);
 
         // -----------------------------------------------------------------------------
 
-        SSkyboxBufferPS* pPSBuffer = static_cast<SSkyboxBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(0), CBuffer::Write));
+        SSkyboxBufferPS PSBuffer;
+ 
+        PSBuffer.m_InvertedScreenSize   = Base::Float4(1.0f / Main::GetActiveWindowSize()[0], 1.0f / Main::GetActiveWindowSize()[1], 0, 0);
+        PSBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
         
-        assert(pPSBuffer != nullptr);
-    
-        pPSBuffer->m_InvertedScreenSize   = Base::Float4(1.0f / Main::GetActiveWindowSize()[0], 1.0f / Main::GetActiveWindowSize()[1], 0, 0);
-        pPSBuffer->m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
-        
-        BufferManager::UnmapConstantBuffer(PSBufferSetPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
         
         // -----------------------------------------------------------------------------
         // Render sky box in background
@@ -671,13 +669,13 @@ namespace
         // -----------------------------------------------------------------------------
         // Data
         // -----------------------------------------------------------------------------
-        SSkytextureBufferPS* pPSBuffer = static_cast<SSkytextureBufferPS*>(BufferManager::MapConstantBuffer(PSBufferSetPtr->GetBuffer(0), CBuffer::Write));
+        SSkytextureBufferPS PSBuffer;
 
-        pPSBuffer->m_HDRFactor     = HDRIntensity;
-        pPSBuffer->m_IsHDR         = rRenderJob.m_pGraphicCamera->GetBackgroundTexture2D()->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
-        pPSBuffer->m_ExposureIndex = static_cast<float>(HistogramRenderer::GetLastExposureHistoryIndex());
+        PSBuffer.m_HDRFactor     = HDRIntensity;
+        PSBuffer.m_IsHDR         = rRenderJob.m_pGraphicCamera->GetBackgroundTexture2D()->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
+        PSBuffer.m_ExposureIndex = static_cast<float>(HistogramRenderer::GetLastExposureHistoryIndex());
 
-        BufferManager::UnmapConstantBuffer(PSBufferSetPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
 
         // -----------------------------------------------------------------------------
         // Rendering

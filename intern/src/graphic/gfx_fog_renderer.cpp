@@ -620,8 +620,19 @@ namespace
 
     void CGfxFogRenderer::RenderESM()
     {
-        Performance::BeginEvent("ESM");
+        SGaussianShaderProperties GaussianSettings;
 
+        GaussianSettings.m_MaxPixelCoord[0] = 256;
+        GaussianSettings.m_MaxPixelCoord[1] = 256;
+        GaussianSettings.m_Weights[0] = 0.018816f;
+        GaussianSettings.m_Weights[1] = 0.034474f;
+        GaussianSettings.m_Weights[2] = 0.056577f;
+        GaussianSettings.m_Weights[3] = 0.083173f;
+        GaussianSettings.m_Weights[4] = 0.109523f;
+        GaussianSettings.m_Weights[5] = 0.129188f;
+        GaussianSettings.m_Weights[6] = 0.136498f;
+
+        Performance::BeginEvent("ESM");
 
         // -----------------------------------------------------------------------------
         // Get light(s) and compute exponential shadow map
@@ -669,21 +680,10 @@ namespace
         // -----------------------------------------------------------------------------
         // Blur
         // -----------------------------------------------------------------------------
-        SGaussianShaderProperties* pGaussianSettings = static_cast<SGaussianShaderProperties*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0), CBuffer::Write));
+        GaussianSettings.m_Direction[0] = 1;
+        GaussianSettings.m_Direction[1] = 0;
 
-        pGaussianSettings->m_Direction[0] = 1;
-        pGaussianSettings->m_Direction[1] = 0;
-        pGaussianSettings->m_MaxPixelCoord[0] = 256;
-        pGaussianSettings->m_MaxPixelCoord[1] = 256;
-        pGaussianSettings->m_Weights[0] = 0.018816f;
-        pGaussianSettings->m_Weights[1] = 0.034474f;
-        pGaussianSettings->m_Weights[2] = 0.056577f;
-        pGaussianSettings->m_Weights[3] = 0.083173f;
-        pGaussianSettings->m_Weights[4] = 0.109523f;
-        pGaussianSettings->m_Weights[5] = 0.129188f;
-        pGaussianSettings->m_Weights[6] = 0.136498f;
-
-        BufferManager::UnmapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0), &GaussianSettings);
 
         ContextManager::SetShaderCS(m_GaussianBlurShaderPtr);
 
@@ -703,21 +703,10 @@ namespace
         // -----------------------------------------------------------------------------
         // Blur
         // -----------------------------------------------------------------------------
-        pGaussianSettings = static_cast<SGaussianShaderProperties*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0), CBuffer::Write));
+        GaussianSettings.m_Direction[0] = 0;
+        GaussianSettings.m_Direction[1] = 1;
 
-        pGaussianSettings->m_Direction[0] = 0;
-        pGaussianSettings->m_Direction[1] = 1;
-        pGaussianSettings->m_MaxPixelCoord[0] = 256;
-        pGaussianSettings->m_MaxPixelCoord[1] = 256;
-        pGaussianSettings->m_Weights[0] = 0.018816f;
-        pGaussianSettings->m_Weights[1] = 0.034474f;
-        pGaussianSettings->m_Weights[2] = 0.056577f;
-        pGaussianSettings->m_Weights[3] = 0.083173f;
-        pGaussianSettings->m_Weights[4] = 0.109523f;
-        pGaussianSettings->m_Weights[5] = 0.129188f;
-        pGaussianSettings->m_Weights[6] = 0.136498f;
-
-        BufferManager::UnmapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0), &GaussianSettings);
 
         ContextManager::SetShaderCS(m_GaussianBlurShaderPtr);
 
@@ -770,34 +759,30 @@ namespace
             }
         }
 
-        SSunLightProperties* pLightBuffer = static_cast<SSunLightProperties*>(BufferManager::MapConstantBuffer(m_VolumeLightingCSBufferSetPtr->GetBuffer(1), CBuffer::Write));
+        SSunLightProperties LightBuffer;
 
-	    assert(pLightBuffer != nullptr);
+        LightBuffer.m_LightViewProjection  = pGraphicSunFacet->GetCamera()->GetViewProjectionMatrix();
+        LightBuffer.m_LightDirection       = Base::Float4(pDataSunFacet->GetDirection(), 0.0f).Normalize();
+        LightBuffer.m_LightColor           = Base::Float4(pDataSunFacet->GetLightness(), 1.0f);
+        LightBuffer.m_SunAngularRadius     = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
+        LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
-	    pLightBuffer->m_LightViewProjection  = pGraphicSunFacet->GetCamera()->GetViewProjectionMatrix();
-	    pLightBuffer->m_LightDirection       = Base::Float4(pDataSunFacet->GetDirection(), 0.0f).Normalize();
-	    pLightBuffer->m_LightColor           = Base::Float4(pDataSunFacet->GetLightness(), 1.0f);
-	    pLightBuffer->m_SunAngularRadius     = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
-	    pLightBuffer->m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
-
-        BufferManager::UnmapConstantBuffer(m_VolumeLightingCSBufferSetPtr->GetBuffer(1));
+        BufferManager::UploadConstantBufferData(m_VolumeLightingCSBufferSetPtr->GetBuffer(1), &LightBuffer);
 
         // -----------------------------------------------------------------------------
 
-        SVolumeLightingProperties* pVolumeProperties = static_cast<SVolumeLightingProperties*>(BufferManager::MapConstantBuffer(m_VolumeLightingCSBufferSetPtr->GetBuffer(2), CBuffer::Write));
+        SVolumeLightingProperties VolumeProperties;
 
-	    assert(pVolumeProperties != nullptr);
+        VolumeProperties.m_WindDirection                      = pDataVolumeFogFacet->GetWindDirection();
+        VolumeProperties.m_FogColor                           = pDataVolumeFogFacet->GetFogColor();
+        VolumeProperties.m_FrustumDepthInMeter                = pDataVolumeFogFacet->GetFrustumDepthInMeter();
+        VolumeProperties.m_ShadowIntensity                    = pDataVolumeFogFacet->GetShadowIntensity();
+        VolumeProperties.m_VolumetricFogScatteringCoefficient = pDataVolumeFogFacet->GetScatteringCoefficient();
+        VolumeProperties.m_VolumetricFogAbsorptionCoefficient = pDataVolumeFogFacet->GetAbsorptionCoefficient();
+        VolumeProperties.m_DensityLevel                       = pDataVolumeFogFacet->GetDensityLevel();
+        VolumeProperties.m_DensityAttenuation                 = pDataVolumeFogFacet->GetDensityAttenuation();
 
-        pVolumeProperties->m_WindDirection                      = pDataVolumeFogFacet->GetWindDirection();
-        pVolumeProperties->m_FogColor                           = pDataVolumeFogFacet->GetFogColor();
-        pVolumeProperties->m_FrustumDepthInMeter                = pDataVolumeFogFacet->GetFrustumDepthInMeter();
-        pVolumeProperties->m_ShadowIntensity                    = pDataVolumeFogFacet->GetShadowIntensity();
-        pVolumeProperties->m_VolumetricFogScatteringCoefficient = pDataVolumeFogFacet->GetScatteringCoefficient();
-        pVolumeProperties->m_VolumetricFogAbsorptionCoefficient = pDataVolumeFogFacet->GetAbsorptionCoefficient();
-        pVolumeProperties->m_DensityLevel                       = pDataVolumeFogFacet->GetDensityLevel();
-        pVolumeProperties->m_DensityAttenuation                 = pDataVolumeFogFacet->GetDensityAttenuation();
-
-        BufferManager::UnmapConstantBuffer(m_VolumeLightingCSBufferSetPtr->GetBuffer(2));
+        BufferManager::UploadConstantBufferData(m_VolumeLightingCSBufferSetPtr->GetBuffer(2), &VolumeProperties);
 
         // -----------------------------------------------------------------------------
 
@@ -875,13 +860,11 @@ namespace
         // -----------------------------------------------------------------------------
         // Data
         // -----------------------------------------------------------------------------
-        SFogApplyProperties* pFogApplyProperties = static_cast<SFogApplyProperties*>(BufferManager::MapConstantBuffer(m_FogApplyBufferPtr->GetBuffer(1), CBuffer::Write));
+        SFogApplyProperties FogApplyProperties;
 
-	    assert(pFogApplyProperties != nullptr);
+        FogApplyProperties.m_FrustumDepthInMeter = pDataVolumeFogFacet->GetFrustumDepthInMeter();
 
-        pFogApplyProperties->m_FrustumDepthInMeter = pDataVolumeFogFacet->GetFrustumDepthInMeter();
-
-        BufferManager::UnmapConstantBuffer(m_FogApplyBufferPtr->GetBuffer(1));
+        BufferManager::UploadConstantBufferData(m_FogApplyBufferPtr->GetBuffer(1), &FogApplyProperties);
 
         // -----------------------------------------------------------------------------
         // Rendering
