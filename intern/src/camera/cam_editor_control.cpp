@@ -117,6 +117,13 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
+    void CEditorControl::InternOnDirtyEntity(Dt::CEntity* _pEntity)
+    {
+        BASE_UNUSED(_pEntity);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CEditorControl::InternUpdate()
     {
         Base::Float3 Forward(0.0f, 0.0f, -1.0f);

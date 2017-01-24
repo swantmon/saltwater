@@ -1,6 +1,5 @@
-
-#ifndef __INCLUDE_VS_TEXTURE_ENV_CUBEMAP_GENERATION_GLSL__
-#define __INCLUDE_VS_TEXTURE_ENV_CUBEMAP_GENERATION_GLSL__
+#ifndef __INCLUDE_VS_GEOMETRY_ENV_CUBEMAP_GENERATION_GLSL__
+#define __INCLUDE_VS_GEOMETRY_ENV_CUBEMAP_GENERATION_GLSL__
 
 layout(row_major, std140, binding = 0) uniform UB0
 {
@@ -19,8 +18,7 @@ out gl_PerVertex
 // Input from buffer
 // -----------------------------------------------------------------------------
 layout(location = 0) in vec3 VertexPosition;
-layout(location = 1) in vec3 VertexNormal;
-layout(location = 2) in vec2 VertexTexCoord;
+layout(location = 1) in vec2 VertexTexCoord;
 
 // -----------------------------------------------------------------------------
 // Output to next stage
@@ -36,10 +34,8 @@ void main(void)
     out_UV = vec2(VertexTexCoord.x, 1.0f - VertexTexCoord.y);
 
     vec4 WSPosition = m_ModelMatrix * vec4(VertexPosition.xyz, 1.0f);
-    
-    out_Normal = normalize(VertexNormal.xyz);
-    
+
     gl_Position = WSPosition;
 }
 
-#endif // __INCLUDE_VS_TEXTURE_ENV_CUBEMAP_GENERATION_GLSL__
+#endif // __INCLUDE_VS_GEOMETRY_ENV_CUBEMAP_GENERATION_GLSL__

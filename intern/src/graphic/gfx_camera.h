@@ -29,14 +29,11 @@ namespace Gfx
         
     public:
 
-        void SetFieldOfView(float _FOVY, float _Near, float _Far);
         void SetFieldOfView(float _FOVY, float _Aspect, float _Near, float _Far);
         void SetPerspective(float _Width, float _Height, float _Near, float _Far);
         void SetPerspective(float _Left, float _Right, float _Bottom, float _Top, float _Near, float _Far);
         void SetOrthographic(float _Width, float _Height, float _Near, float _Far);
         void SetOrthographic(float _Left, float _Right, float _Bottom, float _Top, float _Near, float _Far);
-        
-        void SetProjection(const Base::Float4x4& _rProjectionMatrix);
 
     public:
 
@@ -91,6 +88,8 @@ namespace Gfx
 
         float GetNear() const;
         float GetFar() const;
+
+        float GetFOVY() const;
 
         const Base::Float4x4& GetProjectionMatrix() const;
         const Base::Float4x4& GetViewProjectionMatrix() const;

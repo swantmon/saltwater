@@ -62,12 +62,12 @@ namespace
 {
     void CGfxStartState::OnEnter()
     {
-        BASE_CONSOLE_STREAMINFO("Gfx> Start manager...");
-
         // -----------------------------------------------------------------------------
         // Start manager. We have to take care on a specific order because of
         // dependencies.
         // -----------------------------------------------------------------------------
+        BASE_CONSOLE_STREAMINFO("Gfx> Start manager...");
+
         ViewManager     ::OnStart();
         StateManager    ::OnStart();
         ContextManager  ::OnStart();
@@ -76,15 +76,6 @@ namespace
         BufferManager   ::OnStart();
         ShaderManager   ::OnStart();
         TargetSetManager::OnStart();
-
-        MeshActorManager  ::OnStart();
-        CameraActorManager::OnStart();
-        SunManager        ::OnStart();
-        MeshManager       ::OnStart();
-        MaterialManager   ::OnStart();
-        SkyManager        ::OnStart();
-        LightProbeManager ::OnStart();
-        PointLightManager ::OnStart();
 
         BASE_CONSOLE_STREAMINFO("Gfx> Finished starting manager.");
 
@@ -97,6 +88,22 @@ namespace
         Main::UploadPerFrameConstantBuffers();
 
         BASE_CONSOLE_STREAMINFO("Gfx> Finished create and upload global buffer.");
+
+        // -----------------------------------------------------------------------------
+        // Start entity manager
+        // -----------------------------------------------------------------------------
+        BASE_CONSOLE_STREAMINFO("Gfx> Start entity manager...");
+
+        MeshActorManager  ::OnStart();
+        CameraActorManager::OnStart();
+        SunManager        ::OnStart();
+        MeshManager       ::OnStart();
+        MaterialManager   ::OnStart();
+        SkyManager        ::OnStart();
+        LightProbeManager ::OnStart();
+        PointLightManager ::OnStart();
+
+        BASE_CONSOLE_STREAMINFO("Gfx> Finished starting entity manager.");
 
         // -----------------------------------------------------------------------------
         // Start renderer. It is not possible to setup all the data in the 'OnStart'

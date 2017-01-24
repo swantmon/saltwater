@@ -22,6 +22,7 @@ layout(row_major, std140, binding = 0) uniform UB0
     vec4 g_ScreenPositionScaleBias;
     vec4 g_CameraParameters0;
     vec4 g_WorldParameters0;
+    vec4 g_FrameParameters0;
 };
 
 #define g_CameraParameterNear g_CameraParameters0.x
@@ -30,5 +31,8 @@ layout(row_major, std140, binding = 0) uniform UB0
 #define g_WorldSizeX g_WorldParameters0.x
 #define g_WorldSizeY g_WorldParameters0.y
 #define g_WorldSizeZ g_WorldParameters0.z
+
+#define g_FrameNumber    g_FrameParameters0.x
+#define g_FrameDeltaTime g_FrameParameters0.y
 
 #endif // __INCLUDE_COMMON_GLOBAL_GLSL__

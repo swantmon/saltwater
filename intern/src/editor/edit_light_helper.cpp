@@ -215,9 +215,10 @@ namespace
 
             Dt::CSkyFacet* pSkyboxFacet = Dt::SkyManager::CreateSky();
 
-            pSkyboxFacet->SetType     (Dt::CSkyFacet::Panorama);
-            pSkyboxFacet->SetPanorama (pPanoramaTexture);
-            pSkyboxFacet->SetIntensity(5000.0f);
+            pSkyboxFacet->SetRefreshMode(Dt::CSkyFacet::Static);
+            pSkyboxFacet->SetType       (Dt::CSkyFacet::Panorama);
+            pSkyboxFacet->SetPanorama   (pPanoramaTexture);
+            pSkyboxFacet->SetIntensity  (5000.0f);
 
             rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pSkyboxFacet);
         }
@@ -335,14 +336,24 @@ namespace
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt   (rCurrentEntity.GetID());
-            NewMessage.PutInt   (static_cast<int>(pLightFacet->GetType()));
+            NewMessage.PutInt(rCurrentEntity.GetID());
+            NewMessage.PutInt(static_cast<int>(pLightFacet->GetRefreshMode()));
+            NewMessage.PutInt(static_cast<int>(pLightFacet->GetType()));
 
             if (pLightFacet->GetType() == Dt::CSkyFacet::Cubemap)
             {
                 NewMessage.PutBool(true);
 
-                NewMessage.PutString(pLightFacet->GetCubemap()->GetFileName());
+                if (pLightFacet->GetCubemap()->GetFileName() != nullptr)
+                {
+                    NewMessage.PutBool(true);
+
+                    NewMessage.PutString(pLightFacet->GetCubemap()->GetFileName());
+                }
+                else
+                {
+                    NewMessage.PutBool(false);
+                }
 
                 NewMessage.PutInt(pLightFacet->GetCubemap()->GetHash());
             }
@@ -350,11 +361,20 @@ namespace
             {
                 NewMessage.PutBool(true);
 
-                NewMessage.PutString(pLightFacet->GetPanorama()->GetFileName());
+                if (pLightFacet->GetPanorama()->GetFileName() != nullptr)
+                {
+                    NewMessage.PutBool(true);
+
+                    NewMessage.PutString(pLightFacet->GetPanorama()->GetFileName());
+                }
+                else
+                {
+                    NewMessage.PutBool(false);
+                }
 
                 NewMessage.PutInt(pLightFacet->GetPanorama()->GetHash());
             }
-            else if (pLightFacet->GetType() == Dt::CSkyFacet::Texture || pLightFacet->GetType() == Dt::CSkyFacet::TextureLUT)
+            else if (pLightFacet->GetType() == Dt::CSkyFacet::Texture || pLightFacet->GetType() == Dt::CSkyFacet::TextureGeometry || pLightFacet->GetType() == Dt::CSkyFacet::TextureLUT)
             {
                 NewMessage.PutBool(false);
 
@@ -524,6 +544,8 @@ namespace
             // -----------------------------------------------------------------------------
             // Read values
             // -----------------------------------------------------------------------------
+            int RefreshMode = _rMessage.GetInt();
+
             int Type = _rMessage.GetInt();
 
             unsigned int TextureHash = _rMessage.GetInt();
@@ -533,8 +555,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Set values
             // -----------------------------------------------------------------------------
-            pLightFacet->SetType     (static_cast<Dt::CSkyFacet::EType>(Type));
-            pLightFacet->SetIntensity(Intensity);
+            pLightFacet->SetRefreshMode(static_cast<Dt::CSkyFacet::ERefreshMode>(RefreshMode));
+            pLightFacet->SetType       (static_cast<Dt::CSkyFacet::EType>(Type));
+            pLightFacet->SetIntensity  (Intensity);
 
             if (pLightFacet->GetType() == Dt::CSkyFacet::Cubemap)
             {
@@ -554,7 +577,7 @@ namespace
                     pLightFacet->SetPanorama(pTexturePanorama);
                 }
             }
-            else if (pLightFacet->GetType() == Dt::CSkyFacet::Texture || pLightFacet->GetType() == Dt::CSkyFacet::TextureLUT)
+            else if (pLightFacet->GetType() == Dt::CSkyFacet::Texture || pLightFacet->GetType() == Dt::CSkyFacet::TextureGeometry || pLightFacet->GetType() == Dt::CSkyFacet::TextureLUT)
             {
                 Dt::CTexture2D* pTexture = Dt::TextureManager::GetTexture2DByHash(TextureHash);
 

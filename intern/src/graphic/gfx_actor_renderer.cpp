@@ -63,6 +63,7 @@ namespace
 
         void Update();
         void Render();
+        void RenderHitProxy();
 
     private:
 
@@ -71,19 +72,18 @@ namespace
             Base::Float4x4 m_ModelMatrix;
         };
 
-        struct SForwardLightProperties
+        struct SHitProxyProperties
         {
-            Base::Float4 m_ViewDirection;
-            Base::Float4 m_LightDirection;
-            Base::Float4 m_LightColor;
+            unsigned int m_ID;
         };
 
         struct SRenderJob
         {
-            unsigned int     m_SurfaceAttributes;
-            CSurfacePtr      m_SurfacePtr;
-            CMaterialPtr     m_SurfaceMaterialPtr;
-            Base::Float4x4   m_ModelMatrix;
+            unsigned int   m_SurfaceAttributes;
+            unsigned int   m_EntityID;
+            CSurfacePtr    m_SurfacePtr;
+            CMaterialPtr   m_SurfaceMaterialPtr;
+            Base::Float4x4 m_ModelMatrix;
         };
 
     private:
@@ -97,15 +97,15 @@ namespace
         CBufferSetPtr     m_HSBuffer;
         CBufferSetPtr     m_DSBuffer;
         CBufferSetPtr     m_ViewPSBuffer;
-        CBufferSetPtr     m_ForwardPassPSBuffer;
+        CBufferSetPtr     m_HitProxyPassPSBuffer;
         CSamplerSetPtr    m_PSSamplerSet;
+        CShaderPtr        m_HitProxyShaderPtr;
         CRenderContextPtr m_DeferredContextPtr;
-        CRenderContextPtr m_ForwardContextPtr;
+        CRenderContextPtr m_HitProxyContextPtr;
         CTextureSetPtr    m_DeferredTextureSetPtrs;
         CTextureSetPtr    m_LightingTextureSetPtr;
 
         CRenderJobs       m_DeferredRenderJobs;
-        CRenderJobs       m_ForwardRenderJobs;
 
     private:
 
@@ -121,13 +121,13 @@ namespace
         , m_HSBuffer             ()
         , m_DSBuffer             ()
         , m_ViewPSBuffer         ()
-        , m_ForwardPassPSBuffer  ()
+        , m_HitProxyPassPSBuffer ()
         , m_PSSamplerSet         ()
+        , m_HitProxyShaderPtr    ()
         , m_DeferredContextPtr   ()
-        , m_ForwardContextPtr    ()
+        , m_HitProxyContextPtr   ()
         , m_LightingTextureSetPtr()
         , m_DeferredRenderJobs   ()
-        , m_ForwardRenderJobs    ()
     {
         // -----------------------------------------------------------------------------
         // Register resize delegate
@@ -138,7 +138,6 @@ namespace
         // Reserve some jobs
         // -----------------------------------------------------------------------------
         m_DeferredRenderJobs.reserve(1024);
-        m_ForwardRenderJobs .reserve(16);
     }
 
     // -----------------------------------------------------------------------------
@@ -164,10 +163,11 @@ namespace
         m_HSBuffer               = 0;
         m_DSBuffer               = 0;
         m_ViewPSBuffer           = 0;
-        m_ForwardPassPSBuffer    = 0;
+        m_HitProxyPassPSBuffer   = 0;
         m_PSSamplerSet           = 0;
+        m_HitProxyShaderPtr      = 0;
         m_DeferredContextPtr     = 0;
-        m_ForwardContextPtr      = 0;
+        m_HitProxyContextPtr     = 0;
         m_DeferredTextureSetPtrs = 0;
         m_LightingTextureSetPtr  = 0;
 
@@ -184,23 +184,13 @@ namespace
         }
 
         m_DeferredRenderJobs.clear();
-
-        // -----------------------------------------------------------------------------
-
-        EndOfRenderJobs  = m_ForwardRenderJobs.end();
-
-        for (CRenderJobs::iterator CurrentRenderJob = m_ForwardRenderJobs.begin(); CurrentRenderJob != EndOfRenderJobs; ++ CurrentRenderJob)
-        {
-            CurrentRenderJob->m_SurfacePtr = nullptr;
-        }
-
-        m_ForwardRenderJobs.clear();
     }
 
     // -----------------------------------------------------------------------------
 
     void CGfxActorRenderer::OnSetupShader()
     {
+        m_HitProxyShaderPtr = ShaderManager::CompilePS("fs_hitproxy.glsl", "main");
     }
 
     // -----------------------------------------------------------------------------
@@ -220,12 +210,12 @@ namespace
 
     void CGfxActorRenderer::OnSetupStates()
     {
-        CCameraPtr          CameraPtr              = ViewManager     ::GetMainCamera ();
-        CViewPortSetPtr     ViewPortSetPtr         = ViewManager     ::GetViewPortSet();
-        CRenderStatePtr     DeferredRenderStatePtr = StateManager    ::GetRenderState(0);
-        CRenderStatePtr     ForwardRenderStatePtr  = StateManager    ::GetRenderState(CRenderState::AlphaBlend);
-        CTargetSetPtr       DeferredTargetSetPtr   = TargetSetManager::GetDeferredTargetSet();
-        CTargetSetPtr       SystemTargetSetPtr     = TargetSetManager::GetDefaultTargetSet();
+        CCameraPtr      CameraPtr              = ViewManager     ::GetMainCamera ();
+        CViewPortSetPtr ViewPortSetPtr         = ViewManager     ::GetViewPortSet();
+        CRenderStatePtr DeferredRenderStatePtr = StateManager    ::GetRenderState(0);
+        CRenderStatePtr HitProxyRenderStatePtr = StateManager    ::GetRenderState(CRenderState::EqualDepth);
+        CTargetSetPtr   DeferredTargetSetPtr   = TargetSetManager::GetDeferredTargetSet();
+        CTargetSetPtr   HitProxyTargetSetPtr   = TargetSetManager::GetHitProxyTargetSet();
 
         CRenderContextPtr RenderContextPtr = ContextManager::CreateRenderContext();
 
@@ -242,10 +232,10 @@ namespace
 
         RenderContextPtr->SetCamera(CameraPtr);
         RenderContextPtr->SetViewPortSet(ViewPortSetPtr);
-        RenderContextPtr->SetTargetSet(SystemTargetSetPtr);
-        RenderContextPtr->SetRenderState(ForwardRenderStatePtr);
+        RenderContextPtr->SetTargetSet(HitProxyTargetSetPtr);
+        RenderContextPtr->SetRenderState(HitProxyRenderStatePtr);
 
-        m_ForwardContextPtr = RenderContextPtr;
+        m_HitProxyContextPtr = RenderContextPtr;
 
         // -----------------------------------------------------------------------------
 
@@ -310,27 +300,29 @@ namespace
 
         CBufferPtr MaterialBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
+        // -----------------------------------------------------------------------------
+
         ConstanteBufferDesc.m_Stride        = 0;
         ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SForwardLightProperties);
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SHitProxyProperties);
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
 
-        CBufferPtr LightPropertiesBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        CBufferPtr HitProxyBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
 
-        m_DeferredPassPSBuffer = BufferManager::CreateBufferSet(MaterialBuffer);
+        m_DeferredPassPSBuffer  = BufferManager::CreateBufferSet(MaterialBuffer);
+                                
+        m_ViewPSBuffer          = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), MaterialBuffer);
+                                
+        m_HSBuffer              = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferHS());
+                                
+        m_DSBuffer              = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferDS(), MaterialBuffer);
 
-        m_ViewPSBuffer         = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), MaterialBuffer);
-        
-        m_HSBuffer             = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferHS());
-        
-        m_DSBuffer             = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferDS(), MaterialBuffer);
-
-        m_ForwardPassPSBuffer  = BufferManager::CreateBufferSet(MaterialBuffer, LightPropertiesBuffer);
+        m_HitProxyPassPSBuffer  = BufferManager::CreateBufferSet(HitProxyBuffer);
     }
 
     // -----------------------------------------------------------------------------
@@ -526,6 +518,92 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxActorRenderer::RenderHitProxy()
+    {
+        if (m_DeferredRenderJobs.size() == 0) return;
+
+        Performance::BeginEvent("Actors Hit Proxy");
+
+        // -----------------------------------------------------------------------------
+        // Prepare renderer
+        // -----------------------------------------------------------------------------
+        const unsigned int pOffset[] = { 0, 0 };
+
+        ContextManager::SetRenderContext(m_HitProxyContextPtr);
+
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        // -----------------------------------------------------------------------------
+        // First pass: iterate throw render jobs and compute all meshes
+        // -----------------------------------------------------------------------------
+        CRenderJobs::const_iterator EndOfRenderJobs = m_DeferredRenderJobs.end();
+
+        for (CRenderJobs::const_iterator CurrentRenderJob = m_DeferredRenderJobs.begin(); CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
+        {
+            CSurfacePtr  SurfacePtr  = CurrentRenderJob->m_SurfacePtr;
+
+            // -----------------------------------------------------------------------------
+            // Upload data to buffer
+            // -----------------------------------------------------------------------------
+            SPerDrawCallConstantBufferVS* pModelBuffer = static_cast<SPerDrawCallConstantBufferVS*>(BufferManager::MapConstantBuffer(m_ViewVSBuffer->GetBuffer(1)));
+
+            assert(pModelBuffer != nullptr);
+
+            pModelBuffer->m_ModelMatrix = CurrentRenderJob->m_ModelMatrix;
+
+            BufferManager::UnmapConstantBuffer(m_ViewVSBuffer->GetBuffer(1));
+
+            SHitProxyProperties* pHitProxyProperties = static_cast<SHitProxyProperties*>(BufferManager::MapConstantBuffer(m_HitProxyPassPSBuffer->GetBuffer(0)));
+
+            assert(pHitProxyProperties != nullptr);
+
+            pHitProxyProperties->m_ID = CurrentRenderJob->m_EntityID;
+
+            BufferManager::UnmapConstantBuffer(m_HitProxyPassPSBuffer->GetBuffer(0));
+
+            // -----------------------------------------------------------------------------
+            // Render
+            // -----------------------------------------------------------------------------
+            ContextManager::SetShaderVS(SurfacePtr->GetShaderVS());
+
+            ContextManager::SetShaderPS(m_HitProxyShaderPtr);
+
+            ContextManager::SetConstantBufferSetVS(m_ViewVSBuffer);
+
+            ContextManager::SetConstantBufferSetPS(m_HitProxyPassPSBuffer);
+
+            ContextManager::SetVertexBufferSet(SurfacePtr->GetVertexBuffer(), pOffset);
+
+            ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
+
+            ContextManager::SetInputLayout(SurfacePtr->GetShaderVS()->GetInputLayout());
+
+            ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
+
+            ContextManager::ResetInputLayout();
+
+            ContextManager::ResetIndexBuffer();
+
+            ContextManager::ResetVertexBufferSet();
+
+            ContextManager::ResetConstantBufferSetPS();
+
+            ContextManager::ResetConstantBufferSetVS();
+
+            ContextManager::ResetShaderPS();
+
+            ContextManager::ResetShaderVS();
+        }
+
+        ContextManager::ResetTopology();
+
+        ContextManager::ResetRenderContext();
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxActorRenderer::BuildRenderJobs()
     {
         // -----------------------------------------------------------------------------
@@ -545,7 +623,6 @@ namespace
         // Clear current render jobs
         // -----------------------------------------------------------------------------
         m_DeferredRenderJobs.clear();
-        m_ForwardRenderJobs .clear();
 
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
@@ -605,18 +682,12 @@ namespace
                 SRenderJob NewRenderJob;
 
                 NewRenderJob.m_SurfaceAttributes  = SurfacePtr->GetKey().m_Key;
+                NewRenderJob.m_EntityID           = CurrentEntity->GetID();
                 NewRenderJob.m_SurfacePtr         = SurfacePtr;
                 NewRenderJob.m_SurfaceMaterialPtr = MaterialPtr;
                 NewRenderJob.m_ModelMatrix        = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
 
-                if (!MaterialPtr->GetHasAlpha())
-                {
-                    m_DeferredRenderJobs.push_back(NewRenderJob);
-                }
-                else
-                {
-                    m_ForwardRenderJobs.push_back(NewRenderJob);
-                }
+                m_DeferredRenderJobs.push_back(NewRenderJob);
             }
 
             // -----------------------------------------------------------------------------
@@ -629,7 +700,6 @@ namespace
         // Now we order our render jobs
         // -----------------------------------------------------------------------------
         std::sort(m_DeferredRenderJobs.begin(), m_DeferredRenderJobs.end(), SortObject);
-        std::sort(m_ForwardRenderJobs .begin(), m_ForwardRenderJobs .end(), SortObject);
     }
 } // namespace
 
@@ -746,6 +816,13 @@ namespace ActorRenderer
     void Render()
     {
         CGfxActorRenderer::GetInstance().Render();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void RenderHitProxy()
+    {
+        CGfxActorRenderer::GetInstance().RenderHitProxy();
     }
 } // namespace ActorRenderer
 } // namespace Gfx

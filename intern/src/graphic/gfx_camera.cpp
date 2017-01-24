@@ -42,17 +42,6 @@ namespace Gfx
     {
     }
 
-    // -----------------------------------------------------------------------------
-
-    void CCamera::SetFieldOfView(float _FOVY, float _Near, float _Far)
-    {
-        float Aspect;
-
-        Aspect = m_Left / m_Bottom;
-
-        SetFieldOfView(_FOVY, Aspect, _Near, _Far);
-    }
-
     // --------------------------------------------------------------------------------
 
     void CCamera::SetFieldOfView(float _FOVY, float _Aspect, float _Near, float _Far)
@@ -181,13 +170,6 @@ namespace Gfx
         // Compute the projection matrix.
         // --------------------------------------------------------------------------------
         m_ProjectionMatrix.SetRHOrthographic(_Left, _Right, _Bottom, _Top, _Near, _Far);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CCamera::SetProjection(const Base::Float4x4& _rProjectionMatrix)
-    {
-        m_ProjectionMatrix = _rProjectionMatrix;
     }
 
     // -----------------------------------------------------------------------------
@@ -415,6 +397,13 @@ namespace Gfx
     float CCamera::GetFar() const
     {
         return m_Far;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CCamera::GetFOVY() const
+    {
+        return Base::ATan((m_Top - m_Bottom) / m_Near / 2.0f) * 2.0f;
     }
 
     // --------------------------------------------------------------------------------

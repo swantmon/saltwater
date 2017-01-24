@@ -250,6 +250,7 @@ namespace
         GLuint                 m_NativeShaderPipeline;
         
         unsigned int           m_IndexOfTextureBinding;
+        unsigned int           m_IndexOfBufferLocation;
 
     private:
 
@@ -324,6 +325,7 @@ namespace
         , m_RenderContexts        ()
         , m_NativeShaderPipeline  (0)
         , m_IndexOfTextureBinding (0)
+        , m_IndexOfBufferLocation (0)
     {
         unsigned int IndexOfVertexBuffer;
 
@@ -924,26 +926,28 @@ namespace
                 {
                 case CBuffer::ConstantBuffer:
 
-                    glUniformBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfConstantBuffer, BufferHandle);
+                    glUniformBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfConstantBuffer, m_IndexOfBufferLocation);
 
                     glBindBuffer(GL_UNIFORM_BUFFER, BufferHandle);
 
-                    glBindBufferRange(GL_UNIFORM_BUFFER, BufferHandle, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
+                    glBindBufferRange(GL_UNIFORM_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
 
                     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
                     ++IndexOfConstantBuffer;
+                    ++m_IndexOfBufferLocation;
                     break;
                 case CBuffer::ResourceBuffer:
-                    glShaderStorageBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfResourceBuffer, BufferHandle);
+                    glShaderStorageBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfResourceBuffer, m_IndexOfBufferLocation);
 
                     glBindBuffer(GL_SHADER_STORAGE_BUFFER, BufferHandle);
 
-                    glBindBufferRange(GL_SHADER_STORAGE_BUFFER, BufferHandle, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
+                    glBindBufferRange(GL_SHADER_STORAGE_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
 
                     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
                     ++IndexOfResourceBuffer;
+                    ++m_IndexOfBufferLocation;
                     break;
                 default:
                     BASE_CONSOLE_STREAMWARNING("Unsupported constant buffer type");
@@ -994,26 +998,28 @@ namespace
                 {
                 case CBuffer::ConstantBuffer:
 
-                    glUniformBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfConstantBuffer, BufferHandle);
+                    glUniformBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfConstantBuffer, m_IndexOfBufferLocation);
 
                     glBindBuffer(GL_UNIFORM_BUFFER, BufferHandle);
 
-                    glBindBufferRange(GL_UNIFORM_BUFFER, BufferHandle, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
+                    glBindBufferRange(GL_UNIFORM_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
 
                     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
                     ++IndexOfConstantBuffer;
+                    ++m_IndexOfBufferLocation;
                     break;
                 case CBuffer::ResourceBuffer:
-                    glShaderStorageBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfResourceBuffer, BufferHandle);
+                    glShaderStorageBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfResourceBuffer, m_IndexOfBufferLocation);
 
                     glBindBuffer(GL_SHADER_STORAGE_BUFFER, BufferHandle);
 
-                    glBindBufferRange(GL_SHADER_STORAGE_BUFFER, BufferHandle, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
+                    glBindBufferRange(GL_SHADER_STORAGE_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
 
                     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
                     ++IndexOfResourceBuffer;
+                    ++m_IndexOfBufferLocation;
                     break;
                 default:
                     BASE_CONSOLE_STREAMWARNING("Unsupported constant buffer type");
@@ -1064,26 +1070,28 @@ namespace
                 {
                 case CBuffer::ConstantBuffer:
 
-                    glUniformBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfConstantBuffer, BufferHandle);
+                    glUniformBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfConstantBuffer, m_IndexOfBufferLocation);
 
                     glBindBuffer(GL_UNIFORM_BUFFER, BufferHandle);
 
-                    glBindBufferRange(GL_UNIFORM_BUFFER, BufferHandle, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
+                    glBindBufferRange(GL_UNIFORM_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
 
                     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
                     ++IndexOfConstantBuffer;
+                    ++m_IndexOfBufferLocation;
                     break;
                 case CBuffer::ResourceBuffer:
-                    glShaderStorageBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfResourceBuffer, BufferHandle);
+                    glShaderStorageBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfResourceBuffer, m_IndexOfBufferLocation);
 
                     glBindBuffer(GL_SHADER_STORAGE_BUFFER, BufferHandle);
 
-                    glBindBufferRange(GL_SHADER_STORAGE_BUFFER, BufferHandle, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
+                    glBindBufferRange(GL_SHADER_STORAGE_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
 
                     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
                     ++IndexOfResourceBuffer;
+                    ++m_IndexOfBufferLocation;
                     break;
                 default:
                     BASE_CONSOLE_STREAMWARNING("Unsupported constant buffer type");
@@ -1134,26 +1142,28 @@ namespace
                 {
                 case CBuffer::ConstantBuffer:
 
-                    glUniformBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfConstantBuffer, BufferHandle);
+                    glUniformBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfConstantBuffer, m_IndexOfBufferLocation);
 
                     glBindBuffer(GL_UNIFORM_BUFFER, BufferHandle);
 
-                    glBindBufferRange(GL_UNIFORM_BUFFER, BufferHandle, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
+                    glBindBufferRange(GL_UNIFORM_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
 
                     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
                     ++IndexOfConstantBuffer;
+                    ++m_IndexOfBufferLocation;
                     break;
                 case CBuffer::ResourceBuffer:
-                    glShaderStorageBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfResourceBuffer, BufferHandle);
+                    glShaderStorageBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfResourceBuffer, m_IndexOfBufferLocation);
 
                     glBindBuffer(GL_SHADER_STORAGE_BUFFER, BufferHandle);
 
-                    glBindBufferRange(GL_SHADER_STORAGE_BUFFER, BufferHandle, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
+                    glBindBufferRange(GL_SHADER_STORAGE_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
 
                     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
                     ++IndexOfResourceBuffer;
+                    ++m_IndexOfBufferLocation;
                     break;
                 default:
                     BASE_CONSOLE_STREAMWARNING("Unsupported constant buffer type");
@@ -1204,26 +1214,28 @@ namespace
                 {
                 case CBuffer::ConstantBuffer:
 
-                    glUniformBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfConstantBuffer, BufferHandle);
+                    glUniformBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfConstantBuffer, m_IndexOfBufferLocation);
 
                     glBindBuffer(GL_UNIFORM_BUFFER, BufferHandle);
 
-                    glBindBufferRange(GL_UNIFORM_BUFFER, BufferHandle, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
+                    glBindBufferRange(GL_UNIFORM_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
 
                     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
                     ++IndexOfConstantBuffer;
+                    ++m_IndexOfBufferLocation;
                     break;
                 case CBuffer::ResourceBuffer:
-                    glShaderStorageBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfResourceBuffer, BufferHandle);
+                    glShaderStorageBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfResourceBuffer, m_IndexOfBufferLocation);
 
                     glBindBuffer(GL_SHADER_STORAGE_BUFFER, BufferHandle);
 
-                    glBindBufferRange(GL_SHADER_STORAGE_BUFFER, BufferHandle, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
+                    glBindBufferRange(GL_SHADER_STORAGE_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
 
                     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
                     ++IndexOfResourceBuffer;
+                    ++m_IndexOfBufferLocation;
                     break;
                 default:
                     BASE_CONSOLE_STREAMWARNING("Unsupported constant buffer type");
@@ -1274,15 +1286,16 @@ namespace
                 {
                 case CBuffer::ConstantBuffer:
 
-                    glUniformBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfConstantBuffer, BufferHandle);
+                    glUniformBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfConstantBuffer, m_IndexOfBufferLocation);
 
                     glBindBuffer(GL_UNIFORM_BUFFER, BufferHandle);
 
-                    glBindBufferRange(GL_UNIFORM_BUFFER, BufferHandle, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
+                    glBindBufferRange(GL_UNIFORM_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
 
                     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
                     ++IndexOfConstantBuffer;
+                    ++m_IndexOfBufferLocation;
                     break;
                 case CBuffer::ResourceBuffer:
                 {
@@ -2028,7 +2041,12 @@ namespace
                     Access = rNativeTexture.m_NativeUsage;
                     Format = rNativeTexture.m_NativeInternalFormat;
 
-                    if ((rBaseTexture.GetBinding() & CTextureBase::EBinding::DepthStencilTarget) == CTextureBase::EBinding::DepthStencilTarget)
+                    if (rNativeTexture.IsCube())
+                    {
+                        TextureBinding = GL_TEXTURE_CUBE_MAP;
+                    }
+
+                    if (rBaseTexture.GetBinding() & CTextureBase::EBinding::DepthStencilTarget)
                     {
                         glActiveTexture(GL_TEXTURE0 + m_IndexOfTextureBinding);
 
@@ -2036,11 +2054,6 @@ namespace
                     }
                     else
                     {
-                        if (rNativeTexture.IsCube())
-                        {
-                            TextureBinding = GL_TEXTURE_CUBE_MAP;
-                        }
-
                         glBindImageTexture(m_IndexOfTextureBinding, TextureHandle, 0, GL_FALSE, 0, Access, Format);
                     }
                 }
@@ -2157,6 +2170,7 @@ namespace
         glDrawElements(s_NativeTopologies[m_Topology], _NumberOfIndices, GL_UNSIGNED_INT, 0);
         
         m_IndexOfTextureBinding = 0;
+        m_IndexOfBufferLocation = 0;
     }
 
     // -----------------------------------------------------------------------------
@@ -2170,6 +2184,7 @@ namespace
         glDrawElementsInstanced(s_NativeTopologies[m_Topology], _NumberOfIndices, GL_UNSIGNED_INT, 0, _NumberOfInstances);
         
         m_IndexOfTextureBinding = 0;
+        m_IndexOfBufferLocation = 0;
     }
     
     // -----------------------------------------------------------------------------
@@ -2183,6 +2198,7 @@ namespace
         glDispatchCompute(_NumberOfThreadGroupsX, _NumberOfThreadGroupsY, _NumberOfThreadGroupsZ);
 
         m_IndexOfTextureBinding = 0;
+        m_IndexOfBufferLocation = 0;
     }
     
     // -----------------------------------------------------------------------------

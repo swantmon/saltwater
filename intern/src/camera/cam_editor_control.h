@@ -10,29 +10,30 @@ namespace Cam
 {
     class CEditorControl : public CControl
     {
-        public:
+    public:
 
-            CEditorControl();
-             ~CEditorControl();
+        CEditorControl();
+            ~CEditorControl();
 
-        private:
+    private:
 
-            static const float s_MoveVelocityBorder[];
-            static const float s_RotationVelocity;
+        static const float s_MoveVelocityBorder[];
+        static const float s_RotationVelocity;
 
-        private:
+    private:
 
-            bool          m_IsFlying;
-            Base::Short2  m_LastCursorPosition;
-            Base::Float3  m_CurrentRotation;
-            unsigned int  m_MoveDirection;
+        bool          m_IsFlying;
+        Base::Short2  m_LastCursorPosition;
+        Base::Float3  m_CurrentRotation;
+        unsigned int  m_MoveDirection;
 
-        private:
+    private:
 
-            virtual void InternOnEvent(const Base::CInputEvent& _rEvent);
+        virtual void InternOnEvent(const Base::CInputEvent& _rEvent);
+        virtual void InternOnDirtyEntity(Dt::CEntity* _pEntity);
 
-        private:
+    private:
 
-            virtual void InternUpdate();
+        virtual void InternUpdate();
     };
 }

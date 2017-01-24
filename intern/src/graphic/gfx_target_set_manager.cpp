@@ -37,8 +37,12 @@ namespace
         CTargetSetPtr GetDefaultTargetSet();
         CTargetSetPtr GetDeferredTargetSet();
         CTargetSetPtr GetLightAccumulationTargetSet();
+        CTargetSetPtr GetHitProxyTargetSet();
+
         CTargetSetPtr CreateTargetSet(CTextureBasePtr* _pTargetPtrs, unsigned int _NumberOfTargets);
         
+        void ClearTargetSet(CTargetSetPtr _TargetPtr, float _Depth);
+        void ClearTargetSet(CTargetSetPtr _TargetPtr, const Base::Float4& _rColor);
         void ClearTargetSet(CTargetSetPtr _TargetPtr, const Base::Float4& _rColor, float _Depth);
         
     private:
@@ -73,6 +77,7 @@ namespace
         CTargetSetPtr m_DefaultTargetSet;
         CTargetSetPtr m_DeferredTargetSet;
         CTargetSetPtr m_LightAccumulationTargetSet;
+        CTargetSetPtr m_HitProxyTargetSet;
         
     private:
         
@@ -88,6 +93,7 @@ namespace
         , m_DefaultTargetSet          ()
         , m_DeferredTargetSet         ()
         , m_LightAccumulationTargetSet()
+        , m_HitProxyTargetSet         ()
     {
         // -----------------------------------------------------------------------------
         // Register for resizing events
@@ -166,6 +172,13 @@ namespace
         
         // -----------------------------------------------------------------------------
         
+        RendertargetDescriptor.m_Binding       = CTextureBase::RenderTarget;
+        RendertargetDescriptor.m_Format        = CTextureBase::R32_UINT;
+
+        CTexture2DPtr HitProxyTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Hit Proxy (ID)
+        
+        // -----------------------------------------------------------------------------
+        
         RendertargetDescriptor.m_Binding       = CTextureBase::DepthStencilTarget | CTextureBase::RenderTarget;
         RendertargetDescriptor.m_Format        = CTextureBase::R32_FLOAT;
         
@@ -205,7 +218,6 @@ namespace
         
         m_DeferredTargetSet = CreateTargetSet(DeferredRenderbuffer, 4);
         
-        
         // -----------------------------------------------------------------------------
         // Create light accumulation target set
         // -----------------------------------------------------------------------------
@@ -214,6 +226,16 @@ namespace
         LightAccumulationRenderbuffer[0] = LightAccumulationTexturePtr;
 
         m_LightAccumulationTargetSet = CreateTargetSet(LightAccumulationRenderbuffer, 1);
+
+        // -----------------------------------------------------------------------------
+        // Create hit proxy target set
+        // -----------------------------------------------------------------------------
+        CTextureBasePtr HitProxyRenderbuffer[2];
+
+        HitProxyRenderbuffer[0] = HitProxyTexturePtr;
+        HitProxyRenderbuffer[1] = DepthTexturePtr;
+
+        m_HitProxyTargetSet = CreateTargetSet(HitProxyRenderbuffer, 2);
     }
     
     // -----------------------------------------------------------------------------
@@ -224,6 +246,7 @@ namespace
         m_DefaultTargetSet           = nullptr;
         m_DeferredTargetSet          = nullptr;
         m_LightAccumulationTargetSet = nullptr;
+        m_HitProxyTargetSet          = nullptr;
         
         m_TargetSets.Clear();
     }
@@ -254,6 +277,13 @@ namespace
     CTargetSetPtr CGfxTargetSetManager::GetLightAccumulationTargetSet()
     {
         return m_LightAccumulationTargetSet;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTargetSetPtr CGfxTargetSetManager::GetHitProxyTargetSet()
+    {
+        return m_HitProxyTargetSet;
     }
     
     // -----------------------------------------------------------------------------
@@ -321,6 +351,34 @@ namespace
         
         return CTargetSetPtr(TargetSetPtr);
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxTargetSetManager::ClearTargetSet(CTargetSetPtr _TargetPtr, float _Depth)
+    {
+        CNativeTargetSet& rNativeTargetSet = *static_cast<CNativeTargetSet*>(_TargetPtr.GetPtr());
+
+        glBindFramebuffer(GL_FRAMEBUFFER, rNativeTargetSet.m_NativeTargetSet);
+
+        glClearDepth(_Depth);
+        glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxTargetSetManager::ClearTargetSet(CTargetSetPtr _TargetPtr, const Base::Float4& _rColor)
+    {
+        CNativeTargetSet& rNativeTargetSet = *static_cast<CNativeTargetSet*>(_TargetPtr.GetPtr());
+
+        glBindFramebuffer(GL_FRAMEBUFFER, rNativeTargetSet.m_NativeTargetSet);
+
+        glClearColor(_rColor[0], _rColor[1], _rColor[2], _rColor[3]);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
     
     // -----------------------------------------------------------------------------
     
@@ -329,7 +387,7 @@ namespace
         CNativeTargetSet& rNativeTargetSet = *static_cast<CNativeTargetSet*>(_TargetPtr.GetPtr());
         
         glBindFramebuffer(GL_FRAMEBUFFER, rNativeTargetSet.m_NativeTargetSet);
-        
+
         glClearColor(_rColor[0], _rColor[1], _rColor[2], _rColor[3]);
         glClearDepth(_Depth);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -459,6 +517,13 @@ namespace TargetSetManager
     {
         return CGfxTargetSetManager::GetInstance().GetLightAccumulationTargetSet();
     }
+
+    // -----------------------------------------------------------------------------
+
+    CTargetSetPtr GetHitProxyTargetSet()
+    {
+        return CGfxTargetSetManager::GetInstance().GetHitProxyTargetSet();
+    }
     
     // -----------------------------------------------------------------------------
     
@@ -514,14 +579,14 @@ namespace TargetSetManager
     
     void ClearTargetSet(CTargetSetPtr _TargetPtr, const Base::Float4& _rColor)
     {
-        CGfxTargetSetManager::GetInstance().ClearTargetSet(_TargetPtr, _rColor, 1.0f);
+        CGfxTargetSetManager::GetInstance().ClearTargetSet(_TargetPtr, _rColor);
     }
     
     // -----------------------------------------------------------------------------
     
     void ClearTargetSet(CTargetSetPtr _TargetPtr, float _Depth)
     {
-        CGfxTargetSetManager::GetInstance().ClearTargetSet(_TargetPtr, Base::Float4(0.0f), _Depth);
+        CGfxTargetSetManager::GetInstance().ClearTargetSet(_TargetPtr, _Depth);
     }
     
     // -----------------------------------------------------------------------------

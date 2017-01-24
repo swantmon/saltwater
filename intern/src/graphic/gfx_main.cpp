@@ -149,6 +149,7 @@ namespace
             Base::Float4   m_ScreenPositionScaleBias;
             Base::Float4   m_CameraParameters0;
             Base::Float4   m_WorldParameters0;
+            Base::Float4   m_FrameParameters0;
         };
         
     private:
@@ -546,6 +547,7 @@ namespace
         m_PerFrameConstantBuffer.m_ScreenPositionScaleBias        .SetZero();
         m_PerFrameConstantBuffer.m_CameraParameters0              .SetZero();
         m_PerFrameConstantBuffer.m_WorldParameters0               .SetZero();
+        m_PerFrameConstantBuffer.m_FrameParameters0               .SetZero();
         m_PerFrameConstantBuffer.m_PreviousWorldToView            = m_PerFrameConstantBuffer.m_WorldToView;
         m_PerFrameConstantBuffer.m_PreviousViewToScreen           = m_PerFrameConstantBuffer.m_ViewToScreen;
         m_PerFrameConstantBuffer.m_PreviousScreenToView           = m_PerFrameConstantBuffer.m_ScreenToView;
@@ -586,6 +588,8 @@ namespace
         float WorldNumberOfMetersX;
         float WorldNumberOfMetersY;
         float WorldNumberOfMetersZ;
+        float FrameNumber;
+        float FrameDeltaTime;
         
         CCameraPtr MainCameraPtr   = ViewManager::GetMainCamera ();
         CCameraPtr DecalCameraPtr  = ViewManager::GetDecalCamera();
@@ -613,6 +617,9 @@ namespace
         WorldNumberOfMetersX = static_cast<float>(Dt::Map::GetNumberOfMetersX());
         WorldNumberOfMetersY = static_cast<float>(Dt::Map::GetNumberOfMetersY());
         WorldNumberOfMetersZ = static_cast<float>(128.0f);
+
+        FrameNumber    = static_cast<float>(Core::Time::GetNumberOfFrame());
+        FrameDeltaTime = static_cast<float>(Core::Time::GetDeltaTimeLastFrame());
                 
         // -----------------------------------------------------------------------------
         // Map buffer
@@ -644,6 +651,7 @@ namespace
         m_PerFrameConstantBuffer.m_ScreenPositionScaleBias        .Set(0.5f, 0.5f, 0.5f, 0.5f);
         m_PerFrameConstantBuffer.m_CameraParameters0              .Set(Near, Far, 0.0f, 0.0f);
         m_PerFrameConstantBuffer.m_WorldParameters0               .Set(WorldNumberOfMetersX, WorldNumberOfMetersY, WorldNumberOfMetersZ, 0.0f);
+        m_PerFrameConstantBuffer.m_FrameParameters0               .Set(FrameNumber, FrameDeltaTime, 0.0f, 0.0f);
 
         Base::CMemory::Copy(pPerFrameConstantBuffer, &m_PerFrameConstantBuffer, sizeof(SPerFrameConstantBuffer));
         
@@ -796,6 +804,13 @@ namespace Main
     // -----------------------------------------------------------------------------
     
     CBufferPtr GetPerFrameConstantBufferPS()
+    {
+        return CGfxMain::GetInstance().GetPerFrameConstantBuffer();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CBufferPtr GetPerFrameConstantBufferCS()
     {
         return CGfxMain::GetInstance().GetPerFrameConstantBuffer();
     }

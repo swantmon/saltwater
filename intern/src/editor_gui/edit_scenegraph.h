@@ -36,5 +36,6 @@ namespace Edit
     private:
 
         void OnSceneGraphChanged(Edit::CMessage& _rMessage);
+        void OnEntitySelected(Edit::CMessage& _rMessage);
     };
 } // namespace Edit

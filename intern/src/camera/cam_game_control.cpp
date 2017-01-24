@@ -17,6 +17,7 @@ namespace Cam
         : CControl           (CControl::GameControl)
         , m_pMainCameraEntity(nullptr)
     {
+        
     }
     
     // -----------------------------------------------------------------------------
@@ -32,6 +33,8 @@ namespace Cam
     void CGameControl::SetEntity(Dt::CEntity& _rEntity)
     {
         m_pMainCameraEntity = &_rEntity;
+
+        OnDirtyEntity(m_pMainCameraEntity);
     }
 
     // -----------------------------------------------------------------------------
@@ -54,20 +57,20 @@ namespace Cam
     {
         BASE_UNUSED(_rEvent);
     }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGameControl::InternUpdate()
-    {
-        assert(m_pMainCameraEntity != 0);
 
-        if (m_pMainCameraEntity != 0 && m_pMainCameraEntity->GetDirtyFlags() != 0)
+    // -----------------------------------------------------------------------------
+
+    void CGameControl::InternOnDirtyEntity(Dt::CEntity* _pEntity)
+    {
+        assert(_pEntity != 0);
+
+        if (m_pMainCameraEntity != _pEntity) return;
+
+        if (m_pMainCameraEntity->GetDirtyFlags() & Dt::CEntity::DirtyMove)
         {
             Dt::CTransformationFacet* pTransformationFacet = m_pMainCameraEntity->GetTransformationFacet();
-            Dt::CCameraActorFacet*    pCameraFacet         = static_cast<Dt::CCameraActorFacet*>(m_pMainCameraEntity->GetDetailFacet(Dt::SFacetCategory::Data));
 
             assert(pTransformationFacet != nullptr);
-            assert(pCameraFacet         != nullptr);
 
             // -----------------------------------------------------------------------------
             // Position
@@ -80,6 +83,13 @@ namespace Cam
             Base::Float3& rRotationInDegree = pTransformationFacet->GetRotation();
 
             m_RotationMatrix.SetRotation(rRotationInDegree[0], rRotationInDegree[1], rRotationInDegree[2]);
+        }
+
+        if (m_pMainCameraEntity->GetDirtyFlags() & Dt::CEntity::DirtyDetail)
+        {
+            Dt::CCameraActorFacet*    pCameraFacet = static_cast<Dt::CCameraActorFacet*>(m_pMainCameraEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+
+            assert(pCameraFacet != nullptr);
 
             // -----------------------------------------------------------------------------
             // Projection
@@ -106,7 +116,18 @@ namespace Cam
 
                 ProjectionMatrix.SetRHPerspective(Near, Far, pCameraFacet->GetProjectionMatrix());
 
-                Gfx::Cam::SetProjection(ProjectionMatrix);
+                // -----------------------------------------------------------------------------
+                // Decompose left, right, top, bottom, near and far from projection
+                // matrix:
+                // Near = ProjectionMatrix[2][3] / (ProjectionMatrix[2][2] - 1);
+                // Far  = ProjectionMatrix[2][3] / (ProjectionMatrix[2][2] + 1);
+                // -----------------------------------------------------------------------------
+                float Bottom = Near * (ProjectionMatrix[1][2] - 1.0f) / ProjectionMatrix[1][1];
+                float Top    = Near * (ProjectionMatrix[1][2] + 1.0f) / ProjectionMatrix[1][1];
+                float Left   = Near * (ProjectionMatrix[0][2] - 1.0f) / ProjectionMatrix[0][0];
+                float Right  = Near * (ProjectionMatrix[0][2] + 1.0f) / ProjectionMatrix[0][0];
+
+                Gfx::Cam::SetPerspective(Left, Right, Bottom, Top, Near, Far);
             }
 
             // -----------------------------------------------------------------------------
@@ -138,9 +159,15 @@ namespace Cam
 
             Gfx::Cam::SetDepth(pCameraFacet->GetDepth());
         }
-
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CGameControl::InternUpdate()
+    {
         Gfx::Cam::SetPosition(m_Position);
         Gfx::Cam::SetRotationMatrix(m_RotationMatrix);
+
         Gfx::Cam::Update();
     }
 } // namespace Cam

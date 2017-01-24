@@ -22,7 +22,7 @@ namespace MR
     CWebcamControl::CWebcamControl()
         : CControl               (CControl::Webcam)
         , m_pConfiguration       ("-device=WinDS -flipV")
-        , m_OriginalColorFrame   ()
+        , m_OriginalColorFrameBGR()
         , m_OriginalColorFrameRGB()
         , m_ConvertedColorFrame  ()
     {
@@ -170,7 +170,7 @@ namespace MR
         NumberOfVideoComponents = 4;
 #endif
 
-        m_OriginalColorFrame    = cvCreateImage(cvSize(OriginalSizeU, OriginalSizeV), IPL_DEPTH_8U, NumberOfVideoComponents);
+        m_OriginalColorFrameBGR = cvCreateImage(cvSize(OriginalSizeU, OriginalSizeV), IPL_DEPTH_8U, NumberOfVideoComponents);
         m_OriginalColorFrameRGB = cvCreateImage(cvSize(OriginalSizeU, OriginalSizeV), IPL_DEPTH_8U, 3);
         m_ConvertedColorFrame   = cvCreateImage(cvSize(ConvertedSizeU, ConvertedSizeV), IPL_DEPTH_8U, 3);
 
@@ -203,7 +203,7 @@ namespace MR
             pVideoData = arVideoGetImage();
         }
 
-        static_cast<IplImage*>(m_OriginalColorFrame)->imageData = static_cast<char*>(static_cast<void*>(pVideoData));
+        static_cast<IplImage*>(m_OriginalColorFrameBGR)->imageData = static_cast<char*>(static_cast<void*>(pVideoData));
 
         // -----------------------------------------------------------------------------
         // Convert from original to output
@@ -230,17 +230,21 @@ namespace MR
 
         if (pVideoData != 0)
         {
-            static_cast<IplImage*>(m_OriginalColorFrame)->imageData = static_cast<char*>(static_cast<void*>(pVideoData));
+            static_cast<IplImage*>(m_OriginalColorFrameBGR)->imageData = static_cast<char*>(static_cast<void*>(pVideoData));
+
+#ifdef __APPLE__
+            cvCvtColor(m_OriginalColorFrameBGR, m_OriginalColorFrameRGB, CV_BGRA2RGB);
+#else
+            cvCvtColor(m_OriginalColorFrameBGR, m_OriginalColorFrameRGB, CV_BGR2RGB);
+#endif
 
             // -----------------------------------------------------------------------------
             // Convert to output
             // -----------------------------------------------------------------------------
-            ConvertOriginalToOutput();
-
-            // -----------------------------------------------------------------------------
-            // Environment approximation
-            // -----------------------------------------------------------------------------
-            // ProcessEnvironmentApproximation();
+            if (m_FreezeLastFrame == false)
+            {
+                ConvertOriginalToOutput();
+            }
         }
     }
 
@@ -248,12 +252,6 @@ namespace MR
 
     void CWebcamControl::ConvertOriginalToOutput()
     {
-#ifdef __APPLE__
-        cvCvtColor(m_OriginalColorFrame, m_OriginalColorFrameRGB, CV_BGRA2RGB);
-#else
-        cvCvtColor(m_OriginalColorFrame, m_OriginalColorFrameRGB, CV_BGR2RGB);
-#endif
-
         cvResize(m_OriginalColorFrameRGB, m_ConvertedColorFrame);
 
         Dt::TextureManager::CopyToTexture2D(m_pConvertedFrame, static_cast<void*>(static_cast<IplImage*>(m_ConvertedColorFrame)->imageData));

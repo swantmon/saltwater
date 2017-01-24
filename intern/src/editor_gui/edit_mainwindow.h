@@ -29,6 +29,8 @@ namespace Edit
         void OnStart();
         void OnExit();
 
+        void SetRenderSize(int _Width, int _Height);
+
     public Q_SLOTS:
 
         void switchPlayingCurrentScene();

@@ -24,6 +24,7 @@ namespace TargetSetManager
     CTargetSetPtr GetDefaultTargetSet();
     CTargetSetPtr GetDeferredTargetSet();
     CTargetSetPtr GetLightAccumulationTargetSet();
+    CTargetSetPtr GetHitProxyTargetSet();
     
     CTargetSetPtr CreateTargetSet(CTextureBasePtr _Target1Ptr);
     CTargetSetPtr CreateTargetSet(CTextureBasePtr _Target1Ptr, CTextureBasePtr _Target2Ptr);

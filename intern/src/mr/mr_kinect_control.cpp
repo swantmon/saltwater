@@ -24,14 +24,13 @@ IColorFrameReader* g_pColorFrameReader;
 IDepthFrameReader* g_pDepthFrameReader;
 ICoordinateMapper* g_pCoordinateMapper;
 unsigned char      g_pColorFrameDataRAW[COLOR_WIDTH * COLOR_HEIGHT * 4];
-float              g_pDepthFrameDataRAW[COLOR_WIDTH * COLOR_HEIGHT];
-cv::Mat            DepthFC1CropTemp = cv::Mat(720, 1280, CV_32FC1, 0);
+float              g_pDepthFrameDataRAW[COLOR_WIDTH * COLOR_HEIGHT * 3];
 
-cv::Mat DepthFC1     = cv::Mat(1080, 1920, CV_32FC1, &g_pDepthFrameDataRAW);
+cv::Mat DepthFC3     = cv::Mat(1080, 1920, CV_32FC1, &g_pDepthFrameDataRAW);
 cv::Mat ColorUC4     = cv::Mat(1080, 1920, CV_8UC4, &g_pColorFrameDataRAW);
 cv::Mat ColorUC3     = cv::Mat(1080, 1920, CV_8UC3, 0);
 cv::Mat ColorUC1Crop = cv::Mat(720, 1280, CV_8UC1, 0);
-cv::Mat DepthFC1Crop = cv::Mat(720, 1280, CV_32FC1, 0);
+cv::Mat DepthFC3Crop = cv::Mat(720, 1280, CV_32FC1, 0);
 cv::Mat ColorUC3Crop = cv::Mat(720, 1280, CV_8UC3, 0);
 
 namespace
@@ -56,14 +55,14 @@ namespace MR
 
     void* CKinectControl::GetOriginalDepthFrame() const
     {
-        return static_cast<void*>(static_cast<Base::Ptr>(DepthFC1.data));
+        return static_cast<void*>(static_cast<Base::Ptr>(DepthFC3.data));
     }
 
     // -----------------------------------------------------------------------------
 
     void* CKinectControl::GetConvertedDepthFrame() const
     {
-        return static_cast<void*>(static_cast<Base::Ptr>(DepthFC1Crop.data));
+        return static_cast<void*>(static_cast<Base::Ptr>(DepthFC3Crop.data));
     }
 
     // -----------------------------------------------------------------------------
@@ -295,23 +294,7 @@ namespace MR
 
             assert(Capacity == DEPTH_HEIGHT * DEPTH_WIDTH);
 
-            for (unsigned int IndexOfColorValue = 0; IndexOfColorValue < COLOR_WIDTH * COLOR_HEIGHT; ++IndexOfColorValue)
-            {
-                // -----------------------------------------------------------------------------
-                // Depth in millimeters
-                // -----------------------------------------------------------------------------
-                CameraSpacePoint ColorCameraSpacePoint = CameraSpaceOfColorFrame[IndexOfColorValue];
-
-                // -----------------------------------------------------------------------------
-                // Index of destination
-                // -----------------------------------------------------------------------------
-                g_pDepthFrameDataRAW[IndexOfColorValue] = 0.0f;
-
-                if (!std::isinf(fabsf(ColorCameraSpacePoint.Z)))
-                {
-                    g_pDepthFrameDataRAW[IndexOfColorValue] = ColorCameraSpacePoint.Z;
-                }
-            }
+            Base::CMemory::Copy(g_pDepthFrameDataRAW, CameraSpaceOfColorFrame, COLOR_WIDTH * COLOR_HEIGHT * 3 * sizeof(float));
         }
 
         if (pDepthFrame)
@@ -324,7 +307,7 @@ namespace MR
         // -----------------------------------------------------------------------------
         // Prepare OpenCV data
         // -----------------------------------------------------------------------------
-        DepthFC1 = cv::Mat(1080, 1920, CV_32FC1, &g_pDepthFrameDataRAW);
+        DepthFC3 = cv::Mat(1080, 1920, CV_32FC3, &g_pDepthFrameDataRAW);
         ColorUC4 = cv::Mat(1080, 1920, CV_8UC4, &g_pColorFrameDataRAW);
 
         //cv::flip(DepthFC1, DepthFC1, 1);
@@ -333,9 +316,9 @@ namespace MR
         cv::cvtColor(ColorUC4, ColorUC3, CV_RGBA2RGB);
 
         ColorUC3(cv::Rect(320, 180, 1280, 720)).copyTo(ColorUC3Crop);
-        DepthFC1(cv::Rect(320, 180, 1280, 720)).copyTo(DepthFC1Crop);
+        DepthFC3(cv::Rect(320, 180, 1280, 720)).copyTo(DepthFC3Crop);
 
-        cv::flip(DepthFC1Crop, DepthFC1Crop, 1);
+        cv::flip(DepthFC3Crop, DepthFC3Crop, 1);
         cv::flip(ColorUC3Crop, ColorUC3Crop, 1);
         cv::flip(ColorUC3    , ColorUC3    , 1);
 

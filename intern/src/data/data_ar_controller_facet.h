@@ -59,6 +59,9 @@ namespace Dt
         void SetDeviceType(EType _DeviceType);
         EType GetDeviceType() const;
 
+        void SetFreezeOutput(bool _Flag);
+        bool GetFreezeLastFrame() const;
+
         void SetConfiguration(const Base::Char* _pConfiguration);
         const Base::Char* GetConfiguration() const;
 
@@ -85,6 +88,7 @@ namespace Dt
         Dt::CEntity*      m_pCameraEntity;
         Dt::CTexture2D*   m_pOutputBackground;
         EType             m_DeviceType;
+        bool              m_FreezeOutput;
         unsigned int      m_NumberOfMarker;
         Base::CharString  m_CameraParameterFile;
         Base::CharString  m_Configuration;

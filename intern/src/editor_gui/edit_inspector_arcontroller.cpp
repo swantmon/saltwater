@@ -37,6 +37,8 @@ namespace Edit
         // -----------------------------------------------------------------------------
         int Device = m_pDeviceCB->currentIndex();
 
+        bool FreezeLastFrame = m_pFreezeLastFrameCB->isChecked();
+
         QString Configuration = m_pConfigurationEdit->text();
         QByteArray ConfigurationFileBinary = Configuration.toLatin1();
 
@@ -55,6 +57,8 @@ namespace Edit
         NewMessage.PutInt(m_CurrentEntityID);
 
         NewMessage.PutInt(Device);
+
+        NewMessage.PutBool(FreezeLastFrame);
 
         NewMessage.PutString(ConfigurationFileBinary.data());
 
@@ -137,6 +141,8 @@ namespace Edit
 
         int Device = _rMessage.GetInt();
 
+        bool FreezeLastFrame = _rMessage.GetBool();
+
         char Configuration[256];
 
         _rMessage.GetString(Configuration, 256);
@@ -155,8 +161,11 @@ namespace Edit
         // Set values
         // -----------------------------------------------------------------------------
         m_pDeviceCB->blockSignals(true);
+        m_pFreezeLastFrameCB->blockSignals(true);
 
         m_pDeviceCB->setCurrentIndex(Device);
+
+        m_pFreezeLastFrameCB->setChecked(FreezeLastFrame);
 
         m_pConfigurationEdit->setText(Configuration);
 
@@ -171,6 +180,7 @@ namespace Edit
 
         m_pNumberOfMarkerEdit->setText(QString::number(NumberOfMarker));
 
+        m_pFreezeLastFrameCB->blockSignals(false);
         m_pDeviceCB->blockSignals(false);
     }
 } // namespace Edit

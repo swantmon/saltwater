@@ -193,6 +193,9 @@
       <Filter>string</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\base_precompiled.h" />
+    <ClInclude Include="..\..\..\src\base\base_math_limits.h">
+      <Filter>math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="container">

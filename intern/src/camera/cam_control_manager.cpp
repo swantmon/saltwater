@@ -8,6 +8,8 @@
 #include "camera/cam_editor_control.h"
 #include "camera/cam_game_control.h"
 
+#include "data/data_entity_manager.h"
+
 #include "gui/gui_event_handler.h"
 
 #include "graphic/gfx_camera_interface.h"
@@ -40,6 +42,7 @@ namespace
     public:
 
         void OnEvent(const Base::CInputEvent& _rEvent);
+        void OnDirtyEntity(Dt::CEntity* _pEntity);
 
     public:
 
@@ -56,6 +59,11 @@ namespace
 {
     CCamControlManager::CCamControlManager()
     {
+        // -----------------------------------------------------------------------------
+        // register changing entities
+        // -----------------------------------------------------------------------------
+        Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CCamControlManager::OnDirtyEntity));
+
         // -----------------------------------------------------------------------------
         // register input event to gui
         // -----------------------------------------------------------------------------
@@ -136,6 +144,16 @@ namespace
         if (m_pActiveControl != nullptr)
         {
             m_pActiveControl->OnEvent(_rEvent);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CCamControlManager::OnDirtyEntity(Dt::CEntity* _pEntity)
+    {
+        if (m_pActiveControl != nullptr)
+        {
+            m_pActiveControl->OnDirtyEntity(_pEntity);
         }
     }
 
