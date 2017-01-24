@@ -825,10 +825,10 @@ namespace
                 MaxX = MinX + rTicket.m_SizeX;
                 MaxY = MinY + rTicket.m_SizeY;
 
-                if (MinX < 0) MinX = 0;
-                if (MinY < 0) MinY = 0;
                 if (MaxX > static_cast<unsigned int>(ActiveWindowSize[0])) MaxX = ActiveWindowSize[0];
                 if (MaxY > static_cast<unsigned int>(ActiveWindowSize[1])) MaxY = ActiveWindowSize[1];
+                if (MinX > MaxX) MinX = 0;
+                if (MinY > MaxY) MinY = 0;
 
                 pSettings->m_MinX = MinX;
                 pSettings->m_MinY = MinY;
@@ -894,9 +894,10 @@ namespace
             {
                 CMeshActorFacet* pGraphicModelActorFacet = static_cast<CMeshActorFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
 
+                assert(pGraphicModelActorFacet != nullptr);
+
                 CMeshPtr MeshPtr = pGraphicModelActorFacet->GetMesh();
 
-                assert(pGraphicModelActorFacet != nullptr);
                 assert(MeshPtr.IsValid());
 
                 // -----------------------------------------------------------------------------

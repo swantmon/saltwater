@@ -117,7 +117,7 @@ BASE_TEST(QuaterionToTangentSpaceAndBack)
         // -----------------------------------------------------------------------------
         // Choose an axis of the world system which is not collinear to the normal.
         // -----------------------------------------------------------------------------
-        NonCollinearAxis = (abs(_NormalUnitDir[1]) < 0.999f) ? Base::Float3(0.0f, 1.0f, 0.0f) : Base::Float3(0.0f, 0.0f, 1.0f);
+        NonCollinearAxis = (Base::Abs(_NormalUnitDir[1]) < 0.999f) ? Base::Float3(0.0f, 1.0f, 0.0f) : Base::Float3(0.0f, 0.0f, 1.0f);
         
         // -----------------------------------------------------------------------------
         // Calculate the world base.

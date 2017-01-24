@@ -72,12 +72,12 @@ namespace Gfx
 
     protected:
 
-        unsigned int                     m_ID;
-        bool                             m_HasAlpha;
-        CInputLayoutPtr                  m_InputLayoutPtr;
-        const Base::Char*                m_pFileName;           ///< The name of the file containing the shader function.
-        const Base::Char*                m_pShaderName;         ///< The name of the shader function in the file.
-        EType                            m_Type;                ///< Identifies the shader stage.
+        unsigned int      m_ID;
+        bool              m_HasAlpha;
+        CInputLayoutPtr   m_InputLayoutPtr;
+        const Base::Char* m_pFileName;           ///< The name of the file containing the shader function.
+        const Base::Char* m_pShaderName;         ///< The name of the shader function in the file.
+        EType             m_Type;                ///< Identifies the shader stage.
 
     protected:
 

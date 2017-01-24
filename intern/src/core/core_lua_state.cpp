@@ -598,7 +598,7 @@ namespace
 
     bool CLuaStateManager::IsBoolean(BState _State, int _IndexOfStack)
     {
-        return lua_isboolean(GetNativeState(_State), _IndexOfStack) == 1;
+        return lua_isboolean(GetNativeState(_State), _IndexOfStack) == true;
     }
 
     // -----------------------------------------------------------------------------

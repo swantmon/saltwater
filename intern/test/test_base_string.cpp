@@ -12,7 +12,6 @@ BASE_TEST(Test_Base_String)
 
     const Base::Char* pFranzInBayern = "Franz jagt im komplett verwahrlosten Taxi quer durch Bayern";
 
-    BASE_CHECK(FranzInBayern  == FranzInBayern);
     BASE_CHECK(FranzInBayern  == pFranzInBayern);
     BASE_CHECK(pFranzInBayern == FranzInBayern);
 

@@ -464,8 +464,8 @@ namespace
 
             if (FoundPosition != UndefinedPosition)
             {
-                Base::Size BeginOfInclude = _rShaderContent.find("\"", FoundPosition) + 1;
-                Base::Size EndOfInclude   = _rShaderContent.find("\"", BeginOfInclude);
+                Base::Size BeginOfInclude = _rShaderContent.find('\"', FoundPosition) + 1;
+                Base::Size EndOfInclude   = _rShaderContent.find('\"', BeginOfInclude);
 
 				std::string IncludeFile = g_PathToDataShader + _rShaderContent.substr(BeginOfInclude, EndOfInclude - BeginOfInclude);
 
@@ -509,7 +509,8 @@ namespace
 {
     CGfxShaderManager::CInternShader::CInternShader()
         : CNativeShader()
-        , m_Debug(false)
+        , m_Debug      (false)
+        , m_Hash       (0)
     {
     }
 

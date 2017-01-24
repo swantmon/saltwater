@@ -10,6 +10,7 @@ namespace Gfx
     CMaterial::CMaterial()
         : m_HasAlpha(false)
         , m_HasBump (false)
+        , m_Hash    (0)
     {
         m_MaterialAttributes.m_Color[0]        = 1.0f;
         m_MaterialAttributes.m_Color[1]        = 1.0f;

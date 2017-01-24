@@ -659,13 +659,6 @@ namespace
         NumberOfPixel   = ImageWidth * ImageHeight;
         NumberOfBytes   = ConvertFormatToBytesPerPixel(_rDescriptor.m_Format) * NumberOfPixel;
 
-
-        // -----------------------------------------------------------------------------
-        // Build path to texture in file system
-        // -----------------------------------------------------------------------------
-        std::string PathToTextures = "../data/graphic/textures/";
-        std::string PathToTexture;
-        
         // -----------------------------------------------------------------------------
         // Load texture from file if one is set in descriptor
         // -----------------------------------------------------------------------------

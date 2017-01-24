@@ -27,7 +27,7 @@ LUA_DEFINE_FUNCTION(BaseFloat4ObjFuncs, Set)
     rVector[0] = X;
     rVector[1] = Y;
     rVector[2] = Z;
-    rVector[2] = W;
+    rVector[3] = W;
 
     return 0;
 }

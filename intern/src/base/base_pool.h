@@ -339,7 +339,10 @@ namespace CON
                         throw std::bad_alloc();
                     }
                     
-                    ::memcpy(ppFirstPage, m_ppFirstPage, OldNumberOfPages * sizeof(*ppFirstPage));
+                    if (m_ppFirstPage != nullptr)
+                    {
+                        Base::CMemory::Copy(ppFirstPage, m_ppFirstPage, OldNumberOfPages * sizeof(*ppFirstPage));
+                    }
                     
                     // -----------------------------------------------------------------------------
                     // Construct the new item in the first node of the new page.
