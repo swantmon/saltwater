@@ -76,11 +76,9 @@ namespace
         
         SConstantBufferPS      m_ConstantBufferPS;
 
-        CMeshPtr              m_QuadModelPtr;
-        
-        CBufferSetPtr          m_QuadVSBufferSetPtr;
-
-        CBufferSetPtr          m_ConstantBufferSetPSPtr;
+        CMeshPtr               m_QuadModelPtr;
+       
+        CBufferPtr             m_TonemapBufferPtr;
         
         CInputLayoutPtr        m_QuadInputLayoutPtr;
         
@@ -97,8 +95,7 @@ namespace
     CGfxShadingRenderer::CGfxShadingRenderer()
         : m_ConstantBufferPS      ()
         , m_QuadModelPtr          ()
-        , m_QuadVSBufferSetPtr    ()
-        , m_ConstantBufferSetPSPtr()
+        , m_TonemapBufferPtr      ()
         , m_QuadInputLayoutPtr    ()
         , m_FullquadShaderVSPtr   ()
         , m_ShadingPSPtr          ()
@@ -124,8 +121,7 @@ namespace
     void CGfxShadingRenderer::OnExit()
     {
         m_QuadModelPtr           = 0;
-        m_QuadVSBufferSetPtr     = 0;
-        m_ConstantBufferSetPSPtr = 0;
+        m_TonemapBufferPtr       = 0;
         m_QuadInputLayoutPtr     = 0;
         m_FullquadShaderVSPtr    = 0;
         m_ShadingPSPtr           = 0;
@@ -210,13 +206,7 @@ namespace
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr ToneMappingPropertiesBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
-
-        // -----------------------------------------------------------------------------
-
-        m_QuadVSBufferSetPtr     = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
-
-        m_ConstantBufferSetPSPtr = BufferManager::CreateBufferSet(ToneMappingPropertiesBuffer);
+        m_TonemapBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -287,7 +277,7 @@ namespace
         ConstantBufferPS.m_ColorShadow_Tint1                = m_ConstantBufferPS.m_ColorShadow_Tint1;
         ConstantBufferPS.m_ColorShadow_Tint2                = m_ConstantBufferPS.m_ColorShadow_Tint2;
 
-        BufferManager::UploadConstantBufferData(m_ConstantBufferSetPSPtr->GetBuffer(0), &ConstantBufferPS);
+        BufferManager::UploadConstantBufferData(m_TonemapBufferPtr, &ConstantBufferPS);
 
         // -----------------------------------------------------------------------------
         // Prepare renderer
@@ -308,9 +298,8 @@ namespace
 
         ContextManager::SetShaderPS(m_ShadingPSPtr);
 
-        ContextManager::SetConstantBufferSetVS(m_QuadVSBufferSetPtr);
-
-        ContextManager::SetConstantBufferSetPS(m_ConstantBufferSetPSPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+        ContextManager::SetConstantBuffer(1, m_TonemapBufferPtr);
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
@@ -322,9 +311,8 @@ namespace
 
         ContextManager::ResetSampler(0);
 
-        ContextManager::ResetConstantBufferSetPS();
-
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetTopology();
 
