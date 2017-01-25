@@ -141,7 +141,7 @@ namespace ContextManager
     void SetTargetSet(CTargetSetPtr _TargetSetPtr);
     CTargetSetPtr GetTargetSet();
 
-    void ResetViewPorSett();
+    void ResetViewPortSet();
     void SetViewPortSet(CViewPortSetPtr _ViewPortSetPtr);
     CViewPortSetPtr GetViewPortSet();
 
