@@ -1063,9 +1063,9 @@ namespace
 
         ContextManager::SetInputLayout(InputLayoutPtr);
 
-        ContextManager::SetConstantBufferSetGS(GSBufferSetPtr);
+        ContextManager::SetConstantBuffer(2, GSBufferSetPtr->GetBuffer(0));
 
-        ContextManager::SetConstantBufferSetPS(PSBufferSetPtr);
+        ContextManager::SetConstantBuffer(4, PSBufferSetPtr->GetBuffer(0));
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
@@ -1083,9 +1083,9 @@ namespace
 
         ContextManager::ResetSampler(0);
 
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetConstantBuffer(2);
 
-        ContextManager::ResetConstantBufferSetGS();
+        ContextManager::ResetConstantBuffer(4);
 
         ContextManager::ResetInputLayout();
 
@@ -1161,9 +1161,9 @@ namespace
 
         ContextManager::SetInputLayout(InputLayoutPtr);
 
-        ContextManager::SetConstantBufferSetGS(GSBufferSetPtr);
+        ContextManager::SetConstantBuffer(2, GSBufferSetPtr->GetBuffer(0));
 
-        ContextManager::SetConstantBufferSetPS(PSBufferSetPtr);
+        ContextManager::SetConstantBuffer(4, PSBufferSetPtr->GetBuffer(0));
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
@@ -1181,9 +1181,9 @@ namespace
 
         ContextManager::ResetSampler(0);
 
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetConstantBuffer(2);
 
-        ContextManager::ResetConstantBufferSetGS();
+        ContextManager::ResetConstantBuffer(4);
 
         ContextManager::ResetInputLayout();
 
@@ -1281,11 +1281,12 @@ namespace
 
         ContextManager::SetInputLayout(InputLayoutPtr);
 
-        ContextManager::SetConstantBufferSetVS(VSBufferSetPtr);
+        ContextManager::SetConstantBuffer(1, VSBufferSetPtr->GetBuffer(0));
 
-        ContextManager::SetConstantBufferSetGS(GSBufferSetPtr);
+        ContextManager::SetConstantBuffer(2, GSBufferSetPtr->GetBuffer(0));
 
-        ContextManager::SetConstantBufferSetPS(PSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, PSBufferSetPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(4, PSBufferSetPtr->GetBuffer(1));
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
@@ -1303,11 +1304,11 @@ namespace
 
         ContextManager::ResetSampler(0);
 
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetConstantBuffer(1);
 
-        ContextManager::ResetConstantBufferSetGS();
+        ContextManager::ResetConstantBuffer(2);
 
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(4);
 
         ContextManager::ResetInputLayout();
 
@@ -1435,11 +1436,12 @@ namespace
 
         ContextManager::SetInputLayout(InputLayoutPtr);
 
-        ContextManager::SetConstantBufferSetVS(VSBufferSetPtr);
+        ContextManager::SetConstantBuffer(1, VSBufferSetPtr->GetBuffer(0));
 
-        ContextManager::SetConstantBufferSetGS(GSBufferSetPtr);
+        ContextManager::SetConstantBuffer(2, GSBufferSetPtr->GetBuffer(0));
 
-        ContextManager::SetConstantBufferSetPS(PSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, PSBufferSetPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(4, PSBufferSetPtr->GetBuffer(1));
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
@@ -1457,11 +1459,11 @@ namespace
 
         ContextManager::ResetSampler(0);
 
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetConstantBuffer(1);
 
-        ContextManager::ResetConstantBufferSetGS();
+        ContextManager::ResetConstantBuffer(2);
 
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(4);
 
         ContextManager::ResetInputLayout();
 
@@ -1555,11 +1557,10 @@ namespace
 
         ContextManager::SetInputLayout(InputLayoutPtr);
 
-        ContextManager::SetConstantBufferSetVS(VSBufferSetPtr);
+        ContextManager::SetConstantBuffer(2, GSBufferSetPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(3, GSBufferSetPtr->GetBuffer(1));
 
-        ContextManager::SetConstantBufferSetGS(GSBufferSetPtr);
-
-        ContextManager::SetConstantBufferSetPS(PSBufferSetPtr);
+        ContextManager::SetConstantBuffer(4, PSBufferSetPtr->GetBuffer(0));
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
@@ -1581,11 +1582,11 @@ namespace
         ContextManager::ResetSampler(0);
         ContextManager::ResetSampler(1);
 
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetConstantBuffer(1);
 
-        ContextManager::ResetConstantBufferSetGS();
+        ContextManager::ResetConstantBuffer(2);
 
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(4);
 
         ContextManager::ResetInputLayout();
 

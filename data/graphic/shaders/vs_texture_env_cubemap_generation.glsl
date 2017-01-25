@@ -2,7 +2,7 @@
 #ifndef __INCLUDE_VS_TEXTURE_ENV_CUBEMAP_GENERATION_GLSL__
 #define __INCLUDE_VS_TEXTURE_ENV_CUBEMAP_GENERATION_GLSL__
 
-layout(row_major, std140, binding = 0) uniform UB0
+layout(row_major, std140, binding = 1) uniform UB0
 {
     mat4 m_ModelMatrix;
 };
