@@ -653,7 +653,7 @@ namespace
 
         ContextManager::ResetTexture(0);
 
-        ContextManager::ResetSampler(0)
+        ContextManager::ResetSampler(0);
 
         ContextManager::ResetImageTexture(0);
 

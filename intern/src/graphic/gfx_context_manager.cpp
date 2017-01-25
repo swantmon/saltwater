@@ -360,6 +360,8 @@ namespace
         unsigned int IndexOfTextureUnit;
         unsigned int IndexOfImageUnit;
         unsigned int IndexOfShaderSlot;
+        unsigned int IndexOfBufferSlot;
+        unsigned int IndexOfResourceSlot;
 
         for (IndexOfVertexBuffer = 0; IndexOfVertexBuffer < CBufferSet::s_MaxNumberOfBuffers; ++IndexOfVertexBuffer)
         {
@@ -1342,9 +1344,9 @@ namespace
     {
         if (_BufferPtr == nullptr) return;
 
-        CNativeShader*    pNativeShader  = 0;
-        CNativeTexture2D* pNativeTexture = 0;
-        unsigned int      Slot           = 0;
+        CNativeShader* pNativeShader  = 0;
+        CNativeBuffer* pNativeBuffer = 0;
+        unsigned int   Slot           = 0;
 
         assert(_Unit < s_NumberOfBufferUnitsPerStage);
 
@@ -1391,9 +1393,9 @@ namespace
     {
         if (_BufferPtr == nullptr) return;
 
-        CNativeShader*    pNativeShader  = 0;
-        CNativeTexture2D* pNativeTexture = 0;
-        unsigned int      Slot           = 0;
+        CNativeShader* pNativeShader = 0;
+        CNativeBuffer* pNativeBuffer = 0;
+        unsigned int   Slot          = 0;
 
         assert(_Unit < s_NumberOfResourceUnitsPerStage);
 

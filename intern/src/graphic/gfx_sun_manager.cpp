@@ -78,6 +78,16 @@ namespace
         private:
 
             friend class CGfxSunManager;
+        };
+
+    private:
+
+        typedef Base::CPool<CInternSunFacet, 2> CSunFacets;
+
+    private:
+
+        CShaderPtr m_ShadowShaderVSPtr;
+        CShaderPtr m_ShadowSMShaderPSPtr;
         
         CBufferSetPtr m_LightCameraVSBufferPtr;
         CBufferSetPtr m_MainVSBufferPtr;
