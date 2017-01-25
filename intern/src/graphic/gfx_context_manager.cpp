@@ -99,6 +99,14 @@ namespace
         void SetConstantBufferSetCS(CBufferSetPtr _BufferSetPtr);
         CBufferSetPtr GetConstantBufferSetCS();
 
+        void ResetConstantBuffer(CShader::EType _Type, unsigned int _Unit);
+        void SetConstantBuffer(CShader::EType _Type, unsigned int _Unit, CBufferPtr _BufferPtr);
+        CBufferPtr GetConstantBuffer(CShader::EType _Type, unsigned int _Unit);
+
+        void ResetResourceBuffer(CShader::EType _Type, unsigned int _Unit);
+        void SetResourceBuffer(CShader::EType _Type, unsigned int _Unit, CBufferPtr _BufferPtr);
+        CBufferPtr GetResourceBuffer(CShader::EType _Type, unsigned int _Unit);
+
     public:
 
         void ResetInputLayout();
@@ -160,8 +168,12 @@ namespace
     
     private:
     
-        static const unsigned int s_NumberOfTextureUnits = 16;
-        static const unsigned int s_NumberOfImageUnits   = 16;
+        static const unsigned int s_NumberOfTextureUnits          = 16;
+        static const unsigned int s_NumberOfImageUnits            = 16;
+        static const unsigned int s_NumberOfBufferUnitsPerStage   = 16;
+        static const unsigned int s_NumberOfBufferUnits           = CShader::NumberOfTypes * s_NumberOfBufferUnitsPerStage;
+        static const unsigned int s_NumberOfResourceUnitsPerStage = 16;
+        static const unsigned int s_NumberOfResourceUnits         = CShader::NumberOfTypes * s_NumberOfResourceUnitsPerStage;
 
         static const GLenum s_NativeTopologies[];
         
@@ -222,6 +234,8 @@ namespace
         CTextureBasePtr m_TextureUnits[s_NumberOfTextureUnits];
         CSamplerPtr     m_SamplerUnits[s_NumberOfTextureUnits];
         CTextureBasePtr m_ImageUnits[s_NumberOfImageUnits];
+        CBufferPtr      m_BufferUnits[s_NumberOfBufferUnits];
+        CBufferPtr      m_ResourceUnits[s_NumberOfResourceUnits];
 
     private:
 
@@ -367,6 +381,16 @@ namespace
         for (IndexOfShaderSlot = 0; IndexOfShaderSlot < CShader::NumberOfTypes; ++IndexOfShaderSlot)
         {
             m_ShaderSlots[IndexOfShaderSlot] = 0;
+        }
+
+        for (IndexOfBufferSlot = 0; IndexOfBufferSlot < s_NumberOfBufferUnits; ++IndexOfBufferSlot)
+        {
+            m_BufferUnits[IndexOfBufferSlot] = 0;
+        }
+
+        for (IndexOfResourceSlot = 0; IndexOfResourceSlot < s_NumberOfResourceUnits; ++IndexOfResourceSlot)
+        {
+            m_ResourceUnits[IndexOfResourceSlot] = 0;
         }
 
         // -----------------------------------------------------------------------------
@@ -1299,6 +1323,104 @@ namespace
     CBufferSetPtr CGfxContextManager::GetConstantBufferSetCS()
     {
         return m_ConstantBufferSetCSPtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxContextManager::ResetConstantBuffer(CShader::EType _Type, unsigned int _Unit)
+    {
+        assert(_Unit < s_NumberOfBufferUnitsPerStage);
+
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+        m_BufferUnits[_Type * s_NumberOfBufferUnitsPerStage + _Unit] = 0;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxContextManager::SetConstantBuffer(CShader::EType _Type, unsigned int _Unit, CBufferPtr _BufferPtr)
+    {
+        if (_BufferPtr == nullptr) return;
+
+        CNativeShader*    pNativeShader  = 0;
+        CNativeTexture2D* pNativeTexture = 0;
+        unsigned int      Slot           = 0;
+
+        assert(_Unit < s_NumberOfBufferUnitsPerStage);
+
+        Slot = _Type * s_NumberOfBufferUnitsPerStage + _Unit;
+
+        if (m_BufferUnits[Slot] == _BufferPtr) return;
+
+        pNativeShader = static_cast<CNativeShader*>(m_ShaderPSPtr.GetPtr());
+
+        pNativeBuffer = static_cast<CNativeBuffer*>(_BufferPtr.GetPtr());
+
+        glUniformBlockBinding(pNativeShader->m_NativeShader, _Unit, Slot);
+
+        glBindBuffer(GL_UNIFORM_BUFFER, pNativeBuffer->m_NativeBuffer);
+
+        glBindBufferRange(GL_UNIFORM_BUFFER, Slot, pNativeBuffer->m_NativeBuffer, 0, pNativeBuffer->GetNumberOfBytes());
+
+        m_BufferUnits[Slot] = _BufferPtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CBufferPtr CGfxContextManager::GetConstantBuffer(CShader::EType _Type, unsigned int _Unit)
+    {
+        assert(_Unit < s_NumberOfBufferUnitsPerStage);
+
+        return m_BufferUnits[_Type * s_NumberOfBufferUnitsPerStage + _Unit];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxContextManager::ResetResourceBuffer(CShader::EType _Type, unsigned int _Unit)
+    {
+        assert(_Unit < s_NumberOfResourceUnitsPerStage);
+        
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+        m_ResourceUnits[_Type * s_NumberOfResourceUnitsPerStage + _Unit] = 0;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxContextManager::SetResourceBuffer(CShader::EType _Type, unsigned int _Unit, CBufferPtr _BufferPtr)
+    {
+        if (_BufferPtr == nullptr) return;
+
+        CNativeShader*    pNativeShader  = 0;
+        CNativeTexture2D* pNativeTexture = 0;
+        unsigned int      Slot           = 0;
+
+        assert(_Unit < s_NumberOfResourceUnitsPerStage);
+
+        Slot = _Type * s_NumberOfResourceUnitsPerStage + _Unit;
+
+        if (m_ResourceUnits[Slot] == _BufferPtr) return;
+
+        pNativeShader = static_cast<CNativeShader*>(m_ShaderPSPtr.GetPtr());
+
+        pNativeBuffer = static_cast<CNativeBuffer*>(_BufferPtr.GetPtr());
+
+        glShaderStorageBlockBinding(pNativeShader->m_NativeShader, _Unit, Slot);
+
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, pNativeBuffer->m_NativeBuffer);
+
+        glBindBufferRange(GL_SHADER_STORAGE_BUFFER, Slot, pNativeBuffer->m_NativeBuffer, 0, pNativeBuffer->GetNumberOfBytes());
+
+        m_ResourceUnits[Slot] = _BufferPtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CBufferPtr CGfxContextManager::GetResourceBuffer(CShader::EType _Type, unsigned int _Unit)
+    {
+        assert(_Unit < s_NumberOfResourceUnitsPerStage);
+
+        return m_ResourceUnits[_Type * s_NumberOfResourceUnitsPerStage + _Unit];
     }
 
     // -----------------------------------------------------------------------------
