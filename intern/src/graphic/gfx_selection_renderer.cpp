@@ -173,8 +173,8 @@ namespace
         
     private:
         
-        CBufferSetPtr          m_ViewModelVSBuffer;
-        CBufferSetPtr          m_HighlightPSBufferSetPtr;
+        CBufferPtr             m_ModelBufferPtr;
+        CBufferPtr             m_HighlightPSBufferPtr;
         CBufferSetPtr          m_SelectionBufferSetPtrs[s_MaxNumberOfBuffer];
         CRenderContextPtr      m_RenderContextPtr;
         CShaderPtr             m_HighlightPSPtr;
@@ -222,15 +222,15 @@ namespace
 namespace
 {
     CGfxSelectionRenderer::CGfxSelectionRenderer()
-        : m_ViewModelVSBuffer      ()
-        , m_HighlightPSBufferSetPtr()
-        , m_SelectionBufferSetPtrs ()
-        , m_RenderContextPtr       ()
-        , m_HighlightPSPtr         ()
-        , m_GBufferTextureSetPtr   ()
-        , m_RenderJobs             ()
-        , m_SelectionTickets       ()
-        , m_pSelectedEntity        (0)
+        : m_ModelBufferPtr        ()
+        , m_HighlightPSBufferPtr  ()
+        , m_SelectionBufferSetPtrs()
+        , m_RenderContextPtr      ()
+        , m_HighlightPSPtr        ()
+        , m_GBufferTextureSetPtr  ()
+        , m_RenderJobs            ()
+        , m_SelectionTickets      ()
+        , m_pSelectedEntity       (0)
     {
         ResetTickets();
 
@@ -258,13 +258,13 @@ namespace
     
     void CGfxSelectionRenderer::OnExit()
     {
-        m_ViewModelVSBuffer       = 0;
-        m_HighlightPSBufferSetPtr = 0;
-        m_RenderContextPtr        = 0;
-        m_HighlightPSPtr          = 0;
-        m_SelectionCSPtr          = 0;
-        m_GBufferTextureSetPtr    = 0;
-        m_pSelectedEntity         = 0;
+        m_ModelBufferPtr       = 0;
+        m_HighlightPSBufferPtr = 0;
+        m_RenderContextPtr     = 0;
+        m_HighlightPSPtr       = 0;
+        m_SelectionCSPtr       = 0;
+        m_GBufferTextureSetPtr = 0;
+        m_pSelectedEntity      = 0;
 
         ResetTickets();
 
@@ -353,7 +353,7 @@ namespace
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr ViewBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        m_ModelBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
 
@@ -365,7 +365,7 @@ namespace
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
 
-        CBufferPtr HighlightBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        m_HighlightPSBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
 
@@ -395,12 +395,6 @@ namespace
 
             m_SelectionBufferSetPtrs[IndexOfBuffer] = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferCS(), SelectionRequestBufferPtr, SelectionOuputBufferPtr);;
         }
-
-        // -----------------------------------------------------------------------------
-
-        m_ViewModelVSBuffer       = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS(), ViewBuffer);
-
-        m_HighlightPSBufferSetPtr = BufferManager::CreateBufferSet(HighlightBufferPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -696,13 +690,13 @@ namespace
 
             ModelBuffer.m_ModelMatrix = CurrentRenderJob->m_ModelMatrix;
 
-            BufferManager::UploadConstantBufferData(m_ViewModelVSBuffer->GetBuffer(1), &ModelBuffer);
+            BufferManager::UploadConstantBufferData(m_ModelBufferPtr, &ModelBuffer);
 
             SHighlightSettings SelectionSettings;
 
             SelectionSettings.m_ColorAlpha = Base::Float4(0.31f, 0.45f, 0.64f, 0.4f);
 
-            BufferManager::UploadConstantBufferData(m_HighlightPSBufferSetPtr->GetBuffer(0), &SelectionSettings);
+            BufferManager::UploadConstantBufferData(m_HighlightPSBufferPtr, &SelectionSettings);
 
             // -----------------------------------------------------------------------------
             // Render
@@ -713,9 +707,11 @@ namespace
 
             ContextManager::SetShaderPS(m_HighlightPSPtr);
 
-            ContextManager::SetConstantBufferSetVS(m_ViewModelVSBuffer);
+            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
 
-            ContextManager::SetConstantBufferSetPS(m_HighlightPSBufferSetPtr);
+            ContextManager::SetConstantBuffer(1, m_ModelBufferPtr);
+
+            ContextManager::SetConstantBuffer(2, m_HighlightPSBufferPtr);
 
             // -----------------------------------------------------------------------------
             // Set items to context manager
@@ -734,13 +730,11 @@ namespace
 
             ContextManager::ResetVertexBufferSet();
 
-            ContextManager::ResetConstantBufferSetPS();
+            ContextManager::ResetConstantBuffer(0);
 
-            ContextManager::ResetConstantBufferSetDS();
+            ContextManager::ResetConstantBuffer(1);
 
-            ContextManager::ResetConstantBufferSetHS();
-
-            ContextManager::ResetConstantBufferSetVS();
+            ContextManager::ResetConstantBuffer(2);
         }
 
         ContextManager::ResetShaderVS();
@@ -820,7 +814,8 @@ namespace
                 // -----------------------------------------------------------------------------
                 ContextManager::SetShaderCS(m_SelectionCSPtr);
 
-                ContextManager::SetConstantBufferSetCS(m_SelectionBufferSetPtrs[IndexOfBuffer]);
+                ContextManager::SetConstantBuffer(0, m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(0));
+                ContextManager::SetConstantBuffer(1, m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1));
 
                 ContextManager::SetImageTexture(0, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0));
                 ContextManager::SetImageTexture(1, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1));
@@ -836,7 +831,8 @@ namespace
                 ContextManager::ResetImageTexture(3);
                 ContextManager::ResetImageTexture(4);
 
-                ContextManager::ResetConstantBufferSetCS();
+                ContextManager::ResetConstantBuffer(0);
+                ContextManager::ResetConstantBuffer(1);
 
                 ContextManager::ResetShaderCS();
 
