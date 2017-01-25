@@ -327,7 +327,7 @@ namespace
        
         // -----------------------------------------------------------------------------
         
-        CBufferSetPtr SkytextureVSBufferSetPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
+        CBufferSetPtr SkytextureVSBufferSetPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer());
         CBufferSetPtr SkytexturePSBufferSetPtr = BufferManager::CreateBufferSet(SkytexturePSBuffer);
 
         CBufferSetPtr SkyboxVSBufferSetPtr = BufferManager::CreateBufferSet(SkyboxVSBuffer);

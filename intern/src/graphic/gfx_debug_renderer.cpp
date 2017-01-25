@@ -408,7 +408,7 @@ namespace
         CBufferPtr ModelBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
         
         m_ViewModelVSBuffer = BufferManager::CreateBufferSet(ViewBuffer);
-        m_BaseModelVSBuffer = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS(), ModelBuffer);
+        m_BaseModelVSBuffer = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer(), ModelBuffer);
 
         // -----------------------------------------------------------------------------
 
@@ -655,7 +655,7 @@ namespace
         
         ContextManager::SetShaderPS(m_PositionShaderPSPtr);
         
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         
         ContextManager::SetConstantBuffer(1, m_ViewPSBuffer->GetBuffer(0));
         
@@ -816,7 +816,7 @@ namespace
         
         ContextManager::SetShaderPS(m_QuadTextureShaderPSPtr);
 
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
         ContextManager::SetConstantBuffer(1, m_BaseModelVSBuffer->GetBuffer(1));
 
@@ -921,7 +921,7 @@ namespace
 
         ContextManager::SetShaderPS(m_QuadTextShaderPSPtr);
 
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 

@@ -707,7 +707,7 @@ namespace
 
             ContextManager::SetShaderPS(m_HighlightPSPtr);
 
-            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
             ContextManager::SetConstantBuffer(1, m_ModelBufferPtr);
 
@@ -814,7 +814,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 ContextManager::SetShaderCS(m_SelectionCSPtr);
 
-                ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+                ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
                 ContextManager::SetResourceBuffer(0, m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(0));
                 ContextManager::SetResourceBuffer(1, m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1));

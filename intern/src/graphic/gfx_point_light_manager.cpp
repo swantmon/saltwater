@@ -229,7 +229,7 @@ namespace
 
         m_LightCameraVSBufferPtr = BufferManager::CreateBufferSet(PerLightConstantBuffer, PerDrawCallConstantBuffer);
         
-        m_MainVSBufferPtr        = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS(), PerDrawCallConstantBuffer);
+        m_MainVSBufferPtr        = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer(), PerDrawCallConstantBuffer);
         
         // -----------------------------------------------------------------------------
         // Register dirty entity handler for automatic sky creation

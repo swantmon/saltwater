@@ -555,11 +555,11 @@ namespace
 
         m_SkyboxFromTexture.m_VSBufferSetPtr = BufferManager::CreateBufferSet(ModelMatrixBufferPtr);
         m_SkyboxFromTexture.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSWorldBuffer);
-        m_SkyboxFromTexture.m_PSBufferSetPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), OuputPSBufferPtr);
+        m_SkyboxFromTexture.m_PSBufferSetPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer(), OuputPSBufferPtr);
 
         m_SkyboxFromGeometry.m_VSBufferSetPtr = BufferManager::CreateBufferSet(ModelMatrixBufferPtr);
         m_SkyboxFromGeometry.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSWorldBuffer);
-        m_SkyboxFromGeometry.m_PSBufferSetPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), OuputPSBufferPtr);
+        m_SkyboxFromGeometry.m_PSBufferSetPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer(), OuputPSBufferPtr);
 
         m_SkyboxFromLUT.m_VSBufferSetPtr = 0;
         m_SkyboxFromLUT.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSSphericalBuffer, ModelMatrixBufferPtr);

@@ -382,7 +382,7 @@ namespace
         
         // -----------------------------------------------------------------------------
         
-        m_MainVSBufferPtr                   = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS(), PerDrawCallConstantBuffer);
+        m_MainVSBufferPtr                   = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer(), PerDrawCallConstantBuffer);
         
         m_SphereLightPSBufferPtr            = BufferManager::CreateBufferSet(CameraBuffer, SphereLightBuffer, HistogramExposureHistoryBufferPtr);
 
@@ -524,7 +524,7 @@ namespace
         
         ContextManager::SetInputLayout(m_LightProbeInputLayoutPtr);
 
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
         ContextManager::SetConstantBuffer(1, m_MainVSBufferPtr->GetBuffer(1));
         
@@ -630,7 +630,7 @@ namespace
 
         ContextManager::SetInputLayout(m_LightProbeInputLayoutPtr);
 
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
         ContextManager::SetConstantBuffer(1, m_MainVSBufferPtr->GetBuffer(1));
 
@@ -761,7 +761,7 @@ namespace
         
         ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
 
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
         ContextManager::SetConstantBuffer(1, m_MainVSBufferPtr->GetBuffer(1));
 

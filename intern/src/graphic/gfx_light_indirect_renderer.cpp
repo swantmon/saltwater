@@ -231,9 +231,9 @@ namespace
         
         // -----------------------------------------------------------------------------
         
-        m_FullQuadViewVSBufferPtr  = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
+        m_FullQuadViewVSBufferPtr  = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer());
 
-        m_IndirectLightPSBufferPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), IndirectLightBufferPtr, HistogramExposureHistoryBufferPtr);
+        m_IndirectLightPSBufferPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer(), IndirectLightBufferPtr, HistogramExposureHistoryBufferPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -311,7 +311,7 @@ namespace
 
         ContextManager::SetShaderPS(m_IndirectLightShaderPSPtr);
 
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
         ContextManager::SetConstantBuffer(1, m_IndirectLightPSBufferPtr->GetBuffer(1));
 

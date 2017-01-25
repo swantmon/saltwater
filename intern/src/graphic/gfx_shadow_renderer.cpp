@@ -569,7 +569,7 @@ namespace
 
         ContextManager::SetShaderPS(m_SSAOShaderPSPtrs[SSAO]);
 
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
         ContextManager::SetConstantBuffer(1, m_SSAOPropertiesPSBufferPtr);
 
@@ -701,7 +701,7 @@ namespace
         
         ContextManager::SetShaderPS(m_SSAOShaderPSPtrs[SSAOApply]);
         
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));

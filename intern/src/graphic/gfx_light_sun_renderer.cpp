@@ -297,7 +297,7 @@ namespace
         ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(4, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferVS());
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_SunLightPSBufferPtr);
 
         ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());

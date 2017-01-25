@@ -779,7 +779,7 @@ namespace
 
         ContextManager::SetShaderCS(m_VolumeLightingCSPtr);
 
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_VolumeLightingCSBufferSetPtr->GetBuffer(0));
         ContextManager::SetConstantBuffer(2, m_VolumeLightingCSBufferSetPtr->GetBuffer(1));
 
@@ -894,7 +894,7 @@ namespace
 
         ContextManager::SetShaderPS(m_ApplyPSPtr);
 
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
         ContextManager::SetConstantBuffer(1, m_FogApplyBufferPtr->GetBuffer(0));
 

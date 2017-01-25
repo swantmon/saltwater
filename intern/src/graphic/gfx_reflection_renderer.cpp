@@ -631,7 +631,7 @@ namespace
         
         ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
 
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_ImageLightBufferPtr);
 
         ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
@@ -753,7 +753,7 @@ namespace
 
             ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
 
-            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
             ContextManager::SetConstantBuffer(1, m_HCBBufferPtr);
 
@@ -837,7 +837,7 @@ namespace
 
         ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
 
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
         ContextManager::SetConstantBuffer(1, m_SSRLightBufferPtr);
 
@@ -912,7 +912,7 @@ namespace
 
         ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
 
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 

@@ -544,9 +544,9 @@ namespace
         
         // -----------------------------------------------------------------------------
         
-        m_LiquidVSBufferPtr         = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS(), PerFrameConstantBuffer);
+        m_LiquidVSBufferPtr         = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer(), PerFrameConstantBuffer);
         
-        m_QuadVSBufferPtr           = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
+        m_QuadVSBufferPtr           = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer());
         
         
         m_LiquidPSBufferPtr         = BufferManager::CreateBufferSet(LiquidSettingsBuffer);

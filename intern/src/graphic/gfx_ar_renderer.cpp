@@ -564,7 +564,7 @@ namespace
 
                 ContextManager::SetShaderPS(m_DifferentialGBufferShaderPSPtr);
 
-                ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+                ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
                 ContextManager::SetConstantBuffer(1, m_ModelBufferPtr);
                 ContextManager::SetConstantBuffer(2, m_MaterialPSBufferPtr);
 
@@ -674,7 +674,7 @@ namespace
 
             ContextManager::SetShaderPS(m_CopyToGBufferShaderPSPtr);
 
-            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
             // -----------------------------------------------------------------------------
             // Set items to context manager
@@ -779,7 +779,7 @@ namespace
 
             ContextManager::SetShaderPS(m_HitProxyShaderPtr);
 
-            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
             ContextManager::SetConstantBuffer(1, m_ModelBufferPtr);
             ContextManager::SetConstantBuffer(2, m_HitProxyPassPSBufferPtr);
 

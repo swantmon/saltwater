@@ -608,7 +608,7 @@ namespace
 
             ContextManager::SetShaderPS(m_DownSampleShaderPSPtr);
 
-            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
             ContextManager::SetConstantBuffer(1, m_DownSamplePropertiesBufferPtr);
 
@@ -750,7 +750,7 @@ namespace
         
         ContextManager::SetShaderPS(m_BloomShaderPSPtr);
         
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         
         ContextManager::SetConstantBuffer(1, m_BloomPropertiesBufferPtr);
 
@@ -829,7 +829,7 @@ namespace
         
         ContextManager::SetShaderPS(m_PassThroughPSPtr);
         
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 

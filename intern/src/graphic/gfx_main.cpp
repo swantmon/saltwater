@@ -768,42 +768,7 @@ namespace Main
     
     // -----------------------------------------------------------------------------
     
-    CBufferPtr GetPerFrameConstantBufferVS()
-    {
-        return CGfxMain::GetInstance().GetPerFrameConstantBuffer();
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CBufferPtr GetPerFrameConstantBufferHS()
-    {
-        return CGfxMain::GetInstance().GetPerFrameConstantBuffer();
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CBufferPtr GetPerFrameConstantBufferDS()
-    {
-        return CGfxMain::GetInstance().GetPerFrameConstantBuffer();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CBufferPtr GetPerFrameConstantBufferGS()
-    {
-        return CGfxMain::GetInstance().GetPerFrameConstantBuffer();
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CBufferPtr GetPerFrameConstantBufferPS()
-    {
-        return CGfxMain::GetInstance().GetPerFrameConstantBuffer();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CBufferPtr GetPerFrameConstantBufferCS()
+    CBufferPtr GetPerFrameConstantBuffer()
     {
         return CGfxMain::GetInstance().GetPerFrameConstantBuffer();
     }

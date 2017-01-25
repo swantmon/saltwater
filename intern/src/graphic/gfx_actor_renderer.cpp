@@ -383,7 +383,7 @@ namespace
                 ContextManager::SetTexture(IndexOfTexture, MaterialPtr->GetTextureSetPS()->GetTexture(IndexOfTexture));
             }
 
-            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
             ContextManager::SetConstantBuffer(1, m_ModelBufferPtr);
             ContextManager::SetConstantBuffer(2, m_SurfaceMaterialBufferPtr);
 
@@ -495,7 +495,7 @@ namespace
 
             ContextManager::SetShaderPS(m_HitProxyShaderPtr);
 
-            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
             ContextManager::SetConstantBuffer(1, m_ModelBufferPtr);
             ContextManager::SetConstantBuffer(2, m_HitProxyPassPSBufferPtr);
 
