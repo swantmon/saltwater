@@ -115,10 +115,8 @@ namespace
 
         CMeshPtr m_QuadModelPtr;
         
-        
-        CBufferSetPtr  m_QuadVSBufferPtr;
-        CBufferSetPtr  m_GaussianBlurPropertiesCSBufferPtr;
-        CBufferSetPtr  m_SSAOPropertiesPSBufferPtr;
+        CBufferPtr  m_GaussianBlurPropertiesCSBufferPtr;
+        CBufferPtr  m_SSAOPropertiesPSBufferPtr;
         
         CInputLayoutPtr m_QuadInputLayoutPtr;
 
@@ -152,7 +150,6 @@ namespace
 {
     CGfxShadowRenderer::CGfxShadowRenderer()
         : m_QuadModelPtr                     ()
-        , m_QuadVSBufferPtr                  ()
         , m_SSAOPropertiesPSBufferPtr        ()
         , m_GaussianBlurPropertiesCSBufferPtr()
         , m_QuadInputLayoutPtr               ()
@@ -206,7 +203,6 @@ namespace
     void CGfxShadowRenderer::OnExit()
     {
         m_QuadModelPtr                      = 0;
-        m_QuadVSBufferPtr                   = 0;
         m_GaussianBlurPropertiesCSBufferPtr = 0;
         m_SSAOPropertiesPSBufferPtr         = 0;
         m_QuadInputLayoutPtr                = 0;
@@ -463,7 +459,7 @@ namespace
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr GaussianSettingsBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        m_GaussianBlurPropertiesCSBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
         
@@ -475,15 +471,7 @@ namespace
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr SSAOBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
-        
-        // -----------------------------------------------------------------------------
-        
-        m_QuadVSBufferPtr                   = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
-
-        m_GaussianBlurPropertiesCSBufferPtr = BufferManager::CreateBufferSet(GaussianSettingsBuffer);
-
-        m_SSAOPropertiesPSBufferPtr         = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), SSAOBuffer);
+        m_SSAOPropertiesPSBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -581,9 +569,9 @@ namespace
 
         ContextManager::SetShaderPS(m_SSAOShaderPSPtrs[SSAO]);
 
-        ContextManager::SetConstantBufferSetVS(m_QuadVSBufferPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
 
-        ContextManager::SetConstantBufferSetPS(m_SSAOPropertiesPSBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_SSAOPropertiesPSBufferPtr);
 
         SSAOSettings.m_InverseCameraProjection = ViewManager::GetMainCamera()->GetProjectionMatrix().GetInverted();
         SSAOSettings.m_CameraProjection        = ViewManager::GetMainCamera()->GetProjectionMatrix();
@@ -595,7 +583,7 @@ namespace
             SSAOSettings.m_Kernel[IndexOfNoiseSeq] = m_Kernel[IndexOfNoiseSeq];
         }
 
-        BufferManager::UploadConstantBufferData(m_SSAOPropertiesPSBufferPtr->GetBuffer(1), &SSAOSettings);
+        BufferManager::UploadConstantBufferData(m_SSAOPropertiesPSBufferPtr, &SSAOSettings);
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
@@ -619,9 +607,9 @@ namespace
         ContextManager::ResetSampler(2);
         ContextManager::ResetSampler(3);
 
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetConstantBuffer(0);
 
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetTopology();
 
@@ -661,12 +649,12 @@ namespace
 
             ContextManager::SetShaderCS(m_BilateralBlurShaderCSPtr);
 
-            ContextManager::SetConstantBufferSetCS(m_GaussianBlurPropertiesCSBufferPtr);
+            ContextManager::SetConstantBuffer(0, m_GaussianBlurPropertiesCSBufferPtr);
 
             GaussianSettings.m_Direction[0] = 1;
             GaussianSettings.m_Direction[1] = 0;
 
-            BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesCSBufferPtr->GetBuffer(0), &GaussianSettings);
+            BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesCSBufferPtr, &GaussianSettings);
 
             ContextManager::SetImageTexture(0, m_BilateralBlurHTextureSetPtr->GetTexture(0));
             ContextManager::SetImageTexture(1, m_BilateralBlurHTextureSetPtr->GetTexture(1));
@@ -679,7 +667,7 @@ namespace
             GaussianSettings.m_Direction[0] = 0;
             GaussianSettings.m_Direction[1] = 1;
 
-            BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesCSBufferPtr->GetBuffer(0), &GaussianSettings);
+            BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesCSBufferPtr, &GaussianSettings);
 
             ContextManager::SetImageTexture(0, m_BilateralBlurVTextureSetPtr->GetTexture(0));
             ContextManager::SetImageTexture(1, m_BilateralBlurVTextureSetPtr->GetTexture(1));
@@ -691,7 +679,7 @@ namespace
 
             // -----------------------------------------------------------------------------
 
-            ContextManager::ResetConstantBufferSetCS();
+            ContextManager::ResetConstantBuffer(0);
 
             ContextManager::ResetShaderCS();
         }
@@ -713,7 +701,7 @@ namespace
         
         ContextManager::SetShaderPS(m_SSAOShaderPSPtrs[SSAOApply]);
         
-        ContextManager::SetConstantBufferSetVS(m_QuadVSBufferPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
@@ -737,9 +725,7 @@ namespace
         ContextManager::ResetSampler(2);
         ContextManager::ResetSampler(3);
         
-        ContextManager::ResetConstantBufferSetPS();
-        
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
         
         ContextManager::ResetTopology();
         
