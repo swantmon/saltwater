@@ -121,13 +121,10 @@ namespace
         
         CMeshPtr          m_QuadModelPtr;
         
-        CBufferSetPtr     m_BaseVSBufferSetPtr;
         CBufferSetPtr     m_DOFVSBufferSetPtr;
-        
         CBufferSetPtr     m_DOFDownPropertiesPSBufferPtr;
         CBufferSetPtr     m_DOFApplyPropertiesPSBufferPtr;
         CBufferSetPtr     m_GaussianBlurPropertiesPSBufferPtr;
-        CBufferSetPtr     m_FXAAPropertiesPSBufferPtr;
         
         CInputLayoutPtr   m_FullQuadInputLayoutPtr;
         CShaderPtr        m_RectangleShaderVSPtr;
@@ -182,12 +179,10 @@ namespace
         , m_FullQuadInputLayoutPtr           ()
         , m_RectangleShaderVSPtr             ()
         , m_PassThroughShaderPSPtr           ()
-        , m_BaseVSBufferSetPtr               ()
         , m_DOFVSBufferSetPtr                ()
         , m_DOFDownPropertiesPSBufferPtr     ()
         , m_DOFApplyPropertiesPSBufferPtr    ()
         , m_GaussianBlurPropertiesPSBufferPtr()
-        , m_FXAAPropertiesPSBufferPtr        ()
         , m_SystemContextPtr                 ()
         , m_SwapTargetSetPtrs                ()
         , m_PostAARenderJobs                 ()
@@ -219,12 +214,10 @@ namespace
         m_FullQuadInputLayoutPtr            = 0;
         m_RectangleShaderVSPtr              = 0;
         m_PassThroughShaderPSPtr            = 0;
-        m_BaseVSBufferSetPtr                = 0;
         m_DOFVSBufferSetPtr                 = 0;
         m_DOFDownPropertiesPSBufferPtr      = 0;
         m_DOFApplyPropertiesPSBufferPtr     = 0;
         m_GaussianBlurPropertiesPSBufferPtr = 0;
-        m_FXAAPropertiesPSBufferPtr         = 0;
         m_SystemContextPtr                  = 0;
         m_SwapTextureSetPtrs[0]             = 0;
         m_SwapTextureSetPtrs[1]             = 0;
@@ -742,16 +735,12 @@ namespace
         CBufferPtr GaussianSettingsResourceBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
         
         // -----------------------------------------------------------------------------
-        
-        m_BaseVSBufferSetPtr                   = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
-                                               
+
         m_DOFDownPropertiesPSBufferPtr         = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), DOFDownPropertiesBuffer);
                                                
         m_DOFApplyPropertiesPSBufferPtr        = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), DOFApplyPropertiesBuffer);
                                                
         m_GaussianBlurPropertiesPSBufferPtr    = BufferManager::CreateBufferSet(GaussianSettingsBuffer);
-        
-        m_FXAAPropertiesPSBufferPtr            = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS());
     }
     
     // -----------------------------------------------------------------------------
@@ -907,7 +896,7 @@ namespace
         
         ContextManager::SetShaderPS(m_PassThroughShaderPSPtr);
         
-        ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
@@ -923,7 +912,7 @@ namespace
         ContextManager::ResetSampler(0);
         ContextManager::ResetSampler(1);
         
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
         
         ContextManager::ResetTopology();
         
@@ -956,9 +945,9 @@ namespace
         
         ContextManager::SetShaderPS(m_PostEffectShaderPSPtrs[DOFDownSample]);
         
-        ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
         
-        ContextManager::SetConstantBufferSetPS(m_DOFDownPropertiesPSBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_DOFDownPropertiesPSBufferPtr->GetBuffer(1));
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
@@ -974,9 +963,9 @@ namespace
         ContextManager::ResetSampler(0);
         ContextManager::ResetSampler(1);
         
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetConstantBuffer(0);
         
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(1);
         
         ContextManager::ResetTopology();
         
@@ -1019,9 +1008,9 @@ namespace
         
         ContextManager::SetShaderPS(m_PostEffectShaderPSPtrs[GaussianBlur]);
         
-        ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
         
-        ContextManager::SetConstantBufferSetPS(m_GaussianBlurPropertiesPSBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_GaussianBlurPropertiesPSBufferPtr->GetBuffer(0));
         
         GaussianSettings.m_Direction[0] = 1.0f * 1.0f / static_cast<float>(QuarterSize[0]);
         GaussianSettings.m_Direction[1] = 0.0f * 1.0f / static_cast<float>(QuarterSize[1]);
@@ -1038,9 +1027,9 @@ namespace
 
         ContextManager::ResetSampler(0);
         
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetConstantBuffer(0);
         
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(1);
         
         ContextManager::ResetTopology();
         
@@ -1072,9 +1061,9 @@ namespace
         
         ContextManager::SetShaderPS(m_PostEffectShaderPSPtrs[GaussianBlur]);
         
-        ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
-        
-        ContextManager::SetConstantBufferSetPS(m_GaussianBlurPropertiesPSBufferPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+
+        ContextManager::SetConstantBuffer(1, m_GaussianBlurPropertiesPSBufferPtr->GetBuffer(0));
         
         GaussianSettings.m_Direction[0] = 0.0f * 1.0f / static_cast<float>(QuarterSize[0]);
         GaussianSettings.m_Direction[1] = 1.0f * 1.0f / static_cast<float>(QuarterSize[1]);
@@ -1091,9 +1080,9 @@ namespace
 
         ContextManager::ResetSampler(0);
         
-        ContextManager::ResetConstantBufferSetPS();
-        
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
+
+        ContextManager::ResetConstantBuffer(1);
         
         ContextManager::ResetTopology();
         
@@ -1126,7 +1115,7 @@ namespace
         
         ContextManager::SetShaderPS(m_PostEffectShaderPSPtrs[DOFNear]);
         
-        ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
@@ -1142,7 +1131,7 @@ namespace
         ContextManager::ResetSampler(0);
         ContextManager::ResetSampler(1);
         
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
         
         ContextManager::ResetTopology();
         
@@ -1175,7 +1164,7 @@ namespace
         
         ContextManager::SetShaderPS(m_PostEffectShaderPSPtrs[DOFBlurNear]);
         
-        ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
         
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
@@ -1187,7 +1176,7 @@ namespace
 
         ContextManager::ResetSampler(0);
         
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
         
         ContextManager::ResetTopology();
         
@@ -1222,9 +1211,9 @@ namespace
         
         ContextManager::SetShaderPS(m_PostEffectShaderPSPtrs[DOFApply]);
         
-        ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
         
-        ContextManager::SetConstantBufferSetPS(m_DOFApplyPropertiesPSBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_DOFApplyPropertiesPSBufferPtr->GetBuffer(1));
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
@@ -1248,9 +1237,9 @@ namespace
         ContextManager::ResetSampler(2);
         ContextManager::ResetSampler(3);
         
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetConstantBuffer(0);
         
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(1);
         
         ContextManager::ResetTopology();
         
@@ -1326,9 +1315,7 @@ namespace
         
         ContextManager::SetShaderPS(m_PostEffectShaderPSPtrs[FXAA]);
         
-        ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
-        
-        ContextManager::SetConstantBufferSetPS(m_FXAAPropertiesPSBufferPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
@@ -1344,9 +1331,7 @@ namespace
         ContextManager::ResetSampler(0);
         ContextManager::ResetSampler(1);
         
-        ContextManager::ResetConstantBufferSetPS();
-        
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
         
         ContextManager::ResetTopology();
         
@@ -1463,10 +1448,6 @@ namespace
         ContextManager::ResetSampler(1);
         ContextManager::ResetSampler(2);
 
-        ContextManager::ResetConstantBufferSetPS();
-
-        ContextManager::ResetConstantBufferSetVS();
-
         ContextManager::ResetTopology();
 
         ContextManager::ResetInputLayout();
@@ -1514,7 +1495,7 @@ namespace
         
         ContextManager::SetShaderPS(m_PassThroughShaderPSPtr);
 
-        ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
@@ -1526,7 +1507,7 @@ namespace
 
         ContextManager::ResetSampler(0);
 
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
         
         ContextManager::ResetTopology();
         
