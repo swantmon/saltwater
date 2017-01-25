@@ -48,6 +48,18 @@ namespace ContextManager
     void SetTopology(STopology::Enum _Topology);
     STopology::Enum GetTopology();
 
+    void ResetTargetSet();
+    void SetTargetSet(CTargetSetPtr _TargetSetPtr);
+    CTargetSetPtr GetTargetSet();
+
+    void ResetViewPortSet();
+    void SetViewPortSet(CViewPortSetPtr _ViewPortSetPtr);
+    CViewPortSetPtr GetViewPortSet();
+
+    void ResetInputLayout();
+    void SetInputLayout(CInputLayoutPtr _InputLayoutPtr);
+    CInputLayoutPtr GetInputLayout();
+
     void ResetIndexBuffer();
     void SetIndexBuffer(CBufferPtr _BufferPtr, unsigned int _Offset);
     void SetIndexBuffer(CBufferPtr _BufferPtr, unsigned int _Stride, unsigned int _Offset);
@@ -57,6 +69,41 @@ namespace ContextManager
     void SetVertexBufferSet(CBufferSetPtr _BufferSetPtr, const unsigned int* _pOffsets);
     void SetVertexBufferSet(CBufferSetPtr _BufferSetPtr, const unsigned int* _pStrides, const unsigned int* _pOffsets);
     CBufferSetPtr GetVertexBufferSet();
+
+    void ResetSampler(unsigned int _Unit);
+    void SetSampler(unsigned int _Unit, CSamplerPtr _SamplerPtr);
+    CSamplerPtr GetSampler(unsigned int _Unit);
+
+    void ResetTexture(unsigned int _Unit);
+    void SetTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr);
+    CTextureBasePtr GetTexture(unsigned int _Unit);
+
+    void ResetImageTexture(unsigned int _Unit);
+    void SetImageTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr);
+    CTextureBasePtr GetImageTexture(unsigned int _Unit);
+
+    void ResetResourceBuffer(unsigned int _Unit);
+    void SetResourceBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
+    CBufferPtr GetResourceBuffer(unsigned int _Unit);
+
+    void ResetShaderVS();
+    void SetShaderVS(CShaderPtr _ShaderSetPtr);
+    CShaderPtr GetShaderVS();
+    void ResetShaderHS();
+    void SetShaderHS(CShaderPtr _ShaderSetPtr);
+    CShaderPtr GetShaderHS();
+    void ResetShaderDS();
+    void SetShaderDS(CShaderPtr _ShaderSetPtr);
+    CShaderPtr GetShaderDS();
+    void ResetShaderGS();
+    void SetShaderGS(CShaderPtr _ShaderSetPtr);
+    CShaderPtr GetShaderGS();
+    void ResetShaderPS();
+    void SetShaderPS(CShaderPtr _ShaderSetPtr);
+    CShaderPtr GetShaderSetPS();
+    void ResetShaderCS();
+    void SetShaderCS(CShaderPtr _ShaderSetPtr);
+    CShaderPtr GetShaderCS();
 
     void ResetConstantBufferSetVS();
     void SetConstantBufferSetVS(CBufferSetPtr _BufferSetPtr);
@@ -95,68 +142,6 @@ namespace ContextManager
     void ResetConstantBufferCS(unsigned int _Unit);
     void SetConstantBufferCS(unsigned int _Unit, CBufferPtr _BufferPtr);
     CBufferPtr GetConstantBufferCS(unsigned int _Unit);
-
-    void ResetResourceBufferVS(unsigned int _Unit);
-    void SetResourceBufferVS(unsigned int _Unit, CBufferPtr _BufferPtr);
-    CBufferPtr GetResourceBufferVS(unsigned int _Unit);
-    void ResetResourceBufferHS(unsigned int _Unit);
-    void SetResourceBufferHS(unsigned int _Unit, CBufferPtr _BufferPtr);
-    CBufferPtr GetResourceBufferHS(unsigned int _Unit);
-    void ResetResourceBufferDS(unsigned int _Unit);
-    void SetResourceBufferDS(unsigned int _Unit, CBufferPtr _BufferPtr);
-    CBufferPtr GetResourceBufferDS(unsigned int _Unit);
-    void ResetResourceBufferGS(unsigned int _Unit);
-    void SetResourceBufferGS(unsigned int _Unit, CBufferPtr _BufferPtr);
-    CBufferPtr GetResourceBufferGS(unsigned int _Unit);
-    void ResetResourceBufferPS(unsigned int _Unit);
-    void SetResourceBufferPS(unsigned int _Unit, CBufferPtr _BufferPtr);
-    CBufferPtr GetResourceBufferPS(unsigned int _Unit);
-    void ResetResourceBufferCS(unsigned int _Unit);
-    void SetResourceBufferCS(unsigned int _Unit, CBufferPtr _BufferPtr);
-    CBufferPtr GetResourceBufferCS(unsigned int _Unit);
-
-    void ResetInputLayout();
-    void SetInputLayout(CInputLayoutPtr _InputLayoutPtr);
-    CInputLayoutPtr GetInputLayout();
-    
-    void ResetShaderVS();
-    void SetShaderVS(CShaderPtr _ShaderSetPtr);
-    CShaderPtr GetShaderVS();
-    void ResetShaderHS();
-    void SetShaderHS(CShaderPtr _ShaderSetPtr);
-    CShaderPtr GetShaderHS();
-    void ResetShaderDS();
-    void SetShaderDS(CShaderPtr _ShaderSetPtr);
-    CShaderPtr GetShaderDS();
-    void ResetShaderGS();
-    void SetShaderGS(CShaderPtr _ShaderSetPtr);
-    CShaderPtr GetShaderGS();
-    void ResetShaderPS();
-    void SetShaderPS(CShaderPtr _ShaderSetPtr);
-    CShaderPtr GetShaderSetPS();
-    void ResetShaderCS();
-    void SetShaderCS(CShaderPtr _ShaderSetPtr);
-    CShaderPtr GetShaderCS();
-
-    void ResetSampler(unsigned int _Unit);
-    void SetSampler(unsigned int _Unit, CSamplerPtr _SamplerPtr);
-    CSamplerPtr GetSampler(unsigned int _Unit);
-
-    void ResetTexture(unsigned int _Unit);
-    void SetTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr);
-    CTextureBasePtr GetTexture(unsigned int _Unit);
-
-    void ResetImageTexture(unsigned int _Unit);
-    void SetImageTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr);
-    CTextureBasePtr GetImageTexture(unsigned int _Unit);
-
-    void ResetTargetSet();
-    void SetTargetSet(CTargetSetPtr _TargetSetPtr);
-    CTargetSetPtr GetTargetSet();
-
-    void ResetViewPortSet();
-    void SetViewPortSet(CViewPortSetPtr _ViewPortSetPtr);
-    CViewPortSetPtr GetViewPortSet();
 
     void Draw(unsigned int _NumberOfVertices, unsigned int _IndexOfFirstVertex);
     void DrawIndexed(unsigned int _NumberOfIndices, unsigned int _IndexOfFirstIndex, int _BaseVertexLocation);

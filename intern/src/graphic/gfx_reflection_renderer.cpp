@@ -648,11 +648,14 @@ namespace
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
         
         ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
-        
-        ContextManager::SetConstantBufferSetPS(m_ImageLightPSBufferSetPtr);
-        
-        ContextManager::SetConstantBufferSetVS(m_QuadVSBufferSetPtr);
 
+        ContextManager::SetConstantBufferSetVS(m_QuadVSBufferSetPtr);
+        
+        ContextManager::SetConstantBufferPS(0, m_ImageLightPSBufferSetPtr->GetBuffer(0));
+        ContextManager::SetConstantBufferPS(1, m_ImageLightPSBufferSetPtr->GetBuffer(1));
+
+        ContextManager::SetResourceBuffer(0, m_ImageLightPSBufferSetPtr->GetBuffer(2));
+        
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
@@ -705,7 +708,10 @@ namespace
         
         ContextManager::ResetInputLayout();
         
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetConstantBufferPS(0);
+        ContextManager::ResetConstantBufferPS(1);
+
+        ContextManager::ResetResourceBuffer(0);
         
         ContextManager::ResetConstantBufferSetVS();
         

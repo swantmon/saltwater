@@ -103,9 +103,9 @@ namespace
         void SetConstantBuffer(CShader::EType _Type, unsigned int _Unit, CBufferPtr _BufferPtr);
         CBufferPtr GetConstantBuffer(CShader::EType _Type, unsigned int _Unit);
 
-        void ResetResourceBuffer(CShader::EType _Type, unsigned int _Unit);
-        void SetResourceBuffer(CShader::EType _Type, unsigned int _Unit, CBufferPtr _BufferPtr);
-        CBufferPtr GetResourceBuffer(CShader::EType _Type, unsigned int _Unit);
+        void ResetResourceBuffer(unsigned int _Unit);
+        void SetResourceBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
+        CBufferPtr GetResourceBuffer(unsigned int _Unit);
 
     public:
 
@@ -172,8 +172,7 @@ namespace
         static const unsigned int s_NumberOfImageUnits            = 16;
         static const unsigned int s_NumberOfBufferUnitsPerStage   = 16;
         static const unsigned int s_NumberOfBufferUnits           = CShader::NumberOfTypes * s_NumberOfBufferUnitsPerStage;
-        static const unsigned int s_NumberOfResourceUnitsPerStage = 16;
-        static const unsigned int s_NumberOfResourceUnits         = CShader::NumberOfTypes * s_NumberOfResourceUnitsPerStage;
+        static const unsigned int s_NumberOfResourceUnits         = 16;
 
         static const GLenum s_NativeTopologies[];
         
@@ -216,12 +215,6 @@ namespace
         CBufferSetPtr          m_ConstantBufferSetPSPtr;
         CBufferSetPtr          m_ConstantBufferSetCSPtr;
         CInputLayoutPtr        m_InputLayoutPtr;
-        CShaderPtr             m_ShaderVSPtr;
-        CShaderPtr             m_ShaderGSPtr;
-        CShaderPtr             m_ShaderDSPtr;
-        CShaderPtr             m_ShaderHSPtr;
-        CShaderPtr             m_ShaderPSPtr;
-        CShaderPtr             m_ShaderCSPtr;
         CTargetSetPtr          m_TargetSetPtr;;
         CViewPortSetPtr        m_ViewPortSetPtr;
         CRenderContexts        m_RenderContexts;
@@ -287,12 +280,6 @@ namespace
         , m_ConstantBufferSetPSPtr()
         , m_ConstantBufferSetCSPtr()
         , m_InputLayoutPtr        ()
-        , m_ShaderVSPtr           ()
-        , m_ShaderGSPtr           ()
-        , m_ShaderDSPtr           ()
-        , m_ShaderHSPtr           ()
-        , m_ShaderPSPtr           ()
-        , m_ShaderCSPtr           ()
         , m_TargetSetPtr          ()
         , m_ViewPortSetPtr        ()
         , m_RenderContexts        ()
@@ -909,9 +896,9 @@ namespace
     {
         if (_BufferSetPtr == nullptr) return;
         
-        if (m_ConstantBufferSetVSPtr != _BufferSetPtr && m_ShaderVSPtr != nullptr)
+        if (m_ConstantBufferSetVSPtr != _BufferSetPtr && m_ShaderSlots[CShader::Vertex] != nullptr)
         {
-            CNativeShader* pNativeShaderSet = static_cast<CNativeShader*>(m_ShaderVSPtr.GetPtr());
+            CNativeShader* pNativeShaderSet = static_cast<CNativeShader*>(m_ShaderSlots[CShader::Vertex].GetPtr());
             
             Gfx::CNativeBufferHandle BufferHandle = 0;
 
@@ -981,9 +968,9 @@ namespace
     {
         if (_BufferSetPtr == nullptr) return;
         
-        if (m_ConstantBufferSetHSPtr != _BufferSetPtr && m_ShaderHSPtr != nullptr)
+        if (m_ConstantBufferSetHSPtr != _BufferSetPtr && m_ShaderSlots[CShader::Hull] != nullptr)
         {
-            CNativeShader* pNativeShaderSet = static_cast<CNativeShader*>(m_ShaderHSPtr.GetPtr());
+            CNativeShader* pNativeShaderSet = static_cast<CNativeShader*>(m_ShaderSlots[CShader::Hull].GetPtr());
             
             Gfx::CNativeBufferHandle BufferHandle = 0;
 
@@ -1053,9 +1040,9 @@ namespace
     {
         if (_BufferSetPtr == nullptr) return;
         
-        if (m_ConstantBufferSetDSPtr != _BufferSetPtr && m_ShaderDSPtr != nullptr)
+        if (m_ConstantBufferSetDSPtr != _BufferSetPtr && m_ShaderSlots[CShader::Domain] != nullptr)
         {
-            CNativeShader* pNativeShaderSet = static_cast<CNativeShader*>(m_ShaderDSPtr.GetPtr());
+            CNativeShader* pNativeShaderSet = static_cast<CNativeShader*>(m_ShaderSlots[CShader::Domain].GetPtr());
             
             Gfx::CNativeBufferHandle BufferHandle = 0;
 
@@ -1125,9 +1112,9 @@ namespace
     {
         if (_BufferSetPtr == nullptr) return;
         
-        if (m_ConstantBufferSetGSPtr != _BufferSetPtr && m_ShaderGSPtr != nullptr)
+        if (m_ConstantBufferSetGSPtr != _BufferSetPtr && m_ShaderSlots[CShader::Geometry] != nullptr)
         {
-            CNativeShader* pNativeShaderSet = static_cast<CNativeShader*>(m_ShaderGSPtr.GetPtr());
+            CNativeShader* pNativeShaderSet = static_cast<CNativeShader*>(m_ShaderSlots[CShader::Geometry].GetPtr());
             
             Gfx::CNativeBufferHandle BufferHandle = 0;
 
@@ -1197,9 +1184,9 @@ namespace
     {
         if (_BufferSetPtr == nullptr) return;
         
-        if (m_ConstantBufferSetPSPtr != _BufferSetPtr && m_ShaderPSPtr != nullptr)
+        if (m_ConstantBufferSetPSPtr != _BufferSetPtr && m_ShaderSlots[CShader::Pixel] != nullptr)
         {
-            CNativeShader* pNativeShaderSet = static_cast<CNativeShader*>(m_ShaderPSPtr.GetPtr());
+            CNativeShader* pNativeShaderSet = static_cast<CNativeShader*>(m_ShaderSlots[CShader::Pixel].GetPtr());
             
             Gfx::CNativeBufferHandle BufferHandle = 0;
 
@@ -1271,7 +1258,7 @@ namespace
         
         if (m_ConstantBufferSetCSPtr != _BufferSetPtr)
         {
-            CNativeShader* pNativeShaderSet = static_cast<CNativeShader*>(m_ShaderCSPtr.GetPtr());
+            CNativeShader* pNativeShaderSet = static_cast<CNativeShader*>(m_ShaderSlots[CShader::Compute].GetPtr());
             
             Gfx::CNativeBufferHandle BufferHandle = 0;
 
@@ -1344,9 +1331,9 @@ namespace
     {
         if (_BufferPtr == nullptr) return;
 
-        CNativeShader* pNativeShader  = 0;
+        CNativeShader* pNativeShader = 0;
         CNativeBuffer* pNativeBuffer = 0;
-        unsigned int   Slot           = 0;
+        unsigned int   Slot          = 0;
 
         assert(_Unit < s_NumberOfBufferUnitsPerStage);
 
@@ -1354,15 +1341,19 @@ namespace
 
         if (m_BufferUnits[Slot] == _BufferPtr) return;
 
-        pNativeShader = static_cast<CNativeShader*>(m_ShaderPSPtr.GetPtr());
+        pNativeShader = static_cast<CNativeShader*>(m_ShaderSlots[_Type].GetPtr());
 
         pNativeBuffer = static_cast<CNativeBuffer*>(_BufferPtr.GetPtr());
+
+        assert(pNativeBuffer->GetBinding() == CBuffer::ConstantBuffer);
 
         glUniformBlockBinding(pNativeShader->m_NativeShader, _Unit, Slot);
 
         glBindBuffer(GL_UNIFORM_BUFFER, pNativeBuffer->m_NativeBuffer);
 
         glBindBufferRange(GL_UNIFORM_BUFFER, Slot, pNativeBuffer->m_NativeBuffer, 0, pNativeBuffer->GetNumberOfBytes());
+
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         m_BufferUnits[Slot] = _BufferPtr;
     }
@@ -1378,51 +1369,47 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxContextManager::ResetResourceBuffer(CShader::EType _Type, unsigned int _Unit)
+    void CGfxContextManager::ResetResourceBuffer(unsigned int _Unit)
     {
-        assert(_Unit < s_NumberOfResourceUnitsPerStage);
+        assert(_Unit < s_NumberOfResourceUnits);
         
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-        m_ResourceUnits[_Type * s_NumberOfResourceUnitsPerStage + _Unit] = 0;
+        m_ResourceUnits[_Unit] = 0;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxContextManager::SetResourceBuffer(CShader::EType _Type, unsigned int _Unit, CBufferPtr _BufferPtr)
+    void CGfxContextManager::SetResourceBuffer(unsigned int _Unit, CBufferPtr _BufferPtr)
     {
         if (_BufferPtr == nullptr) return;
 
-        CNativeShader* pNativeShader = 0;
         CNativeBuffer* pNativeBuffer = 0;
-        unsigned int   Slot          = 0;
 
-        assert(_Unit < s_NumberOfResourceUnitsPerStage);
+        assert(_Unit < s_NumberOfResourceUnits);
 
-        Slot = _Type * s_NumberOfResourceUnitsPerStage + _Unit;
-
-        if (m_ResourceUnits[Slot] == _BufferPtr) return;
-
-        pNativeShader = static_cast<CNativeShader*>(m_ShaderPSPtr.GetPtr());
+        if (m_ResourceUnits[_Unit] == _BufferPtr) return;
 
         pNativeBuffer = static_cast<CNativeBuffer*>(_BufferPtr.GetPtr());
 
-        glShaderStorageBlockBinding(pNativeShader->m_NativeShader, _Unit, Slot);
+        assert(pNativeBuffer->GetBinding() == CBuffer::ResourceBuffer);
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, pNativeBuffer->m_NativeBuffer);
 
-        glBindBufferRange(GL_SHADER_STORAGE_BUFFER, Slot, pNativeBuffer->m_NativeBuffer, 0, pNativeBuffer->GetNumberOfBytes());
+        glBindBufferRange(GL_SHADER_STORAGE_BUFFER, _Unit, pNativeBuffer->m_NativeBuffer, 0, pNativeBuffer->GetNumberOfBytes());
 
-        m_ResourceUnits[Slot] = _BufferPtr;
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+        m_ResourceUnits[_Unit] = _BufferPtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    CBufferPtr CGfxContextManager::GetResourceBuffer(CShader::EType _Type, unsigned int _Unit)
+    CBufferPtr CGfxContextManager::GetResourceBuffer(unsigned int _Unit)
     {
-        assert(_Unit < s_NumberOfResourceUnitsPerStage);
+        assert(_Unit < s_NumberOfResourceUnits);
 
-        return m_ResourceUnits[_Type * s_NumberOfResourceUnitsPerStage + _Unit];
+        return m_ResourceUnits[_Unit];
     }
 
     // -----------------------------------------------------------------------------
@@ -1536,7 +1523,7 @@ namespace
     {
         glUseProgramStages(m_NativeShaderPipeline, GL_VERTEX_SHADER_BIT, 0);
         
-        m_ShaderVSPtr = nullptr;
+        m_ShaderSlots[CShader::Vertex] = nullptr;
     }
     
     // -----------------------------------------------------------------------------
@@ -1545,13 +1532,13 @@ namespace
     {
         assert(_ShaderSetPtr != nullptr);
         
-        if (m_ShaderVSPtr != _ShaderSetPtr)
+        if (m_ShaderSlots[CShader::Vertex] != _ShaderSetPtr)
         {
             Gfx::CNativeShader& rShaderSet = *static_cast<Gfx::CNativeShader*>(_ShaderSetPtr.GetPtr());
             
             glUseProgramStages(m_NativeShaderPipeline, GL_VERTEX_SHADER_BIT, rShaderSet.m_NativeShader);
             
-            m_ShaderVSPtr = _ShaderSetPtr;
+            m_ShaderSlots[CShader::Vertex] = _ShaderSetPtr;
         }
     }
     
@@ -1559,7 +1546,7 @@ namespace
     
     CShaderPtr CGfxContextManager::GetShaderVS()
     {
-        return m_ShaderVSPtr;
+        return m_ShaderSlots[CShader::Vertex];
     }
     
     // -----------------------------------------------------------------------------
@@ -1568,7 +1555,7 @@ namespace
     {
         glUseProgramStages(m_NativeShaderPipeline, GL_TESS_CONTROL_SHADER_BIT, 0);
         
-        m_ShaderHSPtr = nullptr;
+        m_ShaderSlots[CShader::Hull] = nullptr;
     }
     
     // -----------------------------------------------------------------------------
@@ -1577,13 +1564,13 @@ namespace
     {
         if (_ShaderSetPtr == nullptr) return;
         
-        if (m_ShaderHSPtr != _ShaderSetPtr)
+        if (m_ShaderSlots[CShader::Hull] != _ShaderSetPtr)
         {
             Gfx::CNativeShader& rShaderSet = *static_cast<Gfx::CNativeShader*>(_ShaderSetPtr.GetPtr());
             
             glUseProgramStages(m_NativeShaderPipeline, GL_TESS_CONTROL_SHADER_BIT, rShaderSet.m_NativeShader);
             
-            m_ShaderHSPtr = _ShaderSetPtr;
+            m_ShaderSlots[CShader::Hull] = _ShaderSetPtr;
         }
     }
     
@@ -1591,7 +1578,7 @@ namespace
     
     CShaderPtr CGfxContextManager::GetShaderHS()
     {
-        return m_ShaderHSPtr;
+        return m_ShaderSlots[CShader::Hull];
     }
     
     // -----------------------------------------------------------------------------
@@ -1600,7 +1587,7 @@ namespace
     {
         glUseProgramStages(m_NativeShaderPipeline, GL_TESS_EVALUATION_SHADER_BIT, 0);
         
-        m_ShaderDSPtr = nullptr;
+        m_ShaderSlots[CShader::Domain] = nullptr;
     }
     
     // -----------------------------------------------------------------------------
@@ -1609,13 +1596,13 @@ namespace
     {
         if (_ShaderSetPtr == nullptr) return;
         
-        if (m_ShaderDSPtr != _ShaderSetPtr)
+        if (m_ShaderSlots[CShader::Domain] != _ShaderSetPtr)
         {
             Gfx::CNativeShader& rShaderSet = *static_cast<Gfx::CNativeShader*>(_ShaderSetPtr.GetPtr());
             
             glUseProgramStages(m_NativeShaderPipeline, GL_TESS_EVALUATION_SHADER_BIT, rShaderSet.m_NativeShader);
             
-            m_ShaderDSPtr = _ShaderSetPtr;
+            m_ShaderSlots[CShader::Domain] = _ShaderSetPtr;
         }
     }
     
@@ -1623,7 +1610,7 @@ namespace
     
     CShaderPtr CGfxContextManager::GetShaderDS()
     {
-        return m_ShaderDSPtr;
+        return m_ShaderSlots[CShader::Domain];
     }
     
     // -----------------------------------------------------------------------------
@@ -1632,7 +1619,7 @@ namespace
     {
         glUseProgramStages(m_NativeShaderPipeline, GL_GEOMETRY_SHADER_BIT, 0);
         
-        m_ShaderGSPtr = nullptr;
+        m_ShaderSlots[CShader::Geometry] = nullptr;
     }
     
     // -----------------------------------------------------------------------------
@@ -1641,13 +1628,13 @@ namespace
     {
         if (_ShaderSetPtr == nullptr) return;
         
-        if (m_ShaderGSPtr != _ShaderSetPtr)
+        if (m_ShaderSlots[CShader::Geometry] != _ShaderSetPtr)
         {
             Gfx::CNativeShader& rShaderSet = *static_cast<Gfx::CNativeShader*>(_ShaderSetPtr.GetPtr());
             
             glUseProgramStages(m_NativeShaderPipeline, GL_GEOMETRY_SHADER_BIT, rShaderSet.m_NativeShader);
 
-            m_ShaderGSPtr = _ShaderSetPtr;
+            m_ShaderSlots[CShader::Geometry] = _ShaderSetPtr;
         }
     }
     
@@ -1655,7 +1642,7 @@ namespace
     
     CShaderPtr CGfxContextManager::GetShaderGS()
     {
-        return m_ShaderGSPtr;
+        return m_ShaderSlots[CShader::Geometry];
     }
     
     // -----------------------------------------------------------------------------
@@ -1664,7 +1651,7 @@ namespace
     {
         glUseProgramStages(m_NativeShaderPipeline, GL_FRAGMENT_SHADER_BIT, 0);
         
-        m_ShaderPSPtr = nullptr;
+        m_ShaderSlots[CShader::Pixel] = nullptr;
     }
     
     // -----------------------------------------------------------------------------
@@ -1673,13 +1660,13 @@ namespace
     {
         assert(_ShaderSetPtr != nullptr);
         
-        if (m_ShaderPSPtr != _ShaderSetPtr)
+        if (m_ShaderSlots[CShader::Pixel] != _ShaderSetPtr)
         {
             Gfx::CNativeShader& rShaderSet = *static_cast<Gfx::CNativeShader*>(_ShaderSetPtr.GetPtr());
             
             glUseProgramStages(m_NativeShaderPipeline, GL_FRAGMENT_SHADER_BIT, rShaderSet.m_NativeShader);
 
-            m_ShaderPSPtr = _ShaderSetPtr;
+            m_ShaderSlots[CShader::Pixel] = _ShaderSetPtr;
         }
     }
     
@@ -1687,7 +1674,7 @@ namespace
     
     CShaderPtr CGfxContextManager::GetShaderPS()
     {
-        return m_ShaderPSPtr;
+        return m_ShaderSlots[CShader::Pixel];
     }
     
     // -----------------------------------------------------------------------------
@@ -1696,7 +1683,7 @@ namespace
     {
         glUseProgramStages(m_NativeShaderPipeline, GL_COMPUTE_SHADER_BIT, 0);
         
-        m_ShaderCSPtr = nullptr;
+        m_ShaderSlots[CShader::Compute] = nullptr;
     }
     
     // -----------------------------------------------------------------------------
@@ -1705,13 +1692,13 @@ namespace
     {
         assert(_ShaderSetPtr != nullptr);
         
-        if (m_ShaderCSPtr != _ShaderSetPtr)
+        if (m_ShaderSlots[CShader::Compute] != _ShaderSetPtr)
         {
             Gfx::CNativeShader& rShaderSet = *static_cast<Gfx::CNativeShader*>(_ShaderSetPtr.GetPtr());
             
             glUseProgramStages(m_NativeShaderPipeline, GL_COMPUTE_SHADER_BIT, rShaderSet.m_NativeShader);
 
-            m_ShaderCSPtr = _ShaderSetPtr;
+            m_ShaderSlots[CShader::Compute] = _ShaderSetPtr;
         }
     }
     
@@ -1719,7 +1706,7 @@ namespace
     
     CShaderPtr CGfxContextManager::GetShaderCS()
     {
-        return m_ShaderCSPtr;
+        return m_ShaderSlots[CShader::Compute];
     }
 
     // -----------------------------------------------------------------------------
@@ -2524,128 +2511,23 @@ namespace ContextManager
 
     // -----------------------------------------------------------------------------
 
-    void ResetResourceBufferVS(unsigned int _Unit)
+    void ResetResourceBuffer(unsigned int _Unit)
     {
-        CGfxContextManager::GetInstance().ResetResourceBuffer(CShader::Vertex, _Unit);
+        CGfxContextManager::GetInstance().ResetResourceBuffer(_Unit);
     }
 
     // -----------------------------------------------------------------------------
 
-    void SetResourceBufferVS(unsigned int _Unit, CBufferPtr _BufferPtr)
+    void SetResourceBuffer(unsigned int _Unit, CBufferPtr _BufferPtr)
     {
-        CGfxContextManager::GetInstance().SetResourceBuffer(CShader::Vertex, _Unit, _BufferPtr);
+        CGfxContextManager::GetInstance().SetResourceBuffer(_Unit, _BufferPtr);
     }
 
     // -----------------------------------------------------------------------------
 
-    CBufferPtr GetResourceBufferVS(unsigned int _Unit)
+    CBufferPtr GetResourceBuffer(unsigned int _Unit)
     {
-        return CGfxContextManager::GetInstance().GetResourceBuffer(CShader::Vertex, _Unit);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void ResetResourceBufferHS(unsigned int _Unit)
-    {
-        CGfxContextManager::GetInstance().ResetResourceBuffer(CShader::Hull, _Unit);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SetResourceBufferHS(unsigned int _Unit, CBufferPtr _BufferPtr)
-    {
-        CGfxContextManager::GetInstance().SetResourceBuffer(CShader::Hull, _Unit, _BufferPtr);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CBufferPtr GetResourceBufferHS(unsigned int _Unit)
-    {
-        return CGfxContextManager::GetInstance().GetResourceBuffer(CShader::Hull, _Unit);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void ResetResourceBufferDS(unsigned int _Unit)
-    {
-        CGfxContextManager::GetInstance().ResetResourceBuffer(CShader::Domain, _Unit);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SetResourceBufferDS(unsigned int _Unit, CBufferPtr _BufferPtr)
-    {
-        CGfxContextManager::GetInstance().SetResourceBuffer(CShader::Domain, _Unit, _BufferPtr);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CBufferPtr GetResourceBufferDS(unsigned int _Unit)
-    {
-        return CGfxContextManager::GetInstance().GetResourceBuffer(CShader::Domain, _Unit);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void ResetResourceBufferGS(unsigned int _Unit)
-    {
-        CGfxContextManager::GetInstance().ResetResourceBuffer(CShader::Geometry, _Unit);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SetResourceBufferGS(unsigned int _Unit, CBufferPtr _BufferPtr)
-    {
-        CGfxContextManager::GetInstance().SetResourceBuffer(CShader::Geometry, _Unit, _BufferPtr);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CBufferPtr GetResourceBufferGS(unsigned int _Unit)
-    {
-        return CGfxContextManager::GetInstance().GetResourceBuffer(CShader::Geometry, _Unit);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void ResetResourceBufferPS(unsigned int _Unit)
-    {
-        CGfxContextManager::GetInstance().ResetResourceBuffer(CShader::Pixel, _Unit);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SetResourceBufferPS(unsigned int _Unit, CBufferPtr _BufferPtr)
-    {
-        CGfxContextManager::GetInstance().SetResourceBuffer(CShader::Pixel, _Unit, _BufferPtr);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CBufferPtr GetResourceBufferPS(unsigned int _Unit)
-    {
-        return CGfxContextManager::GetInstance().GetResourceBuffer(CShader::Pixel, _Unit);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void ResetResourceBufferCS(unsigned int _Unit)
-    {
-        CGfxContextManager::GetInstance().ResetResourceBuffer(CShader::Compute, _Unit);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SetResourceBufferCS(unsigned int _Unit, CBufferPtr _BufferPtr)
-    {
-        CGfxContextManager::GetInstance().SetResourceBuffer(CShader::Compute, _Unit, _BufferPtr);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CBufferPtr GetResourceBufferCS(unsigned int _Unit)
-    {
-        return CGfxContextManager::GetInstance().GetResourceBuffer(CShader::Compute, _Unit);
+        return CGfxContextManager::GetInstance().GetResourceBuffer(_Unit);
     }
 
     // -----------------------------------------------------------------------------

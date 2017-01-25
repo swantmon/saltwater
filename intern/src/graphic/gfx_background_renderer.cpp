@@ -336,18 +336,14 @@ namespace
         ConstanteBufferDesc.m_pClassKey     = 0;
         
         CBufferPtr SkytexturePSBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
-        
-        // -----------------------------------------------------------------------------
-        
-        CBufferPtr HistogramExposureHistoryBufferPtr = HistogramRenderer::GetExposureHistoryBuffer();
-        
+       
         // -----------------------------------------------------------------------------
         
         CBufferSetPtr SkytextureVSBufferSetPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
-        CBufferSetPtr SkytexturePSBufferSetPtr = BufferManager::CreateBufferSet(SkytexturePSBuffer, HistogramExposureHistoryBufferPtr);
+        CBufferSetPtr SkytexturePSBufferSetPtr = BufferManager::CreateBufferSet(SkytexturePSBuffer);
 
         CBufferSetPtr SkyboxVSBufferSetPtr = BufferManager::CreateBufferSet(SkyboxVSBuffer);
-        CBufferSetPtr SkyboxPSBufferSetPtr = BufferManager::CreateBufferSet(SkyboxPSBuffer, HistogramExposureHistoryBufferPtr);
+        CBufferSetPtr SkyboxPSBufferSetPtr = BufferManager::CreateBufferSet(SkyboxPSBuffer);
 
         CBufferSetPtr SkyboxFromTextureVSBufferSetPtr = BufferManager::CreateBufferSet(SkyboxFromTextureVSBufferPtr);
 
@@ -549,7 +545,9 @@ namespace
         
         ContextManager::SetConstantBufferSetVS(VSBufferSetPtr);
         
-        ContextManager::SetConstantBufferSetPS(PSBufferSetPtr);
+        ContextManager::SetConstantBufferPS(0, PSBufferSetPtr->GetBuffer(0));
+
+        ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
@@ -565,7 +563,9 @@ namespace
         ContextManager::ResetSampler(0);
         ContextManager::ResetSampler(1);
         
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetConstantBufferPS(0);
+
+        ContextManager::ResetResourceBuffer(0);
         
         ContextManager::ResetConstantBufferSetVS();
         
@@ -688,7 +688,9 @@ namespace
 
         ContextManager::SetConstantBufferSetVS(VSBufferSetPtr);
 
-        ContextManager::SetConstantBufferSetPS(PSBufferSetPtr);
+        ContextManager::SetConstantBufferPS(0, PSBufferSetPtr->GetBuffer(0));
+
+        ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
@@ -704,7 +706,9 @@ namespace
         ContextManager::ResetSampler(0);
         ContextManager::ResetSampler(1);
 
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetConstantBufferPS(0);
+
+        ContextManager::ResetResourceBuffer(0);
 
         ContextManager::ResetConstantBufferSetVS();
 
