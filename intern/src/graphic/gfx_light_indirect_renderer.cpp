@@ -311,9 +311,11 @@ namespace
 
         ContextManager::SetShaderPS(m_IndirectLightShaderPSPtr);
 
-        ContextManager::SetConstantBufferSetVS(m_FullQuadViewVSBufferPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
 
-        ContextManager::SetConstantBufferSetPS(m_IndirectLightPSBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_IndirectLightPSBufferPtr->GetBuffer(1));
+
+        ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
@@ -381,9 +383,11 @@ namespace
             Gfx::ContextManager::ResetTexture(7);
         }
 
-        ContextManager::ResetConstantBufferSetVS(); 
+        ContextManager::ResetConstantBuffer(0); 
 
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetConstantBuffer(1);
+
+        ContextManager::ResetResourceBuffer(0);
 
         Gfx::ContextManager::ResetSampler(0);
         Gfx::ContextManager::ResetSampler(1);
