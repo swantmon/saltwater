@@ -674,7 +674,13 @@ namespace
         
         ContextManager::SetConstantBufferSetVS(m_QuadVSBufferSetPtr);
         
-        ContextManager::SetTextureSetPS(m_ImageLightTextureSetPtr);
+        ContextManager::SetTexture(0, m_ImageLightTextureSetPtr->GetTexture(0));
+        ContextManager::SetTexture(1, m_ImageLightTextureSetPtr->GetTexture(1));
+        ContextManager::SetTexture(2, m_ImageLightTextureSetPtr->GetTexture(2));
+        ContextManager::SetTexture(3, m_ImageLightTextureSetPtr->GetTexture(3));
+        ContextManager::SetTexture(4, m_ImageLightTextureSetPtr->GetTexture(4));
+        ContextManager::SetTexture(5, pGraphicProbeFacet->GetFilteredSetPtr()->GetTexture(0));
+        ContextManager::SetTexture(6, pGraphicProbeFacet->GetFilteredSetPtr()->GetTexture(1));
                     
         // -----------------------------------------------------------------------------
         // IBL data
@@ -687,11 +693,6 @@ namespace
         BufferManager::UploadConstantBufferData(m_ImageLightPSBufferSetPtr->GetBuffer(1), &IBLSettings);
             
         // -----------------------------------------------------------------------------
-        // IBL textures
-        // -----------------------------------------------------------------------------            
-        ContextManager::SetTextureSetPS(pGraphicProbeFacet->GetFilteredSetPtr());
-            
-        // -----------------------------------------------------------------------------
         // Draw
         // -----------------------------------------------------------------------------
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
@@ -699,7 +700,13 @@ namespace
         // -----------------------------------------------------------------------------
         // Reset
         // -----------------------------------------------------------------------------
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+        ContextManager::ResetTexture(1);
+        ContextManager::ResetTexture(2);
+        ContextManager::ResetTexture(3);
+        ContextManager::ResetTexture(4);
+        ContextManager::ResetTexture(5);
+        ContextManager::ResetTexture(6);
         
         ContextManager::ResetInputLayout();
         

@@ -12,6 +12,7 @@
 #include "graphic/gfx_sampler_set.h"
 #include "graphic/gfx_shader.h"
 #include "graphic/gfx_target_set.h"
+#include "graphic/gfx_texture_base.h"
 #include "graphic/gfx_texture_set.h"
 #include "graphic/gfx_topology.h"
 #include "graphic/gfx_view_port_set.h"
@@ -136,6 +137,10 @@ namespace ContextManager
     void ResetTextureSetCS();
     void SetTextureSetCS(CTextureSetPtr _TextureSetPtr);
     CTextureSetPtr GetTextureSetCS();
+
+    void ResetTexture(unsigned int _Unit);
+    void SetTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr);
+    CTextureBasePtr GetTexture(unsigned int _Unit);
 
     void ResetTargetSet();
     void SetTargetSet(CTargetSetPtr _TargetSetPtr);

@@ -162,6 +162,10 @@ namespace
         void SetTextureSetCS(CTextureSetPtr _TextureSetPtr);
         CTextureSetPtr GetTextureSetCS();
 
+        void ResetTexture(unsigned int _Unit);
+        void SetTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr);
+        CTextureBasePtr GetTexture(unsigned int _Unit);
+
         void ResetTargetSet();
         void SetTargetSet(CTargetSetPtr _TargetSetPtr);
         CTargetSetPtr GetTargetSet();
@@ -184,6 +188,8 @@ namespace
     
     private:
     
+        static const unsigned int s_NumberOfTextureUnits = 16;
+
         static const GLenum s_NativeTopologies[];
         
     private:
@@ -251,6 +257,9 @@ namespace
         
         unsigned int           m_IndexOfTextureBinding;
         unsigned int           m_IndexOfBufferLocation;
+
+        CShaderPtr      m_ShaderSlots[CShader::NumberOfTypes];
+        CTextureBasePtr m_TextureUnits[s_NumberOfTextureUnits];
 
     private:
 
@@ -328,11 +337,23 @@ namespace
         , m_IndexOfBufferLocation (0)
     {
         unsigned int IndexOfVertexBuffer;
+        unsigned int IndexOfTextureUnit;
+        unsigned int IndexOfShaderSlot;
 
         for (IndexOfVertexBuffer = 0; IndexOfVertexBuffer < CBufferSet::s_MaxNumberOfBuffers; ++ IndexOfVertexBuffer)
         {
             m_VertexBufferStrides[IndexOfVertexBuffer] = 0;
             m_VertexBufferOffsets[IndexOfVertexBuffer] = 0;
+        }
+
+        for (IndexOfTextureUnit = 0; IndexOfTextureUnit < s_NumberOfTextureUnits; ++ IndexOfTextureUnit)
+        {
+            m_TextureUnits[IndexOfTextureUnit] = 0;
+        }
+
+        for (IndexOfShaderSlot = 0; IndexOfShaderSlot < CShader::NumberOfTypes; ++IndexOfShaderSlot)
+        {
+            m_ShaderSlots[IndexOfShaderSlot] = 0;
         }
     }
 
@@ -346,6 +367,8 @@ namespace
 
     void CGfxContextManager::OnStart()
     {
+        assert(s_NumberOfTextureUnits < GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+
         // -----------------------------------------------------------------------------
         // Setup program pipeline for shader
         // -----------------------------------------------------------------------------
@@ -2074,6 +2097,57 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxContextManager::ResetTexture(unsigned int _Unit)
+    {
+        assert(_Unit < s_NumberOfTextureUnits);
+
+        m_TextureUnits[_Unit] = 0;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxContextManager::SetTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr)
+    {
+        if (_TextureBasePtr == nullptr) return;
+
+        Gfx::CNativeTextureHandle TextureHandle    = 0;
+        GLuint                    TextureBinding   = 0;
+        CNativeShader*            pNativeShaderSet = 0;
+        CNativeTexture2D*         pNativeTexture   = 0;
+
+        assert(_Unit < s_NumberOfTextureUnits);
+
+        if (m_TextureUnits[_Unit] == _TextureBasePtr) return;
+
+        pNativeShaderSet = static_cast<CNativeShader*>(m_ShaderVSPtr.GetPtr());
+
+        pNativeTexture = static_cast<CNativeTexture2D*>(_TextureBasePtr.GetPtr());
+
+        TextureHandle = pNativeTexture->m_NativeTexture;
+
+        TextureBinding = pNativeTexture->m_NativeDimension;
+
+        if (pNativeTexture->IsCube())
+        {
+            TextureBinding = GL_TEXTURE_CUBE_MAP;
+        }
+
+        glBindTextureUnit(_Unit, TextureHandle);
+
+        m_TextureUnits[_Unit] = _TextureBasePtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTextureBasePtr CGfxContextManager::GetTexture(unsigned int _Unit)
+    {
+        assert(_Unit < s_NumberOfTextureUnits);
+
+        return m_TextureUnits[_Unit];
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxContextManager::ResetTargetSet()
     {
         m_TargetSetPtr = nullptr;
@@ -3031,6 +3105,27 @@ namespace ContextManager
 
     // -----------------------------------------------------------------------------
 
+    void ResetTexture(unsigned int _Unit)
+    {
+        CGfxContextManager::GetInstance().ResetTexture(_Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SetTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr)
+    {
+        CGfxContextManager::GetInstance().SetTexture(_Unit, _TextureBasePtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTextureBasePtr GetTexture(unsigned int _Unit)
+    {
+        return CGfxContextManager::GetInstance().GetTexture(_Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void ResetTargetSet()
     {
         CGfxContextManager::GetInstance().ResetTargetSet();
@@ -3054,14 +3149,14 @@ namespace ContextManager
 
     void ResetViewPortSet()
     {
-        return CGfxContextManager::GetInstance().ResetViewPortSet();
+        CGfxContextManager::GetInstance().ResetViewPortSet();
     }
 
     // -----------------------------------------------------------------------------
 
     void SetViewPortSet(CViewPortSetPtr _ViewPortSetPtr)
     {
-        return CGfxContextManager::GetInstance().SetViewPortSet(_ViewPortSetPtr);
+        CGfxContextManager::GetInstance().SetViewPortSet(_ViewPortSetPtr);
     }
 
     // -----------------------------------------------------------------------------
