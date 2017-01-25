@@ -668,9 +668,9 @@ namespace
 
         ContextManager::SetShaderPS(m_LiquidShaderPSPtrs[Depth]);
 
-        ContextManager::SetConstantBufferSetVS(m_LiquidVSBufferPtr);
-
-        ContextManager::SetConstantBufferSetPS(m_LiquidPSBufferPtr);
+        ContextManager::SetConstantBuffer(0, m_LiquidVSBufferPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(1, m_LiquidVSBufferPtr->GetBuffer(1));
+        ContextManager::SetConstantBuffer(2, m_LiquidPSBufferPtr->GetBuffer(0));
 
         SLiquidSettings LiquidBuffer;
 
@@ -715,9 +715,9 @@ namespace
             NumberOfParticles = 0;
         }
 
-        ContextManager::ResetConstantBufferSetPS();
-
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
+        ContextManager::ResetConstantBuffer(2);
 
         ContextManager::ResetTopology();
 
@@ -751,7 +751,8 @@ namespace
 
         ContextManager::SetShaderPS(m_LiquidShaderPSPtrs[Thickness]);
 
-        ContextManager::SetConstantBufferSetVS(m_LiquidVSBufferPtr);
+        ContextManager::SetConstantBuffer(0, m_LiquidVSBufferPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(1, m_LiquidVSBufferPtr->GetBuffer(1));
 
         pInstances = BufferManager::MapVertexBuffer(m_ParticleInstanceBufferSetPtr->GetBuffer(1), CBuffer::Write);
 
@@ -786,7 +787,8 @@ namespace
             NumberOfParticles = 0;
         }
 
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetTopology();
 
@@ -821,9 +823,8 @@ namespace
 
         ContextManager::SetShaderPS(m_LiquidShaderPSPtrs[BilateralBlur]);
 
-        ContextManager::SetConstantBufferSetVS(m_QuadVSBufferPtr);
-
-        ContextManager::SetConstantBufferSetPS(m_BilateralPSBufferPtr);
+        ContextManager::SetConstantBuffer(0, m_QuadVSBufferPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(1, m_BilateralPSBufferPtr->GetBuffer(0));
 
         BilateralSettings.m_Direction[0] = 1.0f * 1.0f / static_cast<float>(1280.0f);
         BilateralSettings.m_Direction[1] = 0.0f * 1.0f / static_cast<float>(800.0f);
@@ -840,9 +841,8 @@ namespace
 
         ContextManager::ResetTexture(0);
 
-        ContextManager::ResetConstantBufferSetPS();
-
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetTopology();
 
@@ -874,9 +874,8 @@ namespace
 
         ContextManager::SetShaderPS(m_LiquidShaderPSPtrs[BilateralBlur]);
 
-        ContextManager::SetConstantBufferSetVS(m_QuadVSBufferPtr);
-
-        ContextManager::SetConstantBufferSetPS(m_BilateralPSBufferPtr);
+        ContextManager::SetConstantBuffer(0, m_QuadVSBufferPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(1, m_BilateralPSBufferPtr->GetBuffer(0));
 
         BilateralSettings.m_Direction[0] = 0.0f * 1.0f / static_cast<float>(1280.0f);
         BilateralSettings.m_Direction[1] = 1.0f * 1.0f / static_cast<float>(800.0f);
@@ -893,9 +892,8 @@ namespace
 
         ContextManager::ResetSampler(0);
 
-        ContextManager::ResetConstantBufferSetPS();
-
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetTopology();
 
@@ -938,9 +936,8 @@ namespace
 
         ContextManager::SetShaderPS(m_LiquidShaderPSPtrs[GaussianBlur]);
 
-        ContextManager::SetConstantBufferSetVS(m_QuadVSBufferPtr);
-
-        ContextManager::SetConstantBufferSetPS(m_GaussianPSBufferPtr);
+        ContextManager::SetConstantBuffer(0, m_QuadVSBufferPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(1, m_GaussianPSBufferPtr->GetBuffer(0));
 
         GaussianSettings.m_Direction[0] = 1.0f * 1.0f / static_cast<float>(1280);
         GaussianSettings.m_Direction[1] = 0.0f * 1.0f / static_cast<float>(800);
@@ -957,9 +954,8 @@ namespace
 
         ContextManager::ResetSampler(0);
 
-        ContextManager::ResetConstantBufferSetPS();
-
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetTopology();
 
@@ -991,9 +987,8 @@ namespace
 
         ContextManager::SetShaderPS(m_LiquidShaderPSPtrs[GaussianBlur]);
 
-        ContextManager::SetConstantBufferSetVS(m_QuadVSBufferPtr);
-
-        ContextManager::SetConstantBufferSetPS(m_GaussianPSBufferPtr);
+        ContextManager::SetConstantBuffer(0, m_QuadVSBufferPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(1, m_GaussianPSBufferPtr->GetBuffer(0));
 
         GaussianSettings.m_Direction[0] = 0.0f * 1.0f / static_cast<float>(1280);
         GaussianSettings.m_Direction[1] = 1.0f * 1.0f / static_cast<float>(800);
@@ -1010,9 +1005,8 @@ namespace
 
         ContextManager::ResetSampler(0);
 
-        ContextManager::ResetConstantBufferSetPS();
-
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetTopology();
 
@@ -1056,9 +1050,8 @@ namespace
 
         ContextManager::SetShaderPS(m_LiquidShaderPSPtrs[Shading]);
 
-        ContextManager::SetConstantBufferSetVS(m_QuadVSBufferPtr);
-
-        ContextManager::SetConstantBufferSetPS(m_ShadingPSBufferPtr);
+        ContextManager::SetConstantBuffer(0, m_QuadVSBufferPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(1, m_ShadingPSBufferPtr->GetBuffer(0));
 
         ContextManager::SetTexture(0, m_TextureSetPtrs[3]->GetTexture(0));
         ContextManager::SetTexture(1, m_TextureSetPtrs[3]->GetTexture(1));
@@ -1078,9 +1071,8 @@ namespace
         ContextManager::ResetTexture(1);
         ContextManager::ResetTexture(2);
 
-        ContextManager::ResetConstantBufferSetPS();
-
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetTopology();
 
