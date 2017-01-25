@@ -393,7 +393,7 @@ namespace
 
             CBufferPtr SelectionOuputBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
-            m_SelectionBufferSetPtrs[IndexOfBuffer] = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferCS(), SelectionRequestBufferPtr, SelectionOuputBufferPtr);;
+            m_SelectionBufferSetPtrs[IndexOfBuffer] = BufferManager::CreateBufferSet(SelectionRequestBufferPtr, SelectionOuputBufferPtr);;
         }
     }
     
@@ -596,7 +596,7 @@ namespace
         IndexOfLastRequest = (rTicket.m_IndexOfPopRequest > 0) ? rTicket.m_IndexOfPopRequest - 1 : CInternSelectionTicket::s_MaxNumberOfRequests - 1;
         IndexOfBuffer      = rTicket.m_IndexOfTicket * s_MaxNumberOfTickets + IndexOfLastRequest;
 
-        SSelectionOutput* pOutput = static_cast<SSelectionOutput*>(BufferManager::MapConstantBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(2), CBuffer::Read));
+        SSelectionOutput* pOutput = static_cast<SSelectionOutput*>(BufferManager::MapConstantBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1), CBuffer::Read));
 
         rTicket.m_WSPosition = Base::Float3(pOutput->m_WSPosition[0], pOutput->m_WSPosition[1], pOutput->m_WSPosition[2]);
         rTicket.m_WSNormal   = Base::Float3(pOutput->m_WSNormal[0], pOutput->m_WSNormal[1], pOutput->m_WSNormal[2]);
@@ -611,7 +611,7 @@ namespace
             rTicket.m_pObject = &Dt::EntityManager::GetEntityByID(pOutput->m_EntityID);
         }
 
-        BufferManager::UnmapConstantBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(2));
+        BufferManager::UnmapConstantBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1));
 
         return true;
     }
@@ -807,21 +807,24 @@ namespace
                 Settings.m_MaxX = MaxX;
                 Settings.m_MaxY = MaxY;
 
-                BufferManager::UploadConstantBufferData(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1), &Settings);
+                BufferManager::UploadConstantBufferData(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(0), &Settings);
 
                 // -----------------------------------------------------------------------------
                 // Execute
                 // -----------------------------------------------------------------------------
                 ContextManager::SetShaderCS(m_SelectionCSPtr);
 
-                ContextManager::SetConstantBuffer(0, m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(0));
-                ContextManager::SetConstantBuffer(1, m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1));
+                ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+
+                ContextManager::SetResourceBuffer(0, m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(0));
+                ContextManager::SetResourceBuffer(1, m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1));
+
+                ContextManager::SetTexture(0, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
 
                 ContextManager::SetImageTexture(0, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0));
                 ContextManager::SetImageTexture(1, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1));
                 ContextManager::SetImageTexture(2, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2));
-                ContextManager::SetImageTexture(3, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
-                ContextManager::SetImageTexture(4, TargetSetManager::GetHitProxyTargetSet()->GetRenderTarget(0));
+                ContextManager::SetImageTexture(3, TargetSetManager::GetHitProxyTargetSet()->GetRenderTarget(0));
 
                 ContextManager::Dispatch(rTicket.m_SizeX, rTicket.m_SizeY, 1);
 
@@ -829,10 +832,13 @@ namespace
                 ContextManager::ResetImageTexture(1);
                 ContextManager::ResetImageTexture(2);
                 ContextManager::ResetImageTexture(3);
-                ContextManager::ResetImageTexture(4);
+
+                ContextManager::ResetTexture(0);
+
+                ContextManager::ResetResourceBuffer(0);
+                ContextManager::ResetResourceBuffer(1);
 
                 ContextManager::ResetConstantBuffer(0);
-                ContextManager::ResetConstantBuffer(1);
 
                 ContextManager::ResetShaderCS();
 
