@@ -747,7 +747,9 @@ namespace
                 // -----------------------------------------------------------------------------
                 ContextManager::SetShaderVS(m_ShadowShaderVSPtr);
 
-                ContextManager::SetConstantBufferSetVS(m_LightCameraVSBufferPtr);
+                ContextManager::SetConstantBuffer(0, m_LightCameraVSBufferPtr->GetBuffer(0));
+
+                ContextManager::SetConstantBuffer(1, m_LightCameraVSBufferPtr->GetBuffer(1));
 
                 if (_rInternLight.m_CurrentShadowType == Dt::CPointLightFacet::GlobalIllumination)
                 {
@@ -784,7 +786,9 @@ namespace
 
                     BufferManager::UploadConstantBufferData(m_RSMPSBuffer->GetBuffer(1), &PunctualLightProperties);
 
-                    ContextManager::SetConstantBufferSetPS(m_RSMPSBuffer);
+                    ContextManager::SetConstantBuffer(2, m_RSMPSBuffer->GetBuffer(0));
+
+                    ContextManager::SetConstantBuffer(3, m_RSMPSBuffer->GetBuffer(1));
                 }
                 else
                 {
@@ -826,7 +830,13 @@ namespace
             CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor);
         }
             
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
+
+        ContextManager::ResetConstantBuffer(1);
+
+        ContextManager::ResetConstantBuffer(2);
+
+        ContextManager::ResetConstantBuffer(3);
 
         ContextManager::ResetShaderVS();
             
