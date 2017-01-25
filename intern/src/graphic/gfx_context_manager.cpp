@@ -2398,6 +2398,258 @@ namespace ContextManager
 
     // -----------------------------------------------------------------------------
 
+    void ResetConstantBufferVS(unsigned int _Unit)
+    {
+        CGfxContextManager::GetInstance().ResetConstantBuffer(CShader::Vertex, _Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SetConstantBufferVS(unsigned int _Unit, CBufferPtr _BufferPtr)
+    {
+        CGfxContextManager::GetInstance().SetConstantBuffer(CShader::Vertex, _Unit, _BufferPtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CBufferPtr GetConstantBufferVS(unsigned int _Unit)
+    {
+       return CGfxContextManager::GetInstance().GetConstantBuffer(CShader::Vertex, _Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ResetConstantBufferHS(unsigned int _Unit)
+    {
+        CGfxContextManager::GetInstance().ResetConstantBuffer(CShader::Hull, _Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SetConstantBufferHS(unsigned int _Unit, CBufferPtr _BufferPtr)
+    {
+        CGfxContextManager::GetInstance().SetConstantBuffer(CShader::Hull, _Unit, _BufferPtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CBufferPtr GetConstantBufferHS(unsigned int _Unit)
+    {
+        return CGfxContextManager::GetInstance().GetConstantBuffer(CShader::Hull, _Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ResetConstantBufferDS(unsigned int _Unit)
+    {
+        CGfxContextManager::GetInstance().ResetConstantBuffer(CShader::Domain, _Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SetConstantBufferDS(unsigned int _Unit, CBufferPtr _BufferPtr)
+    {
+        CGfxContextManager::GetInstance().SetConstantBuffer(CShader::Domain, _Unit, _BufferPtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CBufferPtr GetConstantBufferDS(unsigned int _Unit)
+    {
+        return CGfxContextManager::GetInstance().GetConstantBuffer(CShader::Domain, _Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ResetConstantBufferGS(unsigned int _Unit)
+    {
+        CGfxContextManager::GetInstance().ResetConstantBuffer(CShader::Geometry, _Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SetConstantBufferGS(unsigned int _Unit, CBufferPtr _BufferPtr)
+    {
+        CGfxContextManager::GetInstance().SetConstantBuffer(CShader::Geometry, _Unit, _BufferPtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CBufferPtr GetConstantBufferGS(unsigned int _Unit)
+    {
+        return CGfxContextManager::GetInstance().GetConstantBuffer(CShader::Geometry, _Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ResetConstantBufferPS(unsigned int _Unit)
+    {
+        CGfxContextManager::GetInstance().ResetConstantBuffer(CShader::Pixel, _Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SetConstantBufferPS(unsigned int _Unit, CBufferPtr _BufferPtr)
+    {
+        CGfxContextManager::GetInstance().SetConstantBuffer(CShader::Pixel, _Unit, _BufferPtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CBufferPtr GetConstantBufferPS(unsigned int _Unit)
+    {
+        return CGfxContextManager::GetInstance().GetConstantBuffer(CShader::Pixel, _Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ResetConstantBufferCS(unsigned int _Unit)
+    {
+        CGfxContextManager::GetInstance().ResetConstantBuffer(CShader::Compute, _Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SetConstantBufferCS(unsigned int _Unit, CBufferPtr _BufferPtr)
+    {
+        CGfxContextManager::GetInstance().SetConstantBuffer(CShader::Compute, _Unit, _BufferPtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CBufferPtr GetConstantBufferCS(unsigned int _Unit)
+    {
+        return CGfxContextManager::GetInstance().GetConstantBuffer(CShader::Compute, _Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ResetResourceBufferVS(unsigned int _Unit)
+    {
+        CGfxContextManager::GetInstance().ResetResourceBuffer(CShader::Vertex, _Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SetResourceBufferVS(unsigned int _Unit, CBufferPtr _BufferPtr)
+    {
+        CGfxContextManager::GetInstance().SetResourceBuffer(CShader::Vertex, _Unit, _BufferPtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CBufferPtr GetResourceBufferVS(unsigned int _Unit)
+    {
+        return CGfxContextManager::GetInstance().GetResourceBuffer(CShader::Vertex, _Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ResetResourceBufferHS(unsigned int _Unit)
+    {
+        CGfxContextManager::GetInstance().ResetResourceBuffer(CShader::Hull, _Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SetResourceBufferHS(unsigned int _Unit, CBufferPtr _BufferPtr)
+    {
+        CGfxContextManager::GetInstance().SetResourceBuffer(CShader::Hull, _Unit, _BufferPtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CBufferPtr GetResourceBufferHS(unsigned int _Unit)
+    {
+        return CGfxContextManager::GetInstance().GetResourceBuffer(CShader::Hull, _Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ResetResourceBufferDS(unsigned int _Unit)
+    {
+        CGfxContextManager::GetInstance().ResetResourceBuffer(CShader::Domain, _Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SetResourceBufferDS(unsigned int _Unit, CBufferPtr _BufferPtr)
+    {
+        CGfxContextManager::GetInstance().SetResourceBuffer(CShader::Domain, _Unit, _BufferPtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CBufferPtr GetResourceBufferDS(unsigned int _Unit)
+    {
+        return CGfxContextManager::GetInstance().GetResourceBuffer(CShader::Domain, _Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ResetResourceBufferGS(unsigned int _Unit)
+    {
+        CGfxContextManager::GetInstance().ResetResourceBuffer(CShader::Geometry, _Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SetResourceBufferGS(unsigned int _Unit, CBufferPtr _BufferPtr)
+    {
+        CGfxContextManager::GetInstance().SetResourceBuffer(CShader::Geometry, _Unit, _BufferPtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CBufferPtr GetResourceBufferGS(unsigned int _Unit)
+    {
+        return CGfxContextManager::GetInstance().GetResourceBuffer(CShader::Geometry, _Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ResetResourceBufferPS(unsigned int _Unit)
+    {
+        CGfxContextManager::GetInstance().ResetResourceBuffer(CShader::Pixel, _Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SetResourceBufferPS(unsigned int _Unit, CBufferPtr _BufferPtr)
+    {
+        CGfxContextManager::GetInstance().SetResourceBuffer(CShader::Pixel, _Unit, _BufferPtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CBufferPtr GetResourceBufferPS(unsigned int _Unit)
+    {
+        return CGfxContextManager::GetInstance().GetResourceBuffer(CShader::Pixel, _Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ResetResourceBufferCS(unsigned int _Unit)
+    {
+        CGfxContextManager::GetInstance().ResetResourceBuffer(CShader::Compute, _Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SetResourceBufferCS(unsigned int _Unit, CBufferPtr _BufferPtr)
+    {
+        CGfxContextManager::GetInstance().SetResourceBuffer(CShader::Compute, _Unit, _BufferPtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CBufferPtr GetResourceBufferCS(unsigned int _Unit)
+    {
+        return CGfxContextManager::GetInstance().GetResourceBuffer(CShader::Compute, _Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void ResetInputLayout()
     {
         CGfxContextManager::GetInstance().ResetInputLayout();

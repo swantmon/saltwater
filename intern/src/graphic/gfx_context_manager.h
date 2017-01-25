@@ -77,6 +77,44 @@ namespace ContextManager
     void SetConstantBufferSetCS(CBufferSetPtr _BufferSetPtr);
     CBufferSetPtr GetConstantBufferSetCS();
 
+    void ResetConstantBufferVS(unsigned int _Unit);
+    void SetConstantBufferVS(unsigned int _Unit, CBufferPtr _BufferPtr);
+    CBufferPtr GetConstantBufferVS(unsigned int _Unit);
+    void ResetConstantBufferHS(unsigned int _Unit);
+    void SetConstantBufferHS(unsigned int _Unit, CBufferPtr _BufferPtr);
+    CBufferPtr GetConstantBufferHS(unsigned int _Unit);
+    void ResetConstantBufferDS(unsigned int _Unit);
+    void SetConstantBufferDS(unsigned int _Unit, CBufferPtr _BufferPtr);
+    CBufferPtr GetConstantBufferDS(unsigned int _Unit);
+    void ResetConstantBufferGS(unsigned int _Unit);
+    void SetConstantBufferGS(unsigned int _Unit, CBufferPtr _BufferPtr);
+    CBufferPtr GetConstantBufferGS(unsigned int _Unit);
+    void ResetConstantBufferPS(unsigned int _Unit);
+    void SetConstantBufferPS(unsigned int _Unit, CBufferPtr _BufferPtr);
+    CBufferPtr GetConstantBufferPS(unsigned int _Unit);
+    void ResetConstantBufferCS(unsigned int _Unit);
+    void SetConstantBufferCS(unsigned int _Unit, CBufferPtr _BufferPtr);
+    CBufferPtr GetConstantBufferCS(unsigned int _Unit);
+
+    void ResetResourceBufferVS(unsigned int _Unit);
+    void SetResourceBufferVS(unsigned int _Unit, CBufferPtr _BufferPtr);
+    CBufferPtr GetResourceBufferVS(unsigned int _Unit);
+    void ResetResourceBufferHS(unsigned int _Unit);
+    void SetResourceBufferHS(unsigned int _Unit, CBufferPtr _BufferPtr);
+    CBufferPtr GetResourceBufferHS(unsigned int _Unit);
+    void ResetResourceBufferDS(unsigned int _Unit);
+    void SetResourceBufferDS(unsigned int _Unit, CBufferPtr _BufferPtr);
+    CBufferPtr GetResourceBufferDS(unsigned int _Unit);
+    void ResetResourceBufferGS(unsigned int _Unit);
+    void SetResourceBufferGS(unsigned int _Unit, CBufferPtr _BufferPtr);
+    CBufferPtr GetResourceBufferGS(unsigned int _Unit);
+    void ResetResourceBufferPS(unsigned int _Unit);
+    void SetResourceBufferPS(unsigned int _Unit, CBufferPtr _BufferPtr);
+    CBufferPtr GetResourceBufferPS(unsigned int _Unit);
+    void ResetResourceBufferCS(unsigned int _Unit);
+    void SetResourceBufferCS(unsigned int _Unit, CBufferPtr _BufferPtr);
+    CBufferPtr GetResourceBufferCS(unsigned int _Unit);
+
     void ResetInputLayout();
     void SetInputLayout(CInputLayoutPtr _InputLayoutPtr);
     CInputLayoutPtr GetInputLayout();
