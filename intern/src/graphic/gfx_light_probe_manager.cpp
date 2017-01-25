@@ -129,8 +129,6 @@ namespace
 
         CInputLayoutPtr m_PositionInputLayoutPtr;
 
-        CSamplerSetPtr m_PSSamplerSetPtr;
-
         CRenderContextPtr m_CubemapRenderContextPtr;
 
         CLightProbeFacets m_LightprobeFacets;
@@ -189,7 +187,6 @@ namespace
         , m_CustomVSBufferSetPtr   ()
         , m_CustomPSBufferSetPtr   ()
         , m_PositionInputLayoutPtr ()
-        , m_PSSamplerSetPtr        ()
         , m_CubemapRenderContextPtr()
         , m_LightprobeFacets       ()
     {
@@ -245,13 +242,6 @@ namespace
 
         m_CubemapRenderContextPtr->SetCamera(CameraPtr);
         m_CubemapRenderContextPtr->SetRenderState(NoDepthStatePtr);
-
-        // -----------------------------------------------------------------------------
-        // Sampler
-        // -----------------------------------------------------------------------------
-        CSamplerPtr LinearFilter = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-
-        m_PSSamplerSetPtr = SamplerManager::CreateSamplerSet(LinearFilter, LinearFilter, LinearFilter);
 
         // -----------------------------------------------------------------------------
         // Buffer
@@ -412,8 +402,6 @@ namespace
         m_CustomPSBufferSetPtr = 0;
 
         m_PositionInputLayoutPtr = 0;
-
-        m_PSSamplerSetPtr = 0;
 
         m_CubemapRenderContextPtr = 0;
 
