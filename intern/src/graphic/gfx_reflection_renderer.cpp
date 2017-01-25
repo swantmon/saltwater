@@ -115,15 +115,13 @@ namespace
         
     private:
         
-        CMeshPtr         m_QuadModelPtr;
+        CMeshPtr          m_QuadModelPtr;
         
-        CBufferSetPtr     m_QuadVSBufferSetPtr;
-        
-        CBufferSetPtr     m_ImageLightPSBufferSetPtr;
-
-        CBufferSetPtr     m_SSRLightPSBufferSetPtr;
-
-        CBufferSetPtr     m_HCBPSBufferSetPtr;
+        CBufferPtr        m_ImageLightBufferPtr;
+                          
+        CBufferPtr        m_SSRLightBufferPtr;
+                          
+        CBufferPtr        m_HCBBufferPtr;
         
         CInputLayoutPtr   m_QuadInputLayoutPtr;
         
@@ -183,10 +181,9 @@ namespace
 {
     CGfxReflectionRenderer::CGfxReflectionRenderer()
         : m_QuadModelPtr                     ()
-        , m_QuadVSBufferSetPtr               ()
-        , m_ImageLightPSBufferSetPtr         ()
-        , m_SSRLightPSBufferSetPtr           ()
-        , m_HCBPSBufferSetPtr                ()
+        , m_ImageLightBufferPtr              ()
+        , m_SSRLightBufferPtr                ()
+        , m_HCBBufferPtr                     ()
         , m_QuadInputLayoutPtr               ()
         , m_RectangleShaderVSPtr             ()
         , m_ImageLightShaderPSPtr            ()
@@ -228,10 +225,9 @@ namespace
     void CGfxReflectionRenderer::OnExit()
     {
         m_QuadModelPtr                      = 0;
-        m_QuadVSBufferSetPtr                = 0;
-        m_ImageLightPSBufferSetPtr          = 0;
-        m_SSRLightPSBufferSetPtr            = 0;
-        m_HCBPSBufferSetPtr                 = 0;
+        m_ImageLightBufferPtr               = 0;
+        m_SSRLightBufferPtr                 = 0;
+        m_HCBBufferPtr                      = 0;
         m_QuadInputLayoutPtr                = 0;
         m_RectangleShaderVSPtr              = 0;
         m_ImageLightShaderPSPtr             = 0;
@@ -504,7 +500,7 @@ namespace
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr SSRBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        m_SSRLightBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
 
@@ -516,11 +512,7 @@ namespace
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr HCBBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
-
-        // -----------------------------------------------------------------------------
-
-        CBufferPtr HistogramExposureHistoryBufferPtr = HistogramRenderer::GetExposureHistoryBuffer();
+        m_HCBBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
         
         // -----------------------------------------------------------------------------
         
@@ -532,17 +524,7 @@ namespace
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr IBLSettingsPSBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
-        
-        // -----------------------------------------------------------------------------
-        
-        m_QuadVSBufferSetPtr       = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
-        
-        m_ImageLightPSBufferSetPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), IBLSettingsPSBuffer, HistogramExposureHistoryBufferPtr);
-
-        m_SSRLightPSBufferSetPtr   = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), SSRBuffer);
-
-        m_HCBPSBufferSetPtr        = BufferManager::CreateBufferSet(HCBBuffer);
+        m_ImageLightBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -649,12 +631,10 @@ namespace
         
         ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
 
-        ContextManager::SetConstantBufferSetVS(m_QuadVSBufferSetPtr);
-        
-        ContextManager::SetConstantBuffer(0, m_ImageLightPSBufferSetPtr->GetBuffer(0));
-        ContextManager::SetConstantBuffer(1, m_ImageLightPSBufferSetPtr->GetBuffer(1));
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+        ContextManager::SetConstantBuffer(1, m_ImageLightBufferPtr);
 
-        ContextManager::SetResourceBuffer(0, m_ImageLightPSBufferSetPtr->GetBuffer(2));
+        ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
         
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
@@ -680,7 +660,7 @@ namespace
         IBLSettings.m_NumberOfMiplevelsSpecularIBL = static_cast<float>(pGraphicProbeFacet->GetFilteredSetPtr()->GetTexture(0)->GetNumberOfMipLevels() - 1);
         IBLSettings.m_ExposureHistoryIndex         = static_cast<float>(HistogramRenderer::GetLastExposureHistoryIndex());
             
-        BufferManager::UploadConstantBufferData(m_ImageLightPSBufferSetPtr->GetBuffer(1), &IBLSettings);
+        BufferManager::UploadConstantBufferData(m_ImageLightBufferPtr, &IBLSettings);
             
         // -----------------------------------------------------------------------------
         // Draw
@@ -713,7 +693,8 @@ namespace
 
         ContextManager::ResetResourceBuffer(0);
         
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
         
         ContextManager::ResetIndexBuffer();
         
@@ -751,7 +732,7 @@ namespace
                 HCBProperties.m_InverseTextureSize = Base::Float2(1.0f / m_HCBViewPortSetPtrs[IndexOfMipmap - 1]->GetViewPorts()[0]->GetWidth(), 1.0f / m_HCBViewPortSetPtrs[IndexOfMipmap - 1]->GetViewPorts()[0]->GetHeight());
             }
 
-            BufferManager::UploadConstantBufferData(m_HCBPSBufferSetPtr->GetBuffer(0), &HCBProperties);
+            BufferManager::UploadConstantBufferData(m_HCBBufferPtr, &HCBProperties);
 
             // -----------------------------------------------------------------------------
 
@@ -772,9 +753,9 @@ namespace
 
             ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
 
-            ContextManager::SetConstantBufferSetVS(m_QuadVSBufferSetPtr);
+            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
 
-            ContextManager::SetConstantBufferSetPS(m_HCBPSBufferSetPtr);
+            ContextManager::SetConstantBuffer(1, m_HCBBufferPtr);
 
             ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
@@ -788,9 +769,9 @@ namespace
 
             ContextManager::ResetInputLayout();
 
-            ContextManager::ResetConstantBufferSetPS();
+            ContextManager::ResetConstantBuffer(0);
 
-            ContextManager::ResetConstantBufferSetVS();
+            ContextManager::ResetConstantBuffer(1);
 
             ContextManager::ResetIndexBuffer();
 
@@ -835,7 +816,7 @@ namespace
         SSRProperties.m_SSRDistance          = pDataSSRFacet->GetDistance();
         SSRProperties.m_PreviousFrame        = pDataSSRFacet->GetUseLastFrame() ? 1.0f : 0.0f;
 
-        BufferManager::UploadConstantBufferData(m_SSRLightPSBufferSetPtr->GetBuffer(1), &SSRProperties);
+        BufferManager::UploadConstantBufferData(m_SSRLightBufferPtr, &SSRProperties);
 
         // -----------------------------------------------------------------------------
         // Screen Space Reflections
@@ -856,9 +837,9 @@ namespace
 
         ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
 
-        ContextManager::SetConstantBufferSetVS(m_QuadVSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
 
-        ContextManager::SetConstantBufferSetPS(m_SSRLightPSBufferSetPtr);
+        ContextManager::SetConstantBuffer(1, m_SSRLightBufferPtr);
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
@@ -896,9 +877,9 @@ namespace
         ContextManager::ResetSampler(4);
         ContextManager::ResetSampler(5);
 
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetConstantBuffer(0);
 
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetIndexBuffer();
 
@@ -931,7 +912,7 @@ namespace
 
         ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
 
-        ContextManager::SetConstantBufferSetVS(m_QuadVSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
@@ -945,9 +926,7 @@ namespace
 
         ContextManager::ResetInputLayout();
 
-        ContextManager::ResetConstantBufferSetPS();
-
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
 
         ContextManager::ResetIndexBuffer();
 
