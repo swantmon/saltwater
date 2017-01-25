@@ -4,7 +4,7 @@
 #define EXPONENT 1
 
 layout (binding = 0) uniform sampler2D cs_InputImage;
-layout (binding = 1, r32f) writeonly uniform image2D cs_OutputImage;
+layout (binding = 0, r32f) writeonly uniform image2D cs_OutputImage;
 
 // -------------------------------------------------------------------------------------
 // Main
