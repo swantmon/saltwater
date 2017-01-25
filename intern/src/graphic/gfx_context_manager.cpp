@@ -126,44 +126,9 @@ namespace
         void SetShaderCS(CShaderPtr _ShaderSetPtr);
         CShaderPtr GetShaderCS();
 
-        void ResetSamplerSetVS();
-        void SetSamplerSetVS(CSamplerSetPtr _SamplerSetPtr);
-        CSamplerSetPtr GetSamplerSetVS();
-        void ResetSamplerSetHS();
-        void SetSamplerSetHS(CSamplerSetPtr _SamplerSetPtr);
-        CSamplerSetPtr GetSamplerSetHS();
-        void ResetSamplerSetDS();
-        void SetSamplerSetDS(CSamplerSetPtr _SamplerSetPtr);
-        CSamplerSetPtr GetSamplerSetDS();
-        void ResetSamplerSetGS();
-        void SetSamplerSetGS(CSamplerSetPtr _SamplerSetPtr);
-        CSamplerSetPtr GetSamplerSetGS();
-        void ResetSamplerSetPS();
-        void SetSamplerSetPS(CSamplerSetPtr _SamplerSetPtr);
-        CSamplerSetPtr GetSamplerSetPS();
-        void ResetSamplerSetCS();
-        void SetSamplerSetCS(CSamplerSetPtr _SamplerSetPtr);
-        CSamplerSetPtr GetSamplerSetCS();
-
         void ResetSampler(unsigned int _Unit);
         void SetSampler(unsigned int _Unit, CSamplerPtr _SamplerPtr);
         CSamplerPtr GetSampler(unsigned int _Unit);
-
-        void ResetTextureSetVS();
-        void SetTextureSetVS(CTextureSetPtr _TextureSetPtr);
-        CTextureSetPtr GetTextureSetVS();
-        void ResetTextureSetHS();
-        void SetTextureSetHS(CTextureSetPtr _TextureSetPtr);
-        CTextureSetPtr GetTextureSetHS();
-        void ResetTextureSetDS();
-        void SetTextureSetDS(CTextureSetPtr _TextureSetPtr);
-        CTextureSetPtr GetTextureSetDS();
-        void ResetTextureSetGS();
-        void SetTextureSetGS(CTextureSetPtr _TextureSetPtr);
-        CTextureSetPtr GetTextureSetGS();
-        void ResetTextureSetPS();
-        void SetTextureSetPS(CTextureSetPtr _TextureSetPtr);
-        CTextureSetPtr GetTextureSetPS();
 
         void ResetTexture(unsigned int _Unit);
         void SetTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr);
@@ -263,7 +228,6 @@ namespace
         
         GLuint                 m_NativeShaderPipeline;
         
-        unsigned int           m_IndexOfTextureBinding;
         unsigned int           m_IndexOfBufferLocation;
 
         CShaderPtr      m_ShaderSlots[CShader::NumberOfTypes];
@@ -343,7 +307,6 @@ namespace
         , m_ViewPortSetPtr        ()
         , m_RenderContexts        ()
         , m_NativeShaderPipeline  (0)
-        , m_IndexOfTextureBinding (0)
         , m_IndexOfBufferLocation (0)
     {
         Reset();
@@ -459,17 +422,6 @@ namespace
         ResetShaderHS();
         ResetShaderPS();
         ResetShaderCS();
-        ResetSamplerSetVS();
-        ResetSamplerSetGS();
-        ResetSamplerSetDS();
-        ResetSamplerSetHS();
-        ResetSamplerSetPS();
-        ResetSamplerSetCS();
-        ResetTextureSetVS();
-        ResetTextureSetGS();
-        ResetTextureSetDS();
-        ResetTextureSetHS();
-        ResetTextureSetPS();
         ResetTargetSet();
         ResetViewPortSet();
 
@@ -1672,147 +1624,6 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxContextManager::ResetSamplerSetVS()
-    {
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxContextManager::SetSamplerSetVS(CSamplerSetPtr _SamplerSetPtr)
-    {
-        assert(_SamplerSetPtr != nullptr);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CSamplerSetPtr CGfxContextManager::GetSamplerSetVS()
-    {
-        return m_SamplerSetVSPtr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxContextManager::ResetSamplerSetHS()
-    {
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxContextManager::SetSamplerSetHS(CSamplerSetPtr _SamplerSetPtr)
-    {
-        assert(_SamplerSetPtr != nullptr);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CSamplerSetPtr CGfxContextManager::GetSamplerSetHS()
-    {
-        return m_SamplerSetHSPtr;
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGfxContextManager::ResetSamplerSetDS()
-    {
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGfxContextManager::SetSamplerSetDS(CSamplerSetPtr _SamplerSetPtr)
-    {
-        assert(_SamplerSetPtr != nullptr);
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CSamplerSetPtr CGfxContextManager::GetSamplerSetDS()
-    {
-        return m_SamplerSetDSPtr;
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGfxContextManager::ResetSamplerSetGS()
-    {
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGfxContextManager::SetSamplerSetGS(CSamplerSetPtr _SamplerSetPtr)
-    {
-        assert(_SamplerSetPtr != nullptr);
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CSamplerSetPtr CGfxContextManager::GetSamplerSetGS()
-    {
-        return m_SamplerSetGSPtr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxContextManager::ResetSamplerSetPS()
-    {
-        if (m_SamplerSetPSPtr == nullptr) return;
-        
-        for (unsigned int IndexOfSampler = 0; IndexOfSampler < m_SamplerSetPSPtr->GetNumberOfSamplers(); ++IndexOfSampler)
-        {
-            glBindSampler(IndexOfSampler, 0);
-        }
-        
-        m_SamplerSetPSPtr = nullptr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxContextManager::SetSamplerSetPS(CSamplerSetPtr _SamplerSetPtr)
-    {
-        assert(_SamplerSetPtr != nullptr);
-        
-        Gfx::CNativeSamplerHandle SamplerHandle = 0;
-        
-        for (unsigned int IndexOfSampler = 0; IndexOfSampler < _SamplerSetPtr->GetNumberOfSamplers(); ++IndexOfSampler)
-        {
-            CNativeSampler& rNativeSampler = *static_cast<CNativeSampler*>(_SamplerSetPtr->GetSampler(IndexOfSampler).GetPtr());
-            
-            SamplerHandle = rNativeSampler.m_NativeSampler;
-            
-            glBindSampler(IndexOfSampler, SamplerHandle);
-
-            m_SamplerSetPSPtr = _SamplerSetPtr;
-        }
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CSamplerSetPtr CGfxContextManager::GetSamplerSetPS()
-    {
-        return m_SamplerSetPSPtr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxContextManager::ResetSamplerSetCS()
-    {
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxContextManager::SetSamplerSetCS(CSamplerSetPtr _SamplerSetPtr)
-    {
-        assert(_SamplerSetPtr != nullptr);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CSamplerSetPtr CGfxContextManager::GetSamplerSetCS()
-    {
-        return m_SamplerSetCSPtr;
-    }
-
-    // -----------------------------------------------------------------------------
-
     void CGfxContextManager::ResetSampler(unsigned int _Unit)
     {
         glBindSampler(_Unit, 0);
@@ -1848,225 +1659,11 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxContextManager::ResetTextureSetVS()
-    {
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxContextManager::SetTextureSetVS(CTextureSetPtr _TextureSetPtr)
-    {
-        BASE_UNUSED(_TextureSetPtr);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CTextureSetPtr CGfxContextManager::GetTextureSetVS()
-    {
-        return m_TextureSetVSPtr;
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGfxContextManager::ResetTextureSetHS()
-    {
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGfxContextManager::SetTextureSetHS(CTextureSetPtr _TextureSetPtr)
-    {
-        BASE_UNUSED(_TextureSetPtr);
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CTextureSetPtr CGfxContextManager::GetTextureSetHS()
-    {
-        return m_TextureSetHSPtr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxContextManager::ResetTextureSetDS()
-    {
-        if (m_TextureSetDSPtr == nullptr) return;
-        
-        for (unsigned int IndexOfTexture = 0; IndexOfTexture < m_TextureSetDSPtr->GetNumberOfTextures(); ++IndexOfTexture)
-        {
-            CNativeTexture2D* pNativeTexture = static_cast<CNativeTexture2D*>(m_TextureSetDSPtr->GetTexture(IndexOfTexture).GetPtr());
-
-            if (pNativeTexture != 0)
-            {
-                CNativeTexture2D& rNativeTexture = *pNativeTexture;
-
-                GLuint TextureBinding = rNativeTexture.m_NativeDimension;
-
-                if (rNativeTexture.IsCube())
-                {
-                    TextureBinding = GL_TEXTURE_CUBE_MAP;
-                }
-
-                glActiveTexture(GL_TEXTURE0 + IndexOfTexture);
-
-                glBindTexture(TextureBinding, 0);
-            }
-        }
-        
-        m_IndexOfTextureBinding = 0;
-
-        m_TextureSetDSPtr = nullptr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxContextManager::SetTextureSetDS(CTextureSetPtr _TextureSetPtr)
-    {
-        if(_TextureSetPtr == nullptr) return;
-        
-        if (m_TextureSetDSPtr != _TextureSetPtr)
-        {
-            Gfx::CNativeTextureHandle TextureHandle  = 0;
-            GLuint                    TextureBinding = 0;
-            
-            for (unsigned int IndexOfTexture = 0; IndexOfTexture < _TextureSetPtr->GetNumberOfTextures(); ++IndexOfTexture)
-            {
-                CNativeTexture2D* pNativeTexture = static_cast<CNativeTexture2D*>(_TextureSetPtr->GetTexture(IndexOfTexture).GetPtr());
-
-                if (pNativeTexture != 0)
-                {
-                    CNativeTexture2D& rNativeTexture = *pNativeTexture;
-
-                    TextureHandle = rNativeTexture.m_NativeTexture;
-
-                    TextureBinding = rNativeTexture.m_NativeDimension;
-
-                    if (rNativeTexture.IsCube())
-                    {
-                        TextureBinding = GL_TEXTURE_CUBE_MAP;
-                    }
-
-                    glActiveTexture(GL_TEXTURE0 + m_IndexOfTextureBinding);
-
-                    glBindTexture(TextureBinding, TextureHandle);
-                }
-
-                ++m_IndexOfTextureBinding;
-            }
-            
-            m_TextureSetDSPtr = _TextureSetPtr;
-        }
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CTextureSetPtr CGfxContextManager::GetTextureSetDS()
-    {
-        return m_TextureSetDSPtr;
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGfxContextManager::ResetTextureSetGS()
-    {
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGfxContextManager::SetTextureSetGS(CTextureSetPtr _TextureSetPtr)
-    {
-        BASE_UNUSED(_TextureSetPtr);
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CTextureSetPtr CGfxContextManager::GetTextureSetGS()
-    {
-        return m_TextureSetGSPtr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxContextManager::ResetTextureSetPS()
-    {
-        if (m_TextureSetPSPtr == nullptr) return;
-        
-        for (unsigned int IndexOfTexture = 0; IndexOfTexture < m_TextureSetPSPtr->GetNumberOfTextures(); ++IndexOfTexture)
-        {
-            CNativeTexture2D* pNativeTexture = static_cast<CNativeTexture2D*>(m_TextureSetPSPtr->GetTexture(IndexOfTexture).GetPtr());
-
-            if (pNativeTexture != 0)
-            {
-                CNativeTexture2D& rNativeTexture = *pNativeTexture;
-
-                GLuint TextureBinding = rNativeTexture.m_NativeDimension;
-
-                if (rNativeTexture.IsCube())
-                {
-                    TextureBinding = GL_TEXTURE_CUBE_MAP;
-                }
-
-                glActiveTexture(GL_TEXTURE0 + IndexOfTexture);
-
-                glBindTexture(TextureBinding, 0);
-            }
-        }
-        
-        m_IndexOfTextureBinding = 0;
-
-        m_TextureSetPSPtr = nullptr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxContextManager::SetTextureSetPS(CTextureSetPtr _TextureSetPtr)
-    {
-        if(_TextureSetPtr == nullptr) return;
-
-        if (m_TextureSetPSPtr != _TextureSetPtr)
-        {
-            Gfx::CNativeTextureHandle TextureHandle  = 0;
-            GLuint                    TextureBinding = 0;
-            
-            for (unsigned int IndexOfTexture = 0; IndexOfTexture < _TextureSetPtr->GetNumberOfTextures(); ++IndexOfTexture)
-            {
-                CNativeTexture2D* pNativeTexture = static_cast<CNativeTexture2D*>(_TextureSetPtr->GetTexture(IndexOfTexture).GetPtr());
-
-                if (pNativeTexture != 0)
-                {
-                    CNativeTexture2D& rNativeTexture = *pNativeTexture;
-
-                    TextureHandle = rNativeTexture.m_NativeTexture;
-
-                    TextureBinding = rNativeTexture.m_NativeDimension;
-
-                    if (rNativeTexture.IsCube())
-                    {
-                        TextureBinding = GL_TEXTURE_CUBE_MAP;
-                    }
-
-                    glBindTextureUnit(m_IndexOfTextureBinding, TextureHandle);
-                }
-
-                ++m_IndexOfTextureBinding;
-            }
-            
-            m_TextureSetPSPtr = _TextureSetPtr;
-        }
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CTextureSetPtr CGfxContextManager::GetTextureSetPS()
-    {
-        return m_TextureSetPSPtr;
-    }
-
-    // -----------------------------------------------------------------------------
-
     void CGfxContextManager::ResetTexture(unsigned int _Unit)
     {
         assert(_Unit < s_NumberOfTextureUnits);
+
+        glBindTextureUnit(_Unit, 0);
 
         m_TextureUnits[_Unit] = 0;
     }
@@ -2105,6 +1702,8 @@ namespace
     {
         assert(_Unit < s_NumberOfImageUnits);
 
+        glBindImageTexture(_Unit, 0, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R8);
+
         m_ImageUnits[_Unit] = 0;
     }
 
@@ -2128,9 +1727,9 @@ namespace
 
         if (pNativeTexture->GetDimension() == CTextureBase::Dim3D) IsLayered = GL_TRUE;
 
-        glBindImageTexture(m_IndexOfTextureBinding, pNativeTexture->m_NativeTexture, 0, IsLayered, 0, pNativeTexture->m_NativeUsage, pNativeTexture->m_NativeInternalFormat);
+        glBindImageTexture(_Unit, pNativeTexture->m_NativeTexture, 0, IsLayered, 0, pNativeTexture->m_NativeUsage, pNativeTexture->m_NativeInternalFormat);
 
-        m_TextureUnits[_Unit] = _TextureBasePtr;
+        m_ImageUnits[_Unit] = _TextureBasePtr;
     }
 
     // -----------------------------------------------------------------------------
@@ -2238,8 +1837,7 @@ namespace
         BASE_UNUSED(_BaseVertexLocation);
         
         glDrawElements(s_NativeTopologies[m_Topology], _NumberOfIndices, GL_UNSIGNED_INT, 0);
-        
-        m_IndexOfTextureBinding = 0;
+
         m_IndexOfBufferLocation = 0;
     }
 
@@ -2252,8 +1850,7 @@ namespace
         BASE_UNUSED(_StartInstanceLocation);
 
         glDrawElementsInstanced(s_NativeTopologies[m_Topology], _NumberOfIndices, GL_UNSIGNED_INT, 0, _NumberOfInstances);
-        
-        m_IndexOfTextureBinding = 0;
+
         m_IndexOfBufferLocation = 0;
     }
     
@@ -2267,7 +1864,6 @@ namespace
 
         glDispatchCompute(_NumberOfThreadGroupsX, _NumberOfThreadGroupsY, _NumberOfThreadGroupsZ);
 
-        m_IndexOfTextureBinding = 0;
         m_IndexOfBufferLocation = 0;
     }
     
@@ -2849,132 +2445,6 @@ namespace ContextManager
 
     // -----------------------------------------------------------------------------
 
-    void ResetSamplerSetVS()
-    {
-        CGfxContextManager::GetInstance().ResetSamplerSetVS();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SetSamplerSetVS(CSamplerSetPtr _SamplerSetPtr)
-    {
-        CGfxContextManager::GetInstance().SetSamplerSetVS(_SamplerSetPtr);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CSamplerSetPtr GetSamplerSetVS()
-    {
-        return CGfxContextManager::GetInstance().GetSamplerSetVS();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void ResetSamplerSetHS()
-    {
-        CGfxContextManager::GetInstance().ResetSamplerSetHS();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SetSamplerSetHS(CSamplerSetPtr _SamplerSetPtr)
-    {
-        CGfxContextManager::GetInstance().SetSamplerSetHS(_SamplerSetPtr);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CSamplerSetPtr GetSamplerSetHS()
-    {
-        return CGfxContextManager::GetInstance().GetSamplerSetHS();
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void ResetSamplerSetDS()
-    {
-        CGfxContextManager::GetInstance().ResetSamplerSetDS();
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void SetSamplerSetDS(CSamplerSetPtr _SamplerSetPtr)
-    {
-        CGfxContextManager::GetInstance().SetSamplerSetDS(_SamplerSetPtr);
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CSamplerSetPtr GetSamplerSetDS()
-    {
-        return CGfxContextManager::GetInstance().GetSamplerSetDS();
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void ResetSamplerSetGS()
-    {
-        CGfxContextManager::GetInstance().ResetSamplerSetGS();
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void SetSamplerSetGS(CSamplerSetPtr _SamplerSetPtr)
-    {
-        CGfxContextManager::GetInstance().SetSamplerSetGS(_SamplerSetPtr);
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CSamplerSetPtr GetSamplerSetGS()
-    {
-        return CGfxContextManager::GetInstance().GetSamplerSetGS();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void ResetSamplerSetPS()
-    {
-        CGfxContextManager::GetInstance().ResetSamplerSetPS();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SetSamplerSetPS(CSamplerSetPtr _SamplerSetPtr)
-    {
-        CGfxContextManager::GetInstance().SetSamplerSetPS(_SamplerSetPtr);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CSamplerSetPtr GetSamplerSetPS()
-    {
-        return CGfxContextManager::GetInstance().GetSamplerSetPS();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void ResetSamplerSetCS()
-    {
-        CGfxContextManager::GetInstance().ResetSamplerSetCS();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SetSamplerSetCS(CSamplerSetPtr _SamplerSetPtr)
-    {
-        CGfxContextManager::GetInstance().SetSamplerSetCS(_SamplerSetPtr);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CSamplerSetPtr GetSamplerSetCS()
-    {
-        return CGfxContextManager::GetInstance().GetSamplerSetCS();
-    }
-
-    // -----------------------------------------------------------------------------
-
     void ResetSampler(unsigned int _Unit)
     {
         CGfxContextManager::GetInstance().ResetSampler(_Unit);
@@ -2993,111 +2463,6 @@ namespace ContextManager
     CSamplerPtr GetSampler(unsigned int _Unit)
     {
         return CGfxContextManager::GetInstance().GetSampler(_Unit);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void ResetTextureSetVS()
-    {
-        CGfxContextManager::GetInstance().ResetTextureSetVS();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SetTextureSetVS(CTextureSetPtr _TextureSetPtr)
-    {
-        CGfxContextManager::GetInstance().SetTextureSetVS(_TextureSetPtr);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CTextureSetPtr GetTextureSetVS()
-    {
-        return CGfxContextManager::GetInstance().GetTextureSetVS();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void ResetTextureSetHS()
-    {
-        CGfxContextManager::GetInstance().ResetTextureSetHS();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SetTextureSetHS(CTextureSetPtr _TextureSetPtr)
-    {
-        CGfxContextManager::GetInstance().SetTextureSetHS(_TextureSetPtr);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CTextureSetPtr GetTextureSetHS()
-    {
-        return CGfxContextManager::GetInstance().GetTextureSetHS();
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void ResetTextureSetDS()
-    {
-        CGfxContextManager::GetInstance().ResetTextureSetDS();
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void SetTextureSetDS(CTextureSetPtr _TextureSetPtr)
-    {
-        CGfxContextManager::GetInstance().SetTextureSetDS(_TextureSetPtr);
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CTextureSetPtr GetTextureSetDS()
-    {
-        return CGfxContextManager::GetInstance().GetTextureSetDS();
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void ResetTextureSetGS()
-    {
-        CGfxContextManager::GetInstance().ResetTextureSetGS();
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void SetTextureSetGS(CTextureSetPtr _TextureSetPtr)
-    {
-        CGfxContextManager::GetInstance().SetTextureSetGS(_TextureSetPtr);
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CTextureSetPtr GetTextureSetGS()
-    {
-        return CGfxContextManager::GetInstance().GetTextureSetGS();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void ResetTextureSetPS()
-    {
-        CGfxContextManager::GetInstance().ResetTextureSetPS();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SetTextureSetPS(CTextureSetPtr _TextureSetPtr)
-    {
-        CGfxContextManager::GetInstance().SetTextureSetPS(_TextureSetPtr);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CTextureSetPtr GetTextureSetPS()
-    {
-        return CGfxContextManager::GetInstance().GetTextureSetPS();
     }
 
     // -----------------------------------------------------------------------------

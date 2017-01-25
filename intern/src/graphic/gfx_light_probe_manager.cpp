@@ -754,8 +754,6 @@ namespace
             // -----------------------------------------------------------------------------
             ContextManager::SetRenderContext(m_CubemapRenderContextPtr);
 
-            ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
-
             ContextManager::SetTopology(STopology::TriangleList);
 
             ContextManager::SetShaderVS(m_FilteringVSPtr);
@@ -774,7 +772,9 @@ namespace
 
             ContextManager::SetConstantBufferSetPS(m_FilteringPSBufferSetPtr);
 
-            ContextManager::SetTextureSetPS(_rInterLightProbeFacet.m_InputCubemapSetPtr);
+            ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+            ContextManager::SetTexture(0, _rInterLightProbeFacet.m_InputCubemapSetPtr->GetTexture(0));
 
             // -----------------------------------------------------------------------------
             // Draw
@@ -784,7 +784,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Reset
             // -----------------------------------------------------------------------------
-            ContextManager::ResetTextureSetPS();
+            ContextManager::ResetTexture(0);
+
+            ContextManager::ResetSampler(0);
 
             ContextManager::ResetConstantBufferSetPS();
 
@@ -803,8 +805,6 @@ namespace
             ContextManager::ResetShaderPS();
 
             ContextManager::ResetTopology();
-
-            ContextManager::ResetSamplerSetPS();
 
             ContextManager::ResetRenderContext();
 
@@ -834,8 +834,6 @@ namespace
             // -----------------------------------------------------------------------------
             ContextManager::SetRenderContext(m_CubemapRenderContextPtr);
 
-            ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
-
             ContextManager::SetTopology(STopology::TriangleList);
 
             ContextManager::SetShaderVS(m_FilteringVSPtr);
@@ -852,7 +850,9 @@ namespace
 
             ContextManager::SetConstantBufferSetGS(m_CubemapGSBufferSetPtr);
 
-            ContextManager::SetTextureSetPS(_rInterLightProbeFacet.m_InputCubemapSetPtr);
+            ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+            ContextManager::SetTexture(0, _rInterLightProbeFacet.m_InputCubemapSetPtr->GetTexture(0));
 
             // -----------------------------------------------------------------------------
             // Draw
@@ -862,7 +862,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Reset
             // -----------------------------------------------------------------------------
-            ContextManager::ResetTextureSetPS();
+            ContextManager::ResetTexture(0);
+
+            ContextManager::ResetSampler(0);
 
             ContextManager::ResetConstantBufferSetGS();
 
@@ -879,8 +881,6 @@ namespace
             ContextManager::ResetShaderPS();
 
             ContextManager::ResetTopology();
-
-            ContextManager::ResetSamplerSetPS();
 
             ContextManager::ResetRenderContext();
         }

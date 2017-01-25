@@ -100,44 +100,9 @@ namespace ContextManager
     void SetShaderCS(CShaderPtr _ShaderSetPtr);
     CShaderPtr GetShaderCS();
 
-    void ResetSamplerSetVS();
-    void SetSamplerSetVS(CSamplerSetPtr _SamplerSetPtr);
-    CSamplerSetPtr GetSamplerSetVS();
-    void ResetSamplerSetHS();
-    void SetSamplerSetHS(CSamplerSetPtr _SamplerSetPtr);
-    CSamplerSetPtr GetSamplerSetHS();
-    void ResetSamplerSetDS();
-    void SetSamplerSetDS(CSamplerSetPtr _SamplerSetPtr);
-    CSamplerSetPtr GetSamplerSetDS();
-    void ResetSamplerSetGS();
-    void SetSamplerSetGS(CSamplerSetPtr _SamplerSetPtr);
-    CSamplerSetPtr GetSamplerSetGS();
-    void ResetSamplerSetPS();
-    void SetSamplerSetPS(CSamplerSetPtr _SamplerSetPtr);
-    CSamplerSetPtr GetSamplerSetPS();
-    void ResetSamplerSetCS();
-    void SetSamplerSetCS(CSamplerSetPtr _SamplerSetPtr);
-    CSamplerSetPtr GetSamplerSetCS();
-
     void ResetSampler(unsigned int _Unit);
     void SetSampler(unsigned int _Unit, CSamplerPtr _SamplerPtr);
     CSamplerPtr GetSampler(unsigned int _Unit);
-
-    void ResetTextureSetVS();
-    void SetTextureSetVS(CTextureSetPtr _TextureSetPtr);
-    CTextureSetPtr GetTextureSetVS();
-    void ResetTextureSetHS();
-    void SetTextureSetHS(CTextureSetPtr _TextureSetPtr);
-    CTextureSetPtr GetTextureSetHS();
-    void ResetTextureSetDS();
-    void SetTextureSetDS(CTextureSetPtr _TextureSetPtr);
-    CTextureSetPtr GetTextureSetDS();
-    void ResetTextureSetGS();
-    void SetTextureSetGS(CTextureSetPtr _TextureSetPtr);
-    CTextureSetPtr GetTextureSetGS();
-    void ResetTextureSetPS();
-    void SetTextureSetPS(CTextureSetPtr _TextureSetPtr);
-    CTextureSetPtr GetTextureSetPS();
 
     void ResetTexture(unsigned int _Unit);
     void SetTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr);

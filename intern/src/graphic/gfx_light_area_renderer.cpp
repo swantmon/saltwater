@@ -525,8 +525,6 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(m_LightRenderContextPtr);
         
-        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
-        
         ContextManager::SetTopology(STopology::TriangleList);
         
         // -----------------------------------------------------------------------------
@@ -546,7 +544,15 @@ namespace
         
         ContextManager::SetConstantBufferSetVS(m_MainVSBufferPtr);
         
-        ContextManager::SetTextureSetPS(m_AreaLightTextureSetPtr);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+
+        ContextManager::SetTexture(0, m_AreaLightTextureSetPtr->GetTexture(0));
+        ContextManager::SetTexture(1, m_AreaLightTextureSetPtr->GetTexture(1));
+        ContextManager::SetTexture(2, m_AreaLightTextureSetPtr->GetTexture(2));
+        ContextManager::SetTexture(3, m_AreaLightTextureSetPtr->GetTexture(3));
         
         for (; CurrentRenderJob != EndOfRenderJobs; ++ CurrentRenderJob)
         {
@@ -591,7 +597,15 @@ namespace
 //             ContextManager::DrawIndexed(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
         }
         
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+        ContextManager::ResetTexture(1);
+        ContextManager::ResetTexture(2);
+        ContextManager::ResetTexture(3);
+
+        ContextManager::ResetSampler(0);
+        ContextManager::ResetSampler(1);
+        ContextManager::ResetSampler(2);
+        ContextManager::ResetSampler(3);
         
         ContextManager::ResetInputLayout();
         
@@ -626,7 +640,15 @@ namespace
 
         ContextManager::SetConstantBufferSetVS(m_MainVSBufferPtr);
 
-        ContextManager::SetTextureSetPS(m_AreaLightTextureSetPtr);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+
+        ContextManager::SetTexture(0, m_AreaLightTextureSetPtr->GetTexture(0));
+        ContextManager::SetTexture(1, m_AreaLightTextureSetPtr->GetTexture(1));
+        ContextManager::SetTexture(2, m_AreaLightTextureSetPtr->GetTexture(2));
+        ContextManager::SetTexture(3, m_AreaLightTextureSetPtr->GetTexture(3));
 
         for (CRenderJobs::const_iterator CurrentRenderJob = m_DiskLightRenderJobs.begin(); CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
         {
@@ -674,7 +696,15 @@ namespace
 //             ContextManager::DrawIndexed(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
         }
 
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+        ContextManager::ResetTexture(1);
+        ContextManager::ResetTexture(2);
+        ContextManager::ResetTexture(3);
+
+        ContextManager::ResetSampler(0);
+        ContextManager::ResetSampler(1);
+        ContextManager::ResetSampler(2);
+        ContextManager::ResetSampler(3);
 
         ContextManager::ResetInputLayout();
 
@@ -694,8 +724,6 @@ namespace
         // Reset non-dynamic objects
         // -----------------------------------------------------------------------------
         ContextManager::ResetTopology();
-        
-        ContextManager::ResetSamplerSetPS();
         
         ContextManager::ResetRenderContext();
     }
@@ -830,8 +858,6 @@ namespace
         // Reset non-dynamic objects
         // -----------------------------------------------------------------------------
         ContextManager::ResetTopology();
-        
-        ContextManager::ResetSamplerSetPS();
         
         ContextManager::ResetRenderContext();
     }

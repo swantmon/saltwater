@@ -755,9 +755,12 @@ namespace
                     {
                         ContextManager::SetShaderPS(m_ShadowRSMTexShaderPSPtr);
 
-                        ContextManager::SetTextureSetPS(MaterialPtr->GetTextureSetPS());
+                        for (unsigned int IndexOfTexture = 0; IndexOfTexture < MaterialPtr->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
+                        {
+                            ContextManager::SetSampler(IndexOfTexture, MaterialPtr->GetSamplerSetPS()->GetSampler(IndexOfTexture));
 
-                        ContextManager::SetSamplerSetPS(MaterialPtr->GetSamplerSetPS());
+                            ContextManager::SetTexture(IndexOfTexture, MaterialPtr->GetTextureSetPS()->GetTexture(IndexOfTexture));
+                        }
                     }
                     else
                     {

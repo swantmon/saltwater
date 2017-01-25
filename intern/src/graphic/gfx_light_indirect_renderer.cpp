@@ -336,7 +336,14 @@ namespace
 
         ContextManager::SetConstantBufferSetPS(m_IndirectLightPSBufferPtr);
 
-        ContextManager::SetSamplerSetPS(m_PSSunSamplerSetPtr);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(4, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(5, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(6, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(7, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
         CRenderJobs::const_iterator CurrentRenderJob = m_RenderJobs.begin();
         CRenderJobs::const_iterator EndOfRenderJobs  = m_RenderJobs.end();
@@ -350,9 +357,14 @@ namespace
             // -----------------------------------------------------------------------------
             // Set shadow map
             // -----------------------------------------------------------------------------
-            Gfx::ContextManager::SetTextureSetPS(m_SunLightTextureSetPtr);
-
-            Gfx::ContextManager::SetTextureSetPS(pGfxPointLight->GetTextureRSMSet());
+            Gfx::ContextManager::SetTexture(0, m_SunLightTextureSetPtr->GetTexture(0));
+            Gfx::ContextManager::SetTexture(1, m_SunLightTextureSetPtr->GetTexture(1));
+            Gfx::ContextManager::SetTexture(2, m_SunLightTextureSetPtr->GetTexture(2));
+            Gfx::ContextManager::SetTexture(3, m_SunLightTextureSetPtr->GetTexture(3));
+            Gfx::ContextManager::SetTexture(4, pGfxPointLight->GetTextureRSMSet()->GetTexture(0));
+            Gfx::ContextManager::SetTexture(5, pGfxPointLight->GetTextureRSMSet()->GetTexture(1));
+            Gfx::ContextManager::SetTexture(6, pGfxPointLight->GetTextureRSMSet()->GetTexture(2));
+            Gfx::ContextManager::SetTexture(7, pGfxPointLight->GetTextureRSMSet()->GetTexture(3));
 
             unsigned int HeightOfShadowmap = static_cast<unsigned int>(pGfxPointLight->GetShadowmapSize()) / 8;
             unsigned int WidthOfShadowmap  = static_cast<unsigned int>(pGfxPointLight->GetShadowmapSize()) / 8;
@@ -380,12 +392,28 @@ namespace
                 Gfx::ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
             }
 
-            Gfx::ContextManager::ResetTextureSetPS();
+            Gfx::ContextManager::ResetTexture(0);
+            Gfx::ContextManager::ResetTexture(1);
+            Gfx::ContextManager::ResetTexture(2);
+            Gfx::ContextManager::ResetTexture(3);
+            Gfx::ContextManager::ResetTexture(4);
+            Gfx::ContextManager::ResetTexture(5);
+            Gfx::ContextManager::ResetTexture(6);
+            Gfx::ContextManager::ResetTexture(7);
         }
 
         ContextManager::ResetConstantBufferSetVS(); 
 
         ContextManager::ResetConstantBufferSetPS();
+
+        Gfx::ContextManager::ResetSampler(0);
+        Gfx::ContextManager::ResetSampler(1);
+        Gfx::ContextManager::ResetSampler(2);
+        Gfx::ContextManager::ResetSampler(3);
+        Gfx::ContextManager::ResetSampler(4);
+        Gfx::ContextManager::ResetSampler(5);
+        Gfx::ContextManager::ResetSampler(6);
+        Gfx::ContextManager::ResetSampler(7);
 
         ContextManager::ResetTopology();
 
@@ -394,8 +422,6 @@ namespace
         ContextManager::ResetIndexBuffer();
 
         ContextManager::ResetVertexBufferSet();
-
-        ContextManager::ResetSamplerSetPS();
 
         ContextManager::ResetShaderVS();
 

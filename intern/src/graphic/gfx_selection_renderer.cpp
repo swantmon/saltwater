@@ -744,12 +744,6 @@ namespace
             ContextManager::ResetConstantBufferSetVS();
         }
 
-        ContextManager::ResetTextureSetDS();
-
-        ContextManager::ResetTextureSetHS();
-
-        ContextManager::ResetSamplerSetPS();
-
         ContextManager::ResetShaderVS();
 
         ContextManager::ResetShaderDS();

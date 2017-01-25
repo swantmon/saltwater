@@ -611,11 +611,15 @@ namespace
 
                 ContextManager::SetInputLayout(SurfacePtr->GetShaderVS()->GetInputLayout());
 
-                ContextManager::SetTextureSetPS(m_DifferentualGBufferTextureSetPtr);
+                ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+
+                ContextManager::SetTexture(0, m_DifferentualGBufferTextureSetPtr->GetTexture(0));
 
                 ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
 
-                ContextManager::ResetTextureSetPS();
+                ContextManager::ResetTexture(0);
+
+                ContextManager::ResetSampler(0);
 
                 ContextManager::ResetInputLayout();
 
@@ -628,7 +632,7 @@ namespace
                 ContextManager::ResetConstantBufferSetPS();
             }
 
-            ContextManager::ResetSamplerSetPS();
+            ContextManager::ResetSampler(0);
 
             ContextManager::ResetShaderVS();
 
@@ -717,15 +721,27 @@ namespace
 
             ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
 
-            ContextManager::SetTextureSetPS(m_CopyToGBufferTextureSetPtr);
+            ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+            ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+            ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+            ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
-            ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
+            ContextManager::SetTexture(0, m_CopyToGBufferTextureSetPtr->GetTexture(0));
+            ContextManager::SetTexture(1, m_CopyToGBufferTextureSetPtr->GetTexture(1));
+            ContextManager::SetTexture(2, m_CopyToGBufferTextureSetPtr->GetTexture(2));
+            ContextManager::SetTexture(3, m_CopyToGBufferTextureSetPtr->GetTexture(3));
 
             ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
 
-            ContextManager::ResetSamplerSetPS();
+            ContextManager::ResetTexture(0);
+            ContextManager::ResetTexture(1);
+            ContextManager::ResetTexture(2);
+            ContextManager::ResetTexture(3);
 
-            ContextManager::ResetTextureSetPS();
+            ContextManager::ResetSampler(0);
+            ContextManager::ResetSampler(1);
+            ContextManager::ResetSampler(2);
+            ContextManager::ResetSampler(3);
 
             ContextManager::ResetInputLayout();
 
@@ -736,8 +752,6 @@ namespace
             ContextManager::ResetConstantBufferSetVS();
 
             ContextManager::ResetConstantBufferSetPS();
-
-            ContextManager::ResetSamplerSetPS();
 
             ContextManager::ResetShaderVS();
 

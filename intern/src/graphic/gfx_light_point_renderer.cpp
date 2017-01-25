@@ -411,7 +411,11 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(m_LightRenderContextPtr);
 
-        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(4, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
         ContextManager::SetTopology(STopology::TriangleList);
 
@@ -482,14 +486,17 @@ namespace
 
             ContextManager::SetConstantBufferSetVS(m_MainVSBufferPtr);
 
-            ContextManager::SetTextureSetPS(m_PunctualLightTextureSetPtr);
+            ContextManager::SetTexture(0, m_PunctualLightTextureSetPtr->GetTexture(0));
+            ContextManager::SetTexture(1, m_PunctualLightTextureSetPtr->GetTexture(1));
+            ContextManager::SetTexture(2, m_PunctualLightTextureSetPtr->GetTexture(2));
+            ContextManager::SetTexture(3, m_PunctualLightTextureSetPtr->GetTexture(3));
             
             // -----------------------------------------------------------------------------
             // Set shadow map
             // -----------------------------------------------------------------------------
             if (pDtLightFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows)
             {
-                ContextManager::SetTextureSetPS(CurrentRenderJob->m_pGfxLightFacet->GetTextureSMSet());
+                ContextManager::SetTexture(4, CurrentRenderJob->m_pGfxLightFacet->GetTextureSMSet()->GetTexture(0));
             }
             
             // -----------------------------------------------------------------------------
@@ -497,7 +504,11 @@ namespace
             // -----------------------------------------------------------------------------
             ContextManager::DrawIndexed(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
 
-            ContextManager::ResetTextureSetPS();
+            ContextManager::ResetTexture(0);
+            ContextManager::ResetTexture(1);
+            ContextManager::ResetTexture(2);
+            ContextManager::ResetTexture(3);
+            ContextManager::ResetTexture(4);
 
             ContextManager::ResetInputLayout();
 
@@ -519,7 +530,11 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::ResetTopology();
         
-        ContextManager::ResetSamplerSetPS();
+        ContextManager::ResetSampler(0);
+        ContextManager::ResetSampler(1);
+        ContextManager::ResetSampler(2);
+        ContextManager::ResetSampler(3);
+        ContextManager::ResetSampler(4);
         
         ContextManager::ResetRenderContext();
     }

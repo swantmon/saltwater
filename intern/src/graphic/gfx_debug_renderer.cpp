@@ -794,8 +794,8 @@ namespace
     void CGfxDebugRenderer::RenderTextures()
     {
         const unsigned int pOffset[] = { 0, 0 };
-        CDebugTextures::const_iterator CurrentTexture = m_DebugTextures.begin();
-        CDebugTextures::const_iterator EndOfTextures  = m_DebugTextures.end();
+        CDebugTextures::iterator CurrentTexture = m_DebugTextures.begin();
+        CDebugTextures::iterator EndOfTextures  = m_DebugTextures.end();
 
         if (CurrentTexture == EndOfTextures)
         {
@@ -851,10 +851,16 @@ namespace
 
             // -----------------------------------------------------------------------------
 
-            ContextManager::SetTextureSetPS(CurrentTexture->m_TexturePtr);
+            ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+
+            ContextManager::SetTexture(0, CurrentTexture->m_TexturePtr->GetTexture(0));
 
             ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
         }
+
+        ContextManager::ResetTexture(0);
+
+        ContextManager::ResetSampler(0);
 
         ContextManager::ResetConstantBufferSetPS();
 
@@ -919,7 +925,9 @@ namespace
 
         ContextManager::SetConstantBufferSetVS(m_BaseVSBuffer);
 
-        ContextManager::SetTextureSetPS(m_TextTexturePtr);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+
+        ContextManager::SetTexture(0, m_TextTexturePtr->GetTexture(0));
 
         pInstances = BufferManager::MapVertexBuffer(m_TextInstanceBufferSetPtr->GetBuffer(1), CBuffer::Write);
 
@@ -980,6 +988,10 @@ namespace
 
             NumberOfLetters = 0;
         }
+
+        ContextManager::ResetTexture(0);
+
+        ContextManager::ResetSampler(0);
 
         ContextManager::ResetConstantBufferSetPS();
 

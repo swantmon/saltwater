@@ -334,9 +334,13 @@ namespace
 
         ContextManager::SetShaderPS(m_SunLightShaderPSPtr);
 
-        ContextManager::SetConstantBufferSetVS(m_FullQuadViewVSBufferPtr);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(4, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
-        ContextManager::SetSamplerSetPS(m_PSSunSamplerSetPtr);
+        ContextManager::SetConstantBufferSetVS(m_FullQuadViewVSBufferPtr);
 
         CRenderJobs::const_iterator CurrentRenderJob = m_RenderJobs.begin();
         CRenderJobs::const_iterator EndOfRenderJobs  = m_RenderJobs.end();
@@ -362,19 +366,31 @@ namespace
             // -----------------------------------------------------------------------------
     
             ContextManager::SetConstantBufferSetPS(m_SunLightPSBufferPtr);
-    
-            ContextManager::SetTextureSetPS(m_SunLightTextureSetPtr);
-            
-            ContextManager::SetTextureSetPS(pGraphicSunFacet->GetTextureSMSet());
+
+            ContextManager::SetTexture(0, m_SunLightTextureSetPtr->GetTexture(0));
+            ContextManager::SetTexture(1, m_SunLightTextureSetPtr->GetTexture(1));
+            ContextManager::SetTexture(2, m_SunLightTextureSetPtr->GetTexture(2));
+            ContextManager::SetTexture(3, m_SunLightTextureSetPtr->GetTexture(3));
+            ContextManager::SetTexture(4, pGraphicSunFacet->GetTextureSMSet()->GetTexture(0));
     
             ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
     
-            ContextManager::ResetTextureSetPS();
+            ContextManager::ResetTexture(0);
+            ContextManager::ResetTexture(1);
+            ContextManager::ResetTexture(2);
+            ContextManager::ResetTexture(3);
+            ContextManager::ResetTexture(4);
     
             ContextManager::ResetConstantBufferSetPS();
         }
 
         ContextManager::ResetConstantBufferSetVS(); 
+
+        ContextManager::ResetSampler(0);
+        ContextManager::ResetSampler(1);
+        ContextManager::ResetSampler(2);
+        ContextManager::ResetSampler(3);
+        ContextManager::ResetSampler(4);
 
         ContextManager::ResetTopology();
 
@@ -383,8 +399,6 @@ namespace
         ContextManager::ResetIndexBuffer();
 
         ContextManager::ResetVertexBufferSet();
-
-        ContextManager::ResetSamplerSetPS();
 
         ContextManager::ResetShaderVS();
 

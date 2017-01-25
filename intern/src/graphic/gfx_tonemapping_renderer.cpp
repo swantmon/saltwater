@@ -87,10 +87,6 @@ namespace
         CShaderPtr             m_FullquadShaderVSPtr;
         
         CShaderPtr             m_ShadingPSPtr;
-        
-        CTextureSetPtr         m_ShadingTextureSetPtr;
-        
-        CSamplerSetPtr         m_PSSamplerSetPtr;
 
         CRenderContextPtr      m_ShadingContextPtr;
     };
@@ -106,7 +102,6 @@ namespace
         , m_QuadInputLayoutPtr    ()
         , m_FullquadShaderVSPtr   ()
         , m_ShadingPSPtr          ()
-        , m_ShadingTextureSetPtr  ()
     {
     }
     
@@ -134,8 +129,6 @@ namespace
         m_QuadInputLayoutPtr     = 0;
         m_FullquadShaderVSPtr    = 0;
         m_ShadingPSPtr           = 0;
-        m_ShadingTextureSetPtr   = 0;
-        m_PSSamplerSetPtr        = 0;
         m_ShadingContextPtr      = 0;
     }
     
@@ -194,28 +187,13 @@ namespace
         ShadingContextPtr->SetRenderState(ShadingStatePtr);
 
         m_ShadingContextPtr = ShadingContextPtr;
-        
-        // -----------------------------------------------------------------------------
-        
-        CSamplerPtr Sampler[6];
-        
-        Sampler[0] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[1] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[2] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[3] = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-        Sampler[4] = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-        Sampler[5] = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-        
-        m_PSSamplerSetPtr = SamplerManager::CreateSamplerSet(Sampler, 6);
     }
     
     // -----------------------------------------------------------------------------
     
     void CGfxShadingRenderer::OnSetupTextures()
     {
-        CTextureBasePtr LightAccumulationTexturePtr = TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0);
-                
-        m_ShadingTextureSetPtr  = TextureManager::CreateTextureSet(LightAccumulationTexturePtr);
+
     }
     
     // -----------------------------------------------------------------------------
@@ -318,8 +296,6 @@ namespace
 
         ContextManager::SetRenderContext(m_ShadingContextPtr);
 
-        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
-
         ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
 
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
@@ -336,11 +312,15 @@ namespace
 
         ContextManager::SetConstantBufferSetPS(m_ConstantBufferSetPSPtr);
 
-        ContextManager::SetTextureSetPS(m_ShadingTextureSetPtr);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+
+        ContextManager::SetTexture(0, TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0));
 
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
 
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+
+        ContextManager::ResetSampler(0);
 
         ContextManager::ResetConstantBufferSetPS();
 
@@ -354,7 +334,7 @@ namespace
 
         ContextManager::ResetVertexBufferSet();
 
-        ContextManager::ResetSamplerSetPS();
+        ContextManager::ResetSampler(0);
 
         ContextManager::ResetShaderVS();
 

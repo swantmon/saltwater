@@ -433,9 +433,12 @@ namespace
 
             ContextManager::SetShaderPS(MaterialPtr->GetShaderPS());
 
-            ContextManager::SetTextureSetPS(MaterialPtr->GetTextureSetPS());
+            for (unsigned int IndexOfTexture = 0; IndexOfTexture < MaterialPtr->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
+            {
+                ContextManager::SetSampler(IndexOfTexture, MaterialPtr->GetSamplerSetPS()->GetSampler(IndexOfTexture));
 
-            ContextManager::SetSamplerSetPS(m_PSSamplerSet);
+                ContextManager::SetTexture(IndexOfTexture, MaterialPtr->GetTextureSetPS()->GetTexture(IndexOfTexture));
+            }
 
             ContextManager::SetConstantBufferSetVS(m_ViewVSBuffer);
 
@@ -456,8 +459,6 @@ namespace
 
                 ContextManager::SetConstantBufferSetDS(m_DSBuffer);
 
-                ContextManager::SetTextureSetDS(MaterialPtr->GetTextureSetPS());
-
                 ContextManager::SetTopology(STopology::Patches);
             }
 
@@ -471,6 +472,13 @@ namespace
             ContextManager::SetInputLayout(SurfacePtr->GetShaderVS()->GetInputLayout());
 
             ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
+
+            for (unsigned int IndexOfTexture = 0; IndexOfTexture < MaterialPtr->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
+            {
+                ContextManager::ResetSampler(IndexOfTexture);
+
+                ContextManager::ResetTexture(IndexOfTexture);
+            }
 
             ContextManager::ResetInputLayout();
 
@@ -486,12 +494,6 @@ namespace
 
             ContextManager::ResetConstantBufferSetVS();
         }
-
-        ContextManager::ResetTextureSetDS();
-
-        ContextManager::ResetTextureSetHS();
-
-        ContextManager::ResetSamplerSetPS();
 
         ContextManager::ResetShaderVS();
 

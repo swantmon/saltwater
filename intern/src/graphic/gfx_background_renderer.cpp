@@ -545,9 +545,7 @@ namespace
         const unsigned int pOffset[] = {0, 0};
         
         ContextManager::SetRenderContext(RenderContextPtr);
-        
-        ContextManager::SetSamplerSetPS(SamplerSetPtr);
-        
+                
         ContextManager::SetVertexBufferSet(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
         
         ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
@@ -563,14 +561,20 @@ namespace
         ContextManager::SetConstantBufferSetVS(VSBufferSetPtr);
         
         ContextManager::SetConstantBufferSetPS(PSBufferSetPtr);
-        
-        ContextManager::SetTextureSetPS(pSkyFacet->GetCubemapSetPtr());
 
-        ContextManager::SetTextureSetPS(TextureSetPtr);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        
+        ContextManager::SetTexture(0, pSkyFacet->GetCubemapSetPtr()->GetTexture(0));
+        ContextManager::SetTexture(1, TextureSetPtr->GetTexture(0));
         
         ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
         
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+        ContextManager::ResetTexture(1);
+
+        ContextManager::ResetSampler(0);
+        ContextManager::ResetSampler(1);
         
         ContextManager::ResetConstantBufferSetPS();
         
@@ -583,8 +587,6 @@ namespace
         ContextManager::ResetIndexBuffer();
         
         ContextManager::ResetVertexBufferSet();
-        
-        ContextManager::ResetSamplerSetPS();
         
         ContextManager::ResetShaderVS();
         
@@ -684,8 +686,6 @@ namespace
 
         ContextManager::SetRenderContext(RenderContextPtr);
 
-        ContextManager::SetSamplerSetPS(SamplerSetPtr);
-
         ContextManager::SetVertexBufferSet(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
 
         ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
@@ -702,13 +702,19 @@ namespace
 
         ContextManager::SetConstantBufferSetPS(PSBufferSetPtr);
 
-        ContextManager::SetTextureSetPS(rRenderJob.m_pGraphicCamera->GetBackgroundTextureSet());
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        ContextManager::SetTextureSetPS(TextureSetPtr);
+        ContextManager::SetTexture(0, rRenderJob.m_pGraphicCamera->GetBackgroundTextureSet()->GetTexture(0));
+        ContextManager::SetTexture(1, TextureSetPtr->GetTexture(0));
 
         ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
 
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+        ContextManager::ResetTexture(1);
+
+        ContextManager::ResetSampler(0);
+        ContextManager::ResetSampler(1);
 
         ContextManager::ResetConstantBufferSetPS();
 
@@ -721,8 +727,6 @@ namespace
         ContextManager::ResetIndexBuffer();
 
         ContextManager::ResetVertexBufferSet();
-
-        ContextManager::ResetSamplerSetPS();
 
         ContextManager::ResetShaderVS();
 

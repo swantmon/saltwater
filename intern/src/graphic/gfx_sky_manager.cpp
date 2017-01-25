@@ -1078,8 +1078,6 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(RenderContextPtr);
 
-        ContextManager::SetSamplerSetPS(SamplerSetPtr);
-
         ContextManager::SetTopology(STopology::TriangleList);
 
         ContextManager::SetShaderVS(VSPtr);
@@ -1098,7 +1096,9 @@ namespace
 
         ContextManager::SetConstantBufferSetPS(PSBufferSetPtr);
 
-        ContextManager::SetTextureSetPS(_pOutput->m_InputTextureSetPtr);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(_pOutput->m_InputTexture2DPtr));
 
         // -----------------------------------------------------------------------------
         // Draw
@@ -1108,7 +1108,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Reset
         // -----------------------------------------------------------------------------
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+
+        ContextManager::ResetSampler(0);
 
         ContextManager::ResetConstantBufferSetPS();
 
@@ -1127,8 +1129,6 @@ namespace
         ContextManager::ResetShaderPS();
 
         ContextManager::ResetTopology();
-
-        ContextManager::ResetSamplerSetPS();
 
         ContextManager::ResetRenderContext();
 
@@ -1177,8 +1177,6 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(RenderContextPtr);
 
-        ContextManager::SetSamplerSetPS(SamplerSetPtr);
-
         ContextManager::SetTopology(STopology::TriangleList);
 
         ContextManager::SetShaderVS(VSPtr);
@@ -1197,7 +1195,9 @@ namespace
 
         ContextManager::SetConstantBufferSetPS(PSBufferSetPtr);
 
-        ContextManager::SetTextureSetPS(_pOutput->m_InputTextureSetPtr);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(_pOutput->m_InputTexture2DPtr));
 
         // -----------------------------------------------------------------------------
         // Draw
@@ -1207,7 +1207,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Reset
         // -----------------------------------------------------------------------------
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+
+        ContextManager::ResetSampler(0);
 
         ContextManager::ResetConstantBufferSetPS();
 
@@ -1226,8 +1228,6 @@ namespace
         ContextManager::ResetShaderPS();
 
         ContextManager::ResetTopology();
-
-        ContextManager::ResetSamplerSetPS();
 
         ContextManager::ResetRenderContext();
 
@@ -1298,8 +1298,6 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(RenderContextPtr);
 
-        ContextManager::SetSamplerSetPS(SamplerSetPtr);
-
         ContextManager::SetTopology(STopology::TriangleList);
 
         ContextManager::SetShaderVS(VSPtr);
@@ -1320,7 +1318,9 @@ namespace
 
         ContextManager::SetConstantBufferSetPS(PSBufferSetPtr);
 
-        ContextManager::SetTextureSetPS(_pOutput->m_InputTextureSetPtr);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(_pOutput->m_InputTexture2DPtr));
 
         // -----------------------------------------------------------------------------
         // Draw
@@ -1330,7 +1330,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Reset
         // -----------------------------------------------------------------------------
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+
+        ContextManager::ResetSampler(0);
 
         ContextManager::ResetConstantBufferSetPS();
 
@@ -1351,8 +1353,6 @@ namespace
         ContextManager::ResetShaderPS();
 
         ContextManager::ResetTopology();
-
-        ContextManager::ResetSamplerSetPS();
 
         ContextManager::ResetRenderContext();
 
@@ -1453,8 +1453,6 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(RenderContextPtr);
 
-        ContextManager::SetSamplerSetPS(SamplerSetPtr);
-
         ContextManager::SetTopology(STopology::TriangleList);
 
         ContextManager::SetShaderVS(VSPtr);
@@ -1475,7 +1473,9 @@ namespace
 
         ContextManager::SetConstantBufferSetPS(PSBufferSetPtr);
 
-        ContextManager::SetTextureSetPS(_pOutput->m_InputTextureSetPtr);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(_pOutput->m_InputTexture2DPtr));
 
         // -----------------------------------------------------------------------------
         // Draw
@@ -1485,7 +1485,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Reset
         // -----------------------------------------------------------------------------
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+
+        ContextManager::ResetSampler(0);
 
         ContextManager::ResetConstantBufferSetPS();
 
@@ -1506,8 +1508,6 @@ namespace
         ContextManager::ResetShaderPS();
 
         ContextManager::ResetTopology();
-
-        ContextManager::ResetSamplerSetPS();
 
         ContextManager::ResetRenderContext();
 
@@ -1574,8 +1574,6 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(RenderContextPtr);
 
-        ContextManager::SetSamplerSetPS(SamplerSetPtr);
-
         ContextManager::SetTopology(STopology::TriangleList);
 
         ContextManager::SetShaderVS(VSPtr);
@@ -1596,9 +1594,11 @@ namespace
 
         ContextManager::SetConstantBufferSetPS(PSBufferSetPtr);
 
-        ContextManager::SetTextureSetPS(_pOutput->m_InputTextureSetPtr);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        ContextManager::SetTextureSetPS(m_LookupTextureSetPtr);
+        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(_pOutput->m_InputTexture2DPtr));
+        ContextManager::SetTexture(1, static_cast<CTextureBasePtr>(m_LookUpTexturePtr));
 
         // -----------------------------------------------------------------------------
         // Draw
@@ -1608,7 +1608,11 @@ namespace
         // -----------------------------------------------------------------------------
         // Reset
         // -----------------------------------------------------------------------------
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+        ContextManager::ResetTexture(1);
+
+        ContextManager::ResetSampler(0);
+        ContextManager::ResetSampler(1);
 
         ContextManager::ResetConstantBufferSetPS();
 
@@ -1629,8 +1633,6 @@ namespace
         ContextManager::ResetShaderPS();
 
         ContextManager::ResetTopology();
-
-        ContextManager::ResetSamplerSetPS();
 
         ContextManager::ResetRenderContext();
 
