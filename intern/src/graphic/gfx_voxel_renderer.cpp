@@ -37,10 +37,10 @@ using namespace Gfx;
 
 namespace
 {
-    const float g_KinectFocalLengthX = 0.72113f;
-    const float g_KinectFocalLengthY = 0.870799f;
-    const float g_KinectFocalPointX = 0.50602675f;
-    const float g_KinectFocalPointY = 0.499133f;
+    const float g_KinectFocalLengthX = 0.72113f * MR::CKinectControl::DepthImageWidth;
+    const float g_KinectFocalLengthY = 0.870799f * MR::CKinectControl::DepthImageHeight;
+    const float g_KinectFocalPointX = 0.50602675f * MR::CKinectControl::DepthImageWidth;
+    const float g_KinectFocalPointY = 0.499133f * MR::CKinectControl::DepthImageHeight;
 
     const int g_PyramidLevels = 3;
 
@@ -128,6 +128,8 @@ namespace
         void RenderVertexMap();
         void RenderVolume();
         void SetSphere();
+
+        GLuint m_DebugBuffer;
 
     private:
 
@@ -227,6 +229,7 @@ namespace
         glDeleteTextures(g_PyramidLevels, m_RaycastVertexMap);
         glDeleteTextures(g_PyramidLevels, m_RaycastNormalMap);
         glDeleteTextures(1, &m_Volume);
+        glDeleteTextures(1, &m_DebugBuffer);
 
         glDeleteBuffers(1, &m_DrawCallConstantBuffer);
         glDeleteBuffers(1, &m_IntrinsicsConstantBuffer);
@@ -238,16 +241,19 @@ namespace
     
     void CGfxVoxelRenderer::OnSetupShader()
     {
-        int NumberOfDefines = 6;
+        int NumberOfDefines = 9;
 
         std::vector<std::stringstream> DefineStreams(NumberOfDefines);
 
         DefineStreams[0] << "VOLUME_RESOLUTION " << g_VolumeResolution;
         DefineStreams[1] << "VOXEL_SIZE " << g_VoxelSize;
         DefineStreams[2] << "VOLUME_SIZE " << g_VolumeSize;
-        DefineStreams[3] << "TILE_SIZE2D " << g_TileSize2D;
-        DefineStreams[4] << "TILE_SIZE3D " << g_TileSize3D;
-        DefineStreams[5] << "UINT16_MAX " << 65535;
+        DefineStreams[3] << "DEPTH_IMAGE_WIDTH " << MR::CKinectControl::DepthImageWidth;
+        DefineStreams[4] << "DEPTH_IMAGE_HEIGHT " << MR::CKinectControl::DepthImageHeight;
+        DefineStreams[5] << "TILE_SIZE2D " << g_TileSize2D;
+        DefineStreams[6] << "TILE_SIZE3D " << g_TileSize3D;
+        DefineStreams[7] << "UINT16_MAX " << 65535;
+        DefineStreams[8] << "TRUNCATED_DISTANCE " << g_TruncatedDistance;
 
         std::vector<std::string> DefineStrings(NumberOfDefines);
         std::vector<const char*> Defines(NumberOfDefines);
@@ -327,6 +333,9 @@ namespace
         }
 
         glTextureStorage3D(m_Volume, 1, GL_RG16UI, g_VolumeResolution, g_VolumeResolution, g_VolumeResolution);
+
+        glCreateTextures(GL_TEXTURE_3D, 1, &m_DebugBuffer);
+        glTextureStorage3D(m_DebugBuffer, 1, GL_RGBA32F, g_VolumeResolution, g_VolumeResolution, g_VolumeResolution);
     }
     
     // -----------------------------------------------------------------------------
@@ -357,11 +366,11 @@ namespace
         STrackingData TrackingData;
 
         TrackingData.m_PoseRotationMatrix.SetIdentity();
-        TrackingData.m_PoseTranslationMatrix.SetTranslation(0.0f, 0.0, 20.0f);
+        TrackingData.m_PoseTranslationMatrix.SetTranslation(0.0f, 0.0, -20.0f);
         TrackingData.m_PoseMatrix = TrackingData.m_PoseTranslationMatrix * TrackingData.m_PoseRotationMatrix;
 
         TrackingData.m_InvPoseRotationMatrix = TrackingData.m_PoseRotationMatrix.GetInverted();
-        TrackingData.m_InvPoseTranslationMatrix = TrackingData.m_PoseTranslationMatrix.GetInverted();;
+        TrackingData.m_InvPoseTranslationMatrix = TrackingData.m_PoseTranslationMatrix.GetInverted();
         TrackingData.m_InvPoseMatrix = TrackingData.m_PoseMatrix.GetInverted();
 
         glCreateBuffers(1, &m_TrackingDataConstantBuffer);
@@ -517,14 +526,14 @@ namespace
 
         glBindImageTexture(0, m_Volume, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RG16UI);
         glBindImageTexture(1, m_KinectRawDepthBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
-        glBindImageTexture(2, m_KinectVertexMap[0], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+        glBindImageTexture(2, m_DebugBuffer, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_IntrinsicsConstantBuffer);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_TrackingDataConstantBuffer);
 
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
-        glDispatchCompute(MR::CKinectControl::DepthImageWidth / g_TileSize2D, MR::CKinectControl::DepthImageHeight / g_TileSize2D, 1);
+        glDispatchCompute(g_VolumeResolution / g_TileSize2D, g_VolumeResolution / g_TileSize2D, 1);
     }
 
     // -----------------------------------------------------------------------------
@@ -564,7 +573,7 @@ namespace
             PerformTracking();
             Integrate();
 
-            SetSphere(); // debugging
+            //SetSphere(); // debugging
 
             Raycast();
             DownSample();
@@ -586,8 +595,11 @@ namespace
         glClear(GL_COLOR_BUFFER_BIT);
         
         //RenderDepth();
+        glViewport(0, 0, 640, 720);
+        RenderVolume();
+        glViewport(640, 0, 640, 720);
         RenderVertexMap();
-        //RenderVolume();
+        glViewport(0, 0, 1280, 720);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

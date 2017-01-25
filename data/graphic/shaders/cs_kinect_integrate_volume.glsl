@@ -11,69 +11,76 @@
 #define MU 0.1
 #define MAX_WEIGHT 100.0
 
-layout(row_major, std140, binding = 1) uniform PerDrawCallData
-{
-	mat4 g_WorldMatrix;
-};
-
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
 
-layout (binding = 0, rg16ui) uniform uimage3D cs_Volume;
-layout (binding = 1, r16ui) readonly uniform uimage2D cs_Depth;
-layout (binding = 2, rgba32f) readonly uniform image2D cs_Vertex;
+layout(binding = 0, rg16ui) uniform uimage3D cs_Volume;
+layout(binding = 1, r16ui) readonly uniform uimage2D cs_Depth;
+layout(binding = 2, rgba32f) writeonly uniform image3D cs_Debug;
 
 // -------------------------------------------------------------------------------------
 // Functions
 // -------------------------------------------------------------------------------------
 
-float sq(float value)
-{
-	return value * value;
-}
-
 layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
 void main()
 {
-	ivec2 ImageSize = imageSize(cs_Vertex);
-	ivec3 PixelPosition = ivec3(gl_GlobalInvocationID.xy, 0);
+	ivec2 ImageSize = ivec2(DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT);
 	
-	vec3 VolumeValue = imageLoad(cs_Vertex, PixelPosition.xy).xyz;
-	VolumeValue += vec3(0.5);
-	VolumeValue *= VOXEL_SIZE;
-	
-    vec3 Position = mat3(g_InvPoseMatrix) * VolumeValue;
-    vec3 CameraX = mat3(g_KMatrix) * Position;
-    vec3 Delta = mat3(g_InvPoseMatrix) * vec3(0.0, 0.0, VOXEL_SIZE);
-    vec3 CameraDelta = mat3(g_KMatrix) * Delta;
+    const int x = int(gl_GlobalInvocationID.x);
+    const int y = int(gl_GlobalInvocationID.y);
 
-    for(PixelPosition.z = 0; PixelPosition.z < VOLUME_RESOLUTION; ++ PixelPosition.z, Position += Delta, CameraX += CameraDelta)
-	{		
-		if(Position.z < 0.0001)
+    const float truncatedDistanceInverse = 1.0 / TRUNCATED_DISTANCE;
+
+    vec3 vg;
+    vg.x = (x + 0.5) * VOXEL_SIZE - g_PoseMatrix[3].x;
+    vg.y = (y + 0.5) * VOXEL_SIZE - g_PoseMatrix[3].y;
+    vg.z = (0 + 0.5) * VOXEL_SIZE - g_PoseMatrix[3].z;
+
+    uvec3 pos = uvec3(x, y, 0);
+    const int step = 1;
+
+    for (int z = 0; z < VOLUME_RESOLUTION; ++ z, pos.z += step, vg.z += VOXEL_SIZE)
+    {
+        imageStore(cs_Volume, ivec3(x, y, z), uvec4(0)); // clear for debugging
+
+        const vec3 v = mat3(g_InvPoseRotationMatrix) * vg;
+
+        const float zFactor = 1.0 / v.z;
+
+        const ivec2 cameraPlane = ivec2(v.xy * g_FocalLength * vec2(zFactor) + g_FocalPoint);
+
+        if (v.z > 0.0 && cameraPlane.x >= 0 && cameraPlane.x < DEPTH_IMAGE_WIDTH && cameraPlane.y >= 0 && cameraPlane.y < DEPTH_IMAGE_HEIGHT)
         {
-			continue;
-		}
-        vec2 Pixel = vec2(CameraX.x / CameraX.z + 0.5, CameraX.y / CameraX.z + 0.5);
-        if(Pixel.x < 0.0 || Pixel.x > ImageSize.x || Pixel.y < 0.0 || Pixel.y > ImageSize.y)
-        {
-			continue;
-		}
-        ivec2 Px = ivec2(Pixel.x, Pixel.y);
-        uint Depth = imageLoad(cs_Depth, Px).x;
-		if (Depth == 0)
-		{
-			continue;
-		}
-        const float Diff = (Depth - CameraX.z) * sqrt(1.0 + sq(Position.x / Position.z) + sq(Position.y / Position.z));
-        if(Diff > - MU)
-		{
-            float SDF = min(1.0, Diff / MU);
-            vec2 Data = vec2(imageLoad(cs_Volume, PixelPosition).xy);
-            Data.x = clamp((Data.y * Data.x + SDF)/(Data.y + 1.0), -1.0, 1.0);
-            Data.y = min(Data.y + 1.0, MAX_WEIGHT);
-			imageStore(cs_Volume, PixelPosition, uvec4(Data, 0, 0));
+            const int depth = int(imageLoad(cs_Depth, cameraPlane).x);
+
+            if (depth != 0)
+            {
+                const float lx = (cameraPlane.x - g_FocalPoint.x) * g_InvFocalLength.x;
+                const float ly = (cameraPlane.y - g_FocalPoint.y) * g_InvFocalLength.y;
+                const float lamdaInverse = 1.0 / sqrt(lx * lx + ly * ly + 1.0);
+
+                const float sdf = float(depth) - lamdaInverse * length(vg);
+
+                if (sdf >= - TRUNCATED_DISTANCE)
+                {
+                    const float tsdf = min(1.0, sdf * (1.0 / TRUNCATED_DISTANCE));
+
+                    const uvec2 volumeValue = uvec2(imageLoad(cs_Volume, ivec3(pos)).xy);
+
+                    const float tsdfOld = float(volumeValue.x) / UINT16_MAX;
+                    const int weightOld = int(volumeValue.y);
+
+                    const float tsdfNew = float(weightOld * tsdfOld + tsdf) / float(weightOld + 1);
+                    const int weightNew = int(min(weightOld + 1.0, MAX_WEIGHT));
+
+                    imageStore(cs_Volume, ivec3(pos), uvec4(tsdfNew * UINT16_MAX, weightNew, 0, 0));
+                }
+            }
+            //imageStore(cs_Debug, ivec3(x, y, 0), vec4(1337.0));
         }
+        //imageStore(cs_Debug, ivec3(x, y, 0), vec4(v, 0));
     }
 }
 
