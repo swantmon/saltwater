@@ -656,15 +656,19 @@ namespace
 
         ContextManager::SetShaderCS(m_ESMCSPtr);
 
-        ContextManager::SetImageTexture(0, pGraphicSunFacet->GetTextureSMSet()->GetTexture(0));
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
-        ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ESMTexturePtr));
+        ContextManager::SetTexture(0, pGraphicSunFacet->GetTextureSMSet()->GetTexture(0));
+
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_ESMTexturePtr));
 
         ContextManager::Dispatch(256, 256, 1);
 
-        ContextManager::ResetImageTexture(0);
+        ContextManager::ResetTexture(0);
 
-        ContextManager::ResetImageTexture(1);
+        ContextManager::ResetSampler(0)
+
+        ContextManager::ResetImageTexture(0);
 
         ContextManager::ResetShaderCS();
 
