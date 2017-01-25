@@ -134,13 +134,14 @@ namespace ContextManager
     void ResetTextureSetPS();
     void SetTextureSetPS(CTextureSetPtr _TextureSetPtr);
     CTextureSetPtr GetTextureSetPS();
-    void ResetTextureSetCS();
-    void SetTextureSetCS(CTextureSetPtr _TextureSetPtr);
-    CTextureSetPtr GetTextureSetCS();
 
     void ResetTexture(unsigned int _Unit);
     void SetTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr);
     CTextureBasePtr GetTexture(unsigned int _Unit);
+
+    void ResetImageTexture(unsigned int _Unit);
+    void SetImageTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr);
+    CTextureBasePtr GetImageTexture(unsigned int _Unit);
 
     void ResetTargetSet();
     void SetTargetSet(CTargetSetPtr _TargetSetPtr);

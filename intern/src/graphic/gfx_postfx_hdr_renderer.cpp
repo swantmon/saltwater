@@ -698,11 +698,13 @@ namespace
 
             ContextManager::SetConstantBufferSetCS(m_GaussianBlurPropertiesCSBufferSetPtr);
 
-            ContextManager::SetTextureSetCS(m_BlurStagesTextureSetPtrs[IndexOfBlurStage * 2 + 0]);
+            ContextManager::SetImageTexture(0, m_BlurStagesTextureSetPtrs[IndexOfBlurStage * 2 + 0]->GetTexture(0));
+            ContextManager::SetImageTexture(1, m_BlurStagesTextureSetPtrs[IndexOfBlurStage * 2 + 0]->GetTexture(1));
 
             ContextManager::Dispatch(NumberOfThreadGroupsX, NumberOfThreadGroupsY, 1);
 
-            ContextManager::ResetTextureSetCS();
+            ContextManager::ResetImageTexture(0);
+            ContextManager::ResetImageTexture(1);
 
             ContextManager::ResetConstantBufferSetCS();
 
@@ -720,11 +722,13 @@ namespace
 
             ContextManager::SetConstantBufferSetCS(m_GaussianBlurPropertiesCSBufferSetPtr);
 
-            ContextManager::SetTextureSetCS(m_BlurStagesTextureSetPtrs[IndexOfBlurStage * 2 + 1]);
+            ContextManager::SetImageTexture(0, m_BlurStagesTextureSetPtrs[IndexOfBlurStage * 2 + 1]->GetTexture(0));
+            ContextManager::SetImageTexture(1, m_BlurStagesTextureSetPtrs[IndexOfBlurStage * 2 + 1]->GetTexture(1));
 
             ContextManager::Dispatch(NumberOfThreadGroupsX, NumberOfThreadGroupsY, 1);
 
-            ContextManager::ResetTextureSetCS();
+            ContextManager::ResetImageTexture(0);
+            ContextManager::ResetImageTexture(1);
 
             ContextManager::ResetConstantBufferSetCS();
 

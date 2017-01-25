@@ -583,11 +583,11 @@ namespace
     {
         ContextManager::SetShaderCS(m_BRDFShaderPtr);
 
-        ContextManager::SetTextureSetCS(m_BRDFTextureSetPtr);
+        ContextManager::SetImageTexture(0, m_BRDFTextureSetPtr->GetTexture(0));
 
         ContextManager::Dispatch(512, 512, 1);
 
-        ContextManager::ResetTextureSetCS();
+        ContextManager::ResetImageTexture(0);
 
         ContextManager::ResetShaderCS();
     }

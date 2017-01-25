@@ -546,7 +546,7 @@ namespace
         m_GaussianBlurPropertiesCSBufferSetPtr = BufferManager::CreateBufferSet(GaussianSettingsResourceBuffer);
         m_VolumeLightingCSBufferSetPtr         = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), SunLightBufferPtr, VolumeLightingPropertiesBufferPtr, HistogramExposureHistoryBufferPtr);
         m_FullQuadViewVSBufferPtr              = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
-        m_FogApplyBufferPtr                  = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), FogApplyPropertiesBufferPtr);
+        m_FogApplyBufferPtr                    = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), FogApplyPropertiesBufferPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -654,17 +654,17 @@ namespace
             }
         }
 
-        CTextureBasePtr ShadowMapPtr = pGraphicSunFacet->GetTextureSMSet()->GetTexture(0);
-
-        m_ESMTextureSetPtr = TextureManager::CreateTextureSet(ShadowMapPtr, static_cast<CTextureBasePtr>(m_ESMTexturePtr));
-
         ContextManager::SetShaderCS(m_ESMCSPtr);
 
-        ContextManager::SetTextureSetCS(m_ESMTextureSetPtr);
+        ContextManager::SetImageTexture(0, pGraphicSunFacet->GetTextureSMSet()->GetTexture(0));
+
+        ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ESMTexturePtr));
 
         ContextManager::Dispatch(256, 256, 1);
 
-        ContextManager::ResetTextureSetCS();
+        ContextManager::ResetImageTexture(0);
+
+        ContextManager::ResetImageTexture(1);
 
         ContextManager::ResetShaderCS();
 
@@ -689,11 +689,13 @@ namespace
 
         ContextManager::SetConstantBufferSetCS(m_GaussianBlurPropertiesCSBufferSetPtr);
 
-        ContextManager::SetTextureSetCS(m_BlurStagesTextureSetPtrs[0]);
+        ContextManager::SetImageTexture(0, m_BlurStagesTextureSetPtrs[0]->GetTexture(0));
+        ContextManager::SetImageTexture(1, m_BlurStagesTextureSetPtrs[0]->GetTexture(1));
 
         ContextManager::Dispatch(NumberOfThreadGroupsX, NumberOfThreadGroupsY, 1);
 
-        ContextManager::ResetTextureSetCS();
+        ContextManager::ResetImageTexture(0);
+        ContextManager::ResetImageTexture(1);
 
         ContextManager::ResetConstantBufferSetCS();
 
@@ -712,11 +714,13 @@ namespace
 
         ContextManager::SetConstantBufferSetCS(m_GaussianBlurPropertiesCSBufferSetPtr);
 
-        ContextManager::SetTextureSetCS(m_BlurStagesTextureSetPtrs[1]);
+        ContextManager::SetImageTexture(0, m_BlurStagesTextureSetPtrs[1]->GetTexture(0));
+        ContextManager::SetImageTexture(1, m_BlurStagesTextureSetPtrs[1]->GetTexture(1));
 
         ContextManager::Dispatch(NumberOfThreadGroupsX, NumberOfThreadGroupsY, 1);
 
-        ContextManager::ResetTextureSetCS();
+        ContextManager::ResetImageTexture(0);
+        ContextManager::ResetImageTexture(1);
 
         ContextManager::ResetConstantBufferSetCS();
 
@@ -790,7 +794,11 @@ namespace
 
         ContextManager::SetConstantBufferSetCS(m_VolumeLightingCSBufferSetPtr);
 
-        ContextManager::SetTextureSetCS(m_VolumeTextureSetPtr);
+        ContextManager::SetImageTexture(0, m_VolumeTextureSetPtr->GetTexture(0));
+        ContextManager::SetImageTexture(1, m_VolumeTextureSetPtr->GetTexture(1));
+        ContextManager::SetImageTexture(2, m_VolumeTextureSetPtr->GetTexture(2));
+        ContextManager::SetImageTexture(3, m_VolumeTextureSetPtr->GetTexture(3));
+        ContextManager::SetImageTexture(4, m_VolumeTextureSetPtr->GetTexture(4));
 
         unsigned int NumberOfThreadGroupsX;
         unsigned int NumberOfThreadGroupsY;
@@ -806,7 +814,11 @@ namespace
 
         ContextManager::Dispatch(NumberOfThreadGroupsX, NumberOfThreadGroupsY, NumberOfThreadGroupsZ);
 
-        ContextManager::ResetTextureSetCS();
+        ContextManager::ResetImageTexture(0);
+        ContextManager::ResetImageTexture(1);
+        ContextManager::ResetImageTexture(2);
+        ContextManager::ResetImageTexture(3);
+        ContextManager::ResetImageTexture(4);
         
         ContextManager::ResetConstantBufferSetCS();
 
@@ -823,7 +835,8 @@ namespace
 
         ContextManager::SetShaderCS(m_VolumeScatteringCSPtr);
 
-        ContextManager::SetTextureSetCS(m_ScatteringTextureSetPtr);
+        ContextManager::SetImageTexture(0, m_ScatteringTextureSetPtr->GetTexture(0));
+        ContextManager::SetImageTexture(1, m_ScatteringTextureSetPtr->GetTexture(1));
 
         unsigned int NumberOfThreadGroupsX;
         unsigned int NumberOfThreadGroupsY;
@@ -836,7 +849,8 @@ namespace
 
         ContextManager::Dispatch(NumberOfThreadGroupsX, NumberOfThreadGroupsY, 1);
 
-        ContextManager::ResetTextureSetCS();
+        ContextManager::ResetImageTexture(0);
+        ContextManager::ResetImageTexture(1);
 
         ContextManager::ResetShaderCS();
 

@@ -673,22 +673,26 @@ namespace
 
             BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesCSBufferPtr->GetBuffer(0), &GaussianSettings);
 
-            ContextManager::SetTextureSetCS(m_BilateralBlurHTextureSetPtr);
+            ContextManager::SetImageTexture(0, m_BilateralBlurHTextureSetPtr->GetTexture(0));
+            ContextManager::SetImageTexture(1, m_BilateralBlurHTextureSetPtr->GetTexture(1));
 
             ContextManager::Dispatch(NumberOfThreadGroupsX, NumberOfThreadGroupsY, 1);
 
-            ContextManager::ResetTextureSetCS();
+            ContextManager::ResetImageTexture(0);
+            ContextManager::ResetImageTexture(1);
 
             GaussianSettings.m_Direction[0] = 0;
             GaussianSettings.m_Direction[1] = 1;
 
             BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesCSBufferPtr->GetBuffer(0), &GaussianSettings);
 
-            ContextManager::SetTextureSetCS(m_BilateralBlurVTextureSetPtr);
+            ContextManager::SetImageTexture(0, m_BilateralBlurVTextureSetPtr->GetTexture(0));
+            ContextManager::SetImageTexture(1, m_BilateralBlurVTextureSetPtr->GetTexture(1));
 
             ContextManager::Dispatch(NumberOfThreadGroupsX, NumberOfThreadGroupsY, 1);
 
-            ContextManager::ResetTextureSetCS();
+            ContextManager::ResetImageTexture(0);
+            ContextManager::ResetImageTexture(1);
 
             // -----------------------------------------------------------------------------
 

@@ -336,19 +336,6 @@ namespace
     
     void CGfxSelectionRenderer::OnSetupTextures()
     {
-        CTargetSetPtr DeferredTargetSetPtr = TargetSetManager::GetDeferredTargetSet();
-        CTargetSetPtr HitProxyTargetSetPtr = TargetSetManager::GetHitProxyTargetSet();
-
-        CTextureBasePtr TextureBasePtrs[] =
-        {
-            DeferredTargetSetPtr->GetRenderTarget(0), 
-            DeferredTargetSetPtr->GetRenderTarget(1), 
-            DeferredTargetSetPtr->GetRenderTarget(2), 
-            DeferredTargetSetPtr->GetDepthStencilTarget(), 
-            HitProxyTargetSetPtr->GetRenderTarget(0)
-        };
-
-        m_GBufferTextureSetPtr = TextureManager::CreateTextureSet(TextureBasePtrs, 5);
     }
     
     // -----------------------------------------------------------------------------
@@ -842,11 +829,19 @@ namespace
 
                 ContextManager::SetConstantBufferSetCS(m_SelectionBufferSetPtrs[IndexOfBuffer]);
 
-                ContextManager::SetTextureSetCS(m_GBufferTextureSetPtr);
+                ContextManager::SetImageTexture(0, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0));
+                ContextManager::SetImageTexture(1, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1));
+                ContextManager::SetImageTexture(2, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2));
+                ContextManager::SetImageTexture(3, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
+                ContextManager::SetImageTexture(4, TargetSetManager::GetHitProxyTargetSet()->GetRenderTarget(0));
 
                 ContextManager::Dispatch(rTicket.m_SizeX, rTicket.m_SizeY, 1);
 
-                ContextManager::ResetTextureSetCS();
+                ContextManager::ResetImageTexture(0);
+                ContextManager::ResetImageTexture(1);
+                ContextManager::ResetImageTexture(2);
+                ContextManager::ResetImageTexture(3);
+                ContextManager::ResetImageTexture(4);
 
                 ContextManager::ResetConstantBufferSetCS();
 

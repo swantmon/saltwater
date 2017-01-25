@@ -433,11 +433,11 @@ namespace
 
             ContextManager::SetConstantBufferSetCS(m_HistogramBufferSetPtrs[HistogramBuild]);
 
-            ContextManager::SetTextureSetCS(m_HistogramInputTextureSetPtr);
+            ContextManager::SetImageTexture(0, m_HistogramInputTextureSetPtr->GetTexture(0));
 
             ContextManager::Dispatch(HistogramSettings.m_NumberOfThreadGroupsX, HistogramSettings.m_NumberOfThreadGroupsY, 1);
 
-            ContextManager::ResetTextureSetCS();
+            ContextManager::ResetImageTexture(0);
 
             ContextManager::ResetConstantBufferSetCS();
 
