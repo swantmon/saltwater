@@ -120,7 +120,6 @@ namespace
     private:
         
         CMeshPtr          m_QuadModelPtr;
-        CBufferSetPtr     m_FullQuadViewVSBufferPtr;
         CBufferSetPtr     m_VolumeLightingCSBufferSetPtr;
         CInputLayoutPtr   m_P2InputLayoutPtr;
         CShaderPtr        m_RectangleShaderVSPtr;
@@ -166,7 +165,6 @@ namespace
 {
     CGfxFogRenderer::CGfxFogRenderer()
         : m_QuadModelPtr                        ()
-        , m_FullQuadViewVSBufferPtr             ()
         , m_VolumeLightingCSBufferSetPtr        ()
         , m_P2InputLayoutPtr                    ()
         , m_RectangleShaderVSPtr                ()
@@ -211,7 +209,6 @@ namespace
     void CGfxFogRenderer::OnExit()
     {
         m_QuadModelPtr                  = 0;
-        m_FullQuadViewVSBufferPtr       = 0;
         m_VolumeLightingCSBufferSetPtr  = 0;
         m_P2InputLayoutPtr              = 0;
         m_RectangleShaderVSPtr          = 0;
@@ -531,9 +528,8 @@ namespace
         // -----------------------------------------------------------------------------
 
         m_GaussianBlurPropertiesCSBufferSetPtr = BufferManager::CreateBufferSet(GaussianSettingsResourceBuffer);
-        m_VolumeLightingCSBufferSetPtr         = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), SunLightBufferPtr, VolumeLightingPropertiesBufferPtr, HistogramExposureHistoryBufferPtr);
-        m_FullQuadViewVSBufferPtr              = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
-        m_FogApplyBufferPtr                    = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), FogApplyPropertiesBufferPtr);
+        m_VolumeLightingCSBufferSetPtr         = BufferManager::CreateBufferSet(SunLightBufferPtr, VolumeLightingPropertiesBufferPtr);
+        m_FogApplyBufferPtr                    = BufferManager::CreateBufferSet(FogApplyPropertiesBufferPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -678,7 +674,7 @@ namespace
 
         ContextManager::SetShaderCS(m_GaussianBlurShaderPtr);
 
-        ContextManager::SetConstantBufferSetCS(m_GaussianBlurPropertiesCSBufferSetPtr);
+        ContextManager::SetResourceBuffer(0, m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0));
 
         ContextManager::SetImageTexture(0, m_BlurStagesTextureSetPtrs[0]->GetTexture(0));
         ContextManager::SetImageTexture(1, m_BlurStagesTextureSetPtrs[0]->GetTexture(1));
@@ -688,7 +684,7 @@ namespace
         ContextManager::ResetImageTexture(0);
         ContextManager::ResetImageTexture(1);
 
-        ContextManager::ResetConstantBufferSetCS();
+        ContextManager::ResetResourceBuffer(0);
 
         ContextManager::ResetShaderCS();
 
@@ -703,7 +699,7 @@ namespace
 
         ContextManager::SetShaderCS(m_GaussianBlurShaderPtr);
 
-        ContextManager::SetConstantBufferSetCS(m_GaussianBlurPropertiesCSBufferSetPtr);
+        ContextManager::SetResourceBuffer(0, m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0));
 
         ContextManager::SetImageTexture(0, m_BlurStagesTextureSetPtrs[1]->GetTexture(0));
         ContextManager::SetImageTexture(1, m_BlurStagesTextureSetPtrs[1]->GetTexture(1));
@@ -713,7 +709,7 @@ namespace
         ContextManager::ResetImageTexture(0);
         ContextManager::ResetImageTexture(1);
 
-        ContextManager::ResetConstantBufferSetCS();
+        ContextManager::ResetResourceBuffer(0);
 
         ContextManager::ResetShaderCS();
 
@@ -762,7 +758,7 @@ namespace
         LightBuffer.m_SunAngularRadius     = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
         LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
-        BufferManager::UploadConstantBufferData(m_VolumeLightingCSBufferSetPtr->GetBuffer(1), &LightBuffer);
+        BufferManager::UploadConstantBufferData(m_VolumeLightingCSBufferSetPtr->GetBuffer(0), &LightBuffer);
 
         // -----------------------------------------------------------------------------
 
@@ -777,13 +773,17 @@ namespace
         VolumeProperties.m_DensityLevel                       = pDataVolumeFogFacet->GetDensityLevel();
         VolumeProperties.m_DensityAttenuation                 = pDataVolumeFogFacet->GetDensityAttenuation();
 
-        BufferManager::UploadConstantBufferData(m_VolumeLightingCSBufferSetPtr->GetBuffer(2), &VolumeProperties);
+        BufferManager::UploadConstantBufferData(m_VolumeLightingCSBufferSetPtr->GetBuffer(1), &VolumeProperties);
 
         // -----------------------------------------------------------------------------
 
         ContextManager::SetShaderCS(m_VolumeLightingCSPtr);
 
-        ContextManager::SetConstantBufferSetCS(m_VolumeLightingCSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
+        ContextManager::SetConstantBuffer(1, m_VolumeLightingCSBufferSetPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(2, m_VolumeLightingCSBufferSetPtr->GetBuffer(1));
+
+        ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
 
         ContextManager::SetImageTexture(0, m_VolumeTextureSetPtr->GetTexture(0));
         ContextManager::SetImageTexture(1, m_VolumeTextureSetPtr->GetTexture(1));
@@ -811,7 +811,11 @@ namespace
         ContextManager::ResetImageTexture(3);
         ContextManager::ResetImageTexture(4);
         
-        ContextManager::ResetConstantBufferSetCS();
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
+        ContextManager::ResetConstantBuffer(2);
+
+        ContextManager::ResetResourceBuffer(0);
 
         ContextManager::ResetShaderCS();
 
@@ -869,7 +873,7 @@ namespace
 
         FogApplyProperties.m_FrustumDepthInMeter = pDataVolumeFogFacet->GetFrustumDepthInMeter();
 
-        BufferManager::UploadConstantBufferData(m_FogApplyBufferPtr->GetBuffer(1), &FogApplyProperties);
+        BufferManager::UploadConstantBufferData(m_FogApplyBufferPtr->GetBuffer(0), &FogApplyProperties);
 
         // -----------------------------------------------------------------------------
         // Rendering
@@ -890,9 +894,9 @@ namespace
 
         ContextManager::SetShaderPS(m_ApplyPSPtr);
 
-        ContextManager::SetConstantBufferSetVS(m_FullQuadViewVSBufferPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
 
-        ContextManager::SetConstantBufferSetPS(m_FogApplyBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_FogApplyBufferPtr->GetBuffer(0));
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
@@ -912,7 +916,9 @@ namespace
         ContextManager::ResetSampler(1);
         ContextManager::ResetSampler(2);
 
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
+
+        ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetTopology();
 
