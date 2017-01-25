@@ -145,6 +145,10 @@ namespace
         void SetSamplerSetCS(CSamplerSetPtr _SamplerSetPtr);
         CSamplerSetPtr GetSamplerSetCS();
 
+        void ResetSampler(unsigned int _Unit);
+        void SetSampler(unsigned int _Unit, CSamplerPtr _SamplerPtr);
+        CSamplerPtr GetSampler(unsigned int _Unit);
+
         void ResetTextureSetVS();
         void SetTextureSetVS(CTextureSetPtr _TextureSetPtr);
         CTextureSetPtr GetTextureSetVS();
@@ -264,6 +268,7 @@ namespace
 
         CShaderPtr      m_ShaderSlots[CShader::NumberOfTypes];
         CTextureBasePtr m_TextureUnits[s_NumberOfTextureUnits];
+        CSamplerPtr     m_SamplerUnits[s_NumberOfTextureUnits];
         CTextureBasePtr m_ImageUnits[s_NumberOfImageUnits];
 
     private:
@@ -412,6 +417,7 @@ namespace
         for (IndexOfTextureUnit = 0; IndexOfTextureUnit < s_NumberOfTextureUnits; ++IndexOfTextureUnit)
         {
             m_TextureUnits[IndexOfTextureUnit] = 0;
+            m_SamplerUnits[IndexOfTextureUnit] = 0;
         }
 
         for (IndexOfImageUnit = 0; IndexOfImageUnit < s_NumberOfImageUnits; ++IndexOfImageUnit)
@@ -1807,6 +1813,41 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxContextManager::ResetSampler(unsigned int _Unit)
+    {
+        glBindSampler(_Unit, 0);
+
+        m_SamplerUnits[_Unit] = nullptr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxContextManager::SetSampler(unsigned int _Unit, CSamplerPtr _SamplerPtr)
+    {
+        if (_SamplerPtr == nullptr) return;
+
+        CNativeSampler* pNativeSampler = 0;
+
+        assert(_Unit < s_NumberOfTextureUnits);
+
+        if (m_SamplerUnits[_Unit] == _SamplerPtr) return;
+
+        pNativeSampler = static_cast<CNativeSampler*>(_SamplerPtr.GetPtr());
+
+        glBindSampler(_Unit, pNativeSampler->m_NativeSampler);
+
+        m_SamplerUnits[_Unit] = _SamplerPtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CSamplerPtr CGfxContextManager::GetSampler(unsigned int _Unit)
+    {
+        return m_SamplerUnits[_Unit];
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxContextManager::ResetTextureSetVS()
     {
     }
@@ -2930,6 +2971,28 @@ namespace ContextManager
     CSamplerSetPtr GetSamplerSetCS()
     {
         return CGfxContextManager::GetInstance().GetSamplerSetCS();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ResetSampler(unsigned int _Unit)
+    {
+        CGfxContextManager::GetInstance().ResetSampler(_Unit);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SetSampler(unsigned int _Unit, CSamplerPtr _SamplerPtr)
+    {
+        CGfxContextManager::GetInstance().SetSampler(_Unit, _SamplerPtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+
+    CSamplerPtr GetSampler(unsigned int _Unit)
+    {
+        return CGfxContextManager::GetInstance().GetSampler(_Unit);
     }
 
     // -----------------------------------------------------------------------------

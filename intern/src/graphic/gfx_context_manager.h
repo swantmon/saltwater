@@ -119,6 +119,10 @@ namespace ContextManager
     void SetSamplerSetCS(CSamplerSetPtr _SamplerSetPtr);
     CSamplerSetPtr GetSamplerSetCS();
 
+    void ResetSampler(unsigned int _Unit);
+    void SetSampler(unsigned int _Unit, CSamplerPtr _SamplerPtr);
+    CSamplerPtr GetSampler(unsigned int _Unit);
+
     void ResetTextureSetVS();
     void SetTextureSetVS(CTextureSetPtr _TextureSetPtr);
     CTextureSetPtr GetTextureSetVS();
