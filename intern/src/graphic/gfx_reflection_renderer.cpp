@@ -651,8 +651,8 @@ namespace
 
         ContextManager::SetConstantBufferSetVS(m_QuadVSBufferSetPtr);
         
-        ContextManager::SetConstantBufferPS(0, m_ImageLightPSBufferSetPtr->GetBuffer(0));
-        ContextManager::SetConstantBufferPS(1, m_ImageLightPSBufferSetPtr->GetBuffer(1));
+        ContextManager::SetConstantBuffer(0, m_ImageLightPSBufferSetPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(1, m_ImageLightPSBufferSetPtr->GetBuffer(1));
 
         ContextManager::SetResourceBuffer(0, m_ImageLightPSBufferSetPtr->GetBuffer(2));
         
@@ -708,8 +708,8 @@ namespace
         
         ContextManager::ResetInputLayout();
         
-        ContextManager::ResetConstantBufferPS(0);
-        ContextManager::ResetConstantBufferPS(1);
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetResourceBuffer(0);
         

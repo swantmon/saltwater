@@ -545,7 +545,7 @@ namespace
         
         ContextManager::SetConstantBufferSetVS(VSBufferSetPtr);
         
-        ContextManager::SetConstantBufferPS(0, PSBufferSetPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(8, PSBufferSetPtr->GetBuffer(0));
 
         ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
 
@@ -563,7 +563,7 @@ namespace
         ContextManager::ResetSampler(0);
         ContextManager::ResetSampler(1);
         
-        ContextManager::ResetConstantBufferPS(0);
+        ContextManager::ResetConstantBuffer(8);
 
         ContextManager::ResetResourceBuffer(0);
         
@@ -688,7 +688,7 @@ namespace
 
         ContextManager::SetConstantBufferSetVS(VSBufferSetPtr);
 
-        ContextManager::SetConstantBufferPS(0, PSBufferSetPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(8, PSBufferSetPtr->GetBuffer(0));
 
         ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
 
@@ -706,7 +706,7 @@ namespace
         ContextManager::ResetSampler(0);
         ContextManager::ResetSampler(1);
 
-        ContextManager::ResetConstantBufferPS(0);
+        ContextManager::ResetConstantBuffer(8);
 
         ContextManager::ResetResourceBuffer(0);
 

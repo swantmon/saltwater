@@ -10,7 +10,7 @@ in vec4 gl_FragCoord;
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(row_major, std140, binding = 0) uniform UB0
+layout(row_major, std140, binding = 8) uniform UB0
 {
     vec4 ps_InvertedScreenSize;
     uint ps_ExposureHistoryIndex;

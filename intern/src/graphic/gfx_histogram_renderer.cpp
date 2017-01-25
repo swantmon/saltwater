@@ -434,7 +434,7 @@ namespace
             ContextManager::SetResourceBuffer(0, m_HistogramBufferSetPtrs[HistogramBuild]->GetBuffer(0));
             ContextManager::SetResourceBuffer(1, m_HistogramBufferSetPtrs[HistogramBuild]->GetBuffer(1));
 
-            ContextManager::SetConstantBufferCS(0, m_HistogramBufferSetPtrs[HistogramBuild]->GetBuffer(2));
+            ContextManager::SetConstantBuffer(0, m_HistogramBufferSetPtrs[HistogramBuild]->GetBuffer(2));
 
             ContextManager::SetImageTexture(0, m_HistogramInputTextureSetPtr->GetTexture(0));
 
@@ -445,7 +445,7 @@ namespace
             ContextManager::ResetResourceBuffer(0);
             ContextManager::ResetResourceBuffer(1);
 
-            ContextManager::ResetConstantBufferCS(0);
+            ContextManager::ResetConstantBuffer(0);
 
             ContextManager::ResetShaderCS();
         }
@@ -459,14 +459,14 @@ namespace
             ContextManager::SetResourceBuffer(0, m_HistogramBufferSetPtrs[HistogramMerge]->GetBuffer(0));
             ContextManager::SetResourceBuffer(1, m_HistogramBufferSetPtrs[HistogramMerge]->GetBuffer(1));
 
-            ContextManager::SetConstantBufferCS(0, m_HistogramBufferSetPtrs[HistogramMerge]->GetBuffer(2));
+            ContextManager::SetConstantBuffer(0, m_HistogramBufferSetPtrs[HistogramMerge]->GetBuffer(2));
             
             ContextManager::Dispatch(s_HistogramSize, 1, 1);
             
             ContextManager::ResetResourceBuffer(0);
             ContextManager::ResetResourceBuffer(1);
 
-            ContextManager::ResetConstantBufferCS(0);
+            ContextManager::ResetConstantBuffer(0);
             
             ContextManager::ResetShaderCS();
         }
@@ -480,14 +480,14 @@ namespace
             ContextManager::SetResourceBuffer(0, m_HistogramBufferSetPtrs[HistogramEvaluate]->GetBuffer(0));
             ContextManager::SetResourceBuffer(1, m_HistogramBufferSetPtrs[HistogramEvaluate]->GetBuffer(1));
 
-            ContextManager::SetConstantBufferCS(0, m_HistogramBufferSetPtrs[HistogramEvaluate]->GetBuffer(2));
+            ContextManager::SetConstantBuffer(0, m_HistogramBufferSetPtrs[HistogramEvaluate]->GetBuffer(2));
             
             ContextManager::Dispatch(1, 1, 1);
             
             ContextManager::ResetResourceBuffer(0);
             ContextManager::ResetResourceBuffer(1);
 
-            ContextManager::ResetConstantBufferCS(0);
+            ContextManager::ResetConstantBuffer(0);
             
             ContextManager::ResetShaderCS();
         }

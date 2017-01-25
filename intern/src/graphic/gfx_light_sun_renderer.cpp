@@ -346,8 +346,8 @@ namespace
     
             // -----------------------------------------------------------------------------
     
-            ContextManager::SetConstantBufferPS(0, m_SunLightPSBufferPtr->GetBuffer(0));
-            ContextManager::SetConstantBufferPS(1, m_SunLightPSBufferPtr->GetBuffer(1));
+            ContextManager::SetConstantBuffer(0, m_SunLightPSBufferPtr->GetBuffer(0));
+            ContextManager::SetConstantBuffer(1, m_SunLightPSBufferPtr->GetBuffer(1));
 
             ContextManager::SetResourceBuffer(0, m_SunLightPSBufferPtr->GetBuffer(2));
 
@@ -365,8 +365,8 @@ namespace
             ContextManager::ResetTexture(3);
             ContextManager::ResetTexture(4);
     
-            ContextManager::ResetConstantBufferPS(0);
-            ContextManager::ResetConstantBufferPS(1);
+            ContextManager::ResetConstantBuffer(0);
+            ContextManager::ResetConstantBuffer(1);
 
             ContextManager::ResetResourceBuffer(0);
         }

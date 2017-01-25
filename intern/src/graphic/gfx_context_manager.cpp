@@ -99,9 +99,9 @@ namespace
         void SetConstantBufferSetCS(CBufferSetPtr _BufferSetPtr);
         CBufferSetPtr GetConstantBufferSetCS();
 
-        void ResetConstantBuffer(CShader::EType _Type, unsigned int _Unit);
-        void SetConstantBuffer(CShader::EType _Type, unsigned int _Unit, CBufferPtr _BufferPtr);
-        CBufferPtr GetConstantBuffer(CShader::EType _Type, unsigned int _Unit);
+        void ResetConstantBuffer(unsigned int _Unit);
+        void SetConstantBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
+        CBufferPtr GetConstantBuffer(unsigned int _Unit);
 
         void ResetResourceBuffer(unsigned int _Unit);
         void SetResourceBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
@@ -168,11 +168,10 @@ namespace
     
     private:
     
-        static const unsigned int s_NumberOfTextureUnits          = 16;
-        static const unsigned int s_NumberOfImageUnits            = 16;
-        static const unsigned int s_NumberOfBufferUnitsPerStage   = 16;
-        static const unsigned int s_NumberOfBufferUnits           = CShader::NumberOfTypes * s_NumberOfBufferUnitsPerStage;
-        static const unsigned int s_NumberOfResourceUnits         = 16;
+        static const unsigned int s_NumberOfTextureUnits  = 16;
+        static const unsigned int s_NumberOfImageUnits    = 16;
+        static const unsigned int s_NumberOfBufferUnits   = 16;
+        static const unsigned int s_NumberOfResourceUnits = 16;
 
         static const GLenum s_NativeTopologies[];
         
@@ -1316,55 +1315,47 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxContextManager::ResetConstantBuffer(CShader::EType _Type, unsigned int _Unit)
+    void CGfxContextManager::ResetConstantBuffer(unsigned int _Unit)
     {
-        assert(_Unit < s_NumberOfBufferUnitsPerStage);
+        assert(_Unit < s_NumberOfBufferUnits);
 
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        m_BufferUnits[_Type * s_NumberOfBufferUnitsPerStage + _Unit] = 0;
+        m_BufferUnits[_Unit] = 0;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxContextManager::SetConstantBuffer(CShader::EType _Type, unsigned int _Unit, CBufferPtr _BufferPtr)
+    void CGfxContextManager::SetConstantBuffer(unsigned int _Unit, CBufferPtr _BufferPtr)
     {
         if (_BufferPtr == nullptr) return;
 
-        CNativeShader* pNativeShader = 0;
         CNativeBuffer* pNativeBuffer = 0;
-        unsigned int   Slot          = 0;
 
-        assert(_Unit < s_NumberOfBufferUnitsPerStage);
+        assert(_Unit < s_NumberOfBufferUnits);
 
-        Slot = _Type * s_NumberOfBufferUnitsPerStage + _Unit;
-
-        if (m_BufferUnits[Slot] == _BufferPtr) return;
-
-        pNativeShader = static_cast<CNativeShader*>(m_ShaderSlots[_Type].GetPtr());
+        if (m_BufferUnits[_Unit] == _BufferPtr) return;
 
         pNativeBuffer = static_cast<CNativeBuffer*>(_BufferPtr.GetPtr());
 
         assert(pNativeBuffer->GetBinding() == CBuffer::ConstantBuffer);
 
-        glUniformBlockBinding(pNativeShader->m_NativeShader, _Unit, Slot);
-
         glBindBuffer(GL_UNIFORM_BUFFER, pNativeBuffer->m_NativeBuffer);
 
-        glBindBufferRange(GL_UNIFORM_BUFFER, Slot, pNativeBuffer->m_NativeBuffer, 0, pNativeBuffer->GetNumberOfBytes());
+        glBindBufferRange(GL_UNIFORM_BUFFER, _Unit, pNativeBuffer->m_NativeBuffer, 0, pNativeBuffer->GetNumberOfBytes());
 
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        m_BufferUnits[Slot] = _BufferPtr;
+        m_BufferUnits[_Unit] = _BufferPtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    CBufferPtr CGfxContextManager::GetConstantBuffer(CShader::EType _Type, unsigned int _Unit)
+    CBufferPtr CGfxContextManager::GetConstantBuffer(unsigned int _Unit)
     {
-        assert(_Unit < s_NumberOfBufferUnitsPerStage);
+        assert(_Unit < s_NumberOfBufferUnits);
 
-        return m_BufferUnits[_Type * s_NumberOfBufferUnitsPerStage + _Unit];
+        return m_BufferUnits[_Unit];
     }
 
     // -----------------------------------------------------------------------------
@@ -2385,128 +2376,23 @@ namespace ContextManager
 
     // -----------------------------------------------------------------------------
 
-    void ResetConstantBufferVS(unsigned int _Unit)
+    void ResetConstantBuffer(unsigned int _Unit)
     {
-        CGfxContextManager::GetInstance().ResetConstantBuffer(CShader::Vertex, _Unit);
+        CGfxContextManager::GetInstance().ResetConstantBuffer(_Unit);
     }
 
     // -----------------------------------------------------------------------------
 
-    void SetConstantBufferVS(unsigned int _Unit, CBufferPtr _BufferPtr)
+    void SetConstantBuffer(unsigned int _Unit, CBufferPtr _BufferPtr)
     {
-        CGfxContextManager::GetInstance().SetConstantBuffer(CShader::Vertex, _Unit, _BufferPtr);
+        CGfxContextManager::GetInstance().SetConstantBuffer(_Unit, _BufferPtr);
     }
 
     // -----------------------------------------------------------------------------
 
-    CBufferPtr GetConstantBufferVS(unsigned int _Unit)
+    CBufferPtr GetConstantBuffer(unsigned int _Unit)
     {
-       return CGfxContextManager::GetInstance().GetConstantBuffer(CShader::Vertex, _Unit);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void ResetConstantBufferHS(unsigned int _Unit)
-    {
-        CGfxContextManager::GetInstance().ResetConstantBuffer(CShader::Hull, _Unit);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SetConstantBufferHS(unsigned int _Unit, CBufferPtr _BufferPtr)
-    {
-        CGfxContextManager::GetInstance().SetConstantBuffer(CShader::Hull, _Unit, _BufferPtr);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CBufferPtr GetConstantBufferHS(unsigned int _Unit)
-    {
-        return CGfxContextManager::GetInstance().GetConstantBuffer(CShader::Hull, _Unit);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void ResetConstantBufferDS(unsigned int _Unit)
-    {
-        CGfxContextManager::GetInstance().ResetConstantBuffer(CShader::Domain, _Unit);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SetConstantBufferDS(unsigned int _Unit, CBufferPtr _BufferPtr)
-    {
-        CGfxContextManager::GetInstance().SetConstantBuffer(CShader::Domain, _Unit, _BufferPtr);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CBufferPtr GetConstantBufferDS(unsigned int _Unit)
-    {
-        return CGfxContextManager::GetInstance().GetConstantBuffer(CShader::Domain, _Unit);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void ResetConstantBufferGS(unsigned int _Unit)
-    {
-        CGfxContextManager::GetInstance().ResetConstantBuffer(CShader::Geometry, _Unit);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SetConstantBufferGS(unsigned int _Unit, CBufferPtr _BufferPtr)
-    {
-        CGfxContextManager::GetInstance().SetConstantBuffer(CShader::Geometry, _Unit, _BufferPtr);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CBufferPtr GetConstantBufferGS(unsigned int _Unit)
-    {
-        return CGfxContextManager::GetInstance().GetConstantBuffer(CShader::Geometry, _Unit);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void ResetConstantBufferPS(unsigned int _Unit)
-    {
-        CGfxContextManager::GetInstance().ResetConstantBuffer(CShader::Pixel, _Unit);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SetConstantBufferPS(unsigned int _Unit, CBufferPtr _BufferPtr)
-    {
-        CGfxContextManager::GetInstance().SetConstantBuffer(CShader::Pixel, _Unit, _BufferPtr);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CBufferPtr GetConstantBufferPS(unsigned int _Unit)
-    {
-        return CGfxContextManager::GetInstance().GetConstantBuffer(CShader::Pixel, _Unit);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void ResetConstantBufferCS(unsigned int _Unit)
-    {
-        CGfxContextManager::GetInstance().ResetConstantBuffer(CShader::Compute, _Unit);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SetConstantBufferCS(unsigned int _Unit, CBufferPtr _BufferPtr)
-    {
-        CGfxContextManager::GetInstance().SetConstantBuffer(CShader::Compute, _Unit, _BufferPtr);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CBufferPtr GetConstantBufferCS(unsigned int _Unit)
-    {
-        return CGfxContextManager::GetInstance().GetConstantBuffer(CShader::Compute, _Unit);
+       return CGfxContextManager::GetInstance().GetConstantBuffer(_Unit);
     }
 
     // -----------------------------------------------------------------------------
