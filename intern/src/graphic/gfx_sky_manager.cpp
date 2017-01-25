@@ -71,7 +71,6 @@ namespace
             CBufferSetPtr     m_VertexBufferSetPtr;
             CBufferPtr        m_IndexBufferPtr;
             CTextureSetPtr    m_TextureSetPtr;
-            CSamplerSetPtr    m_SamplerSetPtr;
         };
 
         struct SModelMatrixBuffer
@@ -212,7 +211,6 @@ namespace
         m_SkyboxFromPanorama.m_VertexBufferSetPtr = 0;
         m_SkyboxFromPanorama.m_IndexBufferPtr     = 0;
         m_SkyboxFromPanorama.m_TextureSetPtr      = 0;
-        m_SkyboxFromPanorama.m_SamplerSetPtr      = 0;
 
         m_SkyboxFromCubemap.m_VSPtr              = 0;
         m_SkyboxFromCubemap.m_GSPtr              = 0;
@@ -225,7 +223,6 @@ namespace
         m_SkyboxFromCubemap.m_VertexBufferSetPtr = 0;
         m_SkyboxFromCubemap.m_IndexBufferPtr     = 0;
         m_SkyboxFromCubemap.m_TextureSetPtr      = 0;
-        m_SkyboxFromCubemap.m_SamplerSetPtr      = 0;
 
         m_SkyboxFromTexture.m_VSPtr              = 0;
         m_SkyboxFromTexture.m_GSPtr              = 0;
@@ -238,7 +235,6 @@ namespace
         m_SkyboxFromTexture.m_VertexBufferSetPtr = 0;
         m_SkyboxFromTexture.m_IndexBufferPtr     = 0;
         m_SkyboxFromTexture.m_TextureSetPtr      = 0;
-        m_SkyboxFromTexture.m_SamplerSetPtr      = 0;
 
         m_SkyboxFromGeometry.m_VSPtr              = 0;
         m_SkyboxFromGeometry.m_GSPtr              = 0;
@@ -251,7 +247,6 @@ namespace
         m_SkyboxFromGeometry.m_VertexBufferSetPtr = 0;
         m_SkyboxFromGeometry.m_IndexBufferPtr     = 0;
         m_SkyboxFromGeometry.m_TextureSetPtr      = 0;
-        m_SkyboxFromGeometry.m_SamplerSetPtr      = 0;
 
         m_SkyboxFromLUT.m_VSPtr              = 0;
         m_SkyboxFromLUT.m_GSPtr              = 0;
@@ -264,7 +259,6 @@ namespace
         m_SkyboxFromLUT.m_VertexBufferSetPtr = 0;
         m_SkyboxFromLUT.m_IndexBufferPtr     = 0;
         m_SkyboxFromLUT.m_TextureSetPtr      = 0;
-        m_SkyboxFromLUT.m_SamplerSetPtr      = 0;
 
 
         // -----------------------------------------------------------------------------
@@ -321,23 +315,6 @@ namespace
         m_SkyboxFromLUT.m_GSPtr          = CubemapRotateGSPtr;
         m_SkyboxFromLUT.m_PSPtr          = CubemapLUTPSPtr;
         m_SkyboxFromLUT.m_InputLayoutPtr = P3N3T2CubemapInputLayoutPtr;
-
-        // -----------------------------------------------------------------------------
-        // Sampler
-        // -----------------------------------------------------------------------------
-        CSamplerPtr LinearFilter = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-
-        CSamplerSetPtr SamplerSetPtr = SamplerManager::CreateSamplerSet(LinearFilter, LinearFilter);
-
-        m_SkyboxFromPanorama.m_SamplerSetPtr = SamplerSetPtr;
-
-        m_SkyboxFromCubemap.m_SamplerSetPtr = SamplerSetPtr;
-
-        m_SkyboxFromTexture.m_SamplerSetPtr = SamplerSetPtr;
-
-        m_SkyboxFromGeometry.m_SamplerSetPtr = SamplerSetPtr;
-
-        m_SkyboxFromLUT.m_SamplerSetPtr = SamplerSetPtr;
 
         // -----------------------------------------------------------------------------
         // Buffer
@@ -707,7 +684,6 @@ namespace
         m_SkyboxFromPanorama.m_VertexBufferSetPtr = 0;
         m_SkyboxFromPanorama.m_IndexBufferPtr     = 0;
         m_SkyboxFromPanorama.m_TextureSetPtr      = 0;
-        m_SkyboxFromPanorama.m_SamplerSetPtr      = 0;
 
         m_SkyboxFromCubemap.m_VSPtr              = 0;
         m_SkyboxFromCubemap.m_GSPtr              = 0;
@@ -720,7 +696,6 @@ namespace
         m_SkyboxFromCubemap.m_VertexBufferSetPtr = 0;
         m_SkyboxFromCubemap.m_IndexBufferPtr     = 0;
         m_SkyboxFromCubemap.m_TextureSetPtr      = 0;
-        m_SkyboxFromCubemap.m_SamplerSetPtr      = 0;
 
         m_SkyboxFromTexture.m_VSPtr              = 0;
         m_SkyboxFromTexture.m_GSPtr              = 0;
@@ -733,7 +708,6 @@ namespace
         m_SkyboxFromTexture.m_VertexBufferSetPtr = 0;
         m_SkyboxFromTexture.m_IndexBufferPtr     = 0;
         m_SkyboxFromTexture.m_TextureSetPtr      = 0;
-        m_SkyboxFromTexture.m_SamplerSetPtr      = 0;
 
         m_SkyboxFromGeometry.m_VSPtr              = 0;
         m_SkyboxFromGeometry.m_GSPtr              = 0;
@@ -746,7 +720,6 @@ namespace
         m_SkyboxFromGeometry.m_VertexBufferSetPtr = 0;
         m_SkyboxFromGeometry.m_IndexBufferPtr     = 0;
         m_SkyboxFromGeometry.m_TextureSetPtr      = 0;
-        m_SkyboxFromGeometry.m_SamplerSetPtr      = 0;
 
         m_SkyboxFromLUT.m_VSPtr              = 0;
         m_SkyboxFromLUT.m_GSPtr              = 0;
@@ -759,7 +732,6 @@ namespace
         m_SkyboxFromLUT.m_VertexBufferSetPtr = 0;
         m_SkyboxFromLUT.m_IndexBufferPtr     = 0;
         m_SkyboxFromLUT.m_TextureSetPtr      = 0;
-        m_SkyboxFromLUT.m_SamplerSetPtr      = 0;
 
         m_LookUpTexturePtr    = 0;
         m_LookupTextureSetPtr = 0;
@@ -1054,7 +1026,6 @@ namespace
         CInputLayoutPtr   InputLayoutPtr   = m_SkyboxFromPanorama.m_InputLayoutPtr;
         CMeshPtr          MeshPtr          = m_SkyboxFromPanorama.m_MeshPtr;
         CTextureSetPtr    TextureSetPtr    = m_SkyboxFromPanorama.m_TextureSetPtr;
-        CSamplerSetPtr    SamplerSetPtr    = m_SkyboxFromPanorama.m_SamplerSetPtr;
 
         Performance::BeginEvent("Skybox from Panorama");
 
@@ -1153,7 +1124,6 @@ namespace
         CInputLayoutPtr   InputLayoutPtr   = m_SkyboxFromCubemap.m_InputLayoutPtr;
         CMeshPtr          MeshPtr          = m_SkyboxFromCubemap.m_MeshPtr;
         CTextureSetPtr    TextureSetPtr    = m_SkyboxFromCubemap.m_TextureSetPtr;
-        CSamplerSetPtr    SamplerSetPtr    = m_SkyboxFromCubemap.m_SamplerSetPtr;
 
         Performance::BeginEvent("Skybox from Cubemap");
 
@@ -1253,7 +1223,6 @@ namespace
         CInputLayoutPtr   InputLayoutPtr   = m_SkyboxFromTexture.m_InputLayoutPtr;
         CMeshPtr          MeshPtr          = m_SkyboxFromTexture.m_MeshPtr;
         CTextureSetPtr    TextureSetPtr    = m_SkyboxFromTexture.m_TextureSetPtr;
-        CSamplerSetPtr    SamplerSetPtr    = m_SkyboxFromTexture.m_SamplerSetPtr;
 
         Performance::BeginEvent("Skybox from Texture");
 
@@ -1379,7 +1348,6 @@ namespace
         CBufferSetPtr     VertexBufferSetPtr = m_SkyboxFromGeometry.m_VertexBufferSetPtr;
         CBufferPtr        IndexBufferPtr     = m_SkyboxFromGeometry.m_IndexBufferPtr;
         CTextureSetPtr    TextureSetPtr      = m_SkyboxFromGeometry.m_TextureSetPtr;
-        CSamplerSetPtr    SamplerSetPtr      = m_SkyboxFromGeometry.m_SamplerSetPtr;
 
         Performance::BeginEvent("Skybox from Geometry");
 
@@ -1533,7 +1501,6 @@ namespace
         CInputLayoutPtr   InputLayoutPtr   = m_SkyboxFromLUT.m_InputLayoutPtr;
         CMeshPtr          MeshPtr          = m_SkyboxFromLUT.m_MeshPtr;
         CTextureSetPtr    TextureSetPtr    = m_SkyboxFromLUT.m_TextureSetPtr;
-        CSamplerSetPtr    SamplerSetPtr    = m_SkyboxFromLUT.m_SamplerSetPtr;
 
         Performance::BeginEvent("Skybox from LUT");
 

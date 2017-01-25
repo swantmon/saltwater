@@ -98,13 +98,11 @@ namespace
         CBufferSetPtr     m_DSBuffer;
         CBufferSetPtr     m_ViewPSBuffer;
         CBufferSetPtr     m_HitProxyPassPSBuffer;
-        CSamplerSetPtr    m_PSSamplerSet;
         CShaderPtr        m_HitProxyShaderPtr;
         CRenderContextPtr m_DeferredContextPtr;
         CRenderContextPtr m_HitProxyContextPtr;
         CTextureSetPtr    m_DeferredTextureSetPtrs;
         CTextureSetPtr    m_LightingTextureSetPtr;
-
         CRenderJobs       m_DeferredRenderJobs;
 
     private:
@@ -122,7 +120,6 @@ namespace
         , m_DSBuffer             ()
         , m_ViewPSBuffer         ()
         , m_HitProxyPassPSBuffer ()
-        , m_PSSamplerSet         ()
         , m_HitProxyShaderPtr    ()
         , m_DeferredContextPtr   ()
         , m_HitProxyContextPtr   ()
@@ -164,7 +161,6 @@ namespace
         m_DSBuffer               = 0;
         m_ViewPSBuffer           = 0;
         m_HitProxyPassPSBuffer   = 0;
-        m_PSSamplerSet           = 0;
         m_HitProxyShaderPtr      = 0;
         m_DeferredContextPtr     = 0;
         m_HitProxyContextPtr     = 0;
@@ -236,21 +232,6 @@ namespace
         RenderContextPtr->SetRenderState(HitProxyRenderStatePtr);
 
         m_HitProxyContextPtr = RenderContextPtr;
-
-        // -----------------------------------------------------------------------------
-
-        CSamplerPtr LinearFilter = SamplerManager::GetSampler(CSampler::MinMagMipLinearWrap);
-
-        CSamplerPtr SamplerList[] =
-        {
-            LinearFilter,
-            LinearFilter,
-            LinearFilter,
-            LinearFilter,
-            LinearFilter,
-        };
-
-        m_PSSamplerSet = SamplerManager::CreateSamplerSet(SamplerList, 5);
     }
 
     // -----------------------------------------------------------------------------

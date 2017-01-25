@@ -90,7 +90,6 @@ namespace
             CInputLayoutPtr   m_InputLayoutPtr;
             CMeshPtr          m_MeshPtr;
             CTextureSetPtr    m_TextureSetPtr;
-            CSamplerSetPtr    m_SamplerSetPtr;
         };
 
         struct SCameraRenderJob
@@ -179,7 +178,6 @@ namespace
         m_BackgroundFromSkybox.m_InputLayoutPtr   = 0;
         m_BackgroundFromSkybox.m_MeshPtr          = 0;
         m_BackgroundFromSkybox.m_TextureSetPtr    = 0;
-        m_BackgroundFromSkybox.m_SamplerSetPtr    = 0;
 
         m_BackgroundFromTexture.m_RenderContextPtr = 0;
         m_BackgroundFromTexture.m_VSPtr            = 0;
@@ -191,7 +189,6 @@ namespace
         m_BackgroundFromTexture.m_InputLayoutPtr   = 0;
         m_BackgroundFromTexture.m_MeshPtr          = 0;
         m_BackgroundFromTexture.m_TextureSetPtr    = 0;
-        m_BackgroundFromTexture.m_SamplerSetPtr    = 0;
 
         m_CameraRenderJobs.clear();
     }
@@ -269,19 +266,12 @@ namespace
         SkyRenderContextPtr->SetViewPortSet(ViewPortSetPtr);
         SkyRenderContextPtr->SetTargetSet(TargetSetPtr);
         SkyRenderContextPtr->SetRenderState(NoDepthStatePtr);
-        
-        // -----------------------------------------------------------------------------
-        
-        CSamplerPtr LinearFilter = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-        
-        CSamplerSetPtr SamplerSetPtr = SamplerManager::CreateSamplerSet(LinearFilter);
 
         // -----------------------------------------------------------------------------
+        
         m_BackgroundFromSkybox.m_RenderContextPtr = SkyRenderContextPtr;
-        m_BackgroundFromSkybox.m_SamplerSetPtr    = SamplerSetPtr;
 
         m_BackgroundFromTexture.m_RenderContextPtr = SkyRenderContextPtr;
-        m_BackgroundFromTexture.m_SamplerSetPtr    = SamplerSetPtr;
     }
     
     // -----------------------------------------------------------------------------
@@ -471,7 +461,6 @@ namespace
         CInputLayoutPtr   InputLayoutPtr   = m_BackgroundFromSkybox.m_InputLayoutPtr;
         CMeshPtr          MeshPtr          = m_BackgroundFromSkybox.m_MeshPtr;
         CTextureSetPtr    TextureSetPtr    = m_BackgroundFromSkybox.m_TextureSetPtr;
-        CSamplerSetPtr    SamplerSetPtr    = m_BackgroundFromSkybox.m_SamplerSetPtr;
 
         // -----------------------------------------------------------------------------
         // Find sky entity
@@ -661,7 +650,6 @@ namespace
         CInputLayoutPtr   InputLayoutPtr   = m_BackgroundFromTexture.m_InputLayoutPtr;
         CMeshPtr          MeshPtr          = m_BackgroundFromTexture.m_MeshPtr;
         CTextureSetPtr    TextureSetPtr    = m_BackgroundFromTexture.m_TextureSetPtr;
-        CSamplerSetPtr    SamplerSetPtr    = m_BackgroundFromTexture.m_SamplerSetPtr;
 
         // -----------------------------------------------------------------------------
         // Render sky texture

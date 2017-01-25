@@ -91,8 +91,6 @@ namespace
         CInputLayoutPtr   m_P2InputLayoutPtr;
         CShaderPtr        m_RectangleShaderVSPtr;
         CShaderPtr        m_IndirectLightShaderPSPtr;
-        CSamplerSetPtr    m_PSSamplerSetPtr;
-        CSamplerSetPtr    m_PSSunSamplerSetPtr;
         CRenderContextPtr m_LightRenderContextPtr;
         CTextureSetPtr    m_SunLightTextureSetPtr;
         CRenderJobs       m_RenderJobs;
@@ -108,12 +106,10 @@ namespace
     CGfxLightIndirectRenderer::CGfxLightIndirectRenderer()
         : m_QuadModelPtr            ()
         , m_FullQuadViewVSBufferPtr ()
-        , m_IndirectLightPSBufferPtr     ()
+        , m_IndirectLightPSBufferPtr()
         , m_P2InputLayoutPtr        ()
         , m_IndirectLightShaderPSPtr()
         , m_RectangleShaderVSPtr    ()
-        , m_PSSamplerSetPtr         ()
-        , m_PSSunSamplerSetPtr      ()
         , m_LightRenderContextPtr   ()
         , m_SunLightTextureSetPtr   ()
         , m_RenderJobs		        ()
@@ -144,8 +140,6 @@ namespace
         m_P2InputLayoutPtr         = 0;
         m_IndirectLightShaderPSPtr = 0;
         m_RectangleShaderVSPtr     = 0;
-        m_PSSamplerSetPtr          = 0;
-        m_PSSunSamplerSetPtr       = 0;
         m_LightRenderContextPtr    = 0;
         m_SunLightTextureSetPtr    = 0;
     }
@@ -199,21 +193,6 @@ namespace
         m_LightRenderContextPtr->SetViewPortSet(ViewPortSetPtr);
         m_LightRenderContextPtr->SetTargetSet(TargetSetPtr);
         m_LightRenderContextPtr->SetRenderState(LightStatePtr);
-        
-        // -----------------------------------------------------------------------------
-        
-        CSamplerPtr Sampler[8];
-
-        Sampler[0] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[1] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[2] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[3] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[4] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[5] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[6] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[7] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-
-        m_PSSunSamplerSetPtr = SamplerManager::CreateSamplerSet(Sampler, 8);
     }
     
     // -----------------------------------------------------------------------------

@@ -132,8 +132,6 @@ namespace
         CInputLayoutPtr   m_FullQuadInputLayoutPtr;
         CShaderPtr        m_RectangleShaderVSPtr;
         CShaderPtr        m_PassThroughShaderPSPtr;
-        CSamplerSetPtr    m_PSSamplerSetPtr;
-        CSamplerSetPtr    m_PSSamplerWrapSetPtr;
         CRenderContextPtr m_SystemContextPtr;
         
         CShaderPtr        m_PostEffectShaderVSPtrs[NumberOfPostEffects];
@@ -192,8 +190,6 @@ namespace
         , m_FXAAPropertiesPSBufferPtr        ()
         , m_SystemContextPtr                 ()
         , m_SwapTargetSetPtrs                ()
-        , m_PSSamplerSetPtr                  ()
-        , m_PSSamplerWrapSetPtr              ()
         , m_PostAARenderJobs                 ()
         , m_DOFRenderJobs                    ()
         , m_SwapCounter                      (0)
@@ -230,8 +226,6 @@ namespace
         m_GaussianBlurPropertiesPSBufferPtr = 0;
         m_FXAAPropertiesPSBufferPtr         = 0;
         m_SystemContextPtr                  = 0;
-        m_PSSamplerSetPtr                   = 0;
-        m_PSSamplerWrapSetPtr               = 0;
         m_SwapTextureSetPtrs[0]             = 0;
         m_SwapTextureSetPtrs[1]             = 0;
         m_SwapRenderContextPtrs[0]          = 0;
@@ -598,16 +592,6 @@ namespace
         QuarterThreeContextPtr->SetRenderState(RenderStatePtr);
         
         m_QuarterRenderContextPtrs[2] = QuarterThreeContextPtr;
-        
-        // -----------------------------------------------------------------------------
-        
-        CSamplerPtr LinearFilter = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-        
-        CSamplerPtr PointFilter = SamplerManager::GetSampler(CSampler::MinMagMipPointWrap);
-        
-        m_PSSamplerSetPtr = SamplerManager::CreateSamplerSet(LinearFilter, LinearFilter, LinearFilter, LinearFilter);
-        
-        m_PSSamplerWrapSetPtr =  SamplerManager::CreateSamplerSet(LinearFilter, PointFilter, LinearFilter);
 
         // -----------------------------------------------------------------------------
 

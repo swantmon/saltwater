@@ -78,17 +78,7 @@ namespace
         private:
 
             friend class CGfxSunManager;
-        };
-
-    private:
-
-        typedef Base::CPool<CInternSunFacet, 2> CSunFacets;
-
-    private:
-
-        CShaderPtr m_ShadowShaderVSPtr;
-        CShaderPtr m_ShadowSMShaderPSPtr;
-        CSamplerSetPtr m_PSSamplerSetPtr;
+        
         CBufferSetPtr m_LightCameraVSBufferPtr;
         CBufferSetPtr m_MainVSBufferPtr;
 
@@ -128,7 +118,6 @@ namespace
     CGfxSunManager::CGfxSunManager()
         : m_ShadowShaderVSPtr     ()
         , m_ShadowSMShaderPSPtr   ()
-        , m_PSSamplerSetPtr       ()
         , m_LightCameraVSBufferPtr()
         , m_MainVSBufferPtr       ()
         , m_SunFacets             ()
@@ -150,18 +139,6 @@ namespace
         // -----------------------------------------------------------------------------
         m_ShadowShaderVSPtr   = ShaderManager::CompileVS("vs_vm_pnx0.glsl", "main");
         m_ShadowSMShaderPSPtr = ShaderManager::CompilePS("fs_shadow.glsl", "SM");
-
-
-        // -----------------------------------------------------------------------------
-        // Sampler
-        // -----------------------------------------------------------------------------
-        CSamplerPtr Sampler[3];
-
-        Sampler[0] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[1] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[2] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-
-        m_PSSamplerSetPtr = SamplerManager::CreateSamplerSet(Sampler, 3);
 
         // -----------------------------------------------------------------------------
         // Buffer
@@ -206,7 +183,6 @@ namespace
     {
         m_ShadowShaderVSPtr      = 0;
         m_ShadowSMShaderPSPtr    = 0;
-        m_PSSamplerSetPtr        = 0;
         m_LightCameraVSBufferPtr = 0;
         m_MainVSBufferPtr        = 0;
 

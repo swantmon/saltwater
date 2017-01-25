@@ -110,6 +110,7 @@ namespace
         CMeshPtr          m_SphereModelPtr;
         
         CBufferSetPtr     m_MainVSBufferPtr;
+        
         CBufferSetPtr     m_PunctualLightPSBufferPtr;
         
         CInputLayoutPtr   m_LightProbeInputLayoutPtr;
@@ -119,8 +120,6 @@ namespace
         CShaderPtr        m_PunctualLightShaderPSPtr;
         
         CTextureSetPtr    m_PunctualLightTextureSetPtr;
-        
-        CSamplerSetPtr    m_PSSamplerSetPtr;
 
         CRenderContextPtr m_LightRenderContextPtr;
 
@@ -143,7 +142,6 @@ namespace
         , m_ModelVSPtr                ()
         , m_PunctualLightShaderPSPtr  ()
         , m_PunctualLightTextureSetPtr()
-        , m_PSSamplerSetPtr           ()
         , m_PunctualLightRenderJobs   ()
     {
     }
@@ -172,7 +170,6 @@ namespace
         m_ModelVSPtr                        = 0;
         m_PunctualLightShaderPSPtr          = 0;
         m_PunctualLightTextureSetPtr        = 0;
-        m_PSSamplerSetPtr                   = 0;
         m_LightRenderContextPtr             = 0;
         
         m_PunctualLightRenderJobs.clear();
@@ -232,19 +229,6 @@ namespace
         LightContextPtr->SetRenderState(LightStatePtr);
         
         m_LightRenderContextPtr = LightContextPtr;
-        
-        // -----------------------------------------------------------------------------
-        
-        CSamplerPtr Sampler[6];
-        
-        Sampler[0] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[1] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[2] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[3] = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-        Sampler[4] = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-        Sampler[5] = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-        
-        m_PSSamplerSetPtr = SamplerManager::CreateSamplerSet(Sampler, 6);
     }
     
     // -----------------------------------------------------------------------------

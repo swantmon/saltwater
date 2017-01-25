@@ -131,8 +131,6 @@ namespace
         CTextureSetPtr m_BilateralBlurHTextureSetPtr;
         CTextureSetPtr m_BilateralBlurVTextureSetPtr;
 
-        CSamplerSetPtr m_PSSamplerSetPtr;
-
         CTargetSetPtr m_HalfRenderbufferPtr;
 
         CRenderContextPtr m_DeferredRenderContextPtr;
@@ -163,11 +161,10 @@ namespace
         , m_BilateralBlurHTextureSetPtr      ()
         , m_BilateralBlurVTextureSetPtr      ()
         , m_SSAOTextureSets                  ()
-        , m_PSSamplerSetPtr                  ()
         , m_DeferredRenderContextPtr         ()
         , m_SSAORenderJobs                   ()
     {
-        m_SSAORenderJobs      .reserve(1);
+        m_SSAORenderJobs.reserve(1);
     }
     
     // -----------------------------------------------------------------------------
@@ -217,7 +214,6 @@ namespace
         m_BilateralBlurShaderCSPtr          = 0;
         m_BilateralBlurHTextureSetPtr       = 0;
         m_BilateralBlurVTextureSetPtr       = 0;
-        m_PSSamplerSetPtr                   = 0;
         m_HalfRenderbufferPtr               = 0;
         m_DeferredRenderContextPtr          = 0;
         m_HalfContextPtr                    = 0;
@@ -360,19 +356,6 @@ namespace
         HalfContextPtr->SetRenderState(NoDepthStatePtr);
 
         m_HalfContextPtr = HalfContextPtr;
-        
-        // -----------------------------------------------------------------------------
-        
-        CSamplerPtr Sampler[6];
-        
-        Sampler[0] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[1] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[2] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[3] = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-        Sampler[4] = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-        Sampler[5] = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-        
-        m_PSSamplerSetPtr = SamplerManager::CreateSamplerSet(Sampler, 6);
     }
     
     // -----------------------------------------------------------------------------

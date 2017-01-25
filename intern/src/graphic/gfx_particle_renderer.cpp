@@ -138,8 +138,6 @@ namespace
         CBufferSetPtr     m_ShadingPSBufferPtr;
         CBufferPtr        m_ParticleInstanceBufferPtr;
         CBufferSetPtr     m_ParticleInstanceBufferSetPtr;
-        CSamplerSetPtr    m_PSSamplerSet;
-        
         CShaderPtr        m_LiquidShaderVSPtrs[NumberOfParts];
         CShaderPtr        m_LiquidShaderPSPtrs[NumberOfParts];
         CRenderContextPtr m_LiquidContextPtrs[6];
@@ -171,7 +169,6 @@ namespace
         , m_ShadingPSBufferPtr          ()
         , m_ParticleInstanceBufferPtr   ()
         , m_ParticleInstanceBufferSetPtr()
-        , m_PSSamplerSet                ()
         , m_LiquidContextPtrs           ()
         , m_LiquidShaderVSPtrs          ()
         , m_LiquidShaderPSPtrs          ()
@@ -217,7 +214,6 @@ namespace
         m_ShadingPSBufferPtr           = 0;
         m_ParticleInstanceBufferPtr    = 0;
         m_ParticleInstanceBufferSetPtr = 0;
-        m_PSSamplerSet                 = 0;
         m_QuadInputLayouPtr            = 0;
         m_ParticleInputLayouPtr        = 0;
         
@@ -453,12 +449,6 @@ namespace
         RenderContextPtr->SetRenderState(StateManager::GetRenderState(CRenderState::NoDepth | CRenderState::AlphaBlend));
         
         m_LiquidContextPtrs[5] = RenderContextPtr;
-        
-        // -----------------------------------------------------------------------------
-        
-        CSamplerPtr LinearFilter = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-        
-        m_PSSamplerSet = SamplerManager::CreateSamplerSet(LinearFilter, LinearFilter, LinearFilter, LinearFilter);
     }
     
     // -----------------------------------------------------------------------------

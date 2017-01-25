@@ -128,7 +128,6 @@ namespace
         CShaderPtr        m_VolumeLightingCSPtr;
         CShaderPtr        m_VolumeScatteringCSPtr;
         CShaderPtr        m_ApplyPSPtr;
-        CSamplerSetPtr    m_PSSamplerSetPtr;
         CRenderContextPtr m_LightRenderContextPtr;
         CTexture2DPtr     m_ESMTexturePtr;
         CTextureSetPtr    m_ESMTextureSetPtr;
@@ -175,7 +174,6 @@ namespace
         , m_VolumeLightingCSPtr                 ()
         , m_VolumeScatteringCSPtr               ()
         , m_ApplyPSPtr                          ()
-        , m_PSSamplerSetPtr                     ()
         , m_LightRenderContextPtr               ()
         , m_ESMTexturePtr                       ()
         , m_ESMTextureSetPtr                    ()
@@ -221,7 +219,6 @@ namespace
         m_VolumeLightingCSPtr           = 0;
         m_VolumeScatteringCSPtr         = 0;
         m_ApplyPSPtr                    = 0;
-        m_PSSamplerSetPtr               = 0;
         m_LightRenderContextPtr         = 0;
         m_ESMTexturePtr                 = 0;
         m_ESMTextureSetPtr              = 0;
@@ -294,16 +291,6 @@ namespace
         m_LightRenderContextPtr->SetViewPortSet(ViewPortSetPtr);
         m_LightRenderContextPtr->SetTargetSet(TargetSetPtr);
         m_LightRenderContextPtr->SetRenderState(LightStatePtr);
-        
-        // -----------------------------------------------------------------------------
-        
-        CSamplerPtr Sampler[6];
-
-        Sampler[0] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[1] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[2] = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-
-        m_PSSamplerSetPtr = SamplerManager::CreateSamplerSet(Sampler, 3);
     }
     
     // -----------------------------------------------------------------------------

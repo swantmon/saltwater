@@ -132,8 +132,6 @@ namespace
         CShaderPtr        m_ColorSpherePSPtr;
         
         CTextureSetPtr    m_AreaLightTextureSetPtr;
-        
-        CSamplerSetPtr    m_PSSamplerSetPtr;
 
         CRenderContextPtr m_DefaultRenderContextPtr;
         CRenderContextPtr m_LightRenderContextPtr;
@@ -167,7 +165,6 @@ namespace
         , m_DiskLightShaderPSPtr    ()
         , m_ColorSpherePSPtr        ()
         , m_AreaLightTextureSetPtr  ()
-        , m_PSSamplerSetPtr         ()
         , m_DefaultRenderContextPtr ()
         , m_LightRenderContextPtr   ()
         , m_SphereLightRenderJobs   ()
@@ -206,7 +203,6 @@ namespace
         m_DiskLightShaderPSPtr     = 0;
         m_ColorSpherePSPtr         = 0;
         m_AreaLightTextureSetPtr   = 0;
-        m_PSSamplerSetPtr          = 0;
         m_DefaultRenderContextPtr  = 0;
         m_LightRenderContextPtr    = 0;
 
@@ -298,18 +294,6 @@ namespace
         LightContextPtr->SetRenderState(LightStatePtr);
         
         m_LightRenderContextPtr = LightContextPtr;
-        
-        // -----------------------------------------------------------------------------
-        
-        CSamplerPtr Sampler[6];
-        
-        Sampler[0] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[1] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[2] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[3] = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-        Sampler[4] = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-
-        m_PSSamplerSetPtr = SamplerManager::CreateSamplerSet(Sampler, 5);
     }
     
     // -----------------------------------------------------------------------------

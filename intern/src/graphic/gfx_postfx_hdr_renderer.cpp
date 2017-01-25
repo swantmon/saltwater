@@ -140,8 +140,6 @@ namespace
         CTargetSetPtr     m_DownSampleTargetSetPtrs[NumberOfDownSamples];
         Base::Int2        m_DownSampleSizes[NumberOfDownSamples];
 
-        CSamplerSetPtr m_PSSamplerSetPtr;
-
         CBloomRenderJobs m_BloomRenderJobs;
         
         unsigned int m_SwapCounter;
@@ -178,7 +176,6 @@ namespace
         , m_DownSampleRenderContextPtrs         ()
         , m_DownSampleTargetSetPtrs             ()
         , m_DownSampleSizes                     ()
-        , m_PSSamplerSetPtr                     ()
         , m_BloomRenderJobs                     ()
         , m_SwapCounter                         (0)
     {
@@ -235,7 +232,6 @@ namespace
         m_SwapRenderTargetPtrs[0] = 0;
         m_SwapRenderTargetPtrs[1] = 0;
 
-        m_PSSamplerSetPtr = 0;
 
         for (unsigned int IndexOfBlurStage = 0; IndexOfBlurStage < s_NumberOfBlurStages; ++IndexOfBlurStage)
         {
@@ -401,12 +397,6 @@ namespace
 
             m_DownSampleRenderContextPtrs[IndexOfDownSample] = DownSampleRenderContextPtr;
         }
-
-        // -----------------------------------------------------------------------------
-
-        CSamplerPtr LinearFilter = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-
-        m_PSSamplerSetPtr = SamplerManager::CreateSamplerSet(LinearFilter, LinearFilter, LinearFilter, LinearFilter);
     }
     
     // -----------------------------------------------------------------------------

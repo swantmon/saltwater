@@ -133,8 +133,6 @@ namespace
         CTextureSetPtr m_CopyToGBufferTextureSetPtr;
         CTextureSetPtr m_DifferentualGBufferTextureSetPtr;
 
-        CSamplerSetPtr m_PSSamplerSetPtr;
-
         CRenderJobs m_RenderJobs;
 
     private:
@@ -169,7 +167,6 @@ namespace
         , m_BilateralBlurTempTextureSetPtr  ()
         , m_CopyToGBufferTextureSetPtr      ()
         , m_DifferentualGBufferTextureSetPtr()
-        , m_PSSamplerSetPtr                 ()
         , m_RenderJobs                      ()
     {
         // -----------------------------------------------------------------------------
@@ -223,7 +220,6 @@ namespace
         m_BilateralBlurTempTextureSetPtr   = 0;
         m_CopyToGBufferTextureSetPtr       = 0;
         m_DifferentualGBufferTextureSetPtr = 0;
-        m_PSSamplerSetPtr                  = 0;
 
         // -----------------------------------------------------------------------------
         // Iterate throw render jobs to release managed pointer
@@ -305,12 +301,6 @@ namespace
         m_HitProxyContextPtr->SetViewPortSet(ViewPortSetPtr);
         m_HitProxyContextPtr->SetTargetSet(HitProxyTargetSetPtr);
         m_HitProxyContextPtr->SetRenderState(HitProxyRenderStatePtr);
-
-        // -----------------------------------------------------------------------------
-
-        CSamplerPtr LinearFilter = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-
-        m_PSSamplerSetPtr = SamplerManager::CreateSamplerSet(LinearFilter, LinearFilter, LinearFilter, LinearFilter);
     }
 
     // -----------------------------------------------------------------------------

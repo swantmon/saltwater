@@ -150,8 +150,6 @@ namespace
         CTextureSetPtr    m_SSRApplyTextureSetPtr;        
 
         CTextureSetPtr    m_BRDFTextureSetPtr;
-        
-        CSamplerSetPtr    m_PSSamplerSetPtr;
 
         CTargetSetPtr     m_SSRTargetSetPtr;        
         
@@ -202,7 +200,6 @@ namespace
         , m_SSRTextureSetPtr                 ()
         , m_SSRApplyTextureSetPtr            ()
         , m_BRDFTextureSetPtr                ()
-        , m_PSSamplerSetPtr                  ()
         , m_SSRTargetSetPtr                  ()
         , m_LightAccumulationRenderContextPtr()
         , m_SSRRenderContextPtr              ()
@@ -248,7 +245,6 @@ namespace
         m_SSRTextureSetPtr                  = 0;
         m_SSRApplyTextureSetPtr             = 0;
         m_BRDFTextureSetPtr                 = 0;
-        m_PSSamplerSetPtr                   = 0;
         m_SSRTargetSetPtr                   = 0;
         m_LightAccumulationRenderContextPtr = 0;
         m_SSRRenderContextPtr               = 0;
@@ -432,21 +428,6 @@ namespace
 
         m_HCBRenderContextPtr->SetCamera(MainCameraPtr);
         m_HCBRenderContextPtr->SetRenderState(DefaultStatePtr);
-        
-        // -----------------------------------------------------------------------------
-        
-        CSamplerPtr Sampler[8];
-        
-        Sampler[0] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[1] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[2] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[3] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[4] = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-        Sampler[5] = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-        Sampler[6] = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-        Sampler[7] = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-        
-        m_PSSamplerSetPtr = SamplerManager::CreateSamplerSet(Sampler, 8);
     }
     
     // -----------------------------------------------------------------------------
