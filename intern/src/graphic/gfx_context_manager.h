@@ -101,32 +101,13 @@ namespace ContextManager
     void SetImageTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr);
     CTextureBasePtr GetImageTexture(unsigned int _Unit);
 
-    void ResetResourceBuffer(unsigned int _Unit);
-    void SetResourceBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
-    CBufferPtr GetResourceBuffer(unsigned int _Unit);
-
     void ResetConstantBuffer(unsigned int _Unit);
     void SetConstantBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
     CBufferPtr GetConstantBuffer(unsigned int _Unit);
 
-    void ResetConstantBufferSetVS();
-    void SetConstantBufferSetVS(CBufferSetPtr _BufferSetPtr);
-    CBufferSetPtr GetConstantBufferSetVS();
-    void ResetConstantBufferSetHS();
-    void SetConstantBufferSetHS(CBufferSetPtr _BufferSetPtr);
-    CBufferSetPtr GetConstantBufferSetHS();
-    void ResetConstantBufferSetDS();
-    void SetConstantBufferSetDS(CBufferSetPtr _BufferSetPtr);
-    CBufferSetPtr GetConstantBufferSetDS();
-    void ResetConstantBufferSetGS();
-    void SetConstantBufferSetGS(CBufferSetPtr _BufferSetPtr);
-    CBufferSetPtr GetConstantBufferSetGS();
-    void ResetConstantBufferSetPS();
-    void SetConstantBufferSetPS(CBufferSetPtr _BufferSetPtr);
-    CBufferSetPtr GetConstantBufferSetPS();
-    void ResetConstantBufferSetCS();
-    void SetConstantBufferSetCS(CBufferSetPtr _BufferSetPtr);
-    CBufferSetPtr GetConstantBufferSetCS();
+    void ResetResourceBuffer(unsigned int _Unit);
+    void SetResourceBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
+    CBufferPtr GetResourceBuffer(unsigned int _Unit);
 
     void Draw(unsigned int _NumberOfVertices, unsigned int _IndexOfFirstVertex);
     void DrawIndexed(unsigned int _NumberOfIndices, unsigned int _IndexOfFirstIndex, int _BaseVertexLocation);

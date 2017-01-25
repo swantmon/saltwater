@@ -64,11 +64,21 @@ namespace
         void SetRasterizerState(CRasterizerStatePtr _StatePtr);
         CRasterizerStatePtr GetRasterizerState();
 
-    public:
-
         void ResetTopology();
         void SetTopology(STopology::Enum _Topology);
         STopology::Enum GetTopology() const;
+
+        void ResetTargetSet();
+        void SetTargetSet(CTargetSetPtr _TargetSetPtr);
+        CTargetSetPtr GetTargetSet();
+
+        void ResetViewPortSet();
+        void SetViewPortSet(CViewPortSetPtr _ViewPortSetPtr);
+        CViewPortSetPtr GetViewPortSet();
+
+        void ResetInputLayout();
+        void SetInputLayout(CInputLayoutPtr _InputLayoutPtr);
+        CInputLayoutPtr GetInputLayout();
 
         void ResetIndexBuffer();
         void SetIndexBuffer(CBufferPtr _BufferPtr, unsigned int _Offset);
@@ -79,41 +89,6 @@ namespace
         void SetVertexBufferSet(CBufferSetPtr _BufferSetPtr, const unsigned int* _pOffsets);
         void SetVertexBufferSet(CBufferSetPtr _BufferSetPtr, const unsigned int* _pStrides, const unsigned int* _pOffsets);
         CBufferSetPtr GetVertexBufferSet();
-
-        void ResetConstantBufferSetVS();
-        void SetConstantBufferSetVS(CBufferSetPtr _BufferSetPtr);
-        CBufferSetPtr GetConstantBufferSetVS();
-        void ResetConstantBufferSetHS();
-        void SetConstantBufferSetHS(CBufferSetPtr _BufferSetPtr);
-        CBufferSetPtr GetConstantBufferSetHS();
-        void ResetConstantBufferSetDS();
-        void SetConstantBufferSetDS(CBufferSetPtr _BufferSetPtr);
-        CBufferSetPtr GetConstantBufferSetDS();
-        void ResetConstantBufferSetGS();
-        void SetConstantBufferSetGS(CBufferSetPtr _BufferSetPtr);
-        CBufferSetPtr GetConstantBufferSetGS();
-        void ResetConstantBufferSetPS();
-        void SetConstantBufferSetPS(CBufferSetPtr _BufferSetPtr);
-        CBufferSetPtr GetConstantBufferSetPS();
-        void ResetConstantBufferSetCS();
-        void SetConstantBufferSetCS(CBufferSetPtr _BufferSetPtr);
-        CBufferSetPtr GetConstantBufferSetCS();
-
-        void ResetConstantBuffer(unsigned int _Unit);
-        void SetConstantBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
-        CBufferPtr GetConstantBuffer(unsigned int _Unit);
-
-        void ResetResourceBuffer(unsigned int _Unit);
-        void SetResourceBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
-        CBufferPtr GetResourceBuffer(unsigned int _Unit);
-
-    public:
-
-        void ResetInputLayout();
-        void SetInputLayout(CInputLayoutPtr _InputLayoutPtr);
-        CInputLayoutPtr GetInputLayout();
-
-    public:
 
         void ResetShaderVS();
         void SetShaderVS(CShaderPtr _ShaderSetPtr);
@@ -146,15 +121,13 @@ namespace
         void SetImageTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr);
         CTextureBasePtr GetImageTexture(unsigned int _Unit);
 
-        void ResetTargetSet();
-        void SetTargetSet(CTargetSetPtr _TargetSetPtr);
-        CTargetSetPtr GetTargetSet();
+        void ResetConstantBuffer(unsigned int _Unit);
+        void SetConstantBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
+        CBufferPtr GetConstantBuffer(unsigned int _Unit);
 
-    public:
-
-        void ResetViewPortSet();
-        void SetViewPortSet(CViewPortSetPtr _ViewPortSetPtr);
-        CViewPortSetPtr GetViewPortSet();
+        void ResetResourceBuffer(unsigned int _Unit);
+        void SetResourceBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
+        CBufferPtr GetResourceBuffer(unsigned int _Unit);        
 
     public:
 
@@ -397,12 +370,6 @@ namespace
         ResetTopology();
         ResetIndexBuffer();
         ResetVertexBufferSet();
-        ResetConstantBufferSetVS();
-        ResetConstantBufferSetGS();
-        ResetConstantBufferSetDS();
-        ResetConstantBufferSetHS();
-        ResetConstantBufferSetPS();
-        ResetConstantBufferSetCS();
         ResetInputLayout();
         ResetShaderVS();
         ResetShaderGS();
@@ -884,434 +851,434 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxContextManager::ResetConstantBufferSetVS()
-    {
-        m_ConstantBufferSetVSPtr = nullptr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxContextManager::SetConstantBufferSetVS(CBufferSetPtr _BufferSetPtr)
-    {
-        if (_BufferSetPtr == nullptr) return;
-        
-        if (m_ConstantBufferSetVSPtr != _BufferSetPtr && m_ShaderSlots[CShader::Vertex] != nullptr)
-        {
-            CNativeShader* pNativeShaderSet = static_cast<CNativeShader*>(m_ShaderSlots[CShader::Vertex].GetPtr());
-            
-            Gfx::CNativeBufferHandle BufferHandle = 0;
-
-            unsigned int IndexOfConstantBuffer = 0;
-            unsigned int IndexOfResourceBuffer = 0;
-            
-            for (unsigned int IndexOfBuffer = 0; IndexOfBuffer < _BufferSetPtr->GetNumberOfBuffers(); ++IndexOfBuffer)
-            {
-                CNativeBuffer& rNativeBuffer = *static_cast<CNativeBuffer*>(_BufferSetPtr->GetBuffer(IndexOfBuffer).GetPtr());
-                
-                BufferHandle = rNativeBuffer.m_NativeBuffer;
-
-                switch (rNativeBuffer.GetBinding())
-                {
-                case CBuffer::ConstantBuffer:
-
-                    glUniformBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfConstantBuffer, m_IndexOfBufferLocation);
-
-                    glBindBuffer(GL_UNIFORM_BUFFER, BufferHandle);
-
-                    glBindBufferRange(GL_UNIFORM_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
-
-                    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-                    ++IndexOfConstantBuffer;
-                    ++m_IndexOfBufferLocation;
-                    break;
-                case CBuffer::ResourceBuffer:
-                    glShaderStorageBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfResourceBuffer, m_IndexOfBufferLocation);
-
-                    glBindBuffer(GL_SHADER_STORAGE_BUFFER, BufferHandle);
-
-                    glBindBufferRange(GL_SHADER_STORAGE_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
-
-                    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-                    ++IndexOfResourceBuffer;
-                    ++m_IndexOfBufferLocation;
-                    break;
-                default:
-                    BASE_CONSOLE_STREAMWARNING("Unsupported constant buffer type");
-                    break;
-                }
-            }
-            
-            m_ConstantBufferSetVSPtr = _BufferSetPtr;
-        }
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CBufferSetPtr CGfxContextManager::GetConstantBufferSetVS()
-    {
-        return m_ConstantBufferSetVSPtr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxContextManager::ResetConstantBufferSetHS()
-    {
-        m_ConstantBufferSetHSPtr = nullptr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxContextManager::SetConstantBufferSetHS(CBufferSetPtr _BufferSetPtr)
-    {
-        if (_BufferSetPtr == nullptr) return;
-        
-        if (m_ConstantBufferSetHSPtr != _BufferSetPtr && m_ShaderSlots[CShader::Hull] != nullptr)
-        {
-            CNativeShader* pNativeShaderSet = static_cast<CNativeShader*>(m_ShaderSlots[CShader::Hull].GetPtr());
-            
-            Gfx::CNativeBufferHandle BufferHandle = 0;
-
-            unsigned int IndexOfConstantBuffer = 0;
-            unsigned int IndexOfResourceBuffer = 0;
-            
-            for (unsigned int IndexOfBuffer = 0; IndexOfBuffer < _BufferSetPtr->GetNumberOfBuffers(); ++IndexOfBuffer)
-            {
-                CNativeBuffer& rNativeBuffer = *static_cast<CNativeBuffer*>(_BufferSetPtr->GetBuffer(IndexOfBuffer).GetPtr());
-                
-                BufferHandle = rNativeBuffer.m_NativeBuffer;
-                
-                switch (rNativeBuffer.GetBinding())
-                {
-                case CBuffer::ConstantBuffer:
-
-                    glUniformBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfConstantBuffer, m_IndexOfBufferLocation);
-
-                    glBindBuffer(GL_UNIFORM_BUFFER, BufferHandle);
-
-                    glBindBufferRange(GL_UNIFORM_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
-
-                    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-                    ++IndexOfConstantBuffer;
-                    ++m_IndexOfBufferLocation;
-                    break;
-                case CBuffer::ResourceBuffer:
-                    glShaderStorageBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfResourceBuffer, m_IndexOfBufferLocation);
-
-                    glBindBuffer(GL_SHADER_STORAGE_BUFFER, BufferHandle);
-
-                    glBindBufferRange(GL_SHADER_STORAGE_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
-
-                    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-                    ++IndexOfResourceBuffer;
-                    ++m_IndexOfBufferLocation;
-                    break;
-                default:
-                    BASE_CONSOLE_STREAMWARNING("Unsupported constant buffer type");
-                    break;
-                }
-            }
-            
-            m_ConstantBufferSetHSPtr = _BufferSetPtr;
-        }
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CBufferSetPtr CGfxContextManager::GetConstantBufferSetHS()
-    {
-        return m_ConstantBufferSetHSPtr;
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGfxContextManager::ResetConstantBufferSetDS()
-    {        
-        m_ConstantBufferSetDSPtr = nullptr;
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGfxContextManager::SetConstantBufferSetDS(CBufferSetPtr _BufferSetPtr)
-    {
-        if (_BufferSetPtr == nullptr) return;
-        
-        if (m_ConstantBufferSetDSPtr != _BufferSetPtr && m_ShaderSlots[CShader::Domain] != nullptr)
-        {
-            CNativeShader* pNativeShaderSet = static_cast<CNativeShader*>(m_ShaderSlots[CShader::Domain].GetPtr());
-            
-            Gfx::CNativeBufferHandle BufferHandle = 0;
-
-            unsigned int IndexOfConstantBuffer = 0;
-            unsigned int IndexOfResourceBuffer = 0;
-            
-            for (unsigned int IndexOfBuffer = 0; IndexOfBuffer < _BufferSetPtr->GetNumberOfBuffers(); ++IndexOfBuffer)
-            {
-                CNativeBuffer& rNativeBuffer = *static_cast<CNativeBuffer*>(_BufferSetPtr->GetBuffer(IndexOfBuffer).GetPtr());
-                
-                BufferHandle = rNativeBuffer.m_NativeBuffer;
-                
-                switch (rNativeBuffer.GetBinding())
-                {
-                case CBuffer::ConstantBuffer:
-
-                    glUniformBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfConstantBuffer, m_IndexOfBufferLocation);
-
-                    glBindBuffer(GL_UNIFORM_BUFFER, BufferHandle);
-
-                    glBindBufferRange(GL_UNIFORM_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
-
-                    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-                    ++IndexOfConstantBuffer;
-                    ++m_IndexOfBufferLocation;
-                    break;
-                case CBuffer::ResourceBuffer:
-                    glShaderStorageBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfResourceBuffer, m_IndexOfBufferLocation);
-
-                    glBindBuffer(GL_SHADER_STORAGE_BUFFER, BufferHandle);
-
-                    glBindBufferRange(GL_SHADER_STORAGE_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
-
-                    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-                    ++IndexOfResourceBuffer;
-                    ++m_IndexOfBufferLocation;
-                    break;
-                default:
-                    BASE_CONSOLE_STREAMWARNING("Unsupported constant buffer type");
-                    break;
-                }
-            }
-            
-            m_ConstantBufferSetDSPtr = _BufferSetPtr;
-        }
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CBufferSetPtr CGfxContextManager::GetConstantBufferSetDS()
-    {
-        return m_ConstantBufferSetDSPtr;
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGfxContextManager::ResetConstantBufferSetGS()
-    {
-        m_ConstantBufferSetGSPtr = nullptr;
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGfxContextManager::SetConstantBufferSetGS(CBufferSetPtr _BufferSetPtr)
-    {
-        if (_BufferSetPtr == nullptr) return;
-        
-        if (m_ConstantBufferSetGSPtr != _BufferSetPtr && m_ShaderSlots[CShader::Geometry] != nullptr)
-        {
-            CNativeShader* pNativeShaderSet = static_cast<CNativeShader*>(m_ShaderSlots[CShader::Geometry].GetPtr());
-            
-            Gfx::CNativeBufferHandle BufferHandle = 0;
-
-            unsigned int IndexOfConstantBuffer = 0;
-            unsigned int IndexOfResourceBuffer = 0;
-            
-            for (unsigned int IndexOfBuffer = 0; IndexOfBuffer < _BufferSetPtr->GetNumberOfBuffers(); ++IndexOfBuffer)
-            {
-                CNativeBuffer& rNativeBuffer = *static_cast<CNativeBuffer*>(_BufferSetPtr->GetBuffer(IndexOfBuffer).GetPtr());
-                
-                BufferHandle = rNativeBuffer.m_NativeBuffer;
-                
-                switch (rNativeBuffer.GetBinding())
-                {
-                case CBuffer::ConstantBuffer:
-
-                    glUniformBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfConstantBuffer, m_IndexOfBufferLocation);
-
-                    glBindBuffer(GL_UNIFORM_BUFFER, BufferHandle);
-
-                    glBindBufferRange(GL_UNIFORM_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
-
-                    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-                    ++IndexOfConstantBuffer;
-                    ++m_IndexOfBufferLocation;
-                    break;
-                case CBuffer::ResourceBuffer:
-                    glShaderStorageBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfResourceBuffer, m_IndexOfBufferLocation);
-
-                    glBindBuffer(GL_SHADER_STORAGE_BUFFER, BufferHandle);
-
-                    glBindBufferRange(GL_SHADER_STORAGE_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
-
-                    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-                    ++IndexOfResourceBuffer;
-                    ++m_IndexOfBufferLocation;
-                    break;
-                default:
-                    BASE_CONSOLE_STREAMWARNING("Unsupported constant buffer type");
-                    break;
-                }
-            }
-            
-            m_ConstantBufferSetGSPtr = _BufferSetPtr;
-        }
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CBufferSetPtr CGfxContextManager::GetConstantBufferSetGS()
-    {
-        return m_ConstantBufferSetGSPtr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxContextManager::ResetConstantBufferSetPS()
-    {
-        m_ConstantBufferSetPSPtr = nullptr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxContextManager::SetConstantBufferSetPS(CBufferSetPtr _BufferSetPtr)
-    {
-        if (_BufferSetPtr == nullptr) return;
-        
-        if (m_ConstantBufferSetPSPtr != _BufferSetPtr && m_ShaderSlots[CShader::Pixel] != nullptr)
-        {
-            CNativeShader* pNativeShaderSet = static_cast<CNativeShader*>(m_ShaderSlots[CShader::Pixel].GetPtr());
-            
-            Gfx::CNativeBufferHandle BufferHandle = 0;
-
-            unsigned int IndexOfConstantBuffer = 0;
-            unsigned int IndexOfResourceBuffer = 0;
-            
-            for (unsigned int IndexOfBuffer = 0; IndexOfBuffer < _BufferSetPtr->GetNumberOfBuffers(); ++IndexOfBuffer)
-            {
-                CNativeBuffer& rNativeBuffer = *static_cast<CNativeBuffer*>(_BufferSetPtr->GetBuffer(IndexOfBuffer).GetPtr());
-                
-                BufferHandle = rNativeBuffer.m_NativeBuffer;
-                
-                switch (rNativeBuffer.GetBinding())
-                {
-                case CBuffer::ConstantBuffer:
-
-                    glUniformBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfConstantBuffer, m_IndexOfBufferLocation);
-
-                    glBindBuffer(GL_UNIFORM_BUFFER, BufferHandle);
-
-                    glBindBufferRange(GL_UNIFORM_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
-
-                    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-                    ++IndexOfConstantBuffer;
-                    ++m_IndexOfBufferLocation;
-                    break;
-                case CBuffer::ResourceBuffer:
-                    glShaderStorageBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfResourceBuffer, m_IndexOfBufferLocation);
-
-                    glBindBuffer(GL_SHADER_STORAGE_BUFFER, BufferHandle);
-
-                    glBindBufferRange(GL_SHADER_STORAGE_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
-
-                    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-                    ++IndexOfResourceBuffer;
-                    ++m_IndexOfBufferLocation;
-                    break;
-                default:
-                    BASE_CONSOLE_STREAMWARNING("Unsupported constant buffer type");
-                    break;
-                }
-            }
-            
-            m_ConstantBufferSetPSPtr = _BufferSetPtr;
-        }
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CBufferSetPtr CGfxContextManager::GetConstantBufferSetPS()
-    {
-        return m_ConstantBufferSetPSPtr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxContextManager::ResetConstantBufferSetCS()
-    {
-        m_ConstantBufferSetCSPtr = nullptr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxContextManager::SetConstantBufferSetCS(CBufferSetPtr _BufferSetPtr)
-    {
-        assert(_BufferSetPtr != nullptr);
-        
-        if (m_ConstantBufferSetCSPtr != _BufferSetPtr)
-        {
-            CNativeShader* pNativeShaderSet = static_cast<CNativeShader*>(m_ShaderSlots[CShader::Compute].GetPtr());
-            
-            Gfx::CNativeBufferHandle BufferHandle = 0;
-
-            unsigned int IndexOfConstantBuffer = 0;
-            unsigned int IndexOfResourceBuffer = 0;
-            
-            for (unsigned int IndexOfBuffer = 0; IndexOfBuffer < _BufferSetPtr->GetNumberOfBuffers(); ++IndexOfBuffer)
-            {
-                CNativeBuffer& rNativeBuffer = *static_cast<CNativeBuffer*>(_BufferSetPtr->GetBuffer(IndexOfBuffer).GetPtr());
-                
-                BufferHandle = rNativeBuffer.m_NativeBuffer;
-                
-                switch (rNativeBuffer.GetBinding())
-                {
-                case CBuffer::ConstantBuffer:
-
-                    glUniformBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfConstantBuffer, m_IndexOfBufferLocation);
-
-                    glBindBuffer(GL_UNIFORM_BUFFER, BufferHandle);
-
-                    glBindBufferRange(GL_UNIFORM_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
-
-                    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-                    ++IndexOfConstantBuffer;
-                    ++m_IndexOfBufferLocation;
-                    break;
-                case CBuffer::ResourceBuffer:
-                {
-                    glBindBuffer(GL_SHADER_STORAGE_BUFFER, BufferHandle);
-
-                    glBindBufferRange(GL_SHADER_STORAGE_BUFFER, IndexOfResourceBuffer, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
-
-                    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-                    ++IndexOfResourceBuffer;
-                }
-                    break;
-                default:
-                    BASE_CONSOLE_STREAMWARNING("Unsupported constant buffer type");
-                    break;
-                }
-            }
-            
-            m_ConstantBufferSetCSPtr = _BufferSetPtr;
-        }
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CBufferSetPtr CGfxContextManager::GetConstantBufferSetCS()
-    {
-        return m_ConstantBufferSetCSPtr;
-    }
+//     void CGfxContextManager::ResetConstantBufferSetVS()
+//     {
+//         m_ConstantBufferSetVSPtr = nullptr;
+//     }
+// 
+//     // -----------------------------------------------------------------------------
+// 
+//     void CGfxContextManager::SetConstantBufferSetVS(CBufferSetPtr _BufferSetPtr)
+//     {
+//         if (_BufferSetPtr == nullptr) return;
+//         
+//         if (m_ConstantBufferSetVSPtr != _BufferSetPtr && m_ShaderSlots[CShader::Vertex] != nullptr)
+//         {
+//             CNativeShader* pNativeShaderSet = static_cast<CNativeShader*>(m_ShaderSlots[CShader::Vertex].GetPtr());
+//             
+//             Gfx::CNativeBufferHandle BufferHandle = 0;
+// 
+//             unsigned int IndexOfConstantBuffer = 0;
+//             unsigned int IndexOfResourceBuffer = 0;
+//             
+//             for (unsigned int IndexOfBuffer = 0; IndexOfBuffer < _BufferSetPtr->GetNumberOfBuffers(); ++IndexOfBuffer)
+//             {
+//                 CNativeBuffer& rNativeBuffer = *static_cast<CNativeBuffer*>(_BufferSetPtr->GetBuffer(IndexOfBuffer).GetPtr());
+//                 
+//                 BufferHandle = rNativeBuffer.m_NativeBuffer;
+// 
+//                 switch (rNativeBuffer.GetBinding())
+//                 {
+//                 case CBuffer::ConstantBuffer:
+// 
+//                     glUniformBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfConstantBuffer, m_IndexOfBufferLocation);
+// 
+//                     glBindBuffer(GL_UNIFORM_BUFFER, BufferHandle);
+// 
+//                     glBindBufferRange(GL_UNIFORM_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
+// 
+//                     glBindBuffer(GL_UNIFORM_BUFFER, 0);
+// 
+//                     ++IndexOfConstantBuffer;
+//                     ++m_IndexOfBufferLocation;
+//                     break;
+//                 case CBuffer::ResourceBuffer:
+//                     glShaderStorageBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfResourceBuffer, m_IndexOfBufferLocation);
+// 
+//                     glBindBuffer(GL_SHADER_STORAGE_BUFFER, BufferHandle);
+// 
+//                     glBindBufferRange(GL_SHADER_STORAGE_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
+// 
+//                     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+// 
+//                     ++IndexOfResourceBuffer;
+//                     ++m_IndexOfBufferLocation;
+//                     break;
+//                 default:
+//                     BASE_CONSOLE_STREAMWARNING("Unsupported constant buffer type");
+//                     break;
+//                 }
+//             }
+//             
+//             m_ConstantBufferSetVSPtr = _BufferSetPtr;
+//         }
+//     }
+// 
+//     // -----------------------------------------------------------------------------
+// 
+//     CBufferSetPtr CGfxContextManager::GetConstantBufferSetVS()
+//     {
+//         return m_ConstantBufferSetVSPtr;
+//     }
+// 
+//     // -----------------------------------------------------------------------------
+// 
+//     void CGfxContextManager::ResetConstantBufferSetHS()
+//     {
+//         m_ConstantBufferSetHSPtr = nullptr;
+//     }
+// 
+//     // -----------------------------------------------------------------------------
+// 
+//     void CGfxContextManager::SetConstantBufferSetHS(CBufferSetPtr _BufferSetPtr)
+//     {
+//         if (_BufferSetPtr == nullptr) return;
+//         
+//         if (m_ConstantBufferSetHSPtr != _BufferSetPtr && m_ShaderSlots[CShader::Hull] != nullptr)
+//         {
+//             CNativeShader* pNativeShaderSet = static_cast<CNativeShader*>(m_ShaderSlots[CShader::Hull].GetPtr());
+//             
+//             Gfx::CNativeBufferHandle BufferHandle = 0;
+// 
+//             unsigned int IndexOfConstantBuffer = 0;
+//             unsigned int IndexOfResourceBuffer = 0;
+//             
+//             for (unsigned int IndexOfBuffer = 0; IndexOfBuffer < _BufferSetPtr->GetNumberOfBuffers(); ++IndexOfBuffer)
+//             {
+//                 CNativeBuffer& rNativeBuffer = *static_cast<CNativeBuffer*>(_BufferSetPtr->GetBuffer(IndexOfBuffer).GetPtr());
+//                 
+//                 BufferHandle = rNativeBuffer.m_NativeBuffer;
+//                 
+//                 switch (rNativeBuffer.GetBinding())
+//                 {
+//                 case CBuffer::ConstantBuffer:
+// 
+//                     glUniformBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfConstantBuffer, m_IndexOfBufferLocation);
+// 
+//                     glBindBuffer(GL_UNIFORM_BUFFER, BufferHandle);
+// 
+//                     glBindBufferRange(GL_UNIFORM_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
+// 
+//                     glBindBuffer(GL_UNIFORM_BUFFER, 0);
+// 
+//                     ++IndexOfConstantBuffer;
+//                     ++m_IndexOfBufferLocation;
+//                     break;
+//                 case CBuffer::ResourceBuffer:
+//                     glShaderStorageBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfResourceBuffer, m_IndexOfBufferLocation);
+// 
+//                     glBindBuffer(GL_SHADER_STORAGE_BUFFER, BufferHandle);
+// 
+//                     glBindBufferRange(GL_SHADER_STORAGE_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
+// 
+//                     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+// 
+//                     ++IndexOfResourceBuffer;
+//                     ++m_IndexOfBufferLocation;
+//                     break;
+//                 default:
+//                     BASE_CONSOLE_STREAMWARNING("Unsupported constant buffer type");
+//                     break;
+//                 }
+//             }
+//             
+//             m_ConstantBufferSetHSPtr = _BufferSetPtr;
+//         }
+//     }
+// 
+//     // -----------------------------------------------------------------------------
+// 
+//     CBufferSetPtr CGfxContextManager::GetConstantBufferSetHS()
+//     {
+//         return m_ConstantBufferSetHSPtr;
+//     }
+//     
+//     // -----------------------------------------------------------------------------
+//     
+//     void CGfxContextManager::ResetConstantBufferSetDS()
+//     {        
+//         m_ConstantBufferSetDSPtr = nullptr;
+//     }
+//     
+//     // -----------------------------------------------------------------------------
+//     
+//     void CGfxContextManager::SetConstantBufferSetDS(CBufferSetPtr _BufferSetPtr)
+//     {
+//         if (_BufferSetPtr == nullptr) return;
+//         
+//         if (m_ConstantBufferSetDSPtr != _BufferSetPtr && m_ShaderSlots[CShader::Domain] != nullptr)
+//         {
+//             CNativeShader* pNativeShaderSet = static_cast<CNativeShader*>(m_ShaderSlots[CShader::Domain].GetPtr());
+//             
+//             Gfx::CNativeBufferHandle BufferHandle = 0;
+// 
+//             unsigned int IndexOfConstantBuffer = 0;
+//             unsigned int IndexOfResourceBuffer = 0;
+//             
+//             for (unsigned int IndexOfBuffer = 0; IndexOfBuffer < _BufferSetPtr->GetNumberOfBuffers(); ++IndexOfBuffer)
+//             {
+//                 CNativeBuffer& rNativeBuffer = *static_cast<CNativeBuffer*>(_BufferSetPtr->GetBuffer(IndexOfBuffer).GetPtr());
+//                 
+//                 BufferHandle = rNativeBuffer.m_NativeBuffer;
+//                 
+//                 switch (rNativeBuffer.GetBinding())
+//                 {
+//                 case CBuffer::ConstantBuffer:
+// 
+//                     glUniformBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfConstantBuffer, m_IndexOfBufferLocation);
+// 
+//                     glBindBuffer(GL_UNIFORM_BUFFER, BufferHandle);
+// 
+//                     glBindBufferRange(GL_UNIFORM_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
+// 
+//                     glBindBuffer(GL_UNIFORM_BUFFER, 0);
+// 
+//                     ++IndexOfConstantBuffer;
+//                     ++m_IndexOfBufferLocation;
+//                     break;
+//                 case CBuffer::ResourceBuffer:
+//                     glShaderStorageBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfResourceBuffer, m_IndexOfBufferLocation);
+// 
+//                     glBindBuffer(GL_SHADER_STORAGE_BUFFER, BufferHandle);
+// 
+//                     glBindBufferRange(GL_SHADER_STORAGE_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
+// 
+//                     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+// 
+//                     ++IndexOfResourceBuffer;
+//                     ++m_IndexOfBufferLocation;
+//                     break;
+//                 default:
+//                     BASE_CONSOLE_STREAMWARNING("Unsupported constant buffer type");
+//                     break;
+//                 }
+//             }
+//             
+//             m_ConstantBufferSetDSPtr = _BufferSetPtr;
+//         }
+//     }
+//     
+//     // -----------------------------------------------------------------------------
+//     
+//     CBufferSetPtr CGfxContextManager::GetConstantBufferSetDS()
+//     {
+//         return m_ConstantBufferSetDSPtr;
+//     }
+//     
+//     // -----------------------------------------------------------------------------
+//     
+//     void CGfxContextManager::ResetConstantBufferSetGS()
+//     {
+//         m_ConstantBufferSetGSPtr = nullptr;
+//     }
+//     
+//     // -----------------------------------------------------------------------------
+//     
+//     void CGfxContextManager::SetConstantBufferSetGS(CBufferSetPtr _BufferSetPtr)
+//     {
+//         if (_BufferSetPtr == nullptr) return;
+//         
+//         if (m_ConstantBufferSetGSPtr != _BufferSetPtr && m_ShaderSlots[CShader::Geometry] != nullptr)
+//         {
+//             CNativeShader* pNativeShaderSet = static_cast<CNativeShader*>(m_ShaderSlots[CShader::Geometry].GetPtr());
+//             
+//             Gfx::CNativeBufferHandle BufferHandle = 0;
+// 
+//             unsigned int IndexOfConstantBuffer = 0;
+//             unsigned int IndexOfResourceBuffer = 0;
+//             
+//             for (unsigned int IndexOfBuffer = 0; IndexOfBuffer < _BufferSetPtr->GetNumberOfBuffers(); ++IndexOfBuffer)
+//             {
+//                 CNativeBuffer& rNativeBuffer = *static_cast<CNativeBuffer*>(_BufferSetPtr->GetBuffer(IndexOfBuffer).GetPtr());
+//                 
+//                 BufferHandle = rNativeBuffer.m_NativeBuffer;
+//                 
+//                 switch (rNativeBuffer.GetBinding())
+//                 {
+//                 case CBuffer::ConstantBuffer:
+// 
+//                     glUniformBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfConstantBuffer, m_IndexOfBufferLocation);
+// 
+//                     glBindBuffer(GL_UNIFORM_BUFFER, BufferHandle);
+// 
+//                     glBindBufferRange(GL_UNIFORM_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
+// 
+//                     glBindBuffer(GL_UNIFORM_BUFFER, 0);
+// 
+//                     ++IndexOfConstantBuffer;
+//                     ++m_IndexOfBufferLocation;
+//                     break;
+//                 case CBuffer::ResourceBuffer:
+//                     glShaderStorageBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfResourceBuffer, m_IndexOfBufferLocation);
+// 
+//                     glBindBuffer(GL_SHADER_STORAGE_BUFFER, BufferHandle);
+// 
+//                     glBindBufferRange(GL_SHADER_STORAGE_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
+// 
+//                     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+// 
+//                     ++IndexOfResourceBuffer;
+//                     ++m_IndexOfBufferLocation;
+//                     break;
+//                 default:
+//                     BASE_CONSOLE_STREAMWARNING("Unsupported constant buffer type");
+//                     break;
+//                 }
+//             }
+//             
+//             m_ConstantBufferSetGSPtr = _BufferSetPtr;
+//         }
+//     }
+//     
+//     // -----------------------------------------------------------------------------
+//     
+//     CBufferSetPtr CGfxContextManager::GetConstantBufferSetGS()
+//     {
+//         return m_ConstantBufferSetGSPtr;
+//     }
+// 
+//     // -----------------------------------------------------------------------------
+// 
+//     void CGfxContextManager::ResetConstantBufferSetPS()
+//     {
+//         m_ConstantBufferSetPSPtr = nullptr;
+//     }
+// 
+//     // -----------------------------------------------------------------------------
+// 
+//     void CGfxContextManager::SetConstantBufferSetPS(CBufferSetPtr _BufferSetPtr)
+//     {
+//         if (_BufferSetPtr == nullptr) return;
+//         
+//         if (m_ConstantBufferSetPSPtr != _BufferSetPtr && m_ShaderSlots[CShader::Pixel] != nullptr)
+//         {
+//             CNativeShader* pNativeShaderSet = static_cast<CNativeShader*>(m_ShaderSlots[CShader::Pixel].GetPtr());
+//             
+//             Gfx::CNativeBufferHandle BufferHandle = 0;
+// 
+//             unsigned int IndexOfConstantBuffer = 0;
+//             unsigned int IndexOfResourceBuffer = 0;
+//             
+//             for (unsigned int IndexOfBuffer = 0; IndexOfBuffer < _BufferSetPtr->GetNumberOfBuffers(); ++IndexOfBuffer)
+//             {
+//                 CNativeBuffer& rNativeBuffer = *static_cast<CNativeBuffer*>(_BufferSetPtr->GetBuffer(IndexOfBuffer).GetPtr());
+//                 
+//                 BufferHandle = rNativeBuffer.m_NativeBuffer;
+//                 
+//                 switch (rNativeBuffer.GetBinding())
+//                 {
+//                 case CBuffer::ConstantBuffer:
+// 
+//                     glUniformBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfConstantBuffer, m_IndexOfBufferLocation);
+// 
+//                     glBindBuffer(GL_UNIFORM_BUFFER, BufferHandle);
+// 
+//                     glBindBufferRange(GL_UNIFORM_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
+// 
+//                     glBindBuffer(GL_UNIFORM_BUFFER, 0);
+// 
+//                     ++IndexOfConstantBuffer;
+//                     ++m_IndexOfBufferLocation;
+//                     break;
+//                 case CBuffer::ResourceBuffer:
+//                     glShaderStorageBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfResourceBuffer, m_IndexOfBufferLocation);
+// 
+//                     glBindBuffer(GL_SHADER_STORAGE_BUFFER, BufferHandle);
+// 
+//                     glBindBufferRange(GL_SHADER_STORAGE_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
+// 
+//                     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+// 
+//                     ++IndexOfResourceBuffer;
+//                     ++m_IndexOfBufferLocation;
+//                     break;
+//                 default:
+//                     BASE_CONSOLE_STREAMWARNING("Unsupported constant buffer type");
+//                     break;
+//                 }
+//             }
+//             
+//             m_ConstantBufferSetPSPtr = _BufferSetPtr;
+//         }
+//     }
+// 
+//     // -----------------------------------------------------------------------------
+// 
+//     CBufferSetPtr CGfxContextManager::GetConstantBufferSetPS()
+//     {
+//         return m_ConstantBufferSetPSPtr;
+//     }
+// 
+//     // -----------------------------------------------------------------------------
+// 
+//     void CGfxContextManager::ResetConstantBufferSetCS()
+//     {
+//         m_ConstantBufferSetCSPtr = nullptr;
+//     }
+// 
+//     // -----------------------------------------------------------------------------
+// 
+//     void CGfxContextManager::SetConstantBufferSetCS(CBufferSetPtr _BufferSetPtr)
+//     {
+//         assert(_BufferSetPtr != nullptr);
+//         
+//         if (m_ConstantBufferSetCSPtr != _BufferSetPtr)
+//         {
+//             CNativeShader* pNativeShaderSet = static_cast<CNativeShader*>(m_ShaderSlots[CShader::Compute].GetPtr());
+//             
+//             Gfx::CNativeBufferHandle BufferHandle = 0;
+// 
+//             unsigned int IndexOfConstantBuffer = 0;
+//             unsigned int IndexOfResourceBuffer = 0;
+//             
+//             for (unsigned int IndexOfBuffer = 0; IndexOfBuffer < _BufferSetPtr->GetNumberOfBuffers(); ++IndexOfBuffer)
+//             {
+//                 CNativeBuffer& rNativeBuffer = *static_cast<CNativeBuffer*>(_BufferSetPtr->GetBuffer(IndexOfBuffer).GetPtr());
+//                 
+//                 BufferHandle = rNativeBuffer.m_NativeBuffer;
+//                 
+//                 switch (rNativeBuffer.GetBinding())
+//                 {
+//                 case CBuffer::ConstantBuffer:
+// 
+//                     glUniformBlockBinding(pNativeShaderSet->m_NativeShader, IndexOfConstantBuffer, m_IndexOfBufferLocation);
+// 
+//                     glBindBuffer(GL_UNIFORM_BUFFER, BufferHandle);
+// 
+//                     glBindBufferRange(GL_UNIFORM_BUFFER, m_IndexOfBufferLocation, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
+// 
+//                     glBindBuffer(GL_UNIFORM_BUFFER, 0);
+// 
+//                     ++IndexOfConstantBuffer;
+//                     ++m_IndexOfBufferLocation;
+//                     break;
+//                 case CBuffer::ResourceBuffer:
+//                 {
+//                     glBindBuffer(GL_SHADER_STORAGE_BUFFER, BufferHandle);
+// 
+//                     glBindBufferRange(GL_SHADER_STORAGE_BUFFER, IndexOfResourceBuffer, BufferHandle, 0, rNativeBuffer.GetNumberOfBytes());
+// 
+//                     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+// 
+//                     ++IndexOfResourceBuffer;
+//                 }
+//                     break;
+//                 default:
+//                     BASE_CONSOLE_STREAMWARNING("Unsupported constant buffer type");
+//                     break;
+//                 }
+//             }
+//             
+//             m_ConstantBufferSetCSPtr = _BufferSetPtr;
+//         }
+//     }
+// 
+//     // -----------------------------------------------------------------------------
+// 
+//     CBufferSetPtr CGfxContextManager::GetConstantBufferSetCS()
+//     {
+//         return m_ConstantBufferSetCSPtr;
+//     }
 
     // -----------------------------------------------------------------------------
 
@@ -2246,132 +2213,6 @@ namespace ContextManager
     CBufferSetPtr GetVertexBufferSet()
     {
         return CGfxContextManager::GetInstance().GetVertexBufferSet();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void ResetConstantBufferSetVS()
-    {
-        CGfxContextManager::GetInstance().ResetConstantBufferSetVS();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SetConstantBufferSetVS(CBufferSetPtr _BufferSetPtr)
-    {
-        CGfxContextManager::GetInstance().SetConstantBufferSetVS(_BufferSetPtr);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CBufferSetPtr GetConstantBufferSetVS()
-    {
-        return CGfxContextManager::GetInstance().GetConstantBufferSetVS();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void ResetConstantBufferSetHS()
-    {
-        CGfxContextManager::GetInstance().ResetConstantBufferSetHS();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SetConstantBufferSetHS(CBufferSetPtr _BufferSetPtr)
-    {
-        CGfxContextManager::GetInstance().SetConstantBufferSetHS(_BufferSetPtr);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CBufferSetPtr GetConstantBufferSetHS()
-    {
-        return CGfxContextManager::GetInstance().GetConstantBufferSetHS();
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void ResetConstantBufferSetDS()
-    {
-        CGfxContextManager::GetInstance().ResetConstantBufferSetDS();
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void SetConstantBufferSetDS(CBufferSetPtr _BufferSetPtr)
-    {
-        CGfxContextManager::GetInstance().SetConstantBufferSetDS(_BufferSetPtr);
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CBufferSetPtr GetConstantBufferSetDS()
-    {
-        return CGfxContextManager::GetInstance().GetConstantBufferSetDS();
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void ResetConstantBufferSetGS()
-    {
-        CGfxContextManager::GetInstance().ResetConstantBufferSetGS();
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void SetConstantBufferSetGS(CBufferSetPtr _BufferSetPtr)
-    {
-        CGfxContextManager::GetInstance().SetConstantBufferSetGS(_BufferSetPtr);
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CBufferSetPtr GetConstantBufferSetGS()
-    {
-        return CGfxContextManager::GetInstance().GetConstantBufferSetGS();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void ResetConstantBufferSetPS()
-    {
-        CGfxContextManager::GetInstance().ResetConstantBufferSetPS();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SetConstantBufferSetPS(CBufferSetPtr _BufferSetPtr)
-    {
-        CGfxContextManager::GetInstance().SetConstantBufferSetPS(_BufferSetPtr);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CBufferSetPtr GetConstantBufferSetPS()
-    {
-        return CGfxContextManager::GetInstance().GetConstantBufferSetPS();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void ResetConstantBufferSetCS()
-    {
-        CGfxContextManager::GetInstance().ResetConstantBufferSetCS();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SetConstantBufferSetCS(CBufferSetPtr _BufferSetPtr)
-    {
-        CGfxContextManager::GetInstance().SetConstantBufferSetCS(_BufferSetPtr);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CBufferSetPtr GetConstantBufferSetCS()
-    {
-        return CGfxContextManager::GetInstance().GetConstantBufferSetCS();
     }
 
     // -----------------------------------------------------------------------------
