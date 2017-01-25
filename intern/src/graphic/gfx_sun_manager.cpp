@@ -537,20 +537,6 @@ namespace
                 }
                     
                 // -----------------------------------------------------------------------------
-                // Set material
-                // -----------------------------------------------------------------------------
-                CMaterialPtr MaterialPtr;
-
-                if (pGraphicModelActorFacet->GetMaterial(IndexOfSurface) != 0)
-                {
-                    MaterialPtr = pGraphicModelActorFacet->GetMaterial(IndexOfSurface);
-                }
-                else
-                {
-                    MaterialPtr = SurfacePtr->GetMaterial();
-                }
-                    
-                // -----------------------------------------------------------------------------
                 // Get input layout from optimal shader
                 // -----------------------------------------------------------------------------
                 assert(SurfacePtr->GetKey().m_HasPosition);
