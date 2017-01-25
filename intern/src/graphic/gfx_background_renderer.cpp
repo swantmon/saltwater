@@ -300,18 +300,6 @@ namespace
         ConstanteBufferDesc.m_pClassKey     = 0;
         
         CBufferPtr SkyboxVSBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
-
-        // -----------------------------------------------------------------------------
-
-        ConstanteBufferDesc.m_Stride        = 0;
-        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
-        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
-        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSkyboxFromTextureVSBuffer);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
-        
-        CBufferPtr SkyboxFromTextureVSBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
                         
         // -----------------------------------------------------------------------------
         
@@ -344,8 +332,6 @@ namespace
 
         CBufferSetPtr SkyboxVSBufferSetPtr = BufferManager::CreateBufferSet(SkyboxVSBuffer);
         CBufferSetPtr SkyboxPSBufferSetPtr = BufferManager::CreateBufferSet(SkyboxPSBuffer);
-
-        CBufferSetPtr SkyboxFromTextureVSBufferSetPtr = BufferManager::CreateBufferSet(SkyboxFromTextureVSBufferPtr);
 
         m_BackgroundFromSkybox.m_VSBufferSetPtr = SkyboxVSBufferSetPtr;
         m_BackgroundFromSkybox.m_GSBufferSetPtr = 0;
@@ -543,7 +529,7 @@ namespace
         
         ContextManager::SetShaderPS(PSPtr);
         
-        ContextManager::SetConstantBufferSetVS(VSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, VSBufferSetPtr->GetBuffer(0));
         
         ContextManager::SetConstantBuffer(8, PSBufferSetPtr->GetBuffer(0));
 
@@ -562,12 +548,12 @@ namespace
 
         ContextManager::ResetSampler(0);
         ContextManager::ResetSampler(1);
+
+        ContextManager::ResetConstantBuffer(0);
         
         ContextManager::ResetConstantBuffer(8);
 
         ContextManager::ResetResourceBuffer(0);
-        
-        ContextManager::ResetConstantBufferSetVS();
         
         ContextManager::ResetTopology();
         
@@ -686,7 +672,7 @@ namespace
 
         ContextManager::SetShaderPS(PSPtr);
 
-        ContextManager::SetConstantBufferSetVS(VSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, VSBufferSetPtr->GetBuffer(0));
 
         ContextManager::SetConstantBuffer(8, PSBufferSetPtr->GetBuffer(0));
 
@@ -706,11 +692,11 @@ namespace
         ContextManager::ResetSampler(0);
         ContextManager::ResetSampler(1);
 
+        ContextManager::ResetConstantBuffer(0);
+
         ContextManager::ResetConstantBuffer(8);
 
         ContextManager::ResetResourceBuffer(0);
-
-        ContextManager::ResetConstantBufferSetVS();
 
         ContextManager::ResetTopology();
 
