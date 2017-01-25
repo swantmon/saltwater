@@ -466,9 +466,15 @@ namespace
 
             ContextManager::SetInputLayout(m_LightProbeInputLayoutPtr);
 
-            ContextManager::SetConstantBufferSetPS(m_PunctualLightPSBufferPtr);
+            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBufferPS());
 
-            ContextManager::SetConstantBufferSetVS(m_MainVSBufferPtr);
+            ContextManager::SetConstantBuffer(1, m_MainVSBufferPtr->GetBuffer(1));
+
+            ContextManager::SetConstantBuffer(2, m_PunctualLightPSBufferPtr->GetBuffer(0));
+
+            ContextManager::SetConstantBuffer(3, m_PunctualLightPSBufferPtr->GetBuffer(1));
+
+            ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
 
             ContextManager::SetTexture(0, m_PunctualLightTextureSetPtr->GetTexture(0));
             ContextManager::SetTexture(1, m_PunctualLightTextureSetPtr->GetTexture(1));
@@ -496,9 +502,12 @@ namespace
 
             ContextManager::ResetInputLayout();
 
-            ContextManager::ResetConstantBufferSetPS();
+            ContextManager::ResetConstantBuffer(0);
+            ContextManager::ResetConstantBuffer(1);
+            ContextManager::ResetConstantBuffer(2);
+            ContextManager::ResetConstantBuffer(3);
 
-            ContextManager::ResetConstantBufferSetVS();
+            ContextManager::ResetResourceBuffer(0);
 
             ContextManager::ResetIndexBuffer();
 
