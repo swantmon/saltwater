@@ -210,18 +210,6 @@ namespace
         CShaderPtr             m_ShaderHSPtr;
         CShaderPtr             m_ShaderPSPtr;
         CShaderPtr             m_ShaderCSPtr;
-        CSamplerSetPtr         m_SamplerSetVSPtr;
-        CSamplerSetPtr         m_SamplerSetGSPtr;
-        CSamplerSetPtr         m_SamplerSetDSPtr;
-        CSamplerSetPtr         m_SamplerSetHSPtr;
-        CSamplerSetPtr         m_SamplerSetPSPtr;
-        CSamplerSetPtr         m_SamplerSetCSPtr;
-        CTextureSetPtr         m_TextureSetVSPtr;
-        CTextureSetPtr         m_TextureSetGSPtr;
-        CTextureSetPtr         m_TextureSetDSPtr;
-        CTextureSetPtr         m_TextureSetHSPtr;
-        CTextureSetPtr         m_TextureSetPSPtr;
-        CTextureSetPtr         m_TextureSetCSPtr;
         CTargetSetPtr          m_TargetSetPtr;;
         CViewPortSetPtr        m_ViewPortSetPtr;
         CRenderContexts        m_RenderContexts;
@@ -291,18 +279,6 @@ namespace
         , m_ShaderHSPtr           ()
         , m_ShaderPSPtr           ()
         , m_ShaderCSPtr           ()
-        , m_SamplerSetVSPtr       ()
-        , m_SamplerSetGSPtr       ()
-        , m_SamplerSetDSPtr       ()
-        , m_SamplerSetHSPtr       ()
-        , m_SamplerSetPSPtr       ()
-        , m_SamplerSetCSPtr       ()
-        , m_TextureSetVSPtr       ()
-        , m_TextureSetGSPtr       ()
-        , m_TextureSetDSPtr       ()
-        , m_TextureSetHSPtr       ()
-        , m_TextureSetPSPtr       ()
-        , m_TextureSetCSPtr       ()
         , m_TargetSetPtr          ()
         , m_ViewPortSetPtr        ()
         , m_RenderContexts        ()
