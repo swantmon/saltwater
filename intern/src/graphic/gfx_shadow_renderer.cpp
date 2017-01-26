@@ -551,6 +551,11 @@ namespace
         Base::Int2 HalfSize   (Size[0] / 2, Size[1] / 2);
 
         // -----------------------------------------------------------------------------
+        // Clear buffer
+        // -----------------------------------------------------------------------------
+        TargetSetManager::ClearTargetSet(m_HalfRenderbufferPtr, Base::Float4(1.0f));
+
+        // -----------------------------------------------------------------------------
         // Rendering: SSAO
         // -----------------------------------------------------------------------------
         SSSAOProperties SSAOSettings;
@@ -576,7 +581,7 @@ namespace
         SSAOSettings.m_InverseCameraProjection = ViewManager::GetMainCamera()->GetProjectionMatrix().GetInverted();
         SSAOSettings.m_CameraProjection        = ViewManager::GetMainCamera()->GetProjectionMatrix();
         SSAOSettings.m_CameraView              = ViewManager::GetMainCamera()->GetView()->GetViewMatrix();
-        SSAOSettings.m_NoiseScale              = Base::Float4(static_cast<float>(HalfSize[0]), static_cast<float>(HalfSize[1]), 0.08f, 0.0f);
+        SSAOSettings.m_NoiseScale              = Base::Float4(static_cast<float>(HalfSize[0]), static_cast<float>(HalfSize[1]), 0.14f, 2.0f);
         
         for (unsigned int IndexOfNoiseSeq = 0; IndexOfNoiseSeq < s_SSAOKernelSize; ++ IndexOfNoiseSeq)
         {
@@ -588,7 +593,7 @@ namespace
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
-        ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipLinearWrap));
 
         ContextManager::SetTexture(0, m_SSAOTextureSets[SSAO]->GetTexture(0));
         ContextManager::SetTexture(1, m_SSAOTextureSets[SSAO]->GetTexture(1));
@@ -649,7 +654,7 @@ namespace
 
             ContextManager::SetShaderCS(m_BilateralBlurShaderCSPtr);
 
-            ContextManager::SetConstantBuffer(0, m_GaussianBlurPropertiesCSBufferPtr);
+            ContextManager::SetResourceBuffer(0, m_GaussianBlurPropertiesCSBufferPtr);
 
             GaussianSettings.m_Direction[0] = 1;
             GaussianSettings.m_Direction[1] = 0;
@@ -679,7 +684,7 @@ namespace
 
             // -----------------------------------------------------------------------------
 
-            ContextManager::ResetConstantBuffer(0);
+            ContextManager::ResetResourceBuffer(0);
 
             ContextManager::ResetShaderCS();
         }
