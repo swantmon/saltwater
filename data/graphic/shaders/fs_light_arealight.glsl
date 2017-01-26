@@ -1,6 +1,6 @@
 
-#ifndef __INCLUDE_FS_LIGHT_SPHERELIGHT_GLSL__
-#define __INCLUDE_FS_LIGHT_SPHERELIGHT_GLSL__
+#ifndef __INCLUDE_FS_LIGHT_AREALIGHT_GLSL__
+#define __INCLUDE_FS_LIGHT_AREALIGHT_GLSL__
 
 #include "common_global.glsl"
 #include "common.glsl"
@@ -63,13 +63,13 @@ layout (location = 0) out vec4 out_Output;
 // -----------------------------------------------------------------------------
 // Tracing and intersection
 // -----------------------------------------------------------------------------
-struct Ray
+struct SRay
 {
     vec3 origin;
     vec3 dir;
 };
 
-struct Rect
+struct SRect
 {
     vec3  center;
     vec3  dirx;
@@ -80,13 +80,14 @@ struct Rect
     vec4  plane;
 };
 
-bool RayPlaneIntersect(Ray ray, vec4 plane, out float t)
+bool RayPlaneIntersect(in SRay _Ray, in vec4 _Plane, out float _Distance)
 {
-    t = -dot(plane, vec4(ray.origin, 1.0))/dot(plane.xyz, ray.dir);
-    return t > 0.0;
+    _Distance = -dot(_Plane, vec4(_Ray.origin, 1.0f)) / dot(_Plane.xyz, _Ray.dir);
+
+    return _Distance > 0.0;
 }
 
-bool RayRectIntersect(Ray ray, Rect rect, out float t)
+bool RayRectIntersect(SRay ray, SRect rect, out float t)
 {
     bool intersect = RayPlaneIntersect(ray, rect.plane, t);
     if (intersect)
@@ -98,7 +99,9 @@ bool RayRectIntersect(Ray ray, Rect rect, out float t)
         float y = dot(lpos, rect.diry);    
 
         if (abs(x) > rect.halfx || abs(y) > rect.halfy)
+        {
             intersect = false;
+        }
     }
 
     return intersect;
@@ -107,29 +110,6 @@ bool RayRectIntersect(Ray ray, Rect rect, out float t)
 // -----------------------------------------------------------------------------
 // Camera functions
 // -----------------------------------------------------------------------------
-Ray GenerateCameraRay(float u1, float u2)
-{
-    Ray ray;
-
-    // Random jitter within pixel for AA
-    vec2 xy = 2.0*(gl_FragCoord.xy)/resolution - vec2(1.0);
-
-    ray.dir = normalize(vec3(xy, 2.0));
-
-    float focalDistance = 2.0;
-    float ft = focalDistance/ray.dir.z;
-    vec3 pFocus = ray.dir*ft;
-
-    ray.origin = vec3(0);
-    ray.dir    = normalize(pFocus - ray.origin);
-
-    // Apply camera transform
-    ray.origin = (view*vec4(ray.origin, 1)).xyz;
-    ray.dir    = (view*vec4(ray.dir,    0)).xyz;
-
-    return ray;
-}
-
 vec3 mul(mat3 m, vec3 v)
 {
     return m * v;
@@ -143,18 +123,22 @@ mat3 mul(mat3 m1, mat3 m2)
 vec3 rotation_y(vec3 v, float a)
 {
     vec3 r;
+
     r.x =  v.x*cos(a) + v.z*sin(a);
     r.y =  v.y;
     r.z = -v.x*sin(a) + v.z*cos(a);
+
     return r;
 }
 
 vec3 rotation_z(vec3 v, float a)
 {
     vec3 r;
+
     r.x =  v.x*cos(a) - v.y*sin(a);
     r.y =  v.x*sin(a) + v.y*cos(a);
     r.z =  v.z;
+
     return r;
 }
 
@@ -166,6 +150,7 @@ vec3 rotation_yz(vec3 v, float ay, float az)
 mat3 transpose(mat3 v)
 {
     mat3 tmp;
+
     tmp[0] = vec3(v[0].x, v[1].x, v[2].x);
     tmp[1] = vec3(v[0].y, v[1].y, v[2].y);
     tmp[2] = vec3(v[0].z, v[1].z, v[2].z);
@@ -297,8 +282,7 @@ void ClipQuadToHorizon(inout vec3 L[5], out int n)
 }
 
 
-vec3 LTC_Evaluate(
-    vec3 N, vec3 V, vec3 P, mat3 Minv, vec3 points[4], bool twoSided)
+vec3 LTC_Evaluate(vec3 N, vec3 V, vec3 P, mat3 Minv, vec3 points[4], bool twoSided)
 {
     // construct orthonormal basis around N
     vec3 T1, T2;
@@ -319,7 +303,9 @@ vec3 LTC_Evaluate(
     ClipQuadToHorizon(L, n);
     
     if (n == 0)
+    {
         return vec3(0, 0, 0);
+    }
 
     // project onto sphere
     L[0] = normalize(L[0]);
@@ -334,10 +320,16 @@ vec3 LTC_Evaluate(
     sum += IntegrateEdge(L[0], L[1]);
     sum += IntegrateEdge(L[1], L[2]);
     sum += IntegrateEdge(L[2], L[3]);
+
     if (n >= 4)
+    {
         sum += IntegrateEdge(L[3], L[4]);
+    }
+
     if (n == 5)
+    {
         sum += IntegrateEdge(L[4], L[0]);
+    }
 
     sum = twoSided ? abs(sum) : max(0.0, sum);
 
@@ -347,51 +339,8 @@ vec3 LTC_Evaluate(
 }
 
 // -----------------------------------------------------------------------------
-// Scene helpers
+// Main
 // -----------------------------------------------------------------------------
-
-void InitRect(out Rect rect)
-{
-    rect.dirx = rotation_yz(vec3(1, 0, 0), roty*2.0*pi, rotz*2.0*pi);
-    rect.diry = rotation_yz(vec3(0, 1, 0), roty*2.0*pi, rotz*2.0*pi);
-
-    rect.center = vec3(0, 6, 32);
-    rect.halfx  = 0.5*width;
-    rect.halfy  = 0.5*height;
-
-    vec3 rectNormal = cross(rect.dirx, rect.diry);
-    rect.plane = vec4(rectNormal, -dot(rectNormal, rect.center));
-}
-
-void InitRectPoints(Rect rect, out vec3 points[4])
-{
-    vec3 ex = rect.halfx*rect.dirx;
-    vec3 ey = rect.halfy*rect.diry;
-
-    points[0] = rect.center - ex - ey;
-    points[1] = rect.center + ex - ey;
-    points[2] = rect.center + ex + ey;
-    points[3] = rect.center - ex + ey;
-}
-
-// -----------------------------------------------------------------------------
-// Misc. helpers
-// -----------------------------------------------------------------------------
-float saturate(float v)
-{
-    return clamp(v, 0.0, 1.0);
-}
-
-vec3 PowVec3(vec3 v, float p)
-{
-    return vec3(pow(v.x, p), pow(v.y, p), pow(v.z, p));
-}
-
-const float gamma = 2.2;
-
-vec3 ToLinear(vec3 v) { return PowVec3(v,     gamma); }
-vec3 ToSRGB(vec3 v)   { return PowVec3(v, 1.0/gamma); }
-
 void main()
 {
     // -----------------------------------------------------------------------------
@@ -425,54 +374,84 @@ void main()
     float AverageExposure = ps_ExposureHistory[ps_ExposureHistoryIndex];
 
     // -----------------------------------------------------------------------------
-    // Stolen:
+    // Create default rect in world
     // -----------------------------------------------------------------------------
-    Rect rect;
-    InitRect(rect);
-
-    vec3 points[4];
-    InitRectPoints(rect, points);
-
-    vec3 lcol = vec3(intensity);
-    vec3 dcol = ToLinear(dcolor.xyz);
-    vec3 scol = ToLinear(scolor.xyz);
+    SRect rect;
+    vec3  points[4];
     
-    vec3 col = vec3(0);
+    rect.dirx = rotation_yz(vec3(1.0f, 0.0f, 0.0f), roty * 2.0f * pi, rotz * 2.0f * pi);
+    rect.diry = rotation_yz(vec3(0.0f, 1.0f, 0.0f), roty * 2.0f * pi, rotz * 2.0f * pi);
 
-    vec3 pos = Data.m_WSPosition.xyz;
-    vec3 N   = Data.m_WSNormal.xyz;
-    vec3 V   = -g_ViewDirection.xyz;
+    rect.center = vec3(0.0f, 0.0f, 5.0f);
+    rect.halfx  = 0.5f * width;
+    rect.halfy  = 0.5f * height;
+
+    vec3 rectNormal = cross(rect.dirx, rect.diry);
+    rect.plane = vec4(rectNormal, -dot(rectNormal, rect.center));
+
+    vec3 ex = rect.halfx * rect.dirx;
+    vec3 ey = rect.halfy * rect.diry;
+
+    points[0] = rect.center - ex - ey;
+    points[1] = rect.center + ex - ey;
+    points[2] = rect.center + ex + ey;
+    points[3] = rect.center - ex + ey;
+
+    // -----------------------------------------------------------------------------
+    // LTC
+    // -----------------------------------------------------------------------------
+    vec3 Output = vec3(0);
+
+    vec3 WSViewDirection = normalize(g_ViewPosition.xyz - Data.m_WSPosition);
     
-    float theta = acos(dot(N, V));
-    vec2 uv = vec2(Data.m_Roughness, theta/(0.5*pi));
-    uv = uv*LUT_SCALE + LUT_BIAS;
+    float Theta = acos(dot(Data.m_WSNormal, WSViewDirection));
+
+    vec2 UV = vec2(Data.m_Roughness, Theta / (0.5f * pi));
+
+    UV = UV * LUT_SCALE + LUT_BIAS;
     
-    vec4 t = texture2D(ltc_mat, uv);
+    vec4 t = texture2D(ltc_mat, UV);
+
     mat3 Minv = mat3(
         vec3(  1,   0, t.y),
         vec3(  0, t.z,   0),
         vec3(t.w,   0, t.x)
     );
     
-    vec3 spec = LTC_Evaluate(N, V, pos, Minv, points, false);
-    spec *= texture2D(ltc_mag, uv).w;
-    
-    vec3 diff = LTC_Evaluate(N, V, pos, mat3(1), points, false); 
-    
-    col  = lcol*(scol*spec + dcol*diff);
-    col /= 2.0*pi;
+    vec3 Specular = LTC_Evaluate(Data.m_WSNormal, WSViewDirection, WSPosition, Minv, points, false);
 
+    Specular *= texture2D(ltc_mag, UV).w;
+    
+    vec3 Diffuse = LTC_Evaluate(Data.m_WSNormal, WSViewDirection, WSPosition, mat3(1), points, false); 
+    
+    Output  = vec3(intensity) * (scolor.xyz * Specular + dcolor.xyz * Diffuse);
 
-    Ray ray = GenerateCameraRay(0.0, 0.0);
+    Output /= 2.0f * pi;
+
+    // -----------------------------------------------------------------------------
+    // Generate ray from camera
+    // -----------------------------------------------------------------------------
+#define SHOW_BULB 0
+#if SHOW_BULB == 1
+    SRay ray;
+
+    ray.origin = g_ViewPosition.xyz;
+    ray.dir    = g_ViewDirection.xyz;
 
     float distToFloor = dot(Data.m_WSPosition, g_ViewPosition.xyz);
 
     float distToRect;
-    if (RayRectIntersect(ray, rect, distToRect))
-        if ((distToRect < distToFloor))
-            col = lcol;
 
-    out_Output = vec4(col, 1.0f);
+    if (RayRectIntersect(ray, rect, distToRect))
+    {
+        if ((distToRect < distToFloor))
+        {
+            Output = vec3(intensity);
+        }
+    }
+#endif
+
+    out_Output = vec4(Output, 0.0f);
 }
 
-#endif // __INCLUDE_FS_LIGHT_SPHERELIGHT_GLSL__
+#endif // __INCLUDE_FS_LIGHT_AREALIGHT_GLSL__
