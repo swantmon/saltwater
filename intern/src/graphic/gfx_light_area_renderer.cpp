@@ -68,20 +68,20 @@ namespace
         {
             Base::Float4x4 m_ModelMatrix;
         };
-        
+                
         struct SAreaLightProperties
         {
             Base::Float4x4 view;
-            Base::Float4   dcolor;
-            Base::Float4   scolor;
-            Base::Float2   resolution;
-            float          intensity;
-            float          width;
-            float          height;
-            float          roty;
-            float          rotz;
-            float          padding;
-            bool           twoSided;
+            Base::Float4   dcolor;                                  //> Diffuse Color {r:1.0, g:1.0, b:1.0}
+            Base::Float4   scolor;                                  //> Specular Color {r:1.0, g:1.0, b:1.0}
+            Base::Float2   resolution;                              
+            float          intensity;                               //> Light Intensity {default:4, min:0, max:10}
+            float          width;                                   //> Width {default: 8, min:0.1, max:15, step:0.1}
+            float          height;                                  //> Height {default: 8, min:0.1, max:15, step:0.1}
+            float          roty;                                    //> Rotation Y {default: 0, min:0, max:1, step:0.001}
+            float          rotz;                                    //> Rotation Z {default: 0, min:0, max:1, step:0.001}
+            float          padding;                                 
+            bool           twoSided;                                //> Two-sided {default:false}
             int            sampleCount;
             unsigned int   m_ExposureHistoryIndex;
         };
@@ -153,7 +153,7 @@ namespace
     {
         m_ScreenQuadShaderPtr = ShaderManager::CompileVS("vs_screen_p_quad.glsl", "main");
 
-        m_LTCAreaLightShaderPtr = ShaderManager::CompilePS("fs_light_spherelight.glsl" , "main");
+        m_LTCAreaLightShaderPtr = ShaderManager::CompilePS("fs_light_arealight.glsl" , "main");
         
         // -----------------------------------------------------------------------------
         
@@ -234,7 +234,7 @@ namespace
         TextureDescriptor.m_pPixels          = s_LTCMaterial;
         TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
         
-        CTextureBasePtr LTCMaterialTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+        CTexture2DPtr LTCMaterialTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
         // -----------------------------------------------------------------------------
 
@@ -252,11 +252,11 @@ namespace
         TextureDescriptor.m_pPixels          = s_LTCMag;
         TextureDescriptor.m_Format           = CTextureBase::R16_FLOAT;
         
-        CTextureBasePtr LTCMagTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+        CTexture2DPtr LTCMagTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
         // -----------------------------------------------------------------------------
 
-        m_LTCTextureSetPtr = TextureManager::CreateTextureSet(LTCMaterialTexturePtr, LTCMagTexturePtr);
+        m_LTCTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(LTCMaterialTexturePtr), static_cast<CTextureBasePtr>(LTCMagTexturePtr));
     }
     
     // -----------------------------------------------------------------------------
