@@ -899,18 +899,14 @@ namespace
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
-        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         
         ContextManager::SetTexture(0, m_SwapTextureSetPtrs[CurrentSwapBufferCount]->GetTexture(0));
-        ContextManager::SetTexture(1, m_SwapTextureSetPtrs[CurrentSwapBufferCount]->GetTexture(1));
         
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
         
         ContextManager::ResetTexture(0);
-        ContextManager::ResetTexture(1);
 
         ContextManager::ResetSampler(0);
-        ContextManager::ResetSampler(1);
         
         ContextManager::ResetConstantBuffer(0);
         

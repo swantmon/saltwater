@@ -5,7 +5,7 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(binding = 0) uniform UB0
+layout(binding = 1) uniform UB0
 {
     vec2  ps_Direction;
     float ps_Weights0;

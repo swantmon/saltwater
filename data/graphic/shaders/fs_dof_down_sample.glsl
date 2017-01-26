@@ -64,49 +64,49 @@ void main(void)
     // Bilinear filtering to average 4 color samples
     // -----------------------------------------------------------------------------
     Color  = vec3(0.0f);
-    Color += texture(PSTextureColor, in_PixelCoords.m_Color0.xy + RowOfs[0]).rgb;
-    Color += texture(PSTextureColor, in_PixelCoords.m_Color1.xy + RowOfs[0]).rgb;
-    Color += texture(PSTextureColor, in_PixelCoords.m_Color0.xy + RowOfs[2]).rgb;
-    Color += texture(PSTextureColor, in_PixelCoords.m_Color1.xy + RowOfs[2]).rgb;
+    Color += texture(PSTextureColor, in_PixelCoords.m_Color0.xy + RowOfs[0] * g_InvertedScreensizeAndScreensize.xy).rgb;
+    Color += texture(PSTextureColor, in_PixelCoords.m_Color1.xy + RowOfs[0] * g_InvertedScreensizeAndScreensize.xy).rgb;
+    Color += texture(PSTextureColor, in_PixelCoords.m_Color0.xy + RowOfs[2] * g_InvertedScreensizeAndScreensize.xy).rgb;
+    Color += texture(PSTextureColor, in_PixelCoords.m_Color1.xy + RowOfs[2] * g_InvertedScreensizeAndScreensize.xy).rgb;
     Color /= 4.0f;
     
     // -----------------------------------------------------------------------------
     // Calculate CoC
     // -----------------------------------------------------------------------------
-    Depth.x = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth0.xy + RowOfs[0]).r, g_CameraParameterNear, g_CameraParameterFar);
-    Depth.y = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth1.xy + RowOfs[0]).r, g_CameraParameterNear, g_CameraParameterFar);
-    Depth.z = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth2.xy + RowOfs[0]).r, g_CameraParameterNear, g_CameraParameterFar);
-    Depth.w = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth3.xy + RowOfs[0]).r, g_CameraParameterNear, g_CameraParameterFar);
+    Depth.x = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth0.xy + RowOfs[0] * g_InvertedScreensizeAndScreensize.xy).r, g_CameraParameterNear, g_CameraParameterFar);
+    Depth.y = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth1.xy + RowOfs[0] * g_InvertedScreensizeAndScreensize.xy).r, g_CameraParameterNear, g_CameraParameterFar);
+    Depth.z = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth2.xy + RowOfs[0] * g_InvertedScreensizeAndScreensize.xy).r, g_CameraParameterNear, g_CameraParameterFar);
+    Depth.w = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth3.xy + RowOfs[0] * g_InvertedScreensizeAndScreensize.xy).r, g_CameraParameterNear, g_CameraParameterFar);
     
     CurCoc = clamp(m_DofNear.x * Depth + m_DofNear.y, 0.0f, 1.0f);
     Coc    = CurCoc;
     
     // -----------------------------------------------------------------------------
     
-    Depth.x = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth0.xy + RowOfs[1]).r, g_CameraParameterNear, g_CameraParameterFar);
-    Depth.y = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth1.xy + RowOfs[1]).r, g_CameraParameterNear, g_CameraParameterFar);
-    Depth.z = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth2.xy + RowOfs[1]).r, g_CameraParameterNear, g_CameraParameterFar);
-    Depth.w = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth3.xy + RowOfs[1]).r, g_CameraParameterNear, g_CameraParameterFar);
+    Depth.x = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth0.xy + RowOfs[1] * g_InvertedScreensizeAndScreensize.xy).r, g_CameraParameterNear, g_CameraParameterFar);
+    Depth.y = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth1.xy + RowOfs[1] * g_InvertedScreensizeAndScreensize.xy).r, g_CameraParameterNear, g_CameraParameterFar);
+    Depth.z = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth2.xy + RowOfs[1] * g_InvertedScreensizeAndScreensize.xy).r, g_CameraParameterNear, g_CameraParameterFar);
+    Depth.w = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth3.xy + RowOfs[1] * g_InvertedScreensizeAndScreensize.xy).r, g_CameraParameterNear, g_CameraParameterFar);
     
     CurCoc = clamp(m_DofNear.x * Depth + m_DofNear.y, 0.0f, 1.0f);
     Coc    = max(Coc, CurCoc);
     
     // -----------------------------------------------------------------------------
     
-    Depth.x = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth0.xy + RowOfs[2]).r, g_CameraParameterNear, g_CameraParameterFar);
-    Depth.y = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth1.xy + RowOfs[2]).r, g_CameraParameterNear, g_CameraParameterFar);
-    Depth.z = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth2.xy + RowOfs[2]).r, g_CameraParameterNear, g_CameraParameterFar);
-    Depth.w = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth3.xy + RowOfs[2]).r, g_CameraParameterNear, g_CameraParameterFar);
+    Depth.x = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth0.xy + RowOfs[2] * g_InvertedScreensizeAndScreensize.xy).r, g_CameraParameterNear, g_CameraParameterFar);
+    Depth.y = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth1.xy + RowOfs[2] * g_InvertedScreensizeAndScreensize.xy).r, g_CameraParameterNear, g_CameraParameterFar);
+    Depth.z = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth2.xy + RowOfs[2] * g_InvertedScreensizeAndScreensize.xy).r, g_CameraParameterNear, g_CameraParameterFar);
+    Depth.w = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth3.xy + RowOfs[2] * g_InvertedScreensizeAndScreensize.xy).r, g_CameraParameterNear, g_CameraParameterFar);
     
     CurCoc = clamp(m_DofNear.x * Depth + m_DofNear.y, 0.0f, 1.0f);
     Coc    = max(Coc, CurCoc);
     
     // -----------------------------------------------------------------------------
     
-    Depth.x = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth0.xy + RowOfs[3]).r, g_CameraParameterNear, g_CameraParameterFar);
-    Depth.y = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth1.xy + RowOfs[3]).r, g_CameraParameterNear, g_CameraParameterFar);
-    Depth.z = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth2.xy + RowOfs[3]).r, g_CameraParameterNear, g_CameraParameterFar);
-    Depth.w = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth3.xy + RowOfs[3]).r, g_CameraParameterNear, g_CameraParameterFar);
+    Depth.x = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth0.xy + RowOfs[3] * g_InvertedScreensizeAndScreensize.xy).r, g_CameraParameterNear, g_CameraParameterFar);
+    Depth.y = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth1.xy + RowOfs[3] * g_InvertedScreensizeAndScreensize.xy).r, g_CameraParameterNear, g_CameraParameterFar);
+    Depth.z = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth2.xy + RowOfs[3] * g_InvertedScreensizeAndScreensize.xy).r, g_CameraParameterNear, g_CameraParameterFar);
+    Depth.w = ConvertToLinearDepth(texture(PSTextureDepth, in_PixelCoords.m_Depth3.xy + RowOfs[3] * g_InvertedScreensizeAndScreensize.xy).r, g_CameraParameterNear, g_CameraParameterFar);
     
     CurCoc = clamp(m_DofNear.x * Depth + m_DofNear.y, 0.0f, 1.0f);
     Coc    = max(Coc, CurCoc);
