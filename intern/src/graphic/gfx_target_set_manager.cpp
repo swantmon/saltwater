@@ -300,9 +300,7 @@ namespace
         
         GLuint Framebuffer;
             
-        glGenFramebuffers(1, &Framebuffer);
-            
-        glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
+        glCreateFramebuffers(1, &Framebuffer);
             
         for (unsigned int IndexOfTexture = 0; IndexOfTexture < _NumberOfTargets; ++ IndexOfTexture)
         {
@@ -311,20 +309,16 @@ namespace
             GLuint TextureHandle = rNativeTexture.m_NativeTexture;
 
             unsigned int MipmapLevel = rNativeTexture.GetCurrentMipLevel();
-
-            unsigned int BindingTarget = rNativeTexture.IsCube() == true ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D;
-
-            glBindTexture(BindingTarget, TextureHandle);
                 
             if ((rNativeTexture.GetBinding() & CTexture2D::DepthStencilTarget) != 0)
             {
-                glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, TextureHandle, MipmapLevel);
+                glNamedFramebufferTexture(Framebuffer, GL_DEPTH_ATTACHMENT, TextureHandle, MipmapLevel);
                     
                 rTargetSet.m_DepthStencilTargetPtr = _pTargetPtrs[IndexOfTexture];
             }
             else if ((rNativeTexture.GetBinding() & CTexture2D::RenderTarget) != 0)
             {
-                glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + NumberOfColorAttachments, TextureHandle, MipmapLevel);
+                glNamedFramebufferTexture(Framebuffer, GL_COLOR_ATTACHMENT0 + NumberOfColorAttachments, TextureHandle, MipmapLevel);
                     
                 rTargetSet.m_RenderTargetPtrs[NumberOfColorAttachments] = _pTargetPtrs[IndexOfTexture];
                     
@@ -342,7 +336,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Check status
         // -----------------------------------------------------------------------------
-        GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        GLenum Status = glCheckNamedFramebufferStatus(Framebuffer, GL_FRAMEBUFFER);
             
         if(Status != GL_FRAMEBUFFER_COMPLETE)
         {
