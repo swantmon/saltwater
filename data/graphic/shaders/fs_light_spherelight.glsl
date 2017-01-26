@@ -442,50 +442,35 @@ void main()
     vec3 points[4];
     InitRectPoints(rect, points);
 
-    vec4 floorPlane = vec4(0, 1, 0, 0);
-
     vec3 lcol = vec3(intensity);
     vec3 dcol = ToLinear(dcolor.xyz);
     vec3 scol = ToLinear(scolor.xyz);
     
     vec3 col = vec3(0);
 
-    Ray ray = GenerateCameraRay(0.0, 0.0);
+    vec3 pos = Data.m_WSPosition.xyz;
+    vec3 N   = Data.m_WSNormal.xyz;
+    vec3 V   = -g_ViewDirection.xyz;
+    
+    float theta = acos(dot(N, V));
+    vec2 uv = vec2(Data.m_Roughness, theta/(0.5*pi));
+    uv = uv*LUT_SCALE + LUT_BIAS;
+    
+    vec4 t = texture2D(ltc_mat, uv);
+    mat3 Minv = mat3(
+        vec3(  1,   0, t.y),
+        vec3(  0, t.z,   0),
+        vec3(t.w,   0, t.x)
+    );
+    
+    vec3 spec = LTC_Evaluate(N, V, pos, Minv, points, false);
+    spec *= texture2D(ltc_mag, uv).w;
+    
+    vec3 diff = LTC_Evaluate(N, V, pos, mat3(1), points, false); 
+    
+    col  = lcol*(scol*spec + dcol*diff);
+    col /= 2.0*pi;
 
-    float distToFloor;
-    bool hitFloor = RayPlaneIntersect(ray, floorPlane, distToFloor);
-
-    if (hitFloor)
-    {
-        vec3 pos = ray.origin + ray.dir*distToFloor;
-
-        vec3 N = floorPlane.xyz;
-        vec3 V = -ray.dir;
-        
-        float theta = acos(dot(N, V));
-        vec2 uv = vec2(0.25f, theta/(0.5*pi));
-        uv = uv*LUT_SCALE + LUT_BIAS;
-        
-        vec4 t = texture2D(ltc_mat, uv);
-        mat3 Minv = mat3(
-            vec3(  1,   0, t.y),
-            vec3(  0, t.z,   0),
-            vec3(t.w,   0, t.x)
-        );
-        
-        vec3 spec = LTC_Evaluate(N, V, pos, Minv, points, false);
-        spec *= texture2D(ltc_mag, uv).w;
-        
-        vec3 diff = LTC_Evaluate(N, V, pos, mat3(1), points, false); 
-        
-        col  = lcol*(scol*spec + dcol*diff);
-        col /= 2.0*pi;
-    }
-
-    float distToRect;
-    if (RayRectIntersect(ray, rect, distToRect))
-        if ((distToRect < distToFloor) || !hitFloor)
-            col = lcol;
 
     out_Output = vec4(col, 1.0f);
 }
