@@ -13,7 +13,7 @@ void main(void)
 		discard;
 	}
 	
-    out_Color = vec4(0.0, 1.0, 0.0, 1.0f);
+    out_Color = vec4(0.0, 1.0, 0.0, 1.0);
 }
 
 #endif // __INCLUDE_FS_KINECT_VISUALIZE_VERTEX_MAP_GLSL__

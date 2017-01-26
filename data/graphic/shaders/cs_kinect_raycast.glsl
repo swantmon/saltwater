@@ -56,10 +56,10 @@ void main()
     
     vec3 VertexPixelPosition = vec3(vec2(VertexMapPosition) / VertexMapSize.xy, 0.0);
     VertexPixelPosition.xy -= vec2(0.5);
-    VertexPixelPosition.xy *= vec2(10.0);
-    VertexPixelPosition.z = -8.0;
+    VertexPixelPosition.xy *= vec2(5.0);
+    VertexPixelPosition.z = -2.0;
 
-    vec3 CameraPosition = vec3(0.0, 0.0, -15.0);
+    vec3 CameraPosition = vec3(0.0, 0.0, -5.0);
     vec3 RayDirection = normalize(VertexPixelPosition - CameraPosition);
 
     RayDirection.x = RayDirection.x == 0.0 ? 1e-15 : RayDirection.x;

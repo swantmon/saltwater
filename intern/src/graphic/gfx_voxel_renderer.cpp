@@ -41,10 +41,12 @@ namespace
     const float g_KinectFocalLengthY = 0.870799f * MR::CKinectControl::DepthImageHeight;
     const float g_KinectFocalPointX = 0.50602675f * MR::CKinectControl::DepthImageWidth;
     const float g_KinectFocalPointY = 0.499133f * MR::CKinectControl::DepthImageHeight;
+    const float g_InverseKinectFocalLengthX = 1.0f / g_KinectFocalLengthX;
+    const float g_InverseKinectFocalLengthY = 1.0f / g_KinectFocalLengthY;
 
     const int g_PyramidLevels = 3;
 
-    const float g_VolumeSize = 10.0f;
+    const float g_VolumeSize = 1.0f;
     const int g_VolumeResolution = 256;
     const float g_VoxelSize = g_VolumeSize / g_VolumeResolution;
 
@@ -54,6 +56,7 @@ namespace
     const float g_EpsilonVertex = 0.1f;
     const float g_EpsilonNormal = 0.342f;
     const float g_TruncatedDistance = 30.0f;
+    const float g_TruncatedDistanceInverse = 1.0f / g_TruncatedDistance;
 
     struct SIntrinsics
     {
@@ -241,7 +244,7 @@ namespace
     
     void CGfxVoxelRenderer::OnSetupShader()
     {
-        int NumberOfDefines = 9;
+        int NumberOfDefines = 10;
 
         std::vector<std::stringstream> DefineStreams(NumberOfDefines);
 
@@ -254,6 +257,7 @@ namespace
         DefineStreams[6] << "TILE_SIZE3D " << g_TileSize3D;
         DefineStreams[7] << "UINT16_MAX " << 65535;
         DefineStreams[8] << "TRUNCATED_DISTANCE " << g_TruncatedDistance;
+        DefineStreams[9] << "TRUNCATED_DISTANCE_INVERSE " << g_TruncatedDistanceInverse;
 
         std::vector<std::string> DefineStrings(NumberOfDefines);
         std::vector<const char*> Defines(NumberOfDefines);
@@ -356,7 +360,7 @@ namespace
 
         Intrinsics.m_FocalPoint = Base::Float2(g_KinectFocalPointX, g_KinectFocalPointY);
         Intrinsics.m_FocalLength = Base::Float2(g_KinectFocalLengthX, g_KinectFocalLengthY);
-        Intrinsics.m_InvFocalLength = Base::Float2(1.0f / g_KinectFocalLengthX, 1.0f / g_KinectFocalLengthY);
+        Intrinsics.m_InvFocalLength = Base::Float2(g_InverseKinectFocalLengthX, g_InverseKinectFocalLengthY);
         Intrinsics.m_KMatrix = Intrinsics.m_InvKMatrix = KMatrix;
         Intrinsics.m_InvKMatrix.Invert();
 
@@ -366,7 +370,8 @@ namespace
         STrackingData TrackingData;
 
         TrackingData.m_PoseRotationMatrix.SetIdentity();
-        TrackingData.m_PoseTranslationMatrix.SetTranslation(0.0f, 0.0, -20.0f);
+        //TrackingData.m_PoseTranslationMatrix.SetTranslation(0.0f, 0.0, -20.0f);
+        TrackingData.m_PoseTranslationMatrix.SetTranslation(g_VolumeResolution * g_VoxelSize * 0.5f, g_VolumeResolution * g_VoxelSize * 0.5f, -0.4f);
         TrackingData.m_PoseMatrix = TrackingData.m_PoseTranslationMatrix * TrackingData.m_PoseRotationMatrix;
 
         TrackingData.m_InvPoseRotationMatrix = TrackingData.m_PoseRotationMatrix.GetInverted();
@@ -573,7 +578,7 @@ namespace
             PerformTracking();
             Integrate();
 
-            //SetSphere(); // debugging
+            SetSphere(); // debugging
 
             Raycast();
             DownSample();
@@ -595,12 +600,15 @@ namespace
         glClear(GL_COLOR_BUFFER_BIT);
         
         //RenderDepth();
+
         glViewport(0, 0, 640, 720);
         RenderVolume();
-        glViewport(640, 0, 640, 720);
-        RenderVertexMap();
-        glViewport(0, 0, 1280, 720);
 
+        glViewport(640, 0, 640, 720);
+
+        RenderVertexMap();
+
+        glViewport(0, 0, 1280, 720);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         Performance::EndEvent();

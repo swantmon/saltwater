@@ -26,7 +26,7 @@ void main(void)
 	VoxelPosition.y = Index / VOLUME_RESOLUTION;
 	VoxelPosition.z = Index % VOLUME_RESOLUTION;
     gl_Position = g_WorldToScreen * g_WorldMatrix * vec4(VoxelPosition, 1.0);
-	out_Color = vec4(imageLoad(vs_Volume, ivec3(VoxelPosition)));
+	out_Color = vec4(imageLoad(vs_Volume, ivec3(VoxelPosition)).xy / vec2(65535.0), 0.0, 0.0);
 }
 
 #endif // __INCLUDE_VS_KINECT_VISUALIZE_VOLUME_GLSL__

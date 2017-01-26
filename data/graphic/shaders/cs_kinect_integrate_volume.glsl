@@ -8,7 +8,6 @@
 // Constants
 // -----------------------------------------------------------------------------
 
-#define MU 0.1
 #define MAX_WEIGHT 100.0
 
 // -----------------------------------------------------------------------------
@@ -30,8 +29,6 @@ void main()
 	
     const int x = int(gl_GlobalInvocationID.x);
     const int y = int(gl_GlobalInvocationID.y);
-
-    const float truncatedDistanceInverse = 1.0 / TRUNCATED_DISTANCE;
 
     vec3 vg;
     vg.x = (x + 0.5) * VOXEL_SIZE - g_PoseMatrix[3].x;
@@ -61,11 +58,12 @@ void main()
                 const float ly = (cameraPlane.y - g_FocalPoint.y) * g_InvFocalLength.y;
                 const float lamdaInverse = 1.0 / sqrt(lx * lx + ly * ly + 1.0);
 
-                const float sdf = float(depth) - lamdaInverse * length(vg);
+                const float sdf = float(depth) - 1000.0f * lamdaInverse * length(vg);
+                //const float sdf = float(depth) - lamdaInverse * length(vg);
 
                 if (sdf >= - TRUNCATED_DISTANCE)
                 {
-                    const float tsdf = min(1.0, sdf * (1.0 / TRUNCATED_DISTANCE));
+                    const float tsdf = min(1.0, sdf * TRUNCATED_DISTANCE_INVERSE);
 
                     const uvec2 volumeValue = uvec2(imageLoad(cs_Volume, ivec3(pos)).xy);
 
@@ -78,9 +76,9 @@ void main()
                     imageStore(cs_Volume, ivec3(pos), uvec4(tsdfNew * UINT16_MAX, weightNew, 0, 0));
                 }
             }
-            //imageStore(cs_Debug, ivec3(x, y, 0), vec4(1337.0));
+            //imageStore(cs_Debug, ivec3(pos), depth == 0 ? vec4(0) : vec4(1));
         }
-        //imageStore(cs_Debug, ivec3(x, y, 0), vec4(v, 0));
+        imageStore(cs_Debug, ivec3(x, y, z), vec4(cameraPlane, 0, 0));
     }
 }
 

@@ -26,15 +26,15 @@ void main()
 	
 	const vec2 ImagePos = vec2(gl_GlobalInvocationID.xy);
 	
-	const int Depth = int(imageLoad(cs_DepthBuffer, ivec2(ImagePos)).x);
+	const float Depth = imageLoad(cs_DepthBuffer, ivec2(ImagePos)).x * 0.001f;
 	
 	vec4 Vertex;
 	
-	Vertex.xy = float(Depth) * (ImagePos / vec2(ImageSize) - g_FocalPoint) * g_InvFocalLength;
-	Vertex.z = float(Depth);
-	Vertex.w = 1.0;
+	Vertex.xy = Depth * (ImagePos - g_FocalPoint) * g_InvFocalLength;
+	Vertex.z = Depth;
+	Vertex.w = 1.0f;
 	
-	imageStore(cs_VertexMap, ivec2(ImagePos), Depth > 0 ? Vertex : vec4(0.0));
+	imageStore(cs_VertexMap, ivec2(ImagePos), Depth > 0.0f ? Vertex : vec4(0.0f));
 }
 
 #endif // __INCLUDE_CS_VERTEX_MAP_GLSL__
