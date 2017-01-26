@@ -76,6 +76,8 @@ namespace
         struct SVolumeFogRenderJob
         {
             Dt::CVolumeFogFXFacet* m_pDataVolumeFogFacet;
+            Dt::CSunLightFacet*    m_pDataSunFacet;
+            Gfx::CSunFacet*        m_pGraphicSunFacet;
         };
 
         struct SGaussianShaderProperties
@@ -603,6 +605,14 @@ namespace
 
     void CGfxFogRenderer::RenderESM()
     {
+        // -----------------------------------------------------------------------------
+        // Getting volume fog informations from render job
+        // TODO: What happens if more then one DOF effect is available?
+        // -----------------------------------------------------------------------------
+        Gfx::CSunFacet* pGfxSunFacet = m_VolumeFogRenderJobs[0].m_pGraphicSunFacet;
+
+        assert(pGfxSunFacet != 0);
+
         SGaussianShaderProperties GaussianSettings;
 
         GaussianSettings.m_MaxPixelCoord[0] = 256;
@@ -617,31 +627,11 @@ namespace
 
         Performance::BeginEvent("ESM");
 
-        // -----------------------------------------------------------------------------
-        // Get light(s) and compute exponential shadow map
-        // TODO: Can this be done in shadow renderer because of other uses with the
-        // light?
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
-        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
-
-        Gfx::CSunFacet* pGraphicSunFacet = 0;
-
-        for (; CurrentEntity != EndOfEntities; CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light))
-        {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
-
-            if (rCurrentEntity.GetType() == Dt::SLightType::Sun)
-            {
-                pGraphicSunFacet = static_cast<Gfx::CSunFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
-            }
-        }
-
         ContextManager::SetShaderCS(m_ESMCSPtr);
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
-        ContextManager::SetTexture(0, pGraphicSunFacet->GetTextureSMSet()->GetTexture(0));
+        ContextManager::SetTexture(0, pGfxSunFacet->GetTextureSMSet()->GetTexture(0));
 
         ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_ESMTexturePtr));
 
@@ -727,34 +717,16 @@ namespace
         // TODO: What happens if more then one DOF effect is available?
         // -----------------------------------------------------------------------------
         Dt::CVolumeFogFXFacet* pDataVolumeFogFacet = m_VolumeFogRenderJobs[0].m_pDataVolumeFogFacet;
+        Dt::CSunLightFacet*    pDtSunFacet         = m_VolumeFogRenderJobs[0].m_pDataSunFacet;
+        Gfx::CSunFacet*        pGfxSunFacet        = m_VolumeFogRenderJobs[0].m_pGraphicSunFacet;
 
-        assert(pDataVolumeFogFacet != 0);
-
-        // -----------------------------------------------------------------------------
-        // Getting sun informations
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
-        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
-
-        Gfx::CSunFacet* pGraphicSunFacet = 0;
-        Dt::CSunLightFacet* pDataSunFacet = 0;
-
-        for (; CurrentEntity != EndOfEntities; CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light))
-        {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
-
-            if (rCurrentEntity.GetType() == Dt::SLightType::Sun)
-            {
-                pDataSunFacet = static_cast<Dt::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-                pGraphicSunFacet = static_cast<Gfx::CSunFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
-            }
-        }
+        assert(pDataVolumeFogFacet != 0 && pDtSunFacet != 0 && pGfxSunFacet != 0);
 
         SSunLightProperties LightBuffer;
 
-        LightBuffer.m_LightViewProjection  = pGraphicSunFacet->GetCamera()->GetViewProjectionMatrix();
-        LightBuffer.m_LightDirection       = Base::Float4(pDataSunFacet->GetDirection(), 0.0f).Normalize();
-        LightBuffer.m_LightColor           = Base::Float4(pDataSunFacet->GetLightness(), 1.0f);
+        LightBuffer.m_LightViewProjection  = pGfxSunFacet->GetCamera()->GetViewProjectionMatrix();
+        LightBuffer.m_LightDirection       = Base::Float4(pDtSunFacet->GetDirection(), 0.0f).Normalize();
+        LightBuffer.m_LightColor           = Base::Float4(pDtSunFacet->GetLightness(), 1.0f);
         LightBuffer.m_SunAngularRadius     = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
         LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
@@ -941,6 +913,9 @@ namespace
 
     void CGfxFogRenderer::BuildRenderJobs()
     {
+        Dt::CSunLightFacet* pDataSunFacet    = 0;
+        Gfx::CSunFacet*     pGraphicSunFacet = 0;
+
         // -----------------------------------------------------------------------------
         // Clear current render jobs
         // -----------------------------------------------------------------------------
@@ -949,9 +924,31 @@ namespace
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
         // -----------------------------------------------------------------------------
+        Dt::Map::CEntityIterator CurrentSunEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
+        Dt::Map::CEntityIterator EndOfSunEntities = Dt::Map::EntitiesEnd();
+
         Dt::Map::CEntityIterator CurrentEffectEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::FX);
         Dt::Map::CEntityIterator EndOfEffectEntities = Dt::Map::EntitiesEnd();
 
+        // -----------------------------------------------------------------------------
+        // Sun
+        // -----------------------------------------------------------------------------
+        for (; CurrentSunEntity != EndOfSunEntities; CurrentSunEntity = CurrentSunEntity.Next(Dt::SEntityCategory::Light))
+        {
+            Dt::CEntity& rCurrentEntity = *CurrentSunEntity;
+
+            if (rCurrentEntity.GetType() == Dt::SLightType::Sun)
+            {
+                pDataSunFacet    = static_cast<Dt::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+                pGraphicSunFacet = static_cast<Gfx::CSunFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+            }
+        }
+
+        if (pDataSunFacet == nullptr || pGraphicSunFacet == nullptr) return;
+
+        // -----------------------------------------------------------------------------
+        // Effect
+        // -----------------------------------------------------------------------------
         for (; CurrentEffectEntity != EndOfEffectEntities; )
         {
             Dt::CEntity& rCurrentEntity = *CurrentEffectEntity;
@@ -971,6 +968,8 @@ namespace
                 SVolumeFogRenderJob NewRenderJob;
 
                 NewRenderJob.m_pDataVolumeFogFacet = pDataSSRFacet;
+                NewRenderJob.m_pGraphicSunFacet    = pGraphicSunFacet;
+                NewRenderJob.m_pDataSunFacet       = pDataSunFacet;
 
                 m_VolumeFogRenderJobs.push_back(NewRenderJob);
             }
