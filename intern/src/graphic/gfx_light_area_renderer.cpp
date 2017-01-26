@@ -388,15 +388,15 @@ namespace
         // -----------------------------------------------------------------------------
         SAreaLightProperties LightBuffer;
 
-        LightBuffer.view.SetIdentity();
+        LightBuffer.view                   = ViewManager::GetMainCamera()->GetView()->GetViewMatrix();
         LightBuffer.dcolor                 = Base::Float4(1.0f);
         LightBuffer.scolor                 = Base::Float4(1.0f);
         LightBuffer.resolution             = Base::Float2(1280.0f, 720.0f);
         LightBuffer.intensity              = 10.0f;
         LightBuffer.width                  = 8.0f;
         LightBuffer.height                 = 8.0f;
-        LightBuffer.roty                   = 0.0f;
-        LightBuffer.rotz                   = 0.0f;
+        LightBuffer.roty                   = 0.123f;
+        LightBuffer.rotz                   = 0.123f;
         LightBuffer.padding                = -1.0f;
         LightBuffer.twoSided               = false;
         LightBuffer.sampleCount            = 0;

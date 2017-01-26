@@ -472,6 +472,15 @@ void main()
     col /= 2.0*pi;
 
 
+    Ray ray = GenerateCameraRay(0.0, 0.0);
+
+    float distToFloor = dot(Data.m_WSPosition, g_ViewPosition.xyz);
+
+    float distToRect;
+    if (RayRectIntersect(ray, rect, distToRect))
+        if ((distToRect < distToFloor))
+            col = lcol;
+
     out_Output = vec4(col, 1.0f);
 }
 
