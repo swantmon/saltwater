@@ -524,6 +524,9 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_selection.h">
       <Filter>engine\renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_ltc_look_up_textures.h">
+      <Filter>engine\renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="interface">

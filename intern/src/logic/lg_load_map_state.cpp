@@ -75,8 +75,8 @@ namespace
 
         BASE_CONSOLE_STREAMINFO("Logic> Loading level number " << LevelIndexDebug);
         
-        CreateEmptyScene();
-        // CreateDefaultScene();
+        // CreateEmptyScene();
+        CreateDefaultScene();
 
         BASE_CONSOLE_STREAMINFO("Logic> Loading level finished.");
         
@@ -193,47 +193,47 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup environment
         // -----------------------------------------------------------------------------
-        {
-            Dt::STextureDescriptor TextureDescriptor;
-
-            TextureDescriptor.m_NumberOfPixelsU = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
-            TextureDescriptor.m_NumberOfPixelsV = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
-            TextureDescriptor.m_NumberOfPixelsW = 1;
-            TextureDescriptor.m_Format          = Dt::CTextureBase::R16G16B16_FLOAT;
-            TextureDescriptor.m_Semantic        = Dt::CTextureBase::HDR;
-            TextureDescriptor.m_Binding         = Dt::CTextureBase::ShaderResource;
-            TextureDescriptor.m_pPixels         = 0;
-            TextureDescriptor.m_pFileName       = "environments/Ridgecrest_Road_Ref.hdr";
-            TextureDescriptor.m_pIdentifier     = 0;
-            
-
-            Dt::CTexture2D* pPanoramaTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
-
-            Dt::TextureManager::MarkTextureAsDirty(pPanoramaTexture, Dt::CTextureBase::DirtyCreate);
-
-            // -----------------------------------------------------------------------------
-
-            Dt::SEntityDescriptor EntityDesc;
-
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
-            EntityDesc.m_EntityType     = Dt::SLightType::Sky;
-            EntityDesc.m_FacetFlags     = 0;
-
-            Dt::CEntity& rEnvironment = Dt::EntityManager::CreateEntity(EntityDesc);
-
-            rEnvironment.SetName("Environment");
-
-            Dt::CSkyFacet* pSkyboxFacet = Dt::SkyManager::CreateSky();
-
-            pSkyboxFacet->SetRefreshMode(Dt::CSkyFacet::Dynamic);
-            pSkyboxFacet->SetType(Dt::CSkyFacet::Panorama);
-            pSkyboxFacet->SetPanorama(pPanoramaTexture);
-            pSkyboxFacet->SetIntensity(10000.0f);
-
-            rEnvironment.SetDetailFacet(Dt::SFacetCategory::Data, pSkyboxFacet);
-
-            Dt::EntityManager::MarkEntityAsDirty(rEnvironment, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-        }
+//         {
+//             Dt::STextureDescriptor TextureDescriptor;
+// 
+//             TextureDescriptor.m_NumberOfPixelsU = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
+//             TextureDescriptor.m_NumberOfPixelsV = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
+//             TextureDescriptor.m_NumberOfPixelsW = 1;
+//             TextureDescriptor.m_Format          = Dt::CTextureBase::R16G16B16_FLOAT;
+//             TextureDescriptor.m_Semantic        = Dt::CTextureBase::HDR;
+//             TextureDescriptor.m_Binding         = Dt::CTextureBase::ShaderResource;
+//             TextureDescriptor.m_pPixels         = 0;
+//             TextureDescriptor.m_pFileName       = "environments/Ridgecrest_Road_Ref.hdr";
+//             TextureDescriptor.m_pIdentifier     = 0;
+//             
+// 
+//             Dt::CTexture2D* pPanoramaTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+// 
+//             Dt::TextureManager::MarkTextureAsDirty(pPanoramaTexture, Dt::CTextureBase::DirtyCreate);
+// 
+//             // -----------------------------------------------------------------------------
+// 
+//             Dt::SEntityDescriptor EntityDesc;
+// 
+//             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
+//             EntityDesc.m_EntityType     = Dt::SLightType::Sky;
+//             EntityDesc.m_FacetFlags     = 0;
+// 
+//             Dt::CEntity& rEnvironment = Dt::EntityManager::CreateEntity(EntityDesc);
+// 
+//             rEnvironment.SetName("Environment");
+// 
+//             Dt::CSkyFacet* pSkyboxFacet = Dt::SkyManager::CreateSky();
+// 
+//             pSkyboxFacet->SetRefreshMode(Dt::CSkyFacet::Dynamic);
+//             pSkyboxFacet->SetType(Dt::CSkyFacet::Panorama);
+//             pSkyboxFacet->SetPanorama(pPanoramaTexture);
+//             pSkyboxFacet->SetIntensity(10000.0f);
+// 
+//             rEnvironment.SetDetailFacet(Dt::SFacetCategory::Data, pSkyboxFacet);
+// 
+//             Dt::EntityManager::MarkEntityAsDirty(rEnvironment, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+//         }
 
         // -----------------------------------------------------------------------------
         // Setup effects
@@ -256,136 +256,154 @@ namespace
             Dt::EntityManager::MarkEntityAsDirty(rEffectEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
-        {
-            Dt::SEntityDescriptor EntityDesc;
+//         {
+//             Dt::SEntityDescriptor EntityDesc;
+// 
+//             EntityDesc.m_EntityCategory = Dt::SEntityCategory::FX;
+//             EntityDesc.m_EntityType = Dt::SFXType::SSAO;
+//             EntityDesc.m_FacetFlags = 0;
+// 
+//             Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+// 
+//             rEffectEntity.SetName("SSAO");
+// 
+//             Dt::CSSAOFXFacet* pEffectFacet = Dt::SSAOManager::CreateSSAOFX();
+// 
+//             rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
+// 
+//             Dt::EntityManager::MarkEntityAsDirty(rEffectEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+//         }
 
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::FX;
-            EntityDesc.m_EntityType     = Dt::SFXType::SSR;
-            EntityDesc.m_FacetFlags     = 0;
-
-            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
-
-            rEffectEntity.SetName("SSR");
-
-            Dt::CSSRFXFacet* pEffectFacet = Dt::SSRFXManager::CreateSSRFX();
-
-            rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
-
-            Dt::EntityManager::MarkEntityAsDirty(rEffectEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-        }
+//         {
+//             Dt::SEntityDescriptor EntityDesc;
+// 
+//             EntityDesc.m_EntityCategory = Dt::SEntityCategory::FX;
+//             EntityDesc.m_EntityType     = Dt::SFXType::SSR;
+//             EntityDesc.m_FacetFlags     = 0;
+// 
+//             Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+// 
+//             rEffectEntity.SetName("SSR");
+// 
+//             Dt::CSSRFXFacet* pEffectFacet = Dt::SSRFXManager::CreateSSRFX();
+// 
+//             rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
+// 
+//             Dt::EntityManager::MarkEntityAsDirty(rEffectEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+//         }
 
         // -----------------------------------------------------------------------------
         // Setup light
         // -----------------------------------------------------------------------------
-        {
-            Dt::SEntityDescriptor EntityDesc;
+//         {
+//             Dt::SEntityDescriptor EntityDesc;
+// 
+//             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
+//             EntityDesc.m_EntityType     = Dt::SLightType::LightProbe;
+//             EntityDesc.m_FacetFlags     = 0;
+// 
+//             Dt::CEntity& rGlobalProbeLight = Dt::EntityManager::CreateEntity(EntityDesc);
+// 
+//             rGlobalProbeLight.SetName("Light probe");
+// 
+//             Dt::CLightProbeFacet* pProbeLightFacet = Dt::LightProbeManager::CreateLightProbe();
+// 
+//             pProbeLightFacet->SetType(Dt::CLightProbeFacet::Sky);
+//             pProbeLightFacet->SetQuality(Dt::CLightProbeFacet::PX512);
+//             pProbeLightFacet->SetIntensity(1.0f);
+//             pProbeLightFacet->SetRefreshMode(Dt::CLightProbeFacet::Dynamic);
+// 
+//             rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pProbeLightFacet);
+// 
+//             Dt::EntityManager::MarkEntityAsDirty(rGlobalProbeLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+//         }
 
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
-            EntityDesc.m_EntityType     = Dt::SLightType::LightProbe;
-            EntityDesc.m_FacetFlags     = 0;
-
-            Dt::CEntity& rGlobalProbeLight = Dt::EntityManager::CreateEntity(EntityDesc);
-
-            rGlobalProbeLight.SetName("Light probe");
-
-            Dt::CLightProbeFacet* pProbeLightFacet = Dt::LightProbeManager::CreateLightProbe();
-
-            pProbeLightFacet->SetType(Dt::CLightProbeFacet::Sky);
-            pProbeLightFacet->SetQuality(Dt::CLightProbeFacet::PX512);
-            pProbeLightFacet->SetIntensity(1.0f);
-            pProbeLightFacet->SetRefreshMode(Dt::CLightProbeFacet::Dynamic);
-
-            rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pProbeLightFacet);
-
-            Dt::EntityManager::MarkEntityAsDirty(rGlobalProbeLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-        }
-
-        {
-            Dt::SEntityDescriptor EntityDesc;
-
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
-            EntityDesc.m_EntityType     = Dt::SLightType::Sun;
-            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
-
-            Dt::CEntity& rSunLight = Dt::EntityManager::CreateEntity(EntityDesc);
-
-            rSunLight.SetName("Sun");
-
-            // -----------------------------------------------------------------------------
-            // Transformation
-            // -----------------------------------------------------------------------------
-            Dt::CTransformationFacet* pTransformationFacet = rSunLight.GetTransformationFacet();
-
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 20.0f));
-            pTransformationFacet->SetScale   (Base::Float3(1.0f));
-            pTransformationFacet->SetRotation(Base::Float3(0.0f));
-
-            Dt::CSunLightFacet* pSunLightFacet = Dt::SunManager::CreateSunLight();
-
-            pSunLightFacet->EnableTemperature(false);
-            pSunLightFacet->SetColor         (Base::Float3(1.0f, 1.0f, 1.0f));
-            pSunLightFacet->SetDirection     (Base::Float3(0.0f, 0.01f, -1.0f));
-            pSunLightFacet->SetIntensity     (90600.0f);
-            pSunLightFacet->SetTemperature   (0);
-            pSunLightFacet->SetRefreshMode   (Dt::CSunLightFacet::Dynamic);
-
-            pSunLightFacet->UpdateLightness();
-
-            rSunLight.SetDetailFacet(Dt::SFacetCategory::Data, pSunLightFacet);
-
-            Dt::EntityManager::MarkEntityAsDirty(rSunLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-        }
+//         {
+//             Dt::SEntityDescriptor EntityDesc;
+// 
+//             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
+//             EntityDesc.m_EntityType     = Dt::SLightType::Sun;
+//             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+// 
+//             Dt::CEntity& rSunLight = Dt::EntityManager::CreateEntity(EntityDesc);
+// 
+//             rSunLight.SetName("Sun");
+// 
+//             // -----------------------------------------------------------------------------
+//             // Transformation
+//             // -----------------------------------------------------------------------------
+//             Dt::CTransformationFacet* pTransformationFacet = rSunLight.GetTransformationFacet();
+// 
+//             pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 20.0f));
+//             pTransformationFacet->SetScale   (Base::Float3(1.0f));
+//             pTransformationFacet->SetRotation(Base::Float3(0.0f));
+// 
+//             Dt::CSunLightFacet* pSunLightFacet = Dt::SunManager::CreateSunLight();
+// 
+//             pSunLightFacet->EnableTemperature(false);
+//             pSunLightFacet->SetColor         (Base::Float3(1.0f, 1.0f, 1.0f));
+//             pSunLightFacet->SetDirection     (Base::Float3(0.0f, 0.01f, -1.0f));
+//             pSunLightFacet->SetIntensity     (90600.0f);
+//             pSunLightFacet->SetTemperature   (0);
+//             pSunLightFacet->SetRefreshMode   (Dt::CSunLightFacet::Dynamic);
+// 
+//             pSunLightFacet->UpdateLightness();
+// 
+//             rSunLight.SetDetailFacet(Dt::SFacetCategory::Data, pSunLightFacet);
+// 
+//             Dt::EntityManager::MarkEntityAsDirty(rSunLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+//         }
 
         // -----------------------------------------------------------------------------
         // Setup entities
         // -----------------------------------------------------------------------------
-        {
-            Dt::SModelFileDescriptor ModelFileDesc;
-
-            ModelFileDesc.m_pFileName = "models/sphere.obj";
-            ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::DefaultFlipUVs;
-
-            Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
-
-            // -----------------------------------------------------------------------------
-
-            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntityFromModel(rModel);
-
-            rSphere.SetName("Sphere");
-
-            Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
-
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 1.0f));
-            pTransformationFacet->SetScale(Base::Float3(0.5f));
-            pTransformationFacet->SetRotation(Base::Float3(0.0f));
-
-            // -----------------------------------------------------------------------------
-
-            Dt::CEntity* pSubEntity = rSphere.GetHierarchyFacet()->GetFirstChild();
-
-            Dt::CMeshActorFacet* pModelActorFacet = static_cast<Dt::CMeshActorFacet*>(pSubEntity->GetDetailFacet(Dt::SFacetCategory::Data));
-
-            Dt::SMaterialDescriptor MaterialFileDesc;
-
-            MaterialFileDesc.m_pFileName = "materials/naturals/metals/Gold_Worn_00.mat";
-
-            Dt::CMaterial& rMaterial = Dt::MaterialManager::CreateMaterial(MaterialFileDesc);
-
-            pModelActorFacet->SetMaterial(0, &rMaterial);
-
-            Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyCreate);
-
-            // -----------------------------------------------------------------------------
-
-            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-
-
-//             Dt::CScriptFacet* pScriptFacet = Dt::ScriptManager::CreateScript();
+//         {
+//             Dt::SModelFileDescriptor ModelFileDesc;
 // 
-//             pScriptFacet->SetScriptFile("scripts/move_circle.lua");
+//             ModelFileDesc.m_pFileName = "models/sphere.obj";
+//             ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::DefaultFlipUVs;
 // 
-//             rSphere.SetDetailFacet(Dt::SFacetCategory::Script, pScriptFacet);
-        }
+//             Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
+// 
+//             // -----------------------------------------------------------------------------
+// 
+//             Dt::CEntity& rSphere = Dt::EntityManager::CreateEntityFromModel(rModel);
+// 
+//             rSphere.SetName("Sphere");
+// 
+//             Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
+// 
+//             pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 1.0f));
+//             pTransformationFacet->SetScale(Base::Float3(0.5f));
+//             pTransformationFacet->SetRotation(Base::Float3(0.0f));
+// 
+//             // -----------------------------------------------------------------------------
+// 
+//             Dt::CEntity* pSubEntity = rSphere.GetHierarchyFacet()->GetFirstChild();
+// 
+//             Dt::CMeshActorFacet* pModelActorFacet = static_cast<Dt::CMeshActorFacet*>(pSubEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+// 
+//             Dt::SMaterialDescriptor MaterialFileDesc;
+// 
+//             MaterialFileDesc.m_pFileName = "materials/naturals/metals/Gold_Worn_00.mat";
+// 
+//             Dt::CMaterial& rMaterial = Dt::MaterialManager::CreateMaterial(MaterialFileDesc);
+// 
+//             pModelActorFacet->SetMaterial(0, &rMaterial);
+// 
+//             Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyCreate);
+// 
+//             // -----------------------------------------------------------------------------
+// 
+//             Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+// 
+// 
+// //             Dt::CScriptFacet* pScriptFacet = Dt::ScriptManager::CreateScript();
+// // 
+// //             pScriptFacet->SetScriptFile("scripts/move_circle.lua");
+// // 
+// //             rSphere.SetDetailFacet(Dt::SFacetCategory::Script, pScriptFacet);
+//         }
 
         // -----------------------------------------------------------------------------
 
@@ -411,7 +429,7 @@ namespace
 
             Dt::CEntity* pSubEntity = rPlane.GetHierarchyFacet()->GetFirstChild();
 
-            pSubEntity->SetLayer(Dt::SEntityLayer::AR);
+            pSubEntity->SetLayer(Dt::SEntityLayer::Default);
 
             Dt::CMeshActorFacet* pModelActorFacet = static_cast<Dt::CMeshActorFacet*>(pSubEntity->GetDetailFacet(Dt::SFacetCategory::Data));
 
@@ -432,58 +450,58 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        {
-            Dt::SEntityDescriptor EntityDesc;
-
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Plugin;
-            EntityDesc.m_EntityType = Dt::SPluginType::ARControlManager;
-            EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy;
-
-            Dt::CEntity& rCurrentEntity = Dt::EntityManager::CreateEntity(EntityDesc);
-
-            rCurrentEntity.SetName("AR Plugin Controller");
-
-            Dt::STextureDescriptor TextureDescriptor;
-
-            TextureDescriptor.m_NumberOfPixelsU  = 1280;
-            TextureDescriptor.m_NumberOfPixelsV  = 720;
-            TextureDescriptor.m_NumberOfPixelsW  = 1;
-            TextureDescriptor.m_Format           = Dt::CTextureBase::R8G8B8_UBYTE;
-            TextureDescriptor.m_Semantic         = Dt::CTextureBase::Diffuse;
-            TextureDescriptor.m_Binding          = Dt::CTextureBase::ShaderResource;
-            TextureDescriptor.m_pPixels          = 0;
-            TextureDescriptor.m_pFileName        = 0;
-            TextureDescriptor.m_pIdentifier      = "AR_BACKGROUND_TEXTURE";
-
-            Dt::CTexture2D* pBackgroundTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
-
-            Dt::TextureManager::MarkTextureAsDirty(pBackgroundTexture, Dt::CTextureBase::DirtyCreate);
-
-            // -----------------------------------------------------------------------------
-
-            Dt::CARControllerPluginFacet* pFacet = Dt::ARControllerManager::CreateARControllerPlugin();
-
-            pFacet->SetCameraEntity       (0);
-            pFacet->SetConfiguration      ("-device=WinDS -flipV -showDialog");
-            pFacet->SetCameraParameterFile("ar/configurations/logitech_para.dat");
-            pFacet->SetOutputBackground   (pBackgroundTexture);
-            pFacet->SetDeviceType         (Dt::CARControllerPluginFacet::Webcam);
-            pFacet->SetNumberOfMarker     (1);
-            pFacet->SetCameraEntity       (pCameraEntity);
-            
-            Dt::CARControllerPluginFacet::SMarker& rMarkerOne = pFacet->GetMarker(0);
-
-            rMarkerOne.m_UID          = 0;
-            rMarkerOne.m_Type         = Dt::CARControllerPluginFacet::SMarker::Square;
-            rMarkerOne.m_WidthInMeter = 0.08f;
-            rMarkerOne.m_PatternFile  = "ar/patterns/patt.hiro";
-
-            rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
-
-            // -----------------------------------------------------------------------------
-
-            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-        }
+//         {
+//             Dt::SEntityDescriptor EntityDesc;
+// 
+//             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Plugin;
+//             EntityDesc.m_EntityType = Dt::SPluginType::ARControlManager;
+//             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy;
+// 
+//             Dt::CEntity& rCurrentEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+// 
+//             rCurrentEntity.SetName("AR Plugin Controller");
+// 
+//             Dt::STextureDescriptor TextureDescriptor;
+// 
+//             TextureDescriptor.m_NumberOfPixelsU  = 1280;
+//             TextureDescriptor.m_NumberOfPixelsV  = 720;
+//             TextureDescriptor.m_NumberOfPixelsW  = 1;
+//             TextureDescriptor.m_Format           = Dt::CTextureBase::R8G8B8_UBYTE;
+//             TextureDescriptor.m_Semantic         = Dt::CTextureBase::Diffuse;
+//             TextureDescriptor.m_Binding          = Dt::CTextureBase::ShaderResource;
+//             TextureDescriptor.m_pPixels          = 0;
+//             TextureDescriptor.m_pFileName        = 0;
+//             TextureDescriptor.m_pIdentifier      = "AR_BACKGROUND_TEXTURE";
+// 
+//             Dt::CTexture2D* pBackgroundTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
+// 
+//             Dt::TextureManager::MarkTextureAsDirty(pBackgroundTexture, Dt::CTextureBase::DirtyCreate);
+// 
+//             // -----------------------------------------------------------------------------
+// 
+//             Dt::CARControllerPluginFacet* pFacet = Dt::ARControllerManager::CreateARControllerPlugin();
+// 
+//             pFacet->SetCameraEntity       (0);
+//             pFacet->SetConfiguration      ("-device=WinDS -flipV -showDialog");
+//             pFacet->SetCameraParameterFile("ar/configurations/logitech_para.dat");
+//             pFacet->SetOutputBackground   (pBackgroundTexture);
+//             pFacet->SetDeviceType         (Dt::CARControllerPluginFacet::Webcam);
+//             pFacet->SetNumberOfMarker     (1);
+//             pFacet->SetCameraEntity       (pCameraEntity);
+//             
+//             Dt::CARControllerPluginFacet::SMarker& rMarkerOne = pFacet->GetMarker(0);
+// 
+//             rMarkerOne.m_UID          = 0;
+//             rMarkerOne.m_Type         = Dt::CARControllerPluginFacet::SMarker::Square;
+//             rMarkerOne.m_WidthInMeter = 0.08f;
+//             rMarkerOne.m_PatternFile  = "ar/patterns/patt.hiro";
+// 
+//             rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
+// 
+//             // -----------------------------------------------------------------------------
+// 
+//             Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+//         }
    }
 } // namespace
 

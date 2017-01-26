@@ -112,6 +112,7 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_light_indirect_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_ltc_look_up_textures.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_mesh_actor_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_mesh_actor_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_point_light_facet.h" />

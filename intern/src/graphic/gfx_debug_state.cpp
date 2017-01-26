@@ -146,8 +146,7 @@ namespace
         TonemappingRenderer::Render();
 
         Performance::BeginEvent("Debugging Pass");
-        
-        LightAreaRenderer::RenderBulbs();
+
         DebugRenderer::Render();
 
         Performance::EndEvent();
