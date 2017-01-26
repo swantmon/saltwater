@@ -21,18 +21,18 @@ layout (binding = 1, rgba32f) writeonly uniform image2D cs_Vertex;
 
 float GetStartLength(vec3 Start, vec3 Direction)
 {
-    float xmin = ((Direction.x > 0.0 ? - VOLUME_SIZE / 2 : VOLUME_SIZE / 2) - Start.x) / Direction.x;
-    float ymin = ((Direction.y > 0.0 ? - VOLUME_SIZE / 2 : VOLUME_SIZE / 2) - Start.y) / Direction.y;
-    float zmin = ((Direction.z > 0.0 ? - VOLUME_SIZE / 2 : VOLUME_SIZE / 2) - Start.z) / Direction.z;
+    float xmin = ((Direction.x > 0.0 ? - VOLUME_SIZE / 2.0 : VOLUME_SIZE / 2.0) - Start.x) / Direction.x;
+    float ymin = ((Direction.y > 0.0 ? - VOLUME_SIZE / 2.0 : VOLUME_SIZE / 2.0) - Start.y) / Direction.y;
+    float zmin = ((Direction.z > 0.0 ? - VOLUME_SIZE / 2.0 : VOLUME_SIZE / 2.0) - Start.z) / Direction.z;
 
     return max(max(xmin, ymin), zmin);
 }
 
 float GetEndLength(vec3 Start, vec3 Direction)
 {
-    float xmax = ((Direction.x > 0.0 ? VOLUME_SIZE / 2 : - VOLUME_SIZE / 2) - Start.x) / Direction.x;
-    float ymax = ((Direction.y > 0.0 ? VOLUME_SIZE / 2 : - VOLUME_SIZE / 2) - Start.y) / Direction.y;
-    float zmax = ((Direction.z > 0.0 ? VOLUME_SIZE / 2 : - VOLUME_SIZE / 2) - Start.z) / Direction.z;
+    float xmax = ((Direction.x > 0.0 ? VOLUME_SIZE / 2.0 : - VOLUME_SIZE / 2.0) - Start.x) / Direction.x;
+    float ymax = ((Direction.y > 0.0 ? VOLUME_SIZE / 2.0 : - VOLUME_SIZE / 2.0) - Start.y) / Direction.y;
+    float zmax = ((Direction.z > 0.0 ? VOLUME_SIZE / 2.0 : - VOLUME_SIZE / 2.0) - Start.z) / Direction.z;
 
     return min(min(xmax, ymax), zmax);
 }
