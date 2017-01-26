@@ -736,9 +736,9 @@ namespace
         
         // -----------------------------------------------------------------------------
 
-        m_DOFDownPropertiesPSBufferPtr         = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer(), DOFDownPropertiesBuffer);
+        m_DOFDownPropertiesPSBufferPtr         = BufferManager::CreateBufferSet(DOFDownPropertiesBuffer);
                                                
-        m_DOFApplyPropertiesPSBufferPtr        = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer(), DOFApplyPropertiesBuffer);
+        m_DOFApplyPropertiesPSBufferPtr        = BufferManager::CreateBufferSet(DOFApplyPropertiesBuffer);
                                                
         m_GaussianBlurPropertiesPSBufferPtr    = BufferManager::CreateBufferSet(GaussianSettingsBuffer);
     }
@@ -875,7 +875,7 @@ namespace
         DOFApplyProperties.m_DofLerpBias  = pDataDOFFacet->GetLerpBias();
         DOFApplyProperties.m_DofLerpScale = pDataDOFFacet->GetLerpScale();
 
-        BufferManager::UploadConstantBufferData(m_DOFApplyPropertiesPSBufferPtr->GetBuffer(1), &DOFApplyProperties);
+        BufferManager::UploadConstantBufferData(m_DOFApplyPropertiesPSBufferPtr->GetBuffer(0), &DOFApplyProperties);
         
         // -----------------------------------------------------------------------------
         // Rendering: Copy from one swap buffer to the other one
@@ -947,7 +947,7 @@ namespace
         
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         
-        ContextManager::SetConstantBuffer(1, m_DOFDownPropertiesPSBufferPtr->GetBuffer(1));
+        ContextManager::SetConstantBuffer(1, m_DOFDownPropertiesPSBufferPtr->GetBuffer(0));
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
@@ -1213,7 +1213,7 @@ namespace
         
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         
-        ContextManager::SetConstantBuffer(1, m_DOFApplyPropertiesPSBufferPtr->GetBuffer(1));
+        ContextManager::SetConstantBuffer(1, m_DOFApplyPropertiesPSBufferPtr->GetBuffer(0));
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));

@@ -101,7 +101,6 @@ namespace
         CShaderPtr m_ShadowRSMShaderPSPtr;
         CShaderPtr m_ShadowRSMTexShaderPSPtr;
         CBufferSetPtr m_LightCameraVSBufferPtr;
-        CBufferSetPtr m_MainVSBufferPtr;
         CBufferSetPtr m_RSMPSBuffer;
 
         CPointLightFacets m_PointLightFacets;
@@ -146,7 +145,6 @@ namespace
         , m_ShadowRSMShaderPSPtr   ()
         , m_ShadowRSMTexShaderPSPtr()
         , m_LightCameraVSBufferPtr ()
-        , m_MainVSBufferPtr        ()
         , m_RSMPSBuffer            ()
         , m_PointLightFacets       ()
     {
@@ -229,8 +227,6 @@ namespace
 
         m_LightCameraVSBufferPtr = BufferManager::CreateBufferSet(PerLightConstantBuffer, PerDrawCallConstantBuffer);
         
-        m_MainVSBufferPtr        = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer(), PerDrawCallConstantBuffer);
-        
         // -----------------------------------------------------------------------------
         // Register dirty entity handler for automatic sky creation
         // -----------------------------------------------------------------------------
@@ -246,7 +242,6 @@ namespace
         m_ShadowRSMShaderPSPtr    = 0;
         m_ShadowRSMTexShaderPSPtr = 0;
         m_LightCameraVSBufferPtr  = 0;
-        m_MainVSBufferPtr         = 0;
         m_RSMPSBuffer             = 0;
 
         m_PointLightFacets.Clear();

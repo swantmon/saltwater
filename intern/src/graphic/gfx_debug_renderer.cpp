@@ -408,7 +408,7 @@ namespace
         CBufferPtr ModelBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
         
         m_ViewModelVSBuffer = BufferManager::CreateBufferSet(ViewBuffer);
-        m_BaseModelVSBuffer = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer(), ModelBuffer);
+        m_BaseModelVSBuffer = BufferManager::CreateBufferSet(ModelBuffer);
 
         // -----------------------------------------------------------------------------
 
@@ -818,7 +818,7 @@ namespace
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
-        ContextManager::SetConstantBuffer(1, m_BaseModelVSBuffer->GetBuffer(1));
+        ContextManager::SetConstantBuffer(1, m_BaseModelVSBuffer->GetBuffer(0));
 
         for (; CurrentTexture != EndOfTextures; ++ CurrentTexture)
         {
@@ -845,7 +845,7 @@ namespace
             ModelBuffer.m_ModelMatrix.SetScale(Difference[0], Difference[1], 1.0f);
             ModelBuffer.m_ModelMatrix.InjectTranslation(MinPoint[0], MinPoint[1], 1.0f);
 
-            BufferManager::UploadConstantBufferData(m_BaseModelVSBuffer->GetBuffer(1), &ModelBuffer);
+            BufferManager::UploadConstantBufferData(m_BaseModelVSBuffer->GetBuffer(0), &ModelBuffer);
 
             // -----------------------------------------------------------------------------
 

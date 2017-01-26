@@ -132,7 +132,6 @@ namespace
         
         CBufferSetPtr     m_LiquidVSBufferPtr;
         CBufferSetPtr     m_LiquidPSBufferPtr;
-        CBufferSetPtr     m_QuadVSBufferPtr;
         CBufferSetPtr     m_BilateralPSBufferPtr;
         CBufferSetPtr     m_GaussianPSBufferPtr;
         CBufferSetPtr     m_ShadingPSBufferPtr;
@@ -164,7 +163,6 @@ namespace
         , m_QuadModelPtr                ()
         , m_LiquidVSBufferPtr           ()
         , m_LiquidPSBufferPtr           ()
-        , m_QuadVSBufferPtr             ()
         , m_BilateralPSBufferPtr        ()
         , m_ShadingPSBufferPtr          ()
         , m_ParticleInstanceBufferPtr   ()
@@ -208,7 +206,6 @@ namespace
         m_QuadModelPtr                 = 0;
         m_LiquidVSBufferPtr            = 0;
         m_LiquidPSBufferPtr            = 0;
-        m_QuadVSBufferPtr              = 0;
         m_BilateralPSBufferPtr         = 0;
         m_GaussianPSBufferPtr          = 0;
         m_ShadingPSBufferPtr           = 0;
@@ -544,11 +541,8 @@ namespace
         
         // -----------------------------------------------------------------------------
         
-        m_LiquidVSBufferPtr         = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer(), PerFrameConstantBuffer);
-        
-        m_QuadVSBufferPtr           = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer());
-        
-        
+        m_LiquidVSBufferPtr         = BufferManager::CreateBufferSet(PerFrameConstantBuffer);
+               
         m_LiquidPSBufferPtr         = BufferManager::CreateBufferSet(LiquidSettingsBuffer);
         
         m_BilateralPSBufferPtr      = BufferManager::CreateBufferSet(BilateralSettingsBuffer);
@@ -626,7 +620,7 @@ namespace
         PerFrameConstantBuffer.m_LiquidMatrix *= Base::Float4x4().SetRotation(Base::DegreesToRadians(-180.0f), 0.0f, 0.0f);
         PerFrameConstantBuffer.m_LiquidMatrix *= Base::Float4x4().SetScale(0.3f);
         
-        BufferManager::UploadConstantBufferData(m_LiquidVSBufferPtr->GetBuffer(1), &PerFrameConstantBuffer);
+        BufferManager::UploadConstantBufferData(m_LiquidVSBufferPtr->GetBuffer(0), &PerFrameConstantBuffer);
         
         // -----------------------------------------------------------------------------
         // Clear render targets
@@ -668,8 +662,8 @@ namespace
 
         ContextManager::SetShaderPS(m_LiquidShaderPSPtrs[Depth]);
 
-        ContextManager::SetConstantBuffer(0, m_LiquidVSBufferPtr->GetBuffer(0));
-        ContextManager::SetConstantBuffer(1, m_LiquidVSBufferPtr->GetBuffer(1));
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_LiquidVSBufferPtr->GetBuffer(0));
         ContextManager::SetConstantBuffer(2, m_LiquidPSBufferPtr->GetBuffer(0));
 
         SLiquidSettings LiquidBuffer;
@@ -805,7 +799,7 @@ namespace
         ContextManager::ResetRenderContext();
 
         // -----------------------------------------------------------------------------
-        // Bileteral Filter
+        // Bilateral Filter
         // -----------------------------------------------------------------------------
         SBilateralSettings BilateralSettings;
 
@@ -823,7 +817,7 @@ namespace
 
         ContextManager::SetShaderPS(m_LiquidShaderPSPtrs[BilateralBlur]);
 
-        ContextManager::SetConstantBuffer(0, m_QuadVSBufferPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_BilateralPSBufferPtr->GetBuffer(0));
 
         BilateralSettings.m_Direction[0] = 1.0f * 1.0f / static_cast<float>(1280.0f);
@@ -874,7 +868,7 @@ namespace
 
         ContextManager::SetShaderPS(m_LiquidShaderPSPtrs[BilateralBlur]);
 
-        ContextManager::SetConstantBuffer(0, m_QuadVSBufferPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_BilateralPSBufferPtr->GetBuffer(0));
 
         BilateralSettings.m_Direction[0] = 0.0f * 1.0f / static_cast<float>(1280.0f);
@@ -936,7 +930,7 @@ namespace
 
         ContextManager::SetShaderPS(m_LiquidShaderPSPtrs[GaussianBlur]);
 
-        ContextManager::SetConstantBuffer(0, m_QuadVSBufferPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_GaussianPSBufferPtr->GetBuffer(0));
 
         GaussianSettings.m_Direction[0] = 1.0f * 1.0f / static_cast<float>(1280);
@@ -987,7 +981,7 @@ namespace
 
         ContextManager::SetShaderPS(m_LiquidShaderPSPtrs[GaussianBlur]);
 
-        ContextManager::SetConstantBuffer(0, m_QuadVSBufferPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_GaussianPSBufferPtr->GetBuffer(0));
 
         GaussianSettings.m_Direction[0] = 0.0f * 1.0f / static_cast<float>(1280);
@@ -1050,7 +1044,7 @@ namespace
 
         ContextManager::SetShaderPS(m_LiquidShaderPSPtrs[Shading]);
 
-        ContextManager::SetConstantBuffer(0, m_QuadVSBufferPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_ShadingPSBufferPtr->GetBuffer(0));
 
         ContextManager::SetTexture(0, m_TextureSetPtrs[3]->GetTexture(0));

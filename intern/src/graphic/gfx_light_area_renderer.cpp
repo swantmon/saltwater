@@ -382,7 +382,7 @@ namespace
         
         // -----------------------------------------------------------------------------
         
-        m_MainVSBufferPtr                   = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer(), PerDrawCallConstantBuffer);
+        m_MainVSBufferPtr                   = BufferManager::CreateBufferSet(PerDrawCallConstantBuffer);
         
         m_SphereLightPSBufferPtr            = BufferManager::CreateBufferSet(CameraBuffer, SphereLightBuffer, HistogramExposureHistoryBufferPtr);
 
@@ -526,7 +526,7 @@ namespace
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
-        ContextManager::SetConstantBuffer(1, m_MainVSBufferPtr->GetBuffer(1));
+        ContextManager::SetConstantBuffer(1, m_MainVSBufferPtr->GetBuffer(0));
         
         ContextManager::SetConstantBuffer(2, m_SphereLightPSBufferPtr->GetBuffer(0));
 

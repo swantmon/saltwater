@@ -292,7 +292,7 @@ namespace
         
         // -----------------------------------------------------------------------------
         
-        m_MainVSBufferPtr                   = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer(), PerDrawCallConstantBuffer);
+        m_MainVSBufferPtr                   = BufferManager::CreateBufferSet(PerDrawCallConstantBuffer);
         
         m_PunctualLightPSBufferPtr          = BufferManager::CreateBufferSet(CameraBuffer, PointLightBuffer, HistogramExposureHistoryBufferPtr);
     }
@@ -425,7 +425,7 @@ namespace
             ModelBuffer.m_ModelMatrix *= Base::Float4x4().SetTranslation(pEntity->GetWorldPosition());
             ModelBuffer.m_ModelMatrix *= Base::Float4x4().SetScale(pDtLightFacet->GetAttenuationRadius());
             
-            BufferManager::UploadConstantBufferData(m_MainVSBufferPtr->GetBuffer(1), &ModelBuffer);
+            BufferManager::UploadConstantBufferData(m_MainVSBufferPtr->GetBuffer(0), &ModelBuffer);
             
             // -----------------------------------------------------------------------------
             // Upload buffer data
@@ -468,7 +468,7 @@ namespace
 
             ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
-            ContextManager::SetConstantBuffer(1, m_MainVSBufferPtr->GetBuffer(1));
+            ContextManager::SetConstantBuffer(1, m_MainVSBufferPtr->GetBuffer(0));
 
             ContextManager::SetConstantBuffer(2, m_PunctualLightPSBufferPtr->GetBuffer(0));
 
