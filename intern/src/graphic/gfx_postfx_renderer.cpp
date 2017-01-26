@@ -121,19 +121,14 @@ namespace
         
         CMeshPtr          m_QuadModelPtr;
         
-        CBufferSetPtr     m_BaseVSBufferSetPtr;
         CBufferSetPtr     m_DOFVSBufferSetPtr;
-        
         CBufferSetPtr     m_DOFDownPropertiesPSBufferPtr;
         CBufferSetPtr     m_DOFApplyPropertiesPSBufferPtr;
         CBufferSetPtr     m_GaussianBlurPropertiesPSBufferPtr;
-        CBufferSetPtr     m_FXAAPropertiesPSBufferPtr;
         
         CInputLayoutPtr   m_FullQuadInputLayoutPtr;
         CShaderPtr        m_RectangleShaderVSPtr;
         CShaderPtr        m_PassThroughShaderPSPtr;
-        CSamplerSetPtr    m_PSSamplerSetPtr;
-        CSamplerSetPtr    m_PSSamplerWrapSetPtr;
         CRenderContextPtr m_SystemContextPtr;
         
         CShaderPtr        m_PostEffectShaderVSPtrs[NumberOfPostEffects];
@@ -184,16 +179,12 @@ namespace
         , m_FullQuadInputLayoutPtr           ()
         , m_RectangleShaderVSPtr             ()
         , m_PassThroughShaderPSPtr           ()
-        , m_BaseVSBufferSetPtr               ()
         , m_DOFVSBufferSetPtr                ()
         , m_DOFDownPropertiesPSBufferPtr     ()
         , m_DOFApplyPropertiesPSBufferPtr    ()
         , m_GaussianBlurPropertiesPSBufferPtr()
-        , m_FXAAPropertiesPSBufferPtr        ()
         , m_SystemContextPtr                 ()
         , m_SwapTargetSetPtrs                ()
-        , m_PSSamplerSetPtr                  ()
-        , m_PSSamplerWrapSetPtr              ()
         , m_PostAARenderJobs                 ()
         , m_DOFRenderJobs                    ()
         , m_SwapCounter                      (0)
@@ -223,15 +214,11 @@ namespace
         m_FullQuadInputLayoutPtr            = 0;
         m_RectangleShaderVSPtr              = 0;
         m_PassThroughShaderPSPtr            = 0;
-        m_BaseVSBufferSetPtr                = 0;
         m_DOFVSBufferSetPtr                 = 0;
         m_DOFDownPropertiesPSBufferPtr      = 0;
         m_DOFApplyPropertiesPSBufferPtr     = 0;
         m_GaussianBlurPropertiesPSBufferPtr = 0;
-        m_FXAAPropertiesPSBufferPtr         = 0;
         m_SystemContextPtr                  = 0;
-        m_PSSamplerSetPtr                   = 0;
-        m_PSSamplerWrapSetPtr               = 0;
         m_SwapTextureSetPtrs[0]             = 0;
         m_SwapTextureSetPtrs[1]             = 0;
         m_SwapRenderContextPtrs[0]          = 0;
@@ -598,16 +585,6 @@ namespace
         QuarterThreeContextPtr->SetRenderState(RenderStatePtr);
         
         m_QuarterRenderContextPtrs[2] = QuarterThreeContextPtr;
-        
-        // -----------------------------------------------------------------------------
-        
-        CSamplerPtr LinearFilter = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-        
-        CSamplerPtr PointFilter = SamplerManager::GetSampler(CSampler::MinMagMipPointWrap);
-        
-        m_PSSamplerSetPtr = SamplerManager::CreateSamplerSet(LinearFilter, LinearFilter, LinearFilter, LinearFilter);
-        
-        m_PSSamplerWrapSetPtr =  SamplerManager::CreateSamplerSet(LinearFilter, PointFilter, LinearFilter);
 
         // -----------------------------------------------------------------------------
 
@@ -657,35 +634,35 @@ namespace
 
         STextureDescriptor AreaTexDescriptor = {};
 
-        AreaTexDescriptor.m_NumberOfPixelsU = AREATEX_WIDTH;
-        AreaTexDescriptor.m_NumberOfPixelsV = AREATEX_HEIGHT;
-        AreaTexDescriptor.m_NumberOfPixelsW = 1;
-        AreaTexDescriptor.m_NumberOfMipMaps = 1;
+        AreaTexDescriptor.m_NumberOfPixelsU  = AREATEX_WIDTH;
+        AreaTexDescriptor.m_NumberOfPixelsV  = AREATEX_HEIGHT;
+        AreaTexDescriptor.m_NumberOfPixelsW  = 1;
+        AreaTexDescriptor.m_NumberOfMipMaps  = 1;
         AreaTexDescriptor.m_NumberOfTextures = 1;
-        AreaTexDescriptor.m_Binding = CTextureBase::ShaderResource;
-        AreaTexDescriptor.m_Access = CTextureBase::CPUWrite;
-        AreaTexDescriptor.m_Format = CTextureBase::R8G8_UBYTE;
-        AreaTexDescriptor.m_Usage = CTextureBase::GPURead;
-        AreaTexDescriptor.m_Semantic = CTextureBase::UndefinedSemantic;
-        AreaTexDescriptor.m_pFileName = 0;
-        AreaTexDescriptor.m_pPixels = const_cast<void*>(static_cast<const void*>(&areaTexBytes[0]));
+        AreaTexDescriptor.m_Binding          = CTextureBase::ShaderResource;
+        AreaTexDescriptor.m_Access           = CTextureBase::CPUWrite;
+        AreaTexDescriptor.m_Format           = CTextureBase::R8G8_UBYTE;
+        AreaTexDescriptor.m_Usage            = CTextureBase::GPURead;
+        AreaTexDescriptor.m_Semantic         = CTextureBase::UndefinedSemantic;
+        AreaTexDescriptor.m_pFileName        = 0;
+        AreaTexDescriptor.m_pPixels          = const_cast<void*>(static_cast<const void*>(&areaTexBytes[0]));
 
         CTextureBasePtr SMAAAreaTexture = TextureManager::CreateTexture2D(AreaTexDescriptor);
 
         STextureDescriptor SearchTexDescriptor = {};
 
-        SearchTexDescriptor.m_NumberOfPixelsU = SEARCHTEX_WIDTH;
-        SearchTexDescriptor.m_NumberOfPixelsV = SEARCHTEX_HEIGHT;
-        SearchTexDescriptor.m_NumberOfPixelsW = 1;
-        SearchTexDescriptor.m_NumberOfMipMaps = 1;
+        SearchTexDescriptor.m_NumberOfPixelsU  = SEARCHTEX_WIDTH;
+        SearchTexDescriptor.m_NumberOfPixelsV  = SEARCHTEX_HEIGHT;
+        SearchTexDescriptor.m_NumberOfPixelsW  = 1;
+        SearchTexDescriptor.m_NumberOfMipMaps  = 1;
         SearchTexDescriptor.m_NumberOfTextures = 1;
-        SearchTexDescriptor.m_Binding = CTextureBase::ShaderResource;
-        SearchTexDescriptor.m_Access = CTextureBase::CPUWrite;
-        SearchTexDescriptor.m_Format = CTextureBase::R8_UBYTE;
-        SearchTexDescriptor.m_Usage = CTextureBase::GPURead;
-        SearchTexDescriptor.m_Semantic = CTextureBase::UndefinedSemantic;
-        SearchTexDescriptor.m_pFileName = 0;
-        SearchTexDescriptor.m_pPixels = const_cast<void*>(static_cast<const void*>(&searchTexBytes[0]));
+        SearchTexDescriptor.m_Binding          = CTextureBase::ShaderResource;
+        SearchTexDescriptor.m_Access           = CTextureBase::CPUWrite;
+        SearchTexDescriptor.m_Format           = CTextureBase::R8_UBYTE;
+        SearchTexDescriptor.m_Usage            = CTextureBase::GPURead;
+        SearchTexDescriptor.m_Semantic         = CTextureBase::UndefinedSemantic;
+        SearchTexDescriptor.m_pFileName        = 0;
+        SearchTexDescriptor.m_pPixels          = const_cast<void*>(static_cast<const void*>(&searchTexBytes[0]));
 
         CTextureBasePtr SMAASearchTexture = TextureManager::CreateTexture2D(SearchTexDescriptor);
 
@@ -758,16 +735,12 @@ namespace
         CBufferPtr GaussianSettingsResourceBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
         
         // -----------------------------------------------------------------------------
-        
-        m_BaseVSBufferSetPtr                   = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
+
+        m_DOFDownPropertiesPSBufferPtr         = BufferManager::CreateBufferSet(DOFDownPropertiesBuffer);
                                                
-        m_DOFDownPropertiesPSBufferPtr         = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), DOFDownPropertiesBuffer);
-                                               
-        m_DOFApplyPropertiesPSBufferPtr        = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), DOFApplyPropertiesBuffer);
+        m_DOFApplyPropertiesPSBufferPtr        = BufferManager::CreateBufferSet(DOFApplyPropertiesBuffer);
                                                
         m_GaussianBlurPropertiesPSBufferPtr    = BufferManager::CreateBufferSet(GaussianSettingsBuffer);
-        
-        m_FXAAPropertiesPSBufferPtr            = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS());
     }
     
     // -----------------------------------------------------------------------------
@@ -902,7 +875,7 @@ namespace
         DOFApplyProperties.m_DofLerpBias  = pDataDOFFacet->GetLerpBias();
         DOFApplyProperties.m_DofLerpScale = pDataDOFFacet->GetLerpScale();
 
-        BufferManager::UploadConstantBufferData(m_DOFApplyPropertiesPSBufferPtr->GetBuffer(1), &DOFApplyProperties);
+        BufferManager::UploadConstantBufferData(m_DOFApplyPropertiesPSBufferPtr->GetBuffer(0), &DOFApplyProperties);
         
         // -----------------------------------------------------------------------------
         // Rendering: Copy from one swap buffer to the other one
@@ -910,8 +883,6 @@ namespace
         const unsigned int pOffset[] = {0, 0};
 
         ContextManager::SetRenderContext(m_SwapRenderContextPtrs[NextSwapBufferCount]);
-        
-        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
         
         ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
         
@@ -925,15 +896,19 @@ namespace
         
         ContextManager::SetShaderPS(m_PassThroughShaderPSPtr);
         
-        ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         
-        ContextManager::SetTextureSetPS(m_SwapTextureSetPtrs[CurrentSwapBufferCount]);
+        ContextManager::SetTexture(0, m_SwapTextureSetPtrs[CurrentSwapBufferCount]->GetTexture(0));
         
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
         
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+
+        ContextManager::ResetSampler(0);
         
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
         
         ContextManager::ResetTopology();
         
@@ -942,8 +917,6 @@ namespace
         ContextManager::ResetIndexBuffer();
         
         ContextManager::ResetVertexBufferSet();
-        
-        ContextManager::ResetSamplerSetPS();
         
         ContextManager::ResetShaderVS();
         
@@ -955,8 +928,6 @@ namespace
         // Rendering: Down Sampling
         // -----------------------------------------------------------------------------        
         ContextManager::SetRenderContext(m_QuarterRenderContextPtrs[0]);
-        
-        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
         
         ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
         
@@ -970,19 +941,27 @@ namespace
         
         ContextManager::SetShaderPS(m_PostEffectShaderPSPtrs[DOFDownSample]);
         
-        ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         
-        ContextManager::SetConstantBufferSetPS(m_DOFDownPropertiesPSBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_DOFDownPropertiesPSBufferPtr->GetBuffer(0));
+
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         
-        ContextManager::SetTextureSetPS(m_SwapTextureSetPtrs[CurrentSwapBufferCount]);
+        ContextManager::SetTexture(0, m_SwapTextureSetPtrs[CurrentSwapBufferCount]->GetTexture(0));
+        ContextManager::SetTexture(1, m_SwapTextureSetPtrs[CurrentSwapBufferCount]->GetTexture(1));
         
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
         
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+        ContextManager::ResetTexture(1);
+
+        ContextManager::ResetSampler(0);
+        ContextManager::ResetSampler(1);
         
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetConstantBuffer(0);
         
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(1);
         
         ContextManager::ResetTopology();
         
@@ -991,8 +970,6 @@ namespace
         ContextManager::ResetIndexBuffer();
         
         ContextManager::ResetVertexBufferSet();
-        
-        ContextManager::ResetSamplerSetPS();
         
         ContextManager::ResetShaderVS();
         
@@ -1014,9 +991,7 @@ namespace
         GaussianSettings.m_Weights[6] = 0.382925f;
         
         ContextManager::SetRenderContext(m_QuarterRenderContextPtrs[1]);
-        
-        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
-        
+
         ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
         
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
@@ -1029,24 +1004,28 @@ namespace
         
         ContextManager::SetShaderPS(m_PostEffectShaderPSPtrs[GaussianBlur]);
         
-        ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         
-        ContextManager::SetConstantBufferSetPS(m_GaussianBlurPropertiesPSBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_GaussianBlurPropertiesPSBufferPtr->GetBuffer(0));
         
         GaussianSettings.m_Direction[0] = 1.0f * 1.0f / static_cast<float>(QuarterSize[0]);
         GaussianSettings.m_Direction[1] = 0.0f * 1.0f / static_cast<float>(QuarterSize[1]);
         
         BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesPSBufferPtr->GetBuffer(0), &GaussianSettings);
         
-        ContextManager::SetTextureSetPS(m_QuarterTextureSetPtrs[0]);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(0, m_QuarterTextureSetPtrs[0]->GetTexture(0));
         
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
         
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+
+        ContextManager::ResetSampler(0);
         
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetConstantBuffer(0);
         
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(1);
         
         ContextManager::ResetTopology();
         
@@ -1055,8 +1034,6 @@ namespace
         ContextManager::ResetIndexBuffer();
         
         ContextManager::ResetVertexBufferSet();
-        
-        ContextManager::ResetSamplerSetPS();
         
         ContextManager::ResetShaderVS();
         
@@ -1067,9 +1044,7 @@ namespace
         // -----------------------------------------------------------------------------
         
         ContextManager::SetRenderContext(m_QuarterRenderContextPtrs[2]);
-        
-        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
-        
+
         ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
         
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
@@ -1082,24 +1057,28 @@ namespace
         
         ContextManager::SetShaderPS(m_PostEffectShaderPSPtrs[GaussianBlur]);
         
-        ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
-        
-        ContextManager::SetConstantBufferSetPS(m_GaussianBlurPropertiesPSBufferPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+
+        ContextManager::SetConstantBuffer(1, m_GaussianBlurPropertiesPSBufferPtr->GetBuffer(0));
         
         GaussianSettings.m_Direction[0] = 0.0f * 1.0f / static_cast<float>(QuarterSize[0]);
         GaussianSettings.m_Direction[1] = 1.0f * 1.0f / static_cast<float>(QuarterSize[1]);
         
         BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesPSBufferPtr->GetBuffer(0), &GaussianSettings);
         
-        ContextManager::SetTextureSetPS(m_QuarterTextureSetPtrs[1]);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(0, m_QuarterTextureSetPtrs[1]->GetTexture(0));
         
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
         
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+
+        ContextManager::ResetSampler(0);
         
-        ContextManager::ResetConstantBufferSetPS();
-        
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
+
+        ContextManager::ResetConstantBuffer(1);
         
         ContextManager::ResetTopology();
         
@@ -1108,8 +1087,6 @@ namespace
         ContextManager::ResetIndexBuffer();
         
         ContextManager::ResetVertexBufferSet();
-        
-        ContextManager::ResetSamplerSetPS();
         
         ContextManager::ResetShaderVS();
         
@@ -1121,8 +1098,6 @@ namespace
         // Rendering: Calculate CoC / Near
         // -----------------------------------------------------------------------------        
         ContextManager::SetRenderContext(m_QuarterRenderContextPtrs[1]);
-        
-        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
         
         ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
         
@@ -1136,17 +1111,23 @@ namespace
         
         ContextManager::SetShaderPS(m_PostEffectShaderPSPtrs[DOFNear]);
         
-        ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         
-        ContextManager::SetTextureSetPS(m_QuarterTextureSetPtrs[0]);
-        
-        ContextManager::SetTextureSetPS(m_QuarterTextureSetPtrs[2]);
+        ContextManager::SetTexture(0, m_QuarterTextureSetPtrs[0]->GetTexture(0));
+        ContextManager::SetTexture(1, m_QuarterTextureSetPtrs[2]->GetTexture(0));
         
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
         
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+        ContextManager::ResetTexture(1);
+
+        ContextManager::ResetSampler(0);
+        ContextManager::ResetSampler(1);
         
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
         
         ContextManager::ResetTopology();
         
@@ -1155,8 +1136,6 @@ namespace
         ContextManager::ResetIndexBuffer();
         
         ContextManager::ResetVertexBufferSet();
-        
-        ContextManager::ResetSamplerSetPS();
         
         ContextManager::ResetShaderVS();
         
@@ -1168,8 +1147,6 @@ namespace
         // Rendering: Blur near
         // -----------------------------------------------------------------------------        
         ContextManager::SetRenderContext(m_QuarterRenderContextPtrs[0]);
-        
-        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
         
         ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
         
@@ -1183,15 +1160,19 @@ namespace
         
         ContextManager::SetShaderPS(m_PostEffectShaderPSPtrs[DOFBlurNear]);
         
-        ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         
-        ContextManager::SetTextureSetPS(m_QuarterTextureSetPtrs[1]);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(0, m_QuarterTextureSetPtrs[1]->GetTexture(0));
         
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
         
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+
+        ContextManager::ResetSampler(0);
         
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
         
         ContextManager::ResetTopology();
         
@@ -1200,8 +1181,6 @@ namespace
         ContextManager::ResetIndexBuffer();
         
         ContextManager::ResetVertexBufferSet();
-        
-        ContextManager::ResetSamplerSetPS();
         
         ContextManager::ResetShaderVS();
         
@@ -1216,8 +1195,6 @@ namespace
         
         ContextManager::SetRenderContext(m_SwapRenderContextPtrs[NextSwapBufferCount]);
         
-        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
-        
         ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
         
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
@@ -1230,23 +1207,35 @@ namespace
         
         ContextManager::SetShaderPS(m_PostEffectShaderPSPtrs[DOFApply]);
         
-        ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         
-        ContextManager::SetConstantBufferSetPS(m_DOFApplyPropertiesPSBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_DOFApplyPropertiesPSBufferPtr->GetBuffer(0));
+
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         
-        ContextManager::SetTextureSetPS(m_SwapTextureSetPtrs[CurrentSwapBufferCount]);
-        
-        ContextManager::SetTextureSetPS(m_QuarterTextureSetPtrs[0]);
-        
-        ContextManager::SetTextureSetPS(m_QuarterTextureSetPtrs[2]);
+        ContextManager::SetTexture(0, m_SwapTextureSetPtrs[CurrentSwapBufferCount]->GetTexture(0));
+        ContextManager::SetTexture(1, m_SwapTextureSetPtrs[CurrentSwapBufferCount]->GetTexture(1));
+        ContextManager::SetTexture(2, m_QuarterTextureSetPtrs[0]->GetTexture(0));
+        ContextManager::SetTexture(3, m_QuarterTextureSetPtrs[2]->GetTexture(0));
         
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
         
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+        ContextManager::ResetTexture(1);
+        ContextManager::ResetTexture(2);
+        ContextManager::ResetTexture(3);
+
+        ContextManager::ResetSampler(0);
+        ContextManager::ResetSampler(1);
+        ContextManager::ResetSampler(2);
+        ContextManager::ResetSampler(3);
         
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetConstantBuffer(0);
         
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(1);
         
         ContextManager::ResetTopology();
         
@@ -1255,8 +1244,6 @@ namespace
         ContextManager::ResetIndexBuffer();
         
         ContextManager::ResetVertexBufferSet();
-        
-        ContextManager::ResetSamplerSetPS();
         
         ContextManager::ResetShaderVS();
         
@@ -1312,8 +1299,6 @@ namespace
         
         ContextManager::SetRenderContext(m_SwapRenderContextPtrs[NextSwapBufferCount]);
         
-        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
-        
         ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
         
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
@@ -1326,19 +1311,23 @@ namespace
         
         ContextManager::SetShaderPS(m_PostEffectShaderPSPtrs[FXAA]);
         
-        ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         
-        ContextManager::SetConstantBufferSetPS(m_FXAAPropertiesPSBufferPtr);
-        
-        ContextManager::SetTextureSetPS(m_SwapTextureSetPtrs[CurrentSwapBufferCount]);
+        ContextManager::SetTexture(0, m_SwapTextureSetPtrs[CurrentSwapBufferCount]->GetTexture(0));
+        ContextManager::SetTexture(1, m_SwapTextureSetPtrs[CurrentSwapBufferCount]->GetTexture(1));
         
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
         
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+        ContextManager::ResetTexture(1);
+
+        ContextManager::ResetSampler(0);
+        ContextManager::ResetSampler(1);
         
-        ContextManager::ResetConstantBufferSetPS();
-        
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
         
         ContextManager::ResetTopology();
         
@@ -1347,8 +1336,6 @@ namespace
         ContextManager::ResetIndexBuffer();
         
         ContextManager::ResetVertexBufferSet();
-        
-        ContextManager::ResetSamplerSetPS();
         
         ContextManager::ResetShaderVS();
         
@@ -1361,60 +1348,49 @@ namespace
     
     // -----------------------------------------------------------------------------
 
-	void CGfxPostFXRenderer::RenderSMAA()
-	{
-		Performance::BeginEvent("SMAA");
+    void CGfxPostFXRenderer::RenderSMAA()
+    {
+        Performance::BeginEvent("SMAA");
 
-		// -----------------------------------------------------------------------------
-		// Set current swap buffer count
-		// -----------------------------------------------------------------------------
-		int CurrentSwapBufferCount = m_SwapCounter % 2;
-		int NextSwapBufferCount = (m_SwapCounter += 1) % 2;
+        // -----------------------------------------------------------------------------
+        // Set current swap buffer count
+        // -----------------------------------------------------------------------------
+        int CurrentSwapBufferCount = m_SwapCounter % 2;
+        int NextSwapBufferCount = (m_SwapCounter += 1) % 2;
 
         TargetSetManager::ClearTargetSet(m_SMAAEdgeTargetSetPtr);
         TargetSetManager::ClearTargetSet(m_SMAAWeightsCalcTargetSetPtr);
 
         const unsigned int pOffset[] = { 0, 0 };
 
-		// -----------------------------------------------------------------------------
-		// Edge detection
-		// -----------------------------------------------------------------------------
+        // -----------------------------------------------------------------------------
+        // Edge detection
+        // -----------------------------------------------------------------------------
 
         ContextManager::SetRenderContext(m_SMAAEdgeDetectContextPtr);
 
-        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
-
         ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
 
-		ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
+        ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
 
-		ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
+        ContextManager::SetTopology(STopology::TriangleStrip);
 
-		ContextManager::SetTopology(STopology::TriangleStrip);
+        ContextManager::SetShaderVS(m_PostEffectShaderVSPtrs[SMAAEdgeDetect]);
 
-		ContextManager::SetShaderVS(m_PostEffectShaderVSPtrs[SMAAEdgeDetect]);
+        ContextManager::SetShaderPS(m_PostEffectShaderPSPtrs[SMAAEdgeDetect]);
 
-		ContextManager::SetShaderPS(m_PostEffectShaderPSPtrs[SMAAEdgeDetect]);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-		//ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
+        ContextManager::SetTexture(0, m_SMAATextureSetPtr[CurrentSwapBufferCount]->GetTexture(0));
 
-		//ContextManager::SetConstantBufferSetPS(m_SMAAPropertiesPSBufferPtr);
-
-		ContextManager::SetTextureSetPS(m_SMAATextureSetPtr[CurrentSwapBufferCount]);
-
-		ContextManager::Draw(3, 0);
+        ContextManager::Draw(3, 0);
 
         // -----------------------------------------------------------------------------
         // Blending weights calculation
         // -----------------------------------------------------------------------------
-
         ContextManager::SetRenderContext(m_SMAAWeightCalcContextPtr);
 
-        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
-
         ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
-
-        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
 
         ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
 
@@ -1424,25 +1400,22 @@ namespace
 
         ContextManager::SetShaderPS(m_PostEffectShaderPSPtrs[SMAAWeightsCalc]);
 
-        //ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        //ContextManager::SetConstantBufferSetPS(m_SMAAPropertiesPSBufferPtr);
-
-        ContextManager::SetTextureSetPS(m_SMAATextureSetPtr[CurrentSwapBufferCount]);
+        ContextManager::SetTexture(0, m_SMAATextureSetPtr[CurrentSwapBufferCount]->GetTexture(1));
+        ContextManager::SetTexture(1, m_SMAATextureSetPtr[CurrentSwapBufferCount]->GetTexture(3));
+        ContextManager::SetTexture(2, m_SMAATextureSetPtr[CurrentSwapBufferCount]->GetTexture(4));
 
         ContextManager::Draw(3, 0);
 
         // -----------------------------------------------------------------------------
-        // Neighbourhood blending
+        // Neighborhood blending
         // -----------------------------------------------------------------------------
-
         ContextManager::SetRenderContext(m_SwapRenderContextPtrs[NextSwapBufferCount]);
 
-        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
-
         ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
-
-        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
 
         ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
 
@@ -1452,44 +1425,43 @@ namespace
 
         ContextManager::SetShaderPS(m_PostEffectShaderPSPtrs[SMAABlending]);
 
-        //ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        //ContextManager::SetConstantBufferSetPS(m_SMAAPropertiesPSBufferPtr);
-
-        ContextManager::SetTextureSetPS(m_SMAATextureSetPtr[CurrentSwapBufferCount]);
+        ContextManager::SetTexture(0, m_SMAATextureSetPtr[CurrentSwapBufferCount]->GetTexture(0));
+        ContextManager::SetTexture(1, m_SMAATextureSetPtr[CurrentSwapBufferCount]->GetTexture(2));
 
         ContextManager::Draw(3, 0);
 
         // -----------------------------------------------------------------------------
         // Reset
         // -----------------------------------------------------------------------------
+        ContextManager::ResetTexture(0);
+        ContextManager::ResetTexture(1);
+        ContextManager::ResetTexture(2);
 
-		ContextManager::ResetTextureSetPS();
+        ContextManager::ResetSampler(0);
+        ContextManager::ResetSampler(1);
+        ContextManager::ResetSampler(2);
 
-		ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetTopology();
 
-		ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetInputLayout();
 
-		ContextManager::ResetTopology();
+        ContextManager::ResetIndexBuffer();
 
-		ContextManager::ResetInputLayout();
+        ContextManager::ResetVertexBufferSet();
 
-		ContextManager::ResetIndexBuffer();
+        ContextManager::ResetShaderVS();
 
-		ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetShaderPS();
 
-		ContextManager::ResetSamplerSetPS();
+        ContextManager::ResetRenderContext();
 
-		ContextManager::ResetShaderVS();
+        Performance::EndEvent();
+    }
 
-		ContextManager::ResetShaderPS();
-
-		ContextManager::ResetRenderContext();
-
-		Performance::EndEvent();
-	}
-
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
     
     void CGfxPostFXRenderer::RenderToSystem()
     {
@@ -1507,8 +1479,6 @@ namespace
         
         ContextManager::SetRenderContext(m_SystemContextPtr);
         
-        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
-        
         ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
         
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
@@ -1521,15 +1491,19 @@ namespace
         
         ContextManager::SetShaderPS(m_PassThroughShaderPSPtr);
 
-        ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
-        ContextManager::SetTextureSetPS(m_SwapTextureSetPtrs[CurrentSwapBufferCount]);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+
+        ContextManager::SetTexture(0, m_SwapTextureSetPtrs[CurrentSwapBufferCount]->GetTexture(0));
 
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
 
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
 
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetSampler(0);
+
+        ContextManager::ResetConstantBuffer(0);
         
         ContextManager::ResetTopology();
         
@@ -1538,8 +1512,6 @@ namespace
         ContextManager::ResetIndexBuffer();
         
         ContextManager::ResetVertexBufferSet();
-        
-        ContextManager::ResetSamplerSetPS();
         
         ContextManager::ResetShaderVS();
         

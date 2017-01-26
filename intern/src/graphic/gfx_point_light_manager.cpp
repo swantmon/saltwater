@@ -101,7 +101,6 @@ namespace
         CShaderPtr m_ShadowRSMShaderPSPtr;
         CShaderPtr m_ShadowRSMTexShaderPSPtr;
         CBufferSetPtr m_LightCameraVSBufferPtr;
-        CBufferSetPtr m_MainVSBufferPtr;
         CBufferSetPtr m_RSMPSBuffer;
 
         CPointLightFacets m_PointLightFacets;
@@ -146,7 +145,6 @@ namespace
         , m_ShadowRSMShaderPSPtr   ()
         , m_ShadowRSMTexShaderPSPtr()
         , m_LightCameraVSBufferPtr ()
-        , m_MainVSBufferPtr        ()
         , m_RSMPSBuffer            ()
         , m_PointLightFacets       ()
     {
@@ -229,8 +227,6 @@ namespace
 
         m_LightCameraVSBufferPtr = BufferManager::CreateBufferSet(PerLightConstantBuffer, PerDrawCallConstantBuffer);
         
-        m_MainVSBufferPtr        = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS(), PerDrawCallConstantBuffer);
-        
         // -----------------------------------------------------------------------------
         // Register dirty entity handler for automatic sky creation
         // -----------------------------------------------------------------------------
@@ -246,7 +242,6 @@ namespace
         m_ShadowRSMShaderPSPtr    = 0;
         m_ShadowRSMTexShaderPSPtr = 0;
         m_LightCameraVSBufferPtr  = 0;
-        m_MainVSBufferPtr         = 0;
         m_RSMPSBuffer             = 0;
 
         m_PointLightFacets.Clear();
@@ -747,7 +742,9 @@ namespace
                 // -----------------------------------------------------------------------------
                 ContextManager::SetShaderVS(m_ShadowShaderVSPtr);
 
-                ContextManager::SetConstantBufferSetVS(m_LightCameraVSBufferPtr);
+                ContextManager::SetConstantBuffer(0, m_LightCameraVSBufferPtr->GetBuffer(0));
+
+                ContextManager::SetConstantBuffer(1, m_LightCameraVSBufferPtr->GetBuffer(1));
 
                 if (_rInternLight.m_CurrentShadowType == Dt::CPointLightFacet::GlobalIllumination)
                 {
@@ -755,9 +752,12 @@ namespace
                     {
                         ContextManager::SetShaderPS(m_ShadowRSMTexShaderPSPtr);
 
-                        ContextManager::SetTextureSetPS(MaterialPtr->GetTextureSetPS());
+                        for (unsigned int IndexOfTexture = 0; IndexOfTexture < MaterialPtr->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
+                        {
+                            ContextManager::SetSampler(IndexOfTexture, MaterialPtr->GetSamplerSetPS()->GetSampler(IndexOfTexture));
 
-                        ContextManager::SetSamplerSetPS(MaterialPtr->GetSamplerSetPS());
+                            ContextManager::SetTexture(IndexOfTexture, MaterialPtr->GetTextureSetPS()->GetTexture(IndexOfTexture));
+                        }
                     }
                     else
                     {
@@ -781,7 +781,9 @@ namespace
 
                     BufferManager::UploadConstantBufferData(m_RSMPSBuffer->GetBuffer(1), &PunctualLightProperties);
 
-                    ContextManager::SetConstantBufferSetPS(m_RSMPSBuffer);
+                    ContextManager::SetConstantBuffer(2, m_RSMPSBuffer->GetBuffer(0));
+
+                    ContextManager::SetConstantBuffer(3, m_RSMPSBuffer->GetBuffer(1));
                 }
                 else
                 {
@@ -823,7 +825,13 @@ namespace
             CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor);
         }
             
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
+
+        ContextManager::ResetConstantBuffer(1);
+
+        ContextManager::ResetConstantBuffer(2);
+
+        ContextManager::ResetConstantBuffer(3);
 
         ContextManager::ResetShaderVS();
             

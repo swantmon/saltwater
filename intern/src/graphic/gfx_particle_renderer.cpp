@@ -132,14 +132,11 @@ namespace
         
         CBufferSetPtr     m_LiquidVSBufferPtr;
         CBufferSetPtr     m_LiquidPSBufferPtr;
-        CBufferSetPtr     m_QuadVSBufferPtr;
         CBufferSetPtr     m_BilateralPSBufferPtr;
         CBufferSetPtr     m_GaussianPSBufferPtr;
         CBufferSetPtr     m_ShadingPSBufferPtr;
         CBufferPtr        m_ParticleInstanceBufferPtr;
         CBufferSetPtr     m_ParticleInstanceBufferSetPtr;
-        CSamplerSetPtr    m_PSSamplerSet;
-        
         CShaderPtr        m_LiquidShaderVSPtrs[NumberOfParts];
         CShaderPtr        m_LiquidShaderPSPtrs[NumberOfParts];
         CRenderContextPtr m_LiquidContextPtrs[6];
@@ -166,12 +163,10 @@ namespace
         , m_QuadModelPtr                ()
         , m_LiquidVSBufferPtr           ()
         , m_LiquidPSBufferPtr           ()
-        , m_QuadVSBufferPtr             ()
         , m_BilateralPSBufferPtr        ()
         , m_ShadingPSBufferPtr          ()
         , m_ParticleInstanceBufferPtr   ()
         , m_ParticleInstanceBufferSetPtr()
-        , m_PSSamplerSet                ()
         , m_LiquidContextPtrs           ()
         , m_LiquidShaderVSPtrs          ()
         , m_LiquidShaderPSPtrs          ()
@@ -211,13 +206,11 @@ namespace
         m_QuadModelPtr                 = 0;
         m_LiquidVSBufferPtr            = 0;
         m_LiquidPSBufferPtr            = 0;
-        m_QuadVSBufferPtr              = 0;
         m_BilateralPSBufferPtr         = 0;
         m_GaussianPSBufferPtr          = 0;
         m_ShadingPSBufferPtr           = 0;
         m_ParticleInstanceBufferPtr    = 0;
         m_ParticleInstanceBufferSetPtr = 0;
-        m_PSSamplerSet                 = 0;
         m_QuadInputLayouPtr            = 0;
         m_ParticleInputLayouPtr        = 0;
         
@@ -453,12 +446,6 @@ namespace
         RenderContextPtr->SetRenderState(StateManager::GetRenderState(CRenderState::NoDepth | CRenderState::AlphaBlend));
         
         m_LiquidContextPtrs[5] = RenderContextPtr;
-        
-        // -----------------------------------------------------------------------------
-        
-        CSamplerPtr LinearFilter = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-        
-        m_PSSamplerSet = SamplerManager::CreateSamplerSet(LinearFilter, LinearFilter, LinearFilter, LinearFilter);
     }
     
     // -----------------------------------------------------------------------------
@@ -554,11 +541,8 @@ namespace
         
         // -----------------------------------------------------------------------------
         
-        m_LiquidVSBufferPtr         = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS(), PerFrameConstantBuffer);
-        
-        m_QuadVSBufferPtr           = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
-        
-        
+        m_LiquidVSBufferPtr         = BufferManager::CreateBufferSet(PerFrameConstantBuffer);
+               
         m_LiquidPSBufferPtr         = BufferManager::CreateBufferSet(LiquidSettingsBuffer);
         
         m_BilateralPSBufferPtr      = BufferManager::CreateBufferSet(BilateralSettingsBuffer);
@@ -636,7 +620,7 @@ namespace
         PerFrameConstantBuffer.m_LiquidMatrix *= Base::Float4x4().SetRotation(Base::DegreesToRadians(-180.0f), 0.0f, 0.0f);
         PerFrameConstantBuffer.m_LiquidMatrix *= Base::Float4x4().SetScale(0.3f);
         
-        BufferManager::UploadConstantBufferData(m_LiquidVSBufferPtr->GetBuffer(1), &PerFrameConstantBuffer);
+        BufferManager::UploadConstantBufferData(m_LiquidVSBufferPtr->GetBuffer(0), &PerFrameConstantBuffer);
         
         // -----------------------------------------------------------------------------
         // Clear render targets
@@ -678,9 +662,9 @@ namespace
 
         ContextManager::SetShaderPS(m_LiquidShaderPSPtrs[Depth]);
 
-        ContextManager::SetConstantBufferSetVS(m_LiquidVSBufferPtr);
-
-        ContextManager::SetConstantBufferSetPS(m_LiquidPSBufferPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_LiquidVSBufferPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(2, m_LiquidPSBufferPtr->GetBuffer(0));
 
         SLiquidSettings LiquidBuffer;
 
@@ -725,9 +709,9 @@ namespace
             NumberOfParticles = 0;
         }
 
-        ContextManager::ResetConstantBufferSetPS();
-
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
+        ContextManager::ResetConstantBuffer(2);
 
         ContextManager::ResetTopology();
 
@@ -761,7 +745,8 @@ namespace
 
         ContextManager::SetShaderPS(m_LiquidShaderPSPtrs[Thickness]);
 
-        ContextManager::SetConstantBufferSetVS(m_LiquidVSBufferPtr);
+        ContextManager::SetConstantBuffer(0, m_LiquidVSBufferPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(1, m_LiquidVSBufferPtr->GetBuffer(1));
 
         pInstances = BufferManager::MapVertexBuffer(m_ParticleInstanceBufferSetPtr->GetBuffer(1), CBuffer::Write);
 
@@ -796,7 +781,8 @@ namespace
             NumberOfParticles = 0;
         }
 
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetTopology();
 
@@ -813,7 +799,7 @@ namespace
         ContextManager::ResetRenderContext();
 
         // -----------------------------------------------------------------------------
-        // Bileteral Filter
+        // Bilateral Filter
         // -----------------------------------------------------------------------------
         SBilateralSettings BilateralSettings;
 
@@ -831,28 +817,26 @@ namespace
 
         ContextManager::SetShaderPS(m_LiquidShaderPSPtrs[BilateralBlur]);
 
-        ContextManager::SetConstantBufferSetVS(m_QuadVSBufferPtr);
-
-        ContextManager::SetConstantBufferSetPS(m_BilateralPSBufferPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_BilateralPSBufferPtr->GetBuffer(0));
 
         BilateralSettings.m_Direction[0] = 1.0f * 1.0f / static_cast<float>(1280.0f);
         BilateralSettings.m_Direction[1] = 0.0f * 1.0f / static_cast<float>(800.0f);
 
         BufferManager::UploadConstantBufferData(m_BilateralPSBufferPtr->GetBuffer(0), &BilateralSettings);
 
-        ContextManager::SetTextureSetPS(m_TextureSetPtrs[0]);
+        ContextManager::SetTexture(0, m_TextureSetPtrs[0]->GetTexture(0));
 
-        ContextManager::SetSamplerSetPS(m_PSSamplerSet);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
 
-        ContextManager::ResetSamplerSetPS();
+        ContextManager::ResetSampler(0);
 
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
 
-        ContextManager::ResetConstantBufferSetPS();
-
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetTopology();
 
@@ -884,28 +868,26 @@ namespace
 
         ContextManager::SetShaderPS(m_LiquidShaderPSPtrs[BilateralBlur]);
 
-        ContextManager::SetConstantBufferSetVS(m_QuadVSBufferPtr);
-
-        ContextManager::SetConstantBufferSetPS(m_BilateralPSBufferPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_BilateralPSBufferPtr->GetBuffer(0));
 
         BilateralSettings.m_Direction[0] = 0.0f * 1.0f / static_cast<float>(1280.0f);
         BilateralSettings.m_Direction[1] = 1.0f * 1.0f / static_cast<float>(800.0f);
 
         BufferManager::UploadConstantBufferData(m_BilateralPSBufferPtr->GetBuffer(0), &BilateralSettings);
 
-        ContextManager::SetTextureSetPS(m_TextureSetPtrs[2]);
+        ContextManager::SetTexture(0, m_TextureSetPtrs[2]->GetTexture(0));
 
-        ContextManager::SetSamplerSetPS(m_PSSamplerSet);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
 
-        ContextManager::ResetSamplerSetPS();
+        ContextManager::ResetTexture(0);
 
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetSampler(0);
 
-        ContextManager::ResetConstantBufferSetPS();
-
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetTopology();
 
@@ -936,8 +918,6 @@ namespace
 
         ContextManager::SetRenderContext(m_LiquidContextPtrs[2]);
 
-        ContextManager::SetSamplerSetPS(m_PSSamplerSet);
-
         ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
 
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
@@ -950,24 +930,26 @@ namespace
 
         ContextManager::SetShaderPS(m_LiquidShaderPSPtrs[GaussianBlur]);
 
-        ContextManager::SetConstantBufferSetVS(m_QuadVSBufferPtr);
-
-        ContextManager::SetConstantBufferSetPS(m_GaussianPSBufferPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_GaussianPSBufferPtr->GetBuffer(0));
 
         GaussianSettings.m_Direction[0] = 1.0f * 1.0f / static_cast<float>(1280);
         GaussianSettings.m_Direction[1] = 0.0f * 1.0f / static_cast<float>(800);
 
         BufferManager::UploadConstantBufferData(m_GaussianPSBufferPtr->GetBuffer(0), &GaussianSettings);
 
-        ContextManager::SetTextureSetPS(m_TextureSetPtrs[1]);
+        ContextManager::SetTexture(0, m_TextureSetPtrs[1]->GetTexture(0));
+
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
 
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
 
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetSampler(0);
 
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetTopology();
 
@@ -976,8 +958,6 @@ namespace
         ContextManager::ResetIndexBuffer();
 
         ContextManager::ResetVertexBufferSet();
-
-        ContextManager::ResetSamplerSetPS();
 
         ContextManager::ResetShaderVS();
 
@@ -989,8 +969,6 @@ namespace
 
         ContextManager::SetRenderContext(m_LiquidContextPtrs[4]);
 
-        ContextManager::SetSamplerSetPS(m_PSSamplerSet);
-
         ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
 
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
@@ -1003,24 +981,26 @@ namespace
 
         ContextManager::SetShaderPS(m_LiquidShaderPSPtrs[GaussianBlur]);
 
-        ContextManager::SetConstantBufferSetVS(m_QuadVSBufferPtr);
-
-        ContextManager::SetConstantBufferSetPS(m_GaussianPSBufferPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_GaussianPSBufferPtr->GetBuffer(0));
 
         GaussianSettings.m_Direction[0] = 0.0f * 1.0f / static_cast<float>(1280);
         GaussianSettings.m_Direction[1] = 1.0f * 1.0f / static_cast<float>(800);
 
         BufferManager::UploadConstantBufferData(m_GaussianPSBufferPtr->GetBuffer(0), &GaussianSettings);
 
-        ContextManager::SetTextureSetPS(m_TextureSetPtrs[2]);
+        ContextManager::SetTexture(0, m_TextureSetPtrs[2]->GetTexture(0));
+
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
 
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
 
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetSampler(0);
 
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetTopology();
 
@@ -1029,8 +1009,6 @@ namespace
         ContextManager::ResetIndexBuffer();
 
         ContextManager::ResetVertexBufferSet();
-
-        ContextManager::ResetSamplerSetPS();
 
         ContextManager::ResetShaderVS();
 
@@ -1066,23 +1044,29 @@ namespace
 
         ContextManager::SetShaderPS(m_LiquidShaderPSPtrs[Shading]);
 
-        ContextManager::SetConstantBufferSetVS(m_QuadVSBufferPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_ShadingPSBufferPtr->GetBuffer(0));
 
-        ContextManager::SetConstantBufferSetPS(m_ShadingPSBufferPtr);
+        ContextManager::SetTexture(0, m_TextureSetPtrs[3]->GetTexture(0));
+        ContextManager::SetTexture(1, m_TextureSetPtrs[3]->GetTexture(1));
+        ContextManager::SetTexture(2, m_TextureSetPtrs[3]->GetTexture(2));
 
-        ContextManager::SetTextureSetPS(m_TextureSetPtrs[3]);
-
-        ContextManager::SetSamplerSetPS(m_PSSamplerSet);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
 
-        ContextManager::ResetSamplerSetPS();
+        ContextManager::ResetSampler(0);
+        ContextManager::ResetSampler(1);
+        ContextManager::ResetSampler(2);
 
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+        ContextManager::ResetTexture(1);
+        ContextManager::ResetTexture(2);
 
-        ContextManager::ResetConstantBufferSetPS();
-
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetTopology();
 

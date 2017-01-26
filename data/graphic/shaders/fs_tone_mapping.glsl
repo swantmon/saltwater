@@ -5,7 +5,7 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(std140, binding = 0) uniform UB0
+layout(std140, binding = 1) uniform UB0
 {
     vec4 ps_ColorMatrixR_ColorCurveCd1;
     vec4 ps_ColorMatrixG_ColorCurveCd3Cm3;

@@ -128,7 +128,6 @@ namespace
         CMeshPtr m_QuadModelPtr;
         CMeshPtr m_GizmoModelPtr;
 
-        CBufferSetPtr     m_BaseVSBuffer;
         CBufferSetPtr     m_ViewModelVSBuffer;
         CBufferSetPtr     m_BaseModelVSBuffer;
         CBufferSetPtr     m_ViewPSBuffer;
@@ -168,7 +167,6 @@ namespace
     CGfxDebugRenderer::CGfxDebugRenderer()
         : m_QuadModelPtr            ()
         , m_GizmoModelPtr           ()
-        , m_BaseVSBuffer            ()
         , m_ViewModelVSBuffer       ()
         , m_BaseModelVSBuffer       ()
         , m_ViewPSBuffer            ()
@@ -218,7 +216,6 @@ namespace
     {
         m_QuadModelPtr             = 0;
         m_GizmoModelPtr            = 0;
-        m_BaseVSBuffer             = 0;
         m_ViewModelVSBuffer        = 0;
         m_BaseModelVSBuffer        = 0;
         m_ViewPSBuffer             = 0;
@@ -410,9 +407,8 @@ namespace
         
         CBufferPtr ModelBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
         
-        m_BaseVSBuffer      = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
         m_ViewModelVSBuffer = BufferManager::CreateBufferSet(ViewBuffer);
-        m_BaseModelVSBuffer = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS(), ModelBuffer);
+        m_BaseModelVSBuffer = BufferManager::CreateBufferSet(ModelBuffer);
 
         // -----------------------------------------------------------------------------
 
@@ -659,9 +655,9 @@ namespace
         
         ContextManager::SetShaderPS(m_PositionShaderPSPtr);
         
-        ContextManager::SetConstantBufferSetVS(m_BaseVSBuffer);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         
-        ContextManager::SetConstantBufferSetPS(m_ViewPSBuffer);
+        ContextManager::SetConstantBuffer(1, m_ViewPSBuffer->GetBuffer(0));
         
         
 
@@ -686,9 +682,9 @@ namespace
             RenderFrustumPlane(pWorldSpaceCameraFrustum[1], pWorldSpaceCameraFrustum[3], pWorldSpaceCameraFrustum[2], pWorldSpaceCameraFrustum[0], Base::Float3(0.0f, 1.0f, 1.0f)); // Near
         }
         
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetConstantBuffer(0);
         
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(1);
         
         ContextManager::ResetTopology();
         
@@ -761,15 +757,15 @@ namespace
 
             ContextManager::SetShaderPS(m_GizmoShaderPSPtr);
 
-            ContextManager::SetConstantBufferSetVS(m_ViewModelVSBuffer);
+            ContextManager::SetConstantBuffer(0, m_ViewModelVSBuffer->GetBuffer(0));
 
-            ContextManager::SetConstantBufferSetPS(m_DeferredPassPSBuffer);
+            ContextManager::SetConstantBuffer(1, m_DeferredPassPSBuffer->GetBuffer(0));
 
             ContextManager::DrawIndexed(m_GizmoModelPtr->GetLOD(0)->GetSurface(IndexOfSurface)->GetNumberOfIndices(), 0, 0);
 
-            ContextManager::ResetConstantBufferSetPS();
+            ContextManager::ResetConstantBuffer(0);
 
-            ContextManager::ResetConstantBufferSetVS();
+            ContextManager::ResetConstantBuffer(1);
 
             ContextManager::ResetTopology();
 
@@ -794,8 +790,8 @@ namespace
     void CGfxDebugRenderer::RenderTextures()
     {
         const unsigned int pOffset[] = { 0, 0 };
-        CDebugTextures::const_iterator CurrentTexture = m_DebugTextures.begin();
-        CDebugTextures::const_iterator EndOfTextures  = m_DebugTextures.end();
+        CDebugTextures::iterator CurrentTexture = m_DebugTextures.begin();
+        CDebugTextures::iterator EndOfTextures  = m_DebugTextures.end();
 
         if (CurrentTexture == EndOfTextures)
         {
@@ -820,7 +816,9 @@ namespace
         
         ContextManager::SetShaderPS(m_QuadTextureShaderPSPtr);
 
-        ContextManager::SetConstantBufferSetVS(m_BaseModelVSBuffer);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+
+        ContextManager::SetConstantBuffer(1, m_BaseModelVSBuffer->GetBuffer(0));
 
         for (; CurrentTexture != EndOfTextures; ++ CurrentTexture)
         {
@@ -847,18 +845,24 @@ namespace
             ModelBuffer.m_ModelMatrix.SetScale(Difference[0], Difference[1], 1.0f);
             ModelBuffer.m_ModelMatrix.InjectTranslation(MinPoint[0], MinPoint[1], 1.0f);
 
-            BufferManager::UploadConstantBufferData(m_BaseModelVSBuffer->GetBuffer(1), &ModelBuffer);
+            BufferManager::UploadConstantBufferData(m_BaseModelVSBuffer->GetBuffer(0), &ModelBuffer);
 
             // -----------------------------------------------------------------------------
 
-            ContextManager::SetTextureSetPS(CurrentTexture->m_TexturePtr);
+            ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+
+            ContextManager::SetTexture(0, CurrentTexture->m_TexturePtr->GetTexture(0));
 
             ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
         }
 
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetTexture(0);
 
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetSampler(0);
+
+        ContextManager::ResetConstantBuffer(0);
+
+        ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetTopology();
 
@@ -917,9 +921,11 @@ namespace
 
         ContextManager::SetShaderPS(m_QuadTextShaderPSPtr);
 
-        ContextManager::SetConstantBufferSetVS(m_BaseVSBuffer);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
-        ContextManager::SetTextureSetPS(m_TextTexturePtr);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+
+        ContextManager::SetTexture(0, m_TextTexturePtr->GetTexture(0));
 
         pInstances = BufferManager::MapVertexBuffer(m_TextInstanceBufferSetPtr->GetBuffer(1), CBuffer::Write);
 
@@ -981,9 +987,11 @@ namespace
             NumberOfLetters = 0;
         }
 
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetTexture(0);
 
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetSampler(0);
+
+        ContextManager::ResetConstantBuffer(0);
 
         ContextManager::ResetTopology();
 

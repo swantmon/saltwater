@@ -23,11 +23,11 @@ layout(std430, binding = 1) writeonly buffer UOutput
     uint  out_EntityID;
 };
 
+layout (binding = 0) uniform sampler2D cs_Depth;
 layout (binding = 0, rgba8) readonly uniform image2D cs_GBuffer0;
 layout (binding = 1, rgba8) readonly uniform image2D cs_GBuffer1;
 layout (binding = 2, rgba8) readonly uniform image2D cs_GBuffer2;
-layout (binding = 3) uniform sampler2D cs_Depth;
-layout (binding = 4, r32ui) readonly uniform uimage2D cs_HitProxy;
+layout (binding = 3, r32ui) readonly uniform uimage2D cs_HitProxy;
 
 // -------------------------------------------------------------------------------------
 // Main

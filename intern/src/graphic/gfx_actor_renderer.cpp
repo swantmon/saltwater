@@ -92,19 +92,12 @@ namespace
 
     private:
 
-        CBufferSetPtr     m_ViewVSBuffer;
-        CBufferSetPtr     m_DeferredPassPSBuffer;
-        CBufferSetPtr     m_HSBuffer;
-        CBufferSetPtr     m_DSBuffer;
-        CBufferSetPtr     m_ViewPSBuffer;
-        CBufferSetPtr     m_HitProxyPassPSBuffer;
-        CSamplerSetPtr    m_PSSamplerSet;
+        CBufferPtr        m_ModelBufferPtr;
+        CBufferPtr        m_SurfaceMaterialBufferPtr;
+        CBufferPtr        m_HitProxyPassPSBufferPtr;
         CShaderPtr        m_HitProxyShaderPtr;
         CRenderContextPtr m_DeferredContextPtr;
         CRenderContextPtr m_HitProxyContextPtr;
-        CTextureSetPtr    m_DeferredTextureSetPtrs;
-        CTextureSetPtr    m_LightingTextureSetPtr;
-
         CRenderJobs       m_DeferredRenderJobs;
 
     private:
@@ -116,18 +109,13 @@ namespace
 namespace
 {
     CGfxActorRenderer::CGfxActorRenderer()
-        : m_ViewVSBuffer         ()
-        , m_DeferredPassPSBuffer ()
-        , m_HSBuffer             ()
-        , m_DSBuffer             ()
-        , m_ViewPSBuffer         ()
-        , m_HitProxyPassPSBuffer ()
-        , m_PSSamplerSet         ()
-        , m_HitProxyShaderPtr    ()
-        , m_DeferredContextPtr   ()
-        , m_HitProxyContextPtr   ()
-        , m_LightingTextureSetPtr()
-        , m_DeferredRenderJobs   ()
+        : m_ModelBufferPtr          ()
+        , m_SurfaceMaterialBufferPtr()
+        , m_HitProxyPassPSBufferPtr ()
+        , m_HitProxyShaderPtr       ()
+        , m_DeferredContextPtr      ()
+        , m_HitProxyContextPtr      ()
+        , m_DeferredRenderJobs      ()
     {
         // -----------------------------------------------------------------------------
         // Register resize delegate
@@ -158,18 +146,12 @@ namespace
 
     void CGfxActorRenderer::OnExit()
     {
-        m_ViewVSBuffer           = 0;
-        m_DeferredPassPSBuffer   = 0;
-        m_HSBuffer               = 0;
-        m_DSBuffer               = 0;
-        m_ViewPSBuffer           = 0;
-        m_HitProxyPassPSBuffer   = 0;
-        m_PSSamplerSet           = 0;
-        m_HitProxyShaderPtr      = 0;
-        m_DeferredContextPtr     = 0;
-        m_HitProxyContextPtr     = 0;
-        m_DeferredTextureSetPtrs = 0;
-        m_LightingTextureSetPtr  = 0;
+        m_ModelBufferPtr           = 0;
+        m_SurfaceMaterialBufferPtr = 0;
+        m_HitProxyPassPSBufferPtr  = 0;
+        m_HitProxyShaderPtr        = 0;
+        m_DeferredContextPtr       = 0;
+        m_HitProxyContextPtr       = 0;
 
         // -----------------------------------------------------------------------------
         // Iterate throw render jobs to release managed pointer
@@ -236,34 +218,13 @@ namespace
         RenderContextPtr->SetRenderState(HitProxyRenderStatePtr);
 
         m_HitProxyContextPtr = RenderContextPtr;
-
-        // -----------------------------------------------------------------------------
-
-        CSamplerPtr LinearFilter = SamplerManager::GetSampler(CSampler::MinMagMipLinearWrap);
-
-        CSamplerPtr SamplerList[] =
-        {
-            LinearFilter,
-            LinearFilter,
-            LinearFilter,
-            LinearFilter,
-            LinearFilter,
-        };
-
-        m_PSSamplerSet = SamplerManager::CreateSamplerSet(SamplerList, 5);
     }
 
     // -----------------------------------------------------------------------------
 
     void CGfxActorRenderer::OnSetupTextures()
     {
-        m_DeferredTextureSetPtrs = TextureManager::CreateTextureSet(m_DeferredContextPtr->GetTargetSet()->GetRenderTarget(0), m_DeferredContextPtr->GetTargetSet()->GetRenderTarget(1), m_DeferredContextPtr->GetTargetSet()->GetRenderTarget(2));
 
-        // -----------------------------------------------------------------------------
-
-        CTextureBasePtr LightAccumulationTexturePtr = TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0);
-
-        m_LightingTextureSetPtr = TextureManager::CreateTextureSet(LightAccumulationTexturePtr);
     }
 
     // -----------------------------------------------------------------------------
@@ -271,10 +232,6 @@ namespace
     void CGfxActorRenderer::OnSetupBuffers()
     {
         SBufferDescriptor ConstanteBufferDesc;
-
-        // -----------------------------------------------------------------------------
-        // Vertex buffer
-        // -----------------------------------------------------------------------------
 
         ConstanteBufferDesc.m_Stride        = 0;
         ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
@@ -284,9 +241,7 @@ namespace
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
 
-        CBufferPtr ModelBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
-
-        m_ViewVSBuffer = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS(), ModelBuffer);
+        m_ModelBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
 
@@ -298,7 +253,7 @@ namespace
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
 
-        CBufferPtr MaterialBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        m_SurfaceMaterialBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
 
@@ -310,19 +265,7 @@ namespace
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
 
-        CBufferPtr HitProxyBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
-
-        // -----------------------------------------------------------------------------
-
-        m_DeferredPassPSBuffer  = BufferManager::CreateBufferSet(MaterialBuffer);
-                                
-        m_ViewPSBuffer          = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), MaterialBuffer);
-                                
-        m_HSBuffer              = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferHS());
-                                
-        m_DSBuffer              = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferDS(), MaterialBuffer);
-
-        m_HitProxyPassPSBuffer  = BufferManager::CreateBufferSet(HitProxyBuffer);
+        m_HitProxyPassPSBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
     }
 
     // -----------------------------------------------------------------------------
@@ -418,9 +361,9 @@ namespace
 
             ModelBuffer.m_ModelMatrix = CurrentRenderJob->m_ModelMatrix;
 
-            BufferManager::UploadConstantBufferData(m_ViewVSBuffer->GetBuffer(1), &ModelBuffer);
+            BufferManager::UploadConstantBufferData(m_ModelBufferPtr, &ModelBuffer);
 
-            BufferManager::UploadConstantBufferData(m_DeferredPassPSBuffer->GetBuffer(0), &MaterialPtr->GetMaterialAttributes());
+            BufferManager::UploadConstantBufferData(m_SurfaceMaterialBufferPtr, &MaterialPtr->GetMaterialAttributes());
 
             // -----------------------------------------------------------------------------
             // Render
@@ -433,13 +376,16 @@ namespace
 
             ContextManager::SetShaderPS(MaterialPtr->GetShaderPS());
 
-            ContextManager::SetTextureSetPS(MaterialPtr->GetTextureSetPS());
+            for (unsigned int IndexOfTexture = 0; IndexOfTexture < MaterialPtr->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
+            {
+                ContextManager::SetSampler(IndexOfTexture, MaterialPtr->GetSamplerSetPS()->GetSampler(IndexOfTexture));
 
-            ContextManager::SetSamplerSetPS(m_PSSamplerSet);
+                ContextManager::SetTexture(IndexOfTexture, MaterialPtr->GetTextureSetPS()->GetTexture(IndexOfTexture));
+            }
 
-            ContextManager::SetConstantBufferSetVS(m_ViewVSBuffer);
-
-            ContextManager::SetConstantBufferSetPS(m_DeferredPassPSBuffer);
+            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+            ContextManager::SetConstantBuffer(1, m_ModelBufferPtr);
+            ContextManager::SetConstantBuffer(2, m_SurfaceMaterialBufferPtr);
 
             // -----------------------------------------------------------------------------
             // If we have a bump map we use tessellation
@@ -451,12 +397,6 @@ namespace
                 ContextManager::SetShaderDS(MaterialPtr->GetShaderDS());
 
                 ContextManager::SetShaderHS(MaterialPtr->GetShaderHS());
-
-                ContextManager::SetConstantBufferSetHS(m_HSBuffer);
-
-                ContextManager::SetConstantBufferSetDS(m_DSBuffer);
-
-                ContextManager::SetTextureSetDS(MaterialPtr->GetTextureSetPS());
 
                 ContextManager::SetTopology(STopology::Patches);
             }
@@ -472,26 +412,23 @@ namespace
 
             ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
 
+            for (unsigned int IndexOfTexture = 0; IndexOfTexture < MaterialPtr->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
+            {
+                ContextManager::ResetSampler(IndexOfTexture);
+
+                ContextManager::ResetTexture(IndexOfTexture);
+            }
+
             ContextManager::ResetInputLayout();
 
             ContextManager::ResetIndexBuffer();
 
             ContextManager::ResetVertexBufferSet();
 
-            ContextManager::ResetConstantBufferSetPS();
-
-            ContextManager::ResetConstantBufferSetDS();
-
-            ContextManager::ResetConstantBufferSetHS();
-
-            ContextManager::ResetConstantBufferSetVS();
+            ContextManager::ResetConstantBuffer(0);
+            ContextManager::ResetConstantBuffer(1);
+            ContextManager::ResetConstantBuffer(2);
         }
-
-        ContextManager::ResetTextureSetDS();
-
-        ContextManager::ResetTextureSetHS();
-
-        ContextManager::ResetSamplerSetPS();
 
         ContextManager::ResetShaderVS();
 
@@ -543,13 +480,13 @@ namespace
 
             ModelBuffer.m_ModelMatrix = CurrentRenderJob->m_ModelMatrix;
 
-            BufferManager::UploadConstantBufferData(m_ViewVSBuffer->GetBuffer(1), &ModelBuffer);
+            BufferManager::UploadConstantBufferData(m_ModelBufferPtr, &ModelBuffer);
 
             SHitProxyProperties HitProxyProperties;
 
             HitProxyProperties.m_ID = CurrentRenderJob->m_EntityID;
 
-            BufferManager::UploadConstantBufferData(m_HitProxyPassPSBuffer->GetBuffer(0), &HitProxyProperties);
+            BufferManager::UploadConstantBufferData(m_HitProxyPassPSBufferPtr, &HitProxyProperties);
 
             // -----------------------------------------------------------------------------
             // Render
@@ -558,9 +495,9 @@ namespace
 
             ContextManager::SetShaderPS(m_HitProxyShaderPtr);
 
-            ContextManager::SetConstantBufferSetVS(m_ViewVSBuffer);
-
-            ContextManager::SetConstantBufferSetPS(m_HitProxyPassPSBuffer);
+            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+            ContextManager::SetConstantBuffer(1, m_ModelBufferPtr);
+            ContextManager::SetConstantBuffer(2, m_HitProxyPassPSBufferPtr);
 
             ContextManager::SetVertexBufferSet(SurfacePtr->GetVertexBuffer(), pOffset);
 
@@ -576,9 +513,9 @@ namespace
 
             ContextManager::ResetVertexBufferSet();
 
-            ContextManager::ResetConstantBufferSetPS();
-
-            ContextManager::ResetConstantBufferSetVS();
+            ContextManager::ResetConstantBuffer(0);
+            ContextManager::ResetConstantBuffer(1);
+            ContextManager::ResetConstantBuffer(2);
 
             ContextManager::ResetShaderPS();
 

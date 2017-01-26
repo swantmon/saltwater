@@ -266,25 +266,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Generate OpenGL buffer
         // -----------------------------------------------------------------------------
-        glGenBuffers(1, &NativeBuffer);
-        
-        // -----------------------------------------------------------------------------
-        // Set settings for the buffer
-        // -----------------------------------------------------------------------------
-        glBindBuffer(NativeBinding, NativeBuffer);
-        
+        glCreateBuffers(1, &NativeBuffer);
+               
         // -----------------------------------------------------------------------------
         // Setup storage of buffer.
         // If pBytes is NULL, a data store of the specified size is still created,
         // but its contents remain uninitialized and thus undefined.
         // -----------------------------------------------------------------------------
-        glBufferData(NativeBinding, _rDescriptor.m_NumberOfBytes, _rDescriptor.m_pBytes, NativeUsage);
-        
-        // -----------------------------------------------------------------------------
-        // Unbound buffer now
-        // -----------------------------------------------------------------------------
-        glBindBuffer(NativeBinding, 0);
-        
+        glNamedBufferData(NativeBuffer, _rDescriptor.m_NumberOfBytes, _rDescriptor.m_pBytes, NativeUsage);
+               
         // -----------------------------------------------------------------------------
         // Create the core resource behavior on the owner policy.
         // -----------------------------------------------------------------------------
@@ -412,7 +402,7 @@ namespace
         rBufferSet.m_NativeBufferArrayHandle = 0;
         
         // -----------------------------------------------------------------------------
-        // Setup internal bufferset with buffer information and define buffer array
+        // Setup internal buffer set with buffer information and define buffer array
         // by binding all buffers to it.
         // -----------------------------------------------------------------------------
         for (unsigned int CurrentBuffer = 0; CurrentBuffer < _NumberOfBuffers; ++CurrentBuffer)
@@ -443,7 +433,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup an buffer array object as a set of buffer
         // -----------------------------------------------------------------------------
-        glGenVertexArrays(1, &BufferArrayHandle);
+        glCreateVertexArrays(1, &BufferArrayHandle);
         
         glBindVertexArray(BufferArrayHandle);
         
@@ -486,7 +476,7 @@ namespace
             
             unsigned int NumberOfBytes = Base::Min(rTargetBuffer.m_NumberOfBytes, rSourceBuffer.m_NumberOfBytes);
             
-            glCopyBufferSubData(rTargetBuffer.m_NativeBuffer, rSourceBuffer.m_NativeBuffer, 0, 0, NumberOfBytes);
+            glCopyNamedBufferSubData(rTargetBuffer.m_NativeBuffer, rSourceBuffer.m_NativeBuffer, 0, 0, NumberOfBytes);
         }
     }
 
@@ -500,13 +490,9 @@ namespace
 
         assert(pBuffer != nullptr);
 
-        GLenum Binding = pBuffer->m_NativeBinding;
-
-        glBindBuffer(Binding, pBuffer->m_NativeBuffer);
-
         int NativeMap = ConvertMap(_Map);
 
-        return glMapBuffer(Binding, NativeMap);
+        return glMapNamedBuffer(pBuffer->m_NativeBuffer, NativeMap);
     }
 
     // -----------------------------------------------------------------------------
@@ -519,9 +505,7 @@ namespace
 
         assert(pBuffer != nullptr);
 
-        GLenum Binding = pBuffer->m_NativeBinding;
-
-        glUnmapBuffer(Binding);
+        glUnmapNamedBuffer(pBuffer->m_NativeBuffer);
     }
 
     // -----------------------------------------------------------------------------
@@ -552,13 +536,9 @@ namespace
 
         assert(pBuffer != nullptr);
 
-        GLenum Binding = pBuffer->m_NativeBinding;
-
-        glBindBuffer(Binding, pBuffer->m_NativeBuffer);
-
         int NativeMap = ConvertMap(_Map);
 
-        return glMapBuffer(Binding, NativeMap);
+        return glMapNamedBuffer(pBuffer->m_NativeBuffer, NativeMap);
     }
 
     // -----------------------------------------------------------------------------
@@ -571,9 +551,7 @@ namespace
 
         assert(pBuffer != nullptr);
 
-        GLenum Binding = pBuffer->m_NativeBinding;
-
-        glUnmapBuffer(Binding);
+        glUnmapNamedBuffer(pBuffer->m_NativeBuffer);
     }
 
     // -----------------------------------------------------------------------------
@@ -588,11 +566,7 @@ namespace
 
         assert(pBuffer != nullptr);
 
-        glBindBuffer(Binding, pBuffer->m_NativeBuffer);
-
-        glBufferSubData(Binding, 0, pBuffer->m_NumberOfBytes, _pData);
-
-        glBindBuffer(Binding, 0);
+        glNamedBufferSubData(pBuffer->m_NativeBuffer, 0, pBuffer->m_NumberOfBytes, _pData);
     }
 
     // -----------------------------------------------------------------------------
@@ -605,14 +579,7 @@ namespace
 
         assert(pBuffer != nullptr);
 
-        GLenum Binding = pBuffer->m_NativeBinding;
-
-        glBindBuffer(Binding, pBuffer->m_NativeBuffer);
-
-        glBufferSubData(Binding, 0, pBuffer->m_NumberOfBytes, _pData);
-
-        glBindBuffer(Binding, 0);
-
+        glNamedBufferSubData(pBuffer->m_NativeBuffer, 0, pBuffer->m_NumberOfBytes, _pData);
     }
 
     // -----------------------------------------------------------------------------

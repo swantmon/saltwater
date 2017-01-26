@@ -118,18 +118,12 @@ namespace
         CShaderPtr m_FilteringDiffusePSPtr;
         CShaderPtr m_FilteringSpecularPSPtr;
 
-        CShaderPtr m_CustomVSPtr;
-        CShaderPtr m_CustomGSPtr;
-        CShaderPtr m_CustomPSPtr;
-
         CBufferSetPtr m_CubemapGSBufferSetPtr;
         CBufferSetPtr m_FilteringPSBufferSetPtr;
         CBufferSetPtr m_CustomVSBufferSetPtr;
         CBufferSetPtr m_CustomPSBufferSetPtr;
 
         CInputLayoutPtr m_PositionInputLayoutPtr;
-
-        CSamplerSetPtr m_PSSamplerSetPtr;
 
         CRenderContextPtr m_CubemapRenderContextPtr;
 
@@ -181,15 +175,11 @@ namespace
         , m_FilteringGSPtr         ()
         , m_FilteringDiffusePSPtr  ()
         , m_FilteringSpecularPSPtr ()
-        , m_CustomVSPtr            ()
-        , m_CustomGSPtr            ()
-        , m_CustomPSPtr            ()
         , m_CubemapGSBufferSetPtr  ()
         , m_FilteringPSBufferSetPtr()
         , m_CustomVSBufferSetPtr   ()
         , m_CustomPSBufferSetPtr   ()
         , m_PositionInputLayoutPtr ()
-        , m_PSSamplerSetPtr        ()
         , m_CubemapRenderContextPtr()
         , m_LightprobeFacets       ()
     {
@@ -218,12 +208,6 @@ namespace
 
         m_FilteringSpecularPSPtr = ShaderManager::CompilePS("fs_lightprobe_specular_sampling.glsl", "main");
 
-        m_CustomVSPtr = ShaderManager::CompileVS("vs_spherical_env_cubemap_generation.glsl", "main");
-
-        m_CustomGSPtr = ShaderManager::CompileGS("gs_spherical_env_cubemap_generation.glsl", "main");
-
-        m_CustomPSPtr = ShaderManager::CompilePS("fs_cubemap_env_cubemap_generation.glsl", "main");
-
         // -----------------------------------------------------------------------------
 
         const SInputElementDescriptor PositionInputLayout[] =
@@ -245,13 +229,6 @@ namespace
 
         m_CubemapRenderContextPtr->SetCamera(CameraPtr);
         m_CubemapRenderContextPtr->SetRenderState(NoDepthStatePtr);
-
-        // -----------------------------------------------------------------------------
-        // Sampler
-        // -----------------------------------------------------------------------------
-        CSamplerPtr LinearFilter = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-
-        m_PSSamplerSetPtr = SamplerManager::CreateSamplerSet(LinearFilter, LinearFilter, LinearFilter);
 
         // -----------------------------------------------------------------------------
         // Buffer
@@ -401,10 +378,6 @@ namespace
         m_FilteringDiffusePSPtr = 0;
         m_FilteringSpecularPSPtr = 0;
 
-        m_CustomVSPtr = 0;
-        m_CustomGSPtr = 0;
-        m_CustomPSPtr = 0;
-
         m_CubemapGSBufferSetPtr = 0;
         m_FilteringPSBufferSetPtr = 0;
 
@@ -412,8 +385,6 @@ namespace
         m_CustomPSBufferSetPtr = 0;
 
         m_PositionInputLayoutPtr = 0;
-
-        m_PSSamplerSetPtr = 0;
 
         m_CubemapRenderContextPtr = 0;
 
@@ -754,8 +725,6 @@ namespace
             // -----------------------------------------------------------------------------
             ContextManager::SetRenderContext(m_CubemapRenderContextPtr);
 
-            ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
-
             ContextManager::SetTopology(STopology::TriangleList);
 
             ContextManager::SetShaderVS(m_FilteringVSPtr);
@@ -770,11 +739,13 @@ namespace
 
             ContextManager::SetInputLayout(m_PositionInputLayoutPtr);
 
-            ContextManager::SetConstantBufferSetGS(m_CubemapGSBufferSetPtr);
+            ContextManager::SetConstantBuffer(0, m_CubemapGSBufferSetPtr->GetBuffer(0));
 
-            ContextManager::SetConstantBufferSetPS(m_FilteringPSBufferSetPtr);
+            ContextManager::SetConstantBuffer(1, m_FilteringPSBufferSetPtr->GetBuffer(0));
 
-            ContextManager::SetTextureSetPS(_rInterLightProbeFacet.m_InputCubemapSetPtr);
+            ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+            ContextManager::SetTexture(0, _rInterLightProbeFacet.m_InputCubemapSetPtr->GetTexture(0));
 
             // -----------------------------------------------------------------------------
             // Draw
@@ -784,11 +755,13 @@ namespace
             // -----------------------------------------------------------------------------
             // Reset
             // -----------------------------------------------------------------------------
-            ContextManager::ResetTextureSetPS();
+            ContextManager::ResetTexture(0);
 
-            ContextManager::ResetConstantBufferSetPS();
+            ContextManager::ResetSampler(0);
 
-            ContextManager::ResetConstantBufferSetGS();
+            ContextManager::ResetConstantBuffer(0);
+
+            ContextManager::ResetConstantBuffer(1);
 
             ContextManager::ResetInputLayout();
 
@@ -803,8 +776,6 @@ namespace
             ContextManager::ResetShaderPS();
 
             ContextManager::ResetTopology();
-
-            ContextManager::ResetSamplerSetPS();
 
             ContextManager::ResetRenderContext();
 
@@ -834,8 +805,6 @@ namespace
             // -----------------------------------------------------------------------------
             ContextManager::SetRenderContext(m_CubemapRenderContextPtr);
 
-            ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
-
             ContextManager::SetTopology(STopology::TriangleList);
 
             ContextManager::SetShaderVS(m_FilteringVSPtr);
@@ -850,9 +819,11 @@ namespace
 
             ContextManager::SetInputLayout(m_PositionInputLayoutPtr);
 
-            ContextManager::SetConstantBufferSetGS(m_CubemapGSBufferSetPtr);
+            ContextManager::SetConstantBuffer(0, m_CubemapGSBufferSetPtr->GetBuffer(0));
 
-            ContextManager::SetTextureSetPS(_rInterLightProbeFacet.m_InputCubemapSetPtr);
+            ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+            ContextManager::SetTexture(0, _rInterLightProbeFacet.m_InputCubemapSetPtr->GetTexture(0));
 
             // -----------------------------------------------------------------------------
             // Draw
@@ -862,9 +833,11 @@ namespace
             // -----------------------------------------------------------------------------
             // Reset
             // -----------------------------------------------------------------------------
-            ContextManager::ResetTextureSetPS();
+            ContextManager::ResetTexture(0);
 
-            ContextManager::ResetConstantBufferSetGS();
+            ContextManager::ResetSampler(0);
+
+            ContextManager::ResetConstantBuffer(0);
 
             ContextManager::ResetInputLayout();
 
@@ -879,8 +852,6 @@ namespace
             ContextManager::ResetShaderPS();
 
             ContextManager::ResetTopology();
-
-            ContextManager::ResetSamplerSetPS();
 
             ContextManager::ResetRenderContext();
         }

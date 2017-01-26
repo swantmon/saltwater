@@ -54,11 +54,6 @@ namespace Main
     void DestroyPerFrameConstantBuffers();
     void UploadPerFrameConstantBuffers();
     
-    CBufferPtr GetPerFrameConstantBufferVS();
-    CBufferPtr GetPerFrameConstantBufferHS();
-    CBufferPtr GetPerFrameConstantBufferDS();
-    CBufferPtr GetPerFrameConstantBufferGS();
-    CBufferPtr GetPerFrameConstantBufferPS();
-    CBufferPtr GetPerFrameConstantBufferCS();
+    CBufferPtr GetPerFrameConstantBuffer();
 } // namespace Main
 } // namespace Gfx

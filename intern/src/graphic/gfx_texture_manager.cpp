@@ -589,16 +589,12 @@ namespace
         // -----------------------------------------------------------------------------
         // Upload data to texture
         // -----------------------------------------------------------------------------
-        glBindTexture(GL_TEXTURE_2D, TextureHandle);
-        
-        glTexSubImage2D(GL_TEXTURE_2D, 0, Offset[0], Offset[1], UpdateSize[0], UpdateSize[1], Format, Type, _pBytes);
+        glTextureSubImage2D(TextureHandle, 0, Offset[0], Offset[1], UpdateSize[0], UpdateSize[1], Format, Type, _pBytes);
         
         if (_UpdateMipLevels)
         {
-            glGenerateMipmap(GL_TEXTURE_2D);
+            glGenerateTextureMipmap(TextureHandle);
         }
-        
-        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     // -----------------------------------------------------------------------------
@@ -635,11 +631,7 @@ namespace
         // -----------------------------------------------------------------------------
         if (pInternTextureArray->m_Info.m_IsCubeTexture)
         {
-            glBindTexture(GL_TEXTURE_CUBE_MAP, TextureHandle);
-
-            glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + _IndexOfSlice, 0, Offset[0], Offset[1], UpdateSize[0], UpdateSize[1], Format, Type, _pBytes);
-
-            glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+            glTextureSubImage3D(TextureHandle, 0, Offset[0], Offset[1], _IndexOfSlice, UpdateSize[0], UpdateSize[1], 1, Format, Type, _pBytes);
         }
         else
         {
@@ -682,11 +674,7 @@ namespace
         // -----------------------------------------------------------------------------
         if (pInternTextureArray->m_Info.m_IsCubeTexture)
         {
-            glBindTexture(GL_TEXTURE_CUBE_MAP, TextureHandle);
-
-            glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + _IndexOfSlice, 0, Offset[0], Offset[1], UpdateSize[0], UpdateSize[1], Format, Type, pInternTexture->GetPixels());
-
-            glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+            glTextureSubImage3D(TextureHandle, 0, Offset[0], Offset[1], _IndexOfSlice, UpdateSize[0], UpdateSize[1], 1, Format, Type, pInternTexture->GetPixels());
         }
         else
         {
@@ -751,16 +739,10 @@ namespace
         assert(_TexturePtr != 0);
         
         CInternTexture2D* pInternTexture = static_cast<CInternTexture2D*>(_TexturePtr.GetPtr());
-        
-        Gfx::CNativeTextureHandle TextureHandle = pInternTexture->m_NativeTexture;
-        
-        GLenum TextureTarget = (pInternTexture->m_Info.m_IsCubeTexture == true) ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D;
-        
-        glBindTexture(TextureTarget, TextureHandle);
-        
-        glGenerateMipmap(TextureTarget);
-        
-        glBindTexture(TextureTarget, 0);
+
+        assert(pInternTexture);
+
+        glGenerateTextureMipmap(pInternTexture->m_NativeTexture);
     }
 
     // -----------------------------------------------------------------------------
@@ -1034,24 +1016,22 @@ namespace
         // -----------------------------------------------------------------------------
         // Generate OpenGL texture or render buffer
         // -----------------------------------------------------------------------------
-        glGenTextures(1, &NativeTextureHandle);
-
-        glBindTexture(GL_TEXTURE_2D, NativeTextureHandle);
+        glCreateTextures(GL_TEXTURE_2D, 1, &NativeTextureHandle);
 
         // -----------------------------------------------------------------------------
         // Binding
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_Binding & Gfx::CTextureBase::DepthStencilTarget)
         {
-            glTexStorage2D(GL_TEXTURE_2D, NumberOfMipmaps, GL_DEPTH_COMPONENT32F, ImageWidth, ImageHeight);
+            glTextureStorage2D(NativeTextureHandle, NumberOfMipmaps, GL_DEPTH_COMPONENT32F, ImageWidth, ImageHeight);
         }
         else if (_rDescriptor.m_Binding & Gfx::CTextureBase::RenderTarget)
         {   
-            glTexStorage2D(GL_TEXTURE_2D, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
+            glTextureStorage2D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
         }
         else
         {
-            glTexStorage2D(GL_TEXTURE_2D, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
+            glTextureStorage2D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
         }
 
         // -----------------------------------------------------------------------------
@@ -1059,7 +1039,7 @@ namespace
         // -----------------------------------------------------------------------------
         if (pTextureData != 0)
         {
-            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, ImageWidth, ImageHeight, GLFormat, GLType, pTextureData);
+            glTextureSubImage2D(NativeTextureHandle, 0, 0, 0, ImageWidth, ImageHeight, GLFormat, GLType, pTextureData);
         }
 
         // -----------------------------------------------------------------------------
@@ -1067,10 +1047,8 @@ namespace
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
         {
-            glGenerateMipmap(GL_TEXTURE_2D);
+            glGenerateTextureMipmap(NativeTextureHandle);
         }
-
-        glBindTexture(GL_TEXTURE_2D, 0);
 
         // -----------------------------------------------------------------------------
         // Generate texture inside texture manager
@@ -1243,34 +1221,30 @@ namespace
         // -----------------------------------------------------------------------------
         // Generate OpenGL texture or render buffer
         // -----------------------------------------------------------------------------
-        glGenTextures(1, &NativeTextureHandle);
-
-        glBindTexture(GL_TEXTURE_3D, NativeTextureHandle);
+        glCreateTextures(GL_TEXTURE_3D, 1, &NativeTextureHandle);
 
         // -----------------------------------------------------------------------------
         // Binding
         // -----------------------------------------------------------------------------
         assert(!(_rDescriptor.m_Binding & Gfx::CTextureBase::DepthStencilTarget || _rDescriptor.m_Binding & Gfx::CTextureBase::RenderTarget));
 
-        glTexStorage3D(GL_TEXTURE_3D, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight, ImageDepth);
+        glTextureStorage3D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight, ImageDepth);
 
         // -----------------------------------------------------------------------------
         // Is data available, then upload it to graphic card
         // -----------------------------------------------------------------------------
         if (pTextureData != 0)
         {
-            glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, ImageWidth, ImageHeight, ImageDepth, GLFormat, GLType, pTextureData);
+            glTextureSubImage3D(NativeTextureHandle, 0, 0, 0, 0, ImageWidth, ImageHeight, ImageDepth, GLFormat, GLType, pTextureData);
         }
 
         // -----------------------------------------------------------------------------
-        // Create mipmaps depending on uploaded data
+        // Create mip maps depending on uploaded data
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
         {
-            glGenerateMipmap(GL_TEXTURE_3D);
+            glGenerateTextureMipmap(NativeTextureHandle);
         }
-
-        glBindTexture(GL_TEXTURE_3D, 0);
 
         // -----------------------------------------------------------------------------
         // Generate texture inside texture manager
@@ -1545,24 +1519,22 @@ namespace
         // -----------------------------------------------------------------------------
         // Generate OpenGL texture or render buffer
         // -----------------------------------------------------------------------------
-        glGenTextures(1, &NativeTextureHandle);
-
-        glBindTexture(GL_TEXTURE_CUBE_MAP, NativeTextureHandle);
+        glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &NativeTextureHandle);
 
         // -----------------------------------------------------------------------------
         // Binding
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_Binding & Gfx::CTextureBase::DepthStencilTarget)
         {
-            glTexStorage2D(GL_TEXTURE_CUBE_MAP, NumberOfMipmaps, GL_DEPTH_COMPONENT32F, ImageWidth, ImageHeight);
+            glTextureStorage2D(NativeTextureHandle, NumberOfMipmaps, GL_DEPTH_COMPONENT32F, ImageWidth, ImageHeight);
         }
         else if (_rDescriptor.m_Binding & Gfx::CTextureBase::RenderTarget)
         {
-            glTexStorage2D(GL_TEXTURE_CUBE_MAP, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
+            glTextureStorage2D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
         }
         else
         {
-            glTexStorage2D(GL_TEXTURE_CUBE_MAP, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
+            glTextureStorage2D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
         }
 
         // -----------------------------------------------------------------------------
@@ -1593,7 +1565,7 @@ namespace
 
                 pTextureData = ilGetData();
 
-                glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + IndexOfFace, 0, 0, 0, ImageWidth, ImageHeight, GLFormat, GLType, pTextureData);
+                glTextureSubImage3D(NativeTextureHandle, 0, 0, 0, IndexOfFace, ImageWidth, ImageHeight, 1, GLFormat, GLType, pTextureData);
             }
         }
 
@@ -1602,13 +1574,8 @@ namespace
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
         {
-            glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+            glGenerateTextureMipmap(NativeTextureHandle);
         }
-
-        // -----------------------------------------------------------------------------
-        // Unbind texture
-        // -----------------------------------------------------------------------------
-        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
         // -----------------------------------------------------------------------------
         // Generate texture inside texture manager

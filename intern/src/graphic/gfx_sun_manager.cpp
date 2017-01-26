@@ -88,9 +88,8 @@ namespace
 
         CShaderPtr m_ShadowShaderVSPtr;
         CShaderPtr m_ShadowSMShaderPSPtr;
-        CSamplerSetPtr m_PSSamplerSetPtr;
+        
         CBufferSetPtr m_LightCameraVSBufferPtr;
-        CBufferSetPtr m_MainVSBufferPtr;
 
         CSunFacets m_SunFacets;
         
@@ -128,9 +127,7 @@ namespace
     CGfxSunManager::CGfxSunManager()
         : m_ShadowShaderVSPtr     ()
         , m_ShadowSMShaderPSPtr   ()
-        , m_PSSamplerSetPtr       ()
         , m_LightCameraVSBufferPtr()
-        , m_MainVSBufferPtr       ()
         , m_SunFacets             ()
     {
     }
@@ -150,18 +147,6 @@ namespace
         // -----------------------------------------------------------------------------
         m_ShadowShaderVSPtr   = ShaderManager::CompileVS("vs_vm_pnx0.glsl", "main");
         m_ShadowSMShaderPSPtr = ShaderManager::CompilePS("fs_shadow.glsl", "SM");
-
-
-        // -----------------------------------------------------------------------------
-        // Sampler
-        // -----------------------------------------------------------------------------
-        CSamplerPtr Sampler[3];
-
-        Sampler[0] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[1] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[2] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-
-        m_PSSamplerSetPtr = SamplerManager::CreateSamplerSet(Sampler, 3);
 
         // -----------------------------------------------------------------------------
         // Buffer
@@ -192,8 +177,6 @@ namespace
 
         m_LightCameraVSBufferPtr = BufferManager::CreateBufferSet(PerLightConstantBuffer, PerDrawCallConstantBuffer);
         
-        m_MainVSBufferPtr        = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS(), PerDrawCallConstantBuffer);
-        
         // -----------------------------------------------------------------------------
         // On dirty entities
         // -----------------------------------------------------------------------------
@@ -206,9 +189,7 @@ namespace
     {
         m_ShadowShaderVSPtr      = 0;
         m_ShadowSMShaderPSPtr    = 0;
-        m_PSSamplerSetPtr        = 0;
         m_LightCameraVSBufferPtr = 0;
-        m_MainVSBufferPtr        = 0;
 
         m_SunFacets.Clear();
     }
@@ -493,7 +474,8 @@ namespace
         // -----------------------------------------------------------------------------
         // Set constant buffer
         // -----------------------------------------------------------------------------
-        ContextManager::SetConstantBufferSetVS(m_LightCameraVSBufferPtr);
+        ContextManager::SetConstantBuffer(0, m_LightCameraVSBufferPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(1, m_LightCameraVSBufferPtr->GetBuffer(1));
             
         // -----------------------------------------------------------------------------
         // Upload data light view projection matrix
@@ -555,20 +537,6 @@ namespace
                 }
                     
                 // -----------------------------------------------------------------------------
-                // Set material
-                // -----------------------------------------------------------------------------
-                CMaterialPtr MaterialPtr;
-
-                if (pGraphicModelActorFacet->GetMaterial(IndexOfSurface) != 0)
-                {
-                    MaterialPtr = pGraphicModelActorFacet->GetMaterial(IndexOfSurface);
-                }
-                else
-                {
-                    MaterialPtr = SurfacePtr->GetMaterial();
-                }
-                    
-                // -----------------------------------------------------------------------------
                 // Get input layout from optimal shader
                 // -----------------------------------------------------------------------------
                 assert(SurfacePtr->GetKey().m_HasPosition);
@@ -603,7 +571,8 @@ namespace
             CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor);
         }
             
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetShaderVS();
             

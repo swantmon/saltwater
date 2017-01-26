@@ -115,10 +115,8 @@ namespace
 
         CMeshPtr m_QuadModelPtr;
         
-        
-        CBufferSetPtr  m_QuadVSBufferPtr;
-        CBufferSetPtr  m_GaussianBlurPropertiesCSBufferPtr;
-        CBufferSetPtr  m_SSAOPropertiesPSBufferPtr;
+        CBufferPtr  m_GaussianBlurPropertiesCSBufferPtr;
+        CBufferPtr  m_SSAOPropertiesPSBufferPtr;
         
         CInputLayoutPtr m_QuadInputLayoutPtr;
 
@@ -130,8 +128,6 @@ namespace
         CTextureSetPtr m_HalfTexturePtrs[2];
         CTextureSetPtr m_BilateralBlurHTextureSetPtr;
         CTextureSetPtr m_BilateralBlurVTextureSetPtr;
-
-        CSamplerSetPtr m_PSSamplerSetPtr;
 
         CTargetSetPtr m_HalfRenderbufferPtr;
 
@@ -154,7 +150,6 @@ namespace
 {
     CGfxShadowRenderer::CGfxShadowRenderer()
         : m_QuadModelPtr                     ()
-        , m_QuadVSBufferPtr                  ()
         , m_SSAOPropertiesPSBufferPtr        ()
         , m_GaussianBlurPropertiesCSBufferPtr()
         , m_QuadInputLayoutPtr               ()
@@ -163,11 +158,10 @@ namespace
         , m_BilateralBlurHTextureSetPtr      ()
         , m_BilateralBlurVTextureSetPtr      ()
         , m_SSAOTextureSets                  ()
-        , m_PSSamplerSetPtr                  ()
         , m_DeferredRenderContextPtr         ()
         , m_SSAORenderJobs                   ()
     {
-        m_SSAORenderJobs      .reserve(1);
+        m_SSAORenderJobs.reserve(1);
     }
     
     // -----------------------------------------------------------------------------
@@ -209,7 +203,6 @@ namespace
     void CGfxShadowRenderer::OnExit()
     {
         m_QuadModelPtr                      = 0;
-        m_QuadVSBufferPtr                   = 0;
         m_GaussianBlurPropertiesCSBufferPtr = 0;
         m_SSAOPropertiesPSBufferPtr         = 0;
         m_QuadInputLayoutPtr                = 0;
@@ -217,7 +210,6 @@ namespace
         m_BilateralBlurShaderCSPtr          = 0;
         m_BilateralBlurHTextureSetPtr       = 0;
         m_BilateralBlurVTextureSetPtr       = 0;
-        m_PSSamplerSetPtr                   = 0;
         m_HalfRenderbufferPtr               = 0;
         m_DeferredRenderContextPtr          = 0;
         m_HalfContextPtr                    = 0;
@@ -360,19 +352,6 @@ namespace
         HalfContextPtr->SetRenderState(NoDepthStatePtr);
 
         m_HalfContextPtr = HalfContextPtr;
-        
-        // -----------------------------------------------------------------------------
-        
-        CSamplerPtr Sampler[6];
-        
-        Sampler[0] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[1] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[2] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[3] = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-        Sampler[4] = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-        Sampler[5] = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-        
-        m_PSSamplerSetPtr = SamplerManager::CreateSamplerSet(Sampler, 6);
     }
     
     // -----------------------------------------------------------------------------
@@ -480,7 +459,7 @@ namespace
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr GaussianSettingsBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        m_GaussianBlurPropertiesCSBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
         
@@ -492,15 +471,7 @@ namespace
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr SSAOBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
-        
-        // -----------------------------------------------------------------------------
-        
-        m_QuadVSBufferPtr                   = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
-
-        m_GaussianBlurPropertiesCSBufferPtr = BufferManager::CreateBufferSet(GaussianSettingsBuffer);
-
-        m_SSAOPropertiesPSBufferPtr         = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), SSAOBuffer);
+        m_SSAOPropertiesPSBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -580,13 +551,16 @@ namespace
         Base::Int2 HalfSize   (Size[0] / 2, Size[1] / 2);
 
         // -----------------------------------------------------------------------------
+        // Clear buffer
+        // -----------------------------------------------------------------------------
+        TargetSetManager::ClearTargetSet(m_HalfRenderbufferPtr, Base::Float4(1.0f));
+
+        // -----------------------------------------------------------------------------
         // Rendering: SSAO
         // -----------------------------------------------------------------------------
         SSSAOProperties SSAOSettings;
         
         ContextManager::SetRenderContext(m_HalfContextPtr);
-
-        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
 
         ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
 
@@ -600,31 +574,47 @@ namespace
 
         ContextManager::SetShaderPS(m_SSAOShaderPSPtrs[SSAO]);
 
-        ContextManager::SetConstantBufferSetVS(m_QuadVSBufferPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
-        ContextManager::SetConstantBufferSetPS(m_SSAOPropertiesPSBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_SSAOPropertiesPSBufferPtr);
 
         SSAOSettings.m_InverseCameraProjection = ViewManager::GetMainCamera()->GetProjectionMatrix().GetInverted();
         SSAOSettings.m_CameraProjection        = ViewManager::GetMainCamera()->GetProjectionMatrix();
         SSAOSettings.m_CameraView              = ViewManager::GetMainCamera()->GetView()->GetViewMatrix();
-        SSAOSettings.m_NoiseScale              = Base::Float4(static_cast<float>(HalfSize[0]), static_cast<float>(HalfSize[1]), 0.08f, 0.0f);
+        SSAOSettings.m_NoiseScale              = Base::Float4(static_cast<float>(HalfSize[0]), static_cast<float>(HalfSize[1]), 0.14f, 2.0f);
         
         for (unsigned int IndexOfNoiseSeq = 0; IndexOfNoiseSeq < s_SSAOKernelSize; ++ IndexOfNoiseSeq)
         {
             SSAOSettings.m_Kernel[IndexOfNoiseSeq] = m_Kernel[IndexOfNoiseSeq];
         }
 
-        BufferManager::UploadConstantBufferData(m_SSAOPropertiesPSBufferPtr->GetBuffer(1), &SSAOSettings);
+        BufferManager::UploadConstantBufferData(m_SSAOPropertiesPSBufferPtr, &SSAOSettings);
 
-        ContextManager::SetTextureSetPS(m_SSAOTextureSets[SSAO]);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipLinearWrap));
+
+        ContextManager::SetTexture(0, m_SSAOTextureSets[SSAO]->GetTexture(0));
+        ContextManager::SetTexture(1, m_SSAOTextureSets[SSAO]->GetTexture(1));
+        ContextManager::SetTexture(2, m_SSAOTextureSets[SSAO]->GetTexture(2));
+        ContextManager::SetTexture(3, m_SSAOTextureSets[SSAO]->GetTexture(3));
 
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
 
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+        ContextManager::ResetTexture(1);
+        ContextManager::ResetTexture(2);
+        ContextManager::ResetTexture(3);
 
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetSampler(0);
+        ContextManager::ResetSampler(1);
+        ContextManager::ResetSampler(2);
+        ContextManager::ResetSampler(3);
 
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
+
+        ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetTopology();
 
@@ -633,8 +623,6 @@ namespace
         ContextManager::ResetIndexBuffer();
 
         ContextManager::ResetVertexBufferSet();
-
-        ContextManager::ResetSamplerSetPS();
 
         ContextManager::ResetShaderVS();
 
@@ -666,33 +654,37 @@ namespace
 
             ContextManager::SetShaderCS(m_BilateralBlurShaderCSPtr);
 
-            ContextManager::SetConstantBufferSetCS(m_GaussianBlurPropertiesCSBufferPtr);
+            ContextManager::SetResourceBuffer(0, m_GaussianBlurPropertiesCSBufferPtr);
 
             GaussianSettings.m_Direction[0] = 1;
             GaussianSettings.m_Direction[1] = 0;
 
-            BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesCSBufferPtr->GetBuffer(0), &GaussianSettings);
+            BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesCSBufferPtr, &GaussianSettings);
 
-            ContextManager::SetTextureSetCS(m_BilateralBlurHTextureSetPtr);
+            ContextManager::SetImageTexture(0, m_BilateralBlurHTextureSetPtr->GetTexture(0));
+            ContextManager::SetImageTexture(1, m_BilateralBlurHTextureSetPtr->GetTexture(1));
 
             ContextManager::Dispatch(NumberOfThreadGroupsX, NumberOfThreadGroupsY, 1);
 
-            ContextManager::ResetTextureSetCS();
+            ContextManager::ResetImageTexture(0);
+            ContextManager::ResetImageTexture(1);
 
             GaussianSettings.m_Direction[0] = 0;
             GaussianSettings.m_Direction[1] = 1;
 
-            BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesCSBufferPtr->GetBuffer(0), &GaussianSettings);
+            BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesCSBufferPtr, &GaussianSettings);
 
-            ContextManager::SetTextureSetCS(m_BilateralBlurVTextureSetPtr);
+            ContextManager::SetImageTexture(0, m_BilateralBlurVTextureSetPtr->GetTexture(0));
+            ContextManager::SetImageTexture(1, m_BilateralBlurVTextureSetPtr->GetTexture(1));
 
             ContextManager::Dispatch(NumberOfThreadGroupsX, NumberOfThreadGroupsY, 1);
 
-            ContextManager::ResetTextureSetCS();
+            ContextManager::ResetImageTexture(0);
+            ContextManager::ResetImageTexture(1);
 
             // -----------------------------------------------------------------------------
 
-            ContextManager::ResetConstantBufferSetCS();
+            ContextManager::ResetResourceBuffer(0);
 
             ContextManager::ResetShaderCS();
         }
@@ -701,8 +693,6 @@ namespace
         // Apply SSAO on deferred buffer
         // -----------------------------------------------------------------------------        
         ContextManager::SetRenderContext(m_DeferredRenderContextPtr);
-        
-        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
         
         ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
         
@@ -716,19 +706,31 @@ namespace
         
         ContextManager::SetShaderPS(m_SSAOShaderPSPtrs[SSAOApply]);
         
-        ContextManager::SetConstantBufferSetVS(m_QuadVSBufferPtr);
-        
-        ContextManager::SetTextureSetPS(m_SSAOTextureSets[SSAOApply]);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
-        ContextManager::SetTextureSetPS(m_HalfTexturePtrs[0]);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(0, m_SSAOTextureSets[SSAOApply]->GetTexture(0));
+        ContextManager::SetTexture(1, m_SSAOTextureSets[SSAOApply]->GetTexture(1));
+        ContextManager::SetTexture(2, m_SSAOTextureSets[SSAOApply]->GetTexture(2));
+        ContextManager::SetTexture(3, m_HalfTexturePtrs[0]->GetTexture(0));
         
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
         
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+        ContextManager::ResetTexture(1);
+        ContextManager::ResetTexture(2);
+        ContextManager::ResetTexture(3);
+
+        ContextManager::ResetSampler(0);
+        ContextManager::ResetSampler(1);
+        ContextManager::ResetSampler(2);
+        ContextManager::ResetSampler(3);
         
-        ContextManager::ResetConstantBufferSetPS();
-        
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
         
         ContextManager::ResetTopology();
         
@@ -737,8 +739,6 @@ namespace
         ContextManager::ResetIndexBuffer();
         
         ContextManager::ResetVertexBufferSet();
-        
-        ContextManager::ResetSamplerSetPS();
         
         ContextManager::ResetShaderVS();
         

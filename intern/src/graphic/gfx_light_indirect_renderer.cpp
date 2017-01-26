@@ -86,15 +86,11 @@ namespace
     private:
         
         CMeshPtr          m_QuadModelPtr;
-        CBufferSetPtr     m_FullQuadViewVSBufferPtr;
-        CBufferSetPtr     m_IndirectLightPSBufferPtr;
+        CBufferPtr        m_IndirectLightPSBufferPtr;
         CInputLayoutPtr   m_P2InputLayoutPtr;
         CShaderPtr        m_RectangleShaderVSPtr;
         CShaderPtr        m_IndirectLightShaderPSPtr;
-        CSamplerSetPtr    m_PSSamplerSetPtr;
-        CSamplerSetPtr    m_PSSunSamplerSetPtr;
         CRenderContextPtr m_LightRenderContextPtr;
-        CTextureSetPtr    m_SunLightTextureSetPtr;
         CRenderJobs       m_RenderJobs;
 
     private:
@@ -107,15 +103,11 @@ namespace
 {
     CGfxLightIndirectRenderer::CGfxLightIndirectRenderer()
         : m_QuadModelPtr            ()
-        , m_FullQuadViewVSBufferPtr ()
-        , m_IndirectLightPSBufferPtr     ()
+        , m_IndirectLightPSBufferPtr()
         , m_P2InputLayoutPtr        ()
         , m_IndirectLightShaderPSPtr()
         , m_RectangleShaderVSPtr    ()
-        , m_PSSamplerSetPtr         ()
-        , m_PSSunSamplerSetPtr      ()
         , m_LightRenderContextPtr   ()
-        , m_SunLightTextureSetPtr   ()
         , m_RenderJobs		        ()
     {
         m_RenderJobs.reserve(4);
@@ -139,15 +131,11 @@ namespace
     void CGfxLightIndirectRenderer::OnExit()
     {
         m_QuadModelPtr             = 0;
-        m_FullQuadViewVSBufferPtr  = 0;
         m_IndirectLightPSBufferPtr = 0;
         m_P2InputLayoutPtr         = 0;
         m_IndirectLightShaderPSPtr = 0;
         m_RectangleShaderVSPtr     = 0;
-        m_PSSamplerSetPtr          = 0;
-        m_PSSunSamplerSetPtr       = 0;
         m_LightRenderContextPtr    = 0;
-        m_SunLightTextureSetPtr    = 0;
     }
     
     // -----------------------------------------------------------------------------
@@ -199,33 +187,12 @@ namespace
         m_LightRenderContextPtr->SetViewPortSet(ViewPortSetPtr);
         m_LightRenderContextPtr->SetTargetSet(TargetSetPtr);
         m_LightRenderContextPtr->SetRenderState(LightStatePtr);
-        
-        // -----------------------------------------------------------------------------
-        
-        CSamplerPtr Sampler[8];
-
-        Sampler[0] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[1] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[2] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[3] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[4] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[5] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[6] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[7] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-
-        m_PSSunSamplerSetPtr = SamplerManager::CreateSamplerSet(Sampler, 8);
     }
     
     // -----------------------------------------------------------------------------
     
     void CGfxLightIndirectRenderer::OnSetupTextures()
     {
-        CTextureBasePtr GBuffer0TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0);
-        CTextureBasePtr GBuffer1TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1);
-        CTextureBasePtr GBuffer2TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2);
-        CTextureBasePtr DepthTexturePtr    = TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget();
-        
-        m_SunLightTextureSetPtr = TextureManager::CreateTextureSet(GBuffer0TexturePtr, GBuffer1TexturePtr, GBuffer2TexturePtr, DepthTexturePtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -244,17 +211,7 @@ namespace
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr IndirectLightBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
-        
-        // -----------------------------------------------------------------------------
-        
-        CBufferPtr HistogramExposureHistoryBufferPtr = HistogramRenderer::GetExposureHistoryBuffer();
-        
-        // -----------------------------------------------------------------------------
-        
-        m_FullQuadViewVSBufferPtr  = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
-
-        m_IndirectLightPSBufferPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), IndirectLightBufferPtr, HistogramExposureHistoryBufferPtr);
+        m_IndirectLightPSBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -332,12 +289,32 @@ namespace
 
         ContextManager::SetShaderPS(m_IndirectLightShaderPSPtr);
 
-        ContextManager::SetConstantBufferSetVS(m_FullQuadViewVSBufferPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
-        ContextManager::SetConstantBufferSetPS(m_IndirectLightPSBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_IndirectLightPSBufferPtr);
 
-        ContextManager::SetSamplerSetPS(m_PSSunSamplerSetPtr);
+        ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
 
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(4, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(5, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(6, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(7, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+
+        // -----------------------------------------------------------------------------
+        // Set textures
+        // -----------------------------------------------------------------------------
+        Gfx::ContextManager::SetTexture(0, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0));
+        Gfx::ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1));
+        Gfx::ContextManager::SetTexture(2, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2));
+        Gfx::ContextManager::SetTexture(3, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
+
+        // -----------------------------------------------------------------------------
+        // Iterate throw every light
+        // -----------------------------------------------------------------------------
         CRenderJobs::const_iterator CurrentRenderJob = m_RenderJobs.begin();
         CRenderJobs::const_iterator EndOfRenderJobs  = m_RenderJobs.end();
 
@@ -350,9 +327,10 @@ namespace
             // -----------------------------------------------------------------------------
             // Set shadow map
             // -----------------------------------------------------------------------------
-            Gfx::ContextManager::SetTextureSetPS(m_SunLightTextureSetPtr);
-
-            Gfx::ContextManager::SetTextureSetPS(pGfxPointLight->GetTextureRSMSet());
+            Gfx::ContextManager::SetTexture(4, pGfxPointLight->GetTextureRSMSet()->GetTexture(0));
+            Gfx::ContextManager::SetTexture(5, pGfxPointLight->GetTextureRSMSet()->GetTexture(1));
+            Gfx::ContextManager::SetTexture(6, pGfxPointLight->GetTextureRSMSet()->GetTexture(2));
+            Gfx::ContextManager::SetTexture(7, pGfxPointLight->GetTextureRSMSet()->GetTexture(3));
 
             unsigned int HeightOfShadowmap = static_cast<unsigned int>(pGfxPointLight->GetShadowmapSize()) / 8;
             unsigned int WidthOfShadowmap  = static_cast<unsigned int>(pGfxPointLight->GetShadowmapSize()) / 8;
@@ -372,20 +350,41 @@ namespace
                 IndirectLightBuffer.m_RSMSettings[3] = 0.0f;
                 IndirectLightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
-                Gfx::BufferManager::UploadConstantBufferData(m_IndirectLightPSBufferPtr->GetBuffer(1), &IndirectLightBuffer);
+                Gfx::BufferManager::UploadConstantBufferData(m_IndirectLightPSBufferPtr, &IndirectLightBuffer);
 
                 // -----------------------------------------------------------------------------
                 // Draw
                 // -----------------------------------------------------------------------------
                 Gfx::ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
             }
-
-            Gfx::ContextManager::ResetTextureSetPS();
         }
 
-        ContextManager::ResetConstantBufferSetVS(); 
+        // -----------------------------------------------------------------------------
+        // Reset
+        // -----------------------------------------------------------------------------
+        Gfx::ContextManager::ResetTexture(0);
+        Gfx::ContextManager::ResetTexture(1);
+        Gfx::ContextManager::ResetTexture(2);
+        Gfx::ContextManager::ResetTexture(3);
+        Gfx::ContextManager::ResetTexture(4);
+        Gfx::ContextManager::ResetTexture(5);
+        Gfx::ContextManager::ResetTexture(6);
+        Gfx::ContextManager::ResetTexture(7);
 
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetConstantBuffer(0); 
+
+        ContextManager::ResetConstantBuffer(1);
+
+        ContextManager::ResetResourceBuffer(0);
+
+        Gfx::ContextManager::ResetSampler(0);
+        Gfx::ContextManager::ResetSampler(1);
+        Gfx::ContextManager::ResetSampler(2);
+        Gfx::ContextManager::ResetSampler(3);
+        Gfx::ContextManager::ResetSampler(4);
+        Gfx::ContextManager::ResetSampler(5);
+        Gfx::ContextManager::ResetSampler(6);
+        Gfx::ContextManager::ResetSampler(7);
 
         ContextManager::ResetTopology();
 
@@ -394,8 +393,6 @@ namespace
         ContextManager::ResetIndexBuffer();
 
         ContextManager::ResetVertexBufferSet();
-
-        ContextManager::ResetSamplerSetPS();
 
         ContextManager::ResetShaderVS();
 

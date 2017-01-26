@@ -90,7 +90,6 @@ namespace
             CInputLayoutPtr   m_InputLayoutPtr;
             CMeshPtr          m_MeshPtr;
             CTextureSetPtr    m_TextureSetPtr;
-            CSamplerSetPtr    m_SamplerSetPtr;
         };
 
         struct SCameraRenderJob
@@ -179,7 +178,6 @@ namespace
         m_BackgroundFromSkybox.m_InputLayoutPtr   = 0;
         m_BackgroundFromSkybox.m_MeshPtr          = 0;
         m_BackgroundFromSkybox.m_TextureSetPtr    = 0;
-        m_BackgroundFromSkybox.m_SamplerSetPtr    = 0;
 
         m_BackgroundFromTexture.m_RenderContextPtr = 0;
         m_BackgroundFromTexture.m_VSPtr            = 0;
@@ -191,7 +189,6 @@ namespace
         m_BackgroundFromTexture.m_InputLayoutPtr   = 0;
         m_BackgroundFromTexture.m_MeshPtr          = 0;
         m_BackgroundFromTexture.m_TextureSetPtr    = 0;
-        m_BackgroundFromTexture.m_SamplerSetPtr    = 0;
 
         m_CameraRenderJobs.clear();
     }
@@ -269,19 +266,12 @@ namespace
         SkyRenderContextPtr->SetViewPortSet(ViewPortSetPtr);
         SkyRenderContextPtr->SetTargetSet(TargetSetPtr);
         SkyRenderContextPtr->SetRenderState(NoDepthStatePtr);
-        
-        // -----------------------------------------------------------------------------
-        
-        CSamplerPtr LinearFilter = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-        
-        CSamplerSetPtr SamplerSetPtr = SamplerManager::CreateSamplerSet(LinearFilter);
 
         // -----------------------------------------------------------------------------
+        
         m_BackgroundFromSkybox.m_RenderContextPtr = SkyRenderContextPtr;
-        m_BackgroundFromSkybox.m_SamplerSetPtr    = SamplerSetPtr;
 
         m_BackgroundFromTexture.m_RenderContextPtr = SkyRenderContextPtr;
-        m_BackgroundFromTexture.m_SamplerSetPtr    = SamplerSetPtr;
     }
     
     // -----------------------------------------------------------------------------
@@ -310,18 +300,6 @@ namespace
         ConstanteBufferDesc.m_pClassKey     = 0;
         
         CBufferPtr SkyboxVSBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
-
-        // -----------------------------------------------------------------------------
-
-        ConstanteBufferDesc.m_Stride        = 0;
-        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
-        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
-        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSkyboxFromTextureVSBuffer);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
-        
-        CBufferPtr SkyboxFromTextureVSBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
                         
         // -----------------------------------------------------------------------------
         
@@ -346,20 +324,14 @@ namespace
         ConstanteBufferDesc.m_pClassKey     = 0;
         
         CBufferPtr SkytexturePSBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
-        
+       
         // -----------------------------------------------------------------------------
         
-        CBufferPtr HistogramExposureHistoryBufferPtr = HistogramRenderer::GetExposureHistoryBuffer();
-        
-        // -----------------------------------------------------------------------------
-        
-        CBufferSetPtr SkytextureVSBufferSetPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
-        CBufferSetPtr SkytexturePSBufferSetPtr = BufferManager::CreateBufferSet(SkytexturePSBuffer, HistogramExposureHistoryBufferPtr);
+        CBufferSetPtr SkytextureVSBufferSetPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer());
+        CBufferSetPtr SkytexturePSBufferSetPtr = BufferManager::CreateBufferSet(SkytexturePSBuffer);
 
         CBufferSetPtr SkyboxVSBufferSetPtr = BufferManager::CreateBufferSet(SkyboxVSBuffer);
-        CBufferSetPtr SkyboxPSBufferSetPtr = BufferManager::CreateBufferSet(SkyboxPSBuffer, HistogramExposureHistoryBufferPtr);
-
-        CBufferSetPtr SkyboxFromTextureVSBufferSetPtr = BufferManager::CreateBufferSet(SkyboxFromTextureVSBufferPtr);
+        CBufferSetPtr SkyboxPSBufferSetPtr = BufferManager::CreateBufferSet(SkyboxPSBuffer);
 
         m_BackgroundFromSkybox.m_VSBufferSetPtr = SkyboxVSBufferSetPtr;
         m_BackgroundFromSkybox.m_GSBufferSetPtr = 0;
@@ -471,7 +443,6 @@ namespace
         CInputLayoutPtr   InputLayoutPtr   = m_BackgroundFromSkybox.m_InputLayoutPtr;
         CMeshPtr          MeshPtr          = m_BackgroundFromSkybox.m_MeshPtr;
         CTextureSetPtr    TextureSetPtr    = m_BackgroundFromSkybox.m_TextureSetPtr;
-        CSamplerSetPtr    SamplerSetPtr    = m_BackgroundFromSkybox.m_SamplerSetPtr;
 
         // -----------------------------------------------------------------------------
         // Find sky entity
@@ -545,9 +516,7 @@ namespace
         const unsigned int pOffset[] = {0, 0};
         
         ContextManager::SetRenderContext(RenderContextPtr);
-        
-        ContextManager::SetSamplerSetPS(SamplerSetPtr);
-        
+                
         ContextManager::SetVertexBufferSet(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
         
         ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
@@ -560,21 +529,31 @@ namespace
         
         ContextManager::SetShaderPS(PSPtr);
         
-        ContextManager::SetConstantBufferSetVS(VSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, VSBufferSetPtr->GetBuffer(0));
         
-        ContextManager::SetConstantBufferSetPS(PSBufferSetPtr);
-        
-        ContextManager::SetTextureSetPS(pSkyFacet->GetCubemapSetPtr());
+        ContextManager::SetConstantBuffer(8, PSBufferSetPtr->GetBuffer(0));
 
-        ContextManager::SetTextureSetPS(TextureSetPtr);
+        ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
+
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        
+        ContextManager::SetTexture(0, pSkyFacet->GetCubemapSetPtr()->GetTexture(0));
+        ContextManager::SetTexture(1, TextureSetPtr->GetTexture(0));
         
         ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
         
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+        ContextManager::ResetTexture(1);
+
+        ContextManager::ResetSampler(0);
+        ContextManager::ResetSampler(1);
+
+        ContextManager::ResetConstantBuffer(0);
         
-        ContextManager::ResetConstantBufferSetPS();
-        
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(8);
+
+        ContextManager::ResetResourceBuffer(0);
         
         ContextManager::ResetTopology();
         
@@ -583,8 +562,6 @@ namespace
         ContextManager::ResetIndexBuffer();
         
         ContextManager::ResetVertexBufferSet();
-        
-        ContextManager::ResetSamplerSetPS();
         
         ContextManager::ResetShaderVS();
         
@@ -659,7 +636,6 @@ namespace
         CInputLayoutPtr   InputLayoutPtr   = m_BackgroundFromTexture.m_InputLayoutPtr;
         CMeshPtr          MeshPtr          = m_BackgroundFromTexture.m_MeshPtr;
         CTextureSetPtr    TextureSetPtr    = m_BackgroundFromTexture.m_TextureSetPtr;
-        CSamplerSetPtr    SamplerSetPtr    = m_BackgroundFromTexture.m_SamplerSetPtr;
 
         // -----------------------------------------------------------------------------
         // Render sky texture
@@ -684,8 +660,6 @@ namespace
 
         ContextManager::SetRenderContext(RenderContextPtr);
 
-        ContextManager::SetSamplerSetPS(SamplerSetPtr);
-
         ContextManager::SetVertexBufferSet(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
 
         ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
@@ -698,21 +672,31 @@ namespace
 
         ContextManager::SetShaderPS(PSPtr);
 
-        ContextManager::SetConstantBufferSetVS(VSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, VSBufferSetPtr->GetBuffer(0));
 
-        ContextManager::SetConstantBufferSetPS(PSBufferSetPtr);
+        ContextManager::SetConstantBuffer(8, PSBufferSetPtr->GetBuffer(0));
 
-        ContextManager::SetTextureSetPS(rRenderJob.m_pGraphicCamera->GetBackgroundTextureSet());
+        ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
 
-        ContextManager::SetTextureSetPS(TextureSetPtr);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(0, rRenderJob.m_pGraphicCamera->GetBackgroundTextureSet()->GetTexture(0));
+        ContextManager::SetTexture(1, TextureSetPtr->GetTexture(0));
 
         ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
 
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+        ContextManager::ResetTexture(1);
 
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetSampler(0);
+        ContextManager::ResetSampler(1);
 
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
+
+        ContextManager::ResetConstantBuffer(8);
+
+        ContextManager::ResetResourceBuffer(0);
 
         ContextManager::ResetTopology();
 
@@ -721,8 +705,6 @@ namespace
         ContextManager::ResetIndexBuffer();
 
         ContextManager::ResetVertexBufferSet();
-
-        ContextManager::ResetSamplerSetPS();
 
         ContextManager::ResetShaderVS();
 

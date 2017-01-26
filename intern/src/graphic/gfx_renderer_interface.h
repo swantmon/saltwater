@@ -8,8 +8,6 @@
 
 #pragma once
 
-#include "graphic/gfx_sky_renderer.h"
-
 namespace Gfx
 {
 namespace Renderer

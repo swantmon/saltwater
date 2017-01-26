@@ -71,7 +71,6 @@ namespace
             CBufferSetPtr     m_VertexBufferSetPtr;
             CBufferPtr        m_IndexBufferPtr;
             CTextureSetPtr    m_TextureSetPtr;
-            CSamplerSetPtr    m_SamplerSetPtr;
         };
 
         struct SModelMatrixBuffer
@@ -212,7 +211,6 @@ namespace
         m_SkyboxFromPanorama.m_VertexBufferSetPtr = 0;
         m_SkyboxFromPanorama.m_IndexBufferPtr     = 0;
         m_SkyboxFromPanorama.m_TextureSetPtr      = 0;
-        m_SkyboxFromPanorama.m_SamplerSetPtr      = 0;
 
         m_SkyboxFromCubemap.m_VSPtr              = 0;
         m_SkyboxFromCubemap.m_GSPtr              = 0;
@@ -225,7 +223,6 @@ namespace
         m_SkyboxFromCubemap.m_VertexBufferSetPtr = 0;
         m_SkyboxFromCubemap.m_IndexBufferPtr     = 0;
         m_SkyboxFromCubemap.m_TextureSetPtr      = 0;
-        m_SkyboxFromCubemap.m_SamplerSetPtr      = 0;
 
         m_SkyboxFromTexture.m_VSPtr              = 0;
         m_SkyboxFromTexture.m_GSPtr              = 0;
@@ -238,7 +235,6 @@ namespace
         m_SkyboxFromTexture.m_VertexBufferSetPtr = 0;
         m_SkyboxFromTexture.m_IndexBufferPtr     = 0;
         m_SkyboxFromTexture.m_TextureSetPtr      = 0;
-        m_SkyboxFromTexture.m_SamplerSetPtr      = 0;
 
         m_SkyboxFromGeometry.m_VSPtr              = 0;
         m_SkyboxFromGeometry.m_GSPtr              = 0;
@@ -251,7 +247,6 @@ namespace
         m_SkyboxFromGeometry.m_VertexBufferSetPtr = 0;
         m_SkyboxFromGeometry.m_IndexBufferPtr     = 0;
         m_SkyboxFromGeometry.m_TextureSetPtr      = 0;
-        m_SkyboxFromGeometry.m_SamplerSetPtr      = 0;
 
         m_SkyboxFromLUT.m_VSPtr              = 0;
         m_SkyboxFromLUT.m_GSPtr              = 0;
@@ -264,7 +259,6 @@ namespace
         m_SkyboxFromLUT.m_VertexBufferSetPtr = 0;
         m_SkyboxFromLUT.m_IndexBufferPtr     = 0;
         m_SkyboxFromLUT.m_TextureSetPtr      = 0;
-        m_SkyboxFromLUT.m_SamplerSetPtr      = 0;
 
 
         // -----------------------------------------------------------------------------
@@ -321,23 +315,6 @@ namespace
         m_SkyboxFromLUT.m_GSPtr          = CubemapRotateGSPtr;
         m_SkyboxFromLUT.m_PSPtr          = CubemapLUTPSPtr;
         m_SkyboxFromLUT.m_InputLayoutPtr = P3N3T2CubemapInputLayoutPtr;
-
-        // -----------------------------------------------------------------------------
-        // Sampler
-        // -----------------------------------------------------------------------------
-        CSamplerPtr LinearFilter = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-
-        CSamplerSetPtr SamplerSetPtr = SamplerManager::CreateSamplerSet(LinearFilter, LinearFilter);
-
-        m_SkyboxFromPanorama.m_SamplerSetPtr = SamplerSetPtr;
-
-        m_SkyboxFromCubemap.m_SamplerSetPtr = SamplerSetPtr;
-
-        m_SkyboxFromTexture.m_SamplerSetPtr = SamplerSetPtr;
-
-        m_SkyboxFromGeometry.m_SamplerSetPtr = SamplerSetPtr;
-
-        m_SkyboxFromLUT.m_SamplerSetPtr = SamplerSetPtr;
 
         // -----------------------------------------------------------------------------
         // Buffer
@@ -578,11 +555,11 @@ namespace
 
         m_SkyboxFromTexture.m_VSBufferSetPtr = BufferManager::CreateBufferSet(ModelMatrixBufferPtr);
         m_SkyboxFromTexture.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSWorldBuffer);
-        m_SkyboxFromTexture.m_PSBufferSetPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), OuputPSBufferPtr);
+        m_SkyboxFromTexture.m_PSBufferSetPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer(), OuputPSBufferPtr);
 
         m_SkyboxFromGeometry.m_VSBufferSetPtr = BufferManager::CreateBufferSet(ModelMatrixBufferPtr);
         m_SkyboxFromGeometry.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSWorldBuffer);
-        m_SkyboxFromGeometry.m_PSBufferSetPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), OuputPSBufferPtr);
+        m_SkyboxFromGeometry.m_PSBufferSetPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer(), OuputPSBufferPtr);
 
         m_SkyboxFromLUT.m_VSBufferSetPtr = 0;
         m_SkyboxFromLUT.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSSphericalBuffer, ModelMatrixBufferPtr);
@@ -707,7 +684,6 @@ namespace
         m_SkyboxFromPanorama.m_VertexBufferSetPtr = 0;
         m_SkyboxFromPanorama.m_IndexBufferPtr     = 0;
         m_SkyboxFromPanorama.m_TextureSetPtr      = 0;
-        m_SkyboxFromPanorama.m_SamplerSetPtr      = 0;
 
         m_SkyboxFromCubemap.m_VSPtr              = 0;
         m_SkyboxFromCubemap.m_GSPtr              = 0;
@@ -720,7 +696,6 @@ namespace
         m_SkyboxFromCubemap.m_VertexBufferSetPtr = 0;
         m_SkyboxFromCubemap.m_IndexBufferPtr     = 0;
         m_SkyboxFromCubemap.m_TextureSetPtr      = 0;
-        m_SkyboxFromCubemap.m_SamplerSetPtr      = 0;
 
         m_SkyboxFromTexture.m_VSPtr              = 0;
         m_SkyboxFromTexture.m_GSPtr              = 0;
@@ -733,7 +708,6 @@ namespace
         m_SkyboxFromTexture.m_VertexBufferSetPtr = 0;
         m_SkyboxFromTexture.m_IndexBufferPtr     = 0;
         m_SkyboxFromTexture.m_TextureSetPtr      = 0;
-        m_SkyboxFromTexture.m_SamplerSetPtr      = 0;
 
         m_SkyboxFromGeometry.m_VSPtr              = 0;
         m_SkyboxFromGeometry.m_GSPtr              = 0;
@@ -746,7 +720,6 @@ namespace
         m_SkyboxFromGeometry.m_VertexBufferSetPtr = 0;
         m_SkyboxFromGeometry.m_IndexBufferPtr     = 0;
         m_SkyboxFromGeometry.m_TextureSetPtr      = 0;
-        m_SkyboxFromGeometry.m_SamplerSetPtr      = 0;
 
         m_SkyboxFromLUT.m_VSPtr              = 0;
         m_SkyboxFromLUT.m_GSPtr              = 0;
@@ -759,7 +732,6 @@ namespace
         m_SkyboxFromLUT.m_VertexBufferSetPtr = 0;
         m_SkyboxFromLUT.m_IndexBufferPtr     = 0;
         m_SkyboxFromLUT.m_TextureSetPtr      = 0;
-        m_SkyboxFromLUT.m_SamplerSetPtr      = 0;
 
         m_LookUpTexturePtr    = 0;
         m_LookupTextureSetPtr = 0;
@@ -1054,7 +1026,6 @@ namespace
         CInputLayoutPtr   InputLayoutPtr   = m_SkyboxFromPanorama.m_InputLayoutPtr;
         CMeshPtr          MeshPtr          = m_SkyboxFromPanorama.m_MeshPtr;
         CTextureSetPtr    TextureSetPtr    = m_SkyboxFromPanorama.m_TextureSetPtr;
-        CSamplerSetPtr    SamplerSetPtr    = m_SkyboxFromPanorama.m_SamplerSetPtr;
 
         Performance::BeginEvent("Skybox from Panorama");
 
@@ -1078,8 +1049,6 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(RenderContextPtr);
 
-        ContextManager::SetSamplerSetPS(SamplerSetPtr);
-
         ContextManager::SetTopology(STopology::TriangleList);
 
         ContextManager::SetShaderVS(VSPtr);
@@ -1094,11 +1063,13 @@ namespace
 
         ContextManager::SetInputLayout(InputLayoutPtr);
 
-        ContextManager::SetConstantBufferSetGS(GSBufferSetPtr);
+        ContextManager::SetConstantBuffer(2, GSBufferSetPtr->GetBuffer(0));
 
-        ContextManager::SetConstantBufferSetPS(PSBufferSetPtr);
+        ContextManager::SetConstantBuffer(4, PSBufferSetPtr->GetBuffer(0));
 
-        ContextManager::SetTextureSetPS(_pOutput->m_InputTextureSetPtr);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(_pOutput->m_InputTexture2DPtr));
 
         // -----------------------------------------------------------------------------
         // Draw
@@ -1108,11 +1079,13 @@ namespace
         // -----------------------------------------------------------------------------
         // Reset
         // -----------------------------------------------------------------------------
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
 
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetSampler(0);
 
-        ContextManager::ResetConstantBufferSetGS();
+        ContextManager::ResetConstantBuffer(2);
+
+        ContextManager::ResetConstantBuffer(4);
 
         ContextManager::ResetInputLayout();
 
@@ -1127,8 +1100,6 @@ namespace
         ContextManager::ResetShaderPS();
 
         ContextManager::ResetTopology();
-
-        ContextManager::ResetSamplerSetPS();
 
         ContextManager::ResetRenderContext();
 
@@ -1153,7 +1124,6 @@ namespace
         CInputLayoutPtr   InputLayoutPtr   = m_SkyboxFromCubemap.m_InputLayoutPtr;
         CMeshPtr          MeshPtr          = m_SkyboxFromCubemap.m_MeshPtr;
         CTextureSetPtr    TextureSetPtr    = m_SkyboxFromCubemap.m_TextureSetPtr;
-        CSamplerSetPtr    SamplerSetPtr    = m_SkyboxFromCubemap.m_SamplerSetPtr;
 
         Performance::BeginEvent("Skybox from Cubemap");
 
@@ -1177,8 +1147,6 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(RenderContextPtr);
 
-        ContextManager::SetSamplerSetPS(SamplerSetPtr);
-
         ContextManager::SetTopology(STopology::TriangleList);
 
         ContextManager::SetShaderVS(VSPtr);
@@ -1193,11 +1161,13 @@ namespace
 
         ContextManager::SetInputLayout(InputLayoutPtr);
 
-        ContextManager::SetConstantBufferSetGS(GSBufferSetPtr);
+        ContextManager::SetConstantBuffer(2, GSBufferSetPtr->GetBuffer(0));
 
-        ContextManager::SetConstantBufferSetPS(PSBufferSetPtr);
+        ContextManager::SetConstantBuffer(4, PSBufferSetPtr->GetBuffer(0));
 
-        ContextManager::SetTextureSetPS(_pOutput->m_InputTextureSetPtr);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(_pOutput->m_InputTexture2DPtr));
 
         // -----------------------------------------------------------------------------
         // Draw
@@ -1207,11 +1177,13 @@ namespace
         // -----------------------------------------------------------------------------
         // Reset
         // -----------------------------------------------------------------------------
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
 
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetSampler(0);
 
-        ContextManager::ResetConstantBufferSetGS();
+        ContextManager::ResetConstantBuffer(2);
+
+        ContextManager::ResetConstantBuffer(4);
 
         ContextManager::ResetInputLayout();
 
@@ -1226,8 +1198,6 @@ namespace
         ContextManager::ResetShaderPS();
 
         ContextManager::ResetTopology();
-
-        ContextManager::ResetSamplerSetPS();
 
         ContextManager::ResetRenderContext();
 
@@ -1253,7 +1223,6 @@ namespace
         CInputLayoutPtr   InputLayoutPtr   = m_SkyboxFromTexture.m_InputLayoutPtr;
         CMeshPtr          MeshPtr          = m_SkyboxFromTexture.m_MeshPtr;
         CTextureSetPtr    TextureSetPtr    = m_SkyboxFromTexture.m_TextureSetPtr;
-        CSamplerSetPtr    SamplerSetPtr    = m_SkyboxFromTexture.m_SamplerSetPtr;
 
         Performance::BeginEvent("Skybox from Texture");
 
@@ -1298,8 +1267,6 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(RenderContextPtr);
 
-        ContextManager::SetSamplerSetPS(SamplerSetPtr);
-
         ContextManager::SetTopology(STopology::TriangleList);
 
         ContextManager::SetShaderVS(VSPtr);
@@ -1314,13 +1281,16 @@ namespace
 
         ContextManager::SetInputLayout(InputLayoutPtr);
 
-        ContextManager::SetConstantBufferSetVS(VSBufferSetPtr);
+        ContextManager::SetConstantBuffer(1, VSBufferSetPtr->GetBuffer(0));
 
-        ContextManager::SetConstantBufferSetGS(GSBufferSetPtr);
+        ContextManager::SetConstantBuffer(2, GSBufferSetPtr->GetBuffer(0));
 
-        ContextManager::SetConstantBufferSetPS(PSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, PSBufferSetPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(4, PSBufferSetPtr->GetBuffer(1));
 
-        ContextManager::SetTextureSetPS(_pOutput->m_InputTextureSetPtr);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(_pOutput->m_InputTexture2DPtr));
 
         // -----------------------------------------------------------------------------
         // Draw
@@ -1330,13 +1300,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Reset
         // -----------------------------------------------------------------------------
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
 
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetSampler(0);
 
-        ContextManager::ResetConstantBufferSetGS();
+        ContextManager::ResetConstantBuffer(1);
 
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(2);
+
+        ContextManager::ResetConstantBuffer(4);
 
         ContextManager::ResetInputLayout();
 
@@ -1351,8 +1323,6 @@ namespace
         ContextManager::ResetShaderPS();
 
         ContextManager::ResetTopology();
-
-        ContextManager::ResetSamplerSetPS();
 
         ContextManager::ResetRenderContext();
 
@@ -1379,7 +1349,6 @@ namespace
         CBufferSetPtr     VertexBufferSetPtr = m_SkyboxFromGeometry.m_VertexBufferSetPtr;
         CBufferPtr        IndexBufferPtr     = m_SkyboxFromGeometry.m_IndexBufferPtr;
         CTextureSetPtr    TextureSetPtr      = m_SkyboxFromGeometry.m_TextureSetPtr;
-        CSamplerSetPtr    SamplerSetPtr      = m_SkyboxFromGeometry.m_SamplerSetPtr;
 
         Performance::BeginEvent("Skybox from Geometry");
 
@@ -1453,8 +1422,6 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(RenderContextPtr);
 
-        ContextManager::SetSamplerSetPS(SamplerSetPtr);
-
         ContextManager::SetTopology(STopology::TriangleList);
 
         ContextManager::SetShaderVS(VSPtr);
@@ -1469,13 +1436,16 @@ namespace
 
         ContextManager::SetInputLayout(InputLayoutPtr);
 
-        ContextManager::SetConstantBufferSetVS(VSBufferSetPtr);
+        ContextManager::SetConstantBuffer(1, VSBufferSetPtr->GetBuffer(0));
 
-        ContextManager::SetConstantBufferSetGS(GSBufferSetPtr);
+        ContextManager::SetConstantBuffer(2, GSBufferSetPtr->GetBuffer(0));
 
-        ContextManager::SetConstantBufferSetPS(PSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, PSBufferSetPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(4, PSBufferSetPtr->GetBuffer(1));
 
-        ContextManager::SetTextureSetPS(_pOutput->m_InputTextureSetPtr);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(_pOutput->m_InputTexture2DPtr));
 
         // -----------------------------------------------------------------------------
         // Draw
@@ -1485,13 +1455,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Reset
         // -----------------------------------------------------------------------------
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
 
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetSampler(0);
 
-        ContextManager::ResetConstantBufferSetGS();
+        ContextManager::ResetConstantBuffer(1);
 
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(2);
+
+        ContextManager::ResetConstantBuffer(4);
 
         ContextManager::ResetInputLayout();
 
@@ -1506,8 +1478,6 @@ namespace
         ContextManager::ResetShaderPS();
 
         ContextManager::ResetTopology();
-
-        ContextManager::ResetSamplerSetPS();
 
         ContextManager::ResetRenderContext();
 
@@ -1533,7 +1503,6 @@ namespace
         CInputLayoutPtr   InputLayoutPtr   = m_SkyboxFromLUT.m_InputLayoutPtr;
         CMeshPtr          MeshPtr          = m_SkyboxFromLUT.m_MeshPtr;
         CTextureSetPtr    TextureSetPtr    = m_SkyboxFromLUT.m_TextureSetPtr;
-        CSamplerSetPtr    SamplerSetPtr    = m_SkyboxFromLUT.m_SamplerSetPtr;
 
         Performance::BeginEvent("Skybox from LUT");
 
@@ -1574,8 +1543,6 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(RenderContextPtr);
 
-        ContextManager::SetSamplerSetPS(SamplerSetPtr);
-
         ContextManager::SetTopology(STopology::TriangleList);
 
         ContextManager::SetShaderVS(VSPtr);
@@ -1590,15 +1557,16 @@ namespace
 
         ContextManager::SetInputLayout(InputLayoutPtr);
 
-        ContextManager::SetConstantBufferSetVS(VSBufferSetPtr);
+        ContextManager::SetConstantBuffer(2, GSBufferSetPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(3, GSBufferSetPtr->GetBuffer(1));
 
-        ContextManager::SetConstantBufferSetGS(GSBufferSetPtr);
+        ContextManager::SetConstantBuffer(4, PSBufferSetPtr->GetBuffer(0));
 
-        ContextManager::SetConstantBufferSetPS(PSBufferSetPtr);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        ContextManager::SetTextureSetPS(_pOutput->m_InputTextureSetPtr);
-
-        ContextManager::SetTextureSetPS(m_LookupTextureSetPtr);
+        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(_pOutput->m_InputTexture2DPtr));
+        ContextManager::SetTexture(1, static_cast<CTextureBasePtr>(m_LookUpTexturePtr));
 
         // -----------------------------------------------------------------------------
         // Draw
@@ -1608,13 +1576,17 @@ namespace
         // -----------------------------------------------------------------------------
         // Reset
         // -----------------------------------------------------------------------------
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+        ContextManager::ResetTexture(1);
 
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetSampler(0);
+        ContextManager::ResetSampler(1);
 
-        ContextManager::ResetConstantBufferSetGS();
+        ContextManager::ResetConstantBuffer(1);
 
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(2);
+
+        ContextManager::ResetConstantBuffer(4);
 
         ContextManager::ResetInputLayout();
 
@@ -1629,8 +1601,6 @@ namespace
         ContextManager::ResetShaderPS();
 
         ContextManager::ResetTopology();
-
-        ContextManager::ResetSamplerSetPS();
 
         ContextManager::ResetRenderContext();
 
