@@ -50,7 +50,7 @@ namespace
     const int g_VolumeResolution = 256;
     const float g_VoxelSize = g_VolumeSize / g_VolumeResolution;
 
-    const float g_IntegrationWeight = 100.0f;
+    const int g_MaxIntegrationWeight = 100;
 
     const int g_ICPIterations[g_PyramidLevels] = { 10, 5, 4 };
     const float g_EpsilonVertex = 0.1f;
@@ -244,7 +244,7 @@ namespace
     
     void CGfxVoxelRenderer::OnSetupShader()
     {
-        int NumberOfDefines = 10;
+        int NumberOfDefines = 11;
 
         std::vector<std::stringstream> DefineStreams(NumberOfDefines);
 
@@ -258,6 +258,7 @@ namespace
         DefineStreams[7] << "UINT16_MAX " << 65535;
         DefineStreams[8] << "TRUNCATED_DISTANCE " << g_TruncatedDistance;
         DefineStreams[9] << "TRUNCATED_DISTANCE_INVERSE " << g_TruncatedDistanceInverse;
+        DefineStreams[10] << "MAX_INTEGRATION_WEIGHT " << g_MaxIntegrationWeight;
 
         std::vector<std::string> DefineStrings(NumberOfDefines);
         std::vector<const char*> Defines(NumberOfDefines);
@@ -449,10 +450,10 @@ namespace
         
         m_VertexMapWorldMatrix = RotationMatrix * ScalingMatrix;
 
-        ScalingMatrix.SetScale(10.0f / static_cast<float>(g_VolumeResolution));
-        TranslationMatrix.SetTranslation(-5.0f, -5.0f, -10.0f);
+        ScalingMatrix.SetScale(5.0f / static_cast<float>(g_VolumeResolution));
+        TranslationMatrix.SetTranslation(0.0f, 0.0f, 0.0f);
 
-        m_VolumeWorldMatrix = TranslationMatrix * ScalingMatrix;
+        m_VolumeWorldMatrix = TranslationMatrix * RotationMatrix * ScalingMatrix;
 
         if (m_KinectControl.GetDepthBuffer(m_DepthPixels.data()))
         {
@@ -538,7 +539,7 @@ namespace
 
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
-        glDispatchCompute(g_VolumeResolution / g_TileSize2D, g_VolumeResolution / g_TileSize2D, 1);
+        glDispatchCompute(g_VolumeResolution / g_TileSize3D, g_VolumeResolution / g_TileSize3D, 1);
     }
 
     // -----------------------------------------------------------------------------
@@ -578,7 +579,7 @@ namespace
             PerformTracking();
             Integrate();
 
-            SetSphere(); // debugging
+            //SetSphere(); // debugging
 
             Raycast();
             DownSample();
@@ -601,12 +602,12 @@ namespace
         
         //RenderDepth();
 
-        glViewport(0, 0, 640, 720);
+        //glViewport(0, 0, 640, 720);
         RenderVolume();
 
-        glViewport(640, 0, 640, 720);
+        //glViewport(640, 0, 640, 720);
 
-        RenderVertexMap();
+        //RenderVertexMap();
 
         glViewport(0, 0, 1280, 720);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
