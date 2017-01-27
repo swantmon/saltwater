@@ -17,23 +17,23 @@ struct SRectangle
     float m_HalfWidth;
     float m_HalfHeight;
 
-    vec4  m_Normal;
+    vec4  m_Plane;
 };
 
 // -----------------------------------------------------------------------------
 
-bool RayPlaneIntersect(in SRay _Ray, in vec4 _PlaneNormal, out float _Distance)
+bool RayPlaneIntersect(in SRay _Ray, in vec4 _Plane, out float _Distance)
 {
-    _Distance = -dot(_PlaneNormal, vec4(_Ray.m_Origin, 1.0f)) / dot(_PlaneNormal.xyz, _Ray.m_Direction);
+    _Distance = -dot(_Plane, vec4(_Ray.m_Origin, 1.0f)) / dot(_Plane.xyz, _Ray.m_Direction);
 
     return _Distance > 0.0;
 }
 
 // -----------------------------------------------------------------------------
 
-bool RayRectIntersect(in SRay _Ray, in SRectangle _Rectangle, out float _Distance)
+bool RayRectangleIntersect(in SRay _Ray, in SRectangle _Rectangle, out float _Distance)
 {
-    bool IsIntersecting = RayPlaneIntersect(_Ray, _Rectangle.m_Normal, _Distance);
+    bool IsIntersecting = RayPlaneIntersect(_Ray, _Rectangle.m_Plane, _Distance);
 
     if (IsIntersecting)
     {

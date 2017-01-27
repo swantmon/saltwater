@@ -314,7 +314,7 @@ void main()
     Lightbulb.m_HalfWidth  = 0.5f * 8;
     Lightbulb.m_HalfHeight  = 0.5f * 8;
 
-    Lightbulb.m_Normal = vec4(LightDirection, -dot(LightDirection, Lightbulb.m_Center));
+    Lightbulb.m_Plane = vec4(LightDirection, -dot(LightDirection, Lightbulb.m_Center));
 
     vec3 ex = Lightbulb.m_HalfWidth  * Lightbulb.m_DirectionX;
     vec3 ey = Lightbulb.m_HalfHeight * Lightbulb.m_DirectionY;
@@ -367,7 +367,7 @@ void main()
 
     float DistanceToLightbulb = 0.0f;
 
-    if (RayRectIntersect(Ray, Lightbulb, DistanceToLightbulb))
+    if (RayRectangleIntersect(Ray, Lightbulb, DistanceToLightbulb))
     {
         if (DistanceToLightbulb < DistanceToGround)
         {
