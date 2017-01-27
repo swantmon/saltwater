@@ -26,8 +26,7 @@ void main()
     const int x = int(gl_GlobalInvocationID.x);
     const int y = int(gl_GlobalInvocationID.y);
     
-    const vec3 CameraPosition = vec3(0.5f, 0.5f, -0.5f);
-
+    const vec3 CameraPosition = g_PoseMatrix[3].xyz;
     ivec3 VoxelPosition = ivec3(x, y, 0);
 
     for (VoxelPosition.z = 0; VoxelPosition.z < VOLUME_RESOLUTION; ++ VoxelPosition.z)
@@ -36,7 +35,7 @@ void main()
 
         vec3 WSVoxelPosition = (VoxelPosition - 0.5f) * VOXEL_SIZE;
 
-        vec3 VSVoxelPosition = WSVoxelPosition - CameraPosition;
+        vec3 VSVoxelPosition = mat3(g_InvPoseRotationMatrix) * (WSVoxelPosition - CameraPosition); // todo: check if rotation is correct
 
         // todo: Rotation
 

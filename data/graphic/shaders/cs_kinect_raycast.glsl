@@ -21,18 +21,18 @@ layout (binding = 1, rgba32f) writeonly uniform image2D cs_Vertex;
 
 float GetStartLength(vec3 Start, vec3 Direction)
 {
-    float xmin = ((Direction.x > 0.0 ? - VOLUME_SIZE / 2.0 : VOLUME_SIZE / 2.0) - Start.x) / Direction.x;
-    float ymin = ((Direction.y > 0.0 ? - VOLUME_SIZE / 2.0 : VOLUME_SIZE / 2.0) - Start.y) / Direction.y;
-    float zmin = ((Direction.z > 0.0 ? - VOLUME_SIZE / 2.0 : VOLUME_SIZE / 2.0) - Start.z) / Direction.z;
+    float xmin = ((Direction.x > 0.0f ? 0.0f : VOLUME_SIZE) - Start.x) / Direction.x;
+    float ymin = ((Direction.y > 0.0f ? 0.0f : VOLUME_SIZE) - Start.y) / Direction.y;
+    float zmin = ((Direction.z > 0.0f ? 0.0f : VOLUME_SIZE) - Start.z) / Direction.z;
 
     return max(max(xmin, ymin), zmin);
 }
 
 float GetEndLength(vec3 Start, vec3 Direction)
 {
-    float xmax = ((Direction.x > 0.0 ? VOLUME_SIZE / 2.0 : - VOLUME_SIZE / 2.0) - Start.x) / Direction.x;
-    float ymax = ((Direction.y > 0.0 ? VOLUME_SIZE / 2.0 : - VOLUME_SIZE / 2.0) - Start.y) / Direction.y;
-    float zmax = ((Direction.z > 0.0 ? VOLUME_SIZE / 2.0 : - VOLUME_SIZE / 2.0) - Start.z) / Direction.z;
+    float xmax = ((Direction.x > 0.0f ? VOLUME_SIZE : 0.0f) - Start.x) / Direction.x;
+    float ymax = ((Direction.y > 0.0f ? VOLUME_SIZE : 0.0f) - Start.y) / Direction.y;
+    float zmax = ((Direction.z > 0.0f ? VOLUME_SIZE : 0.0f) - Start.z) / Direction.z;
 
     return min(min(xmax, ymax), zmax);
 }
@@ -50,21 +50,20 @@ uvec2 GetVoxel(vec3 Position)
 layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
 void main()
 {
-    ivec2 VertexMapSize = imageSize(cs_Vertex);
+    ivec2 VertexMapSize = ivec2(DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT);
 
     const ivec2 VertexMapPosition = ivec2(gl_GlobalInvocationID.xy);
     
-    vec3 VertexPixelPosition = vec3(vec2(VertexMapPosition) / VertexMapSize.xy, 0.0);
-    VertexPixelPosition.xy -= vec2(0.5);
-    VertexPixelPosition.xy *= vec2(5.0);
-    VertexPixelPosition.z = -2.0;
+    vec3 VertexPixelPosition;
+    VertexPixelPosition.xy = vec2(VertexMapPosition - g_FocalPoint) * g_InvFocalLength;
+    VertexPixelPosition.z = 1.0f;
 
-    vec3 CameraPosition = vec3(0.0, 0.0, -5.0);
+    const vec3 CameraPosition = g_PoseMatrix[3].xyz;
     vec3 RayDirection = normalize(VertexPixelPosition - CameraPosition);
 
-    RayDirection.x = RayDirection.x == 0.0 ? 1e-15 : RayDirection.x;
-    RayDirection.y = RayDirection.y == 0.0 ? 1e-15 : RayDirection.y;
-    RayDirection.z = RayDirection.z == 0.0 ? 1e-15 : RayDirection.z;
+    RayDirection.x = RayDirection.x == 0.0f ? 1e-15f : RayDirection.x;
+    RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
+    RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
 
     float StartLength = GetStartLength(CameraPosition, RayDirection);
     float EndLength = GetEndLength(CameraPosition, RayDirection);
@@ -72,7 +71,7 @@ void main()
     float Step = VOXEL_SIZE;
     float RayLength = StartLength;
 
-    vec3 Vertex = vec3(0.0);
+    vec3 Vertex = vec3(0.0f);
 
     while (RayLength <= EndLength)
     {
@@ -88,7 +87,7 @@ void main()
         RayLength += Step;
     }
 
-    imageStore(cs_Vertex, VertexMapPosition, vec4(Vertex, 1.0));
+    imageStore(cs_Vertex, VertexMapPosition, vec4(Vertex, 1.0f));
 }
 
 #endif // __INCLUDE_CS_KINECT_INTEGRATE_VOLUME_GLSL__

@@ -619,14 +619,11 @@ namespace
         glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         
-        //RenderDepth();
-
-        //glViewport(0, 0, 640, 720);
+        RenderDepth();
+        glViewport(0, 0, 640, 720);
         RenderVolume();
-
-        //glViewport(640, 0, 640, 720);
-
-        //RenderVertexMap();
+        glViewport(640, 0, 640, 720);
+        RenderVertexMap();
 
         glViewport(0, 0, 1280, 720);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
