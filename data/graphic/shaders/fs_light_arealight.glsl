@@ -22,15 +22,16 @@ const float LUT_BIAS  = 0.5f / LUT_SIZE;
 
 layout(row_major, std140, binding = 1) uniform UB1
 {
-    vec4  dcolor;
-    vec4  scolor;
-    float intensity;
-    float width;
-    float height;
-    float rotz;
-    float padding;
-    bool  twoSided;
-    uint  ps_ExposureHistoryIndex;
+    vec4  m_Color;
+    vec4  m_Position;
+    vec4  m_DirectionX;
+    vec4  m_DirectionY;
+    vec4  m_Plane;
+    float m_HalfWidth;
+    float m_HalfHeight;
+    float m_IsTwoSided;
+    float m_Padding;
+    uint  m_ExposureHistoryIndex;
 };
 
 layout(std430, binding = 0) buffer UExposureHistoryBuffer
@@ -293,28 +294,20 @@ void main()
     // -----------------------------------------------------------------------------
     // Exposure data
     // -----------------------------------------------------------------------------
-    float AverageExposure = ps_ExposureHistory[ps_ExposureHistoryIndex];
+    float AverageExposure = ps_ExposureHistory[m_ExposureHistoryIndex];
 
     // -----------------------------------------------------------------------------
     // Create default rect in world
     // -----------------------------------------------------------------------------
     SRectangle Lightbulb;
-    vec3  LightbulbCorners[4];
-    
-    vec3 LightDirection = -normalize(vec3(-2.0f, -2.0f, -1.0f));
-    vec3 Left           =  normalize(vec3(0.0f, rotz, 1.0f));
-    vec3 Right          =  normalize(cross(LightDirection, Left));
-    
-    Left = cross(LightDirection, Right);
-    
-    Lightbulb.m_DirectionX = Right;
-    Lightbulb.m_DirectionY = Left;
-    
-    Lightbulb.m_Center = vec3(0.0f, 0.0f, 10.0f);
-    Lightbulb.m_HalfWidth  = 0.5f * 8;
-    Lightbulb.m_HalfHeight  = 0.5f * 8;
+    vec3 LightbulbCorners[4];
 
-    Lightbulb.m_Plane = vec4(LightDirection, -dot(LightDirection, Lightbulb.m_Center));
+    Lightbulb.m_Center     = m_Position.xyz;
+    Lightbulb.m_DirectionX = m_DirectionX.xyz;
+    Lightbulb.m_DirectionY = m_DirectionY.xyz;
+    Lightbulb.m_HalfWidth  = m_HalfWidth;
+    Lightbulb.m_HalfHeight = m_HalfHeight;
+    Lightbulb.m_Plane      = m_Plane;
 
     vec3 ex = Lightbulb.m_HalfWidth  * Lightbulb.m_DirectionX;
     vec3 ey = Lightbulb.m_HalfHeight * Lightbulb.m_DirectionY;
@@ -345,13 +338,13 @@ void main()
         vec3(LTCMaterial.w, 0.0f         , LTCMaterial.x)
     );
     
-    vec3 Specular = EvaluateLTC(Data.m_WSNormal, WSViewDirection, WSPosition, LTCMatrix, LightbulbCorners, false);
+    vec3 Specular = EvaluateLTC(Data.m_WSNormal, WSViewDirection, WSPosition, LTCMatrix, LightbulbCorners, m_IsTwoSided > 0.0f);
 
     Specular *= texture2D(ps_LTCMag, UV).w;
     
-    vec3 Diffuse = EvaluateLTC(Data.m_WSNormal, WSViewDirection, WSPosition, mat3(1), LightbulbCorners, false); 
+    vec3 Diffuse = EvaluateLTC(Data.m_WSNormal, WSViewDirection, WSPosition, mat3(1), LightbulbCorners, m_IsTwoSided > 0.0f); 
     
-    Output  = vec3(intensity) * (scolor.xyz * Specular + dcolor.xyz * Diffuse);
+    Output  = m_Color.xyz * (Specular + Diffuse);
 
     Output /= 2.0f * PI;
 
@@ -371,7 +364,7 @@ void main()
     {
         if (DistanceToLightbulb < DistanceToGround)
         {
-            Output = vec3(intensity);
+            Output = m_Color.xyz;
         }
     }
 

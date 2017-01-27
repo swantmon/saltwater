@@ -71,14 +71,15 @@ namespace
                 
         struct SAreaLightProperties
         {
-            Base::Float4   dcolor;                                  //> Diffuse Color {r:1.0, g:1.0, b:1.0}
-            Base::Float4   scolor;                                  //> Specular Color {r:1.0, g:1.0, b:1.0}
-            float          intensity;                               //> Light Intensity {default:4, min:0, max:10}
-            float          width;                                   //> Width {default: 8, min:0.1, max:15, step:0.1}
-            float          height;                                  //> Height {default: 8, min:0.1, max:15, step:0.1}
-            float          rotz;                                    //> Rotation Z {default: 0, min:0, max:1, step:0.001}
-            bool           twoSided;                                //> Two-sided {default:false}
-            unsigned int   m_ExposureHistoryIndex;
+            Base::Float4 m_Color;
+            Base::Float4 m_Position;
+            Base::Float4 m_DirectionX;
+            Base::Float4 m_DirectionY;
+            Base::Float4 m_Plane;
+            float        m_HalfWidth;
+            float        m_HalfHeight;
+            float        m_IsTwoSided;
+            unsigned int m_ExposureHistoryIndex;
         };
         
     private:
@@ -381,15 +382,23 @@ namespace
         // -----------------------------------------------------------------------------
         // Render
         // -----------------------------------------------------------------------------
+        Base::Float3 LightPosition  = Base::Float3(0.0f, 0.0f, 10.0f);
+        Base::Float3 LightDirection = Base::Float3(-2.0f, -2.0f, -1.0f).Normalize() * Base::Float3(-1.0f);
+        Base::Float3 Left           = Base::Float3(0.0f, 0.123f, 1.0f).Normalize();
+        Base::Float3 Right          = LightDirection.CrossProduct(Left).Normalize();
+
+        Left = LightDirection.CrossProduct(Right);
+
         SAreaLightProperties LightBuffer;
 
-        LightBuffer.dcolor                 = Base::Float4(1.0f);
-        LightBuffer.scolor                 = Base::Float4(1.0f);
-        LightBuffer.intensity              = 100000.0f;
-        LightBuffer.width                  = 8.0f;
-        LightBuffer.height                 = 8.0f;
-        LightBuffer.rotz                   = 0.123f;
-        LightBuffer.twoSided               = false;
+        LightBuffer.m_Color                = Base::Float4(100000.0f);
+        LightBuffer.m_Position             = Base::Float4(LightPosition, 1.0f);
+        LightBuffer.m_DirectionX           = Base::Float4(Right, 0.0f);
+        LightBuffer.m_DirectionY           = Base::Float4(Left, 0.0f);
+        LightBuffer.m_HalfWidth            = 0.5f * 8.0f;
+        LightBuffer.m_HalfHeight           = 0.5f * 8.0f;
+        LightBuffer.m_Plane                = Base::Float4(LightDirection, -(LightDirection.DotProduct(LightPosition)));
+        LightBuffer.m_IsTwoSided           = 1.0f;
         LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
         BufferManager::UploadConstantBufferData(m_AreaLightBufferPtr, &LightBuffer);
