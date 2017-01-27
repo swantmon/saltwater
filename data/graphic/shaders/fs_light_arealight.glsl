@@ -379,14 +379,21 @@ void main()
     SRect rect;
     vec3  points[4];
     
-    rect.dirx = rotation_yz(vec3(1.0f, 0.0f, 0.0f), roty * 2.0f * pi, rotz * 2.0f * pi);
-    rect.diry = rotation_yz(vec3(0.0f, 1.0f, 0.0f), roty * 2.0f * pi, rotz * 2.0f * pi);
+    vec3 LightDirection = -normalize(vec3(-2.0f, -2.0f, -1.0f));
+    vec3 Left           =  normalize(vec3(0.0f, rotz, 1.0f));
+    vec3 Right          =  normalize(cross(LightDirection, Left));
+    
+    Left = cross(LightDirection, Right);
+    
+    vec3 rectNormal = LightDirection;
+    
+    rect.dirx = Right;
+    rect.diry = Left;
+    
+    rect.center = vec3(0.0f, 0.0f, 10.0f);
+    rect.halfx  = 0.5f * 8;
+    rect.halfy  = 0.5f * 8;
 
-    rect.center = vec3(0.0f, 0.0f, 5.0f);
-    rect.halfx  = 0.5f * width;
-    rect.halfy  = 0.5f * height;
-
-    vec3 rectNormal = cross(rect.dirx, rect.diry);
     rect.plane = vec4(rectNormal, -dot(rectNormal, rect.center));
 
     vec3 ex = rect.halfx * rect.dirx;
