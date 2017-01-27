@@ -193,7 +193,7 @@ void ClipQuadToHorizon(inout vec3 L[5], out int n)
 
 // -----------------------------------------------------------------------------
 
-vec3 EvaluateLTC(in vec3 _WSNormal, in vec3 _WSViewDirection, in vec3 _WSPosition, in mat3 _MinV, in vec3 _Points[4], in bool _TwoSided)
+vec3 EvaluateDiffuseLTC(in SSurfaceData _Data, in vec3 _WSViewDirection, in vec3 _Points[4], in bool _TwoSided)
 {
     float Sum;
     vec3  L[5];
@@ -203,21 +203,16 @@ vec3 EvaluateLTC(in vec3 _WSNormal, in vec3 _WSViewDirection, in vec3 _WSPositio
     // -----------------------------------------------------------------------------
     // construct orthonormal basis around N
     // -----------------------------------------------------------------------------
-    T1 = normalize(_WSViewDirection - _WSNormal * dot(_WSViewDirection, _WSNormal));
-    T2 = cross(_WSNormal, T1);
-
-    // -----------------------------------------------------------------------------
-    // rotate area light in (T1, T2, N) basis
-    // -----------------------------------------------------------------------------
-    _MinV = _MinV * (transpose(mat3(T1, T2, _WSNormal)));
+    T1 = normalize(_WSViewDirection - _Data.m_WSNormal * dot(_WSViewDirection, _Data.m_WSNormal));
+    T2 = cross(_Data.m_WSNormal, T1);
 
     // -----------------------------------------------------------------------------
     // polygon (allocate 5 vertices for clipping)
     // -----------------------------------------------------------------------------
-    L[0] = _MinV * (_Points[0] - _WSPosition);
-    L[1] = _MinV * (_Points[1] - _WSPosition);
-    L[2] = _MinV * (_Points[2] - _WSPosition);
-    L[3] = _MinV * (_Points[3] - _WSPosition);
+    L[0] = _Points[0] - _Data.m_WSPosition;
+    L[1] = _Points[1] - _Data.m_WSPosition;
+    L[2] = _Points[2] - _Data.m_WSPosition;
+    L[3] = _Points[3] - _Data.m_WSPosition;
 
     ClipIndex = 0;
 
@@ -258,7 +253,78 @@ vec3 EvaluateLTC(in vec3 _WSNormal, in vec3 _WSViewDirection, in vec3 _WSPositio
 
     Sum = _TwoSided ? abs(Sum) : max(0.0, Sum);
 
-    return vec3(Sum, Sum, Sum);
+    return m_Color.xyz * vec3(Sum, Sum, Sum) * _Data.m_DiffuseAlbedo;
+}
+
+// -----------------------------------------------------------------------------
+
+
+vec3 EvaluateSpecularLTC(in SSurfaceData _Data, in vec3 _WSViewDirection, in mat3 _MinV, in vec3 _Points[4], in bool _TwoSided)
+{
+    float Sum;
+    vec3  L[5];
+    vec3  T1, T2;
+    int   ClipIndex;
+
+    // -----------------------------------------------------------------------------
+    // construct orthonormal basis around N
+    // -----------------------------------------------------------------------------
+    T1 = normalize(_WSViewDirection - _Data.m_WSNormal * dot(_WSViewDirection, _Data.m_WSNormal));
+    T2 = cross(_Data.m_WSNormal, T1);
+
+    // -----------------------------------------------------------------------------
+    // rotate area light in (T1, T2, N) basis
+    // -----------------------------------------------------------------------------
+    _MinV = _MinV * (transpose(mat3(T1, T2, _Data.m_WSNormal)));
+
+    // -----------------------------------------------------------------------------
+    // polygon (allocate 5 vertices for clipping)
+    // -----------------------------------------------------------------------------
+    L[0] = _MinV * (_Points[0] - _Data.m_WSPosition);
+    L[1] = _MinV * (_Points[1] - _Data.m_WSPosition);
+    L[2] = _MinV * (_Points[2] - _Data.m_WSPosition);
+    L[3] = _MinV * (_Points[3] - _Data.m_WSPosition);
+
+    ClipIndex = 0;
+
+    ClipQuadToHorizon(L, ClipIndex);
+    
+    if (ClipIndex == 0)
+    {
+        return vec3(0.0f, 0.0f, 0.0f);
+    }
+
+    // -----------------------------------------------------------------------------
+    // project onto sphere
+    // -----------------------------------------------------------------------------
+    L[0] = normalize(L[0]);
+    L[1] = normalize(L[1]);
+    L[2] = normalize(L[2]);
+    L[3] = normalize(L[3]);
+    L[4] = normalize(L[4]);
+
+    // -----------------------------------------------------------------------------
+    // integrate
+    // -----------------------------------------------------------------------------
+    Sum = 0.0f;
+
+    Sum += IntegrateEdge(L[0], L[1]);
+    Sum += IntegrateEdge(L[1], L[2]);
+    Sum += IntegrateEdge(L[2], L[3]);
+
+    if (ClipIndex >= 4)
+    {
+        Sum += IntegrateEdge(L[3], L[4]);
+    }
+
+    if (ClipIndex == 5)
+    {
+        Sum += IntegrateEdge(L[4], L[0]);
+    }
+
+    Sum = _TwoSided ? abs(Sum) : max(0.0, Sum);
+
+    return m_Color.xyz * vec3(Sum, Sum, Sum) * _Data.m_SpecularAlbedo;
 }
 
 // -----------------------------------------------------------------------------
@@ -320,7 +386,7 @@ void main()
     // -----------------------------------------------------------------------------
     // LTC
     // -----------------------------------------------------------------------------
-    vec3 Output = vec3(0.0f);
+    vec3 Luminance = vec3(0.0f);
 
     vec3 WSViewDirection = normalize(g_ViewPosition.xyz - Data.m_WSPosition);
     
@@ -338,15 +404,15 @@ void main()
         vec3(LTCMaterial.w, 0.0f         , LTCMaterial.x)
     );
     
-    vec3 Specular = EvaluateLTC(Data.m_WSNormal, WSViewDirection, WSPosition, LTCMatrix, LightbulbCorners, m_IsTwoSided > 0.0f);
+    vec3 Specular = EvaluateSpecularLTC(Data, WSViewDirection, LTCMatrix, LightbulbCorners, m_IsTwoSided > 0.0f);
 
     Specular *= texture2D(ps_LTCMag, UV).w;
     
-    vec3 Diffuse = EvaluateLTC(Data.m_WSNormal, WSViewDirection, WSPosition, mat3(1), LightbulbCorners, m_IsTwoSided > 0.0f); 
-    
-    Output  = m_Color.xyz * (Specular + Diffuse);
+    vec3 Diffuse = EvaluateDiffuseLTC(Data, WSViewDirection, LightbulbCorners, m_IsTwoSided > 0.0f); 
 
-    Output /= 2.0f * PI;
+    Diffuse = Diffuse / 2.0f * PI; 
+    
+    Luminance = Specular + Diffuse;
 
     // -----------------------------------------------------------------------------
     // Check if light bulb is visible
@@ -364,11 +430,11 @@ void main()
     {
         if (DistanceToLightbulb < DistanceToGround)
         {
-            Output = m_Color.xyz;
+            Luminance = m_Color.xyz;
         }
     }
 
-    out_Output = vec4(Output * AverageExposure, 0.0f);
+    out_Output = vec4(Luminance * AverageExposure, 0.0f);
 }
 
 #endif // __INCLUDE_FS_LIGHT_AREALIGHT_GLSL__

@@ -200,6 +200,6 @@ namespace Dt
         // -----------------------------------------------------------------------------
         // Luminous power (lumen) is converted into luminous intensity (candela).
         // -----------------------------------------------------------------------------
-        m_Lightness = Color * (m_Intensity / Base::SConstants<float>::s_Pi);
+        m_Lightness = Color * (m_Intensity / (2.0f * m_Width * 2.0f * m_Height * Base::SConstants<float>::s_Pi));
     }
 } // namespace Dt
