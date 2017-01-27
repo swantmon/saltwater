@@ -23,18 +23,14 @@ const float pi = 3.14159265;
 
 layout(row_major, std140, binding = 1) uniform UB1
 {
-    mat4  view;
     vec4  dcolor;
     vec4  scolor;
-    vec2  resolution;
     float intensity;
     float width;
     float height;
-    float roty;
     float rotz;
     float padding;
     bool  twoSided;
-    int   sampleCount;
     uint  ps_ExposureHistoryIndex;
 };
 
@@ -455,7 +451,7 @@ void main()
         }
     }
 
-    out_Output = vec4(Output, 0.0f);
+    out_Output = vec4(Output * AverageExposure, 0.0f);
 }
 
 #endif // __INCLUDE_FS_LIGHT_AREALIGHT_GLSL__

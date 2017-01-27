@@ -71,18 +71,13 @@ namespace
                 
         struct SAreaLightProperties
         {
-            Base::Float4x4 view;
             Base::Float4   dcolor;                                  //> Diffuse Color {r:1.0, g:1.0, b:1.0}
             Base::Float4   scolor;                                  //> Specular Color {r:1.0, g:1.0, b:1.0}
-            Base::Float2   resolution;                              
             float          intensity;                               //> Light Intensity {default:4, min:0, max:10}
             float          width;                                   //> Width {default: 8, min:0.1, max:15, step:0.1}
             float          height;                                  //> Height {default: 8, min:0.1, max:15, step:0.1}
-            float          roty;                                    //> Rotation Y {default: 0, min:0, max:1, step:0.001}
             float          rotz;                                    //> Rotation Z {default: 0, min:0, max:1, step:0.001}
-            float          padding;                                 
             bool           twoSided;                                //> Two-sided {default:false}
-            int            sampleCount;
             unsigned int   m_ExposureHistoryIndex;
         };
         
@@ -388,18 +383,13 @@ namespace
         // -----------------------------------------------------------------------------
         SAreaLightProperties LightBuffer;
 
-        LightBuffer.view                   = ViewManager::GetMainCamera()->GetView()->GetViewMatrix();
         LightBuffer.dcolor                 = Base::Float4(1.0f);
         LightBuffer.scolor                 = Base::Float4(1.0f);
-        LightBuffer.resolution             = Base::Float2(1280.0f, 720.0f);
-        LightBuffer.intensity              = 10.0f;
+        LightBuffer.intensity              = 100000.0f;
         LightBuffer.width                  = 8.0f;
         LightBuffer.height                 = 8.0f;
-        LightBuffer.roty                   = 0.123f;
         LightBuffer.rotz                   = 0.123f;
-        LightBuffer.padding                = -1.0f;
         LightBuffer.twoSided               = false;
-        LightBuffer.sampleCount            = 0;
         LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
         BufferManager::UploadConstantBufferData(m_AreaLightBufferPtr, &LightBuffer);
