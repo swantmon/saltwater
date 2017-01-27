@@ -2,10 +2,11 @@
 #ifndef __INCLUDE_FS_LIGHT_AREALIGHT_GLSL__
 #define __INCLUDE_FS_LIGHT_AREALIGHT_GLSL__
 
-#include "common_global.glsl"
 #include "common.glsl"
+#include "common_global.glsl"
 #include "common_light.glsl"
 #include "common_gbuffer.glsl"
+#include "common_raycast.glsl"
 
 // -----------------------------------------------------------------------------
 // Input from system
@@ -15,11 +16,9 @@ in vec4 gl_FragCoord;
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-const float LUT_SIZE  = 64.0;
-const float LUT_SCALE = (LUT_SIZE - 1.0)/LUT_SIZE;
-const float LUT_BIAS  = 0.5/LUT_SIZE;
-
-const float pi = 3.14159265;
+const float LUT_SIZE  = 64.0f;
+const float LUT_SCALE = (LUT_SIZE - 1.0f) / LUT_SIZE;
+const float LUT_BIAS  = 0.5f / LUT_SIZE;
 
 layout(row_major, std140, binding = 1) uniform UB1
 {
@@ -43,8 +42,8 @@ layout(binding = 0) uniform sampler2D ps_GBuffer0;
 layout(binding = 1) uniform sampler2D ps_GBuffer1;
 layout(binding = 2) uniform sampler2D ps_GBuffer2;
 layout(binding = 3) uniform sampler2D ps_DepthTexture;
-layout(binding = 4) uniform sampler2D ltc_mat;
-layout(binding = 5) uniform sampler2D ltc_mag;
+layout(binding = 4) uniform sampler2D ps_LTCMaterial;
+layout(binding = 5) uniform sampler2D ps_LTCMag;
 
 // -----------------------------------------------------------------------------
 // Input
@@ -57,125 +56,34 @@ layout(location = 2) in vec2 in_TexCoord;
 layout (location = 0) out vec4 out_Output;
 
 // -----------------------------------------------------------------------------
-// Tracing and intersection
-// -----------------------------------------------------------------------------
-struct SRay
-{
-    vec3 origin;
-    vec3 dir;
-};
-
-struct SRect
-{
-    vec3  center;
-    vec3  dirx;
-    vec3  diry;
-    float halfx;
-    float halfy;
-
-    vec4  plane;
-};
-
-bool RayPlaneIntersect(in SRay _Ray, in vec4 _Plane, out float _Distance)
-{
-    _Distance = -dot(_Plane, vec4(_Ray.origin, 1.0f)) / dot(_Plane.xyz, _Ray.dir);
-
-    return _Distance > 0.0;
-}
-
-bool RayRectIntersect(SRay ray, SRect rect, out float t)
-{
-    bool intersect = RayPlaneIntersect(ray, rect.plane, t);
-    if (intersect)
-    {
-        vec3 pos  = ray.origin + ray.dir*t;
-        vec3 lpos = pos - rect.center;
-        
-        float x = dot(lpos, rect.dirx);
-        float y = dot(lpos, rect.diry);    
-
-        if (abs(x) > rect.halfx || abs(y) > rect.halfy)
-        {
-            intersect = false;
-        }
-    }
-
-    return intersect;
-}
-
-// -----------------------------------------------------------------------------
-// Camera functions
-// -----------------------------------------------------------------------------
-vec3 mul(mat3 m, vec3 v)
-{
-    return m * v;
-}
-
-mat3 mul(mat3 m1, mat3 m2)
-{
-    return m1 * m2;
-}
-
-vec3 rotation_y(vec3 v, float a)
-{
-    vec3 r;
-
-    r.x =  v.x*cos(a) + v.z*sin(a);
-    r.y =  v.y;
-    r.z = -v.x*sin(a) + v.z*cos(a);
-
-    return r;
-}
-
-vec3 rotation_z(vec3 v, float a)
-{
-    vec3 r;
-
-    r.x =  v.x*cos(a) - v.y*sin(a);
-    r.y =  v.x*sin(a) + v.y*cos(a);
-    r.z =  v.z;
-
-    return r;
-}
-
-vec3 rotation_yz(vec3 v, float ay, float az)
-{
-    return rotation_z(rotation_y(v, ay), az);
-}
-
-mat3 transpose(mat3 v)
-{
-    mat3 tmp;
-
-    tmp[0] = vec3(v[0].x, v[1].x, v[2].x);
-    tmp[1] = vec3(v[0].y, v[1].y, v[2].y);
-    tmp[2] = vec3(v[0].z, v[1].z, v[2].z);
-
-    return tmp;
-}
-
-// -----------------------------------------------------------------------------
 // Linearly Transformed Cosines
 // -----------------------------------------------------------------------------
-float IntegrateEdge(vec3 v1, vec3 v2)
+float IntegrateEdge(in vec3 _V1, in vec3 _V2)
 {
-    float cosTheta = dot(v1, v2);
-    float theta = acos(cosTheta);    
-    float res = cross(v1, v2).z * ((theta > 0.001) ? theta/sin(theta) : 1.0);
+    float CosTheta = dot(_V1, _V2);
+    float Theta    = acos(CosTheta);    
+    float Result   = cross(_V1, _V2).z * ((Theta > 0.001f) ? Theta / sin(Theta) : 1.0f);
 
-    return res;
+    return Result;
 }
+
+// -----------------------------------------------------------------------------
 
 void ClipQuadToHorizon(inout vec3 L[5], out int n)
 {
+    // -----------------------------------------------------------------------------
     // detect clipping config
+    // -----------------------------------------------------------------------------
     int config = 0;
+
     if (L[0].z > 0.0) config += 1;
     if (L[1].z > 0.0) config += 2;
     if (L[2].z > 0.0) config += 4;
     if (L[3].z > 0.0) config += 8;
 
+    // -----------------------------------------------------------------------------
     // clip
+    // -----------------------------------------------------------------------------
     n = 0;
 
     if (config == 0)
@@ -272,66 +180,84 @@ void ClipQuadToHorizon(inout vec3 L[5], out int n)
     }
     
     if (n == 3)
-        L[3] = L[0];
-    if (n == 4)
-        L[4] = L[0];
-}
-
-
-vec3 LTC_Evaluate(vec3 N, vec3 V, vec3 P, mat3 Minv, vec3 points[4], bool twoSided)
-{
-    // construct orthonormal basis around N
-    vec3 T1, T2;
-    T1 = normalize(V - N*dot(V, N));
-    T2 = cross(N, T1);
-
-    // rotate area light in (T1, T2, N) basis
-    Minv = mul(Minv, transpose(mat3(T1, T2, N)));
-
-    // polygon (allocate 5 vertices for clipping)
-    vec3 L[5];
-    L[0] = mul(Minv, points[0] - P);
-    L[1] = mul(Minv, points[1] - P);
-    L[2] = mul(Minv, points[2] - P);
-    L[3] = mul(Minv, points[3] - P);
-
-    int n;
-    ClipQuadToHorizon(L, n);
-    
-    if (n == 0)
     {
-        return vec3(0, 0, 0);
+        L[3] = L[0];
     }
 
+    if (n == 4)
+    {
+        L[4] = L[0];
+    }
+}
+
+// -----------------------------------------------------------------------------
+
+vec3 EvaluateLTC(in vec3 _WSNormal, in vec3 _WSViewDirection, in vec3 _WSPosition, in mat3 _MinV, in vec3 _Points[4], in bool _TwoSided)
+{
+    float Sum;
+    vec3  L[5];
+    vec3  T1, T2;
+    int   ClipIndex;
+
+    // -----------------------------------------------------------------------------
+    // construct orthonormal basis around N
+    // -----------------------------------------------------------------------------
+    T1 = normalize(_WSViewDirection - _WSNormal * dot(_WSViewDirection, _WSNormal));
+    T2 = cross(_WSNormal, T1);
+
+    // -----------------------------------------------------------------------------
+    // rotate area light in (T1, T2, N) basis
+    // -----------------------------------------------------------------------------
+    _MinV = _MinV * (transpose(mat3(T1, T2, _WSNormal)));
+
+    // -----------------------------------------------------------------------------
+    // polygon (allocate 5 vertices for clipping)
+    // -----------------------------------------------------------------------------
+    L[0] = _MinV * (_Points[0] - _WSPosition);
+    L[1] = _MinV * (_Points[1] - _WSPosition);
+    L[2] = _MinV * (_Points[2] - _WSPosition);
+    L[3] = _MinV * (_Points[3] - _WSPosition);
+
+    ClipIndex = 0;
+
+    ClipQuadToHorizon(L, ClipIndex);
+    
+    if (ClipIndex == 0)
+    {
+        return vec3(0.0f, 0.0f, 0.0f);
+    }
+
+    // -----------------------------------------------------------------------------
     // project onto sphere
+    // -----------------------------------------------------------------------------
     L[0] = normalize(L[0]);
     L[1] = normalize(L[1]);
     L[2] = normalize(L[2]);
     L[3] = normalize(L[3]);
     L[4] = normalize(L[4]);
 
+    // -----------------------------------------------------------------------------
     // integrate
-    float sum = 0.0;
+    // -----------------------------------------------------------------------------
+    Sum = 0.0f;
 
-    sum += IntegrateEdge(L[0], L[1]);
-    sum += IntegrateEdge(L[1], L[2]);
-    sum += IntegrateEdge(L[2], L[3]);
+    Sum += IntegrateEdge(L[0], L[1]);
+    Sum += IntegrateEdge(L[1], L[2]);
+    Sum += IntegrateEdge(L[2], L[3]);
 
-    if (n >= 4)
+    if (ClipIndex >= 4)
     {
-        sum += IntegrateEdge(L[3], L[4]);
+        Sum += IntegrateEdge(L[3], L[4]);
     }
 
-    if (n == 5)
+    if (ClipIndex == 5)
     {
-        sum += IntegrateEdge(L[4], L[0]);
+        Sum += IntegrateEdge(L[4], L[0]);
     }
 
-    sum = twoSided ? abs(sum) : max(0.0, sum);
+    Sum = _TwoSided ? abs(Sum) : max(0.0, Sum);
 
-    vec3 Lo_i = vec3(sum, sum, sum);
-
-    return Lo_i;
+    return vec3(Sum, Sum, Sum);
 }
 
 // -----------------------------------------------------------------------------
@@ -372,8 +298,8 @@ void main()
     // -----------------------------------------------------------------------------
     // Create default rect in world
     // -----------------------------------------------------------------------------
-    SRect rect;
-    vec3  points[4];
+    SRectangle Lightbulb;
+    vec3  LightbulbCorners[4];
     
     vec3 LightDirection = -normalize(vec3(-2.0f, -2.0f, -1.0f));
     vec3 Left           =  normalize(vec3(0.0f, rotz, 1.0f));
@@ -381,71 +307,69 @@ void main()
     
     Left = cross(LightDirection, Right);
     
-    vec3 rectNormal = LightDirection;
+    Lightbulb.m_DirectionX = Right;
+    Lightbulb.m_DirectionY = Left;
     
-    rect.dirx = Right;
-    rect.diry = Left;
-    
-    rect.center = vec3(0.0f, 0.0f, 10.0f);
-    rect.halfx  = 0.5f * 8;
-    rect.halfy  = 0.5f * 8;
+    Lightbulb.m_Center = vec3(0.0f, 0.0f, 10.0f);
+    Lightbulb.m_HalfWidth  = 0.5f * 8;
+    Lightbulb.m_HalfHeight  = 0.5f * 8;
 
-    rect.plane = vec4(rectNormal, -dot(rectNormal, rect.center));
+    Lightbulb.m_Normal = vec4(LightDirection, -dot(LightDirection, Lightbulb.m_Center));
 
-    vec3 ex = rect.halfx * rect.dirx;
-    vec3 ey = rect.halfy * rect.diry;
+    vec3 ex = Lightbulb.m_HalfWidth  * Lightbulb.m_DirectionX;
+    vec3 ey = Lightbulb.m_HalfHeight * Lightbulb.m_DirectionY;
 
-    points[0] = rect.center - ex - ey;
-    points[1] = rect.center + ex - ey;
-    points[2] = rect.center + ex + ey;
-    points[3] = rect.center - ex + ey;
+    LightbulbCorners[0] = Lightbulb.m_Center - ex - ey;
+    LightbulbCorners[1] = Lightbulb.m_Center + ex - ey;
+    LightbulbCorners[2] = Lightbulb.m_Center + ex + ey;
+    LightbulbCorners[3] = Lightbulb.m_Center - ex + ey;
 
     // -----------------------------------------------------------------------------
     // LTC
     // -----------------------------------------------------------------------------
-    vec3 Output = vec3(0);
+    vec3 Output = vec3(0.0f);
 
     vec3 WSViewDirection = normalize(g_ViewPosition.xyz - Data.m_WSPosition);
     
     float Theta = acos(dot(Data.m_WSNormal, WSViewDirection));
 
-    vec2 UV = vec2(Data.m_Roughness, Theta / (0.5f * pi));
+    vec2 UV = vec2(Data.m_Roughness, Theta / (0.5f * PI));
 
     UV = UV * LUT_SCALE + LUT_BIAS;
     
-    vec4 t = texture2D(ltc_mat, UV);
+    vec4 LTCMaterial = texture2D(ps_LTCMaterial, UV);
 
-    mat3 Minv = mat3(
-        vec3(  1,   0, t.y),
-        vec3(  0, t.z,   0),
-        vec3(t.w,   0, t.x)
+    mat3 LTCMatrix = mat3(
+        vec3(1.0f         , 0.0f         , LTCMaterial.y),
+        vec3(0.0f         , LTCMaterial.z, 0.0f         ),
+        vec3(LTCMaterial.w, 0.0f         , LTCMaterial.x)
     );
     
-    vec3 Specular = LTC_Evaluate(Data.m_WSNormal, WSViewDirection, WSPosition, Minv, points, false);
+    vec3 Specular = EvaluateLTC(Data.m_WSNormal, WSViewDirection, WSPosition, LTCMatrix, LightbulbCorners, false);
 
-    Specular *= texture2D(ltc_mag, UV).w;
+    Specular *= texture2D(ps_LTCMag, UV).w;
     
-    vec3 Diffuse = LTC_Evaluate(Data.m_WSNormal, WSViewDirection, WSPosition, mat3(1), points, false); 
+    vec3 Diffuse = EvaluateLTC(Data.m_WSNormal, WSViewDirection, WSPosition, mat3(1), LightbulbCorners, false); 
     
     Output  = vec3(intensity) * (scolor.xyz * Specular + dcolor.xyz * Diffuse);
 
-    Output /= 2.0f * pi;
+    Output /= 2.0f * PI;
 
     // -----------------------------------------------------------------------------
-    // Generate ray from camera
+    // Check if light bulb is visible
     // -----------------------------------------------------------------------------
-    SRay ray;
+    SRay Ray;
 
-    ray.origin = g_ViewPosition.xyz;
-    ray.dir    = -WSViewDirection.xyz;
+    Ray.m_Origin    = g_ViewPosition.xyz;
+    Ray.m_Direction = -WSViewDirection.xyz;
 
-    float distToFloor = length(Data.m_WSPosition - g_ViewPosition.xyz);
+    float DistanceToGround = length(Data.m_WSPosition - g_ViewPosition.xyz);
 
-    float distToRect = 0.0f;
+    float DistanceToLightbulb = 0.0f;
 
-    if (RayRectIntersect(ray, rect, distToRect))
+    if (RayRectIntersect(Ray, Lightbulb, DistanceToLightbulb))
     {
-        if (distToRect < distToFloor)
+        if (DistanceToLightbulb < DistanceToGround)
         {
             Output = vec3(intensity);
         }
