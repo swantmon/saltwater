@@ -6,16 +6,16 @@
 namespace Dt
 {
     CAreaLightFacet::CAreaLightFacet()
-        : m_Direction                          (0.01f, 0.01f, -1.0f)
-        , m_Color                              ()
-        , m_Lightness                          ()
-        , m_Temperature                        (0.0f)
-        , m_Intensity                          (0.0f)
-        , m_Rotation                           (0.0f)
-        , m_Width                              (0.0f)
-        , m_Height                             (0.0f)
-        , m_IsTwoSided                         (false)
-        , m_HasTemperature                     (false)
+        : m_Direction     (0.01f, 0.01f, -1.0f)
+        , m_Color         ()
+        , m_Lightness     ()
+        , m_Temperature   (0.0f)
+        , m_Intensity     (0.0f)
+        , m_Rotation      (0.0f)
+        , m_Width         (0.0f)
+        , m_Height        (0.0f)
+        , m_IsTwoSided    (false)
+        , m_HasTemperature(false)
     {
 
     }
@@ -200,6 +200,6 @@ namespace Dt
         // -----------------------------------------------------------------------------
         // Luminous power (lumen) is converted into luminous intensity (candela).
         // -----------------------------------------------------------------------------
-        m_Lightness = Color * (m_Intensity / (2.0f * m_Width * 2.0f * m_Height * Base::SConstants<float>::s_Pi));
+        m_Lightness = Color * (m_Intensity / (m_Width * m_Height * Base::SConstants<float>::s_Pi));
     }
 } // namespace Dt
