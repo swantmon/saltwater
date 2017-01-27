@@ -10,6 +10,7 @@
 
 #include "graphic/gfx_actor_renderer.h"
 #include "graphic/gfx_ar_renderer.h"
+#include "graphic/gfx_area_light_manager.h"
 #include "graphic/gfx_background_renderer.h"
 #include "graphic/gfx_camera_actor_manager.h"
 #include "graphic/gfx_debug_renderer.h"
@@ -80,6 +81,7 @@ namespace
         SkyManager        ::Update();
         LightProbeManager ::Update();
         PointLightManager ::Update();
+        AreaLightManager  ::Update();
 
         Main::UploadPerFrameConstantBuffers();
         

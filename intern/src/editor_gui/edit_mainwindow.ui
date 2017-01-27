@@ -141,6 +141,7 @@
       <string>&amp;Lights</string>
      </property>
      <addaction name="m_pActionPoint"/>
+     <addaction name="m_pActionArea"/>
      <addaction name="m_pActionSun"/>
      <addaction name="m_pActionEnvironment"/>
      <addaction name="m_pActionGlobalProbe"/>
@@ -604,6 +605,11 @@
     <string>&amp;Empty</string>
    </property>
   </action>
+  <action name="m_pActionArea">
+   <property name="text">
+    <string>Area</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -663,8 +669,8 @@
    <slot>switchPlayingCurrentScene()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>362</x>
-     <y>113</y>
+     <x>359</x>
+     <y>125</y>
     </hint>
     <hint type="destinationlabel">
      <x>736</x>
@@ -779,8 +785,8 @@
      <y>311</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1914</x>
-     <y>61</y>
+     <x>1913</x>
+     <y>83</y>
     </hint>
    </hints>
   </connection>
@@ -1056,6 +1062,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_pActionArea</sender>
+   <signal>triggered()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>createNewLightArea()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>961</x>
+     <y>490</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>switchPlayingCurrentScene()</slot>
@@ -1078,5 +1100,6 @@
   <slot>toggleInspectorDock()</slot>
   <slot>toggleConsoleDock()</slot>
   <slot>toggleAssetsDock()</slot>
+  <slot>createNewLightArea()</slot>
  </slots>
 </ui>

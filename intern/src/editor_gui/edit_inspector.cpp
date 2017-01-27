@@ -8,22 +8,23 @@ namespace Edit
 {
     CInspector::CInspector(QWidget* _pParent)
         : QWidget              (_pParent)
-        , m_pInspectorLayout   ()
-        , m_pEntityWidget      ()
-        , m_pPointlightWidget  ()
-        , m_pSunWidget         ()
-        , m_pTransformWidget   ()
-        , m_pEnvironmentWidget ()
-        , m_pGlobalProbeWidget ()
-        , m_pBloomWidget       ()
-        , m_pDOFWidget         ()
-        , m_pFXAAWidget        ()
-        , m_pSSRWidget         ()
-        , m_pVolumeFogWidget   ()
-        , m_pMaterialWidget    ()
-        , m_pCameraWidget      ()
-        , m_pARControllerWidget()
-        , m_pTextureWidget     ()
+        , m_pInspectorLayout   (0)
+        , m_pEntityWidget      (0)
+        , m_pPointlightWidget  (0)
+        , m_pArealightWidget   (0)
+        , m_pSunWidget         (0)
+        , m_pTransformWidget   (0)
+        , m_pEnvironmentWidget (0)
+        , m_pGlobalProbeWidget (0)
+        , m_pBloomWidget       (0)
+        , m_pDOFWidget         (0)
+        , m_pFXAAWidget        (0)
+        , m_pSSRWidget         (0)
+        , m_pVolumeFogWidget   (0)
+        , m_pMaterialWidget    (0)
+        , m_pCameraWidget      (0)
+        , m_pARControllerWidget(0)
+        , m_pTextureWidget     (0)
         , m_ActiveEntityID     (-1)
     {
         // -----------------------------------------------------------------------------
@@ -38,6 +39,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         m_pEntityWidget       = new CInspectorEntity();
         m_pPointlightWidget   = new CInspectorPointlight();
+        m_pArealightWidget    = new CInspectorArealight();
         m_pSunWidget          = new CInspectorSun();
         m_pTransformWidget    = new CInspectorTransformation();
         m_pEnvironmentWidget  = new CInspectorEnvironment();
@@ -55,6 +57,7 @@ namespace Edit
         m_pInspectorContent->addWidget(m_pEntityWidget);
         m_pInspectorContent->addWidget(m_pTransformWidget);
         m_pInspectorContent->addWidget(m_pPointlightWidget);
+        m_pInspectorContent->addWidget(m_pArealightWidget);
         m_pInspectorContent->addWidget(m_pSunWidget);
         m_pInspectorContent->addWidget(m_pEnvironmentWidget);
         m_pInspectorContent->addWidget(m_pGlobalProbeWidget);
@@ -82,6 +85,7 @@ namespace Edit
     {
         delete m_pEntityWidget;
         delete m_pPointlightWidget;
+        delete m_pArealightWidget;
         delete m_pSunWidget;
         delete m_pTransformWidget;
         delete m_pEnvironmentWidget;
@@ -96,6 +100,7 @@ namespace Edit
 
         m_pEntityWidget      = 0;
         m_pPointlightWidget  = 0;
+        m_pArealightWidget   = 0;
         m_pSunWidget         = 0;
         m_pTransformWidget   = 0;
         m_pEnvironmentWidget = 0;
@@ -248,19 +253,25 @@ namespace Edit
 
                     m_pPointlightWidget->setVisible(true);
                 }
-                else if (Type == 1) // Sun
+                else if (Type == 1) // Area
+                {
+                    m_pArealightWidget->RequestInformation(EntityID);
+
+                    m_pArealightWidget->setVisible(true);
+                }
+                else if (Type == 2) // Sun
                 {
                     m_pSunWidget->RequestInformation(EntityID);
 
                     m_pSunWidget->setVisible(true);
                 }
-                else if (Type == 2) // Probe
+                else if (Type == 3) // Probe
                 {
                     m_pGlobalProbeWidget->RequestInformation(EntityID);
 
                     m_pGlobalProbeWidget->setVisible(true);
                 }
-                else if (Type == 3) // Environment
+                else if (Type == 4) // Environment
                 {
                     m_pEnvironmentWidget->RequestInformation(EntityID);
 
@@ -325,6 +336,7 @@ namespace Edit
         m_pEntityWidget      ->setVisible(false);
         m_pTransformWidget   ->setVisible(false);
         m_pPointlightWidget  ->setVisible(false);
+        m_pArealightWidget   ->setVisible(false);
         m_pSunWidget         ->setVisible(false);
         m_pEnvironmentWidget ->setVisible(false);
         m_pGlobalProbeWidget ->setVisible(false);

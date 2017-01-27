@@ -236,6 +236,12 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_light_indirect_renderer.cpp">
       <Filter>engine\renderer</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_area_light_facet.cpp">
+      <Filter>engine\map\lights\area light</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_area_light_manager.cpp">
+      <Filter>engine\map\lights\area light</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\graphic\gfx_debug_interface.h">
@@ -527,6 +533,12 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_ltc_look_up_textures.h">
       <Filter>engine\renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_area_light_facet.h">
+      <Filter>engine\map\lights\area light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_area_light_manager.h">
+      <Filter>engine\map\lights\area light</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="interface">
@@ -687,6 +699,9 @@
     </Filter>
     <Filter Include="engine\map\actors\camera">
       <UniqueIdentifier>{9e400c53-a975-4c85-9026-d24010c20ccc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\map\lights\area light">
+      <UniqueIdentifier>{7713c0bf-9988-4696-8dfc-fe318fab49c1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

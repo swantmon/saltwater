@@ -6,6 +6,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "data/data_area_light_facet.h"
 #include "data/data_entity.h"
 #include "data/data_light_type.h"
 #include "data/data_map.h"
@@ -63,11 +64,6 @@ namespace
         void Render();
         
     private:
-        
-        struct SPerDrawCallConstantBuffer
-        {
-            Base::Float4x4 m_ModelMatrix;
-        };
                 
         struct SAreaLightProperties
         {
@@ -81,6 +77,16 @@ namespace
             float        m_IsTwoSided;
             unsigned int m_ExposureHistoryIndex;
         };
+
+        struct SRenderJob
+        {
+            Dt::CAreaLightFacet* m_pDtLightFacet;
+            Dt::CEntity*         m_pDtEntity;
+        };
+
+    private:
+
+        typedef std::vector<SRenderJob> CRenderJobs;
         
     private:
         
@@ -98,6 +104,12 @@ namespace
 
         CRenderContextPtr m_DefaultRenderContextPtr;
         CRenderContextPtr m_LightRenderContextPtr;
+
+        CRenderJobs m_RenderJobs;
+
+    private:
+
+        void BuildRenderJobs();
     };
 } // namespace
 
@@ -112,6 +124,7 @@ namespace
         , m_LTCAreaLightShaderPtr   ()
         , m_DefaultRenderContextPtr ()
         , m_LightRenderContextPtr   ()
+        , m_RenderJobs              ()
     {
     }
     
@@ -141,6 +154,8 @@ namespace
         m_LTCTextureSetPtr         = 0;
         m_DefaultRenderContextPtr  = 0;
         m_LightRenderContextPtr    = 0;
+
+        m_RenderJobs.clear();
     }
     
     // -----------------------------------------------------------------------------
@@ -259,32 +274,20 @@ namespace
     
     void CGfxAreaLightRenderer::OnSetupBuffers()
     {
+        SBufferDescriptor ConstantBufferDesc;
+
         // -----------------------------------------------------------------------------
         // Setup view buffer for post rendering
         // -----------------------------------------------------------------------------
-        SBufferDescriptor ConstanteBufferDesc;
+        ConstantBufferDesc.m_Stride        = 0;
+        ConstantBufferDesc.m_Usage         = CBuffer::GPUReadWrite;
+        ConstantBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        ConstantBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(SAreaLightProperties);
+        ConstantBufferDesc.m_pBytes        = 0;
+        ConstantBufferDesc.m_pClassKey     = 0;
         
-        ConstanteBufferDesc.m_Stride        = 0;
-        ConstanteBufferDesc.m_Usage         = CBuffer::GPUReadWrite;
-        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
-        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SPerDrawCallConstantBuffer);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
-        
-        CBufferPtr PerDrawCallConstantBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
-        
-        // -----------------------------------------------------------------------------
-        
-        ConstanteBufferDesc.m_Stride        = 0;
-        ConstanteBufferDesc.m_Usage         = CBuffer::GPUReadWrite;
-        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
-        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SAreaLightProperties);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
-        
-        m_AreaLightBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        m_AreaLightBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -333,6 +336,7 @@ namespace
     
     void CGfxAreaLightRenderer::Update()
     {
+        BuildRenderJobs();
     }
     
     // -----------------------------------------------------------------------------
@@ -344,7 +348,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Rendering
         // -----------------------------------------------------------------------------
-        const unsigned int pOffset[] = { 0, 0 };
+        CRenderJobs::const_iterator CurrentRenderJob;
+        CRenderJobs::const_iterator EndOfRenderJobs;
+        const unsigned int          pOffset[] = { 0, 0 };
 
         ContextManager::SetRenderContext(m_LightRenderContextPtr);
 
@@ -382,28 +388,39 @@ namespace
         // -----------------------------------------------------------------------------
         // Render
         // -----------------------------------------------------------------------------
-        Base::Float3 LightPosition  = Base::Float3(0.0f, 0.0f, 10.0f);
-        Base::Float3 LightDirection = Base::Float3(-2.0f, -2.0f, -1.0f).Normalize() * Base::Float3(-1.0f);
-        Base::Float3 Left           = Base::Float3(0.0f, 0.123f, 1.0f).Normalize();
-        Base::Float3 Right          = LightDirection.CrossProduct(Left).Normalize();
+        CurrentRenderJob = m_RenderJobs.begin();
+        EndOfRenderJobs  = m_RenderJobs.end();
 
-        Left = LightDirection.CrossProduct(Right);
+        for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
+        {
+            Dt::CEntity*         pDtEntity     = CurrentRenderJob->m_pDtEntity;
+            Dt::CAreaLightFacet* pDtLightFacet = CurrentRenderJob->m_pDtLightFacet;
 
-        SAreaLightProperties LightBuffer;
+            assert(pDtEntity && pDtLightFacet);
 
-        LightBuffer.m_Color                = Base::Float4(100000.0f);
-        LightBuffer.m_Position             = Base::Float4(LightPosition, 1.0f);
-        LightBuffer.m_DirectionX           = Base::Float4(Right, 0.0f);
-        LightBuffer.m_DirectionY           = Base::Float4(Left, 0.0f);
-        LightBuffer.m_HalfWidth            = 0.5f * 8.0f;
-        LightBuffer.m_HalfHeight           = 0.5f * 8.0f;
-        LightBuffer.m_Plane                = Base::Float4(LightDirection, -(LightDirection.DotProduct(LightPosition)));
-        LightBuffer.m_IsTwoSided           = 1.0f;
-        LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
+            Base::Float3 LightPosition  = pDtEntity->GetWorldPosition();
+            Base::Float3 LightDirection = pDtLightFacet->GetDirection().Normalize() * Base::Float3(-1.0f);
+            Base::Float3 Left           = Base::Float3(0.0f, pDtLightFacet->GetRotation(), 1.0f).Normalize();
+            Base::Float3 Right          = LightDirection.CrossProduct(Left).Normalize();
 
-        BufferManager::UploadConstantBufferData(m_AreaLightBufferPtr, &LightBuffer);
+            Left = LightDirection.CrossProduct(Right);
 
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+            SAreaLightProperties LightBuffer;
+
+            LightBuffer.m_Color                = Base::Float4(pDtLightFacet->GetLightness(), 1.0f);
+            LightBuffer.m_Position             = Base::Float4(LightPosition, 1.0f);
+            LightBuffer.m_DirectionX           = Base::Float4(Right, 0.0f);
+            LightBuffer.m_DirectionY           = Base::Float4(Left, 0.0f);
+            LightBuffer.m_HalfWidth            = 0.5f * pDtLightFacet->GetWidth();
+            LightBuffer.m_HalfHeight           = 0.5f * pDtLightFacet->GetHeight();
+            LightBuffer.m_Plane                = Base::Float4(LightDirection, -(LightDirection.DotProduct(LightPosition)));
+            LightBuffer.m_IsTwoSided           = pDtLightFacet->GetIsTwoSided() ? 1.0f : 0.0f;
+            LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
+
+            BufferManager::UploadConstantBufferData(m_AreaLightBufferPtr, &LightBuffer);
+
+            ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        }
 
         // -----------------------------------------------------------------------------
         // Reset everything
@@ -443,8 +460,47 @@ namespace
         
         Performance::EndEvent();
     }
-} // namespace
 
+    // -----------------------------------------------------------------------------
+
+    void CGfxAreaLightRenderer::BuildRenderJobs()
+    {
+        // -----------------------------------------------------------------------------
+        // Clear current render jobs
+        // -----------------------------------------------------------------------------
+        m_RenderJobs.clear();
+
+        // -----------------------------------------------------------------------------
+        // Iterate throw every entity inside this map
+        // -----------------------------------------------------------------------------
+        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
+        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
+
+        for (; CurrentEntity != EndOfEntities; )
+        {
+            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+
+            if (rCurrentEntity.GetType() != Dt::SLightType::Area)
+            {
+                CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
+
+                continue;
+            }
+
+            SRenderJob NewRenderJob;
+
+            NewRenderJob.m_pDtLightFacet = static_cast<Dt::CAreaLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+            NewRenderJob.m_pDtEntity     = &rCurrentEntity;
+
+            m_RenderJobs.push_back(NewRenderJob);
+
+            // -----------------------------------------------------------------------------
+            // Get next light
+            // -----------------------------------------------------------------------------
+            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
+        }
+    }
+} // namespace
 
 namespace Gfx
 {

@@ -1,0 +1,194 @@
+﻿
+#include "base/base_vector3.h"
+
+#include "editor_gui/edit_inspector_arealight.h"
+
+#include "editor_port/edit_message_manager.h"
+
+#include <QColorDialog>
+
+namespace Edit
+{
+    CInspectorArealight::CInspectorArealight(QWidget* _pParent)
+        : QWidget          (_pParent)
+        , m_CurrentEntityID(-1)
+    {
+        // -----------------------------------------------------------------------------
+        // Setup UI
+        // -----------------------------------------------------------------------------
+        setupUi(this);
+
+        // -----------------------------------------------------------------------------
+        // Color picker
+        // -----------------------------------------------------------------------------
+        QPalette ButtonPalette = m_pPickColorButton->palette();
+
+        ButtonPalette.setColor(QPalette::Button, QColor(Qt::white));
+
+        m_pPickColorButton->setPalette(ButtonPalette);
+
+        m_pPickColorButton->update();
+
+        // -----------------------------------------------------------------------------
+        // Messages
+        // -----------------------------------------------------------------------------
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Light_Arealight_Info, EDIT_RECEIVE_MESSAGE(&CInspectorArealight::OnEntityInfoArealight));
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CInspectorArealight::~CInspectorArealight()
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorArealight::valueChanged()
+    {
+        // -----------------------------------------------------------------------------
+        // Read values
+        // -----------------------------------------------------------------------------
+        int ColorMode = m_pColorModeCB->currentIndex();
+
+        QPalette ButtonPalette = m_pPickColorButton->palette();
+
+        QColor RGB = ButtonPalette.color(QPalette::Button);
+
+        Base::Float3 Color = Base::Float3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
+
+        float Temperature = m_pTemperatureEdit->text().toFloat();
+        float Intensity   = m_pIntensityEdit->text().toFloat();
+        float Rotation    = m_pRotationEdit->text().toFloat();
+        float Width       = m_pWidthEdit->text().toFloat();
+        float Height      = m_pHeightEdit->text().toFloat();
+        bool  IsTwoSided  = m_IsTwoSidedCB->isChecked();
+
+        Base::Float3 Direction = Base::Float3(m_pDirectionXEdit->text().toFloat(), m_pDirectionYEdit->text().toFloat(), m_pDirectionZEdit->text().toFloat());
+
+        // -----------------------------------------------------------------------------
+        // Send message
+        // -----------------------------------------------------------------------------
+        Edit::CMessage NewMessage;
+
+        NewMessage.PutInt(m_CurrentEntityID);
+
+        NewMessage.PutInt(ColorMode);
+
+        NewMessage.PutFloat(Color[0]);
+        NewMessage.PutFloat(Color[1]);
+        NewMessage.PutFloat(Color[2]);
+
+        NewMessage.PutFloat(Temperature);
+        NewMessage.PutFloat(Intensity);
+        NewMessage.PutFloat(Rotation);
+        NewMessage.PutFloat(Width);
+        NewMessage.PutFloat(Height);
+        NewMessage.PutBool(IsTwoSided);
+
+        NewMessage.PutFloat(Direction[0]);
+        NewMessage.PutFloat(Direction[1]);
+        NewMessage.PutFloat(Direction[2]);
+
+        NewMessage.Reset();
+
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Light_Arealight_Update, NewMessage);
+
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorArealight::pickColorFromDialog()
+    {
+        QColor NewColor = QColorDialog::getColor();
+
+        QPalette ButtonPalette = m_pPickColorButton->palette();
+
+        ButtonPalette.setColor(QPalette::Button, NewColor);
+
+        m_pPickColorButton->setPalette(ButtonPalette);
+
+        m_pPickColorButton->update();
+
+        valueChanged();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorArealight::RequestInformation(unsigned int _EntityID)
+    {
+        m_CurrentEntityID = _EntityID;
+
+        CMessage NewMessage;
+
+        NewMessage.PutInt(m_CurrentEntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Light_Arealight_Info, NewMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorArealight::OnEntityInfoArealight(Edit::CMessage& _rMessage)
+    {
+        float R, G, B;
+        float X, Y, Z;
+
+        // -----------------------------------------------------------------------------
+        // Read values
+        // -----------------------------------------------------------------------------
+        int EntityID  = _rMessage.GetInt();
+        int ColorMode = _rMessage.GetInt();
+
+        R = _rMessage.GetFloat();
+        G = _rMessage.GetFloat();
+        B = _rMessage.GetFloat();
+
+        Base::Int3 Color = Base::Int3(R * 255, G * 255, B * 255);
+
+        float Temperature = _rMessage.GetFloat();
+        float Intensity   = _rMessage.GetFloat();
+        float Rotation    = _rMessage.GetFloat();
+        float Width       = _rMessage.GetFloat();
+        float Height      = _rMessage.GetFloat();
+        bool  IsTwoSided  = _rMessage.GetBool();
+
+        X = _rMessage.GetFloat();
+        Y = _rMessage.GetFloat();
+        Z = _rMessage.GetFloat();
+
+        Base::Float3 Direction = Base::Float3(X, Y, Z);
+
+
+        // -----------------------------------------------------------------------------
+        // Set values
+        // -----------------------------------------------------------------------------
+        m_pColorModeCB    ->blockSignals(true);
+        m_IsTwoSidedCB    ->blockSignals(true);
+
+        m_pColorModeCB->setCurrentIndex(ColorMode);
+
+        QPalette ButtonPalette = m_pPickColorButton->palette();
+
+        ButtonPalette.setColor(QPalette::Button, QColor(Color[0], Color[1], Color[2]));
+
+        m_pPickColorButton->setPalette(ButtonPalette);
+
+        m_pPickColorButton->update();
+
+        m_pTemperatureEdit->setText(QString::number(Temperature));
+        m_pIntensityEdit  ->setText(QString::number(Intensity));
+        m_pRotationEdit   ->setText(QString::number(Rotation));
+        m_pWidthEdit      ->setText(QString::number(Width));
+        m_pHeightEdit     ->setText(QString::number(Height));
+        m_IsTwoSidedCB    ->setChecked(IsTwoSided);
+
+        m_pDirectionXEdit->setText(QString::number(Direction[0]));
+        m_pDirectionYEdit->setText(QString::number(Direction[1]));
+        m_pDirectionZEdit->setText(QString::number(Direction[2]));
+
+        m_pColorModeCB    ->blockSignals(false);
+        m_IsTwoSidedCB    ->blockSignals(false);
+    }
+} // namespace Edit

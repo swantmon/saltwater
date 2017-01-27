@@ -20,6 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\graphic\gfx_application_interface.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_area_light_facet.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_area_light_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_ar_renderer.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_camera_actor_facet.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_camera_actor_manager.cpp" />
@@ -106,6 +108,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\graphic\gfx_application_interface.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_area_light_facet.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_area_light_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_camera_actor_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_camera_actor_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_edit_state.h" />
