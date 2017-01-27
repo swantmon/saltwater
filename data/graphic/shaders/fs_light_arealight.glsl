@@ -438,25 +438,22 @@ void main()
     // -----------------------------------------------------------------------------
     // Generate ray from camera
     // -----------------------------------------------------------------------------
-#define SHOW_BULB 0
-#if SHOW_BULB == 1
     SRay ray;
 
     ray.origin = g_ViewPosition.xyz;
-    ray.dir    = g_ViewDirection.xyz;
+    ray.dir    = -WSViewDirection.xyz;
 
-    float distToFloor = dot(Data.m_WSPosition, g_ViewPosition.xyz);
+    float distToFloor = length(Data.m_WSPosition - g_ViewPosition.xyz);
 
-    float distToRect;
+    float distToRect = 0.0f;
 
     if (RayRectIntersect(ray, rect, distToRect))
     {
-        if ((distToRect < distToFloor))
+        if (distToRect < distToFloor)
         {
             Output = vec3(intensity);
         }
     }
-#endif
 
     out_Output = vec4(Output, 0.0f);
 }
