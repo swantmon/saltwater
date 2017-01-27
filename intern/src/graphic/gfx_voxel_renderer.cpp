@@ -148,6 +148,7 @@ namespace
         CShaderPtr m_VSVisualizeVolume;
         CShaderPtr m_FSVisualizeVolume;
 
+        CShaderPtr m_CSMirrorDepth;
         CShaderPtr m_CSBilateralFilter;
         CShaderPtr m_CSVertexMap;
         CShaderPtr m_CSNormalMap;
@@ -217,6 +218,7 @@ namespace
         m_VSVisualizeVolume = 0;
         m_FSVisualizeVolume = 0;
 
+        m_CSMirrorDepth = 0;
         m_CSBilateralFilter = 0;
         m_CSVertexMap = 0;
         m_CSNormalMap = 0;
@@ -277,13 +279,12 @@ namespace
         m_VSVisualizeVolume = ShaderManager::CompileVS("vs_kinect_visualize_volume.glsl", "main", NumberOfDefines, Defines.data());
         m_FSVisualizeVolume = ShaderManager::CompilePS("fs_kinect_visualize_volume.glsl", "main");
 
+        m_CSMirrorDepth = ShaderManager::CompileCS("cs_kinect_mirror_depth.glsl", "main", NumberOfDefines, Defines.data());
         m_CSBilateralFilter = ShaderManager::CompileCS("cs_kinect_bilateral_filter.glsl", "main", NumberOfDefines, Defines.data());
         m_CSVertexMap = ShaderManager::CompileCS("cs_kinect_vertex_map.glsl", "main", NumberOfDefines, Defines.data());
         m_CSNormalMap = ShaderManager::CompileCS("cs_kinect_normal_map.glsl", "main", NumberOfDefines, Defines.data());
         m_CSDownSample = ShaderManager::CompileCS("cs_kinect_downsample.glsl", "main", NumberOfDefines, Defines.data());
-
         m_CSVolumeIntegration = ShaderManager::CompileCS("cs_kinect_integrate_volume.glsl", "main", NumberOfDefines, Defines.data());
-
         m_CSRaycast = ShaderManager::CompileCS("cs_kinect_raycast.glsl", "main", NumberOfDefines, Defines.data());
 
         m_CSSphere = ShaderManager::CompileCS("cs_kinect_sphere.glsl", "main", NumberOfDefines, Defines.data());
@@ -472,13 +473,25 @@ namespace
         const int WorkGroupsY = (MR::CKinectControl::DepthImageHeight / g_TileSize2D);
 
         //////////////////////////////////////////////////////////////////////////////////////
+        // Mirror depth data
+        //////////////////////////////////////////////////////////////////////////////////////
+
+        Gfx::ContextManager::SetShaderCS(m_CSMirrorDepth);
+        glBindImageTexture(0, m_KinectRawDepthBuffer, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16UI);
+        glDispatchCompute(WorkGroupsX / 2, WorkGroupsY, 1);
+
+        //////////////////////////////////////////////////////////////////////////////////////
         // Bilateral Filter
         //////////////////////////////////////////////////////////////////////////////////////
+
+        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
         Gfx::ContextManager::SetShaderCS(m_CSBilateralFilter);
         glBindImageTexture(0, m_KinectRawDepthBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
         glBindImageTexture(1, m_KinectSmoothDepthBuffer[0], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16UI);
         glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
+
+        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
         for (int PyramidLevel = 0; PyramidLevel < g_PyramidLevels - 1; ++ PyramidLevel)
         {
@@ -498,19 +511,21 @@ namespace
 
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_IntrinsicsConstantBuffer);
 
+        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
         for (int PyramidLevel = 0; PyramidLevel < g_PyramidLevels; ++ PyramidLevel)
         {
             Gfx::ContextManager::SetShaderCS(m_CSVertexMap);
-            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
             glBindImageTexture(0, m_KinectSmoothDepthBuffer[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
             glBindImageTexture(1, m_KinectVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
             glDispatchCompute(WorkGroupsX >> PyramidLevel, WorkGroupsY >> PyramidLevel, 1);			
         }
 
+        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
         for (int PyramidLevel = 0; PyramidLevel < g_PyramidLevels; ++ PyramidLevel)
         {
             Gfx::ContextManager::SetShaderCS(m_CSNormalMap);
-            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
             glBindImageTexture(0, m_KinectVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
             glBindImageTexture(1, m_KinectNormalMap[PyramidLevel], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
             glDispatchCompute(WorkGroupsX >> PyramidLevel, WorkGroupsY >> PyramidLevel, 1);
@@ -611,7 +626,7 @@ namespace
 
         glViewport(0, 0, 1280, 720);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+        
         Performance::EndEvent();
     }
 
