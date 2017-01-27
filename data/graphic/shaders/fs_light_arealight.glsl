@@ -202,12 +202,17 @@ vec3 EvaluateDiffuseLTC(in SSurfaceData _Data, in vec3 _WSViewDirection, in vec3
     T2 = cross(_Data.m_WSNormal, T1);
 
     // -----------------------------------------------------------------------------
+    // rotate area light in (T1, T2, N) basis
+    // -----------------------------------------------------------------------------
+    mat3 MinV = (transpose(mat3(T1, T2, _Data.m_WSNormal)));
+
+    // -----------------------------------------------------------------------------
     // polygon (allocate 5 vertices for clipping)
     // -----------------------------------------------------------------------------
-    L[0] = _Points[0] - _Data.m_WSPosition;
-    L[1] = _Points[1] - _Data.m_WSPosition;
-    L[2] = _Points[2] - _Data.m_WSPosition;
-    L[3] = _Points[3] - _Data.m_WSPosition;
+    L[0] = MinV * (_Points[0] - _Data.m_WSPosition);
+    L[1] = MinV * (_Points[1] - _Data.m_WSPosition);
+    L[2] = MinV * (_Points[2] - _Data.m_WSPosition);
+    L[3] = MinV * (_Points[3] - _Data.m_WSPosition);
 
     ClipIndex = 0;
 
