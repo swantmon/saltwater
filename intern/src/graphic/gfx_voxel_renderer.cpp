@@ -461,6 +461,18 @@ namespace
             glTextureSubImage2D(m_KinectRawDepthBuffer, 0, 0, 0,
                 MR::CKinectControl::DepthImageWidth, MR::CKinectControl::DepthImageHeight,
                 GL_RED_INTEGER, GL_UNSIGNED_SHORT, m_DepthPixels.data());
+
+            //////////////////////////////////////////////////////////////////////////////////////
+            // Mirror depth data
+            //////////////////////////////////////////////////////////////////////////////////////
+
+            const int WorkGroupsX = MR::CKinectControl::DepthImageWidth / g_TileSize2D;
+            const int WorkGroupsY = MR::CKinectControl::DepthImageHeight / g_TileSize2D;
+
+            Gfx::ContextManager::SetShaderCS(m_CSMirrorDepth);
+            glBindImageTexture(0, m_KinectRawDepthBuffer, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16UI);
+            glDispatchCompute(WorkGroupsX / 2, WorkGroupsY, 1);
+
             m_HasNewDepthData = true;
         }
     }
@@ -469,16 +481,8 @@ namespace
     
     void CGfxVoxelRenderer::ReadKinectData()
     {
-        const int WorkGroupsX = (MR::CKinectControl::DepthImageWidth / g_TileSize2D);
-        const int WorkGroupsY = (MR::CKinectControl::DepthImageHeight / g_TileSize2D);
-
-        //////////////////////////////////////////////////////////////////////////////////////
-        // Mirror depth data
-        //////////////////////////////////////////////////////////////////////////////////////
-
-        Gfx::ContextManager::SetShaderCS(m_CSMirrorDepth);
-        glBindImageTexture(0, m_KinectRawDepthBuffer, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16UI);
-        glDispatchCompute(WorkGroupsX / 2, WorkGroupsY, 1);
+        const int WorkGroupsX = MR::CKinectControl::DepthImageWidth / g_TileSize2D;
+        const int WorkGroupsY = MR::CKinectControl::DepthImageHeight / g_TileSize2D;
 
         //////////////////////////////////////////////////////////////////////////////////////
         // Bilateral Filter
