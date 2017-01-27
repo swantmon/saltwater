@@ -16,7 +16,6 @@ struct SRectangle
     vec3  m_DirectionY;
     float m_HalfWidth;
     float m_HalfHeight;
-
     vec4  m_Plane;
 };
 
@@ -26,7 +25,7 @@ bool RayPlaneIntersect(in SRay _Ray, in vec4 _Plane, out float _Distance)
 {
     _Distance = -dot(_Plane, vec4(_Ray.m_Origin, 1.0f)) / dot(_Plane.xyz, _Ray.m_Direction);
 
-    return _Distance > 0.0;
+    return _Distance > 0.0f;
 }
 
 // -----------------------------------------------------------------------------

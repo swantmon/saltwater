@@ -190,31 +190,28 @@ void ClipQuadToHorizon(inout vec3 L[5], out int n)
 
 vec3 EvaluateDiffuseLTC(in SSurfaceData _Data, in vec3 _WSViewDirection, in vec3 _Points[4], in bool _TwoSided)
 {
-    float Sum;
-    vec3  L[5];
-    vec3  T1, T2;
-    int   ClipIndex;
+    // -----------------------------------------------------------------------------
+    // Construct orthonormal basis around world-space normal
+    // -----------------------------------------------------------------------------
+    vec3 T1 = normalize(_WSViewDirection - _Data.m_WSNormal * dot(_WSViewDirection, _Data.m_WSNormal));
+    vec3 T2 = cross(_Data.m_WSNormal, T1);
 
     // -----------------------------------------------------------------------------
-    // construct orthonormal basis around N
-    // -----------------------------------------------------------------------------
-    T1 = normalize(_WSViewDirection - _Data.m_WSNormal * dot(_WSViewDirection, _Data.m_WSNormal));
-    T2 = cross(_Data.m_WSNormal, T1);
-
-    // -----------------------------------------------------------------------------
-    // rotate area light in (T1, T2, N) basis
+    // Rotate area light in (T1, T2 and world-space normal) basis
     // -----------------------------------------------------------------------------
     mat3 MinV = (transpose(mat3(T1, T2, _Data.m_WSNormal)));
 
     // -----------------------------------------------------------------------------
-    // polygon (allocate 5 vertices for clipping)
+    // Polygon (allocate 5 vertices for clipping)
     // -----------------------------------------------------------------------------
+    vec3 L[5];
+
     L[0] = MinV * (_Points[0] - _Data.m_WSPosition);
     L[1] = MinV * (_Points[1] - _Data.m_WSPosition);
     L[2] = MinV * (_Points[2] - _Data.m_WSPosition);
     L[3] = MinV * (_Points[3] - _Data.m_WSPosition);
 
-    ClipIndex = 0;
+    int ClipIndex = 0;
 
     ClipQuadToHorizon(L, ClipIndex);
     
@@ -224,7 +221,7 @@ vec3 EvaluateDiffuseLTC(in SSurfaceData _Data, in vec3 _WSViewDirection, in vec3
     }
 
     // -----------------------------------------------------------------------------
-    // project onto sphere
+    // Project onto sphere
     // -----------------------------------------------------------------------------
     L[0] = normalize(L[0]);
     L[1] = normalize(L[1]);
@@ -233,9 +230,9 @@ vec3 EvaluateDiffuseLTC(in SSurfaceData _Data, in vec3 _WSViewDirection, in vec3
     L[4] = normalize(L[4]);
 
     // -----------------------------------------------------------------------------
-    // integrate
+    // Integrate
     // -----------------------------------------------------------------------------
-    Sum = 0.0f;
+    float Sum = 0.0f;
 
     Sum += IntegrateEdge(L[0], L[1]);
     Sum += IntegrateEdge(L[1], L[2]);
@@ -258,34 +255,31 @@ vec3 EvaluateDiffuseLTC(in SSurfaceData _Data, in vec3 _WSViewDirection, in vec3
 
 // -----------------------------------------------------------------------------
 
-
 vec3 EvaluateSpecularLTC(in SSurfaceData _Data, in vec3 _WSViewDirection, in mat3 _MinV, in vec3 _Points[4], in bool _TwoSided)
 {
-    float Sum;
-    vec3  L[5];
-    vec3  T1, T2;
-    int   ClipIndex;
+    // -----------------------------------------------------------------------------
+    // Construct orthonormal basis around world-space normal
+    // -----------------------------------------------------------------------------
+    vec3 T1 = normalize(_WSViewDirection - _Data.m_WSNormal * dot(_WSViewDirection, _Data.m_WSNormal));
+    vec3 T2 = cross(_Data.m_WSNormal, T1);
 
     // -----------------------------------------------------------------------------
-    // construct orthonormal basis around N
-    // -----------------------------------------------------------------------------
-    T1 = normalize(_WSViewDirection - _Data.m_WSNormal * dot(_WSViewDirection, _Data.m_WSNormal));
-    T2 = cross(_Data.m_WSNormal, T1);
-
-    // -----------------------------------------------------------------------------
-    // rotate area light in (T1, T2, N) basis
+    // Rotate area light in (T1, T2 and world-space normal) basis and depending
+    // on material
     // -----------------------------------------------------------------------------
     _MinV = _MinV * (transpose(mat3(T1, T2, _Data.m_WSNormal)));
 
     // -----------------------------------------------------------------------------
-    // polygon (allocate 5 vertices for clipping)
+    // Polygon (allocate five vertices for clipping)
     // -----------------------------------------------------------------------------
+    vec3 L[5];
+
     L[0] = _MinV * (_Points[0] - _Data.m_WSPosition);
     L[1] = _MinV * (_Points[1] - _Data.m_WSPosition);
     L[2] = _MinV * (_Points[2] - _Data.m_WSPosition);
     L[3] = _MinV * (_Points[3] - _Data.m_WSPosition);
 
-    ClipIndex = 0;
+    int ClipIndex = 0;
 
     ClipQuadToHorizon(L, ClipIndex);
     
@@ -295,7 +289,7 @@ vec3 EvaluateSpecularLTC(in SSurfaceData _Data, in vec3 _WSViewDirection, in mat
     }
 
     // -----------------------------------------------------------------------------
-    // project onto sphere
+    // Project onto sphere
     // -----------------------------------------------------------------------------
     L[0] = normalize(L[0]);
     L[1] = normalize(L[1]);
@@ -304,9 +298,9 @@ vec3 EvaluateSpecularLTC(in SSurfaceData _Data, in vec3 _WSViewDirection, in mat
     L[4] = normalize(L[4]);
 
     // -----------------------------------------------------------------------------
-    // integrate
+    // Integrate
     // -----------------------------------------------------------------------------
-    Sum = 0.0f;
+    float Sum = 0.0f;
 
     Sum += IntegrateEdge(L[0], L[1]);
     Sum += IntegrateEdge(L[1], L[2]);
@@ -363,10 +357,9 @@ void main()
     float AverageExposure = ps_ExposureHistory[m_ExposureHistoryIndex];
 
     // -----------------------------------------------------------------------------
-    // Create default rect in world
+    // Create lightbulb in world based on rectangle
     // -----------------------------------------------------------------------------
     SRectangle Lightbulb;
-    vec3 LightbulbCorners[4];
 
     Lightbulb.m_Center     = m_Position.xyz;
     Lightbulb.m_DirectionX = m_DirectionX.xyz;
@@ -375,13 +368,16 @@ void main()
     Lightbulb.m_HalfHeight = m_HalfHeight;
     Lightbulb.m_Plane      = m_Plane;
 
-    vec3 ex = Lightbulb.m_HalfWidth  * Lightbulb.m_DirectionX;
-    vec3 ey = Lightbulb.m_HalfHeight * Lightbulb.m_DirectionY;
 
-    LightbulbCorners[0] = Lightbulb.m_Center - ex - ey;
-    LightbulbCorners[1] = Lightbulb.m_Center + ex - ey;
-    LightbulbCorners[2] = Lightbulb.m_Center + ex + ey;
-    LightbulbCorners[3] = Lightbulb.m_Center - ex + ey;
+    vec3 LightbulbCorners[4];
+
+    vec3 ExtendX = Lightbulb.m_HalfWidth  * Lightbulb.m_DirectionX;
+    vec3 ExtendY = Lightbulb.m_HalfHeight * Lightbulb.m_DirectionY;
+
+    LightbulbCorners[0] = Lightbulb.m_Center - ExtendX - ExtendY;
+    LightbulbCorners[1] = Lightbulb.m_Center + ExtendX - ExtendY;
+    LightbulbCorners[2] = Lightbulb.m_Center + ExtendX + ExtendY;
+    LightbulbCorners[3] = Lightbulb.m_Center - ExtendX + ExtendY;
 
     // -----------------------------------------------------------------------------
     // LTC
@@ -392,9 +388,7 @@ void main()
     
     float Theta = acos(dot(Data.m_WSNormal, WSViewDirection));
 
-    vec2 UV = vec2(Data.m_Roughness, Theta / (0.5f * PI));
-
-    UV = UV * LUT_SCALE + LUT_BIAS;
+    vec2 UV = vec2(Data.m_Roughness, Theta / (0.5f * PI)) * LUT_SCALE + LUT_BIAS;
     
     vec4 LTCMaterial = texture2D(ps_LTCMaterial, UV);
 
