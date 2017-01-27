@@ -33,6 +33,7 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_mesh_actor_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_point_light_facet.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_point_light_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_renderer_interface.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_sky_facet.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_sky_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_light_area_renderer.cpp" />
@@ -121,6 +122,7 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_mesh_actor_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_point_light_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_point_light_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_renderer_interface.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_selection.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_sky_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_sky_manager.h" />

@@ -187,10 +187,23 @@
     <addaction name="m_pActionReleaseNotes"/>
     <addaction name="m_pActionReportBug"/>
    </widget>
+   <widget class="QMenu" name="menuDebug">
+    <property name="title">
+     <string>Debug</string>
+    </property>
+    <widget class="QMenu" name="menuGraphic">
+     <property name="title">
+      <string>Graphic</string>
+     </property>
+     <addaction name="m_pActionReloadRenderer"/>
+    </widget>
+    <addaction name="menuGraphic"/>
+   </widget>
    <addaction name="m_pMenuFile"/>
    <addaction name="m_pMenuEdit"/>
    <addaction name="m_pMenuAssets"/>
    <addaction name="m_pMenuEntity"/>
+   <addaction name="menuDebug"/>
    <addaction name="m_pMenuWindow"/>
    <addaction name="m_pMenuHelp"/>
   </widget>
@@ -608,6 +621,11 @@
   <action name="m_pActionArea">
    <property name="text">
     <string>Area</string>
+   </property>
+  </action>
+  <action name="m_pActionReloadRenderer">
+   <property name="text">
+    <string>Reload Renderer</string>
    </property>
   </action>
  </widget>
@@ -1078,6 +1096,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_pActionReloadRenderer</sender>
+   <signal>triggered()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>reloadRenderer()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>961</x>
+     <y>490</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>switchPlayingCurrentScene()</slot>
@@ -1101,5 +1135,6 @@
   <slot>toggleConsoleDock()</slot>
   <slot>toggleAssetsDock()</slot>
   <slot>createNewLightArea()</slot>
+  <slot>reloadRenderer()</slot>
  </slots>
 </ui>

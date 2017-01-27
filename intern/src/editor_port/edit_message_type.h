@@ -120,6 +120,8 @@ namespace Edit
 
             Graphic_HighlightEntity,
 
+            Graphic_ReloadRenderer,
+
             NumberOfMembers,
             Undefined = -1,
         };

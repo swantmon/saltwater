@@ -554,6 +554,16 @@ namespace Edit
 
         MessageManager::SendMessage(SGUIMessageType::Entity_Add, NewMessage);
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::reloadRenderer()
+    {
+        Edit::CMessage NewMessage(true);
+
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Graphic_ReloadRenderer, NewMessage);
+    }
+
     // -----------------------------------------------------------------------------
 
     void CMainWindow::changeHistogramSettings()

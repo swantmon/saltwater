@@ -315,7 +315,7 @@ namespace
     
     void CGfxAreaLightRenderer::OnReload()
     {
-        
+        ShaderManager::ReloadShader(m_LTCAreaLightShaderPtr, "fs_light_arealight.glsl", "main");
     }
     
     // -----------------------------------------------------------------------------
@@ -407,7 +407,7 @@ namespace
 
             SAreaLightProperties LightBuffer;
 
-            LightBuffer.m_Color                = Base::Float4(pDtLightFacet->GetLightness(), 1.0f);
+            LightBuffer.m_Color                = Base::Float4(pDtLightFacet->GetLightness(), pDtLightFacet->GetIntensity());
             LightBuffer.m_Position             = Base::Float4(LightPosition, 1.0f);
             LightBuffer.m_DirectionX           = Base::Float4(Right, 0.0f);
             LightBuffer.m_DirectionY           = Base::Float4(Left, 0.0f);

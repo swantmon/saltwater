@@ -35,9 +35,8 @@ namespace ShaderManager
     CShaderPtr CompilePS(const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines = 0, const Base::Char** _ppShaderDefines = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false);
     CShaderPtr CompileCS(const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines = 0, const Base::Char** _ppShaderDefines = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false);
 
+    void ReloadShader(CShaderPtr _ShaderPtr, const Base::Char* _pFileName, const Base::Char* _pShaderName, unsigned int _NumberOfDefines = 0, const Base::Char** _ppShaderDefines = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false);
     void ReloadAllShaders();
-
-    CShaderPtr GetShader(const Base::Char* _pFileName, const Base::Char* _pShaderName, CShader::EType _Type, bool _Debug = false);
 
     CInputLayoutPtr CreateInputLayout(const SInputElementDescriptor* _pDescriptors, unsigned int _NumberOfDescriptors, CShaderPtr _ShaderVSPtr);
 } // namespace ShaderManager

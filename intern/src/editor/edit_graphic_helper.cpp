@@ -6,6 +6,7 @@
 #include "base/base_uncopyable.h"
 
 #include "graphic/gfx_histogram_renderer.h"
+#include "graphic/gfx_renderer_interface.h"
 
 #include "editor/edit_graphic_helper.h"
 
@@ -32,6 +33,7 @@ namespace
 
         void OnRequestHistogramInfo(Edit::CMessage& _rMessage);
         void OnHistogramInfo(Edit::CMessage& _rMessage);
+        void OnReloadAllShader(Edit::CMessage& _rMessage);
     };
 } // namespace
 
@@ -59,6 +61,8 @@ namespace
         Edit::MessageManager::Register(Edit::SGUIMessageType::Graphic_Histogram_Info, EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnRequestHistogramInfo));
 
         Edit::MessageManager::Register(Edit::SGUIMessageType::Graphic_Histogram_Update, EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnHistogramInfo));
+
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Graphic_ReloadRenderer, EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnReloadAllShader));
     }
 
     // -----------------------------------------------------------------------------
@@ -102,6 +106,13 @@ namespace
         Settings.m_EyeAdaptionSpeedDown = _rMessage.GetFloat();
 
         Gfx::HistogramRenderer::SetSettings(Settings);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGraphicHelper::OnReloadAllShader(Edit::CMessage& _rMessage)
+    {
+        Gfx::Renderer::ReloadRenderer();
     }
 } // namespace
 
