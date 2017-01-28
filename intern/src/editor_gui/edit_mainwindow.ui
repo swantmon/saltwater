@@ -189,11 +189,11 @@
    </widget>
    <widget class="QMenu" name="menuDebug">
     <property name="title">
-     <string>Debug</string>
+     <string>&amp;Debug</string>
     </property>
     <widget class="QMenu" name="menuGraphic">
      <property name="title">
-      <string>Graphic</string>
+      <string>&amp;Graphic</string>
      </property>
      <addaction name="m_pActionReloadRenderer"/>
     </widget>
@@ -625,7 +625,10 @@
   </action>
   <action name="m_pActionReloadRenderer">
    <property name="text">
-    <string>Reload Renderer</string>
+    <string>&amp;Reload Renderer</string>
+   </property>
+   <property name="shortcut">
+    <string/>
    </property>
   </action>
  </widget>
