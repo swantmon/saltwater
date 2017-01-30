@@ -141,9 +141,9 @@ namespace
     private:
 
         GLuint m_DrawCallConstantBuffer;
-
         GLuint m_IntrinsicsConstantBuffer;
         GLuint m_TrackingDataConstantBuffer;
+        GLuint m_RaycastPyramidConstantBuffer;
 
         CShaderPtr m_VSVisualizeDepth;
         CShaderPtr m_FSVisualizeDepth;
@@ -159,6 +159,8 @@ namespace
         CShaderPtr m_CSDownSampleDepth;
         CShaderPtr m_CSVolumeIntegration;
         CShaderPtr m_CSRaycast;
+        CShaderPtr m_CSRaycastPyramid;
+
         CShaderPtr m_CSSphere;
 
         GLuint m_KinectRawDepthBuffer;
@@ -229,6 +231,7 @@ namespace
         m_CSDownSampleDepth = 0;
         m_CSVolumeIntegration = 0;
         m_CSRaycast = 0;
+        m_CSRaycastPyramid = 0;
         m_CSSphere = 0;
 
         glDeleteTextures(1, &m_KinectRawDepthBuffer);
@@ -243,6 +246,7 @@ namespace
         glDeleteBuffers(1, &m_DrawCallConstantBuffer);
         glDeleteBuffers(1, &m_IntrinsicsConstantBuffer);
         glDeleteBuffers(1, &m_TrackingDataConstantBuffer);
+        glDeleteBuffers(1, &m_RaycastPyramidConstantBuffer);
     }
 
     
@@ -290,6 +294,7 @@ namespace
         m_CSDownSampleDepth = ShaderManager::CompileCS("cs_kinect_downsample_depth.glsl", "main", NumberOfDefines, Defines.data());
         m_CSVolumeIntegration = ShaderManager::CompileCS("cs_kinect_integrate_volume.glsl", "main", NumberOfDefines, Defines.data());
         m_CSRaycast = ShaderManager::CompileCS("cs_kinect_raycast.glsl", "main", NumberOfDefines, Defines.data());
+        m_CSRaycastPyramid = ShaderManager::CompileCS("cs_kinect_raycast_pyramid.glsl", "main", NumberOfDefines, Defines.data());
 
         m_CSSphere = ShaderManager::CompileCS("cs_kinect_sphere.glsl", "main", NumberOfDefines, Defines.data());
     }
@@ -386,6 +391,9 @@ namespace
 
         glCreateBuffers(1, &m_TrackingDataConstantBuffer);
         glNamedBufferData(m_TrackingDataConstantBuffer, sizeof(STrackingData), &TrackingData, GL_DYNAMIC_COPY);
+
+        glCreateBuffers(1, &m_RaycastPyramidConstantBuffer);
+        glNamedBufferData(m_RaycastPyramidConstantBuffer, 16, nullptr, GL_DYNAMIC_DRAW);
     }
     
     // -----------------------------------------------------------------------------
@@ -569,8 +577,35 @@ namespace
 
     void CGfxVoxelRenderer::DownSample()
     {
-        //const int WorkGroupsX = (MR::CKinectControl::DepthImageWidth / g_TileSize2D);
-        //const int WorkGroupsY = (MR::CKinectControl::DepthImageHeight / g_TileSize2D);
+        const int WorkGroupsX = (MR::CKinectControl::DepthImageWidth / g_TileSize2D);
+        const int WorkGroupsY = (MR::CKinectControl::DepthImageHeight / g_TileSize2D);
+
+        glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_RaycastPyramidConstantBuffer);
+
+        for (int PyramidLevel = 1; PyramidLevel < g_PyramidLevels; ++PyramidLevel)
+        {
+            bool* pData = static_cast<bool*>(glMapNamedBuffer(m_RaycastPyramidConstantBuffer, GL_WRITE_ONLY));
+            *pData = false;
+            glUnmapNamedBuffer(m_RaycastPyramidConstantBuffer);
+
+            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+            Gfx::ContextManager::SetShaderCS(m_CSRaycastPyramid);
+            glBindImageTexture(0, m_RaycastVertexMap[PyramidLevel - 1], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+            glBindImageTexture(1, m_RaycastVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+            glDispatchCompute(WorkGroupsX >> PyramidLevel, WorkGroupsY >> PyramidLevel, 1);
+
+            pData = static_cast<bool*>(glMapNamedBuffer(m_RaycastPyramidConstantBuffer, GL_WRITE_ONLY));
+            *pData = true;
+            glUnmapNamedBuffer(m_RaycastPyramidConstantBuffer);
+
+            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+            Gfx::ContextManager::SetShaderCS(m_CSRaycastPyramid);
+            glBindImageTexture(0, m_RaycastNormalMap[PyramidLevel - 1], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+            glBindImageTexture(1, m_RaycastNormalMap[PyramidLevel], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+            glDispatchCompute(WorkGroupsX >> PyramidLevel, WorkGroupsY >> PyramidLevel, 1);
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -634,10 +669,10 @@ namespace
         glClear(GL_COLOR_BUFFER_BIT);
         
         //RenderDepth();
-        //glViewport(0, 0, 640, 720);
+        glViewport(0, 0, 640, 720);
         RenderVolume();
-        //glViewport(640, 0, 640, 720);
-        //RenderVertexMap();
+        glViewport(640, 0, 640, 720);
+        RenderVertexMap();
 
         glViewport(0, 0, 1280, 720);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
