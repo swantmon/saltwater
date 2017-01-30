@@ -141,6 +141,8 @@ namespace
         
         TonemappingRenderer::Render();
 
+        LightAreaRenderer::RenderBulbs();
+
         PostFX::Render();
 
         Performance::EndEvent();

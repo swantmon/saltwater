@@ -62,6 +62,7 @@ namespace
         
         void Update();
         void Render();
+        void RenderBulbs();
         
     private:
                 
@@ -76,6 +77,11 @@ namespace
             float        m_HalfHeight;
             float        m_IsTwoSided;
             unsigned int m_ExposureHistoryIndex;
+        };
+
+        struct SAreaLightbulbProperties
+        {
+            Base::Float4 m_Color;
         };
 
         struct SRenderJob
@@ -93,12 +99,18 @@ namespace
         CMeshPtr m_QuadModelPtr;
 
         CBufferPtr m_AreaLightBufferPtr;
+        CBufferPtr m_AreaLightbulbBufferPtr;
+        CBufferPtr m_PlaneIndexBufferPtr;
+
+        CBufferSetPtr m_PlaneVertexBufferSetPtr;
         
-        CInputLayoutPtr m_QuadInputLayoutPtr;
-        CInputLayoutPtr m_LightProbeInputLayoutPtr;
+        CInputLayoutPtr m_P2InputLayoutPtr;
+        CInputLayoutPtr m_P3InputLayoutPtr;
         
+        CShaderPtr m_PositionShaderPtr;
         CShaderPtr m_ScreenQuadShaderPtr;
         CShaderPtr m_LTCAreaLightShaderPtr;
+        CShaderPtr m_AreaLightbulbShaderPtr;
         
         CTextureSetPtr m_LTCTextureSetPtr;
 
@@ -118,10 +130,15 @@ namespace
     CGfxAreaLightRenderer::CGfxAreaLightRenderer()
         : m_QuadModelPtr            ()
         , m_AreaLightBufferPtr      ()
-        , m_QuadInputLayoutPtr      ()
-        , m_LightProbeInputLayoutPtr()
+        , m_AreaLightbulbBufferPtr  ()
+        , m_PlaneIndexBufferPtr     ()
+        , m_PlaneVertexBufferSetPtr ()
+        , m_P2InputLayoutPtr        ()
+        , m_P3InputLayoutPtr        ()
+        , m_PositionShaderPtr       ()
         , m_ScreenQuadShaderPtr     ()
         , m_LTCAreaLightShaderPtr   ()
+        , m_AreaLightbulbShaderPtr  ()
         , m_DefaultRenderContextPtr ()
         , m_LightRenderContextPtr   ()
         , m_RenderJobs              ()
@@ -147,10 +164,15 @@ namespace
     {
         m_QuadModelPtr             = 0;
         m_AreaLightBufferPtr       = 0;
-        m_QuadInputLayoutPtr       = 0;
-        m_LightProbeInputLayoutPtr = 0;
+        m_AreaLightbulbBufferPtr   = 0;
+        m_PlaneIndexBufferPtr      = 0;
+        m_PlaneVertexBufferSetPtr  = 0;
+        m_P2InputLayoutPtr         = 0;
+        m_P3InputLayoutPtr         = 0;
+        m_PositionShaderPtr        = 0;
         m_ScreenQuadShaderPtr      = 0;
         m_LTCAreaLightShaderPtr    = 0;
+        m_AreaLightbulbShaderPtr   = 0;
         m_LTCTextureSetPtr         = 0;
         m_DefaultRenderContextPtr  = 0;
         m_LightRenderContextPtr    = 0;
@@ -162,18 +184,29 @@ namespace
     
     void CGfxAreaLightRenderer::OnSetupShader()
     {
+        m_PositionShaderPtr = ShaderManager::CompileVS("vs_non_p.glsl", "main");
+
         m_ScreenQuadShaderPtr = ShaderManager::CompileVS("vs_screen_p_quad.glsl", "main");
 
         m_LTCAreaLightShaderPtr = ShaderManager::CompilePS("fs_light_arealight.glsl" , "main");
+
+        m_AreaLightbulbShaderPtr = ShaderManager::CompilePS("fs_light_arealight_bulb.glsl", "main");
         
         // -----------------------------------------------------------------------------
         
-        const SInputElementDescriptor QuadInputLayout[] =
+        const SInputElementDescriptor P2InputLayout[] =
         {
             { "POSITION", 0, CInputLayout::Float2Format, 0, 0, 8, CInputLayout::PerVertex, 0, },
         };
+
+        const SInputElementDescriptor P3InputLayout[] =
+        {
+            { "POSITION", 0, CInputLayout::Float3Format, 0, 0, 12, CInputLayout::PerVertex, 0, },
+        };
         
-        m_QuadInputLayoutPtr = ShaderManager::CreateInputLayout(QuadInputLayout, 1, m_ScreenQuadShaderPtr);
+        m_P2InputLayoutPtr = ShaderManager::CreateInputLayout(P2InputLayout, 1, m_ScreenQuadShaderPtr);
+
+        m_P3InputLayoutPtr = ShaderManager::CreateInputLayout(P3InputLayout, 1, m_PositionShaderPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -201,7 +234,7 @@ namespace
         CTargetSetPtr       LightTargetSetPtr   = TargetSetManager::GetLightAccumulationTargetSet();
         CTargetSetPtr       DefaultTargetSetPtr = TargetSetManager::GetDefaultTargetSet();
 
-        CRenderStatePtr     DefaultStatePtr = StateManager::GetRenderState(0);
+        CRenderStatePtr     DefaultStatePtr = StateManager::GetRenderState(CRenderState::NoCull);
         CRenderStatePtr     LightStatePtr   = StateManager::GetRenderState(CRenderState::AdditionBlend);
 
         // -----------------------------------------------------------------------------
@@ -288,6 +321,18 @@ namespace
         ConstantBufferDesc.m_pClassKey     = 0;
         
         m_AreaLightBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        // -----------------------------------------------------------------------------
+
+        ConstantBufferDesc.m_Stride        = 0;
+        ConstantBufferDesc.m_Usage         = CBuffer::GPUReadWrite;
+        ConstantBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        ConstantBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(SAreaLightbulbProperties);
+        ConstantBufferDesc.m_pBytes        = 0;
+        ConstantBufferDesc.m_pClassKey     = 0;
+
+        m_AreaLightbulbBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -302,6 +347,50 @@ namespace
     void CGfxAreaLightRenderer::OnSetupModels()
     {
         m_QuadModelPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
+
+        // -----------------------------------------------------------------------------
+
+        SBufferDescriptor BufferDesc;
+
+        static float PlaneVertexBufferData[] =
+        {
+            0.0f, 1.0f, 0.0f,
+            1.0f, 1.0f, 0.0f,
+            1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f,
+        };
+        
+        static unsigned int PlaneIndexBufferData[] =
+        {
+            0, 1, 2, 0, 2, 3,
+        };
+        
+        // -----------------------------------------------------------------------------
+        // Engine buffer handling
+        // -----------------------------------------------------------------------------
+        BufferDesc.m_Stride        = 0;
+        BufferDesc.m_Usage         = CBuffer::GPURead;
+        BufferDesc.m_Binding       = CBuffer::VertexBuffer;
+        BufferDesc.m_Access        = CBuffer::CPUWrite;
+        BufferDesc.m_NumberOfBytes = sizeof(PlaneVertexBufferData);
+        BufferDesc.m_pBytes        = &PlaneVertexBufferData[0];
+        BufferDesc.m_pClassKey     = 0;
+        
+        CBufferPtr PlanePositionBuffer = BufferManager::CreateBuffer(BufferDesc);
+        
+        m_PlaneVertexBufferSetPtr = BufferManager::CreateVertexBufferSet(PlanePositionBuffer);
+        
+        // -----------------------------------------------------------------------------
+        
+        BufferDesc.m_Stride        = 0;
+        BufferDesc.m_Usage         = CBuffer::GPURead;
+        BufferDesc.m_Binding       = CBuffer::IndexBuffer;
+        BufferDesc.m_Access        = CBuffer::CPUWrite;
+        BufferDesc.m_NumberOfBytes = sizeof(PlaneIndexBufferData);
+        BufferDesc.m_pBytes        = &PlaneIndexBufferData[0];
+        BufferDesc.m_pClassKey     = 0;
+        
+        m_PlaneIndexBufferPtr = BufferManager::CreateBuffer(BufferDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -443,6 +532,120 @@ namespace
         ContextManager::ResetSampler(3);
         ContextManager::ResetSampler(4);
         ContextManager::ResetSampler(5);
+
+        ContextManager::ResetTopology();
+
+        ContextManager::ResetInputLayout();
+
+        ContextManager::ResetIndexBuffer();
+
+        ContextManager::ResetVertexBufferSet();
+
+        ContextManager::ResetShaderVS();
+
+        ContextManager::ResetShaderPS();
+
+        ContextManager::ResetRenderContext();
+        
+        Performance::EndEvent();
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CGfxAreaLightRenderer::RenderBulbs()
+    {
+        Performance::BeginEvent("Area Lights Bulbs");
+
+        // -----------------------------------------------------------------------------
+        // Rendering
+        // -----------------------------------------------------------------------------
+        CRenderJobs::const_iterator CurrentRenderJob;
+        CRenderJobs::const_iterator EndOfRenderJobs;
+        const unsigned int          pOffset[] = { 0, 0 };
+
+        ContextManager::SetRenderContext(m_DefaultRenderContextPtr);
+
+        ContextManager::SetVertexBufferSet(m_PlaneVertexBufferSetPtr, pOffset);
+
+        ContextManager::SetIndexBuffer(m_PlaneIndexBufferPtr, 0);
+
+        ContextManager::SetInputLayout(m_PositionShaderPtr->GetInputLayout());
+
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        ContextManager::SetShaderVS(m_PositionShaderPtr);
+
+        ContextManager::SetShaderPS(m_AreaLightbulbShaderPtr);
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_AreaLightbulbBufferPtr);
+
+        // -----------------------------------------------------------------------------
+        // Render
+        // -----------------------------------------------------------------------------
+        CurrentRenderJob = m_RenderJobs.begin();
+        EndOfRenderJobs  = m_RenderJobs.end();
+
+        for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
+        {
+            Dt::CEntity*         pDtEntity     = CurrentRenderJob->m_pDtEntity;
+            Dt::CAreaLightFacet* pDtLightFacet = CurrentRenderJob->m_pDtLightFacet;
+
+            assert(pDtEntity && pDtLightFacet);
+
+            Base::Float3 LightPosition  = pDtEntity->GetWorldPosition();
+            Base::Float3 LightDirection = pDtLightFacet->GetDirection().Normalize() * Base::Float3(-1.0f);
+            Base::Float3 DirectionY     = Base::Float3(0.0f, pDtLightFacet->GetRotation(), 1.0f).Normalize();
+            Base::Float3 DirectionX     = LightDirection.CrossProduct(DirectionY).Normalize();
+
+            DirectionY = LightDirection.CrossProduct(DirectionX);
+
+            Base::Float3 ExtendX = Base::Float3(pDtLightFacet->GetWidth()  * 0.5f) * DirectionX;
+            Base::Float3 ExtendY = Base::Float3(pDtLightFacet->GetHeight() * 0.5f) * DirectionY;
+
+            Base::Float3 LightbulbCorners0 = LightPosition - ExtendX - ExtendY;
+            Base::Float3 LightbulbCorners1 = LightPosition + ExtendX - ExtendY;
+            Base::Float3 LightbulbCorners2 = LightPosition + ExtendX + ExtendY;
+            Base::Float3 LightbulbCorners3 = LightPosition - ExtendX + ExtendY;
+
+            float ViewBuffer[12];
+
+            ViewBuffer[0] = LightbulbCorners0[0];
+            ViewBuffer[1] = LightbulbCorners0[1];
+            ViewBuffer[2] = LightbulbCorners0[2];
+
+            ViewBuffer[3] = LightbulbCorners1[0];
+            ViewBuffer[4] = LightbulbCorners1[1];
+            ViewBuffer[5] = LightbulbCorners1[2];
+
+            ViewBuffer[6] = LightbulbCorners2[0];
+            ViewBuffer[7] = LightbulbCorners2[1];
+            ViewBuffer[8] = LightbulbCorners2[2];
+
+            ViewBuffer[9]  = LightbulbCorners3[0];
+            ViewBuffer[10] = LightbulbCorners3[1];
+            ViewBuffer[11] = LightbulbCorners3[2];
+
+            BufferManager::UploadVertexBufferData(m_PlaneVertexBufferSetPtr->GetBuffer(0), ViewBuffer);
+
+            // -----------------------------------------------------------------------------
+
+            SAreaLightbulbProperties LightBuffer;
+
+            LightBuffer.m_Color = Base::Float4(pDtLightFacet->GetColor(), 0.0f);
+
+            BufferManager::UploadConstantBufferData(m_AreaLightbulbBufferPtr, &LightBuffer);
+
+            // -----------------------------------------------------------------------------
+
+            ContextManager::DrawIndexed(6, 0, 0);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Reset everything
+        // -----------------------------------------------------------------------------
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetTopology();
 
@@ -614,6 +817,13 @@ namespace LightAreaRenderer
     void Render()
     {
         CGfxAreaLightRenderer::GetInstance().Render();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void RenderBulbs()
+    {
+        CGfxAreaLightRenderer::GetInstance().RenderBulbs();
     }
 } // namespace LightAreaRenderer
 } // namespace Gfx

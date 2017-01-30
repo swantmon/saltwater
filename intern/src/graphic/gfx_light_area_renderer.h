@@ -31,5 +31,6 @@ namespace LightAreaRenderer
     
     void Update();
     void Render();
+    void RenderBulbs();
 } // namespace LightAreaRenderer
 } // namespace Gfx

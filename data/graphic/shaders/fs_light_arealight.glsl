@@ -411,23 +411,6 @@ void main()
     // -----------------------------------------------------------------------------
     // Check if light bulb is visible
     // -----------------------------------------------------------------------------
-    SRay Ray;
-
-    Ray.m_Origin    = g_ViewPosition.xyz;
-    Ray.m_Direction = -WSViewDirection.xyz;
-
-    float DistanceToGround = length(Data.m_WSPosition - g_ViewPosition.xyz);
-
-    float DistanceToLightbulb = 0.0f;
-
-    if (RayRectangleIntersect(Ray, Lightbulb, DistanceToLightbulb))
-    {
-        if (DistanceToLightbulb < DistanceToGround)
-        {
-            Luminance = m_Color.xyz;
-        }
-    }
-
     out_Output = vec4(Luminance * AverageExposure, 0.0f);
 }
 
