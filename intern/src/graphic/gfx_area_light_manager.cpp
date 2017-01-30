@@ -15,6 +15,7 @@
 
 #include "graphic/gfx_area_light_facet.h"
 #include "graphic/gfx_area_light_manager.h"
+#include "graphic/gfx_buffer_manager.h"
 
 using namespace Gfx;
 
@@ -156,6 +157,51 @@ namespace
             CInternAreaLightFacet& rGfxLightFacet = AllocateAreaLightFacet();
 
             // -----------------------------------------------------------------------------
+            // Create data
+            // -----------------------------------------------------------------------------
+            SBufferDescriptor BufferDesc;
+
+            static float PlaneVertexBufferData[] =
+            {
+                0.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 0.0f,
+                1.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 0.0f,
+            };
+        
+            static unsigned int PlaneIndexBufferData[] =
+            {
+                0, 1, 2, 0, 2, 3,
+            };
+        
+            // -----------------------------------------------------------------------------
+            // Engine buffer handling
+            // -----------------------------------------------------------------------------
+            BufferDesc.m_Stride        = 0;
+            BufferDesc.m_Usage         = CBuffer::GPURead;
+            BufferDesc.m_Binding       = CBuffer::VertexBuffer;
+            BufferDesc.m_Access        = CBuffer::CPUWrite;
+            BufferDesc.m_NumberOfBytes = sizeof(PlaneVertexBufferData);
+            BufferDesc.m_pBytes        = &PlaneVertexBufferData[0];
+            BufferDesc.m_pClassKey     = 0;
+        
+            CBufferPtr PlanePositionBuffer = BufferManager::CreateBuffer(BufferDesc);
+        
+            rGfxLightFacet.m_PlaneVertexBufferSetPtr = BufferManager::CreateVertexBufferSet(PlanePositionBuffer);
+        
+            // -----------------------------------------------------------------------------
+        
+            BufferDesc.m_Stride        = 0;
+            BufferDesc.m_Usage         = CBuffer::GPURead;
+            BufferDesc.m_Binding       = CBuffer::IndexBuffer;
+            BufferDesc.m_Access        = CBuffer::CPUWrite;
+            BufferDesc.m_NumberOfBytes = sizeof(PlaneIndexBufferData);
+            BufferDesc.m_pBytes        = &PlaneIndexBufferData[0];
+            BufferDesc.m_pClassKey     = 0;
+        
+            rGfxLightFacet.m_PlaneIndexBufferPtr = BufferManager::CreateBuffer(BufferDesc);
+
+            // -----------------------------------------------------------------------------
             // Save facet
             // -----------------------------------------------------------------------------
             _pEntity->SetDetailFacet(Dt::SFacetCategory::Graphic, &rGfxLightFacet);
@@ -171,7 +217,51 @@ namespace
         }
         
         assert(pGfxLightFacet);
-        
+
+        // -----------------------------------------------------------------------------
+        // Update
+        // -----------------------------------------------------------------------------
+        Base::Float3 LightPosition  = _pEntity->GetWorldPosition();
+        Base::Float3 LightDirection = pDtLightFacet->GetDirection().Normalize() * Base::Float3(-1.0f);
+        Base::Float3 DirectionX     = Base::Float3(0.0f, pDtLightFacet->GetRotation(), 1.0f).Normalize();
+        Base::Float3 DirectionY     = LightDirection.CrossProduct(DirectionX).Normalize();
+
+        DirectionX = LightDirection.CrossProduct(DirectionY);
+
+        pGfxLightFacet->m_DirectionX = Base::Float4(DirectionY, 0.0f);
+        pGfxLightFacet->m_DirectionY = Base::Float4(DirectionX, 0.0f);
+        pGfxLightFacet->m_HalfWidth  = 0.5f * pDtLightFacet->GetWidth();
+        pGfxLightFacet->m_HalfHeight = 0.5f * pDtLightFacet->GetHeight();
+        pGfxLightFacet->m_Plane      = Base::Float4(LightDirection, -(LightDirection.DotProduct(LightPosition)));
+
+        Base::Float3 ExtendX = Base::Float3(pDtLightFacet->GetWidth()  * 0.5f) * DirectionY;
+        Base::Float3 ExtendY = Base::Float3(pDtLightFacet->GetHeight() * 0.5f) * DirectionX;
+
+        Base::Float3 LightbulbCorners0 = LightPosition - ExtendX - ExtendY;
+        Base::Float3 LightbulbCorners1 = LightPosition + ExtendX - ExtendY;
+        Base::Float3 LightbulbCorners2 = LightPosition + ExtendX + ExtendY;
+        Base::Float3 LightbulbCorners3 = LightPosition - ExtendX + ExtendY;
+
+        float ViewBuffer[12];
+
+        ViewBuffer[0] = LightbulbCorners0[0];
+        ViewBuffer[1] = LightbulbCorners0[1];
+        ViewBuffer[2] = LightbulbCorners0[2];
+
+        ViewBuffer[3] = LightbulbCorners1[0];
+        ViewBuffer[4] = LightbulbCorners1[1];
+        ViewBuffer[5] = LightbulbCorners1[2];
+
+        ViewBuffer[6] = LightbulbCorners2[0];
+        ViewBuffer[7] = LightbulbCorners2[1];
+        ViewBuffer[8] = LightbulbCorners2[2];
+
+        ViewBuffer[9] = LightbulbCorners3[0];
+        ViewBuffer[10] = LightbulbCorners3[1];
+        ViewBuffer[11] = LightbulbCorners3[2];
+
+        BufferManager::UploadVertexBufferData(pGfxLightFacet->m_PlaneVertexBufferSetPtr->GetBuffer(0), ViewBuffer);
+
         // -----------------------------------------------------------------------------
         // Set time
         // -----------------------------------------------------------------------------

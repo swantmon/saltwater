@@ -6,7 +6,14 @@
 namespace Gfx
 {
     CAreaLightFacet::CAreaLightFacet()
-        : m_TimeStamp(static_cast<Base::U64>(-1))
+        : m_PlaneIndexBufferPtr    (0)
+        , m_PlaneVertexBufferSetPtr(0)
+        , m_DirectionX             (0.0f)
+        , m_DirectionY             (0.0f)
+        , m_Plane                  (0.0f)
+        , m_HalfWidth              (0.0f)
+        , m_HalfHeight             (0.0f)
+        , m_TimeStamp              (static_cast<Base::U64>(-1))
     {
 
     }
@@ -15,5 +22,54 @@ namespace Gfx
 
     CAreaLightFacet::~CAreaLightFacet()
     {
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CBufferPtr CAreaLightFacet::GetPlaneIndexBuffer() const
+    {
+        return m_PlaneIndexBufferPtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CBufferSetPtr CAreaLightFacet::GetPlaneVertexBuffer() const
+    {
+        return m_PlaneVertexBufferSetPtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Base::Float4 CAreaLightFacet::GetDirectionX() const
+    {
+        return m_DirectionX;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Base::Float4 CAreaLightFacet::GetDirectionY() const
+    {
+        return m_DirectionY;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Base::Float4 CAreaLightFacet::GetPlane() const
+    {
+        return m_Plane;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CAreaLightFacet::GetHalfWidth() const
+    {
+        return m_HalfWidth;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CAreaLightFacet::GetHalfHeight() const
+    {
+        return m_HalfHeight;
     }
 } // namespace Gfx

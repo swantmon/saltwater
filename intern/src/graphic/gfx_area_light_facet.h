@@ -1,6 +1,10 @@
 #pragma once
 
 #include "base/base_managed_pool.h"
+#include "base/base_vector4.h"
+
+#include "graphic/gfx_buffer.h"
+#include "graphic/gfx_buffer_set.h"
 
 namespace Gfx
 {
@@ -11,9 +15,27 @@ namespace Gfx
         CAreaLightFacet();
         ~CAreaLightFacet();
 
+    public:
+
+        CBufferPtr GetPlaneIndexBuffer() const;
+        CBufferSetPtr GetPlaneVertexBuffer() const;
+
+        Base::Float4 GetDirectionX() const;
+        Base::Float4 GetDirectionY() const;
+        Base::Float4 GetPlane() const;
+        float GetHalfWidth() const;
+        float GetHalfHeight() const;
+
     protected:
 
-        Base::U64 m_TimeStamp;
+        CBufferPtr    m_PlaneIndexBufferPtr;
+        CBufferSetPtr m_PlaneVertexBufferSetPtr;
+        Base::Float4  m_DirectionX;
+        Base::Float4  m_DirectionY;
+        Base::Float4  m_Plane;
+        float         m_HalfWidth;
+        float         m_HalfHeight;
+        Base::U64     m_TimeStamp;
     };
 } // namespace Gfx
 

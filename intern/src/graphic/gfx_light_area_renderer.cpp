@@ -11,6 +11,7 @@
 #include "data/data_light_type.h"
 #include "data/data_map.h"
 
+#include "graphic/gfx_area_light_facet.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
@@ -86,8 +87,9 @@ namespace
 
         struct SRenderJob
         {
-            Dt::CAreaLightFacet* m_pDtLightFacet;
-            Dt::CEntity*         m_pDtEntity;
+            Gfx::CAreaLightFacet* m_pGfxLightFacet;
+            Dt::CAreaLightFacet*  m_pDtLightFacet;
+            Dt::CEntity*          m_pDtEntity;
         };
 
     private:
@@ -100,9 +102,6 @@ namespace
 
         CBufferPtr m_AreaLightBufferPtr;
         CBufferPtr m_AreaLightbulbBufferPtr;
-        CBufferPtr m_PlaneIndexBufferPtr;
-
-        CBufferSetPtr m_PlaneVertexBufferSetPtr;
         
         CInputLayoutPtr m_P2InputLayoutPtr;
         CInputLayoutPtr m_P3InputLayoutPtr;
@@ -131,8 +130,6 @@ namespace
         : m_QuadModelPtr            ()
         , m_AreaLightBufferPtr      ()
         , m_AreaLightbulbBufferPtr  ()
-        , m_PlaneIndexBufferPtr     ()
-        , m_PlaneVertexBufferSetPtr ()
         , m_P2InputLayoutPtr        ()
         , m_P3InputLayoutPtr        ()
         , m_PositionShaderPtr       ()
@@ -165,8 +162,6 @@ namespace
         m_QuadModelPtr             = 0;
         m_AreaLightBufferPtr       = 0;
         m_AreaLightbulbBufferPtr   = 0;
-        m_PlaneIndexBufferPtr      = 0;
-        m_PlaneVertexBufferSetPtr  = 0;
         m_P2InputLayoutPtr         = 0;
         m_P3InputLayoutPtr         = 0;
         m_PositionShaderPtr        = 0;
@@ -347,50 +342,6 @@ namespace
     void CGfxAreaLightRenderer::OnSetupModels()
     {
         m_QuadModelPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
-
-        // -----------------------------------------------------------------------------
-
-        SBufferDescriptor BufferDesc;
-
-        static float PlaneVertexBufferData[] =
-        {
-            0.0f, 1.0f, 0.0f,
-            1.0f, 1.0f, 0.0f,
-            1.0f, 0.0f, 0.0f,
-            0.0f, 0.0f, 0.0f,
-        };
-        
-        static unsigned int PlaneIndexBufferData[] =
-        {
-            0, 1, 2, 0, 2, 3,
-        };
-        
-        // -----------------------------------------------------------------------------
-        // Engine buffer handling
-        // -----------------------------------------------------------------------------
-        BufferDesc.m_Stride        = 0;
-        BufferDesc.m_Usage         = CBuffer::GPURead;
-        BufferDesc.m_Binding       = CBuffer::VertexBuffer;
-        BufferDesc.m_Access        = CBuffer::CPUWrite;
-        BufferDesc.m_NumberOfBytes = sizeof(PlaneVertexBufferData);
-        BufferDesc.m_pBytes        = &PlaneVertexBufferData[0];
-        BufferDesc.m_pClassKey     = 0;
-        
-        CBufferPtr PlanePositionBuffer = BufferManager::CreateBuffer(BufferDesc);
-        
-        m_PlaneVertexBufferSetPtr = BufferManager::CreateVertexBufferSet(PlanePositionBuffer);
-        
-        // -----------------------------------------------------------------------------
-        
-        BufferDesc.m_Stride        = 0;
-        BufferDesc.m_Usage         = CBuffer::GPURead;
-        BufferDesc.m_Binding       = CBuffer::IndexBuffer;
-        BufferDesc.m_Access        = CBuffer::CPUWrite;
-        BufferDesc.m_NumberOfBytes = sizeof(PlaneIndexBufferData);
-        BufferDesc.m_pBytes        = &PlaneIndexBufferData[0];
-        BufferDesc.m_pClassKey     = 0;
-        
-        m_PlaneIndexBufferPtr = BufferManager::CreateBuffer(BufferDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -482,27 +433,21 @@ namespace
 
         for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
         {
-            Dt::CEntity*         pDtEntity     = CurrentRenderJob->m_pDtEntity;
-            Dt::CAreaLightFacet* pDtLightFacet = CurrentRenderJob->m_pDtLightFacet;
+            Dt::CEntity*          pDtEntity      = CurrentRenderJob->m_pDtEntity;
+            Dt::CAreaLightFacet*  pDtLightFacet  = CurrentRenderJob->m_pDtLightFacet;
+            Gfx::CAreaLightFacet* pGfxLightFacet = CurrentRenderJob->m_pGfxLightFacet;
 
-            assert(pDtEntity && pDtLightFacet);
-
-            Base::Float3 LightPosition  = pDtEntity->GetWorldPosition();
-            Base::Float3 LightDirection = pDtLightFacet->GetDirection().Normalize() * Base::Float3(-1.0f);
-            Base::Float3 Left           = Base::Float3(0.0f, pDtLightFacet->GetRotation(), 1.0f).Normalize();
-            Base::Float3 Right          = LightDirection.CrossProduct(Left).Normalize();
-
-            Left = LightDirection.CrossProduct(Right);
+            assert(pDtEntity && pDtLightFacet && pGfxLightFacet);
 
             SAreaLightProperties LightBuffer;
 
             LightBuffer.m_Color                = Base::Float4(pDtLightFacet->GetLightness(), pDtLightFacet->GetIntensity());
-            LightBuffer.m_Position             = Base::Float4(LightPosition, 1.0f);
-            LightBuffer.m_DirectionX           = Base::Float4(Right, 0.0f);
-            LightBuffer.m_DirectionY           = Base::Float4(Left, 0.0f);
-            LightBuffer.m_HalfWidth            = 0.5f * pDtLightFacet->GetWidth();
-            LightBuffer.m_HalfHeight           = 0.5f * pDtLightFacet->GetHeight();
-            LightBuffer.m_Plane                = Base::Float4(LightDirection, -(LightDirection.DotProduct(LightPosition)));
+            LightBuffer.m_Position             = Base::Float4(pDtEntity->GetWorldPosition(), 1.0f);
+            LightBuffer.m_DirectionX           = pGfxLightFacet->GetDirectionX();
+            LightBuffer.m_DirectionY           = pGfxLightFacet->GetDirectionY();
+            LightBuffer.m_HalfWidth            = pGfxLightFacet->GetHalfWidth();
+            LightBuffer.m_HalfHeight           = pGfxLightFacet->GetHalfHeight();
+            LightBuffer.m_Plane                = pGfxLightFacet->GetPlane();
             LightBuffer.m_IsTwoSided           = pDtLightFacet->GetIsTwoSided() ? 1.0f : 0.0f;
             LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
@@ -563,23 +508,6 @@ namespace
         CRenderJobs::const_iterator EndOfRenderJobs;
         const unsigned int          pOffset[] = { 0, 0 };
 
-        ContextManager::SetRenderContext(m_DefaultRenderContextPtr);
-
-        ContextManager::SetVertexBufferSet(m_PlaneVertexBufferSetPtr, pOffset);
-
-        ContextManager::SetIndexBuffer(m_PlaneIndexBufferPtr, 0);
-
-        ContextManager::SetInputLayout(m_PositionShaderPtr->GetInputLayout());
-
-        ContextManager::SetTopology(STopology::TriangleList);
-
-        ContextManager::SetShaderVS(m_PositionShaderPtr);
-
-        ContextManager::SetShaderPS(m_AreaLightbulbShaderPtr);
-
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-        ContextManager::SetConstantBuffer(1, m_AreaLightbulbBufferPtr);
-
         // -----------------------------------------------------------------------------
         // Render
         // -----------------------------------------------------------------------------
@@ -588,45 +516,28 @@ namespace
 
         for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
         {
-            Dt::CEntity*         pDtEntity     = CurrentRenderJob->m_pDtEntity;
-            Dt::CAreaLightFacet* pDtLightFacet = CurrentRenderJob->m_pDtLightFacet;
+            Dt::CEntity*          pDtEntity      = CurrentRenderJob->m_pDtEntity;
+            Dt::CAreaLightFacet*  pDtLightFacet  = CurrentRenderJob->m_pDtLightFacet;
+            Gfx::CAreaLightFacet* pGfxLightFacet = CurrentRenderJob->m_pGfxLightFacet;
 
-            assert(pDtEntity && pDtLightFacet);
+            assert(pDtEntity && pDtLightFacet && pGfxLightFacet);
 
-            Base::Float3 LightPosition  = pDtEntity->GetWorldPosition();
-            Base::Float3 LightDirection = pDtLightFacet->GetDirection().Normalize() * Base::Float3(-1.0f);
-            Base::Float3 DirectionY     = Base::Float3(0.0f, pDtLightFacet->GetRotation(), 1.0f).Normalize();
-            Base::Float3 DirectionX     = LightDirection.CrossProduct(DirectionY).Normalize();
+            ContextManager::SetRenderContext(m_DefaultRenderContextPtr);
 
-            DirectionY = LightDirection.CrossProduct(DirectionX);
+            ContextManager::SetVertexBufferSet(pGfxLightFacet->GetPlaneVertexBuffer(), pOffset);
 
-            Base::Float3 ExtendX = Base::Float3(pDtLightFacet->GetWidth()  * 0.5f) * DirectionX;
-            Base::Float3 ExtendY = Base::Float3(pDtLightFacet->GetHeight() * 0.5f) * DirectionY;
+            ContextManager::SetIndexBuffer(pGfxLightFacet->GetPlaneIndexBuffer(), 0);
 
-            Base::Float3 LightbulbCorners0 = LightPosition - ExtendX - ExtendY;
-            Base::Float3 LightbulbCorners1 = LightPosition + ExtendX - ExtendY;
-            Base::Float3 LightbulbCorners2 = LightPosition + ExtendX + ExtendY;
-            Base::Float3 LightbulbCorners3 = LightPosition - ExtendX + ExtendY;
+            ContextManager::SetInputLayout(m_PositionShaderPtr->GetInputLayout());
 
-            float ViewBuffer[12];
+            ContextManager::SetTopology(STopology::TriangleList);
 
-            ViewBuffer[0] = LightbulbCorners0[0];
-            ViewBuffer[1] = LightbulbCorners0[1];
-            ViewBuffer[2] = LightbulbCorners0[2];
+            ContextManager::SetShaderVS(m_PositionShaderPtr);
 
-            ViewBuffer[3] = LightbulbCorners1[0];
-            ViewBuffer[4] = LightbulbCorners1[1];
-            ViewBuffer[5] = LightbulbCorners1[2];
+            ContextManager::SetShaderPS(m_AreaLightbulbShaderPtr);
 
-            ViewBuffer[6] = LightbulbCorners2[0];
-            ViewBuffer[7] = LightbulbCorners2[1];
-            ViewBuffer[8] = LightbulbCorners2[2];
-
-            ViewBuffer[9]  = LightbulbCorners3[0];
-            ViewBuffer[10] = LightbulbCorners3[1];
-            ViewBuffer[11] = LightbulbCorners3[2];
-
-            BufferManager::UploadVertexBufferData(m_PlaneVertexBufferSetPtr->GetBuffer(0), ViewBuffer);
+            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+            ContextManager::SetConstantBuffer(1, m_AreaLightbulbBufferPtr);
 
             // -----------------------------------------------------------------------------
 
@@ -639,27 +550,28 @@ namespace
             // -----------------------------------------------------------------------------
 
             ContextManager::DrawIndexed(6, 0, 0);
+
+            // -----------------------------------------------------------------------------
+            // Reset everything
+            // -----------------------------------------------------------------------------
+            ContextManager::ResetConstantBuffer(0);
+            ContextManager::ResetConstantBuffer(1);
+
+            ContextManager::ResetTopology();
+
+            ContextManager::ResetInputLayout();
+
+            ContextManager::ResetIndexBuffer();
+
+            ContextManager::ResetVertexBufferSet();
+
+            ContextManager::ResetShaderVS();
+
+            ContextManager::ResetShaderPS();
+
+            ContextManager::ResetRenderContext();
         }
 
-        // -----------------------------------------------------------------------------
-        // Reset everything
-        // -----------------------------------------------------------------------------
-        ContextManager::ResetConstantBuffer(0);
-        ContextManager::ResetConstantBuffer(1);
-
-        ContextManager::ResetTopology();
-
-        ContextManager::ResetInputLayout();
-
-        ContextManager::ResetIndexBuffer();
-
-        ContextManager::ResetVertexBufferSet();
-
-        ContextManager::ResetShaderVS();
-
-        ContextManager::ResetShaderPS();
-
-        ContextManager::ResetRenderContext();
         
         Performance::EndEvent();
     }
@@ -692,8 +604,9 @@ namespace
 
             SRenderJob NewRenderJob;
 
-            NewRenderJob.m_pDtLightFacet = static_cast<Dt::CAreaLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-            NewRenderJob.m_pDtEntity     = &rCurrentEntity;
+            NewRenderJob.m_pGfxLightFacet = static_cast<Gfx::CAreaLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+            NewRenderJob.m_pDtLightFacet  = static_cast<Dt::CAreaLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+            NewRenderJob.m_pDtEntity      = &rCurrentEntity;
 
             m_RenderJobs.push_back(NewRenderJob);
 
