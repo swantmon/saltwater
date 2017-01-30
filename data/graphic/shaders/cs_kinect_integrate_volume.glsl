@@ -50,8 +50,6 @@ void main()
 
             if (Depth != 0)
             {
-                imageStore(cs_Debug, VoxelPosition, vec4(abs(DistanceFromCamera - Depth), DistanceFromCamera, Depth, 1.0f));
-
                 if (abs(DistanceFromCamera - Depth / 1000.0f) < 0.001f)
                 {
                     imageStore(cs_Volume, VoxelPosition, uvec4(1, 1, 0, 0));

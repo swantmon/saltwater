@@ -39,12 +39,7 @@ float GetEndLength(vec3 Start, vec3 Direction)
 
 uvec2 GetVoxel(vec3 Position)
 {
-    vec3 SamplePosition = Position;
-    SamplePosition /= VOLUME_SIZE;
-    SamplePosition += 0.5;
-    SamplePosition *= VOLUME_RESOLUTION;
-
-    return uvec2(imageLoad(cs_Volume, ivec3(SamplePosition)).xy);
+    return uvec2(imageLoad(cs_Volume, ivec3(Position / VOXEL_SIZE + 0.5f)).xy);
 }
 
 layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
@@ -59,16 +54,17 @@ void main()
     VertexPixelPosition.z = 1.0f;
 
     const vec3 CameraPosition = g_PoseMatrix[3].xyz;
-    vec3 RayDirection = normalize(VertexPixelPosition - CameraPosition);
+
+    vec3 RayDirection = normalize(VertexPixelPosition);
 
     RayDirection.x = RayDirection.x == 0.0f ? 1e-15f : RayDirection.x;
     RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
     RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
 
-    float StartLength = GetStartLength(CameraPosition, RayDirection);
-    float EndLength = GetEndLength(CameraPosition, RayDirection);
+    const float StartLength = GetStartLength(CameraPosition, RayDirection);
+    const float EndLength = GetEndLength(CameraPosition, RayDirection);
 
-    float Step = VOXEL_SIZE;
+    const float Step = VOXEL_SIZE;
     float RayLength = StartLength;
 
     vec3 Vertex = vec3(0.0f);

@@ -119,6 +119,8 @@ namespace
 
     private:
 
+        void UpdateReconstruction();
+
         void ReadKinectData();
         void PerformTracking();
         void Integrate();
@@ -126,6 +128,8 @@ namespace
         void DownSample();
 
         // Just for debugging
+
+        void RenderReconstructionData();
 
         void RenderDepth();
         void RenderVertexMap();
@@ -174,7 +178,7 @@ namespace
 
         std::vector<unsigned short> m_DepthPixels;
 
-        bool m_HasNewDepthData;
+        bool m_NewDepthDataAvailable;
     };
 } // namespace
 
@@ -204,7 +208,7 @@ namespace
 
         m_KinectControl.Start();
 
-        m_HasNewDepthData = false;
+        m_NewDepthDataAvailable = false;
     }
 
     // -----------------------------------------------------------------------------
@@ -373,7 +377,7 @@ namespace
 
         TrackingData.m_PoseRotationMatrix.SetIdentity();
         //TrackingData.m_PoseTranslationMatrix.SetTranslation(0.0f, 0.0, -20.0f);
-        TrackingData.m_PoseTranslationMatrix.SetTranslation(g_VolumeResolution * g_VoxelSize * 0.5f, g_VolumeResolution * g_VoxelSize * 0.5f, -0.4f);
+        TrackingData.m_PoseTranslationMatrix.SetTranslation(g_VolumeSize * 0.5f, g_VolumeSize * 0.5f, -0.5f);
         TrackingData.m_PoseMatrix = TrackingData.m_PoseTranslationMatrix * TrackingData.m_PoseRotationMatrix;
 
         TrackingData.m_InvPoseRotationMatrix = TrackingData.m_PoseRotationMatrix.GetInverted();
@@ -473,7 +477,7 @@ namespace
             glBindImageTexture(0, m_KinectRawDepthBuffer, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16UI);
             glDispatchCompute(WorkGroupsX / 2, WorkGroupsY, 1);
 
-            m_HasNewDepthData = true;
+            m_NewDepthDataAvailable = true;
         }
     }
     
@@ -588,28 +592,38 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxVoxelRenderer::UpdateReconstruction()
+    {        
+        Performance::BeginEvent("Kinect Tracking");
+
+        ReadKinectData();
+        PerformTracking();
+        Integrate();
+
+        //SetSphere(); // debugging
+
+        Raycast();
+        DownSample();
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxVoxelRenderer::Render()
     {
-        //if (m_HasNewDepthData)
+        if (m_NewDepthDataAvailable)
         {
-            Performance::BeginEvent("Kinect Tracking");
-
-            ReadKinectData();
-            PerformTracking();
-            Integrate();
-
-            //SetSphere(); // debugging
-
-            Raycast();
-            DownSample();
-
-            Performance::EndEvent();
+            UpdateReconstruction();
+            m_NewDepthDataAvailable = false;
         }
+        RenderReconstructionData();        
+    }
 
-        //////////////////////////////////////////////////////////////////////////////////////
-        // Rendering
-        //////////////////////////////////////////////////////////////////////////////////////
+    // -----------------------------------------------------------------------------
 
+    void CGfxVoxelRenderer::RenderReconstructionData()
+    {
         Performance::BeginEvent("Tracking Data Rendering");
 
         CTargetSetPtr DefaultTargetSetPtr = TargetSetManager::GetDefaultTargetSet();
@@ -618,8 +632,8 @@ namespace
         glBindFramebuffer(GL_FRAMEBUFFER, NativeTargetSet.m_NativeTargetSet);
         glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        
-        RenderDepth();
+
+        //RenderDepth();
         glViewport(0, 0, 640, 720);
         RenderVolume();
         glViewport(640, 0, 640, 720);
@@ -627,7 +641,7 @@ namespace
 
         glViewport(0, 0, 1280, 720);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        
+
         Performance::EndEvent();
     }
 
