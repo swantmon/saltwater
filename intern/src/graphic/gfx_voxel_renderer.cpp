@@ -156,7 +156,7 @@ namespace
         CShaderPtr m_CSBilateralFilter;
         CShaderPtr m_CSVertexMap;
         CShaderPtr m_CSNormalMap;
-        CShaderPtr m_CSDownSample;
+        CShaderPtr m_CSDownSampleDepth;
         CShaderPtr m_CSVolumeIntegration;
         CShaderPtr m_CSRaycast;
         CShaderPtr m_CSSphere;
@@ -226,7 +226,7 @@ namespace
         m_CSBilateralFilter = 0;
         m_CSVertexMap = 0;
         m_CSNormalMap = 0;
-        m_CSDownSample = 0;
+        m_CSDownSampleDepth = 0;
         m_CSVolumeIntegration = 0;
         m_CSRaycast = 0;
         m_CSSphere = 0;
@@ -287,7 +287,7 @@ namespace
         m_CSBilateralFilter = ShaderManager::CompileCS("cs_kinect_bilateral_filter.glsl", "main", NumberOfDefines, Defines.data());
         m_CSVertexMap = ShaderManager::CompileCS("cs_kinect_vertex_map.glsl", "main", NumberOfDefines, Defines.data());
         m_CSNormalMap = ShaderManager::CompileCS("cs_kinect_normal_map.glsl", "main", NumberOfDefines, Defines.data());
-        m_CSDownSample = ShaderManager::CompileCS("cs_kinect_downsample.glsl", "main", NumberOfDefines, Defines.data());
+        m_CSDownSampleDepth = ShaderManager::CompileCS("cs_kinect_downsample_depth.glsl", "main", NumberOfDefines, Defines.data());
         m_CSVolumeIntegration = ShaderManager::CompileCS("cs_kinect_integrate_volume.glsl", "main", NumberOfDefines, Defines.data());
         m_CSRaycast = ShaderManager::CompileCS("cs_kinect_raycast.glsl", "main", NumberOfDefines, Defines.data());
 
@@ -507,7 +507,7 @@ namespace
             // Downsample depth buffer
             //////////////////////////////////////////////////////////////////////////////////////
 
-            Gfx::ContextManager::SetShaderCS(m_CSDownSample);
+            Gfx::ContextManager::SetShaderCS(m_CSDownSampleDepth);
             glBindImageTexture(0, m_KinectSmoothDepthBuffer[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
             glBindImageTexture(1, m_KinectSmoothDepthBuffer[PyramidLevel + 1], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16UI);
             glDispatchCompute(WorkGroupsX >> PyramidLevel, WorkGroupsY >> PyramidLevel, 1);
@@ -628,16 +628,16 @@ namespace
 
         CTargetSetPtr DefaultTargetSetPtr = TargetSetManager::GetDefaultTargetSet();
         CNativeTargetSet NativeTargetSet = *static_cast<CNativeTargetSet*>(DefaultTargetSetPtr.GetPtr());
-
+        
         glBindFramebuffer(GL_FRAMEBUFFER, NativeTargetSet.m_NativeTargetSet);
         glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-
+        
         //RenderDepth();
-        glViewport(0, 0, 640, 720);
+        //glViewport(0, 0, 640, 720);
         RenderVolume();
-        glViewport(640, 0, 640, 720);
-        RenderVertexMap();
+        //glViewport(640, 0, 640, 720);
+        //RenderVertexMap();
 
         glViewport(0, 0, 1280, 720);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);

@@ -55,9 +55,7 @@ void main()
                     imageStore(cs_Volume, VoxelPosition, uvec4(1, 1, 0, 0));
                 }
             }
-            //imageStore(cs_Debug, ivec3(pos), depth == 0 ? vec4(0) : vec4(1));
         }
-        //imageStore(cs_Debug, VoxelPosition, vec4(CSVoxelPosition, 1.0f));
     }
 }
 

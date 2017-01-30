@@ -1,6 +1,6 @@
 
-#ifndef __INCLUDE_CS_KINECT_BILATERAL_FILTER_GLSL__
-#define __INCLUDE_CS_KINECT_BILATERAL_FILTER_GLSL__
+#ifndef __INCLUDE_CS_KINECT_DOWNSAMPLE_DEPTH_GLSL__
+#define __INCLUDE_CS_KINECT_DOWNSAMPLE_DEPTH_GLSL__
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -41,4 +41,4 @@ void main()
 	imageStore(cs_OutputTexture, ivec2(gl_GlobalInvocationID), ivec4(Result));
 }
 
-#endif // __INCLUDE_CS_KINECT_BILATERAL_FILTER_GLSL__
+#endif // __INCLUDE_CS_KINECT_DOWNSAMPLE_DEPTH_GLSL__
