@@ -1012,6 +1012,10 @@ namespace
         {
             NumberOfMipmaps = static_cast<int>(Base::Log2(static_cast<float>(Base::Max(ImageWidth, ImageHeight)))) + 1;
         }
+        else if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_NumberOfMipMapsFromSource)
+        {
+            NumberOfMipmaps = ilGetInteger(IL_NUM_MIPMAPS);
+        }
         
         // -----------------------------------------------------------------------------
         // Generate OpenGL texture or render buffer
@@ -1040,6 +1044,30 @@ namespace
         if (pTextureData != 0)
         {
             glTextureSubImage2D(NativeTextureHandle, 0, 0, 0, ImageWidth, ImageHeight, GLFormat, GLType, pTextureData);
+
+            if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_NumberOfMipMapsFromSource && NumberOfMipmaps > 1)
+            {
+                for (unsigned int IndexOfMipMap = 1; IndexOfMipMap < NumberOfMipmaps; ++IndexOfMipMap)
+                {
+                    ilBindImage(NativeImageName);
+
+                    ilActiveMipmap(IndexOfMipMap);
+
+                    ILenum CheckILFormat = ilGetInteger(IL_IMAGE_FORMAT);
+                    ILenum CheckILType   = ilGetInteger(IL_IMAGE_TYPE);
+
+                    if (CheckILFormat != NativeILFormat || CheckILType != NativeILType)
+                    {
+                        ilConvertImage(NativeILFormat, NativeILType);
+                    }
+
+                    ImageWidth   = ilGetInteger(IL_IMAGE_WIDTH);
+                    ImageHeight  = ilGetInteger(IL_IMAGE_HEIGHT);
+                    pTextureData = ilGetData();
+
+                    glTextureSubImage2D(NativeTextureHandle, IndexOfMipMap, 0, 0, ImageWidth, ImageHeight, GLFormat, GLType, pTextureData);
+                }
+            }
         }
 
         // -----------------------------------------------------------------------------
