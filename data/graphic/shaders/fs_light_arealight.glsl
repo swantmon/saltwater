@@ -45,7 +45,7 @@ layout(binding = 6) uniform sampler2D ps_FilteredMap;
 // -----------------------------------------------------------------------------
 // Input
 // -----------------------------------------------------------------------------
-layout(location = 2) in vec2 in_TexCoord;
+layout(location = 2) in vec2 in_UV;
 
 // -----------------------------------------------------------------------------
 // Output to light accumulation target
@@ -238,15 +238,15 @@ void main()
     // -----------------------------------------------------------------------------
     // Get data
     // -----------------------------------------------------------------------------
-    vec4  GBuffer0 = texture(ps_GBuffer0    , in_TexCoord);
-    vec4  GBuffer1 = texture(ps_GBuffer1    , in_TexCoord);
-    vec4  GBuffer2 = texture(ps_GBuffer2    , in_TexCoord);
-    float VSDepth  = texture(ps_DepthTexture, in_TexCoord).r;
+    vec4  GBuffer0 = texture(ps_GBuffer0    , in_UV);
+    vec4  GBuffer1 = texture(ps_GBuffer1    , in_UV);
+    vec4  GBuffer2 = texture(ps_GBuffer2    , in_UV);
+    float VSDepth  = texture(ps_DepthTexture, in_UV).r;
 
     // -----------------------------------------------------------------------------
     // VS position
     // -----------------------------------------------------------------------------
-    vec3 VSPosition = GetViewSpacePositionFromDepth(VSDepth, in_TexCoord, g_ScreenToView);
+    vec3 VSPosition = GetViewSpacePositionFromDepth(VSDepth, in_UV, g_ScreenToView);
     
     // -----------------------------------------------------------------------------
     // WS position

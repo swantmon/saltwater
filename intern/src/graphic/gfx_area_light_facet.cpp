@@ -8,6 +8,8 @@ namespace Gfx
     CAreaLightFacet::CAreaLightFacet()
         : m_PlaneIndexBufferPtr    (0)
         , m_PlaneVertexBufferSetPtr(0)
+        , m_TexturePtr             (0)
+        , m_FilteredTexturePtr     (0)
         , m_DirectionX             (0.0f)
         , m_DirectionY             (0.0f)
         , m_Plane                  (0.0f)
@@ -36,6 +38,20 @@ namespace Gfx
     CBufferSetPtr CAreaLightFacet::GetPlaneVertexBuffer() const
     {
         return m_PlaneVertexBufferSetPtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTextureBasePtr CAreaLightFacet::GetTexturePtr() const
+    {
+        return m_TexturePtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTextureBasePtr CAreaLightFacet::GetFilteredTexturePtr() const
+    {
+        return m_FilteredTexturePtr;
     }
 
     // -----------------------------------------------------------------------------

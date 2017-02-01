@@ -104,7 +104,7 @@ namespace
         CBufferPtr m_AreaLightbulbBufferPtr;
         
         CInputLayoutPtr m_P2InputLayoutPtr;
-        CInputLayoutPtr m_P3InputLayoutPtr;
+        CInputLayoutPtr m_P3T2InputLayoutPtr;
         
         CShaderPtr m_PositionShaderPtr;
         CShaderPtr m_ScreenQuadShaderPtr;
@@ -131,7 +131,7 @@ namespace
         , m_AreaLightBufferPtr      ()
         , m_AreaLightbulbBufferPtr  ()
         , m_P2InputLayoutPtr        ()
-        , m_P3InputLayoutPtr        ()
+        , m_P3T2InputLayoutPtr      ()
         , m_PositionShaderPtr       ()
         , m_ScreenQuadShaderPtr     ()
         , m_LTCAreaLightShaderPtr   ()
@@ -163,7 +163,7 @@ namespace
         m_AreaLightBufferPtr       = 0;
         m_AreaLightbulbBufferPtr   = 0;
         m_P2InputLayoutPtr         = 0;
-        m_P3InputLayoutPtr         = 0;
+        m_P3T2InputLayoutPtr       = 0;
         m_PositionShaderPtr        = 0;
         m_ScreenQuadShaderPtr      = 0;
         m_LTCAreaLightShaderPtr    = 0;
@@ -179,7 +179,7 @@ namespace
     
     void CGfxAreaLightRenderer::OnSetupShader()
     {
-        m_PositionShaderPtr = ShaderManager::CompileVS("vs_non_p.glsl", "main");
+        m_PositionShaderPtr = ShaderManager::CompileVS("vs_p3t2.glsl", "main");
 
         m_ScreenQuadShaderPtr = ShaderManager::CompileVS("vs_screen_p_quad.glsl", "main");
 
@@ -194,14 +194,15 @@ namespace
             { "POSITION", 0, CInputLayout::Float2Format, 0, 0, 8, CInputLayout::PerVertex, 0, },
         };
 
-        const SInputElementDescriptor P3InputLayout[] =
+        const SInputElementDescriptor P3T2InputLayout[] =
         {
-            { "POSITION", 0, CInputLayout::Float3Format, 0, 0, 12, CInputLayout::PerVertex, 0, },
+            { "POSITION", 0, CInputLayout::Float3Format, 0,  0, 20, CInputLayout::PerVertex, 0, },
+            { "TEXCOORD", 0, CInputLayout::Float2Format, 0, 12, 20, CInputLayout::PerVertex, 0, },
         };
         
         m_P2InputLayoutPtr = ShaderManager::CreateInputLayout(P2InputLayout, 1, m_ScreenQuadShaderPtr);
 
-        m_P3InputLayoutPtr = ShaderManager::CreateInputLayout(P3InputLayout, 1, m_PositionShaderPtr);
+        m_P3T2InputLayoutPtr = ShaderManager::CreateInputLayout(P3T2InputLayout, 2, m_PositionShaderPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -295,25 +296,7 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        TextureDescriptor.m_NumberOfPixelsU  = 2048;
-        TextureDescriptor.m_NumberOfPixelsV  = 2048;
-        TextureDescriptor.m_NumberOfPixelsW  = 1;
-        TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_NumberOfMipMapsFromSource;
-        TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
-        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-        TextureDescriptor.m_Format           = CTextureBase::Unknown;
-        TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-        TextureDescriptor.m_pFileName        = "textures/LTC/filtered_map.dds";
-        TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
-        
-        CTexture2DPtr FilteredMapTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
-
-        // -----------------------------------------------------------------------------
-
-        m_LTCTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(LTCMaterialTexturePtr), static_cast<CTextureBasePtr>(LTCMagTexturePtr), static_cast<CTextureBasePtr>(FilteredMapTexturePtr));
+        m_LTCTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(LTCMaterialTexturePtr), static_cast<CTextureBasePtr>(LTCMagTexturePtr));
     }
     
     // -----------------------------------------------------------------------------
@@ -430,7 +413,6 @@ namespace
         ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(4, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         ContextManager::SetSampler(5, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
-        ContextManager::SetSampler(6, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_AreaLightBufferPtr);
@@ -443,7 +425,7 @@ namespace
         ContextManager::SetTexture(3, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
         ContextManager::SetTexture(4, m_LTCTextureSetPtr->GetTexture(0));
         ContextManager::SetTexture(5, m_LTCTextureSetPtr->GetTexture(1));
-        ContextManager::SetTexture(6, m_LTCTextureSetPtr->GetTexture(2));
+        
 
         // -----------------------------------------------------------------------------
         // Render
@@ -459,6 +441,9 @@ namespace
 
             assert(pDtEntity && pDtLightFacet && pGfxLightFacet);
 
+            // -----------------------------------------------------------------------------
+            // Update data
+            // -----------------------------------------------------------------------------
             SAreaLightProperties LightBuffer;
 
             LightBuffer.m_Color                = Base::Float4(pDtLightFacet->GetLightness(), pDtLightFacet->GetIntensity());
@@ -472,6 +457,13 @@ namespace
             LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
             BufferManager::UploadConstantBufferData(m_AreaLightBufferPtr, &LightBuffer);
+
+            // -----------------------------------------------------------------------------
+            // Set texture
+            // -----------------------------------------------------------------------------
+            ContextManager::SetSampler(6, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+            ContextManager::SetTexture(6, pGfxLightFacet->GetFilteredTexturePtr());
 
             ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
         }
@@ -566,6 +558,12 @@ namespace
             LightBuffer.m_Color = Base::Float4(pDtLightFacet->GetColor(), 0.0f);
 
             BufferManager::UploadConstantBufferData(m_AreaLightbulbBufferPtr, &LightBuffer);
+
+            // -----------------------------------------------------------------------------
+
+            ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+            ContextManager::SetTexture(0, pGfxLightFacet->GetTexturePtr());
 
             // -----------------------------------------------------------------------------
 

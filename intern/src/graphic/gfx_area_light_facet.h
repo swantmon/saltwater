@@ -5,6 +5,7 @@
 
 #include "graphic/gfx_buffer.h"
 #include "graphic/gfx_buffer_set.h"
+#include "graphic/gfx_texture_base.h"
 
 namespace Gfx
 {
@@ -26,16 +27,21 @@ namespace Gfx
         float GetHalfWidth() const;
         float GetHalfHeight() const;
 
+        CTextureBasePtr GetTexturePtr() const;
+        CTextureBasePtr GetFilteredTexturePtr() const;
+
     protected:
 
-        CBufferPtr    m_PlaneIndexBufferPtr;
-        CBufferSetPtr m_PlaneVertexBufferSetPtr;
-        Base::Float4  m_DirectionX;
-        Base::Float4  m_DirectionY;
-        Base::Float4  m_Plane;
-        float         m_HalfWidth;
-        float         m_HalfHeight;
-        Base::U64     m_TimeStamp;
+        CBufferPtr      m_PlaneIndexBufferPtr;
+        CBufferSetPtr   m_PlaneVertexBufferSetPtr;
+        CTextureBasePtr m_TexturePtr;
+        CTextureBasePtr m_FilteredTexturePtr;
+        Base::Float4    m_DirectionX;
+        Base::Float4    m_DirectionY;
+        Base::Float4    m_Plane;
+        float           m_HalfWidth;
+        float           m_HalfHeight;
+        Base::U64       m_TimeStamp;
     };
 } // namespace Gfx
 

@@ -4,6 +4,8 @@
 #include "base/base_typedef.h"
 #include "base/base_vector3.h"
 
+#include "data/data_texture_2d.h"
+
 namespace Dt
 {
     class CAreaLightFacet
@@ -13,6 +15,11 @@ namespace Dt
         void SetColor(const Base::Float3& _rColor);
         Base::Float3& GetColor();
         const Base::Float3& GetColor() const;
+
+        void SetTexture(Dt::CTexture2D* _pTexture2D);
+        Dt::CTexture2D* GetTexture();
+
+        bool GetHasTexture() const;
 
         void SetDirection(const Base::Float3& _rDirection);
         Base::Float3& GetDirection();
@@ -53,15 +60,16 @@ namespace Dt
 
     private:
 
-        Base::Float3   m_Color;
-        Base::Float3   m_Direction;
-        Base::Float3   m_Lightness;
-        float          m_Temperature;
-        float          m_Intensity;
-        float          m_Rotation;
-        float          m_Width;
-        float          m_Height;
-        bool           m_IsTwoSided;
-        bool           m_HasTemperature;
+        Base::Float3    m_Color;
+        Base::Float3    m_Direction;
+        Base::Float3    m_Lightness;
+        float           m_Temperature;
+        float           m_Intensity;
+        float           m_Rotation;
+        float           m_Width;
+        float           m_Height;
+        bool            m_IsTwoSided;
+        bool            m_HasTemperature;
+        Dt::CTexture2D* m_pTexture;
     };
 } // namespace Dt

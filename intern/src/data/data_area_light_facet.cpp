@@ -16,6 +16,7 @@ namespace Dt
         , m_Height        (0.0f)
         , m_IsTwoSided    (false)
         , m_HasTemperature(false)
+        , m_pTexture      (0)
     {
 
     }
@@ -46,6 +47,27 @@ namespace Dt
     const Base::Float3& CAreaLightFacet::GetColor() const
     {
         return m_Color;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CAreaLightFacet::SetTexture(Dt::CTexture2D* _pTexture2D)
+    {
+        m_pTexture = _pTexture2D;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Dt::CTexture2D* CAreaLightFacet::GetTexture()
+    {
+        return m_pTexture;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CAreaLightFacet::GetHasTexture() const
+    {
+        return m_pTexture != 0;
     }
 
     // -----------------------------------------------------------------------------

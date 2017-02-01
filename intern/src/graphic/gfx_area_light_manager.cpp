@@ -16,6 +16,7 @@
 #include "graphic/gfx_area_light_facet.h"
 #include "graphic/gfx_area_light_manager.h"
 #include "graphic/gfx_buffer_manager.h"
+#include "graphic/gfx_texture_manager.h"
 
 using namespace Gfx;
 
@@ -157,16 +158,16 @@ namespace
             CInternAreaLightFacet& rGfxLightFacet = AllocateAreaLightFacet();
 
             // -----------------------------------------------------------------------------
-            // Create data
+            // Buffer
             // -----------------------------------------------------------------------------
             SBufferDescriptor BufferDesc;
 
             static float PlaneVertexBufferData[] =
             {
-                0.0f, 1.0f, 0.0f,
-                1.0f, 1.0f, 0.0f,
-                1.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 0.0f,
+                0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+                1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+                1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
             };
         
             static unsigned int PlaneIndexBufferData[] =
@@ -174,9 +175,6 @@ namespace
                 0, 1, 2, 0, 2, 3,
             };
         
-            // -----------------------------------------------------------------------------
-            // Engine buffer handling
-            // -----------------------------------------------------------------------------
             BufferDesc.m_Stride        = 0;
             BufferDesc.m_Usage         = CBuffer::GPURead;
             BufferDesc.m_Binding       = CBuffer::VertexBuffer;
@@ -200,6 +198,43 @@ namespace
             BufferDesc.m_pClassKey     = 0;
         
             rGfxLightFacet.m_PlaneIndexBufferPtr = BufferManager::CreateBuffer(BufferDesc);
+
+            // -----------------------------------------------------------------------------
+            // Texture
+            // -----------------------------------------------------------------------------
+            STextureDescriptor TextureDescriptor;
+
+            TextureDescriptor.m_NumberOfPixelsU  = 2048;
+            TextureDescriptor.m_NumberOfPixelsV  = 2048;
+            TextureDescriptor.m_NumberOfPixelsW  = 1;
+            TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_NumberOfMipMapsFromSource;
+            TextureDescriptor.m_NumberOfTextures = 1;
+            TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
+            TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
+            TextureDescriptor.m_Format           = CTextureBase::Unknown;
+            TextureDescriptor.m_Usage            = CTextureBase::GPURead;
+            TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+            TextureDescriptor.m_pFileName        = "textures/LTC/filtered_map.dds";
+            TextureDescriptor.m_pPixels          = 0;
+            TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        
+            rGfxLightFacet.m_FilteredTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+
+            TextureDescriptor.m_NumberOfPixelsU  = 2048;
+            TextureDescriptor.m_NumberOfPixelsV  = 2048;
+            TextureDescriptor.m_NumberOfPixelsW  = 1;
+            TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_NumberOfMipMapsFromSource;
+            TextureDescriptor.m_NumberOfTextures = 1;
+            TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
+            TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
+            TextureDescriptor.m_Format           = CTextureBase::Unknown;
+            TextureDescriptor.m_Usage            = CTextureBase::GPURead;
+            TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+            TextureDescriptor.m_pFileName        = "textures/LTC/map.dds";
+            TextureDescriptor.m_pPixels          = 0;
+            TextureDescriptor.m_Format           = CTextureBase::R8G8B8A8_UBYTE;
+        
+            rGfxLightFacet.m_TexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
             // -----------------------------------------------------------------------------
             // Save facet
@@ -242,23 +277,31 @@ namespace
         Base::Float3 LightbulbCorners2 = LightPosition + ExtendX + ExtendY;
         Base::Float3 LightbulbCorners3 = LightPosition - ExtendX + ExtendY;
 
-        float ViewBuffer[12];
+        float ViewBuffer[20];
 
         ViewBuffer[0] = LightbulbCorners0[0];
         ViewBuffer[1] = LightbulbCorners0[1];
         ViewBuffer[2] = LightbulbCorners0[2];
+        ViewBuffer[3] = 0.0f;
+        ViewBuffer[4] = 0.0f;
 
-        ViewBuffer[3] = LightbulbCorners1[0];
-        ViewBuffer[4] = LightbulbCorners1[1];
-        ViewBuffer[5] = LightbulbCorners1[2];
+        ViewBuffer[5] = LightbulbCorners1[0];
+        ViewBuffer[6] = LightbulbCorners1[1];
+        ViewBuffer[7] = LightbulbCorners1[2];
+        ViewBuffer[8] = 1.0f;
+        ViewBuffer[9] = 0.0f;
 
-        ViewBuffer[6] = LightbulbCorners2[0];
-        ViewBuffer[7] = LightbulbCorners2[1];
-        ViewBuffer[8] = LightbulbCorners2[2];
+        ViewBuffer[10] = LightbulbCorners2[0];
+        ViewBuffer[11] = LightbulbCorners2[1];
+        ViewBuffer[12] = LightbulbCorners2[2];
+        ViewBuffer[13] = 1.0f;
+        ViewBuffer[14] = 1.0f;
 
-        ViewBuffer[9] = LightbulbCorners3[0];
-        ViewBuffer[10] = LightbulbCorners3[1];
-        ViewBuffer[11] = LightbulbCorners3[2];
+        ViewBuffer[15] = LightbulbCorners3[0];
+        ViewBuffer[16] = LightbulbCorners3[1];
+        ViewBuffer[17] = LightbulbCorners3[2];
+        ViewBuffer[18] = 0.0f;
+        ViewBuffer[19] = 1.0f;
 
         BufferManager::UploadVertexBufferData(pGfxLightFacet->m_PlaneVertexBufferSetPtr->GetBuffer(0), ViewBuffer);
 
