@@ -265,7 +265,7 @@ namespace
         DefineStreams[4] << "DEPTH_IMAGE_HEIGHT " << MR::CKinectControl::DepthImageHeight;
         DefineStreams[5] << "TILE_SIZE2D " << g_TileSize2D;
         DefineStreams[6] << "TILE_SIZE3D " << g_TileSize3D;
-        DefineStreams[7] << "UINT16_MAX " << 65535;
+        DefineStreams[7] << "INT16_MAX " << 32767;
         DefineStreams[8] << "TRUNCATED_DISTANCE " << g_TruncatedDistance;
         DefineStreams[9] << "TRUNCATED_DISTANCE_INVERSE " << g_TruncatedDistanceInverse;
         DefineStreams[10] << "MAX_INTEGRATION_WEIGHT " << g_MaxIntegrationWeight;
@@ -347,7 +347,7 @@ namespace
             glTextureStorage2D(m_RaycastNormalMap[i], 1, GL_RGBA32F, Width, Height);
         }
 
-        glTextureStorage3D(m_Volume, 1, GL_RG16UI, g_VolumeResolution, g_VolumeResolution, g_VolumeResolution);
+        glTextureStorage3D(m_Volume, 1, GL_RG16I, g_VolumeResolution, g_VolumeResolution, g_VolumeResolution);
 
         glCreateTextures(GL_TEXTURE_3D, 1, &m_DebugBuffer);
         glTextureStorage3D(m_DebugBuffer, 1, GL_RGBA32F, g_VolumeResolution, g_VolumeResolution, g_VolumeResolution);
@@ -561,7 +561,7 @@ namespace
     {
         Gfx::ContextManager::SetShaderCS(m_CSVolumeIntegration);
 
-        glBindImageTexture(0, m_Volume, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RG16UI);
+        glBindImageTexture(0, m_Volume, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RG16I);
         glBindImageTexture(1, m_KinectRawDepthBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
         glBindImageTexture(2, m_DebugBuffer, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
@@ -614,7 +614,7 @@ namespace
     {
         Gfx::ContextManager::SetShaderCS(m_CSRaycast);
 
-        glBindImageTexture(0, m_Volume, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RG16UI);
+        glBindImageTexture(0, m_Volume, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RG16I);
         glBindImageTexture(1, m_RaycastVertexMap[0], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_IntrinsicsConstantBuffer);
@@ -652,7 +652,7 @@ namespace
             UpdateReconstruction();
             m_NewDepthDataAvailable = false;
         }
-        RenderReconstructionData();        
+        RenderReconstructionData();
     }
 
     // -----------------------------------------------------------------------------
@@ -669,9 +669,9 @@ namespace
         glClear(GL_COLOR_BUFFER_BIT);
         
         //RenderDepth();
-        glViewport(0, 0, 640, 720);
-        RenderVolume();
-        glViewport(640, 0, 640, 720);
+        //glViewport(0, 0, 640, 720);
+        //RenderVolume();
+        //glViewport(640, 0, 640, 720);
         RenderVertexMap();
 
         glViewport(0, 0, 1280, 720);
@@ -752,7 +752,7 @@ namespace
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, NativeBufer.m_NativeBuffer);
         glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_DrawCallConstantBuffer);
 
-        glBindImageTexture(0, m_Volume, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RG16UI);
+        glBindImageTexture(0, m_Volume, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RG16I);
 
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
@@ -765,7 +765,7 @@ namespace
     {
         Gfx::ContextManager::SetShaderCS(m_CSSphere);
 
-        glBindImageTexture(0, m_Volume, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RG16UI);
+        glBindImageTexture(0, m_Volume, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RG16I);
 
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 

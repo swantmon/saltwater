@@ -12,7 +12,7 @@
 // Input from engine
 // -----------------------------------------------------------------------------
 
-layout (binding = 0, rg16ui) readonly uniform uimage3D cs_Volume;
+layout (binding = 0, rg16i) readonly uniform iimage3D cs_Volume;
 layout (binding = 1, rgba32f) writeonly uniform image2D cs_Vertex;
 
 // -------------------------------------------------------------------------------------
@@ -37,9 +37,14 @@ float GetEndLength(vec3 Start, vec3 Direction)
     return min(min(xmax, ymax), zmax);
 }
 
-uvec2 GetVoxel(vec3 Position)
+ivec3 GetVoxelCoords(vec3 Position)
 {
-    return uvec2(imageLoad(cs_Volume, ivec3(Position / VOXEL_SIZE + 0.5f)).xy);
+    return ivec3(Position / VOXEL_SIZE + 0.5f);
+}
+
+ivec2 GetVoxel(ivec3 Coords)
+{
+    return ivec2(imageLoad(cs_Volume, Coords).xy);
 }
 
 layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
@@ -67,23 +72,35 @@ void main()
     const float Step = VOXEL_SIZE;
     float RayLength = StartLength;
 
+    ivec2 Voxel = GetVoxel(GetVoxelCoords(CameraPosition + RayLength * RayDirection));
+
+    float TSDF = Voxel.x / INT16_MAX;
+
     vec3 Vertex = vec3(0.0f);
 
     while (RayLength <= EndLength)
     {
+        RayLength += Step;
+
+        float PreviousTSDF = TSDF;
+
         vec3 CurrentPosition = CameraPosition + RayLength * RayDirection;
 
-        uvec2 Voxel = GetVoxel(CurrentPosition);
-        if (Voxel.x > 0)
+        ivec3 VoxelCoords = GetVoxelCoords(CurrentPosition);
+        
+        ivec2 Voxel = GetVoxel(VoxelCoords);
+
+        TSDF = Voxel.x / float(INT16_MAX);
+
+        //if (TSDF > -001f && TSDF < 0.1f)
+        if (PreviousTSDF > 0.0f && TSDF < 0.0f)
         {
             Vertex = CurrentPosition;
             break;
         }
-
-        RayLength += Step;
     }
 
-    imageStore(cs_Vertex, VertexMapPosition, vec4(Vertex, 1.0f));
+    imageStore(cs_Vertex, VertexMapPosition, vec4(Vertex, TSDF));
 }
 
 #endif // __INCLUDE_CS_KINECT_INTEGRATE_VOLUME_GLSL__

@@ -12,7 +12,7 @@
 // Input from engine
 // -----------------------------------------------------------------------------
 
-layout(binding = 0, rg16ui) uniform uimage3D cs_Volume;
+layout(binding = 0, rg16i) uniform iimage3D cs_Volume;
 layout(binding = 1, r16ui) readonly uniform uimage2D cs_Depth;
 layout(binding = 2, rgba32f) writeonly uniform image3D cs_Debug;
 
@@ -31,7 +31,7 @@ void main()
 
     for (VoxelCoords.z = 0; VoxelCoords.z < VOLUME_RESOLUTION; ++ VoxelCoords.z)
     {
-        imageStore(cs_Volume, VoxelCoords, uvec4(0)); // clear for debugging
+        imageStore(cs_Volume, VoxelCoords, ivec4(0)); // clear for debugging
 
         vec3 WSVoxelPosition = (VoxelCoords - 0.5f) * VOXEL_SIZE;
 
@@ -51,17 +51,15 @@ void main()
                 const vec2 LambdaPoint = (CSVoxelPosition.xy - g_FocalPoint) * g_InvFocalLength;
                 const float Lambda = length(vec3(LambdaPoint, 1.0f));
 
-                const float SDF = Depth - 1000.0f * length(VSVoxelPosition) / Lambda;
+                const float SDF = Depth - 1000.0f * length(CameraPosition - WSVoxelPosition) / Lambda;
 
-                const float DistanceFromCamera = length(CameraPosition - WSVoxelPosition);
+                const float TSDF = clamp(SDF / TRUNCATED_DISTANCE, -1.0f, 1.0f);
 
-                if (abs(DistanceFromCamera - Depth / 1000.0f) < 0.001f)
+                //if (SDF >= -TRUNCATED_DISTANCE)
                 {
-                    imageStore(cs_Volume, VoxelCoords, uvec4(1, 1, 0, 0));
+                    imageStore(cs_Volume, VoxelCoords, ivec4(TSDF * INT16_MAX, 0, 0, 0));
+                    imageStore(cs_Debug, VoxelCoords, vec4(TSDF, 0, 0, 0));
                 }
-                float TSDF = clamp(SDF / TRUNCATED_DISTANCE, -1.0f, 1.0f);
-                
-                imageStore(cs_Debug, VoxelCoords, vec4(SDF, TSDF, 0, 0));
             }
         }
     }
