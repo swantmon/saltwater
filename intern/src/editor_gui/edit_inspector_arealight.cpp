@@ -19,6 +19,17 @@ namespace Edit
         setupUi(this);
 
         // -----------------------------------------------------------------------------
+        // User UI
+        // -----------------------------------------------------------------------------
+        m_pTextureEdit->SetLayout((CTextureValue::NoPreview | CTextureValue::NoHash));
+
+        // -----------------------------------------------------------------------------
+        // Signal / slots
+        // -----------------------------------------------------------------------------
+        connect(m_pTextureEdit, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
+        connect(m_pTextureEdit, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
+
+        // -----------------------------------------------------------------------------
         // Color picker
         // -----------------------------------------------------------------------------
         QPalette ButtonPalette = m_pPickColorButton->palette();
@@ -57,6 +68,8 @@ namespace Edit
 
         Base::Float3 Color = Base::Float3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
 
+        QString NewTexture = m_pTextureEdit->GetTextureFile();
+
         float Temperature = m_pTemperatureEdit->text().toFloat();
         float Intensity   = m_pIntensityEdit->text().toFloat();
         float Rotation    = m_pRotationEdit->text().toFloat();
@@ -89,6 +102,17 @@ namespace Edit
         NewMessage.PutFloat(Direction[0]);
         NewMessage.PutFloat(Direction[1]);
         NewMessage.PutFloat(Direction[2]);
+
+        if (NewTexture.length() > 0)
+        {
+            NewMessage.PutBool(true);
+
+            NewMessage.PutInt(m_pTextureEdit->GetTextureHash());
+        }
+        else
+        {
+            NewMessage.PutBool(false);
+        }
 
         NewMessage.Reset();
 
@@ -134,11 +158,16 @@ namespace Edit
     {
         float R, G, B;
         float X, Y, Z;
+        bool HasTexture = false;
+        char TextureName[256];
 
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
         int EntityID  = _rMessage.GetInt();
+
+        if (EntityID != m_CurrentEntityID) return;
+
         int ColorMode = _rMessage.GetInt();
 
         R = _rMessage.GetFloat();
@@ -160,6 +189,12 @@ namespace Edit
 
         Base::Float3 Direction = Base::Float3(X, Y, Z);
 
+        HasTexture = _rMessage.GetBool();
+
+        if (HasTexture)
+        {
+            _rMessage.GetString(TextureName, 256);
+        }
 
         // -----------------------------------------------------------------------------
         // Set values
@@ -187,6 +222,10 @@ namespace Edit
         m_pDirectionXEdit->setText(QString::number(Direction[0]));
         m_pDirectionYEdit->setText(QString::number(Direction[1]));
         m_pDirectionZEdit->setText(QString::number(Direction[2]));
+
+        m_pTextureEdit->SetTextureFile("");
+
+        if (HasTexture) m_pTextureEdit->SetTextureFile(TextureName);
 
         m_pColorModeCB    ->blockSignals(false);
         m_IsTwoSidedCB    ->blockSignals(false);

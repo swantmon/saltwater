@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>354</width>
-    <height>289</height>
+    <height>308</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,10 +20,10 @@
       <string>Arealight</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="5" column="0">
-       <widget class="QLabel" name="label_7">
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_14">
         <property name="text">
-         <string>Direction</string>
+         <string>Texture</string>
         </property>
        </widget>
       </item>
@@ -31,6 +31,13 @@
        <widget class="QLineEdit" name="m_pWidthEdit">
         <property name="text">
          <string>8</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>Direction</string>
         </property>
        </widget>
       </item>
@@ -75,6 +82,24 @@
          <widget class="QLineEdit" name="m_pDirectionZEdit">
           <property name="text">
            <string>-1</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="2" column="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLineEdit" name="m_pTemperatureEdit">
+          <property name="text">
+           <string>5300</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_10">
+          <property name="text">
+           <string>Kelvin</string>
           </property>
          </widget>
         </item>
@@ -153,28 +178,24 @@
         </item>
        </layout>
       </item>
-      <item row="2" column="2">
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QLineEdit" name="m_pTemperatureEdit">
-          <property name="text">
-           <string>5300</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_10">
-          <property name="text">
-           <string>Kelvin</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="8" column="0">
-       <widget class="QLabel" name="label_6">
+      <item row="6" column="2">
+       <widget class="QLineEdit" name="m_pRotationEdit">
         <property name="text">
-         <string>Height</string>
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="label_8">
+        <property name="text">
+         <string>Intensity</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Temperature</string>
         </property>
        </widget>
       </item>
@@ -192,38 +213,10 @@
         </item>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_3">
+      <item row="8" column="0">
+       <widget class="QLabel" name="label_6">
         <property name="text">
-         <string>Temperature</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="label_8">
-        <property name="text">
-         <string>Intensity</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="2">
-       <widget class="QLineEdit" name="m_pRotationEdit">
-        <property name="text">
-         <string>0</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Rotation</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>Color</string>
+         <string>Height</string>
         </property>
        </widget>
       </item>
@@ -234,10 +227,31 @@
         </property>
        </widget>
       </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Rotation</string>
+        </property>
+       </widget>
+      </item>
       <item row="7" column="0">
        <widget class="QLabel" name="label_5">
         <property name="text">
          <string>Width</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Color</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Color Mode:</string>
         </property>
        </widget>
       </item>
@@ -266,19 +280,15 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>Color Mode:</string>
-        </property>
-       </widget>
-      </item>
       <item row="9" column="2">
        <widget class="QCheckBox" name="m_IsTwoSidedCB">
         <property name="text">
          <string/>
         </property>
        </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="Edit::CTextureValue" name="m_pTextureEdit" native="true"/>
       </item>
      </layout>
     </widget>
@@ -298,6 +308,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Edit::CTextureValue</class>
+   <extends>QWidget</extends>
+   <header>edit_texture_value.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>m_pColorModeCB</tabstop>
   <tabstop>m_pPickColorButton</tabstop>

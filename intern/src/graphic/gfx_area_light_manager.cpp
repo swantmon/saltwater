@@ -60,6 +60,9 @@ namespace
 
         CAreaLightFacets m_AreaLightFacets;
 
+        Gfx::CTextureBasePtr m_TempFilteredTexturePtr;
+        Gfx::CTextureBasePtr m_TempTexturePtr;
+
     private:
 
         void OnDirtyEntity(Dt::CEntity* _pEntity);
@@ -86,7 +89,9 @@ namespace
 namespace 
 {
     CGfxAreaLightManager::CGfxAreaLightManager()
-        : m_AreaLightFacets()
+        : m_AreaLightFacets       ()
+        , m_TempFilteredTexturePtr(0)
+        , m_TempTexturePtr        (0)
     {
 
     }
@@ -106,6 +111,40 @@ namespace
         // Register dirty entity handler for automatic sky creation
         // -----------------------------------------------------------------------------
         Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CGfxAreaLightManager::OnDirtyEntity));
+
+        STextureDescriptor TextureDescriptor;
+
+        TextureDescriptor.m_NumberOfPixelsU  = 2048;
+        TextureDescriptor.m_NumberOfPixelsV  = 2048;
+        TextureDescriptor.m_NumberOfPixelsW  = 1;
+        TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_NumberOfMipMapsFromSource;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
+        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
+        TextureDescriptor.m_Format           = CTextureBase::Unknown;
+        TextureDescriptor.m_Usage            = CTextureBase::GPURead;
+        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        TextureDescriptor.m_pFileName        = "textures/LTC/filtered_map.dds";
+        TextureDescriptor.m_pPixels          = 0;
+        TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        
+        m_TempFilteredTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+
+        TextureDescriptor.m_NumberOfPixelsU  = 2048;
+        TextureDescriptor.m_NumberOfPixelsV  = 2048;
+        TextureDescriptor.m_NumberOfPixelsW  = 1;
+        TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_NumberOfMipMapsFromSource;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
+        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
+        TextureDescriptor.m_Format           = CTextureBase::Unknown;
+        TextureDescriptor.m_Usage            = CTextureBase::GPURead;
+        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        TextureDescriptor.m_pFileName        = "textures/LTC/map.dds";
+        TextureDescriptor.m_pPixels          = 0;
+        TextureDescriptor.m_Format           = CTextureBase::R8G8B8A8_UBYTE;
+        
+        m_TempTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
     }
 
     // -----------------------------------------------------------------------------
@@ -113,6 +152,9 @@ namespace
     void CGfxAreaLightManager::OnExit()
     {
         m_AreaLightFacets.Clear();
+
+        m_TempFilteredTexturePtr = 0;
+        m_TempTexturePtr         = 0;
     }
 
     // -----------------------------------------------------------------------------
@@ -202,39 +244,8 @@ namespace
             // -----------------------------------------------------------------------------
             // Texture
             // -----------------------------------------------------------------------------
-            STextureDescriptor TextureDescriptor;
-
-            TextureDescriptor.m_NumberOfPixelsU  = 2048;
-            TextureDescriptor.m_NumberOfPixelsV  = 2048;
-            TextureDescriptor.m_NumberOfPixelsW  = 1;
-            TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_NumberOfMipMapsFromSource;
-            TextureDescriptor.m_NumberOfTextures = 1;
-            TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
-            TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-            TextureDescriptor.m_Format           = CTextureBase::Unknown;
-            TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-            TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-            TextureDescriptor.m_pFileName        = "textures/LTC/filtered_map.dds";
-            TextureDescriptor.m_pPixels          = 0;
-            TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
-        
-            rGfxLightFacet.m_FilteredTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
-
-            TextureDescriptor.m_NumberOfPixelsU  = 2048;
-            TextureDescriptor.m_NumberOfPixelsV  = 2048;
-            TextureDescriptor.m_NumberOfPixelsW  = 1;
-            TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_NumberOfMipMapsFromSource;
-            TextureDescriptor.m_NumberOfTextures = 1;
-            TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
-            TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-            TextureDescriptor.m_Format           = CTextureBase::Unknown;
-            TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-            TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-            TextureDescriptor.m_pFileName        = "textures/LTC/map.dds";
-            TextureDescriptor.m_pPixels          = 0;
-            TextureDescriptor.m_Format           = CTextureBase::R8G8B8A8_UBYTE;
-        
-            rGfxLightFacet.m_TexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+            rGfxLightFacet.m_FilteredTexturePtr = 0;
+            rGfxLightFacet.m_TexturePtr         = 0;
 
             // -----------------------------------------------------------------------------
             // Save facet
@@ -249,6 +260,17 @@ namespace
         else
         {
             pGfxLightFacet = static_cast<CInternAreaLightFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
+
+            if (pDtLightFacet->GetHasTexture())
+            {
+                pGfxLightFacet->m_FilteredTexturePtr = m_TempFilteredTexturePtr;
+                pGfxLightFacet->m_TexturePtr         = m_TempTexturePtr;
+            }
+            else
+            {
+                pGfxLightFacet->m_FilteredTexturePtr = 0;
+                pGfxLightFacet->m_TexturePtr         = 0;
+            }
         }
         
         assert(pGfxLightFacet);

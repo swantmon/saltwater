@@ -487,6 +487,17 @@ namespace
             NewMessage.PutFloat(pLightFacet->GetDirection()[1]);
             NewMessage.PutFloat(pLightFacet->GetDirection()[2]);
 
+            if (pLightFacet->GetHasTexture())
+            {
+                NewMessage.PutBool(true);
+
+                NewMessage.PutString(pLightFacet->GetTexture()->GetFileName());
+            }
+            else
+            {
+                NewMessage.PutBool(false);
+            }
+
             NewMessage.Reset();
 
             Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Light_Arealight_Info, NewMessage);
@@ -720,6 +731,9 @@ namespace
         {
             float R, G, B;
             float X, Y, Z;
+            unsigned int TextureHash;
+
+            TextureHash = 0;
 
             // -----------------------------------------------------------------------------
             // Read values
@@ -745,6 +759,13 @@ namespace
 
             Base::Float3 Direction = Base::Float3(X, Y, Z);
 
+            bool HasTexture = _rMessage.GetBool();
+
+            if (HasTexture)
+            {
+                TextureHash = _rMessage.GetInt();
+            }
+
             // -----------------------------------------------------------------------------
             // Set values
             // -----------------------------------------------------------------------------
@@ -757,6 +778,20 @@ namespace
             pLightFacet->SetHeight           (Height);
             pLightFacet->SetIsTwoSided       (IsTwoSided);
             pLightFacet->SetDirection        (Direction);
+
+            if (HasTexture)
+            {
+                Dt::CTexture2D* pTexture = Dt::TextureManager::GetTexture2DByHash(TextureHash);
+
+                if (pTexture != nullptr)
+                {
+                    pLightFacet->SetTexture(pTexture);
+                }
+            }
+            else
+            {
+                pLightFacet->SetTexture(0);
+            }
             
             pLightFacet->UpdateLightness();
 
