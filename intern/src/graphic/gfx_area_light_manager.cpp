@@ -77,6 +77,7 @@ namespace
 
         CShaderPtr    m_FilterShaderPtr;
         CShaderPtr    m_BlurShaderPtr;
+        CTexture2DPtr m_DownSampleTexturePtr;
         CTexture2DPtr m_TempFilteredTexturePtr;
         CTexture2DPtr m_TempTexturePtr;
         CBufferPtr    m_GaussianPropertiesPtr;
@@ -113,6 +114,7 @@ namespace
         : m_AreaLightFacets       ()
         , m_FilterShaderPtr       (0)
         , m_BlurShaderPtr         (0)
+        , m_DownSampleTexturePtr  (0)
         , m_TempFilteredTexturePtr(0)
         , m_TempTexturePtr        (0)
         , m_GaussianPropertiesPtr (0)
@@ -141,6 +143,22 @@ namespace
         // -----------------------------------------------------------------------------
 
         STextureDescriptor TextureDescriptor;
+
+        TextureDescriptor.m_NumberOfPixelsU  = 256;
+        TextureDescriptor.m_NumberOfPixelsV  = 256;
+        TextureDescriptor.m_NumberOfPixelsW  = 1;
+        TextureDescriptor.m_NumberOfMipMaps  = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
+        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
+        TextureDescriptor.m_Format           = CTextureBase::Unknown;
+        TextureDescriptor.m_Usage            = CTextureBase::GPUReadWrite;
+        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        TextureDescriptor.m_pFileName        = 0;
+        TextureDescriptor.m_pPixels          = 0;
+        TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        
+        m_DownSampleTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
         TextureDescriptor.m_NumberOfPixelsU  = 2048;
         TextureDescriptor.m_NumberOfPixelsV  = 2048;
@@ -217,6 +235,7 @@ namespace
 
         m_FilterShaderPtr        = 0;
         m_BlurShaderPtr          = 0;
+        m_DownSampleTexturePtr   = 0;
         m_TempFilteredTexturePtr = 0;
         m_TempTexturePtr         = 0;
         m_GaussianPropertiesPtr  = 0;
@@ -444,9 +463,9 @@ namespace
         ContextManager::SetSampler(0, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearClamp));
         ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(_TexturePtr));
 
-        ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(_OutputTexturePtr));
+        ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_DownSampleTexturePtr));
 
-        ContextManager::Dispatch(2048, 2048, 1);
+        ContextManager::Dispatch(256, 256, 1);
 
         ContextManager::ResetSampler(0);
         ContextManager::ResetTexture(0);
@@ -459,8 +478,8 @@ namespace
         
         SGaussianProperties GaussianSettings;
 
-        GaussianSettings.m_MaxPixelCoord[0] = 2048;
-        GaussianSettings.m_MaxPixelCoord[1] = 2048;
+        GaussianSettings.m_MaxPixelCoord[0] = 256;
+        GaussianSettings.m_MaxPixelCoord[1] = 256;
         GaussianSettings.m_Weights[0] = 0.018816f;
         GaussianSettings.m_Weights[1] = 0.034474f;
         GaussianSettings.m_Weights[2] = 0.056577f;
@@ -485,9 +504,9 @@ namespace
 
         ContextManager::SetResourceBuffer(1, m_GaussianPropertiesPtr);
 
-        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(_OutputTexturePtr));
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_DownSampleTexturePtr));
 
-        ContextManager::Dispatch(2048, 2048, 1);
+        ContextManager::Dispatch(256, 256, 1);
 
         ContextManager::ResetImageTexture(1);
 
@@ -510,9 +529,9 @@ namespace
 
         ContextManager::SetResourceBuffer(1, m_GaussianPropertiesPtr);
 
-        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(_OutputTexturePtr));
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_DownSampleTexturePtr));
 
-        ContextManager::Dispatch(2048, 2048, 1);
+        ContextManager::Dispatch(256, 256, 1);
 
         ContextManager::ResetImageTexture(1);
 

@@ -22,15 +22,8 @@ void main()
     PixelCoordX = gl_GlobalInvocationID.x;
     PixelCoordY = gl_GlobalInvocationID.y;
 	Output      = vec4(0.0f);
-
-	// Define inner part
-	int InnerRectX1 = int(2048.0f * 0.125f);
-	int InnerRectX2 = int(2048.0f * (1.0f - 0.125f));
-	int InnerRectY1 = int(2048.0f * 0.125f);
-	int InnerRectY2 = int(2048.0f * (1.0f - 0.125f));
 	
-	
-	vec2 UV =  vec2(PixelCoordX, PixelCoordY) * vec2(1.0f / 2048.0f);
+	vec2 UV =  vec2(PixelCoordX, PixelCoordY) * vec2(1.0f / 256.0f);
 
 	UV = UV * (1.0f + 0.125f * 2) - 0.125f;
 
