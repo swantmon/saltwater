@@ -61,7 +61,6 @@ namespace
         CAreaLightFacets m_AreaLightFacets;
 
         Gfx::CTextureBasePtr m_TempFilteredTexturePtr;
-        Gfx::CTextureBasePtr m_TempTexturePtr;
 
     private:
 
@@ -91,7 +90,6 @@ namespace
     CGfxAreaLightManager::CGfxAreaLightManager()
         : m_AreaLightFacets       ()
         , m_TempFilteredTexturePtr(0)
-        , m_TempTexturePtr        (0)
     {
 
     }
@@ -129,22 +127,6 @@ namespace
         TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
         
         m_TempFilteredTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
-
-        TextureDescriptor.m_NumberOfPixelsU  = 2048;
-        TextureDescriptor.m_NumberOfPixelsV  = 2048;
-        TextureDescriptor.m_NumberOfPixelsW  = 1;
-        TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_NumberOfMipMapsFromSource;
-        TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
-        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-        TextureDescriptor.m_Format           = CTextureBase::Unknown;
-        TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-        TextureDescriptor.m_pFileName        = "textures/LTC/map.dds";
-        TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = CTextureBase::R8G8B8A8_UBYTE;
-        
-        m_TempTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
     }
 
     // -----------------------------------------------------------------------------
@@ -154,7 +136,6 @@ namespace
         m_AreaLightFacets.Clear();
 
         m_TempFilteredTexturePtr = 0;
-        m_TempTexturePtr         = 0;
     }
 
     // -----------------------------------------------------------------------------
@@ -264,7 +245,7 @@ namespace
             if (pDtLightFacet->GetHasTexture())
             {
                 pGfxLightFacet->m_FilteredTexturePtr = m_TempFilteredTexturePtr;
-                pGfxLightFacet->m_TexturePtr         = m_TempTexturePtr;
+                pGfxLightFacet->m_TexturePtr         = Gfx::TextureManager::GetTexture2DByHash(pDtLightFacet->GetTexture()->GetHash());
             }
             else
             {
