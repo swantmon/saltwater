@@ -64,8 +64,8 @@ namespace
         CAreaLightFacets m_AreaLightFacets;
 
         CShaderPtr      m_ShaderPtr;
-        CTextureBasePtr m_TempFilteredTexturePtr;
-        CTextureBasePtr m_TempTexturePtr;
+        CTexture2DPtr m_TempFilteredTexturePtr;
+        CTexture2DPtr m_TempTexturePtr;
 
     private:
 
@@ -73,7 +73,7 @@ namespace
 
         CInternAreaLightFacet& AllocateAreaLightFacet();
 
-        void FilterTexture(Gfx::CTextureBasePtr _TexturePtr, Gfx::CTextureBasePtr _OutputTexturePtr);
+        void FilterTexture(Gfx::CTexture2DPtr _TexturePtr, Gfx::CTexture2DPtr _OutputTexturePtr);
     };
 } // namespace 
 
@@ -262,7 +262,23 @@ namespace
             // -----------------------------------------------------------------------------
             // Texture
             // -----------------------------------------------------------------------------
-            rGfxLightFacet.m_FilteredTexturePtr = 0;
+            STextureDescriptor TextureDescriptor;
+
+            TextureDescriptor.m_NumberOfPixelsU  = 2048;
+            TextureDescriptor.m_NumberOfPixelsV  = 2048;
+            TextureDescriptor.m_NumberOfPixelsW  = 1;
+            TextureDescriptor.m_NumberOfMipMaps  = 0;
+            TextureDescriptor.m_NumberOfTextures = STextureDescriptor::s_GenerateAllMipMaps;
+            TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
+            TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
+            TextureDescriptor.m_Format           = CTextureBase::Unknown;
+            TextureDescriptor.m_Usage            = CTextureBase::GPUReadWrite;
+            TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+            TextureDescriptor.m_pFileName        = 0;
+            TextureDescriptor.m_pPixels          = 0;
+            TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        
+            rGfxLightFacet.m_FilteredTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
             rGfxLightFacet.m_TexturePtr         = 0;
 
             // -----------------------------------------------------------------------------
@@ -281,13 +297,18 @@ namespace
 
             if (pDtLightFacet->GetHasTexture())
             {
-                pGfxLightFacet->m_FilteredTexturePtr = m_TempFilteredTexturePtr;
-                pGfxLightFacet->m_TexturePtr         = Gfx::TextureManager::GetTexture2DByHash(pDtLightFacet->GetTexture()->GetHash());
+                if (pGfxLightFacet->m_TexturePtr == 0 || pGfxLightFacet->m_TexturePtr != 0 && pGfxLightFacet->m_TexturePtr->GetHash() != pDtLightFacet->GetTexture()->GetHash())
+                {
+                    pGfxLightFacet->m_TexturePtr = Gfx::TextureManager::GetTexture2DByHash(pDtLightFacet->GetTexture()->GetHash());
+
+                    FilterTexture(pGfxLightFacet->m_TexturePtr, pGfxLightFacet->m_FilteredTexturePtr);
+
+                    // pGfxLightFacet->m_FilteredTexturePtr = m_TempFilteredTexturePtr;
+                }
             }
             else
             {
-                pGfxLightFacet->m_FilteredTexturePtr = 0;
-                pGfxLightFacet->m_TexturePtr         = 0;
+                pGfxLightFacet->m_TexturePtr = 0;
             }
         }
         
@@ -367,14 +388,14 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxAreaLightManager::FilterTexture(Gfx::CTextureBasePtr _TexturePtr, Gfx::CTextureBasePtr _OutputTexturePtr)
+    void CGfxAreaLightManager::FilterTexture(Gfx::CTexture2DPtr _TexturePtr, Gfx::CTexture2DPtr _OutputTexturePtr)
     {
         ContextManager::SetShaderCS(m_ShaderPtr);
 
         ContextManager::SetSampler(0, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearClamp));
-        ContextManager::SetTexture(0, _TexturePtr);
+        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(_TexturePtr));
 
-        ContextManager::SetImageTexture(1, _OutputTexturePtr);
+        ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(_OutputTexturePtr));
 
         ContextManager::Dispatch(2048, 2048, 1);
 
@@ -384,6 +405,8 @@ namespace
         ContextManager::ResetImageTexture(1);
 
         ContextManager::ResetShaderCS();
+
+        TextureManager::UpdateMipmap(_OutputTexturePtr);
     }
 } // namespace 
 

@@ -467,7 +467,7 @@ namespace
             {
                 ContextManager::SetSampler(6, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-                ContextManager::SetTexture(6, pGfxLightFacet->GetFilteredTexturePtr());
+                ContextManager::SetTexture(6, static_cast<Gfx::CTextureBasePtr>(pGfxLightFacet->GetFilteredTexturePtr()));
             }
 
             ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
@@ -570,7 +570,7 @@ namespace
             {
                 ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-                ContextManager::SetTexture(0, pGfxLightFacet->GetTexturePtr());
+                ContextManager::SetTexture(0, static_cast<Gfx::CTextureBasePtr>(pGfxLightFacet->GetTexturePtr()));
             }
 
             // -----------------------------------------------------------------------------
