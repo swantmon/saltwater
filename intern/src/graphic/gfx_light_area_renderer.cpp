@@ -77,6 +77,7 @@ namespace
             float        m_HalfWidth;
             float        m_HalfHeight;
             float        m_IsTwoSided;
+            float        m_IsTextured;
             unsigned int m_ExposureHistoryIndex;
         };
 
@@ -454,6 +455,7 @@ namespace
             LightBuffer.m_HalfHeight           = pGfxLightFacet->GetHalfHeight();
             LightBuffer.m_Plane                = pGfxLightFacet->GetPlane();
             LightBuffer.m_IsTwoSided           = pDtLightFacet->GetIsTwoSided() ? 1.0f : 0.0f;
+            LightBuffer.m_IsTextured           = pGfxLightFacet->HasTexture() ? 1.0f : 0.0f;
             LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
             BufferManager::UploadConstantBufferData(m_AreaLightBufferPtr, &LightBuffer);
@@ -461,9 +463,12 @@ namespace
             // -----------------------------------------------------------------------------
             // Set texture
             // -----------------------------------------------------------------------------
-            ContextManager::SetSampler(6, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+            if (pGfxLightFacet->HasTexture())
+            {
+                ContextManager::SetSampler(6, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-            ContextManager::SetTexture(6, pGfxLightFacet->GetFilteredTexturePtr());
+                ContextManager::SetTexture(6, pGfxLightFacet->GetFilteredTexturePtr());
+            }
 
             ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
         }
@@ -555,15 +560,18 @@ namespace
 
             SAreaLightbulbProperties LightBuffer;
 
-            LightBuffer.m_Color = Base::Float4(pDtLightFacet->GetColor(), 0.0f);
+            LightBuffer.m_Color = Base::Float4(pDtLightFacet->GetColor(), pGfxLightFacet->HasTexture() ? 1.0f : 0.0f);
 
             BufferManager::UploadConstantBufferData(m_AreaLightbulbBufferPtr, &LightBuffer);
 
             // -----------------------------------------------------------------------------
 
-            ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+            if (pGfxLightFacet->HasTexture())
+            {
+                ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-            ContextManager::SetTexture(0, pGfxLightFacet->GetTexturePtr());
+                ContextManager::SetTexture(0, pGfxLightFacet->GetTexturePtr());
+            }
 
             // -----------------------------------------------------------------------------
 

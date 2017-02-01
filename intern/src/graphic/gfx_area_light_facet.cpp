@@ -42,20 +42,6 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    CTextureBasePtr CAreaLightFacet::GetTexturePtr() const
-    {
-        return m_TexturePtr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CTextureBasePtr CAreaLightFacet::GetFilteredTexturePtr() const
-    {
-        return m_FilteredTexturePtr;
-    }
-
-    // -----------------------------------------------------------------------------
-
     Base::Float4 CAreaLightFacet::GetDirectionX() const
     {
         return m_DirectionX;
@@ -87,5 +73,26 @@ namespace Gfx
     float CAreaLightFacet::GetHalfHeight() const
     {
         return m_HalfHeight;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTextureBasePtr CAreaLightFacet::GetTexturePtr() const
+    {
+        return m_TexturePtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTextureBasePtr CAreaLightFacet::GetFilteredTexturePtr() const
+    {
+        return m_FilteredTexturePtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CAreaLightFacet::HasTexture() const
+    {
+        return m_TexturePtr != 0 && m_FilteredTexturePtr != 0;
     }
 } // namespace Gfx

@@ -27,9 +27,14 @@ layout(location = 0) out vec4 out_Color;
 // -----------------------------------------------------------------------------
 void main(void)
 {
-	vec4 Map = texture(ps_Map, in_UV);
+	vec4 Output = vec4(ps_Color.xyz, 1.0f);
 
-    out_Color = vec4(Map);
+	if (ps_Color.w > 0.0f)
+	{
+		Output *= texture(ps_Map, in_UV);
+	} 
+
+    out_Color = Output;
 }
 
 #endif // __INCLUDE_FS_LIGHT_AREALIGHT_BULB_GLSL_

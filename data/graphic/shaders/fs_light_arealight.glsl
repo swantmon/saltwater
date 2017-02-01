@@ -25,7 +25,7 @@ layout(row_major, std140, binding = 1) uniform UB1
     float m_HalfWidth;
     float m_HalfHeight;
     float m_IsTwoSided;
-    float m_Padding;
+    float m_IsTextured;
     uint  m_ExposureHistoryIndex;
 };
 
@@ -109,7 +109,7 @@ void CalculateUVAndLOD(vec3 _p0_27, vec3 _p0_24, vec3 _p0_32, out vec2 _UV, out 
 }
 
 
-vec3 EvaluateLTCTex(in SSurfaceData _Data, in vec3 _WSViewDirection, in mat3 _MinV, in vec3 _Points[4], in bool _TwoSided)
+vec3 EvaluateLTC(in SSurfaceData _Data, in vec3 _WSViewDirection, in mat3 _MinV, in vec3 _Points[4], in bool _TwoSided, in bool _Textured)
 {
     vec3 NextEdgeVertex;
     vec3 CurrentEdgeVertex;
@@ -146,9 +146,15 @@ vec3 EvaluateLTCTex(in SSurfaceData _Data, in vec3 _WSViewDirection, in mat3 _Mi
     vec3 p0_32  = Function1(_MinV, WSWorldToCorner, T1, T2, _Data.m_WSNormal);
     L[3] = normalize(p0_32);
 
-    CalculateUVAndLOD(p0_27, p0_24, p0_32, FilteredUV, FilteredLOD);
 
-    vec4 FilteredMapValues = textureLod(ps_FilteredMap, FilteredUV, FilteredLOD);
+    vec4 LightTexture = vec4(1.0f);
+
+    if (_Textured)
+    {
+        CalculateUVAndLOD(p0_27, p0_24, p0_32, FilteredUV, FilteredLOD);
+
+        LightTexture = textureLod(ps_FilteredMap, FilteredUV, FilteredLOD);    
+    }
 
     // -----------------------------------------------------------------------------
     // detect clipping config
@@ -227,7 +233,7 @@ vec3 EvaluateLTCTex(in SSurfaceData _Data, in vec3 _WSViewDirection, in mat3 _Mi
         Sum = _TwoSided ? abs(Sum) : max(0.0f, Sum);
     }
 
-    return vec3(Sum) * FilteredMapValues.xyz;
+    return vec3(Sum) * LightTexture.xyz;
 }
 
 // -----------------------------------------------------------------------------
@@ -307,11 +313,11 @@ void main()
         vec3(LTCMaterial.w, 0.0f         , LTCMaterial.x)
     );
         
-    vec3 Specular = EvaluateLTCTex(Data, WSViewDirection, LTCMatrix, LightbulbCorners, m_IsTwoSided > 0.0f);
+    vec3 Specular = EvaluateLTC(Data, WSViewDirection, LTCMatrix, LightbulbCorners, m_IsTwoSided > 0.0f, m_IsTextured > 0.0f);
 
     Specular = Specular * 4.0f * Data.m_SpecularAlbedo * texture(ps_LTCMag, UV).x;
     
-    vec3 Diffuse = EvaluateLTCTex(Data, WSViewDirection, mat3(1.0f), LightbulbCorners, m_IsTwoSided > 0.0f); 
+    vec3 Diffuse = EvaluateLTC(Data, WSViewDirection, mat3(1.0f), LightbulbCorners, m_IsTwoSided > 0.0f, m_IsTextured > 0.0f); 
     
     Diffuse = Diffuse * 4.0f * Data.m_DiffuseAlbedo * texture(ps_LTCMag, UV).x;
     

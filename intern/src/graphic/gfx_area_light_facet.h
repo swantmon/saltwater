@@ -30,6 +30,8 @@ namespace Gfx
         CTextureBasePtr GetTexturePtr() const;
         CTextureBasePtr GetFilteredTexturePtr() const;
 
+        bool HasTexture() const;
+
     protected:
 
         CBufferPtr      m_PlaneIndexBufferPtr;
