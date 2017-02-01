@@ -16,6 +16,9 @@
 #include "graphic/gfx_area_light_facet.h"
 #include "graphic/gfx_area_light_manager.h"
 #include "graphic/gfx_buffer_manager.h"
+#include "graphic/gfx_context_manager.h"
+#include "graphic/gfx_sampler_manager.h"
+#include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_texture_manager.h"
 
 using namespace Gfx;
@@ -60,13 +63,17 @@ namespace
 
         CAreaLightFacets m_AreaLightFacets;
 
-        Gfx::CTextureBasePtr m_TempFilteredTexturePtr;
+        CShaderPtr      m_ShaderPtr;
+        CTextureBasePtr m_TempFilteredTexturePtr;
+        CTextureBasePtr m_TempTexturePtr;
 
     private:
 
         void OnDirtyEntity(Dt::CEntity* _pEntity);
 
         CInternAreaLightFacet& AllocateAreaLightFacet();
+
+        void FilterTexture(Gfx::CTextureBasePtr _TexturePtr, Gfx::CTextureBasePtr _OutputTexturePtr);
     };
 } // namespace 
 
@@ -89,7 +96,9 @@ namespace
 {
     CGfxAreaLightManager::CGfxAreaLightManager()
         : m_AreaLightFacets       ()
+        , m_ShaderPtr             (0)
         , m_TempFilteredTexturePtr(0)
+        , m_TempTexturePtr        (0)
     {
 
     }
@@ -110,7 +119,28 @@ namespace
         // -----------------------------------------------------------------------------
         Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CGfxAreaLightManager::OnDirtyEntity));
 
+
+        // -----------------------------------------------------------------------------
+
         STextureDescriptor TextureDescriptor;
+
+        TextureDescriptor.m_NumberOfPixelsU  = 2048;
+        TextureDescriptor.m_NumberOfPixelsV  = 2048;
+        TextureDescriptor.m_NumberOfPixelsW  = 1;
+        TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_NumberOfMipMapsFromSource;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
+        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
+        TextureDescriptor.m_Format           = CTextureBase::Unknown;
+        TextureDescriptor.m_Usage            = CTextureBase::GPUReadWrite;
+        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        TextureDescriptor.m_pFileName        = "textures/LTC/filtered_map.dds";
+        TextureDescriptor.m_pPixels          = 0;
+        TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        
+        m_TempFilteredTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+
+        // -----------------------------------------------------------------------------
 
         TextureDescriptor.m_NumberOfPixelsU  = 2048;
         TextureDescriptor.m_NumberOfPixelsV  = 2048;
@@ -122,11 +152,15 @@ namespace
         TextureDescriptor.m_Format           = CTextureBase::Unknown;
         TextureDescriptor.m_Usage            = CTextureBase::GPURead;
         TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-        TextureDescriptor.m_pFileName        = "textures/LTC/filtered_map.dds";
+        TextureDescriptor.m_pFileName        = "textures/LTC/map.dds";
         TextureDescriptor.m_pPixels          = 0;
         TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
         
-        m_TempFilteredTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+        m_TempTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+
+        // -----------------------------------------------------------------------------
+
+        m_ShaderPtr = ShaderManager::CompileCS("cs_light_arealight_filter.glsl", "main");
     }
 
     // -----------------------------------------------------------------------------
@@ -135,14 +169,17 @@ namespace
     {
         m_AreaLightFacets.Clear();
 
+        m_ShaderPtr              = 0;
         m_TempFilteredTexturePtr = 0;
+        m_TempTexturePtr         = 0;
     }
 
     // -----------------------------------------------------------------------------
 
     void CGfxAreaLightManager::Update()
     {
-
+        // TODO: Add filtering only on changing texture; This here is for testing!
+        // FilterTexture(m_TempTexturePtr, m_TempFilteredTexturePtr);
     }
 
     // -----------------------------------------------------------------------------
@@ -326,6 +363,27 @@ namespace
         CInternAreaLightFacet& rGfxLightFacet = m_AreaLightFacets.Allocate();
         
         return rGfxLightFacet;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxAreaLightManager::FilterTexture(Gfx::CTextureBasePtr _TexturePtr, Gfx::CTextureBasePtr _OutputTexturePtr)
+    {
+        ContextManager::SetShaderCS(m_ShaderPtr);
+
+        ContextManager::SetSampler(0, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearClamp));
+        ContextManager::SetTexture(0, _TexturePtr);
+
+        ContextManager::SetImageTexture(1, _OutputTexturePtr);
+
+        ContextManager::Dispatch(2048, 2048, 1);
+
+        ContextManager::ResetSampler(0);
+        ContextManager::ResetTexture(0);
+
+        ContextManager::ResetImageTexture(1);
+
+        ContextManager::ResetShaderCS();
     }
 } // namespace 
 
