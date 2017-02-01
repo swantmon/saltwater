@@ -259,8 +259,8 @@ namespace
     {
         STextureDescriptor TextureDescriptor;
         
-        TextureDescriptor.m_NumberOfPixelsU  = 64;
-        TextureDescriptor.m_NumberOfPixelsV  = 64;
+        TextureDescriptor.m_NumberOfPixelsU  = 32;
+        TextureDescriptor.m_NumberOfPixelsV  = 32;
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
@@ -277,8 +277,8 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        TextureDescriptor.m_NumberOfPixelsU  = 64;
-        TextureDescriptor.m_NumberOfPixelsV  = 64;
+        TextureDescriptor.m_NumberOfPixelsU  = 32;
+        TextureDescriptor.m_NumberOfPixelsV  = 32;
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
@@ -289,13 +289,31 @@ namespace
         TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
         TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pPixels          = s_LTCMag;
-        TextureDescriptor.m_Format           = CTextureBase::R16_FLOAT;
+        TextureDescriptor.m_Format           = CTextureBase::R16G16_FLOAT;
         
         CTexture2DPtr LTCMagTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
         // -----------------------------------------------------------------------------
 
-        m_LTCTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(LTCMaterialTexturePtr), static_cast<CTextureBasePtr>(LTCMagTexturePtr));
+        TextureDescriptor.m_NumberOfPixelsU  = 2048;
+        TextureDescriptor.m_NumberOfPixelsV  = 2048;
+        TextureDescriptor.m_NumberOfPixelsW  = 1;
+        TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_NumberOfMipMapsFromSource;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
+        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
+        TextureDescriptor.m_Format           = CTextureBase::Unknown;
+        TextureDescriptor.m_Usage            = CTextureBase::GPURead;
+        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        TextureDescriptor.m_pFileName        = "textures/LTC/filtered_map.dds";
+        TextureDescriptor.m_pPixels          = 0;
+        TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        
+        CTexture2DPtr FilteredMapTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+
+        // -----------------------------------------------------------------------------
+
+        m_LTCTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(LTCMaterialTexturePtr), static_cast<CTextureBasePtr>(LTCMagTexturePtr), static_cast<CTextureBasePtr>(FilteredMapTexturePtr));
     }
     
     // -----------------------------------------------------------------------------
@@ -410,8 +428,9 @@ namespace
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
-        ContextManager::SetSampler(4, SamplerManager::GetSampler(CSampler::MinMagMipLinearBorder));
-        ContextManager::SetSampler(5, SamplerManager::GetSampler(CSampler::MinMagMipLinearBorder));
+        ContextManager::SetSampler(4, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(5, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(6, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_AreaLightBufferPtr);
@@ -424,6 +443,7 @@ namespace
         ContextManager::SetTexture(3, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
         ContextManager::SetTexture(4, m_LTCTextureSetPtr->GetTexture(0));
         ContextManager::SetTexture(5, m_LTCTextureSetPtr->GetTexture(1));
+        ContextManager::SetTexture(6, m_LTCTextureSetPtr->GetTexture(2));
 
         // -----------------------------------------------------------------------------
         // Render

@@ -11,7 +11,7 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-const float LUT_SIZE  = 64.0f;
+const float LUT_SIZE  = 32.0f;
 const float LUT_SCALE = (LUT_SIZE - 1.0f) / LUT_SIZE;
 const float LUT_BIAS  = 0.5f / LUT_SIZE;
 
@@ -40,6 +40,7 @@ layout(binding = 2) uniform sampler2D ps_GBuffer2;
 layout(binding = 3) uniform sampler2D ps_DepthTexture;
 layout(binding = 4) uniform sampler2D ps_LTCMaterial;
 layout(binding = 5) uniform sampler2D ps_LTCMag;
+layout(binding = 6) uniform sampler2D ps_FilteredMap;
 
 // -----------------------------------------------------------------------------
 // Input
@@ -54,271 +55,179 @@ layout (location = 0) out vec4 out_Output;
 // -----------------------------------------------------------------------------
 // Linearly Transformed Cosines
 // -----------------------------------------------------------------------------
-float IntegrateEdge(in vec3 _V1, in vec3 _V2)
+float Function3(vec3 CurrentEdgeVertex, vec3 PreviousEdgeVertex)
 {
-    float CosTheta = dot(_V1, _V2);
-    float Theta    = acos(CosTheta);    
-    float Result   = cross(_V1, _V2).z * ((Theta > 0.001f) ? Theta / sin(Theta) : 1.0f);
+    float Temp = clamp(dot (CurrentEdgeVertex, PreviousEdgeVertex), -0.9999f, 0.9999f);
 
-    return Result;
+    return PI/2 - (sign(Temp) * (PI / 2 - (sqrt((1.0f - abs(Temp))) * (PI/2 + (abs(Temp) * (-0.2146018f + (abs(Temp) * (0.08656672f + (abs(Temp) * -0.03102955f)))))))));
 }
 
-// -----------------------------------------------------------------------------
-
-void ClipQuadToHorizon(inout vec3 L[5], out int n)
+vec3 Function2(vec3 _NextEdge, vec3 _CurrentEdge)
 {
+    vec3 Return;
+
+    Return.z = 0.0f;
+    Return.x = ((-(_NextEdge.z) * _CurrentEdge.x) + (_CurrentEdge.z * _NextEdge.x));
+    Return.y = ((-(_NextEdge.z) * _CurrentEdge.y) + (_CurrentEdge.z * _NextEdge.y));
+
+    return normalize(Return);
+}
+
+vec3 Function1(mat3 _LCTMatrix, vec3 _V1, vec3 _T1, vec3 _T2, vec3 _WSNormal)
+{
+    vec3 Return;
+
+    Return.x = dot (_V1, _T1);
+    Return.y = dot (_V1, _T2);
+    Return.z = dot (_V1, _WSNormal);
+
+    return _LCTMatrix * Return;
+}
+
+void CalculateUVAndLOD(vec3 _p0_27, vec3 _p0_24, vec3 _p0_32, out vec2 _UV, out float _LOD)
+{
+    vec3 A = (_p0_27 - _p0_24);
+    vec3 B = (_p0_32 - _p0_24);
+
+    vec3 C = ((A.yzx * B.zxy) - (A.zxy * B.yzx));
+
+    float CdotC = dot (C, C);
+    float tmpvar_40 = dot (C, _p0_24);
+
+    vec3 D = (((tmpvar_40 * C) / CdotC) - _p0_24);
+
+    float AdotB        = dot (A, B);
+    float InverseAdotA = (1.0 / (dot (A, A)));
+
+    vec3 E = (B - ((A * AdotB) * InverseAdotA));
+
+    _UV.y = (dot (E, D) / dot (E, E));
+    _UV.x = ((dot (A, D) * InverseAdotA) - ((AdotB * InverseAdotA) * _UV.y));
+
+    _UV  = (vec2(0.125f, 0.125f) + (0.75f * _UV));
+    _LOD = (log((textureSize(ps_FilteredMap, 0).x * (abs(tmpvar_40) / pow (CdotC, 0.75f)))) / 1.098612f);
+}
+
+
+vec3 EvaluateLTCTex(in SSurfaceData _Data, in vec3 _WSViewDirection, in mat3 _MinV, in vec3 _Points[4], in bool _TwoSided)
+{
+    vec3 NextEdgeVertex;
+    vec3 CurrentEdgeVertex;
+    vec3 PreviousEdgeVertex;
+    vec3  L[4];
+    vec2  FilteredUV;
+    float FilteredLOD;
+    float Sum;
+  
+    // -----------------------------------------------------------------------------
+    // Construct orthonormal basis around world-space normal
+    // -----------------------------------------------------------------------------
+    vec3 T1 = normalize((_WSViewDirection - (_Data.m_WSNormal * dot (_WSViewDirection, _Data.m_WSNormal))));
+    vec3 T2 = normalize(((_Data.m_WSNormal.yzx * T1.zxy) - (_Data.m_WSNormal.zxy * T1.yzx)));
+
+    vec3 WSWorldToCorner;
+
+    WSWorldToCorner = (_Points[0].xyz - _Data.m_WSPosition);
+
+    vec3 p0_24 = Function1(_MinV, WSWorldToCorner, T1, T2, _Data.m_WSNormal);
+    L[0] = normalize(p0_24);
+
+    WSWorldToCorner = (_Points[1].xyz - _Data.m_WSPosition);
+
+    vec3 p0_27  = Function1(_MinV, WSWorldToCorner, T1, T2, _Data.m_WSNormal);
+    L[1] = normalize(p0_27);
+
+    WSWorldToCorner = (_Points[2].xyz - _Data.m_WSPosition);
+
+    L[2] = normalize(Function1(_MinV, WSWorldToCorner, T1, T2, _Data.m_WSNormal));
+
+    WSWorldToCorner = (_Points[3].xyz - _Data.m_WSPosition);
+
+    vec3 p0_32  = Function1(_MinV, WSWorldToCorner, T1, T2, _Data.m_WSNormal);
+    L[3] = normalize(p0_32);
+
+    CalculateUVAndLOD(p0_27, p0_24, p0_32, FilteredUV, FilteredLOD);
+
+    vec4 FilteredMapValues = textureLod(ps_FilteredMap, FilteredUV, FilteredLOD);
+
     // -----------------------------------------------------------------------------
     // detect clipping config
     // -----------------------------------------------------------------------------
-    int config = 0;
+    int Config = 0;
 
-    if (L[0].z > 0.0) config += 1;
-    if (L[1].z > 0.0) config += 2;
-    if (L[2].z > 0.0) config += 4;
-    if (L[3].z > 0.0) config += 8;
+    if ((L[0].z < 0.0)) 
+    {
+        Config = 1;
 
-    // -----------------------------------------------------------------------------
-    // clip
-    // -----------------------------------------------------------------------------
-    n = 0;
+        if ((L[1].z < 0.0f)) 
+        {
+            Config = 2;
 
-    if (config == 0)
-    {
-        // clip all
-    }
-    else if (config == 1) // V1 clip V2 V3 V4
-    {
-        n = 3;
-        L[1] = -L[1].z * L[0] + L[0].z * L[1];
-        L[2] = -L[3].z * L[0] + L[0].z * L[3];
-    }
-    else if (config == 2) // V2 clip V1 V3 V4
-    {
-        n = 3;
-        L[0] = -L[0].z * L[1] + L[1].z * L[0];
-        L[2] = -L[2].z * L[1] + L[1].z * L[2];
-    }
-    else if (config == 3) // V1 V2 clip V3 V4
-    {
-        n = 4;
-        L[2] = -L[2].z * L[1] + L[1].z * L[2];
-        L[3] = -L[3].z * L[0] + L[0].z * L[3];
-    }
-    else if (config == 4) // V3 clip V1 V2 V4
-    {
-        n = 3;
-        L[0] = -L[3].z * L[2] + L[2].z * L[3];
-        L[1] = -L[1].z * L[2] + L[2].z * L[1];
-    }
-    else if (config == 5) // V1 V3 clip V2 V4) impossible
-    {
-        n = 0;
-    }
-    else if (config == 6) // V2 V3 clip V1 V4
-    {
-        n = 4;
-        L[0] = -L[0].z * L[1] + L[1].z * L[0];
-        L[3] = -L[3].z * L[2] + L[2].z * L[3];
-    }
-    else if (config == 7) // V1 V2 V3 clip V4
-    {
-        n = 5;
-        L[4] = -L[3].z * L[0] + L[0].z * L[3];
-        L[3] = -L[3].z * L[2] + L[2].z * L[3];
-    }
-    else if (config == 8) // V4 clip V1 V2 V3
-    {
-        n = 3;
-        L[0] = -L[0].z * L[3] + L[3].z * L[0];
-        L[1] = -L[2].z * L[3] + L[3].z * L[2];
-        L[2] =  L[3];
-    }
-    else if (config == 9) // V1 V4 clip V2 V3
-    {
-        n = 4;
-        L[1] = -L[1].z * L[0] + L[0].z * L[1];
-        L[2] = -L[2].z * L[3] + L[3].z * L[2];
-    }
-    else if (config == 10) // V2 V4 clip V1 V3) impossible
-    {
-        n = 0;
-    }
-    else if (config == 11) // V1 V2 V4 clip V3
-    {
-        n = 5;
-        L[4] = L[3];
-        L[3] = -L[2].z * L[3] + L[3].z * L[2];
-        L[2] = -L[2].z * L[1] + L[1].z * L[2];
-    }
-    else if (config == 12) // V3 V4 clip V1 V2
-    {
-        n = 4;
-        L[1] = -L[1].z * L[2] + L[2].z * L[1];
-        L[0] = -L[0].z * L[3] + L[3].z * L[0];
-    }
-    else if (config == 13) // V1 V3 V4 clip V2
-    {
-        n = 5;
-        L[4] = L[3];
-        L[3] = L[2];
-        L[2] = -L[1].z * L[2] + L[2].z * L[1];
-        L[1] = -L[1].z * L[0] + L[0].z * L[1];
-    }
-    else if (config == 14) // V2 V3 V4 clip V1
-    {
-        n = 5;
-        L[4] = -L[0].z * L[3] + L[3].z * L[0];
-        L[0] = -L[0].z * L[1] + L[1].z * L[0];
-    }
-    else if (config == 15) // V1 V2 V3 V4
-    {
-        n = 4;
-    }
-    
-    if (n == 3)
-    {
-        L[3] = L[0];
+            if ((L[2].z < 0.0f)) 
+            {
+                Config = 3;
+
+                if ((L[3].z < 0.0f)) 
+                {
+                    Config = 4;
+                }
+            }
+        }
     }
 
-    if (n == 4)
+    Sum = 0.0f;
+  
+    if ((Config < 4)) 
     {
-        L[4] = L[0];
-    }
-}
+        PreviousEdgeVertex = L[Config];
+        NextEdgeVertex     = L[Config];
 
-// -----------------------------------------------------------------------------
+        for (int IndexOfConfig = 1; IndexOfConfig <= 4; IndexOfConfig++) 
+        {
+            CurrentEdgeVertex = NextEdgeVertex;
 
-vec3 EvaluateDiffuseLTC(in SSurfaceData _Data, in vec3 _WSViewDirection, in vec3 _Points[4], in bool _TwoSided)
-{
-    // -----------------------------------------------------------------------------
-    // Construct orthonormal basis around world-space normal
-    // -----------------------------------------------------------------------------
-    vec3 T1 = normalize(_WSViewDirection - _Data.m_WSNormal * dot(_WSViewDirection, _Data.m_WSNormal));
-    vec3 T2 = cross(_Data.m_WSNormal, T1);
+            int Config = int((float(mod (float((Config + IndexOfConfig)), 4.0f))));
 
-    // -----------------------------------------------------------------------------
-    // Rotate area light in (T1, T2 and world-space normal) basis
-    // -----------------------------------------------------------------------------
-    mat3 MinV = (transpose(mat3(T1, T2, _Data.m_WSNormal)));
+            NextEdgeVertex = L[Config];
 
-    // -----------------------------------------------------------------------------
-    // Polygon (allocate 5 vertices for clipping)
-    // -----------------------------------------------------------------------------
-    vec3 L[5];
+            if ((CurrentEdgeVertex.z >= 0.0f)) 
+            {
+                if (NextEdgeVertex.z >= 0.0f)
+                {
+                    PreviousEdgeVertex = NextEdgeVertex;
+                }
+                else
+                {
+                    PreviousEdgeVertex = Function2(NextEdgeVertex, CurrentEdgeVertex);
+                }
 
-    L[0] = MinV * (_Points[0] - _Data.m_WSPosition);
-    L[1] = MinV * (_Points[1] - _Data.m_WSPosition);
-    L[2] = MinV * (_Points[2] - _Data.m_WSPosition);
-    L[3] = MinV * (_Points[3] - _Data.m_WSPosition);
+                float tmpvar_54 = Function3(CurrentEdgeVertex, PreviousEdgeVertex);
 
-    int ClipIndex = 0;
+                Sum = (Sum + ((tmpvar_54 * ((CurrentEdgeVertex.yzx * PreviousEdgeVertex.zxy) - (CurrentEdgeVertex.zxy * PreviousEdgeVertex.yzx)).z) / sin(tmpvar_54)));
+            } 
+            else 
+            {
+                if ((NextEdgeVertex.z > 0.0f)) 
+                {
+                    CurrentEdgeVertex = Function2(-NextEdgeVertex, CurrentEdgeVertex);
 
-    ClipQuadToHorizon(L, ClipIndex);
-    
-    if (ClipIndex == 0)
-    {
-        return vec3(0.0f, 0.0f, 0.0f);
-    }
+                    float tmpvar_58 = Function3(PreviousEdgeVertex, CurrentEdgeVertex);
 
-    // -----------------------------------------------------------------------------
-    // Project onto sphere
-    // -----------------------------------------------------------------------------
-    L[0] = normalize(L[0]);
-    L[1] = normalize(L[1]);
-    L[2] = normalize(L[2]);
-    L[3] = normalize(L[3]);
-    L[4] = normalize(L[4]);
+                    Sum = (Sum + ((tmpvar_58 * ((PreviousEdgeVertex.yzx * CurrentEdgeVertex.zxy) - (PreviousEdgeVertex.zxy * CurrentEdgeVertex.yzx)).z) / sin(tmpvar_58)));
 
-    // -----------------------------------------------------------------------------
-    // Integrate
-    // -----------------------------------------------------------------------------
-    float Sum = 0.0f;
+                    PreviousEdgeVertex = NextEdgeVertex;
 
-    Sum += IntegrateEdge(L[0], L[1]);
-    Sum += IntegrateEdge(L[1], L[2]);
-    Sum += IntegrateEdge(L[2], L[3]);
+                    float tmpvar_60 = Function3(CurrentEdgeVertex, NextEdgeVertex);
 
-    if (ClipIndex >= 4)
-    {
-        Sum += IntegrateEdge(L[3], L[4]);
+                    Sum = (Sum + ((tmpvar_60 * ((CurrentEdgeVertex.yzx * NextEdgeVertex.zxy) - (CurrentEdgeVertex.zxy * NextEdgeVertex.yzx)).z) / sin(tmpvar_60)));
+                }   
+            }
+        }
+
+        Sum = _TwoSided ? abs(Sum) : max(0.0f, Sum);
     }
 
-    if (ClipIndex == 5)
-    {
-        Sum += IntegrateEdge(L[4], L[0]);
-    }
-
-    Sum = _TwoSided ? abs(Sum) : max(0.0, Sum);
-
-    return m_Color.xyz * vec3(Sum, Sum, Sum) * _Data.m_DiffuseAlbedo;
-}
-
-// -----------------------------------------------------------------------------
-
-vec3 EvaluateSpecularLTC(in SSurfaceData _Data, in vec3 _WSViewDirection, in mat3 _MinV, in vec3 _Points[4], in bool _TwoSided)
-{
-    // -----------------------------------------------------------------------------
-    // Construct orthonormal basis around world-space normal
-    // -----------------------------------------------------------------------------
-    vec3 T1 = normalize(_WSViewDirection - _Data.m_WSNormal * dot(_WSViewDirection, _Data.m_WSNormal));
-    vec3 T2 = cross(_Data.m_WSNormal, T1);
-
-    // -----------------------------------------------------------------------------
-    // Rotate area light in (T1, T2 and world-space normal) basis and depending
-    // on material
-    // -----------------------------------------------------------------------------
-    _MinV = _MinV * (transpose(mat3(T1, T2, _Data.m_WSNormal)));
-
-    // -----------------------------------------------------------------------------
-    // Polygon (allocate five vertices for clipping)
-    // -----------------------------------------------------------------------------
-    vec3 L[5];
-
-    L[0] = _MinV * (_Points[0] - _Data.m_WSPosition);
-    L[1] = _MinV * (_Points[1] - _Data.m_WSPosition);
-    L[2] = _MinV * (_Points[2] - _Data.m_WSPosition);
-    L[3] = _MinV * (_Points[3] - _Data.m_WSPosition);
-
-    int ClipIndex = 0;
-
-    ClipQuadToHorizon(L, ClipIndex);
-    
-    if (ClipIndex == 0)
-    {
-        return vec3(0.0f, 0.0f, 0.0f);
-    }
-
-    // -----------------------------------------------------------------------------
-    // Project onto sphere
-    // -----------------------------------------------------------------------------
-    L[0] = normalize(L[0]);
-    L[1] = normalize(L[1]);
-    L[2] = normalize(L[2]);
-    L[3] = normalize(L[3]);
-    L[4] = normalize(L[4]);
-
-    // -----------------------------------------------------------------------------
-    // Integrate
-    // -----------------------------------------------------------------------------
-    float Sum = 0.0f;
-
-    Sum += IntegrateEdge(L[0], L[1]);
-    Sum += IntegrateEdge(L[1], L[2]);
-    Sum += IntegrateEdge(L[2], L[3]);
-
-    if (ClipIndex >= 4)
-    {
-        Sum += IntegrateEdge(L[3], L[4]);
-    }
-
-    if (ClipIndex == 5)
-    {
-        Sum += IntegrateEdge(L[4], L[0]);
-    }
-
-    Sum = _TwoSided ? abs(Sum) : max(0.0, Sum);
-
-    return m_Color.xyz * vec3(Sum, Sum, Sum) * _Data.m_SpecularAlbedo;
+    return vec3(Sum) * FilteredMapValues.xyz;
 }
 
 // -----------------------------------------------------------------------------
@@ -368,7 +277,6 @@ void main()
     Lightbulb.m_HalfHeight = m_HalfHeight;
     Lightbulb.m_Plane      = m_Plane;
 
-
     vec3 LightbulbCorners[4];
 
     vec3 ExtendX = Lightbulb.m_HalfWidth  * Lightbulb.m_DirectionX;
@@ -386,10 +294,11 @@ void main()
 
     vec3 WSViewDirection = normalize(g_ViewPosition.xyz - Data.m_WSPosition);
     
-    float Theta = acos(dot(Data.m_WSNormal, WSViewDirection));
+    float NdotV = dot(Data.m_WSNormal, WSViewDirection);
+    float Theta = acos(NdotV);
 
     vec2 UV = vec2(Data.m_Roughness, Theta / (0.5f * PI)) * LUT_SCALE + LUT_BIAS;
-    
+        
     vec4 LTCMaterial = texture2D(ps_LTCMaterial, UV);
 
     mat3 LTCMatrix = mat3(
@@ -397,16 +306,16 @@ void main()
         vec3(0.0f         , LTCMaterial.z, 0.0f         ),
         vec3(LTCMaterial.w, 0.0f         , LTCMaterial.x)
     );
-    
-    vec3 Specular = EvaluateSpecularLTC(Data, WSViewDirection, LTCMatrix, LightbulbCorners, m_IsTwoSided > 0.0f);
+        
+    vec3 Specular = EvaluateLTCTex(Data, WSViewDirection, LTCMatrix, LightbulbCorners, m_IsTwoSided > 0.0f);
 
-    Specular *= texture2D(ps_LTCMag, UV).w;
+    Specular = Specular * 4.0f * Data.m_SpecularAlbedo * texture(ps_LTCMag, UV).x;
     
-    vec3 Diffuse = EvaluateDiffuseLTC(Data, WSViewDirection, LightbulbCorners, m_IsTwoSided > 0.0f); 
-
-    Diffuse = Diffuse / 2.0f * PI; 
+    vec3 Diffuse = EvaluateLTCTex(Data, WSViewDirection, mat3(1.0f), LightbulbCorners, m_IsTwoSided > 0.0f); 
     
-    Luminance = Specular + Diffuse;
+    Diffuse = Diffuse * 4.0f * Data.m_DiffuseAlbedo * texture(ps_LTCMag, UV).x;
+    
+    Luminance = m_Color.xyz * (Specular + Diffuse) / (2.0f * PI);
 
     // -----------------------------------------------------------------------------
     // Check if light bulb is visible
