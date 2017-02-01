@@ -31,7 +31,7 @@ void main()
 
     for (VoxelCoords.z = 0; VoxelCoords.z < VOLUME_RESOLUTION; ++ VoxelCoords.z)
     {
-        imageStore(cs_Volume, VoxelCoords, ivec4(0)); // clear for debugging
+        //imageStore(cs_Volume, VoxelCoords, ivec4(0)); // clear for debugging
 
         vec3 WSVoxelPosition = (VoxelCoords - 0.5f) * VOXEL_SIZE;
 
@@ -55,10 +55,17 @@ void main()
 
                 const float TSDF = clamp(SDF / TRUNCATED_DISTANCE, -1.0f, 1.0f);
 
-                //if (SDF >= -TRUNCATED_DISTANCE)
+                if (SDF >= -TRUNCATED_DISTANCE)
                 {
-                    imageStore(cs_Volume, VoxelCoords, ivec4(TSDF * INT16_MAX, 0, 0, 0));
-                    imageStore(cs_Debug, VoxelCoords, vec4(TSDF, 0, 0, 0));
+                    vec2 Voxel = imageLoad(cs_Volume, VoxelCoords).xy;
+                    Voxel.x /= INT16_MAX;
+
+                    Voxel.x = (Voxel.x * Voxel.y + TSDF) / (Voxel.y + 1.0f);
+                    Voxel.y = min(MAX_INTEGRATION_WEIGHT, Voxel.y + 1);
+
+                    Voxel.x *= INT16_MAX;
+                    imageStore(cs_Volume, VoxelCoords, ivec4(Voxel, 0, 0));
+                    //imageStore(cs_Debug, VoxelCoords, vec4(TSDF, 0, 0, 0));
                 }
             }
         }

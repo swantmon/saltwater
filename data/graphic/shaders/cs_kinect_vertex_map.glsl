@@ -26,7 +26,7 @@ void main()
 	
 	const vec2 ImagePos = vec2(gl_GlobalInvocationID.xy);
 	
-	const float Depth = imageLoad(cs_DepthBuffer, ivec2(ImagePos)).x * 0.001f;
+	const float Depth = imageLoad(cs_DepthBuffer, ivec2(ImagePos)).x / 1000.0f;
 	
 	vec4 Vertex;
 	

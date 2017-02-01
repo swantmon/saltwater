@@ -26,7 +26,7 @@ void main(void)
 	VoxelPosition.y = Index / VOLUME_RESOLUTION;
 	VoxelPosition.z = Index % VOLUME_RESOLUTION;
     gl_Position = g_WorldToScreen * g_WorldMatrix * vec4(VoxelPosition, 1.0f);
-	out_Color = vec4(imageLoad(vs_Volume, ivec3(VoxelPosition)).xy / vec2(65535.0f), 0.0f, 0.0f);
+	out_Color = vec4(imageLoad(vs_Volume, ivec3(VoxelPosition)).xy / vec2(32767.0f, 1.0f), 0.0f, 0.0f);
 
     ivec3 IsOnEdge = ivec3(
         VoxelPosition.x == 0 || VoxelPosition.x == VOLUME_RESOLUTION - 1,

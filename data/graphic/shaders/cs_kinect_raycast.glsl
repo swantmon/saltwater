@@ -42,9 +42,11 @@ ivec3 GetVoxelCoords(vec3 Position)
     return ivec3(Position / VOXEL_SIZE + 0.5f);
 }
 
-ivec2 GetVoxel(ivec3 Coords)
+vec2 GetVoxel(ivec3 Coords)
 {
-    return ivec2(imageLoad(cs_Volume, Coords).xy);
+    vec2 Voxel = vec2(ivec2(imageLoad(cs_Volume, Coords).xy));
+    Voxel.x /= float(INT16_MAX);
+    return Voxel;
 }
 
 layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
@@ -72,9 +74,9 @@ void main()
     const float Step = VOXEL_SIZE;
     float RayLength = StartLength;
 
-    ivec2 Voxel = GetVoxel(GetVoxelCoords(CameraPosition + RayLength * RayDirection));
+    vec2 Voxel = GetVoxel(GetVoxelCoords(CameraPosition + RayLength * RayDirection));
 
-    float TSDF = Voxel.x / INT16_MAX;
+    float TSDF = Voxel.x;
 
     vec3 Vertex = vec3(0.0f);
 
@@ -88,11 +90,10 @@ void main()
 
         ivec3 VoxelCoords = GetVoxelCoords(CurrentPosition);
         
-        ivec2 Voxel = GetVoxel(VoxelCoords);
+        vec2 Voxel = GetVoxel(VoxelCoords);
 
-        TSDF = Voxel.x / float(INT16_MAX);
+        TSDF = Voxel.x;
 
-        //if (TSDF > -001f && TSDF < 0.1f)
         if (PreviousTSDF > 0.0f && TSDF < 0.0f)
         {
             Vertex = CurrentPosition;
@@ -100,7 +101,7 @@ void main()
         }
     }
 
-    imageStore(cs_Vertex, VertexMapPosition, vec4(Vertex, TSDF));
+    imageStore(cs_Vertex, VertexMapPosition, vec4(Vertex, 1.0f));
 }
 
 #endif // __INCLUDE_CS_KINECT_INTEGRATE_VOLUME_GLSL__

@@ -50,7 +50,7 @@ namespace
     const int g_VolumeResolution = 256;
     const float g_VoxelSize = g_VolumeSize / g_VolumeResolution;
 
-    const int g_MaxIntegrationWeight = 100;
+    const int g_MaxIntegrationWeight = 10;
 
     const int g_ICPIterations[g_PyramidLevels] = { 10, 5, 4 };
     const float g_EpsilonVertex = 0.1f;
@@ -132,7 +132,7 @@ namespace
         void RenderReconstructionData();
 
         void RenderDepth();
-        void RenderVertexMap();
+        void RenderVertexMap(GLuint VertexMap);
         void RenderVolume();
         void SetSphere();
 
@@ -669,10 +669,11 @@ namespace
         glClear(GL_COLOR_BUFFER_BIT);
         
         //RenderDepth();
-        //glViewport(0, 0, 640, 720);
-        //RenderVolume();
-        //glViewport(640, 0, 640, 720);
-        RenderVertexMap();
+        glViewport(0, 0, 640, 720);
+        //RenderVertexMap(m_KinectVertexMap[0]);
+        RenderVolume();
+        glViewport(640, 0, 640, 720);
+        RenderVertexMap(m_RaycastVertexMap[0]);
 
         glViewport(0, 0, 1280, 720);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -709,7 +710,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxVoxelRenderer::RenderVertexMap()
+    void CGfxVoxelRenderer::RenderVertexMap(GLuint VertexMap)
     {
         Base::Float4x4* pData = static_cast<Base::Float4x4*>(glMapNamedBuffer(m_DrawCallConstantBuffer, GL_WRITE_ONLY));
         *pData = m_VertexMapWorldMatrix;
@@ -717,7 +718,7 @@ namespace
 
         glBindVertexArray(1); // dummy vao because opengl needs vertex data even when it does not use it
 
-        glBindImageTexture(0, m_RaycastVertexMap[0], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+        glBindImageTexture(0, VertexMap, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
 
         CBufferPtr FrameConstantBufferPtr = Gfx::Main::GetPerFrameConstantBufferVS();
         CNativeBuffer NativeBufer = *static_cast<CNativeBuffer*>(FrameConstantBufferPtr.GetPtr());

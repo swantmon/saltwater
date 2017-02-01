@@ -14,11 +14,12 @@ void main(void)
     if (in_Color.b == 1.0f)
     {
         out_Color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+		return;
     }
-	else if (in_Color.r == 0.0f)
+	if (in_Color.r > 0.01f || in_Color.r < -0.01f)
 	{
 		discard;
-	}    
+	}
     out_Color = vec4(0.0f, 1.0f, 0.0f, 1.0f);
 }
 
