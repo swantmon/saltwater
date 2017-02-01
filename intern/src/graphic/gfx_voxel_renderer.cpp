@@ -50,7 +50,7 @@ namespace
     const int g_VolumeResolution = 256;
     const float g_VoxelSize = g_VolumeSize / g_VolumeResolution;
 
-    const int g_MaxIntegrationWeight = 10;
+    const int g_MaxIntegrationWeight = 100;
 
     const int g_ICPIterations[g_PyramidLevels] = { 10, 5, 4 };
     const float g_EpsilonVertex = 0.1f;
