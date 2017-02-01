@@ -55,6 +55,18 @@ namespace
             friend class CGfxAreaLightManager;
         };
 
+        struct SFilterProperties
+        {
+            unsigned int m_LOD;
+        };
+
+        struct SGaussianProperties
+        {
+            Base::Int2 m_Direction;
+            Base::Int2 m_MaxPixelCoord;
+            float      m_Weights[7];
+        };
+
     private:
 
         typedef Base::CPool<CInternAreaLightFacet, 64> CAreaLightFacets;
@@ -63,9 +75,12 @@ namespace
 
         CAreaLightFacets m_AreaLightFacets;
 
-        CShaderPtr      m_ShaderPtr;
+        CShaderPtr    m_FilterShaderPtr;
+        CShaderPtr    m_BlurShaderPtr;
         CTexture2DPtr m_TempFilteredTexturePtr;
         CTexture2DPtr m_TempTexturePtr;
+        CBufferPtr    m_GaussianPropertiesPtr;
+        CBufferPtr    m_FilterPropertiesPtr;
 
     private:
 
@@ -96,9 +111,12 @@ namespace
 {
     CGfxAreaLightManager::CGfxAreaLightManager()
         : m_AreaLightFacets       ()
-        , m_ShaderPtr             (0)
+        , m_FilterShaderPtr       (0)
+        , m_BlurShaderPtr         (0)
         , m_TempFilteredTexturePtr(0)
         , m_TempTexturePtr        (0)
+        , m_GaussianPropertiesPtr (0)
+        , m_FilterPropertiesPtr   (0)
     {
 
     }
@@ -127,14 +145,14 @@ namespace
         TextureDescriptor.m_NumberOfPixelsU  = 2048;
         TextureDescriptor.m_NumberOfPixelsV  = 2048;
         TextureDescriptor.m_NumberOfPixelsW  = 1;
-        TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_NumberOfMipMapsFromSource;
+        TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
         TextureDescriptor.m_NumberOfTextures = 1;
         TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
         TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
         TextureDescriptor.m_Format           = CTextureBase::Unknown;
         TextureDescriptor.m_Usage            = CTextureBase::GPUReadWrite;
         TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-        TextureDescriptor.m_pFileName        = "textures/LTC/filtered_map.dds";
+        TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pPixels          = 0;
         TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
         
@@ -160,7 +178,35 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        m_ShaderPtr = ShaderManager::CompileCS("cs_light_arealight_filter.glsl", "main");
+        m_FilterShaderPtr = ShaderManager::CompileCS("cs_light_arealight_filter.glsl", "main");
+
+        m_BlurShaderPtr = ShaderManager::CompileCS("cs_light_arealight_blur.glsl", "main");
+
+        // -----------------------------------------------------------------------------
+
+        SBufferDescriptor ConstanteBufferDesc;
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SGaussianProperties);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        m_GaussianPropertiesPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SFilterProperties);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        m_FilterPropertiesPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
     }
 
     // -----------------------------------------------------------------------------
@@ -169,9 +215,12 @@ namespace
     {
         m_AreaLightFacets.Clear();
 
-        m_ShaderPtr              = 0;
+        m_FilterShaderPtr        = 0;
+        m_BlurShaderPtr          = 0;
         m_TempFilteredTexturePtr = 0;
         m_TempTexturePtr         = 0;
+        m_GaussianPropertiesPtr  = 0;
+        m_FilterPropertiesPtr    = 0;
     }
 
     // -----------------------------------------------------------------------------
@@ -179,7 +228,7 @@ namespace
     void CGfxAreaLightManager::Update()
     {
         // TODO: Add filtering only on changing texture; This here is for testing!
-        // FilterTexture(m_TempTexturePtr, m_TempFilteredTexturePtr);
+        FilterTexture(m_TempTexturePtr, m_TempFilteredTexturePtr);
     }
 
     // -----------------------------------------------------------------------------
@@ -390,7 +439,7 @@ namespace
 
     void CGfxAreaLightManager::FilterTexture(Gfx::CTexture2DPtr _TexturePtr, Gfx::CTexture2DPtr _OutputTexturePtr)
     {
-        ContextManager::SetShaderCS(m_ShaderPtr);
+        ContextManager::SetShaderCS(m_FilterShaderPtr);
 
         ContextManager::SetSampler(0, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearClamp));
         ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(_TexturePtr));
@@ -406,7 +455,72 @@ namespace
 
         ContextManager::ResetShaderCS();
 
-        TextureManager::UpdateMipmap(_OutputTexturePtr);
+        // -----------------------------------------------------------------------------
+        
+        SGaussianProperties GaussianSettings;
+
+        GaussianSettings.m_MaxPixelCoord[0] = 2048;
+        GaussianSettings.m_MaxPixelCoord[1] = 2048;
+        GaussianSettings.m_Weights[0] = 0.018816f;
+        GaussianSettings.m_Weights[1] = 0.034474f;
+        GaussianSettings.m_Weights[2] = 0.056577f;
+        GaussianSettings.m_Weights[3] = 0.083173f;
+        GaussianSettings.m_Weights[4] = 0.109523f;
+        GaussianSettings.m_Weights[5] = 0.129188f;
+        GaussianSettings.m_Weights[6] = 0.136498f;
+        GaussianSettings.m_Direction[0] = 1;
+        GaussianSettings.m_Direction[1] = 0;
+
+        BufferManager::UploadConstantBufferData(m_GaussianPropertiesPtr, &GaussianSettings);
+
+        SFilterProperties FilterSettings;
+
+        FilterSettings.m_LOD = 0;
+
+        BufferManager::UploadConstantBufferData(m_FilterPropertiesPtr, &FilterSettings);
+
+        ContextManager::SetShaderCS(m_BlurShaderPtr);
+
+        ContextManager::SetResourceBuffer(0, m_FilterPropertiesPtr);
+
+        ContextManager::SetResourceBuffer(1, m_GaussianPropertiesPtr);
+
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(_OutputTexturePtr));
+
+        ContextManager::Dispatch(2048, 2048, 1);
+
+        ContextManager::ResetImageTexture(1);
+
+        ContextManager::ResetResourceBuffer(1);
+
+        ContextManager::ResetResourceBuffer(0);
+
+        ContextManager::ResetShaderCS();
+
+        // -----------------------------------------------------------------------------
+
+        GaussianSettings.m_Direction[0] = 0;
+        GaussianSettings.m_Direction[1] = 1;
+
+        BufferManager::UploadConstantBufferData(m_GaussianPropertiesPtr, &GaussianSettings);
+
+        ContextManager::SetShaderCS(m_BlurShaderPtr);
+
+        ContextManager::SetResourceBuffer(0, m_FilterPropertiesPtr);
+
+        ContextManager::SetResourceBuffer(1, m_GaussianPropertiesPtr);
+
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(_OutputTexturePtr));
+
+        ContextManager::Dispatch(2048, 2048, 1);
+
+        ContextManager::ResetImageTexture(1);
+
+        ContextManager::ResetResourceBuffer(1);
+
+        ContextManager::ResetResourceBuffer(0);
+
+        ContextManager::ResetShaderCS();
     }
 } // namespace 
 

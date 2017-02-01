@@ -34,39 +34,7 @@ void main()
 
 	UV = UV * (1.0f + 0.125f * 2) - 0.125f;
 
-	if (PixelCoordX > InnerRectX1 && PixelCoordX < InnerRectX2 && PixelCoordY > InnerRectY1 && PixelCoordY < InnerRectY2)
-	{
-		LOD	= 1;
-		
-		// Inner
-		vec4 BlurredTexture = vec4(0.0f);
-		for (int Y = -LOD; Y <= LOD; ++Y)
-		{
-			for (int X = -LOD; X <= LOD; ++X)
-			{
-				BlurredTexture += texture(in_Texture, UV + vec2(X, Y) * vec2(1.0f / 2048.0f));
-			}
-		}
-		BlurredTexture /= ((LOD + LOD + 1) * (LOD + LOD + 1));
-
-		Output += BlurredTexture;
-	}
-    else
-	{
-		LOD	= 22;
-		
-		vec4 BlurredTexture = vec4(0.0f);
-		for (int Y = -LOD; Y <= LOD; ++Y)
-		{
-			for (int X = -LOD; X <= LOD; ++X)
-			{
-				BlurredTexture += texture(in_Texture, UV + vec2(X, Y) * vec2(1.0f / 2048.0f));
-			}
-		}
-		BlurredTexture /= ((LOD + LOD + 1) * (LOD + LOD + 1));
-
-		Output += BlurredTexture;
-	}
+	Output = texture(in_Texture, UV);
 
     imageStore(out_FilteredTexture, ivec2(PixelCoordX, PixelCoordY), Output);
 }
