@@ -1,26 +1,22 @@
-
 #ifndef __INCLUDE_CS_LIGHT_AREALIGHT_FILTER_GLSL__
 #define __INCLUDE_CS_LIGHT_AREALIGHT_FILTER_GLSL__
 
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(std430, binding = 0) readonly buffer UGaussianProperties
+layout(std430, binding = 0) readonly buffer UFilterProperties
 {
-    uvec4 cs_ConstantData0;
-    float m_Weights[7];
-};
-
-layout(std430, binding = 1) readonly buffer UFilterProperties
-{
-	vec4 cs_InverseSizeAndOffset;
+    vec4 cs_InverseSizeAndOffset;
+    vec2 cs_Direction;
     uint cs_LOD;
 };
+
+layout (binding = 0) uniform sampler2D in_Texture;
 
 // -----------------------------------------------------------------------------
 // Output
 // -----------------------------------------------------------------------------
-layout (binding = 0, rgba16f) uniform image2D out_FilteredTexture;
+layout (binding = 0, rgba8) uniform image2D out_FilteredTexture;
 
 // -------------------------------------------------------------------------------------
 // Functions
@@ -28,68 +24,100 @@ layout (binding = 0, rgba16f) uniform image2D out_FilteredTexture;
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main()
 {
-	uint PixelCoordX;
+    uint PixelCoordX;
     uint PixelCoordY;
-	vec4 Output;
-	int  LOD;
+    vec4 Output;
+    int  LOD;
 
-	// -----------------------------------------------------------------------------
-    // Settings
     // -----------------------------------------------------------------------------
-    uvec2 cs_Direction     = cs_ConstantData0.xy;
-    uvec2 cs_MaxPixelCoord = cs_ConstantData0.zw;
-	
-	// Initialization
+    // Initialization
+    // -----------------------------------------------------------------------------    
     PixelCoordX = gl_GlobalInvocationID.x;
     PixelCoordY = gl_GlobalInvocationID.y;
-	Output      = vec4(0.0f);
+    Output      = vec4(0.0f);
 
-	uvec2 PixelCoord = gl_GlobalInvocationID.xy;
+    uvec2 PixelCoord = gl_GlobalInvocationID.xy;
+    
+    vec2 UV = vec2(PixelCoord) * cs_InverseSizeAndOffset.xy;
+    vec2 BorderUV = vec2(0.0f);
+    
+    float Distance = 0.0f;
+    
+    int Area = 0;
+    
+    if (!(cs_InverseSizeAndOffset.z <= UV.x &&
+          cs_InverseSizeAndOffset.w <= UV.y &&
+          (1.0f - cs_InverseSizeAndOffset.z) >= UV.x &&
+          (1.0f - cs_InverseSizeAndOffset.w) >= UV.y))
+    {
+        if (UV.x <= cs_InverseSizeAndOffset.z)
+        {
+            // Left
+            BorderUV = vec2(cs_InverseSizeAndOffset.z, UV.y);
+        }
+        else if (UV.x >= 1.0f - cs_InverseSizeAndOffset.z)
+        {
+            // Right
+            BorderUV = vec2(1.0f - cs_InverseSizeAndOffset.z, UV.y);
+        }
+        else if (UV.y <= cs_InverseSizeAndOffset.w)
+        {
+            // Lower
+            BorderUV = vec2(UV.x, cs_InverseSizeAndOffset.w);
+        }
+        else if (UV.y >= 1.0f - cs_InverseSizeAndOffset.w)
+        {
+            // Upper
+            BorderUV = vec2(UV.x, 1.0f - cs_InverseSizeAndOffset.w);
+        }
+        
+        if (UV.x <= cs_InverseSizeAndOffset.z && UV.y <= cs_InverseSizeAndOffset.w)
+        {
+            // Lower Left
+            BorderUV = vec2(cs_InverseSizeAndOffset.z, cs_InverseSizeAndOffset.w);
+        }
+        else if (UV.x <= cs_InverseSizeAndOffset.z && UV.y >= 1.0f - cs_InverseSizeAndOffset.w)
+        {
+            // Upper Left
+            BorderUV = vec2(cs_InverseSizeAndOffset.z, 1.0f - cs_InverseSizeAndOffset.w);
+        }
+        else if (UV.x >= 1.0f - cs_InverseSizeAndOffset.z && UV.y <= cs_InverseSizeAndOffset.w)
+        {
+            // Lower Right
+            BorderUV = vec2(1.0f - cs_InverseSizeAndOffset.z, cs_InverseSizeAndOffset.w);
+        }
+        else if (UV.x >= 1.0f - cs_InverseSizeAndOffset.z && UV.y >= 1.0f - cs_InverseSizeAndOffset.w)
+        {
+            // Upper Right
+            BorderUV = vec2(1.0f - cs_InverseSizeAndOffset.z, 1.0f - cs_InverseSizeAndOffset.w);
+        }
+		
+		vec2 DistanceVec = UV - BorderUV;
+    
+		Distance = sqrt(DistanceVec.x * DistanceVec.x + DistanceVec.y * DistanceVec.y) / cs_InverseSizeAndOffset.z;
+    }
+	else
+	{
+		Distance = 0.0f;
+	}
+
+	Area = int(max(Distance, 0.0f) * (cs_InverseSizeAndOffset.z * (1.0f / cs_InverseSizeAndOffset.x)));
 	
 	vec4 BlurredTexture = vec4(0.0f);
-	
-	int Area = 256 - 1;
-	
-	for (int Index = -Area; Index <= Area; ++ Index)
-	{
-		ivec2 ReadCoord = ivec2(PixelCoord) + ivec2(Index) * ivec2(cs_Direction);
-		
-		ReadCoord.x = ReadCoord.x < 0 ? -ReadCoord.x : ReadCoord.x;
-		ReadCoord.y = ReadCoord.y < 0 ? -ReadCoord.y : ReadCoord.y;
-		
-		ReadCoord.x = ReadCoord.x > int(cs_MaxPixelCoord.x) ? int(cs_MaxPixelCoord.x) + int(cs_MaxPixelCoord.x) - ReadCoord.x : ReadCoord.x;
-		ReadCoord.y = ReadCoord.y > int(cs_MaxPixelCoord.y) ? int(cs_MaxPixelCoord.y) + int(cs_MaxPixelCoord.y) - ReadCoord.y : ReadCoord.y;
-	
-		BlurredTexture += imageLoad(out_FilteredTexture, ReadCoord);
-	}
-	
-	Output = BlurredTexture / (Area + 1 + Area);
-	
-	
-	
-	
-	
-	
-/*
-	vec4 BlurredTexture = vec4(0.0f);
-	
-	int Area = 7 - 1;
-	
-	for (int Index = -Area; Index <= Area; ++ Index)
-	{
-		ivec2 ReadCoord = ivec2(PixelCoord) + ivec2(Index) * ivec2(cs_Direction);
-		
-		ReadCoord.x = clamp(ReadCoord.x, 0, int(cs_MaxPixelCoord.x) - 1);
-		ReadCoord.y = clamp(ReadCoord.y, 0, int(cs_MaxPixelCoord.y) - 1);
-		
-		uint I = Area - abs(Index);
-	
-		BlurredTexture += imageLoad(out_FilteredTexture, ReadCoord) * m_Weights[I];
-	}
 
-	Output = BlurredTexture;
-*/
+	for (int X = -Area; X <= Area; ++ X)
+	{
+		vec2 ReadUV = UV + cs_Direction * ivec2(X) * cs_InverseSizeAndOffset.xy;
 		
+		vec4 Color = texture(in_Texture, ReadUV);
+	
+		BlurredTexture += Color;
+	}
+	
+	Output = BlurredTexture / ((Area + 1 + Area));
+	
+	     
+        
     imageStore(out_FilteredTexture, ivec2(PixelCoordX, PixelCoordY), Output);
 }
 

@@ -59,6 +59,7 @@ namespace
         struct SFilterProperties
         {
             Base::Float4 m_InverseSizeAndOffset;
+            Base::Float2 m_Direction;
             unsigned int m_LOD;
         };
 
@@ -146,8 +147,8 @@ namespace
 
         STextureDescriptor TextureDescriptor;
 
-        TextureDescriptor.m_NumberOfPixelsU  = 512;
-        TextureDescriptor.m_NumberOfPixelsV  = 512;
+        TextureDescriptor.m_NumberOfPixelsU  = 2048;
+        TextureDescriptor.m_NumberOfPixelsV  = 2048;
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
@@ -390,7 +391,7 @@ namespace
                         TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
                         TextureDescriptor.m_pFileName        = 0;
                         TextureDescriptor.m_pPixels          = 0;
-                        TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+                        TextureDescriptor.m_Format           = CTextureBase::R8G8B8A8_UBYTE;
 
                         Gfx::CTexture2DPtr FilteredTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
@@ -491,6 +492,7 @@ namespace
         SFilterProperties FilterSettings;
 
         FilterSettings.m_LOD                  = 0;
+        FilterSettings.m_Direction            = Base::Float2(0.0f, 0.0f);
         FilterSettings.m_InverseSizeAndOffset = Base::Float4(1.0f / static_cast<float>(m_DownSampleTexturePtr->GetNumberOfPixelsU()), 1.0f / static_cast<float>(m_DownSampleTexturePtr->GetNumberOfPixelsV()), 0.125f, 0.125f);
 
         BufferManager::UploadConstantBufferData(m_FilterPropertiesPtr, &FilterSettings);
@@ -515,42 +517,20 @@ namespace
 
         ContextManager::ResetShaderCS();
 
-
-
-
-
-        CTexture2DPtr MipMapLevelPtr = TextureManager::GetMipmapFromTexture2D(_OutputTexturePtr, 0);
-
-        FilterSettings.m_LOD = 0;
-        FilterSettings.m_InverseSizeAndOffset = Base::Float4(1.0f / static_cast<float>(MipMapLevelPtr->GetNumberOfPixelsU()), 1.0f / static_cast<float>(MipMapLevelPtr->GetNumberOfPixelsV()), 0.125f, 0.125f);
-
-        BufferManager::UploadConstantBufferData(m_FilterPropertiesPtr, &FilterSettings);
-
-        SGaussianProperties GaussianSettings;
-
-        GaussianSettings.m_MaxPixelCoord[0] = m_DownSampleTexturePtr->GetNumberOfPixelsU();
-        GaussianSettings.m_MaxPixelCoord[1] = m_DownSampleTexturePtr->GetNumberOfPixelsV();
-        GaussianSettings.m_Weights[0] = 0.002406f;
-        GaussianSettings.m_Weights[1] = 0.009255f;
-        GaussianSettings.m_Weights[2] = 0.027867f;
-        GaussianSettings.m_Weights[3] = 0.065666f;
-        GaussianSettings.m_Weights[4] = 0.121117f;
-        GaussianSettings.m_Weights[5] = 0.174868f;
-        GaussianSettings.m_Weights[6] = 0.197641f;
-        
-
         // -----------------------------------------------------------------------------
 
-        GaussianSettings.m_Direction[0] = 1;
-        GaussianSettings.m_Direction[1] = 0;
+        FilterSettings.m_LOD = 0;
+        FilterSettings.m_Direction = Base::Float2(1.0f, 0.0f);
+        FilterSettings.m_InverseSizeAndOffset = Base::Float4(1.0f / static_cast<float>(m_DownSampleTexturePtr->GetNumberOfPixelsU()), 1.0f / static_cast<float>(m_DownSampleTexturePtr->GetNumberOfPixelsV()), 0.125f, 0.125f);
 
-        BufferManager::UploadConstantBufferData(m_GaussianPropertiesPtr, &GaussianSettings);
+        BufferManager::UploadConstantBufferData(m_FilterPropertiesPtr, &FilterSettings);      
 
         ContextManager::SetShaderCS(m_BlurShaderPtr);
 
-        ContextManager::SetResourceBuffer(0, m_GaussianPropertiesPtr);
+        ContextManager::SetResourceBuffer(0, m_FilterPropertiesPtr);
 
-        ContextManager::SetResourceBuffer(1, m_FilterPropertiesPtr);
+        ContextManager::SetSampler(0, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearMirror));
+        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_DownSampleTexturePtr));
 
         ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_DownSampleTexturePtr));
 
@@ -558,7 +538,8 @@ namespace
 
         ContextManager::ResetImageTexture(0);
 
-        ContextManager::ResetResourceBuffer(1);
+        ContextManager::ResetSampler(0);
+        ContextManager::ResetTexture(0);
 
         ContextManager::ResetResourceBuffer(0);
 
@@ -566,54 +547,29 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        GaussianSettings.m_Direction[0] = 0;
-        GaussianSettings.m_Direction[1] = 1;
+        FilterSettings.m_LOD = 0;
+        FilterSettings.m_Direction = Base::Float2(0.0f, 1.0f);
+        FilterSettings.m_InverseSizeAndOffset = Base::Float4(1.0f / static_cast<float>(m_DownSampleTexturePtr->GetNumberOfPixelsU()), 1.0f / static_cast<float>(m_DownSampleTexturePtr->GetNumberOfPixelsV()), 0.125f, 0.125f);
 
-        BufferManager::UploadConstantBufferData(m_GaussianPropertiesPtr, &GaussianSettings);
+        BufferManager::UploadConstantBufferData(m_FilterPropertiesPtr, &FilterSettings);      
 
         ContextManager::SetShaderCS(m_BlurShaderPtr);
 
-        ContextManager::SetResourceBuffer(0, m_GaussianPropertiesPtr);
+        ContextManager::SetResourceBuffer(0, m_FilterPropertiesPtr);
 
-        ContextManager::SetResourceBuffer(1, m_FilterPropertiesPtr);
+        ContextManager::SetSampler(0, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearMirror));
+        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_DownSampleTexturePtr));
 
         ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_DownSampleTexturePtr));
 
         ContextManager::Dispatch(m_DownSampleTexturePtr->GetNumberOfPixelsU(), m_DownSampleTexturePtr->GetNumberOfPixelsV(), 1);
 
-        ContextManager::ResetImageTexture(1);
-
-        ContextManager::ResetResourceBuffer(1);
-
-        ContextManager::ResetResourceBuffer(0);
-
-        ContextManager::ResetShaderCS();
-
-        // -----------------------------------------------------------------------------
-
-        ContextManager::SetShaderCS(m_ApplyShaderPtr);
-
-        ContextManager::SetSampler(0, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearClamp));
-        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_DownSampleTexturePtr));
-
-        ContextManager::SetSampler(1, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearClamp));
-        ContextManager::SetTexture(1, static_cast<CTextureBasePtr>(_TexturePtr));
-
-        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(MipMapLevelPtr));
-
-        ContextManager::SetResourceBuffer(0, m_FilterPropertiesPtr);
-
-        ContextManager::Dispatch(MipMapLevelPtr->GetNumberOfPixelsU(), MipMapLevelPtr->GetNumberOfPixelsV(), 1);
-
-        ContextManager::ResetResourceBuffer(0);
-
-        ContextManager::ResetImageTexture(1);
+        ContextManager::ResetImageTexture(0);
 
         ContextManager::ResetSampler(0);
         ContextManager::ResetTexture(0);
 
-        ContextManager::ResetSampler(1);
-        ContextManager::ResetTexture(1);
+        ContextManager::ResetResourceBuffer(0);
 
         ContextManager::ResetShaderCS();
     }

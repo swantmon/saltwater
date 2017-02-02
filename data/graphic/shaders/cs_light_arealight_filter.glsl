@@ -14,7 +14,7 @@ layout(std430, binding = 0) readonly buffer UFilterProperties
 // Output
 // -----------------------------------------------------------------------------
 layout (binding = 0) uniform sampler2D in_Texture;
-layout (binding = 1, rgba16f) writeonly uniform image2D out_FilteredTexture;
+layout (binding = 1, rgba8) writeonly uniform image2D out_FilteredTexture;
 
 // -------------------------------------------------------------------------------------
 // Functions
