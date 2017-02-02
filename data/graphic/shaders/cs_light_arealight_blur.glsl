@@ -11,6 +11,12 @@ layout(std430, binding = 0) readonly buffer UGaussianProperties
     float m_Weights[7];
 };
 
+layout(std430, binding = 1) readonly buffer UFilterProperties
+{
+	vec4 cs_InverseSizeAndOffset;
+    uint cs_LOD;
+};
+
 // -----------------------------------------------------------------------------
 // Output
 // -----------------------------------------------------------------------------
@@ -39,7 +45,32 @@ void main()
 	Output      = vec4(0.0f);
 
 	uvec2 PixelCoord = gl_GlobalInvocationID.xy;
-
+	
+	vec4 BlurredTexture = vec4(0.0f);
+	
+	int Area = 256 - 1;
+	
+	for (int Index = -Area; Index <= Area; ++ Index)
+	{
+		ivec2 ReadCoord = ivec2(PixelCoord) + ivec2(Index) * ivec2(cs_Direction);
+		
+		ReadCoord.x = ReadCoord.x < 0 ? -ReadCoord.x : ReadCoord.x;
+		ReadCoord.y = ReadCoord.y < 0 ? -ReadCoord.y : ReadCoord.y;
+		
+		ReadCoord.x = ReadCoord.x > int(cs_MaxPixelCoord.x) ? int(cs_MaxPixelCoord.x) + int(cs_MaxPixelCoord.x) - ReadCoord.x : ReadCoord.x;
+		ReadCoord.y = ReadCoord.y > int(cs_MaxPixelCoord.y) ? int(cs_MaxPixelCoord.y) + int(cs_MaxPixelCoord.y) - ReadCoord.y : ReadCoord.y;
+	
+		BlurredTexture += imageLoad(out_FilteredTexture, ReadCoord);
+	}
+	
+	Output = BlurredTexture / (Area + 1 + Area);
+	
+	
+	
+	
+	
+	
+/*
 	vec4 BlurredTexture = vec4(0.0f);
 	
 	int Area = 7 - 1;
@@ -57,6 +88,7 @@ void main()
 	}
 
 	Output = BlurredTexture;
+*/
 		
     imageStore(out_FilteredTexture, ivec2(PixelCoordX, PixelCoordY), Output);
 }

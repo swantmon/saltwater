@@ -31,7 +31,7 @@ void main()
     PixelCoordY = gl_GlobalInvocationID.y;
 	Output      = vec4(0.0f);
 	
-	vec2 UV =  vec2(PixelCoordX, PixelCoordY) * cs_InverseSizeAndOffset.xy;
+    vec2 UV =  vec2(PixelCoordX, PixelCoordY) * cs_InverseSizeAndOffset.xy;
 
 	UV = UV * (1.0f + cs_InverseSizeAndOffset.zw * 2.0f) - cs_InverseSizeAndOffset.zw;
 
