@@ -7,7 +7,6 @@
 layout(std430, binding = 0) readonly buffer UFilterProperties
 {
     vec4 cs_InverseSizeAndOffset;
-    vec2 cs_Direction;
     uint cs_LOD;
 };
 
@@ -38,17 +37,16 @@ void main()
 
     uvec2 PixelCoord = gl_GlobalInvocationID.xy;
     
-    vec2 UV = vec2(PixelCoord) * cs_InverseSizeAndOffset.xy;
+    vec2 UV  = vec2(PixelCoord) * cs_InverseSizeAndOffset.xy;
+    vec2 UV2 = (UV - 0.125f) * (1 + 0.334f);
+
     vec2 BorderUV = vec2(0.0f);
     
     float Distance = 0.0f;
     
     int Area = 0;
     
-    if (!(cs_InverseSizeAndOffset.z <= UV.x &&
-          cs_InverseSizeAndOffset.w <= UV.y &&
-          (1.0f - cs_InverseSizeAndOffset.z) >= UV.x &&
-          (1.0f - cs_InverseSizeAndOffset.w) >= UV.y))
+    if (!(UV2.x >= 0.0f && UV2.y >= 0.0f && UV2.x <= 1.0f && UV2.y <= 1.0f))
     {
         if (UV.x <= cs_InverseSizeAndOffset.z)
         {
@@ -95,30 +93,27 @@ void main()
 		vec2 DistanceVec = UV - BorderUV;
     
 		Distance = sqrt(DistanceVec.x * DistanceVec.x + DistanceVec.y * DistanceVec.y) / cs_InverseSizeAndOffset.z;
-    }
-	else
-	{
-		Distance = 0.0f;
-	}
 
-	Area = int(max(Distance, 0.0f) * (cs_InverseSizeAndOffset.z * (1.0f / cs_InverseSizeAndOffset.x)));
+		Area = int(max(Distance, 0.0f) * 8.0f);
 	
-	vec4 BlurredTexture = vec4(0.0f);
+		vec4 BlurredTexture = vec4(0.0f);
 
-	for (int X = -Area; X <= Area; ++ X)
-	{
-		vec2 ReadUV = UV + cs_Direction * ivec2(X) * cs_InverseSizeAndOffset.xy;
+		for (int Y = -Area; Y <= Area; ++ Y)
+		{
+			for (int X = -Area; X <= Area; ++ X)
+			{
+				vec2 ReadUV = UV + ivec2(X, Y) * cs_InverseSizeAndOffset.xy;
+				
+				vec4 Color = texture(in_Texture, ReadUV);
+			
+				BlurredTexture += Color;
+			}
+		}
 		
-		vec4 Color = texture(in_Texture, ReadUV);
-	
-		BlurredTexture += Color;
-	}
-	
-	Output = BlurredTexture / ((Area + 1 + Area));
-	
-	     
-        
-    imageStore(out_FilteredTexture, ivec2(PixelCoordX, PixelCoordY), Output);
+		Output = BlurredTexture / ((Area + 1 + Area));
+			        
+	    imageStore(out_FilteredTexture, ivec2(PixelCoordX, PixelCoordY), Output);
+    }
 }
 
 #endif // __INCLUDE_CS_LIGHT_AREALIGHT_FILTER_GLSL__

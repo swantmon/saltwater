@@ -59,7 +59,6 @@ namespace
         struct SFilterProperties
         {
             Base::Float4 m_InverseSizeAndOffset;
-            Base::Float2 m_Direction;
             unsigned int m_LOD;
         };
 
@@ -147,8 +146,8 @@ namespace
 
         STextureDescriptor TextureDescriptor;
 
-        TextureDescriptor.m_NumberOfPixelsU  = 2048;
-        TextureDescriptor.m_NumberOfPixelsV  = 2048;
+        TextureDescriptor.m_NumberOfPixelsU  = 1024;
+        TextureDescriptor.m_NumberOfPixelsV  = 1024;
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
@@ -492,7 +491,6 @@ namespace
         SFilterProperties FilterSettings;
 
         FilterSettings.m_LOD                  = 0;
-        FilterSettings.m_Direction            = Base::Float2(0.0f, 0.0f);
         FilterSettings.m_InverseSizeAndOffset = Base::Float4(1.0f / static_cast<float>(m_DownSampleTexturePtr->GetNumberOfPixelsU()), 1.0f / static_cast<float>(m_DownSampleTexturePtr->GetNumberOfPixelsV()), 0.125f, 0.125f);
 
         BufferManager::UploadConstantBufferData(m_FilterPropertiesPtr, &FilterSettings);
@@ -520,35 +518,6 @@ namespace
         // -----------------------------------------------------------------------------
 
         FilterSettings.m_LOD = 0;
-        FilterSettings.m_Direction = Base::Float2(1.0f, 0.0f);
-        FilterSettings.m_InverseSizeAndOffset = Base::Float4(1.0f / static_cast<float>(m_DownSampleTexturePtr->GetNumberOfPixelsU()), 1.0f / static_cast<float>(m_DownSampleTexturePtr->GetNumberOfPixelsV()), 0.125f, 0.125f);
-
-        BufferManager::UploadConstantBufferData(m_FilterPropertiesPtr, &FilterSettings);      
-
-        ContextManager::SetShaderCS(m_BlurShaderPtr);
-
-        ContextManager::SetResourceBuffer(0, m_FilterPropertiesPtr);
-
-        ContextManager::SetSampler(0, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearMirror));
-        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_DownSampleTexturePtr));
-
-        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_DownSampleTexturePtr));
-
-        ContextManager::Dispatch(m_DownSampleTexturePtr->GetNumberOfPixelsU(), m_DownSampleTexturePtr->GetNumberOfPixelsV(), 1);
-
-        ContextManager::ResetImageTexture(0);
-
-        ContextManager::ResetSampler(0);
-        ContextManager::ResetTexture(0);
-
-        ContextManager::ResetResourceBuffer(0);
-
-        ContextManager::ResetShaderCS();
-
-        // -----------------------------------------------------------------------------
-
-        FilterSettings.m_LOD = 0;
-        FilterSettings.m_Direction = Base::Float2(0.0f, 1.0f);
         FilterSettings.m_InverseSizeAndOffset = Base::Float4(1.0f / static_cast<float>(m_DownSampleTexturePtr->GetNumberOfPixelsU()), 1.0f / static_cast<float>(m_DownSampleTexturePtr->GetNumberOfPixelsV()), 0.125f, 0.125f);
 
         BufferManager::UploadConstantBufferData(m_FilterPropertiesPtr, &FilterSettings);      

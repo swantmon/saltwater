@@ -29,13 +29,16 @@ void main()
 	// Initialization
     PixelCoordX = gl_GlobalInvocationID.x;
     PixelCoordY = gl_GlobalInvocationID.y;
-	Output      = vec4(0.0f);
+	Output      = vec4(1.0f);
 	
     vec2 UV =  vec2(PixelCoordX, PixelCoordY) * cs_InverseSizeAndOffset.xy;
 
-	UV = UV * (1.0f + cs_InverseSizeAndOffset.zw * 2.0f) - cs_InverseSizeAndOffset.zw;
+	UV = (UV - 0.125f) * (1 + 0.334f);
 
-	Output = texture(in_Texture, UV);
+    if (UV.x >= 0.0f && UV.y >= 0.0f && UV.x <= 1.0f && UV.y <= 1.0f)
+    {
+	   Output = texture(in_Texture, UV);
+    }
 
     imageStore(out_FilteredTexture, ivec2(PixelCoordX, PixelCoordY), Output);
 }
