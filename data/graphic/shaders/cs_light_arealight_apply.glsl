@@ -7,11 +7,12 @@
 // -----------------------------------------------------------------------------
 layout(std430, binding = 0) readonly buffer UApplyProperties
 {
+    vec4 cs_InverseSizeAndOffset;
     uint cs_LOD;
 };
 
-layout (binding = 0) uniform sampler2D in_Texture;
-layout (binding = 1) uniform sampler2D in_OrigTexture;
+layout (binding = 0) uniform sampler2D in_OuterTexture;
+layout (binding = 1) uniform sampler2D in_InnerTexture;
 layout (binding = 0, rgba16f) writeonly uniform image2D out_FilteredTexture;
 
 // -------------------------------------------------------------------------------------
@@ -33,36 +34,23 @@ void main()
     Output      = vec4(0.0f);
 
     // Define inner part
-    int InnerRectX1 = int(2048.0f * 0.125f);
-    int InnerRectX2 = int(2048.0f * (1.0f - 0.125f));
-    int InnerRectY1 = int(2048.0f * 0.125f);
-    int InnerRectY2 = int(2048.0f * (1.0f - 0.125f));
+    int InnerRectX1 = int((1.0f / cs_InverseSizeAndOffset.x) * cs_InverseSizeAndOffset.z);
+    int InnerRectX2 = int((1.0f / cs_InverseSizeAndOffset.x) * (1.0f - cs_InverseSizeAndOffset.z));
+    int InnerRectY1 = int((1.0f / cs_InverseSizeAndOffset.y) * cs_InverseSizeAndOffset.w);
+    int InnerRectY2 = int((1.0f / cs_InverseSizeAndOffset.y) * (1.0f - cs_InverseSizeAndOffset.w));
 
-    vec2 UV =  vec2(PixelCoordX, PixelCoordY) * vec2(1.0f / 2048.0f);
-    
-    vec4 OuterPixel = texture(in_Texture, UV);
-    
-    UV = UV * (1.0f + 0.125f * 2.0f) - 0.125f;
+    vec2 UV =  vec2(PixelCoordX, PixelCoordY) * cs_InverseSizeAndOffset.xy;
 
-    vec4 InnerPixel = texture(in_OrigTexture, UV);
-    
-    float Mixing = 0.0f;
-    
-    
     if (PixelCoordX > InnerRectX1 && PixelCoordX < InnerRectX2 && PixelCoordY > InnerRectY1 && PixelCoordY < InnerRectY2)
     {
-        Mixing = 0.0f;
+        UV = UV * (1.0f + cs_InverseSizeAndOffset.zw * 2.0f) - cs_InverseSizeAndOffset.zw;
+
+        Output = texture(in_InnerTexture, UV);
     }
     else
     {
-        Mixing = sqrt((PixelCoordX - 1024.0f) * (PixelCoordX - 1024.0f) + (PixelCoordY - 1024.0f) * (PixelCoordY - 1024.0f));
-        
-        Mixing = Mixing / 1024.0f;
-        
-        Mixing *= 1.35f;
+         Output = texture(in_OuterTexture, UV);
     }
-    
-    Output = mix(InnerPixel, OuterPixel, clamp(Mixing, 0.0f, 1.0f));
 
     imageStore(out_FilteredTexture, ivec2(PixelCoordX, PixelCoordY), Output);
 }

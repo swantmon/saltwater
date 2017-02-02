@@ -722,7 +722,12 @@ namespace
             rTexture.m_Info.m_Semantic          = _TexturePtr->GetSemantic();
             rTexture.m_Info.m_Usage             = _TexturePtr->GetUsage();
             
-            rTexture.m_NativeTexture = (*static_cast<CInternTexture2D*>(_TexturePtr.GetPtr())).m_NativeTexture;      
+            CInternTexture2D* pInternalTexture = static_cast<CInternTexture2D*>(_TexturePtr.GetPtr());
+
+            rTexture.m_NativeTexture        = pInternalTexture->m_NativeTexture;
+            rTexture.m_NativeDimension      = pInternalTexture->m_NativeDimension;
+            rTexture.m_NativeInternalFormat = pInternalTexture->m_NativeInternalFormat;
+            rTexture.m_NativeUsage          = pInternalTexture->m_NativeUsage;
         }
         catch (...)
         {
