@@ -5,12 +5,7 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(std430, binding = 0) readonly buffer UFilterProperties
-{
-    uint cs_LOD;
-};
-
-layout(std430, binding = 1) readonly buffer UGaussianProperties
+layout(std430, binding = 0) readonly buffer UGaussianProperties
 {
     uvec4 cs_ConstantData0;
     float m_Weights[7];
@@ -43,37 +38,26 @@ void main()
     PixelCoordY = gl_GlobalInvocationID.y;
 	Output      = vec4(0.0f);
 
-	// Define inner part
-	int InnerRectX1 = int(2048.0f * 0.125f);
-	int InnerRectX2 = int(2048.0f * (1.0f - 0.125f));
-	int InnerRectY1 = int(2048.0f * 0.125f);
-	int InnerRectY2 = int(2048.0f * (1.0f - 0.125f));
-
 	uvec2 PixelCoord = gl_GlobalInvocationID.xy;
+
+	vec4 BlurredTexture = vec4(0.0f);
 	
-
-	if (PixelCoordX > InnerRectX1 && PixelCoordX < InnerRectX2 && PixelCoordY > InnerRectY1 && PixelCoordY < InnerRectY2)
+	int Area = 7 - 1;
+	
+	for (int Index = -Area; Index <= Area; ++ Index)
 	{
-		LOD	= 1;
+		ivec2 ReadCoord = ivec2(PixelCoord) + ivec2(Index) * ivec2(cs_Direction);
 		
-		Output = imageLoad(out_FilteredTexture, ivec2(PixelCoordX, PixelCoordY));
-	}
-    else
-	{
-		vec4 BlurredTexture = vec4(0.0f);
+		ReadCoord.x = clamp(ReadCoord.x, 0, int(cs_MaxPixelCoord.x) - 1);
+		ReadCoord.y = clamp(ReadCoord.y, 0, int(cs_MaxPixelCoord.y) - 1);
 		
-		int Area = 7 - 1;
-		
-		for (int Index = -Area; Index <= Area; ++ Index)
-		{
-			uint I = Area - abs(Index);
-			
-			BlurredTexture += imageLoad(out_FilteredTexture, ivec2(PixelCoord) + ivec2(Index) * ivec2(cs_Direction)) * m_Weights[I];
-		}
-
-		Output = BlurredTexture;
+		uint I = Area - abs(Index);
+	
+		BlurredTexture += imageLoad(out_FilteredTexture, ReadCoord) * m_Weights[I];
 	}
 
+	Output = BlurredTexture;
+		
     imageStore(out_FilteredTexture, ivec2(PixelCoordX, PixelCoordY), Output);
 }
 

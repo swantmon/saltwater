@@ -2,6 +2,16 @@
 #define __INCLUDE_CS_LIGHT_AREALIGHT_FILTER_GLSL__
 
 // -----------------------------------------------------------------------------
+// Input from engine
+// -----------------------------------------------------------------------------
+layout(std430, binding = 0) readonly buffer UFilterProperties
+{
+    uint cs_LOD;
+    vec2 m_InverseSize;
+    float m_Offset;
+};
+
+// -----------------------------------------------------------------------------
 // Output
 // -----------------------------------------------------------------------------
 layout (binding = 0) uniform sampler2D in_Texture;
@@ -16,16 +26,15 @@ void main()
 	uint PixelCoordX;
     uint PixelCoordY;
 	vec4 Output;
-	int  LOD;
-	
+
 	// Initialization
     PixelCoordX = gl_GlobalInvocationID.x;
     PixelCoordY = gl_GlobalInvocationID.y;
 	Output      = vec4(0.0f);
 	
-	vec2 UV =  vec2(PixelCoordX, PixelCoordY) * vec2(1.0f / 256.0f);
+	vec2 UV =  vec2(PixelCoordX, PixelCoordY) * m_InverseSize;
 
-	UV = UV * (1.0f + 0.125f * 2) - 0.125f;
+	UV = UV * (1.0f + m_Offset * 2.0f) - m_Offset;
 
 	Output = texture(in_Texture, UV);
 
