@@ -29,8 +29,7 @@ namespace Gfx
                 Mirror                               =  1,
                 Clamp                                =  2,
                 Border                               =  3,
-                MirrorOnce                           =  4, 
-                NumberOfAddressModi                  =  5,
+                NumberOfAddressModi                  =  4,
                 UndefinedAddressMode                 = -1,
             };
 
@@ -53,12 +52,15 @@ namespace Gfx
                 MinMagMipPointClamp,
                 MinMagMipPointWrap,
                 MinMagMipPointBorder,
+                MinMagMipPointMirror,
                 MinMagLinearMipPointClamp,
                 MinMagLinearMipPointWrap,
                 MinMagLinearMipPointBorder,
+                MinMagLinearMipPointMirror,
                 MinMagMipLinearClamp,
                 MinMagMipLinearWrap,
                 MinMagMipLinearBorder,
+                MinMagMipLinearMirror,
                 NumberOfSamplers,
                 UndefinedSampler = -1,
             };
