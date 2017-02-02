@@ -526,6 +526,7 @@ namespace
         /////////////////////////////////////////////////////////////////////////////////////
 
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_IntrinsicsConstantBuffer);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_TrackingDataConstantBuffer);
 
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
@@ -669,10 +670,10 @@ namespace
         glClear(GL_COLOR_BUFFER_BIT);
         
         //RenderDepth();
-        glViewport(0, 0, 640, 720);
-        //RenderVertexMap(m_KinectVertexMap[0]);
-        RenderVolume();
-        glViewport(640, 0, 640, 720);
+        //glViewport(0, 0, 640, 720);
+        RenderVertexMap(m_KinectVertexMap[0]);
+        //RenderVolume();
+        //glViewport(640, 0, 640, 720);
         RenderVertexMap(m_RaycastVertexMap[0]);
 
         glViewport(0, 0, 1280, 720);

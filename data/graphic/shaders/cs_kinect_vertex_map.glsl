@@ -33,6 +33,8 @@ void main()
 	Vertex.xy = Depth * (ImagePos - g_FocalPoint) * g_InvFocalLength;
 	Vertex.z = Depth;
 	Vertex.w = 1.0f;
+
+    Vertex = g_PoseMatrix * Vertex;
 	
 	imageStore(cs_VertexMap, ivec2(ImagePos), Depth > 0.0f ? Vertex : vec4(0.0f));
 }
