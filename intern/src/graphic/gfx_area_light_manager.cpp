@@ -164,8 +164,8 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        TextureDescriptor.m_NumberOfPixelsU  = 512;
-        TextureDescriptor.m_NumberOfPixelsV  = 512;
+        TextureDescriptor.m_NumberOfPixelsU  = 256;
+        TextureDescriptor.m_NumberOfPixelsV  = 256;
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
@@ -235,7 +235,7 @@ namespace
     void CGfxAreaLightManager::Update()
     {
         // The following is for testing:
-        return;
+        // return;
 
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
@@ -491,7 +491,7 @@ namespace
         SFilterProperties FilterSettings;
 
         FilterSettings.m_LOD                  = 0;
-        FilterSettings.m_InverseSizeAndOffset = Base::Float4(1.0f / 64.0f, 1.0f / 64.0f, 0.125f, 0.125f);
+        FilterSettings.m_InverseSizeAndOffset = Base::Float4(1.0f / static_cast<float>(m_DownSampleTexturePtr->GetNumberOfPixelsU()), 1.0f / static_cast<float>(m_DownSampleTexturePtr->GetNumberOfPixelsV()), 0.125f, 0.125f);
 
         BufferManager::UploadConstantBufferData(m_FilterPropertiesPtr, &FilterSettings);
 
@@ -504,7 +504,7 @@ namespace
 
         ContextManager::SetResourceBuffer(0, m_FilterPropertiesPtr);
 
-        ContextManager::Dispatch(64, 64, 1);
+        ContextManager::Dispatch(m_DownSampleTexturePtr->GetNumberOfPixelsU(), m_DownSampleTexturePtr->GetNumberOfPixelsV(), 1);
 
         ContextManager::ResetResourceBuffer(0);
 
@@ -520,15 +520,15 @@ namespace
         // -----------------------------------------------------------------------------
         SGaussianProperties GaussianSettings;
 
-        GaussianSettings.m_MaxPixelCoord[0] = 64;
-        GaussianSettings.m_MaxPixelCoord[1] = 64;
-        GaussianSettings.m_Weights[0] = 0.018816f;
-        GaussianSettings.m_Weights[1] = 0.034474f;
-        GaussianSettings.m_Weights[2] = 0.056577f;
-        GaussianSettings.m_Weights[3] = 0.083173f;
-        GaussianSettings.m_Weights[4] = 0.109523f;
-        GaussianSettings.m_Weights[5] = 0.129188f;
-        GaussianSettings.m_Weights[6] = 0.136498f;
+        GaussianSettings.m_MaxPixelCoord[0] = m_DownSampleTexturePtr->GetNumberOfPixelsU();
+        GaussianSettings.m_MaxPixelCoord[1] = m_DownSampleTexturePtr->GetNumberOfPixelsV();
+        GaussianSettings.m_Weights[0] = 0.002406f;
+        GaussianSettings.m_Weights[1] = 0.009255f;
+        GaussianSettings.m_Weights[2] = 0.027867f;
+        GaussianSettings.m_Weights[3] = 0.065666f;
+        GaussianSettings.m_Weights[4] = 0.121117f;
+        GaussianSettings.m_Weights[5] = 0.174868f;
+        GaussianSettings.m_Weights[6] = 0.197641f;
         GaussianSettings.m_Direction[0] = 1;
         GaussianSettings.m_Direction[1] = 0;
 
@@ -540,7 +540,7 @@ namespace
 
         ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_DownSampleTexturePtr));
 
-        ContextManager::Dispatch(64, 64, 1);
+        ContextManager::Dispatch(m_DownSampleTexturePtr->GetNumberOfPixelsU(), m_DownSampleTexturePtr->GetNumberOfPixelsV(), 1);
 
         ContextManager::ResetImageTexture(1);
 
@@ -561,7 +561,7 @@ namespace
 
         ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_DownSampleTexturePtr));
 
-        ContextManager::Dispatch(64, 64, 1);
+        ContextManager::Dispatch(m_DownSampleTexturePtr->GetNumberOfPixelsU(), m_DownSampleTexturePtr->GetNumberOfPixelsV(), 1);
 
         ContextManager::ResetImageTexture(1);
 
@@ -573,7 +573,7 @@ namespace
         // Filter inner area with linear filtering without border
         // -----------------------------------------------------------------------------
         FilterSettings.m_LOD                  = 0;
-        FilterSettings.m_InverseSizeAndOffset = Base::Float4(1.0f / 512.0f, 1.0f / 512.0f, 0.0f, 0.0f);
+        FilterSettings.m_InverseSizeAndOffset = Base::Float4(1.0f / static_cast<float>(m_LODSampleTexturePtr->GetNumberOfPixelsU()), 1.0f / static_cast<float>(m_LODSampleTexturePtr->GetNumberOfPixelsV()), 0.0f, 0.0f);
 
         BufferManager::UploadConstantBufferData(m_FilterPropertiesPtr, &FilterSettings);
 
@@ -586,7 +586,7 @@ namespace
 
         ContextManager::SetResourceBuffer(0, m_FilterPropertiesPtr);
 
-        ContextManager::Dispatch(512, 512, 1);
+        ContextManager::Dispatch(m_LODSampleTexturePtr->GetNumberOfPixelsU(), m_LODSampleTexturePtr->GetNumberOfPixelsV(), 1);
 
         ContextManager::ResetResourceBuffer(0);
 
@@ -644,15 +644,15 @@ namespace
             // -----------------------------------------------------------------------------
             SGaussianProperties GaussianSettings;
 
-            GaussianSettings.m_MaxPixelCoord[0] = 512;
-            GaussianSettings.m_MaxPixelCoord[1] = 512;
-            GaussianSettings.m_Weights[0]       = 0.018816f;
-            GaussianSettings.m_Weights[1]       = 0.034474f;
-            GaussianSettings.m_Weights[2]       = 0.056577f;
-            GaussianSettings.m_Weights[3]       = 0.083173f;
-            GaussianSettings.m_Weights[4]       = 0.109523f;
-            GaussianSettings.m_Weights[5]       = 0.129188f;
-            GaussianSettings.m_Weights[6]       = 0.136498f;
+            GaussianSettings.m_MaxPixelCoord[0] = m_LODSampleTexturePtr->GetNumberOfPixelsU();
+            GaussianSettings.m_MaxPixelCoord[1] = m_LODSampleTexturePtr->GetNumberOfPixelsV();
+            GaussianSettings.m_Weights[0]       = 0.002406f;
+            GaussianSettings.m_Weights[1]       = 0.009255f;
+            GaussianSettings.m_Weights[2]       = 0.027867f;
+            GaussianSettings.m_Weights[3]       = 0.065666f;
+            GaussianSettings.m_Weights[4]       = 0.121117f;
+            GaussianSettings.m_Weights[5]       = 0.174868f;
+            GaussianSettings.m_Weights[6]       = 0.197641f;
             GaussianSettings.m_Direction[0]     = 1;
             GaussianSettings.m_Direction[1]     = 0;
 
@@ -670,7 +670,7 @@ namespace
 
             ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_LODSampleTexturePtr));
 
-            ContextManager::Dispatch(512, 512, 1);
+            ContextManager::Dispatch(m_LODSampleTexturePtr->GetNumberOfPixelsU(), m_LODSampleTexturePtr->GetNumberOfPixelsV(), 1);
 
             ContextManager::ResetImageTexture(0);
 
@@ -691,7 +691,7 @@ namespace
 
             ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_LODSampleTexturePtr));
 
-            ContextManager::Dispatch(512, 512, 1);
+            ContextManager::Dispatch(m_LODSampleTexturePtr->GetNumberOfPixelsU(), m_LODSampleTexturePtr->GetNumberOfPixelsV(), 1);
 
             ContextManager::ResetImageTexture(0);
 
