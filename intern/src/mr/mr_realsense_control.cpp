@@ -1,27 +1,14 @@
 
 #include "mr/mr_precompiled.h"
 
-#include "base/base_memory.h"
-
-#include "core/core_time.h"
-
-#include "data/data_texture_manager.h"
-
 #include "mr/mr_control_manager.h"
 #include "mr/mr_realsense_control.h"
-
-#include <iostream>
-#include <type_traits>
 
 //#pragma comment(lib,"Kinect20.lib")
 //#pragma comment(lib,"Kinect20.fusion.lib")
 
 namespace MR
 {
-    const int CRealSenseControl::DepthImageWidth = 640;
-    const int CRealSenseControl::DepthImageHeight = 480;
-    const int CRealSenseControl::DepthImagePixelsCount = DepthImageWidth * DepthImageHeight;
-
     CRealSenseControl::CRealSenseControl()
     {
     }
@@ -44,5 +31,59 @@ namespace MR
     void CRealSenseControl::Stop()
     {
 
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CRealSenseControl::GetDepthBuffer(unsigned short* pBuffer)
+    {
+        return false;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    int CRealSenseControl::GetWidth()
+    {
+        return -1;
+    }
+
+    int CRealSenseControl::GetHeight()
+    {
+        return -1;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    int CRealSenseControl::GetPixelCount()
+    {
+        return -1;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CRealSenseControl::GetFocalLengthX()
+    {
+        return -1.0f;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CRealSenseControl::GetFocalLengthY()
+    {
+        return -1.0f;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CRealSenseControl::GetFocalPointX()
+    {
+        return -1.0f;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CRealSenseControl::GetFocalPointY()
+    {
+        return -1.0f;
     }
 } // namespace MR

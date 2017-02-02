@@ -204,7 +204,7 @@ namespace
     {
         Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxVoxelRenderer::OnResize));
         
-        m_pDepthSensorControl.reset(new MR::CKinectControl());
+        m_pDepthSensorControl.reset(new MR::CRealSenseControl());
         m_pDepthSensorControl->Start();
 
         m_DepthPixels = std::vector<unsigned short>(m_pDepthSensorControl->GetPixelCount());

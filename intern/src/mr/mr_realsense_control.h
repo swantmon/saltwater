@@ -1,45 +1,33 @@
 
 #pragma once
 
-#include "mr/mr_control.h"
+#include "mr/mr_depth_sensor_control.h"
 
-#include "base/base_matrix4x4.h"
 #include "base/base_console.h"
 
 #include <cassert>
 
 namespace MR
 {
-    class CRealSenseControl
+    class CRealSenseControl : CDepthSensorControl
     {
     public:
 
         CRealSenseControl();
-        ~CRealSenseControl();
+        virtual ~CRealSenseControl();
 
-    public:
+        virtual void Start();
+        virtual void Stop();
+        virtual int GetWidth();
+        virtual int GetHeight();
+        virtual int GetPixelCount();
+        virtual float GetFocalLengthX();
+        virtual float GetFocalLengthY();
+        virtual float GetFocalPointX();
+        virtual float GetFocalPointY();
+        virtual bool GetDepthBuffer(unsigned short* pBuffer);
 
-        void Start();
-        void Stop();
-
-        void GetWidth();
-        void GetHeight();
-        void GetPixelCount();
-
-        template<typename T>
-        bool GetDepthBuffer(T* pBuffer)
-        {
-            static_assert(std::is_arithmetic<T>::value, "T is not arithmetic");
-
-            return false;
-        }
-
-        static const int DepthImageWidth;
-        static const int DepthImageHeight;
-        static const int DepthImagePixelsCount;
-
-	private:
-
+    private:
 		
     };
 } // namespace MR
