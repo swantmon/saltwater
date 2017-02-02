@@ -4,15 +4,7 @@
 #include "mr/mr_control_manager.h"
 #include "mr/mr_realsense_control.h"
 
-#include "RealSense/SenseManager.h"
-
-#ifdef _DEBUG
-#pragma comment(lib,"libpxc_d.lib")
-#pragma comment(lib,"libpxcmd_d.lib")
-#else
-#pragma comment(lib,"libpxc.lib")
-#pragma comment(lib,"libpxcmd.lib")
-#endif
+using namespace Intel::RealSense;
 
 namespace MR
 {
@@ -30,14 +22,21 @@ namespace MR
 
     void CRealSenseControl::Start()
     {
-        Intel::RealSense::SenseManager* pSenseManager = Intel::RealSense::SenseManager::CreateInstance();
+        m_pSenseManager = SenseManager::CreateInstance();
+        Capture::DeviceInfo DeviceInfo = {};
+        DeviceInfo.model = Capture::DEVICE_MODEL_R200_ENHANCED;
+        m_pSenseManager->QueryCaptureManager()->FilterByDeviceInfo(&DeviceInfo);
+
+        m_pSenseManager->EnableStream(Capture::STREAM_TYPE_DEPTH, 0, 0, 0);
+        
+        m_pSenseManager->Init();
     }
 
     // -----------------------------------------------------------------------------
 
     void CRealSenseControl::Stop()
     {
-
+        m_pSenseManager->Release();
     }
 
     // -----------------------------------------------------------------------------

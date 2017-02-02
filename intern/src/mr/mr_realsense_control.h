@@ -5,6 +5,9 @@
 
 #include "base/base_console.h"
 
+#include "RealSense/Capture.h"
+#include "RealSense/SenseManager.h"
+
 #include <cassert>
 
 namespace MR
@@ -28,6 +31,8 @@ namespace MR
         virtual bool GetDepthBuffer(unsigned short* pBuffer);
 
     private:
+        
+        Intel::RealSense::SenseManager* m_pSenseManager;
 		
     };
 } // namespace MR
