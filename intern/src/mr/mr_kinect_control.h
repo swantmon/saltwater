@@ -3,6 +3,8 @@
 
 #include "mr/mr_control.h"
 
+#include "mr_depth_sensor_control.h"
+
 #include "base/base_matrix4x4.h"
 #include "base/base_console.h"
 
@@ -16,64 +18,31 @@
 
 namespace MR
 {
-    class CKinectControl
+    class CKinectControl : public CDepthSensorControl
     {
     public:
 
         CKinectControl();
-        ~CKinectControl();
+        virtual ~CKinectControl();
 
     public:
 
-        void Start();
-        void Stop();
+        virtual void Start();
+        virtual void Stop();
 
-        template<typename T>
-        bool GetDepthBuffer(T* pBuffer)
-        {
-            static_assert(std::is_arithmetic<T>::value, "T is not arithmetic");
+        virtual bool GetDepthBuffer(unsigned short* pBuffer);
 
-            IDepthFrame* pDepthFrame = nullptr;
-            unsigned int BufferSize;
-            unsigned short* pShortBuffer;
-
-            if (m_pDepthFrameReader->AcquireLatestFrame(&pDepthFrame) != S_OK)
-            {
-                return false;
-            }
-
-            if (pDepthFrame->AccessUnderlyingBuffer(&BufferSize, &pShortBuffer) != S_OK)
-            {
-                BASE_CONSOLE_ERROR("Failed to access underlying buffer");
-                return false;
-            }
-
-            for (int i = 0; i < DepthImagePixelsCount; ++i)
-            {
-                pBuffer[i] = static_cast<T>(pShortBuffer[i]);
-            }
-
-            
-            pDepthFrame->Release();
-
-            return true;
-        }
-
-        static const int DepthImageWidth;
-        static const int DepthImageHeight;
-        static const int DepthImagePixelsCount;
-
+        virtual int GetWidth();
+        virtual int GetHeight();
+        virtual int GetPixelCount();
+        
+        virtual float GetFocalLengthX();
+        virtual float GetFocalLengthY();
+        virtual float GetFocalPointX();
+        virtual float GetFocalPointY();
 	private:
 
 		IKinectSensor*            m_pKinect;
 		IDepthFrameReader*        m_pDepthFrameReader;
-
-        unsigned short* m_pDepthImagePixelBuffer;
-        DepthSpacePoint* m_pDepthDistortionMap;
-        unsigned int* m_pDepthDistortionLT;
-        
-        __int64 m_CoordinateMappingChangedEvent;
-
-        bool m_VolumeExported;
     };
 } // namespace MR

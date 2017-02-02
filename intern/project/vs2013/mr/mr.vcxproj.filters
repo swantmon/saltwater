@@ -21,6 +21,9 @@
       <Filter>controls</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\mr\mr_precompiled.cpp" />
+    <ClCompile Include="..\..\..\src\mr\mr_realsense_control.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\mr\cv_guidedfilter.h">
@@ -35,5 +38,11 @@
       <Filter>controls</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\mr\mr_precompiled.h" />
+    <ClInclude Include="..\..\..\src\mr\mr_realsense_control.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\mr\mr_depth_sensor_control.h">
+      <Filter>controls</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

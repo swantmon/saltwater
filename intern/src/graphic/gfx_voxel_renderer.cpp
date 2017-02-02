@@ -27,23 +27,20 @@
 #include "gfx_native_buffer.h"
 #include "gfx_native_shader.h"
 #include "gfx_native_target_set.h"
+
+#include "mr/mr_depth_sensor_control.h"
 #include "mr/mr_kinect_control.h"
+#include "mr/mr_realsense_control.h"
 
 #include <gl/glew.h>
 
+#include <memory>
 #include <sstream>
 
 using namespace Gfx;
 
 namespace
 {
-    const float g_KinectFocalLengthX = 0.72113f * MR::CKinectControl::DepthImageWidth;
-    const float g_KinectFocalLengthY = 0.870799f * MR::CKinectControl::DepthImageHeight;
-    const float g_KinectFocalPointX = 0.50602675f * MR::CKinectControl::DepthImageWidth;
-    const float g_KinectFocalPointY = 0.499133f * MR::CKinectControl::DepthImageHeight;
-    const float g_InverseKinectFocalLengthX = 1.0f / g_KinectFocalLengthX;
-    const float g_InverseKinectFocalLengthY = 1.0f / g_KinectFocalLengthY;
-
     const int g_PyramidLevels = 3;
 
     const float g_VolumeSize = 1.0f;
@@ -173,7 +170,7 @@ namespace
 
         GLuint m_Volume;
 
-        MR::CKinectControl m_KinectControl;
+        std::unique_ptr<MR::CDepthSensorControl> m_pDepthSensorControl;
 
         Base::Float4x4 m_VertexMapWorldMatrix;
         Base::Float4x4 m_VolumeWorldMatrix;
@@ -189,6 +186,7 @@ namespace
     using namespace Base;
 
     CGfxVoxelRenderer::CGfxVoxelRenderer()
+        : m_pDepthSensorControl(nullptr)
     {
         
     }
@@ -205,10 +203,11 @@ namespace
     void CGfxVoxelRenderer::OnStart()
     {
         Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxVoxelRenderer::OnResize));
+        
+        m_pDepthSensorControl.reset(new MR::CKinectControl());
+        m_pDepthSensorControl->Start();
 
-        m_DepthPixels = std::vector<unsigned short>(MR::CKinectControl::DepthImagePixelsCount);
-
-        m_KinectControl.Start();
+        m_DepthPixels = std::vector<unsigned short>(m_pDepthSensorControl->GetPixelCount());
 
         m_NewDepthDataAvailable = false;
     }
@@ -261,8 +260,8 @@ namespace
         DefineStreams[0] << "VOLUME_RESOLUTION " << g_VolumeResolution;
         DefineStreams[1] << "VOXEL_SIZE " << g_VoxelSize;
         DefineStreams[2] << "VOLUME_SIZE " << g_VolumeSize;
-        DefineStreams[3] << "DEPTH_IMAGE_WIDTH " << MR::CKinectControl::DepthImageWidth;
-        DefineStreams[4] << "DEPTH_IMAGE_HEIGHT " << MR::CKinectControl::DepthImageHeight;
+        DefineStreams[3] << "DEPTH_IMAGE_WIDTH " << m_pDepthSensorControl->GetWidth();
+        DefineStreams[4] << "DEPTH_IMAGE_HEIGHT " << m_pDepthSensorControl->GetHeight();
         DefineStreams[5] << "TILE_SIZE2D " << g_TileSize2D;
         DefineStreams[6] << "TILE_SIZE3D " << g_TileSize3D;
         DefineStreams[7] << "INT16_MAX " << 32767;
@@ -333,12 +332,12 @@ namespace
 
         glCreateTextures(GL_TEXTURE_3D, 1, &m_Volume);
 
-        glTextureStorage2D(m_KinectRawDepthBuffer, 1, GL_R16UI, MR::CKinectControl::DepthImageWidth, MR::CKinectControl::DepthImageHeight);
+        glTextureStorage2D(m_KinectRawDepthBuffer, 1, GL_R16UI, m_pDepthSensorControl->GetWidth(), m_pDepthSensorControl->GetHeight());
         
         for (int i = 0; i < g_PyramidLevels; ++i)
         {
-            const int Width = MR::CKinectControl::DepthImageWidth >> i;
-            const int Height = MR::CKinectControl::DepthImageHeight >> i;
+            const int Width = m_pDepthSensorControl->GetWidth() >> i;
+            const int Height = m_pDepthSensorControl->GetHeight() >> i;
 
             glTextureStorage2D(m_KinectSmoothDepthBuffer[i], 1, GL_R16UI, Width, Height);
             glTextureStorage2D(m_KinectVertexMap[i], 1, GL_RGBA32F, Width, Height);
@@ -357,21 +356,26 @@ namespace
     
     void CGfxVoxelRenderer::OnSetupBuffers()
     {
+        const float FocalLengthX = m_pDepthSensorControl->GetFocalLengthX() * m_pDepthSensorControl->GetWidth();
+        const float FocalLengthY = m_pDepthSensorControl->GetFocalLengthY() * m_pDepthSensorControl->GetHeight();
+        const float FocalPointX = m_pDepthSensorControl->GetFocalPointX() * m_pDepthSensorControl->GetWidth();
+        const float FocalPointY = m_pDepthSensorControl->GetFocalPointY() * m_pDepthSensorControl->GetHeight();
+
         glCreateBuffers(1, &m_DrawCallConstantBuffer);
         glNamedBufferData(m_DrawCallConstantBuffer, sizeof(Base::Float4x4), nullptr, GL_DYNAMIC_DRAW);
 
         Base::Float4x4 KMatrix(
-            g_KinectFocalLengthX,				  0.0f, g_KinectFocalPointX, 0.0f,
-                            0.0f, g_KinectFocalLengthY, g_KinectFocalPointY, 0.0f,
-                            0.0f,				  0.0f,                1.0f, 0.0f,
-                            0.0f,				  0.0f,                0.0f, 1.0f
+            FocalLengthX,	      0.0f, FocalPointX, 0.0f,
+                    0.0f, FocalLengthY, FocalPointY, 0.0f,
+                    0.0f,		  0.0f,        1.0f, 0.0f,
+                    0.0f,		  0.0f,        0.0f, 1.0f
         );
 
         SIntrinsics Intrinsics;
 
-        Intrinsics.m_FocalPoint = Base::Float2(g_KinectFocalPointX, g_KinectFocalPointY);
-        Intrinsics.m_FocalLength = Base::Float2(g_KinectFocalLengthX, g_KinectFocalLengthY);
-        Intrinsics.m_InvFocalLength = Base::Float2(g_InverseKinectFocalLengthX, g_InverseKinectFocalLengthY);
+        Intrinsics.m_FocalPoint = Base::Float2(FocalPointX, FocalPointY);
+        Intrinsics.m_FocalLength = Base::Float2(FocalLengthX, FocalLengthY);
+        Intrinsics.m_InvFocalLength = Base::Float2(1.0f / FocalLengthX, 1.0f / FocalLengthY);
         Intrinsics.m_KMatrix = Intrinsics.m_InvKMatrix = KMatrix;
         Intrinsics.m_InvKMatrix.Invert();
 
@@ -468,18 +472,18 @@ namespace
 
         m_VolumeWorldMatrix = TranslationMatrix * RotationMatrix * ScalingMatrix;
 
-        if (m_KinectControl.GetDepthBuffer(m_DepthPixels.data()))
+        if (m_pDepthSensorControl->GetDepthBuffer(m_DepthPixels.data()))
         {
             glTextureSubImage2D(m_KinectRawDepthBuffer, 0, 0, 0,
-                MR::CKinectControl::DepthImageWidth, MR::CKinectControl::DepthImageHeight,
+                m_pDepthSensorControl->GetWidth(), m_pDepthSensorControl->GetHeight(),
                 GL_RED_INTEGER, GL_UNSIGNED_SHORT, m_DepthPixels.data());
 
             //////////////////////////////////////////////////////////////////////////////////////
             // Mirror depth data
             //////////////////////////////////////////////////////////////////////////////////////
 
-            const int WorkGroupsX = MR::CKinectControl::DepthImageWidth / g_TileSize2D;
-            const int WorkGroupsY = MR::CKinectControl::DepthImageHeight / g_TileSize2D;
+            const int WorkGroupsX = m_pDepthSensorControl->GetWidth() / g_TileSize2D;
+            const int WorkGroupsY = m_pDepthSensorControl->GetHeight() / g_TileSize2D;
 
             Gfx::ContextManager::SetShaderCS(m_CSMirrorDepth);
             glBindImageTexture(0, m_KinectRawDepthBuffer, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16UI);
@@ -493,8 +497,8 @@ namespace
     
     void CGfxVoxelRenderer::ReadKinectData()
     {
-        const int WorkGroupsX = MR::CKinectControl::DepthImageWidth / g_TileSize2D;
-        const int WorkGroupsY = MR::CKinectControl::DepthImageHeight / g_TileSize2D;
+        const int WorkGroupsX = m_pDepthSensorControl->GetWidth() / g_TileSize2D;
+        const int WorkGroupsY = m_pDepthSensorControl->GetHeight() / g_TileSize2D;
 
         //////////////////////////////////////////////////////////////////////////////////////
         // Bilateral Filter
@@ -578,8 +582,8 @@ namespace
 
     void CGfxVoxelRenderer::DownSample()
     {
-        const int WorkGroupsX = (MR::CKinectControl::DepthImageWidth / g_TileSize2D);
-        const int WorkGroupsY = (MR::CKinectControl::DepthImageHeight / g_TileSize2D);
+        const int WorkGroupsX = m_pDepthSensorControl->GetWidth() / g_TileSize2D;
+        const int WorkGroupsY = m_pDepthSensorControl->GetHeight() / g_TileSize2D;
 
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_RaycastPyramidConstantBuffer);
 
@@ -623,7 +627,7 @@ namespace
 
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
-        glDispatchCompute(MR::CKinectControl::DepthImageWidth / g_TileSize2D, MR::CKinectControl::DepthImageHeight / g_TileSize2D, 1);
+        glDispatchCompute(m_pDepthSensorControl->GetWidth() / g_TileSize2D, m_pDepthSensorControl->GetHeight() / g_TileSize2D, 1);
     }
 
     // -----------------------------------------------------------------------------
@@ -731,7 +735,7 @@ namespace
 
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
-        glDrawArrays(GL_POINTS, 0, MR::CKinectControl::DepthImagePixelsCount);
+        glDrawArrays(GL_POINTS, 0, m_pDepthSensorControl->GetPixelCount());
 
         glBindVertexArray(0);
     }

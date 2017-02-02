@@ -1,13 +1,6 @@
 
 #include "mr/mr_precompiled.h"
 
-#include "base/base_memory.h"
-
-#include "core/core_time.h"
-
-#include "data/data_texture_manager.h"
-
-#include "mr/mr_control_manager.h"
 #include "mr/mr_kinect_control.h"
 
 #include <iostream>
@@ -40,16 +33,9 @@ namespace
 
 namespace MR
 {
-    const int CKinectControl::DepthImageWidth = NUI_DEPTH_RAW_WIDTH;
-    const int CKinectControl::DepthImageHeight = NUI_DEPTH_RAW_HEIGHT;
-    const int CKinectControl::DepthImagePixelsCount = NUI_DEPTH_RAW_WIDTH * NUI_DEPTH_RAW_HEIGHT;
-
     CKinectControl::CKinectControl()
         : m_pKinect               (nullptr)
         , m_pDepthFrameReader     (nullptr)
-        , m_pDepthImagePixelBuffer(nullptr)
-        , m_pDepthDistortionMap   (nullptr)
-        , m_pDepthDistortionLT    (nullptr)
     {
     }
 
@@ -92,4 +78,69 @@ namespace MR
         }
         SafeRelease(m_pKinect);
     }
+
+    bool CKinectControl::GetDepthBuffer(unsigned short* pBuffer)
+    {
+        IDepthFrame* pDepthFrame = nullptr;
+        unsigned int BufferSize;
+        unsigned short* pShortBuffer;
+
+        if (m_pDepthFrameReader->AcquireLatestFrame(&pDepthFrame) != S_OK)
+        {
+            return false;
+        }
+
+        if (pDepthFrame->AccessUnderlyingBuffer(&BufferSize, &pShortBuffer) != S_OK)
+        {
+            BASE_CONSOLE_ERROR("Failed to access underlying buffer");
+            return false;
+        }
+
+        for (int i = 0; i < GetPixelCount(); ++i)
+        {
+            pBuffer[i] = pShortBuffer[i];
+        }
+
+
+        pDepthFrame->Release();
+
+        return true;
+    }
+
+    int CKinectControl::GetWidth()
+    {
+        return NUI_DEPTH_RAW_WIDTH;
+    }
+
+    int CKinectControl::GetHeight()
+    {
+        return NUI_DEPTH_RAW_HEIGHT;
+    }
+
+    int CKinectControl::GetPixelCount()
+    {
+        return GetWidth() * GetHeight();
+    }
+
+    float CKinectControl::GetFocalLengthX()
+    {
+        return NUI_KINECT_DEPTH_NORM_FOCAL_LENGTH_X;
+    }
+
+    float CKinectControl::GetFocalLengthY()
+    {
+        return NUI_KINECT_DEPTH_NORM_FOCAL_LENGTH_Y;
+    }
+
+    float CKinectControl::GetFocalPointX()
+    {
+        return NUI_KINECT_DEPTH_NORM_PRINCIPAL_POINT_X;
+    }
+
+    float CKinectControl::GetFocalPointY()
+    {
+        return NUI_KINECT_DEPTH_NORM_PRINCIPAL_POINT_Y;
+    }
+
+
 } // namespace MR

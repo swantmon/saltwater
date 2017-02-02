@@ -29,14 +29,17 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\mr\mr_realsense_control.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_webcam_control.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\mr\cv_guidedfilter.h" />
     <ClInclude Include="..\..\..\src\mr\mr_control.h" />
     <ClInclude Include="..\..\..\src\mr\mr_control_manager.h" />
+    <ClInclude Include="..\..\..\src\mr\mr_depth_sensor_control.h" />
     <ClInclude Include="..\..\..\src\mr\mr_kinect_control.h" />
     <ClInclude Include="..\..\..\src\mr\mr_precompiled.h" />
+    <ClInclude Include="..\..\..\src\mr\mr_realsense_control.h" />
     <ClInclude Include="..\..\..\src\mr\mr_webcam_control.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
