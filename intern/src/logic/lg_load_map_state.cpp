@@ -12,6 +12,7 @@
 
 #include "data/data_actor_type.h"
 #include "data/data_ar_controller_manager.h"
+#include "data/data_area_light_manager.h"
 #include "data/data_bloom_manager.h"
 #include "data/data_dof_manager.h"
 #include "data/data_entity.h"
@@ -295,28 +296,38 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup light
         // -----------------------------------------------------------------------------
-//         {
-//             Dt::SEntityDescriptor EntityDesc;
-// 
-//             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
-//             EntityDesc.m_EntityType     = Dt::SLightType::LightProbe;
-//             EntityDesc.m_FacetFlags     = 0;
-// 
-//             Dt::CEntity& rGlobalProbeLight = Dt::EntityManager::CreateEntity(EntityDesc);
-// 
-//             rGlobalProbeLight.SetName("Light probe");
-// 
-//             Dt::CLightProbeFacet* pProbeLightFacet = Dt::LightProbeManager::CreateLightProbe();
-// 
-//             pProbeLightFacet->SetType(Dt::CLightProbeFacet::Sky);
-//             pProbeLightFacet->SetQuality(Dt::CLightProbeFacet::PX512);
-//             pProbeLightFacet->SetIntensity(1.0f);
-//             pProbeLightFacet->SetRefreshMode(Dt::CLightProbeFacet::Dynamic);
-// 
-//             rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pProbeLightFacet);
-// 
-//             Dt::EntityManager::MarkEntityAsDirty(rGlobalProbeLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-//         }
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
+            EntityDesc.m_EntityType     = Dt::SLightType::Area;
+            EntityDesc.m_FacetFlags     = 0;
+
+            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            rEntity.SetName("Area");
+
+            // -----------------------------------------------------------------------------
+            // Create facet and set it
+            // -----------------------------------------------------------------------------
+            Dt::CAreaLightFacet* pLightFacet = Dt::AreaLightManager::CreateAreaLight();
+
+            pLightFacet->EnableTemperature(false);
+            pLightFacet->SetColor(Base::Float3(1.0f, 1.0f, 1.0f));
+            pLightFacet->SetRotation(0.0f);
+            pLightFacet->SetWidth(8.0f);
+            pLightFacet->SetHeight(8.0f);
+            pLightFacet->SetDirection(Base::Float3(-0.01f, 0.01f, -1.0f));
+            pLightFacet->SetIntensity(1200.0f);
+            pLightFacet->SetTemperature(0);
+            pLightFacet->SetIsTwoSided(false);
+
+            pLightFacet->UpdateLightness();
+
+            rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pLightFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
 
 //         {
 //             Dt::SEntityDescriptor EntityDesc;
