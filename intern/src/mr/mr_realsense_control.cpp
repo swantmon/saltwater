@@ -4,8 +4,15 @@
 #include "mr/mr_control_manager.h"
 #include "mr/mr_realsense_control.h"
 
-//#pragma comment(lib,"Kinect20.lib")
-//#pragma comment(lib,"Kinect20.fusion.lib")
+#include "RealSense/SenseManager.h"
+
+#ifdef _DEBUG
+#pragma comment(lib,"libpxc_d.lib")
+#pragma comment(lib,"libpxcmd_d.lib")
+#else
+#pragma comment(lib,"libpxc.lib")
+#pragma comment(lib,"libpxcmd.lib")
+#endif
 
 namespace MR
 {
@@ -23,7 +30,7 @@ namespace MR
 
     void CRealSenseControl::Start()
     {
-
+        Intel::RealSense::SenseManager* pSenseManager = Intel::RealSense::SenseManager::CreateInstance();
     }
 
     // -----------------------------------------------------------------------------

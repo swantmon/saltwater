@@ -9,7 +9,7 @@
 
 namespace MR
 {
-    class CRealSenseControl : CDepthSensorControl
+    class CRealSenseControl : public CDepthSensorControl
     {
     public:
 

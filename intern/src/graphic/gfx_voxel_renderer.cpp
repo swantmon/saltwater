@@ -186,7 +186,6 @@ namespace
     using namespace Base;
 
     CGfxVoxelRenderer::CGfxVoxelRenderer()
-        : m_pDepthSensorControl(nullptr)
     {
         
     }
@@ -673,9 +672,9 @@ namespace
         glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         
-        //RenderDepth();
+        RenderDepth();
         //glViewport(0, 0, 640, 720);
-        RenderVertexMap(m_KinectVertexMap[0]);
+        //RenderVertexMap(m_KinectVertexMap[0]);
         //RenderVolume();
         //glViewport(640, 0, 640, 720);
         RenderVertexMap(m_RaycastVertexMap[0]);
