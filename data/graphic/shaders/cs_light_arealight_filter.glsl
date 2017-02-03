@@ -29,7 +29,6 @@ void main()
 	// Initialization
     PixelCoordX = gl_GlobalInvocationID.x;
     PixelCoordY = gl_GlobalInvocationID.y;
-	Output      = vec4(1.0f);
 	
     vec2 UV =  vec2(PixelCoordX, PixelCoordY) * cs_InverseSizeAndOffset.xy;
 
@@ -37,10 +36,10 @@ void main()
 
     if (UV.x >= 0.0f && UV.y >= 0.0f && UV.x <= 1.0f && UV.y <= 1.0f)
     {
-	   Output = texture(in_Texture, UV);
-    }
+	   vec4 Output = texture(in_Texture, UV);
 
-    imageStore(out_FilteredTexture, ivec2(PixelCoordX, PixelCoordY), Output);
+       imageStore(out_FilteredTexture, ivec2(PixelCoordX, PixelCoordY), Output);
+    }
 }
 
 #endif // __INCLUDE_CS_LIGHT_AREALIGHT_FILTER_GLSL__

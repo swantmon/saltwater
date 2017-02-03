@@ -20,7 +20,7 @@ layout (binding = 0, rgba8) uniform image2D out_FilteredTexture;
 // -------------------------------------------------------------------------------------
 // Functions
 // -------------------------------------------------------------------------------------
-layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout (local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 void main()
 {
     uint PixelCoordX;
@@ -94,9 +94,11 @@ void main()
     
 		Distance = sqrt(DistanceVec.x * DistanceVec.x + DistanceVec.y * DistanceVec.y) / cs_InverseSizeAndOffset.z;
 
-		Area = int(max(Distance, 0.0f) * 8.0f);
+		Area = int(max(Distance, 0.0f) * 164.0f);
 	
 		vec4 BlurredTexture = vec4(0.0f);
+		
+		float Count = 0;
 
 		for (int Y = -Area; Y <= Area; ++ Y)
 		{
@@ -107,12 +109,18 @@ void main()
 				vec4 Color = texture(in_Texture, ReadUV);
 			
 				BlurredTexture += Color;
+				
+				if (Color.a > 0) Count += Color.a;
 			}
 		}
 		
-		Output = BlurredTexture / ((Area + 1 + Area));
-			        
+		Output = BlurredTexture / Count;
+				        
 	    imageStore(out_FilteredTexture, ivec2(PixelCoordX, PixelCoordY), Output);
+    }
+    else
+    {
+    	imageStore(out_FilteredTexture, ivec2(PixelCoordX, PixelCoordY), texture(in_Texture, UV));
     }
 }
 

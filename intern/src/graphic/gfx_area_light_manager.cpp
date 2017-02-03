@@ -158,14 +158,14 @@ namespace
         TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
         TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        TextureDescriptor.m_Format           = CTextureBase::R8G8B8A8_UBYTE;
         
         m_DownSampleTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
         // -----------------------------------------------------------------------------
 
-        TextureDescriptor.m_NumberOfPixelsU  = 256;
-        TextureDescriptor.m_NumberOfPixelsV  = 256;
+        TextureDescriptor.m_NumberOfPixelsU  = 1024;
+        TextureDescriptor.m_NumberOfPixelsV  = 1024;
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
@@ -176,7 +176,7 @@ namespace
         TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
         TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        TextureDescriptor.m_Format           = CTextureBase::R8G8B8A8_UBYTE;
         
         m_LODSampleTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
@@ -526,12 +526,12 @@ namespace
 
         ContextManager::SetResourceBuffer(0, m_FilterPropertiesPtr);
 
-        ContextManager::SetSampler(0, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearMirror));
+        ContextManager::SetSampler(0, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearClamp));
         ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_DownSampleTexturePtr));
 
-        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_DownSampleTexturePtr));
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_LODSampleTexturePtr));
 
-        ContextManager::Dispatch(m_DownSampleTexturePtr->GetNumberOfPixelsU(), m_DownSampleTexturePtr->GetNumberOfPixelsV(), 1);
+        ContextManager::Dispatch(m_LODSampleTexturePtr->GetNumberOfPixelsU() / 8, m_LODSampleTexturePtr->GetNumberOfPixelsV() / 8, 1);
 
         ContextManager::ResetImageTexture(0);
 
