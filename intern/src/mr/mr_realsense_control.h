@@ -31,8 +31,25 @@ namespace MR
         virtual bool GetDepthBuffer(unsigned short* pBuffer);
 
     private:
+
+        template<typename T>
+        void SafeRelease(T& pObject)
+        {
+            if (pObject != nullptr)
+            {
+                pObject->Release();
+                pObject = nullptr;
+            }
+        }
         
         Intel::RealSense::SenseManager* m_pSenseManager;
-		
+        Intel::RealSense::CaptureManager* m_pCaptureManager;
+        Intel::RealSense::Device* m_pDevice;
+
+        Intel::RealSense::PointF32 m_FocalLength;
+        Intel::RealSense::PointF32 m_FocalPoint;
+
+        const static int m_Width = 628;
+        const static int m_Height = 468;
     };
 } // namespace MR

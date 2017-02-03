@@ -203,8 +203,16 @@ namespace
     {
         Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxVoxelRenderer::OnResize));
         
-        m_pDepthSensorControl.reset(new MR::CRealSenseControl());
-        m_pDepthSensorControl->Start();
+        try
+        {
+            m_pDepthSensorControl.reset(new MR::CRealSenseControl());
+            m_pDepthSensorControl->Start();
+        }
+        catch (...)
+        {
+            m_pDepthSensorControl.reset(new MR::CKinectControl());
+            m_pDepthSensorControl->Start();
+        }
 
         m_DepthPixels = std::vector<unsigned short>(m_pDepthSensorControl->GetPixelCount());
 
@@ -355,10 +363,10 @@ namespace
     
     void CGfxVoxelRenderer::OnSetupBuffers()
     {
-        const float FocalLengthX = m_pDepthSensorControl->GetFocalLengthX() * m_pDepthSensorControl->GetWidth();
-        const float FocalLengthY = m_pDepthSensorControl->GetFocalLengthY() * m_pDepthSensorControl->GetHeight();
-        const float FocalPointX = m_pDepthSensorControl->GetFocalPointX() * m_pDepthSensorControl->GetWidth();
-        const float FocalPointY = m_pDepthSensorControl->GetFocalPointY() * m_pDepthSensorControl->GetHeight();
+        const float FocalLengthX = m_pDepthSensorControl->GetFocalLengthX();
+        const float FocalLengthY = m_pDepthSensorControl->GetFocalLengthY();
+        const float FocalPointX = m_pDepthSensorControl->GetFocalPointX();
+        const float FocalPointY = m_pDepthSensorControl->GetFocalPointY();
 
         glCreateBuffers(1, &m_DrawCallConstantBuffer);
         glNamedBufferData(m_DrawCallConstantBuffer, sizeof(Base::Float4x4), nullptr, GL_DYNAMIC_DRAW);

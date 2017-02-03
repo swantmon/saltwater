@@ -124,22 +124,22 @@ namespace MR
 
     float CKinectControl::GetFocalLengthX()
     {
-        return NUI_KINECT_DEPTH_NORM_FOCAL_LENGTH_X;
+        return NUI_KINECT_DEPTH_NORM_FOCAL_LENGTH_X * GetWidth();
     }
 
     float CKinectControl::GetFocalLengthY()
     {
-        return NUI_KINECT_DEPTH_NORM_FOCAL_LENGTH_Y;
+        return NUI_KINECT_DEPTH_NORM_FOCAL_LENGTH_Y * GetHeight();
     }
 
     float CKinectControl::GetFocalPointX()
     {
-        return NUI_KINECT_DEPTH_NORM_PRINCIPAL_POINT_X;
+        return NUI_KINECT_DEPTH_NORM_PRINCIPAL_POINT_X * GetWidth();
     }
 
     float CKinectControl::GetFocalPointY()
     {
-        return NUI_KINECT_DEPTH_NORM_PRINCIPAL_POINT_Y;
+        return NUI_KINECT_DEPTH_NORM_PRINCIPAL_POINT_Y * GetHeight();
     }
 
 

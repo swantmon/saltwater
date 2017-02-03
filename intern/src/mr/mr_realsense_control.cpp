@@ -23,26 +23,50 @@ namespace MR
     void CRealSenseControl::Start()
     {
         m_pSenseManager = SenseManager::CreateInstance();
-        Capture::DeviceInfo DeviceInfo = {};
-        DeviceInfo.model = Capture::DEVICE_MODEL_R200_ENHANCED;
-        m_pSenseManager->QueryCaptureManager()->FilterByDeviceInfo(&DeviceInfo);
-
-        m_pSenseManager->EnableStream(Capture::STREAM_TYPE_DEPTH, 0, 0, 0);
         
-        m_pSenseManager->Init();
+        assert(m_pSenseManager != nullptr);
+
+        m_pSenseManager->EnableStream(Capture::STREAM_TYPE_DEPTH, m_Width, m_Height, 30.0f);
+        
+        NSStatus::Status Result = m_pSenseManager->Init();
+
+        m_pCaptureManager = m_pSenseManager->QueryCaptureManager();
+
+        assert(m_pCaptureManager != nullptr);
+
+        m_pDevice = m_pCaptureManager->QueryDevice();
+
+        if (m_pDevice == nullptr)
+        {
+            throw std::exception("No Intel RealSense Found");
+        }
+        
+        m_FocalLength = m_pDevice->QueryDepthFocalLength();
+        m_FocalPoint = m_pDevice->QueryDepthPrincipalPoint();  
     }
 
     // -----------------------------------------------------------------------------
 
     void CRealSenseControl::Stop()
     {
-        m_pSenseManager->Release();
+        SafeRelease(m_pDevice);
+        SafeRelease(m_pCaptureManager);
+        if (m_pSenseManager != nullptr)
+        {
+            m_pSenseManager->Close();
+        }
+        SafeRelease(m_pSenseManager);
     }
 
     // -----------------------------------------------------------------------------
 
     bool CRealSenseControl::GetDepthBuffer(unsigned short* pBuffer)
     {
+        if (!m_pSenseManager->IsConnected())
+        {
+            throw std::exception("Lost connection to Intel RealSense");
+        }
+
         return false;
     }
 
@@ -50,46 +74,46 @@ namespace MR
 
     int CRealSenseControl::GetWidth()
     {
-        return -1;
+        return m_Width;
     }
 
     int CRealSenseControl::GetHeight()
     {
-        return -1;
+        return m_Height;
     }
 
     // -----------------------------------------------------------------------------
 
     int CRealSenseControl::GetPixelCount()
     {
-        return -1;
+        return GetWidth() * GetHeight();
     }
 
     // -----------------------------------------------------------------------------
 
     float CRealSenseControl::GetFocalLengthX()
     {
-        return -1.0f;
+        return m_FocalLength.x;
     }
 
     // -----------------------------------------------------------------------------
 
     float CRealSenseControl::GetFocalLengthY()
     {
-        return -1.0f;
+        return m_FocalLength.y;
     }
 
     // -----------------------------------------------------------------------------
 
     float CRealSenseControl::GetFocalPointX()
     {
-        return -1.0f;
+        return m_FocalPoint.x;
     }
 
     // -----------------------------------------------------------------------------
 
     float CRealSenseControl::GetFocalPointY()
     {
-        return -1.0f;
+        return m_FocalPoint.y;
     }
 } // namespace MR
