@@ -62,12 +62,32 @@ namespace MR
 
     bool CRealSenseControl::GetDepthBuffer(unsigned short* pBuffer)
     {
-        if (!m_pSenseManager->IsConnected())
+        m_pSenseManager->AcquireFrame(true);
+
+        Capture::Sample* pSample = m_pSenseManager->QuerySample();
+
+        Image* pDepth = pSample->depth;
+
+        Image::ImageData data = {};
+        data.format = Image::PIXEL_FORMAT_DEPTH_RAW;
+        
+        pDepth->AcquireAccess(Image::ACCESS_READ, &data);
+
+        unsigned short* pData = reinterpret_cast<unsigned short*>(data.planes[0]);
+
+        for (int i = 0; i < GetWidth(); ++i)
         {
-            throw std::exception("Lost connection to Intel RealSense");
+            for (int j = 0; j < GetHeight(); ++j)
+            {
+                pBuffer[i * GetHeight() + j] = pData[i * GetHeight() + j];
+            }
         }
 
-        return false;
+        pDepth->ReleaseAccess(&data);
+
+        m_pSenseManager->ReleaseFrame();
+
+        return true;
     }
 
     // -----------------------------------------------------------------------------

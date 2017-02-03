@@ -659,7 +659,7 @@ namespace
 
     void CGfxVoxelRenderer::Render()
     {
-        if (m_NewDepthDataAvailable)
+        //if (m_NewDepthDataAvailable)
         {
             UpdateReconstruction();
             m_NewDepthDataAvailable = false;
