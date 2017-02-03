@@ -38,7 +38,7 @@ void main()
     uvec2 PixelCoord = gl_GlobalInvocationID.xy;
     
     vec2 UV  = vec2(PixelCoord) * cs_InverseSizeAndOffset.xy;
-    vec2 UV2 = (UV - 0.125f) * (1 + 0.334f);
+    vec2 UV2 = (UV - 0.125f) * (1.0f + 0.334f);
 
     vec2 BorderUV = vec2(0.0f);
     
@@ -94,7 +94,7 @@ void main()
     
 		Distance = sqrt(DistanceVec.x * DistanceVec.x + DistanceVec.y * DistanceVec.y) / cs_InverseSizeAndOffset.z;
 
-		Area = int(max(Distance, 0.0f) * 164.0f);
+		Area = int(max(Distance, 0.0f) * 64.0f);
 	
 		vec4 BlurredTexture = vec4(0.0f);
 		
@@ -117,10 +117,6 @@ void main()
 		Output = BlurredTexture / Count;
 				        
 	    imageStore(out_FilteredTexture, ivec2(PixelCoordX, PixelCoordY), Output);
-    }
-    else
-    {
-    	imageStore(out_FilteredTexture, ivec2(PixelCoordX, PixelCoordY), texture(in_Texture, UV));
     }
 }
 

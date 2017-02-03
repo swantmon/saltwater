@@ -32,7 +32,7 @@ void main()
 	
     vec2 UV =  vec2(PixelCoordX, PixelCoordY) * cs_InverseSizeAndOffset.xy;
 
-	UV = (UV - 0.125f) * (1 + 0.334f);
+	UV = (UV - 0.125f) * (1.0f + 0.334f);
 
     if (UV.x >= 0.0f && UV.y >= 0.0f && UV.x <= 1.0f && UV.y <= 1.0f)
     {
