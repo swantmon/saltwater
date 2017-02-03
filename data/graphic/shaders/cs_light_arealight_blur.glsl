@@ -1,5 +1,5 @@
-#ifndef __INCLUDE_CS_LIGHT_AREALIGHT_FILTER_GLSL__
-#define __INCLUDE_CS_LIGHT_AREALIGHT_FILTER_GLSL__
+#ifndef __INCLUDE_CS_LIGHT_AREALIGHT_BLUR_GLSL__
+#define __INCLUDE_CS_LIGHT_AREALIGHT_BLUR_GLSL__
 
 // -----------------------------------------------------------------------------
 // Input from engine
@@ -124,4 +124,4 @@ void main()
     }
 }
 
-#endif // __INCLUDE_CS_LIGHT_AREALIGHT_FILTER_GLSL__
+#endif // __INCLUDE_CS_LIGHT_AREALIGHT_BLUR_GLSL__

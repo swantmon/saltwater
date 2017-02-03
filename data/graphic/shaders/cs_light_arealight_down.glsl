@@ -1,5 +1,5 @@
-#ifndef __INCLUDE_CS_LIGHT_AREALIGHT_FILTER_GLSL__
-#define __INCLUDE_CS_LIGHT_AREALIGHT_FILTER_GLSL__
+#ifndef __INCLUDE_CS_LIGHT_AREALIGHT_DOWN_GLSL__
+#define __INCLUDE_CS_LIGHT_AREALIGHT_DOWN_GLSL__
 
 // -----------------------------------------------------------------------------
 // Input from engine
@@ -22,28 +22,14 @@ layout (binding = 1, rgba8) writeonly uniform image2D out_FilteredTexture;
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main()
 {
-	uint PixelCoordX;
-    uint PixelCoordY;
-	vec4 Output;
-
-	// Initialization
-    PixelCoordX = gl_GlobalInvocationID.x;
-    PixelCoordY = gl_GlobalInvocationID.y;
+    uint PixelCoordX = gl_GlobalInvocationID.x;
+    uint PixelCoordY = gl_GlobalInvocationID.y;
 	
     vec2 UV =  vec2(PixelCoordX, PixelCoordY) * cs_InverseSizeAndOffset.xy;
 
-	UV = (UV - 0.125f) * (1 + 0.334f);
+	vec4 Output = texture(in_Texture, UV);
 
-    if (UV.x >= 0.0f && UV.y >= 0.0f && UV.x <= 1.0f && UV.y <= 1.0f)
-    {
-	   vec4 Output = texture(in_Texture, UV);
-
-       imageStore(out_FilteredTexture, ivec2(PixelCoordX, PixelCoordY), Output);
-    }
-    else
-    {
-        imageStore(out_FilteredTexture, ivec2(PixelCoordX, PixelCoordY), vec4(0.125f));  
-    }
+    imageStore(out_FilteredTexture, ivec2(PixelCoordX, PixelCoordY), Output);
 }
 
-#endif // __INCLUDE_CS_LIGHT_AREALIGHT_FILTER_GLSL__
+#endif // __INCLUDE_CS_LIGHT_AREALIGHT_DOWN_GLSL__
