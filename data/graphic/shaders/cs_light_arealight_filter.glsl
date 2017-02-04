@@ -26,14 +26,22 @@ void main()
     uint PixelCoordY;
 	vec4 Output;
 
+    // -------------------------------------------------------------------------------------
 	// Initialization
+    // -------------------------------------------------------------------------------------
     PixelCoordX = gl_GlobalInvocationID.x;
     PixelCoordY = gl_GlobalInvocationID.y;
 	
+    // -------------------------------------------------------------------------------------
+    // Define inner and outer area
+    // -------------------------------------------------------------------------------------
     vec2 UV =  vec2(PixelCoordX, PixelCoordY) * cs_InverseSizeAndOffset.xy;
 
 	UV = (UV - 0.125f) * (1.0f + 0.334f);
 
+    // -------------------------------------------------------------------------------------
+    // Inner part is the texture; Outer part is potencial background
+    // -------------------------------------------------------------------------------------
     if (UV.x >= 0.0f && UV.y >= 0.0f && UV.x <= 1.0f && UV.y <= 1.0f)
     {
 	   vec4 Output = texture(in_Texture, UV);

@@ -78,9 +78,8 @@ namespace
 
         CShaderPtr    m_FilterShaderPtr;
         CShaderPtr    m_BackgroundBlurShaderPtr;
-        CShaderPtr    m_ApplyShaderPtr;
-        CShaderPtr    m_DownSampleShaderPtr;
-        CShaderPtr    m_BlurShaderPtr;
+        CShaderPtr    m_CombineShaderPtr;
+        CShaderPtr    m_ForegroundBlurShaderPtr;
         CTexture2DPtr m_BackgroundTexturePtr;
         CBufferPtr    m_GaussianPropertiesPtr;
         CBufferPtr    m_FilterPropertiesPtr;
@@ -116,9 +115,8 @@ namespace
         : m_AreaLightFacets        ()
         , m_FilterShaderPtr        (0)
         , m_BackgroundBlurShaderPtr(0)
-        , m_ApplyShaderPtr         (0)
-        , m_DownSampleShaderPtr    (0)
-        , m_BlurShaderPtr          (0)
+        , m_CombineShaderPtr         (0)
+        , m_ForegroundBlurShaderPtr          (0)
         , m_BackgroundTexturePtr   (0)
         , m_GaussianPropertiesPtr  (0)
         , m_FilterPropertiesPtr    (0)
@@ -141,7 +139,6 @@ namespace
         // Register dirty entity handler for automatic sky creation
         // -----------------------------------------------------------------------------
         Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CGfxAreaLightManager::OnDirtyEntity));
-
 
         // -----------------------------------------------------------------------------
 
@@ -167,13 +164,11 @@ namespace
 
         m_FilterShaderPtr = ShaderManager::CompileCS("cs_light_arealight_filter.glsl", "main");
 
-        m_BackgroundBlurShaderPtr = ShaderManager::CompileCS("cs_light_arealight_blur.glsl", "main");
+        m_BackgroundBlurShaderPtr = ShaderManager::CompileCS("cs_light_arealight_blur_background.glsl", "main");
 
-        m_ApplyShaderPtr = ShaderManager::CompileCS("cs_light_arealight_apply.glsl", "main");
+        m_ForegroundBlurShaderPtr = ShaderManager::CompileCS("cs_light_arealight_blur_foreground.glsl", "main");
 
-        m_DownSampleShaderPtr = ShaderManager::CompileCS("cs_light_arealight_down.glsl", "main");
-
-        m_BlurShaderPtr = ShaderManager::CompileCS("cs_light_arealight_blur2.glsl", "main");
+        m_CombineShaderPtr = ShaderManager::CompileCS("cs_light_arealight_combine.glsl", "main");        
 
         // -----------------------------------------------------------------------------
 
@@ -208,14 +203,13 @@ namespace
     {
         m_AreaLightFacets.Clear();
 
-        m_FilterShaderPtr          = 0;
-        m_BackgroundBlurShaderPtr  = 0;
-        m_ApplyShaderPtr           = 0;
-        m_DownSampleShaderPtr      = 0;
-        m_BlurShaderPtr            = 0;
-        m_BackgroundTexturePtr     = 0;
-        m_GaussianPropertiesPtr    = 0;
-        m_FilterPropertiesPtr      = 0;
+        m_FilterShaderPtr         = 0;
+        m_BackgroundBlurShaderPtr = 0;
+        m_CombineShaderPtr        = 0;
+        m_ForegroundBlurShaderPtr = 0;
+        m_BackgroundTexturePtr    = 0;
+        m_GaussianPropertiesPtr   = 0;
+        m_FilterPropertiesPtr     = 0;
     }
 
     // -----------------------------------------------------------------------------
@@ -364,6 +358,15 @@ namespace
 
                     if (GfxTexturePtr != 0 && GfxTexturePtr.IsValid())
                     {
+                        // -----------------------------------------------------------------------------
+                        // Remove old
+                        // -----------------------------------------------------------------------------
+                        pGfxLightFacet->m_TexturePtr         = 0;
+                        pGfxLightFacet->m_FilteredTexturePtr = 0;
+
+                        // -----------------------------------------------------------------------------
+                        // Create new
+                        // -----------------------------------------------------------------------------
                         STextureDescriptor TextureDescriptor;
 
                         TextureDescriptor.m_NumberOfPixelsU  = GfxTexturePtr->GetNumberOfPixelsU();
@@ -567,7 +570,7 @@ namespace
 
         BufferManager::UploadConstantBufferData(m_FilterPropertiesPtr, &FilterSettings);
 
-        ContextManager::SetShaderCS(m_ApplyShaderPtr);
+        ContextManager::SetShaderCS(m_CombineShaderPtr);
 
         ContextManager::SetResourceBuffer(0, m_FilterPropertiesPtr);
 
@@ -620,7 +623,7 @@ namespace
 
             BufferManager::UploadConstantBufferData(m_FilterPropertiesPtr, &FilterSettings);
 
-            ContextManager::SetShaderCS(m_BlurShaderPtr);
+            ContextManager::SetShaderCS(m_ForegroundBlurShaderPtr);
 
             ContextManager::SetResourceBuffer(0, m_GaussianPropertiesPtr);
 
@@ -658,7 +661,7 @@ namespace
 
             BufferManager::UploadConstantBufferData(m_FilterPropertiesPtr, &FilterSettings);
 
-            ContextManager::SetShaderCS(m_BlurShaderPtr);
+            ContextManager::SetShaderCS(m_ForegroundBlurShaderPtr);
 
             ContextManager::SetResourceBuffer(0, m_GaussianPropertiesPtr);
 

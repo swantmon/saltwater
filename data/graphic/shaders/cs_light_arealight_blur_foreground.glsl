@@ -1,5 +1,5 @@
-#ifndef __INCLUDE_CS_LIGHT_AREALIGHT_BLU_GLSL__
-#define __INCLUDE_CS_LIGHT_AREALIGHT_BLU_GLSL__
+#ifndef __INCLUDE_CS_LIGHT_AREALIGHT_BLUR_FOREGROUND_GLSL__
+#define __INCLUDE_CS_LIGHT_AREALIGHT_BLUR_FOREGROUND_GLSL__
 
 // -----------------------------------------------------------------------------
 // Input from engine
@@ -38,9 +38,16 @@ void main()
 
     uvec2 PixelCoord = gl_GlobalInvocationID.xy;
 
+    // -------------------------------------------------------------------------------------
+    // Deinfe inner and outer part
+    // -------------------------------------------------------------------------------------
     vec2 UV  = vec2(PixelCoord) * cs_InverseSizeAndOffset.xy;
     vec2 UV2 = (UV - 0.125f) * (1.0f + 0.334f);
 
+    // -------------------------------------------------------------------------------------
+    // Inner part is a bluerred foreground (splitted horizontal and vertical blur)
+    // Outer part is pre blurred texture
+    // -------------------------------------------------------------------------------------
     if (UV2.x >= -0.8f && UV2.y >= -0.8f && UV2.x <= 1.2f && UV2.y <= 1.2f)
     {
         vec4 BlurredTexture = vec4(0.0f); 
@@ -65,4 +72,4 @@ void main()
     imageStore(out_FilteredTexture, ivec2(PixelCoord.x, PixelCoord.y), Output);
 }
 
-#endif // __INCLUDE_CS_LIGHT_AREALIGHT_BLU_GLSL__
+#endif // __INCLUDE_CS_LIGHT_AREALIGHT_BLUR_FOREGROUND_GLSL__

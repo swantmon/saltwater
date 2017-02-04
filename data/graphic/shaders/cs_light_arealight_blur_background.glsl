@@ -1,5 +1,5 @@
-#ifndef __INCLUDE_CS_LIGHT_AREALIGHT_BLUR_GLSL__
-#define __INCLUDE_CS_LIGHT_AREALIGHT_BLUR_GLSL__
+#ifndef __INCLUDE_CS_LIGHT_AREALIGHT_BLUR_BACKGROUND_GLSL__
+#define __INCLUDE_CS_LIGHT_AREALIGHT_BLUR_BACKGROUND_GLSL__
 
 // -----------------------------------------------------------------------------
 // Input from engine
@@ -37,6 +37,9 @@ void main()
 
     uvec2 PixelCoord = gl_GlobalInvocationID.xy;
     
+    // -------------------------------------------------------------------------------------
+    // Define inner and outer area
+    // -------------------------------------------------------------------------------------
     vec2 UV  = vec2(PixelCoord) * cs_InverseSizeAndOffset.xy;
     vec2 UV2 = (UV - 0.125f) * (1.0f + 0.334f);
 
@@ -46,6 +49,10 @@ void main()
     
     int Area = 0;
     
+    // -------------------------------------------------------------------------------------
+    // Outer area is a distnace based blur to the inner BorderUV
+    // Inner area is simply the given texture without blur
+    // -------------------------------------------------------------------------------------
     if (!(UV2.x >= 0.0f && UV2.y >= 0.0f && UV2.x <= 1.0f && UV2.y <= 1.0f))
     {
         if (UV.x <= cs_InverseSizeAndOffset.z)
@@ -120,4 +127,4 @@ void main()
     }
 }
 
-#endif // __INCLUDE_CS_LIGHT_AREALIGHT_BLUR_GLSL__
+#endif // __INCLUDE_CS_LIGHT_AREALIGHT_BLUR_BACKGROUND_GLSL__

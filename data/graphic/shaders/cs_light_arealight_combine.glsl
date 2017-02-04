@@ -1,5 +1,5 @@
-#ifndef __INCLUDE_CS_LIGHT_AREALIGHT_APPLY_GLSL__
-#define __INCLUDE_CS_LIGHT_AREALIGHT_APPLY_GLSL__
+#ifndef __INCLUDE_CS_LIGHT_AREALIGHT_COMBINE_GLSL__
+#define __INCLUDE_CS_LIGHT_AREALIGHT_COMBINE_GLSL__
 
 // -----------------------------------------------------------------------------
 // Output
@@ -24,16 +24,23 @@ void main()
     uint PixelCoordY;
     vec4 Output;
     
+    // -------------------------------------------------------------------------------------
     // Initialization
+    // -------------------------------------------------------------------------------------
     PixelCoordX = gl_GlobalInvocationID.x;
     PixelCoordY = gl_GlobalInvocationID.y;
     Output      = vec4(0.0f);
 
+    // -------------------------------------------------------------------------------------
     // Define inner part
+    // -------------------------------------------------------------------------------------
     vec2 UV =  vec2(PixelCoordX, PixelCoordY) * cs_InverseSizeAndOffset.xy;
     
     vec2 ClampedUV = (UV - 0.125f) * (1 + 0.334f);
 
+    // -------------------------------------------------------------------------------------
+    // Combine inner and outer part
+    // -------------------------------------------------------------------------------------
     if (ClampedUV.x >= 0.0f && ClampedUV.y >= 0.0f && ClampedUV.x <= 1.0f && ClampedUV.y <= 1.0f)
     {
         Output = texture(in_InnerTexture, ClampedUV);
@@ -46,4 +53,4 @@ void main()
     imageStore(out_FilteredTexture, ivec2(PixelCoordX, PixelCoordY), Output);
 }
 
-#endif // __INCLUDE_CS_LIGHT_AREALIGHT_APPLY_GLSL__
+#endif // __INCLUDE_CS_LIGHT_AREALIGHT_COMBINE_GLSL__
