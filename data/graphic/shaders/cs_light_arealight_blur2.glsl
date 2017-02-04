@@ -39,23 +39,19 @@ void main()
     uvec2 PixelCoord = gl_GlobalInvocationID.xy;
 
     vec2 UV  = vec2(PixelCoord) * cs_InverseSizeAndOffset.xy;
-    vec2 UV2 = (UV - 0.125f) * (1 + 0.334f);
+    vec2 UV2 = (UV - 0.125f) * (1.0f + 0.334f);
 
-    if (UV2.x >= 0.0f && UV2.y >= 0.0f && UV2.x <= 1.0f && UV2.y <= 1.0f)
+    if (UV2.x >= -0.8f && UV2.y >= -0.8f && UV2.x <= 1.2f && UV2.y <= 1.2f)
     {
         vec4 BlurredTexture = vec4(0.0f); 
      
-        int Area = int(cs_LOD * 4); 
-        
-        float Count = 0.0f;
+        int Area = int(cs_LOD * 2); 
 
         for (int Index = -Area; Index <= Area; ++ Index) 
         { 
             vec2 TexCoord = UV + (vec2(Index) * vec2(cs_Direction) / vec2(cs_MaxPixelCoord));
 
-            BlurredTexture += texture(in_Texture, TexCoord);
-            
-            Count = Count + 1.0f;
+            BlurredTexture += textureLod(in_Texture, TexCoord, cs_LOD);
         } 
 
         Output = BlurredTexture / (Area + Area + 1); 

@@ -82,7 +82,6 @@ namespace
         CShaderPtr    m_DownSampleShaderPtr;
         CShaderPtr    m_BlurShaderPtr;
         CTexture2DPtr m_BackgroundTexturePtr;
-        CTexture2DPtr m_ForegroundTexturePtr;
         CBufferPtr    m_GaussianPropertiesPtr;
         CBufferPtr    m_FilterPropertiesPtr;
 
@@ -121,7 +120,6 @@ namespace
         , m_DownSampleShaderPtr    (0)
         , m_BlurShaderPtr          (0)
         , m_BackgroundTexturePtr   (0)
-        , m_ForegroundTexturePtr   (0)
         , m_GaussianPropertiesPtr  (0)
         , m_FilterPropertiesPtr    (0)
     {
@@ -164,24 +162,6 @@ namespace
         TextureDescriptor.m_Format           = CTextureBase::R8G8B8A8_UBYTE;
         
         m_BackgroundTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
-
-        // -----------------------------------------------------------------------------
-
-        TextureDescriptor.m_NumberOfPixelsU  = 1024;
-        TextureDescriptor.m_NumberOfPixelsV  = 1024;
-        TextureDescriptor.m_NumberOfPixelsW  = 1;
-        TextureDescriptor.m_NumberOfMipMaps  = 1;
-        TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
-        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-        TextureDescriptor.m_Format           = CTextureBase::Unknown;
-        TextureDescriptor.m_Usage            = CTextureBase::GPUReadWrite;
-        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-        TextureDescriptor.m_pFileName        = 0;
-        TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = CTextureBase::R8G8B8A8_UBYTE;
-        
-        m_ForegroundTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
         // -----------------------------------------------------------------------------
 
@@ -234,7 +214,6 @@ namespace
         m_DownSampleShaderPtr      = 0;
         m_BlurShaderPtr            = 0;
         m_BackgroundTexturePtr     = 0;
-        m_ForegroundTexturePtr     = 0;
         m_GaussianPropertiesPtr    = 0;
         m_FilterPropertiesPtr      = 0;
     }
@@ -244,7 +223,7 @@ namespace
     void CGfxAreaLightManager::Update()
     {
         // The following is for testing:
-        // return;
+        return;
 
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
@@ -636,7 +615,7 @@ namespace
 
             BufferManager::UploadConstantBufferData(m_GaussianPropertiesPtr, &GaussianSettings);
 
-            FilterSettings.m_LOD = IndexOfMipmap;
+            FilterSettings.m_LOD = IndexOfMipmap - 1;
             FilterSettings.m_InverseSizeAndOffset = Base::Float4(1.0f / static_cast<float>(CurrentMipmapLevel->GetNumberOfPixelsU()), 1.0f / static_cast<float>(CurrentMipmapLevel->GetNumberOfPixelsV()), 0.125f, 0.125f);
 
             BufferManager::UploadConstantBufferData(m_FilterPropertiesPtr, &FilterSettings);
@@ -673,6 +652,11 @@ namespace
             GaussianSettings.m_Direction[1] = 1;
 
             BufferManager::UploadConstantBufferData(m_GaussianPropertiesPtr, &GaussianSettings);
+
+            FilterSettings.m_LOD = IndexOfMipmap;
+            FilterSettings.m_InverseSizeAndOffset = Base::Float4(1.0f / static_cast<float>(CurrentMipmapLevel->GetNumberOfPixelsU()), 1.0f / static_cast<float>(CurrentMipmapLevel->GetNumberOfPixelsV()), 0.125f, 0.125f);
+
+            BufferManager::UploadConstantBufferData(m_FilterPropertiesPtr, &FilterSettings);
 
             ContextManager::SetShaderCS(m_BlurShaderPtr);
 

@@ -42,7 +42,7 @@ void main()
     }
     else
     {
-        imageStore(out_FilteredTexture, ivec2(PixelCoordX, PixelCoordY), vec4(0.125f));  
+        imageStore(out_FilteredTexture, ivec2(PixelCoordX, PixelCoordY), vec4(0.25f));  
     }
 }
 
