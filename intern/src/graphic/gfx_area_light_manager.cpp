@@ -59,13 +59,13 @@ namespace
         struct SFilterProperties
         {
             Base::Float4 m_InverseSizeAndOffset;
-            unsigned int m_LOD;
+            
         };
 
         struct SBlurProperties
         {
-            Base::Int2 m_Direction;
-            Base::Int2 m_MaxPixelCoord;
+            Base::UInt2  m_Direction;
+            unsigned int m_LOD;
         };
 
     private:
@@ -97,7 +97,7 @@ namespace
 namespace 
 {
     CGfxAreaLightManager::CInternAreaLightFacet::CInternAreaLightFacet()
-        : CAreaLightFacet   ()
+        : CAreaLightFacet()
     {
 
     }
@@ -115,8 +115,8 @@ namespace
         : m_AreaLightFacets        ()
         , m_FilterShaderPtr        (0)
         , m_BackgroundBlurShaderPtr(0)
-        , m_CombineShaderPtr         (0)
-        , m_ForegroundBlurShaderPtr          (0)
+        , m_CombineShaderPtr       (0)
+        , m_ForegroundBlurShaderPtr(0)
         , m_BackgroundTexturePtr   (0)
         , m_GaussianPropertiesPtr  (0)
         , m_FilterPropertiesPtr    (0)
@@ -481,7 +481,6 @@ namespace
         // -----------------------------------------------------------------------------
         SFilterProperties FilterSettings;
 
-        FilterSettings.m_LOD                  = 0;
         FilterSettings.m_InverseSizeAndOffset = Base::Float4(1.0f / static_cast<float>(m_BackgroundTexturePtr->GetNumberOfPixelsU()), 1.0f / static_cast<float>(m_BackgroundTexturePtr->GetNumberOfPixelsV()), 0.125f, 0.125f);
 
         BufferManager::UploadConstantBufferData(m_FilterPropertiesPtr, &FilterSettings);
@@ -508,11 +507,6 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        FilterSettings.m_LOD = 0;
-        FilterSettings.m_InverseSizeAndOffset = Base::Float4(1.0f / static_cast<float>(m_BackgroundTexturePtr->GetNumberOfPixelsU()), 1.0f / static_cast<float>(m_BackgroundTexturePtr->GetNumberOfPixelsV()), 0.125f, 0.125f);
-
-        BufferManager::UploadConstantBufferData(m_FilterPropertiesPtr, &FilterSettings);      
-
         ContextManager::SetShaderCS(m_BackgroundBlurShaderPtr);
 
         ContextManager::SetResourceBuffer(1, m_FilterPropertiesPtr);
@@ -534,11 +528,6 @@ namespace
         ContextManager::ResetShaderCS();
 
         // -----------------------------------------------------------------------------
-
-        FilterSettings.m_LOD = 0;
-        FilterSettings.m_InverseSizeAndOffset = Base::Float4(1.0f / static_cast<float>(m_BackgroundTexturePtr->GetNumberOfPixelsU()), 1.0f / static_cast<float>(m_BackgroundTexturePtr->GetNumberOfPixelsV()), 0.125f, 0.125f);
-
-        BufferManager::UploadConstantBufferData(m_FilterPropertiesPtr, &FilterSettings);
 
         ContextManager::SetShaderCS(m_BackgroundBlurShaderPtr);
 
@@ -565,7 +554,6 @@ namespace
         // -----------------------------------------------------------------------------
         CTexture2DPtr MipmapLevel0Ptr = TextureManager::GetMipmapFromTexture2D(_OutputTexturePtr, 0);
 
-        FilterSettings.m_LOD = 0;
         FilterSettings.m_InverseSizeAndOffset = Base::Float4(1.0f / static_cast<float>(MipmapLevel0Ptr->GetNumberOfPixelsU()), 1.0f / static_cast<float>(MipmapLevel0Ptr->GetNumberOfPixelsV()), 0.125f, 0.125f);
 
         BufferManager::UploadConstantBufferData(m_FilterPropertiesPtr, &FilterSettings);
@@ -611,14 +599,12 @@ namespace
             // -----------------------------------------------------------------------------
             SBlurProperties GaussianSettings;
 
-            GaussianSettings.m_MaxPixelCoord[0] = CurrentMipmapLevel->GetNumberOfPixelsU();
-            GaussianSettings.m_MaxPixelCoord[1] = CurrentMipmapLevel->GetNumberOfPixelsV();
             GaussianSettings.m_Direction[0] = 1;
             GaussianSettings.m_Direction[1] = 0;
+            GaussianSettings.m_LOD          = IndexOfMipmap - 1;
 
             BufferManager::UploadConstantBufferData(m_GaussianPropertiesPtr, &GaussianSettings);
 
-            FilterSettings.m_LOD = IndexOfMipmap - 1;
             FilterSettings.m_InverseSizeAndOffset = Base::Float4(1.0f / static_cast<float>(CurrentMipmapLevel->GetNumberOfPixelsU()), 1.0f / static_cast<float>(CurrentMipmapLevel->GetNumberOfPixelsV()), 0.125f, 0.125f);
 
             BufferManager::UploadConstantBufferData(m_FilterPropertiesPtr, &FilterSettings);
@@ -653,13 +639,9 @@ namespace
 
             GaussianSettings.m_Direction[0] = 0;
             GaussianSettings.m_Direction[1] = 1;
+            GaussianSettings.m_LOD          = IndexOfMipmap;
 
             BufferManager::UploadConstantBufferData(m_GaussianPropertiesPtr, &GaussianSettings);
-
-            FilterSettings.m_LOD = IndexOfMipmap;
-            FilterSettings.m_InverseSizeAndOffset = Base::Float4(1.0f / static_cast<float>(CurrentMipmapLevel->GetNumberOfPixelsU()), 1.0f / static_cast<float>(CurrentMipmapLevel->GetNumberOfPixelsV()), 0.125f, 0.125f);
-
-            BufferManager::UploadConstantBufferData(m_FilterPropertiesPtr, &FilterSettings);
 
             ContextManager::SetShaderCS(m_ForegroundBlurShaderPtr);
 

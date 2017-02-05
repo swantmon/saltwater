@@ -6,13 +6,13 @@
 // -----------------------------------------------------------------------------
 layout(std430, binding = 0) readonly buffer UBlurProperties 
 { 
-    uvec4 cs_ConstantData0; 
+    uvec2 cs_Direction;
+    uint  cs_LOD;
 }; 
 
 layout(std430, binding = 1) readonly buffer UFilterProperties
 {
 	vec4 cs_InverseSizeAndOffset;
-    uint cs_LOD;
 };
 
 // -----------------------------------------------------------------------------
@@ -21,7 +21,7 @@ layout(std430, binding = 1) readonly buffer UFilterProperties
 layout (binding = 0) uniform sampler2D in_Texture0;
 layout (binding = 1) uniform sampler2D in_Texture1;
 
-layout (binding = 0, rgba8) writeonly uniform image2D out_FilteredTexture;
+layout (binding = 0, rgba8) writeonly uniform image2D out_Texture;
 
 // -------------------------------------------------------------------------------------
 // Layout
@@ -48,7 +48,7 @@ void Filter()
     // -------------------------------------------------------------------------------------
     vec2 UV =  vec2(PixelCoordX, PixelCoordY) * cs_InverseSizeAndOffset.xy;
 
-	UV = (UV - 0.125f) * (1.0f + 0.334f);
+	UV = (UV - cs_InverseSizeAndOffset.zw) * (1.0f + 0.334f);
 
     // -------------------------------------------------------------------------------------
     // Inner part is the texture; Outer part is potencial background
@@ -57,11 +57,11 @@ void Filter()
     {
 	   vec4 Output = texture(in_Texture0, UV);
 
-       imageStore(out_FilteredTexture, ivec2(PixelCoordX, PixelCoordY), Output);
+       imageStore(out_Texture, ivec2(PixelCoordX, PixelCoordY), Output);
     }
     else
     {
-        imageStore(out_FilteredTexture, ivec2(PixelCoordX, PixelCoordY), vec4(0.25f));  
+        imageStore(out_Texture, ivec2(PixelCoordX, PixelCoordY), vec4(0.25f));  
     }
 }
 
@@ -86,8 +86,8 @@ void BlurBackground()
     // -------------------------------------------------------------------------------------
     // Define inner and outer area
     // -------------------------------------------------------------------------------------
-    vec2 UV  = vec2(PixelCoord) * cs_InverseSizeAndOffset.xy;
-    vec2 UV2 = (UV - 0.125f) * (1.0f + 0.334f);
+    vec2 UV        = vec2(PixelCoord) * cs_InverseSizeAndOffset.xy;
+    vec2 ClampedUV = (UV - cs_InverseSizeAndOffset.zw) * (1.0f + 0.334f);
 
     vec2 BorderUV = vec2(0.0f);
     
@@ -99,7 +99,7 @@ void BlurBackground()
     // Outer area is a distnace based blur to the inner BorderUV
     // Inner area is simply the given texture without blur
     // -------------------------------------------------------------------------------------
-    if (!(UV2.x >= 0.0f && UV2.y >= 0.0f && UV2.x <= 1.0f && UV2.y <= 1.0f))
+    if (!(ClampedUV.x >= 0.0f && ClampedUV.y >= 0.0f && ClampedUV.x <= 1.0f && ClampedUV.y <= 1.0f))
     {
         if (UV.x <= cs_InverseSizeAndOffset.z)
         {
@@ -169,7 +169,7 @@ void BlurBackground()
         
         Output = BlurredTexture / Count;
                         
-        imageStore(out_FilteredTexture, ivec2(PixelCoordX, PixelCoordY), Output);
+        imageStore(out_Texture, ivec2(PixelCoordX, PixelCoordY), Output);
     }
 }
 
@@ -177,9 +177,6 @@ void BlurBackground()
 
 void BlurForeground()
 {
-    uvec2 cs_Direction     = cs_ConstantData0.xy; 
-    uvec2 cs_MaxPixelCoord = cs_ConstantData0.zw; 
-
     // -----------------------------------------------------------------------------
     // Initialization
     // -----------------------------------------------------------------------------    
@@ -190,22 +187,22 @@ void BlurForeground()
     // -------------------------------------------------------------------------------------
     // Deinfe inner and outer part
     // -------------------------------------------------------------------------------------
-    vec2 UV  = vec2(PixelCoord) * cs_InverseSizeAndOffset.xy;
-    vec2 UV2 = (UV - 0.125f) * (1.0f + 0.334f);
+    vec2 UV        = vec2(PixelCoord) * cs_InverseSizeAndOffset.xy;
+    vec2 ClampedUV = (UV - cs_InverseSizeAndOffset.zw) * (1.0f + 0.334f);
 
     // -------------------------------------------------------------------------------------
     // Inner part is a bluerred foreground (splitted horizontal and vertical blur)
     // Outer part is pre blurred texture
     // -------------------------------------------------------------------------------------
-    if (UV2.x >= -0.8f && UV2.y >= -0.8f && UV2.x <= 1.2f && UV2.y <= 1.2f)
+    if (ClampedUV.x >= -0.8f && ClampedUV.y >= -0.8f && ClampedUV.x <= 1.2f && ClampedUV.y <= 1.2f)
     {
         vec4 BlurredTexture = vec4(0.0f); 
      
-        int Area = int(cs_LOD * 2); 
+        int Area = int(cs_LOD * 2.0f); 
 
         for (int Index = -Area; Index <= Area; ++ Index) 
         { 
-            vec2 TexCoord = UV + (vec2(Index) * vec2(cs_Direction) / vec2(cs_MaxPixelCoord));
+            vec2 TexCoord = UV + (vec2(Index) * vec2(cs_Direction) * cs_InverseSizeAndOffset.xy);
 
             BlurredTexture += textureLod(in_Texture0, TexCoord, cs_LOD);
         } 
@@ -218,7 +215,7 @@ void BlurForeground()
     }
     
     
-    imageStore(out_FilteredTexture, ivec2(PixelCoord.x, PixelCoord.y), Output);
+    imageStore(out_Texture, ivec2(PixelCoord.x, PixelCoord.y), Output);
 }
 
 // -------------------------------------------------------------------------------------
@@ -241,7 +238,7 @@ void Combine()
     // -------------------------------------------------------------------------------------
     vec2 UV =  vec2(PixelCoordX, PixelCoordY) * cs_InverseSizeAndOffset.xy;
     
-    vec2 ClampedUV = (UV - 0.125f) * (1 + 0.334f);
+    vec2 ClampedUV = (UV - cs_InverseSizeAndOffset.zw) * (1 + 0.334f);
 
     // -------------------------------------------------------------------------------------
     // Combine inner and outer part
@@ -255,7 +252,7 @@ void Combine()
         Output = texture(in_Texture0, UV);
     }
 
-    imageStore(out_FilteredTexture, ivec2(PixelCoordX, PixelCoordY), Output);
+    imageStore(out_Texture, ivec2(PixelCoordX, PixelCoordY), Output);
 }
 
 
