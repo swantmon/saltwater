@@ -216,41 +216,6 @@ namespace
 
     void CGfxAreaLightManager::Update()
     {
-        // The following is for testing:
-        return;
-
-        // -----------------------------------------------------------------------------
-        // Iterate throw every entity inside this map
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
-        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
-
-        for (; CurrentEntity != EndOfEntities; )
-        {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
-
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() == Dt::SLightType::Area)
-            {
-                Dt::CAreaLightFacet*   pDtLightFacet  = static_cast<Dt::CAreaLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-                CInternAreaLightFacet* pGfxLightFacet = static_cast<CInternAreaLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
-
-                if (pDtLightFacet->GetHasTexture())
-                {
-                    if (pGfxLightFacet->m_TexturePtr != 0 && pGfxLightFacet->m_FilteredTexturePtr != 0)
-                    {
-                        FilterTexture(pGfxLightFacet->m_TexturePtr, pGfxLightFacet->m_FilteredTexturePtr);
-                    }
-                }
-            }
-
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
-        }
     }
 
     // -----------------------------------------------------------------------------
