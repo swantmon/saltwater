@@ -357,7 +357,7 @@ namespace
     
     void CGfxAreaLightRenderer::OnReload()
     {
-        ShaderManager::ReloadShader(m_LTCAreaLightShaderPtr, "fs_light_arealight.glsl", "main");
+        ShaderManager::ReloadShader(m_LTCAreaLightShaderPtr);
     }
     
     // -----------------------------------------------------------------------------

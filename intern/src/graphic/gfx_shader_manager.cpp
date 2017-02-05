@@ -55,7 +55,7 @@ namespace
 
     public:
 
-        void ReloadShader(CShaderPtr _ShaderPtr, const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderDefines, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug);
+        void ReloadShader(CShaderPtr _ShaderPtr);
         void ReloadAllShaders();
 
     public:
@@ -213,13 +213,8 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxShaderManager::ReloadShader(CShaderPtr _ShaderPtr, const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderDefines, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
+    void CGfxShaderManager::ReloadShader(CShaderPtr _ShaderPtr)
     {
-        BASE_UNUSED(_pShaderDescription);
-        BASE_UNUSED(_Categories);
-
-        assert(_pFileName != 0);
-        assert(_pShaderName != 0);
         assert(_ShaderPtr != nullptr && _ShaderPtr.IsValid());
 
         CInternShader& rShader = *static_cast<CInternShader*>(_ShaderPtr.GetPtr());
@@ -233,19 +228,7 @@ namespace
         // Build path to shader in file system
         // -----------------------------------------------------------------------------
         std::string PathToShaders = g_PathToDataShader;
-        std::string PathToShader = PathToShaders + _pFileName;
-
-        // -----------------------------------------------------------------------------
-        // Create hash and try to take an existing shader
-        // -----------------------------------------------------------------------------
-        unsigned int Hash = Base::CRC32(_pFileName, static_cast<unsigned int>(strlen(_pFileName)));
-        Hash = Base::CRC32(Hash, _pShaderName, static_cast<unsigned int>(strlen(_pShaderName)));
-        Hash = Base::CRC32(Hash, &rShader.m_Type, sizeof(CShader::EType));
-
-        if (_pShaderDefines != 0)
-        {
-            Hash = Base::CRC32(Hash, _pShaderDefines, static_cast<unsigned int>(strlen(_pShaderDefines)));
-        }
+        std::string PathToShader = PathToShaders + rShader.m_pFileName;
 
         // -----------------------------------------------------------------------------
         // Load file data from given filename
@@ -258,12 +241,12 @@ namespace
 
         std::string ShaderFileContent((std::istreambuf_iterator<char>(ShaderFile)), std::istreambuf_iterator<char>());
 
-        if (_pShaderDefines != 0)
+        if (rShader.m_pShaderDefines != 0)
         {
-            ShaderFileContent = std::string(_pShaderDefines) + "\n" + ShaderFileContent;
+            ShaderFileContent = std::string(rShader.m_pShaderDefines) + "\n" + ShaderFileContent;
         }
 
-        ShaderFileContent = "#define " + std::string(_pShaderName) + " main\n" + ShaderFileContent;
+        ShaderFileContent = "#define " + std::string(rShader.m_pShaderName) + " main\n" + ShaderFileContent;
 
         PreprocessorShader(ShaderFileContent);
 
@@ -350,18 +333,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup the engine shader
         // -----------------------------------------------------------------------------
-        rShader.m_ID          = m_Shaders[rShader.m_Type].GetNumberOfItems();
-        rShader.m_HasAlpha    = _HasAlpha;
-        rShader.m_pFileName   = _pFileName;
-        rShader.m_pShaderName = _pShaderName;
-        rShader.m_Debug       = _Debug;
-        rShader.m_Hash        = Hash;
         rShader.m_NativeShader = NativeProgramHandle;
-
-        // -----------------------------------------------------------------------------
-        // Set current shader into hash map
-        // -----------------------------------------------------------------------------
-        m_ShaderByID[Hash] = &rShader;
     }
 
     // -----------------------------------------------------------------------------
@@ -578,14 +550,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup the engine shader
         // -----------------------------------------------------------------------------
-        rShader.m_ID           = m_Shaders[_Type].GetNumberOfItems();
-        rShader.m_HasAlpha     = _HasAlpha;
-        rShader.m_pFileName    = _pFileName;
-        rShader.m_pShaderName  = _pShaderName;
-        rShader.m_Type         = _Type;
-        rShader.m_Debug        = _Debug;
-        rShader.m_Hash         = Hash;
-        rShader.m_NativeShader = NativeProgramHandle;
+        rShader.m_ID             = m_Shaders[_Type].GetNumberOfItems();
+        rShader.m_HasAlpha       = _HasAlpha;
+        rShader.m_pFileName      = _pFileName;
+        rShader.m_pShaderName    = _pShaderName;
+        rShader.m_pShaderDefines = _pShaderDefines;
+        rShader.m_Type           = _Type;
+        rShader.m_Debug          = _Debug;
+        rShader.m_Hash           = Hash;
+        rShader.m_NativeShader   = NativeProgramHandle;
 
         // -----------------------------------------------------------------------------
         // Set current shader into hash map
@@ -740,9 +713,9 @@ namespace ShaderManager
 
     // -----------------------------------------------------------------------------
 
-    void ReloadShader(CShaderPtr _ShaderPtr, const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderDefines, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
+    void ReloadShader(CShaderPtr _ShaderPtr)
     {
-        CGfxShaderManager::GetInstance().ReloadShader(_ShaderPtr, _pFileName, _pShaderName, _pShaderDefines, _pShaderDescription, _Categories, _HasAlpha, _Debug);
+        CGfxShaderManager::GetInstance().ReloadShader(_ShaderPtr);
     }
 
     // -----------------------------------------------------------------------------

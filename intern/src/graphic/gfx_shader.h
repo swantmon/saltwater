@@ -57,6 +57,7 @@ namespace Gfx
         EType GetType() const;
         const Base::Char* GetFileName() const;
         const Base::Char* GetShaderName() const;
+        const Base::Char* GetShaderDefines() const;
 
     public:
 
@@ -77,6 +78,7 @@ namespace Gfx
         CInputLayoutPtr   m_InputLayoutPtr;
         const Base::Char* m_pFileName;           ///< The name of the file containing the shader function.
         const Base::Char* m_pShaderName;         ///< The name of the shader function in the file.
+        const Base::Char* m_pShaderDefines;      ///< The defines of the shader in the file.
         EType             m_Type;                ///< Identifies the shader stage.
 
     protected:
