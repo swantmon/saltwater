@@ -162,13 +162,13 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        m_FilterShaderPtr = ShaderManager::CompileCS("cs_light_arealight_filter.glsl", "main");
+        m_FilterShaderPtr = ShaderManager::CompileCS("cs_light_arealight_filter.glsl", "Filter", "#define TILE_SIZE 1\n");
 
-        m_BackgroundBlurShaderPtr = ShaderManager::CompileCS("cs_light_arealight_blur_background.glsl", "main");
+        m_BackgroundBlurShaderPtr = ShaderManager::CompileCS("cs_light_arealight_filter.glsl", "BlurBackground", "#define TILE_SIZE 8\n");
 
-        m_ForegroundBlurShaderPtr = ShaderManager::CompileCS("cs_light_arealight_blur_foreground.glsl", "main");
+        m_ForegroundBlurShaderPtr = ShaderManager::CompileCS("cs_light_arealight_filter.glsl", "BlurForeground", "#define TILE_SIZE 8\n");
 
-        m_CombineShaderPtr = ShaderManager::CompileCS("cs_light_arealight_combine.glsl", "main");        
+        m_CombineShaderPtr = ShaderManager::CompileCS("cs_light_arealight_filter.glsl", "Combine", "#define TILE_SIZE 1\n");
 
         // -----------------------------------------------------------------------------
 
@@ -491,13 +491,13 @@ namespace
         ContextManager::SetSampler(0, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearClamp));
         ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(_TexturePtr));
 
-        ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_BackgroundTexturePtr));
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_BackgroundTexturePtr));
 
-        ContextManager::SetResourceBuffer(0, m_FilterPropertiesPtr);
+        ContextManager::SetResourceBuffer(1, m_FilterPropertiesPtr);
 
         ContextManager::Dispatch(m_BackgroundTexturePtr->GetNumberOfPixelsU(), m_BackgroundTexturePtr->GetNumberOfPixelsV(), 1);
 
-        ContextManager::ResetResourceBuffer(0);
+        ContextManager::ResetResourceBuffer(1);
 
         ContextManager::ResetSampler(0);
         ContextManager::ResetTexture(0);
@@ -515,7 +515,7 @@ namespace
 
         ContextManager::SetShaderCS(m_BackgroundBlurShaderPtr);
 
-        ContextManager::SetResourceBuffer(0, m_FilterPropertiesPtr);
+        ContextManager::SetResourceBuffer(1, m_FilterPropertiesPtr);
 
         ContextManager::SetSampler(0, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearClamp));
         ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_BackgroundTexturePtr));
@@ -529,7 +529,7 @@ namespace
         ContextManager::ResetSampler(0);
         ContextManager::ResetTexture(0);
 
-        ContextManager::ResetResourceBuffer(0);
+        ContextManager::ResetResourceBuffer(1);
 
         ContextManager::ResetShaderCS();
 
@@ -542,7 +542,7 @@ namespace
 
         ContextManager::SetShaderCS(m_BackgroundBlurShaderPtr);
 
-        ContextManager::SetResourceBuffer(0, m_FilterPropertiesPtr);
+        ContextManager::SetResourceBuffer(1, m_FilterPropertiesPtr);
 
         ContextManager::SetSampler(0, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearClamp));
         ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_BackgroundTexturePtr));
@@ -556,7 +556,7 @@ namespace
         ContextManager::ResetSampler(0);
         ContextManager::ResetTexture(0);
 
-        ContextManager::ResetResourceBuffer(0);
+        ContextManager::ResetResourceBuffer(1);
 
         ContextManager::ResetShaderCS();
 
@@ -572,7 +572,7 @@ namespace
 
         ContextManager::SetShaderCS(m_CombineShaderPtr);
 
-        ContextManager::SetResourceBuffer(0, m_FilterPropertiesPtr);
+        ContextManager::SetResourceBuffer(1, m_FilterPropertiesPtr);
 
         ContextManager::SetSampler(0, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearClamp));
         ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_BackgroundTexturePtr));
@@ -592,7 +592,7 @@ namespace
         ContextManager::ResetSampler(0);
         ContextManager::ResetTexture(0);
 
-        ContextManager::ResetResourceBuffer(0);
+        ContextManager::ResetResourceBuffer(1);
 
         ContextManager::ResetShaderCS();
 
