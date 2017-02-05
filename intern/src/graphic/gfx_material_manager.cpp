@@ -90,12 +90,12 @@ namespace
     // -----------------------------------------------------------------------------
     const char* g_pShaderAttributeDefines[] =
     {
-        "USE_TEX_DIFFUSE"  ,
-        "USE_TEX_NORMAL"   ,
-        "USE_TEX_ROUGHNESS",
-        "USE_TEX_METALLIC" ,
-        "USE_TEX_AO"       ,
-        "USE_TEX_BUMP"     ,
+        "#define USE_TEX_DIFFUSE\n"  ,
+        "#define USE_TEX_NORMAL\n"   ,
+        "#define USE_TEX_ROUGHNESS\n",
+        "#define USE_TEX_METALLIC\n" ,
+        "#define USE_TEX_AO\n"       ,
+        "#define USE_TEX_BUMP\n"     ,
     };
 } // namespace
 
@@ -769,30 +769,36 @@ namespace
 
     void CGfxMaterialManager::SetShaderOfMaterial(CInternMaterial& _rMaterial) const
     {
-        unsigned int NumberOfDefines = 0;
-        const char*  ppShaderDefines[5];
+        std::string Defines = "";
           
-        if (_rMaterial.m_MaterialKey.m_HasDiffuseTex)   ppShaderDefines[NumberOfDefines++] = g_pShaderAttributeDefines[0];
-        if (_rMaterial.m_MaterialKey.m_HasNormalTex)    ppShaderDefines[NumberOfDefines++] = g_pShaderAttributeDefines[1];
-        if (_rMaterial.m_MaterialKey.m_HasRoughnessTex) ppShaderDefines[NumberOfDefines++] = g_pShaderAttributeDefines[2];
-        if (_rMaterial.m_MaterialKey.m_HasMetallicTex)  ppShaderDefines[NumberOfDefines++] = g_pShaderAttributeDefines[3];
-        if (_rMaterial.m_MaterialKey.m_HasAOTex)        ppShaderDefines[NumberOfDefines++] = g_pShaderAttributeDefines[4];
-        if (_rMaterial.m_MaterialKey.m_HasBumpTex)      ppShaderDefines[NumberOfDefines++] = g_pShaderAttributeDefines[5];
+        if (_rMaterial.m_MaterialKey.m_HasDiffuseTex)   Defines += g_pShaderAttributeDefines[0];
+        if (_rMaterial.m_MaterialKey.m_HasNormalTex)    Defines += g_pShaderAttributeDefines[1];
+        if (_rMaterial.m_MaterialKey.m_HasRoughnessTex) Defines += g_pShaderAttributeDefines[2];
+        if (_rMaterial.m_MaterialKey.m_HasMetallicTex)  Defines += g_pShaderAttributeDefines[3];
+        if (_rMaterial.m_MaterialKey.m_HasAOTex)        Defines += g_pShaderAttributeDefines[4];
+        if (_rMaterial.m_MaterialKey.m_HasBumpTex)      Defines += g_pShaderAttributeDefines[5];
+
+        const char* pDefineString = 0;
+
+        if (Defines.length() > 0)
+        {
+            pDefineString = Defines.c_str();
+        }
 
         // -----------------------------------------------------------------------------
         // Bump Mapping
         // -----------------------------------------------------------------------------
         if (_rMaterial.m_HasBump)
         {
-            _rMaterial.m_ShaderPtrs[CShader::Hull] = Gfx::ShaderManager::CompileHS(g_pShaderFilenameHS[0], g_pShaderNamesHS[0], NumberOfDefines, ppShaderDefines);
+            _rMaterial.m_ShaderPtrs[CShader::Hull] = Gfx::ShaderManager::CompileHS(g_pShaderFilenameHS[0], g_pShaderNamesHS[0], pDefineString);
 
-            _rMaterial.m_ShaderPtrs[CShader::Domain] = Gfx::ShaderManager::CompileDS(g_pShaderFilenameDS[0], g_pShaderNamesDS[0], NumberOfDefines, ppShaderDefines);
+            _rMaterial.m_ShaderPtrs[CShader::Domain] = Gfx::ShaderManager::CompileDS(g_pShaderFilenameDS[0], g_pShaderNamesDS[0], pDefineString);
         }
 
         // -----------------------------------------------------------------------------
         // Disney
         // -----------------------------------------------------------------------------
-        _rMaterial.m_ShaderPtrs[CShader::Pixel] = Gfx::ShaderManager::CompilePS(g_pShaderFilenamePS[0], g_pShaderNamesPS[0], NumberOfDefines, ppShaderDefines);
+        _rMaterial.m_ShaderPtrs[CShader::Pixel] = Gfx::ShaderManager::CompilePS(g_pShaderFilenamePS[0], g_pShaderNamesPS[0], pDefineString);
     }
 } // namespace
 
