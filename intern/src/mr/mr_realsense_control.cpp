@@ -40,6 +40,8 @@ namespace MR
         {
             throw std::exception("No Intel RealSense Found");
         }
+
+        m_pDevice->SetMirrorMode(Device::MirrorMode::MIRROR_MODE_HORIZONTAL);
         
         m_FocalLength = m_pDevice->QueryDepthFocalLength();
         m_FocalPoint = m_pDevice->QueryDepthPrincipalPoint();  
@@ -62,18 +64,22 @@ namespace MR
 
     bool CRealSenseControl::GetDepthBuffer(unsigned short* pBuffer)
     {
-        m_pSenseManager->AcquireFrame(true);
+        if (m_pSenseManager->AcquireFrame(true, 1000) != NSStatus::STATUS_NO_ERROR)
+        {
+            return false;
+        }
 
         Capture::Sample* pSample = m_pSenseManager->QuerySample();
 
         Image* pDepth = pSample->depth;
 
-        Image::ImageInfo Info = pDepth->QueryInfo();
-
         Image::ImageData data = {};
-        data.format = Image::PIXEL_FORMAT_DEPTH;
+        data.format = Image::PIXEL_FORMAT_DEPTH_RAW;
         
-        pDepth->AcquireAccess(Image::ACCESS_READ, &data);
+        if (pDepth->AcquireAccess(Image::ACCESS_READ, &data) != NSStatus::STATUS_NO_ERROR)
+        {
+            return false;
+        }
         
         unsigned short* pData = reinterpret_cast<unsigned short*>(data.planes[0]);
 

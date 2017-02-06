@@ -286,23 +286,23 @@ namespace
             Defines[i] = DefineStrings[i].c_str();
         }
 
-        m_VSVisualizeDepth = ShaderManager::CompileVS("vs_kinect_visualize_depth.glsl", "main");
-        m_FSVisualizeDepth = ShaderManager::CompilePS("fs_kinect_visualize_depth.glsl", "main");
-        m_VSVisualizeVertexMap = ShaderManager::CompileVS("vs_kinect_visualize_vertex_map.glsl", "main");
-        m_FSVisualizeVertexMap = ShaderManager::CompilePS("fs_kinect_visualize_vertex_map.glsl", "main");
-        m_VSVisualizeVolume = ShaderManager::CompileVS("vs_kinect_visualize_volume.glsl", "main", NumberOfDefines, Defines.data());
-        m_FSVisualizeVolume = ShaderManager::CompilePS("fs_kinect_visualize_volume.glsl", "main");
+        m_VSVisualizeDepth = ShaderManager::CompileVS("kinect_fusion\\vs_visualize_depth.glsl", "main");
+        m_FSVisualizeDepth = ShaderManager::CompilePS("kinect_fusion\\fs_visualize_depth.glsl", "main");
+        m_VSVisualizeVertexMap = ShaderManager::CompileVS("kinect_fusion\\vs_visualize_vertex_map.glsl", "main");
+        m_FSVisualizeVertexMap = ShaderManager::CompilePS("kinect_fusion\\fs_visualize_vertex_map.glsl", "main");
+        m_VSVisualizeVolume = ShaderManager::CompileVS("kinect_fusion\\vs_visualize_volume.glsl", "main", NumberOfDefines, Defines.data());
+        m_FSVisualizeVolume = ShaderManager::CompilePS("kinect_fusion\\fs_visualize_volume.glsl", "main");
 
-        m_CSMirrorDepth = ShaderManager::CompileCS("cs_kinect_mirror_depth.glsl", "main", NumberOfDefines, Defines.data());
-        m_CSBilateralFilter = ShaderManager::CompileCS("cs_kinect_bilateral_filter.glsl", "main", NumberOfDefines, Defines.data());
-        m_CSVertexMap = ShaderManager::CompileCS("cs_kinect_vertex_map.glsl", "main", NumberOfDefines, Defines.data());
-        m_CSNormalMap = ShaderManager::CompileCS("cs_kinect_normal_map.glsl", "main", NumberOfDefines, Defines.data());
-        m_CSDownSampleDepth = ShaderManager::CompileCS("cs_kinect_downsample_depth.glsl", "main", NumberOfDefines, Defines.data());
-        m_CSVolumeIntegration = ShaderManager::CompileCS("cs_kinect_integrate_volume.glsl", "main", NumberOfDefines, Defines.data());
-        m_CSRaycast = ShaderManager::CompileCS("cs_kinect_raycast.glsl", "main", NumberOfDefines, Defines.data());
-        m_CSRaycastPyramid = ShaderManager::CompileCS("cs_kinect_raycast_pyramid.glsl", "main", NumberOfDefines, Defines.data());
+        m_CSMirrorDepth = ShaderManager::CompileCS("kinect_fusion\\cs_mirror_depth.glsl", "main", NumberOfDefines, Defines.data());
+        m_CSBilateralFilter = ShaderManager::CompileCS("kinect_fusion\\cs_bilateral_filter.glsl", "main", NumberOfDefines, Defines.data());
+        m_CSVertexMap = ShaderManager::CompileCS("kinect_fusion\\cs_vertex_map.glsl", "main", NumberOfDefines, Defines.data());
+        m_CSNormalMap = ShaderManager::CompileCS("kinect_fusion\\cs_normal_map.glsl", "main", NumberOfDefines, Defines.data());
+        m_CSDownSampleDepth = ShaderManager::CompileCS("kinect_fusion\\cs_downsample_depth.glsl", "main", NumberOfDefines, Defines.data());
+        m_CSVolumeIntegration = ShaderManager::CompileCS("kinect_fusion\\cs_integrate_volume.glsl", "main", NumberOfDefines, Defines.data());
+        m_CSRaycast = ShaderManager::CompileCS("kinect_fusion\\cs_raycast.glsl", "main", NumberOfDefines, Defines.data());
+        m_CSRaycastPyramid = ShaderManager::CompileCS("kinect_fusion\\cs_raycast_pyramid.glsl", "main", NumberOfDefines, Defines.data());
 
-        m_CSSphere = ShaderManager::CompileCS("cs_kinect_sphere.glsl", "main", NumberOfDefines, Defines.data());
+        m_CSSphere = ShaderManager::CompileCS("kinect_fusion\\cs_sphere.glsl", "main", NumberOfDefines, Defines.data());
     }
     
     // -----------------------------------------------------------------------------
@@ -392,7 +392,6 @@ namespace
         STrackingData TrackingData;
 
         TrackingData.m_PoseRotationMatrix.SetIdentity();
-        //TrackingData.m_PoseTranslationMatrix.SetTranslation(0.0f, 0.0, -20.0f);
         TrackingData.m_PoseTranslationMatrix.SetTranslation(g_VolumeSize * 0.5f, g_VolumeSize * 0.5f, -0.5f);
         TrackingData.m_PoseMatrix = TrackingData.m_PoseTranslationMatrix * TrackingData.m_PoseRotationMatrix;
 
@@ -489,12 +488,12 @@ namespace
             // Mirror depth data
             //////////////////////////////////////////////////////////////////////////////////////
 
-            const int WorkGroupsX = m_pDepthSensorControl->GetWidth() / g_TileSize2D;
-            const int WorkGroupsY = m_pDepthSensorControl->GetHeight() / g_TileSize2D;
+            const int WorkGroupsX = m_pDepthSensorControl->GetWidth() / g_TileSize2D + 1;
+            const int WorkGroupsY = m_pDepthSensorControl->GetHeight() / g_TileSize2D + 1;
 
             Gfx::ContextManager::SetShaderCS(m_CSMirrorDepth);
             glBindImageTexture(0, m_KinectRawDepthBuffer, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16UI);
-            glDispatchCompute(WorkGroupsX / 2, WorkGroupsY, 1);
+            glDispatchCompute(WorkGroupsX / 2 + 1, WorkGroupsY + 1, 1);
 
             m_NewDepthDataAvailable = true;
         }
