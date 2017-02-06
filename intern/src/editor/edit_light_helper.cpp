@@ -771,20 +771,18 @@ namespace
             // -----------------------------------------------------------------------------
             // Set values
             // -----------------------------------------------------------------------------
-            pLightFacet->EnableTemperature   (ColorMode == 1);
-            pLightFacet->SetColor            (Color);
-            pLightFacet->SetTemperature      (Temperature);
-            pLightFacet->SetIntensity        (Intensity);
-            pLightFacet->SetRotation         (Rotation);
-            pLightFacet->SetWidth            (Width);
-            pLightFacet->SetHeight           (Height);
-            pLightFacet->SetIsTwoSided       (IsTwoSided);
-            pLightFacet->SetDirection        (Direction);
+            pLightFacet->EnableTemperature(ColorMode == 1);
+            pLightFacet->SetColor         (Color);
+            pLightFacet->SetTemperature   (Temperature);
+            pLightFacet->SetIntensity     (Intensity);
+            pLightFacet->SetRotation      (Rotation);
+            pLightFacet->SetWidth         (Width);
+            pLightFacet->SetHeight        (Height);
+            pLightFacet->SetIsTwoSided    (IsTwoSided);
+            pLightFacet->SetDirection     (Direction);
 
             if (HasTexture)
             {
-                BASE_CONSOLE_INFOV("Change texture with hash %i", TextureHash);
-
                 Dt::CTexture2D* pTexture = Dt::TextureManager::GetTexture2DByHash(TextureHash);
 
                 if (pTexture != nullptr)
