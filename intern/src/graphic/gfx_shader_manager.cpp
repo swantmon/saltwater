@@ -226,12 +226,15 @@ namespace
 
     void CGfxShaderManager::ReloadAllShaders()
     {
-        CShaderIterator CurrentShader = m_Shaders->Begin();
-        CShaderIterator EndOfShaders  = m_Shaders->End();
-
-        for (; CurrentShader != EndOfShaders; ++CurrentShader)
+        for (unsigned int IndexOfType = 0; IndexOfType < CShader::NumberOfTypes; ++IndexOfType)
         {
-            InternReloadShader(&(*CurrentShader));
+            CShaderIterator CurrentShader = m_Shaders[IndexOfType].Begin();
+            CShaderIterator EndOfShaders  = m_Shaders[IndexOfType].End();
+
+            for (; CurrentShader != EndOfShaders; ++CurrentShader)
+            {
+                InternReloadShader(&(*CurrentShader));
+            }
         }
     }
 
