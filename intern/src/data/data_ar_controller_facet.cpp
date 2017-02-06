@@ -23,8 +23,8 @@ namespace Dt
 
     CARControllerPluginFacet::~CARControllerPluginFacet()
     {
-        m_CameraParameterFile.Clear();
-        m_Configuration.Clear();
+        m_CameraParameterFile.clear();
+        m_Configuration.clear();
     }
 
     // -----------------------------------------------------------------------------
@@ -87,7 +87,7 @@ namespace Dt
 
     const Base::Char* CARControllerPluginFacet::GetCameraParameterFile() const
     {
-        return m_CameraParameterFile.GetConst();
+        return m_CameraParameterFile.c_str();
     }
 
     // -----------------------------------------------------------------------------
@@ -101,7 +101,7 @@ namespace Dt
 
     const Base::Char* CARControllerPluginFacet::GetConfiguration() const
     {
-        return m_Configuration.GetConst();
+        return m_Configuration.c_str();
     }
 
     // -----------------------------------------------------------------------------

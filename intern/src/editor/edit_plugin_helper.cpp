@@ -233,7 +233,7 @@ namespace
 
             unsigned int Type = rMarker.m_Type;
 
-            const char* pPatternFile = rMarker.m_PatternFile.GetConst();
+            const char* pPatternFile = rMarker.m_PatternFile.c_str();
 
             float Width = rMarker.m_WidthInMeter;
 

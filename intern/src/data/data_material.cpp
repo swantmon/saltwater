@@ -31,7 +31,7 @@ namespace Dt
 
     CMaterial::~CMaterial()
     {
-        m_Materialname.Clear();
+        m_Materialname.clear();
     }
 
     // -----------------------------------------------------------------------------
@@ -45,7 +45,7 @@ namespace Dt
 
     const char* CMaterial::GetMaterialname() const
     {
-        return m_Materialname.GetConst();
+        return m_Materialname.c_str();
     }
 
     // -----------------------------------------------------------------------------
@@ -59,7 +59,7 @@ namespace Dt
 
     const char* CMaterial::GetFileName() const
     {
-        return m_FileName.GetConst();
+        return m_FileName.c_str();
     }
 
     // -----------------------------------------------------------------------------

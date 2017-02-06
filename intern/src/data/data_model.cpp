@@ -26,9 +26,9 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    const char* CModel::GetModelname() const
+    const Base::Char* CModel::GetModelname() const
     {
-        return m_Modelname.GetConst();
+        return m_Modelname.c_str();
     }
 
     // -----------------------------------------------------------------------------

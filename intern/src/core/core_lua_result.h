@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include "base/base_string.h"
-
 #include "core/core_lua_typedef.h"
+
+#include <string>
 
 namespace Core
 {
@@ -37,7 +37,7 @@ namespace Lua
 
     private:
 
-        typedef Base::CharString CString;
+        typedef std::string CString;
 
     private:
 

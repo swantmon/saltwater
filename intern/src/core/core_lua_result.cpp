@@ -21,7 +21,7 @@ namespace Lua
     {
         if ((m_Type == SValueType::String) && (m_Value.m_pValueAsString != nullptr))
         {
-            m_Value.m_pValueAsString->Clear();
+            m_Value.m_pValueAsString->clear();
         }
     }
 
@@ -34,7 +34,7 @@ namespace Lua
         // -----------------------------------------------------------------------------
         if ((m_Type == SValueType::String) && (m_Value.m_pValueAsString != nullptr))
         {
-            m_Value.m_pValueAsString->Clear();
+            m_Value.m_pValueAsString->clear();
         }
 
         m_Value.m_pValueAsString = nullptr;
@@ -120,9 +120,9 @@ namespace Lua
 
     const Base::Char* CResult::GetString() const
     {
-        assert(m_Type == SValueType::String);
+        assert(m_Type == SValueType::String && m_Value.m_pValueAsString != nullptr);
 
-        return m_Value.m_pValueAsString->GetConst();
+        return m_Value.m_pValueAsString->c_str();
     }
 
     // -----------------------------------------------------------------------------

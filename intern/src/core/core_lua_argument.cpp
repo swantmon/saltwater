@@ -94,7 +94,7 @@ namespace Lua
 
     const Base::Char* CArgument::GetString() const
     {
-        return m_Value.m_pValueAsString->GetConst();
+        return m_Value.m_pValueAsString->c_str();
     }
 
     // -----------------------------------------------------------------------------

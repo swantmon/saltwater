@@ -250,11 +250,11 @@ namespace
 
         NewMessage.PutInt(rCurrentEntity.GetCategory());
 
-        if (rCurrentEntity.GetName().GetLength() > 0)
+        if (rCurrentEntity.GetName() != 0 && strlen(rCurrentEntity.GetName()) > 0)
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(rCurrentEntity.GetName().GetConst());
+            NewMessage.PutString(rCurrentEntity.GetName());
         }
         else
         {
@@ -435,12 +435,10 @@ namespace
             // -----------------------------------------------------------------------------
             // Name
             // -----------------------------------------------------------------------------
-            Base::CharString& rEntityName = rCurrentEntity.GetName();
-
-            if (rEntityName.GetLength() > 0)
+            if (rCurrentEntity.GetName() != 0 && strlen(rCurrentEntity.GetName()) > 0)
             {
                 NewMessage.PutBool(true);
-                NewMessage.PutString(rEntityName.GetConst());
+                NewMessage.PutString(rCurrentEntity.GetName());
             }
             else
             {

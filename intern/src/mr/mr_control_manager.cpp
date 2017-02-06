@@ -674,7 +674,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Create hash and check if marker already available
             // -----------------------------------------------------------------------------
-            const char* pPatternFile = rCurrentMarker.m_PatternFile.GetConst();
+            const char* pPatternFile = rCurrentMarker.m_PatternFile.c_str();
         
             assert(pPatternFile != 0);
 

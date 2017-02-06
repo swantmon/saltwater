@@ -156,7 +156,7 @@ namespace
             NewMessage.PutBool(pTexture->IsCube());
             NewMessage.PutBool(pTexture->IsDummy());
 
-            if (pTexture->GetFileName() != nullptr)
+            if (pTexture->GetFileName() != nullptr && strlen(pTexture->GetFileName()) > 0)
             {
                 NewMessage.PutBool(true);
 
@@ -167,7 +167,7 @@ namespace
                 NewMessage.PutBool(false);
             }
 
-            if (pTexture->GetIdentifier() != nullptr)
+            if (pTexture->GetIdentifier() != nullptr && strlen(pTexture->GetIdentifier()) > 0)
             {
                 NewMessage.PutBool(true);
 

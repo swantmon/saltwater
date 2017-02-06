@@ -15,7 +15,7 @@ namespace Dt
 
     CScriptFacet::~CScriptFacet()
     {
-        m_ScriptFile.Clear();
+        m_ScriptFile.clear();
     }
 
     // -----------------------------------------------------------------------------
@@ -29,6 +29,6 @@ namespace Dt
 
     const Base::Char* CScriptFacet::GetScriptFile()
     {
-        return m_ScriptFile.GetConst();
+        return m_ScriptFile.c_str();
     }
 } // namespace Dt

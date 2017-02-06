@@ -8,10 +8,11 @@
 
 #pragma once
 
-#include "base/base_string.h"
 #include "base/base_typedef.h"
 
 #include "data/data_mesh.h"
+
+#include <string>
 
 namespace Dt
 {
@@ -26,8 +27,8 @@ namespace Dt
         CModel();
         ~CModel();
 
-        void SetModelname(const char* _pModelname);
-        const char* GetModelname() const;
+        void SetModelname(const Base::Char* _pModelname);
+        const Base::Char* GetModelname() const;
 
         unsigned int GetNumberOfMeshes() const;
 
@@ -36,7 +37,7 @@ namespace Dt
         
     protected:
         
-        Base::CharString m_Modelname;
-        CMeshContainer   m_Meshes;
+        std::string    m_Modelname;
+        CMeshContainer m_Meshes;
     };
 } // namespace Dt

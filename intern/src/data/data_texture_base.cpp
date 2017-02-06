@@ -8,8 +8,8 @@ namespace Dt
     CTextureBase::CTextureBase()
         : m_Info      ()
         , m_pPixels   (0)
-        , m_FileName  (0)
-        , m_Identifier(0)
+        , m_FileName  ()
+        , m_Identifier()
         , m_Hash      (0)
         , m_DirtyFlags(0)
         , m_DirtyTime (0)
@@ -89,14 +89,14 @@ namespace Dt
 
     const Base::Char* CTextureBase::GetFileName() const
     {
-        return m_FileName.GetConst();
+        return m_FileName.c_str();
     }
 
     // -----------------------------------------------------------------------------
 
     const Base::Char* CTextureBase::GetIdentifier() const
     {
-        return m_Identifier.GetConst();
+        return m_Identifier.c_str();
     }
 
     // -----------------------------------------------------------------------------

@@ -506,9 +506,10 @@ namespace
             // -----------------------------------------------------------------------------
             // Setup the new texture inside manager
             // -----------------------------------------------------------------------------
+            if (_rDescriptor.m_pFileName)   rTexture.m_FileName   = _rDescriptor.m_pFileName;
+            if (_rDescriptor.m_pIdentifier) rTexture.m_Identifier = _rDescriptor.m_pIdentifier;
+
             rTexture.m_Hash              = Hash;
-            rTexture.m_FileName          = _rDescriptor.m_pFileName;
-            rTexture.m_Identifier        = _rDescriptor.m_pIdentifier;
             rTexture.m_pPixels           = _rDescriptor.m_pPixels;
             rTexture.m_NumberOfPixels[0] = static_cast<Dt::CTextureBase::BPixels>(ImageWidth);
             rTexture.m_NumberOfPixels[1] = static_cast<Dt::CTextureBase::BPixels>(ImageHeight);
@@ -738,9 +739,10 @@ namespace
             // -----------------------------------------------------------------------------
             // Setup the new texture inside manager
             // -----------------------------------------------------------------------------
+            if (_rDescriptor.m_pFileName)   rTexture.m_FileName = _rDescriptor.m_pFileName;
+            if (_rDescriptor.m_pIdentifier) rTexture.m_Identifier = _rDescriptor.m_pIdentifier;
+
             rTexture.m_Hash              = Hash;
-            rTexture.m_FileName          = _rDescriptor.m_pFileName;
-            rTexture.m_Identifier        = _rDescriptor.m_pIdentifier;
             rTexture.m_pPixels           = _rDescriptor.m_pPixels;
             rTexture.m_NumberOfPixels[0] = static_cast<Dt::CTextureBase::BPixels>(ImageWidth);
             rTexture.m_NumberOfPixels[1] = static_cast<Dt::CTextureBase::BPixels>(ImageHeight);
@@ -940,7 +942,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Create hash value over filename if no identifier is set
         // -----------------------------------------------------------------------------
-        if (pInternTexture2D->m_Identifier.GetLength() == 0)
+        if (pInternTexture2D->m_Identifier.length() == 0)
         {
             NumberOfBytes = static_cast<unsigned int>(strlen(_pFile) * sizeof(char));
             pData = static_cast<const void*>(_pFile);
@@ -1623,8 +1625,8 @@ namespace
     {
         if (m_Info.m_IsDeletable)
         {
-            m_FileName  .Clear();
-            m_Identifier.Clear();
+            m_FileName  .clear();
+            m_Identifier.clear();
 
             if (m_Info.m_IsPixelOwner)
             {
@@ -1647,8 +1649,8 @@ namespace
     {
         if (m_Info.m_IsDeletable)
         {
-            m_FileName  .Clear();
-            m_Identifier.Clear();
+            m_FileName  .clear();
+            m_Identifier.clear();
 
             if (m_Info.m_IsPixelOwner)
             {
@@ -1678,8 +1680,8 @@ namespace
             m_pFaces[4] = 0;
             m_pFaces[5] = 0;
 
-            m_FileName  .Clear();
-            m_Identifier.Clear();
+            m_FileName  .clear();
+            m_Identifier.clear();
 
             if (m_Info.m_IsPixelOwner)
             {

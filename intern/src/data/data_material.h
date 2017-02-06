@@ -8,12 +8,13 @@
 
 #pragma once
 
-#include "base/base_string.h"
 #include "base/base_typedef.h"
 #include "base/base_vector3.h"
 #include "base/base_vector4.h"
 
 #include "data/data_texture_2d.h"
+
+#include <string>
 
 namespace Dt
 {
@@ -96,23 +97,23 @@ namespace Dt
 
     protected:
         
-        Base::CharString m_Materialname;
-        Base::CharString m_FileName;
-        Dt::CTexture2D*  m_pColorTexture;
-        Dt::CTexture2D*  m_pNormalTexture;
-        Dt::CTexture2D*  m_pRoughnessTexture;
-        Dt::CTexture2D*  m_pMetalTexture;
-        Dt::CTexture2D*  m_pAOTexture;
-        Dt::CTexture2D*  m_pBumpTexture;
-        Base::Float3     m_Color;
-        Base::Float4     m_TilingOffset;
-        float            m_Roughness;
-        float            m_Reflectance;
-        float            m_MetalMask;
-        float            m_Displacement;
+        std::string     m_Materialname;
+        std::string     m_FileName;
+        Dt::CTexture2D* m_pColorTexture;
+        Dt::CTexture2D* m_pNormalTexture;
+        Dt::CTexture2D* m_pRoughnessTexture;
+        Dt::CTexture2D* m_pMetalTexture;
+        Dt::CTexture2D* m_pAOTexture;
+        Dt::CTexture2D* m_pBumpTexture;
+        Base::Float3    m_Color;
+        Base::Float4    m_TilingOffset;
+        float           m_Roughness;
+        float           m_Reflectance;
+        float           m_MetalMask;
+        float           m_Displacement;
 
-        unsigned int     m_Hash;
-        unsigned int     m_DirtyFlags;
-        Base::U64        m_DirtyTime;
+        unsigned int    m_Hash;
+        unsigned int    m_DirtyFlags;
+        Base::U64       m_DirtyTime;
     };
 } // namespace Dt

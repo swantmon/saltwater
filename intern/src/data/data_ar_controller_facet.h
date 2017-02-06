@@ -1,8 +1,9 @@
 
 #pragma once
 
-#include "base/base_string.h"
 #include "base/base_vector2.h"
+
+#include <string>
 
 namespace Dt
 {
@@ -44,10 +45,10 @@ namespace Dt
                 UndefinedMarker = -1
             };
 
-            unsigned int     m_UID;
-            EMarkerType      m_Type;
-            Base::CharString m_PatternFile;
-            float            m_WidthInMeter;
+            unsigned int m_UID;
+            EMarkerType  m_Type;
+            std::string  m_PatternFile;
+            float        m_WidthInMeter;
         };
 
     public:
@@ -85,13 +86,13 @@ namespace Dt
 
     private:
 
-        Dt::CEntity*      m_pCameraEntity;
-        Dt::CTexture2D*   m_pOutputBackground;
-        EType             m_DeviceType;
-        bool              m_FreezeOutput;
-        unsigned int      m_NumberOfMarker;
-        Base::CharString  m_CameraParameterFile;
-        Base::CharString  m_Configuration;
-        SMarker           m_Marker[s_MaxNumberOfMarker];
+        Dt::CEntity*    m_pCameraEntity;
+        Dt::CTexture2D* m_pOutputBackground;
+        EType           m_DeviceType;
+        bool            m_FreezeOutput;
+        unsigned int    m_NumberOfMarker;
+        std::string     m_CameraParameterFile;
+        std::string     m_Configuration;
+        SMarker         m_Marker[s_MaxNumberOfMarker];
     };
 } // namespace Dt
