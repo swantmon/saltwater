@@ -14,6 +14,7 @@
 
 layout (binding = 0, rg16i) readonly uniform iimage3D cs_Volume;
 layout (binding = 1, rgba32f) writeonly uniform image2D cs_Vertex;
+layout (binding = 2, rgba32f) writeonly uniform image2D cs_Normal;
 
 // -------------------------------------------------------------------------------------
 // Functions

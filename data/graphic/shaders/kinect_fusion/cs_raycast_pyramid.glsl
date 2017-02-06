@@ -33,15 +33,15 @@ void main()
 	
 	bool IsInvalid = false;
 	
-	for (int i = -2; i < 3; ++ i)
+	for (int i = 0; i < 1; ++ i)
 	{
-		for (int j = -2; j < 3; ++ j)
+		for (int j = 0; j < 1; ++ j)
 		{
 			const vec4 Sample = imageLoad(cs_InputTexture, ivec2(SamplePos) + ivec2(i, j));
 			
 			if (Sample.x == 0.0f)
 			{
-				//IsInvalid = true;
+				IsInvalid = true;
 				break;
 			}
 			
@@ -49,7 +49,7 @@ void main()
 		}
 	}
 
-	vec4 Result = Sum / 25.0f;
+	vec4 Result = Sum / 4.0f;
 	
 	if (g_Normalize)
 	{

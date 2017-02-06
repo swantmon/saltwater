@@ -24,19 +24,24 @@ void main()
 
 	const vec2 SamplePos = gl_GlobalInvocationID.xy / OutputImageSize * InputImageSize;
 	
-	int Sum = 0;
+	float Sum = 0;
+    float Count = 0;
 
-	for (int i = -2; i < 3; ++ i)
+	for (int i = 0; i < 1; ++ i)
 	{
-		for (int j = -2; j < 3; ++ j)
+		for (int j = 0; j < 1; ++ j)
 		{
 			const int SampleDepth = int(imageLoad(cs_InputTexture, ivec2(SamplePos) + ivec2(i, j)).x);
 			
-			Sum += SampleDepth;
+            if (SampleDepth != 0)
+            {
+                Sum += SampleDepth;
+                ++Count;
+            }
 		}
 	}
 
-	const int Result = Sum / 25;
+	const int Result = int(Sum / Count);
 	
 	imageStore(cs_OutputTexture, ivec2(gl_GlobalInvocationID), ivec4(Result));
 }
