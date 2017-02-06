@@ -492,6 +492,8 @@ namespace
                 NewMessage.PutBool(true);
 
                 NewMessage.PutString(pLightFacet->GetTexture()->GetFileName());
+
+                NewMessage.PutInt(pLightFacet->GetTexture()->GetHash());
             }
             else
             {
@@ -781,6 +783,8 @@ namespace
 
             if (HasTexture)
             {
+                BASE_CONSOLE_INFOV("Change texture with hash %i", TextureHash);
+
                 Dt::CTexture2D* pTexture = Dt::TextureManager::GetTexture2DByHash(TextureHash);
 
                 if (pTexture != nullptr)
