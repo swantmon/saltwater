@@ -41,13 +41,16 @@ using namespace Gfx;
 
 namespace
 {
-    const int g_PyramidLevels = 3;
-
     const float g_VolumeSize = 1.0f;
     const int g_VolumeResolution = 256;
     const float g_VoxelSize = g_VolumeSize / g_VolumeResolution;
 
+    const Base::Float3 g_InitialCameraPosition = Base::Float3(g_VolumeSize * 0.5f, g_VolumeSize * 0.5f, -g_VolumeSize * 0.5f);
+    const Base::Float3 g_InitialCameraRotation = Base::Float3(0.0f, 0.0f, 0.0f);
+
     const int g_MaxIntegrationWeight = 100;
+
+    const int g_PyramidLevels = 3;
 
     const int g_ICPIterations[g_PyramidLevels] = { 10, 5, 4 };
     const float g_EpsilonVertex = 0.1f;
@@ -391,8 +394,8 @@ namespace
 
         STrackingData TrackingData;
 
-        TrackingData.m_PoseRotationMatrix.SetIdentity();
-        TrackingData.m_PoseTranslationMatrix.SetTranslation(g_VolumeSize * 0.5f, g_VolumeSize * 0.5f, -0.5f);
+        TrackingData.m_PoseRotationMatrix.SetRotation(g_InitialCameraRotation[0], g_InitialCameraRotation[1], g_InitialCameraRotation[2]);
+        TrackingData.m_PoseTranslationMatrix.SetTranslation(g_InitialCameraPosition[0], g_InitialCameraPosition[1], g_InitialCameraPosition[2]);
         TrackingData.m_PoseMatrix = TrackingData.m_PoseTranslationMatrix * TrackingData.m_PoseRotationMatrix;
 
         TrackingData.m_InvPoseRotationMatrix = TrackingData.m_PoseRotationMatrix.GetInverted();

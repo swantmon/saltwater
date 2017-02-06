@@ -35,7 +35,7 @@ void main()
 
         vec3 WSVoxelPosition = (VoxelCoords - 0.5f) * VOXEL_SIZE;
 
-        vec3 VSVoxelPosition = mat3(g_InvPoseRotationMatrix) * (WSVoxelPosition - CameraPosition); // todo: check if rotation is correct
+        vec3 VSVoxelPosition = (g_InvPoseMatrix * vec4(WSVoxelPosition, 1.0f)).xyz;
 
         // todo: Rotation
 

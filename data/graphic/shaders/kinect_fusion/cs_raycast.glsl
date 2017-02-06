@@ -64,6 +64,8 @@ void main()
 
     vec3 RayDirection = normalize(VertexPixelPosition);
 
+    RayDirection = mat3(g_PoseRotationMatrix) * RayDirection;
+
     RayDirection.x = RayDirection.x == 0.0f ? 1e-15f : RayDirection.x;
     RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
     RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
