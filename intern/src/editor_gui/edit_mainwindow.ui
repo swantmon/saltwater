@@ -196,6 +196,7 @@
       <string>&amp;Graphic</string>
      </property>
      <addaction name="m_pActionReloadRenderer"/>
+     <addaction name="m_pActionReloadAllShader"/>
     </widget>
     <addaction name="menuGraphic"/>
    </widget>
@@ -629,6 +630,11 @@
    </property>
    <property name="shortcut">
     <string/>
+   </property>
+  </action>
+  <action name="m_pActionReloadAllShader">
+   <property name="text">
+    <string>Reload all Shader</string>
    </property>
   </action>
  </widget>
@@ -1115,6 +1121,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_pActionReloadAllShader</sender>
+   <signal>triggered()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>reloadAllShader()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>961</x>
+     <y>490</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>switchPlayingCurrentScene()</slot>
@@ -1139,5 +1161,6 @@
   <slot>toggleAssetsDock()</slot>
   <slot>createNewLightArea()</slot>
   <slot>reloadRenderer()</slot>
+  <slot>reloadAllShader()</slot>
  </slots>
 </ui>

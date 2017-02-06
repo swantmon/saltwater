@@ -628,10 +628,9 @@ namespace
         m_QuarterTextureSetPtrs[1] = TextureManager::CreateTextureSet(QuarterTwoTexturePtr);
         m_QuarterTextureSetPtrs[2] = TextureManager::CreateTextureSet(QuarterThreeTexturePtr);
 
-        //////////////////////////////////////////////////////////////////
+        // -----------------------------------------------------------------------------
         // Setting up SMAA look up textures
-        //////////////////////////////////////////////////////////////////
-
+        // -----------------------------------------------------------------------------
         STextureDescriptor AreaTexDescriptor = {};
 
         AreaTexDescriptor.m_NumberOfPixelsU  = AREATEX_WIDTH;

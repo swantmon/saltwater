@@ -245,6 +245,9 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_debug_interface.cpp">
       <Filter>interface\debug</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_manager_interface.cpp">
+      <Filter>interface\manager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\graphic\gfx_camera_interface.h">
@@ -545,6 +548,9 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_debug_interface.h">
       <Filter>interface\debug</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_manager_interface.h">
+      <Filter>interface\manager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="interface">
@@ -711,6 +717,9 @@
     </Filter>
     <Filter Include="interface\debug">
       <UniqueIdentifier>{a05535e9-d966-4728-983c-1c59c9c607ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="interface\manager">
+      <UniqueIdentifier>{841a4b6d-81ea-4cf1-8a3b-39d4f2a87df2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

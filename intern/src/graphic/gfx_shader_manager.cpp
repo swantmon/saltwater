@@ -123,6 +123,8 @@ namespace
 
         CShaderPtr InternCompileShader(CShader::EType _Type, const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderDefines, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug);
 
+        void InternReloadShader(CInternShader* _pInternShader);
+
         void PreprocessorShader(std::string& _rShaderContent);
 
         int ConvertShaderType(CShader::EType _Type);
@@ -217,129 +219,20 @@ namespace
     {
         assert(_ShaderPtr != nullptr && _ShaderPtr.IsValid());
 
-        CInternShader& rShader = *static_cast<CInternShader*>(_ShaderPtr.GetPtr());
-
-        // -----------------------------------------------------------------------------
-        // Remove old shader
-        // -----------------------------------------------------------------------------
-        glDeleteProgram(rShader.m_NativeShader);
-
-        // -----------------------------------------------------------------------------
-        // Build path to shader in file system
-        // -----------------------------------------------------------------------------
-        std::string PathToShaders = g_PathToDataShader;
-        std::string PathToShader = PathToShaders + rShader.m_pFileName;
-
-        // -----------------------------------------------------------------------------
-        // Load file data from given filename
-        // -----------------------------------------------------------------------------
-        Base::Size ShaderLength;
-
-        std::ifstream ShaderFile(PathToShader.c_str());
-
-        assert(ShaderFile.is_open());
-
-        std::string ShaderFileContent((std::istreambuf_iterator<char>(ShaderFile)), std::istreambuf_iterator<char>());
-
-        if (rShader.m_pShaderDefines != 0)
-        {
-            ShaderFileContent = std::string(rShader.m_pShaderDefines) + "\n" + ShaderFileContent;
-        }
-
-        ShaderFileContent = "#define " + std::string(rShader.m_pShaderName) + " main\n" + ShaderFileContent;
-
-        PreprocessorShader(ShaderFileContent);
-
-        ShaderFileContent = "#version 450 \n" + ShaderFileContent;
-
-        ShaderLength = ShaderFileContent.size();
-
-        const char* pRAW = ShaderFileContent.c_str();
-
-        // -----------------------------------------------------------------------------
-        // Create and compile shader
-        //
-        // Warning: When linking shaders with separable programs, your shaders must
-        // redeclare the gl_PerVertex interface block if you attempt to use any of
-        // the variables defined within it.
-        // -----------------------------------------------------------------------------
-        GLuint NativeProgramHandle = 0;
-        GLuint NativeShaderHandle = 0;
-        GLint  Error;
-
-        NativeShaderHandle = glCreateShader(ConvertShaderType(rShader.m_Type));
-
-        if (NativeShaderHandle != 0)
-        {
-            glShaderSource(NativeShaderHandle, 1, &pRAW, NULL);
-
-            glCompileShader(NativeShaderHandle);
-
-            glGetShaderiv(NativeShaderHandle, GL_COMPILE_STATUS, &Error);
-
-            if (!Error)
-            {
-                GLint InfoLength = 0;
-                glGetShaderiv(NativeShaderHandle, GL_INFO_LOG_LENGTH, &InfoLength);
-
-                char* pErrorInfo = new char[InfoLength];
-                glGetShaderInfoLog(NativeShaderHandle, InfoLength, &InfoLength, pErrorInfo);
-
-                BASE_CONSOLE_ERRORV("Error creating shader '%s' with info: \n %s", PathToShader.c_str(), pErrorInfo);
-
-                delete[] pErrorInfo;
-            }
-
-            NativeProgramHandle = glCreateProgram();
-
-            if (NativeProgramHandle != 0)
-            {
-                GLint CompileStatus;
-
-                glGetShaderiv(NativeShaderHandle, GL_COMPILE_STATUS, &CompileStatus);
-
-                glProgramParameteri(NativeProgramHandle, GL_PROGRAM_SEPARABLE, GL_TRUE);
-
-                if (CompileStatus != 0)
-                {
-                    glAttachShader(NativeProgramHandle, NativeShaderHandle);
-
-                    glLinkProgram(NativeProgramHandle);
-
-                    glDetachShader(NativeProgramHandle, NativeShaderHandle);
-                }
-
-                glGetProgramiv(NativeProgramHandle, GL_LINK_STATUS, &Error);
-
-                if (!Error)
-                {
-                    GLint InfoLength = 0;
-                    glGetProgramiv(NativeProgramHandle, GL_INFO_LOG_LENGTH, &InfoLength);
-
-                    char* pErrorInfo = new char[InfoLength];
-                    glGetProgramInfoLog(NativeProgramHandle, InfoLength, &InfoLength, pErrorInfo);
-
-                    BASE_CONSOLE_ERRORV("Error creating a shader program for '%s' and linking shader: \n %s", PathToShader.c_str(), pErrorInfo);
-
-                    delete[] pErrorInfo;
-
-                    glDeleteProgram(NativeProgramHandle);
-                }
-            }
-        }
-
-        glDeleteShader(NativeShaderHandle);
-
-        // -----------------------------------------------------------------------------
-        // Setup the engine shader
-        // -----------------------------------------------------------------------------
-        rShader.m_NativeShader = NativeProgramHandle;
+        InternReloadShader(static_cast<CInternShader*>(_ShaderPtr.GetPtr()));
     }
 
     // -----------------------------------------------------------------------------
 
     void CGfxShaderManager::ReloadAllShaders()
     {
+        CShaderIterator CurrentShader = m_Shaders->Begin();
+        CShaderIterator EndOfShaders  = m_Shaders->End();
+
+        for (; CurrentShader != EndOfShaders; ++CurrentShader)
+        {
+            InternReloadShader(&(*CurrentShader));
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -552,13 +445,14 @@ namespace
         // -----------------------------------------------------------------------------
         rShader.m_ID             = m_Shaders[_Type].GetNumberOfItems();
         rShader.m_HasAlpha       = _HasAlpha;
-        rShader.m_pFileName      = _pFileName;
-        rShader.m_pShaderName    = _pShaderName;
-        rShader.m_pShaderDefines = _pShaderDefines;
+        rShader.m_FileName       = _pFileName;
+        rShader.m_ShaderName     = _pShaderName;
         rShader.m_Type           = _Type;
         rShader.m_Debug          = _Debug;
         rShader.m_Hash           = Hash;
         rShader.m_NativeShader   = NativeProgramHandle;
+
+        if (_pShaderDefines != 0) rShader.m_ShaderDefines = _pShaderDefines;
 
         // -----------------------------------------------------------------------------
         // Set current shader into hash map
@@ -566,6 +460,131 @@ namespace
         m_ShaderByID[Hash] = &rShader;
 
         return CShaderPtr(ShaderPtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxShaderManager::InternReloadShader(CInternShader* _pInternShader)
+    {
+        assert(_pInternShader != nullptr);
+
+        CInternShader& rShader = *_pInternShader;
+
+        // -----------------------------------------------------------------------------
+        // Remove old shader
+        // -----------------------------------------------------------------------------
+        glDeleteProgram(rShader.m_NativeShader);
+
+        // -----------------------------------------------------------------------------
+        // Build path to shader in file system
+        // -----------------------------------------------------------------------------
+        std::string PathToShaders = g_PathToDataShader;
+        std::string PathToShader = PathToShaders + rShader.m_FileName;
+
+        // -----------------------------------------------------------------------------
+        // Load file data from given filename
+        // -----------------------------------------------------------------------------
+        Base::Size ShaderLength;
+
+        std::ifstream ShaderFile(PathToShader.c_str());
+
+        assert(ShaderFile.is_open());
+
+        std::string ShaderFileContent((std::istreambuf_iterator<char>(ShaderFile)), std::istreambuf_iterator<char>());
+
+        if (rShader.m_ShaderDefines.length() > 0)
+        {
+            ShaderFileContent = rShader.m_ShaderDefines + "\n" + ShaderFileContent;
+        }
+
+        ShaderFileContent = "#define " + rShader.m_ShaderName + " main\n" + ShaderFileContent;
+
+        PreprocessorShader(ShaderFileContent);
+
+        ShaderFileContent = "#version 450 \n" + ShaderFileContent;
+
+        ShaderLength = ShaderFileContent.size();
+
+        const char* pRAW = ShaderFileContent.c_str();
+
+        // -----------------------------------------------------------------------------
+        // Create and compile shader
+        //
+        // Warning: When linking shaders with separable programs, your shaders must
+        // redeclare the gl_PerVertex interface block if you attempt to use any of
+        // the variables defined within it.
+        // -----------------------------------------------------------------------------
+        GLuint NativeProgramHandle = 0;
+        GLuint NativeShaderHandle = 0;
+        GLint  Error;
+
+        NativeShaderHandle = glCreateShader(ConvertShaderType(rShader.m_Type));
+
+        if (NativeShaderHandle != 0)
+        {
+            glShaderSource(NativeShaderHandle, 1, &pRAW, NULL);
+
+            glCompileShader(NativeShaderHandle);
+
+            glGetShaderiv(NativeShaderHandle, GL_COMPILE_STATUS, &Error);
+
+            if (!Error)
+            {
+                GLint InfoLength = 0;
+                glGetShaderiv(NativeShaderHandle, GL_INFO_LOG_LENGTH, &InfoLength);
+
+                char* pErrorInfo = new char[InfoLength];
+                glGetShaderInfoLog(NativeShaderHandle, InfoLength, &InfoLength, pErrorInfo);
+
+                BASE_CONSOLE_ERRORV("Error creating shader '%s' with info: \n %s", PathToShader.c_str(), pErrorInfo);
+
+                delete[] pErrorInfo;
+            }
+
+            NativeProgramHandle = glCreateProgram();
+
+            if (NativeProgramHandle != 0)
+            {
+                GLint CompileStatus;
+
+                glGetShaderiv(NativeShaderHandle, GL_COMPILE_STATUS, &CompileStatus);
+
+                glProgramParameteri(NativeProgramHandle, GL_PROGRAM_SEPARABLE, GL_TRUE);
+
+                if (CompileStatus != 0)
+                {
+                    glAttachShader(NativeProgramHandle, NativeShaderHandle);
+
+                    glLinkProgram(NativeProgramHandle);
+
+                    glDetachShader(NativeProgramHandle, NativeShaderHandle);
+                }
+
+                glGetProgramiv(NativeProgramHandle, GL_LINK_STATUS, &Error);
+
+                if (!Error)
+                {
+                    GLint InfoLength = 0;
+                    glGetProgramiv(NativeProgramHandle, GL_INFO_LOG_LENGTH, &InfoLength);
+
+                    char* pErrorInfo = new char[InfoLength];
+                    glGetProgramInfoLog(NativeProgramHandle, InfoLength, &InfoLength, pErrorInfo);
+
+                    BASE_CONSOLE_ERRORV("Error creating a shader program for '%s' and linking shader: \n %s", PathToShader.c_str(), pErrorInfo);
+
+                    delete[] pErrorInfo;
+
+                    glDeleteProgram(NativeProgramHandle);
+                }
+            }
+        }
+
+        glDeleteShader(NativeShaderHandle);
+
+        // -----------------------------------------------------------------------------
+        // Setup the engine shader
+        // -----------------------------------------------------------------------------
+        rShader.m_NativeShader = NativeProgramHandle;
     }
 
     // -----------------------------------------------------------------------------

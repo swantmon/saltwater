@@ -566,6 +566,15 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
+    void CMainWindow::reloadAllShader()
+    {
+        Edit::CMessage NewMessage(true);
+
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Graphic_ReloadAllShader, NewMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CMainWindow::changeHistogramSettings()
     {
         float LowerBound = m_pHistogramLowerBoundEdit->text().toFloat();

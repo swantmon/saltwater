@@ -121,6 +121,7 @@ namespace Edit
             Graphic_HighlightEntity,
 
             Graphic_ReloadRenderer,
+            Graphic_ReloadAllShader,
 
             NumberOfMembers,
             Undefined = -1,
