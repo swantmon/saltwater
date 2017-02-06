@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\graphic\gfx_debug_interface.cpp">
-      <Filter>interface\debug</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_camera_interface.cpp">
       <Filter>interface\camera</Filter>
     </ClCompile>
@@ -236,11 +233,20 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_light_indirect_renderer.cpp">
       <Filter>engine\renderer</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_area_light_facet.cpp">
+      <Filter>engine\map\lights\area light</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_area_light_manager.cpp">
+      <Filter>engine\map\lights\area light</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_renderer_interface.cpp">
+      <Filter>interface\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_debug_interface.cpp">
+      <Filter>interface\debug</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\graphic\gfx_debug_interface.h">
-      <Filter>interface\debug</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_camera_interface.h">
       <Filter>interface\camera</Filter>
     </ClInclude>
@@ -524,13 +530,25 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_selection.h">
       <Filter>engine\renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_ltc_look_up_textures.h">
+      <Filter>engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_area_light_facet.h">
+      <Filter>engine\map\lights\area light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_area_light_manager.h">
+      <Filter>engine\map\lights\area light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_renderer_interface.h">
+      <Filter>interface\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_debug_interface.h">
+      <Filter>interface\debug</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="interface">
       <UniqueIdentifier>{07ef7c66-9b54-44ad-afab-5107165c5ff1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="interface\debug">
-      <UniqueIdentifier>{2b179e5e-f187-406a-8007-f761468b75d2}</UniqueIdentifier>
     </Filter>
     <Filter Include="interface\camera">
       <UniqueIdentifier>{675725fb-284c-4c1e-a6f9-61baa5a2facc}</UniqueIdentifier>
@@ -684,6 +702,15 @@
     </Filter>
     <Filter Include="engine\map\actors\camera">
       <UniqueIdentifier>{9e400c53-a975-4c85-9026-d24010c20ccc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\map\lights\area light">
+      <UniqueIdentifier>{7713c0bf-9988-4696-8dfc-fe318fab49c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="interface\renderer">
+      <UniqueIdentifier>{2b179e5e-f187-406a-8007-f761468b75d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="interface\debug">
+      <UniqueIdentifier>{a05535e9-d966-4728-983c-1c59c9c607ca}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

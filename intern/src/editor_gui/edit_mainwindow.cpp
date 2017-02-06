@@ -479,6 +479,45 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
+    void CMainWindow::createNewLightArea()
+    {
+        CMessage     NewMessage;
+        unsigned int EntityID = 0;
+
+        // -----------------------------------------------------------------------------
+        // Create new entity
+        // -----------------------------------------------------------------------------
+        NewMessage.Reset();
+
+        EntityID = MessageManager::SendMessage(SGUIMessageType::Entity_New, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Create facet on entity
+        // -----------------------------------------------------------------------------
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Light_Arealight_New, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Create and add entity
+        // -----------------------------------------------------------------------------
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Entity_Create, NewMessage);
+
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Entity_Add, NewMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CMainWindow::createNewPluginARController()
     {
         CMessage     NewMessage;
@@ -515,6 +554,16 @@ namespace Edit
 
         MessageManager::SendMessage(SGUIMessageType::Entity_Add, NewMessage);
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::reloadRenderer()
+    {
+        Edit::CMessage NewMessage(true);
+
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Graphic_ReloadRenderer, NewMessage);
+    }
+
     // -----------------------------------------------------------------------------
 
     void CMainWindow::changeHistogramSettings()

@@ -5,6 +5,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "data/data_area_light_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_hierarchy_facet.h"
@@ -42,16 +43,19 @@ namespace
         void OnNewSun(Edit::CMessage& _rMessage);
         void OnNewEnvironment(Edit::CMessage& _rMessage);
         void OnNewGlobalProbe(Edit::CMessage& _rMessage);
+        void OnNewArealight(Edit::CMessage& _rMessage);
 
         void OnRequestInfoPointlight(Edit::CMessage& _rMessage);
         void OnRequestInfoSun(Edit::CMessage& _rMessage);
         void OnRequestInfoEnvironment(Edit::CMessage& _rMessage);
         void OnRequestInfoGlobalProbe(Edit::CMessage& _rMessage);
+        void OnRequestInfoArealight(Edit::CMessage& _rMessage);
 
         void OnInfoPointlight(Edit::CMessage& _rMessage);
         void OnInfoSun(Edit::CMessage& _rMessage);
         void OnInfoEnvironment(Edit::CMessage& _rMessage);
         void OnInfoGlobalProbe(Edit::CMessage& _rMessage);
+        void OnInfoArealight(Edit::CMessage& _rMessage);
 
         void OnDirtyEntity(Dt::CEntity* _pEntity);
     };
@@ -87,16 +91,19 @@ namespace
         Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Sun_New        , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnNewSun));
         Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Environment_New, EDIT_RECEIVE_MESSAGE(&CLightHelper::OnNewEnvironment));
         Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Probe_New      , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnNewGlobalProbe));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Arealight_New  , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnNewArealight));
         
         Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Pointlight_Info , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnRequestInfoPointlight));
         Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Sun_Info        , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnRequestInfoSun));
         Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Environment_Info, EDIT_RECEIVE_MESSAGE(&CLightHelper::OnRequestInfoEnvironment));
         Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Probe_Info      , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnRequestInfoGlobalProbe));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Arealight_Info  , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnRequestInfoArealight));
        
         Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Pointlight_Update , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnInfoPointlight));
         Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Sun_Update        , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnInfoSun));
         Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Environment_Update, EDIT_RECEIVE_MESSAGE(&CLightHelper::OnInfoEnvironment));
         Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Probe_Update      , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnInfoGlobalProbe));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Arealight_Update  , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnInfoArealight));
     }
 
     // -----------------------------------------------------------------------------
@@ -250,6 +257,42 @@ namespace
             pLightProbeFacet->SetIntensity  (1.0f);
 
             rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pLightProbeFacet);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CLightHelper::OnNewArealight(Edit::CMessage& _rMessage)
+    {
+        {
+            // -----------------------------------------------------------------------------
+            // Get entity and set type + category
+            // -----------------------------------------------------------------------------
+            int EntityID = _rMessage.GetInt();
+
+            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+
+            rCurrentEntity.SetCategory(Dt::SEntityCategory::Light);
+            rCurrentEntity.SetType(Dt::SLightType::Area);
+
+            // -----------------------------------------------------------------------------
+            // Create facet and set it
+            // -----------------------------------------------------------------------------
+            Dt::CAreaLightFacet* pLightFacet = Dt::AreaLightManager::CreateAreaLight();
+
+            pLightFacet->EnableTemperature   (false);
+            pLightFacet->SetColor            (Base::Float3(1.0f, 1.0f, 1.0f));
+            pLightFacet->SetRotation         (0.0f);
+            pLightFacet->SetWidth            (8.0f);
+            pLightFacet->SetHeight           (8.0f);
+            pLightFacet->SetDirection        (Base::Float3(-0.01f, 0.01f, -1.0f));
+            pLightFacet->SetIntensity        (1200.0f);
+            pLightFacet->SetTemperature      (0);
+            pLightFacet->SetIsTwoSided       (false);
+
+            pLightFacet->UpdateLightness();
+
+            rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pLightFacet);
         }
     }
 
@@ -412,6 +455,54 @@ namespace
             NewMessage.Reset();
 
             Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Light_Probe_Info, NewMessage);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CLightHelper::OnRequestInfoArealight(Edit::CMessage& _rMessage)
+    {
+        int EntityID = _rMessage.GetInt();
+
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+
+        Dt::CAreaLightFacet* pLightFacet = static_cast<Dt::CAreaLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Area && pLightFacet != nullptr)
+        {
+            Edit::CMessage NewMessage;
+
+            NewMessage.PutInt(rCurrentEntity.GetID());
+            NewMessage.PutInt(static_cast<int>(pLightFacet->HasTemperature()));
+            NewMessage.PutFloat(pLightFacet->GetColor()[0]);
+            NewMessage.PutFloat(pLightFacet->GetColor()[1]);
+            NewMessage.PutFloat(pLightFacet->GetColor()[2]);
+            NewMessage.PutFloat(pLightFacet->GetTemperature());
+            NewMessage.PutFloat(pLightFacet->GetIntensity());
+            NewMessage.PutFloat(Base::RadiansToDegree(pLightFacet->GetRotation()));
+            NewMessage.PutFloat(pLightFacet->GetWidth());
+            NewMessage.PutFloat(pLightFacet->GetHeight());
+            NewMessage.PutBool(pLightFacet->GetIsTwoSided());
+            NewMessage.PutFloat(pLightFacet->GetDirection()[0]);
+            NewMessage.PutFloat(pLightFacet->GetDirection()[1]);
+            NewMessage.PutFloat(pLightFacet->GetDirection()[2]);
+
+            if (pLightFacet->GetHasTexture())
+            {
+                NewMessage.PutBool(true);
+
+                NewMessage.PutString(pLightFacet->GetTexture()->GetFileName());
+
+                NewMessage.PutInt(pLightFacet->GetTexture()->GetHash());
+            }
+            else
+            {
+                NewMessage.PutBool(false);
+            }
+
+            NewMessage.Reset();
+
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Light_Arealight_Info, NewMessage);
         }
     }
 
@@ -624,6 +715,87 @@ namespace
             pLightFacet->SetQuality(static_cast<Dt::CLightProbeFacet::EQuality>(Quality));
 
             pLightFacet->SetIntensity(Intensity);
+
+            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CLightHelper::OnInfoArealight(Edit::CMessage& _rMessage)
+    {
+        int EntityID = _rMessage.GetInt();
+
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CAreaLightFacet* pLightFacet = static_cast<Dt::CAreaLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Area && pLightFacet != nullptr)
+        {
+            float R, G, B;
+            float X, Y, Z;
+            unsigned int TextureHash;
+
+            TextureHash = 0;
+
+            // -----------------------------------------------------------------------------
+            // Read values
+            // -----------------------------------------------------------------------------
+            int ColorMode = _rMessage.GetInt();
+
+            R = _rMessage.GetFloat();
+            G = _rMessage.GetFloat();
+            B = _rMessage.GetFloat();
+
+            Base::Float3 Color = Base::Float3(R, G, B);
+
+            float Temperature = _rMessage.GetFloat();
+            float Intensity   = _rMessage.GetFloat();
+            float Rotation    = Base::DegreesToRadians(_rMessage.GetFloat());
+            float Width       = _rMessage.GetFloat();
+            float Height      = _rMessage.GetFloat();
+            bool  IsTwoSided  = _rMessage.GetBool();
+
+            X = _rMessage.GetFloat();
+            Y = _rMessage.GetFloat();
+            Z = _rMessage.GetFloat();
+
+            Base::Float3 Direction = Base::Float3(X, Y, Z);
+
+            bool HasTexture = _rMessage.GetBool();
+
+            if (HasTexture)
+            {
+                TextureHash = _rMessage.GetInt();
+            }
+
+            // -----------------------------------------------------------------------------
+            // Set values
+            // -----------------------------------------------------------------------------
+            pLightFacet->EnableTemperature(ColorMode == 1);
+            pLightFacet->SetColor         (Color);
+            pLightFacet->SetTemperature   (Temperature);
+            pLightFacet->SetIntensity     (Intensity);
+            pLightFacet->SetRotation      (Rotation);
+            pLightFacet->SetWidth         (Width);
+            pLightFacet->SetHeight        (Height);
+            pLightFacet->SetIsTwoSided    (IsTwoSided);
+            pLightFacet->SetDirection     (Direction);
+
+            if (HasTexture)
+            {
+                Dt::CTexture2D* pTexture = Dt::TextureManager::GetTexture2DByHash(TextureHash);
+
+                if (pTexture != nullptr)
+                {
+                    pLightFacet->SetTexture(pTexture);
+                }
+            }
+            else
+            {
+                pLightFacet->SetTexture(0);
+            }
+            
+            pLightFacet->UpdateLightness();
 
             Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
         }

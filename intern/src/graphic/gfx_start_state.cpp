@@ -7,6 +7,7 @@
 
 #include "graphic/gfx_actor_renderer.h"
 #include "graphic/gfx_ar_renderer.h"
+#include "graphic/gfx_area_light_manager.h"
 #include "graphic/gfx_background_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_camera_actor_manager.h"
@@ -92,7 +93,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Start entity manager
         // -----------------------------------------------------------------------------
-        BASE_CONSOLE_STREAMINFO("Gfx> Start entity manager...");
+        BASE_CONSOLE_STREAMINFO("Gfx> Start entity/facet manager...");
 
         MeshActorManager  ::OnStart();
         CameraActorManager::OnStart();
@@ -102,8 +103,9 @@ namespace
         SkyManager        ::OnStart();
         LightProbeManager ::OnStart();
         PointLightManager ::OnStart();
+        AreaLightManager  ::OnStart();
 
-        BASE_CONSOLE_STREAMINFO("Gfx> Finished starting entity manager.");
+        BASE_CONSOLE_STREAMINFO("Gfx> Finished starting entity/facet manager.");
 
         // -----------------------------------------------------------------------------
         // Start renderer. It is not possible to setup all the data in the 'OnStart'

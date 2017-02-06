@@ -8,6 +8,7 @@ namespace Dt
         enum Enum
         {
             Point,
+            Area,
             Sun,
             LightProbe,
             Sky,

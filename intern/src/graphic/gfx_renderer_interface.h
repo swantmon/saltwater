@@ -12,5 +12,6 @@ namespace Gfx
 {
 namespace Renderer
 {
+    void ReloadRenderer();
 } // namespace Renderer
 } // namespace Gfx

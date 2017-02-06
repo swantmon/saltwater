@@ -3,6 +3,7 @@
 #include "editor_gui/ui_edit_inspector.h"
 
 #include "editor_gui/edit_inspector_arcontroller.h"
+#include "editor_gui/edit_inspector_arealight.h"
 #include "editor_gui/edit_inspector_bloom.h"
 #include "editor_gui/edit_inspector_camera.h"
 #include "editor_gui/edit_inspector_dof.h"
@@ -49,6 +50,7 @@ namespace Edit
         QVBoxLayout*              m_pInspectorLayout;
         CInspectorEntity*         m_pEntityWidget;
         CInspectorPointlight*     m_pPointlightWidget;
+        CInspectorArealight*      m_pArealightWidget;
         CInspectorSun*            m_pSunWidget;
         CInspectorTransformation* m_pTransformWidget;
         CInspectorEnvironment*    m_pEnvironmentWidget;

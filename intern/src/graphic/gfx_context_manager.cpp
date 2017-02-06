@@ -1288,7 +1288,7 @@ namespace
 
         if (pNativeTexture->GetDimension() == CTextureBase::Dim3D) IsLayered = GL_TRUE;
 
-        glBindImageTexture(_Unit, pNativeTexture->m_NativeTexture, 0, IsLayered, 0, pNativeTexture->m_NativeUsage, pNativeTexture->m_NativeInternalFormat);
+        glBindImageTexture(_Unit, pNativeTexture->m_NativeTexture, pNativeTexture->GetCurrentMipLevel(), IsLayered, 0, pNativeTexture->m_NativeUsage, pNativeTexture->m_NativeInternalFormat);
 
         m_ImageUnits[_Unit] = _TextureBasePtr;
     }

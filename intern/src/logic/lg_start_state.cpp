@@ -5,6 +5,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "data/data_area_light_manager.h"
 #include "data/data_bloom_manager.h"
 #include "data/data_camera_actor_manager.h"
 #include "data/data_dof_manager.h"
@@ -57,10 +58,11 @@ namespace
         Dt::SunManager        ::OnStart();
         Dt::LightProbeManager ::OnStart();
         Dt::PointLightManager ::OnStart();
+        Dt::AreaLightManager  ::OnStart();
         Dt::SkyManager        ::OnStart();
         Dt::BloomManager      ::OnStart();
         Dt::DOFManager        ::OnStart();
-        Dt::PostAAManager       ::OnStart();
+        Dt::PostAAManager     ::OnStart();
         Dt::SSAOManager       ::OnStart();
         Dt::SSRFXManager      ::OnStart();
         Dt::VolumeFogManager  ::OnStart();

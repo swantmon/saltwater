@@ -12,6 +12,7 @@
 
 #include "data/data_actor_type.h"
 #include "data/data_ar_controller_manager.h"
+#include "data/data_area_light_manager.h"
 #include "data/data_bloom_manager.h"
 #include "data/data_dof_manager.h"
 #include "data/data_entity.h"
@@ -146,7 +147,7 @@ namespace
 
     void CLgLoadMapState::CreateDefaultScene()
     {
-        // -----------------------------------------------------------------------------
+                // -----------------------------------------------------------------------------
         // Allocate a map
         // -----------------------------------------------------------------------------
         Dt::Map::AllocateMap(1, 1);
@@ -484,7 +485,7 @@ namespace
 
             Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
-   }
+    }
 } // namespace
 
 namespace Lg

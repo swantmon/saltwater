@@ -39,12 +39,14 @@ namespace Edit
         void createNewLightSun();
         void createNewLightEnvironment();
         void createNewLightGlobalProbe();
+        void createNewLightArea();
         void createNewEntityBloom();
         void createNewEntityDOF();
         void createNewEntityPostAA();
         void createNewEntitySSR();
         void createNewEntityVolumeFog();
         void createNewPluginARController();
+        void reloadRenderer();
         void changeHistogramSettings();
         void toggleHistogramDock();
         void toggleSceneGraphDock();

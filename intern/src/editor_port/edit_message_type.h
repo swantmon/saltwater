@@ -57,6 +57,10 @@ namespace Edit
             Light_Pointlight_Info,
             Light_Pointlight_Update,
 
+            Light_Arealight_New,
+            Light_Arealight_Info,
+            Light_Arealight_Update,
+
             Light_Sun_New,
             Light_Sun_Info,
             Light_Sun_Update,
@@ -116,6 +120,8 @@ namespace Edit
 
             Graphic_HighlightEntity,
 
+            Graphic_ReloadRenderer,
+
             NumberOfMembers,
             Undefined = -1,
         };
@@ -144,6 +150,7 @@ namespace Edit
             Light_Sun_Info,
             Light_Environment_Info,
             Light_Probe_Info,
+            Light_Arealight_Info,
 
             Effect_Bloom_Info,
             Effect_DOF_Info,

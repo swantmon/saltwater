@@ -13,6 +13,7 @@ namespace Gfx
         , m_InputLayoutPtr()
         , m_pFileName     ()
         , m_pShaderName   ()
+        , m_pShaderDefines(0)
         , m_Type          (UndefinedType)
     {
     }
@@ -49,6 +50,13 @@ namespace Gfx
     const Base::Char* CShader::GetShaderName() const
     {
         return m_pShaderName;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const Base::Char* CShader::GetShaderDefines() const
+    {
+        return m_pShaderDefines;
     }
 
     // -----------------------------------------------------------------------------
