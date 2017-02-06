@@ -26,7 +26,7 @@ namespace MR
         
         assert(m_pSenseManager != nullptr);
 
-        m_pSenseManager->EnableStream(Capture::STREAM_TYPE_DEPTH, m_Width, m_Height, 30.0f);
+        m_pSenseManager->EnableStream(Capture::STREAM_TYPE_DEPTH, s_Width, s_Height, 30.0f);
         
         NSStatus::Status Result = m_pSenseManager->Init();
 
@@ -68,18 +68,20 @@ namespace MR
 
         Image* pDepth = pSample->depth;
 
+        Image::ImageInfo Info = pDepth->QueryInfo();
+
         Image::ImageData data = {};
-        data.format = Image::PIXEL_FORMAT_DEPTH_RAW;
+        data.format = Image::PIXEL_FORMAT_DEPTH;
         
         pDepth->AcquireAccess(Image::ACCESS_READ, &data);
-
+        
         unsigned short* pData = reinterpret_cast<unsigned short*>(data.planes[0]);
 
-        for (int i = 0; i < GetWidth(); ++i)
+        for (int i = 0; i < GetWidth(); ++ i)
         {
-            for (int j = 0; j < GetHeight(); ++j)
+            for (int j = 0; j < GetHeight(); ++ j)
             {
-                pBuffer[i * GetHeight() + j] = pData[i * GetHeight() + j];
+                pBuffer[j * GetWidth() + i] = pData[j * data.pitches[0] / 2 + i];
             }
         }
 
@@ -94,12 +96,12 @@ namespace MR
 
     int CRealSenseControl::GetWidth()
     {
-        return m_Width;
+        return s_Width;
     }
 
     int CRealSenseControl::GetHeight()
     {
-        return m_Height;
+        return s_Height;
     }
 
     // -----------------------------------------------------------------------------

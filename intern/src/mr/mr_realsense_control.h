@@ -49,7 +49,7 @@ namespace MR
         Intel::RealSense::PointF32 m_FocalLength;
         Intel::RealSense::PointF32 m_FocalPoint;
 
-        const static int m_Width = 628;
-        const static int m_Height = 468;
+        const static int s_Width = 628;
+        const static int s_Height = 468;
     };
 } // namespace MR
