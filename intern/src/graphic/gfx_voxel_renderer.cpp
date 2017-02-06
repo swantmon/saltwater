@@ -638,6 +638,15 @@ namespace
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
         glDispatchCompute(m_pDepthSensorControl->GetWidth() / g_TileSize2D, m_pDepthSensorControl->GetHeight() / g_TileSize2D, 1);
+
+        Gfx::ContextManager::SetShaderCS(m_CSNormalMap);
+
+        glBindImageTexture(0, m_RaycastVertexMap[0], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+        glBindImageTexture(1, m_RaycastNormalMap[0], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+
+        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+        glDispatchCompute(m_pDepthSensorControl->GetWidth() / g_TileSize2D, m_pDepthSensorControl->GetHeight() / g_TileSize2D, 1);
     }
 
     // -----------------------------------------------------------------------------
