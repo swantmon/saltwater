@@ -189,9 +189,6 @@
     <ClInclude Include="..\..\..\src\base\base_tokenizer.h">
       <Filter>container</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_string.h">
-      <Filter>string</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\base_precompiled.h" />
     <ClInclude Include="..\..\..\src\base\base_math_limits.h">
       <Filter>math</Filter>
@@ -227,9 +224,6 @@
     </Filter>
     <Filter Include="pattern">
       <UniqueIdentifier>{757702e6-16a5-416d-8e38-7fc9a9390376}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="string">
-      <UniqueIdentifier>{8476f834-310f-4312-8193-cc6aaa48a264}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

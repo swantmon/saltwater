@@ -6,6 +6,7 @@
 #include "base/base_uncopyable.h"
 
 #include "graphic/gfx_histogram_renderer.h"
+#include "graphic/gfx_manager_interface.h"
 #include "graphic/gfx_renderer_interface.h"
 
 #include "editor/edit_graphic_helper.h"
@@ -33,6 +34,7 @@ namespace
 
         void OnRequestHistogramInfo(Edit::CMessage& _rMessage);
         void OnHistogramInfo(Edit::CMessage& _rMessage);
+        void OnReloadAllRenderer(Edit::CMessage& _rMessage);
         void OnReloadAllShader(Edit::CMessage& _rMessage);
     };
 } // namespace
@@ -62,7 +64,9 @@ namespace
 
         Edit::MessageManager::Register(Edit::SGUIMessageType::Graphic_Histogram_Update, EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnHistogramInfo));
 
-        Edit::MessageManager::Register(Edit::SGUIMessageType::Graphic_ReloadRenderer, EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnReloadAllShader));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Graphic_ReloadRenderer, EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnReloadAllRenderer));
+
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Graphic_ReloadAllShader, EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnReloadAllShader));
     }
 
     // -----------------------------------------------------------------------------
@@ -110,9 +114,16 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGraphicHelper::OnReloadAllShader(Edit::CMessage& _rMessage)
+    void CGraphicHelper::OnReloadAllRenderer(Edit::CMessage& _rMessage)
     {
         Gfx::Renderer::ReloadRenderer();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGraphicHelper::OnReloadAllShader(Edit::CMessage& _rMessage)
+    {
+        Gfx::Manager::ReloadAllShaders();
     }
 } // namespace
 

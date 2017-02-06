@@ -40,9 +40,6 @@
     <ClCompile Include="..\..\..\test\base\test_base_tokenizer.cpp">
       <Filter>base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\test\test_base_string.cpp">
-      <Filter>base</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\test\test_precompiled.cpp" />
     <ClCompile Include="..\..\..\test\test_main.cpp" />
   </ItemGroup>

@@ -1,8 +1,9 @@
 
 #pragma once
 
-#include "base/base_string.h"
 #include "base/base_typedef.h"
+
+#include <string>
 
 namespace Dt
 {
@@ -169,13 +170,13 @@ namespace Dt
         
         protected:
 
-            SInfo            m_Info;
-            void*            m_pPixels;
-            Base::CharString m_FileName;
-            Base::CharString m_Identifier;
-            unsigned int     m_Hash;
-            unsigned int     m_DirtyFlags;
-            Base::U64        m_DirtyTime;
+            SInfo        m_Info;
+            void*        m_pPixels;
+            std::string  m_FileName;
+            std::string  m_Identifier;
+            unsigned int m_Hash;
+            unsigned int m_DirtyFlags;
+            Base::U64    m_DirtyTime;
 
         protected:
 

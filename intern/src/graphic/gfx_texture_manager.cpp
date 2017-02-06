@@ -1099,7 +1099,8 @@ namespace
             // -----------------------------------------------------------------------------
             // Setup the new texture inside manager
             // -----------------------------------------------------------------------------
-            rTexture.m_FileName          = _rDescriptor.m_pFileName;
+            if (_rDescriptor.m_pFileName != 0) rTexture.m_FileName = _rDescriptor.m_pFileName;
+
             rTexture.m_pPixels           = _rDescriptor.m_pPixels;
             rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTextureBase::BPixels>(ImageWidth);
             rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTextureBase::BPixels>(ImageHeight);
@@ -1295,7 +1296,8 @@ namespace
             // -----------------------------------------------------------------------------
             // Setup the new texture inside manager
             // -----------------------------------------------------------------------------
-            rTexture.m_FileName          = _rDescriptor.m_pFileName;
+            if (_rDescriptor.m_pFileName != 0) rTexture.m_FileName = _rDescriptor.m_pFileName;
+
             rTexture.m_pPixels           = _rDescriptor.m_pPixels;
             rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTextureBase::BPixels>(ImageWidth);
             rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTextureBase::BPixels>(ImageHeight);
@@ -1626,7 +1628,8 @@ namespace
             // -----------------------------------------------------------------------------
             // Setup the new texture inside manager
             // -----------------------------------------------------------------------------
-            rTexture.m_FileName          = _rDescriptor.m_pFileName;
+            if (_rDescriptor.m_pFileName != 0) rTexture.m_FileName = _rDescriptor.m_pFileName;
+
             rTexture.m_pPixels           = _rDescriptor.m_pPixels;
             rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTextureBase::BPixels>(ImageWidth);
             rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTextureBase::BPixels>(ImageHeight);
@@ -2387,7 +2390,7 @@ namespace
     {
         if (m_Info.m_IsDeletable)
         {
-            m_FileName.Clear();
+            m_FileName.clear();
 
             if (m_Info.m_IsPixelOwner)
             {
@@ -2410,7 +2413,7 @@ namespace
     {
         if (m_Info.m_IsDeletable)
         {
-            m_FileName.Clear();
+            m_FileName.clear();
 
             if (m_Info.m_IsPixelOwner)
             {
@@ -2435,7 +2438,7 @@ namespace
     {
         if (m_Info.m_IsDeletable)
         {
-            m_FileName.Clear();
+            m_FileName.clear();
 
             if (m_Info.m_IsPixelOwner)
             {

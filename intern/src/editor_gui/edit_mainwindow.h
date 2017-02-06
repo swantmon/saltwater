@@ -47,6 +47,7 @@ namespace Edit
         void createNewEntityVolumeFog();
         void createNewPluginARController();
         void reloadRenderer();
+        void reloadAllShader();
         void changeHistogramSettings();
         void toggleHistogramDock();
         void toggleSceneGraphDock();

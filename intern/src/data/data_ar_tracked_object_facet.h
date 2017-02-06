@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include "base/base_string.h"
 #include "base/base_vector2.h"
 
 namespace Dt

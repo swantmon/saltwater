@@ -505,12 +505,12 @@ namespace
         AlbedoColor     = _rDescriptor.m_AlbedoColor;
         TilingOffset    = _rDescriptor.m_TilingOffset;
 
-        if (_rDescriptor.m_pFileName != nullptr)
+        if (_rDescriptor.m_pFileName != nullptr && strlen(_rDescriptor.m_pFileName) > 0)
         {
             // -----------------------------------------------------------------------------
             // Build path to texture in file system
             // -----------------------------------------------------------------------------
-		    std::string PathToMaterial = g_PathToAssets + _rDescriptor.m_pFileName;
+            std::string PathToMaterial = g_PathToAssets + _rDescriptor.m_pFileName;
         
             // -----------------------------------------------------------------------------
             // Load material file

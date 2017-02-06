@@ -29,6 +29,7 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_light_indirect_renderer.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_light_probe_facet.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_light_probe_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_manager_interface.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_mesh_actor_facet.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_mesh_actor_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_point_light_facet.cpp" />
@@ -118,6 +119,7 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_ltc_look_up_textures.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_manager_interface.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_mesh_actor_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_mesh_actor_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_point_light_facet.h" />

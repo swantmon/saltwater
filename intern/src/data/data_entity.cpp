@@ -30,7 +30,7 @@ namespace Dt
 
     CEntity::~CEntity()
     {
-        m_Name.Clear();
+        m_Name.clear();
     }
 
     // -----------------------------------------------------------------------------
@@ -57,23 +57,16 @@ namespace Dt
     // -----------------------------------------------------------------------------
 
 
-    void CEntity::SetName(const Base::CharString& _rName)
+    void CEntity::SetName(const Base::Char* _pName)
     {
-        m_Name = _rName;
+        m_Name = _pName;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::CharString& CEntity::GetName()
+    const Base::Char* CEntity::GetName() const
     {
-        return m_Name;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const Base::CharString& CEntity::GetName() const
-    {
-        return m_Name;
+        return m_Name.c_str();
     }
 
     // -----------------------------------------------------------------------------

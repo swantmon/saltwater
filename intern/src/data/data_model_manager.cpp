@@ -892,12 +892,12 @@ namespace
                 m_LODs.Free(&rInternLOD);
             }
 
-            rInternMesh.m_Meshname.Clear();
+            rInternMesh.m_Meshname.clear();
 
             m_Meshes.Free(&rInternMesh);
         }
 
-        rInternModel.m_Modelname.Clear();
+        rInternModel.m_Modelname.clear();
 
         m_Models.Free(&rInternModel);
     }

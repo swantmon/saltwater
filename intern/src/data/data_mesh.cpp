@@ -21,16 +21,16 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CMesh::SetMeshname(const char* _pMeshname)
+    void CMesh::SetMeshname(const Base::Char* _pMeshname)
     {
         m_Meshname = _pMeshname;
     }
 
     // -----------------------------------------------------------------------------
 
-    const char* CMesh::GetMeshname() const
+    const Base::Char* CMesh::GetMeshname() const
     {
-        return m_Meshname.GetConst();
+        return m_Meshname.c_str();
     }
 
     // -----------------------------------------------------------------------------

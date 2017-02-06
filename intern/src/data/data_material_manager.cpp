@@ -365,7 +365,8 @@ namespace
             rNewMaterial.m_Displacement = Displacement;
             rNewMaterial.m_TilingOffset = TilingOffset;
             rNewMaterial.m_Hash         = Hash;
-            rNewMaterial.m_FileName     = _rDescriptor.m_pFileName;
+
+            if (_rDescriptor.m_pFileName != 0) rNewMaterial.m_FileName = _rDescriptor.m_pFileName;
 
             // -----------------------------------------------------------------------------
             // Setup material textures
