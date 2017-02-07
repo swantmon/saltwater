@@ -198,7 +198,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Set name
             // -----------------------------------------------------------------------------
-            if (strlen(rMesh.GetMeshname()) > 0)
+            if (rMesh.GetMeshname().length() > 0)
             {
                 rChildEntity.SetName(rMesh.GetMeshname());
             }

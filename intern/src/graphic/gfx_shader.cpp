@@ -40,23 +40,23 @@ namespace Gfx
     
     // -----------------------------------------------------------------------------
     
-    const Base::Char* CShader::GetFileName() const
+    const std::string& CShader::GetFileName() const
     {
-        return m_FileName.c_str();
+        return m_FileName;
     }
     
     // -----------------------------------------------------------------------------
     
-    const Base::Char* CShader::GetShaderName() const
+    const std::string& CShader::GetShaderName() const
     {
-        return m_ShaderName.c_str();
+        return m_ShaderName;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Char* CShader::GetShaderDefines() const
+    const std::string& CShader::GetShaderDefines() const
     {
-        return m_ShaderDefines.c_str();
+        return m_ShaderDefines;
     }
 
     // -----------------------------------------------------------------------------

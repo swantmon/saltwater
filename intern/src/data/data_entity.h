@@ -128,8 +128,8 @@ namespace Dt
         void SetCategory(unsigned int _Category);
         unsigned int GetCategory() const;
 
-        void SetName(const Base::Char* _pName);
-        const Base::Char* GetName() const;
+        void SetName(const std::string& _rName);
+        const std::string& GetName() const;
 
         void SetDynamic(bool _Flag);
         bool IsDynamic() const;

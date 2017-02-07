@@ -381,7 +381,7 @@ namespace
             // -----------------------------------------------------------------------------
             CWebcamControl* pWebcamControl = static_cast<CWebcamControl*>(m_pActiveControl);
 
-            pWebcamControl->SetConfiguration(m_pControllerPlugin->GetConfiguration());
+            pWebcamControl->SetConfiguration(m_pControllerPlugin->GetConfiguration().c_str());
         }
         break;
         case Dt::CARControllerPluginFacet::Kinect:
@@ -398,7 +398,7 @@ namespace
         // -----------------------------------------------------------------------------
         m_pActiveControl->SetConvertedFrame(m_pControllerPlugin->GetOutputBackground());
 
-        m_pActiveControl->Start(m_pControllerPlugin->GetCameraParameterFile());
+        m_pActiveControl->Start(m_pControllerPlugin->GetCameraParameterFile().c_str());
     }
 
     // -----------------------------------------------------------------------------

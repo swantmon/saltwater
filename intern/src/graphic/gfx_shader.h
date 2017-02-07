@@ -56,9 +56,9 @@ namespace Gfx
 
         unsigned int GetID() const;
         EType GetType() const;
-        const Base::Char* GetFileName() const;
-        const Base::Char* GetShaderName() const;
-        const Base::Char* GetShaderDefines() const;
+        const std::string& GetFileName() const;
+        const std::string& GetShaderName() const;
+        const std::string& GetShaderDefines() const;
 
     public:
 

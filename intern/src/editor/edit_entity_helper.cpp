@@ -250,11 +250,11 @@ namespace
 
         NewMessage.PutInt(rCurrentEntity.GetCategory());
 
-        if (rCurrentEntity.GetName() != 0 && strlen(rCurrentEntity.GetName()) > 0)
+        if (rCurrentEntity.GetName().length() > 0)
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(rCurrentEntity.GetName());
+            NewMessage.PutString(rCurrentEntity.GetName().c_str());
         }
         else
         {
@@ -435,10 +435,10 @@ namespace
             // -----------------------------------------------------------------------------
             // Name
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetName() != 0 && strlen(rCurrentEntity.GetName()) > 0)
+            if (rCurrentEntity.GetName().length() > 0)
             {
                 NewMessage.PutBool(true);
-                NewMessage.PutString(rCurrentEntity.GetName());
+                NewMessage.PutString(rCurrentEntity.GetName().c_str());
             }
             else
             {

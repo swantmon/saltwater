@@ -231,9 +231,9 @@ namespace
         // -----------------------------------------------------------------------------
         unsigned int Hash = 0;
         
-        if (rDataModel.GetMeshname() != 0)
+        if (rDataModel.GetMeshname().length() > 0)
         {
-            Hash = Base::CRC32(rDataModel.GetMeshname(), static_cast<unsigned int>(strlen(rDataModel.GetMeshname())));
+            Hash = Base::CRC32(rDataModel.GetMeshname().c_str(), static_cast<unsigned int>(rDataModel.GetMeshname().length()));
             
             if (m_ModelByID.find(Hash) != m_ModelByID.end())
             {

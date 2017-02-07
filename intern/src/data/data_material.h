@@ -38,11 +38,11 @@ namespace Dt
         CMaterial();
         ~CMaterial();
 
-        void SetMaterialname(const char* _pMaterialname);
-        const char* GetMaterialname() const;
+        void SetMaterialname(const std::string& _rMaterialname);
+        const std::string& GetMaterialname() const;
 
-        void SetFilename(const char* _pFilename);
-        const char* GetFileName() const;
+        void SetFilename(const std::string& _rFilename);
+        const std::string& GetFileName() const;
 
         void SetColorTexture(Dt::CTexture2D* _pColorTexture);
         Dt::CTexture2D* GetColorTexture();

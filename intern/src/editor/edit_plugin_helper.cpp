@@ -168,9 +168,9 @@ namespace
 
             bool FreezeOutput = pFacet->GetFreezeLastFrame();
 
-            const char* pConfiguration = pFacet->GetConfiguration();
+            const char* pConfiguration = pFacet->GetConfiguration().c_str();
 
-            const char* pParameterFile = pFacet->GetCameraParameterFile();
+            const char* pParameterFile = pFacet->GetCameraParameterFile().c_str();
 
             int CameraEntityID = -1;
 
