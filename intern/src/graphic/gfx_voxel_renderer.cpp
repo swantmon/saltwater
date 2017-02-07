@@ -25,6 +25,7 @@
 
 #include "base/base_console.h"
 #include "gfx_native_buffer.h"
+#include "gfx_native_sampler.h"
 #include "gfx_native_shader.h"
 #include "gfx_native_target_set.h"
 
@@ -628,8 +629,12 @@ namespace
     {
         Gfx::ContextManager::SetShaderCS(m_CSRaycast);
 
+        CSamplerPtr Sampler = Gfx::SamplerManager::GetSampler(Gfx::CSampler::ESampler::MinMagMipLinearClamp);
+        CNativeSampler* NativeSampler = static_cast<CNativeSampler*>(Sampler.GetPtr());
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_3D, m_Volume);
+        glBindSampler(0, NativeSampler->m_NativeSampler);
         glBindImageTexture(1, m_RaycastVertexMap[0], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
         glBindImageTexture(2, m_RaycastNormalMap[0], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
