@@ -57,16 +57,16 @@ namespace Dt
     // -----------------------------------------------------------------------------
 
 
-    void CEntity::SetName(const Base::Char* _pName)
+    void CEntity::SetName(const std::string& _rName)
     {
-        m_Name = _pName;
+        m_Name = _rName;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Char* CEntity::GetName() const
+    const std::string& CEntity::GetName() const
     {
-        return m_Name.c_str();
+        return m_Name;
     }
 
     // -----------------------------------------------------------------------------

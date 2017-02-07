@@ -63,11 +63,11 @@ namespace Dt
         void SetFreezeOutput(bool _Flag);
         bool GetFreezeLastFrame() const;
 
-        void SetConfiguration(const Base::Char* _pConfiguration);
-        const Base::Char* GetConfiguration() const;
+        void SetConfiguration(const std::string& _rConfiguration);
+        const std::string& GetConfiguration() const;
 
-        void SetCameraParameterFile(const Base::Char* _pCameraParameterFile);
-        const Base::Char* GetCameraParameterFile() const;
+        void SetCameraParameterFile(const std::string& _rCameraParameterFile);
+        const std::string& GetCameraParameterFile() const;
 
         void SetOutputBackground(Dt::CTexture2D* _pOutputBackground);
         Dt::CTexture2D* GetOutputBackground();

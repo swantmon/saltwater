@@ -150,7 +150,7 @@ namespace Gfx
             void* GetPixels();
             const void* GetPixels() const;
 
-            const Base::Char* GetFileName() const;
+            const std::string& GetFileName() const;
 
             unsigned int GetHash() const;
 

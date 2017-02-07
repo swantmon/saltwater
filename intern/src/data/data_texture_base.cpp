@@ -87,16 +87,16 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    const Base::Char* CTextureBase::GetFileName() const
+    const std::string& CTextureBase::GetFileName() const
     {
-        return m_FileName.c_str();
+        return m_FileName;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Char* CTextureBase::GetIdentifier() const
+    const std::string& CTextureBase::GetIdentifier() const
     {
-        return m_Identifier.c_str();
+        return m_Identifier;
     }
 
     // -----------------------------------------------------------------------------

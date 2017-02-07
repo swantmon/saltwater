@@ -78,30 +78,30 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CARControllerPluginFacet::SetCameraParameterFile(const Base::Char* _pCameraParameterFile)
+    void CARControllerPluginFacet::SetCameraParameterFile(const std::string& _rCameraParameterFile)
     {
-        m_CameraParameterFile = _pCameraParameterFile;
+        m_CameraParameterFile = _rCameraParameterFile;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Char* CARControllerPluginFacet::GetCameraParameterFile() const
+    const std::string& CARControllerPluginFacet::GetCameraParameterFile() const
     {
-        return m_CameraParameterFile.c_str();
+        return m_CameraParameterFile;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CARControllerPluginFacet::SetConfiguration(const Base::Char* _pConfiguration)
+    void CARControllerPluginFacet::SetConfiguration(const std::string& _rConfiguration)
     {
-        m_Configuration = _pConfiguration;
+        m_Configuration = _rConfiguration;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Char* CARControllerPluginFacet::GetConfiguration() const
+    const std::string& CARControllerPluginFacet::GetConfiguration() const
     {
-        return m_Configuration.c_str();
+        return m_Configuration;
     }
 
     // -----------------------------------------------------------------------------

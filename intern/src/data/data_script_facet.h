@@ -21,8 +21,8 @@ namespace Dt
 
     public:
 
-        void SetScriptFile(const Base::Char* _pScriptFile);
-        const Base::Char* GetScriptFile();
+        void SetScriptFile(const std::string& _rScriptFile);
+        const std::string& GetScriptFile();
 
     public:
 

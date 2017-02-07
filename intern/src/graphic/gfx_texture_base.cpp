@@ -115,9 +115,9 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    const Base::Char* CTextureBase::GetFileName() const
+    const std::string& CTextureBase::GetFileName() const
     {
-        return m_FileName.c_str();
+        return m_FileName;
     }
 
     // -----------------------------------------------------------------------------

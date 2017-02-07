@@ -27,8 +27,7 @@ namespace Dt
         CModel();
         ~CModel();
 
-        void SetModelname(const Base::Char* _pModelname);
-        const Base::Char* GetModelname() const;
+        const std::string& GetModelname() const;
 
         unsigned int GetNumberOfMeshes() const;
 

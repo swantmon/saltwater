@@ -20,15 +20,15 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CScriptFacet::SetScriptFile(const Base::Char* _pScriptFile)
+    void CScriptFacet::SetScriptFile(const std::string& _rScriptFile)
     {
-        m_ScriptFile = _pScriptFile;
+        m_ScriptFile = _rScriptFile;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Char* CScriptFacet::GetScriptFile()
+    const std::string& CScriptFacet::GetScriptFile()
     {
-        return m_ScriptFile.c_str();
+        return m_ScriptFile;
     }
 } // namespace Dt

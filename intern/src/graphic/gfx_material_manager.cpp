@@ -314,20 +314,22 @@ namespace
 
                 // TODO by tschwandt
                 // Do not use filename of texture; use texture instead
-                MaterialDescriptor.m_pMaterialName   = _Material->GetMaterialname();
-                MaterialDescriptor.m_pColorMap       = _Material->GetColorTexture()            != 0 ? _Material->GetColorTexture()->GetFileName()            : 0;
-                MaterialDescriptor.m_pNormalMap      = _Material->GetNormalTexture()           != 0 ? _Material->GetNormalTexture()->GetFileName()           : 0;
-                MaterialDescriptor.m_pRoughnessMap   = _Material->GetRoughnessTexture()        != 0 ? _Material->GetRoughnessTexture()->GetFileName()        : 0;
-                MaterialDescriptor.m_pMetalMaskMap   = _Material->GetMetalTexture()            != 0 ? _Material->GetMetalTexture()->GetFileName()            : 0;
-                MaterialDescriptor.m_pAOMap          = _Material->GetAmbientOcclusionTexture() != 0 ? _Material->GetAmbientOcclusionTexture()->GetFileName() : 0;
-                MaterialDescriptor.m_pBumpMap        = _Material->GetBumpTexture()             != 0 ? _Material->GetBumpTexture()->GetFileName()             : 0;
+                MaterialDescriptor.m_pMaterialName   = _Material->GetMaterialname().length() > 0 ? _Material->GetMaterialname().c_str() : 0;
+                MaterialDescriptor.m_pFileName       = _Material->GetFileName().length()     > 0 ? _Material->GetFileName().c_str()     : 0;
+
+                MaterialDescriptor.m_pColorMap       = _Material->GetColorTexture()            != 0 ? _Material->GetColorTexture()->GetFileName().c_str()            : 0;
+                MaterialDescriptor.m_pNormalMap      = _Material->GetNormalTexture()           != 0 ? _Material->GetNormalTexture()->GetFileName().c_str()           : 0;
+                MaterialDescriptor.m_pRoughnessMap   = _Material->GetRoughnessTexture()        != 0 ? _Material->GetRoughnessTexture()->GetFileName().c_str()        : 0;
+                MaterialDescriptor.m_pMetalMaskMap   = _Material->GetMetalTexture()            != 0 ? _Material->GetMetalTexture()->GetFileName().c_str()            : 0;
+                MaterialDescriptor.m_pAOMap          = _Material->GetAmbientOcclusionTexture() != 0 ? _Material->GetAmbientOcclusionTexture()->GetFileName().c_str() : 0;
+                MaterialDescriptor.m_pBumpMap        = _Material->GetBumpTexture()             != 0 ? _Material->GetBumpTexture()->GetFileName().c_str()             : 0;
+
                 MaterialDescriptor.m_Roughness       = _Material->GetRoughness();
                 MaterialDescriptor.m_Reflectance     = _Material->GetReflectance();
                 MaterialDescriptor.m_MetalMask       = _Material->GetMetalness();
                 MaterialDescriptor.m_Displacement    = _Material->GetDisplacement();
                 MaterialDescriptor.m_AlbedoColor     = _Material->GetColor();
                 MaterialDescriptor.m_TilingOffset    = _Material->GetTilingOffset();
-                MaterialDescriptor.m_pFileName       = _Material->GetFileName();
 
                 CInternMaterial* pInternMaterial = InternCreateMaterial(MaterialDescriptor);
 

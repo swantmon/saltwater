@@ -20,8 +20,7 @@ namespace Dt
         CMesh();
         ~CMesh();
 
-        void SetMeshname(const Base::Char* _pMeshname);
-        const Base::Char* GetMeshname() const;
+        const std::string& GetMeshname() const;
 
         void SetNumberOfLODs(unsigned int _NumberOfLODs);
         unsigned int GetNumberOfLODs() const;

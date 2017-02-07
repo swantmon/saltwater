@@ -58,7 +58,7 @@ namespace Lua
     CArgument::CArgument(const Base::Char* _pValue)
         : m_Type(SValueType::String)
     {
-        m_Value.m_pValueAsString = new CString(_pValue);
+        m_Value.m_pValueAsString = new std::string(_pValue);
     }
 
     // -----------------------------------------------------------------------------
@@ -92,9 +92,9 @@ namespace Lua
 
     // -----------------------------------------------------------------------------
 
-    const Base::Char* CArgument::GetString() const
+    const std::string& CArgument::GetString() const
     {
-        return m_Value.m_pValueAsString->c_str();
+        return *m_Value.m_pValueAsString;
     }
 
     // -----------------------------------------------------------------------------

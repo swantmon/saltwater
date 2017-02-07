@@ -19,16 +19,9 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CModel::SetModelname(const char* _pModelname)
+    const std::string& CModel::GetModelname() const
     {
-        m_Modelname = _pModelname;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const Base::Char* CModel::GetModelname() const
-    {
-        return m_Modelname.c_str();
+        return m_Modelname;
     }
 
     // -----------------------------------------------------------------------------

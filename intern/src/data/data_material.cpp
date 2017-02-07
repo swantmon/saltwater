@@ -36,30 +36,30 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetMaterialname(const char* _pMaterialname)
+    void CMaterial::SetMaterialname(const std::string& _rMaterialname)
     {
-        m_Materialname = _pMaterialname;
+        m_Materialname = _rMaterialname;
     }
 
     // -----------------------------------------------------------------------------
 
-    const char* CMaterial::GetMaterialname() const
+    const std::string& CMaterial::GetMaterialname() const
     {
-        return m_Materialname.c_str();
+        return m_Materialname;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetFilename(const char* _pFilename)
+    void CMaterial::SetFilename(const std::string& _rFilename)
     {
-        m_FileName = _pFilename;
+        m_FileName = _rFilename;
     }
 
     // -----------------------------------------------------------------------------
 
-    const char* CMaterial::GetFileName() const
+    const std::string& CMaterial::GetFileName() const
     {
-        return m_FileName.c_str();
+        return m_FileName;
     }
 
     // -----------------------------------------------------------------------------

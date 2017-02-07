@@ -387,11 +387,11 @@ namespace
             {
                 NewMessage.PutBool(true);
 
-                if (pLightFacet->GetCubemap()->GetFileName() != nullptr)
+                if (pLightFacet->GetCubemap()->GetFileName().length() > 0)
                 {
                     NewMessage.PutBool(true);
 
-                    NewMessage.PutString(pLightFacet->GetCubemap()->GetFileName());
+                    NewMessage.PutString(pLightFacet->GetCubemap()->GetFileName().c_str());
                 }
                 else
                 {
@@ -404,11 +404,11 @@ namespace
             {
                 NewMessage.PutBool(true);
 
-                if (pLightFacet->GetPanorama()->GetFileName() != nullptr)
+                if (pLightFacet->GetPanorama()->GetFileName().length() > 0)
                 {
                     NewMessage.PutBool(true);
 
-                    NewMessage.PutString(pLightFacet->GetPanorama()->GetFileName());
+                    NewMessage.PutString(pLightFacet->GetPanorama()->GetFileName().c_str());
                 }
                 else
                 {
@@ -491,7 +491,7 @@ namespace
             {
                 NewMessage.PutBool(true);
 
-                NewMessage.PutString(pLightFacet->GetTexture()->GetFileName());
+                NewMessage.PutString(pLightFacet->GetTexture()->GetFileName().c_str());
 
                 NewMessage.PutInt(pLightFacet->GetTexture()->GetHash());
             }

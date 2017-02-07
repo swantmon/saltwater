@@ -21,7 +21,7 @@ namespace MR
 {
     CWebcamControl::CWebcamControl()
         : CControl               (CControl::Webcam)
-        , m_pConfiguration       ("-device=WinDS -flipV")
+        , m_Configuration        ("-device=WinDS -flipV")
         , m_OriginalColorFrameBGR()
         , m_OriginalColorFrameRGB()
         , m_ConvertedColorFrame  ()
@@ -36,16 +36,16 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CWebcamControl::SetConfiguration(const Base::Char* _pConfiguration)
+    void CWebcamControl::SetConfiguration(const std::string& _rConfiguration)
     {
-        m_pConfiguration = _pConfiguration;
+        m_Configuration = _rConfiguration;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Char* CWebcamControl::GetConfiguration() const
+    const std::string& CWebcamControl::GetConfiguration() const
     {
-        return m_pConfiguration;
+        return m_Configuration;
     }
 
     // -----------------------------------------------------------------------------
@@ -68,9 +68,7 @@ namespace MR
         // -----------------------------------------------------------------------------
         // Setup camera parameters and open video
         // -----------------------------------------------------------------------------
-        assert(m_pConfiguration != nullptr);
-
-        Error = arVideoOpen(m_pConfiguration);
+        Error = arVideoOpen(m_Configuration.c_str());
 
         assert(Error >= 0);
 

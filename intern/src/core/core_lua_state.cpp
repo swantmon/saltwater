@@ -640,7 +640,7 @@ namespace
         case SValueType::Nil:     ::lua_pushnil(_pState); break;
         case SValueType::Boolean: ::lua_pushboolean(_pState, rArgument.GetBoolean()); break;
         case SValueType::Number:  ::lua_pushnumber(_pState, rArgument.GetNumber()); break;
-        case SValueType::String:  ::lua_pushstring(_pState, rArgument.GetString()); break;
+        case SValueType::String:  ::lua_pushstring(_pState, rArgument.GetString().c_str()); break;
         case SValueType::Pointer: ::lua_pushlightuserdata(_pState, rArgument.GetPointer()); break;
 
         default:

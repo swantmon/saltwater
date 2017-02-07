@@ -81,7 +81,7 @@ namespace Lua
 
         if (m_Value.m_pValueAsString == nullptr)
         {
-            m_Value.m_pValueAsString = new CString();
+            m_Value.m_pValueAsString = new std::string();
         }
 
         m_Type                    = SValueType::String;
@@ -118,11 +118,11 @@ namespace Lua
 
     // -----------------------------------------------------------------------------
 
-    const Base::Char* CResult::GetString() const
+    const std::string& CResult::GetString() const
     {
         assert(m_Type == SValueType::String && m_Value.m_pValueAsString != nullptr);
 
-        return m_Value.m_pValueAsString->c_str();
+        return *m_Value.m_pValueAsString;
     }
 
     // -----------------------------------------------------------------------------

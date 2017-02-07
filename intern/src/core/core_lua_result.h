@@ -25,7 +25,7 @@ namespace Lua
 
         bool GetBool() const;
         double GetNumber() const;
-        const Base::Char* GetString() const;
+        const std::string& GetString() const;
         void* GetPointer() const;
 
     public:
@@ -37,16 +37,12 @@ namespace Lua
 
     private:
 
-        typedef std::string CString;
-
-    private:
-
         union UValue
         {
-            bool     m_ValueAsBool;
-            double   m_ValueAsDouble;
-            CString* m_pValueAsString;
-            void*    m_pValueAsPtr;
+            bool         m_ValueAsBool;
+            double       m_ValueAsDouble;
+            std::string* m_pValueAsString;
+            void*        m_pValueAsPtr;
         };
 
     private:
