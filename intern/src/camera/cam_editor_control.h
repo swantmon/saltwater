@@ -23,6 +23,7 @@ namespace Cam
     private:
 
         bool          m_IsFlying;
+        bool          m_IsDragging;
         Base::Short2  m_LastCursorPosition;
         Base::Float3  m_CurrentRotation;
         unsigned int  m_MoveDirection;

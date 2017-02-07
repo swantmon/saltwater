@@ -25,6 +25,7 @@ namespace Cam
     CEditorControl::CEditorControl()
         : CControl            (CControl::EditorControl)
         , m_IsFlying          (false)
+        , m_IsDragging        (false)
         , m_LastCursorPosition( )
         , m_CurrentRotation   ( )
         , m_MoveDirection     (0)
@@ -44,15 +45,22 @@ namespace Cam
 
     void CEditorControl::InternOnEvent(const Base::CInputEvent& _rEvent)
     {
-        if (_rEvent.GetAction() == Base::CInputEvent::MouseRightPressed)
+        if (_rEvent.GetAction() == Base::CInputEvent::MouseMiddlePressed && !m_IsFlying)
+        {
+            m_IsDragging = true;
+
+            m_LastCursorPosition = _rEvent.GetCursorPosition();
+        }
+        else if (_rEvent.GetAction() == Base::CInputEvent::MouseRightPressed && !!m_IsDragging)
         {
             m_IsFlying = true;
 
             m_LastCursorPosition = _rEvent.GetCursorPosition();
         }
-        else if (_rEvent.GetAction() == Base::CInputEvent::MouseRightReleased)
+        else if (_rEvent.GetAction() == Base::CInputEvent::MouseMiddleReleased || _rEvent.GetAction() == Base::CInputEvent::MouseRightReleased)
         {
-            m_IsFlying = false;
+            m_IsFlying   = false;
+            m_IsDragging = false;
         }
         else if (_rEvent.GetAction() == Base::CInputEvent::KeyPressed && m_IsFlying)
         {
@@ -82,36 +90,62 @@ namespace Cam
 
             m_MoveVelocity = Base::Clamp(m_MoveVelocity + WheelDelta, s_MoveVelocityBorder[0], s_MoveVelocityBorder[1]);
         }
-        else if (_rEvent.GetAction() == Base::CInputEvent::MouseMove && m_IsFlying)
+        else if (_rEvent.GetAction() == Base::CInputEvent::MouseMove)
         {
-            const Base::Short2& rCursorPosition = _rEvent.GetCursorPosition();
-                
-            m_CurrentRotation[0] += static_cast<float>(rCursorPosition[0] - m_LastCursorPosition[0]) * s_RotationVelocity;
-            m_CurrentRotation[1] += static_cast<float>(rCursorPosition[1] - m_LastCursorPosition[1]) * s_RotationVelocity;
-
-            if (m_CurrentRotation[0] < 0.0f)
+            if (m_IsDragging)
             {
-                m_CurrentRotation[0] = 360.0f + m_CurrentRotation[0];
-            }
-                
-            m_CurrentRotation[0] = Base::Modulo(m_CurrentRotation[0], 360.0f);
+                Base::Float3 Forward(0.0f, 0.0f, -1.0f);
+                Base::Float3 Right(1.0f, 0.0f, 0.0f);
+                Base::Float3 Up(0.0f, 0.0f, 1.0f);
 
-            if (m_CurrentRotation[1] < 0.0f)
+                const Base::Short2& rCursorPosition = _rEvent.GetCursorPosition();
+
+                float DeltaTime = static_cast<float>(Core::Time::GetDeltaTimeLastFrame());
+
+                float CurrentVelocityX = static_cast<float>(rCursorPosition[0] - m_LastCursorPosition[0]);
+                float CurrentVelocityY = static_cast<float>(rCursorPosition[1] - m_LastCursorPosition[1]);
+
+                Forward = Forward * m_RotationMatrix;
+                Right   = Right   * m_RotationMatrix;
+                Up      = Forward.CrossProduct(Right);
+
+                m_Position -= (Right * CurrentVelocityX * DeltaTime);
+                m_Position -= (Up    * CurrentVelocityY * DeltaTime);
+
+                m_LastCursorPosition = rCursorPosition;
+            }
+
+            if (m_IsFlying)
             {
-                m_CurrentRotation[1] = 360.0f + m_CurrentRotation[1];
+                const Base::Short2& rCursorPosition = _rEvent.GetCursorPosition();
+
+                m_CurrentRotation[0] += static_cast<float>(rCursorPosition[0] - m_LastCursorPosition[0]) * s_RotationVelocity;
+                m_CurrentRotation[1] += static_cast<float>(rCursorPosition[1] - m_LastCursorPosition[1]) * s_RotationVelocity;
+
+                if (m_CurrentRotation[0] < 0.0f)
+                {
+                    m_CurrentRotation[0] = 360.0f + m_CurrentRotation[0];
+                }
+
+                m_CurrentRotation[0] = Base::Modulo(m_CurrentRotation[0], 360.0f);
+
+                if (m_CurrentRotation[1] < 0.0f)
+                {
+                    m_CurrentRotation[1] = 360.0f + m_CurrentRotation[1];
+                }
+
+                m_CurrentRotation[1] = Base::Modulo(m_CurrentRotation[1], 360.0f);
+
+                Base::Float3x3 RotationX(Base::Float3x3::s_Identity);
+                Base::Float3x3 RotationZ(Base::Float3x3::s_Identity);
+
+                RotationX.SetRotationX(Base::DegreesToRadians(m_CurrentRotation[1]));
+                RotationZ.SetRotationZ(Base::DegreesToRadians(m_CurrentRotation[0]));
+
+                m_RotationMatrix = RotationX * RotationZ;
+
+                m_LastCursorPosition = rCursorPosition;
             }
-
-            m_CurrentRotation[1] = Base::Modulo(m_CurrentRotation[1], 360.0f);
-
-            Base::Float3x3 RotationX(Base::Float3x3::s_Identity);
-            Base::Float3x3 RotationZ(Base::Float3x3::s_Identity);
-
-            RotationX.SetRotationX(Base::DegreesToRadians(m_CurrentRotation[1]));
-            RotationZ.SetRotationZ(Base::DegreesToRadians(m_CurrentRotation[0]));
-
-            m_RotationMatrix = RotationX * RotationZ;
-                
-            m_LastCursorPosition = rCursorPosition;
         }
     }
 
