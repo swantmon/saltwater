@@ -136,11 +136,9 @@ namespace Dt
             void* GetPixels();
             const void* GetPixels() const;
 
-            const Base::Char* GetFileName() const;
-            bool HasFileName() const;
+            const std::string& GetFileName() const;
 
-            const Base::Char* GetIdentifier() const;
-            bool HasIdentifier() const;
+            const std::string& GetIdentifier() const;
 
             unsigned int GetHash() const;
 

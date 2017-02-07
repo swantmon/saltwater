@@ -156,22 +156,22 @@ namespace
             NewMessage.PutBool(pTexture->IsCube());
             NewMessage.PutBool(pTexture->IsDummy());
 
-            if (pTexture->GetFileName() != nullptr && strlen(pTexture->GetFileName()) > 0)
+            if (pTexture->GetFileName().length() > 0)
             {
                 NewMessage.PutBool(true);
 
-                NewMessage.PutString(pTexture->GetFileName());
+                NewMessage.PutString(pTexture->GetFileName().c_str());
             }
             else
             {
                 NewMessage.PutBool(false);
             }
 
-            if (pTexture->GetIdentifier() != nullptr && strlen(pTexture->GetIdentifier()) > 0)
+            if (pTexture->GetIdentifier().length() > 0)
             {
                 NewMessage.PutBool(true);
 
-                NewMessage.PutString(pTexture->GetIdentifier());
+                NewMessage.PutString(pTexture->GetIdentifier().c_str());
             }
             else
             {

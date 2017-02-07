@@ -788,7 +788,7 @@ namespace
             TextureDescriptor.m_Binding          = ConvertDataBinding(_pTexture->GetBinding());
             TextureDescriptor.m_Format           = ConvertDataFormat(_pTexture->GetFormat());
 
-            if (_pTexture->HasFileName()) TextureDescriptor.m_pFileName = _pTexture->GetFileName();
+            if (_pTexture->GetFileName().length() > 0) TextureDescriptor.m_pFileName = _pTexture->GetFileName().c_str();
 
             // -----------------------------------------------------------------------------
             // Depending on dimension create the texture

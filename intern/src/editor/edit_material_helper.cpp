@@ -191,7 +191,7 @@ namespace
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(rMaterial.GetColorTexture()->GetFileName());
+            NewMessage.PutString(rMaterial.GetColorTexture()->GetFileName().c_str());
         }
         else
         {
@@ -202,7 +202,7 @@ namespace
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(rMaterial.GetNormalTexture()->GetFileName());
+            NewMessage.PutString(rMaterial.GetNormalTexture()->GetFileName().c_str());
         }
         else
         {
@@ -213,7 +213,7 @@ namespace
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(rMaterial.GetRoughnessTexture()->GetFileName());
+            NewMessage.PutString(rMaterial.GetRoughnessTexture()->GetFileName().c_str());
         }
         else
         {
@@ -224,7 +224,7 @@ namespace
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(rMaterial.GetMetalTexture()->GetFileName());
+            NewMessage.PutString(rMaterial.GetMetalTexture()->GetFileName().c_str());
         }
         else
         {
@@ -235,7 +235,7 @@ namespace
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(rMaterial.GetBumpTexture()->GetFileName());
+            NewMessage.PutString(rMaterial.GetBumpTexture()->GetFileName().c_str());
         }
         else
         {
@@ -246,7 +246,7 @@ namespace
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(rMaterial.GetAmbientOcclusionTexture()->GetFileName());
+            NewMessage.PutString(rMaterial.GetAmbientOcclusionTexture()->GetFileName().c_str());
         }
         else
         {
