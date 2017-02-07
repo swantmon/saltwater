@@ -122,6 +122,13 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
+    bool CTextureBase::HasFileName() const
+    {
+        return m_FileName.length() > 0;
+    }
+
+    // -----------------------------------------------------------------------------
+
     unsigned int CTextureBase::GetHash() const
     {
         return m_Hash;

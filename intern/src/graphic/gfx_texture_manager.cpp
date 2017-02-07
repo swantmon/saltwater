@@ -783,11 +783,12 @@ namespace
             TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
             TextureDescriptor.m_Usage            = CTextureBase::GPURead;
             TextureDescriptor.m_Semantic         = ConvertDataSemantic(_pTexture->GetSemantic());
+            TextureDescriptor.m_pFileName        = 0;
             TextureDescriptor.m_pPixels          = _pTexture->GetPixels();
             TextureDescriptor.m_Binding          = ConvertDataBinding(_pTexture->GetBinding());
             TextureDescriptor.m_Format           = ConvertDataFormat(_pTexture->GetFormat());
 
-            strlen(_pTexture->GetFileName()) > 0 ? TextureDescriptor.m_pFileName = _pTexture->GetFileName() : TextureDescriptor.m_pFileName = 0;
+            if (_pTexture->HasFileName()) TextureDescriptor.m_pFileName = _pTexture->GetFileName();
 
             // -----------------------------------------------------------------------------
             // Depending on dimension create the texture

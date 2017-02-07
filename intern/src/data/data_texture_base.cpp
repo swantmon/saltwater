@@ -94,9 +94,23 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
+    bool CTextureBase::HasFileName() const
+    {
+        return m_FileName.length() > 0;
+    }
+
+    // -----------------------------------------------------------------------------
+
     const Base::Char* CTextureBase::GetIdentifier() const
     {
         return m_Identifier.c_str();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CTextureBase::HasIdentifier() const
+    {
+        return m_Identifier.length() > 0;
     }
 
     // -----------------------------------------------------------------------------
