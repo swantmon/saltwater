@@ -770,6 +770,9 @@ namespace
         // -----------------------------------------------------------------------------
         if ((DirtyFlags & Dt::CTextureBase::DirtyCreate) != 0)
         {
+            // -----------------------------------------------------------------------------
+            // Create descriptor
+            // -----------------------------------------------------------------------------
             STextureDescriptor TextureDescriptor;
 
             TextureDescriptor.m_NumberOfPixelsU  = 1;
@@ -780,11 +783,15 @@ namespace
             TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
             TextureDescriptor.m_Usage            = CTextureBase::GPURead;
             TextureDescriptor.m_Semantic         = ConvertDataSemantic(_pTexture->GetSemantic());
-            TextureDescriptor.m_pFileName        = _pTexture->GetFileName();
             TextureDescriptor.m_pPixels          = _pTexture->GetPixels();
             TextureDescriptor.m_Binding          = ConvertDataBinding(_pTexture->GetBinding());
             TextureDescriptor.m_Format           = ConvertDataFormat(_pTexture->GetFormat());
 
+            strlen(_pTexture->GetFileName()) > 0 ? TextureDescriptor.m_pFileName = _pTexture->GetFileName() : TextureDescriptor.m_pFileName = 0;
+
+            // -----------------------------------------------------------------------------
+            // Depending on dimension create the texture
+            // -----------------------------------------------------------------------------
             if (_pTexture->GetDimension() == Dt::CTextureBase::Dim1D)
             {
                 Dt::CTexture1D* pDataTexture = static_cast<Dt::CTexture1D*>(_pTexture);
