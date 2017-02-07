@@ -50,6 +50,8 @@ vec2 GetVoxel(ivec3 Coords)
     return Voxel;
 }
 
+
+
 layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
 void main()
 {

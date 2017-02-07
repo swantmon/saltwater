@@ -27,11 +27,17 @@ void main(void)
 	VertexMapPosition.x = gl_VertexID / ImageSize.x;
 	VertexMapPosition.y = gl_VertexID % ImageSize.x;
 	
-	vec4 Vertex = vec4(imageLoad(vs_VertexMap, VertexMapPosition).xyz * 1000.0, 1.0);
+	vec4 Vertex = vec4(imageLoad(vs_VertexMap, VertexMapPosition).xyz, 1.0);
 	
-	IsValid = Vertex.x != 0.0 ? 1 : 0;
+    bool IsInVolume =
+        Vertex.x > 0.0f && Vertex.x < VOLUME_SIZE &&
+        Vertex.y > 0.0f && Vertex.y < VOLUME_SIZE &&
+        Vertex.z > 0.0f && Vertex.z < VOLUME_SIZE;
 	
+    IsValid = (Vertex.x != 0.0 && IsInVolume) ? 1 : 0;
+
     TexCoords = VertexMapPosition;
+    Vertex.xyz *= 1000.0f;
 	gl_Position = g_WorldToScreen * g_WorldMatrix * Vertex;
 }
 
