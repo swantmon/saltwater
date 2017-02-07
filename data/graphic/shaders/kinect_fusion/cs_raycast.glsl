@@ -12,7 +12,7 @@
 // Input from engine
 // -----------------------------------------------------------------------------
 
-layout (binding = 0, rg16i) readonly uniform iimage3D cs_Volume;
+layout (binding = 0) uniform isampler3D cs_Volume;
 layout (binding = 1, rgba32f) writeonly uniform image2D cs_Vertex;
 layout (binding = 2, rgba32f) writeonly uniform image2D cs_Normal;
 
@@ -45,12 +45,17 @@ ivec3 GetVoxelCoords(vec3 Position)
 
 vec2 GetVoxel(ivec3 Coords)
 {
-    vec2 Voxel = vec2(ivec2(imageLoad(cs_Volume, Coords).xy));
+    vec2 Voxel = texelFetch(cs_Volume, Coords, 0).xy;
     Voxel.x /= float(INT16_MAX);
     return Voxel;
 }
 
-
+float GetInterPolatedTSDF(vec3 Position)
+{
+    vec3 Coords = GetVoxelCoords(Position);
+        
+    return textureLod(cs_Volume, Coords / float(VOLUME_RESOLUTION), 0).x / float(INT16_MAX);
+}
 
 layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
 void main()
@@ -87,12 +92,12 @@ void main()
 
     while (RayLength <= EndLength)
     {
+        vec3 PreviousPosition = CameraPosition + RayLength * RayDirection;
         RayLength += Step;
-
-        float PreviousTSDF = TSDF;
-
         vec3 CurrentPosition = CameraPosition + RayLength * RayDirection;
 
+        float PreviousTSDF = TSDF;
+        
         ivec3 VoxelCoords = GetVoxelCoords(CurrentPosition);
         
         vec2 Voxel = GetVoxel(VoxelCoords);
@@ -101,7 +106,13 @@ void main()
 
         if (PreviousTSDF > 0.0f && TSDF < 0.0f)
         {
-            Vertex = CurrentPosition;
+            float Ft = GetInterPolatedTSDF(PreviousPosition);
+            float Ftdt = GetInterPolatedTSDF(CurrentPosition);
+            float Ts = RayLength - Step * Ft / (Ftdt - Ft);
+
+            Vertex = CameraPosition + RayDirection * Ts;
+            //Vertex = CurrentPosition;
+
             break;
         }
     }
