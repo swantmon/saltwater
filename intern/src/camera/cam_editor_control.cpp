@@ -51,7 +51,7 @@ namespace Cam
 
             m_LastCursorPosition = _rEvent.GetCursorPosition();
         }
-        else if (_rEvent.GetAction() == Base::CInputEvent::MouseRightPressed && !!m_IsDragging)
+        else if (_rEvent.GetAction() == Base::CInputEvent::MouseRightPressed && !m_IsDragging)
         {
             m_IsFlying = true;
 
