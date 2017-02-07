@@ -132,7 +132,7 @@ namespace
         void RenderReconstructionData();
 
         void RenderDepth();
-        void RenderVertexMap(GLuint VertexMap);
+        void RenderVertexMap(GLuint VertexMap, GLuint NormalMap);
         void RenderVolume();
         void SetSphere();
 
@@ -693,11 +693,11 @@ namespace
         glClear(GL_COLOR_BUFFER_BIT);
         
         RenderDepth();
-        //glViewport(0, 0, 640, 720);
-        //RenderVertexMap(m_KinectVertexMap[0]);
+        glViewport(0, 0, 640, 720);
+        RenderVertexMap(m_KinectVertexMap[0], m_KinectNormalMap[0]);
         //RenderVolume();
-        //glViewport(640, 0, 640, 720);
-        RenderVertexMap(m_RaycastVertexMap[0]);
+        glViewport(640, 0, 640, 720);
+        RenderVertexMap(m_RaycastVertexMap[0], m_RaycastNormalMap[0]);
 
         glViewport(0, 0, 1280, 720);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -734,7 +734,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxVoxelRenderer::RenderVertexMap(GLuint VertexMap)
+    void CGfxVoxelRenderer::RenderVertexMap(GLuint VertexMap, GLuint NormalMap)
     {
         Base::Float4x4* pData = static_cast<Base::Float4x4*>(glMapNamedBuffer(m_DrawCallConstantBuffer, GL_WRITE_ONLY));
         *pData = m_VertexMapWorldMatrix;
@@ -743,6 +743,7 @@ namespace
         glBindVertexArray(1); // dummy vao because opengl needs vertex data even when it does not use it
 
         glBindImageTexture(0, VertexMap, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+        glBindImageTexture(1, NormalMap, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
 
         CBufferPtr FrameConstantBufferPtr = Gfx::Main::GetPerFrameConstantBufferVS();
         CNativeBuffer NativeBufer = *static_cast<CNativeBuffer*>(FrameConstantBufferPtr.GetPtr());

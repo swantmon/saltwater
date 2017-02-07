@@ -17,6 +17,7 @@ out gl_PerVertex
 };
 
 layout(location = 0) out flat int IsValid;
+layout(location = 1) out flat ivec2 TexCoords;
 
 void main(void)
 {
@@ -30,6 +31,7 @@ void main(void)
 	
 	IsValid = Vertex.x != 0.0 ? 1 : 0;
 	
+    TexCoords = VertexMapPosition;
 	gl_Position = g_WorldToScreen * g_WorldMatrix * Vertex;
 }
 
