@@ -38,7 +38,12 @@ void main()
 
     Vertex = g_PoseMatrix * Vertex;
 	
-	imageStore(cs_VertexMap, ivec2(ImagePos), Depth > 0.0f ? Vertex : vec4(0.0f));
+    bool IsValid = Depth > 0.0f &&
+        Vertex.x > 0.0f && Vertex.x < VOLUME_SIZE &&
+        Vertex.y > 0.0f && Vertex.y < VOLUME_SIZE &&
+        Vertex.z > 0.0f && Vertex.z < VOLUME_SIZE;
+
+	imageStore(cs_VertexMap, ivec2(ImagePos), IsValid ? Vertex : vec4(0.0f));
 }
 
 #endif // __INCLUDE_CS_VERTEX_MAP_GLSL__
