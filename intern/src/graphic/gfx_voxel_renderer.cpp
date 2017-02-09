@@ -49,15 +49,16 @@ namespace
     const Base::Float3 g_InitialCameraPosition = Base::Float3(g_VolumeSize * 0.5f, g_VolumeSize * 0.5f, -g_VolumeSize * 0.5f);
     const Base::Float3 g_InitialCameraRotation = Base::Float3(0.0f, 0.0f, 0.0f);
 
+    const float g_TruncatedDistance = 30.0f;
+    const float g_TruncatedDistanceInverse = 1.0f / g_TruncatedDistance;
+
     const int g_MaxIntegrationWeight = 100;
 
     const int g_PyramidLevels = 3;
 
     const int g_ICPIterations[g_PyramidLevels] = { 10, 5, 4 };
-    const float g_EpsilonVertex = 0.1f;
-    const float g_EpsilonNormal = 0.342f;
-    const float g_TruncatedDistance = 30.0f;
-    const float g_TruncatedDistanceInverse = 1.0f / g_TruncatedDistance;
+    const float g_EpsilonDistance = 0.1f;
+    const float g_EpsilonAngle = 0.342f;
 
     struct SIntrinsics
     {
@@ -123,10 +124,13 @@ namespace
         void UpdateReconstruction();
 
         void ReadKinectData();
-        void PerformTracking();
         void Integrate();
         void Raycast();
         void DownSample();
+
+        void PerformTracking();
+
+        void DetermineSummands(int PyramidLevel);
 
         // Just for debugging
 
@@ -161,6 +165,7 @@ namespace
         CShaderPtr m_CSVolumeIntegration;
         CShaderPtr m_CSRaycast;
         CShaderPtr m_CSRaycastPyramid;
+        CShaderPtr m_CSDetermineSummands;
 
         CShaderPtr m_CSSphere;
 
@@ -242,6 +247,7 @@ namespace
         m_CSVolumeIntegration = 0;
         m_CSRaycast = 0;
         m_CSRaycastPyramid = 0;
+        m_CSDetermineSummands = 0;
         m_CSSphere = 0;
 
         glDeleteTextures(1, &m_KinectRawDepthBuffer);
@@ -264,7 +270,7 @@ namespace
     
     void CGfxVoxelRenderer::OnSetupShader()
     {
-        int NumberOfDefines = 11;
+        int NumberOfDefines = 13;
 
         std::vector<std::stringstream> DefineStreams(NumberOfDefines);
 
@@ -279,6 +285,8 @@ namespace
         DefineStreams[8] << "TRUNCATED_DISTANCE " << g_TruncatedDistance;
         DefineStreams[9] << "TRUNCATED_DISTANCE_INVERSE " << g_TruncatedDistanceInverse;
         DefineStreams[10] << "MAX_INTEGRATION_WEIGHT " << g_MaxIntegrationWeight;
+        DefineStreams[11] << "EPSILON_DISTANCE " << g_EpsilonDistance;
+        DefineStreams[12] << "EPSILON_ANGLE " << g_EpsilonAngle;
 
         std::vector<std::string> DefineStrings(NumberOfDefines);
         std::vector<const char*> Defines(NumberOfDefines);
@@ -305,6 +313,7 @@ namespace
         m_CSVolumeIntegration = ShaderManager::CompileCS("kinect_fusion\\cs_integrate_volume.glsl", "main", NumberOfDefines, Defines.data());
         m_CSRaycast = ShaderManager::CompileCS("kinect_fusion\\cs_raycast.glsl", "main", NumberOfDefines, Defines.data());
         m_CSRaycastPyramid = ShaderManager::CompileCS("kinect_fusion\\cs_raycast_pyramid.glsl", "main", NumberOfDefines, Defines.data());
+        m_CSDetermineSummands = ShaderManager::CompileCS("kinect_fusion\\cs_determine_summands.glsl", "main", NumberOfDefines, Defines.data());
 
         m_CSSphere = ShaderManager::CompileCS("kinect_fusion\\cs_sphere.glsl", "main", NumberOfDefines, Defines.data());
     }
@@ -359,8 +368,8 @@ namespace
 
         glTextureStorage3D(m_Volume, 1, GL_RG16I, g_VolumeResolution, g_VolumeResolution, g_VolumeResolution);
 
-        glCreateTextures(GL_TEXTURE_3D, 1, &m_DebugBuffer);
-        glTextureStorage3D(m_DebugBuffer, 1, GL_RGBA32F, g_VolumeResolution, g_VolumeResolution, g_VolumeResolution);
+        glCreateTextures(GL_TEXTURE_2D, 1, &m_DebugBuffer);
+        glTextureStorage2D(m_DebugBuffer, 1, GL_RGBA32F, m_pDepthSensorControl->GetWidth(), m_pDepthSensorControl->GetHeight());
     }
     
     // -----------------------------------------------------------------------------
@@ -567,7 +576,31 @@ namespace
 
     void CGfxVoxelRenderer::PerformTracking()
     {
+        for (int PyramidLevel = g_PyramidLevels - 1; PyramidLevel >= 0; -- PyramidLevel)
+        {
+            for (int Iteration = 0; Iteration < g_ICPIterations[PyramidLevel]; ++ Iteration)
+            {
+                DetermineSummands(PyramidLevel);
+            }
+        }
+    }
 
+    // -----------------------------------------------------------------------------
+
+    void CGfxVoxelRenderer::DetermineSummands(int PyramidLevel)
+    {
+        const int WorkGroupsX = m_pDepthSensorControl->GetWidth() >> PyramidLevel;
+        const int WorkGroupsY = m_pDepthSensorControl->GetHeight() >> PyramidLevel;
+
+        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+        Gfx::ContextManager::SetShaderCS(m_CSDetermineSummands);
+        glBindImageTexture(0, m_KinectVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+        glBindImageTexture(1, m_KinectNormalMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+        glBindImageTexture(2, m_RaycastVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+        glBindImageTexture(3, m_RaycastNormalMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+        glBindImageTexture(4, m_DebugBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+        glDispatchCompute(WorkGroupsX / g_TileSize2D, WorkGroupsY / g_TileSize2D, 1);
     }
 
     // -----------------------------------------------------------------------------
@@ -578,7 +611,6 @@ namespace
 
         glBindImageTexture(0, m_Volume, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RG16I);
         glBindImageTexture(1, m_KinectRawDepthBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
-        glBindImageTexture(2, m_DebugBuffer, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_IntrinsicsConstantBuffer);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_TrackingDataConstantBuffer);
@@ -660,14 +692,19 @@ namespace
 
     void CGfxVoxelRenderer::UpdateReconstruction()
     {        
-        Performance::BeginEvent("Kinect Tracking");
+        Performance::BeginEvent("Kinect Data Input");
 
         ReadKinectData();
+
+        Performance::EndEvent();
+        Performance::BeginEvent("Kinect Tracking");
+
         PerformTracking();
+
+        Performance::EndEvent();
+        Performance::BeginEvent("TSDF Integration and Raycasting");
+
         Integrate();
-
-        //SetSphere(); // debugging
-
         Raycast();
         DownSample();
 
@@ -678,12 +715,16 @@ namespace
 
     void CGfxVoxelRenderer::Render()
     {
+        Performance::BeginEvent("Kinect Fusion");
+
         //if (m_NewDepthDataAvailable)
         {
             UpdateReconstruction();
             m_NewDepthDataAvailable = false;
         }
         RenderReconstructionData();
+
+        Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------

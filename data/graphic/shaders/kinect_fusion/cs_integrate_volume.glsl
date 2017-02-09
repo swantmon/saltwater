@@ -14,7 +14,6 @@
 
 layout(binding = 0, rg16i) uniform iimage3D cs_Volume;
 layout(binding = 1, r16ui) readonly uniform uimage2D cs_Depth;
-layout(binding = 2, rgba32f) writeonly uniform image3D cs_Debug;
 
 // -------------------------------------------------------------------------------------
 // Functions
@@ -65,7 +64,6 @@ void main()
 
                     Voxel.x *= INT16_MAX;
                     imageStore(cs_Volume, VoxelCoords, ivec4(Voxel, 0, 0));
-                    //imageStore(cs_Debug, VoxelCoords, vec4(TSDF, 0, 0, 0));
                 }
             }
         }
