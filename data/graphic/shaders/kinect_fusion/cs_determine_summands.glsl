@@ -28,8 +28,11 @@ void main()
 {
     const int x = int(gl_GlobalInvocationID.x);
     const int y = int(gl_GlobalInvocationID.y);
+
+    const ivec2 ImageSize = imageSize(cs_VertexMap);
+    const int PyramidLevel = int(log2(DEPTH_IMAGE_WIDTH / ImageSize.x));
     
-    imageStore(cs_Debug, ivec2(x, y), vec4(0.1337));
+    imageStore(cs_Debug, ivec2(x, y), vec4(PyramidLevel));
 }
 
 #endif // __INCLUDE_CS_DETERMINE_SUMMANDS_GLSL__

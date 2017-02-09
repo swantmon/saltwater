@@ -141,7 +141,7 @@ namespace
         void RenderVolume();
         void SetSphere();
 
-        GLuint m_DebugBuffer;
+        GLuint m_DebugBuffer[g_PyramidLevels];
 
     private:
 
@@ -257,7 +257,7 @@ namespace
         glDeleteTextures(g_PyramidLevels, m_RaycastVertexMap);
         glDeleteTextures(g_PyramidLevels, m_RaycastNormalMap);
         glDeleteTextures(1, &m_Volume);
-        glDeleteTextures(1, &m_DebugBuffer);
+        glDeleteTextures(g_PyramidLevels, m_DebugBuffer);
 
         glDeleteBuffers(1, &m_DrawCallConstantBuffer);
         glDeleteBuffers(1, &m_IntrinsicsConstantBuffer);
@@ -354,6 +354,8 @@ namespace
 
         glTextureStorage2D(m_KinectRawDepthBuffer, 1, GL_R16UI, m_pDepthSensorControl->GetWidth(), m_pDepthSensorControl->GetHeight());
         
+        glCreateTextures(GL_TEXTURE_2D, g_PyramidLevels, m_DebugBuffer);
+
         for (int i = 0; i < g_PyramidLevels; ++i)
         {
             const int Width = m_pDepthSensorControl->GetWidth() >> i;
@@ -364,12 +366,10 @@ namespace
             glTextureStorage2D(m_KinectNormalMap[i], 1, GL_RGBA32F, Width, Height);
             glTextureStorage2D(m_RaycastVertexMap[i], 1, GL_RGBA32F, Width, Height);
             glTextureStorage2D(m_RaycastNormalMap[i], 1, GL_RGBA32F, Width, Height);
+            glTextureStorage2D(m_DebugBuffer[i], 1, GL_RGBA32F, Width, Height);
         }
 
-        glTextureStorage3D(m_Volume, 1, GL_RG16I, g_VolumeResolution, g_VolumeResolution, g_VolumeResolution);
-
-        glCreateTextures(GL_TEXTURE_2D, 1, &m_DebugBuffer);
-        glTextureStorage2D(m_DebugBuffer, 1, GL_RGBA32F, m_pDepthSensorControl->GetWidth(), m_pDepthSensorControl->GetHeight());
+        glTextureStorage3D(m_Volume, 1, GL_RG16I, g_VolumeResolution, g_VolumeResolution, g_VolumeResolution);        
     }
     
     // -----------------------------------------------------------------------------
@@ -589,8 +589,8 @@ namespace
 
     void CGfxVoxelRenderer::DetermineSummands(int PyramidLevel)
     {
-        const int WorkGroupsX = m_pDepthSensorControl->GetWidth() >> PyramidLevel;
-        const int WorkGroupsY = m_pDepthSensorControl->GetHeight() >> PyramidLevel;
+        const int WorkGroupsX = m_pDepthSensorControl->GetWidth() / g_TileSize2D;
+        const int WorkGroupsY = m_pDepthSensorControl->GetHeight() / g_TileSize2D;
 
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
@@ -599,8 +599,8 @@ namespace
         glBindImageTexture(1, m_KinectNormalMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
         glBindImageTexture(2, m_RaycastVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
         glBindImageTexture(3, m_RaycastNormalMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-        glBindImageTexture(4, m_DebugBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-        glDispatchCompute(WorkGroupsX / g_TileSize2D, WorkGroupsY / g_TileSize2D, 1);
+        glBindImageTexture(4, m_DebugBuffer[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+        glDispatchCompute(WorkGroupsX >> PyramidLevel, WorkGroupsY >> PyramidLevel, 1);
     }
 
     // -----------------------------------------------------------------------------
@@ -631,8 +631,8 @@ namespace
 
         for (int PyramidLevel = 1; PyramidLevel < g_PyramidLevels; ++PyramidLevel)
         {
-            bool* pData = static_cast<bool*>(glMapNamedBuffer(m_RaycastPyramidConstantBuffer, GL_WRITE_ONLY));
-            *pData = false;
+            float* pData = static_cast<float*>(glMapNamedBuffer(m_RaycastPyramidConstantBuffer, GL_WRITE_ONLY));
+            *pData = 0.0f;
             glUnmapNamedBuffer(m_RaycastPyramidConstantBuffer);
 
             glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
@@ -642,8 +642,8 @@ namespace
             glBindImageTexture(1, m_RaycastVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
             glDispatchCompute(WorkGroupsX >> PyramidLevel, WorkGroupsY >> PyramidLevel, 1);
 
-            pData = static_cast<bool*>(glMapNamedBuffer(m_RaycastPyramidConstantBuffer, GL_WRITE_ONLY));
-            *pData = true;
+            pData = static_cast<float*>(glMapNamedBuffer(m_RaycastPyramidConstantBuffer, GL_WRITE_ONLY));
+            *pData = 1.0f;
             glUnmapNamedBuffer(m_RaycastPyramidConstantBuffer);
 
             glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);

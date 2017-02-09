@@ -8,7 +8,7 @@
 
 layout(row_major, std140, binding = 0) uniform UBONormalize
 {
-	bool g_Normalize;
+	float g_Normalize;
 };
 
 // -----------------------------------------------------------------------------
@@ -24,39 +24,29 @@ layout (binding = 1, rgba32f) writeonly uniform image2D cs_OutputTexture;
 layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
 void main()
 {
-	const vec2 InputImageSize = imageSize(cs_InputTexture);
-	const vec2 OutputImageSize = imageSize(cs_OutputTexture);
+	const vec2 SamplePos = gl_GlobalInvocationID.xy * 2;
+	
+	vec3 Sum = vec3(0.0f);
+	
+    vec3 Sample00 = imageLoad(cs_InputTexture, ivec2(SamplePos.x    , SamplePos.y    )).xyz;
+    vec3 Sample01 = imageLoad(cs_InputTexture, ivec2(SamplePos.x    , SamplePos.y + 1)).xyz;
+    vec3 Sample10 = imageLoad(cs_InputTexture, ivec2(SamplePos.x + 1, SamplePos.y    )).xyz;
+    vec3 Sample11 = imageLoad(cs_InputTexture, ivec2(SamplePos.x + 1, SamplePos.y + 1)).xyz;
 
-	const vec2 SamplePos = gl_GlobalInvocationID.xy / OutputImageSize * InputImageSize;
-	
-	vec4 Sum = vec4(0.0f);
-	
-	bool IsInvalid = false;
-	
-	for (int i = 0; i < 1; ++ i)
-	{
-		for (int j = 0; j < 1; ++ j)
-		{
-			const vec4 Sample = imageLoad(cs_InputTexture, ivec2(SamplePos) + ivec2(i, j));
-			
-			if (Sample.x == 0.0f)
-			{
-				IsInvalid = true;
-				break;
-			}
-			
-			Sum += Sample;
-		}
-	}
+    if (Sample00.x == 0.0f || Sample01.x == 0.0f || Sample10.x == 0.0f || Sample11.x == 0.0f)
+    {
+        imageStore(cs_OutputTexture, ivec2(gl_GlobalInvocationID), vec4(0.0f));
+        return;
+    }
 
-	vec4 Result = Sum / 4.0f;
+	vec3 Result = (Sample00 + Sample01 + Sample10 + Sample11) * 0.25f;
 	
-	if (g_Normalize)
+	if (g_Normalize > 0.0f)
 	{
-		Result.xyz = normalize(Result.xyz);
+		Result = normalize(Result);
 	}
 	
-	imageStore(cs_OutputTexture, ivec2(gl_GlobalInvocationID), IsInvalid ? vec4(0.0f) : Result);
+	imageStore(cs_OutputTexture, ivec2(gl_GlobalInvocationID), vec4(Result, 1.0f));
 }
 
 #endif // __INCLUDE_CS_KINECT_RAYCAST_PYRAMID_GLSL__
