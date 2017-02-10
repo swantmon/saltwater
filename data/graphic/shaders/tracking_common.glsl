@@ -18,7 +18,7 @@ layout(row_major, std140, binding = 0) uniform UBOIntrinsics
 	SIntrinics g_Intrinisics[PYRAMID_LEVELS];
 };
 
-layout(row_major, std430, binding = 1) buffer UBOTrackingData
+layout(row_major, std140, binding = 1) uniform UBOTrackingData
 {
 	mat4 g_PoseRotationMatrix;
 	mat4 g_InvPoseRotationMatrix;

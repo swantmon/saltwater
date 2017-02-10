@@ -58,7 +58,7 @@ namespace
 
     const int g_ICPIterations[g_PyramidLevels] = { 10, 5, 4 };
     const float g_EpsilonDistance = 0.1f;
-    const float g_EpsilonAngle = 0.342f;
+    const float g_EpsilonAngle = 0.7f;
 
     struct SIntrinsics
     {
@@ -129,6 +129,7 @@ namespace
         void DownSample();
 
         void PerformTracking();
+        void SolveLGS();
 
         void DetermineSummands(int PyramidLevel);
 
@@ -180,6 +181,8 @@ namespace
         GLuint m_Volume;
 
         std::unique_ptr<MR::CDepthSensorControl> m_pDepthSensorControl;
+
+        Base::Float4x4 m_PoseMatrix;
 
         Base::Float4x4 m_VertexMapWorldMatrix;
         Base::Float4x4 m_VolumeWorldMatrix;
@@ -417,13 +420,14 @@ namespace
         TrackingData.m_PoseRotationMatrix.SetRotation(g_InitialCameraRotation[0], g_InitialCameraRotation[1], g_InitialCameraRotation[2]);
         TrackingData.m_PoseTranslationMatrix.SetTranslation(g_InitialCameraPosition[0], g_InitialCameraPosition[1], g_InitialCameraPosition[2]);
         TrackingData.m_PoseMatrix = TrackingData.m_PoseTranslationMatrix * TrackingData.m_PoseRotationMatrix;
+        m_PoseMatrix = TrackingData.m_PoseMatrix;
 
         TrackingData.m_InvPoseRotationMatrix = TrackingData.m_PoseRotationMatrix.GetInverted();
         TrackingData.m_InvPoseTranslationMatrix = TrackingData.m_PoseTranslationMatrix.GetInverted();
         TrackingData.m_InvPoseMatrix = TrackingData.m_PoseMatrix.GetInverted();
 
         glCreateBuffers(1, &m_TrackingDataConstantBuffer);
-        glNamedBufferData(m_TrackingDataConstantBuffer, sizeof(STrackingData), &TrackingData, GL_DYNAMIC_COPY);
+        glNamedBufferData(m_TrackingDataConstantBuffer, sizeof(STrackingData), &TrackingData, GL_DYNAMIC_DRAW);
 
         glCreateBuffers(1, &m_RaycastPyramidConstantBuffer);
         glNamedBufferData(m_RaycastPyramidConstantBuffer, 16, nullptr, GL_DYNAMIC_DRAW);
@@ -559,7 +563,7 @@ namespace
         /////////////////////////////////////////////////////////////////////////////////////
 
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_IntrinsicsConstantBuffer);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_TrackingDataConstantBuffer);
+        glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_TrackingDataConstantBuffer);
 
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
@@ -623,7 +627,7 @@ namespace
         glBindImageTexture(1, m_KinectRawDepthBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
 
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_IntrinsicsConstantBuffer);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_TrackingDataConstantBuffer);
+        glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_TrackingDataConstantBuffer);
 
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
@@ -681,7 +685,7 @@ namespace
         glBindImageTexture(2, m_RaycastNormalMap[0], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_IntrinsicsConstantBuffer);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_TrackingDataConstantBuffer);
+        glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_TrackingDataConstantBuffer);
 
         glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);

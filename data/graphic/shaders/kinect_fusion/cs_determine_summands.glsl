@@ -33,14 +33,41 @@ void main()
     const int PyramidLevel = int(log2(DEPTH_IMAGE_WIDTH / ImageSize.x));
     
     vec3 ReferenceVertex = imageLoad(cs_VertexMap, ivec2(x, y)).xyz;
-    vec3 RaycastVertex = imageLoad(cs_RaycastVertexMap, ivec2(x, y)).xyz;
 
-    vec3 ReferenceNormal = imageLoad(cs_NormalMap, ivec2(x, y)).xyz;
-    vec3 RaycastNormal = imageLoad(cs_RaycastNormalMap, ivec2(x, y)).xyz;
+    if (ReferenceVertex.x == 0.0f)
+    {
+        return;
+    }
 
     vec3 Vertex = (g_InvPoseMatrix * vec4(ReferenceVertex, 1.0)).xyz;
+    vec3 CameraPlane = mat3(g_Intrinisics[PyramidLevel].m_KMatrix) * Vertex;
+    CameraPlane /= CameraPlane.z;
 
-    imageStore(cs_Debug, ivec2(x, y), vec4(Vertex, 1.0f));
+    if (CameraPlane.x < 0.0f || CameraPlane.x > ImageSize.x ||
+        CameraPlane.y < 0.0f || CameraPlane.y > ImageSize.y)
+    {
+        return;
+    }
+
+    vec3 ReferenceNormal = imageLoad(cs_NormalMap, ivec2(x, y)).xyz;
+
+    if (ReferenceNormal.x == 0.0f)
+    {
+        return;
+    }
+
+    vec3 RaycastVertex = imageLoad(cs_RaycastVertexMap, ivec2(CameraPlane.xy)).xyz;
+    vec3 RaycastNormal = imageLoad(cs_RaycastNormalMap, ivec2(CameraPlane.xy)).xyz;
+    
+    const float Distance = distance(ReferenceVertex, RaycastVertex);
+    const float Angle = dot(ReferenceNormal, RaycastNormal);
+
+    if (Distance > EPSILON_DISTANCE || Angle < EPSILON_ANGLE)
+    {
+        return;
+    }
+    
+    imageStore(cs_Debug, ivec2(x, y), vec4(Distance, Angle, 0.0f, 1.0f));
 }
 
 #endif // __INCLUDE_CS_DETERMINE_SUMMANDS_GLSL__
