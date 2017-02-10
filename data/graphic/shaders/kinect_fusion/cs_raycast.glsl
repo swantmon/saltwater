@@ -63,9 +63,12 @@ void main()
     ivec2 VertexMapSize = ivec2(DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT);
 
     const ivec2 VertexMapPosition = ivec2(gl_GlobalInvocationID.xy);
-    
+
+    const vec2 FocalPoint = g_Intrinisics[0].m_FocalPoint;
+    const vec2 InvFocalLength = g_Intrinisics[0].m_InvFocalLength;
+
     vec3 VertexPixelPosition;
-    VertexPixelPosition.xy = vec2(VertexMapPosition - g_FocalPoint) * g_InvFocalLength;
+    VertexPixelPosition.xy = vec2(VertexMapPosition - FocalPoint) * InvFocalLength;
     VertexPixelPosition.z = 1.0f;
 
     const vec3 CameraPosition = g_PoseMatrix[3].xyz;

@@ -376,31 +376,41 @@ namespace
     
     void CGfxVoxelRenderer::OnSetupBuffers()
     {
-        const float FocalLengthX = m_pDepthSensorControl->GetFocalLengthX();
-        const float FocalLengthY = m_pDepthSensorControl->GetFocalLengthY();
-        const float FocalPointX = m_pDepthSensorControl->GetFocalPointX();
-        const float FocalPointY = m_pDepthSensorControl->GetFocalPointY();
+        const float FocalLengthX0 = m_pDepthSensorControl->GetFocalLengthX();
+        const float FocalLengthY0 = m_pDepthSensorControl->GetFocalLengthY();
+        const float FocalPointX0 = m_pDepthSensorControl->GetFocalPointX();
+        const float FocalPointY0 = m_pDepthSensorControl->GetFocalPointY();
 
         glCreateBuffers(1, &m_DrawCallConstantBuffer);
         glNamedBufferData(m_DrawCallConstantBuffer, sizeof(Base::Float4x4), nullptr, GL_DYNAMIC_DRAW);
 
-        Base::Float4x4 KMatrix(
-            FocalLengthX,	      0.0f, FocalPointX, 0.0f,
-                    0.0f, FocalLengthY, FocalPointY, 0.0f,
-                    0.0f,		  0.0f,        1.0f, 0.0f,
-                    0.0f,		  0.0f,        0.0f, 1.0f
-        );
+        SIntrinsics Intrinsics[g_PyramidLevels];
 
-        SIntrinsics Intrinsics;
+        for (int i = 0; i < g_PyramidLevels; ++ i)
+        {
+            const int PyramidFactor = 1 << i;
 
-        Intrinsics.m_FocalPoint = Base::Float2(FocalPointX, FocalPointY);
-        Intrinsics.m_FocalLength = Base::Float2(FocalLengthX, FocalLengthY);
-        Intrinsics.m_InvFocalLength = Base::Float2(1.0f / FocalLengthX, 1.0f / FocalLengthY);
-        Intrinsics.m_KMatrix = Intrinsics.m_InvKMatrix = KMatrix;
-        Intrinsics.m_InvKMatrix.Invert();
+            const float FocalLengthX = FocalLengthX0 / PyramidFactor;
+            const float FocalLengthY = FocalLengthY0 / PyramidFactor;
+            const float FocalPointX = FocalPointX0 / PyramidFactor;
+            const float FocalPointY = FocalPointY0 / PyramidFactor;
+
+            Base::Float4x4 KMatrix(
+                FocalLengthX, 0.0f, FocalPointX, 0.0f,
+                0.0f, FocalLengthY, FocalPointY, 0.0f,
+                0.0f, 0.0f, 1.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 1.0f
+            );
+
+            Intrinsics[i].m_FocalPoint = Base::Float2(FocalPointX, FocalPointY);
+            Intrinsics[i].m_FocalLength = Base::Float2(FocalLengthX, FocalLengthY);
+            Intrinsics[i].m_InvFocalLength = Base::Float2(1.0f / FocalLengthX, 1.0f / FocalLengthY);
+            Intrinsics[i].m_KMatrix = Intrinsics[i].m_InvKMatrix = KMatrix;
+            Intrinsics[i].m_InvKMatrix.Invert();
+        }
 
         glCreateBuffers(1, &m_IntrinsicsConstantBuffer);
-        glNamedBufferData(m_IntrinsicsConstantBuffer, sizeof(SIntrinsics), &Intrinsics, GL_STATIC_DRAW);
+        glNamedBufferData(m_IntrinsicsConstantBuffer, sizeof(SIntrinsics) * g_PyramidLevels, Intrinsics, GL_STATIC_DRAW);
 
         STrackingData TrackingData;
 

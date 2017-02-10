@@ -24,15 +24,17 @@ void main()
 {
 	const ivec2 ImageSize = imageSize(cs_DepthBuffer);
 	
-    const float PyramidFactor = 1.0f / (DEPTH_IMAGE_WIDTH / ImageSize.x);
+    const int PyramidLevel = int(log2(DEPTH_IMAGE_WIDTH / ImageSize.x));
 
 	const vec2 ImagePos = vec2(gl_GlobalInvocationID.xy);
 	
+    const vec2 FocalPoint = g_Intrinisics[PyramidLevel].m_FocalPoint;
+    const vec2 InvFocalLength = g_Intrinisics[PyramidLevel].m_InvFocalLength;
+
 	const float Depth = imageLoad(cs_DepthBuffer, ivec2(ImagePos)).x / 1000.0f;
 	
-	vec4 Vertex;
-	
-	Vertex.xy = Depth * (ImagePos - g_FocalPoint * PyramidFactor) * (g_InvFocalLength / PyramidFactor);
+	vec4 Vertex;	
+	Vertex.xy = Depth * (ImagePos - FocalPoint) * InvFocalLength;
 	Vertex.z = Depth;
 	Vertex.w = 1.0f;
 

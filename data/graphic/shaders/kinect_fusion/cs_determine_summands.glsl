@@ -32,7 +32,15 @@ void main()
     const ivec2 ImageSize = imageSize(cs_VertexMap);
     const int PyramidLevel = int(log2(DEPTH_IMAGE_WIDTH / ImageSize.x));
     
-    imageStore(cs_Debug, ivec2(x, y), vec4(PyramidLevel));
+    vec3 ReferenceVertex = imageLoad(cs_VertexMap, ivec2(x, y)).xyz;
+    vec3 RaycastVertex = imageLoad(cs_RaycastVertexMap, ivec2(x, y)).xyz;
+
+    vec3 ReferenceNormal = imageLoad(cs_NormalMap, ivec2(x, y)).xyz;
+    vec3 RaycastNormal = imageLoad(cs_RaycastNormalMap, ivec2(x, y)).xyz;
+
+    vec3 Vertex = (g_InvPoseMatrix * vec4(ReferenceVertex, 1.0)).xyz;
+
+    imageStore(cs_Debug, ivec2(x, y), vec4(Vertex, 1.0f));
 }
 
 #endif // __INCLUDE_CS_DETERMINE_SUMMANDS_GLSL__

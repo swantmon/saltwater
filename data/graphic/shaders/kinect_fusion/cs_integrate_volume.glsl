@@ -30,15 +30,11 @@ void main()
 
     for (VoxelCoords.z = 0; VoxelCoords.z < VOLUME_RESOLUTION; ++ VoxelCoords.z)
     {
-        //imageStore(cs_Volume, VoxelCoords, ivec4(0)); // clear for debugging
-
         vec3 WSVoxelPosition = (VoxelCoords - 0.5f) * VOXEL_SIZE;
 
         vec3 VSVoxelPosition = (g_InvPoseMatrix * vec4(WSVoxelPosition, 1.0f)).xyz;
 
-        // todo: Rotation
-
-        vec3 CSVoxelPosition = mat3(g_KMatrix) * VSVoxelPosition;
+        vec3 CSVoxelPosition = mat3(g_Intrinisics[0].m_KMatrix) * VSVoxelPosition;
         CSVoxelPosition.xyz /= CSVoxelPosition.z;
 
         if (CSVoxelPosition.x > 0 && CSVoxelPosition.x < DEPTH_IMAGE_WIDTH && CSVoxelPosition.y > 0 && CSVoxelPosition.y < DEPTH_IMAGE_HEIGHT)
@@ -47,7 +43,7 @@ void main()
             
             if (Depth != 0)
             {
-                const vec2 LambdaPoint = (CSVoxelPosition.xy - g_FocalPoint) * g_InvFocalLength;
+                const vec2 LambdaPoint = (CSVoxelPosition.xy - g_Intrinisics[0].m_FocalPoint) * g_Intrinisics[0].m_InvFocalLength;
                 const float Lambda = length(vec3(LambdaPoint, 1.0f));
 
                 const float SDF = Depth - 1000.0f * length(CameraPosition - WSVoxelPosition) / Lambda;
