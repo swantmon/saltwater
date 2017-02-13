@@ -5,10 +5,6 @@
 #include "tracking_common.glsl"
 
 // -----------------------------------------------------------------------------
-// Constants
-// -----------------------------------------------------------------------------
-
-// -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
 
@@ -18,6 +14,10 @@ layout(binding = 2, rgba32f) uniform image2D cs_RaycastVertexMap;
 layout(binding = 3, rgba32f) uniform image2D cs_RaycastNormalMap;
 
 layout(binding = 4, rgba32f) uniform image2D cs_Debug;
+
+// -----------------------------------------------------------------------------
+
+shared float SharedData[256];
 
 // -------------------------------------------------------------------------------------
 // Functions
@@ -66,8 +66,32 @@ void main()
     {
         return;
     }
+
+    float Row[7];
+
+    vec3 Cross = cross(Vertex, RaycastNormal);
+
+    Row[0] = Cross.x;
+    Row[1] = Cross.y;
+    Row[2] = Cross.z;
+    Row[3] = RaycastNormal.x;
+    Row[4] = RaycastNormal.y;
+    Row[5] = RaycastNormal.z;
+    Row[6] = dot(RaycastNormal, RaycastVertex - Vertex);
     
-    imageStore(cs_Debug, ivec2(x, y), vec4(Distance, Angle, 0.0f, 1.0f));
+    for (int i = 0; i < 6; ++ i)
+    {
+        for (int j = i; j < 7; ++ j)
+        {
+            barrier();
+            SharedData[gl_LocalInvocationIndex] = Row[i] * Row[j];
+            barrier();
+
+
+        }
+    }
+
+    imageStore(cs_Debug, ivec2(x, y), vec4(Cross, Row[6]));
 }
 
 #endif // __INCLUDE_CS_DETERMINE_SUMMANDS_GLSL__

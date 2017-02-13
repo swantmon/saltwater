@@ -22,24 +22,22 @@ namespace MR
     {
     public:
 
-        CKinectControl();
-        virtual ~CKinectControl();
+        virtual void Start() override;
+        virtual void Stop() override;
+        virtual int GetWidth() override;
+        virtual int GetHeight() override;
+        virtual int GetPixelCount() override;
+        virtual float GetFocalLengthX() override;
+        virtual float GetFocalLengthY() override;
+        virtual float GetFocalPointX() override;
+        virtual float GetFocalPointY() override;
+        virtual bool GetDepthBuffer(unsigned short* pBuffer) override;
 
     public:
 
-        virtual void Start();
-        virtual void Stop();
+        CKinectControl();
+        virtual ~CKinectControl() override;
 
-        virtual bool GetDepthBuffer(unsigned short* pBuffer);
-
-        virtual int GetWidth();
-        virtual int GetHeight();
-        virtual int GetPixelCount();
-        
-        virtual float GetFocalLengthX();
-        virtual float GetFocalLengthY();
-        virtual float GetFocalPointX();
-        virtual float GetFocalPointY();
 	private:
 
 		IKinectSensor*            m_pKinect;

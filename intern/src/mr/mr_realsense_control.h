@@ -16,19 +16,21 @@ namespace MR
     {
     public:
 
-        CRealSenseControl();
-        virtual ~CRealSenseControl();
+        virtual void Start() override;
+        virtual void Stop() override;
+        virtual int GetWidth() override;
+        virtual int GetHeight() override;
+        virtual int GetPixelCount() override;
+        virtual float GetFocalLengthX() override;
+        virtual float GetFocalLengthY() override;
+        virtual float GetFocalPointX() override;
+        virtual float GetFocalPointY() override;
+        virtual bool GetDepthBuffer(unsigned short* pBuffer) override;
 
-        virtual void Start();
-        virtual void Stop();
-        virtual int GetWidth();
-        virtual int GetHeight();
-        virtual int GetPixelCount();
-        virtual float GetFocalLengthX();
-        virtual float GetFocalLengthY();
-        virtual float GetFocalPointX();
-        virtual float GetFocalPointY();
-        virtual bool GetDepthBuffer(unsigned short* pBuffer);
+    public:
+
+        CRealSenseControl();
+        virtual ~CRealSenseControl() override;
 
     private:
 
