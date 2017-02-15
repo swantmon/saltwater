@@ -12,19 +12,19 @@
 
 namespace MR
 {
-    class CRealSenseControl : public CDepthSensorControl
+    class CRealSenseControl : public IDepthSensorControl
     {
     public:
 
         virtual void Start() override;
         virtual void Stop() override;
-        virtual int GetWidth() override;
-        virtual int GetHeight() override;
-        virtual int GetPixelCount() override;
-        virtual float GetFocalLengthX() override;
-        virtual float GetFocalLengthY() override;
-        virtual float GetFocalPointX() override;
-        virtual float GetFocalPointY() override;
+        virtual int GetWidth() const override;
+        virtual int GetHeight() const override;
+        virtual int GetPixelCount() const override;
+        virtual float GetFocalLengthX() const override;
+        virtual float GetFocalLengthY() const override;
+        virtual float GetFocalPointX() const override;
+        virtual float GetFocalPointY() const override;
         virtual bool GetDepthBuffer(unsigned short* pBuffer) override;
 
     public:

@@ -4,6 +4,8 @@
 
 #include "tracking_common.glsl"
 
+#define WORKGROUP_SIZE (TILE_SIZE2D) * (TILE_SIZE2D)
+
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
@@ -17,11 +19,29 @@ layout(binding = 4, rgba32f) uniform image2D cs_Debug;
 
 // -----------------------------------------------------------------------------
 
-shared float SharedData[256];
+shared float SharedData[WORKGROUP_SIZE];
 
 // -------------------------------------------------------------------------------------
 // Functions
 // -------------------------------------------------------------------------------------
+
+void reduce()
+{
+    int SumCount = WORKGROUP_SIZE / 2;
+
+    while (SumCount > 0)
+    {
+        if (gl_LocalInvocationIndex < SumCount)
+        {
+            const float Sum = SharedData[gl_LocalInvocationIndex] + SharedData[gl_LocalInvocationIndex + SumCount];
+            SharedData[gl_LocalInvocationIndex] = Sum;
+        }
+
+        SumCount /= 2;
+
+        barrier();
+    }
+}
 
 layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
 void main()
@@ -32,11 +52,13 @@ void main()
     const ivec2 ImageSize = imageSize(cs_VertexMap);
     const int PyramidLevel = int(log2(DEPTH_IMAGE_WIDTH / ImageSize.x));
     
+    bool CorresponenceFound = true;
+
     vec3 ReferenceVertex = imageLoad(cs_VertexMap, ivec2(x, y)).xyz;
 
     if (ReferenceVertex.x == 0.0f)
     {
-        return;
+        CorresponenceFound = false;
     }
 
     vec3 Vertex = (g_InvPoseMatrix * vec4(ReferenceVertex, 1.0)).xyz;
@@ -46,14 +68,14 @@ void main()
     if (CameraPlane.x < 0.0f || CameraPlane.x > ImageSize.x ||
         CameraPlane.y < 0.0f || CameraPlane.y > ImageSize.y)
     {
-        return;
+        CorresponenceFound = false;
     }
 
     vec3 ReferenceNormal = imageLoad(cs_NormalMap, ivec2(x, y)).xyz;
 
     if (ReferenceNormal.x == 0.0f)
     {
-        return;
+        CorresponenceFound = false;
     }
 
     vec3 RaycastVertex = imageLoad(cs_RaycastVertexMap, ivec2(CameraPlane.xy)).xyz;
@@ -64,20 +86,27 @@ void main()
 
     if (Distance > EPSILON_DISTANCE || Angle < EPSILON_ANGLE)
     {
-        return;
+        CorresponenceFound = false;
     }
 
     float Row[7];
 
     vec3 Cross = cross(Vertex, RaycastNormal);
 
-    Row[0] = Cross.x;
-    Row[1] = Cross.y;
-    Row[2] = Cross.z;
-    Row[3] = RaycastNormal.x;
-    Row[4] = RaycastNormal.y;
-    Row[5] = RaycastNormal.z;
-    Row[6] = dot(RaycastNormal, RaycastVertex - Vertex);
+    if (CorresponenceFound)
+    {
+        Row[0] = Cross.x;
+        Row[1] = Cross.y;
+        Row[2] = Cross.z;
+        Row[3] = RaycastNormal.x;
+        Row[4] = RaycastNormal.y;
+        Row[5] = RaycastNormal.z;
+        Row[6] = dot(RaycastNormal, RaycastVertex - Vertex);
+    }
+    else
+    {
+        Row[0] = Row[1] = Row[2] = Row[3] = Row[4] = Row[5] = Row[6] = 0.0f;
+    }
     
     for (int i = 0; i < 6; ++ i)
     {
@@ -87,11 +116,16 @@ void main()
             SharedData[gl_LocalInvocationIndex] = Row[i] * Row[j];
             barrier();
 
+            reduce();
 
+            if (gl_LocalInvocationIndex == 0)
+            {
+                SharedData[0];
+            }
         }
     }
 
-    imageStore(cs_Debug, ivec2(x, y), vec4(Cross, Row[6]));
+    imageStore(cs_Debug, ivec2(x, y), vec4(Cross, SharedData[0]));
 }
 
 #endif // __INCLUDE_CS_DETERMINE_SUMMANDS_GLSL__

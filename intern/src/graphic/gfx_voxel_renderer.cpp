@@ -42,7 +42,7 @@ using namespace Gfx;
 
 namespace
 {
-    const float g_VolumeSize = 1.0f;
+    const float g_VolumeSize = 5.0f;
     const int g_VolumeResolution = 256;
     const float g_VoxelSize = g_VolumeSize / g_VolumeResolution;
 
@@ -180,7 +180,7 @@ namespace
 
         GLuint m_Volume;
 
-        std::unique_ptr<MR::CDepthSensorControl> m_pDepthSensorControl;
+        std::unique_ptr<MR::IDepthSensorControl> m_pDepthSensorControl;
 
         Base::Float4x4 m_PoseMatrix;
 
@@ -755,13 +755,20 @@ namespace
         glClear(GL_COLOR_BUFFER_BIT);
         
         //RenderDepth();
-        glViewport(0, 0, 640, 720);
+
+        GLint ViewPort[4];
+        glGetIntegerv(GL_VIEWPORT, ViewPort);
+
+        glViewport(0, 0, ViewPort[2] / 2, ViewPort[3]);
         RenderVertexMap(m_KinectVertexMap[0], m_KinectNormalMap[0]);
-        //RenderVolume();
-        glViewport(640, 0, 640, 720);
+        
+        glViewport(ViewPort[2] / 2, 0, ViewPort[2] / 2, ViewPort[3]);
         RenderVertexMap(m_RaycastVertexMap[0], m_RaycastNormalMap[0]);
 
-        glViewport(0, 0, 1280, 720);
+        glViewport(ViewPort[0], ViewPort[1], ViewPort[2], ViewPort[3]);
+
+        //RenderVolume();
+
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         Performance::EndEvent();

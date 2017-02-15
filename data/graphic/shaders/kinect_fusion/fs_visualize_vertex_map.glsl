@@ -16,7 +16,7 @@ void main(void)
 		discard;
 	}
     
-    out_Color = vec4(imageLoad(fs_NormalMap, TexCoords).xyz, 1.0);
+    out_Color = vec4(imageLoad(fs_NormalMap, TexCoords).xyz * 0.5f + 0.5f, 1.0);
 }
 
 #endif // __INCLUDE_FS_KINECT_VISUALIZE_VERTEX_MAP_GLSL__

@@ -100,47 +100,47 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    int CRealSenseControl::GetWidth()
+    int CRealSenseControl::GetWidth() const
     {
         return s_Width;
     }
 
-    int CRealSenseControl::GetHeight()
+    int CRealSenseControl::GetHeight() const
     {
         return s_Height;
     }
 
     // -----------------------------------------------------------------------------
 
-    int CRealSenseControl::GetPixelCount()
+    int CRealSenseControl::GetPixelCount() const
     {
         return GetWidth() * GetHeight();
     }
 
     // -----------------------------------------------------------------------------
 
-    float CRealSenseControl::GetFocalLengthX()
+    float CRealSenseControl::GetFocalLengthX() const
     {
         return m_FocalLength.x;
     }
 
     // -----------------------------------------------------------------------------
 
-    float CRealSenseControl::GetFocalLengthY()
+    float CRealSenseControl::GetFocalLengthY() const
     {
         return m_FocalLength.y;
     }
 
     // -----------------------------------------------------------------------------
 
-    float CRealSenseControl::GetFocalPointX()
+    float CRealSenseControl::GetFocalPointX() const
     {
         return m_FocalPoint.x;
     }
 
     // -----------------------------------------------------------------------------
 
-    float CRealSenseControl::GetFocalPointY()
+    float CRealSenseControl::GetFocalPointY() const
     {
         return m_FocalPoint.y;
     }

@@ -107,37 +107,37 @@ namespace MR
         return true;
     }
 
-    int CKinectControl::GetWidth()
+    int CKinectControl::GetWidth() const
     {
         return NUI_DEPTH_RAW_WIDTH;
     }
 
-    int CKinectControl::GetHeight()
+    int CKinectControl::GetHeight() const
     {
         return NUI_DEPTH_RAW_HEIGHT;
     }
 
-    int CKinectControl::GetPixelCount()
+    int CKinectControl::GetPixelCount() const
     {
         return GetWidth() * GetHeight();
     }
 
-    float CKinectControl::GetFocalLengthX()
+    float CKinectControl::GetFocalLengthX() const
     {
         return NUI_KINECT_DEPTH_NORM_FOCAL_LENGTH_X * GetWidth();
     }
 
-    float CKinectControl::GetFocalLengthY()
+    float CKinectControl::GetFocalLengthY() const
     {
         return NUI_KINECT_DEPTH_NORM_FOCAL_LENGTH_Y * GetHeight();
     }
 
-    float CKinectControl::GetFocalPointX()
+    float CKinectControl::GetFocalPointX() const
     {
         return NUI_KINECT_DEPTH_NORM_PRINCIPAL_POINT_X * GetWidth();
     }
 
-    float CKinectControl::GetFocalPointY()
+    float CKinectControl::GetFocalPointY() const
     {
         return NUI_KINECT_DEPTH_NORM_PRINCIPAL_POINT_Y * GetHeight();
     }
