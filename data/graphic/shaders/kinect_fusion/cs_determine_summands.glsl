@@ -15,8 +15,6 @@ layout(binding = 1, rgba32f) uniform image2D cs_NormalMap;
 layout(binding = 2, rgba32f) uniform image2D cs_RaycastVertexMap;
 layout(binding = 3, rgba32f) uniform image2D cs_RaycastNormalMap;
 
-layout(binding = 4, rgba32f) uniform image2D cs_Debug;
-
 // -----------------------------------------------------------------------------
 
 shared float SharedData[WORKGROUP_SIZE];
@@ -108,24 +106,25 @@ void main()
         Row[0] = Row[1] = Row[2] = Row[3] = Row[4] = Row[5] = Row[6] = 0.0f;
     }
     
+    const uint ICPSummandIndex = gl_WorkGroupID.x + gl_WorkGroupID.y * gl_NumWorkGroups.x;
+    int ICPValueIndex = 0;
+
     for (int i = 0; i < 6; ++ i)
     {
         for (int j = i; j < 7; ++ j)
         {
             barrier();
-            SharedData[gl_LocalInvocationIndex] = Row[i] * Row[j];
+            SharedData[gl_LocalInvocationIndex] = 1.0f;//Row[i] * Row[j];
             barrier();
 
             reduce();
 
             if (gl_LocalInvocationIndex == 0)
             {
-                SharedData[0];
+                g_ICPData[ICPSummandIndex][ICPValueIndex++] = SharedData[0];
             }
         }
     }
-
-    imageStore(cs_Debug, ivec2(x, y), vec4(Cross, SharedData[0]));
 }
 
 #endif // __INCLUDE_CS_DETERMINE_SUMMANDS_GLSL__
