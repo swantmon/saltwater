@@ -17,7 +17,7 @@ layout(binding = 3, rgba32f) uniform image2D cs_RaycastNormalMap;
 
 // -----------------------------------------------------------------------------
 
-shared float SharedData[WORKGROUP_SIZE];
+shared float g_SharedData[WORKGROUP_SIZE];
 
 // -------------------------------------------------------------------------------------
 // Functions
@@ -31,8 +31,8 @@ void reduce()
     {
         if (gl_LocalInvocationIndex < SumCount)
         {
-            const float Sum = SharedData[gl_LocalInvocationIndex] + SharedData[gl_LocalInvocationIndex + SumCount];
-            SharedData[gl_LocalInvocationIndex] = Sum;
+            const float Sum = g_SharedData[gl_LocalInvocationIndex] + g_SharedData[gl_LocalInvocationIndex + SumCount];
+            g_SharedData[gl_LocalInvocationIndex] = Sum;
         }
 
         SumCount /= 2;
@@ -114,14 +114,14 @@ void main()
         for (int j = i; j < 7; ++ j)
         {
             barrier();
-            SharedData[gl_LocalInvocationIndex] = 1.0f;//Row[i] * Row[j];
+            g_SharedData[gl_LocalInvocationIndex] = Row[i] * Row[j];
             barrier();
 
             reduce();
 
             if (gl_LocalInvocationIndex == 0)
             {
-                g_ICPData[ICPSummandIndex][ICPValueIndex++] = SharedData[0];
+                g_ICPData[ICPValueIndex++][ICPSummandIndex] = 1.0f;//g_SharedData[0];
             }
         }
     }

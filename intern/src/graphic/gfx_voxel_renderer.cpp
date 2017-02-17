@@ -466,6 +466,7 @@ namespace
 
         glCreateBuffers(1, &m_ICPSummationDataBuffer);
         glNamedBufferData(m_ICPSummationDataBuffer, 16, nullptr, GL_DYNAMIC_DRAW);
+
     }
     
     // -----------------------------------------------------------------------------
@@ -652,8 +653,6 @@ namespace
         const int WorkGroupsX = GetWorkGroupCount(m_pDepthSensorControl->GetWidth() >> PyramidLevel, g_TileSize2D);
         const int WorkGroupsY = GetWorkGroupCount(m_pDepthSensorControl->GetHeight() >> PyramidLevel, g_TileSize2D);
         
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
         Gfx::ContextManager::SetShaderCS(m_CSDetermineSummands);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_ICPBuffer);
         glBindImageTexture(0, m_KinectVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
@@ -661,6 +660,7 @@ namespace
         glBindImageTexture(2, m_RaycastVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
         glBindImageTexture(3, m_RaycastNormalMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
         glBindImageTexture(4, m_DebugBuffer[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
         glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
     }
 
@@ -682,7 +682,7 @@ namespace
 
         Gfx::ContextManager::SetShaderCS(m_CSReduceSum);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_ICPBuffer);
-        glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_ICPSummationDataBuffer);
+        glBindBufferBase(GL_UNIFORM_BUFFER, 2, m_ICPSummationDataBuffer);
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
         glDispatchCompute(1, g_ICPValueCount, 1);
     }
@@ -804,6 +804,7 @@ namespace
 
         Integrate();
         Raycast();
+
         DownSample();
 
         Performance::EndEvent();

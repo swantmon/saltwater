@@ -32,7 +32,7 @@ layout(row_major, std140, binding = 1) uniform UBOTrackingData
 
 layout(std430, binding = 0) buffer ICPBuffer
 {
-    float g_ICPData[ICP_SUMMAND_COUNT][ICP_VALUE_COUNT];
+    float g_ICPData[ICP_VALUE_COUNT][ICP_SUMMAND_COUNT];
 };
 
 #endif // __INCLUDE_TRACKING_COMMON_GLSL__

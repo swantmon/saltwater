@@ -4,7 +4,7 @@
 
 #include "tracking_common.glsl"
 
-layout(row_major, std140, binding = 1) uniform UBOSummationData
+layout(row_major, std140, binding = 2) uniform UBOSummationData
 {
     int g_SumCount;
     int g_SumCountPOT;
@@ -14,15 +14,19 @@ layout(row_major, std140, binding = 1) uniform UBOSummationData
 // Functions
 // -----------------------------------------------------------------------------
 
+shared float g_SharedData[REDUCTION_SHADER_COUNT];
+
 layout (local_size_x = REDUCTION_SHADER_COUNT, local_size_y = 1, local_size_z = 1) in;
 void main()
 {
     uint LeftIndex = gl_GlobalInvocationID.x;
     uint RightIndex = gl_GlobalInvocationID.x + g_SumCountPOT;
 
+    g_SharedData[LeftIndex] = g_ICPData[LeftIndex][gl_GlobalInvocationID.y];
+
     if (RightIndex < g_SumCount)
     {
-        g_ICPData[LeftIndex][gl_GlobalInvocationID.y] += g_ICPData[RightIndex][gl_GlobalInvocationID.y];
+        g_SharedData[LeftIndex] += g_ICPData[RightIndex][gl_GlobalInvocationID.y];
     }
 
     int SumCountPOT = g_SumCountPOT / 2;
@@ -36,12 +40,17 @@ void main()
 
         if (LeftIndex < SumCountPOT)
         {
-            g_ICPData[LeftIndex][gl_GlobalInvocationID.y] += g_ICPData[RightIndex][gl_GlobalInvocationID.y];
+            g_SharedData[LeftIndex] += g_SharedData[RightIndex];
         }
 
         barrier();
 
         SumCountPOT /= 2;
+    }
+
+    if (gl_GlobalInvocationID.x == 0)
+    {
+        g_ICPData[gl_GlobalInvocationID.y][0] = g_SharedData[0];
     }
 }
 
