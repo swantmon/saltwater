@@ -35,6 +35,7 @@
 
 #include <gl/glew.h>
 
+#include <limits>
 #include <memory>
 #include <sstream>
 
@@ -289,14 +290,14 @@ namespace
     
     void CGfxVoxelRenderer::OnSetupShader()
     {
-        const int SummandsX = m_pDepthSensorControl->GetWidth() / g_TileSize2D;
-        const int SummandsY = m_pDepthSensorControl->GetHeight() / g_TileSize2D;
+        const int SummandsX = GetWorkGroupCount(m_pDepthSensorControl->GetWidth(), g_TileSize2D);
+        const int SummandsY = GetWorkGroupCount(m_pDepthSensorControl->GetHeight(), g_TileSize2D);
 
         const int Summands = SummandsX * SummandsY;
         const float SummandsLog2 = Base::Log2(static_cast<float>(Summands));
         const int SummandsPOT = 1 << (static_cast<int>(SummandsLog2) + 1);
 
-        const int NumberOfDefines = 16;
+        const int NumberOfDefines = 17;
 
         std::vector<std::stringstream> DefineStreams(NumberOfDefines);
 
@@ -308,7 +309,7 @@ namespace
         DefineStreams[5] << "TILE_SIZE1D " << g_TileSize1D;
         DefineStreams[6] << "TILE_SIZE2D " << g_TileSize2D;
         DefineStreams[7] << "TILE_SIZE3D " << g_TileSize3D;
-        DefineStreams[8] << "INT16_MAX " << 32767;
+        DefineStreams[8] << "INT16_MAX " << std::numeric_limits<int16_t>::max();
         DefineStreams[9] << "TRUNCATED_DISTANCE " << g_TruncatedDistance;
         DefineStreams[10] << "TRUNCATED_DISTANCE_INVERSE " << g_TruncatedDistanceInverse;
         DefineStreams[11] << "MAX_INTEGRATION_WEIGHT " << g_MaxIntegrationWeight;
@@ -316,6 +317,7 @@ namespace
         DefineStreams[13] << "EPSILON_ANGLE " << g_EpsilonAngle;
         DefineStreams[14] << "ICP_VALUE_COUNT " << g_ICPValueCount; 
         DefineStreams[15] << "REDUCTION_SHADER_COUNT " << SummandsPOT / 2;
+        DefineStreams[16] << "ICP_SUMMAND_COUNT " << Summands;
 
         std::vector<std::string> DefineStrings(NumberOfDefines);
         std::vector<const char*> Defines(NumberOfDefines);
@@ -459,7 +461,8 @@ namespace
         glCreateBuffers(1, &m_RaycastPyramidConstantBuffer);
         glNamedBufferData(m_RaycastPyramidConstantBuffer, 16, nullptr, GL_DYNAMIC_DRAW);
 
-        const int ICPRowCount = (m_pDepthSensorControl->GetWidth() / g_TileSize2D) * (m_pDepthSensorControl->GetHeight() / g_TileSize2D);
+        const int ICPRowCount = GetWorkGroupCount(m_pDepthSensorControl->GetWidth(), g_TileSize2D) *
+                                GetWorkGroupCount(m_pDepthSensorControl->GetHeight(), g_TileSize2D);
 
         glCreateBuffers(1, &m_ICPBuffer);
         glNamedBufferData(m_ICPBuffer, sizeof(float) * ICPRowCount * g_ICPValueCount, nullptr, GL_DYNAMIC_COPY);

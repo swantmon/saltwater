@@ -28,8 +28,6 @@ layout(row_major, std140, binding = 1) uniform UBOTrackingData
 	mat4 g_InvPoseMatrix;
 };
 
-#define ICP_SUMMAND_COUNT ((DEPTH_IMAGE_WIDTH / TILE_SIZE2D) * (DEPTH_IMAGE_HEIGHT / TILE_SIZE2D))
-
 layout(std430, binding = 0) buffer ICPBuffer
 {
     float g_ICPData[ICP_VALUE_COUNT][ICP_SUMMAND_COUNT];
