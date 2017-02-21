@@ -14,19 +14,15 @@ layout(row_major, std140, binding = 2) uniform UBOSummationData
 // Functions
 // -----------------------------------------------------------------------------
 
-shared float g_SharedData[REDUCTION_SHADER_COUNT];
-
 layout (local_size_x = REDUCTION_SHADER_COUNT, local_size_y = 1, local_size_z = 1) in;
 void main()
 {
     uint LeftIndex = gl_GlobalInvocationID.x;
     uint RightIndex = gl_GlobalInvocationID.x + g_SumCountPOT;
 
-    g_SharedData[LeftIndex] = g_ICPData[LeftIndex][gl_GlobalInvocationID.y];
-
-    if (RightIndex < g_SumCount)
+    if (RightIndex < g_SumCount * 2)
     {
-        g_SharedData[LeftIndex] += g_ICPData[RightIndex][gl_GlobalInvocationID.y];
+        g_ICPData[gl_GlobalInvocationID.y][LeftIndex] += g_ICPData[gl_GlobalInvocationID.y][RightIndex];
     }
 
     int SumCountPOT = g_SumCountPOT / 2;
@@ -40,17 +36,12 @@ void main()
 
         if (LeftIndex < SumCountPOT)
         {
-            g_SharedData[LeftIndex] += g_SharedData[RightIndex];
+            g_ICPData[gl_GlobalInvocationID.y][LeftIndex] += g_ICPData[gl_GlobalInvocationID.y][RightIndex];
         }
 
-        barrier();
-
         SumCountPOT /= 2;
-    }
 
-    if (gl_GlobalInvocationID.x == 0)
-    {
-        g_ICPData[gl_GlobalInvocationID.y][0] = g_SharedData[0];
+        barrier();
     }
 }
 

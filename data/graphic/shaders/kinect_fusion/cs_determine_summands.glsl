@@ -30,9 +30,8 @@ void reduce()
     while (SumCount > 0)
     {
         if (gl_LocalInvocationIndex < SumCount)
-        {
-            const float Sum = g_SharedData[gl_LocalInvocationIndex] + g_SharedData[gl_LocalInvocationIndex + SumCount];
-            g_SharedData[gl_LocalInvocationIndex] = Sum;
+        {           
+            g_SharedData[gl_LocalInvocationIndex] += g_SharedData[gl_LocalInvocationIndex + SumCount];
         }
 
         SumCount /= 2;
@@ -46,7 +45,7 @@ void main()
 {
     const int x = int(gl_GlobalInvocationID.x);
     const int y = int(gl_GlobalInvocationID.y);
-
+    
     const ivec2 ImageSize = imageSize(cs_VertexMap);
     const int PyramidLevel = int(log2(DEPTH_IMAGE_WIDTH / ImageSize.x));
     
@@ -108,20 +107,29 @@ void main()
     
     const uint ICPSummandIndex = gl_WorkGroupID.x + gl_WorkGroupID.y * gl_NumWorkGroups.x;
     int ICPValueIndex = 0;
-
+    
     for (int i = 0; i < 6; ++ i)
     {
         for (int j = i; j < 7; ++ j)
         {
             barrier();
-            g_SharedData[gl_LocalInvocationIndex] = Row[i] * Row[j];
+            
+            if (x < ImageSize.x && y < ImageSize.y)
+            {
+                g_SharedData[gl_LocalInvocationIndex] = 1.0f;//Row[i] * Row[j];
+            }
+            else
+            {
+                g_SharedData[gl_LocalInvocationIndex] = 0.0f;
+            }
+            
             barrier();
 
             reduce();
 
             if (gl_LocalInvocationIndex == 0)
             {
-                g_ICPData[ICPValueIndex++][ICPSummandIndex] = 1.0f;//g_SharedData[0];
+                g_ICPData[ICPValueIndex++][ICPSummandIndex] = g_SharedData[0];
             }
         }
     }

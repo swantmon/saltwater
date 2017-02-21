@@ -57,7 +57,7 @@ namespace
 
     const int g_PyramidLevels = 3;
 
-    const int g_ICPIterations[g_PyramidLevels] = { 10, 5, 4 };
+    const int g_ICPIterations[g_PyramidLevels] = { 1, 1, 1 };// { 10, 5, 4 };
     const float g_EpsilonDistance = 0.1f;
     const float g_EpsilonAngle = 0.7f;
 
@@ -671,8 +671,8 @@ namespace
 
     void CGfxVoxelRenderer::ReduceSum(int PyramidLevel)
     {
-        const int SummandsX = (m_pDepthSensorControl->GetWidth() / g_TileSize2D) >> PyramidLevel;
-        const int SummandsY = (m_pDepthSensorControl->GetHeight() / g_TileSize2D) >> PyramidLevel;
+        const int SummandsX = GetWorkGroupCount(m_pDepthSensorControl->GetWidth() >> PyramidLevel, g_TileSize2D);
+        const int SummandsY = GetWorkGroupCount(m_pDepthSensorControl->GetHeight() >> PyramidLevel, g_TileSize2D);
 
         const int Summands = SummandsX * SummandsY;
         const float SummandsLog2 = Base::Log2(static_cast<float>(Summands));
@@ -694,11 +694,15 @@ namespace
 
     void CGfxVoxelRenderer::CalculatePoseMatrix()
     {
-        float* pICPBufferData = static_cast<float*>(glMapNamedBufferRange(m_ICPBuffer, 0, sizeof(float) * g_ICPValueCount, GL_MAP_READ_BIT));
+        /*float* pICPBufferData = static_cast<float*>(glMapNamedBufferRange(m_ICPBuffer, 0, sizeof(float) * g_ICPValueCount, GL_MAP_READ_BIT));
         for (int i = 0; i < g_ICPValueCount; ++i)
         {
             pICPBufferData[i];
         }
+        glUnmapNamedBuffer(m_ICPBuffer);*/
+        
+        float* pICPBufferData = static_cast<float*>(glMapNamedBufferRange(m_ICPBuffer, 0, sizeof(float) * g_ICPValueCount, GL_MAP_READ_BIT));
+        
         glUnmapNamedBuffer(m_ICPBuffer);
     }
 
