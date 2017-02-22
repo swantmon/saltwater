@@ -953,7 +953,7 @@ namespace
 
     int CGfxVoxelRenderer::GetWorkGroupCount(int TotalShaderCount, int WorkGroupSize)
     {
-        return static_cast<int>(TotalShaderCount / static_cast<float>(WorkGroupSize) + 0.5f);
+        return (TotalShaderCount + WorkGroupSize - 1) / WorkGroupSize;
     }
 
     // -----------------------------------------------------------------------------
