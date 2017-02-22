@@ -31,12 +31,9 @@ void main()
 
     while (SumCountPOT > 0)
     {
-        LeftIndex = LeftIndex / 2;
-        RightIndex = RightIndex / 2;
-
-        if (LeftIndex < SumCountPOT)
+        if (gl_GlobalInvocationID.x < SumCountPOT)
         {
-            g_ICPData[LeftIndex][gl_GlobalInvocationID.y] += g_ICPData[RightIndex][gl_GlobalInvocationID.y];
+            g_ICPData[gl_GlobalInvocationID.x][gl_GlobalInvocationID.y] += g_ICPData[gl_GlobalInvocationID.x + SumCountPOT][gl_GlobalInvocationID.y];
         }
 
         SumCountPOT /= 2;

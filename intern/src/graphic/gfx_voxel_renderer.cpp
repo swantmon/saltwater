@@ -57,7 +57,7 @@ namespace
 
     const int g_PyramidLevels = 3;
 
-    const int g_ICPIterations[g_PyramidLevels] = { 1, 1, 1 }; // { 10, 5, 4 };
+    const int g_ICPIterations[g_PyramidLevels] = { 10, 5, 4 };
     const float g_EpsilonDistance = 0.1f;
     const float g_EpsilonAngle = 0.7f;
 
@@ -694,22 +694,11 @@ namespace
 
     void CGfxVoxelRenderer::CalculatePoseMatrix(int PyramidLevel)
     {
-        /*float* pICPBufferData = static_cast<float*>(glMapNamedBufferRange(m_ICPBuffer, 0, sizeof(float) * g_ICPValueCount, GL_MAP_READ_BIT));
+        float* pICPBufferData = static_cast<float*>(glMapNamedBufferRange(m_ICPBuffer, 0, sizeof(float) * g_ICPValueCount, GL_MAP_READ_BIT));
         for (int i = 0; i < g_ICPValueCount; ++i)
         {
             pICPBufferData[i];
         }
-        glUnmapNamedBuffer(m_ICPBuffer);*/
-        
-        const int PixelCounts[] = { 217088, 54272, 13568 };
-
-        float* pICPBufferData = static_cast<float*>(glMapNamedBufferRange(m_ICPBuffer, 0, sizeof(float) * g_ICPValueCount, GL_MAP_READ_BIT));
-        
-        /*for (int i = 0; i < g_ICPValueCount; ++ i)
-        {
-            assert(PixelCounts[PyramidLevel] == static_cast<int>(pICPBufferData[i]));
-        }*/
-
         glUnmapNamedBuffer(m_ICPBuffer);
     }
 
