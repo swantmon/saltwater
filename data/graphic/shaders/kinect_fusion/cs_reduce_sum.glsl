@@ -22,7 +22,7 @@ void main()
 
     if (RightIndex < g_SumCount * 2)
     {
-        g_ICPData[gl_GlobalInvocationID.y][LeftIndex] += g_ICPData[gl_GlobalInvocationID.y][RightIndex];
+        g_ICPData[LeftIndex][gl_GlobalInvocationID.y] += g_ICPData[RightIndex][gl_GlobalInvocationID.y];
     }
 
     int SumCountPOT = g_SumCountPOT / 2;
@@ -36,7 +36,7 @@ void main()
 
         if (LeftIndex < SumCountPOT)
         {
-            g_ICPData[gl_GlobalInvocationID.y][LeftIndex] += g_ICPData[gl_GlobalInvocationID.y][RightIndex];
+            g_ICPData[LeftIndex][gl_GlobalInvocationID.y] += g_ICPData[RightIndex][gl_GlobalInvocationID.y];
         }
 
         SumCountPOT /= 2;

@@ -136,7 +136,7 @@ namespace
 
         void DetermineSummands(int PyramidLevel);
         void ReduceSum(int PyramidLevel);
-        void CalculatePoseMatrix();
+        void CalculatePoseMatrix(int PyramidLevel);
 
         // Just for debugging
 
@@ -642,10 +642,9 @@ namespace
         {
             for (int Iteration = 0; Iteration < g_ICPIterations[PyramidLevel]; ++ Iteration)
             {
-                glNamedBufferData(m_ICPBuffer, sizeof(float) * 864 * g_ICPValueCount, nullptr, GL_DYNAMIC_COPY);
                 DetermineSummands(PyramidLevel);
                 ReduceSum(PyramidLevel);
-                CalculatePoseMatrix();
+                CalculatePoseMatrix(PyramidLevel);
             }
         }        
     }
@@ -693,7 +692,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxVoxelRenderer::CalculatePoseMatrix()
+    void CGfxVoxelRenderer::CalculatePoseMatrix(int PyramidLevel)
     {
         /*float* pICPBufferData = static_cast<float*>(glMapNamedBufferRange(m_ICPBuffer, 0, sizeof(float) * g_ICPValueCount, GL_MAP_READ_BIT));
         for (int i = 0; i < g_ICPValueCount; ++i)
@@ -702,8 +701,15 @@ namespace
         }
         glUnmapNamedBuffer(m_ICPBuffer);*/
         
+        const int PixelCounts[] = { 217088, 54272, 13568 };
+
         float* pICPBufferData = static_cast<float*>(glMapNamedBufferRange(m_ICPBuffer, 0, sizeof(float) * g_ICPValueCount, GL_MAP_READ_BIT));
         
+        /*for (int i = 0; i < g_ICPValueCount; ++ i)
+        {
+            assert(PixelCounts[PyramidLevel] == static_cast<int>(pICPBufferData[i]));
+        }*/
+
         glUnmapNamedBuffer(m_ICPBuffer);
     }
 

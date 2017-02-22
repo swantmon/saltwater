@@ -136,14 +136,15 @@ void main()
             {
                 g_SharedData[gl_LocalInvocationIndex] = 0.0f;
             }
+
             
             barrier();
 
             reduce();
-
+            
             if (gl_LocalInvocationIndex == 0)
             {
-                g_ICPData[ICPValueIndex++][ICPSummandIndex] = g_SharedData[0];
+                g_ICPData[ICPSummandIndex][ICPValueIndex++] = g_SharedData[0];
             }
         }
     }
