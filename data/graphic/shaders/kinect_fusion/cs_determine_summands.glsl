@@ -23,6 +23,52 @@ shared float g_SharedData[WORKGROUP_SIZE];
 // Functions
 // -------------------------------------------------------------------------------------
 
+bool findCorrespondence(out vec3 Vertex, out vec3 RaycastVertex, out vec3 RaycastNormal)
+{
+    const int x = int(gl_GlobalInvocationID.x);
+    const int y = int(gl_GlobalInvocationID.y);
+
+    const ivec2 ImageSize = imageSize(cs_VertexMap);
+    const int PyramidLevel = int(log2(DEPTH_IMAGE_WIDTH / ImageSize.x));
+
+    vec3 ReferenceVertex = imageLoad(cs_VertexMap, ivec2(x, y)).xyz;
+
+    if (ReferenceVertex.x == 0.0f)
+    {
+        return false;
+    }
+
+    Vertex = (g_InvPoseMatrix * vec4(ReferenceVertex, 1.0)).xyz;
+    vec3 CameraPlane = mat3(g_Intrinisics[PyramidLevel].m_KMatrix) * Vertex;
+    CameraPlane /= CameraPlane.z;
+
+    if (CameraPlane.x < 0.0f || CameraPlane.x > ImageSize.x ||
+        CameraPlane.y < 0.0f || CameraPlane.y > ImageSize.y)
+    {
+        return false;
+    }
+
+    vec3 ReferenceNormal = imageLoad(cs_NormalMap, ivec2(x, y)).xyz;
+
+    if (ReferenceNormal.x == 0.0f)
+    {
+        return false;
+    }
+
+    RaycastVertex = imageLoad(cs_RaycastVertexMap, ivec2(CameraPlane.xy)).xyz;
+    RaycastNormal = imageLoad(cs_RaycastNormalMap, ivec2(CameraPlane.xy)).xyz;
+
+    const float Distance = distance(ReferenceVertex, RaycastVertex);
+    const float Angle = dot(ReferenceNormal, RaycastNormal);
+
+    if (Distance > EPSILON_DISTANCE || Angle < EPSILON_ANGLE)
+    {
+        return false;
+    }
+
+    return true;
+}
+
 void reduce()
 {
     int SumCount = WORKGROUP_SIZE / 2;
@@ -30,7 +76,7 @@ void reduce()
     while (SumCount > 0)
     {
         if (gl_LocalInvocationIndex < SumCount)
-        {           
+        {
             g_SharedData[gl_LocalInvocationIndex] += g_SharedData[gl_LocalInvocationIndex + SumCount];
         }
 
@@ -45,53 +91,21 @@ void main()
 {
     const int x = int(gl_GlobalInvocationID.x);
     const int y = int(gl_GlobalInvocationID.y);
-    
+
     const ivec2 ImageSize = imageSize(cs_VertexMap);
-    const int PyramidLevel = int(log2(DEPTH_IMAGE_WIDTH / ImageSize.x));
-    
-    bool CorresponenceFound = true;
 
-    vec3 ReferenceVertex = imageLoad(cs_VertexMap, ivec2(x, y)).xyz;
+    vec3 Vertex;
+    vec3 RaycastVertex;
+    vec3 RaycastNormal;
 
-    if (ReferenceVertex.x == 0.0f)
-    {
-        CorresponenceFound = false;
-    }
-
-    vec3 Vertex = (g_InvPoseMatrix * vec4(ReferenceVertex, 1.0)).xyz;
-    vec3 CameraPlane = mat3(g_Intrinisics[PyramidLevel].m_KMatrix) * Vertex;
-    CameraPlane /= CameraPlane.z;
-
-    if (CameraPlane.x < 0.0f || CameraPlane.x > ImageSize.x ||
-        CameraPlane.y < 0.0f || CameraPlane.y > ImageSize.y)
-    {
-        CorresponenceFound = false;
-    }
-
-    vec3 ReferenceNormal = imageLoad(cs_NormalMap, ivec2(x, y)).xyz;
-
-    if (ReferenceNormal.x == 0.0f)
-    {
-        CorresponenceFound = false;
-    }
-
-    vec3 RaycastVertex = imageLoad(cs_RaycastVertexMap, ivec2(CameraPlane.xy)).xyz;
-    vec3 RaycastNormal = imageLoad(cs_RaycastNormalMap, ivec2(CameraPlane.xy)).xyz;
-    
-    const float Distance = distance(ReferenceVertex, RaycastVertex);
-    const float Angle = dot(ReferenceNormal, RaycastNormal);
-
-    if (Distance > EPSILON_DISTANCE || Angle < EPSILON_ANGLE)
-    {
-        CorresponenceFound = false;
-    }
+    bool CorresponenceFound = findCorrespondence(Vertex, RaycastVertex, RaycastNormal);
 
     float Row[7];
 
-    vec3 Cross = cross(Vertex, RaycastNormal);
-
     if (CorresponenceFound)
     {
+        vec3 Cross = cross(Vertex, RaycastNormal);
+
         Row[0] = Cross.x;
         Row[1] = Cross.y;
         Row[2] = Cross.z;

@@ -57,7 +57,7 @@ namespace
 
     const int g_PyramidLevels = 3;
 
-    const int g_ICPIterations[g_PyramidLevels] = { 1, 1, 1 };// { 10, 5, 4 };
+    const int g_ICPIterations[g_PyramidLevels] = { 1, 1, 1 }; // { 10, 5, 4 };
     const float g_EpsilonDistance = 0.1f;
     const float g_EpsilonAngle = 0.7f;
 
@@ -642,6 +642,7 @@ namespace
         {
             for (int Iteration = 0; Iteration < g_ICPIterations[PyramidLevel]; ++ Iteration)
             {
+                glNamedBufferData(m_ICPBuffer, sizeof(float) * 864 * g_ICPValueCount, nullptr, GL_DYNAMIC_COPY);
                 DetermineSummands(PyramidLevel);
                 ReduceSum(PyramidLevel);
                 CalculatePoseMatrix();
