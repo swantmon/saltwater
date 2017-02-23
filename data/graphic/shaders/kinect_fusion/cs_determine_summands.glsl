@@ -15,6 +15,11 @@ layout(binding = 1, rgba32f) uniform image2D cs_NormalMap;
 layout(binding = 2, rgba32f) uniform image2D cs_RaycastVertexMap;
 layout(binding = 3, rgba32f) uniform image2D cs_RaycastNormalMap;
 
+layout(row_major, std140, binding = 2) uniform UBOInc
+{
+    mat4 g_IncPoseMatrix;
+};
+
 // -----------------------------------------------------------------------------
 
 shared float g_SharedData[WORKGROUP_SIZE];
@@ -39,6 +44,7 @@ bool findCorrespondence(out vec3 Vertex, out vec3 RaycastVertex, out vec3 Raycas
     }
 
     Vertex = (g_InvPoseMatrix * vec4(ReferenceVertex, 1.0)).xyz;
+    
     vec3 CameraPlane = mat3(g_Intrinisics[PyramidLevel].m_KMatrix) * Vertex;
     CameraPlane /= CameraPlane.z;
 
@@ -50,13 +56,15 @@ bool findCorrespondence(out vec3 Vertex, out vec3 RaycastVertex, out vec3 Raycas
 
     vec3 ReferenceNormal = imageLoad(cs_NormalMap, ivec2(x, y)).xyz;
 
+    ReferenceNormal = mat3(g_InvPoseMatrix) * ReferenceNormal;
+
     if (ReferenceNormal.x == 0.0f)
     {
         return false;
     }
 
-    RaycastVertex = imageLoad(cs_RaycastVertexMap, ivec2(CameraPlane.xy)).xyz;
-    RaycastNormal = imageLoad(cs_RaycastNormalMap, ivec2(CameraPlane.xy)).xyz;
+    RaycastVertex = (vec4(imageLoad(cs_RaycastVertexMap, ivec2(CameraPlane.xy)).xyz, 1.0)).xyz;
+    RaycastNormal = (vec4(imageLoad(cs_RaycastNormalMap, ivec2(CameraPlane.xy)).xyz, 0.0)).xyz;
 
     const float Distance = distance(ReferenceVertex, RaycastVertex);
     const float Angle = dot(ReferenceNormal, RaycastNormal);
@@ -65,6 +73,9 @@ bool findCorrespondence(out vec3 Vertex, out vec3 RaycastVertex, out vec3 Raycas
     {
         return false;
     }
+
+    RaycastVertex = (g_InvPoseMatrix * vec4(RaycastVertex, 1.0)).xyz;
+    RaycastNormal = (g_InvPoseMatrix * vec4(RaycastNormal, 0.0)).xyz;
 
     return true;
 }
@@ -128,16 +139,8 @@ void main()
         {
             barrier();
             
-            if (x < ImageSize.x && y < ImageSize.y)
-            {
-                g_SharedData[gl_LocalInvocationIndex] = 1.0f;//Row[i] * Row[j];
-            }
-            else
-            {
-                g_SharedData[gl_LocalInvocationIndex] = 0.0f;
-            }
+            g_SharedData[gl_LocalInvocationIndex] = Row[i] * Row[j];
 
-            
             barrier();
 
             reduce();

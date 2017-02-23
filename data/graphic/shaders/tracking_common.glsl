@@ -20,10 +20,6 @@ layout(row_major, std140, binding = 0) uniform UBOIntrinsics
 
 layout(row_major, std140, binding = 1) uniform UBOTrackingData
 {
-	mat4 g_PoseRotationMatrix;
-	mat4 g_InvPoseRotationMatrix;
-	mat4 g_PoseTranslationMatrix;
-	mat4 g_InvPoseTranslationMatrix;
 	mat4 g_PoseMatrix;
 	mat4 g_InvPoseMatrix;
 };

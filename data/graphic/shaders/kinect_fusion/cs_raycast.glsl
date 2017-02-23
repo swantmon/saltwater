@@ -75,7 +75,7 @@ void main()
 
     vec3 RayDirection = normalize(VertexPixelPosition);
 
-    RayDirection = mat3(g_PoseRotationMatrix) * RayDirection;
+    RayDirection = mat3(g_PoseMatrix) * RayDirection;
 
     RayDirection.x = RayDirection.x == 0.0f ? 1e-15f : RayDirection.x;
     RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
@@ -114,7 +114,6 @@ void main()
             float Ts = RayLength - Step * Ft / (Ftdt - Ft);
 
             Vertex = CameraPosition + RayDirection * Ts;
-            //Vertex = CurrentPosition;
 
             break;
         }

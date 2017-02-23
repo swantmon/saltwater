@@ -57,7 +57,7 @@ namespace
 
     const int g_PyramidLevels = 3;
 
-    const int g_ICPIterations[g_PyramidLevels] = { 10, 5, 4 };
+    const int g_ICPIterations[g_PyramidLevels] = { 1, 1, 1 }; //{ 10, 5, 4 };
     const float g_EpsilonDistance = 0.1f;
     const float g_EpsilonAngle = 0.7f;
 
@@ -79,10 +79,6 @@ namespace
 
     struct STrackingData
     {
-        Base::Float4x4 m_PoseRotationMatrix;
-        Base::Float4x4 m_InvPoseRotationMatrix;
-        Base::Float4x4 m_PoseTranslationMatrix;
-        Base::Float4x4 m_InvPoseTranslationMatrix;
         Base::Float4x4 m_PoseMatrix;
         Base::Float4x4 m_InvPoseMatrix;
     };
@@ -134,9 +130,9 @@ namespace
 
         void PerformTracking();
 
-        void DetermineSummands(int PyramidLevel);
+        void DetermineSummands(int PyramidLevel, const Base::Float4x4& rIncPoseMatrix);
         void ReduceSum(int PyramidLevel);
-        void CalculatePoseMatrix(int PyramidLevel);
+        void CalculatePoseMatrix(Base::Float4x4& rIncPoseMatrix);
 
         // Just for debugging
 
@@ -159,6 +155,7 @@ namespace
         GLuint m_TrackingDataConstantBuffer;
         GLuint m_RaycastPyramidConstantBuffer;
         GLuint m_ICPSummationDataBuffer;
+        GLuint m_IncPoseMatrixBuffer;
 
         CShaderPtr m_VSVisualizeDepth;
         CShaderPtr m_FSVisualizeDepth;
@@ -202,6 +199,7 @@ namespace
         std::vector<unsigned short> m_DepthPixels;
 
         bool m_NewDepthDataAvailable;
+        bool m_IsFirstIntegration;
     };
 } // namespace
 
@@ -242,7 +240,14 @@ namespace
 
         m_DepthPixels = std::vector<unsigned short>(m_pDepthSensorControl->GetPixelCount());
 
+        Base::Float4x4 PoseRotation, PoseTranslation;
+
+        PoseRotation.SetRotation(g_InitialCameraRotation[0], g_InitialCameraRotation[1], g_InitialCameraRotation[2]);
+        PoseTranslation.SetTranslation(g_InitialCameraPosition[0], g_InitialCameraPosition[1], g_InitialCameraPosition[2]);
+        m_PoseMatrix = PoseTranslation * PoseRotation;
+
         m_NewDepthDataAvailable = false;
+        m_IsFirstIntegration = true;
     }
 
     // -----------------------------------------------------------------------------
@@ -283,6 +288,7 @@ namespace
         glDeleteBuffers(1, &m_RaycastPyramidConstantBuffer);
         glDeleteBuffers(1, &m_ICPBuffer);
         glDeleteBuffers(1, &m_ICPSummationDataBuffer);
+        glDeleteBuffers(1, &m_IncPoseMatrixBuffer);
     }
 
     
@@ -445,15 +451,9 @@ namespace
         glNamedBufferData(m_IntrinsicsConstantBuffer, sizeof(SIntrinsics) * g_PyramidLevels, Intrinsics, GL_STATIC_DRAW);
 
         STrackingData TrackingData;
-
-        TrackingData.m_PoseRotationMatrix.SetRotation(g_InitialCameraRotation[0], g_InitialCameraRotation[1], g_InitialCameraRotation[2]);
-        TrackingData.m_PoseTranslationMatrix.SetTranslation(g_InitialCameraPosition[0], g_InitialCameraPosition[1], g_InitialCameraPosition[2]);
-        TrackingData.m_PoseMatrix = TrackingData.m_PoseTranslationMatrix * TrackingData.m_PoseRotationMatrix;
-        m_PoseMatrix = TrackingData.m_PoseMatrix;
-
-        TrackingData.m_InvPoseRotationMatrix = TrackingData.m_PoseRotationMatrix.GetInverted();
-        TrackingData.m_InvPoseTranslationMatrix = TrackingData.m_PoseTranslationMatrix.GetInverted();
-        TrackingData.m_InvPoseMatrix = TrackingData.m_PoseMatrix.GetInverted();
+                
+        TrackingData.m_PoseMatrix = m_PoseMatrix;
+        TrackingData.m_InvPoseMatrix = m_PoseMatrix.GetInverted();
 
         glCreateBuffers(1, &m_TrackingDataConstantBuffer);
         glNamedBufferData(m_TrackingDataConstantBuffer, sizeof(STrackingData), &TrackingData, GL_DYNAMIC_DRAW);
@@ -469,7 +469,9 @@ namespace
 
         glCreateBuffers(1, &m_ICPSummationDataBuffer);
         glNamedBufferData(m_ICPSummationDataBuffer, 16, nullptr, GL_DYNAMIC_DRAW);
-
+        
+        glCreateBuffers(1, &m_IncPoseMatrixBuffer);
+        glNamedBufferData(m_IncPoseMatrixBuffer, sizeof(Base::Float4x4), nullptr, GL_DYNAMIC_DRAW);
     }
     
     // -----------------------------------------------------------------------------
@@ -543,7 +545,7 @@ namespace
         TranslationMatrix.SetTranslation(0.0f, 0.0f, 0.0f);
 
         m_VolumeWorldMatrix = TranslationMatrix * RotationMatrix * ScalingMatrix;
-
+        
         if (m_pDepthSensorControl->GetDepthBuffer(m_DepthPixels.data()))
         {
             glTextureSubImage2D(m_KinectRawDepthBuffer, 0, 0, 0,
@@ -638,26 +640,38 @@ namespace
 
     void CGfxVoxelRenderer::PerformTracking()
     {
+        Base::Float4x4 IncPoseMatrix;
+        IncPoseMatrix.SetIdentity();
+
         for (int PyramidLevel = g_PyramidLevels - 1; PyramidLevel >= 0; -- PyramidLevel)
         {
             for (int Iteration = 0; Iteration < g_ICPIterations[PyramidLevel]; ++ Iteration)
             {
-                DetermineSummands(PyramidLevel);
+                DetermineSummands(PyramidLevel, IncPoseMatrix);
                 ReduceSum(PyramidLevel);
-                CalculatePoseMatrix(PyramidLevel);
+                CalculatePoseMatrix(IncPoseMatrix);
             }
-        }        
+        }
+        //m_PoseMatrix *= IncPoseMatrix;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxVoxelRenderer::DetermineSummands(int PyramidLevel)
+    void CGfxVoxelRenderer::DetermineSummands(int PyramidLevel, const Base::Float4x4& rIncPoseMatrix)
     {
         const int WorkGroupsX = GetWorkGroupCount(m_pDepthSensorControl->GetWidth() >> PyramidLevel, g_TileSize2D);
         const int WorkGroupsY = GetWorkGroupCount(m_pDepthSensorControl->GetHeight() >> PyramidLevel, g_TileSize2D);
         
+        Base::Float4x4* pIncMatrix = static_cast<Base::Float4x4*>(glMapNamedBufferRange(m_IncPoseMatrixBuffer, 0, sizeof(Base::Float4x4), GL_MAP_WRITE_BIT));
+        *pIncMatrix = rIncPoseMatrix;
+        glUnmapNamedBuffer(m_IncPoseMatrixBuffer);
+
         Gfx::ContextManager::SetShaderCS(m_CSDetermineSummands);
+
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_ICPBuffer);
+        glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_TrackingDataConstantBuffer);
+        glBindBufferBase(GL_UNIFORM_BUFFER, 2, m_IncPoseMatrixBuffer);
+        
         glBindImageTexture(0, m_KinectVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
         glBindImageTexture(1, m_KinectNormalMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
         glBindImageTexture(2, m_RaycastVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
@@ -692,14 +706,69 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxVoxelRenderer::CalculatePoseMatrix(int PyramidLevel)
+    void CGfxVoxelRenderer::CalculatePoseMatrix(Base::Float4x4& rIncPoseMatrix)
     {
+        float A[6 * 6];
+        float b[6];
+
+        int ValueIndex = 0;
+
         float* pICPBufferData = static_cast<float*>(glMapNamedBufferRange(m_ICPBuffer, 0, sizeof(float) * g_ICPValueCount, GL_MAP_READ_BIT));
-        for (int i = 0; i < g_ICPValueCount; ++i)
+        for (int i = 0; i < 6; ++ i)
         {
-            pICPBufferData[i];
+            for (int j = i; j < 7; ++ j)
+            {
+                float Value = pICPBufferData[ValueIndex++];
+                
+                if (j == 6)
+                {
+                    b[i] = Value;
+                }
+                else
+                {
+                    A[i * 6 + j] = A[j * 6 + i] = Value;
+                }
+            }
+        }       
+
+        float L[6 * 6];
+
+        for (int i = 0; i < 6; ++ i)
+        {
+            for (int j = 0; j <= i; ++ j)
+            {
+                float Sum = 0.0f;
+                for (int k = 0; k < j; ++ k)
+                {
+                    Sum += L[k * 6 + i] * L[k * 6 + j];
+                }
+                L[j * 6 + i] = i == j ? sqrt(A[i * 6 + i] - Sum) : ((1.0f / L[j * 6 + j]) * (A[j * 6 + i] - Sum));
+            }
         }
+
+        float x[6], y[6];
+        
+        y[0] = b[0] / L[0];
+        y[1] = (b[1] - L[1] * y[0]) / L[7];
+        y[2] = (b[2] - L[2] * y[0] - L[8] * y[1]) / L[14];
+        y[3] = (b[3] - L[3] * y[0] - L[9] * y[1] - L[15] * y[2]) / L[21];
+        y[4] = (b[4] - L[4] * y[0] - L[10] * y[1] - L[16] * y[2] - L[22] * y[3]) / L[28];
+        y[5] = (b[5] - L[5] * y[0] - L[11] * y[1] - L[17] * y[2] - L[23] * y[3] - L[29] * y[4]) / L[35];
+
+        x[5] = y[5] / L[35];
+        x[4] = (y[4] - L[29] * x[5]) / L[28];
+        x[3] = (y[3] - L[23] * x[5] - L[22] * x[4]) / L[21];
+        x[2] = (y[2] - L[17] * x[5] - L[16] * x[4] - L[15] * x[3]) / L[14];
+        x[1] = (y[1] - L[11] * x[5] - L[10] * x[4] - L[9] * x[3] - L[8] * x[2]) / L[7];
+        x[0] = (y[0] - L[5] * x[5] - L[4] * x[4] - L[3] * x[3] - L[2] * x[2] - L[1] * x[1]) / L[0];
+
         glUnmapNamedBuffer(m_ICPBuffer);
+
+        Base::Float4x4 Rotation, Translation;
+        Rotation.SetRotation(x[0], x[1], x[2]);
+        Translation.SetTranslation(x[3], x[4], x[5]);
+
+        rIncPoseMatrix = rIncPoseMatrix * Translation * Rotation;
     }
 
     // -----------------------------------------------------------------------------
@@ -798,14 +867,20 @@ namespace
         ReadKinectData();
 
         Performance::EndEvent();
-        Performance::BeginEvent("Kinect Tracking");
+        
+        if (!m_IsFirstIntegration)
+        {
+            Performance::BeginEvent("Kinect Tracking");
 
-        PerformTracking();
+            PerformTracking();
 
-        Performance::EndEvent();
+            Performance::EndEvent();
+        }
+
         Performance::BeginEvent("TSDF Integration and Raycasting");
 
         Integrate();
+        m_IsFirstIntegration = false;
         Raycast();
 
         DownSample();
@@ -818,6 +893,11 @@ namespace
     void CGfxVoxelRenderer::Render()
     {
         Performance::BeginEvent("Kinect Fusion");
+
+        STrackingData* pTrackingData = static_cast<STrackingData*>(glMapNamedBuffer(m_TrackingDataConstantBuffer, GL_WRITE_ONLY));
+        pTrackingData->m_PoseMatrix = m_PoseMatrix;
+        pTrackingData->m_InvPoseMatrix = m_PoseMatrix.GetInverted();
+        glUnmapNamedBuffer(m_TrackingDataConstantBuffer);
 
         //if (m_NewDepthDataAvailable)
         {
