@@ -18,6 +18,7 @@ layout(binding = 3, rgba32f) uniform image2D cs_RaycastNormalMap;
 layout(row_major, std140, binding = 2) uniform UBOInc
 {
     mat4 g_IncPoseMatrix;
+    mat4 g_InvIncPoseMatrix;
 };
 
 // -----------------------------------------------------------------------------
@@ -43,7 +44,7 @@ bool findCorrespondence(out vec3 Vertex, out vec3 RaycastVertex, out vec3 Raycas
         return false;
     }
 
-    Vertex = (g_InvPoseMatrix * vec4(ReferenceVertex, 1.0)).xyz;
+    Vertex = (g_IncPoseMatrix * g_InvPoseMatrix * vec4(ReferenceVertex, 1.0)).xyz;
     
     vec3 CameraPlane = mat3(g_Intrinisics[PyramidLevel].m_KMatrix) * Vertex;
     CameraPlane /= CameraPlane.z;
@@ -56,7 +57,7 @@ bool findCorrespondence(out vec3 Vertex, out vec3 RaycastVertex, out vec3 Raycas
 
     vec3 ReferenceNormal = imageLoad(cs_NormalMap, ivec2(x, y)).xyz;
 
-    ReferenceNormal = mat3(g_InvPoseMatrix) * ReferenceNormal;
+    ReferenceNormal = mat3(g_IncPoseMatrix) * mat3(g_InvPoseMatrix) * ReferenceNormal;
 
     if (ReferenceNormal.x == 0.0f)
     {
@@ -74,8 +75,8 @@ bool findCorrespondence(out vec3 Vertex, out vec3 RaycastVertex, out vec3 Raycas
         return false;
     }
 
-    RaycastVertex = (g_InvPoseMatrix * vec4(RaycastVertex, 1.0)).xyz;
-    RaycastNormal = (g_InvPoseMatrix * vec4(RaycastNormal, 0.0)).xyz;
+    RaycastVertex = (g_InvIncPoseMatrix * vec4(RaycastVertex, 1.0)).xyz;
+    RaycastNormal = (g_InvIncPoseMatrix * vec4(RaycastNormal, 0.0)).xyz;
 
     return true;
 }

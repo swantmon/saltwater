@@ -57,7 +57,7 @@ namespace
 
     const int g_PyramidLevels = 3;
 
-    const int g_ICPIterations[g_PyramidLevels] = { 1, 1, 1 }; //{ 10, 5, 4 };
+    const int g_ICPIterations[g_PyramidLevels] = { 10, 5, 4 };
     const float g_EpsilonDistance = 0.1f;
     const float g_EpsilonAngle = 0.7f;
 
@@ -132,7 +132,7 @@ namespace
 
         void DetermineSummands(int PyramidLevel, const Base::Float4x4& rIncPoseMatrix);
         void ReduceSum(int PyramidLevel);
-        void CalculatePoseMatrix(Base::Float4x4& rIncPoseMatrix);
+        bool CalculatePoseMatrix(Base::Float4x4& rIncPoseMatrix);
 
         // Just for debugging
 
@@ -649,10 +649,14 @@ namespace
             {
                 DetermineSummands(PyramidLevel, IncPoseMatrix);
                 ReduceSum(PyramidLevel);
-                CalculatePoseMatrix(IncPoseMatrix);
+
+                if (!CalculatePoseMatrix(IncPoseMatrix))
+                {
+                    return;
+                }
             }
         }
-        //m_PoseMatrix *= IncPoseMatrix;
+        m_PoseMatrix = IncPoseMatrix * m_PoseMatrix;
     }
 
     // -----------------------------------------------------------------------------
@@ -664,6 +668,7 @@ namespace
         
         Base::Float4x4* pIncMatrix = static_cast<Base::Float4x4*>(glMapNamedBufferRange(m_IncPoseMatrixBuffer, 0, sizeof(Base::Float4x4), GL_MAP_WRITE_BIT));
         *pIncMatrix = rIncPoseMatrix;
+        *(pIncMatrix + 1) = rIncPoseMatrix.GetInverted();
         glUnmapNamedBuffer(m_IncPoseMatrixBuffer);
 
         Gfx::ContextManager::SetShaderCS(m_CSDetermineSummands);
@@ -706,7 +711,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxVoxelRenderer::CalculatePoseMatrix(Base::Float4x4& rIncPoseMatrix)
+    bool CGfxVoxelRenderer::CalculatePoseMatrix(Base::Float4x4& rIncPoseMatrix)
     {
         float A[6 * 6];
         float b[6];
@@ -729,7 +734,9 @@ namespace
                     A[i * 6 + j] = A[j * 6 + i] = Value;
                 }
             }
-        }       
+        }
+
+        glUnmapNamedBuffer(m_ICPBuffer);
 
         float L[6 * 6];
 
@@ -744,6 +751,12 @@ namespace
                 }
                 L[j * 6 + i] = i == j ? sqrt(A[i * 6 + i] - Sum) : ((1.0f / L[j * 6 + j]) * (A[j * 6 + i] - Sum));
             }
+        }
+
+        const float Det = L[0] * L[0] * L[7] * L[7] * L[14] * L[14] * L[21] * L[21] * L[28] * L[28] * L[35] * L[35];
+        if (std::isnan(Det))
+        {
+            return false;
         }
 
         float x[6], y[6];
@@ -761,14 +774,12 @@ namespace
         x[2] = (y[2] - L[17] * x[5] - L[16] * x[4] - L[15] * x[3]) / L[14];
         x[1] = (y[1] - L[11] * x[5] - L[10] * x[4] - L[9] * x[3] - L[8] * x[2]) / L[7];
         x[0] = (y[0] - L[5] * x[5] - L[4] * x[4] - L[3] * x[3] - L[2] * x[2] - L[1] * x[1]) / L[0];
-
-        glUnmapNamedBuffer(m_ICPBuffer);
-
+        
         Base::Float4x4 Rotation, Translation;
         Rotation.SetRotation(x[0], x[1], x[2]);
         Translation.SetTranslation(x[3], x[4], x[5]);
 
-        rIncPoseMatrix = rIncPoseMatrix * Translation * Rotation;
+        rIncPoseMatrix = Translation * Rotation;
     }
 
     // -----------------------------------------------------------------------------
