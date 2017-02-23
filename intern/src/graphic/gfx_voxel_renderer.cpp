@@ -53,7 +53,7 @@ namespace
     const float g_TruncatedDistance = 30.0f;
     const float g_TruncatedDistanceInverse = 1.0f / g_TruncatedDistance;
 
-    const int g_MaxIntegrationWeight = 100;
+    const int g_MaxIntegrationWeight = 200;
 
     const int g_PyramidLevels = 3;
 
@@ -471,7 +471,7 @@ namespace
         glNamedBufferData(m_ICPSummationDataBuffer, 16, nullptr, GL_DYNAMIC_DRAW);
         
         glCreateBuffers(1, &m_IncPoseMatrixBuffer);
-        glNamedBufferData(m_IncPoseMatrixBuffer, sizeof(Base::Float4x4), nullptr, GL_DYNAMIC_DRAW);
+        glNamedBufferData(m_IncPoseMatrixBuffer, sizeof(Base::Float4x4) * 2, nullptr, GL_DYNAMIC_DRAW);
     }
     
     // -----------------------------------------------------------------------------
@@ -666,7 +666,7 @@ namespace
         const int WorkGroupsX = GetWorkGroupCount(m_pDepthSensorControl->GetWidth() >> PyramidLevel, g_TileSize2D);
         const int WorkGroupsY = GetWorkGroupCount(m_pDepthSensorControl->GetHeight() >> PyramidLevel, g_TileSize2D);
         
-        Base::Float4x4* pIncMatrix = static_cast<Base::Float4x4*>(glMapNamedBufferRange(m_IncPoseMatrixBuffer, 0, sizeof(Base::Float4x4), GL_MAP_WRITE_BIT));
+        Base::Float4x4* pIncMatrix = static_cast<Base::Float4x4*>(glMapNamedBufferRange(m_IncPoseMatrixBuffer, 0, sizeof(Base::Float4x4) * 2, GL_MAP_WRITE_BIT));
         *pIncMatrix = rIncPoseMatrix;
         *(pIncMatrix + 1) = rIncPoseMatrix.GetInverted();
         glUnmapNamedBuffer(m_IncPoseMatrixBuffer);
@@ -754,7 +754,7 @@ namespace
         }
 
         const float Det = L[0] * L[0] * L[7] * L[7] * L[14] * L[14] * L[21] * L[21] * L[28] * L[28] * L[35] * L[35];
-        if (std::isnan(Det))
+        if (std::isnan(Det) || (Det < 0.00001f && Det > -0.00001f))
         {
             return false;
         }
@@ -779,7 +779,7 @@ namespace
         Rotation.SetRotation(x[0], x[1], x[2]);
         Translation.SetTranslation(x[3], x[4], x[5]);
 
-        rIncPoseMatrix = Translation * Rotation;
+        rIncPoseMatrix = rIncPoseMatrix * Translation * Rotation;
     }
 
     // -----------------------------------------------------------------------------
@@ -888,6 +888,11 @@ namespace
             Performance::EndEvent();
         }
 
+        STrackingData* pTrackingData = static_cast<STrackingData*>(glMapNamedBuffer(m_TrackingDataConstantBuffer, GL_WRITE_ONLY));
+        pTrackingData->m_PoseMatrix = m_PoseMatrix;
+        pTrackingData->m_InvPoseMatrix = m_PoseMatrix.GetInverted();
+        glUnmapNamedBuffer(m_TrackingDataConstantBuffer);
+
         Performance::BeginEvent("TSDF Integration and Raycasting");
 
         Integrate();
@@ -905,16 +910,12 @@ namespace
     {
         Performance::BeginEvent("Kinect Fusion");
 
-        STrackingData* pTrackingData = static_cast<STrackingData*>(glMapNamedBuffer(m_TrackingDataConstantBuffer, GL_WRITE_ONLY));
-        pTrackingData->m_PoseMatrix = m_PoseMatrix;
-        pTrackingData->m_InvPoseMatrix = m_PoseMatrix.GetInverted();
-        glUnmapNamedBuffer(m_TrackingDataConstantBuffer);
-
         //if (m_NewDepthDataAvailable)
         {
             UpdateReconstruction();
             m_NewDepthDataAvailable = false;
         }
+
         RenderReconstructionData();
 
         Performance::EndEvent();

@@ -29,7 +29,7 @@ shared float g_SharedData[WORKGROUP_SIZE];
 // Functions
 // -------------------------------------------------------------------------------------
 
-bool findCorrespondence(out vec3 Vertex, out vec3 RaycastVertex, out vec3 RaycastNormal)
+bool findCorrespondence(out vec3 ReferenceVertex, out vec3 RaycastVertex, out vec3 RaycastNormal)
 {
     const int x = int(gl_GlobalInvocationID.x);
     const int y = int(gl_GlobalInvocationID.y);
@@ -37,14 +37,16 @@ bool findCorrespondence(out vec3 Vertex, out vec3 RaycastVertex, out vec3 Raycas
     const ivec2 ImageSize = imageSize(cs_VertexMap);
     const int PyramidLevel = int(log2(DEPTH_IMAGE_WIDTH / ImageSize.x));
 
-    vec3 ReferenceVertex = imageLoad(cs_VertexMap, ivec2(x, y)).xyz;
+    ReferenceVertex = imageLoad(cs_VertexMap, ivec2(x, y)).xyz;
 
     if (ReferenceVertex.x == 0.0f)
     {
         return false;
     }
 
-    Vertex = (g_IncPoseMatrix * g_InvPoseMatrix * vec4(ReferenceVertex, 1.0)).xyz;
+    ReferenceVertex = (g_IncPoseMatrix * vec4(ReferenceVertex, 1.0)).xyz;
+
+    vec3 Vertex = (g_InvPoseMatrix * vec4(ReferenceVertex, 1.0)).xyz;
     
     vec3 CameraPlane = mat3(g_Intrinisics[PyramidLevel].m_KMatrix) * Vertex;
     CameraPlane /= CameraPlane.z;
@@ -57,12 +59,12 @@ bool findCorrespondence(out vec3 Vertex, out vec3 RaycastVertex, out vec3 Raycas
 
     vec3 ReferenceNormal = imageLoad(cs_NormalMap, ivec2(x, y)).xyz;
 
-    ReferenceNormal = mat3(g_IncPoseMatrix) * mat3(g_InvPoseMatrix) * ReferenceNormal;
-
     if (ReferenceNormal.x == 0.0f)
     {
         return false;
     }
+
+    ReferenceNormal = (g_IncPoseMatrix * vec4(ReferenceNormal, 0.0)).xyz;
 
     RaycastVertex = (vec4(imageLoad(cs_RaycastVertexMap, ivec2(CameraPlane.xy)).xyz, 1.0)).xyz;
     RaycastNormal = (vec4(imageLoad(cs_RaycastNormalMap, ivec2(CameraPlane.xy)).xyz, 0.0)).xyz;
@@ -75,9 +77,9 @@ bool findCorrespondence(out vec3 Vertex, out vec3 RaycastVertex, out vec3 Raycas
         return false;
     }
 
-    RaycastVertex = (g_InvIncPoseMatrix * vec4(RaycastVertex, 1.0)).xyz;
-    RaycastNormal = (g_InvIncPoseMatrix * vec4(RaycastNormal, 0.0)).xyz;
-
+    RaycastVertex = (vec4(RaycastVertex, 1.0)).xyz;
+    RaycastNormal = (vec4(RaycastNormal, 0.0)).xyz;
+    
     return true;
 }
 
@@ -106,17 +108,17 @@ void main()
 
     const ivec2 ImageSize = imageSize(cs_VertexMap);
 
-    vec3 Vertex;
+    vec3 ReferenceVertex;
     vec3 RaycastVertex;
     vec3 RaycastNormal;
 
-    bool CorresponenceFound = findCorrespondence(Vertex, RaycastVertex, RaycastNormal);
+    bool CorresponenceFound = findCorrespondence(ReferenceVertex, RaycastVertex, RaycastNormal);
 
     float Row[7];
 
     if (CorresponenceFound)
     {
-        vec3 Cross = cross(Vertex, RaycastNormal);
+        vec3 Cross = cross(ReferenceVertex, RaycastNormal);
 
         Row[0] = Cross.x;
         Row[1] = Cross.y;
@@ -124,7 +126,7 @@ void main()
         Row[3] = RaycastNormal.x;
         Row[4] = RaycastNormal.y;
         Row[5] = RaycastNormal.z;
-        Row[6] = dot(RaycastNormal, RaycastVertex - Vertex);
+        Row[6] = dot(RaycastNormal, RaycastVertex - ReferenceVertex);
     }
     else
     {
