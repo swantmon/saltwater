@@ -449,14 +449,9 @@ namespace
 
         glCreateBuffers(1, &m_IntrinsicsConstantBuffer);
         glNamedBufferData(m_IntrinsicsConstantBuffer, sizeof(SIntrinsics) * g_PyramidLevels, Intrinsics, GL_STATIC_DRAW);
-
-        STrackingData TrackingData;
-                
-        TrackingData.m_PoseMatrix = m_PoseMatrix;
-        TrackingData.m_InvPoseMatrix = m_PoseMatrix.GetInverted();
-
+        
         glCreateBuffers(1, &m_TrackingDataConstantBuffer);
-        glNamedBufferData(m_TrackingDataConstantBuffer, sizeof(STrackingData), &TrackingData, GL_DYNAMIC_DRAW);
+        glNamedBufferData(m_TrackingDataConstantBuffer, sizeof(STrackingData), nullptr, GL_DYNAMIC_DRAW);
 
         glCreateBuffers(1, &m_RaycastPyramidConstantBuffer);
         glNamedBufferData(m_RaycastPyramidConstantBuffer, 16, nullptr, GL_DYNAMIC_DRAW);
@@ -640,8 +635,8 @@ namespace
 
     void CGfxVoxelRenderer::PerformTracking()
     {
-        Base::Float4x4 IncPoseMatrix;
-        IncPoseMatrix.SetIdentity();
+        Base::Float4x4 IncPoseMatrix = m_PoseMatrix;
+        //IncPoseMatrix.SetIdentity();
 
         for (int PyramidLevel = g_PyramidLevels - 1; PyramidLevel >= 0; -- PyramidLevel)
         {
@@ -656,7 +651,7 @@ namespace
                 }
             }
         }
-        m_PoseMatrix = IncPoseMatrix * m_PoseMatrix;
+        m_PoseMatrix = IncPoseMatrix;
     }
 
     // -----------------------------------------------------------------------------
@@ -682,6 +677,7 @@ namespace
         glBindImageTexture(2, m_RaycastVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
         glBindImageTexture(3, m_RaycastNormalMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
         glBindImageTexture(4, m_DebugBuffer[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
         glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
     }
@@ -706,6 +702,7 @@ namespace
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_ICPBuffer);
         glBindBufferBase(GL_UNIFORM_BUFFER, 2, m_ICPSummationDataBuffer);
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
         glDispatchCompute(1, g_ICPValueCount, 1);
     }
 
@@ -718,6 +715,7 @@ namespace
 
         int ValueIndex = 0;
 
+        glFinish();
         float* pICPBufferData = static_cast<float*>(glMapNamedBufferRange(m_ICPBuffer, 0, sizeof(float) * g_ICPValueCount, GL_MAP_READ_BIT));
         for (int i = 0; i < 6; ++ i)
         {
@@ -731,7 +729,7 @@ namespace
                 }
                 else
                 {
-                    A[i * 6 + j] = A[j * 6 + i] = Value;
+                    A[j * 6 + i] = A[i * 6 + j] = Value;
                 }
             }
         }
@@ -739,6 +737,8 @@ namespace
         glUnmapNamedBuffer(m_ICPBuffer);
 
         float L[6 * 6];
+
+        std::memset(L, 0.0f, sizeof(L[0]) * 36);
 
         for (int i = 0; i < 6; ++ i)
         {
@@ -754,12 +754,12 @@ namespace
         }
 
         const float Det = L[0] * L[0] * L[7] * L[7] * L[14] * L[14] * L[21] * L[21] * L[28] * L[28] * L[35] * L[35];
-        if (std::isnan(Det) || (Det < 0.00001f && Det > -0.00001f))
+        if (std::isnan(Det) || (Det < 1e-9 && Det > -1e-9))
         {
             return false;
         }
 
-        float x[6], y[6];
+        float y[6];
         
         y[0] = b[0] / L[0];
         y[1] = (b[1] - L[1] * y[0]) / L[7];
@@ -767,6 +767,8 @@ namespace
         y[3] = (b[3] - L[3] * y[0] - L[9] * y[1] - L[15] * y[2]) / L[21];
         y[4] = (b[4] - L[4] * y[0] - L[10] * y[1] - L[16] * y[2] - L[22] * y[3]) / L[28];
         y[5] = (b[5] - L[5] * y[0] - L[11] * y[1] - L[17] * y[2] - L[23] * y[3] - L[29] * y[4]) / L[35];
+
+        float x[6];
 
         x[5] = y[5] / L[35];
         x[4] = (y[4] - L[29] * x[5]) / L[28];
@@ -779,7 +781,9 @@ namespace
         Rotation.SetRotation(x[0], x[1], x[2]);
         Translation.SetTranslation(x[3], x[4], x[5]);
 
-        rIncPoseMatrix = rIncPoseMatrix * Translation * Rotation;
+        rIncPoseMatrix = Translation * Rotation * rIncPoseMatrix;
+
+        return true;
     }
 
     // -----------------------------------------------------------------------------
@@ -872,13 +876,18 @@ namespace
     // -----------------------------------------------------------------------------
 
     void CGfxVoxelRenderer::UpdateReconstruction()
-    {        
+    {
+        STrackingData* pTrackingData = static_cast<STrackingData*>(glMapNamedBuffer(m_TrackingDataConstantBuffer, GL_WRITE_ONLY));
+        pTrackingData->m_PoseMatrix = m_PoseMatrix;
+        pTrackingData->m_InvPoseMatrix = m_PoseMatrix.GetInverted();
+        glUnmapNamedBuffer(m_TrackingDataConstantBuffer);
+
         Performance::BeginEvent("Kinect Data Input");
 
         ReadKinectData();
 
         Performance::EndEvent();
-        
+
         if (!m_IsFirstIntegration)
         {
             Performance::BeginEvent("Kinect Tracking");
@@ -887,11 +896,6 @@ namespace
 
             Performance::EndEvent();
         }
-
-        STrackingData* pTrackingData = static_cast<STrackingData*>(glMapNamedBuffer(m_TrackingDataConstantBuffer, GL_WRITE_ONLY));
-        pTrackingData->m_PoseMatrix = m_PoseMatrix;
-        pTrackingData->m_InvPoseMatrix = m_PoseMatrix.GetInverted();
-        glUnmapNamedBuffer(m_TrackingDataConstantBuffer);
 
         Performance::BeginEvent("TSDF Integration and Raycasting");
 
@@ -986,7 +990,7 @@ namespace
     void CGfxVoxelRenderer::RenderVertexMap(GLuint VertexMap, GLuint NormalMap)
     {
         Base::Float4x4* pData = static_cast<Base::Float4x4*>(glMapNamedBuffer(m_DrawCallConstantBuffer, GL_WRITE_ONLY));
-        *pData = m_VertexMapWorldMatrix;
+        *pData = m_VertexMapWorldMatrix * m_PoseMatrix;
         glUnmapNamedBuffer(m_DrawCallConstantBuffer);
 
         glBindVertexArray(1); // dummy vao because opengl needs vertex data even when it does not use it

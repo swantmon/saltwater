@@ -28,7 +28,7 @@ void main(void)
 	VertexMapPosition.y = gl_VertexID % ImageSize.x;
 	
 	vec4 Vertex = vec4(imageLoad(vs_VertexMap, VertexMapPosition).xyz, 1.0);
-		
+    
     IsValid = Vertex.x != 0.0 ? 1 : 0;
 
     TexCoords = VertexMapPosition;

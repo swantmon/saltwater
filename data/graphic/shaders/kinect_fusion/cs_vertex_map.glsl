@@ -38,12 +38,7 @@ void main()
 	Vertex.z = Depth;
 	Vertex.w = 1.0f;
 
-    Vertex = g_PoseMatrix * Vertex;
-	
-    bool IsValid = Depth > 0.0f &&
-        Vertex.x > 0.0f && Vertex.x < VOLUME_SIZE &&
-        Vertex.y > 0.0f && Vertex.y < VOLUME_SIZE &&
-        Vertex.z > 0.0f && Vertex.z < VOLUME_SIZE;
+    bool IsValid = Depth > 0.0f;
 
 	imageStore(cs_VertexMap, ivec2(ImagePos), IsValid ? Vertex : vec4(0.0f));
 }

@@ -14,6 +14,7 @@ layout(binding = 0, rgba32f) uniform image2D cs_VertexMap;
 layout(binding = 1, rgba32f) uniform image2D cs_NormalMap;
 layout(binding = 2, rgba32f) uniform image2D cs_RaycastVertexMap;
 layout(binding = 3, rgba32f) uniform image2D cs_RaycastNormalMap;
+layout(binding = 4, rgba32f) uniform image2D cs_Debug;
 
 layout(row_major, std140, binding = 2) uniform UBOInc
 {
@@ -29,6 +30,23 @@ shared float g_SharedData[WORKGROUP_SIZE];
 // Functions
 // -------------------------------------------------------------------------------------
 
+void reduce()
+{
+    int SumCount = WORKGROUP_SIZE / 2;
+
+    while (SumCount > 0)
+    {
+        if (gl_LocalInvocationIndex < SumCount)
+        {
+            g_SharedData[gl_LocalInvocationIndex] += g_SharedData[gl_LocalInvocationIndex + SumCount];
+        }
+
+        SumCount /= 2;
+
+        barrier();
+    }
+}
+
 bool findCorrespondence(out vec3 ReferenceVertex, out vec3 RaycastVertex, out vec3 RaycastNormal)
 {
     const int x = int(gl_GlobalInvocationID.x);
@@ -37,18 +55,17 @@ bool findCorrespondence(out vec3 ReferenceVertex, out vec3 RaycastVertex, out ve
     const ivec2 ImageSize = imageSize(cs_VertexMap);
     const int PyramidLevel = int(log2(DEPTH_IMAGE_WIDTH / ImageSize.x));
 
-    ReferenceVertex = imageLoad(cs_VertexMap, ivec2(x, y)).xyz;
+    vec3 Vertex = imageLoad(cs_VertexMap, ivec2(x, y)).xyz;
 
-    if (ReferenceVertex.x == 0.0f)
+    if (Vertex.x == 0.0f)
     {
         return false;
     }
 
-    ReferenceVertex = (g_IncPoseMatrix * vec4(ReferenceVertex, 1.0)).xyz;
+    ReferenceVertex = (g_IncPoseMatrix * vec4(Vertex, 1.0)).xyz;
 
-    vec3 Vertex = (g_InvPoseMatrix * vec4(ReferenceVertex, 1.0)).xyz;
-    
-    vec3 CameraPlane = mat3(g_Intrinisics[PyramidLevel].m_KMatrix) * Vertex;
+    vec3 CameraPlane = (g_InvPoseMatrix * vec4(ReferenceVertex, 1.0)).xyz;
+    CameraPlane = mat3(g_Intrinisics[PyramidLevel].m_KMatrix) * CameraPlane;
     CameraPlane /= CameraPlane.z;
 
     if (CameraPlane.x < 0.0f || CameraPlane.x > ImageSize.x ||
@@ -66,38 +83,24 @@ bool findCorrespondence(out vec3 ReferenceVertex, out vec3 RaycastVertex, out ve
 
     ReferenceNormal = (g_IncPoseMatrix * vec4(ReferenceNormal, 0.0)).xyz;
 
-    RaycastVertex = (vec4(imageLoad(cs_RaycastVertexMap, ivec2(CameraPlane.xy)).xyz, 1.0)).xyz;
-    RaycastNormal = (vec4(imageLoad(cs_RaycastNormalMap, ivec2(CameraPlane.xy)).xyz, 0.0)).xyz;
+    RaycastVertex = imageLoad(cs_RaycastVertexMap, ivec2(CameraPlane.xy)).xyz;
+    RaycastNormal = imageLoad(cs_RaycastNormalMap, ivec2(CameraPlane.xy)).xyz;
+
+    if (RaycastVertex.x == 0.0f || RaycastNormal.x == 0.0f)
+    {
+        return false;
+    }
 
     const float Distance = distance(ReferenceVertex, RaycastVertex);
     const float Angle = dot(ReferenceNormal, RaycastNormal);
 
     if (Distance > EPSILON_DISTANCE || Angle < EPSILON_ANGLE)
     {
+        imageStore(cs_Debug, ivec2(x, y), vec4(Distance, Angle, 0.0f, 1.0f));
         return false;
     }
-
-    RaycastVertex = (vec4(RaycastVertex, 1.0)).xyz;
-    RaycastNormal = (vec4(RaycastNormal, 0.0)).xyz;
     
     return true;
-}
-
-void reduce()
-{
-    int SumCount = WORKGROUP_SIZE / 2;
-
-    while (SumCount > 0)
-    {
-        if (gl_LocalInvocationIndex < SumCount)
-        {
-            g_SharedData[gl_LocalInvocationIndex] += g_SharedData[gl_LocalInvocationIndex + SumCount];
-        }
-
-        SumCount /= 2;
-
-        barrier();
-    }
 }
 
 layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
