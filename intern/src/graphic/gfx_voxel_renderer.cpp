@@ -333,13 +333,13 @@ namespace
 
             Defines[i] = DefineStrings[i].c_str();
         }
-
-        m_VSVisualizeDepth = ShaderManager::CompileVS("kinect_fusion\\vs_visualize_depth.glsl", "main");
-        m_FSVisualizeDepth = ShaderManager::CompilePS("kinect_fusion\\fs_visualize_depth.glsl", "main");
-        m_VSVisualizeVertexMap = ShaderManager::CompileVS("kinect_fusion\\vs_visualize_vertex_map.glsl", "main", NumberOfDefines, Defines.data());
-        m_FSVisualizeVertexMap = ShaderManager::CompilePS("kinect_fusion\\fs_visualize_vertex_map.glsl", "main");
-        m_VSVisualizeVolume = ShaderManager::CompileVS("kinect_fusion\\vs_visualize_volume.glsl", "main", NumberOfDefines, Defines.data());
-        m_FSVisualizeVolume = ShaderManager::CompilePS("kinect_fusion\\fs_visualize_volume.glsl", "main");
+        
+        m_VSVisualizeDepth = ShaderManager::CompileVS("kinect_fusion\\debug\\vs_visualize_depth.glsl", "main");
+        m_FSVisualizeDepth = ShaderManager::CompilePS("kinect_fusion\\debug\\fs_visualize_depth.glsl", "main");
+        m_VSVisualizeVertexMap = ShaderManager::CompileVS("kinect_fusion\\debug\\vs_visualize_vertex_map.glsl", "main", NumberOfDefines, Defines.data());
+        m_FSVisualizeVertexMap = ShaderManager::CompilePS("kinect_fusion\\Debug\\fs_visualize_vertex_map.glsl", "main");
+        m_VSVisualizeVolume = ShaderManager::CompileVS("kinect_fusion\\debug\\vs_visualize_volume.glsl", "main", NumberOfDefines, Defines.data());
+        m_FSVisualizeVolume = ShaderManager::CompilePS("kinect_fusion\\debug\\fs_visualize_volume.glsl", "main");
 
         m_CSMirrorDepth = ShaderManager::CompileCS("kinect_fusion\\cs_mirror_depth.glsl", "main", NumberOfDefines, Defines.data());
         m_CSBilateralFilter = ShaderManager::CompileCS("kinect_fusion\\cs_bilateral_filter.glsl", "main", NumberOfDefines, Defines.data());
