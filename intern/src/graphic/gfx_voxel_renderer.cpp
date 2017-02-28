@@ -290,8 +290,7 @@ namespace
         glDeleteBuffers(1, &m_ICPSummationDataBuffer);
         glDeleteBuffers(1, &m_IncPoseMatrixBuffer);
     }
-
-    
+        
     // -----------------------------------------------------------------------------
     
     void CGfxVoxelRenderer::OnSetupShader()
@@ -710,7 +709,7 @@ namespace
 
     bool CGfxVoxelRenderer::CalculatePoseMatrix(Base::Float4x4& rIncPoseMatrix)
     {
-        float A[6 * 6];
+        float A[36];
         float b[6];
 
         int ValueIndex = 0;
@@ -736,9 +735,8 @@ namespace
 
         glUnmapNamedBuffer(m_ICPBuffer);
 
-        float L[6 * 6];
-
-        std::memset(L, 0.0f, sizeof(L[0]) * 36);
+        float L[36];
+        std::memset(L, 0, sizeof(L[0]) * 36);
 
         for (int i = 0; i < 6; ++ i)
         {
@@ -777,11 +775,20 @@ namespace
         x[1] = (y[1] - L[11] * x[5] - L[10] * x[4] - L[9] * x[3] - L[8] * x[2]) / L[7];
         x[0] = (y[0] - L[5] * x[5] - L[4] * x[4] - L[3] * x[3] - L[2] * x[2] - L[1] * x[1]) / L[0];
         
-        Base::Float4x4 Rotation, Translation;
+        Base::Float4x4 RotationX, RotationY, RotationZ, Rotation, Translation;
+        RotationX.SetRotationX(x[0]);
+        RotationY.SetRotationY(x[1]);
+        RotationZ.SetRotationZ(x[2]);
+        Rotation = RotationZ * RotationY * RotationX;
+        Translation.SetTranslation(x[3], x[4], x[5]);
+        
+        rIncPoseMatrix = Translation * Rotation * rIncPoseMatrix;
+
+        /*Base::Float4x4 Rotation, Translation;
         Rotation.SetRotation(x[0], x[1], x[2]);
         Translation.SetTranslation(x[3], x[4], x[5]);
 
-        rIncPoseMatrix = Translation * Rotation * rIncPoseMatrix;
+        rIncPoseMatrix = Translation * Rotation * rIncPoseMatrix;*/
 
         return true;
     }

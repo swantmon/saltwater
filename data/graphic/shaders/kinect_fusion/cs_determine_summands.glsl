@@ -6,9 +6,9 @@
 
 #define WORKGROUP_SIZE (TILE_SIZE2D) * (TILE_SIZE2D)
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 // Input from engine
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 
 layout(binding = 0, rgba32f) uniform image2D cs_VertexMap;
 layout(binding = 1, rgba32f) uniform image2D cs_NormalMap;
@@ -22,7 +22,7 @@ layout(row_major, std140, binding = 2) uniform UBOInc
     mat4 g_InvIncPoseMatrix;
 };
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 
 shared float g_SharedData[WORKGROUP_SIZE];
 
@@ -64,7 +64,7 @@ bool findCorrespondence(out vec3 ReferenceVertex, out vec3 RaycastVertex, out ve
 
     ReferenceVertex = (g_IncPoseMatrix * vec4(Vertex, 1.0)).xyz;
 
-    vec3 CameraPlane = (g_InvPoseMatrix * vec4(ReferenceVertex, 1.0)).xyz;
+    vec3 CameraPlane = (g_InvIncPoseMatrix * vec4(ReferenceVertex, 1.0)).xyz;
     CameraPlane = mat3(g_Intrinisics[PyramidLevel].m_KMatrix) * CameraPlane;
     CameraPlane /= CameraPlane.z;
 
