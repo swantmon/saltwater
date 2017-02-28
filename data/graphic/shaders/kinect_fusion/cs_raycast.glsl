@@ -57,6 +57,38 @@ float GetInterPolatedTSDF(vec3 Position)
     return textureLod(cs_Volume, Coords / float(VOLUME_RESOLUTION), 0).x / float(INT16_MAX);
 }
 
+vec3 GetNormal(vec3 Vertex)
+{
+    vec3 T, Normal;
+
+    T = Vertex;
+    T.x += VOXEL_SIZE;
+    float Fx1 = GetInterPolatedTSDF(T);
+    T = Vertex;
+    T.x -= VOXEL_SIZE;
+    float Fx2 = GetInterPolatedTSDF(T);
+
+    T = Vertex;
+    T.y += VOXEL_SIZE;
+    float Fy1 = GetInterPolatedTSDF(T);
+    T = Vertex;
+    T.y -= VOXEL_SIZE;
+    float Fy2 = GetInterPolatedTSDF(T);
+    
+    T = Vertex;
+    T.z += VOXEL_SIZE;
+    float Fz1 = GetInterPolatedTSDF(T);
+    T = Vertex;
+    T.z -= VOXEL_SIZE;
+    float Fz2 = GetInterPolatedTSDF(T);
+
+    Normal.x = Fx2 - Fx1;
+    Normal.y = Fy2 - Fy1;
+    Normal.z = Fz2 - Fz1;
+
+    return normalize(Normal);
+}
+
 layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
 void main()
 {
@@ -120,6 +152,7 @@ void main()
     }
 
     imageStore(cs_Vertex, VertexMapPosition, vec4(Vertex, 1.0f));
+    imageStore(cs_Normal, VertexMapPosition, vec4(GetNormal(Vertex), 1.0f));
 }
 
 #endif // __INCLUDE_CS_KINECT_INTEGRATE_VOLUME_GLSL__

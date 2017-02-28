@@ -870,14 +870,14 @@ namespace
 
         glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
 
-        Gfx::ContextManager::SetShaderCS(m_CSNormalMap);
+        /*Gfx::ContextManager::SetShaderCS(m_CSNormalMap);
 
         glBindImageTexture(0, m_RaycastVertexMap[0], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
         glBindImageTexture(1, m_RaycastNormalMap[0], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
         
-        glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
+        glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);*/
     }
 
     // -----------------------------------------------------------------------------
@@ -945,7 +945,7 @@ namespace
         glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         
-        //RenderDepth();
+        RenderDepth();
 
         //GLint ViewPort[4];
         //glGetIntegerv(GL_VIEWPORT, ViewPort);
