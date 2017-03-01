@@ -35,6 +35,7 @@
 
 #include <gl/glew.h>
 
+#include <iostream>
 #include <limits>
 #include <memory>
 #include <sstream>
@@ -57,7 +58,7 @@ namespace
 
     const int g_PyramidLevels = 3;
 
-    const int g_ICPIterations[g_PyramidLevels] = { 10, 5, 4 };
+    const int g_ICPIterations[g_PyramidLevels] = { 1, 1, 1 };
     const float g_EpsilonDistance = 0.1f;
     const float g_EpsilonAngle = 0.7f;
 
@@ -134,6 +135,8 @@ namespace
         void ReduceSum(int PyramidLevel);
         bool CalculatePoseMatrix(Base::Float4x4& rIncPoseMatrix);
 
+        void Draw();
+
         // Just for debugging
 
         void RenderReconstructionData();
@@ -146,7 +149,7 @@ namespace
 
         void SetSphere();
 
-        GLuint m_DebugBuffer[g_PyramidLevels];
+        GLuint m_DebugBuffer;
 
     private:
 
@@ -154,8 +157,8 @@ namespace
         GLuint m_IntrinsicsConstantBuffer;
         GLuint m_TrackingDataConstantBuffer;
         GLuint m_RaycastPyramidConstantBuffer;
-        GLuint m_ICPSummationDataBuffer;
-        GLuint m_IncPoseMatrixBuffer;
+        GLuint m_ICPSummationConstantBuffer;
+        GLuint m_IncPoseMatrixConstantBuffer;
 
         CShaderPtr m_VSVisualizeDepth;
         CShaderPtr m_FSVisualizeDepth;
@@ -163,6 +166,7 @@ namespace
         CShaderPtr m_FSVisualizeVertexMap;
         CShaderPtr m_VSVisualizeVolume;
         CShaderPtr m_FSVisualizeVolume;
+        CShaderPtr m_CSSphere;
 
         CShaderPtr m_CSMirrorDepth;
         CShaderPtr m_CSBilateralFilter;
@@ -173,9 +177,9 @@ namespace
         CShaderPtr m_CSRaycast;
         CShaderPtr m_CSRaycastPyramid;
         CShaderPtr m_CSDetermineSummands;
-        CShaderPtr m_CSReduceSum;
-
-        CShaderPtr m_CSSphere;
+        CShaderPtr m_CSReduceSum;        
+        CShaderPtr m_VSRaycast;
+        CShaderPtr m_FSRaycast;
 
         GLuint m_KinectRawDepthBuffer;
         GLuint m_KinectSmoothDepthBuffer[g_PyramidLevels];
@@ -260,6 +264,7 @@ namespace
         m_FSVisualizeVertexMap = 0;
         m_VSVisualizeVolume = 0;
         m_FSVisualizeVolume = 0;
+        m_CSSphere = 0;
 
         m_CSMirrorDepth = 0;
         m_CSBilateralFilter = 0;
@@ -271,7 +276,8 @@ namespace
         m_CSRaycastPyramid = 0;
         m_CSDetermineSummands = 0;
         m_CSReduceSum = 0;
-        m_CSSphere = 0;
+        m_VSRaycast = 0;
+        m_FSRaycast = 0;        
 
         glDeleteTextures(1, &m_KinectRawDepthBuffer);
         glDeleteTextures(g_PyramidLevels, m_KinectSmoothDepthBuffer);
@@ -280,15 +286,15 @@ namespace
         glDeleteTextures(g_PyramidLevels, m_RaycastVertexMap);
         glDeleteTextures(g_PyramidLevels, m_RaycastNormalMap);
         glDeleteTextures(1, &m_Volume);
-        glDeleteTextures(g_PyramidLevels, m_DebugBuffer);
+        glDeleteTextures(1, &m_DebugBuffer);
 
         glDeleteBuffers(1, &m_DrawCallConstantBuffer);
         glDeleteBuffers(1, &m_IntrinsicsConstantBuffer);
         glDeleteBuffers(1, &m_TrackingDataConstantBuffer);
         glDeleteBuffers(1, &m_RaycastPyramidConstantBuffer);
         glDeleteBuffers(1, &m_ICPBuffer);
-        glDeleteBuffers(1, &m_ICPSummationDataBuffer);
-        glDeleteBuffers(1, &m_IncPoseMatrixBuffer);
+        glDeleteBuffers(1, &m_ICPSummationConstantBuffer);
+        glDeleteBuffers(1, &m_IncPoseMatrixConstantBuffer);
     }
         
     // -----------------------------------------------------------------------------
@@ -334,12 +340,13 @@ namespace
             Defines[i] = DefineStrings[i].c_str();
         }
 
-        m_VSVisualizeDepth = ShaderManager::CompileVS("kinect_fusion\\vs_visualize_depth.glsl", "main");
-        m_FSVisualizeDepth = ShaderManager::CompilePS("kinect_fusion\\fs_visualize_depth.glsl", "main");
+        m_VSVisualizeDepth = ShaderManager::CompileVS("kinect_fusion\\vs_visualize_depth.glsl", "main", NumberOfDefines, Defines.data());
+        m_FSVisualizeDepth = ShaderManager::CompilePS("kinect_fusion\\fs_visualize_depth.glsl", "main", NumberOfDefines, Defines.data());
         m_VSVisualizeVertexMap = ShaderManager::CompileVS("kinect_fusion\\vs_visualize_vertex_map.glsl", "main", NumberOfDefines, Defines.data());
-        m_FSVisualizeVertexMap = ShaderManager::CompilePS("kinect_fusion\\fs_visualize_vertex_map.glsl", "main");
+        m_FSVisualizeVertexMap = ShaderManager::CompilePS("kinect_fusion\\fs_visualize_vertex_map.glsl", "main", NumberOfDefines, Defines.data());
         m_VSVisualizeVolume = ShaderManager::CompileVS("kinect_fusion\\vs_visualize_volume.glsl", "main", NumberOfDefines, Defines.data());
-        m_FSVisualizeVolume = ShaderManager::CompilePS("kinect_fusion\\fs_visualize_volume.glsl", "main");
+        m_FSVisualizeVolume = ShaderManager::CompilePS("kinect_fusion\\fs_visualize_volume.glsl", "main", NumberOfDefines, Defines.data());
+        m_CSSphere = ShaderManager::CompileCS("kinect_fusion\\cs_sphere.glsl", "main", NumberOfDefines, Defines.data());
 
         m_CSMirrorDepth = ShaderManager::CompileCS("kinect_fusion\\cs_mirror_depth.glsl", "main", NumberOfDefines, Defines.data());
         m_CSBilateralFilter = ShaderManager::CompileCS("kinect_fusion\\cs_bilateral_filter.glsl", "main", NumberOfDefines, Defines.data());
@@ -351,8 +358,8 @@ namespace
         m_CSRaycastPyramid = ShaderManager::CompileCS("kinect_fusion\\cs_raycast_pyramid.glsl", "main", NumberOfDefines, Defines.data());
         m_CSDetermineSummands = ShaderManager::CompileCS("kinect_fusion\\cs_determine_summands.glsl", "main", NumberOfDefines, Defines.data());
         m_CSReduceSum = ShaderManager::CompileCS("kinect_fusion\\cs_reduce_sum.glsl", "main", NumberOfDefines, Defines.data());
-
-        m_CSSphere = ShaderManager::CompileCS("kinect_fusion\\cs_sphere.glsl", "main", NumberOfDefines, Defines.data());
+        m_VSRaycast = ShaderManager::CompileVS("kinect_fusion\\vs_raycast.glsl", "main", NumberOfDefines, Defines.data());
+        m_FSRaycast = ShaderManager::CompilePS("kinect_fusion\\fs_raycast.glsl", "main", NumberOfDefines, Defines.data());
     }
     
     // -----------------------------------------------------------------------------
@@ -391,7 +398,8 @@ namespace
 
         glTextureStorage2D(m_KinectRawDepthBuffer, 1, GL_R16UI, m_pDepthSensorControl->GetWidth(), m_pDepthSensorControl->GetHeight());
         
-        glCreateTextures(GL_TEXTURE_2D, g_PyramidLevels, m_DebugBuffer);
+        glCreateTextures(GL_TEXTURE_2D, 1, &m_DebugBuffer);
+        glTextureStorage2D(m_DebugBuffer, 1, GL_RGBA32F, m_pDepthSensorControl->GetWidth(), m_pDepthSensorControl->GetHeight());
 
         for (int i = 0; i < g_PyramidLevels; ++i)
         {
@@ -403,7 +411,6 @@ namespace
             glTextureStorage2D(m_KinectNormalMap[i], 1, GL_RGBA32F, Width, Height);
             glTextureStorage2D(m_RaycastVertexMap[i], 1, GL_RGBA32F, Width, Height);
             glTextureStorage2D(m_RaycastNormalMap[i], 1, GL_RGBA32F, Width, Height);
-            glTextureStorage2D(m_DebugBuffer[i], 1, GL_RGBA32F, Width, Height);
         }
 
         glTextureStorage3D(m_Volume, 1, GL_RG16I, g_VolumeResolution, g_VolumeResolution, g_VolumeResolution);        
@@ -461,11 +468,11 @@ namespace
         glCreateBuffers(1, &m_ICPBuffer);
         glNamedBufferData(m_ICPBuffer, sizeof(float) * ICPRowCount * g_ICPValueCount, nullptr, GL_DYNAMIC_COPY);
 
-        glCreateBuffers(1, &m_ICPSummationDataBuffer);
-        glNamedBufferData(m_ICPSummationDataBuffer, 16, nullptr, GL_DYNAMIC_DRAW);
+        glCreateBuffers(1, &m_ICPSummationConstantBuffer);
+        glNamedBufferData(m_ICPSummationConstantBuffer, 16, nullptr, GL_DYNAMIC_DRAW);
         
-        glCreateBuffers(1, &m_IncPoseMatrixBuffer);
-        glNamedBufferData(m_IncPoseMatrixBuffer, sizeof(Base::Float4x4) * 2, nullptr, GL_DYNAMIC_DRAW);
+        glCreateBuffers(1, &m_IncPoseMatrixConstantBuffer);
+        glNamedBufferData(m_IncPoseMatrixConstantBuffer, sizeof(Base::Float4x4) * 2, nullptr, GL_DYNAMIC_DRAW);
     }
     
     // -----------------------------------------------------------------------------
@@ -563,6 +570,43 @@ namespace
     
     // -----------------------------------------------------------------------------
     
+    void CGfxVoxelRenderer::Draw()
+    {
+        Performance::BeginEvent("Rendering");
+
+        glBindVertexArray(1); // dummy vao because opengl needs vertex data even when it does not use it
+
+        CTargetSetPtr DefaultTargetSetPtr = TargetSetManager::GetDefaultTargetSet();
+        CNativeTargetSet NativeTargetSet = *static_cast<CNativeTargetSet*>(DefaultTargetSetPtr.GetPtr());
+
+        glBindFramebuffer(GL_FRAMEBUFFER, NativeTargetSet.m_NativeTargetSet);
+        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        
+        CSamplerPtr Sampler = Gfx::SamplerManager::GetSampler(Gfx::CSampler::ESampler::MinMagMipLinearClamp);
+        CNativeSampler* NativeSampler = static_cast<CNativeSampler*>(Sampler.GetPtr());
+
+        Gfx::ContextManager::SetShaderVS(m_VSRaycast);
+        Gfx::ContextManager::SetShaderPS(m_FSRaycast);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_3D, m_Volume);
+        glBindSampler(0, NativeSampler->m_NativeSampler);
+
+        //glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_IntrinsicsConstantBuffer);
+        //glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_TrackingDataConstantBuffer);
+
+        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxVoxelRenderer::ReadKinectData()
     {
         const int WorkGroupsX = GetWorkGroupCount(m_pDepthSensorControl->GetWidth(), g_TileSize2D);
@@ -577,6 +621,7 @@ namespace
         Gfx::ContextManager::SetShaderCS(m_CSBilateralFilter);
         glBindImageTexture(0, m_KinectRawDepthBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
         glBindImageTexture(1, m_KinectSmoothDepthBuffer[0], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16UI);
+        glBindImageTexture(2, m_DebugBuffer, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
         glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
 
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
@@ -635,7 +680,6 @@ namespace
     void CGfxVoxelRenderer::PerformTracking()
     {
         Base::Float4x4 IncPoseMatrix = m_PoseMatrix;
-        //IncPoseMatrix.SetIdentity();
 
         for (int PyramidLevel = g_PyramidLevels - 1; PyramidLevel >= 0; -- PyramidLevel)
         {
@@ -660,22 +704,21 @@ namespace
         const int WorkGroupsX = GetWorkGroupCount(m_pDepthSensorControl->GetWidth() >> PyramidLevel, g_TileSize2D);
         const int WorkGroupsY = GetWorkGroupCount(m_pDepthSensorControl->GetHeight() >> PyramidLevel, g_TileSize2D);
         
-        Base::Float4x4* pIncMatrix = static_cast<Base::Float4x4*>(glMapNamedBufferRange(m_IncPoseMatrixBuffer, 0, sizeof(Base::Float4x4) * 2, GL_MAP_WRITE_BIT));
+        Base::Float4x4* pIncMatrix = static_cast<Base::Float4x4*>(glMapNamedBufferRange(m_IncPoseMatrixConstantBuffer, 0, sizeof(Base::Float4x4) * 2, GL_MAP_WRITE_BIT));
         *pIncMatrix = rIncPoseMatrix;
         *(pIncMatrix + 1) = rIncPoseMatrix.GetInverted();
-        glUnmapNamedBuffer(m_IncPoseMatrixBuffer);
+        glUnmapNamedBuffer(m_IncPoseMatrixConstantBuffer);
 
         Gfx::ContextManager::SetShaderCS(m_CSDetermineSummands);
 
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_ICPBuffer);
         glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_TrackingDataConstantBuffer);
-        glBindBufferBase(GL_UNIFORM_BUFFER, 2, m_IncPoseMatrixBuffer);
+        glBindBufferBase(GL_UNIFORM_BUFFER, 2, m_IncPoseMatrixConstantBuffer);
         
         glBindImageTexture(0, m_KinectVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
         glBindImageTexture(1, m_KinectNormalMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
         glBindImageTexture(2, m_RaycastVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
         glBindImageTexture(3, m_RaycastNormalMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-        glBindImageTexture(4, m_DebugBuffer[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
         glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
@@ -692,14 +735,14 @@ namespace
         const float SummandsLog2 = Base::Log2(static_cast<float>(Summands));
         const int SummandsPOT = 1 << (static_cast<int>(SummandsLog2) + 1);
 
-        int* pData = static_cast<int*>(glMapNamedBuffer(m_ICPSummationDataBuffer, GL_WRITE_ONLY));
+        int* pData = static_cast<int*>(glMapNamedBuffer(m_ICPSummationConstantBuffer, GL_WRITE_ONLY));
         *pData = Summands / 2;
         *(pData + 1) = SummandsPOT / 2;
-        glUnmapNamedBuffer(m_ICPSummationDataBuffer);
+        glUnmapNamedBuffer(m_ICPSummationConstantBuffer);
 
         Gfx::ContextManager::SetShaderCS(m_CSReduceSum);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_ICPBuffer);
-        glBindBufferBase(GL_UNIFORM_BUFFER, 2, m_ICPSummationDataBuffer);
+        glBindBufferBase(GL_UNIFORM_BUFFER, 2, m_ICPSummationConstantBuffer);
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
         glDispatchCompute(1, g_ICPValueCount, 1);
@@ -714,7 +757,6 @@ namespace
 
         int ValueIndex = 0;
 
-        glFinish();
         float* pICPBufferData = static_cast<float*>(glMapNamedBufferRange(m_ICPBuffer, 0, sizeof(float) * g_ICPValueCount, GL_MAP_READ_BIT));
         for (int i = 0; i < 6; ++ i)
         {
@@ -752,6 +794,7 @@ namespace
         }
 
         const float Det = L[0] * L[0] * L[7] * L[7] * L[14] * L[14] * L[21] * L[21] * L[28] * L[28] * L[35] * L[35];
+        
         if (std::isnan(Det) || (Det < 1e-9 && Det > -1e-9))
         {
             return false;
@@ -929,6 +972,8 @@ namespace
 
         RenderReconstructionData();
 
+        //Draw();
+
         Performance::EndEvent();
     }
 
@@ -997,7 +1042,7 @@ namespace
     void CGfxVoxelRenderer::RenderVertexMap(GLuint VertexMap, GLuint NormalMap)
     {
         Base::Float4x4* pData = static_cast<Base::Float4x4*>(glMapNamedBuffer(m_DrawCallConstantBuffer, GL_WRITE_ONLY));
-        *pData = m_VertexMapWorldMatrix * m_PoseMatrix;
+        *pData = m_PoseMatrix * m_VertexMapWorldMatrix;
         glUnmapNamedBuffer(m_DrawCallConstantBuffer);
 
         glBindVertexArray(1); // dummy vao because opengl needs vertex data even when it does not use it

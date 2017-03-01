@@ -6,14 +6,14 @@
 // Constants
 // -----------------------------------------------------------------------------
 
-const float g_SigmaColor = 30.0; // in mm
-const float g_SigmaSpace = 4.5; //in pixels
+const float g_SigmaColor = 30.0f; // in mm
+const float g_SigmaSpace = 4.5f; //in pixels
 
 const float g_SigmaColor2 = g_SigmaColor * g_SigmaColor;
 const float g_SigmaSpace2 = g_SigmaSpace * g_SigmaSpace;
 
-const float g_SigmaColor2_inv = 1.0 / g_SigmaColor2;
-const float g_SigmaSpace2_inv = 1.0 / g_SigmaSpace2;
+const float g_SigmaColor2_inv = 1.0f / g_SigmaColor2;
+const float g_SigmaSpace2_inv = 1.0f / g_SigmaSpace2;
 
 // -----------------------------------------------------------------------------
 // Input from engine
@@ -21,6 +21,7 @@ const float g_SigmaSpace2_inv = 1.0 / g_SigmaSpace2;
 
 layout (binding = 0, r16ui) readonly uniform uimage2D cs_InputTexture;
 layout (binding = 1, r16ui) writeonly uniform uimage2D cs_OutputTexture;
+layout (binding = 2, rgba32f) writeonly uniform image2D cs_Debug;
 
 // -------------------------------------------------------------------------------------
 // Functions
@@ -38,8 +39,10 @@ void main()
 
 	const float Depth = float(imageLoad(cs_InputTexture, ivec2(x, y)).x);
 
-	float Normalization = 0.0;
-	float Sum = 0.0;
+	float Sum1 = 0.0;
+	float Sum2 = 0.0;
+
+    float ReferenceDepth = float(imageLoad(cs_InputTexture, ivec2(x, y)).x);
 
 	for (int cx = -R; cx < R; ++ cx)
 	{
@@ -48,19 +51,20 @@ void main()
 			const ivec2 SamplePos = ivec2(x + cx, y + cy);
 			const float SampleDepth = float(imageLoad(cs_InputTexture, SamplePos).x);
 
-			const float Weight = abs(SampleDepth - Depth) > 30.0 ? 0.0 : 1.0;
+            float Space2 = cx * cx + cy * cy;
+            float Color2 = (ReferenceDepth - SampleDepth) * (ReferenceDepth - SampleDepth);
 
-			Normalization += Weight;
-			Sum += SampleDepth * Weight;
+            const float Weight = exp(-(Space2 * g_SigmaSpace2_inv + Color2 * g_SigmaColor2_inv));
+
+			Sum1 += SampleDepth * Weight;
+			Sum2 += Weight;
 		}
 	}
 
-	const float Result = Sum / Normalization;
+	const float Result = Sum1 / Sum2;
 	
-	imageStore(cs_OutputTexture, ivec2(x, y), ivec4(Depth));
-	//imageStore(cs_OutputTexture, ivec2(x, y), ivec4(Normalization));
-	//imageStore(cs_OutputTexture, ivec2(x, y), ivec4(Sum));
-	//imageStore(cs_OutputTexture, ivec2(x, y), ivec4(Depth));
+	imageStore(cs_OutputTexture, ivec2(x, y), ivec4(Result));
+    imageStore(cs_Debug, ivec2(x, y), vec4(Sum1, Sum2, Depth, 1.0f));
 }
 
 #endif // __INCLUDE_CS_KINECT_BILATERAL_FILTER_GLSL__

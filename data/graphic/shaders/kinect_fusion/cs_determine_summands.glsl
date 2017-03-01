@@ -2,7 +2,7 @@
 #ifndef __INCLUDE_CS_DETERMINE_SUMMANDS_GLSL__
 #define __INCLUDE_CS_DETERMINE_SUMMANDS_GLSL__
 
-#include "tracking_common.glsl"
+#include "common_tracking.glsl"
 
 #define WORKGROUP_SIZE (TILE_SIZE2D) * (TILE_SIZE2D)
 
@@ -81,7 +81,7 @@ bool findCorrespondence(out vec3 ReferenceVertex, out vec3 RaycastVertex, out ve
         return false;
     }
 
-    ReferenceNormal = (g_IncPoseMatrix * vec4(ReferenceNormal, 0.0)).xyz;
+    ReferenceNormal = mat3(g_IncPoseMatrix) * ReferenceNormal;
 
     RaycastVertex = imageLoad(cs_RaycastVertexMap, ivec2(CameraPlane.xy)).xyz;
     RaycastNormal = imageLoad(cs_RaycastNormalMap, ivec2(CameraPlane.xy)).xyz;
@@ -96,7 +96,6 @@ bool findCorrespondence(out vec3 ReferenceVertex, out vec3 RaycastVertex, out ve
 
     if (Distance > EPSILON_DISTANCE || Angle < EPSILON_ANGLE)
     {
-        imageStore(cs_Debug, ivec2(x, y), vec4(Distance, Angle, 0.0f, 1.0f));
         return false;
     }
     

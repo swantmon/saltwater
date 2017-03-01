@@ -2,7 +2,7 @@
 #ifndef __INCLUDE_CS_VERTEX_MAP_GLSL__
 #define __INCLUDE_CS_VERTEX_MAP_GLSL__
 
-#include "tracking_common.glsl"
+#include "common_tracking.glsl"
 
 // -----------------------------------------------------------------------------
 // Defines
