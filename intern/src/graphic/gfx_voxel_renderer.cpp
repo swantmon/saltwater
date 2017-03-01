@@ -593,8 +593,9 @@ namespace
         glBindTexture(GL_TEXTURE_3D, m_Volume);
         glBindSampler(0, NativeSampler->m_NativeSampler);
 
-        //glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_IntrinsicsConstantBuffer);
-        //glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_TrackingDataConstantBuffer);
+        CBufferPtr FrameConstantBufferPtr = Gfx::Main::GetPerFrameConstantBufferVS();
+        CNativeBuffer NativeBufer = *static_cast<CNativeBuffer*>(FrameConstantBufferPtr.GetPtr());
+        glBindBufferBase(GL_UNIFORM_BUFFER, 0, NativeBufer.m_NativeBuffer);
 
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
@@ -970,9 +971,9 @@ namespace
             m_NewDepthDataAvailable = false;
         }
 
-        RenderReconstructionData();
+        //RenderReconstructionData();
 
-        //Draw();
+        Draw();
 
         Performance::EndEvent();
     }
