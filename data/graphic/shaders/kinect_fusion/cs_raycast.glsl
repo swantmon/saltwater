@@ -2,7 +2,7 @@
 #ifndef __INCLUDE_CS_KINECT_INTEGRATE_VOLUME_GLSL__
 #define __INCLUDE_CS_KINECT_INTEGRATE_VOLUME_GLSL__
 
-#include "common_tracking.glsl"
+#include "common_raycast.glsl"
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -19,75 +19,6 @@ layout (binding = 2, rgba32f) writeonly uniform image2D cs_Normal;
 // -------------------------------------------------------------------------------------
 // Functions
 // -------------------------------------------------------------------------------------
-
-float GetStartLength(vec3 Start, vec3 Direction)
-{
-    float xmin = ((Direction.x > 0.0f ? 0.0f : VOLUME_SIZE) - Start.x) / Direction.x;
-    float ymin = ((Direction.y > 0.0f ? 0.0f : VOLUME_SIZE) - Start.y) / Direction.y;
-    float zmin = ((Direction.z > 0.0f ? 0.0f : VOLUME_SIZE) - Start.z) / Direction.z;
-
-    return max(max(xmin, ymin), zmin);
-}
-
-float GetEndLength(vec3 Start, vec3 Direction)
-{
-    float xmax = ((Direction.x > 0.0f ? VOLUME_SIZE : 0.0f) - Start.x) / Direction.x;
-    float ymax = ((Direction.y > 0.0f ? VOLUME_SIZE : 0.0f) - Start.y) / Direction.y;
-    float zmax = ((Direction.z > 0.0f ? VOLUME_SIZE : 0.0f) - Start.z) / Direction.z;
-
-    return min(min(xmax, ymax), zmax);
-}
-
-ivec3 GetVoxelCoords(vec3 Position)
-{
-    return ivec3(Position / VOXEL_SIZE + 0.5f);
-}
-
-vec2 GetVoxel(ivec3 Coords)
-{
-    vec2 Voxel = texelFetch(cs_Volume, Coords, 0).xy;
-    Voxel.x /= float(INT16_MAX);
-    return Voxel;
-}
-
-float GetInterPolatedTSDF(vec3 Position)
-{
-    vec3 Coords = GetVoxelCoords(Position);
-        
-    return textureLod(cs_Volume, Coords / float(VOLUME_RESOLUTION), 0).x / float(INT16_MAX);
-}
-
-vec3 GetNormal(vec3 Vertex)
-{
-    vec3 T, Normal;
-
-    T = Vertex;
-    T.x += VOXEL_SIZE;
-    float Fx1 = GetInterPolatedTSDF(T);
-    T = Vertex;
-    T.x -= VOXEL_SIZE;
-    float Fx2 = GetInterPolatedTSDF(T);
-
-    T = Vertex;
-    T.y += VOXEL_SIZE;
-    float Fy1 = GetInterPolatedTSDF(T);
-    T = Vertex;
-    T.y -= VOXEL_SIZE;
-    float Fy2 = GetInterPolatedTSDF(T);
-    
-    T = Vertex;
-    T.z += VOXEL_SIZE;
-    float Fz1 = GetInterPolatedTSDF(T);
-    T = Vertex;
-    T.z -= VOXEL_SIZE;
-    float Fz2 = GetInterPolatedTSDF(T);
-
-    Normal.x = Fx2 - Fx1;
-    Normal.y = Fy2 - Fy1;
-    Normal.z = Fz2 - Fz1;
-
-    return normalize(Normal);
-}
 
 layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
 void main()
@@ -112,47 +43,12 @@ void main()
     RayDirection.x = RayDirection.x == 0.0f ? 1e-15f : RayDirection.x;
     RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
     RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
-
-    const float StartLength = GetStartLength(CameraPosition, RayDirection);
-    const float EndLength = GetEndLength(CameraPosition, RayDirection);
-
-    const float Step = VOXEL_SIZE;
-    float RayLength = StartLength;
-
-    vec2 Voxel = GetVoxel(GetVoxelCoords(CameraPosition + RayLength * RayDirection));
-
-    float TSDF = Voxel.x;
-
-    vec3 Vertex = vec3(0.0f);
-
-    while (RayLength <= EndLength)
-    {
-        vec3 PreviousPosition = CameraPosition + RayLength * RayDirection;
-        RayLength += Step;
-        vec3 CurrentPosition = CameraPosition + RayLength * RayDirection;
-
-        float PreviousTSDF = TSDF;
-        
-        ivec3 VoxelCoords = GetVoxelCoords(CurrentPosition);
-        
-        vec2 Voxel = GetVoxel(VoxelCoords);
-
-        TSDF = Voxel.x;
-
-        if (PreviousTSDF > 0.0f && TSDF < 0.0f)
-        {
-            float Ft = GetInterPolatedTSDF(PreviousPosition);
-            float Ftdt = GetInterPolatedTSDF(CurrentPosition);
-            float Ts = RayLength - Step * Ft / (Ftdt - Ft);
-
-            Vertex = CameraPosition + RayDirection * Ts;
-
-            break;
-        }
-    }
+    
+    vec3 Vertex = GetPosition(CameraPosition, RayDirection, cs_Volume);
+    vec3 Normal = GetNormal(Vertex, cs_Volume);
 
     imageStore(cs_Vertex, VertexMapPosition, vec4(Vertex, 1.0f));
-    imageStore(cs_Normal, VertexMapPosition, vec4(GetNormal(Vertex), 1.0f));
+    imageStore(cs_Normal, VertexMapPosition, vec4(Normal, 1.0f));
 }
 
 #endif // __INCLUDE_CS_KINECT_INTEGRATE_VOLUME_GLSL__
