@@ -13,6 +13,11 @@
 // Input from engine
 // -----------------------------------------------------------------------------
 
+layout(row_major, std140, binding = 1) uniform PerDrawCallData
+{
+    vec4 g_LightPosition;
+};
+
 layout (binding = 0) uniform isampler3D fs_Volume;
 
 layout(location = 0) in vec3 in_WSRayDirection;
@@ -27,7 +32,14 @@ void main()
     {
         vec3 WSNormal = GetNormal(WSPosition, fs_Volume);
 
-        out_Color = vec4(WSNormal * 0.5f + 0.5f, 1.0f);
+        vec3 WSLightDirection = normalize(WSPosition - g_LightPosition.xyz);
+        vec3 WSHalf = normalize(WSLightDirection - in_WSRayDirection);
+
+        float DiffuseIntensity = max(0.0f, dot(WSNormal, WSLightDirection)) * 0.6f;
+        float SpecularIntensity = max(0.0f, pow(max(0.0f, dot(WSNormal, WSHalf)), 127.0f));
+        float LightIntensity = DiffuseIntensity + SpecularIntensity + 0.2f;
+
+        out_Color = vec4(LightIntensity, LightIntensity, LightIntensity, 1.0f);
     }
     else
     {

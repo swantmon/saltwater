@@ -59,7 +59,7 @@ namespace
 
     const int g_PyramidLevelCount = 3;
 
-    const int g_ICPIterations[g_PyramidLevelCount] = { 4, 4, 4 };
+    const int g_ICPIterations[g_PyramidLevelCount] = { 1, 5, 4 };
     const float g_EpsilonDistance = 0.1f;
     const float g_EpsilonAngle = 0.7f;
 
@@ -214,6 +214,8 @@ namespace
 
         GLuint m_DebugBuffer;
         GLuint m_CameraVAO;
+
+        GLuint m_LightBuffer;
     };
 } // namespace
 
@@ -309,6 +311,7 @@ namespace
         glDeleteBuffers(1, &m_ICPBuffer);
         glDeleteBuffers(1, &m_ICPSummationConstantBuffer);
         glDeleteBuffers(1, &m_IncPoseMatrixConstantBuffer);
+        glDeleteBuffers(1, &m_LightBuffer);
 
         glDeleteVertexArrays(1, &m_CameraVAO);
         glDeleteBuffers(2, m_CubeMesh);
@@ -492,6 +495,9 @@ namespace
         
         glCreateBuffers(1, &m_IncPoseMatrixConstantBuffer);
         glNamedBufferData(m_IncPoseMatrixConstantBuffer, sizeof(Base::Float4x4) * 2, nullptr, GL_DYNAMIC_DRAW);
+
+        glCreateBuffers(1, &m_LightBuffer);
+        glNamedBufferData(m_LightBuffer, sizeof(Base::Float4), nullptr, GL_DYNAMIC_DRAW);
     }
     
     // -----------------------------------------------------------------------------
@@ -638,6 +644,11 @@ namespace
         CSamplerPtr Sampler = Gfx::SamplerManager::GetSampler(Gfx::CSampler::ESampler::MinMagMipLinearClamp);
         CNativeSampler* NativeSampler = static_cast<CNativeSampler*>(Sampler.GetPtr());
 
+        Base::Float4* pData = static_cast<Base::Float4*>(glMapNamedBuffer(m_LightBuffer, GL_WRITE_ONLY));
+        m_PoseMatrix.GetTranslation((*pData)[0], (*pData)[1], (*pData)[2]);
+        (*pData)[3] = 1.0f;
+        glUnmapNamedBuffer(m_LightBuffer);
+
         Gfx::ContextManager::SetShaderVS(m_VSRaycast);
         Gfx::ContextManager::SetShaderPS(m_FSRaycast);
 
@@ -648,6 +659,7 @@ namespace
         CBufferPtr FrameConstantBufferPtr = Gfx::Main::GetPerFrameConstantBufferVS();
         CNativeBuffer NativeBufer = *static_cast<CNativeBuffer*>(FrameConstantBufferPtr.GetPtr());
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, NativeBufer.m_NativeBuffer);
+        glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_LightBuffer);
 
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
