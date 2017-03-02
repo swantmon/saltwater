@@ -45,8 +45,8 @@ vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection, isampler3D Volume)
 {
     const float StartLength = GetStartLength(CameraPosition, RayDirection);
     const float EndLength = GetEndLength(CameraPosition, RayDirection);
-
-    const float Step = VOXEL_SIZE;
+    
+    float Step = TRUNCATED_DISTANCE * 0.001f * 0.8f;
     float RayLength = StartLength;
 
     vec2 Voxel = GetVoxel(GetVoxelCoords(CameraPosition + RayLength * RayDirection), Volume);
@@ -68,6 +68,11 @@ vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection, isampler3D Volume)
         vec2 Voxel = GetVoxel(VoxelCoords, Volume);
 
         TSDF = Voxel.x;
+		
+        if (TSDF < 1.0f)
+        {
+            Step = VOXEL_SIZE;
+        }
 
         if (PreviousTSDF > 0.0f && TSDF < 0.0f)
         {

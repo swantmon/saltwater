@@ -52,6 +52,7 @@ namespace
     const Base::Float3 g_InitialCameraRotation = Base::Float3(0.0f, 0.0f, 0.0f);
 
     const float g_TruncatedDistance = 30.0f;
+
     const float g_TruncatedDistanceInverse = 1.0f / g_TruncatedDistance;
 
     const int g_MaxIntegrationWeight = 200;
@@ -581,7 +582,7 @@ namespace
 
         glBindFramebuffer(GL_FRAMEBUFFER, NativeTargetSet.m_NativeTargetSet);
         glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        //glClear(GL_COLOR_BUFFER_BIT);
         
         CSamplerPtr Sampler = Gfx::SamplerManager::GetSampler(Gfx::CSampler::ESampler::MinMagMipLinearClamp);
         CNativeSampler* NativeSampler = static_cast<CNativeSampler*>(Sampler.GetPtr());

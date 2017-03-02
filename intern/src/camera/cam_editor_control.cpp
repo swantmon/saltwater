@@ -29,7 +29,7 @@ namespace Cam
     {
         m_Position[0] = 0.0f;
         m_Position[1] = 0.0f;
-        m_Position[2] = 10.0f;
+        m_Position[2] = 5.0f;
     }
 
     // -----------------------------------------------------------------------------
@@ -108,7 +108,7 @@ namespace Cam
             RotationZ.SetRotationZ(Base::DegreesToRadians(m_CurrentRotation[0]));
 
             m_RotationMatrix = RotationX * RotationZ;
-                
+            
             m_LastCursorPosition = rCursorPosition;
         }
     }
