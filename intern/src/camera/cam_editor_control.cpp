@@ -27,9 +27,9 @@ namespace Cam
         , m_CurrentRotation   ( )
         , m_MoveDirection     (0)
     {
-        m_Position[0] = 0.0f;
-        m_Position[1] = 0.0f;
-        m_Position[2] = 5.0f;
+        m_Position[0] = 0.5f;
+        m_Position[1] = 0.5f;
+        m_Position[2] = -0.5f;
     }
 
     // -----------------------------------------------------------------------------

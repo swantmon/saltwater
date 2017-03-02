@@ -1,0 +1,12 @@
+
+#ifndef __INCLUDE_FS_CAMERA_GLSL__
+#define __INCLUDE_FS_CAMERA_GLSL__
+
+layout(location = 0) out vec4 out_Color;
+
+void main()
+{
+    out_Color = vec4(1.0f);
+}
+
+#endif // __INCLUDE_FS_CAMERA_GLSL__

@@ -27,7 +27,9 @@ void main()
 
 	const int Result = int(dot(DepthSamples, vec4(1.0f)) * 0.25f);
 
-	imageStore(cs_OutputTexture, ivec2(gl_GlobalInvocationID), ivec4(Result));
+    bool IsValid = DepthSamples.x != 0 && DepthSamples.y != 0 && DepthSamples.z != 0 && DepthSamples.w != 0;
+
+    imageStore(cs_OutputTexture, ivec2(gl_GlobalInvocationID), ivec4(IsValid ? Result : 0));
 }
 
 #endif // __INCLUDE_CS_KINECT_DOWNSAMPLE_DEPTH_GLSL__
