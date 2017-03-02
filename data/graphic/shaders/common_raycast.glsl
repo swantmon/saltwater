@@ -73,7 +73,7 @@ vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection, isampler3D Volume)
         {
             Step = VOXEL_SIZE;
         }
-
+        
         if (PreviousTSDF > 0.0f && TSDF < 0.0f)
         {
             float Ft = GetInterPolatedTSDF(PreviousPosition, Volume);

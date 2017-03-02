@@ -628,7 +628,7 @@ namespace
 
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
-        for (int PyramidLevel = 0; PyramidLevel < g_PyramidLevels - 1; ++ PyramidLevel)
+        for (int PyramidLevel = 1; PyramidLevel < g_PyramidLevels; ++ PyramidLevel)
         {
             const int WorkGroupsX = GetWorkGroupCount(m_pDepthSensorControl->GetWidth() >> PyramidLevel, g_TileSize2D);
             const int WorkGroupsY = GetWorkGroupCount(m_pDepthSensorControl->GetHeight() >> PyramidLevel, g_TileSize2D);
@@ -638,8 +638,14 @@ namespace
             //////////////////////////////////////////////////////////////////////////////////////
 
             Gfx::ContextManager::SetShaderCS(m_CSDownSampleDepth);
-            glBindImageTexture(0, m_KinectSmoothDepthBuffer[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
-            glBindImageTexture(1, m_KinectSmoothDepthBuffer[PyramidLevel + 1], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16UI);
+
+            CSamplerPtr Sampler = Gfx::SamplerManager::GetSampler(Gfx::CSampler::ESampler::MinMagMipLinearClamp);
+            CNativeSampler* NativeSampler = static_cast<CNativeSampler*>(Sampler.GetPtr());
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, m_KinectSmoothDepthBuffer[PyramidLevel - 1]);
+            glBindSampler(0, NativeSampler->m_NativeSampler);
+
+            glBindImageTexture(1, m_KinectSmoothDepthBuffer[PyramidLevel], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16UI);
             glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
         }
 

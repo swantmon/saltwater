@@ -10,7 +10,7 @@
 // Input from engine
 // -----------------------------------------------------------------------------
 
-layout (binding = 0, r16ui) readonly uniform uimage2D cs_InputTexture;
+layout(binding = 0) uniform usampler2D cs_InputTexture;
 layout (binding = 1, r16ui) writeonly uniform uimage2D cs_OutputTexture;
 
 // -------------------------------------------------------------------------------------
@@ -19,30 +19,14 @@ layout (binding = 1, r16ui) writeonly uniform uimage2D cs_OutputTexture;
 layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
 void main()
 {
-	const vec2 InputImageSize = imageSize(cs_InputTexture);
 	const vec2 OutputImageSize = imageSize(cs_OutputTexture);
 
-	const vec2 SamplePos = gl_GlobalInvocationID.xy / OutputImageSize * InputImageSize;
-	
-	float Sum = 0;
-    float Count = 0;
+	const vec2 SamplePos = gl_GlobalInvocationID.xy / OutputImageSize;
 
-	for (int i = 0; i < 1; ++ i)
-	{
-		for (int j = 0; j < 1; ++ j)
-		{
-			const int SampleDepth = int(imageLoad(cs_InputTexture, ivec2(SamplePos) + ivec2(i, j)).x);
-			
-            if (SampleDepth != 0)
-            {
-                Sum += SampleDepth;
-                ++Count;
-            }
-		}
-	}
+    const vec4 DepthSamples = vec4(textureGather(cs_InputTexture, SamplePos));
 
-	const int Result = int(Sum / Count);
-	
+	const int Result = int(dot(DepthSamples, vec4(1.0f)) * 0.25f);
+
 	imageStore(cs_OutputTexture, ivec2(gl_GlobalInvocationID), ivec4(Result));
 }
 

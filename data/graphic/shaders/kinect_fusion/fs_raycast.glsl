@@ -13,9 +13,11 @@
 // Input from engine
 // -----------------------------------------------------------------------------
 
-layout (binding = 0) uniform isampler3D fs_Volume;
+layout(binding = 0) uniform isampler3D fs_Volume;
 
 layout(location = 0) in vec3 in_WSRayDirection;
+
+layout(location = 0) out vec4 out_Color;
 
 void main()
 {
@@ -24,7 +26,7 @@ void main()
     if (WSPosition.x != 0.0f)
     {
         vec3 WSNormal = GetNormal(WSPosition, fs_Volume);
-        gl_FragColor = vec4(WSNormal * 0.5f + 0.5f, 1.0f);
+        out_Color = vec4(WSNormal * 0.5f + 0.5f, 1.0f);
     }
     else
     {
