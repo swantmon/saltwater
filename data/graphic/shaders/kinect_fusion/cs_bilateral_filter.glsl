@@ -6,7 +6,7 @@
 // Constants
 // -----------------------------------------------------------------------------
 
-const float g_SigmaColor = 30.0f; // in mm
+const float g_SigmaColor = TRUNCATED_DISTANCE; // in mm
 const float g_SigmaSpace = 4.5f; //in pixels
 
 const float g_SigmaColor2 = g_SigmaColor * g_SigmaColor;
@@ -41,7 +41,7 @@ void main()
 	float Sum1 = 0.0;
 	float Sum2 = 0.0;
 
-    float ReferenceDepth = float(imageLoad(cs_InputTexture, ivec2(x, y)).x);
+    const float ReferenceDepth = float(imageLoad(cs_InputTexture, ivec2(x, y)).x);
 
 	for (int cx = -R; cx < R; ++ cx)
 	{
@@ -50,10 +50,10 @@ void main()
 			const ivec2 SamplePos = ivec2(x + cx, y + cy);
 			const float SampleDepth = float(imageLoad(cs_InputTexture, SamplePos).x);
 
-            float Space2 = cx * cx + cy * cy;
-            float Color2 = (ReferenceDepth - SampleDepth) * (ReferenceDepth - SampleDepth);
+            const float Space2 = cx * cx + cy * cy;
+            const float Color2 = (ReferenceDepth - SampleDepth) * (ReferenceDepth - SampleDepth);
 
-            const float Weight = exp(-(Space2 * g_SigmaSpace2_inv + Color2 * g_SigmaColor2_inv));
+            const float Weight = exp(-(Space2 * g_SigmaSpace2_inv));
 
 			Sum1 += SampleDepth * Weight;
 			Sum2 += Weight;
@@ -62,7 +62,8 @@ void main()
 
 	const float Result = Sum1 / Sum2;
 	
-	imageStore(cs_OutputTexture, ivec2(x, y), ivec4(Result));
+	//imageStore(cs_OutputTexture, ivec2(x, y), ivec4(Result));
+    imageStore(cs_OutputTexture, ivec2(x, y), ivec4(ReferenceDepth));
 }
 
 #endif // __INCLUDE_CS_KINECT_BILATERAL_FILTER_GLSL__

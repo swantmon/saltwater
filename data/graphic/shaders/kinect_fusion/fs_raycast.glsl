@@ -16,6 +16,7 @@
 layout(row_major, std140, binding = 1) uniform PerDrawCallData
 {
     vec4 g_LightPosition;
+    vec4 g_Color;
 };
 
 layout (binding = 0) uniform isampler3D fs_Volume;
@@ -39,7 +40,7 @@ void main()
         float SpecularIntensity = max(0.0f, pow(max(0.0f, dot(WSNormal, WSHalf)), 127.0f));
         float LightIntensity = DiffuseIntensity + SpecularIntensity + 0.2f;
 
-        out_Color = vec4(0.0f, LightIntensity, 0.0f, 1.0f);
+        out_Color = vec4(g_Color.xyz * LightIntensity, 1.0f);
     }
     else
     {

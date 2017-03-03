@@ -55,7 +55,7 @@ namespace
 
     const float g_TruncatedDistanceInverse = 1.0f / g_TruncatedDistance;
 
-    const int g_MaxIntegrationWeight = 200;
+    const int g_MaxIntegrationWeight = 100;
 
     const int g_PyramidLevelCount = 3;
 
@@ -208,6 +208,8 @@ namespace
         bool m_NewDepthDataAvailable;
         bool m_IsFirstIntegration;
 
+        bool m_TrackingLost;
+
         // just for debugging
 
         GLuint m_CubeMesh[2];
@@ -215,7 +217,7 @@ namespace
         GLuint m_DebugBuffer;
         GLuint m_CameraVAO;
 
-        GLuint m_LightBuffer;
+        GLuint m_RaycastBuffer;
     };
 } // namespace
 
@@ -264,8 +266,7 @@ namespace
 
         m_NewDepthDataAvailable = false;
         m_IsFirstIntegration = true;
-
-
+        m_TrackingLost = true;
     }
 
     // -----------------------------------------------------------------------------
@@ -311,7 +312,7 @@ namespace
         glDeleteBuffers(1, &m_ICPBuffer);
         glDeleteBuffers(1, &m_ICPSummationConstantBuffer);
         glDeleteBuffers(1, &m_IncPoseMatrixConstantBuffer);
-        glDeleteBuffers(1, &m_LightBuffer);
+        glDeleteBuffers(1, &m_RaycastBuffer);
 
         glDeleteVertexArrays(1, &m_CameraVAO);
         glDeleteBuffers(2, m_CubeMesh);
@@ -496,8 +497,8 @@ namespace
         glCreateBuffers(1, &m_IncPoseMatrixConstantBuffer);
         glNamedBufferData(m_IncPoseMatrixConstantBuffer, sizeof(Base::Float4x4) * 2, nullptr, GL_DYNAMIC_DRAW);
 
-        glCreateBuffers(1, &m_LightBuffer);
-        glNamedBufferData(m_LightBuffer, sizeof(Base::Float4), nullptr, GL_DYNAMIC_DRAW);
+        glCreateBuffers(1, &m_RaycastBuffer);
+        glNamedBufferData(m_RaycastBuffer, sizeof(Base::Float4) * 2, nullptr, GL_DYNAMIC_DRAW);
     }
     
     // -----------------------------------------------------------------------------
@@ -644,10 +645,11 @@ namespace
         CSamplerPtr Sampler = Gfx::SamplerManager::GetSampler(Gfx::CSampler::ESampler::MinMagMipLinearClamp);
         CNativeSampler* NativeSampler = static_cast<CNativeSampler*>(Sampler.GetPtr());
 
-        Base::Float4* pData = static_cast<Base::Float4*>(glMapNamedBuffer(m_LightBuffer, GL_WRITE_ONLY));
+        Base::Float4* pData = static_cast<Base::Float4*>(glMapNamedBuffer(m_RaycastBuffer, GL_WRITE_ONLY));
         m_PoseMatrix.GetTranslation((*pData)[0], (*pData)[1], (*pData)[2]);
         (*pData)[3] = 1.0f;
-        glUnmapNamedBuffer(m_LightBuffer);
+        (*(pData + 1)) = m_TrackingLost ? Base::Float4(1.0f, 0.0f, 0.0f, 1.0f) : Base::Float4(0.0f, 1.0f, 0.0f, 1.0f);
+        glUnmapNamedBuffer(m_RaycastBuffer);
 
         Gfx::ContextManager::SetShaderVS(m_VSRaycast);
         Gfx::ContextManager::SetShaderPS(m_FSRaycast);
@@ -659,7 +661,7 @@ namespace
         CBufferPtr FrameConstantBufferPtr = Gfx::Main::GetPerFrameConstantBufferVS();
         CNativeBuffer NativeBufer = *static_cast<CNativeBuffer*>(FrameConstantBufferPtr.GetPtr());
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, NativeBufer.m_NativeBuffer);
-        glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_LightBuffer);
+        glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_RaycastBuffer);
 
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
@@ -708,6 +710,8 @@ namespace
             glBindSampler(0, NativeSampler->m_NativeSampler);
 
             glBindImageTexture(1, m_KinectSmoothDepthBuffer[PyramidLevel], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16UI);
+            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+            glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
             glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
         }
 
@@ -717,9 +721,7 @@ namespace
 
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_IntrinsicsConstantBuffer);
         glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_TrackingDataConstantBuffer);
-
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
+        
         for (int PyramidLevel = 0; PyramidLevel < g_PyramidLevelCount; ++ PyramidLevel)
         {
             const int WorkGroupsX = GetWorkGroupCount(m_pDepthSensorControl->GetWidth() >> PyramidLevel, g_TileSize2D);
@@ -728,10 +730,9 @@ namespace
             Gfx::ContextManager::SetShaderCS(m_CSVertexMap);
             glBindImageTexture(0, m_KinectSmoothDepthBuffer[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
             glBindImageTexture(1, m_KinectVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
             glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);			
         }
-
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
         for (int PyramidLevel = 0; PyramidLevel < g_PyramidLevelCount; ++ PyramidLevel)
         {
@@ -741,6 +742,7 @@ namespace
             Gfx::ContextManager::SetShaderCS(m_CSNormalMap);
             glBindImageTexture(0, m_KinectVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
             glBindImageTexture(1, m_KinectNormalMap[PyramidLevel], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
             glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
         }
     }
@@ -758,7 +760,9 @@ namespace
                 DetermineSummands(PyramidLevel, IncPoseMatrix);
                 ReduceSum(PyramidLevel);
 
-                if (!CalculatePoseMatrix(IncPoseMatrix))
+                m_TrackingLost = !CalculatePoseMatrix(IncPoseMatrix);
+
+                if (m_TrackingLost)
                 {
                     return;
                 }
@@ -822,8 +826,8 @@ namespace
 
     bool CGfxVoxelRenderer::CalculatePoseMatrix(Base::Float4x4& rIncPoseMatrix)
     {
-        float A[36];
-        float b[6];
+        double A[36];
+        double b[6];
 
         int ValueIndex = 0;
 
@@ -847,7 +851,7 @@ namespace
 
         glUnmapNamedBuffer(m_ICPBuffer);
 
-        float L[36];
+        double L[36];
         std::memset(L, 0, sizeof(L[0]) * 36);
 
         for (int i = 0; i < 6; ++ i)
@@ -863,14 +867,14 @@ namespace
             }
         }
 
-        const float Det = L[0] * L[0] * L[7] * L[7] * L[14] * L[14] * L[21] * L[21] * L[28] * L[28] * L[35] * L[35];
+        const double Det = L[0] * L[0] * L[7] * L[7] * L[14] * L[14] * L[21] * L[21] * L[28] * L[28] * L[35] * L[35];
         
         if (std::isnan(Det) || (Det < 1e-9 && Det > -1e-9))
         {
             return false;
         }
 
-        float y[6];
+        double y[6];
         
         y[0] = b[0] / L[0];
         y[1] = (b[1] - L[1] * y[0]) / L[7];
@@ -879,7 +883,7 @@ namespace
         y[4] = (b[4] - L[4] * y[0] - L[10] * y[1] - L[16] * y[2] - L[22] * y[3]) / L[28];
         y[5] = (b[5] - L[5] * y[0] - L[11] * y[1] - L[17] * y[2] - L[23] * y[3] - L[29] * y[4]) / L[35];
 
-        float x[6];
+        double x[6];
 
         x[5] = y[5] / L[35];
         x[4] = (y[4] - L[29] * x[5]) / L[28];
@@ -1038,10 +1042,9 @@ namespace
             m_NewDepthDataAvailable = false;
         }
 
-        //RenderReconstructionData();
+        RenderReconstructionData();
 
         Draw();
-
         RenderCamera();
 
         Performance::EndEvent();
@@ -1069,7 +1072,7 @@ namespace
         //RenderVertexMap(m_KinectVertexMap[0], m_KinectNormalMap[0]);
         
         //glViewport(ViewPort[2] / 2, 0, ViewPort[2] / 2, ViewPort[3]);
-        RenderVertexMap(m_RaycastVertexMap[0], m_RaycastNormalMap[0]);
+        //RenderVertexMap(m_RaycastVertexMap[0], m_RaycastNormalMap[0]);
 
         //glViewport(ViewPort[0], ViewPort[1], ViewPort[2], ViewPort[3]);
 
