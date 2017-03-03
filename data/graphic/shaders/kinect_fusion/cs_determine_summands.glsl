@@ -14,7 +14,6 @@ layout(binding = 0, rgba32f) uniform image2D cs_VertexMap;
 layout(binding = 1, rgba32f) uniform image2D cs_NormalMap;
 layout(binding = 2, rgba32f) uniform image2D cs_RaycastVertexMap;
 layout(binding = 3, rgba32f) uniform image2D cs_RaycastNormalMap;
-layout(binding = 4, rgba32f) uniform image2D cs_Debug;
 
 layout(row_major, std140, binding = 2) uniform UBOInc
 {
@@ -80,6 +79,7 @@ bool findCorrespondence(out vec3 ReferenceVertex, out vec3 RaycastVertex, out ve
     {
         return false;
     }
+
 
     ReferenceNormal = mat3(g_IncPoseMatrix) * ReferenceNormal;
 

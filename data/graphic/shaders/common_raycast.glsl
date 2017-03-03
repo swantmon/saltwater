@@ -34,7 +34,7 @@ vec2 GetVoxel(ivec3 Coords, isampler3D Volume)
     return Voxel;
 }
 
-float GetInterPolatedTSDF(vec3 Position, isampler3D Volume)
+float GetInterpolatedTSDF(vec3 Position, isampler3D Volume)
 {
     vec3 Coords = GetVoxelCoords(Position);
 
@@ -68,21 +68,23 @@ vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection, isampler3D Volume)
         vec2 Voxel = GetVoxel(VoxelCoords, Volume);
 
         TSDF = Voxel.x;
-		
-        if (TSDF < 1.0f)
-        {
-            Step = VOXEL_SIZE;
-        }
         
         if (PreviousTSDF > 0.0f && TSDF < 0.0f)
         {
-            float Ft = GetInterPolatedTSDF(PreviousPosition, Volume);
-            float Ftdt = GetInterPolatedTSDF(CurrentPosition, Volume);
+            float Ft = GetInterpolatedTSDF(PreviousPosition, Volume);
+            float Ftdt = GetInterpolatedTSDF(CurrentPosition, Volume);
             float Ts = RayLength - Step * Ft / (Ftdt - Ft);
 
             Vertex = CameraPosition + RayDirection * Ts;
 
+            ivec3 VoxelCoords = GetVoxelCoords(Vertex);
+            
             break;
+        }
+
+        if (TSDF < 1.0f)
+        {
+            Step = VOXEL_SIZE;
         }
     }
 
@@ -95,24 +97,24 @@ vec3 GetNormal(vec3 Vertex, isampler3D Volume)
 
     T = Vertex;
     T.x += VOXEL_SIZE;
-    float Fx1 = GetInterPolatedTSDF(T, Volume);
+    float Fx1 = GetInterpolatedTSDF(T, Volume);
     T = Vertex;
     T.x -= VOXEL_SIZE;
-    float Fx2 = GetInterPolatedTSDF(T, Volume);
+    float Fx2 = GetInterpolatedTSDF(T, Volume);
 
     T = Vertex;
     T.y += VOXEL_SIZE;
-    float Fy1 = GetInterPolatedTSDF(T, Volume);
+    float Fy1 = GetInterpolatedTSDF(T, Volume);
     T = Vertex;
     T.y -= VOXEL_SIZE;
-    float Fy2 = GetInterPolatedTSDF(T, Volume);
+    float Fy2 = GetInterpolatedTSDF(T, Volume);
 
     T = Vertex;
     T.z += VOXEL_SIZE;
-    float Fz1 = GetInterPolatedTSDF(T, Volume);
+    float Fz1 = GetInterpolatedTSDF(T, Volume);
     T = Vertex;
     T.z -= VOXEL_SIZE;
-    float Fz2 = GetInterPolatedTSDF(T, Volume);
+    float Fz2 = GetInterpolatedTSDF(T, Volume);
 
     Normal.x = Fx2 - Fx1;
     Normal.y = Fy2 - Fy1;

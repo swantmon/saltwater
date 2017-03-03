@@ -27,19 +27,19 @@ layout(location = 0) out vec4 out_Color;
 void main()
 {
     vec3 WSPosition = GetPosition(g_ViewPosition.xyz, normalize(in_WSRayDirection), fs_Volume);
-
+    
     if (WSPosition.x != 0.0f)
     {
         vec3 WSNormal = GetNormal(WSPosition, fs_Volume);
 
         vec3 WSLightDirection = normalize(WSPosition - g_LightPosition.xyz);
-        vec3 WSHalf = normalize(WSLightDirection - in_WSRayDirection);
+        vec3 WSHalf = normalize(WSLightDirection + in_WSRayDirection);
 
         float DiffuseIntensity = max(0.0f, dot(WSNormal, WSLightDirection)) * 0.6f;
         float SpecularIntensity = max(0.0f, pow(max(0.0f, dot(WSNormal, WSHalf)), 127.0f));
         float LightIntensity = DiffuseIntensity + SpecularIntensity + 0.2f;
 
-        out_Color = vec4(LightIntensity, LightIntensity, LightIntensity, 1.0f);
+        out_Color = vec4(0.0f, LightIntensity, 0.0f, 1.0f);
     }
     else
     {

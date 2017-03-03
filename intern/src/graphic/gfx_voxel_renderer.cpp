@@ -59,8 +59,8 @@ namespace
 
     const int g_PyramidLevelCount = 3;
 
-    const int g_ICPIterations[g_PyramidLevelCount] = { 1, 5, 4 };
-    const float g_EpsilonDistance = 0.1f;
+    const int g_ICPIterations[g_PyramidLevelCount] = { 10, 5, 4 };
+    const float g_EpsilonDistance = 0.05f;
     const float g_EpsilonAngle = 0.7f;
 
     const int g_ICPValueCount = 27;
@@ -513,10 +513,10 @@ namespace
     {
         Base::Float3 Vertices[] =
         {
-            Base::Float3(-0.5f, -0.5f, 2.0f),
-            Base::Float3( 0.5f, -0.5f, 2.0f),
-            Base::Float3( 0.5f,  0.5f, 2.0f),
-            Base::Float3(-0.5f,  0.5f, 2.0f),
+            Base::Float3(-1.0f, -0.5f, 2.0f),
+            Base::Float3( 1.0f, -0.5f, 2.0f),
+            Base::Float3( 1.0f,  0.5f, 2.0f),
+            Base::Float3(-1.0f,  0.5f, 2.0f),
             Base::Float3(-0.0f,  0.0f, 0.0f),
         };
 
@@ -1188,7 +1188,11 @@ namespace
         
         glBindVertexArray(m_CameraVAO);
 
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
         glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_INT, 0);
+
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         glBindVertexArray(0);
     }
