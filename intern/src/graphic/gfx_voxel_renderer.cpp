@@ -214,7 +214,7 @@ namespace
 
         GLuint m_CubeMesh[2];
 
-        GLuint m_DebugBuffer;
+        GLuint m_DebugBuffer[g_PyramidLevelCount];
         GLuint m_CameraVAO;
 
         GLuint m_RaycastBuffer;
@@ -303,7 +303,7 @@ namespace
         glDeleteTextures(g_PyramidLevelCount, m_RaycastVertexMap);
         glDeleteTextures(g_PyramidLevelCount, m_RaycastNormalMap);
         glDeleteTextures(1, &m_Volume);
-        glDeleteTextures(1, &m_DebugBuffer);
+        glDeleteTextures(g_PyramidLevelCount, m_DebugBuffer);
 
         glDeleteBuffers(1, &m_DrawCallConstantBuffer);
         glDeleteBuffers(1, &m_IntrinsicsConstantBuffer);
@@ -416,14 +416,12 @@ namespace
         glCreateTextures(GL_TEXTURE_2D, g_PyramidLevelCount, m_KinectNormalMap);
         glCreateTextures(GL_TEXTURE_2D, g_PyramidLevelCount, m_RaycastVertexMap);
         glCreateTextures(GL_TEXTURE_2D, g_PyramidLevelCount, m_RaycastNormalMap);
-
         glCreateTextures(GL_TEXTURE_3D, 1, &m_Volume);
+
+        glCreateTextures(GL_TEXTURE_2D, g_PyramidLevelCount, m_DebugBuffer);
 
         glTextureStorage2D(m_KinectRawDepthBuffer, 1, GL_R16UI, m_pDepthSensorControl->GetWidth(), m_pDepthSensorControl->GetHeight());
         
-        glCreateTextures(GL_TEXTURE_2D, 1, &m_DebugBuffer);
-        glTextureStorage2D(m_DebugBuffer, 1, GL_RGBA32F, m_pDepthSensorControl->GetWidth(), m_pDepthSensorControl->GetHeight());
-
         for (int i = 0; i < g_PyramidLevelCount; ++i)
         {
             const int Width = m_pDepthSensorControl->GetWidth() >> i;
@@ -434,6 +432,7 @@ namespace
             glTextureStorage2D(m_KinectNormalMap[i], 1, GL_RGBA32F, Width, Height);
             glTextureStorage2D(m_RaycastVertexMap[i], 1, GL_RGBA32F, Width, Height);
             glTextureStorage2D(m_RaycastNormalMap[i], 1, GL_RGBA32F, Width, Height);
+            glTextureStorage2D(m_DebugBuffer[i], 1, GL_RGBA32F, Width, Height);
         }
 
         glTextureStorage3D(m_Volume, 1, GL_RG16I, g_VolumeResolution, g_VolumeResolution, g_VolumeResolution);        
@@ -688,19 +687,18 @@ namespace
         Gfx::ContextManager::SetShaderCS(m_CSBilateralFilter);
         glBindImageTexture(0, m_KinectRawDepthBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
         glBindImageTexture(1, m_KinectSmoothDepthBuffer[0], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16UI);
+        glBindImageTexture(2, m_DebugBuffer[0], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
         glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
 
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        //////////////////////////////////////////////////////////////////////////////////////
+        // Downsample depth buffer
+        //////////////////////////////////////////////////////////////////////////////////////
 
         for (int PyramidLevel = 1; PyramidLevel < g_PyramidLevelCount; ++ PyramidLevel)
         {
             const int WorkGroupsX = GetWorkGroupCount(m_pDepthSensorControl->GetWidth() >> PyramidLevel, g_TileSize2D);
             const int WorkGroupsY = GetWorkGroupCount(m_pDepthSensorControl->GetHeight() >> PyramidLevel, g_TileSize2D);
-
-            //////////////////////////////////////////////////////////////////////////////////////
-            // Downsample depth buffer
-            //////////////////////////////////////////////////////////////////////////////////////
-
+            
             Gfx::ContextManager::SetShaderCS(m_CSDownSampleDepth);
 
             CSamplerPtr Sampler = Gfx::SamplerManager::GetSampler(Gfx::CSampler::ESampler::MinMagMipLinearClamp);
@@ -793,6 +791,7 @@ namespace
         glBindImageTexture(1, m_KinectNormalMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
         glBindImageTexture(2, m_RaycastVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
         glBindImageTexture(3, m_RaycastNormalMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+        glBindImageTexture(4, m_DebugBuffer[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
         glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
@@ -893,11 +892,11 @@ namespace
         x[0] = (y[0] - L[5] * x[5] - L[4] * x[4] - L[3] * x[3] - L[2] * x[2] - L[1] * x[1]) / L[0];
         
         Base::Float4x4 RotationX, RotationY, RotationZ, Rotation, Translation;
-        RotationX.SetRotationX(x[0]);
-        RotationY.SetRotationY(x[1]);
-        RotationZ.SetRotationZ(x[2]);
+        RotationX.SetRotationX(static_cast<float>(x[0]));
+        RotationY.SetRotationY(static_cast<float>(x[1]));
+        RotationZ.SetRotationZ(static_cast<float>(x[2]));
         Rotation = RotationZ * RotationY * RotationX;
-        Translation.SetTranslation(x[3], x[4], x[5]);
+        Translation.SetTranslation(static_cast<float>(x[3]), static_cast<float>(x[4]), static_cast<float>(x[5]));
         
         rIncPoseMatrix = Translation * Rotation * rIncPoseMatrix;
 

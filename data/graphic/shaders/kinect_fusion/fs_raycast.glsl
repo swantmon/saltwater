@@ -27,7 +27,13 @@ layout(location = 0) out vec4 out_Color;
 
 void main()
 {
-    vec3 WSPosition = GetPosition(g_ViewPosition.xyz, normalize(in_WSRayDirection), fs_Volume);
+    vec3 RayDirection = normalize(in_WSRayDirection);
+
+    RayDirection.x = RayDirection.x == 0.0f ? 1e-15f : RayDirection.x;
+    RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
+    RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
+
+    vec3 WSPosition = GetPosition(g_ViewPosition.xyz, RayDirection, fs_Volume);
     
     if (WSPosition.x != 0.0f)
     {

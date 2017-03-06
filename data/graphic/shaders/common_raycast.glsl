@@ -76,9 +76,7 @@ vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection, isampler3D Volume)
             float Ts = RayLength - Step * Ft / (Ftdt - Ft);
 
             Vertex = CameraPosition + RayDirection * Ts;
-
-            ivec3 VoxelCoords = GetVoxelCoords(Vertex);
-            
+                        
             break;
         }
 
