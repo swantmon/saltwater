@@ -48,20 +48,18 @@ namespace
     const int g_VolumeResolution = 256;
     const float g_VoxelSize = g_VolumeSize / g_VolumeResolution;
 
-    const Base::Float3 g_InitialCameraPosition = Base::Float3(g_VolumeSize * 0.5f, g_VolumeSize * 0.5f, -g_VolumeSize * 0.5f);
-    const Base::Float3 g_InitialCameraRotation = Base::Float3(0.0f, 0.0f, 0.0f);
+    const Base::Float3 g_InitialCameraPosition = Base::Float3(g_VolumeSize * 0.5f, g_VolumeSize * 0.5f, g_VolumeSize * 1.5f);
+    const Base::Float3 g_InitialCameraRotation = Base::Float3(3.14f, 0.0f, 0.0f);
 
     const float g_TruncatedDistance = 30.0f;
-
-    const float g_TruncatedDistanceInverse = 1.0f / g_TruncatedDistance;
-
-    const int g_MaxIntegrationWeight = 100;
+    
+    const int g_MaxIntegrationWeight = 200;
 
     const int g_PyramidLevelCount = 3;
 
-    const int g_ICPIterations[g_PyramidLevelCount] = { 10, 5, 4 };
-    const float g_EpsilonDistance = 0.05f;
-    const float g_EpsilonAngle = 0.7f;
+    const int g_ICPIterations[g_PyramidLevelCount] = { 5, 4, 3 };
+    const float g_EpsilonDistance = 0.1f;
+    const float g_EpsilonAngle = 0.4f;
 
     const int g_ICPValueCount = 27;
 
@@ -343,7 +341,7 @@ namespace
         DefineStreams[7] << "TILE_SIZE3D " << g_TileSize3D;
         DefineStreams[8] << "INT16_MAX " << std::numeric_limits<int16_t>::max();
         DefineStreams[9] << "TRUNCATED_DISTANCE " << g_TruncatedDistance;
-        DefineStreams[10] << "TRUNCATED_DISTANCE_INVERSE " << g_TruncatedDistanceInverse;
+        DefineStreams[10] << "TRUNCATED_DISTANCE_INVERSE " << 1.0f / g_TruncatedDistance;
         DefineStreams[11] << "MAX_INTEGRATION_WEIGHT " << g_MaxIntegrationWeight;
         DefineStreams[12] << "EPSILON_DISTANCE " << g_EpsilonDistance;
         DefineStreams[13] << "EPSILON_ANGLE " << g_EpsilonAngle;
@@ -851,7 +849,6 @@ namespace
         glUnmapNamedBuffer(m_ICPBuffer);
 
         double L[36];
-        std::memset(L, 0, sizeof(L[0]) * 36);
 
         for (int i = 0; i < 6; ++ i)
         {
@@ -1003,6 +1000,7 @@ namespace
         Performance::EndEvent();
 
         if (!m_IsFirstIntegration)
+
         {
             Performance::BeginEvent("Kinect Tracking");
 
@@ -1041,7 +1039,7 @@ namespace
             m_NewDepthDataAvailable = false;
         }
 
-        RenderReconstructionData();
+        //RenderReconstructionData();
 
         Draw();
         RenderCamera();

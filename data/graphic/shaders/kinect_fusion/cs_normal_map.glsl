@@ -33,7 +33,7 @@ void main()
 	vec3 Normal = cross(Vertex1 - Vertex0, Vertex2 - Vertex0);
 	Normal = normalize(Normal);
 	
-	vec3 One = vec3(1.0);
+	const vec3 One = vec3(1.0);
 	
 	bool IsValid = dot(Vertex0, One) != 0.0 && dot(Vertex1, One) != 0.0 && dot(Vertex2, One) != 0.0;
 	

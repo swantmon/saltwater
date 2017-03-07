@@ -64,8 +64,7 @@ bool findCorrespondence(out vec3 ReferenceVertex, out vec3 RaycastVertex, out ve
 
     ReferenceVertex = (g_IncPoseMatrix * vec4(Vertex, 1.0)).xyz;
 
-    vec3 CameraPlane = (g_InvIncPoseMatrix * vec4(ReferenceVertex, 1.0)).xyz;
-    CameraPlane = mat3(g_Intrinisics[PyramidLevel].m_KMatrix) * CameraPlane;
+    vec3 CameraPlane = mat3(g_Intrinisics[PyramidLevel].m_KMatrix) * Vertex;
     CameraPlane /= CameraPlane.z;
 
     if (CameraPlane.x < 0.0f || CameraPlane.x > ImageSize.x ||
@@ -80,7 +79,6 @@ bool findCorrespondence(out vec3 ReferenceVertex, out vec3 RaycastVertex, out ve
     {
         return false;
     }
-
 
     ReferenceNormal = mat3(g_IncPoseMatrix) * ReferenceNormal;
 

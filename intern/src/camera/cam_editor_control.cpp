@@ -28,8 +28,8 @@ namespace Cam
         , m_MoveDirection     (0)
     {
         m_Position[0] = 0.5f;
-        m_Position[1] = 0.5f;
-        m_Position[2] = -0.5f;
+        m_Position[1] = 1.0f;
+        m_Position[2] = 2.0f;
     }
 
     // -----------------------------------------------------------------------------

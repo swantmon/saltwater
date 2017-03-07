@@ -21,7 +21,6 @@ const float g_SigmaSpace2_inv = 1.0f / g_SigmaSpace2;
 
 layout (binding = 0, r16ui) readonly uniform uimage2D cs_InputTexture;
 layout (binding = 1, r16ui) writeonly uniform uimage2D cs_OutputTexture;
-layout (binding = 2, rgba32f) writeonly uniform image2D cs_Debug;
 
 // -------------------------------------------------------------------------------------
 // Functions
@@ -64,8 +63,6 @@ void main()
 	const float Result = Sum1 / Sum2;
 	
 	imageStore(cs_OutputTexture, ivec2(x, y), ivec4(Result));
-    //imageStore(cs_OutputTexture, ivec2(x, y), ivec4(ReferenceDepth));
-    imageStore(cs_Debug, ivec2(x, y), vec4(Result - ReferenceDepth));
 }
 
 #endif // __INCLUDE_CS_KINECT_BILATERAL_FILTER_GLSL__
