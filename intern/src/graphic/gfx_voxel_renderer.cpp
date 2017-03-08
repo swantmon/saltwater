@@ -59,6 +59,7 @@ namespace
 
     const int g_ICPIterations[g_PyramidLevelCount] = { 5, 4, 3 };
     const float g_EpsilonDistance = 0.1f;
+
     const float g_EpsilonAngle = 0.4f;
 
     const int g_ICPValueCount = 27;
@@ -241,7 +242,7 @@ namespace
     {
         Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxVoxelRenderer::OnResize));
         
-        try
+        /*try
         {
             m_pDepthSensorControl.reset(new MR::CRealSenseControl());
             m_pDepthSensorControl->Start();
@@ -252,7 +253,10 @@ namespace
             m_pDepthSensorControl.reset(new MR::CKinectControl());
             m_pDepthSensorControl->Start();
             BASE_CONSOLE_INFO("Using Kinect for SLAM");
-        }
+        }*/
+        m_pDepthSensorControl.reset(new MR::CKinectControl());
+        m_pDepthSensorControl->Start();
+        BASE_CONSOLE_INFO("Using Kinect for SLAM");
 
         m_DepthPixels = std::vector<unsigned short>(m_pDepthSensorControl->GetPixelCount());
 
@@ -476,8 +480,12 @@ namespace
         glCreateBuffers(1, &m_IntrinsicsConstantBuffer);
         glNamedBufferData(m_IntrinsicsConstantBuffer, sizeof(SIntrinsics) * g_PyramidLevelCount, Intrinsics, GL_STATIC_DRAW);
         
+        STrackingData TrackingData;
+        TrackingData.m_PoseMatrix = m_PoseMatrix;
+        TrackingData.m_InvPoseMatrix = m_PoseMatrix.GetInverted();
+
         glCreateBuffers(1, &m_TrackingDataConstantBuffer);
-        glNamedBufferData(m_TrackingDataConstantBuffer, sizeof(STrackingData), nullptr, GL_DYNAMIC_DRAW);
+        glNamedBufferData(m_TrackingDataConstantBuffer, sizeof(STrackingData), &TrackingData, GL_DYNAMIC_DRAW);
 
         glCreateBuffers(1, &m_RaycastPyramidConstantBuffer);
         glNamedBufferData(m_RaycastPyramidConstantBuffer, 16, nullptr, GL_DYNAMIC_DRAW);
@@ -647,7 +655,7 @@ namespace
         (*pData)[3] = 1.0f;
         (*(pData + 1)) = m_TrackingLost ? Base::Float4(1.0f, 0.0f, 0.0f, 1.0f) : Base::Float4(0.0f, 1.0f, 0.0f, 1.0f);
         glUnmapNamedBuffer(m_RaycastBuffer);
-
+        
         Gfx::ContextManager::SetShaderVS(m_VSRaycast);
         Gfx::ContextManager::SetShaderPS(m_FSRaycast);
 
@@ -845,7 +853,6 @@ namespace
                 }
             }
         }
-
         glUnmapNamedBuffer(m_ICPBuffer);
 
         double L[36];
@@ -988,11 +995,6 @@ namespace
 
     void CGfxVoxelRenderer::UpdateReconstruction()
     {
-        STrackingData* pTrackingData = static_cast<STrackingData*>(glMapNamedBuffer(m_TrackingDataConstantBuffer, GL_WRITE_ONLY));
-        pTrackingData->m_PoseMatrix = m_PoseMatrix;
-        pTrackingData->m_InvPoseMatrix = m_PoseMatrix.GetInverted();
-        glUnmapNamedBuffer(m_TrackingDataConstantBuffer);
-
         Performance::BeginEvent("Kinect Data Input");
 
         ReadKinectData();
@@ -1008,6 +1010,11 @@ namespace
 
             Performance::EndEvent();
         }
+
+        STrackingData* pTrackingData = static_cast<STrackingData*>(glMapNamedBuffer(m_TrackingDataConstantBuffer, GL_WRITE_ONLY));
+        pTrackingData->m_PoseMatrix = m_PoseMatrix;
+        pTrackingData->m_InvPoseMatrix = m_PoseMatrix.GetInverted();
+        glUnmapNamedBuffer(m_TrackingDataConstantBuffer);
 
         Performance::BeginEvent("TSDF Integration and Raycasting");
 
@@ -1175,10 +1182,13 @@ namespace
 
         Gfx::ContextManager::SetShaderVS(m_VSCamera);
         Gfx::ContextManager::SetShaderPS(m_FSCamera);
-        
+
+        Base::Float4x4 WorldMatrix;
+        WorldMatrix.SetScale(0.1f);
+        WorldMatrix = m_PoseMatrix * WorldMatrix;
+
         Base::Float4x4* pData = static_cast<Base::Float4x4*>(glMapNamedBuffer(m_DrawCallConstantBuffer, GL_WRITE_ONLY));
-        pData->SetScale(0.1f);
-        *pData = m_PoseMatrix * (*pData);
+        *pData = WorldMatrix;
         glUnmapNamedBuffer(m_DrawCallConstantBuffer);
 
         CBufferPtr FrameConstantBufferPtr = Gfx::Main::GetPerFrameConstantBufferVS();

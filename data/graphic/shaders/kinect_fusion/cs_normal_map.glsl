@@ -31,13 +31,11 @@ void main()
 	vec3 Vertex2 = imageLoad(cs_VertexMap, ivec2(x, y + 1)).xyz;
 	
 	vec3 Normal = cross(Vertex1 - Vertex0, Vertex2 - Vertex0);
-	Normal = normalize(Normal);
-	
-	const vec3 One = vec3(1.0);
-	
+
+	const vec3 One = vec3(1.0);	
 	bool IsValid = dot(Vertex0, One) != 0.0 && dot(Vertex1, One) != 0.0 && dot(Vertex2, One) != 0.0;
 	
-	imageStore(cs_NormalMap, ivec2(x, y), IsValid ? vec4(Normal, 0.0) : vec4(0.0));
+	imageStore(cs_NormalMap, ivec2(x, y), IsValid ? vec4(normalize(Normal), 0.0) : vec4(0.0));
 }
 
 #endif // __INCLUDE_CS_NORMAL_MAP_GLSL__
