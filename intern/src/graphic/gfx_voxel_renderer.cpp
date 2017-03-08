@@ -260,7 +260,7 @@ namespace
 
         m_DepthPixels = std::vector<unsigned short>(m_pDepthSensorControl->GetPixelCount());
 
-        Base::Float4x4 PoseRotation, PoseTranslation;
+        Float4x4 PoseRotation, PoseTranslation;
 
         PoseRotation.SetRotation(g_InitialCameraRotation[0], g_InitialCameraRotation[1], g_InitialCameraRotation[2]);
         PoseTranslation.SetTranslation(g_InitialCameraPosition[0], g_InitialCameraPosition[1], g_InitialCameraPosition[2]);
@@ -328,7 +328,7 @@ namespace
         const int SummandsY = GetWorkGroupCount(m_pDepthSensorControl->GetHeight(), g_TileSize2D);
 
         const int Summands = SummandsX * SummandsY;
-        const float SummandsLog2 = Base::Log2(static_cast<float>(Summands));
+        const float SummandsLog2 = Log2(static_cast<float>(Summands));
         const int SummandsPOT = 1 << (static_cast<int>(SummandsLog2) + 1);
 
         const int NumberOfDefines = 17;
@@ -450,7 +450,7 @@ namespace
         const float FocalPointY0 = m_pDepthSensorControl->GetFocalPointY();
 
         glCreateBuffers(1, &m_DrawCallConstantBuffer);
-        glNamedBufferData(m_DrawCallConstantBuffer, sizeof(Base::Float4x4), nullptr, GL_DYNAMIC_DRAW);
+        glNamedBufferData(m_DrawCallConstantBuffer, sizeof(Float4x4), nullptr, GL_DYNAMIC_DRAW);
 
         SIntrinsics Intrinsics[g_PyramidLevelCount];
 
@@ -463,16 +463,16 @@ namespace
             const float FocalPointX = FocalPointX0 / PyramidFactor;
             const float FocalPointY = FocalPointY0 / PyramidFactor;
 
-            Base::Float4x4 KMatrix(
+            Float4x4 KMatrix(
                 FocalLengthX, 0.0f, FocalPointX, 0.0f,
                 0.0f, FocalLengthY, FocalPointY, 0.0f,
                 0.0f, 0.0f, 1.0f, 0.0f,
                 0.0f, 0.0f, 0.0f, 1.0f
             );
 
-            Intrinsics[i].m_FocalPoint = Base::Float2(FocalPointX, FocalPointY);
-            Intrinsics[i].m_FocalLength = Base::Float2(FocalLengthX, FocalLengthY);
-            Intrinsics[i].m_InvFocalLength = Base::Float2(1.0f / FocalLengthX, 1.0f / FocalLengthY);
+            Intrinsics[i].m_FocalPoint = Float2(FocalPointX, FocalPointY);
+            Intrinsics[i].m_FocalLength = Float2(FocalLengthX, FocalLengthY);
+            Intrinsics[i].m_InvFocalLength = Float2(1.0f / FocalLengthX, 1.0f / FocalLengthY);
             Intrinsics[i].m_KMatrix = Intrinsics[i].m_InvKMatrix = KMatrix;
             Intrinsics[i].m_InvKMatrix.Invert();
         }
@@ -500,10 +500,10 @@ namespace
         glNamedBufferData(m_ICPSummationConstantBuffer, 16, nullptr, GL_DYNAMIC_DRAW);
         
         glCreateBuffers(1, &m_IncPoseMatrixConstantBuffer);
-        glNamedBufferData(m_IncPoseMatrixConstantBuffer, sizeof(Base::Float4x4) * 2, nullptr, GL_DYNAMIC_DRAW);
+        glNamedBufferData(m_IncPoseMatrixConstantBuffer, sizeof(Float4x4) * 2, nullptr, GL_DYNAMIC_DRAW);
 
         glCreateBuffers(1, &m_RaycastBuffer);
-        glNamedBufferData(m_RaycastBuffer, sizeof(Base::Float4) * 2, nullptr, GL_DYNAMIC_DRAW);
+        glNamedBufferData(m_RaycastBuffer, sizeof(Float4) * 2, nullptr, GL_DYNAMIC_DRAW);
     }
     
     // -----------------------------------------------------------------------------
@@ -517,13 +517,13 @@ namespace
     
     void CGfxVoxelRenderer::OnSetupModels()
     {
-        Base::Float3 Vertices[] =
+        Float3 Vertices[] =
         {
-            Base::Float3(-1.0f, -0.5f, 2.0f),
-            Base::Float3( 1.0f, -0.5f, 2.0f),
-            Base::Float3( 1.0f,  0.5f, 2.0f),
-            Base::Float3(-1.0f,  0.5f, 2.0f),
-            Base::Float3(-0.0f,  0.0f, 0.0f),
+            Float3(-1.0f, -0.5f, 2.0f),
+            Float3( 1.0f, -0.5f, 2.0f),
+            Float3( 1.0f,  0.5f, 2.0f),
+            Float3(-1.0f,  0.5f, 2.0f),
+            Float3(-0.0f,  0.0f, 0.0f),
         };
 
         unsigned int Indices[] =
@@ -597,9 +597,9 @@ namespace
         // Get Kinect Data
         //////////////////////////////////////////////////////////////////////////////////////
 
-        Base::Float4x4 TranslationMatrix;
-        Base::Float4x4 ScalingMatrix;
-        Base::Float4x4 RotationMatrix;
+        Float4x4 TranslationMatrix;
+        Float4x4 ScalingMatrix;
+        Float4x4 RotationMatrix;
 
         ScalingMatrix.SetScale(0.005f);
         RotationMatrix.SetRotationX(3.14f);
@@ -650,10 +650,10 @@ namespace
         CSamplerPtr Sampler = Gfx::SamplerManager::GetSampler(Gfx::CSampler::ESampler::MinMagMipLinearClamp);
         CNativeSampler* NativeSampler = static_cast<CNativeSampler*>(Sampler.GetPtr());
 
-        Base::Float4* pData = static_cast<Base::Float4*>(glMapNamedBuffer(m_RaycastBuffer, GL_WRITE_ONLY));
+        Float4* pData = static_cast<Float4*>(glMapNamedBuffer(m_RaycastBuffer, GL_WRITE_ONLY));
         m_PoseMatrix.GetTranslation((*pData)[0], (*pData)[1], (*pData)[2]);
         (*pData)[3] = 1.0f;
-        (*(pData + 1)) = m_TrackingLost ? Base::Float4(1.0f, 0.0f, 0.0f, 1.0f) : Base::Float4(0.0f, 1.0f, 0.0f, 1.0f);
+        (*(pData + 1)) = m_TrackingLost ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 1.0f, 0.0f, 1.0f);
         glUnmapNamedBuffer(m_RaycastBuffer);
         
         Gfx::ContextManager::SetShaderVS(m_VSRaycast);
@@ -755,7 +755,7 @@ namespace
 
     void CGfxVoxelRenderer::PerformTracking()
     {
-        Base::Float4x4 IncPoseMatrix = m_PoseMatrix;
+        Float4x4 IncPoseMatrix = m_PoseMatrix;
 
         for (int PyramidLevel = g_PyramidLevelCount - 1; PyramidLevel >= 0; -- PyramidLevel)
         {
@@ -777,12 +777,12 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxVoxelRenderer::DetermineSummands(int PyramidLevel, const Base::Float4x4& rIncPoseMatrix)
+    void CGfxVoxelRenderer::DetermineSummands(int PyramidLevel, const Float4x4& rIncPoseMatrix)
     {
         const int WorkGroupsX = GetWorkGroupCount(m_pDepthSensorControl->GetWidth() >> PyramidLevel, g_TileSize2D);
         const int WorkGroupsY = GetWorkGroupCount(m_pDepthSensorControl->GetHeight() >> PyramidLevel, g_TileSize2D);
         
-        Base::Float4x4* pIncMatrix = static_cast<Base::Float4x4*>(glMapNamedBufferRange(m_IncPoseMatrixConstantBuffer, 0, sizeof(Base::Float4x4) * 2, GL_MAP_WRITE_BIT));
+        Float4x4* pIncMatrix = static_cast<Float4x4*>(glMapNamedBufferRange(m_IncPoseMatrixConstantBuffer, 0, sizeof(Float4x4) * 2, GL_MAP_WRITE_BIT));
         *pIncMatrix = rIncPoseMatrix;
         *(pIncMatrix + 1) = rIncPoseMatrix.GetInverted();
         glUnmapNamedBuffer(m_IncPoseMatrixConstantBuffer);
@@ -811,7 +811,7 @@ namespace
         const int SummandsY = GetWorkGroupCount(m_pDepthSensorControl->GetHeight() >> PyramidLevel, g_TileSize2D);
 
         const int Summands = SummandsX * SummandsY;
-        const float SummandsLog2 = Base::Log2(static_cast<float>(Summands));
+        const float SummandsLog2 = Log2(static_cast<float>(Summands));
         const int SummandsPOT = 1 << (static_cast<int>(SummandsLog2) + 1);
 
         int* pData = static_cast<int*>(glMapNamedBuffer(m_ICPSummationConstantBuffer, GL_WRITE_ONLY));
@@ -829,7 +829,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    bool CGfxVoxelRenderer::CalculatePoseMatrix(Base::Float4x4& rIncPoseMatrix)
+    bool CGfxVoxelRenderer::CalculatePoseMatrix(Float4x4& rIncPoseMatrix)
     {
         double A[36];
         double b[6];
@@ -861,7 +861,7 @@ namespace
         {
             for (int j = 0; j <= i; ++ j)
             {
-                float Sum = 0.0f;
+                double Sum = 0.0f;
                 for (int k = 0; k < j; ++ k)
                 {
                     Sum += L[k * 6 + i] * L[k * 6 + j];
@@ -895,7 +895,7 @@ namespace
         x[1] = (y[1] - L[11] * x[5] - L[10] * x[4] - L[9] * x[3] - L[8] * x[2]) / L[7];
         x[0] = (y[0] - L[5] * x[5] - L[4] * x[4] - L[3] * x[3] - L[2] * x[2] - L[1] * x[1]) / L[0];
         
-        Base::Float4x4 RotationX, RotationY, RotationZ, Rotation, Translation;
+        Float4x4 RotationX, RotationY, RotationZ, Rotation, Translation;
         RotationX.SetRotationX(static_cast<float>(x[0]));
         RotationY.SetRotationY(static_cast<float>(x[1]));
         RotationZ.SetRotationZ(static_cast<float>(x[2]));
@@ -904,7 +904,7 @@ namespace
         
         rIncPoseMatrix = Translation * Rotation * rIncPoseMatrix;
 
-        /*Base::Float4x4 Rotation, Translation;
+        /*Float4x4 Rotation, Translation;
         Rotation.SetRotation(x[0], x[1], x[2]);
         Translation.SetTranslation(x[3], x[4], x[5]);
 
@@ -1118,7 +1118,7 @@ namespace
 
     void CGfxVoxelRenderer::RenderVertexMap(GLuint VertexMap, GLuint NormalMap)
     {
-        Base::Float4x4* pData = static_cast<Base::Float4x4*>(glMapNamedBuffer(m_DrawCallConstantBuffer, GL_WRITE_ONLY));
+        Float4x4* pData = static_cast<Float4x4*>(glMapNamedBuffer(m_DrawCallConstantBuffer, GL_WRITE_ONLY));
         *pData = m_PoseMatrix * m_VertexMapWorldMatrix;
         glUnmapNamedBuffer(m_DrawCallConstantBuffer);
 
@@ -1146,7 +1146,7 @@ namespace
 
     void CGfxVoxelRenderer::RenderVolume()
     {
-        Base::Float4x4* pData = static_cast<Base::Float4x4*>(glMapNamedBuffer(m_DrawCallConstantBuffer, GL_WRITE_ONLY));
+        Float4x4* pData = static_cast<Float4x4*>(glMapNamedBuffer(m_DrawCallConstantBuffer, GL_WRITE_ONLY));
         *pData = m_VolumeWorldMatrix;
         glUnmapNamedBuffer(m_DrawCallConstantBuffer);
 
@@ -1183,11 +1183,11 @@ namespace
         Gfx::ContextManager::SetShaderVS(m_VSCamera);
         Gfx::ContextManager::SetShaderPS(m_FSCamera);
 
-        Base::Float4x4 WorldMatrix;
+        Float4x4 WorldMatrix;
         WorldMatrix.SetScale(0.1f);
         WorldMatrix = m_PoseMatrix * WorldMatrix;
 
-        Base::Float4x4* pData = static_cast<Base::Float4x4*>(glMapNamedBuffer(m_DrawCallConstantBuffer, GL_WRITE_ONLY));
+        Float4x4* pData = static_cast<Float4x4*>(glMapNamedBuffer(m_DrawCallConstantBuffer, GL_WRITE_ONLY));
         *pData = WorldMatrix;
         glUnmapNamedBuffer(m_DrawCallConstantBuffer);
 

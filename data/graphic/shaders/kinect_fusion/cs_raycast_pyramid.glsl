@@ -36,17 +36,18 @@ void main()
     if (Sample00.x == 0.0f || Sample01.x == 0.0f || Sample10.x == 0.0f || Sample11.x == 0.0f)
     {
         imageStore(cs_OutputTexture, ivec2(gl_GlobalInvocationID), vec4(0.0f));
-        return;
     }
+    else
+    {
+        vec3 Result = (Sample00 + Sample01 + Sample10 + Sample11) * 0.25f;
 
-	vec3 Result = (Sample00 + Sample01 + Sample10 + Sample11) * 0.25f;
-	
-	if (g_Normalize > 0.0f)
-	{
-		Result = normalize(Result);
-	}
-	
-	imageStore(cs_OutputTexture, ivec2(gl_GlobalInvocationID), vec4(Result, 1.0f));
+        if (g_Normalize > 0.0f)
+        {
+            Result = normalize(Result);
+        }
+
+        imageStore(cs_OutputTexture, ivec2(gl_GlobalInvocationID), vec4(Result, 1.0f));
+    }
 }
 
 #endif // __INCLUDE_CS_KINECT_RAYCAST_PYRAMID_GLSL__
