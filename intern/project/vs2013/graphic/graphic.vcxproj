@@ -20,6 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\graphic\gfx_application_interface.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_area_light_facet.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_area_light_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_ar_renderer.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_camera_actor_facet.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_camera_actor_manager.cpp" />
@@ -27,10 +29,12 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_light_indirect_renderer.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_light_probe_facet.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_light_probe_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_manager_interface.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_mesh_actor_facet.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_mesh_actor_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_point_light_facet.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_point_light_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_renderer_interface.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_sky_facet.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_sky_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_light_area_renderer.cpp" />
@@ -103,20 +107,25 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_view_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_view_port.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_view_port_set.cpp" />
-    <ClCompile Include="..\..\..\src\graphic\gfx_voxel_renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\graphic\gfx_application_interface.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_area_light_facet.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_area_light_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_camera_actor_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_camera_actor_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_edit_state.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_indirect_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_ltc_look_up_textures.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_manager_interface.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_mesh_actor_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_mesh_actor_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_point_light_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_point_light_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_renderer_interface.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_selection.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_sky_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_sky_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_area_renderer.h" />
@@ -201,7 +210,6 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_view_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_view_port.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_view_port_set.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_voxel_renderer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\data\graphic\shaders\cs_brdf.glsl" />
@@ -372,7 +380,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(RSSDK_DIR)/include;..\..\..\src;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\opencv\include;..\..\..\..\extern\kinect\include;..\..\..\..\extern\tinyxml2\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\opencv\include;..\..\..\..\extern\tinyxml2\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>graphic/gfx_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -421,7 +429,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(RSSDK_DIR)/include;..\..\..\src;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\opencv\include;..\..\..\..\extern\kinect\include;..\..\..\..\extern\tinyxml2\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\opencv\include;..\..\..\..\extern\tinyxml2\include</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>graphic/gfx_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>

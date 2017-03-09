@@ -35,7 +35,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewMap, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::App_NewMap, NewMessage);
     }
 
     // -----------------------------------------------------------------------------

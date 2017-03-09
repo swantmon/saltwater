@@ -128,7 +128,6 @@ namespace
         CMeshPtr m_QuadModelPtr;
         CMeshPtr m_GizmoModelPtr;
 
-        CBufferSetPtr     m_BaseVSBuffer;
         CBufferSetPtr     m_ViewModelVSBuffer;
         CBufferSetPtr     m_BaseModelVSBuffer;
         CBufferSetPtr     m_ViewPSBuffer;
@@ -168,7 +167,6 @@ namespace
     CGfxDebugRenderer::CGfxDebugRenderer()
         : m_QuadModelPtr            ()
         , m_GizmoModelPtr           ()
-        , m_BaseVSBuffer            ()
         , m_ViewModelVSBuffer       ()
         , m_BaseModelVSBuffer       ()
         , m_ViewPSBuffer            ()
@@ -218,7 +216,6 @@ namespace
     {
         m_QuadModelPtr             = 0;
         m_GizmoModelPtr            = 0;
-        m_BaseVSBuffer             = 0;
         m_ViewModelVSBuffer        = 0;
         m_BaseModelVSBuffer        = 0;
         m_ViewPSBuffer             = 0;
@@ -410,9 +407,8 @@ namespace
         
         CBufferPtr ModelBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
         
-        m_BaseVSBuffer      = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
         m_ViewModelVSBuffer = BufferManager::CreateBufferSet(ViewBuffer);
-        m_BaseModelVSBuffer = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS(), ModelBuffer);
+        m_BaseModelVSBuffer = BufferManager::CreateBufferSet(ModelBuffer);
 
         // -----------------------------------------------------------------------------
 
@@ -598,36 +594,36 @@ namespace
     {
         auto RenderFrustumPlane = [&](const Base::Float3& _rTopLeft, const Base::Float3& _rTopRight, const Base::Float3& _rBottomRight, const Base::Float3& _rBottomLeft, const Base::Float3& _rColor)
         {
-            float* pViewBuffer = static_cast<float*>(BufferManager::MapVertexBuffer(m_PlaneBuffer->GetBuffer(0), CBuffer::Write));
+            float ViewBuffer[12];
 
-            pViewBuffer[0] = _rTopLeft[0];
-            pViewBuffer[1] = _rTopLeft[1];
-            pViewBuffer[2] = _rTopLeft[2];
+            ViewBuffer[0] = _rTopLeft[0];
+            ViewBuffer[1] = _rTopLeft[1];
+            ViewBuffer[2] = _rTopLeft[2];
 
-            pViewBuffer[3] = _rTopRight[0];
-            pViewBuffer[4] = _rTopRight[1];
-            pViewBuffer[5] = _rTopRight[2];
+            ViewBuffer[3] = _rTopRight[0];
+            ViewBuffer[4] = _rTopRight[1];
+            ViewBuffer[5] = _rTopRight[2];
 
-            pViewBuffer[6] = _rBottomRight[0];
-            pViewBuffer[7] = _rBottomRight[1];
-            pViewBuffer[8] = _rBottomRight[2];
+            ViewBuffer[6] = _rBottomRight[0];
+            ViewBuffer[7] = _rBottomRight[1];
+            ViewBuffer[8] = _rBottomRight[2];
 
-            pViewBuffer[9] = _rBottomLeft[0];
-            pViewBuffer[10] = _rBottomLeft[1];
-            pViewBuffer[11] = _rBottomLeft[2];
+            ViewBuffer[9] = _rBottomLeft[0];
+            ViewBuffer[10] = _rBottomLeft[1];
+            ViewBuffer[11] = _rBottomLeft[2];
 
-            BufferManager::UnmapVertexBuffer(m_PlaneBuffer->GetBuffer(0));
+            BufferManager::UploadVertexBufferData(m_PlaneBuffer->GetBuffer(0), ViewBuffer);
 
             // -----------------------------------------------------------------------------
 
-            SProperties* pProperties = static_cast<SProperties*>(BufferManager::MapConstantBuffer(m_ViewPSBuffer->GetBuffer(0)));
+            SProperties Properties;
 
-            pProperties->m_Color[0] = _rColor[0];
-            pProperties->m_Color[1] = _rColor[1];
-            pProperties->m_Color[2] = _rColor[2];
-            pProperties->m_Color[3] = 0.5f;
+            Properties.m_Color[0] = _rColor[0];
+            Properties.m_Color[1] = _rColor[1];
+            Properties.m_Color[2] = _rColor[2];
+            Properties.m_Color[3] = 0.5f;
 
-            BufferManager::UnmapConstantBuffer(m_ViewPSBuffer->GetBuffer(0));
+            BufferManager::UploadConstantBufferData(m_ViewPSBuffer->GetBuffer(0), &Properties);
 
             // -----------------------------------------------------------------------------
 
@@ -659,9 +655,9 @@ namespace
         
         ContextManager::SetShaderPS(m_PositionShaderPSPtr);
         
-        ContextManager::SetConstantBufferSetVS(m_BaseVSBuffer);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         
-        ContextManager::SetConstantBufferSetPS(m_ViewPSBuffer);
+        ContextManager::SetConstantBuffer(1, m_ViewPSBuffer->GetBuffer(0));
         
         
 
@@ -686,9 +682,9 @@ namespace
             RenderFrustumPlane(pWorldSpaceCameraFrustum[1], pWorldSpaceCameraFrustum[3], pWorldSpaceCameraFrustum[2], pWorldSpaceCameraFrustum[0], Base::Float3(0.0f, 1.0f, 1.0f)); // Near
         }
         
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetConstantBuffer(0);
         
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(1);
         
         ContextManager::ResetTopology();
         
@@ -722,14 +718,14 @@ namespace
         // -----------------------------------------------------------------------------
         CCameraPtr CameraPtr = m_RenderContextPtr->GetCamera();
 
-        SPerFrameConstantBuffer* pViewBuffer = static_cast<SPerFrameConstantBuffer*>(BufferManager::MapConstantBuffer(m_ViewModelVSBuffer->GetBuffer(0)));
+        SPerFrameConstantBuffer ViewBuffer;
 
-        pViewBuffer->m_ViewProjection = CameraPtr->GetProjectionMatrix();
-        pViewBuffer->m_ModelMatrix  = Base::Float4x4::s_Identity;
-        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(0.0f, 0.0f, -1.0f);
-        pViewBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(0.1f) * ViewManager::GetMainCamera()->GetView()->GetRotationMatrix();
+        ViewBuffer.m_ViewProjection = CameraPtr->GetProjectionMatrix();
+        ViewBuffer.m_ModelMatrix  = Base::Float4x4::s_Identity;
+        ViewBuffer.m_ModelMatrix *= Base::Float4x4().SetTranslation(0.0f, 0.0f, -1.0f);
+        ViewBuffer.m_ModelMatrix *= Base::Float4x4().SetScale(0.1f) * ViewManager::GetMainCamera()->GetView()->GetRotationMatrix();
 
-        BufferManager::UnmapConstantBuffer(m_ViewModelVSBuffer->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(m_ViewModelVSBuffer->GetBuffer(0), &ViewBuffer);
 
         // -----------------------------------------------------------------------------
         // Per surface
@@ -742,11 +738,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Buffer
             // -----------------------------------------------------------------------------
-            CMaterial::SMaterialAttributes* pMaterialBuffer = static_cast<CMaterial::SMaterialAttributes*>(BufferManager::MapConstantBuffer(m_DeferredPassPSBuffer->GetBuffer(0)));
-
-            Base::CMemory::Copy(pMaterialBuffer, &m_GizmoModelPtr->GetLOD(0)->GetSurface(IndexOfSurface)->GetMaterial()->GetMaterialAttributes(), sizeof(CMaterial::SMaterialAttributes));
-
-            BufferManager::UnmapConstantBuffer(m_DeferredPassPSBuffer->GetBuffer(0));
+            BufferManager::UploadConstantBufferData(m_DeferredPassPSBuffer->GetBuffer(0), &m_GizmoModelPtr->GetLOD(0)->GetSurface(IndexOfSurface)->GetMaterial()->GetMaterialAttributes());
 
             // -----------------------------------------------------------------------------
             // Render
@@ -765,15 +757,15 @@ namespace
 
             ContextManager::SetShaderPS(m_GizmoShaderPSPtr);
 
-            ContextManager::SetConstantBufferSetVS(m_ViewModelVSBuffer);
+            ContextManager::SetConstantBuffer(0, m_ViewModelVSBuffer->GetBuffer(0));
 
-            ContextManager::SetConstantBufferSetPS(m_DeferredPassPSBuffer);
+            ContextManager::SetConstantBuffer(1, m_DeferredPassPSBuffer->GetBuffer(0));
 
             ContextManager::DrawIndexed(m_GizmoModelPtr->GetLOD(0)->GetSurface(IndexOfSurface)->GetNumberOfIndices(), 0, 0);
 
-            ContextManager::ResetConstantBufferSetPS();
+            ContextManager::ResetConstantBuffer(0);
 
-            ContextManager::ResetConstantBufferSetVS();
+            ContextManager::ResetConstantBuffer(1);
 
             ContextManager::ResetTopology();
 
@@ -798,8 +790,8 @@ namespace
     void CGfxDebugRenderer::RenderTextures()
     {
         const unsigned int pOffset[] = { 0, 0 };
-        CDebugTextures::const_iterator CurrentTexture = m_DebugTextures.begin();
-        CDebugTextures::const_iterator EndOfTextures  = m_DebugTextures.end();
+        CDebugTextures::iterator CurrentTexture = m_DebugTextures.begin();
+        CDebugTextures::iterator EndOfTextures  = m_DebugTextures.end();
 
         if (CurrentTexture == EndOfTextures)
         {
@@ -824,14 +816,12 @@ namespace
         
         ContextManager::SetShaderPS(m_QuadTextureShaderPSPtr);
 
-        ContextManager::SetConstantBufferSetVS(m_BaseModelVSBuffer);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+
+        ContextManager::SetConstantBuffer(1, m_BaseModelVSBuffer->GetBuffer(0));
 
         for (; CurrentTexture != EndOfTextures; ++ CurrentTexture)
         {
-            SPerDrawCallConstantBuffer* pModelBuffer = static_cast<SPerDrawCallConstantBuffer*>(BufferManager::MapConstantBuffer(m_BaseModelVSBuffer->GetBuffer(1)));
-
-            assert(pModelBuffer != nullptr);
-
             // -----------------------------------------------------------------------------
             // 
             //   0,0                      1,0
@@ -849,23 +839,30 @@ namespace
             Base::Float2 MaxPoint   = CurrentTexture->m_ScreenRegion.GetMax();
             Base::Float2 Difference = MaxPoint - MinPoint;
 
-            pModelBuffer->m_ModelMatrix = Base::Float4x4::s_Identity;
+            SPerDrawCallConstantBuffer ModelBuffer;
 
-            pModelBuffer->m_ModelMatrix.SetScale(Difference[0], Difference[1], 1.0f);
-            pModelBuffer->m_ModelMatrix.InjectTranslation(MinPoint[0], MinPoint[1], 1.0f);
+            ModelBuffer.m_ModelMatrix = Base::Float4x4::s_Identity;
+            ModelBuffer.m_ModelMatrix.SetScale(Difference[0], Difference[1], 1.0f);
+            ModelBuffer.m_ModelMatrix.InjectTranslation(MinPoint[0], MinPoint[1], 1.0f);
 
-            BufferManager::UnmapConstantBuffer(m_BaseModelVSBuffer->GetBuffer(1));
+            BufferManager::UploadConstantBufferData(m_BaseModelVSBuffer->GetBuffer(0), &ModelBuffer);
 
             // -----------------------------------------------------------------------------
 
-            ContextManager::SetTextureSetPS(CurrentTexture->m_TexturePtr);
+            ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+
+            ContextManager::SetTexture(0, CurrentTexture->m_TexturePtr->GetTexture(0));
 
             ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
         }
 
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetTexture(0);
 
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetSampler(0);
+
+        ContextManager::ResetConstantBuffer(0);
+
+        ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetTopology();
 
@@ -924,9 +921,11 @@ namespace
 
         ContextManager::SetShaderPS(m_QuadTextShaderPSPtr);
 
-        ContextManager::SetConstantBufferSetVS(m_BaseVSBuffer);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
-        ContextManager::SetTextureSetPS(m_TextTexturePtr);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+
+        ContextManager::SetTexture(0, m_TextTexturePtr->GetTexture(0));
 
         pInstances = BufferManager::MapVertexBuffer(m_TextInstanceBufferSetPtr->GetBuffer(1), CBuffer::Write);
 
@@ -988,9 +987,11 @@ namespace
             NumberOfLetters = 0;
         }
 
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetTexture(0);
 
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetSampler(0);
+
+        ContextManager::ResetConstantBuffer(0);
 
         ContextManager::ResetTopology();
 

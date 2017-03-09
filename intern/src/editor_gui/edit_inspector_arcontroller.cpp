@@ -18,7 +18,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::PluginInfoARController, EDIT_RECEIVE_MESSAGE(&CInspectorARController::OnEntityInfoARController));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Plugin_ARController_Info, EDIT_RECEIVE_MESSAGE(&CInspectorARController::OnEntityInfoARController));
     }
 
     // -----------------------------------------------------------------------------
@@ -36,6 +36,8 @@ namespace Edit
         // Read values
         // -----------------------------------------------------------------------------
         int Device = m_pDeviceCB->currentIndex();
+
+        bool FreezeLastFrame = m_pFreezeLastFrameCB->isChecked();
 
         QString Configuration = m_pConfigurationEdit->text();
         QByteArray ConfigurationFileBinary = Configuration.toLatin1();
@@ -56,6 +58,8 @@ namespace Edit
 
         NewMessage.PutInt(Device);
 
+        NewMessage.PutBool(FreezeLastFrame);
+
         NewMessage.PutString(ConfigurationFileBinary.data());
 
         NewMessage.PutString(ParameterFileBinary.data());
@@ -66,7 +70,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::PluginInfoARController, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Plugin_ARConroller_Update, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -121,7 +125,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::RequestPluginInfoARController, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Plugin_ARConroller_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -137,6 +141,8 @@ namespace Edit
 
         int Device = _rMessage.GetInt();
 
+        bool FreezeLastFrame = _rMessage.GetBool();
+
         char Configuration[256];
 
         _rMessage.GetString(Configuration, 256);
@@ -149,16 +155,17 @@ namespace Edit
 
         unsigned int OutputBackground = _rMessage.GetInt();
 
-        unsigned int OutputCubemap = _rMessage.GetInt();
-
         unsigned int NumberOfMarker = _rMessage.GetInt();
 
         // -----------------------------------------------------------------------------
         // Set values
         // -----------------------------------------------------------------------------
         m_pDeviceCB->blockSignals(true);
+        m_pFreezeLastFrameCB->blockSignals(true);
 
         m_pDeviceCB->setCurrentIndex(Device);
+
+        m_pFreezeLastFrameCB->setChecked(FreezeLastFrame);
 
         m_pConfigurationEdit->setText(Configuration);
 
@@ -171,10 +178,9 @@ namespace Edit
 
         m_pOutputBackgroundEdit->setText(QString::number(OutputBackground));
 
-        m_pOutputCubemapEdit->setText(QString::number(OutputCubemap));
-
         m_pNumberOfMarkerEdit->setText(QString::number(NumberOfMarker));
 
+        m_pFreezeLastFrameCB->blockSignals(false);
         m_pDeviceCB->blockSignals(false);
     }
 } // namespace Edit

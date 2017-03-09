@@ -21,7 +21,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::EffectInfoPostAA, EDIT_RECEIVE_MESSAGE(&CInspectorPostAA::OnEntityInfoPostAA));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Effect_PostAA_Info, EDIT_RECEIVE_MESSAGE(&CInspectorPostAA::OnEntityInfoPostAA));
     }
 
     // -----------------------------------------------------------------------------
@@ -51,7 +51,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::EffectInfoPostAA, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Effect_PostAA_Update, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -66,7 +66,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::RequestEffectInfoPostAA, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Effect_PostAA_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------

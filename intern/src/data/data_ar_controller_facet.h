@@ -1,8 +1,9 @@
 
 #pragma once
 
-#include "base/base_string.h"
 #include "base/base_vector2.h"
+
+#include <string>
 
 namespace Dt
 {
@@ -44,10 +45,10 @@ namespace Dt
                 UndefinedMarker = -1
             };
 
-            unsigned int     m_UID;
-            EMarkerType      m_Type;
-            Base::CharString m_PatternFile;
-            float            m_WidthInMeter;
+            unsigned int m_UID;
+            EMarkerType  m_Type;
+            std::string  m_PatternFile;
+            float        m_WidthInMeter;
         };
 
     public:
@@ -59,19 +60,18 @@ namespace Dt
         void SetDeviceType(EType _DeviceType);
         EType GetDeviceType() const;
 
-        void SetConfiguration(const Base::Char* _pConfiguration);
-        const Base::Char* GetConfiguration() const;
+        void SetFreezeOutput(bool _Flag);
+        bool GetFreezeLastFrame() const;
 
-        void SetCameraParameterFile(const Base::Char* _pCameraParameterFile);
-        const Base::Char* GetCameraParameterFile() const;
+        void SetConfiguration(const std::string& _rConfiguration);
+        const std::string& GetConfiguration() const;
+
+        void SetCameraParameterFile(const std::string& _rCameraParameterFile);
+        const std::string& GetCameraParameterFile() const;
 
         void SetOutputBackground(Dt::CTexture2D* _pOutputBackground);
         Dt::CTexture2D* GetOutputBackground();
         const Dt::CTexture2D* GetOutputBackground() const;
-
-        void SetOutputCubemap(Dt::CTextureCube* _pOutputCubemap);
-        Dt::CTextureCube* GetOutputCubemap();
-        const Dt::CTextureCube* GetOutputCubemap() const;
 
         void SetNumberOfMarker(unsigned int _NumberOfMarker);
         unsigned int GetNumberOfMarker() const;
@@ -86,13 +86,13 @@ namespace Dt
 
     private:
 
-        Dt::CEntity*      m_pCameraEntity;
-        Dt::CTexture2D*   m_pOutputBackground;
-        Dt::CTextureCube* m_pOutputCubemap;
-        EType             m_DeviceType;
-        unsigned int      m_NumberOfMarker;
-        Base::CharString  m_CameraParameterFile;
-        Base::CharString  m_Configuration;
-        SMarker           m_Marker[s_MaxNumberOfMarker];
+        Dt::CEntity*    m_pCameraEntity;
+        Dt::CTexture2D* m_pOutputBackground;
+        EType           m_DeviceType;
+        bool            m_FreezeOutput;
+        unsigned int    m_NumberOfMarker;
+        std::string     m_CameraParameterFile;
+        std::string     m_Configuration;
+        SMarker         m_Marker[s_MaxNumberOfMarker];
     };
 } // namespace Dt

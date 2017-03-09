@@ -6,6 +6,7 @@
 
 #include "graphic/gfx_actor_renderer.h"
 #include "graphic/gfx_ar_renderer.h"
+#include "graphic/gfx_area_light_manager.h"
 #include "graphic/gfx_background_renderer.h"
 #include "graphic/gfx_camera_actor_manager.h"
 #include "graphic/gfx_fog_renderer.h"
@@ -24,11 +25,11 @@
 #include "graphic/gfx_postfx_hdr_renderer.h"
 #include "graphic/gfx_postfx_renderer.h"
 #include "graphic/gfx_reflection_renderer.h"
+#include "graphic/gfx_selection_renderer.h"
 #include "graphic/gfx_shadow_renderer.h"
 #include "graphic/gfx_sky_manager.h"
 #include "graphic/gfx_sun_manager.h"
 #include "graphic/gfx_tonemapping_renderer.h"
-#include "graphic/gfx_voxel_renderer.h"
 
 using namespace Gfx;
 
@@ -77,6 +78,7 @@ namespace
         SkyManager        ::Update();
         LightProbeManager ::Update();
         PointLightManager ::Update();
+        AreaLightManager  ::Update();
 
         // -----------------------------------------------------------------------------
         // Update graphic
@@ -100,7 +102,7 @@ namespace
         TonemappingRenderer  ::Update();
         PostFXHDR            ::Update();
         PostFX               ::Update();
-        VoxelRenderer        ::Update();
+        SelectionRenderer    ::Update();
 
         // -----------------------------------------------------------------------------
         // Creation Pass
@@ -125,7 +127,8 @@ namespace
         ReflectionRenderer   ::Render();
         BackgroundRenderer   ::Render();
         FogRenderer          ::Render();
-        HistogramRenderer    ::Render();
+
+        HistogramRenderer::Render();
 
         PostFXHDR::Render();
 
@@ -138,9 +141,18 @@ namespace
         
         TonemappingRenderer::Render();
 
-        VoxelRenderer::Render();
+        LightAreaRenderer::RenderBulbs();
 
         PostFX::Render();
+
+        Performance::EndEvent();
+
+        // -----------------------------------------------------------------------------
+        // Interaction
+        // -----------------------------------------------------------------------------
+        Performance::BeginEvent("Interaction Pass");
+
+        SelectionRenderer::Render();
 
         Performance::EndEvent();
 

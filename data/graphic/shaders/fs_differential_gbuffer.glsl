@@ -8,7 +8,7 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(std140, binding = 1) uniform UB1
+layout(std140, binding = 2) uniform UB1
 {
     vec4  ps_TilingOffset;
     vec3  ps_Color;

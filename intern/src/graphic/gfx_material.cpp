@@ -10,6 +10,7 @@ namespace Gfx
     CMaterial::CMaterial()
         : m_HasAlpha(false)
         , m_HasBump (false)
+        , m_Hash    (0)
     {
         m_MaterialAttributes.m_Color[0]        = 1.0f;
         m_MaterialAttributes.m_Color[1]        = 1.0f;
@@ -17,6 +18,7 @@ namespace Gfx
         m_MaterialAttributes.m_Roughness       = 0.0f;
         m_MaterialAttributes.m_Reflectance     = 0.0f;
         m_MaterialAttributes.m_MetalMask       = 0.0f;
+        m_MaterialAttributes.m_Displacement    = 0.0f;
         m_MaterialAttributes.m_TilingOffset[0] = 1.0f;
         m_MaterialAttributes.m_TilingOffset[1] = 1.0f;
         m_MaterialAttributes.m_TilingOffset[2] = 0.0f;
@@ -175,7 +177,7 @@ namespace Gfx
 
     bool CMaterial::GetHasBump() const
     {
-        return m_HasBump;
+        return m_HasBump && m_MaterialAttributes.m_Displacement > 0.0f;
     }
 
     // -----------------------------------------------------------------------------

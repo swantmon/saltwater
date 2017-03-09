@@ -7,6 +7,7 @@
 
 #include "graphic/gfx_actor_renderer.h"
 #include "graphic/gfx_ar_renderer.h"
+#include "graphic/gfx_area_light_manager.h"
 #include "graphic/gfx_background_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_camera_actor_manager.h"
@@ -40,7 +41,6 @@
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_tonemapping_renderer.h"
 #include "graphic/gfx_view_manager.h"
-#include "graphic/gfx_voxel_renderer.h"
 
 using namespace Gfx;
 
@@ -63,12 +63,12 @@ namespace
 {
     void CGfxStartState::OnEnter()
     {
-        BASE_CONSOLE_STREAMINFO("Gfx> Start manager...");
-
         // -----------------------------------------------------------------------------
         // Start manager. We have to take care on a specific order because of
         // dependencies.
         // -----------------------------------------------------------------------------
+        BASE_CONSOLE_STREAMINFO("Gfx> Start manager...");
+
         ViewManager     ::OnStart();
         StateManager    ::OnStart();
         ContextManager  ::OnStart();
@@ -77,15 +77,6 @@ namespace
         BufferManager   ::OnStart();
         ShaderManager   ::OnStart();
         TargetSetManager::OnStart();
-
-        MeshActorManager  ::OnStart();
-        CameraActorManager::OnStart();
-        SunManager        ::OnStart();
-        MeshManager       ::OnStart();
-        MaterialManager   ::OnStart();
-        SkyManager        ::OnStart();
-        LightProbeManager ::OnStart();
-        PointLightManager ::OnStart();
 
         BASE_CONSOLE_STREAMINFO("Gfx> Finished starting manager.");
 
@@ -98,6 +89,23 @@ namespace
         Main::UploadPerFrameConstantBuffers();
 
         BASE_CONSOLE_STREAMINFO("Gfx> Finished create and upload global buffer.");
+
+        // -----------------------------------------------------------------------------
+        // Start entity manager
+        // -----------------------------------------------------------------------------
+        BASE_CONSOLE_STREAMINFO("Gfx> Start entity/facet manager...");
+
+        MeshActorManager  ::OnStart();
+        CameraActorManager::OnStart();
+        SunManager        ::OnStart();
+        MeshManager       ::OnStart();
+        MaterialManager   ::OnStart();
+        SkyManager        ::OnStart();
+        LightProbeManager ::OnStart();
+        PointLightManager ::OnStart();
+        AreaLightManager  ::OnStart();
+
+        BASE_CONSOLE_STREAMINFO("Gfx> Finished starting entity/facet manager.");
 
         // -----------------------------------------------------------------------------
         // Start renderer. It is not possible to setup all the data in the 'OnStart'
@@ -129,7 +137,6 @@ namespace
         DebugRenderer        ::OnStart();
         SelectionRenderer    ::OnStart();
         TonemappingRenderer  ::OnStart();
-        VoxelRenderer        ::OnStart();
         
         
         // -----------------------------------------------------------------------------
@@ -152,7 +159,6 @@ namespace
         DebugRenderer        ::OnSetupShader();
         SelectionRenderer    ::OnSetupShader();
         TonemappingRenderer  ::OnSetupShader();
-        VoxelRenderer        ::OnSetupShader();
         
         // -----------------------------------------------------------------------------
         // Setup the kernels of all renderer
@@ -174,7 +180,6 @@ namespace
         DebugRenderer        ::OnSetupKernels();
         SelectionRenderer    ::OnSetupKernels();
         TonemappingRenderer  ::OnSetupKernels();
-        VoxelRenderer        ::OnSetupKernels();
         
         // -----------------------------------------------------------------------------
         // Setup the render targets of all renderer
@@ -196,7 +201,6 @@ namespace
         DebugRenderer        ::OnSetupRenderTargets();
         SelectionRenderer    ::OnSetupRenderTargets();
         TonemappingRenderer  ::OnSetupRenderTargets();
-        VoxelRenderer        ::OnSetupRenderTargets();
         
         // -----------------------------------------------------------------------------
         // Setup the states of all renderer
@@ -218,7 +222,6 @@ namespace
         DebugRenderer        ::OnSetupStates();
         SelectionRenderer    ::OnSetupStates();
         TonemappingRenderer  ::OnSetupStates();
-        VoxelRenderer        ::OnSetupStates();
         
         // -----------------------------------------------------------------------------
         // Setup the textures of all renderer
@@ -240,7 +243,6 @@ namespace
         DebugRenderer        ::OnSetupTextures();
         SelectionRenderer    ::OnSetupTextures();
         TonemappingRenderer  ::OnSetupTextures();
-        VoxelRenderer        ::OnSetupTextures();
         
         // -----------------------------------------------------------------------------
         // Setup the buffers of all renderer
@@ -262,8 +264,7 @@ namespace
         DebugRenderer        ::OnSetupBuffers();
         SelectionRenderer    ::OnSetupBuffers();
         TonemappingRenderer  ::OnSetupBuffers();
-        VoxelRenderer        ::OnSetupBuffers();
-
+        
         // -----------------------------------------------------------------------------
         // Setup the resources of all renderer
         // -----------------------------------------------------------------------------
@@ -284,9 +285,7 @@ namespace
         DebugRenderer        ::OnSetupResources();
         SelectionRenderer    ::OnSetupResources();
         TonemappingRenderer  ::OnSetupResources();
-        VoxelRenderer        ::OnSetupResources();
-
-
+        
         // -----------------------------------------------------------------------------
         // Setup the models of all renderer
         // -----------------------------------------------------------------------------
@@ -307,8 +306,7 @@ namespace
         DebugRenderer        ::OnSetupModels();
         SelectionRenderer    ::OnSetupModels();
         TonemappingRenderer  ::OnSetupModels();
-        VoxelRenderer        ::OnSetupModels();
-
+        
         // -----------------------------------------------------------------------------
         // Setup ends with a last call
         // -----------------------------------------------------------------------------
@@ -329,7 +327,6 @@ namespace
         DebugRenderer        ::OnSetupEnd();
         SelectionRenderer    ::OnSetupEnd();
         TonemappingRenderer  ::OnSetupEnd();
-        VoxelRenderer        ::OnSetupEnd();
 
         BASE_CONSOLE_STREAMINFO("Gfx> Finished renderer starting.");
     }

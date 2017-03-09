@@ -15,6 +15,7 @@ namespace ControlManager
     void Update();
 
     bool IsActive();
+    bool IsOriginTracked();
 
     CControl* GetActiveControl();
 } // namespace ControlManager

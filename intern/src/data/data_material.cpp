@@ -19,6 +19,7 @@ namespace Dt
         , m_Roughness        (1.0f)
         , m_Reflectance      (0.0f)
         , m_MetalMask        (0.0f)
+        , m_Displacement     (0.0f)
         , m_Hash             (0)
         , m_DirtyFlags       (0)
         , m_DirtyTime        (0)
@@ -30,35 +31,35 @@ namespace Dt
 
     CMaterial::~CMaterial()
     {
-        m_Materialname.Clear();
+        m_Materialname.clear();
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetMaterialname(const char* _pMaterialname)
+    void CMaterial::SetMaterialname(const std::string& _rMaterialname)
     {
-        m_Materialname = _pMaterialname;
+        m_Materialname = _rMaterialname;
     }
 
     // -----------------------------------------------------------------------------
 
-    const char* CMaterial::GetMaterialname() const
+    const std::string& CMaterial::GetMaterialname() const
     {
-        return m_Materialname.GetConst();
+        return m_Materialname;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetFilename(const char* _pFilename)
+    void CMaterial::SetFilename(const std::string& _rFilename)
     {
-        m_FileName = _pFilename;
+        m_FileName = _rFilename;
     }
 
     // -----------------------------------------------------------------------------
 
-    const char* CMaterial::GetFileName() const
+    const std::string& CMaterial::GetFileName() const
     {
-        return m_FileName.GetConst();
+        return m_FileName;
     }
 
     // -----------------------------------------------------------------------------
@@ -269,6 +270,20 @@ namespace Dt
     float CMaterial::GetMetalness() const
     {
         return m_MetalMask;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMaterial::SetDisplacement(float _Displacement)
+    {
+        m_Displacement = _Displacement;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CMaterial::GetDisplacement() const
+    {
+        return m_Displacement;
     }
 
     // -----------------------------------------------------------------------------

@@ -13,9 +13,6 @@
 #include "editor_port/edit_message.h"
 #include "editor_port/edit_message_manager.h"
 
-#include <windows.h>
-#undef SendMessage
-
 namespace
 {
     class CMaterialHelper : Base::CUncopyable
@@ -36,13 +33,13 @@ namespace
 
         void OnNewMaterial(Edit::CMessage& _rMessage);
 
+        void OnLoadMaterial(Edit::CMessage& _rMessage);
+
         void OnRequestMaterialInfo(Edit::CMessage& _rMessage);
 
-        void OnMaterialInfo(Edit::CMessage& _rMessage);
+        void OnMaterialUpdate(Edit::CMessage& _rMessage);
 
         void OnDirtyMaterial(Dt::CMaterial* _pMaterial);
-
-        std::string CopyFileToAssets(const char* _pAssetFolder, const char* _pPathToFile);
     };
 } // namespace
 
@@ -72,11 +69,13 @@ namespace
         // -----------------------------------------------------------------------------
         // Edit
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewMaterial, EDIT_RECEIVE_MESSAGE(&CMaterialHelper::OnNewMaterial));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Material_New, EDIT_RECEIVE_MESSAGE(&CMaterialHelper::OnNewMaterial));
 
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestMaterialInfo, EDIT_RECEIVE_MESSAGE(&CMaterialHelper::OnRequestMaterialInfo));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Material_Load, EDIT_RECEIVE_MESSAGE(&CMaterialHelper::OnLoadMaterial));
 
-        Edit::MessageManager::Register(Edit::SGUIMessageType::MaterialInfo, EDIT_RECEIVE_MESSAGE(&CMaterialHelper::OnMaterialInfo));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Material_Info, EDIT_RECEIVE_MESSAGE(&CMaterialHelper::OnRequestMaterialInfo));
+
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Material_Update, EDIT_RECEIVE_MESSAGE(&CMaterialHelper::OnMaterialUpdate));
     }
 
     // -----------------------------------------------------------------------------
@@ -91,7 +90,7 @@ namespace
     void CMaterialHelper::OnNewMaterial(Edit::CMessage& _rMessage)
     {
         // -----------------------------------------------------------------------------
-        // Model
+        // Material
         // -----------------------------------------------------------------------------
         Dt::SMaterialDescriptor MaterialDescriptor;
 
@@ -105,6 +104,7 @@ namespace
         MaterialDescriptor.m_Roughness       = 1.0f;
         MaterialDescriptor.m_Reflectance     = 0.0f;
         MaterialDescriptor.m_MetalMask       = 0.0f;
+        MaterialDescriptor.m_Displacement    = 0.0f;
         MaterialDescriptor.m_AlbedoColor     = Base::Float3(1.0f);
         MaterialDescriptor.m_TilingOffset    = Base::Float4(1.0f, 1.0f, 0.0f, 0.0f);
         MaterialDescriptor.m_pFileName       = 0;
@@ -113,6 +113,50 @@ namespace
 
         // -----------------------------------------------------------------------------
         // Add model to map
+        // -----------------------------------------------------------------------------
+        Dt::MaterialManager::MarkMaterialAsDirty(rNewMaterial, Dt::CMaterial::DirtyCreate);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMaterialHelper::OnLoadMaterial(Edit::CMessage& _rMessage)
+    {
+        char pTmp[512];
+
+        // -----------------------------------------------------------------------------
+        // Read values
+        // -----------------------------------------------------------------------------
+        const char* pPathToFile = _rMessage.GetString(pTmp, 512);
+
+        // -----------------------------------------------------------------------------
+        // Material
+        // -----------------------------------------------------------------------------
+        Dt::SMaterialDescriptor MaterialDescriptor;
+
+        MaterialDescriptor.m_pMaterialName   = 0;
+        MaterialDescriptor.m_pColorMap       = 0;
+        MaterialDescriptor.m_pNormalMap      = 0;
+        MaterialDescriptor.m_pRoughnessMap   = 0;
+        MaterialDescriptor.m_pMetalMaskMap   = 0;
+        MaterialDescriptor.m_pAOMap          = 0;
+        MaterialDescriptor.m_pBumpMap        = 0;
+        MaterialDescriptor.m_Roughness       = 1.0f;
+        MaterialDescriptor.m_Reflectance     = 0.0f;
+        MaterialDescriptor.m_MetalMask       = 0.0f;
+        MaterialDescriptor.m_Displacement    = 0.0f;
+        MaterialDescriptor.m_AlbedoColor     = Base::Float3(1.0f);
+        MaterialDescriptor.m_TilingOffset    = Base::Float4(1.0f, 1.0f, 0.0f, 0.0f);
+        MaterialDescriptor.m_pFileName       = pPathToFile;
+        
+        Dt::CMaterial& rNewMaterial = Dt::MaterialManager::CreateMaterial(MaterialDescriptor);
+
+        // -----------------------------------------------------------------------------
+        // Set result as hash
+        // -----------------------------------------------------------------------------
+        _rMessage.SetResult(rNewMaterial.GetHash());
+
+        // -----------------------------------------------------------------------------
+        // Mark material as dirty
         // -----------------------------------------------------------------------------
         Dt::MaterialManager::MarkMaterialAsDirty(rNewMaterial, Dt::CMaterial::DirtyCreate);
     }
@@ -141,12 +185,13 @@ namespace
         NewMessage.PutFloat(rMaterial.GetRoughness());
         NewMessage.PutFloat(rMaterial.GetReflectance());
         NewMessage.PutFloat(rMaterial.GetMetalness());
+        NewMessage.PutFloat(rMaterial.GetDisplacement());
 
         if (rMaterial.GetColorTexture())
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(rMaterial.GetColorTexture()->GetFileName());
+            NewMessage.PutString(rMaterial.GetColorTexture()->GetFileName().c_str());
         }
         else
         {
@@ -157,7 +202,7 @@ namespace
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(rMaterial.GetNormalTexture()->GetFileName());
+            NewMessage.PutString(rMaterial.GetNormalTexture()->GetFileName().c_str());
         }
         else
         {
@@ -168,7 +213,7 @@ namespace
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(rMaterial.GetRoughnessTexture()->GetFileName());
+            NewMessage.PutString(rMaterial.GetRoughnessTexture()->GetFileName().c_str());
         }
         else
         {
@@ -179,7 +224,7 @@ namespace
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(rMaterial.GetMetalTexture()->GetFileName());
+            NewMessage.PutString(rMaterial.GetMetalTexture()->GetFileName().c_str());
         }
         else
         {
@@ -190,7 +235,7 @@ namespace
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(rMaterial.GetBumpTexture()->GetFileName());
+            NewMessage.PutString(rMaterial.GetBumpTexture()->GetFileName().c_str());
         }
         else
         {
@@ -201,7 +246,7 @@ namespace
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(rMaterial.GetAmbientOcclusionTexture()->GetFileName());
+            NewMessage.PutString(rMaterial.GetAmbientOcclusionTexture()->GetFileName().c_str());
         }
         else
         {
@@ -210,16 +255,16 @@ namespace
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::MaterialInfo, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Material_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMaterialHelper::OnMaterialInfo(Edit::CMessage& _rMessage)
+    void CMaterialHelper::OnMaterialUpdate(Edit::CMessage& _rMessage)
     {
-        int MaterialHash = _rMessage.GetInt();
+        unsigned int MaterialHash = _rMessage.GetInt();
 
-        Dt::CMaterial& rMaterial = Dt::MaterialManager::GetMaterialByHash(static_cast<unsigned int>(MaterialHash));
+        Dt::CMaterial& rMaterial = Dt::MaterialManager::GetMaterialByHash(MaterialHash);
 
         float X, Y, Z, W;
 
@@ -230,12 +275,12 @@ namespace
         bool HasBumpMap      = false;
         bool HasAOMap        = false;
 
-        char ColorMapName[256];
-        char NormalMapName[256];
-        char RoughnessMapName[256];
-        char MetalMapName[256];
-        char BumpMapName[256];
-        char AOMapName[256];
+        unsigned int ColorMapName;
+        unsigned int NormalMapName;
+        unsigned int RoughnessMapName;
+        unsigned int MetalMapName;
+        unsigned int BumpMapName;
+        unsigned int AOMapName;
 
         // -----------------------------------------------------------------------------
         // Read values
@@ -259,46 +304,48 @@ namespace
 
         float Metalness = _rMessage.GetFloat();
 
+        float Displacement = _rMessage.GetFloat();
+
         HasColorMap = _rMessage.GetBool();
 
         if (HasColorMap)
         {
-            _rMessage.GetString(ColorMapName, 256);
+            ColorMapName = _rMessage.GetInt();
         }
 
         HasNormalMap = _rMessage.GetBool();
 
         if (HasNormalMap)
         {
-            _rMessage.GetString(NormalMapName, 256);
+            NormalMapName = _rMessage.GetInt();
         }
 
         HasRoughnessMap = _rMessage.GetBool();
 
         if (HasRoughnessMap)
         {
-            _rMessage.GetString(RoughnessMapName, 256);
+            RoughnessMapName = _rMessage.GetInt();
         }
 
         HasMetalnessMap = _rMessage.GetBool();
 
         if (HasMetalnessMap)
         {
-            _rMessage.GetString(MetalMapName, 256);
+            MetalMapName = _rMessage.GetInt();
         }
 
         HasBumpMap = _rMessage.GetBool();
 
         if (HasBumpMap)
         {
-            _rMessage.GetString(BumpMapName, 256);
+            BumpMapName = _rMessage.GetInt();
         }
 
         HasAOMap = _rMessage.GetBool();
 
         if (HasAOMap)
         {
-            _rMessage.GetString(AOMapName, 256);
+            AOMapName = _rMessage.GetInt();
         }
 
         rMaterial.SetColor       (Color);
@@ -306,41 +353,15 @@ namespace
         rMaterial.SetRoughness   (Roughness);
         rMaterial.SetReflectance (Reflectance);
         rMaterial.SetMetalness   (Metalness);
-
-        Dt::STextureDescriptor TextureDescriptor;
-
-        TextureDescriptor.m_NumberOfPixelsU  = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
-        TextureDescriptor.m_NumberOfPixelsV  = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
-        TextureDescriptor.m_NumberOfPixelsW  = 1;
-        TextureDescriptor.m_Format           = Dt::CTextureBase::R8G8B8_UBYTE;
-        TextureDescriptor.m_Semantic         = Dt::CTextureBase::Diffuse;
-        TextureDescriptor.m_Binding          = Dt::CTextureBase::ShaderResource;
-        TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_pFileName        = 0;
-        TextureDescriptor.m_pIdentifier      = 0;
+        rMaterial.SetDisplacement(Displacement);
 
         if (HasColorMap)
         {
-            Dt::CTexture2D* pTexture = rMaterial.GetColorTexture();
+            Dt::CTexture2D* pTexture = Dt::TextureManager::GetTexture2DByHash(ColorMapName);
 
-            if (pTexture != nullptr && strcmp(pTexture->GetFileName(), ColorMapName))
+            if (pTexture != nullptr)
             {
-                Dt::TextureManager::CopyToTexture2D(pTexture, ColorMapName);
-
-                Dt::TextureManager::MarkTextureAsDirty(pTexture, Dt::CTextureBase::DirtyFile);
-            }
-            else
-            {
-                TextureDescriptor.m_pFileName = ColorMapName;
-
-                pTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
-
-                if (pTexture != nullptr)
-                {
-                    rMaterial.SetColorTexture(pTexture);
-
-                    Dt::TextureManager::MarkTextureAsDirty(pTexture, Dt::CTextureBase::DirtyCreate);
-                }
+                rMaterial.SetColorTexture(pTexture);
             }
         }
         else
@@ -350,26 +371,11 @@ namespace
 
         if (HasNormalMap)
         {
-            Dt::CTexture2D* pTexture = rMaterial.GetNormalTexture();
+            Dt::CTexture2D* pTexture = Dt::TextureManager::GetTexture2DByHash(NormalMapName);
 
-            if (pTexture != nullptr && strcmp(pTexture->GetFileName(), NormalMapName))
+            if (pTexture != nullptr)
             {
-                Dt::TextureManager::CopyToTexture2D(pTexture, NormalMapName);
-
-                Dt::TextureManager::MarkTextureAsDirty(pTexture, Dt::CTextureBase::DirtyFile);
-            }
-            else
-            {
-                TextureDescriptor.m_pFileName = NormalMapName;
-
-                pTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
-
-                if (pTexture != nullptr)
-                {
-                    rMaterial.SetNormalTexture(pTexture);
-
-                    Dt::TextureManager::MarkTextureAsDirty(pTexture, Dt::CTextureBase::DirtyCreate);
-                }
+                rMaterial.SetNormalTexture(pTexture);
             }
         }
         else
@@ -379,26 +385,11 @@ namespace
 
         if (HasRoughnessMap)
         {
-            Dt::CTexture2D* pTexture = rMaterial.GetRoughnessTexture();
+            Dt::CTexture2D* pTexture = Dt::TextureManager::GetTexture2DByHash(RoughnessMapName);
 
-            if (pTexture != nullptr && strcmp(pTexture->GetFileName(), RoughnessMapName))
+            if (pTexture != nullptr)
             {
-                Dt::TextureManager::CopyToTexture2D(pTexture, RoughnessMapName);
-
-                Dt::TextureManager::MarkTextureAsDirty(pTexture, Dt::CTextureBase::DirtyFile);
-            }
-            else
-            {
-                TextureDescriptor.m_pFileName = RoughnessMapName;
-
-                pTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
-
-                if (pTexture != nullptr)
-                {
-                    rMaterial.SetRoughnessTexture(pTexture);
-
-                    Dt::TextureManager::MarkTextureAsDirty(pTexture, Dt::CTextureBase::DirtyCreate);
-                }
+                rMaterial.SetRoughnessTexture(pTexture);
             }
         }
         else
@@ -408,26 +399,11 @@ namespace
 
         if (HasMetalnessMap)
         {
-            Dt::CTexture2D* pTexture = rMaterial.GetMetalTexture();
+            Dt::CTexture2D* pTexture = Dt::TextureManager::GetTexture2DByHash(MetalMapName);
 
-            if (pTexture != nullptr && strcmp(pTexture->GetFileName(), MetalMapName))
+            if (pTexture != nullptr)
             {
-                Dt::TextureManager::CopyToTexture2D(pTexture, MetalMapName);
-
-                Dt::TextureManager::MarkTextureAsDirty(pTexture, Dt::CTextureBase::DirtyFile);
-            }
-            else
-            {
-                TextureDescriptor.m_pFileName = MetalMapName;
-
-                pTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
-
-                if (pTexture != nullptr)
-                {
-                    rMaterial.SetMetalTexture(pTexture);
-
-                    Dt::TextureManager::MarkTextureAsDirty(pTexture, Dt::CTextureBase::DirtyCreate);
-                }
+                rMaterial.SetMetalTexture(pTexture);
             }
         }
         else
@@ -437,26 +413,11 @@ namespace
 
         if (HasBumpMap)
         {
-            Dt::CTexture2D* pTexture = rMaterial.GetBumpTexture();
+            Dt::CTexture2D* pTexture = Dt::TextureManager::GetTexture2DByHash(BumpMapName);
 
-            if (pTexture != nullptr && strcmp(pTexture->GetFileName(), BumpMapName))
+            if (pTexture != nullptr)
             {
-                Dt::TextureManager::CopyToTexture2D(pTexture, BumpMapName);
-
-                Dt::TextureManager::MarkTextureAsDirty(pTexture, Dt::CTextureBase::DirtyFile);
-            }
-            else
-            {
-                TextureDescriptor.m_pFileName = BumpMapName;
-
-                pTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
-
-                if (pTexture != nullptr)
-                {
-                    rMaterial.SetBumpTexture(pTexture);
-
-                    Dt::TextureManager::MarkTextureAsDirty(pTexture, Dt::CTextureBase::DirtyCreate);
-                }
+                rMaterial.SetBumpTexture(pTexture);
             }
         }
         else
@@ -466,26 +427,11 @@ namespace
 
         if (HasAOMap)
         {
-            Dt::CTexture2D* pTexture = rMaterial.GetAmbientOcclusionTexture();
+            Dt::CTexture2D* pTexture = Dt::TextureManager::GetTexture2DByHash(AOMapName);
 
-            if (pTexture != nullptr && strcmp(pTexture->GetFileName(), AOMapName))
+            if (pTexture != nullptr)
             {
-                Dt::TextureManager::CopyToTexture2D(pTexture, AOMapName);
-
-                Dt::TextureManager::MarkTextureAsDirty(pTexture, Dt::CTextureBase::DirtyFile);
-            }
-            else
-            {
-                TextureDescriptor.m_pFileName = AOMapName;
-
-                pTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
-
-                if (pTexture != nullptr)
-                {
-                    rMaterial.SetAmbientOcclusionTexture(pTexture);
-
-                    Dt::TextureManager::MarkTextureAsDirty(pTexture, Dt::CTextureBase::DirtyCreate);
-                }
+                rMaterial.SetAmbientOcclusionTexture(pTexture);
             }
         }
         else
@@ -493,7 +439,7 @@ namespace
             rMaterial.SetAmbientOcclusionTexture(0);
         }
 
-        Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyData);
+        Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyData | Dt::CMaterial::DirtyTexture);
     }
 
 
@@ -508,28 +454,6 @@ namespace
             
         }
     }
-
-    // -----------------------------------------------------------------------------
-
-    std::string CMaterialHelper::CopyFileToAssets(const char* _pAssetFolder, const char* _pPathToFile)
-    {
-        char pDrive[4];
-        char pDirectory[512];
-        char pFilename[32];
-        char pExtension[12];
-
-        std::string FileExtension;
-        std::string RelativePathToModel;
-
-        _splitpath_s(_pPathToFile, pDrive, 4, pDirectory, 512, pFilename, 32, pExtension, 12);
-
-        FileExtension = std::string(pFilename) + std::string(pExtension);
-        RelativePathToModel = std::string(_pAssetFolder) + FileExtension;
-
-        CopyFileA(_pPathToFile, RelativePathToModel.c_str(), true);
-
-        return FileExtension.c_str();
-    };
 } // namespace
 
 namespace Edit

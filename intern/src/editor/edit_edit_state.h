@@ -5,6 +5,11 @@
 
 #include "editor_port/edit_message.h"
 
+namespace Gfx
+{
+    class CSelectionTicket;
+} // namespace Gfx
+
 namespace Edit
 {
     class CEditState : public CState
@@ -17,6 +22,8 @@ namespace Edit
     private:
 
         CState::EStateType m_Action;
+
+        Gfx::CSelectionTicket* m_pSelectionTicket;
 
     private:
         
@@ -34,5 +41,9 @@ namespace Edit
         void OnExit(Edit::CMessage& _rMessage);
         void OnPlay(Edit::CMessage& _rMessage);
         void OnNewMap(Edit::CMessage& _rMessage);
+
+        void OnHighlightEntity(Edit::CMessage& _rMessage);
+
+        void OnMouseLeftReleased(Edit::CMessage& _rMessage);
     };
 } // namespace Edit

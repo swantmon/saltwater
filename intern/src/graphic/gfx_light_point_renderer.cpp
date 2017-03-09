@@ -110,6 +110,7 @@ namespace
         CMeshPtr          m_SphereModelPtr;
         
         CBufferSetPtr     m_MainVSBufferPtr;
+        
         CBufferSetPtr     m_PunctualLightPSBufferPtr;
         
         CInputLayoutPtr   m_LightProbeInputLayoutPtr;
@@ -119,8 +120,6 @@ namespace
         CShaderPtr        m_PunctualLightShaderPSPtr;
         
         CTextureSetPtr    m_PunctualLightTextureSetPtr;
-        
-        CSamplerSetPtr    m_PSSamplerSetPtr;
 
         CRenderContextPtr m_LightRenderContextPtr;
 
@@ -143,7 +142,6 @@ namespace
         , m_ModelVSPtr                ()
         , m_PunctualLightShaderPSPtr  ()
         , m_PunctualLightTextureSetPtr()
-        , m_PSSamplerSetPtr           ()
         , m_PunctualLightRenderJobs   ()
     {
     }
@@ -172,7 +170,6 @@ namespace
         m_ModelVSPtr                        = 0;
         m_PunctualLightShaderPSPtr          = 0;
         m_PunctualLightTextureSetPtr        = 0;
-        m_PSSamplerSetPtr                   = 0;
         m_LightRenderContextPtr             = 0;
         
         m_PunctualLightRenderJobs.clear();
@@ -232,19 +229,6 @@ namespace
         LightContextPtr->SetRenderState(LightStatePtr);
         
         m_LightRenderContextPtr = LightContextPtr;
-        
-        // -----------------------------------------------------------------------------
-        
-        CSamplerPtr Sampler[6];
-        
-        Sampler[0] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[1] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[2] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[3] = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-        Sampler[4] = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-        Sampler[5] = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-        
-        m_PSSamplerSetPtr = SamplerManager::CreateSamplerSet(Sampler, 6);
     }
     
     // -----------------------------------------------------------------------------
@@ -308,7 +292,7 @@ namespace
         
         // -----------------------------------------------------------------------------
         
-        m_MainVSBufferPtr                   = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS(), PerDrawCallConstantBuffer);
+        m_MainVSBufferPtr                   = BufferManager::CreateBufferSet(PerDrawCallConstantBuffer);
         
         m_PunctualLightPSBufferPtr          = BufferManager::CreateBufferSet(CameraBuffer, PointLightBuffer, HistogramExposureHistoryBufferPtr);
     }
@@ -394,48 +378,34 @@ namespace
         // -----------------------------------------------------------------------------
         CCameraPtr CameraPtr = ViewManager::GetMainCamera();
         
-        SCameraProperties* pPSBuffer = static_cast<SCameraProperties*>(BufferManager::MapConstantBuffer(m_PunctualLightPSBufferPtr->GetBuffer(0)));
-        
-        assert(pPSBuffer != nullptr);
+        SCameraProperties CameraProperties;
         
         Base::Float3 Position = CameraPtr->GetView()->GetPosition();
         
-        pPSBuffer->m_InverseCameraProjection = CameraPtr->GetProjectionMatrix().GetInverted();
-        pPSBuffer->m_InverseCameraView       = CameraPtr->GetView()->GetViewMatrix().GetInverted();
-        pPSBuffer->m_CameraPosition          = Base::Float4(Position[0], Position[1], Position[2], 1.0f);
-        pPSBuffer->m_InvertedScreenSize      = Base::Float4(1.0f / Main::GetActiveWindowSize()[0], 1.0f / Main::GetActiveWindowSize()[1], 0, 0);
-        pPSBuffer->m_ExposureHistoryIndex    = HistogramRenderer::GetLastExposureHistoryIndex();
+        CameraProperties.m_InverseCameraProjection = CameraPtr->GetProjectionMatrix().GetInverted();
+        CameraProperties.m_InverseCameraView       = CameraPtr->GetView()->GetViewMatrix().GetInverted();
+        CameraProperties.m_CameraPosition          = Base::Float4(Position[0], Position[1], Position[2], 1.0f);
+        CameraProperties.m_InvertedScreenSize      = Base::Float4(1.0f / Main::GetActiveWindowSize()[0], 1.0f / Main::GetActiveWindowSize()[1], 0, 0);
+        CameraProperties.m_ExposureHistoryIndex    = HistogramRenderer::GetLastExposureHistoryIndex();
         
-        BufferManager::UnmapConstantBuffer(m_PunctualLightPSBufferPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(m_PunctualLightPSBufferPtr->GetBuffer(0), &CameraProperties);
         
         // -----------------------------------------------------------------------------
-        // Rendering of light probes
+        // Rendering of light sources point
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(m_LightRenderContextPtr);
-        
-        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
-        
+
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(4, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+
         ContextManager::SetTopology(STopology::TriangleList);
-        
+
         // -----------------------------------------------------------------------------
-        // Punctual lights
+        // Iterate over every point light
         // -----------------------------------------------------------------------------
-        ContextManager::SetShaderVS(m_ModelVSPtr);
-        
-        ContextManager::SetShaderPS(m_PunctualLightShaderPSPtr);
-        
-        ContextManager::SetVertexBufferSet(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
-        
-        ContextManager::SetIndexBuffer(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
-        
-        ContextManager::SetInputLayout(m_LightProbeInputLayoutPtr);
-        
-        ContextManager::SetConstantBufferSetPS(m_PunctualLightPSBufferPtr);
-        
-        ContextManager::SetConstantBufferSetVS(m_MainVSBufferPtr);
-        
-        ContextManager::SetTextureSetPS(m_PunctualLightTextureSetPtr);
-        
         CurrentRenderJob = m_PunctualLightRenderJobs.begin();
         EndOfRenderJobs  = m_PunctualLightRenderJobs.end();
 
@@ -445,82 +415,119 @@ namespace
             Dt::CEntity*          pEntity            = CurrentRenderJob->m_pLevelEntity;
             
             assert(pDtLightFacet    != nullptr);
-            
+
             // -----------------------------------------------------------------------------
             // Upload model matrix to buffer
             // -----------------------------------------------------------------------------
-            SPerDrawCallConstantBuffer* pModelBuffer = static_cast<SPerDrawCallConstantBuffer*>(BufferManager::MapConstantBuffer(m_MainVSBufferPtr->GetBuffer(1)));
+            SPerDrawCallConstantBuffer ModelBuffer;
             
-            assert(pModelBuffer != nullptr);
+            ModelBuffer.m_ModelMatrix = Base::Float4x4::s_Identity;
+            ModelBuffer.m_ModelMatrix *= Base::Float4x4().SetTranslation(pEntity->GetWorldPosition());
+            ModelBuffer.m_ModelMatrix *= Base::Float4x4().SetScale(pDtLightFacet->GetAttenuationRadius());
             
-            pModelBuffer->m_ModelMatrix = Base::Float4x4::s_Identity;
-            pModelBuffer->m_ModelMatrix *= Base::Float4x4().SetTranslation(pEntity->GetWorldPosition());
-            pModelBuffer->m_ModelMatrix *= Base::Float4x4().SetScale(pDtLightFacet->GetAttenuationRadius());
-            
-            BufferManager::UnmapConstantBuffer(m_MainVSBufferPtr->GetBuffer(1));
+            BufferManager::UploadConstantBufferData(m_MainVSBufferPtr->GetBuffer(0), &ModelBuffer);
             
             // -----------------------------------------------------------------------------
             // Upload buffer data
             // -----------------------------------------------------------------------------
-            SPunctualLightProperties* pLightBuffer = static_cast<SPunctualLightProperties*>(BufferManager::MapConstantBuffer(m_PunctualLightPSBufferPtr->GetBuffer(1)));
-            
-            assert(pLightBuffer != nullptr);
+            SPunctualLightProperties LightBuffer;
             
             float InvSqrAttenuationRadius = pDtLightFacet->GetReciprocalSquaredAttenuationRadius();
             float AngleScale              = pDtLightFacet->GetAngleScale();
             float AngleOffset             = pDtLightFacet->GetAngleOffset();
             float HasShadows              = pDtLightFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows ? 1.0f : 0.0f;
             
-            pLightBuffer->m_LightPosition       = Base::Float4(pEntity->GetWorldPosition(), 1.0f);
-            pLightBuffer->m_LightDirection      = Base::Float4(pDtLightFacet->GetDirection(), 0.0f).Normalize();
-            pLightBuffer->m_LightColor          = Base::Float4(pDtLightFacet->GetLightness(), 1.0f);
-            pLightBuffer->m_LightSettings       = Base::Float4(InvSqrAttenuationRadius, AngleScale, AngleOffset, HasShadows);
+            LightBuffer.m_LightPosition  = Base::Float4(pEntity->GetWorldPosition(), 1.0f);
+            LightBuffer.m_LightDirection = Base::Float4(pDtLightFacet->GetDirection(), 0.0f).Normalize();
+            LightBuffer.m_LightColor     = Base::Float4(pDtLightFacet->GetLightness(), 1.0f);
+            LightBuffer.m_LightSettings  = Base::Float4(InvSqrAttenuationRadius, AngleScale, AngleOffset, HasShadows);
+
+            LightBuffer.m_LightViewProjection.SetIdentity();
 
             if (pDtLightFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows)
             {
                 assert(CurrentRenderJob->m_pGfxLightFacet->GetCamera().IsValid());
 
-                pLightBuffer->m_LightViewProjection = CurrentRenderJob->m_pGfxLightFacet->GetCamera()->GetViewProjectionMatrix();
+                LightBuffer.m_LightViewProjection = CurrentRenderJob->m_pGfxLightFacet->GetCamera()->GetViewProjectionMatrix();
             }
             
-            BufferManager::UnmapConstantBuffer(m_PunctualLightPSBufferPtr->GetBuffer(1));
+            BufferManager::UploadConstantBufferData(m_PunctualLightPSBufferPtr->GetBuffer(1), &LightBuffer);
+
+            // -----------------------------------------------------------------------------
+            // Render punctual lights
+            // -----------------------------------------------------------------------------
+            ContextManager::SetShaderVS(m_ModelVSPtr);
+
+            ContextManager::SetShaderPS(m_PunctualLightShaderPSPtr);
+
+            ContextManager::SetVertexBufferSet(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+
+            ContextManager::SetIndexBuffer(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+
+            ContextManager::SetInputLayout(m_LightProbeInputLayoutPtr);
+
+            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+
+            ContextManager::SetConstantBuffer(1, m_MainVSBufferPtr->GetBuffer(0));
+
+            ContextManager::SetConstantBuffer(2, m_PunctualLightPSBufferPtr->GetBuffer(0));
+
+            ContextManager::SetConstantBuffer(3, m_PunctualLightPSBufferPtr->GetBuffer(1));
+
+            ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
+
+            ContextManager::SetTexture(0, m_PunctualLightTextureSetPtr->GetTexture(0));
+            ContextManager::SetTexture(1, m_PunctualLightTextureSetPtr->GetTexture(1));
+            ContextManager::SetTexture(2, m_PunctualLightTextureSetPtr->GetTexture(2));
+            ContextManager::SetTexture(3, m_PunctualLightTextureSetPtr->GetTexture(3));
             
             // -----------------------------------------------------------------------------
             // Set shadow map
             // -----------------------------------------------------------------------------
             if (pDtLightFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows)
             {
-                ContextManager::SetTextureSetPS(CurrentRenderJob->m_pGfxLightFacet->GetTextureSMSet());
+                ContextManager::SetTexture(4, CurrentRenderJob->m_pGfxLightFacet->GetTextureSMSet()->GetTexture(0));
             }
             
             // -----------------------------------------------------------------------------
             // Draw light
             // -----------------------------------------------------------------------------
             ContextManager::DrawIndexed(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+
+            ContextManager::ResetTexture(0);
+            ContextManager::ResetTexture(1);
+            ContextManager::ResetTexture(2);
+            ContextManager::ResetTexture(3);
+            ContextManager::ResetTexture(4);
+
+            ContextManager::ResetInputLayout();
+
+            ContextManager::ResetConstantBuffer(0);
+            ContextManager::ResetConstantBuffer(1);
+            ContextManager::ResetConstantBuffer(2);
+            ContextManager::ResetConstantBuffer(3);
+
+            ContextManager::ResetResourceBuffer(0);
+
+            ContextManager::ResetIndexBuffer();
+
+            ContextManager::ResetVertexBufferSet();
+
+            ContextManager::ResetShaderVS();
+
+            ContextManager::ResetShaderPS();
         }
-        
-        ContextManager::ResetTextureSetPS();
-        
-        ContextManager::ResetInputLayout();
-        
-        ContextManager::ResetConstantBufferSetPS();
-        
-        ContextManager::ResetConstantBufferSetVS();
-        
-        ContextManager::ResetIndexBuffer();
-        
-        ContextManager::ResetVertexBufferSet();
-        
-        ContextManager::ResetShaderVS();
-        
-        ContextManager::ResetShaderPS();
         
         // -----------------------------------------------------------------------------
         // Reset non-dynamic objects
         // -----------------------------------------------------------------------------
         ContextManager::ResetTopology();
         
-        ContextManager::ResetSamplerSetPS();
+        ContextManager::ResetSampler(0);
+        ContextManager::ResetSampler(1);
+        ContextManager::ResetSampler(2);
+        ContextManager::ResetSampler(3);
+        ContextManager::ResetSampler(4);
         
         ContextManager::ResetRenderContext();
     }

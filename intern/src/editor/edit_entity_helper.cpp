@@ -10,15 +10,13 @@
 #include "data/data_entity_manager.h"
 #include "data/data_hierarchy_facet.h"
 #include "data/data_map.h"
+#include "data/data_model_manager.h"
 #include "data/data_transformation_facet.h"
 
 #include "editor/edit_entity_helper.h"
 
 #include "editor_port/edit_message.h"
 #include "editor_port/edit_message_manager.h"
-
-#include <windows.h>
-#undef SendMessage
 
 namespace
 {
@@ -38,15 +36,20 @@ namespace
 
     private:
 
+        void OnNewEntity(Edit::CMessage& _rMessage);
+        void OnLoadEntity(Edit::CMessage& _rMessage);
+        void OnCreateEntity(Edit::CMessage& _rMessage);
+        void OnAddEntity(Edit::CMessage& _rMessage);
         void OnRemoveEntity(Edit::CMessage& _rMessage);
+        void OnDestroyEntity(Edit::CMessage& _rMessage);
 
-        void OnRequestEntityInfoFacets(Edit::CMessage& _rMessage);
-        void OnRequestEntityInfoEntity(Edit::CMessage& _rMessage);
-        void OnRequestEntityInfoTransformation(Edit::CMessage& _rMessage);
+        void OnRequestInfoFacets(Edit::CMessage& _rMessage);
+        void OnRequestInfoEntity(Edit::CMessage& _rMessage);
+        void OnRequestInfoTransformation(Edit::CMessage& _rMessage);
 
-        void OnEntityInfoEntity(Edit::CMessage& _rMessage);
-        void OnEntityInfoHierarchie(Edit::CMessage& _rMessage);
-        void OnEntityInfoTransformation(Edit::CMessage& _rMessage);
+        void OnInfoEntity(Edit::CMessage& _rMessage);
+        void OnInfoHierarchie(Edit::CMessage& _rMessage);
+        void OnInfoTransformation(Edit::CMessage& _rMessage);
 
         void OnDirtyEntity(Dt::CEntity* _pEntity);
     };
@@ -78,15 +81,20 @@ namespace
         // -----------------------------------------------------------------------------
         // Edit
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RemoveEntity                   , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnRemoveEntity));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Entity_New    , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnNewEntity));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Entity_Load   , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnLoadEntity));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Entity_Create , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnCreateEntity));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Entity_Add    , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnAddEntity));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Entity_Remove , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnRemoveEntity));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Entity_Destroy, EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnDestroyEntity));
 
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoFacets        , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnRequestEntityInfoFacets));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoEntity        , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnRequestEntityInfoEntity));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestEntityInfoTransformation, EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnRequestEntityInfoTransformation));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Entity_Facets_Info        , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnRequestInfoFacets));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Entity_Info               , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnRequestInfoEntity));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Entity_Transformation_Info, EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnRequestInfoTransformation));
         
-        Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoEntity               , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnEntityInfoEntity));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoHierarchie           , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnEntityInfoHierarchie));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::EntityInfoTransformation       , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnEntityInfoTransformation));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Entity_Info_Update          , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnInfoEntity));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Entity_Hierarchy_Update     , EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnInfoHierarchie));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Entity_Transformation_Update, EDIT_RECEIVE_MESSAGE(&CEntityHelper::OnInfoTransformation));
     }
 
     // -----------------------------------------------------------------------------
@@ -98,7 +106,95 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CEntityHelper::OnNewEntity(Edit::CMessage& _rMessage)
+    {
+        Dt::SEntityDescriptor EntityDesc;
+
+        EntityDesc.m_EntityCategory = 0;
+        EntityDesc.m_EntityType     = 0;
+        EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+
+        Dt::CEntity& rNewEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+        Dt::CTransformationFacet* pTransformationFacet = rNewEntity.GetTransformationFacet();
+
+        pTransformationFacet->SetPosition(Base::Float3(0.0f));
+        pTransformationFacet->SetScale(Base::Float3(1.0f));
+        pTransformationFacet->SetRotation(Base::Float3(0.0f));
+
+        _rMessage.SetResult(rNewEntity.GetID());
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEntityHelper::OnLoadEntity(Edit::CMessage& _rMessage)
+    {
+        // -----------------------------------------------------------------------------
+        // Create new entity
+        // -----------------------------------------------------------------------------
+        char pTmp[512];
+
+        // -----------------------------------------------------------------------------
+        // Model
+        // -----------------------------------------------------------------------------
+        Dt::SModelFileDescriptor ModelFileDesc;
+
+        const char* pPathToFile = _rMessage.GetString(pTmp, 512);
+
+        ModelFileDesc.m_pFileName = pPathToFile;
+        ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::Default;
+
+        Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
+
+        Dt::CEntity& rNewEntity = Dt::EntityManager::CreateEntityFromModel(rModel);
+
+        rNewEntity.SetName("New Prefab");
+
+        Dt::EntityManager::MarkEntityAsDirty(rNewEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEntityHelper::OnCreateEntity(Edit::CMessage& _rMessage)
+    {
+        int EntityID = _rMessage.GetInt();
+
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+
+        Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyCreate);
+
+        _rMessage.SetResult(1);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEntityHelper::OnAddEntity(Edit::CMessage& _rMessage)
+    {
+        int EntityID = _rMessage.GetInt();
+
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+
+        Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyAdd);
+
+        _rMessage.SetResult(1);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CEntityHelper::OnRemoveEntity(Edit::CMessage& _rMessage)
+    {
+        int EntityID = _rMessage.GetInt();
+
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+
+        Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyRemove);
+
+        _rMessage.SetResult(1);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEntityHelper::OnDestroyEntity(Edit::CMessage& _rMessage)
     {
         int EntityID = _rMessage.GetInt();
 
@@ -106,12 +202,12 @@ namespace
 
         Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyRemove | Dt::CEntity::DirtyDestroy);
 
-        _rMessage.SetResult(100);
+        _rMessage.SetResult(1);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CEntityHelper::OnRequestEntityInfoFacets(Edit::CMessage& _rMessage)
+    void CEntityHelper::OnRequestInfoFacets(Edit::CMessage& _rMessage)
     {
         int EntityID = _rMessage.GetInt();
 
@@ -133,12 +229,12 @@ namespace
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoFacets, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Entity_Facets_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CEntityHelper::OnRequestEntityInfoEntity(Edit::CMessage& _rMessage)
+    void CEntityHelper::OnRequestInfoEntity(Edit::CMessage& _rMessage)
     {
         int EntityID = _rMessage.GetInt();
 
@@ -154,11 +250,11 @@ namespace
 
         NewMessage.PutInt(rCurrentEntity.GetCategory());
 
-        if (rCurrentEntity.GetName().GetLength() > 0)
+        if (rCurrentEntity.GetName().length() > 0)
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(rCurrentEntity.GetName().GetConst());
+            NewMessage.PutString(rCurrentEntity.GetName().c_str());
         }
         else
         {
@@ -167,12 +263,12 @@ namespace
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoEntity, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Entity_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CEntityHelper::OnRequestEntityInfoTransformation(Edit::CMessage& _rMessage)
+    void CEntityHelper::OnRequestInfoTransformation(Edit::CMessage& _rMessage)
     {
         int EntityID = _rMessage.GetInt();
 
@@ -211,27 +307,16 @@ namespace
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoTransformation, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Entity_Transformation_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CEntityHelper::OnEntityInfoEntity(Edit::CMessage& _rMessage)
+    void CEntityHelper::OnInfoEntity(Edit::CMessage& _rMessage)
     {
         int EntityID = _rMessage.GetInt();
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
-
-        bool IsEnabled = _rMessage.GetBool();
-
-        if (IsEnabled == true && rCurrentEntity.IsInMap() == false)
-        {
-            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyAdd);
-        }
-        else if (IsEnabled == false && rCurrentEntity.IsInMap() == true)
-        {
-            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyRemove);
-        }
 
         int Layer = _rMessage.GetInt();
 
@@ -255,7 +340,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CEntityHelper::OnEntityInfoHierarchie(Edit::CMessage& _rMessage)
+    void CEntityHelper::OnInfoHierarchie(Edit::CMessage& _rMessage)
     {
         int EntityIDSource = _rMessage.GetInt();
         int EntityIDDestination = _rMessage.GetInt();
@@ -281,7 +366,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CEntityHelper::OnEntityInfoTransformation(Edit::CMessage& _rMessage)
+    void CEntityHelper::OnInfoTransformation(Edit::CMessage& _rMessage)
     {
         float TranslationX;
         float TranslationY;
@@ -350,12 +435,10 @@ namespace
             // -----------------------------------------------------------------------------
             // Name
             // -----------------------------------------------------------------------------
-            Base::CharString& rEntityName = rCurrentEntity.GetName();
-
-            if (rEntityName.GetLength() > 0)
+            if (rCurrentEntity.GetName().length() > 0)
             {
                 NewMessage.PutBool(true);
-                NewMessage.PutString(rEntityName.GetConst());
+                NewMessage.PutString(rCurrentEntity.GetName().c_str());
             }
             else
             {
@@ -392,7 +475,7 @@ namespace
 
             NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::EntityInfoHierarchy, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Entity_Hierarchy_Info, NewMessage);
         }
     }
 } // namespace

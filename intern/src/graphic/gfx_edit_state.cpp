@@ -6,6 +6,7 @@
 
 #include "graphic/gfx_actor_renderer.h"
 #include "graphic/gfx_ar_renderer.h"
+#include "graphic/gfx_area_light_manager.h"
 #include "graphic/gfx_background_renderer.h"
 #include "graphic/gfx_camera_actor_manager.h"
 #include "graphic/gfx_edit_state.h"
@@ -29,7 +30,6 @@
 #include "graphic/gfx_sky_manager.h"
 #include "graphic/gfx_sun_manager.h"
 #include "graphic/gfx_tonemapping_renderer.h"
-#include "graphic/gfx_voxel_renderer.h"
 
 using namespace Gfx;
 
@@ -78,6 +78,7 @@ namespace
         SkyManager        ::Update();
         LightProbeManager ::Update();
         PointLightManager ::Update();
+        AreaLightManager  ::Update();
 
         // -----------------------------------------------------------------------------
         // Update graphic
@@ -102,7 +103,6 @@ namespace
         PostFXHDR            ::Update();
         PostFX               ::Update();
         SelectionRenderer    ::Update();
-        VoxelRenderer        ::Update();
 
         // -----------------------------------------------------------------------------
         // Creation Pass
@@ -141,9 +141,16 @@ namespace
         
         TonemappingRenderer::Render();
 
-        VoxelRenderer::Render();
+        LightAreaRenderer::RenderBulbs();
 
         PostFX::Render();
+
+        Performance::EndEvent();
+
+        // -----------------------------------------------------------------------------
+        // Interaction
+        // -----------------------------------------------------------------------------
+        Performance::BeginEvent("Interaction Pass");
 
         SelectionRenderer::Render();
 

@@ -30,7 +30,7 @@ namespace Dt
 
     CEntity::~CEntity()
     {
-        m_Name.Clear();
+        m_Name.clear();
     }
 
     // -----------------------------------------------------------------------------
@@ -38,6 +38,13 @@ namespace Dt
     CEntity::BID CEntity::GetID() const
     {
         return m_ID;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEntity::SetCategory(unsigned int _Category)
+    {
+        m_Flags.m_Category = _Category;
     }
 
     // -----------------------------------------------------------------------------
@@ -50,21 +57,14 @@ namespace Dt
     // -----------------------------------------------------------------------------
 
 
-    void CEntity::SetName(const Base::CharString& _rName)
+    void CEntity::SetName(const std::string& _rName)
     {
         m_Name = _rName;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::CharString& CEntity::GetName()
-    {
-        return m_Name;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const Base::CharString& CEntity::GetName() const
+    const std::string& CEntity::GetName() const
     {
         return m_Name;
     }

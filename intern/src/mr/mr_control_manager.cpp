@@ -8,6 +8,8 @@
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
+#include "core/core_time.h"
+
 #include "data/data_actor_type.h"
 #include "data/data_ar_controller_facet.h"
 #include "data/data_camera_actor_facet.h"
@@ -40,6 +42,10 @@ namespace
     class CMRControlManager : private Base::CUncopyable
     {
         BASE_SINGLETON_FUNC(CMRControlManager);
+
+    public:
+
+        static const unsigned int s_NumberOfFramesUntilCameraIsInvisible = 0;
         
     public:
 
@@ -57,6 +63,8 @@ namespace
 
         bool IsActive();
 
+        bool IsOriginTracked();
+
         CControl* GetActiveControl();
 
     private:
@@ -66,7 +74,7 @@ namespace
         public:
             Dt::CARControllerPluginFacet::SMarker* m_pDataInfos;
             ARPattHandle*                          m_pPatternHandle;
-            bool                                   m_IsVisible;
+            Base::U64                              m_VisbilityFrame;
             unsigned int                           m_UID;
             unsigned int                           m_NativeID;
             Base::Float3x3                         m_RotationToCamera;
@@ -82,6 +90,7 @@ namespace
 
     private:
 
+        bool                          m_IsOriginTracked;
         ARHandle*	                  m_pNativeTrackingHandle;
         AR3DHandle*	                  m_pNativeTracking3DHandle;
         ARParamLT*	                  m_pNativeParameterLT;
@@ -118,7 +127,8 @@ namespace
 namespace
 {
     CMRControlManager::CMRControlManager()
-        : m_pNativeTrackingHandle  (0)
+        : m_IsOriginTracked        (false)
+        , m_pNativeTrackingHandle  (0)
         , m_pNativeTracking3DHandle(0)
         , m_pNativeParameterLT     (0)
         , m_DirtyEntities          ()
@@ -247,6 +257,13 @@ namespace
     }
 
     // -----------------------------------------------------------------------------
+
+    bool CMRControlManager::IsOriginTracked()
+    {
+        return m_IsOriginTracked;
+    }
+
+    // -----------------------------------------------------------------------------
     
     CControl* CMRControlManager::GetActiveControl()
     {
@@ -367,7 +384,7 @@ namespace
             // -----------------------------------------------------------------------------
             CWebcamControl* pWebcamControl = static_cast<CWebcamControl*>(m_pActiveControl);
 
-            pWebcamControl->SetConfiguration(m_pControllerPlugin->GetConfiguration());
+            pWebcamControl->SetConfiguration(m_pControllerPlugin->GetConfiguration().c_str());
         }
         break;
         case Dt::CARControllerPluginFacet::Kinect:
@@ -383,9 +400,8 @@ namespace
         // Update general stuff
         // -----------------------------------------------------------------------------
         m_pActiveControl->SetConvertedFrame(m_pControllerPlugin->GetOutputBackground());
-        m_pActiveControl->SetCubemap(m_pControllerPlugin->GetOutputCubemap());
 
-        m_pActiveControl->Start(m_pControllerPlugin->GetCameraParameterFile());
+        m_pActiveControl->Start(m_pControllerPlugin->GetCameraParameterFile().c_str());
     }
 
     // -----------------------------------------------------------------------------
@@ -661,7 +677,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Create hash and check if marker already available
             // -----------------------------------------------------------------------------
-            const char* pPatternFile = rCurrentMarker.m_PatternFile.GetConst();
+            const char* pPatternFile = rCurrentMarker.m_PatternFile.c_str();
         
             assert(pPatternFile != 0);
 
@@ -672,9 +688,9 @@ namespace
             // -----------------------------------------------------------------------------
             CInternMarker& rNewMarker = m_Markers.Allocate();
 
-            rNewMarker.m_UID        = rCurrentMarker.m_UID;
-            rNewMarker.m_pDataInfos = &rCurrentMarker;
-            rNewMarker.m_IsVisible  = false;
+            rNewMarker.m_UID            = rCurrentMarker.m_UID;
+            rNewMarker.m_pDataInfos     = &rCurrentMarker;
+            rNewMarker.m_VisbilityFrame = 0;
             
             rNewMarker.m_pPatternHandle = arPattCreateHandle();
             
@@ -707,6 +723,13 @@ namespace
     void CMRControlManager::UpdateActiveControl()
     {
         if (IsActive() == false) return;
+
+        m_pActiveControl->FreezeLastFrame(false);
+
+        if (m_IsOriginTracked == false && m_pControllerPlugin->GetFreezeLastFrame())
+        {
+            m_pActiveControl->FreezeLastFrame(true);
+        }
 
         m_pActiveControl->Update();
     }
@@ -771,16 +794,23 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Get transformation of this pattern
                 // -----------------------------------------------------------------------------
-                if (pMarker->m_IsVisible == false)
+                if (pMarker->m_VisbilityFrame >= Core::Time::GetNumberOfFrame() - 1)
                 {
-                    arGetTransMatSquare(m_pNativeTracking3DHandle, &(rCurrentMarkerInfo), pMarker->m_pDataInfos->m_WidthInMeter * 1000.0f, pMarker->m_PatternTransformation);
+                    // -----------------------------------------------------------------------------
+                    // Marker was visible in last frame
+                    // -> reuse last transformation
+                    // -----------------------------------------------------------------------------
+                    arGetTransMatSquareCont(m_pNativeTracking3DHandle, &(rCurrentMarkerInfo), pMarker->m_PatternTransformation, pMarker->m_pDataInfos->m_WidthInMeter * 1000.0f, pMarker->m_PatternTransformation);
                 }
                 else
                 {
-                    arGetTransMatSquareCont(m_pNativeTracking3DHandle, &(rCurrentMarkerInfo), pMarker->m_PatternTransformation, pMarker->m_pDataInfos->m_WidthInMeter * 1000.0f, pMarker->m_PatternTransformation);
+                    // -----------------------------------------------------------------------------
+                    // Marker wasn't visible for a longer time
+                    // -----------------------------------------------------------------------------
+                    arGetTransMatSquare(m_pNativeTracking3DHandle, &(rCurrentMarkerInfo), pMarker->m_pDataInfos->m_WidthInMeter * 1000.0f, pMarker->m_PatternTransformation);
                 }   
 
-                pMarker->m_IsVisible = true;
+                pMarker->m_VisbilityFrame = Core::Time::GetNumberOfFrame();
 
                 // -----------------------------------------------------------------------------
                 // Create / Edit marker infos
@@ -801,10 +831,6 @@ namespace
                 pMarker->m_RotationToCamera[2][1] = static_cast<float>(pMarker->m_PatternTransformation[2][1]);
                 pMarker->m_RotationToCamera[2][2] = static_cast<float>(pMarker->m_PatternTransformation[2][2]);
             }
-            else
-            {
-                pMarker->m_IsVisible = false;
-            }
         }
     }
 
@@ -812,6 +838,8 @@ namespace
 
     void CMRControlManager::UpdateCameraEntity()
     {
+        m_IsOriginTracked = false;
+
         if (IsActive() == false) return;
 
         // -----------------------------------------------------------------------------
@@ -824,9 +852,18 @@ namespace
         {
             CInternMarker& rMarkerInfo = *CurrentOfMarkerInfo->second;
 
-            if (rMarkerInfo.m_IsVisible == false)
+            if (rMarkerInfo.m_VisbilityFrame < Core::Time::GetNumberOfFrame() - s_NumberOfFramesUntilCameraIsInvisible)
             {
                  continue;
+            }
+
+            Dt::CEntity* pCameraEntity = m_pControllerPlugin->GetCameraEntity();
+
+            if (pCameraEntity == nullptr)
+            {
+                BASE_CONSOLE_WARNING("Origin marker found but no camera entity is set!");
+
+                break;
             }
 
             Base::Float3x3 RotationMatrix(Base::Float3x3::s_Identity);
@@ -851,28 +888,25 @@ namespace
             Position = RotationMatrix.GetTransposed() * Position;
 
             // -----------------------------------------------------------------------------
-            // Marker Found: Now search for entity with AR facet
+            // Set camera entity to the first found marker
             // -----------------------------------------------------------------------------
-            Dt::CEntity* pCameraEntity = m_pControllerPlugin->GetCameraEntity();
+            pCameraEntity->SetWorldPosition(Position);
 
-            if (pCameraEntity != nullptr)
-            {
-                pCameraEntity->SetWorldPosition(Position);
+            Dt::CTransformationFacet* pTransformationFacet = pCameraEntity->GetTransformationFacet();
 
-                Dt::CTransformationFacet* pTransformationFacet = pCameraEntity->GetTransformationFacet();
+            assert(pTransformationFacet != nullptr);
 
-                assert(pTransformationFacet != nullptr);
+            Base::Float3 Rotation;
 
-                Base::Float3 Rotation;
+            RotationMatrix.GetRotation(Rotation);
 
-                RotationMatrix.GetRotation(Rotation);
+            pTransformationFacet->SetRotation(Rotation * -1.0f);
 
-                pTransformationFacet->SetRotation(Rotation * -1.0f);
-            }
-            else
-            {
-                BASE_CONSOLE_STREAMWARNING("Origin marker found but no camera entity is set!");
-            }
+            pTransformationFacet->SetPosition(Position);
+
+            Dt::EntityManager::MarkEntityAsDirty(*pCameraEntity, Dt::CEntity::DirtyMove | Dt::CEntity::DirtyDetail);
+
+            m_IsOriginTracked = true;
 
             // -----------------------------------------------------------------------------
             // Using only the first found marker as camera entity
@@ -926,6 +960,13 @@ namespace ControlManager
     bool IsActive()
     {
         return CMRControlManager::GetInstance().IsActive();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool IsOriginTracked()
+    {
+        return CMRControlManager::GetInstance().IsOriginTracked();
     }
 
     // -----------------------------------------------------------------------------

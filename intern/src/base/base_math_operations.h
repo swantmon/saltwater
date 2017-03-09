@@ -35,6 +35,13 @@ namespace MATH
     {
         return std::sin(_Radians);
     }
+
+    // -----------------------------------------------------------------------------
+
+    inline float ASin(float _Radians)
+    {
+        return std::asin(_Radians);
+    }
     
     // -----------------------------------------------------------------------------
     
@@ -42,12 +49,26 @@ namespace MATH
     {
         return std::cos(_Radians);
     }
+
+    // -----------------------------------------------------------------------------
+
+    inline float ACos(float _Radians)
+    {
+        return std::acos(_Radians);
+    }
     
     // -----------------------------------------------------------------------------
     
     inline float Tan(float _Radians)
     {
         return std::tan(_Radians);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    inline float ATan(float _Radians)
+    {
+        return std::atan(_Radians);
     }
 
     // -----------------------------------------------------------------------------
@@ -150,7 +171,7 @@ namespace MATH
     
     // -----------------------------------------------------------------------------
     
-    inline float IsEqual(float _Value1, float _Value2, float _Epsilon)
+    inline bool IsEqual(float _Value1, float _Value2, float _Epsilon)
     {
         float Difference = _Value1 - _Value2;
         

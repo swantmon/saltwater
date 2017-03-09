@@ -12,19 +12,6 @@
 
 #include "opencv2/opencv.hpp"
 
-#define CROP_PERCENTAGE 0.8f
-#define IMAGE_EDGE_LENGTH 512
-#define IMAGE_SPACE 0
-#define USE_INPAINTING 0
-#define INPAINT_RADIUS 0
-#define INPAINT_METHOD INPAINT_TELEA
-
-cv::Mat RedImage;
-cv::Mat OriginalFrontImage, FrontCroped, FrontLeftPart, FrontRightPart, FrontTopPart, FrontBottomPart;
-cv::Mat OriginalBackImage, BackCroped, BackLeftPart, BackRightPart, BackTopPart, BackBottomPart;
-
-cv::Mat CombinedRight, CombinedLeft, CombinedTop, CombinedBottom;
-
 namespace
 {
 	std::string g_PathToAssets = "../assets/";
@@ -34,8 +21,8 @@ namespace MR
 {
     CWebcamControl::CWebcamControl()
         : CControl               (CControl::Webcam)
-        , m_pConfiguration       ("-device=WinDS -flipV")
-        , m_OriginalColorFrame   ()
+        , m_Configuration        ("-device=WinDS -flipV")
+        , m_OriginalColorFrameBGR()
         , m_OriginalColorFrameRGB()
         , m_ConvertedColorFrame  ()
     {
@@ -49,16 +36,16 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CWebcamControl::SetConfiguration(const Base::Char* _pConfiguration)
+    void CWebcamControl::SetConfiguration(const std::string& _rConfiguration)
     {
-        m_pConfiguration = _pConfiguration;
+        m_Configuration = _rConfiguration;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Char* CWebcamControl::GetConfiguration() const
+    const std::string& CWebcamControl::GetConfiguration() const
     {
-        return m_pConfiguration;
+        return m_Configuration;
     }
 
     // -----------------------------------------------------------------------------
@@ -81,9 +68,7 @@ namespace MR
         // -----------------------------------------------------------------------------
         // Setup camera parameters and open video
         // -----------------------------------------------------------------------------
-        assert(m_pConfiguration != nullptr);
-
-        Error = arVideoOpen(m_pConfiguration);
+        Error = arVideoOpen(m_Configuration.c_str());
 
         assert(Error >= 0);
 
@@ -183,16 +168,9 @@ namespace MR
         NumberOfVideoComponents = 4;
 #endif
 
-        m_OriginalColorFrame    = cvCreateImage(cvSize(OriginalSizeU, OriginalSizeV), IPL_DEPTH_8U, NumberOfVideoComponents);
+        m_OriginalColorFrameBGR = cvCreateImage(cvSize(OriginalSizeU, OriginalSizeV), IPL_DEPTH_8U, NumberOfVideoComponents);
         m_OriginalColorFrameRGB = cvCreateImage(cvSize(OriginalSizeU, OriginalSizeV), IPL_DEPTH_8U, 3);
         m_ConvertedColorFrame   = cvCreateImage(cvSize(ConvertedSizeU, ConvertedSizeV), IPL_DEPTH_8U, 3);
-
-        CombinedRight.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
-        CombinedLeft.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
-        CombinedTop.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
-        CombinedBottom.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
-        FrontCroped.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
-        BackCroped.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_8UC3);
 
         // -----------------------------------------------------------------------------
         // Setup intern data
@@ -223,7 +201,7 @@ namespace MR
             pVideoData = arVideoGetImage();
         }
 
-        static_cast<IplImage*>(m_OriginalColorFrame)->imageData = static_cast<char*>(static_cast<void*>(pVideoData));
+        static_cast<IplImage*>(m_OriginalColorFrameBGR)->imageData = static_cast<char*>(static_cast<void*>(pVideoData));
 
         // -----------------------------------------------------------------------------
         // Convert from original to output
@@ -250,17 +228,21 @@ namespace MR
 
         if (pVideoData != 0)
         {
-            static_cast<IplImage*>(m_OriginalColorFrame)->imageData = static_cast<char*>(static_cast<void*>(pVideoData));
+            static_cast<IplImage*>(m_OriginalColorFrameBGR)->imageData = static_cast<char*>(static_cast<void*>(pVideoData));
+
+#ifdef __APPLE__
+            cvCvtColor(m_OriginalColorFrameBGR, m_OriginalColorFrameRGB, CV_BGRA2RGB);
+#else
+            cvCvtColor(m_OriginalColorFrameBGR, m_OriginalColorFrameRGB, CV_BGR2RGB);
+#endif
 
             // -----------------------------------------------------------------------------
             // Convert to output
             // -----------------------------------------------------------------------------
-            ConvertOriginalToOutput();
-
-            // -----------------------------------------------------------------------------
-            // Environment approximation
-            // -----------------------------------------------------------------------------
-            // ProcessEnvironmentApproximation();
+            if (m_FreezeLastFrame == false)
+            {
+                ConvertOriginalToOutput();
+            }
         }
     }
 
@@ -268,383 +250,10 @@ namespace MR
 
     void CWebcamControl::ConvertOriginalToOutput()
     {
-#ifdef __APPLE__
-        cvCvtColor(m_OriginalColorFrame, m_OriginalColorFrameRGB, CV_BGRA2RGB);
-#else
-        cvCvtColor(m_OriginalColorFrame, m_OriginalColorFrameRGB, CV_BGR2RGB);
-#endif
-
         cvResize(m_OriginalColorFrameRGB, m_ConvertedColorFrame);
 
         Dt::TextureManager::CopyToTexture2D(m_pConvertedFrame, static_cast<void*>(static_cast<IplImage*>(m_ConvertedColorFrame)->imageData));
 
         Dt::TextureManager::MarkTextureAsDirty(m_pConvertedFrame, Dt::CTextureBase::DirtyData);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CWebcamControl::ProcessEnvironmentApproximation()
-    {
-        using namespace cv;
-
-        auto CropImage = [&](const Mat& _rOriginal, Mat& _rCroppedImage, Mat& _rLeftPart, Mat& _rRightPart, Mat& _rTopPart, Mat& _rBottomPart)
-        {
-            int LengthX;
-            int LengthY;
-            int ShortedLength;
-            int PercentualShortedLength;
-
-            LengthX = _rOriginal.size[0];
-            LengthY = _rOriginal.size[1];
-
-            ShortedLength = LengthX < LengthY ? LengthX : LengthY;
-
-            PercentualShortedLength = static_cast<int>(static_cast<float>(ShortedLength) * CROP_PERCENTAGE);
-
-            unsigned int X = (LengthX - PercentualShortedLength) / 2;
-            unsigned int Y = (LengthY - PercentualShortedLength) / 2;
-
-            Rect CroppedRectangel(Y, X, PercentualShortedLength, PercentualShortedLength);
-
-            _rCroppedImage = _rOriginal(CroppedRectangel);
-
-            resize(_rCroppedImage, _rCroppedImage, Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH));
-
-            // -----------------------------------------------------------------------------
-
-            _rLeftPart   = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, _rOriginal.type());
-            _rRightPart  = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, _rOriginal.type());
-            _rTopPart    = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, _rOriginal.type());
-            _rBottomPart = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, _rOriginal.type());
-
-            // -----------------------------------------------------------------------------
-
-            Point2f MaskPoints[4];
-            Point2f DestPoints[4];
-            Mat     WarpMat;
-
-            DestPoints[0] = Point2f(static_cast<float>(0)                    , static_cast<float>(0));
-            DestPoints[1] = Point2f(static_cast<float>(0)                    , static_cast<float>(IMAGE_EDGE_LENGTH - 1));
-            DestPoints[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH - 1), static_cast<float>(IMAGE_EDGE_LENGTH - 1));
-            DestPoints[3] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH - 1), static_cast<float>(0));
-
-            // -----------------------------------------------------------------------------
-
-            MaskPoints[0] = Point2f(static_cast<float>(0)    , static_cast<float>(0));
-            MaskPoints[1] = Point2f(static_cast<float>(0)    , static_cast<float>(LengthX - 1));
-            MaskPoints[2] = Point2f(static_cast<float>(Y - 1), static_cast<float>(X + PercentualShortedLength - 1));
-            MaskPoints[3] = Point2f(static_cast<float>(Y - 1), static_cast<float>(X - 1));
-
-            WarpMat = getPerspectiveTransform(MaskPoints, DestPoints);
-
-            warpPerspective(_rOriginal, _rLeftPart, WarpMat, _rLeftPart.size());
-
-            // -----------------------------------------------------------------------------
-
-            MaskPoints[0] = Point2f(static_cast<float>(Y + PercentualShortedLength - 1), static_cast<float>(X - 1));
-            MaskPoints[1] = Point2f(static_cast<float>(Y + PercentualShortedLength - 1), static_cast<float>(X + PercentualShortedLength - 1));
-            MaskPoints[2] = Point2f(static_cast<float>(LengthY - 1)                    , static_cast<float>(LengthX - 1));
-            MaskPoints[3] = Point2f(static_cast<float>(LengthY - 1)                    , static_cast<float>(0));
-
-            WarpMat = getPerspectiveTransform(MaskPoints, DestPoints);
-
-            warpPerspective(_rOriginal, _rRightPart, WarpMat, _rRightPart.size());
-
-            // -----------------------------------------------------------------------------
-
-            MaskPoints[0] = Point2f(static_cast<float>(0)                              , static_cast<float>(0));
-            MaskPoints[1] = Point2f(static_cast<float>(Y - 1)                          , static_cast<float>(X - 1));
-            MaskPoints[2] = Point2f(static_cast<float>(Y + PercentualShortedLength - 1), static_cast<float>(X - 1));
-            MaskPoints[3] = Point2f(static_cast<float>(LengthY - 1)                    , static_cast<float>(0));
-
-            WarpMat = getPerspectiveTransform(MaskPoints, DestPoints);
-
-            warpPerspective(_rOriginal, _rTopPart, WarpMat, _rTopPart.size());
-
-            // -----------------------------------------------------------------------------
-
-            MaskPoints[0] = Point2f(static_cast<float>(Y - 1)                          , static_cast<float>(X + PercentualShortedLength - 1));
-            MaskPoints[1] = Point2f(static_cast<float>(0)                              , static_cast<float>(LengthX - 1));
-            MaskPoints[2] = Point2f(static_cast<float>(LengthY - 1)                    , static_cast<float>(LengthX - 1));
-            MaskPoints[3] = Point2f(static_cast<float>(Y + PercentualShortedLength - 1), static_cast<float>(X + PercentualShortedLength - 1));
-
-            WarpMat = getPerspectiveTransform(MaskPoints, DestPoints);
-
-            warpPerspective(_rOriginal, _rBottomPart, WarpMat, _rBottomPart.size());
-        };
-
-        // -----------------------------------------------------------------------------
-
-        auto CombineFaces = [&](const Mat& _rOne, const Mat& _rTwo, const Point2f* _pDestinationOne, const Point2f* _pDestinationTwo)->cv::Mat
-        {
-            Mat CombinedOne, CombinedTwo;
-
-            CombinedOne = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, _rOne.type());
-            CombinedTwo = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, _rOne.type());
-
-            // -----------------------------------------------------------------------------
-
-            Point2f MaskPoints[3];
-
-            MaskPoints[0] = Point2f(static_cast<float>(0)                , static_cast<float>(0));
-            MaskPoints[1] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH));
-            MaskPoints[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH));
-
-            Mat WarpMat;
-
-            // -----------------------------------------------------------------------------
-
-            WarpMat = getAffineTransform(MaskPoints, _pDestinationOne);
-
-            warpAffine(_rOne, CombinedOne, WarpMat, CombinedOne.size());
-
-            // -----------------------------------------------------------------------------
-
-            WarpMat = getAffineTransform(MaskPoints, _pDestinationTwo);
-
-            warpAffine(_rTwo, CombinedTwo, WarpMat, CombinedTwo.size());
-
-            return CombinedOne + CombinedTwo;
-        };
-
-        // -----------------------------------------------------------------------------
-
-        auto CombineRightFaces = [&](const Mat& _rOne, const Mat& _rTwo)->cv::Mat
-        {
-            Point2f DestPointsOne[3];
-            Point2f DestPointsTwo[3];
-
-            DestPointsOne[0] = Point2f(static_cast<float>(0)                                  , static_cast<float>(0));
-            DestPointsOne[1] = Point2f(static_cast<float>(0)                                  , static_cast<float>(IMAGE_EDGE_LENGTH));
-            DestPointsOne[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE), static_cast<float>(IMAGE_EDGE_LENGTH));
-
-            DestPointsTwo[0] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE), static_cast<float>(0));
-            DestPointsTwo[1] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE), static_cast<float>(IMAGE_EDGE_LENGTH));
-            DestPointsTwo[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH)                  , static_cast<float>(IMAGE_EDGE_LENGTH));
-
-            Mat Combination = CombineFaces(_rOne, _rTwo, DestPointsOne, DestPointsTwo);
-
-#if USE_INPAINTING == 0
-            return Combination;
-#else
-            Mat Mask   = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, CV_8U);
-            Mat Result = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, Combination.type());
-
-            Point MaskPoints[3];
-
-            MaskPoints[0] = Point(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2, 0);
-            MaskPoints[1] = Point(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2, IMAGE_EDGE_LENGTH);
-            MaskPoints[2] = Point(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2, 0);
-
-            Scalar Color = Scalar(255, 255, 255);
-
-            fillConvexPoly(Mask, MaskPoints, 3, Color);
-
-            MaskPoints[0] = Point(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2, IMAGE_EDGE_LENGTH);
-            MaskPoints[1] = Point(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2, 0);
-            MaskPoints[2] = Point(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2, IMAGE_EDGE_LENGTH);
-
-            fillConvexPoly(Mask, MaskPoints, 3, Color);
-
-            // -----------------------------------------------------------------------------
-
-            inpaint(Combination, Mask, Result, INPAINT_RADIUS, INPAINT_METHOD);
-
-            // -----------------------------------------------------------------------------
-
-            return Result;
-#endif
-        };
-
-        // -----------------------------------------------------------------------------
-
-        auto CombineLeftFaces = [&](const Mat& _rOne, const Mat& _rTwo)->cv::Mat
-        {
-            Point2f DestPointsOne[3];
-            Point2f DestPointsTwo[3];
-
-            DestPointsOne[0] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE), static_cast<float>(0));
-            DestPointsOne[1] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE), static_cast<float>(IMAGE_EDGE_LENGTH));
-            DestPointsOne[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH)                  , static_cast<float>(IMAGE_EDGE_LENGTH));
-
-            DestPointsTwo[0] = Point2f(static_cast<float>(0)                                  , static_cast<float>(0));
-            DestPointsTwo[1] = Point2f(static_cast<float>(0)                                  , static_cast<float>(IMAGE_EDGE_LENGTH));
-            DestPointsTwo[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE), static_cast<float>(IMAGE_EDGE_LENGTH));
-
-            Mat Combination = CombineFaces(_rOne, _rTwo, DestPointsOne, DestPointsTwo);
-
-#if USE_INPAINTING == 0
-            return Combination;
-#else
-            Mat Mask   = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, CV_8U);
-            Mat Result = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, Combination.type());
-
-            Point MaskPoints[3];
-
-            MaskPoints[0] = Point(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2, 0);
-            MaskPoints[1] = Point(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2, IMAGE_EDGE_LENGTH);
-            MaskPoints[2] = Point(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2, 0);
-
-            Scalar Color = Scalar(255, 255, 255);
-
-            fillConvexPoly(Mask, MaskPoints, 3, Color);
-
-            MaskPoints[0] = Point(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2, IMAGE_EDGE_LENGTH);
-            MaskPoints[1] = Point(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2, 0);
-            MaskPoints[2] = Point(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2, IMAGE_EDGE_LENGTH);
-
-            fillConvexPoly(Mask, MaskPoints, 3, Color);
-
-            // -----------------------------------------------------------------------------
-
-            inpaint(Combination, Mask, Result, INPAINT_RADIUS, INPAINT_METHOD);
-
-            // -----------------------------------------------------------------------------
-
-            return Result;
-#endif
-        };
-
-        // -----------------------------------------------------------------------------
-
-        auto CombineTopFaces = [&](const Mat& _rOne, const Mat& _rTwo)->cv::Mat
-        {
-            Point2f DestPointsOne[3];
-            Point2f DestPointsTwo[3];
-
-            DestPointsOne[0] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE));
-            DestPointsOne[1] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH));
-            DestPointsOne[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH));
-
-            DestPointsTwo[0] = Point2f(static_cast<float>(0)                , static_cast<float>(0));
-            DestPointsTwo[1] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE));
-            DestPointsTwo[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE));
-
-            Mat Combination = CombineFaces(_rOne, _rTwo, DestPointsOne, DestPointsTwo);
-
-#if USE_INPAINTING == 0
-            return Combination;
-#else
-            Mat Mask   = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, CV_8U);
-            Mat Result = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, Combination.type());
-
-            Point MaskPoints[3];
-
-            MaskPoints[0] = Point(0, IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2);
-            MaskPoints[1] = Point(0, IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2);
-            MaskPoints[2] = Point(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2);
-
-            Scalar Color = Scalar(255, 255, 255);
-
-            fillConvexPoly(Mask, MaskPoints, 3, Color);
-
-            MaskPoints[0] = Point(0, IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2);
-            MaskPoints[1] = Point(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2);
-            MaskPoints[2] = Point(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2);
-
-            fillConvexPoly(Mask, MaskPoints, 3, Color);
-
-            // -----------------------------------------------------------------------------
-
-            inpaint(Combination, Mask, Result, INPAINT_RADIUS, INPAINT_METHOD);
-
-            // -----------------------------------------------------------------------------
-
-            return Result;
-#endif
-        };
-
-        // -----------------------------------------------------------------------------
-
-        auto CombineBottomFaces = [&](const Mat& _rOne, const Mat& _rTwo)->cv::Mat
-        {
-            Point2f DestPointsOne[3];
-            Point2f DestPointsTwo[3];
-
-            DestPointsOne[0] = Point2f(static_cast<float>(0)                , static_cast<float>(0));
-            DestPointsOne[1] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE));
-            DestPointsOne[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE));
-
-            DestPointsTwo[0] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE));
-            DestPointsTwo[1] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH));
-            DestPointsTwo[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH));
-
-            Mat Combination = CombineFaces(_rOne, _rTwo, DestPointsOne, DestPointsTwo);
-
-#if USE_INPAINTING == 0
-            return Combination;
-#else
-            Mat Mask   = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, CV_8U);
-            Mat Result = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, Combination.type());
-
-            Point MaskPoints[3];
-
-            MaskPoints[0] = Point(0, IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2);
-            MaskPoints[1] = Point(0, IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2);
-            MaskPoints[2] = Point(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2);
-
-            Scalar Color = Scalar(255, 255, 255);
-
-            fillConvexPoly(Mask, MaskPoints, 3, Color);
-
-            MaskPoints[0] = Point(0, IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2);
-            MaskPoints[1] = Point(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH / 2 + IMAGE_SPACE * 2);
-            MaskPoints[2] = Point(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH / 2 - IMAGE_SPACE * 2);
-
-            fillConvexPoly(Mask, MaskPoints, 3, Color);
-
-            // -----------------------------------------------------------------------------
-
-            inpaint(Combination, Mask, Result, INPAINT_RADIUS, INPAINT_METHOD);
-
-            // -----------------------------------------------------------------------------
-
-            return Result;
-#endif
-        };
-
-        // -----------------------------------------------------------------------------
-
-        IplImage* pConvertedColorFrame = static_cast<IplImage*>(m_ConvertedColorFrame);
-
-        OriginalFrontImage = cvarrToMat(pConvertedColorFrame, true);
-
-        flip(OriginalFrontImage, OriginalBackImage, 1);
-
-        // -----------------------------------------------------------------------------
-        // Crop front image
-        // -----------------------------------------------------------------------------
-        CropImage(OriginalFrontImage, FrontCroped, FrontLeftPart, FrontRightPart, FrontTopPart, FrontBottomPart);
-        CropImage(OriginalBackImage, BackCroped, BackLeftPart, BackRightPart, BackTopPart, BackBottomPart);
-
-        // -----------------------------------------------------------------------------
-        // Flip back images because of negative direction on back face
-        // -----------------------------------------------------------------------------
-        flip(BackTopPart, BackTopPart, -1);
-        flip(BackBottomPart, BackBottomPart, -1);
-
-        // -----------------------------------------------------------------------------
-        // Fill Images
-        // -----------------------------------------------------------------------------
-        CombinedRight  = CombineRightFaces(FrontRightPart, BackLeftPart);
-        CombinedLeft   = CombineLeftFaces(FrontLeftPart, BackRightPart);
-        CombinedTop    = CombineTopFaces(FrontTopPart, BackTopPart);
-        CombinedBottom = CombineBottomFaces(FrontBottomPart, BackBottomPart);
-
-//         imshow("CombinedRight", CombinedRight);
-//         imshow("CombinedLeft", CombinedLeft);
-//         imshow("CombinedTop", CombinedTop);
-//         imshow("CombinedBottom", CombinedBottom);
-//         imshow("FrontCroped", FrontCroped);
-//         imshow("BackCroped", BackCroped);
-
-        Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Right,  CombinedRight.data);
-        Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Left,   CombinedLeft.data);
-        Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Top,    CombinedTop.data);
-        Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Bottom, CombinedBottom.data);
-        Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Front,  FrontCroped.data);
-        Dt::TextureManager::CopyToTextureCube(m_pCubemap, Dt::CTextureCube::Back,   BackCroped.data);
-    
-        Dt::TextureManager::MarkTextureAsDirty(m_pCubemap, Dt::CTextureBase::DirtyData);
     }
 } // namespace MR

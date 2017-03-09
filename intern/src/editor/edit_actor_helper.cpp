@@ -12,8 +12,8 @@
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
 #include "data/data_material_manager.h"
+#include "data/data_mesh.h"
 #include "data/data_mesh_actor_facet.h"
-#include "data/data_model_manager.h"
 #include "data/data_texture_manager.h"
 #include "data/data_transformation_facet.h"
 
@@ -21,9 +21,6 @@
 
 #include "editor_port/edit_message.h"
 #include "editor_port/edit_message_manager.h"
-
-#include <windows.h>
-#undef SendMessage
 
 namespace
 {
@@ -53,8 +50,6 @@ namespace
         void OnActorInfoCamera(Edit::CMessage& _rMessage);
 
         void OnDirtyEntity(Dt::CEntity* _pEntity);
-
-        std::string CopyFileToAssets(const char* _pAssetFolder, const char* _pPathToFile);
     };
 } // namespace
 
@@ -84,14 +79,14 @@ namespace
         // -----------------------------------------------------------------------------
         // Edit
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewActorModel, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnNewActorModel));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewActorCamera, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnNewActorCamera));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Actor_Mesh_New, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnNewActorModel));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Actor_Camera_New, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnNewActorCamera));
         
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestActorInfoMaterial, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnRequestActorInfoMaterial));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestActorInfoCamera, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnRequestActorInfoCamera));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Actor_Material_Info, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnRequestActorInfoMaterial));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Actor_Camera_Info, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnRequestActorInfoCamera));
 
-        Edit::MessageManager::Register(Edit::SGUIMessageType::ActorInfoMaterial, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnActorInfoMaterial));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::ActorInfoCamera, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnActorInfoCamera));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Actor_Material_Update, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnActorInfoMaterial));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Actor_Camera_Update, EDIT_RECEIVE_MESSAGE(&CActorHelper::OnActorInfoCamera));
     }
 
     // -----------------------------------------------------------------------------
@@ -105,61 +100,30 @@ namespace
 
     void CActorHelper::OnNewActorModel(Edit::CMessage& _rMessage)
     {
-        // -----------------------------------------------------------------------------
-        // Create new entity
-        // -----------------------------------------------------------------------------
-        char        pTmp[512];
-        std::string PathToFile;
-
-        // -----------------------------------------------------------------------------
-        // Model
-        // -----------------------------------------------------------------------------
-        Dt::SModelFileDescriptor ModelFileDesc;
-
-        const char* pPathToFile = _rMessage.GetString(pTmp, 512);
-
-        PathToFile = "models/" + CopyFileToAssets("../assets/models/", pPathToFile);
-
-        ModelFileDesc.m_pFileName = PathToFile.c_str();
-        ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::Default;
-
-        Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
-
-        Dt::CEntity& rNewEntity = Dt::EntityManager::CreateEntityFromModel(rModel);
-
-        rNewEntity.SetName("New Model");
-
-        // -----------------------------------------------------------------------------
-        // Add model to map
-        // -----------------------------------------------------------------------------
-        Dt::EntityManager::MarkEntityAsDirty(rNewEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
     }
 
     // -----------------------------------------------------------------------------
 
     void CActorHelper::OnNewActorCamera(Edit::CMessage& _rMessage)
     {
-        Dt::SEntityDescriptor EntityDesc;
+        {
+            // -----------------------------------------------------------------------------
+            // Get entity and set type + category
+            // -----------------------------------------------------------------------------
+            int EntityID = _rMessage.GetInt();
 
-        EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
-        EntityDesc.m_EntityType = Dt::SActorType::Camera;
-        EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            rCurrentEntity.SetCategory(Dt::SEntityCategory::Actor);
+            rCurrentEntity.SetType(Dt::SActorType::Camera);
 
-        rEntity.SetName("New Camera");
+            // -----------------------------------------------------------------------------
+            // Create facet and set it
+            // -----------------------------------------------------------------------------
+            Dt::CCameraActorFacet* pFacet = Dt::CameraActorManager::CreateCameraActor();
 
-        Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
-
-        pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 10.0f));
-        pTransformationFacet->SetScale   (Base::Float3(1.0f));
-        pTransformationFacet->SetRotation(Base::Float3(0.0f, 0.0f, 0.0f));
-
-        Dt::CCameraActorFacet* pFacet = Dt::CameraActorManager::CreateCameraActor();
-
-        rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
-
-        Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -204,7 +168,7 @@ namespace
 
             NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::ActorInfoMaterial, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Actor_Material_Info, NewMessage);
         }
     }
 
@@ -274,7 +238,7 @@ namespace
             
             NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::ActorInfoCamera, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Actor_Camera_Info, NewMessage);
         }
     }
 
@@ -284,13 +248,19 @@ namespace
     {
         int EntityID = _rMessage.GetInt();
 
+        int MaterialHash = _rMessage.GetInt();
+
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
         Dt::CMeshActorFacet* pFacet = static_cast<Dt::CMeshActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
 
         if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Actor && rCurrentEntity.GetType() == Dt::SActorType::Mesh && pFacet != nullptr)
         {
-            
+            Dt::CMaterial& rDtMaterial = Dt::MaterialManager::GetMaterialByHash(MaterialHash);
+
+            pFacet->SetMaterial(0, &rDtMaterial);
+
+            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
         }
     }
 
@@ -417,28 +387,6 @@ namespace
             
         }
     }
-
-    // -----------------------------------------------------------------------------
-
-    std::string CActorHelper::CopyFileToAssets(const char* _pAssetFolder, const char* _pPathToFile)
-    {
-        char pDrive[4];
-        char pDirectory[512];
-        char pFilename[32];
-        char pExtension[12];
-
-        std::string FileExtension;
-        std::string RelativePathToModel;
-
-        _splitpath_s(_pPathToFile, pDrive, 4, pDirectory, 512, pFilename, 32, pExtension, 12);
-
-        FileExtension = std::string(pFilename) + std::string(pExtension);
-        RelativePathToModel = std::string(_pAssetFolder) + FileExtension;
-
-        CopyFileA(_pPathToFile, RelativePathToModel.c_str(), true);
-
-        return FileExtension.c_str();
-    };
 } // namespace
 
 namespace Edit

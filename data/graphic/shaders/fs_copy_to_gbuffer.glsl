@@ -63,9 +63,9 @@ float SampleDepthTexture(in sampler2D _DepthTexture, in vec2 _DepthUV)
     // P. Lensing originally used RGB char depth texture from Kinect 1:
     // float depth = v.r*31*2048 + v.g*63*32  + v.b*31;
     // -----------------------------------------------------------------------------
-    Depth = textureLod( _DepthTexture, _DepthUV, 0 ).x;
+    Depth = textureLod( _DepthTexture, _DepthUV, 0 ).z;
     
-    if (Depth <= 0)
+    if (isinf(abs(Depth)))
     {
         return 10000;
     }

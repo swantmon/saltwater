@@ -19,7 +19,6 @@
 #include "editor/edit_intro_state.h"
 #include "editor/edit_light_helper.h"
 #include "editor/edit_load_map_state.h"
-#include "editor/edit_map_helper.h"
 #include "editor/edit_material_helper.h"
 #include "editor/edit_play_state.h"
 #include "editor/edit_plugin_helper.h"
@@ -78,8 +77,8 @@ namespace
         void OnMouseRightPressed(Edit::CMessage& _rMessage);
         void OnMouseRightReleased(Edit::CMessage& _rMessage);
         void OnMouseMove(Edit::CMessage& _rMessage);
-        
-        void OnTakeScreenshot(Edit::CMessage& _rMessage);
+        void OnWheel(Edit::CMessage& _rMessage);
+
         void OnResize(Edit::CMessage& _rMessage);
     };
 } // namespace
@@ -154,17 +153,17 @@ namespace
         // -----------------------------------------------------------------------------
         // Register messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SGUIMessageType::KeyPressed         , EDIT_RECEIVE_MESSAGE(&CApplication::OnKeyPressed));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::KeyReleased        , EDIT_RECEIVE_MESSAGE(&CApplication::OnKeyReleased));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::MouseLeftPressed   , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseLeftPressed));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::MouseLeftReleased  , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseLeftReleased));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::MouseMiddlePressed , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseMiddlePressed));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::MouseMiddleReleased, EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseMiddleReleased));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::MouseRightPressed  , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseRightPressed));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::MouseRightReleased , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseRightReleased));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::MouseMove          , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseMove));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::TakeScreenshot     , EDIT_RECEIVE_MESSAGE(&CApplication::OnTakeScreenshot));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::ResizeMapEditWindow, EDIT_RECEIVE_MESSAGE(&CApplication::OnResize));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Input_KeyPressed         , EDIT_RECEIVE_MESSAGE(&CApplication::OnKeyPressed));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Input_KeyReleased        , EDIT_RECEIVE_MESSAGE(&CApplication::OnKeyReleased));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Input_MouseLeftPressed   , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseLeftPressed));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Input_MouseLeftReleased  , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseLeftReleased));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Input_MouseMiddlePressed , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseMiddlePressed));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Input_MouseMiddleReleased, EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseMiddleReleased));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Input_MouseRightPressed  , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseRightPressed));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Input_MouseRightReleased , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseRightReleased));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Input_MouseMove          , EDIT_RECEIVE_MESSAGE(&CApplication::OnMouseMove));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Input_MouseWheel         , EDIT_RECEIVE_MESSAGE(&CApplication::OnWheel));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Window_Resize            , EDIT_RECEIVE_MESSAGE(&CApplication::OnResize));
 
         // -----------------------------------------------------------------------------
         // Helper
@@ -175,7 +174,6 @@ namespace
         Edit::Helper::Entity  ::OnStart();
         Edit::Helper::Graphic ::OnStart();
         Edit::Helper::Light   ::OnStart();
-        Edit::Helper::Map     ::OnStart();
         Edit::Helper::Material::OnStart();
         Edit::Helper::Plugin  ::OnStart();
         Edit::Helper::Texture ::OnStart();
@@ -198,7 +196,6 @@ namespace
         Edit::Helper::Entity  ::OnExit();
         Edit::Helper::Graphic ::OnExit();
         Edit::Helper::Light   ::OnExit();
-        Edit::Helper::Map     ::OnExit();
         Edit::Helper::Material::OnExit();
         Edit::Helper::Plugin  ::OnExit();
         Edit::Helper::Texture ::OnExit();
@@ -238,7 +235,7 @@ namespace
 
             NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::FramesPerSecond, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Graphic_FPS_Info, NewMessage);
 
             // -----------------------------------------------------------------------------
             // State engine
@@ -274,10 +271,29 @@ namespace
     
     void CApplication::OnTranslation(Edit::CState::EStateType _NewState)
     {
+        // -----------------------------------------------------------------------------
+        // Do state switch
+        // -----------------------------------------------------------------------------
         s_pStates[m_CurrentState]->OnLeave();
         
         s_pStates[_NewState]->OnEnter();
-        
+
+        // -----------------------------------------------------------------------------
+        // Send message
+        // -----------------------------------------------------------------------------
+        Edit::CMessage NewMessage;
+
+        NewMessage.PutInt(m_CurrentState);
+
+        NewMessage.PutInt(_NewState);
+
+        NewMessage.Reset();
+
+        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::App_State_Change, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Save new state
+        // -----------------------------------------------------------------------------
         m_CurrentState = _NewState;
     }
 
@@ -412,13 +428,14 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CApplication::OnTakeScreenshot(Edit::CMessage& _rMessage)
+    void CApplication::OnWheel(Edit::CMessage& _rMessage)
     {
-        char pPathToSave[256];
+        bool IsVertically = _rMessage.GetBool();
+        int WheelDelta    = _rMessage.GetInt();
 
-        _rMessage.GetString(pPathToSave, 256);
+        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseWheel, Base::CInputEvent::Mouse, m_LatestMousePosition, WheelDelta);
 
-        Gfx::App::TakeScreenshot(m_EditWindowID, pPathToSave);
+        Gui::EventHandler::OnUserEvent(NewInput);
     }
 
     // -----------------------------------------------------------------------------

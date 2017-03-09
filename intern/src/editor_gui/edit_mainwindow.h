@@ -29,22 +29,25 @@ namespace Edit
         void OnStart();
         void OnExit();
 
+        void SetRenderSize(int _Width, int _Height);
+
     public Q_SLOTS:
 
         void switchPlayingCurrentScene();
-        void takeScreenshot();
         void openNewSceneDialog();
-        void openNewActorModelDialog();
         void createNewLightPoint();
         void createNewLightSun();
         void createNewLightEnvironment();
         void createNewLightGlobalProbe();
+        void createNewLightArea();
         void createNewEntityBloom();
         void createNewEntityDOF();
         void createNewEntityPostAA();
         void createNewEntitySSR();
         void createNewEntityVolumeFog();
         void createNewPluginARController();
+        void reloadRenderer();
+        void reloadAllShader();
         void changeHistogramSettings();
         void toggleHistogramDock();
         void toggleSceneGraphDock();
@@ -66,6 +69,7 @@ namespace Edit
 
     private:
 
+        void OnStateChange(Edit::CMessage& _rMessage);
         void OnFramesPerSecond(Edit::CMessage& _rMessage);
         void OnHistogramInfo(Edit::CMessage& _rMessage);
     };

@@ -17,7 +17,8 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::EntityInfoHierarchy, EDIT_RECEIVE_MESSAGE(&CSceneGraph::OnSceneGraphChanged));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Entity_Hierarchy_Info, EDIT_RECEIVE_MESSAGE(&CSceneGraph::OnSceneGraphChanged));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Entity_Selected, EDIT_RECEIVE_MESSAGE(&CSceneGraph::OnEntitySelected));
     }
 
     // -----------------------------------------------------------------------------
@@ -96,7 +97,7 @@ namespace Edit
 
             NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SGUIMessageType::EntityInfoHierarchie, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Entity_Hierarchy_Update, NewMessage);
 
             // -----------------------------------------------------------------------------
             // Emit signal
@@ -127,9 +128,9 @@ namespace Edit
 
                 NewMessage.Reset();
 
-                int Result = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::RemoveEntity, NewMessage);
+                int Result = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Entity_Destroy, NewMessage);
 
-                if (Result == 100)
+                if (Result == 1)
                 {
                     delete pSource;
                 }
@@ -204,5 +205,21 @@ namespace Edit
         // hide columns
         // -----------------------------------------------------------------------------
         header()->hideSection(1);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSceneGraph::OnEntitySelected(Edit::CMessage& _rMessage)
+    {
+        int EntityID = _rMessage.GetInt();
+
+        QList<QTreeWidgetItem*> ListOfEntities = findItems(QString::number(EntityID), Qt::MatchExactly | Qt::MatchRecursive, 1);
+
+        foreach(QTreeWidgetItem* pEntity, ListOfEntities)
+        {
+            setCurrentItem(pEntity);
+
+            itemSelected(pEntity);
+        }
     }
 } // namespace Edit

@@ -45,11 +45,8 @@ void main(void)
     vec4  GBuffer0 = texture(ps_GBuffer0, in_TexCoord);
     vec4  GBuffer1 = texture(ps_GBuffer1, in_TexCoord);
     float Depth    = texture(ps_Depth   , in_TexCoord).r;
-    
-    // -----------------------------------------------------------------------------
-    // Linear depth
-    // -----------------------------------------------------------------------------
-    float LinearDepth = ConvertToLinearDepth(Depth, g_CameraParameterNear, g_CameraParameterFar);
+
+    if (Depth > 0.9996f) discard;
     
     // -----------------------------------------------------------------------------
     // Get world-space normal and convert to view-space normal
@@ -64,6 +61,7 @@ void main(void)
     
     vec2  NoiseScale = ps_NoiseScale.xy;
     float Radius     = ps_NoiseScale.z;
+    float Strength   = ps_NoiseScale.w;
     
     // -----------------------------------------------------------------------------
     // Create random rotation
@@ -103,13 +101,12 @@ void main(void)
         // -----------------------------------------------------------------------------
         // Sample depth from screen-space texcoord
         // -----------------------------------------------------------------------------
-        DepthSample       = texture(ps_Depth, SSOffset.xy).r;
-        LinearDepthSample = ConvertToLinearDepth(DepthSample, g_CameraParameterNear, g_CameraParameterFar);
+        DepthSample = texture(ps_Depth, SSOffset.xy).r;
         
         // -----------------------------------------------------------------------------
         // Range check
         // -----------------------------------------------------------------------------
-        RangeCheck = smoothstep(0.0f, 1.0f, Radius / (abs(LinearDepth - LinearDepthSample) * g_CameraParameterFar));
+        RangeCheck = smoothstep(0.0f, 1.0f, Radius / (abs(Depth - DepthSample) * g_CameraParameterFar));
 
         // -----------------------------------------------------------------------------
         // Occlusion check
@@ -119,7 +116,7 @@ void main(void)
 
     Occlusion = 1.0f - (Occlusion / float(KERNEL_SIZE));
     
-    out_Final = vec4(pow(Occlusion, 2.0f));
+    out_Final = vec4(pow(Occlusion, Strength));
 }
 
 #endif // __INCLUDE_FS_SSAO_GLSL__

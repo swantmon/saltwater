@@ -90,15 +90,11 @@ namespace
     private:
         
         CMeshPtr          m_QuadModelPtr;
-        CBufferSetPtr     m_FullQuadViewVSBufferPtr;
-        CBufferSetPtr     m_SunLightPSBufferPtr;
+        CBufferPtr        m_SunLightPSBufferPtr;
         CInputLayoutPtr   m_P2InputLayoutPtr;
         CShaderPtr        m_RectangleShaderVSPtr;
         CShaderPtr        m_SunLightShaderPSPtr;
-        CSamplerSetPtr    m_PSSamplerSetPtr;
-        CSamplerSetPtr    m_PSSunSamplerSetPtr;
         CRenderContextPtr m_LightRenderContextPtr;
-        CTextureSetPtr    m_SunLightTextureSetPtr;
         CRenderJobs       m_RenderJobs;
 
     private:
@@ -111,15 +107,11 @@ namespace
 {
     CGfxLightSunRenderer::CGfxLightSunRenderer()
         : m_QuadModelPtr           ()
-        , m_FullQuadViewVSBufferPtr()
         , m_SunLightPSBufferPtr    ()
         , m_P2InputLayoutPtr       ()
         , m_SunLightShaderPSPtr    ()
         , m_RectangleShaderVSPtr   ()
-        , m_PSSamplerSetPtr        ()
-        , m_PSSunSamplerSetPtr     ()
         , m_LightRenderContextPtr  ()
-        , m_SunLightTextureSetPtr  ()
         , m_RenderJobs		       ()
     {
         m_RenderJobs.reserve(4);
@@ -142,16 +134,12 @@ namespace
     
     void CGfxLightSunRenderer::OnExit()
     {
-        m_QuadModelPtr            = 0;
-        m_FullQuadViewVSBufferPtr = 0;
-        m_SunLightPSBufferPtr     = 0;
-        m_P2InputLayoutPtr        = 0;
-        m_SunLightShaderPSPtr     = 0;
-        m_RectangleShaderVSPtr    = 0;
-        m_PSSamplerSetPtr         = 0;
-        m_PSSunSamplerSetPtr      = 0;
-        m_LightRenderContextPtr   = 0;
-        m_SunLightTextureSetPtr   = 0;
+        m_QuadModelPtr          = 0;
+        m_SunLightPSBufferPtr   = 0;
+        m_P2InputLayoutPtr      = 0;
+        m_SunLightShaderPSPtr   = 0;
+        m_RectangleShaderVSPtr  = 0;
+        m_LightRenderContextPtr = 0;
     }
     
     // -----------------------------------------------------------------------------
@@ -203,31 +191,12 @@ namespace
         m_LightRenderContextPtr->SetViewPortSet(ViewPortSetPtr);
         m_LightRenderContextPtr->SetTargetSet(TargetSetPtr);
         m_LightRenderContextPtr->SetRenderState(LightStatePtr);
-        
-        // -----------------------------------------------------------------------------
-        
-        CSamplerPtr Sampler[6];
-
-        Sampler[0] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[1] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[2] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[3] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[4] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[5] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-
-        m_PSSunSamplerSetPtr = SamplerManager::CreateSamplerSet(Sampler, 6);
     }
     
     // -----------------------------------------------------------------------------
     
     void CGfxLightSunRenderer::OnSetupTextures()
     {
-        CTextureBasePtr GBuffer0TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0);
-        CTextureBasePtr GBuffer1TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1);
-        CTextureBasePtr GBuffer2TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2);
-        CTextureBasePtr DepthTexturePtr    = TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget();
-        
-        m_SunLightTextureSetPtr = TextureManager::CreateTextureSet(GBuffer0TexturePtr, GBuffer1TexturePtr, GBuffer2TexturePtr, DepthTexturePtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -235,8 +204,6 @@ namespace
     void CGfxLightSunRenderer::OnSetupBuffers()
     {
         SBufferDescriptor ConstanteBufferDesc;
-        
-        // -----------------------------------------------------------------------------
         
         ConstanteBufferDesc.m_Stride        = 0;
         ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
@@ -246,17 +213,7 @@ namespace
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr SunLightBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
-        
-        // -----------------------------------------------------------------------------
-        
-        CBufferPtr HistogramExposureHistoryBufferPtr = HistogramRenderer::GetExposureHistoryBuffer();
-        
-        // -----------------------------------------------------------------------------
-        
-        m_FullQuadViewVSBufferPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
-
-        m_SunLightPSBufferPtr     = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), SunLightBuffer, HistogramExposureHistoryBufferPtr);
+        m_SunLightPSBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -334,49 +291,76 @@ namespace
 
         ContextManager::SetShaderPS(m_SunLightShaderPSPtr);
 
-        ContextManager::SetConstantBufferSetVS(m_FullQuadViewVSBufferPtr);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(4, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
-        ContextManager::SetSamplerSetPS(m_PSSunSamplerSetPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_SunLightPSBufferPtr);
 
+        ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
+
+        ContextManager::SetTexture(0, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0));
+        ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1));
+        ContextManager::SetTexture(2, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2));
+        ContextManager::SetTexture(3, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
+
+        // -----------------------------------------------------------------------------
+        // Render every sun
+        // -----------------------------------------------------------------------------
         CRenderJobs::const_iterator CurrentRenderJob = m_RenderJobs.begin();
         CRenderJobs::const_iterator EndOfRenderJobs  = m_RenderJobs.end();
 
         for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
         {
-        	Dt::CSunLightFacet*  pDataSunFacet    = CurrentRenderJob->m_pDataSunLightFacet;
-        	Gfx::CSunFacet* pGraphicSunFacet = CurrentRenderJob->m_pGraphicSunLightFacet;
+        	Dt::CSunLightFacet* pDataSunFacet    = CurrentRenderJob->m_pDataSunLightFacet;
+        	Gfx::CSunFacet*     pGraphicSunFacet = CurrentRenderJob->m_pGraphicSunLightFacet;
 
         	// -----------------------------------------------------------------------------
-	        // Upload buffer data
-	        // -----------------------------------------------------------------------------
-	        SSunLightProperties* pLightBuffer = static_cast<SSunLightProperties*>(BufferManager::MapConstantBuffer(m_SunLightPSBufferPtr->GetBuffer(1)));
-
-	        assert(pLightBuffer != nullptr);
-
-	        pLightBuffer->m_LightViewProjection = pGraphicSunFacet->GetCamera()->GetViewProjectionMatrix();
-	        pLightBuffer->m_LightDirection      = Base::Float4(pDataSunFacet->GetDirection(), 0.0f).Normalize();
-	        pLightBuffer->m_LightColor          = Base::Float4(pDataSunFacet->GetLightness(), 1.0f);
-	        pLightBuffer->m_SunAngularRadius    = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
-	        pLightBuffer->m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
-
-	        BufferManager::UnmapConstantBuffer(m_SunLightPSBufferPtr->GetBuffer(1));
-
-	        // -----------------------------------------------------------------------------
-
-	        ContextManager::SetConstantBufferSetPS(m_SunLightPSBufferPtr);
-
-	        ContextManager::SetTextureSetPS(m_SunLightTextureSetPtr);
-	        
-	        ContextManager::SetTextureSetPS(pGraphicSunFacet->GetTextureSMSet());
-
-	        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
-
-        	ContextManager::ResetTextureSetPS();
-
-	        ContextManager::ResetConstantBufferSetPS();
+            // Upload buffer data
+            // -----------------------------------------------------------------------------
+            SSunLightProperties LightBuffer;
+    
+            LightBuffer.m_LightViewProjection  = pGraphicSunFacet->GetCamera()->GetViewProjectionMatrix();
+            LightBuffer.m_LightDirection       = Base::Float4(pDataSunFacet->GetDirection(), 0.0f).Normalize();
+            LightBuffer.m_LightColor           = Base::Float4(pDataSunFacet->GetLightness(), 1.0f);
+            LightBuffer.m_SunAngularRadius     = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
+            LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
+    
+            BufferManager::UploadConstantBufferData(m_SunLightPSBufferPtr, &LightBuffer);
+    
+            // -----------------------------------------------------------------------------
+            // Prepare last context
+            // -----------------------------------------------------------------------------
+            ContextManager::SetTexture(4, pGraphicSunFacet->GetTextureSMSet()->GetTexture(0));
+    
+            // -----------------------------------------------------------------------------
+            // Draw
+            // -----------------------------------------------------------------------------
+            ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
         }
 
-        ContextManager::ResetConstantBufferSetVS(); 
+        // -----------------------------------------------------------------------------
+        // Reset everything
+        // -----------------------------------------------------------------------------
+        ContextManager::ResetTexture(0);
+        ContextManager::ResetTexture(1);
+        ContextManager::ResetTexture(2);
+        ContextManager::ResetTexture(3);
+        ContextManager::ResetTexture(4);
+
+        ContextManager::ResetResourceBuffer(0);
+
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
+
+        ContextManager::ResetSampler(0);
+        ContextManager::ResetSampler(1);
+        ContextManager::ResetSampler(2);
+        ContextManager::ResetSampler(3);
+        ContextManager::ResetSampler(4);
 
         ContextManager::ResetTopology();
 
@@ -385,8 +369,6 @@ namespace
         ContextManager::ResetIndexBuffer();
 
         ContextManager::ResetVertexBufferSet();
-
-        ContextManager::ResetSamplerSetPS();
 
         ContextManager::ResetShaderVS();
 

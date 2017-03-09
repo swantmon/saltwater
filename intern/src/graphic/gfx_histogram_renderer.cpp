@@ -396,36 +396,34 @@ namespace
         // -----------------------------------------------------------------------------
         // Upload data to buffer
         // -----------------------------------------------------------------------------
-        SConstantBufferCS* pHistogramSettings = static_cast<SConstantBufferCS*>(BufferManager::MapConstantBuffer(m_HistogramBufferSetPtrs[HistogramEvaluate]->GetBuffer(2)));
+        SConstantBufferCS HistogramSettings;
+
+        HistogramSettings.m_MinPixelCoordX           = m_ConstantBufferPS.m_MinPixelCoordX;
+        HistogramSettings.m_MinPixelCoordY           = m_ConstantBufferPS.m_MinPixelCoordY;
+        HistogramSettings.m_MaxPixelCoordX           = m_ConstantBufferPS.m_MaxPixelCoordX;
+        HistogramSettings.m_MaxPixelCoordY           = m_ConstantBufferPS.m_MaxPixelCoordY;
+        HistogramSettings.m_NumberOfThreadGroupsX    = m_ConstantBufferPS.m_NumberOfThreadGroupsX;
+        HistogramSettings.m_NumberOfThreadGroupsY    = m_ConstantBufferPS.m_NumberOfThreadGroupsY;
+        HistogramSettings.m_ReciprocalNumberOfPixels = m_ConstantBufferPS.m_ReciprocalNumberOfPixels;
+        HistogramSettings.m_HistoryIndex             = m_ConstantBufferPS.m_HistoryIndex;
+        HistogramSettings.m_LastHistoryIndex         = m_ConstantBufferPS.m_LastHistoryIndex;
+        HistogramSettings.m_Time                     = m_ConstantBufferPS.m_Time;
+        HistogramSettings.m_HistogramLowerBound      = m_ConstantBufferPS.m_HistogramLowerBound;
+        HistogramSettings.m_HistogramUpperBound      = m_ConstantBufferPS.m_HistogramUpperBound;
+        HistogramSettings.m_HistogramLogMin          = m_ConstantBufferPS.m_HistogramLogMin;
+        HistogramSettings.m_HistogramLogMax          = m_ConstantBufferPS.m_HistogramLogMax;
+        HistogramSettings.m_HistogramScale           = m_ConstantBufferPS.m_HistogramScale;
+        HistogramSettings.m_HistogramReciprocalScale = m_ConstantBufferPS.m_HistogramReciprocalScale;
+        HistogramSettings.m_EyeAdaptionSpeedUp       = m_ConstantBufferPS.m_EyeAdaptionSpeedUp   * 20.0f;
+        HistogramSettings.m_EyeAdaptionSpeedDown     = m_ConstantBufferPS.m_EyeAdaptionSpeedDown * 20.0f;
+        HistogramSettings.m_ExposureCompensation     = m_ConstantBufferPS.m_ExposureCompensation;
+        HistogramSettings.m_UseAutoExposure          = m_ConstantBufferPS.m_UseAutoExposure;
+        HistogramSettings.m_Aperture                 = m_ConstantBufferPS.m_Aperture;           
+        HistogramSettings.m_Shuttertime              = m_ConstantBufferPS.m_Shuttertime;
+        HistogramSettings.m_ISO                      = m_ConstantBufferPS.m_ISO;
+        HistogramSettings.m_ResetEyeAdaption         = m_ConstantBufferPS.m_ResetEyeAdaption;
         
-        assert(pHistogramSettings != nullptr);
-        
-        pHistogramSettings->m_MinPixelCoordX           = m_ConstantBufferPS.m_MinPixelCoordX;
-        pHistogramSettings->m_MinPixelCoordY           = m_ConstantBufferPS.m_MinPixelCoordY;
-        pHistogramSettings->m_MaxPixelCoordX           = m_ConstantBufferPS.m_MaxPixelCoordX;
-        pHistogramSettings->m_MaxPixelCoordY           = m_ConstantBufferPS.m_MaxPixelCoordY;
-        pHistogramSettings->m_NumberOfThreadGroupsX    = m_ConstantBufferPS.m_NumberOfThreadGroupsX;
-        pHistogramSettings->m_NumberOfThreadGroupsY    = m_ConstantBufferPS.m_NumberOfThreadGroupsY;
-        pHistogramSettings->m_ReciprocalNumberOfPixels = m_ConstantBufferPS.m_ReciprocalNumberOfPixels;
-        pHistogramSettings->m_HistoryIndex             = m_ConstantBufferPS.m_HistoryIndex;
-        pHistogramSettings->m_LastHistoryIndex         = m_ConstantBufferPS.m_LastHistoryIndex;
-        pHistogramSettings->m_Time                     = m_ConstantBufferPS.m_Time;
-        pHistogramSettings->m_HistogramLowerBound      = m_ConstantBufferPS.m_HistogramLowerBound;
-        pHistogramSettings->m_HistogramUpperBound      = m_ConstantBufferPS.m_HistogramUpperBound;
-        pHistogramSettings->m_HistogramLogMin          = m_ConstantBufferPS.m_HistogramLogMin;
-        pHistogramSettings->m_HistogramLogMax          = m_ConstantBufferPS.m_HistogramLogMax;
-        pHistogramSettings->m_HistogramScale           = m_ConstantBufferPS.m_HistogramScale;
-        pHistogramSettings->m_HistogramReciprocalScale = m_ConstantBufferPS.m_HistogramReciprocalScale;
-        pHistogramSettings->m_EyeAdaptionSpeedUp       = m_ConstantBufferPS.m_EyeAdaptionSpeedUp   * 20.0f;
-        pHistogramSettings->m_EyeAdaptionSpeedDown     = m_ConstantBufferPS.m_EyeAdaptionSpeedDown * 20.0f;
-        pHistogramSettings->m_ExposureCompensation     = m_ConstantBufferPS.m_ExposureCompensation;
-        pHistogramSettings->m_UseAutoExposure          = m_ConstantBufferPS.m_UseAutoExposure;
-        pHistogramSettings->m_Aperture                 = m_ConstantBufferPS.m_Aperture;           
-        pHistogramSettings->m_Shuttertime              = m_ConstantBufferPS.m_Shuttertime;
-        pHistogramSettings->m_ISO                      = m_ConstantBufferPS.m_ISO;
-        pHistogramSettings->m_ResetEyeAdaption         = m_ConstantBufferPS.m_ResetEyeAdaption;
-        
-        BufferManager::UnmapConstantBuffer(m_HistogramBufferSetPtrs[HistogramEvaluate]->GetBuffer(2));
+        BufferManager::UploadConstantBufferData(m_HistogramBufferSetPtrs[HistogramEvaluate]->GetBuffer(2), &HistogramSettings);
 
         // -----------------------------------------------------------------------------
         // 1. pass: Build partial histograms
@@ -433,15 +431,21 @@ namespace
         {
             ContextManager::SetShaderCS(m_HistogramShaderPtrs[HistogramBuild]);
 
-            ContextManager::SetConstantBufferSetCS(m_HistogramBufferSetPtrs[HistogramBuild]);
+            ContextManager::SetResourceBuffer(0, m_HistogramBufferSetPtrs[HistogramBuild]->GetBuffer(0));
+            ContextManager::SetResourceBuffer(1, m_HistogramBufferSetPtrs[HistogramBuild]->GetBuffer(1));
 
-            ContextManager::SetTextureSetCS(m_HistogramInputTextureSetPtr);
+            ContextManager::SetConstantBuffer(0, m_HistogramBufferSetPtrs[HistogramBuild]->GetBuffer(2));
 
-            ContextManager::Dispatch(pHistogramSettings->m_NumberOfThreadGroupsX, pHistogramSettings->m_NumberOfThreadGroupsY, 1);
+            ContextManager::SetImageTexture(0, m_HistogramInputTextureSetPtr->GetTexture(0));
 
-            ContextManager::ResetTextureSetCS();
+            ContextManager::Dispatch(HistogramSettings.m_NumberOfThreadGroupsX, HistogramSettings.m_NumberOfThreadGroupsY, 1);
 
-            ContextManager::ResetConstantBufferSetCS();
+            ContextManager::ResetImageTexture(0);
+
+            ContextManager::ResetResourceBuffer(0);
+            ContextManager::ResetResourceBuffer(1);
+
+            ContextManager::ResetConstantBuffer(0);
 
             ContextManager::ResetShaderCS();
         }
@@ -451,12 +455,18 @@ namespace
         // -----------------------------------------------------------------------------
         {
             ContextManager::SetShaderCS(m_HistogramShaderPtrs[HistogramMerge]);
-            
-            ContextManager::SetConstantBufferSetCS(m_HistogramBufferSetPtrs[HistogramMerge]);
+
+            ContextManager::SetResourceBuffer(0, m_HistogramBufferSetPtrs[HistogramMerge]->GetBuffer(0));
+            ContextManager::SetResourceBuffer(1, m_HistogramBufferSetPtrs[HistogramMerge]->GetBuffer(1));
+
+            ContextManager::SetConstantBuffer(0, m_HistogramBufferSetPtrs[HistogramMerge]->GetBuffer(2));
             
             ContextManager::Dispatch(s_HistogramSize, 1, 1);
             
-            ContextManager::ResetConstantBufferSetCS();
+            ContextManager::ResetResourceBuffer(0);
+            ContextManager::ResetResourceBuffer(1);
+
+            ContextManager::ResetConstantBuffer(0);
             
             ContextManager::ResetShaderCS();
         }
@@ -466,12 +476,18 @@ namespace
         // -----------------------------------------------------------------------------
         {
             ContextManager::SetShaderCS(m_HistogramShaderPtrs[HistogramEvaluate]);
-            
-            ContextManager::SetConstantBufferSetCS(m_HistogramBufferSetPtrs[HistogramEvaluate]);
+
+            ContextManager::SetResourceBuffer(0, m_HistogramBufferSetPtrs[HistogramEvaluate]->GetBuffer(0));
+            ContextManager::SetResourceBuffer(1, m_HistogramBufferSetPtrs[HistogramEvaluate]->GetBuffer(1));
+
+            ContextManager::SetConstantBuffer(0, m_HistogramBufferSetPtrs[HistogramEvaluate]->GetBuffer(2));
             
             ContextManager::Dispatch(1, 1, 1);
             
-            ContextManager::ResetConstantBufferSetCS();
+            ContextManager::ResetResourceBuffer(0);
+            ContextManager::ResetResourceBuffer(1);
+
+            ContextManager::ResetConstantBuffer(0);
             
             ContextManager::ResetShaderCS();
         }

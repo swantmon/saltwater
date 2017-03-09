@@ -20,9 +20,9 @@ layout(location = 4) in vec2 in_PixCoord;
 // -----------------------------------------------------------------------------
 layout(location = 0) out vec4 out_Output;
 
-layout(binding = 1) uniform sampler2D ps_EdgesTexture;
-layout(binding = 3) uniform sampler2D ps_AreaTexture;
-layout(binding = 4) uniform sampler2D ps_SearchTexture;
+layout(binding = 0) uniform sampler2D ps_EdgesTexture;
+layout(binding = 1) uniform sampler2D ps_AreaTexture;
+layout(binding = 2) uniform sampler2D ps_SearchTexture;
 
 void main(void)
 {

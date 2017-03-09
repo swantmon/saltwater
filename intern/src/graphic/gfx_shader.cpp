@@ -11,8 +11,9 @@ namespace Gfx
         : m_ID            (s_InvalidID)
         , m_HasAlpha      (false)
         , m_InputLayoutPtr()
-        , m_pFileName     ()
-        , m_pShaderName   ()
+        , m_FileName      ()
+        , m_ShaderName    ()
+        , m_ShaderDefines ()
         , m_Type          (UndefinedType)
     {
     }
@@ -39,16 +40,23 @@ namespace Gfx
     
     // -----------------------------------------------------------------------------
     
-    const Base::Char* CShader::GetFileName() const
+    const std::string& CShader::GetFileName() const
     {
-        return m_pFileName;
+        return m_FileName;
     }
     
     // -----------------------------------------------------------------------------
     
-    const Base::Char* CShader::GetShaderName() const
+    const std::string& CShader::GetShaderName() const
     {
-        return m_pShaderName;
+        return m_ShaderName;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const std::string& CShader::GetShaderDefines() const
+    {
+        return m_ShaderDefines;
     }
 
     // -----------------------------------------------------------------------------

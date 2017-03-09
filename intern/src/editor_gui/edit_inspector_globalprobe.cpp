@@ -17,7 +17,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::LightInfoGlobalProbe, EDIT_RECEIVE_MESSAGE(&CInspectorGlobalProbe::OnEntityInfoGlobalProbe));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Light_Probe_Info, EDIT_RECEIVE_MESSAGE(&CInspectorGlobalProbe::OnEntityInfoGlobalProbe));
     }
 
     // -----------------------------------------------------------------------------
@@ -57,7 +57,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::LightInfoGlobalProbe, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Light_Probe_Update, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -72,7 +72,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::RequestLightInfoGlobalProbe, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Light_Probe_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------

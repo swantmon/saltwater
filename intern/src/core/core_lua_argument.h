@@ -1,10 +1,11 @@
 
 #pragma once
 
-#include "base/base_string.h"
 #include "base/base_typedef.h"
 
 #include "core/core_lua_typedef.h"
+
+#include <string>
 
 namespace Core
 {
@@ -31,21 +32,17 @@ namespace Lua
 
         bool GetBoolean() const;
         double GetNumber() const;
-        const Base::Char* GetString() const;
+        const std::string& GetString() const;
         void* GetPointer() const;
-
-    private:
-
-        typedef Base::CharString CString;
 
     private:
 
         union UAny
         {
-            bool		m_ValueAsBool;
-            double		m_ValueAsDouble;
-            CString*	m_pValueAsString;
-            void*       m_pValueAsPtr;
+            bool         m_ValueAsBool;
+            double       m_ValueAsDouble;
+            std::string* m_pValueAsString;
+            void*        m_pValueAsPtr;
         };
 
     private:

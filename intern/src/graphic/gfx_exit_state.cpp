@@ -7,6 +7,7 @@
 
 #include "graphic/gfx_actor_renderer.h"
 #include "graphic/gfx_ar_renderer.h"
+#include "graphic/gfx_area_light_manager.h"
 #include "graphic/gfx_background_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_camera_actor_manager.h"
@@ -40,7 +41,6 @@
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_tonemapping_renderer.h"
 #include "graphic/gfx_view_manager.h"
-#include "graphic/gfx_voxel_renderer.h"
 
 using namespace Gfx;
 
@@ -85,7 +85,6 @@ namespace
         PostFXHDR            ::OnExit();
         PostFX               ::OnExit();
         TonemappingRenderer  ::OnExit();
-        VoxelRenderer        ::OnExit();
 
         BASE_CONSOLE_STREAMINFO("Gfx> Finished exit of renderer.");
         
@@ -104,6 +103,7 @@ namespace
         BASE_CONSOLE_STREAMINFO("Gfx> Exit manager...");
 
         PointLightManager ::OnExit();
+        AreaLightManager  ::OnExit();
         LightProbeManager ::OnExit();
         SkyManager        ::OnExit();
         MeshActorManager  ::OnExit();

@@ -90,12 +90,12 @@ namespace
     // -----------------------------------------------------------------------------
     const char* g_pShaderAttributeDefines[] =
     {
-        "USE_TEX_DIFFUSE"  ,
-        "USE_TEX_NORMAL"   ,
-        "USE_TEX_ROUGHNESS",
-        "USE_TEX_METALLIC" ,
-        "USE_TEX_AO"       ,
-        "USE_TEX_BUMP"     ,
+        "#define USE_TEX_DIFFUSE\n"  ,
+        "#define USE_TEX_NORMAL\n"   ,
+        "#define USE_TEX_ROUGHNESS\n",
+        "#define USE_TEX_METALLIC\n" ,
+        "#define USE_TEX_AO\n"       ,
+        "#define USE_TEX_BUMP\n"     ,
     };
 } // namespace
 
@@ -194,6 +194,7 @@ namespace
         MaterialDescriptor.m_Roughness       = 1.0f;
         MaterialDescriptor.m_Reflectance     = 0.0f;
         MaterialDescriptor.m_MetalMask       = 0.0f;
+        MaterialDescriptor.m_Displacement    = 0.0f;
         MaterialDescriptor.m_AlbedoColor     = Base::Float3(1.0f);
         MaterialDescriptor.m_TilingOffset    = Base::Float4(0.0f);
         MaterialDescriptor.m_pFileName       = 0;
@@ -305,37 +306,47 @@ namespace
 
         assert(Hash != 0);
 
-        if ((DirtyFlags & Dt::CTextureBase::DirtyCreate) != 0)
+        if ((DirtyFlags & Dt::CMaterial::DirtyCreate) != 0)
         {
-            SMaterialDescriptor MaterialDescriptor;
-
-            // TODO by tschwandt
-            // Do not use filename of texture; use texture instead
-            MaterialDescriptor.m_pMaterialName   = _Material->GetMaterialname();
-            MaterialDescriptor.m_pColorMap       = _Material->GetColorTexture()            != 0 ? _Material->GetColorTexture()->GetFileName()            : 0;
-            MaterialDescriptor.m_pNormalMap      = _Material->GetNormalTexture()           != 0 ? _Material->GetNormalTexture()->GetFileName()           : 0;
-            MaterialDescriptor.m_pRoughnessMap   = _Material->GetRoughnessTexture()        != 0 ? _Material->GetRoughnessTexture()->GetFileName()        : 0;
-            MaterialDescriptor.m_pMetalMaskMap   = _Material->GetMetalTexture()            != 0 ? _Material->GetMetalTexture()->GetFileName()            : 0;
-            MaterialDescriptor.m_pAOMap          = _Material->GetAmbientOcclusionTexture() != 0 ? _Material->GetAmbientOcclusionTexture()->GetFileName() : 0;
-            MaterialDescriptor.m_pBumpMap        = _Material->GetBumpTexture()             != 0 ? _Material->GetBumpTexture()->GetFileName()             : 0;
-            MaterialDescriptor.m_Roughness       = _Material->GetRoughness();
-            MaterialDescriptor.m_Reflectance     = _Material->GetReflectance();
-            MaterialDescriptor.m_MetalMask       = _Material->GetMetalness();
-            MaterialDescriptor.m_AlbedoColor     = _Material->GetColor();
-            MaterialDescriptor.m_TilingOffset    = _Material->GetTilingOffset();
-            MaterialDescriptor.m_pFileName       = _Material->GetFileName();
-
-            CInternMaterial* pInternMaterial = InternCreateMaterial(MaterialDescriptor);
-
-            if (pInternMaterial != nullptr)
+            if (m_MaterialByHash.find(Hash) == m_MaterialByHash.end())
             {
-                pInternMaterial->m_Hash = Hash;
+                SMaterialDescriptor MaterialDescriptor;
 
-                m_MaterialByHash[Hash] = pInternMaterial;
+                // TODO by tschwandt
+                // Do not use filename of texture; use texture instead
+                MaterialDescriptor.m_pMaterialName   = _Material->GetMaterialname().length() > 0 ? _Material->GetMaterialname().c_str() : 0;
+                MaterialDescriptor.m_pFileName       = _Material->GetFileName().length()     > 0 ? _Material->GetFileName().c_str()     : 0;
+
+                MaterialDescriptor.m_pColorMap       = _Material->GetColorTexture()            != 0 ? _Material->GetColorTexture()->GetFileName().c_str()            : 0;
+                MaterialDescriptor.m_pNormalMap      = _Material->GetNormalTexture()           != 0 ? _Material->GetNormalTexture()->GetFileName().c_str()           : 0;
+                MaterialDescriptor.m_pRoughnessMap   = _Material->GetRoughnessTexture()        != 0 ? _Material->GetRoughnessTexture()->GetFileName().c_str()        : 0;
+                MaterialDescriptor.m_pMetalMaskMap   = _Material->GetMetalTexture()            != 0 ? _Material->GetMetalTexture()->GetFileName().c_str()            : 0;
+                MaterialDescriptor.m_pAOMap          = _Material->GetAmbientOcclusionTexture() != 0 ? _Material->GetAmbientOcclusionTexture()->GetFileName().c_str() : 0;
+                MaterialDescriptor.m_pBumpMap        = _Material->GetBumpTexture()             != 0 ? _Material->GetBumpTexture()->GetFileName().c_str()             : 0;
+
+                MaterialDescriptor.m_Roughness       = _Material->GetRoughness();
+                MaterialDescriptor.m_Reflectance     = _Material->GetReflectance();
+                MaterialDescriptor.m_MetalMask       = _Material->GetMetalness();
+                MaterialDescriptor.m_Displacement    = _Material->GetDisplacement();
+                MaterialDescriptor.m_AlbedoColor     = _Material->GetColor();
+                MaterialDescriptor.m_TilingOffset    = _Material->GetTilingOffset();
+
+                CInternMaterial* pInternMaterial = InternCreateMaterial(MaterialDescriptor);
+
+                if (pInternMaterial != nullptr)
+                {
+                    pInternMaterial->m_Hash = Hash;
+
+                    m_MaterialByHash[Hash] = pInternMaterial;
+                }
+            }
+            else
+            {
+                BASE_CONSOLE_STREAMDEBUG("A material has already been created. No new one will be created.")
             }
         }
 
-        if ((DirtyFlags & Dt::CTextureBase::DirtyData) != 0)
+        if ((DirtyFlags & Dt::CMaterial::DirtyData) != 0)
         {
             // -----------------------------------------------------------------------------
             // Get data material
@@ -365,17 +376,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Set definitions
             // -----------------------------------------------------------------------------
-            rMaterial.m_HasAlpha = false;
             rMaterial.m_HasBump  = rDataMaterial.GetBumpTexture() != 0;
-
-            // -----------------------------------------------------------------------------
-            // Set attributes
-            // -----------------------------------------------------------------------------
-            rMaterial.m_MaterialAttributes.m_Color        = rDataMaterial.GetColor();
-            rMaterial.m_MaterialAttributes.m_Roughness    = rDataMaterial.GetRoughness();
-            rMaterial.m_MaterialAttributes.m_Reflectance  = rDataMaterial.GetReflectance();
-            rMaterial.m_MaterialAttributes.m_MetalMask    = rDataMaterial.GetMetalness();
-            rMaterial.m_MaterialAttributes.m_TilingOffset = rDataMaterial.GetTilingOffset();
 
             // -----------------------------------------------------------------------------
             // Shader
@@ -437,11 +438,39 @@ namespace
             }
 
             rMaterial.m_TextureSetPtrs[CShader::Pixel] = TextureManager::CreateTextureSet(TexturePtrs, CMaterial::SMaterialKey::s_NumberOfTextures);
+        }
 
-            if (Hash != 0)
+        if ((DirtyFlags & Dt::CMaterial::DirtyData) != 0)
+        {
+            // -----------------------------------------------------------------------------
+            // Get data material
+            // -----------------------------------------------------------------------------
+            Dt::CMaterial&   rDataMaterial    = *_Material;
+            CInternMaterial* pGraphicMaterial = m_MaterialByHash.at(Hash);
+
+            if (pGraphicMaterial == nullptr)
             {
-                m_MaterialByHash[Hash] = pGraphicMaterial;
+                BASE_CONSOLE_STREAMWARNING("Update of data material failed because it is not created!");
+
+                return;
             }
+
+            CInternMaterial& rMaterial = *pGraphicMaterial;
+
+            // -----------------------------------------------------------------------------
+            // Set definitions
+            // -----------------------------------------------------------------------------
+            rMaterial.m_HasAlpha = false;
+
+            // -----------------------------------------------------------------------------
+            // Set attributes
+            // -----------------------------------------------------------------------------
+            rMaterial.m_MaterialAttributes.m_Color        = rDataMaterial.GetColor();
+            rMaterial.m_MaterialAttributes.m_Roughness    = rDataMaterial.GetRoughness();
+            rMaterial.m_MaterialAttributes.m_Reflectance  = rDataMaterial.GetReflectance();
+            rMaterial.m_MaterialAttributes.m_MetalMask    = rDataMaterial.GetMetalness();
+            rMaterial.m_MaterialAttributes.m_Displacement = rDataMaterial.GetDisplacement();
+            rMaterial.m_MaterialAttributes.m_TilingOffset = rDataMaterial.GetTilingOffset();
         }
     }
 
@@ -459,6 +488,7 @@ namespace
         float                 Roughness;
         float                 Reflectance;
         float                 MetalMask;
+        float                 Displacement;
         Base::Float3          AlbedoColor;
         Base::Float4          TilingOffset;
         tinyxml2::XMLDocument MaterialFile;
@@ -473,15 +503,16 @@ namespace
         Roughness       = _rDescriptor.m_Roughness;
         Reflectance     = _rDescriptor.m_Reflectance;
         MetalMask       = _rDescriptor.m_MetalMask;
+        Displacement    = _rDescriptor.m_Displacement;
         AlbedoColor     = _rDescriptor.m_AlbedoColor;
         TilingOffset    = _rDescriptor.m_TilingOffset;
 
-        if (_rDescriptor.m_pFileName != nullptr)
+        if (_rDescriptor.m_pFileName != nullptr && strlen(_rDescriptor.m_pFileName) > 0)
         {
             // -----------------------------------------------------------------------------
             // Build path to texture in file system
             // -----------------------------------------------------------------------------
-		    std::string PathToMaterial = g_PathToAssets + _rDescriptor.m_pFileName;
+            std::string PathToMaterial = g_PathToAssets + _rDescriptor.m_pFileName;
         
             // -----------------------------------------------------------------------------
             // Load material file
@@ -632,6 +663,7 @@ namespace
         rMaterial.m_MaterialAttributes.m_Roughness    = Roughness;
         rMaterial.m_MaterialAttributes.m_Reflectance  = Reflectance;
         rMaterial.m_MaterialAttributes.m_MetalMask    = MetalMask;
+        rMaterial.m_MaterialAttributes.m_Displacement = Displacement;
         rMaterial.m_MaterialAttributes.m_TilingOffset = TilingOffset;
 
         // -----------------------------------------------------------------------------
@@ -739,30 +771,36 @@ namespace
 
     void CGfxMaterialManager::SetShaderOfMaterial(CInternMaterial& _rMaterial) const
     {
-        unsigned int NumberOfDefines = 0;
-        const char*  ppShaderDefines[5];
+        std::string Defines = "";
           
-        if (_rMaterial.m_MaterialKey.m_HasDiffuseTex)   ppShaderDefines[NumberOfDefines++] = g_pShaderAttributeDefines[0];
-        if (_rMaterial.m_MaterialKey.m_HasNormalTex)    ppShaderDefines[NumberOfDefines++] = g_pShaderAttributeDefines[1];
-        if (_rMaterial.m_MaterialKey.m_HasRoughnessTex) ppShaderDefines[NumberOfDefines++] = g_pShaderAttributeDefines[2];
-        if (_rMaterial.m_MaterialKey.m_HasMetallicTex)  ppShaderDefines[NumberOfDefines++] = g_pShaderAttributeDefines[3];
-        if (_rMaterial.m_MaterialKey.m_HasAOTex)        ppShaderDefines[NumberOfDefines++] = g_pShaderAttributeDefines[4];
-        if (_rMaterial.m_MaterialKey.m_HasBumpTex)      ppShaderDefines[NumberOfDefines++] = g_pShaderAttributeDefines[5];
+        if (_rMaterial.m_MaterialKey.m_HasDiffuseTex)   Defines += g_pShaderAttributeDefines[0];
+        if (_rMaterial.m_MaterialKey.m_HasNormalTex)    Defines += g_pShaderAttributeDefines[1];
+        if (_rMaterial.m_MaterialKey.m_HasRoughnessTex) Defines += g_pShaderAttributeDefines[2];
+        if (_rMaterial.m_MaterialKey.m_HasMetallicTex)  Defines += g_pShaderAttributeDefines[3];
+        if (_rMaterial.m_MaterialKey.m_HasAOTex)        Defines += g_pShaderAttributeDefines[4];
+        if (_rMaterial.m_MaterialKey.m_HasBumpTex)      Defines += g_pShaderAttributeDefines[5];
+
+        const char* pDefineString = 0;
+
+        if (Defines.length() > 0)
+        {
+            pDefineString = Defines.c_str();
+        }
 
         // -----------------------------------------------------------------------------
         // Bump Mapping
         // -----------------------------------------------------------------------------
         if (_rMaterial.m_HasBump)
         {
-            _rMaterial.m_ShaderPtrs[CShader::Hull] = Gfx::ShaderManager::CompileHS(g_pShaderFilenameHS[0], g_pShaderNamesHS[0], NumberOfDefines, ppShaderDefines);
+            _rMaterial.m_ShaderPtrs[CShader::Hull] = Gfx::ShaderManager::CompileHS(g_pShaderFilenameHS[0], g_pShaderNamesHS[0], pDefineString);
 
-            _rMaterial.m_ShaderPtrs[CShader::Domain] = Gfx::ShaderManager::CompileDS(g_pShaderFilenameDS[0], g_pShaderNamesDS[0], NumberOfDefines, ppShaderDefines);
+            _rMaterial.m_ShaderPtrs[CShader::Domain] = Gfx::ShaderManager::CompileDS(g_pShaderFilenameDS[0], g_pShaderNamesDS[0], pDefineString);
         }
 
         // -----------------------------------------------------------------------------
         // Disney
         // -----------------------------------------------------------------------------
-        _rMaterial.m_ShaderPtrs[CShader::Pixel] = Gfx::ShaderManager::CompilePS(g_pShaderFilenamePS[0], g_pShaderNamesPS[0], NumberOfDefines, ppShaderDefines);
+        _rMaterial.m_ShaderPtrs[CShader::Pixel] = Gfx::ShaderManager::CompilePS(g_pShaderFilenamePS[0], g_pShaderNamesPS[0], pDefineString);
     }
 } // namespace
 

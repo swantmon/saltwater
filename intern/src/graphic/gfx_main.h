@@ -34,7 +34,7 @@ namespace Main
 
     void RegisterResizeHandler(CResizeDelegate _NewDelgate);
 
-    unsigned int RegisterWindow(void* _pWindow, unsigned int _VSync = true);
+    unsigned int RegisterWindow(void* _pWindow, unsigned int _VSync = 1);
 
     unsigned int GetNumberOfWindows();
 
@@ -54,10 +54,6 @@ namespace Main
     void DestroyPerFrameConstantBuffers();
     void UploadPerFrameConstantBuffers();
     
-    CBufferPtr GetPerFrameConstantBufferVS();
-    CBufferPtr GetPerFrameConstantBufferHS();
-    CBufferPtr GetPerFrameConstantBufferDS();
-    CBufferPtr GetPerFrameConstantBufferGS();
-    CBufferPtr GetPerFrameConstantBufferPS();
+    CBufferPtr GetPerFrameConstantBuffer();
 } // namespace Main
 } // namespace Gfx

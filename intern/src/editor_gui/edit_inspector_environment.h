@@ -20,14 +20,11 @@ namespace Edit
 
         void valueChanged();
 
-        void loadTextureFromDialog();
-
         void RequestInformation(unsigned int _EntityID);
 
     private:
 
         unsigned int m_CurrentEntityID;
-        QString m_TextureFileName;
 
     private:
 

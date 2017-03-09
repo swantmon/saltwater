@@ -2,8 +2,9 @@
 #pragma once
 
 #include "base/base_managed_pool.h"
-#include "base/base_string.h"
 #include "base/base_typedef.h"
+
+#include <string>
 
 namespace Gfx
 {
@@ -149,7 +150,7 @@ namespace Gfx
             void* GetPixels();
             const void* GetPixels() const;
 
-            const Base::Char* GetFileName() const;
+            const std::string& GetFileName() const;
 
             unsigned int GetHash() const;
 
@@ -181,10 +182,10 @@ namespace Gfx
         
         protected:
 
-            SInfo            m_Info;
-            void*            m_pPixels;
-            Base::CharString m_FileName;
-            unsigned int     m_Hash;
+            SInfo        m_Info;
+            void*        m_pPixels;
+            std::string  m_FileName;
+            unsigned int m_Hash;
 
         protected:
 

@@ -12,9 +12,6 @@
 #include "editor_port/edit_message.h"
 #include "editor_port/edit_message_manager.h"
 
-#include <windows.h>
-#undef SendMessage
-
 namespace
 {
     class CTextureHelper : Base::CUncopyable
@@ -33,15 +30,15 @@ namespace
 
     private:
 
-        void OnNewTexture(Edit::CMessage& _rMessage);
+        void OnTextureNew(Edit::CMessage& _rMessage);
 
-        void OnRequestTextureInfo(Edit::CMessage& _rMessage);
+        void OnTextureLoad(Edit::CMessage& _rMessage);
 
         void OnTextureInfo(Edit::CMessage& _rMessage);
 
-        void OnDirtyTexture(Dt::CTextureBase* _pTexture);
+        void OnTextureUpdate(Edit::CMessage& _rMessage);
 
-        std::string CopyFileToAssets(const char* _pAssetFolder, const char* _pPathToFile);
+        void OnDirtyTexture(Dt::CTextureBase* _pTexture);
     };
 } // namespace
 
@@ -71,11 +68,13 @@ namespace
         // -----------------------------------------------------------------------------
         // Edit
         // -----------------------------------------------------------------------------
-//         Edit::MessageManager::Register(Edit::SGUIMessageType::NewMaterial, EDIT_RECEIVE_MESSAGE(&CTextureHelper::OnNewTexture));
-// 
-//         Edit::MessageManager::Register(Edit::SGUIMessageType::RequestMaterialInfo, EDIT_RECEIVE_MESSAGE(&CTextureHelper::OnRequestTextureInfo));
-// 
-//         Edit::MessageManager::Register(Edit::SGUIMessageType::MaterialInfo, EDIT_RECEIVE_MESSAGE(&CTextureHelper::OnTextureInfo));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Texture_New, EDIT_RECEIVE_MESSAGE(&CTextureHelper::OnTextureNew));
+
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Texture_Load, EDIT_RECEIVE_MESSAGE(&CTextureHelper::OnTextureLoad));
+
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Texture_Info, EDIT_RECEIVE_MESSAGE(&CTextureHelper::OnTextureInfo));
+
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Texture_Update, EDIT_RECEIVE_MESSAGE(&CTextureHelper::OnTextureUpdate));
     }
 
     // -----------------------------------------------------------------------------
@@ -87,21 +86,113 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CTextureHelper::OnNewTexture(Edit::CMessage& _rMessage)
+    void CTextureHelper::OnTextureNew(Edit::CMessage& _rMessage)
     {
         BASE_UNUSED(_rMessage);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CTextureHelper::OnRequestTextureInfo(Edit::CMessage& _rMessage)
+    void CTextureHelper::OnTextureLoad(Edit::CMessage& _rMessage)
     {
-        BASE_UNUSED(_rMessage);
+        // -----------------------------------------------------------------------------
+        // Read
+        // -----------------------------------------------------------------------------
+        char TextureName[256];
+
+        _rMessage.GetString(TextureName, 256);
+
+        // -----------------------------------------------------------------------------
+        // Load
+        // Check if texture is really created or only loaded!
+        // -----------------------------------------------------------------------------
+        Dt::STextureDescriptor TextureDescriptor;
+
+        TextureDescriptor.m_NumberOfPixelsU  = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
+        TextureDescriptor.m_NumberOfPixelsV  = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
+        TextureDescriptor.m_NumberOfPixelsW  = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
+        TextureDescriptor.m_Format           = Dt::STextureDescriptor::s_FormatFromSource;
+        TextureDescriptor.m_Semantic         = Dt::CTextureBase::Diffuse;
+        TextureDescriptor.m_Binding          = Dt::CTextureBase::ShaderResource;
+        TextureDescriptor.m_pPixels          = 0;
+        TextureDescriptor.m_pFileName        = TextureName;
+        TextureDescriptor.m_pIdentifier      = 0;
+
+        Dt::CTextureBase* pLoadedTexture = Dt::TextureManager::CreateTexture(TextureDescriptor);
+
+        // -----------------------------------------------------------------------------
+        // Set hash
+        // -----------------------------------------------------------------------------
+        if (pLoadedTexture)
+        {
+            Dt::TextureManager::MarkTextureAsDirty(pLoadedTexture, Dt::CTextureBase::DirtyCreate);
+
+            _rMessage.SetResult(pLoadedTexture->GetHash());
+        }
+        else
+        {
+            _rMessage.SetResult(-1);
+        }
     }
 
     // -----------------------------------------------------------------------------
 
     void CTextureHelper::OnTextureInfo(Edit::CMessage& _rMessage)
+    {
+        unsigned int TextureHash = _rMessage.GetInt();
+
+        Dt::CTextureBase* pTexture = Dt::TextureManager::GetTextureByHash(static_cast<unsigned int>(TextureHash));
+
+        if (pTexture != nullptr)
+        {
+            Edit::CMessage NewMessage;
+
+            NewMessage.PutInt(pTexture->GetHash());
+            NewMessage.PutInt(pTexture->GetDimension());
+            NewMessage.PutInt(pTexture->GetFormat());
+            NewMessage.PutInt(pTexture->GetSemantic());
+            NewMessage.PutInt(pTexture->GetBinding());
+            NewMessage.PutBool(pTexture->IsArray());
+            NewMessage.PutBool(pTexture->IsCube());
+            NewMessage.PutBool(pTexture->IsDummy());
+
+            if (pTexture->GetFileName().length() > 0)
+            {
+                NewMessage.PutBool(true);
+
+                NewMessage.PutString(pTexture->GetFileName().c_str());
+            }
+            else
+            {
+                NewMessage.PutBool(false);
+            }
+
+            if (pTexture->GetIdentifier().length() > 0)
+            {
+                NewMessage.PutBool(true);
+
+                NewMessage.PutString(pTexture->GetIdentifier().c_str());
+            }
+            else
+            {
+                NewMessage.PutBool(false);
+            }
+
+            NewMessage.Reset();
+
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Texture_Info, NewMessage);
+
+            _rMessage.SetResult(pTexture->GetHash());
+        }
+        else
+        {
+            _rMessage.SetResult(-1);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CTextureHelper::OnTextureUpdate(Edit::CMessage& _rMessage)
     {
         BASE_UNUSED(_rMessage);
     }
@@ -117,28 +208,6 @@ namespace
             
         }
     }
-
-    // -----------------------------------------------------------------------------
-
-    std::string CTextureHelper::CopyFileToAssets(const char* _pAssetFolder, const char* _pPathToFile)
-    {
-        char pDrive[4];
-        char pDirectory[512];
-        char pFilename[32];
-        char pExtension[12];
-
-        std::string FileExtension;
-        std::string RelativePathToModel;
-
-        _splitpath_s(_pPathToFile, pDrive, 4, pDirectory, 512, pFilename, 32, pExtension, 12);
-
-        FileExtension = std::string(pFilename) + std::string(pExtension);
-        RelativePathToModel = std::string(_pAssetFolder) + FileExtension;
-
-        CopyFileA(_pPathToFile, RelativePathToModel.c_str(), true);
-
-        return FileExtension.c_str();
-    };
 } // namespace
 
 namespace Edit

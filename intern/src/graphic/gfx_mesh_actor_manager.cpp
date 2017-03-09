@@ -175,7 +175,41 @@ namespace
 
     void CGfxMeshFacetManager::UpdateActorMesh(Dt::CEntity& _rEntity)
     {
-        BASE_UNUSED(_rEntity);
+        Gfx::CMeshActorFacet* pGfxActorModelFacet;
+        Dt::CMeshActorFacet* pDataActorModelFacet;
+
+        // -----------------------------------------------------------------------------
+        // Get data
+        // -----------------------------------------------------------------------------
+        pGfxActorModelFacet  = static_cast<Gfx::CMeshActorFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+        pDataActorModelFacet = static_cast<Dt::CMeshActorFacet*>(_rEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+
+        assert(pGfxActorModelFacet);
+        assert(pDataActorModelFacet);
+
+        // -----------------------------------------------------------------------------
+        // Update material
+        // -----------------------------------------------------------------------------
+        SMaterialDescriptor MaterialDesc;
+
+        CLODPtr ModelLODPtr = pGfxActorModelFacet->GetMesh()->GetLOD(0);
+
+        for (unsigned int NumberOfSurface = 0; NumberOfSurface < ModelLODPtr->GetNumberOfSurfaces(); ++NumberOfSurface)
+        {
+            Dt::CMaterial* pDataMaterial = pDataActorModelFacet->GetMaterial(NumberOfSurface);
+
+            if (pDataMaterial != 0)
+            {
+                // -----------------------------------------------------------------------------
+                // Set material from material manager
+                // -----------------------------------------------------------------------------
+                unsigned int Hash = pDataMaterial->GetHash();
+
+                CMaterialPtr NewMaterialPtr = MaterialManager::GetMaterialByHash(Hash);
+
+                pGfxActorModelFacet->SetMaterial(NumberOfSurface, NewMaterialPtr);
+            }
+        }
     }
 
     // -----------------------------------------------------------------------------

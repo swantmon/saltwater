@@ -18,6 +18,16 @@ namespace Edit
         setupUi(this);
 
         // -----------------------------------------------------------------------------
+        // Setup user UI
+        // -----------------------------------------------------------------------------
+        m_pBackgroundTextureEdit->SetLayout(CTextureValue::NoPreview);
+
+        // -----------------------------------------------------------------------------
+        // Signal / slots
+        // -----------------------------------------------------------------------------
+        connect(m_pBackgroundTextureEdit, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
+
+        // -----------------------------------------------------------------------------
         // Color picker
         // -----------------------------------------------------------------------------
         QPalette ButtonPalette = m_pSolidColorButton->palette();
@@ -31,7 +41,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::ActorInfoCamera, EDIT_RECEIVE_MESSAGE(&CInspectorCamera::OnEntityInfoCamera));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Actor_Camera_Info, EDIT_RECEIVE_MESSAGE(&CInspectorCamera::OnEntityInfoCamera));
     }
 
     // -----------------------------------------------------------------------------
@@ -53,7 +63,7 @@ namespace Edit
 
         int ClearFlag = m_pClearFlagCS->currentIndex();
 
-        int Hash = m_pBackgroundTextureEdit->text().toInt();
+        int Hash = m_pBackgroundTextureEdit->GetTextureHash();
 
         QPalette ButtonPalette = m_pSolidColorButton->palette();
 
@@ -156,7 +166,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::ActorInfoCamera, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Actor_Camera_Update, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -197,7 +207,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::RequestActorInfoCamera, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Actor_Camera_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -278,11 +288,11 @@ namespace Edit
 
         if (HasTexture)
         {
-            m_pBackgroundTextureEdit->setText(QString::number(TextureHash));
+            m_pBackgroundTextureEdit->SetTextureHash(TextureHash);
         }
         else
         {
-            m_pBackgroundTextureEdit->setText(QString::number(0));
+            m_pBackgroundTextureEdit->SetTextureHash(0);
         }
 
         QPalette ButtonPalette = m_pSolidColorButton->palette();

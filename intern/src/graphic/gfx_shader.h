@@ -7,6 +7,7 @@
 #include "graphic/gfx_buffer_set.h"
 #include "graphic/gfx_input_layout.h"
 
+#include <string>
 #include <vector>
 
 namespace Gfx
@@ -55,8 +56,9 @@ namespace Gfx
 
         unsigned int GetID() const;
         EType GetType() const;
-        const Base::Char* GetFileName() const;
-        const Base::Char* GetShaderName() const;
+        const std::string& GetFileName() const;
+        const std::string& GetShaderName() const;
+        const std::string& GetShaderDefines() const;
 
     public:
 
@@ -72,12 +74,13 @@ namespace Gfx
 
     protected:
 
-        unsigned int                     m_ID;
-        bool                             m_HasAlpha;
-        CInputLayoutPtr                  m_InputLayoutPtr;
-        const Base::Char*                m_pFileName;           ///< The name of the file containing the shader function.
-        const Base::Char*                m_pShaderName;         ///< The name of the shader function in the file.
-        EType                            m_Type;                ///< Identifies the shader stage.
+        unsigned int    m_ID;
+        bool            m_HasAlpha;
+        CInputLayoutPtr m_InputLayoutPtr;
+        std::string     m_FileName;           ///< The name of the file containing the shader function.
+        std::string     m_ShaderName;         ///< The name of the shader function in the file.
+        std::string     m_ShaderDefines;      ///< The defines of the shader in the file.
+        EType           m_Type;                ///< Identifies the shader stage.
 
     protected:
 

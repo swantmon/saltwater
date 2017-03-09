@@ -892,12 +892,12 @@ namespace
                 m_LODs.Free(&rInternLOD);
             }
 
-            rInternMesh.m_Meshname.Clear();
+            rInternMesh.m_Meshname.clear();
 
             m_Meshes.Free(&rInternMesh);
         }
 
-        rInternModel.m_Modelname.Clear();
+        rInternModel.m_Modelname.clear();
 
         m_Models.Free(&rInternModel);
     }
@@ -996,11 +996,11 @@ namespace
         // -----------------------------------------------------------------------------
         // Vertices
         // -----------------------------------------------------------------------------
-        unsigned int NumberOfPositions      = _NumberOfVertices * ((_Elements & CSurface::Position)  == CSurface::Position);
-        unsigned int NumberOfNormals        = _NumberOfVertices * ((_Elements & CSurface::Normal)    == CSurface::Normal);
-        unsigned int NumberOfTagents        = _NumberOfVertices * ((_Elements & CSurface::Tangent)   == CSurface::Tangent);
-        unsigned int NumberOfBitangents     = _NumberOfVertices * ((_Elements & CSurface::Tangent)   == CSurface::Tangent);
-        unsigned int NumberOfTexCoords      = _NumberOfVertices * ((_Elements & CSurface::TexCoord0) == CSurface::TexCoord0);
+        unsigned int NumberOfPositions      = _NumberOfVertices;
+        unsigned int NumberOfNormals        = _NumberOfVertices * ((_Elements & CSurface::Normal));
+        unsigned int NumberOfTagents        = _NumberOfVertices * ((_Elements & CSurface::Tangent));
+        unsigned int NumberOfBitangents     = _NumberOfVertices * ((_Elements & CSurface::Tangent));
+        unsigned int NumberOfTexCoords      = _NumberOfVertices * ((_Elements & CSurface::TexCoord0));
         
         // -----------------------------------------------------------------------------
         // Position

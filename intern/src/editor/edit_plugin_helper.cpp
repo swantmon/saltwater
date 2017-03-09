@@ -17,9 +17,6 @@
 #include "editor_port/edit_message.h"
 #include "editor_port/edit_message_manager.h"
 
-#include <windows.h>
-#undef SendMessage
-
 namespace
 {
     class CPluginHelper : Base::CUncopyable
@@ -81,13 +78,13 @@ namespace
         // -----------------------------------------------------------------------------
         // Edit
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SGUIMessageType::NewPluginARController, EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnNewPluginARController));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Plugin_ARConroller_New, EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnNewPluginARController));
 
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestPluginInfoARController      , EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnRequestPluginInfoARController));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestPluginInfoARControllerMarker, EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnRequestPluginInfoARControllerMarker));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Plugin_ARConroller_Info       , EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnRequestPluginInfoARController));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Plugin_ARConroller_Marker_Info, EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnRequestPluginInfoARControllerMarker));
 
-        Edit::MessageManager::Register(Edit::SGUIMessageType::PluginInfoARController      , EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnPluginInfoARController));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::PluginInfoARControllerMarker, EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnPluginInfoARControllerMarker));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Plugin_ARConroller_Update       , EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnPluginInfoARController));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Plugin_ARConroller_Marker_Update, EDIT_RECEIVE_MESSAGE(&CPluginHelper::OnPluginInfoARControllerMarker));
     }
 
     // -----------------------------------------------------------------------------
@@ -101,6 +98,19 @@ namespace
 
     void CPluginHelper::OnNewPluginARController(Edit::CMessage& _rMessage)
     {
+        // -----------------------------------------------------------------------------
+        // Get entity and set type + category
+        // -----------------------------------------------------------------------------
+        int EntityID = _rMessage.GetInt();
+
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+
+        rCurrentEntity.SetCategory(Dt::SEntityCategory::Plugin);
+        rCurrentEntity.SetType(Dt::SPluginType::ARControlManager);
+
+        // -----------------------------------------------------------------------------
+        // Create facet and set it
+        // -----------------------------------------------------------------------------
         Dt::STextureDescriptor TextureDescriptor;
 
         TextureDescriptor.m_NumberOfPixelsU  = 1280;
@@ -117,26 +127,7 @@ namespace
 
         Dt::TextureManager::MarkTextureAsDirty(pBackgroundTexture, Dt::CTextureBase::DirtyCreate);
 
-        TextureDescriptor.m_NumberOfPixelsU = 512;
-        TextureDescriptor.m_NumberOfPixelsV = 512;
-        TextureDescriptor.m_Binding         = Dt::CTextureBase::ShaderResource | Dt::CTextureBase::RenderTarget;
-        TextureDescriptor.m_pIdentifier     = "AR_ENV_CUBEMAP_TEXTURE";
-
-        Dt::CTextureCube* pTextureCubemap = Dt::TextureManager::CreateCubeTexture(TextureDescriptor);
-
-        Dt::TextureManager::MarkTextureAsDirty(pTextureCubemap, Dt::CTextureBase::DirtyCreate);
-
         // -----------------------------------------------------------------------------
-
-        Dt::SEntityDescriptor EntityDesc;
-
-        EntityDesc.m_EntityCategory = Dt::SEntityCategory::Plugin;
-        EntityDesc.m_EntityType     = Dt::SPluginType::ARControlManager;
-        EntityDesc.m_FacetFlags     = 0;
-
-        Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
-
-        rEntity.SetWorldPosition(Base::Float3(0.0f, 0.0f, 0.0f));
 
         Dt::CARControllerPluginFacet* pFacet = Dt::ARControllerManager::CreateARControllerPlugin();
 
@@ -144,9 +135,9 @@ namespace
         pFacet->SetConfiguration      ("-device=WinDS -flipV");
         pFacet->SetCameraParameterFile("ar/configurations/logitech_para.dat");
         pFacet->SetOutputBackground   (pBackgroundTexture);
-        pFacet->SetOutputCubemap      (pTextureCubemap);
         pFacet->SetDeviceType         (Dt::CARControllerPluginFacet::Webcam);
         pFacet->SetNumberOfMarker     (1);
+        pFacet->SetFreezeOutput       (false);
             
         Dt::CARControllerPluginFacet::SMarker& rMarkerOne = pFacet->GetMarker(0);
 
@@ -155,9 +146,7 @@ namespace
         rMarkerOne.m_WidthInMeter = 0.08f;
         rMarkerOne.m_PatternFile  = "ar/patterns/patt.hiro";
 
-        rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
-
-        Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
     }
 
     // -----------------------------------------------------------------------------
@@ -177,9 +166,11 @@ namespace
             // -----------------------------------------------------------------------------
             int Device = pFacet->GetDeviceType();
 
-            const char* pConfiguration = pFacet->GetConfiguration();
+            bool FreezeOutput = pFacet->GetFreezeLastFrame();
 
-            const char* pParameterFile = pFacet->GetCameraParameterFile();
+            const char* pConfiguration = pFacet->GetConfiguration().c_str();
+
+            const char* pParameterFile = pFacet->GetCameraParameterFile().c_str();
 
             int CameraEntityID = -1;
 
@@ -189,8 +180,6 @@ namespace
             }
 
             unsigned int OutputBackground = pFacet->GetOutputBackground()->GetHash();
-
-            unsigned int OutputCubemap = pFacet->GetOutputCubemap()->GetHash();
 
             unsigned int NumberOfMarker = pFacet->GetNumberOfMarker();
 
@@ -203,6 +192,8 @@ namespace
 
             NewMessage.PutInt(Device);
 
+            NewMessage.PutBool(FreezeOutput);
+
             NewMessage.PutString(pConfiguration);
            
             NewMessage.PutString(pParameterFile);
@@ -211,13 +202,11 @@ namespace
 
             NewMessage.PutInt(OutputBackground);
 
-            NewMessage.PutInt(OutputCubemap);
-
             NewMessage.PutInt(NumberOfMarker);
 
             NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::PluginInfoARController, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Plugin_ARController_Info, NewMessage);
         }
     }
 
@@ -244,7 +233,7 @@ namespace
 
             unsigned int Type = rMarker.m_Type;
 
-            const char* pPatternFile = rMarker.m_PatternFile.GetConst();
+            const char* pPatternFile = rMarker.m_PatternFile.c_str();
 
             float Width = rMarker.m_WidthInMeter;
 
@@ -267,7 +256,7 @@ namespace
 
             NewMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::PluginInfoARControllerMarker, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Plugin_ARController_Marker_Info, NewMessage);
         }
     }
 
@@ -287,6 +276,8 @@ namespace
             // -----------------------------------------------------------------------------
             int Device = _rMessage.GetInt();
 
+            bool FreezeOutput = _rMessage.GetBool();
+
             char Configuration[256];
 
             _rMessage.GetString(Configuration, 256);
@@ -305,6 +296,8 @@ namespace
             // Set values
             // -----------------------------------------------------------------------------
             pFacet->SetDeviceType(static_cast<Dt::CARControllerPluginFacet::EType>(Device));
+
+            pFacet->SetFreezeOutput(FreezeOutput);
 
             pFacet->SetConfiguration(Configuration);
 

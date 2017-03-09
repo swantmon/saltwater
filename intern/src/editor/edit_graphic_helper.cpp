@@ -6,15 +6,13 @@
 #include "base/base_uncopyable.h"
 
 #include "graphic/gfx_histogram_renderer.h"
-#include "graphic/gfx_selection_renderer.h"
+#include "graphic/gfx_manager_interface.h"
+#include "graphic/gfx_renderer_interface.h"
 
 #include "editor/edit_graphic_helper.h"
 
 #include "editor_port/edit_message.h"
 #include "editor_port/edit_message_manager.h"
-
-#include <windows.h>
-#undef SendMessage
 
 namespace
 {
@@ -36,7 +34,8 @@ namespace
 
         void OnRequestHistogramInfo(Edit::CMessage& _rMessage);
         void OnHistogramInfo(Edit::CMessage& _rMessage);
-        void OnHighlightEntity(Edit::CMessage& _rMessage);
+        void OnReloadAllRenderer(Edit::CMessage& _rMessage);
+        void OnReloadAllShader(Edit::CMessage& _rMessage);
     };
 } // namespace
 
@@ -61,11 +60,13 @@ namespace
         // -----------------------------------------------------------------------------
         // Edit
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SGUIMessageType::RequestGraphicHistogramInfo, EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnRequestHistogramInfo));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Graphic_Histogram_Info, EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnRequestHistogramInfo));
 
-        Edit::MessageManager::Register(Edit::SGUIMessageType::GraphicHistogramInfo, EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnHistogramInfo));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Graphic_Histogram_Update, EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnHistogramInfo));
 
-        Edit::MessageManager::Register(Edit::SGUIMessageType::GraphicHighlightEntity, EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnHighlightEntity));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Graphic_ReloadRenderer, EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnReloadAllRenderer));
+
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Graphic_ReloadAllShader, EDIT_RECEIVE_MESSAGE(&CGraphicHelper::OnReloadAllShader));
     }
 
     // -----------------------------------------------------------------------------
@@ -92,7 +93,7 @@ namespace
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::HistogramInfo, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Graphic_Histogram_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -113,20 +114,16 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGraphicHelper::OnHighlightEntity(Edit::CMessage& _rMessage)
+    void CGraphicHelper::OnReloadAllRenderer(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Gfx::Renderer::ReloadRenderer();
+    }
 
-        if (EntityID >= 0)
-        {
-            unsigned int SelectedEntity = static_cast<unsigned int>(EntityID);
+    // -----------------------------------------------------------------------------
 
-            Gfx::SelectionRenderer::SelectEntity(SelectedEntity);
-        }
-        else
-        {
-            Gfx::SelectionRenderer::UnselectEntity();
-        }
+    void CGraphicHelper::OnReloadAllShader(Edit::CMessage& _rMessage)
+    {
+        Gfx::Manager::ReloadAllShaders();
     }
 } // namespace
 

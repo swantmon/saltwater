@@ -8,7 +8,7 @@ namespace MR
     CControl::CControl(EType _Type)
         : m_Type            (_Type)
         , m_IsStarted       (false)
-        , m_pCubemap        (nullptr)
+        , m_FreezeLastFrame (false)
         , m_pOriginalFrame  (nullptr)
         , m_pConvertedFrame (nullptr)
         , m_CameraParameters()
@@ -48,6 +48,13 @@ namespace MR
     }
 
     // -----------------------------------------------------------------------------
+    
+    void CControl::FreezeLastFrame(bool _Flag)
+    {
+        m_FreezeLastFrame = _Flag;
+    }
+
+    // -----------------------------------------------------------------------------
 
     bool CControl::IsStarted() const
     {
@@ -73,20 +80,6 @@ namespace MR
     Dt::CTexture2D* CControl::GetConvertedFrame()
     {
         return m_pConvertedFrame;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CControl::SetCubemap(Dt::CTextureCube* _pTexture)
-    {
-        m_pCubemap = _pTexture;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Dt::CTextureCube* CControl::GetCubemap()
-    {
-        return m_pCubemap;
     }
 
     // -----------------------------------------------------------------------------

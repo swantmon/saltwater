@@ -31,7 +31,6 @@
     <ClInclude Include="..\..\..\src\base\base_event_queue.h" />
     <ClInclude Include="..\..\..\src\base\base_exception.h" />
     <ClInclude Include="..\..\..\src\base\base_precompiled.h" />
-    <ClInclude Include="..\..\..\src\base\base_string.h" />
     <ClInclude Include="..\..\..\src\base\base_tokenizer.h" />
     <ClInclude Include="..\..\..\src\base\base_frustum.h" />
     <ClInclude Include="..\..\..\src\base\base_input_event.h" />
@@ -81,6 +80,7 @@
     <ClInclude Include="..\..\..\src\base\base_vector2.h" />
     <ClInclude Include="..\..\..\src\base\base_vector3.h" />
     <ClInclude Include="..\..\..\src\base\base_vector4.h" />
+    <ClInclude Include="..\..\..\src\base\base_math_limits.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\base\base_console.cpp" />

@@ -37,15 +37,21 @@ namespace Edit
         // -----------------------------------------------------------------------------
         m_pHistogramDockWidget->setVisible(false);
         m_pConsoleDockWidget  ->setVisible(false);
-        m_pAssetsDockWidget   ->setVisible(false);
 
         tabifyDockWidget(m_pAssetsDockWidget, m_pConsoleDockWidget);
 
         // -----------------------------------------------------------------------------
+        // Signal / slots
+        // -----------------------------------------------------------------------------
+        connect(m_pAssetBrowserWidget->m_pFileTreeView, SIGNAL(textureClicked(const QString&)), m_pInspector, SLOT(updateContentForTexture(const QString&)));
+        connect(m_pAssetBrowserWidget->m_pFileTreeView, SIGNAL(materialClicked(const QString&)), m_pInspector, SLOT(updateContentForMaterial(const QString&)));
+
+        // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::FramesPerSecond, EDIT_RECEIVE_MESSAGE(&CMainWindow::OnFramesPerSecond));
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::HistogramInfo, EDIT_RECEIVE_MESSAGE(&CMainWindow::OnHistogramInfo));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::App_State_Change      , EDIT_RECEIVE_MESSAGE(&CMainWindow::OnStateChange));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Graphic_FPS_Info      , EDIT_RECEIVE_MESSAGE(&CMainWindow::OnFramesPerSecond));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Graphic_Histogram_Info, EDIT_RECEIVE_MESSAGE(&CMainWindow::OnHistogramInfo));
     }
 
     // -----------------------------------------------------------------------------
@@ -74,20 +80,7 @@ namespace Edit
 
     void CMainWindow::OnStart()
     {
-        // -----------------------------------------------------------------------------
-        // Check startup behavior
-        // -----------------------------------------------------------------------------
-        if (m_IsSceneLoaded == false)
-        {
-            m_pNewSceneDialog->show();
-
-            m_IsSceneLoaded = true;
-        }
-
-        // -----------------------------------------------------------------------------
-        // Set focus of edit window
-        // -----------------------------------------------------------------------------
-        m_pEditorRenderContext->setFocus();
+        
     }
 
     // -----------------------------------------------------------------------------
@@ -95,6 +88,13 @@ namespace Edit
     void CMainWindow::OnExit()
     {
 
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::SetRenderSize(int _Width, int _Height)
+    {
+        m_pEditorRenderContext->setFixedSize(QSize(_Width, _Height));
     }
 
     // -----------------------------------------------------------------------------
@@ -107,38 +107,16 @@ namespace Edit
 
         if (m_IsPlaying == false)
         {
-            MessageManager::SendMessage(SGUIMessageType::Play, NewMessage);
+            MessageManager::SendMessage(SGUIMessageType::App_Play, NewMessage);
 
             m_IsPlaying = true;
         }
         else
         {
-            MessageManager::SendMessage(SGUIMessageType::Edit, NewMessage);
+            MessageManager::SendMessage(SGUIMessageType::App_Edit, NewMessage);
             
             m_IsPlaying = false;
         }
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMainWindow::takeScreenshot()
-    {
-        CMessage NewMessage;
-
-        // -----------------------------------------------------------------------------
-        // Prepare image path
-        // -----------------------------------------------------------------------------
-        QString    PathToImage       = m_pMailAdressEdit->text() + ".png";
-        QByteArray PathToImageBinary = PathToImage.toLatin1();
-
-        // -----------------------------------------------------------------------------
-        // Compare message
-        // -----------------------------------------------------------------------------
-        NewMessage.PutString(PathToImageBinary.data());
-
-        NewMessage.Reset();
-
-        MessageManager::SendMessage(SGUIMessageType::TakeScreenshot, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -150,136 +128,451 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CMainWindow::openNewActorModelDialog()
-    {
-        QString ModelFile = QFileDialog::getOpenFileName(this, tr("Load model file"), tr(""), tr("Object files (*.obj *.dae)"));
-
-        // -----------------------------------------------------------------------------
-        // Send message with new scene / map request
-        // -----------------------------------------------------------------------------
-        if (!ModelFile.isEmpty())
-        {
-            QByteArray ModelFileBinary = ModelFile.toLatin1();
-
-            CMessage NewMessage;
-
-            NewMessage.PutString(ModelFileBinary.data());
-
-            NewMessage.Reset();
-
-            MessageManager::SendMessage(SGUIMessageType::NewActorModel, NewMessage);
-        }
-    }
-
-    // -----------------------------------------------------------------------------
-
     void CMainWindow::createNewLightSun()
     {
-        CMessage NewMessage(true);
+        CMessage     NewMessage;
+        unsigned int EntityID = 0;
+
+        // -----------------------------------------------------------------------------
+        // Create new entity
+        // -----------------------------------------------------------------------------
+        NewMessage.Reset();
+
+        EntityID = MessageManager::SendMessage(SGUIMessageType::Entity_New, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Create facet on entity
+        // -----------------------------------------------------------------------------
+        NewMessage.PutInt(EntityID);
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewLightSun, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Light_Sun_New, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Create and add entity
+        // -----------------------------------------------------------------------------
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Entity_Create, NewMessage);
+
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Entity_Add, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
 
     void CMainWindow::createNewEntityBloom()
     {
-        CMessage NewMessage(true);
+        CMessage     NewMessage;
+        unsigned int EntityID = 0;
+
+        // -----------------------------------------------------------------------------
+        // Create new entity
+        // -----------------------------------------------------------------------------
+        NewMessage.Reset();
+
+        EntityID = MessageManager::SendMessage(SGUIMessageType::Entity_New, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Create facet on entity
+        // -----------------------------------------------------------------------------
+        NewMessage.PutInt(EntityID);
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewEffectBloom, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Effect_Bloom_New, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Create and add entity
+        // -----------------------------------------------------------------------------
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Entity_Create, NewMessage);
+
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Entity_Add, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
 
     void CMainWindow::createNewEntityDOF()
     {
-        CMessage NewMessage(true);
+        CMessage     NewMessage;
+        unsigned int EntityID = 0;
+
+        // -----------------------------------------------------------------------------
+        // Create new entity
+        // -----------------------------------------------------------------------------
+        NewMessage.Reset();
+
+        EntityID = MessageManager::SendMessage(SGUIMessageType::Entity_New, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Create facet on entity
+        // -----------------------------------------------------------------------------
+        NewMessage.PutInt(EntityID);
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewEffectDOF, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Effect_DOF_New, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Create and add entity
+        // -----------------------------------------------------------------------------
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Entity_Create, NewMessage);
+
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Entity_Add, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
 
     void CMainWindow::createNewEntityPostAA()
     {
-        CMessage NewMessage(true);
+        CMessage     NewMessage;
+        unsigned int EntityID = 0;
+
+        // -----------------------------------------------------------------------------
+        // Create new entity
+        // -----------------------------------------------------------------------------
+        NewMessage.Reset();
+
+        EntityID = MessageManager::SendMessage(SGUIMessageType::Entity_New, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Create facet on entity
+        // -----------------------------------------------------------------------------
+        NewMessage.PutInt(EntityID);
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewEffectPostAA, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Effect_PostAA_New, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Create and add entity
+        // -----------------------------------------------------------------------------
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Entity_Create, NewMessage);
+
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Entity_Add, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
 
     void CMainWindow::createNewEntitySSR()
     {
-        CMessage NewMessage(true);
+        CMessage     NewMessage;
+        unsigned int EntityID = 0;
+
+        // -----------------------------------------------------------------------------
+        // Create new entity
+        // -----------------------------------------------------------------------------
+        NewMessage.Reset();
+
+        EntityID = MessageManager::SendMessage(SGUIMessageType::Entity_New, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Create facet on entity
+        // -----------------------------------------------------------------------------
+        NewMessage.PutInt(EntityID);
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewEffectSSR, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Effect_SSR_New, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Create and add entity
+        // -----------------------------------------------------------------------------
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Entity_Create, NewMessage);
+
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Entity_Add, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
 
     void CMainWindow::createNewEntityVolumeFog()
     {
-        CMessage NewMessage(true);
+        CMessage     NewMessage;
+        unsigned int EntityID = 0;
+
+        // -----------------------------------------------------------------------------
+        // Create new entity
+        // -----------------------------------------------------------------------------
+        NewMessage.Reset();
+
+        EntityID = MessageManager::SendMessage(SGUIMessageType::Entity_New, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Create facet on entity
+        // -----------------------------------------------------------------------------
+        NewMessage.PutInt(EntityID);
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewEffectVolumeFog, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Effect_VolumeFog_New, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Create and add entity
+        // -----------------------------------------------------------------------------
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Entity_Create, NewMessage);
+
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Entity_Add, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
 
     void CMainWindow::createNewLightPoint()
     {
-        CMessage NewMessage(true);
+        CMessage     NewMessage;
+        unsigned int EntityID = 0;
+
+        // -----------------------------------------------------------------------------
+        // Create new entity
+        // -----------------------------------------------------------------------------
+        NewMessage.Reset();
+
+        EntityID = MessageManager::SendMessage(SGUIMessageType::Entity_New, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Create facet on entity
+        // -----------------------------------------------------------------------------
+        NewMessage.PutInt(EntityID);
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewLightPointlight, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Light_Pointlight_New, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Create and add entity
+        // -----------------------------------------------------------------------------
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Entity_Create, NewMessage);
+
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Entity_Add, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
 
     void CMainWindow::createNewLightEnvironment()
     {
-        CMessage NewMessage(true);
+        CMessage     NewMessage;
+        unsigned int EntityID = 0;
+
+        // -----------------------------------------------------------------------------
+        // Create new entity
+        // -----------------------------------------------------------------------------
+        NewMessage.Reset();
+
+        EntityID = MessageManager::SendMessage(SGUIMessageType::Entity_New, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Create facet on entity
+        // -----------------------------------------------------------------------------
+        NewMessage.PutInt(EntityID);
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewLightEnvironment, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Light_Environment_New, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Create and add entity
+        // -----------------------------------------------------------------------------
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Entity_Create, NewMessage);
+
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Entity_Add, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
 
     void CMainWindow::createNewLightGlobalProbe()
     {
-        CMessage NewMessage(true);
+        CMessage     NewMessage;
+        unsigned int EntityID = 0;
+
+        // -----------------------------------------------------------------------------
+        // Create new entity
+        // -----------------------------------------------------------------------------
+        NewMessage.Reset();
+
+        EntityID = MessageManager::SendMessage(SGUIMessageType::Entity_New, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Create facet on entity
+        // -----------------------------------------------------------------------------
+        NewMessage.PutInt(EntityID);
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewLightGlobalProbe, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Light_Probe_New, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Create and add entity
+        // -----------------------------------------------------------------------------
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Entity_Create, NewMessage);
+
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Entity_Add, NewMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::createNewLightArea()
+    {
+        CMessage     NewMessage;
+        unsigned int EntityID = 0;
+
+        // -----------------------------------------------------------------------------
+        // Create new entity
+        // -----------------------------------------------------------------------------
+        NewMessage.Reset();
+
+        EntityID = MessageManager::SendMessage(SGUIMessageType::Entity_New, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Create facet on entity
+        // -----------------------------------------------------------------------------
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Light_Arealight_New, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Create and add entity
+        // -----------------------------------------------------------------------------
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Entity_Create, NewMessage);
+
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Entity_Add, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
 
     void CMainWindow::createNewPluginARController()
     {
-        CMessage NewMessage(true);
+        CMessage     NewMessage;
+        unsigned int EntityID = 0;
+
+        // -----------------------------------------------------------------------------
+        // Create new entity
+        // -----------------------------------------------------------------------------
+        NewMessage.Reset();
+
+        EntityID = MessageManager::SendMessage(SGUIMessageType::Entity_New, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Create facet on entity
+        // -----------------------------------------------------------------------------
+        NewMessage.PutInt(EntityID);
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::NewPluginARController, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Plugin_ARConroller_New, NewMessage);
+
+        // -----------------------------------------------------------------------------
+        // Create and add entity
+        // -----------------------------------------------------------------------------
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Entity_Create, NewMessage);
+
+        NewMessage.PutInt(EntityID);
+
+        NewMessage.Reset();
+
+        MessageManager::SendMessage(SGUIMessageType::Entity_Add, NewMessage);
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::reloadRenderer()
+    {
+        Edit::CMessage NewMessage(true);
+
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Graphic_ReloadRenderer, NewMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::reloadAllShader()
+    {
+        Edit::CMessage NewMessage(true);
+
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Graphic_ReloadAllShader, NewMessage);
+    }
+
     // -----------------------------------------------------------------------------
 
     void CMainWindow::changeHistogramSettings()
@@ -304,7 +597,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::GraphicHistogramInfo, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Graphic_Histogram_Update, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -319,7 +612,7 @@ namespace Edit
 
             NewMessage.Reset();
 
-            MessageManager::SendMessage(SGUIMessageType::RequestGraphicHistogramInfo, NewMessage);
+            MessageManager::SendMessage(SGUIMessageType::Graphic_Histogram_Info, NewMessage);
         }
     }
 
@@ -359,7 +652,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::Exit, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::App_Exit, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -367,6 +660,49 @@ namespace Edit
     void CMainWindow::mousePressEvent(QMouseEvent* _pMouseEvent)
     {
         setFocus();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::OnStateChange(Edit::CMessage& _rMessage)
+    {
+        int OldState = _rMessage.GetInt();
+        int NewState = _rMessage.GetInt();
+
+        // TODO by tschwandt
+        // Find a better solution to handle different states
+        if (NewState == 1) // Intro
+        {
+            // -----------------------------------------------------------------------------
+            // Check startup behavior
+            // -----------------------------------------------------------------------------
+            if (m_IsSceneLoaded == false)
+            {
+                m_pNewSceneDialog->show();
+
+                m_IsSceneLoaded = true;
+            }
+            else
+            {
+                CMessage NewMessage(true);
+
+                NewMessage.Reset();
+
+                MessageManager::SendMessage(SGUIMessageType::App_LoadMap, NewMessage);
+            }
+        }
+        else if (NewState == 3) // Edit
+        {
+            // -----------------------------------------------------------------------------
+            // Reset all content widgets
+            // -----------------------------------------------------------------------------
+            m_pAssetBrowserWidget->Reset();
+
+            // -----------------------------------------------------------------------------
+            // Set focus of edit window
+            // -----------------------------------------------------------------------------
+            m_pEditorRenderContext->setFocus();
+        }
     }
 
     // -----------------------------------------------------------------------------

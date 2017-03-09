@@ -39,7 +39,7 @@ namespace Gfx
                     BMaterialID m_HasRoughnessTex       :  1;        //< Defines either a roughness texture is set
                     BMaterialID m_HasMetallicTex        :  1;        //< Defines either a metallic texture is set
                     BMaterialID m_HasAOTex              :  1;        //< Defines either a ambient occlusion texture is set
-                    BMaterialID m_HasBumpTex            :  1;        //< Defines either a height/bump/displacement texture is set
+                    BMaterialID m_HasBumpTex            :  1;        //< Defines either a bump/displacement texture is set
                     BMaterialID m_Padding               :  1;
                 };
                 BMaterialID m_Key;
@@ -54,6 +54,7 @@ namespace Gfx
             float         m_Roughness;
             float         m_Reflectance;
             float         m_MetalMask;
+            float         m_Displacement;
         };
         
     public:

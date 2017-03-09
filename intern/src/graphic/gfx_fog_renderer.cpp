@@ -76,6 +76,8 @@ namespace
         struct SVolumeFogRenderJob
         {
             Dt::CVolumeFogFXFacet* m_pDataVolumeFogFacet;
+            Dt::CSunLightFacet*    m_pDataSunFacet;
+            Gfx::CSunFacet*        m_pGraphicSunFacet;
         };
 
         struct SGaussianShaderProperties
@@ -120,7 +122,6 @@ namespace
     private:
         
         CMeshPtr          m_QuadModelPtr;
-        CBufferSetPtr     m_FullQuadViewVSBufferPtr;
         CBufferSetPtr     m_VolumeLightingCSBufferSetPtr;
         CInputLayoutPtr   m_P2InputLayoutPtr;
         CShaderPtr        m_RectangleShaderVSPtr;
@@ -128,7 +129,6 @@ namespace
         CShaderPtr        m_VolumeLightingCSPtr;
         CShaderPtr        m_VolumeScatteringCSPtr;
         CShaderPtr        m_ApplyPSPtr;
-        CSamplerSetPtr    m_PSSamplerSetPtr;
         CRenderContextPtr m_LightRenderContextPtr;
         CTexture2DPtr     m_ESMTexturePtr;
         CTextureSetPtr    m_ESMTextureSetPtr;
@@ -167,7 +167,6 @@ namespace
 {
     CGfxFogRenderer::CGfxFogRenderer()
         : m_QuadModelPtr                        ()
-        , m_FullQuadViewVSBufferPtr             ()
         , m_VolumeLightingCSBufferSetPtr        ()
         , m_P2InputLayoutPtr                    ()
         , m_RectangleShaderVSPtr                ()
@@ -175,7 +174,6 @@ namespace
         , m_VolumeLightingCSPtr                 ()
         , m_VolumeScatteringCSPtr               ()
         , m_ApplyPSPtr                          ()
-        , m_PSSamplerSetPtr                     ()
         , m_LightRenderContextPtr               ()
         , m_ESMTexturePtr                       ()
         , m_ESMTextureSetPtr                    ()
@@ -213,7 +211,6 @@ namespace
     void CGfxFogRenderer::OnExit()
     {
         m_QuadModelPtr                  = 0;
-        m_FullQuadViewVSBufferPtr       = 0;
         m_VolumeLightingCSBufferSetPtr  = 0;
         m_P2InputLayoutPtr              = 0;
         m_RectangleShaderVSPtr          = 0;
@@ -221,7 +218,6 @@ namespace
         m_VolumeLightingCSPtr           = 0;
         m_VolumeScatteringCSPtr         = 0;
         m_ApplyPSPtr                    = 0;
-        m_PSSamplerSetPtr               = 0;
         m_LightRenderContextPtr         = 0;
         m_ESMTexturePtr                 = 0;
         m_ESMTextureSetPtr              = 0;
@@ -294,16 +290,6 @@ namespace
         m_LightRenderContextPtr->SetViewPortSet(ViewPortSetPtr);
         m_LightRenderContextPtr->SetTargetSet(TargetSetPtr);
         m_LightRenderContextPtr->SetRenderState(LightStatePtr);
-        
-        // -----------------------------------------------------------------------------
-        
-        CSamplerPtr Sampler[6];
-
-        Sampler[0] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[1] = SamplerManager::GetSampler(CSampler::MinMagMipPointClamp);
-        Sampler[2] = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-
-        m_PSSamplerSetPtr = SamplerManager::CreateSamplerSet(Sampler, 3);
     }
     
     // -----------------------------------------------------------------------------
@@ -544,9 +530,8 @@ namespace
         // -----------------------------------------------------------------------------
 
         m_GaussianBlurPropertiesCSBufferSetPtr = BufferManager::CreateBufferSet(GaussianSettingsResourceBuffer);
-        m_VolumeLightingCSBufferSetPtr         = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), SunLightBufferPtr, VolumeLightingPropertiesBufferPtr, HistogramExposureHistoryBufferPtr);
-        m_FullQuadViewVSBufferPtr              = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
-        m_FogApplyBufferPtr                  = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferPS(), FogApplyPropertiesBufferPtr);
+        m_VolumeLightingCSBufferSetPtr         = BufferManager::CreateBufferSet(SunLightBufferPtr, VolumeLightingPropertiesBufferPtr);
+        m_FogApplyBufferPtr                    = BufferManager::CreateBufferSet(FogApplyPropertiesBufferPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -620,40 +605,43 @@ namespace
 
     void CGfxFogRenderer::RenderESM()
     {
+        // -----------------------------------------------------------------------------
+        // Getting volume fog informations from render job
+        // TODO: What happens if more then one DOF effect is available?
+        // -----------------------------------------------------------------------------
+        Gfx::CSunFacet* pGfxSunFacet = m_VolumeFogRenderJobs[0].m_pGraphicSunFacet;
+
+        assert(pGfxSunFacet != 0);
+
+        SGaussianShaderProperties GaussianSettings;
+
+        GaussianSettings.m_MaxPixelCoord[0] = 256;
+        GaussianSettings.m_MaxPixelCoord[1] = 256;
+        GaussianSettings.m_Weights[0] = 0.018816f;
+        GaussianSettings.m_Weights[1] = 0.034474f;
+        GaussianSettings.m_Weights[2] = 0.056577f;
+        GaussianSettings.m_Weights[3] = 0.083173f;
+        GaussianSettings.m_Weights[4] = 0.109523f;
+        GaussianSettings.m_Weights[5] = 0.129188f;
+        GaussianSettings.m_Weights[6] = 0.136498f;
+
         Performance::BeginEvent("ESM");
-
-
-        // -----------------------------------------------------------------------------
-        // Get light(s) and compute exponential shadow map
-        // TODO: Can this be done in shadow renderer because of other uses with the
-        // light?
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
-        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
-
-        Gfx::CSunFacet* pGraphicSunFacet = 0;
-
-        for (; CurrentEntity != EndOfEntities; CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light))
-        {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
-
-            if (rCurrentEntity.GetType() == Dt::SLightType::Sun)
-            {
-                pGraphicSunFacet = static_cast<Gfx::CSunFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
-            }
-        }
-
-        CTextureBasePtr ShadowMapPtr = pGraphicSunFacet->GetTextureSMSet()->GetTexture(0);
-
-        m_ESMTextureSetPtr = TextureManager::CreateTextureSet(ShadowMapPtr, static_cast<CTextureBasePtr>(m_ESMTexturePtr));
 
         ContextManager::SetShaderCS(m_ESMCSPtr);
 
-        ContextManager::SetTextureSetCS(m_ESMTextureSetPtr);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+
+        ContextManager::SetTexture(0, pGfxSunFacet->GetTextureSMSet()->GetTexture(0));
+
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_ESMTexturePtr));
 
         ContextManager::Dispatch(256, 256, 1);
 
-        ContextManager::ResetTextureSetCS();
+        ContextManager::ResetTexture(0);
+
+        ContextManager::ResetSampler(0);
+
+        ContextManager::ResetImageTexture(0);
 
         ContextManager::ResetShaderCS();
 
@@ -669,33 +657,24 @@ namespace
         // -----------------------------------------------------------------------------
         // Blur
         // -----------------------------------------------------------------------------
-        SGaussianShaderProperties* pGaussianSettings = static_cast<SGaussianShaderProperties*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0)));
+        GaussianSettings.m_Direction[0] = 1;
+        GaussianSettings.m_Direction[1] = 0;
 
-        pGaussianSettings->m_Direction[0] = 1;
-        pGaussianSettings->m_Direction[1] = 0;
-        pGaussianSettings->m_MaxPixelCoord[0] = 256;
-        pGaussianSettings->m_MaxPixelCoord[1] = 256;
-        pGaussianSettings->m_Weights[0] = 0.018816f;
-        pGaussianSettings->m_Weights[1] = 0.034474f;
-        pGaussianSettings->m_Weights[2] = 0.056577f;
-        pGaussianSettings->m_Weights[3] = 0.083173f;
-        pGaussianSettings->m_Weights[4] = 0.109523f;
-        pGaussianSettings->m_Weights[5] = 0.129188f;
-        pGaussianSettings->m_Weights[6] = 0.136498f;
-
-        BufferManager::UnmapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0), &GaussianSettings);
 
         ContextManager::SetShaderCS(m_GaussianBlurShaderPtr);
 
-        ContextManager::SetConstantBufferSetCS(m_GaussianBlurPropertiesCSBufferSetPtr);
+        ContextManager::SetResourceBuffer(0, m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0));
 
-        ContextManager::SetTextureSetCS(m_BlurStagesTextureSetPtrs[0]);
+        ContextManager::SetImageTexture(0, m_BlurStagesTextureSetPtrs[0]->GetTexture(0));
+        ContextManager::SetImageTexture(1, m_BlurStagesTextureSetPtrs[0]->GetTexture(1));
 
         ContextManager::Dispatch(NumberOfThreadGroupsX, NumberOfThreadGroupsY, 1);
 
-        ContextManager::ResetTextureSetCS();
+        ContextManager::ResetImageTexture(0);
+        ContextManager::ResetImageTexture(1);
 
-        ContextManager::ResetConstantBufferSetCS();
+        ContextManager::ResetResourceBuffer(0);
 
         ContextManager::ResetShaderCS();
 
@@ -703,33 +682,24 @@ namespace
         // -----------------------------------------------------------------------------
         // Blur
         // -----------------------------------------------------------------------------
-        pGaussianSettings = static_cast<SGaussianShaderProperties*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0)));
+        GaussianSettings.m_Direction[0] = 0;
+        GaussianSettings.m_Direction[1] = 1;
 
-        pGaussianSettings->m_Direction[0] = 0;
-        pGaussianSettings->m_Direction[1] = 1;
-        pGaussianSettings->m_MaxPixelCoord[0] = 256;
-        pGaussianSettings->m_MaxPixelCoord[1] = 256;
-        pGaussianSettings->m_Weights[0] = 0.018816f;
-        pGaussianSettings->m_Weights[1] = 0.034474f;
-        pGaussianSettings->m_Weights[2] = 0.056577f;
-        pGaussianSettings->m_Weights[3] = 0.083173f;
-        pGaussianSettings->m_Weights[4] = 0.109523f;
-        pGaussianSettings->m_Weights[5] = 0.129188f;
-        pGaussianSettings->m_Weights[6] = 0.136498f;
-
-        BufferManager::UnmapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0), &GaussianSettings);
 
         ContextManager::SetShaderCS(m_GaussianBlurShaderPtr);
 
-        ContextManager::SetConstantBufferSetCS(m_GaussianBlurPropertiesCSBufferSetPtr);
+        ContextManager::SetResourceBuffer(0, m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0));
 
-        ContextManager::SetTextureSetCS(m_BlurStagesTextureSetPtrs[1]);
+        ContextManager::SetImageTexture(0, m_BlurStagesTextureSetPtrs[1]->GetTexture(0));
+        ContextManager::SetImageTexture(1, m_BlurStagesTextureSetPtrs[1]->GetTexture(1));
 
         ContextManager::Dispatch(NumberOfThreadGroupsX, NumberOfThreadGroupsY, 1);
 
-        ContextManager::ResetTextureSetCS();
+        ContextManager::ResetImageTexture(0);
+        ContextManager::ResetImageTexture(1);
 
-        ContextManager::ResetConstantBufferSetCS();
+        ContextManager::ResetResourceBuffer(0);
 
         ContextManager::ResetShaderCS();
 
@@ -747,65 +717,51 @@ namespace
         // TODO: What happens if more then one DOF effect is available?
         // -----------------------------------------------------------------------------
         Dt::CVolumeFogFXFacet* pDataVolumeFogFacet = m_VolumeFogRenderJobs[0].m_pDataVolumeFogFacet;
+        Dt::CSunLightFacet*    pDtSunFacet         = m_VolumeFogRenderJobs[0].m_pDataSunFacet;
+        Gfx::CSunFacet*        pGfxSunFacet        = m_VolumeFogRenderJobs[0].m_pGraphicSunFacet;
 
-        assert(pDataVolumeFogFacet != 0);
+        assert(pDataVolumeFogFacet != 0 && pDtSunFacet != 0 && pGfxSunFacet != 0);
 
-        // -----------------------------------------------------------------------------
-        // Getting sun informations
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
-        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
+        SSunLightProperties LightBuffer;
 
-        Gfx::CSunFacet* pGraphicSunFacet = 0;
-        Dt::CSunLightFacet* pDataSunFacet = 0;
+        LightBuffer.m_LightViewProjection  = pGfxSunFacet->GetCamera()->GetViewProjectionMatrix();
+        LightBuffer.m_LightDirection       = Base::Float4(pDtSunFacet->GetDirection(), 0.0f).Normalize();
+        LightBuffer.m_LightColor           = Base::Float4(pDtSunFacet->GetLightness(), 1.0f);
+        LightBuffer.m_SunAngularRadius     = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
+        LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
-        for (; CurrentEntity != EndOfEntities; CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light))
-        {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
-
-            if (rCurrentEntity.GetType() == Dt::SLightType::Sun)
-            {
-                pDataSunFacet = static_cast<Dt::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-                pGraphicSunFacet = static_cast<Gfx::CSunFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
-            }
-        }
-
-        SSunLightProperties* pLightBuffer = static_cast<SSunLightProperties*>(BufferManager::MapConstantBuffer(m_VolumeLightingCSBufferSetPtr->GetBuffer(1)));
-
-	    assert(pLightBuffer != nullptr);
-
-	    pLightBuffer->m_LightViewProjection  = pGraphicSunFacet->GetCamera()->GetViewProjectionMatrix();
-	    pLightBuffer->m_LightDirection       = Base::Float4(pDataSunFacet->GetDirection(), 0.0f).Normalize();
-	    pLightBuffer->m_LightColor           = Base::Float4(pDataSunFacet->GetLightness(), 1.0f);
-	    pLightBuffer->m_SunAngularRadius     = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
-	    pLightBuffer->m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
-
-        BufferManager::UnmapConstantBuffer(m_VolumeLightingCSBufferSetPtr->GetBuffer(1));
+        BufferManager::UploadConstantBufferData(m_VolumeLightingCSBufferSetPtr->GetBuffer(0), &LightBuffer);
 
         // -----------------------------------------------------------------------------
 
-        SVolumeLightingProperties* pVolumeProperties = static_cast<SVolumeLightingProperties*>(BufferManager::MapConstantBuffer(m_VolumeLightingCSBufferSetPtr->GetBuffer(2)));
+        SVolumeLightingProperties VolumeProperties;
 
-	    assert(pVolumeProperties != nullptr);
+        VolumeProperties.m_WindDirection                      = pDataVolumeFogFacet->GetWindDirection();
+        VolumeProperties.m_FogColor                           = pDataVolumeFogFacet->GetFogColor();
+        VolumeProperties.m_FrustumDepthInMeter                = pDataVolumeFogFacet->GetFrustumDepthInMeter();
+        VolumeProperties.m_ShadowIntensity                    = pDataVolumeFogFacet->GetShadowIntensity();
+        VolumeProperties.m_VolumetricFogScatteringCoefficient = pDataVolumeFogFacet->GetScatteringCoefficient();
+        VolumeProperties.m_VolumetricFogAbsorptionCoefficient = pDataVolumeFogFacet->GetAbsorptionCoefficient();
+        VolumeProperties.m_DensityLevel                       = pDataVolumeFogFacet->GetDensityLevel();
+        VolumeProperties.m_DensityAttenuation                 = pDataVolumeFogFacet->GetDensityAttenuation();
 
-        pVolumeProperties->m_WindDirection                      = pDataVolumeFogFacet->GetWindDirection();
-        pVolumeProperties->m_FogColor                           = pDataVolumeFogFacet->GetFogColor();
-        pVolumeProperties->m_FrustumDepthInMeter                = pDataVolumeFogFacet->GetFrustumDepthInMeter();
-        pVolumeProperties->m_ShadowIntensity                    = pDataVolumeFogFacet->GetShadowIntensity();
-        pVolumeProperties->m_VolumetricFogScatteringCoefficient = pDataVolumeFogFacet->GetScatteringCoefficient();
-        pVolumeProperties->m_VolumetricFogAbsorptionCoefficient = pDataVolumeFogFacet->GetAbsorptionCoefficient();
-        pVolumeProperties->m_DensityLevel                       = pDataVolumeFogFacet->GetDensityLevel();
-        pVolumeProperties->m_DensityAttenuation                 = pDataVolumeFogFacet->GetDensityAttenuation();
-
-        BufferManager::UnmapConstantBuffer(m_VolumeLightingCSBufferSetPtr->GetBuffer(2));
+        BufferManager::UploadConstantBufferData(m_VolumeLightingCSBufferSetPtr->GetBuffer(1), &VolumeProperties);
 
         // -----------------------------------------------------------------------------
 
         ContextManager::SetShaderCS(m_VolumeLightingCSPtr);
 
-        ContextManager::SetConstantBufferSetCS(m_VolumeLightingCSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_VolumeLightingCSBufferSetPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(2, m_VolumeLightingCSBufferSetPtr->GetBuffer(1));
 
-        ContextManager::SetTextureSetCS(m_VolumeTextureSetPtr);
+        ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
+
+        ContextManager::SetImageTexture(0, m_VolumeTextureSetPtr->GetTexture(0));
+        ContextManager::SetImageTexture(1, m_VolumeTextureSetPtr->GetTexture(1));
+        ContextManager::SetImageTexture(2, m_VolumeTextureSetPtr->GetTexture(2));
+        ContextManager::SetImageTexture(3, m_VolumeTextureSetPtr->GetTexture(3));
+        ContextManager::SetImageTexture(4, m_VolumeTextureSetPtr->GetTexture(4));
 
         unsigned int NumberOfThreadGroupsX;
         unsigned int NumberOfThreadGroupsY;
@@ -821,9 +777,17 @@ namespace
 
         ContextManager::Dispatch(NumberOfThreadGroupsX, NumberOfThreadGroupsY, NumberOfThreadGroupsZ);
 
-        ContextManager::ResetTextureSetCS();
+        ContextManager::ResetImageTexture(0);
+        ContextManager::ResetImageTexture(1);
+        ContextManager::ResetImageTexture(2);
+        ContextManager::ResetImageTexture(3);
+        ContextManager::ResetImageTexture(4);
         
-        ContextManager::ResetConstantBufferSetCS();
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
+        ContextManager::ResetConstantBuffer(2);
+
+        ContextManager::ResetResourceBuffer(0);
 
         ContextManager::ResetShaderCS();
 
@@ -838,7 +802,8 @@ namespace
 
         ContextManager::SetShaderCS(m_VolumeScatteringCSPtr);
 
-        ContextManager::SetTextureSetCS(m_ScatteringTextureSetPtr);
+        ContextManager::SetImageTexture(0, m_ScatteringTextureSetPtr->GetTexture(0));
+        ContextManager::SetImageTexture(1, m_ScatteringTextureSetPtr->GetTexture(1));
 
         unsigned int NumberOfThreadGroupsX;
         unsigned int NumberOfThreadGroupsY;
@@ -851,7 +816,8 @@ namespace
 
         ContextManager::Dispatch(NumberOfThreadGroupsX, NumberOfThreadGroupsY, 1);
 
-        ContextManager::ResetTextureSetCS();
+        ContextManager::ResetImageTexture(0);
+        ContextManager::ResetImageTexture(1);
 
         ContextManager::ResetShaderCS();
 
@@ -875,13 +841,11 @@ namespace
         // -----------------------------------------------------------------------------
         // Data
         // -----------------------------------------------------------------------------
-        SFogApplyProperties* pFogApplyProperties = static_cast<SFogApplyProperties*>(BufferManager::MapConstantBuffer(m_FogApplyBufferPtr->GetBuffer(1)));
+        SFogApplyProperties FogApplyProperties;
 
-	    assert(pFogApplyProperties != nullptr);
+        FogApplyProperties.m_FrustumDepthInMeter = pDataVolumeFogFacet->GetFrustumDepthInMeter();
 
-        pFogApplyProperties->m_FrustumDepthInMeter = pDataVolumeFogFacet->GetFrustumDepthInMeter();
-
-        BufferManager::UnmapConstantBuffer(m_FogApplyBufferPtr->GetBuffer(1));
+        BufferManager::UploadConstantBufferData(m_FogApplyBufferPtr->GetBuffer(0), &FogApplyProperties);
 
         // -----------------------------------------------------------------------------
         // Rendering
@@ -902,19 +866,31 @@ namespace
 
         ContextManager::SetShaderPS(m_ApplyPSPtr);
 
-        ContextManager::SetConstantBufferSetVS(m_FullQuadViewVSBufferPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
-        ContextManager::SetConstantBufferSetPS(m_FogApplyBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_FogApplyBufferPtr->GetBuffer(0));
 
-        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        ContextManager::SetTextureSetPS(m_ApplyTextureSetPtr);
+        ContextManager::SetTexture(0, m_ApplyTextureSetPtr->GetTexture(0));
+        ContextManager::SetTexture(1, m_ApplyTextureSetPtr->GetTexture(1));
+        ContextManager::SetTexture(2, m_ApplyTextureSetPtr->GetTexture(2));
 
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
 
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+        ContextManager::ResetTexture(1);
+        ContextManager::ResetTexture(2);
 
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetSampler(0);
+        ContextManager::ResetSampler(1);
+        ContextManager::ResetSampler(2);
+
+        ContextManager::ResetConstantBuffer(0);
+
+        ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetTopology();
 
@@ -923,8 +899,6 @@ namespace
         ContextManager::ResetIndexBuffer();
 
         ContextManager::ResetVertexBufferSet();
-
-        ContextManager::ResetSamplerSetPS();
 
         ContextManager::ResetShaderVS();
 
@@ -939,6 +913,9 @@ namespace
 
     void CGfxFogRenderer::BuildRenderJobs()
     {
+        Dt::CSunLightFacet* pDataSunFacet    = 0;
+        Gfx::CSunFacet*     pGraphicSunFacet = 0;
+
         // -----------------------------------------------------------------------------
         // Clear current render jobs
         // -----------------------------------------------------------------------------
@@ -947,9 +924,31 @@ namespace
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
         // -----------------------------------------------------------------------------
+        Dt::Map::CEntityIterator CurrentSunEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
+        Dt::Map::CEntityIterator EndOfSunEntities = Dt::Map::EntitiesEnd();
+
         Dt::Map::CEntityIterator CurrentEffectEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::FX);
         Dt::Map::CEntityIterator EndOfEffectEntities = Dt::Map::EntitiesEnd();
 
+        // -----------------------------------------------------------------------------
+        // Sun
+        // -----------------------------------------------------------------------------
+        for (; CurrentSunEntity != EndOfSunEntities; CurrentSunEntity = CurrentSunEntity.Next(Dt::SEntityCategory::Light))
+        {
+            Dt::CEntity& rCurrentEntity = *CurrentSunEntity;
+
+            if (rCurrentEntity.GetType() == Dt::SLightType::Sun)
+            {
+                pDataSunFacet    = static_cast<Dt::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+                pGraphicSunFacet = static_cast<Gfx::CSunFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+            }
+        }
+
+        if (pDataSunFacet == nullptr || pGraphicSunFacet == nullptr) return;
+
+        // -----------------------------------------------------------------------------
+        // Effect
+        // -----------------------------------------------------------------------------
         for (; CurrentEffectEntity != EndOfEffectEntities; )
         {
             Dt::CEntity& rCurrentEntity = *CurrentEffectEntity;
@@ -969,6 +968,8 @@ namespace
                 SVolumeFogRenderJob NewRenderJob;
 
                 NewRenderJob.m_pDataVolumeFogFacet = pDataSSRFacet;
+                NewRenderJob.m_pGraphicSunFacet    = pGraphicSunFacet;
+                NewRenderJob.m_pDataSunFacet       = pDataSunFacet;
 
                 m_VolumeFogRenderJobs.push_back(NewRenderJob);
             }

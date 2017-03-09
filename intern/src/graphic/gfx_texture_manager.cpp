@@ -1,4 +1,4 @@
-
+﻿
 #include "graphic/gfx_precompiled.h"
 
 #include "base/base_crc.h"
@@ -589,16 +589,12 @@ namespace
         // -----------------------------------------------------------------------------
         // Upload data to texture
         // -----------------------------------------------------------------------------
-        glBindTexture(GL_TEXTURE_2D, TextureHandle);
-        
-        glTexSubImage2D(GL_TEXTURE_2D, 0, Offset[0], Offset[1], UpdateSize[0], UpdateSize[1], Format, Type, _pBytes);
+        glTextureSubImage2D(TextureHandle, 0, Offset[0], Offset[1], UpdateSize[0], UpdateSize[1], Format, Type, _pBytes);
         
         if (_UpdateMipLevels)
         {
-            glGenerateMipmap(GL_TEXTURE_2D);
+            glGenerateTextureMipmap(TextureHandle);
         }
-        
-        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     // -----------------------------------------------------------------------------
@@ -627,20 +623,15 @@ namespace
 
         Gfx::CNativeTextureHandle TextureHandle = pInternTextureArray->m_NativeTexture;
 
-        int InternalFormat = ConvertGLInternalImageFormat(pInternTextureArray->GetFormat());
-        int Format         = ConvertGLImageFormat(pInternTextureArray->GetFormat());
-        int Type           = ConvertGLImageType  (pInternTextureArray->GetFormat());
+        int Format = ConvertGLImageFormat(pInternTextureArray->GetFormat());
+        int Type   = ConvertGLImageType  (pInternTextureArray->GetFormat());
         
         // -----------------------------------------------------------------------------
         // Upload data to texture
         // -----------------------------------------------------------------------------
         if (pInternTextureArray->m_Info.m_IsCubeTexture)
         {
-            glBindTexture(GL_TEXTURE_CUBE_MAP, TextureHandle);
-
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + _IndexOfSlice, 0, InternalFormat, UpdateSize[0], UpdateSize[1], 0, Format, Type, _pBytes);
-
-            glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+            glTextureSubImage3D(TextureHandle, 0, Offset[0], Offset[1], _IndexOfSlice, UpdateSize[0], UpdateSize[1], 1, Format, Type, _pBytes);
         }
         else
         {
@@ -675,20 +666,15 @@ namespace
         
         Gfx::CNativeTextureHandle TextureHandle = pInternTextureArray->m_NativeTexture;
         
-        int InternalFormat = ConvertGLInternalImageFormat(pInternTextureArray->GetFormat());
-        int Format         = ConvertGLImageFormat(pInternTextureArray->GetFormat());
-        int Type           = ConvertGLImageType  (pInternTextureArray->GetFormat());
+        int Format = ConvertGLImageFormat(pInternTextureArray->GetFormat());
+        int Type   = ConvertGLImageType  (pInternTextureArray->GetFormat());
         
         // -----------------------------------------------------------------------------
         // Upload data to texture
         // -----------------------------------------------------------------------------
         if (pInternTextureArray->m_Info.m_IsCubeTexture)
         {
-            glBindTexture(GL_TEXTURE_CUBE_MAP, TextureHandle);
-
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + _IndexOfSlice, 0, InternalFormat, UpdateSize[0], UpdateSize[1], 0, Format, Type, pInternTexture->GetPixels());
-
-            glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+            glTextureSubImage3D(TextureHandle, 0, Offset[0], Offset[1], _IndexOfSlice, UpdateSize[0], UpdateSize[1], 1, Format, Type, pInternTexture->GetPixels());
         }
         else
         {
@@ -736,7 +722,12 @@ namespace
             rTexture.m_Info.m_Semantic          = _TexturePtr->GetSemantic();
             rTexture.m_Info.m_Usage             = _TexturePtr->GetUsage();
             
-            rTexture.m_NativeTexture = (*static_cast<CInternTexture2D*>(_TexturePtr.GetPtr())).m_NativeTexture;      
+            CInternTexture2D* pInternalTexture = static_cast<CInternTexture2D*>(_TexturePtr.GetPtr());
+
+            rTexture.m_NativeTexture        = pInternalTexture->m_NativeTexture;
+            rTexture.m_NativeDimension      = pInternalTexture->m_NativeDimension;
+            rTexture.m_NativeInternalFormat = pInternalTexture->m_NativeInternalFormat;
+            rTexture.m_NativeUsage          = pInternalTexture->m_NativeUsage;
         }
         catch (...)
         {
@@ -753,16 +744,10 @@ namespace
         assert(_TexturePtr != 0);
         
         CInternTexture2D* pInternTexture = static_cast<CInternTexture2D*>(_TexturePtr.GetPtr());
-        
-        Gfx::CNativeTextureHandle TextureHandle = pInternTexture->m_NativeTexture;
-        
-        GLenum TextureTarget = pInternTexture->m_Info.m_IsCubeTexture == true ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D;
-        
-        glBindTexture(TextureTarget, TextureHandle);
-        
-        glGenerateMipmap(TextureTarget);
-        
-        glBindTexture(TextureTarget, 0);
+
+        assert(pInternTexture);
+
+        glGenerateTextureMipmap(pInternTexture->m_NativeTexture);
     }
 
     // -----------------------------------------------------------------------------
@@ -776,7 +761,7 @@ namespace
         unsigned int Binding    = _pTexture->GetBinding();
 
         // -----------------------------------------------------------------------------
-        // Check if binding is realted to graphics
+        // Check if binding is related to graphics
         // -----------------------------------------------------------------------------
         if (Binding == Dt::CTextureBase::CPU) return;
 
@@ -785,6 +770,9 @@ namespace
         // -----------------------------------------------------------------------------
         if ((DirtyFlags & Dt::CTextureBase::DirtyCreate) != 0)
         {
+            // -----------------------------------------------------------------------------
+            // Create descriptor
+            // -----------------------------------------------------------------------------
             STextureDescriptor TextureDescriptor;
 
             TextureDescriptor.m_NumberOfPixelsU  = 1;
@@ -795,11 +783,16 @@ namespace
             TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
             TextureDescriptor.m_Usage            = CTextureBase::GPURead;
             TextureDescriptor.m_Semantic         = ConvertDataSemantic(_pTexture->GetSemantic());
-            TextureDescriptor.m_pFileName        = _pTexture->GetFileName();
+            TextureDescriptor.m_pFileName        = 0;
             TextureDescriptor.m_pPixels          = _pTexture->GetPixels();
             TextureDescriptor.m_Binding          = ConvertDataBinding(_pTexture->GetBinding());
             TextureDescriptor.m_Format           = ConvertDataFormat(_pTexture->GetFormat());
 
+            if (_pTexture->GetFileName().length() > 0) TextureDescriptor.m_pFileName = _pTexture->GetFileName().c_str();
+
+            // -----------------------------------------------------------------------------
+            // Depending on dimension create the texture
+            // -----------------------------------------------------------------------------
             if (_pTexture->GetDimension() == Dt::CTextureBase::Dim1D)
             {
                 Dt::CTexture1D* pDataTexture = static_cast<Dt::CTexture1D*>(_pTexture);
@@ -848,77 +841,6 @@ namespace
                 {
                     pInternTexture2D->m_Hash = Hash;
 
-                    m_Textures2DByHash[Hash] = pInternTexture2D;
-                }
-            }
-            else if (_pTexture->GetDimension() == Dt::CTextureBase::Dim3D)
-            {
-                // TODO by tschwandt
-                // Not implemented yet
-
-                BASE_CONSOLE_STREAMWARNING("Texture 3D from data textures is not yet supported!");
-            }
-        }
-
-        // -----------------------------------------------------------------------------
-        // File
-        // -----------------------------------------------------------------------------
-        if ((DirtyFlags & Dt::CTextureBase::DirtyFile) != 0)
-        {
-            STextureDescriptor TextureDescriptor;
-
-            TextureDescriptor.m_NumberOfPixelsU  = 1;
-            TextureDescriptor.m_NumberOfPixelsV  = 1;
-            TextureDescriptor.m_NumberOfPixelsW  = 1;
-            TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
-            TextureDescriptor.m_NumberOfTextures = 1;
-            TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-            TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-            TextureDescriptor.m_Semantic         = ConvertDataSemantic(_pTexture->GetSemantic());
-            TextureDescriptor.m_pFileName        = _pTexture->GetFileName();
-            TextureDescriptor.m_pPixels          = _pTexture->GetPixels();
-            TextureDescriptor.m_Binding          = ConvertDataBinding(_pTexture->GetBinding());
-            TextureDescriptor.m_Format           = ConvertDataFormat(_pTexture->GetFormat());
-
-            if (_pTexture->GetDimension() == Dt::CTextureBase::Dim1D)
-            {
-                Dt::CTexture1D* pDataTexture = static_cast<Dt::CTexture1D*>(_pTexture);
-
-                TextureDescriptor.m_NumberOfPixelsU = pDataTexture->GetNumberOfPixelsU();
-
-                InternCreateTexture1D(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
-            }
-            else if (_pTexture->GetDimension() == Dt::CTextureBase::Dim2D)
-            {
-                CInternTexture2D* pInternTexture2D = nullptr;
-
-                if (_pTexture->IsCube())
-                {
-                    Dt::CTextureCube* pDataTexture = static_cast<Dt::CTextureCube*>(_pTexture);
-
-                    TextureDescriptor.m_NumberOfPixelsU  = pDataTexture->GetNumberOfPixelsU();
-                    TextureDescriptor.m_NumberOfPixelsV  = pDataTexture->GetNumberOfPixelsV();
-                    TextureDescriptor.m_NumberOfTextures = 6;
-
-                    pInternTexture2D = InternCreateCubeTexture(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
-                }
-                else
-                {
-                    Dt::CTexture2D* pDataTexture = static_cast<Dt::CTexture2D*>(_pTexture);
-
-                    TextureDescriptor.m_NumberOfPixelsU = pDataTexture->GetNumberOfPixelsU();
-                    TextureDescriptor.m_NumberOfPixelsV = pDataTexture->GetNumberOfPixelsV();
-
-                    pInternTexture2D = InternCreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
-
-                    if (pInternTexture2D == nullptr)
-                    {
-                        pInternTexture2D = static_cast<CInternTexture2D*>(m_Texture2DPtr.GetPtr());
-                    }
-                }
-
-                if (Hash != 0 && pInternTexture2D != nullptr)
-                {
                     m_Textures2DByHash[Hash] = pInternTexture2D;
                 }
             }
@@ -1103,28 +1025,30 @@ namespace
         {
             NumberOfMipmaps = static_cast<int>(Base::Log2(static_cast<float>(Base::Max(ImageWidth, ImageHeight)))) + 1;
         }
+        else if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_NumberOfMipMapsFromSource)
+        {
+            NumberOfMipmaps = ilGetInteger(IL_NUM_MIPMAPS);
+        }
         
         // -----------------------------------------------------------------------------
         // Generate OpenGL texture or render buffer
         // -----------------------------------------------------------------------------
-        glGenTextures(1, &NativeTextureHandle);
-
-        glBindTexture(GL_TEXTURE_2D, NativeTextureHandle);
+        glCreateTextures(GL_TEXTURE_2D, 1, &NativeTextureHandle);
 
         // -----------------------------------------------------------------------------
         // Binding
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_Binding & Gfx::CTextureBase::DepthStencilTarget)
         {
-            glTexStorage2D(GL_TEXTURE_2D, NumberOfMipmaps, GL_DEPTH_COMPONENT32F, ImageWidth, ImageHeight);
+            glTextureStorage2D(NativeTextureHandle, NumberOfMipmaps, GL_DEPTH_COMPONENT32F, ImageWidth, ImageHeight);
         }
         else if (_rDescriptor.m_Binding & Gfx::CTextureBase::RenderTarget)
         {   
-            glTexStorage2D(GL_TEXTURE_2D, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
+            glTextureStorage2D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
         }
         else
         {
-            glTexStorage2D(GL_TEXTURE_2D, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
+            glTextureStorage2D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
         }
 
         // -----------------------------------------------------------------------------
@@ -1132,7 +1056,31 @@ namespace
         // -----------------------------------------------------------------------------
         if (pTextureData != 0)
         {
-            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, ImageWidth, ImageHeight, GLFormat, GLType, pTextureData);
+            glTextureSubImage2D(NativeTextureHandle, 0, 0, 0, ImageWidth, ImageHeight, GLFormat, GLType, pTextureData);
+
+            if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_NumberOfMipMapsFromSource && NumberOfMipmaps > 1)
+            {
+                for (unsigned int IndexOfMipMap = 1; IndexOfMipMap < NumberOfMipmaps; ++IndexOfMipMap)
+                {
+                    ilBindImage(NativeImageName);
+
+                    ilActiveMipmap(IndexOfMipMap);
+
+                    ILenum CheckILFormat = ilGetInteger(IL_IMAGE_FORMAT);
+                    ILenum CheckILType   = ilGetInteger(IL_IMAGE_TYPE);
+
+                    if (CheckILFormat != NativeILFormat || CheckILType != NativeILType)
+                    {
+                        ilConvertImage(NativeILFormat, NativeILType);
+                    }
+
+                    ImageWidth   = ilGetInteger(IL_IMAGE_WIDTH);
+                    ImageHeight  = ilGetInteger(IL_IMAGE_HEIGHT);
+                    pTextureData = ilGetData();
+
+                    glTextureSubImage2D(NativeTextureHandle, IndexOfMipMap, 0, 0, ImageWidth, ImageHeight, GLFormat, GLType, pTextureData);
+                }
+            }
         }
 
         // -----------------------------------------------------------------------------
@@ -1140,10 +1088,8 @@ namespace
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
         {
-            glGenerateMipmap(GL_TEXTURE_2D);
+            glGenerateTextureMipmap(NativeTextureHandle);
         }
-
-        glBindTexture(GL_TEXTURE_2D, 0);
 
         // -----------------------------------------------------------------------------
         // Generate texture inside texture manager
@@ -1161,7 +1107,8 @@ namespace
             // -----------------------------------------------------------------------------
             // Setup the new texture inside manager
             // -----------------------------------------------------------------------------
-            rTexture.m_FileName          = _rDescriptor.m_pFileName;
+            if (_rDescriptor.m_pFileName != 0) rTexture.m_FileName = _rDescriptor.m_pFileName;
+
             rTexture.m_pPixels           = _rDescriptor.m_pPixels;
             rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTextureBase::BPixels>(ImageWidth);
             rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTextureBase::BPixels>(ImageHeight);
@@ -1316,34 +1263,30 @@ namespace
         // -----------------------------------------------------------------------------
         // Generate OpenGL texture or render buffer
         // -----------------------------------------------------------------------------
-        glGenTextures(1, &NativeTextureHandle);
-
-        glBindTexture(GL_TEXTURE_3D, NativeTextureHandle);
+        glCreateTextures(GL_TEXTURE_3D, 1, &NativeTextureHandle);
 
         // -----------------------------------------------------------------------------
         // Binding
         // -----------------------------------------------------------------------------
         assert(!(_rDescriptor.m_Binding & Gfx::CTextureBase::DepthStencilTarget || _rDescriptor.m_Binding & Gfx::CTextureBase::RenderTarget));
 
-        glTexStorage3D(GL_TEXTURE_3D, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight, ImageDepth);
+        glTextureStorage3D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight, ImageDepth);
 
         // -----------------------------------------------------------------------------
         // Is data available, then upload it to graphic card
         // -----------------------------------------------------------------------------
         if (pTextureData != 0)
         {
-            glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, ImageWidth, ImageHeight, ImageDepth, GLFormat, GLType, pTextureData);
+            glTextureSubImage3D(NativeTextureHandle, 0, 0, 0, 0, ImageWidth, ImageHeight, ImageDepth, GLFormat, GLType, pTextureData);
         }
 
         // -----------------------------------------------------------------------------
-        // Create mipmaps depending on uploaded data
+        // Create mip maps depending on uploaded data
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
         {
-            glGenerateMipmap(GL_TEXTURE_3D);
+            glGenerateTextureMipmap(NativeTextureHandle);
         }
-
-        glBindTexture(GL_TEXTURE_3D, 0);
 
         // -----------------------------------------------------------------------------
         // Generate texture inside texture manager
@@ -1361,7 +1304,8 @@ namespace
             // -----------------------------------------------------------------------------
             // Setup the new texture inside manager
             // -----------------------------------------------------------------------------
-            rTexture.m_FileName          = _rDescriptor.m_pFileName;
+            if (_rDescriptor.m_pFileName != 0) rTexture.m_FileName = _rDescriptor.m_pFileName;
+
             rTexture.m_pPixels           = _rDescriptor.m_pPixels;
             rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTextureBase::BPixels>(ImageWidth);
             rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTextureBase::BPixels>(ImageHeight);
@@ -1618,24 +1562,22 @@ namespace
         // -----------------------------------------------------------------------------
         // Generate OpenGL texture or render buffer
         // -----------------------------------------------------------------------------
-        glGenTextures(1, &NativeTextureHandle);
-
-        glBindTexture(GL_TEXTURE_CUBE_MAP, NativeTextureHandle);
+        glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &NativeTextureHandle);
 
         // -----------------------------------------------------------------------------
         // Binding
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_Binding & Gfx::CTextureBase::DepthStencilTarget)
         {
-            glTexStorage2D(GL_TEXTURE_CUBE_MAP, NumberOfMipmaps, GL_DEPTH_COMPONENT32F, ImageWidth, ImageHeight);
+            glTextureStorage2D(NativeTextureHandle, NumberOfMipmaps, GL_DEPTH_COMPONENT32F, ImageWidth, ImageHeight);
         }
         else if (_rDescriptor.m_Binding & Gfx::CTextureBase::RenderTarget)
         {
-            glTexStorage2D(GL_TEXTURE_CUBE_MAP, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
+            glTextureStorage2D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
         }
         else
         {
-            glTexStorage2D(GL_TEXTURE_CUBE_MAP, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
+            glTextureStorage2D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
         }
 
         // -----------------------------------------------------------------------------
@@ -1666,7 +1608,7 @@ namespace
 
                 pTextureData = ilGetData();
 
-                glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + IndexOfFace, 0, 0, 0, ImageWidth, ImageHeight, GLFormat, GLType, pTextureData);
+                glTextureSubImage3D(NativeTextureHandle, 0, 0, 0, IndexOfFace, ImageWidth, ImageHeight, 1, GLFormat, GLType, pTextureData);
             }
         }
 
@@ -1675,13 +1617,8 @@ namespace
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
         {
-            glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+            glGenerateTextureMipmap(NativeTextureHandle);
         }
-
-        // -----------------------------------------------------------------------------
-        // Unbind texture
-        // -----------------------------------------------------------------------------
-        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
         // -----------------------------------------------------------------------------
         // Generate texture inside texture manager
@@ -1699,7 +1636,8 @@ namespace
             // -----------------------------------------------------------------------------
             // Setup the new texture inside manager
             // -----------------------------------------------------------------------------
-            rTexture.m_FileName          = _rDescriptor.m_pFileName;
+            if (_rDescriptor.m_pFileName != 0) rTexture.m_FileName = _rDescriptor.m_pFileName;
+
             rTexture.m_pPixels           = _rDescriptor.m_pPixels;
             rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTextureBase::BPixels>(ImageWidth);
             rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTextureBase::BPixels>(ImageHeight);
@@ -2460,7 +2398,7 @@ namespace
     {
         if (m_Info.m_IsDeletable)
         {
-            m_FileName.Clear();
+            m_FileName.clear();
 
             if (m_Info.m_IsPixelOwner)
             {
@@ -2483,7 +2421,7 @@ namespace
     {
         if (m_Info.m_IsDeletable)
         {
-            m_FileName.Clear();
+            m_FileName.clear();
 
             if (m_Info.m_IsPixelOwner)
             {
@@ -2508,7 +2446,7 @@ namespace
     {
         if (m_Info.m_IsDeletable)
         {
-            m_FileName.Clear();
+            m_FileName.clear();
 
             if (m_Info.m_IsPixelOwner)
             {

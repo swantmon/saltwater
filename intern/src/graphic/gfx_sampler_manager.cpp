@@ -143,12 +143,15 @@ namespace
         { CSampler::MinMagMipPoint      , CSampler::Clamp , CSampler::Clamp , CSampler::Clamp , CSampler::Never, 16.0f, -1000.0f, 1000.0f, 0.0f },
         { CSampler::MinMagMipPoint      , CSampler::Wrap  , CSampler::Wrap  , CSampler::Wrap  , CSampler::Never, 16.0f, -1000.0f, 1000.0f, 0.0f },
         { CSampler::MinMagMipPoint      , CSampler::Border, CSampler::Border, CSampler::Border, CSampler::Never, 16.0f, -1000.0f, 1000.0f, 0.0f },
+        { CSampler::MinMagMipPoint      , CSampler::Mirror, CSampler::Mirror, CSampler::Mirror, CSampler::Never, 16.0f, -1000.0f, 1000.0f, 0.0f },
         { CSampler::MinMagLinearMipPoint, CSampler::Clamp , CSampler::Clamp , CSampler::Clamp , CSampler::Never, 16.0f, -1000.0f, 1000.0f, 0.0f },
         { CSampler::MinMagLinearMipPoint, CSampler::Wrap  , CSampler::Wrap  , CSampler::Wrap  , CSampler::Never, 16.0f, -1000.0f, 1000.0f, 0.0f },
         { CSampler::MinMagLinearMipPoint, CSampler::Border, CSampler::Border, CSampler::Border, CSampler::Never, 16.0f, -1000.0f, 1000.0f, 0.0f },
+        { CSampler::MinMagLinearMipPoint, CSampler::Mirror, CSampler::Mirror, CSampler::Mirror, CSampler::Never, 16.0f, -1000.0f, 1000.0f, 0.0f },
         { CSampler::MinMagMipLinear     , CSampler::Clamp , CSampler::Clamp , CSampler::Clamp , CSampler::Never, 16.0f, -1000.0f, 1000.0f, 0.0f },
         { CSampler::MinMagMipLinear     , CSampler::Wrap  , CSampler::Wrap  , CSampler::Wrap  , CSampler::Never, 16.0f, -1000.0f, 1000.0f, 0.0f },
         { CSampler::MinMagMipLinear     , CSampler::Border, CSampler::Border, CSampler::Border, CSampler::Never, 16.0f, -1000.0f, 1000.0f, 0.0f },
+        { CSampler::MinMagMipLinear     , CSampler::Mirror, CSampler::Mirror, CSampler::Mirror, CSampler::Never, 16.0f, -1000.0f, 1000.0f, 0.0f },
     };
 } // namespace
 

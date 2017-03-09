@@ -167,6 +167,12 @@
     <ClInclude Include="..\..\..\src\data\data_post_aa_manager.h">
       <Filter>map\fx\post_aa</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_area_light_facet.h">
+      <Filter>map\lights\area light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_area_light_manager.h">
+      <Filter>map\lights\area light</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\data\data_entity_manager.cpp">
@@ -311,6 +317,12 @@
     <ClCompile Include="..\..\..\src\data\data_post_aa_manager.cpp">
       <Filter>map\fx\post_aa</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_area_light_manager.cpp">
+      <Filter>map\lights\area light</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_area_light_facet.cpp">
+      <Filter>map\lights\area light</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="map">
@@ -399,6 +411,9 @@
     </Filter>
     <Filter Include="map\fx\post_aa">
       <UniqueIdentifier>{cc4d74eb-3e0b-4be2-b81b-8ce81125f7f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\lights\area light">
+      <UniqueIdentifier>{ca13568f-5167-48be-a0a7-4e8fb1077983}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

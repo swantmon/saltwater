@@ -3,6 +3,8 @@
 
 #include "mr/mr_control.h"
 
+#include <string>
+
 namespace MR
 {
     class CWebcamControl : public CControl
@@ -15,15 +17,15 @@ namespace MR
 
     public:
 
-        void SetConfiguration(const Base::Char* _pConfiguration);
-        const Base::Char* GetConfiguration() const;
+        void SetConfiguration(const std::string& _rConfiguration);
+        const std::string& GetConfiguration() const;
 
     private:
 
-        const Base::Char* m_pConfiguration;
-        void*             m_OriginalColorFrame;
-        void*             m_OriginalColorFrameRGB;
-        void*             m_ConvertedColorFrame;
+        std::string m_Configuration;
+        void*       m_OriginalColorFrameBGR;
+        void*       m_OriginalColorFrameRGB;
+        void*       m_ConvertedColorFrame;
 
     private:
 
@@ -36,6 +38,5 @@ namespace MR
     private:
 
         void ConvertOriginalToOutput();
-        void ProcessEnvironmentApproximation();
     };
 } // namespace MR

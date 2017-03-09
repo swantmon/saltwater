@@ -52,26 +52,6 @@
         </property>
        </spacer>
       </item>
-      <item>
-       <widget class="QLineEdit" name="m_pMailAdressEdit">
-        <property name="maximumSize">
-         <size>
-          <width>200</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="placeholderText">
-         <string>max.mustermann@mail.com</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="m_pScreenshotButton">
-        <property name="text">
-         <string>Screenshot</string>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
     <item>
@@ -94,6 +74,9 @@
          <cursorShape>ArrowCursor</cursorShape>
         </property>
         <property name="mouseTracking">
+         <bool>true</bool>
+        </property>
+        <property name="acceptDrops">
          <bool>true</bool>
         </property>
         <property name="autoFillBackground">
@@ -150,7 +133,7 @@
      <property name="title">
       <string>&amp;Actors</string>
      </property>
-     <addaction name="m_pActionModel"/>
+     <addaction name="m_pActionEmpty"/>
      <addaction name="m_pActionCamera"/>
     </widget>
     <widget class="QMenu" name="menuLights">
@@ -158,6 +141,7 @@
       <string>&amp;Lights</string>
      </property>
      <addaction name="m_pActionPoint"/>
+     <addaction name="m_pActionArea"/>
      <addaction name="m_pActionSun"/>
      <addaction name="m_pActionEnvironment"/>
      <addaction name="m_pActionGlobalProbe"/>
@@ -203,10 +187,24 @@
     <addaction name="m_pActionReleaseNotes"/>
     <addaction name="m_pActionReportBug"/>
    </widget>
+   <widget class="QMenu" name="menuDebug">
+    <property name="title">
+     <string>&amp;Debug</string>
+    </property>
+    <widget class="QMenu" name="menuGraphic">
+     <property name="title">
+      <string>&amp;Graphic</string>
+     </property>
+     <addaction name="m_pActionReloadRenderer"/>
+     <addaction name="m_pActionReloadAllShader"/>
+    </widget>
+    <addaction name="menuGraphic"/>
+   </widget>
    <addaction name="m_pMenuFile"/>
    <addaction name="m_pMenuEdit"/>
    <addaction name="m_pMenuAssets"/>
    <addaction name="m_pMenuEntity"/>
+   <addaction name="menuDebug"/>
    <addaction name="m_pMenuWindow"/>
    <addaction name="m_pMenuHelp"/>
   </widget>
@@ -279,8 +277,8 @@
   <widget class="QDockWidget" name="m_pInspectorDockWidget">
    <property name="minimumSize">
     <size>
-     <width>82</width>
-     <height>58</height>
+     <width>380</width>
+     <height>617</height>
     </size>
    </property>
    <property name="features">
@@ -294,8 +292,25 @@
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_2">
     <layout class="QVBoxLayout" name="verticalLayout_2">
-     <item alignment="Qt::AlignTop">
-      <widget class="Edit::CInspector" name="m_pInspector" native="true"/>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_8">
+       <item>
+        <widget class="Edit::CInspector" name="m_pInspector" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </widget>
@@ -431,7 +446,13 @@
    <attribute name="dockWidgetArea">
     <number>8</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents_5"/>
+   <widget class="QWidget" name="dockWidgetContents_5">
+    <layout class="QVBoxLayout" name="verticalLayout_6">
+     <item>
+      <widget class="Edit::CAssetBrowser" name="m_pAssetBrowserWidget" native="true"/>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <action name="m_pActionNew">
    <property name="text">
@@ -470,14 +491,6 @@
   <action name="m_pActionReportBug">
    <property name="text">
     <string>Report a &amp;Bug...</string>
-   </property>
-  </action>
-  <action name="m_pActionModel">
-   <property name="text">
-    <string>&amp;Model</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+N</string>
    </property>
   </action>
   <action name="actionPoint">
@@ -598,6 +611,32 @@
     <string>Ctrl+2</string>
    </property>
   </action>
+  <action name="m_pActionEmpty">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Empty</string>
+   </property>
+  </action>
+  <action name="m_pActionArea">
+   <property name="text">
+    <string>Area</string>
+   </property>
+  </action>
+  <action name="m_pActionReloadRenderer">
+   <property name="text">
+    <string>&amp;Reload Renderer</string>
+   </property>
+   <property name="shortcut">
+    <string/>
+   </property>
+  </action>
+  <action name="m_pActionReloadAllShader">
+   <property name="text">
+    <string>Reload all Shader</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -625,6 +664,12 @@
     <slot>updateContentForEntity(int)</slot>
    </slots>
   </customwidget>
+  <customwidget>
+   <class>Edit::CAssetBrowser</class>
+   <extends>QWidget</extends>
+   <header>edit_asset_browser.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <resources/>
  <connections>
@@ -651,28 +696,12 @@
    <slot>switchPlayingCurrentScene()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>362</x>
-     <y>113</y>
+     <x>359</x>
+     <y>125</y>
     </hint>
     <hint type="destinationlabel">
      <x>736</x>
      <y>41</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>m_pScreenshotButton</sender>
-   <signal>clicked()</signal>
-   <receiver>CMainWindow</receiver>
-   <slot>takeScreenshot()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>1829</x>
-     <y>113</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>1166</x>
-     <y>44</y>
     </hint>
    </hints>
   </connection>
@@ -705,22 +734,6 @@
     <hint type="destinationlabel">
      <x>246</x>
      <y>280</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>m_pActionModel</sender>
-   <signal>triggered()</signal>
-   <receiver>CMainWindow</receiver>
-   <slot>openNewActorModelDialog()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>966</x>
-     <y>445</y>
     </hint>
    </hints>
   </connection>
@@ -799,8 +812,8 @@
      <y>311</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1914</x>
-     <y>61</y>
+     <x>1913</x>
+     <y>83</y>
     </hint>
    </hints>
   </connection>
@@ -1076,6 +1089,54 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_pActionArea</sender>
+   <signal>triggered()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>createNewLightArea()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>961</x>
+     <y>490</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pActionReloadRenderer</sender>
+   <signal>triggered()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>reloadRenderer()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>961</x>
+     <y>490</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pActionReloadAllShader</sender>
+   <signal>triggered()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>reloadAllShader()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>961</x>
+     <y>490</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>switchPlayingCurrentScene()</slot>
@@ -1098,5 +1159,8 @@
   <slot>toggleInspectorDock()</slot>
   <slot>toggleConsoleDock()</slot>
   <slot>toggleAssetsDock()</slot>
+  <slot>createNewLightArea()</slot>
+  <slot>reloadRenderer()</slot>
+  <slot>reloadAllShader()</slot>
  </slots>
 </ui>

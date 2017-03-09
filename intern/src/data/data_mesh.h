@@ -1,10 +1,11 @@
 
 #pragma once
 
-#include "base/base_string.h"
 #include "base/base_typedef.h"
 
 #include "data/data_lod.h"
+
+#include <string>
 
 namespace Dt
 {
@@ -19,8 +20,7 @@ namespace Dt
         CMesh();
         ~CMesh();
 
-        void SetMeshname(const char* _pMeshname);
-        const char* GetMeshname() const;
+        const std::string& GetMeshname() const;
 
         void SetNumberOfLODs(unsigned int _NumberOfLODs);
         unsigned int GetNumberOfLODs() const;
@@ -31,8 +31,8 @@ namespace Dt
 
     protected:
 
-        Base::CharString m_Meshname;
-        unsigned int     m_NumberOfLODs;
-        CLOD*            m_LODs[s_NumberOfLODs];
+        std::string  m_Meshname;
+        unsigned int m_NumberOfLODs;
+        CLOD*        m_LODs[s_NumberOfLODs];
     };
 } // namespace Dt

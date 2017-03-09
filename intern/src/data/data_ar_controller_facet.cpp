@@ -10,8 +10,8 @@ namespace Dt
     CARControllerPluginFacet::CARControllerPluginFacet()
         : m_pCameraEntity      (nullptr)
         , m_pOutputBackground  (nullptr)
-        , m_pOutputCubemap     (nullptr)
         , m_DeviceType         (Undefined)
+        , m_FreezeOutput       (false)
         , m_NumberOfMarker     (0)
         , m_CameraParameterFile()
         , m_Configuration      ()
@@ -23,8 +23,8 @@ namespace Dt
 
     CARControllerPluginFacet::~CARControllerPluginFacet()
     {
-        m_CameraParameterFile.Clear();
-        m_Configuration.Clear();
+        m_CameraParameterFile.clear();
+        m_Configuration.clear();
     }
 
     // -----------------------------------------------------------------------------
@@ -64,30 +64,44 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CARControllerPluginFacet::SetCameraParameterFile(const Base::Char* _pCameraParameterFile)
+    void CARControllerPluginFacet::SetFreezeOutput(bool _Flag)
     {
-        m_CameraParameterFile = _pCameraParameterFile;
+        m_FreezeOutput = _Flag;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Char* CARControllerPluginFacet::GetCameraParameterFile() const
+    bool CARControllerPluginFacet::GetFreezeLastFrame() const
     {
-        return m_CameraParameterFile.GetConst();
+        return m_FreezeOutput;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CARControllerPluginFacet::SetConfiguration(const Base::Char* _pConfiguration)
+    void CARControllerPluginFacet::SetCameraParameterFile(const std::string& _rCameraParameterFile)
     {
-        m_Configuration = _pConfiguration;
+        m_CameraParameterFile = _rCameraParameterFile;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Char* CARControllerPluginFacet::GetConfiguration() const
+    const std::string& CARControllerPluginFacet::GetCameraParameterFile() const
     {
-        return m_Configuration.GetConst();
+        return m_CameraParameterFile;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CARControllerPluginFacet::SetConfiguration(const std::string& _rConfiguration)
+    {
+        m_Configuration = _rConfiguration;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const std::string& CARControllerPluginFacet::GetConfiguration() const
+    {
+        return m_Configuration;
     }
 
     // -----------------------------------------------------------------------------
@@ -109,27 +123,6 @@ namespace Dt
     const Dt::CTexture2D* CARControllerPluginFacet::GetOutputBackground() const
     {
         return m_pOutputBackground;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CARControllerPluginFacet::SetOutputCubemap(Dt::CTextureCube* _pOutputCubemap)
-    {
-        m_pOutputCubemap = _pOutputCubemap;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Dt::CTextureCube* CARControllerPluginFacet::GetOutputCubemap()
-    {
-        return m_pOutputCubemap;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const Dt::CTextureCube* CARControllerPluginFacet::GetOutputCubemap() const
-    {
-        return m_pOutputCubemap;
     }
 
     // -----------------------------------------------------------------------------

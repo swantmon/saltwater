@@ -20,7 +20,7 @@ layout(location = 1) in vec4 in_Offset;
 layout(location = 0) out vec4 out_Output;
 
 layout(binding = 0) uniform sampler2D ps_InputTexture;
-layout(binding = 2) uniform sampler2D ps_WeightsTexture;
+layout(binding = 1) uniform sampler2D ps_WeightsTexture;
 
 void main(void)
 {

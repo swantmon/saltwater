@@ -1,8 +1,9 @@
 
 #pragma once
 
-#include "base/base_string.h"
 #include "base/base_typedef.h"
+
+#include <string>
 
 namespace Dt
 {
@@ -91,7 +92,7 @@ namespace Dt
                 R5G5G5A1_USHORT,
                 R10G10B10A2_UINT,
                 
-                Unknown = -1,
+                UndefinedFormat = -1,
             };
 
             enum ESemantic
@@ -100,8 +101,6 @@ namespace Dt
                 Normal,
                 Height,
                 HDR,
-                NumberOfSemantics,
-                UndefinedSemantic = -1,
             };
 
             enum EBinding
@@ -115,10 +114,8 @@ namespace Dt
             enum EDirtyFlags
             {
                 DirtyCreate  = 0x01,
-                DirtyFile    = 0x02,
-                DirtyData    = 0x04,
-                DirtyInfo    = 0x08,
-                DirtyDestroy = 0x10,
+                DirtyData    = 0x02,
+                DirtyDestroy = 0x04,
             };
 
         public:
@@ -139,9 +136,9 @@ namespace Dt
             void* GetPixels();
             const void* GetPixels() const;
 
-            const Base::Char* GetFileName() const;
+            const std::string& GetFileName() const;
 
-            const Base::Char* GetIdentifier() const;
+            const std::string& GetIdentifier() const;
 
             unsigned int GetHash() const;
 
@@ -173,13 +170,13 @@ namespace Dt
         
         protected:
 
-            SInfo            m_Info;
-            void*            m_pPixels;
-            Base::CharString m_FileName;
-            Base::CharString m_Identifier;
-            unsigned int     m_Hash;
-            unsigned int     m_DirtyFlags;
-            Base::U64        m_DirtyTime;
+            SInfo        m_Info;
+            void*        m_pPixels;
+            std::string  m_FileName;
+            std::string  m_Identifier;
+            unsigned int m_Hash;
+            unsigned int m_DirtyFlags;
+            Base::U64    m_DirtyTime;
 
         protected:
 

@@ -33,5 +33,6 @@ namespace ARRenderer
     
     void Update();
     void Render();
+    void RenderHitProxy();
 } // namespace ARRenderer
 } // namespace Gfx

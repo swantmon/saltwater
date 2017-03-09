@@ -9,9 +9,10 @@
 #pragma once
 
 #include "base/base_typedef.h"
-#include "base/base_string.h"
 #include "base/base_vector2.h"
 #include "base/base_vector3.h"
+
+#include <string>
 
 namespace Dt
 {
@@ -20,8 +21,8 @@ namespace Dt
 
     public:
 
-        void SetScriptFile(const Base::Char* _pScriptFile);
-        const Base::Char* GetScriptFile();
+        void SetScriptFile(const std::string& _rScriptFile);
+        const std::string& GetScriptFile();
 
     public:
 
@@ -30,6 +31,6 @@ namespace Dt
 
     private:
         
-        Base::CharString m_ScriptFile;
+        std::string m_ScriptFile;
     };
 } // namespace Dt

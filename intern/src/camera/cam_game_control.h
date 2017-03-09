@@ -6,7 +6,7 @@
 
 #include "camera/cam_control.h"
 
-#include "data/data_entity.h"
+
 
 namespace Cam
 {
@@ -30,6 +30,7 @@ namespace Cam
     private:
         
         virtual void InternOnEvent(const Base::CInputEvent& _rEvent);
+        virtual void InternOnDirtyEntity(Dt::CEntity* _pEntity);
         
     private:
         

@@ -30,7 +30,7 @@ namespace Edit
 
     private:
 
-        void OnEntityInfoARControllerMarker(Edit::CMessage& _rMessage);
+        void OnInfoARControllerMarker(Edit::CMessage& _rMessage);
     };
 } // namespace Edit
 

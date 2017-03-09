@@ -7,7 +7,7 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(row_major, std140, binding = 0) uniform UB0
+layout(row_major, std140, binding = 4) uniform UB0
 {
     vec4 m_ConstantBufferData0;
 };
@@ -42,7 +42,7 @@ void main(void)
         FinalColor = InverseToneMapping(FinalColor);
     }
     
-    out_Output = FinalColor * m_HDRConvertFactor;
+    out_Output = vec4(clamp(FinalColor.xyz * m_HDRConvertFactor, 0.0f, F16_MAX), 1.0f);
 }
 
 #endif // __INCLUDE_FS_CUBEMAP_ENV_CUBEMAP_GENERATION_GLSL__

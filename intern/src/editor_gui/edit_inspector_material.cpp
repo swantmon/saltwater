@@ -1,12 +1,24 @@
 ﻿
+#include "base/base_crc.h"
 #include "base/base_vector3.h"
 #include "base/base_vector4.h"
 
 #include "editor_gui/edit_inspector_material.h"
+#include "editor_gui/edit_texture_value.h"
 
 #include "editor_port/edit_message_manager.h"
 
 #include <QColorDialog>
+#include <QDir>
+#include <QDragEnterEvent>
+#include <QDropEvent>
+#include <QFile>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QKeyEvent>
+#include <QMimeData>
+#include <QResizeEvent>
+#include <QUrl>
 
 namespace Edit
 {
@@ -19,6 +31,37 @@ namespace Edit
         // Setup UI
         // -----------------------------------------------------------------------------
         setupUi(this);
+
+        // -----------------------------------------------------------------------------
+        // User UI
+        // -----------------------------------------------------------------------------
+        m_pAlbedoTextureEdit   ->SetLayout((CTextureValue::NoPreview | CTextureValue::NoHash));
+        m_pNormalTextureEdit   ->SetLayout((CTextureValue::NoPreview | CTextureValue::NoHash));
+        m_pRoughnessTextureEdit->SetLayout((CTextureValue::NoPreview | CTextureValue::NoHash));
+        m_pMetallicTextureEdit ->SetLayout((CTextureValue::NoPreview | CTextureValue::NoHash));
+        m_pBumpTextureEdit     ->SetLayout((CTextureValue::NoPreview | CTextureValue::NoHash));
+        m_pAOTextureEdit       ->SetLayout((CTextureValue::NoPreview | CTextureValue::NoHash));
+
+        // -----------------------------------------------------------------------------
+        // Signal / slots
+        // -----------------------------------------------------------------------------
+        connect(m_pAlbedoTextureEdit, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
+        connect(m_pAlbedoTextureEdit, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
+
+        connect(m_pNormalTextureEdit, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
+        connect(m_pNormalTextureEdit, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
+
+        connect(m_pRoughnessTextureEdit, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
+        connect(m_pRoughnessTextureEdit, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
+
+        connect(m_pMetallicTextureEdit, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
+        connect(m_pMetallicTextureEdit, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
+
+        connect(m_pBumpTextureEdit, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
+        connect(m_pBumpTextureEdit, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
+
+        connect(m_pAOTextureEdit, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
+        connect(m_pAOTextureEdit, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
 
         // -----------------------------------------------------------------------------
         // Color picker
@@ -34,8 +77,8 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::ActorInfoMaterial, EDIT_RECEIVE_MESSAGE(&CInspectorMaterial::OnEntityInfoMaterial));
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::MaterialInfo     , EDIT_RECEIVE_MESSAGE(&CInspectorMaterial::OnMaterialInfo));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Actor_Material_Info, EDIT_RECEIVE_MESSAGE(&CInspectorMaterial::OnEntityInfoMaterial));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Material_Info      , EDIT_RECEIVE_MESSAGE(&CInspectorMaterial::OnMaterialInfo));
     }
 
     // -----------------------------------------------------------------------------
@@ -58,43 +101,17 @@ namespace Edit
 
         Base::Float3 AlbedoColor = Base::Float3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
 
-        QString    NewColorTexture = m_pAlbedoTextureEdit->text();
-        QByteArray NewColorTextureBinary = NewColorTexture.toLatin1();
+        QString NewColorTexture     = m_pAlbedoTextureEdit->GetTextureFile();
+        QString NewNormalTexture    = m_pNormalTextureEdit->GetTextureFile();
+        QString NewRoughnessTexture = m_pRoughnessTextureEdit->GetTextureFile();
+        QString NewMetalicTexture   = m_pMetallicTextureEdit->GetTextureFile();
+        QString NewBumpTexture      = m_pBumpTextureEdit->GetTextureFile();
+        QString NewAOTexture        = m_pAOTextureEdit->GetTextureFile();
 
-        // -----------------------------------------------------------------------------
-
-        QString    NewNormalTexture = m_pNormalTextureEdit->text();
-        QByteArray NewNormalTextureBinary = NewNormalTexture.toLatin1();
-
-        // -----------------------------------------------------------------------------
-
-        QString    NewRoughnessTexture = m_pRoughnessTextureEdit->text();
-        QByteArray NewRoughnessTextureBinary = NewRoughnessTexture.toLatin1();
-
-        float RoughnessValue = m_pRoughnessEdit  ->text().toFloat();
-
-        // -----------------------------------------------------------------------------
-
-        QString    NewMetalicTexture = m_pMetallicTextureEdit->text();
-        QByteArray NewMetalicTextureBinary = NewMetalicTexture.toLatin1();
-
-        float MetallicValue = m_pMetallicEdit->text().toFloat();
-
-        // -----------------------------------------------------------------------------
-
+        float RoughnessValue   = m_pRoughnessEdit  ->text().toFloat();
+        float MetallicValue    = m_pMetallicEdit->text().toFloat();
         float ReflectanceValue = m_pReflectanceEdit->text().toFloat();
-
-        // -----------------------------------------------------------------------------
-
-        QString    NewBumpTexture = m_pBumpTextureEdit->text();
-        QByteArray NewBumpTextureBinary = NewBumpTexture.toLatin1();
-
-        // -----------------------------------------------------------------------------
-
-        QString    NewAOTexture = m_pAOTextureEdit->text();
-        QByteArray NewAOTextureBinary = NewAOTexture.toLatin1();
-
-        // -----------------------------------------------------------------------------
+        float BumpValue        = m_pBumpEdit->text().toFloat();
 
         float TilingX = m_pTilingXEdit->text().toFloat();
         float TilingY = m_pTilingYEdit->text().toFloat();
@@ -136,67 +153,68 @@ namespace Edit
         NewMessage.PutFloat(RoughnessValue);
         NewMessage.PutFloat(ReflectanceValue);
         NewMessage.PutFloat(MetallicValue);
+        NewMessage.PutFloat(BumpValue);
 
-        if (NewColorTextureBinary.length() > 0)
+        if (NewColorTexture.length() > 0)
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(NewColorTextureBinary.data());
+            NewMessage.PutInt(m_pAlbedoTextureEdit->GetTextureHash());
         }
         else
         {
             NewMessage.PutBool(false);
         }
 
-        if (NewNormalTextureBinary.length() > 0)
+        if (NewNormalTexture.length() > 0)
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(NewNormalTextureBinary.data());
+            NewMessage.PutInt(m_pNormalTextureEdit->GetTextureHash());
         }
         else
         {
             NewMessage.PutBool(false);
         }
 
-        if (NewRoughnessTextureBinary.length() > 0)
+        if (NewRoughnessTexture.length() > 0)
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(NewRoughnessTextureBinary.data());
+            NewMessage.PutInt(m_pRoughnessTextureEdit->GetTextureHash());
         }
         else
         {
             NewMessage.PutBool(false);
         }
 
-        if (NewMetalicTextureBinary.length() > 0)
+        if (NewMetalicTexture.length() > 0)
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(NewMetalicTextureBinary.data());
+            NewMessage.PutInt(m_pMetallicTextureEdit->GetTextureHash());
         }
         else
         {
             NewMessage.PutBool(false);
         }
 
-        if (NewBumpTextureBinary.length() > 0)
+        if (NewBumpTexture.length() > 0)
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(NewBumpTextureBinary.data());
+            NewMessage.PutInt(m_pBumpTextureEdit->GetTextureHash());
         }
         else
         {
             NewMessage.PutBool(false);
         }
 
-        if (NewAOTextureBinary.length() > 0)
+        if (NewAOTexture.length() > 0)
         {
             NewMessage.PutBool(true);
 
-            NewMessage.PutString(NewAOTextureBinary.data());
+            NewMessage.PutInt(m_pAOTextureEdit->GetTextureHash());
         }
         else
         {
@@ -205,7 +223,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::MaterialInfo, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Material_Update, NewMessage);
 
     }
 
@@ -254,6 +272,14 @@ namespace Edit
 
     void CInspectorMaterial::RequestInformation(unsigned int _EntityID)
     {
+        // -----------------------------------------------------------------------------
+        // Behavior
+        // -----------------------------------------------------------------------------
+        setAcceptDrops(true);
+
+        // -----------------------------------------------------------------------------
+        // Load material from entity
+        // -----------------------------------------------------------------------------
         m_CurrentEntityID = _EntityID;
 
         CMessage NewMessage;
@@ -262,7 +288,93 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::RequestActorInfoMaterial, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Actor_Material_Info, NewMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorMaterial::RequestInformation(const QString& _rRelPathToTexture)
+    {
+        // -----------------------------------------------------------------------------
+        // Behavior
+        // -----------------------------------------------------------------------------
+        setAcceptDrops(false);
+
+        // -----------------------------------------------------------------------------
+        // Load material from file
+        // -----------------------------------------------------------------------------
+        Edit::CMessage NewMessage;
+
+        NewMessage.PutString(_rRelPathToTexture.toLatin1().data());
+
+        NewMessage.Reset();
+
+        int Hash = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Material_Load, NewMessage);
+
+        if (Hash != -1)
+        {
+            m_MaterialHash = static_cast<unsigned int>(Hash);
+
+            // -----------------------------------------------------------------------------
+            // Request info of texture
+            // -----------------------------------------------------------------------------
+            Edit::CMessage NewMessage;
+
+            NewMessage.PutInt(m_MaterialHash);
+
+            NewMessage.Reset();
+
+            Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Material_Info, NewMessage);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorMaterial::dragEnterEvent(QDragEnterEvent* _pEvent)
+    {
+        const QMimeData* pMimeData = _pEvent->mimeData();
+
+        if (pMimeData->hasFormat("SW_MATERIAL_REL_PATH") == false) return;
+
+        _pEvent->acceptProposedAction();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorMaterial::dropEvent(QDropEvent* _pEvent)
+    {
+        const QMimeData* pMimeData = _pEvent->mimeData();
+
+        assert(pMimeData->hasFormat("SW_MATERIAL_REL_PATH"));
+
+        QString RelativePathToFile = pMimeData->data("SW_MATERIAL_REL_PATH");
+
+        QByteArray ModelFileBinary = RelativePathToFile.toLatin1();
+
+        CMessage NewLoadMaterialMessage;
+
+        NewLoadMaterialMessage.PutString(ModelFileBinary.data());
+
+        NewLoadMaterialMessage.Reset();
+
+        int HashOfMaterial = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Material_Load, NewLoadMaterialMessage);
+
+        if (HashOfMaterial == -1) return;
+
+        // -----------------------------------------------------------------------------
+        // Set material to entity
+        // -----------------------------------------------------------------------------
+        Edit::CMessage NewApplyMessage;
+
+        NewApplyMessage.PutInt(m_CurrentEntityID);
+
+        NewApplyMessage.PutInt(HashOfMaterial);
+
+        NewApplyMessage.Reset();
+
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Actor_Material_Update, NewApplyMessage);
+
+        RequestInformation(m_CurrentEntityID);
     }
 
     // -----------------------------------------------------------------------------
@@ -296,7 +408,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::RequestMaterialInfo, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Material_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -343,6 +455,7 @@ namespace Edit
         float Roughness   = _rMessage.GetFloat();
         float Reflectance = _rMessage.GetFloat();
         float Metalness   = _rMessage.GetFloat();
+        float BumpFactor  = _rMessage.GetFloat();
 
         HasColorMap = _rMessage.GetBool();
 
@@ -399,9 +512,9 @@ namespace Edit
 
         // -----------------------------------------------------------------------------
 
-        m_pAlbedoTextureEdit->setText("");
+        m_pAlbedoTextureEdit->SetTextureFile("");
 
-        if (HasColorMap) m_pAlbedoTextureEdit->setText(ColorMapName);
+        if (HasColorMap) m_pAlbedoTextureEdit->SetTextureFile(ColorMapName);
 
         QPalette ButtonPalette = m_pAlbedoColorButton->palette();
 
@@ -413,15 +526,15 @@ namespace Edit
 
         // -----------------------------------------------------------------------------
 
-        m_pNormalTextureEdit->setText("");
+        m_pNormalTextureEdit->SetTextureFile("");
 
-        if (HasNormalMap) m_pNormalTextureEdit->setText(NormalMapName);
+        if (HasNormalMap) m_pNormalTextureEdit->SetTextureFile(NormalMapName);
 
         // -----------------------------------------------------------------------------
 
-        m_pRoughnessTextureEdit->setText("");
+        m_pRoughnessTextureEdit->SetTextureFile("");
 
-        if (HasRoughnessMap) m_pRoughnessTextureEdit->setText(RoughnessMapName);
+        if (HasRoughnessMap) m_pRoughnessTextureEdit->SetTextureFile(RoughnessMapName);
 
         m_pRoughnessSlider->setValue(static_cast<int>(Roughness * 100.0f));
 
@@ -429,9 +542,9 @@ namespace Edit
 
         // -----------------------------------------------------------------------------
 
-        m_pMetallicTextureEdit->setText("");
+        m_pMetallicTextureEdit->SetTextureFile("");
 
-        if (HasMetalnessMap) m_pMetallicTextureEdit->setText(MetalMapName);
+        if (HasMetalnessMap) m_pMetallicTextureEdit->SetTextureFile(MetalMapName);
 
         m_pMetallicSlider->setValue(static_cast<int>(Metalness * 100.0f));
 
@@ -445,15 +558,17 @@ namespace Edit
 
         // -----------------------------------------------------------------------------
 
-        m_pBumpTextureEdit->setText("");
+        m_pBumpTextureEdit->SetTextureFile("");
 
-        if (HasBumpMap) m_pBumpTextureEdit->setText(BumpMapName);
+        if (HasBumpMap) m_pBumpTextureEdit->SetTextureFile(BumpMapName);
+
+        m_pBumpEdit->setText(QString::number(BumpFactor));
 
         // -----------------------------------------------------------------------------
 
-        m_pAOTextureEdit->setText("");
+        m_pAOTextureEdit->SetTextureFile("");
 
-        if (HasAOMap) m_pAOTextureEdit->setText(AOMapName);
+        if (HasAOMap) m_pAOTextureEdit->SetTextureFile(AOMapName);
 
         // -----------------------------------------------------------------------------
 

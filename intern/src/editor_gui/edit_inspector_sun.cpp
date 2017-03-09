@@ -32,7 +32,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::LightInfoSun, EDIT_RECEIVE_MESSAGE(&CInspectorSun::OnEntityInfoSun));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Light_Sun_Info, EDIT_RECEIVE_MESSAGE(&CInspectorSun::OnEntityInfoSun));
     }
 
     // -----------------------------------------------------------------------------
@@ -88,7 +88,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::LightInfoSun, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Light_Sun_Update, NewMessage);
 
     }
 
@@ -121,7 +121,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::RequestLightInfoSun, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Light_Sun_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------

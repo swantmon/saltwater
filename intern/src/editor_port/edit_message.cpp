@@ -355,7 +355,7 @@ namespace Edit
     template <>
     void CMessage::InternPutAddress<4>(void* _pPointer)
     {
-        PutInt(static_cast<int>((Base::Size) _pPointer));
+        PutInt(static_cast<int>((int) _pPointer));
     }
 
     // -----------------------------------------------------------------------------

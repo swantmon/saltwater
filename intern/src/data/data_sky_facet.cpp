@@ -6,7 +6,8 @@
 namespace Dt
 {
     CSkyFacet::CSkyFacet()
-        : m_Type            (Procedural)
+        : m_RefreshMode     (Static)
+        , m_Type            (Procedural)
         , m_HasHDR          (true)
         , m_pCubemap        (0)
         , m_pPanoramaTexture(0)
@@ -21,6 +22,20 @@ namespace Dt
     CSkyFacet::~CSkyFacet()
     {
 
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSkyFacet::SetRefreshMode(ERefreshMode _RefreshMode)
+    {
+        m_RefreshMode = _RefreshMode;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CSkyFacet::ERefreshMode CSkyFacet::GetRefreshMode()
+    {
+        return m_RefreshMode;
     }
 
     // -----------------------------------------------------------------------------

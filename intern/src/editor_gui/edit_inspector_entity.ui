@@ -198,22 +198,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>m_pEnabledCB</sender>
-   <signal>clicked()</signal>
-   <receiver>InspectorEntity</receiver>
-   <slot>valueChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>76</x>
-     <y>20</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>397</x>
-     <y>15</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>m_pCategoryCB</sender>
    <signal>currentIndexChanged(int)</signal>
    <receiver>InspectorEntity</receiver>
@@ -245,8 +229,25 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_pEnabledCB</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>InspectorEntity</receiver>
+   <slot>enableEntity(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>75</x>
+     <y>21</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>397</x>
+     <y>18</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>valueChanged()</slot>
+  <slot>enableEntity(bool)</slot>
  </slots>
 </ui>

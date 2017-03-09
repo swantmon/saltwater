@@ -33,5 +33,6 @@ namespace ActorRenderer
     
     void Update();
     void Render();
+    void RenderHitProxy();
 } // namespace ActorRenderer
 } // namespace Gfx

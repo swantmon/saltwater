@@ -18,7 +18,7 @@ namespace Gfx
     struct STextureDescriptor
     {
         static const unsigned int          s_NumberOfPixelsFromSource   = static_cast<unsigned int>(-1);
-//      static const unsigned int          s_NumberOfMipMapsFromSource  = static_cast<unsigned int>(-1);
+        static const unsigned int          s_NumberOfMipMapsFromSource  = static_cast<unsigned int>(-1);
         static const unsigned int          s_GenerateAllMipMaps         = static_cast<unsigned int>( 0);
         static const unsigned int          s_NumberOfTexturesFromSource = static_cast<unsigned int>(-1);
         static const CTextureBase::EFormat s_FormatFromSource           = CTextureBase::Unknown;

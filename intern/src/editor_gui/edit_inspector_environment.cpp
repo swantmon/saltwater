@@ -12,7 +12,6 @@ namespace Edit
     CInspectorEnvironment::CInspectorEnvironment(QWidget* _pParent)
         : QWidget          (_pParent)
         , m_CurrentEntityID(-1)
-        , m_TextureFileName()
     {
         // -----------------------------------------------------------------------------
         // Setup UI
@@ -20,9 +19,20 @@ namespace Edit
         setupUi(this);
 
         // -----------------------------------------------------------------------------
+        // Setup user UI
+        // -----------------------------------------------------------------------------
+        m_pTextureValue->SetLayout(CTextureValue::NoPreview);
+
+        // -----------------------------------------------------------------------------
+        // Signal / slots
+        // -----------------------------------------------------------------------------
+        connect(m_pTextureValue, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
+        connect(m_pTextureValue, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
+
+        // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::LightInfoEnvironment, EDIT_RECEIVE_MESSAGE(&CInspectorEnvironment::OnEntityInfoEnvironment));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Light_Environment_Info, EDIT_RECEIVE_MESSAGE(&CInspectorEnvironment::OnEntityInfoEnvironment));
     }
 
     // -----------------------------------------------------------------------------
@@ -39,11 +49,11 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
+        int RefreshMode = m_pRefreshModeCB->currentIndex();
+        
         int Type = m_pTypeCB->currentIndex();
 
-        QByteArray NewTextureBinary = m_TextureFileName.toLatin1();
-
-        unsigned int TextureHash = m_pTextureEdit->text().toUInt();
+        unsigned int TextureHash = m_pTextureValue->GetTextureHash();
 
         float Intensity = m_pIntensityEdit->text().toFloat();
 
@@ -54,9 +64,9 @@ namespace Edit
 
         NewMessage.PutInt(m_CurrentEntityID);
 
-        NewMessage.PutInt(Type);
+        NewMessage.PutInt(RefreshMode);
 
-        NewMessage.PutString(NewTextureBinary);
+        NewMessage.PutInt(Type);
 
         NewMessage.PutInt(TextureHash);
 
@@ -64,45 +74,7 @@ namespace Edit
 
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::LightInfoEnvironment, NewMessage);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CInspectorEnvironment::loadTextureFromDialog()
-    {
-        QString TextureFile = QFileDialog::getOpenFileName(this, tr("Load environment file"), tr(""), tr("Environment files (*.dds *.hdr)"));
-
-        // -----------------------------------------------------------------------------
-        // Send message with new scene / map request
-        // -----------------------------------------------------------------------------
-        if (!TextureFile.isEmpty())
-        {
-            QDir dir("../assets/");
-
-            m_TextureFileName = dir.relativeFilePath(TextureFile);
-
-            // -----------------------------------------------------------------------------
-            // Create hash
-            // TODO: Should be done by a texture manager
-            // -----------------------------------------------------------------------------
-            QByteArray NewTextureBinary = m_TextureFileName.toLatin1();
-
-            const char*  pHashIdentifier = NewTextureBinary.data();
-            unsigned int NumberOfBytes;
-            unsigned int Hash;
-
-            const void* pData;
-
-            NumberOfBytes = static_cast<unsigned int>(strlen(pHashIdentifier) * sizeof(char));
-            pData = static_cast<const void*>(pHashIdentifier);
-
-            Hash = Base::CRC32(pData, NumberOfBytes);
-
-            m_pTextureEdit->setText(QString::number(Hash));
-
-            valueChanged();
-        }
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Light_Environment_Update, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -117,13 +89,16 @@ namespace Edit
 
         NewMessage.Reset();
 
-        MessageManager::SendMessage(SGUIMessageType::RequestLightInfoEnvironment, NewMessage);
+        MessageManager::SendMessage(SGUIMessageType::Light_Environment_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
 
     void CInspectorEnvironment::OnEntityInfoEnvironment(Edit::CMessage& _rMessage)
     {
+        char pTemp[256];
+        const char* pTexture = nullptr;
+
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
@@ -131,11 +106,21 @@ namespace Edit
 
         if (EntityID != m_CurrentEntityID) return;
 
+        int RefreshMode = _rMessage.GetInt();
+
         int Type = _rMessage.GetInt();
 
-        char pTemp[256];
+        bool HasTexture = _rMessage.GetBool();
 
-        const char* pTexture = _rMessage.GetString(pTemp, 256);
+        if (HasTexture)
+        {
+            bool HasName = _rMessage.GetBool();
+
+            if (HasName)
+            {
+                pTexture = _rMessage.GetString(pTemp, 256);
+            }
+        }
 
         unsigned int TextureHash = _rMessage.GetInt();
 
@@ -144,17 +129,24 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Set values
         // -----------------------------------------------------------------------------
+        m_pRefreshModeCB->blockSignals(true);
         m_pTypeCB->blockSignals(true);
+
+        m_pRefreshModeCB->setCurrentIndex(RefreshMode);
 
         m_pTypeCB->setCurrentIndex(Type);
 
-        m_pTypeCB->blockSignals(false);
+        if (HasTexture)
+        {
+            m_pTextureValue->SetTextureFile(pTexture);
+        }
 
-        m_TextureFileName = pTexture;
-
-        m_pTextureEdit->setText(QString::number(TextureHash));
+        m_pTextureValue->SetTextureHash(TextureHash);
 
         m_pIntensityEdit->setText(QString::number(Intensity));
+
+        m_pTypeCB->blockSignals(false);
+        m_pRefreshModeCB->blockSignals(false);
     }
 } // namespace Edit
 

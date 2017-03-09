@@ -123,10 +123,9 @@ namespace
         CShaderPtr m_BloomShaderPSPtr;
         CShaderPtr m_PassThroughPSPtr;
 
-        CBufferSetPtr m_BaseVSBufferSetPtr;
-        CBufferSetPtr m_GaussianBlurPropertiesCSBufferSetPtr;
-        CBufferSetPtr m_DownSamplePropertiesPSBufferSetPtr;
-        CBufferSetPtr m_BloomPropertiesPSBufferSetPtr;
+        CBufferPtr m_GaussianBlurPropertiesBufferPtr;
+        CBufferPtr m_DownSamplePropertiesBufferPtr;
+        CBufferPtr m_BloomPropertiesBufferPtr;
 
         CTextureSetPtr m_BlurStagesTextureSetPtrs[s_NumberOfBlurStages * 2];
         CTextureSetPtr m_BlurStageFinalTextureSetPtrs[s_NumberOfBlurStages];
@@ -139,8 +138,6 @@ namespace
         CRenderContextPtr m_DownSampleRenderContextPtrs[NumberOfDownSamples];
         CTargetSetPtr     m_DownSampleTargetSetPtrs[NumberOfDownSamples];
         Base::Int2        m_DownSampleSizes[NumberOfDownSamples];
-
-        CSamplerSetPtr m_PSSamplerSetPtr;
 
         CBloomRenderJobs m_BloomRenderJobs;
         
@@ -158,29 +155,27 @@ namespace
 namespace
 {
     CGfxPostFXHDRRenderer::CGfxPostFXHDRRenderer()
-        : m_QuadModelPtr                        ()
-        , m_FullQuadInputLayoutPtr              ()
-        , m_RectangleShaderVSPtr                ()
-        , m_DownSampleShaderPSPtr               ()
-        , m_GaussianBlurShaderPtr               ()
-        , m_BloomShaderPSPtr                    ()
-        , m_PassThroughPSPtr                    ()
-        , m_BaseVSBufferSetPtr                  ()
-        , m_GaussianBlurPropertiesCSBufferSetPtr()
-        , m_DownSamplePropertiesPSBufferSetPtr  ()
-        , m_BloomPropertiesPSBufferSetPtr       ()
-        , m_BlurStagesTextureSetPtrs            ()
-        , m_BlurStageFinalTextureSetPtrs        ()
-        , m_SwapTexturePtrs                     ()
-        , m_SwapContextPtrs                     ()
-        , m_SwapRenderTargetPtrs                ()
-        , m_DownSampleTextureSetPtrs            ()
-        , m_DownSampleRenderContextPtrs         ()
-        , m_DownSampleTargetSetPtrs             ()
-        , m_DownSampleSizes                     ()
-        , m_PSSamplerSetPtr                     ()
-        , m_BloomRenderJobs                     ()
-        , m_SwapCounter                         (0)
+        : m_QuadModelPtr                   ()
+        , m_FullQuadInputLayoutPtr         ()
+        , m_RectangleShaderVSPtr           ()
+        , m_DownSampleShaderPSPtr          ()
+        , m_GaussianBlurShaderPtr          ()
+        , m_BloomShaderPSPtr               ()
+        , m_PassThroughPSPtr               ()
+        , m_GaussianBlurPropertiesBufferPtr()
+        , m_DownSamplePropertiesBufferPtr  ()
+        , m_BloomPropertiesBufferPtr       ()
+        , m_BlurStagesTextureSetPtrs       ()
+        , m_BlurStageFinalTextureSetPtrs   ()
+        , m_SwapTexturePtrs                ()
+        , m_SwapContextPtrs                ()
+        , m_SwapRenderTargetPtrs           ()
+        , m_DownSampleTextureSetPtrs       ()
+        , m_DownSampleRenderContextPtrs    ()
+        , m_DownSampleTargetSetPtrs        ()
+        , m_DownSampleSizes                ()
+        , m_BloomRenderJobs                ()
+        , m_SwapCounter                    (0)
     {
         m_BloomRenderJobs.reserve(2);
     }
@@ -223,10 +218,9 @@ namespace
         m_BloomShaderPSPtr      = 0;
         m_PassThroughPSPtr      = 0;
 
-        m_BaseVSBufferSetPtr                   = 0;
-        m_GaussianBlurPropertiesCSBufferSetPtr = 0;
-        m_DownSamplePropertiesPSBufferSetPtr   = 0;
-        m_BloomPropertiesPSBufferSetPtr        = 0;
+        m_GaussianBlurPropertiesBufferPtr = 0;
+        m_DownSamplePropertiesBufferPtr   = 0;
+        m_BloomPropertiesBufferPtr        = 0;
 
         m_SwapTexturePtrs[0]      = 0;
         m_SwapTexturePtrs[1]      = 0;
@@ -235,7 +229,6 @@ namespace
         m_SwapRenderTargetPtrs[0] = 0;
         m_SwapRenderTargetPtrs[1] = 0;
 
-        m_PSSamplerSetPtr = 0;
 
         for (unsigned int IndexOfBlurStage = 0; IndexOfBlurStage < s_NumberOfBlurStages; ++IndexOfBlurStage)
         {
@@ -401,12 +394,6 @@ namespace
 
             m_DownSampleRenderContextPtrs[IndexOfDownSample] = DownSampleRenderContextPtr;
         }
-
-        // -----------------------------------------------------------------------------
-
-        CSamplerPtr LinearFilter = SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp);
-
-        m_PSSamplerSetPtr = SamplerManager::CreateSamplerSet(LinearFilter, LinearFilter, LinearFilter, LinearFilter);
     }
     
     // -----------------------------------------------------------------------------
@@ -490,7 +477,7 @@ namespace
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr GaussianSettingsResourceBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        m_GaussianBlurPropertiesBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
         
@@ -502,7 +489,7 @@ namespace
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr BloomSettingsResourceBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        m_BloomPropertiesBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
         
@@ -514,14 +501,7 @@ namespace
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr DownSampleSettingsResourceBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
-        
-        // -----------------------------------------------------------------------------
-
-        m_BaseVSBufferSetPtr                   = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBufferVS());
-        m_GaussianBlurPropertiesCSBufferSetPtr = BufferManager::CreateBufferSet(GaussianSettingsResourceBuffer);
-        m_BloomPropertiesPSBufferSetPtr        = BufferManager::CreateBufferSet(BloomSettingsResourceBuffer);
-        m_DownSamplePropertiesPSBufferSetPtr   = BufferManager::CreateBufferSet(DownSampleSettingsResourceBuffer);
+        m_DownSamplePropertiesBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -605,18 +585,16 @@ namespace
         // -----------------------------------------------------------------------------
         for (unsigned int IndexOfDownSample = 0; IndexOfDownSample < pDataBloomFacet->GetSize(); ++IndexOfDownSample)
         {
-            SDownSampleShaderProperties* pDownSampleSettings = static_cast<SDownSampleShaderProperties*>(BufferManager::MapConstantBuffer(m_DownSamplePropertiesPSBufferSetPtr->GetBuffer(0)));
+            SDownSampleShaderProperties DownSampleSettings;
 
-            pDownSampleSettings->m_InvertTexturesize[0] = 1.0f / static_cast<float>(m_DownSampleSizes[IndexOfDownSample][0] * 2);
-            pDownSampleSettings->m_InvertTexturesize[1] = 1.0f / static_cast<float>(m_DownSampleSizes[IndexOfDownSample][1] * 2);
+            DownSampleSettings.m_InvertTexturesize[0] = 1.0f / static_cast<float>(m_DownSampleSizes[IndexOfDownSample][0] * 2);
+            DownSampleSettings.m_InvertTexturesize[1] = 1.0f / static_cast<float>(m_DownSampleSizes[IndexOfDownSample][1] * 2);
 
-            BufferManager::UnmapConstantBuffer(m_DownSamplePropertiesPSBufferSetPtr->GetBuffer(0));
+            BufferManager::UploadConstantBufferData(m_DownSamplePropertiesBufferPtr, &DownSampleSettings);
 
             const unsigned int pOffset[] = { 0, 0 };
 
             ContextManager::SetRenderContext(m_DownSampleRenderContextPtrs[IndexOfDownSample]);
-
-            ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
 
             ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
 
@@ -630,19 +608,23 @@ namespace
 
             ContextManager::SetShaderPS(m_DownSampleShaderPSPtr);
 
-            ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
+            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
-            ContextManager::SetConstantBufferSetPS(m_DownSamplePropertiesPSBufferSetPtr);
+            ContextManager::SetConstantBuffer(1, m_DownSamplePropertiesBufferPtr);
 
-            ContextManager::SetTextureSetPS(m_DownSampleTextureSetPtrs[IndexOfDownSample]);
+            ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+            ContextManager::SetTexture(0, m_DownSampleTextureSetPtrs[IndexOfDownSample]->GetTexture(0));
 
             ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
 
-            ContextManager::ResetTextureSetPS();
+            ContextManager::ResetTexture(0);
 
-            ContextManager::ResetConstantBufferSetPS();
+            ContextManager::ResetSampler(0);
 
-            ContextManager::ResetConstantBufferSetVS();
+            ContextManager::ResetConstantBuffer(0);
+
+            ContextManager::ResetConstantBuffer(1);
 
             ContextManager::ResetTopology();
 
@@ -651,8 +633,6 @@ namespace
             ContextManager::ResetIndexBuffer();
 
             ContextManager::ResetVertexBufferSet();
-
-            ContextManager::ResetSamplerSetPS();
 
             ContextManager::ResetShaderVS();
 
@@ -672,74 +652,65 @@ namespace
             NumberOfThreadGroupsX = (m_DownSampleSizes[IndexOfBlurStage][0] + s_BlurTileSize - 1) / (s_BlurTileSize);
             NumberOfThreadGroupsY = (m_DownSampleSizes[IndexOfBlurStage][1] + s_BlurTileSize - 1) / (s_BlurTileSize);
 
+            SGaussianShaderProperties GaussianSettings;
+
+            GaussianSettings.m_Direction[0] = 1;
+            GaussianSettings.m_Direction[1] = 0;
+            GaussianSettings.m_MaxPixelCoord[0] = m_DownSampleSizes[IndexOfBlurStage][0];
+            GaussianSettings.m_MaxPixelCoord[1] = m_DownSampleSizes[IndexOfBlurStage][1];
+            GaussianSettings.m_Weights[0] = 0.018816f;
+            GaussianSettings.m_Weights[1] = 0.034474f;
+            GaussianSettings.m_Weights[2] = 0.056577f;
+            GaussianSettings.m_Weights[3] = 0.083173f;
+            GaussianSettings.m_Weights[4] = 0.109523f;
+            GaussianSettings.m_Weights[5] = 0.129188f;
+            GaussianSettings.m_Weights[6] = 0.136498f;
+
             // -----------------------------------------------------------------------------
             // Blur
             // -----------------------------------------------------------------------------
-            SGaussianShaderProperties* pGaussianSettings = static_cast<SGaussianShaderProperties*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0)));
+            GaussianSettings.m_Direction[0] = 1;
+            GaussianSettings.m_Direction[1] = 0;
 
-            pGaussianSettings->m_Direction[0] = 1;
-            pGaussianSettings->m_Direction[1] = 0;
-            pGaussianSettings->m_MaxPixelCoord[0] = m_DownSampleSizes[IndexOfBlurStage][0];
-            pGaussianSettings->m_MaxPixelCoord[1] = m_DownSampleSizes[IndexOfBlurStage][1];
-            pGaussianSettings->m_Weights[0] = 0.018816f;
-            pGaussianSettings->m_Weights[1] = 0.034474f;
-            pGaussianSettings->m_Weights[2] = 0.056577f;
-            pGaussianSettings->m_Weights[3] = 0.083173f;
-            pGaussianSettings->m_Weights[4] = 0.109523f;
-            pGaussianSettings->m_Weights[5] = 0.129188f;
-            pGaussianSettings->m_Weights[6] = 0.136498f;
-
-            BufferManager::UnmapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0));
-
-
+            BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesBufferPtr, &GaussianSettings);
 
             ContextManager::SetShaderCS(m_GaussianBlurShaderPtr);
 
-            ContextManager::SetConstantBufferSetCS(m_GaussianBlurPropertiesCSBufferSetPtr);
+            ContextManager::SetResourceBuffer(0, m_GaussianBlurPropertiesBufferPtr);
 
-            ContextManager::SetTextureSetCS(m_BlurStagesTextureSetPtrs[IndexOfBlurStage * 2 + 0]);
+            ContextManager::SetImageTexture(0, m_BlurStagesTextureSetPtrs[IndexOfBlurStage * 2 + 0]->GetTexture(0));
+            ContextManager::SetImageTexture(1, m_BlurStagesTextureSetPtrs[IndexOfBlurStage * 2 + 0]->GetTexture(1));
 
             ContextManager::Dispatch(NumberOfThreadGroupsX, NumberOfThreadGroupsY, 1);
 
-            ContextManager::ResetTextureSetCS();
+            ContextManager::ResetImageTexture(0);
+            ContextManager::ResetImageTexture(1);
 
-            ContextManager::ResetConstantBufferSetCS();
+            ContextManager::ResetResourceBuffer(0);
 
             ContextManager::ResetShaderCS();
 
-
             // -----------------------------------------------------------------------------
             // Blur
             // -----------------------------------------------------------------------------
-            pGaussianSettings = static_cast<SGaussianShaderProperties*>(BufferManager::MapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0)));
+            GaussianSettings.m_Direction[0] = 0;
+            GaussianSettings.m_Direction[1] = 1;
 
-            pGaussianSettings->m_Direction[0] = 0;
-            pGaussianSettings->m_Direction[1] = 1;
-            pGaussianSettings->m_MaxPixelCoord[0] = m_DownSampleSizes[IndexOfBlurStage][0];
-            pGaussianSettings->m_MaxPixelCoord[1] = m_DownSampleSizes[IndexOfBlurStage][1];
-            pGaussianSettings->m_Weights[0] = 0.018816f;
-            pGaussianSettings->m_Weights[1] = 0.034474f;
-            pGaussianSettings->m_Weights[2] = 0.056577f;
-            pGaussianSettings->m_Weights[3] = 0.083173f;
-            pGaussianSettings->m_Weights[4] = 0.109523f;
-            pGaussianSettings->m_Weights[5] = 0.129188f;
-            pGaussianSettings->m_Weights[6] = 0.136498f;
-
-            BufferManager::UnmapConstantBuffer(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0));
-
-
+            BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesBufferPtr, &GaussianSettings);
 
             ContextManager::SetShaderCS(m_GaussianBlurShaderPtr);
 
-            ContextManager::SetConstantBufferSetCS(m_GaussianBlurPropertiesCSBufferSetPtr);
+            ContextManager::SetResourceBuffer(0, m_GaussianBlurPropertiesBufferPtr);
 
-            ContextManager::SetTextureSetCS(m_BlurStagesTextureSetPtrs[IndexOfBlurStage * 2 + 1]);
+            ContextManager::SetImageTexture(0, m_BlurStagesTextureSetPtrs[IndexOfBlurStage * 2 + 1]->GetTexture(0));
+            ContextManager::SetImageTexture(1, m_BlurStagesTextureSetPtrs[IndexOfBlurStage * 2 + 1]->GetTexture(1));
 
             ContextManager::Dispatch(NumberOfThreadGroupsX, NumberOfThreadGroupsY, 1);
 
-            ContextManager::ResetTextureSetCS();
+            ContextManager::ResetImageTexture(0);
+            ContextManager::ResetImageTexture(1);
 
-            ContextManager::ResetConstantBufferSetCS();
+            ContextManager::ResetResourceBuffer(0);
 
             ContextManager::ResetShaderCS();
         }
@@ -753,12 +724,12 @@ namespace
         // -----------------------------------------------------------------------------
         // Buffer
         // -----------------------------------------------------------------------------
-        SBloomShaderProperties* pBloomShaderProperties = static_cast<SBloomShaderProperties*>(BufferManager::MapConstantBuffer(m_BloomPropertiesPSBufferSetPtr->GetBuffer(0)));
+        SBloomShaderProperties BloomShaderProperties;
 
-        pBloomShaderProperties->m_BloomThresholdValue = Base::Float4(static_cast<float>(pDataBloomFacet->GetTreshhold()), 0, 0, pDataBloomFacet->GetExposureScale());
-        pBloomShaderProperties->m_BloomTintIntensity  = pDataBloomFacet->GetTint() * pDataBloomFacet->GetIntensity();
+        BloomShaderProperties.m_BloomThresholdValue = Base::Float4(static_cast<float>(pDataBloomFacet->GetTreshhold()), 0, 0, pDataBloomFacet->GetExposureScale());
+        BloomShaderProperties.m_BloomTintIntensity  = pDataBloomFacet->GetTint() * pDataBloomFacet->GetIntensity();
 
-        BufferManager::UnmapConstantBuffer(m_BloomPropertiesPSBufferSetPtr->GetBuffer(0));
+        BufferManager::UploadConstantBufferData(m_BloomPropertiesBufferPtr, &BloomShaderProperties);
 
         // -----------------------------------------------------------------------------
         // Rendering
@@ -766,8 +737,6 @@ namespace
         const unsigned int pOffset[] = {0, 0};
 
         ContextManager::SetRenderContext(m_SwapContextPtrs[NextSwapBufferCount]);
-        
-        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
         
         ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
         
@@ -781,21 +750,31 @@ namespace
         
         ContextManager::SetShaderPS(m_BloomShaderPSPtr);
         
-        ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         
-        ContextManager::SetConstantBufferSetPS(m_BloomPropertiesPSBufferSetPtr);
-        
-        ContextManager::SetTextureSetPS(m_SwapTexturePtrs[CurrentSwapBufferCount]);
+        ContextManager::SetConstantBuffer(1, m_BloomPropertiesBufferPtr);
 
-        ContextManager::SetTextureSetPS(m_BlurStageFinalTextureSetPtrs[pDataBloomFacet->GetSize() - 1]);
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        
+        ContextManager::SetTexture(0, m_SwapTexturePtrs[CurrentSwapBufferCount]->GetTexture(0));
+        ContextManager::SetTexture(1, m_SwapTexturePtrs[CurrentSwapBufferCount]->GetTexture(1));
+        ContextManager::SetTexture(2, m_BlurStageFinalTextureSetPtrs[pDataBloomFacet->GetSize() - 1]->GetTexture(0));
         
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
         
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+        ContextManager::ResetTexture(1);
+        ContextManager::ResetTexture(2);
+
+        ContextManager::ResetSampler(0);
+        ContextManager::ResetSampler(1);
+        ContextManager::ResetSampler(2);
         
-        ContextManager::ResetConstantBufferSetPS();
+        ContextManager::ResetConstantBuffer(0);
         
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(1);
         
         ContextManager::ResetTopology();
         
@@ -804,8 +783,6 @@ namespace
         ContextManager::ResetIndexBuffer();
         
         ContextManager::ResetVertexBufferSet();
-        
-        ContextManager::ResetSamplerSetPS();
         
         ContextManager::ResetShaderVS();
         
@@ -839,9 +816,7 @@ namespace
         const unsigned int pOffset[] = {0, 0};
         
         ContextManager::SetRenderContext(m_SwapContextPtrs[NextSwapBufferCount]);
-        
-        ContextManager::SetSamplerSetPS(m_PSSamplerSetPtr);
-        
+
         ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
         
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
@@ -854,17 +829,19 @@ namespace
         
         ContextManager::SetShaderPS(m_PassThroughPSPtr);
         
-        ContextManager::SetConstantBufferSetVS(m_BaseVSBufferSetPtr);
-        
-        ContextManager::SetTextureSetPS(m_SwapTexturePtrs[CurrentSwapBufferCount]);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+
+        ContextManager::SetTexture(0, m_SwapTexturePtrs[CurrentSwapBufferCount]->GetTexture(0));
         
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
         
-        ContextManager::ResetTextureSetPS();
+        ContextManager::ResetTexture(0);
+
+        ContextManager::ResetSampler(0);
         
-        ContextManager::ResetConstantBufferSetPS();
-        
-        ContextManager::ResetConstantBufferSetVS();
+        ContextManager::ResetConstantBuffer(0);
         
         ContextManager::ResetTopology();
         
@@ -873,8 +850,6 @@ namespace
         ContextManager::ResetIndexBuffer();
         
         ContextManager::ResetVertexBufferSet();
-        
-        ContextManager::ResetSamplerSetPS();
         
         ContextManager::ResetShaderVS();
         
