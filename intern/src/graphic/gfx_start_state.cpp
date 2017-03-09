@@ -41,6 +41,7 @@
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_tonemapping_renderer.h"
 #include "graphic/gfx_view_manager.h"
+#include "graphic/gfx_voxel_renderer.h"
 
 using namespace Gfx;
 
@@ -137,6 +138,7 @@ namespace
         DebugRenderer        ::OnStart();
         SelectionRenderer    ::OnStart();
         TonemappingRenderer  ::OnStart();
+        VoxelRenderer        ::OnStart();
         
         
         // -----------------------------------------------------------------------------
@@ -159,6 +161,7 @@ namespace
         DebugRenderer        ::OnSetupShader();
         SelectionRenderer    ::OnSetupShader();
         TonemappingRenderer  ::OnSetupShader();
+        VoxelRenderer        ::OnSetupShader();
         
         // -----------------------------------------------------------------------------
         // Setup the kernels of all renderer
@@ -180,6 +183,7 @@ namespace
         DebugRenderer        ::OnSetupKernels();
         SelectionRenderer    ::OnSetupKernels();
         TonemappingRenderer  ::OnSetupKernels();
+        VoxelRenderer        ::OnSetupKernels();
         
         // -----------------------------------------------------------------------------
         // Setup the render targets of all renderer
@@ -201,6 +205,7 @@ namespace
         DebugRenderer        ::OnSetupRenderTargets();
         SelectionRenderer    ::OnSetupRenderTargets();
         TonemappingRenderer  ::OnSetupRenderTargets();
+        VoxelRenderer        ::OnSetupRenderTargets();
         
         // -----------------------------------------------------------------------------
         // Setup the states of all renderer
@@ -222,6 +227,7 @@ namespace
         DebugRenderer        ::OnSetupStates();
         SelectionRenderer    ::OnSetupStates();
         TonemappingRenderer  ::OnSetupStates();
+        VoxelRenderer        ::OnSetupStates();
         
         // -----------------------------------------------------------------------------
         // Setup the textures of all renderer
@@ -243,6 +249,7 @@ namespace
         DebugRenderer        ::OnSetupTextures();
         SelectionRenderer    ::OnSetupTextures();
         TonemappingRenderer  ::OnSetupTextures();
+        VoxelRenderer        ::OnSetupTextures();
         
         // -----------------------------------------------------------------------------
         // Setup the buffers of all renderer
@@ -264,6 +271,7 @@ namespace
         DebugRenderer        ::OnSetupBuffers();
         SelectionRenderer    ::OnSetupBuffers();
         TonemappingRenderer  ::OnSetupBuffers();
+        VoxelRenderer        ::OnSetupBuffers();
         
         // -----------------------------------------------------------------------------
         // Setup the resources of all renderer
@@ -285,6 +293,7 @@ namespace
         DebugRenderer        ::OnSetupResources();
         SelectionRenderer    ::OnSetupResources();
         TonemappingRenderer  ::OnSetupResources();
+        VoxelRenderer        ::OnSetupResources();
         
         // -----------------------------------------------------------------------------
         // Setup the models of all renderer
@@ -306,6 +315,7 @@ namespace
         DebugRenderer        ::OnSetupModels();
         SelectionRenderer    ::OnSetupModels();
         TonemappingRenderer  ::OnSetupModels();
+        VoxelRenderer        ::OnSetupModels();
         
         // -----------------------------------------------------------------------------
         // Setup ends with a last call
@@ -327,6 +337,7 @@ namespace
         DebugRenderer        ::OnSetupEnd();
         SelectionRenderer    ::OnSetupEnd();
         TonemappingRenderer  ::OnSetupEnd();
+        VoxelRenderer        ::OnSetupEnd();
 
         BASE_CONSOLE_STREAMINFO("Gfx> Finished renderer starting.");
     }

@@ -331,61 +331,52 @@ namespace
         const int Summands = SummandsX * SummandsY;
         const float SummandsLog2 = Log2(static_cast<float>(Summands));
         const int SummandsPOT = 1 << (static_cast<int>(SummandsLog2) + 1);
+        
+        std::stringstream DefineStream;
 
-        const int NumberOfDefines = 17;
+        DefineStream
+            << "#define VOLUME_RESOLUTION "          << g_VolumeResolution                  << " \n"
+            << "#define VOXEL_SIZE "                 << g_VoxelSize                         << " \n"
+            << "#define VOLUME_SIZE "                << g_VolumeSize                        << " \n"
+            << "#define DEPTH_IMAGE_WIDTH "          << m_pDepthSensorControl->GetWidth()   << " \n"
+            << "#define DEPTH_IMAGE_HEIGHT "         << m_pDepthSensorControl->GetHeight()  << " \n"
+            << "#define TILE_SIZE1D "                << g_TileSize1D                        << " \n"
+            << "#define TILE_SIZE2D "                << g_TileSize2D                        << " \n"
+            << "#define TILE_SIZE3D "                << g_TileSize3D                        << " \n"
+            << "#define INT16_MAX "                  << std::numeric_limits<int16_t>::max() << " \n"
+            << "#define TRUNCATED_DISTANCE "         << g_TruncatedDistance                 << " \n"
+            << "#define TRUNCATED_DISTANCE_INVERSE " << 1.0f / g_TruncatedDistance          << " \n"
+            << "#define MAX_INTEGRATION_WEIGHT "     << g_MaxIntegrationWeight              << " \n"
+            << "#define EPSILON_DISTANCE "           << g_EpsilonDistance                   << " \n"
+            << "#define EPSILON_ANGLE "              << g_EpsilonAngle                      << " \n"
+            << "#define ICP_VALUE_COUNT "            << g_ICPValueCount                     << " \n"
+            << "#define REDUCTION_SHADER_COUNT "     << SummandsPOT / 2                     << " \n"
+            << "#define ICP_SUMMAND_COUNT "          << Summands                            << " \n";
 
-        std::vector<std::stringstream> DefineStreams(NumberOfDefines);
+        std::string DefineString = DefineStream.str();
 
-        DefineStreams[0] << "VOLUME_RESOLUTION " << g_VolumeResolution;
-        DefineStreams[1] << "VOXEL_SIZE " << g_VoxelSize;
-        DefineStreams[2] << "VOLUME_SIZE " << g_VolumeSize;
-        DefineStreams[3] << "DEPTH_IMAGE_WIDTH " << m_pDepthSensorControl->GetWidth();
-        DefineStreams[4] << "DEPTH_IMAGE_HEIGHT " << m_pDepthSensorControl->GetHeight();
-        DefineStreams[5] << "TILE_SIZE1D " << g_TileSize1D;
-        DefineStreams[6] << "TILE_SIZE2D " << g_TileSize2D;
-        DefineStreams[7] << "TILE_SIZE3D " << g_TileSize3D;
-        DefineStreams[8] << "INT16_MAX " << std::numeric_limits<int16_t>::max();
-        DefineStreams[9] << "TRUNCATED_DISTANCE " << g_TruncatedDistance;
-        DefineStreams[10] << "TRUNCATED_DISTANCE_INVERSE " << 1.0f / g_TruncatedDistance;
-        DefineStreams[11] << "MAX_INTEGRATION_WEIGHT " << g_MaxIntegrationWeight;
-        DefineStreams[12] << "EPSILON_DISTANCE " << g_EpsilonDistance;
-        DefineStreams[13] << "EPSILON_ANGLE " << g_EpsilonAngle;
-        DefineStreams[14] << "ICP_VALUE_COUNT " << g_ICPValueCount;
-        DefineStreams[15] << "REDUCTION_SHADER_COUNT " << SummandsPOT / 2;
-        DefineStreams[16] << "ICP_SUMMAND_COUNT " << Summands;
+        m_VSVisualizeDepth = ShaderManager::CompileVS("kinect_fusion\\vs_visualize_depth.glsl", "main", DefineString.c_str());
+        m_FSVisualizeDepth = ShaderManager::CompilePS("kinect_fusion\\fs_visualize_depth.glsl", "main", DefineString.c_str());
+        m_VSVisualizeVertexMap = ShaderManager::CompileVS("kinect_fusion\\vs_visualize_vertex_map.glsl", "main", DefineString.c_str());
+        m_FSVisualizeVertexMap = ShaderManager::CompilePS("kinect_fusion\\fs_visualize_vertex_map.glsl", "main", DefineString.c_str());
+        m_VSVisualizeVolume = ShaderManager::CompileVS("kinect_fusion\\vs_visualize_volume.glsl", "main", DefineString.c_str());
+        m_FSVisualizeVolume = ShaderManager::CompilePS("kinect_fusion\\fs_visualize_volume.glsl", "main", DefineString.c_str());
+        m_VSCamera = ShaderManager::CompileVS("kinect_fusion\\vs_camera.glsl", "main", DefineString.c_str());
+        m_FSCamera = ShaderManager::CompilePS("kinect_fusion\\fs_camera.glsl", "main", DefineString.c_str());
+        m_CSSphere = ShaderManager::CompileCS("kinect_fusion\\cs_sphere.glsl", "main", DefineString.c_str());
 
-        std::vector<std::string> DefineStrings(NumberOfDefines);
-        std::vector<const char*> Defines(NumberOfDefines);
-
-        for (int i = 0; i < NumberOfDefines; ++ i)
-        {
-            DefineStrings[i] = DefineStreams[i].str();
-
-            Defines[i] = DefineStrings[i].c_str();
-        }
-
-        m_VSVisualizeDepth = ShaderManager::CompileVS("kinect_fusion\\vs_visualize_depth.glsl", "main", NumberOfDefines, Defines.data());
-        m_FSVisualizeDepth = ShaderManager::CompilePS("kinect_fusion\\fs_visualize_depth.glsl", "main", NumberOfDefines, Defines.data());
-        m_VSVisualizeVertexMap = ShaderManager::CompileVS("kinect_fusion\\vs_visualize_vertex_map.glsl", "main", NumberOfDefines, Defines.data());
-        m_FSVisualizeVertexMap = ShaderManager::CompilePS("kinect_fusion\\fs_visualize_vertex_map.glsl", "main", NumberOfDefines, Defines.data());
-        m_VSVisualizeVolume = ShaderManager::CompileVS("kinect_fusion\\vs_visualize_volume.glsl", "main", NumberOfDefines, Defines.data());
-        m_FSVisualizeVolume = ShaderManager::CompilePS("kinect_fusion\\fs_visualize_volume.glsl", "main", NumberOfDefines, Defines.data());
-        m_VSCamera = ShaderManager::CompileVS("kinect_fusion\\vs_camera.glsl", "main", NumberOfDefines, Defines.data());
-        m_FSCamera = ShaderManager::CompilePS("kinect_fusion\\fs_camera.glsl", "main", NumberOfDefines, Defines.data());
-        m_CSSphere = ShaderManager::CompileCS("kinect_fusion\\cs_sphere.glsl", "main", NumberOfDefines, Defines.data());
-
-        m_CSMirrorDepth = ShaderManager::CompileCS("kinect_fusion\\cs_mirror_depth.glsl", "main", NumberOfDefines, Defines.data());
-        m_CSBilateralFilter = ShaderManager::CompileCS("kinect_fusion\\cs_bilateral_filter.glsl", "main", NumberOfDefines, Defines.data());
-        m_CSVertexMap = ShaderManager::CompileCS("kinect_fusion\\cs_vertex_map.glsl", "main", NumberOfDefines, Defines.data());
-        m_CSNormalMap = ShaderManager::CompileCS("kinect_fusion\\cs_normal_map.glsl", "main", NumberOfDefines, Defines.data());
-        m_CSDownSampleDepth = ShaderManager::CompileCS("kinect_fusion\\cs_downsample_depth.glsl", "main", NumberOfDefines, Defines.data());
-        m_CSVolumeIntegration = ShaderManager::CompileCS("kinect_fusion\\cs_integrate_volume.glsl", "main", NumberOfDefines, Defines.data());
-        m_CSRaycast = ShaderManager::CompileCS("kinect_fusion\\cs_raycast.glsl", "main", NumberOfDefines, Defines.data());
-        m_CSRaycastPyramid = ShaderManager::CompileCS("kinect_fusion\\cs_raycast_pyramid.glsl", "main", NumberOfDefines, Defines.data());
-        m_CSDetermineSummands = ShaderManager::CompileCS("kinect_fusion\\cs_determine_summands.glsl", "main", NumberOfDefines, Defines.data());
-        m_CSReduceSum = ShaderManager::CompileCS("kinect_fusion\\cs_reduce_sum.glsl", "main", NumberOfDefines, Defines.data());
-        m_VSRaycast = ShaderManager::CompileVS("kinect_fusion\\vs_raycast.glsl", "main", NumberOfDefines, Defines.data());
-        m_FSRaycast = ShaderManager::CompilePS("kinect_fusion\\fs_raycast.glsl", "main", NumberOfDefines, Defines.data());
+        m_CSMirrorDepth = ShaderManager::CompileCS("kinect_fusion\\cs_mirror_depth.glsl", "main", DefineString.c_str());
+        m_CSBilateralFilter = ShaderManager::CompileCS("kinect_fusion\\cs_bilateral_filter.glsl", "main", DefineString.c_str());
+        m_CSVertexMap = ShaderManager::CompileCS("kinect_fusion\\cs_vertex_map.glsl", "main", DefineString.c_str());
+        m_CSNormalMap = ShaderManager::CompileCS("kinect_fusion\\cs_normal_map.glsl", "main", DefineString.c_str());
+        m_CSDownSampleDepth = ShaderManager::CompileCS("kinect_fusion\\cs_downsample_depth.glsl", "main", DefineString.c_str());
+        m_CSVolumeIntegration = ShaderManager::CompileCS("kinect_fusion\\cs_integrate_volume.glsl", "main", DefineString.c_str());
+        m_CSRaycast = ShaderManager::CompileCS("kinect_fusion\\cs_raycast.glsl", "main", DefineString.c_str());
+        m_CSRaycastPyramid = ShaderManager::CompileCS("kinect_fusion\\cs_raycast_pyramid.glsl", "main", DefineString.c_str());
+        m_CSDetermineSummands = ShaderManager::CompileCS("kinect_fusion\\cs_determine_summands.glsl", "main", DefineString.c_str());
+        m_CSReduceSum = ShaderManager::CompileCS("kinect_fusion\\cs_reduce_sum.glsl", "main", DefineString.c_str());
+        m_VSRaycast = ShaderManager::CompileVS("kinect_fusion\\vs_raycast.glsl", "main", DefineString.c_str());
+        m_FSRaycast = ShaderManager::CompilePS("kinect_fusion\\fs_raycast.glsl", "main", DefineString.c_str());
     }
     
     // -----------------------------------------------------------------------------
@@ -664,7 +655,7 @@ namespace
         glBindTexture(GL_TEXTURE_3D, m_Volume);
         glBindSampler(0, NativeSampler->m_NativeSampler);
 
-        CBufferPtr FrameConstantBufferPtr = Gfx::Main::GetPerFrameConstantBufferVS();
+        CBufferPtr FrameConstantBufferPtr = Gfx::Main::GetPerFrameConstantBuffer();
         CNativeBuffer NativeBufer = *static_cast<CNativeBuffer*>(FrameConstantBufferPtr.GetPtr());
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, NativeBufer.m_NativeBuffer);
         glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_RaycastBuffer);
@@ -1128,7 +1119,7 @@ namespace
         glBindImageTexture(0, VertexMap, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
         glBindImageTexture(1, NormalMap, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
 
-        CBufferPtr FrameConstantBufferPtr = Gfx::Main::GetPerFrameConstantBufferVS();
+        CBufferPtr FrameConstantBufferPtr = Gfx::Main::GetPerFrameConstantBuffer();
         CNativeBuffer NativeBufer = *static_cast<CNativeBuffer*>(FrameConstantBufferPtr.GetPtr());
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, NativeBufer.m_NativeBuffer);
         glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_DrawCallConstantBuffer);
@@ -1156,7 +1147,7 @@ namespace
         Gfx::ContextManager::SetShaderVS(m_VSVisualizeVolume);
         Gfx::ContextManager::SetShaderPS(m_FSVisualizeVolume);
 
-        CBufferPtr FrameConstantBufferPtr = Gfx::Main::GetPerFrameConstantBufferVS();
+        CBufferPtr FrameConstantBufferPtr = Gfx::Main::GetPerFrameConstantBuffer();
         CNativeBuffer NativeBufer = *static_cast<CNativeBuffer*>(FrameConstantBufferPtr.GetPtr());
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, NativeBufer.m_NativeBuffer);
         glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_DrawCallConstantBuffer);
@@ -1192,7 +1183,7 @@ namespace
         *pData = WorldMatrix;
         glUnmapNamedBuffer(m_DrawCallConstantBuffer);
 
-        CBufferPtr FrameConstantBufferPtr = Gfx::Main::GetPerFrameConstantBufferVS();
+        CBufferPtr FrameConstantBufferPtr = Gfx::Main::GetPerFrameConstantBuffer();
         CNativeBuffer NativeBufer = *static_cast<CNativeBuffer*>(FrameConstantBufferPtr.GetPtr());
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, NativeBufer.m_NativeBuffer);
         glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_DrawCallConstantBuffer);

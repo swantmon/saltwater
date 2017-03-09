@@ -30,6 +30,7 @@
 #include "graphic/gfx_sky_manager.h"
 #include "graphic/gfx_sun_manager.h"
 #include "graphic/gfx_tonemapping_renderer.h"
+#include "graphic/gfx_voxel_renderer.h"
 
 using namespace Gfx;
 
@@ -96,13 +97,14 @@ namespace
         LightPointRenderer   ::Update();   
         LightSunRenderer     ::Update();   
         LightIndirectRenderer::Update();
-        ReflectionRenderer   ::Update();    
+        ReflectionRenderer   ::Update();
         BackgroundRenderer   ::Update();
         HistogramRenderer    ::Update(); 
         TonemappingRenderer  ::Update();
         PostFXHDR            ::Update();
         PostFX               ::Update();
         SelectionRenderer    ::Update();
+        VoxelRenderer        ::Update();
 
         // -----------------------------------------------------------------------------
         // Creation Pass
@@ -140,6 +142,8 @@ namespace
         Performance::BeginEvent("Shading Pass");
         
         TonemappingRenderer::Render();
+
+        VoxelRenderer::Render();
 
         LightAreaRenderer::RenderBulbs();
 

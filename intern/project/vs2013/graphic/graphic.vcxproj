@@ -107,6 +107,7 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_view_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_view_port.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_view_port_set.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_voxel_renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\graphic\gfx_application_interface.h" />
@@ -210,6 +211,7 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_view_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_view_port.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_view_port_set.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_voxel_renderer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\data\graphic\shaders\cs_brdf.glsl" />
@@ -380,7 +382,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\opencv\include;..\..\..\..\extern\tinyxml2\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\opencv\include;..\..\..\..\extern\tinyxml2\include;..\..\..\..\extern\realsense\include;..\..\..\..\extern\kinect\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>graphic/gfx_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -429,7 +431,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\opencv\include;..\..\..\..\extern\tinyxml2\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\opencv\include;..\..\..\..\extern\tinyxml2\include;..\..\..\..\extern\realsense\include;..\..\..\..\extern\kinect\include</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>graphic/gfx_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
