@@ -57,7 +57,7 @@ namespace
 
     const int g_PyramidLevelCount = 3;
 
-    const int g_ICPIterations[g_PyramidLevelCount] = { 5, 3, 1 };
+    const int g_ICPIterations[g_PyramidLevelCount] = { 10, 5, 4 };
     const float g_EpsilonDistance = 0.1f;
 
     const float g_EpsilonAngle = 0.4f;
@@ -254,6 +254,7 @@ namespace
             m_pDepthSensorControl->Start();
             BASE_CONSOLE_INFO("Using Kinect for SLAM");
         }*/
+
         m_pDepthSensorControl.reset(new MR::CKinectControl());
         m_pDepthSensorControl->Start();
         BASE_CONSOLE_INFO("Using Kinect for SLAM");
@@ -349,7 +350,7 @@ namespace
         DefineStreams[11] << "MAX_INTEGRATION_WEIGHT " << g_MaxIntegrationWeight;
         DefineStreams[12] << "EPSILON_DISTANCE " << g_EpsilonDistance;
         DefineStreams[13] << "EPSILON_ANGLE " << g_EpsilonAngle;
-        DefineStreams[14] << "ICP_VALUE_COUNT " << g_ICPValueCount; 
+        DefineStreams[14] << "ICP_VALUE_COUNT " << g_ICPValueCount;
         DefineStreams[15] << "REDUCTION_SHADER_COUNT " << SummandsPOT / 2;
         DefineStreams[16] << "ICP_SUMMAND_COUNT " << Summands;
 
@@ -872,7 +873,7 @@ namespace
 
         const double Det = L[0] * L[0] * L[7] * L[7] * L[14] * L[14] * L[21] * L[21] * L[28] * L[28] * L[35] * L[35];
         
-        if (std::isnan(Det) || abs(Det) < 1e-9)
+        if (std::isnan(Det) || abs(Det) < 1e-12)
         {
             return false;
         }

@@ -32,18 +32,39 @@ shared float g_SharedData[WORKGROUP_SIZE];
 
 void reduce()
 {
-    int SumCount = WORKGROUP_SIZE / 2;
-
-    while (SumCount > 0)
+    if (WORKGROUP_SIZE >= 512)
     {
-        if (gl_LocalInvocationIndex < SumCount)
+        if (gl_LocalInvocationIndex < 256)
         {
-            g_SharedData[gl_LocalInvocationIndex] += g_SharedData[gl_LocalInvocationIndex + SumCount];
+            g_SharedData[gl_LocalInvocationIndex] += g_SharedData[gl_LocalInvocationIndex + 256];
         }
-
-        SumCount /= 2;
-
         barrier();
+    }
+    if (WORKGROUP_SIZE >= 256)
+    {
+        if (gl_LocalInvocationIndex < 128)
+        {
+            g_SharedData[gl_LocalInvocationIndex] += g_SharedData[gl_LocalInvocationIndex + 128];
+        }
+        barrier();
+    }
+    if (WORKGROUP_SIZE >= 128)
+    {
+        if (gl_LocalInvocationIndex < 64)
+        {
+            g_SharedData[gl_LocalInvocationIndex] += g_SharedData[gl_LocalInvocationIndex + 64];
+        }
+        barrier();
+    }
+
+    if (gl_LocalInvocationIndex < 32)
+    {
+        g_SharedData[gl_LocalInvocationIndex] += g_SharedData[gl_LocalInvocationIndex + 32];
+        g_SharedData[gl_LocalInvocationIndex] += g_SharedData[gl_LocalInvocationIndex + 16];
+        g_SharedData[gl_LocalInvocationIndex] += g_SharedData[gl_LocalInvocationIndex +  8];
+        g_SharedData[gl_LocalInvocationIndex] += g_SharedData[gl_LocalInvocationIndex +  4];
+        g_SharedData[gl_LocalInvocationIndex] += g_SharedData[gl_LocalInvocationIndex +  2];
+        g_SharedData[gl_LocalInvocationIndex] += g_SharedData[gl_LocalInvocationIndex +  1];
     }
 }
 
