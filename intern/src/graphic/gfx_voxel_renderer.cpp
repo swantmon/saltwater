@@ -57,7 +57,7 @@ namespace
 
     const int g_PyramidLevelCount = 3;
 
-    const int g_ICPIterations[g_PyramidLevelCount] = { 5, 4, 3 };
+    const int g_ICPIterations[g_PyramidLevelCount] = { 5, 3, 1 };
     const float g_EpsilonDistance = 0.1f;
 
     const float g_EpsilonAngle = 0.4f;
@@ -205,7 +205,7 @@ namespace
         std::vector<unsigned short> m_DepthPixels;
 
         bool m_NewDepthDataAvailable;
-        bool m_IsFirstIntegration;
+        int m_FrameCount;
 
         bool m_TrackingLost;
 
@@ -267,7 +267,7 @@ namespace
         m_PoseMatrix = PoseTranslation * PoseRotation;
 
         m_NewDepthDataAvailable = false;
-        m_IsFirstIntegration = true;
+        m_FrameCount = 0;
         m_TrackingLost = true;
     }
 
@@ -861,18 +861,18 @@ namespace
         {
             for (int j = 0; j <= i; ++ j)
             {
-                double Sum = 0.0f;
+                double Sum = 0.0;
                 for (int k = 0; k < j; ++ k)
                 {
                     Sum += L[k * 6 + i] * L[k * 6 + j];
                 }
-                L[j * 6 + i] = i == j ? sqrt(A[i * 6 + i] - Sum) : ((1.0f / L[j * 6 + j]) * (A[j * 6 + i] - Sum));
+                L[j * 6 + i] = i == j ? sqrt(A[i * 6 + i] - Sum) : ((1.0 / L[j * 6 + j]) * (A[j * 6 + i] - Sum));
             }
         }
 
         const double Det = L[0] * L[0] * L[7] * L[7] * L[14] * L[14] * L[21] * L[21] * L[28] * L[28] * L[35] * L[35];
         
-        if (std::isnan(Det) || (Det < 1e-9 && Det > -1e-9))
+        if (std::isnan(Det) || abs(Det) < 1e-9)
         {
             return false;
         }
@@ -1001,30 +1001,30 @@ namespace
 
         Performance::EndEvent();
 
-        if (!m_IsFirstIntegration)
-
+        if (m_FrameCount > 0)
         {
             Performance::BeginEvent("Kinect Tracking");
 
             PerformTracking();
 
+            STrackingData* pTrackingData = static_cast<STrackingData*>(glMapNamedBuffer(m_TrackingDataConstantBuffer, GL_WRITE_ONLY));
+            pTrackingData->m_PoseMatrix = m_PoseMatrix;
+            pTrackingData->m_InvPoseMatrix = m_PoseMatrix.GetInverted();
+            glUnmapNamedBuffer(m_TrackingDataConstantBuffer);
+
             Performance::EndEvent();
         }
-
-        STrackingData* pTrackingData = static_cast<STrackingData*>(glMapNamedBuffer(m_TrackingDataConstantBuffer, GL_WRITE_ONLY));
-        pTrackingData->m_PoseMatrix = m_PoseMatrix;
-        pTrackingData->m_InvPoseMatrix = m_PoseMatrix.GetInverted();
-        glUnmapNamedBuffer(m_TrackingDataConstantBuffer);
 
         Performance::BeginEvent("TSDF Integration and Raycasting");
 
         Integrate();
-        m_IsFirstIntegration = false;
         Raycast();
 
         DownSample();
 
         Performance::EndEvent();
+
+        ++m_FrameCount;
     }
 
     // -----------------------------------------------------------------------------
