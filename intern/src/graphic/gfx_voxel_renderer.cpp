@@ -53,13 +53,13 @@ namespace
 
     const float g_TruncatedDistance = 30.0f;
     
-    const int g_MaxIntegrationWeight = 200;
+    const int g_MaxIntegrationWeight = 150;
 
     const int g_PyramidLevelCount = 3;
 
     const int g_ICPIterations[g_PyramidLevelCount] = { 10, 5, 4 };
-    const float g_EpsilonDistance = 0.1f;
 
+    const float g_EpsilonDistance = 0.1f;
     const float g_EpsilonAngle = 0.4f;
 
     const int g_ICPValueCount = 27;
@@ -205,6 +205,7 @@ namespace
         std::vector<unsigned short> m_DepthPixels;
 
         bool m_NewDepthDataAvailable;
+        int m_IntegratedDepthFrameCount;
         int m_FrameCount;
 
         bool m_TrackingLost;
@@ -268,6 +269,7 @@ namespace
         m_PoseMatrix = PoseTranslation * PoseRotation;
 
         m_NewDepthDataAvailable = false;
+        m_IntegratedDepthFrameCount = 0;
         m_FrameCount = 0;
         m_TrackingLost = true;
     }
@@ -757,7 +759,6 @@ namespace
                 ReduceSum(PyramidLevel);
 
                 m_TrackingLost = !CalculatePoseMatrix(IncPoseMatrix);
-
                 if (m_TrackingLost)
                 {
                     return;
@@ -774,9 +775,12 @@ namespace
         const int WorkGroupsX = GetWorkGroupCount(m_pDepthSensorControl->GetWidth() >> PyramidLevel, g_TileSize2D);
         const int WorkGroupsY = GetWorkGroupCount(m_pDepthSensorControl->GetHeight() >> PyramidLevel, g_TileSize2D);
         
-        Float4x4* pIncMatrix = static_cast<Float4x4*>(glMapNamedBufferRange(m_IncPoseMatrixConstantBuffer, 0, sizeof(Float4x4) * 2, GL_MAP_WRITE_BIT));
-        *pIncMatrix = rIncPoseMatrix;
-        *(pIncMatrix + 1) = rIncPoseMatrix.GetInverted();
+        STrackingData TrackingData;
+        TrackingData.m_PoseMatrix = rIncPoseMatrix;
+        TrackingData.m_InvPoseMatrix = rIncPoseMatrix.GetInverted();
+
+        Float4x4* pData = static_cast<Float4x4*>(glMapNamedBufferRange(m_IncPoseMatrixConstantBuffer, 0, sizeof(Float4x4) * 2, GL_MAP_WRITE_BIT));
+        memcpy(pData, &TrackingData, sizeof(STrackingData));
         glUnmapNamedBuffer(m_IncPoseMatrixConstantBuffer);
 
         Gfx::ContextManager::SetShaderCS(m_CSDetermineSummands);
@@ -993,15 +997,18 @@ namespace
 
         Performance::EndEvent();
 
-        if (m_FrameCount > 0)
+        if (m_IntegratedDepthFrameCount > 0)
         {
             Performance::BeginEvent("Kinect Tracking");
 
             PerformTracking();
 
+            STrackingData TrackingData;
+            TrackingData.m_PoseMatrix = m_PoseMatrix;
+            TrackingData.m_InvPoseMatrix = m_PoseMatrix.GetInverted();
+
             STrackingData* pTrackingData = static_cast<STrackingData*>(glMapNamedBuffer(m_TrackingDataConstantBuffer, GL_WRITE_ONLY));
-            pTrackingData->m_PoseMatrix = m_PoseMatrix;
-            pTrackingData->m_InvPoseMatrix = m_PoseMatrix.GetInverted();
+            memcpy(pTrackingData, &TrackingData, sizeof(STrackingData));
             glUnmapNamedBuffer(m_TrackingDataConstantBuffer);
 
             Performance::EndEvent();
@@ -1016,7 +1023,7 @@ namespace
 
         Performance::EndEvent();
 
-        ++m_FrameCount;
+        ++m_IntegratedDepthFrameCount;
     }
 
     // -----------------------------------------------------------------------------
@@ -1038,10 +1045,12 @@ namespace
             m_NewDepthDataAvailable = false;
         }
 
-        //RenderReconstructionData();
+        RenderReconstructionData();
 
         Draw();
         RenderCamera();
+
+        ++m_FrameCount;
 
         Performance::EndEvent();
     }
