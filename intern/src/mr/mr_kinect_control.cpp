@@ -55,15 +55,18 @@ namespace MR
 
         CheckResult(GetDefaultKinectSensor(&m_pKinect), "Failed to get default kinect");
 
-        // Initialize the Kinect and get the depth reader
+        IColorFrameSource* pColorFrameSource = nullptr;
         IDepthFrameSource* pDepthFrameSource = nullptr;
 
         CheckResult(m_pKinect->Open(), "failed to open kinect");
 
+        CheckResult(m_pKinect->get_ColorFrameSource(&pColorFrameSource), "Failed to get color frame source");
+        CheckResult(pColorFrameSource->OpenReader(&m_pColorFrameReader), "Failed to open color frame reader");
+
         CheckResult(m_pKinect->get_DepthFrameSource(&pDepthFrameSource), "Failed to get depth frame source");
-
         CheckResult(pDepthFrameSource->OpenReader(&m_pDepthFrameReader), "Failed to open depth frame reader");
-
+        
+        SafeRelease(pColorFrameSource);
         SafeRelease(pDepthFrameSource);
     }
 
@@ -78,6 +81,86 @@ namespace MR
         }
         SafeRelease(m_pKinect);
     }
+
+    // -----------------------------------------------------------------------------
+
+    int CKinectControl::GetCameraWidth() const
+    {
+        return 0;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    int CKinectControl::GetCameraHeight() const
+    {
+        return 0;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    int CKinectControl::GetCameraPixelCount() const
+    {
+        return GetCameraWidth() * GetCameraHeight();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CKinectControl::GetCameraFocalLengthX() const
+    {
+        return 0.0f;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CKinectControl::GetCameraFocalLengthY() const
+    {
+        return 0.0f;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CKinectControl::GetCameraFocalPointX() const
+    {
+        return 0.0f;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CKinectControl::GetCameraFocalPointY() const
+    {
+        return 0.0f;
+    }
+
+    // -----------------------------------------------------------------------------
+    
+    bool CKinectControl::GetCameraFrame(unsigned char* pBuffer)
+    {
+        IColorFrame* pColorFrame = nullptr;
+        unsigned int BufferSize;
+        BYTE* pByteBuffer;
+
+        if (m_pColorFrameReader->AcquireLatestFrame(&pColorFrame) != S_OK)
+        {
+            return false;
+        }
+        
+        if (pColorFrame->AccessRawUnderlyingBuffer(&BufferSize, &pByteBuffer) != S_OK)
+        {
+            BASE_CONSOLE_ERROR("Failed to access underlying buffer");
+            return false;
+        }
+
+        for (int i = 0; i < GetDepthPixelCount(); ++i)
+        {
+            pBuffer[i] = pByteBuffer[i];
+        }
+
+        pColorFrame->Release();
+
+        return true;
+    }
+
+    // -----------------------------------------------------------------------------
 
     bool CKinectControl::GetDepthBuffer(unsigned short* pBuffer)
     {
@@ -96,50 +179,63 @@ namespace MR
             return false;
         }
 
-        for (int i = 0; i < GetPixelCount(); ++i)
+        for (int i = 0; i < GetDepthPixelCount(); ++i)
         {
             pBuffer[i] = pShortBuffer[i];
         }
-
 
         pDepthFrame->Release();
 
         return true;
     }
 
-    int CKinectControl::GetWidth() const
+    // -----------------------------------------------------------------------------
+
+    int CKinectControl::GetDepthWidth() const
     {
         return NUI_DEPTH_RAW_WIDTH;
     }
 
-    int CKinectControl::GetHeight() const
+    // -----------------------------------------------------------------------------
+
+    int CKinectControl::GetDepthHeight() const
     {
         return NUI_DEPTH_RAW_HEIGHT;
     }
 
-    int CKinectControl::GetPixelCount() const
+    // -----------------------------------------------------------------------------
+
+    int CKinectControl::GetDepthPixelCount() const
     {
-        return GetWidth() * GetHeight();
+        return GetDepthWidth() * GetDepthHeight();
     }
 
-    float CKinectControl::GetFocalLengthX() const
+    // -----------------------------------------------------------------------------
+
+    float CKinectControl::GetDepthFocalLengthX() const
     {
-        return NUI_KINECT_DEPTH_NORM_FOCAL_LENGTH_X * GetWidth();
+        return NUI_KINECT_DEPTH_NORM_FOCAL_LENGTH_X * GetDepthWidth();
     }
 
-    float CKinectControl::GetFocalLengthY() const
+    // -----------------------------------------------------------------------------
+
+    float CKinectControl::GetDepthFocalLengthY() const
     {
-        return NUI_KINECT_DEPTH_NORM_FOCAL_LENGTH_Y * GetHeight();
+        return NUI_KINECT_DEPTH_NORM_FOCAL_LENGTH_Y * GetDepthHeight();
     }
 
-    float CKinectControl::GetFocalPointX() const
+    // -----------------------------------------------------------------------------
+
+    float CKinectControl::GetDepthFocalPointX() const
     {
-        return NUI_KINECT_DEPTH_NORM_PRINCIPAL_POINT_X * GetWidth();
+        return NUI_KINECT_DEPTH_NORM_PRINCIPAL_POINT_X * GetDepthWidth();
     }
 
-    float CKinectControl::GetFocalPointY() const
+    // -----------------------------------------------------------------------------
+
+    float CKinectControl::GetDepthFocalPointY() const
     {
-        return NUI_KINECT_DEPTH_NORM_PRINCIPAL_POINT_Y * GetHeight();
+        return NUI_KINECT_DEPTH_NORM_PRINCIPAL_POINT_Y * GetDepthHeight();
     }
 
 

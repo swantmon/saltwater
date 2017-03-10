@@ -44,5 +44,11 @@
     <ClInclude Include="..\..\..\src\mr\mr_depth_sensor_control.h">
       <Filter>controls</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\mr\mr_camera_control.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\mr\mr_rgbd_camera_control.h">
+      <Filter>controls</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

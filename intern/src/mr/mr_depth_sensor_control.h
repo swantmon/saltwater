@@ -11,13 +11,13 @@ namespace MR
 
         virtual void Start() = 0;
         virtual void Stop() = 0;
-        virtual int GetWidth() const = 0 ;
-        virtual int GetHeight() const = 0;
-        virtual int GetPixelCount() const = 0;
-        virtual float GetFocalLengthX() const = 0;
-        virtual float GetFocalLengthY() const = 0;
-        virtual float GetFocalPointX() const = 0;
-        virtual float GetFocalPointY() const = 0;
+        virtual int GetDepthWidth() const = 0 ;
+        virtual int GetDepthHeight() const = 0;
+        virtual int GetDepthPixelCount() const = 0;
+        virtual float GetDepthFocalLengthX() const = 0;
+        virtual float GetDepthFocalLengthY() const = 0;
+        virtual float GetDepthFocalPointX() const = 0;
+        virtual float GetDepthFocalPointY() const = 0;
         virtual bool GetDepthBuffer(unsigned short* pBuffer) = 0;
     };
 } // namespace MR

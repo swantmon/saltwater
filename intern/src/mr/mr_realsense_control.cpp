@@ -83,11 +83,11 @@ namespace MR
         
         unsigned short* pData = reinterpret_cast<unsigned short*>(data.planes[0]);
 
-        for (int i = 0; i < GetWidth(); ++ i)
+        for (int i = 0; i < GetDepthWidth(); ++ i)
         {
-            for (int j = 0; j < GetHeight(); ++ j)
+            for (int j = 0; j < GetDepthHeight(); ++ j)
             {
-                pBuffer[j * GetWidth() + i] = pData[j * data.pitches[0] / 2 + i];
+                pBuffer[j * GetDepthWidth() + i] = pData[j * data.pitches[0] / 2 + i];
             }
         }
 
@@ -100,47 +100,47 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    int CRealSenseControl::GetWidth() const
+    int CRealSenseControl::GetDepthWidth() const
     {
         return s_Width;
     }
 
-    int CRealSenseControl::GetHeight() const
+    int CRealSenseControl::GetDepthHeight() const
     {
         return s_Height;
     }
 
     // -----------------------------------------------------------------------------
 
-    int CRealSenseControl::GetPixelCount() const
+    int CRealSenseControl::GetDepthPixelCount() const
     {
-        return GetWidth() * GetHeight();
+        return GetDepthWidth() * GetDepthHeight();
     }
 
     // -----------------------------------------------------------------------------
 
-    float CRealSenseControl::GetFocalLengthX() const
+    float CRealSenseControl::GetDepthFocalLengthX() const
     {
         return m_FocalLength.x;
     }
 
     // -----------------------------------------------------------------------------
 
-    float CRealSenseControl::GetFocalLengthY() const
+    float CRealSenseControl::GetDepthFocalLengthY() const
     {
         return m_FocalLength.y;
     }
 
     // -----------------------------------------------------------------------------
 
-    float CRealSenseControl::GetFocalPointX() const
+    float CRealSenseControl::GetDepthFocalPointX() const
     {
         return m_FocalPoint.x;
     }
 
     // -----------------------------------------------------------------------------
 
-    float CRealSenseControl::GetFocalPointY() const
+    float CRealSenseControl::GetDepthFocalPointY() const
     {
         return m_FocalPoint.y;
     }
