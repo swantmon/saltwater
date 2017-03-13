@@ -9,8 +9,6 @@ namespace MR
 
         virtual ~IDepthSensorControl() {};
 
-        virtual void Start() = 0;
-        virtual void Stop() = 0;
         virtual int GetDepthWidth() const = 0 ;
         virtual int GetDepthHeight() const = 0;
         virtual int GetDepthPixelCount() const = 0;

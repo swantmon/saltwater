@@ -22,9 +22,6 @@ namespace MR
     {
     public:
 
-        virtual void Start() override;
-        virtual void Stop() override;
-
         virtual int GetCameraWidth() const;
         virtual int GetCameraHeight() const;
         virtual int GetCameraPixelCount() const;
@@ -49,6 +46,9 @@ namespace MR
         virtual ~CKinectControl() override;
 
 	private:
+
+        void Start();
+        void Stop();
 
 		IKinectSensor*            m_pKinect;
         IColorFrameReader*        m_pColorFrameReader;

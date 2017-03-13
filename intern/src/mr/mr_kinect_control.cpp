@@ -37,12 +37,14 @@ namespace MR
         : m_pKinect               (nullptr)
         , m_pDepthFrameReader     (nullptr)
     {
+        Start();
     }
 
     // -----------------------------------------------------------------------------
 
     CKinectControl::~CKinectControl()
     {
+        Stop();
     }
 
     // -----------------------------------------------------------------------------

@@ -15,9 +15,7 @@ namespace MR
     class CRealSenseControl : public IDepthSensorControl
     {
     public:
-
-        virtual void Start() override;
-        virtual void Stop() override;
+        
         virtual int GetDepthWidth() const override;
         virtual int GetDepthHeight() const override;
         virtual int GetDepthPixelCount() const override;
@@ -33,6 +31,9 @@ namespace MR
         virtual ~CRealSenseControl() override;
 
     private:
+
+        void Start();
+        void Stop();
 
         template<typename T>
         void SafeRelease(T& pObject)

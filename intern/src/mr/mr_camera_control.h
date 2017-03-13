@@ -9,8 +9,6 @@ namespace MR
 
         virtual ~ICameraControl() {};
 
-        virtual void Start() = 0;
-        virtual void Stop() = 0;
         virtual int GetCameraWidth() const = 0;
         virtual int GetCameraHeight() const = 0;
         virtual int GetCameraPixelCount() const = 0;

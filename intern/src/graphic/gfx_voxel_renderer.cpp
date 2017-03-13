@@ -29,7 +29,7 @@
 #include "gfx_native_shader.h"
 #include "gfx_native_target_set.h"
 
-#include "mr/mr_depth_sensor_control.h"
+#include "mr/mr_rgbd_camera_control.h"
 #include "mr/mr_kinect_control.h"
 #include "mr/mr_realsense_control.h"
 
@@ -124,7 +124,7 @@ namespace
 
         void UpdateReconstruction();
 
-        void ReadKinectData();
+        void CreateReferencePyramid();
         void Integrate();
         void Raycast();
         void DownSample();
@@ -182,11 +182,11 @@ namespace
         CShaderPtr m_CSReduceSum;        
         CShaderPtr m_VSRaycast;
         CShaderPtr m_FSRaycast;
-
-        GLuint m_KinectRawDepthBuffer;
-        GLuint m_KinectSmoothDepthBuffer[g_PyramidLevelCount];
-        GLuint m_KinectVertexMap[g_PyramidLevelCount];
-        GLuint m_KinectNormalMap[g_PyramidLevelCount];
+        
+        GLuint m_RawDepthBuffer;
+        GLuint m_SmoothDepthBuffer[g_PyramidLevelCount];
+        GLuint m_ReferenceVertexMap[g_PyramidLevelCount];
+        GLuint m_ReferenceNormalMap[g_PyramidLevelCount];
 
         GLuint m_RaycastVertexMap[g_PyramidLevelCount];
         GLuint m_RaycastNormalMap[g_PyramidLevelCount];
@@ -195,7 +195,7 @@ namespace
 
         GLuint m_ICPBuffer;
 
-        std::unique_ptr<MR::IDepthSensorControl> m_pDepthSensorControl;
+        std::unique_ptr<MR::IRGBDCameraControl> m_pRGBDCameraControl;
 
         Base::Float4x4 m_PoseMatrix;
 
@@ -243,24 +243,10 @@ namespace
     {
         Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxVoxelRenderer::OnResize));
         
-        /*try
-        {
-            m_pDepthSensorControl.reset(new MR::CRealSenseControl());
-            m_pDepthSensorControl->Start();
-            BASE_CONSOLE_INFO("Using RealSense for SLAM");
-        }
-        catch (...)
-        {
-            m_pDepthSensorControl.reset(new MR::CKinectControl());
-            m_pDepthSensorControl->Start();
-            BASE_CONSOLE_INFO("Using Kinect for SLAM");
-        }*/
-
-        m_pDepthSensorControl.reset(new MR::CKinectControl());
-        m_pDepthSensorControl->Start();
+        m_pRGBDCameraControl.reset(new MR::CKinectControl());
         BASE_CONSOLE_INFO("Using Kinect for SLAM");
 
-        m_DepthPixels = std::vector<unsigned short>(m_pDepthSensorControl->GetDepthPixelCount());
+        m_DepthPixels = std::vector<unsigned short>(m_pRGBDCameraControl->GetDepthPixelCount());
 
         Float4x4 PoseRotation, PoseTranslation;
 
@@ -301,10 +287,10 @@ namespace
         m_VSRaycast = 0;
         m_FSRaycast = 0;        
 
-        glDeleteTextures(1, &m_KinectRawDepthBuffer);
-        glDeleteTextures(g_PyramidLevelCount, m_KinectSmoothDepthBuffer);
-        glDeleteTextures(g_PyramidLevelCount, m_KinectVertexMap);
-        glDeleteTextures(g_PyramidLevelCount, m_KinectNormalMap);
+        glDeleteTextures(1, &m_RawDepthBuffer);
+        glDeleteTextures(g_PyramidLevelCount, m_SmoothDepthBuffer);
+        glDeleteTextures(g_PyramidLevelCount, m_ReferenceVertexMap);
+        glDeleteTextures(g_PyramidLevelCount, m_ReferenceNormalMap);
         glDeleteTextures(g_PyramidLevelCount, m_RaycastVertexMap);
         glDeleteTextures(g_PyramidLevelCount, m_RaycastNormalMap);
         glDeleteTextures(1, &m_Volume);
@@ -327,8 +313,8 @@ namespace
     
     void CGfxVoxelRenderer::OnSetupShader()
     {
-        const int SummandsX = GetWorkGroupCount(m_pDepthSensorControl->GetDepthWidth(), g_TileSize2D);
-        const int SummandsY = GetWorkGroupCount(m_pDepthSensorControl->GetDepthHeight(), g_TileSize2D);
+        const int SummandsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth(), g_TileSize2D);
+        const int SummandsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
 
         const int Summands = SummandsX * SummandsY;
         const float SummandsLog2 = Log2(static_cast<float>(Summands));
@@ -340,8 +326,8 @@ namespace
             << "#define VOLUME_RESOLUTION "          << g_VolumeResolution                       << " \n"
             << "#define VOXEL_SIZE "                 << g_VoxelSize                              << " \n"
             << "#define VOLUME_SIZE "                << g_VolumeSize                             << " \n"
-            << "#define DEPTH_IMAGE_WIDTH "          << m_pDepthSensorControl->GetDepthWidth()   << " \n"
-            << "#define DEPTH_IMAGE_HEIGHT "         << m_pDepthSensorControl->GetDepthHeight()  << " \n"
+            << "#define DEPTH_IMAGE_WIDTH "          << m_pRGBDCameraControl->GetDepthWidth()   << " \n"
+            << "#define DEPTH_IMAGE_HEIGHT "         << m_pRGBDCameraControl->GetDepthHeight()  << " \n"
             << "#define TILE_SIZE1D "                << g_TileSize1D                             << " \n"
             << "#define TILE_SIZE2D "                << g_TileSize2D                             << " \n"
             << "#define TILE_SIZE3D "                << g_TileSize3D                             << " \n"
@@ -406,26 +392,26 @@ namespace
     
     void CGfxVoxelRenderer::OnSetupTextures()
     {
-        glCreateTextures(GL_TEXTURE_2D, 1, &m_KinectRawDepthBuffer);
-        glCreateTextures(GL_TEXTURE_2D, g_PyramidLevelCount, m_KinectSmoothDepthBuffer);
-        glCreateTextures(GL_TEXTURE_2D, g_PyramidLevelCount, m_KinectVertexMap);
-        glCreateTextures(GL_TEXTURE_2D, g_PyramidLevelCount, m_KinectNormalMap);
+        glCreateTextures(GL_TEXTURE_2D, 1, &m_RawDepthBuffer);
+        glCreateTextures(GL_TEXTURE_2D, g_PyramidLevelCount, m_SmoothDepthBuffer);
+        glCreateTextures(GL_TEXTURE_2D, g_PyramidLevelCount, m_ReferenceVertexMap);
+        glCreateTextures(GL_TEXTURE_2D, g_PyramidLevelCount, m_ReferenceNormalMap);
         glCreateTextures(GL_TEXTURE_2D, g_PyramidLevelCount, m_RaycastVertexMap);
         glCreateTextures(GL_TEXTURE_2D, g_PyramidLevelCount, m_RaycastNormalMap);
         glCreateTextures(GL_TEXTURE_3D, 1, &m_Volume);
 
         glCreateTextures(GL_TEXTURE_2D, g_PyramidLevelCount, m_DebugBuffer);
-
-        glTextureStorage2D(m_KinectRawDepthBuffer, 1, GL_R16UI, m_pDepthSensorControl->GetDepthWidth(), m_pDepthSensorControl->GetDepthHeight());
+        
+        glTextureStorage2D(m_RawDepthBuffer, 1, GL_R16UI, m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight());
         
         for (int i = 0; i < g_PyramidLevelCount; ++i)
         {
-            const int Width = m_pDepthSensorControl->GetDepthWidth() >> i;
-            const int Height = m_pDepthSensorControl->GetDepthHeight() >> i;
+            const int Width = m_pRGBDCameraControl->GetDepthWidth() >> i;
+            const int Height = m_pRGBDCameraControl->GetDepthHeight() >> i;
 
-            glTextureStorage2D(m_KinectSmoothDepthBuffer[i], 1, GL_R16UI, Width, Height);
-            glTextureStorage2D(m_KinectVertexMap[i], 1, GL_RGBA32F, Width, Height);
-            glTextureStorage2D(m_KinectNormalMap[i], 1, GL_RGBA32F, Width, Height);
+            glTextureStorage2D(m_SmoothDepthBuffer[i], 1, GL_R16UI, Width, Height);
+            glTextureStorage2D(m_ReferenceVertexMap[i], 1, GL_RGBA32F, Width, Height);
+            glTextureStorage2D(m_ReferenceNormalMap[i], 1, GL_RGBA32F, Width, Height);
             glTextureStorage2D(m_RaycastVertexMap[i], 1, GL_RGBA32F, Width, Height);
             glTextureStorage2D(m_RaycastNormalMap[i], 1, GL_RGBA32F, Width, Height);
             glTextureStorage2D(m_DebugBuffer[i], 1, GL_RGBA32F, Width, Height);
@@ -438,10 +424,10 @@ namespace
     
     void CGfxVoxelRenderer::OnSetupBuffers()
     {
-        const float FocalLengthX0 = m_pDepthSensorControl->GetDepthFocalLengthX();
-        const float FocalLengthY0 = m_pDepthSensorControl->GetDepthFocalLengthY();
-        const float FocalPointX0 = m_pDepthSensorControl->GetDepthFocalPointX();
-        const float FocalPointY0 = m_pDepthSensorControl->GetDepthFocalPointY();
+        const float FocalLengthX0 = m_pRGBDCameraControl->GetDepthFocalLengthX();
+        const float FocalLengthY0 = m_pRGBDCameraControl->GetDepthFocalLengthY();
+        const float FocalPointX0 = m_pRGBDCameraControl->GetDepthFocalPointX();
+        const float FocalPointY0 = m_pRGBDCameraControl->GetDepthFocalPointY();
 
         glCreateBuffers(1, &m_DrawCallConstantBuffer);
         glNamedBufferData(m_DrawCallConstantBuffer, sizeof(Float4x4), nullptr, GL_DYNAMIC_DRAW);
@@ -484,8 +470,8 @@ namespace
         glCreateBuffers(1, &m_RaycastPyramidConstantBuffer);
         glNamedBufferData(m_RaycastPyramidConstantBuffer, 16, nullptr, GL_DYNAMIC_DRAW);
 
-        const int ICPRowCount = GetWorkGroupCount(m_pDepthSensorControl->GetDepthWidth(), g_TileSize2D) *
-                                GetWorkGroupCount(m_pDepthSensorControl->GetDepthHeight(), g_TileSize2D);
+        const int ICPRowCount = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth(), g_TileSize2D) *
+                                GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
 
         glCreateBuffers(1, &m_ICPBuffer);
         glNamedBufferData(m_ICPBuffer, sizeof(float) * ICPRowCount * g_ICPValueCount, nullptr, GL_DYNAMIC_COPY);
@@ -588,7 +574,7 @@ namespace
     void CGfxVoxelRenderer::Update()
     {
         //////////////////////////////////////////////////////////////////////////////////////
-        // Get Kinect Data
+        // Get camera Data
         //////////////////////////////////////////////////////////////////////////////////////
 
         Float4x4 TranslationMatrix;
@@ -605,21 +591,21 @@ namespace
 
         m_VolumeWorldMatrix = TranslationMatrix * RotationMatrix * ScalingMatrix;
         
-        if (m_pDepthSensorControl->GetDepthBuffer(m_DepthPixels.data()))
+        if (m_pRGBDCameraControl->GetDepthBuffer(m_DepthPixels.data()))
         {
-            glTextureSubImage2D(m_KinectRawDepthBuffer, 0, 0, 0,
-                m_pDepthSensorControl->GetDepthWidth(), m_pDepthSensorControl->GetDepthHeight(),
+            glTextureSubImage2D(m_RawDepthBuffer, 0, 0, 0,
+                m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight(),
                 GL_RED_INTEGER, GL_UNSIGNED_SHORT, m_DepthPixels.data());
 
             //////////////////////////////////////////////////////////////////////////////////////
             // Mirror depth data
             //////////////////////////////////////////////////////////////////////////////////////
 
-            const int WorkGroupsX = GetWorkGroupCount(m_pDepthSensorControl->GetDepthWidth() / 2, g_TileSize2D);
-            const int WorkGroupsY = GetWorkGroupCount(m_pDepthSensorControl->GetDepthHeight(), g_TileSize2D);
+            const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() / 2, g_TileSize2D);
+            const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
             
             Gfx::ContextManager::SetShaderCS(m_CSMirrorDepth);
-            glBindImageTexture(0, m_KinectRawDepthBuffer, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16UI);
+            glBindImageTexture(0, m_RawDepthBuffer, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16UI);
             glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
 
             m_NewDepthDataAvailable = true;
@@ -673,10 +659,10 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxVoxelRenderer::ReadKinectData()
+    void CGfxVoxelRenderer::CreateReferencePyramid()
     {
-        const int WorkGroupsX = GetWorkGroupCount(m_pDepthSensorControl->GetDepthWidth(), g_TileSize2D);
-        const int WorkGroupsY = GetWorkGroupCount(m_pDepthSensorControl->GetDepthHeight(), g_TileSize2D);
+        const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth(), g_TileSize2D);
+        const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
 
         //////////////////////////////////////////////////////////////////////////////////////
         // Bilateral Filter
@@ -685,8 +671,8 @@ namespace
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
         Gfx::ContextManager::SetShaderCS(m_CSBilateralFilter);
-        glBindImageTexture(0, m_KinectRawDepthBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
-        glBindImageTexture(1, m_KinectSmoothDepthBuffer[0], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16UI);
+        glBindImageTexture(0, m_RawDepthBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
+        glBindImageTexture(1, m_SmoothDepthBuffer[0], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16UI);
         glBindImageTexture(2, m_DebugBuffer[0], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
         glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
 
@@ -696,18 +682,18 @@ namespace
 
         for (int PyramidLevel = 1; PyramidLevel < g_PyramidLevelCount; ++ PyramidLevel)
         {
-            const int WorkGroupsX = GetWorkGroupCount(m_pDepthSensorControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
-            const int WorkGroupsY = GetWorkGroupCount(m_pDepthSensorControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
+            const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
+            const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
             
             Gfx::ContextManager::SetShaderCS(m_CSDownSampleDepth);
 
             CSamplerPtr Sampler = Gfx::SamplerManager::GetSampler(Gfx::CSampler::ESampler::MinMagMipLinearClamp);
             CNativeSampler* NativeSampler = static_cast<CNativeSampler*>(Sampler.GetPtr());
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, m_KinectSmoothDepthBuffer[PyramidLevel - 1]);
+            glBindTexture(GL_TEXTURE_2D, m_SmoothDepthBuffer[PyramidLevel - 1]);
             glBindSampler(0, NativeSampler->m_NativeSampler);
 
-            glBindImageTexture(1, m_KinectSmoothDepthBuffer[PyramidLevel], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16UI);
+            glBindImageTexture(1, m_SmoothDepthBuffer[PyramidLevel], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16UI);
             glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
             glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
             glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
@@ -722,24 +708,24 @@ namespace
         
         for (int PyramidLevel = 0; PyramidLevel < g_PyramidLevelCount; ++ PyramidLevel)
         {
-            const int WorkGroupsX = GetWorkGroupCount(m_pDepthSensorControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
-            const int WorkGroupsY = GetWorkGroupCount(m_pDepthSensorControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
+            const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
+            const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
 
             Gfx::ContextManager::SetShaderCS(m_CSVertexMap);
-            glBindImageTexture(0, m_KinectSmoothDepthBuffer[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
-            glBindImageTexture(1, m_KinectVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+            glBindImageTexture(0, m_SmoothDepthBuffer[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
+            glBindImageTexture(1, m_ReferenceVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
             glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
             glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);			
         }
 
         for (int PyramidLevel = 0; PyramidLevel < g_PyramidLevelCount; ++ PyramidLevel)
         {
-            const int WorkGroupsX = GetWorkGroupCount(m_pDepthSensorControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
-            const int WorkGroupsY = GetWorkGroupCount(m_pDepthSensorControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
+            const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
+            const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
 
             Gfx::ContextManager::SetShaderCS(m_CSNormalMap);
-            glBindImageTexture(0, m_KinectVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-            glBindImageTexture(1, m_KinectNormalMap[PyramidLevel], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+            glBindImageTexture(0, m_ReferenceVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+            glBindImageTexture(1, m_ReferenceNormalMap[PyramidLevel], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
             glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
             glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
         }
@@ -772,8 +758,8 @@ namespace
 
     void CGfxVoxelRenderer::DetermineSummands(int PyramidLevel, const Float4x4& rIncPoseMatrix)
     {
-        const int WorkGroupsX = GetWorkGroupCount(m_pDepthSensorControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
-        const int WorkGroupsY = GetWorkGroupCount(m_pDepthSensorControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
+        const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
+        const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
         
         STrackingData TrackingData;
         TrackingData.m_PoseMatrix = rIncPoseMatrix;
@@ -789,8 +775,8 @@ namespace
         glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_TrackingDataConstantBuffer);
         glBindBufferBase(GL_UNIFORM_BUFFER, 2, m_IncPoseMatrixConstantBuffer);
         
-        glBindImageTexture(0, m_KinectVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-        glBindImageTexture(1, m_KinectNormalMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+        glBindImageTexture(0, m_ReferenceVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+        glBindImageTexture(1, m_ReferenceNormalMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
         glBindImageTexture(2, m_RaycastVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
         glBindImageTexture(3, m_RaycastNormalMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
         glBindImageTexture(4, m_DebugBuffer[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
@@ -803,8 +789,8 @@ namespace
 
     void CGfxVoxelRenderer::ReduceSum(int PyramidLevel)
     {
-        const int SummandsX = GetWorkGroupCount(m_pDepthSensorControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
-        const int SummandsY = GetWorkGroupCount(m_pDepthSensorControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
+        const int SummandsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
+        const int SummandsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
 
         const int Summands = SummandsX * SummandsY;
         const float SummandsLog2 = Log2(static_cast<float>(Summands));
@@ -918,7 +904,7 @@ namespace
         Gfx::ContextManager::SetShaderCS(m_CSVolumeIntegration);
 
         glBindImageTexture(0, m_Volume, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RG16I);
-        glBindImageTexture(1, m_KinectRawDepthBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
+        glBindImageTexture(1, m_RawDepthBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
 
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_IntrinsicsConstantBuffer);
         glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_TrackingDataConstantBuffer);
@@ -937,8 +923,8 @@ namespace
         
         for (int PyramidLevel = 1; PyramidLevel < g_PyramidLevelCount; ++PyramidLevel)
         {
-            const int WorkGroupsX = GetWorkGroupCount(m_pDepthSensorControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
-            const int WorkGroupsY = GetWorkGroupCount(m_pDepthSensorControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
+            const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
+            const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
 
             float* pData = static_cast<float*>(glMapNamedBuffer(m_RaycastPyramidConstantBuffer, GL_WRITE_ONLY));
             *pData = 0.0f;
@@ -964,8 +950,8 @@ namespace
 
     void CGfxVoxelRenderer::Raycast()
     {
-        const int WorkGroupsX = GetWorkGroupCount(m_pDepthSensorControl->GetDepthWidth(), g_TileSize2D);
-        const int WorkGroupsY = GetWorkGroupCount(m_pDepthSensorControl->GetDepthHeight(), g_TileSize2D);
+        const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth(), g_TileSize2D);
+        const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
 
         Gfx::ContextManager::SetShaderCS(m_CSRaycast);
 
@@ -991,15 +977,15 @@ namespace
 
     void CGfxVoxelRenderer::UpdateReconstruction()
     {
-        Performance::BeginEvent("Kinect Data Input");
+        Performance::BeginEvent("Data Input");
 
-        ReadKinectData();
+        CreateReferencePyramid();
 
         Performance::EndEvent();
 
         if (m_IntegratedDepthFrameCount > 0)
         {
-            Performance::BeginEvent("Kinect Tracking");
+            Performance::BeginEvent("Tracking");
 
             PerformTracking();
 
@@ -1101,10 +1087,10 @@ namespace
         glGetIntegerv(GL_VIEWPORT, ViewPort);
 
         glViewport(0, 0, ViewPort[2] / 2, ViewPort[3]);
-        glBindImageTexture(0, m_KinectRawDepthBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16);
+        glBindImageTexture(0, m_RawDepthBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 3);
         glViewport(ViewPort[2] / 2, 0, ViewPort[2] / 2, ViewPort[3]);
-        glBindImageTexture(0, m_KinectSmoothDepthBuffer[0], 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16);
+        glBindImageTexture(0, m_SmoothDepthBuffer[0], 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16);
 
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
@@ -1138,7 +1124,7 @@ namespace
 
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
-        glDrawArrays(GL_POINTS, 0, m_pDepthSensorControl->GetDepthPixelCount());
+        glDrawArrays(GL_POINTS, 0, m_pRGBDCameraControl->GetDepthPixelCount());
 
         glBindVertexArray(0);
     }
