@@ -139,6 +139,8 @@ namespace
 
         int GetWorkGroupCount(int TotalShaderCount, int WorkGroupSize);
 
+        void ResetReconstruction();
+
         // Just for debugging
 
         void RenderReconstructionData();
@@ -149,7 +151,7 @@ namespace
 
         void RenderCamera();
 
-        void SetSphere();
+        void ClearVolume();
         
     private:
 
@@ -168,7 +170,7 @@ namespace
         CShaderPtr m_FSVisualizeVolume;
         CShaderPtr m_VSCamera;
         CShaderPtr m_FSCamera;
-        CShaderPtr m_CSSphere;
+        CShaderPtr m_CSClearVolume;
 
         CShaderPtr m_CSMirrorDepth;
         CShaderPtr m_CSBilateralFilter;
@@ -270,7 +272,7 @@ namespace
         m_FSVisualizeVolume = 0;
         m_VSCamera = 0;
         m_FSCamera = 0;
-        m_CSSphere = 0;
+        m_CSClearVolume = 0;
 
         m_CSMirrorDepth = 0;
         m_CSBilateralFilter = 0;
@@ -349,7 +351,6 @@ namespace
         m_FSVisualizeVolume = ShaderManager::CompilePS("kinect_fusion\\fs_visualize_volume.glsl", "main", DefineString.c_str());
         m_VSCamera = ShaderManager::CompileVS("kinect_fusion\\vs_camera.glsl", "main", DefineString.c_str());
         m_FSCamera = ShaderManager::CompilePS("kinect_fusion\\fs_camera.glsl", "main", DefineString.c_str());
-        m_CSSphere = ShaderManager::CompileCS("kinect_fusion\\cs_sphere.glsl", "main", DefineString.c_str());
 
         m_CSMirrorDepth = ShaderManager::CompileCS("kinect_fusion\\cs_mirror_depth.glsl", "main", DefineString.c_str());
         m_CSBilateralFilter = ShaderManager::CompileCS("kinect_fusion\\cs_bilateral_filter.glsl", "main", DefineString.c_str());
@@ -361,6 +362,7 @@ namespace
         m_CSRaycastPyramid = ShaderManager::CompileCS("kinect_fusion\\cs_raycast_pyramid.glsl", "main", DefineString.c_str());
         m_CSDetermineSummands = ShaderManager::CompileCS("kinect_fusion\\cs_determine_summands.glsl", "main", DefineString.c_str());
         m_CSReduceSum = ShaderManager::CompileCS("kinect_fusion\\cs_reduce_sum.glsl", "main", DefineString.c_str());
+        m_CSClearVolume = ShaderManager::CompileCS("kinect_fusion\\cs_clear_volume.glsl", "main", DefineString.c_str());
         m_VSRaycast = ShaderManager::CompileVS("kinect_fusion\\vs_raycast.glsl", "main", DefineString.c_str());
         m_FSRaycast = ShaderManager::CompilePS("kinect_fusion\\fs_raycast.glsl", "main", DefineString.c_str());
     }
@@ -415,7 +417,7 @@ namespace
             glTextureStorage2D(m_DebugBuffer[i], 1, GL_RGBA32F, Width, Height);
         }
 
-        glTextureStorage3D(m_Volume, 1, GL_RG16I, g_VolumeResolution, g_VolumeResolution, g_VolumeResolution);        
+        glTextureStorage3D(m_Volume, 1, GL_RG16I, g_VolumeResolution, g_VolumeResolution, g_VolumeResolution);
     }
     
     // -----------------------------------------------------------------------------
@@ -542,7 +544,7 @@ namespace
     
     void CGfxVoxelRenderer::OnReload()
     {
-        
+        ResetReconstruction();
     }
     
     // -----------------------------------------------------------------------------
@@ -991,6 +993,48 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxVoxelRenderer::ResetReconstruction()
+    {
+        Float4x4 PoseRotation, PoseTranslation;
+
+        PoseRotation.SetRotation(g_InitialCameraRotation[0], g_InitialCameraRotation[1], g_InitialCameraRotation[2]);
+        PoseTranslation.SetTranslation(g_InitialCameraPosition[0], g_InitialCameraPosition[1], g_InitialCameraPosition[2]);
+        m_PoseMatrix = PoseTranslation * PoseRotation;
+
+        m_IntegratedDepthFrameCount = 0;
+        m_FrameCount = 0;
+        m_TrackingLost = true;
+
+        STrackingData TrackingData;
+        TrackingData.m_PoseMatrix = m_PoseMatrix;
+        TrackingData.m_InvPoseMatrix = m_PoseMatrix.GetInverted();
+
+        STrackingData* pTrackingData = static_cast<STrackingData*>(glMapNamedBuffer(m_TrackingDataConstantBuffer, GL_WRITE_ONLY));
+        memcpy(pTrackingData, &TrackingData, sizeof(STrackingData));
+        glUnmapNamedBuffer(m_TrackingDataConstantBuffer);
+        
+        glClearTexSubImage(m_Volume, 0, 0, 0, 0, g_VolumeResolution, g_VolumeResolution, g_VolumeResolution, GL_RG16I, GL_SHORT, nullptr);
+
+        ClearVolume();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxVoxelRenderer::ClearVolume()
+    {
+        Gfx::ContextManager::SetShaderCS(m_CSClearVolume);
+
+        glBindImageTexture(0, m_Volume, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RG16I);
+
+        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+        const int WorkGroupSize = GetWorkGroupCount(g_VolumeResolution, g_TileSize3D);
+
+        glDispatchCompute(WorkGroupSize, WorkGroupSize, WorkGroupSize);
+    }
+
+    // -----------------------------------------------------------------------------
+
     int CGfxVoxelRenderer::GetWorkGroupCount(int TotalShaderCount, int WorkGroupSize)
     {
         return (TotalShaderCount + WorkGroupSize - 1) / WorkGroupSize;
@@ -1183,22 +1227,7 @@ namespace
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         glBindVertexArray(0);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxVoxelRenderer::SetSphere()
-    {
-        Gfx::ContextManager::SetShaderCS(m_CSSphere);
-
-        glBindImageTexture(0, m_Volume, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RG16I);
-
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
-        const int WorkGroupSize = GetWorkGroupCount(g_VolumeResolution, g_TileSize3D);
-
-        glDispatchCompute(WorkGroupSize, WorkGroupSize, WorkGroupSize);
-    }
+    }    
 } // namespace
 
 namespace Gfx

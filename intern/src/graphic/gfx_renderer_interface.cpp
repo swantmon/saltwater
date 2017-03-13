@@ -18,6 +18,7 @@
 #include "graphic/gfx_renderer_interface.h"
 #include "graphic/gfx_shadow_renderer.h"
 #include "graphic/gfx_tonemapping_renderer.h"
+#include "graphic/gfx_voxel_renderer.h"
 
 namespace Gfx
 {
@@ -39,6 +40,7 @@ namespace Renderer
         TonemappingRenderer  ::OnReload();
         PostFXHDR            ::OnReload();
         PostFX               ::OnReload();
+        VoxelRenderer        ::OnReload();
     }
 } // namespace Renderer
 } // namespace Gfx
