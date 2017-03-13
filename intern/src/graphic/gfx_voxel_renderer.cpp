@@ -127,7 +127,7 @@ namespace
         void CreateReferencePyramid();
         void Integrate();
         void Raycast();
-        void DownSample();
+        void CreateRaycastPyramid();
 
         void PerformTracking();
 
@@ -204,7 +204,6 @@ namespace
 
         std::vector<unsigned short> m_DepthPixels;
 
-        bool m_NewDepthDataAvailable;
         int m_IntegratedDepthFrameCount;
         int m_FrameCount;
 
@@ -254,7 +253,6 @@ namespace
         PoseTranslation.SetTranslation(g_InitialCameraPosition[0], g_InitialCameraPosition[1], g_InitialCameraPosition[2]);
         m_PoseMatrix = PoseTranslation * PoseRotation;
 
-        m_NewDepthDataAvailable = false;
         m_IntegratedDepthFrameCount = 0;
         m_FrameCount = 0;
         m_TrackingLost = true;
@@ -590,26 +588,6 @@ namespace
         TranslationMatrix.SetTranslation(0.0f, 0.0f, 0.0f);
 
         m_VolumeWorldMatrix = TranslationMatrix * RotationMatrix * ScalingMatrix;
-        
-        if (m_pRGBDCameraControl->GetDepthBuffer(m_DepthPixels.data()))
-        {
-            glTextureSubImage2D(m_RawDepthBuffer, 0, 0, 0,
-                m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight(),
-                GL_RED_INTEGER, GL_UNSIGNED_SHORT, m_DepthPixels.data());
-
-            //////////////////////////////////////////////////////////////////////////////////////
-            // Mirror depth data
-            //////////////////////////////////////////////////////////////////////////////////////
-
-            const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() / 2, g_TileSize2D);
-            const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
-            
-            Gfx::ContextManager::SetShaderCS(m_CSMirrorDepth);
-            glBindImageTexture(0, m_RawDepthBuffer, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16UI);
-            glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
-
-            m_NewDepthDataAvailable = true;
-        }
     }
     
     // -----------------------------------------------------------------------------
@@ -916,7 +894,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxVoxelRenderer::DownSample()
+    void CGfxVoxelRenderer::CreateRaycastPyramid()
     {
         Gfx::ContextManager::SetShaderCS(m_CSRaycastPyramid);
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_RaycastPyramidConstantBuffer);
@@ -1002,10 +980,9 @@ namespace
 
         Performance::BeginEvent("TSDF Integration and Raycasting");
 
-        Integrate();
+        Integrate();        
         Raycast();
-
-        DownSample();
+        CreateRaycastPyramid();
 
         Performance::EndEvent();
 
@@ -1025,10 +1002,24 @@ namespace
     {
         Performance::BeginEvent("Kinect Fusion");
 
-        //if (m_NewDepthDataAvailable)
+        if (m_pRGBDCameraControl->GetDepthBuffer(m_DepthPixels.data()))
         {
+            glTextureSubImage2D(m_RawDepthBuffer, 0, 0, 0,
+                m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight(),
+                GL_RED_INTEGER, GL_UNSIGNED_SHORT, m_DepthPixels.data());
+
+            //////////////////////////////////////////////////////////////////////////////////////
+            // Mirror depth data
+            //////////////////////////////////////////////////////////////////////////////////////
+
+            const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() / 2, g_TileSize2D);
+            const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
+
+            Gfx::ContextManager::SetShaderCS(m_CSMirrorDepth);
+            glBindImageTexture(0, m_RawDepthBuffer, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16UI);
+            glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
+
             UpdateReconstruction();
-            m_NewDepthDataAvailable = false;
         }
 
         RenderReconstructionData();
