@@ -19,6 +19,12 @@ const float g_SigmaSpace2_inv = 1.0f / g_SigmaSpace2;
 // Input from engine
 // -----------------------------------------------------------------------------
 
+layout(row_major, std140, binding = 0) uniform UBODepthThreshold
+{
+    int g_MinDepth;
+    int g_MaxDepth;
+};
+
 layout (binding = 0, r16ui) readonly uniform uimage2D cs_InputTexture;
 layout (binding = 1, r16ui) writeonly uniform uimage2D cs_OutputTexture;
 
@@ -60,8 +66,11 @@ void main()
 		}
 	}
 
-	const float Result = Sum1 / Sum2;
+	int Result = int(Sum1 / Sum2);
 	
+    Result = Result < g_MinDepth ? 0 : Result;
+    Result = Result > g_MaxDepth ? 0 : Result;
+
 	imageStore(cs_OutputTexture, ivec2(x, y), ivec4(Result));
 }
 

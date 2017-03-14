@@ -60,7 +60,9 @@ namespace
     const int g_ICPIterations[g_PyramidLevelCount] = { 10, 5, 4 };
 
     const float g_EpsilonDistance = 0.1f;
-    const float g_EpsilonAngle = 0.4f;
+    const float g_EpsilonAngle = 0.8f;
+
+    const Base::Int2 g_DepthThreshold = Base::Int2(800, 5000);
 
     const int g_ICPValueCount = 27;
 
@@ -82,6 +84,14 @@ namespace
     {
         Base::Float4x4 m_PoseMatrix;
         Base::Float4x4 m_InvPoseMatrix;
+    };
+
+    struct SIncBuffer
+    {
+        Base::Float4x4 m_PoseMatrix;
+        Base::Float4x4 m_InvPoseMatrix;
+        int m_PyramidLevel;
+        float Padding[3];
     };
 
     struct SDrawCallBufferData
@@ -161,6 +171,7 @@ namespace
         GLuint m_RaycastPyramidConstantBuffer;
         GLuint m_ICPSummationConstantBuffer;
         GLuint m_IncPoseMatrixConstantBuffer;
+        GLuint m_BilateralFilterConstantBuffer;
 
         CShaderPtr m_VSVisualizeDepth;
         CShaderPtr m_FSVisualizeDepth;
@@ -303,6 +314,7 @@ namespace
         glDeleteBuffers(1, &m_ICPBuffer);
         glDeleteBuffers(1, &m_ICPSummationConstantBuffer);
         glDeleteBuffers(1, &m_IncPoseMatrixConstantBuffer);
+        glDeleteBuffers(1, &m_BilateralFilterConstantBuffer);
         glDeleteBuffers(1, &m_RaycastBuffer);
 
         glDeleteVertexArrays(1, &m_CameraVAO);
@@ -480,10 +492,13 @@ namespace
         glNamedBufferData(m_ICPSummationConstantBuffer, 16, nullptr, GL_DYNAMIC_DRAW);
         
         glCreateBuffers(1, &m_IncPoseMatrixConstantBuffer);
-        glNamedBufferData(m_IncPoseMatrixConstantBuffer, sizeof(Float4x4) * 2, nullptr, GL_DYNAMIC_DRAW);
+        glNamedBufferData(m_IncPoseMatrixConstantBuffer, sizeof(SIncBuffer), nullptr, GL_DYNAMIC_DRAW);
 
         glCreateBuffers(1, &m_RaycastBuffer);
         glNamedBufferData(m_RaycastBuffer, sizeof(Float4) * 2, nullptr, GL_DYNAMIC_DRAW);
+
+        glCreateBuffers(1, &m_BilateralFilterConstantBuffer);
+        glNamedBufferData(m_BilateralFilterConstantBuffer, sizeof(Base::Int2), &g_DepthThreshold, GL_STATIC_DRAW);
     }
     
     // -----------------------------------------------------------------------------
@@ -651,9 +666,9 @@ namespace
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
         Gfx::ContextManager::SetShaderCS(m_CSBilateralFilter);
+        glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_BilateralFilterConstantBuffer);
         glBindImageTexture(0, m_RawDepthBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
         glBindImageTexture(1, m_SmoothDepthBuffer[0], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16UI);
-        glBindImageTexture(2, m_DebugBuffer[0], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
         glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
 
         //////////////////////////////////////////////////////////////////////////////////////
@@ -741,12 +756,13 @@ namespace
         const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
         const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
         
-        STrackingData TrackingData;
+        SIncBuffer TrackingData;
         TrackingData.m_PoseMatrix = rIncPoseMatrix;
         TrackingData.m_InvPoseMatrix = rIncPoseMatrix.GetInverted();
+        TrackingData.m_PyramidLevel = PyramidLevel;
 
-        Float4x4* pData = static_cast<Float4x4*>(glMapNamedBufferRange(m_IncPoseMatrixConstantBuffer, 0, sizeof(Float4x4) * 2, GL_MAP_WRITE_BIT));
-        memcpy(pData, &TrackingData, sizeof(STrackingData));
+        SIncBuffer* pData = static_cast<SIncBuffer*>(glMapNamedBufferRange(m_IncPoseMatrixConstantBuffer, 0, sizeof(SIncBuffer), GL_MAP_WRITE_BIT));
+        memcpy(pData, &TrackingData, sizeof(SIncBuffer));
         glUnmapNamedBuffer(m_IncPoseMatrixConstantBuffer);
 
         Gfx::ContextManager::SetShaderCS(m_CSDetermineSummands);

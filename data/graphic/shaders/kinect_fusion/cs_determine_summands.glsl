@@ -14,11 +14,13 @@ layout(binding = 0, rgba32f) uniform image2D cs_VertexMap;
 layout(binding = 1, rgba32f) uniform image2D cs_NormalMap;
 layout(binding = 2, rgba32f) uniform image2D cs_RaycastVertexMap;
 layout(binding = 3, rgba32f) uniform image2D cs_RaycastNormalMap;
+layout(binding = 4, rgba32f) uniform image2D cs_Debug;
 
 layout(row_major, std140, binding = 2) uniform UBOInc
 {
     mat4 g_IncPoseMatrix;
     mat4 g_InvIncPoseMatrix;
+    int g_PyramidLevel;
 };
 
 // -------------------------------------------------------------------------------------
@@ -73,7 +75,6 @@ bool findCorrespondence(out vec3 ReferenceVertex, out vec3 RaycastVertex, out ve
     const int y = int(gl_GlobalInvocationID.y);
 
     const ivec2 ImageSize = imageSize(cs_VertexMap);
-    const int PyramidLevel = int(log2(DEPTH_IMAGE_WIDTH / ImageSize.x));
 
     vec3 Vertex = imageLoad(cs_VertexMap, ivec2(x, y)).xyz;
 
@@ -84,7 +85,7 @@ bool findCorrespondence(out vec3 ReferenceVertex, out vec3 RaycastVertex, out ve
     
     ReferenceVertex = (g_IncPoseMatrix * vec4(Vertex, 1.0)).xyz;
 
-    vec3 CameraPlane = mat3(g_Intrinisics[PyramidLevel].m_KMatrix) * (g_InvPoseMatrix * vec4(ReferenceVertex, 1.0f)).xyz;
+    vec3 CameraPlane = mat3(g_Intrinisics[g_PyramidLevel].m_KMatrix) * (g_InvPoseMatrix * vec4(ReferenceVertex, 1.0f)).xyz;
     CameraPlane /= CameraPlane.z;
 
     if (CameraPlane.x < 0.0f || CameraPlane.x > ImageSize.x ||
@@ -153,7 +154,9 @@ void main()
     {
         Row[0] = Row[1] = Row[2] = Row[3] = Row[4] = Row[5] = Row[6] = 0.0f;
     }
-        
+    
+    imageStore(cs_Debug, ivec2(x, y), CorresponenceFound ? vec4(1.0f) : vec4(0.0f));
+
     const uint ICPSummandIndex = gl_WorkGroupID.x + gl_WorkGroupID.y * gl_NumWorkGroups.x;
     int ICPValueIndex = 0;
     
