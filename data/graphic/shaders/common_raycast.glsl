@@ -24,7 +24,7 @@ float GetEndLength(vec3 Start, vec3 Direction)
 
 ivec3 GetVoxelCoords(vec3 Position)
 {
-    return ivec3(Position / VOXEL_SIZE + 0.5f);
+    return ivec3(Position / VOXEL_SIZE);
 }
 
 vec2 GetVoxel(ivec3 Coords, isampler3D Volume)
@@ -43,6 +43,7 @@ float GetInterpolatedTSDF(vec3 Position, isampler3D Volume)
 
 vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection, isampler3D Volume)
 {
+
     const float StartLength = GetStartLength(CameraPosition, RayDirection);
     const float EndLength = GetEndLength(CameraPosition, RayDirection);
     

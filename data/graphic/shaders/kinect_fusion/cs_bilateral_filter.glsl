@@ -54,7 +54,8 @@ void main()
 		for (int cy = -R; cy < R; ++ cy)
 		{
 			const ivec2 SamplePos = ivec2(x + cx, y + cy);
-			const float SampleDepth = float(imageLoad(cs_InputTexture, SamplePos).x);
+			float SampleDepth = float(imageLoad(cs_InputTexture, SamplePos).x);
+            SampleDepth = (SampleDepth < g_MinDepth || SampleDepth > g_MaxDepth) ? 0.0f : SampleDepth;
 
             const float Space2 = cx * cx + cy * cy;
             const float Color2 = (ReferenceDepth - SampleDepth) * (ReferenceDepth - SampleDepth);
@@ -67,9 +68,6 @@ void main()
 	}
 
 	int Result = int(Sum1 / Sum2);
-	
-    Result = Result < g_MinDepth ? 0 : Result;
-    Result = Result > g_MaxDepth ? 0 : Result;
 
 	imageStore(cs_OutputTexture, ivec2(x, y), ivec4(Result));
 }

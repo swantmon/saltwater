@@ -53,14 +53,14 @@ namespace
 
     const float g_TruncatedDistance = 30.0f;
     
-    const int g_MaxIntegrationWeight = 150;
+    const int g_MaxIntegrationWeight = 500;
 
     const int g_PyramidLevelCount = 3;
 
     const int g_ICPIterations[g_PyramidLevelCount] = { 10, 5, 4 };
 
     const float g_EpsilonDistance = 0.1f;
-    const float g_EpsilonAngle = 0.8f;
+    const float g_EpsilonAngle = 0.4f;
 
     const Base::Int2 g_DepthThreshold = Base::Int2(800, 5000);
 
@@ -809,8 +809,10 @@ namespace
 
     bool CGfxVoxelRenderer::CalculatePoseMatrix(Float4x4& rIncPoseMatrix)
     {
-        double A[36];
-        double b[6];
+        typedef double Scalar;
+
+        Scalar A[36];
+        Scalar b[6];
 
         int ValueIndex = 0;
 
@@ -823,39 +825,39 @@ namespace
                 
                 if (j == 6)
                 {
-                    b[i] = Value;
+                    b[i] = static_cast<Scalar>(Value);
                 }
                 else
                 {
-                    A[j * 6 + i] = A[i * 6 + j] = Value;
+                    A[j * 6 + i] = A[i * 6 + j] = static_cast<Scalar>(Value);
                 }
             }
         }
         glUnmapNamedBuffer(m_ICPBuffer);
 
-        double L[36];
+        Scalar L[36];
 
         for (int i = 0; i < 6; ++ i)
         {
             for (int j = 0; j <= i; ++ j)
             {
-                double Sum = 0.0;
+                Scalar Sum = 0.0;
                 for (int k = 0; k < j; ++ k)
                 {
                     Sum += L[k * 6 + i] * L[k * 6 + j];
                 }
-                L[j * 6 + i] = i == j ? sqrt(A[i * 6 + i] - Sum) : ((1.0 / L[j * 6 + j]) * (A[j * 6 + i] - Sum));
+                L[j * 6 + i] = i == j ? sqrt(A[i * 6 + i] - Sum) : ((1.0f / L[j * 6 + j]) * (A[j * 6 + i] - Sum));
             }
         }
 
-        const double Det = L[0] * L[0] * L[7] * L[7] * L[14] * L[14] * L[21] * L[21] * L[28] * L[28] * L[35] * L[35];
+        const Scalar Det = L[0] * L[0] * L[7] * L[7] * L[14] * L[14] * L[21] * L[21] * L[28] * L[28] * L[35] * L[35];
         
-        if (std::isnan(Det) || abs(Det) < 1e-12)
+        if (std::isnan(Det) || abs(Det) < 1e-2)
         {
             return false;
         }
 
-        double y[6];
+        Scalar y[6];
         
         y[0] = b[0] / L[0];
         y[1] = (b[1] - L[1] * y[0]) / L[7];
@@ -864,7 +866,7 @@ namespace
         y[4] = (b[4] - L[4] * y[0] - L[10] * y[1] - L[16] * y[2] - L[22] * y[3]) / L[28];
         y[5] = (b[5] - L[5] * y[0] - L[11] * y[1] - L[17] * y[2] - L[23] * y[3] - L[29] * y[4]) / L[35];
 
-        double x[6];
+        Scalar x[6];
 
         x[5] = y[5] / L[35];
         x[4] = (y[4] - L[29] * x[5]) / L[28];
