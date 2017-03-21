@@ -50,13 +50,14 @@ namespace MR
         void DetermineSummands(int PyramidLevel, const Base::Float4x4& rIncPoseMatrix);
         void ReduceSum(int PyramidLevel);
         bool CalculatePoseMatrix(Base::Float4x4& rIncPoseMatrix);
-        
-        int GetWorkGroupCount(int TotalShaderCount, int WorkGroupSize);
         void ClearVolume();
 
     private:
 
-        GLuint m_DrawCallConstantBuffer;
+        static int GetWorkGroupCount(int TotalShaderCount, int WorkGroupSize);
+
+    private:
+
         GLuint m_IntrinsicsConstantBuffer;
         GLuint m_TrackingDataConstantBuffer;
         GLuint m_RaycastPyramidConstantBuffer;

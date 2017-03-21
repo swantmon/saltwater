@@ -182,7 +182,6 @@ namespace MR
         glDeleteTextures(g_PyramidLevelCount, m_RaycastNormalMap);
         glDeleteTextures(1, &m_Volume);
 
-        glDeleteBuffers(1, &m_DrawCallConstantBuffer);
         glDeleteBuffers(1, &m_IntrinsicsConstantBuffer);
         glDeleteBuffers(1, &m_TrackingDataConstantBuffer);
         glDeleteBuffers(1, &m_RaycastPyramidConstantBuffer);
@@ -289,9 +288,6 @@ namespace MR
         const float FocalPointX0 = m_pRGBDCameraControl->GetDepthFocalPointX();
         const float FocalPointY0 = m_pRGBDCameraControl->GetDepthFocalPointY();
         
-        glCreateBuffers(1, &m_DrawCallConstantBuffer);
-        glNamedBufferData(m_DrawCallConstantBuffer, sizeof(Float4x4), nullptr, GL_DYNAMIC_DRAW);
-
         SIntrinsics Intrinsics[g_PyramidLevelCount];
 
         for (int i = 0; i < g_PyramidLevelCount; ++ i)
@@ -727,6 +723,7 @@ namespace MR
             ++m_IntegratedDepthFrameCount;
             ++m_FrameCount;
         }
+
         Performance::EndEvent();
     }
 
@@ -780,4 +777,3 @@ namespace MR
     }
 
 } // namespace
-

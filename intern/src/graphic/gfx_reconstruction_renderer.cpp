@@ -302,7 +302,7 @@ namespace
 
     void CGfxReconstructionRenderer::Update()
     {
-        m_pReconstructor->Update();
+        
     }
     
     // -----------------------------------------------------------------------------
@@ -360,6 +360,8 @@ namespace
 
     void CGfxReconstructionRenderer::Render()
     {
+        m_pReconstructor->Update();
+
         Performance::BeginEvent("SLAM Reconstruction Rendering");
         
         //RenderReconstructionData();
