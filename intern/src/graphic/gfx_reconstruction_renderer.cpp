@@ -152,7 +152,7 @@ namespace
         glDeleteVertexArrays(1, &m_CameraVAO);
         glDeleteBuffers(2, m_CubeMesh);
 
-        m_pReconstructor.release();
+        m_pReconstructor = nullptr;
     }
         
     // -----------------------------------------------------------------------------
