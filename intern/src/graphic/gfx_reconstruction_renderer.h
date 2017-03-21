@@ -1,5 +1,5 @@
 //
-//  gfx_voxel_renderer.h
+//  gfx_reconstruction_renderer.h
 //  graphic
 //
 //  Created by Tobias Schwandt on 12/12/14.
@@ -10,7 +10,7 @@
 
 namespace Gfx
 {
-namespace VoxelRenderer
+namespace ReconstructionRenderer
 {
     void OnStart();
     void OnExit();
@@ -31,5 +31,5 @@ namespace VoxelRenderer
     
     void Update();
     void Render();
-} // namespace VoxelRenderer
+} // namespace ReconstructionRenderer
 } // namespace Gfx

@@ -41,7 +41,7 @@
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_tonemapping_renderer.h"
 #include "graphic/gfx_view_manager.h"
-#include "graphic/gfx_voxel_renderer.h"
+#include "graphic/gfx_reconstruction_renderer.h"
 
 using namespace Gfx;
 
@@ -86,7 +86,7 @@ namespace
         PostFXHDR            ::OnExit();
         PostFX               ::OnExit();
         TonemappingRenderer  ::OnExit();
-        VoxelRenderer        ::OnExit();
+        ReconstructionRenderer        ::OnExit();
 
         BASE_CONSOLE_STREAMINFO("Gfx> Finished exit of renderer.");
         

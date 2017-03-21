@@ -248,7 +248,7 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_manager_interface.cpp">
       <Filter>interface\manager</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_voxel_renderer.cpp">
+    <ClCompile Include="..\..\..\src\graphic\gfx_reconstruction_renderer.cpp">
       <Filter>engine\renderer</Filter>
     </ClCompile>
   </ItemGroup>
@@ -554,7 +554,7 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_manager_interface.h">
       <Filter>interface\manager</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_voxel_renderer.h">
+    <ClInclude Include="..\..\..\src\graphic\gfx_reconstruction_renderer.h">
       <Filter>engine\renderer</Filter>
     </ClInclude>
   </ItemGroup>

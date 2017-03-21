@@ -34,6 +34,7 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_mesh_actor_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_point_light_facet.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_point_light_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_reconstruction_renderer.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_renderer_interface.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_sky_facet.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_sky_manager.cpp" />
@@ -107,7 +108,6 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_view_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_view_port.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_view_port_set.cpp" />
-    <ClCompile Include="..\..\..\src\graphic\gfx_voxel_renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\graphic\gfx_application_interface.h" />
@@ -125,6 +125,7 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_mesh_actor_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_point_light_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_point_light_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_reconstruction_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_renderer_interface.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_selection.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_sky_facet.h" />
@@ -211,7 +212,6 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_view_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_view_port.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_view_port_set.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_voxel_renderer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\data\graphic\shaders\cs_brdf.glsl" />
