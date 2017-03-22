@@ -20,23 +20,36 @@ namespace MR
     {
     public:
 
-        CSLAMReconstructor();
-        ~CSLAMReconstructor();
-
-    public:
-
         struct ReconstructionData
         {
-            const static int MAX_ITERATIONS = 3;
+            const static int MAX_PYRAMIDLEVELS = 8;
 
             float m_VolumeSize;
             int m_VolumeResolution;
-            float m_VoxelSize;
             float m_TruncatedDistance;
             int m_MaxIntegrationWeight;
             int m_PyramidLevelCount;
-            int m_PyramidLevelIterations[MAX_ITERATIONS];
+            int m_PyramidLevelIterations[MAX_PYRAMIDLEVELS];
+            Base::Int2 m_DepthThreshold;
+
+            ReconstructionData()
+                : m_VolumeSize(1.0f)
+                , m_VolumeResolution(256)
+                , m_TruncatedDistance(30.0f)
+                , m_MaxIntegrationWeight(200)
+                , m_PyramidLevelCount(MAX_PYRAMIDLEVELS)
+                , m_DepthThreshold(500, 8000)
+            {
+                m_PyramidLevelIterations[0] = 10;
+                m_PyramidLevelIterations[1] = 5;
+                m_PyramidLevelIterations[2] = 4;
+            }
         };
+
+    public:
+
+        CSLAMReconstructor(const ReconstructionData* pReconstructionData = nullptr);
+        ~CSLAMReconstructor();
 
     public:
 
@@ -44,13 +57,12 @@ namespace MR
         void Exit();
 
         void Update();
-        void ResetReconstruction();
+        void ResetReconstruction(const ReconstructionData* pReconstructionData = nullptr);
 
         bool IsTrackingLost() const;
         Base::Float4x4 GetPoseMatrix() const;
         GLuint GetVolume();
-        
-        void SetReconstructionData(const ReconstructionData& rReconstructionData) const;
+
         void GetReconstructionData(ReconstructionData& rReconstructionData);
 
     private:
@@ -76,6 +88,8 @@ namespace MR
         static int GetWorkGroupCount(int TotalShaderCount, int WorkGroupSize);
 
     private:
+
+        ReconstructionData m_ReconstructionData;
 
         GLuint m_IntrinsicsConstantBuffer;
         GLuint m_TrackingDataConstantBuffer;
