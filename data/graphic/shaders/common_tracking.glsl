@@ -2,8 +2,6 @@
 #ifndef __INCLUDE_TRACKING_COMMON_GLSL__
 #define __INCLUDE_TRACKING_COMMON_GLSL__
 
-#define PYRAMID_LEVELS 3
-
 struct SIntrinics
 {
 	mat4 m_KMatrix;

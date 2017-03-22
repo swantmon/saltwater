@@ -2,6 +2,7 @@
 #ifndef __INCLUDE_CS_KINECT_INTEGRATE_VOLUME_GLSL__
 #define __INCLUDE_CS_KINECT_INTEGRATE_VOLUME_GLSL__
 
+#include "common_tracking.glsl"
 #include "common_raycast.glsl"
 
 // -----------------------------------------------------------------------------

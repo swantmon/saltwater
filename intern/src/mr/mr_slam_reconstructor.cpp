@@ -115,14 +115,14 @@ namespace MR
     
     // -----------------------------------------------------------------------------
     
-    bool CSLAMReconstructor::IsTrackingLost()
+    bool CSLAMReconstructor::IsTrackingLost() const
     {
         return m_TrackingLost;
     }
 
     // -----------------------------------------------------------------------------
 
-    Float4x4 CSLAMReconstructor::GetPoseMatrix()
+    Float4x4 CSLAMReconstructor::GetPoseMatrix() const
     {
         return m_PoseMatrix;
     }
@@ -211,6 +211,7 @@ namespace MR
         std::stringstream DefineStream;
 
         DefineStream
+            << "#define PYRAMID_LEVELS "             << g_PyramidLevelCount                      << " \n"
             << "#define VOLUME_RESOLUTION "          << g_VolumeResolution                       << " \n"
             << "#define VOXEL_SIZE "                 << g_VoxelSize                              << " \n"
             << "#define VOLUME_SIZE "                << g_VolumeSize                             << " \n"
@@ -221,7 +222,6 @@ namespace MR
             << "#define TILE_SIZE3D "                << g_TileSize3D                             << " \n"
             << "#define INT16_MAX "                  << std::numeric_limits<int16_t>::max()      << " \n"
             << "#define TRUNCATED_DISTANCE "         << g_TruncatedDistance                      << " \n"
-            << "#define TRUNCATED_DISTANCE_INVERSE " << 1.0f / g_TruncatedDistance               << " \n"
             << "#define MAX_INTEGRATION_WEIGHT "     << g_MaxIntegrationWeight                   << " \n"
             << "#define EPSILON_DISTANCE "           << g_EpsilonDistance                        << " \n"
             << "#define EPSILON_ANGLE "              << g_EpsilonAngle                           << " \n"

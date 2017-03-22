@@ -19,8 +19,24 @@ namespace MR
     class CSLAMReconstructor : private Base::CUncopyable
     {
     public:
+
         CSLAMReconstructor();
         ~CSLAMReconstructor();
+
+    public:
+
+        struct ReconstructionData
+        {
+            const static int MAX_ITERATIONS = 3;
+
+            float m_VolumeSize;
+            int m_VolumeResolution;
+            float m_VoxelSize;
+            float m_TruncatedDistance;
+            int m_MaxIntegrationWeight;
+            int m_PyramidLevelCount;
+            int m_PyramidLevelIterations[MAX_ITERATIONS];
+        };
 
     public:
 
@@ -30,9 +46,12 @@ namespace MR
         void Update();
         void ResetReconstruction();
 
-        bool IsTrackingLost();
-        Base::Float4x4 GetPoseMatrix();
+        bool IsTrackingLost() const;
+        Base::Float4x4 GetPoseMatrix() const;
         GLuint GetVolume();
+        
+        void SetReconstructionData(const ReconstructionData& rReconstructionData) const;
+        void GetReconstructionData(ReconstructionData& rReconstructionData);
 
     private:
 

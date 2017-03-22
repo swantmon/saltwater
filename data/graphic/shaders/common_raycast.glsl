@@ -2,8 +2,6 @@
 #ifndef __INCLUDE_COMMON_RAYCAST_GLSL__
 #define __INCLUDE_COMMON_RAYCAST_GLSL__
 
-#include "common_tracking.glsl"
-
 float GetStartLength(vec3 Start, vec3 Direction)
 {
     float xmin = ((Direction.x > 0.0f ? 0.0f : VOLUME_SIZE) - Start.x) / Direction.x;
