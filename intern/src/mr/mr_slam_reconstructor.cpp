@@ -90,11 +90,11 @@ namespace MR
     
     // -----------------------------------------------------------------------------
 
-    CSLAMReconstructor::CSLAMReconstructor(const ReconstructionData* pReconstructionData)
+    CSLAMReconstructor::CSLAMReconstructor(const ReconstructionSettings* pReconstructionSettings)
     {
-        if (pReconstructionData != nullptr)
+        if (pReconstructionSettings != nullptr)
         {
-            m_ReconstructionData = *pReconstructionData;
+            m_ReconstructionSettings = *pReconstructionSettings;
         }
         Start();
     }
@@ -136,7 +136,7 @@ namespace MR
 
         m_DepthPixels = std::vector<unsigned short>(m_pRGBDCameraControl->GetDepthPixelCount());
 
-        const float VolumeSize = m_ReconstructionData.m_VolumeSize;
+        const float VolumeSize = m_ReconstructionSettings.m_VolumeSize;
         Float4x4 PoseRotation, PoseTranslation;
 
         PoseRotation.SetRotation(g_InitialCameraRotation[0], g_InitialCameraRotation[1], g_InitialCameraRotation[2]);
@@ -174,11 +174,11 @@ namespace MR
         m_CSClearVolume = 0;
 
         glDeleteTextures(1, &m_RawDepthBuffer);
-        glDeleteTextures(m_ReconstructionData.m_PyramidLevelCount, m_SmoothDepthBuffer);
-        glDeleteTextures(m_ReconstructionData.m_PyramidLevelCount, m_ReferenceVertexMap);
-        glDeleteTextures(m_ReconstructionData.m_PyramidLevelCount, m_ReferenceNormalMap);
-        glDeleteTextures(m_ReconstructionData.m_PyramidLevelCount, m_RaycastVertexMap);
-        glDeleteTextures(m_ReconstructionData.m_PyramidLevelCount, m_RaycastNormalMap);
+        glDeleteTextures(m_ReconstructionSettings.m_PyramidLevelCount, m_SmoothDepthBuffer);
+        glDeleteTextures(m_ReconstructionSettings.m_PyramidLevelCount, m_ReferenceVertexMap);
+        glDeleteTextures(m_ReconstructionSettings.m_PyramidLevelCount, m_ReferenceNormalMap);
+        glDeleteTextures(m_ReconstructionSettings.m_PyramidLevelCount, m_RaycastVertexMap);
+        glDeleteTextures(m_ReconstructionSettings.m_PyramidLevelCount, m_RaycastNormalMap);
         glDeleteTextures(1, &m_Volume);
 
         glDeleteBuffers(1, &m_IntrinsicsConstantBuffer);
@@ -207,23 +207,23 @@ namespace MR
         const float SummandsLog2 = Log2(static_cast<float>(Summands));
         const int SummandsPOT = 1 << (static_cast<int>(SummandsLog2) + 1);
         
-        const float VoxelSize = m_ReconstructionData.m_VolumeSize / m_ReconstructionData.m_VolumeResolution;
+        const float VoxelSize = m_ReconstructionSettings.m_VolumeSize / m_ReconstructionSettings.m_VolumeResolution;
 
         std::stringstream DefineStream;
 
         DefineStream
-            << "#define PYRAMID_LEVELS "             << m_ReconstructionData.m_PyramidLevelCount    << " \n"
-            << "#define VOLUME_RESOLUTION "          << m_ReconstructionData.m_VolumeResolution     << " \n"
+            << "#define PYRAMID_LEVELS "             << m_ReconstructionSettings.m_PyramidLevelCount    << " \n"
+            << "#define VOLUME_RESOLUTION "          << m_ReconstructionSettings.m_VolumeResolution     << " \n"
             << "#define VOXEL_SIZE "                 << VoxelSize                                   << " \n"
-            << "#define VOLUME_SIZE "                << m_ReconstructionData.m_VolumeSize           << " \n"
+            << "#define VOLUME_SIZE "                << m_ReconstructionSettings.m_VolumeSize           << " \n"
             << "#define DEPTH_IMAGE_WIDTH "          << m_pRGBDCameraControl->GetDepthWidth()       << " \n"
             << "#define DEPTH_IMAGE_HEIGHT "         << m_pRGBDCameraControl->GetDepthHeight()      << " \n"
             << "#define TILE_SIZE1D "                << g_TileSize1D                                << " \n"
             << "#define TILE_SIZE2D "                << g_TileSize2D                                << " \n"
             << "#define TILE_SIZE3D "                << g_TileSize3D                                << " \n"
             << "#define INT16_MAX "                  << std::numeric_limits<int16_t>::max()         << " \n"
-            << "#define TRUNCATED_DISTANCE "         << m_ReconstructionData.m_TruncatedDistance    << " \n"
-            << "#define MAX_INTEGRATION_WEIGHT "     << m_ReconstructionData.m_MaxIntegrationWeight << " \n"
+            << "#define TRUNCATED_DISTANCE "         << m_ReconstructionSettings.m_TruncatedDistance    << " \n"
+            << "#define MAX_INTEGRATION_WEIGHT "     << m_ReconstructionSettings.m_MaxIntegrationWeight << " \n"
             << "#define EPSILON_DISTANCE "           << g_EpsilonDistance                           << " \n"
             << "#define EPSILON_ANGLE "              << g_EpsilonAngle                              << " \n"
             << "#define ICP_VALUE_COUNT "            << g_ICPValueCount                             << " \n"
@@ -249,23 +249,23 @@ namespace MR
     
     void CSLAMReconstructor::SetupTextures()
     {
-        m_SmoothDepthBuffer = new GLuint[m_ReconstructionData.m_PyramidLevelCount];
-        m_ReferenceVertexMap = new GLuint[m_ReconstructionData.m_PyramidLevelCount];
-        m_ReferenceNormalMap = new GLuint[m_ReconstructionData.m_PyramidLevelCount];
-        m_RaycastVertexMap = new GLuint[m_ReconstructionData.m_PyramidLevelCount];
-        m_RaycastNormalMap = new GLuint[m_ReconstructionData.m_PyramidLevelCount];
+        m_SmoothDepthBuffer = new GLuint[m_ReconstructionSettings.m_PyramidLevelCount];
+        m_ReferenceVertexMap = new GLuint[m_ReconstructionSettings.m_PyramidLevelCount];
+        m_ReferenceNormalMap = new GLuint[m_ReconstructionSettings.m_PyramidLevelCount];
+        m_RaycastVertexMap = new GLuint[m_ReconstructionSettings.m_PyramidLevelCount];
+        m_RaycastNormalMap = new GLuint[m_ReconstructionSettings.m_PyramidLevelCount];
 
         glCreateTextures(GL_TEXTURE_2D, 1, &m_RawDepthBuffer);
-        glCreateTextures(GL_TEXTURE_2D, m_ReconstructionData.m_PyramidLevelCount, m_SmoothDepthBuffer);
-        glCreateTextures(GL_TEXTURE_2D, m_ReconstructionData.m_PyramidLevelCount, m_ReferenceVertexMap);
-        glCreateTextures(GL_TEXTURE_2D, m_ReconstructionData.m_PyramidLevelCount, m_ReferenceNormalMap);
-        glCreateTextures(GL_TEXTURE_2D, m_ReconstructionData.m_PyramidLevelCount, m_RaycastVertexMap);
-        glCreateTextures(GL_TEXTURE_2D, m_ReconstructionData.m_PyramidLevelCount, m_RaycastNormalMap);
+        glCreateTextures(GL_TEXTURE_2D, m_ReconstructionSettings.m_PyramidLevelCount, m_SmoothDepthBuffer);
+        glCreateTextures(GL_TEXTURE_2D, m_ReconstructionSettings.m_PyramidLevelCount, m_ReferenceVertexMap);
+        glCreateTextures(GL_TEXTURE_2D, m_ReconstructionSettings.m_PyramidLevelCount, m_ReferenceNormalMap);
+        glCreateTextures(GL_TEXTURE_2D, m_ReconstructionSettings.m_PyramidLevelCount, m_RaycastVertexMap);
+        glCreateTextures(GL_TEXTURE_2D, m_ReconstructionSettings.m_PyramidLevelCount, m_RaycastNormalMap);
         glCreateTextures(GL_TEXTURE_3D, 1, &m_Volume);
                 
         glTextureStorage2D(m_RawDepthBuffer, 1, GL_R16UI, m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight());
         
-        for (int i = 0; i < m_ReconstructionData.m_PyramidLevelCount; ++i)
+        for (int i = 0; i < m_ReconstructionSettings.m_PyramidLevelCount; ++i)
         {
             const int Width = m_pRGBDCameraControl->GetDepthWidth() >> i;
             const int Height = m_pRGBDCameraControl->GetDepthHeight() >> i;
@@ -277,7 +277,7 @@ namespace MR
             glTextureStorage2D(m_RaycastNormalMap[i], 1, GL_RGBA32F, Width, Height);
         }
 
-        const int Resolution = m_ReconstructionData.m_VolumeResolution;
+        const int Resolution = m_ReconstructionSettings.m_VolumeResolution;
 
         glTextureStorage3D(m_Volume, 1, GL_RG16I, Resolution, Resolution, Resolution);
     }
@@ -291,9 +291,9 @@ namespace MR
         const float FocalPointX0 = m_pRGBDCameraControl->GetDepthFocalPointX();
         const float FocalPointY0 = m_pRGBDCameraControl->GetDepthFocalPointY();
         
-        std::vector<SIntrinsics> Intrinsics(m_ReconstructionData.m_PyramidLevelCount);
+        std::vector<SIntrinsics> Intrinsics(m_ReconstructionSettings.m_PyramidLevelCount);
 
-        for (int i = 0; i < m_ReconstructionData.m_PyramidLevelCount; ++ i)
+        for (int i = 0; i < m_ReconstructionSettings.m_PyramidLevelCount; ++ i)
         {
             const int PyramidFactor = 1 << i;
 
@@ -317,7 +317,7 @@ namespace MR
         }
 
         glCreateBuffers(1, &m_IntrinsicsConstantBuffer);
-        glNamedBufferData(m_IntrinsicsConstantBuffer, sizeof(SIntrinsics) * m_ReconstructionData.m_PyramidLevelCount, Intrinsics.data(), GL_STATIC_DRAW);
+        glNamedBufferData(m_IntrinsicsConstantBuffer, sizeof(SIntrinsics) * m_ReconstructionSettings.m_PyramidLevelCount, Intrinsics.data(), GL_STATIC_DRAW);
         
         STrackingData TrackingData;
         TrackingData.m_PoseMatrix = m_PoseMatrix;
@@ -342,7 +342,7 @@ namespace MR
         glNamedBufferData(m_IncPoseMatrixConstantBuffer, sizeof(SIncBuffer), nullptr, GL_DYNAMIC_DRAW);
 
         glCreateBuffers(1, &m_BilateralFilterConstantBuffer);
-        glNamedBufferData(m_BilateralFilterConstantBuffer, sizeof(Base::Int2), &m_ReconstructionData.m_DepthThreshold, GL_STATIC_DRAW);
+        glNamedBufferData(m_BilateralFilterConstantBuffer, sizeof(Base::Int2), &m_ReconstructionSettings.m_DepthThreshold, GL_STATIC_DRAW);
     }
 
     // -----------------------------------------------------------------------------
@@ -368,7 +368,7 @@ namespace MR
         // Downsample depth buffer
         //////////////////////////////////////////////////////////////////////////////////////
 
-        for (int PyramidLevel = 1; PyramidLevel < m_ReconstructionData.m_PyramidLevelCount; ++ PyramidLevel)
+        for (int PyramidLevel = 1; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++ PyramidLevel)
         {
             const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
             const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
@@ -394,7 +394,7 @@ namespace MR
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_IntrinsicsConstantBuffer);
         glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_TrackingDataConstantBuffer);
         
-        for (int PyramidLevel = 0; PyramidLevel < m_ReconstructionData.m_PyramidLevelCount; ++ PyramidLevel)
+        for (int PyramidLevel = 0; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++ PyramidLevel)
         {
             const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
             const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
@@ -406,7 +406,7 @@ namespace MR
             glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);			
         }
 
-        for (int PyramidLevel = 0; PyramidLevel < m_ReconstructionData.m_PyramidLevelCount; ++ PyramidLevel)
+        for (int PyramidLevel = 0; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++ PyramidLevel)
         {
             const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
             const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
@@ -425,9 +425,9 @@ namespace MR
     {
         Float4x4 IncPoseMatrix = m_PoseMatrix;
 
-        for (int PyramidLevel = m_ReconstructionData.m_PyramidLevelCount - 1; PyramidLevel >= 0; -- PyramidLevel)
+        for (int PyramidLevel = m_ReconstructionSettings.m_PyramidLevelCount - 1; PyramidLevel >= 0; -- PyramidLevel)
         {
-            for (int Iteration = 0; Iteration < m_ReconstructionData.m_PyramidLevelIterations[PyramidLevel]; ++ Iteration)
+            for (int Iteration = 0; Iteration < m_ReconstructionSettings.m_PyramidLevelIterations[PyramidLevel]; ++ Iteration)
             {
                 DetermineSummands(PyramidLevel, IncPoseMatrix);
                 ReduceSum(PyramidLevel);
@@ -583,7 +583,7 @@ namespace MR
 
     void CSLAMReconstructor::Integrate()
     {
-        const int WorkGroups = GetWorkGroupCount(m_ReconstructionData.m_VolumeResolution, g_TileSize3D);
+        const int WorkGroups = GetWorkGroupCount(m_ReconstructionSettings.m_VolumeResolution, g_TileSize3D);
 
         ContextManager::SetShaderCS(m_CSVolumeIntegration);
 
@@ -605,7 +605,7 @@ namespace MR
         ContextManager::SetShaderCS(m_CSRaycastPyramid);
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_RaycastPyramidConstantBuffer);
         
-        for (int PyramidLevel = 1; PyramidLevel < m_ReconstructionData.m_PyramidLevelCount; ++PyramidLevel)
+        for (int PyramidLevel = 1; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++PyramidLevel)
         {
             const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
             const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
@@ -732,13 +732,13 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CSLAMReconstructor::ResetReconstruction(const ReconstructionData* pReconstructionData)
+    void CSLAMReconstructor::ResetReconstruction(const ReconstructionSettings* pReconstructionSettings)
     {
-        if (pReconstructionData != nullptr)
+        if (pReconstructionSettings != nullptr)
         {
             Exit();
 
-            m_ReconstructionData = *pReconstructionData;
+            m_ReconstructionSettings = *pReconstructionSettings;
             
             SetupTextures();
             SetupBuffers();
@@ -750,9 +750,9 @@ namespace MR
         PoseRotation.SetRotation(g_InitialCameraRotation[0], g_InitialCameraRotation[1], g_InitialCameraRotation[2]);
         PoseTranslation.SetTranslation
         (
-            g_InitialCameraPosition[0] * m_ReconstructionData.m_VolumeSize,
-            g_InitialCameraPosition[1] * m_ReconstructionData.m_VolumeSize,
-            g_InitialCameraPosition[2] * m_ReconstructionData.m_VolumeSize
+            g_InitialCameraPosition[0] * m_ReconstructionSettings.m_VolumeSize,
+            g_InitialCameraPosition[1] * m_ReconstructionSettings.m_VolumeSize,
+            g_InitialCameraPosition[2] * m_ReconstructionSettings.m_VolumeSize
         );
         m_PoseMatrix = PoseTranslation * PoseRotation;
 
@@ -781,16 +781,16 @@ namespace MR
 
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
-        const int WorkGroupSize = GetWorkGroupCount(m_ReconstructionData.m_VolumeResolution, g_TileSize3D);
+        const int WorkGroupSize = GetWorkGroupCount(m_ReconstructionSettings.m_VolumeResolution, g_TileSize3D);
 
         glDispatchCompute(WorkGroupSize, WorkGroupSize, WorkGroupSize);
     }
         
     // -----------------------------------------------------------------------------
 
-    void CSLAMReconstructor::GetReconstructionData(ReconstructionData& rReconstructionData)
+    void CSLAMReconstructor::GetReconstructionData(ReconstructionSettings& rReconstructionSettings)
     {
-        rReconstructionData = m_ReconstructionData;
+        rReconstructionSettings = m_ReconstructionSettings;
     }
 
     // -----------------------------------------------------------------------------

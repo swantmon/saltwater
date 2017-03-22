@@ -150,18 +150,18 @@ namespace
     
     void CGfxReconstructionRenderer::OnSetupShader()
     {
-        MR::CSLAMReconstructor::ReconstructionData Data;
+        MR::CSLAMReconstructor::ReconstructionSettings Settings;
 
-        m_pReconstructor->GetReconstructionData(Data);
+        m_pReconstructor->GetReconstructionData(Settings);
 
         std::stringstream DefineStream;
 
         DefineStream
-            << "#define VOLUME_RESOLUTION "  << Data.m_VolumeResolution                     << " \n"
-            << "#define INT16_MAX "          << std::numeric_limits<int16_t>::max()         << " \n"
-            << "#define TRUNCATED_DISTANCE " << Data.m_TruncatedDistance                    << " \n"
-            << "#define VOLUME_SIZE "        << Data.m_VolumeSize                           << " \n"
-            << "#define VOXEL_SIZE "         << Data.m_VolumeSize / Data.m_VolumeResolution << " \n";
+            << "#define VOLUME_RESOLUTION "  << Settings.m_VolumeResolution                         << " \n"
+            << "#define INT16_MAX "          << std::numeric_limits<int16_t>::max()                 << " \n"
+            << "#define TRUNCATED_DISTANCE " << Settings.m_TruncatedDistance                        << " \n"
+            << "#define VOLUME_SIZE "        << Settings.m_VolumeSize                               << " \n"
+            << "#define VOXEL_SIZE "         << Settings.m_VolumeSize / Settings.m_VolumeResolution << " \n";
 
         std::string DefineString = DefineStream.str();
 
@@ -274,11 +274,12 @@ namespace
     
     void CGfxReconstructionRenderer::OnReload()
     {
-        MR::CSLAMReconstructor::ReconstructionData Data;
-        m_pReconstructor->GetReconstructionData(Data);
-        Data.m_VolumeResolution = 512;
+        //MR::CSLAMReconstructor::ReconstructionSettings Settings;
+        //m_pReconstructor->GetReconstructionData(Settings);
+        //Settings.m_VolumeResolution = 512;
+        //m_pReconstructor->ResetReconstruction(&Settings);
 
-        m_pReconstructor->ResetReconstruction(&Data);
+        m_pReconstructor->ResetReconstruction();
 
         OnSetupShader();
     }
