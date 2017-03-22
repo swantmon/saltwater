@@ -131,7 +131,7 @@ namespace MR
 
     void CSLAMReconstructor::Start()
     {
-        m_pRGBDCameraControl.reset(new MR::CKinectControl());
+        m_pRGBDCameraControl.reset(new MR::CKinectControl);
         BASE_CONSOLE_INFO("Using Kinect for SLAM");
 
         m_DepthPixels = std::vector<unsigned short>(m_pRGBDCameraControl->GetDepthPixelCount());
@@ -195,7 +195,7 @@ namespace MR
         delete[] m_RaycastVertexMap;
         delete[] m_RaycastNormalMap;
     }
-        
+    
     // -----------------------------------------------------------------------------
     
     void CSLAMReconstructor::SetupShaders()
@@ -736,13 +736,24 @@ namespace MR
     {
         if (pReconstructionData != nullptr)
         {
+            Exit();
+
             m_ReconstructionData = *pReconstructionData;
+            
+            SetupTextures();
+            SetupBuffers();
+            SetupShaders();
         }
 
         Float4x4 PoseRotation, PoseTranslation;
 
         PoseRotation.SetRotation(g_InitialCameraRotation[0], g_InitialCameraRotation[1], g_InitialCameraRotation[2]);
-        PoseTranslation.SetTranslation(g_InitialCameraPosition[0], g_InitialCameraPosition[1], g_InitialCameraPosition[2]);
+        PoseTranslation.SetTranslation
+        (
+            g_InitialCameraPosition[0] * m_ReconstructionData.m_VolumeSize,
+            g_InitialCameraPosition[1] * m_ReconstructionData.m_VolumeSize,
+            g_InitialCameraPosition[2] * m_ReconstructionData.m_VolumeSize
+        );
         m_PoseMatrix = PoseTranslation * PoseRotation;
 
         m_IntegratedDepthFrameCount = 0;
@@ -757,10 +768,6 @@ namespace MR
         memcpy(pTrackingData, &TrackingData, sizeof(STrackingData));
         glUnmapNamedBuffer(m_TrackingDataConstantBuffer);
         
-        const int Resolution = m_ReconstructionData.m_VolumeResolution;
-
-        glClearTexSubImage(m_Volume, 0, 0, 0, 0, Resolution, Resolution, Resolution, GL_RG16I, GL_SHORT, nullptr);
-
         ClearVolume();
     }
 

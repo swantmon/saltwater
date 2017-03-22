@@ -37,7 +37,7 @@ namespace MR
                 , m_VolumeResolution(256)
                 , m_TruncatedDistance(30.0f)
                 , m_MaxIntegrationWeight(200)
-                , m_PyramidLevelCount(MAX_PYRAMIDLEVELS)
+                , m_PyramidLevelCount(3)
                 , m_DepthThreshold(500, 8000)
             {
                 m_PyramidLevelIterations[0] = 10;
@@ -53,9 +53,6 @@ namespace MR
 
     public:
 
-        void Start();
-        void Exit();
-
         void Update();
         void ResetReconstruction(const ReconstructionData* pReconstructionData = nullptr);
 
@@ -66,6 +63,9 @@ namespace MR
         void GetReconstructionData(ReconstructionData& rReconstructionData);
 
     private:
+
+        void Start();
+        void Exit();
 
         void SetupShaders();
         void SetupTextures();

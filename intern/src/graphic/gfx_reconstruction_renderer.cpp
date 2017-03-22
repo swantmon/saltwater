@@ -172,8 +172,6 @@ namespace
 
         //m_VSVisualizeDepth = ShaderManager::CompileVS("kinect_fusion\\vs_visualize_depth.glsl", "main", DefineString.c_str());
         //m_FSVisualizeDepth = ShaderManager::CompilePS("kinect_fusion\\fs_visualize_depth.glsl", "main", DefineString.c_str());
-        //m_VSVisualizeVertexMap = ShaderManager::CompileVS("kinect_fusion\\vs_visualize_vertex_map.glsl", "main", DefineString.c_str());
-        //m_FSVisualizeVertexMap = ShaderManager::CompilePS("kinect_fusion\\fs_visualize_vertex_map.glsl", "main", DefineString.c_str());
     }
     
     // -----------------------------------------------------------------------------
@@ -245,21 +243,24 @@ namespace
             0, 3, 4,
         };
 
-        GLuint m_CubeMesh[2];
-        glCreateBuffers(2, m_CubeMesh);
-        glNamedBufferData(m_CubeMesh[0], sizeof(Vertices), &Vertices, GL_STATIC_DRAW);
-        glNamedBufferData(m_CubeMesh[1], sizeof(Indices), &Indices, GL_STATIC_DRAW);
+        GLuint m_PyramidMesh[2];
+        glCreateBuffers(2, m_PyramidMesh);
+        glNamedBufferData(m_PyramidMesh[0], sizeof(Vertices), &Vertices, GL_STATIC_DRAW);
+        glNamedBufferData(m_PyramidMesh[1], sizeof(Indices), &Indices, GL_STATIC_DRAW);
 
         glCreateVertexArrays(1, &m_CameraVAO);
         glBindVertexArray(m_CameraVAO);
 
-        glBindBuffer(GL_ARRAY_BUFFER, m_CubeMesh[0]);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_CubeMesh[1]);
+        glBindBuffer(GL_ARRAY_BUFFER, m_PyramidMesh[0]);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_PyramidMesh[1]);
         
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
         glBindVertexArray(0);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
     
     // -----------------------------------------------------------------------------
@@ -273,7 +274,13 @@ namespace
     
     void CGfxReconstructionRenderer::OnReload()
     {
+        MR::CSLAMReconstructor::ReconstructionData Data;
+        m_pReconstructor->GetReconstructionData(Data);
+        Data.m_VolumeResolution = 512;
 
+        m_pReconstructor->ResetReconstruction(&Data);
+
+        OnSetupShader();
     }
     
     // -----------------------------------------------------------------------------
@@ -317,7 +324,7 @@ namespace
         CNativeTargetSet NativeTargetSet = *static_cast<CNativeTargetSet*>(DefaultTargetSetPtr.GetPtr());
 
         glBindFramebuffer(GL_FRAMEBUFFER, NativeTargetSet.m_NativeTargetSet);
-        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+        //glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         //glClear(GL_COLOR_BUFFER_BIT);
         
         CSamplerPtr Sampler = Gfx::SamplerManager::GetSampler(Gfx::CSampler::ESampler::MinMagMipLinearClamp);
