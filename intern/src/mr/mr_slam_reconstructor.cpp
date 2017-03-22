@@ -734,7 +734,10 @@ namespace MR
 
     void CSLAMReconstructor::ResetReconstruction(const ReconstructionData* pReconstructionData)
     {
-        m_ReconstructionData = (pReconstructionData == nullptr) ? ReconstructionData() : *pReconstructionData;
+        if (pReconstructionData != nullptr)
+        {
+            m_ReconstructionData = *pReconstructionData;
+        }
 
         Float4x4 PoseRotation, PoseTranslation;
 

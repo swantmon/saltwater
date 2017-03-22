@@ -3,7 +3,6 @@
 #define __INCLUDE_VS_KINECT_RAYCAST_GLSL__
 
 #include "common_global.glsl"
-#include "common_tracking.glsl"
 
 // -----------------------------------------------------------------------------
 // Constants

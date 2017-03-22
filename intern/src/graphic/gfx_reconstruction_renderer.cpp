@@ -77,34 +77,27 @@ namespace
 
         void RenderVolume();
         void RenderCamera();
-
-        // Just for debugging
-
-        void RenderReconstructionData();
+        
+        // for debugging
 
         void RenderDepth();
-        void RenderVertexMap(GLuint VertexMap, GLuint NormalMap);
         
     private:
 
         std::unique_ptr<MR::CSLAMReconstructor> m_pReconstructor;
-
-        CShaderPtr m_VSVisualizeDepth;
-        CShaderPtr m_FSVisualizeDepth;
-        CShaderPtr m_VSVisualizeVertexMap;
-        CShaderPtr m_FSVisualizeVertexMap;
+        
         CShaderPtr m_VSCamera;
         CShaderPtr m_FSCamera;
-
         CShaderPtr m_VSRaycast;
         CShaderPtr m_FSRaycast;
 
         GLuint m_RaycastBuffer;
+        GLuint m_DrawCallConstantBuffer;
 
-        // just for debugging
-
-        GLuint m_CubeMesh[2];
         GLuint m_CameraVAO;
+
+        CShaderPtr m_VSDepth;
+        CShaderPtr m_FSDepth;
     };
 } // namespace
 
@@ -137,20 +130,18 @@ namespace
     
     void CGfxReconstructionRenderer::OnExit()
     {
-        m_VSVisualizeDepth = 0;
-        m_FSVisualizeDepth = 0;
-        m_VSVisualizeVertexMap = 0;
-        m_FSVisualizeVertexMap = 0;
         m_VSCamera = 0;
-        m_FSCamera = 0;
-        
+        m_FSCamera = 0;        
         m_VSRaycast = 0;
         m_FSRaycast = 0;
 
+        m_VSDepth = 0;
+        m_FSDepth = 0;
+
         glDeleteBuffers(1, &m_RaycastBuffer);
+        glDeleteBuffers(1, &m_DrawCallConstantBuffer);
 
         glDeleteVertexArrays(1, &m_CameraVAO);
-        glDeleteBuffers(2, m_CubeMesh);
 
         m_pReconstructor = nullptr;
     }
@@ -158,25 +149,31 @@ namespace
     // -----------------------------------------------------------------------------
     
     void CGfxReconstructionRenderer::OnSetupShader()
-    {        
+    {
+        MR::CSLAMReconstructor::ReconstructionData Data;
+
+        m_pReconstructor->GetReconstructionData(Data);
+
         std::stringstream DefineStream;
 
         DefineStream
-            << "#define VOLUME_RESOLUTION " << 256 << " \n"
-            << "#define INT16_MAX " << std::numeric_limits<int16_t>::max() << " \n"
-            << "#define TRUNCATED_DISTANCE " << 30.0f << " \n";
+            << "#define VOLUME_RESOLUTION "  << Data.m_VolumeResolution                     << " \n"
+            << "#define INT16_MAX "          << std::numeric_limits<int16_t>::max()         << " \n"
+            << "#define TRUNCATED_DISTANCE " << Data.m_TruncatedDistance                    << " \n"
+            << "#define VOLUME_SIZE "        << Data.m_VolumeSize                           << " \n"
+            << "#define VOXEL_SIZE "         << Data.m_VolumeSize / Data.m_VolumeResolution << " \n";
 
         std::string DefineString = DefineStream.str();
+
+        m_VSCamera = ShaderManager::CompileVS("kinect_fusion\\vs_camera.glsl", "main", DefineString.c_str());
+        m_FSCamera = ShaderManager::CompilePS("kinect_fusion\\fs_camera.glsl", "main", DefineString.c_str());
+        m_VSRaycast = ShaderManager::CompileVS("kinect_fusion\\vs_raycast.glsl", "main", DefineString.c_str());
+        m_FSRaycast = ShaderManager::CompilePS("kinect_fusion\\fs_raycast.glsl", "main", DefineString.c_str());
 
         //m_VSVisualizeDepth = ShaderManager::CompileVS("kinect_fusion\\vs_visualize_depth.glsl", "main", DefineString.c_str());
         //m_FSVisualizeDepth = ShaderManager::CompilePS("kinect_fusion\\fs_visualize_depth.glsl", "main", DefineString.c_str());
         //m_VSVisualizeVertexMap = ShaderManager::CompileVS("kinect_fusion\\vs_visualize_vertex_map.glsl", "main", DefineString.c_str());
         //m_FSVisualizeVertexMap = ShaderManager::CompilePS("kinect_fusion\\fs_visualize_vertex_map.glsl", "main", DefineString.c_str());
-        //m_VSCamera = ShaderManager::CompileVS("kinect_fusion\\vs_camera.glsl", "main", DefineString.c_str());
-        //m_FSCamera = ShaderManager::CompilePS("kinect_fusion\\fs_camera.glsl", "main", DefineString.c_str());
-
-        //m_VSRaycast = ShaderManager::CompileVS("kinect_fusion\\vs_raycast.glsl", "main", DefineString.c_str());
-        //m_FSRaycast = ShaderManager::CompilePS("kinect_fusion\\fs_raycast.glsl", "main", DefineString.c_str());
     }
     
     // -----------------------------------------------------------------------------
@@ -213,6 +210,9 @@ namespace
     {
         glCreateBuffers(1, &m_RaycastBuffer);
         glNamedBufferData(m_RaycastBuffer, sizeof(Float4) * 2, nullptr, GL_DYNAMIC_DRAW);
+
+        glCreateBuffers(1, &m_DrawCallConstantBuffer);
+        glNamedBufferData(m_DrawCallConstantBuffer, sizeof(Float4x4) * 2, nullptr, GL_DYNAMIC_DRAW);
     }
     
     // -----------------------------------------------------------------------------
@@ -366,42 +366,9 @@ namespace
         
         //RenderReconstructionData();
 
-        //RenderVolume();
-        //RenderCamera();
+        RenderVolume();
+        RenderCamera();
         
-        Performance::EndEvent();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxReconstructionRenderer::RenderReconstructionData()
-    {
-        Performance::BeginEvent("Tracking Data Rendering");
-
-        CTargetSetPtr DefaultTargetSetPtr = TargetSetManager::GetDefaultTargetSet();
-        CNativeTargetSet NativeTargetSet = *static_cast<CNativeTargetSet*>(DefaultTargetSetPtr.GetPtr());
-        
-        glBindFramebuffer(GL_FRAMEBUFFER, NativeTargetSet.m_NativeTargetSet);
-        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-        
-        RenderDepth();
-
-        //GLint ViewPort[4];
-        //glGetIntegerv(GL_VIEWPORT, ViewPort);
-
-        //glViewport(0, 0, ViewPort[2] / 2, ViewPort[3]);
-        //RenderVertexMap(m_KinectVertexMap[0], m_KinectNormalMap[0]);
-        
-        //glViewport(ViewPort[2] / 2, 0, ViewPort[2] / 2, ViewPort[3]);
-        //RenderVertexMap(m_RaycastVertexMap[0], m_RaycastNormalMap[0]);
-
-        //glViewport(ViewPort[0], ViewPort[1], ViewPort[2], ViewPort[3]);
-
-        //RenderVolume();
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
         Performance::EndEvent();
     }
 
@@ -411,8 +378,8 @@ namespace
     {
         glBindVertexArray(1); // dummy vao because opengl needs vertex data even when it does not use it
 
-        Gfx::ContextManager::SetShaderVS(m_VSVisualizeDepth);
-        Gfx::ContextManager::SetShaderPS(m_FSVisualizeDepth);
+        Gfx::ContextManager::SetShaderVS(m_VSDepth);
+        Gfx::ContextManager::SetShaderPS(m_FSDepth);
 
         GLint ViewPort[4];
         glGetIntegerv(GL_VIEWPORT, ViewPort);
@@ -433,34 +400,6 @@ namespace
     }
 
     // -----------------------------------------------------------------------------
-
-    void CGfxReconstructionRenderer::RenderVertexMap(GLuint VertexMap, GLuint NormalMap)
-    {
-        //Float4x4* pData = static_cast<Float4x4*>(glMapNamedBuffer(m_DrawCallConstantBuffer, GL_WRITE_ONLY));
-        //*pData = m_PoseMatrix * m_VertexMapWorldMatrix;
-        //glUnmapNamedBuffer(m_DrawCallConstantBuffer);
-
-        glBindVertexArray(1); // dummy vao because opengl needs vertex data even when it does not use it
-
-        glBindImageTexture(0, VertexMap, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-        glBindImageTexture(1, NormalMap, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-
-        CBufferPtr FrameConstantBufferPtr = Gfx::Main::GetPerFrameConstantBuffer();
-        CNativeBuffer NativeBufer = *static_cast<CNativeBuffer*>(FrameConstantBufferPtr.GetPtr());
-        glBindBufferBase(GL_UNIFORM_BUFFER, 0, NativeBufer.m_NativeBuffer);
-        //glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_DrawCallConstantBuffer);
-
-        Gfx::ContextManager::SetShaderVS(m_VSVisualizeVertexMap);
-        Gfx::ContextManager::SetShaderPS(m_FSVisualizeVertexMap);
-
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
-        //glDrawArrays(GL_POINTS, 0, m_pRGBDCameraControl->GetDepthPixelCount());
-
-        glBindVertexArray(0);
-    }
-
-    // -----------------------------------------------------------------------------
     
     void CGfxReconstructionRenderer::RenderCamera()
     {
@@ -468,24 +407,22 @@ namespace
         CNativeTargetSet NativeTargetSet = *static_cast<CNativeTargetSet*>(DefaultTargetSetPtr.GetPtr());
 
         glBindFramebuffer(GL_FRAMEBUFFER, NativeTargetSet.m_NativeTargetSet);
-        //glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-        //glClear(GL_COLOR_BUFFER_BIT);
 
         Gfx::ContextManager::SetShaderVS(m_VSCamera);
         Gfx::ContextManager::SetShaderPS(m_FSCamera);
 
         Float4x4 WorldMatrix;
         WorldMatrix.SetScale(0.1f);
-        //WorldMatrix = m_PoseMatrix * WorldMatrix;
+        WorldMatrix = m_pReconstructor->GetPoseMatrix() * WorldMatrix;
 
-        //Float4x4* pData = static_cast<Float4x4*>(glMapNamedBuffer(m_DrawCallConstantBuffer, GL_WRITE_ONLY));
-        //*pData = WorldMatrix;
-        //glUnmapNamedBuffer(m_DrawCallConstantBuffer);
+        Float4x4* pData = static_cast<Float4x4*>(glMapNamedBuffer(m_DrawCallConstantBuffer, GL_WRITE_ONLY));
+        *pData = WorldMatrix;
+        glUnmapNamedBuffer(m_DrawCallConstantBuffer);
 
         CBufferPtr FrameConstantBufferPtr = Gfx::Main::GetPerFrameConstantBuffer();
         CNativeBuffer NativeBufer = *static_cast<CNativeBuffer*>(FrameConstantBufferPtr.GetPtr());
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, NativeBufer.m_NativeBuffer);
-        //glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_DrawCallConstantBuffer);
+        glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_DrawCallConstantBuffer);
         
         glBindVertexArray(m_CameraVAO);
 
