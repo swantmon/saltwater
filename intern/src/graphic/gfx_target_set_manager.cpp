@@ -352,12 +352,7 @@ namespace
     {
         CNativeTargetSet& rNativeTargetSet = *static_cast<CNativeTargetSet*>(_TargetPtr.GetPtr());
 
-        glBindFramebuffer(GL_FRAMEBUFFER, rNativeTargetSet.m_NativeTargetSet);
-
-        glClearDepth(_Depth);
-        glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClearNamedFramebufferfi(rNativeTargetSet.m_NativeTargetSet, GL_DEPTH_STENCIL, 0, _Depth, 0x00);
     }
 
     // -----------------------------------------------------------------------------
@@ -366,12 +361,7 @@ namespace
     {
         CNativeTargetSet& rNativeTargetSet = *static_cast<CNativeTargetSet*>(_TargetPtr.GetPtr());
 
-        glBindFramebuffer(GL_FRAMEBUFFER, rNativeTargetSet.m_NativeTargetSet);
-
-        glClearColor(_rColor[0], _rColor[1], _rColor[2], _rColor[3]);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClearNamedFramebufferfv(rNativeTargetSet.m_NativeTargetSet, GL_COLOR, 0, const_cast<GLfloat*>(&_rColor[0]));
     }
     
     // -----------------------------------------------------------------------------
@@ -379,14 +369,9 @@ namespace
     void CGfxTargetSetManager::ClearTargetSet(CTargetSetPtr _TargetPtr, const Base::Float4& _rColor, float _Depth)
     {
         CNativeTargetSet& rNativeTargetSet = *static_cast<CNativeTargetSet*>(_TargetPtr.GetPtr());
-        
-        glBindFramebuffer(GL_FRAMEBUFFER, rNativeTargetSet.m_NativeTargetSet);
-
-        glClearColor(_rColor[0], _rColor[1], _rColor[2], _rColor[3]);
-        glClearDepth(_Depth);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+       
+        glClearNamedFramebufferfv(rNativeTargetSet.m_NativeTargetSet, GL_COLOR, 0, const_cast<GLfloat*>(&_rColor[0]));
+        glClearNamedFramebufferfi(rNativeTargetSet.m_NativeTargetSet, GL_DEPTH_STENCIL, 0, _Depth, 0x00);
     }
     
     // -----------------------------------------------------------------------------
