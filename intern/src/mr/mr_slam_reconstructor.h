@@ -12,6 +12,8 @@
 
 #include <gl/glew.h>
 
+#include <vector>
+
 namespace MR
 {
     class IRGBDCameraControl;
@@ -111,11 +113,11 @@ namespace MR
         Gfx::CShaderPtr m_CSReduceSum;
 
         GLuint m_RawDepthBuffer;
-        GLuint *m_SmoothDepthBuffer;
-        GLuint *m_ReferenceVertexMap;
-        GLuint *m_ReferenceNormalMap;
-        GLuint *m_RaycastVertexMap;
-        GLuint *m_RaycastNormalMap;
+        std::vector<GLuint> m_SmoothDepthBuffer;
+        std::vector<GLuint> m_ReferenceVertexMap;
+        std::vector<GLuint> m_ReferenceNormalMap;
+        std::vector<GLuint> m_RaycastVertexMap;
+        std::vector<GLuint> m_RaycastNormalMap;
 
         GLuint m_Volume;
 

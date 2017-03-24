@@ -174,11 +174,11 @@ namespace MR
         m_CSClearVolume = 0;
 
         glDeleteTextures(1, &m_RawDepthBuffer);
-        glDeleteTextures(m_ReconstructionSettings.m_PyramidLevelCount, m_SmoothDepthBuffer);
-        glDeleteTextures(m_ReconstructionSettings.m_PyramidLevelCount, m_ReferenceVertexMap);
-        glDeleteTextures(m_ReconstructionSettings.m_PyramidLevelCount, m_ReferenceNormalMap);
-        glDeleteTextures(m_ReconstructionSettings.m_PyramidLevelCount, m_RaycastVertexMap);
-        glDeleteTextures(m_ReconstructionSettings.m_PyramidLevelCount, m_RaycastNormalMap);
+        glDeleteTextures(m_ReconstructionSettings.m_PyramidLevelCount, m_SmoothDepthBuffer.data());
+        glDeleteTextures(m_ReconstructionSettings.m_PyramidLevelCount, m_ReferenceVertexMap.data());
+        glDeleteTextures(m_ReconstructionSettings.m_PyramidLevelCount, m_ReferenceNormalMap.data());
+        glDeleteTextures(m_ReconstructionSettings.m_PyramidLevelCount, m_RaycastVertexMap.data());
+        glDeleteTextures(m_ReconstructionSettings.m_PyramidLevelCount, m_RaycastNormalMap.data());
         glDeleteTextures(1, &m_Volume);
 
         glDeleteBuffers(1, &m_IntrinsicsConstantBuffer);
@@ -188,12 +188,6 @@ namespace MR
         glDeleteBuffers(1, &m_ICPSummationConstantBuffer);
         glDeleteBuffers(1, &m_IncPoseMatrixConstantBuffer);
         glDeleteBuffers(1, &m_BilateralFilterConstantBuffer);
-        
-        delete[] m_SmoothDepthBuffer;
-        delete[] m_ReferenceVertexMap;
-        delete[] m_ReferenceNormalMap;
-        delete[] m_RaycastVertexMap;
-        delete[] m_RaycastNormalMap;
     }
     
     // -----------------------------------------------------------------------------
@@ -214,21 +208,21 @@ namespace MR
         DefineStream
             << "#define PYRAMID_LEVELS "             << m_ReconstructionSettings.m_PyramidLevelCount    << " \n"
             << "#define VOLUME_RESOLUTION "          << m_ReconstructionSettings.m_VolumeResolution     << " \n"
-            << "#define VOXEL_SIZE "                 << VoxelSize                                   << " \n"
+            << "#define VOXEL_SIZE "                 << VoxelSize                                       << " \n"
             << "#define VOLUME_SIZE "                << m_ReconstructionSettings.m_VolumeSize           << " \n"
-            << "#define DEPTH_IMAGE_WIDTH "          << m_pRGBDCameraControl->GetDepthWidth()       << " \n"
-            << "#define DEPTH_IMAGE_HEIGHT "         << m_pRGBDCameraControl->GetDepthHeight()      << " \n"
-            << "#define TILE_SIZE1D "                << g_TileSize1D                                << " \n"
-            << "#define TILE_SIZE2D "                << g_TileSize2D                                << " \n"
-            << "#define TILE_SIZE3D "                << g_TileSize3D                                << " \n"
-            << "#define INT16_MAX "                  << std::numeric_limits<int16_t>::max()         << " \n"
+            << "#define DEPTH_IMAGE_WIDTH "          << m_pRGBDCameraControl->GetDepthWidth()           << " \n"
+            << "#define DEPTH_IMAGE_HEIGHT "         << m_pRGBDCameraControl->GetDepthHeight()          << " \n"
+            << "#define TILE_SIZE1D "                << g_TileSize1D                                    << " \n"
+            << "#define TILE_SIZE2D "                << g_TileSize2D                                    << " \n"
+            << "#define TILE_SIZE3D "                << g_TileSize3D                                    << " \n"
+            << "#define INT16_MAX "                  << std::numeric_limits<int16_t>::max()             << " \n"
             << "#define TRUNCATED_DISTANCE "         << m_ReconstructionSettings.m_TruncatedDistance    << " \n"
             << "#define MAX_INTEGRATION_WEIGHT "     << m_ReconstructionSettings.m_MaxIntegrationWeight << " \n"
-            << "#define EPSILON_DISTANCE "           << g_EpsilonDistance                           << " \n"
-            << "#define EPSILON_ANGLE "              << g_EpsilonAngle                              << " \n"
-            << "#define ICP_VALUE_COUNT "            << g_ICPValueCount                             << " \n"
-            << "#define REDUCTION_SHADER_COUNT "     << SummandsPOT / 2                             << " \n"
-            << "#define ICP_SUMMAND_COUNT "          << Summands                                    << " \n";
+            << "#define EPSILON_DISTANCE "           << g_EpsilonDistance                               << " \n"
+            << "#define EPSILON_ANGLE "              << g_EpsilonAngle                                  << " \n"
+            << "#define ICP_VALUE_COUNT "            << g_ICPValueCount                                 << " \n"
+            << "#define REDUCTION_SHADER_COUNT "     << SummandsPOT / 2                                 << " \n"
+            << "#define ICP_SUMMAND_COUNT "          << Summands                                        << " \n";
 
         std::string DefineString = DefineStream.str();
         
@@ -249,18 +243,18 @@ namespace MR
     
     void CSLAMReconstructor::SetupTextures()
     {
-        m_SmoothDepthBuffer = new GLuint[m_ReconstructionSettings.m_PyramidLevelCount];
-        m_ReferenceVertexMap = new GLuint[m_ReconstructionSettings.m_PyramidLevelCount];
-        m_ReferenceNormalMap = new GLuint[m_ReconstructionSettings.m_PyramidLevelCount];
-        m_RaycastVertexMap = new GLuint[m_ReconstructionSettings.m_PyramidLevelCount];
-        m_RaycastNormalMap = new GLuint[m_ReconstructionSettings.m_PyramidLevelCount];
+        m_SmoothDepthBuffer.resize(m_ReconstructionSettings.m_PyramidLevelCount);
+        m_ReferenceVertexMap.resize(m_ReconstructionSettings.m_PyramidLevelCount);
+        m_ReferenceNormalMap.resize(m_ReconstructionSettings.m_PyramidLevelCount);
+        m_RaycastVertexMap.resize(m_ReconstructionSettings.m_PyramidLevelCount);
+        m_RaycastNormalMap.resize(m_ReconstructionSettings.m_PyramidLevelCount);
 
         glCreateTextures(GL_TEXTURE_2D, 1, &m_RawDepthBuffer);
-        glCreateTextures(GL_TEXTURE_2D, m_ReconstructionSettings.m_PyramidLevelCount, m_SmoothDepthBuffer);
-        glCreateTextures(GL_TEXTURE_2D, m_ReconstructionSettings.m_PyramidLevelCount, m_ReferenceVertexMap);
-        glCreateTextures(GL_TEXTURE_2D, m_ReconstructionSettings.m_PyramidLevelCount, m_ReferenceNormalMap);
-        glCreateTextures(GL_TEXTURE_2D, m_ReconstructionSettings.m_PyramidLevelCount, m_RaycastVertexMap);
-        glCreateTextures(GL_TEXTURE_2D, m_ReconstructionSettings.m_PyramidLevelCount, m_RaycastNormalMap);
+        glCreateTextures(GL_TEXTURE_2D, m_ReconstructionSettings.m_PyramidLevelCount, m_SmoothDepthBuffer.data());
+        glCreateTextures(GL_TEXTURE_2D, m_ReconstructionSettings.m_PyramidLevelCount, m_ReferenceVertexMap.data());
+        glCreateTextures(GL_TEXTURE_2D, m_ReconstructionSettings.m_PyramidLevelCount, m_ReferenceNormalMap.data());
+        glCreateTextures(GL_TEXTURE_2D, m_ReconstructionSettings.m_PyramidLevelCount, m_RaycastVertexMap.data());
+        glCreateTextures(GL_TEXTURE_2D, m_ReconstructionSettings.m_PyramidLevelCount, m_RaycastNormalMap.data());
         glCreateTextures(GL_TEXTURE_3D, 1, &m_Volume);
                 
         glTextureStorage2D(m_RawDepthBuffer, 1, GL_R16UI, m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight());
