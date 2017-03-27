@@ -406,9 +406,15 @@ namespace
         BASE_UNUSED(_Width);
         BASE_UNUSED(_Height);
 
-        OnSetupRenderTargets();
-        OnSetupStates();
-        OnSetupTextures();
+        m_BackgroundFromSkybox.m_TextureSetPtr = 0;
+
+        m_BackgroundFromTexture.m_TextureSetPtr = 0;
+
+        CTextureSetPtr DepthTextureSetPtr = TextureManager::CreateTextureSet(TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
+
+        m_BackgroundFromSkybox.m_TextureSetPtr = DepthTextureSetPtr;
+
+        m_BackgroundFromTexture.m_TextureSetPtr = DepthTextureSetPtr;
     }
     
     // -----------------------------------------------------------------------------
