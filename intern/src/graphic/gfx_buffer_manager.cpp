@@ -671,7 +671,7 @@ namespace
             GL_READ_ONLY,
             GL_WRITE_ONLY,
             GL_READ_WRITE,
-            GL_READ_ONLY,
+            GL_WRITE_ONLY,
             GL_WRITE_ONLY,
         };
 

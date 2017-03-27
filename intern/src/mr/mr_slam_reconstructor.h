@@ -9,8 +9,7 @@
 #pragma once
 
 #include "graphic/gfx_shader.h"
-
-#include <gl/glew.h>
+#include "graphic/gfx_texture_3d.h"
 
 #include <vector>
 
@@ -60,7 +59,7 @@ namespace MR
 
         bool IsTrackingLost() const;
         Base::Float4x4 GetPoseMatrix() const;
-        GLuint GetVolume();
+        Gfx::CTexture3DPtr GetVolume();
 
         void GetReconstructionData(ReconstructionSettings& rReconstructionSettings);
 
@@ -93,12 +92,12 @@ namespace MR
 
         ReconstructionSettings m_ReconstructionSettings;
 
-        GLuint m_IntrinsicsConstantBuffer;
-        GLuint m_TrackingDataConstantBuffer;
-        GLuint m_RaycastPyramidConstantBuffer;
-        GLuint m_ICPSummationConstantBuffer;
-        GLuint m_IncPoseMatrixConstantBuffer;
-        GLuint m_BilateralFilterConstantBuffer;
+        Gfx::CBufferPtr m_IntrinsicsConstantBuffer;
+        Gfx::CBufferPtr m_TrackingDataConstantBuffer;
+        Gfx::CBufferPtr m_RaycastPyramidConstantBuffer;
+        Gfx::CBufferPtr m_ICPSummationConstantBuffer;
+        Gfx::CBufferPtr m_IncPoseMatrixConstantBuffer;
+        Gfx::CBufferPtr m_BilateralFilterConstantBuffer;
 
         Gfx::CShaderPtr m_CSClearVolume;
         Gfx::CShaderPtr m_CSMirrorDepth;
@@ -112,16 +111,16 @@ namespace MR
         Gfx::CShaderPtr m_CSDetermineSummands;
         Gfx::CShaderPtr m_CSReduceSum;
 
-        GLuint m_RawDepthBuffer;
-        std::vector<GLuint> m_SmoothDepthBuffer;
-        std::vector<GLuint> m_ReferenceVertexMap;
-        std::vector<GLuint> m_ReferenceNormalMap;
-        std::vector<GLuint> m_RaycastVertexMap;
-        std::vector<GLuint> m_RaycastNormalMap;
+        Gfx::CTexture2DPtr m_RawDepthBuffer;
+        std::vector<Gfx::CTexture2DPtr> m_SmoothDepthBuffer;
+        std::vector<Gfx::CTexture2DPtr> m_ReferenceVertexMap;
+        std::vector<Gfx::CTexture2DPtr> m_ReferenceNormalMap;
+        std::vector<Gfx::CTexture2DPtr> m_RaycastVertexMap;
+        std::vector<Gfx::CTexture2DPtr> m_RaycastNormalMap;
 
-        GLuint m_Volume;
+        Gfx::CTexture3DPtr m_Volume;
 
-        GLuint m_ICPBuffer;
+        Gfx::CBufferPtr m_ICPBuffer;
 
         std::unique_ptr<MR::IRGBDCameraControl> m_pRGBDCameraControl;
 

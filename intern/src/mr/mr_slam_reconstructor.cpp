@@ -22,14 +22,14 @@
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
 
-#include "graphic/gfx_native_sampler.h"
-
 #include "base/base_console.h"
 
 #include "mr/mr_slam_reconstructor.h"
 #include "mr/mr_rgbd_camera_control.h"
 #include "mr/mr_kinect_control.h"
 #include "mr/mr_realsense_control.h"
+
+#include <gl/glew.h>
 
 #include <limits>
 #include <memory>
@@ -122,7 +122,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    GLuint CSLAMReconstructor::GetVolume()
+    Gfx::CTexture3DPtr CSLAMReconstructor::GetVolume()
     {
         return m_Volume;
     }
@@ -173,21 +173,24 @@ namespace MR
         m_CSReduceSum = 0;
         m_CSClearVolume = 0;
 
-        glDeleteTextures(1, &m_RawDepthBuffer);
-        glDeleteTextures(m_ReconstructionSettings.m_PyramidLevelCount, m_SmoothDepthBuffer.data());
-        glDeleteTextures(m_ReconstructionSettings.m_PyramidLevelCount, m_ReferenceVertexMap.data());
-        glDeleteTextures(m_ReconstructionSettings.m_PyramidLevelCount, m_ReferenceNormalMap.data());
-        glDeleteTextures(m_ReconstructionSettings.m_PyramidLevelCount, m_RaycastVertexMap.data());
-        glDeleteTextures(m_ReconstructionSettings.m_PyramidLevelCount, m_RaycastNormalMap.data());
-        glDeleteTextures(1, &m_Volume);
+        m_RawDepthBuffer = 0;
 
-        glDeleteBuffers(1, &m_IntrinsicsConstantBuffer);
-        glDeleteBuffers(1, &m_TrackingDataConstantBuffer);
-        glDeleteBuffers(1, &m_RaycastPyramidConstantBuffer);
-        glDeleteBuffers(1, &m_ICPBuffer);
-        glDeleteBuffers(1, &m_ICPSummationConstantBuffer);
-        glDeleteBuffers(1, &m_IncPoseMatrixConstantBuffer);
-        glDeleteBuffers(1, &m_BilateralFilterConstantBuffer);
+        for (int i = 0; i < m_ReconstructionSettings.m_PyramidLevelCount; ++ i)
+        {
+            m_SmoothDepthBuffer[i] = 0;
+            m_ReferenceVertexMap[i] = 0;
+            m_ReferenceNormalMap[i] = 0;
+            m_RaycastVertexMap[i] = 0;
+            m_RaycastNormalMap[i] = 0;
+        }
+
+        m_IntrinsicsConstantBuffer = 0;
+        m_TrackingDataConstantBuffer = 0;
+        m_RaycastPyramidConstantBuffer = 0;
+        m_ICPBuffer = 0;
+        m_ICPSummationConstantBuffer = 0;
+        m_IncPoseMatrixConstantBuffer = 0;
+        m_BilateralFilterConstantBuffer = 0;
     }
     
     // -----------------------------------------------------------------------------
@@ -238,7 +241,7 @@ namespace MR
         m_CSReduceSum         = ShaderManager::CompileCS("kinect_fusion\\cs_reduce_sum.glsl"        , "main", DefineString.c_str());
         m_CSClearVolume       = ShaderManager::CompileCS("kinect_fusion\\cs_clear_volume.glsl"      , "main", DefineString.c_str());
     }
-        
+    
     // -----------------------------------------------------------------------------
     
     void CSLAMReconstructor::SetupTextures()
@@ -249,31 +252,62 @@ namespace MR
         m_RaycastVertexMap.resize(m_ReconstructionSettings.m_PyramidLevelCount);
         m_RaycastNormalMap.resize(m_ReconstructionSettings.m_PyramidLevelCount);
 
-        glCreateTextures(GL_TEXTURE_2D, 1, &m_RawDepthBuffer);
-        glCreateTextures(GL_TEXTURE_2D, m_ReconstructionSettings.m_PyramidLevelCount, m_SmoothDepthBuffer.data());
-        glCreateTextures(GL_TEXTURE_2D, m_ReconstructionSettings.m_PyramidLevelCount, m_ReferenceVertexMap.data());
-        glCreateTextures(GL_TEXTURE_2D, m_ReconstructionSettings.m_PyramidLevelCount, m_ReferenceNormalMap.data());
-        glCreateTextures(GL_TEXTURE_2D, m_ReconstructionSettings.m_PyramidLevelCount, m_RaycastVertexMap.data());
-        glCreateTextures(GL_TEXTURE_2D, m_ReconstructionSettings.m_PyramidLevelCount, m_RaycastNormalMap.data());
-        glCreateTextures(GL_TEXTURE_3D, 1, &m_Volume);
-                
-        glTextureStorage2D(m_RawDepthBuffer, 1, GL_R16UI, m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight());
+        STextureDescriptor TextureDescriptor;
+
+        TextureDescriptor.m_NumberOfPixelsU = m_pRGBDCameraControl->GetDepthWidth();
+        TextureDescriptor.m_NumberOfPixelsV = m_pRGBDCameraControl->GetDepthHeight();
+        TextureDescriptor.m_NumberOfPixelsW = 1;
+        TextureDescriptor.m_NumberOfMipMaps = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding = CTextureBase::ShaderResource;
+        TextureDescriptor.m_Access = CTextureBase::CPUWrite;        
+        TextureDescriptor.m_Usage = CTextureBase::GPUReadWrite;
+        TextureDescriptor.m_Semantic = CTextureBase::Diffuse;
+        TextureDescriptor.m_pFileName = 0;
+        TextureDescriptor.m_pPixels = 0;
+        TextureDescriptor.m_Format = CTextureBase::R16_UINT;
         
+        m_RawDepthBuffer = TextureManager::CreateTexture2D(TextureDescriptor);
+
         for (int i = 0; i < m_ReconstructionSettings.m_PyramidLevelCount; ++i)
         {
-            const int Width = m_pRGBDCameraControl->GetDepthWidth() >> i;
-            const int Height = m_pRGBDCameraControl->GetDepthHeight() >> i;
+            TextureDescriptor.m_NumberOfPixelsU = m_pRGBDCameraControl->GetDepthWidth() >> i;
+            TextureDescriptor.m_NumberOfPixelsV = m_pRGBDCameraControl->GetDepthHeight() >> i;
+            TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_NumberOfMipMaps = 1;
+            TextureDescriptor.m_NumberOfTextures = 1;
+            TextureDescriptor.m_Binding = CTextureBase::ShaderResource;
+            TextureDescriptor.m_Access = CTextureBase::CPUWrite;
+            TextureDescriptor.m_Usage = CTextureBase::GPUReadWrite;
+            TextureDescriptor.m_Semantic = CTextureBase::UndefinedSemantic;
+            TextureDescriptor.m_pFileName = 0;
+            TextureDescriptor.m_pPixels = 0;
+            TextureDescriptor.m_Format = CTextureBase::R16_UINT;
 
-            glTextureStorage2D(m_SmoothDepthBuffer[i], 1, GL_R16UI, Width, Height);
-            glTextureStorage2D(m_ReferenceVertexMap[i], 1, GL_RGBA32F, Width, Height);
-            glTextureStorage2D(m_ReferenceNormalMap[i], 1, GL_RGBA32F, Width, Height);
-            glTextureStorage2D(m_RaycastVertexMap[i], 1, GL_RGBA32F, Width, Height);
-            glTextureStorage2D(m_RaycastNormalMap[i], 1, GL_RGBA32F, Width, Height);
+            m_SmoothDepthBuffer[i] = TextureManager::CreateTexture2D(TextureDescriptor);
+
+            TextureDescriptor.m_Format = CTextureBase::R32G32B32A32_FLOAT;
+
+            m_ReferenceVertexMap[i] = TextureManager::CreateTexture2D(TextureDescriptor);
+            m_ReferenceNormalMap[i] = TextureManager::CreateTexture2D(TextureDescriptor);
+            m_RaycastVertexMap[i] = TextureManager::CreateTexture2D(TextureDescriptor);
+            m_RaycastNormalMap[i] = TextureManager::CreateTexture2D(TextureDescriptor);
         }
+        
+        TextureDescriptor.m_NumberOfPixelsU = m_ReconstructionSettings.m_VolumeResolution;
+        TextureDescriptor.m_NumberOfPixelsV = m_ReconstructionSettings.m_VolumeResolution;
+        TextureDescriptor.m_NumberOfPixelsW = m_ReconstructionSettings.m_VolumeResolution;
+        TextureDescriptor.m_NumberOfMipMaps = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding = CTextureBase::ShaderResource;
+        TextureDescriptor.m_Access = CTextureBase::CPUWrite;
+        TextureDescriptor.m_Usage = CTextureBase::GPUReadWrite;
+        TextureDescriptor.m_Semantic = CTextureBase::UndefinedSemantic;
+        TextureDescriptor.m_pFileName = 0;
+        TextureDescriptor.m_pPixels = 0;
+        TextureDescriptor.m_Format = CTextureBase::R16_INT;
 
-        const int Resolution = m_ReconstructionSettings.m_VolumeResolution;
-
-        glTextureStorage3D(m_Volume, 1, GL_RG16I, Resolution, Resolution, Resolution);
+        m_Volume = TextureManager::CreateTexture3D(TextureDescriptor);
     }
     
     // -----------------------------------------------------------------------------
@@ -310,33 +344,49 @@ namespace MR
             Intrinsics[i].m_InvKMatrix.Invert();
         }
 
-        glCreateBuffers(1, &m_IntrinsicsConstantBuffer);
-        glNamedBufferData(m_IntrinsicsConstantBuffer, sizeof(SIntrinsics) * m_ReconstructionSettings.m_PyramidLevelCount, Intrinsics.data(), GL_STATIC_DRAW);
+        SBufferDescriptor ConstanteBufferDesc;
+
+        ConstanteBufferDesc.m_Stride = 0;
+        ConstanteBufferDesc.m_Usage = CBuffer::EUsage::GPURead;
+        ConstanteBufferDesc.m_Binding = CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SIntrinsics) * m_ReconstructionSettings.m_PyramidLevelCount;
+        ConstanteBufferDesc.m_pBytes = &Intrinsics;
+        ConstanteBufferDesc.m_pClassKey = 0;
+
+        m_IntrinsicsConstantBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
         
         STrackingData TrackingData;
         TrackingData.m_PoseMatrix = m_PoseMatrix;
         TrackingData.m_InvPoseMatrix = m_PoseMatrix.GetInverted();
 
-        glCreateBuffers(1, &m_TrackingDataConstantBuffer);
-        glNamedBufferData(m_TrackingDataConstantBuffer, sizeof(STrackingData), &TrackingData, GL_DYNAMIC_DRAW);
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(STrackingData);
+        ConstanteBufferDesc.m_pBytes        = &TrackingData;
+        m_TrackingDataConstantBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
-        glCreateBuffers(1, &m_RaycastPyramidConstantBuffer);
-        glNamedBufferData(m_RaycastPyramidConstantBuffer, 16, nullptr, GL_DYNAMIC_DRAW);
+        ConstanteBufferDesc.m_pBytes = 0;
+        ConstanteBufferDesc.m_NumberOfBytes = 16;
+        ConstanteBufferDesc.m_Usage = CBuffer::GPUReadWrite;
+        m_RaycastPyramidConstantBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        
+        ConstanteBufferDesc.m_Usage = CBuffer::GPURead;
+        ConstanteBufferDesc.m_NumberOfBytes = 16;
+        m_ICPSummationConstantBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SIncBuffer);
+        m_IncPoseMatrixConstantBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(Base::Int2);
+        m_BilateralFilterConstantBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         const int ICPRowCount = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth(), g_TileSize2D) *
-                                GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
+            GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
 
-        glCreateBuffers(1, &m_ICPBuffer);
-        glNamedBufferData(m_ICPBuffer, sizeof(float) * ICPRowCount * g_ICPValueCount, nullptr, GL_DYNAMIC_COPY);
-
-        glCreateBuffers(1, &m_ICPSummationConstantBuffer);
-        glNamedBufferData(m_ICPSummationConstantBuffer, 16, nullptr, GL_DYNAMIC_DRAW);
-        
-        glCreateBuffers(1, &m_IncPoseMatrixConstantBuffer);
-        glNamedBufferData(m_IncPoseMatrixConstantBuffer, sizeof(SIncBuffer), nullptr, GL_DYNAMIC_DRAW);
-
-        glCreateBuffers(1, &m_BilateralFilterConstantBuffer);
-        glNamedBufferData(m_BilateralFilterConstantBuffer, sizeof(Base::Int2), &m_ReconstructionSettings.m_DepthThreshold, GL_STATIC_DRAW);
+        ConstanteBufferDesc.m_Usage = CBuffer::GPUToCPU;
+        ConstanteBufferDesc.m_Binding = CBuffer::ResourceBuffer;
+        ConstanteBufferDesc.m_Access = CBuffer::CPURead;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(float) * ICPRowCount * g_ICPValueCount;
+        m_ICPBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
     }
 
     // -----------------------------------------------------------------------------
@@ -350,13 +400,13 @@ namespace MR
         // Bilateral Filter
         //////////////////////////////////////////////////////////////////////////////////////
 
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
         ContextManager::SetShaderCS(m_CSBilateralFilter);
-        glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_BilateralFilterConstantBuffer);
-        glBindImageTexture(0, m_RawDepthBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
-        glBindImageTexture(1, m_SmoothDepthBuffer[0], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16UI);
-        glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
+        ContextManager::SetConstantBuffer(0, m_BilateralFilterConstantBuffer);
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawDepthBuffer));
+        ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_SmoothDepthBuffer[0]));
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
         //////////////////////////////////////////////////////////////////////////////////////
         // Downsample depth buffer
@@ -369,35 +419,32 @@ namespace MR
             
             ContextManager::SetShaderCS(m_CSDownSampleDepth);
 
-            CSamplerPtr Sampler = SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp);
-            CNativeSampler* NativeSampler = static_cast<CNativeSampler*>(Sampler.GetPtr());
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, m_SmoothDepthBuffer[PyramidLevel - 1]);
-            glBindSampler(0, NativeSampler->m_NativeSampler);
+            ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_SmoothDepthBuffer[PyramidLevel - 1]));
+            ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
 
-            glBindImageTexture(1, m_SmoothDepthBuffer[PyramidLevel], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16UI);
-            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-            glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
-            glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
+            ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_SmoothDepthBuffer[PyramidLevel]));
+            //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+            //glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
+            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
         }
 
         /////////////////////////////////////////////////////////////////////////////////////
         // Generate vertex and normal map
         /////////////////////////////////////////////////////////////////////////////////////
 
-        glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_IntrinsicsConstantBuffer);
-        glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_TrackingDataConstantBuffer);
-        
+        ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBuffer);
+        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBuffer);
+
         for (int PyramidLevel = 0; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++ PyramidLevel)
         {
             const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
             const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
 
             ContextManager::SetShaderCS(m_CSVertexMap);
-            glBindImageTexture(0, m_SmoothDepthBuffer[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
-            glBindImageTexture(1, m_ReferenceVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-            glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);			
+            ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_SmoothDepthBuffer[PyramidLevel]));
+            ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ReferenceVertexMap[PyramidLevel]));
+            //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);			
         }
 
         for (int PyramidLevel = 0; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++ PyramidLevel)
@@ -406,10 +453,10 @@ namespace MR
             const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
 
             ContextManager::SetShaderCS(m_CSNormalMap);
-            glBindImageTexture(0, m_ReferenceVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-            glBindImageTexture(1, m_ReferenceNormalMap[PyramidLevel], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-            glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
+            ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_ReferenceVertexMap[PyramidLevel]));
+            ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ReferenceNormalMap[PyramidLevel]));
+            //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
         }
     }
 
@@ -448,23 +495,23 @@ namespace MR
         TrackingData.m_InvPoseMatrix = rIncPoseMatrix.GetInverted();
         TrackingData.m_PyramidLevel = PyramidLevel;
 
-        SIncBuffer* pData = static_cast<SIncBuffer*>(glMapNamedBufferRange(m_IncPoseMatrixConstantBuffer, 0, sizeof(SIncBuffer), GL_MAP_WRITE_BIT));
+        SIncBuffer* pData = static_cast<SIncBuffer*>(BufferManager::MapConstantBuffer(m_IncPoseMatrixConstantBuffer, CBuffer::EMap::WriteDiscard));
         memcpy(pData, &TrackingData, sizeof(SIncBuffer));
-        glUnmapNamedBuffer(m_IncPoseMatrixConstantBuffer);
+        BufferManager::UnmapConstantBuffer(m_IncPoseMatrixConstantBuffer);
 
         ContextManager::SetShaderCS(m_CSDetermineSummands);
-
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_ICPBuffer);
-        glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_TrackingDataConstantBuffer);
-        glBindBufferBase(GL_UNIFORM_BUFFER, 2, m_IncPoseMatrixConstantBuffer);
+        ContextManager::SetResourceBuffer(0, m_ICPBuffer);
+        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBuffer);
+        ContextManager::SetConstantBuffer(2, m_IncPoseMatrixConstantBuffer);
         
-        glBindImageTexture(0, m_ReferenceVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-        glBindImageTexture(1, m_ReferenceNormalMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-        glBindImageTexture(2, m_RaycastVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-        glBindImageTexture(3, m_RaycastNormalMap[PyramidLevel], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-        glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_ReferenceVertexMap[PyramidLevel]));
+        ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ReferenceNormalMap[PyramidLevel]));
+        ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(m_RaycastVertexMap[PyramidLevel]));
+        ContextManager::SetImageTexture(3, static_cast<CTextureBasePtr>(m_RaycastNormalMap[PyramidLevel]));
+
+        //glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+        //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
     }
 
     // -----------------------------------------------------------------------------
@@ -477,18 +524,18 @@ namespace MR
         const int Summands = SummandsX * SummandsY;
         const float SummandsLog2 = Log2(static_cast<float>(Summands));
         const int SummandsPOT = 1 << (static_cast<int>(SummandsLog2) + 1);
-
-        int* pData = static_cast<int*>(glMapNamedBuffer(m_ICPSummationConstantBuffer, GL_WRITE_ONLY));
+                
+        int* pData = static_cast<int*>(BufferManager::MapConstantBuffer(m_ICPSummationConstantBuffer, Gfx::CBuffer::EMap::WriteDiscard));
         *pData = Summands / 2;
         *(pData + 1) = SummandsPOT / 2;
-        glUnmapNamedBuffer(m_ICPSummationConstantBuffer);
+        BufferManager::UnmapConstantBuffer(m_ICPSummationConstantBuffer);
 
         ContextManager::SetShaderCS(m_CSReduceSum);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_ICPBuffer);
-        glBindBufferBase(GL_UNIFORM_BUFFER, 2, m_ICPSummationConstantBuffer);
-        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-        glDispatchCompute(1, g_ICPValueCount, 1);
+        ContextManager::SetResourceBuffer(0, m_ICPBuffer);
+        ContextManager::SetConstantBuffer(2, m_ICPSummationConstantBuffer);
+        //glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+        //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        ContextManager::Dispatch(1, g_ICPValueCount, 1);
     }
 
     // -----------------------------------------------------------------------------
@@ -501,8 +548,9 @@ namespace MR
         Scalar b[6];
 
         int ValueIndex = 0;
-
-        float* pICPBufferData = static_cast<float*>(glMapNamedBufferRange(m_ICPBuffer, 0, sizeof(float) * g_ICPValueCount, GL_MAP_READ_BIT));
+        
+        float* pICPBufferData = static_cast<float*>(BufferManager::MapConstantBuffer(m_ICPBuffer, CBuffer::EMap::Read));
+        //todo: only map first 27 floats
         for (int i = 0; i < 6; ++ i)
         {
             for (int j = i; j < 7; ++ j)
@@ -519,7 +567,7 @@ namespace MR
                 }
             }
         }
-        glUnmapNamedBuffer(m_ICPBuffer);
+        BufferManager::UnmapConstantBuffer(m_ICPBuffer);
 
         Scalar L[36];
 
@@ -581,15 +629,15 @@ namespace MR
 
         ContextManager::SetShaderCS(m_CSVolumeIntegration);
 
-        glBindImageTexture(0, m_Volume, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RG16I);
-        glBindImageTexture(1, m_RawDepthBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16UI);
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_Volume));
+        ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RawDepthBuffer));
 
-        glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_IntrinsicsConstantBuffer);
-        glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_TrackingDataConstantBuffer);
+        ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBuffer);
+        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBuffer);
+        
+        //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
-        glDispatchCompute(WorkGroups, WorkGroups, 1);
+        ContextManager::Dispatch(WorkGroups, WorkGroups, 1);
     }
 
     // -----------------------------------------------------------------------------
@@ -597,30 +645,31 @@ namespace MR
     void CSLAMReconstructor::CreateRaycastPyramid()
     {
         ContextManager::SetShaderCS(m_CSRaycastPyramid);
-        glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_RaycastPyramidConstantBuffer);
+
+        ContextManager::SetConstantBuffer(0, m_RaycastPyramidConstantBuffer);
         
         for (int PyramidLevel = 1; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++PyramidLevel)
         {
             const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
             const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
 
-            float* pData = static_cast<float*>(glMapNamedBuffer(m_RaycastPyramidConstantBuffer, GL_WRITE_ONLY));
+            float* pData = static_cast<float*>(BufferManager::MapConstantBuffer(m_RaycastPyramidConstantBuffer, CBuffer::EMap::WriteDiscard));
             *pData = 0.0f;
-            glUnmapNamedBuffer(m_RaycastPyramidConstantBuffer);
+            BufferManager::UnmapConstantBuffer(m_RaycastPyramidConstantBuffer);
 
             glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-            glBindImageTexture(0, m_RaycastVertexMap[PyramidLevel - 1], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-            glBindImageTexture(1, m_RaycastVertexMap[PyramidLevel], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-            glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
+            ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RaycastVertexMap[PyramidLevel - 1]));
+            ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RaycastVertexMap[PyramidLevel]));
+            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
-            pData = static_cast<float*>(glMapNamedBuffer(m_RaycastPyramidConstantBuffer, GL_WRITE_ONLY));
+            pData = static_cast<float*>(BufferManager::MapConstantBuffer(m_RaycastPyramidConstantBuffer, CBuffer::EMap::WriteDiscard));
             *pData = 1.0f;
-            glUnmapNamedBuffer(m_RaycastPyramidConstantBuffer);
+            BufferManager::UnmapConstantBuffer(m_RaycastPyramidConstantBuffer);
 
             glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-            glBindImageTexture(0, m_RaycastNormalMap[PyramidLevel - 1], 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-            glBindImageTexture(1, m_RaycastNormalMap[PyramidLevel], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-            glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
+            ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RaycastNormalMap[PyramidLevel - 1]));
+            ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RaycastNormalMap[PyramidLevel]));
+            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
         }
     }
 
@@ -633,22 +682,19 @@ namespace MR
 
         ContextManager::SetShaderCS(m_CSRaycast);
 
-        CSamplerPtr Sampler = SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp);
-        CNativeSampler* NativeSampler = static_cast<CNativeSampler*>(Sampler.GetPtr());
+        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_Volume));
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_3D, m_Volume);
-        glBindSampler(0, NativeSampler->m_NativeSampler);
-        glBindImageTexture(1, m_RaycastVertexMap[0], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-        glBindImageTexture(2, m_RaycastNormalMap[0], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+        ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RaycastVertexMap[0]));
+        ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(m_RaycastNormalMap[0]));
 
-        glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_IntrinsicsConstantBuffer);
-        glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_TrackingDataConstantBuffer);
-
+        ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBuffer);
+        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBuffer);
+        
         glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
-        glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
     }
 
     // -----------------------------------------------------------------------------
@@ -659,10 +705,25 @@ namespace MR
 
         if (m_pRGBDCameraControl->GetDepthBuffer(m_DepthPixels.data()))
         {
-            glTextureSubImage2D(m_RawDepthBuffer, 0, 0, 0,
-                m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight(),
-                GL_RED_INTEGER, GL_UNSIGNED_SHORT, m_DepthPixels.data());
+            Performance::BeginEvent("Data Input");
 
+            STextureDescriptor TextureDescriptor;
+
+            TextureDescriptor.m_NumberOfPixelsU = m_pRGBDCameraControl->GetDepthWidth();
+            TextureDescriptor.m_NumberOfPixelsV = m_pRGBDCameraControl->GetDepthHeight();
+            TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_NumberOfMipMaps = 1;
+            TextureDescriptor.m_NumberOfTextures = 1;
+            TextureDescriptor.m_Binding = CTextureBase::ShaderResource;
+            TextureDescriptor.m_Access = CTextureBase::CPUWrite;
+            TextureDescriptor.m_Usage = CTextureBase::GPUReadWrite;
+            TextureDescriptor.m_Semantic = CTextureBase::UndefinedSemantic;
+            TextureDescriptor.m_pFileName = nullptr;
+            TextureDescriptor.m_pPixels = m_DepthPixels.data();
+            TextureDescriptor.m_Format = CTextureBase::R16_UINT;
+
+            m_RawDepthBuffer = TextureManager::CreateTexture2D(TextureDescriptor);
+            
             //////////////////////////////////////////////////////////////////////////////////////
             // Mirror depth data
             //////////////////////////////////////////////////////////////////////////////////////
@@ -671,14 +732,12 @@ namespace MR
             const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
 
             ContextManager::SetShaderCS(m_CSMirrorDepth);
-            glBindImageTexture(0, m_RawDepthBuffer, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16UI);
-            glDispatchCompute(WorkGroupsX, WorkGroupsY, 1);
+            ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawDepthBuffer));
+            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
             //////////////////////////////////////////////////////////////////////////////////////
             // Create reference data
             //////////////////////////////////////////////////////////////////////////////////////
-
-            Performance::BeginEvent("Data Input");
 
             CreateReferencePyramid();
 
@@ -697,10 +756,12 @@ namespace MR
                 STrackingData TrackingData;
                 TrackingData.m_PoseMatrix = m_PoseMatrix;
                 TrackingData.m_InvPoseMatrix = m_PoseMatrix.GetInverted();
-
-                STrackingData* pData = static_cast<STrackingData*>(glMapNamedBuffer(m_TrackingDataConstantBuffer, GL_WRITE_ONLY));
+                
+                STrackingData* pData = static_cast<STrackingData*>(BufferManager::MapConstantBuffer(m_TrackingDataConstantBuffer, CBuffer::EMap::WriteDiscard));
                 memcpy(pData, &TrackingData, sizeof(STrackingData));
-                glUnmapNamedBuffer(m_TrackingDataConstantBuffer);
+                BufferManager::UnmapConstantBuffer(m_TrackingDataConstantBuffer);
+
+                //BufferManager::UploadConstantBufferData(m_TrackingDataConstantBuffer, &TrackingData);
 
                 Performance::EndEvent();
             }
@@ -757,10 +818,10 @@ namespace MR
         STrackingData TrackingData;
         TrackingData.m_PoseMatrix = m_PoseMatrix;
         TrackingData.m_InvPoseMatrix = m_PoseMatrix.GetInverted();
-
-        STrackingData* pTrackingData = static_cast<STrackingData*>(glMapNamedBuffer(m_TrackingDataConstantBuffer, GL_WRITE_ONLY));
+                
+        STrackingData* pTrackingData = static_cast<STrackingData*>(BufferManager::MapConstantBuffer(m_TrackingDataConstantBuffer, CBuffer::EMap::WriteDiscard));
         memcpy(pTrackingData, &TrackingData, sizeof(STrackingData));
-        glUnmapNamedBuffer(m_TrackingDataConstantBuffer);
+        BufferManager::UnmapConstantBuffer(m_TrackingDataConstantBuffer);
         
         ClearVolume();
     }
@@ -771,13 +832,13 @@ namespace MR
     {
         ContextManager::SetShaderCS(m_CSClearVolume);
 
-        glBindImageTexture(0, m_Volume, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RG16I);
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_Volume));
 
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
         const int WorkGroupSize = GetWorkGroupCount(m_ReconstructionSettings.m_VolumeResolution, g_TileSize3D);
 
-        glDispatchCompute(WorkGroupSize, WorkGroupSize, WorkGroupSize);
+        ContextManager::Dispatch(WorkGroupSize, WorkGroupSize, WorkGroupSize);
     }
         
     // -----------------------------------------------------------------------------

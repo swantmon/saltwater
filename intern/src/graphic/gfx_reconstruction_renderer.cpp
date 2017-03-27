@@ -28,6 +28,7 @@
 #include "gfx_native_sampler.h"
 #include "gfx_native_shader.h"
 #include "gfx_native_target_set.h"
+#include "gfx_native_texture_3d.h"
 
 #include "mr/mr_slam_reconstructor.h"
 
@@ -346,8 +347,11 @@ namespace
         Gfx::ContextManager::SetShaderVS(m_VSRaycast);
         Gfx::ContextManager::SetShaderPS(m_FSRaycast);
 
+        Gfx::CTexture3DPtr Volume = m_pReconstructor->GetVolume();
+        CNativeTexture3D* NativeTexture = static_cast<CNativeTexture3D*>(Volume.GetPtr());
+
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_3D, m_pReconstructor->GetVolume());
+        glBindTexture(GL_TEXTURE_3D, NativeTexture->m_NativeTexture);
         glBindSampler(0, NativeSampler->m_NativeSampler);
 
         CBufferPtr FrameConstantBufferPtr = Gfx::Main::GetPerFrameConstantBuffer();
