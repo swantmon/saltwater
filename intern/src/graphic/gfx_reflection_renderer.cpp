@@ -587,8 +587,9 @@ namespace
 
     void CGfxReflectionRenderer::OnResize(unsigned int _Width, unsigned int _Height)
     {
-        BASE_UNUSED(_Width);
-        BASE_UNUSED(_Height);
+        // -----------------------------------------------------------------------------
+        // Clear old sets
+        // -----------------------------------------------------------------------------
 
         for (unsigned int IndexOfElement = 0; IndexOfElement < m_HCBTextureSetPtrs.size(); ++IndexOfElement)
         {
@@ -601,15 +602,101 @@ namespace
         m_HCBTargetSetPtrs  .clear();
         m_HCBViewPortSetPtrs.clear();
 
-        OnSetupRenderTargets();
-        OnSetupStates();
+        // -----------------------------------------------------------------------------
+        // Initiate target set
+        // -----------------------------------------------------------------------------
+        Base::Int2 Size(_Width, _Height);
+
+        // -----------------------------------------------------------------------------
+        // Create render target textures
+        // -----------------------------------------------------------------------------
+        STextureDescriptor RendertargetDescriptor;
+        
+        RendertargetDescriptor.m_NumberOfPixelsU  = Size[0];
+        RendertargetDescriptor.m_NumberOfPixelsV  = Size[1];
+        RendertargetDescriptor.m_NumberOfPixelsW  = 1;
+        RendertargetDescriptor.m_NumberOfMipMaps  = 1;
+        RendertargetDescriptor.m_NumberOfTextures = 1;
+        RendertargetDescriptor.m_Binding          = CTextureBase::RenderTarget | CTextureBase::ShaderResource;
+        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
+        RendertargetDescriptor.m_Format           = CTextureBase::Unknown;
+        RendertargetDescriptor.m_Usage            = CTextureBase::GPURead;
+        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_pFileName        = 0;
+        RendertargetDescriptor.m_pPixels          = 0;
+        RendertargetDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        
+        CTexture2DPtr SSRTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // SSR Temp Color
 
         // -----------------------------------------------------------------------------
 
-        CTextureBasePtr GBuffer0TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0);
-        CTextureBasePtr GBuffer1TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1);
-        CTextureBasePtr GBuffer2TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2);
-        CTextureBasePtr DepthTexturePtr = TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget();
+        RendertargetDescriptor.m_NumberOfPixelsU  = Size[0];
+        RendertargetDescriptor.m_NumberOfPixelsV  = Size[1];
+        RendertargetDescriptor.m_NumberOfPixelsW  = 1;
+        RendertargetDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
+        RendertargetDescriptor.m_NumberOfTextures = 1;
+        RendertargetDescriptor.m_Binding          = CTextureBase::RenderTarget | CTextureBase::ShaderResource;
+        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
+        RendertargetDescriptor.m_Format           = CTextureBase::Unknown;
+        RendertargetDescriptor.m_Usage            = CTextureBase::GPURead;
+        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_pFileName        = 0;
+        RendertargetDescriptor.m_pPixels          = 0;
+        RendertargetDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        
+        m_HCBTexture2DPtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // HCB
+
+        TextureManager::UpdateMipmap(m_HCBTexture2DPtr);
+
+        // -----------------------------------------------------------------------------
+        // Create target set
+        // -----------------------------------------------------------------------------
+        m_SSRTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(SSRTexturePtr));
+
+        // -----------------------------------------------------------------------------
+
+        SViewPortDescriptor ViewPortDesc;
+
+        ViewPortDesc.m_TopLeftX = 0.0f;
+        ViewPortDesc.m_TopLeftY = 0.0f;
+        ViewPortDesc.m_MinDepth = 0.0f;
+        ViewPortDesc.m_MaxDepth = 1.0f;
+
+        for (unsigned int IndexOfMipmap = 0; IndexOfMipmap < m_HCBTexture2DPtr->GetNumberOfMipLevels(); ++IndexOfMipmap)
+        {
+            // -----------------------------------------------------------------------------
+            // Target set
+            // -----------------------------------------------------------------------------
+            CTexture2DPtr MipmapTexture = TextureManager::GetMipmapFromTexture2D(m_HCBTexture2DPtr, IndexOfMipmap);
+
+            CTargetSetPtr MipmapTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(MipmapTexture));
+
+            // -----------------------------------------------------------------------------
+            // View port
+            // -----------------------------------------------------------------------------
+            ViewPortDesc.m_Width = static_cast<float>(MipmapTexture->GetNumberOfPixelsU());
+            ViewPortDesc.m_Height = static_cast<float>(MipmapTexture->GetNumberOfPixelsV());
+
+            CViewPortPtr MipMapViewPort = ViewManager::CreateViewPort(ViewPortDesc);
+
+            CViewPortSetPtr ViewPortSetPtr = ViewManager::CreateViewPortSet(MipMapViewPort);
+
+            // -----------------------------------------------------------------------------
+            // Put into class
+            // -----------------------------------------------------------------------------
+            m_HCBTargetSetPtrs  .push_back(MipmapTargetSetPtr);
+            m_HCBViewPortSetPtrs.push_back(ViewPortSetPtr);
+        }
+
+        m_SSRRenderContextPtr->SetTargetSet(m_SSRTargetSetPtr);
+
+        // -----------------------------------------------------------------------------
+        // Set texture sets
+        // -----------------------------------------------------------------------------
+        CTextureBasePtr GBuffer0TexturePtr  = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0);
+        CTextureBasePtr GBuffer1TexturePtr  = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1);
+        CTextureBasePtr GBuffer2TexturePtr  = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2);
+        CTextureBasePtr DepthTexturePtr     = TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget();
         CTextureBasePtr LightAccumuationPtr = TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0);
 
         // -----------------------------------------------------------------------------
