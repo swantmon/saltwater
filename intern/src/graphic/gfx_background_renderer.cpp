@@ -72,6 +72,8 @@ namespace
         void OnReload();
         void OnNewMap();
         void OnUnloadMap();
+
+        void OnResize(unsigned int _Width, unsigned int _Height);
         
         void Update();
         void Render();
@@ -150,6 +152,10 @@ namespace
         , m_BackgroundFromTexture      ()
         , m_CameraRenderJobs           ()
     {
+        // -----------------------------------------------------------------------------
+        // Register for resizing events
+        // -----------------------------------------------------------------------------
+        Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxBackgroundRenderer::OnResize));
     }
     
     // -----------------------------------------------------------------------------
@@ -391,6 +397,18 @@ namespace
     void CGfxBackgroundRenderer::OnUnloadMap()
     {
         
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxBackgroundRenderer::OnResize(unsigned int _Width, unsigned int _Height)
+    {
+        BASE_UNUSED(_Width);
+        BASE_UNUSED(_Height);
+
+        OnSetupRenderTargets();
+        OnSetupStates();
+        OnSetupTextures();
     }
     
     // -----------------------------------------------------------------------------

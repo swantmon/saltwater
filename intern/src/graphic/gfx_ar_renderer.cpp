@@ -462,6 +462,10 @@ namespace
     {
         BASE_UNUSED(_Width);
         BASE_UNUSED(_Height);
+
+        OnSetupRenderTargets();
+        OnSetupStates();
+        OnSetupTextures();
     }
 
     // -----------------------------------------------------------------------------

@@ -790,8 +790,8 @@ namespace
     {
         std::stringstream SMAADefineStream;
 
-        SMAADefineStream << "SMAA_RT_METRICS " << "vec4(1.0 / "
-            << _Width << ", 1.0 / " << _Height  << ", "
+        SMAADefineStream << "#define SMAA_RT_METRICS " << "vec4(1.0 / "
+            << _Width << ", 1.0 / " << _Height << ", "
             << _Width << ", " << _Height << ")";
 
         std::string SMAADefineString = SMAADefineStream.str();
@@ -804,6 +804,12 @@ namespace
         CShaderPtr ShaderSMAAWeightsCalcPSPtr = ShaderManager::CompilePS("fs_smaa_weights_calc.glsl", "main", pDefine);
         CShaderPtr ShaderSMAABlendingVSPtr    = ShaderManager::CompileVS("vs_smaa_blending.glsl"    , "main", pDefine);
         CShaderPtr ShaderSMAABlendingPSPtr    = ShaderManager::CompilePS("fs_smaa_blending.glsl"    , "main", pDefine);
+
+        // -----------------------------------------------------------------------------
+
+        OnSetupRenderTargets();
+        OnSetupStates();
+        OnSetupTextures();
     }
     
     // -----------------------------------------------------------------------------

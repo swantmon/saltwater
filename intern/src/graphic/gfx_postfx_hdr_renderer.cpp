@@ -54,6 +54,8 @@ namespace
         void OnReload();
         void OnNewMap();
         void OnUnloadMap();
+
+        void OnResize(unsigned int _Width, unsigned int _Height);
         
         void Update();
         void Render();
@@ -178,6 +180,11 @@ namespace
         , m_SwapCounter                    (0)
     {
         m_BloomRenderJobs.reserve(2);
+
+        // -----------------------------------------------------------------------------
+        // Register for resizing events
+        // -----------------------------------------------------------------------------
+        Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxPostFXHDRRenderer::OnResize));
     }
     
     // -----------------------------------------------------------------------------
@@ -543,6 +550,19 @@ namespace
     void CGfxPostFXHDRRenderer::OnUnloadMap()
     {
         
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxPostFXHDRRenderer::OnResize(unsigned int _Width, unsigned int _Height)
+    {
+        BASE_UNUSED(_Width);
+        BASE_UNUSED(_Height);
+
+        OnStart();
+        OnSetupRenderTargets();
+        OnSetupStates();
+        OnSetupTextures();
     }
     
     // -----------------------------------------------------------------------------

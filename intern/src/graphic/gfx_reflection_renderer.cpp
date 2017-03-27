@@ -65,6 +65,8 @@ namespace
         void OnReload();
         void OnNewMap();
         void OnUnloadMap();
+
+        void OnResize(unsigned int _Width, unsigned int _Height);
         
         void Update();
         void Render();
@@ -206,6 +208,11 @@ namespace
     {
         m_LightProbeRenderJobs.reserve(1);
         m_SSRRenderJobs       .reserve(1);
+
+        // -----------------------------------------------------------------------------
+        // Register for resizing events
+        // -----------------------------------------------------------------------------
+        Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxReflectionRenderer::OnResize));
     }
     
     // -----------------------------------------------------------------------------
@@ -574,7 +581,62 @@ namespace
     void CGfxReflectionRenderer::OnUnloadMap()
     {
         
-    } 
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReflectionRenderer::OnResize(unsigned int _Width, unsigned int _Height)
+    {
+        BASE_UNUSED(_Width);
+        BASE_UNUSED(_Height);
+
+        for (unsigned int IndexOfElement = 0; IndexOfElement < m_HCBTextureSetPtrs.size(); ++IndexOfElement)
+        {
+            m_HCBTextureSetPtrs [IndexOfElement] = 0;
+            m_HCBTargetSetPtrs  [IndexOfElement] = 0;
+            m_HCBViewPortSetPtrs[IndexOfElement] = 0;
+        }
+
+        m_HCBTextureSetPtrs .clear();
+        m_HCBTargetSetPtrs  .clear();
+        m_HCBViewPortSetPtrs.clear();
+
+        OnSetupRenderTargets();
+        OnSetupStates();
+
+        // -----------------------------------------------------------------------------
+
+        CTextureBasePtr GBuffer0TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0);
+        CTextureBasePtr GBuffer1TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1);
+        CTextureBasePtr GBuffer2TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2);
+        CTextureBasePtr DepthTexturePtr = TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget();
+        CTextureBasePtr LightAccumuationPtr = TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0);
+
+        // -----------------------------------------------------------------------------
+
+        CTextureBasePtr ImageLightTexturePtrs[] = { GBuffer0TexturePtr, GBuffer1TexturePtr, GBuffer2TexturePtr, DepthTexturePtr, static_cast<CTextureBasePtr>(m_BRDFTexture2DPtr) };
+
+        m_ImageLightTextureSetPtr = TextureManager::CreateTextureSet(ImageLightTexturePtrs, 5);
+
+        // -----------------------------------------------------------------------------
+
+        CTextureBasePtr SSRTexturePtrs[] = { GBuffer0TexturePtr, GBuffer1TexturePtr, GBuffer2TexturePtr, DepthTexturePtr, static_cast<CTextureBasePtr>(m_HCBTexture2DPtr), static_cast<CTextureBasePtr>(m_BRDFTexture2DPtr) };
+
+        m_SSRTextureSetPtr = TextureManager::CreateTextureSet(SSRTexturePtrs, 6);
+
+        // -----------------------------------------------------------------------------
+
+        m_SSRApplyTextureSetPtr = TextureManager::CreateTextureSet(m_SSRTargetSetPtr->GetRenderTarget(0));
+
+        // -----------------------------------------------------------------------------
+
+        m_HCBTextureSetPtrs.push_back(TextureManager::CreateTextureSet(LightAccumuationPtr));
+
+        for (unsigned int IndexOfMipmap = 1; IndexOfMipmap < m_HCBTexture2DPtr->GetNumberOfMipLevels(); ++IndexOfMipmap)
+        {
+            m_HCBTextureSetPtrs.push_back(TextureManager::CreateTextureSet(m_HCBTargetSetPtrs[IndexOfMipmap - 1]->GetRenderTarget(0)));
+        }
+    }
     
     // -----------------------------------------------------------------------------
     

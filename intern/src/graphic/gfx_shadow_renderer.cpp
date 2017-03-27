@@ -63,6 +63,8 @@ namespace
         void OnReload();
         void OnNewMap();
         void OnUnloadMap();
+
+        void OnResize(unsigned int _Width, unsigned int _Height);
         
         void Update();
         void Render();
@@ -162,6 +164,11 @@ namespace
         , m_SSAORenderJobs                   ()
     {
         m_SSAORenderJobs.reserve(1);
+
+        // -----------------------------------------------------------------------------
+        // Register for resizing events
+        // -----------------------------------------------------------------------------
+        Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxShadowRenderer::OnResize));
     }
     
     // -----------------------------------------------------------------------------
@@ -513,6 +520,18 @@ namespace
     void CGfxShadowRenderer::OnUnloadMap()
     {
         
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxShadowRenderer::OnResize(unsigned int _Width, unsigned int _Height)
+    {
+        BASE_UNUSED(_Width);
+        BASE_UNUSED(_Height);
+
+        OnSetupRenderTargets();
+        OnSetupStates();
+        OnSetupTextures();
     }
     
     // -----------------------------------------------------------------------------
