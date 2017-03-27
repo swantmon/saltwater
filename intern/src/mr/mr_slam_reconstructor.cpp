@@ -547,16 +547,17 @@ namespace MR
 
         Scalar A[36];
         Scalar b[6];
+        
+        float ICPValues[g_ICPValueCount];
+        void* pICPBuffer = BufferManager::MapConstantBufferRange(m_ICPBuffer, CBuffer::EMap::Read, g_ICPValueCount * sizeof(float));
+        memcpy(ICPValues, pICPBuffer, sizeof(ICPValues[0]) * g_ICPValueCount);
 
         int ValueIndex = 0;
-        
-        float* pICPBufferData = static_cast<float*>(BufferManager::MapConstantBuffer(m_ICPBuffer, CBuffer::EMap::Read));
-        //todo: only map first 27 floats
         for (int i = 0; i < 6; ++ i)
         {
             for (int j = i; j < 7; ++ j)
             {
-                float Value = pICPBufferData[ValueIndex++];
+                float Value = ICPValues[ValueIndex++];
                 
                 if (j == 6)
                 {

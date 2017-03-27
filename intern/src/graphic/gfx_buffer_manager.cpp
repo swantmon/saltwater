@@ -65,6 +65,7 @@ namespace
         void UnmapIndexBuffer(CBufferPtr _BufferPtr);
 
         void* MapConstantBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map);
+        void* MapConstantBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, Base::Size _Range);
         void UnmapConstantBuffer(CBufferPtr _BufferPtr);
 
         void UploadVertexBufferData(CBufferPtr _BufferPtr, const void* _pData);
@@ -121,6 +122,7 @@ namespace
         GLenum ConvertBindFlag(CBuffer::EBinding _BindFlag);
         GLenum ConvertAccess(CBuffer::EAccess _Access);
         GLenum ConvertMap(CBuffer::EMap _Map);
+        GLenum ConvertMapRange(CBuffer::EMap _Map);
     };
 } // namespace
 
@@ -543,6 +545,22 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void* CGfxBufferManager::MapConstantBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, Base::Size _Range)
+    {
+        assert(_BufferPtr != nullptr && _BufferPtr.IsValid());
+        assert(_Range > 0);
+
+        CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
+
+        assert(pBuffer != nullptr);
+
+        int NativeMap = ConvertMapRange(_Map);
+
+        return glMapNamedBufferRange(pBuffer->m_NativeBuffer, 0, _Range, NativeMap);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxBufferManager::UnmapConstantBuffer(CBufferPtr _BufferPtr)
     {
         assert(_BufferPtr != nullptr && _BufferPtr.IsValid());
@@ -673,6 +691,22 @@ namespace
             GL_READ_WRITE,
             GL_WRITE_ONLY,
             GL_WRITE_ONLY,
+        };
+
+        return s_NativeMap[_Map];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    GLenum  CGfxBufferManager::ConvertMapRange(CBuffer::EMap _Map)
+    {
+        static const GLenum  s_NativeMap[] =
+        {
+            GL_MAP_READ_BIT,
+            GL_MAP_WRITE_BIT,
+            GL_MAP_READ_BIT,
+            GL_MAP_WRITE_BIT,
+            GL_MAP_WRITE_BIT,
         };
 
         return s_NativeMap[_Map];
@@ -835,6 +869,13 @@ namespace BufferManager
     void* MapConstantBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map)
     {
         return CGfxBufferManager::GetInstance().MapConstantBuffer(_BufferPtr, _Map);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void* MapConstantBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, Base::Size _Range)
+    {
+        return CGfxBufferManager::GetInstance().MapConstantBufferRange(_BufferPtr, _Map, _Range);
     }
 
     // -----------------------------------------------------------------------------

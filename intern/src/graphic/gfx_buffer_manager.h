@@ -55,6 +55,7 @@ namespace BufferManager
     void UnmapIndexBuffer(CBufferPtr _BufferPtr);
 
     void* MapConstantBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map);
+    void* MapConstantBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, Base::Size _Range);
     void UnmapConstantBuffer(CBufferPtr _BufferPtr);
 
     void UploadVertexBufferData(CBufferPtr _BufferPtr, const void* _pData);
