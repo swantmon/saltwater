@@ -357,9 +357,11 @@ namespace
         BASE_UNUSED(_Width);
         BASE_UNUSED(_Height);
 
-        OnSetupRenderTargets();
-        OnSetupStates();
-        OnSetupTextures();
+        m_HistogramInputTextureSetPtr = 0;
+
+        CTextureBasePtr LightAccumulationTexturePtr = TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0);
+
+        m_HistogramInputTextureSetPtr = TextureManager::CreateTextureSet(LightAccumulationTexturePtr);
     }
     
     // -----------------------------------------------------------------------------
