@@ -29,8 +29,6 @@
 #include "mr/mr_kinect_control.h"
 #include "mr/mr_realsense_control.h"
 
-#include <gl/glew.h>
-
 #include <limits>
 #include <memory>
 #include <sstream>
@@ -344,51 +342,51 @@ namespace MR
             Intrinsics[i].m_InvKMatrix.Invert();
         }
 
-        SBufferDescriptor ConstanteBufferDesc;
+        SBufferDescriptor ConstantBufferDesc;
 
-        ConstanteBufferDesc.m_Stride = 0;
-        ConstanteBufferDesc.m_Usage = CBuffer::EUsage::GPURead;
-        ConstanteBufferDesc.m_Binding = CBuffer::ConstantBuffer;
-        ConstanteBufferDesc.m_Access = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SIntrinsics) * m_ReconstructionSettings.m_PyramidLevelCount;
-        ConstanteBufferDesc.m_pBytes = Intrinsics.data();
-        ConstanteBufferDesc.m_pClassKey = 0;
+        ConstantBufferDesc.m_Stride = 0;
+        ConstantBufferDesc.m_Usage = CBuffer::EUsage::GPURead;
+        ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
+        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(SIntrinsics) * m_ReconstructionSettings.m_PyramidLevelCount;
+        ConstantBufferDesc.m_pBytes = Intrinsics.data();
+        ConstantBufferDesc.m_pClassKey = 0;
 
-        m_IntrinsicsConstantBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        m_IntrinsicsConstantBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
         
         STrackingData TrackingData;
         TrackingData.m_PoseMatrix = m_PoseMatrix;
         TrackingData.m_InvPoseMatrix = m_PoseMatrix.GetInverted();
 
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(STrackingData);
-        ConstanteBufferDesc.m_pBytes        = &TrackingData;
-        m_TrackingDataConstantBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(STrackingData);
+        ConstantBufferDesc.m_pBytes        = &TrackingData;
+        m_TrackingDataConstantBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
 
-        ConstanteBufferDesc.m_pBytes = 0;
-        ConstanteBufferDesc.m_NumberOfBytes = 16;
-        ConstanteBufferDesc.m_Usage = CBuffer::GPUReadWrite;
-        m_RaycastPyramidConstantBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        ConstantBufferDesc.m_pBytes = 0;
+        ConstantBufferDesc.m_NumberOfBytes = 16;
+        ConstantBufferDesc.m_Usage = CBuffer::GPUReadWrite;
+        m_RaycastPyramidConstantBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
         
-        ConstanteBufferDesc.m_Usage = CBuffer::GPURead;
-        ConstanteBufferDesc.m_NumberOfBytes = 16;
-        m_ICPSummationConstantBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
+        ConstantBufferDesc.m_NumberOfBytes = 16;
+        m_ICPSummationConstantBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
 
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SIncBuffer);
-        m_IncPoseMatrixConstantBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(SIncBuffer);
+        m_IncPoseMatrixConstantBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
 
-        ConstanteBufferDesc.m_NumberOfBytes = 16;
-        ConstanteBufferDesc.m_pBytes = &m_ReconstructionSettings.m_DepthThreshold;
-        m_BilateralFilterConstantBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        ConstantBufferDesc.m_NumberOfBytes = 16;
+        ConstantBufferDesc.m_pBytes = &m_ReconstructionSettings.m_DepthThreshold;
+        m_BilateralFilterConstantBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
 
         const int ICPRowCount = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth(), g_TileSize2D) *
             GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
 
-        ConstanteBufferDesc.m_Usage = CBuffer::GPUToCPU;
-        ConstanteBufferDesc.m_Binding = CBuffer::ResourceBuffer;
-        ConstanteBufferDesc.m_Access = CBuffer::CPURead;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(float) * ICPRowCount * g_ICPValueCount;
-        ConstanteBufferDesc.m_pBytes = nullptr;
-        m_ICPBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        ConstantBufferDesc.m_Usage = CBuffer::GPUToCPU;
+        ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
+        ConstantBufferDesc.m_Access = CBuffer::CPURead;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(float) * ICPRowCount * g_ICPValueCount;
+        ConstantBufferDesc.m_pBytes = nullptr;
+        m_ICPBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
 
     // -----------------------------------------------------------------------------
@@ -402,7 +400,7 @@ namespace MR
         // Bilateral Filter
         //////////////////////////////////////////////////////////////////////////////////////
 
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
         ContextManager::SetShaderCS(m_CSBilateralFilter);
         ContextManager::SetConstantBuffer(0, m_BilateralFilterConstantBuffer);
@@ -425,8 +423,8 @@ namespace MR
             ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
 
             ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_SmoothDepthBuffer[PyramidLevel]));
-            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-            glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
+            //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+            //glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
             ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
         }
 
@@ -445,7 +443,7 @@ namespace MR
             ContextManager::SetShaderCS(m_CSVertexMap);
             ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_SmoothDepthBuffer[PyramidLevel]));
             ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ReferenceVertexMap[PyramidLevel]));
-            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+            //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
             ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);			
         }
 
@@ -457,7 +455,7 @@ namespace MR
             ContextManager::SetShaderCS(m_CSNormalMap);
             ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_ReferenceVertexMap[PyramidLevel]));
             ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ReferenceNormalMap[PyramidLevel]));
-            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+            //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
             ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
         }
     }
@@ -509,8 +507,8 @@ namespace MR
         ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(m_RaycastVertexMap[PyramidLevel]));
         ContextManager::SetImageTexture(3, static_cast<CTextureBasePtr>(m_RaycastNormalMap[PyramidLevel]));
 
-        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        //glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+        //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
     }
 
@@ -534,8 +532,8 @@ namespace MR
         ContextManager::SetShaderCS(m_CSReduceSum);
         ContextManager::SetResourceBuffer(0, m_ICPBuffer);
         ContextManager::SetConstantBuffer(2, m_ICPSummationConstantBuffer);
-        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        //glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+        //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
         ContextManager::Dispatch(1, g_ICPValueCount, 1);
     }
 
@@ -637,7 +635,7 @@ namespace MR
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBuffer);
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBuffer);
         
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
         ContextManager::Dispatch(WorkGroups, WorkGroups, 1);
     }
@@ -658,7 +656,7 @@ namespace MR
             float Normalized = 0.0f;
             BufferManager::UploadConstantBufferData(m_RaycastPyramidConstantBuffer, &Normalized);
             
-            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+            //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
             ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RaycastVertexMap[PyramidLevel - 1]));
             ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RaycastVertexMap[PyramidLevel]));
             ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
@@ -666,7 +664,7 @@ namespace MR
             Normalized = 1.0f;
             BufferManager::UploadConstantBufferData(m_RaycastPyramidConstantBuffer, &Normalized);
 
-            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+            //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
             ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RaycastNormalMap[PyramidLevel - 1]));
             ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RaycastNormalMap[PyramidLevel]));
             ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
@@ -691,8 +689,8 @@ namespace MR
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBuffer);
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBuffer);
         
-        glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        //glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
+        //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
     }
@@ -828,7 +826,7 @@ namespace MR
 
         ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_Volume));
 
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
         const int WorkGroupSize = GetWorkGroupCount(m_ReconstructionSettings.m_VolumeResolution, g_TileSize3D);
 

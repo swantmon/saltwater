@@ -92,8 +92,8 @@ namespace
         CShaderPtr m_VSRaycast;
         CShaderPtr m_FSRaycast;
 
-        GLuint m_RaycastBuffer;
-        GLuint m_DrawCallConstantBuffer;
+        CBufferPtr m_RaycastBuffer;
+        CBufferPtr m_DrawCallConstantBuffer;
 
         GLuint m_CameraVAO;
 
@@ -132,16 +132,16 @@ namespace
     void CGfxReconstructionRenderer::OnExit()
     {
         m_VSCamera = 0;
-        m_FSCamera = 0;        
+        m_FSCamera = 0;
         m_VSRaycast = 0;
         m_FSRaycast = 0;
 
         m_VSDepth = 0;
         m_FSDepth = 0;
 
-        glDeleteBuffers(1, &m_RaycastBuffer);
-        glDeleteBuffers(1, &m_DrawCallConstantBuffer);
-
+        m_RaycastBuffer = 0;
+        m_DrawCallConstantBuffer = 0;
+        
         glDeleteVertexArrays(1, &m_CameraVAO);
 
         m_pReconstructor = nullptr;
@@ -207,11 +207,21 @@ namespace
     
     void CGfxReconstructionRenderer::OnSetupBuffers()
     {
-        glCreateBuffers(1, &m_RaycastBuffer);
-        glNamedBufferData(m_RaycastBuffer, sizeof(Float4) * 2, nullptr, GL_DYNAMIC_DRAW);
+        SBufferDescriptor ConstantBufferDesc;
 
-        glCreateBuffers(1, &m_DrawCallConstantBuffer);
-        glNamedBufferData(m_DrawCallConstantBuffer, sizeof(Float4x4) * 2, nullptr, GL_DYNAMIC_DRAW);
+        ConstantBufferDesc.m_Stride = 0;
+        ConstantBufferDesc.m_Usage = CBuffer::EUsage::GPURead;
+        ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
+        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(Float4) * 2;
+        ConstantBufferDesc.m_pBytes = nullptr;
+        ConstantBufferDesc.m_pClassKey = 0;
+
+        m_RaycastBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
+        
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(Float4x4) * 2;
+
+        m_DrawCallConstantBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -321,17 +331,11 @@ namespace
         Performance::BeginEvent("Rendering");
         
         glBindVertexArray(1); // dummy vao because opengl needs vertex data even when it does not use it
-
-        CTargetSetPtr DefaultTargetSetPtr = TargetSetManager::GetDefaultTargetSet();
-        CNativeTargetSet NativeTargetSet = *static_cast<CNativeTargetSet*>(DefaultTargetSetPtr.GetPtr());
-
-        glBindFramebuffer(GL_FRAMEBUFFER, NativeTargetSet.m_NativeTargetSet);
+        
+        ContextManager::SetTargetSet(TargetSetManager::GetDefaultTargetSet());
         //glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         //glClear(GL_COLOR_BUFFER_BIT);
         
-        CSamplerPtr Sampler = Gfx::SamplerManager::GetSampler(Gfx::CSampler::ESampler::MinMagMipLinearClamp);
-        CNativeSampler* NativeSampler = static_cast<CNativeSampler*>(Sampler.GetPtr());
-
         Float4x4 PoseMatrix = m_pReconstructor->GetPoseMatrix();
         bool TrackingLost = m_pReconstructor->IsTrackingLost();
 
@@ -340,31 +344,23 @@ namespace
         RaycastData[0][3] = 1.0f;
         RaycastData[1] = TrackingLost ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 1.0f, 0.0f, 1.0f);
 
-        Float4* pData = static_cast<Float4*>(glMapNamedBuffer(m_RaycastBuffer, GL_WRITE_ONLY));
-        memcpy(pData, &RaycastData, sizeof(RaycastData));
-        glUnmapNamedBuffer(m_RaycastBuffer);
-        
+        BufferManager::UploadConstantBufferData(m_RaycastBuffer, RaycastData);
+                
         Gfx::ContextManager::SetShaderVS(m_VSRaycast);
         Gfx::ContextManager::SetShaderPS(m_FSRaycast);
 
         Gfx::CTexture3DPtr Volume = m_pReconstructor->GetVolume();
-        CNativeTexture3D* NativeTexture = static_cast<CNativeTexture3D*>(Volume.GetPtr());
+        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(Volume));
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(Gfx::CSampler::ESampler::MinMagMipLinearClamp));
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_3D, NativeTexture->m_NativeTexture);
-        glBindSampler(0, NativeSampler->m_NativeSampler);
-
-        CBufferPtr FrameConstantBufferPtr = Gfx::Main::GetPerFrameConstantBuffer();
-        CNativeBuffer NativeBufer = *static_cast<CNativeBuffer*>(FrameConstantBufferPtr.GetPtr());
-        glBindBufferBase(GL_UNIFORM_BUFFER, 0, NativeBufer.m_NativeBuffer);
-        glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_RaycastBuffer);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_RaycastBuffer);
 
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
-        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+        ContextManager::SetTopology(STopology::TriangleFan);
+        ContextManager::Draw(4, 0);
+                
         Performance::EndEvent();
     }
 
@@ -427,14 +423,12 @@ namespace
         WorldMatrix.SetScale(0.1f);
         WorldMatrix = m_pReconstructor->GetPoseMatrix() * WorldMatrix;
 
-        Float4x4* pData = static_cast<Float4x4*>(glMapNamedBuffer(m_DrawCallConstantBuffer, GL_WRITE_ONLY));
-        *pData = WorldMatrix;
-        glUnmapNamedBuffer(m_DrawCallConstantBuffer);
-
+        BufferManager::UploadConstantBufferData(m_DrawCallConstantBuffer, &WorldMatrix);
+        
         CBufferPtr FrameConstantBufferPtr = Gfx::Main::GetPerFrameConstantBuffer();
         CNativeBuffer NativeBufer = *static_cast<CNativeBuffer*>(FrameConstantBufferPtr.GetPtr());
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, NativeBufer.m_NativeBuffer);
-        glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_DrawCallConstantBuffer);
+        ContextManager::SetConstantBuffer(1, m_DrawCallConstantBuffer);
         
         glBindVertexArray(m_CameraVAO);
 
