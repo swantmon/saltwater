@@ -445,7 +445,7 @@ namespace
         int Width  = _rMessage.GetInt();
         int Height = _rMessage.GetInt();
 
-        // Gfx::App::OnResize(m_EditWindowID, 1280, 720);
+        Gfx::App::OnResize(m_EditWindowID, Width, Height);
     }
 }
 

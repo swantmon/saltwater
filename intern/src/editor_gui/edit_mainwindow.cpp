@@ -94,7 +94,7 @@ namespace Edit
 
     void CMainWindow::SetRenderSize(int _Width, int _Height)
     {
-        m_pEditorRenderContext->setFixedSize(QSize(_Width, _Height));
+        // m_pEditorRenderContext->setMinimumSize(QSize(_Width, _Height));
     }
 
     // -----------------------------------------------------------------------------
