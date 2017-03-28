@@ -126,11 +126,6 @@ namespace
         CTexture2DPtr m_VSPositionTempTexturePtr;
         CTexture2DPtr m_WebcamTexturePtr;
 
-        CTextureSetPtr m_BilateralBlurTextureSetPtr;
-        CTextureSetPtr m_BilateralBlurTempTextureSetPtr;
-        CTextureSetPtr m_CopyToGBufferTextureSetPtr;
-        CTextureSetPtr m_DifferentualGBufferTextureSetPtr;
-
         CRenderJobs m_RenderJobs;
 
     private:
@@ -159,10 +154,6 @@ namespace
         , m_VSPositionTexturePtr            ()
         , m_VSPositionTempTexturePtr        ()
         , m_WebcamTexturePtr                ()
-        , m_BilateralBlurTextureSetPtr      ()
-        , m_BilateralBlurTempTextureSetPtr  ()
-        , m_CopyToGBufferTextureSetPtr      ()
-        , m_DifferentualGBufferTextureSetPtr()
         , m_RenderJobs                      ()
     {
         // -----------------------------------------------------------------------------
@@ -210,10 +201,6 @@ namespace
         m_VSPositionTexturePtr             = 0;
         m_VSPositionTempTexturePtr         = 0;
         m_WebcamTexturePtr                 = 0;
-        m_BilateralBlurTextureSetPtr       = 0;
-        m_BilateralBlurTempTextureSetPtr   = 0;
-        m_CopyToGBufferTextureSetPtr       = 0;
-        m_DifferentualGBufferTextureSetPtr = 0;
 
         // -----------------------------------------------------------------------------
         // Iterate throw render jobs to release managed pointer
@@ -301,30 +288,8 @@ namespace
 
     void CGfxARRenderer::OnSetupTextures()
     {
-        Base::Int2 Size = Main::GetActiveWindowSize();
-
         STextureDescriptor TextureDescriptor;
         
-        TextureDescriptor.m_NumberOfPixelsU  = Size[0];
-        TextureDescriptor.m_NumberOfPixelsV  = Size[1];
-        TextureDescriptor.m_NumberOfPixelsW  = 1;
-        TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
-        TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
-        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-        TextureDescriptor.m_Format           = CTextureBase::Unknown;
-        TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-        TextureDescriptor.m_pFileName        = 0;
-        TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = CTextureBase::R8G8B8_UBYTE;
-        
-        m_WebcamTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
-
-        m_DifferentualGBufferTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_WebcamTexturePtr));
-
-        // -----------------------------------------------------------------------------
-
         TextureDescriptor.m_NumberOfPixelsU  = 1280;
         TextureDescriptor.m_NumberOfPixelsV  = 720;
         TextureDescriptor.m_NumberOfPixelsW  = 1;
@@ -339,26 +304,17 @@ namespace
         TextureDescriptor.m_pPixels          = 0;
         TextureDescriptor.m_Format           = CTextureBase::R8G8B8_UBYTE;
         
+        m_WebcamTexturePtr     = TextureManager::CreateTexture2D(TextureDescriptor);
+        
         m_BackgroundTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
-        TextureDescriptor.m_Format           = CTextureBase::R32G32B32_FLOAT;
+        // -----------------------------------------------------------------------------
 
-        m_VSPositionTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+        TextureDescriptor.m_Format = CTextureBase::R32G32B32_FLOAT;
+
+        m_VSPositionTexturePtr     = TextureManager::CreateTexture2D(TextureDescriptor);
 
         m_VSPositionTempTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
-
-        // -----------------------------------------------------------------------------
-
-        CTextureBasePtr GBuffer0texturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0);
-        CTextureBasePtr GBuffer1texturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1);
-
-        // -----------------------------------------------------------------------------
-
-        m_BilateralBlurTempTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_VSPositionTexturePtr), static_cast<CTextureBasePtr>(m_VSPositionTempTexturePtr));
-
-        m_BilateralBlurTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_VSPositionTempTexturePtr), static_cast<CTextureBasePtr>(m_VSPositionTexturePtr));
-
-        m_CopyToGBufferTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_BackgroundTexturePtr), static_cast<CTextureBasePtr>(m_VSPositionTexturePtr), GBuffer0texturePtr, GBuffer1texturePtr);
     }
 
     // -----------------------------------------------------------------------------
@@ -460,12 +416,6 @@ namespace
 
     void CGfxARRenderer::OnResize(unsigned int _Width, unsigned int _Height)
     {
-        BASE_UNUSED(_Width);
-        BASE_UNUSED(_Height);
-
-        OnSetupRenderTargets();
-        OnSetupStates();
-        OnSetupTextures();
     }
 
     // -----------------------------------------------------------------------------
@@ -504,6 +454,11 @@ namespace
         }
         else if (pControl != nullptr && pControl->GetType() == MR::CControl::Kinect)
         {
+            // -----------------------------------------------------------------------------
+            // Copy data from kinect
+            // TODO: It is generally outdated because of the branch of ckunert and should
+            // be edited according to his work.
+            // -----------------------------------------------------------------------------
             MR::CKinectControl& rKinectControl = static_cast<MR::CKinectControl&>(*pControl);
 
             Base::AABB2UInt TargetRect(Base::UInt2(0), Base::UInt2(1280, 720));
@@ -583,7 +538,7 @@ namespace
 
                 ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
-                ContextManager::SetTexture(0, m_DifferentualGBufferTextureSetPtr->GetTexture(0));
+                ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_WebcamTexturePtr));
 
                 ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
 
@@ -619,6 +574,10 @@ namespace
 
         if (pControl->GetType() == MR::CControl::Kinect)
         {
+            // TODO: Remove texture set
+            //m_BilateralBlurTempTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_VSPositionTexturePtr), static_cast<CTextureBasePtr>(m_VSPositionTempTexturePtr));
+            //m_BilateralBlurTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_VSPositionTempTexturePtr), static_cast<CTextureBasePtr>(m_VSPositionTexturePtr));
+
 //             SBilateralBlurConstantBufferCS* pBilateralBlurConstantBuffer;
 //             
 //             pBilateralBlurConstantBuffer = static_cast<SBilateralBlurConstantBufferCS*>(BufferManager::MapConstantBuffer(m_BilateralBlurCSBufferSetPtr->GetBuffer(0)));
@@ -694,10 +653,10 @@ namespace
             ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
             ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
-            ContextManager::SetTexture(0, m_CopyToGBufferTextureSetPtr->GetTexture(0));
-            ContextManager::SetTexture(1, m_CopyToGBufferTextureSetPtr->GetTexture(1));
-            ContextManager::SetTexture(2, m_CopyToGBufferTextureSetPtr->GetTexture(2));
-            ContextManager::SetTexture(3, m_CopyToGBufferTextureSetPtr->GetTexture(3));
+            ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_BackgroundTexturePtr));
+            ContextManager::SetTexture(1, static_cast<CTextureBasePtr>(m_VSPositionTexturePtr));
+            ContextManager::SetTexture(2, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0));
+            ContextManager::SetTexture(3, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1));
 
             ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
 
