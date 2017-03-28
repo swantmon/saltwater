@@ -52,6 +52,9 @@
         </property>
        </spacer>
       </item>
+      <item>
+       <widget class="QComboBox" name="m_pResolutionCB"/>
+      </item>
      </layout>
     </item>
     <item>
@@ -1137,6 +1140,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_pResolutionCB</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>changeResolution(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1505</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1543</x>
+     <y>141</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>switchPlayingCurrentScene()</slot>
@@ -1162,5 +1181,6 @@
   <slot>createNewLightArea()</slot>
   <slot>reloadRenderer()</slot>
   <slot>reloadAllShader()</slot>
+  <slot>changeResolution(int)</slot>
  </slots>
 </ui>
