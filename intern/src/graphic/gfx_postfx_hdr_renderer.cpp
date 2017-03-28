@@ -556,13 +556,144 @@ namespace
 
     void CGfxPostFXHDRRenderer::OnResize(unsigned int _Width, unsigned int _Height)
     {
-        BASE_UNUSED(_Width);
-        BASE_UNUSED(_Height);
+        // -----------------------------------------------------------------------------
+        // Initiate target set sizes of down samples
+        // -----------------------------------------------------------------------------
+        Base::Int2 Size(_Width, _Height);
 
-        OnStart();
-        OnSetupRenderTargets();
-        OnSetupStates();
-        OnSetupTextures();
+        for (unsigned int IndexOfBlur = 0; IndexOfBlur < s_NumberOfBlurStages; ++IndexOfBlur)
+        {
+            int Devisor = Base::Pow(2, (IndexOfBlur + 1));
+
+            m_DownSampleSizes[IndexOfBlur] = Base::Int2(Size[0] / Devisor, Size[1] / Devisor);
+        }
+
+        // -----------------------------------------------------------------------------
+                
+        // -----------------------------------------------------------------------------
+        // Create render target textures
+        // -----------------------------------------------------------------------------
+        STextureDescriptor RendertargetDescriptor;
+        
+        RendertargetDescriptor.m_NumberOfPixelsU  = Size[0];
+        RendertargetDescriptor.m_NumberOfPixelsV  = Size[1];
+        RendertargetDescriptor.m_NumberOfPixelsW  = 1;
+        RendertargetDescriptor.m_NumberOfMipMaps  = 1;
+        RendertargetDescriptor.m_NumberOfTextures = 1;
+        RendertargetDescriptor.m_Binding          = CTextureBase::RenderTarget | CTextureBase::ShaderResource;
+        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
+        RendertargetDescriptor.m_Format           = CTextureBase::Unknown;
+        RendertargetDescriptor.m_Usage            = CTextureBase::GPURead;
+        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_pFileName        = 0;
+        RendertargetDescriptor.m_pPixels          = 0;
+        RendertargetDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        
+        CTexture2DPtr ColorTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Swap Color
+
+        // -----------------------------------------------------------------------------
+        // Create down sample target sets
+        // -----------------------------------------------------------------------------
+        for (unsigned int IndexofDownSample = 0; IndexofDownSample < NumberOfDownSamples; ++ IndexofDownSample)
+        {
+            RendertargetDescriptor.m_NumberOfPixelsU = m_DownSampleSizes[IndexofDownSample][0];
+            RendertargetDescriptor.m_NumberOfPixelsV = m_DownSampleSizes[IndexofDownSample][1];
+
+            CTexture2DPtr DownSampleRenderTargetTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Down Samples
+
+            m_DownSampleTargetSetPtrs[IndexofDownSample] = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(DownSampleRenderTargetTexturePtr));
+        }
+        
+        // -----------------------------------------------------------------------------
+        // Create swap buffer target set
+        // -----------------------------------------------------------------------------
+        m_SwapRenderTargetPtrs[0] = TargetSetManager::CreateTargetSet(TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0));
+        m_SwapRenderTargetPtrs[1] = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(ColorTexturePtr));
+
+        m_SwapContextPtrs[0]->SetTargetSet(m_SwapRenderTargetPtrs[0]);
+        m_SwapContextPtrs[1]->SetTargetSet(m_SwapRenderTargetPtrs[1]);
+
+        // -----------------------------------------------------------------------------
+
+        for (unsigned int IndexOfDownSample = 0; IndexOfDownSample < NumberOfDownSamples; ++IndexOfDownSample)
+        {
+            SViewPortDescriptor ViewPortDesc;
+
+            ViewPortDesc.m_TopLeftX = 0.0f;
+            ViewPortDesc.m_TopLeftY = 0.0f;
+            ViewPortDesc.m_Width    = static_cast<float>(m_DownSampleSizes[IndexOfDownSample][0]);
+            ViewPortDesc.m_Height   = static_cast<float>(m_DownSampleSizes[IndexOfDownSample][1]);
+            ViewPortDesc.m_MinDepth = 0.0f;
+            ViewPortDesc.m_MaxDepth = 1.0f;
+        
+            CViewPortPtr DownSampleViewPortPtr = ViewManager::CreateViewPort(ViewPortDesc);
+
+            CViewPortSetPtr DownSampleViewPortSetPtr = ViewManager::CreateViewPortSet(DownSampleViewPortPtr);
+
+            // -----------------------------------------------------------------------------
+
+            m_DownSampleRenderContextPtrs[IndexOfDownSample]->SetViewPortSet(DownSampleViewPortSetPtr);
+            m_DownSampleRenderContextPtrs[IndexOfDownSample]->SetTargetSet(m_DownSampleTargetSetPtrs[IndexOfDownSample]);
+        }
+
+        // -----------------------------------------------------------------------------
+
+        CTextureBasePtr ColorOneTexturePtr          = m_SwapRenderTargetPtrs[0]->GetRenderTarget(0);
+        CTextureBasePtr ColorTwoTexturePtr          = m_SwapRenderTargetPtrs[1]->GetRenderTarget(0);
+        CTextureBasePtr LightAccumulationTexturePtr = TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0);
+        CTextureBasePtr DepthTexturePtr             = TargetSetManager::GetDeferredTargetSet()         ->GetDepthStencilTarget();
+
+        // -----------------------------------------------------------------------------
+
+        STextureDescriptor TextureDescriptor;
+        
+        TextureDescriptor.m_NumberOfPixelsW  = 1;
+        TextureDescriptor.m_NumberOfMipMaps  = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
+        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
+        TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        TextureDescriptor.m_Usage            = CTextureBase::GPUReadWrite;
+        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        TextureDescriptor.m_pFileName        = 0;
+        TextureDescriptor.m_pPixels          = 0;
+
+        assert(s_NumberOfBlurStages == NumberOfDownSamples);
+
+        for (unsigned int IndexOfBlurStage = 0; IndexOfBlurStage < s_NumberOfBlurStages; ++IndexOfBlurStage)
+        {
+            TextureDescriptor.m_NumberOfPixelsU = m_DownSampleSizes[IndexOfBlurStage][0];
+            TextureDescriptor.m_NumberOfPixelsV = m_DownSampleSizes[IndexOfBlurStage][1];
+
+            CTextureBasePtr ResultTexturePtr     = static_cast<CTextureBasePtr>(TextureManager::CreateTexture2D(TextureDescriptor));
+            CTextureBasePtr TempTexturePtr       = static_cast<CTextureBasePtr>(TextureManager::CreateTexture2D(TextureDescriptor));
+            CTextureBasePtr DownSampleTexturePtr = m_DownSampleTargetSetPtrs[IndexOfBlurStage]->GetRenderTarget(0);
+
+            m_BlurStagesTextureSetPtrs[IndexOfBlurStage * 2 + 0] = TextureManager::CreateTextureSet(DownSampleTexturePtr, TempTexturePtr);
+            m_BlurStagesTextureSetPtrs[IndexOfBlurStage * 2 + 1] = TextureManager::CreateTextureSet(TempTexturePtr      , ResultTexturePtr);
+        }
+
+        // -----------------------------------------------------------------------------
+
+        m_DownSampleTextureSetPtrs[DownSample1] = TextureManager::CreateTextureSet(LightAccumulationTexturePtr);
+        m_DownSampleTextureSetPtrs[DownSample2] = TextureManager::CreateTextureSet(m_DownSampleTargetSetPtrs[0]->GetRenderTarget(0));
+        m_DownSampleTextureSetPtrs[DownSample3] = TextureManager::CreateTextureSet(m_DownSampleTargetSetPtrs[1]->GetRenderTarget(0));
+        m_DownSampleTextureSetPtrs[DownSample4] = TextureManager::CreateTextureSet(m_DownSampleTargetSetPtrs[2]->GetRenderTarget(0));
+        m_DownSampleTextureSetPtrs[DownSample5] = TextureManager::CreateTextureSet(m_DownSampleTargetSetPtrs[3]->GetRenderTarget(0));
+
+        // -----------------------------------------------------------------------------
+        
+        for (unsigned int IndexOfBlurStage = 0; IndexOfBlurStage < s_NumberOfBlurStages; ++IndexOfBlurStage)
+        {
+            unsigned int BlurStageIndex = IndexOfBlurStage * 2 + 1;
+
+            m_BlurStageFinalTextureSetPtrs[IndexOfBlurStage] = TextureManager::CreateTextureSet(m_BlurStagesTextureSetPtrs[BlurStageIndex]->GetTexture(1));
+        }
+
+        // -----------------------------------------------------------------------------
+
+        m_SwapTexturePtrs[0] = TextureManager::CreateTextureSet(ColorOneTexturePtr, DepthTexturePtr);
+        m_SwapTexturePtrs[1] = TextureManager::CreateTextureSet(ColorTwoTexturePtr, DepthTexturePtr);
     }
     
     // -----------------------------------------------------------------------------
