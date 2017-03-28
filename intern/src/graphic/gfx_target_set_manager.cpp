@@ -523,10 +523,6 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        GLuint Framebuffer;
-
-        glCreateFramebuffers(1, &Framebuffer);
-
         for (unsigned int IndexOfTexture = 0; IndexOfTexture < _NumberOfTargets; ++IndexOfTexture)
         {
             CNativeTexture2D& rNativeTexture = *static_cast<CNativeTexture2D*>(_pTargetPtrs[IndexOfTexture].GetPtr());
@@ -537,13 +533,13 @@ namespace
 
             if ((rNativeTexture.GetBinding() & CTexture2D::DepthStencilTarget) != 0)
             {
-                glNamedFramebufferTexture(Framebuffer, GL_DEPTH_ATTACHMENT, TextureHandle, MipmapLevel);
+                glNamedFramebufferTexture(rTargetSet.m_NativeTargetSet, GL_DEPTH_ATTACHMENT, TextureHandle, MipmapLevel);
 
                 rTargetSet.m_DepthStencilTargetPtr = _pTargetPtrs[IndexOfTexture];
             }
             else if ((rNativeTexture.GetBinding() & CTexture2D::RenderTarget) != 0)
             {
-                glNamedFramebufferTexture(Framebuffer, GL_COLOR_ATTACHMENT0 + NumberOfColorAttachments, TextureHandle, MipmapLevel);
+                glNamedFramebufferTexture(rTargetSet.m_NativeTargetSet, GL_COLOR_ATTACHMENT0 + NumberOfColorAttachments, TextureHandle, MipmapLevel);
 
                 rTargetSet.m_RenderTargetPtrs[NumberOfColorAttachments] = _pTargetPtrs[IndexOfTexture];
 
@@ -555,13 +551,12 @@ namespace
             }
         }
 
-        rTargetSet.m_NumberOfRenderTargets = NumberOfColorAttachments;
-        rTargetSet.m_NativeTargetSet = Framebuffer;
+        assert(rTargetSet.m_NumberOfRenderTargets == NumberOfColorAttachments);
 
         // -----------------------------------------------------------------------------
         // Check status
         // -----------------------------------------------------------------------------
-        GLenum Status = glCheckNamedFramebufferStatus(Framebuffer, GL_FRAMEBUFFER);
+        GLenum Status = glCheckNamedFramebufferStatus(rTargetSet.m_NativeTargetSet, GL_FRAMEBUFFER);
 
         if (Status != GL_FRAMEBUFFER_COMPLETE)
         {
