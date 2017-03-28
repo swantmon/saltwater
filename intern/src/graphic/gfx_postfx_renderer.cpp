@@ -154,6 +154,8 @@ namespace
         CRenderContextPtr m_SMAAWeightCalcContextPtr;
         CTargetSetPtr     m_SMAAEdgeTargetSetPtr;
         CTargetSetPtr     m_SMAAWeightsCalcTargetSetPtr;
+        CTexture2DPtr     m_SMAAAreaTexture;
+        CTexture2DPtr     m_SMAASearchTexture;
 
         CPostAARenderJobs m_PostAARenderJobs;
         CDOFRenderJobs  m_DOFRenderJobs;
@@ -185,12 +187,15 @@ namespace
         , m_GaussianBlurPropertiesPSBufferPtr()
         , m_SystemContextPtr                 ()
         , m_SwapTargetSetPtrs                ()
+        , m_SMAAAreaTexture                  ()
+        , m_SMAASearchTexture                ()
         , m_PostAARenderJobs                 ()
         , m_DOFRenderJobs                    ()
         , m_SwapCounter                      (0)
     {
         m_PostAARenderJobs.reserve(2);
         m_DOFRenderJobs .reserve(2);
+
         Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxPostFXRenderer::OnResize));
     }
     
@@ -246,6 +251,8 @@ namespace
         m_SMAAWeightCalcContextPtr          = 0;
         m_SMAAEdgeTargetSetPtr              = 0;
         m_SMAAWeightsCalcTargetSetPtr       = 0;
+        m_SMAAAreaTexture                   = 0;
+        m_SMAASearchTexture                 = 0;
         
         for (unsigned int IndexOfPostEffectShader = 0; IndexOfPostEffectShader < NumberOfPostEffects; ++ IndexOfPostEffectShader)
         {
@@ -646,7 +653,7 @@ namespace
         AreaTexDescriptor.m_pFileName        = 0;
         AreaTexDescriptor.m_pPixels          = const_cast<void*>(static_cast<const void*>(&areaTexBytes[0]));
 
-        CTextureBasePtr SMAAAreaTexture = TextureManager::CreateTexture2D(AreaTexDescriptor);
+        m_SMAAAreaTexture = TextureManager::CreateTexture2D(AreaTexDescriptor);
 
         STextureDescriptor SearchTexDescriptor = {};
 
@@ -663,15 +670,15 @@ namespace
         SearchTexDescriptor.m_pFileName        = 0;
         SearchTexDescriptor.m_pPixels          = const_cast<void*>(static_cast<const void*>(&searchTexBytes[0]));
 
-        CTextureBasePtr SMAASearchTexture = TextureManager::CreateTexture2D(SearchTexDescriptor);
+        m_SMAASearchTexture = TextureManager::CreateTexture2D(SearchTexDescriptor);
 
         auto EdgesTexPtr = m_SMAAEdgeTargetSetPtr->GetRenderTarget(0);
         auto WeightsTexPtr = m_SMAAWeightsCalcTargetSetPtr->GetRenderTarget(0);
 
         CTextureBasePtr TexturePtrs[2][5] =
         {
-            { ColorOneTexturePtr, EdgesTexPtr, WeightsTexPtr, SMAAAreaTexture, SMAASearchTexture },
-            { ColorTwoTexturePtr, EdgesTexPtr, WeightsTexPtr, SMAAAreaTexture, SMAASearchTexture }
+            { ColorOneTexturePtr, EdgesTexPtr, WeightsTexPtr, m_SMAAAreaTexture, m_SMAASearchTexture },
+            { ColorTwoTexturePtr, EdgesTexPtr, WeightsTexPtr, m_SMAAAreaTexture, m_SMAASearchTexture }
         };
 
         m_SMAATextureSetPtr[0] = TextureManager::CreateTextureSet(TexturePtrs[0], 5);
@@ -807,9 +814,206 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        OnSetupRenderTargets();
-        OnSetupStates();
-        OnSetupTextures();
+        // -----------------------------------------------------------------------------
+        // Initiate target set
+        // -----------------------------------------------------------------------------
+        Base::Int2 Size(_Width, _Height);
+        
+        Base::Int2 HalfSize   (Size[0] / 2, Size[1] / 2);
+        Base::Int2 QuarterSize(Size[0] / 4, Size[1] / 4);
+        
+        // -----------------------------------------------------------------------------
+        // Create render target textures
+        // -----------------------------------------------------------------------------
+        STextureDescriptor RendertargetDescriptor;
+        
+        RendertargetDescriptor.m_NumberOfPixelsU  = Size[0];
+        RendertargetDescriptor.m_NumberOfPixelsV  = Size[1];
+        RendertargetDescriptor.m_NumberOfPixelsW  = 1;
+        RendertargetDescriptor.m_NumberOfMipMaps  = 1;
+        RendertargetDescriptor.m_NumberOfTextures = 1;
+        RendertargetDescriptor.m_Binding          = CTextureBase::RenderTarget | CTextureBase::ShaderResource;
+        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
+        RendertargetDescriptor.m_Format           = CTextureBase::Unknown;
+        RendertargetDescriptor.m_Usage            = CTextureBase::GPURead;
+        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_pFileName        = 0;
+        RendertargetDescriptor.m_pPixels          = 0;
+        RendertargetDescriptor.m_Format           = CTextureBase::R8G8B8A8_UBYTE;
+        
+        CTexture2DPtr ColorTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Swap Color
+
+        // -----------------------------------------------------------------------------
+        
+        RendertargetDescriptor.m_NumberOfPixelsU = Size[0];
+        RendertargetDescriptor.m_NumberOfPixelsV = Size[1];
+
+        CTexture2DPtr FullTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // First Full
+
+        // -----------------------------------------------------------------------------
+        
+        RendertargetDescriptor.m_NumberOfPixelsU = HalfSize[0];
+        RendertargetDescriptor.m_NumberOfPixelsV = HalfSize[1];
+
+        CTexture2DPtr HalfTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // First Half
+        
+        // -----------------------------------------------------------------------------
+        
+        RendertargetDescriptor.m_NumberOfPixelsU  = QuarterSize[0];
+        RendertargetDescriptor.m_NumberOfPixelsV  = QuarterSize[1];
+        
+        CTexture2DPtr QuarterOneTexturePtr   = TextureManager::CreateTexture2D(RendertargetDescriptor); // First Quarter
+        CTexture2DPtr QuarterTwoTexturePtr   = TextureManager::CreateTexture2D(RendertargetDescriptor); // Second Quarter
+        CTexture2DPtr QuarterThreeTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Third Quarter
+        
+        // -----------------------------------------------------------------------------
+        // Create swap buffer target set
+        // -----------------------------------------------------------------------------
+        CTextureBasePtr SwapRenderbuffer[1];
+        
+        SwapRenderbuffer[0] = ColorTexturePtr;
+
+        CTextureBasePtr FullRenderbuffer[1];
+
+        FullRenderbuffer[0] = FullTexturePtr;
+
+        CTextureBasePtr HalfRenderbuffer[1];
+
+        HalfRenderbuffer[0] = HalfTexturePtr;
+        
+        CTextureBasePtr QuarterOneRenderbuffer[1];
+        
+        QuarterOneRenderbuffer[0] = QuarterOneTexturePtr;
+        
+        CTextureBasePtr QuarterTwoRenderbuffer[1];
+        
+        QuarterTwoRenderbuffer[0] = QuarterTwoTexturePtr;
+        
+        CTextureBasePtr QuarterThreeRenderbuffer[1];
+        
+        QuarterThreeRenderbuffer[0] = QuarterThreeTexturePtr;
+        
+        m_SwapTargetSetPtrs[0] = TargetSetManager::GetDefaultTargetSet();
+        m_SwapTargetSetPtrs[1] = TargetSetManager::CreateTargetSet(SwapRenderbuffer, 1);
+
+        m_FullTargetSetPtrs[0] = TargetSetManager::CreateTargetSet(FullRenderbuffer, 1);
+
+        m_HalfTargetSetPtrs[0] = TargetSetManager::CreateTargetSet(HalfRenderbuffer, 1);
+        
+        m_QuarterTargetSetPtrs[0] = TargetSetManager::CreateTargetSet(QuarterOneRenderbuffer  , 1);
+        m_QuarterTargetSetPtrs[1] = TargetSetManager::CreateTargetSet(QuarterTwoRenderbuffer  , 1);
+        m_QuarterTargetSetPtrs[2] = TargetSetManager::CreateTargetSet(QuarterThreeRenderbuffer, 1);
+
+        //////////////////////////////////////////////////////////
+        // SMAA Render Targets
+        //////////////////////////////////////////////////////////
+
+        RendertargetDescriptor.m_NumberOfPixelsU  = Size[0];
+        RendertargetDescriptor.m_NumberOfPixelsV  = Size[1];
+        RendertargetDescriptor.m_NumberOfPixelsW  = 1;
+        RendertargetDescriptor.m_NumberOfMipMaps  = 1;
+        RendertargetDescriptor.m_NumberOfTextures = 1;
+        RendertargetDescriptor.m_Binding          = CTextureBase::RenderTarget | CTextureBase::ShaderResource;
+        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
+        RendertargetDescriptor.m_Format           = CTextureBase::Unknown;
+        RendertargetDescriptor.m_Usage            = CTextureBase::GPURead;
+        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_pFileName        = 0;
+        RendertargetDescriptor.m_pPixels          = 0;
+        RendertargetDescriptor.m_Format           = CTextureBase::R8G8_UBYTE;
+
+        CTextureBasePtr EdgesTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
+
+        RendertargetDescriptor.m_Format = CTextureBase::R8G8B8A8_UBYTE;
+
+        CTextureBasePtr BlendWeightsTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
+
+        m_SMAAEdgeTargetSetPtr        = TargetSetManager::CreateTargetSet(EdgesTexturePtr);
+        m_SMAAWeightsCalcTargetSetPtr = TargetSetManager::CreateTargetSet(BlendWeightsTexturePtr);
+
+        // -----------------------------------------------------------------------------
+
+        // -----------------------------------------------------------------------------
+        // Build view ports
+        // -----------------------------------------------------------------------------
+        SViewPortDescriptor ViewPortDesc;
+
+        ViewPortDesc.m_TopLeftX = 0.0f;
+        ViewPortDesc.m_TopLeftY = 0.0f;
+        ViewPortDesc.m_Width    = static_cast<float>(HalfSize[0]);
+        ViewPortDesc.m_Height   = static_cast<float>(HalfSize[1]);
+        ViewPortDesc.m_MinDepth = 0.0f;
+        ViewPortDesc.m_MaxDepth = 1.0f;
+        
+        CViewPortPtr HalfViewPort = ViewManager::CreateViewPort(ViewPortDesc);
+        
+        CViewPortSetPtr HalfViewPortSetPtr = ViewManager::CreateViewPortSet(HalfViewPort);
+        
+        ViewPortDesc.m_TopLeftX = 0.0f;
+        ViewPortDesc.m_TopLeftY = 0.0f;
+        ViewPortDesc.m_Width    = static_cast<float>(QuarterSize[0]);
+        ViewPortDesc.m_Height   = static_cast<float>(QuarterSize[1]);
+        ViewPortDesc.m_MinDepth = 0.0f;
+        ViewPortDesc.m_MaxDepth = 1.0f;
+        
+        CViewPortPtr QuarterViewPort = ViewManager::CreateViewPort(ViewPortDesc);
+        
+        CViewPortSetPtr QuarterViewPortSetPtr = ViewManager::CreateViewPortSet(QuarterViewPort);
+        
+        // -----------------------------------------------------------------------------
+        // Setup states
+        // -----------------------------------------------------------------------------
+        m_SwapRenderContextPtrs[0]->SetTargetSet(m_SwapTargetSetPtrs[0]);
+        m_SwapRenderContextPtrs[1]->SetTargetSet(m_SwapTargetSetPtrs[1]);
+
+        m_FullRenderContextPtrs[0]->SetTargetSet(m_FullTargetSetPtrs[0]);
+
+        m_HalfRenderContextPtrs[0]->SetViewPortSet(HalfViewPortSetPtr);
+        m_HalfRenderContextPtrs[0]->SetTargetSet(m_HalfTargetSetPtrs[0]);
+        
+        m_QuarterRenderContextPtrs[0]->SetViewPortSet(QuarterViewPortSetPtr);
+        m_QuarterRenderContextPtrs[0]->SetTargetSet(m_QuarterTargetSetPtrs[0]);
+
+        m_QuarterRenderContextPtrs[1]->SetViewPortSet(QuarterViewPortSetPtr);
+        m_QuarterRenderContextPtrs[1]->SetTargetSet(m_QuarterTargetSetPtrs[1]);
+
+        m_QuarterRenderContextPtrs[2]->SetViewPortSet(QuarterViewPortSetPtr);
+        m_QuarterRenderContextPtrs[2]->SetTargetSet(m_QuarterTargetSetPtrs[2]);
+
+        m_SMAAEdgeDetectContextPtr->SetTargetSet(m_SMAAEdgeTargetSetPtr);
+        m_SMAAWeightCalcContextPtr->SetTargetSet(m_SMAAWeightsCalcTargetSetPtr);
+
+        // -----------------------------------------------------------------------------
+
+        CTextureBasePtr ColorOneTexturePtr = m_SwapTargetSetPtrs[0]->GetRenderTarget(0);
+        CTextureBasePtr ColorTwoTexturePtr = m_SwapTargetSetPtrs[1]->GetRenderTarget(0);
+        CTextureBasePtr DepthTexturePtr    = TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget();
+        
+        m_SwapTextureSetPtrs[0] = TextureManager::CreateTextureSet(ColorOneTexturePtr, DepthTexturePtr);
+        m_SwapTextureSetPtrs[1] = TextureManager::CreateTextureSet(ColorTwoTexturePtr, DepthTexturePtr);
+
+        m_FullTextureSetPtrs[0] = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(FullTexturePtr));
+
+        m_HalfTexturePtrs[0] = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(HalfTexturePtr));
+        
+        m_QuarterTextureSetPtrs[0] = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(QuarterOneTexturePtr));
+        m_QuarterTextureSetPtrs[1] = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(QuarterTwoTexturePtr));
+        m_QuarterTextureSetPtrs[2] = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(QuarterThreeTexturePtr));
+
+        // -----------------------------------------------------------------------------
+        // Setting up SMAA look up textures
+        // -----------------------------------------------------------------------------
+        auto EdgesTexPtr   = m_SMAAEdgeTargetSetPtr->GetRenderTarget(0);
+        auto WeightsTexPtr = m_SMAAWeightsCalcTargetSetPtr->GetRenderTarget(0);
+
+        CTextureBasePtr TexturePtrs[2][5] =
+        {
+            { ColorOneTexturePtr, EdgesTexPtr, WeightsTexPtr, m_SMAAAreaTexture, m_SMAASearchTexture },
+            { ColorTwoTexturePtr, EdgesTexPtr, WeightsTexPtr, m_SMAAAreaTexture, m_SMAASearchTexture }
+        };
+
+        m_SMAATextureSetPtr[0] = TextureManager::CreateTextureSet(TexturePtrs[0], 5);
+        m_SMAATextureSetPtr[1] = TextureManager::CreateTextureSet(TexturePtrs[1], 5);
     }
     
     // -----------------------------------------------------------------------------
