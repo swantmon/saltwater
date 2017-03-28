@@ -97,6 +97,9 @@ namespace
 
         GLuint m_CameraVAO;
 
+        CMeshPtr m_CameraMesh;
+        CInputLayoutPtr m_InputLayout;
+
         CShaderPtr m_VSDepth;
         CShaderPtr m_FSDepth;
     };
@@ -143,6 +146,9 @@ namespace
         m_DrawCallConstantBuffer = 0;
         
         glDeleteVertexArrays(1, &m_CameraVAO);
+        
+        m_CameraMesh = 0;
+        m_InputLayout = 0;
 
         m_pReconstructor = nullptr;
     }
@@ -173,6 +179,19 @@ namespace
 
         //m_VSVisualizeDepth = ShaderManager::CompileVS("kinect_fusion\\vs_visualize_depth.glsl", "main", DefineString.c_str());
         //m_FSVisualizeDepth = ShaderManager::CompilePS("kinect_fusion\\fs_visualize_depth.glsl", "main", DefineString.c_str());
+
+        SInputElementDescriptor InputLayout = {};
+
+        InputLayout.m_pSemanticName        = "POSITION";
+        InputLayout.m_SemanticIndex        = 0;
+        InputLayout.m_Format               = CInputLayout::Float3Format;
+        InputLayout.m_InputSlot            = 0;
+        InputLayout.m_AlignedByteOffset    = 0;
+        InputLayout.m_Stride               = 12;
+        InputLayout.m_InputSlotClass       = CInputLayout::PerVertex;
+        InputLayout.m_InstanceDataStepRate = 0;
+
+        m_InputLayout = ShaderManager::CreateInputLayout(&InputLayout, 1, m_VSCamera);
     }
     
     // -----------------------------------------------------------------------------
@@ -193,7 +212,7 @@ namespace
     
     void CGfxReconstructionRenderer::OnSetupStates()
     {
-        
+
     }
     
     // -----------------------------------------------------------------------------
@@ -253,25 +272,29 @@ namespace
             0, 4, 1,
             0, 3, 4,
         };
+                
+        Dt::CSurface* pSurface = new Dt::CSurface;
+        Dt::CLOD* pLOD = new Dt::CLOD;
+        Dt::CMesh* pMesh = new Dt::CMesh;
 
-        GLuint m_PyramidMesh[2];
-        glCreateBuffers(2, m_PyramidMesh);
-        glNamedBufferData(m_PyramidMesh[0], sizeof(Vertices), &Vertices, GL_STATIC_DRAW);
-        glNamedBufferData(m_PyramidMesh[1], sizeof(Indices), &Indices, GL_STATIC_DRAW);
+        pSurface->SetPositions(Vertices);
+        pSurface->SetNumberOfVertices(sizeof(Vertices) / sizeof(Vertices[0]));
+        pSurface->SetIndices(Indices);
+        pSurface->SetNumberOfIndices(sizeof(Indices) / sizeof(Indices[0]));
+        pSurface->SetElements(0);
 
-        glCreateVertexArrays(1, &m_CameraVAO);
-        glBindVertexArray(m_CameraVAO);
-
-        glBindBuffer(GL_ARRAY_BUFFER, m_PyramidMesh[0]);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_PyramidMesh[1]);
+        pLOD->SetSurface(0, pSurface);
+        pLOD->SetNumberOfSurfaces(1);
         
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        pMesh->SetLOD(0, pLOD);
+        pMesh->SetNumberOfLODs(1);
 
-        glBindVertexArray(0);
+        SMeshDescriptor MeshDesc =
+        {
+            pMesh
+        };
 
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        m_CameraMesh = MeshManager::CreateMesh(MeshDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -331,32 +354,28 @@ namespace
         Performance::BeginEvent("Rendering");
         
         glBindVertexArray(1); // dummy vao because opengl needs vertex data even when it does not use it
-        
-        ContextManager::SetTargetSet(TargetSetManager::GetDefaultTargetSet());
-        //glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-        //glClear(GL_COLOR_BUFFER_BIT);
-        
+
         Float4x4 PoseMatrix = m_pReconstructor->GetPoseMatrix();
-        bool TrackingLost = m_pReconstructor->IsTrackingLost();
 
         Float4 RaycastData[2];
         PoseMatrix.GetTranslation(RaycastData[0][0], RaycastData[0][1], RaycastData[0][2]);
         RaycastData[0][3] = 1.0f;
-        RaycastData[1] = TrackingLost ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 1.0f, 0.0f, 1.0f);
+        RaycastData[1] = m_pReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 1.0f, 0.0f, 1.0f);
 
         BufferManager::UploadConstantBufferData(m_RaycastBuffer, RaycastData);
                 
         Gfx::ContextManager::SetShaderVS(m_VSRaycast);
         Gfx::ContextManager::SetShaderPS(m_FSRaycast);
 
-        Gfx::CTexture3DPtr Volume = m_pReconstructor->GetVolume();
-        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(Volume));
+        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_pReconstructor->GetVolume()));
         ContextManager::SetSampler(0, SamplerManager::GetSampler(Gfx::CSampler::ESampler::MinMagMipLinearClamp));
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_RaycastBuffer);
 
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
         ContextManager::SetTopology(STopology::TriangleFan);
         ContextManager::Draw(4, 0);
@@ -373,6 +392,11 @@ namespace
         Performance::BeginEvent("SLAM Reconstruction Rendering");
         
         //RenderReconstructionData();
+
+        Base::Float4 ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+
+        ContextManager::SetTargetSet(TargetSetManager::GetDefaultTargetSet());
+        //TargetSetManager::ClearTargetSet(TargetSetManager::GetDefaultTargetSet(), ClearColor);
 
         RenderVolume();
         RenderCamera();
@@ -411,10 +435,7 @@ namespace
     
     void CGfxReconstructionRenderer::RenderCamera()
     {
-        CTargetSetPtr DefaultTargetSetPtr = TargetSetManager::GetDefaultTargetSet();
-        CNativeTargetSet NativeTargetSet = *static_cast<CNativeTargetSet*>(DefaultTargetSetPtr.GetPtr());
-
-        glBindFramebuffer(GL_FRAMEBUFFER, NativeTargetSet.m_NativeTargetSet);
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
 
         Gfx::ContextManager::SetShaderVS(m_VSCamera);
         Gfx::ContextManager::SetShaderPS(m_FSCamera);
@@ -425,20 +446,17 @@ namespace
 
         BufferManager::UploadConstantBufferData(m_DrawCallConstantBuffer, &WorldMatrix);
         
-        CBufferPtr FrameConstantBufferPtr = Gfx::Main::GetPerFrameConstantBuffer();
-        CNativeBuffer NativeBufer = *static_cast<CNativeBuffer*>(FrameConstantBufferPtr.GetPtr());
-        glBindBufferBase(GL_UNIFORM_BUFFER, 0, NativeBufer.m_NativeBuffer);
+        ContextManager::SetConstantBuffer(0, Gfx::Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_DrawCallConstantBuffer);
         
-        glBindVertexArray(m_CameraVAO);
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBufferSet(m_CameraMesh->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetIndexBuffer(m_CameraMesh->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-        glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_INT, 0);
-
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-        glBindVertexArray(0);
+        ContextManager::SetInputLayout(m_InputLayout);
+                
+        ContextManager::SetTopology(STopology::TriangleList);
+        ContextManager::DrawIndexed(m_CameraMesh->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
     }    
 } // namespace
 
