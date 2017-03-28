@@ -92,35 +92,35 @@ namespace MR
 
         ReconstructionSettings m_ReconstructionSettings;
 
-        Gfx::CBufferPtr m_IntrinsicsConstantBuffer;
-        Gfx::CBufferPtr m_TrackingDataConstantBuffer;
-        Gfx::CBufferPtr m_RaycastPyramidConstantBuffer;
-        Gfx::CBufferPtr m_ICPSummationConstantBuffer;
-        Gfx::CBufferPtr m_IncPoseMatrixConstantBuffer;
-        Gfx::CBufferPtr m_BilateralFilterConstantBuffer;
+        Gfx::CBufferPtr m_IntrinsicsConstantBufferPtr;
+        Gfx::CBufferPtr m_TrackingDataConstantBufferPtr;
+        Gfx::CBufferPtr m_RaycastPyramidConstantBufferPtr;
+        Gfx::CBufferPtr m_ICPSummationConstantBufferPtr;
+        Gfx::CBufferPtr m_IncPoseMatrixConstantBufferPtr;
+        Gfx::CBufferPtr m_BilateralFilterConstantBufferPtr;
 
-        Gfx::CShaderPtr m_CSClearVolume;
-        Gfx::CShaderPtr m_CSMirrorDepth;
-        Gfx::CShaderPtr m_CSBilateralFilter;
-        Gfx::CShaderPtr m_CSVertexMap;
-        Gfx::CShaderPtr m_CSNormalMap;
-        Gfx::CShaderPtr m_CSDownSampleDepth;
-        Gfx::CShaderPtr m_CSVolumeIntegration;
-        Gfx::CShaderPtr m_CSRaycast;
-        Gfx::CShaderPtr m_CSRaycastPyramid;
-        Gfx::CShaderPtr m_CSDetermineSummands;
-        Gfx::CShaderPtr m_CSReduceSum;
+        Gfx::CShaderPtr m_ClearVolumeCSPtr;
+        Gfx::CShaderPtr m_MirrorDepthCSPtr;
+        Gfx::CShaderPtr m_BilateralFilterCSPtr;
+        Gfx::CShaderPtr m_VertexMapCSPtr;
+        Gfx::CShaderPtr m_NormalMapCSPtr;
+        Gfx::CShaderPtr m_DownSampleDepthCSPtr;
+        Gfx::CShaderPtr m_VolumeIntegrationCSPtr;
+        Gfx::CShaderPtr m_RaycastCSPtr;
+        Gfx::CShaderPtr m_RaycastPyramidCSPtr;
+        Gfx::CShaderPtr m_DetermineSummandsCSPtr;
+        Gfx::CShaderPtr m_ReduceSumCSPtr;
 
-        Gfx::CTexture2DPtr m_RawDepthBuffer;
-        std::vector<Gfx::CTexture2DPtr> m_SmoothDepthBuffer;
-        std::vector<Gfx::CTexture2DPtr> m_ReferenceVertexMap;
-        std::vector<Gfx::CTexture2DPtr> m_ReferenceNormalMap;
-        std::vector<Gfx::CTexture2DPtr> m_RaycastVertexMap;
-        std::vector<Gfx::CTexture2DPtr> m_RaycastNormalMap;
+        Gfx::CTexture2DPtr m_RawDepthBufferPtr;
+        std::vector<Gfx::CTexture2DPtr> m_SmoothDepthBufferPtr;
+        std::vector<Gfx::CTexture2DPtr> m_ReferenceVertexMapPtr;
+        std::vector<Gfx::CTexture2DPtr> m_ReferenceNormalMapPtr;
+        std::vector<Gfx::CTexture2DPtr> m_RaycastVertexMapPtr;
+        std::vector<Gfx::CTexture2DPtr> m_RaycastNormalMapPtr;
 
-        Gfx::CTexture3DPtr m_Volume;
+        Gfx::CTexture3DPtr m_VolumePtr;
 
-        Gfx::CBufferPtr m_ICPBuffer;
+        Gfx::CBufferPtr m_ICPResourceBufferPtr;
 
         std::unique_ptr<MR::IRGBDCameraControl> m_pRGBDCameraControl;
 

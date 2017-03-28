@@ -81,16 +81,16 @@ namespace
 
         std::unique_ptr<MR::CSLAMReconstructor> m_pReconstructor;
         
-        CShaderPtr m_VSCamera;
-        CShaderPtr m_FSCamera;
-        CShaderPtr m_VSRaycast;
-        CShaderPtr m_FSRaycast;
+        CShaderPtr m_CameraVSPtr;
+        CShaderPtr m_CameraFSPtr;
+        CShaderPtr m_RaycastVSPtr;
+        CShaderPtr m_RaycastFSPtr;
 
-        CBufferPtr m_RaycastBuffer;
-        CBufferPtr m_DrawCallConstantBuffer;
+        CBufferPtr m_RaycastConstantBufferPtr;
+        CBufferPtr m_DrawCallConstantBufferPtr;
         
-        CMeshPtr m_CameraMesh;
-        CInputLayoutPtr m_InputLayout;
+        CMeshPtr m_CameraMeshPtr;
+        CInputLayoutPtr m_CameraInputLayoutPtr;
     };
 } // namespace
 
@@ -123,16 +123,16 @@ namespace
     
     void CGfxReconstructionRenderer::OnExit()
     {
-        m_VSCamera = 0;
-        m_FSCamera = 0;
-        m_VSRaycast = 0;
-        m_FSRaycast = 0;
+        m_CameraVSPtr = 0;
+        m_CameraFSPtr = 0;
+        m_RaycastVSPtr = 0;
+        m_RaycastFSPtr = 0;
         
-        m_RaycastBuffer = 0;
-        m_DrawCallConstantBuffer = 0;
+        m_RaycastConstantBufferPtr = 0;
+        m_DrawCallConstantBufferPtr = 0;
                 
-        m_CameraMesh = 0;
-        m_InputLayout = 0;
+        m_CameraMeshPtr = 0;
+        m_CameraInputLayoutPtr = 0;
 
         m_pReconstructor = nullptr;
     }
@@ -156,23 +156,23 @@ namespace
 
         std::string DefineString = DefineStream.str();
 
-        m_VSCamera = ShaderManager::CompileVS("kinect_fusion\\vs_camera.glsl", "main", DefineString.c_str());
-        m_FSCamera = ShaderManager::CompilePS("kinect_fusion\\fs_camera.glsl", "main", DefineString.c_str());
-        m_VSRaycast = ShaderManager::CompileVS("kinect_fusion\\vs_raycast.glsl", "main", DefineString.c_str());
-        m_FSRaycast = ShaderManager::CompilePS("kinect_fusion\\fs_raycast.glsl", "main", DefineString.c_str());
+        m_CameraVSPtr = ShaderManager::CompileVS("kinect_fusion\\vs_camera.glsl", "main", DefineString.c_str());
+        m_CameraFSPtr = ShaderManager::CompilePS("kinect_fusion\\fs_camera.glsl", "main", DefineString.c_str());
+        m_RaycastVSPtr = ShaderManager::CompileVS("kinect_fusion\\vs_raycast.glsl", "main", DefineString.c_str());
+        m_RaycastFSPtr = ShaderManager::CompilePS("kinect_fusion\\fs_raycast.glsl", "main", DefineString.c_str());
         
-        SInputElementDescriptor InputLayout = {};
+        SInputElementDescriptor InputLayoutDesc = {};
 
-        InputLayout.m_pSemanticName        = "POSITION";
-        InputLayout.m_SemanticIndex        = 0;
-        InputLayout.m_Format               = CInputLayout::Float3Format;
-        InputLayout.m_InputSlot            = 0;
-        InputLayout.m_AlignedByteOffset    = 0;
-        InputLayout.m_Stride               = 12;
-        InputLayout.m_InputSlotClass       = CInputLayout::PerVertex;
-        InputLayout.m_InstanceDataStepRate = 0;
+        InputLayoutDesc.m_pSemanticName        = "POSITION";
+        InputLayoutDesc.m_SemanticIndex        = 0;
+        InputLayoutDesc.m_Format               = CInputLayout::Float3Format;
+        InputLayoutDesc.m_InputSlot            = 0;
+        InputLayoutDesc.m_AlignedByteOffset    = 0;
+        InputLayoutDesc.m_Stride               = 12;
+        InputLayoutDesc.m_InputSlotClass       = CInputLayout::PerVertex;
+        InputLayoutDesc.m_InstanceDataStepRate = 0;
 
-        m_InputLayout = ShaderManager::CreateInputLayout(&InputLayout, 1, m_VSCamera);
+        m_CameraInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_CameraVSPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -207,7 +207,7 @@ namespace
     
     void CGfxReconstructionRenderer::OnSetupBuffers()
     {
-        SBufferDescriptor ConstantBufferDesc;
+        SBufferDescriptor ConstantBufferDesc = {};
 
         ConstantBufferDesc.m_Stride = 0;
         ConstantBufferDesc.m_Usage = CBuffer::EUsage::GPURead;
@@ -217,11 +217,11 @@ namespace
         ConstantBufferDesc.m_pBytes = nullptr;
         ConstantBufferDesc.m_pClassKey = 0;
 
-        m_RaycastBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
+        m_RaycastConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         
         ConstantBufferDesc.m_NumberOfBytes = sizeof(Float4x4) * 2;
 
-        m_DrawCallConstantBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
+        m_DrawCallConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -275,7 +275,7 @@ namespace
             pMesh
         };
 
-        m_CameraMesh = MeshManager::CreateMesh(MeshDesc);
+        m_CameraMeshPtr = MeshManager::CreateMesh(MeshDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -289,11 +289,6 @@ namespace
     
     void CGfxReconstructionRenderer::OnReload()
     {
-        //MR::CSLAMReconstructor::ReconstructionSettings Settings;
-        //m_pReconstructor->GetReconstructionData(Settings);
-        //Settings.m_VolumeResolution = 512;
-        //m_pReconstructor->ResetReconstruction(&Settings);
-
         m_pReconstructor->ResetReconstruction();
 
         OnSetupShader();
@@ -341,16 +336,16 @@ namespace
         RaycastData[0][3] = 1.0f;
         RaycastData[1] = m_pReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 1.0f, 0.0f, 1.0f);
 
-        BufferManager::UploadConstantBufferData(m_RaycastBuffer, RaycastData);
+        BufferManager::UploadConstantBufferData(m_RaycastConstantBufferPtr, RaycastData);
                 
-        Gfx::ContextManager::SetShaderVS(m_VSRaycast);
-        Gfx::ContextManager::SetShaderPS(m_FSRaycast);
+        Gfx::ContextManager::SetShaderVS(m_RaycastVSPtr);
+        Gfx::ContextManager::SetShaderPS(m_RaycastFSPtr);
 
         ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_pReconstructor->GetVolume()));
         ContextManager::SetSampler(0, SamplerManager::GetSampler(Gfx::CSampler::ESampler::MinMagMipLinearClamp));
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-        ContextManager::SetConstantBuffer(1, m_RaycastBuffer);
+        ContextManager::SetConstantBuffer(1, m_RaycastConstantBufferPtr);
 
         ContextManager::Barrier();
 
@@ -359,9 +354,9 @@ namespace
         // todo: remove dummy geometry
 
         const unsigned int Offset = 0;
-        ContextManager::SetVertexBufferSet(m_CameraMesh->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
-        ContextManager::SetIndexBuffer(m_CameraMesh->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
-        ContextManager::SetInputLayout(m_InputLayout);
+        ContextManager::SetVertexBufferSet(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetIndexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
 
         // todo: remove dummy geometry
 
@@ -379,8 +374,6 @@ namespace
 
         Performance::BeginEvent("SLAM Reconstruction Rendering");
         
-        //RenderReconstructionData();
-
         Base::Float4 ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 
         ContextManager::SetTargetSet(TargetSetManager::GetDefaultTargetSet());
@@ -398,26 +391,26 @@ namespace
     {
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
 
-        Gfx::ContextManager::SetShaderVS(m_VSCamera);
-        Gfx::ContextManager::SetShaderPS(m_FSCamera);
+        Gfx::ContextManager::SetShaderVS(m_CameraVSPtr);
+        Gfx::ContextManager::SetShaderPS(m_CameraFSPtr);
 
         Float4x4 WorldMatrix;
         WorldMatrix.SetScale(0.1f);
         WorldMatrix = m_pReconstructor->GetPoseMatrix() * WorldMatrix;
 
-        BufferManager::UploadConstantBufferData(m_DrawCallConstantBuffer, &WorldMatrix);
+        BufferManager::UploadConstantBufferData(m_DrawCallConstantBufferPtr, &WorldMatrix);
         
         ContextManager::SetConstantBuffer(0, Gfx::Main::GetPerFrameConstantBuffer());
-        ContextManager::SetConstantBuffer(1, m_DrawCallConstantBuffer);
+        ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
         
         const unsigned int Offset = 0;
-        ContextManager::SetVertexBufferSet(m_CameraMesh->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
-        ContextManager::SetIndexBuffer(m_CameraMesh->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetVertexBufferSet(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetIndexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
 
-        ContextManager::SetInputLayout(m_InputLayout);
+        ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
                 
         ContextManager::SetTopology(STopology::TriangleList);
-        ContextManager::DrawIndexed(m_CameraMesh->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
     }
 } // namespace
 
