@@ -91,6 +91,8 @@ namespace
         
         CMeshPtr m_CameraMeshPtr;
         CInputLayoutPtr m_CameraInputLayoutPtr;
+
+        CRenderContextPtr m_CameraRenderContextPtr;
     };
 } // namespace
 
@@ -133,6 +135,8 @@ namespace
                 
         m_CameraMeshPtr = 0;
         m_CameraInputLayoutPtr = 0;
+
+        m_CameraRenderContextPtr = 0;
 
         m_pReconstructor = nullptr;
     }
@@ -193,7 +197,12 @@ namespace
     
     void CGfxReconstructionRenderer::OnSetupStates()
     {
+        m_CameraRenderContextPtr = ContextManager::CreateRenderContext();
 
+        m_CameraRenderContextPtr->SetCamera(ViewManager::GetMainCamera());
+        m_CameraRenderContextPtr->SetViewPortSet(ViewManager::GetViewPortSet());
+        m_CameraRenderContextPtr->SetTargetSet(TargetSetManager::GetDefaultTargetSet());
+        m_CameraRenderContextPtr->SetRenderState(StateManager::GetRenderState(CRenderState::NoCull | CRenderState::Wireframe));
     }
     
     // -----------------------------------------------------------------------------
@@ -391,6 +400,7 @@ namespace
     {
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
 
+        ContextManager::SetRenderContext(m_CameraRenderContextPtr);
         Gfx::ContextManager::SetShaderVS(m_CameraVSPtr);
         Gfx::ContextManager::SetShaderPS(m_CameraFSPtr);
 
