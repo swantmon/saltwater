@@ -140,12 +140,12 @@ namespace
 
         m_pReconstructor = nullptr;
     }
-        
+    
     // -----------------------------------------------------------------------------
     
     void CGfxReconstructionRenderer::OnSetupShader()
     {
-        MR::CSLAMReconstructor::ReconstructionSettings Settings;
+        MR::CSLAMReconstructor::SReconstructionSettings Settings;
 
         m_pReconstructor->GetReconstructionData(Settings);
 
@@ -228,7 +228,7 @@ namespace
 
         m_RaycastConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(Float4x4) * 2;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(Float4x4);
 
         m_DrawCallConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
@@ -336,8 +336,6 @@ namespace
     
     void CGfxReconstructionRenderer::RenderVolume()
     {
-        Performance::BeginEvent("Rendering");
-        
         Float4x4 PoseMatrix = m_pReconstructor->GetPoseMatrix();
 
         Float4 RaycastData[2];
@@ -347,11 +345,11 @@ namespace
 
         BufferManager::UploadConstantBufferData(m_RaycastConstantBufferPtr, RaycastData);
                 
-        Gfx::ContextManager::SetShaderVS(m_RaycastVSPtr);
-        Gfx::ContextManager::SetShaderPS(m_RaycastFSPtr);
+        ContextManager::SetShaderVS(m_RaycastVSPtr);
+        ContextManager::SetShaderPS(m_RaycastFSPtr);
 
         ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_pReconstructor->GetVolume()));
-        ContextManager::SetSampler(0, SamplerManager::GetSampler(Gfx::CSampler::ESampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_RaycastConstantBufferPtr);
@@ -370,9 +368,8 @@ namespace
         // todo: remove dummy geometry
 
         ContextManager::SetTopology(STopology::TriangleFan);
+
         ContextManager::Draw(4, 0);
-                
-        Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------
@@ -383,9 +380,8 @@ namespace
 
         Performance::BeginEvent("SLAM Reconstruction Rendering");
         
-        Base::Float4 ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-
         ContextManager::SetTargetSet(TargetSetManager::GetDefaultTargetSet());
+        //Base::Float4 ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         //TargetSetManager::ClearTargetSet(TargetSetManager::GetDefaultTargetSet(), ClearColor);
 
         RenderVolume();
@@ -401,8 +397,8 @@ namespace
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
 
         ContextManager::SetRenderContext(m_CameraRenderContextPtr);
-        Gfx::ContextManager::SetShaderVS(m_CameraVSPtr);
-        Gfx::ContextManager::SetShaderPS(m_CameraFSPtr);
+        ContextManager::SetShaderVS(m_CameraVSPtr);
+        ContextManager::SetShaderPS(m_CameraFSPtr);
 
         Float4x4 WorldMatrix;
         WorldMatrix.SetScale(0.1f);
@@ -410,16 +406,16 @@ namespace
 
         BufferManager::UploadConstantBufferData(m_DrawCallConstantBufferPtr, &WorldMatrix);
         
-        ContextManager::SetConstantBuffer(0, Gfx::Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
         
         const unsigned int Offset = 0;
         ContextManager::SetVertexBufferSet(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
         ContextManager::SetIndexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
 
-        ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
-                
+        ContextManager::SetInputLayout(m_CameraInputLayoutPtr);        
         ContextManager::SetTopology(STopology::TriangleList);
+
         ContextManager::DrawIndexed(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
     }
 } // namespace

@@ -88,7 +88,7 @@ namespace MR
     
     // -----------------------------------------------------------------------------
 
-    CSLAMReconstructor::CSLAMReconstructor(const ReconstructionSettings* pReconstructionSettings)
+    CSLAMReconstructor::CSLAMReconstructor(const SReconstructionSettings* pReconstructionSettings)
     {
         if (pReconstructionSettings != nullptr)
         {
@@ -781,7 +781,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CSLAMReconstructor::ResetReconstruction(const ReconstructionSettings* pReconstructionSettings)
+    void CSLAMReconstructor::ResetReconstruction(const SReconstructionSettings* pReconstructionSettings)
     {
         if (pReconstructionSettings != nullptr)
         {
@@ -835,7 +835,7 @@ namespace MR
         
     // -----------------------------------------------------------------------------
 
-    void CSLAMReconstructor::GetReconstructionData(ReconstructionSettings& rReconstructionSettings)
+    void CSLAMReconstructor::GetReconstructionData(SReconstructionSettings& rReconstructionSettings)
     {
         rReconstructionSettings = m_ReconstructionSettings;
     }

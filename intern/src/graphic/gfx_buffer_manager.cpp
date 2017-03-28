@@ -577,9 +577,7 @@ namespace
     void CGfxBufferManager::UploadVertexBufferData(CBufferPtr _BufferPtr, const void* _pData)
     {
         assert(_BufferPtr != nullptr && _BufferPtr.IsValid());
-
-        GLenum Binding = ConvertBindFlag(_BufferPtr->GetBinding());
-
+        
         CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
 
         assert(pBuffer != nullptr);

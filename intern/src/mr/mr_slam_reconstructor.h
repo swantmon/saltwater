@@ -21,7 +21,7 @@ namespace MR
     {
     public:
 
-        struct ReconstructionSettings
+        struct SReconstructionSettings
         {
             const static int MAX_PYRAMIDLEVELS = 8;
 
@@ -33,7 +33,7 @@ namespace MR
             int m_PyramidLevelIterations[MAX_PYRAMIDLEVELS];
             Base::Int2 m_DepthThreshold;
 
-            ReconstructionSettings()
+            SReconstructionSettings()
                 : m_VolumeSize(1.0f)
                 , m_VolumeResolution(256)
                 , m_TruncatedDistance(30.0f)
@@ -49,19 +49,19 @@ namespace MR
 
     public:
 
-        CSLAMReconstructor(const ReconstructionSettings* pReconstructionSettings = nullptr);
+        CSLAMReconstructor(const SReconstructionSettings* pReconstructionSettings = nullptr);
         ~CSLAMReconstructor();
 
     public:
 
         void Update();
-        void ResetReconstruction(const ReconstructionSettings* pReconstructionSettings = nullptr);
+        void ResetReconstruction(const SReconstructionSettings* pReconstructionSettings = nullptr);
 
         bool IsTrackingLost() const;
         Base::Float4x4 GetPoseMatrix() const;
         Gfx::CTexture3DPtr GetVolume();
 
-        void GetReconstructionData(ReconstructionSettings& rReconstructionSettings);
+        void GetReconstructionData(SReconstructionSettings& rReconstructionSettings);
 
     private:
 
@@ -90,7 +90,7 @@ namespace MR
 
     private:
 
-        ReconstructionSettings m_ReconstructionSettings;
+        SReconstructionSettings m_ReconstructionSettings;
 
         Gfx::CBufferPtr m_IntrinsicsConstantBufferPtr;
         Gfx::CBufferPtr m_TrackingDataConstantBufferPtr;
