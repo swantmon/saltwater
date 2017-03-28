@@ -128,7 +128,6 @@ namespace
 
         CTextureBasePtr m_NoiseTexturePtr;
 
-        CTextureSetPtr m_SSAOTextureSets[NumberOfSSAOs];
         CTextureSetPtr m_HalfTexturePtrs[2];
         CTextureSetPtr m_BilateralBlurHTextureSetPtr;
         CTextureSetPtr m_BilateralBlurVTextureSetPtr;
@@ -162,7 +161,6 @@ namespace
         , m_BilateralBlurHTextureSetPtr      ()
         , m_BilateralBlurVTextureSetPtr      ()
         , m_NoiseTexturePtr                  ()
-        , m_SSAOTextureSets                  ()
         , m_DeferredRenderContextPtr         ()
         , m_SSAORenderJobs                   ()
     {
@@ -224,13 +222,10 @@ namespace
         m_DeferredRenderContextPtr          = 0;
         m_HalfContextPtr                    = 0;
         m_NoiseTexturePtr                   = 0;
-               
-        m_SSAOTextureSets[SSAO]      = 0;
-        m_SSAOTextureSets[SSAOApply] = 0;
 
         m_SSAOShaderPSPtrs[SSAO]      = 0;
         m_SSAOShaderPSPtrs[SSAOApply] = 0;
-        
+
         m_HalfTexturePtrs[0] = 0;
         m_HalfTexturePtrs[1] = 0;
     }
@@ -375,13 +370,9 @@ namespace
         Base::Int2 Size = Main::GetActiveWindowSize();
         
         Base::Int2 HalfSize(Size[0] / 2, Size[1] / 2);
-        
-        CTextureBasePtr GBuffer0TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0);
-        CTextureBasePtr GBuffer1TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1);
-        CTextureBasePtr GBuffer2TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2);
-        CTextureBasePtr DepthTexturePtr    = TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget();
-        CTextureBasePtr HalfTextureOnePtr  = m_HalfRenderbufferPtr->GetRenderTarget(0);
-        
+
+        CTextureBasePtr HalfTextureOnePtr = m_HalfRenderbufferPtr->GetRenderTarget(0);
+
         // -----------------------------------------------------------------------------
         // Create texture for result of blurring
         // -----------------------------------------------------------------------------
@@ -442,9 +433,6 @@ namespace
         m_NoiseTexturePtr = static_cast<CTextureBasePtr>(TextureManager::CreateTexture2D(NoiseTextureDescriptor));
 
         // -----------------------------------------------------------------------------
-
-        m_SSAOTextureSets[SSAO]      = TextureManager::CreateTextureSet(GBuffer0TexturePtr, GBuffer1TexturePtr, DepthTexturePtr, m_NoiseTexturePtr);
-        m_SSAOTextureSets[SSAOApply] = TextureManager::CreateTextureSet(GBuffer0TexturePtr, GBuffer1TexturePtr, GBuffer2TexturePtr);
         
         m_HalfTexturePtrs[0]     = TextureManager::CreateTextureSet(HalfTextureOnePtr);
         m_HalfTexturePtrs[1]     = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(HalfTextureTwoPtr));
@@ -592,19 +580,12 @@ namespace
 
         // -----------------------------------------------------------------------------
         // Initiate target set
-        // -----------------------------------------------------------------------------        
-        CTextureBasePtr GBuffer0TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0);
-        CTextureBasePtr GBuffer1TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1);
-        CTextureBasePtr GBuffer2TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2);
-        CTextureBasePtr DepthTexturePtr    = TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget();
+        // -----------------------------------------------------------------------------
         CTextureBasePtr HalfTextureOnePtr  = m_HalfRenderbufferPtr->GetRenderTarget(0);
         
         // -----------------------------------------------------------------------------
         // Create texture sets
         // -----------------------------------------------------------------------------
-        m_SSAOTextureSets[SSAO]      = TextureManager::CreateTextureSet(GBuffer0TexturePtr, GBuffer1TexturePtr, DepthTexturePtr, m_NoiseTexturePtr);
-        m_SSAOTextureSets[SSAOApply] = TextureManager::CreateTextureSet(GBuffer0TexturePtr, GBuffer1TexturePtr, GBuffer2TexturePtr);
-        
         m_HalfTexturePtrs[0] = TextureManager::CreateTextureSet(HalfTextureOnePtr);
         m_HalfTexturePtrs[1] = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(HalfTextureTwoPtr));
 
@@ -692,10 +673,10 @@ namespace
         ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipLinearWrap));
 
-        ContextManager::SetTexture(0, m_SSAOTextureSets[SSAO]->GetTexture(0));
-        ContextManager::SetTexture(1, m_SSAOTextureSets[SSAO]->GetTexture(1));
-        ContextManager::SetTexture(2, m_SSAOTextureSets[SSAO]->GetTexture(2));
-        ContextManager::SetTexture(3, m_SSAOTextureSets[SSAO]->GetTexture(3));
+        ContextManager::SetTexture(0, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0));
+        ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1));
+        ContextManager::SetTexture(2, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2));
+        ContextManager::SetTexture(3, m_NoiseTexturePtr);
 
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
 
@@ -810,9 +791,9 @@ namespace
         ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        ContextManager::SetTexture(0, m_SSAOTextureSets[SSAOApply]->GetTexture(0));
-        ContextManager::SetTexture(1, m_SSAOTextureSets[SSAOApply]->GetTexture(1));
-        ContextManager::SetTexture(2, m_SSAOTextureSets[SSAOApply]->GetTexture(2));
+        ContextManager::SetTexture(0, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0));
+        ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1));
+        ContextManager::SetTexture(2, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2));
         ContextManager::SetTexture(3, m_HalfTexturePtrs[0]->GetTexture(0));
         
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);

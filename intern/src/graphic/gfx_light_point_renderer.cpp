@@ -60,8 +60,6 @@ namespace
         void OnReload();
         void OnNewMap();
         void OnUnloadMap();
-
-        void OnResize(unsigned int _Width, unsigned int _Height);
         
         void Update();
         void Render();
@@ -143,7 +141,6 @@ namespace
         , m_PunctualLightShaderPSPtr  ()
         , m_PunctualLightRenderJobs   ()
     {
-        Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxPointLightRenderer::OnResize));
     }
     
     // -----------------------------------------------------------------------------
@@ -340,14 +337,6 @@ namespace
         // Build render jobs
         // -----------------------------------------------------------------------------
         BuildRenderJobs();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxPointLightRenderer::OnResize(unsigned int _Width, unsigned int _Height)
-    {
-        BASE_UNUSED(_Width);
-        BASE_UNUSED(_Height);
     }
     
     // -----------------------------------------------------------------------------

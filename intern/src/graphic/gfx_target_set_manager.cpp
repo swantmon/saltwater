@@ -523,12 +523,14 @@ namespace
             {
                 glNamedFramebufferTexture(rTargetSet.m_NativeTargetSet, GL_DEPTH_ATTACHMENT, TextureHandle, MipmapLevel);
 
+                rTargetSet.m_DepthStencilTargetPtr = 0;
                 rTargetSet.m_DepthStencilTargetPtr = _pTargetPtrs[IndexOfTexture];
             }
             else if ((rNativeTexture.GetBinding() & CTexture2D::RenderTarget) != 0)
             {
                 glNamedFramebufferTexture(rTargetSet.m_NativeTargetSet, GL_COLOR_ATTACHMENT0 + NumberOfColorAttachments, TextureHandle, MipmapLevel);
 
+                rTargetSet.m_RenderTargetPtrs[NumberOfColorAttachments] = 0;
                 rTargetSet.m_RenderTargetPtrs[NumberOfColorAttachments] = _pTargetPtrs[IndexOfTexture];
 
                 ++NumberOfColorAttachments;
@@ -566,6 +568,16 @@ namespace
     {
         if (m_NativeTargetSet != 0)
         {
+            for (unsigned int IndexOfTexture = 0; IndexOfTexture < m_NumberOfRenderTargets; ++IndexOfTexture)
+            {
+                m_RenderTargetPtrs[IndexOfTexture] = 0;
+            }
+
+            if (m_DepthStencilTargetPtr != 0)
+            {
+                m_DepthStencilTargetPtr = 0;
+            }
+
             glDeleteFramebuffers(1, &m_NativeTargetSet);
         }
     }

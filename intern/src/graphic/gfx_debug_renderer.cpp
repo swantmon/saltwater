@@ -145,7 +145,7 @@ namespace
         CShaderPtr        m_QuadTextureShaderPSPtr;
         CShaderPtr        m_QuadTextShaderVSPtr;
         CShaderPtr        m_QuadTextShaderPSPtr;
-        CTextureSetPtr    m_TextTexturePtr;
+        CTextureBasePtr   m_ConsolasTexturePtr;
 
         CDebugCameras  m_DebugCameras;
         CDebugTextures m_DebugTextures;
@@ -184,7 +184,7 @@ namespace
         , m_QuadTextureShaderPSPtr  ()
         , m_QuadTextShaderVSPtr     ()
         , m_QuadTextShaderPSPtr     ()
-        , m_TextTexturePtr          ()
+        , m_ConsolasTexturePtr      ()
         , m_DebugTextures           ()
         , m_DebugCameras            ()
         , m_DebugTexts              ()
@@ -233,7 +233,7 @@ namespace
         m_QuadTextureShaderPSPtr   = 0;
         m_QuadTextShaderVSPtr      = 0;
         m_QuadTextShaderPSPtr      = 0;
-        m_TextTexturePtr           = 0;
+        m_ConsolasTexturePtr       = 0;
 
         m_DebugCameras .clear();
         m_DebugTextures.clear();
@@ -372,9 +372,7 @@ namespace
         TextTextureDescriptor.m_pPixels          = 0;
         TextTextureDescriptor.m_Format           = CTextureBase::R8G8B8_UBYTE;
 
-        CTextureBasePtr ConsolasTexturePtr = static_cast<CTextureBasePtr>(TextureManager::CreateTexture2D(TextTextureDescriptor));
-
-        m_TextTexturePtr = TextureManager::CreateTextureSet(ConsolasTexturePtr);
+        m_ConsolasTexturePtr = static_cast<CTextureBasePtr>(TextureManager::CreateTexture2D(TextTextureDescriptor));
     }
     
     // -----------------------------------------------------------------------------
@@ -925,7 +923,7 @@ namespace
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
-        ContextManager::SetTexture(0, m_TextTexturePtr->GetTexture(0));
+        ContextManager::SetTexture(0, m_ConsolasTexturePtr);
 
         pInstances = BufferManager::MapVertexBuffer(m_TextInstanceBufferSetPtr->GetBuffer(1), CBuffer::Write);
 

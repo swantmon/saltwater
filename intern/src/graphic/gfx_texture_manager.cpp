@@ -2452,6 +2452,8 @@ namespace
             {
                 Base::CMemory::Free(m_pPixels);
             }
+
+            glDeleteTextures(1, &m_NativeTexture);
         }
     }
 } // namespace
@@ -2467,6 +2469,12 @@ namespace
 
     CGfxTextureManager::CInternTextureSet::~CInternTextureSet()
     {
+        unsigned int IndexOfTexture;
+
+        for (IndexOfTexture = 0; IndexOfTexture < m_NumberOfTextures; ++IndexOfTexture)
+        {
+            m_TexturePtrs[IndexOfTexture] = 0;
+        }
     }
 
     // -----------------------------------------------------------------------------
