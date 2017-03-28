@@ -458,19 +458,7 @@ namespace
         RendertargetDescriptor.m_Format        = CTextureBase::R32_FLOAT;
         
         CTexture2DPtr DepthTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Depth
-        
-        // -----------------------------------------------------------------------------
-        // Create system target set
-        // -----------------------------------------------------------------------------
-        CTargetSets::CPtr TargetSetPtr = m_TargetSets.Allocate();
-        
-        CInternTargetSet& rTargetSet = *TargetSetPtr;
-        
-        rTargetSet.m_NumberOfRenderTargets = 0;
-        rTargetSet.m_NativeTargetSet       = 0;
-
-        m_SystemTargetSet = CTargetSetPtr(TargetSetPtr);
-        
+                
         // -----------------------------------------------------------------------------
         // Create default target set
         // -----------------------------------------------------------------------------
