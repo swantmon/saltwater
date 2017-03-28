@@ -556,6 +556,14 @@ namespace
 
     void CGfxPostFXHDRRenderer::OnResize(unsigned int _Width, unsigned int _Height)
     {
+        m_SwapRenderTargetPtrs[0] = 0;
+        m_SwapRenderTargetPtrs[1] = 0;
+
+        for (unsigned int IndexofDownSample = 0; IndexofDownSample < NumberOfDownSamples; ++IndexofDownSample)
+        {
+            m_DownSampleTargetSetPtrs[IndexofDownSample] = 0;
+        }
+
         // -----------------------------------------------------------------------------
         // Initiate target set sizes of down samples
         // -----------------------------------------------------------------------------

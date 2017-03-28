@@ -795,6 +795,22 @@ namespace
 
     void CGfxPostFXRenderer::OnResize(unsigned int _Width, unsigned int _Height)
     {
+        m_SwapTargetSetPtrs[0] = 0;
+        m_SwapTargetSetPtrs[1] = 0;
+        
+        m_FullTargetSetPtrs[0] = 0;
+        
+        m_HalfTargetSetPtrs[0] = 0;
+        
+        m_QuarterTargetSetPtrs[0] = 0;
+        m_QuarterTargetSetPtrs[1] = 0;
+        m_QuarterTargetSetPtrs[2] = 0;
+
+        m_SMAAEdgeTargetSetPtr        = 0;
+        m_SMAAWeightsCalcTargetSetPtr = 0;
+
+        // -----------------------------------------------------------------------------
+
         std::stringstream SMAADefineStream;
 
         SMAADefineStream << "#define SMAA_RT_METRICS " << "vec4(1.0 / "
@@ -904,10 +920,10 @@ namespace
         m_QuarterTargetSetPtrs[1] = TargetSetManager::CreateTargetSet(QuarterTwoRenderbuffer  , 1);
         m_QuarterTargetSetPtrs[2] = TargetSetManager::CreateTargetSet(QuarterThreeRenderbuffer, 1);
 
-        //////////////////////////////////////////////////////////
-        // SMAA Render Targets
-        //////////////////////////////////////////////////////////
 
+        // -----------------------------------------------------------------------------
+        // SMAA Render Targets
+        // -----------------------------------------------------------------------------
         RendertargetDescriptor.m_NumberOfPixelsU  = Size[0];
         RendertargetDescriptor.m_NumberOfPixelsV  = Size[1];
         RendertargetDescriptor.m_NumberOfPixelsW  = 1;
