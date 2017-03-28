@@ -354,7 +354,7 @@ namespace
     {
         CNativeTargetSet& rNativeTargetSet = *static_cast<CNativeTargetSet*>(_TargetPtr.GetPtr());
 
-        glClearNamedFramebufferfi(rNativeTargetSet.m_NativeTargetSet, GL_DEPTH_STENCIL, 0, _Depth, 0x00);
+        glClearNamedFramebufferfv(rNativeTargetSet.m_NativeTargetSet, GL_DEPTH, 0, &_Depth);
     }
 
     // -----------------------------------------------------------------------------
@@ -363,7 +363,10 @@ namespace
     {
         CNativeTargetSet& rNativeTargetSet = *static_cast<CNativeTargetSet*>(_TargetPtr.GetPtr());
 
-        glClearNamedFramebufferfv(rNativeTargetSet.m_NativeTargetSet, GL_COLOR, 0, const_cast<GLfloat*>(&_rColor[0]));
+        for (unsigned int Index = 0; Index <_TargetPtr->GetNumberOfRenderTargets(); ++ Index)
+        {
+            glClearNamedFramebufferfv(rNativeTargetSet.m_NativeTargetSet, GL_COLOR, Index, const_cast<GLfloat*>(&_rColor[0]));
+        }
     }
     
     // -----------------------------------------------------------------------------
@@ -372,21 +375,22 @@ namespace
     {
         CNativeTargetSet& rNativeTargetSet = *static_cast<CNativeTargetSet*>(_TargetPtr.GetPtr());
        
-        glClearNamedFramebufferfv(rNativeTargetSet.m_NativeTargetSet, GL_COLOR, 0, const_cast<GLfloat*>(&_rColor[0]));
-        glClearNamedFramebufferfi(rNativeTargetSet.m_NativeTargetSet, GL_DEPTH_STENCIL, 0, _Depth, 0x00);
+        for (unsigned int Index = 0; Index < _TargetPtr->GetNumberOfRenderTargets(); ++Index)
+        {
+            glClearNamedFramebufferfv(rNativeTargetSet.m_NativeTargetSet, GL_COLOR, Index, const_cast<GLfloat*>(&_rColor[0]));
+        }
+
+        glClearNamedFramebufferfv(rNativeTargetSet.m_NativeTargetSet, GL_DEPTH, 0, &_Depth);
     }
     
     // -----------------------------------------------------------------------------
 
     void CGfxTargetSetManager::OnResize(int _Width, int _Height)
     {
-        BASE_UNUSED(_Width);
-        BASE_UNUSED(_Height);
-
         // -----------------------------------------------------------------------------
         // Initiate target set
         // -----------------------------------------------------------------------------
-        Base::Int2 Size = Main::GetActiveWindowSize();
+        Base::Int2 Size(_Width, _Height);
         
         // -----------------------------------------------------------------------------
         // Create render target textures
