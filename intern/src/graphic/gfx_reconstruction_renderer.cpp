@@ -32,8 +32,6 @@
 
 #include "mr/mr_slam_reconstructor.h"
 
-#include <gl/glew.h>
-
 #include <iostream>
 #include <limits>
 #include <memory>
@@ -78,11 +76,7 @@ namespace
 
         void RenderVolume();
         void RenderCamera();
-        
-        // for debugging
-
-        void RenderDepth();
-        
+                
     private:
 
         std::unique_ptr<MR::CSLAMReconstructor> m_pReconstructor;
@@ -94,14 +88,9 @@ namespace
 
         CBufferPtr m_RaycastBuffer;
         CBufferPtr m_DrawCallConstantBuffer;
-
-        GLuint m_CameraVAO;
-
+        
         CMeshPtr m_CameraMesh;
         CInputLayoutPtr m_InputLayout;
-
-        CShaderPtr m_VSDepth;
-        CShaderPtr m_FSDepth;
     };
 } // namespace
 
@@ -138,15 +127,10 @@ namespace
         m_FSCamera = 0;
         m_VSRaycast = 0;
         m_FSRaycast = 0;
-
-        m_VSDepth = 0;
-        m_FSDepth = 0;
-
+        
         m_RaycastBuffer = 0;
         m_DrawCallConstantBuffer = 0;
-        
-        glDeleteVertexArrays(1, &m_CameraVAO);
-        
+                
         m_CameraMesh = 0;
         m_InputLayout = 0;
 
@@ -176,10 +160,7 @@ namespace
         m_FSCamera = ShaderManager::CompilePS("kinect_fusion\\fs_camera.glsl", "main", DefineString.c_str());
         m_VSRaycast = ShaderManager::CompileVS("kinect_fusion\\vs_raycast.glsl", "main", DefineString.c_str());
         m_FSRaycast = ShaderManager::CompilePS("kinect_fusion\\fs_raycast.glsl", "main", DefineString.c_str());
-
-        //m_VSVisualizeDepth = ShaderManager::CompileVS("kinect_fusion\\vs_visualize_depth.glsl", "main", DefineString.c_str());
-        //m_FSVisualizeDepth = ShaderManager::CompilePS("kinect_fusion\\fs_visualize_depth.glsl", "main", DefineString.c_str());
-
+        
         SInputElementDescriptor InputLayout = {};
 
         InputLayout.m_pSemanticName        = "POSITION";
@@ -353,8 +334,6 @@ namespace
     {
         Performance::BeginEvent("Rendering");
         
-        glBindVertexArray(1); // dummy vao because opengl needs vertex data even when it does not use it
-
         Float4x4 PoseMatrix = m_pReconstructor->GetPoseMatrix();
 
         Float4 RaycastData[2];
@@ -373,9 +352,18 @@ namespace
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_RaycastBuffer);
 
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        ContextManager::Barrier();
 
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+        // todo: remove dummy geometry
+
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBufferSet(m_CameraMesh->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetIndexBuffer(m_CameraMesh->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetInputLayout(m_InputLayout);
+
+        // todo: remove dummy geometry
 
         ContextManager::SetTopology(STopology::TriangleFan);
         ContextManager::Draw(4, 0);
@@ -403,34 +391,7 @@ namespace
         
         Performance::EndEvent();
     }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxReconstructionRenderer::RenderDepth()
-    {
-        glBindVertexArray(1); // dummy vao because opengl needs vertex data even when it does not use it
-
-        Gfx::ContextManager::SetShaderVS(m_VSDepth);
-        Gfx::ContextManager::SetShaderPS(m_FSDepth);
-
-        GLint ViewPort[4];
-        glGetIntegerv(GL_VIEWPORT, ViewPort);
-
-        glViewport(0, 0, ViewPort[2] / 2, ViewPort[3]);
-        //glBindImageTexture(0, m_RawDepthBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16);
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 3);
-        glViewport(ViewPort[2] / 2, 0, ViewPort[2] / 2, ViewPort[3]);
-        //glBindImageTexture(0, m_SmoothDepthBuffer[0], 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16);
-
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 3);
-
-        glViewport(ViewPort[0], ViewPort[1], ViewPort[2], ViewPort[3]);
-
-        glBindVertexArray(0);
-    }
-
+    
     // -----------------------------------------------------------------------------
     
     void CGfxReconstructionRenderer::RenderCamera()
@@ -457,7 +418,7 @@ namespace
                 
         ContextManager::SetTopology(STopology::TriangleList);
         ContextManager::DrawIndexed(m_CameraMesh->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
-    }    
+    }
 } // namespace
 
 namespace Gfx

@@ -400,7 +400,7 @@ namespace MR
         // Bilateral Filter
         //////////////////////////////////////////////////////////////////////////////////////
 
-        //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        ContextManager::Barrier();
 
         ContextManager::SetShaderCS(m_CSBilateralFilter);
         ContextManager::SetConstantBuffer(0, m_BilateralFilterConstantBuffer);
@@ -423,8 +423,8 @@ namespace MR
             ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
 
             ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_SmoothDepthBuffer[PyramidLevel]));
-            //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-            //glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
+            ContextManager::Barrier();
+
             ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
         }
 
@@ -443,7 +443,7 @@ namespace MR
             ContextManager::SetShaderCS(m_CSVertexMap);
             ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_SmoothDepthBuffer[PyramidLevel]));
             ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ReferenceVertexMap[PyramidLevel]));
-            //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+            ContextManager::Barrier();
             ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);			
         }
 
@@ -455,7 +455,7 @@ namespace MR
             ContextManager::SetShaderCS(m_CSNormalMap);
             ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_ReferenceVertexMap[PyramidLevel]));
             ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ReferenceNormalMap[PyramidLevel]));
-            //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+            ContextManager::Barrier();
             ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
         }
     }
@@ -507,8 +507,8 @@ namespace MR
         ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(m_RaycastVertexMap[PyramidLevel]));
         ContextManager::SetImageTexture(3, static_cast<CTextureBasePtr>(m_RaycastNormalMap[PyramidLevel]));
 
-        //glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-        //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        ContextManager::Barrier();
+
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
     }
 
@@ -532,8 +532,9 @@ namespace MR
         ContextManager::SetShaderCS(m_CSReduceSum);
         ContextManager::SetResourceBuffer(0, m_ICPBuffer);
         ContextManager::SetConstantBuffer(2, m_ICPSummationConstantBuffer);
-        //glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-        //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        
+        ContextManager::Barrier();
+
         ContextManager::Dispatch(1, g_ICPValueCount, 1);
     }
 
@@ -635,7 +636,7 @@ namespace MR
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBuffer);
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBuffer);
         
-        //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        ContextManager::Barrier();
 
         ContextManager::Dispatch(WorkGroups, WorkGroups, 1);
     }
@@ -656,7 +657,7 @@ namespace MR
             float Normalized = 0.0f;
             BufferManager::UploadConstantBufferData(m_RaycastPyramidConstantBuffer, &Normalized);
             
-            //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+            ContextManager::Barrier();
             ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RaycastVertexMap[PyramidLevel - 1]));
             ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RaycastVertexMap[PyramidLevel]));
             ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
@@ -664,7 +665,7 @@ namespace MR
             Normalized = 1.0f;
             BufferManager::UploadConstantBufferData(m_RaycastPyramidConstantBuffer, &Normalized);
 
-            //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+            ContextManager::Barrier();
             ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RaycastNormalMap[PyramidLevel - 1]));
             ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RaycastNormalMap[PyramidLevel]));
             ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
@@ -689,8 +690,7 @@ namespace MR
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBuffer);
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBuffer);
         
-        //glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
-        //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        ContextManager::Barrier();
 
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
     }
@@ -826,7 +826,7 @@ namespace MR
 
         ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_Volume));
 
-        //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        ContextManager::Barrier();
 
         const int WorkGroupSize = GetWorkGroupCount(m_ReconstructionSettings.m_VolumeResolution, g_TileSize3D);
 
