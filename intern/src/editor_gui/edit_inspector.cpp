@@ -18,7 +18,7 @@ namespace Edit
         , m_pGlobalProbeWidget (0)
         , m_pBloomWidget       (0)
         , m_pDOFWidget         (0)
-        , m_pFXAAWidget        (0)
+        , m_pPostAAWidget      (0)
         , m_pSSRWidget         (0)
         , m_pVolumeFogWidget   (0)
         , m_pMaterialWidget    (0)
@@ -46,7 +46,7 @@ namespace Edit
         m_pGlobalProbeWidget  = new CInspectorGlobalProbe();
         m_pBloomWidget        = new CInspectorBloom();
         m_pDOFWidget          = new CInspectorDOF();
-        m_pFXAAWidget         = new CInspectorPostAA();
+        m_pPostAAWidget       = new CInspectorPostAA();
         m_pSSRWidget          = new CInspectorSSR();
         m_pVolumeFogWidget    = new CInspectorVolumeFog();
         m_pMaterialWidget     = new CInspectorMaterial();
@@ -63,7 +63,7 @@ namespace Edit
         m_pInspectorContent->addWidget(m_pGlobalProbeWidget);
         m_pInspectorContent->addWidget(m_pBloomWidget);
         m_pInspectorContent->addWidget(m_pDOFWidget);
-        m_pInspectorContent->addWidget(m_pFXAAWidget);
+        m_pInspectorContent->addWidget(m_pPostAAWidget);
         m_pInspectorContent->addWidget(m_pSSRWidget);
         m_pInspectorContent->addWidget(m_pVolumeFogWidget);
         m_pInspectorContent->addWidget(m_pMaterialWidget);
@@ -92,7 +92,7 @@ namespace Edit
         delete m_pGlobalProbeWidget;
         delete m_pBloomWidget;
         delete m_pDOFWidget;
-        delete m_pFXAAWidget;
+        delete m_pPostAAWidget;
         delete m_pSSRWidget;
         delete m_pVolumeFogWidget;
         delete m_pMaterialWidget;
@@ -107,7 +107,7 @@ namespace Edit
         m_pGlobalProbeWidget = 0;
         m_pBloomWidget       = 0;
         m_pDOFWidget         = 0;
-        m_pFXAAWidget        = 0;
+        m_pPostAAWidget      = 0;
         m_pSSRWidget         = 0;
         m_pVolumeFogWidget   = 0;
         m_pMaterialWidget    = 0;
@@ -300,9 +300,9 @@ namespace Edit
                 }
                 else if (Type == 3) // FXAA
                 {
-                    m_pFXAAWidget->RequestInformation(EntityID);
+                    m_pPostAAWidget->RequestInformation(EntityID);
 
-                    m_pFXAAWidget->setVisible(true);
+                    m_pPostAAWidget->setVisible(true);
                 }
                 else if (Type == 4) // SSAO
                 {
@@ -342,7 +342,7 @@ namespace Edit
         m_pGlobalProbeWidget ->setVisible(false);
         m_pBloomWidget       ->setVisible(false);
         m_pDOFWidget         ->setVisible(false);
-        m_pFXAAWidget        ->setVisible(false);
+        m_pPostAAWidget      ->setVisible(false);
         m_pSSRWidget         ->setVisible(false);
         m_pVolumeFogWidget   ->setVisible(false);
         m_pMaterialWidget    ->setVisible(false);
