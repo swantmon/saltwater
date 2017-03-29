@@ -187,10 +187,6 @@ namespace
         CTexture2DPtr InternCreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
         CTexture3DPtr InternCreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
 
-        CTexture1DPtr InternCreateTextureArray1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
-        CTexture2DPtr InternCreateTextureArray2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
-        CTexture3DPtr InternCreateTextureArray3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
-
         CTexture2DPtr InternCreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
 
         int ConvertGLFormatToBytesPerPixel(Gfx::CTextureBase::EFormat _Format) const;
@@ -416,7 +412,7 @@ namespace
         {
             pInternTexture2D->m_Hash = Hash;
 
-            m_Textures2DByHash[Hash] = pInternTexture2D;
+            m_Textures2DByHash[Hash] = Texture2DPtr;
         }
 
         if (pInternTexture2D == nullptr)
