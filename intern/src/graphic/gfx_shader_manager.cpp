@@ -439,9 +439,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Create shader
         // -----------------------------------------------------------------------------
-        CShaders::CPtr ShaderPtr = m_Shaders[_Type].Allocate();
+        CShaderPtr ShaderPtr = m_Shaders[_Type].Allocate();
 
-        CInternShader& rShader = *ShaderPtr;
+        CInternShader& rShader = *static_cast<CInternShader*>(ShaderPtr.GetPtr());
 
         // -----------------------------------------------------------------------------
         // Setup the engine shader
