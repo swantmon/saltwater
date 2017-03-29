@@ -1008,7 +1008,7 @@ namespace
         }
         else if (_rDescriptor.m_Binding & Gfx::CTextureBase::RenderTarget)
         {   
-            //glTextureStorage2D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
+            glTextureStorage2D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
         }
         else
         {
