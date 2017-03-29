@@ -42,6 +42,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\test\test_precompiled.cpp" />
     <ClCompile Include="..\..\..\test\test_main.cpp" />
+    <ClCompile Include="..\..\..\test\base\test_base_managed_pool.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="core">
