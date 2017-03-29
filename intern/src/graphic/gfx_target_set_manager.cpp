@@ -82,6 +82,8 @@ namespace
     private:
         
         void OnResize(int _Width, int _Height);
+
+        void ResizeTargetSet(CTargetSetPtr _TargetSetPtr, CTextureBasePtr* _pTargetPtrs, unsigned int _NumberOfTargets);
     };
 } // namespace
 
@@ -352,7 +354,7 @@ namespace
     {
         CNativeTargetSet& rNativeTargetSet = *static_cast<CNativeTargetSet*>(_TargetPtr.GetPtr());
 
-        glClearNamedFramebufferfi(rNativeTargetSet.m_NativeTargetSet, GL_DEPTH_STENCIL, 0, _Depth, 0x00);
+        glClearNamedFramebufferfv(rNativeTargetSet.m_NativeTargetSet, GL_DEPTH, 0, &_Depth);
     }
 
     // -----------------------------------------------------------------------------
@@ -361,7 +363,10 @@ namespace
     {
         CNativeTargetSet& rNativeTargetSet = *static_cast<CNativeTargetSet*>(_TargetPtr.GetPtr());
 
-        glClearNamedFramebufferfv(rNativeTargetSet.m_NativeTargetSet, GL_COLOR, 0, const_cast<GLfloat*>(&_rColor[0]));
+        for (unsigned int Index = 0; Index <_TargetPtr->GetNumberOfRenderTargets(); ++ Index)
+        {
+            glClearNamedFramebufferfv(rNativeTargetSet.m_NativeTargetSet, GL_COLOR, Index, const_cast<GLfloat*>(&_rColor[0]));
+        }
     }
     
     // -----------------------------------------------------------------------------
@@ -370,16 +375,183 @@ namespace
     {
         CNativeTargetSet& rNativeTargetSet = *static_cast<CNativeTargetSet*>(_TargetPtr.GetPtr());
        
-        glClearNamedFramebufferfv(rNativeTargetSet.m_NativeTargetSet, GL_COLOR, 0, const_cast<GLfloat*>(&_rColor[0]));
-        glClearNamedFramebufferfi(rNativeTargetSet.m_NativeTargetSet, GL_DEPTH_STENCIL, 0, _Depth, 0x00);
+        for (unsigned int Index = 0; Index < _TargetPtr->GetNumberOfRenderTargets(); ++Index)
+        {
+            glClearNamedFramebufferfv(rNativeTargetSet.m_NativeTargetSet, GL_COLOR, Index, const_cast<GLfloat*>(&_rColor[0]));
+        }
+
+        glClearNamedFramebufferfv(rNativeTargetSet.m_NativeTargetSet, GL_DEPTH, 0, &_Depth);
     }
     
     // -----------------------------------------------------------------------------
 
     void CGfxTargetSetManager::OnResize(int _Width, int _Height)
     {
-        BASE_UNUSED(_Width);
-        BASE_UNUSED(_Height);
+        // -----------------------------------------------------------------------------
+        // Initiate target set
+        // -----------------------------------------------------------------------------
+        Base::Int2 Size(_Width, _Height);
+        
+        // -----------------------------------------------------------------------------
+        // Create render target textures
+        // -----------------------------------------------------------------------------
+        STextureDescriptor RendertargetDescriptor;
+        
+        RendertargetDescriptor.m_NumberOfPixelsU  = Size[0];
+        RendertargetDescriptor.m_NumberOfPixelsV  = Size[1];
+        RendertargetDescriptor.m_NumberOfPixelsW  = 1;
+        RendertargetDescriptor.m_NumberOfMipMaps  = 1;
+        RendertargetDescriptor.m_NumberOfTextures = 1;
+        RendertargetDescriptor.m_Binding          = CTextureBase::RenderTarget;
+        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
+        RendertargetDescriptor.m_Format           = CTextureBase::Unknown;
+        RendertargetDescriptor.m_Usage            = CTextureBase::GPURead;
+        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_pFileName        = 0;
+        RendertargetDescriptor.m_pPixels          = 0;
+        
+        // -----------------------------------------------------------------------------
+        
+        RendertargetDescriptor.m_Binding       = CTextureBase::RenderTarget;
+        RendertargetDescriptor.m_Format        = CTextureBase::R8G8B8A8_UBYTE;
+        
+        CTexture2DPtr AlbedoPtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // RGB Albedo
+        
+        // -----------------------------------------------------------------------------
+        
+        RendertargetDescriptor.m_Binding       = CTextureBase::RenderTarget;
+        RendertargetDescriptor.m_Format        = CTextureBase::R8G8B8A8_UBYTE;
+        
+        CTexture2DPtr GBuffer1Ptr = TextureManager::CreateTexture2D(RendertargetDescriptor); // G-Buffer 1
+        
+        // -----------------------------------------------------------------------------
+
+        RendertargetDescriptor.m_Binding       = CTextureBase::RenderTarget;
+        RendertargetDescriptor.m_Format        = CTextureBase::R8G8B8A8_UBYTE;
+        
+        CTexture2DPtr GBuffer2Ptr = TextureManager::CreateTexture2D(RendertargetDescriptor); // G-Buffer 2
+        
+        // -----------------------------------------------------------------------------
+        
+        RendertargetDescriptor.m_Binding       = CTextureBase::RenderTarget;
+        RendertargetDescriptor.m_Format        = CTextureBase::R8G8B8A8_UBYTE;
+        
+        CTexture2DPtr GBuffer3Ptr = TextureManager::CreateTexture2D(RendertargetDescriptor); // G-Buffer 3
+        
+        // -----------------------------------------------------------------------------
+        
+        RendertargetDescriptor.m_Binding       = CTextureBase::RenderTarget;
+        RendertargetDescriptor.m_Format        = CTextureBase::R16G16B16A16_FLOAT;
+        
+        CTexture2DPtr LightAccumulationTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Light Accumulation (HDR)
+        
+        // -----------------------------------------------------------------------------
+        
+        RendertargetDescriptor.m_Binding       = CTextureBase::RenderTarget;
+        RendertargetDescriptor.m_Format        = CTextureBase::R32_UINT;
+
+        CTexture2DPtr HitProxyTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Hit Proxy (ID)
+        
+        // -----------------------------------------------------------------------------
+        
+        RendertargetDescriptor.m_Binding       = CTextureBase::DepthStencilTarget | CTextureBase::RenderTarget;
+        RendertargetDescriptor.m_Format        = CTextureBase::R32_FLOAT;
+        
+        CTexture2DPtr DepthTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Depth
+                
+        // -----------------------------------------------------------------------------
+        // Create default target set
+        // -----------------------------------------------------------------------------
+        CTextureBasePtr DefaultRenderbuffer[2];
+        
+        DefaultRenderbuffer[0] = AlbedoPtr;
+        DefaultRenderbuffer[1] = DepthTexturePtr;
+        
+        ResizeTargetSet(m_DefaultTargetSet, DefaultRenderbuffer, 2);
+        
+        // -----------------------------------------------------------------------------
+        // Create deferred target set
+        // -----------------------------------------------------------------------------
+        CTextureBasePtr DeferredRenderbuffer[4];
+        
+        DeferredRenderbuffer[0] = GBuffer1Ptr;
+        DeferredRenderbuffer[1] = GBuffer2Ptr;
+        DeferredRenderbuffer[2] = GBuffer3Ptr;
+        DeferredRenderbuffer[3] = DepthTexturePtr;
+        
+        ResizeTargetSet(m_DeferredTargetSet, DeferredRenderbuffer, 4);
+        
+        // -----------------------------------------------------------------------------
+        // Create light accumulation target set
+        // -----------------------------------------------------------------------------
+        CTextureBasePtr LightAccumulationRenderbuffer[1];
+        
+        LightAccumulationRenderbuffer[0] = LightAccumulationTexturePtr;
+
+        ResizeTargetSet(m_LightAccumulationTargetSet, LightAccumulationRenderbuffer, 1);
+
+        // -----------------------------------------------------------------------------
+        // Create hit proxy target set
+        // -----------------------------------------------------------------------------
+        CTextureBasePtr HitProxyRenderbuffer[2];
+
+        HitProxyRenderbuffer[0] = HitProxyTexturePtr;
+        HitProxyRenderbuffer[1] = DepthTexturePtr;
+
+        ResizeTargetSet(m_HitProxyTargetSet, HitProxyRenderbuffer, 2);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxTargetSetManager::ResizeTargetSet(CTargetSetPtr _TargetSetPtr, CTextureBasePtr* _pTargetPtrs, unsigned int _NumberOfTargets)
+    {
+        unsigned int NumberOfColorAttachments = 0;
+
+        CInternTargetSet& rTargetSet = *static_cast<CInternTargetSet*>(_TargetSetPtr.GetPtr());
+
+        // -----------------------------------------------------------------------------
+
+        for (unsigned int IndexOfTexture = 0; IndexOfTexture < _NumberOfTargets; ++IndexOfTexture)
+        {
+            CNativeTexture2D& rNativeTexture = *static_cast<CNativeTexture2D*>(_pTargetPtrs[IndexOfTexture].GetPtr());
+
+            GLuint TextureHandle = rNativeTexture.m_NativeTexture;
+
+            unsigned int MipmapLevel = rNativeTexture.GetCurrentMipLevel();
+
+            if ((rNativeTexture.GetBinding() & CTexture2D::DepthStencilTarget) != 0)
+            {
+                glNamedFramebufferTexture(rTargetSet.m_NativeTargetSet, GL_DEPTH_ATTACHMENT, TextureHandle, MipmapLevel);
+
+                rTargetSet.m_DepthStencilTargetPtr = 0;
+                rTargetSet.m_DepthStencilTargetPtr = _pTargetPtrs[IndexOfTexture];
+            }
+            else if ((rNativeTexture.GetBinding() & CTexture2D::RenderTarget) != 0)
+            {
+                glNamedFramebufferTexture(rTargetSet.m_NativeTargetSet, GL_COLOR_ATTACHMENT0 + NumberOfColorAttachments, TextureHandle, MipmapLevel);
+
+                rTargetSet.m_RenderTargetPtrs[NumberOfColorAttachments] = 0;
+                rTargetSet.m_RenderTargetPtrs[NumberOfColorAttachments] = _pTargetPtrs[IndexOfTexture];
+
+                ++NumberOfColorAttachments;
+            }
+            else
+            {
+                BASE_CONSOLE_STREAMWARNING("Tried to bind a texture to frame buffer (target set) without subsided binding.");
+            }
+        }
+
+        assert(rTargetSet.m_NumberOfRenderTargets == NumberOfColorAttachments);
+
+        // -----------------------------------------------------------------------------
+        // Check status
+        // -----------------------------------------------------------------------------
+        GLenum Status = glCheckNamedFramebufferStatus(rTargetSet.m_NativeTargetSet, GL_FRAMEBUFFER);
+
+        if (Status != GL_FRAMEBUFFER_COMPLETE)
+        {
+            BASE_THROWM("Can't create an acceptable frame buffer.");
+        }
     }
 } // namespace
 
@@ -396,6 +568,16 @@ namespace
     {
         if (m_NativeTargetSet != 0)
         {
+            for (unsigned int IndexOfTexture = 0; IndexOfTexture < m_NumberOfRenderTargets; ++IndexOfTexture)
+            {
+                m_RenderTargetPtrs[IndexOfTexture] = 0;
+            }
+
+            if (m_DepthStencilTargetPtr != 0)
+            {
+                m_DepthStencilTargetPtr = 0;
+            }
+
             glDeleteFramebuffers(1, &m_NativeTargetSet);
         }
     }

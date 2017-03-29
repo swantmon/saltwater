@@ -54,6 +54,7 @@ namespace Edit
         void toggleInspectorDock();
         void toggleConsoleDock();
         void toggleAssetsDock();
+        void changeResolution(int _Index);
 
     private:
 

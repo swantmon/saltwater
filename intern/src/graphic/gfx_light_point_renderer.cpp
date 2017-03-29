@@ -118,8 +118,6 @@ namespace
         CShaderPtr        m_ModelVSPtr;
 
         CShaderPtr        m_PunctualLightShaderPSPtr;
-        
-        CTextureSetPtr    m_PunctualLightTextureSetPtr;
 
         CRenderContextPtr m_LightRenderContextPtr;
 
@@ -141,7 +139,6 @@ namespace
         , m_LightProbeInputLayoutPtr  ()
         , m_ModelVSPtr                ()
         , m_PunctualLightShaderPSPtr  ()
-        , m_PunctualLightTextureSetPtr()
         , m_PunctualLightRenderJobs   ()
     {
     }
@@ -169,7 +166,6 @@ namespace
         m_LightProbeInputLayoutPtr          = 0;
         m_ModelVSPtr                        = 0;
         m_PunctualLightShaderPSPtr          = 0;
-        m_PunctualLightTextureSetPtr        = 0;
         m_LightRenderContextPtr             = 0;
         
         m_PunctualLightRenderJobs.clear();
@@ -235,12 +231,6 @@ namespace
     
     void CGfxPointLightRenderer::OnSetupTextures()
     {
-        CTextureBasePtr GBuffer0TexturePtr          = TargetSetManager::GetDeferredTargetSet()         ->GetRenderTarget(0);
-        CTextureBasePtr GBuffer1TexturePtr          = TargetSetManager::GetDeferredTargetSet()         ->GetRenderTarget(1);
-        CTextureBasePtr GBuffer2TexturePtr          = TargetSetManager::GetDeferredTargetSet()         ->GetRenderTarget(2);
-        CTextureBasePtr DepthTexturePtr             = TargetSetManager::GetDeferredTargetSet()         ->GetDepthStencilTarget();
-        
-        m_PunctualLightTextureSetPtr = TextureManager::CreateTextureSet(GBuffer0TexturePtr, GBuffer1TexturePtr, GBuffer2TexturePtr, DepthTexturePtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -476,10 +466,10 @@ namespace
 
             ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
 
-            ContextManager::SetTexture(0, m_PunctualLightTextureSetPtr->GetTexture(0));
-            ContextManager::SetTexture(1, m_PunctualLightTextureSetPtr->GetTexture(1));
-            ContextManager::SetTexture(2, m_PunctualLightTextureSetPtr->GetTexture(2));
-            ContextManager::SetTexture(3, m_PunctualLightTextureSetPtr->GetTexture(3));
+            ContextManager::SetTexture(0, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0));
+            ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1));
+            ContextManager::SetTexture(2, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2));
+            ContextManager::SetTexture(3, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
             
             // -----------------------------------------------------------------------------
             // Set shadow map
