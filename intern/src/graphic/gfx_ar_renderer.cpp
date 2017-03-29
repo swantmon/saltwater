@@ -416,6 +416,8 @@ namespace
 
     void CGfxARRenderer::OnResize(unsigned int _Width, unsigned int _Height)
     {
+        BASE_UNUSED(_Width);
+        BASE_UNUSED(_Height);
     }
 
     // -----------------------------------------------------------------------------

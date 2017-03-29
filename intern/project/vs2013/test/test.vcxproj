@@ -22,6 +22,7 @@
     <ClCompile Include="..\..\..\test\base\test_base_aabb3.cpp" />
     <ClCompile Include="..\..\..\test\base\test_base_crc.cpp" />
     <ClCompile Include="..\..\..\test\base\test_base_exception.cpp" />
+    <ClCompile Include="..\..\..\test\base\test_base_managed_pool.cpp" />
     <ClCompile Include="..\..\..\test\base\test_base_matrix3x3.cpp" />
     <ClCompile Include="..\..\..\test\base\test_base_matrix4x4.cpp" />
     <ClCompile Include="..\..\..\test\base\test_base_memory.cpp" />
