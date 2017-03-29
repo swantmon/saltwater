@@ -16,6 +16,12 @@ namespace Edit
         // Setup UI
         // -----------------------------------------------------------------------------
         setupUi(this);
+
+        const int InitialSliderPosition = 8;
+
+        m_pResolutionHS->setRange(0, 15);
+        m_pResolutionHS->setValue(InitialSliderPosition);
+        m_pResolutionTL->setText(QString::number(1 << InitialSliderPosition));
     }
 
     // -----------------------------------------------------------------------------
@@ -34,7 +40,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         
         const float VolumeSize = m_pVolumeSizeLE->text().toFloat();
-        const int Resolution = m_pVolumeResolutionLE->text().toInt();
+        const int Resolution = 1 << m_pResolutionHS->value();
         const float TruncatedDistance = m_pTruncatedDistanceLE->text().toFloat();
         const int MaxIntegrationWeight = m_pMaxIntegrationWeightLE->text().toInt();
         const int MinDepth = m_pMinDepthLE->text().toInt();
@@ -56,5 +62,13 @@ namespace Edit
         NewMessage.Reset();
 
         Edit::MessageManager::SendMessage(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Update, NewMessage);
-    }    
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorSLAM::sliderValueChanged(int _Value)
+    {
+        m_pResolutionTL->setText(QString::number(1 << _Value));
+    }
+
 } // namespace Edit

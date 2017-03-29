@@ -57,7 +57,6 @@ namespace
         // Edit
         // -----------------------------------------------------------------------------
         Edit::MessageManager::Register(Edit::SGUIMessageType::MR_SLAM_NewReconstruction, EDIT_RECEIVE_MESSAGE(&CSLAMHelper::OnNewSLAMReconstruction));
-
         Edit::MessageManager::Register(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Update, EDIT_RECEIVE_MESSAGE(&CSLAMHelper::OnSLAMReconstructionUpdate));
     }
 
@@ -78,9 +77,7 @@ namespace
     // -----------------------------------------------------------------------------
 
     void CSLAMHelper::OnSLAMReconstructionUpdate(Edit::CMessage& _rMessage)
-    {
-        BASE_CONSOLE_INFO("Reconstruction Update");
-        
+    {        
         MR::CSLAMReconstructor::SReconstructionSettings Settings;
 
         Settings.m_VolumeSize = _rMessage.GetFloat();

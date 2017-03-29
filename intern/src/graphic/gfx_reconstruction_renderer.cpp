@@ -378,6 +378,35 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxReconstructionRenderer::RenderCamera()
+    {
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
+
+        ContextManager::SetRenderContext(m_CameraRenderContextPtr);
+        ContextManager::SetShaderVS(m_CameraVSPtr);
+        ContextManager::SetShaderPS(m_CameraFSPtr);
+
+        Float4x4 WorldMatrix;
+        WorldMatrix.SetScale(0.1f);
+        WorldMatrix = m_pReconstructor->GetPoseMatrix() * WorldMatrix;
+
+        BufferManager::UploadConstantBufferData(m_DrawCallConstantBufferPtr, &WorldMatrix);
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
+
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBufferSet(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetIndexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+
+        ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        ContextManager::DrawIndexed(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxReconstructionRenderer::Render()
     {
         m_pReconstructor->Update();
@@ -392,35 +421,6 @@ namespace
         RenderCamera();
         
         Performance::EndEvent();
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGfxReconstructionRenderer::RenderCamera()
-    {
-        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
-
-        ContextManager::SetRenderContext(m_CameraRenderContextPtr);
-        ContextManager::SetShaderVS(m_CameraVSPtr);
-        ContextManager::SetShaderPS(m_CameraFSPtr);
-
-        Float4x4 WorldMatrix;
-        WorldMatrix.SetScale(0.1f);
-        WorldMatrix = m_pReconstructor->GetPoseMatrix() * WorldMatrix;
-
-        BufferManager::UploadConstantBufferData(m_DrawCallConstantBufferPtr, &WorldMatrix);
-        
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-        ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
-        
-        const unsigned int Offset = 0;
-        ContextManager::SetVertexBufferSet(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
-        ContextManager::SetIndexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
-
-        ContextManager::SetInputLayout(m_CameraInputLayoutPtr);        
-        ContextManager::SetTopology(STopology::TriangleList);
-
-        ContextManager::DrawIndexed(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
     }
 } // namespace
 

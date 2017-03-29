@@ -24,17 +24,17 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout_2">
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="m_pVolumeSizeLE">
+       <property name="text">
+        <string>1</string>
+       </property>
+      </widget>
+     </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>Volume Resolution</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>Max Integration Weight</string>
        </property>
       </widget>
      </item>
@@ -45,13 +45,6 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="m_pVolumeSizeLE">
-       <property name="text">
-        <string>1</string>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
@@ -59,17 +52,10 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="label_5">
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_4">
        <property name="text">
-        <string>Depth Threshold</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="m_pVolumeResolutionLE">
-       <property name="text">
-        <string>256</string>
+        <string>Max Integration Weight</string>
        </property>
       </widget>
      </item>
@@ -87,6 +73,13 @@
        </property>
       </widget>
      </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>Depth Threshold</string>
+       </property>
+      </widget>
+     </item>
      <item row="4" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
@@ -100,6 +93,24 @@
         <widget class="QLineEdit" name="m_pMaxDepthLE">
          <property name="text">
           <string>8000</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="1" column="1">
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QLabel" name="m_pResolutionTL">
+         <property name="text">
+          <string>TextLabel</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSlider" name="m_pResolutionHS">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
          </property>
         </widget>
        </item>
@@ -147,8 +158,25 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_pResolutionHS</sender>
+   <signal>sliderMoved(int)</signal>
+   <receiver>InspectorSLAM</receiver>
+   <slot>sliderValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>274</x>
+     <y>85</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>187</x>
+     <y>109</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>valueChanged()</slot>
+  <slot>sliderValueChanged(int)</slot>
  </slots>
 </ui>
