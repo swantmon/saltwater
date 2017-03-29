@@ -110,7 +110,7 @@ namespace
         typedef Base::CManagedPool<CInternInputLayout, 128> CInputLayouts;
         typedef CInputLayouts::CIterator                    CInputLayoutIterator;
 
-        typedef std::unordered_map<unsigned int, CInternShader*>  CShaderByIDs;
+        typedef std::unordered_map<unsigned int, CShaderPtr> CShaderByIDs;
 
     private:
 
@@ -142,7 +142,7 @@ namespace
         , m_Shaders     ()
         , m_ShaderByID  ()
     {
-        m_ShaderByID   .reserve(128);
+        m_ShaderByID.reserve(128);
     }
 
     // -----------------------------------------------------------------------------
@@ -162,6 +162,8 @@ namespace
     void CGfxShaderManager::OnExit()
     {
         unsigned int ShaderType;
+
+        m_ShaderByID.clear();
 
         m_InputLayouts.Clear();
 
@@ -333,7 +335,7 @@ namespace
 
         if (m_ShaderByID.find(Hash) != m_ShaderByID.end())
         {
-            return CShaderPtr(m_ShaderByID[Hash]);
+            return m_ShaderByID[Hash];
         }
 
         // -----------------------------------------------------------------------------
@@ -460,9 +462,12 @@ namespace
         // -----------------------------------------------------------------------------
         // Set current shader into hash map
         // -----------------------------------------------------------------------------
-        m_ShaderByID[Hash] = &rShader;
+        if (Hash != 0)
+        {
+            m_ShaderByID[Hash] = ShaderPtr;
+        }
 
-        return CShaderPtr(ShaderPtr);
+        return ShaderPtr;
     }
 
     // -----------------------------------------------------------------------------
@@ -606,7 +611,7 @@ namespace
                 Base::Size BeginOfInclude = _rShaderContent.find('\"', FoundPosition) + 1;
                 Base::Size EndOfInclude   = _rShaderContent.find('\"', BeginOfInclude);
 
-				std::string IncludeFile = g_PathToDataShader + _rShaderContent.substr(BeginOfInclude, EndOfInclude - BeginOfInclude);
+                std::string IncludeFile = g_PathToDataShader + _rShaderContent.substr(BeginOfInclude, EndOfInclude - BeginOfInclude);
 
                 // -----------------------------------------------------------------------------
                 // Load included file and replace include directive with new file
