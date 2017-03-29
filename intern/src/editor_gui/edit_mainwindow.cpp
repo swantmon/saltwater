@@ -557,6 +557,15 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
+    void CMainWindow::createNewSLAMReconstruction()
+    {
+        Edit::CMessage NewMessage(true);
+
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::MR_SLAM_NewReconstruction, NewMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CMainWindow::reloadRenderer()
     {
         Edit::CMessage NewMessage(true);

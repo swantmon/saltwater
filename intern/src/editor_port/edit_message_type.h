@@ -123,7 +123,8 @@ namespace Edit
             Graphic_ReloadRenderer,
             Graphic_ReloadAllShader,
 
-            MR_SLAM_Reconstruction_Info,
+            MR_SLAM_NewReconstruction,
+            MR_SLAM_Reconstruction_Info_Update,
 
             NumberOfMembers,
             Undefined = -1,

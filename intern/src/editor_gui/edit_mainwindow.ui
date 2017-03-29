@@ -135,6 +135,7 @@
      </property>
      <addaction name="m_pActionEmpty"/>
      <addaction name="m_pActionCamera"/>
+     <addaction name="m_pActionSLAM"/>
     </widget>
     <widget class="QMenu" name="menuLights">
      <property name="title">
@@ -514,6 +515,9 @@
    </property>
   </action>
   <action name="m_pActionCamera">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>&amp;Camera</string>
    </property>
@@ -635,6 +639,11 @@
   <action name="m_pActionReloadAllShader">
    <property name="text">
     <string>Reload all Shader</string>
+   </property>
+  </action>
+  <action name="m_pActionSLAM">
+   <property name="text">
+    <string>SLAM</string>
    </property>
   </action>
  </widget>
@@ -786,7 +795,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>m_pActionGlobalProbe</sender>
+   <sender>m_pActionExit</sender>
    <signal>triggered()</signal>
    <receiver>CMainWindow</receiver>
    <slot>createNewLightGlobalProbe()</slot>
@@ -1137,6 +1146,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_pActionSLAM</sender>
+   <signal>triggered()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>createNewSLAMReconstruction()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>961</x>
+     <y>490</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>switchPlayingCurrentScene()</slot>
@@ -1162,5 +1187,6 @@
   <slot>createNewLightArea()</slot>
   <slot>reloadRenderer()</slot>
   <slot>reloadAllShader()</slot>
+  <slot>createNewSLAMReconstruction()</slot>
  </slots>
 </ui>
