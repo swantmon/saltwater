@@ -6,6 +6,10 @@
 namespace Gfx
 {
     CTextureBase::CTextureBase()
+        : m_Info    ()
+        , m_pPixels (0)
+        , m_FileName("")
+        , m_Hash    (-1)
     {
     }
 
@@ -13,6 +17,12 @@ namespace Gfx
 
     CTextureBase::~CTextureBase()
     {
+        if (m_Info.m_IsPixelOwner)
+        {
+            Base::CMemory::Free(m_pPixels);
+        }
+
+        m_FileName.clear();
     }
 
     // -----------------------------------------------------------------------------

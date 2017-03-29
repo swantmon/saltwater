@@ -137,9 +137,9 @@ namespace
 
     private:
 
-        typedef Base::CManagedPool<CInternMaterial, 1024, 1> CMaterials;
+        typedef Base::CManagedPool<CInternMaterial, 32, 0> CMaterials;
 
-        typedef std::unordered_map<unsigned int, CInternMaterial*> CMaterialByHashs;
+        typedef std::unordered_map<unsigned int, CMaterialPtr> CMaterialByHashs;
 
     private:
 
@@ -152,7 +152,7 @@ namespace
 
         void OnDirtyMaterial(Dt::CMaterial* _Material);
 
-        CInternMaterial* InternCreateMaterial(const SMaterialDescriptor& _rDescriptor);
+        CMaterialPtr InternCreateMaterial(const SMaterialDescriptor& _rDescriptor);
 
         void SetShaderOfMaterial(CInternMaterial& _rMaterial) const;
     };
@@ -214,14 +214,14 @@ namespace
         m_DefaultMaterialPtr = 0;
 
         // -----------------------------------------------------------------------------
-        // Clear materials
-        // -----------------------------------------------------------------------------
-        m_Materials.Clear();
-
-        // -----------------------------------------------------------------------------
         // Clear hashes
         // -----------------------------------------------------------------------------
         m_MaterialByHash.clear();
+
+        // -----------------------------------------------------------------------------
+        // Clear materials
+        // -----------------------------------------------------------------------------
+        m_Materials.Clear();
     }
 
     // -----------------------------------------------------------------------------
@@ -253,13 +253,15 @@ namespace
 
         if (m_MaterialByHash.find(Hash) != m_MaterialByHash.end())
         {
-            return CMaterialPtr(m_MaterialByHash.at(Hash));
+            return m_MaterialByHash.at(Hash);
         }
 
         // -----------------------------------------------------------------------------
         // Material
         // -----------------------------------------------------------------------------
-        CInternMaterial* pInternMaterial = InternCreateMaterial(_rDescriptor);
+        CMaterialPtr MaterialPtr = InternCreateMaterial(_rDescriptor);
+
+        CInternMaterial* pInternMaterial = static_cast<CInternMaterial*>(MaterialPtr.GetPtr());
 
         if (pInternMaterial == nullptr)
         {
@@ -273,7 +275,7 @@ namespace
             m_MaterialByHash[Hash] = pInternMaterial;
         }
 
-        return CMaterialPtr(pInternMaterial);
+        return MaterialPtr;
     }
 
     // -----------------------------------------------------------------------------
@@ -331,7 +333,9 @@ namespace
                 MaterialDescriptor.m_AlbedoColor     = _Material->GetColor();
                 MaterialDescriptor.m_TilingOffset    = _Material->GetTilingOffset();
 
-                CInternMaterial* pInternMaterial = InternCreateMaterial(MaterialDescriptor);
+                CMaterialPtr MaterialPtr = InternCreateMaterial(MaterialDescriptor);
+
+                CInternMaterial* pInternMaterial = static_cast<CInternMaterial*>(MaterialPtr.GetPtr());
 
                 if (pInternMaterial != nullptr)
                 {
@@ -351,8 +355,11 @@ namespace
             // -----------------------------------------------------------------------------
             // Get data material
             // -----------------------------------------------------------------------------
-            Dt::CMaterial&   rDataMaterial    = *_Material;
-            CInternMaterial* pGraphicMaterial = m_MaterialByHash.at(Hash);
+            Dt::CMaterial& rDataMaterial    = *_Material;
+
+            CMaterialPtr MaterialPtr = m_MaterialByHash.at(Hash);
+
+            CInternMaterial* pGraphicMaterial = static_cast<CInternMaterial*>(MaterialPtr.GetPtr());
 
             if (pGraphicMaterial == nullptr)
             {
@@ -446,7 +453,10 @@ namespace
             // Get data material
             // -----------------------------------------------------------------------------
             Dt::CMaterial&   rDataMaterial    = *_Material;
-            CInternMaterial* pGraphicMaterial = m_MaterialByHash.at(Hash);
+
+            CMaterialPtr MaterialPtr = m_MaterialByHash.at(Hash);
+
+            CInternMaterial* pGraphicMaterial = static_cast<CInternMaterial*>(MaterialPtr.GetPtr());
 
             if (pGraphicMaterial == nullptr)
             {
@@ -476,7 +486,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CGfxMaterialManager::CInternMaterial* CGfxMaterialManager::InternCreateMaterial(const SMaterialDescriptor& _rDescriptor)
+    CMaterialPtr CGfxMaterialManager::InternCreateMaterial(const SMaterialDescriptor& _rDescriptor)
     {
         const char*           pMaterialName;
         const char*           pColorMap;
@@ -634,7 +644,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Create material
         // -----------------------------------------------------------------------------
-        CInternMaterial* pInternMaterial = m_Materials.Allocate();
+        CMaterialPtr MaterialPtr = m_Materials.Allocate();
+
+        CInternMaterial* pInternMaterial = static_cast<CInternMaterial*>(MaterialPtr.GetPtr());
         
         assert(pInternMaterial != nullptr);
 
@@ -764,7 +776,7 @@ namespace
 
         rMaterial.m_SamplerSetPtrs[CShader::Pixel] = SamplerManager::CreateSamplerSet(SamplerPtrs, CMaterial::SMaterialKey::s_NumberOfTextures);
 
-        return pInternMaterial;
+        return MaterialPtr;
     }
 
     // -----------------------------------------------------------------------------

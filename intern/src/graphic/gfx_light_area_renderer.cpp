@@ -533,11 +533,10 @@ namespace
 
         for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
         {
-            Dt::CEntity*          pDtEntity      = CurrentRenderJob->m_pDtEntity;
             Dt::CAreaLightFacet*  pDtLightFacet  = CurrentRenderJob->m_pDtLightFacet;
             Gfx::CAreaLightFacet* pGfxLightFacet = CurrentRenderJob->m_pGfxLightFacet;
 
-            assert(pDtEntity && pDtLightFacet && pGfxLightFacet);
+            assert(pDtLightFacet && pGfxLightFacet);
 
             ContextManager::SetRenderContext(m_DefaultRenderContextPtr);
 

@@ -5,6 +5,32 @@
 #include <QFileDialog>
 #include <QString>
 
+#include <assert.h>
+
+
+namespace Edit
+{
+    struct SResolution
+    {
+        enum Enum
+        {
+            FreeAspect = 0,
+            A640x480,
+            A1024x768,
+            A1280x720,
+            A1920x1080,
+            A2560x1440,
+            NumberOfResultions
+        };
+
+        static const QStringList s_NameOfAspect;
+        static const QList<QSize> s_Resolutions;
+    };
+} // namespace Edit
+
+const QStringList Edit::SResolution::s_NameOfAspect = QStringList() << "FreeAspect" << "640x480" << "1024x768" << "1280x720" << "1920x1080" << "2560x1440";
+const QList<QSize> Edit::SResolution::s_Resolutions = QList<QSize>() << QSize(-1, -1) << QSize(640, 480) << QSize(1024, 768) << QSize(1280, 720) << QSize(1920, 1080) << QSize(2560, 1440);
+
 namespace Edit
 {
     CMainWindow::CMainWindow(QWidget* _pParent) 
@@ -31,6 +57,8 @@ namespace Edit
         m_pStatusLabel->setText("FPS:");
 
         m_pStatusBar->addPermanentWidget(m_pStatusLabel, 1);
+
+        m_pResolutionCB->addItems(SResolution::s_NameOfAspect);
 
         // -----------------------------------------------------------------------------
         // Dock widgets setup
@@ -94,7 +122,7 @@ namespace Edit
 
     void CMainWindow::SetRenderSize(int _Width, int _Height)
     {
-        m_pEditorRenderContext->setFixedSize(QSize(_Width, _Height));
+        // m_pEditorRenderContext->setMinimumSize(QSize(_Width, _Height));
     }
 
     // -----------------------------------------------------------------------------
@@ -651,6 +679,26 @@ namespace Edit
     void CMainWindow::toggleAssetsDock()
     {
         m_pAssetsDockWidget->setVisible(!m_pAssetsDockWidget->isVisible());
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::changeResolution(int _Index)
+    {
+        assert(_Index < SResolution::NumberOfResultions);
+
+        QSize CurrentSize = Edit::SResolution::s_Resolutions[_Index];
+
+        if (CurrentSize.width() == -1 || CurrentSize.height() == -1)
+        {
+            m_pEditorRenderContext->setMinimumSize(0, 0);
+
+            m_pEditorRenderContext->setMaximumSize(2560, 1440);
+        }
+        else
+        {
+            m_pEditorRenderContext->setFixedSize(CurrentSize);
+        }
     }
 
     // -----------------------------------------------------------------------------

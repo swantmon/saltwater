@@ -63,6 +63,8 @@ namespace
         void OnReload();
         void OnNewMap();
         void OnUnloadMap();
+
+        void OnResize(unsigned int _Width, unsigned int _Height);
         
         void Update();
         void Render();
@@ -124,7 +126,8 @@ namespace
         CShaderPtr m_SSAOShaderPSPtrs[NumberOfSSAOs];
         CShaderPtr m_BilateralBlurShaderCSPtr;
 
-        CTextureSetPtr m_SSAOTextureSets[NumberOfSSAOs];
+        CTextureBasePtr m_NoiseTexturePtr;
+
         CTextureSetPtr m_HalfTexturePtrs[2];
         CTextureSetPtr m_BilateralBlurHTextureSetPtr;
         CTextureSetPtr m_BilateralBlurVTextureSetPtr;
@@ -157,11 +160,16 @@ namespace
         , m_BilateralBlurShaderCSPtr         ()
         , m_BilateralBlurHTextureSetPtr      ()
         , m_BilateralBlurVTextureSetPtr      ()
-        , m_SSAOTextureSets                  ()
+        , m_NoiseTexturePtr                  ()
         , m_DeferredRenderContextPtr         ()
         , m_SSAORenderJobs                   ()
     {
         m_SSAORenderJobs.reserve(1);
+
+        // -----------------------------------------------------------------------------
+        // Register for resizing events
+        // -----------------------------------------------------------------------------
+        Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxShadowRenderer::OnResize));
     }
     
     // -----------------------------------------------------------------------------
@@ -213,13 +221,11 @@ namespace
         m_HalfRenderbufferPtr               = 0;
         m_DeferredRenderContextPtr          = 0;
         m_HalfContextPtr                    = 0;
-               
-        m_SSAOTextureSets[SSAO]      = 0;
-        m_SSAOTextureSets[SSAOApply] = 0;
+        m_NoiseTexturePtr                   = 0;
 
         m_SSAOShaderPSPtrs[SSAO]      = 0;
         m_SSAOShaderPSPtrs[SSAOApply] = 0;
-        
+
         m_HalfTexturePtrs[0] = 0;
         m_HalfTexturePtrs[1] = 0;
     }
@@ -364,13 +370,9 @@ namespace
         Base::Int2 Size = Main::GetActiveWindowSize();
         
         Base::Int2 HalfSize(Size[0] / 2, Size[1] / 2);
-        
-        CTextureBasePtr GBuffer0TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0);
-        CTextureBasePtr GBuffer1TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1);
-        CTextureBasePtr GBuffer2TexturePtr = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2);
-        CTextureBasePtr DepthTexturePtr    = TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget();
-        CTextureBasePtr HalfTextureOnePtr  = m_HalfRenderbufferPtr->GetRenderTarget(0);
-        
+
+        CTextureBasePtr HalfTextureOnePtr = m_HalfRenderbufferPtr->GetRenderTarget(0);
+
         // -----------------------------------------------------------------------------
         // Create texture for result of blurring
         // -----------------------------------------------------------------------------
@@ -428,12 +430,9 @@ namespace
         NoiseTextureDescriptor.m_pPixels          = NoiseColor;
         NoiseTextureDescriptor.m_Format           = CTextureBase::R8G8B8_UBYTE;
 
-        CTextureBasePtr NoiseTexturePtr = static_cast<CTextureBasePtr>(TextureManager::CreateTexture2D(NoiseTextureDescriptor));
+        m_NoiseTexturePtr = static_cast<CTextureBasePtr>(TextureManager::CreateTexture2D(NoiseTextureDescriptor));
 
         // -----------------------------------------------------------------------------
-
-        m_SSAOTextureSets[SSAO]      = TextureManager::CreateTextureSet(GBuffer0TexturePtr, GBuffer1TexturePtr, DepthTexturePtr, NoiseTexturePtr);
-        m_SSAOTextureSets[SSAOApply] = TextureManager::CreateTextureSet(GBuffer0TexturePtr, GBuffer1TexturePtr, GBuffer2TexturePtr);
         
         m_HalfTexturePtrs[0]     = TextureManager::CreateTextureSet(HalfTextureOnePtr);
         m_HalfTexturePtrs[1]     = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(HalfTextureTwoPtr));
@@ -513,6 +512,85 @@ namespace
     void CGfxShadowRenderer::OnUnloadMap()
     {
         
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxShadowRenderer::OnResize(unsigned int _Width, unsigned int _Height)
+    {
+        STextureDescriptor RendertargetDescriptor;
+
+        // -----------------------------------------------------------------------------
+        // Initiate target set
+        // -----------------------------------------------------------------------------
+        Base::Int2 Size(_Width, _Height);
+
+        Base::Int2 HalfSize   (Size[0] / 2, Size[1] / 2);
+        Base::Int2 QuarterSize(Size[0] / 4, Size[1] / 4);
+
+        // -----------------------------------------------------------------------------
+        // Create render target textures
+        // -----------------------------------------------------------------------------
+        RendertargetDescriptor.m_NumberOfPixelsU  = HalfSize[0];
+        RendertargetDescriptor.m_NumberOfPixelsV  = HalfSize[1];
+        RendertargetDescriptor.m_NumberOfPixelsW  = 1;
+        RendertargetDescriptor.m_NumberOfMipMaps  = 1;
+        RendertargetDescriptor.m_NumberOfTextures = 1;
+        RendertargetDescriptor.m_Binding          = CTextureBase::RenderTarget;
+        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
+        RendertargetDescriptor.m_Format           = CTextureBase::R8G8B8A8_UBYTE;
+        RendertargetDescriptor.m_Usage            = CTextureBase::GPURead;
+        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_pFileName        = 0;
+        RendertargetDescriptor.m_pPixels          = 0;
+
+        CTexture2DPtr HalfTexturePtr    = TextureManager::CreateTexture2D(RendertargetDescriptor);
+        CTexture2DPtr HalfTextureTwoPtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
+        
+        // -----------------------------------------------------------------------------
+        // Create render target
+        // -----------------------------------------------------------------------------
+        CTextureBasePtr HalfRenderbuffer[1];
+
+        HalfRenderbuffer[0] = HalfTexturePtr;
+
+        m_HalfRenderbufferPtr = TargetSetManager::CreateTargetSet(HalfRenderbuffer, 1);
+
+        // -----------------------------------------------------------------------------
+        // Build view ports
+        // -----------------------------------------------------------------------------
+        SViewPortDescriptor ViewPortDesc;
+
+        ViewPortDesc.m_TopLeftX = 0.0f;
+        ViewPortDesc.m_TopLeftY = 0.0f;
+        ViewPortDesc.m_Width    = static_cast<float>(HalfSize[0]);
+        ViewPortDesc.m_Height   = static_cast<float>(HalfSize[1]);
+        ViewPortDesc.m_MinDepth = 0.0f;
+        ViewPortDesc.m_MaxDepth = 1.0f;
+        
+        CViewPortPtr HalfViewPort = ViewManager::CreateViewPort(ViewPortDesc);
+
+        CViewPortSetPtr HalfViewPortSetPtr = ViewManager::CreateViewPortSet(HalfViewPort);
+        
+        // -----------------------------------------------------------------------------
+        // Setup states
+        // -----------------------------------------------------------------------------
+        m_HalfContextPtr->SetViewPortSet(HalfViewPortSetPtr);
+        m_HalfContextPtr->SetTargetSet(m_HalfRenderbufferPtr);
+
+        // -----------------------------------------------------------------------------
+        // Initiate target set
+        // -----------------------------------------------------------------------------
+        CTextureBasePtr HalfTextureOnePtr  = m_HalfRenderbufferPtr->GetRenderTarget(0);
+        
+        // -----------------------------------------------------------------------------
+        // Create texture sets
+        // -----------------------------------------------------------------------------
+        m_HalfTexturePtrs[0] = TextureManager::CreateTextureSet(HalfTextureOnePtr);
+        m_HalfTexturePtrs[1] = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(HalfTextureTwoPtr));
+
+        m_BilateralBlurHTextureSetPtr = TextureManager::CreateTextureSet(HalfTextureOnePtr, static_cast<CTextureBasePtr>(HalfTextureTwoPtr));
+        m_BilateralBlurVTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(HalfTextureTwoPtr), HalfTextureOnePtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -595,10 +673,10 @@ namespace
         ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipLinearWrap));
 
-        ContextManager::SetTexture(0, m_SSAOTextureSets[SSAO]->GetTexture(0));
-        ContextManager::SetTexture(1, m_SSAOTextureSets[SSAO]->GetTexture(1));
-        ContextManager::SetTexture(2, m_SSAOTextureSets[SSAO]->GetTexture(2));
-        ContextManager::SetTexture(3, m_SSAOTextureSets[SSAO]->GetTexture(3));
+        ContextManager::SetTexture(0, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0));
+        ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1));
+        ContextManager::SetTexture(2, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2));
+        ContextManager::SetTexture(3, m_NoiseTexturePtr);
 
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
 
@@ -713,9 +791,9 @@ namespace
         ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        ContextManager::SetTexture(0, m_SSAOTextureSets[SSAOApply]->GetTexture(0));
-        ContextManager::SetTexture(1, m_SSAOTextureSets[SSAOApply]->GetTexture(1));
-        ContextManager::SetTexture(2, m_SSAOTextureSets[SSAOApply]->GetTexture(2));
+        ContextManager::SetTexture(0, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0));
+        ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1));
+        ContextManager::SetTexture(2, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2));
         ContextManager::SetTexture(3, m_HalfTexturePtrs[0]->GetTexture(0));
         
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);

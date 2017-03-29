@@ -52,6 +52,8 @@ namespace
         void OnReload();
         void OnNewMap();
         void OnUnloadMap();
+
+        void OnResize(unsigned int _Width, unsigned int _Height);
         
         void Update();
         void Render();
@@ -136,8 +138,6 @@ namespace
         
         CBufferSetPtr          m_HistogramBufferSetPtrs[NumberOfHistogramPasses];
 
-        CTextureSetPtr         m_HistogramInputTextureSetPtr;
-
         unsigned int           m_HistoryIndex;
         unsigned int           m_LastHistoryIndex;
         
@@ -153,11 +153,14 @@ namespace
         , m_ExposureHistoryBufferPtr         ()
         , m_HistogramShaderPtrs              ()
         , m_HistogramBufferSetPtrs           ()
-        , m_HistogramInputTextureSetPtr      ()
         , m_HistoryIndex                     (0)
         , m_LastHistoryIndex                 (s_HistogramHistorySize - 1)
         , m_FrameOnResetEyeAdaption          (0)
     {
+        // -----------------------------------------------------------------------------
+        // Register for resizing events
+        // -----------------------------------------------------------------------------
+        Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxHistogramRenderer::OnResize));
     }
     
     // -----------------------------------------------------------------------------
@@ -178,7 +181,6 @@ namespace
     
     void CGfxHistogramRenderer::OnExit()
     {
-        m_HistogramInputTextureSetPtr = 0;
         m_ExposureHistoryBufferPtr    = 0;
 
         m_HistogramShaderPtrs[HistogramBuild]    = 0;
@@ -224,9 +226,7 @@ namespace
     
     void CGfxHistogramRenderer::OnSetupTextures()
     {
-        CTextureBasePtr LightAccumulationTexturePtr = TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0);
 
-        m_HistogramInputTextureSetPtr = TextureManager::CreateTextureSet(LightAccumulationTexturePtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -343,6 +343,14 @@ namespace
     {
         
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxHistogramRenderer::OnResize(unsigned int _Width, unsigned int _Height)
+    {
+        BASE_UNUSED(_Width);
+        BASE_UNUSED(_Height);
+    }
     
     // -----------------------------------------------------------------------------
     
@@ -436,7 +444,7 @@ namespace
 
             ContextManager::SetConstantBuffer(0, m_HistogramBufferSetPtrs[HistogramBuild]->GetBuffer(2));
 
-            ContextManager::SetImageTexture(0, m_HistogramInputTextureSetPtr->GetTexture(0));
+            ContextManager::SetImageTexture(0, TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0));
 
             ContextManager::Dispatch(HistogramSettings.m_NumberOfThreadGroupsX, HistogramSettings.m_NumberOfThreadGroupsY, 1);
 

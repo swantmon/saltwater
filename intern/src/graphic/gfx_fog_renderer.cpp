@@ -139,8 +139,6 @@ namespace
         CTexture3DPtr     m_ScatteringTexturePtr;
         CTextureSetPtr    m_ScatteringTextureSetPtr;
 
-        CTextureSetPtr    m_ApplyTextureSetPtr;
-
         CTexture2DPtr m_PermutationTexturePtr;
         CTexture2DPtr m_GradientPermutationTexturePtr;
 
@@ -181,7 +179,6 @@ namespace
         , m_VolumeTextureSetPtr                 ()
         , m_ScatteringTexturePtr                ()
         , m_ScatteringTextureSetPtr             ()
-        , m_ApplyTextureSetPtr                  ()
         , m_PermutationTexturePtr               ()
         , m_GradientPermutationTexturePtr       ()
         , m_FogApplyBufferPtr                   ()
@@ -225,7 +222,6 @@ namespace
         m_VolumeTextureSetPtr           = 0;
         m_ScatteringTexturePtr          = 0;
         m_ScatteringTextureSetPtr       = 0;
-        m_ApplyTextureSetPtr            = 0;
         m_PermutationTexturePtr         = 0;
         m_GradientPermutationTexturePtr = 0;
         m_FogApplyBufferPtr             = 0;
@@ -456,15 +452,7 @@ namespace
         // -----------------------------------------------------------------------------
 
         m_ScatteringTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_VolumeTexturePtr), static_cast<CTextureBasePtr>(m_ScatteringTexturePtr));
-
-        // -----------------------------------------------------------------------------
-
-        CTextureBasePtr LightAccumulationTexture = TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0);
-
-        CTextureBasePtr DepthTexturePtr = TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget();
-
-        m_ApplyTextureSetPtr = TextureManager::CreateTextureSet(LightAccumulationTexture, DepthTexturePtr, static_cast<CTextureBasePtr>(m_ScatteringTexturePtr));
-
+        
         // -----------------------------------------------------------------------------
 
         m_BlurStagesTextureSetPtrs[0] = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_ESMTexturePtr), static_cast<CTextureBasePtr>(ESMSwapTexturePtr));
@@ -874,9 +862,9 @@ namespace
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        ContextManager::SetTexture(0, m_ApplyTextureSetPtr->GetTexture(0));
-        ContextManager::SetTexture(1, m_ApplyTextureSetPtr->GetTexture(1));
-        ContextManager::SetTexture(2, m_ApplyTextureSetPtr->GetTexture(2));
+        ContextManager::SetTexture(0, TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0));
+        ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
+        ContextManager::SetTexture(2, static_cast<CTextureBasePtr>(m_ScatteringTexturePtr));
 
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
 
