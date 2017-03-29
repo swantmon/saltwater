@@ -378,8 +378,8 @@ namespace MR
         ConstantBufferDesc.m_pBytes = &m_ReconstructionSettings.m_DepthThreshold;
         m_BilateralFilterConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
-        const int ICPRowCount = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth(), g_TileSize2D) *
-            GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
+        const int ICPRowCount = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() , g_TileSize2D) *
+                                GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
 
         ConstantBufferDesc.m_Usage = CBuffer::GPUToCPU;
         ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
@@ -785,8 +785,6 @@ namespace MR
     {
         if (pReconstructionSettings != nullptr)
         {
-            Exit();
-
             m_ReconstructionSettings = *pReconstructionSettings;
             
             SetupTextures();

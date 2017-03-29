@@ -110,6 +110,7 @@ namespace ContextManager
     CBufferPtr GetResourceBuffer(unsigned int _Unit);
 
     void Barrier();
+    void Flush();
 
     void Draw(unsigned int _NumberOfVertices, unsigned int _IndexOfFirstVertex);
     void DrawIndexed(unsigned int _NumberOfIndices, unsigned int _IndexOfFirstIndex, int _BaseVertexLocation);

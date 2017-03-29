@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include "mr/mr_slam_reconstructor.h"
+
 namespace Gfx
 {
 namespace ReconstructionRenderer
@@ -26,6 +28,7 @@ namespace ReconstructionRenderer
     void OnSetupEnd();
     
     void OnReload();
+    void OnReconstructionUpdate(const MR::CSLAMReconstructor::SReconstructionSettings& _Settings);
     void OnNewMap();
     void OnUnloadMap();
     

@@ -25,6 +25,7 @@ namespace Edit
         , m_pCameraWidget      (0)
         , m_pARControllerWidget(0)
         , m_pTextureWidget     (0)
+        , m_pSlamWidget        (0)
         , m_ActiveEntityID     (-1)
     {
         // -----------------------------------------------------------------------------
@@ -53,6 +54,7 @@ namespace Edit
         m_pCameraWidget       = new CInspectorCamera();
         m_pARControllerWidget = new CInspectorARController();
         m_pTextureWidget      = new CInspectorTexture();
+        m_pSlamWidget         = new CInspectorSLAM();
 
         m_pInspectorContent->addWidget(m_pEntityWidget);
         m_pInspectorContent->addWidget(m_pTransformWidget);
@@ -70,6 +72,7 @@ namespace Edit
         m_pInspectorContent->addWidget(m_pCameraWidget);
         m_pInspectorContent->addWidget(m_pARControllerWidget);
         m_pInspectorContent->addWidget(m_pTextureWidget);
+        m_pInspectorContent->addWidget(m_pSlamWidget);
 
         ResetLayout();
 
@@ -97,6 +100,7 @@ namespace Edit
         delete m_pVolumeFogWidget;
         delete m_pMaterialWidget;
         delete m_pCameraWidget;
+        delete m_pSlamWidget;
 
         m_pEntityWidget      = 0;
         m_pPointlightWidget  = 0;

@@ -23,13 +23,6 @@
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
 
-#include "base/base_console.h"
-#include "gfx_native_buffer.h"
-#include "gfx_native_sampler.h"
-#include "gfx_native_shader.h"
-#include "gfx_native_target_set.h"
-#include "gfx_native_texture_3d.h"
-
 #include "mr/mr_slam_reconstructor.h"
 
 #include <iostream>
@@ -71,6 +64,8 @@ namespace
         
         void Update();
         void Render();
+
+        void OnReconstructionUpdate(const MR::CSLAMReconstructor::SReconstructionSettings& _Settings);
 
     private:
 
@@ -302,6 +297,15 @@ namespace
 
         OnSetupShader();
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::OnReconstructionUpdate(const MR::CSLAMReconstructor::SReconstructionSettings& _Settings)
+    {
+        m_pReconstructor->ResetReconstruction(&_Settings);
+
+        OnSetupShader();
+    }
     
     // -----------------------------------------------------------------------------
     
@@ -506,6 +510,13 @@ namespace ReconstructionRenderer
         CGfxReconstructionRenderer::GetInstance().OnReload();
     }
     
+    // -----------------------------------------------------------------------------
+
+    void OnReconstructionUpdate(const MR::CSLAMReconstructor::SReconstructionSettings& _Settings)
+    {
+        CGfxReconstructionRenderer::GetInstance().OnReconstructionUpdate(_Settings);
+    }
+
     // -----------------------------------------------------------------------------
     
     void OnNewMap()

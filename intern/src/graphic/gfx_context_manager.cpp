@@ -130,6 +130,7 @@ namespace
         CBufferPtr GetResourceBuffer(unsigned int _Unit);        
 
         void Barrier();
+        void Flush();
 
         void Draw(unsigned int _NumberOfVertices, unsigned int _IndexOfFirstVertex);
         void DrawIndexed(unsigned int _NumberOfIndices, unsigned int _IndexOfFirstIndex, int _BaseVertexLocation);
@@ -1403,6 +1404,13 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxContextManager::Flush()
+    {
+        glFinish();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxContextManager::Draw(unsigned int _NumberOfVertices, unsigned int _IndexOfFirstVertex)
     {
         glDrawArrays(s_NativeTopologies[m_Topology], _IndexOfFirstVertex, _NumberOfVertices);
@@ -2058,6 +2066,13 @@ namespace ContextManager
     void Barrier()
     {
         CGfxContextManager::GetInstance().Barrier();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void Flush()
+    {
+        CGfxContextManager::GetInstance().Flush();
     }
 
     // -----------------------------------------------------------------------------

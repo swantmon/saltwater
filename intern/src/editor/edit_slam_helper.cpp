@@ -6,6 +6,8 @@
 #include "base/base_uncopyable.h"
 
 #include "editor/edit_slam_helper.h"
+#include "mr/mr_slam_reconstructor.h"
+#include "graphic/gfx_reconstruction_renderer.h"
 
 #include "editor_port/edit_message.h"
 #include "editor_port/edit_message_manager.h"
@@ -56,7 +58,7 @@ namespace
         // -----------------------------------------------------------------------------
         Edit::MessageManager::Register(Edit::SGUIMessageType::MR_SLAM_NewReconstruction, EDIT_RECEIVE_MESSAGE(&CSLAMHelper::OnNewSLAMReconstruction));
 
-        Edit::MessageManager::Register(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Info_Update, EDIT_RECEIVE_MESSAGE(&CSLAMHelper::OnSLAMReconstructionUpdate));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Update, EDIT_RECEIVE_MESSAGE(&CSLAMHelper::OnSLAMReconstructionUpdate));
     }
 
     // -----------------------------------------------------------------------------
@@ -70,14 +72,27 @@ namespace
 
     void CSLAMHelper::OnNewSLAMReconstruction(Edit::CMessage& _rMessage)
     {
-        
+        BASE_CONSOLE_INFO("New Reconstruction");
     }
 
     // -----------------------------------------------------------------------------
 
     void CSLAMHelper::OnSLAMReconstructionUpdate(Edit::CMessage& _rMessage)
     {
+        BASE_CONSOLE_INFO("Reconstruction Update");
         
+        MR::CSLAMReconstructor::SReconstructionSettings Settings;
+
+        Settings.m_VolumeSize = _rMessage.GetFloat();
+        Settings.m_VolumeResolution = _rMessage.GetInt();
+        Settings.m_TruncatedDistance = _rMessage.GetFloat();
+        Settings.m_MaxIntegrationWeight = _rMessage.GetInt();
+        Settings.m_DepthThreshold[0] = _rMessage.GetInt();
+        Settings.m_DepthThreshold[1] = _rMessage.GetInt();
+
+        Gfx::ReconstructionRenderer::OnReconstructionUpdate(Settings);
+
+        _rMessage.SetResult(1);
     }
 } // namespace
 

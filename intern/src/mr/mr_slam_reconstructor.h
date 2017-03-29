@@ -8,7 +8,12 @@
 
 #pragma once
 
+#include "base/base_uncopyable.h"
+#include "base/base_matrix4x4.h"
+#include "base/base_vector2.h"
+
 #include "graphic/gfx_shader.h"
+#include "graphic/gfx_texture_2d.h"
 #include "graphic/gfx_texture_3d.h"
 
 #include <vector>
@@ -18,7 +23,7 @@ namespace MR
     class IRGBDCameraControl;
 
     class CSLAMReconstructor : private Base::CUncopyable
-    {
+    {        
     public:
 
         struct SReconstructionSettings

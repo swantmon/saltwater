@@ -22,6 +22,7 @@
 #include "editor/edit_material_helper.h"
 #include "editor/edit_play_state.h"
 #include "editor/edit_plugin_helper.h"
+#include "editor/edit_slam_helper.h"
 #include "editor/edit_start_state.h"
 #include "editor/edit_texture_helper.h"
 #include "editor/edit_unload_map_state.h"
@@ -177,6 +178,7 @@ namespace
         Edit::Helper::Material::OnStart();
         Edit::Helper::Plugin  ::OnStart();
         Edit::Helper::Texture ::OnStart();
+        Edit::Helper::SLAM    ::OnStart();
     }
     
     // -----------------------------------------------------------------------------
@@ -199,6 +201,7 @@ namespace
         Edit::Helper::Material::OnExit();
         Edit::Helper::Plugin  ::OnExit();
         Edit::Helper::Texture ::OnExit();
+        Edit::Helper::SLAM    ::OnExit();
 
         // -----------------------------------------------------------------------------
         // At the end we have to clean our context and windows.
