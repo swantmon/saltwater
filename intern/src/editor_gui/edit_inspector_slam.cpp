@@ -14,6 +14,7 @@ namespace Edit
 {
     CInspectorSLAM::CInspectorSLAM(QWidget* _pParent)
         : QWidget(_pParent)
+        , m_IsPaused(false)
     {
         // -----------------------------------------------------------------------------
         // Setup UI
@@ -35,17 +36,12 @@ namespace Edit
         m_pWeightTL->setText(QString::number(DefaultSettings.m_MaxIntegrationWeight));
 
         int InitialSliderPosition = static_cast<int>(Base::Log2(static_cast<float>(DefaultSettings.m_VolumeResolution)));
-        m_pResolutionHS->setRange(0, 15);
+        m_pResolutionHS->setRange(0, 11);
         m_pResolutionHS->setValue(InitialSliderPosition);
         m_pResolutionHS->setPageStep(1);
         m_pResolutionTL->setText(QString::number(1 << InitialSliderPosition));
-
-        m_IsPaused = false;
-
-        m_PauseText = QString("Pause Integration");
-        m_ResumeText = QString("Resume Integration");
-
-        m_pPauseButton->setText(m_PauseText);
+        
+        m_pPauseButton->setText(m_IsPaused ? s_ResumeText : s_PauseText);
     }
 
     // -----------------------------------------------------------------------------
@@ -101,7 +97,7 @@ namespace Edit
     {
         m_IsPaused = !m_IsPaused;
 
-        m_pPauseButton->setText(m_IsPaused ? m_ResumeText : m_PauseText);
+        m_pPauseButton->setText(m_IsPaused ? s_ResumeText : s_PauseText);
 
         Edit::CMessage NewMessage;
         NewMessage.PutBool(m_IsPaused);
@@ -109,4 +105,12 @@ namespace Edit
 
         Edit::MessageManager::SendMessage(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Pause, NewMessage);
     }
+
+    // -----------------------------------------------------------------------------
+
+    const QString CInspectorSLAM::s_PauseText = "Pause Integration";
+    const QString CInspectorSLAM::s_ResumeText = "Resume Integration";
+
+    // -----------------------------------------------------------------------------
+
 } // namespace Edit

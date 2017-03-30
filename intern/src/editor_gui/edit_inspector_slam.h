@@ -26,7 +26,7 @@ namespace Edit
 
         bool m_IsPaused;
 
-        QString m_PauseText;
-        QString m_ResumeText;
+        static const QString s_PauseText;
+        static const QString s_ResumeText;
     };
 } // namespace Edit

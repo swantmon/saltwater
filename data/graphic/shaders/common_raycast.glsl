@@ -41,7 +41,6 @@ float GetInterpolatedTSDF(vec3 Position, isampler3D Volume)
 
 vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection, isampler3D Volume)
 {
-
     const float StartLength = GetStartLength(CameraPosition, RayDirection);
     const float EndLength = GetEndLength(CameraPosition, RayDirection);
     
