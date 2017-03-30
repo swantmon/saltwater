@@ -18,7 +18,7 @@ namespace Edit
 
     public Q_SLOTS:
 
-        void valueChanged();
-        void sliderValueChanged(int);
+        void resetClicked();
+        void volumeResolutionChanged(int);
     };
 } // namespace Edit

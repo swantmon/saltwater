@@ -7,6 +7,9 @@
 
 #include <QColorDialog>
 
+#include "base/base_math_operations.h"
+#include "mr/mr_slam_reconstructor.h"
+
 namespace Edit
 {
     CInspectorSLAM::CInspectorSLAM(QWidget* _pParent)
@@ -17,10 +20,24 @@ namespace Edit
         // -----------------------------------------------------------------------------
         setupUi(this);
 
-        const int InitialSliderPosition = 8;
+        MR::CSLAMReconstructor::SReconstructionSettings DefaultSettings;
+        
+        m_pSizeHS->setRange(0, 5);
+        m_pSizeHS->setValue(1);
+        m_pSizeTL->setText(QString::number(DefaultSettings.m_VolumeSize));
 
+        m_pTruncatedDistanceHS->setRange(1, 100);
+        m_pTruncatedDistanceHS->setValue(DefaultSettings.m_TruncatedDistance);
+        m_pTruncatedDistanceTL->setText(QString::number(DefaultSettings.m_TruncatedDistance));
+
+        m_pWeightHS->setRange(1, 1000);
+        m_pWeightHS->setValue(DefaultSettings.m_MaxIntegrationWeight);
+        m_pWeightTL->setText(QString::number(DefaultSettings.m_MaxIntegrationWeight));
+
+        int InitialSliderPosition = static_cast<int>(Base::Log2(static_cast<float>(DefaultSettings.m_VolumeResolution)));
         m_pResolutionHS->setRange(0, 15);
         m_pResolutionHS->setValue(InitialSliderPosition);
+        m_pResolutionHS->setPageStep(1);
         m_pResolutionTL->setText(QString::number(1 << InitialSliderPosition));
     }
 
@@ -33,16 +50,16 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorSLAM::valueChanged()
+    void CInspectorSLAM::resetClicked()
     {
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
         
-        const float VolumeSize = m_pVolumeSizeLE->text().toFloat();
+        const float VolumeSize = static_cast<float>(m_pSizeHS->value());
         const int Resolution = 1 << m_pResolutionHS->value();
-        const float TruncatedDistance = m_pTruncatedDistanceLE->text().toFloat();
-        const int MaxIntegrationWeight = m_pMaxIntegrationWeightLE->text().toInt();
+        const float TruncatedDistance = static_cast<float>(m_pTruncatedDistanceHS->value());
+        const int MaxIntegrationWeight = m_pWeightHS->value();
         const int MinDepth = m_pMinDepthLE->text().toInt();
         const int MaxDepth = m_pMaxDepthLE->text().toInt();
 
@@ -66,7 +83,7 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorSLAM::sliderValueChanged(int _Value)
+    void CInspectorSLAM::volumeResolutionChanged(int _Value)
     {
         m_pResolutionTL->setText(QString::number(1 << _Value));
     }
