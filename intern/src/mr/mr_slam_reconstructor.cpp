@@ -149,6 +149,7 @@ namespace MR
         m_IntegratedDepthFrameCount = 0;
         m_FrameCount = 0;
         m_TrackingLost = true;
+        m_IsPaused = false;
 
         SetupShaders();
         SetupTextures();
@@ -766,7 +767,11 @@ namespace MR
 
             Performance::BeginEvent("TSDF Integration and Raycasting");
 
-            Integrate();
+            if (!m_IsPaused)
+            {
+                Integrate();
+            }
+
             Raycast();
             CreateRaycastPyramid();
 
@@ -814,6 +819,13 @@ namespace MR
         BufferManager::UploadConstantBufferData(m_TrackingDataConstantBufferPtr, &TrackingData);
                 
         ClearVolume();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::SetPaused(bool _Paused)
+    {
+        m_IsPaused = _Paused;
     }
 
     // -----------------------------------------------------------------------------

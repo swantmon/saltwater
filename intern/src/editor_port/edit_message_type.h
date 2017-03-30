@@ -125,6 +125,7 @@ namespace Edit
 
             MR_SLAM_NewReconstruction,
             MR_SLAM_Reconstruction_Update,
+            MR_SLAM_Reconstruction_Pause,
 
             NumberOfMembers,
             Undefined = -1,

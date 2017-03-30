@@ -18,7 +18,15 @@ namespace Edit
 
     public Q_SLOTS:
 
-        void resetClicked();
+        void reset();
+        void pause();
         void volumeResolutionChanged(int);
+
+    private:
+
+        bool m_IsPaused;
+
+        QString m_PauseText;
+        QString m_ResumeText;
     };
 } // namespace Edit

@@ -158,7 +158,14 @@
     </layout>
    </item>
    <item>
-    <widget class="QPushButton" name="m_pReconstructButton">
+    <widget class="QPushButton" name="m_pPauseButton">
+     <property name="text">
+      <string>Pause Integration</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="m_pResetButton">
      <property name="text">
       <string>Reset Reconstruction</string>
      </property>
@@ -182,10 +189,10 @@
  <resources/>
  <connections>
   <connection>
-   <sender>m_pReconstructButton</sender>
+   <sender>m_pResetButton</sender>
    <signal>clicked()</signal>
    <receiver>InspectorSLAM</receiver>
-   <slot>resetClicked()</slot>
+   <slot>reset()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>187</x>
@@ -245,9 +252,26 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_pPauseButton</sender>
+   <signal>clicked()</signal>
+   <receiver>InspectorSLAM</receiver>
+   <slot>pause()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>187</x>
+     <y>193</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>187</x>
+     <y>109</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>volumeResolutionChanged(int)</slot>
-  <slot>resetClicked()</slot>
+  <slot>pause()</slot>
+  <slot>reset()</slot>
  </slots>
 </ui>

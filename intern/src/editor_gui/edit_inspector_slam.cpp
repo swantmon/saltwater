@@ -39,6 +39,13 @@ namespace Edit
         m_pResolutionHS->setValue(InitialSliderPosition);
         m_pResolutionHS->setPageStep(1);
         m_pResolutionTL->setText(QString::number(1 << InitialSliderPosition));
+
+        m_IsPaused = false;
+
+        m_PauseText = QString("Pause Integration");
+        m_ResumeText = QString("Resume Integration");
+
+        m_pPauseButton->setText(m_PauseText);
     }
 
     // -----------------------------------------------------------------------------
@@ -50,7 +57,7 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorSLAM::resetClicked()
+    void CInspectorSLAM::reset()
     {
         // -----------------------------------------------------------------------------
         // Read values
@@ -88,4 +95,18 @@ namespace Edit
         m_pResolutionTL->setText(QString::number(1 << _Value));
     }
 
+    // -----------------------------------------------------------------------------
+
+    void CInspectorSLAM::pause()
+    {
+        m_IsPaused = !m_IsPaused;
+
+        m_pPauseButton->setText(m_IsPaused ? m_ResumeText : m_PauseText);
+
+        Edit::CMessage NewMessage;
+        NewMessage.PutBool(m_IsPaused);
+        NewMessage.Reset();
+
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Pause, NewMessage);
+    }
 } // namespace Edit

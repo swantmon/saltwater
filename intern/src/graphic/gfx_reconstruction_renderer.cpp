@@ -64,6 +64,7 @@ namespace
         
         void Update();
         void Render();
+        void Pause(bool _Paused);
 
         void OnReconstructionUpdate(const MR::CSLAMReconstructor::SReconstructionSettings& _Settings);
 
@@ -112,7 +113,7 @@ namespace
     void CGfxReconstructionRenderer::OnStart()
     {
         Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxReconstructionRenderer::OnResize));
-
+        
         m_pReconstructor.reset(new MR::CSLAMReconstructor);
     }
 
@@ -422,6 +423,13 @@ namespace
         
         Performance::EndEvent();
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::Pause(bool _Paused)
+    {
+        m_pReconstructor->SetPaused(_Paused);
+    }
 } // namespace
 
 namespace Gfx
@@ -543,6 +551,13 @@ namespace ReconstructionRenderer
     void Render()
     {
         CGfxReconstructionRenderer::GetInstance().Render();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void Pause(bool _Paused)
+    {
+        CGfxReconstructionRenderer::GetInstance().Pause(_Paused);
     }
 } // namespace Voxel
 } // namespace Gfx

@@ -32,6 +32,7 @@ namespace
 
         void OnNewSLAMReconstruction(Edit::CMessage& _rMessage);
         void OnSLAMReconstructionUpdate(Edit::CMessage& _rMessage);
+        void OnSLAMReconstructionPause(Edit::CMessage& _rMessage);
     };
 } // namespace
 
@@ -58,6 +59,7 @@ namespace
         // -----------------------------------------------------------------------------
         Edit::MessageManager::Register(Edit::SGUIMessageType::MR_SLAM_NewReconstruction, EDIT_RECEIVE_MESSAGE(&CSLAMHelper::OnNewSLAMReconstruction));
         Edit::MessageManager::Register(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Update, EDIT_RECEIVE_MESSAGE(&CSLAMHelper::OnSLAMReconstructionUpdate));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Pause, EDIT_RECEIVE_MESSAGE(&CSLAMHelper::OnSLAMReconstructionPause));
     }
 
     // -----------------------------------------------------------------------------
@@ -88,6 +90,17 @@ namespace
         Settings.m_DepthThreshold[1] = _rMessage.GetInt();
 
         Gfx::ReconstructionRenderer::OnReconstructionUpdate(Settings);
+
+        _rMessage.SetResult(1);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMHelper::OnSLAMReconstructionPause(Edit::CMessage& _rMessage)
+    {
+        bool Pause = _rMessage.GetBool();
+
+        Gfx::ReconstructionRenderer::Pause(Pause);
 
         _rMessage.SetResult(1);
     }
