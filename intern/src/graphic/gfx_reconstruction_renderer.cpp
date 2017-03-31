@@ -86,7 +86,9 @@ namespace
         CBufferPtr m_DrawCallConstantBufferPtr;
         
         CMeshPtr m_CameraMeshPtr;
+        CMeshPtr m_CubeMeshPtr;
         CInputLayoutPtr m_CameraInputLayoutPtr;
+        CInputLayoutPtr m_CubeInputLayoutPtr;
 
         CRenderContextPtr m_CameraRenderContextPtr;
     };
@@ -130,7 +132,9 @@ namespace
         m_DrawCallConstantBufferPtr = 0;
                 
         m_CameraMeshPtr = 0;
+        m_CubeMeshPtr = 0;
         m_CameraInputLayoutPtr = 0;
+        m_CubeInputLayoutPtr = 0;
 
         m_CameraRenderContextPtr = 0;
 
@@ -173,6 +177,7 @@ namespace
         InputLayoutDesc.m_InstanceDataStepRate = 0;
 
         m_CameraInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_CameraVSPtr);
+        m_CubeInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_RaycastVSPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -240,7 +245,7 @@ namespace
     
     void CGfxReconstructionRenderer::OnSetupModels()
     {
-        Float3 Vertices[] =
+        Float3 CameraVertices[] =
         {
             Float3(-1.0f, -0.5f, 2.0f),
             Float3( 1.0f, -0.5f, 2.0f),
@@ -249,7 +254,7 @@ namespace
             Float3(-0.0f,  0.0f, 0.0f),
         };
 
-        unsigned int Indices[] =
+        unsigned int CameraIndices[] =
         {
             0, 1, 2,
             0, 2, 3,
@@ -263,10 +268,10 @@ namespace
         Dt::CLOD* pLOD = new Dt::CLOD;
         Dt::CMesh* pMesh = new Dt::CMesh;
 
-        pSurface->SetPositions(Vertices);
-        pSurface->SetNumberOfVertices(sizeof(Vertices) / sizeof(Vertices[0]));
-        pSurface->SetIndices(Indices);
-        pSurface->SetNumberOfIndices(sizeof(Indices) / sizeof(Indices[0]));
+        pSurface->SetPositions(CameraVertices);
+        pSurface->SetNumberOfVertices(sizeof(CameraVertices) / sizeof(CameraVertices[0]));
+        pSurface->SetIndices(CameraIndices);
+        pSurface->SetNumberOfIndices(sizeof(CameraIndices) / sizeof(CameraIndices[0]));
         pSurface->SetElements(0);
 
         pLOD->SetSurface(0, pSurface);
@@ -281,6 +286,59 @@ namespace
         };
 
         m_CameraMeshPtr = MeshManager::CreateMesh(MeshDesc);
+
+        Float3 CubeVertices[] =
+        {
+            Float3(0.0f, 0.0f, 0.0f), // 0
+            Float3(1.0f, 0.0f, 0.0f), // 1
+            Float3(1.0f, 1.0f, 0.0f), // 2
+            Float3(0.0f, 1.0f, 0.0f), // 3
+            Float3(0.0f, 0.0f, 1.0f), // 4
+            Float3(1.0f, 0.0f, 1.0f), // 5
+            Float3(1.0f, 1.0f, 1.0f), // 6
+            Float3(0.0f, 1.0f, 1.0f), // 7
+        };
+
+        unsigned int CubeIndices[] =
+        {
+            0, 2, 1, // back
+            0, 3, 2,
+
+            5, 1, 2, // right
+            5, 2, 6,
+
+            4, 1, 5, // bottom
+            4, 0, 1,
+
+            4, 7, 0, // left
+            0, 7, 3,
+
+            7, 6, 2, // top
+            7, 2, 3,
+
+            4, 6, 7, // front
+            4, 5, 6,
+        };
+
+        pSurface = new Dt::CSurface;
+        pLOD = new Dt::CLOD;
+        pMesh = new Dt::CMesh;
+
+        pSurface->SetPositions(CubeVertices);
+        pSurface->SetNumberOfVertices(sizeof(CubeVertices) / sizeof(CubeVertices[0]));
+        pSurface->SetIndices(CubeIndices);
+        pSurface->SetNumberOfIndices(sizeof(CubeIndices) / sizeof(CubeIndices[0]));
+        pSurface->SetElements(0);
+
+        pLOD->SetSurface(0, pSurface);
+        pLOD->SetNumberOfSurfaces(1);
+
+        pMesh->SetLOD(0, pLOD);
+        pMesh->SetNumberOfLODs(1);
+
+        MeshDesc.m_pModel = pMesh;
+
+        m_CubeMeshPtr = MeshManager::CreateMesh(MeshDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -363,19 +421,15 @@ namespace
 
         ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
-
-        // todo: remove dummy geometry
-
+        
         const unsigned int Offset = 0;
-        ContextManager::SetVertexBufferSet(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
-        ContextManager::SetIndexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
-        ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
+        ContextManager::SetVertexBufferSet(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
+        
+        ContextManager::SetTopology(STopology::TriangleList);
 
-        // todo: remove dummy geometry
-
-        ContextManager::SetTopology(STopology::TriangleFan);
-
-        ContextManager::Draw(4, 0);
+        ContextManager::DrawIndexed(36, 0, 0);
     }
 
     // -----------------------------------------------------------------------------
