@@ -252,22 +252,7 @@ namespace MR
         m_RaycastNormalMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
 
         STextureDescriptor TextureDescriptor = {};
-
-        TextureDescriptor.m_NumberOfPixelsU = m_pRGBDCameraControl->GetDepthWidth();
-        TextureDescriptor.m_NumberOfPixelsV = m_pRGBDCameraControl->GetDepthHeight();
-        TextureDescriptor.m_NumberOfPixelsW = 1;
-        TextureDescriptor.m_NumberOfMipMaps = 1;
-        TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding = CTextureBase::ShaderResource;
-        TextureDescriptor.m_Access = CTextureBase::CPUWrite;        
-        TextureDescriptor.m_Usage = CTextureBase::GPUReadWrite;
-        TextureDescriptor.m_Semantic = CTextureBase::Diffuse;
-        TextureDescriptor.m_pFileName = 0;
-        TextureDescriptor.m_pPixels = 0;
-        TextureDescriptor.m_Format = CTextureBase::R16_UINT;
         
-        m_RawDepthBufferPtr = TextureManager::CreateTexture2D(TextureDescriptor);
-
         for (int i = 0; i < m_ReconstructionSettings.m_PyramidLevelCount; ++i)
         {
             TextureDescriptor.m_NumberOfPixelsU = m_pRGBDCameraControl->GetDepthWidth() >> i;
@@ -307,6 +292,21 @@ namespace MR
         TextureDescriptor.m_Format = CTextureBase::R16G16_INT;
 
         m_VolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
+
+        TextureDescriptor.m_NumberOfPixelsU = m_pRGBDCameraControl->GetDepthWidth();
+        TextureDescriptor.m_NumberOfPixelsV = m_pRGBDCameraControl->GetDepthHeight();
+        TextureDescriptor.m_NumberOfPixelsW = 1;
+        TextureDescriptor.m_NumberOfMipMaps = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding = CTextureBase::ShaderResource;
+        TextureDescriptor.m_Access = CTextureBase::CPUWrite;
+        TextureDescriptor.m_Usage = CTextureBase::GPUReadWrite;
+        TextureDescriptor.m_Semantic = CTextureBase::UndefinedSemantic;
+        TextureDescriptor.m_pFileName = nullptr;
+        TextureDescriptor.m_pPixels = 0;
+        TextureDescriptor.m_Format = CTextureBase::R16_UINT;
+
+        m_RawDepthBufferPtr = TextureManager::CreateTexture2D(TextureDescriptor);
     }
     
     // -----------------------------------------------------------------------------
@@ -706,22 +706,8 @@ namespace MR
         {
             Performance::BeginEvent("Data Input");
 
-            STextureDescriptor TextureDescriptor = {};
-
-            TextureDescriptor.m_NumberOfPixelsU = m_pRGBDCameraControl->GetDepthWidth();
-            TextureDescriptor.m_NumberOfPixelsV = m_pRGBDCameraControl->GetDepthHeight();
-            TextureDescriptor.m_NumberOfPixelsW = 1;
-            TextureDescriptor.m_NumberOfMipMaps = 1;
-            TextureDescriptor.m_NumberOfTextures = 1;
-            TextureDescriptor.m_Binding = CTextureBase::ShaderResource;
-            TextureDescriptor.m_Access = CTextureBase::CPUWrite;
-            TextureDescriptor.m_Usage = CTextureBase::GPUReadWrite;
-            TextureDescriptor.m_Semantic = CTextureBase::UndefinedSemantic;
-            TextureDescriptor.m_pFileName = nullptr;
-            TextureDescriptor.m_pPixels = m_DepthPixels.data();
-            TextureDescriptor.m_Format = CTextureBase::R16_UINT;
-
-            m_RawDepthBufferPtr = TextureManager::CreateTexture2D(TextureDescriptor);
+            Base::AABB2UInt TargetRect = Base::AABB2UInt(Base::UInt2(0, 0), Base::UInt2(m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight()));
+            TextureManager::CopyToTexture2D(m_RawDepthBufferPtr, TargetRect, m_pRGBDCameraControl->GetDepthWidth(), m_DepthPixels.data());
             
             //////////////////////////////////////////////////////////////////////////////////////
             // Mirror depth data
@@ -733,7 +719,7 @@ namespace MR
             ContextManager::SetShaderCS(m_MirrorDepthCSPtr);
             ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
             ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
-
+            
             //////////////////////////////////////////////////////////////////////////////////////
             // Create reference data
             //////////////////////////////////////////////////////////////////////////////////////
@@ -741,7 +727,7 @@ namespace MR
             CreateReferencePyramid();
 
             Performance::EndEvent();
-
+            
             //////////////////////////////////////////////////////////////////////////////////////
             // Tracking
             //////////////////////////////////////////////////////////////////////////////////////
@@ -771,7 +757,7 @@ namespace MR
             {
                 Integrate();
             }
-
+            
             Raycast();
             CreateRaycastPyramid();
 
@@ -780,6 +766,8 @@ namespace MR
             ++m_IntegratedDepthFrameCount;
             ++m_FrameCount;
         }
+
+        ContextManager::ResetShaderCS();
 
         Performance::EndEvent();
     }

@@ -76,8 +76,8 @@ namespace
 
         BASE_CONSOLE_STREAMINFO("Logic> Loading level number " << LevelIndexDebug);
         
-        CreateEmptyScene();
-        //CreateDefaultScene();
+        //CreateEmptyScene();
+        CreateDefaultScene();
 
         BASE_CONSOLE_STREAMINFO("Logic> Loading level finished.");
         
@@ -147,7 +147,7 @@ namespace
 
     void CLgLoadMapState::CreateDefaultScene()
     {
-                // -----------------------------------------------------------------------------
+        // -----------------------------------------------------------------------------
         // Allocate a map
         // -----------------------------------------------------------------------------
         Dt::Map::AllocateMap(1, 1);
@@ -226,7 +226,7 @@ namespace
 
             Dt::CSkyFacet* pSkyboxFacet = Dt::SkyManager::CreateSky();
 
-            pSkyboxFacet->SetRefreshMode(Dt::CSkyFacet::Dynamic);
+            pSkyboxFacet->SetRefreshMode(Dt::CSkyFacet::Static);
             pSkyboxFacet->SetType(Dt::CSkyFacet::Panorama);
             pSkyboxFacet->SetPanorama(pPanoramaTexture);
             pSkyboxFacet->SetIntensity(10000.0f);
@@ -294,7 +294,7 @@ namespace
             pProbeLightFacet->SetType(Dt::CLightProbeFacet::Sky);
             pProbeLightFacet->SetQuality(Dt::CLightProbeFacet::PX512);
             pProbeLightFacet->SetIntensity(1.0f);
-            pProbeLightFacet->SetRefreshMode(Dt::CLightProbeFacet::Dynamic);
+            pProbeLightFacet->SetRefreshMode(Dt::CLightProbeFacet::Static);
 
             rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pProbeLightFacet);
 
@@ -357,7 +357,7 @@ namespace
             Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
 
             pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 1.0f));
-            pTransformationFacet->SetScale(Base::Float3(0.5f));
+            pTransformationFacet->SetScale(Base::Float3(0.02f));
             pTransformationFacet->SetRotation(Base::Float3(0.0f));
 
             // -----------------------------------------------------------------------------
@@ -412,7 +412,7 @@ namespace
 
             Dt::CEntity* pSubEntity = rPlane.GetHierarchyFacet()->GetFirstChild();
 
-            pSubEntity->SetLayer(Dt::SEntityLayer::AR);
+            pSubEntity->SetLayer(Dt::SEntityLayer::Default);
 
             Dt::CMeshActorFacet* pModelActorFacet = static_cast<Dt::CMeshActorFacet*>(pSubEntity->GetDetailFacet(Dt::SFacetCategory::Data));
 
@@ -483,7 +483,7 @@ namespace
 
             // -----------------------------------------------------------------------------
 
-            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            //Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
     }
 } // namespace
