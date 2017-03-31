@@ -361,6 +361,7 @@ namespace
 
         ContextManager::Barrier();
 
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
         // todo: remove dummy geometry

@@ -47,6 +47,9 @@ void main()
         float LightIntensity = DiffuseIntensity + SpecularIntensity + 0.2f;
 
         out_Color = vec4(g_Color.xyz * LightIntensity, 1.0f);
+
+        vec4 CSPosition = g_WorldToScreen * vec4(WSPosition, 1.0f);
+        gl_FragDepth = (CSPosition.z / CSPosition.w) * 0.5f + 0.5f;
     }
     else
     {
