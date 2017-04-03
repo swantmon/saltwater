@@ -4,6 +4,7 @@
 
 #include "common_global.glsl"
 #include "common_raycast.glsl"
+#include "common_gbuffer.glsl"
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -23,7 +24,9 @@ layout (binding = 0) uniform isampler3D fs_Volume;
 
 layout(location = 0) in vec3 in_WSRayDirection;
 
-layout(location = 0) out vec4 out_Color;
+layout(location = 0) out vec4 out_GBuffer0;
+layout(location = 1) out vec4 out_GBuffer1;
+layout(location = 2) out vec4 out_GBuffer2;
 
 void main()
 {
@@ -38,15 +41,17 @@ void main()
     if (WSPosition.x != 0.0f)
     {
         vec3 WSNormal = GetNormal(WSPosition, fs_Volume);
+        
+        WSNormal.x = -WSNormal.x;
+		WSNormal.z = -WSNormal.z;		
+        
+        SGBuffer GBuffer;
 
-        vec3 WSLightDirection = normalize(WSPosition - g_LightPosition.xyz);
-        vec3 WSHalf = normalize(WSLightDirection + RayDirection);
+        PackGBuffer(WSNormal, WSNormal, 0.0f, vec3(0.0f), 0.0f, 1.0f, GBuffer);
 
-        float DiffuseIntensity = max(0.0f, dot(WSNormal, WSLightDirection)) * 0.6f;
-        float SpecularIntensity = max(0.0f, pow(max(0.0f, dot(WSNormal, WSHalf)), 127.0f));
-        float LightIntensity = DiffuseIntensity + SpecularIntensity + 0.2f;
-
-        out_Color = vec4(g_Color.xyz * LightIntensity, 1.0f);
+        out_GBuffer0 = GBuffer.m_Color0;
+        out_GBuffer1 = GBuffer.m_Color1;
+        out_GBuffer2 = GBuffer.m_Color2;
 
         vec4 CSPosition = g_WorldToScreen * vec4(WSPosition, 1.0f);
         gl_FragDepth = (CSPosition.z / CSPosition.w) * 0.5f + 0.5f;

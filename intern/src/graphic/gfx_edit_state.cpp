@@ -113,6 +113,7 @@ namespace
 
         ARRenderer   ::Render();
         ActorRenderer::Render();
+        ReconstructionRenderer::Render();
 
         Performance::EndEvent();
         
@@ -142,9 +143,6 @@ namespace
         Performance::BeginEvent("Shading Pass");
         
         TonemappingRenderer::Render();
-
-        ReconstructionRenderer::Render();
-
         LightAreaRenderer::RenderBulbs();
 
         PostFX::Render();

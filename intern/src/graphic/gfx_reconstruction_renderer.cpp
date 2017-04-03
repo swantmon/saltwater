@@ -202,7 +202,7 @@ namespace
 
         m_WireframeRenderContextPtr->SetCamera(ViewManager::GetMainCamera());
         m_WireframeRenderContextPtr->SetViewPortSet(ViewManager::GetViewPortSet());
-        m_WireframeRenderContextPtr->SetTargetSet(TargetSetManager::GetDefaultTargetSet());
+        m_WireframeRenderContextPtr->SetTargetSet(TargetSetManager::GetDeferredTargetSet());
         m_WireframeRenderContextPtr->SetRenderState(StateManager::GetRenderState(CRenderState::NoCull | CRenderState::Wireframe));
     }
     
@@ -289,14 +289,14 @@ namespace
 
         Float3 CubeVertices[] =
         {
-            Float3(0.0f, 0.0f, 0.0f), // 0
-            Float3(1.0f, 0.0f, 0.0f), // 1
-            Float3(1.0f, 1.0f, 0.0f), // 2
-            Float3(0.0f, 1.0f, 0.0f), // 3
-            Float3(0.0f, 0.0f, 1.0f), // 4
-            Float3(1.0f, 0.0f, 1.0f), // 5
-            Float3(1.0f, 1.0f, 1.0f), // 6
-            Float3(0.0f, 1.0f, 1.0f), // 7
+            Float3(0.0f, 0.0f, 0.0f),
+            Float3(1.0f, 0.0f, 0.0f),
+            Float3(1.0f, 1.0f, 0.0f),
+            Float3(0.0f, 1.0f, 0.0f),
+            Float3(0.0f, 0.0f, 1.0f),
+            Float3(1.0f, 0.0f, 1.0f),
+            Float3(1.0f, 1.0f, 1.0f),
+            Float3(0.0f, 1.0f, 1.0f),
         };
 
         unsigned int CubeIndices[] =
@@ -469,9 +469,9 @@ namespace
 
         Performance::BeginEvent("SLAM Reconstruction Rendering");
         
-        ContextManager::SetTargetSet(TargetSetManager::GetDefaultTargetSet());
+        ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
         //Base::Float4 ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-        //TargetSetManager::ClearTargetSet(TargetSetManager::GetDefaultTargetSet(), ClearColor);
+        //TargetSetManager::ClearTargetSet(TargetSetManager::GetDeferredTargetSet(), ClearColor);
 
         RenderVolume();
         RenderCamera();
