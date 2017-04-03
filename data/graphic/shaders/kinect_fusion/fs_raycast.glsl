@@ -40,7 +40,7 @@ void main()
         vec3 WSNormal = GetNormal(WSPosition, fs_Volume);
 
         vec3 WSLightDirection = normalize(WSPosition - g_LightPosition.xyz);
-        vec3 WSHalf = normalize(WSLightDirection + in_WSRayDirection);
+        vec3 WSHalf = normalize(WSLightDirection + RayDirection);
 
         float DiffuseIntensity = max(0.0f, dot(WSNormal, WSLightDirection)) * 0.6f;
         float SpecularIntensity = max(0.0f, pow(max(0.0f, dot(WSNormal, WSHalf)), 127.0f));

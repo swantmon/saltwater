@@ -90,7 +90,7 @@ namespace
         CInputLayoutPtr m_CameraInputLayoutPtr;
         CInputLayoutPtr m_CubeInputLayoutPtr;
 
-        CRenderContextPtr m_CameraRenderContextPtr;
+        CRenderContextPtr m_WireframeRenderContextPtr;
     };
 } // namespace
 
@@ -136,7 +136,7 @@ namespace
         m_CameraInputLayoutPtr = 0;
         m_CubeInputLayoutPtr = 0;
 
-        m_CameraRenderContextPtr = 0;
+        m_WireframeRenderContextPtr = 0;
 
         m_pReconstructor = nullptr;
     }
@@ -198,12 +198,12 @@ namespace
     
     void CGfxReconstructionRenderer::OnSetupStates()
     {
-        m_CameraRenderContextPtr = ContextManager::CreateRenderContext();
+        m_WireframeRenderContextPtr = ContextManager::CreateRenderContext();
 
-        m_CameraRenderContextPtr->SetCamera(ViewManager::GetMainCamera());
-        m_CameraRenderContextPtr->SetViewPortSet(ViewManager::GetViewPortSet());
-        m_CameraRenderContextPtr->SetTargetSet(TargetSetManager::GetDefaultTargetSet());
-        m_CameraRenderContextPtr->SetRenderState(StateManager::GetRenderState(CRenderState::NoCull | CRenderState::Wireframe));
+        m_WireframeRenderContextPtr->SetCamera(ViewManager::GetMainCamera());
+        m_WireframeRenderContextPtr->SetViewPortSet(ViewManager::GetViewPortSet());
+        m_WireframeRenderContextPtr->SetTargetSet(TargetSetManager::GetDefaultTargetSet());
+        m_WireframeRenderContextPtr->SetRenderState(StateManager::GetRenderState(CRenderState::NoCull | CRenderState::Wireframe));
     }
     
     // -----------------------------------------------------------------------------
@@ -301,23 +301,23 @@ namespace
 
         unsigned int CubeIndices[] =
         {
-            0, 2, 1, // back
-            0, 3, 2,
+            0, 1, 2,
+            0, 2, 3,
 
-            5, 1, 2, // right
-            5, 2, 6,
+            5, 2, 1,
+            5, 6, 2,
 
-            4, 1, 5, // bottom
-            4, 0, 1,
+            4, 5, 1,
+            4, 1, 0,
 
-            4, 7, 0, // left
-            0, 7, 3,
+            4, 0, 7,
+            0, 3, 7,
 
-            7, 6, 2, // top
-            7, 2, 3,
+            7, 2, 6,
+            7, 3, 2,
 
-            4, 6, 7, // front
-            4, 5, 6,
+            4, 7, 6,
+            4, 6, 5,
         };
 
         pSurface = new Dt::CSurface;
@@ -438,7 +438,7 @@ namespace
     {
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
 
-        ContextManager::SetRenderContext(m_CameraRenderContextPtr);
+        ContextManager::SetRenderContext(m_WireframeRenderContextPtr);
         ContextManager::SetShaderVS(m_CameraVSPtr);
         ContextManager::SetShaderPS(m_CameraFSPtr);
 
