@@ -88,6 +88,7 @@ namespace
         Settings.m_MaxIntegrationWeight = _rMessage.GetInt();
         Settings.m_DepthThreshold[0] = _rMessage.GetInt();
         Settings.m_DepthThreshold[1] = _rMessage.GetInt();
+        Settings.m_CaptureColor = _rMessage.GetBool();
 
         Gfx::ReconstructionRenderer::OnReconstructionUpdate(Settings);
 

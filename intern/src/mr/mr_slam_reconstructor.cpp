@@ -309,11 +309,14 @@ namespace MR
 
         m_RawDepthBufferPtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
-        TextureDescriptor.m_NumberOfPixelsU = m_pRGBDCameraControl->GetCameraWidth();
-        TextureDescriptor.m_NumberOfPixelsV = m_pRGBDCameraControl->GetCameraHeight();
-        TextureDescriptor.m_Format = CTextureBase::R8G8B8A8_UINT;
+        if (m_ReconstructionSettings.m_CaptureColor)
+        {
+            TextureDescriptor.m_NumberOfPixelsU = m_pRGBDCameraControl->GetCameraWidth();
+            TextureDescriptor.m_NumberOfPixelsV = m_pRGBDCameraControl->GetCameraHeight();
+            TextureDescriptor.m_Format = CTextureBase::R8G8B8A8_UINT;
 
-        m_RawCameraFramePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+            m_RawCameraFramePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+        }
     }
     
     // -----------------------------------------------------------------------------
@@ -403,66 +406,78 @@ namespace MR
     {
         Performance::BeginEvent("Kinect Fusion");
 
+        const bool CaptureColor = m_ReconstructionSettings.m_CaptureColor;
+
         unsigned short* pDepth = m_DepthPixels.data();
         Base::Byte4* pColor = m_CameraPixels.data();
 
-        if (m_pRGBDCameraControl->GetDepthBuffer(pDepth) && m_pRGBDCameraControl->GetCameraFrame(pColor))
+        if (!m_pRGBDCameraControl->GetDepthBuffer(pDepth))
         {
-            Performance::BeginEvent("Data Input");
+            return;
+        }
 
-            Base::AABB2UInt TargetRect;
-            TargetRect = Base::AABB2UInt(Base::UInt2(0, 0), Base::UInt2(m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight()));
-            TextureManager::CopyToTexture2D(m_RawDepthBufferPtr, TargetRect, m_pRGBDCameraControl->GetDepthWidth(), pDepth);
+        if (CaptureColor && !m_pRGBDCameraControl->GetCameraFrame(pColor))
+        {
+            return;
+        }
 
+        Performance::BeginEvent("Data Input");
+
+        Base::AABB2UInt TargetRect;
+        TargetRect = Base::AABB2UInt(Base::UInt2(0, 0), Base::UInt2(m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight()));
+        TextureManager::CopyToTexture2D(m_RawDepthBufferPtr, TargetRect, m_pRGBDCameraControl->GetDepthWidth(), pDepth);
+
+        if (CaptureColor)
+        {
             TargetRect = Base::AABB2UInt(Base::UInt2(0, 0), Base::UInt2(m_pRGBDCameraControl->GetCameraWidth(), m_pRGBDCameraControl->GetCameraHeight()));
             TextureManager::CopyToTexture2D(m_RawCameraFramePtr, TargetRect, m_pRGBDCameraControl->GetCameraWidth(), pColor);
-            
-            //////////////////////////////////////////////////////////////////////////////////////
-            // Create reference data
-            //////////////////////////////////////////////////////////////////////////////////////
-
-            CreateReferencePyramid();
-
-            Performance::EndEvent();
-
-            //////////////////////////////////////////////////////////////////////////////////////
-            // Tracking
-            //////////////////////////////////////////////////////////////////////////////////////
-
-            if (m_IntegratedDepthFrameCount > 0)
-            {
-                Performance::BeginEvent("Tracking");
-
-                PerformTracking();
-
-                STrackingData TrackingData;
-                TrackingData.m_PoseMatrix = m_PoseMatrix;
-                TrackingData.m_InvPoseMatrix = m_PoseMatrix.GetInverted();
-
-                BufferManager::UploadConstantBufferData(m_TrackingDataConstantBufferPtr, &TrackingData);
-
-                Performance::EndEvent();
-            }
-
-            //////////////////////////////////////////////////////////////////////////////////////
-            // Integrate and raycast pyramid
-            //////////////////////////////////////////////////////////////////////////////////////
-
-            Performance::BeginEvent("TSDF Integration and Raycasting");
-
-            if (!m_IsPaused)
-            {
-                Integrate();
-            }
-
-            Raycast();
-            CreateRaycastPyramid();
-
-            Performance::EndEvent();
-
-            ++m_IntegratedDepthFrameCount;
-            ++m_FrameCount;
         }
+
+        //////////////////////////////////////////////////////////////////////////////////////
+        // Create reference data
+        //////////////////////////////////////////////////////////////////////////////////////
+
+        CreateReferencePyramid();
+
+        Performance::EndEvent();
+
+        //////////////////////////////////////////////////////////////////////////////////////
+        // Tracking
+        //////////////////////////////////////////////////////////////////////////////////////
+
+        if (m_IntegratedDepthFrameCount > 0)
+        {
+            Performance::BeginEvent("Tracking");
+
+            PerformTracking();
+
+            STrackingData TrackingData;
+            TrackingData.m_PoseMatrix = m_PoseMatrix;
+            TrackingData.m_InvPoseMatrix = m_PoseMatrix.GetInverted();
+
+            BufferManager::UploadConstantBufferData(m_TrackingDataConstantBufferPtr, &TrackingData);
+
+            Performance::EndEvent();
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////
+        // Integrate and raycast pyramid
+        //////////////////////////////////////////////////////////////////////////////////////
+
+        Performance::BeginEvent("TSDF Integration and Raycasting");
+
+        if (!m_IsPaused)
+        {
+            Integrate();
+        }
+
+        Raycast();
+        CreateRaycastPyramid();
+
+        Performance::EndEvent();
+
+        ++m_IntegratedDepthFrameCount;
+        ++m_FrameCount;
 
         ContextManager::ResetShaderCS();
 

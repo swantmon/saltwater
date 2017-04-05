@@ -65,6 +65,7 @@ namespace Edit
         const int MaxIntegrationWeight = m_pWeightHS->value();
         const int MinDepth = m_pMinDepthLE->text().toInt();
         const int MaxDepth = m_pMaxDepthLE->text().toInt();
+        const bool CaptureColor = m_pCaptureColorCB->checkState() == Qt::CheckState::Checked;
 
         // -----------------------------------------------------------------------------
         // Send message
@@ -78,6 +79,7 @@ namespace Edit
         NewMessage.PutInt(MaxIntegrationWeight);
         NewMessage.PutInt(MinDepth);
         NewMessage.PutInt(MaxDepth);
+        NewMessage.PutBool(CaptureColor);
 
         NewMessage.Reset();
 

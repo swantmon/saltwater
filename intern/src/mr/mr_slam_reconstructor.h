@@ -37,6 +37,7 @@ namespace MR
             int m_PyramidLevelCount;
             int m_PyramidLevelIterations[MAX_PYRAMIDLEVELS];
             Base::Int2 m_DepthThreshold;
+            bool m_CaptureColor;
 
             SReconstructionSettings()
                 : m_VolumeSize(1.0f)
@@ -45,6 +46,7 @@ namespace MR
                 , m_MaxIntegrationWeight(200)
                 , m_PyramidLevelCount(3)
                 , m_DepthThreshold(500, 8000)
+                , m_CaptureColor(false)
             {
                 m_PyramidLevelIterations[0] = 10;
                 m_PyramidLevelIterations[1] = 5;
