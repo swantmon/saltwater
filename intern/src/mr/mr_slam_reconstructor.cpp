@@ -50,6 +50,8 @@ namespace
     const unsigned int g_TileSize2D = 16;
     const unsigned int g_TileSize3D = 8;
 
+    const bool g_UseHighPrecisionMaps = false;
+
     struct SIntrinsics
     {
         Base::Float4x4 m_KMatrix;
@@ -215,6 +217,8 @@ namespace MR
         
         const float VoxelSize = m_ReconstructionSettings.m_VolumeSize / m_ReconstructionSettings.m_VolumeResolution;
 
+        const std::string InternalFormatString = g_UseHighPrecisionMaps ? "rgba32f" : "rgba16f";
+
         std::stringstream DefineStream;
 
         DefineStream
@@ -236,7 +240,8 @@ namespace MR
             << "#define EPSILON_ANGLE "          << g_EpsilonAngle                                  << " \n"
             << "#define ICP_VALUE_COUNT "        << g_ICPValueCount                                 << " \n"
             << "#define REDUCTION_SHADER_COUNT " << SummandsPOT / 2                                 << " \n"
-            << "#define ICP_SUMMAND_COUNT "      << Summands                                        << " \n";
+            << "#define ICP_SUMMAND_COUNT "      << Summands                                        << " \n"
+            << "#define MAP_TEXTURE_FORMAT "     << InternalFormatString                            << " \n";
 
         if (m_ReconstructionSettings.m_CaptureColor)
         {
@@ -286,7 +291,7 @@ namespace MR
 
             m_SmoothDepthBufferPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
 
-            TextureDescriptor.m_Format = CTextureBase::R32G32B32A32_FLOAT;
+            TextureDescriptor.m_Format = g_UseHighPrecisionMaps ? CTextureBase::R32G32B32A32_FLOAT : CTextureBase::R16G16B16A16_FLOAT;
 
             m_ReferenceVertexMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
             m_ReferenceNormalMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);

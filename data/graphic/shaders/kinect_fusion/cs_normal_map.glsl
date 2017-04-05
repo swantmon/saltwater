@@ -12,8 +12,8 @@ const float NaN = 0.0 / 0.0;
 // Input from engine
 // -----------------------------------------------------------------------------
 
-layout (binding = 0, rgba32f) readonly uniform image2D cs_VertexMap;
-layout (binding = 1, rgba32f) writeonly uniform image2D cs_NormalMap;
+layout (binding = 0, MAP_TEXTURE_FORMAT) readonly uniform image2D cs_VertexMap;
+layout (binding = 1, MAP_TEXTURE_FORMAT) writeonly uniform image2D cs_NormalMap;
 
 // -------------------------------------------------------------------------------------
 // Functions

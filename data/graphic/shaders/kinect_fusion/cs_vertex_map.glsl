@@ -13,7 +13,7 @@
 // -----------------------------------------------------------------------------
 
 layout (binding = 0, r16ui) readonly uniform uimage2D cs_DepthBuffer;
-layout (binding = 1, rgba32f) writeonly uniform image2D cs_VertexMap;
+layout (binding = 1, MAP_TEXTURE_FORMAT) writeonly uniform image2D cs_VertexMap;
 
 // -------------------------------------------------------------------------------------
 // Functions

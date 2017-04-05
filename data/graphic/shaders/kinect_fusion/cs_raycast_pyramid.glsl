@@ -15,8 +15,8 @@ layout(row_major, std140, binding = 0) uniform UBONormalize
 // Input from engine
 
 // -----------------------------------------------------------------------------
-layout (binding = 0, rgba32f) readonly uniform image2D cs_InputTexture;
-layout (binding = 1, rgba32f) writeonly uniform image2D cs_OutputTexture;
+layout (binding = 0, MAP_TEXTURE_FORMAT) readonly uniform image2D cs_InputTexture;
+layout (binding = 1, MAP_TEXTURE_FORMAT) writeonly uniform image2D cs_OutputTexture;
 
 // Functions
 // -------------------------------------------------------------------------------------

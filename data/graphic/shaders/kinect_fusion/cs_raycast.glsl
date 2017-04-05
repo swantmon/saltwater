@@ -14,8 +14,8 @@
 // -----------------------------------------------------------------------------
 
 layout (binding = 0) uniform isampler3D cs_Volume;
-layout (binding = 1, rgba32f) writeonly uniform image2D cs_Vertex;
-layout (binding = 2, rgba32f) writeonly uniform image2D cs_Normal;
+layout (binding = 1, MAP_TEXTURE_FORMAT) writeonly uniform image2D cs_Vertex;
+layout (binding = 2, MAP_TEXTURE_FORMAT) writeonly uniform image2D cs_Normal;
 
 // -------------------------------------------------------------------------------------
 // Functions

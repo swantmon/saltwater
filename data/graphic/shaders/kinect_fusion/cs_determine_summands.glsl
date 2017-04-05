@@ -10,10 +10,10 @@
 // Input from engine
 // -------------------------------------------------------------------------------------
 
-layout(binding = 0, rgba32f) uniform image2D cs_VertexMap;
-layout(binding = 1, rgba32f) uniform image2D cs_NormalMap;
-layout(binding = 2, rgba32f) uniform image2D cs_RaycastVertexMap;
-layout(binding = 3, rgba32f) uniform image2D cs_RaycastNormalMap;
+layout(binding = 0, MAP_TEXTURE_FORMAT) uniform image2D cs_VertexMap;
+layout(binding = 1, MAP_TEXTURE_FORMAT) uniform image2D cs_NormalMap;
+layout(binding = 2, MAP_TEXTURE_FORMAT) uniform image2D cs_RaycastVertexMap;
+layout(binding = 3, MAP_TEXTURE_FORMAT) uniform image2D cs_RaycastNormalMap;
 
 layout(row_major, std140, binding = 2) uniform UBOInc
 {
