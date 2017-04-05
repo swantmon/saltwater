@@ -147,7 +147,7 @@ namespace
     {
         MR::CSLAMReconstructor::SReconstructionSettings Settings;
 
-        m_pReconstructor->GetReconstructionData(Settings);
+        m_pReconstructor->GetReconstructionSettings(Settings);
 
         std::stringstream DefineStream;
 
@@ -411,7 +411,7 @@ namespace
         ContextManager::SetShaderVS(m_RaycastVSPtr);
         ContextManager::SetShaderPS(m_RaycastFSPtr);
 
-        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_pReconstructor->GetVolume()));
+        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_pReconstructor->GetTSDFVolume()));
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());

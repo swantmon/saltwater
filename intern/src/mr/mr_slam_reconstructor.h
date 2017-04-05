@@ -68,9 +68,10 @@ namespace MR
 
         bool IsTrackingLost() const;
         Base::Float4x4 GetPoseMatrix() const;
-        Gfx::CTexture3DPtr GetVolume();
+        Gfx::CTexture3DPtr GetTSDFVolume();
+        Gfx::CTexture3DPtr GetColorVolume();
 
-        void GetReconstructionData(SReconstructionSettings& rReconstructionSettings);
+        void GetReconstructionSettings(SReconstructionSettings& rReconstructionSettings);
 
     private:
 
@@ -127,7 +128,8 @@ namespace MR
         std::vector<Gfx::CTexture2DPtr> m_RaycastVertexMapPtr;
         std::vector<Gfx::CTexture2DPtr> m_RaycastNormalMapPtr;
 
-        Gfx::CTexture3DPtr m_VolumePtr;
+        Gfx::CTexture3DPtr m_TSDFVolumePtr;
+        Gfx::CTexture3DPtr m_ColorVolumePtr;
 
         Gfx::CBufferPtr m_ICPResourceBufferPtr;
 

@@ -119,9 +119,16 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    Gfx::CTexture3DPtr CSLAMReconstructor::GetVolume()
+    Gfx::CTexture3DPtr CSLAMReconstructor::GetTSDFVolume()
     {
-        return m_VolumePtr;
+        return m_TSDFVolumePtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Gfx::CTexture3DPtr CSLAMReconstructor::GetColorVolume()
+    {
+        return m_ColorVolumePtr;
     }
 
     // -----------------------------------------------------------------------------
@@ -208,25 +215,30 @@ namespace MR
         std::stringstream DefineStream;
 
         DefineStream
-            << "#define PYRAMID_LEVELS "             << m_ReconstructionSettings.m_PyramidLevelCount    << " \n"
-            << "#define VOLUME_RESOLUTION "          << m_ReconstructionSettings.m_VolumeResolution     << " \n"
-            << "#define VOXEL_SIZE "                 << VoxelSize                                       << " \n"
-            << "#define VOLUME_SIZE "                << m_ReconstructionSettings.m_VolumeSize           << " \n"
-            << "#define DEPTH_IMAGE_WIDTH "          << m_pRGBDCameraControl->GetDepthWidth()           << " \n"
-            << "#define DEPTH_IMAGE_HEIGHT "         << m_pRGBDCameraControl->GetDepthHeight()          << " \n"
-            << "#define COLOR_IMAGE_WIDTH "          << m_pRGBDCameraControl->GetCameraWidth()          << " \n"
-            << "#define COLOR_IMAGE_HEIGHT "         << m_pRGBDCameraControl->GetCameraHeight()         << " \n"
-            << "#define TILE_SIZE1D "                << g_TileSize1D                                    << " \n"
-            << "#define TILE_SIZE2D "                << g_TileSize2D                                    << " \n"
-            << "#define TILE_SIZE3D "                << g_TileSize3D                                    << " \n"
-            << "#define INT16_MAX "                  << std::numeric_limits<int16_t>::max()             << " \n"
-            << "#define TRUNCATED_DISTANCE "         << m_ReconstructionSettings.m_TruncatedDistance    << " \n"
-            << "#define MAX_INTEGRATION_WEIGHT "     << m_ReconstructionSettings.m_MaxIntegrationWeight << " \n"
-            << "#define EPSILON_DISTANCE "           << g_EpsilonDistance                               << " \n"
-            << "#define EPSILON_ANGLE "              << g_EpsilonAngle                                  << " \n"
-            << "#define ICP_VALUE_COUNT "            << g_ICPValueCount                                 << " \n"
-            << "#define REDUCTION_SHADER_COUNT "     << SummandsPOT / 2                                 << " \n"
-            << "#define ICP_SUMMAND_COUNT "          << Summands                                        << " \n";
+            << "#define PYRAMID_LEVELS "         << m_ReconstructionSettings.m_PyramidLevelCount    << " \n"
+            << "#define VOLUME_RESOLUTION "      << m_ReconstructionSettings.m_VolumeResolution     << " \n"
+            << "#define VOXEL_SIZE "             << VoxelSize                                       << " \n"
+            << "#define VOLUME_SIZE "            << m_ReconstructionSettings.m_VolumeSize           << " \n"
+            << "#define DEPTH_IMAGE_WIDTH "      << m_pRGBDCameraControl->GetDepthWidth()           << " \n"
+            << "#define DEPTH_IMAGE_HEIGHT "     << m_pRGBDCameraControl->GetDepthHeight()          << " \n"
+            << "#define COLOR_IMAGE_WIDTH "      << m_pRGBDCameraControl->GetCameraWidth()          << " \n"
+            << "#define COLOR_IMAGE_HEIGHT "     << m_pRGBDCameraControl->GetCameraHeight()         << " \n"
+            << "#define TILE_SIZE1D "            << g_TileSize1D                                    << " \n"
+            << "#define TILE_SIZE2D "            << g_TileSize2D                                    << " \n"
+            << "#define TILE_SIZE3D "            << g_TileSize3D                                    << " \n"
+            << "#define INT16_MAX "              << std::numeric_limits<int16_t>::max()             << " \n"
+            << "#define TRUNCATED_DISTANCE "     << m_ReconstructionSettings.m_TruncatedDistance    << " \n"
+            << "#define MAX_INTEGRATION_WEIGHT " << m_ReconstructionSettings.m_MaxIntegrationWeight << " \n"
+            << "#define EPSILON_DISTANCE "       << g_EpsilonDistance                               << " \n"
+            << "#define EPSILON_ANGLE "          << g_EpsilonAngle                                  << " \n"
+            << "#define ICP_VALUE_COUNT "        << g_ICPValueCount                                 << " \n"
+            << "#define REDUCTION_SHADER_COUNT " << SummandsPOT / 2                                 << " \n"
+            << "#define ICP_SUMMAND_COUNT "      << Summands                                        << " \n";
+
+        if (m_ReconstructionSettings.m_CaptureColor)
+        {
+            DefineStream << "#define CAPTURE_COLOR\n";
+        }
 
         std::string DefineString = DefineStream.str();
         
@@ -292,7 +304,7 @@ namespace MR
         TextureDescriptor.m_pPixels = 0;
         TextureDescriptor.m_Format = CTextureBase::R16G16_INT;
 
-        m_VolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
+        m_TSDFVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
 
         TextureDescriptor.m_NumberOfPixelsU = m_pRGBDCameraControl->GetDepthWidth();
         TextureDescriptor.m_NumberOfPixelsV = m_pRGBDCameraControl->GetDepthHeight();
@@ -316,6 +328,13 @@ namespace MR
             TextureDescriptor.m_Format = CTextureBase::R8G8B8A8_UINT;
 
             m_RawCameraFramePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+
+            TextureDescriptor.m_NumberOfPixelsU = m_ReconstructionSettings.m_VolumeResolution;
+            TextureDescriptor.m_NumberOfPixelsV = m_ReconstructionSettings.m_VolumeResolution;
+            TextureDescriptor.m_NumberOfPixelsW = m_ReconstructionSettings.m_VolumeResolution;
+            TextureDescriptor.m_Format = CTextureBase::R8G8B8A8_UBYTE;
+
+            m_ColorVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
         }
     }
     
@@ -404,8 +423,6 @@ namespace MR
 
     void CSLAMReconstructor::Update()
     {
-        Performance::BeginEvent("Kinect Fusion");
-
         const bool CaptureColor = m_ReconstructionSettings.m_CaptureColor;
 
         unsigned short* pDepth = m_DepthPixels.data();
@@ -420,6 +437,8 @@ namespace MR
         {
             return;
         }
+
+        Performance::BeginEvent("Kinect Fusion");
 
         Performance::BeginEvent("Data Input");
 
@@ -725,7 +744,7 @@ namespace MR
 
         ContextManager::SetShaderCS(m_VolumeIntegrationCSPtr);
 
-        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_VolumePtr));
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_TSDFVolumePtr));
         ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
 
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
@@ -776,7 +795,7 @@ namespace MR
 
         ContextManager::SetShaderCS(m_RaycastCSPtr);
 
-        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_VolumePtr));
+        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_TSDFVolumePtr));
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
 
         ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RaycastVertexMapPtr[0]));
@@ -840,7 +859,11 @@ namespace MR
     {
         ContextManager::SetShaderCS(m_ClearVolumeCSPtr);
 
-        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_VolumePtr));
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_TSDFVolumePtr));
+        if (m_ReconstructionSettings.m_CaptureColor)
+        {
+            ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ColorVolumePtr));
+        }
 
         ContextManager::Barrier();
 
@@ -851,7 +874,7 @@ namespace MR
         
     // -----------------------------------------------------------------------------
 
-    void CSLAMReconstructor::GetReconstructionData(SReconstructionSettings& rReconstructionSettings)
+    void CSLAMReconstructor::GetReconstructionSettings(SReconstructionSettings& rReconstructionSettings)
     {
         rReconstructionSettings = m_ReconstructionSettings;
     }
