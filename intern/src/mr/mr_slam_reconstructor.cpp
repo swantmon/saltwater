@@ -159,7 +159,7 @@ namespace MR
     // -----------------------------------------------------------------------------
     
     void CSLAMReconstructor::Exit()
-    {        
+    {
         m_MirrorDepthCSPtr = 0;
         m_MirrorColorCSPtr = 0;
         m_BilateralFilterCSPtr = 0;
@@ -315,7 +315,7 @@ namespace MR
 
         TextureDescriptor.m_NumberOfPixelsU = m_pRGBDCameraControl->GetCameraWidth();
         TextureDescriptor.m_NumberOfPixelsV = m_pRGBDCameraControl->GetCameraHeight();
-        TextureDescriptor.m_Format = CTextureBase::R8G8B8A8_UBYTE;
+        TextureDescriptor.m_Format = CTextureBase::R8G8B8A8_UINT;
 
         m_RawCameraFramePtr = TextureManager::CreateTexture2D(TextureDescriptor);
     }
