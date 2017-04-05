@@ -190,6 +190,9 @@ namespace MR
             m_RaycastNormalMapPtr[i] = 0;
         }
 
+        m_TSDFVolumePtr = 0;
+        m_ColorVolumePtr = 0;
+
         m_IntrinsicsConstantBufferPtr = 0;
         m_TrackingDataConstantBufferPtr = 0;
         m_RaycastPyramidConstantBufferPtr = 0;
