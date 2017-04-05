@@ -46,7 +46,7 @@ namespace MR
                 , m_MaxIntegrationWeight(200)
                 , m_PyramidLevelCount(3)
                 , m_DepthThreshold(500, 8000)
-                , m_CaptureColor(false)
+                , m_CaptureColor(true)
             {
                 m_PyramidLevelIterations[0] = 10;
                 m_PyramidLevelIterations[1] = 5;
@@ -83,7 +83,8 @@ namespace MR
         void SetupBuffers();
 
         void CreateReferencePyramid();
-        void Integrate();
+        void IntegrateDepth();
+        void IntegrateColor();
         void Raycast();
         void CreateRaycastPyramid();
 
@@ -114,7 +115,8 @@ namespace MR
         Gfx::CShaderPtr m_VertexMapCSPtr;
         Gfx::CShaderPtr m_NormalMapCSPtr;
         Gfx::CShaderPtr m_DownSampleDepthCSPtr;
-        Gfx::CShaderPtr m_VolumeIntegrationCSPtr;
+        Gfx::CShaderPtr m_DepthIntegrationCSPtr;
+        Gfx::CShaderPtr m_ColorIntegrationCSPtr;
         Gfx::CShaderPtr m_RaycastCSPtr;
         Gfx::CShaderPtr m_RaycastPyramidCSPtr;
         Gfx::CShaderPtr m_DetermineSummandsCSPtr;

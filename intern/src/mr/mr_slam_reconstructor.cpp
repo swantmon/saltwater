@@ -79,7 +79,7 @@ namespace
     struct SDrawCallBufferData
     {
         Base::Float4x4 m_WorldMatrix;
-    };    
+    };
     
 } // namespace
 
@@ -173,7 +173,8 @@ namespace MR
         m_VertexMapCSPtr = 0;
         m_NormalMapCSPtr = 0;
         m_DownSampleDepthCSPtr = 0;
-        m_VolumeIntegrationCSPtr = 0;
+        m_DepthIntegrationCSPtr = 0;
+        m_ColorIntegrationCSPtr = 0;
         m_RaycastCSPtr = 0;
         m_RaycastPyramidCSPtr = 0;
         m_DetermineSummandsCSPtr = 0;
@@ -254,12 +255,17 @@ namespace MR
         m_VertexMapCSPtr         = ShaderManager::CompileCS("kinect_fusion\\cs_vertex_map.glsl"        , "main", DefineString.c_str());
         m_NormalMapCSPtr         = ShaderManager::CompileCS("kinect_fusion\\cs_normal_map.glsl"        , "main", DefineString.c_str());
         m_DownSampleDepthCSPtr   = ShaderManager::CompileCS("kinect_fusion\\cs_downsample_depth.glsl"  , "main", DefineString.c_str());
-        m_VolumeIntegrationCSPtr = ShaderManager::CompileCS("kinect_fusion\\cs_integrate_volume.glsl"  , "main", DefineString.c_str());
+        m_DepthIntegrationCSPtr  = ShaderManager::CompileCS("kinect_fusion\\cs_integrate_depth.glsl"   , "main", DefineString.c_str());        
         m_RaycastCSPtr           = ShaderManager::CompileCS("kinect_fusion\\cs_raycast.glsl"           , "main", DefineString.c_str());
         m_RaycastPyramidCSPtr    = ShaderManager::CompileCS("kinect_fusion\\cs_raycast_pyramid.glsl"   , "main", DefineString.c_str());
         m_DetermineSummandsCSPtr = ShaderManager::CompileCS("kinect_fusion\\cs_determine_summands.glsl", "main", DefineString.c_str());
         m_ReduceSumCSPtr         = ShaderManager::CompileCS("kinect_fusion\\cs_reduce_sum.glsl"        , "main", DefineString.c_str());
         m_ClearVolumeCSPtr       = ShaderManager::CompileCS("kinect_fusion\\cs_clear_volume.glsl"      , "main", DefineString.c_str());
+
+        if (m_ReconstructionSettings.m_CaptureColor)
+        {
+            m_ColorIntegrationCSPtr = ShaderManager::CompileCS("kinect_fusion\\cs_integrate_color.glsl", "main", DefineString.c_str());
+        }
     }
     
     // -----------------------------------------------------------------------------
@@ -333,7 +339,7 @@ namespace MR
         {
             TextureDescriptor.m_NumberOfPixelsU = m_pRGBDCameraControl->GetCameraWidth();
             TextureDescriptor.m_NumberOfPixelsV = m_pRGBDCameraControl->GetCameraHeight();
-            TextureDescriptor.m_Format = CTextureBase::R8G8B8A8_UINT;
+            TextureDescriptor.m_Format = CTextureBase::R8G8B8A8_UBYTE;
 
             m_RawCameraFramePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
@@ -343,6 +349,11 @@ namespace MR
             TextureDescriptor.m_Format = CTextureBase::R8G8B8A8_UBYTE;
 
             m_ColorVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
+        }
+        else
+        {
+            m_RawCameraFramePtr = 0;
+            m_ColorVolumePtr = 0;
         }
     }
     
@@ -495,7 +506,11 @@ namespace MR
 
         if (!m_IsPaused)
         {
-            Integrate();
+            IntegrateDepth();
+            if (CaptureColor)
+            {
+                IntegrateColor();
+            }
         }
 
         Raycast();
@@ -746,21 +761,41 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CSLAMReconstructor::Integrate()
+    void CSLAMReconstructor::IntegrateDepth()
     {
         const int WorkGroups = GetWorkGroupCount(m_ReconstructionSettings.m_VolumeResolution, g_TileSize3D);
 
-        ContextManager::SetShaderCS(m_VolumeIntegrationCSPtr);
+        ContextManager::SetShaderCS(m_DepthIntegrationCSPtr);
 
         ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_TSDFVolumePtr));
         ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
-
+        
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
         
         ContextManager::Barrier();
 
         ContextManager::Dispatch(WorkGroups, WorkGroups, 1);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::IntegrateColor()
+    {
+        const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth(), g_TileSize2D);
+        const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
+
+        ContextManager::SetShaderCS(m_ColorIntegrationCSPtr);
+
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_ColorVolumePtr));
+        ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RawCameraFramePtr));
+
+        ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
+
+        ContextManager::Barrier();
+
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
     }
 
     // -----------------------------------------------------------------------------

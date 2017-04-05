@@ -42,6 +42,8 @@ namespace Edit
         m_pResolutionTL->setText(QString::number(1 << InitialSliderPosition));
         
         m_pPauseButton->setText(m_IsPaused ? s_ResumeText : s_PauseText);
+
+        m_pCaptureColorCB->setChecked(DefaultSettings.m_CaptureColor);
     }
 
     // -----------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 
-#ifndef __INCLUDE_CS_KINECT_INTEGRATE_VOLUME_GLSL__
-#define __INCLUDE_CS_KINECT_INTEGRATE_VOLUME_GLSL__
+#ifndef __INCLUDE_CS_KINECT_INTEGRATE_DEPTH_GLSL__
+#define __INCLUDE_CS_KINECT_INTEGRATE_DEPTH_GLSL__
 
 #include "common_tracking.glsl"
 
@@ -12,7 +12,7 @@
 // Input from engine
 // -----------------------------------------------------------------------------
 
-layout(binding = 0, rg16i) uniform iimage3D cs_Volume;
+layout(binding = 0, rg16i) uniform iimage3D cs_TSDFVolume;
 layout(binding = 1, r16ui) readonly uniform uimage2D cs_Depth;
 
 // -------------------------------------------------------------------------------------
@@ -53,18 +53,18 @@ void main()
 
                 if (SDF >= -TRUNCATED_DISTANCE)
                 {
-                    vec2 Voxel = imageLoad(cs_Volume, VoxelCoords).xy;
+                    vec2 Voxel = imageLoad(cs_TSDFVolume, VoxelCoords).xy;
                     Voxel.x /= INT16_MAX;
 
                     Voxel.x = (Voxel.x * Voxel.y + TSDF) / (Voxel.y + 1.0f);
                     Voxel.y = min(MAX_INTEGRATION_WEIGHT, Voxel.y + 1);
 
                     Voxel.x *= INT16_MAX;
-                    imageStore(cs_Volume, VoxelCoords, ivec4(Voxel, 0, 0));
+                    imageStore(cs_TSDFVolume, VoxelCoords, ivec4(Voxel, 0, 0));
                 }
             }
         }
     }
 }
 
-#endif // __INCLUDE_CS_KINECT_INTEGRATE_VOLUME_GLSL__
+#endif // __INCLUDE_CS_KINECT_INTEGRATE_DEPTH_GLSL__
