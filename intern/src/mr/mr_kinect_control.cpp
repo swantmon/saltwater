@@ -64,7 +64,7 @@ namespace MR
 
         CheckResult(m_pKinect->get_ColorFrameSource(&pColorFrameSource), "Failed to get color frame source");
         CheckResult(pColorFrameSource->OpenReader(&m_pColorFrameReader), "Failed to open color frame reader");
-
+        
         CheckResult(m_pKinect->get_DepthFrameSource(&pDepthFrameSource), "Failed to get depth frame source");
         CheckResult(pDepthFrameSource->OpenReader(&m_pDepthFrameReader), "Failed to open depth frame reader");
         
@@ -88,14 +88,14 @@ namespace MR
 
     int CKinectControl::GetCameraWidth() const
     {
-        return 0;
+        return 1920;
     }
 
     // -----------------------------------------------------------------------------
 
     int CKinectControl::GetCameraHeight() const
     {
-        return 0;
+        return 1080;
     }
 
     // -----------------------------------------------------------------------------
@@ -135,7 +135,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
     
-    bool CKinectControl::GetCameraFrame(unsigned char* pBuffer)
+    bool CKinectControl::GetCameraFrame(Base::Byte4* pBuffer)
     {
         IColorFrame* pColorFrame = nullptr;
         unsigned int BufferSize;
@@ -146,24 +146,19 @@ namespace MR
             return false;
         }
         
-        if (pColorFrame->AccessRawUnderlyingBuffer(&BufferSize, &pByteBuffer) != S_OK)
-        {
-            BASE_CONSOLE_ERROR("Failed to access underlying buffer");
-            return false;
-        }
+        pColorFrame->CopyConvertedFrameDataToArray(
+            GetCameraWidth() * GetCameraHeight() * sizeof(pBuffer[0]),
+            &pBuffer[0][0],
+            ColorImageFormat::ColorImageFormat_Rgba
+        );
 
-        for (int i = 0; i < GetDepthPixelCount(); ++i)
-        {
-            pBuffer[i] = pByteBuffer[i];
-        }
-
-        pColorFrame->Release();
+        pColorFrame->Release();        
 
         return true;
     }
 
     // -----------------------------------------------------------------------------
-
+    
     bool CKinectControl::GetDepthBuffer(unsigned short* pBuffer)
     {
         IDepthFrame* pDepthFrame = nullptr;
@@ -187,7 +182,11 @@ namespace MR
         }
 
         pDepthFrame->Release();
-
+        
+        //ICoordinateMapper* pMapper = nullptr;
+        //m_pKinect->get_CoordinateMapper(&pMapper);
+        //pMapper->MapColorFrameToDepthSpace(DepthPixels.size(), DepthPixels.data(), DepthSpacePoints.size(), DepthSpacePoints.data());
+        
         return true;
     }
 

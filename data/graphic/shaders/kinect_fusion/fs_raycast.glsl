@@ -43,11 +43,11 @@ void main()
         vec3 WSNormal = GetNormal(WSPosition, fs_Volume);
         
         WSNormal.x = -WSNormal.x;
-		WSNormal.z = -WSNormal.z;		
+		WSNormal.z = -WSNormal.z;
         
         SGBuffer GBuffer;
 
-        PackGBuffer(WSNormal, WSNormal, 0.0f, vec3(0.0f), 0.0f, 1.0f, GBuffer);
+        PackGBuffer(g_Color.rgb, WSNormal, 0.5f, vec3(0.5f), 0.0f, 1.0f, GBuffer);
 
         out_GBuffer0 = GBuffer.m_Color0;
         out_GBuffer1 = GBuffer.m_Color1;

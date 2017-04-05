@@ -8,8 +8,5 @@ namespace MR
 {
     class IRGBDCameraControl : public ICameraControl, public IDepthSensorControl
     {
-    public:
-
-        virtual ~IRGBDCameraControl() {};
     };
 } // namespace MR

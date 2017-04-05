@@ -29,7 +29,7 @@ namespace MR
         virtual float GetCameraFocalLengthY() const;
         virtual float GetCameraFocalPointX() const;
         virtual float GetCameraFocalPointY() const;
-        virtual bool GetCameraFrame(unsigned char* pBuffer);
+        virtual bool GetCameraFrame(Base::Byte4* pBuffer);
                 
         virtual int GetDepthWidth() const override;
         virtual int GetDepthHeight() const override;

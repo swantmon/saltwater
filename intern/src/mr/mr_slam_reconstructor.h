@@ -108,6 +108,7 @@ namespace MR
 
         Gfx::CShaderPtr m_ClearVolumeCSPtr;
         Gfx::CShaderPtr m_MirrorDepthCSPtr;
+        Gfx::CShaderPtr m_MirrorColorCSPtr;
         Gfx::CShaderPtr m_BilateralFilterCSPtr;
         Gfx::CShaderPtr m_VertexMapCSPtr;
         Gfx::CShaderPtr m_NormalMapCSPtr;
@@ -119,6 +120,7 @@ namespace MR
         Gfx::CShaderPtr m_ReduceSumCSPtr;
 
         Gfx::CTexture2DPtr m_RawDepthBufferPtr;
+        Gfx::CTexture2DPtr m_RawCameraFramePtr;
         std::vector<Gfx::CTexture2DPtr> m_SmoothDepthBufferPtr;
         std::vector<Gfx::CTexture2DPtr> m_ReferenceVertexMapPtr;
         std::vector<Gfx::CTexture2DPtr> m_ReferenceNormalMapPtr;
@@ -134,6 +136,7 @@ namespace MR
         Base::Float4x4 m_PoseMatrix;
         
         std::vector<unsigned short> m_DepthPixels;
+        std::vector<Base::Byte4> m_CameraPixels;
 
         int m_IntegratedDepthFrameCount;
         int m_FrameCount;

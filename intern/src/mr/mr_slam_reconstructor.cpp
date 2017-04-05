@@ -132,6 +132,7 @@ namespace MR
         BASE_CONSOLE_INFO("Using Kinect for SLAM");
 
         m_DepthPixels = std::vector<unsigned short>(m_pRGBDCameraControl->GetDepthPixelCount());
+        m_CameraPixels = std::vector<Base::Byte4>(m_pRGBDCameraControl->GetCameraPixelCount());
 
         const float VolumeSize = m_ReconstructionSettings.m_VolumeSize;
         Float4x4 PoseRotation, PoseTranslation;
@@ -160,6 +161,7 @@ namespace MR
     void CSLAMReconstructor::Exit()
     {        
         m_MirrorDepthCSPtr = 0;
+        m_MirrorColorCSPtr = 0;
         m_BilateralFilterCSPtr = 0;
         m_VertexMapCSPtr = 0;
         m_NormalMapCSPtr = 0;
@@ -172,6 +174,7 @@ namespace MR
         m_ClearVolumeCSPtr = 0;
 
         m_RawDepthBufferPtr = 0;
+        m_RawCameraFramePtr = 0;
 
         for (int i = 0; i < m_ReconstructionSettings.m_PyramidLevelCount; ++ i)
         {
@@ -213,6 +216,8 @@ namespace MR
             << "#define VOLUME_SIZE "                << m_ReconstructionSettings.m_VolumeSize           << " \n"
             << "#define DEPTH_IMAGE_WIDTH "          << m_pRGBDCameraControl->GetDepthWidth()           << " \n"
             << "#define DEPTH_IMAGE_HEIGHT "         << m_pRGBDCameraControl->GetDepthHeight()          << " \n"
+            << "#define COLOR_IMAGE_WIDTH "          << m_pRGBDCameraControl->GetCameraWidth()          << " \n"
+            << "#define COLOR_IMAGE_HEIGHT "         << m_pRGBDCameraControl->GetCameraHeight()         << " \n"
             << "#define TILE_SIZE1D "                << g_TileSize1D                                    << " \n"
             << "#define TILE_SIZE2D "                << g_TileSize2D                                    << " \n"
             << "#define TILE_SIZE3D "                << g_TileSize3D                                    << " \n"
@@ -228,6 +233,7 @@ namespace MR
         std::string DefineString = DefineStream.str();
         
         m_MirrorDepthCSPtr       = ShaderManager::CompileCS("kinect_fusion\\cs_mirror_depth.glsl"      , "main", DefineString.c_str());
+        m_MirrorColorCSPtr       = ShaderManager::CompileCS("kinect_fusion\\cs_mirror_color.glsl"      , "main", DefineString.c_str());
         m_BilateralFilterCSPtr   = ShaderManager::CompileCS("kinect_fusion\\cs_bilateral_filter.glsl"  , "main", DefineString.c_str());
         m_VertexMapCSPtr         = ShaderManager::CompileCS("kinect_fusion\\cs_vertex_map.glsl"        , "main", DefineString.c_str());
         m_NormalMapCSPtr         = ShaderManager::CompileCS("kinect_fusion\\cs_normal_map.glsl"        , "main", DefineString.c_str());
@@ -306,6 +312,12 @@ namespace MR
         TextureDescriptor.m_Format = CTextureBase::R16_UINT;
 
         m_RawDepthBufferPtr = TextureManager::CreateTexture2D(TextureDescriptor);
+
+        TextureDescriptor.m_NumberOfPixelsU = m_pRGBDCameraControl->GetCameraWidth();
+        TextureDescriptor.m_NumberOfPixelsV = m_pRGBDCameraControl->GetCameraHeight();
+        TextureDescriptor.m_Format = CTextureBase::R8G8B8A8_UBYTE;
+
+        m_RawCameraFramePtr = TextureManager::CreateTexture2D(TextureDescriptor);
     }
     
     // -----------------------------------------------------------------------------
@@ -387,6 +399,96 @@ namespace MR
         ConstantBufferDesc.m_NumberOfBytes = sizeof(float) * ICPRowCount * g_ICPValueCount;
         ConstantBufferDesc.m_pBytes = nullptr;
         m_ICPResourceBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::Update()
+    {
+        Performance::BeginEvent("Kinect Fusion");
+
+        unsigned short* pDepth = m_DepthPixels.data();
+        Base::Byte4* pColor = m_CameraPixels.data();
+
+        if (m_pRGBDCameraControl->GetDepthBuffer(pDepth) && m_pRGBDCameraControl->GetCameraFrame(pColor))
+        {
+            Performance::BeginEvent("Data Input");
+
+            Base::AABB2UInt TargetRect;
+            TargetRect = Base::AABB2UInt(Base::UInt2(0, 0), Base::UInt2(m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight()));
+            TextureManager::CopyToTexture2D(m_RawDepthBufferPtr, TargetRect, m_pRGBDCameraControl->GetDepthWidth(), pDepth);
+
+            TargetRect = Base::AABB2UInt(Base::UInt2(0, 0), Base::UInt2(m_pRGBDCameraControl->GetCameraWidth(), m_pRGBDCameraControl->GetCameraHeight()));
+            TextureManager::CopyToTexture2D(m_RawCameraFramePtr, TargetRect, m_pRGBDCameraControl->GetCameraWidth(), pColor);
+
+            //////////////////////////////////////////////////////////////////////////////////////
+            // Mirror data
+            //////////////////////////////////////////////////////////////////////////////////////
+
+            int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() / 2, g_TileSize2D);
+            int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
+
+            ContextManager::SetShaderCS(m_MirrorDepthCSPtr);
+            ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
+            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+            WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetCameraWidth() / 2, g_TileSize2D);
+            WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetCameraHeight(), g_TileSize2D);
+
+            ContextManager::SetShaderCS(m_MirrorColorCSPtr);
+            ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawCameraFramePtr));
+            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+            //////////////////////////////////////////////////////////////////////////////////////
+            // Create reference data
+            //////////////////////////////////////////////////////////////////////////////////////
+
+            CreateReferencePyramid();
+
+            Performance::EndEvent();
+
+            //////////////////////////////////////////////////////////////////////////////////////
+            // Tracking
+            //////////////////////////////////////////////////////////////////////////////////////
+
+            if (m_IntegratedDepthFrameCount > 0)
+            {
+                Performance::BeginEvent("Tracking");
+
+                PerformTracking();
+
+                STrackingData TrackingData;
+                TrackingData.m_PoseMatrix = m_PoseMatrix;
+                TrackingData.m_InvPoseMatrix = m_PoseMatrix.GetInverted();
+
+                BufferManager::UploadConstantBufferData(m_TrackingDataConstantBufferPtr, &TrackingData);
+
+                Performance::EndEvent();
+            }
+
+            //////////////////////////////////////////////////////////////////////////////////////
+            // Integrate and raycast pyramid
+            //////////////////////////////////////////////////////////////////////////////////////
+
+            Performance::BeginEvent("TSDF Integration and Raycasting");
+
+            if (!m_IsPaused)
+            {
+                Integrate();
+            }
+
+            Raycast();
+            CreateRaycastPyramid();
+
+            Performance::EndEvent();
+
+            ++m_IntegratedDepthFrameCount;
+            ++m_FrameCount;
+        }
+
+        ContextManager::ResetShaderCS();
+
+        Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------
@@ -693,82 +795,6 @@ namespace MR
         ContextManager::Barrier();
 
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CSLAMReconstructor::Update()
-    {        
-        Performance::BeginEvent("Kinect Fusion");
-
-        if (m_pRGBDCameraControl->GetDepthBuffer(m_DepthPixels.data()))
-        {
-            Performance::BeginEvent("Data Input");
-
-            Base::AABB2UInt TargetRect = Base::AABB2UInt(Base::UInt2(0, 0), Base::UInt2(m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight()));
-            TextureManager::CopyToTexture2D(m_RawDepthBufferPtr, TargetRect, m_pRGBDCameraControl->GetDepthWidth(), m_DepthPixels.data());
-            
-            //////////////////////////////////////////////////////////////////////////////////////
-            // Mirror depth data
-            //////////////////////////////////////////////////////////////////////////////////////
-
-            const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() / 2, g_TileSize2D);
-            const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
-
-            ContextManager::SetShaderCS(m_MirrorDepthCSPtr);
-            ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
-            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
-            
-            //////////////////////////////////////////////////////////////////////////////////////
-            // Create reference data
-            //////////////////////////////////////////////////////////////////////////////////////
-
-            CreateReferencePyramid();
-
-            Performance::EndEvent();
-            
-            //////////////////////////////////////////////////////////////////////////////////////
-            // Tracking
-            //////////////////////////////////////////////////////////////////////////////////////
-
-            if (m_IntegratedDepthFrameCount > 0)
-            {
-                Performance::BeginEvent("Tracking");
-
-                PerformTracking();
-
-                STrackingData TrackingData;
-                TrackingData.m_PoseMatrix = m_PoseMatrix;
-                TrackingData.m_InvPoseMatrix = m_PoseMatrix.GetInverted();
-                
-                BufferManager::UploadConstantBufferData(m_TrackingDataConstantBufferPtr, &TrackingData);
-                
-                Performance::EndEvent();
-            }
-
-            //////////////////////////////////////////////////////////////////////////////////////
-            // Integrate and raycast pyramid
-            //////////////////////////////////////////////////////////////////////////////////////
-
-            Performance::BeginEvent("TSDF Integration and Raycasting");
-
-            if (!m_IsPaused)
-            {
-                Integrate();
-            }
-            
-            Raycast();
-            CreateRaycastPyramid();
-
-            Performance::EndEvent();
-
-            ++m_IntegratedDepthFrameCount;
-            ++m_FrameCount;
-        }
-
-        ContextManager::ResetShaderCS();
-
-        Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------
