@@ -42,18 +42,18 @@ void main()
 	const int R = 6; // int(g_SigmaSpace * 1,5)
 	const int D = R * 2 + 1;
 
-	const float Depth = float(imageLoad(cs_InputTexture, ivec2(x, y)).x);
+	const float Depth = float(imageLoad(cs_InputTexture, ivec2(DEPTH_IMAGE_WIDTH - x, y)).x);
 
 	float Sum1 = 0.0;
 	float Sum2 = 0.0;
 
-    const float ReferenceDepth = float(imageLoad(cs_InputTexture, ivec2(x, y)).x);
+    const float ReferenceDepth = float(imageLoad(cs_InputTexture, ivec2(DEPTH_IMAGE_WIDTH - x, y)).x);
 
 	for (int cx = -R; cx < R; ++ cx)
 	{
 		for (int cy = -R; cy < R; ++ cy)
 		{
-			const ivec2 SamplePos = ivec2(x + cx, y + cy);
+			const ivec2 SamplePos = ivec2(DEPTH_IMAGE_WIDTH - x + cx, y + cy);
 			float SampleDepth = float(imageLoad(cs_InputTexture, SamplePos).x);
             SampleDepth = (SampleDepth < g_MinDepth || SampleDepth > g_MaxDepth) ? 0.0f : SampleDepth;
 

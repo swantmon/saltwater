@@ -160,8 +160,6 @@ namespace MR
     
     void CSLAMReconstructor::Exit()
     {
-        m_MirrorDepthCSPtr = 0;
-        m_MirrorColorCSPtr = 0;
         m_BilateralFilterCSPtr = 0;
         m_VertexMapCSPtr = 0;
         m_NormalMapCSPtr = 0;
@@ -232,8 +230,6 @@ namespace MR
 
         std::string DefineString = DefineStream.str();
         
-        m_MirrorDepthCSPtr       = ShaderManager::CompileCS("kinect_fusion\\cs_mirror_depth.glsl"      , "main", DefineString.c_str());
-        m_MirrorColorCSPtr       = ShaderManager::CompileCS("kinect_fusion\\cs_mirror_color.glsl"      , "main", DefineString.c_str());
         m_BilateralFilterCSPtr   = ShaderManager::CompileCS("kinect_fusion\\cs_bilateral_filter.glsl"  , "main", DefineString.c_str());
         m_VertexMapCSPtr         = ShaderManager::CompileCS("kinect_fusion\\cs_vertex_map.glsl"        , "main", DefineString.c_str());
         m_NormalMapCSPtr         = ShaderManager::CompileCS("kinect_fusion\\cs_normal_map.glsl"        , "main", DefineString.c_str());
@@ -420,25 +416,7 @@ namespace MR
 
             TargetRect = Base::AABB2UInt(Base::UInt2(0, 0), Base::UInt2(m_pRGBDCameraControl->GetCameraWidth(), m_pRGBDCameraControl->GetCameraHeight()));
             TextureManager::CopyToTexture2D(m_RawCameraFramePtr, TargetRect, m_pRGBDCameraControl->GetCameraWidth(), pColor);
-
-            //////////////////////////////////////////////////////////////////////////////////////
-            // Mirror data
-            //////////////////////////////////////////////////////////////////////////////////////
-
-            int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() / 2, g_TileSize2D);
-            int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
-
-            ContextManager::SetShaderCS(m_MirrorDepthCSPtr);
-            ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
-            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
-
-            WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetCameraWidth() / 2, g_TileSize2D);
-            WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetCameraHeight(), g_TileSize2D);
-
-            ContextManager::SetShaderCS(m_MirrorColorCSPtr);
-            ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawCameraFramePtr));
-            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
-
+            
             //////////////////////////////////////////////////////////////////////////////////////
             // Create reference data
             //////////////////////////////////////////////////////////////////////////////////////
