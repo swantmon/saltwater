@@ -14,6 +14,7 @@
 
 layout(binding = 0, rgba8) uniform image3D cs_ColorVolume;
 layout(binding = 1, rgba8) readonly uniform image2D cs_Color;
+layout binding = 2, r16ui) readonly uniform uimage2D cs_Depth;
 
 // -------------------------------------------------------------------------------------
 // Functions

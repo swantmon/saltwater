@@ -176,13 +176,13 @@ namespace MR
                 const int x = static_cast<int>(m_ColorSpacePoints[j * GetDepthWidth() + i].X + 0.5f);
                 const int y = static_cast<int>(m_ColorSpacePoints[j * GetDepthWidth() + i].Y + 0.5f);
 
-                if (x >= 0 && x < GetDepthWidth() && y >= 0 && y < GetDepthHeight())
+                if (x >= 0 && x < GetCameraWidth() && y >= 0 && y < GetCameraHeight())
                 {
-                    pBuffer[j * GetDepthWidth() + i] = Base::Byte4(255, 0, 0, 255); //m_CameraFrameBuffer[y * GetDepthWidth() + x];
+                    pBuffer[j * GetDepthWidth() + i] = m_CameraFrameBuffer[y * GetCameraWidth() + x];
                 }
                 else
                 {
-                    pBuffer[j * GetDepthWidth() + i] = Base::Byte4(0, 255, 0, 255);
+                    pBuffer[j * GetDepthWidth() + i] = Base::Byte4(0, 0, 0, 255);
                 }
             }
         }
