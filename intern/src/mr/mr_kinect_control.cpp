@@ -36,6 +36,7 @@ namespace MR
     CKinectControl::CKinectControl()
         : m_pKinect               (nullptr)
         , m_pDepthFrameReader     (nullptr)
+        , m_pMapper               (nullptr)
     {
         Start();
     }
@@ -70,6 +71,12 @@ namespace MR
         
         SafeRelease(pColorFrameSource);
         SafeRelease(pDepthFrameSource);
+                
+        m_pKinect->get_CoordinateMapper(&m_pMapper);
+
+        m_CameraFrameBuffer = std::vector<Base::Byte4>(GetCameraWidth() * GetCameraHeight());
+        m_DepthBuffer = std::vector<UINT16>(GetDepthWidth() * GetDepthHeight());
+        m_ColorSpacePoints = std::vector<ColorSpacePoint>(GetDepthWidth() * GetDepthHeight());
     }
 
     // -----------------------------------------------------------------------------
@@ -138,8 +145,6 @@ namespace MR
     bool CKinectControl::GetCameraFrame(Base::Byte4* pBuffer)
     {
         IColorFrame* pColorFrame = nullptr;
-        unsigned int BufferSize;
-        BYTE* pByteBuffer;
 
         if (m_pColorFrameReader->AcquireLatestFrame(&pColorFrame) != S_OK)
         {
@@ -147,12 +152,40 @@ namespace MR
         }
         
         pColorFrame->CopyConvertedFrameDataToArray(
-            GetCameraWidth() * GetCameraHeight() * sizeof(pBuffer[0]),
-            &pBuffer[0][0],
+            GetCameraWidth() * GetCameraHeight() * sizeof(m_CameraFrameBuffer[0]),
+            &m_CameraFrameBuffer[0][0],
             ColorImageFormat::ColorImageFormat_Rgba
         );
 
-        pColorFrame->Release();        
+        pColorFrame->Release();
+        
+        HRESULT Result = m_pMapper->MapDepthFrameToColorSpace(
+            static_cast<UINT>(m_DepthBuffer.size()), m_DepthBuffer.data(),
+            static_cast<UINT>(m_ColorSpacePoints.size()), m_ColorSpacePoints.data()
+        );
+        
+        if (Result != S_OK)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < GetDepthWidth(); ++ i)
+        {
+            for (int j = 0; j < GetDepthHeight(); ++ j)
+            {
+                const int x = static_cast<int>(m_ColorSpacePoints[j * GetDepthWidth() + i].X + 0.5f);
+                const int y = static_cast<int>(m_ColorSpacePoints[j * GetDepthWidth() + i].Y + 0.5f);
+
+                if (x >= 0 && x < GetDepthWidth() && y >= 0 && y < GetDepthHeight())
+                {
+                    pBuffer[j * GetDepthWidth() + i] = Base::Byte4(255, 0, 0, 255); //m_CameraFrameBuffer[y * GetDepthWidth() + x];
+                }
+                else
+                {
+                    pBuffer[j * GetDepthWidth() + i] = Base::Byte4(0, 255, 0, 255);
+                }
+            }
+        }
 
         return true;
     }
@@ -179,14 +212,11 @@ namespace MR
         for (int i = 0; i < GetDepthPixelCount(); ++i)
         {
             pBuffer[i] = pShortBuffer[i];
+            m_DepthBuffer[i] = pShortBuffer[i];
         }
 
         pDepthFrame->Release();
-        
-        //ICoordinateMapper* pMapper = nullptr;
-        //m_pKinect->get_CoordinateMapper(&pMapper);
-        //pMapper->MapColorFrameToDepthSpace(DepthPixels.size(), DepthPixels.data(), DepthSpacePoints.size(), DepthSpacePoints.data());
-        
+                        
         return true;
     }
 

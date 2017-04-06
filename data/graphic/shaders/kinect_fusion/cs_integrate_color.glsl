@@ -25,10 +25,7 @@ void main()
     const int x = int(gl_GlobalInvocationID.x);
     const int y = int(gl_GlobalInvocationID.y);
     
-    const vec3 CameraPosition = g_PoseMatrix[3].xyz;
-    ivec3 VoxelCoords = ivec3(x, y, 0);
-
-    
+    imageStore(cs_ColorVolume, ivec3(x, y, 0), vec4(imageLoad(cs_Color, ivec2(x,y))));
 }
 
 #endif // __INCLUDE_CS_KINECT_INTEGRATE_COLOR_GLSL__

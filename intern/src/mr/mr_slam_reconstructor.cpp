@@ -141,7 +141,7 @@ namespace MR
         BASE_CONSOLE_INFO("Using Kinect for SLAM");
 
         m_DepthPixels = std::vector<unsigned short>(m_pRGBDCameraControl->GetDepthPixelCount());
-        m_CameraPixels = std::vector<Base::Byte4>(m_pRGBDCameraControl->GetCameraPixelCount());
+        m_CameraPixels = std::vector<Base::Byte4>(m_pRGBDCameraControl->GetDepthPixelCount());
 
         const float VolumeSize = m_ReconstructionSettings.m_VolumeSize;
         Float4x4 PoseRotation, PoseTranslation;
@@ -229,8 +229,6 @@ namespace MR
             << "#define VOLUME_SIZE "            << m_ReconstructionSettings.m_VolumeSize           << " \n"
             << "#define DEPTH_IMAGE_WIDTH "      << m_pRGBDCameraControl->GetDepthWidth()           << " \n"
             << "#define DEPTH_IMAGE_HEIGHT "     << m_pRGBDCameraControl->GetDepthHeight()          << " \n"
-            << "#define COLOR_IMAGE_WIDTH "      << m_pRGBDCameraControl->GetCameraWidth()          << " \n"
-            << "#define COLOR_IMAGE_HEIGHT "     << m_pRGBDCameraControl->GetCameraHeight()         << " \n"
             << "#define TILE_SIZE1D "            << g_TileSize1D                                    << " \n"
             << "#define TILE_SIZE2D "            << g_TileSize2D                                    << " \n"
             << "#define TILE_SIZE3D "            << g_TileSize3D                                    << " \n"
@@ -337,8 +335,8 @@ namespace MR
 
         if (m_ReconstructionSettings.m_CaptureColor)
         {
-            TextureDescriptor.m_NumberOfPixelsU = m_pRGBDCameraControl->GetCameraWidth();
-            TextureDescriptor.m_NumberOfPixelsV = m_pRGBDCameraControl->GetCameraHeight();
+            TextureDescriptor.m_NumberOfPixelsU = m_pRGBDCameraControl->GetDepthWidth();
+            TextureDescriptor.m_NumberOfPixelsV = m_pRGBDCameraControl->GetDepthHeight();
             TextureDescriptor.m_Format = CTextureBase::R8G8B8A8_UBYTE;
 
             m_RawCameraFramePtr = TextureManager::CreateTexture2D(TextureDescriptor);
@@ -467,8 +465,8 @@ namespace MR
 
         if (CaptureColor)
         {
-            TargetRect = Base::AABB2UInt(Base::UInt2(0, 0), Base::UInt2(m_pRGBDCameraControl->GetCameraWidth(), m_pRGBDCameraControl->GetCameraHeight()));
-            TextureManager::CopyToTexture2D(m_RawCameraFramePtr, TargetRect, m_pRGBDCameraControl->GetCameraWidth(), pColor);
+            TargetRect = Base::AABB2UInt(Base::UInt2(0, 0), Base::UInt2(m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight()));
+            TextureManager::CopyToTexture2D(m_RawCameraFramePtr, TargetRect, m_pRGBDCameraControl->GetDepthWidth(), pColor);
         }
 
         //////////////////////////////////////////////////////////////////////////////////////

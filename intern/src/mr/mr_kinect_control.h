@@ -50,8 +50,13 @@ namespace MR
         void Start();
         void Stop();
 
-		IKinectSensor*            m_pKinect;
-        IColorFrameReader*        m_pColorFrameReader;
-		IDepthFrameReader*        m_pDepthFrameReader;
+        IKinectSensor*     m_pKinect;
+        IColorFrameReader* m_pColorFrameReader;
+        IDepthFrameReader* m_pDepthFrameReader;
+        ICoordinateMapper* m_pMapper;
+
+        std::vector<Base::Byte4> m_CameraFrameBuffer;
+        std::vector<UINT16> m_DepthBuffer;
+        std::vector<ColorSpacePoint> m_ColorSpacePoints;
     };
 } // namespace MR
