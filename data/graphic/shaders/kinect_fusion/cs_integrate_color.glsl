@@ -14,7 +14,8 @@
 
 layout(binding = 0, rgba8) uniform image3D cs_ColorVolume;
 layout(binding = 1, rgba8) readonly uniform image2D cs_Color;
-layout binding = 2, r16ui) readonly uniform uimage2D cs_Depth;
+layout(binding = 2, r16ui) readonly uniform uimage2D cs_Depth;
+layout(binding = 3, rgba32f) uniform image2D cs_Debug;
 
 // -------------------------------------------------------------------------------------
 // Functions
@@ -25,8 +26,26 @@ void main()
 {
     const int x = int(gl_GlobalInvocationID.x);
     const int y = int(gl_GlobalInvocationID.y);
+        
+    const float Depth = imageLoad(cs_Depth, ivec2(x, y)).x / 1000.0f;
     
-    imageStore(cs_ColorVolume, ivec3(x, y, 0), vec4(imageLoad(cs_Color, ivec2(x,y))));
+    vec2 CameraPlane = vec2(x, y);
+    
+    CameraPlane = (CameraPlane - g_Intrinisics[0].m_FocalPoint) * Depth / g_Intrinisics[0].m_FocalLength;
+
+    vec3 VSPosition = vec3(CameraPlane, Depth);
+    vec4 WSPosition = g_PoseMatrix * vec4(VSPosition, 1.0f);
+
+    ivec3 VoxelCoords = ivec3(WSPosition.xyz / VOXEL_SIZE + 0.5f);
+    //VoxelCoords.x = VOLUME_RESOLUTION - VoxelCoords.x;
+    //VoxelCoords.y = VOLUME_RESOLUTION - VoxelCoords.y;
+    //VoxelCoords.z = VOLUME_RESOLUTION - VoxelCoords.z;
+
+    vec3 Color = imageLoad(cs_Color, ivec2(x, y)).rgb;
+    
+    imageStore(cs_ColorVolume, VoxelCoords, vec4(Color, 1.0f));
+
+    imageStore(cs_Debug, ivec2(x, y), vec4(VoxelCoords, 1.0f));
 }
 
 #endif // __INCLUDE_CS_KINECT_INTEGRATE_COLOR_GLSL__

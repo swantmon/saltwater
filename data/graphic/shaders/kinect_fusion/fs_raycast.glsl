@@ -20,7 +20,11 @@ layout(row_major, std140, binding = 1) uniform PerDrawCallData
     vec4 g_Color;
 };
 
-layout (binding = 0) uniform isampler3D fs_Volume;
+layout (binding = 0) uniform isampler3D fs_TSDFVolume;
+
+#ifdef CAPTURE_COLOR
+layout (binding = 1) uniform sampler3D fs_ColorVolume;
+#endif
 
 layout(location = 0) in vec3 in_WSRayDirection;
 
@@ -36,18 +40,24 @@ void main()
     RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
     RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
 
-    vec3 WSPosition = GetPosition(g_ViewPosition.xyz, RayDirection, fs_Volume);
+    vec3 WSPosition = GetPosition(g_ViewPosition.xyz, RayDirection, fs_TSDFVolume);
     
     if (WSPosition.x != 0.0f)
     {
-        vec3 WSNormal = GetNormal(WSPosition, fs_Volume);
+        vec3 WSNormal = GetNormal(WSPosition, fs_TSDFVolume);
         
         WSNormal.x = -WSNormal.x;
 		WSNormal.z = -WSNormal.z;
         
         SGBuffer GBuffer;
-
-        PackGBuffer(g_Color.rgb, WSNormal, 0.5f, vec3(0.5f), 0.0f, 1.0f, GBuffer);
+		
+		#ifdef CAPTURE_COLOR
+		vec3 Color = textureLod(fs_ColorVolume, WSPosition / VOLUME_SIZE, 0).rgb;
+		#else
+		vec3 Color = g_Color.rgb;
+		#endif
+		
+        PackGBuffer(Color, WSNormal, 0.5f, vec3(0.5f), 0.0f, 1.0f, GBuffer);
 
         out_GBuffer0 = GBuffer.m_Color0;
         out_GBuffer1 = GBuffer.m_Color1;

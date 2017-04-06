@@ -147,7 +147,7 @@ namespace
     {
         MR::CSLAMReconstructor::SReconstructionSettings Settings;
 
-        m_pReconstructor->GetReconstructionSettings(Settings);
+        m_pReconstructor->GetReconstructionSettings(&Settings);
 
         std::stringstream DefineStream;
 
@@ -157,6 +157,11 @@ namespace
             << "#define TRUNCATED_DISTANCE " << Settings.m_TruncatedDistance                        << " \n"
             << "#define VOLUME_SIZE "        << Settings.m_VolumeSize                               << " \n"
             << "#define VOXEL_SIZE "         << Settings.m_VolumeSize / Settings.m_VolumeResolution << " \n";
+
+        if (Settings.m_CaptureColor)
+        {
+            DefineStream << "#define CAPTURE_COLOR\n";
+        }
 
         std::string DefineString = DefineStream.str();
 
@@ -399,6 +404,9 @@ namespace
     
     void CGfxReconstructionRenderer::RenderVolume()
     {
+        MR::CSLAMReconstructor::SReconstructionSettings Settings;
+        m_pReconstructor->GetReconstructionSettings(&Settings);
+
         Float4x4 PoseMatrix = m_pReconstructor->GetPoseMatrix();
 
         Float4 RaycastData[2];
@@ -407,12 +415,18 @@ namespace
         RaycastData[1] = m_pReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 1.0f, 0.0f, 1.0f);
 
         BufferManager::UploadConstantBufferData(m_RaycastConstantBufferPtr, RaycastData);
-                
+        
         ContextManager::SetShaderVS(m_RaycastVSPtr);
         ContextManager::SetShaderPS(m_RaycastFSPtr);
 
         ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_pReconstructor->GetTSDFVolume()));
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
+
+        if (Settings.m_CaptureColor)
+        {
+            ContextManager::SetTexture(1, static_cast<CTextureBasePtr>(m_pReconstructor->GetColorVolume()));
+            ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
+        }        
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_RaycastConstantBufferPtr);

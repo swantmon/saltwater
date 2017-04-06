@@ -71,7 +71,7 @@ namespace MR
         Gfx::CTexture3DPtr GetTSDFVolume();
         Gfx::CTexture3DPtr GetColorVolume();
 
-        void GetReconstructionSettings(SReconstructionSettings& rReconstructionSettings);
+        void GetReconstructionSettings(SReconstructionSettings* pReconstructionSettings);
 
     private:
 
