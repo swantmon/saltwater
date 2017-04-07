@@ -19,14 +19,19 @@ namespace Edit
     public Q_SLOTS:
 
         void reset();
-        void pause();
+        void pauseDepthIntegration();
+        void pauseColorIntegration();
         void volumeResolutionChanged(int);
 
     private:
 
-        bool m_IsPaused;
+        bool m_IsDepthPaused;
+        bool m_IsColorPaused;
 
-        static const QString s_PauseText;
-        static const QString s_ResumeText;
+        static const QString s_PauseDepthText;
+        static const QString s_ResumeDepthText;
+
+        static const QString s_PauseColorText;
+        static const QString s_ResumeColorText;
     };
 } // namespace Edit

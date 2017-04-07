@@ -158,7 +158,9 @@ namespace MR
         m_IntegratedDepthFrameCount = 0;
         m_FrameCount = 0;
         m_TrackingLost = true;
-        m_IsPaused = false;
+        m_IsDepthPaused = false;
+        m_IsColorPaused = false;
+
 
         SetupShaders();
         SetupTextures();
@@ -450,7 +452,7 @@ namespace MR
             return;
         }
 
-        if (CaptureColor && !m_pRGBDCameraControl->GetCameraFrame(pColor))
+        if (CaptureColor && !m_IsColorPaused && !m_pRGBDCameraControl->GetCameraFrame(pColor))
         {
             return;
         }
@@ -502,13 +504,13 @@ namespace MR
 
         Performance::BeginEvent("TSDF Integration and Raycasting");
 
-        if (!m_IsPaused)
+        if (!m_IsDepthPaused)
         {
-            IntegrateDepth();
-            if (CaptureColor)
-            {
-                IntegrateColor();
-            }
+            IntegrateDepth();            
+        }
+        if (CaptureColor && !m_IsColorPaused)
+        {
+            IntegrateColor();
         }
 
         Raycast();
@@ -889,10 +891,15 @@ namespace MR
     }
 
     // -----------------------------------------------------------------------------
-
-    void CSLAMReconstructor::SetPaused(bool _Paused)
+    
+    void CSLAMReconstructor::PauseDepthIntegration(bool _Paused)
     {
-        m_IsPaused = _Paused;
+        m_IsDepthPaused = _Paused;
+    }
+
+    void CSLAMReconstructor::PauseColorIntegration(bool _Paused)
+    {
+        m_IsColorPaused = _Paused;
     }
 
     // -----------------------------------------------------------------------------

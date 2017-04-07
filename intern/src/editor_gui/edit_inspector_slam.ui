@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>376</width>
-    <height>220</height>
+    <height>286</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -176,9 +176,16 @@
     </layout>
    </item>
    <item>
-    <widget class="QPushButton" name="m_pPauseButton">
+    <widget class="QPushButton" name="m_pPauseDepthIntegrationButton">
      <property name="text">
-      <string>Pause Integration</string>
+      <string>Pause Depth Integration</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="m_pPauseColorIntegrationButton">
+     <property name="text">
+      <string>Pause Color Integration</string>
      </property>
     </widget>
    </item>
@@ -271,10 +278,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>m_pPauseButton</sender>
+   <sender>m_pPauseDepthIntegrationButton</sender>
    <signal>clicked()</signal>
    <receiver>InspectorSLAM</receiver>
-   <slot>pause()</slot>
+   <slot>pauseDepthIntegration()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>187</x>
@@ -286,10 +293,27 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_pPauseColorIntegrationButton</sender>
+   <signal>clicked()</signal>
+   <receiver>InspectorSLAM</receiver>
+   <slot>pauseColorIntegration()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>187</x>
+     <y>230</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>187</x>
+     <y>142</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>volumeResolutionChanged(int)</slot>
-  <slot>pause()</slot>
   <slot>reset()</slot>
+  <slot>pauseDepthIntegration()</slot>
+  <slot>pauseColorIntegration()</slot>
  </slots>
 </ui>

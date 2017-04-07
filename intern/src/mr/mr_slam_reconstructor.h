@@ -64,8 +64,8 @@ namespace MR
         void Update();
         void ResetReconstruction(const SReconstructionSettings* pReconstructionSettings = nullptr);
 
-        void SetPaused(bool _Paused);
-
+        void PauseDepthIntegration(bool _Paused);
+        void PauseColorIntegration(bool _Paused);
         bool IsTrackingLost() const;
         Base::Float4x4 GetPoseMatrix() const;
         Gfx::CTexture3DPtr GetTSDFVolume();
@@ -147,6 +147,7 @@ namespace MR
 
         bool m_TrackingLost;
 
-        bool m_IsPaused;
+        bool m_IsDepthPaused;
+        bool m_IsColorPaused;
     };
 } // namespace MR

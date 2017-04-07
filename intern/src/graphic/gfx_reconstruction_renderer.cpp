@@ -64,7 +64,8 @@ namespace
         
         void Update();
         void Render();
-        void Pause(bool _Paused);
+        void PauseDepthIntegration(bool _Paused);
+        void PauseColorIntegration(bool _Paused);
 
         void OnReconstructionUpdate(const MR::CSLAMReconstructor::SReconstructionSettings& _Settings);
 
@@ -433,7 +434,7 @@ namespace
         {
             ContextManager::SetTexture(1, static_cast<CTextureBasePtr>(m_pReconstructor->GetColorVolume()));
             ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
-        }        
+        }
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_RaycastConstantBufferPtr);
@@ -502,9 +503,16 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::Pause(bool _Paused)
+    void CGfxReconstructionRenderer::PauseDepthIntegration(bool _Paused)
     {
-        m_pReconstructor->SetPaused(_Paused);
+        m_pReconstructor->PauseDepthIntegration(_Paused);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::PauseColorIntegration(bool _Paused)
+    {
+        m_pReconstructor->PauseColorIntegration(_Paused);
     }
 } // namespace
 
@@ -631,9 +639,16 @@ namespace ReconstructionRenderer
 
     // -----------------------------------------------------------------------------
 
-    void Pause(bool _Paused)
+    void PauseDepthIntegration(bool _Paused)
     {
-        CGfxReconstructionRenderer::GetInstance().Pause(_Paused);
+        CGfxReconstructionRenderer::GetInstance().PauseDepthIntegration(_Paused);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void PauseColorIntegration(bool _Paused)
+    {
+        CGfxReconstructionRenderer::GetInstance().PauseColorIntegration(_Paused);
     }
 } // namespace Voxel
 } // namespace Gfx

@@ -32,7 +32,8 @@ namespace
 
         void OnNewSLAMReconstruction(Edit::CMessage& _rMessage);
         void OnSLAMReconstructionUpdate(Edit::CMessage& _rMessage);
-        void OnSLAMReconstructionPause(Edit::CMessage& _rMessage);
+        void OnSLAMReconstructionPauseDepth(Edit::CMessage& _rMessage);
+        void OnSLAMReconstructionPauseColor(Edit::CMessage& _rMessage);
     };
 } // namespace
 
@@ -59,7 +60,8 @@ namespace
         // -----------------------------------------------------------------------------
         Edit::MessageManager::Register(Edit::SGUIMessageType::MR_SLAM_NewReconstruction, EDIT_RECEIVE_MESSAGE(&CSLAMHelper::OnNewSLAMReconstruction));
         Edit::MessageManager::Register(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Update, EDIT_RECEIVE_MESSAGE(&CSLAMHelper::OnSLAMReconstructionUpdate));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Pause, EDIT_RECEIVE_MESSAGE(&CSLAMHelper::OnSLAMReconstructionPause));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Pause_Depth, EDIT_RECEIVE_MESSAGE(&CSLAMHelper::OnSLAMReconstructionPauseDepth));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Pause_Color, EDIT_RECEIVE_MESSAGE(&CSLAMHelper::OnSLAMReconstructionPauseColor));
     }
 
     // -----------------------------------------------------------------------------
@@ -97,11 +99,22 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CSLAMHelper::OnSLAMReconstructionPause(Edit::CMessage& _rMessage)
+    void CSLAMHelper::OnSLAMReconstructionPauseDepth(Edit::CMessage& _rMessage)
     {
         bool Pause = _rMessage.GetBool();
 
-        Gfx::ReconstructionRenderer::Pause(Pause);
+        Gfx::ReconstructionRenderer::PauseDepthIntegration(Pause);
+
+        _rMessage.SetResult(1);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMHelper::OnSLAMReconstructionPauseColor(Edit::CMessage& _rMessage)
+    {
+        bool Pause = _rMessage.GetBool();
+
+        Gfx::ReconstructionRenderer::PauseColorIntegration(Pause);
 
         _rMessage.SetResult(1);
     }

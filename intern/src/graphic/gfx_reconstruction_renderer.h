@@ -34,6 +34,7 @@ namespace ReconstructionRenderer
     
     void Update();
     void Render();
-    void Pause(bool _Paused);
+    void PauseDepthIntegration(bool _Paused);
+    void PauseColorIntegration(bool _Paused);
 } // namespace ReconstructionRenderer
 } // namespace Gfx
