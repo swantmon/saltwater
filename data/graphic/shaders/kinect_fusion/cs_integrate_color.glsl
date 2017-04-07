@@ -37,9 +37,6 @@ void main()
     vec4 WSPosition = g_PoseMatrix * vec4(VSPosition, 1.0f);
 
     ivec3 VoxelCoords = ivec3(WSPosition.xyz / VOXEL_SIZE + 0.5f);
-    //VoxelCoords.x = VOLUME_RESOLUTION - VoxelCoords.x;
-    //VoxelCoords.y = VOLUME_RESOLUTION - VoxelCoords.y;
-    //VoxelCoords.z = VOLUME_RESOLUTION - VoxelCoords.z;
 
     vec3 Color = imageLoad(cs_Color, ivec2(DEPTH_IMAGE_WIDTH - x, y)).rgb;
     

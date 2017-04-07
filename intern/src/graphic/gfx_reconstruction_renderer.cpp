@@ -412,7 +412,14 @@ namespace
         Float4 RaycastData[2];
         PoseMatrix.GetTranslation(RaycastData[0][0], RaycastData[0][1], RaycastData[0][2]);
         RaycastData[0][3] = 1.0f;
-        RaycastData[1] = m_pReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 1.0f, 0.0f, 1.0f);
+        if (Settings.m_CaptureColor)
+        {
+            RaycastData[1] = m_pReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 0.0f, 0.0f, 1.0f);
+        }
+        else
+        {
+            RaycastData[1] = m_pReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 1.0f, 0.0f, 1.0f);
+        }
 
         BufferManager::UploadConstantBufferData(m_RaycastConstantBufferPtr, RaycastData);
         

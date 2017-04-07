@@ -52,7 +52,7 @@ void main()
         SGBuffer GBuffer;
 		
 		#ifdef CAPTURE_COLOR
-		vec3 Color = textureLod(fs_ColorVolume, WSPosition / VOLUME_SIZE, 0).rgb;
+		vec3 Color = g_Color.rgb + textureLod(fs_ColorVolume, WSPosition / VOLUME_SIZE, 0).rgb;
 		#else
 		vec3 Color = g_Color.rgb;
 		#endif
