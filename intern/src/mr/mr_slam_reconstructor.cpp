@@ -80,8 +80,6 @@ namespace
     {
         Base::Float4x4 m_WorldMatrix;
     };
-
-    Gfx::CTexture2DPtr DebugBuffer;
     
 } // namespace
 
@@ -182,8 +180,6 @@ namespace MR
         m_DetermineSummandsCSPtr = 0;
         m_ReduceSumCSPtr = 0;
         m_ClearVolumeCSPtr = 0;
-
-        DebugBuffer = 0;
 
         m_RawDepthBufferPtr = 0;
         m_RawCameraFramePtr = 0;
@@ -336,9 +332,6 @@ namespace MR
         TextureDescriptor.m_Format = CTextureBase::R16_UINT;
 
         m_RawDepthBufferPtr = TextureManager::CreateTexture2D(TextureDescriptor);
-
-        TextureDescriptor.m_Format = CTextureBase::R32G32B32A32_FLOAT;
-        DebugBuffer = TextureManager::CreateTexture2D(TextureDescriptor);
 
         if (m_ReconstructionSettings.m_CaptureColor)
         {
@@ -795,7 +788,6 @@ namespace MR
         ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_ColorVolumePtr));
         ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RawCameraFramePtr));
         ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
-        ContextManager::SetImageTexture(3, static_cast<CTextureBasePtr>(DebugBuffer));
 
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);

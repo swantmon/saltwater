@@ -15,7 +15,6 @@
 layout(binding = 0, rgba8) uniform image3D cs_ColorVolume;
 layout(binding = 1, rgba8) readonly uniform image2D cs_Color;
 layout(binding = 2, r16ui) readonly uniform uimage2D cs_Depth;
-layout(binding = 3, rgba32f) uniform image2D cs_Debug;
 
 // -------------------------------------------------------------------------------------
 // Functions
@@ -36,13 +35,11 @@ void main()
     vec3 VSPosition = vec3(CameraPlane, Depth);
     vec4 WSPosition = g_PoseMatrix * vec4(VSPosition, 1.0f);
 
-    ivec3 VoxelCoords = ivec3(WSPosition.xyz / VOXEL_SIZE + 0.5f);
+    ivec3 VoxelCoords = ivec3(WSPosition.xyz / VOXEL_SIZE);
 
     vec3 Color = imageLoad(cs_Color, ivec2(DEPTH_IMAGE_WIDTH - x, y)).rgb;
     
     imageStore(cs_ColorVolume, VoxelCoords, vec4(Color, 1.0f));
-
-    imageStore(cs_Debug, ivec2(x, y), vec4(VoxelCoords, 1.0f));
 }
 
 #endif // __INCLUDE_CS_KINECT_INTEGRATE_COLOR_GLSL__
