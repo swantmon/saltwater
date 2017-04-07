@@ -39,7 +39,10 @@ void main()
 
     vec3 Color = imageLoad(cs_Color, ivec2(DEPTH_IMAGE_WIDTH - x, y)).rgb;
     
-    imageStore(cs_ColorVolume, VoxelCoords, vec4(Color, 1.0f));
+    if (Color.r > 0.0f && Color.g > 0.0f && Color.b > 0.0f)
+    {
+        imageStore(cs_ColorVolume, VoxelCoords, vec4(Color, 1.0f));
+    }
 }
 
 #endif // __INCLUDE_CS_KINECT_INTEGRATE_COLOR_GLSL__
