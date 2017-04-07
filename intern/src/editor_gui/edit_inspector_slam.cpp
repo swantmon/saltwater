@@ -47,7 +47,7 @@ namespace Edit
         m_pPauseColorIntegrationButton->setText(m_IsColorPaused ? s_ResumeColorText : s_PauseColorText);
         m_pPauseTrackingButton->setText(m_IsTrackingPaused ? s_ResumeTrackingText : s_PauseTrackingText);
 
-        m_pPauseColorIntegrationButton->setEnabled(DefaultSettings.m_CaptureColor);
+        m_pPauseColorIntegrationButton->setVisible(DefaultSettings.m_CaptureColor);
 
         m_pCaptureColorCB->setChecked(DefaultSettings.m_CaptureColor);
     }
@@ -75,7 +75,7 @@ namespace Edit
         const int MaxDepth = m_pMaxDepthLE->text().toInt();
         const bool CaptureColor = m_pCaptureColorCB->checkState() == Qt::CheckState::Checked;
 
-        m_pPauseColorIntegrationButton->setEnabled(CaptureColor);
+        m_pPauseColorIntegrationButton->setVisible(CaptureColor);
 
         // -----------------------------------------------------------------------------
         // Send message

@@ -176,16 +176,9 @@
     </layout>
    </item>
    <item>
-    <widget class="QPushButton" name="m_pPauseDepthIntegrationButton">
+    <widget class="QPushButton" name="m_pResetButton">
      <property name="text">
-      <string>Pause Depth Integration</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QPushButton" name="m_pPauseColorIntegrationButton">
-     <property name="text">
-      <string>Pause Color Integration</string>
+      <string>Reset Reconstruction</string>
      </property>
     </widget>
    </item>
@@ -197,9 +190,16 @@
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="m_pResetButton">
+    <widget class="QPushButton" name="m_pPauseDepthIntegrationButton">
      <property name="text">
-      <string>Reset Reconstruction</string>
+      <string>Pause Depth Integration</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="m_pPauseColorIntegrationButton">
+     <property name="text">
+      <string>Pause Color Integration</string>
      </property>
     </widget>
    </item>
