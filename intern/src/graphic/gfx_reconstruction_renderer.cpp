@@ -74,7 +74,7 @@ namespace
 
         void RenderVolume();
         void RenderCamera();
-                
+        
     private:
 
         std::unique_ptr<MR::CSLAMReconstructor> m_pReconstructor;
@@ -132,7 +132,7 @@ namespace
         
         m_RaycastConstantBufferPtr = 0;
         m_DrawCallConstantBufferPtr = 0;
-                
+        
         m_CameraMeshPtr = 0;
         m_CubeMeshPtr = 0;
         m_CameraInputLayoutPtr = 0;

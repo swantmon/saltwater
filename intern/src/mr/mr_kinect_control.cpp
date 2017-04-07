@@ -83,6 +83,7 @@ namespace MR
 
     void CKinectControl::Stop()
     {
+        SafeRelease(m_pMapper);
         SafeRelease(m_pDepthFrameReader);
         if (m_pKinect != nullptr)
         {
