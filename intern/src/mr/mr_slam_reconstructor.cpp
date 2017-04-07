@@ -109,7 +109,7 @@ namespace MR
     
     bool CSLAMReconstructor::IsTrackingLost() const
     {
-        return m_TrackingLost;
+        return !m_IsTrackingPaused && m_TrackingLost;
     }
 
     // -----------------------------------------------------------------------------
@@ -160,7 +160,7 @@ namespace MR
         m_TrackingLost = true;
         m_IsDepthPaused = false;
         m_IsColorPaused = false;
-
+        m_IsTrackingPaused = false;
 
         SetupShaders();
         SetupTextures();
@@ -446,6 +446,11 @@ namespace MR
 
         unsigned short* pDepth = m_DepthPixels.data();
         Base::Byte4* pColor = m_CameraPixels.data();
+
+        if (m_IsTrackingPaused)
+        {
+            return;
+        }
 
         if (!m_pRGBDCameraControl->GetDepthBuffer(pDepth))
         {
@@ -897,9 +902,18 @@ namespace MR
         m_IsDepthPaused = _Paused;
     }
 
+    // -----------------------------------------------------------------------------
+
     void CSLAMReconstructor::PauseColorIntegration(bool _Paused)
     {
         m_IsColorPaused = _Paused;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::PauseTracking(bool _Paused)
+    {
+        m_IsTrackingPaused = _Paused;
     }
 
     // -----------------------------------------------------------------------------

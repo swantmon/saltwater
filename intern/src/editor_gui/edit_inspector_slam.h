@@ -21,17 +21,22 @@ namespace Edit
         void reset();
         void pauseDepthIntegration();
         void pauseColorIntegration();
+        void pauseTracking();
         void volumeResolutionChanged(int);
 
     private:
 
         bool m_IsDepthPaused;
         bool m_IsColorPaused;
+        bool m_IsTrackingPaused;
 
         static const QString s_PauseDepthText;
         static const QString s_ResumeDepthText;
 
         static const QString s_PauseColorText;
         static const QString s_ResumeColorText;
+
+        static const QString s_PauseTrackingText;
+        static const QString s_ResumeTrackingText;
     };
 } // namespace Edit

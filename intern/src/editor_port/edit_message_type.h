@@ -127,6 +127,7 @@ namespace Edit
             MR_SLAM_Reconstruction_Update,
             MR_SLAM_Reconstruction_Pause_Depth,
             MR_SLAM_Reconstruction_Pause_Color,
+            MR_SLAM_Reconstruction_Pause_Tracking,
 
             NumberOfMembers,
             Undefined = -1,

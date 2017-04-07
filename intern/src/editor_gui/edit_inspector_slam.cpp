@@ -16,6 +16,7 @@ namespace Edit
         : QWidget(_pParent)
         , m_IsDepthPaused(false)
         , m_IsColorPaused(false)
+        , m_IsTrackingPaused(false)
     {
         // -----------------------------------------------------------------------------
         // Setup UI
@@ -44,6 +45,8 @@ namespace Edit
         
         m_pPauseDepthIntegrationButton->setText(m_IsDepthPaused ? s_ResumeDepthText : s_PauseDepthText);
         m_pPauseColorIntegrationButton->setText(m_IsColorPaused ? s_ResumeColorText : s_PauseColorText);
+        m_pPauseTrackingButton->setText(m_IsTrackingPaused ? s_ResumeTrackingText : s_PauseTrackingText);
+
         m_pPauseColorIntegrationButton->setEnabled(DefaultSettings.m_CaptureColor);
 
         m_pCaptureColorCB->setChecked(DefaultSettings.m_CaptureColor);
@@ -132,11 +135,29 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
+    void CInspectorSLAM::pauseTracking()
+    {
+        m_IsTrackingPaused = !m_IsTrackingPaused;
+
+        m_pPauseTrackingButton->setText(m_IsTrackingPaused ? s_ResumeTrackingText : s_PauseTrackingText);
+
+        Edit::CMessage NewMessage;
+        NewMessage.PutBool(m_IsTrackingPaused);
+        NewMessage.Reset();
+
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Pause_Tracking, NewMessage);
+    }
+
+    // -----------------------------------------------------------------------------
+
     const QString CInspectorSLAM::s_PauseDepthText = "Pause Depth Integration";
     const QString CInspectorSLAM::s_ResumeDepthText = "Resume Depth Integration";
 
     const QString CInspectorSLAM::s_PauseColorText = "Pause Color Integration";
     const QString CInspectorSLAM::s_ResumeColorText = "Resume Color Integration";
+
+    const QString CInspectorSLAM::s_PauseTrackingText = "Pause Tracking";
+    const QString CInspectorSLAM::s_ResumeTrackingText = "Resume Tracking";
 
     // -----------------------------------------------------------------------------
 

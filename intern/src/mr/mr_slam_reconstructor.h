@@ -66,6 +66,7 @@ namespace MR
 
         void PauseDepthIntegration(bool _Paused);
         void PauseColorIntegration(bool _Paused);
+        void PauseTracking(bool _Paused);
         bool IsTrackingLost() const;
         Base::Float4x4 GetPoseMatrix() const;
         Gfx::CTexture3DPtr GetTSDFVolume();
@@ -149,5 +150,6 @@ namespace MR
 
         bool m_IsDepthPaused;
         bool m_IsColorPaused;
+        bool m_IsTrackingPaused;
     };
 } // namespace MR

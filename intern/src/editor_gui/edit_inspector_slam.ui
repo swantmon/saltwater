@@ -190,6 +190,13 @@
     </widget>
    </item>
    <item>
+    <widget class="QPushButton" name="m_pPauseTrackingButton">
+     <property name="text">
+      <string>Pause Tracking</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QPushButton" name="m_pResetButton">
      <property name="text">
       <string>Reset Reconstruction</string>
@@ -309,11 +316,28 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_pPauseTrackingButton</sender>
+   <signal>clicked()</signal>
+   <receiver>InspectorSLAM</receiver>
+   <slot>pauseTracking()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>187</x>
+     <y>230</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>187</x>
+     <y>142</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>volumeResolutionChanged(int)</slot>
   <slot>reset()</slot>
   <slot>pauseDepthIntegration()</slot>
   <slot>pauseColorIntegration()</slot>
+  <slot>pauseTracking()</slot>
  </slots>
 </ui>

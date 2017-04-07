@@ -66,6 +66,7 @@ namespace
         void Render();
         void PauseDepthIntegration(bool _Paused);
         void PauseColorIntegration(bool _Paused);
+        void PauseTracking(bool _Paused);
 
         void OnReconstructionUpdate(const MR::CSLAMReconstructor::SReconstructionSettings& _Settings);
 
@@ -514,6 +515,13 @@ namespace
     {
         m_pReconstructor->PauseColorIntegration(_Paused);
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::PauseTracking(bool _Paused)
+    {
+        m_pReconstructor->PauseTracking(_Paused);
+    }
 } // namespace
 
 namespace Gfx
@@ -649,6 +657,13 @@ namespace ReconstructionRenderer
     void PauseColorIntegration(bool _Paused)
     {
         CGfxReconstructionRenderer::GetInstance().PauseColorIntegration(_Paused);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void PauseTracking(bool _Paused)
+    {
+        CGfxReconstructionRenderer::GetInstance().PauseTracking(_Paused);
     }
 } // namespace Voxel
 } // namespace Gfx
