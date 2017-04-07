@@ -41,7 +41,7 @@ void main()
     //VoxelCoords.y = VOLUME_RESOLUTION - VoxelCoords.y;
     //VoxelCoords.z = VOLUME_RESOLUTION - VoxelCoords.z;
 
-    vec3 Color = imageLoad(cs_Color, ivec2(x, y)).rgb;
+    vec3 Color = imageLoad(cs_Color, ivec2(DEPTH_IMAGE_WIDTH - x, y)).rgb;
     
     imageStore(cs_ColorVolume, VoxelCoords, vec4(Color, 1.0f));
 
