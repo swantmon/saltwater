@@ -19,7 +19,15 @@ namespace Gfx
                 MinLinearMagPointMipLinear           =  5,
                 MinMagLinearMipPoint                 =  6,
                 MinMagMipLinear                      =  7,
-                NumberOfFilters                      =  8,
+                MinMagMipPointCompare                =  8,
+                MinMagPointMipLinearCompare          =  9,
+                MinPointMagLinearMipPointCompare     = 10,
+                MinPointMagMipLinearCompare          = 11,
+                MinLinearMagMipPointCompare          = 12,
+                MinLinearMagPointMipLinearCompare    = 13,
+                MinMagLinearMipPointCompare          = 14,
+                MinMagMipLinearCompare               = 15,
+                NumberOfFilters                      = 16,
                 UndefinedFilter                      = -1,
             };
 
@@ -61,6 +69,7 @@ namespace Gfx
                 MinMagMipLinearWrap,
                 MinMagMipLinearBorder,
                 MinMagMipLinearMirror,
+                PCF,
                 NumberOfSamplers,
                 UndefinedSampler = -1,
             };
