@@ -85,7 +85,6 @@ namespace MR
 
         void CreateReferencePyramid();
         void IntegrateDepth();
-        void IntegrateColor();
         void Raycast();
         void CreateRaycastPyramid();
 
@@ -117,7 +116,6 @@ namespace MR
         Gfx::CShaderPtr m_NormalMapCSPtr;
         Gfx::CShaderPtr m_DownSampleDepthCSPtr;
         Gfx::CShaderPtr m_DepthIntegrationCSPtr;
-        Gfx::CShaderPtr m_ColorIntegrationCSPtr;
         Gfx::CShaderPtr m_RaycastCSPtr;
         Gfx::CShaderPtr m_RaycastPyramidCSPtr;
         Gfx::CShaderPtr m_DetermineSummandsCSPtr;

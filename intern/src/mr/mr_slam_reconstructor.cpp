@@ -176,7 +176,6 @@ namespace MR
         m_NormalMapCSPtr = 0;
         m_DownSampleDepthCSPtr = 0;
         m_DepthIntegrationCSPtr = 0;
-        m_ColorIntegrationCSPtr = 0;
         m_RaycastCSPtr = 0;
         m_RaycastPyramidCSPtr = 0;
         m_DetermineSummandsCSPtr = 0;
@@ -261,11 +260,6 @@ namespace MR
         m_DetermineSummandsCSPtr = ShaderManager::CompileCS("kinect_fusion\\cs_determine_summands.glsl", "main", DefineString.c_str());
         m_ReduceSumCSPtr         = ShaderManager::CompileCS("kinect_fusion\\cs_reduce_sum.glsl"        , "main", DefineString.c_str());
         m_ClearVolumeCSPtr       = ShaderManager::CompileCS("kinect_fusion\\cs_clear_volume.glsl"      , "main", DefineString.c_str());
-
-        if (m_ReconstructionSettings.m_CaptureColor)
-        {
-            m_ColorIntegrationCSPtr = ShaderManager::CompileCS("kinect_fusion\\cs_integrate_color.glsl", "main", DefineString.c_str());
-        }
     }
     
     // -----------------------------------------------------------------------------
@@ -784,28 +778,7 @@ namespace MR
 
         ContextManager::Dispatch(WorkGroups, WorkGroups, 1);
     }
-
-    // -----------------------------------------------------------------------------
-
-    void CSLAMReconstructor::IntegrateColor()
-    {
-        const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth(), g_TileSize2D);
-        const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
-
-        ContextManager::SetShaderCS(m_ColorIntegrationCSPtr);
-
-        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_ColorVolumePtr));
-        ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RawCameraFramePtr));
-        ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
-
-        ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
-        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
-
-        ContextManager::Barrier();
-
-        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
-    }
-
+    
     // -----------------------------------------------------------------------------
 
     void CSLAMReconstructor::CreateRaycastPyramid()
