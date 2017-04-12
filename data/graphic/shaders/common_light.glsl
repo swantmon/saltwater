@@ -62,7 +62,7 @@ float GetShadowAtPosition(in vec3 _WSPosition, in mat4 _LightViewProjection, in 
     // Get final depth at this texcoord and compare it with the real
     // position z value (do a manual depth test)
     // -----------------------------------------------------------------------------
-    DepthValue = texture( _Shadowmap, vec2(ShadowCoord.x, ShadowCoord.y) ).r;
+    DepthValue = texture(_Shadowmap, ShadowCoord.xy).r;
     
     Shadow = 1.0f;
     
@@ -76,7 +76,7 @@ float GetShadowAtPosition(in vec3 _WSPosition, in mat4 _LightViewProjection, in 
 
 // -----------------------------------------------------------------------------
 
-float GetShadowAtPositionWithPCF(in vec3 _WSPosition, in mat4 _LightViewProjection, in sampler2D _Shadowmap)
+float GetShadowAtPositionWithPCF(in vec3 _WSPosition, in mat4 _LightViewProjection, in sampler2DShadow _Shadowmap)
 {
     vec4  LSPosition;
     vec3  ShadowCoord;
@@ -110,29 +110,20 @@ float GetShadowAtPositionWithPCF(in vec3 _WSPosition, in mat4 _LightViewProjecti
     // Get final depth at this texcoord and compare it with the real
     // position z value (do a manual depth test)
     // -----------------------------------------------------------------------------
-    ShadowAcc = 0.0f;
-    Shadow    = 0.0f;
+    Shadow = 0.0f;
     
-    for(int TexCoordX = -1; TexCoordX <= 1; ++TexCoordX)
+	#pragma unroll
+    for(int TexCoordX = -2; TexCoordX <= 2; ++TexCoordX)
     {
-        for(int TexCoordY = -1; TexCoordY <= 1; ++TexCoordY)
+        for(int TexCoordY = -2; TexCoordY <= 2; ++TexCoordY)
         {
             vec2 Offset = ShadowCoord.xy + (vec2(TexCoordX, TexCoordY) / ShadowMapSize);
             
-            DepthValue = texture(_Shadowmap, Offset).r;
-            
-            Shadow = 1.0f;
-            
-            if (ShadowCoord.z - 0.001f > DepthValue)
-            {
-                Shadow = 0.0f;
-            }
-            
-            ShadowAcc += Shadow;
+            Shadow += texture( _Shadowmap, vec3(Offset.x, Offset.y, ShadowCoord.z));
         }
     }
     
-    return ShadowAcc / 9.0f;
+    return Shadow / 25.0f;
 }
 
 // -----------------------------------------------------------------------------

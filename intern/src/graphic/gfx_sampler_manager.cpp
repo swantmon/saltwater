@@ -344,6 +344,14 @@ namespace
             GL_NEAREST,
             GL_LINEAR,
             GL_LINEAR,
+            GL_NEAREST,
+            GL_NEAREST,
+            GL_LINEAR,
+            GL_LINEAR,
+            GL_NEAREST,
+            GL_NEAREST,
+            GL_LINEAR,
+            GL_LINEAR,
         };
         
         return s_NativeMagFilterMode[_Filter];
@@ -355,6 +363,14 @@ namespace
     {
         static int s_NativeMinFilterMode[] =
         {
+            GL_NEAREST_MIPMAP_NEAREST,
+            GL_NEAREST_MIPMAP_LINEAR,
+            GL_NEAREST_MIPMAP_NEAREST,
+            GL_NEAREST_MIPMAP_LINEAR,
+            GL_LINEAR_MIPMAP_NEAREST,
+            GL_LINEAR_MIPMAP_LINEAR,
+            GL_LINEAR_MIPMAP_NEAREST,
+            GL_LINEAR_MIPMAP_LINEAR,
             GL_NEAREST_MIPMAP_NEAREST,
             GL_NEAREST_MIPMAP_LINEAR,
             GL_NEAREST_MIPMAP_NEAREST,
@@ -393,7 +409,6 @@ namespace
     {
         static bool s_IsComparison[] =
         {
-            false,
             false,
             false,
             false,
