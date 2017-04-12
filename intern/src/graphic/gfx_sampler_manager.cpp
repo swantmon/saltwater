@@ -140,18 +140,19 @@ namespace
         // BIAS              | 0.0f                   |
         // -----------------------------------------------------------------------------
        
-        { CSampler::MinMagMipPoint      , CSampler::Clamp , CSampler::Clamp , CSampler::Clamp , CSampler::Never, 16.0f, -1000.0f, 1000.0f, 0.0f },
-        { CSampler::MinMagMipPoint      , CSampler::Wrap  , CSampler::Wrap  , CSampler::Wrap  , CSampler::Never, 16.0f, -1000.0f, 1000.0f, 0.0f },
-        { CSampler::MinMagMipPoint      , CSampler::Border, CSampler::Border, CSampler::Border, CSampler::Never, 16.0f, -1000.0f, 1000.0f, 0.0f },
-        { CSampler::MinMagMipPoint      , CSampler::Mirror, CSampler::Mirror, CSampler::Mirror, CSampler::Never, 16.0f, -1000.0f, 1000.0f, 0.0f },
-        { CSampler::MinMagLinearMipPoint, CSampler::Clamp , CSampler::Clamp , CSampler::Clamp , CSampler::Never, 16.0f, -1000.0f, 1000.0f, 0.0f },
-        { CSampler::MinMagLinearMipPoint, CSampler::Wrap  , CSampler::Wrap  , CSampler::Wrap  , CSampler::Never, 16.0f, -1000.0f, 1000.0f, 0.0f },
-        { CSampler::MinMagLinearMipPoint, CSampler::Border, CSampler::Border, CSampler::Border, CSampler::Never, 16.0f, -1000.0f, 1000.0f, 0.0f },
-        { CSampler::MinMagLinearMipPoint, CSampler::Mirror, CSampler::Mirror, CSampler::Mirror, CSampler::Never, 16.0f, -1000.0f, 1000.0f, 0.0f },
-        { CSampler::MinMagMipLinear     , CSampler::Clamp , CSampler::Clamp , CSampler::Clamp , CSampler::Never, 16.0f, -1000.0f, 1000.0f, 0.0f },
-        { CSampler::MinMagMipLinear     , CSampler::Wrap  , CSampler::Wrap  , CSampler::Wrap  , CSampler::Never, 16.0f, -1000.0f, 1000.0f, 0.0f },
-        { CSampler::MinMagMipLinear     , CSampler::Border, CSampler::Border, CSampler::Border, CSampler::Never, 16.0f, -1000.0f, 1000.0f, 0.0f },
-        { CSampler::MinMagMipLinear     , CSampler::Mirror, CSampler::Mirror, CSampler::Mirror, CSampler::Never, 16.0f, -1000.0f, 1000.0f, 0.0f },
+        { CSampler::MinMagMipPoint        , CSampler::Clamp , CSampler::Clamp , CSampler::Clamp , CSampler::Never      , 16.0f, -1000.0f, 1000.0f, 0.0f },
+        { CSampler::MinMagMipPoint        , CSampler::Wrap  , CSampler::Wrap  , CSampler::Wrap  , CSampler::Never      , 16.0f, -1000.0f, 1000.0f, 0.0f },
+        { CSampler::MinMagMipPoint        , CSampler::Border, CSampler::Border, CSampler::Border, CSampler::Never      , 16.0f, -1000.0f, 1000.0f, 0.0f },
+        { CSampler::MinMagMipPoint        , CSampler::Mirror, CSampler::Mirror, CSampler::Mirror, CSampler::Never      , 16.0f, -1000.0f, 1000.0f, 0.0f },
+        { CSampler::MinMagLinearMipPoint  , CSampler::Clamp , CSampler::Clamp , CSampler::Clamp , CSampler::Never      , 16.0f, -1000.0f, 1000.0f, 0.0f },
+        { CSampler::MinMagLinearMipPoint  , CSampler::Wrap  , CSampler::Wrap  , CSampler::Wrap  , CSampler::Never      , 16.0f, -1000.0f, 1000.0f, 0.0f },
+        { CSampler::MinMagLinearMipPoint  , CSampler::Border, CSampler::Border, CSampler::Border, CSampler::Never      , 16.0f, -1000.0f, 1000.0f, 0.0f },
+        { CSampler::MinMagLinearMipPoint  , CSampler::Mirror, CSampler::Mirror, CSampler::Mirror, CSampler::Never      , 16.0f, -1000.0f, 1000.0f, 0.0f },
+        { CSampler::MinMagMipLinear       , CSampler::Clamp , CSampler::Clamp , CSampler::Clamp , CSampler::Never      , 16.0f, -1000.0f, 1000.0f, 0.0f },
+        { CSampler::MinMagMipLinear       , CSampler::Wrap  , CSampler::Wrap  , CSampler::Wrap  , CSampler::Never      , 16.0f, -1000.0f, 1000.0f, 0.0f },
+        { CSampler::MinMagMipLinear       , CSampler::Border, CSampler::Border, CSampler::Border, CSampler::Never      , 16.0f, -1000.0f, 1000.0f, 0.0f },
+        { CSampler::MinMagMipLinear       , CSampler::Mirror, CSampler::Mirror, CSampler::Mirror, CSampler::Never      , 16.0f, -1000.0f, 1000.0f, 0.0f },
+        { CSampler::MinMagMipLinearCompare, CSampler::Clamp , CSampler::Clamp , CSampler::Clamp , CSampler::LesserEqual, 16.0f, -1000.0f, 1000.0f, 0.0f },
     };
 } // namespace
 
@@ -222,9 +223,15 @@ namespace
                 
                 glSamplerParameterf(NativeSampler, GL_TEXTURE_LOD_BIAS, s_NativeSamplerDescriptors[IndexOfSampler].Bias);
                 
+                glSamplerParameteri(NativeSampler, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+
+                glSamplerParameteri(NativeSampler, GL_TEXTURE_COMPARE_FUNC, GL_NEVER);
+
                 if (IsComparison)
                 {
-                    glSamplerParameteri(NativeSampler, GL_TEXTURE_COMPARE_MODE, ComparisonMode); // GL_NEVER
+                    glSamplerParameteri(NativeSampler, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+
+                    glSamplerParameteri(NativeSampler, GL_TEXTURE_COMPARE_FUNC, ComparisonMode);
                 }
             }
         }
@@ -395,7 +402,6 @@ namespace
             false,
             false,
             false,
-            true,
             true,
             true,
             true,

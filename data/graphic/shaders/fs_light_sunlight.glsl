@@ -28,7 +28,7 @@ layout(binding = 0) uniform sampler2D ps_GBuffer0;
 layout(binding = 1) uniform sampler2D ps_GBuffer1;
 layout(binding = 2) uniform sampler2D ps_GBuffer2;
 layout(binding = 3) uniform sampler2D ps_DepthTexture;
-layout(binding = 4) uniform sampler2D ps_ShadowTexture;
+layout(binding = 4) uniform sampler2DShadow ps_ShadowTexture;
 
 // -----------------------------------------------------------------------------
 // Input
@@ -43,6 +43,38 @@ layout (location = 0) out vec4 out_Output;
 // -----------------------------------------------------------------------------
 // Main
 // -----------------------------------------------------------------------------
+float PCF(in vec3 _WSPosition, in mat4 _LightViewProjection, in sampler2DShadow _Shadowmap)
+{
+    vec4  LSPosition;
+    vec3  ShadowCoord;
+    float DepthValue;
+    float Shadow;
+
+    // -----------------------------------------------------------------------------
+    // Set worls space coord into light projection by multiply with light
+    // view and projection matrix;
+    // -----------------------------------------------------------------------------
+    LSPosition = _LightViewProjection * vec4(_WSPosition, 1.0f);
+    
+    // -----------------------------------------------------------------------------
+    // Divide xyz by w to get the position in light view's clip space.
+    // -----------------------------------------------------------------------------
+    LSPosition.xyz /= LSPosition.w;
+    
+    // -----------------------------------------------------------------------------
+    // Get uv texcoords for this position
+    // -----------------------------------------------------------------------------
+    ShadowCoord = LSPosition.xyz * 0.5f + 0.5f;
+    
+    // -----------------------------------------------------------------------------
+    // Get final depth at this texcoord and compare it with the real
+    // position z value (do a manual depth test)
+    // -----------------------------------------------------------------------------
+    Shadow = texture( _Shadowmap, vec3(ShadowCoord.x, ShadowCoord.y, ShadowCoord.z) ).r;
+    
+    return Shadow;
+}
+
 void main()
 {    
     // -----------------------------------------------------------------------------
@@ -95,7 +127,7 @@ void main()
     vec3  S     = ViewMirrorUnitDir - DdotR * WSLightDirection;
     vec3  L     = DdotR < d ? normalize(d * WSLightDirection + normalize(S) * r) : ViewMirrorUnitDir;
     
-    float Shadow = GetShadowAtPositionWithPCF(Data.m_WSPosition, ps_LightViewProjection, ps_ShadowTexture);
+    float Shadow = PCF(Data.m_WSPosition, ps_LightViewProjection, ps_ShadowTexture);
     
     // -----------------------------------------------------------------------------
     // Apply light luminance
