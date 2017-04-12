@@ -71,7 +71,7 @@ void main()
                     const vec3 Color = imageLoad(cs_Color, DepthCoords).rgb;
                     if (Color.r != 0.0f && Color.g != 0.0f && Color.b != 0.0f)
                     {
-                        const vec3 NewColor = (OldColor + Color) / 2.0f;
+                        const vec3 NewColor = mix(OldColor, Color, abs(TSDF));
                         imageStore(cs_ColorVolume, VoxelCoords, vec4(NewColor, 1.0f));
                     }
                     #endif
