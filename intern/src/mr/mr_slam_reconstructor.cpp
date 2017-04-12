@@ -507,10 +507,6 @@ namespace MR
         {
             IntegrateDepth();            
         }
-        if (CaptureColor && !m_IsColorPaused)
-        {
-            //IntegrateColor();
-        }
 
         Raycast();
         CreateRaycastPyramid();
