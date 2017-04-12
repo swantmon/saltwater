@@ -12,11 +12,11 @@
 // -----------------------------------------------------------------------------
 layout(row_major, std140, binding = 1) uniform UB1
 {
-    mat4   ps_LightViewProjection;
-    vec4   ps_LightDirection;
-    vec4   ps_LightColor;
-    float  ps_SunAngularRadius;
-    uint   ps_ExposureHistoryIndex;
+    mat4  ps_LightViewProjection;
+    vec4  ps_LightDirection;
+    vec4  ps_LightColor;
+    float ps_SunAngularRadius;
+    uint  ps_ExposureHistoryIndex;
 };
 
 layout(std430, binding = 0) readonly buffer BB0
@@ -24,11 +24,11 @@ layout(std430, binding = 0) readonly buffer BB0
     float ps_ExposureHistory[8];
 };
 
-layout(binding = 0) uniform sampler2D ps_GBuffer0;
-layout(binding = 1) uniform sampler2D ps_GBuffer1;
-layout(binding = 2) uniform sampler2D ps_GBuffer2;
-layout(binding = 3) uniform sampler2D ps_DepthTexture;
-layout(binding = 4) uniform sampler2D ps_ShadowTexture;
+layout(binding = 0) uniform sampler2D       ps_GBuffer0;
+layout(binding = 1) uniform sampler2D       ps_GBuffer1;
+layout(binding = 2) uniform sampler2D       ps_GBuffer2;
+layout(binding = 3) uniform sampler2D       ps_DepthTexture;
+layout(binding = 4) uniform sampler2DShadow ps_ShadowTexture;
 
 // -----------------------------------------------------------------------------
 // Input
