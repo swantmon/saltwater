@@ -53,6 +53,10 @@ void main()
 		
 		#ifdef CAPTURE_COLOR
 		vec3 Color = g_Color.rgb + textureLod(fs_ColorVolume, WSPosition / VOLUME_SIZE, 0).rgb;
+		if (Color.r == 0.0f && Color.g == 0.0f && Color.b == 0.0f)
+		{
+			discard;
+		}
 		#else
 		vec3 Color = g_Color.rgb;
 		#endif

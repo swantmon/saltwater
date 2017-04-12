@@ -14,6 +14,10 @@
 
 layout(binding = 0, rg16i) uniform iimage3D cs_TSDFVolume;
 layout(binding = 1, r16ui) readonly uniform uimage2D cs_Depth;
+#ifdef CAPTURE_COLOR
+layout(binding = 2, rgba8) uniform image3D cs_ColorVolume;
+layout(binding = 3, rgba8) readonly uniform image2D cs_Color;
+#endif
 
 // -------------------------------------------------------------------------------------
 // Functions
@@ -61,6 +65,16 @@ void main()
 
                     Voxel.x *= INT16_MAX;
                     imageStore(cs_TSDFVolume, VoxelCoords, ivec4(Voxel, 0, 0));
+
+                    #ifdef CAPTURE_COLOR
+                    const vec3 OldColor = imageLoad(cs_ColorVolume, VoxelCoords).rgb;
+                    const vec3 Color = imageLoad(cs_Color, DepthCoords).rgb;
+                    if (Color.r != 0.0f && Color.g != 0.0f && Color.b != 0.0f)
+                    {
+                        const vec3 NewColor = (OldColor + Color) / 2.0f;
+                        imageStore(cs_ColorVolume, VoxelCoords, vec4(NewColor, 1.0f));
+                    }
+                    #endif
                 }
             }
         }

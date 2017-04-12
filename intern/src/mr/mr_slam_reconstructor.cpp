@@ -515,7 +515,7 @@ namespace MR
         }
         if (CaptureColor && !m_IsColorPaused)
         {
-            IntegrateColor();
+            //IntegrateColor();
         }
 
         Raycast();
@@ -774,9 +774,11 @@ namespace MR
 
         ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_TSDFVolumePtr));
         ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
+        ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(m_ColorVolumePtr));
+        ContextManager::SetImageTexture(3, static_cast<CTextureBasePtr>(m_RawCameraFramePtr));
         
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
-        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);        
         
         ContextManager::Barrier();
 
