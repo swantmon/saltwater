@@ -70,9 +70,7 @@ namespace Edit
         const int MinDepth = m_pMinDepthLE->text().toInt();
         const int MaxDepth = m_pMaxDepthLE->text().toInt();
         const bool CaptureColor = m_pCaptureColorCB->checkState() == Qt::CheckState::Checked;
-
-        m_pPauseIntegrationButton->setVisible(CaptureColor);
-
+        
         // -----------------------------------------------------------------------------
         // Send message
         // -----------------------------------------------------------------------------
