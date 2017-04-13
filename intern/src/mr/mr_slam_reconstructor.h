@@ -64,8 +64,7 @@ namespace MR
         void Update();
         void ResetReconstruction(const SReconstructionSettings* pReconstructionSettings = nullptr);
 
-        void PauseDepthIntegration(bool _Paused);
-        void PauseColorIntegration(bool _Paused);
+        void PauseIntegration(bool _Paused);
         void PauseTracking(bool _Paused);
         bool IsTrackingLost() const;
         Base::Float4x4 GetPoseMatrix() const;
@@ -84,7 +83,7 @@ namespace MR
         void SetupBuffers();
 
         void CreateReferencePyramid();
-        void IntegrateDepth();
+        void Integrate();
         void Raycast();
         void CreateRaycastPyramid();
 
@@ -115,7 +114,7 @@ namespace MR
         Gfx::CShaderPtr m_VertexMapCSPtr;
         Gfx::CShaderPtr m_NormalMapCSPtr;
         Gfx::CShaderPtr m_DownSampleDepthCSPtr;
-        Gfx::CShaderPtr m_DepthIntegrationCSPtr;
+        Gfx::CShaderPtr m_IntegrationCSPtr;
         Gfx::CShaderPtr m_RaycastCSPtr;
         Gfx::CShaderPtr m_RaycastPyramidCSPtr;
         Gfx::CShaderPtr m_DetermineSummandsCSPtr;
@@ -141,13 +140,12 @@ namespace MR
         std::vector<unsigned short> m_DepthPixels;
         std::vector<Base::Byte4> m_CameraPixels;
 
-        int m_IntegratedDepthFrameCount;
+        int m_IntegratedFrameCount;
         int m_FrameCount;
 
         bool m_TrackingLost;
 
-        bool m_IsDepthPaused;
-        bool m_IsColorPaused;
+        bool m_IsIntegrationPaused;
         bool m_IsTrackingPaused;
     };
 } // namespace MR

@@ -64,8 +64,7 @@ namespace
         
         void Update();
         void Render();
-        void PauseDepthIntegration(bool _Paused);
-        void PauseColorIntegration(bool _Paused);
+        void PauseIntegration(bool _Paused);
         void PauseTracking(bool _Paused);
 
         void OnReconstructionUpdate(const MR::CSLAMReconstructor::SReconstructionSettings& _Settings);
@@ -504,18 +503,11 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::PauseDepthIntegration(bool _Paused)
+    void CGfxReconstructionRenderer::PauseIntegration(bool _Paused)
     {
-        m_pReconstructor->PauseDepthIntegration(_Paused);
+        m_pReconstructor->PauseIntegration(_Paused);
     }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxReconstructionRenderer::PauseColorIntegration(bool _Paused)
-    {
-        m_pReconstructor->PauseColorIntegration(_Paused);
-    }
-
+    
     // -----------------------------------------------------------------------------
 
     void CGfxReconstructionRenderer::PauseTracking(bool _Paused)
@@ -644,19 +636,12 @@ namespace ReconstructionRenderer
     {
         CGfxReconstructionRenderer::GetInstance().Render();
     }
-
+    
     // -----------------------------------------------------------------------------
 
-    void PauseDepthIntegration(bool _Paused)
+    void PauseIntegration(bool _Paused)
     {
-        CGfxReconstructionRenderer::GetInstance().PauseDepthIntegration(_Paused);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void PauseColorIntegration(bool _Paused)
-    {
-        CGfxReconstructionRenderer::GetInstance().PauseColorIntegration(_Paused);
+        CGfxReconstructionRenderer::GetInstance().PauseIntegration(_Paused);
     }
 
     // -----------------------------------------------------------------------------

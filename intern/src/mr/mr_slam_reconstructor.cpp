@@ -155,11 +155,10 @@ namespace MR
         );
         m_PoseMatrix = PoseTranslation * PoseRotation;
 
-        m_IntegratedDepthFrameCount = 0;
+        m_IntegratedFrameCount = 0;
         m_FrameCount = 0;
         m_TrackingLost = true;
-        m_IsDepthPaused = false;
-        m_IsColorPaused = false;
+        m_IsIntegrationPaused = false;
         m_IsTrackingPaused = false;
 
         SetupShaders();
@@ -175,7 +174,7 @@ namespace MR
         m_VertexMapCSPtr = 0;
         m_NormalMapCSPtr = 0;
         m_DownSampleDepthCSPtr = 0;
-        m_DepthIntegrationCSPtr = 0;
+        m_IntegrationCSPtr = 0;
         m_RaycastCSPtr = 0;
         m_RaycastPyramidCSPtr = 0;
         m_DetermineSummandsCSPtr = 0;
@@ -254,7 +253,7 @@ namespace MR
         m_VertexMapCSPtr         = ShaderManager::CompileCS("kinect_fusion\\cs_vertex_map.glsl"        , "main", DefineString.c_str());
         m_NormalMapCSPtr         = ShaderManager::CompileCS("kinect_fusion\\cs_normal_map.glsl"        , "main", DefineString.c_str());
         m_DownSampleDepthCSPtr   = ShaderManager::CompileCS("kinect_fusion\\cs_downsample_depth.glsl"  , "main", DefineString.c_str());
-        m_DepthIntegrationCSPtr  = ShaderManager::CompileCS("kinect_fusion\\cs_integrate_depth.glsl"   , "main", DefineString.c_str());        
+        m_IntegrationCSPtr       = ShaderManager::CompileCS("kinect_fusion\\cs_integrate.glsl"         , "main", DefineString.c_str());        
         m_RaycastCSPtr           = ShaderManager::CompileCS("kinect_fusion\\cs_raycast.glsl"           , "main", DefineString.c_str());
         m_RaycastPyramidCSPtr    = ShaderManager::CompileCS("kinect_fusion\\cs_raycast_pyramid.glsl"   , "main", DefineString.c_str());
         m_DetermineSummandsCSPtr = ShaderManager::CompileCS("kinect_fusion\\cs_determine_summands.glsl", "main", DefineString.c_str());
@@ -451,7 +450,7 @@ namespace MR
             return;
         }
 
-        if (CaptureColor && !m_IsColorPaused && !m_pRGBDCameraControl->GetCameraFrame(pColor))
+        if (CaptureColor && !m_pRGBDCameraControl->GetCameraFrame(pColor))
         {
             return;
         }
@@ -482,7 +481,7 @@ namespace MR
         // Tracking
         //////////////////////////////////////////////////////////////////////////////////////
 
-        if (m_IntegratedDepthFrameCount > 0)
+        if (m_IntegratedFrameCount > 0)
         {
             Performance::BeginEvent("Tracking");
 
@@ -503,9 +502,9 @@ namespace MR
 
         Performance::BeginEvent("TSDF Integration and Raycasting");
 
-        if (!m_IsDepthPaused)
+        if (!m_IsIntegrationPaused)
         {
-            IntegrateDepth();            
+            Integrate();            
         }
 
         Raycast();
@@ -513,7 +512,7 @@ namespace MR
 
         Performance::EndEvent();
 
-        ++m_IntegratedDepthFrameCount;
+        ++m_IntegratedFrameCount;
         ++m_FrameCount;
 
         ContextManager::ResetShaderCS();
@@ -756,11 +755,11 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CSLAMReconstructor::IntegrateDepth()
+    void CSLAMReconstructor::Integrate()
     {
         const int WorkGroups = GetWorkGroupCount(m_ReconstructionSettings.m_VolumeResolution, g_TileSize3D);
 
-        ContextManager::SetShaderCS(m_DepthIntegrationCSPtr);
+        ContextManager::SetShaderCS(m_IntegrationCSPtr);
 
         ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_TSDFVolumePtr));
         ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
@@ -853,7 +852,7 @@ namespace MR
         );
         m_PoseMatrix = PoseTranslation * PoseRotation;
 
-        m_IntegratedDepthFrameCount = 0;
+        m_IntegratedFrameCount = 0;
         m_FrameCount = 0;
         m_TrackingLost = true;
 
@@ -868,18 +867,11 @@ namespace MR
 
     // -----------------------------------------------------------------------------
     
-    void CSLAMReconstructor::PauseDepthIntegration(bool _Paused)
+    void CSLAMReconstructor::PauseIntegration(bool _Paused)
     {
-        m_IsDepthPaused = _Paused;
+        m_IsIntegrationPaused = _Paused;
     }
-
-    // -----------------------------------------------------------------------------
-
-    void CSLAMReconstructor::PauseColorIntegration(bool _Paused)
-    {
-        m_IsColorPaused = _Paused;
-    }
-
+    
     // -----------------------------------------------------------------------------
 
     void CSLAMReconstructor::PauseTracking(bool _Paused)

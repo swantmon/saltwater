@@ -14,8 +14,7 @@ namespace Edit
 {
     CInspectorSLAM::CInspectorSLAM(QWidget* _pParent)
         : QWidget(_pParent)
-        , m_IsDepthPaused(false)
-        , m_IsColorPaused(false)
+        , m_IsIntegrationPaused(false)
         , m_IsTrackingPaused(false)
     {
         // -----------------------------------------------------------------------------
@@ -43,12 +42,9 @@ namespace Edit
         m_pResolutionHS->setPageStep(1);
         m_pResolutionTL->setText(QString::number(1 << InitialSliderPosition));
         
-        m_pPauseDepthIntegrationButton->setText(m_IsDepthPaused ? s_ResumeDepthText : s_PauseDepthText);
-        m_pPauseColorIntegrationButton->setText(m_IsColorPaused ? s_ResumeColorText : s_PauseColorText);
+        m_pPauseIntegrationButton->setText(m_IsIntegrationPaused ? s_ResumeIntegrationText : s_PauseIntegrationText);
         m_pPauseTrackingButton->setText(m_IsTrackingPaused ? s_ResumeTrackingText : s_PauseTrackingText);
-
-        m_pPauseColorIntegrationButton->setVisible(DefaultSettings.m_CaptureColor);
-
+        
         m_pCaptureColorCB->setChecked(DefaultSettings.m_CaptureColor);
     }
 
@@ -75,7 +71,7 @@ namespace Edit
         const int MaxDepth = m_pMaxDepthLE->text().toInt();
         const bool CaptureColor = m_pCaptureColorCB->checkState() == Qt::CheckState::Checked;
 
-        m_pPauseColorIntegrationButton->setVisible(CaptureColor);
+        m_pPauseIntegrationButton->setVisible(CaptureColor);
 
         // -----------------------------------------------------------------------------
         // Send message
@@ -102,35 +98,20 @@ namespace Edit
     {
         m_pResolutionTL->setText(QString::number(1 << _Value));
     }
-
+    
     // -----------------------------------------------------------------------------
 
-    void CInspectorSLAM::pauseDepthIntegration()
+    void CInspectorSLAM::pauseIntegration()
     {
-        m_IsDepthPaused = !m_IsDepthPaused;
+        m_IsIntegrationPaused = !m_IsIntegrationPaused;
 
-        m_pPauseDepthIntegrationButton->setText(m_IsDepthPaused ? s_ResumeDepthText : s_PauseDepthText);
+        m_pPauseIntegrationButton->setText(m_IsIntegrationPaused ? s_ResumeIntegrationText : s_PauseIntegrationText);
 
         Edit::CMessage NewMessage;
-        NewMessage.PutBool(m_IsDepthPaused);
+        NewMessage.PutBool(m_IsIntegrationPaused);
         NewMessage.Reset();
 
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Pause_Depth, NewMessage);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CInspectorSLAM::pauseColorIntegration()
-    {
-        m_IsColorPaused = !m_IsColorPaused;
-
-        m_pPauseColorIntegrationButton->setText(m_IsColorPaused ? s_ResumeColorText : s_PauseColorText);
-
-        Edit::CMessage NewMessage;
-        NewMessage.PutBool(m_IsColorPaused);
-        NewMessage.Reset();
-
-        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Pause_Color, NewMessage);
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Pause_Integration, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -150,11 +131,8 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    const QString CInspectorSLAM::s_PauseDepthText = "Pause Depth Integration";
-    const QString CInspectorSLAM::s_ResumeDepthText = "Resume Depth Integration";
-
-    const QString CInspectorSLAM::s_PauseColorText = "Pause Color Integration";
-    const QString CInspectorSLAM::s_ResumeColorText = "Resume Color Integration";
+    const QString CInspectorSLAM::s_PauseIntegrationText = "Pause Integration";
+    const QString CInspectorSLAM::s_ResumeIntegrationText = "Resume Integration";
 
     const QString CInspectorSLAM::s_PauseTrackingText = "Pause Tracking";
     const QString CInspectorSLAM::s_ResumeTrackingText = "Resume Tracking";
