@@ -14,6 +14,7 @@
 
 layout(binding = 0, rg16i) uniform iimage3D cs_TSDFVolume;
 layout(binding = 1, r16ui) readonly uniform uimage2D cs_Depth;
+
 #ifdef CAPTURE_COLOR
 layout(binding = 2, rgba8) uniform image3D cs_ColorVolume;
 layout(binding = 3, rgba8) readonly uniform image2D cs_Color;
@@ -52,11 +53,11 @@ void main()
                 const float Lambda = length(vec3(LambdaPoint, 1.0f));
 
                 const float SDF = Depth - 1000.0f * length(CameraPosition - WSVoxelPosition) / Lambda;
-
-                const float TSDF = clamp(SDF / TRUNCATED_DISTANCE, -1.0f, 1.0f);
-
+                
                 if (SDF >= -TRUNCATED_DISTANCE)
                 {
+                    const float TSDF = min(SDF / TRUNCATED_DISTANCE, 1.0f);
+
                     vec2 Voxel = imageLoad(cs_TSDFVolume, VoxelCoords).xy;
                     Voxel.x /= INT16_MAX;
 
