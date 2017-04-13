@@ -38,8 +38,13 @@ using namespace Gfx;
 
 namespace
 {
+    //*
     const Base::Float3 g_InitialCameraPosition = Base::Float3(0.5f, 0.5f, 1.5f);
     const Base::Float3 g_InitialCameraRotation = Base::Float3(3.14f, 0.0f, 0.0f);
+    /*/
+    const Base::Float3 g_InitialCameraPosition = Base::Float3(0.5f, 0.5f, -0.5f);
+    const Base::Float3 g_InitialCameraRotation = Base::Float3(0.0f, 0.0f, 0.0f);
+    //*/
     
     const float g_EpsilonDistance = 0.1f;
     const float g_EpsilonAngle = 0.4f;
