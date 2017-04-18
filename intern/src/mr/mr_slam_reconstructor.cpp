@@ -521,6 +521,11 @@ namespace MR
         ++m_FrameCount;
 
         ContextManager::ResetShaderCS();
+        ContextManager::ResetImageTexture(0);
+        ContextManager::ResetImageTexture(1);
+        ContextManager::ResetImageTexture(2);
+        ContextManager::ResetImageTexture(3);
+        ContextManager::ResetTexture(0);
 
         Performance::EndEvent();
     }
@@ -762,14 +767,25 @@ namespace MR
 
     void CSLAMReconstructor::Integrate()
     {
+        
+
         const int WorkGroups = GetWorkGroupCount(m_ReconstructionSettings.m_VolumeResolution, g_TileSize2D);
 
         ContextManager::SetShaderCS(m_IntegrationCSPtr);
 
         ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_TSDFVolumePtr));
         ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
-        ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(m_ColorVolumePtr));
-        ContextManager::SetImageTexture(3, static_cast<CTextureBasePtr>(m_RawCameraFramePtr));
+        
+        if (m_ReconstructionSettings.m_CaptureColor)
+        {
+            ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(m_ColorVolumePtr));
+            ContextManager::SetImageTexture(3, static_cast<CTextureBasePtr>(m_RawCameraFramePtr));
+        }
+        else
+        {
+            ContextManager::ResetImageTexture(2);
+            ContextManager::ResetImageTexture(3);
+        }
         
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);        
@@ -891,9 +907,14 @@ namespace MR
         ContextManager::SetShaderCS(m_ClearVolumeCSPtr);
 
         ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_TSDFVolumePtr));
+
         if (m_ReconstructionSettings.m_CaptureColor)
         {
             ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ColorVolumePtr));
+        }
+        else
+        {
+            ContextManager::ResetImageTexture(1);
         }
 
         ContextManager::Barrier();
