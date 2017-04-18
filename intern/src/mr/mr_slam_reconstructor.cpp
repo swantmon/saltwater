@@ -762,7 +762,7 @@ namespace MR
 
     void CSLAMReconstructor::Integrate()
     {
-        const int WorkGroups = GetWorkGroupCount(m_ReconstructionSettings.m_VolumeResolution, g_TileSize3D);
+        const int WorkGroups = GetWorkGroupCount(m_ReconstructionSettings.m_VolumeResolution, g_TileSize2D);
 
         ContextManager::SetShaderCS(m_IntegrationCSPtr);
 

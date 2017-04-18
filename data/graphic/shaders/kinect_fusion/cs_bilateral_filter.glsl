@@ -15,6 +15,9 @@ const float g_SigmaSpace2 = g_SigmaSpace * g_SigmaSpace;
 const float g_SigmaColor2_inv = 1.0f / g_SigmaColor2;
 const float g_SigmaSpace2_inv = 1.0f / g_SigmaSpace2;
 
+const int R = int(g_SigmaSpace * 1.5f);
+const int D = R * 2 + 1;
+
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
@@ -38,10 +41,7 @@ void main()
 	
 	const int x = int(gl_GlobalInvocationID.x);
 	const int y = int(gl_GlobalInvocationID.y);
-
-	const int R = 6; // int(g_SigmaSpace * 1,5)
-	const int D = R * 2 + 1;
-
+    
 	const float Depth = float(imageLoad(cs_InputTexture, ivec2(DEPTH_IMAGE_WIDTH - x, y)).x);
 
 	float Sum1 = 0.0;
