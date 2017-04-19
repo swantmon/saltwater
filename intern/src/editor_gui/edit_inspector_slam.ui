@@ -57,7 +57,7 @@
        <item>
         <widget class="QSlider" name="m_pSizeHS">
          <property name="enabled">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -325,11 +325,28 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_pSizeHS</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>InspectorSLAM</receiver>
+   <slot>volumeSizeChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>274</x>
+     <y>60</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>187</x>
+     <y>171</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>volumeResolutionChanged(int)</slot>
   <slot>reset()</slot>
   <slot>pauseTracking()</slot>
   <slot>pauseIntegration()</slot>
+  <slot>volumeSizeChanged(int)</slot>
  </slots>
 </ui>

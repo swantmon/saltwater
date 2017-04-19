@@ -10,6 +10,24 @@
 #include "base/base_math_operations.h"
 #include "mr/mr_slam_reconstructor.h"
 
+namespace
+{
+    const int g_ResolutionCount = 9;
+
+    int g_Resolutions[g_ResolutionCount] =
+    {
+        64,
+        128,
+        192,
+        256,
+        384,
+        512,
+        640,
+        768,
+        1024,
+    };
+}
+
 namespace Edit
 {
     CInspectorSLAM::CInspectorSLAM(QWidget* _pParent)
@@ -23,9 +41,9 @@ namespace Edit
         setupUi(this);
 
         MR::CSLAMReconstructor::SReconstructionSettings DefaultSettings;
-                
-        m_pSizeHS->setRange(0, 5);
-        m_pSizeHS->setValue(1);
+        
+        m_pSizeHS->setRange(1, 500);
+        m_pSizeHS->setValue(100);
         m_pSizeTL->setText(QString::number(DefaultSettings.m_VolumeSize));
 
         m_pTruncatedDistanceHS->setRange(1, 100);
@@ -36,11 +54,11 @@ namespace Edit
         m_pWeightHS->setValue(DefaultSettings.m_MaxIntegrationWeight);
         m_pWeightTL->setText(QString::number(DefaultSettings.m_MaxIntegrationWeight));
 
-        int InitialSliderPosition = static_cast<int>(Base::Log2(static_cast<float>(DefaultSettings.m_VolumeResolution)));
-        m_pResolutionHS->setRange(0, 11);
+        int InitialSliderPosition = 3;
+        m_pResolutionHS->setRange(0, g_ResolutionCount - 1);
         m_pResolutionHS->setValue(InitialSliderPosition);
         m_pResolutionHS->setPageStep(1);
-        m_pResolutionTL->setText(QString::number(1 << InitialSliderPosition));
+        m_pResolutionTL->setText(QString::number(g_Resolutions[InitialSliderPosition]));
         
         m_pPauseIntegrationButton->setText(m_IsIntegrationPaused ? s_ResumeIntegrationText : s_PauseIntegrationText);
         m_pPauseTrackingButton->setText(m_IsTrackingPaused ? s_ResumeTrackingText : s_PauseTrackingText);
@@ -63,8 +81,8 @@ namespace Edit
         // Read values
         // -----------------------------------------------------------------------------
         
-        const float VolumeSize = static_cast<float>(m_pSizeHS->value());
-        const int Resolution = 1 << m_pResolutionHS->value();
+        const float VolumeSize = static_cast<float>(m_pSizeHS->value() / 100.0f);
+        const int Resolution = g_Resolutions[m_pResolutionHS->value()];
         const float TruncatedDistance = static_cast<float>(m_pTruncatedDistanceHS->value());
         const int MaxIntegrationWeight = m_pWeightHS->value();
         const int MinDepth = m_pMinDepthLE->text().toInt();
@@ -94,7 +112,17 @@ namespace Edit
 
     void CInspectorSLAM::volumeResolutionChanged(int _Value)
     {
-        m_pResolutionTL->setText(QString::number(1 << _Value));
+        const int SliderPosition = m_pResolutionHS->value();
+        assert(SliderPosition >= 0 && SliderPosition < g_ResolutionCount);
+
+        m_pResolutionTL->setText(QString::number(g_Resolutions[SliderPosition]));
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorSLAM::volumeSizeChanged(int _Value)
+    {
+        m_pSizeTL->setText(QString::number(_Value / 100.0f));
     }
     
     // -----------------------------------------------------------------------------

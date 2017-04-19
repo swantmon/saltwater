@@ -22,6 +22,7 @@ namespace Edit
         void pauseIntegration();
         void pauseTracking();
         void volumeResolutionChanged(int);
+        void volumeSizeChanged(int);
 
     private:
 
