@@ -237,7 +237,6 @@ namespace MR
             << "#define TILE_SIZE1D "            << g_TileSize1D                                    << " \n"
             << "#define TILE_SIZE2D "            << g_TileSize2D                                    << " \n"
             << "#define TILE_SIZE3D "            << g_TileSize3D                                    << " \n"
-            << "#define INT16_MAX "              << std::numeric_limits<int16_t>::max()             << " \n"
             << "#define TRUNCATED_DISTANCE "     << m_ReconstructionSettings.m_TruncatedDistance    << " \n"
             << "#define MAX_INTEGRATION_WEIGHT " << m_ReconstructionSettings.m_MaxIntegrationWeight << " \n"
             << "#define EPSILON_DISTANCE "       << g_EpsilonDistance                               << " \n"
@@ -314,7 +313,7 @@ namespace MR
         TextureDescriptor.m_Semantic = CTextureBase::UndefinedSemantic;
         TextureDescriptor.m_pFileName = 0;
         TextureDescriptor.m_pPixels = 0;
-        TextureDescriptor.m_Format = CTextureBase::R16G16_INT;
+        TextureDescriptor.m_Format = CTextureBase::R16G16_FLOAT;
 
         m_TSDFVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
 
@@ -767,8 +766,6 @@ namespace MR
 
     void CSLAMReconstructor::Integrate()
     {
-        
-
         const int WorkGroups = GetWorkGroupCount(m_ReconstructionSettings.m_VolumeResolution, g_TileSize2D);
 
         ContextManager::SetShaderCS(m_IntegrationCSPtr);
@@ -836,7 +833,7 @@ namespace MR
         ContextManager::SetShaderCS(m_RaycastCSPtr);
 
         ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_TSDFVolumePtr));
-        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipPointClamp));
 
         ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RaycastVertexMapPtr[0]));
         ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(m_RaycastNormalMapPtr[0]));

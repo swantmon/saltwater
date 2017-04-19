@@ -20,7 +20,7 @@ layout(row_major, std140, binding = 1) uniform PerDrawCallData
     vec4 g_Color;
 };
 
-layout (binding = 0) uniform isampler3D fs_TSDFVolume;
+layout (binding = 0) uniform sampler3D fs_TSDFVolume;
 
 #ifdef CAPTURE_COLOR
 layout (binding = 1) uniform sampler3D fs_ColorVolume;

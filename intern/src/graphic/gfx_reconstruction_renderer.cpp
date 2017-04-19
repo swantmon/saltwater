@@ -154,7 +154,6 @@ namespace
 
         DefineStream
             << "#define VOLUME_RESOLUTION "  << Settings.m_VolumeResolution                         << " \n"
-            << "#define INT16_MAX "          << std::numeric_limits<int16_t>::max()                 << " \n"
             << "#define TRUNCATED_DISTANCE " << Settings.m_TruncatedDistance                        << " \n"
             << "#define VOLUME_SIZE "        << Settings.m_VolumeSize                               << " \n"
             << "#define VOXEL_SIZE "         << Settings.m_VolumeSize / Settings.m_VolumeResolution << " \n";

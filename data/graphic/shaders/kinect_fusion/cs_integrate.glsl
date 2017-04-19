@@ -12,7 +12,7 @@
 // Input from engine
 // -----------------------------------------------------------------------------
 
-layout(binding = 0, rg16i) uniform iimage3D cs_TSDFVolume;
+layout(binding = 0, rg16f) uniform image3D cs_TSDFVolume;
 layout(binding = 1, r16ui) readonly uniform uimage2D cs_Depth;
 
 #ifdef CAPTURE_COLOR
@@ -59,13 +59,11 @@ void main()
                     const float TSDF = min(SDF / TRUNCATED_DISTANCE, 1.0f);
 
                     vec2 Voxel = imageLoad(cs_TSDFVolume, VoxelCoords).xy;
-                    Voxel.x /= INT16_MAX;
 
                     Voxel.x = (Voxel.x * Voxel.y + TSDF) / (Voxel.y + 1.0f);
-                    Voxel.y = min(MAX_INTEGRATION_WEIGHT, Voxel.y + 1);
+                    Voxel.y = min(MAX_INTEGRATION_WEIGHT, Voxel.y + 1.0f);
 
-                    Voxel.x *= INT16_MAX;
-                    imageStore(cs_TSDFVolume, VoxelCoords, ivec4(Voxel, 0, 0));
+                    imageStore(cs_TSDFVolume, VoxelCoords, vec4(Voxel, 0.0f, 0.0f));
 
                     #ifdef CAPTURE_COLOR
                     const vec3 OldColor = imageLoad(cs_ColorVolume, VoxelCoords).rgb;

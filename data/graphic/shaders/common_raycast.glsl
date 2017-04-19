@@ -25,21 +25,20 @@ ivec3 GetVoxelCoords(vec3 Position)
     return ivec3(Position / VOXEL_SIZE);
 }
 
-vec2 GetVoxel(ivec3 Coords, isampler3D Volume)
+vec2 GetVoxel(ivec3 Coords, sampler3D Volume)
 {
     vec2 Voxel = texelFetch(Volume, Coords, 0).xy;
-    Voxel.x /= float(INT16_MAX);
     return Voxel;
 }
 
-float GetInterpolatedTSDF(vec3 Position, isampler3D Volume)
+float GetInterpolatedTSDF(vec3 Position, sampler3D Volume)
 {
     vec3 Coords = GetVoxelCoords(Position);
 
-    return textureLod(Volume, Coords / float(VOLUME_RESOLUTION), 0).x / float(INT16_MAX);
+    return textureLod(Volume, Coords / float(VOLUME_RESOLUTION), 0).x;
 }
 
-vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection, isampler3D Volume)
+vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection, sampler3D Volume)
 {
     const float StartLength = GetStartLength(CameraPosition, RayDirection);
     const float EndLength = GetEndLength(CameraPosition, RayDirection);
@@ -87,7 +86,7 @@ vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection, isampler3D Volume)
     return Vertex;
 }
 
-vec3 GetNormal(vec3 Vertex, isampler3D Volume)
+vec3 GetNormal(vec3 Vertex, sampler3D Volume)
 {
     vec3 T, Normal;
 
