@@ -38,6 +38,37 @@ float GetInterpolatedTSDF(vec3 Position, sampler3D Volume)
     return textureLod(Volume, Coords / float(VOLUME_RESOLUTION), 0).x;
 }
 
+float GetInterpolatedTSDF_(vec3 Position, sampler3D Volume)
+{
+    vec3 Coords = GetVoxelCoords(Position);
+
+    uvec3 g = GetVoxelCoords(Position);
+
+    const float vx = (g.x + 0.5f) * VOXEL_SIZE;
+    const float vy = (g.y + 0.5f) * VOXEL_SIZE;
+    const float vz = (g.z + 0.5f) * VOXEL_SIZE;
+
+    g.x = (Position.x < vx) ? (g.x - 1) : g.x;
+    g.y = (Position.y < vy) ? (g.y - 1) : g.y;
+    g.z = (Position.z < vz) ? (g.z - 1) : g.z;
+
+    const float a = (Position.x - (g.x + 0.5f) * VOXEL_SIZE) / VOXEL_SIZE;
+    const float b = (Position.y - (g.y + 0.5f) * VOXEL_SIZE) / VOXEL_SIZE;
+    const float c = (Position.z - (g.z + 0.5f) * VOXEL_SIZE) / VOXEL_SIZE;
+
+    const float result =
+        texelFetch(Volume, ivec3(g.x, g.y, g.z), 0).x * (1.0f - a) * (1.0f - b) * (1.0f - c) +
+        texelFetch(Volume, ivec3(g.x, g.y, g.z + 1), 0).x * (1.0f - a) * (1.0f - b) * c +
+        texelFetch(Volume, ivec3(g.x, g.y + 1, g.z), 0).x * (1.0f - a) * b * (1.0f - c) +
+        texelFetch(Volume, ivec3(g.x, g.y + 1, g.z + 1), 0).x * (1.0f - a) * b * c +
+        texelFetch(Volume, ivec3(g.x + 1, g.y, g.z), 0).x * a * (1.0f - b) * (1.0f - c) +
+        texelFetch(Volume, ivec3(g.x + 1, g.y, g.z + 1), 0).x * a * (1.0f - b) * c +
+        texelFetch(Volume, ivec3(g.x + 1, g.y + 1, g.z), 0).x * a * b * (1.0f - c) +
+        texelFetch(Volume, ivec3(g.x + 1, g.y + 1, g.z + 1), 0).x * a * b * c;
+
+    return result;
+}
+
 vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection, sampler3D Volume)
 {
     const float StartLength = GetStartLength(CameraPosition, RayDirection);

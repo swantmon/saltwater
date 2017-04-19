@@ -727,7 +727,7 @@ namespace MR
 
         const Scalar Det = L[0] * L[0] * L[7] * L[7] * L[14] * L[14] * L[21] * L[21] * L[28] * L[28] * L[35] * L[35];
         
-        if (std::isnan(Det) || abs(Det) < 1e-2)
+        if (std::isnan(Det) || abs(Det) < 1e-5)
         {
             return false;
         }
@@ -833,7 +833,7 @@ namespace MR
         ContextManager::SetShaderCS(m_RaycastCSPtr);
 
         ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_TSDFVolumePtr));
-        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
 
         ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RaycastVertexMapPtr[0]));
         ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(m_RaycastNormalMapPtr[0]));

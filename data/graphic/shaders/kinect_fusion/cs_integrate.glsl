@@ -35,12 +35,12 @@ void main()
 
     for (VoxelCoords.z = 0; VoxelCoords.z < VOLUME_RESOLUTION; ++ VoxelCoords.z)
     {
-        vec3 WSVoxelPosition = (VoxelCoords + 0.5f) * VOXEL_SIZE;
+        vec3 WSVoxelPosition = (VoxelCoords + vec3(0.5f, 0.5f, 0.0f)) * VOXEL_SIZE;
 
         vec3 VSVoxelPosition = (g_InvPoseMatrix * vec4(WSVoxelPosition, 1.0f)).xyz;
 
         vec2 CSVoxelPosition = VSVoxelPosition.xy * g_Intrinisics[0].m_FocalLength / VSVoxelPosition.z + g_Intrinisics[0].m_FocalPoint;
-        CSVoxelPosition.xy += vec2(0.5f);
+        //CSVoxelPosition.xy += vec2(0.5f);
 
         if (CSVoxelPosition.x > 0 && CSVoxelPosition.x < DEPTH_IMAGE_WIDTH && CSVoxelPosition.y > 0 && CSVoxelPosition.y < DEPTH_IMAGE_HEIGHT)
         {

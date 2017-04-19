@@ -153,6 +153,11 @@ void main()
     {
         Row[0] = Row[1] = Row[2] = Row[3] = Row[4] = Row[5] = Row[6] = 0.0f;
     }
+
+    if (isnan(Row[0]) || isnan(Row[1]) || isnan(Row[2]) || isnan(Row[3]) || isnan(Row[4]) || isnan(Row[5]) || isnan(Row[6]))
+    {
+        Row[0] = Row[1] = Row[2] = Row[3] = Row[4] = Row[5] = Row[6] = 0.0f;
+    }
     
     const uint ICPSummandIndex = gl_WorkGroupID.x + gl_WorkGroupID.y * gl_NumWorkGroups.x;
     int ICPValueIndex = 0;
