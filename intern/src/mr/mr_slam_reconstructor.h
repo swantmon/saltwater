@@ -39,19 +39,7 @@ namespace MR
             Base::Int2 m_DepthThreshold;
             bool m_CaptureColor;
 
-            SReconstructionSettings()
-                : m_VolumeSize(1.0f)
-                , m_VolumeResolution(256)
-                , m_TruncatedDistance(30.0f)
-                , m_MaxIntegrationWeight(200)
-                , m_PyramidLevelCount(3)
-                , m_DepthThreshold(500, 8000)
-                , m_CaptureColor(false)
-            {
-                m_PyramidLevelIterations[0] = 10;
-                m_PyramidLevelIterations[1] = 5;
-                m_PyramidLevelIterations[2] = 4;
-            }
+            SReconstructionSettings();
         };
 
     public:
