@@ -58,6 +58,8 @@ namespace
         void SetSettings();
         void SetSettings(const SColorGradingSettings& _rSettings);
 
+        const SColorGradingSettings& GetSettings();
+
     private:
 
         struct SConstantBufferPS
@@ -87,6 +89,8 @@ namespace
         CShaderPtr             m_ShadingPSPtr;
 
         CRenderContextPtr      m_ShadingContextPtr;
+
+        SColorGradingSettings  m_ColorGradingSettings;
     };
 } // namespace
 
@@ -99,6 +103,7 @@ namespace
         , m_QuadInputLayoutPtr    ()
         , m_FullquadShaderVSPtr   ()
         , m_ShadingPSPtr          ()
+        , m_ColorGradingSettings  ()
     {
     }
     
@@ -341,8 +346,8 @@ namespace
         
         SColorGradingSettings Settings;
 
-        Settings.m_Tint             = Base::Float3(1.000f, 1.000000f, 1.0f);
-        Settings.m_DarkTint         = Base::Float3(0.615f, 0.739474f, 1.0f);
+        Settings.m_Tint             = Base::Float3(1.0f, 1.0f, 1.0f);
+        Settings.m_DarkTint         = Base::Float3(0.2f, 0.2f, 0.2f);
         Settings.m_DarkTintBlend    = 0.5f;
         Settings.m_DarkTintStrength = 0.5f;
         Settings.m_Saturation       = 1.0f;
@@ -361,6 +366,11 @@ namespace
 
     void CGfxShadingRenderer::SetSettings(const SColorGradingSettings& _rSettings)
     {
+        // -----------------------------------------------------------------------------
+        // Save settings
+        // -----------------------------------------------------------------------------
+        m_ColorGradingSettings = _rSettings;
+
         // -----------------------------------------------------------------------------
 	    // Must insure inputs are in correct range (else possible generation of NaNs).
 	    // -----------------------------------------------------------------------------
@@ -530,6 +540,13 @@ namespace
         m_ConstantBufferPS.m_ColorShadow_Tint1               .Set(OutColorShadow_Tint1[0], OutColorShadow_Tint1[1], OutColorShadow_Tint1[2], 0.0f);
         m_ConstantBufferPS.m_ColorShadow_Tint2               .Set(OutColorShadow_Tint2[0], OutColorShadow_Tint2[1], OutColorShadow_Tint2[2], 0.0f);
     }
+
+    // -----------------------------------------------------------------------------
+
+    const SColorGradingSettings& CGfxShadingRenderer::GetSettings()
+    {
+        return m_ColorGradingSettings;
+    }
 } // namespace
 
 
@@ -659,6 +676,13 @@ namespace TonemappingRenderer
     void SetSettings(const SColorGradingSettings& _rSettings)
     {
         CGfxShadingRenderer::GetInstance().SetSettings(_rSettings);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const SColorGradingSettings& GetSettings()
+    {
+        return CGfxShadingRenderer::GetInstance().GetSettings();
     }
 } // namespace TonemappingRenderer
 } // namespace Gfx

@@ -50,6 +50,7 @@ namespace Edit
         void reloadAllShader();
         void changeHistogramSettings();
         void toggleHistogramDock();
+        void toggleToneMappingDock();
         void toggleSceneGraphDock();
         void toggleInspectorDock();
         void toggleConsoleDock();

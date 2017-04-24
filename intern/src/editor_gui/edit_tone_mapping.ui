@@ -1,0 +1,786 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ToneMapping</class>
+ <widget class="QWidget" name="ToneMapping">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>458</width>
+    <height>333</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Tone Mapping</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <layout class="QGridLayout" name="gridLayout_2">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_7">
+       <property name="text">
+        <string>Tint</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="label_9">
+       <property name="text">
+        <string>Dark Tint Blend</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_8">
+       <property name="text">
+        <string>Dark Tint</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="label_10">
+       <property name="text">
+        <string>Dark Tint Strength</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0">
+      <widget class="QLabel" name="label_11">
+       <property name="text">
+        <string>Saturation</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="0">
+      <widget class="QLabel" name="label_12">
+       <property name="text">
+        <string>Contrast</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="0">
+      <widget class="QLabel" name="label_13">
+       <property name="text">
+        <string>Dynamic Range</string>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="0">
+      <widget class="QLabel" name="label_14">
+       <property name="text">
+        <string>Crush Brights</string>
+       </property>
+      </widget>
+     </item>
+     <item row="12" column="0">
+      <widget class="QLabel" name="label_17">
+       <property name="text">
+        <string>Green</string>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="0">
+      <widget class="QLabel" name="label_15">
+       <property name="text">
+        <string>Crush Darks</string>
+       </property>
+      </widget>
+     </item>
+     <item row="11" column="0">
+      <widget class="QLabel" name="label_16">
+       <property name="text">
+        <string>Red</string>
+       </property>
+      </widget>
+     </item>
+     <item row="13" column="0">
+      <widget class="QLabel" name="label_18">
+       <property name="text">
+        <string>Blue</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QLineEdit" name="m_pDarkTintBlendEdit">
+       <property name="text">
+        <string>0.5</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QLineEdit" name="m_pDarkTintStrengthEdit">
+       <property name="text">
+        <string>0.5</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <widget class="QLineEdit" name="m_pSaturationEdit">
+       <property name="text">
+        <string>1.0</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="1">
+      <widget class="QLineEdit" name="m_pContrastEdit">
+       <property name="text">
+        <string>0.05</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="1">
+      <widget class="QLineEdit" name="m_pDynamicRangeEdit">
+       <property name="text">
+        <string>4.0</string>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="1">
+      <widget class="QLineEdit" name="m_pCrushBrightsEdit">
+       <property name="text">
+        <string>0.18</string>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="1">
+      <widget class="QLineEdit" name="m_pCrushDarksEdit">
+       <property name="text">
+        <string>1.0</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <item>
+        <widget class="QPushButton" name="m_pPickDarkTintButton">
+         <property name="palette">
+          <palette>
+           <active>
+            <colorrole role="Button">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
+               <red>50</red>
+               <green>50</green>
+               <blue>50</blue>
+              </color>
+             </brush>
+            </colorrole>
+           </active>
+           <inactive>
+            <colorrole role="Button">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
+               <red>50</red>
+               <green>50</green>
+               <blue>50</blue>
+              </color>
+             </brush>
+            </colorrole>
+           </inactive>
+           <disabled>
+            <colorrole role="Button">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
+               <red>50</red>
+               <green>50</green>
+               <blue>50</blue>
+              </color>
+             </brush>
+            </colorrole>
+           </disabled>
+          </palette>
+         </property>
+         <property name="autoFillBackground">
+          <bool>true</bool>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="m_pPickDarkTintButton2">
+         <property name="maximumSize">
+          <size>
+           <width>30</width>
+           <height>23</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Pick</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="0" column="1">
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <item>
+        <widget class="QPushButton" name="m_pPickTintButton">
+         <property name="palette">
+          <palette>
+           <active>
+            <colorrole role="Button">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
+               <red>255</red>
+               <green>255</green>
+               <blue>255</blue>
+              </color>
+             </brush>
+            </colorrole>
+           </active>
+           <inactive>
+            <colorrole role="Button">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
+               <red>255</red>
+               <green>255</green>
+               <blue>255</blue>
+              </color>
+             </brush>
+            </colorrole>
+           </inactive>
+           <disabled>
+            <colorrole role="Button">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
+               <red>255</red>
+               <green>255</green>
+               <blue>255</blue>
+              </color>
+             </brush>
+            </colorrole>
+           </disabled>
+          </palette>
+         </property>
+         <property name="autoFillBackground">
+          <bool>true</bool>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="m_pPickTintButton2">
+         <property name="maximumSize">
+          <size>
+           <width>30</width>
+           <height>23</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Pick</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="11" column="1">
+      <layout class="QHBoxLayout" name="horizontalLayout_6">
+       <item>
+        <widget class="QPushButton" name="m_pPickRedButton">
+         <property name="palette">
+          <palette>
+           <active>
+            <colorrole role="Button">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
+               <red>255</red>
+               <green>0</green>
+               <blue>0</blue>
+              </color>
+             </brush>
+            </colorrole>
+           </active>
+           <inactive>
+            <colorrole role="Button">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
+               <red>255</red>
+               <green>0</green>
+               <blue>0</blue>
+              </color>
+             </brush>
+            </colorrole>
+           </inactive>
+           <disabled>
+            <colorrole role="Button">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
+               <red>255</red>
+               <green>0</green>
+               <blue>0</blue>
+              </color>
+             </brush>
+            </colorrole>
+           </disabled>
+          </palette>
+         </property>
+         <property name="autoFillBackground">
+          <bool>true</bool>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="m_pPickRedButton2">
+         <property name="maximumSize">
+          <size>
+           <width>30</width>
+           <height>23</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Pick</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="12" column="1">
+      <layout class="QHBoxLayout" name="horizontalLayout_7">
+       <item>
+        <widget class="QPushButton" name="m_pPickGreenButton">
+         <property name="palette">
+          <palette>
+           <active>
+            <colorrole role="Button">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
+               <red>0</red>
+               <green>255</green>
+               <blue>0</blue>
+              </color>
+             </brush>
+            </colorrole>
+           </active>
+           <inactive>
+            <colorrole role="Button">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
+               <red>0</red>
+               <green>255</green>
+               <blue>0</blue>
+              </color>
+             </brush>
+            </colorrole>
+           </inactive>
+           <disabled>
+            <colorrole role="Button">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
+               <red>0</red>
+               <green>255</green>
+               <blue>0</blue>
+              </color>
+             </brush>
+            </colorrole>
+           </disabled>
+          </palette>
+         </property>
+         <property name="autoFillBackground">
+          <bool>true</bool>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="m_pPickGreenButton2">
+         <property name="maximumSize">
+          <size>
+           <width>30</width>
+           <height>23</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Pick</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="13" column="1">
+      <layout class="QHBoxLayout" name="horizontalLayout_8">
+       <item>
+        <widget class="QPushButton" name="m_pPickBlueButton">
+         <property name="palette">
+          <palette>
+           <active>
+            <colorrole role="Button">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
+               <red>0</red>
+               <green>0</green>
+               <blue>255</blue>
+              </color>
+             </brush>
+            </colorrole>
+           </active>
+           <inactive>
+            <colorrole role="Button">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
+               <red>0</red>
+               <green>0</green>
+               <blue>255</blue>
+              </color>
+             </brush>
+            </colorrole>
+           </inactive>
+           <disabled>
+            <colorrole role="Button">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
+               <red>0</red>
+               <green>0</green>
+               <blue>255</blue>
+              </color>
+             </brush>
+            </colorrole>
+           </disabled>
+          </palette>
+         </property>
+         <property name="autoFillBackground">
+          <bool>true</bool>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="m_pPickBlueButton2">
+         <property name="maximumSize">
+          <size>
+           <width>30</width>
+           <height>23</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Pick</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>m_pDarkTintBlendEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>ToneMapping</receiver>
+   <slot>changeToneMappingSettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>293</x>
+     <y>82</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>294</x>
+     <y>166</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pDarkTintStrengthEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>ToneMapping</receiver>
+   <slot>changeToneMappingSettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>216</x>
+     <y>108</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>294</x>
+     <y>187</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pSaturationEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>ToneMapping</receiver>
+   <slot>changeToneMappingSettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>293</x>
+     <y>134</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>294</x>
+     <y>216</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pContrastEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>ToneMapping</receiver>
+   <slot>changeToneMappingSettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>293</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>294</x>
+     <y>242</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pDynamicRangeEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>ToneMapping</receiver>
+   <slot>changeToneMappingSettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>293</x>
+     <y>186</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>294</x>
+     <y>268</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pCrushBrightsEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>ToneMapping</receiver>
+   <slot>changeToneMappingSettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>293</x>
+     <y>212</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>294</x>
+     <y>298</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pCrushDarksEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>ToneMapping</receiver>
+   <slot>changeToneMappingSettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>293</x>
+     <y>238</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>294</x>
+     <y>325</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pPickTintButton2</sender>
+   <signal>clicked()</signal>
+   <receiver>ToneMapping</receiver>
+   <slot>pickTintFromDialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>444</x>
+     <y>16</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>482</x>
+     <y>13</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pPickTintButton</sender>
+   <signal>clicked()</signal>
+   <receiver>ToneMapping</receiver>
+   <slot>pickTintFromDialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>394</x>
+     <y>15</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>409</x>
+     <y>-7</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pPickDarkTintButton2</sender>
+   <signal>clicked()</signal>
+   <receiver>ToneMapping</receiver>
+   <slot>pickDarkTintFromDialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>439</x>
+     <y>39</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>466</x>
+     <y>39</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pPickRedButton2</sender>
+   <signal>clicked()</signal>
+   <receiver>ToneMapping</receiver>
+   <slot>pickRedFromDialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>442</x>
+     <y>253</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>480</x>
+     <y>256</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pPickGreenButton2</sender>
+   <signal>clicked()</signal>
+   <receiver>ToneMapping</receiver>
+   <slot>pickGreenFromDialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>436</x>
+     <y>281</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>281</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pPickGreenButton</sender>
+   <signal>clicked()</signal>
+   <receiver>m_pPickGreenButton2</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>383</x>
+     <y>285</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>443</x>
+     <y>285</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pPickBlueButton2</sender>
+   <signal>clicked()</signal>
+   <receiver>ToneMapping</receiver>
+   <slot>pickBlueFromDialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>447</x>
+     <y>313</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>478</x>
+     <y>314</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pPickBlueButton</sender>
+   <signal>clicked()</signal>
+   <receiver>m_pPickBlueButton2</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>356</x>
+     <y>312</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>438</x>
+     <y>316</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pPickRedButton</sender>
+   <signal>clicked()</signal>
+   <receiver>m_pPickRedButton2</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>249</x>
+     <y>253</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>427</x>
+     <y>257</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pPickDarkTintButton</sender>
+   <signal>clicked()</signal>
+   <receiver>m_pPickDarkTintButton2</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>271</x>
+     <y>36</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>432</x>
+     <y>47</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>changeToneMappingSettings()</slot>
+  <slot>pickTintFromDialog()</slot>
+  <slot>pickDarkTintFromDialog()</slot>
+  <slot>pickRedFromDialog()</slot>
+  <slot>pickGreenFromDialog()</slot>
+  <slot>pickBlueFromDialog()</slot>
+ </slots>
+</ui>

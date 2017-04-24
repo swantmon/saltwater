@@ -63,8 +63,9 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Dock widgets setup
         // -----------------------------------------------------------------------------
-        m_pHistogramDockWidget->setVisible(false);
-        m_pConsoleDockWidget  ->setVisible(false);
+        m_pHistogramDockWidget  ->setVisible(false);
+        m_pToneMappingDockWidget->setVisible(false);
+        m_pConsoleDockWidget    ->setVisible(false);
 
         tabifyDockWidget(m_pAssetsDockWidget, m_pConsoleDockWidget);
 
@@ -641,6 +642,22 @@ namespace Edit
             NewMessage.Reset();
 
             MessageManager::SendMessage(SGUIMessageType::Graphic_Histogram_Info, NewMessage);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMainWindow::toggleToneMappingDock()
+    {
+        m_pToneMappingDockWidget->setVisible(!m_pToneMappingDockWidget->isVisible());
+
+        if (m_pToneMappingDockWidget->isVisible())
+        {
+            CMessage NewMessage(true);
+
+            NewMessage.Reset();
+
+            MessageManager::SendMessage(SGUIMessageType::Graphic_ToneMapping_Info, NewMessage);
         }
     }
 
