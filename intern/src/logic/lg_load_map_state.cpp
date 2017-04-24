@@ -357,7 +357,7 @@ namespace
             Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
 
             pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 5.0f));
-            pTransformationFacet->SetScale(Base::Float3(0.05f));
+            pTransformationFacet->SetScale(Base::Float3(0.25f));
             pTransformationFacet->SetRotation(Base::Float3(0.0f));
 
             // -----------------------------------------------------------------------------
