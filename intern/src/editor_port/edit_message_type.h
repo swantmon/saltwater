@@ -118,6 +118,9 @@ namespace Edit
             Graphic_Histogram_Info,
             Graphic_Histogram_Update,
 
+            Graphic_ToneMapping_Info,
+            Graphic_ToneMapping_Update,
+
             Graphic_HighlightEntity,
 
             Graphic_ReloadRenderer,
@@ -174,6 +177,7 @@ namespace Edit
 
             Graphic_FPS_Info,
             Graphic_Histogram_Info,
+            Graphic_ToneMapping_Info,
 
             NumberOfMembers,
             Undefined = -1,

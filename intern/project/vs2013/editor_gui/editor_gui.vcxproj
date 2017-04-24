@@ -47,6 +47,7 @@
     <ClCompile Include="..\..\..\src\editor_gui\edit_render_context.cpp" />
     <ClCompile Include="..\..\..\src\editor_gui\edit_scenegraph.cpp" />
     <ClCompile Include="..\..\..\src\editor_gui\edit_texture_value.cpp" />
+    <ClCompile Include="..\..\..\src\editor_gui\edit_tone_mapping.cpp" />
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_asset_browser.cpp" />
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_asset_file_list.cpp" />
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_clickable_label.cpp" />
@@ -74,6 +75,7 @@
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_render_context.cpp" />
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_scenegraph.cpp" />
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_texture_value.cpp" />
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_tone_mapping.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_mainwindow.ui">
@@ -96,6 +98,25 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_tone_mapping.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing edit_tone_mapping.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\src\editor_gui\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\..\..\..\src\editor_gui\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DEDITUR_GUI_LIB "-I.\..\..\..\src" "-I.\..\..\..\..\extern\qt\include" "-I.\..\..\..\..\extern\qt\include\QtCore" "-I.\..\..\..\..\extern\qt\include\QtGui" "-I.\..\..\..\..\extern\qt\include\QtWidgets" "-I.\..\..\..\src\editor_gui"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing edit_tone_mapping.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\..\src\editor_gui\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\..\..\..\src\editor_gui\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DEDITUR_GUI_LIB "-I.\..\..\..\src" "-I.\..\..\..\..\extern\qt\include" "-I.\..\..\..\..\extern\qt\include\QtCore" "-I.\..\..\..\..\extern\qt\include\QtGui" "-I.\..\..\..\..\extern\qt\include\QtWidgets" "-I.\..\..\..\src\editor_gui"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing edit_tone_mapping.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\..\..\..\src\editor_gui\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\..\..\..\src\editor_gui\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DEDITUR_GUI_LIB "-I.\..\..\..\src" "-I.\..\..\..\..\extern\qt\include" "-I.\..\..\..\..\extern\qt\include\QtCore" "-I.\..\..\..\..\extern\qt\include\QtGui" "-I.\..\..\..\..\extern\qt\include\QtWidgets" "-I.\..\..\..\src\editor_gui"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing edit_tone_mapping.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\..\..\src\editor_gui\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\..\..\..\src\editor_gui\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DEDITUR_GUI_LIB "-I.\..\..\..\src" "-I.\..\..\..\..\extern\qt\include" "-I.\..\..\..\..\extern\qt\include\QtCore" "-I.\..\..\..\..\extern\qt\include\QtGui" "-I.\..\..\..\..\extern\qt\include\QtWidgets" "-I.\..\..\..\src\editor_gui"</Command>
+    </CustomBuild>
+    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_tone_mapping.h" />
     <CustomBuild Include="..\..\..\src\editor_gui\edit_texture_value.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing edit_texture_value.h...</Message>
@@ -1068,6 +1089,26 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\uic.exe" -o ".\..\..\..\src\editor_gui\ui_%(Filename).h" "%(FullPath)"</Command>
     </CustomBuild>
   </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_tone_mapping.ui">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\src\editor_gui\ui_%(Filename).h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o ".\..\..\..\src\editor_gui\ui_%(Filename).h" "%(FullPath)"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Uic%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\..\src\editor_gui\ui_%(Filename).h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\uic.exe" -o ".\..\..\..\src\editor_gui\ui_%(Filename).h" "%(FullPath)"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\..\..\..\src\editor_gui\ui_%(Filename).h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o ".\..\..\..\src\editor_gui\ui_%(Filename).h" "%(FullPath)"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Uic%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\..\..\src\editor_gui\ui_%(Filename).h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\uic.exe" -o ".\..\..\..\src\editor_gui\ui_%(Filename).h" "%(FullPath)"</Command>
+    </CustomBuild>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B12702AD-ABFB-343A-A199-8E24837244A3}</ProjectGuid>
     <Keyword>Qt4VSv1.0</Keyword>
@@ -1225,7 +1266,7 @@
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties MocDir=".\..\..\..\src\editor_gui" UicDir=".\..\..\..\src\editor_gui" RccDir=".\..\..\..\src\editor_gui" lupdateOptions="" lupdateOnBuild="0" lreleaseOptions="" Qt5Version_x0020_x64="5.7" MocOptions="" />
+      <UserProperties MocDir=".\..\..\..\src\editor_gui" UicDir=".\..\..\..\src\editor_gui" RccDir=".\..\..\..\src\editor_gui" lupdateOptions="" lupdateOnBuild="0" lreleaseOptions="" Qt5Version_x0020_x64="Qt5.7 (msvc2015_x64)" MocOptions="" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

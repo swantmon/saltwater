@@ -179,6 +179,7 @@
     <addaction name="m_pActionInspector"/>
     <addaction name="m_pActionAssets"/>
     <addaction name="m_pActionHistogram"/>
+    <addaction name="m_pActionToneMapping"/>
     <addaction name="separator"/>
     <addaction name="m_pActionConsole"/>
    </widget>
@@ -458,6 +459,21 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QDockWidget" name="m_pToneMappingDockWidget">
+   <property name="windowTitle">
+    <string>Tone Mapping</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_6">
+    <layout class="QVBoxLayout" name="verticalLayout_7">
+     <item>
+      <widget class="Edit::CToneMapping" name="m_pToneMappingWidget" native="true"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
   <action name="m_pActionNew">
    <property name="text">
     <string>&amp;New Scene</string>
@@ -644,6 +660,14 @@
     <string>Reload all Shader</string>
    </property>
   </action>
+  <action name="m_pActionToneMapping">
+   <property name="text">
+    <string>Tone &amp;Mapping</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+4</string>
+   </property>
+  </action>
   <action name="m_pActionSLAM">
    <property name="text">
     <string>SLAM</string>
@@ -680,6 +704,12 @@
    <class>Edit::CAssetBrowser</class>
    <extends>QWidget</extends>
    <header>edit_asset_browser.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Edit::CToneMapping</class>
+   <extends>QWidget</extends>
+   <header>edit_tone_mapping.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
@@ -837,7 +867,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>263</x>
-     <y>395</y>
+     <y>387</y>
     </hint>
     <hint type="destinationlabel">
      <x>279</x>
@@ -853,7 +883,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>263</x>
-     <y>421</y>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
      <x>280</x>
@@ -869,7 +899,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>263</x>
-     <y>447</y>
+     <y>439</y>
     </hint>
     <hint type="destinationlabel">
      <x>277</x>
@@ -885,7 +915,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>263</x>
-     <y>473</y>
+     <y>465</y>
     </hint>
     <hint type="destinationlabel">
      <x>280</x>
@@ -901,7 +931,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>263</x>
-     <y>499</y>
+     <y>491</y>
     </hint>
     <hint type="destinationlabel">
      <x>274</x>
@@ -917,7 +947,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>263</x>
-     <y>525</y>
+     <y>517</y>
     </hint>
     <hint type="destinationlabel">
      <x>278</x>
@@ -1181,6 +1211,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_pActionToneMapping</sender>
+   <signal>triggered()</signal>
+   <receiver>CMainWindow</receiver>
+   <slot>toggleToneMappingDock()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>961</x>
+     <y>490</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>switchPlayingCurrentScene()</slot>
@@ -1208,5 +1254,6 @@
   <slot>reloadAllShader()</slot>
   <slot>createNewSLAMReconstruction()</slot>
   <slot>changeResolution(int)</slot>
+  <slot>toggleToneMappingDock()</slot>
  </slots>
 </ui>
