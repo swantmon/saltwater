@@ -346,8 +346,8 @@ namespace
         
         SColorGradingSettings Settings;
 
-        Settings.m_Tint             = Base::Float3(1.000f, 1.000000f, 1.0f);
-        Settings.m_DarkTint         = Base::Float3(0.615f, 0.739474f, 1.0f);
+        Settings.m_Tint             = Base::Float3(1.0f, 1.0f, 1.0f);
+        Settings.m_DarkTint         = Base::Float3(0.2f, 0.2f, 0.2f);
         Settings.m_DarkTintBlend    = 0.5f;
         Settings.m_DarkTintStrength = 0.5f;
         Settings.m_Saturation       = 1.0f;
