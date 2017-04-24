@@ -651,14 +651,14 @@ namespace Edit
     {
         m_pToneMappingDockWidget->setVisible(!m_pToneMappingDockWidget->isVisible());
 
-//         if (m_pToneMappingDockWidget->isVisible())
-//         {
-//             CMessage NewMessage(true);
-// 
-//             NewMessage.Reset();
-// 
-//             MessageManager::SendMessage(SGUIMessageType::Graphic_ToneMapping_Info, NewMessage);
-//         }
+        if (m_pToneMappingDockWidget->isVisible())
+        {
+            CMessage NewMessage(true);
+
+            NewMessage.Reset();
+
+            MessageManager::SendMessage(SGUIMessageType::Graphic_ToneMapping_Info, NewMessage);
+        }
     }
 
     // -----------------------------------------------------------------------------

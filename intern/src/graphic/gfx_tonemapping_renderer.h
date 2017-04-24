@@ -55,5 +55,7 @@ namespace TonemappingRenderer
 
     void SetSettings();
     void SetSettings(const SColorGradingSettings& _rSettings);
+
+    const SColorGradingSettings& GetSettings();
 } // namespace TonemappingRenderer
 } // namespace Gfx
