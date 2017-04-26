@@ -559,9 +559,7 @@ namespace MR
             
             ContextManager::SetShaderCS(m_DownSampleDepthCSPtr);
 
-            ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_SmoothDepthBufferPtr[PyramidLevel - 1]));
-            ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
-
+            ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_SmoothDepthBufferPtr[PyramidLevel - 1]));
             ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_SmoothDepthBufferPtr[PyramidLevel]));
             ContextManager::Barrier();
 
