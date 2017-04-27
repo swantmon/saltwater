@@ -892,7 +892,6 @@ namespace
                 ContextManager::SetConstantBuffer(0, m_SkyboxFromGeometry.m_VSBufferSetPtr->GetBuffer(0));
                 ContextManager::SetConstantBuffer(1, m_SkyboxFromGeometry.m_VSBufferSetPtr->GetBuffer(1));
                 ContextManager::SetConstantBuffer(2, m_SkyboxFromGeometry.m_GSBufferSetPtr->GetBuffer(0));
-                ContextManager::SetConstantBuffer(3, m_SkyboxFromGeometry.m_PSBufferSetPtr->GetBuffer(0));
 
                 // -----------------------------------------------------------------------------
                 // Set items to context manager
