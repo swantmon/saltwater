@@ -481,7 +481,7 @@ namespace
         TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
         TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = CTextureBase::R8G8B8A8_BYTE;
+        TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
         
         CTexture2DPtr SkyCubeTexturePtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
@@ -867,7 +867,7 @@ namespace
                 
                 SViewBuffer ViewBuffer;
 
-                ViewBuffer.m_View = Base::Float4x4::s_Identity;
+                ViewBuffer.m_View = Base::Float4x4().SetTranslation(5.0f, 0.0f, 5.0f);
 
                 BufferManager::UploadConstantBufferData(m_SkyboxFromGeometry.m_VSBufferSetPtr->GetBuffer(0), &ViewBuffer);
 
