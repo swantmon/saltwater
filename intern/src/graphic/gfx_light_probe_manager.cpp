@@ -273,17 +273,17 @@ namespace
         // -----------------------------------------------------------------------------
         m_FilteringVSPtr = ShaderManager::CompileVS("vs_lightprobe_sampling.glsl", "main");
 
-        CShaderPtr CubemapGeometryVSPtr = ShaderManager::CompileVS("vs_geometry_env_cubemap_generation.glsl", "main");
-
         m_FilteringGSPtr = ShaderManager::CompileGS("gs_lightprobe_sampling.glsl", "main");
-
-        CShaderPtr CubemapGSPtr = ShaderManager::CompileGS("gs_spherical_env_cubemap_generation.glsl", "main");
 
         m_FilteringDiffusePSPtr = ShaderManager::CompilePS("fs_lightprobe_diffuse_sampling.glsl", "main");
 
         m_FilteringSpecularPSPtr = ShaderManager::CompilePS("fs_lightprobe_specular_sampling.glsl", "main");
 
-        CShaderPtr CubemapTexturePSPtr = ShaderManager::CompilePS("fs_texture_env_cubemap_generation.glsl", "main");
+
+
+        CShaderPtr CubemapGeometryVSPtr = ShaderManager::CompileVS("vs_x1.glsl", "main");
+        CShaderPtr CubemapGSPtr         = ShaderManager::CompileGS("gs_x1.glsl", "main");
+        CShaderPtr CubemapTexturePSPtr  = ShaderManager::CompilePS("fs_x1.glsl", "main");
 
         // -----------------------------------------------------------------------------
 
@@ -441,7 +441,6 @@ namespace
 
         m_SkyboxFromGeometry.m_VSBufferSetPtr = BufferManager::CreateBufferSet(ViewBuffer, VSBuffer);
         m_SkyboxFromGeometry.m_GSBufferSetPtr = BufferManager::CreateBufferSet(GSBuffer);
-        m_SkyboxFromGeometry.m_PSBufferSetPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer());
 
         // -----------------------------------------------------------------------------
         // Models
