@@ -393,6 +393,56 @@ namespace
         {
             Dt::SModelFileDescriptor ModelFileDesc;
 
+            ModelFileDesc.m_pFileName = "models/cube.obj";
+            ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::DefaultFlipUVs;
+
+            Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
+
+            // -----------------------------------------------------------------------------
+
+            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntityFromModel(rModel);
+
+            rSphere.SetName("Cube");
+
+            Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(5.0f, 0.0f, 5.0f));
+            pTransformationFacet->SetScale(Base::Float3(1.0f));
+            pTransformationFacet->SetRotation(Base::Float3(0.0f));
+
+            // -----------------------------------------------------------------------------
+
+            Dt::CEntity* pSubEntity = rSphere.GetHierarchyFacet()->GetFirstChild();
+
+            Dt::CMeshActorFacet* pModelActorFacet = static_cast<Dt::CMeshActorFacet*>(pSubEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+
+            Dt::SMaterialDescriptor MaterialFileDesc;
+
+            MaterialFileDesc.m_pFileName = "materials/naturals/metals/Chrome_Glossy_00.mat";
+
+            Dt::CMaterial& rMaterial = Dt::MaterialManager::CreateMaterial(MaterialFileDesc);
+
+            pModelActorFacet->SetMaterial(0, &rMaterial);
+
+            Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyCreate);
+
+            // -----------------------------------------------------------------------------
+
+            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+
+
+            //             Dt::CScriptFacet* pScriptFacet = Dt::ScriptManager::CreateScript();
+            // 
+            //             pScriptFacet->SetScriptFile("scripts/move_circle.lua");
+            // 
+            //             rSphere.SetDetailFacet(Dt::SFacetCategory::Script, pScriptFacet);
+        }
+
+        // -----------------------------------------------------------------------------
+
+        {
+            Dt::SModelFileDescriptor ModelFileDesc;
+
             ModelFileDesc.m_pFileName = "models/plane.obj";
             ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::DefaultFlipUVs;
 
