@@ -37,17 +37,17 @@ using namespace Gfx;
 
 namespace
 {
-    const bool g_UseTrackingCamera = true;
-
     class CGfxReconstructionRenderer : private Base::CUncopyable
     {
         BASE_SINGLETON_FUNC(CGfxReconstructionRenderer)
         
     public:
+
         CGfxReconstructionRenderer();
         ~CGfxReconstructionRenderer();
         
     public:
+
         void OnStart();
         void OnExit();
         
@@ -97,6 +97,8 @@ namespace
         CInputLayoutPtr m_CubeInputLayoutPtr;
 
         CRenderContextPtr m_WireframeRenderContextPtr;
+
+        bool m_UseTrackingCamera;
     };
 } // namespace
 
@@ -123,6 +125,8 @@ namespace
         Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxReconstructionRenderer::OnResize));
         
         m_pReconstructor.reset(new MR::CSLAMReconstructor);
+
+        m_UseTrackingCamera = true;
     }
 
     // -----------------------------------------------------------------------------
@@ -402,7 +406,7 @@ namespace
 
     void CGfxReconstructionRenderer::Update()
     {
-        if (g_UseTrackingCamera)
+        if (m_UseTrackingCamera)
         {
             Cam::CControl& rControl = static_cast<Cam::CEditorControl&>(Cam::ControlManager::GetActiveControl());
             
@@ -517,7 +521,7 @@ namespace
         //TargetSetManager::ClearTargetSet(TargetSetManager::GetDeferredTargetSet(), ClearColor);
 
         RenderVolume();
-        if (!g_UseTrackingCamera)
+        if (!m_UseTrackingCamera)
         {
             RenderCamera();
         }
@@ -536,6 +540,7 @@ namespace
 
     void CGfxReconstructionRenderer::PauseTracking(bool _Paused)
     {
+        m_UseTrackingCamera = !_Paused;
         m_pReconstructor->PauseTracking(_Paused);
     }
 } // namespace
