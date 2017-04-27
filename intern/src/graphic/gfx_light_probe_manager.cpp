@@ -32,6 +32,24 @@
 #include "graphic/gfx_texture_set.h"
 #include "graphic/gfx_view_manager.h"
 
+
+
+
+
+
+#include "data/data_actor_type.h"
+#include "data/data_entity.h"
+#include "data/data_transformation_facet.h"
+#include "graphic/gfx_mesh.h"
+#include "graphic/gfx_mesh_actor_facet.h"
+#include "graphic/gfx_state_manager.h"
+
+
+
+
+
+
+
 using namespace Gfx;
 
 namespace 
@@ -105,6 +123,43 @@ namespace
             friend class CGfxLightProbeManager;
         };
 
+
+
+
+
+
+
+
+        struct SRenderContext
+        {
+            CShaderPtr            m_VSPtr;
+            CShaderPtr            m_GSPtr;
+            CShaderPtr            m_PSPtr;
+            CBufferSetPtr         m_VSBufferSetPtr;
+            CBufferSetPtr         m_GSBufferSetPtr;
+            CBufferSetPtr         m_PSBufferSetPtr;
+            CInputLayoutPtr       m_InputLayoutPtr;
+            CTextureSetPtr        m_TextureSetPtr;
+            CTargetSetPtr         m_TargetSetPtr;
+            CViewPortSetPtr       m_ViewPortSetPtr;
+            CBlendStatePtr        m_BlendStatePtr;
+            CDepthStencilStatePtr m_DepthStencilPtr;
+            CRasterizerStatePtr   m_RasterizerStatePtr;
+        };
+
+        struct SPerDrawCallConstantBufferVS
+        {
+            Base::Float4x4 m_ModelMatrix;
+        };
+
+
+
+
+
+
+
+
+
     private:
 
         typedef Base::CPool<CInternLightProbeFacet, 1> CLightProbeFacets;
@@ -129,6 +184,20 @@ namespace
 
         CLightProbeFacets m_LightprobeFacets;
 
+
+
+
+
+
+
+        SRenderContext m_SkyboxFromGeometry;
+
+
+
+
+
+
+
     private:
 
         void OnDirtyEntity(Dt::CEntity* _pEntity);
@@ -136,6 +205,8 @@ namespace
         CInternLightProbeFacet& AllocateLightProbeFacet(unsigned int _SpecularFaceSize, unsigned int _DiffuseFaceSize);
 
         void RenderEnvironment(CInternLightProbeFacet& _rInterLightProbeFacet);
+
+        void RenderEntities(CInternLightProbeFacet& _rInterLightProbeFacet);
 
         void RenderFiltering(CInternLightProbeFacet& _rInterLightProbeFacet);
     };
@@ -202,11 +273,17 @@ namespace
         // -----------------------------------------------------------------------------
         m_FilteringVSPtr = ShaderManager::CompileVS("vs_lightprobe_sampling.glsl", "main");
 
+        CShaderPtr CubemapGeometryVSPtr = ShaderManager::CompileVS("vs_geometry_env_cubemap_generation.glsl", "main");
+
         m_FilteringGSPtr = ShaderManager::CompileGS("gs_lightprobe_sampling.glsl", "main");
+
+        CShaderPtr CubemapGSPtr = ShaderManager::CompileGS("gs_spherical_env_cubemap_generation.glsl", "main");
 
         m_FilteringDiffusePSPtr = ShaderManager::CompilePS("fs_lightprobe_diffuse_sampling.glsl", "main");
 
         m_FilteringSpecularPSPtr = ShaderManager::CompilePS("fs_lightprobe_specular_sampling.glsl", "main");
+
+        CShaderPtr CubemapTexturePSPtr = ShaderManager::CompilePS("fs_texture_env_cubemap_generation.glsl", "main");
 
         // -----------------------------------------------------------------------------
 
@@ -229,6 +306,11 @@ namespace
 
         m_CubemapRenderContextPtr->SetCamera(CameraPtr);
         m_CubemapRenderContextPtr->SetRenderState(NoDepthStatePtr);
+
+        m_SkyboxFromGeometry.m_VSPtr          = CubemapGeometryVSPtr;
+        m_SkyboxFromGeometry.m_GSPtr          = CubemapGSPtr;
+        m_SkyboxFromGeometry.m_PSPtr          = CubemapTexturePSPtr;
+        m_SkyboxFromGeometry.m_InputLayoutPtr = m_PositionInputLayoutPtr;
 
         // -----------------------------------------------------------------------------
         // Buffer
@@ -334,6 +416,18 @@ namespace
         ConstanteBufferDesc.m_pClassKey     = 0;
         
         CBufferPtr PSBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SPerDrawCallConstantBufferVS);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        CBufferPtr VSBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
         
         // -----------------------------------------------------------------------------
         
@@ -344,6 +438,10 @@ namespace
         m_CustomPSBufferSetPtr    = BufferManager::CreateBufferSet(PSBuffer);
         
         m_FilteringPSBufferSetPtr = BufferManager::CreateBufferSet(SpecularPSBuffer);
+
+        m_SkyboxFromGeometry.m_VSBufferSetPtr = BufferManager::CreateBufferSet(ViewBuffer, VSBuffer);
+        m_SkyboxFromGeometry.m_GSBufferSetPtr = BufferManager::CreateBufferSet(GSBuffer);
+        m_SkyboxFromGeometry.m_PSBufferSetPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer());
 
         // -----------------------------------------------------------------------------
         // Models
@@ -365,6 +463,50 @@ namespace
         // Register dirty entity handler for automatic sky creation
         // -----------------------------------------------------------------------------
         Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CGfxLightProbeManager::OnDirtyEntity));
+
+        // -----------------------------------------------------------------------------
+        // States
+        // -----------------------------------------------------------------------------
+        Gfx::STextureDescriptor  TextureDescriptor;
+        Gfx::SViewPortDescriptor ViewPortDesc;
+
+        TextureDescriptor.m_NumberOfPixelsU  = 512;
+        TextureDescriptor.m_NumberOfPixelsV  = 512;
+        TextureDescriptor.m_NumberOfPixelsW  = 1;
+        TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
+        TextureDescriptor.m_NumberOfTextures = 6;
+        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource | CTextureBase::RenderTarget;
+        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
+        TextureDescriptor.m_Format           = CTextureBase::Unknown;
+        TextureDescriptor.m_Usage            = CTextureBase::GPURead;
+        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        TextureDescriptor.m_pFileName        = 0;
+        TextureDescriptor.m_pPixels          = 0;
+        TextureDescriptor.m_Format           = CTextureBase::R8G8B8A8_BYTE;
+        
+        CTexture2DPtr SkyCubeTexturePtr = TextureManager::CreateCubeTexture(TextureDescriptor);
+
+        m_SkyboxFromGeometry.m_TextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(SkyCubeTexturePtr));
+        
+        CTargetSetPtr SkyCubeTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(SkyCubeTexturePtr));
+             
+        ViewPortDesc.m_TopLeftX = 0.0f;
+        ViewPortDesc.m_TopLeftY = 0.0f;
+        ViewPortDesc.m_MinDepth = 0.0f;
+        ViewPortDesc.m_MaxDepth = 1.0f;
+        ViewPortDesc.m_Width    = 512;
+        ViewPortDesc.m_Height   = 512;
+            
+        CViewPortPtr SkyCubeViewPortPtr = ViewManager::CreateViewPort(ViewPortDesc);
+            
+        CViewPortSetPtr SkyCubeViewPortSetPtr = ViewManager::CreateViewPortSet(SkyCubeViewPortPtr);
+
+        m_SkyboxFromGeometry.m_TargetSetPtr       = SkyCubeTargetSetPtr;
+        m_SkyboxFromGeometry.m_ViewPortSetPtr     = SkyCubeViewPortSetPtr;
+        m_SkyboxFromGeometry.m_BlendStatePtr      = StateManager::GetBlendState(0);
+        m_SkyboxFromGeometry.m_DepthStencilPtr    = StateManager::GetDepthStencilState(0);
+        m_SkyboxFromGeometry.m_RasterizerStatePtr = StateManager::GetRasterizerState(0);
+
     }
 
     // -----------------------------------------------------------------------------
@@ -420,7 +562,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 if (pDataGlobalProbeFacet->GetRefreshMode() == Dt::CLightProbeFacet::Dynamic)
                 {
-                    RenderEnvironment(*pGraphicGlobalProbeFacet);
+                    RenderEntities(*pGraphicGlobalProbeFacet);
 
                     RenderFiltering(*pGraphicGlobalProbeFacet);
                 }
@@ -469,7 +611,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Render
             // -----------------------------------------------------------------------------
-            RenderEnvironment(rGraphicSkyboxFacet);
+            RenderEntities(rGraphicSkyboxFacet);
 
             RenderFiltering(rGraphicSkyboxFacet);
 
@@ -494,7 +636,7 @@ namespace
             // TODO by tschwandt
             // 1. what happens on dirty cubemap and not sky?
             // 2. render general light probe with settings
-            RenderEnvironment(*pGraphicGlobalProbeLightFacet);
+            RenderEntities(*pGraphicGlobalProbeLightFacet);
 
             RenderFiltering(*pGraphicGlobalProbeLightFacet);
 
@@ -621,9 +763,6 @@ namespace
 
     void CGfxLightProbeManager::RenderEnvironment(CInternLightProbeFacet& _rInterLightProbeFacet)
     {
-        // TODO by tschwandt
-        // Render environment with meshes inside. Now the environment is only made of the sky...
-
         // -----------------------------------------------------------------------------
         // Find sky entity
         // -----------------------------------------------------------------------------
@@ -665,6 +804,142 @@ namespace
         assert(pSkyFacet);
 
         _rInterLightProbeFacet.m_InputCubemapSetPtr = pSkyFacet->GetCubemapSetPtr();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxLightProbeManager::RenderEntities(CInternLightProbeFacet& _rInterLightProbeFacet)
+    {
+        // -----------------------------------------------------------------------------
+        // Find actors
+        // -----------------------------------------------------------------------------
+        Dt::Map::CEntityIterator CurrentEntity;
+        Dt::Map::CEntityIterator EndOfEntities;
+
+        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Actor);
+        EndOfEntities = Dt::Map::EntitiesEnd();
+
+        // -----------------------------------------------------------------------------
+        // Prepare renderer
+        // -----------------------------------------------------------------------------
+        const unsigned int pOffset[] = { 0, 0 };
+
+        ContextManager::SetTargetSet        (m_SkyboxFromGeometry.m_TargetSetPtr);
+        ContextManager::SetViewPortSet      (m_SkyboxFromGeometry.m_ViewPortSetPtr);
+        ContextManager::SetBlendState       (m_SkyboxFromGeometry.m_BlendStatePtr);
+        ContextManager::SetDepthStencilState(m_SkyboxFromGeometry.m_DepthStencilPtr);
+        ContextManager::SetRasterizerState  (m_SkyboxFromGeometry.m_RasterizerStatePtr);
+
+        for (; CurrentEntity != EndOfEntities; )
+        {
+            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+
+            // -----------------------------------------------------------------------------
+            // Get graphic facet
+            // -----------------------------------------------------------------------------
+            if (rCurrentEntity.GetType() != Dt::SActorType::Mesh || rCurrentEntity.GetLayer() != Dt::SEntityLayer::Default)
+            {
+                CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor);
+
+                continue;
+            }
+
+            CMeshActorFacet* pGraphicModelActorFacet = static_cast<CMeshActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+
+            CMeshPtr MeshPtr = pGraphicModelActorFacet->GetMesh();
+
+            // -----------------------------------------------------------------------------
+            // Set every surface of this entity into a new render job
+            // -----------------------------------------------------------------------------
+            unsigned int NumberOfSurfaces = MeshPtr->GetLOD(0)->GetNumberOfSurfaces();
+
+            for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurfaces; ++IndexOfSurface)
+            {
+                CSurfacePtr SurfacePtr = MeshPtr->GetLOD(0)->GetSurface(IndexOfSurface);
+
+                if (SurfacePtr == nullptr)
+                {
+                    break;
+                }
+
+                // -----------------------------------------------------------------------------
+                // Upload data to buffer
+                // -----------------------------------------------------------------------------
+                
+                SViewBuffer ViewBuffer;
+
+                ViewBuffer.m_View = Base::Float4x4::s_Identity;
+
+                BufferManager::UploadConstantBufferData(m_SkyboxFromGeometry.m_VSBufferSetPtr->GetBuffer(0), &ViewBuffer);
+
+
+                SPerDrawCallConstantBufferVS ModelBuffer;
+
+                ModelBuffer.m_ModelMatrix = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
+
+                BufferManager::UploadConstantBufferData(m_SkyboxFromGeometry.m_VSBufferSetPtr->GetBuffer(1), &ModelBuffer);
+
+                // -----------------------------------------------------------------------------
+                // Render
+                // -----------------------------------------------------------------------------
+                ContextManager::SetTopology(STopology::TriangleList);
+
+                ContextManager::SetShaderVS(m_SkyboxFromGeometry.m_VSPtr);
+
+                ContextManager::SetShaderGS(m_SkyboxFromGeometry.m_GSPtr);
+
+                ContextManager::SetShaderPS(m_SkyboxFromGeometry.m_PSPtr);
+
+                ContextManager::SetConstantBuffer(0, m_SkyboxFromGeometry.m_VSBufferSetPtr->GetBuffer(0));
+                ContextManager::SetConstantBuffer(1, m_SkyboxFromGeometry.m_VSBufferSetPtr->GetBuffer(1));
+                ContextManager::SetConstantBuffer(2, m_SkyboxFromGeometry.m_GSBufferSetPtr->GetBuffer(0));
+                ContextManager::SetConstantBuffer(3, m_SkyboxFromGeometry.m_PSBufferSetPtr->GetBuffer(0));
+
+                // -----------------------------------------------------------------------------
+                // Set items to context manager
+                // -----------------------------------------------------------------------------
+                ContextManager::SetVertexBufferSet(SurfacePtr->GetVertexBuffer(), pOffset);
+
+                ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
+
+                ContextManager::SetInputLayout(SurfacePtr->GetShaderVS()->GetInputLayout());
+
+                ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
+
+                ContextManager::ResetInputLayout();
+
+                ContextManager::ResetIndexBuffer();
+
+                ContextManager::ResetVertexBufferSet();
+
+                ContextManager::ResetConstantBuffer(0);
+                ContextManager::ResetConstantBuffer(1);
+                ContextManager::ResetConstantBuffer(2);
+                ContextManager::ResetConstantBuffer(3);
+            }
+            
+
+            // -----------------------------------------------------------------------------
+            // Next entity
+            // -----------------------------------------------------------------------------
+            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor);
+        }
+
+        ContextManager::ResetShaderVS();
+
+        ContextManager::ResetShaderDS();
+
+        ContextManager::ResetShaderHS();
+
+        ContextManager::ResetShaderGS();
+
+        ContextManager::ResetShaderPS();
+
+        ContextManager::ResetRenderContext();
+
+        ContextManager::ResetTopology();
+
+        _rInterLightProbeFacet.m_InputCubemapSetPtr = m_SkyboxFromGeometry.m_TextureSetPtr;
     }
 
     // -----------------------------------------------------------------------------
