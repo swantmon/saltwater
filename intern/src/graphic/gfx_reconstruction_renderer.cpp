@@ -6,6 +6,9 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "camera/cam_control_manager.h"
+#include "camera/cam_editor_control.h"
+
 #include "core/core_time.h"
 
 #include "graphic/gfx_buffer_manager.h"
@@ -34,6 +37,8 @@ using namespace Gfx;
 
 namespace
 {
+    const bool g_UseTrackingCamera = true;
+
     class CGfxReconstructionRenderer : private Base::CUncopyable
     {
         BASE_SINGLETON_FUNC(CGfxReconstructionRenderer)
@@ -397,7 +402,24 @@ namespace
 
     void CGfxReconstructionRenderer::Update()
     {
-        
+        if (g_UseTrackingCamera)
+        {
+            Cam::CControl& rControl = static_cast<Cam::CEditorControl&>(Cam::ControlManager::GetActiveControl());
+            
+            Float4x4 PoseMatrix = m_pReconstructor->GetPoseMatrix();
+
+            Base::Float3 Position;
+            Base::Float3 Rotation;
+
+            PoseMatrix.GetTranslation(Position);
+            PoseMatrix.GetRotation(Rotation);
+
+            Base::Float3x3 RotationMatrix;
+            RotationMatrix.SetRotation(Rotation[0] + 3.14f, Rotation[1], Rotation[2]);            
+
+            rControl.SetPosition(Position);
+            rControl.SetRotation(RotationMatrix);
+        }        
     }
     
     // -----------------------------------------------------------------------------
@@ -495,7 +517,10 @@ namespace
         //TargetSetManager::ClearTargetSet(TargetSetManager::GetDeferredTargetSet(), ClearColor);
 
         RenderVolume();
-        RenderCamera();
+        if (!g_UseTrackingCamera)
+        {
+            RenderCamera();
+        }
         
         Performance::EndEvent();
     }
