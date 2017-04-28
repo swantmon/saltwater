@@ -512,6 +512,30 @@ namespace
 
     void CGfxLightProbeManager::OnExit()
     {
+
+
+
+
+
+        m_SkyboxFromGeometry.m_VSPtr = 0;
+        m_SkyboxFromGeometry.m_GSPtr = 0;
+        m_SkyboxFromGeometry.m_PSPtr = 0;
+        m_SkyboxFromGeometry.m_VSBufferSetPtr = 0;
+        m_SkyboxFromGeometry.m_GSBufferSetPtr = 0;
+        m_SkyboxFromGeometry.m_PSBufferSetPtr = 0;
+        m_SkyboxFromGeometry.m_InputLayoutPtr = 0;
+        m_SkyboxFromGeometry.m_RasterizerStatePtr = 0;
+        m_SkyboxFromGeometry.m_TargetSetPtr = 0;
+        m_SkyboxFromGeometry.m_BlendStatePtr = 0;
+        m_SkyboxFromGeometry.m_DepthStencilPtr = 0;
+        m_SkyboxFromGeometry.m_ViewPortSetPtr = 0;
+        m_SkyboxFromGeometry.m_TextureSetPtr = 0;
+
+
+
+
+
+
         m_EnvironmentSpherePtr = 0;
 
         m_FilteringVSPtr = 0;
@@ -819,6 +843,11 @@ namespace
         EndOfEntities = Dt::Map::EntitiesEnd();
 
         // -----------------------------------------------------------------------------
+        // Clear target set
+        // -----------------------------------------------------------------------------
+        TargetSetManager::ClearTargetSet(m_SkyboxFromGeometry.m_TargetSetPtr);
+
+        // -----------------------------------------------------------------------------
         // Prepare renderer
         // -----------------------------------------------------------------------------
         const unsigned int pOffset[] = { 0, 0 };
@@ -864,10 +893,9 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Upload data to buffer
                 // -----------------------------------------------------------------------------
-                
                 SViewBuffer ViewBuffer;
 
-                ViewBuffer.m_View = Base::Float4x4().SetTranslation(5.0f, 0.0f, 5.0f);
+                ViewBuffer.m_View = Base::Float4x4().SetTranslation(0.0f, 0.0f, 10.0f);
 
                 BufferManager::UploadConstantBufferData(m_SkyboxFromGeometry.m_VSBufferSetPtr->GetBuffer(0), &ViewBuffer);
 
