@@ -20,7 +20,8 @@ namespace Dt
 
         enum EType
         {
-            Sky,         //< Defines a global light probe that use the skydome
+            Sky,         //< Defines a global light probe that use the sky dome
+            Local,       //< Define a local light probe that captures nearby entities
             Custom,      //< A cubemap texture can be set for generating the global light probe
         };
 
@@ -55,7 +56,13 @@ namespace Dt
         Dt::CTextureCube* GetCubemap();
 
         void SetIntensity(float _Intensity);
-        float GetIntensity();
+        float GetIntensity() const;
+
+        void SetNear(float _Near);
+        float GetNear() const;
+
+        void SetFar(float _Far);
+        float GetFar() const;
 
     public:
 
@@ -69,5 +76,7 @@ namespace Dt
         EQuality          m_Quality;            //< Quality of the probe (@see EQuality)
         Dt::CTextureCube* m_pCubemap;           //< Pointer to cube map for custom probe
         float             m_Intensity;          //< Intensity of the light probe
+        float             m_Near;               //< Near clipping plane
+        float             m_Far;                //< Far clipping plane
     };
 } // namespace Dt

@@ -11,6 +11,8 @@ namespace Dt
         , m_Quality    (PX128)
         , m_pCubemap   ()
         , m_Intensity  (0)
+        , m_Near       (0.1f)
+        , m_Far        (10.0f)
     {
 
     }
@@ -96,8 +98,36 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    float CLightProbeFacet::GetIntensity()
+    float CLightProbeFacet::GetIntensity() const
     {
         return m_Intensity;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CLightProbeFacet::SetNear(float _Near)
+    {
+        m_Near = _Near;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CLightProbeFacet::GetNear() const
+    {
+        return m_Near;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CLightProbeFacet::SetFar(float _Far)
+    {
+        m_Far = _Far;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CLightProbeFacet::GetFar() const
+    {
+        return m_Far;
     }
 } // namespace Dt

@@ -287,14 +287,39 @@ namespace
 
             Dt::CEntity& rGlobalProbeLight = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            rGlobalProbeLight.SetName("Light probe");
+            rGlobalProbeLight.SetName("Sky light probe");
 
             Dt::CLightProbeFacet* pProbeLightFacet = Dt::LightProbeManager::CreateLightProbe();
 
             pProbeLightFacet->SetType(Dt::CLightProbeFacet::Sky);
             pProbeLightFacet->SetQuality(Dt::CLightProbeFacet::PX512);
             pProbeLightFacet->SetIntensity(1.0f);
+            pProbeLightFacet->SetRefreshMode(Dt::CLightProbeFacet::Static);
+
+            rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pProbeLightFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rGlobalProbeLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
+            EntityDesc.m_EntityType     = Dt::SLightType::LightProbe;
+            EntityDesc.m_FacetFlags     = 0;
+
+            Dt::CEntity& rGlobalProbeLight = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            rGlobalProbeLight.SetName("Local light probe");
+
+            Dt::CLightProbeFacet* pProbeLightFacet = Dt::LightProbeManager::CreateLightProbe();
+
+            pProbeLightFacet->SetType(Dt::CLightProbeFacet::Local);
+            pProbeLightFacet->SetQuality(Dt::CLightProbeFacet::PX512);
+            pProbeLightFacet->SetIntensity(1.0f);
             pProbeLightFacet->SetRefreshMode(Dt::CLightProbeFacet::Dynamic);
+            pProbeLightFacet->SetNear(2.0f);
+            pProbeLightFacet->SetFar(10.0f);
 
             rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pProbeLightFacet);
 
