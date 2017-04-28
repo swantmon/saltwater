@@ -135,6 +135,7 @@ namespace
             CShaderPtr            m_VSPtr;
             CShaderPtr            m_GSPtr;
             CShaderPtr            m_PSPtr;
+            CShaderPtr            m_PS2Ptr;
             CBufferSetPtr         m_VSBufferSetPtr;
             CBufferSetPtr         m_GSBufferSetPtr;
             CBufferSetPtr         m_PSBufferSetPtr;
@@ -283,7 +284,8 @@ namespace
 
         CShaderPtr CubemapGeometryVSPtr = ShaderManager::CompileVS("vs_x1.glsl", "main");
         CShaderPtr CubemapGSPtr         = ShaderManager::CompileGS("gs_x1.glsl", "main");
-        CShaderPtr CubemapTexturePSPtr  = ShaderManager::CompilePS("fs_x1.glsl", "main");
+        CShaderPtr CubemapPSPtr         = ShaderManager::CompilePS("fs_x1.glsl", "main");
+        CShaderPtr CubemapTexturePSPtr  = ShaderManager::CompilePS("fs_x1.glsl", "main", "#define USE_TEX_DIFFUSE");
 
         // -----------------------------------------------------------------------------
 
@@ -309,7 +311,8 @@ namespace
 
         m_SkyboxFromGeometry.m_VSPtr          = CubemapGeometryVSPtr;
         m_SkyboxFromGeometry.m_GSPtr          = CubemapGSPtr;
-        m_SkyboxFromGeometry.m_PSPtr          = CubemapTexturePSPtr;
+        m_SkyboxFromGeometry.m_PSPtr          = CubemapPSPtr;
+        m_SkyboxFromGeometry.m_PS2Ptr         = CubemapTexturePSPtr;
         m_SkyboxFromGeometry.m_InputLayoutPtr = m_PositionInputLayoutPtr;
 
         // -----------------------------------------------------------------------------
@@ -349,7 +352,7 @@ namespace
         
         SConstantBufferGS DefaultGSValues;
         
-        DefaultGSValues.m_CubeProjectionMatrix.SetRHFieldOfView(Base::RadiansToDegree(Base::SConstants<float>::s_Pi * 0.5f), 1.0f, 1.0f, 20000.0f);
+        DefaultGSValues.m_CubeProjectionMatrix.SetRHFieldOfView(Base::RadiansToDegree(Base::SConstants<float>::s_Pi * 0.5f), 1.0f, 2.0f, 2000.0f);
         
         // -----------------------------------------------------------------------------
         
@@ -428,6 +431,18 @@ namespace
         ConstanteBufferDesc.m_pClassKey     = 0;
         
         CBufferPtr VSBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(CMaterial::SMaterialAttributes);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+
+        CBufferPtr SurfaceMaterialBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
         
         // -----------------------------------------------------------------------------
         
@@ -441,6 +456,7 @@ namespace
 
         m_SkyboxFromGeometry.m_VSBufferSetPtr = BufferManager::CreateBufferSet(ViewBuffer, VSBuffer);
         m_SkyboxFromGeometry.m_GSBufferSetPtr = BufferManager::CreateBufferSet(GSBuffer);
+        m_SkyboxFromGeometry.m_PSBufferSetPtr = BufferManager::CreateBufferSet(SurfaceMaterialBufferPtr);
 
         // -----------------------------------------------------------------------------
         // Models
@@ -520,6 +536,7 @@ namespace
         m_SkyboxFromGeometry.m_VSPtr = 0;
         m_SkyboxFromGeometry.m_GSPtr = 0;
         m_SkyboxFromGeometry.m_PSPtr = 0;
+        m_SkyboxFromGeometry.m_PS2Ptr = 0;
         m_SkyboxFromGeometry.m_VSBufferSetPtr = 0;
         m_SkyboxFromGeometry.m_GSBufferSetPtr = 0;
         m_SkyboxFromGeometry.m_PSBufferSetPtr = 0;
@@ -869,6 +886,7 @@ namespace
         ContextManager::SetConstantBuffer(0, m_SkyboxFromGeometry.m_VSBufferSetPtr->GetBuffer(0));
         ContextManager::SetConstantBuffer(1, m_SkyboxFromGeometry.m_VSBufferSetPtr->GetBuffer(1));
         ContextManager::SetConstantBuffer(2, m_SkyboxFromGeometry.m_GSBufferSetPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(3, m_SkyboxFromGeometry.m_PSBufferSetPtr->GetBuffer(0));
 
         for (; CurrentEntity != EndOfEntities; )
         {
@@ -894,7 +912,7 @@ namespace
             SViewBuffer ViewBuffer;
 
             ViewBuffer.m_View  = Base::Float4x4::s_Identity;
-            ViewBuffer.m_View *= Base::Float4x4().SetScale(-1.0f, 1.0f, -1.0f);
+            ViewBuffer.m_View *= Base::Float4x4().SetScale(-1.0f, -1.0f, -1.0f);
             ViewBuffer.m_View *= Base::Float4x4().SetTranslation(0.0f, 0.0f, -10.0f);
 
             BufferManager::UploadConstantBufferData(m_SkyboxFromGeometry.m_VSBufferSetPtr->GetBuffer(0), &ViewBuffer);
@@ -919,6 +937,25 @@ namespace
                 {
                     break;
                 }
+
+                BufferManager::UploadConstantBufferData(m_SkyboxFromGeometry.m_PSBufferSetPtr->GetBuffer(0), &SurfacePtr->GetMaterial()->GetMaterialAttributes());
+
+                if (SurfacePtr->GetMaterial()->GetTextureSetPS()->GetTexture(0) != 0)
+                {
+                    ContextManager::SetShaderPS(m_SkyboxFromGeometry.m_PS2Ptr);
+                }
+                else
+                {
+                    ContextManager::SetShaderPS(m_SkyboxFromGeometry.m_PSPtr);
+                }
+
+                for (unsigned int IndexOfTexture = 0; IndexOfTexture < SurfacePtr->GetMaterial()->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
+                {
+                    ContextManager::SetSampler(IndexOfTexture, SurfacePtr->GetMaterial()->GetSamplerSetPS()->GetSampler(IndexOfTexture));
+
+                    ContextManager::SetTexture(IndexOfTexture, SurfacePtr->GetMaterial()->GetTextureSetPS()->GetTexture(IndexOfTexture));
+                }
+
                 // -----------------------------------------------------------------------------
                 // Render
                 // -----------------------------------------------------------------------------
@@ -935,6 +972,13 @@ namespace
                 ContextManager::ResetIndexBuffer();
 
                 ContextManager::ResetVertexBufferSet();
+
+                for (unsigned int IndexOfTexture = 0; IndexOfTexture < SurfacePtr->GetMaterial()->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
+                {
+                    ContextManager::ResetSampler(IndexOfTexture);
+
+                    ContextManager::ResetTexture(IndexOfTexture);
+                }
             }
             
 
