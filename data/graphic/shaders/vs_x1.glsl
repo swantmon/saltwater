@@ -39,7 +39,7 @@ void main(void)
 {
     out_UV = vec2(VertexTexCoord.x, 1.0f - VertexTexCoord.y);
 
-    vec4 WSPosition = inverse(m_ViewMatrix) * m_ModelMatrix * vec4(VertexPosition.xyz, 1.0f);
+    vec4 WSPosition = m_ViewMatrix * m_ModelMatrix * vec4(VertexPosition.xyz, 1.0f);
 
     gl_Position = WSPosition;
 }

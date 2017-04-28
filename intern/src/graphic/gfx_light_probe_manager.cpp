@@ -858,6 +858,18 @@ namespace
         ContextManager::SetDepthStencilState(m_SkyboxFromGeometry.m_DepthStencilPtr);
         ContextManager::SetRasterizerState  (m_SkyboxFromGeometry.m_RasterizerStatePtr);
 
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        ContextManager::SetShaderVS(m_SkyboxFromGeometry.m_VSPtr);
+
+        ContextManager::SetShaderGS(m_SkyboxFromGeometry.m_GSPtr);
+
+        ContextManager::SetShaderPS(m_SkyboxFromGeometry.m_PSPtr);
+
+        ContextManager::SetConstantBuffer(0, m_SkyboxFromGeometry.m_VSBufferSetPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(1, m_SkyboxFromGeometry.m_VSBufferSetPtr->GetBuffer(1));
+        ContextManager::SetConstantBuffer(2, m_SkyboxFromGeometry.m_GSBufferSetPtr->GetBuffer(0));
+
         for (; CurrentEntity != EndOfEntities; )
         {
             Dt::CEntity& rCurrentEntity = *CurrentEntity;
@@ -877,6 +889,22 @@ namespace
             CMeshPtr MeshPtr = pGraphicModelActorFacet->GetMesh();
 
             // -----------------------------------------------------------------------------
+            // Upload data to buffer
+            // -----------------------------------------------------------------------------
+            SViewBuffer ViewBuffer;
+
+            ViewBuffer.m_View = Base::Float4x4().SetTranslation(0.0f, 0.0f, -10.0f);
+
+            BufferManager::UploadConstantBufferData(m_SkyboxFromGeometry.m_VSBufferSetPtr->GetBuffer(0), &ViewBuffer);
+
+
+            SPerDrawCallConstantBufferVS ModelBuffer;
+
+            ModelBuffer.m_ModelMatrix = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
+
+            BufferManager::UploadConstantBufferData(m_SkyboxFromGeometry.m_VSBufferSetPtr->GetBuffer(1), &ModelBuffer);
+
+            // -----------------------------------------------------------------------------
             // Set every surface of this entity into a new render job
             // -----------------------------------------------------------------------------
             unsigned int NumberOfSurfaces = MeshPtr->GetLOD(0)->GetNumberOfSurfaces();
@@ -889,40 +917,8 @@ namespace
                 {
                     break;
                 }
-
-                // -----------------------------------------------------------------------------
-                // Upload data to buffer
-                // -----------------------------------------------------------------------------
-                SViewBuffer ViewBuffer;
-
-                ViewBuffer.m_View = Base::Float4x4().SetTranslation(0.0f, 0.0f, 10.0f);
-
-                BufferManager::UploadConstantBufferData(m_SkyboxFromGeometry.m_VSBufferSetPtr->GetBuffer(0), &ViewBuffer);
-
-
-                SPerDrawCallConstantBufferVS ModelBuffer;
-
-                ModelBuffer.m_ModelMatrix = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
-
-                BufferManager::UploadConstantBufferData(m_SkyboxFromGeometry.m_VSBufferSetPtr->GetBuffer(1), &ModelBuffer);
-
                 // -----------------------------------------------------------------------------
                 // Render
-                // -----------------------------------------------------------------------------
-                ContextManager::SetTopology(STopology::TriangleList);
-
-                ContextManager::SetShaderVS(m_SkyboxFromGeometry.m_VSPtr);
-
-                ContextManager::SetShaderGS(m_SkyboxFromGeometry.m_GSPtr);
-
-                ContextManager::SetShaderPS(m_SkyboxFromGeometry.m_PSPtr);
-
-                ContextManager::SetConstantBuffer(0, m_SkyboxFromGeometry.m_VSBufferSetPtr->GetBuffer(0));
-                ContextManager::SetConstantBuffer(1, m_SkyboxFromGeometry.m_VSBufferSetPtr->GetBuffer(1));
-                ContextManager::SetConstantBuffer(2, m_SkyboxFromGeometry.m_GSBufferSetPtr->GetBuffer(0));
-
-                // -----------------------------------------------------------------------------
-                // Set items to context manager
                 // -----------------------------------------------------------------------------
                 ContextManager::SetVertexBufferSet(SurfacePtr->GetVertexBuffer(), pOffset);
 
@@ -937,11 +933,6 @@ namespace
                 ContextManager::ResetIndexBuffer();
 
                 ContextManager::ResetVertexBufferSet();
-
-                ContextManager::ResetConstantBuffer(0);
-                ContextManager::ResetConstantBuffer(1);
-                ContextManager::ResetConstantBuffer(2);
-                ContextManager::ResetConstantBuffer(3);
             }
             
 
@@ -950,6 +941,10 @@ namespace
             // -----------------------------------------------------------------------------
             CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor);
         }
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
+        ContextManager::ResetConstantBuffer(2);
+        ContextManager::ResetConstantBuffer(3);
 
         ContextManager::ResetShaderVS();
 
