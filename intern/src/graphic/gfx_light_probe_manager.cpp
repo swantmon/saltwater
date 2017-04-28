@@ -90,6 +90,11 @@ namespace
             float m_IsHDR;
         };
 
+        struct SPerDrawCallConstantBufferVS
+        {
+            Base::Float4x4 m_ModelMatrix;
+        };
+
         struct SSpecularCubemapSettings
         {
             float m_LinearRoughness;
@@ -98,6 +103,16 @@ namespace
 
         class CInternLightProbeFacet : public CLightProbeFacet
         {
+        public:
+
+            struct SRenderContext
+            {
+                CInputLayoutPtr m_InputLayoutPtr;
+                CTextureSetPtr  m_TextureSetPtr;
+                CTargetSetPtr   m_TargetSetPtr;
+                CViewPortSetPtr m_ViewPortSetPtr;
+            };
+
         public:
 
             typedef std::vector<CTargetSetPtr>   CTargetSets;
@@ -118,48 +133,12 @@ namespace
             CTargetSetPtr   m_DiffuseHDRTargetSetPtr;
             CViewPortSetPtr m_DiffuseViewPortSetPtr;
 
+            SRenderContext m_SkyboxFromGeometry;
+
         private:
 
             friend class CGfxLightProbeManager;
         };
-
-
-
-
-
-
-
-
-        struct SRenderContext
-        {
-            CShaderPtr            m_VSPtr;
-            CShaderPtr            m_GSPtr;
-            CShaderPtr            m_PSPtr;
-            CShaderPtr            m_PS2Ptr;
-            CBufferSetPtr         m_VSBufferSetPtr;
-            CBufferSetPtr         m_GSBufferSetPtr;
-            CBufferSetPtr         m_PSBufferSetPtr;
-            CInputLayoutPtr       m_InputLayoutPtr;
-            CTextureSetPtr        m_TextureSetPtr;
-            CTargetSetPtr         m_TargetSetPtr;
-            CViewPortSetPtr       m_ViewPortSetPtr;
-            CBlendStatePtr        m_BlendStatePtr;
-            CDepthStencilStatePtr m_DepthStencilPtr;
-            CRasterizerStatePtr   m_RasterizerStatePtr;
-        };
-
-        struct SPerDrawCallConstantBufferVS
-        {
-            Base::Float4x4 m_ModelMatrix;
-        };
-
-
-
-
-
-
-
-
 
     private:
 
@@ -173,31 +152,24 @@ namespace
         CShaderPtr m_FilteringGSPtr;
         CShaderPtr m_FilteringDiffusePSPtr;
         CShaderPtr m_FilteringSpecularPSPtr;
+        CShaderPtr m_CubemapGeometryVSPtr;
+        CShaderPtr m_CubemapGSPtr;
+        CShaderPtr m_CubemapPSPtr;
+        CShaderPtr m_CubemapTexturePSPtr;
 
         CBufferSetPtr m_CubemapGSBufferSetPtr;
         CBufferSetPtr m_FilteringPSBufferSetPtr;
         CBufferSetPtr m_CustomVSBufferSetPtr;
         CBufferSetPtr m_CustomPSBufferSetPtr;
+        CBufferSetPtr m_VSBufferSetPtr;
+        CBufferSetPtr m_GSBufferSetPtr;
+        CBufferSetPtr m_PSBufferSetPtr;
 
         CInputLayoutPtr m_PositionInputLayoutPtr;
 
         CRenderContextPtr m_CubemapRenderContextPtr;
 
         CLightProbeFacets m_LightprobeFacets;
-
-
-
-
-
-
-
-        SRenderContext m_SkyboxFromGeometry;
-
-
-
-
-
-
 
     private:
 
@@ -230,6 +202,11 @@ namespace
 
     CGfxLightProbeManager::CInternLightProbeFacet::~CInternLightProbeFacet()
     {
+        m_SkyboxFromGeometry.m_InputLayoutPtr = 0;
+        m_SkyboxFromGeometry.m_TargetSetPtr = 0;
+        m_SkyboxFromGeometry.m_ViewPortSetPtr = 0;
+        m_SkyboxFromGeometry.m_TextureSetPtr = 0;
+
         m_InputCubemapSetPtr     = 0;
         m_DiffuseHDRTargetSetPtr = 0;
         m_DiffuseViewPortSetPtr  = 0;
@@ -280,12 +257,10 @@ namespace
 
         m_FilteringSpecularPSPtr = ShaderManager::CompilePS("fs_lightprobe_specular_sampling.glsl", "main");
 
-
-
-        CShaderPtr CubemapGeometryVSPtr = ShaderManager::CompileVS("vs_x1.glsl", "main");
-        CShaderPtr CubemapGSPtr         = ShaderManager::CompileGS("gs_x1.glsl", "main");
-        CShaderPtr CubemapPSPtr         = ShaderManager::CompilePS("fs_x1.glsl", "main");
-        CShaderPtr CubemapTexturePSPtr  = ShaderManager::CompilePS("fs_x1.glsl", "main", "#define USE_TEX_DIFFUSE");
+        m_CubemapGeometryVSPtr = ShaderManager::CompileVS("vs_x1.glsl", "main");
+        m_CubemapGSPtr         = ShaderManager::CompileGS("gs_x1.glsl", "main");
+        m_CubemapPSPtr         = ShaderManager::CompilePS("fs_x1.glsl", "main");
+        m_CubemapTexturePSPtr  = ShaderManager::CompilePS("fs_x1.glsl", "main", "#define USE_TEX_DIFFUSE");
 
         // -----------------------------------------------------------------------------
 
@@ -308,12 +283,6 @@ namespace
 
         m_CubemapRenderContextPtr->SetCamera(CameraPtr);
         m_CubemapRenderContextPtr->SetRenderState(NoDepthStatePtr);
-
-        m_SkyboxFromGeometry.m_VSPtr          = CubemapGeometryVSPtr;
-        m_SkyboxFromGeometry.m_GSPtr          = CubemapGSPtr;
-        m_SkyboxFromGeometry.m_PSPtr          = CubemapPSPtr;
-        m_SkyboxFromGeometry.m_PS2Ptr         = CubemapTexturePSPtr;
-        m_SkyboxFromGeometry.m_InputLayoutPtr = m_PositionInputLayoutPtr;
 
         // -----------------------------------------------------------------------------
         // Buffer
@@ -454,9 +423,9 @@ namespace
         
         m_FilteringPSBufferSetPtr = BufferManager::CreateBufferSet(SpecularPSBuffer);
 
-        m_SkyboxFromGeometry.m_VSBufferSetPtr = BufferManager::CreateBufferSet(ViewBuffer, VSBuffer);
-        m_SkyboxFromGeometry.m_GSBufferSetPtr = BufferManager::CreateBufferSet(GSBuffer);
-        m_SkyboxFromGeometry.m_PSBufferSetPtr = BufferManager::CreateBufferSet(SurfaceMaterialBufferPtr);
+        m_VSBufferSetPtr = BufferManager::CreateBufferSet(ViewBuffer, VSBuffer);
+        m_GSBufferSetPtr = BufferManager::CreateBufferSet(GSBuffer);
+        m_PSBufferSetPtr = BufferManager::CreateBufferSet(SurfaceMaterialBufferPtr);
 
         // -----------------------------------------------------------------------------
         // Models
@@ -478,90 +447,28 @@ namespace
         // Register dirty entity handler for automatic sky creation
         // -----------------------------------------------------------------------------
         Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CGfxLightProbeManager::OnDirtyEntity));
-
-        // -----------------------------------------------------------------------------
-        // States
-        // -----------------------------------------------------------------------------
-        Gfx::STextureDescriptor  TextureDescriptor;
-        Gfx::SViewPortDescriptor ViewPortDesc;
-
-        TextureDescriptor.m_NumberOfPixelsU  = 512;
-        TextureDescriptor.m_NumberOfPixelsV  = 512;
-        TextureDescriptor.m_NumberOfPixelsW  = 1;
-        TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
-        TextureDescriptor.m_NumberOfTextures = 6;
-        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource | CTextureBase::RenderTarget;
-        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-        TextureDescriptor.m_Format           = CTextureBase::Unknown;
-        TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-        TextureDescriptor.m_pFileName        = 0;
-        TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
-        
-        CTexture2DPtr SkyCubeTexturePtr = TextureManager::CreateCubeTexture(TextureDescriptor);
-
-        m_SkyboxFromGeometry.m_TextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(SkyCubeTexturePtr));
-        
-        CTargetSetPtr SkyCubeTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(SkyCubeTexturePtr));
-             
-        ViewPortDesc.m_TopLeftX = 0.0f;
-        ViewPortDesc.m_TopLeftY = 0.0f;
-        ViewPortDesc.m_MinDepth = 0.0f;
-        ViewPortDesc.m_MaxDepth = 1.0f;
-        ViewPortDesc.m_Width    = 512;
-        ViewPortDesc.m_Height   = 512;
-            
-        CViewPortPtr SkyCubeViewPortPtr = ViewManager::CreateViewPort(ViewPortDesc);
-            
-        CViewPortSetPtr SkyCubeViewPortSetPtr = ViewManager::CreateViewPortSet(SkyCubeViewPortPtr);
-
-        m_SkyboxFromGeometry.m_TargetSetPtr       = SkyCubeTargetSetPtr;
-        m_SkyboxFromGeometry.m_ViewPortSetPtr     = SkyCubeViewPortSetPtr;
-        m_SkyboxFromGeometry.m_BlendStatePtr      = StateManager::GetBlendState(0);
-        m_SkyboxFromGeometry.m_DepthStencilPtr    = StateManager::GetDepthStencilState(0);
-        m_SkyboxFromGeometry.m_RasterizerStatePtr = StateManager::GetRasterizerState(0);
-
     }
 
     // -----------------------------------------------------------------------------
 
     void CGfxLightProbeManager::OnExit()
     {
-
-
-
-
-
-        m_SkyboxFromGeometry.m_VSPtr = 0;
-        m_SkyboxFromGeometry.m_GSPtr = 0;
-        m_SkyboxFromGeometry.m_PSPtr = 0;
-        m_SkyboxFromGeometry.m_PS2Ptr = 0;
-        m_SkyboxFromGeometry.m_VSBufferSetPtr = 0;
-        m_SkyboxFromGeometry.m_GSBufferSetPtr = 0;
-        m_SkyboxFromGeometry.m_PSBufferSetPtr = 0;
-        m_SkyboxFromGeometry.m_InputLayoutPtr = 0;
-        m_SkyboxFromGeometry.m_RasterizerStatePtr = 0;
-        m_SkyboxFromGeometry.m_TargetSetPtr = 0;
-        m_SkyboxFromGeometry.m_BlendStatePtr = 0;
-        m_SkyboxFromGeometry.m_DepthStencilPtr = 0;
-        m_SkyboxFromGeometry.m_ViewPortSetPtr = 0;
-        m_SkyboxFromGeometry.m_TextureSetPtr = 0;
-
-
-
-
-
-
         m_EnvironmentSpherePtr = 0;
 
         m_FilteringVSPtr = 0;
         m_FilteringGSPtr = 0;
         m_FilteringDiffusePSPtr = 0;
         m_FilteringSpecularPSPtr = 0;
+        m_CubemapGeometryVSPtr = 0;
+        m_CubemapGSPtr = 0;
+        m_CubemapPSPtr = 0;
+        m_CubemapTexturePSPtr = 0;
 
         m_CubemapGSBufferSetPtr = 0;
         m_FilteringPSBufferSetPtr = 0;
+        m_VSBufferSetPtr = 0;
+        m_GSBufferSetPtr = 0;
+        m_PSBufferSetPtr = 0;
 
         m_CustomVSBufferSetPtr = 0;
         m_CustomPSBufferSetPtr = 0;
@@ -700,6 +607,45 @@ namespace
         // Create facet
         // -----------------------------------------------------------------------------
         CInternLightProbeFacet& rGraphicLightProbeFacet = m_LightprobeFacets.Allocate();
+
+        // -----------------------------------------------------------------------------
+        // Create stuff for local probe
+        // TODO: make variable
+        // -----------------------------------------------------------------------------
+        TextureDescriptor.m_NumberOfPixelsU  = 512;
+        TextureDescriptor.m_NumberOfPixelsV  = 512;
+        TextureDescriptor.m_NumberOfPixelsW  = 1;
+        TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
+        TextureDescriptor.m_NumberOfTextures = 6;
+        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource | CTextureBase::RenderTarget;
+        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
+        TextureDescriptor.m_Format           = CTextureBase::Unknown;
+        TextureDescriptor.m_Usage            = CTextureBase::GPURead;
+        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        TextureDescriptor.m_pFileName        = 0;
+        TextureDescriptor.m_pPixels          = 0;
+        TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+
+        CTexture2DPtr SkyCubeTexturePtr = TextureManager::CreateCubeTexture(TextureDescriptor);
+
+        rGraphicLightProbeFacet.m_SkyboxFromGeometry.m_TextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(SkyCubeTexturePtr));
+
+        CTargetSetPtr SkyCubeTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(SkyCubeTexturePtr));
+
+        ViewPortDesc.m_TopLeftX = 0.0f;
+        ViewPortDesc.m_TopLeftY = 0.0f;
+        ViewPortDesc.m_MinDepth = 0.0f;
+        ViewPortDesc.m_MaxDepth = 1.0f;
+        ViewPortDesc.m_Width    = 512;
+        ViewPortDesc.m_Height   = 512;
+
+        CViewPortPtr SkyCubeViewPortPtr = ViewManager::CreateViewPort(ViewPortDesc);
+
+        CViewPortSetPtr SkyCubeViewPortSetPtr = ViewManager::CreateViewPortSet(SkyCubeViewPortPtr);
+
+        rGraphicLightProbeFacet.m_SkyboxFromGeometry.m_TargetSetPtr = SkyCubeTargetSetPtr;
+        rGraphicLightProbeFacet.m_SkyboxFromGeometry.m_ViewPortSetPtr = SkyCubeViewPortSetPtr;
+
         
         // -----------------------------------------------------------------------------
         // Create rest of the global probe that is available at any type
@@ -862,31 +808,31 @@ namespace
         // -----------------------------------------------------------------------------
         // Clear target set
         // -----------------------------------------------------------------------------
-        TargetSetManager::ClearTargetSet(m_SkyboxFromGeometry.m_TargetSetPtr);
+        TargetSetManager::ClearTargetSet(_rInterLightProbeFacet.m_SkyboxFromGeometry.m_TargetSetPtr);
 
         // -----------------------------------------------------------------------------
         // Prepare renderer
         // -----------------------------------------------------------------------------
         const unsigned int pOffset[] = { 0, 0 };
 
-        ContextManager::SetTargetSet        (m_SkyboxFromGeometry.m_TargetSetPtr);
-        ContextManager::SetViewPortSet      (m_SkyboxFromGeometry.m_ViewPortSetPtr);
-        ContextManager::SetBlendState       (m_SkyboxFromGeometry.m_BlendStatePtr);
-        ContextManager::SetDepthStencilState(m_SkyboxFromGeometry.m_DepthStencilPtr);
-        ContextManager::SetRasterizerState  (m_SkyboxFromGeometry.m_RasterizerStatePtr);
+        ContextManager::SetTargetSet        (_rInterLightProbeFacet.m_SkyboxFromGeometry.m_TargetSetPtr);
+        ContextManager::SetViewPortSet      (_rInterLightProbeFacet.m_SkyboxFromGeometry.m_ViewPortSetPtr);
+        ContextManager::SetBlendState       (StateManager::GetBlendState(0));
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(0));
+        ContextManager::SetRasterizerState  (StateManager::GetRasterizerState(0));
 
         ContextManager::SetTopology(STopology::TriangleList);
 
-        ContextManager::SetShaderVS(m_SkyboxFromGeometry.m_VSPtr);
+        ContextManager::SetShaderVS(m_CubemapGeometryVSPtr);
 
-        ContextManager::SetShaderGS(m_SkyboxFromGeometry.m_GSPtr);
+        ContextManager::SetShaderGS(m_CubemapGSPtr);
 
-        ContextManager::SetShaderPS(m_SkyboxFromGeometry.m_PSPtr);
+        ContextManager::SetShaderPS(m_CubemapPSPtr);
 
-        ContextManager::SetConstantBuffer(0, m_SkyboxFromGeometry.m_VSBufferSetPtr->GetBuffer(0));
-        ContextManager::SetConstantBuffer(1, m_SkyboxFromGeometry.m_VSBufferSetPtr->GetBuffer(1));
-        ContextManager::SetConstantBuffer(2, m_SkyboxFromGeometry.m_GSBufferSetPtr->GetBuffer(0));
-        ContextManager::SetConstantBuffer(3, m_SkyboxFromGeometry.m_PSBufferSetPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(0, m_VSBufferSetPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(1, m_VSBufferSetPtr->GetBuffer(1));
+        ContextManager::SetConstantBuffer(2, m_GSBufferSetPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(3, m_PSBufferSetPtr->GetBuffer(0));
 
         for (; CurrentEntity != EndOfEntities; )
         {
@@ -915,14 +861,14 @@ namespace
             ViewBuffer.m_View *= Base::Float4x4().SetScale(-1.0f, -1.0f, -1.0f);
             ViewBuffer.m_View *= Base::Float4x4().SetTranslation(0.0f, 0.0f, -10.0f);
 
-            BufferManager::UploadConstantBufferData(m_SkyboxFromGeometry.m_VSBufferSetPtr->GetBuffer(0), &ViewBuffer);
+            BufferManager::UploadConstantBufferData(m_VSBufferSetPtr->GetBuffer(0), &ViewBuffer);
 
 
             SPerDrawCallConstantBufferVS ModelBuffer;
 
             ModelBuffer.m_ModelMatrix = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
 
-            BufferManager::UploadConstantBufferData(m_SkyboxFromGeometry.m_VSBufferSetPtr->GetBuffer(1), &ModelBuffer);
+            BufferManager::UploadConstantBufferData(m_VSBufferSetPtr->GetBuffer(1), &ModelBuffer);
 
             // -----------------------------------------------------------------------------
             // Set every surface of this entity into a new render job
@@ -938,15 +884,15 @@ namespace
                     break;
                 }
 
-                BufferManager::UploadConstantBufferData(m_SkyboxFromGeometry.m_PSBufferSetPtr->GetBuffer(0), &SurfacePtr->GetMaterial()->GetMaterialAttributes());
+                BufferManager::UploadConstantBufferData(m_PSBufferSetPtr->GetBuffer(0), &SurfacePtr->GetMaterial()->GetMaterialAttributes());
 
                 if (SurfacePtr->GetMaterial()->GetTextureSetPS()->GetTexture(0) != 0)
                 {
-                    ContextManager::SetShaderPS(m_SkyboxFromGeometry.m_PS2Ptr);
+                    ContextManager::SetShaderPS(m_CubemapTexturePSPtr);
                 }
                 else
                 {
-                    ContextManager::SetShaderPS(m_SkyboxFromGeometry.m_PSPtr);
+                    ContextManager::SetShaderPS(m_CubemapPSPtr);
                 }
 
                 for (unsigned int IndexOfTexture = 0; IndexOfTexture < SurfacePtr->GetMaterial()->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
@@ -1006,7 +952,8 @@ namespace
 
         ContextManager::ResetTopology();
 
-        _rInterLightProbeFacet.m_InputCubemapSetPtr = m_SkyboxFromGeometry.m_TextureSetPtr;
+        // TODO: this has to be the same texture
+        _rInterLightProbeFacet.m_InputCubemapSetPtr = _rInterLightProbeFacet.m_SkyboxFromGeometry.m_TextureSetPtr;
     }
 
     // -----------------------------------------------------------------------------
