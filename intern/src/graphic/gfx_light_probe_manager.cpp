@@ -893,7 +893,9 @@ namespace
             // -----------------------------------------------------------------------------
             SViewBuffer ViewBuffer;
 
-            ViewBuffer.m_View = Base::Float4x4().SetTranslation(0.0f, 0.0f, -10.0f);
+            ViewBuffer.m_View  = Base::Float4x4::s_Identity;
+            ViewBuffer.m_View *= Base::Float4x4().SetScale(-1.0f, 1.0f, -1.0f);
+            ViewBuffer.m_View *= Base::Float4x4().SetTranslation(0.0f, 0.0f, -10.0f);
 
             BufferManager::UploadConstantBufferData(m_SkyboxFromGeometry.m_VSBufferSetPtr->GetBuffer(0), &ViewBuffer);
 
