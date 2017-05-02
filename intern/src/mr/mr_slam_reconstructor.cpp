@@ -47,7 +47,7 @@ namespace
     //*/
     
     const float g_EpsilonDistance = 0.1f;
-    const float g_EpsilonAngle = 0.4f;
+    const float g_EpsilonAngle = 0.75f;
     
     const int g_ICPValueCount = 27;
 
