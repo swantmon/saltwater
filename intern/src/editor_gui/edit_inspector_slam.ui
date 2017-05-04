@@ -24,24 +24,6 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout_2">
-     <item row="3" column="1">
-      <layout class="QHBoxLayout" name="horizontalLayout_4">
-       <item>
-        <widget class="QLabel" name="m_pWeightTL">
-         <property name="text">
-          <string>TextLabel</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QSlider" name="m_pWeightHS">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
      <item row="0" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout_5">
        <item>
@@ -66,17 +48,17 @@
        </item>
       </layout>
      </item>
-     <item row="2" column="1">
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item row="3" column="1">
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
        <item>
-        <widget class="QLabel" name="m_pTruncatedDistanceTL">
+        <widget class="QLabel" name="m_pWeightTL">
          <property name="text">
           <string>TextLabel</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QSlider" name="m_pTruncatedDistanceHS">
+        <widget class="QSlider" name="m_pWeightHS">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -109,19 +91,23 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>Truncated Distance</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Volume Size</string>
-       </property>
-      </widget>
+     <item row="2" column="1">
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QLabel" name="m_pTruncatedDistanceTL">
+         <property name="text">
+          <string>TextLabel</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSlider" name="m_pTruncatedDistanceHS">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item row="3" column="0">
       <widget class="QLabel" name="label_4">
@@ -136,6 +122,38 @@
         <string>Depth Threshold</string>
        </property>
       </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Volume Size</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Truncated Distance</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="label_6">
+       <property name="text">
+        <string>Capture Color</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <layout class="QHBoxLayout" name="horizontalLayout_7">
+       <item>
+        <widget class="QCheckBox" name="m_pCaptureColorCB">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item row="4" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout">
@@ -155,21 +173,17 @@
        </item>
       </layout>
      </item>
-     <item row="5" column="1">
-      <layout class="QHBoxLayout" name="horizontalLayout_7">
-       <item>
-        <widget class="QCheckBox" name="m_pCaptureColorCB">
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item row="5" column="0">
-      <widget class="QLabel" name="label_6">
+     <item row="6" column="0">
+      <widget class="QLabel" name="label_7">
        <property name="text">
-        <string>Capture Color</string>
+        <string>Use Tracking Camera</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <widget class="QCheckBox" name="m_pTrackingCameraCB">
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </item>
@@ -341,6 +355,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>m_pTrackingCameraCB</sender>
+   <signal>clicked()</signal>
+   <receiver>InspectorSLAM</receiver>
+   <slot>changeCamera()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>247</x>
+     <y>224</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>187</x>
+     <y>171</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>volumeResolutionChanged(int)</slot>
@@ -348,5 +378,6 @@
   <slot>pauseTracking()</slot>
   <slot>pauseIntegration()</slot>
   <slot>volumeSizeChanged(int)</slot>
+  <slot>changeCamera()</slot>
  </slots>
 </ui>
