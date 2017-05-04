@@ -378,7 +378,7 @@ namespace
 
             // -----------------------------------------------------------------------------
 
-            //Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
 
 
 //             Dt::CScriptFacet* pScriptFacet = Dt::ScriptManager::CreateScript();
