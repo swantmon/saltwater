@@ -275,6 +275,9 @@ namespace MR
         m_RaycastVertexMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
         m_RaycastNormalMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
 
+        m_CountourMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
+        m_RaycastCountourMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
+
         STextureDescriptor TextureDescriptor = {};
         
         for (int i = 0; i < m_ReconstructionSettings.m_PyramidLevelCount; ++i)
@@ -300,6 +303,9 @@ namespace MR
             m_ReferenceNormalMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
             m_RaycastVertexMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
             m_RaycastNormalMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
+
+            m_CountourMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
+            m_RaycastCountourMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
         }
         
         TextureDescriptor.m_NumberOfPixelsU = m_ReconstructionSettings.m_VolumeResolution;

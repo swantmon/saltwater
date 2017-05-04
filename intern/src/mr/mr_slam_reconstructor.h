@@ -116,6 +116,9 @@ namespace MR
         std::vector<Gfx::CTexture2DPtr> m_RaycastVertexMapPtr;
         std::vector<Gfx::CTexture2DPtr> m_RaycastNormalMapPtr;
 
+        std::vector<Gfx::CTexture2DPtr> m_CountourMapPtr;
+        std::vector<Gfx::CTexture2DPtr> m_RaycastCountourMapPtr;
+
         Gfx::CTexture3DPtr m_TSDFVolumePtr;
         Gfx::CTexture3DPtr m_ColorVolumePtr;
 
