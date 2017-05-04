@@ -36,5 +36,6 @@ namespace ReconstructionRenderer
     void Render();
     void PauseIntegration(bool _Paused);
     void PauseTracking(bool _Paused);
+    void ChangeCamera(bool _IsTrackingCamera);
 } // namespace ReconstructionRenderer
 } // namespace Gfx

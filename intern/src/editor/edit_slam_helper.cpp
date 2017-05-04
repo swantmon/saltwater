@@ -34,6 +34,7 @@ namespace
         void OnSLAMReconstructionUpdate(Edit::CMessage& _rMessage);
         void OnSLAMReconstructionPauseIntegration(Edit::CMessage& _rMessage);
         void OnSLAMReconstructionPauseTracking(Edit::CMessage& _rMessage);
+        void OnSLAMReconstructionChangeCamera(Edit::CMessage& _rMessage);
     };
 } // namespace
 
@@ -62,6 +63,7 @@ namespace
         Edit::MessageManager::Register(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Update, EDIT_RECEIVE_MESSAGE(&CSLAMHelper::OnSLAMReconstructionUpdate));
         Edit::MessageManager::Register(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Pause_Integration, EDIT_RECEIVE_MESSAGE(&CSLAMHelper::OnSLAMReconstructionPauseIntegration));
         Edit::MessageManager::Register(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Pause_Tracking, EDIT_RECEIVE_MESSAGE(&CSLAMHelper::OnSLAMReconstructionPauseTracking));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Change_Camera, EDIT_RECEIVE_MESSAGE(&CSLAMHelper::OnSLAMReconstructionChangeCamera));
     }
 
     // -----------------------------------------------------------------------------
@@ -115,6 +117,17 @@ namespace
         bool Pause = _rMessage.GetBool();
 
         Gfx::ReconstructionRenderer::PauseTracking(Pause);
+
+        _rMessage.SetResult(1);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMHelper::OnSLAMReconstructionChangeCamera(Edit::CMessage& _rMessage)
+    {
+        bool Pause = _rMessage.GetBool();
+
+        Gfx::ReconstructionRenderer::ChangeCamera(Pause);
 
         _rMessage.SetResult(1);
     }

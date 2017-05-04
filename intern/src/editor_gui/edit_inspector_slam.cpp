@@ -63,6 +63,8 @@ namespace Edit
         m_pPauseTrackingButton->setText(m_IsTrackingPaused ? s_ResumeTrackingText : s_PauseTrackingText);
         
         m_pCaptureColorCB->setChecked(DefaultSettings.m_CaptureColor);
+
+        m_pTrackingCameraCB->setChecked(true);
     }
 
     // -----------------------------------------------------------------------------
@@ -152,6 +154,17 @@ namespace Edit
         NewMessage.Reset();
 
         Edit::MessageManager::SendMessage(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Pause_Tracking, NewMessage);
+    }
+
+    void CInspectorSLAM::changeCamera()
+    {
+        const bool UseTrackingCamera = m_pTrackingCameraCB->checkState() == Qt::CheckState::Checked;
+
+        Edit::CMessage NewMessage;
+        NewMessage.PutBool(UseTrackingCamera);
+        NewMessage.Reset();
+
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Change_Camera, NewMessage);
     }
 
     // -----------------------------------------------------------------------------

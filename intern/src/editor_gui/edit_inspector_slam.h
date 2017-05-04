@@ -21,6 +21,7 @@ namespace Edit
         void reset();
         void pauseIntegration();
         void pauseTracking();
+        void changeCamera();
         void volumeResolutionChanged(int);
         void volumeSizeChanged(int);
 

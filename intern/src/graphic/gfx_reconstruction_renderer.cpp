@@ -71,6 +71,7 @@ namespace
         void Render();
         void PauseIntegration(bool _Paused);
         void PauseTracking(bool _Paused);
+        void ChangeCamera(bool _IsTrackingCamera);
 
         void OnReconstructionUpdate(const MR::CSLAMReconstructor::SReconstructionSettings& _Settings);
 
@@ -540,9 +541,16 @@ namespace
 
     void CGfxReconstructionRenderer::PauseTracking(bool _Paused)
     {
-        m_UseTrackingCamera = !_Paused;
         m_pReconstructor->PauseTracking(_Paused);
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::ChangeCamera(bool _IsTrackingCamera)
+    {
+        m_UseTrackingCamera = _IsTrackingCamera;
+    }
+
 } // namespace
 
 namespace Gfx
@@ -679,6 +687,14 @@ namespace ReconstructionRenderer
     {
         CGfxReconstructionRenderer::GetInstance().PauseTracking(_Paused);
     }
+
+    // -----------------------------------------------------------------------------
+
+    void ChangeCamera(bool _IsTrackingCamera)
+    {
+        CGfxReconstructionRenderer::GetInstance().ChangeCamera(_IsTrackingCamera);
+    }
+
 } // namespace Voxel
 } // namespace Gfx
 

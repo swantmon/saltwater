@@ -130,6 +130,7 @@ namespace Edit
             MR_SLAM_Reconstruction_Update,
             MR_SLAM_Reconstruction_Pause_Integration,
             MR_SLAM_Reconstruction_Pause_Tracking,
+            MR_SLAM_Reconstruction_Change_Camera,
 
             NumberOfMembers,
             Undefined = -1,
