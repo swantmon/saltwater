@@ -75,6 +75,8 @@ namespace MR
         void Raycast();
         void CreateRaycastPyramid();
 
+        void FindContours();
+
         void PerformTracking();
 
         void DetermineSummands(int PyramidLevel, const Base::Float4x4& rIncPoseMatrix);
@@ -108,6 +110,9 @@ namespace MR
         Gfx::CShaderPtr m_DetermineSummandsCSPtr;
         Gfx::CShaderPtr m_ReduceSumCSPtr;
 
+        Gfx::CShaderPtr m_ContoursCSPtr;
+        Gfx::CShaderPtr m_ContourCandidatesCSPtr;
+
         Gfx::CTexture2DPtr m_RawDepthBufferPtr;
         Gfx::CTexture2DPtr m_RawCameraFramePtr;
         std::vector<Gfx::CTexture2DPtr> m_SmoothDepthBufferPtr;
@@ -116,8 +121,8 @@ namespace MR
         std::vector<Gfx::CTexture2DPtr> m_RaycastVertexMapPtr;
         std::vector<Gfx::CTexture2DPtr> m_RaycastNormalMapPtr;
 
-        std::vector<Gfx::CTexture2DPtr> m_CountourMapPtr;
-        std::vector<Gfx::CTexture2DPtr> m_RaycastCountourMapPtr;
+        std::vector<Gfx::CTexture2DPtr> m_ContourMapPtr;
+        std::vector<Gfx::CTexture2DPtr> m_RaycastContourMapPtr;
 
         Gfx::CTexture3DPtr m_TSDFVolumePtr;
         Gfx::CTexture3DPtr m_ColorVolumePtr;

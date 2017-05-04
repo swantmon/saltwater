@@ -186,6 +186,9 @@ namespace MR
         m_ReduceSumCSPtr = 0;
         m_ClearVolumeCSPtr = 0;
 
+        m_ContoursCSPtr = 0;
+        m_ContourCandidatesCSPtr = 0;
+
         m_RawDepthBufferPtr = 0;
         m_RawCameraFramePtr = 0;
 
@@ -263,6 +266,8 @@ namespace MR
         m_DetermineSummandsCSPtr = ShaderManager::CompileCS("kinect_fusion\\cs_determine_summands.glsl", "main", DefineString.c_str());
         m_ReduceSumCSPtr         = ShaderManager::CompileCS("kinect_fusion\\cs_reduce_sum.glsl"        , "main", DefineString.c_str());
         m_ClearVolumeCSPtr       = ShaderManager::CompileCS("kinect_fusion\\cs_clear_volume.glsl"      , "main", DefineString.c_str());
+        m_ContoursCSPtr          = ShaderManager::CompileCS("kinect_fusion\\cs_contours.glsl"          , "main", DefineString.c_str());
+        m_ContourCandidatesCSPtr = ShaderManager::CompileCS("kinect_fusion\\cs_contour_candidates.glsl", "main", DefineString.c_str());
     }
     
     // -----------------------------------------------------------------------------
@@ -275,8 +280,8 @@ namespace MR
         m_RaycastVertexMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
         m_RaycastNormalMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
 
-        m_CountourMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
-        m_RaycastCountourMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
+        m_ContourMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
+        m_RaycastContourMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
 
         STextureDescriptor TextureDescriptor = {};
         
@@ -304,8 +309,10 @@ namespace MR
             m_RaycastVertexMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
             m_RaycastNormalMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
 
-            m_CountourMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
-            m_RaycastCountourMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
+            TextureDescriptor.m_Format = CTextureBase::R32G32B32A32_FLOAT;
+
+            m_ContourMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
+            m_RaycastContourMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
         }
         
         TextureDescriptor.m_NumberOfPixelsU = m_ReconstructionSettings.m_VolumeResolution;
@@ -519,6 +526,8 @@ namespace MR
 
         Raycast();
         CreateRaycastPyramid();
+
+        FindContours();
 
         Performance::EndEvent();
 
@@ -848,6 +857,26 @@ namespace MR
         ContextManager::Barrier();
 
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::FindContours()
+    {
+        for (int PyramidLevel = 0; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++PyramidLevel)
+        {
+            const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
+            const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
+
+            ContextManager::SetShaderCS(m_ContoursCSPtr);
+            
+            ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_SmoothDepthBufferPtr[PyramidLevel]));
+            ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ContourMapPtr[PyramidLevel]));
+            
+            ContextManager::Barrier();
+
+            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+        }
     }
 
     // -----------------------------------------------------------------------------

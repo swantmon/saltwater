@@ -137,7 +137,7 @@ void main()
 
     float Row[7];
 
-    if (CorresponenceFound)
+    if (CorresponenceFound && x > 1 && y > 1 && x < ImageSize.x - 1 && y < ImageSize.y - 1)
     {
         vec3 Cross = cross(ReferenceVertex, RaycastNormal);
 
