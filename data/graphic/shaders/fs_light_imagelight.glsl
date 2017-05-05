@@ -50,7 +50,7 @@ layout(location = 0) out vec4 out_Output;
 vec3 EvaluateDiffuseIBL(in SSurfaceData _Data, in vec3 _WSViewDirection, in float _PreF, in float _NdotV)
 {
     vec3 DiffuseDominantN = GetDiffuseDominantDir(_Data.m_WSNormal, _WSViewDirection, _NdotV, _Data.m_Roughness);
-    vec3 DiffuseIBL       = textureLod(ps_DiffuseCubemap, -DiffuseDominantN, 0).rgb;
+    vec3 DiffuseIBL       = textureLod(ps_DiffuseCubemap, DiffuseDominantN, 0).rgb;
     
     DiffuseIBL = mix(DiffuseIBL * 0.3f, DiffuseIBL, _Data.m_AmbientOcclusion);
 
@@ -74,7 +74,7 @@ vec3 EvaluateSpecularIBL(in SSurfaceData _Data, in vec3 _WSReflectVector, in vec
     // Sample specular cubemap
     // -----------------------------------------------------------------------------
     float LOD         = GetMipLevelByRoughness(_Data.m_Roughness, ps_NumberOfMiplevelsSpecularIBL);
-    vec3  SpecularIBL = textureLod(ps_SpecularCubemap, -SpecularDominantR, LOD).rgb;
+    vec3  SpecularIBL = textureLod(ps_SpecularCubemap, SpecularDominantR, LOD).rgb;
     
     // -----------------------------------------------------------------------------
     // Output

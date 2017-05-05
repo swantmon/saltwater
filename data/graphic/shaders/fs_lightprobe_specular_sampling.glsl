@@ -103,7 +103,7 @@ vec3 GetImportanceSampleSpecular(in vec3 _Reflection, in float _Roughness)
 // -----------------------------------------------------------------------------
 void main(void)
 {
-    vec3 Reflection = normalize(in_Normal);
+    vec3 Reflection = normalize(-in_Normal);
     
     vec3 SpecularSample = GetImportanceSampleSpecular(Reflection, ps_LinearRoughness);
     
