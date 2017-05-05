@@ -76,7 +76,7 @@ namespace MR
         void CreateRaycastPyramid();
 
         void InpaintDepth();
-        void FindContours();
+        void FindContourGenerators();
 
         void PerformTracking();
 
@@ -111,7 +111,7 @@ namespace MR
         Gfx::CShaderPtr m_DetermineSummandsCSPtr;
         Gfx::CShaderPtr m_ReduceSumCSPtr;
         Gfx::CShaderPtr m_InpaintDepthCSPtr;
-        Gfx::CShaderPtr m_ContoursCSPtr;
+        Gfx::CShaderPtr m_ContourGeneratorsCSPtr;
         Gfx::CShaderPtr m_ContourCandidatesCSPtr;
 
         Gfx::CTexture2DPtr m_RawDepthBufferPtr;
@@ -123,7 +123,7 @@ namespace MR
         std::vector<Gfx::CTexture2DPtr> m_RaycastNormalMapPtr;
 
         std::vector<Gfx::CTexture2DPtr> m_InpaintedDepthBufferPtr;
-        std::vector<Gfx::CTexture2DPtr> m_ContourMapPtr;
+        std::vector<Gfx::CTexture2DPtr> m_ContourGeneratorMapPtr;
         std::vector<Gfx::CTexture2DPtr> m_RaycastContourMapPtr;
 
         Gfx::CTexture3DPtr m_TSDFVolumePtr;

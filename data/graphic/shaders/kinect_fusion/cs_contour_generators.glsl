@@ -1,6 +1,6 @@
 
-#ifndef __INCLUDE_CS_CONTOURS_GLSL__
-#define __INCLUDE_CS_CONTOURS_GLSL__
+#ifndef __INCLUDE_CS_CONTOUR_GENERATORS_GLSL__
+#define __INCLUDE_CS_CONTOUR_GENERATORS_GLSL__
 
 // -----------------------------------------------------------------------------
 // Defines
@@ -11,7 +11,7 @@
 // -----------------------------------------------------------------------------
 
 layout (binding = 0, r16ui) readonly uniform uimage2D cs_DepthBuffer;
-layout (binding = 1, rgba32f) writeonly uniform image2D cs_Contours;
+layout (binding = 1, rgba32f) writeonly uniform image2D cs_ContourGenerators;
 
 // -------------------------------------------------------------------------------------
 // Functions
@@ -25,7 +25,7 @@ void main()
 
     const ivec2 ImageSize = imageSize(cs_DepthBuffer);
 
-    if (x > 0 && x < ImageSize.x - 1 && y > 0 && y < ImageSize.y - 1)
+    if (x > 1 && x < ImageSize.x - 1 && y > 1 && y < ImageSize.y - 1)
     {
         ivec2 Coords[8];
 
@@ -46,12 +46,12 @@ void main()
 
             if (Center - Sample > 0.05f * 1000.0f) // 0.05 Meters
             {
-                imageStore(cs_Contours, ivec2(x, y), vec4(1.0f));
+                imageStore(cs_ContourGenerators, ivec2(x, y), vec4(1.0f));
                 return;
             }
         }
     }
-    imageStore(cs_Contours, ivec2(x, y), vec4(0.0f));
+    imageStore(cs_ContourGenerators, ivec2(x, y), vec4(0.0f));
 }
 
-#endif // __INCLUDE_CS_CONTOURS_GLSL__
+#endif // __INCLUDE_CS_CONTOUR_GENERATORS_GLSL__
