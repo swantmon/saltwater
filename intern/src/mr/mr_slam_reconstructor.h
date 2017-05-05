@@ -20,6 +20,8 @@
 
 namespace MR
 {
+    typedef std::vector<Gfx::CTexture2DPtr> CTextureVector;
+
     class IRGBDCameraControl;
 
     class CSLAMReconstructor : private Base::CUncopyable
@@ -75,7 +77,7 @@ namespace MR
         void Raycast();
         void CreateRaycastPyramid();
 
-        void InpaintDepth();
+        void InpaintDepth(CTextureVector& rDepthBuffers, CTextureVector& rInpaintedDepthBuffers);
         void FindContourGenerators();
 
         void PerformTracking();
@@ -116,15 +118,17 @@ namespace MR
 
         Gfx::CTexture2DPtr m_RawDepthBufferPtr;
         Gfx::CTexture2DPtr m_RawCameraFramePtr;
-        std::vector<Gfx::CTexture2DPtr> m_SmoothDepthBufferPtr;
-        std::vector<Gfx::CTexture2DPtr> m_ReferenceVertexMapPtr;
-        std::vector<Gfx::CTexture2DPtr> m_ReferenceNormalMapPtr;
-        std::vector<Gfx::CTexture2DPtr> m_RaycastVertexMapPtr;
-        std::vector<Gfx::CTexture2DPtr> m_RaycastNormalMapPtr;
+        CTextureVector m_SmoothDepthBufferPtr;
+        CTextureVector m_ReferenceVertexMapPtr;
+        CTextureVector m_ReferenceNormalMapPtr;
+        CTextureVector m_RaycastVertexMapPtr;
+        CTextureVector m_RaycastNormalMapPtr;
 
-        std::vector<Gfx::CTexture2DPtr> m_InpaintedDepthBufferPtr;
-        std::vector<Gfx::CTexture2DPtr> m_ContourGeneratorMapPtr;
-        std::vector<Gfx::CTexture2DPtr> m_RaycastContourMapPtr;
+        CTextureVector m_InpaintedReferenceDepthBufferPtr;
+        CTextureVector m_InpaintedRaycastDepthBufferPtr;
+
+        CTextureVector m_ContourGeneratorMapPtr;
+        CTextureVector m_RaycastContourMapPtr;
 
         Gfx::CTexture3DPtr m_TSDFVolumePtr;
         Gfx::CTexture3DPtr m_ColorVolumePtr;
