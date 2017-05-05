@@ -477,9 +477,7 @@ namespace MR
         }
 
         Performance::BeginEvent("Kinect Fusion");
-
-        Performance::BeginEvent("Data Input");
-
+        
         Base::AABB2UInt TargetRect;
         TargetRect = Base::AABB2UInt(Base::UInt2(0, 0), Base::UInt2(m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight()));
         TextureManager::CopyToTexture2D(m_RawDepthBufferPtr, TargetRect, m_pRGBDCameraControl->GetDepthWidth(), pDepth);
@@ -491,12 +489,25 @@ namespace MR
         }
 
         //////////////////////////////////////////////////////////////////////////////////////
+        // Create contours data
+        //////////////////////////////////////////////////////////////////////////////////////
+
+        Performance::BeginEvent("Depth inpainting and contour generation");
+
+        InpaintDepth();
+        FindContourGenerators();
+
+        Performance::EndEvent();
+
+        //////////////////////////////////////////////////////////////////////////////////////
         // Create reference data
         //////////////////////////////////////////////////////////////////////////////////////
 
+        Performance::BeginEvent("Create reference pyramid");
+
         CreateReferencePyramid();
 
-        Performance::EndEvent();
+        Performance::EndEvent();    
 
         //////////////////////////////////////////////////////////////////////////////////////
         // Tracking
@@ -529,10 +540,7 @@ namespace MR
         }
 
         Raycast();
-        CreateRaycastPyramid();
-
-        InpaintDepth();
-        FindContourGenerators();
+        CreateRaycastPyramid();        
 
         Performance::EndEvent();
 
