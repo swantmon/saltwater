@@ -35,6 +35,10 @@ layout(std430, binding = 0) readonly buffer BB0
 
 //layout(binding = 0) uniform sampler2DShadow ps_ShadowTexture;
 layout(binding = 0) uniform sampler2D PSTextureDiffuse;
+layout(binding = 1) uniform sampler2D PSTextureNormal;
+layout(binding = 2) uniform sampler2D PSTextureRoughness;
+layout(binding = 3) uniform sampler2D PSTextureMetallic;
+layout(binding = 4) uniform sampler2D PSTextureAO;
 
 // -----------------------------------------------------------------------------
 // Input to fragment from VS
@@ -42,6 +46,7 @@ layout(binding = 0) uniform sampler2D PSTextureDiffuse;
 layout(location = 0) in vec3 in_Position;
 layout(location = 1) in vec3 in_Normal;
 layout(location = 2) in vec2 in_UV;
+layout(location = 3) in mat3 in_WSNormalMatrix;
 
 // -----------------------------------------------------------------------------
 // Output to fragment
@@ -53,20 +58,28 @@ layout(location = 0) out vec4 out_Output;
 // -----------------------------------------------------------------------------
 void main(void)
 {    
-    vec2 UV    = in_UV * ps_TilingOffset.xy + ps_TilingOffset.zw;
-    vec3 Color = ps_Color.xyz;
+    vec2  UV        = in_UV * ps_TilingOffset.xy + ps_TilingOffset.zw;
+    vec3  Color     = ps_Color.xyz;
+    vec3  WSNormal  = in_Normal;
+    float Roughness = ps_Roughness;
+    float MetalMask = ps_MetalMask;
+    float AO        = 1.0f;
 
 #ifdef USE_TEX_DIFFUSE
     Color *= texture(PSTextureDiffuse, UV).rgb;
 #endif // USE_TEX_DIFFUSE
 
-    //out_Output = vec4(Color * 10000.0f, 0.0f); return;
-    //out_Output = vec4(Color * ps_LightColor.xyz, 0.0f); return;
-    out_Output = vec4(Color * ps_LightColor.xyz * clamp(dot(in_Normal, ps_LightDirection.xyz), 0.0f, 1.0f), 0.0f); return;
+#ifdef USE_TEX_NORMAL
+    WSNormal = in_WSNormalMatrix * (texture(PSTextureNormal, UV).rgb * 2.0f - 1.0f);
+#endif // USE_TEX_NORMAL
 
+#ifdef USE_TEX_ROUGHNESS
+    Roughness *= texture(PSTextureRoughness, UV).r;
+#endif // USE_TEX_ROUGHNESS
 
-
-
+#ifdef USE_TEX_METALLIC
+    MetalMask *= texture(PSTextureMetallic, UV).r;
+#endif // USE_TEX_METALLIC
 
     // -----------------------------------------------------------------------------
     // Surface data
@@ -75,19 +88,12 @@ void main(void)
 
     Data.m_VSDepth          = 1.0f;
     Data.m_WSPosition       = in_Position;
-    Data.m_WSNormal         = -in_Normal;
-    Data.m_DiffuseAlbedo    = Color;
-    Data.m_SpecularAlbedo   = Color;
-    Data.m_Roughness        = ps_Roughness;
-    Data.m_AmbientOcclusion = 1.0f;
+    Data.m_WSNormal         = -WSNormal;
+    Data.m_DiffuseAlbedo    = Color * (1.0f - MetalMask);
+    Data.m_SpecularAlbedo   = Color * MetalMask + 0.16f * ps_Reflectance * ps_Reflectance * (1.0f - MetalMask);
+    Data.m_Roughness        = clamp(Roughness, 0.0f, 1.0f);
+    Data.m_AmbientOcclusion = AO;
 
-
-
-    // -----------------------------------------------------------------------------
-    // Exposure data
-    // -----------------------------------------------------------------------------
-    float AverageExposure = ps_ExposureHistory[ps_ExposureHistoryIndex];
-    
     // -----------------------------------------------------------------------------
     // Compute lighting for sun light
     // -----------------------------------------------------------------------------
@@ -116,9 +122,7 @@ void main(void)
     // -----------------------------------------------------------------------------
     vec3 Luminance = BRDF(L, WSViewDirection, Data.m_WSNormal, Data) * clamp(dot(Data.m_WSNormal, L), 0.0f, 1.0f) * ps_LightColor.xyz * Data.m_AmbientOcclusion * Shadow;
 
-//    AverageExposure = 0.0f;
-
-    out_Output = vec4(Luminance * 10000, 0.0f);
+    out_Output = vec4(Luminance, 0.0f);
 }
 
 #endif // __INCLUDE_FS_X1_GLSL__

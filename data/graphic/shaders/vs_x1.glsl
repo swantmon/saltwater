@@ -49,7 +49,7 @@ void main(void)
     
     mat3 WSNormalMatrix = mat3(WSTangent.xyz, WSBitangent.xyz, WSNormal.xyz);
     
-    out_Position       = WSPosition.xyz;
+    out_Position       = (m_ViewMatrix * WSPosition).xyz;
     out_Normal         = WSNormal.xyz;
     out_UV             = in_UV;
     out_WSNormalMatrix = WSNormalMatrix;

@@ -274,7 +274,7 @@ namespace
         m_CubemapGeometryVSPtr = ShaderManager::CompileVS("vs_x1.glsl", "main");
         m_CubemapGSPtr         = ShaderManager::CompileGS("gs_x1.glsl", "main");
         m_CubemapPSPtr         = ShaderManager::CompilePS("fs_x1.glsl", "main");
-        m_CubemapTexturePSPtr  = ShaderManager::CompilePS("fs_x1.glsl", "main", "#define USE_TEX_DIFFUSE");
+        m_CubemapTexturePSPtr  = ShaderManager::CompilePS("fs_x1.glsl", "main", "#define USE_TEX_DIFFUSE\n #define USE_TEX_NORMAL\n #define USE_TEX_ROUGHNESS\n #define USE_TEX_METALLIC\n");
 
         // -----------------------------------------------------------------------------
 
