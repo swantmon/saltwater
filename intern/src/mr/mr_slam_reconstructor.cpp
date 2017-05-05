@@ -185,7 +185,8 @@ namespace MR
         m_DetermineSummandsCSPtr = 0;
         m_ReduceSumCSPtr = 0;
         m_ClearVolumeCSPtr = 0;
-
+        m_InpaintDepthCSPtr = 0;
+        m_InpaintedDepthBufferPtr = 0;
         m_ContoursCSPtr = 0;
         m_ContourCandidatesCSPtr = 0;
 
@@ -266,6 +267,7 @@ namespace MR
         m_DetermineSummandsCSPtr = ShaderManager::CompileCS("kinect_fusion\\cs_determine_summands.glsl", "main", DefineString.c_str());
         m_ReduceSumCSPtr         = ShaderManager::CompileCS("kinect_fusion\\cs_reduce_sum.glsl"        , "main", DefineString.c_str());
         m_ClearVolumeCSPtr       = ShaderManager::CompileCS("kinect_fusion\\cs_clear_volume.glsl"      , "main", DefineString.c_str());
+        m_InpaintDepthCSPtr      = ShaderManager::CompileCS("kinect_fusion\\cs_inpaint_depth.glsl"     , "main", DefineString.c_str());
         m_ContoursCSPtr          = ShaderManager::CompileCS("kinect_fusion\\cs_contours.glsl"          , "main", DefineString.c_str());
         m_ContourCandidatesCSPtr = ShaderManager::CompileCS("kinect_fusion\\cs_contour_candidates.glsl", "main", DefineString.c_str());
     }
@@ -344,6 +346,7 @@ namespace MR
         TextureDescriptor.m_Format = CTextureBase::R16_UINT;
 
         m_RawDepthBufferPtr = TextureManager::CreateTexture2D(TextureDescriptor);
+        m_InpaintedDepthBufferPtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
         if (m_ReconstructionSettings.m_CaptureColor)
         {
@@ -521,12 +524,13 @@ namespace MR
 
         if (!m_IsIntegrationPaused)
         {
-            Integrate();            
+            Integrate();
         }
 
         Raycast();
         CreateRaycastPyramid();
 
+        InpaintDepth();
         FindContours();
 
         Performance::EndEvent();
@@ -854,6 +858,23 @@ namespace MR
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
         
+        ContextManager::Barrier();
+
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::InpaintDepth()
+    {
+        const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth(), g_TileSize2D);
+        const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
+
+        ContextManager::SetShaderCS(m_InpaintDepthCSPtr);
+        
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
+        ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_InpaintedDepthBufferPtr));
+
         ContextManager::Barrier();
 
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);

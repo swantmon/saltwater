@@ -29,7 +29,7 @@ void main()
 
     if (x > 0 && x < ImageSize.x - 1 && y > 0 && y < ImageSize.y - 1)
     {
-        imageLoad
+        
     }
 }
 
