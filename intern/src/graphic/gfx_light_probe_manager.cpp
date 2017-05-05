@@ -860,7 +860,6 @@ namespace
             SViewBuffer ViewBuffer;
 
             ViewBuffer.m_View  = Base::Float4x4::s_Identity;
-            // ViewBuffer.m_View *= Base::Float4x4().SetScale(-1.0f, -1.0f, -1.0f);
             ViewBuffer.m_View *= Base::Float4x4().SetTranslation(0.0f, 0.0f, -10.0f);
 
             BufferManager::UploadConstantBufferData(m_VSBufferSetPtr->GetBuffer(0), &ViewBuffer);
@@ -886,7 +885,14 @@ namespace
                     break;
                 }
 
-                BufferManager::UploadConstantBufferData(m_PSBufferSetPtr->GetBuffer(0), &SurfacePtr->GetMaterial()->GetMaterialAttributes());
+                CMaterialPtr MaterialPtr = pGraphicModelActorFacet->GetMaterial(IndexOfSurface);
+
+                if (MaterialPtr == 0)
+                {
+                    MaterialPtr = SurfacePtr->GetMaterial();
+                }
+
+                BufferManager::UploadConstantBufferData(m_PSBufferSetPtr->GetBuffer(0), &MaterialPtr->GetMaterialAttributes());
 
                 if (SurfacePtr->GetMaterial()->GetTextureSetPS()->GetTexture(0) != 0)
                 {
@@ -897,11 +903,11 @@ namespace
                     ContextManager::SetShaderPS(m_CubemapPSPtr);
                 }
 
-                for (unsigned int IndexOfTexture = 0; IndexOfTexture < SurfacePtr->GetMaterial()->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
+                for (unsigned int IndexOfTexture = 0; IndexOfTexture < MaterialPtr->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
                 {
-                    ContextManager::SetSampler(IndexOfTexture, SurfacePtr->GetMaterial()->GetSamplerSetPS()->GetSampler(IndexOfTexture));
+                    ContextManager::SetSampler(IndexOfTexture, MaterialPtr->GetSamplerSetPS()->GetSampler(IndexOfTexture));
 
-                    ContextManager::SetTexture(IndexOfTexture, SurfacePtr->GetMaterial()->GetTextureSetPS()->GetTexture(IndexOfTexture));
+                    ContextManager::SetTexture(IndexOfTexture, MaterialPtr->GetTextureSetPS()->GetTexture(IndexOfTexture));
                 }
 
                 // -----------------------------------------------------------------------------
@@ -921,7 +927,7 @@ namespace
 
                 ContextManager::ResetVertexBufferSet();
 
-                for (unsigned int IndexOfTexture = 0; IndexOfTexture < SurfacePtr->GetMaterial()->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
+                for (unsigned int IndexOfTexture = 0; IndexOfTexture < MaterialPtr->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
                 {
                     ContextManager::ResetSampler(IndexOfTexture);
 
