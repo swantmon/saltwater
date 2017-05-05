@@ -108,6 +108,7 @@ namespace
             struct SRenderContext
             {
                 CInputLayoutPtr m_InputLayoutPtr;
+                CTexture2DPtr   m_Texture2DPtr;
                 CTextureSetPtr  m_TextureSetPtr;
                 CTargetSetPtr   m_TargetSetPtr;
                 CViewPortSetPtr m_ViewPortSetPtr;
@@ -203,9 +204,10 @@ namespace
     CGfxLightProbeManager::CInternLightProbeFacet::~CInternLightProbeFacet()
     {
         m_SkyboxFromGeometry.m_InputLayoutPtr = 0;
-        m_SkyboxFromGeometry.m_TargetSetPtr = 0;
+        m_SkyboxFromGeometry.m_TargetSetPtr   = 0;
         m_SkyboxFromGeometry.m_ViewPortSetPtr = 0;
-        m_SkyboxFromGeometry.m_TextureSetPtr = 0;
+        m_SkyboxFromGeometry.m_TextureSetPtr  = 0;
+        m_SkyboxFromGeometry.m_Texture2DPtr   = 0;
 
         m_InputCubemapSetPtr     = 0;
         m_DiffuseHDRTargetSetPtr = 0;
@@ -315,7 +317,7 @@ namespace
         
         Base::Float3 EyePosition = Base::Float3(0.0f);
         Base::Float3 UpDirection;
-        Base::Float3 LookDirection;
+        Base::Float3 TargetPosition;
         
         float lookAt =  1.5f;
         
@@ -325,45 +327,45 @@ namespace
         
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition + Base::Float3(-lookAt, 0.0f, 0.0f);
-        UpDirection   = Base::Float3(0.0f, -1.0f, 0.0f);
+        TargetPosition = EyePosition + Base::Float3(lookAt, 0.0f, 0.0f);
+        UpDirection    = Base::Float3(0.0f, -1.0f, 0.0f);
         
-        DefaultGSValues.m_CubeViewMatrix[0].LookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition + Base::Float3(lookAt, 0.0f, 0.0f);
-        UpDirection   = Base::Float3(0.0f, -1.0f, 0.0f);
-        
-        DefaultGSValues.m_CubeViewMatrix[1].LookAt(EyePosition, LookDirection, UpDirection);
+        DefaultGSValues.m_CubeViewMatrix[0].LookAt(EyePosition, TargetPosition, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition + Base::Float3(0.0f, lookAt, 0.0f);
-        UpDirection = Base::Float3(0.0f, 0.0f, -1.0f);
+        TargetPosition = EyePosition + Base::Float3(-lookAt, 0.0f, 0.0f);
+        UpDirection    = Base::Float3(0.0f, -1.0f, 0.0f);
         
-        DefaultGSValues.m_CubeViewMatrix[3].LookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition + Base::Float3(0.0f, -lookAt, 0.0f);
-        UpDirection = Base::Float3(0.0f, 0.0f, 1.0f);
-        
-        DefaultGSValues.m_CubeViewMatrix[2].LookAt(EyePosition, LookDirection, UpDirection);
+        DefaultGSValues.m_CubeViewMatrix[1].LookAt(EyePosition, TargetPosition, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition + Base::Float3(0.0f, 0.0f, -lookAt);
-        UpDirection   = Base::Float3(0.0f, -1.0f, 0.0f);
+        TargetPosition = EyePosition + Base::Float3(0.0f, lookAt, 0.0f);
+        UpDirection    = Base::Float3(0.0f, 0.0f, -1.0f);
         
-        DefaultGSValues.m_CubeViewMatrix[4].LookAt(EyePosition, LookDirection, UpDirection);
+        DefaultGSValues.m_CubeViewMatrix[2].LookAt(EyePosition, TargetPosition, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition + Base::Float3(0.0f, 0.0f, lookAt);
-        UpDirection   = Base::Float3(0.0f, -1.0f, 0.0f);
+        TargetPosition = EyePosition + Base::Float3(0.0f, -lookAt, 0.0f);
+        UpDirection    = Base::Float3(0.0f, 0.0f, 1.0f);
         
-        DefaultGSValues.m_CubeViewMatrix[5].LookAt(EyePosition, LookDirection, UpDirection);
+        DefaultGSValues.m_CubeViewMatrix[3].LookAt(EyePosition, TargetPosition, UpDirection);
+        
+        // -----------------------------------------------------------------------------
+        
+        TargetPosition = EyePosition + Base::Float3(0.0f, 0.0f, lookAt);
+        UpDirection    = Base::Float3(0.0f, -1.0f, 0.0f);
+        
+        DefaultGSValues.m_CubeViewMatrix[4].LookAt(EyePosition, TargetPosition, UpDirection);
+        
+        // -----------------------------------------------------------------------------
+        
+        TargetPosition = EyePosition + Base::Float3(0.0f, 0.0f, -lookAt);
+        UpDirection    = Base::Float3(0.0f, -1.0f, 0.0f);
+        
+        DefaultGSValues.m_CubeViewMatrix[5].LookAt(EyePosition, TargetPosition, UpDirection);
         
         // -----------------------------------------------------------------------------
         
@@ -626,11 +628,11 @@ namespace
         TextureDescriptor.m_pPixels          = 0;
         TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
 
-        CTexture2DPtr SkyCubeTexturePtr = TextureManager::CreateCubeTexture(TextureDescriptor);
+        rGraphicLightProbeFacet.m_SkyboxFromGeometry.m_Texture2DPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
-        rGraphicLightProbeFacet.m_SkyboxFromGeometry.m_TextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(SkyCubeTexturePtr));
+        rGraphicLightProbeFacet.m_SkyboxFromGeometry.m_TextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(rGraphicLightProbeFacet.m_SkyboxFromGeometry.m_Texture2DPtr));
 
-        CTargetSetPtr SkyCubeTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(SkyCubeTexturePtr));
+        CTargetSetPtr SkyCubeTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(rGraphicLightProbeFacet.m_SkyboxFromGeometry.m_Texture2DPtr));
 
         ViewPortDesc.m_TopLeftX = 0.0f;
         ViewPortDesc.m_TopLeftY = 0.0f;
@@ -858,7 +860,7 @@ namespace
             SViewBuffer ViewBuffer;
 
             ViewBuffer.m_View  = Base::Float4x4::s_Identity;
-            ViewBuffer.m_View *= Base::Float4x4().SetScale(-1.0f, -1.0f, -1.0f);
+            // ViewBuffer.m_View *= Base::Float4x4().SetScale(-1.0f, -1.0f, -1.0f);
             ViewBuffer.m_View *= Base::Float4x4().SetTranslation(0.0f, 0.0f, -10.0f);
 
             BufferManager::UploadConstantBufferData(m_VSBufferSetPtr->GetBuffer(0), &ViewBuffer);
@@ -953,6 +955,8 @@ namespace
         ContextManager::ResetTopology();
 
         // TODO: this has to be the same texture
+        TextureManager::UpdateMipmap(_rInterLightProbeFacet.m_SkyboxFromGeometry.m_Texture2DPtr);
+
         _rInterLightProbeFacet.m_InputCubemapSetPtr = _rInterLightProbeFacet.m_SkyboxFromGeometry.m_TextureSetPtr;
     }
 
