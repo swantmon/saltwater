@@ -123,7 +123,7 @@ vec3 GetImportanceSampleDiffuse(in vec3 _NormalReflection)
 // -----------------------------------------------------------------------------
 void main(void)
 {
-    vec3 Reflection = normalize(-in_Normal);
+    vec3 Reflection = normalize(in_Normal);
     
     vec3 DiffuseSample = GetImportanceSampleDiffuse(Reflection);
     

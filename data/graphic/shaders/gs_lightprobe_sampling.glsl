@@ -53,7 +53,7 @@ void main()
 
         for( int IndexOfVertex = 0; IndexOfVertex < 3; IndexOfVertex++ )
         {
-            out_Normal   = -in_Normal[IndexOfVertex];
+            out_Normal   = in_Normal[IndexOfVertex];
             out_TexCoord = in_TexCoord[IndexOfVertex];
             gl_Position  = m_CubeProjectionMatrix * m_CubeViewMatrix[FaceIndex] * gl_in[IndexOfVertex].gl_Position;
 
