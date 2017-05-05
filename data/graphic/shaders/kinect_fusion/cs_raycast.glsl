@@ -13,9 +13,10 @@
 // Input from engine
 // -----------------------------------------------------------------------------
 
-layout (binding = 0) uniform sampler3D cs_Volume;
-layout (binding = 1, MAP_TEXTURE_FORMAT) writeonly uniform image2D cs_Vertex;
-layout (binding = 2, MAP_TEXTURE_FORMAT) writeonly uniform image2D cs_Normal;
+layout(binding = 0) uniform sampler3D cs_Volume;
+layout(binding = 1, MAP_TEXTURE_FORMAT) writeonly uniform image2D cs_Vertex;
+layout(binding = 2, MAP_TEXTURE_FORMAT) writeonly uniform image2D cs_Normal;
+layout(binding = 3, r16ui) writeonly uniform uimage2D cs_Depth;
 
 // -------------------------------------------------------------------------------------
 // Functions
@@ -50,6 +51,10 @@ void main()
 
     imageStore(cs_Vertex, VertexMapPosition, vec4(Vertex, 1.0f));
     imageStore(cs_Normal, VertexMapPosition, vec4(Normal, 1.0f));
+
+    const uint Depth = uint(distance(Vertex, CameraPosition) * 1000.0f);
+
+    imageStore(cs_Depth, VertexMapPosition, uvec4((Depth < 65535) ? Depth : 0));
 }
 
 #endif // __INCLUDE_CS_KINECT_INTEGRATE_VOLUME_GLSL__

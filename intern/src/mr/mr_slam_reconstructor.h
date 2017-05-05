@@ -124,6 +124,8 @@ namespace MR
         CTextureVector m_RaycastVertexMapPtr;
         CTextureVector m_RaycastNormalMapPtr;
 
+        CTextureVector m_RaycastDepthBufferPtr;
+
         CTextureVector m_InpaintedReferenceDepthBufferPtr;
         CTextureVector m_InpaintedRaycastDepthBufferPtr;
 

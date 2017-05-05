@@ -202,6 +202,7 @@ namespace MR
             m_RaycastNormalMapPtr[i] = 0;
             m_InpaintedReferenceDepthBufferPtr[i] = 0;
             m_InpaintedRaycastDepthBufferPtr[i] = 0;
+            m_RaycastDepthBufferPtr[i] = 0;
         }
 
         m_TSDFVolumePtr = 0;
@@ -286,7 +287,8 @@ namespace MR
         m_InpaintedReferenceDepthBufferPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
         m_InpaintedRaycastDepthBufferPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
         m_ContourGeneratorMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
-        m_RaycastContourMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);        
+        m_RaycastContourMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
+        m_RaycastDepthBufferPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
 
         STextureDescriptor TextureDescriptor = {};
         
@@ -307,6 +309,7 @@ namespace MR
 
             m_SmoothDepthBufferPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
             m_InpaintedReferenceDepthBufferPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
+            m_RaycastDepthBufferPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
 
             TextureDescriptor.m_Format = g_UseHighPrecisionMaps ? CTextureBase::R32G32B32A32_FLOAT : CTextureBase::R16G16B16A16_FLOAT;
 
@@ -866,6 +869,7 @@ namespace MR
 
         ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RaycastVertexMapPtr[0]));
         ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(m_RaycastNormalMapPtr[0]));
+        ContextManager::SetImageTexture(3, static_cast<CTextureBasePtr>(m_RaycastDepthBufferPtr[0]));
 
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
