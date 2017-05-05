@@ -43,6 +43,9 @@
 #include "graphic/gfx_mesh.h"
 #include "graphic/gfx_mesh_actor_facet.h"
 #include "graphic/gfx_state_manager.h"
+#include "graphic/gfx_histogram_renderer.h"
+#include "data/data_sun_facet.h"
+#include "graphic/gfx_sun_facet.h"
 
 
 
@@ -99,6 +102,15 @@ namespace
         {
             float m_LinearRoughness;
             float m_NumberOfMiplevels;
+        };
+
+        struct SSunLightProperties
+        {
+            Base::Float4x4 m_LightViewProjection;
+            Base::Float4   m_LightDirection;
+            Base::Float4   m_LightColor;
+            float          m_SunAngularRadius;
+            unsigned int   m_ExposureHistoryIndex;
         };
 
         class CInternLightProbeFacet : public CLightProbeFacet
@@ -414,6 +426,18 @@ namespace
         ConstanteBufferDesc.m_pClassKey     = 0;
 
         CBufferPtr SurfaceMaterialBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSunLightProperties);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        CBufferPtr SunLightPSBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
         
         // -----------------------------------------------------------------------------
         
@@ -427,7 +451,7 @@ namespace
 
         m_VSBufferSetPtr = BufferManager::CreateBufferSet(ViewBuffer, VSBuffer);
         m_GSBufferSetPtr = BufferManager::CreateBufferSet(GSBuffer);
-        m_PSBufferSetPtr = BufferManager::CreateBufferSet(SurfaceMaterialBufferPtr);
+        m_PSBufferSetPtr = BufferManager::CreateBufferSet(SurfaceMaterialBufferPtr, SunLightPSBufferPtr);
 
         // -----------------------------------------------------------------------------
         // Models
@@ -612,10 +636,9 @@ namespace
 
         // -----------------------------------------------------------------------------
         // Create stuff for local probe
-        // TODO: make variable
         // -----------------------------------------------------------------------------
-        TextureDescriptor.m_NumberOfPixelsU  = 512;
-        TextureDescriptor.m_NumberOfPixelsV  = 512;
+        TextureDescriptor.m_NumberOfPixelsU  = _SpecularFaceSize;
+        TextureDescriptor.m_NumberOfPixelsV  = _SpecularFaceSize;
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
         TextureDescriptor.m_NumberOfTextures = 6;
@@ -638,22 +661,21 @@ namespace
         ViewPortDesc.m_TopLeftY = 0.0f;
         ViewPortDesc.m_MinDepth = 0.0f;
         ViewPortDesc.m_MaxDepth = 1.0f;
-        ViewPortDesc.m_Width    = 512;
-        ViewPortDesc.m_Height   = 512;
+        ViewPortDesc.m_Width    = _SpecularFaceSize;
+        ViewPortDesc.m_Height   = _SpecularFaceSize;
 
         CViewPortPtr SkyCubeViewPortPtr = ViewManager::CreateViewPort(ViewPortDesc);
 
         CViewPortSetPtr SkyCubeViewPortSetPtr = ViewManager::CreateViewPortSet(SkyCubeViewPortPtr);
 
-        rGraphicLightProbeFacet.m_SkyboxFromGeometry.m_TargetSetPtr = SkyCubeTargetSetPtr;
+        rGraphicLightProbeFacet.m_SkyboxFromGeometry.m_TargetSetPtr   = SkyCubeTargetSetPtr;
         rGraphicLightProbeFacet.m_SkyboxFromGeometry.m_ViewPortSetPtr = SkyCubeViewPortSetPtr;
 
-        
         // -----------------------------------------------------------------------------
         // Create rest of the global probe that is available at any type
         // -> specular and diffuse cubemap
         // -----------------------------------------------------------------------------
-        unsigned int SizeOfSpecularCubemap =_SpecularFaceSize;
+        unsigned int SizeOfSpecularCubemap = _SpecularFaceSize;
         unsigned int SizeOfDiffuseCubemap  = _DiffuseFaceSize;
 
         TextureDescriptor.m_NumberOfPixelsU  = SizeOfSpecularCubemap;
@@ -804,9 +826,6 @@ namespace
         Dt::Map::CEntityIterator CurrentEntity;
         Dt::Map::CEntityIterator EndOfEntities;
 
-        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Actor);
-        EndOfEntities = Dt::Map::EntitiesEnd();
-
         // -----------------------------------------------------------------------------
         // Clear target set
         // -----------------------------------------------------------------------------
@@ -831,10 +850,67 @@ namespace
 
         ContextManager::SetShaderPS(m_CubemapPSPtr);
 
-        ContextManager::SetConstantBuffer(0, m_VSBufferSetPtr->GetBuffer(0));
-        ContextManager::SetConstantBuffer(1, m_VSBufferSetPtr->GetBuffer(1));
-        ContextManager::SetConstantBuffer(2, m_GSBufferSetPtr->GetBuffer(0));
-        ContextManager::SetConstantBuffer(3, m_PSBufferSetPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_VSBufferSetPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(2, m_VSBufferSetPtr->GetBuffer(1));
+        ContextManager::SetConstantBuffer(3, m_GSBufferSetPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(4, m_PSBufferSetPtr->GetBuffer(0));
+        ContextManager::SetConstantBuffer(5, m_PSBufferSetPtr->GetBuffer(1));
+
+        ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
+
+        // -----------------------------------------------------------------------------
+        // Light
+        // -----------------------------------------------------------------------------
+        
+
+        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
+        EndOfEntities = Dt::Map::EntitiesEnd();
+
+        SSunLightProperties LightBuffer;
+    
+        LightBuffer.m_LightViewProjection  .SetIdentity();
+        LightBuffer.m_LightDirection       .SetZero();
+        LightBuffer.m_LightColor           .SetZero();
+        LightBuffer.m_SunAngularRadius     = 0.0f;
+        LightBuffer.m_ExposureHistoryIndex = 0;
+
+        for (; CurrentEntity != EndOfEntities; )
+        {
+            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+
+            // -----------------------------------------------------------------------------
+            // Get graphic facet
+            // -----------------------------------------------------------------------------
+            if (rCurrentEntity.GetType() != Dt::SLightType::Sun)
+            {
+                CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
+
+                continue;
+            }
+
+            Dt::CSunLightFacet* pDataSunFacet = 0;
+            Gfx::CSunFacet*     pGraphicSunFacet = 0;
+
+            pDataSunFacet    = static_cast<Dt::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+            pGraphicSunFacet = static_cast<Gfx::CSunFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+
+            LightBuffer.m_LightViewProjection  = pGraphicSunFacet->GetCamera()->GetViewProjectionMatrix();
+            LightBuffer.m_LightDirection       = Base::Float4(pDataSunFacet->GetDirection(), 0.0f).Normalize();
+            LightBuffer.m_LightColor           = Base::Float4(pDataSunFacet->GetLightness(), 1.0f);
+            LightBuffer.m_SunAngularRadius     = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
+            LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
+
+            break;
+        }
+    
+        BufferManager::UploadConstantBufferData(m_PSBufferSetPtr->GetBuffer(1), &LightBuffer);
+
+        // -----------------------------------------------------------------------------
+        // Actors
+        // -----------------------------------------------------------------------------
+        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Actor);
+        EndOfEntities = Dt::Map::EntitiesEnd();
 
         for (; CurrentEntity != EndOfEntities; )
         {
