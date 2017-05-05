@@ -2,8 +2,6 @@
 #ifndef __INCLUDE_CS_CONTOURS_GLSL__
 #define __INCLUDE_CS_CONTOURS_GLSL__
 
-#include "common_tracking.glsl"
-
 // -----------------------------------------------------------------------------
 // Defines
 // -----------------------------------------------------------------------------
@@ -29,8 +27,31 @@ void main()
 
     if (x > 0 && x < ImageSize.x - 1 && y > 0 && y < ImageSize.y - 1)
     {
-        
+        ivec2 Coords[8];
+
+        Coords[0] = ivec2(x + 1, y    );
+        Coords[1] = ivec2(x + 1, y + 1);
+        Coords[2] = ivec2(x    , y + 1);
+        Coords[3] = ivec2(x - 1, y + 1);
+        Coords[4] = ivec2(x - 1, y    );
+        Coords[5] = ivec2(x - 1, y - 1);
+        Coords[6] = ivec2(x    , y - 1);
+        Coords[7] = ivec2(x + 1, y - 1);
+
+        const int Center = int(imageLoad(cs_DepthBuffer, ivec2(x, y)).x);
+
+        for (int i = 0; i < 8; ++ i)
+        {
+            const int Sample = int(imageLoad(cs_DepthBuffer, Coords[i]).x);
+
+            if (Center - Sample > 0.05f * 1000.0f) // 0.05 Meters
+            {
+                imageStore(cs_Contours, ivec2(x, y), vec4(1.0f));
+                return;
+            }
+        }
     }
+    imageStore(cs_Contours, ivec2(x, y), vec4(0.0f));
 }
 
 #endif // __INCLUDE_CS_CONTOURS_GLSL__

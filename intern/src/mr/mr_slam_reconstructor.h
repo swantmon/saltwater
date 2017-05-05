@@ -122,7 +122,7 @@ namespace MR
         std::vector<Gfx::CTexture2DPtr> m_RaycastVertexMapPtr;
         std::vector<Gfx::CTexture2DPtr> m_RaycastNormalMapPtr;
 
-        Gfx::CTexture2DPtr m_InpaintedDepthBufferPtr;
+        std::vector<Gfx::CTexture2DPtr> m_InpaintedDepthBufferPtr;
         std::vector<Gfx::CTexture2DPtr> m_ContourMapPtr;
         std::vector<Gfx::CTexture2DPtr> m_RaycastContourMapPtr;
 

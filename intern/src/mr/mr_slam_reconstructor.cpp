@@ -186,7 +186,7 @@ namespace MR
         m_ReduceSumCSPtr = 0;
         m_ClearVolumeCSPtr = 0;
         m_InpaintDepthCSPtr = 0;
-        m_InpaintedDepthBufferPtr = 0;
+        
         m_ContoursCSPtr = 0;
         m_ContourCandidatesCSPtr = 0;
 
@@ -200,6 +200,7 @@ namespace MR
             m_ReferenceNormalMapPtr[i] = 0;
             m_RaycastVertexMapPtr[i] = 0;
             m_RaycastNormalMapPtr[i] = 0;
+            m_InpaintedDepthBufferPtr[i] = 0;
         }
 
         m_TSDFVolumePtr = 0;
@@ -281,7 +282,7 @@ namespace MR
         m_ReferenceNormalMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
         m_RaycastVertexMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
         m_RaycastNormalMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
-
+        m_InpaintedDepthBufferPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
         m_ContourMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
         m_RaycastContourMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
 
@@ -303,6 +304,7 @@ namespace MR
             TextureDescriptor.m_Format = CTextureBase::R16_UINT;
 
             m_SmoothDepthBufferPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
+            m_InpaintedDepthBufferPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
 
             TextureDescriptor.m_Format = g_UseHighPrecisionMaps ? CTextureBase::R32G32B32A32_FLOAT : CTextureBase::R16G16B16A16_FLOAT;
 
@@ -345,8 +347,7 @@ namespace MR
         TextureDescriptor.m_pPixels = 0;
         TextureDescriptor.m_Format = CTextureBase::R16_UINT;
 
-        m_RawDepthBufferPtr = TextureManager::CreateTexture2D(TextureDescriptor);
-        m_InpaintedDepthBufferPtr = TextureManager::CreateTexture2D(TextureDescriptor);
+        m_RawDepthBufferPtr = TextureManager::CreateTexture2D(TextureDescriptor);        
 
         if (m_ReconstructionSettings.m_CaptureColor)
         {
@@ -867,17 +868,20 @@ namespace MR
 
     void CSLAMReconstructor::InpaintDepth()
     {
-        const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth(), g_TileSize2D);
-        const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
+        for (int PyramidLevel = 0; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++PyramidLevel)
+        {
+            const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
+            const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
 
-        ContextManager::SetShaderCS(m_InpaintDepthCSPtr);
-        
-        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
-        ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_InpaintedDepthBufferPtr));
+            ContextManager::SetShaderCS(m_InpaintDepthCSPtr);
 
-        ContextManager::Barrier();
+            ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_SmoothDepthBufferPtr[PyramidLevel]));
+            ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_InpaintedDepthBufferPtr[PyramidLevel]));
 
-        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+            ContextManager::Barrier();
+
+            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -891,7 +895,7 @@ namespace MR
 
             ContextManager::SetShaderCS(m_ContoursCSPtr);
             
-            ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_SmoothDepthBufferPtr[PyramidLevel]));
+            ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_InpaintedDepthBufferPtr[PyramidLevel]));
             ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ContourMapPtr[PyramidLevel]));
             
             ContextManager::Barrier();
