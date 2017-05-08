@@ -17,7 +17,6 @@ struct SLightProperties
     vec4 ps_LightDirection;
     vec4 ps_LightColor;
     vec4 ps_LightSettings;
-    uint ps_ExposureHistoryIndex;
     uint ps_LightType;
 };
 
@@ -31,6 +30,12 @@ layout(std140, binding = 4) uniform UB4
     float ps_Roughness;
     float ps_Reflectance;
     float ps_MetalMask;
+};
+
+layout(std140, binding = 5) uniform UB5
+{
+    vec4 ps_CameraPosition;
+    uint ps_ExposureHistoryIndex;
 };
 
 layout(std430, binding = 0) readonly buffer BB0
@@ -117,13 +122,13 @@ void main(void)
             // -----------------------------------------------------------------------------
             // Exposure data
             // -----------------------------------------------------------------------------
-            float AverageExposure = ps_ExposureHistory[LightProb.ps_ExposureHistoryIndex];
+            float AverageExposure = ps_ExposureHistory[ps_ExposureHistoryIndex];
 
             // -----------------------------------------------------------------------------
             // Compute lighting for sun light
             // -----------------------------------------------------------------------------
             vec3 WSLightDirection  = -LightProb.ps_LightDirection.xyz;
-            vec3 WSViewDirection   = normalize(vec3(0.0f, 0.0f, 10.0f) - Data.m_WSPosition);
+            vec3 WSViewDirection   = normalize(ps_CameraPosition.xyz - Data.m_WSPosition);
             
             float NdotV = dot(Data.m_WSNormal, WSViewDirection);
             
@@ -156,7 +161,7 @@ void main(void)
             // -----------------------------------------------------------------------------
             // Exposure data
             // -----------------------------------------------------------------------------
-            float AverageExposure = ps_ExposureHistory[LightProb.ps_ExposureHistoryIndex];
+            float AverageExposure = ps_ExposureHistory[ps_ExposureHistoryIndex];
 
             // -----------------------------------------------------------------------------
             // Light data
@@ -171,7 +176,7 @@ void main(void)
             // -----------------------------------------------------------------------------
             vec3 UnnormalizedLightVector = LightProb.ps_LightPosition.xyz - Data.m_WSPosition;
             vec3 NormalizedLightVector   = normalize(UnnormalizedLightVector);
-            vec3 WSViewDirection         = normalize(vec3(0.0f, 0.0f, 10.0f) - Data.m_WSPosition);
+            vec3 WSViewDirection         = normalize(ps_CameraPosition.xyz - Data.m_WSPosition);
 
             // -----------------------------------------------------------------------------
             // Compute attenuation

@@ -283,7 +283,7 @@ namespace
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
             EntityDesc.m_EntityType     = Dt::SLightType::LightProbe;
-            EntityDesc.m_FacetFlags     = 0;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
             Dt::CEntity& rGlobalProbeLight = Dt::EntityManager::CreateEntity(EntityDesc);
 
@@ -306,7 +306,7 @@ namespace
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
             EntityDesc.m_EntityType     = Dt::SLightType::LightProbe;
-            EntityDesc.m_FacetFlags     = 0;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
             Dt::CEntity& rGlobalProbeLight = Dt::EntityManager::CreateEntity(EntityDesc);
 

@@ -18,7 +18,17 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
+layout(row_major, std140, binding = 1) uniform UB0
+{
+    vec4 ps_ConstantBufferData0;
+};
+
 uniform samplerCube ps_EnvironmentCubemap;
+
+// -----------------------------------------------------------------------------
+// Easy access defines
+// -----------------------------------------------------------------------------
+#define ps_Intensity ps_ConstantBufferData0.z
 
 // -----------------------------------------------------------------------------
 // Input to fragment from VS
@@ -93,7 +103,7 @@ vec3 GetImportanceSampleDiffuseMipmapped(in vec3 _NormalReflection)
         //TODO: add mip count to constantbuffer
         float LOD = 0.5f * log2(SolidAngleSample / SolidAngleTexel);
         
-        vec3 Pixel = textureLod(ps_EnvironmentCubemap, H, LOD).rgb;
+        vec3 Pixel = textureLod(ps_EnvironmentCubemap, H, LOD).rgb * ps_Intensity;
         
         Result.xyz += Pixel;
         Result.w++;

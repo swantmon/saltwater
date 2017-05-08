@@ -104,10 +104,11 @@ namespace
             Base::Float4x4 m_ModelMatrix;
         };
 
-        struct SSpecularCubemapSettings
+        struct SFilterProperties
         {
             float m_LinearRoughness;
             float m_NumberOfMiplevels;
+            float m_Intensity;
         };
 
         struct SLightProperties
@@ -117,10 +118,15 @@ namespace
             Base::Float4   m_LightDirection;
             Base::Float4   m_LightColor;
             Base::Float4   m_LightSettings;             // InvSqrAttenuationRadius / SunAngularRadius, AngleScale, AngleOffset, WithShadow
-            unsigned int   m_ExposureHistoryIndex;
             unsigned int   m_LightType;
             unsigned int   m_Padding0;
             unsigned int   m_Padding1;
+        };
+
+        struct SProbeProperties
+        {
+            Base::Float4 m_CameraPosition;
+            unsigned int m_ExposureHistoryIndex;
         };
 
         class CInternLightProbeFacet : public CLightProbeFacet
@@ -202,11 +208,11 @@ namespace
 
         CInternLightProbeFacet& AllocateLightProbeFacet(unsigned int _SpecularFaceSize, unsigned int _DiffuseFaceSize);
 
-        void RenderEnvironment(CInternLightProbeFacet& _rInterLightProbeFacet);
+        void RenderEnvironment(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet* _pDtLightProbeFacet);
 
-        void RenderEntities(CInternLightProbeFacet& _rInterLightProbeFacet);
+        void RenderEntities(CInternLightProbeFacet& _rInterLightProbeFacet, const Base::Float3& _rPosition);
 
-        void RenderFiltering(CInternLightProbeFacet& _rInterLightProbeFacet);
+        void RenderFiltering(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet* _pDtLightProbeFacet);
 
         void BuildLightJobs();
     };
@@ -333,7 +339,7 @@ namespace
         ConstanteBufferDesc.m_Usage         = CBuffer::GPUReadWrite;
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSpecularCubemapSettings);
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SFilterProperties);
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
@@ -445,6 +451,18 @@ namespace
 
         ConstanteBufferDesc.m_Stride        = 0;
         ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SProbeProperties);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+
+        CBufferPtr ProbePropertiesBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
         ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(SLightProperties) * s_MaxNumberOfLightsPerProbe;
@@ -465,7 +483,7 @@ namespace
 
         m_VSBufferSetPtr = BufferManager::CreateBufferSet(ViewBuffer, VSBuffer);
         m_GSBufferSetPtr = BufferManager::CreateBufferSet(GSBuffer);
-        m_PSBufferSetPtr = BufferManager::CreateBufferSet(SurfaceMaterialBufferPtr, m_LightPropertiesBufferPtr);
+        m_PSBufferSetPtr = BufferManager::CreateBufferSet(SurfaceMaterialBufferPtr, ProbePropertiesBufferPtr);
 
         // -----------------------------------------------------------------------------
         // Models
@@ -551,11 +569,9 @@ namespace
                 // -----------------------------------------------------------------------------
                 if (pDataGlobalProbeFacet->GetRefreshMode() == Dt::CLightProbeFacet::Dynamic)
                 {
-                    BuildLightJobs();
+                    RenderEntities(*pGraphicGlobalProbeFacet, rCurrentEntity.GetWorldPosition());
 
-                    RenderEntities(*pGraphicGlobalProbeFacet);
-
-                    RenderFiltering(*pGraphicGlobalProbeFacet);
+                    RenderFiltering(*pGraphicGlobalProbeFacet, pDataGlobalProbeFacet);
                 }
             }
 
@@ -602,11 +618,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Render
             // -----------------------------------------------------------------------------
-            BuildLightJobs();
+            RenderEntities(rGraphicSkyboxFacet, _pEntity->GetWorldPosition());
 
-            RenderEntities(rGraphicSkyboxFacet);
-
-            RenderFiltering(rGraphicSkyboxFacet);
+            RenderFiltering(rGraphicSkyboxFacet, pDataGlobalLightProbeFacet);
 
             // -----------------------------------------------------------------------------
             // Set time
@@ -629,11 +643,9 @@ namespace
             // TODO by tschwandt
             // 1. what happens on dirty cubemap and not sky?
             // 2. render general light probe with settings
-            BuildLightJobs();
+            RenderEntities(*pGraphicGlobalProbeLightFacet, _pEntity->GetWorldPosition());
 
-            RenderEntities(*pGraphicGlobalProbeLightFacet);
-
-            RenderFiltering(*pGraphicGlobalProbeLightFacet);
+            RenderFiltering(*pGraphicGlobalProbeLightFacet, pDataGlobalLightProbeFacet);
 
             // -----------------------------------------------------------------------------
             // Set time
@@ -793,7 +805,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxLightProbeManager::RenderEnvironment(CInternLightProbeFacet& _rInterLightProbeFacet)
+    void CGfxLightProbeManager::RenderEnvironment(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet* _pDtLightProbeFacet)
     {
         // -----------------------------------------------------------------------------
         // Find sky entity
@@ -840,13 +852,18 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxLightProbeManager::RenderEntities(CInternLightProbeFacet& _rInterLightProbeFacet)
+    void CGfxLightProbeManager::RenderEntities(CInternLightProbeFacet& _rInterLightProbeFacet, const Base::Float3& _rPosition)
     {
         // -----------------------------------------------------------------------------
         // Find actors
         // -----------------------------------------------------------------------------
         Dt::Map::CEntityIterator CurrentEntity;
         Dt::Map::CEntityIterator EndOfEntities;
+
+        // -----------------------------------------------------------------------------
+        // Prepare lights
+        // -----------------------------------------------------------------------------
+        BuildLightJobs();
 
         // -----------------------------------------------------------------------------
         // Clear target set
@@ -877,7 +894,7 @@ namespace
         ContextManager::SetConstantBuffer(2, m_VSBufferSetPtr->GetBuffer(1));
         ContextManager::SetConstantBuffer(3, m_GSBufferSetPtr->GetBuffer(0));
         ContextManager::SetConstantBuffer(4, m_PSBufferSetPtr->GetBuffer(0));
-        
+        ContextManager::SetConstantBuffer(5, m_PSBufferSetPtr->GetBuffer(1));        
 
         ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());       
         ContextManager::SetResourceBuffer(1, m_LightPropertiesBufferPtr);
@@ -912,10 +929,20 @@ namespace
             SViewBuffer ViewBuffer;
 
             ViewBuffer.m_View  = Base::Float4x4::s_Identity;
-            ViewBuffer.m_View *= Base::Float4x4().SetTranslation(0.0f, 0.0f, -10.0f);
+            ViewBuffer.m_View *= Base::Float4x4().SetTranslation(_rPosition * Base::Float3(-1.0f));
 
             BufferManager::UploadConstantBufferData(m_VSBufferSetPtr->GetBuffer(0), &ViewBuffer);
 
+            // -----------------------------------------------------------------------------
+
+            SProbeProperties ProbeProperties;
+
+            ProbeProperties.m_CameraPosition       = Base::Float4(_rPosition, 1.0f);
+            ProbeProperties.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
+
+            BufferManager::UploadConstantBufferData(m_PSBufferSetPtr->GetBuffer(1), &ProbeProperties);
+
+            // -----------------------------------------------------------------------------
 
             SPerDrawCallConstantBufferVS ModelBuffer;
 
@@ -1020,7 +1047,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxLightProbeManager::RenderFiltering(CInternLightProbeFacet& _rInterLightProbeFacet)
+    void CGfxLightProbeManager::RenderFiltering(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet* _pDtLightProbeFacet)
     {
         // -----------------------------------------------------------------------------
         // Start updating/filtering
@@ -1028,6 +1055,17 @@ namespace
         Performance::BeginEvent("Filter Distance Light Probe");
 
         unsigned int IndexOfMipmap = 0;
+
+        // -----------------------------------------------------------------------------
+        // Prepare buffer
+        // -----------------------------------------------------------------------------
+        SFilterProperties CubemapSettings;
+
+        CubemapSettings.m_LinearRoughness   = 0.0f;
+        CubemapSettings.m_NumberOfMiplevels = 0.0f;
+        CubemapSettings.m_Intensity         = _pDtLightProbeFacet->GetIntensity();
+
+        BufferManager::UploadConstantBufferData(m_FilteringPSBufferSetPtr->GetBuffer(0), &CubemapSettings);
 
         // -----------------------------------------------------------------------------
         // Refine HDR specular from HDR cube map
@@ -1060,12 +1098,11 @@ namespace
             // -----------------------------------------------------------------------------
             // Upload per mipmap changing data
             // -----------------------------------------------------------------------------
-            SSpecularCubemapSettings SpecularCubemapSettings;
+            CubemapSettings.m_LinearRoughness   = MipmapRoughness;
+            CubemapSettings.m_NumberOfMiplevels = NumberOfMiplevels - 1.0f;
+            CubemapSettings.m_Intensity         = _pDtLightProbeFacet->GetIntensity();
 
-            SpecularCubemapSettings.m_LinearRoughness = MipmapRoughness;
-            SpecularCubemapSettings.m_NumberOfMiplevels = NumberOfMiplevels - 1.0f;
-
-            BufferManager::UploadConstantBufferData(m_FilteringPSBufferSetPtr->GetBuffer(0), &SpecularCubemapSettings);
+            BufferManager::UploadConstantBufferData(m_FilteringPSBufferSetPtr->GetBuffer(0), &CubemapSettings);
 
             // -----------------------------------------------------------------------------
 
@@ -1139,6 +1176,12 @@ namespace
         // Refine HDR diffuse from HDR cube map
         // -----------------------------------------------------------------------------
         {
+            CubemapSettings.m_LinearRoughness   = 0.0f;
+            CubemapSettings.m_NumberOfMiplevels = 0.0f;
+            CubemapSettings.m_Intensity         = _pDtLightProbeFacet->GetIntensity();
+
+            BufferManager::UploadConstantBufferData(m_FilteringPSBufferSetPtr->GetBuffer(0), &CubemapSettings);
+
             // -----------------------------------------------------------------------------
             // Prepare render target for environment cube map generation per mipmap
             // -----------------------------------------------------------------------------
@@ -1171,6 +1214,8 @@ namespace
             ContextManager::SetInputLayout(m_PositionInputLayoutPtr);
 
             ContextManager::SetConstantBuffer(0, m_CubemapGSBufferSetPtr->GetBuffer(0));
+
+            ContextManager::SetConstantBuffer(1, m_FilteringPSBufferSetPtr->GetBuffer(0));
 
             ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
@@ -1231,13 +1276,12 @@ namespace
 
         for (; IndexOfLight < s_MaxNumberOfLightsPerProbe; ++ IndexOfLight)
         {
-            LightBuffer[IndexOfLight].m_LightType            = 0;
-            LightBuffer[IndexOfLight].m_LightViewProjection  .SetIdentity();
-            LightBuffer[IndexOfLight].m_LightPosition        .SetZero();
-            LightBuffer[IndexOfLight].m_LightDirection       .SetZero();
-            LightBuffer[IndexOfLight].m_LightColor           .SetZero();
-            LightBuffer[IndexOfLight].m_LightSettings        .SetZero();
-            LightBuffer[IndexOfLight].m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
+            LightBuffer[IndexOfLight].m_LightType          = 0;
+            LightBuffer[IndexOfLight].m_LightViewProjection.SetIdentity();
+            LightBuffer[IndexOfLight].m_LightPosition      .SetZero();
+            LightBuffer[IndexOfLight].m_LightDirection     .SetZero();
+            LightBuffer[IndexOfLight].m_LightColor         .SetZero();
+            LightBuffer[IndexOfLight].m_LightSettings      .SetZero();
         }
 
         // -----------------------------------------------------------------------------
@@ -1259,12 +1303,11 @@ namespace
 
                 assert(pDtSunFacet != 0 && pGfxSunFacet != 0);
 
-                LightBuffer[IndexOfLight].m_LightType            = 1;
-                LightBuffer[IndexOfLight].m_LightViewProjection  = pGfxSunFacet->GetCamera()->GetViewProjectionMatrix();
-                LightBuffer[IndexOfLight].m_LightDirection       = Base::Float4(pDtSunFacet->GetDirection(), 0.0f).Normalize();
-                LightBuffer[IndexOfLight].m_LightColor           = Base::Float4(pDtSunFacet->GetLightness(), 1.0f);
-                LightBuffer[IndexOfLight].m_LightSettings[0]     = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
-                LightBuffer[IndexOfLight].m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
+                LightBuffer[IndexOfLight].m_LightType           = 1;
+                LightBuffer[IndexOfLight].m_LightViewProjection = pGfxSunFacet->GetCamera()->GetViewProjectionMatrix();
+                LightBuffer[IndexOfLight].m_LightDirection      = Base::Float4(pDtSunFacet->GetDirection(), 0.0f).Normalize();
+                LightBuffer[IndexOfLight].m_LightColor          = Base::Float4(pDtSunFacet->GetLightness(), 1.0f);
+                LightBuffer[IndexOfLight].m_LightSettings[0]    = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
 
                 ++IndexOfLight;
             }

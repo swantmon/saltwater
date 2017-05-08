@@ -25,6 +25,7 @@ uniform samplerCube ps_EnvironmentCubemap;
 // -----------------------------------------------------------------------------
 #define ps_LinearRoughness   ps_ConstantBufferData0.x
 #define ps_NumberOfMiplevels ps_ConstantBufferData0.y
+#define ps_Intensity         ps_ConstantBufferData0.z
 
 // -----------------------------------------------------------------------------
 // Input to fragment from VS
@@ -88,7 +89,7 @@ vec3 GetImportanceSampleSpecular(in vec3 _Reflection, in float _Roughness)
             const float LODBias = 1.0f;
             
             float LOD   = _Roughness == 0.0f ? 0.0f : clamp(0.5f * log2(OmegaS / OmegaP) + LODBias, 0.0f, ps_NumberOfMiplevels);
-            vec4  Pixel = textureLod(ps_EnvironmentCubemap, L, LOD);
+            vec4  Pixel = textureLod(ps_EnvironmentCubemap, L, LOD) * ps_Intensity;
 
             Result += Pixel.rgb * NdotL;
             Weight += NdotL;
