@@ -37,7 +37,10 @@ vec2 ComputeGradient(ivec2 Position)
     {
         for (int j = 0; j < g_KernelSize; ++j)
         {
-            float Sample = float(imageLoad(cs_DepthBuffer, Position + ivec2(i, j)));
+            ivec2 SamplePosition = ivec2(i, j);
+            SamplePosition -= g_KernelSize / 2;
+
+            float Sample = float(imageLoad(cs_DepthBuffer, SamplePosition + Position));
 
             Result.x += Sample * g_SobelKernel[i * g_KernelSize + j];
             Result.y += Sample * g_SobelKernel[j * g_KernelSize + i];
@@ -53,7 +56,9 @@ void main()
     const int x = int(gl_GlobalInvocationID.x);
     const int y = int(gl_GlobalInvocationID.y);
     
-    imageStore(cs_NormalBuffer, ivec2(x, y), vec4(ComputeGradient(ivec2(x, y)), 0.0, 1.0));
+    const vec2 Gradient = ComputeGradient(ivec2(x, y));
+
+    imageStore(cs_NormalBuffer, ivec2(x, y), vec4(normalize(vec3(Gradient, -1.0f)), 1.0));
 }
 
 #endif // __INCLUDE_CS_CONTOURS_NORMAL_GLSL__
