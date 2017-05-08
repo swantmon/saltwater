@@ -112,7 +112,7 @@ void main(void)
     {
         SLightProperties LightProb = ps_LightProperties[IndexOfLight];
 
-        if (LightProb.ps_LightType == 0)
+        if (LightProb.ps_LightType == 1)
         {
             // -----------------------------------------------------------------------------
             // Exposure data
@@ -139,13 +139,58 @@ void main(void)
             vec3  S     = ViewMirrorUnitDir - DdotR * WSLightDirection;
             vec3  L     = DdotR < d ? normalize(d * WSLightDirection + normalize(S) * r) : ViewMirrorUnitDir;
             
-            // float Shadow = GetShadowAtPositionWithPCF(Data.m_WSPosition, ps_LightViewProjection, ps_ShadowTexture);
-            float Shadow = 1.0f;
+            // -----------------------------------------------------------------------------
+            // Compute attenuation
+            // -----------------------------------------------------------------------------
+            float Attenuation = 1.0f;
+            Attenuation *= Data.m_AmbientOcclusion;
+            // Attenuation = GetShadowAtPositionWithPCF(Data.m_WSPosition, ps_LightViewProjection, ps_ShadowTexture);
             
             // -----------------------------------------------------------------------------
             // Apply light luminance
             // -----------------------------------------------------------------------------
-            Luminance += BRDF(L, WSViewDirection, Data.m_WSNormal, Data) * clamp(dot(Data.m_WSNormal, L), 0.0f, 1.0f) * LightProb.ps_LightColor.xyz * Data.m_AmbientOcclusion * Shadow;
+            Luminance += BRDF(L, WSViewDirection, Data.m_WSNormal, Data) * clamp(dot(Data.m_WSNormal, L), 0.0f, 1.0f) * LightProb.ps_LightColor.xyz * Attenuation * AverageExposure;
+        }
+        else if (LightProb.ps_LightType == 2)
+        {
+            // -----------------------------------------------------------------------------
+            // Exposure data
+            // -----------------------------------------------------------------------------
+            float AverageExposure = ps_ExposureHistory[LightProb.ps_ExposureHistoryIndex];
+
+            // -----------------------------------------------------------------------------
+            // Light data
+            // -----------------------------------------------------------------------------
+            float LightInvSqrAttenuationRadius = LightProb.ps_LightSettings.x;
+            float LightAngleScale              = LightProb.ps_LightSettings.y;
+            float LightAngleOffset             = LightProb.ps_LightSettings.z;
+            float LightHasShadows              = LightProb.ps_LightSettings.w;
+
+            // -----------------------------------------------------------------------------
+            // Compute lighting for punctual lights
+            // -----------------------------------------------------------------------------
+            vec3 UnnormalizedLightVector = LightProb.ps_LightPosition.xyz - Data.m_WSPosition;
+            vec3 NormalizedLightVector   = normalize(UnnormalizedLightVector);
+            vec3 WSViewDirection         = normalize(vec3(0.0f, 0.0f, 10.0f) - Data.m_WSPosition);
+
+            // -----------------------------------------------------------------------------
+            // Compute attenuation
+            // -----------------------------------------------------------------------------
+            float Attenuation = 1.0f;
+
+            Attenuation *= GetDistanceAttenuation(UnnormalizedLightVector, LightInvSqrAttenuationRadius);
+            Attenuation *= GetAngleAttenuation(NormalizedLightVector, -LightProb.ps_LightDirection.xyz, LightAngleScale, LightAngleOffset);
+
+            // -----------------------------------------------------------------------------
+            // Shadowing
+            // -----------------------------------------------------------------------------
+            Attenuation *= Data.m_AmbientOcclusion;
+            // Attenuation *= LightHasShadows == 1.0f ? GetShadowAtPosition(Data.m_WSPosition, LightProb.ps_LightViewProjection, ps_Shadowmap) : 1.0f;
+            
+            // -----------------------------------------------------------------------------
+            // Apply light luminance and shading
+            // -----------------------------------------------------------------------------
+            Luminance += BRDF(NormalizedLightVector, WSViewDirection, Data.m_WSNormal, Data) * clamp(dot(Data.m_WSNormal, NormalizedLightVector), 0.0f, 1.0f) * LightProb.ps_LightColor.xyz * Attenuation * AverageExposure;
         }
     }
 

@@ -77,6 +77,10 @@ namespace
 
     private:
 
+        static const unsigned int s_MaxNumberOfLightsPerProbe = 10;
+
+    private:
+
         struct SViewBuffer
         {
             Base::Float4x4 m_View;
@@ -115,6 +119,8 @@ namespace
             Base::Float4   m_LightSettings;             // InvSqrAttenuationRadius / SunAngularRadius, AngleScale, AngleOffset, WithShadow
             unsigned int   m_ExposureHistoryIndex;
             unsigned int   m_LightType;
+            unsigned int   m_Padding0;
+            unsigned int   m_Padding1;
         };
 
         class CInternLightProbeFacet : public CLightProbeFacet
@@ -441,7 +447,7 @@ namespace
         ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
         ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SLightProperties) * 10;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SLightProperties) * s_MaxNumberOfLightsPerProbe;
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
@@ -1208,7 +1214,8 @@ namespace
 
     void CGfxLightProbeManager::BuildLightJobs()
     {
-        SLightProperties LightBuffer[10];
+        SLightProperties LightBuffer[s_MaxNumberOfLightsPerProbe];
+        unsigned int     IndexOfLight;
 
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
@@ -1216,19 +1223,31 @@ namespace
         Dt::Map::CEntityIterator CurrentLightEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
         Dt::Map::CEntityIterator EndOfLightEntities = Dt::Map::EntitiesEnd();
 
-        unsigned int IndexofLight = 0;
 
-        for (; CurrentLightEntity != EndOfLightEntities && IndexofLight < 10; )
+        // -----------------------------------------------------------------------------
+        // Initiate light buffer
+        // -----------------------------------------------------------------------------
+        IndexOfLight = 0;
+
+        for (; IndexOfLight < s_MaxNumberOfLightsPerProbe; ++ IndexOfLight)
+        {
+            LightBuffer[IndexOfLight].m_LightType            = 0;
+            LightBuffer[IndexOfLight].m_LightViewProjection  .SetIdentity();
+            LightBuffer[IndexOfLight].m_LightPosition        .SetZero();
+            LightBuffer[IndexOfLight].m_LightDirection       .SetZero();
+            LightBuffer[IndexOfLight].m_LightColor           .SetZero();
+            LightBuffer[IndexOfLight].m_LightSettings        .SetZero();
+            LightBuffer[IndexOfLight].m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
+        }
+
+        // -----------------------------------------------------------------------------
+        // Fill with data
+        // -----------------------------------------------------------------------------
+        IndexOfLight = 0;
+
+        for (; CurrentLightEntity != EndOfLightEntities && IndexOfLight < s_MaxNumberOfLightsPerProbe; )
         {
             Dt::CEntity& rCurrentEntity = *CurrentLightEntity;
-
-            LightBuffer[IndexofLight].m_LightType            = 0;
-            LightBuffer[IndexofLight].m_LightViewProjection  .SetIdentity();
-            LightBuffer[IndexofLight].m_LightPosition        .SetZero();
-            LightBuffer[IndexofLight].m_LightDirection       .SetZero();
-            LightBuffer[IndexofLight].m_LightColor           .SetZero();
-            LightBuffer[IndexofLight].m_LightSettings        .SetZero();
-            LightBuffer[IndexofLight].m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
             // -----------------------------------------------------------------------------
             // Setup buffer
@@ -1240,14 +1259,14 @@ namespace
 
                 assert(pDtSunFacet != 0 && pGfxSunFacet != 0);
 
-                LightBuffer[IndexofLight].m_LightType            = 0;
-                LightBuffer[IndexofLight].m_LightViewProjection  = pGfxSunFacet->GetCamera()->GetViewProjectionMatrix();
-                LightBuffer[IndexofLight].m_LightDirection       = Base::Float4(pDtSunFacet->GetDirection(), 0.0f).Normalize();
-                LightBuffer[IndexofLight].m_LightColor           = Base::Float4(pDtSunFacet->GetLightness(), 1.0f);
-                LightBuffer[IndexofLight].m_LightSettings[0]     = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
-                LightBuffer[IndexofLight].m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
+                LightBuffer[IndexOfLight].m_LightType            = 1;
+                LightBuffer[IndexOfLight].m_LightViewProjection  = pGfxSunFacet->GetCamera()->GetViewProjectionMatrix();
+                LightBuffer[IndexOfLight].m_LightDirection       = Base::Float4(pDtSunFacet->GetDirection(), 0.0f).Normalize();
+                LightBuffer[IndexOfLight].m_LightColor           = Base::Float4(pDtSunFacet->GetLightness(), 1.0f);
+                LightBuffer[IndexOfLight].m_LightSettings[0]     = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
+                LightBuffer[IndexOfLight].m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
-                ++IndexofLight;
+                ++IndexOfLight;
             }
             else if (rCurrentEntity.GetType() == Dt::SLightType::Point)
             {
@@ -1261,22 +1280,22 @@ namespace
                 float AngleOffset             = pDtPointFacet->GetAngleOffset();
                 float HasShadows              = pDtPointFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows ? 1.0f : 0.0f;
             
-                LightBuffer[IndexofLight].m_LightType      = 1;
-                LightBuffer[IndexofLight].m_LightPosition  = Base::Float4(rCurrentEntity.GetWorldPosition(), 1.0f);
-                LightBuffer[IndexofLight].m_LightDirection = Base::Float4(pDtPointFacet->GetDirection(), 0.0f).Normalize();
-                LightBuffer[IndexofLight].m_LightColor     = Base::Float4(pDtPointFacet->GetLightness(), 1.0f);
-                LightBuffer[IndexofLight].m_LightSettings  = Base::Float4(InvSqrAttenuationRadius, AngleScale, AngleOffset, HasShadows);
+                LightBuffer[IndexOfLight].m_LightType      = 2;
+                LightBuffer[IndexOfLight].m_LightPosition  = Base::Float4(rCurrentEntity.GetWorldPosition(), 1.0f);
+                LightBuffer[IndexOfLight].m_LightDirection = Base::Float4(pDtPointFacet->GetDirection(), 0.0f).Normalize();
+                LightBuffer[IndexOfLight].m_LightColor     = Base::Float4(pDtPointFacet->GetLightness(), 1.0f);
+                LightBuffer[IndexOfLight].m_LightSettings  = Base::Float4(InvSqrAttenuationRadius, AngleScale, AngleOffset, HasShadows);
 
-                LightBuffer[IndexofLight].m_LightViewProjection.SetIdentity();
+                LightBuffer[IndexOfLight].m_LightViewProjection.SetIdentity();
 
                 if (pDtPointFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows)
                 {
                     assert(pGfxPointFacet->GetCamera().IsValid());
 
-                    LightBuffer[IndexofLight].m_LightViewProjection = pGfxPointFacet->GetCamera()->GetViewProjectionMatrix();
+                    LightBuffer[IndexOfLight].m_LightViewProjection = pGfxPointFacet->GetCamera()->GetViewProjectionMatrix();
                 }
 
-                ++IndexofLight;
+                ++IndexOfLight;
             }
 
             // -----------------------------------------------------------------------------
