@@ -189,6 +189,7 @@ namespace MR
         
         m_ContourGeneratorsCSPtr = 0;
         m_ContourCandidatesCSPtr = 0;
+        m_ContourNormalsCSPtr = 0;
 
         m_RawDepthBufferPtr = 0;
         m_RawCameraFramePtr = 0;
@@ -203,6 +204,7 @@ namespace MR
             m_InpaintedReferenceDepthBufferPtr[i] = 0;
             m_InpaintedRaycastDepthBufferPtr[i] = 0;
             m_RaycastDepthBufferPtr[i] = 0;
+            m_ContourNormalsPtr[i] = 0;
         }
 
         m_TSDFVolumePtr = 0;
@@ -273,6 +275,7 @@ namespace MR
         m_InpaintDepthCSPtr      = ShaderManager::CompileCS("kinect_fusion\\cs_inpaint_depth.glsl"     , "main", DefineString.c_str());
         m_ContourGeneratorsCSPtr = ShaderManager::CompileCS("kinect_fusion\\cs_contour_generators.glsl", "main", DefineString.c_str());
         m_ContourCandidatesCSPtr = ShaderManager::CompileCS("kinect_fusion\\cs_contour_candidates.glsl", "main", DefineString.c_str());
+        m_ContourNormalsCSPtr    = ShaderManager::CompileCS("kinect_fusion\\cs_contour_normals.glsl"   , "main", DefineString.c_str());
     }
     
     // -----------------------------------------------------------------------------
@@ -289,6 +292,7 @@ namespace MR
         m_ContourGeneratorMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
         m_RaycastContourMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
         m_RaycastDepthBufferPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
+        m_ContourNormalsPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
 
         STextureDescriptor TextureDescriptor = {};
         
@@ -317,6 +321,8 @@ namespace MR
             m_ReferenceNormalMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
             m_RaycastVertexMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
             m_RaycastNormalMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
+
+            m_ContourNormalsPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
 
             TextureDescriptor.m_Format = CTextureBase::R32G32B32A32_FLOAT;
 
@@ -501,6 +507,7 @@ namespace MR
 
         InpaintDepth(m_SmoothDepthBufferPtr, m_InpaintedReferenceDepthBufferPtr);
         FindContourGenerators();
+        CreateContourNormals();
 
         Performance::EndEvent();
 
@@ -913,6 +920,26 @@ namespace MR
             ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_InpaintedReferenceDepthBufferPtr[PyramidLevel]));
             ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ContourGeneratorMapPtr[PyramidLevel]));
             
+            ContextManager::Barrier();
+
+            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::CreateContourNormals()
+    {
+        for (int PyramidLevel = 0; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++PyramidLevel)
+        {
+            const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
+            const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
+
+            ContextManager::SetShaderCS(m_ContourNormalsCSPtr);
+
+            ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_InpaintedReferenceDepthBufferPtr[PyramidLevel]));
+            ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ContourNormalsPtr[PyramidLevel]));
+
             ContextManager::Barrier();
 
             ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
