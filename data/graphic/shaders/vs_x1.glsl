@@ -3,8 +3,8 @@
 
 layout(row_major, std140, binding = 1) uniform UB0
 {
-    mat4 m_ViewMatrix;
     mat4 m_ProjectionMatrix;
+    mat4 m_ViewMatrix;
 };
 
 layout(row_major, std140, binding = 2) uniform UB1

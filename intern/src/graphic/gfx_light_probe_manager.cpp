@@ -77,71 +77,54 @@ namespace
 
     private:
 
-        static const unsigned int s_MaxNumberOfLightsPerProbe = 10;
+        static const unsigned int s_MaxNumberOfLightsPerProbe = 16;
 
     private:
 
-        struct SViewBuffer
+        struct SGeometryVPBuffer
         {
-            Base::Float4x4 m_View;
             Base::Float4x4 m_Projection;
+            Base::Float4x4 m_View;
         };
 
-        struct SConstantBufferGS
+        struct SGeometryMBuffer
+        {
+            Base::Float4x4 m_ModelMatrix;
+        };
+
+        struct SCubemapGeometryBuffer
         {
             Base::Float4x4 m_CubeProjectionMatrix;
             Base::Float4x4 m_CubeViewMatrix[6];
         };
 
-        struct SConstantBufferPS
+        struct SLightPropertiesBuffer
         {
-            float m_HDRFactor;
-            float m_IsHDR;
+            Base::Float4x4 m_LightViewProjection;
+            Base::Float4   m_LightPosition;
+            Base::Float4   m_LightDirection;
+            Base::Float4   m_LightColor;
+            Base::Float4   m_LightSettings;
+            unsigned int   m_LightType;
+            unsigned int   m_Padding0;
+            unsigned int   m_Padding1;
         };
 
-        struct SPerDrawCallConstantBufferVS
+        struct SLightprobePropertiesBuffer
         {
-            Base::Float4x4 m_ModelMatrix;
+            Base::Float4 m_CameraPosition;
+            unsigned int m_ExposureHistoryIndex;
         };
 
-        struct SFilterProperties
+        struct SFilterPropertiesBuffer
         {
             float m_LinearRoughness;
             float m_NumberOfMiplevels;
             float m_Intensity;
         };
 
-        struct SLightProperties
-        {
-            Base::Float4x4 m_LightViewProjection;
-            Base::Float4   m_LightPosition;
-            Base::Float4   m_LightDirection;
-            Base::Float4   m_LightColor;
-            Base::Float4   m_LightSettings;             // InvSqrAttenuationRadius / SunAngularRadius, AngleScale, AngleOffset, WithShadow
-            unsigned int   m_LightType;
-            unsigned int   m_Padding0;
-            unsigned int   m_Padding1;
-        };
-
-        struct SProbeProperties
-        {
-            Base::Float4 m_CameraPosition;
-            unsigned int m_ExposureHistoryIndex;
-        };
-
         class CInternLightProbeFacet : public CLightProbeFacet
         {
-        public:
-
-            struct SRenderContext
-            {
-                CInputLayoutPtr m_InputLayoutPtr;
-                CTexture2DPtr   m_Texture2DPtr;
-                CTextureSetPtr  m_TextureSetPtr;
-                CTargetSetPtr   m_TargetSetPtr;
-                CViewPortSetPtr m_ViewPortSetPtr;
-            };
-
         public:
 
             typedef std::vector<CTargetSetPtr>   CTargetSets;
@@ -154,6 +137,12 @@ namespace
 
         public:
 
+            CInputLayoutPtr m_InputLayoutPtr;
+            CTexture2DPtr   m_Texture2DPtr;
+            CTextureSetPtr  m_TextureSetPtr;
+            CTargetSetPtr   m_TargetSetPtr;
+            CViewPortSetPtr m_ViewPortSetPtr;
+
             CTextureSetPtr m_InputCubemapSetPtr;
 
             CTargetSets   m_SpecularHDRTargetSetPtrs;
@@ -161,8 +150,6 @@ namespace
 
             CTargetSetPtr   m_DiffuseHDRTargetSetPtr;
             CViewPortSetPtr m_DiffuseViewPortSetPtr;
-
-            SRenderContext m_SkyboxFromGeometry;
 
         private:
 
@@ -187,14 +174,12 @@ namespace
         CShaderPtr m_CubemapTexturePSPtr;
 
         CBufferPtr m_LightPropertiesBufferPtr;
-
-        CBufferSetPtr m_CubemapGSBufferSetPtr;
-        CBufferSetPtr m_FilteringPSBufferSetPtr;
-        CBufferSetPtr m_CustomVSBufferSetPtr;
-        CBufferSetPtr m_CustomPSBufferSetPtr;
-        CBufferSetPtr m_VSBufferSetPtr;
-        CBufferSetPtr m_GSBufferSetPtr;
-        CBufferSetPtr m_PSBufferSetPtr;
+        CBufferPtr m_CubemapGSBufferPtr;
+        CBufferPtr m_FilteringPSBufferPtr;
+        CBufferPtr m_SurfaceMaterialBufferPtr;
+        CBufferPtr m_ProbePropertiesBufferPtr;
+        CBufferPtr m_GeometryVPBufferPtr;
+        CBufferPtr m_GeometryMBufferPtr;
 
         CInputLayoutPtr m_PositionInputLayoutPtr;
 
@@ -235,11 +220,11 @@ namespace
 
     CGfxLightProbeManager::CInternLightProbeFacet::~CInternLightProbeFacet()
     {
-        m_SkyboxFromGeometry.m_InputLayoutPtr = 0;
-        m_SkyboxFromGeometry.m_TargetSetPtr   = 0;
-        m_SkyboxFromGeometry.m_ViewPortSetPtr = 0;
-        m_SkyboxFromGeometry.m_TextureSetPtr  = 0;
-        m_SkyboxFromGeometry.m_Texture2DPtr   = 0;
+        m_InputLayoutPtr = 0;
+        m_TargetSetPtr   = 0;
+        m_ViewPortSetPtr = 0;
+        m_TextureSetPtr  = 0;
+        m_Texture2DPtr   = 0;
 
         m_InputCubemapSetPtr     = 0;
         m_DiffuseHDRTargetSetPtr = 0;
@@ -258,10 +243,8 @@ namespace
         , m_FilteringGSPtr         ()
         , m_FilteringDiffusePSPtr  ()
         , m_FilteringSpecularPSPtr ()
-        , m_CubemapGSBufferSetPtr  ()
-        , m_FilteringPSBufferSetPtr()
-        , m_CustomVSBufferSetPtr   ()
-        , m_CustomPSBufferSetPtr   ()
+        , m_CubemapGSBufferPtr     ()
+        , m_FilteringPSBufferPtr   ()
         , m_PositionInputLayoutPtr ()
         , m_CubemapRenderContextPtr()
         , m_LightprobeFacets       ()
@@ -292,7 +275,7 @@ namespace
         m_FilteringSpecularPSPtr = ShaderManager::CompilePS("fs_lightprobe_specular_sampling.glsl", "main");
 
         m_CubemapGeometryVSPtr = ShaderManager::CompileVS("vs_x1.glsl", "main");
-        m_CubemapGSPtr         = ShaderManager::CompileGS("gs_x1.glsl", "main");
+        m_CubemapGSPtr         = ShaderManager::CompileGS("gs_lightprobe_sampling.glsl", "main");
         m_CubemapPSPtr         = ShaderManager::CompilePS("fs_x1.glsl", "main");
         m_CubemapTexturePSPtr  = ShaderManager::CompilePS("fs_x1.glsl", "main", "#define USE_TEX_DIFFUSE\n #define USE_TEX_NORMAL\n #define USE_TEX_ROUGHNESS\n #define USE_TEX_METALLIC\n");
 
@@ -327,11 +310,11 @@ namespace
         ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SViewBuffer);
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SGeometryVPBuffer);
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr ViewBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        m_GeometryVPBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
         
@@ -339,11 +322,11 @@ namespace
         ConstanteBufferDesc.m_Usage         = CBuffer::GPUReadWrite;
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SFilterProperties);
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SFilterPropertiesBuffer);
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr SpecularPSBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        m_FilteringPSBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
         
         // -----------------------------------------------------------------------------
         
@@ -353,7 +336,7 @@ namespace
         
         float lookAt =  1.5f;
         
-        SConstantBufferGS DefaultGSValues;
+        SCubemapGeometryBuffer DefaultGSValues;
         
         DefaultGSValues.m_CubeProjectionMatrix.SetRHFieldOfView(Base::RadiansToDegree(Base::SConstants<float>::s_Pi * 0.5f), 1.0f, 2.0f, 2000.0f);
         
@@ -405,11 +388,11 @@ namespace
         ConstanteBufferDesc.m_Usage         = CBuffer::GPUReadWrite;
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SConstantBufferGS);
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SCubemapGeometryBuffer);
         ConstanteBufferDesc.m_pBytes        = &DefaultGSValues;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr GSBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        m_CubemapGSBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
 
@@ -417,23 +400,11 @@ namespace
         ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SConstantBufferPS);
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SGeometryMBuffer);
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr PSBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
-
-        // -----------------------------------------------------------------------------
-
-        ConstanteBufferDesc.m_Stride        = 0;
-        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
-        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
-        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SPerDrawCallConstantBufferVS);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
-        
-        CBufferPtr VSBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        m_GeometryMBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
 
@@ -445,7 +416,7 @@ namespace
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
 
-        CBufferPtr SurfaceMaterialBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        m_SurfaceMaterialBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
 
@@ -453,11 +424,11 @@ namespace
         ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SProbeProperties);
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SLightprobePropertiesBuffer);
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
 
-        CBufferPtr ProbePropertiesBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        m_ProbePropertiesBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
 
@@ -465,25 +436,11 @@ namespace
         ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
         ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SLightProperties) * s_MaxNumberOfLightsPerProbe;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SLightPropertiesBuffer) * s_MaxNumberOfLightsPerProbe;
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
         m_LightPropertiesBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
-        
-        // -----------------------------------------------------------------------------
-        
-        m_CustomVSBufferSetPtr    = BufferManager::CreateBufferSet(ViewBuffer);
-
-        m_CubemapGSBufferSetPtr   = BufferManager::CreateBufferSet(GSBuffer);
-
-        m_CustomPSBufferSetPtr    = BufferManager::CreateBufferSet(PSBuffer);
-        
-        m_FilteringPSBufferSetPtr = BufferManager::CreateBufferSet(SpecularPSBuffer);
-
-        m_VSBufferSetPtr = BufferManager::CreateBufferSet(ViewBuffer, VSBuffer);
-        m_GSBufferSetPtr = BufferManager::CreateBufferSet(GSBuffer);
-        m_PSBufferSetPtr = BufferManager::CreateBufferSet(SurfaceMaterialBufferPtr, ProbePropertiesBufferPtr);
 
         // -----------------------------------------------------------------------------
         // Models
@@ -524,14 +481,12 @@ namespace
 
         m_LightPropertiesBufferPtr = 0;
 
-        m_CubemapGSBufferSetPtr = 0;
-        m_FilteringPSBufferSetPtr = 0;
-        m_VSBufferSetPtr = 0;
-        m_GSBufferSetPtr = 0;
-        m_PSBufferSetPtr = 0;
-
-        m_CustomVSBufferSetPtr = 0;
-        m_CustomPSBufferSetPtr = 0;
+        m_CubemapGSBufferPtr = 0;
+        m_FilteringPSBufferPtr = 0;
+        m_SurfaceMaterialBufferPtr = 0;
+        m_ProbePropertiesBufferPtr = 0;
+        m_GeometryVPBufferPtr = 0;
+        m_GeometryMBufferPtr = 0;
 
         m_PositionInputLayoutPtr = 0;
 
@@ -569,7 +524,14 @@ namespace
                 // -----------------------------------------------------------------------------
                 if (pDataGlobalProbeFacet->GetRefreshMode() == Dt::CLightProbeFacet::Dynamic)
                 {
-                    RenderEntities(*pGraphicGlobalProbeFacet, rCurrentEntity.GetWorldPosition());
+                    if (pDataGlobalProbeFacet->GetType() == Dt::CLightProbeFacet::Sky)
+                    {
+                        RenderEnvironment(*pGraphicGlobalProbeFacet, pDataGlobalProbeFacet);
+                    }
+                    else if (pDataGlobalProbeFacet->GetType() == Dt::CLightProbeFacet::Local)
+                    {
+                        RenderEntities(*pGraphicGlobalProbeFacet, rCurrentEntity.GetWorldPosition());
+                    }
 
                     RenderFiltering(*pGraphicGlobalProbeFacet, pDataGlobalProbeFacet);
                 }
@@ -618,7 +580,14 @@ namespace
             // -----------------------------------------------------------------------------
             // Render
             // -----------------------------------------------------------------------------
-            RenderEntities(rGraphicSkyboxFacet, _pEntity->GetWorldPosition());
+            if (pDataGlobalLightProbeFacet->GetType() == Dt::CLightProbeFacet::Sky)
+            {
+                RenderEnvironment(rGraphicSkyboxFacet, pDataGlobalLightProbeFacet);
+            }
+            else if (pDataGlobalLightProbeFacet->GetType() == Dt::CLightProbeFacet::Local)
+            {
+                RenderEntities(rGraphicSkyboxFacet, _pEntity->GetWorldPosition());
+            }
 
             RenderFiltering(rGraphicSkyboxFacet, pDataGlobalLightProbeFacet);
 
@@ -634,16 +603,19 @@ namespace
         }
         else if ((DirtyFlags & Dt::CEntity::DirtyDetail) != 0)
         {
-            Dt::CLightProbeFacet*   pDataGlobalProbeLightFacet;
             CInternLightProbeFacet*  pGraphicGlobalProbeLightFacet;
 
-            pDataGlobalProbeLightFacet    = static_cast<Dt::CLightProbeFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+            pDataGlobalLightProbeFacet    = static_cast<Dt::CLightProbeFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Data));
             pGraphicGlobalProbeLightFacet = static_cast<CInternLightProbeFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
 
-            // TODO by tschwandt
-            // 1. what happens on dirty cubemap and not sky?
-            // 2. render general light probe with settings
-            RenderEntities(*pGraphicGlobalProbeLightFacet, _pEntity->GetWorldPosition());
+            if (pDataGlobalLightProbeFacet->GetType() == Dt::CLightProbeFacet::Sky)
+            {
+                RenderEnvironment(*pGraphicGlobalProbeLightFacet, pDataGlobalLightProbeFacet);
+            }
+            else if (pDataGlobalLightProbeFacet->GetType() == Dt::CLightProbeFacet::Local)
+            {
+                RenderEntities(*pGraphicGlobalProbeLightFacet, _pEntity->GetWorldPosition());
+            }
 
             RenderFiltering(*pGraphicGlobalProbeLightFacet, pDataGlobalLightProbeFacet);
 
@@ -666,7 +638,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Create facet
         // -----------------------------------------------------------------------------
-        CInternLightProbeFacet& rGraphicLightProbeFacet = m_LightprobeFacets.Allocate();
+        CInternLightProbeFacet& rGfxLightProbeFacet = m_LightprobeFacets.Allocate();
 
         // -----------------------------------------------------------------------------
         // Create stuff for local probe
@@ -685,11 +657,11 @@ namespace
         TextureDescriptor.m_pPixels          = 0;
         TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
 
-        rGraphicLightProbeFacet.m_SkyboxFromGeometry.m_Texture2DPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
+        rGfxLightProbeFacet.m_Texture2DPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
-        rGraphicLightProbeFacet.m_SkyboxFromGeometry.m_TextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(rGraphicLightProbeFacet.m_SkyboxFromGeometry.m_Texture2DPtr));
+        rGfxLightProbeFacet.m_TextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(rGfxLightProbeFacet.m_Texture2DPtr));
 
-        CTargetSetPtr SkyCubeTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(rGraphicLightProbeFacet.m_SkyboxFromGeometry.m_Texture2DPtr));
+        CTargetSetPtr SkyCubeTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(rGfxLightProbeFacet.m_Texture2DPtr));
 
         ViewPortDesc.m_TopLeftX = 0.0f;
         ViewPortDesc.m_TopLeftY = 0.0f;
@@ -702,8 +674,8 @@ namespace
 
         CViewPortSetPtr SkyCubeViewPortSetPtr = ViewManager::CreateViewPortSet(SkyCubeViewPortPtr);
 
-        rGraphicLightProbeFacet.m_SkyboxFromGeometry.m_TargetSetPtr   = SkyCubeTargetSetPtr;
-        rGraphicLightProbeFacet.m_SkyboxFromGeometry.m_ViewPortSetPtr = SkyCubeViewPortSetPtr;
+        rGfxLightProbeFacet.m_TargetSetPtr   = SkyCubeTargetSetPtr;
+        rGfxLightProbeFacet.m_ViewPortSetPtr = SkyCubeViewPortSetPtr;
 
         // -----------------------------------------------------------------------------
         // Create rest of the global probe that is available at any type
@@ -736,7 +708,7 @@ namespace
         
         CTexture2DPtr DiffuseCube = TextureManager::CreateCubeTexture(TextureDescriptor);
         
-        rGraphicLightProbeFacet.m_FilteredSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(SpecularCube), static_cast<CTextureBasePtr>(DiffuseCube));
+        rGfxLightProbeFacet.m_FilteredSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(SpecularCube), static_cast<CTextureBasePtr>(DiffuseCube));
         
         // -----------------------------------------------------------------------------
         // For all cube maps create a render target for every mip map
@@ -746,8 +718,8 @@ namespace
         ViewPortDesc.m_MinDepth = 0.0f;
         ViewPortDesc.m_MaxDepth = 1.0f;
 
-        CInternLightProbeFacet::CTargetSets&   rSpecularTargetSets   = rGraphicLightProbeFacet.m_SpecularHDRTargetSetPtrs;
-        CInternLightProbeFacet::CViewPortSets& rSpecularViewPortSets = rGraphicLightProbeFacet.m_SpecularViewPortSetPtrs;
+        CInternLightProbeFacet::CTargetSets&   rSpecularTargetSets   = rGfxLightProbeFacet.m_SpecularHDRTargetSetPtrs;
+        CInternLightProbeFacet::CViewPortSets& rSpecularViewPortSets = rGfxLightProbeFacet.m_SpecularViewPortSetPtrs;
 
         for (unsigned int IndexOfMipmap = 0; IndexOfMipmap < SpecularCube->GetNumberOfMipLevels(); ++ IndexOfMipmap)
         {
@@ -796,11 +768,11 @@ namespace
             // -----------------------------------------------------------------------------
             // Put into light probe
             // -----------------------------------------------------------------------------
-            rGraphicLightProbeFacet.m_DiffuseHDRTargetSetPtr = DiffuseMipmapTargetSetPtr;
-            rGraphicLightProbeFacet.m_DiffuseViewPortSetPtr  = DiffuseViewPortSetPtr;
+            rGfxLightProbeFacet.m_DiffuseHDRTargetSetPtr = DiffuseMipmapTargetSetPtr;
+            rGfxLightProbeFacet.m_DiffuseViewPortSetPtr  = DiffuseViewPortSetPtr;
         }
 
-        return rGraphicLightProbeFacet;
+        return rGfxLightProbeFacet;
     }
 
     // -----------------------------------------------------------------------------
@@ -868,15 +840,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Clear target set
         // -----------------------------------------------------------------------------
-        TargetSetManager::ClearTargetSet(_rInterLightProbeFacet.m_SkyboxFromGeometry.m_TargetSetPtr);
+        TargetSetManager::ClearTargetSet(_rInterLightProbeFacet.m_TargetSetPtr);
 
         // -----------------------------------------------------------------------------
         // Prepare renderer
         // -----------------------------------------------------------------------------
         const unsigned int pOffset[] = { 0, 0 };
 
-        ContextManager::SetTargetSet        (_rInterLightProbeFacet.m_SkyboxFromGeometry.m_TargetSetPtr);
-        ContextManager::SetViewPortSet      (_rInterLightProbeFacet.m_SkyboxFromGeometry.m_ViewPortSetPtr);
+        ContextManager::SetTargetSet        (_rInterLightProbeFacet.m_TargetSetPtr);
+        ContextManager::SetViewPortSet      (_rInterLightProbeFacet.m_ViewPortSetPtr);
         ContextManager::SetBlendState       (StateManager::GetBlendState(0));
         ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(0));
         ContextManager::SetRasterizerState  (StateManager::GetRasterizerState(0));
@@ -890,11 +862,11 @@ namespace
         ContextManager::SetShaderPS(m_CubemapPSPtr);
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-        ContextManager::SetConstantBuffer(1, m_VSBufferSetPtr->GetBuffer(0));
-        ContextManager::SetConstantBuffer(2, m_VSBufferSetPtr->GetBuffer(1));
-        ContextManager::SetConstantBuffer(3, m_GSBufferSetPtr->GetBuffer(0));
-        ContextManager::SetConstantBuffer(4, m_PSBufferSetPtr->GetBuffer(0));
-        ContextManager::SetConstantBuffer(5, m_PSBufferSetPtr->GetBuffer(1));        
+        ContextManager::SetConstantBuffer(1, m_GeometryVPBufferPtr);
+        ContextManager::SetConstantBuffer(2, m_GeometryMBufferPtr);
+        ContextManager::SetConstantBuffer(3, m_CubemapGSBufferPtr);
+        ContextManager::SetConstantBuffer(4, m_SurfaceMaterialBufferPtr);
+        ContextManager::SetConstantBuffer(5, m_ProbePropertiesBufferPtr);        
 
         ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());       
         ContextManager::SetResourceBuffer(1, m_LightPropertiesBufferPtr);
@@ -926,29 +898,29 @@ namespace
             // -----------------------------------------------------------------------------
             // Upload data to buffer
             // -----------------------------------------------------------------------------
-            SViewBuffer ViewBuffer;
+            SGeometryVPBuffer ViewBuffer;
 
             ViewBuffer.m_View  = Base::Float4x4::s_Identity;
             ViewBuffer.m_View *= Base::Float4x4().SetTranslation(_rPosition * Base::Float3(-1.0f));
 
-            BufferManager::UploadConstantBufferData(m_VSBufferSetPtr->GetBuffer(0), &ViewBuffer);
+            BufferManager::UploadConstantBufferData(m_GeometryVPBufferPtr, &ViewBuffer);
 
             // -----------------------------------------------------------------------------
 
-            SProbeProperties ProbeProperties;
+            SLightprobePropertiesBuffer ProbeProperties;
 
             ProbeProperties.m_CameraPosition       = Base::Float4(_rPosition, 1.0f);
             ProbeProperties.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
-            BufferManager::UploadConstantBufferData(m_PSBufferSetPtr->GetBuffer(1), &ProbeProperties);
+            BufferManager::UploadConstantBufferData(m_ProbePropertiesBufferPtr, &ProbeProperties);
 
             // -----------------------------------------------------------------------------
 
-            SPerDrawCallConstantBufferVS ModelBuffer;
+            SGeometryMBuffer ModelBuffer;
 
             ModelBuffer.m_ModelMatrix = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
 
-            BufferManager::UploadConstantBufferData(m_VSBufferSetPtr->GetBuffer(1), &ModelBuffer);
+            BufferManager::UploadConstantBufferData(m_GeometryMBufferPtr, &ModelBuffer);
 
             // -----------------------------------------------------------------------------
             // Set every surface of this entity into a new render job
@@ -971,7 +943,7 @@ namespace
                     MaterialPtr = SurfacePtr->GetMaterial();
                 }
 
-                BufferManager::UploadConstantBufferData(m_PSBufferSetPtr->GetBuffer(0), &MaterialPtr->GetMaterialAttributes());
+                BufferManager::UploadConstantBufferData(m_SurfaceMaterialBufferPtr, &MaterialPtr->GetMaterialAttributes());
 
                 if (SurfacePtr->GetMaterial()->GetTextureSetPS()->GetTexture(0) != 0)
                 {
@@ -1040,9 +1012,9 @@ namespace
         ContextManager::ResetTopology();
 
         // TODO: this has to be the same texture
-        TextureManager::UpdateMipmap(_rInterLightProbeFacet.m_SkyboxFromGeometry.m_Texture2DPtr);
+        TextureManager::UpdateMipmap(_rInterLightProbeFacet.m_Texture2DPtr);
 
-        _rInterLightProbeFacet.m_InputCubemapSetPtr = _rInterLightProbeFacet.m_SkyboxFromGeometry.m_TextureSetPtr;
+        _rInterLightProbeFacet.m_InputCubemapSetPtr = _rInterLightProbeFacet.m_TextureSetPtr;
     }
 
     // -----------------------------------------------------------------------------
@@ -1059,13 +1031,13 @@ namespace
         // -----------------------------------------------------------------------------
         // Prepare buffer
         // -----------------------------------------------------------------------------
-        SFilterProperties CubemapSettings;
+        SFilterPropertiesBuffer CubemapSettings;
 
         CubemapSettings.m_LinearRoughness   = 0.0f;
         CubemapSettings.m_NumberOfMiplevels = 0.0f;
         CubemapSettings.m_Intensity         = _pDtLightProbeFacet->GetIntensity();
 
-        BufferManager::UploadConstantBufferData(m_FilteringPSBufferSetPtr->GetBuffer(0), &CubemapSettings);
+        BufferManager::UploadConstantBufferData(m_FilteringPSBufferPtr, &CubemapSettings);
 
         // -----------------------------------------------------------------------------
         // Refine HDR specular from HDR cube map
@@ -1102,7 +1074,7 @@ namespace
             CubemapSettings.m_NumberOfMiplevels = NumberOfMiplevels - 1.0f;
             CubemapSettings.m_Intensity         = _pDtLightProbeFacet->GetIntensity();
 
-            BufferManager::UploadConstantBufferData(m_FilteringPSBufferSetPtr->GetBuffer(0), &CubemapSettings);
+            BufferManager::UploadConstantBufferData(m_FilteringPSBufferPtr, &CubemapSettings);
 
             // -----------------------------------------------------------------------------
 
@@ -1127,9 +1099,9 @@ namespace
 
             ContextManager::SetInputLayout(m_PositionInputLayoutPtr);
 
-            ContextManager::SetConstantBuffer(0, m_CubemapGSBufferSetPtr->GetBuffer(0));
+            ContextManager::SetConstantBuffer(0, m_CubemapGSBufferPtr);
 
-            ContextManager::SetConstantBuffer(1, m_FilteringPSBufferSetPtr->GetBuffer(0));
+            ContextManager::SetConstantBuffer(1, m_FilteringPSBufferPtr);
 
             ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
@@ -1180,7 +1152,7 @@ namespace
             CubemapSettings.m_NumberOfMiplevels = 0.0f;
             CubemapSettings.m_Intensity         = _pDtLightProbeFacet->GetIntensity();
 
-            BufferManager::UploadConstantBufferData(m_FilteringPSBufferSetPtr->GetBuffer(0), &CubemapSettings);
+            BufferManager::UploadConstantBufferData(m_FilteringPSBufferPtr, &CubemapSettings);
 
             // -----------------------------------------------------------------------------
             // Prepare render target for environment cube map generation per mipmap
@@ -1213,9 +1185,9 @@ namespace
 
             ContextManager::SetInputLayout(m_PositionInputLayoutPtr);
 
-            ContextManager::SetConstantBuffer(0, m_CubemapGSBufferSetPtr->GetBuffer(0));
+            ContextManager::SetConstantBuffer(0, m_CubemapGSBufferPtr);
 
-            ContextManager::SetConstantBuffer(1, m_FilteringPSBufferSetPtr->GetBuffer(0));
+            ContextManager::SetConstantBuffer(1, m_FilteringPSBufferPtr);
 
             ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
@@ -1259,7 +1231,7 @@ namespace
 
     void CGfxLightProbeManager::BuildLightJobs()
     {
-        SLightProperties LightBuffer[s_MaxNumberOfLightsPerProbe];
+        SLightPropertiesBuffer LightBuffer[s_MaxNumberOfLightsPerProbe];
         unsigned int     IndexOfLight;
 
         // -----------------------------------------------------------------------------
