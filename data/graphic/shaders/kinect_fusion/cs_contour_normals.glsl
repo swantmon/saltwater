@@ -19,13 +19,18 @@ layout(binding = 1, MAP_TEXTURE_FORMAT) uniform image2D cs_NormalBuffer;
 // Functions
 // -------------------------------------------------------------------------------------
 
+vec2 ComputeGradient(ivec2 Position)
+{
+    
+}
+
 layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
 void main()
 {
     const int x = int(gl_GlobalInvocationID.x);
     const int y = int(gl_GlobalInvocationID.y);
-
-    imageStore(cs_NormalBuffer, ivec2(x, y), vec4(0.5, 0.5, 0.5, 1.0));
+    
+    imageStore(cs_NormalBuffer, ivec2(x, y), vec4(ComputeGradient(ivec2(x, y)), 0.5, 1.0));
 }
 
 #endif // __INCLUDE_CS_CONTOURS_NORMAL_GLSL__
