@@ -39,11 +39,13 @@
 
 #include "data/data_actor_type.h"
 #include "data/data_entity.h"
+#include "data/data_point_light_facet.h"
 #include "data/data_transformation_facet.h"
 #include "graphic/gfx_mesh.h"
 #include "graphic/gfx_mesh_actor_facet.h"
 #include "graphic/gfx_state_manager.h"
 #include "graphic/gfx_histogram_renderer.h"
+#include "graphic/gfx_point_light_facet.h"
 #include "data/data_sun_facet.h"
 #include "graphic/gfx_sun_facet.h"
 
@@ -104,13 +106,15 @@ namespace
             float m_NumberOfMiplevels;
         };
 
-        struct SSunLightProperties
+        struct SLightProperties
         {
             Base::Float4x4 m_LightViewProjection;
+            Base::Float4   m_LightPosition;
             Base::Float4   m_LightDirection;
             Base::Float4   m_LightColor;
-            float          m_SunAngularRadius;
+            Base::Float4   m_LightSettings;             // InvSqrAttenuationRadius / SunAngularRadius, AngleScale, AngleOffset, WithShadow
             unsigned int   m_ExposureHistoryIndex;
+            unsigned int   m_LightType;
         };
 
         class CInternLightProbeFacet : public CLightProbeFacet
@@ -170,6 +174,8 @@ namespace
         CShaderPtr m_CubemapPSPtr;
         CShaderPtr m_CubemapTexturePSPtr;
 
+        CBufferPtr m_LightPropertiesBufferPtr;
+
         CBufferSetPtr m_CubemapGSBufferSetPtr;
         CBufferSetPtr m_FilteringPSBufferSetPtr;
         CBufferSetPtr m_CustomVSBufferSetPtr;
@@ -195,6 +201,8 @@ namespace
         void RenderEntities(CInternLightProbeFacet& _rInterLightProbeFacet);
 
         void RenderFiltering(CInternLightProbeFacet& _rInterLightProbeFacet);
+
+        void BuildLightJobs();
     };
 } // namespace 
 
@@ -431,13 +439,13 @@ namespace
 
         ConstanteBufferDesc.m_Stride        = 0;
         ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
-        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSunLightProperties);
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SLightProperties) * 10;
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr SunLightPSBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        m_LightPropertiesBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
         
         // -----------------------------------------------------------------------------
         
@@ -451,7 +459,7 @@ namespace
 
         m_VSBufferSetPtr = BufferManager::CreateBufferSet(ViewBuffer, VSBuffer);
         m_GSBufferSetPtr = BufferManager::CreateBufferSet(GSBuffer);
-        m_PSBufferSetPtr = BufferManager::CreateBufferSet(SurfaceMaterialBufferPtr, SunLightPSBufferPtr);
+        m_PSBufferSetPtr = BufferManager::CreateBufferSet(SurfaceMaterialBufferPtr, m_LightPropertiesBufferPtr);
 
         // -----------------------------------------------------------------------------
         // Models
@@ -489,6 +497,8 @@ namespace
         m_CubemapGSPtr = 0;
         m_CubemapPSPtr = 0;
         m_CubemapTexturePSPtr = 0;
+
+        m_LightPropertiesBufferPtr = 0;
 
         m_CubemapGSBufferSetPtr = 0;
         m_FilteringPSBufferSetPtr = 0;
@@ -535,6 +545,8 @@ namespace
                 // -----------------------------------------------------------------------------
                 if (pDataGlobalProbeFacet->GetRefreshMode() == Dt::CLightProbeFacet::Dynamic)
                 {
+                    BuildLightJobs();
+
                     RenderEntities(*pGraphicGlobalProbeFacet);
 
                     RenderFiltering(*pGraphicGlobalProbeFacet);
@@ -584,6 +596,8 @@ namespace
             // -----------------------------------------------------------------------------
             // Render
             // -----------------------------------------------------------------------------
+            BuildLightJobs();
+
             RenderEntities(rGraphicSkyboxFacet);
 
             RenderFiltering(rGraphicSkyboxFacet);
@@ -609,6 +623,8 @@ namespace
             // TODO by tschwandt
             // 1. what happens on dirty cubemap and not sky?
             // 2. render general light probe with settings
+            BuildLightJobs();
+
             RenderEntities(*pGraphicGlobalProbeLightFacet);
 
             RenderFiltering(*pGraphicGlobalProbeLightFacet);
@@ -855,56 +871,10 @@ namespace
         ContextManager::SetConstantBuffer(2, m_VSBufferSetPtr->GetBuffer(1));
         ContextManager::SetConstantBuffer(3, m_GSBufferSetPtr->GetBuffer(0));
         ContextManager::SetConstantBuffer(4, m_PSBufferSetPtr->GetBuffer(0));
-        ContextManager::SetConstantBuffer(5, m_PSBufferSetPtr->GetBuffer(1));
-
-        ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
-
-        // -----------------------------------------------------------------------------
-        // Light
-        // -----------------------------------------------------------------------------
         
 
-        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
-        EndOfEntities = Dt::Map::EntitiesEnd();
-
-        SSunLightProperties LightBuffer;
-    
-        LightBuffer.m_LightViewProjection  .SetIdentity();
-        LightBuffer.m_LightDirection       .SetZero();
-        LightBuffer.m_LightColor           .SetZero();
-        LightBuffer.m_SunAngularRadius     = 0.0f;
-        LightBuffer.m_ExposureHistoryIndex = 0;
-
-        for (; CurrentEntity != EndOfEntities; )
-        {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
-
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() != Dt::SLightType::Sun)
-            {
-                CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
-
-                continue;
-            }
-
-            Dt::CSunLightFacet* pDataSunFacet = 0;
-            Gfx::CSunFacet*     pGraphicSunFacet = 0;
-
-            pDataSunFacet    = static_cast<Dt::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-            pGraphicSunFacet = static_cast<Gfx::CSunFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
-
-            LightBuffer.m_LightViewProjection  = pGraphicSunFacet->GetCamera()->GetViewProjectionMatrix();
-            LightBuffer.m_LightDirection       = Base::Float4(pDataSunFacet->GetDirection(), 0.0f).Normalize();
-            LightBuffer.m_LightColor           = Base::Float4(pDataSunFacet->GetLightness(), 1.0f);
-            LightBuffer.m_SunAngularRadius     = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
-            LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
-
-            break;
-        }
-    
-        BufferManager::UploadConstantBufferData(m_PSBufferSetPtr->GetBuffer(1), &LightBuffer);
+        ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());       
+        ContextManager::SetResourceBuffer(1, m_LightPropertiesBufferPtr);
 
         // -----------------------------------------------------------------------------
         // Actors
@@ -1232,6 +1202,90 @@ namespace
         }
 
         Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxLightProbeManager::BuildLightJobs()
+    {
+        SLightProperties LightBuffer[10];
+
+        // -----------------------------------------------------------------------------
+        // Iterate throw every entity inside this map
+        // -----------------------------------------------------------------------------
+        Dt::Map::CEntityIterator CurrentLightEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
+        Dt::Map::CEntityIterator EndOfLightEntities = Dt::Map::EntitiesEnd();
+
+        unsigned int IndexofLight = 0;
+
+        for (; CurrentLightEntity != EndOfLightEntities && IndexofLight < 10; )
+        {
+            Dt::CEntity& rCurrentEntity = *CurrentLightEntity;
+
+            LightBuffer[IndexofLight].m_LightType            = 0;
+            LightBuffer[IndexofLight].m_LightViewProjection  .SetIdentity();
+            LightBuffer[IndexofLight].m_LightPosition        .SetZero();
+            LightBuffer[IndexofLight].m_LightDirection       .SetZero();
+            LightBuffer[IndexofLight].m_LightColor           .SetZero();
+            LightBuffer[IndexofLight].m_LightSettings        .SetZero();
+            LightBuffer[IndexofLight].m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
+
+            // -----------------------------------------------------------------------------
+            // Setup buffer
+            // -----------------------------------------------------------------------------
+            if (rCurrentEntity.GetType() == Dt::SLightType::Sun)
+            {
+                Dt::CSunLightFacet* pDtSunFacet  = static_cast<Dt::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+                Gfx::CSunFacet*     pGfxSunFacet = static_cast<Gfx::CSunFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+
+                assert(pDtSunFacet != 0 && pGfxSunFacet != 0);
+
+                LightBuffer[IndexofLight].m_LightType            = 0;
+                LightBuffer[IndexofLight].m_LightViewProjection  = pGfxSunFacet->GetCamera()->GetViewProjectionMatrix();
+                LightBuffer[IndexofLight].m_LightDirection       = Base::Float4(pDtSunFacet->GetDirection(), 0.0f).Normalize();
+                LightBuffer[IndexofLight].m_LightColor           = Base::Float4(pDtSunFacet->GetLightness(), 1.0f);
+                LightBuffer[IndexofLight].m_LightSettings[0]     = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
+                LightBuffer[IndexofLight].m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
+
+                ++IndexofLight;
+            }
+            else if (rCurrentEntity.GetType() == Dt::SLightType::Point)
+            {
+                Dt::CPointLightFacet*  pDtPointFacet  = static_cast<Dt::CPointLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+                Gfx::CPointLightFacet* pGfxPointFacet = static_cast<Gfx::CPointLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+
+                assert(pDtPointFacet != 0 && pGfxPointFacet != 0);
+
+                float InvSqrAttenuationRadius = pDtPointFacet->GetReciprocalSquaredAttenuationRadius();
+                float AngleScale              = pDtPointFacet->GetAngleScale();
+                float AngleOffset             = pDtPointFacet->GetAngleOffset();
+                float HasShadows              = pDtPointFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows ? 1.0f : 0.0f;
+            
+                LightBuffer[IndexofLight].m_LightType      = 1;
+                LightBuffer[IndexofLight].m_LightPosition  = Base::Float4(rCurrentEntity.GetWorldPosition(), 1.0f);
+                LightBuffer[IndexofLight].m_LightDirection = Base::Float4(pDtPointFacet->GetDirection(), 0.0f).Normalize();
+                LightBuffer[IndexofLight].m_LightColor     = Base::Float4(pDtPointFacet->GetLightness(), 1.0f);
+                LightBuffer[IndexofLight].m_LightSettings  = Base::Float4(InvSqrAttenuationRadius, AngleScale, AngleOffset, HasShadows);
+
+                LightBuffer[IndexofLight].m_LightViewProjection.SetIdentity();
+
+                if (pDtPointFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows)
+                {
+                    assert(pGfxPointFacet->GetCamera().IsValid());
+
+                    LightBuffer[IndexofLight].m_LightViewProjection = pGfxPointFacet->GetCamera()->GetViewProjectionMatrix();
+                }
+
+                ++IndexofLight;
+            }
+
+            // -----------------------------------------------------------------------------
+            // Next entity
+            // -----------------------------------------------------------------------------
+            CurrentLightEntity = CurrentLightEntity.Next(Dt::SEntityCategory::Light);
+        }
+
+        BufferManager::UploadConstantBufferData(m_LightPropertiesBufferPtr, &LightBuffer);
     }
 } // namespace 
 

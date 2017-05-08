@@ -8,6 +8,20 @@
 #include "common_material.glsl"
 
 // -----------------------------------------------------------------------------
+// Definitions
+// -----------------------------------------------------------------------------
+struct SLightProperties
+{
+    mat4 ps_LightViewProjection;
+    vec4 ps_LightPosition;
+    vec4 ps_LightDirection;
+    vec4 ps_LightColor;
+    vec4 ps_LightSettings;
+    uint ps_ExposureHistoryIndex;
+    uint ps_LightType;
+};
+
+// -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
 layout(std140, binding = 4) uniform UB4
@@ -19,18 +33,14 @@ layout(std140, binding = 4) uniform UB4
     float ps_MetalMask;
 };
 
-layout(std140, binding = 5) uniform UB5
-{
-    mat4  ps_LightViewProjection;
-    vec4  ps_LightDirection;
-    vec4  ps_LightColor;
-    float ps_SunAngularRadius;
-    uint  ps_ExposureHistoryIndex;
-};
-
 layout(std430, binding = 0) readonly buffer BB0
 {
     float ps_ExposureHistory[8];
+};
+
+layout(std430, binding = 1) readonly buffer BB1
+{
+    SLightProperties ps_LightProperties[];
 };
 
 //layout(binding = 0) uniform sampler2DShadow ps_ShadowTexture;
@@ -64,6 +74,7 @@ void main(void)
     float Roughness = ps_Roughness;
     float MetalMask = ps_MetalMask;
     float AO        = 1.0f;
+    vec3 Luminance  = vec3(0.0f);
 
 #ifdef USE_TEX_DIFFUSE
     Color *= texture(PSTextureDiffuse, UV).rgb;
@@ -95,32 +106,48 @@ void main(void)
     Data.m_AmbientOcclusion = AO;
 
     // -----------------------------------------------------------------------------
-    // Compute lighting for sun light
+    // Forward pass for each light
     // -----------------------------------------------------------------------------
-    vec3 WSLightDirection  = -ps_LightDirection.xyz;
-    vec3 WSViewDirection   = normalize(vec3(0,0,10) - Data.m_WSPosition);
-    
-    float NdotV = dot(Data.m_WSNormal, WSViewDirection);
-    
-    vec3 ViewMirrorUnitDir = 2.0f * NdotV * Data.m_WSNormal - WSViewDirection;
+    for (uint IndexOfLight = 0; IndexOfLight < ps_LightProperties.length(); ++ IndexOfLight)
+    {
+        SLightProperties LightProb = ps_LightProperties[IndexOfLight];
 
-    // -----------------------------------------------------------------------------
-    // Compute sun data
-    // -----------------------------------------------------------------------------
-    float r = sin(ps_SunAngularRadius);
-    float d = cos(ps_SunAngularRadius);
+        if (LightProb.ps_LightType == 0)
+        {
+            // -----------------------------------------------------------------------------
+            // Exposure data
+            // -----------------------------------------------------------------------------
+            float AverageExposure = ps_ExposureHistory[LightProb.ps_ExposureHistoryIndex];
 
-    float DdotR = dot(WSLightDirection, ViewMirrorUnitDir);
-    vec3  S     = ViewMirrorUnitDir - DdotR * WSLightDirection;
-    vec3  L     = DdotR < d ? normalize(d * WSLightDirection + normalize(S) * r) : ViewMirrorUnitDir;
-    
-    // float Shadow = GetShadowAtPositionWithPCF(Data.m_WSPosition, ps_LightViewProjection, ps_ShadowTexture);
-    float Shadow = 1.0f;
-    
-    // -----------------------------------------------------------------------------
-    // Apply light luminance
-    // -----------------------------------------------------------------------------
-    vec3 Luminance = BRDF(L, WSViewDirection, Data.m_WSNormal, Data) * clamp(dot(Data.m_WSNormal, L), 0.0f, 1.0f) * ps_LightColor.xyz * Data.m_AmbientOcclusion * Shadow;
+            // -----------------------------------------------------------------------------
+            // Compute lighting for sun light
+            // -----------------------------------------------------------------------------
+            vec3 WSLightDirection  = -LightProb.ps_LightDirection.xyz;
+            vec3 WSViewDirection   = normalize(vec3(0.0f, 0.0f, 10.0f) - Data.m_WSPosition);
+            
+            float NdotV = dot(Data.m_WSNormal, WSViewDirection);
+            
+            vec3 ViewMirrorUnitDir = 2.0f * NdotV * Data.m_WSNormal - WSViewDirection;
+
+            // -----------------------------------------------------------------------------
+            // Compute sun data
+            // -----------------------------------------------------------------------------
+            float r = sin(LightProb.ps_LightSettings[0]);
+            float d = cos(LightProb.ps_LightSettings[0]);
+
+            float DdotR = dot(WSLightDirection, ViewMirrorUnitDir);
+            vec3  S     = ViewMirrorUnitDir - DdotR * WSLightDirection;
+            vec3  L     = DdotR < d ? normalize(d * WSLightDirection + normalize(S) * r) : ViewMirrorUnitDir;
+            
+            // float Shadow = GetShadowAtPositionWithPCF(Data.m_WSPosition, ps_LightViewProjection, ps_ShadowTexture);
+            float Shadow = 1.0f;
+            
+            // -----------------------------------------------------------------------------
+            // Apply light luminance
+            // -----------------------------------------------------------------------------
+            Luminance += BRDF(L, WSViewDirection, Data.m_WSNormal, Data) * clamp(dot(Data.m_WSNormal, L), 0.0f, 1.0f) * LightProb.ps_LightColor.xyz * Data.m_AmbientOcclusion * Shadow;
+        }
+    }
 
     out_Output = vec4(Luminance, 0.0f);
 }
