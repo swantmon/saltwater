@@ -1064,12 +1064,35 @@ namespace
                 ++IndexOfRenderInputDesc;
             }
 
-            _rSurface.m_InputLayoutPtr = Gfx::ShaderManager::CreateInputLayout(pDescriptor, InputLayoutDesc.m_NumberOfElements, VSShader);
+            Gfx::ShaderManager::CreateInputLayout(pDescriptor, InputLayoutDesc.m_NumberOfElements, VSShader);
 
             Base::CMemory::Free(pDescriptor);
         }
 
+        if (VSMVPShader->GetInputLayout() == nullptr)
+        {
+            SInputElementDescriptorSetting InputLayoutDesc = g_InputLayoutDescriptor[VSIndex];
+
+            Gfx::SInputElementDescriptor* pDescriptor = static_cast<Gfx::SInputElementDescriptor*>(Base::CMemory::Allocate(sizeof(Gfx::SInputElementDescriptor) * InputLayoutDesc.m_NumberOfElements));
+
+            unsigned int IndexOfRenderInputDesc = InputLayoutDesc.m_Offset;
+
+            for (unsigned int IndexOfElement = 0; IndexOfElement < InputLayoutDesc.m_NumberOfElements; ++IndexOfElement)
+            {
+                pDescriptor[IndexOfElement] = g_InputLayouts[IndexOfRenderInputDesc];
+
+                ++IndexOfRenderInputDesc;
+            }
+
+            Gfx::ShaderManager::CreateInputLayout(pDescriptor, InputLayoutDesc.m_NumberOfElements, VSMVPShader);
+
+            Base::CMemory::Free(pDescriptor);
+        }
+
+
         _rSurface.m_VertexShaderPtr = VSShader;
+
+        _rSurface.m_MVPVertexShaderPtr = VSMVPShader;
     }
 } // namespace
 

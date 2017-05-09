@@ -43,14 +43,13 @@ namespace Gfx
 
     public:
         
-        CBufferSetPtr   GetVertexBuffer() const;
-        CBufferPtr      GetIndexBuffer() const;
-        CMaterialPtr    GetMaterial() const;
-        CShaderPtr      GetShaderVS() const;
-        CShaderPtr      GetMVPShaderVS() const;
-        CInputLayoutPtr GetInputLayout() const;
-        unsigned int    GetNumberOfIndices() const;
-        unsigned int    GetNumberOfVertices() const;
+        CBufferSetPtr GetVertexBuffer() const;
+        CBufferPtr    GetIndexBuffer() const;
+        CMaterialPtr  GetMaterial() const;
+        CShaderPtr    GetShaderVS() const;
+        CShaderPtr    GetMVPShaderVS() const;
+        unsigned int  GetNumberOfIndices() const;
+        unsigned int  GetNumberOfVertices() const;
         
         const SSurfaceKey& GetKey() const;
         
@@ -67,8 +66,6 @@ namespace Gfx
 
         CShaderPtr m_VertexShaderPtr;
         CShaderPtr m_MVPVertexShaderPtr;
-
-        CInputLayoutPtr m_InputLayoutPtr;
         
         unsigned int m_NumberOfIndices;
         unsigned int m_NumberOfVertices;

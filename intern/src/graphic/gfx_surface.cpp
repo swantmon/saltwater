@@ -62,13 +62,6 @@ namespace Gfx
     {
         return m_MVPVertexShaderPtr;
     }
-
-    // -----------------------------------------------------------------------------
-
-    CInputLayoutPtr CSurface::GetInputLayout() const
-    {
-        return m_InputLayoutPtr;
-    }
     
     // -----------------------------------------------------------------------------
     
