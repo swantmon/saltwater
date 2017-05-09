@@ -137,13 +137,12 @@ namespace
 
         public:
 
-            CInputLayoutPtr m_InputLayoutPtr;
-            CTexture2DPtr   m_Texture2DPtr;
-            CTextureSetPtr  m_TextureSetPtr;
             CTargetSetPtr   m_TargetSetPtr;
             CViewPortSetPtr m_ViewPortSetPtr;
 
-            CTextureSetPtr m_InputCubemapSetPtr;
+            CTexture2DPtr  m_EntitiesCubemapPtr;
+            CTextureSetPtr m_EntitiesCubemapSetPtr;
+            CTextureSetPtr m_SkyCubemapSetPtr;
 
             CTargetSets   m_SpecularHDRTargetSetPtrs;
             CViewPortSets m_SpecularViewPortSetPtrs;
@@ -207,7 +206,7 @@ namespace
 {
     CGfxLightProbeManager::CInternLightProbeFacet::CInternLightProbeFacet()
         : CLightProbeFacet          ()
-        , m_InputCubemapSetPtr      ()
+        , m_SkyCubemapSetPtr        ()
         , m_DiffuseHDRTargetSetPtr  ()
         , m_DiffuseViewPortSetPtr   ()
         , m_SpecularHDRTargetSetPtrs()
@@ -220,13 +219,13 @@ namespace
 
     CGfxLightProbeManager::CInternLightProbeFacet::~CInternLightProbeFacet()
     {
-        m_InputLayoutPtr = 0;
-        m_TargetSetPtr   = 0;
-        m_ViewPortSetPtr = 0;
-        m_TextureSetPtr  = 0;
-        m_Texture2DPtr   = 0;
+        m_TargetSetPtr          = 0;
+        m_ViewPortSetPtr        = 0;
 
-        m_InputCubemapSetPtr     = 0;
+        m_EntitiesCubemapSetPtr = 0;
+        m_EntitiesCubemapPtr    = 0;
+        m_SkyCubemapSetPtr      = 0;
+
         m_DiffuseHDRTargetSetPtr = 0;
         m_DiffuseViewPortSetPtr  = 0;
 
@@ -472,21 +471,21 @@ namespace
 
         m_FilteringVSPtr = 0;
         m_FilteringGSPtr = 0;
-        m_FilteringDiffusePSPtr = 0;
+        m_FilteringDiffusePSPtr  = 0;
         m_FilteringSpecularPSPtr = 0;
-        m_CubemapGeometryVSPtr = 0;
+        m_CubemapGeometryVSPtr   = 0;
         m_CubemapGSPtr = 0;
         m_CubemapPSPtr = 0;
         m_CubemapTexturePSPtr = 0;
 
         m_LightPropertiesBufferPtr = 0;
 
-        m_CubemapGSBufferPtr = 0;
+        m_CubemapGSBufferPtr   = 0;
         m_FilteringPSBufferPtr = 0;
         m_SurfaceMaterialBufferPtr = 0;
         m_ProbePropertiesBufferPtr = 0;
         m_GeometryVPBufferPtr = 0;
-        m_GeometryMBufferPtr = 0;
+        m_GeometryMBufferPtr  = 0;
 
         m_PositionInputLayoutPtr = 0;
 
@@ -657,11 +656,11 @@ namespace
         TextureDescriptor.m_pPixels          = 0;
         TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
 
-        rGfxLightProbeFacet.m_Texture2DPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
+        rGfxLightProbeFacet.m_EntitiesCubemapPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
-        rGfxLightProbeFacet.m_TextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(rGfxLightProbeFacet.m_Texture2DPtr));
+        rGfxLightProbeFacet.m_EntitiesCubemapSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(rGfxLightProbeFacet.m_EntitiesCubemapPtr));
 
-        CTargetSetPtr SkyCubeTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(rGfxLightProbeFacet.m_Texture2DPtr));
+        CTargetSetPtr SkyCubeTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(rGfxLightProbeFacet.m_EntitiesCubemapPtr));
 
         ViewPortDesc.m_TopLeftX = 0.0f;
         ViewPortDesc.m_TopLeftY = 0.0f;
@@ -819,7 +818,7 @@ namespace
 
         assert(pSkyFacet);
 
-        _rInterLightProbeFacet.m_InputCubemapSetPtr = pSkyFacet->GetCubemapSetPtr();
+        _rInterLightProbeFacet.m_SkyCubemapSetPtr = pSkyFacet->GetCubemapSetPtr();
     }
 
     // -----------------------------------------------------------------------------
@@ -1012,9 +1011,9 @@ namespace
         ContextManager::ResetTopology();
 
         // TODO: this has to be the same texture
-        TextureManager::UpdateMipmap(_rInterLightProbeFacet.m_Texture2DPtr);
+        TextureManager::UpdateMipmap(_rInterLightProbeFacet.m_EntitiesCubemapPtr);
 
-        _rInterLightProbeFacet.m_InputCubemapSetPtr = _rInterLightProbeFacet.m_TextureSetPtr;
+        _rInterLightProbeFacet.m_SkyCubemapSetPtr = _rInterLightProbeFacet.m_EntitiesCubemapSetPtr;
     }
 
     // -----------------------------------------------------------------------------
@@ -1105,7 +1104,7 @@ namespace
 
             ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-            ContextManager::SetTexture(0, _rInterLightProbeFacet.m_InputCubemapSetPtr->GetTexture(0));
+            ContextManager::SetTexture(0, _rInterLightProbeFacet.m_SkyCubemapSetPtr->GetTexture(0));
 
             // -----------------------------------------------------------------------------
             // Draw
@@ -1191,7 +1190,7 @@ namespace
 
             ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-            ContextManager::SetTexture(0, _rInterLightProbeFacet.m_InputCubemapSetPtr->GetTexture(0));
+            ContextManager::SetTexture(0, _rInterLightProbeFacet.m_SkyCubemapSetPtr->GetTexture(0));
 
             // -----------------------------------------------------------------------------
             // Draw
