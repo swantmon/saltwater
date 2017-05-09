@@ -50,11 +50,11 @@ layout(std430, binding = 1) readonly buffer BB1
     SLightProperties ps_LightProperties[];
 };
 
-layout(binding = 0) uniform sampler2D       PSTextureDiffuse;
-layout(binding = 1) uniform sampler2D       PSTextureNormal;
-layout(binding = 2) uniform sampler2D       PSTextureRoughness;
-layout(binding = 3) uniform sampler2D       PSTextureMetallic;
-layout(binding = 4) uniform sampler2D       PSTextureAO;
+layout(binding = 0) uniform sampler2D       ps_DiffuseTexture;
+layout(binding = 1) uniform sampler2D       ps_NormalTexture;
+layout(binding = 2) uniform sampler2D       ps_RougnessTexture;
+layout(binding = 3) uniform sampler2D       ps_Metaltexture;
+layout(binding = 4) uniform sampler2D       ps_AOTexture;
 layout(binding = 5) uniform sampler2DShadow ps_ShadowTexture;
 
 // -----------------------------------------------------------------------------
@@ -84,23 +84,23 @@ void main(void)
     vec3 Luminance  = vec3(0.0f);
 
 #ifdef USE_TEX_DIFFUSE
-    Color *= texture(PSTextureDiffuse, UV).rgb;
+    Color *= texture(ps_DiffuseTexture, UV).rgb;
 #endif // USE_TEX_DIFFUSE
 
 #ifdef USE_TEX_NORMAL
-    WSNormal = in_WSNormalMatrix * (texture(PSTextureNormal, UV).rgb * 2.0f - 1.0f);
+    WSNormal = in_WSNormalMatrix * (texture(ps_NormalTexture, UV).rgb * 2.0f - 1.0f);
 #endif // USE_TEX_NORMAL
 
 #ifdef USE_TEX_ROUGHNESS
-    Roughness *= texture(PSTextureRoughness, UV).r;
+    Roughness *= texture(ps_RougnessTexture, UV).r;
 #endif // USE_TEX_ROUGHNESS
 
 #ifdef USE_TEX_METALLIC
-    MetalMask *= texture(PSTextureMetallic, UV).r;
+    MetalMask *= texture(ps_Metaltexture, UV).r;
 #endif // USE_TEX_METALLIC
 
 #ifdef USE_TEX_AO
-    AO *= texture(PSTextureAO, UV).r;
+    AO *= texture(ps_AOTexture, UV).r;
 #endif // USE_TEX_AO
 
     // -----------------------------------------------------------------------------
