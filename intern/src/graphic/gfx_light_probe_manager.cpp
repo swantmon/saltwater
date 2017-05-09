@@ -180,7 +180,7 @@ namespace
 
         void RenderFiltering(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet* _pDtLightProbeFacet);
 
-        void BuildLightJobs();
+        void UpdateLightProperties();
     };
 } // namespace 
 
@@ -201,8 +201,8 @@ namespace
 
     CGfxLightProbeManager::CInternLightProbeFacet::~CInternLightProbeFacet()
     {
-        m_TargetSetPtr          = 0;
-        m_ViewPortSetPtr        = 0;
+        m_TargetSetPtr   = 0;
+        m_ViewPortSetPtr = 0;
 
         m_EntitiesCubemapSetPtr = 0;
         m_EntitiesCubemapPtr    = 0;
@@ -219,14 +219,14 @@ namespace
 namespace 
 {
     CGfxLightProbeManager::CGfxLightProbeManager()
-        : m_EnvironmentSpherePtr   ()
-        , m_FilteringVSPtr         ()
-        , m_FilteringDiffusePSPtr  ()
-        , m_FilteringSpecularPSPtr ()
-        , m_CubemapGSBufferPtr     ()
-        , m_FilteringPSBufferPtr   ()
-        , m_PositionInputLayoutPtr ()
-        , m_LightprobeFacets       ()
+        : m_EnvironmentSpherePtr  ()
+        , m_FilteringVSPtr        ()
+        , m_FilteringDiffusePSPtr ()
+        , m_FilteringSpecularPSPtr()
+        , m_CubemapGSBufferPtr    ()
+        , m_FilteringPSBufferPtr  ()
+        , m_PositionInputLayoutPtr()
+        , m_LightprobeFacets      ()
     {
 
     }
@@ -251,7 +251,7 @@ namespace
 
         m_FilteringSpecularPSPtr = ShaderManager::CompilePS("fs_lightprobe_specular_sampling.glsl", "main");
 
-        m_CubemapGSPtr         = ShaderManager::CompileGS("gs_lightprobe_sampling.glsl", "main");
+        m_CubemapGSPtr = ShaderManager::CompileGS("gs_lightprobe_sampling.glsl", "main");
 
         // -----------------------------------------------------------------------------
 
@@ -297,7 +297,7 @@ namespace
         Base::Float3 UpDirection;
         Base::Float3 TargetPosition;
         
-        float lookAt =  1.5f;
+        float LookAt = 1.5f;
         
         SCubemapGeometryBuffer DefaultGSValues;
         
@@ -305,42 +305,42 @@ namespace
         
         // -----------------------------------------------------------------------------
         
-        TargetPosition = EyePosition + Base::Float3(lookAt, 0.0f, 0.0f);
+        TargetPosition = EyePosition + Base::Float3(LookAt, 0.0f, 0.0f);
         UpDirection    = Base::Float3(0.0f, -1.0f, 0.0f);
         
         DefaultGSValues.m_CubeViewMatrix[0].LookAt(EyePosition, TargetPosition, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        TargetPosition = EyePosition + Base::Float3(-lookAt, 0.0f, 0.0f);
+        TargetPosition = EyePosition + Base::Float3(-LookAt, 0.0f, 0.0f);
         UpDirection    = Base::Float3(0.0f, -1.0f, 0.0f);
         
         DefaultGSValues.m_CubeViewMatrix[1].LookAt(EyePosition, TargetPosition, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        TargetPosition = EyePosition + Base::Float3(0.0f, lookAt, 0.0f);
+        TargetPosition = EyePosition + Base::Float3(0.0f, LookAt, 0.0f);
         UpDirection    = Base::Float3(0.0f, 0.0f, -1.0f);
         
         DefaultGSValues.m_CubeViewMatrix[2].LookAt(EyePosition, TargetPosition, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        TargetPosition = EyePosition + Base::Float3(0.0f, -lookAt, 0.0f);
+        TargetPosition = EyePosition + Base::Float3(0.0f, -LookAt, 0.0f);
         UpDirection    = Base::Float3(0.0f, 0.0f, 1.0f);
         
         DefaultGSValues.m_CubeViewMatrix[3].LookAt(EyePosition, TargetPosition, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        TargetPosition = EyePosition + Base::Float3(0.0f, 0.0f, lookAt);
+        TargetPosition = EyePosition + Base::Float3(0.0f, 0.0f, LookAt);
         UpDirection    = Base::Float3(0.0f, -1.0f, 0.0f);
         
         DefaultGSValues.m_CubeViewMatrix[4].LookAt(EyePosition, TargetPosition, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        TargetPosition = EyePosition + Base::Float3(0.0f, 0.0f, -lookAt);
+        TargetPosition = EyePosition + Base::Float3(0.0f, 0.0f, -LookAt);
         UpDirection    = Base::Float3(0.0f, -1.0f, 0.0f);
         
         DefaultGSValues.m_CubeViewMatrix[5].LookAt(EyePosition, TargetPosition, UpDirection);
@@ -792,7 +792,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Prepare lights
         // -----------------------------------------------------------------------------
-        BuildLightJobs();
+        UpdateLightProperties();
 
         // -----------------------------------------------------------------------------
         // Clear target set
@@ -888,7 +888,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 CSurfacePtr SurfacePtr = MeshPtr->GetLOD(0)->GetSurface(IndexOfSurface);
 
-                if (SurfacePtr == nullptr)
+                if (SurfacePtr == 0)
                 {
                     break;
                 }
@@ -902,6 +902,8 @@ namespace
                 {
                     MaterialPtr = SurfacePtr->GetMaterial();
                 }
+
+                assert(MaterialPtr != 0);
 
                 BufferManager::UploadConstantBufferData(m_SurfaceMaterialBufferPtr, &MaterialPtr->GetMaterialAttributes());
 
@@ -946,7 +948,6 @@ namespace
                     ContextManager::ResetTexture(IndexOfTexture);
                 }
             }
-            
 
             // -----------------------------------------------------------------------------
             // Next entity
@@ -1204,7 +1205,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxLightProbeManager::BuildLightJobs()
+    void CGfxLightProbeManager::UpdateLightProperties()
     {
         SLightPropertiesBuffer LightBuffer[s_MaxNumberOfLightsPerProbe];
         unsigned int     IndexOfLight;
@@ -1250,11 +1251,14 @@ namespace
 
                 assert(pDtSunFacet != 0 && pGfxSunFacet != 0);
 
+                float SunAngularRadius = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
+                float HasShadows       = 1.0f;
+
                 LightBuffer[IndexOfLight].m_LightType           = 1;
                 LightBuffer[IndexOfLight].m_LightViewProjection = pGfxSunFacet->GetCamera()->GetViewProjectionMatrix();
                 LightBuffer[IndexOfLight].m_LightDirection      = Base::Float4(pDtSunFacet->GetDirection(), 0.0f).Normalize();
                 LightBuffer[IndexOfLight].m_LightColor          = Base::Float4(pDtSunFacet->GetLightness(), 1.0f);
-                LightBuffer[IndexOfLight].m_LightSettings[0]    = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
+                LightBuffer[IndexOfLight].m_LightSettings       = Base::Float4(SunAngularRadius, 0.0f, 0.0f, HasShadows);
 
                 ++IndexOfLight;
             }
