@@ -85,6 +85,16 @@ namespace
         "PSShaderMaterialDisney",
     };
 
+    const char* g_pForwardShaderFilenamePS[] =
+    {
+        "fs_material_forward.glsl",
+    };
+
+    const char* g_pForwardShaderNamesPS[] =
+    {
+        "PSShaderMaterialDisneyForward",
+    };
+
     // -----------------------------------------------------------------------------
     // Define shader defines
     // -----------------------------------------------------------------------------
@@ -813,6 +823,8 @@ namespace
         // Disney
         // -----------------------------------------------------------------------------
         _rMaterial.m_ShaderPtrs[CShader::Pixel] = Gfx::ShaderManager::CompilePS(g_pShaderFilenamePS[0], g_pShaderNamesPS[0], pDefineString);
+
+        _rMaterial.m_ForwardShaderPSPtr = Gfx::ShaderManager::CompilePS(g_pForwardShaderFilenamePS[0], g_pForwardShaderNamesPS[0], pDefineString);
     }
 } // namespace
 

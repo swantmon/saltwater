@@ -1,14 +1,16 @@
 
-#ifndef __INCLUDE_FS_X1_GLSL__
-#define __INCLUDE_FS_X1_GLSL__
+#ifndef __INCLUDE_FS_MATERIAL_FORWARD_GLSL__
+#define __INCLUDE_FS_MATERIAL_FORWARD_GLSL__
 
 #include "common.glsl"
 #include "common_light.glsl"
 #include "common_global.glsl"
+#include "common_gbuffer.glsl"
 #include "common_material.glsl"
 
 // -----------------------------------------------------------------------------
 // Definitions
+// LightType: 1 = Sun, 2 = Point
 // -----------------------------------------------------------------------------
 struct SLightProperties
 {
@@ -48,12 +50,12 @@ layout(std430, binding = 1) readonly buffer BB1
     SLightProperties ps_LightProperties[];
 };
 
-//layout(binding = 0) uniform sampler2DShadow ps_ShadowTexture;
-layout(binding = 0) uniform sampler2D PSTextureDiffuse;
-layout(binding = 1) uniform sampler2D PSTextureNormal;
-layout(binding = 2) uniform sampler2D PSTextureRoughness;
-layout(binding = 3) uniform sampler2D PSTextureMetallic;
-layout(binding = 4) uniform sampler2D PSTextureAO;
+layout(binding = 0) uniform sampler2D       PSTextureDiffuse;
+layout(binding = 1) uniform sampler2D       PSTextureNormal;
+layout(binding = 2) uniform sampler2D       PSTextureRoughness;
+layout(binding = 3) uniform sampler2D       PSTextureMetallic;
+layout(binding = 4) uniform sampler2D       PSTextureAO;
+layout(binding = 5) uniform sampler2DShadow ps_ShadowTexture;
 
 // -----------------------------------------------------------------------------
 // Input to fragment from VS
@@ -97,18 +99,20 @@ void main(void)
     MetalMask *= texture(PSTextureMetallic, UV).r;
 #endif // USE_TEX_METALLIC
 
+#ifdef USE_TEX_AO
+    AO *= texture(PSTextureAO, UV).r;
+#endif // USE_TEX_AO
+
     // -----------------------------------------------------------------------------
     // Surface data
     // -----------------------------------------------------------------------------
+    SGBuffer GBuffer;
+
+    PackGBuffer(Color, WSNormal, Roughness, vec3(ps_Reflectance), MetalMask, AO, GBuffer);
+
     SSurfaceData Data;
 
-    Data.m_VSDepth          = 1.0f;
-    Data.m_WSPosition       = in_Position;
-    Data.m_WSNormal         = -WSNormal;
-    Data.m_DiffuseAlbedo    = Color * (1.0f - MetalMask);
-    Data.m_SpecularAlbedo   = Color * MetalMask + 0.16f * ps_Reflectance * ps_Reflectance * (1.0f - MetalMask);
-    Data.m_Roughness        = clamp(Roughness, 0.0f, 1.0f);
-    Data.m_AmbientOcclusion = AO;
+    UnpackGBuffer(GBuffer.m_Color0, GBuffer.m_Color1, GBuffer.m_Color2, in_Position.xyz, gl_FragCoord.z, Data);
 
     // -----------------------------------------------------------------------------
     // Forward pass for each light
@@ -202,4 +206,4 @@ void main(void)
     out_Output = vec4(Luminance, 0.0f);
 }
 
-#endif // __INCLUDE_FS_X1_GLSL__
+#endif // __INCLUDE_FS_MATERIAL_FORWARD_GLSL__
