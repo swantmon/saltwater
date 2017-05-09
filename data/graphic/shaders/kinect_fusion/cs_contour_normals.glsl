@@ -19,7 +19,7 @@ layout(binding = 1, MAP_TEXTURE_FORMAT) uniform image2D cs_NormalBuffer;
 // Functions
 // -------------------------------------------------------------------------------------
 
-const int g_KernelSize = 5;
+const int g_KernelSize = 7;
 
 /*float g_SobelKernel[g_KernelSize * g_KernelSize] = {
     -0.25f, -0.20f, 0.0f, 0.20f, 0.25f,
@@ -30,19 +30,19 @@ const int g_KernelSize = 5;
 };*/
 
 float g_SobelKernel[g_KernelSize * g_KernelSize] = {
-    - 5.0f, - 4.0f, 0.0f,  4.0f,  5.0f,
-    - 8.0f, -10.0f, 0.0f, 10.0f,  8.0f,
-    -10.0f, -20.0f, 0.0f, 20.0f, 10.0f,
-    - 8.0f, -10.0f, 0.0f, 10.0f,  8.0f,
-    - 5.0f, - 4.0f, 0.0f,  4.0f,  5.0f,
+    -3.0f / 18.0f, -2.0f / 13.0f, -1.0f / 10.0f, 0.0f, 1.0f / 10.0f, 2.0f / 13.0f, 3.0f / 18.0f,
+    -3.0f / 13.0f, -2.0f /  8.0f, -1.0f /  5.0f, 0.0f, 1.0f /  5.0f, 2.0f /  8.0f, 3.0f / 13.0f,
+    -3.0f / 10.0f, -2.0f /  5.0f, -1.0f /  2.0f, 0.0f, 1.0f /  2.0f, 2.0f /  5.0f, 3.0f / 10.0f,
+    -3.0f /  9.0f, -2.0f /  4.0f, -1.0f /  1.0f, 0.0f, 1.0f /  1.0f, 2.0f /  4.0f, 3.0f /  9.0f,
+    -3.0f / 10.0f, -2.0f /  5.0f, -1.0f /  2.0f, 0.0f, 1.0f /  2.0f, 2.0f /  5.0f, 3.0f / 10.0f,
+    -3.0f / 13.0f, -2.0f /  8.0f, -1.0f /  5.0f, 0.0f, 1.0f /  5.0f, 2.0f /  8.0f, 3.0f / 13.0f,
+    -3.0f / 18.0f, -2.0f / 13.0f, -1.0f / 10.0f, 0.0f, 1.0f / 10.0f, 2.0f / 13.0f, 3.0f / 18.0f,
 };
 
 vec2 ComputeGradient(ivec2 Position)
 {
     vec2 Result = vec2(0.0f);
-
-    float TotalWeight = 0.0f;
-
+    
     for (int i = 0; i < g_KernelSize; ++i)
     {
         for (int j = 0; j < g_KernelSize; ++j)
@@ -51,15 +51,13 @@ vec2 ComputeGradient(ivec2 Position)
             SamplePosition -= g_KernelSize / 2;
 
             float Sample = float(imageLoad(cs_DepthBuffer, SamplePosition + Position));
-
-            TotalWeight += abs(g_SobelKernel[i * g_KernelSize + j]);
-
+            
             Result.x += Sample * g_SobelKernel[i * g_KernelSize + j];
             Result.y += Sample * g_SobelKernel[j * g_KernelSize + i];
         }
     }
 
-    return Result / TotalWeight;
+    return Result;
 }
 
 layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
@@ -77,7 +75,7 @@ void main()
     const float z = float(imageLoad(cs_DepthBuffer, ivec2(u, v)).x) / 1000.0f;
     const vec2 xy = (vec2(u, v) - g_Intrinisics[PyramidLevel].m_FocalPoint) * z / g_Intrinisics[PyramidLevel].m_FocalLength;
     
-    imageStore(cs_NormalBuffer, ivec2(u, v), vec4(xy, z, 1.0f));
+    imageStore(cs_NormalBuffer, ivec2(u, v), vec4(Gradient, 0.0f, 1.0f));
 }
 
 #endif // __INCLUDE_CS_CONTOURS_NORMAL_GLSL__
