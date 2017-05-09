@@ -950,13 +950,14 @@ namespace MR
 
     void CSLAMReconstructor::CreateContourNormals()
     {
+        ContextManager::SetShaderCS(m_ContourNormalsCSPtr);
+        ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
+
         for (int PyramidLevel = 0; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++PyramidLevel)
         {
             const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
             const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
-
-            ContextManager::SetShaderCS(m_ContourNormalsCSPtr);
-
+            
             ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_InpaintedReferenceDepthBufferPtr[PyramidLevel]));
             ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ContourNormalsPtr[PyramidLevel]));
 

@@ -21,17 +21,27 @@ layout(binding = 1, MAP_TEXTURE_FORMAT) uniform image2D cs_NormalBuffer;
 
 const int g_KernelSize = 5;
 
-float g_SobelKernel[g_KernelSize * g_KernelSize] = {
+/*float g_SobelKernel[g_KernelSize * g_KernelSize] = {
     -0.25f, -0.20f, 0.0f, 0.20f, 0.25f,
     -0.20f, -0.50f, 0.0f, 0.50f, 0.20f,
     -0.50f, -1.00f, 0.0f, 1.00f, 0.50f,
     -0.20f, -0.50f, 0.0f, 0.50f, 0.20f,
     -0.25f, -0.20f, 0.0f, 0.20f, 0.25f,
+};*/
+
+float g_SobelKernel[g_KernelSize * g_KernelSize] = {
+    - 5.0f, - 4.0f, 0.0f,  4.0f,  5.0f,
+    - 8.0f, -10.0f, 0.0f, 10.0f,  8.0f,
+    -10.0f, -20.0f, 0.0f, 20.0f, 10.0f,
+    - 8.0f, -10.0f, 0.0f, 10.0f,  8.0f,
+    - 5.0f, - 4.0f, 0.0f,  4.0f,  5.0f,
 };
 
 vec2 ComputeGradient(ivec2 Position)
 {
     vec2 Result = vec2(0.0f);
+
+    float TotalWeight = 0.0f;
 
     for (int i = 0; i < g_KernelSize; ++i)
     {
@@ -42,23 +52,32 @@ vec2 ComputeGradient(ivec2 Position)
 
             float Sample = float(imageLoad(cs_DepthBuffer, SamplePosition + Position));
 
+            TotalWeight += abs(g_SobelKernel[i * g_KernelSize + j]);
+
             Result.x += Sample * g_SobelKernel[i * g_KernelSize + j];
             Result.y += Sample * g_SobelKernel[j * g_KernelSize + i];
         }
     }
 
-    return Result;
+    return Result / TotalWeight;
 }
 
 layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
 void main()
 {
-    const int x = int(gl_GlobalInvocationID.x);
-    const int y = int(gl_GlobalInvocationID.y);
-    
-    const vec2 Gradient = ComputeGradient(ivec2(x, y));
+    const vec2 ImageSize = imageSize(cs_DepthBuffer);
 
-    imageStore(cs_NormalBuffer, ivec2(x, y), vec4(normalize(vec3(Gradient, -1.0f)), 1.0));
+    const int u = int(gl_GlobalInvocationID.x);
+    const int v = int(gl_GlobalInvocationID.y);
+    
+    const int PyramidLevel = int(log2(DEPTH_IMAGE_WIDTH / ImageSize.x));
+
+    const vec2 Gradient = ComputeGradient(ivec2(u, v));
+
+    const float z = float(imageLoad(cs_DepthBuffer, ivec2(u, v)).x) / 1000.0f;
+    const vec2 xy = (vec2(u, v) - g_Intrinisics[PyramidLevel].m_FocalPoint) * z / g_Intrinisics[PyramidLevel].m_FocalLength;
+    
+    imageStore(cs_NormalBuffer, ivec2(u, v), vec4(xy, z, 1.0f));
 }
 
 #endif // __INCLUDE_CS_CONTOURS_NORMAL_GLSL__
