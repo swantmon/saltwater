@@ -55,6 +55,20 @@ namespace
         "VSShaderPNTBX0",
     };
 
+    const Base::Char* g_pMVPShaderFilenameVS[] =
+    {
+        "vs_mvp_pn.glsl",
+        "vs_mvp_pnx0.glsl",
+        "vs_mvp_pntbx0.glsl",
+    };
+
+    const Base::Char* g_pMVPShaderNamesVS[] =
+    {
+        "VSMVPShaderPN",
+        "VSMVPShaderPNX0",
+        "VSMVPShaderPNTBX0",
+    };
+
     // -----------------------------------------------------------------------------
     // Define input layouts depending on vertex shader
     // -----------------------------------------------------------------------------
@@ -406,7 +420,7 @@ namespace
                 
                 CBufferPtr PositionBuffer = BufferManager::CreateBuffer(VertexBufferDesc);
                 
-                rSurface.m_VertexBuffer = BufferManager::CreateVertexBufferSet(PositionBuffer);
+                rSurface.m_VertexBufferPtr = BufferManager::CreateVertexBufferSet(PositionBuffer);
                 
                 // -----------------------------------------------------------------------------
                 
@@ -420,7 +434,7 @@ namespace
                 IndexBufferDesc.m_pBytes        = pUploadIndexData;
                 IndexBufferDesc.m_pClassKey     = 0;
                 
-                rSurface.m_IndexBuffer = BufferManager::CreateBuffer(IndexBufferDesc);
+                rSurface.m_IndexBufferPtr = BufferManager::CreateBuffer(IndexBufferDesc);
                 
                 // -----------------------------------------------------------------------------
                 // Set last data information of the surface
@@ -589,7 +603,7 @@ namespace
         
         CBufferPtr ConePositionBuffer = BufferManager::CreateBuffer(BufferDesc);
         
-        rSurface.m_VertexBuffer     = BufferManager::CreateVertexBufferSet(ConePositionBuffer);
+        rSurface.m_VertexBufferPtr     = BufferManager::CreateVertexBufferSet(ConePositionBuffer);
         rSurface.m_NumberOfVertices = NumberOfVertices;
         
         // -----------------------------------------------------------------------------
@@ -602,7 +616,7 @@ namespace
         BufferDesc.m_pBytes        = pIndices;
         BufferDesc.m_pClassKey     = 0;
         
-        rSurface.m_IndexBuffer     = BufferManager::CreateBuffer(BufferDesc);
+        rSurface.m_IndexBufferPtr     = BufferManager::CreateBuffer(BufferDesc);
         rSurface.m_NumberOfIndices = NumberOfIndices;
         
         // -----------------------------------------------------------------------------
@@ -736,7 +750,7 @@ namespace
         
         CBufferPtr ConePositionBuffer = BufferManager::CreateBuffer(BufferDesc);
         
-        rSurface.m_VertexBuffer     = BufferManager::CreateVertexBufferSet(ConePositionBuffer);
+        rSurface.m_VertexBufferPtr     = BufferManager::CreateVertexBufferSet(ConePositionBuffer);
         rSurface.m_NumberOfVertices = NumberOfVertices;
         
         // -----------------------------------------------------------------------------
@@ -749,7 +763,7 @@ namespace
         BufferDesc.m_pBytes        = pIndices;
         BufferDesc.m_pClassKey     = 0;
         
-        rSurface.m_IndexBuffer     = BufferManager::CreateBuffer(BufferDesc);
+        rSurface.m_IndexBufferPtr     = BufferManager::CreateBuffer(BufferDesc);
         rSurface.m_NumberOfIndices = NumberOfIndices;
         
         // -----------------------------------------------------------------------------
@@ -868,7 +882,7 @@ namespace
         
         CBufferPtr ConePositionBuffer = BufferManager::CreateBuffer(BufferDesc);
         
-        rSurface.m_VertexBuffer     = BufferManager::CreateVertexBufferSet(ConePositionBuffer);
+        rSurface.m_VertexBufferPtr     = BufferManager::CreateVertexBufferSet(ConePositionBuffer);
         rSurface.m_NumberOfVertices = NumberOfVertices;
         
         // -----------------------------------------------------------------------------
@@ -881,7 +895,7 @@ namespace
         BufferDesc.m_pBytes        = pIndices;
         BufferDesc.m_pClassKey     = 0;
         
-        rSurface.m_IndexBuffer     = BufferManager::CreateBuffer(BufferDesc);
+        rSurface.m_IndexBufferPtr     = BufferManager::CreateBuffer(BufferDesc);
         rSurface.m_NumberOfIndices = NumberOfIndices;
         
         // -----------------------------------------------------------------------------
@@ -973,7 +987,7 @@ namespace
         
         CBufferPtr RectanglePositionBuffer = BufferManager::CreateBuffer(BufferDesc);
         
-        rSurface.m_VertexBuffer     = BufferManager::CreateVertexBufferSet(RectanglePositionBuffer);
+        rSurface.m_VertexBufferPtr     = BufferManager::CreateVertexBufferSet(RectanglePositionBuffer);
         rSurface.m_NumberOfVertices = NumberOfVertices;
         
         // -----------------------------------------------------------------------------
@@ -986,7 +1000,7 @@ namespace
         BufferDesc.m_pBytes        = pIndices;
         BufferDesc.m_pClassKey     = 0;
         
-        rSurface.m_IndexBuffer     = BufferManager::CreateBuffer(BufferDesc);
+        rSurface.m_IndexBufferPtr     = BufferManager::CreateBuffer(BufferDesc);
         rSurface.m_NumberOfIndices = NumberOfIndices;
         
         // -----------------------------------------------------------------------------
@@ -1028,7 +1042,9 @@ namespace
         // -----------------------------------------------------------------------------
         Gfx::CShaderPtr VSShader = Gfx::ShaderManager::CompileVS(g_pShaderFilenameVS[VSIndex], g_pShaderNamesVS[VSIndex]);
 
-        assert(VSShader != 0);
+        Gfx::CShaderPtr VSMVPShader = Gfx::ShaderManager::CompileVS(g_pMVPShaderFilenameVS[VSIndex], g_pMVPShaderNamesVS[VSIndex]);
+
+        assert(VSShader != 0 && VSMVPShader != 0);
 
         // -----------------------------------------------------------------------------
         // Set input layout if vertex shader has no input layout
@@ -1048,12 +1064,12 @@ namespace
                 ++IndexOfRenderInputDesc;
             }
 
-            Gfx::CInputLayoutPtr LayoutPtr = Gfx::ShaderManager::CreateInputLayout(pDescriptor, InputLayoutDesc.m_NumberOfElements, VSShader);
+            _rSurface.m_InputLayoutPtr = Gfx::ShaderManager::CreateInputLayout(pDescriptor, InputLayoutDesc.m_NumberOfElements, VSShader);
 
             Base::CMemory::Free(pDescriptor);
         }
 
-        _rSurface.m_VertexShader = VSShader;
+        _rSurface.m_VertexShaderPtr = VSShader;
     }
 } // namespace
 

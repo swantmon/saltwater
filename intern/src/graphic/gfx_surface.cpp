@@ -23,22 +23,23 @@ namespace Gfx
     
     CSurface::~CSurface()
     {
-        m_VertexBuffer = 0;
-        m_IndexBuffer  = 0;
-        m_MaterialPtr  = 0;
-        m_VertexShader = 0;
+        m_VertexBufferPtr    = 0;
+        m_IndexBufferPtr     = 0;
+        m_MaterialPtr        = 0;
+        m_VertexShaderPtr    = 0;
+        m_MVPVertexShaderPtr = 0;
     }
     
     CBufferSetPtr CSurface::GetVertexBuffer() const
     {
-        return m_VertexBuffer;
+        return m_VertexBufferPtr;
     }
     
     // -----------------------------------------------------------------------------
     
     CBufferPtr CSurface::GetIndexBuffer() const
     {
-        return m_IndexBuffer;
+        return m_IndexBufferPtr;
     }
     
     // -----------------------------------------------------------------------------
@@ -52,7 +53,21 @@ namespace Gfx
 
     CShaderPtr CSurface::GetShaderVS() const
     {
-        return m_VertexShader;
+        return m_VertexShaderPtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CShaderPtr CSurface::GetMVPShaderVS() const
+    {
+        return m_MVPVertexShaderPtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CInputLayoutPtr CSurface::GetInputLayout() const
+    {
+        return m_InputLayoutPtr;
     }
     
     // -----------------------------------------------------------------------------
