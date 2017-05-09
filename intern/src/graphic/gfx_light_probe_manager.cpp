@@ -7,53 +7,41 @@
 
 #include "core/core_time.h"
 
+#include "data/data_actor_type.h"
+#include "data/data_entity.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_light_probe_facet.h"
 #include "data/data_light_type.h"
 #include "data/data_map.h"
 #include "data/data_model_manager.h"
+#include "data/data_point_light_facet.h"
+#include "data/data_sun_facet.h"
+#include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
-#include "graphic/gfx_main.h"
-#include "graphic/gfx_mesh_manager.h"
-#include "graphic/gfx_performance.h"
-#include "graphic/gfx_sampler_manager.h"
-#include "graphic/gfx_shader_manager.h"
+#include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_probe_facet.h"
 #include "graphic/gfx_light_probe_manager.h"
+#include "graphic/gfx_main.h"
+#include "graphic/gfx_mesh.h"
+#include "graphic/gfx_mesh_actor_facet.h"
+#include "graphic/gfx_mesh_manager.h"
+#include "graphic/gfx_performance.h"
+#include "graphic/gfx_point_light_facet.h"
+#include "graphic/gfx_sampler_manager.h"
+#include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_sky_facet.h"
 #include "graphic/gfx_state_manager.h"
+#include "graphic/gfx_state_manager.h"
+#include "graphic/gfx_sun_facet.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_2d.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_texture_set.h"
 #include "graphic/gfx_view_manager.h"
-
-
-
-
-
-
-#include "data/data_actor_type.h"
-#include "data/data_entity.h"
-#include "data/data_point_light_facet.h"
-#include "data/data_transformation_facet.h"
-#include "graphic/gfx_mesh.h"
-#include "graphic/gfx_mesh_actor_facet.h"
-#include "graphic/gfx_state_manager.h"
-#include "graphic/gfx_histogram_renderer.h"
-#include "graphic/gfx_point_light_facet.h"
-#include "data/data_sun_facet.h"
-#include "graphic/gfx_sun_facet.h"
-
-
-
-
-
-
 
 using namespace Gfx;
 
@@ -1191,6 +1179,8 @@ namespace
             ContextManager::ResetSampler(0);
 
             ContextManager::ResetConstantBuffer(0);
+
+            ContextManager::ResetConstantBuffer(1);
 
             ContextManager::ResetInputLayout();
 
