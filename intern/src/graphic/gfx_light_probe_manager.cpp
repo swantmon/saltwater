@@ -164,7 +164,6 @@ namespace
         CMeshPtr m_EnvironmentSpherePtr;
 
         CShaderPtr m_FilteringVSPtr;
-        CShaderPtr m_FilteringGSPtr;
         CShaderPtr m_FilteringDiffusePSPtr;
         CShaderPtr m_FilteringSpecularPSPtr;
         CShaderPtr m_CubemapGSPtr;
@@ -178,8 +177,6 @@ namespace
         CBufferPtr m_GeometryMBufferPtr;
 
         CInputLayoutPtr m_PositionInputLayoutPtr;
-
-        CRenderContextPtr m_CubemapRenderContextPtr;
 
         CLightProbeFacets m_LightprobeFacets;
 
@@ -236,13 +233,11 @@ namespace
     CGfxLightProbeManager::CGfxLightProbeManager()
         : m_EnvironmentSpherePtr   ()
         , m_FilteringVSPtr         ()
-        , m_FilteringGSPtr         ()
         , m_FilteringDiffusePSPtr  ()
         , m_FilteringSpecularPSPtr ()
         , m_CubemapGSBufferPtr     ()
         , m_FilteringPSBufferPtr   ()
         , m_PositionInputLayoutPtr ()
-        , m_CubemapRenderContextPtr()
         , m_LightprobeFacets       ()
     {
 
@@ -264,8 +259,6 @@ namespace
         // -----------------------------------------------------------------------------
         m_FilteringVSPtr = ShaderManager::CompileVS("vs_lightprobe_sampling.glsl", "main");
 
-        m_FilteringGSPtr = ShaderManager::CompileGS("gs_lightprobe_sampling.glsl", "main");
-
         m_FilteringDiffusePSPtr = ShaderManager::CompilePS("fs_lightprobe_diffuse_sampling.glsl", "main");
 
         m_FilteringSpecularPSPtr = ShaderManager::CompilePS("fs_lightprobe_specular_sampling.glsl", "main");
@@ -282,17 +275,6 @@ namespace
         };
 
         m_PositionInputLayoutPtr = ShaderManager::CreateInputLayout(PositionInputLayout, 3, m_FilteringVSPtr);
-
-        // -----------------------------------------------------------------------------
-        // Render context
-        // -----------------------------------------------------------------------------
-        CCameraPtr      CameraPtr = ViewManager::GetMainCamera();
-        CRenderStatePtr NoDepthStatePtr = StateManager::GetRenderState(CRenderState::NoDepth);
-
-        m_CubemapRenderContextPtr = ContextManager::CreateRenderContext();
-
-        m_CubemapRenderContextPtr->SetCamera(CameraPtr);
-        m_CubemapRenderContextPtr->SetRenderState(NoDepthStatePtr);
 
         // -----------------------------------------------------------------------------
         // Buffer
@@ -464,7 +446,6 @@ namespace
         m_EnvironmentSpherePtr = 0;
 
         m_FilteringVSPtr = 0;
-        m_FilteringGSPtr = 0;
         m_FilteringDiffusePSPtr  = 0;
         m_FilteringSpecularPSPtr = 0;
         m_CubemapGSPtr = 0;
@@ -479,8 +460,6 @@ namespace
         m_GeometryMBufferPtr  = 0;
 
         m_PositionInputLayoutPtr = 0;
-
-        m_CubemapRenderContextPtr = 0;
 
         m_LightprobeFacets.Clear();
     }
@@ -986,6 +965,7 @@ namespace
             // -----------------------------------------------------------------------------
             CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor);
         }
+
         ContextManager::ResetConstantBuffer(0);
         ContextManager::ResetConstantBuffer(1);
         ContextManager::ResetConstantBuffer(2);
@@ -1001,9 +981,15 @@ namespace
 
         ContextManager::ResetShaderPS();
 
-        ContextManager::ResetRenderContext();
-
         ContextManager::ResetTopology();
+
+        ContextManager::ResetRasterizerState();
+
+        ContextManager::ResetDepthStencilState();
+
+        ContextManager::ResetViewPortSet();
+
+        ContextManager::ResetTargetSet();
 
         // TODO: this has to be the same texture
         TextureManager::UpdateMipmap(_rInterLightProbeFacet.m_EntitiesCubemapPtr);
@@ -1015,12 +1001,12 @@ namespace
 
     void CGfxLightProbeManager::RenderFiltering(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet* _pDtLightProbeFacet)
     {
+        const unsigned int pOffset[] = { 0, 0 };
+
         // -----------------------------------------------------------------------------
         // Start updating/filtering
         // -----------------------------------------------------------------------------
         Performance::BeginEvent("Filter Distance Light Probe");
-
-        unsigned int IndexOfMipmap = 0;
 
         // -----------------------------------------------------------------------------
         // Prepare buffer
@@ -1042,12 +1028,9 @@ namespace
         CInternLightProbeFacet::CTargetSets::iterator CurrentOfSpecularMipmap = rSpecularTargetSets.begin();
         CInternLightProbeFacet::CTargetSets::iterator EndOfSpecularMipmaps    = rSpecularTargetSets.end();
 
-        IndexOfMipmap = 0;
+        unsigned int IndexOfMipmap = 0;
 
-        // TODO by tschwandt
-        // limit the number of mip levels
-        float NumberOfMiplevels = static_cast<float>(rSpecularTargetSets.size());
-
+        float NumberOfMiplevels    = static_cast<float>(rSpecularTargetSets.size());
         float MipmapRoughness      = 0.0f;
         float MipmapRoughnessDelta = 1.0f / NumberOfMiplevels;
 
@@ -1056,9 +1039,6 @@ namespace
             // -----------------------------------------------------------------------------
             // Prepare render target for environment cube map generation per mipmap
             // -----------------------------------------------------------------------------
-            m_CubemapRenderContextPtr->SetViewPortSet(rSpecularViewPortSets[IndexOfMipmap]);
-            m_CubemapRenderContextPtr->SetTargetSet(rSpecularTargetSets[IndexOfMipmap]);
-
             TargetSetManager::ClearTargetSet(rSpecularTargetSets[IndexOfMipmap]);
 
             // -----------------------------------------------------------------------------
@@ -1071,19 +1051,23 @@ namespace
             BufferManager::UploadConstantBufferData(m_FilteringPSBufferPtr, &CubemapSettings);
 
             // -----------------------------------------------------------------------------
-
-            const unsigned int pOffset[] = { 0, 0 };
-
-            // -----------------------------------------------------------------------------
             // Setup
             // -----------------------------------------------------------------------------
-            ContextManager::SetRenderContext(m_CubemapRenderContextPtr);
+            ContextManager::SetTargetSet(rSpecularTargetSets[IndexOfMipmap]);
+
+            ContextManager::SetViewPortSet(rSpecularViewPortSets[IndexOfMipmap]);
+
+            ContextManager::SetBlendState(StateManager::GetBlendState(0));
+
+            ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
+
+            ContextManager::SetRasterizerState(StateManager::GetRasterizerState(0));
 
             ContextManager::SetTopology(STopology::TriangleList);
 
             ContextManager::SetShaderVS(m_FilteringVSPtr);
 
-            ContextManager::SetShaderGS(m_FilteringGSPtr);
+            ContextManager::SetShaderGS(m_CubemapGSPtr);
 
             ContextManager::SetShaderPS(m_FilteringSpecularPSPtr);
 
@@ -1131,7 +1115,13 @@ namespace
 
             ContextManager::ResetTopology();
 
-            ContextManager::ResetRenderContext();
+            ContextManager::ResetRasterizerState();
+
+            ContextManager::ResetDepthStencilState();
+
+            ContextManager::ResetViewPortSet();
+
+            ContextManager::ResetTargetSet();
 
             MipmapRoughness += MipmapRoughnessDelta;
 
@@ -1151,25 +1141,26 @@ namespace
             // -----------------------------------------------------------------------------
             // Prepare render target for environment cube map generation per mipmap
             // -----------------------------------------------------------------------------
-            m_CubemapRenderContextPtr->SetViewPortSet(_rInterLightProbeFacet.m_DiffuseViewPortSetPtr);
-            m_CubemapRenderContextPtr->SetTargetSet  (_rInterLightProbeFacet.m_DiffuseHDRTargetSetPtr);
-
             TargetSetManager::ClearTargetSet(_rInterLightProbeFacet.m_DiffuseHDRTargetSetPtr);
-
-            // -----------------------------------------------------------------------------
-
-            const unsigned int pOffset[] = { 0, 0 };
 
             // -----------------------------------------------------------------------------
             // Setup
             // -----------------------------------------------------------------------------
-            ContextManager::SetRenderContext(m_CubemapRenderContextPtr);
+            ContextManager::SetTargetSet(_rInterLightProbeFacet.m_DiffuseHDRTargetSetPtr);
+
+            ContextManager::SetViewPortSet(_rInterLightProbeFacet.m_DiffuseViewPortSetPtr);
+
+            ContextManager::SetBlendState(StateManager::GetBlendState(0));
+
+            ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
+
+            ContextManager::SetRasterizerState(StateManager::GetRasterizerState(0));
 
             ContextManager::SetTopology(STopology::TriangleList);
 
             ContextManager::SetShaderVS(m_FilteringVSPtr);
 
-            ContextManager::SetShaderGS(m_FilteringGSPtr);
+            ContextManager::SetShaderGS(m_CubemapGSPtr);
 
             ContextManager::SetShaderPS(m_FilteringDiffusePSPtr);
 
