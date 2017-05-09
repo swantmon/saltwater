@@ -110,7 +110,7 @@ namespace
             unsigned int   m_Padding1;
         };
 
-        struct SLightprobePropertiesBuffer
+        struct SCameraPropertiesBuffer
         {
             Base::Float4 m_CameraPosition;
             unsigned int m_ExposureHistoryIndex;
@@ -167,10 +167,7 @@ namespace
         CShaderPtr m_FilteringGSPtr;
         CShaderPtr m_FilteringDiffusePSPtr;
         CShaderPtr m_FilteringSpecularPSPtr;
-        CShaderPtr m_CubemapGeometryVSPtr;
         CShaderPtr m_CubemapGSPtr;
-        CShaderPtr m_CubemapPSPtr;
-        CShaderPtr m_CubemapTexturePSPtr;
 
         CBufferPtr m_LightPropertiesBufferPtr;
         CBufferPtr m_CubemapGSBufferPtr;
@@ -273,10 +270,7 @@ namespace
 
         m_FilteringSpecularPSPtr = ShaderManager::CompilePS("fs_lightprobe_specular_sampling.glsl", "main");
 
-        m_CubemapGeometryVSPtr = ShaderManager::CompileVS("vs_x1.glsl", "main");
         m_CubemapGSPtr         = ShaderManager::CompileGS("gs_lightprobe_sampling.glsl", "main");
-        m_CubemapPSPtr         = ShaderManager::CompilePS("fs_x1.glsl", "main");
-        m_CubemapTexturePSPtr  = ShaderManager::CompilePS("fs_x1.glsl", "main", "#define USE_TEX_DIFFUSE\n #define USE_TEX_NORMAL\n #define USE_TEX_ROUGHNESS\n #define USE_TEX_METALLIC\n");
 
         // -----------------------------------------------------------------------------
 
@@ -423,7 +417,7 @@ namespace
         ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SLightprobePropertiesBuffer);
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SCameraPropertiesBuffer);
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
 
@@ -473,10 +467,7 @@ namespace
         m_FilteringGSPtr = 0;
         m_FilteringDiffusePSPtr  = 0;
         m_FilteringSpecularPSPtr = 0;
-        m_CubemapGeometryVSPtr   = 0;
         m_CubemapGSPtr = 0;
-        m_CubemapPSPtr = 0;
-        m_CubemapTexturePSPtr = 0;
 
         m_LightPropertiesBufferPtr = 0;
 
@@ -854,11 +845,7 @@ namespace
 
         ContextManager::SetTopology(STopology::TriangleList);
 
-        ContextManager::SetShaderVS(m_CubemapGeometryVSPtr);
-
         ContextManager::SetShaderGS(m_CubemapGSPtr);
-
-        ContextManager::SetShaderPS(m_CubemapPSPtr);
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_GeometryVPBufferPtr);
@@ -899,14 +886,15 @@ namespace
             // -----------------------------------------------------------------------------
             SGeometryVPBuffer ViewBuffer;
 
-            ViewBuffer.m_View  = Base::Float4x4::s_Identity;
-            ViewBuffer.m_View *= Base::Float4x4().SetTranslation(_rPosition * Base::Float3(-1.0f));
+            ViewBuffer.m_Projection  = Base::Float4x4::s_Identity;
+            ViewBuffer.m_View        = Base::Float4x4::s_Identity;
+            ViewBuffer.m_View       *= Base::Float4x4().SetTranslation(_rPosition * Base::Float3(-1.0f));
 
             BufferManager::UploadConstantBufferData(m_GeometryVPBufferPtr, &ViewBuffer);
 
             // -----------------------------------------------------------------------------
 
-            SLightprobePropertiesBuffer ProbeProperties;
+            SCameraPropertiesBuffer ProbeProperties;
 
             ProbeProperties.m_CameraPosition       = Base::Float4(_rPosition, 1.0f);
             ProbeProperties.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
@@ -928,6 +916,9 @@ namespace
 
             for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurfaces; ++IndexOfSurface)
             {
+                // -----------------------------------------------------------------------------
+                // Get surface
+                // -----------------------------------------------------------------------------
                 CSurfacePtr SurfacePtr = MeshPtr->GetLOD(0)->GetSurface(IndexOfSurface);
 
                 if (SurfacePtr == nullptr)
@@ -935,6 +926,9 @@ namespace
                     break;
                 }
 
+                // -----------------------------------------------------------------------------
+                // Get material and upload correct attributes
+                // -----------------------------------------------------------------------------
                 CMaterialPtr MaterialPtr = pGraphicModelActorFacet->GetMaterial(IndexOfSurface);
 
                 if (MaterialPtr == 0)
@@ -944,15 +938,16 @@ namespace
 
                 BufferManager::UploadConstantBufferData(m_SurfaceMaterialBufferPtr, &MaterialPtr->GetMaterialAttributes());
 
-                if (SurfacePtr->GetMaterial()->GetTextureSetPS()->GetTexture(0) != 0)
-                {
-                    ContextManager::SetShaderPS(m_CubemapTexturePSPtr);
-                }
-                else
-                {
-                    ContextManager::SetShaderPS(m_CubemapPSPtr);
-                }
+                // -----------------------------------------------------------------------------
+                // Set shader
+                // -----------------------------------------------------------------------------
+                ContextManager::SetShaderVS(SurfacePtr->GetMVPShaderVS());
 
+                ContextManager::SetShaderPS(MaterialPtr->GetForwardShaderPS());
+
+                // -----------------------------------------------------------------------------
+                // Set textures
+                // -----------------------------------------------------------------------------
                 for (unsigned int IndexOfTexture = 0; IndexOfTexture < MaterialPtr->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
                 {
                     ContextManager::SetSampler(IndexOfTexture, MaterialPtr->GetSamplerSetPS()->GetSampler(IndexOfTexture));
@@ -967,7 +962,7 @@ namespace
 
                 ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
 
-                ContextManager::SetInputLayout(SurfacePtr->GetShaderVS()->GetInputLayout());
+                ContextManager::SetInputLayout(SurfacePtr->GetMVPShaderVS()->GetInputLayout());
 
                 ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
 
