@@ -13,7 +13,7 @@
 // 0: Lambert
 // 1: Disney Original
 // 2: Disney renormalized
-#define BRDF_DIFFUSE 2
+#define BRDF_DIFFUSE 0
 
 // Microfacet distribution function:
 // 0: GGX
