@@ -952,6 +952,7 @@ namespace MR
     {
         ContextManager::SetShaderCS(m_ContourNormalsCSPtr);
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
 
         for (int PyramidLevel = 0; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++PyramidLevel)
         {
