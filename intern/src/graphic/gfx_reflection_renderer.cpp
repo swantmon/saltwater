@@ -167,7 +167,7 @@ namespace
         std::vector<CViewPortSetPtr>   m_HCBViewPortSetPtrs;
 
         CLightProbeRenderJobs m_LightProbeRenderJobs;
-        CSSRRenderJobs         m_SSRRenderJobs;
+        CSSRRenderJobs        m_SSRRenderJobs;
         
     private:
         
@@ -265,7 +265,7 @@ namespace
         m_HCBViewPortSetPtrs.clear();
 
         m_LightProbeRenderJobs.clear();
-        m_SSRRenderJobs        .clear();
+        m_SSRRenderJobs       .clear();
     }
     
     // -----------------------------------------------------------------------------
@@ -753,109 +753,112 @@ namespace
     {
         if (m_LightProbeRenderJobs.size() == 0) return;
 
-        // TODO:
-        // activate multiple global probes
-        SLightProbeRenderJob& rRenderJob = m_LightProbeRenderJobs[0];
-
-        Gfx::CLightProbeFacet* pGraphicProbeFacet = rRenderJob.m_pGraphicLightProbe;
-
         Performance::BeginEvent("IBL");
 
-        const unsigned int pOffset[] = {0, 0};
-                
-        // -----------------------------------------------------------------------------
-        // Distance light probes
-        // -----------------------------------------------------------------------------
-        ContextManager::SetRenderContext(m_LightAccumulationRenderContextPtr);
-        
-        ContextManager::SetTopology(STopology::TriangleList);
-        
-        ContextManager::SetShaderVS(m_RectangleShaderVSPtr);
-        
-        ContextManager::SetShaderPS(m_ImageLightShaderPSPtr);
-        
-        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
-        
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
-        
-        ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
+        const unsigned int pOffset[] = { 0, 0 };
 
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-        ContextManager::SetConstantBuffer(1, m_ImageLightBufferPtr);
+        CLightProbeRenderJobs::const_iterator CurrentLightProbe = m_LightProbeRenderJobs.begin();
+        CLightProbeRenderJobs::const_iterator EndofLightProbes  = m_LightProbeRenderJobs.end();
 
-        ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
+        for (; CurrentLightProbe != EndofLightProbes; ++CurrentLightProbe)
+        {
+            Performance::BeginEvent("Probe");
+
+            Gfx::CLightProbeFacet* pGraphicProbeFacet = CurrentLightProbe->m_pGraphicLightProbe;
+
+            ContextManager::SetRenderContext(m_LightAccumulationRenderContextPtr);
         
-        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
-        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
-        ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
-        ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
-        ContextManager::SetSampler(4, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
-        ContextManager::SetSampler(5, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
-        ContextManager::SetSampler(6, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+            ContextManager::SetTopology(STopology::TriangleList);
+        
+            ContextManager::SetShaderVS(m_RectangleShaderVSPtr);
+        
+            ContextManager::SetShaderPS(m_ImageLightShaderPSPtr);
+        
+            ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        
+            ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        
+            ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
 
-        ContextManager::SetTexture(0, m_ImageLightTextureSetPtr->GetTexture(0));
-        ContextManager::SetTexture(1, m_ImageLightTextureSetPtr->GetTexture(1));
-        ContextManager::SetTexture(2, m_ImageLightTextureSetPtr->GetTexture(2));
-        ContextManager::SetTexture(3, m_ImageLightTextureSetPtr->GetTexture(3));
-        ContextManager::SetTexture(4, m_ImageLightTextureSetPtr->GetTexture(4));
-        ContextManager::SetTexture(5, pGraphicProbeFacet->GetFilteredSetPtr()->GetTexture(0));
-        ContextManager::SetTexture(6, pGraphicProbeFacet->GetFilteredSetPtr()->GetTexture(1));
+            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+            ContextManager::SetConstantBuffer(1, m_ImageLightBufferPtr);
+
+            ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
+        
+            ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+            ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+            ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+            ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+            ContextManager::SetSampler(4, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+            ContextManager::SetSampler(5, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+            ContextManager::SetSampler(6, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+            ContextManager::SetTexture(0, m_ImageLightTextureSetPtr->GetTexture(0));
+            ContextManager::SetTexture(1, m_ImageLightTextureSetPtr->GetTexture(1));
+            ContextManager::SetTexture(2, m_ImageLightTextureSetPtr->GetTexture(2));
+            ContextManager::SetTexture(3, m_ImageLightTextureSetPtr->GetTexture(3));
+            ContextManager::SetTexture(4, m_ImageLightTextureSetPtr->GetTexture(4));
+            ContextManager::SetTexture(5, pGraphicProbeFacet->GetFilteredSetPtr()->GetTexture(0));
+            ContextManager::SetTexture(6, pGraphicProbeFacet->GetFilteredSetPtr()->GetTexture(1));
                     
-        // -----------------------------------------------------------------------------
-        // IBL data
-        // -----------------------------------------------------------------------------
-        SIBLSettings IBLSettings;
+            // -----------------------------------------------------------------------------
+            // IBL data
+            // -----------------------------------------------------------------------------
+            SIBLSettings IBLSettings;
             
-        IBLSettings.m_NumberOfMiplevelsSpecularIBL = static_cast<float>(pGraphicProbeFacet->GetFilteredSetPtr()->GetTexture(0)->GetNumberOfMipLevels() - 1);
-        IBLSettings.m_ExposureHistoryIndex         = static_cast<float>(HistogramRenderer::GetLastExposureHistoryIndex());
+            IBLSettings.m_NumberOfMiplevelsSpecularIBL = static_cast<float>(pGraphicProbeFacet->GetFilteredSetPtr()->GetTexture(0)->GetNumberOfMipLevels() - 1);
+            IBLSettings.m_ExposureHistoryIndex         = static_cast<float>(HistogramRenderer::GetLastExposureHistoryIndex());
             
-        BufferManager::UploadConstantBufferData(m_ImageLightBufferPtr, &IBLSettings);
+            BufferManager::UploadConstantBufferData(m_ImageLightBufferPtr, &IBLSettings);
             
-        // -----------------------------------------------------------------------------
-        // Draw
-        // -----------------------------------------------------------------------------
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+            // -----------------------------------------------------------------------------
+            // Draw
+            // -----------------------------------------------------------------------------
+            ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
 
-        // -----------------------------------------------------------------------------
-        // Reset
-        // -----------------------------------------------------------------------------
-        ContextManager::ResetTexture(0);
-        ContextManager::ResetTexture(1);
-        ContextManager::ResetTexture(2);
-        ContextManager::ResetTexture(3);
-        ContextManager::ResetTexture(4);
-        ContextManager::ResetTexture(5);
-        ContextManager::ResetTexture(6);
+            // -----------------------------------------------------------------------------
+            // Reset
+            // -----------------------------------------------------------------------------
+            ContextManager::ResetTexture(0);
+            ContextManager::ResetTexture(1);
+            ContextManager::ResetTexture(2);
+            ContextManager::ResetTexture(3);
+            ContextManager::ResetTexture(4);
+            ContextManager::ResetTexture(5);
+            ContextManager::ResetTexture(6);
 
-        ContextManager::ResetSampler(0);
-        ContextManager::ResetSampler(1);
-        ContextManager::ResetSampler(2);
-        ContextManager::ResetSampler(3);
-        ContextManager::ResetSampler(4);
-        ContextManager::ResetSampler(5);
-        ContextManager::ResetSampler(6);
+            ContextManager::ResetSampler(0);
+            ContextManager::ResetSampler(1);
+            ContextManager::ResetSampler(2);
+            ContextManager::ResetSampler(3);
+            ContextManager::ResetSampler(4);
+            ContextManager::ResetSampler(5);
+            ContextManager::ResetSampler(6);
         
-        ContextManager::ResetInputLayout();
+            ContextManager::ResetInputLayout();
         
-        ContextManager::ResetConstantBuffer(0);
-        ContextManager::ResetConstantBuffer(1);
+            ContextManager::ResetConstantBuffer(0);
+            ContextManager::ResetConstantBuffer(1);
 
-        ContextManager::ResetResourceBuffer(0);
+            ContextManager::ResetResourceBuffer(0);
         
-        ContextManager::ResetConstantBuffer(0);
-        ContextManager::ResetConstantBuffer(1);
+            ContextManager::ResetConstantBuffer(0);
+            ContextManager::ResetConstantBuffer(1);
         
-        ContextManager::ResetIndexBuffer();
+            ContextManager::ResetIndexBuffer();
         
-        ContextManager::ResetVertexBufferSet();
+            ContextManager::ResetVertexBufferSet();
         
-        ContextManager::ResetShaderVS();
+            ContextManager::ResetShaderVS();
         
-        ContextManager::ResetShaderPS();
+            ContextManager::ResetShaderPS();
         
-        ContextManager::ResetTopology();
+            ContextManager::ResetTopology();
         
-        ContextManager::ResetRenderContext();
+            ContextManager::ResetRenderContext();
+
+            Performance::EndEvent();
+        }
 
         Performance::EndEvent();
     }
@@ -1100,7 +1103,7 @@ namespace
         // Clear current render jobs
         // -----------------------------------------------------------------------------
         m_LightProbeRenderJobs.clear();
-        m_SSRRenderJobs        .clear();
+        m_SSRRenderJobs       .clear();
 
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
@@ -1127,7 +1130,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 SLightProbeRenderJob NewRenderJob;
 
-                NewRenderJob.m_pDataLightProbe = pDataLightProbeFacet;
+                NewRenderJob.m_pDataLightProbe    = pDataLightProbeFacet;
                 NewRenderJob.m_pGraphicLightProbe = pGraphicLightProbeFacet;
 
                 m_LightProbeRenderJobs.push_back(NewRenderJob);
