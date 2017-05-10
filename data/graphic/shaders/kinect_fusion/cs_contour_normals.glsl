@@ -50,7 +50,7 @@ vec2 ComputeGradient(ivec2 Position)
             ivec2 SamplePosition = ivec2(i, j);
             SamplePosition -= g_KernelSize / 2;
 
-            float Sample = float(imageLoad(cs_DepthBuffer, SamplePosition + Position));
+            float Sample = float(imageLoad(cs_DepthBuffer, SamplePosition + Position)) / 1000.0f;
             
             Result.x += Sample * g_SobelKernel[i * g_KernelSize + j];
             Result.y += Sample * g_SobelKernel[j * g_KernelSize + i];
@@ -72,16 +72,20 @@ void main()
 
     const vec2 Gradient = ComputeGradient(ivec2(u, v));
 
-    const float z = float(imageLoad(cs_DepthBuffer, ivec2(u, v)).x) / 1000.0f;
-    const vec2 xy = (vec2(u, v) - g_Intrinisics[PyramidLevel].m_FocalPoint) * z * g_Intrinisics[PyramidLevel].m_InvFocalLength;
-    
+    const int Depth = int(imageLoad(cs_DepthBuffer, ivec2(u, v)).x);
     vec3 Normal;
-    Normal.xy = Gradient + vec2(u, v) * g_Intrinisics[PyramidLevel].m_InvFocalLength;
-    Normal.xy -= g_Intrinisics[PyramidLevel].m_FocalPoint * g_Intrinisics[PyramidLevel].m_InvFocalLength;
-    Normal.xy /= z * g_Intrinisics[PyramidLevel].m_InvFocalLength;
-    Normal.z = -1.0f;
 
-    imageStore(cs_NormalBuffer, ivec2(u, v), vec4(normalize(Normal), 1.0f));
+    if (Depth != 0)
+    {
+        const float z = Depth / 1000.0f;
+                
+        Normal.xy = Gradient + vec2(u, v) * g_Intrinisics[PyramidLevel].m_InvFocalLength;
+        Normal.xy -= g_Intrinisics[PyramidLevel].m_FocalPoint * g_Intrinisics[PyramidLevel].m_InvFocalLength;
+        Normal.xy /= z * g_Intrinisics[PyramidLevel].m_InvFocalLength;
+        Normal.z = -1.0f;
+    }
+
+    imageStore(cs_NormalBuffer, ivec2(u, v), vec4(Normal, 1.0f));
 }
 
 #endif // __INCLUDE_CS_CONTOURS_NORMAL_GLSL__
