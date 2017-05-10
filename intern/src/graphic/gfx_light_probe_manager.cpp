@@ -96,6 +96,7 @@ namespace
             unsigned int   m_LightType;
             unsigned int   m_Padding0;
             unsigned int   m_Padding1;
+            unsigned int   m_Padding2;
         };
 
         struct SCameraPropertiesBuffer
@@ -160,7 +161,7 @@ namespace
         CBufferPtr m_CubemapGSBufferPtr;
         CBufferPtr m_FilteringPSBufferPtr;
         CBufferPtr m_SurfaceMaterialBufferPtr;
-        CBufferPtr m_ProbePropertiesBufferPtr;
+        CBufferPtr m_CameraPropertiesBufferPtr;
         CBufferPtr m_GeometryVPBufferPtr;
         CBufferPtr m_GeometryMBufferPtr;
 
@@ -391,7 +392,7 @@ namespace
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
 
-        m_ProbePropertiesBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        m_CameraPropertiesBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
 
@@ -443,7 +444,7 @@ namespace
         m_CubemapGSBufferPtr   = 0;
         m_FilteringPSBufferPtr = 0;
         m_SurfaceMaterialBufferPtr = 0;
-        m_ProbePropertiesBufferPtr = 0;
+        m_CameraPropertiesBufferPtr = 0;
         m_GeometryVPBufferPtr = 0;
         m_GeometryMBufferPtr  = 0;
 
@@ -814,12 +815,11 @@ namespace
 
         ContextManager::SetShaderGS(m_CubemapGSPtr);
 
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-        ContextManager::SetConstantBuffer(1, m_GeometryVPBufferPtr);
-        ContextManager::SetConstantBuffer(2, m_GeometryMBufferPtr);
-        ContextManager::SetConstantBuffer(3, m_CubemapGSBufferPtr);
-        ContextManager::SetConstantBuffer(4, m_SurfaceMaterialBufferPtr);
-        ContextManager::SetConstantBuffer(5, m_ProbePropertiesBufferPtr);        
+        ContextManager::SetConstantBuffer(0, m_GeometryVPBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_GeometryMBufferPtr);
+        ContextManager::SetConstantBuffer(2, m_CubemapGSBufferPtr);
+        ContextManager::SetConstantBuffer(3, m_SurfaceMaterialBufferPtr);
+        ContextManager::SetConstantBuffer(4, m_CameraPropertiesBufferPtr);        
 
         ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());       
         ContextManager::SetResourceBuffer(1, m_LightPropertiesBufferPtr);
@@ -866,7 +866,7 @@ namespace
             ProbeProperties.m_CameraPosition       = Base::Float4(_rPosition, 1.0f);
             ProbeProperties.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
-            BufferManager::UploadConstantBufferData(m_ProbePropertiesBufferPtr, &ProbeProperties);
+            BufferManager::UploadConstantBufferData(m_CameraPropertiesBufferPtr, &ProbeProperties);
 
             // -----------------------------------------------------------------------------
 
@@ -1066,9 +1066,9 @@ namespace
 
             ContextManager::SetInputLayout(m_PositionInputLayoutPtr);
 
-            ContextManager::SetConstantBuffer(0, m_CubemapGSBufferPtr);
+            ContextManager::SetConstantBuffer(2, m_CubemapGSBufferPtr);
 
-            ContextManager::SetConstantBuffer(1, m_FilteringPSBufferPtr);
+            ContextManager::SetConstantBuffer(3, m_FilteringPSBufferPtr);
 
             ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
@@ -1086,9 +1086,9 @@ namespace
 
             ContextManager::ResetSampler(0);
 
-            ContextManager::ResetConstantBuffer(0);
+            ContextManager::ResetConstantBuffer(2);
 
-            ContextManager::ResetConstantBuffer(1);
+            ContextManager::ResetConstantBuffer(3);
 
             ContextManager::ResetInputLayout();
 
@@ -1159,9 +1159,9 @@ namespace
 
             ContextManager::SetInputLayout(m_PositionInputLayoutPtr);
 
-            ContextManager::SetConstantBuffer(0, m_CubemapGSBufferPtr);
+            ContextManager::SetConstantBuffer(2, m_CubemapGSBufferPtr);
 
-            ContextManager::SetConstantBuffer(1, m_FilteringPSBufferPtr);
+            ContextManager::SetConstantBuffer(3, m_FilteringPSBufferPtr);
 
             ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
@@ -1179,9 +1179,9 @@ namespace
 
             ContextManager::ResetSampler(0);
 
-            ContextManager::ResetConstantBuffer(0);
+            ContextManager::ResetConstantBuffer(2);
 
-            ContextManager::ResetConstantBuffer(1);
+            ContextManager::ResetConstantBuffer(3);
 
             ContextManager::ResetInputLayout();
 

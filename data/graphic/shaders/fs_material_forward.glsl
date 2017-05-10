@@ -25,7 +25,7 @@ struct SLightProperties
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(std140, binding = 4) uniform UB4
+layout(std140, binding = 3) uniform UB4
 {
     vec4  ps_TilingOffset;
     vec3  ps_Color;
@@ -34,7 +34,7 @@ layout(std140, binding = 4) uniform UB4
     float ps_MetalMask;
 };
 
-layout(std140, binding = 5) uniform UB5
+layout(std140, binding = 4) uniform UB5
 {
     vec4 ps_CameraPosition;
     uint ps_ExposureHistoryIndex;
@@ -115,6 +115,11 @@ void main(void)
     UnpackGBuffer(GBuffer.m_Color0, GBuffer.m_Color1, GBuffer.m_Color2, in_Position.xyz, gl_FragCoord.z, Data);
 
     // -----------------------------------------------------------------------------
+    // Exposure data
+    // -----------------------------------------------------------------------------
+    float AverageExposure = ps_ExposureHistory[ps_ExposureHistoryIndex];
+
+    // -----------------------------------------------------------------------------
     // Forward pass for each light
     // -----------------------------------------------------------------------------
     for (uint IndexOfLight = 0; IndexOfLight < ps_LightProperties.length(); ++ IndexOfLight)
@@ -124,15 +129,10 @@ void main(void)
         if (LightProb.ps_LightType == 1)
         {
             // -----------------------------------------------------------------------------
-            // Exposure data
-            // -----------------------------------------------------------------------------
-            float AverageExposure = ps_ExposureHistory[ps_ExposureHistoryIndex];
-
-            // -----------------------------------------------------------------------------
             // Compute lighting for sun light
             // -----------------------------------------------------------------------------
-            vec3 WSLightDirection  = -LightProb.ps_LightDirection.xyz;
-            vec3 WSViewDirection   = normalize(ps_CameraPosition.xyz - Data.m_WSPosition);
+            vec3 WSLightDirection  = LightProb.ps_LightDirection.xyz;
+            vec3 WSViewDirection   = normalize(Data.m_WSPosition - ps_CameraPosition.xyz);
             
             float NdotV = dot(Data.m_WSNormal, WSViewDirection);
             
@@ -158,15 +158,10 @@ void main(void)
             // -----------------------------------------------------------------------------
             // Apply light luminance
             // -----------------------------------------------------------------------------
-            Luminance += BRDF(L, WSViewDirection, Data.m_WSNormal, Data) * clamp(dot(Data.m_WSNormal, L), 0.0f, 1.0f) * LightProb.ps_LightColor.xyz * Attenuation * AverageExposure;
+            Luminance += BRDF(L, WSViewDirection, Data.m_WSNormal, Data) * clamp(dot(Data.m_WSNormal, L), 0.0f, 1.0f) * LightProb.ps_LightColor.xyz * Attenuation;
         }
         else if (LightProb.ps_LightType == 2)
         {
-            // -----------------------------------------------------------------------------
-            // Exposure data
-            // -----------------------------------------------------------------------------
-            float AverageExposure = ps_ExposureHistory[ps_ExposureHistoryIndex];
-
             // -----------------------------------------------------------------------------
             // Light data
             // -----------------------------------------------------------------------------
@@ -178,9 +173,9 @@ void main(void)
             // -----------------------------------------------------------------------------
             // Compute lighting for punctual lights
             // -----------------------------------------------------------------------------
-            vec3 UnnormalizedLightVector = LightProb.ps_LightPosition.xyz - Data.m_WSPosition;
+            vec3 UnnormalizedLightVector = Data.m_WSPosition - LightProb.ps_LightPosition.xyz;
             vec3 NormalizedLightVector   = normalize(UnnormalizedLightVector);
-            vec3 WSViewDirection         = normalize(ps_CameraPosition.xyz - Data.m_WSPosition);
+            vec3 WSViewDirection         = normalize(Data.m_WSPosition - ps_CameraPosition.xyz);
 
             // -----------------------------------------------------------------------------
             // Compute attenuation
@@ -199,11 +194,11 @@ void main(void)
             // -----------------------------------------------------------------------------
             // Apply light luminance and shading
             // -----------------------------------------------------------------------------
-            Luminance += BRDF(NormalizedLightVector, WSViewDirection, Data.m_WSNormal, Data) * clamp(dot(Data.m_WSNormal, NormalizedLightVector), 0.0f, 1.0f) * LightProb.ps_LightColor.xyz * Attenuation * AverageExposure;
+            Luminance += BRDF(NormalizedLightVector, WSViewDirection, Data.m_WSNormal, Data) * clamp(dot(Data.m_WSNormal, NormalizedLightVector), 0.0f, 1.0f) * LightProb.ps_LightColor.xyz * Attenuation;
         }
     }
 
-    out_Output = vec4(Luminance, 0.0f);
+    out_Output = vec4(Luminance * AverageExposure, 0.0f);
 }
 
 #endif // __INCLUDE_FS_MATERIAL_FORWARD_GLSL__
