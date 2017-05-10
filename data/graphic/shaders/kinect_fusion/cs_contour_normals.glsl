@@ -73,9 +73,15 @@ void main()
     const vec2 Gradient = ComputeGradient(ivec2(u, v));
 
     const float z = float(imageLoad(cs_DepthBuffer, ivec2(u, v)).x) / 1000.0f;
-    const vec2 xy = (vec2(u, v) - g_Intrinisics[PyramidLevel].m_FocalPoint) * z / g_Intrinisics[PyramidLevel].m_FocalLength;
+    const vec2 xy = (vec2(u, v) - g_Intrinisics[PyramidLevel].m_FocalPoint) * z * g_Intrinisics[PyramidLevel].m_InvFocalLength;
     
-    imageStore(cs_NormalBuffer, ivec2(u, v), vec4(Gradient, 0.0f, 1.0f));
+    vec3 Normal;
+    Normal.xy = Gradient + vec2(u, v) * g_Intrinisics[PyramidLevel].m_InvFocalLength;
+    Normal.xy -= g_Intrinisics[PyramidLevel].m_FocalPoint * g_Intrinisics[PyramidLevel].m_InvFocalLength;
+    Normal.xy /= z * g_Intrinisics[PyramidLevel].m_InvFocalLength;
+    Normal.z = -1.0f;
+
+    imageStore(cs_NormalBuffer, ivec2(u, v), vec4(normalize(Normal), 1.0f));
 }
 
 #endif // __INCLUDE_CS_CONTOURS_NORMAL_GLSL__
