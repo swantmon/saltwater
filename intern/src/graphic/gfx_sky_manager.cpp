@@ -331,9 +331,40 @@ namespace
         
         // -----------------------------------------------------------------------------
         // By creating a cube map in OpenGL, several facts should be considered:
-        //  1. OpenGL cubemaps has an left handed coord system
+        //  1. OpenGL cubemaps has an left handed coord system inside the cube and
+        //    right handed coord system outside the cube
         //  2. Texcoords starts in the upper left corner (normally in the lower left 
         //     corner)
+        //
+        // RHS:
+        //          +--------+
+        //          |        |
+        //          |   Y+   |
+        //          |        |
+        // +--------+--------+--------+--------+
+        // |        |        |        |        |
+        // |   X-   |   Z+   |   X+   |   Z-   |
+        // |        |        |        |        |
+        // +--------+--------+--------+--------+
+        //          |        |
+        //          |   Y-   |
+        //          |        |
+        //          +--------+
+        //
+        // LHS:
+        //          +--------+
+        //          |        |
+        //          |   Y+   |
+        //          |        |
+        // +--------+--------+--------+--------+
+        // |        |        |        |        |
+        // |   X-   |   Z-   |   X+   |   Z+   |
+        // |        |        |        |        |
+        // +--------+--------+--------+--------+
+        //          |        |
+        //          |   Y-   |
+        //          |        |
+        //          +--------+
         // -----------------------------------------------------------------------------
 
         // -----------------------------------------------------------------------------
