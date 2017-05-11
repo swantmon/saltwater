@@ -369,6 +369,7 @@ namespace
 
         // -----------------------------------------------------------------------------
         // Creating VS matrix for spherical image to cube map:
+        // -> Viewer is inside the cube > LHS
         // -> y-Axis is mirrored (normally "z" but we will rotate cube later) 
         // -> Orientation of every side is flipped
         // -> At the end we rotate the matrix because the spherical image is y-up
