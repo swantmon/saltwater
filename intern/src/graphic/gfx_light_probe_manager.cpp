@@ -151,11 +151,14 @@ namespace
     private:
 
         CMeshPtr m_EnvironmentSpherePtr;
+        CMeshPtr m_SkyboxBoxPtr;
 
         CShaderPtr m_FilteringVSPtr;
         CShaderPtr m_FilteringDiffusePSPtr;
         CShaderPtr m_FilteringSpecularPSPtr;
         CShaderPtr m_CubemapGSPtr;
+        CShaderPtr m_CubemapVSPtr;
+        CShaderPtr m_CubemapPSPtr;
 
         CBufferPtr m_LightPropertiesBufferPtr;
         CBufferPtr m_CubemapGSBufferPtr;
@@ -165,7 +168,8 @@ namespace
         CBufferPtr m_GeometryVPBufferPtr;
         CBufferPtr m_GeometryMBufferPtr;
 
-        CInputLayoutPtr m_PositionInputLayoutPtr;
+        CInputLayoutPtr m_P3N3T2InputLayoutPtr;
+        CInputLayoutPtr m_P3InputLayoutPtr;
 
         CLightProbeFacets m_LightprobeFacets;
 
@@ -177,11 +181,13 @@ namespace
 
         void RenderEnvironment(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet* _pDtLightProbeFacet);
 
-        void RenderEntities(CInternLightProbeFacet& _rInterLightProbeFacet, const Base::Float3& _rPosition);
+        void RenderEntities(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet* _pDtLightProbeFacet, const Base::Float3& _rPosition);
 
         void RenderFiltering(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet* _pDtLightProbeFacet);
 
         void UpdateLightProperties();
+
+        void UpdateGeometryBuffer(const Base::Float3& _rPosition, float _Near, float _Far);
     };
 } // namespace 
 
@@ -221,12 +227,13 @@ namespace
 {
     CGfxLightProbeManager::CGfxLightProbeManager()
         : m_EnvironmentSpherePtr  ()
+        , m_SkyboxBoxPtr          ()
         , m_FilteringVSPtr        ()
         , m_FilteringDiffusePSPtr ()
         , m_FilteringSpecularPSPtr()
         , m_CubemapGSBufferPtr    ()
         , m_FilteringPSBufferPtr  ()
-        , m_PositionInputLayoutPtr()
+        , m_P3N3T2InputLayoutPtr  ()
         , m_LightprobeFacets      ()
     {
 
@@ -254,6 +261,10 @@ namespace
 
         m_CubemapGSPtr = ShaderManager::CompileGS("gs_lightprobe_sampling.glsl", "main");
 
+        m_CubemapVSPtr = ShaderManager::CompileVS("vs_p3.glsl", "main");
+
+        m_CubemapPSPtr = ShaderManager::CompilePS("fs_lightprobe.glsl", "main");
+
         // -----------------------------------------------------------------------------
 
         const SInputElementDescriptor PositionInputLayout[] =
@@ -263,7 +274,14 @@ namespace
             { "TEXCOORD", 0, CInputLayout::Float2Format, 0, 24, 32, CInputLayout::PerVertex, 0 },
         };
 
-        m_PositionInputLayoutPtr = ShaderManager::CreateInputLayout(PositionInputLayout, 3, m_FilteringVSPtr);
+        m_P3N3T2InputLayoutPtr = ShaderManager::CreateInputLayout(PositionInputLayout, 3, m_FilteringVSPtr);
+
+        const SInputElementDescriptor TriangleInputLayout[] =
+        {
+            { "POSITION", 0, CInputLayout::Float3Format, 0,  0, 12, CInputLayout::PerVertex, 0, },
+        };
+
+        m_P3InputLayoutPtr = ShaderManager::CreateInputLayout(TriangleInputLayout, 1, m_CubemapVSPtr);
 
         // -----------------------------------------------------------------------------
         // Buffer
@@ -294,69 +312,17 @@ namespace
         
         // -----------------------------------------------------------------------------
         
-        Base::Float3 EyePosition = Base::Float3(0.0f);
-        Base::Float3 UpDirection;
-        Base::Float3 TargetPosition;
-        
-        float LookAt = 1.5f;
-        
-        SCubemapGeometryBuffer DefaultGSValues;
-        
-        DefaultGSValues.m_CubeProjectionMatrix.SetRHFieldOfView(Base::RadiansToDegree(Base::SConstants<float>::s_Pi * 0.5f), 1.0f, 2.0f, 2000.0f);
-        
-        // -----------------------------------------------------------------------------
-        
-        TargetPosition = EyePosition + Base::Float3(LookAt, 0.0f, 0.0f);
-        UpDirection    = Base::Float3(0.0f, -1.0f, 0.0f);
-        
-        DefaultGSValues.m_CubeViewMatrix[0].LookAt(EyePosition, TargetPosition, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        TargetPosition = EyePosition + Base::Float3(-LookAt, 0.0f, 0.0f);
-        UpDirection    = Base::Float3(0.0f, -1.0f, 0.0f);
-        
-        DefaultGSValues.m_CubeViewMatrix[1].LookAt(EyePosition, TargetPosition, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        TargetPosition = EyePosition + Base::Float3(0.0f, LookAt, 0.0f);
-        UpDirection    = Base::Float3(0.0f, 0.0f, -1.0f);
-        
-        DefaultGSValues.m_CubeViewMatrix[2].LookAt(EyePosition, TargetPosition, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        TargetPosition = EyePosition + Base::Float3(0.0f, -LookAt, 0.0f);
-        UpDirection    = Base::Float3(0.0f, 0.0f, 1.0f);
-        
-        DefaultGSValues.m_CubeViewMatrix[3].LookAt(EyePosition, TargetPosition, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        TargetPosition = EyePosition + Base::Float3(0.0f, 0.0f, LookAt);
-        UpDirection    = Base::Float3(0.0f, -1.0f, 0.0f);
-        
-        DefaultGSValues.m_CubeViewMatrix[4].LookAt(EyePosition, TargetPosition, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        TargetPosition = EyePosition + Base::Float3(0.0f, 0.0f, -LookAt);
-        UpDirection    = Base::Float3(0.0f, -1.0f, 0.0f);
-        
-        DefaultGSValues.m_CubeViewMatrix[5].LookAt(EyePosition, TargetPosition, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
         ConstanteBufferDesc.m_Stride        = 0;
         ConstanteBufferDesc.m_Usage         = CBuffer::GPUReadWrite;
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(SCubemapGeometryBuffer);
-        ConstanteBufferDesc.m_pBytes        = &DefaultGSValues;
+        ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
         m_CubemapGSBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        UpdateGeometryBuffer(Base::Float3::s_Zero, 0.1f, 1000.0f);
 
         // -----------------------------------------------------------------------------
 
@@ -422,6 +388,8 @@ namespace
 
         m_EnvironmentSpherePtr = MeshManager::CreateMesh(ModelDesc);
 
+        m_SkyboxBoxPtr = MeshManager::CreateBox(2.0f, 2.0f, 2.0f);
+
         // -----------------------------------------------------------------------------
         // Register dirty entity handler for automatic sky creation
         // -----------------------------------------------------------------------------
@@ -433,11 +401,15 @@ namespace
     void CGfxLightProbeManager::OnExit()
     {
         m_EnvironmentSpherePtr = 0;
+        m_SkyboxBoxPtr = 0;
 
         m_FilteringVSPtr = 0;
         m_FilteringDiffusePSPtr  = 0;
         m_FilteringSpecularPSPtr = 0;
+
         m_CubemapGSPtr = 0;
+        m_CubemapVSPtr = 0;
+        m_CubemapPSPtr = 0;
 
         m_LightPropertiesBufferPtr = 0;
 
@@ -448,7 +420,8 @@ namespace
         m_GeometryVPBufferPtr = 0;
         m_GeometryMBufferPtr  = 0;
 
-        m_PositionInputLayoutPtr = 0;
+        m_P3N3T2InputLayoutPtr = 0;
+        m_P3InputLayoutPtr = 0;
 
         m_LightprobeFacets.Clear();
     }
@@ -488,7 +461,7 @@ namespace
                     }
                     else if (pDataGlobalProbeFacet->GetType() == Dt::CLightProbeFacet::Local)
                     {
-                        RenderEntities(*pGraphicGlobalProbeFacet, rCurrentEntity.GetWorldPosition());
+                        RenderEntities(*pGraphicGlobalProbeFacet, pDataGlobalProbeFacet, rCurrentEntity.GetWorldPosition());
                     }
 
                     RenderFiltering(*pGraphicGlobalProbeFacet, pDataGlobalProbeFacet);
@@ -517,9 +490,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Get data
         // -----------------------------------------------------------------------------
-        Dt::CLightProbeFacet* pDataGlobalLightProbeFacet = static_cast<Dt::CLightProbeFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CLightProbeFacet* pDtLightProbeFacet = static_cast<Dt::CLightProbeFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Data));
 
-        if (pDataGlobalLightProbeFacet == nullptr) return;
+        if (pDtLightProbeFacet == nullptr) return;
 
         // -----------------------------------------------------------------------------
         // Dirty check
@@ -533,56 +506,56 @@ namespace
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
-            CInternLightProbeFacet& rGraphicSkyboxFacet = AllocateLightProbeFacet(pDataGlobalLightProbeFacet->GetQualityInPixel(), 128);
+            CInternLightProbeFacet& rGfxLightProbeFacet = AllocateLightProbeFacet(pDtLightProbeFacet->GetQualityInPixel(), 128);
 
             // -----------------------------------------------------------------------------
             // Render
             // -----------------------------------------------------------------------------
-            if (pDataGlobalLightProbeFacet->GetType() == Dt::CLightProbeFacet::Sky)
+            if (pDtLightProbeFacet->GetType() == Dt::CLightProbeFacet::Sky)
             {
-                RenderEnvironment(rGraphicSkyboxFacet, pDataGlobalLightProbeFacet);
+                RenderEnvironment(rGfxLightProbeFacet, pDtLightProbeFacet);
             }
-            else if (pDataGlobalLightProbeFacet->GetType() == Dt::CLightProbeFacet::Local)
+            else if (pDtLightProbeFacet->GetType() == Dt::CLightProbeFacet::Local)
             {
-                RenderEntities(rGraphicSkyboxFacet, _pEntity->GetWorldPosition());
+                RenderEntities(rGfxLightProbeFacet, pDtLightProbeFacet, _pEntity->GetWorldPosition());
             }
 
-            RenderFiltering(rGraphicSkyboxFacet, pDataGlobalLightProbeFacet);
+            RenderFiltering(rGfxLightProbeFacet, pDtLightProbeFacet);
 
             // -----------------------------------------------------------------------------
             // Set time
             // -----------------------------------------------------------------------------
-            rGraphicSkyboxFacet.m_TimeStamp = Core::Time::GetNumberOfFrame();
+            rGfxLightProbeFacet.m_TimeStamp = Core::Time::GetNumberOfFrame();
 
             // -----------------------------------------------------------------------------
             // Save facet
             // -----------------------------------------------------------------------------
-            _pEntity->SetDetailFacet(Dt::SFacetCategory::Graphic, &rGraphicSkyboxFacet);
+            _pEntity->SetDetailFacet(Dt::SFacetCategory::Graphic, &rGfxLightProbeFacet);
         }
         else if ((DirtyFlags & Dt::CEntity::DirtyDetail) != 0)
         {
-            CInternLightProbeFacet*  pGraphicGlobalProbeLightFacet;
+            CInternLightProbeFacet*  pGfxLightProbeFacet;
 
-            pDataGlobalLightProbeFacet    = static_cast<Dt::CLightProbeFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Data));
-            pGraphicGlobalProbeLightFacet = static_cast<CInternLightProbeFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
+            pDtLightProbeFacet    = static_cast<Dt::CLightProbeFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+            pGfxLightProbeFacet = static_cast<CInternLightProbeFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
 
-            if (pDataGlobalLightProbeFacet->GetType() == Dt::CLightProbeFacet::Sky)
+            if (pDtLightProbeFacet->GetType() == Dt::CLightProbeFacet::Sky)
             {
-                RenderEnvironment(*pGraphicGlobalProbeLightFacet, pDataGlobalLightProbeFacet);
+                RenderEnvironment(*pGfxLightProbeFacet, pDtLightProbeFacet);
             }
-            else if (pDataGlobalLightProbeFacet->GetType() == Dt::CLightProbeFacet::Local)
+            else if (pDtLightProbeFacet->GetType() == Dt::CLightProbeFacet::Local)
             {
-                RenderEntities(*pGraphicGlobalProbeLightFacet, _pEntity->GetWorldPosition());
+                RenderEntities(*pGfxLightProbeFacet, pDtLightProbeFacet, _pEntity->GetWorldPosition());
             }
 
-            RenderFiltering(*pGraphicGlobalProbeLightFacet, pDataGlobalLightProbeFacet);
+            RenderFiltering(*pGfxLightProbeFacet, pDtLightProbeFacet);
 
             // -----------------------------------------------------------------------------
             // Set time
             // -----------------------------------------------------------------------------
             Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
 
-            pGraphicGlobalProbeLightFacet->m_TimeStamp = FrameTime;
+            pGfxLightProbeFacet->m_TimeStamp = FrameTime;
         }
     }
 
@@ -743,10 +716,40 @@ namespace
         Dt::Map::CEntityIterator CurrentEntity;
         Dt::Map::CEntityIterator EndOfEntities;
 
+        TargetSetManager::ClearTargetSet(_rInterLightProbeFacet.m_TargetSetPtr);
+
+        // -----------------------------------------------------------------------------
+        // Render sky into cube map
+        // -----------------------------------------------------------------------------
+        const unsigned int pOffset[] = { 0, 0 };
+
+        ContextManager::SetTargetSet        (_rInterLightProbeFacet.m_TargetSetPtr);
+        ContextManager::SetViewPortSet      (_rInterLightProbeFacet.m_ViewPortSetPtr);
+        ContextManager::SetBlendState       (StateManager::GetBlendState(0));
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
+        ContextManager::SetRasterizerState  (StateManager::GetRasterizerState(CRasterizerState::NoCull));
+
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        // -----------------------------------------------------------------------------
+        // Set shader
+        // -----------------------------------------------------------------------------
+        ContextManager::SetShaderVS(m_CubemapVSPtr);
+        ContextManager::SetShaderGS(m_CubemapGSPtr);
+        ContextManager::SetShaderPS(m_CubemapPSPtr);
+        
+        // -----------------------------------------------------------------------------
+        // Set buffer
+        // -----------------------------------------------------------------------------
+        ContextManager::SetConstantBuffer(2, m_CubemapGSBufferPtr);
+
+        UpdateGeometryBuffer(Base::Float3::s_Zero, 0.2f, 2.0f);
+
+        // -----------------------------------------------------------------------------
+        // Actors
+        // -----------------------------------------------------------------------------
         CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
         EndOfEntities = Dt::Map::EntitiesEnd();
-
-        Dt::CEntity* pSkyEntity = 0;
 
         for (; CurrentEntity != EndOfEntities; )
         {
@@ -755,11 +758,59 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() == Dt::SLightType::Sky)
+            if (rCurrentEntity.GetType() != Dt::SLightType::Sky)
             {
-                pSkyEntity = &rCurrentEntity;
+                CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
 
-                break;
+                continue;
+            }
+
+            Gfx::CSkyFacet* pSkyFacet = static_cast<Gfx::CSkyFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+
+            // -----------------------------------------------------------------------------
+            // Set every surface of this entity into a new render job
+            // -----------------------------------------------------------------------------
+            unsigned int NumberOfSurfaces = m_SkyboxBoxPtr->GetLOD(0)->GetNumberOfSurfaces();
+
+            for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurfaces; ++IndexOfSurface)
+            {
+                // -----------------------------------------------------------------------------
+                // Get surface
+                // -----------------------------------------------------------------------------
+                CSurfacePtr SurfacePtr = m_SkyboxBoxPtr->GetLOD(0)->GetSurface(IndexOfSurface);
+
+                if (SurfacePtr == 0)
+                {
+                    break;
+                }
+
+                // -----------------------------------------------------------------------------
+                // Set textures
+                // -----------------------------------------------------------------------------
+                ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+                ContextManager::SetTexture(0, pSkyFacet->GetCubemapSetPtr()->GetTexture(0));
+
+                // -----------------------------------------------------------------------------
+                // Render
+                // -----------------------------------------------------------------------------
+                ContextManager::SetVertexBufferSet(SurfacePtr->GetVertexBuffer(), pOffset);
+
+                ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
+
+                ContextManager::SetInputLayout(m_P3InputLayoutPtr);
+
+                ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
+
+                ContextManager::ResetInputLayout();
+
+                ContextManager::ResetIndexBuffer();
+
+                ContextManager::ResetVertexBufferSet();
+
+                ContextManager::ResetSampler(0);
+
+                ContextManager::ResetTexture(0);
             }
 
             // -----------------------------------------------------------------------------
@@ -768,21 +819,40 @@ namespace
             CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
         }
 
-        if (pSkyEntity == 0)
-        {
-            return;
-        }
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
+        ContextManager::ResetConstantBuffer(2);
+        ContextManager::ResetConstantBuffer(3);
 
-        Gfx::CSkyFacet* pSkyFacet = static_cast<Gfx::CSkyFacet*>(pSkyEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
+        ContextManager::ResetShaderVS();
 
-        assert(pSkyFacet);
+        ContextManager::ResetShaderDS();
 
-        _rInterLightProbeFacet.m_SkyCubemapSetPtr = pSkyFacet->GetCubemapSetPtr();
+        ContextManager::ResetShaderHS();
+
+        ContextManager::ResetShaderGS();
+
+        ContextManager::ResetShaderPS();
+
+        ContextManager::ResetTopology();
+
+        ContextManager::ResetRasterizerState();
+
+        ContextManager::ResetDepthStencilState();
+
+        ContextManager::ResetViewPortSet();
+
+        ContextManager::ResetTargetSet();
+
+        // TODO: this has to be the same texture
+        TextureManager::UpdateMipmap(_rInterLightProbeFacet.m_EntitiesCubemapPtr);
+
+        _rInterLightProbeFacet.m_SkyCubemapSetPtr = _rInterLightProbeFacet.m_EntitiesCubemapSetPtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxLightProbeManager::RenderEntities(CInternLightProbeFacet& _rInterLightProbeFacet, const Base::Float3& _rPosition)
+    void CGfxLightProbeManager::RenderEntities(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet* _pDtLightProbeFacet, const Base::Float3& _rPosition)
     {
         // -----------------------------------------------------------------------------
         // Find actors
@@ -823,6 +893,11 @@ namespace
 
         ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());       
         ContextManager::SetResourceBuffer(1, m_LightPropertiesBufferPtr);
+
+        // -----------------------------------------------------------------------------
+        // Settings
+        // -----------------------------------------------------------------------------
+        UpdateGeometryBuffer(Base::Float3::s_Zero, _pDtLightProbeFacet->GetNear(), _pDtLightProbeFacet->GetFar());
 
         // -----------------------------------------------------------------------------
         // Actors
@@ -1008,6 +1083,8 @@ namespace
 
         BufferManager::UploadConstantBufferData(m_FilteringPSBufferPtr, &CubemapSettings);
 
+        UpdateGeometryBuffer(Base::Float3::s_Zero, 0.1f, 1000.0f);
+
         // -----------------------------------------------------------------------------
         // Refine HDR specular from HDR cube map
         // -----------------------------------------------------------------------------
@@ -1064,7 +1141,7 @@ namespace
 
             ContextManager::SetIndexBuffer(m_EnvironmentSpherePtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
-            ContextManager::SetInputLayout(m_PositionInputLayoutPtr);
+            ContextManager::SetInputLayout(m_P3N3T2InputLayoutPtr);
 
             ContextManager::SetConstantBuffer(2, m_CubemapGSBufferPtr);
 
@@ -1157,7 +1234,7 @@ namespace
 
             ContextManager::SetIndexBuffer(m_EnvironmentSpherePtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
-            ContextManager::SetInputLayout(m_PositionInputLayoutPtr);
+            ContextManager::SetInputLayout(m_P3N3T2InputLayoutPtr);
 
             ContextManager::SetConstantBuffer(2, m_CubemapGSBufferPtr);
 
@@ -1299,6 +1376,66 @@ namespace
         }
 
         BufferManager::UploadConstantBufferData(m_LightPropertiesBufferPtr, &LightBuffer);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxLightProbeManager::UpdateGeometryBuffer(const Base::Float3& _rPosition, float _Near, float _Far)
+    {
+        Base::Float3 EyePosition = _rPosition;
+        Base::Float3 UpDirection;
+        Base::Float3 TargetPosition;
+
+        SCubemapGeometryBuffer Values;
+
+        Values.m_CubeProjectionMatrix.SetRHFieldOfView(Base::RadiansToDegree(Base::SConstants<float>::s_Pi * 0.5f), 1.0f, _Near, _Far);
+
+        // -----------------------------------------------------------------------------
+
+        TargetPosition = EyePosition + Base::Float3::s_AxisX;
+        UpDirection = Base::Float3(0.0f, -1.0f, 0.0f);
+
+        Values.m_CubeViewMatrix[0].LookAt(EyePosition, TargetPosition, UpDirection);
+
+        // -----------------------------------------------------------------------------
+
+        TargetPosition = EyePosition - Base::Float3::s_AxisX;
+        UpDirection = Base::Float3(0.0f, -1.0f, 0.0f);
+
+        Values.m_CubeViewMatrix[1].LookAt(EyePosition, TargetPosition, UpDirection);
+
+        // -----------------------------------------------------------------------------
+
+        TargetPosition = EyePosition + Base::Float3::s_AxisY;
+        UpDirection = Base::Float3(0.0f, 0.0f, -1.0f);
+
+        Values.m_CubeViewMatrix[2].LookAt(EyePosition, TargetPosition, UpDirection);
+
+        // -----------------------------------------------------------------------------
+
+        TargetPosition = EyePosition - Base::Float3::s_AxisY;
+        UpDirection = Base::Float3(0.0f, 0.0f, 1.0f);
+
+        Values.m_CubeViewMatrix[3].LookAt(EyePosition, TargetPosition, UpDirection);
+
+        // -----------------------------------------------------------------------------
+
+        TargetPosition = EyePosition + Base::Float3::s_AxisZ;
+        UpDirection = Base::Float3(0.0f, -1.0f, 0.0f);
+
+        Values.m_CubeViewMatrix[4].LookAt(EyePosition, TargetPosition, UpDirection);
+
+        // -----------------------------------------------------------------------------
+
+        TargetPosition = EyePosition - Base::Float3::s_AxisZ;
+        UpDirection = Base::Float3(0.0f, -1.0f, 0.0f);
+
+        Values.m_CubeViewMatrix[5].LookAt(EyePosition, TargetPosition, UpDirection);
+
+        // -----------------------------------------------------------------------------
+        // Upload data
+        // -----------------------------------------------------------------------------
+        BufferManager::UploadConstantBufferData(m_CubemapGSBufferPtr, &Values);
     }
 } // namespace 
 
