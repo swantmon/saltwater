@@ -129,8 +129,7 @@ namespace
             CTargetSetPtr   m_TargetSetPtr;
             CViewPortSetPtr m_ViewPortSetPtr;
 
-            CTexture2DPtr  m_ReflectionCubemapPtr;
-            CTextureSetPtr m_ReflectionCubemapSetPtr;
+            CTexture2DPtr m_ReflectionCubemapPtr;
 
             CTargetSets   m_SpecularHDRTargetSetPtrs;
             CViewPortSets m_SpecularViewPortSetPtrs;
@@ -211,8 +210,7 @@ namespace
         m_TargetSetPtr   = 0;
         m_ViewPortSetPtr = 0;
 
-        m_ReflectionCubemapSetPtr = 0;
-        m_ReflectionCubemapPtr    = 0;
+        m_ReflectionCubemapPtr = 0;
 
         m_DiffuseHDRTargetSetPtr = 0;
         m_DiffuseViewPortSetPtr  = 0;
@@ -558,9 +556,21 @@ namespace
 
         rGfxLightProbeFacet.m_ReflectionCubemapPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
-        rGfxLightProbeFacet.m_ReflectionCubemapSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(rGfxLightProbeFacet.m_ReflectionCubemapPtr));
+        // -----------------------------------------------------------------------------
 
-        CTargetSetPtr ReflectionTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(rGfxLightProbeFacet.m_ReflectionCubemapPtr));
+        TextureDescriptor.m_NumberOfPixelsU = _SpecularFaceSize;
+        TextureDescriptor.m_NumberOfPixelsV = _SpecularFaceSize;
+        TextureDescriptor.m_NumberOfMipMaps = 1;
+        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource | CTextureBase::DepthStencilTarget;
+        TextureDescriptor.m_Format           = CTextureBase::R32_FLOAT;
+
+        rGfxLightProbeFacet.m_DepthPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
+
+        // -----------------------------------------------------------------------------
+
+        CTargetSetPtr ReflectionTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(rGfxLightProbeFacet.m_ReflectionCubemapPtr), static_cast<CTextureBasePtr>(rGfxLightProbeFacet.m_DepthPtr));
+
+        // -----------------------------------------------------------------------------
 
         ViewPortDesc.m_TopLeftX = 0.0f;
         ViewPortDesc.m_TopLeftY = 0.0f;
@@ -604,6 +614,8 @@ namespace
         TextureDescriptor.m_NumberOfPixelsU  = SizeOfDiffuseCubemap;
         TextureDescriptor.m_NumberOfPixelsV  = SizeOfDiffuseCubemap;
         TextureDescriptor.m_NumberOfMipMaps  = 1;
+        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource | CTextureBase::RenderTarget;
+        TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
         
         rGfxLightProbeFacet.m_DiffusePtr = TextureManager::CreateCubeTexture(TextureDescriptor);
         
@@ -1131,7 +1143,7 @@ namespace
 
             ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-            ContextManager::SetTexture(0, _rInterLightProbeFacet.m_ReflectionCubemapSetPtr->GetTexture(0));
+            ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(_rInterLightProbeFacet.m_ReflectionCubemapPtr));
 
             // -----------------------------------------------------------------------------
             // Draw
@@ -1224,7 +1236,7 @@ namespace
 
             ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-            ContextManager::SetTexture(0, _rInterLightProbeFacet.m_ReflectionCubemapSetPtr->GetTexture(0));
+            ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(_rInterLightProbeFacet.m_ReflectionCubemapPtr));
 
             // -----------------------------------------------------------------------------
             // Draw
