@@ -793,6 +793,7 @@ namespace
             ContextManager::SetSampler(4, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
             ContextManager::SetSampler(5, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
             ContextManager::SetSampler(6, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+            ContextManager::SetSampler(7, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
             ContextManager::SetTexture(0, m_ImageLightTextureSetPtr->GetTexture(0));
             ContextManager::SetTexture(1, m_ImageLightTextureSetPtr->GetTexture(1));
@@ -801,7 +802,7 @@ namespace
             ContextManager::SetTexture(4, m_ImageLightTextureSetPtr->GetTexture(4));
             ContextManager::SetTexture(5, static_cast<CTextureBasePtr>(pGraphicProbeFacet->GetSpecularPtr()));
             ContextManager::SetTexture(6, static_cast<CTextureBasePtr>(pGraphicProbeFacet->GetDiffusePtr()));
-            // ContextManager::SetTexture(6, static_cast<CTextureBasePtr>(pGraphicProbeFacet->GetDepthPtr()));
+            ContextManager::SetTexture(7, static_cast<CTextureBasePtr>(pGraphicProbeFacet->GetDepthPtr()));
                     
             // -----------------------------------------------------------------------------
             // IBL data

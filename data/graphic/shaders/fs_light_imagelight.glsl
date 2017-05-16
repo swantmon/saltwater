@@ -27,6 +27,7 @@ layout(binding = 3) uniform sampler2D   ps_Depth;
 layout(binding = 4) uniform sampler2D   ps_BRDF;
 layout(binding = 5) uniform samplerCube ps_SpecularCubemap;
 layout(binding = 6) uniform samplerCube ps_DiffuseCubemap;
+layout(binding = 7) uniform samplerCube ps_ShadowCubemap;
 
 // -----------------------------------------------------------------------------
 // Easy access
@@ -145,6 +146,9 @@ void main()
     // -------------------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------------------
+    float Alpha = textureLod(ps_ShadowCubemap, WSReflectVector, 0).r < 1.0f ? 1.0f : 0.0f;
+
+    out_Output = vec4(Luminance * AverageExposure, Alpha);
     out_Output = vec4(Luminance * AverageExposure, 0.0f);
 }
 
