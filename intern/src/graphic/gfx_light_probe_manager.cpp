@@ -178,11 +178,13 @@ namespace
 
         CInternLightProbeFacet& AllocateLightProbeFacet(unsigned int _SpecularFaceSize, unsigned int _DiffuseFaceSize);
 
-        void RenderEnvironment(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet* _pDtLightProbeFacet);
+        void Render(const Dt::CEntity& _rEntity, CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet& _rDtLightProbeFacet);
 
-        void RenderEntities(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet* _pDtLightProbeFacet, const Base::Float3& _rPosition);
+        void RenderEnvironment(CInternLightProbeFacet& _rInterLightProbeFacet);
 
-        void RenderFiltering(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet* _pDtLightProbeFacet);
+        void RenderEntities(CInternLightProbeFacet& _rInterLightProbeFacet, const Base::Float3& _rPosition);
+
+        void RenderFiltering(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet& _rDtLightProbeFacet);
 
         void UpdateLightProperties();
 
@@ -448,21 +450,10 @@ namespace
 
                 // -----------------------------------------------------------------------------
                 // Check update needs
-                // TODO by tschwandt
-                // check dynamic mode on dirty entity and add entities to list -> performance
                 // -----------------------------------------------------------------------------
                 if (pDataGlobalProbeFacet->GetRefreshMode() == Dt::CLightProbeFacet::Dynamic)
                 {
-                    if (pDataGlobalProbeFacet->GetType() == Dt::CLightProbeFacet::Sky)
-                    {
-                        RenderEnvironment(*pGraphicGlobalProbeFacet, pDataGlobalProbeFacet);
-                    }
-                    else if (pDataGlobalProbeFacet->GetType() == Dt::CLightProbeFacet::Local)
-                    {
-                        RenderEntities(*pGraphicGlobalProbeFacet, pDataGlobalProbeFacet, rCurrentEntity.GetWorldPosition());
-                    }
-
-                    RenderFiltering(*pGraphicGlobalProbeFacet, pDataGlobalProbeFacet);
+                    Render(rCurrentEntity, *pGraphicGlobalProbeFacet, *pDataGlobalProbeFacet);
                 }
             }
 
@@ -506,19 +497,7 @@ namespace
             // -----------------------------------------------------------------------------
             CInternLightProbeFacet& rGfxLightProbeFacet = AllocateLightProbeFacet(pDtLightProbeFacet->GetQualityInPixel(), 128);
 
-            // -----------------------------------------------------------------------------
-            // Render
-            // -----------------------------------------------------------------------------
-            if (pDtLightProbeFacet->GetType() == Dt::CLightProbeFacet::Sky)
-            {
-                RenderEnvironment(rGfxLightProbeFacet, pDtLightProbeFacet);
-            }
-            else if (pDtLightProbeFacet->GetType() == Dt::CLightProbeFacet::Local)
-            {
-                RenderEntities(rGfxLightProbeFacet, pDtLightProbeFacet, _pEntity->GetWorldPosition());
-            }
-
-            RenderFiltering(rGfxLightProbeFacet, pDtLightProbeFacet);
+            Render(*_pEntity, rGfxLightProbeFacet, *pDtLightProbeFacet);
 
             // -----------------------------------------------------------------------------
             // Set time
@@ -534,19 +513,10 @@ namespace
         {
             CInternLightProbeFacet*  pGfxLightProbeFacet;
 
-            pDtLightProbeFacet    = static_cast<Dt::CLightProbeFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+            pDtLightProbeFacet  = static_cast<Dt::CLightProbeFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Data));
             pGfxLightProbeFacet = static_cast<CInternLightProbeFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
 
-            if (pDtLightProbeFacet->GetType() == Dt::CLightProbeFacet::Sky)
-            {
-                RenderEnvironment(*pGfxLightProbeFacet, pDtLightProbeFacet);
-            }
-            else if (pDtLightProbeFacet->GetType() == Dt::CLightProbeFacet::Local)
-            {
-                RenderEntities(*pGfxLightProbeFacet, pDtLightProbeFacet, _pEntity->GetWorldPosition());
-            }
-
-            RenderFiltering(*pGfxLightProbeFacet, pDtLightProbeFacet);
+            Render(*_pEntity, *pGfxLightProbeFacet, *pDtLightProbeFacet);
 
             // -----------------------------------------------------------------------------
             // Set time
@@ -706,10 +676,36 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxLightProbeManager::RenderEnvironment(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet* _pDtLightProbeFacet)
+    void CGfxLightProbeManager::Render(const Dt::CEntity& _rEntity, CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet& _rDtLightProbeFacet)
     {
+        Performance::BeginEvent("Light Probe");
+
+        if (_rDtLightProbeFacet.GetType() == Dt::CLightProbeFacet::Sky)
+        {
+            RenderEnvironment(_rInterLightProbeFacet);
+        }
+        else if (_rDtLightProbeFacet.GetType() == Dt::CLightProbeFacet::Local)
+        {
+            UpdateLightProperties();
+
+            UpdateGeometryBuffer(Base::Float3::s_Zero, _rDtLightProbeFacet.GetNear(), _rDtLightProbeFacet.GetFar());
+
+            RenderEntities(_rInterLightProbeFacet, _rEntity.GetWorldPosition());
+        }
+
+        RenderFiltering(_rInterLightProbeFacet, _rDtLightProbeFacet);
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxLightProbeManager::RenderEnvironment(CInternLightProbeFacet& _rInterLightProbeFacet)
+    {
+        Performance::BeginEvent("Render Environment");
+
         // -----------------------------------------------------------------------------
-        // Find envrionment entity
+        // Find environment entity
         // -----------------------------------------------------------------------------
         Dt::Map::CEntityIterator CurrentEntity;
         Dt::Map::CEntityIterator EndOfEntities;
@@ -843,22 +839,21 @@ namespace
         ContextManager::ResetTargetSet();
 
         TextureManager::UpdateMipmap(_rInterLightProbeFacet.m_ReflectionCubemapPtr);
+
+        Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxLightProbeManager::RenderEntities(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet* _pDtLightProbeFacet, const Base::Float3& _rPosition)
+    void CGfxLightProbeManager::RenderEntities(CInternLightProbeFacet& _rInterLightProbeFacet, const Base::Float3& _rPosition)
     {
+        Performance::BeginEvent("Render Entities");
+
         // -----------------------------------------------------------------------------
         // Find actors
         // -----------------------------------------------------------------------------
         Dt::Map::CEntityIterator CurrentEntity;
         Dt::Map::CEntityIterator EndOfEntities;
-
-        // -----------------------------------------------------------------------------
-        // Prepare lights
-        // -----------------------------------------------------------------------------
-        UpdateLightProperties();
 
         // -----------------------------------------------------------------------------
         // Clear target set
@@ -888,11 +883,6 @@ namespace
 
         ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());       
         ContextManager::SetResourceBuffer(1, m_LightPropertiesBufferPtr);
-
-        // -----------------------------------------------------------------------------
-        // Settings
-        // -----------------------------------------------------------------------------
-        UpdateGeometryBuffer(Base::Float3::s_Zero, _pDtLightProbeFacet->GetNear(), _pDtLightProbeFacet->GetFar());
 
         // -----------------------------------------------------------------------------
         // Actors
@@ -1051,11 +1041,13 @@ namespace
         ContextManager::ResetTargetSet();
 
         TextureManager::UpdateMipmap(_rInterLightProbeFacet.m_ReflectionCubemapPtr);
+
+        Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxLightProbeManager::RenderFiltering(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet* _pDtLightProbeFacet)
+    void CGfxLightProbeManager::RenderFiltering(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet& _rDtLightProbeFacet)
     {
         const unsigned int pOffset[] = { 0, 0 };
 
@@ -1071,7 +1063,7 @@ namespace
 
         CubemapSettings.m_LinearRoughness   = 0.0f;
         CubemapSettings.m_NumberOfMiplevels = 0.0f;
-        CubemapSettings.m_Intensity         = _pDtLightProbeFacet->GetIntensity();
+        CubemapSettings.m_Intensity         = _rDtLightProbeFacet.GetIntensity();
 
         BufferManager::UploadConstantBufferData(m_FilteringPSBufferPtr, &CubemapSettings);
 
@@ -1104,7 +1096,7 @@ namespace
             // -----------------------------------------------------------------------------
             CubemapSettings.m_LinearRoughness   = MipmapRoughness;
             CubemapSettings.m_NumberOfMiplevels = NumberOfMiplevels - 1.0f;
-            CubemapSettings.m_Intensity         = _pDtLightProbeFacet->GetIntensity();
+            CubemapSettings.m_Intensity         = _rDtLightProbeFacet.GetIntensity();
 
             BufferManager::UploadConstantBufferData(m_FilteringPSBufferPtr, &CubemapSettings);
 
@@ -1192,7 +1184,7 @@ namespace
         {
             CubemapSettings.m_LinearRoughness   = 0.0f;
             CubemapSettings.m_NumberOfMiplevels = 0.0f;
-            CubemapSettings.m_Intensity         = _pDtLightProbeFacet->GetIntensity();
+            CubemapSettings.m_Intensity         = _rDtLightProbeFacet.GetIntensity();
 
             BufferManager::UploadConstantBufferData(m_FilteringPSBufferPtr, &CubemapSettings);
 
