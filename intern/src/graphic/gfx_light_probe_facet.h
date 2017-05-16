@@ -20,7 +20,7 @@ namespace Gfx
 
         CTexture2DPtr GetSpecularPtr() const;
 
-        CTextureSetPtr GetFilteredSetPtr() const;
+        CTexture2DPtr GetDepthPtr() const;
 
         Base::U64 GetTimeStamp() const;
 
@@ -28,7 +28,7 @@ namespace Gfx
 
         CTexture2DPtr  m_DiffusePtr;
         CTexture2DPtr  m_SpecularPtr;
-        CTextureSetPtr m_FilteredSetPtr;
+        CTexture2DPtr  m_DepthPtr;
         Base::U64      m_TimeStamp;
     };
 } // namespace Gfx

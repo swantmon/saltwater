@@ -597,7 +597,7 @@ namespace
         TextureDescriptor.m_pPixels          = 0;
         TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
         
-        CTexture2DPtr SpecularCube = TextureManager::CreateCubeTexture(TextureDescriptor);
+        rGfxLightProbeFacet.m_SpecularPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
         
         // -----------------------------------------------------------------------------
         
@@ -605,9 +605,7 @@ namespace
         TextureDescriptor.m_NumberOfPixelsV  = SizeOfDiffuseCubemap;
         TextureDescriptor.m_NumberOfMipMaps  = 1;
         
-        CTexture2DPtr DiffuseCube = TextureManager::CreateCubeTexture(TextureDescriptor);
-        
-        rGfxLightProbeFacet.m_FilteredSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(SpecularCube), static_cast<CTextureBasePtr>(DiffuseCube));
+        rGfxLightProbeFacet.m_DiffusePtr = TextureManager::CreateCubeTexture(TextureDescriptor);
         
         // -----------------------------------------------------------------------------
         // For all cube maps create a render target for every mip map
@@ -620,12 +618,12 @@ namespace
         CInternLightProbeFacet::CTargetSets&   rSpecularTargetSets   = rGfxLightProbeFacet.m_SpecularHDRTargetSetPtrs;
         CInternLightProbeFacet::CViewPortSets& rSpecularViewPortSets = rGfxLightProbeFacet.m_SpecularViewPortSetPtrs;
 
-        for (unsigned int IndexOfMipmap = 0; IndexOfMipmap < SpecularCube->GetNumberOfMipLevels(); ++ IndexOfMipmap)
+        for (unsigned int IndexOfMipmap = 0; IndexOfMipmap < rGfxLightProbeFacet.m_SpecularPtr->GetNumberOfMipLevels(); ++ IndexOfMipmap)
         {
             // -----------------------------------------------------------------------------
             // Target set
             // -----------------------------------------------------------------------------
-            CTexture2DPtr MipmapCubeTexture = TextureManager::GetMipmapFromTexture2D(SpecularCube, IndexOfMipmap);
+            CTexture2DPtr MipmapCubeTexture = TextureManager::GetMipmapFromTexture2D(rGfxLightProbeFacet.m_SpecularPtr, IndexOfMipmap);
             
             CTargetSetPtr SpecularMipmapTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(MipmapCubeTexture));
             
@@ -652,13 +650,13 @@ namespace
             // -----------------------------------------------------------------------------
             // Target set
             // -----------------------------------------------------------------------------
-            CTargetSetPtr DiffuseMipmapTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(DiffuseCube));
+            CTargetSetPtr DiffuseMipmapTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(rGfxLightProbeFacet.m_DiffusePtr));
             
             // -----------------------------------------------------------------------------
             // View port
             // -----------------------------------------------------------------------------
-            ViewPortDesc.m_Width    = static_cast<float>(DiffuseCube->GetNumberOfPixelsU());
-            ViewPortDesc.m_Height   = static_cast<float>(DiffuseCube->GetNumberOfPixelsV());
+            ViewPortDesc.m_Width    = static_cast<float>(rGfxLightProbeFacet.m_DiffusePtr->GetNumberOfPixelsU());
+            ViewPortDesc.m_Height   = static_cast<float>(rGfxLightProbeFacet.m_DiffusePtr->GetNumberOfPixelsV());
             
             CViewPortPtr DiffuseMipmapViewPort = ViewManager::CreateViewPort(ViewPortDesc);
             

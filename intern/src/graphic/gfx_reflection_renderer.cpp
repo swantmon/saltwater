@@ -75,6 +75,7 @@ namespace
 
         struct SLightProbeRenderJob
         {
+            int                    m_ID;
             Dt::CLightProbeFacet*  m_pDataLightProbe;
             Gfx::CLightProbeFacet* m_pGraphicLightProbe;
         };
@@ -798,15 +799,16 @@ namespace
             ContextManager::SetTexture(2, m_ImageLightTextureSetPtr->GetTexture(2));
             ContextManager::SetTexture(3, m_ImageLightTextureSetPtr->GetTexture(3));
             ContextManager::SetTexture(4, m_ImageLightTextureSetPtr->GetTexture(4));
-            ContextManager::SetTexture(5, pGraphicProbeFacet->GetFilteredSetPtr()->GetTexture(0));
-            ContextManager::SetTexture(6, pGraphicProbeFacet->GetFilteredSetPtr()->GetTexture(1));
+            ContextManager::SetTexture(5, static_cast<CTextureBasePtr>(pGraphicProbeFacet->GetSpecularPtr()));
+            ContextManager::SetTexture(6, static_cast<CTextureBasePtr>(pGraphicProbeFacet->GetDiffusePtr()));
+            // ContextManager::SetTexture(6, static_cast<CTextureBasePtr>(pGraphicProbeFacet->GetDepthPtr()));
                     
             // -----------------------------------------------------------------------------
             // IBL data
             // -----------------------------------------------------------------------------
             SIBLSettings IBLSettings;
             
-            IBLSettings.m_NumberOfMiplevelsSpecularIBL = static_cast<float>(pGraphicProbeFacet->GetFilteredSetPtr()->GetTexture(0)->GetNumberOfMipLevels() - 1);
+            IBLSettings.m_NumberOfMiplevelsSpecularIBL = static_cast<float>(pGraphicProbeFacet->GetSpecularPtr()->GetNumberOfMipLevels() - 1);
             IBLSettings.m_ExposureHistoryIndex         = static_cast<float>(HistogramRenderer::GetLastExposureHistoryIndex());
             
             BufferManager::UploadConstantBufferData(m_ImageLightBufferPtr, &IBLSettings);
@@ -1108,6 +1110,14 @@ namespace
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
         // -----------------------------------------------------------------------------
+        struct SSortProbes
+        {
+            bool operator() (SLightProbeRenderJob& _rLeft, SLightProbeRenderJob& _rRight)
+            {
+                return (_rLeft.m_ID < _rRight.m_ID);
+            }
+        } SortProbes;
+
         Dt::Map::CEntityIterator CurrentLightEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
         Dt::Map::CEntityIterator EndOfLightEntities = Dt::Map::EntitiesEnd();
 
@@ -1130,6 +1140,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 SLightProbeRenderJob NewRenderJob;
 
+                NewRenderJob.m_ID                 = static_cast<int>(Dt::CLightProbeFacet::Sky); 
                 NewRenderJob.m_pDataLightProbe    = pDataLightProbeFacet;
                 NewRenderJob.m_pGraphicLightProbe = pGraphicLightProbeFacet;
 
@@ -1141,6 +1152,8 @@ namespace
             // -----------------------------------------------------------------------------
             CurrentLightEntity = CurrentLightEntity.Next(Dt::SEntityCategory::Light);
         }
+
+        std::sort(m_LightProbeRenderJobs.begin(), m_LightProbeRenderJobs.end(), SortProbes);
 
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
