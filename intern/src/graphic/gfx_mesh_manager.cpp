@@ -508,8 +508,10 @@ namespace
 
         rSurface.m_MaterialPtr = nullptr;
 
+        rModel.m_NumberOfLODs = 1;
         rModel.m_LODs[0] = LODPtr;
 
+        rLOD.m_NumberOfSurfaces = 1;
         rLOD.m_Surfaces[0] = SurfacePtr;
 
         // -----------------------------------------------------------------------------
@@ -649,8 +651,10 @@ namespace
         
         rSurface.m_MaterialPtr = nullptr;
         
+        rModel.m_NumberOfLODs = 1;
         rModel.m_LODs[0] = LODPtr;
-        
+
+        rLOD.m_NumberOfSurfaces = 1;
         rLOD.m_Surfaces[0] = SurfacePtr;
         
         // -----------------------------------------------------------------------------
@@ -796,8 +800,10 @@ namespace
 
         rSurface.m_MaterialPtr = nullptr;
 
+        rModel.m_NumberOfLODs = 1;
         rModel.m_LODs[0] = LODPtr;
 
+        rLOD.m_NumberOfSurfaces = 1;
         rLOD.m_Surfaces[0] = SurfacePtr;
 
         // -----------------------------------------------------------------------------
@@ -928,8 +934,10 @@ namespace
         
         rSurface.m_MaterialPtr = nullptr;
         
+        rModel.m_NumberOfLODs = 1;
         rModel.m_LODs[0] = LODPtr;
-        
+
+        rLOD.m_NumberOfSurfaces = 1;
         rLOD.m_Surfaces[0] = SurfacePtr;
         
         // -----------------------------------------------------------------------------
