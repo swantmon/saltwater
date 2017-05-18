@@ -246,7 +246,6 @@ void main(void)
             // -----------------------------------------------------------------------------
             Luminance += BRDF(NormalizedLightVector, WSViewDirection, Data.m_WSNormal, Data) * clamp(dot(Data.m_WSNormal, NormalizedLightVector), 0.0f, 1.0f) * LightProb.ps_LightColor.xyz * Attenuation;
         }
-
         else if (LightProb.ps_LightType == REFLECTION_LIGHT)
         {
             // -----------------------------------------------------------------------------
