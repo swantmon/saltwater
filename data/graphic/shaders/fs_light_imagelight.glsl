@@ -149,7 +149,6 @@ void main()
     float Alpha = textureLod(ps_ShadowCubemap, WSReflectVector, 0).r < 1.0f ? 1.0f : 0.0f;
 
     out_Output = vec4(Luminance * AverageExposure, Alpha);
-    out_Output = vec4(Luminance * AverageExposure, 0.0f);
 }
 
 #endif // __INCLUDE_FS_LIGHT_IMAGELIGHT_GLSL__
