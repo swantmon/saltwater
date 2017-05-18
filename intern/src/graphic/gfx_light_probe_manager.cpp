@@ -927,7 +927,7 @@ namespace
 
             if (rJob.m_Texture0Ptr != 0)
             {
-                ContextManager::SetSampler(IndexOfShadowTexture, SamplerManager::GetSampler(CSampler::PCF));
+                ContextManager::SetSampler(IndexOfShadowTexture, SamplerManager::GetSampler(CSampler::MinMagLinearMipPointClamp));
 
                 ContextManager::SetTexture(IndexOfShadowTexture, rJob.m_Texture0Ptr);
             }
