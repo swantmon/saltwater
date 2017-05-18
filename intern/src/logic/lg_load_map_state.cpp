@@ -312,6 +312,12 @@ namespace
 
             rGlobalProbeLight.SetName("Local light probe");
 
+            Dt::CTransformationFacet* pTransformationFacet = rGlobalProbeLight.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 5.0f));
+            pTransformationFacet->SetScale   (Base::Float3(1.0f));
+            pTransformationFacet->SetRotation(Base::Float3(0.0f));
+
             Dt::CLightProbeFacet* pProbeLightFacet = Dt::LightProbeManager::CreateLightProbe();
 
             pProbeLightFacet->SetType(Dt::CLightProbeFacet::Local);
@@ -431,7 +437,7 @@ namespace
 
             Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(5.0f, 0.0f, 5.0f));
+            pTransformationFacet->SetPosition(Base::Float3(2.0f, 0.0f, 0.5f));
             pTransformationFacet->SetScale(Base::Float3(1.0f));
             pTransformationFacet->SetRotation(Base::Float3(0.0f));
 
@@ -443,7 +449,20 @@ namespace
 
             Dt::SMaterialDescriptor MaterialFileDesc;
 
-            MaterialFileDesc.m_pFileName = "materials/naturals/metals/Chrome_Glossy_00.mat";
+            MaterialFileDesc.m_pMaterialName = "Red Alert";
+            MaterialFileDesc.m_pColorMap     = 0;
+            MaterialFileDesc.m_pNormalMap    = 0;
+            MaterialFileDesc.m_pRoughnessMap = 0;
+            MaterialFileDesc.m_pMetalMaskMap = 0;
+            MaterialFileDesc.m_pAOMap        = 0;
+            MaterialFileDesc.m_pBumpMap      = 0;
+            MaterialFileDesc.m_Roughness     = 1.0f;
+            MaterialFileDesc.m_Reflectance   = 0.0f;
+            MaterialFileDesc.m_MetalMask     = 0.0f;
+            MaterialFileDesc.m_Displacement  = 0.0f;
+            MaterialFileDesc.m_AlbedoColor   = Base::Float3(1.0f, 0.0f, 0.0f);
+            MaterialFileDesc.m_TilingOffset  = Base::Float4(0.0f, 0.0f, 0.0f, 0.0f);
+            MaterialFileDesc.m_pFileName     = 0;
 
             Dt::CMaterial& rMaterial = Dt::MaterialManager::CreateMaterial(MaterialFileDesc);
 
