@@ -70,6 +70,8 @@ namespace
         
         void Update();
         void Render();
+
+        CTextureBasePtr GetBRDF();
         
     private:
 
@@ -747,6 +749,13 @@ namespace
 
         Performance::EndEvent();
     }
+
+    // -----------------------------------------------------------------------------
+
+    CTextureBasePtr CGfxReflectionRenderer::GetBRDF()
+    {
+        return m_BRDFTexture2DPtr;
+    }
     
     // -----------------------------------------------------------------------------
     
@@ -1306,6 +1315,13 @@ namespace ReflectionRenderer
     void Render()
     {
         CGfxReflectionRenderer::GetInstance().Render();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTextureBasePtr GetBRDF()
+    {
+        return CGfxReflectionRenderer::GetInstance().GetBRDF();
     }
 } // namespace ReflectionRenderer
 } // namespace Gfx

@@ -30,6 +30,7 @@
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_point_light_facet.h"
+#include "graphic/gfx_reflection_renderer.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_sky_facet.h"
@@ -65,9 +66,16 @@ namespace
 
     private:
 
-        static const unsigned int s_MaxNumberOfLightsPerProbe = 16;
+        static const unsigned int s_MaxNumberOfLightsPerProbe = 4;
 
     private:
+
+        struct SLightJob
+        {
+            CTextureBasePtr m_Texture0Ptr;
+            CTextureBasePtr m_Texture1Ptr;
+            CTextureBasePtr m_Texture2Ptr;
+        };
 
         struct SGeometryVPBuffer
         {
@@ -145,6 +153,7 @@ namespace
     private:
 
         typedef Base::CPool<CInternLightProbeFacet, 1> CLightProbeFacets;
+        typedef std::vector<SLightJob> CLightJobs;
 
     private:
 
@@ -170,6 +179,7 @@ namespace
         CInputLayoutPtr m_P3InputLayoutPtr;
 
         CLightProbeFacets m_LightprobeFacets;
+        CLightJobs m_LightJobs;
 
     private:
 
@@ -232,6 +242,7 @@ namespace
         , m_FilteringPSBufferPtr  ()
         , m_P3N3T2InputLayoutPtr  ()
         , m_LightprobeFacets      ()
+        , m_LightJobs             ()
     {
 
     }
@@ -422,6 +433,8 @@ namespace
         m_P3InputLayoutPtr = 0;
 
         m_LightprobeFacets.Clear();
+
+        m_LightJobs.clear();
     }
 
     // -----------------------------------------------------------------------------
@@ -895,6 +908,48 @@ namespace
         ContextManager::SetResourceBuffer(1, m_LightPropertiesBufferPtr);
 
         // -----------------------------------------------------------------------------
+        // Bind shadow and reflection textures
+        // -----------------------------------------------------------------------------
+        ContextManager::SetSampler(6, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(6, ReflectionRenderer::GetBRDF());
+
+        CLightJobs::const_iterator CurrentLightJob = m_LightJobs.begin();
+        CLightJobs::const_iterator EndOfLightJobs  = m_LightJobs.end();
+
+        unsigned int IndexOfShadowTexture   = 7;
+        unsigned int IndexOfSpecularCubemap = IndexOfShadowTexture   + s_MaxNumberOfLightsPerProbe;
+        unsigned int IndexOfDiffuseCubemap  = IndexOfSpecularCubemap + s_MaxNumberOfLightsPerProbe;
+
+        for (; CurrentLightJob != EndOfLightJobs; ++ CurrentLightJob)
+        {
+            const SLightJob& rJob = *CurrentLightJob;
+
+            if (rJob.m_Texture0Ptr != 0)
+            {
+                ContextManager::SetSampler(IndexOfShadowTexture, SamplerManager::GetSampler(CSampler::PCF));
+
+                ContextManager::SetTexture(IndexOfShadowTexture, rJob.m_Texture0Ptr);
+            }
+            if (rJob.m_Texture1Ptr != 0)
+            {
+                ContextManager::SetSampler(IndexOfSpecularCubemap, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+                ContextManager::SetTexture(IndexOfSpecularCubemap, rJob.m_Texture1Ptr);
+            }
+            if (rJob.m_Texture2Ptr != 0)
+            {
+                ContextManager::SetSampler(IndexOfDiffuseCubemap, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+                ContextManager::SetTexture(IndexOfDiffuseCubemap, rJob.m_Texture2Ptr);
+            }
+
+            ++IndexOfShadowTexture;
+            ++IndexOfSpecularCubemap;
+            ++IndexOfDiffuseCubemap;
+        }
+
+        // -----------------------------------------------------------------------------
         // Actors
         // -----------------------------------------------------------------------------
         CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Actor);
@@ -1282,11 +1337,15 @@ namespace
         unsigned int     IndexOfLight;
 
         // -----------------------------------------------------------------------------
+        // Clear jobs
+        // -----------------------------------------------------------------------------
+        m_LightJobs.clear();
+
+        // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
         // -----------------------------------------------------------------------------
         Dt::Map::CEntityIterator CurrentLightEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
         Dt::Map::CEntityIterator EndOfLightEntities = Dt::Map::EntitiesEnd();
-
 
         // -----------------------------------------------------------------------------
         // Initiate light buffer
@@ -1320,47 +1379,104 @@ namespace
                 Dt::CSunLightFacet* pDtSunFacet  = static_cast<Dt::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
                 Gfx::CSunFacet*     pGfxSunFacet = static_cast<Gfx::CSunFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
 
-                assert(pDtSunFacet != 0 && pGfxSunFacet != 0);
+                if (pDtSunFacet != 0 && pGfxSunFacet != 0)
+                {
+                    float SunAngularRadius = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
+                    float HasShadows = 1.0f;
 
-                float SunAngularRadius = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
-                float HasShadows       = 1.0f;
+                    LightBuffer[IndexOfLight].m_LightType           = 1;
+                    LightBuffer[IndexOfLight].m_LightViewProjection = pGfxSunFacet->GetCamera()->GetViewProjectionMatrix();
+                    LightBuffer[IndexOfLight].m_LightDirection      = Base::Float4(pDtSunFacet->GetDirection(), 0.0f).Normalize();
+                    LightBuffer[IndexOfLight].m_LightColor          = Base::Float4(pDtSunFacet->GetLightness(), 1.0f);
+                    LightBuffer[IndexOfLight].m_LightSettings       = Base::Float4(SunAngularRadius, 0.0f, 0.0f, HasShadows);
 
-                LightBuffer[IndexOfLight].m_LightType           = 1;
-                LightBuffer[IndexOfLight].m_LightViewProjection = pGfxSunFacet->GetCamera()->GetViewProjectionMatrix();
-                LightBuffer[IndexOfLight].m_LightDirection      = Base::Float4(pDtSunFacet->GetDirection(), 0.0f).Normalize();
-                LightBuffer[IndexOfLight].m_LightColor          = Base::Float4(pDtSunFacet->GetLightness(), 1.0f);
-                LightBuffer[IndexOfLight].m_LightSettings       = Base::Float4(SunAngularRadius, 0.0f, 0.0f, HasShadows);
+                    ++IndexOfLight;
 
-                ++IndexOfLight;
+                    // -----------------------------------------------------------------------------
+
+                    SLightJob NewLightJob;
+
+                    NewLightJob.m_Texture0Ptr = pGfxSunFacet->GetTextureSMSet()->GetTexture(0);
+                    NewLightJob.m_Texture1Ptr = 0;
+                    NewLightJob.m_Texture2Ptr = 0;
+
+                    m_LightJobs.push_back(NewLightJob);
+                }
             }
             else if (rCurrentEntity.GetType() == Dt::SLightType::Point)
             {
                 Dt::CPointLightFacet*  pDtPointFacet  = static_cast<Dt::CPointLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
                 Gfx::CPointLightFacet* pGfxPointFacet = static_cast<Gfx::CPointLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
 
-                assert(pDtPointFacet != 0 && pGfxPointFacet != 0);
-
-                float InvSqrAttenuationRadius = pDtPointFacet->GetReciprocalSquaredAttenuationRadius();
-                float AngleScale              = pDtPointFacet->GetAngleScale();
-                float AngleOffset             = pDtPointFacet->GetAngleOffset();
-                float HasShadows              = pDtPointFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows ? 1.0f : 0.0f;
-            
-                LightBuffer[IndexOfLight].m_LightType      = 2;
-                LightBuffer[IndexOfLight].m_LightPosition  = Base::Float4(rCurrentEntity.GetWorldPosition(), 1.0f);
-                LightBuffer[IndexOfLight].m_LightDirection = Base::Float4(pDtPointFacet->GetDirection(), 0.0f).Normalize();
-                LightBuffer[IndexOfLight].m_LightColor     = Base::Float4(pDtPointFacet->GetLightness(), 1.0f);
-                LightBuffer[IndexOfLight].m_LightSettings  = Base::Float4(InvSqrAttenuationRadius, AngleScale, AngleOffset, HasShadows);
-
-                LightBuffer[IndexOfLight].m_LightViewProjection.SetIdentity();
-
-                if (pDtPointFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows)
+                if (pDtPointFacet != 0 && pGfxPointFacet != 0)
                 {
-                    assert(pGfxPointFacet->GetCamera().IsValid());
+                    float InvSqrAttenuationRadius = pDtPointFacet->GetReciprocalSquaredAttenuationRadius();
+                    float AngleScale              = pDtPointFacet->GetAngleScale();
+                    float AngleOffset             = pDtPointFacet->GetAngleOffset();
+                    float HasShadows              = pDtPointFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows ? 1.0f : 0.0f;
 
-                    LightBuffer[IndexOfLight].m_LightViewProjection = pGfxPointFacet->GetCamera()->GetViewProjectionMatrix();
+                    LightBuffer[IndexOfLight].m_LightType      = 2;
+                    LightBuffer[IndexOfLight].m_LightPosition  = Base::Float4(rCurrentEntity.GetWorldPosition(), 1.0f);
+                    LightBuffer[IndexOfLight].m_LightDirection = Base::Float4(pDtPointFacet->GetDirection(), 0.0f).Normalize();
+                    LightBuffer[IndexOfLight].m_LightColor     = Base::Float4(pDtPointFacet->GetLightness(), 1.0f);
+                    LightBuffer[IndexOfLight].m_LightSettings  = Base::Float4(InvSqrAttenuationRadius, AngleScale, AngleOffset, HasShadows);
+
+                    LightBuffer[IndexOfLight].m_LightViewProjection.SetIdentity();
+
+                    if (pDtPointFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows)
+                    {
+                        assert(pGfxPointFacet->GetCamera().IsValid());
+
+                        LightBuffer[IndexOfLight].m_LightViewProjection = pGfxPointFacet->GetCamera()->GetViewProjectionMatrix();
+                    }
+
+                    ++IndexOfLight;
+
+                    // -----------------------------------------------------------------------------
+
+                    SLightJob NewLightJob;
+
+                    if (pDtPointFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows)
+                    {
+                        NewLightJob.m_Texture0Ptr = pGfxPointFacet->GetTextureSMSet()->GetTexture(0);
+                    }
+                    else
+                    {
+                        NewLightJob.m_Texture0Ptr = 0;
+                    }
+                    NewLightJob.m_Texture1Ptr = 0;
+                    NewLightJob.m_Texture2Ptr = 0;
+
+                    m_LightJobs.push_back(NewLightJob);
                 }
+            }
+            else if (rCurrentEntity.GetType() == Dt::SLightType::LightProbe)
+            {
+                Dt::CLightProbeFacet*  pDataLightProbeFacet    = static_cast<Dt::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+                Gfx::CLightProbeFacet* pGraphicLightProbeFacet = static_cast<Gfx::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
 
-                ++IndexOfLight;
+                if (pDataLightProbeFacet != 0 && pGraphicLightProbeFacet != 0 && pDataLightProbeFacet->GetType() == Dt::CLightProbeFacet::Sky)
+                {
+                    LightBuffer[IndexOfLight].m_LightType      = 3;
+                    LightBuffer[IndexOfLight].m_LightPosition  = Base::Float4(rCurrentEntity.GetWorldPosition(), 1.0f);
+                    LightBuffer[IndexOfLight].m_LightDirection = Base::Float4(0.0f);
+                    LightBuffer[IndexOfLight].m_LightColor     = Base::Float4(0.0f);
+                    LightBuffer[IndexOfLight].m_LightSettings  = Base::Float4(pGraphicLightProbeFacet->GetSpecularPtr()->GetNumberOfMipLevels() - 1, 0.0f, 0.0f, 0.0f);
+
+                    LightBuffer[IndexOfLight].m_LightViewProjection.SetIdentity();
+
+                    ++IndexOfLight;
+
+                    // -----------------------------------------------------------------------------
+
+                    SLightJob NewLightJob;
+
+                    NewLightJob.m_Texture0Ptr = 0;
+                    NewLightJob.m_Texture1Ptr = pGraphicLightProbeFacet->GetSpecularPtr();
+                    NewLightJob.m_Texture2Ptr = pGraphicLightProbeFacet->GetDiffusePtr();
+
+                    m_LightJobs.push_back(NewLightJob);
+                }
             }
 
             // -----------------------------------------------------------------------------

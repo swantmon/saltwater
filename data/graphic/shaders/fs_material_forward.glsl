@@ -10,8 +10,13 @@
 
 // -----------------------------------------------------------------------------
 // Definitions
-// LightType: 1 = Sun, 2 = Point
 // -----------------------------------------------------------------------------
+#define MAX_NUMBER_OF_LIGHTS 4
+
+#define SUN_LIGHT 1
+#define POINT_LIGHT 2
+#define REFLECTION_LIGHT 3
+
 struct SLightProperties
 {
     mat4 ps_LightViewProjection;
@@ -50,12 +55,16 @@ layout(std430, binding = 1) readonly buffer BB1
     SLightProperties ps_LightProperties[];
 };
 
-layout(binding = 0) uniform sampler2D       ps_DiffuseTexture;
-layout(binding = 1) uniform sampler2D       ps_NormalTexture;
-layout(binding = 2) uniform sampler2D       ps_RougnessTexture;
-layout(binding = 3) uniform sampler2D       ps_Metaltexture;
-layout(binding = 4) uniform sampler2D       ps_AOTexture;
-layout(binding = 5) uniform sampler2DShadow ps_ShadowTexture;
+layout(binding =  0) uniform sampler2D       ps_DiffuseTexture;
+layout(binding =  1) uniform sampler2D       ps_NormalTexture;
+layout(binding =  2) uniform sampler2D       ps_RougnessTexture;
+layout(binding =  3) uniform sampler2D       ps_Metaltexture;
+layout(binding =  4) uniform sampler2D       ps_AOTexture;
+// binding 5 is reserved for bump texture
+layout(binding =  6) uniform sampler2D       ps_BRDF;
+layout(binding =  7) uniform sampler2DShadow ps_ShadowTexture[MAX_NUMBER_OF_LIGHTS];
+layout(binding = 11) uniform samplerCube     ps_SpecularCubemap[MAX_NUMBER_OF_LIGHTS];
+layout(binding = 15) uniform samplerCube     ps_DiffuseCubemap[MAX_NUMBER_OF_LIGHTS];
 
 // -----------------------------------------------------------------------------
 // Input to fragment from VS
@@ -69,6 +78,47 @@ layout(location = 3) in mat3 in_WSNormalMatrix;
 // Output to fragment
 // -----------------------------------------------------------------------------
 layout(location = 0) out vec4 out_Output;
+
+// -----------------------------------------------------------------------------
+// Functions
+// -----------------------------------------------------------------------------
+vec3 EvaluateDiffuseIBL(in samplerCube _Cubemap, in SSurfaceData _Data, in vec3 _WSViewDirection, in float _PreF, in float _NdotV)
+{
+    vec3 DiffuseDominantN = GetDiffuseDominantDir(_Data.m_WSNormal, _WSViewDirection, _NdotV, _Data.m_Roughness);
+    vec3 DiffuseIBL       = textureLod(_Cubemap, DiffuseDominantN, 0).rgb;
+    
+    DiffuseIBL = mix(DiffuseIBL * 0.3f, DiffuseIBL, _Data.m_AmbientOcclusion);
+
+    return _Data.m_DiffuseAlbedo * DiffuseIBL * _PreF / PI;
+}
+
+// -----------------------------------------------------------------------------
+
+vec3 EvaluateSpecularIBL(in samplerCube _Cubemap, in SSurfaceData _Data, in vec3 _WSReflectVector, in vec2 _PreDFG, in float _NdotV, in float _NumberOfMiplevels)
+{
+    vec3 SpecularDominantR = GetSpecularDominantDir(_Data.m_WSNormal, _WSReflectVector, _Data.m_Roughness);
+    
+    ivec2 DFGSize = textureSize(ps_BRDF, 0);
+    
+    // -----------------------------------------------------------------------------
+    // Rebuild the function
+    // -----------------------------------------------------------------------------
+    _NdotV = max(_NdotV, 0.5f / DFGSize.x);
+    
+    // -----------------------------------------------------------------------------
+    // Sample specular cubemap
+    // -----------------------------------------------------------------------------
+    float LOD         = GetMipLevelByRoughness(_Data.m_Roughness, _NumberOfMiplevels);
+    vec3  SpecularIBL = textureLod(_Cubemap, SpecularDominantR, LOD).rgb;
+    
+    // -----------------------------------------------------------------------------
+    // Output
+    // -----------------------------------------------------------------------------
+    float F90 = clamp(50.0f * dot(_Data.m_SpecularAlbedo, vec3(0.33f)), 0.0f, 1.0f);
+    float AO  = GetSpecularOcclusion(_NdotV, _Data.m_AmbientOcclusion, _Data.m_Roughness);
+    
+    return SpecularIBL * (_Data.m_SpecularAlbedo * _PreDFG.x + F90 * _PreDFG.y) * AO;
+}
 
 // -----------------------------------------------------------------------------
 // Main
@@ -126,7 +176,7 @@ void main(void)
     {
         SLightProperties LightProb = ps_LightProperties[IndexOfLight];
 
-        if (LightProb.ps_LightType == 1)
+        if (LightProb.ps_LightType == SUN_LIGHT)
         {
             // -----------------------------------------------------------------------------
             // Compute lighting for sun light
@@ -153,14 +203,14 @@ void main(void)
             // -----------------------------------------------------------------------------
             float Attenuation = 1.0f;
             Attenuation *= Data.m_AmbientOcclusion;
-            // Attenuation = GetShadowAtPositionWithPCF(Data.m_WSPosition, ps_LightViewProjection, ps_ShadowTexture);
+            // Attenuation  = GetShadowAtPositionWithPCF(Data.m_WSPosition, LightProb.ps_LightViewProjection, ps_ShadowTexture[IndexOfLight]);
             
             // -----------------------------------------------------------------------------
             // Apply light luminance
             // -----------------------------------------------------------------------------
             Luminance += BRDF(L, WSViewDirection, Data.m_WSNormal, Data) * clamp(dot(Data.m_WSNormal, L), 0.0f, 1.0f) * LightProb.ps_LightColor.xyz * Attenuation;
         }
-        else if (LightProb.ps_LightType == 2)
+        else if (LightProb.ps_LightType == POINT_LIGHT)
         {
             // -----------------------------------------------------------------------------
             // Light data
@@ -195,6 +245,34 @@ void main(void)
             // Apply light luminance and shading
             // -----------------------------------------------------------------------------
             Luminance += BRDF(NormalizedLightVector, WSViewDirection, Data.m_WSNormal, Data) * clamp(dot(Data.m_WSNormal, NormalizedLightVector), 0.0f, 1.0f) * LightProb.ps_LightColor.xyz * Attenuation;
+        }
+
+        else if (LightProb.ps_LightType == REFLECTION_LIGHT)
+        {
+            // -----------------------------------------------------------------------------
+            // Light data
+            // -----------------------------------------------------------------------------
+            float NumberOfMiplevels = LightProb.ps_LightSettings.x;
+
+            // -----------------------------------------------------------------------------
+            // Compute lighting for sphere lights
+            // -----------------------------------------------------------------------------
+            vec3  WSViewDirection = normalize(Data.m_WSPosition - g_ViewPosition.xyz);
+            vec3  WSReflectVector = normalize(reflect(WSViewDirection, Data.m_WSNormal));
+            float NdotV           = clamp( dot( Data.m_WSNormal, -WSViewDirection ), 0.0, 1.0f);
+            
+            // -----------------------------------------------------------------------------
+            // Get data
+            // -----------------------------------------------------------------------------
+            vec3 PreDFGF = textureLod(ps_BRDF, vec2(NdotV, Data.m_Roughness), 0).rgb;
+            
+            vec3 DiffuseIBL  = EvaluateDiffuseIBL(ps_DiffuseCubemap[IndexOfLight], Data, WSViewDirection, PreDFGF.z, NdotV);
+            vec3 SpecularIBL = EvaluateSpecularIBL(ps_SpecularCubemap[IndexOfLight], Data, WSReflectVector, PreDFGF.xy, NdotV, NumberOfMiplevels);
+            
+            // -------------------------------------------------------------------------------------
+            // Combination of lighting
+            // -------------------------------------------------------------------------------------
+            Luminance += DiffuseIBL.rgb + SpecularIBL.rgb;
         }
     }
 

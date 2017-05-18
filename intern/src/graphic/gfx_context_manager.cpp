@@ -137,7 +137,7 @@ namespace
     
     private:
     
-        static const unsigned int s_NumberOfTextureUnits  = 16;
+        static const unsigned int s_NumberOfTextureUnits  = 32;
         static const unsigned int s_NumberOfImageUnits    = 8;
         static const unsigned int s_NumberOfBufferUnits   = 16;
         static const unsigned int s_NumberOfResourceUnits = 16;
