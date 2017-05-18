@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>188</height>
+    <height>240</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,15 +17,22 @@
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>Global Light Probe</string>
+      <string> Light Probe</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
        <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="0">
-         <widget class="QLabel" name="label">
+        <item row="4" column="0">
+         <widget class="QLabel" name="label_5">
           <property name="text">
-           <string>Refresh Mode</string>
+           <string>Near</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>Intensity</string>
           </property>
          </widget>
         </item>
@@ -36,6 +43,13 @@
           </property>
          </widget>
         </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Refresh Mode</string>
+          </property>
+         </widget>
+        </item>
         <item row="2" column="0">
          <widget class="QLabel" name="label_3">
           <property name="text">
@@ -43,10 +57,10 @@
           </property>
          </widget>
         </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="label_4">
+        <item row="3" column="1">
+         <widget class="QLineEdit" name="m_pIntensityEdit">
           <property name="text">
-           <string>Intensity</string>
+           <string>1.0</string>
           </property>
          </widget>
         </item>
@@ -60,25 +74,6 @@
           <item>
            <property name="text">
             <string>Dynamic</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QComboBox" name="m_pTypeCB">
-          <item>
-           <property name="text">
-            <string>Sky</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Local</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Custom</string>
            </property>
           </item>
          </widget>
@@ -112,10 +107,43 @@
           </item>
          </widget>
         </item>
-        <item row="3" column="1">
-         <widget class="QLineEdit" name="m_pIntensityEdit">
+        <item row="1" column="1">
+         <widget class="QComboBox" name="m_pTypeCB">
+          <item>
+           <property name="text">
+            <string>Sky</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Local</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Custom</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string>Far</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QLineEdit" name="m_pNearEdit">
           <property name="text">
            <string>1.0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <widget class="QLineEdit" name="m_pFarEdit">
+          <property name="text">
+           <string>1000.0</string>
           </property>
          </widget>
         </item>

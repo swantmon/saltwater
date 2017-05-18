@@ -255,6 +255,8 @@ namespace
             pLightProbeFacet->SetType       (Dt::CLightProbeFacet::Sky);
             pLightProbeFacet->SetQuality    (Dt::CLightProbeFacet::PX512);
             pLightProbeFacet->SetIntensity  (1.0f);
+            pLightProbeFacet->SetNear       (1.0f);
+            pLightProbeFacet->SetFar        (1000.0f);
 
             rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pLightProbeFacet);
         }
@@ -451,6 +453,8 @@ namespace
             NewMessage.PutInt(pLightFacet->GetType());
             NewMessage.PutInt(pLightFacet->GetQuality());
             NewMessage.PutFloat(pLightFacet->GetIntensity());
+            NewMessage.PutFloat(pLightFacet->GetNear());
+            NewMessage.PutFloat(pLightFacet->GetFar());
 
             NewMessage.Reset();
 
@@ -705,6 +709,10 @@ namespace
 
             float Intensity = _rMessage.GetFloat();
 
+            float Near = _rMessage.GetFloat();
+
+            float Far = _rMessage.GetFloat();
+
             // -----------------------------------------------------------------------------
             // Set values
             // -----------------------------------------------------------------------------
@@ -715,6 +723,10 @@ namespace
             pLightFacet->SetQuality(static_cast<Dt::CLightProbeFacet::EQuality>(Quality));
 
             pLightFacet->SetIntensity(Intensity);
+
+            pLightFacet->SetNear(Near);
+
+            pLightFacet->SetFar(Far);
 
             Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
         }

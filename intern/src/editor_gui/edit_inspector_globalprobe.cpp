@@ -40,6 +40,10 @@ namespace Edit
 
         float Intensity = m_pIntensityEdit->text().toFloat();
 
+        float Near = m_pNearEdit->text().toFloat();
+
+        float Far = m_pFarEdit->text().toFloat();
+
         // -----------------------------------------------------------------------------
         // Send message
         // -----------------------------------------------------------------------------
@@ -54,6 +58,10 @@ namespace Edit
         NewMessage.PutInt(Quality);
 
         NewMessage.PutFloat(Intensity);
+
+        NewMessage.PutFloat(Near);
+
+        NewMessage.PutFloat(Far);
 
         NewMessage.Reset();
 
@@ -94,6 +102,10 @@ namespace Edit
 
         float Intensity = _rMessage.GetFloat();
 
+        float Near = _rMessage.GetFloat();
+
+        float Far = _rMessage.GetFloat();
+
         // -----------------------------------------------------------------------------
         // Set values
         // -----------------------------------------------------------------------------
@@ -108,6 +120,10 @@ namespace Edit
         m_pQualityCB->setCurrentIndex(Quality);
 
         m_pIntensityEdit->setText(QString::number(Intensity));
+
+        m_pNearEdit->setText(QString::number(Near));
+
+        m_pFarEdit->setText(QString::number(Far));
 
         m_pRefreshModeCB->blockSignals(false);
         m_pTypeCB       ->blockSignals(false);
