@@ -50,7 +50,7 @@ layout(std430, binding = 0) readonly buffer BB0
     float ps_ExposureHistory[8];
 };
 
-layout(std430, binding = 1) readonly buffer BB1
+layout(std430, row_major, binding = 1) readonly buffer BB1
 {
     SLightProperties ps_LightProperties[];
 };
@@ -203,8 +203,8 @@ void main(void)
             // -----------------------------------------------------------------------------
             float Attenuation = 1.0f;
             Attenuation *= Data.m_AmbientOcclusion;
-            //Attenuation *= GetShadowAtPosition(Data.m_WSPosition, LightProb.ps_LightViewProjection, ps_ShadowTexture[IndexOfLight]);
-            
+            Attenuation *= GetShadowAtPosition(Data.m_WSPosition, transpose(LightProb.ps_LightViewProjection), ps_ShadowTexture[IndexOfLight]);
+
             // -----------------------------------------------------------------------------
             // Apply light luminance
             // -----------------------------------------------------------------------------
