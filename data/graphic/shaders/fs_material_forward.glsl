@@ -223,7 +223,7 @@ void main(void)
             // -----------------------------------------------------------------------------
             // Compute lighting for punctual lights
             // -----------------------------------------------------------------------------
-            vec3 UnnormalizedLightVector = Data.m_WSPosition - LightProb.ps_LightPosition.xyz;
+            vec3 UnnormalizedLightVector = LightProb.ps_LightPosition.xyz - Data.m_WSPosition;
             vec3 NormalizedLightVector   = normalize(UnnormalizedLightVector);
             vec3 WSViewDirection         = normalize(Data.m_WSPosition - ps_CameraPosition.xyz);
 
