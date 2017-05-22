@@ -370,32 +370,29 @@ namespace
         // -----------------------------------------------------------------------------
         // Creating VS matrix for spherical image to cube map:
         // -> Viewer is inside the cube > LHS
-        // -> y-Axis is mirrored (normally "z" but we will rotate cube later) 
-        // -> Orientation of every side is flipped
-        // -> At the end we rotate the matrix because the spherical image is y-up
         // -----------------------------------------------------------------------------
         LookDirection = EyePosition + Base::Float3::s_AxisX;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[0].LookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
         LookDirection = EyePosition - Base::Float3::s_AxisX;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[1].LookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition - Base::Float3::s_AxisY;
+        LookDirection = EyePosition + Base::Float3::s_AxisY;
         UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisZ;
         
         DefaultGSValues.m_CubeViewMatrix[2].LookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition + Base::Float3::s_AxisY;
+        LookDirection = EyePosition - Base::Float3::s_AxisY;
         UpDirection   = Base::Float3::s_AxisZ;
         
         DefaultGSValues.m_CubeViewMatrix[3].LookAt(EyePosition, LookDirection, UpDirection);
@@ -403,14 +400,14 @@ namespace
         // -----------------------------------------------------------------------------
         
         LookDirection = EyePosition + Base::Float3::s_AxisZ;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[4].LookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
         LookDirection = EyePosition - Base::Float3::s_AxisZ;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[5].LookAt(EyePosition, LookDirection, UpDirection);
         
@@ -441,43 +438,43 @@ namespace
         // -> Mirroring isn't necessary because it is done inside the cubemap
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition - Base::Float3::s_AxisX;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        LookDirection = EyePosition + Base::Float3::s_AxisX;
+        UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[0].LookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition + Base::Float3::s_AxisX;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        LookDirection = EyePosition - Base::Float3::s_AxisX;
+        UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[1].LookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition - Base::Float3::s_AxisY;
-        UpDirection   = Base::Float3::s_AxisZ;
-        
-        DefaultGSValues.m_CubeViewMatrix[2].LookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
         LookDirection = EyePosition + Base::Float3::s_AxisY;
         UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisZ;
         
+        DefaultGSValues.m_CubeViewMatrix[2].LookAt(EyePosition, LookDirection, UpDirection);
+        
+        // -----------------------------------------------------------------------------
+        
+        LookDirection = EyePosition - Base::Float3::s_AxisY;
+        UpDirection   = Base::Float3::s_AxisZ;
+        
         DefaultGSValues.m_CubeViewMatrix[3].LookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition - Base::Float3::s_AxisZ;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        LookDirection = EyePosition + Base::Float3::s_AxisZ;
+        UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[4].LookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition + Base::Float3::s_AxisZ;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        LookDirection = EyePosition - Base::Float3::s_AxisZ;
+        UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[5].LookAt(EyePosition, LookDirection, UpDirection);
         

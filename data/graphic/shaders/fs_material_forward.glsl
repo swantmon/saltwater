@@ -181,8 +181,8 @@ void main(void)
             // -----------------------------------------------------------------------------
             // Compute lighting for sun light
             // -----------------------------------------------------------------------------
-            vec3 WSLightDirection  = LightProb.ps_LightDirection.xyz;
-            vec3 WSViewDirection   = normalize(Data.m_WSPosition - ps_CameraPosition.xyz);
+            vec3 WSLightDirection  = -LightProb.ps_LightDirection.xyz;
+            vec3 WSViewDirection   = normalize(ps_CameraPosition.xyz - Data.m_WSPosition);
             
             float NdotV = dot(Data.m_WSNormal, WSViewDirection);
             
@@ -203,12 +203,12 @@ void main(void)
             // -----------------------------------------------------------------------------
             float Attenuation = 1.0f;
             Attenuation *= Data.m_AmbientOcclusion;
-            Attenuation *= GetShadowAtPosition(Data.m_WSPosition, LightProb.ps_LightViewProjection, ps_ShadowTexture[IndexOfLight]);
+            //Attenuation *= GetShadowAtPosition(Data.m_WSPosition, LightProb.ps_LightViewProjection, ps_ShadowTexture[IndexOfLight]);
             
             // -----------------------------------------------------------------------------
             // Apply light luminance
             // -----------------------------------------------------------------------------
-            Luminance += BRDF(L, WSViewDirection, Data.m_WSNormal, Data) * clamp(dot(Data.m_WSNormal, L), 0.0f, 1.0f) * LightProb.ps_LightColor.xyz * Attenuation;
+            Luminance += BRDF(L, WSViewDirection, Data.m_WSNormal, Data) * clamp(dot(Data.m_WSNormal, L), 0.0f, 1.0f) * LightProb.ps_LightColor.xyz * Attenuation * AverageExposure;
         }
         else if (LightProb.ps_LightType == POINT_LIGHT)
         {
@@ -244,7 +244,7 @@ void main(void)
             // -----------------------------------------------------------------------------
             // Apply light luminance and shading
             // -----------------------------------------------------------------------------
-            Luminance += BRDF(NormalizedLightVector, WSViewDirection, Data.m_WSNormal, Data) * clamp(dot(Data.m_WSNormal, NormalizedLightVector), 0.0f, 1.0f) * LightProb.ps_LightColor.xyz * Attenuation;
+            Luminance += BRDF(NormalizedLightVector, WSViewDirection, Data.m_WSNormal, Data) * clamp(dot(Data.m_WSNormal, NormalizedLightVector), 0.0f, 1.0f) * LightProb.ps_LightColor.xyz * Attenuation * AverageExposure;
         }
         else if (LightProb.ps_LightType == REFLECTION_LIGHT)
         {
@@ -271,11 +271,11 @@ void main(void)
             // -------------------------------------------------------------------------------------
             // Combination of lighting
             // -------------------------------------------------------------------------------------
-            Luminance += DiffuseIBL.rgb + SpecularIBL.rgb;
+            Luminance += (DiffuseIBL.rgb + SpecularIBL.rgb) * AverageExposure;
         }
     }
 
-    out_Output = vec4(Luminance * AverageExposure, 0.0f);
+    out_Output = vec4(Luminance, 0.0f);
 }
 
 #endif // __INCLUDE_FS_MATERIAL_FORWARD_GLSL__

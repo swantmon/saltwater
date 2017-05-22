@@ -181,6 +181,8 @@ namespace
         CLightProbeFacets m_LightprobeFacets;
         CLightJobs m_LightJobs;
 
+        SCubemapGeometryBuffer m_Values;
+
     private:
 
         void OnDirtyEntity(Dt::CEntity* _pEntity);
@@ -711,7 +713,7 @@ namespace
         {
             UpdateLightProperties();
 
-            UpdateGeometryBuffer(Base::Float3::s_Zero, _rDtLightProbeFacet.GetNear(), _rDtLightProbeFacet.GetFar());
+            UpdateGeometryBuffer(_rEntity.GetWorldPosition(), _rDtLightProbeFacet.GetNear(), _rDtLightProbeFacet.GetFar());
 
             RenderEntities(_rInterLightProbeFacet, _rEntity.GetWorldPosition());
         }
@@ -902,10 +904,24 @@ namespace
         ContextManager::SetConstantBuffer(1, m_GeometryMBufferPtr);
         ContextManager::SetConstantBuffer(2, m_CubemapGSBufferPtr);
         ContextManager::SetConstantBuffer(3, m_SurfaceMaterialBufferPtr);
-        ContextManager::SetConstantBuffer(4, m_CameraPropertiesBufferPtr);        
+        ContextManager::SetConstantBuffer(4, m_CameraPropertiesBufferPtr);
 
-        ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());       
+        ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
         ContextManager::SetResourceBuffer(1, m_LightPropertiesBufferPtr);
+
+        // -----------------------------------------------------------------------------
+        // Upload data
+        // Note: If you don't want to use a geometry shader you can change the
+        // view-projections matrix here!
+        // -----------------------------------------------------------------------------
+        SGeometryVPBuffer ViewBuffer;
+
+        ViewBuffer.m_Projection = Base::Float4x4::s_Identity;
+        ViewBuffer.m_View       = Base::Float4x4::s_Identity;
+
+        BufferManager::UploadConstantBufferData(m_GeometryVPBufferPtr, &ViewBuffer);
+
+        // ----------------------------------------------------------------------------- 
 
         // -----------------------------------------------------------------------------
         // Bind shadow and reflection textures
@@ -976,16 +992,6 @@ namespace
             // -----------------------------------------------------------------------------
             // Upload data to buffer
             // -----------------------------------------------------------------------------
-            SGeometryVPBuffer ViewBuffer;
-
-            ViewBuffer.m_Projection  = Base::Float4x4::s_Identity;
-            ViewBuffer.m_View        = Base::Float4x4::s_Identity;
-            ViewBuffer.m_View       *= Base::Float4x4().SetTranslation(_rPosition * Base::Float3(-1.0f));
-
-            BufferManager::UploadConstantBufferData(m_GeometryVPBufferPtr, &ViewBuffer);
-
-            // -----------------------------------------------------------------------------
-
             SCameraPropertiesBuffer ProbeProperties;
 
             ProbeProperties.m_CameraPosition       = Base::Float4(_rPosition, 1.0f);
@@ -1176,7 +1182,7 @@ namespace
 
             ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
 
-            ContextManager::SetRasterizerState(StateManager::GetRasterizerState(0));
+            ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::NoCull));
 
             ContextManager::SetTopology(STopology::TriangleList);
 
@@ -1496,56 +1502,54 @@ namespace
         Base::Float3 UpDirection;
         Base::Float3 TargetPosition;
 
-        SCubemapGeometryBuffer Values;
-
-        Values.m_CubeProjectionMatrix.SetRHFieldOfView(Base::RadiansToDegree(Base::SConstants<float>::s_Pi * 0.5f), 1.0f, _Near, _Far);
+        m_Values.m_CubeProjectionMatrix.SetRHFieldOfView(Base::RadiansToDegree(Base::SConstants<float>::s_Pi * 0.5f), 1.0f, _Near, _Far);
 
         // -----------------------------------------------------------------------------
 
         TargetPosition = EyePosition + Base::Float3::s_AxisX;
-        UpDirection = Base::Float3(0.0f, -1.0f, 0.0f);
+        UpDirection    = Base::Float3::s_AxisY;
 
-        Values.m_CubeViewMatrix[0].LookAt(EyePosition, TargetPosition, UpDirection);
+        m_Values.m_CubeViewMatrix[0].LookAt(EyePosition, TargetPosition, UpDirection);
 
         // -----------------------------------------------------------------------------
 
         TargetPosition = EyePosition - Base::Float3::s_AxisX;
-        UpDirection = Base::Float3(0.0f, -1.0f, 0.0f);
+        UpDirection    = Base::Float3::s_AxisY;
 
-        Values.m_CubeViewMatrix[1].LookAt(EyePosition, TargetPosition, UpDirection);
+        m_Values.m_CubeViewMatrix[1].LookAt(EyePosition, TargetPosition, UpDirection);
 
         // -----------------------------------------------------------------------------
 
         TargetPosition = EyePosition + Base::Float3::s_AxisY;
-        UpDirection = Base::Float3(0.0f, 0.0f, -1.0f);
+        UpDirection    = Base::Float3::s_Zero - Base::Float3::s_AxisZ;
 
-        Values.m_CubeViewMatrix[2].LookAt(EyePosition, TargetPosition, UpDirection);
+        m_Values.m_CubeViewMatrix[2].LookAt(EyePosition, TargetPosition, UpDirection);
 
         // -----------------------------------------------------------------------------
 
         TargetPosition = EyePosition - Base::Float3::s_AxisY;
-        UpDirection = Base::Float3(0.0f, 0.0f, 1.0f);
+        UpDirection    = Base::Float3::s_AxisZ;
 
-        Values.m_CubeViewMatrix[3].LookAt(EyePosition, TargetPosition, UpDirection);
+        m_Values.m_CubeViewMatrix[3].LookAt(EyePosition, TargetPosition, UpDirection);
 
         // -----------------------------------------------------------------------------
 
         TargetPosition = EyePosition + Base::Float3::s_AxisZ;
-        UpDirection = Base::Float3(0.0f, -1.0f, 0.0f);
+        UpDirection    = Base::Float3::s_AxisY;
 
-        Values.m_CubeViewMatrix[4].LookAt(EyePosition, TargetPosition, UpDirection);
+        m_Values.m_CubeViewMatrix[4].LookAt(EyePosition, TargetPosition, UpDirection);
 
         // -----------------------------------------------------------------------------
 
         TargetPosition = EyePosition - Base::Float3::s_AxisZ;
-        UpDirection = Base::Float3(0.0f, -1.0f, 0.0f);
+        UpDirection    = Base::Float3::s_AxisY;
 
-        Values.m_CubeViewMatrix[5].LookAt(EyePosition, TargetPosition, UpDirection);
+        m_Values.m_CubeViewMatrix[5].LookAt(EyePosition, TargetPosition, UpDirection);
 
         // -----------------------------------------------------------------------------
         // Upload data
         // -----------------------------------------------------------------------------
-        BufferManager::UploadConstantBufferData(m_CubemapGSBufferPtr, &Values);
+        BufferManager::UploadConstantBufferData(m_CubemapGSBufferPtr, &m_Values);
     }
 } // namespace 
 
