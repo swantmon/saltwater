@@ -176,7 +176,7 @@ namespace
         CBufferPtr m_GeometryMBufferPtr;
 
         CInputLayoutPtr m_P3N3T2InputLayoutPtr;
-        CInputLayoutPtr m_P3InputLayoutPtr;
+        CInputLayoutPtr m_P3N3InputLayoutPtr;
 
         CLightProbeFacets m_LightprobeFacets;
         CLightJobs m_LightJobs;
@@ -288,10 +288,11 @@ namespace
 
         const SInputElementDescriptor TriangleInputLayout[] =
         {
-            { "POSITION", 0, CInputLayout::Float3Format, 0,  0, 12, CInputLayout::PerVertex, 0, },
+            { "POSITION", 0, CInputLayout::Float3Format, 0,  0, 24, CInputLayout::PerVertex, 0, },
+            { "NORMAL"  , 0, CInputLayout::Float3Format, 0, 12, 24, CInputLayout::PerVertex, 0, },
         };
 
-        m_P3InputLayoutPtr = ShaderManager::CreateInputLayout(TriangleInputLayout, 1, m_CubemapVSPtr);
+        m_P3N3InputLayoutPtr = ShaderManager::CreateInputLayout(TriangleInputLayout, 1, m_CubemapVSPtr);
 
         // -----------------------------------------------------------------------------
         // Buffer
@@ -394,7 +395,7 @@ namespace
 
         SMeshDescriptor ModelDesc;
 
-        ModelDesc.m_pModel = &rSphereModel.GetMesh(0);
+        ModelDesc.m_pMesh = &rSphereModel.GetMesh(0);
 
         m_EnvironmentSpherePtr = MeshManager::CreateMesh(ModelDesc);
 
@@ -432,7 +433,7 @@ namespace
         m_GeometryMBufferPtr  = 0;
 
         m_P3N3T2InputLayoutPtr = 0;
-        m_P3InputLayoutPtr = 0;
+        m_P3N3InputLayoutPtr = 0;
 
         m_LightprobeFacets.Clear();
 
@@ -817,7 +818,7 @@ namespace
 
                 ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
 
-                ContextManager::SetInputLayout(m_P3InputLayoutPtr);
+                ContextManager::SetInputLayout(m_P3N3InputLayoutPtr);
 
                 ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
 

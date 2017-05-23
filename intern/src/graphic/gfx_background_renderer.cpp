@@ -224,17 +224,18 @@ namespace
         
         const SInputElementDescriptor TriangleInputLayout[] =
         {
-            { "POSITION", 0, CInputLayout::Float3Format, 0,  0, 12, CInputLayout::PerVertex, 0, },
+            { "POSITION", 0, CInputLayout::Float3Format, 0,  0, 24, CInputLayout::PerVertex, 0, },
+            { "NORMAL"  , 0, CInputLayout::Float3Format, 0, 12, 24, CInputLayout::PerVertex, 0, },
         };
         
-        CInputLayoutPtr P3SkyboxLayoutPtr = ShaderManager::CreateInputLayout(TriangleInputLayout, 1, SkyboxVSPtr);
+        CInputLayoutPtr P3N3BoxLayoutPtr = ShaderManager::CreateInputLayout(TriangleInputLayout, 1, SkyboxVSPtr);
         
         // -----------------------------------------------------------------------------
 
         m_BackgroundFromSkybox.m_VSPtr          = SkyboxVSPtr;
         m_BackgroundFromSkybox.m_GSPtr          = 0;
         m_BackgroundFromSkybox.m_PSPtr          = SkyboxPSPtr;
-        m_BackgroundFromSkybox.m_InputLayoutPtr = P3SkyboxLayoutPtr;
+        m_BackgroundFromSkybox.m_InputLayoutPtr = P3N3BoxLayoutPtr;
 
         m_BackgroundFromTexture.m_VSPtr          = SkytextureVSPtr;
         m_BackgroundFromTexture.m_GSPtr          = 0;

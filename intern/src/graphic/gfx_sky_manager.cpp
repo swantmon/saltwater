@@ -605,7 +605,7 @@ namespace
 
         Dt::CModel& rSphereModel = Dt::ModelManager::CreateModel(ModelFileDesc);
 
-        ModelDescr.m_pModel = &rSphereModel.GetMesh(0);
+        ModelDescr.m_pMesh = &rSphereModel.GetMesh(0);
 
         CMeshPtr CubemapTextureSpherePtr = MeshManager::CreateMesh(ModelDescr);
 
@@ -616,7 +616,7 @@ namespace
 
         Dt::CModel& rCurvedPlaneModel = Dt::ModelManager::CreateModel(ModelFileDesc);
 
-        ModelDescr.m_pModel = &rCurvedPlaneModel.GetMesh(0);
+        ModelDescr.m_pMesh = &rCurvedPlaneModel.GetMesh(0);
 
         CMeshPtr CurvedPlanePtr = MeshManager::CreateMesh(ModelDescr);
 
