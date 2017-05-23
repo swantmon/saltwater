@@ -52,7 +52,7 @@ layout(std430, binding = 0) readonly buffer BB0
 
 layout(std430, row_major, binding = 1) readonly buffer BB1
 {
-    SLightProperties ps_LightProperties[];
+    SLightProperties ps_LightProperties[MAX_NUMBER_OF_LIGHTS];
 };
 
 layout(binding =  0) uniform sampler2D   ps_DiffuseTexture;
@@ -131,7 +131,8 @@ void main(void)
     // -----------------------------------------------------------------------------
     // Forward pass for each light
     // -----------------------------------------------------------------------------
-    for (uint IndexOfLight = 0; IndexOfLight < ps_LightProperties.length(); ++ IndexOfLight)
+    #pragma unroll
+    for (uint IndexOfLight = 0; IndexOfLight < MAX_NUMBER_OF_LIGHTS; ++ IndexOfLight)
     {
         SLightProperties LightProb = ps_LightProperties[IndexOfLight];
 
