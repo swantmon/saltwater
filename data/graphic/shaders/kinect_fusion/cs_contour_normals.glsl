@@ -42,18 +42,17 @@ float g_SobelKernel[g_KernelSize * g_KernelSize] = {
 vec2 ComputeGradient(ivec2 Position)
 {
     vec2 Result = vec2(0.0f);
-    
+
     for (int i = 0; i < g_KernelSize; ++i)
     {
         for (int j = 0; j < g_KernelSize; ++j)
         {
-            ivec2 SamplePosition = ivec2(i, j);
-            SamplePosition -= g_KernelSize / 2;
-
-            float Sample = float(imageLoad(cs_DepthBuffer, SamplePosition + Position)) / 1000.0f;
+            ivec2 SampleOffset = ivec2(i, j) - g_KernelSize / 2;
             
-            Result.x += Sample * g_SobelKernel[i * g_KernelSize + j];
-            Result.y += Sample * g_SobelKernel[j * g_KernelSize + i];
+            const float Sample = float(imageLoad(cs_DepthBuffer, Position + SampleOffset));
+
+            Result.x += Sample * g_SobelKernel[j * g_KernelSize + i];
+            Result.y += Sample * g_SobelKernel[i * g_KernelSize + j];
         }
     }
 
@@ -71,26 +70,27 @@ void main()
     const int PyramidLevel = int(log2(DEPTH_IMAGE_WIDTH / ImageSize.x));
 
     const vec2 Gradient = ComputeGradient(ivec2(u, v));
+    //const vec2 Gradient = vec2(0.5f);
 
     const int Depth = int(imageLoad(cs_DepthBuffer, ivec2(u, v)).x);
     vec3 Normal = vec3(0.0f);
 
     if (Depth != 0)
     {
-        const float z = Depth / 1000.0f;
+        const float z = Depth;
+        //const float z = 0.5;
 
         const vec2 FocalPoint = g_Intrinisics[PyramidLevel].m_FocalPoint;
         const vec2 InvFocalLength = g_Intrinisics[PyramidLevel].m_InvFocalLength;
-                
+        
         Normal.xy = Gradient / (z * InvFocalLength);
-        Normal.z = -1.0f -
-            Normal.x * (u * InvFocalLength.x - FocalPoint.x * InvFocalLength.x) -
-            Normal.y * (v * InvFocalLength.y - FocalPoint.y * InvFocalLength.y);
-
+        Normal.z = -1.0f - (Gradient.x  * (u - FocalPoint.x) - Gradient.y * (v - FocalPoint.y)) / z;
+        
         Normal = mat3(g_PoseMatrix) * Normal;
     }
 
-    imageStore(cs_NormalBuffer, ivec2(u, v), vec4(normalize(Normal), 1.0f));
+    imageStore(cs_NormalBuffer, ivec2(u, v), vec4(Gradient, 0.0f, 1.0f));
+    //imageStore(cs_NormalBuffer, ivec2(u, v), vec4(Normal, length(Normal)));
 }
 
 #endif // __INCLUDE_CS_CONTOURS_NORMAL_GLSL__
