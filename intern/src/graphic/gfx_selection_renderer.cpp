@@ -704,7 +704,7 @@ namespace
         // -----------------------------------------------------------------------------
         // First pass: iterate throw surface render jobs and draw all meshes
         // -----------------------------------------------------------------------------
-        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRenderState::Wireframe));
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
 
         ContextManager::SetShaderPS(m_HighlightPSPtr);
 
@@ -744,7 +744,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Second pass: show probe lights
         // -----------------------------------------------------------------------------
-        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::NoCull));
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(0));
 
         ContextManager::SetShaderPS(m_TextureCubePSPtr);
 
