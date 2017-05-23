@@ -46,47 +46,6 @@ layout(location = 2) in vec2 in_UV;
 layout(location = 0) out vec4 out_Output;
 
 // -----------------------------------------------------------------------------
-// Functions
-// -----------------------------------------------------------------------------
-vec3 EvaluateDiffuseIBL(in SSurfaceData _Data, in vec3 _WSViewDirection, in float _PreF, in float _NdotV)
-{
-    vec3 DiffuseDominantN = GetDiffuseDominantDir(_Data.m_WSNormal, _WSViewDirection, _NdotV, _Data.m_Roughness);
-    vec3 DiffuseIBL       = textureLod(ps_DiffuseCubemap, DiffuseDominantN, 0).rgb;
-    
-    DiffuseIBL = mix(DiffuseIBL * 0.3f, DiffuseIBL, _Data.m_AmbientOcclusion);
-
-    return _Data.m_DiffuseAlbedo * DiffuseIBL * _PreF / PI;
-}
-
-// -----------------------------------------------------------------------------
-
-vec3 EvaluateSpecularIBL(in SSurfaceData _Data, in vec3 _WSReflectVector, in vec2 _PreDFG, in float _NdotV)
-{
-    vec3 SpecularDominantR = GetSpecularDominantDir(_Data.m_WSNormal, _WSReflectVector, _Data.m_Roughness);
-    
-    ivec2 DFGSize = textureSize(ps_BRDF, 0);
-    
-    // -----------------------------------------------------------------------------
-    // Rebuild the function
-    // -----------------------------------------------------------------------------
-    _NdotV = max(_NdotV, 0.5f / DFGSize.x);
-    
-    // -----------------------------------------------------------------------------
-    // Sample specular cubemap
-    // -----------------------------------------------------------------------------
-    float LOD         = GetMipLevelByRoughness(_Data.m_Roughness, ps_NumberOfMiplevelsSpecularIBL);
-    vec3  SpecularIBL = textureLod(ps_SpecularCubemap, SpecularDominantR, LOD).rgb;
-    
-    // -----------------------------------------------------------------------------
-    // Output
-    // -----------------------------------------------------------------------------
-    float F90 = clamp(50.0f * dot(_Data.m_SpecularAlbedo, vec3(0.33f)), 0.0f, 1.0f);
-    float AO  = GetSpecularOcclusion(_NdotV, _Data.m_AmbientOcclusion, _Data.m_Roughness);
-    
-    return SpecularIBL * (_Data.m_SpecularAlbedo * _PreDFG.x + F90 * _PreDFG.y) * AO;
-}
-
-// -----------------------------------------------------------------------------
 // Main
 // -----------------------------------------------------------------------------
 void main()
@@ -127,14 +86,21 @@ void main()
     vec3  WSViewDirection = normalize(Data.m_WSPosition - g_ViewPosition.xyz);
     vec3  WSReflectVector = normalize(reflect(WSViewDirection, Data.m_WSNormal));
     float NdotV           = clamp( dot( Data.m_WSNormal, -WSViewDirection ), 0.0, 1.0f);
+
+    // -----------------------------------------------------------------------------
+    // Rebuild the function
+    // -----------------------------------------------------------------------------
+    ivec2 DFGSize = textureSize(ps_BRDF, 0);
+
+    float ClampNdotV = max(NdotV, 0.5f / DFGSize.x);
     
     // -----------------------------------------------------------------------------
     // Get data
     // -----------------------------------------------------------------------------
     vec3 PreDFGF = textureLod(ps_BRDF, vec2(NdotV, Data.m_Roughness), 0).rgb;
     
-    vec3 DiffuseIBL  = EvaluateDiffuseIBL(Data, WSViewDirection, PreDFGF.z, NdotV);
-    vec3 SpecularIBL = EvaluateSpecularIBL(Data, WSReflectVector, PreDFGF.xy, NdotV);
+    vec3 DiffuseIBL  = EvaluateDiffuseIBL(ps_DiffuseCubemap, Data, WSViewDirection, PreDFGF.z, NdotV);
+    vec3 SpecularIBL = EvaluateSpecularIBL(ps_SpecularCubemap, Data, WSReflectVector, PreDFGF.xy, ClampNdotV, ps_NumberOfMiplevelsSpecularIBL);
     
     // -------------------------------------------------------------------------------------
     // Combination of lighting
