@@ -239,7 +239,7 @@ void main(void)
             // Shadowing
             // -----------------------------------------------------------------------------
             Attenuation *= Data.m_AmbientOcclusion;
-            // Attenuation *= LightHasShadows == 1.0f ? GetShadowAtPosition(Data.m_WSPosition, LightProb.ps_LightViewProjection, ps_Shadowmap) : 1.0f;
+            Attenuation *= LightHasShadows == 1.0f ? GetShadowAtPosition(Data.m_WSPosition, LightProb.ps_LightViewProjection, ps_ShadowTexture[IndexOfLight]) : 1.0f;
             
             // -----------------------------------------------------------------------------
             // Apply light luminance and shading
