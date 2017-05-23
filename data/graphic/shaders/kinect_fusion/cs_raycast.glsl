@@ -46,13 +46,14 @@ void main()
     RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
     RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
     
+	float RayLength = GetDepth(CameraPosition, RayDirection, cs_Volume);
     vec3 Vertex = GetPosition(CameraPosition, RayDirection, cs_Volume);
     vec3 Normal = GetNormal(Vertex, cs_Volume);
 
     imageStore(cs_Vertex, VertexMapPosition, vec4(Vertex, 1.0f));
     imageStore(cs_Normal, VertexMapPosition, vec4(Normal, 1.0f));
 
-    const uint Depth = uint(distance(Vertex, CameraPosition) * 1000.0f);
+    const uint Depth = uint(RayLength * 1000.0f);
 
     imageStore(cs_Depth, VertexMapPosition, uvec4((Depth < 65535) ? Depth : 0));
 }

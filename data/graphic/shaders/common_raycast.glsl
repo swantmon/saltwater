@@ -69,6 +69,54 @@ float GetInterpolatedTSDF(vec3 Position, sampler3D Volume)
     return result;
 }
 
+float GetDepth(vec3 CameraPosition, vec3 RayDirection, sampler3D Volume)
+{
+	const float StartLength = GetStartLength(CameraPosition, RayDirection);
+	const float EndLength = GetEndLength(CameraPosition, RayDirection);
+
+	float Step = TRUNCATED_DISTANCE * 0.001f * 0.8f;
+	float RayLength = StartLength;
+
+	vec2 Voxel = GetVoxel(GetVoxelCoords(CameraPosition + RayLength * RayDirection), Volume);
+
+	float TSDF = Voxel.x;
+
+	float Depth = 0.0f;
+
+	while (RayLength <= EndLength)
+	{
+		vec3 PreviousPosition = CameraPosition + RayLength * RayDirection;
+		RayLength += Step;
+		vec3 CurrentPosition = CameraPosition + RayLength * RayDirection;
+
+		float PreviousTSDF = TSDF;
+
+		ivec3 VoxelCoords = GetVoxelCoords(CurrentPosition);
+
+		vec2 Voxel = GetVoxel(VoxelCoords, Volume);
+
+		TSDF = Voxel.x;
+
+		if (PreviousTSDF > 0.0f && TSDF < 0.0f)
+		{
+			float Ft = GetInterpolatedTSDF(PreviousPosition, Volume);
+			float Ftdt = GetInterpolatedTSDF(CurrentPosition, Volume);
+			float Ts = RayLength - Step * Ft / (Ftdt - Ft);
+
+			Depth = Ts;
+
+			break;
+		}
+
+		if (TSDF < 1.0f)
+		{
+			Step = VOXEL_SIZE;
+		}
+	}
+
+	return Depth;
+}
+
 vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection, sampler3D Volume)
 {
     const float StartLength = GetStartLength(CameraPosition, RayDirection);

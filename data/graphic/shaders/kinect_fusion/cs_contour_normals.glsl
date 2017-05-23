@@ -89,8 +89,8 @@ void main()
         Normal = mat3(g_PoseMatrix) * Normal;
     }
 
-    imageStore(cs_NormalBuffer, ivec2(u, v), vec4(Gradient, 0.0f, 1.0f));
-    //imageStore(cs_NormalBuffer, ivec2(u, v), vec4(Normal, length(Normal)));
+	//imageStore(cs_NormalBuffer, ivec2(u, v), vec4(Gradient, 0.0f, 1.0f));
+    imageStore(cs_NormalBuffer, ivec2(u, v), vec4(Normal, length(Normal)));
 }
 
 #endif // __INCLUDE_CS_CONTOURS_NORMAL_GLSL__
