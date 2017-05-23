@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>InspectorArealight</class>
- <widget class="QWidget" name="InspectorArealight">
+ <class>InspectorAreaLight</class>
+ <widget class="QWidget" name="InspectorAreaLight">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -335,7 +335,7 @@
   <connection>
    <sender>m_pPickColorButton</sender>
    <signal>clicked()</signal>
-   <receiver>InspectorArealight</receiver>
+   <receiver>InspectorAreaLight</receiver>
    <slot>pickColorFromDialog()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -351,7 +351,7 @@
   <connection>
    <sender>m_pPickColorButton2</sender>
    <signal>clicked()</signal>
-   <receiver>InspectorArealight</receiver>
+   <receiver>InspectorAreaLight</receiver>
    <slot>pickColorFromDialog()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -367,7 +367,7 @@
   <connection>
    <sender>m_pColorModeCB</sender>
    <signal>currentIndexChanged(int)</signal>
-   <receiver>InspectorArealight</receiver>
+   <receiver>InspectorAreaLight</receiver>
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -383,7 +383,7 @@
   <connection>
    <sender>m_pTemperatureEdit</sender>
    <signal>textEdited(QString)</signal>
-   <receiver>InspectorArealight</receiver>
+   <receiver>InspectorAreaLight</receiver>
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -399,7 +399,7 @@
   <connection>
    <sender>m_pIntensityEdit</sender>
    <signal>textEdited(QString)</signal>
-   <receiver>InspectorArealight</receiver>
+   <receiver>InspectorAreaLight</receiver>
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -415,7 +415,7 @@
   <connection>
    <sender>m_pDirectionXEdit</sender>
    <signal>textEdited(QString)</signal>
-   <receiver>InspectorArealight</receiver>
+   <receiver>InspectorAreaLight</receiver>
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -431,7 +431,7 @@
   <connection>
    <sender>m_pDirectionYEdit</sender>
    <signal>textEdited(QString)</signal>
-   <receiver>InspectorArealight</receiver>
+   <receiver>InspectorAreaLight</receiver>
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -447,7 +447,7 @@
   <connection>
    <sender>m_pDirectionZEdit</sender>
    <signal>textEdited(QString)</signal>
-   <receiver>InspectorArealight</receiver>
+   <receiver>InspectorAreaLight</receiver>
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -463,7 +463,7 @@
   <connection>
    <sender>m_pRotationEdit</sender>
    <signal>textEdited(QString)</signal>
-   <receiver>InspectorArealight</receiver>
+   <receiver>InspectorAreaLight</receiver>
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -479,7 +479,7 @@
   <connection>
    <sender>m_pWidthEdit</sender>
    <signal>textEdited(QString)</signal>
-   <receiver>InspectorArealight</receiver>
+   <receiver>InspectorAreaLight</receiver>
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -495,7 +495,7 @@
   <connection>
    <sender>m_pHeightEdit</sender>
    <signal>textEdited(QString)</signal>
-   <receiver>InspectorArealight</receiver>
+   <receiver>InspectorAreaLight</receiver>
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -511,7 +511,7 @@
   <connection>
    <sender>m_IsTwoSidedCB</sender>
    <signal>clicked()</signal>
-   <receiver>InspectorArealight</receiver>
+   <receiver>InspectorAreaLight</receiver>
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">

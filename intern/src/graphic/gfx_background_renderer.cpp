@@ -84,10 +84,8 @@ namespace
         {
             CRenderContextPtr m_RenderContextPtr;
             CShaderPtr        m_VSPtr;
-            CShaderPtr        m_GSPtr;
             CShaderPtr        m_PSPtr;
             CBufferSetPtr     m_VSBufferSetPtr;
-            CBufferSetPtr     m_GSBufferSetPtr;
             CBufferSetPtr     m_PSBufferSetPtr;
             CInputLayoutPtr   m_InputLayoutPtr;
             CMeshPtr          m_MeshPtr;
@@ -176,10 +174,8 @@ namespace
     {
         m_BackgroundFromSkybox.m_RenderContextPtr = 0;
         m_BackgroundFromSkybox.m_VSPtr            = 0;
-        m_BackgroundFromSkybox.m_GSPtr            = 0;
         m_BackgroundFromSkybox.m_PSPtr            = 0;
         m_BackgroundFromSkybox.m_VSBufferSetPtr   = 0;
-        m_BackgroundFromSkybox.m_GSBufferSetPtr   = 0;
         m_BackgroundFromSkybox.m_PSBufferSetPtr   = 0;
         m_BackgroundFromSkybox.m_InputLayoutPtr   = 0;
         m_BackgroundFromSkybox.m_MeshPtr          = 0;
@@ -187,10 +183,8 @@ namespace
 
         m_BackgroundFromTexture.m_RenderContextPtr = 0;
         m_BackgroundFromTexture.m_VSPtr            = 0;
-        m_BackgroundFromTexture.m_GSPtr            = 0;
         m_BackgroundFromTexture.m_PSPtr            = 0;
         m_BackgroundFromTexture.m_VSBufferSetPtr   = 0;
-        m_BackgroundFromTexture.m_GSBufferSetPtr   = 0;
         m_BackgroundFromTexture.m_PSBufferSetPtr   = 0;
         m_BackgroundFromTexture.m_InputLayoutPtr   = 0;
         m_BackgroundFromTexture.m_MeshPtr          = 0;
@@ -207,7 +201,7 @@ namespace
 
         CShaderPtr SkytexturePSPtr = ShaderManager::CompilePS("fs_atmosphere_texture.glsl", "main");
 
-        CShaderPtr SkyboxVSPtr  = ShaderManager::CompileVS("vs_cubemap.glsl"           , "main");
+        CShaderPtr SkyboxVSPtr  = ShaderManager::CompileVS("vs_cubemap.glsl", "main");
         
         CShaderPtr SkyboxPSPtr  = ShaderManager::CompilePS("fs_atmosphere_cubemap.glsl", "main");
 
@@ -228,17 +222,15 @@ namespace
             { "NORMAL"  , 0, CInputLayout::Float3Format, 0, 12, 24, CInputLayout::PerVertex, 0, },
         };
         
-        CInputLayoutPtr P3N3BoxLayoutPtr = ShaderManager::CreateInputLayout(TriangleInputLayout, 1, SkyboxVSPtr);
+        CInputLayoutPtr P3N3BoxLayoutPtr = ShaderManager::CreateInputLayout(TriangleInputLayout, 2, SkyboxVSPtr);
         
         // -----------------------------------------------------------------------------
 
         m_BackgroundFromSkybox.m_VSPtr          = SkyboxVSPtr;
-        m_BackgroundFromSkybox.m_GSPtr          = 0;
         m_BackgroundFromSkybox.m_PSPtr          = SkyboxPSPtr;
         m_BackgroundFromSkybox.m_InputLayoutPtr = P3N3BoxLayoutPtr;
 
         m_BackgroundFromTexture.m_VSPtr          = SkytextureVSPtr;
-        m_BackgroundFromTexture.m_GSPtr          = 0;
         m_BackgroundFromTexture.m_PSPtr          = SkytexturePSPtr;
         m_BackgroundFromTexture.m_InputLayoutPtr = P2SkytextureLayoutPtr;
     }
@@ -341,11 +333,9 @@ namespace
         CBufferSetPtr SkyboxPSBufferSetPtr = BufferManager::CreateBufferSet(SkyboxPSBuffer);
 
         m_BackgroundFromSkybox.m_VSBufferSetPtr = SkyboxVSBufferSetPtr;
-        m_BackgroundFromSkybox.m_GSBufferSetPtr = 0;
         m_BackgroundFromSkybox.m_PSBufferSetPtr = SkyboxPSBufferSetPtr;
 
         m_BackgroundFromTexture.m_VSBufferSetPtr = SkytextureVSBufferSetPtr;
-        m_BackgroundFromTexture.m_GSBufferSetPtr = 0;
         m_BackgroundFromTexture.m_PSBufferSetPtr = SkytexturePSBufferSetPtr;
     }
     
@@ -460,10 +450,8 @@ namespace
     {
         CRenderContextPtr RenderContextPtr = m_BackgroundFromSkybox.m_RenderContextPtr;
         CShaderPtr        VSPtr            = m_BackgroundFromSkybox.m_VSPtr;
-        CShaderPtr        GSPtr            = m_BackgroundFromSkybox.m_GSPtr;
         CShaderPtr        PSPtr            = m_BackgroundFromSkybox.m_PSPtr;
         CBufferSetPtr     VSBufferSetPtr   = m_BackgroundFromSkybox.m_VSBufferSetPtr;
-        CBufferSetPtr     GSBufferSetPtr   = m_BackgroundFromSkybox.m_GSBufferSetPtr;
         CBufferSetPtr     PSBufferSetPtr   = m_BackgroundFromSkybox.m_PSBufferSetPtr;
         CInputLayoutPtr   InputLayoutPtr   = m_BackgroundFromSkybox.m_InputLayoutPtr;
         CMeshPtr          MeshPtr          = m_BackgroundFromSkybox.m_MeshPtr;
@@ -653,10 +641,8 @@ namespace
         // -----------------------------------------------------------------------------
         CRenderContextPtr RenderContextPtr = m_BackgroundFromTexture.m_RenderContextPtr;
         CShaderPtr        VSPtr            = m_BackgroundFromTexture.m_VSPtr;
-        CShaderPtr        GSPtr            = m_BackgroundFromTexture.m_GSPtr;
         CShaderPtr        PSPtr            = m_BackgroundFromTexture.m_PSPtr;
         CBufferSetPtr     VSBufferSetPtr   = m_BackgroundFromTexture.m_VSBufferSetPtr;
-        CBufferSetPtr     GSBufferSetPtr   = m_BackgroundFromTexture.m_GSBufferSetPtr;
         CBufferSetPtr     PSBufferSetPtr   = m_BackgroundFromTexture.m_PSBufferSetPtr;
         CInputLayoutPtr   InputLayoutPtr   = m_BackgroundFromTexture.m_InputLayoutPtr;
         CMeshPtr          MeshPtr          = m_BackgroundFromTexture.m_MeshPtr;

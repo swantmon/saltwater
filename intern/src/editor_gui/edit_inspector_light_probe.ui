@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>InspectorGlobalProbe</class>
- <widget class="QWidget" name="InspectorGlobalProbe">
+ <class>InspectorLightProbe</class>
+ <widget class="QWidget" name="InspectorLightProbe">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -17,7 +17,7 @@
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string> Light Probe</string>
+      <string>Light Probe</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
@@ -196,7 +196,7 @@
   <connection>
    <sender>m_pGenerateButton</sender>
    <signal>clicked()</signal>
-   <receiver>InspectorGlobalProbe</receiver>
+   <receiver>InspectorLightProbe</receiver>
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">

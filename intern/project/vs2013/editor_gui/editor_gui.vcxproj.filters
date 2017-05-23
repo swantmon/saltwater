@@ -242,12 +242,6 @@
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_environment.ui">
       <Filter>Form Files\Inspector</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_globalprobe.ui">
-      <Filter>Form Files\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_pointlight.ui">
-      <Filter>Form Files\Inspector</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_ssr.ui">
       <Filter>Form Files\Inspector</Filter>
     </CustomBuild>
@@ -326,9 +320,6 @@
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_texture.h">
       <Filter>Widgets\Inspector</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_arealight.ui">
-      <Filter>Form Files\Inspector</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_arealight.h">
       <Filter>Widgets\Inspector</Filter>
     </CustomBuild>
@@ -337,6 +328,15 @@
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_tone_mapping.h">
       <Filter>Widgets</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_area_light.ui">
+      <Filter>Form Files\Inspector</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_point_light.ui">
+      <Filter>Form Files\Inspector</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_light_probe.ui">
+      <Filter>Form Files\Inspector</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -350,13 +350,7 @@
     <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_transformation.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_pointlight.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_environment.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_globalprobe.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_bloom.h">
@@ -407,10 +401,16 @@
     <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_texture.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_arealight.h">
+    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_tone_mapping.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_tone_mapping.h">
+    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_area_light.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_point_light.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_light_probe.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

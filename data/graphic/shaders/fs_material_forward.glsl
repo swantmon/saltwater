@@ -15,7 +15,7 @@
 
 #define SUN_LIGHT 1
 #define POINT_LIGHT 2
-#define REFLECTION_LIGHT 3
+#define LIGHT_PROBE 3
 
 struct SLightProperties
 {
@@ -206,7 +206,7 @@ void main(void)
             // -----------------------------------------------------------------------------
             Luminance += BRDF(NormalizedLightVector, WSViewDirection, Data.m_WSNormal, Data) * clamp(dot(Data.m_WSNormal, NormalizedLightVector), 0.0f, 1.0f) * LightProb.ps_LightColor.xyz * Attenuation * AverageExposure;
         }
-        else if (LightProb.ps_LightType == REFLECTION_LIGHT)
+        else if (LightProb.ps_LightType == LIGHT_PROBE)
         {
             // -----------------------------------------------------------------------------
             // Light data

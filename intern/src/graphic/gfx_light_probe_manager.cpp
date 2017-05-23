@@ -181,8 +181,6 @@ namespace
         CLightProbeFacets m_LightprobeFacets;
         CLightJobs m_LightJobs;
 
-        SCubemapGeometryBuffer m_Values;
-
     private:
 
         void OnDirtyEntity(Dt::CEntity* _pEntity);
@@ -292,7 +290,7 @@ namespace
             { "NORMAL"  , 0, CInputLayout::Float3Format, 0, 12, 24, CInputLayout::PerVertex, 0, },
         };
 
-        m_P3N3InputLayoutPtr = ShaderManager::CreateInputLayout(TriangleInputLayout, 1, m_CubemapVSPtr);
+        m_P3N3InputLayoutPtr = ShaderManager::CreateInputLayout(TriangleInputLayout, 2, m_CubemapVSPtr);
 
         // -----------------------------------------------------------------------------
         // Buffer
@@ -603,7 +601,7 @@ namespace
         rGfxLightProbeFacet.m_ViewPortSetPtr = ReflectionViewPortSetPtr;
 
         // -----------------------------------------------------------------------------
-        // Create rest of the global probe that is available at any type
+        // Create rest of the probe that is available at any type
         // -> specular and diffuse cubemap
         // -----------------------------------------------------------------------------
         unsigned int SizeOfSpecularCubemap = _SpecularFaceSize;
@@ -1459,16 +1457,16 @@ namespace
             }
             else if (rCurrentEntity.GetType() == Dt::SLightType::LightProbe)
             {
-                Dt::CLightProbeFacet*  pDataLightProbeFacet    = static_cast<Dt::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-                Gfx::CLightProbeFacet* pGraphicLightProbeFacet = static_cast<Gfx::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+                Dt::CLightProbeFacet*  pDtLightProbeFacet  = static_cast<Dt::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+                Gfx::CLightProbeFacet* pGfxLightProbeFacet = static_cast<Gfx::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
 
-                if (pDataLightProbeFacet != 0 && pGraphicLightProbeFacet != 0 && pDataLightProbeFacet->GetType() == Dt::CLightProbeFacet::Sky)
+                if (pDtLightProbeFacet != 0 && pGfxLightProbeFacet != 0 && pDtLightProbeFacet->GetType() == Dt::CLightProbeFacet::Sky)
                 {
                     LightBuffer[IndexOfLight].m_LightType      = 3;
                     LightBuffer[IndexOfLight].m_LightPosition  = Base::Float4(rCurrentEntity.GetWorldPosition(), 1.0f);
                     LightBuffer[IndexOfLight].m_LightDirection = Base::Float4(0.0f);
                     LightBuffer[IndexOfLight].m_LightColor     = Base::Float4(0.0f);
-                    LightBuffer[IndexOfLight].m_LightSettings  = Base::Float4(pGraphicLightProbeFacet->GetSpecularPtr()->GetNumberOfMipLevels() - 1, 0.0f, 0.0f, 0.0f);
+                    LightBuffer[IndexOfLight].m_LightSettings  = Base::Float4(pGfxLightProbeFacet->GetSpecularPtr()->GetNumberOfMipLevels() - 1, 0.0f, 0.0f, 0.0f);
 
                     LightBuffer[IndexOfLight].m_LightViewProjection.SetIdentity();
 
@@ -1479,8 +1477,8 @@ namespace
                     SLightJob NewLightJob;
 
                     NewLightJob.m_Texture0Ptr = 0;
-                    NewLightJob.m_Texture1Ptr = pGraphicLightProbeFacet->GetSpecularPtr();
-                    NewLightJob.m_Texture2Ptr = pGraphicLightProbeFacet->GetDiffusePtr();
+                    NewLightJob.m_Texture1Ptr = pGfxLightProbeFacet->GetSpecularPtr();
+                    NewLightJob.m_Texture2Ptr = pGfxLightProbeFacet->GetDiffusePtr();
 
                     m_LightJobs.push_back(NewLightJob);
                 }
@@ -1503,54 +1501,56 @@ namespace
         Base::Float3 UpDirection;
         Base::Float3 TargetPosition;
 
-        m_Values.m_CubeProjectionMatrix.SetRHFieldOfView(Base::RadiansToDegree(Base::SConstants<float>::s_Pi * 0.5f), 1.0f, _Near, _Far);
+        SCubemapGeometryBuffer Values;
+
+        Values.m_CubeProjectionMatrix.SetRHFieldOfView(Base::RadiansToDegree(Base::SConstants<float>::s_Pi * 0.5f), 1.0f, _Near, _Far);
 
         // -----------------------------------------------------------------------------
 
         TargetPosition = EyePosition + Base::Float3::s_AxisX;
         UpDirection    = Base::Float3::s_AxisY;
 
-        m_Values.m_CubeViewMatrix[0].LookAt(EyePosition, TargetPosition, UpDirection);
+        Values.m_CubeViewMatrix[0].LookAt(EyePosition, TargetPosition, UpDirection);
 
         // -----------------------------------------------------------------------------
 
         TargetPosition = EyePosition - Base::Float3::s_AxisX;
         UpDirection    = Base::Float3::s_AxisY;
 
-        m_Values.m_CubeViewMatrix[1].LookAt(EyePosition, TargetPosition, UpDirection);
+        Values.m_CubeViewMatrix[1].LookAt(EyePosition, TargetPosition, UpDirection);
 
         // -----------------------------------------------------------------------------
 
         TargetPosition = EyePosition + Base::Float3::s_AxisY;
         UpDirection    = Base::Float3::s_Zero - Base::Float3::s_AxisZ;
 
-        m_Values.m_CubeViewMatrix[2].LookAt(EyePosition, TargetPosition, UpDirection);
+        Values.m_CubeViewMatrix[2].LookAt(EyePosition, TargetPosition, UpDirection);
 
         // -----------------------------------------------------------------------------
 
         TargetPosition = EyePosition - Base::Float3::s_AxisY;
         UpDirection    = Base::Float3::s_AxisZ;
 
-        m_Values.m_CubeViewMatrix[3].LookAt(EyePosition, TargetPosition, UpDirection);
+        Values.m_CubeViewMatrix[3].LookAt(EyePosition, TargetPosition, UpDirection);
 
         // -----------------------------------------------------------------------------
 
         TargetPosition = EyePosition + Base::Float3::s_AxisZ;
         UpDirection    = Base::Float3::s_AxisY;
 
-        m_Values.m_CubeViewMatrix[4].LookAt(EyePosition, TargetPosition, UpDirection);
+        Values.m_CubeViewMatrix[4].LookAt(EyePosition, TargetPosition, UpDirection);
 
         // -----------------------------------------------------------------------------
 
         TargetPosition = EyePosition - Base::Float3::s_AxisZ;
         UpDirection    = Base::Float3::s_AxisY;
 
-        m_Values.m_CubeViewMatrix[5].LookAt(EyePosition, TargetPosition, UpDirection);
+        Values.m_CubeViewMatrix[5].LookAt(EyePosition, TargetPosition, UpDirection);
 
         // -----------------------------------------------------------------------------
         // Upload data
         // -----------------------------------------------------------------------------
-        BufferManager::UploadConstantBufferData(m_CubemapGSBufferPtr, &m_Values);
+        BufferManager::UploadConstantBufferData(m_CubemapGSBufferPtr, &Values);
     }
 } // namespace 
 
