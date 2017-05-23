@@ -216,7 +216,7 @@ void main(void)
             // -----------------------------------------------------------------------------
             // Compute lighting for sphere lights
             // -----------------------------------------------------------------------------
-            vec3  WSViewDirection = normalize(Data.m_WSPosition - LightProb.ps_LightPosition.xyz);
+            vec3  WSViewDirection = normalize(Data.m_WSPosition - ps_CameraPosition.xyz);
             vec3  WSReflectVector = normalize(reflect(WSViewDirection, Data.m_WSNormal));
             float NdotV           = clamp( dot( Data.m_WSNormal, -WSViewDirection ), 0.0, 1.0f);
 
