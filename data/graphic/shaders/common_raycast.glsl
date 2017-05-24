@@ -34,7 +34,6 @@ vec2 GetVoxel(ivec3 Coords, sampler3D Volume)
 float GetInterpolatedTSDF_(vec3 Position, sampler3D Volume)
 {
     vec3 Coords = GetVoxelCoords(Position);
-
     return textureLod(Volume, Coords / float(VOLUME_RESOLUTION), 0).x;
 }
 
@@ -67,59 +66,6 @@ float GetInterpolatedTSDF(vec3 Position, sampler3D Volume)
         texelFetch(Volume, ivec3(g.x + 1, g.y + 1, g.z + 1), 0).x * a * b * c;
 
     return result;
-}
-
-float GetDepth(vec3 CameraPosition, vec3 RayDirection, sampler3D Volume)
-{
-	const float StartLength = GetStartLength(CameraPosition, RayDirection);
-	const float EndLength = GetEndLength(CameraPosition, RayDirection);
-
-	float Step = TRUNCATED_DISTANCE * 0.001f * 0.8f;
-	float RayLength = StartLength;
-
-	vec2 Voxel = GetVoxel(GetVoxelCoords(CameraPosition + RayLength * RayDirection), Volume);
-
-	float TSDF = Voxel.x;
-
-	float Depth = 0.0f;
-
-	while (RayLength <= EndLength)
-	{
-		vec3 PreviousPosition = CameraPosition + RayLength * RayDirection;
-		RayLength += Step;
-		vec3 CurrentPosition = CameraPosition + RayLength * RayDirection;
-
-		float PreviousTSDF = TSDF;
-
-		ivec3 VoxelCoords = GetVoxelCoords(CurrentPosition);
-
-		vec2 Voxel = GetVoxel(VoxelCoords, Volume);
-
-		TSDF = Voxel.x;
-
-		if (PreviousTSDF > 0.0f && TSDF < 0.0f)
-		{
-			float Ft = GetInterpolatedTSDF(PreviousPosition, Volume);
-			float Ftdt = GetInterpolatedTSDF(CurrentPosition, Volume);
-			float Ts = RayLength - Step * Ft / (Ftdt - Ft);
-
-			Depth = Ts;
-
-			break;
-		}
-
-		if (TSDF < 1.0f)
-		{
-			Step = VOXEL_SIZE;
-		}
-	}
-
-	return Depth;
-}
-
-vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection, float Depth)
-{
-	return CameraPosition + RayDirection * Depth;
 }
 
 vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection, sampler3D Volume)
@@ -157,7 +103,7 @@ vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection, sampler3D Volume)
             float Ts = RayLength - Step * Ft / (Ftdt - Ft);
 
             Vertex = CameraPosition + RayDirection * Ts;
-                        
+            
             break;
         }
 
