@@ -117,6 +117,11 @@ float GetDepth(vec3 CameraPosition, vec3 RayDirection, sampler3D Volume)
 	return Depth;
 }
 
+vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection, float Depth)
+{
+	return CameraPosition + RayDirection * Depth;
+}
+
 vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection, sampler3D Volume)
 {
     const float StartLength = GetStartLength(CameraPosition, RayDirection);
