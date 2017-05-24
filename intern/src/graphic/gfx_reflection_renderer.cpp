@@ -1085,9 +1085,9 @@ namespace
                 LightBuffer[IndexOfLight].m_LightType        = static_cast<int>(pDataLightProbeFacet->GetType()) + 1;
                 LightBuffer[IndexOfLight].m_ProbePosition    = Base::Float4(rCurrentEntity.GetWorldPosition(), 1.0f);
                 LightBuffer[IndexOfLight].m_LightSettings[0] = static_cast<float>(pGraphicLightProbeFacet->GetSpecularPtr()->GetNumberOfMipLevels() - 1);
-                LightBuffer[IndexOfLight].m_LightSettings[1] = pDataLightProbeFacet->GetType() == Dt::CLightProbeFacet::Sky ? 0.0f : 1.0f;
-                LightBuffer[IndexOfLight].m_LightSettings[2] = -10.0f;
-                LightBuffer[IndexOfLight].m_LightSettings[3] = +10.0f;
+                LightBuffer[IndexOfLight].m_LightSettings[1] = pDataLightProbeFacet->GetParallaxCorrection() == true ? 1.0f : 0.0f;
+                LightBuffer[IndexOfLight].m_LightSettings[2] = -pDataLightProbeFacet->GetBoxSize().Length();
+                LightBuffer[IndexOfLight].m_LightSettings[3] = +pDataLightProbeFacet->GetBoxSize().Length();
 
                 ++IndexOfLight;
 

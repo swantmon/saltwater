@@ -295,6 +295,8 @@ namespace
             pProbeLightFacet->SetQuality(Dt::CLightProbeFacet::PX512);
             pProbeLightFacet->SetIntensity(1.0f);
             pProbeLightFacet->SetRefreshMode(Dt::CLightProbeFacet::Static);
+            pProbeLightFacet->SetParallaxCorrection(false);
+            pProbeLightFacet->SetBoxSize(Base::Float3(1000.0f));
 
             rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pProbeLightFacet);
 
@@ -326,6 +328,8 @@ namespace
             pProbeLightFacet->SetRefreshMode(Dt::CLightProbeFacet::Dynamic);
             pProbeLightFacet->SetNear(2.0f);
             pProbeLightFacet->SetFar(100.0f);
+            pProbeLightFacet->SetParallaxCorrection(true);
+            pProbeLightFacet->SetBoxSize(Base::Float3(10.0f));
 
             rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pProbeLightFacet);
 

@@ -44,6 +44,14 @@ namespace Edit
 
         float Far = m_pFarEdit->text().toFloat();
 
+        bool ParallaxCorrection = m_pParallaxCorrectionCB->isChecked();
+
+        float BoxSizeX = m_pBoxSizeXEdit->text().toFloat();
+
+        float BoxSizeY = m_pBoxSizeYEdit->text().toFloat();
+
+        float BoxSizeZ = m_pBoxSizeZEdit->text().toFloat();
+
         // -----------------------------------------------------------------------------
         // Send message
         // -----------------------------------------------------------------------------
@@ -62,6 +70,14 @@ namespace Edit
         NewMessage.PutFloat(Near);
 
         NewMessage.PutFloat(Far);
+
+        NewMessage.PutBool(ParallaxCorrection);
+
+        NewMessage.PutFloat(BoxSizeX);
+
+        NewMessage.PutFloat(BoxSizeY);
+
+        NewMessage.PutFloat(BoxSizeZ);
 
         NewMessage.Reset();
 
@@ -106,12 +122,21 @@ namespace Edit
 
         float Far = _rMessage.GetFloat();
 
+        bool ParallaxCorrection = _rMessage.GetBool();
+
+        float BoxSizeX = _rMessage.GetFloat();
+
+        float BoxSizeY = _rMessage.GetFloat();
+
+        float BoxSizeZ = _rMessage.GetFloat();
+
         // -----------------------------------------------------------------------------
         // Set values
         // -----------------------------------------------------------------------------
-        m_pRefreshModeCB->blockSignals(true);
-        m_pTypeCB       ->blockSignals(true);
-        m_pQualityCB    ->blockSignals(true);
+        m_pRefreshModeCB       ->blockSignals(true);
+        m_pTypeCB              ->blockSignals(true);
+        m_pQualityCB           ->blockSignals(true);
+        m_pParallaxCorrectionCB->blockSignals(true);
 
         m_pRefreshModeCB->setCurrentIndex(RefreshMode);
 
@@ -125,9 +150,18 @@ namespace Edit
 
         m_pFarEdit->setText(QString::number(Far));
 
-        m_pRefreshModeCB->blockSignals(false);
-        m_pTypeCB       ->blockSignals(false);
-        m_pQualityCB    ->blockSignals(false);
+        m_pParallaxCorrectionCB->setChecked(ParallaxCorrection);
+
+        m_pBoxSizeXEdit->setText(QString::number(BoxSizeX));
+
+        m_pBoxSizeYEdit->setText(QString::number(BoxSizeY));
+
+        m_pBoxSizeZEdit->setText(QString::number(BoxSizeZ));
+
+        m_pRefreshModeCB       ->blockSignals(false);
+        m_pTypeCB              ->blockSignals(false);
+        m_pQualityCB           ->blockSignals(false);
+        m_pParallaxCorrectionCB->blockSignals(false);
     }
 } // namespace Edit
 

@@ -251,12 +251,14 @@ namespace
             // -----------------------------------------------------------------------------
             Dt::CLightProbeFacet* pLightProbeFacet = Dt::LightProbeManager::CreateLightProbe();
 
-            pLightProbeFacet->SetRefreshMode(Dt::CLightProbeFacet::Static);
-            pLightProbeFacet->SetType       (Dt::CLightProbeFacet::Sky);
-            pLightProbeFacet->SetQuality    (Dt::CLightProbeFacet::PX512);
-            pLightProbeFacet->SetIntensity  (1.0f);
-            pLightProbeFacet->SetNear       (1.0f);
-            pLightProbeFacet->SetFar        (1000.0f);
+            pLightProbeFacet->SetRefreshMode       (Dt::CLightProbeFacet::Static);
+            pLightProbeFacet->SetType              (Dt::CLightProbeFacet::Local);
+            pLightProbeFacet->SetQuality           (Dt::CLightProbeFacet::PX256);
+            pLightProbeFacet->SetIntensity         (1.0f);
+            pLightProbeFacet->SetNear              (0.1f);
+            pLightProbeFacet->SetFar               (10.0f);
+            pLightProbeFacet->SetParallaxCorrection(true);
+            pLightProbeFacet->SetBoxSize           (Base::Float3(10.0f));
 
             rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pLightProbeFacet);
         }
@@ -455,6 +457,10 @@ namespace
             NewMessage.PutFloat(pLightFacet->GetIntensity());
             NewMessage.PutFloat(pLightFacet->GetNear());
             NewMessage.PutFloat(pLightFacet->GetFar());
+            NewMessage.PutBool(pLightFacet->GetParallaxCorrection());
+            NewMessage.PutFloat(pLightFacet->GetBoxSize()[0]);
+            NewMessage.PutFloat(pLightFacet->GetBoxSize()[1]);
+            NewMessage.PutFloat(pLightFacet->GetBoxSize()[2]);
 
             NewMessage.Reset();
 
@@ -713,6 +719,14 @@ namespace
 
             float Far = _rMessage.GetFloat();
 
+            bool ParallaxCorrection = _rMessage.GetBool();
+
+            float BoxSizeX = _rMessage.GetFloat();
+
+            float BoxSizeY = _rMessage.GetFloat();
+
+            float BoxSizeZ = _rMessage.GetFloat();
+
             // -----------------------------------------------------------------------------
             // Set values
             // -----------------------------------------------------------------------------
@@ -727,6 +741,10 @@ namespace
             pLightFacet->SetNear(Near);
 
             pLightFacet->SetFar(Far);
+
+            pLightFacet->SetParallaxCorrection(ParallaxCorrection);
+
+            pLightFacet->SetBoxSize(Base::Float3(BoxSizeX, BoxSizeY, BoxSizeZ));
 
             Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
         }
