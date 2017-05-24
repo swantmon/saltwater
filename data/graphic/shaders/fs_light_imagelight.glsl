@@ -8,6 +8,22 @@
 #include "common_global.glsl"
 
 // -----------------------------------------------------------------------------
+// Definitions
+// -----------------------------------------------------------------------------
+#define USE_SSR
+#define USE_IBL
+#define MAX_NUMBER_OF_PROBES 4
+
+#define SKY_PROBE 1
+#define LOCAL_PROBE 2
+
+struct SProbeProperties
+{
+    vec4 ps_LightSettings;
+    uint ps_ProbeType;
+};
+
+// -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
 layout(std140, binding = 1) uniform UB1
@@ -20,20 +36,25 @@ layout(std430, binding = 0) buffer BB0
     float ps_ExposureHistory[8];
 };
 
-layout(binding = 0) uniform sampler2D   ps_GBuffer0;
-layout(binding = 1) uniform sampler2D   ps_GBuffer1;
-layout(binding = 2) uniform sampler2D   ps_GBuffer2;
-layout(binding = 3) uniform sampler2D   ps_Depth;
-layout(binding = 4) uniform sampler2D   ps_BRDF;
-layout(binding = 5) uniform samplerCube ps_SpecularCubemap;
-layout(binding = 6) uniform samplerCube ps_DiffuseCubemap;
-layout(binding = 7) uniform samplerCube ps_ShadowCubemap;
+layout(std430, row_major, binding = 1) readonly buffer BB1
+{
+    SProbeProperties ps_LightProperties[MAX_NUMBER_OF_PROBES];
+};
+
+layout(binding =  0) uniform sampler2D   ps_GBuffer0;
+layout(binding =  1) uniform sampler2D   ps_GBuffer1;
+layout(binding =  2) uniform sampler2D   ps_GBuffer2;
+layout(binding =  3) uniform sampler2D   ps_Depth;
+layout(binding =  4) uniform sampler2D   ps_BRDF;
+layout(binding =  5) uniform sampler2D   ps_SSR;
+layout(binding =  6) uniform samplerCube ps_SpecularCubemap[MAX_NUMBER_OF_PROBES];
+layout(binding = 10) uniform samplerCube ps_DiffuseCubemap[MAX_NUMBER_OF_PROBES];
+layout(binding = 14) uniform samplerCube ps_ShadowCubemap[MAX_NUMBER_OF_PROBES];
 
 // -----------------------------------------------------------------------------
 // Easy access
 // -----------------------------------------------------------------------------
-#define ps_NumberOfMiplevelsSpecularIBL ps_ConstantBufferData0.x
-#define ps_ExposureHistoryIndex         ps_ConstantBufferData0.y
+#define ps_ExposureHistoryIndex ps_ConstantBufferData0.x
 
 // -----------------------------------------------------------------------------
 // Input
@@ -98,23 +119,51 @@ void main()
     // Get data
     // -----------------------------------------------------------------------------
     vec3 PreDFGF = textureLod(ps_BRDF, vec2(NdotV, Data.m_Roughness), 0).rgb;
-    
-    vec3 DiffuseIBL  = EvaluateDiffuseIBL(ps_DiffuseCubemap, Data, WSViewDirection, PreDFGF.z, NdotV);
-    vec3 SpecularIBL = EvaluateSpecularIBL(ps_SpecularCubemap, Data, WSReflectVector, PreDFGF.xy, ClampNdotV, ps_NumberOfMiplevelsSpecularIBL);
-    
-    // -------------------------------------------------------------------------------------
-    // Combination of lighting
-    // -------------------------------------------------------------------------------------
-    vec3 Luminance = DiffuseIBL.rgb + SpecularIBL.rgb;
-    
-//    AverageExposure = 0.0f;
 
+    // -----------------------------------------------------------------------------
+    // Lighting
+    // -----------------------------------------------------------------------------
+    vec4 SpecularLighting = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    
+#ifdef USE_SSR
+    vec4 SSR = textureLod(ps_SSR, in_UV, 0);
+
+    SpecularLighting.rgb = SSR.rgb;
+    SpecularLighting.a   = 1.0f - SSR.a;
+#endif
+    
+#ifdef USE_IBL
+    if (SpecularLighting.a > 0.001f)
+    { 
+        vec3 IBL = vec3(0.0f);
+        
+        #pragma unroll
+        for (uint IndexOfLight = 0; IndexOfLight < MAX_NUMBER_OF_PROBES; ++ IndexOfLight)
+        {
+            SProbeProperties LightProb = ps_LightProperties[IndexOfLight];
+
+            float NumberOfMiplevelsSpecularIBL = LightProb.ps_LightSettings.x;
+
+            if (LightProb.ps_ProbeType != 0)
+            {
+                vec3 DiffuseIBL  = EvaluateDiffuseIBL(ps_DiffuseCubemap[IndexOfLight], Data, WSViewDirection, PreDFGF.z, NdotV);
+                vec3 SpecularIBL = EvaluateSpecularIBL(ps_SpecularCubemap[IndexOfLight], Data, WSReflectVector, PreDFGF.xy, ClampNdotV, NumberOfMiplevelsSpecularIBL);
+                
+                // -------------------------------------------------------------------------------------
+                // Combination of lighting
+                // -------------------------------------------------------------------------------------
+                IBL += (DiffuseIBL.rgb + SpecularIBL.rgb) * AverageExposure;
+            }
+        }
+        
+        SpecularLighting += SpecularLighting.a * vec4(IBL, 0.0f);
+    }
+#endif
+    
     // -------------------------------------------------------------------------------------
     // Output
-    // -------------------------------------------------------------------------------------
-    float Alpha = textureLod(ps_ShadowCubemap, WSReflectVector, 0).r < 1.0f ? 1.0f : 0.0f;
-
-    out_Output = vec4(Luminance * AverageExposure, Alpha);
+    // -------------------------------------------------------------------------------------    
+    out_Output = vec4(SpecularLighting.rgb, 0.0f);
 }
 
 #endif // __INCLUDE_FS_LIGHT_IMAGELIGHT_GLSL__

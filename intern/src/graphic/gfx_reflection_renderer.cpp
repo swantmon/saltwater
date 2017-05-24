@@ -72,14 +72,18 @@ namespace
         void Render();
 
         CTextureBasePtr GetBRDF();
+
+    private:
+
+        static const unsigned int s_MaxNumberOfProbes = 4;
         
     private:
 
         struct SLightProbeRenderJob
         {
-            int                    m_ID;
-            Dt::CLightProbeFacet*  m_pDataLightProbe;
-            Gfx::CLightProbeFacet* m_pGraphicLightProbe;
+            CTextureBasePtr m_Texture0Ptr;
+            CTextureBasePtr m_Texture1Ptr;
+            CTextureBasePtr m_Texture2Ptr;
         };
 
         struct SSSRRenderJob
@@ -106,11 +110,19 @@ namespace
             Base::Float2 m_InverseTextureSize;
             float        m_MipmapLevel;
         };
+
+        struct SProbePropertiesBuffer
+        {
+            Base::Float4 m_LightSettings;
+            unsigned int m_LightType;
+            unsigned int m_Padding0;
+            unsigned int m_Padding1;
+            unsigned int m_Padding2;
+        };
         
         struct SIBLSettings
         {
-            float m_NumberOfMiplevelsSpecularIBL;
-            float m_ExposureHistoryIndex;
+            Base::Float4 m_IBLSettings;
         };
 
     private:
@@ -121,6 +133,8 @@ namespace
     private:
         
         CMeshPtr          m_QuadModelPtr;
+
+        CBufferPtr        m_ProbePropertiesBufferPtr;
         
         CBufferPtr        m_ImageLightBufferPtr;
                           
@@ -136,8 +150,6 @@ namespace
 
         CShaderPtr        m_SSRShaderPSPtr;
 
-        CShaderPtr        m_SSRApplyShaderPSPtr;
-
         CShaderPtr        m_HCBShaderPSPtr;
 
         CShaderPtr        m_BRDFShaderPtr;
@@ -145,16 +157,8 @@ namespace
         CTexture2DPtr     m_BRDFTexture2DPtr;
 
         CTexture2DPtr     m_HCBTexture2DPtr;
-        
-        CTextureSetPtr    m_ImageLightTextureSetPtr;
 
-        CTextureSetPtr    m_SSRTextureSetPtr;
-
-        CTextureSetPtr    m_SSRApplyTextureSetPtr;        
-
-        CTextureSetPtr    m_BRDFTextureSetPtr;
-
-        CTargetSetPtr     m_SSRTargetSetPtr;        
+        CTargetSetPtr     m_SSRTargetSetPtr;
         
         CRenderContextPtr m_LightAccumulationRenderContextPtr;
 
@@ -163,7 +167,7 @@ namespace
         CRenderContextPtr m_HCBRenderContextPtr;
 
 
-        std::vector<CTextureSetPtr>    m_HCBTextureSetPtrs;
+        std::vector<CTextureBasePtr>   m_HCBTexturePtrs;
 
         std::vector<CTargetSetPtr>     m_HCBTargetSetPtrs;
 
@@ -186,6 +190,7 @@ namespace
 {
     CGfxReflectionRenderer::CGfxReflectionRenderer()
         : m_QuadModelPtr                     ()
+        , m_ProbePropertiesBufferPtr         ()
         , m_ImageLightBufferPtr              ()
         , m_SSRLightBufferPtr                ()
         , m_HCBBufferPtr                     ()
@@ -193,15 +198,10 @@ namespace
         , m_RectangleShaderVSPtr             ()
         , m_ImageLightShaderPSPtr            ()
         , m_SSRShaderPSPtr                   ()
-        , m_SSRApplyShaderPSPtr              ()
         , m_HCBShaderPSPtr                   ()
         , m_BRDFShaderPtr                    ()
         , m_BRDFTexture2DPtr                 ()
         , m_HCBTexture2DPtr                  ()
-        , m_ImageLightTextureSetPtr          ()
-        , m_SSRTextureSetPtr                 ()
-        , m_SSRApplyTextureSetPtr            ()
-        , m_BRDFTextureSetPtr                ()
         , m_SSRTargetSetPtr                  ()
         , m_LightAccumulationRenderContextPtr()
         , m_SSRRenderContextPtr              ()
@@ -235,6 +235,7 @@ namespace
     void CGfxReflectionRenderer::OnExit()
     {
         m_QuadModelPtr                      = 0;
+        m_ProbePropertiesBufferPtr          = 0;
         m_ImageLightBufferPtr               = 0;
         m_SSRLightBufferPtr                 = 0;
         m_HCBBufferPtr                      = 0;
@@ -242,28 +243,23 @@ namespace
         m_RectangleShaderVSPtr              = 0;
         m_ImageLightShaderPSPtr             = 0;
         m_SSRShaderPSPtr                    = 0;
-        m_SSRApplyShaderPSPtr               = 0;
         m_HCBShaderPSPtr                    = 0;
         m_BRDFShaderPtr                     = 0;
         m_BRDFTexture2DPtr                  = 0;
         m_HCBTexture2DPtr                   = 0;
-        m_ImageLightTextureSetPtr           = 0;
-        m_SSRTextureSetPtr                  = 0;
-        m_SSRApplyTextureSetPtr             = 0;
-        m_BRDFTextureSetPtr                 = 0;
         m_SSRTargetSetPtr                   = 0;
         m_LightAccumulationRenderContextPtr = 0;
         m_SSRRenderContextPtr               = 0;
         m_HCBRenderContextPtr               = 0;
 
-        for (unsigned int IndexOfElement = 0; IndexOfElement < m_HCBTextureSetPtrs.size(); ++IndexOfElement)
+        for (unsigned int IndexOfElement = 0; IndexOfElement < m_HCBTexturePtrs.size(); ++IndexOfElement)
         {
-            m_HCBTextureSetPtrs [IndexOfElement] = 0;
+            m_HCBTexturePtrs    [IndexOfElement] = 0;
             m_HCBTargetSetPtrs  [IndexOfElement] = 0;
             m_HCBViewPortSetPtrs[IndexOfElement] = 0;
         }
 
-        m_HCBTextureSetPtrs .clear();
+        m_HCBTexturePtrs    .clear();
         m_HCBTargetSetPtrs  .clear();
         m_HCBViewPortSetPtrs.clear();
 
@@ -280,8 +276,6 @@ namespace
         m_ImageLightShaderPSPtr = ShaderManager::CompilePS("fs_light_imagelight.glsl" , "main");
 
         m_SSRShaderPSPtr        = ShaderManager::CompilePS("fs_ssr.glsl", "main");
-
-        m_SSRApplyShaderPSPtr   = ShaderManager::CompilePS("fs_texture.glsl", "main");
 
         m_BRDFShaderPtr         = ShaderManager::CompileCS("cs_brdf.glsl", "main");
 
@@ -331,7 +325,7 @@ namespace
         RendertargetDescriptor.m_pPixels          = 0;
         RendertargetDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
         
-        CTexture2DPtr SSRTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // SSR Temp Color
+        CTexture2DPtr SSRTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // SSR
 
         // -----------------------------------------------------------------------------
 
@@ -404,9 +398,7 @@ namespace
         
         CTargetSetPtr       LightTargetSetPtr  = TargetSetManager::GetLightAccumulationTargetSet();
         
-        // TODO by tschwandt
-        // Addional Blend work as well; Why destination blend?
-        CRenderStatePtr     LightStatePtr      = StateManager::GetRenderState(CRenderState::DestinationBlend);
+        CRenderStatePtr     LightStatePtr      = StateManager::GetRenderState(CRenderState::AdditionBlend);
 
         CRenderStatePtr     DefaultStatePtr    = StateManager::GetRenderState(0);
 
@@ -456,40 +448,14 @@ namespace
         RendertargetDescriptor.m_pPixels          = 0;
         
         m_BRDFTexture2DPtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
-
-        m_BRDFTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_BRDFTexture2DPtr));
-        
-        // -----------------------------------------------------------------------------
-        
-        CTextureBasePtr GBuffer0TexturePtr          = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0);
-        CTextureBasePtr GBuffer1TexturePtr          = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1);
-        CTextureBasePtr GBuffer2TexturePtr          = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2);
-        CTextureBasePtr DepthTexturePtr             = TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget();
-        CTextureBasePtr LightAccumuationPtr         = TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0);
         
         // -----------------------------------------------------------------------------
 
-        CTextureBasePtr ImageLightTexturePtrs[] = {GBuffer0TexturePtr, GBuffer1TexturePtr, GBuffer2TexturePtr, DepthTexturePtr, static_cast<CTextureBasePtr>(m_BRDFTexture2DPtr) };
-        
-        m_ImageLightTextureSetPtr = TextureManager::CreateTextureSet(ImageLightTexturePtrs, 5);
-
-        // -----------------------------------------------------------------------------
-        
-        CTextureBasePtr SSRTexturePtrs[] = { GBuffer0TexturePtr, GBuffer1TexturePtr, GBuffer2TexturePtr, DepthTexturePtr, static_cast<CTextureBasePtr>(m_HCBTexture2DPtr), static_cast<CTextureBasePtr>(m_BRDFTexture2DPtr) };
-
-        m_SSRTextureSetPtr = TextureManager::CreateTextureSet(SSRTexturePtrs, 6);
-
-        // -----------------------------------------------------------------------------
-
-        m_SSRApplyTextureSetPtr = TextureManager::CreateTextureSet(m_SSRTargetSetPtr->GetRenderTarget(0));
-
-        // -----------------------------------------------------------------------------
-
-        m_HCBTextureSetPtrs.push_back(TextureManager::CreateTextureSet(LightAccumuationPtr));
+        m_HCBTexturePtrs.push_back(TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0));
 
         for (unsigned int IndexOfMipmap = 1; IndexOfMipmap < m_HCBTexture2DPtr->GetNumberOfMipLevels(); ++IndexOfMipmap)
         {
-            m_HCBTextureSetPtrs.push_back(TextureManager::CreateTextureSet(m_HCBTargetSetPtrs[IndexOfMipmap - 1]->GetRenderTarget(0)));
+            m_HCBTexturePtrs.push_back(m_HCBTargetSetPtrs[IndexOfMipmap - 1]->GetRenderTarget(0));
         }
     }
     
@@ -535,6 +501,18 @@ namespace
         ConstanteBufferDesc.m_pClassKey     = 0;
         
         m_ImageLightBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SProbePropertiesBuffer) * s_MaxNumberOfProbes;
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        m_ProbePropertiesBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -556,7 +534,7 @@ namespace
     {
         ContextManager::SetShaderCS(m_BRDFShaderPtr);
 
-        ContextManager::SetImageTexture(0, m_BRDFTextureSetPtr->GetTexture(0));
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_BRDFTexture2DPtr));
 
         ContextManager::Dispatch(512, 512, 1);
 
@@ -594,14 +572,14 @@ namespace
         // Clear old sets
         // -----------------------------------------------------------------------------
 
-        for (unsigned int IndexOfElement = 0; IndexOfElement < m_HCBTextureSetPtrs.size(); ++IndexOfElement)
+        for (unsigned int IndexOfElement = 0; IndexOfElement < m_HCBTexturePtrs.size(); ++IndexOfElement)
         {
-            m_HCBTextureSetPtrs [IndexOfElement] = 0;
+            m_HCBTexturePtrs    [IndexOfElement] = 0;
             m_HCBTargetSetPtrs  [IndexOfElement] = 0;
             m_HCBViewPortSetPtrs[IndexOfElement] = 0;
         }
 
-        m_HCBTextureSetPtrs .clear();
+        m_HCBTexturePtrs    .clear();
         m_HCBTargetSetPtrs  .clear();
         m_HCBViewPortSetPtrs.clear();
 
@@ -629,7 +607,7 @@ namespace
         RendertargetDescriptor.m_pPixels          = 0;
         RendertargetDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
         
-        CTexture2DPtr SSRTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // SSR Temp Color
+        CTexture2DPtr SSRTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // SSR
 
         // -----------------------------------------------------------------------------
 
@@ -694,37 +672,12 @@ namespace
         m_SSRRenderContextPtr->SetTargetSet(m_SSRTargetSetPtr);
 
         // -----------------------------------------------------------------------------
-        // Set texture sets
-        // -----------------------------------------------------------------------------
-        CTextureBasePtr GBuffer0TexturePtr  = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0);
-        CTextureBasePtr GBuffer1TexturePtr  = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1);
-        CTextureBasePtr GBuffer2TexturePtr  = TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2);
-        CTextureBasePtr DepthTexturePtr     = TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget();
-        CTextureBasePtr LightAccumuationPtr = TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0);
 
-        // -----------------------------------------------------------------------------
-
-        CTextureBasePtr ImageLightTexturePtrs[] = { GBuffer0TexturePtr, GBuffer1TexturePtr, GBuffer2TexturePtr, DepthTexturePtr, static_cast<CTextureBasePtr>(m_BRDFTexture2DPtr) };
-
-        m_ImageLightTextureSetPtr = TextureManager::CreateTextureSet(ImageLightTexturePtrs, 5);
-
-        // -----------------------------------------------------------------------------
-
-        CTextureBasePtr SSRTexturePtrs[] = { GBuffer0TexturePtr, GBuffer1TexturePtr, GBuffer2TexturePtr, DepthTexturePtr, static_cast<CTextureBasePtr>(m_HCBTexture2DPtr), static_cast<CTextureBasePtr>(m_BRDFTexture2DPtr) };
-
-        m_SSRTextureSetPtr = TextureManager::CreateTextureSet(SSRTexturePtrs, 6);
-
-        // -----------------------------------------------------------------------------
-
-        m_SSRApplyTextureSetPtr = TextureManager::CreateTextureSet(m_SSRTargetSetPtr->GetRenderTarget(0));
-
-        // -----------------------------------------------------------------------------
-
-        m_HCBTextureSetPtrs.push_back(TextureManager::CreateTextureSet(LightAccumuationPtr));
+        m_HCBTexturePtrs.push_back(TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0));
 
         for (unsigned int IndexOfMipmap = 1; IndexOfMipmap < m_HCBTexture2DPtr->GetNumberOfMipLevels(); ++IndexOfMipmap)
         {
-            m_HCBTextureSetPtrs.push_back(TextureManager::CreateTextureSet(m_HCBTargetSetPtrs[IndexOfMipmap - 1]->GetRenderTarget(0)));
+            m_HCBTexturePtrs.push_back(m_HCBTargetSetPtrs[IndexOfMipmap - 1]->GetRenderTarget(0));
         }
     }
     
@@ -767,110 +720,127 @@ namespace
 
         const unsigned int pOffset[] = { 0, 0 };
 
-        CLightProbeRenderJobs::const_iterator CurrentLightProbe = m_LightProbeRenderJobs.begin();
-        CLightProbeRenderJobs::const_iterator EndofLightProbes  = m_LightProbeRenderJobs.end();
+        // -----------------------------------------------------------------------------
+        // IBL data
+        // -----------------------------------------------------------------------------
+        SIBLSettings IBLSettings;
 
-        for (; CurrentLightProbe != EndofLightProbes; ++CurrentLightProbe)
+        IBLSettings.m_IBLSettings    = Base::Float4::s_Zero;
+        IBLSettings.m_IBLSettings[0] = static_cast<float>(HistogramRenderer::GetLastExposureHistoryIndex());
+
+        BufferManager::UploadConstantBufferData(m_ImageLightBufferPtr, &IBLSettings);
+
+        // -----------------------------------------------------------------------------
+        // Bind shadow and reflection textures
+        // -----------------------------------------------------------------------------
+        CLightProbeRenderJobs::const_iterator CurrentLightJob = m_LightProbeRenderJobs.begin();
+        CLightProbeRenderJobs::const_iterator EndOfLightJobs  = m_LightProbeRenderJobs.end();
+
+        unsigned int IndexOfSpecularCubemap = 6;
+        unsigned int IndexOfDiffuseCubemap  = IndexOfSpecularCubemap + s_MaxNumberOfProbes;
+        unsigned int IndexOfShadowCubemap   = IndexOfDiffuseCubemap  + s_MaxNumberOfProbes;
+
+        for (; CurrentLightJob != EndOfLightJobs; ++ CurrentLightJob)
         {
-            Performance::BeginEvent("Probe");
+            const SLightProbeRenderJob& rJob = *CurrentLightJob;
 
-            Gfx::CLightProbeFacet* pGraphicProbeFacet = CurrentLightProbe->m_pGraphicLightProbe;
+            ContextManager::SetSampler(IndexOfSpecularCubemap, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+            ContextManager::SetSampler(IndexOfDiffuseCubemap, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+            ContextManager::SetSampler(IndexOfShadowCubemap, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
-            ContextManager::SetRenderContext(m_LightAccumulationRenderContextPtr);
-        
-            ContextManager::SetTopology(STopology::TriangleList);
-        
-            ContextManager::SetShaderVS(m_RectangleShaderVSPtr);
-        
-            ContextManager::SetShaderPS(m_ImageLightShaderPSPtr);
-        
-            ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
-        
-            ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
-        
-            ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
+            ContextManager::SetTexture(IndexOfSpecularCubemap, rJob.m_Texture0Ptr);
+            ContextManager::SetTexture(IndexOfDiffuseCubemap, rJob.m_Texture1Ptr);
+            ContextManager::SetTexture(IndexOfShadowCubemap, rJob.m_Texture2Ptr);
 
-            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-            ContextManager::SetConstantBuffer(1, m_ImageLightBufferPtr);
-
-            ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
-        
-            ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
-            ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
-            ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
-            ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
-            ContextManager::SetSampler(4, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
-            ContextManager::SetSampler(5, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
-            ContextManager::SetSampler(6, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
-            ContextManager::SetSampler(7, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
-
-            ContextManager::SetTexture(0, m_ImageLightTextureSetPtr->GetTexture(0));
-            ContextManager::SetTexture(1, m_ImageLightTextureSetPtr->GetTexture(1));
-            ContextManager::SetTexture(2, m_ImageLightTextureSetPtr->GetTexture(2));
-            ContextManager::SetTexture(3, m_ImageLightTextureSetPtr->GetTexture(3));
-            ContextManager::SetTexture(4, m_ImageLightTextureSetPtr->GetTexture(4));
-            ContextManager::SetTexture(5, static_cast<CTextureBasePtr>(pGraphicProbeFacet->GetSpecularPtr()));
-            ContextManager::SetTexture(6, static_cast<CTextureBasePtr>(pGraphicProbeFacet->GetDiffusePtr()));
-            ContextManager::SetTexture(7, static_cast<CTextureBasePtr>(pGraphicProbeFacet->GetDepthPtr()));
-                    
-            // -----------------------------------------------------------------------------
-            // IBL data
-            // -----------------------------------------------------------------------------
-            SIBLSettings IBLSettings;
-            
-            IBLSettings.m_NumberOfMiplevelsSpecularIBL = static_cast<float>(pGraphicProbeFacet->GetSpecularPtr()->GetNumberOfMipLevels() - 1);
-            IBLSettings.m_ExposureHistoryIndex         = static_cast<float>(HistogramRenderer::GetLastExposureHistoryIndex());
-            
-            BufferManager::UploadConstantBufferData(m_ImageLightBufferPtr, &IBLSettings);
-            
-            // -----------------------------------------------------------------------------
-            // Draw
-            // -----------------------------------------------------------------------------
-            ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
-
-            // -----------------------------------------------------------------------------
-            // Reset
-            // -----------------------------------------------------------------------------
-            ContextManager::ResetTexture(0);
-            ContextManager::ResetTexture(1);
-            ContextManager::ResetTexture(2);
-            ContextManager::ResetTexture(3);
-            ContextManager::ResetTexture(4);
-            ContextManager::ResetTexture(5);
-            ContextManager::ResetTexture(6);
-
-            ContextManager::ResetSampler(0);
-            ContextManager::ResetSampler(1);
-            ContextManager::ResetSampler(2);
-            ContextManager::ResetSampler(3);
-            ContextManager::ResetSampler(4);
-            ContextManager::ResetSampler(5);
-            ContextManager::ResetSampler(6);
-        
-            ContextManager::ResetInputLayout();
-        
-            ContextManager::ResetConstantBuffer(0);
-            ContextManager::ResetConstantBuffer(1);
-
-            ContextManager::ResetResourceBuffer(0);
-        
-            ContextManager::ResetConstantBuffer(0);
-            ContextManager::ResetConstantBuffer(1);
-        
-            ContextManager::ResetIndexBuffer();
-        
-            ContextManager::ResetVertexBufferSet();
-        
-            ContextManager::ResetShaderVS();
-        
-            ContextManager::ResetShaderPS();
-        
-            ContextManager::ResetTopology();
-        
-            ContextManager::ResetRenderContext();
-
-            Performance::EndEvent();
+            ++ IndexOfSpecularCubemap;
+            ++ IndexOfDiffuseCubemap;
+            ++ IndexOfShadowCubemap;
         }
+
+        // -----------------------------------------------------------------------------
+        // Render probes together with SSR result
+        // -----------------------------------------------------------------------------
+        ContextManager::SetRenderContext(m_LightAccumulationRenderContextPtr);
+        
+        ContextManager::SetTopology(STopology::TriangleList);
+        
+        ContextManager::SetShaderVS(m_RectangleShaderVSPtr);
+        
+        ContextManager::SetShaderPS(m_ImageLightShaderPSPtr);
+        
+        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        
+        ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_ImageLightBufferPtr);
+
+        ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
+        ContextManager::SetResourceBuffer(1, m_ProbePropertiesBufferPtr);
+        
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(4, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(5, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(0, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0));
+        ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1));
+        ContextManager::SetTexture(2, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2));
+        ContextManager::SetTexture(3, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
+        ContextManager::SetTexture(4, static_cast<CTextureBasePtr>(m_BRDFTexture2DPtr));
+        ContextManager::SetTexture(5, m_SSRTargetSetPtr->GetRenderTarget(0));
+            
+        // -----------------------------------------------------------------------------
+        // Draw
+        // -----------------------------------------------------------------------------
+        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+
+        // -----------------------------------------------------------------------------
+        // Reset
+        // -----------------------------------------------------------------------------
+        ContextManager::ResetTexture(0);
+        ContextManager::ResetTexture(1);
+        ContextManager::ResetTexture(2);
+        ContextManager::ResetTexture(3);
+        ContextManager::ResetTexture(4);
+        ContextManager::ResetTexture(5);
+        ContextManager::ResetTexture(6);
+        ContextManager::ResetTexture(7);
+        ContextManager::ResetTexture(8);
+
+        ContextManager::ResetSampler(0);
+        ContextManager::ResetSampler(1);
+        ContextManager::ResetSampler(2);
+        ContextManager::ResetSampler(3);
+        ContextManager::ResetSampler(4);
+        ContextManager::ResetSampler(5);
+        ContextManager::ResetSampler(6);
+        ContextManager::ResetSampler(7);
+        ContextManager::ResetSampler(8);
+        
+        ContextManager::ResetInputLayout();
+        
+        ContextManager::ResetResourceBuffer(0);
+        ContextManager::ResetResourceBuffer(1);
+        
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
+        
+        ContextManager::ResetIndexBuffer();
+        
+        ContextManager::ResetVertexBufferSet();
+        
+        ContextManager::ResetShaderVS();
+        
+        ContextManager::ResetShaderPS();
+        
+        ContextManager::ResetTopology();
+        
+        ContextManager::ResetRenderContext();
 
         Performance::EndEvent();
     }
@@ -923,7 +893,7 @@ namespace
 
             ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
-            ContextManager::SetTexture(0, m_HCBTextureSetPtrs[0]->GetTexture(0));
+            ContextManager::SetTexture(0, m_HCBTexturePtrs[0]);
 
             ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
 
@@ -961,7 +931,7 @@ namespace
 
         Performance::BeginEvent("SSR");
 
-        // TODO: What happens if more then one DOF effect is available?
+        // TODO: What happens if more then one SSR effect is available?
         Dt::CSSRFXFacet* pDataSSRFacet = m_SSRRenderJobs[0].m_pDataSSRFacet;
 
         assert(pDataSSRFacet != 0);
@@ -1012,12 +982,13 @@ namespace
         ContextManager::SetSampler(4, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         ContextManager::SetSampler(5, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        ContextManager::SetTexture(0, m_SSRTextureSetPtr->GetTexture(0));
-        ContextManager::SetTexture(1, m_SSRTextureSetPtr->GetTexture(1));
-        ContextManager::SetTexture(2, m_SSRTextureSetPtr->GetTexture(2));
-        ContextManager::SetTexture(3, m_SSRTextureSetPtr->GetTexture(3));
-        ContextManager::SetTexture(4, m_SSRTextureSetPtr->GetTexture(4));
-        ContextManager::SetTexture(5, m_SSRTextureSetPtr->GetTexture(5));
+
+        ContextManager::SetTexture(0, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0));
+        ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1));
+        ContextManager::SetTexture(2, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2));
+        ContextManager::SetTexture(3, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
+        ContextManager::SetTexture(4, static_cast<CTextureBasePtr>(m_HCBTexture2DPtr));
+        ContextManager::SetTexture(5, static_cast<CTextureBasePtr>(m_BRDFTexture2DPtr));
 
         // -----------------------------------------------------------------------------
         // Draw
@@ -1059,51 +1030,6 @@ namespace
 
         ContextManager::ResetRenderContext();
 
-        // -----------------------------------------------------------------------------
-        // Apply
-        // -----------------------------------------------------------------------------
-        ContextManager::SetRenderContext(m_LightAccumulationRenderContextPtr);
-
-        ContextManager::SetTopology(STopology::TriangleList);
-
-        ContextManager::SetShaderVS(m_RectangleShaderVSPtr);
-
-        ContextManager::SetShaderPS(m_SSRApplyShaderPSPtr);
-
-        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
-
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
-
-        ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
-
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-
-        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
-
-        ContextManager::SetTexture(0, m_SSRApplyTextureSetPtr->GetTexture(0));
-
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
-
-        ContextManager::ResetTexture(0);
-
-        ContextManager::ResetSampler(0);
-
-        ContextManager::ResetInputLayout();
-
-        ContextManager::ResetConstantBuffer(0);
-
-        ContextManager::ResetIndexBuffer();
-
-        ContextManager::ResetVertexBufferSet();
-
-        ContextManager::ResetShaderVS();
-
-        ContextManager::ResetShaderPS();
-
-        ContextManager::ResetTopology();
-
-        ContextManager::ResetRenderContext();
-
         Performance::EndEvent();
     }
 
@@ -1111,6 +1037,20 @@ namespace
 
     void CGfxReflectionRenderer::BuildRenderJobs()
     {
+        SProbePropertiesBuffer LightBuffer[s_MaxNumberOfProbes];
+        unsigned int           IndexOfLight;
+
+        // -----------------------------------------------------------------------------
+        // Initialize buffer
+        // -----------------------------------------------------------------------------
+        IndexOfLight = 0;
+
+        for (; IndexOfLight < s_MaxNumberOfProbes; ++ IndexOfLight)
+        {
+            LightBuffer[IndexOfLight].m_LightType     = 0;
+            LightBuffer[IndexOfLight].m_LightSettings = Base::Float4::s_Zero;
+        }
+
         // -----------------------------------------------------------------------------
         // Clear current render jobs
         // -----------------------------------------------------------------------------
@@ -1120,18 +1060,10 @@ namespace
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
         // -----------------------------------------------------------------------------
-        struct SSortProbes
-        {
-            bool operator() (SLightProbeRenderJob& _rLeft, SLightProbeRenderJob& _rRight)
-            {
-                return (_rLeft.m_ID < _rRight.m_ID);
-            }
-        } SortProbes;
-
         Dt::Map::CEntityIterator CurrentLightEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
         Dt::Map::CEntityIterator EndOfLightEntities = Dt::Map::EntitiesEnd();
 
-        for (; CurrentLightEntity != EndOfLightEntities; )
+        for (IndexOfLight = 0; CurrentLightEntity != EndOfLightEntities && IndexOfLight < s_MaxNumberOfProbes; )
         {
             Dt::CEntity& rCurrentEntity = *CurrentLightEntity;
 
@@ -1146,13 +1078,21 @@ namespace
                 assert(pDataLightProbeFacet != 0 && pGraphicLightProbeFacet != 0);
 
                 // -----------------------------------------------------------------------------
-                // Set sun into a new render job
+                // Fill data
+                // -----------------------------------------------------------------------------
+                LightBuffer[IndexOfLight].m_LightType        = static_cast<int>(pDataLightProbeFacet->GetType()) + 1;
+                LightBuffer[IndexOfLight].m_LightSettings[0] = static_cast<float>(pGraphicLightProbeFacet->GetSpecularPtr()->GetNumberOfMipLevels() - 1);
+
+                ++IndexOfLight;
+
+                // -----------------------------------------------------------------------------
+                // Set probe into a new render job
                 // -----------------------------------------------------------------------------
                 SLightProbeRenderJob NewRenderJob;
 
-                NewRenderJob.m_ID                 = static_cast<int>(Dt::CLightProbeFacet::Sky); 
-                NewRenderJob.m_pDataLightProbe    = pDataLightProbeFacet;
-                NewRenderJob.m_pGraphicLightProbe = pGraphicLightProbeFacet;
+                NewRenderJob.m_Texture0Ptr = pGraphicLightProbeFacet->GetSpecularPtr();
+                NewRenderJob.m_Texture1Ptr = pGraphicLightProbeFacet->GetDiffusePtr();
+                NewRenderJob.m_Texture2Ptr = pGraphicLightProbeFacet->GetDepthPtr();
 
                 m_LightProbeRenderJobs.push_back(NewRenderJob);
             }
@@ -1163,7 +1103,7 @@ namespace
             CurrentLightEntity = CurrentLightEntity.Next(Dt::SEntityCategory::Light);
         }
 
-        std::sort(m_LightProbeRenderJobs.begin(), m_LightProbeRenderJobs.end(), SortProbes);
+        BufferManager::UploadConstantBufferData(m_ProbePropertiesBufferPtr, &LightBuffer);
 
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
