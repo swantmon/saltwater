@@ -113,6 +113,7 @@ namespace
 
         struct SProbePropertiesBuffer
         {
+            Base::Float4 m_ProbePosition;
             Base::Float4 m_LightSettings;
             unsigned int m_LightType;
             unsigned int m_Padding0;
@@ -1048,6 +1049,7 @@ namespace
         for (; IndexOfLight < s_MaxNumberOfProbes; ++ IndexOfLight)
         {
             LightBuffer[IndexOfLight].m_LightType     = 0;
+            LightBuffer[IndexOfLight].m_ProbePosition = Base::Float4::s_Zero;
             LightBuffer[IndexOfLight].m_LightSettings = Base::Float4::s_Zero;
         }
 
@@ -1081,7 +1083,11 @@ namespace
                 // Fill data
                 // -----------------------------------------------------------------------------
                 LightBuffer[IndexOfLight].m_LightType        = static_cast<int>(pDataLightProbeFacet->GetType()) + 1;
+                LightBuffer[IndexOfLight].m_ProbePosition    = Base::Float4(rCurrentEntity.GetWorldPosition(), 1.0f);
                 LightBuffer[IndexOfLight].m_LightSettings[0] = static_cast<float>(pGraphicLightProbeFacet->GetSpecularPtr()->GetNumberOfMipLevels() - 1);
+                LightBuffer[IndexOfLight].m_LightSettings[1] = pDataLightProbeFacet->GetType() == Dt::CLightProbeFacet::Sky ? 0.0f : 1.0f;
+                LightBuffer[IndexOfLight].m_LightSettings[2] = -10.0f;
+                LightBuffer[IndexOfLight].m_LightSettings[3] = +10.0f;
 
                 ++IndexOfLight;
 

@@ -12,6 +12,7 @@
 // -----------------------------------------------------------------------------
 #define USE_SSR
 #define USE_IBL
+#define USE_PARALLAX
 #define MAX_NUMBER_OF_PROBES 4
 
 #define SKY_PROBE 1
@@ -19,6 +20,7 @@
 
 struct SProbeProperties
 {
+    vec4 ps_ProbePosition;
     vec4 ps_LightSettings;
     uint ps_ProbeType;
 };
@@ -69,6 +71,26 @@ layout(location = 0) out vec4 out_Output;
 // -----------------------------------------------------------------------------
 // Main
 // -----------------------------------------------------------------------------
+vec3 GetParallaxReflection(in vec3 _WSReflectVector, in vec3 _CubemapWSPosition, in vec3 _WSPosition, in vec2 _BoxMinMax)
+{
+    // -----------------------------------------------------------------------------
+    // Special thanks to seblagarde
+    // More information here: https://seblagarde.wordpress.com/2012/09/29/image-based-lighting-approaches-and-parallax-corrected-cubemap/
+    // -----------------------------------------------------------------------------
+    vec3 FirstPlaneIntersect  = (_BoxMinMax.y - _WSPosition) / _WSReflectVector;
+    vec3 SecondPlaneIntersect = (_BoxMinMax.x - _WSPosition) / _WSReflectVector;
+
+    vec3 FurthestPlane = max(FirstPlaneIntersect, SecondPlaneIntersect);
+
+    float Distance = min(FurthestPlane.x, min(FurthestPlane.y, FurthestPlane.z));
+
+    vec3 IntersectWSPosition = _WSPosition + _WSReflectVector * Distance;
+
+    return IntersectWSPosition - _CubemapWSPosition;
+}
+
+// -----------------------------------------------------------------------------
+
 void main()
 {
     // -----------------------------------------------------------------------------
@@ -146,11 +168,28 @@ void main()
 
             if (LightProb.ps_ProbeType != 0)
             {
+#ifdef USE_PARALLAX
+                // -------------------------------------------------------------------------------------
+                // Cumpute reflection vector based on parallax correction
+                // -------------------------------------------------------------------------------------
+                WSReflectVector = normalize(reflect(WSViewDirection, Data.m_WSNormal));
+
+                if (LightProb.ps_LightSettings.y == 1.0f)
+                {
+                    vec2 BoxMinMax = vec2(LightProb.ps_LightSettings.z, LightProb.ps_LightSettings.w);
+
+                    WSReflectVector = GetParallaxReflection(WSReflectVector, LightProb.ps_ProbePosition.xyz, Data.m_WSPosition, BoxMinMax);
+                }
+#endif
+
+                // -------------------------------------------------------------------------------------
+                // Estimate lighting of cubemap
+                // -------------------------------------------------------------------------------------
                 vec3 DiffuseIBL  = EvaluateDiffuseIBL(ps_DiffuseCubemap[IndexOfLight], Data, WSViewDirection, PreDFGF.z, NdotV);
                 vec3 SpecularIBL = EvaluateSpecularIBL(ps_SpecularCubemap[IndexOfLight], Data, WSReflectVector, PreDFGF.xy, ClampNdotV, NumberOfMiplevelsSpecularIBL);
                 
                 // -------------------------------------------------------------------------------------
-                // Combination of lighting
+                // Combination of lighting based on luminosity
                 // -------------------------------------------------------------------------------------
                 IBL.rgb += (DiffuseIBL.rgb + SpecularIBL.rgb) * AverageExposure * (1.0f - IBL.a);
                 
