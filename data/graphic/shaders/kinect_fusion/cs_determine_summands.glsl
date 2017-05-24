@@ -128,7 +128,7 @@ void main()
     const int y = int(gl_GlobalInvocationID.y);
 
     const ivec2 ImageSize = imageSize(cs_VertexMap);
-
+	
     vec3 ReferenceVertex;
     vec3 RaycastVertex;
     vec3 RaycastNormal;
@@ -137,7 +137,7 @@ void main()
 
     float Row[7];
 
-    if (CorresponenceFound && x > 1 && y > 1 && x < ImageSize.x - 1 && y < ImageSize.y - 1)
+	if (CorresponenceFound)
     {
         vec3 Cross = cross(ReferenceVertex, RaycastNormal);
 
