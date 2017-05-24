@@ -135,7 +135,7 @@ void main()
 #ifdef USE_IBL
     if (SpecularLighting.a > 0.001f)
     { 
-        vec3 IBL = vec3(0.0f);
+        vec4 IBL = vec4(0.0f);
         
         #pragma unroll
         for (uint IndexOfLight = 0; IndexOfLight < MAX_NUMBER_OF_PROBES; ++ IndexOfLight)
@@ -152,11 +152,15 @@ void main()
                 // -------------------------------------------------------------------------------------
                 // Combination of lighting
                 // -------------------------------------------------------------------------------------
-                IBL += (DiffuseIBL.rgb + SpecularIBL.rgb) * AverageExposure;
+                IBL.rgb += (DiffuseIBL.rgb + SpecularIBL.rgb) * AverageExposure * (1.0f - IBL.a);
+                
+                float Luminosity = 0.3f * IBL.r + 0.59f * IBL.g + 0.11f * IBL.b;
+                
+                IBL.a = min(IBL.a + Luminosity, 1.0f);
             }
         }
         
-        SpecularLighting += SpecularLighting.a * vec4(IBL, 0.0f);
+        SpecularLighting += SpecularLighting.a * vec4(IBL.rgb, 0.0f);
     }
 #endif
     
