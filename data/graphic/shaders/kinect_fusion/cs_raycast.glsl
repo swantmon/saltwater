@@ -22,39 +22,39 @@ layout(binding = 3, r16ui) writeonly uniform uimage2D cs_Depth;
 // Functions
 // -------------------------------------------------------------------------------------
 
-layout(local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
+layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
 void main()
 {
-	const vec2 ImageSize = imageSize(cs_DepthBuffer);
+    ivec2 VertexMapSize = ivec2(DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT);
 
-	const int u = int(gl_GlobalInvocationID.x);
-	const int v = int(gl_GlobalInvocationID.y);
+    const ivec2 VertexMapPosition = ivec2(gl_GlobalInvocationID.xy);
 
-	const int PyramidLevel = int(log2(DEPTH_IMAGE_WIDTH / ImageSize.x));
+    const vec2 FocalPoint = g_Intrinisics[0].m_FocalPoint;
+    const vec2 InvFocalLength = g_Intrinisics[0].m_InvFocalLength;
 
-	const vec2 Gradient = ComputeGradient(ivec2(u, v));
-	//const vec2 Gradient = vec2(0.5f);
+    vec3 VertexPixelPosition;
+    VertexPixelPosition.xy = vec2(VertexMapPosition - FocalPoint) * InvFocalLength;
+    VertexPixelPosition.z = 1.0f;
 
-	const int Depth = int(imageLoad(cs_DepthBuffer, ivec2(u, v)).x);
-	vec3 Normal = vec3(0.0f);
+    const vec3 CameraPosition = g_PoseMatrix[3].xyz;
 
-	if (Depth != 0)
-	{
-		const float z = Depth / 1000.0f;
-		//const float z = 0.5;
+    vec3 RayDirection = normalize(VertexPixelPosition);
 
-		const vec2 FocalPoint = g_Intrinisics[PyramidLevel].m_FocalPoint;
-		const vec2 InvFocalLength = g_Intrinisics[PyramidLevel].m_InvFocalLength;
+    RayDirection = mat3(g_PoseMatrix) * RayDirection;
 
-		Normal.xy = Gradient / (z * InvFocalLength);
-		Normal.z = -1.0f - (Gradient.x  * (u - FocalPoint.x) - Gradient.y * (v - FocalPoint.y)) / z;
+    RayDirection.x = RayDirection.x == 0.0f ? 1e-15f : RayDirection.x;
+    RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
+    RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
+    
+    vec3 Vertex = GetPosition(CameraPosition, RayDirection, cs_Volume);
+    vec3 Normal = GetNormal(Vertex, cs_Volume);
 
-		Normal = mat3(g_PoseMatrix) * Normal;
-	}
+    imageStore(cs_Vertex, VertexMapPosition, vec4(Vertex, 1.0f));
+    imageStore(cs_Normal, VertexMapPosition, vec4(Normal, 1.0f));
 
-	//imageStore(cs_NormalBuffer, ivec2(u, v), vec4(Gradient, 0.0f, 1.0f));
-	//imageStore(cs_NormalBuffer, ivec2(u, v), vec4(Normal, 1.0f));
-	imageStore(cs_NormalBuffer, ivec2(u, v), vec4(normalize(Normal), 1.0f));
+    const uint Depth = uint(Vertex.z * 1000.0f);
+
+    imageStore(cs_Depth, VertexMapPosition, uvec4((Depth < 65535) ? Depth : 0));
 }
 
 #endif // __INCLUDE_CS_KINECT_INTEGRATE_VOLUME_GLSL__

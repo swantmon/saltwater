@@ -49,7 +49,7 @@ vec2 ComputeGradient(ivec2 Position)
         {
             ivec2 SampleOffset = ivec2(i, j) - g_KernelSize / 2;
             
-            const float Sample = float(imageLoad(cs_DepthBuffer, Position + SampleOffset));
+            const float Sample = float(imageLoad(cs_DepthBuffer, Position + SampleOffset)) / 1000.0f;;
 
             Result.x += Sample * g_SobelKernel[j * g_KernelSize + i];
             Result.y += Sample * g_SobelKernel[i * g_KernelSize + j];
@@ -59,38 +59,39 @@ vec2 ComputeGradient(ivec2 Position)
     return Result;
 }
 
-layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
+layout(local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
 void main()
 {
-    const vec2 ImageSize = imageSize(cs_DepthBuffer);
+	const vec2 ImageSize = imageSize(cs_DepthBuffer);
 
-    const int u = int(gl_GlobalInvocationID.x);
-    const int v = int(gl_GlobalInvocationID.y);
-    
-    const int PyramidLevel = int(log2(DEPTH_IMAGE_WIDTH / ImageSize.x));
+	const int u = int(gl_GlobalInvocationID.x);
+	const int v = int(gl_GlobalInvocationID.y);
 
-    const vec2 Gradient = ComputeGradient(ivec2(u, v));
-    //const vec2 Gradient = vec2(0.5f);
+	const int PyramidLevel = int(log2(DEPTH_IMAGE_WIDTH / ImageSize.x));
 
-    const int Depth = int(imageLoad(cs_DepthBuffer, ivec2(u, v)).x);
-    vec3 Normal = vec3(0.0f);
+	const vec2 Gradient = ComputeGradient(ivec2(u, v));
+	//const vec2 Gradient = vec2(0.5f);
 
-    if (Depth != 0)
-    {
-        const float z = Depth;
-        //const float z = 0.5;
+	const int Depth = int(imageLoad(cs_DepthBuffer, ivec2(u, v)).x);
+	vec3 Normal = vec3(0.0f);
 
-        const vec2 FocalPoint = g_Intrinisics[PyramidLevel].m_FocalPoint;
-        const vec2 InvFocalLength = g_Intrinisics[PyramidLevel].m_InvFocalLength;
-        
-        Normal.xy = Gradient / (z * InvFocalLength);
-        Normal.z = -1.0f - (Gradient.x  * (u - FocalPoint.x) - Gradient.y * (v - FocalPoint.y)) / z;
-        
-        Normal = mat3(g_PoseMatrix) * Normal;
-    }
+	if (Depth != 0)
+	{
+		const float z = Depth / 1000.0f;
+		//const float z = 0.5;
+
+		const vec2 FocalPoint = g_Intrinisics[PyramidLevel].m_FocalPoint;
+		const vec2 InvFocalLength = g_Intrinisics[PyramidLevel].m_InvFocalLength;
+
+		Normal.xy = Gradient / (z * InvFocalLength);
+		Normal.z = -1.0f - (Gradient.x  * (u - FocalPoint.x) - Gradient.y * (v - FocalPoint.y)) / z;
+
+		Normal = mat3(g_PoseMatrix) * Normal;
+	}
 
 	//imageStore(cs_NormalBuffer, ivec2(u, v), vec4(Gradient, 0.0f, 1.0f));
-    imageStore(cs_NormalBuffer, ivec2(u, v), vec4(Normal, length(Normal)));
+	//imageStore(cs_NormalBuffer, ivec2(u, v), vec4(Normal, 1.0f));
+	imageStore(cs_NormalBuffer, ivec2(u, v), vec4(normalize(Normal), 1.0f));
 }
 
 #endif // __INCLUDE_CS_CONTOURS_NORMAL_GLSL__
