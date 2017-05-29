@@ -71,12 +71,6 @@
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_environment.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_globalprobe.cpp">
-      <Filter>Widgets\Inspector</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_globalprobe.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_bloom.cpp">
       <Filter>Widgets\Inspector</Filter>
     </ClCompile>
@@ -185,6 +179,12 @@
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_tone_mapping.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_light_probe.cpp">
+      <Filter>Widgets\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_light_probe.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_mainwindow.ui">
@@ -213,9 +213,6 @@
       <Filter>Widgets\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_environment.h">
-      <Filter>Widgets\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_globalprobe.h">
       <Filter>Widgets\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_bloom.h">
@@ -337,6 +334,9 @@
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_light_probe.ui">
       <Filter>Form Files\Inspector</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_light_probe.h">
+      <Filter>Widgets\Inspector</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

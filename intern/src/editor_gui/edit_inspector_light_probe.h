@@ -9,13 +9,13 @@
 
 namespace Edit
 {
-    class CInspectorGlobalProbe : public QWidget, public Ui::InspectorLightProbe
+    class CInspectorLightProbe : public QWidget, public Ui::InspectorLightProbe
     {
         Q_OBJECT
 
     public:
-        CInspectorGlobalProbe(QWidget* _pParent = Q_NULLPTR);
-        ~CInspectorGlobalProbe();
+        CInspectorLightProbe(QWidget* _pParent = Q_NULLPTR);
+        ~CInspectorLightProbe();
 
     public Q_SLOTS:
 

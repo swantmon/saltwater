@@ -1,11 +1,11 @@
 ﻿
-#include "editor_gui/edit_inspector_globalprobe.h"
+#include "editor_gui/edit_inspector_light_probe.h"
 
 #include "editor_port/edit_message_manager.h"
 
 namespace Edit
 {
-    CInspectorGlobalProbe::CInspectorGlobalProbe(QWidget* _pParent) 
+    CInspectorLightProbe::CInspectorLightProbe(QWidget* _pParent) 
         : QWidget          (_pParent)
         , m_CurrentEntityID(-1)
     {
@@ -17,17 +17,17 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::Light_Probe_Info, EDIT_RECEIVE_MESSAGE(&CInspectorGlobalProbe::OnEntityInfoGlobalProbe));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Light_Probe_Info, EDIT_RECEIVE_MESSAGE(&CInspectorLightProbe::OnEntityInfoGlobalProbe));
     }
 
     // -----------------------------------------------------------------------------
 
-    CInspectorGlobalProbe::~CInspectorGlobalProbe() 
+    CInspectorLightProbe::~CInspectorLightProbe() 
     {
 
     }
 
-    void CInspectorGlobalProbe::valueChanged()
+    void CInspectorLightProbe::valueChanged()
     {
         // -----------------------------------------------------------------------------
         // read values
@@ -86,7 +86,7 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorGlobalProbe::RequestInformation(unsigned int _EntityID)
+    void CInspectorLightProbe::RequestInformation(unsigned int _EntityID)
     {
         m_CurrentEntityID = _EntityID;
 
@@ -101,7 +101,7 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorGlobalProbe::OnEntityInfoGlobalProbe(Edit::CMessage& _rMessage)
+    void CInspectorLightProbe::OnEntityInfoGlobalProbe(Edit::CMessage& _rMessage)
     {
         // -----------------------------------------------------------------------------
         // Read values
