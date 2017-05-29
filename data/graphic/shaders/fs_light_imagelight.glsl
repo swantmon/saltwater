@@ -20,7 +20,9 @@
 
 struct SProbeProperties
 {
+    mat4 ps_WorldToProbeLS;
     vec4 ps_ProbePosition;
+    vec4 ps_UnitaryBox;
     vec4 ps_LightSettings;
     uint ps_ProbeType;
 };
@@ -71,14 +73,17 @@ layout(location = 0) out vec4 out_Output;
 // -----------------------------------------------------------------------------
 // Main
 // -----------------------------------------------------------------------------
-vec3 GetParallaxReflection(in vec3 _WSReflectVector, in vec3 _CubemapWSPosition, in vec3 _WSPosition, in vec2 _BoxMinMax)
+vec3 GetParallaxReflection(in vec3 _WSReflectVector, in vec3 _WSPosition, in SProbeProperties _Probe)
 {
     // -----------------------------------------------------------------------------
     // Special thanks to seblagarde
     // More information here: https://seblagarde.wordpress.com/2012/09/29/image-based-lighting-approaches-and-parallax-corrected-cubemap/
-    // -----------------------------------------------------------------------------
-    vec3 FirstPlaneIntersect  = (_BoxMinMax.y - _WSPosition) / _WSReflectVector;
-    vec3 SecondPlaneIntersect = (_BoxMinMax.x - _WSPosition) / _WSReflectVector;
+    // -----------------------------------------------------------------------------            
+    vec3 LSReflectVector = mat3(_Probe.ps_WorldToProbeLS) * _WSReflectVector;
+    vec3 LSPosition      = (_Probe.ps_WorldToProbeLS * vec4(_WSPosition, 1.0f)).xyz;
+
+    vec3 FirstPlaneIntersect  = (_Probe.ps_UnitaryBox.xyz - LSPosition) / LSReflectVector;
+    vec3 SecondPlaneIntersect = (-_Probe.ps_UnitaryBox.xyz - LSPosition) / LSReflectVector;
 
     vec3 FurthestPlane = max(FirstPlaneIntersect, SecondPlaneIntersect);
 
@@ -86,7 +91,7 @@ vec3 GetParallaxReflection(in vec3 _WSReflectVector, in vec3 _CubemapWSPosition,
 
     vec3 IntersectWSPosition = _WSPosition + _WSReflectVector * Distance;
 
-    return IntersectWSPosition - _CubemapWSPosition;
+    return IntersectWSPosition - _Probe.ps_ProbePosition.xyz;
 }
 
 // -----------------------------------------------------------------------------
@@ -176,9 +181,7 @@ void main()
 
                 if (LightProb.ps_LightSettings.y == 1.0f)
                 {
-                    vec2 BoxMinMax = vec2(LightProb.ps_LightSettings.z, LightProb.ps_LightSettings.w);
-
-                    WSReflectVector = GetParallaxReflection(WSReflectVector, LightProb.ps_ProbePosition.xyz, Data.m_WSPosition, BoxMinMax);
+                    WSReflectVector = GetParallaxReflection(WSReflectVector, Data.m_WSPosition, LightProb);
                 }
 #endif
 

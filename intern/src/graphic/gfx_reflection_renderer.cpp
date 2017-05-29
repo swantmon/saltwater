@@ -12,6 +12,7 @@
 #include "data/data_fx_type.h"
 #include "data/data_map.h"
 #include "data/data_ssr_facet.h"
+#include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
@@ -113,12 +114,14 @@ namespace
 
         struct SProbePropertiesBuffer
         {
-            Base::Float4 m_ProbePosition;
-            Base::Float4 m_LightSettings;
-            unsigned int m_LightType;
-            unsigned int m_Padding0;
-            unsigned int m_Padding1;
-            unsigned int m_Padding2;
+            Base::Float4x4 m_WorldToProbeLS;
+            Base::Float4   m_ProbePosition;
+            Base::Float4   m_UnitaryBox;
+            Base::Float4   m_LightSettings;
+            unsigned int   m_LightType;
+            unsigned int   m_Padding0;
+            unsigned int   m_Padding1;
+            unsigned int   m_Padding2;
         };
         
         struct SIBLSettings
@@ -1048,9 +1051,11 @@ namespace
 
         for (; IndexOfLight < s_MaxNumberOfProbes; ++ IndexOfLight)
         {
-            LightBuffer[IndexOfLight].m_LightType     = 0;
-            LightBuffer[IndexOfLight].m_ProbePosition = Base::Float4::s_Zero;
-            LightBuffer[IndexOfLight].m_LightSettings = Base::Float4::s_Zero;
+            LightBuffer[IndexOfLight].m_LightType      = 0;
+            LightBuffer[IndexOfLight].m_WorldToProbeLS = Base::Float4x4::s_Identity;
+            LightBuffer[IndexOfLight].m_ProbePosition  = Base::Float4::s_Zero;
+            LightBuffer[IndexOfLight].m_UnitaryBox     = Base::Float4::s_One;
+            LightBuffer[IndexOfLight].m_LightSettings  = Base::Float4::s_Zero;
         }
 
         // -----------------------------------------------------------------------------
@@ -1083,11 +1088,13 @@ namespace
                 // Fill data
                 // -----------------------------------------------------------------------------
                 LightBuffer[IndexOfLight].m_LightType        = static_cast<int>(pDataLightProbeFacet->GetType()) + 1;
+                LightBuffer[IndexOfLight].m_WorldToProbeLS   = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix().GetInverted();
                 LightBuffer[IndexOfLight].m_ProbePosition    = Base::Float4(rCurrentEntity.GetWorldPosition(), 1.0f);
+                LightBuffer[IndexOfLight].m_UnitaryBox       = Base::Float4(pDataLightProbeFacet->GetBoxSize(), 0.0f);
                 LightBuffer[IndexOfLight].m_LightSettings[0] = static_cast<float>(pGraphicLightProbeFacet->GetSpecularPtr()->GetNumberOfMipLevels() - 1);
                 LightBuffer[IndexOfLight].m_LightSettings[1] = pDataLightProbeFacet->GetParallaxCorrection() == true ? 1.0f : 0.0f;
-                LightBuffer[IndexOfLight].m_LightSettings[2] = -pDataLightProbeFacet->GetBoxSize().Length();
-                LightBuffer[IndexOfLight].m_LightSettings[3] = +pDataLightProbeFacet->GetBoxSize().Length();
+                LightBuffer[IndexOfLight].m_LightSettings[2] = 0.0f;
+                LightBuffer[IndexOfLight].m_LightSettings[3] = 0.0f;
 
                 ++IndexOfLight;
 
