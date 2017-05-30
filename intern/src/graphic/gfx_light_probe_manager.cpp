@@ -704,6 +704,8 @@ namespace
     {
         Performance::BeginEvent("Light Probe");
 
+        TargetSetManager::ClearTargetSet(_rInterLightProbeFacet.m_TargetSetPtr);
+
         if (_rDtLightProbeFacet.GetType() == Dt::CLightProbeFacet::Sky)
         {
             RenderEnvironment(_rInterLightProbeFacet);
@@ -733,8 +735,6 @@ namespace
         // -----------------------------------------------------------------------------
         Dt::Map::CEntityIterator CurrentEntity;
         Dt::Map::CEntityIterator EndOfEntities;
-
-        TargetSetManager::ClearTargetSet(_rInterLightProbeFacet.m_TargetSetPtr);
 
         // -----------------------------------------------------------------------------
         // Render environment as reflection into cube map
@@ -878,11 +878,6 @@ namespace
         // -----------------------------------------------------------------------------
         Dt::Map::CEntityIterator CurrentEntity;
         Dt::Map::CEntityIterator EndOfEntities;
-
-        // -----------------------------------------------------------------------------
-        // Clear target set
-        // -----------------------------------------------------------------------------
-        TargetSetManager::ClearTargetSet(_rInterLightProbeFacet.m_TargetSetPtr);
 
         // -----------------------------------------------------------------------------
         // Prepare renderer
