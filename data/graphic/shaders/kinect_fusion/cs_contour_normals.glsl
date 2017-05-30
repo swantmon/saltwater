@@ -81,15 +81,18 @@ void main()
 		const vec2 FocalPoint = g_Intrinisics[PyramidLevel].m_FocalPoint;
 		const vec2 FocalLength = g_Intrinisics[PyramidLevel].m_FocalLength;
 
-		Normal.xy = (Gradient * FocalLength) / z;
-		Normal.z = -1.0f - (Gradient.x  * (u - FocalPoint.x) - Gradient.y * (v - FocalPoint.y)) / z;
+		const vec2 Temp = Gradient * (vec2(u, v) - FocalPoint) / ImageSize;
 
-		//Normal = mat3(g_PoseMatrix) * Normal;
+		Normal.xy = (Gradient * FocalLength / ImageSize) / z;
+		Normal.z = -1.0f - (Temp.x - Temp.y) / z;
+
+		Normal = mat3(g_PoseMatrix) * Normal;
 	}
 
 	//imageStore(cs_NormalBuffer, ivec2(u, v), vec4(Gradient, length(Gradient), 1.0f));
 	//imageStore(cs_NormalBuffer, ivec2(u, v), vec4(Normal, length(Normal)));
 	imageStore(cs_NormalBuffer, ivec2(u, v), vec4(normalize(Normal), 1.0f));
+	//imageStore(cs_NormalBuffer, ivec2(u, v), vec4(Normal.xy, 0.0f, 1.0f));
 }
 
 #endif // __INCLUDE_CS_CONTOURS_NORMAL_GLSL__
