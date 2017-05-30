@@ -439,7 +439,6 @@ void main(void)
         return;
     }
 
-
 #ifdef DEBUG
 
 
@@ -562,11 +561,10 @@ void main(void)
         out_Output = vec4(Specular, 1.0f - HitUVzTime.z);
     }
 
-
 #endif 
 
-    out_Output *= ps_SSRIntensity;
-    out_Output *= clamp(RoughnessFade, 0.0f, 1.0f);
+    out_Output.rgb *= ps_SSRIntensity;
+    out_Output.rgb *= clamp(RoughnessFade, 0.0f, 1.0f);
 
 }
 

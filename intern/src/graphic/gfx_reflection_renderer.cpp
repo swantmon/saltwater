@@ -166,11 +166,6 @@ namespace
         
         CRenderContextPtr m_LightAccumulationRenderContextPtr;
 
-        CRenderContextPtr m_SSRRenderContextPtr;
-
-        CRenderContextPtr m_HCBRenderContextPtr;
-
-
         std::vector<CTextureBasePtr>   m_HCBTexturePtrs;
 
         std::vector<CTargetSetPtr>     m_HCBTargetSetPtrs;
@@ -208,8 +203,6 @@ namespace
         , m_HCBTexture2DPtr                  ()
         , m_SSRTargetSetPtr                  ()
         , m_LightAccumulationRenderContextPtr()
-        , m_SSRRenderContextPtr              ()
-        , m_HCBRenderContextPtr              ()
         , m_LightProbeRenderJobs             ()
         , m_SSRRenderJobs                    ()
     {
@@ -253,8 +246,6 @@ namespace
         m_HCBTexture2DPtr                   = 0;
         m_SSRTargetSetPtr                   = 0;
         m_LightAccumulationRenderContextPtr = 0;
-        m_SSRRenderContextPtr               = 0;
-        m_HCBRenderContextPtr               = 0;
 
         for (unsigned int IndexOfElement = 0; IndexOfElement < m_HCBTexturePtrs.size(); ++IndexOfElement)
         {
@@ -404,8 +395,6 @@ namespace
         
         CRenderStatePtr     LightStatePtr      = StateManager::GetRenderState(CRenderState::AdditionBlend);
 
-        CRenderStatePtr     DefaultStatePtr    = StateManager::GetRenderState(0);
-
         // -----------------------------------------------------------------------------
         
         m_LightAccumulationRenderContextPtr = ContextManager::CreateRenderContext();
@@ -414,22 +403,6 @@ namespace
         m_LightAccumulationRenderContextPtr->SetViewPortSet(ViewPortSetPtr);
         m_LightAccumulationRenderContextPtr->SetTargetSet(LightTargetSetPtr);
         m_LightAccumulationRenderContextPtr->SetRenderState(LightStatePtr);
-
-        // -----------------------------------------------------------------------------
-
-        m_SSRRenderContextPtr = ContextManager::CreateRenderContext();
-
-        m_SSRRenderContextPtr->SetCamera(MainCameraPtr);
-        m_SSRRenderContextPtr->SetViewPortSet(ViewPortSetPtr);
-        m_SSRRenderContextPtr->SetTargetSet(m_SSRTargetSetPtr);
-        m_SSRRenderContextPtr->SetRenderState(DefaultStatePtr);
-
-        // -----------------------------------------------------------------------------
-
-        m_HCBRenderContextPtr = ContextManager::CreateRenderContext();
-
-        m_HCBRenderContextPtr->SetCamera(MainCameraPtr);
-        m_HCBRenderContextPtr->SetRenderState(DefaultStatePtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -673,8 +646,6 @@ namespace
             m_HCBViewPortSetPtrs.push_back(ViewPortSetPtr);
         }
 
-        m_SSRRenderContextPtr->SetTargetSet(m_SSRTargetSetPtr);
-
         // -----------------------------------------------------------------------------
 
         m_HCBTexturePtrs.push_back(TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0));
@@ -711,14 +682,14 @@ namespace
 
     CTextureBasePtr CGfxReflectionRenderer::GetBRDF()
     {
-        return m_BRDFTexture2DPtr;
+        return static_cast<CTextureBasePtr>(m_BRDFTexture2DPtr);
     }
     
     // -----------------------------------------------------------------------------
     
     void CGfxReflectionRenderer::RenderIBL()
     {
-        if (m_LightProbeRenderJobs.size() == 0) return;
+        if (m_LightProbeRenderJobs.size() == 0 && m_SSRRenderJobs.size() == 0) return;
 
         Performance::BeginEvent("IBL");
 
@@ -731,6 +702,7 @@ namespace
 
         IBLSettings.m_IBLSettings    = Base::Float4::s_Zero;
         IBLSettings.m_IBLSettings[0] = static_cast<float>(HistogramRenderer::GetLastExposureHistoryIndex());
+        IBLSettings.m_IBLSettings[1] = m_SSRRenderJobs.size() > 0 ? 1.0f : 0.0f;
 
         BufferManager::UploadConstantBufferData(m_ImageLightBufferPtr, &IBLSettings);
 
@@ -853,9 +825,37 @@ namespace
 
     void CGfxReflectionRenderer::RenderHCB()
     {
+        if (m_SSRRenderJobs.size() == 0) return;
+
         Performance::BeginEvent("HCB");
 
         const unsigned int pOffset[] = { 0, 0 };
+
+        ContextManager::SetBlendState(StateManager::GetBlendState(0));
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(0));
+
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        ContextManager::SetShaderVS(m_RectangleShaderVSPtr);
+
+        ContextManager::SetShaderPS(m_HCBShaderPSPtr);
+
+        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+
+        ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+
+        ContextManager::SetConstantBuffer(1, m_HCBBufferPtr);
+
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+
+        ContextManager::SetTexture(0, TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0));
 
         for (unsigned int IndexOfMipmap = 0; IndexOfMipmap < m_HCBTexture2DPtr->GetNumberOfMipLevels(); ++ IndexOfMipmap)
         {
@@ -874,55 +874,34 @@ namespace
 
             // -----------------------------------------------------------------------------
 
-            m_HCBRenderContextPtr->SetTargetSet  (m_HCBTargetSetPtrs[IndexOfMipmap]);
-            m_HCBRenderContextPtr->SetViewPortSet(m_HCBViewPortSetPtrs[IndexOfMipmap]);
+            ContextManager::SetTargetSet(m_HCBTargetSetPtrs[IndexOfMipmap]);
 
-            ContextManager::SetRenderContext(m_HCBRenderContextPtr);
-
-            ContextManager::SetTopology(STopology::TriangleList);
-
-            ContextManager::SetShaderVS(m_RectangleShaderVSPtr);
-
-            ContextManager::SetShaderPS(m_HCBShaderPSPtr);
-
-            ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
-
-            ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
-
-            ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
-
-            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-
-            ContextManager::SetConstantBuffer(1, m_HCBBufferPtr);
-
-            ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
-
-            ContextManager::SetTexture(0, m_HCBTexturePtrs[0]);
+            ContextManager::SetViewPortSet(m_HCBViewPortSetPtrs[IndexOfMipmap]);
 
             ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        }
 
-            ContextManager::ResetTexture(0);
+        ContextManager::ResetTexture(0);
 
-            ContextManager::ResetSampler(0);
+        ContextManager::ResetSampler(0);
 
-            ContextManager::ResetInputLayout();
+        ContextManager::ResetInputLayout();
 
-            ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(0);
 
-            ContextManager::ResetConstantBuffer(1);
+        ContextManager::ResetConstantBuffer(1);
 
-            ContextManager::ResetIndexBuffer();
+        ContextManager::ResetIndexBuffer();
 
-            ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBufferSet();
 
-            ContextManager::ResetShaderVS();
+        ContextManager::ResetShaderVS();
 
-            ContextManager::ResetShaderPS();
+        ContextManager::ResetShaderPS();
 
-            ContextManager::ResetTopology();
+        ContextManager::ResetTopology();
 
-            ContextManager::ResetRenderContext();
-        }        
+        ContextManager::ResetRenderContext();
 
         Performance::EndEvent();
     }
@@ -961,7 +940,15 @@ namespace
         // -----------------------------------------------------------------------------
         const unsigned int pOffset[] = { 0, 0 };
 
-        ContextManager::SetRenderContext(m_SSRRenderContextPtr);
+        ContextManager::SetBlendState(StateManager::GetBlendState(0));
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(0));
+
+        ContextManager::SetTargetSet(m_SSRTargetSetPtr);
+
+        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
 
         ContextManager::SetTopology(STopology::TriangleList);
 
@@ -985,7 +972,6 @@ namespace
         ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(4, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         ContextManager::SetSampler(5, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
-
 
         ContextManager::SetTexture(0, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0));
         ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1));

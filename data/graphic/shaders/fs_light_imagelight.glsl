@@ -59,6 +59,7 @@ layout(binding = 14) uniform samplerCube ps_ShadowCubemap[MAX_NUMBER_OF_PROBES];
 // Easy access
 // -----------------------------------------------------------------------------
 #define ps_ExposureHistoryIndex ps_ConstantBufferData0.x
+#define ps_UseSSR               ps_ConstantBufferData0.y
 
 // -----------------------------------------------------------------------------
 // Input
@@ -187,10 +188,13 @@ void main()
     vec4 SpecularLighting = vec4(0.0f, 0.0f, 0.0f, 1.0f);
     
 #ifdef USE_SSR
-    vec4 SSR = textureLod(ps_SSR, in_UV, 0);
+    if (ps_UseSSR == 1.0f)
+    {    
+        vec4 SSR = textureLod(ps_SSR, in_UV, 0);
 
-    SpecularLighting.rgb = SSR.rgb;
-    SpecularLighting.a   = 1.0f - SSR.a;
+        SpecularLighting.rgb = SSR.rgb;
+        SpecularLighting.a   = 1.0f - clamp(SSR.a, 0.0f, 1.0f);
+    }
 #endif
     
 #ifdef USE_IBL
