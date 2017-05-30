@@ -73,6 +73,40 @@ layout(location = 0) out vec4 out_Output;
 // -----------------------------------------------------------------------------
 // Main
 // -----------------------------------------------------------------------------
+bool IsPositionInProbe(in vec3 _WSPosition, in SProbeProperties _Probe)
+{
+    vec3 LSPosition = (_Probe.ps_WorldToProbeLS * vec4(_WSPosition, 1.0f)).xyz;
+
+    return (
+        -_Probe.ps_UnitaryBox.x <= LSPosition.x && 
+        -_Probe.ps_UnitaryBox.y <= LSPosition.y && 
+        -_Probe.ps_UnitaryBox.z <= LSPosition.z &&
+        +_Probe.ps_UnitaryBox.x >= LSPosition.x && 
+        +_Probe.ps_UnitaryBox.y >= LSPosition.y && 
+        +_Probe.ps_UnitaryBox.z >= LSPosition.z 
+    );
+}
+
+// -----------------------------------------------------------------------------
+
+vec3 GetIntersectionWithProbeBox(in vec3 _WSPosition, in SProbeProperties _Probe)
+{
+    vec3 LSReflectVector = mat3(_Probe.ps_WorldToProbeLS) * normalize(_WSPosition - _Probe.ps_ProbePosition.xyz);
+
+    vec3 FirstPlaneIntersect  = ( _Probe.ps_UnitaryBox.xyz) / LSReflectVector;
+    vec3 SecondPlaneIntersect = (-_Probe.ps_UnitaryBox.xyz) / LSReflectVector;
+
+    vec3 FurthestPlane = max(FirstPlaneIntersect, SecondPlaneIntersect);
+
+    float Distance = min(FurthestPlane.x, min(FurthestPlane.y, FurthestPlane.z));
+
+    vec3 IntersectWSPosition = _Probe.ps_ProbePosition.xyz + normalize(_WSPosition - _Probe.ps_ProbePosition.xyz) * Distance;
+
+    return vec3(IntersectWSPosition);
+}
+
+// -----------------------------------------------------------------------------
+
 vec3 GetParallaxReflection(in vec3 _WSReflectVector, in vec3 _WSPosition, in SProbeProperties _Probe)
 {
     // -----------------------------------------------------------------------------
@@ -173,6 +207,22 @@ void main()
 
             if (LightProb.ps_ProbeType != 0)
             {
+                bool IsInside = IsPositionInProbe(Data.m_WSPosition, LightProb);
+                
+                if (IsInside == false) continue;
+
+                float DistanceFromProbe = 1.0f;
+                                
+                if (LightProb.ps_ProbeType == LOCAL_PROBE)
+                {
+                    vec3 Intersection = GetIntersectionWithProbeBox(Data.m_WSPosition, LightProb);
+                    
+                    float DistanceInsideBox = distance(LightProb.ps_ProbePosition.xyz, Intersection);
+                    float DistanceProbeSurf = distance(LightProb.ps_ProbePosition.xyz, Data.m_WSPosition);
+
+                    DistanceFromProbe = clamp((DistanceInsideBox - DistanceProbeSurf) * 0.25f, 0.0f, 1.0f);
+                }
+
 #ifdef USE_PARALLAX
                 // -------------------------------------------------------------------------------------
                 // Cumpute reflection vector based on parallax correction
@@ -184,7 +234,6 @@ void main()
                     WSReflectVector = GetParallaxReflection(WSReflectVector, Data.m_WSPosition, LightProb);
                 }
 #endif
-
                 // -------------------------------------------------------------------------------------
                 // Estimate lighting of cubemap
                 // -------------------------------------------------------------------------------------
@@ -194,7 +243,7 @@ void main()
                 // -------------------------------------------------------------------------------------
                 // Combination of lighting based on luminosity
                 // -------------------------------------------------------------------------------------
-                IBL.rgb += (DiffuseIBL.rgb + SpecularIBL.rgb) * AverageExposure * (1.0f - IBL.a);
+                IBL.rgb += (DiffuseIBL.rgb + SpecularIBL.rgb) * AverageExposure * (1.0f - IBL.a) * DistanceFromProbe;
                 
                 float Luminosity = 0.3f * IBL.r + 0.59f * IBL.g + 0.11f * IBL.b;
                 

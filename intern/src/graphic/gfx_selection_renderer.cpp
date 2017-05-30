@@ -14,6 +14,7 @@
 #include "data/data_entity_manager.h"
 #include "data/data_hierarchy_facet.h"
 #include "data/data_light_type.h"
+#include "data/data_light_probe_facet.h"
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_actor_renderer.h"
@@ -171,8 +172,9 @@ namespace
 
         struct SProbeRenderJob
         {
-            Base::Float4x4       m_ModelMatrix;
-            Gfx::CTextureBasePtr m_TextureCubePtr;
+            Base::Float4x4        m_ModelMatrix;
+            Gfx::CTextureBasePtr  m_TextureCubePtr;
+            Dt::CLightProbeFacet* m_pDtProbeFacet;
         };
 
     private:
@@ -190,6 +192,7 @@ namespace
         CShaderPtr             m_SelectionCSPtr;
         CTextureSetPtr         m_GBufferTextureSetPtr;
         CMeshPtr               m_SphereMeshPtr;
+        CMeshPtr               m_BoxMeshPtr;
         CSurfaceRenderJobs     m_SurfaceRenderJobs;
         CProbeRenderJobs       m_ProbeRenderJobs;
         CInternSelectionTicket m_SelectionTickets[s_MaxNumberOfTickets];
@@ -201,6 +204,10 @@ namespace
         void ResetTickets();
     
         void RenderHighlight();
+
+        void RenderHighlightSurfaces();
+
+        void RenderHighlightProbes();
 
         void RenderSelection();
 
@@ -240,6 +247,7 @@ namespace
         , m_TextureCubePSPtr      ()
         , m_GBufferTextureSetPtr  ()
         , m_SphereMeshPtr         ()
+        , m_BoxMeshPtr            ()
         , m_SurfaceRenderJobs     ()
         , m_ProbeRenderJobs       ()
         , m_SelectionTickets      ()
@@ -278,6 +286,7 @@ namespace
         m_SelectionCSPtr       = 0;
         m_GBufferTextureSetPtr = 0;
         m_SphereMeshPtr        = 0;
+        m_BoxMeshPtr           = 0;
         m_pSelectedEntity      = 0;
 
         ResetTickets();
@@ -412,7 +421,9 @@ namespace
     
     void CGfxSelectionRenderer::OnSetupModels()
     {
-        m_SphereMeshPtr = MeshManager::CreateSphere(1.0f, 32.0f, 32.0f);
+        m_SphereMeshPtr = MeshManager::CreateSphere(1.0f, 32, 32);
+
+        m_BoxMeshPtr = MeshManager::CreateBox(2.0f, 2.0f, 2.0f);
     }
     
     // -----------------------------------------------------------------------------
@@ -674,8 +685,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Prepare renderer
         // -----------------------------------------------------------------------------
-        const unsigned int pOffset[] = { 0, 0 };
-
         ContextManager::SetTargetSet(TargetSetManager::GetSystemTargetSet());
 
         ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
@@ -702,14 +711,58 @@ namespace
         BufferManager::UploadConstantBufferData(m_HighlightPSBufferPtr, &SelectionSettings);
 
         // -----------------------------------------------------------------------------
-        // First pass: iterate throw surface render jobs and draw all meshes
+        // Render
         // -----------------------------------------------------------------------------
+        RenderHighlightSurfaces();
+
+        RenderHighlightProbes();
+
+        // -----------------------------------------------------------------------------
+        // Exit renderer
+        // -----------------------------------------------------------------------------
+        ContextManager::ResetInputLayout();
+
+        ContextManager::ResetIndexBuffer();
+
+        ContextManager::ResetVertexBufferSet();
+
+        ContextManager::ResetConstantBuffer(0);
+
+        ContextManager::ResetConstantBuffer(1);
+
+        ContextManager::ResetConstantBuffer(2);
+
+        ContextManager::ResetTexture(0);
+
+        ContextManager::ResetShaderVS();
+
+        ContextManager::ResetShaderDS();
+
+        ContextManager::ResetShaderHS();
+
+        ContextManager::ResetShaderGS();
+
+        ContextManager::ResetShaderPS();
+
+        ContextManager::ResetRenderContext();
+
+        ContextManager::ResetTopology();
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxSelectionRenderer::RenderHighlightSurfaces()
+    {
+        const unsigned int pOffset[] = { 0, 0 };
+
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
 
         ContextManager::SetShaderPS(m_HighlightPSPtr);
 
         CSurfaceRenderJobs::const_iterator CurrentSurfaceRenderJob = m_SurfaceRenderJobs.begin();
-        CSurfaceRenderJobs::const_iterator EndOfSurfaceRenderJobs  = m_SurfaceRenderJobs.end();
+        CSurfaceRenderJobs::const_iterator EndOfSurfaceRenderJobs = m_SurfaceRenderJobs.end();
 
         for (; CurrentSurfaceRenderJob != EndOfSurfaceRenderJobs; ++CurrentSurfaceRenderJob)
         {
@@ -740,10 +793,14 @@ namespace
 
             ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
         }
+    }
 
-        // -----------------------------------------------------------------------------
-        // Second pass: show probe lights
-        // -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
+
+    void CGfxSelectionRenderer::RenderHighlightProbes()
+    {
+        const unsigned int pOffset[] = { 0, 0 };
+
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(0));
 
         ContextManager::SetShaderPS(m_TextureCubePSPtr);
@@ -784,37 +841,44 @@ namespace
         }
 
         // -----------------------------------------------------------------------------
-        // Exit renderer
-        // -----------------------------------------------------------------------------
-        ContextManager::ResetInputLayout();
 
-        ContextManager::ResetIndexBuffer();
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
 
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::SetShaderPS(m_HighlightPSPtr);
 
-        ContextManager::ResetConstantBuffer(0);
+        CurrentProbeRenderJob = m_ProbeRenderJobs.begin();
+        EndOfProbeRenderJobs  = m_ProbeRenderJobs.end();
 
-        ContextManager::ResetConstantBuffer(1);
+        for (; CurrentProbeRenderJob != EndOfProbeRenderJobs; ++CurrentProbeRenderJob)
+        {
+            CSurfacePtr SurfacePtr = m_BoxMeshPtr->GetLOD(0)->GetSurface(0);
 
-        ContextManager::ResetConstantBuffer(2);
+            // -----------------------------------------------------------------------------
+            // Upload data to buffer
+            // -----------------------------------------------------------------------------
+            SPerDrawCallConstantBufferVS ModelBuffer;
 
-        ContextManager::ResetTexture(0);
+            ModelBuffer.m_ModelMatrix  = CurrentProbeRenderJob->m_ModelMatrix;
+            ModelBuffer.m_ModelMatrix *= Base::Float4x4().SetScale(CurrentProbeRenderJob->m_pDtProbeFacet->GetBoxSize());
 
-        ContextManager::ResetShaderVS();
+            BufferManager::UploadConstantBufferData(m_ModelBufferPtr, &ModelBuffer);
 
-        ContextManager::ResetShaderDS();
+            // -----------------------------------------------------------------------------
+            // Render
+            // -----------------------------------------------------------------------------
+            ContextManager::SetShaderVS(SurfacePtr->GetShaderVS());
 
-        ContextManager::ResetShaderHS();
+            // -----------------------------------------------------------------------------
+            // Set items to context manager
+            // -----------------------------------------------------------------------------
+            ContextManager::SetVertexBufferSet(SurfacePtr->GetVertexBuffer(), pOffset);
 
-        ContextManager::ResetShaderGS();
+            ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
 
-        ContextManager::ResetShaderPS();
+            ContextManager::SetInputLayout(SurfacePtr->GetShaderVS()->GetInputLayout());
 
-        ContextManager::ResetRenderContext();
-
-        ContextManager::ResetTopology();
-
-        Performance::EndEvent();
+            ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -992,9 +1056,10 @@ namespace
             }
             else if (_pEntity->GetCategory() == Dt::SEntityCategory::Light && _pEntity->GetType() == Dt::SLightType::LightProbe)
             {
-                CLightProbeFacet* pFacet = static_cast<CLightProbeFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
+                Dt::CLightProbeFacet*  pDtFacet  = static_cast<Dt::CLightProbeFacet* > (_pEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+                Gfx::CLightProbeFacet* pGfxFacet = static_cast<Gfx::CLightProbeFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
 
-                assert(pFacet != nullptr);
+                assert(pGfxFacet != nullptr);
 
                 // -----------------------------------------------------------------------------
                 // Set informations to render job
@@ -1002,7 +1067,8 @@ namespace
                 SProbeRenderJob NewRenderJob;
 
                 NewRenderJob.m_ModelMatrix    = _pEntity->GetTransformationFacet()->GetWorldMatrix();
-                NewRenderJob.m_TextureCubePtr = pFacet->GetSpecularPtr();
+                NewRenderJob.m_TextureCubePtr = pGfxFacet->GetSpecularPtr();
+                NewRenderJob.m_pDtProbeFacet  = pDtFacet;
 
                 m_ProbeRenderJobs.push_back(NewRenderJob);
             }

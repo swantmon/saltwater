@@ -515,6 +515,16 @@ namespace
         rLOD.m_Surfaces[0] = SurfacePtr;
 
         // -----------------------------------------------------------------------------
+        // Prepare surface
+        // -----------------------------------------------------------------------------
+        rSurface.m_SurfaceKey.m_Key          = 0;
+        rSurface.m_SurfaceKey.m_HasPosition  = true;
+        rSurface.m_SurfaceKey.m_HasNormal    = true;
+        rSurface.m_SurfaceKey.m_HasTangent   = false;
+        rSurface.m_SurfaceKey.m_HasBitangent = false;
+        rSurface.m_SurfaceKey.m_HasTexCoords = false;
+
+        // -----------------------------------------------------------------------------
         // Calculate Data
         // -----------------------------------------------------------------------------
         float HalfWidth  = _Width  / 2.0f;

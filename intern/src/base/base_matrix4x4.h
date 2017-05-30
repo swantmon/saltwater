@@ -160,7 +160,7 @@ namespace MATH
 
         inline CThis& SetScale(X _Scale);
         inline CThis& SetScale(X _X, X _Y, X _Z);
-        inline CThis& SetScale(CVector3<T>& _rVector);
+        inline CThis& SetScale(const CVector3<T>& _rVector);
         inline CThis& SetScale(const CLine& _rVector);
 
         inline void GetScale(X& _rX, X& _rY, X& _rZ) const;
@@ -1015,7 +1015,7 @@ namespace MATH
     // -----------------------------------------------------------------------------
 
     template<typename T>
-    inline typename CMatrix4x4<T>::CThis& CMatrix4x4<T>::SetScale(CVector3<T>& _rVector)
+    inline typename CMatrix4x4<T>::CThis& CMatrix4x4<T>::SetScale(const CVector3<T>& _rVector)
     {
         return SetScale(_rVector[0], _rVector[1], _rVector[2]);
     }
