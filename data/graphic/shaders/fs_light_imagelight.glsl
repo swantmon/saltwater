@@ -92,7 +92,9 @@ bool IsPositionInProbe(in vec3 _WSPosition, in SProbeProperties _Probe)
 
 vec3 GetIntersectionWithProbeBox(in vec3 _WSPosition, in SProbeProperties _Probe)
 {
-    vec3 LSReflectVector = mat3(_Probe.ps_WorldToProbeLS) * normalize(_WSPosition - _Probe.ps_ProbePosition.xyz);
+    vec3 NormalizedDirection = normalize(_WSPosition - _Probe.ps_ProbePosition.xyz);
+
+    vec3 LSReflectVector = mat3(_Probe.ps_WorldToProbeLS) * NormalizedDirection;
 
     vec3 FirstPlaneIntersect  = ( _Probe.ps_UnitaryBox.xyz) / LSReflectVector;
     vec3 SecondPlaneIntersect = (-_Probe.ps_UnitaryBox.xyz) / LSReflectVector;
@@ -101,9 +103,7 @@ vec3 GetIntersectionWithProbeBox(in vec3 _WSPosition, in SProbeProperties _Probe
 
     float Distance = min(FurthestPlane.x, min(FurthestPlane.y, FurthestPlane.z));
 
-    vec3 IntersectWSPosition = _Probe.ps_ProbePosition.xyz + normalize(_WSPosition - _Probe.ps_ProbePosition.xyz) * Distance;
-
-    return vec3(IntersectWSPosition);
+    return _Probe.ps_ProbePosition.xyz + NormalizedDirection * Distance;
 }
 
 // -----------------------------------------------------------------------------
@@ -229,7 +229,7 @@ void main()
 
 #ifdef USE_PARALLAX
                 // -------------------------------------------------------------------------------------
-                // Cumpute reflection vector based on parallax correction
+                // Compute reflection vector based on parallax correction
                 // -------------------------------------------------------------------------------------
                 WSReflectVector = normalize(reflect(WSViewDirection, Data.m_WSNormal));
 

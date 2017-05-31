@@ -9,7 +9,7 @@ namespace Gfx
         : m_Info    ()
         , m_pPixels (0)
         , m_FileName("")
-        , m_Hash    (-1)
+        , m_Hash    (static_cast<unsigned int>(-1))
     {
     }
 

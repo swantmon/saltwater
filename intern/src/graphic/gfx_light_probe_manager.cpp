@@ -590,8 +590,8 @@ namespace
         ViewPortDesc.m_TopLeftY = 0.0f;
         ViewPortDesc.m_MinDepth = 0.0f;
         ViewPortDesc.m_MaxDepth = 1.0f;
-        ViewPortDesc.m_Width    = _SpecularFaceSize;
-        ViewPortDesc.m_Height   = _SpecularFaceSize;
+        ViewPortDesc.m_Width    = static_cast<float>(_SpecularFaceSize);
+        ViewPortDesc.m_Height   = static_cast<float>(_SpecularFaceSize);
 
         CViewPortPtr ReflectionViewPortPtr = ViewManager::CreateViewPort(ViewPortDesc);
 
@@ -1461,7 +1461,7 @@ namespace
                     LightBuffer[IndexOfLight].m_LightPosition  = Base::Float4(rCurrentEntity.GetWorldPosition(), 1.0f);
                     LightBuffer[IndexOfLight].m_LightDirection = Base::Float4(0.0f);
                     LightBuffer[IndexOfLight].m_LightColor     = Base::Float4(0.0f);
-                    LightBuffer[IndexOfLight].m_LightSettings  = Base::Float4(pGfxLightProbeFacet->GetSpecularPtr()->GetNumberOfMipLevels() - 1, 0.0f, 0.0f, 0.0f);
+                    LightBuffer[IndexOfLight].m_LightSettings  = Base::Float4(static_cast<float>(pGfxLightProbeFacet->GetSpecularPtr()->GetNumberOfMipLevels() - 1), 0.0f, 0.0f, 0.0f);
 
                     LightBuffer[IndexOfLight].m_LightViewProjection.SetIdentity();
 

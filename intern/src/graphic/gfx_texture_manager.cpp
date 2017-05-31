@@ -25,8 +25,8 @@ using namespace Gfx;
 
 namespace
 {
-	std::string g_PathToAssets		 = "../assets/";
-	std::string g_PathToDataTextures = "../data/graphic/textures/";
+    std::string g_PathToAssets         = "../assets/";
+    std::string g_PathToDataTextures = "../data/graphic/textures/";
 } // namespace
 
 namespace
@@ -520,7 +520,7 @@ namespace
     }
 
     // -----------------------------------------------------------------------------
-	
+    
     void CGfxTextureManager::CopyToTexture2D(CTexture2DPtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels)
     {
         BASE_UNUSED(_NumberOfBytesPerLine);
@@ -601,7 +601,7 @@ namespace
     }
 
     // -----------------------------------------------------------------------------
-	
+    
     void CGfxTextureManager::CopyToTextureArray2D(CTexture2DPtr _TextureArrayPtr, unsigned int _IndexOfSlice, CTexture2DPtr _TexturePtr, bool _UpdateMipLevels)
     {
         BASE_UNUSED(_UpdateMipLevels);
@@ -857,7 +857,7 @@ namespace
                         Base::AABB2UInt TargetRect(Base::UInt2(0), TextureResolution);
 
                         CopyToTexture2D(pGraphicTexture, TargetRect, TargetRect[1][0], pDataTexture->GetPixels(), true);
-                    }                    
+                    }
                 }
             }
         }
@@ -881,17 +881,17 @@ namespace
         bool         Result;
         void*        pBytes;
         void*        pTextureData;
-        unsigned int NativeImageName;
-        GLuint       NativeTextureHandle;
-        int          ImageWidth;
-        int          ImageHeight;
-        int          NumberOfPixel;
-        int          NumberOfBytes;
-        int          NumberOfMipmaps;
+        unsigned int ImageWidth;
+        unsigned int ImageHeight;
+        unsigned int NumberOfPixel;
+        unsigned int NumberOfBytes;
+        unsigned int NumberOfMipmaps;
         int          GLInternalFormat;
         int          GLFormat;
         int          GLUsage;
         int          GLType;
+        GLuint       NativeTextureHandle;
+        ILuint       NativeImageName;
         ILenum       NativeILFormat;
         ILenum       NativeILType;
 
@@ -934,22 +934,22 @@ namespace
             // Load texture from file (either in assets or data)
             // -----------------------------------------------------------------------------
             std::string    PathToTexture;
-			const wchar_t* pPathToTexture = 0;
+            const wchar_t* pPathToTexture = 0;
 
-			PathToTexture = g_PathToAssets + _rDescriptor.m_pFileName;
+            PathToTexture = g_PathToAssets + _rDescriptor.m_pFileName;
 
             pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
             
             Result = ilLoadImage(pPathToTexture) == IL_TRUE;
 
-			if (!Result)
-			{
-				PathToTexture = g_PathToDataTextures + _rDescriptor.m_pFileName;
+            if (!Result)
+            {
+                PathToTexture = g_PathToDataTextures + _rDescriptor.m_pFileName;
 
-				pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
+                pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
 
-				Result = ilLoadImage(pPathToTexture) == IL_TRUE;
-			}
+                Result = ilLoadImage(pPathToTexture) == IL_TRUE;
+            }
             
             if (Result)
             {
@@ -1177,17 +1177,17 @@ namespace
     {
         void*        pBytes;
         void*        pTextureData;
-        GLuint       NativeTextureHandle;
-        int          ImageWidth;
-        int          ImageHeight;
-        int          ImageDepth;
-        int          NumberOfPixel;
-        int          NumberOfBytes;
-        int          NumberOfMipmaps;
+        unsigned int ImageWidth;
+        unsigned int ImageHeight;
+        unsigned int ImageDepth;
+        unsigned int NumberOfPixel;
+        unsigned int NumberOfBytes;
+        unsigned int NumberOfMipmaps;
         int          GLInternalFormat;
         int          GLFormat;
         int          GLUsage;
         int          GLType;
+        GLuint       NativeTextureHandle;
         ILenum       NativeILFormat;
         ILenum       NativeILType;
 
@@ -1364,18 +1364,18 @@ namespace
         bool         ImageIsLoaded;
         void*        pBytes;
         void*        pTextureData;
-        unsigned int NumberOfFaces;
-        unsigned int NativeImageName;
-        GLuint       NativeTextureHandle;
-        int          ImageWidth;
-        int          ImageHeight;
-        int          NumberOfPixel;
-        int          NumberOfBytes;
-        int          NumberOfMipmaps;
+        unsigned int ImageWidth;
+        unsigned int ImageHeight;
+        unsigned int NumberOfPixel;
+        unsigned int NumberOfBytes;
+        unsigned int NumberOfMipmaps;
         int          GLInternalFormat;
         int          GLFormat;
         int          GLUsage;
         int          GLType;
+        GLuint       NativeTextureHandle;
+        ILuint       NumberOfFaces;
+        ILuint       NativeImageName;
         ILenum       NativeILFormat;
         ILenum       NativeILType;
         ILinfo       NativeILImageInfo;
@@ -1423,22 +1423,22 @@ namespace
             // Load texture from file (either in assets or data)
             // -----------------------------------------------------------------------------
             std::string    PathToTexture;
-			const wchar_t* pPathToTexture = 0;
+            const wchar_t* pPathToTexture = 0;
 
-			PathToTexture = g_PathToAssets + _rDescriptor.m_pFileName;
+            PathToTexture = g_PathToAssets + _rDescriptor.m_pFileName;
 
             pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
             
             ImageIsLoaded = ilLoadImage(pPathToTexture) == IL_TRUE;
 
-			if (!ImageIsLoaded)
-			{
-				PathToTexture = g_PathToDataTextures + _rDescriptor.m_pFileName;
+            if (!ImageIsLoaded)
+            {
+                PathToTexture = g_PathToDataTextures + _rDescriptor.m_pFileName;
 
-				pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
+                pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
 
-				ImageIsLoaded = ilLoadImage(pPathToTexture) == IL_TRUE;
-			}
+                ImageIsLoaded = ilLoadImage(pPathToTexture) == IL_TRUE;
+            }
 
             if (ImageIsLoaded)
             {
@@ -1508,7 +1508,7 @@ namespace
         // -----------------------------------------------------------------------------
         if (ImageIsLoaded)
         {
-            for (unsigned int IndexOfFace = 0; IndexOfFace <= NumberOfFaces; ++IndexOfFace)
+            for (ILuint IndexOfFace = 0; IndexOfFace <= NumberOfFaces; ++IndexOfFace)
             {
                 ilBindImage(NativeImageName);
 
@@ -1536,7 +1536,7 @@ namespace
         }
 
         // -----------------------------------------------------------------------------
-        // Create mipmaps depending on uploaded data
+        // Create mip maps depending on uploaded data
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
         {
