@@ -324,7 +324,7 @@ namespace
 
             pProbeLightFacet->SetType(Dt::CLightProbeFacet::Local);
             pProbeLightFacet->SetQuality(Dt::CLightProbeFacet::PX512);
-            pProbeLightFacet->SetIntensity(50000.0f);
+            pProbeLightFacet->SetIntensity(1.0f);
             pProbeLightFacet->SetRefreshMode(Dt::CLightProbeFacet::Dynamic);
             pProbeLightFacet->SetNear(2.0f);
             pProbeLightFacet->SetFar(100.0f);

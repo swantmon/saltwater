@@ -38,6 +38,8 @@ namespace Edit
 
         int Quality = m_pQualityCB->currentIndex();
 
+        int ClearFlag = m_pClearFlagCB->currentIndex();
+
         float Intensity = m_pIntensityEdit->text().toFloat();
 
         float Near = m_pNearEdit->text().toFloat();
@@ -64,6 +66,8 @@ namespace Edit
         NewMessage.PutInt(Type);
 
         NewMessage.PutInt(Quality);
+
+        NewMessage.PutInt(ClearFlag);
 
         NewMessage.PutFloat(Intensity);
 
@@ -116,6 +120,8 @@ namespace Edit
 
         int Quality = _rMessage.GetInt();
 
+        int ClearFlag = _rMessage.GetInt();
+
         float Intensity = _rMessage.GetFloat();
 
         float Near = _rMessage.GetFloat();
@@ -136,6 +142,7 @@ namespace Edit
         m_pRefreshModeCB       ->blockSignals(true);
         m_pTypeCB              ->blockSignals(true);
         m_pQualityCB           ->blockSignals(true);
+        m_pClearFlagCB         ->blockSignals(true);
         m_pParallaxCorrectionCB->blockSignals(true);
 
         m_pRefreshModeCB->setCurrentIndex(RefreshMode);
@@ -143,6 +150,8 @@ namespace Edit
         m_pTypeCB->setCurrentIndex(Type);
 
         m_pQualityCB->setCurrentIndex(Quality);
+
+        m_pClearFlagCB->setCurrentIndex(ClearFlag);
 
         m_pIntensityEdit->setText(QString::number(Intensity));
 
@@ -161,6 +170,7 @@ namespace Edit
         m_pRefreshModeCB       ->blockSignals(false);
         m_pTypeCB              ->blockSignals(false);
         m_pQualityCB           ->blockSignals(false);
+        m_pClearFlagCB         ->blockSignals(false);
         m_pParallaxCorrectionCB->blockSignals(false);
     }
 } // namespace Edit

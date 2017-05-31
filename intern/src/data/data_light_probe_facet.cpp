@@ -9,6 +9,7 @@ namespace Dt
         : m_RefreshMode       (Static)
         , m_Type              (Sky)
         , m_Quality           (PX128)
+        , m_ClearFlag         (Skybox)
         , m_pCubemap          ()
         , m_Intensity         (0)
         , m_Near              (0.1f)
@@ -75,6 +76,20 @@ namespace Dt
         static unsigned int s_QualityInPixel[s_NumberOfQualities] = { 128, 256, 512, 1024, 2048 };
 
         return s_QualityInPixel[m_Quality];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CLightProbeFacet::SetClearFlag(EClearFlag _ClearFlag)
+    {
+        m_ClearFlag = _ClearFlag;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CLightProbeFacet::EClearFlag CLightProbeFacet::GetClearFlag() const
+    {
+        return m_ClearFlag;
     }
 
     // -----------------------------------------------------------------------------

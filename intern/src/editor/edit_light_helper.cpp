@@ -254,6 +254,7 @@ namespace
             pLightProbeFacet->SetRefreshMode       (Dt::CLightProbeFacet::Static);
             pLightProbeFacet->SetType              (Dt::CLightProbeFacet::Local);
             pLightProbeFacet->SetQuality           (Dt::CLightProbeFacet::PX256);
+            pLightProbeFacet->SetClearFlag         (Dt::CLightProbeFacet::Skybox);
             pLightProbeFacet->SetIntensity         (1.0f);
             pLightProbeFacet->SetNear              (0.1f);
             pLightProbeFacet->SetFar               (10.0f);
@@ -454,6 +455,7 @@ namespace
             NewMessage.PutInt(pLightFacet->GetRefreshMode());
             NewMessage.PutInt(pLightFacet->GetType());
             NewMessage.PutInt(pLightFacet->GetQuality());
+            NewMessage.PutInt(pLightFacet->GetClearFlag());
             NewMessage.PutFloat(pLightFacet->GetIntensity());
             NewMessage.PutFloat(pLightFacet->GetNear());
             NewMessage.PutFloat(pLightFacet->GetFar());
@@ -713,6 +715,8 @@ namespace
 
             int Quality = _rMessage.GetInt();
 
+            int ClearFlag = _rMessage.GetInt();
+
             float Intensity = _rMessage.GetFloat();
 
             float Near = _rMessage.GetFloat();
@@ -735,6 +739,8 @@ namespace
             pLightFacet->SetType(static_cast<Dt::CLightProbeFacet::EType>(Type));
 
             pLightFacet->SetQuality(static_cast<Dt::CLightProbeFacet::EQuality>(Quality));
+
+            pLightFacet->SetClearFlag(static_cast<Dt::CLightProbeFacet::EClearFlag>(ClearFlag));
 
             pLightFacet->SetIntensity(Intensity);
 

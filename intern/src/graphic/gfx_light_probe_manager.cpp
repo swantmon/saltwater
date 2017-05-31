@@ -735,7 +735,10 @@ namespace
         {
             UpdateLightProperties();
 
-            RenderEnvironment(_rInterLightProbeFacet);
+            if (_rDtLightProbeFacet.GetClearFlag() == Dt::CLightProbeFacet::Skybox)
+            {
+                RenderEnvironment(_rInterLightProbeFacet);
+            }
 
             UpdateGeometryBuffer(_rEntity.GetWorldPosition(), _rDtLightProbeFacet.GetNear(), _rDtLightProbeFacet.GetFar());
 
