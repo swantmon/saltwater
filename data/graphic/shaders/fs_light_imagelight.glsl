@@ -35,12 +35,7 @@ layout(std140, binding = 1) uniform UB1
     vec4 ps_ConstantBufferData0;
 };
 
-layout(std430, binding = 0) buffer BB0
-{
-    float ps_ExposureHistory[8];
-};
-
-layout(std430, row_major, binding = 1) readonly buffer BB1
+layout(std430, row_major, binding = 0) readonly buffer BB0
 {
     SProbeProperties ps_LightProperties[MAX_NUMBER_OF_PROBES];
 };
@@ -58,8 +53,7 @@ layout(binding = 14) uniform samplerCube ps_ShadowCubemap[MAX_NUMBER_OF_PROBES];
 // -----------------------------------------------------------------------------
 // Easy access
 // -----------------------------------------------------------------------------
-#define ps_ExposureHistoryIndex ps_ConstantBufferData0.x
-#define ps_UseSSR               ps_ConstantBufferData0.y
+#define ps_UseSSR ps_ConstantBufferData0.x
 
 // -----------------------------------------------------------------------------
 // Input
@@ -157,11 +151,6 @@ void main()
     SSurfaceData Data;
 
     UnpackGBuffer(GBuffer0, GBuffer1, GBuffer2, WSPosition.xyz, VSDepth, Data);
-
-    // -----------------------------------------------------------------------------
-    // Exposure data
-    // -----------------------------------------------------------------------------
-    float AverageExposure = ps_ExposureHistory[uint(ps_ExposureHistoryIndex)];
     
     // -----------------------------------------------------------------------------
     // Compute lighting for sphere lights
@@ -247,7 +236,7 @@ void main()
                 // -------------------------------------------------------------------------------------
                 // Combination of lighting based on luminosity
                 // -------------------------------------------------------------------------------------
-                IBL.rgb += (DiffuseIBL.rgb + SpecularIBL.rgb) * AverageExposure * (1.0f - IBL.a) * DistanceFromProbe;
+                IBL.rgb += (DiffuseIBL.rgb + SpecularIBL.rgb) * (1.0f - IBL.a) * DistanceFromProbe;
                 
                 float Luminosity = 0.3f * IBL.r + 0.59f * IBL.g + 0.11f * IBL.b;
                 

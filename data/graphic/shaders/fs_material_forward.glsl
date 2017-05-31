@@ -237,8 +237,9 @@ void main(void)
             
             // -------------------------------------------------------------------------------------
             // Combination of lighting
+            // Multiplication with average exposure is not necessary because it is already included
             // -------------------------------------------------------------------------------------
-            Luminance += (DiffuseIBL.rgb + SpecularIBL.rgb) * AverageExposure;
+            Luminance += (DiffuseIBL.rgb + SpecularIBL.rgb);
         }
     }
 

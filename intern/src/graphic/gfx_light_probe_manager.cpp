@@ -107,6 +107,11 @@ namespace
             unsigned int   m_Padding2;
         };
 
+        struct SReflectionProbePropertiesBuffer
+        {
+            Base::Float4 m_Properties;
+        };
+
         struct SCameraPropertiesBuffer
         {
             Base::Float4 m_CameraPosition;
@@ -172,6 +177,7 @@ namespace
         CBufferPtr m_FilteringPSBufferPtr;
         CBufferPtr m_SurfaceMaterialBufferPtr;
         CBufferPtr m_CameraPropertiesBufferPtr;
+        CBufferPtr m_ReflectionProbePropertiesBufferPtr;
         CBufferPtr m_GeometryVPBufferPtr;
         CBufferPtr m_GeometryMBufferPtr;
 
@@ -373,6 +379,18 @@ namespace
 
         ConstanteBufferDesc.m_Stride        = 0;
         ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SReflectionProbePropertiesBuffer);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+
+        m_ReflectionProbePropertiesBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
         ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(SLightPropertiesBuffer) * s_MaxNumberOfLightsPerProbe;
@@ -427,6 +445,7 @@ namespace
         m_FilteringPSBufferPtr = 0;
         m_SurfaceMaterialBufferPtr = 0;
         m_CameraPropertiesBufferPtr = 0;
+        m_ReflectionProbePropertiesBufferPtr = 0;
         m_GeometryVPBufferPtr = 0;
         m_GeometryMBufferPtr  = 0;
 
@@ -709,14 +728,20 @@ namespace
         if (_rDtLightProbeFacet.GetType() == Dt::CLightProbeFacet::Sky)
         {
             RenderEnvironment(_rInterLightProbeFacet);
+
+            TextureManager::UpdateMipmap(_rInterLightProbeFacet.m_ReflectionCubemapPtr);
         }
         else if (_rDtLightProbeFacet.GetType() == Dt::CLightProbeFacet::Local)
         {
             UpdateLightProperties();
 
+            RenderEnvironment(_rInterLightProbeFacet);
+
             UpdateGeometryBuffer(_rEntity.GetWorldPosition(), _rDtLightProbeFacet.GetNear(), _rDtLightProbeFacet.GetFar());
 
             RenderEntities(_rInterLightProbeFacet, _rEntity.GetWorldPosition());
+
+            TextureManager::UpdateMipmap(_rInterLightProbeFacet.m_ReflectionCubemapPtr);
         }
 
         RenderFiltering(_rInterLightProbeFacet, _rDtLightProbeFacet);
@@ -760,8 +785,20 @@ namespace
         // Set buffer
         // -----------------------------------------------------------------------------
         ContextManager::SetConstantBuffer(2, m_CubemapGSBufferPtr);
+        ContextManager::SetConstantBuffer(3, m_ReflectionProbePropertiesBufferPtr);
 
+        ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
+
+        // -----------------------------------------------------------------------------
+        // Upload data
+        // -----------------------------------------------------------------------------
         UpdateGeometryBuffer(Base::Float3::s_Zero, 0.2f, 2.0f);
+
+        SReflectionProbePropertiesBuffer ReflectionProbePropertiesBuffer;
+
+        ReflectionProbePropertiesBuffer.m_Properties    = Base::Float4::s_Zero;
+        ReflectionProbePropertiesBuffer.m_Properties[0] = static_cast<float>(HistogramRenderer::GetCurrentExposureHistoryIndex());
+        ReflectionProbePropertiesBuffer.m_Properties[1] = 1.0f;
 
         // -----------------------------------------------------------------------------
         // Actors
@@ -837,6 +874,8 @@ namespace
             CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
         }
 
+        ContextManager::ResetResourceBuffer(0);
+
         ContextManager::ResetConstantBuffer(0);
         ContextManager::ResetConstantBuffer(1);
         ContextManager::ResetConstantBuffer(2);
@@ -861,8 +900,6 @@ namespace
         ContextManager::ResetViewPortSet();
 
         ContextManager::ResetTargetSet();
-
-        TextureManager::UpdateMipmap(_rInterLightProbeFacet.m_ReflectionCubemapPtr);
 
         Performance::EndEvent();
     }
@@ -1104,8 +1141,6 @@ namespace
         ContextManager::ResetViewPortSet();
 
         ContextManager::ResetTargetSet();
-
-        TextureManager::UpdateMipmap(_rInterLightProbeFacet.m_ReflectionCubemapPtr);
 
         Performance::EndEvent();
     }

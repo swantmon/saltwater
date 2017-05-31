@@ -701,8 +701,7 @@ namespace
         SIBLSettings IBLSettings;
 
         IBLSettings.m_IBLSettings    = Base::Float4::s_Zero;
-        IBLSettings.m_IBLSettings[0] = static_cast<float>(HistogramRenderer::GetLastExposureHistoryIndex());
-        IBLSettings.m_IBLSettings[1] = m_SSRRenderJobs.size() > 0 ? 1.0f : 0.0f;
+        IBLSettings.m_IBLSettings[0] = m_SSRRenderJobs.size() > 0 ? 1.0f : 0.0f;
 
         BufferManager::UploadConstantBufferData(m_ImageLightBufferPtr, &IBLSettings);
 
@@ -753,8 +752,7 @@ namespace
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_ImageLightBufferPtr);
 
-        ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
-        ContextManager::SetResourceBuffer(1, m_ProbePropertiesBufferPtr);
+        ContextManager::SetResourceBuffer(0, m_ProbePropertiesBufferPtr);
         
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
