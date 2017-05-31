@@ -63,6 +63,7 @@ namespace Gfx
         CShaderPtr GetShaderDS() const;
         CShaderPtr GetShaderGS() const;
         CShaderPtr GetShaderPS() const;
+        CShaderPtr GetForwardShaderPS() const;
 
     public:
 
@@ -96,7 +97,9 @@ namespace Gfx
         
     protected:
         
-        CShaderPtr  m_ShaderPtrs[CShader::NumberOfTypes];
+        CShaderPtr m_ShaderPtrs[CShader::NumberOfTypes];
+
+        CShaderPtr m_ForwardShaderPSPtr;
 
         CSamplerSetPtr m_SamplerSetPtrs[CShader::NumberOfTypes];
 

@@ -331,39 +331,68 @@ namespace
         
         // -----------------------------------------------------------------------------
         // By creating a cube map in OpenGL, several facts should be considered:
-        //  1. OpenGL cubemaps has an left handed coord system
+        //  1. OpenGL cubemaps has an left handed coord system inside the cube and
+        //    right handed coord system outside the cube
         //  2. Texcoords starts in the upper left corner (normally in the lower left 
         //     corner)
+        //
+        // RHS:
+        //          +--------+
+        //          |        |
+        //          |   Y+   |
+        //          |        |
+        // +--------+--------+--------+--------+
+        // |        |        |        |        |
+        // |   X-   |   Z+   |   X+   |   Z-   |
+        // |        |        |        |        |
+        // +--------+--------+--------+--------+
+        //          |        |
+        //          |   Y-   |
+        //          |        |
+        //          +--------+
+        //
+        // LHS:
+        //          +--------+
+        //          |        |
+        //          |   Y+   |
+        //          |        |
+        // +--------+--------+--------+--------+
+        // |        |        |        |        |
+        // |   X-   |   Z-   |   X+   |   Z+   |
+        // |        |        |        |        |
+        // +--------+--------+--------+--------+
+        //          |        |
+        //          |   Y-   |
+        //          |        |
+        //          +--------+
         // -----------------------------------------------------------------------------
 
         // -----------------------------------------------------------------------------
         // Creating VS matrix for spherical image to cube map:
-        // -> y-Axis is mirrored (normally "z" but we will rotate cube later) 
-        // -> Orientation of every side is flipped
-        // -> At the end we rotate the matrix because the spherical image is y-up
+        // -> Viewer is inside the cube > LHS
         // -----------------------------------------------------------------------------
         LookDirection = EyePosition + Base::Float3::s_AxisX;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[0].LookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
         LookDirection = EyePosition - Base::Float3::s_AxisX;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[1].LookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition - Base::Float3::s_AxisY;
+        LookDirection = EyePosition + Base::Float3::s_AxisY;
         UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisZ;
         
         DefaultGSValues.m_CubeViewMatrix[2].LookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition + Base::Float3::s_AxisY;
+        LookDirection = EyePosition - Base::Float3::s_AxisY;
         UpDirection   = Base::Float3::s_AxisZ;
         
         DefaultGSValues.m_CubeViewMatrix[3].LookAt(EyePosition, LookDirection, UpDirection);
@@ -371,14 +400,14 @@ namespace
         // -----------------------------------------------------------------------------
         
         LookDirection = EyePosition + Base::Float3::s_AxisZ;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[4].LookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
         LookDirection = EyePosition - Base::Float3::s_AxisZ;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[5].LookAt(EyePosition, LookDirection, UpDirection);
         
@@ -409,43 +438,43 @@ namespace
         // -> Mirroring isn't necessary because it is done inside the cubemap
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition - Base::Float3::s_AxisX;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        LookDirection = EyePosition + Base::Float3::s_AxisX;
+        UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[0].LookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition + Base::Float3::s_AxisX;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        LookDirection = EyePosition - Base::Float3::s_AxisX;
+        UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[1].LookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition - Base::Float3::s_AxisY;
-        UpDirection   = Base::Float3::s_AxisZ;
-        
-        DefaultGSValues.m_CubeViewMatrix[2].LookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
         LookDirection = EyePosition + Base::Float3::s_AxisY;
         UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisZ;
         
+        DefaultGSValues.m_CubeViewMatrix[2].LookAt(EyePosition, LookDirection, UpDirection);
+        
+        // -----------------------------------------------------------------------------
+        
+        LookDirection = EyePosition - Base::Float3::s_AxisY;
+        UpDirection   = Base::Float3::s_AxisZ;
+        
         DefaultGSValues.m_CubeViewMatrix[3].LookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition - Base::Float3::s_AxisZ;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        LookDirection = EyePosition + Base::Float3::s_AxisZ;
+        UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[4].LookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition + Base::Float3::s_AxisZ;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        LookDirection = EyePosition - Base::Float3::s_AxisZ;
+        UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[5].LookAt(EyePosition, LookDirection, UpDirection);
         
@@ -576,7 +605,7 @@ namespace
 
         Dt::CModel& rSphereModel = Dt::ModelManager::CreateModel(ModelFileDesc);
 
-        ModelDescr.m_pModel = &rSphereModel.GetMesh(0);
+        ModelDescr.m_pMesh = &rSphereModel.GetMesh(0);
 
         CMeshPtr CubemapTextureSpherePtr = MeshManager::CreateMesh(ModelDescr);
 
@@ -587,7 +616,7 @@ namespace
 
         Dt::CModel& rCurvedPlaneModel = Dt::ModelManager::CreateModel(ModelFileDesc);
 
-        ModelDescr.m_pModel = &rCurvedPlaneModel.GetMesh(0);
+        ModelDescr.m_pMesh = &rCurvedPlaneModel.GetMesh(0);
 
         CMeshPtr CurvedPlanePtr = MeshManager::CreateMesh(ModelDescr);
 

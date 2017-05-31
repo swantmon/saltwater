@@ -6,11 +6,16 @@
 namespace Dt
 {
     CLightProbeFacet::CLightProbeFacet()
-        : m_RefreshMode(Static)
-        , m_Type       (Sky)
-        , m_Quality    (PX128)
-        , m_pCubemap   ()
-        , m_Intensity  (0)
+        : m_RefreshMode       (Static)
+        , m_Type              (Sky)
+        , m_Quality           (PX128)
+        , m_ClearFlag         (Skybox)
+        , m_pCubemap          ()
+        , m_Intensity         (0)
+        , m_Near              (0.1f)
+        , m_Far               (10.0f)
+        , m_ParallaxCorrection(false)
+        , m_BoxSize           (10.0f)
     {
 
     }
@@ -75,6 +80,20 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
+    void CLightProbeFacet::SetClearFlag(EClearFlag _ClearFlag)
+    {
+        m_ClearFlag = _ClearFlag;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CLightProbeFacet::EClearFlag CLightProbeFacet::GetClearFlag() const
+    {
+        return m_ClearFlag;
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CLightProbeFacet::SetCubemap(Dt::CTextureCube* _pCubemap)
     {
         m_pCubemap = _pCubemap;
@@ -96,8 +115,62 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    float CLightProbeFacet::GetIntensity()
+    float CLightProbeFacet::GetIntensity() const
     {
         return m_Intensity;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CLightProbeFacet::SetNear(float _Near)
+    {
+        m_Near = _Near;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CLightProbeFacet::GetNear() const
+    {
+        return m_Near;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CLightProbeFacet::SetFar(float _Far)
+    {
+        m_Far = _Far;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CLightProbeFacet::GetFar() const
+    {
+        return m_Far;
+    }
+
+    void CLightProbeFacet::SetParallaxCorrection(bool _Flag)
+    {
+        m_ParallaxCorrection = _Flag;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CLightProbeFacet::GetParallaxCorrection() const
+    {
+        return m_ParallaxCorrection;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CLightProbeFacet::SetBoxSize(const Base::Float3& _rSize)
+    {
+        m_BoxSize = _rSize;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const Base::Float3& CLightProbeFacet::GetBoxSize() const
+    {
+        return m_BoxSize;
     }
 } // namespace Dt

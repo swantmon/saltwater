@@ -31,5 +31,7 @@ namespace ReflectionRenderer
     
     void Update();
     void Render();
+
+    CTextureBasePtr GetBRDF();
 } // namespace ReflectionRenderer
 } // namespace Gfx

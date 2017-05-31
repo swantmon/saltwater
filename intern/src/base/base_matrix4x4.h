@@ -160,7 +160,7 @@ namespace MATH
 
         inline CThis& SetScale(X _Scale);
         inline CThis& SetScale(X _X, X _Y, X _Z);
-        inline CThis& SetScale(CVector3<T>& _rVector);
+        inline CThis& SetScale(const CVector3<T>& _rVector);
         inline CThis& SetScale(const CLine& _rVector);
 
         inline void GetScale(X& _rX, X& _rY, X& _rZ) const;
@@ -1015,7 +1015,7 @@ namespace MATH
     // -----------------------------------------------------------------------------
 
     template<typename T>
-    inline typename CMatrix4x4<T>::CThis& CMatrix4x4<T>::SetScale(CVector3<T>& _rVector)
+    inline typename CMatrix4x4<T>::CThis& CMatrix4x4<T>::SetScale(const CVector3<T>& _rVector)
     {
         return SetScale(_rVector[0], _rVector[1], _rVector[2]);
     }
@@ -1202,15 +1202,13 @@ namespace MATH
     template <typename T>
     inline typename CMatrix4x4<T>::CThis& CMatrix4x4<T>::LookAt(const Float3& _rEye, const Float3& _rTarget, const Float3& _rUp)
     {
-        Base::Float3 LookDirection = (_rTarget - _rEye).Normalize();
-        Base::Float3 Up            = _rUp.Normalize();
-        Base::Float3 Right         = LookDirection.CrossProduct(Up).Normalize();
-
-        Up = LookDirection.CrossProduct(Right);
+        Base::Float3 LookDirection = (_rEye - _rTarget).Normalize();
+        Base::Float3 Right         = LookDirection.CrossProduct(_rUp).Normalize();
+        Base::Float3 Up            = LookDirection.CrossProduct(Right);
         
         m_V[A11] =          Right[0]; m_V[A12] =          Right[1]; m_V[A13] =           Right[2]; m_V[A14] =         -(Right.DotProduct(_rEye));
         m_V[A21] =             Up[0]; m_V[A22] =             Up[1]; m_V[A23] =              Up[2]; m_V[A24] =            -(Up.DotProduct(_rEye));
-        m_V[A31] = -LookDirection[0]; m_V[A32] = -LookDirection[1]; m_V[A33] = - LookDirection[2]; m_V[A34] = -(LookDirection.DotProduct(_rEye));
+        m_V[A31] =  LookDirection[0]; m_V[A32] =  LookDirection[1]; m_V[A33] =   LookDirection[2]; m_V[A34] = -(LookDirection.DotProduct(_rEye));
         m_V[A41] =              X(0); m_V[A42] =              X(0); m_V[A43] =               X(0); m_V[A44] =                               X(1);
         
         return *this;

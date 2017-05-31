@@ -6,10 +6,10 @@
 namespace Gfx
 {
     CLightProbeFacet::CLightProbeFacet()
-        : m_DiffusePtr    ()
-        , m_SpecularPtr   ()
-        , m_FilteredSetPtr()
-        , m_TimeStamp     (static_cast<Base::U64>(-1))
+        : m_DiffusePtr ()
+        , m_SpecularPtr()
+        , m_DepthPtr   ()
+        , m_TimeStamp  (static_cast<Base::U64>(-1))
     {
 
     }
@@ -18,9 +18,9 @@ namespace Gfx
 
     CLightProbeFacet::~CLightProbeFacet()
     {
-        m_DiffusePtr     = 0;
-        m_SpecularPtr    = 0;
-        m_FilteredSetPtr = 0;
+        m_DiffusePtr  = 0;
+        m_SpecularPtr = 0;
+        m_DepthPtr    = 0;
     }
 
     // -----------------------------------------------------------------------------
@@ -39,10 +39,9 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-
-    CTextureSetPtr CLightProbeFacet::GetFilteredSetPtr() const
+    CTexture2DPtr CLightProbeFacet::GetDepthPtr() const
     {
-        return m_FilteredSetPtr;
+        return m_DepthPtr;
     }
 
     // -----------------------------------------------------------------------------

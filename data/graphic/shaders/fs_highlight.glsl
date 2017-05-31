@@ -1,6 +1,6 @@
 
-#ifndef __INCLUDE_FS_SELECTION_GLSL_
-#define __INCLUDE_FS_SELECTION_GLSL_
+#ifndef __INCLUDE_FS_HIGHLIGHT_GLSL_
+#define __INCLUDE_FS_HIGHLIGHT_GLSL_
 
 // -----------------------------------------------------------------------------
 // Input from engine
@@ -21,4 +21,4 @@ void main(void)
     out_Output = ps_Color;
 }
 
-#endif // __INCLUDE_FS_SELECTION_GLSL_
+#endif // __INCLUDE_FS_HIGHLIGHT_GLSL_

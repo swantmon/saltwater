@@ -476,7 +476,7 @@ namespace
 
         Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
 
-        ModelDesc.m_pModel = &rModel.GetMesh(0);
+        ModelDesc.m_pMesh = &rModel.GetMesh(0);
 
         m_GizmoModelPtr = MeshManager::CreateMesh(ModelDesc);
 

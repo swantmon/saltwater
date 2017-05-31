@@ -43,6 +43,8 @@ vec4 GetTextureSpherical(in vec3 _Normal, in float _LOD)
     
     TexCoord.x = (_Normal.z > 0.0) ? TexCoord.x * 0.5f : 1.0f - (TexCoord.x * 0.5f);
 
+    TexCoord.y = 1.0f - TexCoord.y;
+
     return textureLod(PSEnvironmentTexture, TexCoord, _LOD);
 }
 
@@ -51,7 +53,7 @@ vec4 GetTextureSpherical(in vec3 _Normal, in float _LOD)
 // -----------------------------------------------------------------------------
 void main(void)
 {
-    vec4 FinalColor = GetTextureSpherical(in_Normal, 0);
+    vec4 FinalColor = GetTextureSpherical(-in_Normal, 0);
     
     if (m_IsHDR == 0.0f)
     {

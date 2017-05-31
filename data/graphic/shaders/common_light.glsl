@@ -13,7 +13,7 @@
 // 0: Lambert
 // 1: Disney Original
 // 2: Disney renormalized
-#define BRDF_DIFFUSE 2
+#define BRDF_DIFFUSE 0
 
 // Microfacet distribution function:
 // 0: GGX
@@ -659,7 +659,6 @@ vec3 GetDiffuseBRDF(in vec3 _Albedo, in float _NdotV, in float _NdotL, in float 
 // -----------------------------------------------------------------------------
 // Shading
 // -----------------------------------------------------------------------------
-
 vec3 BRDF(in vec3 _L, in vec3 _V, in vec3 _N, in SSurfaceData _Data)
 {
     // -----------------------------------------------------------------------------
@@ -685,6 +684,40 @@ vec3 BRDF(in vec3 _L, in vec3 _V, in vec3 _N, in SSurfaceData _Data)
     vec3 SpecularBSDF = GetSpecularBSDF(_Data.m_SpecularAlbedo, NdotV, NdotL, NdotH, LdotH, Roughness);
 
     return DiffuseBSDF + SpecularBSDF;
+}
+
+// -----------------------------------------------------------------------------
+// Shading with IBL
+// -----------------------------------------------------------------------------
+vec3 EvaluateDiffuseIBL(in samplerCube _Cubemap, in SSurfaceData _Data, in vec3 _WSViewDirection, in float _PreF, in float _NdotV)
+{
+    vec3 DiffuseDominantN = GetDiffuseDominantDir(_Data.m_WSNormal, _WSViewDirection, _NdotV, _Data.m_Roughness);
+    vec3 DiffuseIBL       = textureLod(_Cubemap, DiffuseDominantN, 0).rgb;
+    
+    DiffuseIBL = mix(DiffuseIBL * 0.3f, DiffuseIBL, _Data.m_AmbientOcclusion);
+
+    return _Data.m_DiffuseAlbedo * DiffuseIBL * _PreF / PI;
+}
+
+// -----------------------------------------------------------------------------
+
+vec3 EvaluateSpecularIBL(in samplerCube _Cubemap, in SSurfaceData _Data, in vec3 _WSReflectVector, in vec2 _PreDFG, in float _NdotV, in float _NumberOfMiplevels)
+{
+    vec3 SpecularDominantR = GetSpecularDominantDir(_Data.m_WSNormal, _WSReflectVector, _Data.m_Roughness);
+    
+    // -----------------------------------------------------------------------------
+    // Sample specular cubemap
+    // -----------------------------------------------------------------------------
+    float LOD         = GetMipLevelByRoughness(_Data.m_Roughness, _NumberOfMiplevels);
+    vec3  SpecularIBL = textureLod(_Cubemap, SpecularDominantR, LOD).rgb;
+    
+    // -----------------------------------------------------------------------------
+    // Output
+    // -----------------------------------------------------------------------------
+    float F90 = clamp(50.0f * dot(_Data.m_SpecularAlbedo, vec3(0.33f)), 0.0f, 1.0f);
+    float AO  = GetSpecularOcclusion(_NdotV, _Data.m_AmbientOcclusion, _Data.m_Roughness);
+    
+    return SpecularIBL * (_Data.m_SpecularAlbedo * _PreDFG.x + F90 * _PreDFG.y) * AO;
 }
 
 #endif // __INCLUDE_COMMON_LIGHT_GLSL__

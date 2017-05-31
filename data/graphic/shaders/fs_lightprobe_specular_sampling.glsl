@@ -13,7 +13,7 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(row_major, std140, binding = 1) uniform UB0
+layout(row_major, std140, binding = 3) uniform UB0
 {
     vec4 ps_ConstantBufferData0;
 };
@@ -25,11 +25,12 @@ uniform samplerCube ps_EnvironmentCubemap;
 // -----------------------------------------------------------------------------
 #define ps_LinearRoughness   ps_ConstantBufferData0.x
 #define ps_NumberOfMiplevels ps_ConstantBufferData0.y
+#define ps_Intensity         ps_ConstantBufferData0.z
 
 // -----------------------------------------------------------------------------
 // Input to fragment from VS
 // -----------------------------------------------------------------------------
-layout(location = 0) in vec3 in_Normal;
+layout(location = 1) in vec3 in_Normal;
 
 // -----------------------------------------------------------------------------
 // Output to fragment
@@ -88,7 +89,7 @@ vec3 GetImportanceSampleSpecular(in vec3 _Reflection, in float _Roughness)
             const float LODBias = 1.0f;
             
             float LOD   = _Roughness == 0.0f ? 0.0f : clamp(0.5f * log2(OmegaS / OmegaP) + LODBias, 0.0f, ps_NumberOfMiplevels);
-            vec4  Pixel = textureLod(ps_EnvironmentCubemap, L, LOD);
+            vec4  Pixel = textureLod(ps_EnvironmentCubemap, L, LOD) * ps_Intensity;
 
             Result += Pixel.rgb * NdotL;
             Weight += NdotL;

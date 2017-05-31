@@ -15,7 +15,7 @@ namespace Edit
         , m_pSunWidget         (0)
         , m_pTransformWidget   (0)
         , m_pEnvironmentWidget (0)
-        , m_pGlobalProbeWidget (0)
+        , m_pLightProbeWidget  (0)
         , m_pBloomWidget       (0)
         , m_pDOFWidget         (0)
         , m_pFXAAWidget        (0)
@@ -43,7 +43,7 @@ namespace Edit
         m_pSunWidget          = new CInspectorSun();
         m_pTransformWidget    = new CInspectorTransformation();
         m_pEnvironmentWidget  = new CInspectorEnvironment();
-        m_pGlobalProbeWidget  = new CInspectorGlobalProbe();
+        m_pLightProbeWidget   = new CInspectorLightProbe();
         m_pBloomWidget        = new CInspectorBloom();
         m_pDOFWidget          = new CInspectorDOF();
         m_pFXAAWidget         = new CInspectorPostAA();
@@ -60,7 +60,7 @@ namespace Edit
         m_pInspectorContent->addWidget(m_pArealightWidget);
         m_pInspectorContent->addWidget(m_pSunWidget);
         m_pInspectorContent->addWidget(m_pEnvironmentWidget);
-        m_pInspectorContent->addWidget(m_pGlobalProbeWidget);
+        m_pInspectorContent->addWidget(m_pLightProbeWidget);
         m_pInspectorContent->addWidget(m_pBloomWidget);
         m_pInspectorContent->addWidget(m_pDOFWidget);
         m_pInspectorContent->addWidget(m_pFXAAWidget);
@@ -89,7 +89,7 @@ namespace Edit
         delete m_pSunWidget;
         delete m_pTransformWidget;
         delete m_pEnvironmentWidget;
-        delete m_pGlobalProbeWidget;
+        delete m_pLightProbeWidget;
         delete m_pBloomWidget;
         delete m_pDOFWidget;
         delete m_pFXAAWidget;
@@ -104,7 +104,7 @@ namespace Edit
         m_pSunWidget         = 0;
         m_pTransformWidget   = 0;
         m_pEnvironmentWidget = 0;
-        m_pGlobalProbeWidget = 0;
+        m_pLightProbeWidget = 0;
         m_pBloomWidget       = 0;
         m_pDOFWidget         = 0;
         m_pFXAAWidget        = 0;
@@ -267,9 +267,9 @@ namespace Edit
                 }
                 else if (Type == 3) // Probe
                 {
-                    m_pGlobalProbeWidget->RequestInformation(EntityID);
+                    m_pLightProbeWidget->RequestInformation(EntityID);
 
-                    m_pGlobalProbeWidget->setVisible(true);
+                    m_pLightProbeWidget->setVisible(true);
                 }
                 else if (Type == 4) // Environment
                 {
@@ -339,7 +339,7 @@ namespace Edit
         m_pArealightWidget   ->setVisible(false);
         m_pSunWidget         ->setVisible(false);
         m_pEnvironmentWidget ->setVisible(false);
-        m_pGlobalProbeWidget ->setVisible(false);
+        m_pLightProbeWidget ->setVisible(false);
         m_pBloomWidget       ->setVisible(false);
         m_pDOFWidget         ->setVisible(false);
         m_pFXAAWidget        ->setVisible(false);

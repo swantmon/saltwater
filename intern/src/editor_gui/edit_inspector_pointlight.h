@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "editor_gui/ui_edit_inspector_pointlight.h"
+#include "editor_gui/ui_edit_inspector_point_light.h"
 
 #include "editor_port/edit_message.h"
 
@@ -8,7 +8,7 @@
 
 namespace Edit
 {
-    class CInspectorPointlight : public QWidget, public Ui::InspectorPointlight
+    class CInspectorPointlight : public QWidget, public Ui::InspectorPointLight
     {
 	    Q_OBJECT
 

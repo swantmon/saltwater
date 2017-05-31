@@ -137,7 +137,7 @@ namespace
     
     private:
     
-        static const unsigned int s_NumberOfTextureUnits  = 16;
+        static const unsigned int s_NumberOfTextureUnits  = 32;
         static const unsigned int s_NumberOfImageUnits    = 8;
         static const unsigned int s_NumberOfBufferUnits   = 16;
         static const unsigned int s_NumberOfResourceUnits = 16;
@@ -758,81 +758,77 @@ namespace
     void CGfxContextManager::SetInputLayout(CInputLayoutPtr _InputLayoutPtr)
     {
         assert(_InputLayoutPtr      != nullptr);
-        //assert(m_VertexBufferSetPtr != nullptr);
         
-        if (m_InputLayoutPtr != _InputLayoutPtr)
+        unsigned int LastIndexOfVB    = static_cast<unsigned int>(-1);
+        unsigned int NumberOfElements = _InputLayoutPtr->GetNumberOfElements();
+            
+        for (unsigned int IndexOfElement = 0; IndexOfElement < NumberOfElements; ++ IndexOfElement)
         {
-            unsigned int LastIndexOfVB    = static_cast<unsigned int>(-1);
-            unsigned int NumberOfElements = _InputLayoutPtr->GetNumberOfElements();
-            
-            for (unsigned int IndexOfElement = 0; IndexOfElement < NumberOfElements; ++ IndexOfElement)
+            const Gfx::CInputLayout::CElement& rElement = _InputLayoutPtr->GetElement(IndexOfElement);
+                
+            unsigned int IndexOfVB         = rElement.GetInputSlot();
+            int NativeFormat               = ConvertInputLayoutFormat(rElement.GetFormat());
+            int FormatSize                 = ConvertInputLayoutFormatSize(rElement.GetFormat());
+            unsigned int Stride            = rElement.GetStride();
+            unsigned int AlignedByteOffset = rElement.GetAlignedByteOffset();
+                
+            if (IndexOfVB != LastIndexOfVB)
             {
-                const Gfx::CInputLayout::CElement& rElement = _InputLayoutPtr->GetElement(IndexOfElement);
-                
-                unsigned int IndexOfVB         = rElement.GetInputSlot();
-                int NativeFormat               = ConvertInputLayoutFormat(rElement.GetFormat());
-                int FormatSize                 = ConvertInputLayoutFormatSize(rElement.GetFormat());
-                unsigned int Stride            = rElement.GetStride();
-                unsigned int AlignedByteOffset = rElement.GetAlignedByteOffset();
-                
-                if (IndexOfVB != LastIndexOfVB)
+                if (m_VertexBufferSetPtr == nullptr)
                 {
-                    if (m_VertexBufferSetPtr == nullptr)
-                    {
-                        glBindBuffer(GL_ARRAY_BUFFER, 0);
-                    }
-                    else
-                    {
-                        Gfx::CNativeBuffer& rNativeSingleBuffer = *static_cast<Gfx::CNativeBuffer*>(m_VertexBufferSetPtr->GetBuffer(IndexOfVB).GetPtr());
-
-                        glBindBuffer(GL_ARRAY_BUFFER, rNativeSingleBuffer.m_NativeBuffer);
-                    }
-                    
-                    LastIndexOfVB = IndexOfVB;
+                    glBindBuffer(GL_ARRAY_BUFFER, 0);
                 }
-                
-                glEnableVertexAttribArray(IndexOfElement);
-
-                glVertexAttribPointer(IndexOfElement, FormatSize, NativeFormat, GL_FALSE, Stride, (char *)NULL + AlignedByteOffset);
-                
-                if (rElement.GetInputClassification() == CInputLayout::PerInstance)
+                else
                 {
-                    glVertexAttribDivisor(IndexOfElement, rElement.GetInstanceDataStepRate());
-                } 
-                
-                // -----------------------------------------------------------------------------
-                // Interleaved:
-                // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 24,  0);
-                // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 24, 12);
-                // 
-                // Byte	Content
-                // 0	Position
-                // 12	Normal
-                // 24	Position
-                // 36	Normal
-                // 48	Position
-                // 60	Normal
-                // 
-                // 
-                // Non-Interleaved:
-                // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12,  0);  // alternativ auch stride=0
-                // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 12, 36);  // alternativ auch stride=0
-                // 
-                // Byte	Content
-                // 0	Position
-                // 12	Position
-                // 24	Position
-                // 36	Normal
-                // 48	Normal
-                // 60	Normal
-                //
-                // From: http://wiki.delphigl.com/index.php/glVertexAttribPointer
-                //
-                // -----------------------------------------------------------------------------
+                    Gfx::CNativeBuffer& rNativeSingleBuffer = *static_cast<Gfx::CNativeBuffer*>(m_VertexBufferSetPtr->GetBuffer(IndexOfVB).GetPtr());
+
+                    glBindBuffer(GL_ARRAY_BUFFER, rNativeSingleBuffer.m_NativeBuffer);
+                }
+                    
+                LastIndexOfVB = IndexOfVB;
             }
+                
+            glEnableVertexAttribArray(IndexOfElement);
+
+            glVertexAttribPointer(IndexOfElement, FormatSize, NativeFormat, GL_FALSE, Stride, (char *)NULL + AlignedByteOffset);
+                
+            if (rElement.GetInputClassification() == CInputLayout::PerInstance)
+            {
+                glVertexAttribDivisor(IndexOfElement, rElement.GetInstanceDataStepRate());
+            } 
+                
+            // -----------------------------------------------------------------------------
+            // Interleaved:
+            // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 24,  0);
+            // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 24, 12);
+            // 
+            // Byte	Content
+            // 0	Position
+            // 12	Normal
+            // 24	Position
+            // 36	Normal
+            // 48	Position
+            // 60	Normal
+            // 
+            // 
+            // Non-Interleaved:
+            // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12,  0);  // alternativ auch stride=0
+            // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 12, 36);  // alternativ auch stride=0
+            // 
+            // Byte	Content
+            // 0	Position
+            // 12	Position
+            // 24	Position
+            // 36	Normal
+            // 48	Normal
+            // 60	Normal
+            //
+            // From: http://wiki.delphigl.com/index.php/glVertexAttribPointer
+            //
+            // -----------------------------------------------------------------------------
+        }
             
-            m_InputLayoutPtr = _InputLayoutPtr;
-        }        
+        m_InputLayoutPtr = _InputLayoutPtr;
     }
 
     // -----------------------------------------------------------------------------

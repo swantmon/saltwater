@@ -18,7 +18,7 @@ namespace Gfx
 {
     struct SMeshDescriptor
     {
-        Dt::CMesh* m_pModel;
+        Dt::CMesh* m_pMesh;
     };
 } // namespace Gfx
 
