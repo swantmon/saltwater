@@ -476,15 +476,15 @@ namespace
             // -----------------------------------------------------------------------------
             if (rCurrentEntity.GetType() == Dt::SLightType::LightProbe)
             {
-                Dt::CLightProbeFacet*   pDataGlobalProbeFacet    = static_cast<Dt::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-                CInternLightProbeFacet* pGraphicGlobalProbeFacet = static_cast<CInternLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+                Dt::CLightProbeFacet*   pDtProbeFacet    = static_cast<Dt::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+                CInternLightProbeFacet* pGfxProbeFacet = static_cast<CInternLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
 
                 // -----------------------------------------------------------------------------
                 // Check update needs
                 // -----------------------------------------------------------------------------
-                if (pDataGlobalProbeFacet->GetRefreshMode() == Dt::CLightProbeFacet::Dynamic)
+                if (pDtProbeFacet->GetRefreshMode() == Dt::CLightProbeFacet::Dynamic || pGfxProbeFacet->m_TimeStamp >= Core::Time::GetNumberOfFrame() - 1)
                 {
-                    Render(rCurrentEntity, *pGraphicGlobalProbeFacet, *pDataGlobalProbeFacet);
+                    Render(rCurrentEntity, *pGfxProbeFacet, *pDtProbeFacet);
                 }
             }
 
@@ -528,8 +528,6 @@ namespace
             // -----------------------------------------------------------------------------
             CInternLightProbeFacet& rGfxLightProbeFacet = AllocateLightProbeFacet(pDtLightProbeFacet->GetQualityInPixel(), 128);
 
-            Render(*_pEntity, rGfxLightProbeFacet, *pDtLightProbeFacet);
-
             // -----------------------------------------------------------------------------
             // Set time
             // -----------------------------------------------------------------------------
@@ -544,10 +542,7 @@ namespace
         {
             CInternLightProbeFacet*  pGfxLightProbeFacet;
 
-            pDtLightProbeFacet  = static_cast<Dt::CLightProbeFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Data));
             pGfxLightProbeFacet = static_cast<CInternLightProbeFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
-
-            Render(*_pEntity, *pGfxLightProbeFacet, *pDtLightProbeFacet);
 
             // -----------------------------------------------------------------------------
             // Set time
