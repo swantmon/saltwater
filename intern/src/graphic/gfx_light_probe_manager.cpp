@@ -72,9 +72,9 @@ namespace
 
         struct SLightJob
         {
-            CTextureBasePtr m_Texture0Ptr;
-            CTextureBasePtr m_Texture1Ptr;
-            CTextureBasePtr m_Texture2Ptr;
+            CTextureBasePtr m_ShadowTexturePtrs[s_MaxNumberOfLightsPerProbe];
+            CTextureBasePtr m_SpecularTexturePtr;
+            CTextureBasePtr m_DiffuseTexturePtr;
         };
 
         struct SGeometryVPBuffer
@@ -158,7 +158,6 @@ namespace
     private:
 
         typedef Base::CPool<CInternLightProbeFacet, 1> CLightProbeFacets;
-        typedef std::vector<SLightJob> CLightJobs;
 
     private:
 
@@ -185,7 +184,7 @@ namespace
         CInputLayoutPtr m_P3N3InputLayoutPtr;
 
         CLightProbeFacets m_LightprobeFacets;
-        CLightJobs m_LightJobs;
+        SLightJob m_LightJob;
 
     private:
 
@@ -248,7 +247,6 @@ namespace
         , m_FilteringPSBufferPtr  ()
         , m_P3N3T2InputLayoutPtr  ()
         , m_LightprobeFacets      ()
-        , m_LightJobs             ()
     {
 
     }
@@ -452,9 +450,15 @@ namespace
         m_P3N3T2InputLayoutPtr = 0;
         m_P3N3InputLayoutPtr = 0;
 
-        m_LightprobeFacets.Clear();
+        for (unsigned int IndexOfTexture = 0; IndexOfTexture < s_MaxNumberOfLightsPerProbe; ++IndexOfTexture)
+        {
+            m_LightJob.m_ShadowTexturePtrs[IndexOfTexture] = 0;
+        }
 
-        m_LightJobs.clear();
+        m_LightJob.m_SpecularTexturePtr = 0;
+        m_LightJob.m_DiffuseTexturePtr  = 0;
+
+        m_LightprobeFacets.Clear();
     }
 
     // -----------------------------------------------------------------------------
@@ -476,7 +480,7 @@ namespace
             // -----------------------------------------------------------------------------
             if (rCurrentEntity.GetType() == Dt::SLightType::LightProbe)
             {
-                Dt::CLightProbeFacet*   pDtProbeFacet    = static_cast<Dt::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+                Dt::CLightProbeFacet*   pDtProbeFacet  = static_cast<Dt::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
                 CInternLightProbeFacet* pGfxProbeFacet = static_cast<CInternLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
 
                 // -----------------------------------------------------------------------------
@@ -950,8 +954,6 @@ namespace
 
         BufferManager::UploadConstantBufferData(m_GeometryVPBufferPtr, &ViewBuffer);
 
-        // ----------------------------------------------------------------------------- 
-
         // -----------------------------------------------------------------------------
         // Bind shadow and reflection textures
         // -----------------------------------------------------------------------------
@@ -959,39 +961,28 @@ namespace
 
         ContextManager::SetTexture(6, ReflectionRenderer::GetBRDF());
 
-        CLightJobs::const_iterator CurrentLightJob = m_LightJobs.begin();
-        CLightJobs::const_iterator EndOfLightJobs  = m_LightJobs.end();
-
-        unsigned int IndexOfShadowTexture   = 7;
-        unsigned int IndexOfSpecularCubemap = IndexOfShadowTexture   + s_MaxNumberOfLightsPerProbe;
-        unsigned int IndexOfDiffuseCubemap  = IndexOfSpecularCubemap + s_MaxNumberOfLightsPerProbe;
-
-        for (; CurrentLightJob != EndOfLightJobs; ++ CurrentLightJob)
+        if (m_LightJob.m_SpecularTexturePtr != 0)
         {
-            const SLightJob& rJob = *CurrentLightJob;
+            ContextManager::SetSampler(7, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-            if (rJob.m_Texture0Ptr != 0)
+            ContextManager::SetTexture(7, m_LightJob.m_SpecularTexturePtr);
+        }
+
+        if (m_LightJob.m_DiffuseTexturePtr != 0)
+        {
+            ContextManager::SetSampler(8, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+            ContextManager::SetTexture(8, m_LightJob.m_DiffuseTexturePtr);
+        }
+
+        for (unsigned int IndexOfTexture = 0; IndexOfTexture < s_MaxNumberOfLightsPerProbe; ++IndexOfTexture)
+        {
+            if (m_LightJob.m_ShadowTexturePtrs[IndexOfTexture] != 0)
             {
-                ContextManager::SetSampler(IndexOfShadowTexture, SamplerManager::GetSampler(CSampler::MinMagLinearMipPointClamp));
+                ContextManager::SetSampler(9 + IndexOfTexture, SamplerManager::GetSampler(CSampler::MinMagLinearMipPointClamp));
 
-                ContextManager::SetTexture(IndexOfShadowTexture, rJob.m_Texture0Ptr);
+                ContextManager::SetTexture(9 + IndexOfTexture, m_LightJob.m_ShadowTexturePtrs[IndexOfTexture]);
             }
-            if (rJob.m_Texture1Ptr != 0)
-            {
-                ContextManager::SetSampler(IndexOfSpecularCubemap, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
-
-                ContextManager::SetTexture(IndexOfSpecularCubemap, rJob.m_Texture1Ptr);
-            }
-            if (rJob.m_Texture2Ptr != 0)
-            {
-                ContextManager::SetSampler(IndexOfDiffuseCubemap, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
-
-                ContextManager::SetTexture(IndexOfDiffuseCubemap, rJob.m_Texture2Ptr);
-            }
-
-            ++IndexOfShadowTexture;
-            ++IndexOfSpecularCubemap;
-            ++IndexOfDiffuseCubemap;
         }
 
         // -----------------------------------------------------------------------------
@@ -1094,19 +1085,6 @@ namespace
                 ContextManager::SetInputLayout(SurfacePtr->GetMVPShaderVS()->GetInputLayout());
 
                 ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
-
-                ContextManager::ResetInputLayout();
-
-                ContextManager::ResetIndexBuffer();
-
-                ContextManager::ResetVertexBufferSet();
-
-                for (unsigned int IndexOfTexture = 0; IndexOfTexture < MaterialPtr->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
-                {
-                    ContextManager::ResetSampler(IndexOfTexture);
-
-                    ContextManager::ResetTexture(IndexOfTexture);
-                }
             }
 
             // -----------------------------------------------------------------------------
@@ -1114,6 +1092,19 @@ namespace
             // -----------------------------------------------------------------------------
             CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor);
         }
+
+        for (unsigned int IndexOfTexture = 0; IndexOfTexture < 16; ++IndexOfTexture)
+        {
+            ContextManager::ResetSampler(IndexOfTexture);
+
+            ContextManager::ResetTexture(IndexOfTexture);
+        }
+
+        ContextManager::ResetInputLayout();
+
+        ContextManager::ResetIndexBuffer();
+
+        ContextManager::ResetVertexBufferSet();
 
         ContextManager::ResetConstantBuffer(0);
         ContextManager::ResetConstantBuffer(1);
@@ -1372,7 +1363,13 @@ namespace
         // -----------------------------------------------------------------------------
         // Clear jobs
         // -----------------------------------------------------------------------------
-        m_LightJobs.clear();
+        m_LightJob.m_SpecularTexturePtr = 0;
+        m_LightJob.m_DiffuseTexturePtr  = 0;
+
+        for (unsigned int IndexOfTexture = 0; IndexOfTexture < s_MaxNumberOfLightsPerProbe; ++IndexOfTexture)
+        {
+            m_LightJob.m_ShadowTexturePtrs[IndexOfTexture];
+        }
 
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
@@ -1423,17 +1420,13 @@ namespace
                     LightBuffer[IndexOfLight].m_LightColor          = Base::Float4(pDtSunFacet->GetLightness(), 1.0f);
                     LightBuffer[IndexOfLight].m_LightSettings       = Base::Float4(SunAngularRadius, 0.0f, 0.0f, HasShadows);
 
-                    ++IndexOfLight;
+                    // -----------------------------------------------------------------------------
+
+                    m_LightJob.m_ShadowTexturePtrs[IndexOfLight] = pGfxSunFacet->GetTextureSMSet()->GetTexture(0);
 
                     // -----------------------------------------------------------------------------
 
-                    SLightJob NewLightJob;
-
-                    NewLightJob.m_Texture0Ptr = pGfxSunFacet->GetTextureSMSet()->GetTexture(0);
-                    NewLightJob.m_Texture1Ptr = 0;
-                    NewLightJob.m_Texture2Ptr = 0;
-
-                    m_LightJobs.push_back(NewLightJob);
+                    ++IndexOfLight;
                 }
             }
             else if (rCurrentEntity.GetType() == Dt::SLightType::Point)
@@ -1463,27 +1456,19 @@ namespace
                         LightBuffer[IndexOfLight].m_LightViewProjection = pGfxPointFacet->GetCamera()->GetViewProjectionMatrix();
                     }
 
-                    ++IndexOfLight;
-
                     // -----------------------------------------------------------------------------
-
-                    SLightJob NewLightJob;
 
                     if (pDtPointFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows)
                     {
-                        NewLightJob.m_Texture0Ptr = pGfxPointFacet->GetTextureSMSet()->GetTexture(0);
+                        m_LightJob.m_ShadowTexturePtrs[IndexOfLight] = pGfxPointFacet->GetTextureSMSet()->GetTexture(0);
                     }
-                    else
-                    {
-                        NewLightJob.m_Texture0Ptr = 0;
-                    }
-                    NewLightJob.m_Texture1Ptr = 0;
-                    NewLightJob.m_Texture2Ptr = 0;
 
-                    m_LightJobs.push_back(NewLightJob);
+                    // -----------------------------------------------------------------------------
+
+                    ++IndexOfLight;
                 }
             }
-            else if (rCurrentEntity.GetType() == Dt::SLightType::LightProbe)
+            else if (rCurrentEntity.GetType() == Dt::SLightType::LightProbe && (m_LightJob.m_SpecularTexturePtr == 0 && m_LightJob.m_DiffuseTexturePtr == 0))
             {
                 Dt::CLightProbeFacet*  pDtLightProbeFacet  = static_cast<Dt::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
                 Gfx::CLightProbeFacet* pGfxLightProbeFacet = static_cast<Gfx::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
@@ -1502,13 +1487,8 @@ namespace
 
                     // -----------------------------------------------------------------------------
 
-                    SLightJob NewLightJob;
-
-                    NewLightJob.m_Texture0Ptr = 0;
-                    NewLightJob.m_Texture1Ptr = pGfxLightProbeFacet->GetSpecularPtr();
-                    NewLightJob.m_Texture2Ptr = pGfxLightProbeFacet->GetDiffusePtr();
-
-                    m_LightJobs.push_back(NewLightJob);
+                    m_LightJob.m_SpecularTexturePtr = pGfxLightProbeFacet->GetSpecularPtr();
+                    m_LightJob.m_DiffuseTexturePtr  = pGfxLightProbeFacet->GetDiffusePtr();
                 }
             }
 

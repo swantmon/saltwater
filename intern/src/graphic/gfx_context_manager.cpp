@@ -127,7 +127,7 @@ namespace
 
         void ResetResourceBuffer(unsigned int _Unit);
         void SetResourceBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
-        CBufferPtr GetResourceBuffer(unsigned int _Unit);        
+        CBufferPtr GetResourceBuffer(unsigned int _Unit);
 
         void Draw(unsigned int _NumberOfVertices, unsigned int _IndexOfFirstVertex);
         void DrawIndexed(unsigned int _NumberOfIndices, unsigned int _IndexOfFirstIndex, int _BaseVertexLocation);
@@ -137,7 +137,7 @@ namespace
     
     private:
     
-        static const unsigned int s_NumberOfTextureUnits  = 32;
+        static const unsigned int s_NumberOfTextureUnits  = 16;
         static const unsigned int s_NumberOfImageUnits    = 8;
         static const unsigned int s_NumberOfBufferUnits   = 16;
         static const unsigned int s_NumberOfResourceUnits = 16;

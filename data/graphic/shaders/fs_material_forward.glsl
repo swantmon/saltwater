@@ -55,16 +55,16 @@ layout(std430, row_major, binding = 1) readonly buffer BB1
     SLightProperties ps_LightProperties[MAX_NUMBER_OF_LIGHTS];
 };
 
-layout(binding =  0) uniform sampler2D   ps_DiffuseTexture;
-layout(binding =  1) uniform sampler2D   ps_NormalTexture;
-layout(binding =  2) uniform sampler2D   ps_RougnessTexture;
-layout(binding =  3) uniform sampler2D   ps_Metaltexture;
-layout(binding =  4) uniform sampler2D   ps_AOTexture;
+layout(binding = 0) uniform sampler2D   ps_DiffuseTexture;
+layout(binding = 1) uniform sampler2D   ps_NormalTexture;
+layout(binding = 2) uniform sampler2D   ps_RougnessTexture;
+layout(binding = 3) uniform sampler2D   ps_Metaltexture;
+layout(binding = 4) uniform sampler2D   ps_AOTexture;
 // binding 5 is reserved for bump texture
-layout(binding =  6) uniform sampler2D   ps_BRDF;
-layout(binding =  7) uniform sampler2D   ps_ShadowTexture[MAX_NUMBER_OF_LIGHTS];
-layout(binding = 11) uniform samplerCube ps_SpecularCubemap[MAX_NUMBER_OF_LIGHTS];
-layout(binding = 15) uniform samplerCube ps_DiffuseCubemap[MAX_NUMBER_OF_LIGHTS];
+layout(binding = 6) uniform sampler2D   ps_BRDF;
+layout(binding = 7) uniform samplerCube ps_SpecularCubemap;
+layout(binding = 8) uniform samplerCube ps_DiffuseCubemap;
+layout(binding = 9) uniform sampler2D   ps_ShadowTexture[MAX_NUMBER_OF_LIGHTS];
 
 // -----------------------------------------------------------------------------
 // Input to fragment from VS
@@ -232,8 +232,8 @@ void main(void)
             // -----------------------------------------------------------------------------
             vec3 PreDFGF = textureLod(ps_BRDF, vec2(NdotV, Data.m_Roughness), 0).rgb;
             
-            vec3 DiffuseIBL  = EvaluateDiffuseIBL(ps_DiffuseCubemap[IndexOfLight], Data, WSViewDirection, PreDFGF.z, NdotV);
-            vec3 SpecularIBL = EvaluateSpecularIBL(ps_SpecularCubemap[IndexOfLight], Data, WSReflectVector, PreDFGF.xy, ClampNdotV, NumberOfMiplevels);
+            vec3 DiffuseIBL  = EvaluateDiffuseIBL(ps_DiffuseCubemap, Data, WSViewDirection, PreDFGF.z, NdotV);
+            vec3 SpecularIBL = EvaluateSpecularIBL(ps_SpecularCubemap, Data, WSReflectVector, PreDFGF.xy, ClampNdotV, NumberOfMiplevels);
             
             // -------------------------------------------------------------------------------------
             // Combination of lighting
