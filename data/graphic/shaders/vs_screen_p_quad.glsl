@@ -4,9 +4,9 @@
 
 #include "common_global.glsl"
 
-layout(location = 0) in vec2 VertexPosition;
+layout(location = 0) in vec2 in_VertexPosition;
 
-layout(location = 2) out vec2 PSTexCoord;
+layout(location = 2) out vec2 out_UV;
 
 out gl_PerVertex
 {
@@ -15,9 +15,9 @@ out gl_PerVertex
 
 void main()
 {
-	vec4 Position = vec4(VertexPosition.xy, 0.0f, 1.0f);
+	vec4 Position = vec4(in_VertexPosition.xy, 0.0f, 1.0f);
     
-    PSTexCoord = vec2(Position.x, 1.0f - Position.y);
+    out_UV = vec2(Position.x, 1.0f - Position.y);
 
 	gl_Position = g_WorldToQuad * Position;
 }

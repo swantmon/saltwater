@@ -67,7 +67,7 @@ layout(binding = 8) uniform samplerCube ps_DiffuseCubemap;
 layout(binding = 9) uniform sampler2D   ps_ShadowTexture[MAX_NUMBER_OF_LIGHTS];
 
 // -----------------------------------------------------------------------------
-// Input to fragment from VS
+// Input to fragment from previous stage
 // -----------------------------------------------------------------------------
 layout(location = 0) in vec3 in_Position;
 layout(location = 1) in vec3 in_Normal;
