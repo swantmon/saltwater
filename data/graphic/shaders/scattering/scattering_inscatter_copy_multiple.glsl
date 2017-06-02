@@ -5,82 +5,38 @@
 #include "scattering/scattering_common.glsl"
 #include "scattering/scattering_precompute_common.glsl"
 
-cbuffer SGSBuffer : register(b0)
+// -----------------------------------------------------------------------------
+// Input from engine
+// -----------------------------------------------------------------------------
+layout(row_major, std140, binding = 3) uniform PSLayerValues
 {
-    uint g_Layer;
-}
-
-cbuffer SPSBuffer : register(b1)
-{
-    float4 g_Dhdh;
+    vec4  g_Dhdh;
     float g_Radius;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////// Structures
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-struct GSInput
-{
-    float4 m_CSPosition : POSITION;
 };
 
-struct PSInput
-{
-    float4 m_CSPosition : SV_Position;
-    uint m_Layer : SV_RenderTargetArrayIndex;
-};
+// -----------------------------------------------------------------------------
+// Input to fragment from previous stage
+// -----------------------------------------------------------------------------
+layout(location = 2) in vec2 in_UV;
+layout(location = 4) in flat uint in_Layer;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////// Vertex shader
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// -----------------------------------------------------------------------------
+// Output to fragment
+// -----------------------------------------------------------------------------
+layout(location = 0) out vec4 out_Output;
 
-GSInput VSShader(uint _VertexID : SV_VertexID)
-{
-    float2 Vertices[] =
-    {
-        float2(-1.0f, -1.0f),
-        float2( 3.0f, -1.0f),
-        float2(-1.0f,  3.0f),
-    };
-
-    GSInput Output;
-
-    Output.m_CSPosition = float4(Vertices[_VertexID], 0.0f, 1.0f);
-
-    return Output;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////// Geometry shader
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-[maxvertexcount(3)]
-void GSShader(triangle GSInput _Input[3], inout TriangleStream<PSInput> _OutputStream)
-{
-    PSInput Output;
-
-    for (uint i = 0; i < 3; ++ i)
-    {
-        Output.m_CSPosition = _Input[i].m_CSPosition;
-        Output.m_Layer = g_Layer;
-
-        _OutputStream.Append(Output);
-    }
-
-    _OutputStream.RestartStrip();
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////// Pixel shader
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-float4 PSShader(PSInput _Input) : SV_Target
+// -----------------------------------------------------------------------------
+// Main
+// -----------------------------------------------------------------------------
+void main()
 {
     float Mu, MuS, Nu;
-    GetMuMuSNu(_Input.m_CSPosition.xy, g_Radius, g_Dhdh, Mu, MuS, Nu);
-    float3 UVW = float3(_Input.m_CSPosition.xy, _Input.m_Layer) / float3(g_InscatterMuS * g_InscatterNu, g_InscatterMu, g_InscatterAltitude);
-    return float4(g_DeltaSR.Sample(g_ClampSampler, UVW).rgb / PhaseFunctionR(Nu), 0.0f);
+
+    GetMuMuSNu(gl_FragCoord.xy, g_Radius, g_Dhdh, Mu, MuS, Nu);
+
+    vec3 UVW = vec3(gl_FragCoord.xy, in_Layer) / vec3(g_InscatterMuS * g_InscatterNu, g_InscatterMu, g_InscatterAltitude);
+
+    out_Output = vec4(texture(g_DeltaSR, UVW).rgb / PhaseFunctionR(Nu), 0.0f);
 }
 
 #endif // __INCLUDE_FS_INSCATTER_COPY_MULTIPLE_GLSL__

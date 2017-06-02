@@ -1863,7 +1863,7 @@ namespace
 
         CShaderPtr m_InscatterCopySingleMaterial = ShaderManager::CompilePS("scattering/scattering_inscatter_copy_single.glsl", "main");
 
-//         CShaderPtr m_InscatterCopyMultipleMaterial = ShaderManager::CompilePS("scattering/scattering_inscatter_copy_multiple.glsl", "main");
+        CShaderPtr m_InscatterCopyMultipleMaterial = ShaderManager::CompilePS("scattering/scattering_inscatter_copy_multiple.glsl", "main");
 
         //////////////////////////////////////////////////////////////
         // Post effect
@@ -2187,7 +2187,74 @@ namespace
             ContextManager::ResetShaderGS();
 
             Performance::EndEvent();
-            
+
+			// -----------------------------------------------------------------------------
+			// Enable blending
+			// -----------------------------------------------------------------------------
+			ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::AlphaBlend));
+
+			// -----------------------------------------------------------------------------
+			// Copy deltaE to irradiance
+			// -----------------------------------------------------------------------------
+			SPSIrradianceK PSIrradianceK;
+
+			PSIrradianceK.k = 1;
+
+			BufferManager::UploadConstantBufferData(m_PSIrradianceK, &PSIrradianceK);
+
+			Performance::BeginEvent("Copy DeltaE to Irradiance");
+
+			ContextManager::SetTargetSet(m_IrradianceTableTS);
+
+			ContextManager::SetViewPortSet(m_IrradianceVPS);
+
+			ContextManager::SetShaderPS(m_IrradianceCopyMaterial);
+
+			ContextManager::Draw(3, 0);
+
+			Performance::EndEvent();
+
+			// -----------------------------------------------------------------------------
+			// Copy DeltaS to Inscatter
+			// -----------------------------------------------------------------------------
+			Performance::BeginEvent("Copy DeltaS to Inscatter");
+
+			ContextManager::SetTargetSet(m_InscatterTableTS);
+
+			ContextManager::SetViewPortSet(m_InscatterVPS);
+
+			ContextManager::SetShaderGS(GSPtr);
+
+			ContextManager::SetShaderPS(m_InscatterCopyMultipleMaterial);
+
+			for (uint Layer = 0; Layer < g_InscatterDepth; ++Layer)
+			{
+				SGSLayer GSLayer;
+
+				GSLayer.m_Layer = Layer;
+
+				BufferManager::UploadConstantBufferData(m_GSLayer, &GSLayer);
+
+				GetLayerValues(Layer, Radius, Dhdh);
+
+				SPSLayerValues PSLayerValues;
+
+				PSLayerValues.m_Dhdh = Dhdh;
+				PSLayerValues.m_Radius = Radius;
+
+				BufferManager::UploadConstantBufferData(m_PSLayerValues, &PSLayerValues);
+
+				ContextManager::Draw(3, 0);
+			}
+
+			ContextManager::ResetShaderGS();
+
+			Performance::EndEvent();
+
+			// -----------------------------------------------------------------------------
+			// Disable blending
+			// -----------------------------------------------------------------------------
+			ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::Default));
         }
 
         Performance::EndEvent();
@@ -2197,268 +2264,12 @@ namespace
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//         m_pContext->RSSetState(m_pRasterizerState);
-//         m_pContext->OMSetDepthStencilState(m_pDepthStencilState, 0);
-//         m_pContext->OMSetBlendState(m_pDisableBlendState, nullptr, 0xffffffff);
-// 
-//         D3D11_MAPPED_SUBRESOURCE Data;
-//         ID3D11RenderTargetView* pRenderTargetViews[2];
-// 
-//         Base::Float4 Dhdh;
-//         float Radius;
-// 
-//         m_pContext->IASetVertexBuffers(0, 0, nullptr, nullptr, nullptr);
-//         m_pContext->IASetIndexBuffer(nullptr, DXGI_FORMAT_UNKNOWN, 0);
-//         m_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-//         m_pContext->IASetInputLayout(nullptr);
-// 
-//         //////////////////////////////////////////////////////////////
-//         // One constant buffer for all precomputation steps
-//         //////////////////////////////////////////////////////////////
-// 
-//         m_pContext->Map(m_PSPrecomputeConstants.get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &Data);
-//         auto pPrecomuteBuffer = static_cast<SPrecomputeConstants*>(Data.pData);
-//         pPrecomuteBuffer->m_TransmittanceWidth = static_cast<float>(g_TransmittanceWidth);
-//         pPrecomuteBuffer->m_TransmittanceHeight = static_cast<float>(g_TransmittanceHeight);
-//         pPrecomuteBuffer->m_IrradianceWidth = static_cast<float>(g_IrradianceWidth);
-//         pPrecomuteBuffer->m_IrradianceHeight = static_cast<float>(g_IrradianceHeight);
-//         pPrecomuteBuffer->m_InscatterMus = static_cast<float>(g_InscatterMuS);
-//         pPrecomuteBuffer->m_InscatterMu = static_cast<float>(g_InscatterMu);
-//         pPrecomuteBuffer->m_InscatterNu = static_cast<float>(g_InscatterNu);
-//         pPrecomuteBuffer->m_InscatterAltitude = static_cast<float>(g_InscatterAltitude);
-//         m_pContext->Unmap(m_PSPrecomputeConstants.get(), 0);
-// 
-//         //////////////////////////////////////////////////////////////
-//         // Transmittance
-//         //////////////////////////////////////////////////////////////
-// 
-//         m_pRenderer->SetViewPort(g_TransmittanceWidth, g_TransmittanceHeight);
-// 
-//         pRenderTargetViews[0] = m_TransmittanceTable.GetTextureView();
-//         m_pContext->OMSetRenderTargets(1, &pRenderTargetViews[0], nullptr);
-// 
-//         m_pRenderer->SetMaterial(m_TransmittanceMaterial);
-// 
-//         m_pContext->Draw(3, 0);
-// 
-//         m_pRenderer->ResetMaterial();
-// 
-//         //////////////////////////////////////////////////////////////
-//         // Irradiance single
-//         //////////////////////////////////////////////////////////////
-// 
-//         m_pRenderer->SetViewPort(g_IrradianceWidth, g_IrradianceHeight);
-// 
-//         pRenderTargetViews[0] = m_DeltaE.GetTextureView();
-//         m_pContext->OMSetRenderTargets(1, pRenderTargetViews, nullptr);
-// 
-//         m_pRenderer->SetMaterial(m_IrradianceSingleMaterial);
-// 
-//         m_pContext->Draw(3, 0);
-// 
-//         m_pRenderer->ResetMaterial();
-// 
-//         //////////////////////////////////////////////////////////////
-//         // Inscatter single
-//         //////////////////////////////////////////////////////////////
-// 
-//         m_pRenderer->SetViewPort(g_InscatterWidth, g_InscatterHeight);
-// 
-//         pRenderTargetViews[0] = m_DeltaSR.GetRenderTargetView();
-//         pRenderTargetViews[1] = m_DeltaSM.GetRenderTargetView();
-//         m_pContext->OMSetRenderTargets(2, pRenderTargetViews, nullptr);
-// 
-//         m_pRenderer->SetMaterial(m_InscatterSingleMaterial);
-// 
-//         for (uint Layer = 0; Layer < g_InscatterDepth; ++Layer)
-//         {
-//             m_pContext->Map(m_InscatterSingleMaterial.m_GeometryShaderBuffers[0].get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &Data);
-//             auto pGSBuffer = static_cast<SGSLayer*>(Data.pData);
-//             pGSBuffer->m_Layer = Layer;
-//             m_pContext->Unmap(m_InscatterSingleMaterial.m_GeometryShaderBuffers[0].get(), 0);
-// 
-//             GetLayerValues(Layer, Radius, Dhdh);
-// 
-//             m_pContext->Map(m_InscatterSingleMaterial.m_PixelShaderBuffers[1].get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &Data);
-//             auto pPSPuffer = static_cast<SPSLayerValues*>(Data.pData);
-//             pPSPuffer->m_Dhdh = Dhdh;
-//             pPSPuffer->m_Radius = Radius;
-//             m_pContext->Unmap(m_InscatterSingleMaterial.m_PixelShaderBuffers[1].get(), 0);
-// 
-//             m_pContext->Draw(3, 0);
-//         }
-// 
-//         m_pRenderer->ResetMaterial();
-// 
-//         //////////////////////////////////////////////////////////////
-//         // Copy irradiance single
-//         //////////////////////////////////////////////////////////////
-//         m_pRenderer->SetViewPort(g_IrradianceWidth, g_IrradianceHeight);
-// 
-//         pRenderTargetViews[0] = m_IrradianceTable.GetTextureView();
-//         pRenderTargetViews[1] = nullptr;
-//         m_pContext->OMSetRenderTargets(2, pRenderTargetViews, nullptr);
-// 
-//         m_pRenderer->SetMaterial(m_IrradianceCopyMaterial);
-// 
-//         m_pContext->Map(m_IrradianceCopyMaterial.m_PixelShaderBuffers[1].get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &Data);
-//         auto pIrradianceK = static_cast<SPSIrradianceK*>(Data.pData);
-//         pIrradianceK->k = 0.0f;
-//         m_pContext->Unmap(m_IrradianceCopyMaterial.m_PixelShaderBuffers[1].get(), 0);
-// 
-//         m_pContext->Draw(3, 0);
-// 
-//         m_pRenderer->ResetMaterial();
-// 
-//         //////////////////////////////////////////////////////////////
-//         // Copy inscatter single
-//         //////////////////////////////////////////////////////////////
-// 
-//         m_pRenderer->SetViewPort(g_InscatterWidth, g_InscatterHeight);
-// 
-//         pRenderTargetViews[0] = m_InscatterTable.GetRenderTargetView();
-//         m_pContext->OMSetRenderTargets(1, pRenderTargetViews, nullptr);
-// 
-//         m_pRenderer->SetMaterial(m_InscatterCopySingleMaterial);
-// 
-//         for (uint Layer = 0; Layer < g_InscatterDepth; ++Layer)
-//         {
-//             m_pContext->Map(m_InscatterCopySingleMaterial.m_GeometryShaderBuffers[0].get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &Data);
-//             auto pGSBuffer = static_cast<SGSLayer*>(Data.pData);
-//             pGSBuffer->m_Layer = Layer;
-//             m_pContext->Unmap(m_InscatterCopySingleMaterial.m_GeometryShaderBuffers[0].get(), 0);
-// 
-//             m_pContext->Draw(3, 0);
-//         }
-// 
-//         m_pRenderer->ResetMaterial();
-// 
 //         //////////////////////////////////////////////////////////////
 //         // Multiple scattering
 //         //////////////////////////////////////////////////////////////
 // 
 //         for (uint Order = 2; Order <= 4; ++Order)
 //         {
-//             m_pContext->Map(m_PSScatteringOrder.get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &Data);
-//             auto pOrderBuffer = static_cast<SPSScatteringOrder*>(Data.pData);
-//             pOrderBuffer->m_FirstOrder = (Order == 2 ? 1.0f : 0.0f);
-//             m_pContext->Unmap(m_PSScatteringOrder.get(), 0);
-// 
-//             //////////////////////////////////////////////////////////////
-//             // DeltaJ Inscatter
-//             //////////////////////////////////////////////////////////////
-// 
-//             m_pRenderer->SetViewPort(g_InscatterWidth, g_InscatterHeight);
-// 
-//             pRenderTargetViews[0] = m_DeltaJ.GetRenderTargetView();
-//             m_pContext->OMSetRenderTargets(1, pRenderTargetViews, nullptr);
-// 
-//             m_pRenderer->SetMaterial(m_InscatterMultipleAMaterial);
-// 
-//             for (uint Layer = 0; Layer < g_InscatterDepth; ++Layer)
-//             {
-//                 m_pContext->Map(m_InscatterMultipleAMaterial.m_GeometryShaderBuffers[0].get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &Data);
-//                 auto pGSBuffer = static_cast<SGSLayer*>(Data.pData);
-//                 pGSBuffer->m_Layer = Layer;
-//                 m_pContext->Unmap(m_InscatterMultipleAMaterial.m_GeometryShaderBuffers[0].get(), 0);
-// 
-//                 GetLayerValues(Layer, Radius, Dhdh);
-// 
-//                 m_pContext->Map(m_InscatterMultipleAMaterial.m_PixelShaderBuffers[1].get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &Data);
-//                 auto pPSPuffer = static_cast<SPSLayerValues*>(Data.pData);
-//                 pPSPuffer->m_Dhdh = Dhdh;
-//                 pPSPuffer->m_Radius = Radius;
-//                 m_pContext->Unmap(m_InscatterMultipleAMaterial.m_PixelShaderBuffers[1].get(), 0);
-// 
-//                 m_pContext->Draw(3, 0);
-// 
-//                 m_pContext->Flush();
-//             }
-// 
-//             m_pRenderer->ResetMaterial();
-// 
-//             //////////////////////////////////////////////////////////////
-//             // DeltaE irradiance
-//             //////////////////////////////////////////////////////////////
-// 
-//             m_pRenderer->SetViewPort(g_IrradianceWidth, g_IrradianceHeight);
-// 
-//             pRenderTargetViews[0] = m_DeltaE.GetTextureView();
-//             m_pContext->OMSetRenderTargets(1, pRenderTargetViews, nullptr);
-// 
-//             m_pRenderer->SetMaterial(m_IrradianceMultipleMaterial);
-// 
-//             m_pContext->Draw(3, 0);
-// 
-//             m_pRenderer->ResetMaterial();
-// 
-//             //////////////////////////////////////////////////////////////
-//             // DeltaS inscatter
-//             //////////////////////////////////////////////////////////////
-// 
-//             m_pRenderer->SetViewPort(g_InscatterWidth, g_InscatterHeight);
-// 
-//             pRenderTargetViews[0] = m_DeltaSR.GetRenderTargetView();
-//             m_pContext->OMSetRenderTargets(1, pRenderTargetViews, nullptr);
-// 
-//             m_pRenderer->SetMaterial(m_InscatterMultipleBMaterial);
-// 
-//             for (uint Layer = 0; Layer < g_InscatterDepth; ++Layer)
-//             {
-//                 m_pContext->Map(m_InscatterMultipleBMaterial.m_GeometryShaderBuffers[0].get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &Data);
-//                 auto pGSBuffer = static_cast<SGSLayer*>(Data.pData);
-//                 pGSBuffer->m_Layer = Layer;
-//                 m_pContext->Unmap(m_InscatterMultipleBMaterial.m_GeometryShaderBuffers[0].get(), 0);
-// 
-//                 GetLayerValues(Layer, Radius, Dhdh);
-// 
-//                 m_pContext->Map(m_InscatterMultipleBMaterial.m_PixelShaderBuffers[1].get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &Data);
-//                 auto pPSPuffer = static_cast<SPSLayerValues*>(Data.pData);
-//                 pPSPuffer->m_Dhdh = Dhdh;
-//                 pPSPuffer->m_Radius = Radius;
-//                 m_pContext->Unmap(m_InscatterMultipleBMaterial.m_PixelShaderBuffers[1].get(), 0);
-// 
-//                 m_pContext->Draw(3, 0);
-// 
-//                 //m_pContext->Flush();
-//             }
-// 
-//             m_pRenderer->ResetMaterial();
-// 
-//             //////////////////////////////////////////////////////////////
-//             // Enable blending
-//             //////////////////////////////////////////////////////////////
-// 
-//             m_pContext->OMSetBlendState(m_pEnableBlendState, nullptr, 0xffffffff);
 // 
 //             //////////////////////////////////////////////////////////////
 //             // Copy deltaE to irradiance
