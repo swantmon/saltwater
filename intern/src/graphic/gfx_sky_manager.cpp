@@ -1891,16 +1891,21 @@ namespace
         // -----------------------------------------------------------------------------
         const unsigned int pOffset[] = { 0, 0 };
 
-        auto GetLayerValues = [&](uint _Layer, float& _rRadius, Base::Float4& _rDhdH)
+        auto GetLayerValues = [&](unsigned int _Layer, float& _rRadius, Base::Float4& _rDhdH)
         {
             float Radius = _Layer / Base::Max((g_InscatterAltitude - 1.0f), 1.0f);
+
             Radius = Radius * Radius;
             Radius = Base::Sqrt(g_RadiusGround * g_RadiusGround + Radius * (g_RadiusAtmosphere * g_RadiusAtmosphere - g_RadiusGround * g_RadiusGround)) + (_Layer == 0 ? 0.01f : (_Layer == g_InscatterAltitude - 1 ? -0.001f : 0.0f));
-            float DMin = g_RadiusAtmosphere - Radius;
-            float DMax = Base::Sqrt(Radius * Radius - g_RadiusGround * g_RadiusGround) + Base::Sqrt(g_RadiusAtmosphere * g_RadiusAtmosphere - g_RadiusGround * g_RadiusGround);
+
+            float DMin  = g_RadiusAtmosphere - Radius;
+            float DMax  = Base::Sqrt(Radius * Radius - g_RadiusGround * g_RadiusGround) + Base::Sqrt(g_RadiusAtmosphere * g_RadiusAtmosphere - g_RadiusGround * g_RadiusGround);
+
             float DMinP = Radius - g_RadiusGround;
             float DMaxP = Base::Sqrt(Radius * Radius - g_RadiusGround * g_RadiusGround);
+
             _rRadius = Radius;
+
             _rDhdH = Base::Float4(DMin, DMax, DMinP, DMaxP);
         };
 
@@ -1985,7 +1990,7 @@ namespace
 
         ContextManager::SetConstantBuffer(3, m_PSLayerValues);
 
-        for (uint Layer = 0; Layer < g_InscatterDepth; ++Layer)
+        for (unsigned int Layer = 0; Layer < g_InscatterDepth; ++Layer)
         {
             SGSLayer GSLayer;
 
@@ -2030,7 +2035,7 @@ namespace
 
         ContextManager::SetSampler(6, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        ContextManager::SetConstantBuffer(2, m_PSIrradianceK);
+        ContextManager::SetConstantBuffer(5, m_PSIrradianceK);
 
         ContextManager::Draw(3, 0);
 
@@ -2059,7 +2064,7 @@ namespace
 
         ContextManager::SetSampler(4, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        for (uint Layer = 0; Layer < g_InscatterDepth; ++Layer)
+        for (unsigned int Layer = 0; Layer < g_InscatterDepth; ++Layer)
         {
             SGSLayer GSLayer;
 
@@ -2079,8 +2084,14 @@ namespace
         // -----------------------------------------------------------------------------
         Performance::BeginEvent("Multiple Scattering");
 
-        for (uint Order = 2; Order <= 4; ++Order)
+        ContextManager::SetTexture(5, static_cast<CTextureBasePtr>(m_DeltaJ));
+
+        ContextManager::SetSampler(5, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        for (unsigned int Order = 2; Order <= 4; ++Order)
         {
+            Performance::BeginEvent("Order");
+
             SPSScatteringOrder PSScatteringOrder;
 
             PSScatteringOrder.m_FirstOrder = (Order == 2 ? 1.0f : 0.0f);
@@ -2106,7 +2117,7 @@ namespace
 
             ContextManager::SetConstantBuffer(4, m_PSScatteringOrder);
 
-            for (uint Layer = 0; Layer < g_InscatterDepth; ++Layer)
+            for (unsigned int Layer = 0; Layer < g_InscatterDepth; ++Layer)
             {
                 SGSLayer GSLayer;
 
@@ -2164,7 +2175,7 @@ namespace
 
             ContextManager::SetConstantBuffer(4, m_PSScatteringOrder);
 
-            for (uint Layer = 0; Layer < g_InscatterDepth; ++Layer)
+            for (unsigned int Layer = 0; Layer < g_InscatterDepth; ++Layer)
             {
                 SGSLayer GSLayer;
 
@@ -2188,73 +2199,75 @@ namespace
 
             Performance::EndEvent();
 
-			// -----------------------------------------------------------------------------
-			// Enable blending
-			// -----------------------------------------------------------------------------
-			ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::AlphaBlend));
+            // -----------------------------------------------------------------------------
+            // Enable blending
+            // -----------------------------------------------------------------------------
+            ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::AdditionBlend));
 
-			// -----------------------------------------------------------------------------
-			// Copy deltaE to irradiance
-			// -----------------------------------------------------------------------------
-			SPSIrradianceK PSIrradianceK;
+            // -----------------------------------------------------------------------------
+            // Copy deltaE to irradiance
+            // -----------------------------------------------------------------------------
+            SPSIrradianceK PSIrradianceK;
 
-			PSIrradianceK.k = 1;
+            PSIrradianceK.k = 1;
 
-			BufferManager::UploadConstantBufferData(m_PSIrradianceK, &PSIrradianceK);
+            BufferManager::UploadConstantBufferData(m_PSIrradianceK, &PSIrradianceK);
 
-			Performance::BeginEvent("Copy DeltaE to Irradiance");
+            Performance::BeginEvent("Add DeltaE to Irradiance");
 
-			ContextManager::SetTargetSet(m_IrradianceTableTS);
+            ContextManager::SetTargetSet(m_IrradianceTableTS);
 
-			ContextManager::SetViewPortSet(m_IrradianceVPS);
+            ContextManager::SetViewPortSet(m_IrradianceVPS);
 
-			ContextManager::SetShaderPS(m_IrradianceCopyMaterial);
+            ContextManager::SetShaderPS(m_IrradianceCopyMaterial);
 
-			ContextManager::Draw(3, 0);
+            ContextManager::Draw(3, 0);
 
-			Performance::EndEvent();
+            Performance::EndEvent();
 
-			// -----------------------------------------------------------------------------
-			// Copy DeltaS to Inscatter
-			// -----------------------------------------------------------------------------
-			Performance::BeginEvent("Copy DeltaS to Inscatter");
+            // -----------------------------------------------------------------------------
+            // Copy DeltaS to Inscatter
+            // -----------------------------------------------------------------------------
+            Performance::BeginEvent("Add DeltaS to Inscatter");
 
-			ContextManager::SetTargetSet(m_InscatterTableTS);
+            ContextManager::SetTargetSet(m_InscatterTableTS);
 
-			ContextManager::SetViewPortSet(m_InscatterVPS);
+            ContextManager::SetViewPortSet(m_InscatterVPS);
 
-			ContextManager::SetShaderGS(GSPtr);
+            ContextManager::SetShaderGS(GSPtr);
 
-			ContextManager::SetShaderPS(m_InscatterCopyMultipleMaterial);
+            ContextManager::SetShaderPS(m_InscatterCopyMultipleMaterial);
 
-			for (uint Layer = 0; Layer < g_InscatterDepth; ++Layer)
-			{
-				SGSLayer GSLayer;
+            for (unsigned int Layer = 0; Layer < g_InscatterDepth; ++Layer)
+            {
+                SGSLayer GSLayer;
 
-				GSLayer.m_Layer = Layer;
+                GSLayer.m_Layer = Layer;
 
-				BufferManager::UploadConstantBufferData(m_GSLayer, &GSLayer);
+                BufferManager::UploadConstantBufferData(m_GSLayer, &GSLayer);
 
-				GetLayerValues(Layer, Radius, Dhdh);
+                GetLayerValues(Layer, Radius, Dhdh);
 
-				SPSLayerValues PSLayerValues;
+                SPSLayerValues PSLayerValues;
 
-				PSLayerValues.m_Dhdh = Dhdh;
-				PSLayerValues.m_Radius = Radius;
+                PSLayerValues.m_Dhdh = Dhdh;
+                PSLayerValues.m_Radius = Radius;
 
-				BufferManager::UploadConstantBufferData(m_PSLayerValues, &PSLayerValues);
+                BufferManager::UploadConstantBufferData(m_PSLayerValues, &PSLayerValues);
 
-				ContextManager::Draw(3, 0);
-			}
+                ContextManager::Draw(3, 0);
+            }
 
-			ContextManager::ResetShaderGS();
+            ContextManager::ResetShaderGS();
 
-			Performance::EndEvent();
+            Performance::EndEvent();
 
-			// -----------------------------------------------------------------------------
-			// Disable blending
-			// -----------------------------------------------------------------------------
-			ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::Default));
+            // -----------------------------------------------------------------------------
+            // Disable blending
+            // -----------------------------------------------------------------------------
+            ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::Default));
+
+            Performance::EndEvent();
         }
 
         Performance::EndEvent();

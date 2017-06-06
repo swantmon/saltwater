@@ -8,7 +8,7 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(row_major, std140, binding = 2) uniform UB2
+layout(row_major, std140, binding = 5) uniform UB2
 {
     float k; // wtf?
 };
