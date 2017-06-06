@@ -209,7 +209,7 @@ namespace
 
             pSkyboxFacet->SetRefreshMode(Dt::CSkyFacet::Dynamic);
             pSkyboxFacet->SetType(Dt::CSkyFacet::Procedural);
-            pSkyboxFacet->SetIntensity(25000.0f);
+            pSkyboxFacet->SetIntensity(60000.0f);
 
             rEnvironment.SetDetailFacet(Dt::SFacetCategory::Data, pSkyboxFacet);
 

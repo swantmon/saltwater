@@ -279,9 +279,9 @@ vec4 GetAtmosphericFog(vec3 _Position, vec3 _ViewDirection, float _Depth, vec3 _
 
 void main()
 {        
-    vec4 Color = GetAtmosphericFog(g_ViewPosition.xyz * 100.0f, normalize(in_Normal), 50000.0f, vec3(0.0f));
+    vec4 Color = GetAtmosphericFog(g_ViewPosition.xyz, normalize(in_Normal), 50000.0f, vec3(0.0f));
 
-    out_Output = Color * 50000.0f;
+    out_Output = Color * g_SunIntensity;
 }
 
 #endif // __INCLUDE_FS_PAS_GLSL__

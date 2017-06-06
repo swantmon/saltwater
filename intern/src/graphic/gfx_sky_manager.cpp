@@ -1175,7 +1175,7 @@ namespace
     {
         switch (_pDataSkyFacet->GetType())
         {
-            case Dt::CSkyFacet::Procedural:      RenderSkyboxFromAtmopsphericScattering(_pOutput, 1.0f); break;
+            case Dt::CSkyFacet::Procedural:      RenderSkyboxFromAtmopsphericScattering(_pOutput, _pDataSkyFacet->GetIntensity()); break;
             case Dt::CSkyFacet::Panorama:        RenderSkyboxFromPanorama(_pOutput, _pDataSkyFacet->GetIntensity()); break;
             case Dt::CSkyFacet::Cubemap:         RenderSkyboxFromCubemap(_pOutput, _pDataSkyFacet->GetIntensity()); break;
             case Dt::CSkyFacet::Texture:         RenderSkyboxFromTexture(_pOutput, _pDataSkyFacet->GetIntensity()); break;
@@ -1217,9 +1217,9 @@ namespace
         // -----------------------------------------------------------------------------
         SPSPASSettings PSBuffer;
 
-        PSBuffer.g_SunDirection          = pDataSunFacet == nullptr ? Base::Float4(0.0f, 1.0f, 0.0f, 0.0f) : Base::Float4(pDataSunFacet->GetDirection() * Base::Float3(-1.0f), 0.0f);
-        PSBuffer.g_SunIntensity          = Base::Float4(_Intensity);
-        PSBuffer.ps_ExposureHistoryIndex = 0;
+        PSBuffer.g_SunDirection           = pDataSunFacet == nullptr ? Base::Float4(0.0f, 1.0f, 0.0f, 0.0f) : Base::Float4x4().SetRotationX(Base::DegreesToRadians(90.0f)) * Base::Float4(pDataSunFacet->GetDirection(), 0.0f);
+        PSBuffer.g_SunIntensity           = Base::Float4(_Intensity);
+        PSBuffer.ps_ExposureHistoryIndex  = 0;
 
         BufferManager::UploadConstantBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
 
