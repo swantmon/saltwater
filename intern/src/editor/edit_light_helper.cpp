@@ -388,7 +388,13 @@ namespace
             NewMessage.PutInt(static_cast<int>(pLightFacet->GetRefreshMode()));
             NewMessage.PutInt(static_cast<int>(pLightFacet->GetType()));
 
-            if (pLightFacet->GetType() == Dt::CSkyFacet::Cubemap)
+            if (pLightFacet->GetType() == Dt::CSkyFacet::Procedural)
+            {
+                NewMessage.PutBool(false);
+
+                NewMessage.PutInt(0);
+            }
+            else if (pLightFacet->GetType() == Dt::CSkyFacet::Cubemap)
             {
                 NewMessage.PutBool(true);
 

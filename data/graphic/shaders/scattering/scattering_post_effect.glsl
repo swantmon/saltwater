@@ -1,86 +1,54 @@
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////// Scattering post effect shader
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#ifndef __INCLUDE_FS_PAS_GLSL__
+#define __INCLUDE_FS_PAS_GLSL__
 
-#include <scattering_common.fx>
+#include "common.glsl"
+#include "common_light.glsl"
+#include "common_gbuffer.glsl"
+#include "common_global.glsl"
+#include "scattering/scattering_common.glsl"
 
-Texture2D<float4> g_FrameBuffer        : register(t3);
-Texture2D<float4> g_NormalBuffer       : register(t4);
-Texture2D<float>  g_DepthBuffer        : register(t5);
+// -----------------------------------------------------------------------------
+// Defines
+// -----------------------------------------------------------------------------
+const float g_EpsilonInscatter = 0.004f;
+const float HeightOffset = 0.01f;
 
-const static float g_EpsilonInscatter = 0.004f;
-
-cbuffer VSBuffer : register(b0)
+// -----------------------------------------------------------------------------
+// Input from engine
+// -----------------------------------------------------------------------------
+layout(row_major, std140, binding = 3) uniform UB2
 {
-    float4x4 g_InvViewProjectionMatrix;
-    float3 g_WSEyePositionVS;
-}
-
-cbuffer PSBuffer : register(b1)
-{
-    float g_Near;
-    float g_Far;
-    float3 g_WSEyePositionPS;
-    float3 g_SunDirection;
-    float3 g_SunIntensity;
-}
-
-struct PSInput
-{
-    float4 m_CSPosition : SV_Position;
-    float3 m_WSViewRay : TEXCOORD;
+    vec4 g_SunDirection;
+    vec4 g_SunIntensity;
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////// Vertex shader
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// -----------------------------------------------------------------------------
+// Input
+// -----------------------------------------------------------------------------
+layout(location = 0) in vec3 in_Normal;
 
-PSInput VSShader(uint _VertexID : SV_VertexID)
+// -----------------------------------------------------------------------------
+// Output
+// -----------------------------------------------------------------------------
+layout (location = 0) out vec4 out_Output;
+
+// -----------------------------------------------------------------------------
+// Main
+// -----------------------------------------------------------------------------
+float saturate(in float _Input)
 {
-    float2 Vertices[] =
-    {
-        float2(-1.0f, -1.0f),
-        float2( 3.0f, -1.0f),
-        float2(-1.0f,  3.0f),
-    };
-
-    float4 CSPosition = float4(Vertices[_VertexID], 0.0f, 1.0f);
-    float4 CSViewRayEnd = float4(Vertices[_VertexID], 1.0f, 1.0f);
-
-    float4 WSViewRayEnd = mul(CSViewRayEnd, g_InvViewProjectionMatrix);
-    WSViewRayEnd /= WSViewRayEnd.w;
-
-    PSInput Output;
-
-    Output.m_CSPosition = CSPosition;
-    Output.m_WSViewRay = WSViewRayEnd.xyz - g_WSEyePositionVS;
-
-    return Output;
+    return clamp(_Input, 0.0f, 1.0f);
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////// Pixel shader
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// -----------------------------------------------------------------------------
 
-const static float HeightOffset = 0.01f;
-
-float GetLinearDepth(float _Depth)
+vec3 GetInscatterColor(float _FogDepth, vec3 _X, float _T, vec3 _V, vec3 _S, float _Radius, float _Mu, out vec3 _Attenuation, bool _IsSceneGeometry) 
 {
-    float VSZ = g_Near / (g_Far - ((g_Far - g_Near) * _Depth));
-    return VSZ;
-}
-
-float3 GetWSPosition(float3 _WSViewRay, float _LinearDepth)
-{
-    return _LinearDepth * _WSViewRay + g_WSEyePositionPS;
-}
-
-float3 GetInscatterColor(float _FogDepth, float3 _X, float _T, float3 _V, float3 _S, float _Radius, float _Mu, out float3 _Attenuation, bool _IsSceneGeometry) 
-{
-    float3 Result = float3(0.0f, 0.0f, 0.0f); 	// X in space and ray looking in space, intialize
-	_Attenuation = float3(1.0f, 1.0f, 1.0f);
+    vec3 Result = vec3(0.0f, 0.0f, 0.0f); 	// X in space and ray looking in space, intialize
+	_Attenuation = vec3(1.0f, 1.0f, 1.0f);
 
 	float D = -_Radius * _Mu - sqrt(_Radius * _Radius * (_Mu * _Mu - 1.0f) + g_RadiusAtmosphere * g_RadiusAtmosphere);
+
     if (D > 0.0f) 
 	{ 
 		// if X in space and ray intersects atmosphere
@@ -104,7 +72,7 @@ float3 GetInscatterColor(float _FogDepth, float3 _X, float _T, float3 _V, float3
 
     if (_Radius <= g_RadiusAtmosphere && _FogDepth > 0.0f)
 	{ 
-		float3 X0 = _X + _T * _V;
+		vec3 X0 = _X + _T * _V;
 		float R0 = length(X0);
 		// if ray intersects atmosphere
 		float Nu = dot(_V, _S);
@@ -132,7 +100,7 @@ float3 GetInscatterColor(float _FogDepth, float3 _X, float _T, float3 _V, float3
 			{
 				_V.z = max(_V.z, 0.15f);
 				_V = normalize(_V);
-				float3 X1 = _X + _T * _V;
+				vec3 X1 = _X + _T * _V;
 				float R1 = length(X1);
 				_Mu = dot(X1, _V) / R1; 
 			}
@@ -140,7 +108,7 @@ float3 GetInscatterColor(float _FogDepth, float3 _X, float _T, float3 _V, float3
 
 		float PhaseR = PhaseFunctionR(Nu);
 		float PhaseM = PhaseFunctionM(Nu);
-		float4 Inscatter = max(Texture4DSample(g_InscatterTable, _Radius, _Mu, MuS, Nu), 0.0f);
+		vec4 Inscatter = max(Texture4DSample(g_InscatterTable, _Radius, _Mu, MuS, Nu), 0.0f);
 
 		if (_T > 0.0f) 
 		{
@@ -159,6 +127,7 @@ float3 GetInscatterColor(float _FogDepth, float3 _X, float _T, float3 _V, float3
 				if (BlendRatio < 1.0f)
 				{
 					Inscatter = max(Inscatter - _Attenuation.rgbr * Texture4DSample(g_InscatterTable, R0, Mu0, MuS0, Nu), 0.0f);
+
 					if (!_IsSceneGeometry ) 
 					{
 						if (abs(_Mu - MuHorizon) < Epsilon)
@@ -170,9 +139,9 @@ float3 GetInscatterColor(float _FogDepth, float3 _X, float _T, float3 _V, float3
 							Mu0 = (_Radius * _Mu + _T) / R0;
 
 							Mu0 = max(MuHorizon + Epsilon, Mu0);
-							float4 Inscatter0 = Texture4DSample(g_InscatterTable, _Radius, _Mu, MuS, Nu);
-							float4 Inscatter1 = Texture4DSample(g_InscatterTable, R0, Mu0, MuS0, Nu);
-							float4 InscatterA = max(Inscatter0 - _Attenuation.rgbr * Inscatter1, 0.0f);
+							vec4 Inscatter0 = Texture4DSample(g_InscatterTable, _Radius, _Mu, MuS, Nu);
+							vec4 Inscatter1 = Texture4DSample(g_InscatterTable, R0, Mu0, MuS0, Nu);
+							vec4 InscatterA = max(Inscatter0 - _Attenuation.rgbr * Inscatter1, 0.0f);
 
 							_Mu = MuHorizon + Epsilon;
 							R0 = sqrt(_Radius * _Radius + _T * _T + 2.0f * _Radius * _T * _Mu);
@@ -181,14 +150,14 @@ float3 GetInscatterColor(float _FogDepth, float3 _X, float _T, float3 _V, float3
 							Mu0 = max(MuHorizon + Epsilon, Mu0);
 							Inscatter0 = Texture4DSample(g_InscatterTable, _Radius, _Mu, MuS, Nu);
 							Inscatter1 = Texture4DSample(g_InscatterTable, R0, Mu0, MuS0, Nu);
-							float4 InscatterB = max(Inscatter0 - _Attenuation.rgbr * Inscatter1, 0.0f);
+							vec4 InscatterB = max(Inscatter0 - _Attenuation.rgbr * Inscatter1, 0.0f);
 
-							Inscatter = lerp(InscatterA, InscatterB, Alpha);
+							Inscatter = mix(InscatterA, InscatterB, Alpha);
 						}
 					}
 					else if (BlendRatio > 0.0f)
 					{
-						Inscatter = lerp(Inscatter,
+						Inscatter = mix(Inscatter,
 							(1.0f - _Attenuation.rgbr) * max(Texture4DSample(g_InscatterTable, _Radius, MuOriginal, MuS, Nu), 0.0f), 
 							BlendRatio);
 					}
@@ -199,33 +168,37 @@ float3 GetInscatterColor(float _FogDepth, float3 _X, float _T, float3 _V, float3
 				}
 			}
 		}
+
         Inscatter.w *= smoothstep(0.0f, 0.02f, MuS);
+
         Result = max(Inscatter.rgb * PhaseR + GetMie(Inscatter) * PhaseM, 0.0f);
     } 
 
 	return Result;
 }
 
-float3 GetGroundColor(float4 _SceneColor, float3 _X, float _T, float3 _V, float3 _S, float _Radius, float3 _Attenuation, bool _IsSceneGeometry)
+// -----------------------------------------------------------------------------
+
+vec3 GetGroundColor(vec4 _SceneColor, vec3 _X, float _T, vec3 _V, vec3 _S, float _Radius, vec3 _Attenuation, bool _IsSceneGeometry)
 {
-    float3 Result = float3(0.0f, 0.0f, 0.0f); 	// ray looking at the sky (for intial value)
+    vec3 Result = vec3(0.0f, 0.0f, 0.0f); 	// ray looking at the sky (for intial value)
     
     if (_T > 0.0f)
 	{ 
-        float3 X0 = _X + _T * _V;
+        vec3 X0 = _X + _T * _V;
         float R0 = length(X0);
-        float3 N = X0 / R0;
+        vec3 N = X0 / R0;
 		
-		_SceneColor.xyz = saturate(_SceneColor.xyz + 0.05f);
+		_SceneColor.xyz = clamp(_SceneColor.xyz + vec3(0.05f), vec3(0.0f), vec3(1.0f));
 
-        float4 Reflectance = _SceneColor * float4(0.2f, 0.2f, 0.2f, 1.0f);
+        vec4 Reflectance = _SceneColor * vec4(0.2f, 0.2f, 0.2f, 1.0f);
 
         float MuS = dot(N, _S);
 
-        float3 SunLight = _IsSceneGeometry ? float3(0.0f, 0.0f, 0.0f) : GetTransmittanceWithShadow(R0, MuS);
-        //float3 SunLight = GetTransmittanceWithShadow(R0, MuS);
-        float3 GroundSkyLight = GetIrradiance(g_IrradianceTable, R0, MuS);
-        float3 GroundColor = (Reflectance.rgb * (max(MuS, 0.0f) * SunLight + GroundSkyLight)) / g_PI;
+        vec3 SunLight = _IsSceneGeometry ? vec3(0.0f, 0.0f, 0.0f) : GetTransmittanceWithShadow(R0, MuS);
+        //vec3 SunLight = GetTransmittanceWithShadow(R0, MuS);
+        vec3 GroundSkyLight = GetIrradiance(g_IrradianceTable, R0, MuS);
+        vec3 GroundColor = (Reflectance.rgb * (max(MuS, 0.0f) * SunLight + GroundSkyLight)) / g_PI;
 
         Result = GroundColor * _Attenuation;
     }
@@ -233,26 +206,32 @@ float3 GetGroundColor(float4 _SceneColor, float3 _X, float _T, float3 _V, float3
     return Result;
 }
 
-float3 GetSunColor(float3 _X, float _T, float3 _V, float3 _S, float _Radius, float _Mu) 
+// -----------------------------------------------------------------------------
+
+vec3 GetSunColor(vec3 _X, float _T, vec3 _V, vec3 _S, float _Radius, float _Mu) 
 {
-	float3 TransmittanceValue = _Radius <= g_RadiusAtmosphere ? GetTransmittanceWithShadow(_Radius, _Mu) : float3(1.0f, 1.0f, 1.0f);
+	vec3 TransmittanceValue = _Radius <= g_RadiusAtmosphere ? GetTransmittanceWithShadow(_Radius, _Mu) : vec3(1.0f, 1.0f, 1.0f);
+
     if (_T > 0.0f) 
 	{
-        return float3(0.0f, 0.0f, 0.0f);
+        return vec3(0.0f, 0.0f, 0.0f);
     }
 	else 
 	{
 		float SunIntensity = step(cos(g_PI * 1.0f / 180.0f), dot(_V, _S));
+
         return TransmittanceValue * SunIntensity;
     }
 }
 
-float4 GetAtmosphericFog(float3 _Position, float3 _ViewDirection, float _Depth, float3 _SceneColor)
-{
-    bool IsSceneGeometry = _Depth < g_Far;
+// -----------------------------------------------------------------------------
 
-	float Scale = 0.00001f; // meters to km
-	_Position.y = _Position.y + 100000.0f;  // ground offset
+vec4 GetAtmosphericFog(vec3 _Position, vec3 _ViewDirection, float _Depth, vec3 _SceneColor)
+{
+    bool IsSceneGeometry = _Depth < g_CameraParameterFar;
+
+	float Scale = 0.001f; // meters to km
+	_Position.y = _Position.y + 1000.0f;  // ground offset
 	_Position *= Scale;
 	_Position.y += g_RadiusGround + HeightOffset;
 
@@ -279,34 +258,30 @@ float4 GetAtmosphericFog(float3 _Position, float3 _ViewDirection, float _Depth, 
 
     //return IsSceneGeometry;
 
-	float3 Attenuation = 1.0f;
+	vec3 Attenuation = vec3(1.0f);
 
-	float3 InscatterColor = GetInscatterColor(1, _Position, T, _ViewDirection, g_SunDirection, Radius, Mu, Attenuation, IsSceneGeometry); // TODO: understand FogDepth
-    float3 GroundColor = GetGroundColor(float4(_SceneColor, 1.0f), _Position, T, _ViewDirection, g_SunDirection, Radius, Attenuation, IsSceneGeometry);
-    float3 Sun = GetSunColor(_Position, T, _ViewDirection, g_SunDirection, Radius, Mu);
+	vec3 InscatterColor = GetInscatterColor(1, _Position, T, _ViewDirection, normalize(g_SunDirection.xyz), Radius, Mu, Attenuation, IsSceneGeometry); // TODO: understand FogDepth
+    vec3 GroundColor = GetGroundColor(vec4(_SceneColor, 1.0f), _Position, T, _ViewDirection, normalize(g_SunDirection.xyz), Radius, Attenuation, IsSceneGeometry);
+    vec3 Sun = GetSunColor(_Position, T, _ViewDirection, normalize(g_SunDirection.xyz), Radius, Mu);
 
-    //return float4(Attenuation, 1.0f);
-    //return float4(GroundColor + InscatterColor + Sun, 1.0f);
+    //return vec4(Attenuation, 1.0f);
+    //return vec4(Sun, 1.0f);
 
 	// Decay color
-	float3 OriginalColor = Sun + GroundColor + InscatterColor;
-    return float4(OriginalColor, 1.0f);
-	OriginalColor = ShadowFactor * OriginalColor * float3(1.0f, 1.0f, 1.0f); // sun color
-	float4 OutColor = float4(OriginalColor, lerp(saturate(Attenuation.r), 1.0f, (1.0f - DistanceRatio)));
+	vec3 OriginalColor = Sun + GroundColor + InscatterColor;
+    return vec4(OriginalColor, 1.0f);
+	OriginalColor = ShadowFactor * OriginalColor * vec3(1.0f, 1.0f, 1.0f); // sun color
+	vec4 OutColor = vec4(OriginalColor, mix(saturate(Attenuation.r), 1.0f, (1.0f - DistanceRatio)));
     return OutColor;
 }
 
-float4 PSShader(PSInput _Input) : SV_Target
-{
-    float2 UV = _Input.m_CSPosition.xy;
+// -----------------------------------------------------------------------------
 
-    float CSDepth = g_DepthBuffer[UV];
-    float LinearDepth = GetLinearDepth(CSDepth);
-    float SceneDepth = LinearDepth * g_Far;
-    
-    float3 WSViewDirection = normalize(_Input.m_WSViewRay);
-    float3 WSPosition = GetWSPosition(_Input.m_WSViewRay, LinearDepth);
-    
-    float4 Color = GetAtmosphericFog(WSPosition, WSViewDirection, SceneDepth, g_FrameBuffer[UV].rgb);
-    return Color;
+void main()
+{        
+    vec4 Color = GetAtmosphericFog(g_ViewPosition.xyz * 100.0f, normalize(in_Normal), 50000.0f, vec3(0.0f));
+
+    out_Output = Color * 50000.0f;
 }
+
+#endif // __INCLUDE_FS_PAS_GLSL__
