@@ -1293,7 +1293,7 @@ namespace
 
             ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
 
-            ContextManager::SetRasterizerState(StateManager::GetRasterizerState(0));
+            ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::NoCull));
 
             ContextManager::SetTopology(STopology::TriangleList);
 
