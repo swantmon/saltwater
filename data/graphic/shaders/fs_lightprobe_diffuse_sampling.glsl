@@ -23,7 +23,7 @@ layout(row_major, std140, binding = 3) uniform UB0
     vec4 ps_ConstantBufferData0;
 };
 
-uniform samplerCube ps_EnvironmentCubemap;
+layout(binding = 0) uniform samplerCube ps_EnvironmentCubemap;
 
 // -----------------------------------------------------------------------------
 // Easy access defines
