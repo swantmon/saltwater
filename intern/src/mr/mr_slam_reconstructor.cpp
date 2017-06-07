@@ -960,7 +960,8 @@ namespace MR
             const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
             
             ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_InpaintedRaycastDepthBufferPtr[PyramidLevel]));
-            ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ContourNormalsPtr[PyramidLevel]));
+			ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ContourNormalsPtr[PyramidLevel]));
+			ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(m_ReferenceNormalMapPtr[PyramidLevel]));
 
             ContextManager::Barrier();
 

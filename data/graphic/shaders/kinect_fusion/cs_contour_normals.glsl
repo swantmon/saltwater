@@ -14,6 +14,7 @@
 
 layout(binding = 0, r16ui) uniform uimage2D cs_DepthBuffer;
 layout(binding = 1, MAP_TEXTURE_FORMAT) uniform image2D cs_NormalBuffer;
+layout(binding = 2, MAP_TEXTURE_FORMAT) uniform image2D cs_ReferenceNormalBuffer;
 
 // -------------------------------------------------------------------------------------
 // Functions
@@ -52,7 +53,7 @@ vec2 ComputeGradient(ivec2 Position)
 			const float Sample = float(imageLoad(cs_DepthBuffer, Position + SampleOffset));
 
 			Result.x += Sample * g_SobelKernel[j * g_KernelSize + i];
-			Result.y += Sample * g_SobelKernel[i * g_KernelSize + j];
+			Result.y -= Sample * g_SobelKernel[i * g_KernelSize + j];
 		}
 	}
 
@@ -74,25 +75,30 @@ void main()
 	const int Depth = int(imageLoad(cs_DepthBuffer, ivec2(u, v)).x);
 	vec3 Normal = vec3(0.0f);
 
+	const vec2 uv = vec2(u, v) / ImageSize;
+
 	if (Depth != 0)
 	{
 		const float z = Depth / 1000.0f;
 
-		const vec2 FocalPoint = g_Intrinisics[PyramidLevel].m_FocalPoint;
-		const vec2 FocalLength = g_Intrinisics[PyramidLevel].m_FocalLength;
+		const vec2 FocalPoint = g_Intrinisics[PyramidLevel].m_FocalPoint / ImageSize;
+		const vec2 FocalLength = g_Intrinisics[PyramidLevel].m_FocalLength / ImageSize;
 
-		const vec2 Temp = Gradient * (vec2(u, v) - FocalPoint) / ImageSize;
+		const vec2 Temp = Gradient * (uv - FocalPoint);
 
-		Normal.xy = (Gradient * FocalLength / ImageSize) / z;
-		Normal.z = -1.0f - (Temp.x - Temp.y) / z;
+		Normal.xy = (Gradient * FocalLength) / z;
+		Normal.z = (Temp.y - Temp.x) / z;
 
-		Normal = mat3(g_PoseMatrix) * Normal;
+		//Normal = mat3(g_PoseMatrix) * Normal;
 	}
+
+	const vec3 Reference = imageLoad(cs_ReferenceNormalBuffer, ivec2(u, v)).xyz;
 
 	//imageStore(cs_NormalBuffer, ivec2(u, v), vec4(Gradient, length(Gradient), 1.0f));
 	//imageStore(cs_NormalBuffer, ivec2(u, v), vec4(Normal, length(Normal)));
 	imageStore(cs_NormalBuffer, ivec2(u, v), vec4(normalize(Normal), 1.0f));
 	//imageStore(cs_NormalBuffer, ivec2(u, v), vec4(Normal.xy, 0.0f, 1.0f));
+	imageStore(cs_ReferenceNormalBuffer, ivec2(u, v), vec4(abs(Reference - Normal), 1.0f));
 }
 
 #endif // __INCLUDE_CS_CONTOURS_NORMAL_GLSL__
