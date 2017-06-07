@@ -79,7 +79,7 @@ namespace MR
 
         void InpaintDepth(CTextureVector& rDepthBuffers, CTextureVector& rInpaintedDepthBuffers);
         void FindContourGenerators();
-        void CreateContourNormals();
+        void CreateContourNormals(CTextureVector& rDepthBuffers, CTextureVector& rNormalBuffers);
 
         void PerformTracking();
 
@@ -117,9 +117,7 @@ namespace MR
         Gfx::CShaderPtr m_ContourGeneratorsCSPtr;
         Gfx::CShaderPtr m_ContourCandidatesCSPtr;
         Gfx::CShaderPtr m_ContourNormalsCSPtr;
-
-        CTextureVector m_ContourNormalsPtr;
-
+		
         Gfx::CTexture2DPtr m_RawDepthBufferPtr;
         Gfx::CTexture2DPtr m_RawCameraFramePtr;
         CTextureVector m_SmoothDepthBufferPtr;
@@ -135,6 +133,9 @@ namespace MR
 
         CTextureVector m_ContourGeneratorMapPtr;
         CTextureVector m_RaycastContourMapPtr;
+
+		CTextureVector m_ReferenceContourNormalsPtr;
+		CTextureVector m_RaycastContourNormalsPtr;
 
         Gfx::CTexture3DPtr m_TSDFVolumePtr;
         Gfx::CTexture3DPtr m_ColorVolumePtr;

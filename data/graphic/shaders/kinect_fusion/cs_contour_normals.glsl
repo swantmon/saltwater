@@ -92,13 +92,13 @@ void main()
 		//Normal = mat3(g_PoseMatrix) * Normal;
 	}
 
-	const vec3 Reference = imageLoad(cs_ReferenceNormalBuffer, ivec2(u, v)).xyz;
+	vec3 Reference = mat3(g_InvPoseMatrix) * imageLoad(cs_ReferenceNormalBuffer, ivec2(u, v)).xyz;
 
 	//imageStore(cs_NormalBuffer, ivec2(u, v), vec4(Gradient, length(Gradient), 1.0f));
 	//imageStore(cs_NormalBuffer, ivec2(u, v), vec4(Normal, length(Normal)));
 	imageStore(cs_NormalBuffer, ivec2(u, v), vec4(normalize(Normal), 1.0f));
 	//imageStore(cs_NormalBuffer, ivec2(u, v), vec4(Normal.xy, 0.0f, 1.0f));
-	imageStore(cs_ReferenceNormalBuffer, ivec2(u, v), vec4(abs(Reference - Normal), 1.0f));
+	imageStore(cs_ReferenceNormalBuffer, ivec2(u, v), vec4(Reference, 1.0f));
 }
 
 #endif // __INCLUDE_CS_CONTOURS_NORMAL_GLSL__
