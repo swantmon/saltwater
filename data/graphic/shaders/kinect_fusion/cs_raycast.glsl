@@ -52,7 +52,7 @@ void main()
     imageStore(cs_Vertex, VertexMapPosition, vec4(Vertex, 1.0f));
     imageStore(cs_Normal, VertexMapPosition, vec4(Normal, 1.0f));
 
-    const uint Depth = uint(Vertex.z * 1000.0f);
+	const uint Depth = uint(clamp(Vertex.z * 1000.0f, MIN_DEPTH, MAX_DEPTH));
 
     imageStore(cs_Depth, VertexMapPosition, uvec4((Depth < 65535) ? Depth : 0));
 }
