@@ -1159,6 +1159,37 @@ namespace
         UpdateGeometryBuffer(Base::Float3::s_Zero, 0.1f, 1000.0f);
 
         // -----------------------------------------------------------------------------
+        // Prepare
+        // -----------------------------------------------------------------------------
+        ContextManager::SetBlendState(StateManager::GetBlendState(0));
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::NoCull));
+
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        ContextManager::SetShaderVS(m_FilteringVSPtr);
+
+        ContextManager::SetShaderGS(m_CubemapGSPtr);
+
+        ContextManager::SetShaderPS(m_FilteringSpecularPSPtr);
+
+        ContextManager::SetVertexBufferSet(m_EnvironmentSpherePtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+
+        ContextManager::SetIndexBuffer(m_EnvironmentSpherePtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+
+        ContextManager::SetInputLayout(m_P3N3T2InputLayoutPtr);
+
+        ContextManager::SetConstantBuffer(2, m_CubemapGSBufferPtr);
+
+        ContextManager::SetConstantBuffer(3, m_FilteringPSBufferPtr);
+
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(_rInterLightProbeFacet.m_ReflectionCubemapPtr));
+
+        // -----------------------------------------------------------------------------
         // Refine HDR specular from HDR cube map
         // -----------------------------------------------------------------------------
         CInternLightProbeFacet::CTargetSets&   rSpecularTargetSets   = _rInterLightProbeFacet.m_SpecularHDRTargetSetPtrs;
@@ -1176,11 +1207,6 @@ namespace
         for (; CurrentOfSpecularMipmap != EndOfSpecularMipmaps; ++CurrentOfSpecularMipmap)
         {
             // -----------------------------------------------------------------------------
-            // Prepare render target for environment cube map generation per mipmap
-            // -----------------------------------------------------------------------------
-            TargetSetManager::ClearTargetSet(rSpecularTargetSets[IndexOfMipmap]);
-
-            // -----------------------------------------------------------------------------
             // Upload per mipmap changing data
             // -----------------------------------------------------------------------------
             CubemapSettings.m_LinearRoughness   = MipmapRoughness;
@@ -1189,40 +1215,9 @@ namespace
 
             BufferManager::UploadConstantBufferData(m_FilteringPSBufferPtr, &CubemapSettings);
 
-            // -----------------------------------------------------------------------------
-            // Setup
-            // -----------------------------------------------------------------------------
             ContextManager::SetTargetSet(rSpecularTargetSets[IndexOfMipmap]);
 
             ContextManager::SetViewPortSet(rSpecularViewPortSets[IndexOfMipmap]);
-
-            ContextManager::SetBlendState(StateManager::GetBlendState(0));
-
-            ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
-
-            ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::NoCull));
-
-            ContextManager::SetTopology(STopology::TriangleList);
-
-            ContextManager::SetShaderVS(m_FilteringVSPtr);
-
-            ContextManager::SetShaderGS(m_CubemapGSPtr);
-
-            ContextManager::SetShaderPS(m_FilteringSpecularPSPtr);
-
-            ContextManager::SetVertexBufferSet(m_EnvironmentSpherePtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
-
-            ContextManager::SetIndexBuffer(m_EnvironmentSpherePtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
-
-            ContextManager::SetInputLayout(m_P3N3T2InputLayoutPtr);
-
-            ContextManager::SetConstantBuffer(2, m_CubemapGSBufferPtr);
-
-            ContextManager::SetConstantBuffer(3, m_FilteringPSBufferPtr);
-
-            ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
-
-            ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(_rInterLightProbeFacet.m_ReflectionCubemapPtr));
 
             // -----------------------------------------------------------------------------
             // Draw
@@ -1230,38 +1225,8 @@ namespace
             ContextManager::DrawIndexed(m_EnvironmentSpherePtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
 
             // -----------------------------------------------------------------------------
-            // Reset
+            // Next mip
             // -----------------------------------------------------------------------------
-            ContextManager::ResetTexture(0);
-
-            ContextManager::ResetSampler(0);
-
-            ContextManager::ResetConstantBuffer(2);
-
-            ContextManager::ResetConstantBuffer(3);
-
-            ContextManager::ResetInputLayout();
-
-            ContextManager::ResetIndexBuffer();
-
-            ContextManager::ResetVertexBufferSet();
-
-            ContextManager::ResetShaderVS();
-
-            ContextManager::ResetShaderGS();
-
-            ContextManager::ResetShaderPS();
-
-            ContextManager::ResetTopology();
-
-            ContextManager::ResetRasterizerState();
-
-            ContextManager::ResetDepthStencilState();
-
-            ContextManager::ResetViewPortSet();
-
-            ContextManager::ResetTargetSet();
-
             MipmapRoughness += MipmapRoughnessDelta;
 
             ++IndexOfMipmap;
@@ -1270,6 +1235,8 @@ namespace
         // -----------------------------------------------------------------------------
         // Refine HDR diffuse from HDR cube map
         // -----------------------------------------------------------------------------
+        ContextManager::SetShaderPS(m_FilteringDiffusePSPtr);
+
         {
             CubemapSettings.m_LinearRoughness   = 0.0f;
             CubemapSettings.m_NumberOfMiplevels = 0.0f;
@@ -1278,77 +1245,49 @@ namespace
             BufferManager::UploadConstantBufferData(m_FilteringPSBufferPtr, &CubemapSettings);
 
             // -----------------------------------------------------------------------------
-            // Prepare render target for environment cube map generation per mipmap
-            // -----------------------------------------------------------------------------
-            TargetSetManager::ClearTargetSet(_rInterLightProbeFacet.m_DiffuseHDRTargetSetPtr);
 
-            // -----------------------------------------------------------------------------
-            // Setup
-            // -----------------------------------------------------------------------------
             ContextManager::SetTargetSet(_rInterLightProbeFacet.m_DiffuseHDRTargetSetPtr);
 
             ContextManager::SetViewPortSet(_rInterLightProbeFacet.m_DiffuseViewPortSetPtr);
-
-            ContextManager::SetBlendState(StateManager::GetBlendState(0));
-
-            ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
-
-            ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::NoCull));
-
-            ContextManager::SetTopology(STopology::TriangleList);
-
-            ContextManager::SetShaderVS(m_FilteringVSPtr);
-
-            ContextManager::SetShaderGS(m_CubemapGSPtr);
-
-            ContextManager::SetShaderPS(m_FilteringDiffusePSPtr);
-
-            ContextManager::SetVertexBufferSet(m_EnvironmentSpherePtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
-
-            ContextManager::SetIndexBuffer(m_EnvironmentSpherePtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
-
-            ContextManager::SetInputLayout(m_P3N3T2InputLayoutPtr);
-
-            ContextManager::SetConstantBuffer(2, m_CubemapGSBufferPtr);
-
-            ContextManager::SetConstantBuffer(3, m_FilteringPSBufferPtr);
-
-            ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
-
-            ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(_rInterLightProbeFacet.m_ReflectionCubemapPtr));
 
             // -----------------------------------------------------------------------------
             // Draw
             // -----------------------------------------------------------------------------
             ContextManager::DrawIndexed(m_EnvironmentSpherePtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
-
-            // -----------------------------------------------------------------------------
-            // Reset
-            // -----------------------------------------------------------------------------
-            ContextManager::ResetTexture(0);
-
-            ContextManager::ResetSampler(0);
-
-            ContextManager::ResetConstantBuffer(2);
-
-            ContextManager::ResetConstantBuffer(3);
-
-            ContextManager::ResetInputLayout();
-
-            ContextManager::ResetIndexBuffer();
-
-            ContextManager::ResetVertexBufferSet();
-
-            ContextManager::ResetShaderVS();
-
-            ContextManager::ResetShaderGS();
-
-            ContextManager::ResetShaderPS();
-
-            ContextManager::ResetTopology();
-
-            ContextManager::ResetRenderContext();
         }
+
+        // -----------------------------------------------------------------------------
+        // Reset
+        // -----------------------------------------------------------------------------
+        ContextManager::ResetTexture(0);
+
+        ContextManager::ResetSampler(0);
+
+        ContextManager::ResetConstantBuffer(2);
+
+        ContextManager::ResetConstantBuffer(3);
+
+        ContextManager::ResetInputLayout();
+
+        ContextManager::ResetIndexBuffer();
+
+        ContextManager::ResetVertexBufferSet();
+
+        ContextManager::ResetShaderVS();
+
+        ContextManager::ResetShaderGS();
+
+        ContextManager::ResetShaderPS();
+
+        ContextManager::ResetTopology();
+
+        ContextManager::ResetRasterizerState();
+
+        ContextManager::ResetDepthStencilState();
+
+        ContextManager::ResetViewPortSet();
+
+        ContextManager::ResetTargetSet();
 
         Performance::EndEvent();
     }
