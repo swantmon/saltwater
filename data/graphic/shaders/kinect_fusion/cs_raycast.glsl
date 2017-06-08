@@ -53,8 +53,8 @@ void main()
     imageStore(cs_Normal, VertexMapPosition, vec4(Normal, 1.0f));
 
 	Vertex = (g_InvPoseMatrix * vec4(Vertex, 1.0f)).xyz;
-
-	const uint Depth = uint(clamp(Vertex.z * 1000.0f, MIN_DEPTH, MAX_DEPTH));
+	
+	const uint Depth = uint(Vertex.z * 1000.0f > MAX_DEPTH ? 0.0f : Vertex.z * 1000.0f);
 
     imageStore(cs_Depth, VertexMapPosition, uvec4((Depth < 65535) ? Depth : 0));
 }
