@@ -973,7 +973,7 @@ namespace MR
             
             ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(rDepthBuffers[PyramidLevel]));
 			ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(rNormalBuffers[PyramidLevel]));
-			ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(m_ReferenceNormalMapPtr[PyramidLevel]));
+			ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(m_RaycastNormalMapPtr[PyramidLevel]));
 
             ContextManager::Barrier();
 
@@ -1075,8 +1075,8 @@ namespace MR
     // -----------------------------------------------------------------------------
 
     CSLAMReconstructor::SReconstructionSettings::SReconstructionSettings()
-        : m_VolumeSize(1.0f)
-        , m_VolumeResolution(256)
+        : m_VolumeSize(5.0f)
+        , m_VolumeResolution(512)
         , m_TruncatedDistance(30.0f)
         , m_MaxIntegrationWeight(200)
         , m_PyramidLevelCount(3)
