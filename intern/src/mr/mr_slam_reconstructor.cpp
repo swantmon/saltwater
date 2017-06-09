@@ -938,8 +938,8 @@ namespace MR
     // -----------------------------------------------------------------------------
 
     CSLAMReconstructor::SReconstructionSettings::SReconstructionSettings()
-        : m_VolumeSize(1.0f)
-        , m_VolumeResolution(256)
+        : m_VolumeSize(5.0f)
+        , m_VolumeResolution(512)
         , m_TruncatedDistance(30.0f)
         , m_MaxIntegrationWeight(200)
         , m_PyramidLevelCount(3)
