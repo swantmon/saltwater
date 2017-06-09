@@ -42,7 +42,7 @@ namespace Edit
         MR::CSLAMReconstructor::SReconstructionSettings DefaultSettings;
         
         m_pSizeHS->setRange(1, 500);
-        m_pSizeHS->setValue(100);
+        m_pSizeHS->setValue(DefaultSettings.m_VolumeSize * 100);
         m_pSizeTL->setText(QString::number(DefaultSettings.m_VolumeSize));
 
         m_pTruncatedDistanceHS->setRange(1, 100);
@@ -53,7 +53,7 @@ namespace Edit
         m_pWeightHS->setValue(DefaultSettings.m_MaxIntegrationWeight);
         m_pWeightTL->setText(QString::number(DefaultSettings.m_MaxIntegrationWeight));
 
-        const int InitialSliderPosition = 2;
+        const int InitialSliderPosition = 4;
         m_pResolutionHS->setRange(0, g_ResolutionCount - 1);
         m_pResolutionHS->setValue(InitialSliderPosition);
         m_pResolutionHS->setPageStep(1);
