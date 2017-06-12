@@ -31,14 +31,14 @@ vec2 GetVoxel(ivec3 Coords, sampler3D Volume)
     return Voxel;
 }
 
-float GetInterpolatedTSDF(vec3 Position, sampler3D Volume)
+float GetInterpolatedTSDF_(vec3 Position, sampler3D Volume)
 {
     vec3 Coords = GetVoxelCoords(Position);
 
     return textureLod(Volume, Coords / float(VOLUME_RESOLUTION), 0).x;
 }
 
-float GetInterpolatedTSDF_(vec3 Position, sampler3D Volume)
+float GetInterpolatedTSDF(vec3 Position, sampler3D Volume)
 {
     vec3 Coords = GetVoxelCoords(Position);
 
