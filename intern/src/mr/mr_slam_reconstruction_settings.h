@@ -24,6 +24,7 @@ namespace MR
 		int m_PyramidLevelIterations[MAX_PYRAMIDLEVELS];
 		Base::Int2 m_DepthThreshold;
 		bool m_CaptureColor;
+		bool m_IsScalable;
 
 		SReconstructionSettings();
 	};
