@@ -253,16 +253,16 @@ namespace MR
 
         std::string DefineString = DefineStream.str();
         
-        m_BilateralFilterCSPtr   = ShaderManager::CompileCS("kinect_fusion\\cs_bilateral_filter.glsl"  , "main", DefineString.c_str());
-        m_VertexMapCSPtr         = ShaderManager::CompileCS("kinect_fusion\\cs_vertex_map.glsl"        , "main", DefineString.c_str());
-        m_NormalMapCSPtr         = ShaderManager::CompileCS("kinect_fusion\\cs_normal_map.glsl"        , "main", DefineString.c_str());
-        m_DownSampleDepthCSPtr   = ShaderManager::CompileCS("kinect_fusion\\cs_downsample_depth.glsl"  , "main", DefineString.c_str());
-        m_IntegrationCSPtr       = ShaderManager::CompileCS("kinect_fusion\\cs_integrate.glsl"         , "main", DefineString.c_str());        
-        m_RaycastCSPtr           = ShaderManager::CompileCS("kinect_fusion\\cs_raycast.glsl"           , "main", DefineString.c_str());
-        m_RaycastPyramidCSPtr    = ShaderManager::CompileCS("kinect_fusion\\cs_raycast_pyramid.glsl"   , "main", DefineString.c_str());
-        m_DetermineSummandsCSPtr = ShaderManager::CompileCS("kinect_fusion\\cs_determine_summands.glsl", "main", DefineString.c_str());
-        m_ReduceSumCSPtr         = ShaderManager::CompileCS("kinect_fusion\\cs_reduce_sum.glsl"        , "main", DefineString.c_str());
-        m_ClearVolumeCSPtr       = ShaderManager::CompileCS("kinect_fusion\\cs_clear_volume.glsl"      , "main", DefineString.c_str());
+        m_BilateralFilterCSPtr   = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_bilateral_filter.glsl"  , "main", DefineString.c_str());
+        m_VertexMapCSPtr         = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_vertex_map.glsl"        , "main", DefineString.c_str());
+        m_NormalMapCSPtr         = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_normal_map.glsl"        , "main", DefineString.c_str());
+        m_DownSampleDepthCSPtr   = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_downsample_depth.glsl"  , "main", DefineString.c_str());
+        m_IntegrationCSPtr       = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_integrate.glsl"         , "main", DefineString.c_str());        
+        m_RaycastCSPtr           = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_raycast.glsl"           , "main", DefineString.c_str());
+        m_RaycastPyramidCSPtr    = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_raycast_pyramid.glsl"   , "main", DefineString.c_str());
+        m_DetermineSummandsCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_determine_summands.glsl", "main", DefineString.c_str());
+        m_ReduceSumCSPtr         = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_reduce_sum.glsl"        , "main", DefineString.c_str());
+        m_ClearVolumeCSPtr       = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_clear_volume.glsl"      , "main", DefineString.c_str());
     }
     
     // -----------------------------------------------------------------------------
