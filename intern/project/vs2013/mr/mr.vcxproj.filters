@@ -25,6 +25,7 @@
       <Filter>controls</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\mr\mr_slam_reconstructor.cpp" />
+    <ClCompile Include="..\..\..\src\mr\mr_scalable_slam_reconstructor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\mr\cv_guidedfilter.h">
@@ -52,5 +53,6 @@
       <Filter>controls</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\mr\mr_slam_reconstructor.h" />
+    <ClInclude Include="..\..\..\src\mr\mr_scalable_slam_reconstructor.h" />
   </ItemGroup>
 </Project>
