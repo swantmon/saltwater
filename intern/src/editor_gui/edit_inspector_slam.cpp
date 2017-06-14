@@ -39,7 +39,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         setupUi(this);
 
-        MR::CSLAMReconstructor::SReconstructionSettings DefaultSettings;
+        MR::SReconstructionSettings DefaultSettings;
         
         m_pSizeHS->setRange(1, 500);
         m_pSizeHS->setValue(DefaultSettings.m_VolumeSize * 100);

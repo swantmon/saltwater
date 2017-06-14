@@ -73,7 +73,7 @@ namespace
         void PauseTracking(bool _Paused);
         void ChangeCamera(bool _IsTrackingCamera);
 
-        void OnReconstructionUpdate(const MR::CSLAMReconstructor::SReconstructionSettings& _Settings);
+        void OnReconstructionUpdate(const MR::SReconstructionSettings& _Settings);
 
     private:
 
@@ -156,7 +156,7 @@ namespace
     
     void CGfxReconstructionRenderer::OnSetupShader()
     {
-        MR::CSLAMReconstructor::SReconstructionSettings Settings;
+        MR::SReconstructionSettings Settings;
 
         m_pReconstructor->GetReconstructionSettings(&Settings);
 
@@ -374,7 +374,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::OnReconstructionUpdate(const MR::CSLAMReconstructor::SReconstructionSettings& _Settings)
+    void CGfxReconstructionRenderer::OnReconstructionUpdate(const MR::SReconstructionSettings& _Settings)
     {
         m_pReconstructor->ResetReconstruction(&_Settings);
 
@@ -431,7 +431,7 @@ namespace
     
     void CGfxReconstructionRenderer::RenderVolume()
     {
-        MR::CSLAMReconstructor::SReconstructionSettings Settings;
+        MR::SReconstructionSettings Settings;
         m_pReconstructor->GetReconstructionSettings(&Settings);
 
         Float4x4 PoseMatrix = m_pReconstructor->GetPoseMatrix();
@@ -641,7 +641,7 @@ namespace ReconstructionRenderer
     
     // -----------------------------------------------------------------------------
 
-    void OnReconstructionUpdate(const MR::CSLAMReconstructor::SReconstructionSettings& _Settings)
+    void OnReconstructionUpdate(const MR::SReconstructionSettings& _Settings)
     {
         CGfxReconstructionRenderer::GetInstance().OnReconstructionUpdate(_Settings);
     }

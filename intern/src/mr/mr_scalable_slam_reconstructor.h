@@ -12,6 +12,8 @@
 #include "base/base_matrix4x4.h"
 #include "base/base_vector2.h"
 
+#include "mr/mr_slam_reconstruction_settings.h"
+
 #include "graphic/gfx_shader.h"
 #include "graphic/gfx_texture_2d.h"
 #include "graphic/gfx_texture_3d.h"
@@ -23,25 +25,7 @@ namespace MR
     class IRGBDCameraControl;
 
     class CScalableSLAMReconstructor : private Base::CUncopyable
-    {        
-    public:
-
-        struct SReconstructionSettings
-        {
-            const static int MAX_PYRAMIDLEVELS = 8;
-
-            float m_VolumeSize;
-            int m_VolumeResolution;
-            float m_TruncatedDistance;
-            int m_MaxIntegrationWeight;
-            int m_PyramidLevelCount;
-            int m_PyramidLevelIterations[MAX_PYRAMIDLEVELS];
-            Base::Int2 m_DepthThreshold;
-            bool m_CaptureColor;
-
-            SReconstructionSettings();
-        };
-
+    {
     public:
 
         CScalableSLAMReconstructor(const SReconstructionSettings* pReconstructionSettings = nullptr);

@@ -31,6 +31,7 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\mr\mr_realsense_control.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_scalable_slam_reconstructor.cpp" />
+    <ClCompile Include="..\..\..\src\mr\mr_slam_reconstruction_settings.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_slam_reconstructor.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_webcam_control.cpp" />
   </ItemGroup>
@@ -45,6 +46,7 @@
     <ClInclude Include="..\..\..\src\mr\mr_realsense_control.h" />
     <ClInclude Include="..\..\..\src\mr\mr_rgbd_camera_control.h" />
     <ClInclude Include="..\..\..\src\mr\mr_scalable_slam_reconstructor.h" />
+    <ClInclude Include="..\..\..\src\mr\mr_slam_reconstruction_settings.h" />
     <ClInclude Include="..\..\..\src\mr\mr_slam_reconstructor.h" />
     <ClInclude Include="..\..\..\src\mr\mr_webcam_control.h" />
   </ItemGroup>

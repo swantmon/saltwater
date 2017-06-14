@@ -28,7 +28,7 @@ namespace ReconstructionRenderer
     void OnSetupEnd();
     
     void OnReload();
-    void OnReconstructionUpdate(const MR::CSLAMReconstructor::SReconstructionSettings& _Settings);
+    void OnReconstructionUpdate(const MR::SReconstructionSettings& _Settings);
     void OnNewMap();
     void OnUnloadMap();
     
