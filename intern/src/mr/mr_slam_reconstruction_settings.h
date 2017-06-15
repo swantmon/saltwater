@@ -15,6 +15,7 @@ namespace MR
 	struct SReconstructionSettings
 	{
 		const static int MAX_PYRAMIDLEVELS = 8;
+		const static int GRID_LEVELS = 3;
 
 		float m_VolumeSize;
 		int m_VolumeResolution;
@@ -24,6 +25,8 @@ namespace MR
 		int m_PyramidLevelIterations[MAX_PYRAMIDLEVELS];
 		Base::Int2 m_DepthThreshold;
 		bool m_CaptureColor;
+
+		int m_GridResolutions[GRID_LEVELS];
 
 		SReconstructionSettings();
 	};

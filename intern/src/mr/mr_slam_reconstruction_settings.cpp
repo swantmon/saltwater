@@ -17,5 +17,9 @@ namespace MR
         m_PyramidLevelIterations[0] = 10;
         m_PyramidLevelIterations[1] = 5;
         m_PyramidLevelIterations[2] = 4;
+
+		m_GridResolutions[0] = 16;
+		m_GridResolutions[1] =  8;
+		m_GridResolutions[2] =  8;
     }
 } // namespace MR
