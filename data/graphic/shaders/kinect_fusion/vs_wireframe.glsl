@@ -1,12 +1,13 @@
 
-#ifndef __INCLUDE_VS_CAMERA_GLSL__
-#define __INCLUDE_VS_CAMERA_GLSL__
+#ifndef __INCLUDE_VS_WIREFRAME_GLSL__
+#define __INCLUDE_VS_WIREFRAME_GLSL__
 
 #include "common_global.glsl"
 
 layout(row_major, std140, binding = 1) uniform PerDrawCallData
 {
     mat4 g_WorldMatrix;
+	vec4 g_Color;
 };
 
 layout(location = 0) in vec3 in_VertexPosition;
@@ -26,4 +27,4 @@ void main()
     gl_Position = g_WorldToScreen * WSPosition;
 }
 
-#endif // __INCLUDE_VS_CAMERA_GLSL__
+#endif // __INCLUDE_VS_WIREFRAME_GLSL__
