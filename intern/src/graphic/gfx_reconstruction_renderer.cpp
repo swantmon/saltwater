@@ -38,6 +38,12 @@ using namespace Gfx;
 
 namespace
 {
+	struct SDrawCallConstantBuffer
+	{
+		Base::Float4x4 m_WorldMatrix;
+		Base::Float4 m_Color;
+	};
+
     class CGfxReconstructionRenderer : private Base::CUncopyable
     {
         BASE_SINGLETON_FUNC(CGfxReconstructionRenderer)
@@ -86,8 +92,8 @@ namespace
 		std::unique_ptr<MR::CSLAMReconstructor> m_pReconstructor;
 		std::unique_ptr<MR::CScalableSLAMReconstructor> m_pScalableReconstructor;
         
-        CShaderPtr m_CameraVSPtr;
-        CShaderPtr m_CameraFSPtr;
+        CShaderPtr m_WireframeVSPtr;
+        CShaderPtr m_WireframeFSPtr;
         CShaderPtr m_RaycastVSPtr;
         CShaderPtr m_RaycastFSPtr;
 
@@ -137,8 +143,8 @@ namespace
     
     void CGfxReconstructionRenderer::OnExit()
     {
-        m_CameraVSPtr = 0;
-        m_CameraFSPtr = 0;
+        m_WireframeVSPtr = 0;
+        m_WireframeFSPtr = 0;
         m_RaycastVSPtr = 0;
         m_RaycastFSPtr = 0;
         
@@ -181,15 +187,15 @@ namespace
 
         if (Settings.m_IsScalable)
         {
-			m_CameraVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_wireframe.glsl", "main", DefineString.c_str());
-			m_CameraFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_wireframe.glsl", "main", DefineString.c_str());
+			m_WireframeVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_wireframe.glsl", "main", DefineString.c_str());
+			m_WireframeFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_wireframe.glsl", "main", DefineString.c_str());
 			m_RaycastVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_raycast.glsl", "main", DefineString.c_str());
 			m_RaycastFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_raycast.glsl", "main", DefineString.c_str());
         }
 		else
 		{
-			m_CameraVSPtr = ShaderManager::CompileVS("kinect_fusion\\vs_wireframe.glsl", "main", DefineString.c_str());
-			m_CameraFSPtr = ShaderManager::CompilePS("kinect_fusion\\fs_wireframe.glsl", "main", DefineString.c_str());
+			m_WireframeVSPtr = ShaderManager::CompileVS("kinect_fusion\\vs_wireframe.glsl", "main", DefineString.c_str());
+			m_WireframeFSPtr = ShaderManager::CompilePS("kinect_fusion\\fs_wireframe.glsl", "main", DefineString.c_str());
 			m_RaycastVSPtr = ShaderManager::CompileVS("kinect_fusion\\vs_raycast.glsl", "main", DefineString.c_str());
 			m_RaycastFSPtr = ShaderManager::CompilePS("kinect_fusion\\fs_raycast.glsl", "main", DefineString.c_str());
 		}
@@ -205,7 +211,7 @@ namespace
         InputLayoutDesc.m_InputSlotClass       = CInputLayout::PerVertex;
         InputLayoutDesc.m_InstanceDataStepRate = 0;
 
-        m_CameraInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_CameraVSPtr);
+        m_CameraInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_WireframeVSPtr);
         m_CubeInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_RaycastVSPtr);
     }
     
@@ -258,7 +264,7 @@ namespace
 
         m_RaycastConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(Float4x4);
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(SDrawCallConstantBuffer);
 
         m_DrawCallConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
@@ -509,14 +515,15 @@ namespace
 		ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
 
 		ContextManager::SetRenderContext(m_WireframeRenderContextPtr);
-		ContextManager::SetShaderVS(m_CameraVSPtr);
-		ContextManager::SetShaderPS(m_CameraFSPtr);
+		ContextManager::SetShaderVS(m_WireframeVSPtr);
+		ContextManager::SetShaderPS(m_WireframeFSPtr);
 
-		Float4x4 WorldMatrix;
+		SDrawCallConstantBuffer BufferData;
 
-		WorldMatrix.SetScale(Settings.m_VolumeSize);
+		BufferData.m_WorldMatrix.SetScale(Settings.m_VolumeSize);
+		BufferData.m_Color = Float4(0.0f, 0.0f, 1.0f, 1.0f);
 
-		BufferManager::UploadConstantBufferData(m_DrawCallConstantBufferPtr, &WorldMatrix);
+		BufferManager::UploadConstantBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
 		ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 		ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
@@ -531,12 +538,15 @@ namespace
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
 
         ContextManager::SetRenderContext(m_WireframeRenderContextPtr);
-        ContextManager::SetShaderVS(m_CameraVSPtr);
-        ContextManager::SetShaderPS(m_CameraFSPtr);
+        ContextManager::SetShaderVS(m_WireframeVSPtr);
+        ContextManager::SetShaderPS(m_WireframeFSPtr);
 
-        Float4x4 WorldMatrix = m_pReconstructor->GetPoseMatrix();
+		SDrawCallConstantBuffer BufferData;
 
-        BufferManager::UploadConstantBufferData(m_DrawCallConstantBufferPtr, &WorldMatrix);
+		BufferData.m_WorldMatrix = m_pReconstructor->GetPoseMatrix();
+		BufferData.m_Color = Float4(1.0f, 0.0f, 1.0f, 1.0f);
+
+		BufferManager::UploadConstantBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
