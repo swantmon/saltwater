@@ -276,16 +276,20 @@ namespace
     {
 		//Todo: remove magic numbers (focal length/point, max/min depth)
 
-		float x = (-0.50602675f) / 0.72113f * 8.0f;
-		float y = (-0.499133f) / 0.870799f * 8.0f;
+		float x = (-0.50602675f) / 0.72113f;
+		float y = (-0.499133f) / 0.870799f;
 		
         Float3 CameraVertices[] =
         {
-            Float3(-x, -y, 8.0f),
-            Float3( x, -y, 8.0f),
-            Float3( x,  y, 8.0f),
-            Float3(-x,  y, 8.0f),
+            Float3(-x * 8.0f, -y * 8.0f, 8.0f),
+            Float3( x * 8.0f, -y * 8.0f, 8.0f),
+            Float3( x * 8.0f,  y * 8.0f, 8.0f),
+            Float3(-x * 8.0f,  y * 8.0f, 8.0f),
             Float3( 0.0f,  0.0f, 0.0f),
+			Float3(-x * 0.5f, -y * 0.5f, 0.5f),
+			Float3( x * 0.5f, -y * 0.5f, 0.5f),
+			Float3( x * 0.5f,  y * 0.5f, 0.5f),
+			Float3(-x * 0.5f,  y * 0.5f, 0.5f),
         };
 
         unsigned int CameraIndices[] =
@@ -296,6 +300,8 @@ namespace
             2, 4, 3,
             0, 4, 1,
             0, 3, 4,
+			5, 6, 7,
+			5, 7, 8,
         };
                 
         Dt::CSurface* pSurface = new Dt::CSurface;
