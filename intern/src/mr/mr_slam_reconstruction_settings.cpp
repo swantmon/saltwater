@@ -13,7 +13,6 @@ namespace MR
         , m_PyramidLevelCount(3)
         , m_DepthThreshold(500, 8000)
         , m_CaptureColor(false)
-		, m_IsScalable(true)
     {
         m_PyramidLevelIterations[0] = 10;
         m_PyramidLevelIterations[1] = 5;

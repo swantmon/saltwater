@@ -84,7 +84,8 @@ namespace
 
     private:
 
-        void RenderVolume();
+		void RenderVolume();
+		void RenderScalableVolume();
         void RenderCamera();
         
     private:
@@ -133,7 +134,7 @@ namespace
     {
         Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxReconstructionRenderer::OnResize));
         
-        m_pReconstructor.reset(new MR::CSLAMReconstructor);
+		//m_pReconstructor.reset(new MR::CSLAMReconstructor);
 		m_pScalableReconstructor.reset(new MR::CScalableSLAMReconstructor);
 
         m_UseTrackingCamera = true;
@@ -166,38 +167,55 @@ namespace
     
     void CGfxReconstructionRenderer::OnSetupShader()
     {
-        MR::SReconstructionSettings Settings;
+		MR::SReconstructionSettings Settings;
 
-        m_pReconstructor->GetReconstructionSettings(&Settings);
+		if (m_pScalableReconstructor != nullptr)
+		{
+			m_pScalableReconstructor->GetReconstructionSettings(&Settings);
 
-        std::stringstream DefineStream;
+			std::stringstream DefineStream;
 
-        DefineStream
-            << "#define VOLUME_RESOLUTION "  << Settings.m_VolumeResolution                         << " \n"
-            << "#define TRUNCATED_DISTANCE " << Settings.m_TruncatedDistance                        << " \n"
-            << "#define VOLUME_SIZE "        << Settings.m_VolumeSize                               << " \n"
-            << "#define VOXEL_SIZE "         << Settings.m_VolumeSize / Settings.m_VolumeResolution << " \n";
+			DefineStream
+				<< "#define VOLUME_RESOLUTION "  << Settings.m_VolumeResolution << " \n"
+				<< "#define TRUNCATED_DISTANCE " << Settings.m_TruncatedDistance << " \n"
+				<< "#define VOLUME_SIZE "        << Settings.m_VolumeSize << " \n"
+				<< "#define VOXEL_SIZE "         << Settings.m_VolumeSize / Settings.m_VolumeResolution << " \n";
 
-        if (Settings.m_CaptureColor)
-        {
-            DefineStream << "#define CAPTURE_COLOR\n";
-        }
+			if (Settings.m_CaptureColor)
+			{
+				DefineStream << "#define CAPTURE_COLOR\n";
+			}
 
-        std::string DefineString = DefineStream.str();
+			std::string DefineString = DefineStream.str();
 
-        if (Settings.m_IsScalable)
-        {
 			m_WireframeVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_wireframe.glsl", "main", DefineString.c_str());
 			m_WireframeFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_wireframe.glsl", "main", DefineString.c_str());
-			m_RaycastVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_raycast.glsl", "main", DefineString.c_str());
-			m_RaycastFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_raycast.glsl", "main", DefineString.c_str());
+			m_RaycastVSPtr   = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_raycast.glsl"  , "main", DefineString.c_str());
+			m_RaycastFSPtr   = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_raycast.glsl"  , "main", DefineString.c_str());
         }
 		else
 		{
+			m_pReconstructor->GetReconstructionSettings(&Settings);
+
+			std::stringstream DefineStream;
+
+			DefineStream
+				<< "#define VOLUME_RESOLUTION "  << Settings.m_VolumeResolution << " \n"
+				<< "#define TRUNCATED_DISTANCE " << Settings.m_TruncatedDistance << " \n"
+				<< "#define VOLUME_SIZE "        << Settings.m_VolumeSize << " \n"
+				<< "#define VOXEL_SIZE "         << Settings.m_VolumeSize / Settings.m_VolumeResolution << " \n";
+
+			if (Settings.m_CaptureColor)
+			{
+				DefineStream << "#define CAPTURE_COLOR\n";
+			}
+
+			std::string DefineString = DefineStream.str();
+
 			m_WireframeVSPtr = ShaderManager::CompileVS("kinect_fusion\\vs_wireframe.glsl", "main", DefineString.c_str());
 			m_WireframeFSPtr = ShaderManager::CompilePS("kinect_fusion\\fs_wireframe.glsl", "main", DefineString.c_str());
-			m_RaycastVSPtr = ShaderManager::CompileVS("kinect_fusion\\vs_raycast.glsl", "main", DefineString.c_str());
-			m_RaycastFSPtr = ShaderManager::CompilePS("kinect_fusion\\fs_raycast.glsl", "main", DefineString.c_str());
+			m_RaycastVSPtr   = ShaderManager::CompileVS("kinect_fusion\\vs_raycast.glsl"  , "main", DefineString.c_str());
+			m_RaycastFSPtr   = ShaderManager::CompilePS("kinect_fusion\\fs_raycast.glsl"  , "main", DefineString.c_str());
 		}
         
         SInputElementDescriptor InputLayoutDesc = {};
@@ -398,7 +416,14 @@ namespace
     
     void CGfxReconstructionRenderer::OnReload()
     {
-        m_pReconstructor->ResetReconstruction();
+        if (m_pScalableReconstructor != nullptr)
+        {
+			m_pScalableReconstructor->ResetReconstruction();
+        }
+		else
+		{
+			m_pReconstructor->ResetReconstruction();
+		}
 
         OnSetupShader();
     }
@@ -407,7 +432,14 @@ namespace
 
     void CGfxReconstructionRenderer::OnReconstructionUpdate(const MR::SReconstructionSettings& _Settings)
     {
-        m_pReconstructor->ResetReconstruction(&_Settings);
+		if (m_pScalableReconstructor != nullptr)
+		{
+			m_pScalableReconstructor->ResetReconstruction(&_Settings);
+		}
+		else
+		{
+			m_pReconstructor->ResetReconstruction(&_Settings);
+		}        
 
         OnSetupShader();
     }
@@ -442,7 +474,7 @@ namespace
         {
             Cam::CControl& rControl = static_cast<Cam::CEditorControl&>(Cam::ControlManager::GetActiveControl());
             
-            Float4x4 PoseMatrix = m_pReconstructor->GetPoseMatrix();
+            Float4x4 PoseMatrix = (m_pScalableReconstructor != nullptr) ? m_pScalableReconstructor->GetPoseMatrix() : m_pReconstructor->GetPoseMatrix();
 
             Base::Float3 Position;
             Base::Float3 Rotation;
@@ -531,6 +563,79 @@ namespace
 		ContextManager::DrawIndexed(36, 0, 0);
     }
 
+	// -----------------------------------------------------------------------------
+
+	void CGfxReconstructionRenderer::RenderScalableVolume()
+	{
+		MR::SReconstructionSettings Settings;
+		m_pScalableReconstructor->GetReconstructionSettings(&Settings);
+
+		Float4x4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
+
+		Float4 RaycastData[2];
+		PoseMatrix.GetTranslation(RaycastData[0][0], RaycastData[0][1], RaycastData[0][2]);
+		RaycastData[0][3] = 1.0f;
+		if (Settings.m_CaptureColor)
+		{
+			RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 0.0f, 0.0f, 1.0f);
+		}
+		else
+		{
+			RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 1.0f, 0.0f, 1.0f);
+		}
+
+		BufferManager::UploadConstantBufferData(m_RaycastConstantBufferPtr, RaycastData);
+
+		ContextManager::SetShaderVS(m_RaycastVSPtr);
+		ContextManager::SetShaderPS(m_RaycastFSPtr);
+
+		ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_pScalableReconstructor->GetTSDFVolume()));
+		ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
+
+		if (Settings.m_CaptureColor)
+		{
+			ContextManager::SetTexture(1, static_cast<CTextureBasePtr>(m_pScalableReconstructor->GetColorVolume()));
+			ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
+		}
+
+		ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+		ContextManager::SetConstantBuffer(1, m_RaycastConstantBufferPtr);
+
+		ContextManager::Barrier();
+
+		ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
+		ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+		const unsigned int Offset = 0;
+		ContextManager::SetVertexBufferSet(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+		ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+		ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
+
+		ContextManager::SetTopology(STopology::TriangleList);
+
+		ContextManager::DrawIndexed(36, 0, 0);
+
+		// Render volume box
+
+		ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
+
+		ContextManager::SetRenderContext(m_WireframeRenderContextPtr);
+		ContextManager::SetShaderVS(m_WireframeVSPtr);
+		ContextManager::SetShaderPS(m_WireframeFSPtr);
+
+		SDrawCallConstantBuffer BufferData;
+
+		BufferData.m_WorldMatrix.SetScale(Settings.m_VolumeSize);
+		BufferData.m_Color = Float4(0.0f, 0.0f, 1.0f, 1.0f);
+
+		BufferManager::UploadConstantBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+
+		ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+		ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
+
+		ContextManager::DrawIndexed(36, 0, 0);
+	}
+
     // -----------------------------------------------------------------------------
 
     void CGfxReconstructionRenderer::RenderCamera()
@@ -543,7 +648,7 @@ namespace
 
 		SDrawCallConstantBuffer BufferData;
 
-		BufferData.m_WorldMatrix = m_pReconstructor->GetPoseMatrix();
+		BufferData.m_WorldMatrix = (m_pScalableReconstructor != nullptr) ? m_pScalableReconstructor->GetPoseMatrix() : m_pReconstructor->GetPoseMatrix();
 		BufferData.m_Color = Float4(1.0f, 0.0f, 1.0f, 1.0f);
 
 		BufferManager::UploadConstantBufferData(m_DrawCallConstantBufferPtr, &BufferData);
@@ -565,7 +670,14 @@ namespace
 
     void CGfxReconstructionRenderer::Render()
     {
-        m_pReconstructor->Update();
+		if (m_pScalableReconstructor != nullptr)
+		{
+			m_pScalableReconstructor->Update();
+		}
+		else
+		{
+			m_pReconstructor->Update();
+		}        
 
         Performance::BeginEvent("SLAM Reconstruction Rendering");
         
@@ -573,7 +685,15 @@ namespace
         //Base::Float4 ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         //TargetSetManager::ClearTargetSet(TargetSetManager::GetDeferredTargetSet(), ClearColor);
 
-        RenderVolume();
+		if (m_pScalableReconstructor != nullptr)
+		{
+			RenderScalableVolume();
+		}
+		else
+		{
+			RenderVolume();
+		}
+
         if (!m_UseTrackingCamera)
         {
             RenderCamera();
@@ -586,14 +706,28 @@ namespace
 
     void CGfxReconstructionRenderer::PauseIntegration(bool _Paused)
     {
-        m_pReconstructor->PauseIntegration(_Paused);
+		if (m_pScalableReconstructor != nullptr)
+		{
+			m_pScalableReconstructor->PauseIntegration(_Paused);
+		}
+		else
+		{
+			m_pReconstructor->PauseIntegration(_Paused);
+		}
     }
     
     // -----------------------------------------------------------------------------
 
     void CGfxReconstructionRenderer::PauseTracking(bool _Paused)
     {
-        m_pReconstructor->PauseTracking(_Paused);
+		if (m_pScalableReconstructor != nullptr)
+		{
+			m_pScalableReconstructor->PauseTracking(_Paused);
+		}
+		else
+		{
+			m_pReconstructor->PauseTracking(_Paused);
+		}        
     }
 
     // -----------------------------------------------------------------------------
