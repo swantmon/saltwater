@@ -41,7 +41,7 @@ namespace Edit
 
         MR::SReconstructionSettings DefaultSettings;
         
-        m_pSizeHS->setRange(1, 500);
+        m_pSizeHS->setRange(1, 1000);
         m_pSizeHS->setValue(DefaultSettings.m_VolumeSize * 100);
         m_pSizeTL->setText(QString::number(DefaultSettings.m_VolumeSize));
 
