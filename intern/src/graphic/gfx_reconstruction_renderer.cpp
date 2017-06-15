@@ -181,15 +181,15 @@ namespace
 
         if (Settings.m_IsScalable)
         {
-			m_CameraVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_camera.glsl", "main", DefineString.c_str());
-			m_CameraFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_camera.glsl", "main", DefineString.c_str());
+			m_CameraVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_wireframe.glsl", "main", DefineString.c_str());
+			m_CameraFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_wireframe.glsl", "main", DefineString.c_str());
 			m_RaycastVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_raycast.glsl", "main", DefineString.c_str());
 			m_RaycastFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_raycast.glsl", "main", DefineString.c_str());
         }
 		else
 		{
-			m_CameraVSPtr = ShaderManager::CompileVS("kinect_fusion\\vs_camera.glsl", "main", DefineString.c_str());
-			m_CameraFSPtr = ShaderManager::CompilePS("kinect_fusion\\fs_camera.glsl", "main", DefineString.c_str());
+			m_CameraVSPtr = ShaderManager::CompileVS("kinect_fusion\\vs_wireframe.glsl", "main", DefineString.c_str());
+			m_CameraFSPtr = ShaderManager::CompilePS("kinect_fusion\\fs_wireframe.glsl", "main", DefineString.c_str());
 			m_RaycastVSPtr = ShaderManager::CompileVS("kinect_fusion\\vs_raycast.glsl", "main", DefineString.c_str());
 			m_RaycastFSPtr = ShaderManager::CompilePS("kinect_fusion\\fs_raycast.glsl", "main", DefineString.c_str());
 		}
