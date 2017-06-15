@@ -27,6 +27,7 @@
 #include "graphic/gfx_view_manager.h"
 
 #include "mr/mr_slam_reconstructor.h"
+#include "mr/mr_scalable_slam_reconstructor.h"
 
 #include <iostream>
 #include <limits>
@@ -82,7 +83,8 @@ namespace
         
     private:
 
-        std::unique_ptr<MR::CSLAMReconstructor> m_pReconstructor;
+		std::unique_ptr<MR::CSLAMReconstructor> m_pReconstructor;
+		std::unique_ptr<MR::CScalableSLAMReconstructor> m_pScalableReconstructor;
         
         CShaderPtr m_CameraVSPtr;
         CShaderPtr m_CameraFSPtr;
@@ -126,6 +128,7 @@ namespace
         Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxReconstructionRenderer::OnResize));
         
         m_pReconstructor.reset(new MR::CSLAMReconstructor);
+		m_pScalableReconstructor.reset(new MR::CScalableSLAMReconstructor);
 
         m_UseTrackingCamera = true;
     }
@@ -149,7 +152,8 @@ namespace
 
         m_WireframeRenderContextPtr = 0;
 
-        m_pReconstructor = nullptr;
+		m_pReconstructor = nullptr;
+		m_pScalableReconstructor = nullptr;
     }
     
     // -----------------------------------------------------------------------------
@@ -175,10 +179,20 @@ namespace
 
         std::string DefineString = DefineStream.str();
 
-        m_CameraVSPtr = ShaderManager::CompileVS("kinect_fusion\\vs_camera.glsl", "main", DefineString.c_str());
-        m_CameraFSPtr = ShaderManager::CompilePS("kinect_fusion\\fs_camera.glsl", "main", DefineString.c_str());
-        m_RaycastVSPtr = ShaderManager::CompileVS("kinect_fusion\\vs_raycast.glsl", "main", DefineString.c_str());
-        m_RaycastFSPtr = ShaderManager::CompilePS("kinect_fusion\\fs_raycast.glsl", "main", DefineString.c_str());
+        if (Settings.m_IsScalable)
+        {
+			m_CameraVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_camera.glsl", "main", DefineString.c_str());
+			m_CameraFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_camera.glsl", "main", DefineString.c_str());
+			m_RaycastVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_raycast.glsl", "main", DefineString.c_str());
+			m_RaycastFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_raycast.glsl", "main", DefineString.c_str());
+        }
+		else
+		{
+			m_CameraVSPtr = ShaderManager::CompileVS("kinect_fusion\\vs_camera.glsl", "main", DefineString.c_str());
+			m_CameraFSPtr = ShaderManager::CompilePS("kinect_fusion\\fs_camera.glsl", "main", DefineString.c_str());
+			m_RaycastVSPtr = ShaderManager::CompileVS("kinect_fusion\\vs_raycast.glsl", "main", DefineString.c_str());
+			m_RaycastFSPtr = ShaderManager::CompilePS("kinect_fusion\\fs_raycast.glsl", "main", DefineString.c_str());
+		}
         
         SInputElementDescriptor InputLayoutDesc = {};
 
@@ -260,13 +274,18 @@ namespace
     
     void CGfxReconstructionRenderer::OnSetupModels()
     {
+		//Todo: remove magic numbers (focal length/point, max/min depth)
+
+		float x = (-0.50602675f) / 0.72113f * 8.0f;
+		float y = (-0.499133f) / 0.870799f * 8.0f;
+		
         Float3 CameraVertices[] =
         {
-            Float3(-1.0f, -0.5f, 2.0f),
-            Float3( 1.0f, -0.5f, 2.0f),
-            Float3( 1.0f,  0.5f, 2.0f),
-            Float3(-1.0f,  0.5f, 2.0f),
-            Float3(-0.0f,  0.0f, 0.0f),
+            Float3(-x, -y, 8.0f),
+            Float3( x, -y, 8.0f),
+            Float3( x,  y, 8.0f),
+            Float3(-x,  y, 8.0f),
+            Float3( 0.0f,  0.0f, 0.0f),
         };
 
         unsigned int CameraIndices[] =
@@ -490,9 +509,7 @@ namespace
         ContextManager::SetShaderVS(m_CameraVSPtr);
         ContextManager::SetShaderPS(m_CameraFSPtr);
 
-        Float4x4 WorldMatrix;
-        WorldMatrix.SetScale(0.1f);
-        WorldMatrix = m_pReconstructor->GetPoseMatrix() * WorldMatrix;
+        Float4x4 WorldMatrix = m_pReconstructor->GetPoseMatrix();
 
         BufferManager::UploadConstantBufferData(m_DrawCallConstantBufferPtr, &WorldMatrix);
 
