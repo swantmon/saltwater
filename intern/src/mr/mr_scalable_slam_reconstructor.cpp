@@ -160,6 +160,15 @@ namespace MR
 		m_IsIntegrationPaused = false;
 		m_IsTrackingPaused = false;
 		
+		const int GridLevelCount = MR::SReconstructionSettings::GRID_LEVELS;
+
+		m_GridSizes.resize(GridLevelCount);
+		m_GridSizes[GridLevelCount - 1] = m_ReconstructionSettings.m_VoxelSize * m_ReconstructionSettings.m_GridResolutions[GridLevelCount - 1];
+		for (int i = GridLevelCount - 2; i >= 0; -- i)
+		{
+			m_GridSizes[i] = m_GridSizes[i + 1] * m_ReconstructionSettings.m_GridResolutions[i];
+		}
+
 		SetupShaders();
 		SetupTextures();
 		SetupBuffers();
