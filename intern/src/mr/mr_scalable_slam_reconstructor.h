@@ -50,6 +50,8 @@ namespace MR
         void Start();
         void Exit();
 
+		void SetupData();
+
         void SetupShaders();
         void SetupTextures();
         void SetupBuffers();
@@ -119,5 +121,7 @@ namespace MR
 
         bool m_IsIntegrationPaused;
         bool m_IsTrackingPaused;
+
+		std::vector<float> m_GridSizes;
     };
 } // namespace MR
