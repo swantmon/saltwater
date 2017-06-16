@@ -87,7 +87,8 @@ namespace
         MR::SReconstructionSettings Settings;
 
         Settings.m_VolumeSize = _rMessage.GetFloat();
-        Settings.m_VolumeResolution = _rMessage.GetInt();
+		Settings.m_VolumeResolution = _rMessage.GetInt();
+		Settings.m_VoxelSize = _rMessage.GetInt();
         Settings.m_TruncatedDistance = _rMessage.GetFloat();
         Settings.m_MaxIntegrationWeight = _rMessage.GetInt();
         Settings.m_DepthThreshold[0] = _rMessage.GetInt();

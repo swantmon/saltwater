@@ -19,6 +19,7 @@ namespace MR
 
 		float m_VolumeSize;
 		int m_VolumeResolution;
+		float m_VoxelSize;
 		float m_TruncatedDistance;
 		int m_MaxIntegrationWeight;
 		int m_PyramidLevelCount;

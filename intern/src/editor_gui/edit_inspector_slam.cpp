@@ -45,6 +45,10 @@ namespace Edit
         m_pSizeHS->setValue(DefaultSettings.m_VolumeSize * 100);
         m_pSizeTL->setText(QString::number(DefaultSettings.m_VolumeSize));
 
+		m_pVoxelSizeHS->setRange(1, 10);
+		m_pVoxelSizeHS->setValue(DefaultSettings.m_VoxelSize);
+		m_pVoxelSizeTL->setText(QString::number(DefaultSettings.m_VoxelSize));
+
         m_pTruncatedDistanceHS->setRange(1, 100);
         m_pTruncatedDistanceHS->setValue(DefaultSettings.m_TruncatedDistance);
         m_pTruncatedDistanceTL->setText(QString::number(DefaultSettings.m_TruncatedDistance));
@@ -65,6 +69,13 @@ namespace Edit
         m_pCaptureColorCB->setChecked(DefaultSettings.m_CaptureColor);
 
         m_pTrackingCameraCB->setChecked(true);
+
+		const bool isScalable = true;
+
+		m_pScalableCB->setChecked(isScalable);
+		m_pSizeHS->setEnabled(!isScalable);
+		m_pResolutionHS->setEnabled(!isScalable);
+		m_pVoxelSizeHS->setEnabled(isScalable);
     }
 
     // -----------------------------------------------------------------------------
@@ -84,6 +95,7 @@ namespace Edit
         
         const float VolumeSize = static_cast<float>(m_pSizeHS->value() / 100.0f);
         const int Resolution = g_Resolutions[m_pResolutionHS->value()];
+		const int VoxelSize = static_cast<float>(m_pSizeHS->value());
         const float TruncatedDistance = static_cast<float>(m_pTruncatedDistanceHS->value());
         const int MaxIntegrationWeight = m_pWeightHS->value();
         const int MinDepth = m_pMinDepthLE->text().toInt();
@@ -98,6 +110,7 @@ namespace Edit
         
         NewMessage.PutFloat(VolumeSize);
         NewMessage.PutInt(Resolution);
+		NewMessage.PutInt(VoxelSize);
         NewMessage.PutFloat(TruncatedDistance);
         NewMessage.PutInt(MaxIntegrationWeight);
         NewMessage.PutInt(MinDepth);
@@ -125,6 +138,13 @@ namespace Edit
     {
         m_pSizeTL->setText(QString::number(_Value / 100.0f));
     }
+
+	// -----------------------------------------------------------------------------
+
+	void CInspectorSLAM::voxelSizeChanged(int _Value)
+	{
+		m_pVoxelSizeTL->setText(QString::number(_Value / 100.0f));
+	}
     
     // -----------------------------------------------------------------------------
 
@@ -168,6 +188,17 @@ namespace Edit
     }
 
     // -----------------------------------------------------------------------------
+
+	void CInspectorSLAM::scalableChanged(int State)
+	{
+		const bool isScalable = State == Qt::CheckState::Checked;
+
+		m_pSizeHS->setEnabled(!isScalable);
+		m_pResolutionHS->setEnabled(!isScalable); 
+		m_pVoxelSizeHS->setEnabled(isScalable);
+	}
+
+	// -----------------------------------------------------------------------------
 
     const QString CInspectorSLAM::s_PauseIntegrationText = "Pause Integration";
     const QString CInspectorSLAM::s_ResumeIntegrationText = "Resume Integration";

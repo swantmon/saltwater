@@ -24,6 +24,8 @@ namespace Edit
         void changeCamera();
         void volumeResolutionChanged(int);
         void volumeSizeChanged(int);
+		void voxelSizeChanged(int);
+		void scalableChanged(int);
 
     private:
 
