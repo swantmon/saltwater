@@ -635,26 +635,6 @@ namespace
 		ContextManager::SetTopology(STopology::TriangleList);
 
 		ContextManager::DrawIndexed(36, 0, 0);
-
-		// Render volume box
-
-		ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
-
-		ContextManager::SetRenderContext(m_WireframeRenderContextPtr);
-		ContextManager::SetShaderVS(m_WireframeVSPtr);
-		ContextManager::SetShaderPS(m_WireframeFSPtr);
-
-		SDrawCallConstantBuffer BufferData;
-
-		BufferData.m_WorldMatrix.SetScale(Settings.m_VolumeSize);
-		BufferData.m_Color = Float4(0.0f, 0.0f, 1.0f, 1.0f);
-
-		BufferManager::UploadConstantBufferData(m_DrawCallConstantBufferPtr, &BufferData);
-
-		ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-		ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
-
-		ContextManager::DrawIndexed(36, 0, 0);
 	}
 
     // -----------------------------------------------------------------------------
