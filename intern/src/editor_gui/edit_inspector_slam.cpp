@@ -96,7 +96,7 @@ namespace Edit
         
         const float VolumeSize = static_cast<float>(m_pSizeHS->value() / 100.0f);
         const int Resolution = g_Resolutions[m_pResolutionHS->value()];
-		const float VoxelSize = static_cast<float>(m_pSizeHS->value());
+		const float VoxelSize = static_cast<float>(m_pVoxelSizeHS->value());
         const float TruncatedDistance = static_cast<float>(m_pTruncatedDistanceHS->value());
         const int MaxIntegrationWeight = m_pWeightHS->value();
         const int MinDepth = m_pMinDepthLE->text().toInt();
