@@ -134,8 +134,18 @@ namespace
     {
         Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxReconstructionRenderer::OnResize));
         
-		//m_pReconstructor.reset(new MR::CSLAMReconstructor);
-		m_pScalableReconstructor.reset(new MR::CScalableSLAMReconstructor);
+		MR::SReconstructionSettings DefaultSettings;
+
+		if (DefaultSettings.m_IsScalable)
+		{			
+			m_pScalableReconstructor.reset(new MR::CScalableSLAMReconstructor);
+			m_pReconstructor = nullptr;
+		}
+		else
+		{
+			m_pReconstructor.reset(new MR::CSLAMReconstructor);
+			m_pScalableReconstructor = nullptr;
+		}
 
         m_UseTrackingCamera = true;
     }
@@ -432,6 +442,17 @@ namespace
 
     void CGfxReconstructionRenderer::OnReconstructionUpdate(const MR::SReconstructionSettings& _Settings)
     {
+		if (_Settings.m_IsScalable && m_pScalableReconstructor == nullptr)
+		{
+			m_pReconstructor = nullptr;
+			m_pScalableReconstructor.reset(new MR::CScalableSLAMReconstructor);			
+		}
+		else if (!_Settings.m_IsScalable && m_pReconstructor == nullptr)
+		{
+			m_pScalableReconstructor = nullptr;
+			m_pReconstructor.reset(new MR::CSLAMReconstructor);
+		}
+
 		if (m_pScalableReconstructor != nullptr)
 		{
 			m_pScalableReconstructor->ResetReconstruction(&_Settings);
@@ -439,7 +460,7 @@ namespace
 		else
 		{
 			m_pReconstructor->ResetReconstruction(&_Settings);
-		}        
+		}
 
         OnSetupShader();
     }

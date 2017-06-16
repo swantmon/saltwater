@@ -88,12 +88,13 @@ namespace
 
         Settings.m_VolumeSize = _rMessage.GetFloat();
 		Settings.m_VolumeResolution = _rMessage.GetInt();
-		Settings.m_VoxelSize = _rMessage.GetInt();
+		Settings.m_VoxelSize = _rMessage.GetFloat();
         Settings.m_TruncatedDistance = _rMessage.GetFloat();
         Settings.m_MaxIntegrationWeight = _rMessage.GetInt();
         Settings.m_DepthThreshold[0] = _rMessage.GetInt();
         Settings.m_DepthThreshold[1] = _rMessage.GetInt();
         Settings.m_CaptureColor = _rMessage.GetBool();
+		Settings.m_IsScalable = _rMessage.GetBool();
 
         Gfx::ReconstructionRenderer::OnReconstructionUpdate(Settings);
 

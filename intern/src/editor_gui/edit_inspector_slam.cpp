@@ -70,12 +70,12 @@ namespace Edit
 
         m_pTrackingCameraCB->setChecked(true);
 
-		const bool isScalable = true;
+		const bool IsScalable = DefaultSettings.m_IsScalable;
 
-		m_pScalableCB->setChecked(isScalable);
-		m_pSizeHS->setEnabled(!isScalable);
-		m_pResolutionHS->setEnabled(!isScalable);
-		m_pVoxelSizeHS->setEnabled(isScalable);
+		m_pScalableCB->setChecked(IsScalable);
+		m_pSizeHS->setEnabled(!IsScalable);
+		m_pResolutionHS->setEnabled(!IsScalable);
+		m_pVoxelSizeHS->setEnabled(IsScalable);
     }
 
     // -----------------------------------------------------------------------------
@@ -95,12 +95,13 @@ namespace Edit
         
         const float VolumeSize = static_cast<float>(m_pSizeHS->value() / 100.0f);
         const int Resolution = g_Resolutions[m_pResolutionHS->value()];
-		const int VoxelSize = static_cast<float>(m_pSizeHS->value());
+		const float VoxelSize = static_cast<float>(m_pSizeHS->value());
         const float TruncatedDistance = static_cast<float>(m_pTruncatedDistanceHS->value());
         const int MaxIntegrationWeight = m_pWeightHS->value();
         const int MinDepth = m_pMinDepthLE->text().toInt();
         const int MaxDepth = m_pMaxDepthLE->text().toInt();
         const bool CaptureColor = m_pCaptureColorCB->checkState() == Qt::CheckState::Checked;
+		const bool IsScalable = m_pScalableCB->checkState() == Qt::CheckState::Checked;
         
         // -----------------------------------------------------------------------------
         // Send message
@@ -110,12 +111,13 @@ namespace Edit
         
         NewMessage.PutFloat(VolumeSize);
         NewMessage.PutInt(Resolution);
-		NewMessage.PutInt(VoxelSize);
+		NewMessage.PutFloat(VoxelSize);
         NewMessage.PutFloat(TruncatedDistance);
         NewMessage.PutInt(MaxIntegrationWeight);
         NewMessage.PutInt(MinDepth);
         NewMessage.PutInt(MaxDepth);
         NewMessage.PutBool(CaptureColor);
+		NewMessage.PutBool(IsScalable);
 
         NewMessage.Reset();
 

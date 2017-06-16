@@ -27,6 +27,8 @@ namespace MR
 		Base::Int2 m_DepthThreshold;
 		bool m_CaptureColor;
 
+		bool m_IsScalable;
+
 		int m_GridResolutions[GRID_LEVELS];
 
 		SReconstructionSettings();
