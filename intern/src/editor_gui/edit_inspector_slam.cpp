@@ -47,6 +47,7 @@ namespace Edit
 
 		m_pVoxelSizeHS->setRange(1, 10);
 		m_pVoxelSizeHS->setValue(DefaultSettings.m_VoxelSize);
+		m_pVoxelSizeHS->setPageStep(1);
 		m_pVoxelSizeTL->setText(QString::number(DefaultSettings.m_VoxelSize));
 
         m_pTruncatedDistanceHS->setRange(1, 100);
