@@ -46,9 +46,9 @@ namespace Edit
         m_pSizeTL->setText(QString::number(DefaultSettings.m_VolumeSize));
 
 		m_pVoxelSizeHS->setRange(1, 10);
-		m_pVoxelSizeHS->setValue(DefaultSettings.m_VoxelSize);
+		m_pVoxelSizeHS->setValue(DefaultSettings.m_VoxelSize * 1000.0f); // meter to millimeter
 		m_pVoxelSizeHS->setPageStep(1);
-		m_pVoxelSizeTL->setText(QString::number(DefaultSettings.m_VoxelSize));
+		m_pVoxelSizeTL->setText(QString::number(DefaultSettings.m_VoxelSize * 1000.0f));
 
         m_pTruncatedDistanceHS->setRange(1, 100);
         m_pTruncatedDistanceHS->setValue(DefaultSettings.m_TruncatedDistance);
@@ -96,7 +96,7 @@ namespace Edit
         
         const float VolumeSize = static_cast<float>(m_pSizeHS->value() / 100.0f);
         const int Resolution = g_Resolutions[m_pResolutionHS->value()];
-		const float VoxelSize = static_cast<float>(m_pVoxelSizeHS->value());
+		const float VoxelSize = static_cast<float>(m_pVoxelSizeHS->value() / 1000.0f);
         const float TruncatedDistance = static_cast<float>(m_pTruncatedDistanceHS->value());
         const int MaxIntegrationWeight = m_pWeightHS->value();
         const int MinDepth = m_pMinDepthLE->text().toInt();
