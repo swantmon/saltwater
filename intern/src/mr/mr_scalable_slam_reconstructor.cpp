@@ -179,7 +179,41 @@ namespace MR
 			m_GridSizes[i] = m_GridSizes[i + 1] * m_ReconstructionSettings.m_GridResolutions[i];
 		}
 
-		
+		UpdateFrustum();
+	}
+
+	// -----------------------------------------------------------------------------
+
+	void CScalableSLAMReconstructor::UpdateFrustum()
+	{
+		//Todo: remove magic numbers (focal length/point)
+
+		float x = (-0.50602675f) / 0.72113f;
+		float y = (-0.499133f) / 0.870799f;
+
+		const float Near = m_pRGBDCameraControl->GetMinDepth();
+		const float Far = m_pRGBDCameraControl->GetMaxDepth();
+
+		// near
+
+		m_Frustum[0] = Float3(x * Near, y * Near, Near);
+		m_Frustum[1] = Float3(-x * Near, y * Near, Near);
+		m_Frustum[2] = Float3(-x * Near, -y * Near, Near);
+		m_Frustum[3] = Float3(x * Near, -y * Near, Near);
+
+		// far
+
+		m_Frustum[4] = Float3(x * Far, y * Far, Far);
+		m_Frustum[5] = Float3(-x * Far, y * Far, Far);
+		m_Frustum[6] = Float3(-x * Far, -y * Far, Far);
+		m_Frustum[7] = Float3(x * Far, -y * Far, Far);
+
+		for (int i = 0; i < g_FrustumCorners; ++i)
+		{
+			Float4 Corner = Float4(m_Frustum[i], 1.0f);
+			Corner = m_PoseMatrix * Corner;
+			m_Frustum[i] = Float3(Corner[0], Corner[1], Corner[2]);
+		}
 	}
 
     // -----------------------------------------------------------------------------
@@ -279,6 +313,18 @@ namespace MR
     
 	void CScalableSLAMReconstructor::UpdateRootrids()
 	{
+		Float3 Max = m_Frustum[0];
+		Float3 Min = m_Frustum[0];
+
+		for (int i = 1; i < g_FrustumCorners; ++ i)
+		{
+			for (int j = 0; j < 3; ++ j)
+			{
+				Max[j] = Max[j] = Base::Max(m_Frustum[i][j], Max[j]);
+				Min[j] = Min[j] = Base::Min(m_Frustum[i][j], Max[j]);
+			}
+		}
+		
 		if (m_RootGrids.size() > 0)
 		{
 			return;
@@ -531,6 +577,7 @@ namespace MR
 
         Performance::BeginEvent("TSDF Integration and Raycasting");
 
+		UpdateFrustum();
 		UpdateRootrids();
 
         if (!m_IsIntegrationPaused)

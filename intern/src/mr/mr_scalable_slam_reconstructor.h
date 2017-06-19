@@ -75,6 +75,8 @@ namespace MR
 
         void PerformTracking();
 
+		void UpdateFrustum();
+
         void DetermineSummands(int PyramidLevel, const Base::Float4x4& rIncPoseMatrix);
         void ReduceSum(int PyramidLevel);
         bool CalculatePoseMatrix(Base::Float4x4& rIncPoseMatrix);
