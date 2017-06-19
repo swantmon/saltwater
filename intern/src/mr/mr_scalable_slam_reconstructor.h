@@ -26,6 +26,15 @@ namespace MR
 
     class CScalableSLAMReconstructor : private Base::CUncopyable
     {
+	public:
+
+		struct SRootGrid
+		{
+			Gfx::CTexture3DPtr m_TSDFVolumePtr;
+			Gfx::CTexture3DPtr m_ColorVolumePtr;
+			Base::Float3 m_Offset;
+		};
+
     public:
 
         CScalableSLAMReconstructor(const SReconstructionSettings* pReconstructionSettings = nullptr);
@@ -40,8 +49,8 @@ namespace MR
         void PauseTracking(bool _Paused);
         bool IsTrackingLost() const;
         Base::Float4x4 GetPoseMatrix() const;
-        Gfx::CTexture3DPtr GetTSDFVolume();
-        Gfx::CTexture3DPtr GetColorVolume();
+
+		std::vector<SRootGrid>& GetRootGrids();
 
         void GetReconstructionSettings(SReconstructionSettings* pReconstructionSettings);
 
@@ -49,6 +58,8 @@ namespace MR
 
         void Start();
         void Exit();
+
+		void UpdateRootrids();
 
 		void SetupData();
 
@@ -66,7 +77,6 @@ namespace MR
         void DetermineSummands(int PyramidLevel, const Base::Float4x4& rIncPoseMatrix);
         void ReduceSum(int PyramidLevel);
         bool CalculatePoseMatrix(Base::Float4x4& rIncPoseMatrix);
-        void ClearVolume();
 
     private:
 
@@ -102,8 +112,7 @@ namespace MR
         std::vector<Gfx::CTexture2DPtr> m_RaycastVertexMapPtr;
         std::vector<Gfx::CTexture2DPtr> m_RaycastNormalMapPtr;
 
-        Gfx::CTexture3DPtr m_TSDFVolumePtr;
-        Gfx::CTexture3DPtr m_ColorVolumePtr;
+		std::vector<SRootGrid> m_RootGrids;
 
         Gfx::CBufferPtr m_ICPResourceBufferPtr;
 

@@ -610,15 +610,6 @@ namespace
 		ContextManager::SetShaderVS(m_RaycastVSPtr);
 		ContextManager::SetShaderPS(m_RaycastFSPtr);
 
-		ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_pScalableReconstructor->GetTSDFVolume()));
-		ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
-
-		if (Settings.m_CaptureColor)
-		{
-			ContextManager::SetTexture(1, static_cast<CTextureBasePtr>(m_pScalableReconstructor->GetColorVolume()));
-			ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
-		}
-
 		ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 		ContextManager::SetConstantBuffer(1, m_RaycastConstantBufferPtr);
 
@@ -634,7 +625,19 @@ namespace
 
 		ContextManager::SetTopology(STopology::TriangleList);
 
-		ContextManager::DrawIndexed(36, 0, 0);
+		for (MR::CScalableSLAMReconstructor::SRootGrid& rRootGrid : m_pScalableReconstructor->GetRootGrids())
+		{
+			ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(rRootGrid.m_TSDFVolumePtr));
+			ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
+
+			if (Settings.m_CaptureColor)
+			{
+				ContextManager::SetTexture(1, static_cast<CTextureBasePtr>(rRootGrid.m_ColorVolumePtr));
+				ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
+			}
+
+			ContextManager::DrawIndexed(36, 0, 0);
+		}
 	}
 
     // -----------------------------------------------------------------------------

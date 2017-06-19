@@ -126,16 +126,9 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    Gfx::CTexture3DPtr CScalableSLAMReconstructor::GetTSDFVolume()
+	std::vector<CScalableSLAMReconstructor::SRootGrid>& CScalableSLAMReconstructor::GetRootGrids()
     {
-        return m_TSDFVolumePtr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Gfx::CTexture3DPtr CScalableSLAMReconstructor::GetColorVolume()
-    {
-        return m_ColorVolumePtr;
+        return m_RootGrids;
     }
 
     // -----------------------------------------------------------------------------
@@ -214,8 +207,7 @@ namespace MR
             m_RaycastNormalMapPtr[i] = 0;
         }
 
-        m_TSDFVolumePtr = 0;
-        m_ColorVolumePtr = 0;
+        m_RootGrids.clear();
 
         m_IntrinsicsConstantBufferPtr = 0;
         m_TrackingDataConstantBufferPtr = 0;
@@ -283,6 +275,48 @@ namespace MR
     
     // -----------------------------------------------------------------------------
     
+	void CScalableSLAMReconstructor::UpdateRootrids()
+	{
+		if (m_RootGrids.size() > 0)
+		{
+			return;
+		}
+
+		STextureDescriptor TextureDescriptor = {};
+
+		TextureDescriptor.m_NumberOfPixelsU = m_ReconstructionSettings.m_VolumeResolution;
+		TextureDescriptor.m_NumberOfPixelsV = m_ReconstructionSettings.m_VolumeResolution;
+		TextureDescriptor.m_NumberOfPixelsW = m_ReconstructionSettings.m_VolumeResolution;
+		TextureDescriptor.m_NumberOfMipMaps = 1;
+		TextureDescriptor.m_NumberOfTextures = 1;
+		TextureDescriptor.m_Binding = CTextureBase::ShaderResource;
+		TextureDescriptor.m_Access = CTextureBase::CPUWrite;
+		TextureDescriptor.m_Usage = CTextureBase::GPUReadWrite;
+		TextureDescriptor.m_Semantic = CTextureBase::UndefinedSemantic;
+		TextureDescriptor.m_pFileName = 0;
+		TextureDescriptor.m_pPixels = 0;
+		TextureDescriptor.m_Format = CTextureBase::R16G16_FLOAT;
+
+		SRootGrid RootGrid;
+
+		RootGrid.m_TSDFVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
+		RootGrid.m_Offset = Float3(0.0f);
+
+		if (m_ReconstructionSettings.m_CaptureColor)
+		{
+			TextureDescriptor.m_NumberOfPixelsU = m_ReconstructionSettings.m_VolumeResolution;
+			TextureDescriptor.m_NumberOfPixelsV = m_ReconstructionSettings.m_VolumeResolution;
+			TextureDescriptor.m_NumberOfPixelsW = m_ReconstructionSettings.m_VolumeResolution;
+			TextureDescriptor.m_Format = CTextureBase::R8G8B8A8_UBYTE;
+
+			RootGrid.m_ColorVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
+		}
+
+		m_RootGrids.push_back(RootGrid);
+	}
+
+	// -----------------------------------------------------------------------------
+
     void CScalableSLAMReconstructor::SetupTextures()
     {
         m_SmoothDepthBufferPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
@@ -317,21 +351,6 @@ namespace MR
             m_RaycastVertexMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
             m_RaycastNormalMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
         }
-        
-        TextureDescriptor.m_NumberOfPixelsU = m_ReconstructionSettings.m_VolumeResolution;
-        TextureDescriptor.m_NumberOfPixelsV = m_ReconstructionSettings.m_VolumeResolution;
-        TextureDescriptor.m_NumberOfPixelsW = m_ReconstructionSettings.m_VolumeResolution;
-        TextureDescriptor.m_NumberOfMipMaps = 1;
-        TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding = CTextureBase::ShaderResource;
-        TextureDescriptor.m_Access = CTextureBase::CPUWrite;
-        TextureDescriptor.m_Usage = CTextureBase::GPUReadWrite;
-        TextureDescriptor.m_Semantic = CTextureBase::UndefinedSemantic;
-        TextureDescriptor.m_pFileName = 0;
-        TextureDescriptor.m_pPixels = 0;
-        TextureDescriptor.m_Format = CTextureBase::R16G16_FLOAT;
-
-        m_TSDFVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
 
         TextureDescriptor.m_NumberOfPixelsU = m_pRGBDCameraControl->GetDepthWidth();
         TextureDescriptor.m_NumberOfPixelsV = m_pRGBDCameraControl->GetDepthHeight();
@@ -346,28 +365,16 @@ namespace MR
         TextureDescriptor.m_pPixels = 0;
         TextureDescriptor.m_Format = CTextureBase::R16_UINT;
 
-        m_RawDepthBufferPtr = TextureManager::CreateTexture2D(TextureDescriptor);
+        m_RawDepthBufferPtr = TextureManager::CreateTexture2D(TextureDescriptor);   
 
-        if (m_ReconstructionSettings.m_CaptureColor)
-        {
-            TextureDescriptor.m_NumberOfPixelsU = m_pRGBDCameraControl->GetDepthWidth();
-            TextureDescriptor.m_NumberOfPixelsV = m_pRGBDCameraControl->GetDepthHeight();
-            TextureDescriptor.m_Format = CTextureBase::R8G8B8A8_UBYTE;
+		if (m_ReconstructionSettings.m_CaptureColor)
+		{
+			TextureDescriptor.m_NumberOfPixelsU = m_pRGBDCameraControl->GetDepthWidth();
+			TextureDescriptor.m_NumberOfPixelsV = m_pRGBDCameraControl->GetDepthHeight();
+			TextureDescriptor.m_Format = CTextureBase::R8G8B8A8_UBYTE;
 
-            m_RawCameraFramePtr = TextureManager::CreateTexture2D(TextureDescriptor);
-
-            TextureDescriptor.m_NumberOfPixelsU = m_ReconstructionSettings.m_VolumeResolution;
-            TextureDescriptor.m_NumberOfPixelsV = m_ReconstructionSettings.m_VolumeResolution;
-            TextureDescriptor.m_NumberOfPixelsW = m_ReconstructionSettings.m_VolumeResolution;
-            TextureDescriptor.m_Format = CTextureBase::R8G8B8A8_UBYTE;
-
-            m_ColorVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
-        }
-        else
-        {
-            m_RawCameraFramePtr = 0;
-            m_ColorVolumePtr = 0;
-        }
+			m_RawCameraFramePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+		}
     }
     
     // -----------------------------------------------------------------------------
@@ -521,6 +528,8 @@ namespace MR
         //////////////////////////////////////////////////////////////////////////////////////
 
         Performance::BeginEvent("TSDF Integration and Raycasting");
+
+		UpdateRootrids();
 
         if (!m_IsIntegrationPaused)
         {
@@ -784,12 +793,12 @@ namespace MR
 
         ContextManager::SetShaderCS(m_IntegrationCSPtr);
 
-        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_TSDFVolumePtr));
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RootGrids[0].m_TSDFVolumePtr));
         ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
         
         if (m_ReconstructionSettings.m_CaptureColor)
         {
-            ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(m_ColorVolumePtr));
+            ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(m_RootGrids[0].m_ColorVolumePtr));
             ContextManager::SetImageTexture(3, static_cast<CTextureBasePtr>(m_RawCameraFramePtr));
         }
         else
@@ -846,7 +855,7 @@ namespace MR
 
         ContextManager::SetShaderCS(m_RaycastCSPtr);
 
-        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_TSDFVolumePtr));
+        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_RootGrids[0].m_TSDFVolumePtr));
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
 
         ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RaycastVertexMapPtr[0]));
@@ -864,6 +873,8 @@ namespace MR
 
     void CScalableSLAMReconstructor::ResetReconstruction(const SReconstructionSettings* pReconstructionSettings)
     {
+		m_RootGrids.clear();
+
         if (pReconstructionSettings != nullptr)
         {
             m_ReconstructionSettings = *pReconstructionSettings;
@@ -873,8 +884,7 @@ namespace MR
             SetupShaders();
         }
 
-		SetupData();                
-        ClearVolume();
+		SetupData();
     }
 
     // -----------------------------------------------------------------------------
@@ -889,30 +899,6 @@ namespace MR
     void CScalableSLAMReconstructor::PauseTracking(bool _Paused)
     {
         m_IsTrackingPaused = _Paused;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CScalableSLAMReconstructor::ClearVolume()
-    {
-        ContextManager::SetShaderCS(m_ClearVolumeCSPtr);
-
-        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_TSDFVolumePtr));
-
-        if (m_ReconstructionSettings.m_CaptureColor)
-        {
-            ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ColorVolumePtr));
-        }
-        else
-        {
-            ContextManager::ResetImageTexture(1);
-        }
-
-        ContextManager::Barrier();
-
-        const int WorkGroupSize = GetWorkGroupCount(m_ReconstructionSettings.m_VolumeResolution, g_TileSize3D);
-
-        ContextManager::Dispatch(WorkGroupSize, WorkGroupSize, WorkGroupSize);
     }
         
     // -----------------------------------------------------------------------------
