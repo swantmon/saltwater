@@ -142,6 +142,10 @@ namespace MR
         m_CameraPixels = std::vector<Base::Byte4>(m_pRGBDCameraControl->GetDepthPixelCount());
 
 		SetupData();
+
+		SetupShaders();
+		SetupTextures();
+		SetupBuffers();
     }
 
 	// -----------------------------------------------------------------------------
@@ -175,9 +179,7 @@ namespace MR
 			m_GridSizes[i] = m_GridSizes[i + 1] * m_ReconstructionSettings.m_GridResolutions[i];
 		}
 
-		SetupShaders();
-		SetupTextures();
-		SetupBuffers();
+		
 	}
 
     // -----------------------------------------------------------------------------
@@ -878,13 +880,13 @@ namespace MR
         if (pReconstructionSettings != nullptr)
         {
             m_ReconstructionSettings = *pReconstructionSettings;
-            
-            SetupTextures();
-            SetupBuffers();
-            SetupShaders();
         }
 
 		SetupData();
+
+		SetupTextures();
+		SetupBuffers();
+		SetupShaders();
     }
 
     // -----------------------------------------------------------------------------

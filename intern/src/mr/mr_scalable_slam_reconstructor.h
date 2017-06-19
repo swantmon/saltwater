@@ -18,6 +18,7 @@
 #include "graphic/gfx_texture_2d.h"
 #include "graphic/gfx_texture_3d.h"
 
+#include <array>
 #include <vector>
 
 namespace MR
@@ -82,6 +83,10 @@ namespace MR
 
         static int GetWorkGroupCount(int TotalShaderCount, int WorkGroupSize);
 
+	private:
+
+		static const int g_FrustumCorners = 8;
+
     private:
 
         SReconstructionSettings m_ReconstructionSettings;
@@ -132,5 +137,7 @@ namespace MR
         bool m_IsTrackingPaused;
 
 		std::vector<float> m_GridSizes;
+
+		std::array<Base::Float3, 8> m_Frustum;
     };
 } // namespace MR
