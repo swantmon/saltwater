@@ -32,7 +32,7 @@ namespace MR
 		{
 			Gfx::CTexture3DPtr m_TSDFVolumePtr;
 			Gfx::CTexture3DPtr m_ColorVolumePtr;
-			Base::Float3 m_Offset;
+			Base::Int3 m_Offset;
 		};
 
     public:

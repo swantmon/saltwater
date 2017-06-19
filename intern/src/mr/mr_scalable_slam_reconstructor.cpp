@@ -300,7 +300,7 @@ namespace MR
 		SRootGrid RootGrid;
 
 		RootGrid.m_TSDFVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
-		RootGrid.m_Offset = Float3(0.0f);
+		RootGrid.m_Offset = Int3(0);
 
 		if (m_ReconstructionSettings.m_CaptureColor)
 		{
