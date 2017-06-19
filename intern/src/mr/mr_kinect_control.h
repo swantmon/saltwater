@@ -38,6 +38,8 @@ namespace MR
         virtual float GetDepthFocalLengthY() const override;
         virtual float GetDepthFocalPointX() const override;
         virtual float GetDepthFocalPointY() const override;
+		virtual float GetMinDepth() const override;
+		virtual float GetMaxDepth() const override;
         virtual bool GetDepthBuffer(unsigned short* pBuffer) override;
 
     public:

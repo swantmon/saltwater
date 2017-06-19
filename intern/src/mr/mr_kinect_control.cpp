@@ -270,5 +270,18 @@ namespace MR
         return NUI_KINECT_DEPTH_NORM_PRINCIPAL_POINT_Y * GetDepthHeight();
     }
 
+	// -----------------------------------------------------------------------------
+
+	float CKinectControl::GetMinDepth() const
+	{
+		return 0.5f;
+	}
+
+	// -----------------------------------------------------------------------------
+
+	float CKinectControl::GetMaxDepth() const
+	{
+		return 8.0f;
+	}
 
 } // namespace MR
