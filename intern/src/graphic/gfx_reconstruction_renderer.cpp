@@ -597,8 +597,6 @@ namespace
 		Float4x4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
 
 		Float4 RaycastData[2];
-		PoseMatrix.GetTranslation(RaycastData[0][0], RaycastData[0][1], RaycastData[0][2]);
-		RaycastData[0][3] = 1.0f;
 		if (Settings.m_CaptureColor)
 		{
 			RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -607,8 +605,6 @@ namespace
 		{
 			RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 1.0f, 0.0f, 1.0f);
 		}
-
-		BufferManager::UploadConstantBufferData(m_RaycastConstantBufferPtr, RaycastData);
 
 		ContextManager::SetShaderVS(m_RaycastVSPtr);
 		ContextManager::SetShaderPS(m_RaycastFSPtr);
@@ -630,6 +626,13 @@ namespace
 
 		for (MR::CScalableSLAMReconstructor::SRootGrid& rRootGrid : m_pScalableReconstructor->GetRootGrids())
 		{
+			Float3 Position;
+			Position[0] = static_cast<float>(rRootGrid.m_Offset[0]);
+			Position[1] = static_cast<float>(rRootGrid.m_Offset[1]);
+			Position[2] = static_cast<float>(rRootGrid.m_Offset[2]);
+			
+			BufferManager::UploadConstantBufferData(m_RaycastConstantBufferPtr, RaycastData);
+
 			ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(rRootGrid.m_TSDFVolumePtr));
 			ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
 
