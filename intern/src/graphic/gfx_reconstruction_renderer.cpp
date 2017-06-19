@@ -661,19 +661,18 @@ namespace
 
 		SDrawCallConstantBuffer BufferData;
 
+		Float3 Position;
+		Float4x4 Scaling;
+		Float4x4 Translation;
+
 		for (MR::CScalableSLAMReconstructor::SRootGrid& rRootGrid : m_pScalableReconstructor->GetRootGrids())
 		{
-			Float3 Position;
-
 			Position[0] = static_cast<float>(rRootGrid.m_Offset[0]);
 			Position[1] = static_cast<float>(rRootGrid.m_Offset[1]);
 			Position[2] = static_cast<float>(rRootGrid.m_Offset[2]);
 
 			Position = Position * Settings.m_VolumeSize;
-
-			Float4x4 Scaling;
-			Float4x4 Translation;
-
+			
 			Scaling.SetScale(Settings.m_VolumeSize);
 			Translation.SetTranslation(Position);
 
