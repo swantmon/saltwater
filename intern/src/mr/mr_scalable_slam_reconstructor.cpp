@@ -37,7 +37,15 @@ using namespace MR;
 using namespace Gfx;
 
 namespace
-{    
+{
+	//*
+	const Base::Float3 g_InitialCameraPosition = Base::Float3(0.5f, 0.5f, 1.5f);
+	const Base::Float3 g_InitialCameraRotation = Base::Float3(3.14f, 0.0f, 0.0f);
+	/*/
+	const Base::Float3 g_InitialCameraPosition = Base::Float3(0.5f, 0.5f, -0.5f);
+	const Base::Float3 g_InitialCameraRotation = Base::Float3(0.0f, 0.0f, 0.0f);
+	//*/
+
     const float g_EpsilonDistance = 0.1f;
     const float g_EpsilonAngle = 0.75f;
     
@@ -149,9 +157,14 @@ namespace MR
 	{
 		const float VolumeSize = m_ReconstructionSettings.m_VolumeSize;
 		Float4x4 PoseRotation, PoseTranslation;
-
-		PoseRotation.SetRotation(0.0f, 3.14f, 0.0f);
-		PoseTranslation.SetTranslation(0.0f, 0.0f, 0.0f);
+		
+		PoseRotation.SetRotation(g_InitialCameraRotation[0], g_InitialCameraRotation[1], g_InitialCameraRotation[2]);
+		PoseTranslation.SetTranslation
+		(
+			g_InitialCameraPosition[0] * VolumeSize,
+			g_InitialCameraPosition[1] * VolumeSize,
+			g_InitialCameraPosition[2] * VolumeSize
+		);
 		m_PoseMatrix = PoseTranslation * PoseRotation;
 
 		m_IntegratedFrameCount = 0;
