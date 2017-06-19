@@ -1046,10 +1046,19 @@ namespace
                     _pGraphicSkyboxFacet->m_InputTexture2DPtr = TexturePtr;
 
                     _pGraphicSkyboxFacet->m_InputTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(TexturePtr));
+                }
+                else
+                {
+                    _pGraphicSkyboxFacet->m_InputTexture2DPtr = nullptr;
 
-                    RenderSkybox(_pDataSkyboxFacet, _pGraphicSkyboxFacet);
+                    _pGraphicSkyboxFacet->m_InputTextureSetPtr = nullptr;
                 }
             }
+
+            // -----------------------------------------------------------------------------
+            // Render sky because of the change
+            // -----------------------------------------------------------------------------
+            RenderSkybox(_pDataSkyboxFacet, _pGraphicSkyboxFacet);
 
             // -----------------------------------------------------------------------------
             // Set time
@@ -1319,6 +1328,14 @@ namespace
 
     void CGfxSkyManager::RenderSkyboxFromPanorama(CInternSkyFacet* _pOutput, float _Intensity)
     {
+        if (_pOutput->m_InputTexture2DPtr == 0)
+        {
+            BASE_CONSOLE_INFO("Skybox can't be rendered from panorama because of missing image.");
+            return;
+        }
+
+        // -----------------------------------------------------------------------------
+
         CRenderContextPtr RenderContextPtr = _pOutput->m_RenderContextPtr;
         CShaderPtr        VSPtr            = m_SkyboxFromPanorama.m_VSPtr;
         CShaderPtr        GSPtr            = m_SkyboxFromPanorama.m_GSPtr;
@@ -1417,6 +1434,14 @@ namespace
 
     void CGfxSkyManager::RenderSkyboxFromCubemap(CInternSkyFacet* _pOutput, float _Intensity)
     {
+        if (_pOutput->m_InputTexture2DPtr == 0)
+        {
+            BASE_CONSOLE_INFO("Skybox can't be rendered from cube map because of missing image.");
+            return;
+        }
+
+        // -----------------------------------------------------------------------------
+
         CRenderContextPtr RenderContextPtr = _pOutput->m_RenderContextPtr;
         CShaderPtr        VSPtr            = m_SkyboxFromCubemap.m_VSPtr;
         CShaderPtr        GSPtr            = m_SkyboxFromCubemap.m_GSPtr;
@@ -1515,6 +1540,14 @@ namespace
 
     void CGfxSkyManager::RenderSkyboxFromTexture(CInternSkyFacet* _pOutput, float _Intensity)
     {
+        if (_pOutput->m_InputTexture2DPtr == 0)
+        {
+            BASE_CONSOLE_INFO("Skybox can't be rendered from texture because of missing image.");
+            return;
+        }
+
+        // -----------------------------------------------------------------------------
+
         CRenderContextPtr RenderContextPtr = _pOutput->m_RenderContextPtr;
         CShaderPtr        VSPtr            = m_SkyboxFromTexture.m_VSPtr;
         CShaderPtr        GSPtr            = m_SkyboxFromTexture.m_GSPtr;
@@ -1640,6 +1673,14 @@ namespace
 
     void CGfxSkyManager::RenderSkyboxFromGeometry(CInternSkyFacet* _pOutput, float _Intensity)
     {
+        if(_pOutput->m_InputTexture2DPtr == 0)
+        {
+            BASE_CONSOLE_INFO("Skybox can't be rendered from geometry beacuse of missing image.");
+            return;
+        }
+
+        // -----------------------------------------------------------------------------
+
         CRenderContextPtr RenderContextPtr   = _pOutput->m_RenderContextPtr;
         CShaderPtr        VSPtr              = m_SkyboxFromGeometry.m_VSPtr;
         CShaderPtr        GSPtr              = m_SkyboxFromGeometry.m_GSPtr;
@@ -1795,6 +1836,14 @@ namespace
 
     void CGfxSkyManager::RenderSkyboxFromLUT(CInternSkyFacet* _pOutput, float _Intensity)
     {
+        if (_pOutput->m_InputTexture2DPtr == 0)
+        {
+            BASE_CONSOLE_INFO("Skybox can't be rendered from LUT because of missing image.");
+            return;
+        }
+
+        // -----------------------------------------------------------------------------
+
         CRenderContextPtr RenderContextPtr = _pOutput->m_RenderContextPtr;
         CShaderPtr        VSPtr            = m_SkyboxFromLUT.m_VSPtr;
         CShaderPtr        GSPtr            = m_SkyboxFromLUT.m_GSPtr;
