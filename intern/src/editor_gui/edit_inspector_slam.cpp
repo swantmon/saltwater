@@ -12,10 +12,13 @@
 
 namespace
 {
-    const int g_ResolutionCount = 8;
+    const int g_ResolutionCount = 11;
 
     int g_Resolutions[g_ResolutionCount] =
     {
+		32,
+		64,
+		92,
         128,
         192,
         256,
@@ -58,7 +61,7 @@ namespace Edit
         m_pWeightHS->setValue(DefaultSettings.m_MaxIntegrationWeight);
         m_pWeightTL->setText(QString::number(DefaultSettings.m_MaxIntegrationWeight));
 
-        const int InitialSliderPosition = 2;
+        const int InitialSliderPosition = 5;
         m_pResolutionHS->setRange(0, g_ResolutionCount - 1);
         m_pResolutionHS->setValue(InitialSliderPosition);
         m_pResolutionHS->setPageStep(1);
