@@ -33,6 +33,8 @@
 #include <memory>
 #include <sstream>
 
+#include <gl/glew.h>
+
 using namespace MR;
 using namespace Gfx;
 
@@ -312,6 +314,21 @@ namespace MR
     
     // -----------------------------------------------------------------------------
     
+	bool CScalableSLAMReconstructor::RootGridVisible(const Int3& rKey)
+	{
+		float AABB[6];
+
+		for (int i = 0; i < 3; ++i)
+		{
+			AABB[i * 2] = rKey[i] * m_ReconstructionSettings.m_VolumeSize;
+			AABB[i * 2 + 1] = AABB[i * 2] + m_ReconstructionSettings.m_VolumeSize;
+		}
+
+		return true;
+	}
+
+	// -----------------------------------------------------------------------------
+
 	void CScalableSLAMReconstructor::UpdateRootrids()
 	{
 		Float3 BBMax = m_Frustum[0];
@@ -335,11 +352,6 @@ namespace MR
 			MinIndex[i] = static_cast<int>(BBMin[i] / m_ReconstructionSettings.m_VolumeSize);
 		}
 
-		if (m_RootGrids.size() > 0)
-		{
-			return;
-		}
-
 		STextureDescriptor TextureDescriptor = {};
 		
 		TextureDescriptor.m_NumberOfMipMaps = 1;
@@ -353,16 +365,24 @@ namespace MR
 
 		SRootGrid RootGrid;
 
-		for (int x = MinIndex[0]; x < MaxIndex[0]; ++ x)
+		for (int x = MinIndex[0] - 1; x <= MaxIndex[0]; ++ x)
 		{
-			for (int y = MinIndex[1]; y < MaxIndex[1]; ++ y)
+			for (int y = MinIndex[1] - 1; y <= MaxIndex[1]; ++ y)
 			{
-				for (int z = MinIndex[2]; z < MaxIndex[2]; ++ z)
+				for (int z = MinIndex[2] - 1; z <= MaxIndex[2]; ++ z)
 				{
-					Int3 Key = Int3(0);
-
-					if (m_RootGrids.count(Key) == 0)
+					Int3 Key = Int3(x, y, z);
+					
+					if (m_RootGrids.count(Key) == 0 && RootGridVisible(Key))
 					{
+						GLint Memory;
+						glGetIntegerv(0x9049, &Memory);
+
+						if (Memory < 1000000)
+						{
+							std::terminate();
+						}
+
 						TextureDescriptor.m_NumberOfPixelsU = m_ReconstructionSettings.m_VolumeResolution;
 						TextureDescriptor.m_NumberOfPixelsV = m_ReconstructionSettings.m_VolumeResolution;
 						TextureDescriptor.m_NumberOfPixelsW = m_ReconstructionSettings.m_VolumeResolution;
@@ -373,9 +393,6 @@ namespace MR
 
 						if (m_ReconstructionSettings.m_CaptureColor)
 						{
-							TextureDescriptor.m_NumberOfPixelsU = m_ReconstructionSettings.m_VolumeResolution;
-							TextureDescriptor.m_NumberOfPixelsV = m_ReconstructionSettings.m_VolumeResolution;
-							TextureDescriptor.m_NumberOfPixelsW = m_ReconstructionSettings.m_VolumeResolution;
 							TextureDescriptor.m_Format = CTextureBase::R8G8B8A8_UBYTE;
 
 							RootGrid.m_ColorVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);

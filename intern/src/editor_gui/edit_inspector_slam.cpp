@@ -58,7 +58,7 @@ namespace Edit
         m_pWeightHS->setValue(DefaultSettings.m_MaxIntegrationWeight);
         m_pWeightTL->setText(QString::number(DefaultSettings.m_MaxIntegrationWeight));
 
-        const int InitialSliderPosition = 4;
+        const int InitialSliderPosition = 2;
         m_pResolutionHS->setRange(0, g_ResolutionCount - 1);
         m_pResolutionHS->setValue(InitialSliderPosition);
         m_pResolutionHS->setPageStep(1);

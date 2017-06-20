@@ -7,7 +7,7 @@ namespace MR
 {    
     SReconstructionSettings::SReconstructionSettings()
         : m_VolumeSize(5.0f)
-        , m_VolumeResolution(512)
+        , m_VolumeResolution(256)
 		, m_VoxelSize(0.004f)
         , m_TruncatedDistance(30.0f)
         , m_MaxIntegrationWeight(200)

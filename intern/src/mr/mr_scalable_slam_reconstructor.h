@@ -95,6 +95,7 @@ namespace MR
         void Start();
         void Exit();
 
+		bool RootGridVisible(const Base::Int3& rKey);
 		void UpdateRootrids();
 
 		void SetupData();
