@@ -711,7 +711,7 @@ namespace
 		MR::SReconstructionSettings Settings;
 		m_pScalableReconstructor->GetReconstructionSettings(&Settings);
 
-		ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
+		ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
 		ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
 		ContextManager::SetShaderVS(m_OutlineVSPtr);
@@ -721,6 +721,12 @@ namespace
 		ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
 
 		SDrawCallConstantBuffer BufferData;
+
+		const unsigned int Offset = 0;
+		ContextManager::SetVertexBufferSet(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+		ContextManager::SetInputLayout(m_CubeOutlineInputLayoutPtr);
+
+		ContextManager::SetTopology(STopology::LineList);
 
 		Float3 Position;
 		Float4x4 Scaling;
@@ -744,7 +750,7 @@ namespace
 
 			BufferManager::UploadConstantBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
-			ContextManager::DrawIndexed(36, 0, 0);
+			ContextManager::Draw(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfVertices(), 0);
 		}
 	}
 
