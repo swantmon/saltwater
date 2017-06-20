@@ -96,8 +96,8 @@ namespace
 		std::unique_ptr<MR::CSLAMReconstructor> m_pReconstructor;
 		std::unique_ptr<MR::CScalableSLAMReconstructor> m_pScalableReconstructor;
         
-        CShaderPtr m_WireframeVSPtr;
-        CShaderPtr m_WireframeFSPtr;
+        CShaderPtr m_OutlineVSPtr;
+        CShaderPtr m_OutlineFSPtr;
         CShaderPtr m_RaycastVSPtr;
         CShaderPtr m_RaycastFSPtr;
 
@@ -105,11 +105,12 @@ namespace
         CBufferPtr m_DrawCallConstantBufferPtr;
         
         CMeshPtr m_CameraMeshPtr;
-        CMeshPtr m_CubeMeshPtr;
-        CInputLayoutPtr m_CameraInputLayoutPtr;
-        CInputLayoutPtr m_CubeInputLayoutPtr;
+		CInputLayoutPtr m_CameraInputLayoutPtr;
 
-        CRenderContextPtr m_WireframeRenderContextPtr;
+        CMeshPtr m_VolumeMeshPtr;        
+        CInputLayoutPtr m_VolumeInputLayoutPtr;
+
+        CRenderContextPtr m_OutlineRenderContextPtr;
 
         bool m_UseTrackingCamera;
     };
@@ -157,8 +158,8 @@ namespace
     
     void CGfxReconstructionRenderer::OnExit()
     {
-        m_WireframeVSPtr = 0;
-        m_WireframeFSPtr = 0;
+        m_OutlineVSPtr = 0;
+        m_OutlineFSPtr = 0;
         m_RaycastVSPtr = 0;
         m_RaycastFSPtr = 0;
         
@@ -166,11 +167,11 @@ namespace
         m_DrawCallConstantBufferPtr = 0;
         
         m_CameraMeshPtr = 0;
-        m_CubeMeshPtr = 0;
+        m_VolumeMeshPtr = 0;
         m_CameraInputLayoutPtr = 0;
-        m_CubeInputLayoutPtr = 0;
+        m_VolumeInputLayoutPtr = 0;
 
-        m_WireframeRenderContextPtr = 0;
+        m_OutlineRenderContextPtr = 0;
 
 		m_pReconstructor = nullptr;
 		m_pScalableReconstructor = nullptr;
@@ -201,8 +202,8 @@ namespace
 
 			std::string DefineString = DefineStream.str();
 
-			m_WireframeVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_wireframe.glsl", "main", DefineString.c_str());
-			m_WireframeFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_wireframe.glsl", "main", DefineString.c_str());
+			m_OutlineVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_outline.glsl", "main", DefineString.c_str());
+			m_OutlineFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_outline.glsl", "main", DefineString.c_str());
 			m_RaycastVSPtr   = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_raycast.glsl"  , "main", DefineString.c_str());
 			m_RaycastFSPtr   = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_raycast.glsl"  , "main", DefineString.c_str());
         }
@@ -225,8 +226,8 @@ namespace
 
 			std::string DefineString = DefineStream.str();
 
-			m_WireframeVSPtr = ShaderManager::CompileVS("kinect_fusion\\vs_wireframe.glsl", "main", DefineString.c_str());
-			m_WireframeFSPtr = ShaderManager::CompilePS("kinect_fusion\\fs_wireframe.glsl", "main", DefineString.c_str());
+			m_OutlineVSPtr = ShaderManager::CompileVS("kinect_fusion\\vs_outline.glsl", "main", DefineString.c_str());
+			m_OutlineFSPtr = ShaderManager::CompilePS("kinect_fusion\\fs_outline.glsl", "main", DefineString.c_str());
 			m_RaycastVSPtr   = ShaderManager::CompileVS("kinect_fusion\\vs_raycast.glsl"  , "main", DefineString.c_str());
 			m_RaycastFSPtr   = ShaderManager::CompilePS("kinect_fusion\\fs_raycast.glsl"  , "main", DefineString.c_str());
 		}
@@ -242,8 +243,8 @@ namespace
         InputLayoutDesc.m_InputSlotClass       = CInputLayout::PerVertex;
         InputLayoutDesc.m_InstanceDataStepRate = 0;
 
-        m_CameraInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_WireframeVSPtr);
-        m_CubeInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_RaycastVSPtr);
+        m_CameraInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_OutlineVSPtr);
+        m_VolumeInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_RaycastVSPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -264,12 +265,12 @@ namespace
     
     void CGfxReconstructionRenderer::OnSetupStates()
     {
-        m_WireframeRenderContextPtr = ContextManager::CreateRenderContext();
+        m_OutlineRenderContextPtr = ContextManager::CreateRenderContext();
 
-        m_WireframeRenderContextPtr->SetCamera(ViewManager::GetMainCamera());
-        m_WireframeRenderContextPtr->SetViewPortSet(ViewManager::GetViewPortSet());
-        m_WireframeRenderContextPtr->SetTargetSet(TargetSetManager::GetDeferredTargetSet());
-        m_WireframeRenderContextPtr->SetRenderState(StateManager::GetRenderState(CRenderState::NoCull | CRenderState::Wireframe));
+        m_OutlineRenderContextPtr->SetCamera(ViewManager::GetMainCamera());
+        m_OutlineRenderContextPtr->SetViewPortSet(ViewManager::GetViewPortSet());
+        m_OutlineRenderContextPtr->SetTargetSet(TargetSetManager::GetDeferredTargetSet());
+        m_OutlineRenderContextPtr->SetRenderState(StateManager::GetRenderState(CRenderState::NoCull | CRenderState::Wireframe));
     }
     
     // -----------------------------------------------------------------------------
@@ -415,7 +416,7 @@ namespace
 
         MeshDesc.m_pModel = pMesh;
 
-        m_CubeMeshPtr = MeshManager::CreateMesh(MeshDesc);
+        m_VolumeMeshPtr = MeshManager::CreateMesh(MeshDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -558,9 +559,9 @@ namespace
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
         
         const unsigned int Offset = 0;
-        ContextManager::SetVertexBufferSet(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
-        ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
-        ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
+        ContextManager::SetVertexBufferSet(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetIndexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetInputLayout(m_VolumeInputLayoutPtr);
         
         ContextManager::SetTopology(STopology::TriangleList);
 
@@ -570,9 +571,9 @@ namespace
 
 		ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
 
-		ContextManager::SetRenderContext(m_WireframeRenderContextPtr);
-		ContextManager::SetShaderVS(m_WireframeVSPtr);
-		ContextManager::SetShaderPS(m_WireframeFSPtr);
+		ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
+		ContextManager::SetShaderVS(m_OutlineVSPtr);
+		ContextManager::SetShaderPS(m_OutlineFSPtr);
 
 		SDrawCallConstantBuffer BufferData;
 
@@ -618,9 +619,9 @@ namespace
 		ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
 		const unsigned int Offset = 0;
-		ContextManager::SetVertexBufferSet(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
-		ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
-		ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
+		ContextManager::SetVertexBufferSet(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+		ContextManager::SetIndexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+		ContextManager::SetInputLayout(m_VolumeInputLayoutPtr);
 
 		ContextManager::SetTopology(STopology::TriangleList);
 
@@ -657,9 +658,9 @@ namespace
 
 		ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
 
-		ContextManager::SetRenderContext(m_WireframeRenderContextPtr);
-		ContextManager::SetShaderVS(m_WireframeVSPtr);
-		ContextManager::SetShaderPS(m_WireframeFSPtr);
+		ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
+		ContextManager::SetShaderVS(m_OutlineVSPtr);
+		ContextManager::SetShaderPS(m_OutlineFSPtr);
 
 		ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 		ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
@@ -698,9 +699,9 @@ namespace
     {
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
 
-        ContextManager::SetRenderContext(m_WireframeRenderContextPtr);
-        ContextManager::SetShaderVS(m_WireframeVSPtr);
-        ContextManager::SetShaderPS(m_WireframeFSPtr);
+        ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
+        ContextManager::SetShaderVS(m_OutlineVSPtr);
+        ContextManager::SetShaderPS(m_OutlineFSPtr);
 
 		SDrawCallConstantBuffer BufferData;
 

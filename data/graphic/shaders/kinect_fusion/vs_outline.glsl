@@ -1,6 +1,6 @@
 
-#ifndef __INCLUDE_VS_WIREFRAME_GLSL__
-#define __INCLUDE_VS_WIREFRAME_GLSL__
+#ifndef __INCLUDE_VS_OUTLINE_GLSL__
+#define __INCLUDE_VS_OUTLINE_GLSL__
 
 #include "common_global.glsl"
 
@@ -27,4 +27,4 @@ void main()
     gl_Position = g_WorldToScreen * WSPosition;
 }
 
-#endif // __INCLUDE_VS_WIREFRAME_GLSL__
+#endif // __INCLUDE_VS_OUTLINE_GLSL__

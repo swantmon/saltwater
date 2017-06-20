@@ -1,6 +1,6 @@
 
-#ifndef __INCLUDE_FS_WIREFRAME_GLSL__
-#define __INCLUDE_FS_WIREFRAME_GLSL__
+#ifndef __INCLUDE_FS_OUTLINE_GLSL__
+#define __INCLUDE_FS_OUTLINE_GLSL__
 
 layout(row_major, std140, binding = 1) uniform PerDrawCallData
 {
@@ -15,4 +15,4 @@ void main()
     out_Color = g_Color;
 }
 
-#endif // __INCLUDE_FS_WIREFRAME_GLSL__
+#endif // __INCLUDE_FS_OUTLINE_GLSL__
