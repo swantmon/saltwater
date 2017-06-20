@@ -107,6 +107,9 @@ namespace
         CMeshPtr m_CameraMeshPtr;
 		CInputLayoutPtr m_CameraInputLayoutPtr;
 
+		CMeshPtr m_CubeOutlineMeshPtr;
+		CInputLayoutPtr m_CubeOutlineInputLayoutPtr;
+
         CMeshPtr m_VolumeMeshPtr;        
         CInputLayoutPtr m_VolumeInputLayoutPtr;
 
@@ -330,26 +333,32 @@ namespace
 			Float3(-x * 0.5f,  y * 0.5f, 0.5f),
         };
 
-        unsigned int CameraIndices[] =
+		Float3 CameraLines[24] =
         {
-            0, 1, 2,
-            0, 2, 3,
-            1, 4, 2,
-            2, 4, 3,
-            0, 4, 1,
-            0, 3, 4,
-			5, 6, 7,
-			5, 7, 8,
+			CameraVertices[4], CameraVertices[0],
+			CameraVertices[4], CameraVertices[1],
+			CameraVertices[4], CameraVertices[2],
+			CameraVertices[4], CameraVertices[3],
+
+			CameraVertices[0], CameraVertices[1],
+			CameraVertices[1], CameraVertices[2],
+			CameraVertices[2], CameraVertices[3],
+			CameraVertices[3], CameraVertices[0],
+
+			CameraVertices[5], CameraVertices[6],
+			CameraVertices[6], CameraVertices[7],
+			CameraVertices[7], CameraVertices[8],
+			CameraVertices[8], CameraVertices[5],
         };
                 
         Dt::CSurface* pSurface = new Dt::CSurface;
         Dt::CLOD* pLOD = new Dt::CLOD;
         Dt::CMesh* pMesh = new Dt::CMesh;
 
-        pSurface->SetPositions(CameraVertices);
-        pSurface->SetNumberOfVertices(sizeof(CameraVertices) / sizeof(CameraVertices[0]));
-        pSurface->SetIndices(CameraIndices);
-        pSurface->SetNumberOfIndices(sizeof(CameraIndices) / sizeof(CameraIndices[0]));
+        pSurface->SetPositions(CameraLines);
+        pSurface->SetNumberOfVertices(sizeof(CameraLines) / sizeof(CameraLines[0]));
+        pSurface->SetIndices(0);
+        pSurface->SetNumberOfIndices(0);
         pSurface->SetElements(0);
 
         pLOD->SetSurface(0, pSurface);
@@ -697,7 +706,7 @@ namespace
 
     void CGfxReconstructionRenderer::RenderCamera()
     {
-        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
         ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
         ContextManager::SetShaderVS(m_OutlineVSPtr);
@@ -718,9 +727,9 @@ namespace
         ContextManager::SetIndexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
 
         ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
-        ContextManager::SetTopology(STopology::TriangleList);
+        ContextManager::SetTopology(STopology::LineList);
 
-        ContextManager::DrawIndexed(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::Draw(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfVertices(), 0);
     }
 
     // -----------------------------------------------------------------------------
