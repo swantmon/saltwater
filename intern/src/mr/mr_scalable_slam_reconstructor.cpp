@@ -199,24 +199,53 @@ namespace MR
 
 		// near
 
-		m_Frustum[0] = Float3(x * Near, y * Near, Near);
-		m_Frustum[1] = Float3(-x * Near, y * Near, Near);
-		m_Frustum[2] = Float3(-x * Near, -y * Near, Near);
-		m_Frustum[3] = Float3(x * Near, -y * Near, Near);
+		m_FrustumPoints[0] = Float3(x * Near, y * Near, Near);
+		m_FrustumPoints[1] = Float3(-x * Near, y * Near, Near);
+		m_FrustumPoints[2] = Float3(-x * Near, -y * Near, Near);
+		m_FrustumPoints[3] = Float3(x * Near, -y * Near, Near);
 
 		// far
 
-		m_Frustum[4] = Float3(x * Far, y * Far, Far);
-		m_Frustum[5] = Float3(-x * Far, y * Far, Far);
-		m_Frustum[6] = Float3(-x * Far, -y * Far, Far);
-		m_Frustum[7] = Float3(x * Far, -y * Far, Far);
+		m_FrustumPoints[4] = Float3(x * Far, y * Far, Far);
+		m_FrustumPoints[5] = Float3(-x * Far, y * Far, Far);
+		m_FrustumPoints[6] = Float3(-x * Far, -y * Far, Far);
+		m_FrustumPoints[7] = Float3(x * Far, -y * Far, Far);
 
 		for (int i = 0; i < g_FrustumCorners; ++i)
 		{
-			Float4 Corner = Float4(m_Frustum[i], 1.0f);
+			Float4 Corner = Float4(m_FrustumPoints[i], 1.0f);
 			Corner = m_PoseMatrix * Corner;
-			m_Frustum[i] = Float3(Corner[0], Corner[1], Corner[2]);
+			m_FrustumPoints[i] = Float3(Corner[0], Corner[1], Corner[2]);
 		}
+
+		m_FrustumPlanes[0] = GetHessianNormalForm(m_FrustumPoints[0], m_FrustumPoints[2], m_FrustumPoints[1]); // near
+		m_FrustumPlanes[1] = GetHessianNormalForm(m_FrustumPoints[6], m_FrustumPoints[7], m_FrustumPoints[4]); // far
+		m_FrustumPlanes[2] = GetHessianNormalForm(m_FrustumPoints[4], m_FrustumPoints[3], m_FrustumPoints[0]); // right
+		m_FrustumPlanes[3] = GetHessianNormalForm(m_FrustumPoints[1], m_FrustumPoints[6], m_FrustumPoints[5]); // left
+		m_FrustumPlanes[4] = GetHessianNormalForm(m_FrustumPoints[4], m_FrustumPoints[1], m_FrustumPoints[5]); // top
+		m_FrustumPlanes[5] = GetHessianNormalForm(m_FrustumPoints[7], m_FrustumPoints[6], m_FrustumPoints[2]); // bottom
+	}
+
+	// -----------------------------------------------------------------------------
+
+	Base::Float4 CScalableSLAMReconstructor::GetHessianNormalForm(const Base::Float3& rA, const Base::Float3& rB, const Base::Float3& rC)
+	{
+		Float3 V1 = rB - rA;
+		Float3 V2 = rC - rA;
+
+		Float3 Normal = V1.CrossProduct(V2).Normalize();
+
+		float D = rA.DotProduct(Normal);
+
+		return Float4(Normal, D);
+	}
+
+	// -----------------------------------------------------------------------------
+
+	float CScalableSLAMReconstructor::GetPointPlaneDistance(const Base::Float3& rPoint, const Base::Float4& rPlane)
+	{
+		const float Dot = rPoint.DotProduct(Float3(rPlane[0], rPlane[1], rPlane[2]));
+		return Dot - rPlane[3];
 	}
 
     // -----------------------------------------------------------------------------
@@ -318,10 +347,38 @@ namespace MR
 	{
 		float AABB[6];
 
-		for (int i = 0; i < 3; ++i)
+		for (int PlaneIndex = 0; PlaneIndex < 3; ++PlaneIndex)
 		{
-			AABB[i * 2] = rKey[i] * m_ReconstructionSettings.m_VolumeSize;
-			AABB[i * 2 + 1] = AABB[i * 2] + m_ReconstructionSettings.m_VolumeSize;
+			AABB[PlaneIndex * 2] = rKey[PlaneIndex] * m_ReconstructionSettings.m_VolumeSize;
+			AABB[PlaneIndex * 2 + 1] = AABB[PlaneIndex * 2] + m_ReconstructionSettings.m_VolumeSize;
+		}
+
+		Float3 Cube[8] =
+		{
+			Float3(AABB[0], AABB[2], AABB[4]),
+			Float3(AABB[0], AABB[3], AABB[4]),
+			Float3(AABB[0], AABB[2], AABB[5]),
+			Float3(AABB[0], AABB[3], AABB[5]),
+			Float3(AABB[1], AABB[2], AABB[4]),
+			Float3(AABB[1], AABB[3], AABB[4]),
+			Float3(AABB[1], AABB[2], AABB[5]),
+			Float3(AABB[1], AABB[3], AABB[5]),
+		};
+
+		for (int PlaneIndex = 0; PlaneIndex < 6; ++ PlaneIndex)
+		{
+			int Outside = 0;
+			for (int CubeIndex = 0; CubeIndex < 8; ++ CubeIndex)
+			{
+				if (GetPointPlaneDistance(Cube[CubeIndex], m_FrustumPlanes[PlaneIndex]) > 0)
+				{
+					++ Outside;
+				}
+			}
+			if (Outside == 8)
+			{
+				return false;
+			}
 		}
 
 		return true;
@@ -331,15 +388,15 @@ namespace MR
 
 	void CScalableSLAMReconstructor::UpdateRootrids()
 	{
-		Float3 BBMax = m_Frustum[0];
-		Float3 BBMin = m_Frustum[0];
+		Float3 BBMax = m_FrustumPoints[0];
+		Float3 BBMin = m_FrustumPoints[0];
 
 		for (int i = 1; i < g_FrustumCorners; ++ i)
 		{
 			for (int j = 0; j < 3; ++ j)
 			{
-				BBMax[j] = Base::Max(m_Frustum[i][j], BBMax[j]);
-				BBMin[j] = Base::Min(m_Frustum[i][j], BBMin[j]);
+				BBMax[j] = Base::Max(m_FrustumPoints[i][j], BBMax[j]);
+				BBMin[j] = Base::Min(m_FrustumPoints[i][j], BBMin[j]);
 			}
 		}
 		

@@ -95,6 +95,8 @@ namespace MR
         void Start();
         void Exit();
 
+		Base::Float4 GetHessianNormalForm(const Base::Float3& rA, const Base::Float3& rB, const Base::Float3& rC);
+		float GetPointPlaneDistance(const Base::Float3& rPoint, const Base::Float4& rPlane);
 		bool RootGridVisible(const Base::Int3& rKey);
 		void UpdateRootrids();
 
@@ -176,6 +178,7 @@ namespace MR
 
 		std::vector<float> m_GridSizes;
 
-		std::array<Base::Float3, 8> m_Frustum;
+		std::array<Base::Float3, 8> m_FrustumPoints;
+		std::array<Base::Float4, 6> m_FrustumPlanes;
     };
 } // namespace MR

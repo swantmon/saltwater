@@ -644,7 +644,7 @@ namespace
 				ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
 			}
 
-			ContextManager::DrawIndexed(36, 0, 0);
+			//ContextManager::DrawIndexed(36, 0, 0);
 		}
 	}
 
