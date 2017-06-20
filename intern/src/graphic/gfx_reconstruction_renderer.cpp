@@ -171,8 +171,10 @@ namespace
         
         m_CameraMeshPtr = 0;
         m_VolumeMeshPtr = 0;
+		m_CubeOutlineMeshPtr = 0;
         m_CameraInputLayoutPtr = 0;
         m_VolumeInputLayoutPtr = 0;
+		m_CubeOutlineInputLayoutPtr = 0;
 
         m_OutlineRenderContextPtr = 0;
 
@@ -248,6 +250,7 @@ namespace
 
         m_CameraInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_OutlineVSPtr);
         m_VolumeInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_RaycastVSPtr);
+		m_CubeOutlineInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_OutlineVSPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -357,7 +360,7 @@ namespace
 
         pSurface->SetPositions(CameraLines);
         pSurface->SetNumberOfVertices(sizeof(CameraLines) / sizeof(CameraLines[0]));
-        pSurface->SetIndices(0);
+        pSurface->SetIndices(nullptr);
         pSurface->SetNumberOfIndices(0);
         pSurface->SetElements(0);
 
@@ -385,6 +388,24 @@ namespace
             Float3(1.0f, 1.0f, 1.0f),
             Float3(0.0f, 1.0f, 1.0f),
         };
+
+		Float3 CubeLines[24] =
+		{
+			CubeVertices[0], CubeVertices[1],
+			CubeVertices[1], CubeVertices[2],
+			CubeVertices[2], CubeVertices[3],
+			CubeVertices[3], CubeVertices[0],
+
+			CubeVertices[0], CubeVertices[4],
+			CubeVertices[1], CubeVertices[5],
+			CubeVertices[2], CubeVertices[6],
+			CubeVertices[3], CubeVertices[7],
+
+			CubeVertices[4], CubeVertices[5],
+			CubeVertices[5], CubeVertices[6],
+			CubeVertices[6], CubeVertices[7],
+			CubeVertices[7], CubeVertices[4],
+		};
 
         unsigned int CubeIndices[] =
         {
@@ -426,6 +447,26 @@ namespace
         MeshDesc.m_pModel = pMesh;
 
         m_VolumeMeshPtr = MeshManager::CreateMesh(MeshDesc);
+
+		pSurface = new Dt::CSurface;
+		pLOD = new Dt::CLOD;
+		pMesh = new Dt::CMesh;
+
+		pSurface->SetPositions(CubeLines);
+		pSurface->SetNumberOfVertices(sizeof(CubeLines) / sizeof(CubeLines[0]));
+		pSurface->SetIndices(nullptr);
+		pSurface->SetNumberOfIndices(0);
+		pSurface->SetElements(0);
+
+		pLOD->SetSurface(0, pSurface);
+		pLOD->SetNumberOfSurfaces(1);
+
+		pMesh->SetLOD(0, pLOD);
+		pMesh->SetNumberOfLODs(1);
+
+		MeshDesc.m_pModel = pMesh;
+
+		m_CubeOutlineMeshPtr = MeshManager::CreateMesh(MeshDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -594,7 +635,12 @@ namespace
 		ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 		ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
 		
-		ContextManager::DrawIndexed(36, 0, 0);
+		ContextManager::SetVertexBufferSet(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+		ContextManager::SetInputLayout(m_CubeOutlineInputLayoutPtr);
+
+		ContextManager::SetTopology(STopology::LineList);
+
+		ContextManager::Draw(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfVertices(), 0);
     }
 
 	// -----------------------------------------------------------------------------
