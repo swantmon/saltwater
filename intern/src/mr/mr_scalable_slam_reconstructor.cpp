@@ -126,7 +126,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-	std::vector<CScalableSLAMReconstructor::SRootGrid>& CScalableSLAMReconstructor::GetRootGrids()
+	CScalableSLAMReconstructor::CRootGridMap& CScalableSLAMReconstructor::GetRootGrids()
     {
         return m_RootGrids;
     }
@@ -313,28 +313,34 @@ namespace MR
     
 	void CScalableSLAMReconstructor::UpdateRootrids()
 	{
-		Float3 Max = m_Frustum[0];
-		Float3 Min = m_Frustum[0];
+		Float3 BBMax = m_Frustum[0];
+		Float3 BBMin = m_Frustum[0];
 
 		for (int i = 1; i < g_FrustumCorners; ++ i)
 		{
 			for (int j = 0; j < 3; ++ j)
 			{
-				Max[j] = Max[j] = Base::Max(m_Frustum[i][j], Max[j]);
-				Min[j] = Min[j] = Base::Min(m_Frustum[i][j], Max[j]);
+				BBMax[j] = Base::Max(m_Frustum[i][j], BBMax[j]);
+				BBMin[j] = Base::Min(m_Frustum[i][j], BBMin[j]);
 			}
 		}
 		
+		Int3 MaxIndex;
+		Int3 MinIndex;
+
+		for (int i = 0; i < 3; ++ i)
+		{
+			MaxIndex[i] = static_cast<int>(BBMax[i] / m_ReconstructionSettings.m_VolumeSize);
+			MinIndex[i] = static_cast<int>(BBMin[i] / m_ReconstructionSettings.m_VolumeSize);
+		}
+
 		if (m_RootGrids.size() > 0)
 		{
 			return;
 		}
 
 		STextureDescriptor TextureDescriptor = {};
-
-		TextureDescriptor.m_NumberOfPixelsU = m_ReconstructionSettings.m_VolumeResolution;
-		TextureDescriptor.m_NumberOfPixelsV = m_ReconstructionSettings.m_VolumeResolution;
-		TextureDescriptor.m_NumberOfPixelsW = m_ReconstructionSettings.m_VolumeResolution;
+		
 		TextureDescriptor.m_NumberOfMipMaps = 1;
 		TextureDescriptor.m_NumberOfTextures = 1;
 		TextureDescriptor.m_Binding = CTextureBase::ShaderResource;
@@ -343,24 +349,42 @@ namespace MR
 		TextureDescriptor.m_Semantic = CTextureBase::UndefinedSemantic;
 		TextureDescriptor.m_pFileName = 0;
 		TextureDescriptor.m_pPixels = 0;
-		TextureDescriptor.m_Format = CTextureBase::R16G16_FLOAT;
 
 		SRootGrid RootGrid;
 
-		RootGrid.m_TSDFVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
-		RootGrid.m_Offset = Int3(0);
-
-		if (m_ReconstructionSettings.m_CaptureColor)
+		for (int x = MinIndex[0]; x < MaxIndex[0]; ++ x)
 		{
-			TextureDescriptor.m_NumberOfPixelsU = m_ReconstructionSettings.m_VolumeResolution;
-			TextureDescriptor.m_NumberOfPixelsV = m_ReconstructionSettings.m_VolumeResolution;
-			TextureDescriptor.m_NumberOfPixelsW = m_ReconstructionSettings.m_VolumeResolution;
-			TextureDescriptor.m_Format = CTextureBase::R8G8B8A8_UBYTE;
+			for (int y = MinIndex[1]; y < MaxIndex[1]; ++ y)
+			{
+				for (int z = MinIndex[2]; z < MaxIndex[2]; ++ z)
+				{
+					Int3 Key = Int3(0);
 
-			RootGrid.m_ColorVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
+					if (m_RootGrids.count(Key) == 0)
+					{
+						TextureDescriptor.m_NumberOfPixelsU = m_ReconstructionSettings.m_VolumeResolution;
+						TextureDescriptor.m_NumberOfPixelsV = m_ReconstructionSettings.m_VolumeResolution;
+						TextureDescriptor.m_NumberOfPixelsW = m_ReconstructionSettings.m_VolumeResolution;
+						TextureDescriptor.m_Format = CTextureBase::R16G16_FLOAT;
+
+						RootGrid.m_TSDFVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
+						RootGrid.m_Offset = Key;
+
+						if (m_ReconstructionSettings.m_CaptureColor)
+						{
+							TextureDescriptor.m_NumberOfPixelsU = m_ReconstructionSettings.m_VolumeResolution;
+							TextureDescriptor.m_NumberOfPixelsV = m_ReconstructionSettings.m_VolumeResolution;
+							TextureDescriptor.m_NumberOfPixelsW = m_ReconstructionSettings.m_VolumeResolution;
+							TextureDescriptor.m_Format = CTextureBase::R8G8B8A8_UBYTE;
+
+							RootGrid.m_ColorVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
+						}
+
+						m_RootGrids[RootGrid.m_Offset] = RootGrid;
+					}
+				}
+			}
 		}
-
-		m_RootGrids.push_back(RootGrid);
 	}
 
 	// -----------------------------------------------------------------------------

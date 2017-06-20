@@ -19,11 +19,44 @@
 #include "graphic/gfx_texture_3d.h"
 
 #include <array>
+#include <map>
 #include <vector>
 
 namespace MR
 {
     class IRGBDCameraControl;
+
+	struct IndexCompare
+	{
+		bool operator()(const Base::Int3& rLeft, const Base::Int3& rRight)
+		{
+			if (rLeft[0] < rRight[0])
+			{
+				return true;
+			}
+			if (rLeft[0] > rRight[0])
+			{
+				return false;
+			}
+			if (rLeft[1] < rRight[1])
+			{
+				return true;
+			}
+			if (rLeft[1] > rRight[1])
+			{
+				return false;
+			}
+			if (rLeft[2] < rRight[2])
+			{
+				return true;
+			}
+			if (rLeft[2] > rRight[2])
+			{
+				return false;
+			}
+			return false;
+		}
+	};
 
     class CScalableSLAMReconstructor : private Base::CUncopyable
     {
@@ -35,6 +68,8 @@ namespace MR
 			Gfx::CTexture3DPtr m_ColorVolumePtr;
 			Base::Int3 m_Offset;
 		};
+
+		typedef std::map<Base::Int3, SRootGrid, IndexCompare> CRootGridMap;
 
     public:
 
@@ -51,7 +86,7 @@ namespace MR
         bool IsTrackingLost() const;
         Base::Float4x4 GetPoseMatrix() const;
 
-		std::vector<SRootGrid>& GetRootGrids();
+		CRootGridMap& GetRootGrids();
 
         void GetReconstructionSettings(SReconstructionSettings* pReconstructionSettings);
 
@@ -119,7 +154,7 @@ namespace MR
         std::vector<Gfx::CTexture2DPtr> m_RaycastVertexMapPtr;
         std::vector<Gfx::CTexture2DPtr> m_RaycastNormalMapPtr;
 
-		std::vector<SRootGrid> m_RootGrids;
+		CRootGridMap m_RootGrids;
 
         Gfx::CBufferPtr m_ICPResourceBufferPtr;
 

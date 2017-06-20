@@ -624,8 +624,10 @@ namespace
 
 		ContextManager::SetTopology(STopology::TriangleList);
 
-		for (MR::CScalableSLAMReconstructor::SRootGrid& rRootGrid : m_pScalableReconstructor->GetRootGrids())
+		for (auto& rPair : m_pScalableReconstructor->GetRootGrids())
 		{
+			auto& rRootGrid = rPair.second;
+
 			Float3 Position;
 			Position[0] = static_cast<float>(rRootGrid.m_Offset[0]);
 			Position[1] = static_cast<float>(rRootGrid.m_Offset[1]);
@@ -668,8 +670,10 @@ namespace
 		Float4x4 Scaling;
 		Float4x4 Translation;
 
-		for (MR::CScalableSLAMReconstructor::SRootGrid& rRootGrid : m_pScalableReconstructor->GetRootGrids())
+		for (auto& rPair : m_pScalableReconstructor->GetRootGrids())
 		{
+			auto& rRootGrid = rPair.second;
+
 			Position[0] = static_cast<float>(rRootGrid.m_Offset[0]);
 			Position[1] = static_cast<float>(rRootGrid.m_Offset[1]);
 			Position[2] = static_cast<float>(rRootGrid.m_Offset[2]);
