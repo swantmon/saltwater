@@ -98,6 +98,7 @@ namespace MR
     {
         if (pReconstructionSettings != nullptr)
         {
+			assert(pReconstructionSettings->m_IsScalable);
             m_ReconstructionSettings = *pReconstructionSettings;
         }
         Start();
@@ -950,6 +951,7 @@ namespace MR
 
         if (pReconstructionSettings != nullptr)
         {
+			assert(pReconstructionSettings->m_IsScalable);
             m_ReconstructionSettings = *pReconstructionSettings;
         }
 
@@ -979,7 +981,6 @@ namespace MR
     void CScalableSLAMReconstructor::GetReconstructionSettings(SReconstructionSettings* pReconstructionSettings)
     {
         assert(pReconstructionSettings != nullptr);
-
         *pReconstructionSettings = m_ReconstructionSettings;
     }
 

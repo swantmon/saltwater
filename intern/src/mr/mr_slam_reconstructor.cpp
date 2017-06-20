@@ -98,6 +98,7 @@ namespace MR
     {
         if (pReconstructionSettings != nullptr)
         {
+			assert(!pReconstructionSettings->m_IsScalable);
             m_ReconstructionSettings = *pReconstructionSettings;
         }
         Start();
@@ -850,6 +851,7 @@ namespace MR
     {
         if (pReconstructionSettings != nullptr)
         {
+			assert(!pReconstructionSettings->m_IsScalable);
             m_ReconstructionSettings = *pReconstructionSettings;
             
             SetupTextures();
@@ -924,7 +926,6 @@ namespace MR
     void CSLAMReconstructor::GetReconstructionSettings(SReconstructionSettings* pReconstructionSettings)
     {
         assert(pReconstructionSettings != nullptr);
-
         *pReconstructionSettings = m_ReconstructionSettings;
     }
 
