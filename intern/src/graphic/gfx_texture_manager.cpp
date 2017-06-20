@@ -1226,9 +1226,21 @@ namespace
         // -----------------------------------------------------------------------------
         // Binding
         // -----------------------------------------------------------------------------
-        assert(!(_rDescriptor.m_Binding & Gfx::CTextureBase::DepthStencilTarget || _rDescriptor.m_Binding & Gfx::CTextureBase::RenderTarget));
-
-        glTextureStorage3D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight, ImageDepth);
+        // -----------------------------------------------------------------------------
+        // Binding
+        // -----------------------------------------------------------------------------
+        if (_rDescriptor.m_Binding & Gfx::CTextureBase::DepthStencilTarget)
+        {
+            glTextureStorage3D(NativeTextureHandle, NumberOfMipmaps, GL_DEPTH_COMPONENT32F, ImageWidth, ImageHeight, ImageDepth);
+        }
+        else if (_rDescriptor.m_Binding & Gfx::CTextureBase::RenderTarget)
+        {
+            glTextureStorage3D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight, ImageDepth);
+        }
+        else
+        {
+            glTextureStorage3D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight, ImageDepth);
+        }
 
         // -----------------------------------------------------------------------------
         // Is data available, then upload it to graphic card

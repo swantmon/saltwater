@@ -195,25 +195,6 @@ namespace
         // Setup environment
         // -----------------------------------------------------------------------------
         {
-            Dt::STextureDescriptor TextureDescriptor;
-
-            TextureDescriptor.m_NumberOfPixelsU = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
-            TextureDescriptor.m_NumberOfPixelsV = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
-            TextureDescriptor.m_NumberOfPixelsW = 1;
-            TextureDescriptor.m_Format          = Dt::CTextureBase::R16G16B16_FLOAT;
-            TextureDescriptor.m_Semantic        = Dt::CTextureBase::HDR;
-            TextureDescriptor.m_Binding         = Dt::CTextureBase::ShaderResource;
-            TextureDescriptor.m_pPixels         = 0;
-            TextureDescriptor.m_pFileName       = "environments/Ridgecrest_Road_Ref.hdr";
-            TextureDescriptor.m_pIdentifier     = 0;
-            
-
-            Dt::CTexture2D* pPanoramaTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
-
-            Dt::TextureManager::MarkTextureAsDirty(pPanoramaTexture, Dt::CTextureBase::DirtyCreate);
-
-            // -----------------------------------------------------------------------------
-
             Dt::SEntityDescriptor EntityDesc;
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
@@ -226,10 +207,9 @@ namespace
 
             Dt::CSkyFacet* pSkyboxFacet = Dt::SkyManager::CreateSky();
 
-            pSkyboxFacet->SetRefreshMode(Dt::CSkyFacet::Static);
-            pSkyboxFacet->SetType(Dt::CSkyFacet::Panorama);
-            pSkyboxFacet->SetPanorama(pPanoramaTexture);
-            pSkyboxFacet->SetIntensity(10000.0f);
+            pSkyboxFacet->SetRefreshMode(Dt::CSkyFacet::Dynamic);
+            pSkyboxFacet->SetType(Dt::CSkyFacet::Procedural);
+            pSkyboxFacet->SetIntensity(60000.0f);
 
             rEnvironment.SetDetailFacet(Dt::SFacetCategory::Data, pSkyboxFacet);
 

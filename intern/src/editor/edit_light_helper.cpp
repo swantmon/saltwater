@@ -374,6 +374,33 @@ namespace
 
     void CLightHelper::OnRequestInfoEnvironment(Edit::CMessage& _rMessage)
     {
+        auto AddTextureToMessage = [&](const Dt::CTextureBase* _pTextureBase, Edit::CMessage& _rMessage)
+        {
+            if (_pTextureBase != 0)
+            {
+                if (_pTextureBase->GetFileName().length() > 0)
+                {
+                    _rMessage.PutBool(true);
+
+                    _rMessage.PutString(_pTextureBase->GetFileName().c_str());
+                }
+                else
+                {
+                    _rMessage.PutBool(false);
+                }
+
+                _rMessage.PutInt(_pTextureBase->GetHash());
+            }
+            else
+            {
+                _rMessage.PutBool(false);
+
+                _rMessage.PutInt(0);
+            }
+        };
+
+        // -----------------------------------------------------------------------------
+
         int EntityID = _rMessage.GetInt();
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
@@ -388,45 +415,29 @@ namespace
             NewMessage.PutInt(static_cast<int>(pLightFacet->GetRefreshMode()));
             NewMessage.PutInt(static_cast<int>(pLightFacet->GetType()));
 
-            if (pLightFacet->GetType() == Dt::CSkyFacet::Cubemap)
+            if (pLightFacet->GetType() == Dt::CSkyFacet::Procedural)
             {
-                NewMessage.PutBool(true);
+                NewMessage.PutBool(false);
 
-                if (pLightFacet->GetCubemap()->GetFileName().length() > 0)
-                {
-                    NewMessage.PutBool(true);
-
-                    NewMessage.PutString(pLightFacet->GetCubemap()->GetFileName().c_str());
-                }
-                else
-                {
-                    NewMessage.PutBool(false);
-                }
-
-                NewMessage.PutInt(pLightFacet->GetCubemap()->GetHash());
+                NewMessage.PutInt(0);
             }
             else if (pLightFacet->GetType() == Dt::CSkyFacet::Panorama)
             {
                 NewMessage.PutBool(true);
 
-                if (pLightFacet->GetPanorama()->GetFileName().length() > 0)
-                {
-                    NewMessage.PutBool(true);
+                AddTextureToMessage(pLightFacet->GetPanorama(), NewMessage);
+            }
+            else if (pLightFacet->GetType() == Dt::CSkyFacet::Cubemap)
+            {
+                NewMessage.PutBool(true);
 
-                    NewMessage.PutString(pLightFacet->GetPanorama()->GetFileName().c_str());
-                }
-                else
-                {
-                    NewMessage.PutBool(false);
-                }
-
-                NewMessage.PutInt(pLightFacet->GetPanorama()->GetHash());
+                AddTextureToMessage(pLightFacet->GetCubemap(), NewMessage);
             }
             else if (pLightFacet->GetType() == Dt::CSkyFacet::Texture || pLightFacet->GetType() == Dt::CSkyFacet::TextureGeometry || pLightFacet->GetType() == Dt::CSkyFacet::TextureLUT)
             {
-                NewMessage.PutBool(false);
+                NewMessage.PutBool(true);
 
-                NewMessage.PutInt(pLightFacet->GetTexture()->GetHash());
+                AddTextureToMessage(pLightFacet->GetTexture(), NewMessage);
             }
 
             NewMessage.PutFloat (pLightFacet->GetIntensity());
