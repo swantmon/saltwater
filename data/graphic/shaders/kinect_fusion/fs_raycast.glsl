@@ -3,7 +3,7 @@
 #define __INCLUDE_FS_KINECT_RAYCAST_GLSL__
 
 #include "common_global.glsl"
-#include "common_raycast.glsl"
+#include "kinect_fusion/common_raycast.glsl"
 #include "common_gbuffer.glsl"
 
 // -----------------------------------------------------------------------------

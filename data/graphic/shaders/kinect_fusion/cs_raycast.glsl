@@ -1,9 +1,9 @@
 
-#ifndef __INCLUDE_CS_KINECT_INTEGRATE_VOLUME_GLSL__
-#define __INCLUDE_CS_KINECT_INTEGRATE_VOLUME_GLSL__
+#ifndef __INCLUDE_CS_KINECT_RAYCAST_GLSL__
+#define __INCLUDE_CS_KINECT_RAYCAST_GLSL__
 
 #include "common_tracking.glsl"
-#include "common_raycast.glsl"
+#include "kinect_fusion/common_raycast.glsl"
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -52,4 +52,4 @@ void main()
     imageStore(cs_Normal, VertexMapPosition, vec4(Normal, 1.0f));
 }
 
-#endif // __INCLUDE_CS_KINECT_INTEGRATE_VOLUME_GLSL__
+#endif // __INCLUDE_CS_KINECT_RAYCAST_GLSL__

@@ -3,7 +3,7 @@
 #define __INCLUDE_CS_KINECT_INTEGRATE_VOLUME_GLSL__
 
 #include "common_tracking.glsl"
-#include "common_raycast.glsl"
+#include "scalable_kinect_fusion/common_raycast.glsl"
 
 // -----------------------------------------------------------------------------
 // Constants
