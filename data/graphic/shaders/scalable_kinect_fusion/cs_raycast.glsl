@@ -45,7 +45,7 @@ void main()
     RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
     RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
     
-    vec3 Vertex = GetPosition(CameraPosition, RayDirection, cs_Volume);
+    vec3 Vertex = GetPosition(CameraPosition, RayDirection, vec3(0.0f), cs_Volume);
     vec3 Normal = GetNormal(Vertex, cs_Volume);
 
     imageStore(cs_Vertex, VertexMapPosition, vec4(Vertex, 1.0f));

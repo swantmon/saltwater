@@ -40,7 +40,7 @@ void main()
     RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
     RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
 
-    vec3 WSPosition = GetPosition(g_ViewPosition.xyz, RayDirection, fs_TSDFVolume);
+    vec3 WSPosition = GetPosition(g_ViewPosition.xyz, RayDirection, g_Offset.xyz, fs_TSDFVolume);
     
     if (WSPosition.x != 0.0f)
     {
