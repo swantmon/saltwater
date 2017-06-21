@@ -137,6 +137,7 @@ namespace MR
         Gfx::CBufferPtr m_ICPSummationConstantBufferPtr;
         Gfx::CBufferPtr m_IncPoseMatrixConstantBufferPtr;
         Gfx::CBufferPtr m_BilateralFilterConstantBufferPtr;
+		Gfx::CBufferPtr m_IntegrationConstantBufferPtr;
 
         Gfx::CShaderPtr m_ClearVolumeCSPtr;
         Gfx::CShaderPtr m_BilateralFilterCSPtr;

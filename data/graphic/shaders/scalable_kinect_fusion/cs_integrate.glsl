@@ -8,6 +8,11 @@
 // Constants
 // -----------------------------------------------------------------------------
 
+layout(row_major, std140, binding = 2) uniform UBODepthThreshold
+{
+    vec3 g_Offset;
+};
+
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
@@ -36,7 +41,8 @@ void main()
     for (VoxelCoords.z = 0; VoxelCoords.z < VOLUME_RESOLUTION; ++ VoxelCoords.z)
     {
         vec3 WSVoxelPosition = (VoxelCoords + vec3(0.5f, 0.5f, 0.0f)) * VOXEL_SIZE;
-
+		WSVoxelPosition += g_Offset;
+		
         vec3 VSVoxelPosition = (g_InvPoseMatrix * vec4(WSVoxelPosition, 1.0f)).xyz;
 
         vec2 CSVoxelPosition = VSVoxelPosition.xy * g_Intrinisics[0].m_FocalLength / VSVoxelPosition.z + g_Intrinisics[0].m_FocalPoint;

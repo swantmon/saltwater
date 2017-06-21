@@ -83,6 +83,11 @@ namespace
         float Padding[3];
     };
 
+	struct SIntegrationBuffer
+	{
+		Base::Float3 m_Position;
+	};
+
     struct SDrawCallBufferData
     {
         Base::Float4x4 m_WorldMatrix;
@@ -284,6 +289,7 @@ namespace MR
         m_ICPSummationConstantBufferPtr = 0;
         m_IncPoseMatrixConstantBufferPtr = 0;
         m_BilateralFilterConstantBufferPtr = 0;
+		m_IntegrationConstantBufferPtr = 0;
     }
     
     // -----------------------------------------------------------------------------
@@ -437,6 +443,7 @@ namespace MR
 
 						if (Memory < 1000000)
 						{
+							BASE_CONSOLE_ERROR("Out of GPU memory");
 							std::terminate();
 						}
 
@@ -593,6 +600,10 @@ namespace MR
         ConstantBufferDesc.m_NumberOfBytes = 16;
         ConstantBufferDesc.m_pBytes = &m_ReconstructionSettings.m_DepthThreshold;
         m_BilateralFilterConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+		ConstantBufferDesc.m_NumberOfBytes = sizeof(SIntegrationBuffer);
+		ConstantBufferDesc.m_pBytes = nullptr;
+		m_IntegrationConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
         const int ICPRowCount = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() , g_TileSize2D) *
                                 GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
@@ -941,26 +952,48 @@ namespace MR
 
         ContextManager::SetShaderCS(m_IntegrationCSPtr);
 
-        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RootGrids[0].m_TSDFVolumePtr));
-        ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
-        
-        if (m_ReconstructionSettings.m_CaptureColor)
-        {
-            ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(m_RootGrids[0].m_ColorVolumePtr));
-            ContextManager::SetImageTexture(3, static_cast<CTextureBasePtr>(m_RawCameraFramePtr));
-        }
-        else
-        {
-            ContextManager::ResetImageTexture(2);
-            ContextManager::ResetImageTexture(3);
-        }
-        
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);        
-        
+		ContextManager::SetConstantBuffer(2, m_IntegrationConstantBufferPtr);
+
         ContextManager::Barrier();
 
-        ContextManager::Dispatch(WorkGroups, WorkGroups, 1);
+		ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
+
+		if (m_ReconstructionSettings.m_CaptureColor)
+		{
+			ContextManager::SetImageTexture(3, static_cast<CTextureBasePtr>(m_RawCameraFramePtr));
+		}
+		else
+		{
+			ContextManager::ResetImageTexture(3);
+		}
+
+		for (auto& rEntry : m_RootGrids)
+		{
+			SRootGrid& rRootGrid = rEntry.second;
+
+			Float3 Position;
+
+			Position[0] = rRootGrid.m_Offset[0] * m_ReconstructionSettings.m_VolumeSize;
+			Position[1] = rRootGrid.m_Offset[1] * m_ReconstructionSettings.m_VolumeSize;
+			Position[2] = rRootGrid.m_Offset[2] * m_ReconstructionSettings.m_VolumeSize;
+
+			BufferManager::UploadConstantBufferData(m_IntegrationConstantBufferPtr, &Position);
+
+			ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(rRootGrid.m_TSDFVolumePtr));
+			
+			if (m_ReconstructionSettings.m_CaptureColor)
+			{
+				ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(rRootGrid.m_ColorVolumePtr));
+			}
+			else
+			{
+				ContextManager::ResetImageTexture(2);
+			}
+
+			ContextManager::Dispatch(WorkGroups, WorkGroups, 1);
+		}
     }
     
     // -----------------------------------------------------------------------------

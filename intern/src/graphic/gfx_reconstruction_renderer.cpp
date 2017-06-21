@@ -683,11 +683,10 @@ namespace
 		for (auto& rPair : m_pScalableReconstructor->GetRootGrids())
 		{
 			auto& rRootGrid = rPair.second;
-
-			Float3 Position;
-			Position[0] = static_cast<float>(rRootGrid.m_Offset[0]);
-			Position[1] = static_cast<float>(rRootGrid.m_Offset[1]);
-			Position[2] = static_cast<float>(rRootGrid.m_Offset[2]);
+						
+			RaycastData[0][0] = rRootGrid.m_Offset[0] * Settings.m_VolumeSize;
+			RaycastData[0][1] = rRootGrid.m_Offset[1] * Settings.m_VolumeSize;
+			RaycastData[0][2] = rRootGrid.m_Offset[2] * Settings.m_VolumeSize;
 			
 			BufferManager::UploadConstantBufferData(m_RaycastConstantBufferPtr, RaycastData);
 
@@ -700,7 +699,7 @@ namespace
 				ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
 			}
 
-			//ContextManager::DrawIndexed(36, 0, 0);
+			ContextManager::DrawIndexed(36, 0, 0);
 		}
 	}
 
