@@ -2,20 +2,20 @@
 #ifndef __INCLUDE_COMMON_RAYCAST_GLSL__
 #define __INCLUDE_COMMON_RAYCAST_GLSL__
 
-float GetStartLength(vec3 Start, vec3 Direction, vec3 Offset)
+float GetStartLength(vec3 Start, vec3 Direction)
 {
-    float xmin = ((Direction.x > 0.0f ? 0.0f : VOLUME_SIZE) - Start.x - Offset.x) / Direction.x;
-    float ymin = ((Direction.y > 0.0f ? 0.0f : VOLUME_SIZE) - Start.y - Offset.y) / Direction.y;
-    float zmin = ((Direction.z > 0.0f ? 0.0f : VOLUME_SIZE) - Start.z - Offset.z) / Direction.z;
+    float xmin = ((Direction.x > 0.0f ? 0.0f : VOLUME_SIZE) - Start.x) / Direction.x;
+    float ymin = ((Direction.y > 0.0f ? 0.0f : VOLUME_SIZE) - Start.y) / Direction.y;
+    float zmin = ((Direction.z > 0.0f ? 0.0f : VOLUME_SIZE) - Start.z) / Direction.z;
 
     return max(max(xmin, ymin), zmin);
 }
 
-float GetEndLength(vec3 Start, vec3 Direction, vec3 Offset)
+float GetEndLength(vec3 Start, vec3 Direction)
 {
-    float xmax = ((Direction.x > 0.0f ? VOLUME_SIZE : 0.0f) - Start.x - Offset.x) / Direction.x;
-	float ymax = ((Direction.y > 0.0f ? VOLUME_SIZE : 0.0f) - Start.y - Offset.y) / Direction.y;
-	float zmax = ((Direction.z > 0.0f ? VOLUME_SIZE : 0.0f) - Start.z - Offset.z) / Direction.z;
+    float xmax = ((Direction.x > 0.0f ? VOLUME_SIZE : 0.0f) - Start.x) / Direction.x;
+	float ymax = ((Direction.y > 0.0f ? VOLUME_SIZE : 0.0f) - Start.y) / Direction.y;
+	float zmax = ((Direction.z > 0.0f ? VOLUME_SIZE : 0.0f) - Start.z) / Direction.z;
 
     return min(min(xmax, ymax), zmax);
 }
@@ -69,10 +69,10 @@ float GetInterpolatedTSDF(vec3 Position, sampler3D Volume)
     return result;
 }
 
-vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection, vec3 Offset, sampler3D Volume)
+vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection, sampler3D Volume)
 {
-    const float StartLength = GetStartLength(CameraPosition, RayDirection, Offset);
-    const float EndLength = GetEndLength(CameraPosition, RayDirection, Offset);
+    const float StartLength = GetStartLength(CameraPosition, RayDirection);
+    const float EndLength = GetEndLength(CameraPosition, RayDirection);
     
     float Step = TRUNCATED_DISTANCE * 0.001f * 0.8f;
     float RayLength = StartLength;
