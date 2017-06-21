@@ -2,7 +2,7 @@
 #ifndef __INCLUDE_CS_DETERMINE_SUMMANDS_GLSL__
 #define __INCLUDE_CS_DETERMINE_SUMMANDS_GLSL__
 
-#include "common_tracking.glsl"
+#include "scalable_kinect_fusion/common_tracking.glsl"
 
 #define WORKGROUP_SIZE (TILE_SIZE2D) * (TILE_SIZE2D)
 

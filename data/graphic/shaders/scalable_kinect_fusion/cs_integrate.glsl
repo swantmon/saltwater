@@ -2,7 +2,7 @@
 #ifndef __INCLUDE_CS_KINECT_INTEGRATE_GLSL__
 #define __INCLUDE_CS_KINECT_INTEGRATE_GLSL__
 
-#include "common_tracking.glsl"
+#include "scalable_kinect_fusion/common_tracking.glsl"
 
 // -----------------------------------------------------------------------------
 // Constants

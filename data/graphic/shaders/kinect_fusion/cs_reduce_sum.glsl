@@ -2,7 +2,7 @@
 #ifndef __INCLUDE_CS_REDUCE_SUMMANDS_GLSL__
 #define __INCLUDE_CS_REDUCE_SUMMANDS_GLSL__
 
-#include "common_tracking.glsl"
+#include "kinect_fusion/common_tracking.glsl"
 
 layout(row_major, std140, binding = 2) uniform UBOSummationData
 {

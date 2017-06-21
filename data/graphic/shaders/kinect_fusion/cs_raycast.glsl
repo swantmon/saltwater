@@ -2,7 +2,7 @@
 #ifndef __INCLUDE_CS_KINECT_RAYCAST_GLSL__
 #define __INCLUDE_CS_KINECT_RAYCAST_GLSL__
 
-#include "common_tracking.glsl"
+#include "kinect_fusion/common_tracking.glsl"
 #include "kinect_fusion/common_raycast.glsl"
 
 // -----------------------------------------------------------------------------
