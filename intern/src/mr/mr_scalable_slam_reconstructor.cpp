@@ -349,7 +349,7 @@ namespace MR
     
     // -----------------------------------------------------------------------------
     
-	bool CScalableSLAMReconstructor::RootGridVisible(const Int3& rKey)
+	bool CScalableSLAMReconstructor::RootGridInFrustum(const Int3& rKey)
 	{
 		float AABB[6];
 
@@ -387,6 +387,13 @@ namespace MR
 			}
 		}
 
+		return true;
+	}
+
+	// -----------------------------------------------------------------------------
+
+	bool CScalableSLAMReconstructor::RootGridContainsDepth(const Base::Int3& rKey)
+	{
 		return true;
 	}
 
@@ -436,7 +443,7 @@ namespace MR
 				{
 					Int3 Key = Int3(x, y, z);
 					
-					if (m_RootGrids.count(Key) == 0 && RootGridVisible(Key))
+					if (m_RootGrids.count(Key) == 0 && RootGridInFrustum(Key) && RootGridContainsDepth(Key))
 					{
 						GLint Memory;
 						glGetIntegerv(0x9049, &Memory);
@@ -444,7 +451,7 @@ namespace MR
 						if (Memory < 1000000)
 						{
 							BASE_CONSOLE_ERROR("Out of GPU memory");
-							std::terminate();
+							return;
 						}
 
 						TextureDescriptor.m_NumberOfPixelsU = m_ReconstructionSettings.m_VolumeResolution;
@@ -473,7 +480,7 @@ namespace MR
 		{
 			auto& rRootGrid = rPair.second;
 
-			rRootGrid.m_IsVisible = RootGridVisible(rRootGrid.m_Offset);
+			rRootGrid.m_IsVisible = RootGridInFrustum(rRootGrid.m_Offset);
 		}
 	}
 

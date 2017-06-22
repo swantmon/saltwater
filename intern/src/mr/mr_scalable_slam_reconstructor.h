@@ -98,7 +98,8 @@ namespace MR
 
 		Base::Float4 GetHessianNormalForm(const Base::Float3& rA, const Base::Float3& rB, const Base::Float3& rC);
 		float GetPointPlaneDistance(const Base::Float3& rPoint, const Base::Float4& rPlane);
-		bool RootGridVisible(const Base::Int3& rKey);
+		bool RootGridInFrustum(const Base::Int3& rKey);
+		bool RootGridContainsDepth(const Base::Int3& rKey);
 		void UpdateRootrids();
 
 		void SetupData();
