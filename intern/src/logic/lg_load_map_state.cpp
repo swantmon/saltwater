@@ -207,7 +207,7 @@ namespace
 
             Dt::CSkyFacet* pSkyboxFacet = Dt::SkyManager::CreateSky();
 
-            pSkyboxFacet->SetRefreshMode(Dt::CSkyFacet::Dynamic);
+            pSkyboxFacet->SetRefreshMode(Dt::CSkyFacet::Static);
             pSkyboxFacet->SetType(Dt::CSkyFacet::Procedural);
             pSkyboxFacet->SetIntensity(60000.0f);
 
