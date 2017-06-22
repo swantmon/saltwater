@@ -831,21 +831,21 @@ namespace BufferManager
 
 	// -----------------------------------------------------------------------------
 
-	void* MapAtmomicCounterBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map)
+	void* MapAtomicCounterBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map)
 	{
 		return CGfxBufferManager::GetInstance().MapBuffer(_BufferPtr, _Map);
 	}
 
 	// -----------------------------------------------------------------------------
 
-	void* MapAtmomicCounterBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range)
+	void* MapAtomicCounterBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range)
 	{
 		return CGfxBufferManager::GetInstance().MapBufferRange(_BufferPtr, _Map, _Offset, _Range);
 	}
 
 	// -----------------------------------------------------------------------------
 
-	void UnmapAtmomicCounterBuffer(CBufferPtr _BufferPtr)
+	void UnmapAtomicCounterBuffer(CBufferPtr _BufferPtr)
 	{
 		CGfxBufferManager::GetInstance().UnmapBuffer(_BufferPtr);
 	}
