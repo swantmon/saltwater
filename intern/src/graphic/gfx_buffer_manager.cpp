@@ -248,15 +248,16 @@ namespace
         void*                    pBytes;
         int                      NativeBinding;
         int                      NativeUsage;
+		GLbitfield               Flags;
         Gfx::CNativeBufferHandle NativeBuffer;
 
         // -----------------------------------------------------------------------------
         // Setup variables for exception safety.
         // -----------------------------------------------------------------------------
+
         pBytes         = nullptr;
         NativeBuffer   = 0;
         NativeBinding  = ConvertBindFlag(_rDescriptor.m_Binding);
-        NativeUsage    = ConvertUsage(_rDescriptor.m_Usage);
         
         // -----------------------------------------------------------------------------
         // Generate OpenGL buffer
@@ -268,7 +269,16 @@ namespace
         // If pBytes is NULL, a data store of the specified size is still created,
         // but its contents remain uninitialized and thus undefined.
         // -----------------------------------------------------------------------------
-        glNamedBufferData(NativeBuffer, _rDescriptor.m_NumberOfBytes, _rDescriptor.m_pBytes, NativeUsage);
+		if (_rDescriptor.m_Usage == CBuffer::Persistent)
+		{
+			Flags = GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+			glNamedBufferStorage(NativeBuffer, _rDescriptor.m_NumberOfBytes, _rDescriptor.m_pBytes, Flags);
+		}
+		else
+		{
+			NativeUsage = ConvertUsage(_rDescriptor.m_Usage);
+			glNamedBufferData(NativeBuffer, _rDescriptor.m_NumberOfBytes, _rDescriptor.m_pBytes, NativeUsage);
+		}
                
         // -----------------------------------------------------------------------------
         // Create the core resource behavior on the owner policy.
@@ -831,21 +841,21 @@ namespace BufferManager
 
 	// -----------------------------------------------------------------------------
 
-	void* MapAtmomicCounterBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map)
+	void* MapAtomicCounterBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map)
 	{
 		return CGfxBufferManager::GetInstance().MapBuffer(_BufferPtr, _Map);
 	}
 
 	// -----------------------------------------------------------------------------
 
-	void* MapAtmomicCounterBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range)
+	void* MapAtomicCounterBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range)
 	{
 		return CGfxBufferManager::GetInstance().MapBufferRange(_BufferPtr, _Map, _Offset, _Range);
 	}
 
 	// -----------------------------------------------------------------------------
 
-	void UnmapAtmomicCounterBuffer(CBufferPtr _BufferPtr)
+	void UnmapAtomicCounterBuffer(CBufferPtr _BufferPtr)
 	{
 		CGfxBufferManager::GetInstance().UnmapBuffer(_BufferPtr);
 	}
