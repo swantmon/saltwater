@@ -454,6 +454,7 @@ namespace MR
 
 						RootGrid.m_TSDFVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
 						RootGrid.m_Offset = Key;
+						RootGrid.m_IsVisible = true;
 
 						if (m_ReconstructionSettings.m_CaptureColor)
 						{
@@ -466,6 +467,13 @@ namespace MR
 					}
 				}
 			}
+		}
+
+		for (auto& rPair : m_RootGrids)
+		{
+			auto& rRootGrid = rPair.second;
+
+			rRootGrid.m_IsVisible = RootGridVisible(rRootGrid.m_Offset);
 		}
 	}
 
@@ -973,26 +981,29 @@ namespace MR
 		{
 			SRootGrid& rRootGrid = rEntry.second;
 
-			Float3 Position;
-
-			Position[0] = rRootGrid.m_Offset[0] * m_ReconstructionSettings.m_VolumeSize;
-			Position[1] = rRootGrid.m_Offset[1] * m_ReconstructionSettings.m_VolumeSize;
-			Position[2] = rRootGrid.m_Offset[2] * m_ReconstructionSettings.m_VolumeSize;
-
-			BufferManager::UploadConstantBufferData(m_IntegrationConstantBufferPtr, &Position);
-
-			ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(rRootGrid.m_TSDFVolumePtr));
-			
-			if (m_ReconstructionSettings.m_CaptureColor)
+			if (rRootGrid.m_IsVisible)
 			{
-				ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(rRootGrid.m_ColorVolumePtr));
-			}
-			else
-			{
-				ContextManager::ResetImageTexture(2);
-			}
+				Float3 Position;
 
-			ContextManager::Dispatch(WorkGroups, WorkGroups, 1);
+				Position[0] = rRootGrid.m_Offset[0] * m_ReconstructionSettings.m_VolumeSize;
+				Position[1] = rRootGrid.m_Offset[1] * m_ReconstructionSettings.m_VolumeSize;
+				Position[2] = rRootGrid.m_Offset[2] * m_ReconstructionSettings.m_VolumeSize;
+
+				BufferManager::UploadConstantBufferData(m_IntegrationConstantBufferPtr, &Position);
+
+				ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(rRootGrid.m_TSDFVolumePtr));
+
+				if (m_ReconstructionSettings.m_CaptureColor)
+				{
+					ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(rRootGrid.m_ColorVolumePtr));
+				}
+				else
+				{
+					ContextManager::ResetImageTexture(2);
+				}
+
+				ContextManager::Dispatch(WorkGroups, WorkGroups, 1);
+			}
 		}
     }
     

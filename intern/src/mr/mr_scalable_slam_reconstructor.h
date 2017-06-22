@@ -67,6 +67,7 @@ namespace MR
 			Gfx::CTexture3DPtr m_TSDFVolumePtr;
 			Gfx::CTexture3DPtr m_ColorVolumePtr;
 			Base::Int3 m_Offset;
+			bool m_IsVisible;
 		};
 
 		typedef std::map<Base::Int3, SRootGrid, IndexCompare> CRootGridMap;
