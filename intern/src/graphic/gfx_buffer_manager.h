@@ -60,9 +60,9 @@ namespace BufferManager
 	void* MapConstantBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range);
     void UnmapConstantBuffer(CBufferPtr _BufferPtr);
 
-	void* MapAtmomicCounterBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map);
-	void* MapAtmomicCounterBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range);
-	void UnmapAtmomicCounterBuffer(CBufferPtr _BufferPtr);
+	void* MapAtomicCounterBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map);
+	void* MapAtomicCounterBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range);
+	void UnmapAtomicCounterBuffer(CBufferPtr _BufferPtr);
 
     void UploadVertexBufferData(CBufferPtr _BufferPtr, const void* _pData);
     void UploadConstantBufferData(CBufferPtr _BufferPtr, const void* _pData);

@@ -19,6 +19,7 @@ namespace Gfx
                 GPURead          = 1,
                 GPUReadCPUWrite  = 2,
                 GPUToCPU         = 3,
+				Persistent       = 4,
             };
             
             enum EBinding
