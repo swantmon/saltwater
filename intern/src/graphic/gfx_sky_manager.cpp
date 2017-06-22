@@ -14,6 +14,7 @@
 #include "data/data_map.h"
 #include "data/data_model_manager.h"
 #include "data/data_sky_facet.h"
+#include "data/data_sun_facet.h"
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
@@ -35,6 +36,26 @@
 #include "opencv2/opencv.hpp"
 
 using namespace Gfx;
+
+namespace
+{
+    const float g_RadiusGround     = 6360.0f;
+    const float g_RadiusAtmosphere = 6420.0f;
+
+    const uint g_TransmittanceWidth  = 256;
+    const uint g_TransmittanceHeight = 64;
+
+    const uint g_InscatterAltitude = 128;
+    const uint g_InscatterMu       = 128;         // view / zenith
+    const uint g_InscatterMuS      = 32;          // sun / zenith
+    const uint g_InscatterNu       = 8;           // view / sun
+    const uint g_InscatterWidth    = g_InscatterMuS * g_InscatterNu;
+    const uint g_InscatterHeight   = g_InscatterMu;
+    const uint g_InscatterDepth    = g_InscatterAltitude;
+
+    const uint g_IrradianceWidth  = 64;
+    const uint g_IrradianceHeight = 16;
+}
 
 namespace 
 {
@@ -90,6 +111,50 @@ namespace
             float m_IsHDR;
         };
 
+        struct SPrecomputeConstants
+        {
+            float m_TransmittanceWidth;
+            float m_TransmittanceHeight;
+            float m_IrradianceWidth;
+            float m_IrradianceHeight;
+            float m_InscatterMus;
+            float m_InscatterMu;
+            float m_InscatterNu;
+            float m_InscatterAltitude;
+        };
+
+        struct SPSIrradianceK
+        {
+            float k;
+            float Padding[3];
+        };
+
+        struct SGSLayer
+        {
+            uint m_Layer;
+            float Padding[3];
+        };
+
+        struct SPSLayerValues
+        {
+            Base::Float4 m_Dhdh;
+            float m_Radius;
+            float Padding[3];
+        };
+
+        struct SPSScatteringOrder
+        {
+            float m_FirstOrder;
+            float Padding[3];
+        };
+
+        struct SPSPASSettings
+        {
+            Base::Float4 g_SunDirection;
+            Base::Float4 g_SunIntensity;
+            uint         ps_ExposureHistoryIndex;
+        };
+
         class CInternSkyFacet : public CSkyFacet
         {
         public:
@@ -116,6 +181,7 @@ namespace
 
     private:
 
+        SRenderContext    m_SkyboxFromAtmosphere;
         SRenderContext    m_SkyboxFromPanorama;
         SRenderContext    m_SkyboxFromCubemap;
         SRenderContext    m_SkyboxFromTexture;
@@ -126,6 +192,16 @@ namespace
         CSelectionTicket* m_pSelectionTicket;
         CSkyfacets        m_Skyfacets;
 
+
+
+        CBufferPtr m_PSPrecomputeConstants;
+
+        CTexture2DPtr m_TransmittanceTable;
+        CTexture2DPtr m_IrradianceTable;
+        CTexture3DPtr m_InscatterTable;
+
+
+
     private:
 
         void OnDirtyEntity(Dt::CEntity* _pEntity);
@@ -133,6 +209,8 @@ namespace
         CInternSkyFacet& AllocateSkyFacet(unsigned int _FaceSize);
 
         void RenderSkybox(Dt::CSkyFacet* _pDataSkyFacet, CInternSkyFacet* _pOutput);
+
+        void RenderSkyboxFromAtmopsphericScattering(CInternSkyFacet* _pOutput, float _Intensity = 1.0f);
 
         void RenderSkyboxFromPanorama(CInternSkyFacet* _pOutput, float _Intensity = 1.0f);
 
@@ -143,6 +221,8 @@ namespace
         void RenderSkyboxFromGeometry(CInternSkyFacet* _pOutput, float _Intensity = 1.0f);
 
         void RenderSkyboxFromLUT(CInternSkyFacet* _pOutput, float _Intensity = 1.0f);
+
+        void PrecomputeScattering();
 
         void PrecomputeLUT();
     };
@@ -200,6 +280,18 @@ namespace
 
     void CGfxSkyManager::OnStart()
     {
+        m_SkyboxFromAtmosphere.m_VSPtr              = 0;
+        m_SkyboxFromAtmosphere.m_GSPtr              = 0;
+        m_SkyboxFromAtmosphere.m_PSPtr              = 0;
+        m_SkyboxFromAtmosphere.m_VSBufferSetPtr     = 0;
+        m_SkyboxFromAtmosphere.m_GSBufferSetPtr     = 0;
+        m_SkyboxFromAtmosphere.m_PSBufferSetPtr     = 0;
+        m_SkyboxFromAtmosphere.m_InputLayoutPtr     = 0;
+        m_SkyboxFromAtmosphere.m_MeshPtr            = 0;
+        m_SkyboxFromAtmosphere.m_VertexBufferSetPtr = 0;
+        m_SkyboxFromAtmosphere.m_IndexBufferPtr     = 0;
+        m_SkyboxFromAtmosphere.m_TextureSetPtr      = 0;
+
         m_SkyboxFromPanorama.m_VSPtr              = 0;
         m_SkyboxFromPanorama.m_GSPtr              = 0;
         m_SkyboxFromPanorama.m_PSPtr              = 0;
@@ -274,6 +366,8 @@ namespace
         CShaderPtr CubemapTexturePSPtr  = ShaderManager::CompilePS("fs_texture_env_cubemap_generation.glsl", "main");
         CShaderPtr CubemapLUTPSPtr      = ShaderManager::CompilePS("fs_lut_env_cubemap_generation.glsl", "main");
 
+        CShaderPtr m_PostEffectMaterial = ShaderManager::CompilePS("scattering/scattering_post_effect.glsl", "main");
+
         const SInputElementDescriptor P3N3T2InputLayout[] =
         {
             { "POSITION", 0, CInputLayout::Float3Format, 0, 0 , 32, CInputLayout::PerVertex, 0 },
@@ -290,6 +384,11 @@ namespace
         };
 
         CInputLayoutPtr P3T2CubemapInputLayoutPtr = ShaderManager::CreateInputLayout(P3T2InputLayout, 2, CubemapVSPtr);
+
+        m_SkyboxFromAtmosphere.m_VSPtr          = CubemapVSPtr;
+        m_SkyboxFromAtmosphere.m_GSPtr          = CubemapGSPtr;
+        m_SkyboxFromAtmosphere.m_PSPtr          = m_PostEffectMaterial;
+        m_SkyboxFromAtmosphere.m_InputLayoutPtr = P3N3T2CubemapInputLayoutPtr;
 
         m_SkyboxFromPanorama.m_VSPtr          = CubemapVSPtr;
         m_SkyboxFromPanorama.m_GSPtr          = CubemapGSPtr;
@@ -331,39 +430,68 @@ namespace
         
         // -----------------------------------------------------------------------------
         // By creating a cube map in OpenGL, several facts should be considered:
-        //  1. OpenGL cubemaps has an left handed coord system
+        //  1. OpenGL cubemaps has an left handed coord system inside the cube and
+        //    right handed coord system outside the cube
         //  2. Texcoords starts in the upper left corner (normally in the lower left 
         //     corner)
+        //
+        // RHS:
+        //          +--------+
+        //          |        |
+        //          |   Y+   |
+        //          |        |
+        // +--------+--------+--------+--------+
+        // |        |        |        |        |
+        // |   X-   |   Z+   |   X+   |   Z-   |
+        // |        |        |        |        |
+        // +--------+--------+--------+--------+
+        //          |        |
+        //          |   Y-   |
+        //          |        |
+        //          +--------+
+        //
+        // LHS:
+        //          +--------+
+        //          |        |
+        //          |   Y+   |
+        //          |        |
+        // +--------+--------+--------+--------+
+        // |        |        |        |        |
+        // |   X-   |   Z-   |   X+   |   Z+   |
+        // |        |        |        |        |
+        // +--------+--------+--------+--------+
+        //          |        |
+        //          |   Y-   |
+        //          |        |
+        //          +--------+
         // -----------------------------------------------------------------------------
 
         // -----------------------------------------------------------------------------
         // Creating VS matrix for spherical image to cube map:
-        // -> y-Axis is mirrored (normally "z" but we will rotate cube later) 
-        // -> Orientation of every side is flipped
-        // -> At the end we rotate the matrix because the spherical image is y-up
+        // -> Viewer is inside the cube > LHS
         // -----------------------------------------------------------------------------
         LookDirection = EyePosition + Base::Float3::s_AxisX;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[0].LookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
         LookDirection = EyePosition - Base::Float3::s_AxisX;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[1].LookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition - Base::Float3::s_AxisY;
+        LookDirection = EyePosition + Base::Float3::s_AxisY;
         UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisZ;
         
         DefaultGSValues.m_CubeViewMatrix[2].LookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition + Base::Float3::s_AxisY;
+        LookDirection = EyePosition - Base::Float3::s_AxisY;
         UpDirection   = Base::Float3::s_AxisZ;
         
         DefaultGSValues.m_CubeViewMatrix[3].LookAt(EyePosition, LookDirection, UpDirection);
@@ -371,14 +499,14 @@ namespace
         // -----------------------------------------------------------------------------
         
         LookDirection = EyePosition + Base::Float3::s_AxisZ;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[4].LookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
         LookDirection = EyePosition - Base::Float3::s_AxisZ;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[5].LookAt(EyePosition, LookDirection, UpDirection);
         
@@ -409,43 +537,43 @@ namespace
         // -> Mirroring isn't necessary because it is done inside the cubemap
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition - Base::Float3::s_AxisX;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        LookDirection = EyePosition + Base::Float3::s_AxisX;
+        UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[0].LookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition + Base::Float3::s_AxisX;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        LookDirection = EyePosition - Base::Float3::s_AxisX;
+        UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[1].LookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition - Base::Float3::s_AxisY;
-        UpDirection   = Base::Float3::s_AxisZ;
-        
-        DefaultGSValues.m_CubeViewMatrix[2].LookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
         LookDirection = EyePosition + Base::Float3::s_AxisY;
         UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisZ;
         
+        DefaultGSValues.m_CubeViewMatrix[2].LookAt(EyePosition, LookDirection, UpDirection);
+        
+        // -----------------------------------------------------------------------------
+        
+        LookDirection = EyePosition - Base::Float3::s_AxisY;
+        UpDirection   = Base::Float3::s_AxisZ;
+        
         DefaultGSValues.m_CubeViewMatrix[3].LookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition - Base::Float3::s_AxisZ;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        LookDirection = EyePosition + Base::Float3::s_AxisZ;
+        UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[4].LookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition + Base::Float3::s_AxisZ;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisY;
+        LookDirection = EyePosition - Base::Float3::s_AxisZ;
+        UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[5].LookAt(EyePosition, LookDirection, UpDirection);
         
@@ -545,6 +673,22 @@ namespace
 
         // -----------------------------------------------------------------------------
 
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SPSPASSettings);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+
+        CBufferPtr PSPASSettings = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+
+        m_SkyboxFromAtmosphere.m_VSBufferSetPtr = 0;
+        m_SkyboxFromAtmosphere.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSSphericalBuffer);
+        m_SkyboxFromAtmosphere.m_PSBufferSetPtr = BufferManager::CreateBufferSet(PSPASSettings);
+
         m_SkyboxFromPanorama.m_VSBufferSetPtr = 0;
         m_SkyboxFromPanorama.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSSphericalBuffer);
         m_SkyboxFromPanorama.m_PSBufferSetPtr = BufferManager::CreateBufferSet(OuputPSBufferPtr);
@@ -576,7 +720,7 @@ namespace
 
         Dt::CModel& rSphereModel = Dt::ModelManager::CreateModel(ModelFileDesc);
 
-        ModelDescr.m_pModel = &rSphereModel.GetMesh(0);
+        ModelDescr.m_pMesh = &rSphereModel.GetMesh(0);
 
         CMeshPtr CubemapTextureSpherePtr = MeshManager::CreateMesh(ModelDescr);
 
@@ -587,7 +731,7 @@ namespace
 
         Dt::CModel& rCurvedPlaneModel = Dt::ModelManager::CreateModel(ModelFileDesc);
 
-        ModelDescr.m_pModel = &rCurvedPlaneModel.GetMesh(0);
+        ModelDescr.m_pMesh = &rCurvedPlaneModel.GetMesh(0);
 
         CMeshPtr CurvedPlanePtr = MeshManager::CreateMesh(ModelDescr);
 
@@ -631,6 +775,10 @@ namespace
 
         // -----------------------------------------------------------------------------
 
+        m_SkyboxFromAtmosphere.m_MeshPtr            = CubemapTextureSpherePtr;
+        m_SkyboxFromAtmosphere.m_VertexBufferSetPtr = 0;
+        m_SkyboxFromAtmosphere.m_IndexBufferPtr     = 0;
+
         m_SkyboxFromPanorama.m_MeshPtr            = CubemapTextureSpherePtr;
         m_SkyboxFromPanorama.m_VertexBufferSetPtr = 0;
         m_SkyboxFromPanorama.m_IndexBufferPtr     = 0;
@@ -665,6 +813,11 @@ namespace
         // Generate LUT
         // -----------------------------------------------------------------------------
         PrecomputeLUT();
+
+        // -----------------------------------------------------------------------------
+        // Precompute Scattering
+        // -----------------------------------------------------------------------------
+        PrecomputeScattering();
     }
 
     // -----------------------------------------------------------------------------
@@ -672,6 +825,18 @@ namespace
     void CGfxSkyManager::OnExit()
     {
         SelectionRenderer::Clear(*m_pSelectionTicket);
+
+        m_SkyboxFromAtmosphere.m_VSPtr              = 0;
+        m_SkyboxFromAtmosphere.m_GSPtr              = 0;
+        m_SkyboxFromAtmosphere.m_PSPtr              = 0;
+        m_SkyboxFromAtmosphere.m_VSBufferSetPtr     = 0;
+        m_SkyboxFromAtmosphere.m_GSBufferSetPtr     = 0;
+        m_SkyboxFromAtmosphere.m_PSBufferSetPtr     = 0;
+        m_SkyboxFromAtmosphere.m_InputLayoutPtr     = 0;
+        m_SkyboxFromAtmosphere.m_MeshPtr            = 0;
+        m_SkyboxFromAtmosphere.m_VertexBufferSetPtr = 0;
+        m_SkyboxFromAtmosphere.m_IndexBufferPtr     = 0;
+        m_SkyboxFromAtmosphere.m_TextureSetPtr      = 0;
 
         m_SkyboxFromPanorama.m_VSPtr              = 0;
         m_SkyboxFromPanorama.m_GSPtr              = 0;
@@ -735,6 +900,12 @@ namespace
 
         m_LookUpTexturePtr    = 0;
         m_LookupTextureSetPtr = 0;
+
+        m_PSPrecomputeConstants = 0;
+
+        m_TransmittanceTable = 0;
+        m_InscatterTable     = 0;
+        m_IrradianceTable    = 0;
 
         m_Skyfacets.Clear();
     }
@@ -875,10 +1046,19 @@ namespace
                     _pGraphicSkyboxFacet->m_InputTexture2DPtr = TexturePtr;
 
                     _pGraphicSkyboxFacet->m_InputTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(TexturePtr));
+                }
+                else
+                {
+                    _pGraphicSkyboxFacet->m_InputTexture2DPtr = nullptr;
 
-                    RenderSkybox(_pDataSkyboxFacet, _pGraphicSkyboxFacet);
+                    _pGraphicSkyboxFacet->m_InputTextureSetPtr = nullptr;
                 }
             }
+
+            // -----------------------------------------------------------------------------
+            // Render sky because of the change
+            // -----------------------------------------------------------------------------
+            RenderSkybox(_pDataSkyboxFacet, _pGraphicSkyboxFacet);
 
             // -----------------------------------------------------------------------------
             // Set time
@@ -1004,7 +1184,7 @@ namespace
     {
         switch (_pDataSkyFacet->GetType())
         {
-            case Dt::CSkyFacet::Procedural: break;
+            case Dt::CSkyFacet::Procedural:      RenderSkyboxFromAtmopsphericScattering(_pOutput, _pDataSkyFacet->GetIntensity()); break;
             case Dt::CSkyFacet::Panorama:        RenderSkyboxFromPanorama(_pOutput, _pDataSkyFacet->GetIntensity()); break;
             case Dt::CSkyFacet::Cubemap:         RenderSkyboxFromCubemap(_pOutput, _pDataSkyFacet->GetIntensity()); break;
             case Dt::CSkyFacet::Texture:         RenderSkyboxFromTexture(_pOutput, _pDataSkyFacet->GetIntensity()); break;
@@ -1015,8 +1195,147 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxSkyManager::RenderSkyboxFromAtmopsphericScattering(CInternSkyFacet* _pOutput, float _Intensity)
+    {
+        CRenderContextPtr RenderContextPtr = _pOutput->m_RenderContextPtr;
+        CShaderPtr        VSPtr            = m_SkyboxFromAtmosphere.m_VSPtr;
+        CShaderPtr        GSPtr            = m_SkyboxFromAtmosphere.m_GSPtr;
+        CShaderPtr        PSPtr            = m_SkyboxFromAtmosphere.m_PSPtr;
+        CBufferSetPtr     GSBufferSetPtr   = m_SkyboxFromAtmosphere.m_GSBufferSetPtr;
+        CBufferSetPtr     PSBufferSetPtr   = m_SkyboxFromAtmosphere.m_PSBufferSetPtr;
+        CInputLayoutPtr   InputLayoutPtr   = m_SkyboxFromAtmosphere.m_InputLayoutPtr;
+        CMeshPtr          MeshPtr          = m_SkyboxFromAtmosphere.m_MeshPtr;
+
+        // -----------------------------------------------------------------------------
+        // Iterate throw every entity inside this map
+        // -----------------------------------------------------------------------------
+        Dt::CSunLightFacet* pDataSunFacet = 0;
+
+        for (Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light); CurrentEntity != Dt::Map::EntitiesEnd() && pDataSunFacet == 0; CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light))
+        {
+            if (CurrentEntity->GetType() == Dt::SLightType::Sun)
+            {
+                pDataSunFacet = static_cast<Dt::CSunLightFacet*>(CurrentEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+            }
+        }
+
+        Performance::BeginEvent("Skybox from PAS");
+
+        // -----------------------------------------------------------------------------
+        // Setup constant buffer
+        // -----------------------------------------------------------------------------
+        SPSPASSettings PSBuffer;
+
+        PSBuffer.g_SunDirection           = pDataSunFacet == nullptr ? Base::Float4(0.0f, 1.0f, 0.0f, 0.0f) : Base::Float4x4().SetRotationX(Base::DegreesToRadians(90.0f)) * Base::Float4(pDataSunFacet->GetDirection(), 0.0f);
+        PSBuffer.g_SunIntensity           = Base::Float4(_Intensity);
+        PSBuffer.ps_ExposureHistoryIndex  = 0;
+
+        BufferManager::UploadConstantBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
+
+        // -----------------------------------------------------------------------------
+        // Environment to cube map
+        // -----------------------------------------------------------------------------           
+        const unsigned int pOffset[] = { 0, 0 };
+
+        // -----------------------------------------------------------------------------
+        // Setup
+        // -----------------------------------------------------------------------------
+        ContextManager::SetTargetSet(_pOutput->m_RenderContextPtr->GetTargetSet());
+
+        ContextManager::SetViewPortSet(_pOutput->m_RenderContextPtr->GetViewPortSet());
+
+        ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::Default));
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::NoCull));
+
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        ContextManager::SetShaderVS(VSPtr);
+
+        ContextManager::SetShaderGS(GSPtr);
+
+        ContextManager::SetShaderPS(PSPtr);
+
+        ContextManager::SetVertexBufferSet(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+
+        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+
+        ContextManager::SetInputLayout(InputLayoutPtr);
+
+        ContextManager::SetConstantBuffer(2, GSBufferSetPtr->GetBuffer(0));
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+
+        ContextManager::SetConstantBuffer(3, PSBufferSetPtr->GetBuffer(0));
+        
+        ContextManager::SetConstantBuffer(1, m_PSPrecomputeConstants);
+
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_TransmittanceTable));
+
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(1, static_cast<CTextureBasePtr>(m_InscatterTable));
+
+        ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(2, static_cast<CTextureBasePtr>(m_IrradianceTable));
+
+        // -----------------------------------------------------------------------------
+        // Draw
+        // -----------------------------------------------------------------------------
+        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+
+        // -----------------------------------------------------------------------------
+        // Reset
+        // -----------------------------------------------------------------------------
+        ContextManager::ResetTexture(0);
+
+        ContextManager::ResetSampler(0);
+
+        ContextManager::ResetConstantBuffer(2);
+
+        ContextManager::ResetConstantBuffer(4);
+
+        ContextManager::ResetInputLayout();
+
+        ContextManager::ResetIndexBuffer();
+
+        ContextManager::ResetVertexBufferSet();
+
+        ContextManager::ResetShaderVS();
+
+        ContextManager::ResetShaderGS();
+
+        ContextManager::ResetShaderPS();
+
+        ContextManager::ResetTopology();
+
+        ContextManager::ResetRenderContext();
+
+        // -----------------------------------------------------------------------------
+        // Update mip maps
+        // -----------------------------------------------------------------------------
+        TextureManager::UpdateMipmap(_pOutput->m_CubemapPtr);
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxSkyManager::RenderSkyboxFromPanorama(CInternSkyFacet* _pOutput, float _Intensity)
     {
+        if (_pOutput->m_InputTexture2DPtr == 0)
+        {
+            BASE_CONSOLE_INFO("Skybox can't be rendered from panorama because of missing image.");
+            return;
+        }
+
+        // -----------------------------------------------------------------------------
+
         CRenderContextPtr RenderContextPtr = _pOutput->m_RenderContextPtr;
         CShaderPtr        VSPtr            = m_SkyboxFromPanorama.m_VSPtr;
         CShaderPtr        GSPtr            = m_SkyboxFromPanorama.m_GSPtr;
@@ -1115,6 +1434,14 @@ namespace
 
     void CGfxSkyManager::RenderSkyboxFromCubemap(CInternSkyFacet* _pOutput, float _Intensity)
     {
+        if (_pOutput->m_InputTexture2DPtr == 0)
+        {
+            BASE_CONSOLE_INFO("Skybox can't be rendered from cube map because of missing image.");
+            return;
+        }
+
+        // -----------------------------------------------------------------------------
+
         CRenderContextPtr RenderContextPtr = _pOutput->m_RenderContextPtr;
         CShaderPtr        VSPtr            = m_SkyboxFromCubemap.m_VSPtr;
         CShaderPtr        GSPtr            = m_SkyboxFromCubemap.m_GSPtr;
@@ -1213,6 +1540,14 @@ namespace
 
     void CGfxSkyManager::RenderSkyboxFromTexture(CInternSkyFacet* _pOutput, float _Intensity)
     {
+        if (_pOutput->m_InputTexture2DPtr == 0)
+        {
+            BASE_CONSOLE_INFO("Skybox can't be rendered from texture because of missing image.");
+            return;
+        }
+
+        // -----------------------------------------------------------------------------
+
         CRenderContextPtr RenderContextPtr = _pOutput->m_RenderContextPtr;
         CShaderPtr        VSPtr            = m_SkyboxFromTexture.m_VSPtr;
         CShaderPtr        GSPtr            = m_SkyboxFromTexture.m_GSPtr;
@@ -1338,6 +1673,14 @@ namespace
 
     void CGfxSkyManager::RenderSkyboxFromGeometry(CInternSkyFacet* _pOutput, float _Intensity)
     {
+        if(_pOutput->m_InputTexture2DPtr == 0)
+        {
+            BASE_CONSOLE_INFO("Skybox can't be rendered from geometry beacuse of missing image.");
+            return;
+        }
+
+        // -----------------------------------------------------------------------------
+
         CRenderContextPtr RenderContextPtr   = _pOutput->m_RenderContextPtr;
         CShaderPtr        VSPtr              = m_SkyboxFromGeometry.m_VSPtr;
         CShaderPtr        GSPtr              = m_SkyboxFromGeometry.m_GSPtr;
@@ -1493,6 +1836,14 @@ namespace
 
     void CGfxSkyManager::RenderSkyboxFromLUT(CInternSkyFacet* _pOutput, float _Intensity)
     {
+        if (_pOutput->m_InputTexture2DPtr == 0)
+        {
+            BASE_CONSOLE_INFO("Skybox can't be rendered from LUT because of missing image.");
+            return;
+        }
+
+        // -----------------------------------------------------------------------------
+
         CRenderContextPtr RenderContextPtr = _pOutput->m_RenderContextPtr;
         CShaderPtr        VSPtr            = m_SkyboxFromLUT.m_VSPtr;
         CShaderPtr        GSPtr            = m_SkyboxFromLUT.m_GSPtr;
@@ -1608,6 +1959,564 @@ namespace
         // Update mip maps
         // -----------------------------------------------------------------------------
         TextureManager::UpdateMipmap(_pOutput->m_CubemapPtr);
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxSkyManager::PrecomputeScattering()
+    {
+        // -----------------------------------------------------------------------------
+        // Textures
+        // -----------------------------------------------------------------------------
+        STextureDescriptor TextureDesc;
+
+        TextureDesc.m_NumberOfPixelsU  = 0;
+        TextureDesc.m_NumberOfPixelsV  = 0;
+        TextureDesc.m_NumberOfPixelsW  = 1;
+        TextureDesc.m_NumberOfMipMaps  = 1;
+        TextureDesc.m_NumberOfTextures = 1;
+        TextureDesc.m_Binding          = CTextureBase::RenderTarget | CTextureBase::ShaderResource;
+        TextureDesc.m_Access           = CTextureBase::CPUWrite;
+        TextureDesc.m_Format           = CTextureBase::Unknown;
+        TextureDesc.m_Usage            = CTextureBase::GPURead;
+        TextureDesc.m_Semantic         = CTextureBase::Diffuse;
+        TextureDesc.m_pFileName        = 0;
+        TextureDesc.m_pPixels          = 0;
+        TextureDesc.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        
+        TextureDesc.m_NumberOfPixelsU = g_TransmittanceWidth;
+        TextureDesc.m_NumberOfPixelsV = g_TransmittanceHeight;
+
+        m_TransmittanceTable = TextureManager::CreateTexture2D(TextureDesc);
+
+        TextureDesc.m_NumberOfPixelsU = g_IrradianceWidth;
+        TextureDesc.m_NumberOfPixelsV = g_IrradianceHeight;
+
+        m_IrradianceTable = TextureManager::CreateTexture2D(TextureDesc);
+        CTexture2DPtr m_DeltaE          = TextureManager::CreateTexture2D(TextureDesc);
+
+        TextureDesc.m_NumberOfPixelsU = g_InscatterWidth;
+        TextureDesc.m_NumberOfPixelsV = g_InscatterHeight;
+        TextureDesc.m_NumberOfPixelsW = g_InscatterDepth;
+
+        m_InscatterTable = TextureManager::CreateTexture3D(TextureDesc);
+        CTexture3DPtr m_DeltaSR        = TextureManager::CreateTexture3D(TextureDesc);
+        CTexture3DPtr m_DeltaSM        = TextureManager::CreateTexture3D(TextureDesc);
+        CTexture3DPtr m_DeltaJ         = TextureManager::CreateTexture3D(TextureDesc);
+
+        // -----------------------------------------------------------------------------
+        // Target sets & view ports
+        // -----------------------------------------------------------------------------
+        CTargetSetPtr m_TransmittanceTableTS = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_TransmittanceTable));
+
+        CTargetSetPtr m_DeltaETS = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_DeltaE));
+
+        CTargetSetPtr m_DeltaSRSMTS = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_DeltaSR), static_cast<CTextureBasePtr>(m_DeltaSM));
+
+        CTargetSetPtr m_IrradianceTableTS = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_IrradianceTable));
+
+        CTargetSetPtr m_InscatterTableTS = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_InscatterTable));
+
+        CTargetSetPtr m_DeltaJTS = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_DeltaJ));
+
+        CTargetSetPtr m_DeltaSRTS = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_DeltaSR));
+
+        SViewPortDescriptor ViewPortDesc;
+
+        ViewPortDesc.m_TopLeftX = 0;
+        ViewPortDesc.m_TopLeftY = 0;
+        ViewPortDesc.m_MinDepth = 0;
+        ViewPortDesc.m_MaxDepth  = 1.0f;
+
+        ViewPortDesc.m_Width     = g_TransmittanceWidth;
+        ViewPortDesc.m_Height    = g_TransmittanceHeight;
+
+        CViewPortSetPtr m_TransmittanceVPS = ViewManager::CreateViewPortSet(ViewManager::CreateViewPort(ViewPortDesc));
+
+        ViewPortDesc.m_Width     = g_IrradianceWidth;
+        ViewPortDesc.m_Height    = g_IrradianceHeight;
+
+        CViewPortSetPtr m_IrradianceVPS = ViewManager::CreateViewPortSet(ViewManager::CreateViewPort(ViewPortDesc));
+
+        ViewPortDesc.m_Width     = g_InscatterWidth;
+        ViewPortDesc.m_Height    = g_InscatterHeight;
+
+        CViewPortSetPtr m_InscatterVPS = ViewManager::CreateViewPortSet(ViewManager::CreateViewPort(ViewPortDesc));
+
+        // -----------------------------------------------------------------------------
+        // Materials
+        // -----------------------------------------------------------------------------
+        SBufferDescriptor BufferDesc;
+
+        BufferDesc.m_Stride        = 0;
+        BufferDesc.m_Usage         = CBuffer::GPURead;
+        BufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        BufferDesc.m_Access        = CBuffer::CPUWrite;
+        BufferDesc.m_NumberOfBytes = 0;
+        BufferDesc.m_pBytes        = 0;
+        BufferDesc.m_pClassKey     = 0;
+
+        BufferDesc.m_NumberOfBytes = sizeof(SPrecomputeConstants);
+
+        m_PSPrecomputeConstants = BufferManager::CreateBuffer(BufferDesc);
+
+        BufferDesc.m_NumberOfBytes = sizeof(SGSLayer);
+
+        CBufferPtr m_GSLayer = BufferManager::CreateBuffer(BufferDesc);
+
+        BufferDesc.m_NumberOfBytes = sizeof(SPSLayerValues);
+
+        CBufferPtr m_PSLayerValues = BufferManager::CreateBuffer(BufferDesc);
+
+        BufferDesc.m_NumberOfBytes = sizeof(SPSScatteringOrder);
+
+        CBufferPtr m_PSScatteringOrder = BufferManager::CreateBuffer(BufferDesc);
+
+        BufferDesc.m_NumberOfBytes = sizeof(SPSIrradianceK);
+
+        CBufferPtr m_PSIrradianceK = BufferManager::CreateBuffer(BufferDesc);
+        
+        // -----------------------------------------------------------------------------
+        // Shader
+        // -----------------------------------------------------------------------------
+        CShaderPtr VSPtr = ShaderManager::CompileVS("scattering/vs.glsl", "main");;
+        CShaderPtr GSPtr = ShaderManager::CompileGS("scattering/gs.glsl", "main");;
+
+        //////////////////////////////////////////////////////////////
+        // Transmittance
+        //////////////////////////////////////////////////////////////
+
+        CShaderPtr m_TransmittanceMaterial = ShaderManager::CompilePS("scattering/scattering_transmittance.glsl", "main");
+
+        //////////////////////////////////////////////////////////////
+        // Irradiance
+        //////////////////////////////////////////////////////////////
+
+        CShaderPtr m_IrradianceSingleMaterial = ShaderManager::CompilePS("scattering/scattering_irradiance_single.glsl", "main");
+
+        CShaderPtr m_IrradianceMultipleMaterial = ShaderManager::CompilePS("scattering/scattering_irradiance_multiple.glsl", "main");
+
+        CShaderPtr m_IrradianceCopyMaterial = ShaderManager::CompilePS("scattering/scattering_irradiance_copy.glsl", "main");
+
+        //////////////////////////////////////////////////////////////
+        // Inscatter
+        //////////////////////////////////////////////////////////////
+
+        CShaderPtr m_InscatterSingleMaterial = ShaderManager::CompilePS("scattering/scattering_inscatter_single.glsl", "main");
+
+        CShaderPtr m_InscatterMultipleAMaterial = ShaderManager::CompilePS("scattering/scattering_inscatter_multiple_a.glsl", "main");
+
+        CShaderPtr m_InscatterMultipleBMaterial = ShaderManager::CompilePS("scattering/scattering_inscatter_multiple_b.glsl", "main");
+
+        CShaderPtr m_InscatterCopySingleMaterial = ShaderManager::CompilePS("scattering/scattering_inscatter_copy_single.glsl", "main");
+
+        CShaderPtr m_InscatterCopyMultipleMaterial = ShaderManager::CompilePS("scattering/scattering_inscatter_copy_multiple.glsl", "main");
+
+
+        // -----------------------------------------------------------------------------
+        // Mesh
+        // -----------------------------------------------------------------------------
+        BufferDesc.m_Stride        = 0;
+        BufferDesc.m_Usage         = CBuffer::GPURead;
+        BufferDesc.m_Binding       = CBuffer::VertexBuffer;
+        BufferDesc.m_Access        = CBuffer::CPUWrite;
+        BufferDesc.m_NumberOfBytes = 0;
+        BufferDesc.m_pBytes        = 0;
+        BufferDesc.m_pClassKey     = 0;
+
+        CBufferPtr EmptyVertexBufferPtr = BufferManager::CreateBuffer(BufferDesc);
+
+        CBufferSetPtr EmptyVertexBufferSetPtr = BufferManager::CreateVertexBufferSet(EmptyVertexBufferPtr);
+
+        // -----------------------------------------------------------------------------
+        // Render
+        // -----------------------------------------------------------------------------
+        Performance::BeginEvent("Precompute Atmospheric Scattering");
+
+        const unsigned int pOffset[] = { 0, 0 };
+
+        auto GetLayerValues = [&](unsigned int _Layer, float& _rRadius, Base::Float4& _rDhdH)
+        {
+            float Radius = _Layer / Base::Max((g_InscatterAltitude - 1.0f), 1.0f);
+
+            Radius = Radius * Radius;
+            Radius = Base::Sqrt(g_RadiusGround * g_RadiusGround + Radius * (g_RadiusAtmosphere * g_RadiusAtmosphere - g_RadiusGround * g_RadiusGround)) + (_Layer == 0 ? 0.01f : (_Layer == g_InscatterAltitude - 1 ? -0.001f : 0.0f));
+
+            float DMin  = g_RadiusAtmosphere - Radius;
+            float DMax  = Base::Sqrt(Radius * Radius - g_RadiusGround * g_RadiusGround) + Base::Sqrt(g_RadiusAtmosphere * g_RadiusAtmosphere - g_RadiusGround * g_RadiusGround);
+
+            float DMinP = Radius - g_RadiusGround;
+            float DMaxP = Base::Sqrt(Radius * Radius - g_RadiusGround * g_RadiusGround);
+
+            _rRadius = Radius;
+
+            _rDhdH = Base::Float4(DMin, DMax, DMinP, DMaxP);
+        };
+
+        // -----------------------------------------------------------------------------
+        // Transmittance
+        // -----------------------------------------------------------------------------
+        SPrecomputeConstants PrecomuteBuffer;
+
+        PrecomuteBuffer.m_TransmittanceWidth  = static_cast<float>(g_TransmittanceWidth);
+        PrecomuteBuffer.m_TransmittanceHeight = static_cast<float>(g_TransmittanceHeight);
+        PrecomuteBuffer.m_IrradianceWidth     = static_cast<float>(g_IrradianceWidth);
+        PrecomuteBuffer.m_IrradianceHeight    = static_cast<float>(g_IrradianceHeight);
+        PrecomuteBuffer.m_InscatterMus        = static_cast<float>(g_InscatterMuS);
+        PrecomuteBuffer.m_InscatterMu         = static_cast<float>(g_InscatterMu);
+        PrecomuteBuffer.m_InscatterNu         = static_cast<float>(g_InscatterNu);
+        PrecomuteBuffer.m_InscatterAltitude   = static_cast<float>(g_InscatterAltitude);
+        
+        BufferManager::UploadConstantBufferData(m_PSPrecomputeConstants, &PrecomuteBuffer);
+
+        Performance::BeginEvent("Transmittance");
+
+        ContextManager::SetTargetSet(m_TransmittanceTableTS);
+
+        ContextManager::SetViewPortSet(m_TransmittanceVPS);
+
+        ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::Default));
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+        ContextManager::SetTopology(STopology::TriangleStrip);
+
+        ContextManager::SetShaderVS(VSPtr);
+
+        ContextManager::SetShaderPS(m_TransmittanceMaterial);
+
+        ContextManager::SetVertexBufferSet(EmptyVertexBufferSetPtr, pOffset);
+
+        ContextManager::SetConstantBuffer(1, m_PSPrecomputeConstants);
+
+        ContextManager::Draw(3, 0);
+
+        Performance::EndEvent();
+
+        // -----------------------------------------------------------------------------
+        // Irradiance single
+        // -----------------------------------------------------------------------------
+        Performance::BeginEvent("Irradiance Single");
+
+        ContextManager::SetTargetSet(m_DeltaETS);
+
+        ContextManager::SetViewPortSet(m_IrradianceVPS);
+
+        ContextManager::SetShaderPS(m_IrradianceSingleMaterial);
+
+        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_TransmittanceTable));
+
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::Draw(3, 0);
+
+        Performance::EndEvent();
+
+        // -----------------------------------------------------------------------------
+        // Inscatter single
+        // -----------------------------------------------------------------------------
+        Base::Float4 Dhdh;
+        float Radius;
+
+        Performance::BeginEvent("Inscatter Single");
+
+        ContextManager::SetTargetSet(m_DeltaSRSMTS);
+
+        ContextManager::SetViewPortSet(m_InscatterVPS);
+
+        ContextManager::SetShaderGS(GSPtr);
+
+        ContextManager::SetShaderPS(m_InscatterSingleMaterial);
+
+        ContextManager::SetConstantBuffer(2, m_GSLayer);
+
+        ContextManager::SetConstantBuffer(3, m_PSLayerValues);
+
+        for (unsigned int Layer = 0; Layer < g_InscatterDepth; ++Layer)
+        {
+            SGSLayer GSLayer;
+
+            GSLayer.m_Layer = Layer;
+
+            BufferManager::UploadConstantBufferData(m_GSLayer, &GSLayer);
+
+            GetLayerValues(Layer, Radius, Dhdh);
+
+            SPSLayerValues PSLayerValues;
+
+            PSLayerValues.m_Dhdh   = Dhdh;
+            PSLayerValues.m_Radius = Radius;
+
+            BufferManager::UploadConstantBufferData(m_PSLayerValues, &PSLayerValues);
+
+            ContextManager::Draw(3, 0);
+        }
+
+        ContextManager::ResetShaderGS();
+
+        Performance::EndEvent();
+
+        // -----------------------------------------------------------------------------
+        // Copy irradiance 
+        // -----------------------------------------------------------------------------
+        SPSIrradianceK PSIrradianceK;
+
+        PSIrradianceK.k = 0;
+
+        BufferManager::UploadConstantBufferData(m_PSIrradianceK, &PSIrradianceK);
+
+        Performance::BeginEvent("Copy Irradiance");
+
+        ContextManager::SetTargetSet(m_IrradianceTableTS);
+
+        ContextManager::SetViewPortSet(m_IrradianceVPS);
+
+        ContextManager::SetShaderPS(m_IrradianceCopyMaterial);
+
+        ContextManager::SetTexture(6, static_cast<CTextureBasePtr>(m_DeltaE));
+
+        ContextManager::SetSampler(6, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetConstantBuffer(5, m_PSIrradianceK);
+
+        ContextManager::Draw(3, 0);
+
+        Performance::EndEvent();
+
+        // -----------------------------------------------------------------------------
+        // Copy inscatter single
+        // -----------------------------------------------------------------------------
+        Performance::BeginEvent("Copy Inscatter Single");
+
+        ContextManager::SetTargetSet(m_InscatterTableTS);
+
+        ContextManager::SetViewPortSet(m_InscatterVPS);
+
+        ContextManager::SetShaderGS(GSPtr);
+
+        ContextManager::SetShaderPS(m_InscatterCopySingleMaterial);
+
+        ContextManager::SetConstantBuffer(2, m_GSLayer);
+
+        ContextManager::SetTexture(3, static_cast<CTextureBasePtr>(m_DeltaSR));
+
+        ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(4, static_cast<CTextureBasePtr>(m_DeltaSM));
+
+        ContextManager::SetSampler(4, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        for (unsigned int Layer = 0; Layer < g_InscatterDepth; ++Layer)
+        {
+            SGSLayer GSLayer;
+
+            GSLayer.m_Layer = Layer;
+
+            BufferManager::UploadConstantBufferData(m_GSLayer, &GSLayer);
+
+            ContextManager::Draw(3, 0);
+        }
+
+        ContextManager::ResetShaderGS();
+
+        Performance::EndEvent();
+
+        // -----------------------------------------------------------------------------
+        // Multiple scattering
+        // -----------------------------------------------------------------------------
+        Performance::BeginEvent("Multiple Scattering");
+
+        ContextManager::SetTexture(5, static_cast<CTextureBasePtr>(m_DeltaJ));
+
+        ContextManager::SetSampler(5, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        for (unsigned int Order = 2; Order <= 4; ++Order)
+        {
+            Performance::BeginEvent("Order");
+
+            SPSScatteringOrder PSScatteringOrder;
+
+            PSScatteringOrder.m_FirstOrder = (Order == 2 ? 1.0f : 0.0f);
+
+            BufferManager::UploadConstantBufferData(m_PSScatteringOrder, &PSScatteringOrder);
+
+            // -----------------------------------------------------------------------------
+            // DeltaJ Inscatter
+            // -----------------------------------------------------------------------------
+            Performance::BeginEvent("DeltaJ Inscatter");
+
+            ContextManager::SetTargetSet(m_DeltaJTS);
+
+            ContextManager::SetViewPortSet(m_InscatterVPS);
+
+            ContextManager::SetShaderGS(GSPtr);
+
+            ContextManager::SetShaderPS(m_InscatterMultipleAMaterial);
+
+            ContextManager::SetConstantBuffer(2, m_GSLayer);
+
+            ContextManager::SetConstantBuffer(3, m_PSLayerValues);
+
+            ContextManager::SetConstantBuffer(4, m_PSScatteringOrder);
+
+            for (unsigned int Layer = 0; Layer < g_InscatterDepth; ++Layer)
+            {
+                SGSLayer GSLayer;
+
+                GSLayer.m_Layer = Layer;
+
+                BufferManager::UploadConstantBufferData(m_GSLayer, &GSLayer);
+
+                GetLayerValues(Layer, Radius, Dhdh);
+
+                SPSLayerValues PSLayerValues;
+
+                PSLayerValues.m_Dhdh = Dhdh;
+                PSLayerValues.m_Radius = Radius;
+
+                BufferManager::UploadConstantBufferData(m_PSLayerValues, &PSLayerValues);
+
+                ContextManager::Draw(3, 0);
+            }
+
+            ContextManager::ResetShaderGS();
+
+            Performance::EndEvent();
+
+            // -----------------------------------------------------------------------------
+            // DeltaE Irradiance
+            // -----------------------------------------------------------------------------
+            Performance::BeginEvent("DeltaE Irradiance");
+
+            ContextManager::SetTargetSet(m_DeltaETS);
+
+            ContextManager::SetViewPortSet(m_IrradianceVPS);
+
+            ContextManager::SetShaderPS(m_IrradianceMultipleMaterial);
+
+            ContextManager::Draw(3, 0);
+
+            Performance::EndEvent();
+
+            // -----------------------------------------------------------------------------
+            // DeltaS Inscatter
+            // -----------------------------------------------------------------------------
+            Performance::BeginEvent("DeltaS Inscatter");
+
+            ContextManager::SetTargetSet(m_DeltaSRTS);
+
+            ContextManager::SetViewPortSet(m_InscatterVPS);
+
+            ContextManager::SetShaderGS(GSPtr);
+
+            ContextManager::SetShaderPS(m_InscatterMultipleBMaterial);
+
+            ContextManager::SetConstantBuffer(2, m_GSLayer);
+
+            ContextManager::SetConstantBuffer(3, m_PSLayerValues);
+
+            ContextManager::SetConstantBuffer(4, m_PSScatteringOrder);
+
+            for (unsigned int Layer = 0; Layer < g_InscatterDepth; ++Layer)
+            {
+                SGSLayer GSLayer;
+
+                GSLayer.m_Layer = Layer;
+
+                BufferManager::UploadConstantBufferData(m_GSLayer, &GSLayer);
+
+                GetLayerValues(Layer, Radius, Dhdh);
+
+                SPSLayerValues PSLayerValues;
+
+                PSLayerValues.m_Dhdh = Dhdh;
+                PSLayerValues.m_Radius = Radius;
+
+                BufferManager::UploadConstantBufferData(m_PSLayerValues, &PSLayerValues);
+
+                ContextManager::Draw(3, 0);
+            }
+
+            ContextManager::ResetShaderGS();
+
+            Performance::EndEvent();
+
+            // -----------------------------------------------------------------------------
+            // Enable blending
+            // -----------------------------------------------------------------------------
+            ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::AdditionBlend));
+
+            // -----------------------------------------------------------------------------
+            // Copy deltaE to irradiance
+            // -----------------------------------------------------------------------------
+            SPSIrradianceK PSIrradianceK;
+
+            PSIrradianceK.k = 1;
+
+            BufferManager::UploadConstantBufferData(m_PSIrradianceK, &PSIrradianceK);
+
+            Performance::BeginEvent("Add DeltaE to Irradiance");
+
+            ContextManager::SetTargetSet(m_IrradianceTableTS);
+
+            ContextManager::SetViewPortSet(m_IrradianceVPS);
+
+            ContextManager::SetShaderPS(m_IrradianceCopyMaterial);
+
+            ContextManager::Draw(3, 0);
+
+            Performance::EndEvent();
+
+            // -----------------------------------------------------------------------------
+            // Copy DeltaS to Inscatter
+            // -----------------------------------------------------------------------------
+            Performance::BeginEvent("Add DeltaS to Inscatter");
+
+            ContextManager::SetTargetSet(m_InscatterTableTS);
+
+            ContextManager::SetViewPortSet(m_InscatterVPS);
+
+            ContextManager::SetShaderGS(GSPtr);
+
+            ContextManager::SetShaderPS(m_InscatterCopyMultipleMaterial);
+
+            for (unsigned int Layer = 0; Layer < g_InscatterDepth; ++Layer)
+            {
+                SGSLayer GSLayer;
+
+                GSLayer.m_Layer = Layer;
+
+                BufferManager::UploadConstantBufferData(m_GSLayer, &GSLayer);
+
+                GetLayerValues(Layer, Radius, Dhdh);
+
+                SPSLayerValues PSLayerValues;
+
+                PSLayerValues.m_Dhdh = Dhdh;
+                PSLayerValues.m_Radius = Radius;
+
+                BufferManager::UploadConstantBufferData(m_PSLayerValues, &PSLayerValues);
+
+                ContextManager::Draw(3, 0);
+            }
+
+            ContextManager::ResetShaderGS();
+
+            Performance::EndEvent();
+
+            // -----------------------------------------------------------------------------
+            // Disable blending
+            // -----------------------------------------------------------------------------
+            ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::Default));
+
+            Performance::EndEvent();
+        }
+
+        Performance::EndEvent();
 
         Performance::EndEvent();
     }

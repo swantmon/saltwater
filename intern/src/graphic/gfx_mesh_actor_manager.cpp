@@ -235,7 +235,7 @@ namespace
         // -----------------------------------------------------------------------------
         SMeshDescriptor ModelDesc;
 
-        ModelDesc.m_pModel = pDataActorModelFacet->GetMesh();
+        ModelDesc.m_pMesh = pDataActorModelFacet->GetMesh();
 
         CMeshPtr NewModelPtr = MeshManager::CreateMesh(ModelDesc);
 

@@ -23,11 +23,12 @@ namespace Gfx
             
             enum EBinding
             {
-                NoBinding        = 0,
-                VertexBuffer     = 1,
-                IndexBuffer      = 2,
-                ConstantBuffer   = 3,
-                ResourceBuffer   = 4,
+                NoBinding           = 0,
+                VertexBuffer        = 1,
+                IndexBuffer         = 2,
+                ConstantBuffer      = 3,
+                ResourceBuffer      = 4,
+				AtomicCounterBuffer = 5,
             };
             
             enum EAccess
@@ -40,11 +41,12 @@ namespace Gfx
             
             enum EMap
             {
-                Read             = 0,
-                Write            = 1,
-                ReadWrite        = 2,
-                WriteDiscard     = 3,
-                WriteNoOverwrite = 4,
+                Read                = 0,
+                Write               = 1,
+                ReadWrite           = 2,
+                WriteDiscard        = 3,
+                WriteNoOverwrite    = 4,
+				ReadWritePersistent = 5,
             };
         
         public:

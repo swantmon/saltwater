@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "editor_gui/ui_edit_inspector_globalprobe.h"
+#include "editor_gui/ui_edit_inspector_light_probe.h"
 
 #include "editor_port/edit_message.h"
 
@@ -9,13 +9,13 @@
 
 namespace Edit
 {
-    class CInspectorGlobalProbe : public QWidget, public Ui::InspectorGlobalProbe
+    class CInspectorLightProbe : public QWidget, public Ui::InspectorLightProbe
     {
         Q_OBJECT
 
     public:
-        CInspectorGlobalProbe(QWidget* _pParent = Q_NULLPTR);
-        ~CInspectorGlobalProbe();
+        CInspectorLightProbe(QWidget* _pParent = Q_NULLPTR);
+        ~CInspectorLightProbe();
 
     public Q_SLOTS:
 

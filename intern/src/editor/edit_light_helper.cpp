@@ -42,19 +42,19 @@ namespace
         void OnNewPointlight(Edit::CMessage& _rMessage);
         void OnNewSun(Edit::CMessage& _rMessage);
         void OnNewEnvironment(Edit::CMessage& _rMessage);
-        void OnNewGlobalProbe(Edit::CMessage& _rMessage);
+        void OnNewLightProbe(Edit::CMessage& _rMessage);
         void OnNewArealight(Edit::CMessage& _rMessage);
 
         void OnRequestInfoPointlight(Edit::CMessage& _rMessage);
         void OnRequestInfoSun(Edit::CMessage& _rMessage);
         void OnRequestInfoEnvironment(Edit::CMessage& _rMessage);
-        void OnRequestInfoGlobalProbe(Edit::CMessage& _rMessage);
+        void OnRequestInfoLightProbe(Edit::CMessage& _rMessage);
         void OnRequestInfoArealight(Edit::CMessage& _rMessage);
 
         void OnInfoPointlight(Edit::CMessage& _rMessage);
         void OnInfoSun(Edit::CMessage& _rMessage);
         void OnInfoEnvironment(Edit::CMessage& _rMessage);
-        void OnInfoGlobalProbe(Edit::CMessage& _rMessage);
+        void OnInfoLightProbe(Edit::CMessage& _rMessage);
         void OnInfoArealight(Edit::CMessage& _rMessage);
 
         void OnDirtyEntity(Dt::CEntity* _pEntity);
@@ -90,19 +90,19 @@ namespace
         Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Pointlight_New , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnNewPointlight));
         Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Sun_New        , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnNewSun));
         Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Environment_New, EDIT_RECEIVE_MESSAGE(&CLightHelper::OnNewEnvironment));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Probe_New      , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnNewGlobalProbe));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Probe_New      , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnNewLightProbe));
         Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Arealight_New  , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnNewArealight));
         
         Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Pointlight_Info , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnRequestInfoPointlight));
         Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Sun_Info        , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnRequestInfoSun));
         Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Environment_Info, EDIT_RECEIVE_MESSAGE(&CLightHelper::OnRequestInfoEnvironment));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Probe_Info      , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnRequestInfoGlobalProbe));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Probe_Info      , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnRequestInfoLightProbe));
         Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Arealight_Info  , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnRequestInfoArealight));
        
         Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Pointlight_Update , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnInfoPointlight));
         Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Sun_Update        , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnInfoSun));
         Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Environment_Update, EDIT_RECEIVE_MESSAGE(&CLightHelper::OnInfoEnvironment));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Probe_Update      , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnInfoGlobalProbe));
+        Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Probe_Update      , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnInfoLightProbe));
         Edit::MessageManager::Register(Edit::SGUIMessageType::Light_Arealight_Update  , EDIT_RECEIVE_MESSAGE(&CLightHelper::OnInfoArealight));
     }
 
@@ -233,7 +233,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CLightHelper::OnNewGlobalProbe(Edit::CMessage& _rMessage)
+    void CLightHelper::OnNewLightProbe(Edit::CMessage& _rMessage)
     {
         {
             // -----------------------------------------------------------------------------
@@ -251,10 +251,15 @@ namespace
             // -----------------------------------------------------------------------------
             Dt::CLightProbeFacet* pLightProbeFacet = Dt::LightProbeManager::CreateLightProbe();
 
-            pLightProbeFacet->SetRefreshMode(Dt::CLightProbeFacet::Static);
-            pLightProbeFacet->SetType       (Dt::CLightProbeFacet::Sky);
-            pLightProbeFacet->SetQuality    (Dt::CLightProbeFacet::PX512);
-            pLightProbeFacet->SetIntensity  (1.0f);
+            pLightProbeFacet->SetRefreshMode       (Dt::CLightProbeFacet::Static);
+            pLightProbeFacet->SetType              (Dt::CLightProbeFacet::Local);
+            pLightProbeFacet->SetQuality           (Dt::CLightProbeFacet::PX256);
+            pLightProbeFacet->SetClearFlag         (Dt::CLightProbeFacet::Skybox);
+            pLightProbeFacet->SetIntensity         (1.0f);
+            pLightProbeFacet->SetNear              (0.1f);
+            pLightProbeFacet->SetFar               (10.0f);
+            pLightProbeFacet->SetParallaxCorrection(true);
+            pLightProbeFacet->SetBoxSize           (Base::Float3(10.0f));
 
             rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pLightProbeFacet);
         }
@@ -369,6 +374,33 @@ namespace
 
     void CLightHelper::OnRequestInfoEnvironment(Edit::CMessage& _rMessage)
     {
+        auto AddTextureToMessage = [&](const Dt::CTextureBase* _pTextureBase, Edit::CMessage& _rMessage)
+        {
+            if (_pTextureBase != 0)
+            {
+                if (_pTextureBase->GetFileName().length() > 0)
+                {
+                    _rMessage.PutBool(true);
+
+                    _rMessage.PutString(_pTextureBase->GetFileName().c_str());
+                }
+                else
+                {
+                    _rMessage.PutBool(false);
+                }
+
+                _rMessage.PutInt(_pTextureBase->GetHash());
+            }
+            else
+            {
+                _rMessage.PutBool(false);
+
+                _rMessage.PutInt(0);
+            }
+        };
+
+        // -----------------------------------------------------------------------------
+
         int EntityID = _rMessage.GetInt();
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
@@ -383,45 +415,29 @@ namespace
             NewMessage.PutInt(static_cast<int>(pLightFacet->GetRefreshMode()));
             NewMessage.PutInt(static_cast<int>(pLightFacet->GetType()));
 
-            if (pLightFacet->GetType() == Dt::CSkyFacet::Cubemap)
+            if (pLightFacet->GetType() == Dt::CSkyFacet::Procedural)
             {
-                NewMessage.PutBool(true);
+                NewMessage.PutBool(false);
 
-                if (pLightFacet->GetCubemap()->GetFileName().length() > 0)
-                {
-                    NewMessage.PutBool(true);
-
-                    NewMessage.PutString(pLightFacet->GetCubemap()->GetFileName().c_str());
-                }
-                else
-                {
-                    NewMessage.PutBool(false);
-                }
-
-                NewMessage.PutInt(pLightFacet->GetCubemap()->GetHash());
+                NewMessage.PutInt(0);
             }
             else if (pLightFacet->GetType() == Dt::CSkyFacet::Panorama)
             {
                 NewMessage.PutBool(true);
 
-                if (pLightFacet->GetPanorama()->GetFileName().length() > 0)
-                {
-                    NewMessage.PutBool(true);
+                AddTextureToMessage(pLightFacet->GetPanorama(), NewMessage);
+            }
+            else if (pLightFacet->GetType() == Dt::CSkyFacet::Cubemap)
+            {
+                NewMessage.PutBool(true);
 
-                    NewMessage.PutString(pLightFacet->GetPanorama()->GetFileName().c_str());
-                }
-                else
-                {
-                    NewMessage.PutBool(false);
-                }
-
-                NewMessage.PutInt(pLightFacet->GetPanorama()->GetHash());
+                AddTextureToMessage(pLightFacet->GetCubemap(), NewMessage);
             }
             else if (pLightFacet->GetType() == Dt::CSkyFacet::Texture || pLightFacet->GetType() == Dt::CSkyFacet::TextureGeometry || pLightFacet->GetType() == Dt::CSkyFacet::TextureLUT)
             {
-                NewMessage.PutBool(false);
+                NewMessage.PutBool(true);
 
-                NewMessage.PutInt(pLightFacet->GetTexture()->GetHash());
+                AddTextureToMessage(pLightFacet->GetTexture(), NewMessage);
             }
 
             NewMessage.PutFloat (pLightFacet->GetIntensity());
@@ -434,7 +450,7 @@ namespace
 
     // -----------------------------------------------------------------------------
     
-    void CLightHelper::OnRequestInfoGlobalProbe(Edit::CMessage& _rMessage)
+    void CLightHelper::OnRequestInfoLightProbe(Edit::CMessage& _rMessage)
     {
         int EntityID = _rMessage.GetInt();
 
@@ -450,7 +466,14 @@ namespace
             NewMessage.PutInt(pLightFacet->GetRefreshMode());
             NewMessage.PutInt(pLightFacet->GetType());
             NewMessage.PutInt(pLightFacet->GetQuality());
+            NewMessage.PutInt(pLightFacet->GetClearFlag());
             NewMessage.PutFloat(pLightFacet->GetIntensity());
+            NewMessage.PutFloat(pLightFacet->GetNear());
+            NewMessage.PutFloat(pLightFacet->GetFar());
+            NewMessage.PutBool(pLightFacet->GetParallaxCorrection());
+            NewMessage.PutFloat(pLightFacet->GetBoxSize()[0]);
+            NewMessage.PutFloat(pLightFacet->GetBoxSize()[1]);
+            NewMessage.PutFloat(pLightFacet->GetBoxSize()[2]);
 
             NewMessage.Reset();
 
@@ -684,7 +707,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CLightHelper::OnInfoGlobalProbe(Edit::CMessage& _rMessage)
+    void CLightHelper::OnInfoLightProbe(Edit::CMessage& _rMessage)
     {
         int EntityID = _rMessage.GetInt();
 
@@ -703,7 +726,21 @@ namespace
 
             int Quality = _rMessage.GetInt();
 
+            int ClearFlag = _rMessage.GetInt();
+
             float Intensity = _rMessage.GetFloat();
+
+            float Near = _rMessage.GetFloat();
+
+            float Far = _rMessage.GetFloat();
+
+            bool ParallaxCorrection = _rMessage.GetBool();
+
+            float BoxSizeX = _rMessage.GetFloat();
+
+            float BoxSizeY = _rMessage.GetFloat();
+
+            float BoxSizeZ = _rMessage.GetFloat();
 
             // -----------------------------------------------------------------------------
             // Set values
@@ -714,7 +751,17 @@ namespace
 
             pLightFacet->SetQuality(static_cast<Dt::CLightProbeFacet::EQuality>(Quality));
 
+            pLightFacet->SetClearFlag(static_cast<Dt::CLightProbeFacet::EClearFlag>(ClearFlag));
+
             pLightFacet->SetIntensity(Intensity);
+
+            pLightFacet->SetNear(Near);
+
+            pLightFacet->SetFar(Far);
+
+            pLightFacet->SetParallaxCorrection(ParallaxCorrection);
+
+            pLightFacet->SetBoxSize(Base::Float3(BoxSizeX, BoxSizeY, BoxSizeZ));
 
             Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
         }

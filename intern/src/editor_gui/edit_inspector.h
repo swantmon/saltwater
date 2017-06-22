@@ -9,8 +9,8 @@
 #include "editor_gui/edit_inspector_dof.h"
 #include "editor_gui/edit_inspector_entity.h"
 #include "editor_gui/edit_inspector_environment.h"
+#include "editor_gui/edit_inspector_light_probe.h"
 #include "editor_gui/edit_inspector_post_aa.h"
-#include "editor_gui/edit_inspector_globalprobe.h"
 #include "editor_gui/edit_inspector_material.h"
 #include "editor_gui/edit_inspector_pointlight.h"
 #include "editor_gui/edit_inspector_sun.h"
@@ -55,7 +55,7 @@ namespace Edit
         CInspectorSun*            m_pSunWidget;
         CInspectorTransformation* m_pTransformWidget;
         CInspectorEnvironment*    m_pEnvironmentWidget;
-        CInspectorGlobalProbe*    m_pGlobalProbeWidget;
+        CInspectorLightProbe*     m_pLightProbeWidget;
         CInspectorBloom*          m_pBloomWidget;
         CInspectorDOF*            m_pDOFWidget;
         CInspectorPostAA*         m_pPostAAWidget;

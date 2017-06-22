@@ -1,11 +1,11 @@
 ﻿
-#include "editor_gui/edit_inspector_globalprobe.h"
+#include "editor_gui/edit_inspector_light_probe.h"
 
 #include "editor_port/edit_message_manager.h"
 
 namespace Edit
 {
-    CInspectorGlobalProbe::CInspectorGlobalProbe(QWidget* _pParent) 
+    CInspectorLightProbe::CInspectorLightProbe(QWidget* _pParent) 
         : QWidget          (_pParent)
         , m_CurrentEntityID(-1)
     {
@@ -17,17 +17,17 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Messages
         // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::Light_Probe_Info, EDIT_RECEIVE_MESSAGE(&CInspectorGlobalProbe::OnEntityInfoGlobalProbe));
+        Edit::MessageManager::Register(Edit::SApplicationMessageType::Light_Probe_Info, EDIT_RECEIVE_MESSAGE(&CInspectorLightProbe::OnEntityInfoGlobalProbe));
     }
 
     // -----------------------------------------------------------------------------
 
-    CInspectorGlobalProbe::~CInspectorGlobalProbe() 
+    CInspectorLightProbe::~CInspectorLightProbe() 
     {
 
     }
 
-    void CInspectorGlobalProbe::valueChanged()
+    void CInspectorLightProbe::valueChanged()
     {
         // -----------------------------------------------------------------------------
         // read values
@@ -38,7 +38,21 @@ namespace Edit
 
         int Quality = m_pQualityCB->currentIndex();
 
+        int ClearFlag = m_pClearFlagCB->currentIndex();
+
         float Intensity = m_pIntensityEdit->text().toFloat();
+
+        float Near = m_pNearEdit->text().toFloat();
+
+        float Far = m_pFarEdit->text().toFloat();
+
+        bool ParallaxCorrection = m_pParallaxCorrectionCB->isChecked();
+
+        float BoxSizeX = m_pBoxSizeXEdit->text().toFloat();
+
+        float BoxSizeY = m_pBoxSizeYEdit->text().toFloat();
+
+        float BoxSizeZ = m_pBoxSizeZEdit->text().toFloat();
 
         // -----------------------------------------------------------------------------
         // Send message
@@ -53,7 +67,21 @@ namespace Edit
 
         NewMessage.PutInt(Quality);
 
+        NewMessage.PutInt(ClearFlag);
+
         NewMessage.PutFloat(Intensity);
+
+        NewMessage.PutFloat(Near);
+
+        NewMessage.PutFloat(Far);
+
+        NewMessage.PutBool(ParallaxCorrection);
+
+        NewMessage.PutFloat(BoxSizeX);
+
+        NewMessage.PutFloat(BoxSizeY);
+
+        NewMessage.PutFloat(BoxSizeZ);
 
         NewMessage.Reset();
 
@@ -62,7 +90,7 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorGlobalProbe::RequestInformation(unsigned int _EntityID)
+    void CInspectorLightProbe::RequestInformation(unsigned int _EntityID)
     {
         m_CurrentEntityID = _EntityID;
 
@@ -77,7 +105,7 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorGlobalProbe::OnEntityInfoGlobalProbe(Edit::CMessage& _rMessage)
+    void CInspectorLightProbe::OnEntityInfoGlobalProbe(Edit::CMessage& _rMessage)
     {
         // -----------------------------------------------------------------------------
         // Read values
@@ -92,14 +120,30 @@ namespace Edit
 
         int Quality = _rMessage.GetInt();
 
+        int ClearFlag = _rMessage.GetInt();
+
         float Intensity = _rMessage.GetFloat();
+
+        float Near = _rMessage.GetFloat();
+
+        float Far = _rMessage.GetFloat();
+
+        bool ParallaxCorrection = _rMessage.GetBool();
+
+        float BoxSizeX = _rMessage.GetFloat();
+
+        float BoxSizeY = _rMessage.GetFloat();
+
+        float BoxSizeZ = _rMessage.GetFloat();
 
         // -----------------------------------------------------------------------------
         // Set values
         // -----------------------------------------------------------------------------
-        m_pRefreshModeCB->blockSignals(true);
-        m_pTypeCB       ->blockSignals(true);
-        m_pQualityCB    ->blockSignals(true);
+        m_pRefreshModeCB       ->blockSignals(true);
+        m_pTypeCB              ->blockSignals(true);
+        m_pQualityCB           ->blockSignals(true);
+        m_pClearFlagCB         ->blockSignals(true);
+        m_pParallaxCorrectionCB->blockSignals(true);
 
         m_pRefreshModeCB->setCurrentIndex(RefreshMode);
 
@@ -107,11 +151,27 @@ namespace Edit
 
         m_pQualityCB->setCurrentIndex(Quality);
 
+        m_pClearFlagCB->setCurrentIndex(ClearFlag);
+
         m_pIntensityEdit->setText(QString::number(Intensity));
 
-        m_pRefreshModeCB->blockSignals(false);
-        m_pTypeCB       ->blockSignals(false);
-        m_pQualityCB    ->blockSignals(false);
+        m_pNearEdit->setText(QString::number(Near));
+
+        m_pFarEdit->setText(QString::number(Far));
+
+        m_pParallaxCorrectionCB->setChecked(ParallaxCorrection);
+
+        m_pBoxSizeXEdit->setText(QString::number(BoxSizeX));
+
+        m_pBoxSizeYEdit->setText(QString::number(BoxSizeY));
+
+        m_pBoxSizeZEdit->setText(QString::number(BoxSizeZ));
+
+        m_pRefreshModeCB       ->blockSignals(false);
+        m_pTypeCB              ->blockSignals(false);
+        m_pQualityCB           ->blockSignals(false);
+        m_pClearFlagCB         ->blockSignals(false);
+        m_pParallaxCorrectionCB->blockSignals(false);
     }
 } // namespace Edit
 

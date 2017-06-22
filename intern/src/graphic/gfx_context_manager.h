@@ -109,6 +109,10 @@ namespace ContextManager
     void SetResourceBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
     CBufferPtr GetResourceBuffer(unsigned int _Unit);
 
+	void ResetAtomicCounterBuffer(unsigned int _Unit);
+	void SetAtomicCounterBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
+	CBufferPtr GetAtomicCounterBuffer(unsigned int _Unit);
+
     void Barrier();
     void Flush();
 

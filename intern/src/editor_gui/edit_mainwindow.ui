@@ -148,7 +148,7 @@
      <addaction name="m_pActionArea"/>
      <addaction name="m_pActionSun"/>
      <addaction name="m_pActionEnvironment"/>
-     <addaction name="m_pActionGlobalProbe"/>
+     <addaction name="m_pActionLightProbe"/>
     </widget>
     <widget class="QMenu" name="menuEffects">
      <property name="title">
@@ -528,9 +528,9 @@
     <string>&amp;Environment</string>
    </property>
   </action>
-  <action name="m_pActionGlobalProbe">
+  <action name="m_pActionLightProbe">
    <property name="text">
-    <string>&amp;Global Probe</string>
+    <string>&amp;Light Probe</string>
    </property>
   </action>
   <action name="m_pActionCamera">
@@ -828,7 +828,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>m_pActionExit</sender>
+   <sender>m_pActionLightProbe</sender>
    <signal>triggered()</signal>
    <receiver>CMainWindow</receiver>
    <slot>createNewLightGlobalProbe()</slot>

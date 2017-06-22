@@ -32,6 +32,8 @@ namespace Gfx
         m_ShaderPtrs[CShader::Geometry] = 0;
         m_ShaderPtrs[CShader::Pixel]    = 0;
 
+        m_ForwardShaderPSPtr = 0;
+
         m_SamplerSetPtrs[CShader::Vertex]   = 0;
         m_SamplerSetPtrs[CShader::Hull]     = 0;
         m_SamplerSetPtrs[CShader::Domain]   = 0;
@@ -54,6 +56,8 @@ namespace Gfx
         m_ShaderPtrs[CShader::Domain]   = 0;
         m_ShaderPtrs[CShader::Geometry] = 0;
         m_ShaderPtrs[CShader::Pixel]    = 0;
+
+        m_ForwardShaderPSPtr = 0;
 
         m_SamplerSetPtrs[CShader::Vertex]   = 0;
         m_SamplerSetPtrs[CShader::Hull]     = 0;
@@ -94,6 +98,13 @@ namespace Gfx
     CShaderPtr CMaterial::GetShaderPS() const
     {
         return m_ShaderPtrs[CShader::Pixel];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CShaderPtr CMaterial::GetForwardShaderPS() const
+    {
+        return m_ForwardShaderPSPtr;
     }
 
     // -----------------------------------------------------------------------------

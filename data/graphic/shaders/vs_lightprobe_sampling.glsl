@@ -20,8 +20,8 @@ layout(location = 2) in vec2 VertexTexCoord;
 // -----------------------------------------------------------------------------
 // Output to next stage
 // -----------------------------------------------------------------------------
-layout(location = 0) out vec3 out_Normal;
-layout(location = 1) out vec2 out_TexCoord;
+layout(location = 1) out vec3 out_Normal;
+layout(location = 2) out vec2 out_UV;
 
 // -----------------------------------------------------------------------------
 // Main
@@ -31,8 +31,8 @@ void main(void)
     vec4 WSPosition = vec4(VertexPosition.xyz, 1.0f);
     vec3 WSNormal   = VertexNormal;
     
-    out_Normal   = normalize(WSNormal);
-    out_TexCoord = VertexTexCoord;
+    out_Normal = normalize(WSNormal);
+    out_UV     = VertexTexCoord;
     
     gl_Position = WSPosition;
 }
