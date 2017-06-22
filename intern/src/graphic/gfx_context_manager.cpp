@@ -1325,11 +1325,7 @@ namespace
 
         assert(pNativeBuffer->GetBinding() == CBuffer::ConstantBuffer);
 
-        glBindBuffer(GL_UNIFORM_BUFFER, pNativeBuffer->m_NativeBuffer);
-
         glBindBufferRange(GL_UNIFORM_BUFFER, _Unit, pNativeBuffer->m_NativeBuffer, 0, pNativeBuffer->GetNumberOfBytes());
-
-        glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         m_BufferUnits[_Unit] = _BufferPtr;
     }
@@ -1370,12 +1366,8 @@ namespace
 
         assert(pNativeBuffer->GetBinding() == CBuffer::ResourceBuffer);
 
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, pNativeBuffer->m_NativeBuffer);
-
         glBindBufferRange(GL_SHADER_STORAGE_BUFFER, _Unit, pNativeBuffer->m_NativeBuffer, 0, pNativeBuffer->GetNumberOfBytes());
-
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
+		
         m_ResourceUnits[_Unit] = _BufferPtr;
     }
 
