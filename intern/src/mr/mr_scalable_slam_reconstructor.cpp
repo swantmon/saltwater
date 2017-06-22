@@ -885,7 +885,7 @@ namespace MR
         Scalar b[6];
         
         float ICPValues[g_ICPValueCount];
-        void* pICPBuffer = BufferManager::MapConstantBufferRange(m_ICPResourceBufferPtr, CBuffer::EMap::Read, sizeof(float) * g_ICPValueCount);
+        void* pICPBuffer = BufferManager::MapConstantBufferRange(m_ICPResourceBufferPtr, CBuffer::EMap::Read, 0, sizeof(float) * g_ICPValueCount);
         memcpy(ICPValues, pICPBuffer, sizeof(ICPValues[0]) * g_ICPValueCount);
         BufferManager::UnmapConstantBuffer(m_ICPResourceBufferPtr);
 

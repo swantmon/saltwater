@@ -444,7 +444,7 @@ namespace
         pMesh->SetLOD(0, pLOD);
         pMesh->SetNumberOfLODs(1);
 
-        MeshDesc.m_pModel = pMesh;
+        MeshDesc.m_pMesh = pMesh;
 
         m_VolumeMeshPtr = MeshManager::CreateMesh(MeshDesc);
 
@@ -464,7 +464,7 @@ namespace
 		pMesh->SetLOD(0, pLOD);
 		pMesh->SetNumberOfLODs(1);
 
-		MeshDesc.m_pModel = pMesh;
+		MeshDesc.m_pMesh = pMesh;
 
 		m_CubeOutlineMeshPtr = MeshManager::CreateMesh(MeshDesc);
     }

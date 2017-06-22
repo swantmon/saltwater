@@ -641,22 +641,6 @@ namespace
 
         return s_NativeMap[_Map];
     }
-
-    // -----------------------------------------------------------------------------
-
-    GLenum  CGfxBufferManager::ConvertMapRange(CBuffer::EMap _Map)
-    {
-        static const GLenum  s_NativeMap[] =
-        {
-            GL_MAP_READ_BIT,
-            GL_MAP_WRITE_BIT,
-            GL_MAP_READ_BIT,
-            GL_MAP_WRITE_BIT,
-            GL_MAP_WRITE_BIT,
-        };
-
-        return s_NativeMap[_Map];
-    }
 } // namespace
 
 namespace Gfx
@@ -837,14 +821,7 @@ namespace BufferManager
 	{
 		return CGfxBufferManager::GetInstance().MapBufferRange(_BufferPtr, _Map, _Offset, _Range);
 	}
-
-    // -----------------------------------------------------------------------------
-
-    void* MapConstantBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, Base::Size _Range)
-    {
-        return CGfxBufferManager::GetInstance().MapConstantBufferRange(_BufferPtr, _Map, _Range);
-    }
-
+	
     // -----------------------------------------------------------------------------
 
     void UnmapConstantBuffer(CBufferPtr _BufferPtr)
