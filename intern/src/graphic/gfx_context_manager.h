@@ -109,6 +109,10 @@ namespace ContextManager
     void SetResourceBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
     CBufferPtr GetResourceBuffer(unsigned int _Unit);
 
+	void ResetAtomicCounterBuffer(unsigned int _Unit);
+	void SetAtomicCounterBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
+	CBufferPtr GetAtomicCounterBuffer(unsigned int _Unit);
+
     void Draw(unsigned int _NumberOfVertices, unsigned int _IndexOfFirstVertex);
     void DrawIndexed(unsigned int _NumberOfIndices, unsigned int _IndexOfFirstIndex, int _BaseVertexLocation);
     void DrawIndexedInstanced(unsigned int _NumberOfIndices, unsigned int _NumberOfInstances, unsigned int _IndexOfFirstIndex, int _BaseVertexLocation, unsigned int _StartInstanceLocation);

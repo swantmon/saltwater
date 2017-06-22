@@ -636,6 +636,7 @@ namespace
             GL_ELEMENT_ARRAY_BUFFER,    //> Indices
             GL_UNIFORM_BUFFER,          //> Constant Buffer
             GL_SHADER_STORAGE_BUFFER,   //> Resource Buffer
+			GL_ATOMIC_COUNTER_BUFFER,   //> Atomic Counter
         };
 
         return s_NativeBindFlag[_BindFlag];
