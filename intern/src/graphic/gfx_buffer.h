@@ -41,11 +41,12 @@ namespace Gfx
             
             enum EMap
             {
-                Read             = 0,
-                Write            = 1,
-                ReadWrite        = 2,
-                WriteDiscard     = 3,
-                WriteNoOverwrite = 4,
+                Read                = 0,
+                Write               = 1,
+                ReadWrite           = 2,
+                WriteDiscard        = 3,
+                WriteNoOverwrite    = 4,
+				ReadWritePersistent = 5,
             };
         
         public:

@@ -120,7 +120,7 @@ namespace
         GLenum ConvertUsage(CBuffer::EUsage _Usage);
         GLenum ConvertBindFlag(CBuffer::EBinding _BindFlag);
         GLenum ConvertAccess(CBuffer::EAccess _Access);
-        GLenum ConvertMap(CBuffer::EMap _Map);
+        GLbitfield ConvertMap(CBuffer::EMap _Map);
     };
 } // namespace
 
@@ -490,9 +490,9 @@ namespace
 
         assert(pBuffer != nullptr);
 
-        int NativeMap = ConvertMap(_Map);
+        GLbitfield NativeMap = ConvertMap(_Map);
 
-        return glMapNamedBuffer(pBuffer->m_NativeBuffer, NativeMap);
+        return glMapNamedBufferRange(pBuffer->m_NativeBuffer, 0, pBuffer->m_NumberOfBytes, NativeMap);
     }
 
     // -----------------------------------------------------------------------------
@@ -536,9 +536,9 @@ namespace
 
         assert(pBuffer != nullptr);
 
-        int NativeMap = ConvertMap(_Map);
+        GLbitfield NativeMap = ConvertMap(_Map);
 
-        return glMapNamedBuffer(pBuffer->m_NativeBuffer, NativeMap);
+        return glMapNamedBufferRange(pBuffer->m_NativeBuffer, 0, pBuffer->m_NumberOfBytes, NativeMap);
     }
 
     // -----------------------------------------------------------------------------
@@ -663,15 +663,16 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    GLenum  CGfxBufferManager::ConvertMap(CBuffer::EMap _Map)
+    GLbitfield  CGfxBufferManager::ConvertMap(CBuffer::EMap _Map)
     {
         static const GLenum  s_NativeMap[] =
         {
-            GL_READ_ONLY,
-            GL_WRITE_ONLY,
-            GL_READ_WRITE,
-            GL_READ_ONLY,
-            GL_WRITE_ONLY,
+            GL_MAP_READ_BIT,
+			GL_MAP_WRITE_BIT,
+			GL_MAP_READ_BIT | GL_MAP_WRITE_BIT,
+			GL_MAP_READ_BIT,
+			GL_MAP_WRITE_BIT,
+			GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT,
         };
 
         return s_NativeMap[_Map];
