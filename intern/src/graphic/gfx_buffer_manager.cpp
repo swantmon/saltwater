@@ -255,9 +255,10 @@ namespace
         // Setup variables for exception safety.
         // -----------------------------------------------------------------------------
 
-        pBytes         = nullptr;
-        NativeBuffer   = 0;
-        NativeBinding  = ConvertBindFlag(_rDescriptor.m_Binding);
+        pBytes        = nullptr;
+        NativeBuffer  = 0;
+        NativeBinding = ConvertBindFlag(_rDescriptor.m_Binding);
+		NativeUsage   = 0;
         
         // -----------------------------------------------------------------------------
         // Generate OpenGL buffer
