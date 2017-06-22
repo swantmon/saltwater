@@ -248,15 +248,16 @@ namespace
         void*                    pBytes;
         int                      NativeBinding;
         int                      NativeUsage;
+		GLbitfield               Flags;
         Gfx::CNativeBufferHandle NativeBuffer;
 
         // -----------------------------------------------------------------------------
         // Setup variables for exception safety.
         // -----------------------------------------------------------------------------
+
         pBytes         = nullptr;
         NativeBuffer   = 0;
         NativeBinding  = ConvertBindFlag(_rDescriptor.m_Binding);
-        NativeUsage    = ConvertUsage(_rDescriptor.m_Usage);
         
         // -----------------------------------------------------------------------------
         // Generate OpenGL buffer
@@ -268,7 +269,16 @@ namespace
         // If pBytes is NULL, a data store of the specified size is still created,
         // but its contents remain uninitialized and thus undefined.
         // -----------------------------------------------------------------------------
-        glNamedBufferData(NativeBuffer, _rDescriptor.m_NumberOfBytes, _rDescriptor.m_pBytes, NativeUsage);
+		if (_rDescriptor.m_Usage == CBuffer::Persistent)
+		{
+			Flags = GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+			glNamedBufferStorage(NativeBuffer, _rDescriptor.m_NumberOfBytes, _rDescriptor.m_pBytes, Flags);
+		}
+		else
+		{
+			NativeUsage = ConvertUsage(_rDescriptor.m_Usage);
+			glNamedBufferData(NativeBuffer, _rDescriptor.m_NumberOfBytes, _rDescriptor.m_pBytes, NativeUsage);
+		}
                
         // -----------------------------------------------------------------------------
         // Create the core resource behavior on the owner policy.
