@@ -139,7 +139,9 @@ namespace MR
         Gfx::CBufferPtr m_ICPSummationConstantBufferPtr;
         Gfx::CBufferPtr m_IncPoseMatrixConstantBufferPtr;
         Gfx::CBufferPtr m_BilateralFilterConstantBufferPtr;
-		Gfx::CBufferPtr m_IntegrationConstantBufferPtr;
+		Gfx::CBufferPtr m_PositionConstantBufferPtr;
+
+		Gfx::CBufferPtr m_AtomicCounterBufferPtr;
 
         Gfx::CShaderPtr m_ClearVolumeCSPtr;
         Gfx::CShaderPtr m_BilateralFilterCSPtr;
@@ -151,6 +153,7 @@ namespace MR
         Gfx::CShaderPtr m_RaycastPyramidCSPtr;
         Gfx::CShaderPtr m_DetermineSummandsCSPtr;
         Gfx::CShaderPtr m_ReduceSumCSPtr;
+		Gfx::CShaderPtr m_RootgridDepthCSPtr;
 
         Gfx::CTexture2DPtr m_RawDepthBufferPtr;
         Gfx::CTexture2DPtr m_RawCameraFramePtr;
@@ -183,5 +186,7 @@ namespace MR
 
 		std::array<Base::Float3, 8> m_FrustumPoints;
 		std::array<Base::Float4, 6> m_FrustumPlanes;
+
+		int* m_pCounter;
     };
 } // namespace MR

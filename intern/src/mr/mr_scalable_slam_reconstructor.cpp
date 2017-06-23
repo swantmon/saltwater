@@ -83,7 +83,7 @@ namespace
         float Padding[3];
     };
 
-	struct SIntegrationBuffer
+	struct SPositionBuffer
 	{
 		Base::Float3 m_Position;
 	};
@@ -267,6 +267,7 @@ namespace MR
         m_DetermineSummandsCSPtr = 0;
         m_ReduceSumCSPtr = 0;
         m_ClearVolumeCSPtr = 0;
+		m_RootgridDepthCSPtr = 0;
 
         m_RawDepthBufferPtr = 0;
         m_RawCameraFramePtr = 0;
@@ -289,7 +290,8 @@ namespace MR
         m_ICPSummationConstantBufferPtr = 0;
         m_IncPoseMatrixConstantBufferPtr = 0;
         m_BilateralFilterConstantBufferPtr = 0;
-		m_IntegrationConstantBufferPtr = 0;
+		m_PositionConstantBufferPtr = 0;
+		m_AtomicCounterBufferPtr = 0;
     }
     
     // -----------------------------------------------------------------------------
@@ -345,6 +347,7 @@ namespace MR
         m_DetermineSummandsCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_determine_summands.glsl", "main", DefineString.c_str());
         m_ReduceSumCSPtr         = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_reduce_sum.glsl"        , "main", DefineString.c_str());
         m_ClearVolumeCSPtr       = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_clear_volume.glsl"      , "main", DefineString.c_str());
+		m_RootgridDepthCSPtr     = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_rootgrid_depth.glsl"    , "main", DefineString.c_str());
     }
     
     // -----------------------------------------------------------------------------
@@ -394,7 +397,23 @@ namespace MR
 
 	bool CScalableSLAMReconstructor::RootGridContainsDepth(const Base::Int3& rKey)
 	{
-		return true;
+		*m_pCounter = 0;
+		const int WorkGroups = GetWorkGroupCount(m_ReconstructionSettings.m_VolumeResolution, g_TileSize3D);
+
+		SRootGrid& rRootGrid = m_RootGrids[rKey];
+
+		Float3 Position;
+		Position[0] = rRootGrid.m_Offset[0] * m_ReconstructionSettings.m_VolumeSize;
+		Position[1] = rRootGrid.m_Offset[1] * m_ReconstructionSettings.m_VolumeSize;
+		Position[2] = rRootGrid.m_Offset[2] * m_ReconstructionSettings.m_VolumeSize;
+
+		BufferManager::UploadConstantBufferData(m_PositionConstantBufferPtr, &Position);
+		ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(rRootGrid.m_TSDFVolumePtr));
+		
+		ContextManager::Dispatch(WorkGroups, WorkGroups, WorkGroups);
+		ContextManager::Flush();
+
+		return (*m_pCounter) > 0;
 	}
 
 	// -----------------------------------------------------------------------------
@@ -435,6 +454,14 @@ namespace MR
 
 		SRootGrid RootGrid;
 
+		ContextManager::SetShaderCS(m_RootgridDepthCSPtr);
+		ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
+		ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
+		ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
+		ContextManager::SetAtomicCounterBuffer(0, m_AtomicCounterBufferPtr);
+		m_pCounter = static_cast<int*>(BufferManager::MapAtomicCounterBufferRange(m_AtomicCounterBufferPtr, CBuffer::ReadWritePersistent, 0, 4));
+		ContextManager::Barrier();
+
 		for (int x = MinIndex[0] - 1; x <= MaxIndex[0]; ++ x)
 		{
 			for (int y = MinIndex[1] - 1; y <= MaxIndex[1]; ++ y)
@@ -451,7 +478,7 @@ namespace MR
 						if (Memory < 1000000)
 						{
 							BASE_CONSOLE_ERROR("Out of GPU memory");
-							return;
+							std::terminate();
 						}
 
 						TextureDescriptor.m_NumberOfPixelsU = m_ReconstructionSettings.m_VolumeResolution;
@@ -475,6 +502,10 @@ namespace MR
 				}
 			}
 		}
+
+		BufferManager::UnmapAtomicCounterBuffer(m_AtomicCounterBufferPtr);
+		ContextManager::ResetAtomicCounterBuffer(0);
+		m_pCounter = nullptr;
 
 		for (auto& rPair : m_RootGrids)
 		{
@@ -616,9 +647,9 @@ namespace MR
         ConstantBufferDesc.m_pBytes = &m_ReconstructionSettings.m_DepthThreshold;
         m_BilateralFilterConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
-		ConstantBufferDesc.m_NumberOfBytes = sizeof(SIntegrationBuffer);
+		ConstantBufferDesc.m_NumberOfBytes = sizeof(SPositionBuffer);
 		ConstantBufferDesc.m_pBytes = nullptr;
-		m_IntegrationConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+		m_PositionConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
         const int ICPRowCount = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() , g_TileSize2D) *
                                 GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
@@ -629,6 +660,12 @@ namespace MR
         ConstantBufferDesc.m_NumberOfBytes = sizeof(float) * ICPRowCount * g_ICPValueCount;
         ConstantBufferDesc.m_pBytes = nullptr;
         m_ICPResourceBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+		ConstantBufferDesc.m_Usage = CBuffer::Persistent;
+		ConstantBufferDesc.m_Binding = CBuffer::AtomicCounterBuffer;
+		ConstantBufferDesc.m_Access = CBuffer::CPURead;
+		ConstantBufferDesc.m_NumberOfBytes = 4;
+		m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
 
     // -----------------------------------------------------------------------------
@@ -969,7 +1006,7 @@ namespace MR
 
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);        
-		ContextManager::SetConstantBuffer(2, m_IntegrationConstantBufferPtr);
+		ContextManager::SetConstantBuffer(2, m_PositionConstantBufferPtr);
 
         ContextManager::Barrier();
 
@@ -996,7 +1033,7 @@ namespace MR
 				Position[1] = rRootGrid.m_Offset[1] * m_ReconstructionSettings.m_VolumeSize;
 				Position[2] = rRootGrid.m_Offset[2] * m_ReconstructionSettings.m_VolumeSize;
 
-				BufferManager::UploadConstantBufferData(m_IntegrationConstantBufferPtr, &Position);
+				BufferManager::UploadConstantBufferData(m_PositionConstantBufferPtr, &Position);
 
 				ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(rRootGrid.m_TSDFVolumePtr));
 
