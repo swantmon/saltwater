@@ -8,7 +8,7 @@
 // Constants
 // -----------------------------------------------------------------------------
 
-layout(row_major, std140, binding = 2) uniform UBODepthThreshold
+layout(row_major, std140, binding = 2) uniform UBOOffset
 {
     vec3 g_Offset;
 };

@@ -86,6 +86,7 @@ namespace
 	struct SPositionBuffer
 	{
 		Base::Float3 m_Position;
+		float Padding;
 	};
 
     struct SDrawCallBufferData
@@ -398,22 +399,21 @@ namespace MR
 	bool CScalableSLAMReconstructor::RootGridContainsDepth(const Base::Int3& rKey)
 	{
 		*m_pCounter = 0;
-		const int WorkGroups = GetWorkGroupCount(m_ReconstructionSettings.m_VolumeResolution, g_TileSize3D);
+		const int WorkGroups = GetWorkGroupCount(m_ReconstructionSettings.m_VolumeResolution, g_TileSize2D);
 
 		SRootGrid& rRootGrid = m_RootGrids[rKey];
 
-		Float3 Position;
-		Position[0] = rRootGrid.m_Offset[0] * m_ReconstructionSettings.m_VolumeSize;
-		Position[1] = rRootGrid.m_Offset[1] * m_ReconstructionSettings.m_VolumeSize;
-		Position[2] = rRootGrid.m_Offset[2] * m_ReconstructionSettings.m_VolumeSize;
+		Float4 Position;
+		Position[0] = rKey[0] * m_ReconstructionSettings.m_VolumeSize;
+		Position[1] = rKey[1] * m_ReconstructionSettings.m_VolumeSize;
+		Position[2] = rKey[2] * m_ReconstructionSettings.m_VolumeSize;
 
 		BufferManager::UploadConstantBufferData(m_PositionConstantBufferPtr, &Position);
-		ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(rRootGrid.m_TSDFVolumePtr));
 		
-		ContextManager::Dispatch(WorkGroups, WorkGroups, WorkGroups);
+		ContextManager::Dispatch(WorkGroups, WorkGroups, 1);
 		ContextManager::Flush();
 
-		return (*m_pCounter) > 0;
+		return *m_pCounter > 0;
 	}
 
 	// -----------------------------------------------------------------------------
@@ -457,9 +457,9 @@ namespace MR
 		ContextManager::SetShaderCS(m_RootgridDepthCSPtr);
 		ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
 		ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
+		ContextManager::SetConstantBuffer(2, m_PositionConstantBufferPtr);
 		ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
 		ContextManager::SetAtomicCounterBuffer(0, m_AtomicCounterBufferPtr);
-		m_pCounter = static_cast<int*>(BufferManager::MapAtomicCounterBufferRange(m_AtomicCounterBufferPtr, CBuffer::ReadWritePersistent, 0, 4));
 		ContextManager::Barrier();
 
 		for (int x = MinIndex[0] - 1; x <= MaxIndex[0]; ++ x)
@@ -471,6 +471,7 @@ namespace MR
 					Int3 Key = Int3(x, y, z);
 					
 					if (m_RootGrids.count(Key) == 0 && RootGridInFrustum(Key) && RootGridContainsDepth(Key))
+					//if (RootGridContainsDepth(Key) && m_RootGrids.count(Key) == 0)
 					{
 						GLint Memory;
 						glGetIntegerv(0x9049, &Memory);
@@ -497,15 +498,13 @@ namespace MR
 							RootGrid.m_ColorVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
 						}
 
-						m_RootGrids[RootGrid.m_Offset] = RootGrid;
+						m_RootGrids[Key] = RootGrid;
 					}
 				}
 			}
 		}
 
-		BufferManager::UnmapAtomicCounterBuffer(m_AtomicCounterBufferPtr);
 		ContextManager::ResetAtomicCounterBuffer(0);
-		m_pCounter = nullptr;
 
 		for (auto& rPair : m_RootGrids)
 		{
@@ -666,6 +665,7 @@ namespace MR
 		ConstantBufferDesc.m_Access = CBuffer::CPURead;
 		ConstantBufferDesc.m_NumberOfBytes = 4;
 		m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+		m_pCounter = static_cast<int*>(BufferManager::MapAtomicCounterBufferRange(m_AtomicCounterBufferPtr, CBuffer::ReadWritePersistent, 0, 4));
     }
 
     // -----------------------------------------------------------------------------
@@ -737,10 +737,14 @@ namespace MR
         // Integrate and raycast pyramid
         //////////////////////////////////////////////////////////////////////////////////////
 
-        Performance::BeginEvent("TSDF Integration and Raycasting");
+		Performance::BeginEvent("Updating root grid");
 
 		UpdateFrustum();
 		UpdateRootrids();
+
+		Performance::EndEvent();
+
+        Performance::BeginEvent("TSDF Integration and Raycasting");
 
         if (!m_IsIntegrationPaused)
         {
