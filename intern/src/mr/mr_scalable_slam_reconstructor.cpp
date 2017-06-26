@@ -665,7 +665,7 @@ namespace MR
 		ConstantBufferDesc.m_NumberOfBytes = 4;
 		ConstantBufferDesc.m_pBytes = &Zero;
 		m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-		m_pCounter = static_cast<int*>(BufferManager::MapAtomicCounterBufferRange(m_AtomicCounterBufferPtr, CBuffer::ReadWritePersistent, 0, 4));
+		m_pCounter = static_cast<unsigned int*>(BufferManager::MapAtomicCounterBufferRange(m_AtomicCounterBufferPtr, CBuffer::ReadWritePersistent, 0, 4));
     }
 
     // -----------------------------------------------------------------------------

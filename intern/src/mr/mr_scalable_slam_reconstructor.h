@@ -187,6 +187,6 @@ namespace MR
 		std::array<Base::Float3, 8> m_FrustumPoints;
 		std::array<Base::Float4, 6> m_FrustumPlanes;
 
-		int* m_pCounter;
+		unsigned int* m_pCounter;
     };
 } // namespace MR
