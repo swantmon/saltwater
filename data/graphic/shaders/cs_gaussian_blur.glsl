@@ -1,11 +1,9 @@
 
-#ifndef __INCLUDE_CS_GAUSSIAN_BLUR_R32F_GLSL__
-#define __INCLUDE_CS_GAUSSIAN_BLUR_R32F_GLSL__
+#ifndef __INCLUDE_CS_GAUSSIAN_BLUR_GLSL__
+#define __INCLUDE_CS_GAUSSIAN_BLUR_GLSL__
 
-// -----------------------------------------------------------------------------
-// Defines
-// -----------------------------------------------------------------------------
-#define TILE_SIZE 8
+// #define TILE_SIZE 8
+// #define IMAGE_TYPE rgba8
 
 // -----------------------------------------------------------------------------
 // Input from engine
@@ -16,8 +14,8 @@ layout(std430, binding = 0) readonly buffer UGaussianSettings
     float m_Weights[7];
 };
 
-layout (binding = 0, r32f) readonly  uniform image2D cs_InputTexture;
-layout (binding = 1, r32f) writeonly uniform image2D cs_OutputTexture;
+layout (binding = 0, IMAGE_TYPE) readonly  uniform image2D cs_InputTexture;
+layout (binding = 1, IMAGE_TYPE) writeonly uniform image2D cs_OutputTexture;
 
 // -------------------------------------------------------------------------------------
 // Functions
@@ -76,4 +74,4 @@ void main()
     }
 }
 
-#endif // __INCLUDE_CS_GAUSSIAN_BLUR_R32F_GLSL__
+#endif // __INCLUDE_CS_GAUSSIAN_BLUR_GLSL__
