@@ -400,9 +400,7 @@ namespace MR
 	{
 		*m_pCounter = 0;
 		const int WorkGroups = GetWorkGroupCount(m_ReconstructionSettings.m_VolumeResolution, g_TileSize2D);
-
-		SRootGrid& rRootGrid = m_RootGrids[rKey];
-
+		
 		Float4 Position;
 		Position[0] = rKey[0] * m_ReconstructionSettings.m_VolumeSize;
 		Position[1] = rKey[1] * m_ReconstructionSettings.m_VolumeSize;
@@ -471,7 +469,6 @@ namespace MR
 					Int3 Key = Int3(x, y, z);
 					
 					if (m_RootGrids.count(Key) == 0 && RootGridInFrustum(Key) && RootGridContainsDepth(Key))
-					//if (RootGridContainsDepth(Key) && m_RootGrids.count(Key) == 0)
 					{
 						GLint Memory;
 						glGetIntegerv(0x9049, &Memory);
@@ -479,7 +476,7 @@ namespace MR
 						if (Memory < 1000000)
 						{
 							BASE_CONSOLE_ERROR("Out of GPU memory");
-							std::terminate();
+							throw std::exception("Out of GPU memory");
 						}
 
 						TextureDescriptor.m_NumberOfPixelsU = m_ReconstructionSettings.m_VolumeResolution;
@@ -660,10 +657,13 @@ namespace MR
         ConstantBufferDesc.m_pBytes = nullptr;
         m_ICPResourceBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
+		unsigned int Zero = 0;
+
 		ConstantBufferDesc.m_Usage = CBuffer::Persistent;
 		ConstantBufferDesc.m_Binding = CBuffer::AtomicCounterBuffer;
 		ConstantBufferDesc.m_Access = CBuffer::CPURead;
 		ConstantBufferDesc.m_NumberOfBytes = 4;
+		ConstantBufferDesc.m_pBytes = &Zero;
 		m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 		m_pCounter = static_cast<int*>(BufferManager::MapAtomicCounterBufferRange(m_AtomicCounterBufferPtr, CBuffer::ReadWritePersistent, 0, 4));
     }
@@ -1045,14 +1045,14 @@ namespace MR
 				{
 					ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(rRootGrid.m_ColorVolumePtr));
 				}
-				else
-				{
-					ContextManager::ResetImageTexture(2);
-				}
 
 				ContextManager::Dispatch(WorkGroups, WorkGroups, 1);
 			}
 		}
+		ContextManager::ResetImageTexture(0);
+		ContextManager::ResetImageTexture(1);
+		ContextManager::ResetImageTexture(2);
+		ContextManager::ResetImageTexture(3);
     }
     
     // -----------------------------------------------------------------------------
@@ -1095,7 +1095,7 @@ namespace MR
 
         ContextManager::SetShaderCS(m_RaycastCSPtr);
 
-        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_RootGrids[0].m_TSDFVolumePtr));
+		ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_RootGrids[Int3(0, 0, 0)].m_TSDFVolumePtr));
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
 
         ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RaycastVertexMapPtr[0]));

@@ -36,7 +36,7 @@ void main()
     const vec2 InvFocalLength = g_Intrinisics[0].m_InvFocalLength;
 
 	const float Depth = imageLoad(cs_Depth, ivec2(ImagePos)).x / 1000.0f;
-	
+		
 	vec3 Vertex;	
 	Vertex.xy = Depth * (ImagePos - FocalPoint) * InvFocalLength;
 	Vertex.z = Depth;
