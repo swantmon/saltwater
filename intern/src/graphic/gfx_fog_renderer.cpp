@@ -243,7 +243,7 @@ namespace
         m_VolumeLightingCSPtr   = ShaderManager::CompileCS("cs_volume_lighting.glsl", "main");
         m_VolumeScatteringCSPtr = ShaderManager::CompileCS("cs_volume_scattering.glsl", "main");  
         m_ApplyPSPtr            = ShaderManager::CompilePS("fs_fog_apply.glsl", "main");  
-        m_GaussianBlurShaderPtr = ShaderManager::CompileCS("cs_gaussian_blur_r32f.glsl", "main");
+        m_GaussianBlurShaderPtr = ShaderManager::CompileCS("cs_gaussian_blur.glsl", "main", "#define TILE_SIZE 8\n#define IMAGE_TYPE r32f");
         
         // -----------------------------------------------------------------------------
         
