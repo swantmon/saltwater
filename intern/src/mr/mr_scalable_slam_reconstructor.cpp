@@ -38,6 +38,8 @@
 using namespace MR;
 using namespace Gfx;
 
+#define USE_PERISTENT_MAPPING
+
 namespace
 {
 	//*
@@ -398,7 +400,12 @@ namespace MR
 
 	bool CScalableSLAMReconstructor::RootGridContainsDepth(const Base::Int3& rKey)
 	{
+#ifdef USE_PERISTENT_MAPPING
 		*m_pCounter = 0;
+#else
+		unsigned int Zero = 0;
+		BufferManager::UploadConstantBufferData(m_AtomicCounterBufferPtr, &Zero);
+#endif
 		const int WorkGroups = GetWorkGroupCount(m_ReconstructionSettings.m_VolumeResolution, g_TileSize2D);
 		
 		Float4 Position;
@@ -409,9 +416,16 @@ namespace MR
 		BufferManager::UploadConstantBufferData(m_PositionConstantBufferPtr, &Position);
 		
 		ContextManager::Dispatch(WorkGroups, WorkGroups, 1);
-		ContextManager::Flush();
+		ContextManager::Flush();		
 
+#ifdef USE_PERISTENT_MAPPING
 		return *m_pCounter > 0;
+#else
+		m_pCounter = static_cast<unsigned int*>(BufferManager::MapAtomicCounterBuffer(m_AtomicCounterBufferPtr, CBuffer::EMap::Read));
+		unsigned int DepthCount = *m_pCounter;
+		BufferManager::UnmapAtomicCounterBuffer(m_AtomicCounterBufferPtr);
+		return DepthCount > 0;
+#endif
 	}
 
 	// -----------------------------------------------------------------------------
@@ -658,14 +672,20 @@ namespace MR
         m_ICPResourceBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
 		unsigned int Zero = 0;
-
-		ConstantBufferDesc.m_Usage = CBuffer::Persistent;
+				
 		ConstantBufferDesc.m_Binding = CBuffer::AtomicCounterBuffer;
 		ConstantBufferDesc.m_Access = CBuffer::CPURead;
 		ConstantBufferDesc.m_NumberOfBytes = 4;
 		ConstantBufferDesc.m_pBytes = &Zero;
+#ifdef USE_PERISTENT_MAPPING
+		ConstantBufferDesc.m_Usage = CBuffer::Persistent;
 		m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 		m_pCounter = static_cast<unsigned int*>(BufferManager::MapAtomicCounterBufferRange(m_AtomicCounterBufferPtr, CBuffer::ReadWritePersistent, 0, 4));
+#else
+		ConstantBufferDesc.m_Usage = CBuffer::GPUToCPU;
+		m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+#endif // USE_PERISTENT_MAPPING
+
     }
 
     // -----------------------------------------------------------------------------
