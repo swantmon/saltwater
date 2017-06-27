@@ -5,7 +5,6 @@
 
 #include "mr_rgbd_camera_control.h"
 
-#include "base/base_matrix4x4.h"
 #include "base/base_console.h"
 
 #define NOMINMAX
