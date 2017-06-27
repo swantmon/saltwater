@@ -258,7 +258,7 @@ namespace
         pBytes        = nullptr;
         NativeBuffer  = 0;
         NativeBinding = ConvertBindFlag(_rDescriptor.m_Binding);
-		NativeUsage   = 0;
+        NativeUsage   = 0;
         
         // -----------------------------------------------------------------------------
         // Generate OpenGL buffer
@@ -272,7 +272,7 @@ namespace
         // -----------------------------------------------------------------------------
 		if (_rDescriptor.m_Usage == CBuffer::Persistent)
 		{
-			Flags = GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+			Flags = GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_DYNAMIC_STORAGE_BIT;
 			glNamedBufferStorage(NativeBuffer, _rDescriptor.m_NumberOfBytes, _rDescriptor.m_pBytes, Flags);
 		}
 		else
