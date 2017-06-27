@@ -38,7 +38,7 @@
 using namespace MR;
 using namespace Gfx;
 
-#define USE_PERISTENT_MAPPING
+//#define USE_PERISTENT_MAPPING
 
 namespace
 {
@@ -416,9 +416,9 @@ namespace MR
 		BufferManager::UploadConstantBufferData(m_PositionConstantBufferPtr, &Position);
 		
 		ContextManager::Dispatch(WorkGroups, WorkGroups, 1);
-		ContextManager::Flush();		
 
 #ifdef USE_PERISTENT_MAPPING
+		ContextManager::Flush();
 		return *m_pCounter > 0;
 #else
 		m_pCounter = static_cast<unsigned int*>(BufferManager::MapAtomicCounterBuffer(m_AtomicCounterBufferPtr, CBuffer::EMap::Read));
