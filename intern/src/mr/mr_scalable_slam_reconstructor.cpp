@@ -157,6 +157,9 @@ namespace MR
 		SetupShaders();
 		SetupTextures();
 		SetupBuffers();
+
+		m_IsIntegrationPaused = false;
+		m_IsTrackingPaused = false;
     }
 
 	// -----------------------------------------------------------------------------
@@ -178,8 +181,6 @@ namespace MR
 		m_IntegratedFrameCount = 0;
 		m_FrameCount = 0;
 		m_TrackingLost = true;
-		m_IsIntegrationPaused = false;
-		m_IsTrackingPaused = false;
 		
 		const int GridLevelCount = MR::SReconstructionSettings::GRID_LEVELS;
 
