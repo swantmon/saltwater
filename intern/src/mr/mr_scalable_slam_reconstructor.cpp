@@ -153,7 +153,6 @@ namespace MR
         m_CameraPixels = std::vector<Base::Byte4>(m_pRGBDCameraControl->GetDepthPixelCount());
 
 		SetupData();
-
 		SetupShaders();
 		SetupTextures();
 		SetupBuffers();

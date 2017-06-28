@@ -48,7 +48,7 @@ void main()
         vec2 CSVoxelPosition = VSVoxelPosition.xy * g_Intrinisics[0].m_FocalLength / VSVoxelPosition.z + g_Intrinisics[0].m_FocalPoint;
         //CSVoxelPosition.xy += vec2(0.5f);
 
-        if (CSVoxelPosition.x > 0 && CSVoxelPosition.x < DEPTH_IMAGE_WIDTH && CSVoxelPosition.y > 0 && CSVoxelPosition.y < DEPTH_IMAGE_HEIGHT)
+        if (CSVoxelPosition.x > 0 && CSVoxelPosition.x < DEPTH_IMAGE_WIDTH && CSVoxelPosition.y > 0 && CSVoxelPosition.y < DEPTH_IMAGE_HEIGHT && VSVoxelPosition.z > 0.0f)
         {
 			const ivec2 DepthCoords = ivec2(DEPTH_IMAGE_WIDTH - CSVoxelPosition.x, CSVoxelPosition.y);
             const int Depth = int(imageLoad(cs_Depth, DepthCoords).x);
