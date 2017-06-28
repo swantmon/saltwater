@@ -17,8 +17,7 @@ layout(row_major, std140, binding = 2) uniform UBOOffset
     vec3 g_Offset;
 };
 
-layout(binding = 0, rg16f) uniform image3D cs_TSDFVolume;
-layout(binding = 1, r16ui) readonly uniform uimage2D cs_Depth;
+layout(binding = 0, r16ui) readonly uniform uimage2D cs_Depth;
 layout(binding = 0, offset = 0) uniform atomic_uint cs_Counter;
 
 // -------------------------------------------------------------------------------------

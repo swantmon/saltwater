@@ -470,7 +470,7 @@ namespace MR
 		ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
 		ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
 		ContextManager::SetConstantBuffer(2, m_PositionConstantBufferPtr);
-		ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
+		ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
 		ContextManager::SetAtomicCounterBuffer(0, m_AtomicCounterBufferPtr);
 		ContextManager::Barrier();
 
