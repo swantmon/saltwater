@@ -38,7 +38,7 @@
 using namespace MR;
 using namespace Gfx;
 
-#define USE_PERISTENT_MAPPING
+//#define USE_PERISTENT_MAPPING
 
 namespace
 {
@@ -421,12 +421,12 @@ namespace MR
 
 #ifdef USE_PERISTENT_MAPPING
 		ContextManager::Flush();
-		return *pCounter > 0;
+		return *pCounter > 200;
 #else
         uint32_t* pCounter = static_cast<unsigned int*>(BufferManager::MapAtomicCounterBuffer(m_AtomicCounterBufferPtr, CBuffer::EMap::Read));
 		unsigned int DepthCount = *pCounter;
 		BufferManager::UnmapAtomicCounterBuffer(m_AtomicCounterBufferPtr);
-		return DepthCount > 0;
+		return DepthCount > 200;
 #endif
 	}
 
