@@ -6,6 +6,7 @@
 namespace Gfx
 {
     CBuffer::CBuffer()
+        : m_pStorage(nullptr)
     {
     }
 
@@ -62,5 +63,13 @@ namespace Gfx
     const void* CBuffer::GetBytes() const
     {
         return m_pBytes;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void* CBuffer::GetStorage()
+    {
+        assert(m_pStorage != nullptr);
+        return m_pStorage;
     }
 } // namespace Gfx
