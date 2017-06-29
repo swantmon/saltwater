@@ -407,16 +407,17 @@ namespace MR
 		unsigned int Zero = 0;
 		BufferManager::UploadConstantBufferData(m_AtomicCounterBufferPtr, &Zero);
 #endif
-		const int WorkGroups = GetWorkGroupCount(m_ReconstructionSettings.m_VolumeResolution, g_TileSize2D);
-		
-		Float4 Position;
-		Position[0] = rKey[0] * m_ReconstructionSettings.m_VolumeSize;
-		Position[1] = rKey[1] * m_ReconstructionSettings.m_VolumeSize;
-		Position[2] = rKey[2] * m_ReconstructionSettings.m_VolumeSize;
+        const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth(), g_TileSize2D);
+        const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
+        
+        Float4 Position;
+        Position[0] = rKey[0] * m_ReconstructionSettings.m_VolumeSize;
+        Position[1] = rKey[1] * m_ReconstructionSettings.m_VolumeSize;
+        Position[2] = rKey[2] * m_ReconstructionSettings.m_VolumeSize;
 
-		BufferManager::UploadConstantBufferData(m_PositionConstantBufferPtr, &Position);
-		
-		ContextManager::Dispatch(WorkGroups, WorkGroups, 1);
+        BufferManager::UploadConstantBufferData(m_PositionConstantBufferPtr, &Position);
+
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
 #ifdef USE_PERISTENT_MAPPING
 		ContextManager::Flush();
