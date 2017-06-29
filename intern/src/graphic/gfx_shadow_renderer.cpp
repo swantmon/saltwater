@@ -124,7 +124,7 @@ namespace
 
         CShaderPtr m_FullquadShaderVSPtr;
         CShaderPtr m_SSAOShaderPSPtrs[NumberOfSSAOs];
-        CShaderPtr m_BilateralBlurShaderCSPtr;
+        CShaderPtr m_GaussianBlurShaderCSPtr;
 
         CTextureBasePtr m_NoiseTexturePtr;
 
@@ -157,7 +157,7 @@ namespace
         , m_GaussianBlurPropertiesCSBufferPtr()
         , m_QuadInputLayoutPtr               ()
         , m_FullquadShaderVSPtr              ()
-        , m_BilateralBlurShaderCSPtr         ()
+        , m_GaussianBlurShaderCSPtr         ()
         , m_BilateralBlurHTextureSetPtr      ()
         , m_BilateralBlurVTextureSetPtr      ()
         , m_NoiseTexturePtr                  ()
@@ -215,7 +215,7 @@ namespace
         m_SSAOPropertiesPSBufferPtr         = 0;
         m_QuadInputLayoutPtr                = 0;
         m_FullquadShaderVSPtr               = 0;
-        m_BilateralBlurShaderCSPtr          = 0;
+        m_GaussianBlurShaderCSPtr          = 0;
         m_BilateralBlurHTextureSetPtr       = 0;
         m_BilateralBlurVTextureSetPtr       = 0;
         m_HalfRenderbufferPtr               = 0;
@@ -239,7 +239,7 @@ namespace
         m_SSAOShaderPSPtrs[SSAO]      = ShaderManager::CompilePS("fs_ssao.glsl"      , "main");
         m_SSAOShaderPSPtrs[SSAOApply] = ShaderManager::CompilePS("fs_ssao_apply.glsl", "main");
 
-        m_BilateralBlurShaderCSPtr    = ShaderManager::CompileCS("cs_gaussian_blur_rgba8.glsl", "main");
+        m_GaussianBlurShaderCSPtr = ShaderManager::CompileCS("cs_gaussian_blur.glsl", "main", "#define TILE_SIZE 8\n#define IMAGE_TYPE rgba8");
         
         // -----------------------------------------------------------------------------
         
@@ -730,7 +730,7 @@ namespace
             GaussianSettings.m_Weights[5] = 0.107644f;
             GaussianSettings.m_Weights[6] = 0.111043f;
 
-            ContextManager::SetShaderCS(m_BilateralBlurShaderCSPtr);
+            ContextManager::SetShaderCS(m_GaussianBlurShaderCSPtr);
 
             ContextManager::SetResourceBuffer(0, m_GaussianBlurPropertiesCSBufferPtr);
 

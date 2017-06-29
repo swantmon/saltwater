@@ -73,12 +73,15 @@ namespace Gfx
             
             void* GetBytes();
             const void* GetBytes() const;
+
+            void* GetStorage();
         
         protected:
         
             SInfo             m_Info;             ///< Stores information about the buffer.
             unsigned int      m_NumberOfBytes;    ///< The number of bytes stored in the buffer.
             void*             m_pBytes;           ///< The bytes stored in the buffer.
+            void*             m_pStorage;         ///< Pointer to GPU memory.
         
         protected:
             

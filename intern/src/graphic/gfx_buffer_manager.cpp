@@ -258,7 +258,7 @@ namespace
         pBytes        = nullptr;
         NativeBuffer  = 0;
         NativeBinding = ConvertBindFlag(_rDescriptor.m_Binding);
-		NativeUsage   = 0;
+        NativeUsage   = 0;
         
         // -----------------------------------------------------------------------------
         // Generate OpenGL buffer
@@ -272,7 +272,7 @@ namespace
         // -----------------------------------------------------------------------------
 		if (_rDescriptor.m_Usage == CBuffer::Persistent)
 		{
-			Flags = GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+			Flags = GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_DYNAMIC_STORAGE_BIT;
 			glNamedBufferStorage(NativeBuffer, _rDescriptor.m_NumberOfBytes, _rDescriptor.m_pBytes, Flags);
 		}
 		else
@@ -303,6 +303,7 @@ namespace
             rBuffer.m_NativeBuffer   = NativeBuffer;
             rBuffer.m_NativeBinding  = NativeBinding;
             rBuffer.m_NativeUsage    = NativeUsage;
+            rBuffer.m_pStorage       = nullptr;
 
             // -----------------------------------------------------------------------------
             // Check the behavior.
@@ -498,7 +499,7 @@ namespace
 
         GLbitfield NativeMap = ConvertMap(_Map);
 
-        return glMapNamedBufferRange(pBuffer->m_NativeBuffer, 0, pBuffer->m_NumberOfBytes, NativeMap);
+        return pBuffer->m_pStorage = glMapNamedBufferRange(pBuffer->m_NativeBuffer, 0, pBuffer->m_NumberOfBytes, NativeMap);
     }
 
 	// -----------------------------------------------------------------------------
@@ -513,7 +514,7 @@ namespace
 
 		GLbitfield NativeMap = ConvertMap(_Map);
 
-		return glMapNamedBufferRange(pBuffer->m_NativeBuffer, _Offset, _Range, NativeMap);
+		return pBuffer->m_pStorage = glMapNamedBufferRange(pBuffer->m_NativeBuffer, _Offset, _Range, NativeMap);
 	}
 
     // -----------------------------------------------------------------------------
@@ -527,6 +528,7 @@ namespace
         assert(pBuffer != nullptr);
 
         glUnmapNamedBuffer(pBuffer->m_NativeBuffer);
+        pBuffer->m_pStorage = nullptr;
     }
 
     // -----------------------------------------------------------------------------
