@@ -303,6 +303,7 @@ namespace
             rBuffer.m_NativeBuffer   = NativeBuffer;
             rBuffer.m_NativeBinding  = NativeBinding;
             rBuffer.m_NativeUsage    = NativeUsage;
+            rBuffer.m_pStorage       = nullptr;
 
             // -----------------------------------------------------------------------------
             // Check the behavior.
@@ -498,7 +499,7 @@ namespace
 
         GLbitfield NativeMap = ConvertMap(_Map);
 
-        return glMapNamedBufferRange(pBuffer->m_NativeBuffer, 0, pBuffer->m_NumberOfBytes, NativeMap);
+        return pBuffer->m_pStorage = glMapNamedBufferRange(pBuffer->m_NativeBuffer, 0, pBuffer->m_NumberOfBytes, NativeMap);
     }
 
 	// -----------------------------------------------------------------------------
@@ -513,7 +514,7 @@ namespace
 
 		GLbitfield NativeMap = ConvertMap(_Map);
 
-		return glMapNamedBufferRange(pBuffer->m_NativeBuffer, _Offset, _Range, NativeMap);
+		return pBuffer->m_pStorage = glMapNamedBufferRange(pBuffer->m_NativeBuffer, _Offset, _Range, NativeMap);
 	}
 
     // -----------------------------------------------------------------------------
@@ -527,6 +528,7 @@ namespace
         assert(pBuffer != nullptr);
 
         glUnmapNamedBuffer(pBuffer->m_NativeBuffer);
+        pBuffer->m_pStorage = nullptr;
     }
 
     // -----------------------------------------------------------------------------
