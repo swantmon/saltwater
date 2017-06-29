@@ -38,7 +38,7 @@
 using namespace MR;
 using namespace Gfx;
 
-//#define USE_PERISTENT_MAPPING
+#define USE_PERISTENT_MAPPING
 
 namespace
 {
@@ -401,7 +401,8 @@ namespace MR
 	bool CScalableSLAMReconstructor::RootGridContainsDepth(const Base::Int3& rKey)
 	{
 #ifdef USE_PERISTENT_MAPPING
-		*m_pCounter = 0;
+        uint32_t* pCounter = static_cast<uint32_t*>(m_AtomicCounterBufferPtr->GetStorage());
+		*pCounter = 0;
 #else
 		unsigned int Zero = 0;
 		BufferManager::UploadConstantBufferData(m_AtomicCounterBufferPtr, &Zero);
@@ -419,10 +420,10 @@ namespace MR
 
 #ifdef USE_PERISTENT_MAPPING
 		ContextManager::Flush();
-		return *m_pCounter > 0;
+		return *pCounter > 0;
 #else
-		m_pCounter = static_cast<unsigned int*>(BufferManager::MapAtomicCounterBuffer(m_AtomicCounterBufferPtr, CBuffer::EMap::Read));
-		unsigned int DepthCount = *m_pCounter;
+        uint32_t* pCounter = static_cast<unsigned int*>(BufferManager::MapAtomicCounterBuffer(m_AtomicCounterBufferPtr, CBuffer::EMap::Read));
+		unsigned int DepthCount = *pCounter;
 		BufferManager::UnmapAtomicCounterBuffer(m_AtomicCounterBufferPtr);
 		return DepthCount > 0;
 #endif
@@ -680,7 +681,7 @@ namespace MR
 #ifdef USE_PERISTENT_MAPPING
 		ConstantBufferDesc.m_Usage = CBuffer::Persistent;
 		m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-		m_pCounter = static_cast<unsigned int*>(BufferManager::MapAtomicCounterBufferRange(m_AtomicCounterBufferPtr, CBuffer::ReadWritePersistent, 0, 4));
+		BufferManager::MapAtomicCounterBufferRange(m_AtomicCounterBufferPtr, CBuffer::ReadWritePersistent, 0, 4);
 #else
 		ConstantBufferDesc.m_Usage = CBuffer::GPUToCPU;
 		m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
