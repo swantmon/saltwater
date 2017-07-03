@@ -207,17 +207,17 @@ namespace MR
 
 		// near
 
-		m_FrustumPoints[0] = Float3(x * Near, y * Near, Near);
-		m_FrustumPoints[1] = Float3(-x * Near, y * Near, Near);
+		m_FrustumPoints[0] = Float3( x * Near,  y * Near, Near);
+		m_FrustumPoints[1] = Float3(-x * Near,  y * Near, Near);
 		m_FrustumPoints[2] = Float3(-x * Near, -y * Near, Near);
-		m_FrustumPoints[3] = Float3(x * Near, -y * Near, Near);
+		m_FrustumPoints[3] = Float3( x * Near, -y * Near, Near);
 
 		// far
 
-		m_FrustumPoints[4] = Float3(x * Far, y * Far, Far);
-		m_FrustumPoints[5] = Float3(-x * Far, y * Far, Far);
+		m_FrustumPoints[4] = Float3( x * Far,  y * Far, Far);
+		m_FrustumPoints[5] = Float3(-x * Far,  y * Far, Far);
 		m_FrustumPoints[6] = Float3(-x * Far, -y * Far, Far);
-		m_FrustumPoints[7] = Float3(x * Far, -y * Far, Far);
+		m_FrustumPoints[7] = Float3( x * Far, -y * Far, Far);
 
 		for (int i = 0; i < g_FrustumCorners; ++i)
 		{
