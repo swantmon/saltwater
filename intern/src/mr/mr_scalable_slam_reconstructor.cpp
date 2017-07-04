@@ -152,13 +152,97 @@ namespace MR
         m_DepthPixels = std::vector<unsigned short>(m_pRGBDCameraControl->GetDepthPixelCount());
         m_CameraPixels = std::vector<Base::Byte4>(m_pRGBDCameraControl->GetDepthPixelCount());
 
+        SetupMeshes();
 		SetupData();
+        SetupRenderTargets();
 		SetupShaders();
 		SetupTextures();
 		SetupBuffers();
 
 		m_IsIntegrationPaused = false;
 		m_IsTrackingPaused = false;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CScalableSLAMReconstructor::SetupRenderTargets()
+    {
+        STextureDescriptor RendertargetDescriptor = {};
+
+        RendertargetDescriptor.m_NumberOfPixelsU = m_pRGBDCameraControl->GetDepthWidth();
+        RendertargetDescriptor.m_NumberOfPixelsV = m_pRGBDCameraControl->GetDepthHeight();
+        RendertargetDescriptor.m_NumberOfPixelsW = 1;
+        RendertargetDescriptor.m_NumberOfMipMaps = 1;
+        RendertargetDescriptor.m_NumberOfTextures = 1;
+        RendertargetDescriptor.m_Binding = CTextureBase::RenderTarget | CTextureBase::ShaderResource;
+        RendertargetDescriptor.m_Access = CTextureBase::CPUWrite;
+        RendertargetDescriptor.m_Format = CTextureBase::Unknown;
+        RendertargetDescriptor.m_Usage = CTextureBase::GPURead;
+        RendertargetDescriptor.m_Semantic = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_Format = CTextureBase::R32G32B32A32_FLOAT;
+
+        CTextureBasePtr RenderTarget = TextureManager::CreateTexture2D(RendertargetDescriptor);
+        
+        CTargetSetPtr m_TargetSetPtr = TargetSetManager::CreateTargetSet(RenderTarget);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CScalableSLAMReconstructor::SetupMeshes()
+    {
+        Float3 CubeVertices[] =
+        {
+            Float3(0.0f, 0.0f, 0.0f),
+            Float3(1.0f, 0.0f, 0.0f),
+            Float3(1.0f, 1.0f, 0.0f),
+            Float3(0.0f, 1.0f, 0.0f),
+            Float3(0.0f, 0.0f, 1.0f),
+            Float3(1.0f, 0.0f, 1.0f),
+            Float3(1.0f, 1.0f, 1.0f),
+            Float3(0.0f, 1.0f, 1.0f),
+        };
+
+        unsigned int CubeIndices[] =
+        {
+            0, 1, 2,
+            0, 2, 3,
+
+            5, 2, 1,
+            5, 6, 2,
+
+            4, 5, 1,
+            4, 1, 0,
+
+            4, 0, 7,
+            0, 3, 7,
+
+            7, 2, 6,
+            7, 3, 2,
+
+            4, 7, 6,
+            4, 6, 5,
+        };
+
+        Dt::CSurface* pSurface = new Dt::CSurface;
+        Dt::CLOD* pLOD = new Dt::CLOD;
+        Dt::CMesh* pMesh = new Dt::CMesh;
+
+        pSurface->SetPositions(CubeVertices);
+        pSurface->SetNumberOfVertices(sizeof(CubeVertices) / sizeof(CubeVertices[0]));
+        pSurface->SetIndices(CubeIndices);
+        pSurface->SetNumberOfIndices(sizeof(CubeIndices) / sizeof(CubeIndices[0]));
+        pSurface->SetElements(0);
+
+        pLOD->SetSurface(0, pSurface);
+        pLOD->SetNumberOfSurfaces(1);
+
+        pMesh->SetLOD(0, pLOD);
+        pMesh->SetNumberOfLODs(1);
+
+        SMeshDescriptor MeshDesc = {};
+        MeshDesc.m_pMesh = pMesh;
+
+        m_CubeMeshPtr = MeshManager::CreateMesh(MeshDesc);
     }
 
 	// -----------------------------------------------------------------------------
@@ -272,8 +356,16 @@ namespace MR
         m_ClearVolumeCSPtr = 0;
 		m_RootgridDepthCSPtr = 0;
 
+        m_RasterizeRootGridVSPtr = 0;
+        m_RasterizeRootGridFSPtr = 0;
+
+        m_CubeMeshPtr = 0;
+        m_CubeInputLayoutPtr = 0;
+
         m_RawDepthBufferPtr = 0;
         m_RawCameraFramePtr = 0;
+
+        m_TargetSetPtr = 0;
 
         for (int i = 0; i < m_ReconstructionSettings.m_PyramidLevelCount; ++ i)
         {
@@ -351,6 +443,21 @@ namespace MR
         m_ReduceSumCSPtr         = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_reduce_sum.glsl"        , "main", DefineString.c_str());
         m_ClearVolumeCSPtr       = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_clear_volume.glsl"      , "main", DefineString.c_str());
 		m_RootgridDepthCSPtr     = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_rootgrid_depth.glsl"    , "main", DefineString.c_str());
+        m_RasterizeRootGridVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_rasterize_rootgrid.glsl", "main", DefineString.c_str());
+        m_RasterizeRootGridFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_rasterize_rootgrid.glsl", "main", DefineString.c_str());
+
+        SInputElementDescriptor InputLayoutDesc = {};
+
+        InputLayoutDesc.m_pSemanticName = "POSITION";
+        InputLayoutDesc.m_SemanticIndex = 0;
+        InputLayoutDesc.m_Format = CInputLayout::Float3Format;
+        InputLayoutDesc.m_InputSlot = 0;
+        InputLayoutDesc.m_AlignedByteOffset = 0;
+        InputLayoutDesc.m_Stride = 12;
+        InputLayoutDesc.m_InputSlotClass = CInputLayout::PerVertex;
+        InputLayoutDesc.m_InstanceDataStepRate = 0;
+
+        m_CubeInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_RasterizeRootGridVSPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -770,7 +877,13 @@ namespace MR
 
         if (!m_IsIntegrationPaused)
         {
-            Integrate();            
+            Performance::BeginEvent("Old integration");
+            IntegrateOld();
+            Performance::EndEvent();
+
+            Performance::BeginEvent("New integration");
+            Integrate();
+            Performance::EndEvent();
         }
 
         Raycast();
@@ -1025,6 +1138,54 @@ namespace MR
     // -----------------------------------------------------------------------------
 
     void CScalableSLAMReconstructor::Integrate()
+    {
+        ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
+        ContextManager::SetConstantBuffer(2, m_PositionConstantBufferPtr);
+        
+        ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
+
+        ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
+        ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
+
+        ContextManager::Barrier();
+
+        for (auto& rEntry : m_RootGrids)
+        {
+            SRootGrid& rRootGrid = rEntry.second;
+
+            if (rRootGrid.m_IsVisible)
+            {
+                Float3 Position;
+
+                Position[0] = rRootGrid.m_Offset[0] * m_ReconstructionSettings.m_VolumeSize;
+                Position[1] = rRootGrid.m_Offset[1] * m_ReconstructionSettings.m_VolumeSize;
+                Position[2] = rRootGrid.m_Offset[2] * m_ReconstructionSettings.m_VolumeSize;
+
+                BufferManager::UploadConstantBufferData(m_PositionConstantBufferPtr, &Position);
+
+                ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(rRootGrid.m_TSDFVolumePtr));
+
+                if (m_ReconstructionSettings.m_CaptureColor)
+                {
+                    ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(rRootGrid.m_ColorVolumePtr));
+                }
+
+                const unsigned int Offset = 0;
+                ContextManager::SetVertexBufferSet(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+                ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+                ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
+
+                ContextManager::SetTopology(STopology::TriangleList);
+
+                ContextManager::DrawIndexed(36, 0, 0);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CScalableSLAMReconstructor::IntegrateOld()
     {
         const int WorkGroups = GetWorkGroupCount(m_ReconstructionSettings.m_VolumeResolution, g_TileSize2D);
 

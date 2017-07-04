@@ -103,6 +103,8 @@ namespace MR
 		void UpdateRootrids();
 
 		void SetupData();
+        void SetupMeshes();
+        void SetupRenderTargets();
 
         void SetupShaders();
         void SetupTextures();
@@ -110,6 +112,7 @@ namespace MR
 
         void CreateReferencePyramid();
         void Integrate();
+        void IntegrateOld();
         void Raycast();
         void CreateRaycastPyramid();
 
@@ -154,6 +157,14 @@ namespace MR
         Gfx::CShaderPtr m_DetermineSummandsCSPtr;
         Gfx::CShaderPtr m_ReduceSumCSPtr;
 		Gfx::CShaderPtr m_RootgridDepthCSPtr;
+
+        Gfx::CShaderPtr m_RasterizeRootGridVSPtr;
+        Gfx::CShaderPtr m_RasterizeRootGridFSPtr;
+
+        Gfx::CMeshPtr m_CubeMeshPtr;
+        Gfx::CInputLayoutPtr m_CubeInputLayoutPtr;
+
+        Gfx::CTargetSetPtr m_TargetSetPtr;
 
         Gfx::CTexture2DPtr m_RawDepthBufferPtr;
         Gfx::CTexture2DPtr m_RawCameraFramePtr;
