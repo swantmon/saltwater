@@ -104,7 +104,7 @@ namespace MR
 
 		void SetupData();
         void SetupMeshes();
-        void SetupRenderTargets();
+        void SetupRenderStates();
 
         void SetupShaders();
         void SetupTextures();
@@ -163,8 +163,8 @@ namespace MR
 
         Gfx::CMeshPtr m_CubeMeshPtr;
         Gfx::CInputLayoutPtr m_CubeInputLayoutPtr;
-
         Gfx::CTargetSetPtr m_TargetSetPtr;
+        Gfx::CViewPortSetPtr m_DepthViewPortSetPtr;
 
         Gfx::CTexture2DPtr m_RawDepthBufferPtr;
         Gfx::CTexture2DPtr m_RawCameraFramePtr;

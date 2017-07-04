@@ -154,7 +154,7 @@ namespace MR
 
         SetupMeshes();
 		SetupData();
-        SetupRenderTargets();
+        SetupRenderStates();
 		SetupShaders();
 		SetupTextures();
 		SetupBuffers();
@@ -165,7 +165,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::SetupRenderTargets()
+    void CScalableSLAMReconstructor::SetupRenderStates()
     {
         STextureDescriptor RendertargetDescriptor = {};
 
@@ -183,7 +183,20 @@ namespace MR
 
         CTextureBasePtr RenderTarget = TextureManager::CreateTexture2D(RendertargetDescriptor);
         
-        CTargetSetPtr m_TargetSetPtr = TargetSetManager::CreateTargetSet(RenderTarget);
+        m_TargetSetPtr = TargetSetManager::CreateTargetSet(RenderTarget);
+
+        SViewPortDescriptor ViewPortDescriptor = {};
+
+        ViewPortDescriptor.m_MinDepth = 0.0f;
+        ViewPortDescriptor.m_MaxDepth = 1.0f;
+        ViewPortDescriptor.m_TopLeftX = 0.0f;
+        ViewPortDescriptor.m_TopLeftY = 0.0f;
+        ViewPortDescriptor.m_Width = static_cast<float>(m_pRGBDCameraControl->GetDepthWidth());
+        ViewPortDescriptor.m_Height = static_cast<float>(m_pRGBDCameraControl->GetDepthHeight());
+
+        Gfx::CViewPortPtr DepthViewPort = ViewManager::CreateViewPort(ViewPortDescriptor);
+
+        m_DepthViewPortSetPtr = ViewManager::CreateViewPortSet(DepthViewPort);
     }
 
     // -----------------------------------------------------------------------------
@@ -364,8 +377,8 @@ namespace MR
 
         m_RawDepthBufferPtr = 0;
         m_RawCameraFramePtr = 0;
-
         m_TargetSetPtr = 0;
+        m_DepthViewPortSetPtr = 0;
 
         for (int i = 0; i < m_ReconstructionSettings.m_PyramidLevelCount; ++ i)
         {
@@ -1139,6 +1152,16 @@ namespace MR
 
     void CScalableSLAMReconstructor::Integrate()
     {
+        ContextManager::SetViewPortSet(m_DepthViewPortSetPtr);
+        ContextManager::SetTargetSet(m_TargetSetPtr);
+
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBufferSet(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
+
+        ContextManager::SetTopology(STopology::TriangleList);
+
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
         ContextManager::SetConstantBuffer(2, m_PositionConstantBufferPtr);
@@ -1170,13 +1193,6 @@ namespace MR
                 {
                     ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(rRootGrid.m_ColorVolumePtr));
                 }
-
-                const unsigned int Offset = 0;
-                ContextManager::SetVertexBufferSet(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
-                ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
-                ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
-
-                ContextManager::SetTopology(STopology::TriangleList);
 
                 ContextManager::DrawIndexed(36, 0, 0);
             }

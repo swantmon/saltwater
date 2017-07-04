@@ -209,8 +209,8 @@ namespace
 
 			m_OutlineVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_outline.glsl", "main", DefineString.c_str());
 			m_OutlineFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_outline.glsl", "main", DefineString.c_str());
-			m_RaycastVSPtr   = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_raycast.glsl"  , "main", DefineString.c_str());
-			m_RaycastFSPtr   = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_raycast.glsl"  , "main", DefineString.c_str());
+			m_RaycastVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_raycast.glsl"  , "main", DefineString.c_str());
+			m_RaycastFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_raycast.glsl"  , "main", DefineString.c_str());
         }
 		else
 		{
@@ -233,8 +233,8 @@ namespace
 
 			m_OutlineVSPtr = ShaderManager::CompileVS("kinect_fusion\\vs_outline.glsl", "main", DefineString.c_str());
 			m_OutlineFSPtr = ShaderManager::CompilePS("kinect_fusion\\fs_outline.glsl", "main", DefineString.c_str());
-			m_RaycastVSPtr   = ShaderManager::CompileVS("kinect_fusion\\vs_raycast.glsl"  , "main", DefineString.c_str());
-			m_RaycastFSPtr   = ShaderManager::CompilePS("kinect_fusion\\fs_raycast.glsl"  , "main", DefineString.c_str());
+			m_RaycastVSPtr = ShaderManager::CompileVS("kinect_fusion\\vs_raycast.glsl"  , "main", DefineString.c_str());
+			m_RaycastFSPtr = ShaderManager::CompilePS("kinect_fusion\\fs_raycast.glsl"  , "main", DefineString.c_str());
 		}
         
         SInputElementDescriptor InputLayoutDesc = {};
