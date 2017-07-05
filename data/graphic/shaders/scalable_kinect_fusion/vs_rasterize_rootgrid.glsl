@@ -22,10 +22,10 @@ out gl_PerVertex
 
 void main()
 {
-	vec4 Vertex = (g_PoseMatrix * vec4(in_VertexPosition + g_Offset, 1.0f));
+	vec4 Vertex = (g_PoseMatrix * vec4(in_VertexPosition * VOLUME_SIZE + g_Offset, 1.0f));
 	Vertex.xy = Vertex.xy * g_Intrinisics[0].m_FocalLength / Vertex.z + g_Intrinisics[0].m_FocalPoint;
-	Vertex.xy /= vec2(512, 424) - vec2(512, 424) / 2;
-	Vertex.z /= 8.0f;
+	Vertex.xy /= vec2(DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT) * 2.0f - 1.0f;
+	Vertex.z = 1.0f;
     gl_Position = Vertex;
 }
 

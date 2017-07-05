@@ -1166,10 +1166,10 @@ namespace MR
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
         ContextManager::SetConstantBuffer(2, m_PositionConstantBufferPtr);
         
-        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
-
         ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
         ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
+
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
 
         ContextManager::Barrier();
 
