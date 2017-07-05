@@ -50,6 +50,9 @@ namespace
 	const Base::Float3 g_InitialCameraRotation = Base::Float3(0.0f, 0.0f, 0.0f);
 	//*/
 
+    const int g_HierarchyLevelCount = 3;
+    const float g_HierarchyResolutions[g_HierarchyLevelCount] = { 16, 8, 8 };
+
     const float g_EpsilonDistance = 0.1f;
     const float g_EpsilonAngle = 0.75f;
     
@@ -400,6 +403,7 @@ namespace MR
         m_BilateralFilterConstantBufferPtr = 0;
 		m_PositionConstantBufferPtr = 0;
 		m_AtomicCounterBufferPtr = 0;
+        m_HierarchyConstantBufferPtr = 0;
     }
     
     // -----------------------------------------------------------------------------
@@ -436,7 +440,8 @@ namespace MR
             << "#define ICP_VALUE_COUNT "        << g_ICPValueCount                                 << " \n"
             << "#define REDUCTION_SHADER_COUNT " << SummandsPOT / 2                                 << " \n"
             << "#define ICP_SUMMAND_COUNT "      << Summands                                        << " \n"
-            << "#define MAP_TEXTURE_FORMAT "     << InternalFormatString                            << " \n";
+            << "#define MAP_TEXTURE_FORMAT "     << InternalFormatString                            << " \n"
+            << "#define HIERARCHY_LEVELS "       << g_HierarchyLevelCount                           << " \n";
 
         if (m_ReconstructionSettings.m_CaptureColor)
         {
@@ -792,6 +797,13 @@ namespace MR
         ConstantBufferDesc.m_NumberOfBytes = sizeof(float) * ICPRowCount * g_ICPValueCount;
         ConstantBufferDesc.m_pBytes = nullptr;
         m_ICPResourceBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
+        ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
+        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(float) * g_HierarchyLevelCount;
+        ConstantBufferDesc.m_pBytes = const_cast<float*>(g_HierarchyResolutions);
+        m_HierarchyConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
 		unsigned int Zero = 0;
 				
@@ -1165,11 +1177,12 @@ namespace MR
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
         ContextManager::SetConstantBuffer(2, m_PositionConstantBufferPtr);
+        ContextManager::SetConstantBuffer(3, m_HierarchyConstantBufferPtr);
         
         ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
         ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
 
-        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));        
 
         ContextManager::Barrier();
 

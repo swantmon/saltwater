@@ -142,7 +142,8 @@ namespace MR
         Gfx::CBufferPtr m_ICPSummationConstantBufferPtr;
         Gfx::CBufferPtr m_IncPoseMatrixConstantBufferPtr;
         Gfx::CBufferPtr m_BilateralFilterConstantBufferPtr;
-		Gfx::CBufferPtr m_PositionConstantBufferPtr;
+        Gfx::CBufferPtr m_PositionConstantBufferPtr;
+        Gfx::CBufferPtr m_HierarchyConstantBufferPtr;
 
 		Gfx::CBufferPtr m_AtomicCounterBufferPtr;
 
