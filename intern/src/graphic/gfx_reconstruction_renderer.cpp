@@ -798,6 +798,7 @@ namespace
 
         Performance::BeginEvent("SLAM Reconstruction Rendering");
         
+        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
         ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
         //Base::Float4 ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         //TargetSetManager::ClearTargetSet(TargetSetManager::GetDeferredTargetSet(), ClearColor);

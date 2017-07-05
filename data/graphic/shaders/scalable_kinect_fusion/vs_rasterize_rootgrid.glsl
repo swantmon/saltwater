@@ -2,12 +2,11 @@
 #ifndef __INCLUDE_VS_RASTERIZE_ROOTGRID_GLSL__
 #define __INCLUDE_VS_RASTERIZE_ROOTGRID_GLSL__
 
-#include "common_global.glsl"
+#include "scalable_kinect_fusion/common_tracking.glsl"
 
-layout(row_major, std140, binding = 1) uniform PerDrawCallData
+layout(row_major, std140, binding = 2) uniform UBOOffset
 {
-    mat4 g_WorldMatrix;
-	vec4 g_Color;
+    vec3 g_Offset;
 };
 
 layout(location = 0) in vec3 in_VertexPosition;
@@ -23,8 +22,11 @@ out gl_PerVertex
 
 void main()
 {
-    vec4 WSPosition = g_WorldMatrix * vec4(in_VertexPosition, 1.0f);
-    gl_Position = g_WorldToScreen * WSPosition;
+	vec4 Vertex = (g_PoseMatrix * vec4(in_VertexPosition + g_Offset, 1.0f));
+	Vertex.xy = Vertex.xy * g_Intrinisics[0].m_FocalLength / Vertex.z + g_Intrinisics[0].m_FocalPoint;
+	Vertex.xy /= vec2(512, 424) - vec2(512, 424) / 2;
+	Vertex.z /= 8.0f;
+    gl_Position = Vertex;
 }
 
 #endif // __INCLUDE_VS_RASTERIZE_ROOTGRID_GLSL__

@@ -2,17 +2,11 @@
 #ifndef __INCLUDE_FS_RASTERIZE_ROOTGRID_GLSL__
 #define __INCLUDE_FS_RASTERIZE_ROOTGRID_GLSL__
 
-layout(row_major, std140, binding = 1) uniform PerDrawCallData
-{
-    mat4 g_WorldMatrix;
-	vec4 g_Color;
-};
-
 layout(location = 0) out vec4 out_Color;
 
 void main()
 {
-    out_Color = g_Color;
+    out_Color = vec4(1.0f);
 }
 
 #endif // __INCLUDE_FS_RASTERIZE_ROOTGRID_GLSL__

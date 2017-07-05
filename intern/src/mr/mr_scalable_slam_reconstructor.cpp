@@ -179,7 +179,7 @@ namespace MR
         RendertargetDescriptor.m_Format = CTextureBase::Unknown;
         RendertargetDescriptor.m_Usage = CTextureBase::GPURead;
         RendertargetDescriptor.m_Semantic = CTextureBase::Diffuse;
-        RendertargetDescriptor.m_Format = CTextureBase::R32G32B32A32_FLOAT;
+        RendertargetDescriptor.m_Format = CTextureBase::R16G16B16A16_FLOAT;
 
         CTextureBasePtr RenderTarget = TextureManager::CreateTexture2D(RendertargetDescriptor);
         
@@ -1166,7 +1166,7 @@ namespace MR
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
         ContextManager::SetConstantBuffer(2, m_PositionConstantBufferPtr);
         
-        ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
 
         ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
         ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
@@ -1186,17 +1186,13 @@ namespace MR
                 Position[2] = rRootGrid.m_Offset[2] * m_ReconstructionSettings.m_VolumeSize;
 
                 BufferManager::UploadConstantBufferData(m_PositionConstantBufferPtr, &Position);
-
-                ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(rRootGrid.m_TSDFVolumePtr));
-
-                if (m_ReconstructionSettings.m_CaptureColor)
-                {
-                    ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(rRootGrid.m_ColorVolumePtr));
-                }
-
+                                
                 ContextManager::DrawIndexed(36, 0, 0);
             }
         }
+
+        ContextManager::ResetShaderVS();
+        ContextManager::ResetShaderPS();
     }
 
     // -----------------------------------------------------------------------------
