@@ -2,6 +2,12 @@
 #ifndef __INCLUDE_FS_RASTERIZE_ROOTGRID_GLSL__
 #define __INCLUDE_FS_RASTERIZE_ROOTGRID_GLSL__
 
+layout(row_major, std140, binding = 2) uniform UBOOffset
+{
+    vec3 g_Offset;
+    int g_Index;
+};
+
 layout(row_major, std140, binding = 3) uniform UBOHierarchy
 {
     float g_HierarchyResolutions[HIERARCHY_LEVELS];

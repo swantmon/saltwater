@@ -7,6 +7,7 @@
 layout(row_major, std140, binding = 2) uniform UBOOffset
 {
     vec3 g_Offset;
+    int g_Index;
 };
 
 layout(location = 0) in vec3 in_VertexPosition;

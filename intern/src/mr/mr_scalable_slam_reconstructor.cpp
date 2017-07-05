@@ -91,7 +91,7 @@ namespace
 	struct SPositionBuffer
 	{
 		Base::Float3 m_Position;
-		float Padding;
+		int m_Index;
 	};
 
     struct SDrawCallBufferData
@@ -535,12 +535,13 @@ namespace MR
         const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth(), g_TileSize2D);
         const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
         
-        Float4 Position;
-        Position[0] = rKey[0] * m_ReconstructionSettings.m_VolumeSize;
-        Position[1] = rKey[1] * m_ReconstructionSettings.m_VolumeSize;
-        Position[2] = rKey[2] * m_ReconstructionSettings.m_VolumeSize;
+        SPositionBuffer PositionBuffer;
+        PositionBuffer.m_Position[0] = rKey[0] * m_ReconstructionSettings.m_VolumeSize;
+        PositionBuffer.m_Position[1] = rKey[1] * m_ReconstructionSettings.m_VolumeSize;
+        PositionBuffer.m_Position[2] = rKey[2] * m_ReconstructionSettings.m_VolumeSize;
+        PositionBuffer.m_Index = -1; // don't care
 
-        BufferManager::UploadConstantBufferData(m_PositionConstantBufferPtr, &Position);
+        BufferManager::UploadConstantBufferData(m_PositionConstantBufferPtr, &PositionBuffer);
 
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
@@ -1186,19 +1187,21 @@ namespace MR
 
         ContextManager::Barrier();
 
+        int Index = 0;
+
         for (auto& rEntry : m_RootGrids)
         {
             SRootGrid& rRootGrid = rEntry.second;
 
             if (rRootGrid.m_IsVisible)
             {
-                Float3 Position;
+                SPositionBuffer PositionBuffer;
+                PositionBuffer.m_Position[0] = rRootGrid.m_Offset[0] * m_ReconstructionSettings.m_VolumeSize;
+                PositionBuffer.m_Position[1] = rRootGrid.m_Offset[1] * m_ReconstructionSettings.m_VolumeSize;
+                PositionBuffer.m_Position[2] = rRootGrid.m_Offset[2] * m_ReconstructionSettings.m_VolumeSize;
+                PositionBuffer.m_Index = Index++;
 
-                Position[0] = rRootGrid.m_Offset[0] * m_ReconstructionSettings.m_VolumeSize;
-                Position[1] = rRootGrid.m_Offset[1] * m_ReconstructionSettings.m_VolumeSize;
-                Position[2] = rRootGrid.m_Offset[2] * m_ReconstructionSettings.m_VolumeSize;
-
-                BufferManager::UploadConstantBufferData(m_PositionConstantBufferPtr, &Position);
+                BufferManager::UploadConstantBufferData(m_PositionConstantBufferPtr, &PositionBuffer);
                                 
                 ContextManager::DrawIndexed(36, 0, 0);
             }
