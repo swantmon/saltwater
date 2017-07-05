@@ -101,6 +101,7 @@ namespace MR
 		bool RootGridInFrustum(const Base::Int3& rKey);
 		bool RootGridContainsDepth(const Base::Int3& rKey);
 		void UpdateRootrids();
+        void ClearAtomicCounterImage();
 
 		void SetupData();
         void SetupMeshes();
@@ -145,7 +146,7 @@ namespace MR
         Gfx::CBufferPtr m_PositionConstantBufferPtr;
         Gfx::CBufferPtr m_HierarchyConstantBufferPtr;
 
-		Gfx::CBufferPtr m_AtomicCounterBufferPtr;
+		Gfx::CBufferPtr m_DepthCounterBufferPtr;
 
         Gfx::CShaderPtr m_ClearVolumeCSPtr;
         Gfx::CShaderPtr m_BilateralFilterCSPtr;
@@ -162,6 +163,8 @@ namespace MR
         Gfx::CShaderPtr m_RasterizeRootGridVSPtr;
         Gfx::CShaderPtr m_RasterizeRootGridFSPtr;
 
+        Gfx::CShaderPtr m_ClearAtomicImageCSPtr;
+
         Gfx::CMeshPtr m_CubeMeshPtr;
         Gfx::CInputLayoutPtr m_CubeInputLayoutPtr;
         Gfx::CTargetSetPtr m_TargetSetPtr;
@@ -174,6 +177,8 @@ namespace MR
         std::vector<Gfx::CTexture2DPtr> m_ReferenceNormalMapPtr;
         std::vector<Gfx::CTexture2DPtr> m_RaycastVertexMapPtr;
         std::vector<Gfx::CTexture2DPtr> m_RaycastNormalMapPtr;
+
+        Gfx::CTexture2DPtr m_AtomicCounterImagePtr;
 
 		CRootGridMap m_RootGrids;
 

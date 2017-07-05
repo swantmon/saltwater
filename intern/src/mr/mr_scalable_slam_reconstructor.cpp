@@ -374,6 +374,7 @@ namespace MR
 
         m_RasterizeRootGridVSPtr = 0;
         m_RasterizeRootGridFSPtr = 0;
+        m_ClearAtomicImageCSPtr = 0;
 
         m_CubeMeshPtr = 0;
         m_CubeInputLayoutPtr = 0;
@@ -402,8 +403,9 @@ namespace MR
         m_IncPoseMatrixConstantBufferPtr = 0;
         m_BilateralFilterConstantBufferPtr = 0;
 		m_PositionConstantBufferPtr = 0;
-		m_AtomicCounterBufferPtr = 0;
+		m_DepthCounterBufferPtr = 0;
         m_HierarchyConstantBufferPtr = 0;
+        m_AtomicCounterImagePtr = 0;
     }
     
     // -----------------------------------------------------------------------------
@@ -463,6 +465,7 @@ namespace MR
 		m_RootgridDepthCSPtr     = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_rootgrid_depth.glsl"    , "main", DefineString.c_str());
         m_RasterizeRootGridVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_rasterize_rootgrid.glsl", "main", DefineString.c_str());
         m_RasterizeRootGridFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_rasterize_rootgrid.glsl", "main", DefineString.c_str());
+        m_ClearAtomicImageCSPtr  = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_clear_atomic_image.glsl", "main", DefineString.c_str());
 
         SInputElementDescriptor InputLayoutDesc = {};
 
@@ -526,11 +529,11 @@ namespace MR
 	bool CScalableSLAMReconstructor::RootGridContainsDepth(const Base::Int3& rKey)
 	{
 #ifdef USE_PERISTENT_MAPPING
-        uint32_t* pCounter = static_cast<uint32_t*>(m_AtomicCounterBufferPtr->GetStorage());
+        uint32_t* pCounter = static_cast<uint32_t*>(m_DepthCounterBufferPtr->GetStorage());
 		*pCounter = 0;
 #else
 		unsigned int Zero = 0;
-		BufferManager::UploadConstantBufferData(m_AtomicCounterBufferPtr, &Zero);
+		BufferManager::UploadConstantBufferData(m_DepthCounterBufferPtr, &Zero);
 #endif
         const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth(), g_TileSize2D);
         const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
@@ -549,9 +552,9 @@ namespace MR
 		ContextManager::Flush();
 		return *pCounter > 200;
 #else
-        uint32_t* pCounter = static_cast<unsigned int*>(BufferManager::MapAtomicCounterBuffer(m_AtomicCounterBufferPtr, CBuffer::EMap::Read));
+        uint32_t* pCounter = static_cast<unsigned int*>(BufferManager::MapAtomicCounterBuffer(m_DepthCounterBufferPtr, CBuffer::EMap::Read));
 		unsigned int DepthCount = *pCounter;
-		BufferManager::UnmapAtomicCounterBuffer(m_AtomicCounterBufferPtr);
+		BufferManager::UnmapAtomicCounterBuffer(m_DepthCounterBufferPtr);
 		return DepthCount > 200;
 #endif
 	}
@@ -599,7 +602,7 @@ namespace MR
 		ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
 		ContextManager::SetConstantBuffer(2, m_PositionConstantBufferPtr);
 		ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
-		ContextManager::SetAtomicCounterBuffer(0, m_AtomicCounterBufferPtr);
+		ContextManager::SetAtomicCounterBuffer(0, m_DepthCounterBufferPtr);
 		ContextManager::Barrier();
 
 		for (int x = MinIndex[0] - 1; x <= MaxIndex[0]; ++ x)
@@ -645,12 +648,37 @@ namespace MR
 
 		ContextManager::ResetAtomicCounterBuffer(0);
 
+        int RootGridCount = 0;
+
 		for (auto& rPair : m_RootGrids)
 		{
 			auto& rRootGrid = rPair.second;
 
 			rRootGrid.m_IsVisible = RootGridInFrustum(rRootGrid.m_Offset);
-		}
+            ++ RootGridCount;
+        }
+
+        if (RootGridCount > m_AtomicCounterImagePtr->GetNumberOfPixelsU())
+        {
+            TextureDescriptor.m_NumberOfPixelsU = RootGridCount;
+            TextureDescriptor.m_NumberOfPixelsV = 1;
+            TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_NumberOfMipMaps = 1;
+            TextureDescriptor.m_NumberOfTextures = 1;
+            TextureDescriptor.m_Binding = CTextureBase::ShaderResource;
+            TextureDescriptor.m_Access = CTextureBase::CPUWrite;
+            TextureDescriptor.m_Usage = CTextureBase::GPUReadWrite;
+            TextureDescriptor.m_Semantic = CTextureBase::UndefinedSemantic;
+            TextureDescriptor.m_pFileName = nullptr;
+            TextureDescriptor.m_pPixels = 0;
+            TextureDescriptor.m_Format = CTextureBase::R32_UINT;
+
+            m_AtomicCounterImagePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+        }
+        else
+        {
+            ClearAtomicCounterImage();
+        }
 	}
 
 	// -----------------------------------------------------------------------------
@@ -713,6 +741,21 @@ namespace MR
 
 			m_RawCameraFramePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 		}
+
+        TextureDescriptor.m_NumberOfPixelsU = 1;
+        TextureDescriptor.m_NumberOfPixelsV = 1;
+        TextureDescriptor.m_NumberOfPixelsW = 1;
+        TextureDescriptor.m_NumberOfMipMaps = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding = CTextureBase::ShaderResource;
+        TextureDescriptor.m_Access = CTextureBase::CPUWrite;
+        TextureDescriptor.m_Usage = CTextureBase::GPUReadWrite;
+        TextureDescriptor.m_Semantic = CTextureBase::UndefinedSemantic;
+        TextureDescriptor.m_pFileName = nullptr;
+        TextureDescriptor.m_pPixels = 0;
+        TextureDescriptor.m_Format = CTextureBase::R32_UINT;
+
+        m_AtomicCounterImagePtr = TextureManager::CreateTexture2D(TextureDescriptor);
     }
     
     // -----------------------------------------------------------------------------
@@ -814,11 +857,11 @@ namespace MR
 		ConstantBufferDesc.m_pBytes = &Zero;
 #ifdef USE_PERISTENT_MAPPING
 		ConstantBufferDesc.m_Usage = CBuffer::Persistent;
-		m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-		BufferManager::MapAtomicCounterBufferRange(m_AtomicCounterBufferPtr, CBuffer::ReadWritePersistent, 0, 4);
+		m_DepthCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+		BufferManager::MapAtomicCounterBufferRange(m_DepthCounterBufferPtr, CBuffer::ReadWritePersistent, 0, 4);
 #else
 		ConstantBufferDesc.m_Usage = CBuffer::GPUToCPU;
-		m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+		m_DepthCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 #endif // USE_PERISTENT_MAPPING
 
     }
@@ -1183,7 +1226,8 @@ namespace MR
         ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
         ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
 
-        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));        
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
+        ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_AtomicCounterImagePtr));
 
         ContextManager::Barrier();
 
@@ -1202,7 +1246,7 @@ namespace MR
                 PositionBuffer.m_Index = Index++;
 
                 BufferManager::UploadConstantBufferData(m_PositionConstantBufferPtr, &PositionBuffer);
-                                
+                
                 ContextManager::DrawIndexed(36, 0, 0);
             }
         }
@@ -1318,6 +1362,21 @@ namespace MR
         ContextManager::Barrier();
 
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CScalableSLAMReconstructor::ClearAtomicCounterImage()
+    {
+        const int WorkGroups = m_AtomicCounterImagePtr->GetNumberOfPixelsU();
+
+        ContextManager::SetShaderCS(m_ClearAtomicImageCSPtr);
+        
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_AtomicCounterImagePtr));
+        
+        ContextManager::Barrier();
+
+        ContextManager::Dispatch(WorkGroups, 1, 1);
     }
 
     // -----------------------------------------------------------------------------

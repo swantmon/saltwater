@@ -14,11 +14,13 @@ layout(row_major, std140, binding = 3) uniform UBOHierarchy
 };
 
 layout(binding = 0, r16ui) readonly uniform uimage2D cs_Depth;
+layout(binding = 1, r32ui) uniform uimage2D cs_Counter;
 
 layout(location = 0) out vec4 out_Color;
 
 void main()
 {
+    imageAtomicAdd(cs_Counter, ivec2(g_Index, 0), 1);
     out_Color = vec4(imageLoad(cs_Depth, ivec2(gl_FragCoord.xy)));
 }
 
