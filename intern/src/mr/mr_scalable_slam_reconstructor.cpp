@@ -374,7 +374,7 @@ namespace MR
 
         m_RasterizeRootGridVSPtr = 0;
         m_RasterizeRootGridFSPtr = 0;
-        m_ClearAtomicImageCSPtr = 0;
+        m_ClearAtomicCountersCSPtr = 0;
 
         m_CubeMeshPtr = 0;
         m_CubeInputLayoutPtr = 0;
@@ -405,7 +405,7 @@ namespace MR
 		m_PositionConstantBufferPtr = 0;
 		m_DepthCounterBufferPtr = 0;
         m_HierarchyConstantBufferPtr = 0;
-        m_AtomicCounterImagePtr = 0;
+        m_AtomicCounterBufferPtr = 0;
     }
     
     // -----------------------------------------------------------------------------
@@ -452,20 +452,20 @@ namespace MR
 
         std::string DefineString = DefineStream.str();
         
-        m_BilateralFilterCSPtr   = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_bilateral_filter.glsl"  , "main", DefineString.c_str());
-        m_VertexMapCSPtr         = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_vertex_map.glsl"        , "main", DefineString.c_str());
-        m_NormalMapCSPtr         = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_normal_map.glsl"        , "main", DefineString.c_str());
-        m_DownSampleDepthCSPtr   = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_downsample_depth.glsl"  , "main", DefineString.c_str());
-        m_IntegrationCSPtr       = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_integrate.glsl"         , "main", DefineString.c_str());        
-        m_RaycastCSPtr           = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_raycast.glsl"           , "main", DefineString.c_str());
-        m_RaycastPyramidCSPtr    = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_raycast_pyramid.glsl"   , "main", DefineString.c_str());
-        m_DetermineSummandsCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_determine_summands.glsl", "main", DefineString.c_str());
-        m_ReduceSumCSPtr         = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_reduce_sum.glsl"        , "main", DefineString.c_str());
-        m_ClearVolumeCSPtr       = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_clear_volume.glsl"      , "main", DefineString.c_str());
-		m_RootgridDepthCSPtr     = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_rootgrid_depth.glsl"    , "main", DefineString.c_str());
-        m_RasterizeRootGridVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_rasterize_rootgrid.glsl", "main", DefineString.c_str());
-        m_RasterizeRootGridFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_rasterize_rootgrid.glsl", "main", DefineString.c_str());
-        m_ClearAtomicImageCSPtr  = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_clear_atomic_image.glsl", "main", DefineString.c_str());
+        m_BilateralFilterCSPtr     = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_bilateral_filter.glsl"   , "main", DefineString.c_str());
+        m_VertexMapCSPtr           = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_vertex_map.glsl"         , "main", DefineString.c_str());
+        m_NormalMapCSPtr           = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_normal_map.glsl"         , "main", DefineString.c_str());
+        m_DownSampleDepthCSPtr     = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_downsample_depth.glsl"   , "main", DefineString.c_str());
+        m_IntegrationCSPtr         = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_integrate.glsl"          , "main", DefineString.c_str());        
+        m_RaycastCSPtr             = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_raycast.glsl"            , "main", DefineString.c_str());
+        m_RaycastPyramidCSPtr      = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_raycast_pyramid.glsl"    , "main", DefineString.c_str());
+        m_DetermineSummandsCSPtr   = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_determine_summands.glsl" , "main", DefineString.c_str());
+        m_ReduceSumCSPtr           = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_reduce_sum.glsl"         , "main", DefineString.c_str());
+        m_ClearVolumeCSPtr         = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_clear_volume.glsl"       , "main", DefineString.c_str());
+		m_RootgridDepthCSPtr       = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_rootgrid_depth.glsl"     , "main", DefineString.c_str());
+        m_RasterizeRootGridVSPtr   = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_rasterize_rootgrid.glsl" , "main", DefineString.c_str());
+        m_RasterizeRootGridFSPtr   = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_rasterize_rootgrid.glsl" , "main", DefineString.c_str());
+        m_ClearAtomicCountersCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_clear_atomic_buffer.glsl", "main", DefineString.c_str());
 
         SInputElementDescriptor InputLayoutDesc = {};
 
@@ -613,7 +613,7 @@ namespace MR
 				{
 					Int3 Key = Int3(x, y, z);
 					
-					if (m_RootGrids.count(Key) == 0 && RootGridInFrustum(Key) && RootGridContainsDepth(Key))
+					if (m_RootGrids.count(Key) == 0 && RootGridInFrustum(Key))
 					{
 						GLint Memory;
 						glGetIntegerv(0x9049, &Memory);
@@ -658,22 +658,16 @@ namespace MR
             ++ RootGridCount;
         }
 
-        if (RootGridCount > m_AtomicCounterImagePtr->GetNumberOfPixelsU())
+        if (RootGridCount > m_AtomicCounterBufferPtr->GetNumberOfBytes() / sizeof(uint32_t))
         {
-            TextureDescriptor.m_NumberOfPixelsU = RootGridCount;
-            TextureDescriptor.m_NumberOfPixelsV = 1;
-            TextureDescriptor.m_NumberOfPixelsW = 1;
-            TextureDescriptor.m_NumberOfMipMaps = 1;
-            TextureDescriptor.m_NumberOfTextures = 1;
-            TextureDescriptor.m_Binding = CTextureBase::ShaderResource;
-            TextureDescriptor.m_Access = CTextureBase::CPUWrite;
-            TextureDescriptor.m_Usage = CTextureBase::GPUReadWrite;
-            TextureDescriptor.m_Semantic = CTextureBase::UndefinedSemantic;
-            TextureDescriptor.m_pFileName = nullptr;
-            TextureDescriptor.m_pPixels = 0;
-            TextureDescriptor.m_Format = CTextureBase::R32_UINT;
+            SBufferDescriptor BufferDesc = {};
 
-            m_AtomicCounterImagePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+            BufferDesc.m_Usage = CBuffer::GPUToCPU;
+            BufferDesc.m_Binding = CBuffer::ResourceBuffer;
+            BufferDesc.m_Access = CBuffer::CPURead;
+            BufferDesc.m_NumberOfBytes = sizeof(uint32_t) * RootGridCount;
+            BufferDesc.m_pBytes = nullptr;
+            m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(BufferDesc);
         }
         else
         {
@@ -740,22 +734,7 @@ namespace MR
 			TextureDescriptor.m_Format = CTextureBase::R8G8B8A8_UBYTE;
 
 			m_RawCameraFramePtr = TextureManager::CreateTexture2D(TextureDescriptor);
-		}
-
-        TextureDescriptor.m_NumberOfPixelsU = 1;
-        TextureDescriptor.m_NumberOfPixelsV = 1;
-        TextureDescriptor.m_NumberOfPixelsW = 1;
-        TextureDescriptor.m_NumberOfMipMaps = 1;
-        TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding = CTextureBase::ShaderResource;
-        TextureDescriptor.m_Access = CTextureBase::CPUWrite;
-        TextureDescriptor.m_Usage = CTextureBase::GPUReadWrite;
-        TextureDescriptor.m_Semantic = CTextureBase::UndefinedSemantic;
-        TextureDescriptor.m_pFileName = nullptr;
-        TextureDescriptor.m_pPixels = 0;
-        TextureDescriptor.m_Format = CTextureBase::R32_UINT;
-
-        m_AtomicCounterImagePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+		}        
     }
     
     // -----------------------------------------------------------------------------
@@ -848,6 +827,13 @@ namespace MR
         ConstantBufferDesc.m_NumberOfBytes = sizeof(float) * g_HierarchyLevelCount;
         ConstantBufferDesc.m_pBytes = const_cast<float*>(g_HierarchyResolutions);
         m_HierarchyConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        ConstantBufferDesc.m_Usage = CBuffer::GPUToCPU;
+        ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
+        ConstantBufferDesc.m_Access = CBuffer::CPURead;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t);
+        ConstantBufferDesc.m_pBytes = nullptr;
+        m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
 		unsigned int Zero = 0;
 				
@@ -1227,7 +1213,8 @@ namespace MR
         ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
 
         ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
-        ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_AtomicCounterImagePtr));
+
+        ContextManager::SetResourceBuffer(0, m_AtomicCounterBufferPtr);
 
         ContextManager::Barrier();
 
@@ -1368,11 +1355,11 @@ namespace MR
 
     void CScalableSLAMReconstructor::ClearAtomicCounterImage()
     {
-        const int WorkGroups = m_AtomicCounterImagePtr->GetNumberOfPixelsU();
+        const int WorkGroups = m_AtomicCounterBufferPtr->GetNumberOfBytes() / sizeof(uint32_t);
 
-        ContextManager::SetShaderCS(m_ClearAtomicImageCSPtr);
+        ContextManager::SetShaderCS(m_ClearAtomicCountersCSPtr);
         
-        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_AtomicCounterImagePtr));
+        ContextManager::SetResourceBuffer(0, m_AtomicCounterBufferPtr);
         
         ContextManager::Barrier();
 

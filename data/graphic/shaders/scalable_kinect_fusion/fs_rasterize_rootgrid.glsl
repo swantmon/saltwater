@@ -13,14 +13,18 @@ layout(row_major, std140, binding = 3) uniform UBOHierarchy
     float g_HierarchyResolutions[HIERARCHY_LEVELS];
 };
 
+layout(std430, binding = 0) buffer ICPBuffer
+{
+    uint g_Counters[];
+};
+
 layout(binding = 0, r16ui) readonly uniform uimage2D cs_Depth;
-layout(binding = 1, r32ui) uniform uimage2D cs_Counter;
 
 layout(location = 0) out vec4 out_Color;
 
 void main()
 {
-    imageAtomicAdd(cs_Counter, ivec2(g_Index, 0), 1);
+    atomicAdd(g_Counters[g_Index], 1);
     out_Color = vec4(imageLoad(cs_Depth, ivec2(gl_FragCoord.xy)));
 }
 

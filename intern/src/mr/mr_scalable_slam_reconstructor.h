@@ -163,7 +163,7 @@ namespace MR
         Gfx::CShaderPtr m_RasterizeRootGridVSPtr;
         Gfx::CShaderPtr m_RasterizeRootGridFSPtr;
 
-        Gfx::CShaderPtr m_ClearAtomicImageCSPtr;
+        Gfx::CShaderPtr m_ClearAtomicCountersCSPtr;
 
         Gfx::CMeshPtr m_CubeMeshPtr;
         Gfx::CInputLayoutPtr m_CubeInputLayoutPtr;
@@ -178,7 +178,7 @@ namespace MR
         std::vector<Gfx::CTexture2DPtr> m_RaycastVertexMapPtr;
         std::vector<Gfx::CTexture2DPtr> m_RaycastNormalMapPtr;
 
-        Gfx::CTexture2DPtr m_AtomicCounterImagePtr;
+        Gfx::CBufferPtr m_AtomicCounterBufferPtr;
 
 		CRootGridMap m_RootGrids;
 
