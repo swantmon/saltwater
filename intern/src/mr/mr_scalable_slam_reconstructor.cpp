@@ -613,7 +613,7 @@ namespace MR
 				{
 					Int3 Key = Int3(x, y, z);
 					
-					if (m_RootGrids.count(Key) == 0 && RootGridInFrustum(Key))
+					if (m_RootGrids.count(Key) == 0 && RootGridInFrustum(Key) && RootGridContainsDepth(Key))
 					{
 						GLint Memory;
 						glGetIntegerv(0x9049, &Memory);

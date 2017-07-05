@@ -13,7 +13,7 @@ layout(row_major, std140, binding = 3) uniform UBOHierarchy
     float g_HierarchyResolutions[HIERARCHY_LEVELS];
 };
 
-layout(std430, binding = 0) buffer ICPBuffer
+layout(std430, binding = 0) buffer AtomicBuffer
 {
     uint g_Counters[];
 };
