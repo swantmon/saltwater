@@ -28,8 +28,8 @@ void main()
 
     const ivec2 VertexMapPosition = ivec2(gl_GlobalInvocationID.xy);
 
-    const vec2 FocalPoint = g_Intrinisics[0].m_FocalPoint;
-    const vec2 InvFocalLength = g_Intrinisics[0].m_InvFocalLength;
+    const vec2 FocalPoint = g_Intrinsics[0].m_FocalPoint;
+    const vec2 InvFocalLength = g_Intrinsics[0].m_InvFocalLength;
 
     vec3 VertexPixelPosition;
     VertexPixelPosition.xy = vec2(VertexMapPosition - FocalPoint) * InvFocalLength;

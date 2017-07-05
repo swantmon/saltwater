@@ -45,7 +45,7 @@ void main()
 		
         vec3 VSVoxelPosition = (g_InvPoseMatrix * vec4(WSVoxelPosition, 1.0f)).xyz;
 
-        vec2 CSVoxelPosition = VSVoxelPosition.xy * g_Intrinisics[0].m_FocalLength / VSVoxelPosition.z + g_Intrinisics[0].m_FocalPoint;
+        vec2 CSVoxelPosition = VSVoxelPosition.xy * g_Intrinsics[0].m_FocalLength / VSVoxelPosition.z + g_Intrinsics[0].m_FocalPoint;
         //CSVoxelPosition.xy += vec2(0.5f);
 
         if (CSVoxelPosition.x > 0 && CSVoxelPosition.x < DEPTH_IMAGE_WIDTH && CSVoxelPosition.y > 0 && CSVoxelPosition.y < DEPTH_IMAGE_HEIGHT && VSVoxelPosition.z > 0.0f)
@@ -55,7 +55,7 @@ void main()
             
             if (Depth != 0)
             {
-                const vec2 LambdaPoint = (CSVoxelPosition.xy - g_Intrinisics[0].m_FocalPoint) * g_Intrinisics[0].m_InvFocalLength;
+                const vec2 LambdaPoint = (CSVoxelPosition.xy - g_Intrinsics[0].m_FocalPoint) * g_Intrinsics[0].m_InvFocalLength;
                 const float Lambda = length(vec3(LambdaPoint, 1.0f));
 
                 const float SDF = Depth - 1000.0f * length(CameraPosition - WSVoxelPosition) / Lambda;

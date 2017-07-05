@@ -31,8 +31,8 @@ void main()
 	
 	const vec2 ImagePos = vec2(gl_GlobalInvocationID.xy);
 	
-    const vec2 FocalPoint = g_Intrinisics[0].m_FocalPoint;
-    const vec2 InvFocalLength = g_Intrinisics[0].m_InvFocalLength;
+    const vec2 FocalPoint = g_Intrinsics[0].m_FocalPoint;
+    const vec2 InvFocalLength = g_Intrinsics[0].m_InvFocalLength;
 
 	const float Depth = imageLoad(cs_Depth, ivec2(ImagePos)).x / 1000.0f;
 		
