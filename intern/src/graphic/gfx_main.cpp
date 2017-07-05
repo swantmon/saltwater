@@ -55,7 +55,7 @@ namespace
             BASE_CONSOLE_INFOV("%s\n", _pMessage);
             break;
         case GL_DEBUG_TYPE_PERFORMANCE:
-            BASE_CONSOLE_INFOV("%s\n", _pMessage);
+            //BASE_CONSOLE_INFOV("%s\n", _pMessage);
             break;
         case GL_DEBUG_TYPE_OTHER:
             // -----------------------------------------------------------------------------
