@@ -1229,7 +1229,7 @@ namespace MR
 
         ContextManager::Barrier();
 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
         const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         const unsigned int InstanceCount = static_cast<unsigned int>(m_RootGridMap.size());

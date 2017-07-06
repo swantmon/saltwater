@@ -29,10 +29,30 @@ layout(location = 0) in flat int in_Index;
 
 layout(location = 0) out vec4 out_Color;
 
+bool InBox()
+{
+    vec3 AABBPosition = g_InstanceData[in_Index].m_Offset * VOLUME_SIZE;
+    
+    vec3 AABBMin = AABBPosition;
+    vec3 AABBMax = AABBPosition + VOLUME_SIZE;
+
+    vec3 Vertex = imageLoad(cs_Vertex, ivec2(gl_FragCoord.xy)).xyz;
+
+    return 
+        Vertex.x > AABBMin.x && Vertex.x < AABBMax.x &&
+        Vertex.y > AABBMin.y && Vertex.y < AABBMax.y &&
+        Vertex.z > AABBMin.z && Vertex.z < AABBMax.z;
+}
+
 void main()
 {
-    atomicAdd(g_Counters[in_Index], 1);
-    out_Color = vec4(imageLoad(cs_Vertex, ivec2(gl_FragCoord.xy)));
+    bool InBox = InBox();
+
+    if (InBox)
+    {
+        atomicAdd(g_Counters[in_Index], 1);
+    }
+    out_Color = vec4(InBox);
 }
 
 #endif // __INCLUDE_FS_RASTERIZE_ROOTGRID_GLSL__
