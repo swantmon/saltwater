@@ -613,10 +613,10 @@ namespace MR
         TextureDescriptor.m_pFileName = 0;
         TextureDescriptor.m_pPixels = 0;
 
+        m_RootGridVector.resize(m_RootGridMap.size());
         int Index = 0;
         SInstanceData* pInstanceData = static_cast<SInstanceData*>(BufferManager::MapConstantBuffer(m_RootGridInstanceBufferPtr, CBuffer::Write));
 
-        m_RootGridVector.resize(m_RootGridMap.size());
 		for (auto& rPair : m_RootGridMap)
 		{
 			auto& rRootGrid = rPair.second;
@@ -1197,16 +1197,17 @@ namespace MR
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
         ContextManager::SetConstantBuffer(3, m_HierarchyConstantBufferPtr);
 
-        ContextManager::SetResourceBuffer(2, m_RootGridInstanceBufferPtr);
-        
         ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
         ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
 
         ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
 
         ContextManager::SetResourceBuffer(0, m_AtomicCounterBufferPtr);
+        ContextManager::SetResourceBuffer(1, m_RootGridInstanceBufferPtr);
 
         ContextManager::Barrier();
+
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
         ContextManager::DrawIndexedInstanced(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfVertices(), m_RootGridMap.size(), 0, 0, 0);
 
