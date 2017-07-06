@@ -389,6 +389,7 @@ namespace MR
         m_CubeMeshPtr = 0;
         m_CubeInputLayoutPtr = 0;
 
+        m_RawVertexMapPtr = 0;
         m_RawDepthBufferPtr = 0;
         m_RawCameraFramePtr = 0;
         m_TargetSetPtr = 0;
@@ -713,7 +714,11 @@ namespace MR
         TextureDescriptor.m_pPixels = 0;
         TextureDescriptor.m_Format = CTextureBase::R16_UINT;
 
-        m_RawDepthBufferPtr = TextureManager::CreateTexture2D(TextureDescriptor);   
+        m_RawDepthBufferPtr = TextureManager::CreateTexture2D(TextureDescriptor);
+
+        TextureDescriptor.m_Format = g_UseHighPrecisionMaps ? CTextureBase::R32G32B32A32_FLOAT : CTextureBase::R16G16B16A16_FLOAT;
+
+        m_RawVertexMapPtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
 		if (m_ReconstructionSettings.m_CaptureColor)
 		{
@@ -986,30 +991,45 @@ namespace MR
         }
 
         /////////////////////////////////////////////////////////////////////////////////////
-        // Generate vertex and normal map
+        // Generate vertex map pyramid
         /////////////////////////////////////////////////////////////////////////////////////
 
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
 
+        ContextManager::SetShaderCS(m_VertexMapCSPtr);
         for (int PyramidLevel = 0; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++ PyramidLevel)
         {
             const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
             const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
 
-            ContextManager::SetShaderCS(m_VertexMapCSPtr);
             ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_SmoothDepthBufferPtr[PyramidLevel]));
             ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ReferenceVertexMapPtr[PyramidLevel]));
             ContextManager::Barrier();
-            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);			
+            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
         }
 
+        /////////////////////////////////////////////////////////////////////////////////////
+        // Generate raw vertex map
+        /////////////////////////////////////////////////////////////////////////////////////
+        
+        ContextManager::SetShaderCS(m_VertexMapCSPtr);
+
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
+        ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RawVertexMapPtr));
+        ContextManager::Barrier();
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+        /////////////////////////////////////////////////////////////////////////////////////
+        // Generate normal map pyramid
+        /////////////////////////////////////////////////////////////////////////////////////
+
+        ContextManager::SetShaderCS(m_NormalMapCSPtr);
         for (int PyramidLevel = 0; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++ PyramidLevel)
         {
             const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
             const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
-
-            ContextManager::SetShaderCS(m_NormalMapCSPtr);
+                        
             ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_ReferenceVertexMapPtr[PyramidLevel]));
             ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ReferenceNormalMapPtr[PyramidLevel]));
             ContextManager::Barrier();
@@ -1202,7 +1222,7 @@ namespace MR
         ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
         ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
 
-        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawVertexMapPtr));
 
         ContextManager::SetResourceBuffer(0, m_AtomicCounterBufferPtr);
         ContextManager::SetResourceBuffer(1, m_RootGridInstanceBufferPtr);
@@ -1211,7 +1231,9 @@ namespace MR
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-        ContextManager::DrawIndexedInstanced(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), m_RootGridMap.size(), 0, 0, 0);
+        const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
+        const unsigned int InstanceCount = static_cast<unsigned int>(m_RootGridMap.size());
+        ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
 
         ContextManager::ResetShaderVS();
         ContextManager::ResetShaderPS();

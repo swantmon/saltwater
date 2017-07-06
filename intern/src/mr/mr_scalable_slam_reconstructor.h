@@ -175,6 +175,7 @@ namespace MR
 
         Gfx::CTexture2DPtr m_RawDepthBufferPtr;
         Gfx::CTexture2DPtr m_RawCameraFramePtr;
+        Gfx::CTexture2DPtr m_RawVertexMapPtr;
         std::vector<Gfx::CTexture2DPtr> m_SmoothDepthBufferPtr;
         std::vector<Gfx::CTexture2DPtr> m_ReferenceVertexMapPtr;
         std::vector<Gfx::CTexture2DPtr> m_ReferenceNormalMapPtr;
