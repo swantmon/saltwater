@@ -1183,6 +1183,8 @@ namespace MR
 
     void CScalableSLAMReconstructor::RasterizeRootGrids()
     {
+        TargetSetManager::ClearTargetSet(m_TargetSetPtr);
+
         ContextManager::SetViewPortSet(m_DepthViewPortSetPtr);
         ContextManager::SetTargetSet(m_TargetSetPtr);
 
@@ -1209,7 +1211,7 @@ namespace MR
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-        ContextManager::DrawIndexedInstanced(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfVertices(), m_RootGridMap.size(), 0, 0, 0);
+        ContextManager::DrawIndexedInstanced(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), m_RootGridMap.size(), 0, 0, 0);
 
         ContextManager::ResetShaderVS();
         ContextManager::ResetShaderPS();
