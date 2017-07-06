@@ -139,8 +139,11 @@ namespace
         void Draw(unsigned int _NumberOfVertices, unsigned int _IndexOfFirstVertex);
         void DrawIndexed(unsigned int _NumberOfIndices, unsigned int _IndexOfFirstIndex, int _BaseVertexLocation);
         void DrawIndexedInstanced(unsigned int _NumberOfIndices, unsigned int _NumberOfInstances, unsigned int _IndexOfFirstIndex, int _BaseVertexLocation, unsigned int _StartInstanceLocation);
+        void DrawIndirect(CBufferPtr _IndirectBufferPtr);
+        void DrawIndexedIndirect(CBufferPtr _IndirectBufferPtr);
         
         void Dispatch(unsigned int _NumberOfThreadGroupsX, unsigned int _NumberOfThreadGroupsY, unsigned int _NumberOfThreadGroupsZ);
+        void DispatchIndirect(CBufferPtr _IndirectBufferPtr);
     
     private:
     
@@ -974,7 +977,7 @@ namespace
         unsigned int NumberOfBuffers = rNativeBuffer.GetNumberOfBuffers();
         
         if (m_VertexBufferSetPtr != _BufferSetPtr || m_NumberOfVertexBuffers != NumberOfBuffers)
-        {            
+        {
             glBindVertexArray(rNativeBuffer.m_NativeBufferArrayHandle);
 
             for (unsigned int IndexOfBuffer = 0; IndexOfBuffer < NumberOfBuffers; ++ IndexOfBuffer)
@@ -1473,12 +1476,51 @@ namespace
     }
     
     // -----------------------------------------------------------------------------
+
+    void CGfxContextManager::DrawIndirect(CBufferPtr _IndirectBufferPtr)
+    {
+        Gfx::CNativeBuffer& rNativeBuffer = *static_cast<Gfx::CNativeBuffer*>(_IndirectBufferPtr.GetPtr());
+
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, rNativeBuffer.m_NativeBuffer);
+
+        glDrawArraysIndirect(s_NativeTopologies[m_Topology], 0);
+
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxContextManager::DrawIndexedIndirect(CBufferPtr _IndirectBufferPtr)
+    {
+        Gfx::CNativeBuffer& rNativeBuffer = *static_cast<Gfx::CNativeBuffer*>(_IndirectBufferPtr.GetPtr());
+
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, rNativeBuffer.m_NativeBuffer);
+
+        glDrawElementsIndirect(s_NativeTopologies[m_Topology], GL_UNSIGNED_INT, 0);
+
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+    }
+
+    // -----------------------------------------------------------------------------
     
     void CGfxContextManager::Dispatch(unsigned int _NumberOfThreadGroupsX, unsigned int _NumberOfThreadGroupsY, unsigned int _NumberOfThreadGroupsZ)
     {
         assert(_NumberOfThreadGroupsX > 0 && _NumberOfThreadGroupsY > 0 && _NumberOfThreadGroupsZ > 0);
 
         glDispatchCompute(_NumberOfThreadGroupsX, _NumberOfThreadGroupsY, _NumberOfThreadGroupsZ);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxContextManager::DispatchIndirect(CBufferPtr _IndirectBufferPtr)
+    {
+        Gfx::CNativeBuffer& rNativeBuffer = *static_cast<Gfx::CNativeBuffer*>(_IndirectBufferPtr.GetPtr());
+
+        glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, rNativeBuffer.m_NativeBuffer);
+
+        glDispatchComputeIndirect(0);
+
+        glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, 0);
     }
 
     // -----------------------------------------------------------------------------
@@ -2153,10 +2195,31 @@ namespace ContextManager
     }
     
     // -----------------------------------------------------------------------------
+
+    void DrawIndirect(CBufferPtr _IndirectBufferPtr)
+    {
+        CGfxContextManager::GetInstance().DrawIndirect(_IndirectBufferPtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void DrawIndexedIndirect(CBufferPtr _IndirectBufferPtr)
+    {
+        CGfxContextManager::GetInstance().DrawIndexedIndirect(_IndirectBufferPtr);
+    }
+
+    // -----------------------------------------------------------------------------
     
     void Dispatch(unsigned int _NumberOfThreadGroupsX, unsigned int _NumberOfThreadGroupsY, unsigned int _NumberOfThreadGroupsZ)
     {
         CGfxContextManager::GetInstance().Dispatch(_NumberOfThreadGroupsX, _NumberOfThreadGroupsY, _NumberOfThreadGroupsZ);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void DispatchIndirect(CBufferPtr _IndirectBufferPtr)
+    {
+        CGfxContextManager::GetInstance().DispatchIndirect(_IndirectBufferPtr);
     }
 } // ContextManager
 } // namespace Gfx
