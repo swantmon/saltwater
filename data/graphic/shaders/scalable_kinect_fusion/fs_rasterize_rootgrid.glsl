@@ -2,15 +2,14 @@
 #ifndef __INCLUDE_FS_RASTERIZE_ROOTGRID_GLSL__
 #define __INCLUDE_FS_RASTERIZE_ROOTGRID_GLSL__
 
+// -----------------------------------------------------------------------------
+// Shader storage buffers
+// -----------------------------------------------------------------------------
+
 struct SInstanceData
 {
     ivec3 m_Offset;
     int m_Index;
-};
-
-layout(row_major, std140, binding = 3) uniform UBOHierarchy
-{
-    float g_HierarchyResolutions[HIERARCHY_LEVELS];
 };
 
 layout(std430, binding = 0) buffer AtomicBuffer
@@ -23,11 +22,36 @@ layout(std430, binding = 1) buffer InstanceBuffer
     SInstanceData g_InstanceData[];
 };
 
+// -----------------------------------------------------------------------------
+// Uniform buffers
+// -----------------------------------------------------------------------------
+
+layout(row_major, std140, binding = 3) uniform UBOHierarchy
+{
+    float g_HierarchyResolutions[HIERARCHY_LEVELS];
+};
+
+// -----------------------------------------------------------------------------
+// Images
+// -----------------------------------------------------------------------------
+
 layout(binding = 0, MAP_TEXTURE_FORMAT) readonly uniform image2D cs_Vertex;
+
+// -----------------------------------------------------------------------------
+// Input
+// -----------------------------------------------------------------------------
 
 layout(location = 0) in flat int in_Index;
 
+// -----------------------------------------------------------------------------
+// Output
+// -----------------------------------------------------------------------------
+
 layout(location = 0) out vec4 out_Color;
+
+// -----------------------------------------------------------------------------
+// Functions
+// -----------------------------------------------------------------------------
 
 bool InBox()
 {
@@ -43,6 +67,10 @@ bool InBox()
         Vertex.y > AABBMin.y && Vertex.y < AABBMax.y &&
         Vertex.z > AABBMin.z && Vertex.z < AABBMax.z;
 }
+
+// -----------------------------------------------------------------------------
+// Fragment shader
+// -----------------------------------------------------------------------------
 
 void main()
 {
