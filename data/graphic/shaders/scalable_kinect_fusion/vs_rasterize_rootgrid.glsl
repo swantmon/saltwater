@@ -4,13 +4,20 @@
 
 #include "scalable_kinect_fusion/common_tracking.glsl"
 
-layout(row_major, std140, binding = 2) uniform UBOOffset
+struct SInstanceData
 {
-    vec3 g_Offset;
-    int g_Index;
+    ivec3 m_Offset;
+    int m_Index;
+};
+
+layout(std430, binding = 1) buffer InstanceBuffer
+{
+    SInstanceData g_InstanceData[];
 };
 
 layout(location = 0) in vec3 in_VertexPosition;
+
+layout(location = 0) out flat int out_Index;
 
 out gl_PerVertex
 {
@@ -23,7 +30,10 @@ out gl_PerVertex
 
 void main()
 {
-	vec4 Vertex = (g_PoseMatrix * vec4(in_VertexPosition * VOLUME_SIZE + g_Offset, 1.0f));
+    SInstanceData InstanceData = g_InstanceData[gl_InstanceID];
+    out_Index = InstanceData.m_Index;
+    vec3 Offset = InstanceData.m_Offset;
+	vec4 Vertex = (g_PoseMatrix * vec4(in_VertexPosition * VOLUME_SIZE + Offset, 1.0f));
 	Vertex.xy = Vertex.xy * g_Intrinsics[0].m_FocalLength / Vertex.z + g_Intrinsics[0].m_FocalPoint;
 	Vertex.xy = Vertex.xy / vec2(DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT) * 2.0f - 1.0f;
 	Vertex.z = 1.0f;

@@ -680,7 +680,7 @@ namespace
 
 		ContextManager::SetTopology(STopology::TriangleList);
 
-		for (auto& rPair : m_pScalableReconstructor->GetRootGrids())
+		for (auto& rPair : m_pScalableReconstructor->GetRootGridMap())
 		{
 			auto& rRootGrid = rPair.second;
 						
@@ -731,7 +731,7 @@ namespace
 		Float4x4 Scaling;
 		Float4x4 Translation;
 
-		for (auto& rPair : m_pScalableReconstructor->GetRootGrids())
+		for (auto& rPair : m_pScalableReconstructor->GetRootGridMap())
 		{
 			auto& rRootGrid = rPair.second;
 

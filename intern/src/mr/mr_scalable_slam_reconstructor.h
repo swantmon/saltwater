@@ -70,7 +70,8 @@ namespace MR
 			bool m_IsVisible;
 		};
 
-		typedef std::map<Base::Int3, SRootGrid, IndexCompare> CRootGridMap;
+        typedef std::map<Base::Int3, SRootGrid, IndexCompare> CRootGridMap;
+        typedef std::vector<SRootGrid*> CRootGridVector;
 
     public:
 
@@ -87,7 +88,8 @@ namespace MR
         bool IsTrackingLost() const;
         Base::Float4x4 GetPoseMatrix() const;
 
-		CRootGridMap& GetRootGrids();
+		CRootGridMap& GetRootGridMap();
+        CRootGridVector& GetRootGridVector();
 
         void GetReconstructionSettings(SReconstructionSettings* pReconstructionSettings);
 
@@ -101,7 +103,7 @@ namespace MR
 		bool RootGridInFrustum(const Base::Int3& rKey);
 		bool RootGridContainsDepth(const Base::Int3& rKey);
 		void UpdateRootrids();
-        void ClearAtomicCounterImage();
+        void ClearAtomicCounterBuffer();
 
 		void SetupData();
         void SetupMeshes();
@@ -112,7 +114,7 @@ namespace MR
         void SetupBuffers();
 
         void CreateReferencePyramid();
-        void Integrate();
+        void RasterizeRootGrids();
         void IntegrateOld();
         void Raycast();
         void CreateRaycastPyramid();
@@ -145,6 +147,7 @@ namespace MR
         Gfx::CBufferPtr m_BilateralFilterConstantBufferPtr;
         Gfx::CBufferPtr m_PositionConstantBufferPtr;
         Gfx::CBufferPtr m_HierarchyConstantBufferPtr;
+        Gfx::CBufferPtr m_RootGridInstanceBufferPtr;
 
 		Gfx::CBufferPtr m_DepthCounterBufferPtr;
 
@@ -180,7 +183,8 @@ namespace MR
 
         Gfx::CBufferPtr m_AtomicCounterBufferPtr;
 
-		CRootGridMap m_RootGrids;
+		CRootGridMap m_RootGridMap;
+        CRootGridVector m_RootGridVector;
 
         Gfx::CBufferPtr m_ICPResourceBufferPtr;
 
@@ -200,7 +204,7 @@ namespace MR
         bool m_IsTrackingPaused;
 
 		std::vector<float> m_GridSizes;
-
+        
 		std::array<Base::Float3, 8> m_FrustumPoints;
 		std::array<Base::Float4, 6> m_FrustumPlanes;
     };

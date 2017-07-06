@@ -49,10 +49,7 @@ namespace
 	const Base::Float3 g_InitialCameraPosition = Base::Float3(0.5f, 0.5f, -0.5f);
 	const Base::Float3 g_InitialCameraRotation = Base::Float3(0.0f, 0.0f, 0.0f);
 	//*/
-
-    const int g_HierarchyLevelCount = 3;
-    const float g_HierarchyResolutions[g_HierarchyLevelCount] = { 16, 8, 8 };
-
+    
     const float g_EpsilonDistance = 0.1f;
     const float g_EpsilonAngle = 0.75f;
     
@@ -98,6 +95,12 @@ namespace
     {
         Base::Float4x4 m_WorldMatrix;
     };
+
+    struct SInstanceData
+    {
+        Base::Int3 m_Offset;
+        int m_Index;
+    };
     
 } // namespace
 
@@ -140,9 +143,16 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-	CScalableSLAMReconstructor::CRootGridMap& CScalableSLAMReconstructor::GetRootGrids()
+	CScalableSLAMReconstructor::CRootGridMap& CScalableSLAMReconstructor::GetRootGridMap()
     {
-        return m_RootGrids;
+        return m_RootGridMap;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CScalableSLAMReconstructor::CRootGridVector& CScalableSLAMReconstructor::GetRootGridVector()
+    {
+        return m_RootGridVector;
     }
 
     // -----------------------------------------------------------------------------
@@ -393,7 +403,7 @@ namespace MR
             m_RaycastNormalMapPtr[i] = 0;
         }
 
-        m_RootGrids.clear();
+        m_RootGridMap.clear();
 
         m_IntrinsicsConstantBufferPtr = 0;
         m_TrackingDataConstantBufferPtr = 0;
@@ -406,6 +416,7 @@ namespace MR
 		m_DepthCounterBufferPtr = 0;
         m_HierarchyConstantBufferPtr = 0;
         m_AtomicCounterBufferPtr = 0;
+        m_RootGridInstanceBufferPtr = 0;
     }
     
     // -----------------------------------------------------------------------------
@@ -443,7 +454,7 @@ namespace MR
             << "#define REDUCTION_SHADER_COUNT " << SummandsPOT / 2                                 << " \n"
             << "#define ICP_SUMMAND_COUNT "      << Summands                                        << " \n"
             << "#define MAP_TEXTURE_FORMAT "     << InternalFormatString                            << " \n"
-            << "#define HIERARCHY_LEVELS "       << g_HierarchyLevelCount                           << " \n";
+            << "#define HIERARCHY_LEVELS "       << MR::SReconstructionSettings::GRID_LEVELS        << " \n";
 
         if (m_ReconstructionSettings.m_CaptureColor)
         {
@@ -525,42 +536,7 @@ namespace MR
 	}
 
 	// -----------------------------------------------------------------------------
-
-	bool CScalableSLAMReconstructor::RootGridContainsDepth(const Base::Int3& rKey)
-	{
-#ifdef USE_PERISTENT_MAPPING
-        uint32_t* pCounter = static_cast<uint32_t*>(m_DepthCounterBufferPtr->GetStorage());
-		*pCounter = 0;
-#else
-		unsigned int Zero = 0;
-		BufferManager::UploadConstantBufferData(m_DepthCounterBufferPtr, &Zero);
-#endif
-        const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth(), g_TileSize2D);
-        const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
-        
-        SPositionBuffer PositionBuffer;
-        PositionBuffer.m_Position[0] = rKey[0] * m_ReconstructionSettings.m_VolumeSize;
-        PositionBuffer.m_Position[1] = rKey[1] * m_ReconstructionSettings.m_VolumeSize;
-        PositionBuffer.m_Position[2] = rKey[2] * m_ReconstructionSettings.m_VolumeSize;
-        PositionBuffer.m_Index = -1; // don't care
-
-        BufferManager::UploadConstantBufferData(m_PositionConstantBufferPtr, &PositionBuffer);
-
-        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
-
-#ifdef USE_PERISTENT_MAPPING
-		ContextManager::Flush();
-		return *pCounter > 200;
-#else
-        uint32_t* pCounter = static_cast<unsigned int*>(BufferManager::MapAtomicCounterBuffer(m_DepthCounterBufferPtr, CBuffer::EMap::Read));
-		unsigned int DepthCount = *pCounter;
-		BufferManager::UnmapAtomicCounterBuffer(m_DepthCounterBufferPtr);
-		return DepthCount > 200;
-#endif
-	}
-
-	// -----------------------------------------------------------------------------
-
+    
 	void CScalableSLAMReconstructor::UpdateRootrids()
 	{
 		Float3 BBMax = m_FrustumPoints[0];
@@ -584,26 +560,7 @@ namespace MR
 			MinIndex[i] = static_cast<int>(BBMin[i] / m_ReconstructionSettings.m_VolumeSize);
 		}
 
-		STextureDescriptor TextureDescriptor = {};
-		
-		TextureDescriptor.m_NumberOfMipMaps = 1;
-		TextureDescriptor.m_NumberOfTextures = 1;
-		TextureDescriptor.m_Binding = CTextureBase::ShaderResource;
-		TextureDescriptor.m_Access = CTextureBase::CPUWrite;
-		TextureDescriptor.m_Usage = CTextureBase::GPUReadWrite;
-		TextureDescriptor.m_Semantic = CTextureBase::UndefinedSemantic;
-		TextureDescriptor.m_pFileName = 0;
-		TextureDescriptor.m_pPixels = 0;
-
 		SRootGrid RootGrid;
-
-		ContextManager::SetShaderCS(m_RootgridDepthCSPtr);
-		ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
-		ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
-		ContextManager::SetConstantBuffer(2, m_PositionConstantBufferPtr);
-		ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
-		ContextManager::SetAtomicCounterBuffer(0, m_DepthCounterBufferPtr);
-		ContextManager::Barrier();
 
 		for (int x = MinIndex[0] - 1; x <= MaxIndex[0]; ++ x)
 		{
@@ -613,66 +570,97 @@ namespace MR
 				{
 					Int3 Key = Int3(x, y, z);
 					
-					if (m_RootGrids.count(Key) == 0 && RootGridInFrustum(Key) && RootGridContainsDepth(Key))
+					if (m_RootGridMap.count(Key) == 0 && RootGridInFrustum(Key))
 					{
-						GLint Memory;
-						glGetIntegerv(0x9049, &Memory);
-
-						if (Memory < 1000000)
-						{
-							BASE_CONSOLE_ERROR("Out of GPU memory");
-							throw std::exception("Out of GPU memory");
-						}
-
-						TextureDescriptor.m_NumberOfPixelsU = m_ReconstructionSettings.m_VolumeResolution;
-						TextureDescriptor.m_NumberOfPixelsV = m_ReconstructionSettings.m_VolumeResolution;
-						TextureDescriptor.m_NumberOfPixelsW = m_ReconstructionSettings.m_VolumeResolution;
-						TextureDescriptor.m_Format = CTextureBase::R16G16_FLOAT;
-
-						RootGrid.m_TSDFVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
 						RootGrid.m_Offset = Key;
 						RootGrid.m_IsVisible = true;
+                        RootGrid.m_TSDFVolumePtr = nullptr;
+                        RootGrid.m_ColorVolumePtr = nullptr;
 
-						if (m_ReconstructionSettings.m_CaptureColor)
-						{
-							TextureDescriptor.m_Format = CTextureBase::R8G8B8A8_UBYTE;
-
-							RootGrid.m_ColorVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
-						}
-
-						m_RootGrids[Key] = RootGrid;
+						m_RootGridMap[Key] = RootGrid;
 					}
 				}
 			}
 		}
 
-		ContextManager::ResetAtomicCounterBuffer(0);
-
-        int RootGridCount = 0;
-
-		for (auto& rPair : m_RootGrids)
-		{
-			auto& rRootGrid = rPair.second;
-
-			rRootGrid.m_IsVisible = RootGridInFrustum(rRootGrid.m_Offset);
-            ++ RootGridCount;
-        }
-
-        if (RootGridCount > m_AtomicCounterBufferPtr->GetNumberOfBytes() / sizeof(uint32_t))
+        if (m_RootGridMap.size() > m_AtomicCounterBufferPtr->GetNumberOfBytes() / sizeof(uint32_t))
         {
             SBufferDescriptor BufferDesc = {};
 
             BufferDesc.m_Usage = CBuffer::GPUToCPU;
             BufferDesc.m_Binding = CBuffer::ResourceBuffer;
             BufferDesc.m_Access = CBuffer::CPURead;
-            BufferDesc.m_NumberOfBytes = sizeof(uint32_t) * RootGridCount;
+            BufferDesc.m_NumberOfBytes = static_cast<unsigned int>(sizeof(uint32_t) * m_RootGridMap.size());
             BufferDesc.m_pBytes = nullptr;
             m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(BufferDesc);
+
+            BufferDesc.m_Usage = CBuffer::GPURead;
+            BufferDesc.m_Binding = CBuffer::ResourceBuffer;
+            BufferDesc.m_Access = CBuffer::CPUWrite;
+            BufferDesc.m_NumberOfBytes = static_cast<unsigned int>(sizeof(SInstanceData) * m_RootGridMap.size());
+            m_RootGridInstanceBufferPtr = BufferManager::CreateBuffer(BufferDesc);
         }
-        else
-        {
-            ClearAtomicCounterImage();
+        ClearAtomicCounterBuffer();
+        
+        STextureDescriptor TextureDescriptor = {};
+
+        TextureDescriptor.m_NumberOfMipMaps = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding = CTextureBase::ShaderResource;
+        TextureDescriptor.m_Access = CTextureBase::CPUWrite;
+        TextureDescriptor.m_Usage = CTextureBase::GPUReadWrite;
+        TextureDescriptor.m_Semantic = CTextureBase::UndefinedSemantic;
+        TextureDescriptor.m_pFileName = 0;
+        TextureDescriptor.m_pPixels = 0;
+
+        int Index = 0;
+        SInstanceData* pInstanceData = static_cast<SInstanceData*>(BufferManager::MapConstantBuffer(m_RootGridInstanceBufferPtr, CBuffer::Write));
+
+        m_RootGridVector.resize(m_RootGridMap.size());
+		for (auto& rPair : m_RootGridMap)
+		{
+			auto& rRootGrid = rPair.second;
+
+			rRootGrid.m_IsVisible = RootGridInFrustum(rRootGrid.m_Offset);
+            
+            m_RootGridVector.push_back(&rRootGrid);
+
+            SInstanceData InstanceData;
+            InstanceData.m_Index = Index++;
+            InstanceData.m_Offset = rRootGrid.m_Offset;
+
+            *pInstanceData = InstanceData;
+            ++pInstanceData;
         }
+
+        BufferManager::UnmapConstantBuffer(m_RootGridInstanceBufferPtr);
+
+        RasterizeRootGrids();
+
+        /*{
+            GLint Memory;
+            glGetIntegerv(0x9049, &Memory);
+
+            if (Memory < 1000000)
+            {
+                BASE_CONSOLE_ERROR("Out of GPU memory");
+                throw std::exception("Out of GPU memory");
+            }
+
+            TextureDescriptor.m_NumberOfPixelsU = m_ReconstructionSettings.m_VolumeResolution;
+            TextureDescriptor.m_NumberOfPixelsV = m_ReconstructionSettings.m_VolumeResolution;
+            TextureDescriptor.m_NumberOfPixelsW = m_ReconstructionSettings.m_VolumeResolution;
+            TextureDescriptor.m_Format = CTextureBase::R16G16_FLOAT;
+
+            RootGrid.m_TSDFVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
+
+            if (m_ReconstructionSettings.m_CaptureColor)
+            {
+                TextureDescriptor.m_Format = CTextureBase::R8G8B8A8_UBYTE;
+
+                RootGrid.m_ColorVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
+            }
+        }*/
 	}
 
 	// -----------------------------------------------------------------------------
@@ -824,8 +812,8 @@ namespace MR
         ConstantBufferDesc.m_Usage = CBuffer::GPURead;
         ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
         ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(float) * g_HierarchyLevelCount;
-        ConstantBufferDesc.m_pBytes = const_cast<float*>(g_HierarchyResolutions);
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(float) * MR::SReconstructionSettings::GRID_LEVELS;
+        ConstantBufferDesc.m_pBytes = m_ReconstructionSettings.m_GridResolutions;
         m_HierarchyConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
         ConstantBufferDesc.m_Usage = CBuffer::GPUToCPU;
@@ -834,6 +822,7 @@ namespace MR
         ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t);
         ConstantBufferDesc.m_pBytes = nullptr;
         m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        m_RootGridInstanceBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
 		unsigned int Zero = 0;
 				
@@ -936,9 +925,9 @@ namespace MR
             IntegrateOld();
             Performance::EndEvent();
 
-            Performance::BeginEvent("New integration");
-            Integrate();
-            Performance::EndEvent();
+            /*Performance::BeginEvent("New integration");
+            RasterizeRootGrids();
+            Performance::EndEvent();*/
         }
 
         Raycast();
@@ -1192,7 +1181,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::Integrate()
+    void CScalableSLAMReconstructor::RasterizeRootGrids()
     {
         ContextManager::SetViewPortSet(m_DepthViewPortSetPtr);
         ContextManager::SetTargetSet(m_TargetSetPtr);
@@ -1206,8 +1195,9 @@ namespace MR
 
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
-        ContextManager::SetConstantBuffer(2, m_PositionConstantBufferPtr);
         ContextManager::SetConstantBuffer(3, m_HierarchyConstantBufferPtr);
+
+        ContextManager::SetResourceBuffer(2, m_RootGridInstanceBufferPtr);
         
         ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
         ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
@@ -1218,25 +1208,7 @@ namespace MR
 
         ContextManager::Barrier();
 
-        int Index = 0;
-
-        for (auto& rEntry : m_RootGrids)
-        {
-            SRootGrid& rRootGrid = rEntry.second;
-
-            if (rRootGrid.m_IsVisible)
-            {
-                SPositionBuffer PositionBuffer;
-                PositionBuffer.m_Position[0] = rRootGrid.m_Offset[0] * m_ReconstructionSettings.m_VolumeSize;
-                PositionBuffer.m_Position[1] = rRootGrid.m_Offset[1] * m_ReconstructionSettings.m_VolumeSize;
-                PositionBuffer.m_Position[2] = rRootGrid.m_Offset[2] * m_ReconstructionSettings.m_VolumeSize;
-                PositionBuffer.m_Index = Index++;
-
-                BufferManager::UploadConstantBufferData(m_PositionConstantBufferPtr, &PositionBuffer);
-                
-                ContextManager::DrawIndexed(36, 0, 0);
-            }
-        }
+        ContextManager::DrawIndexedInstanced(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfVertices(), m_RootGridMap.size(), 0, 0, 0);
 
         ContextManager::ResetShaderVS();
         ContextManager::ResetShaderPS();
@@ -1267,7 +1239,7 @@ namespace MR
 			ContextManager::ResetImageTexture(3);
 		}
 
-		for (auto& rEntry : m_RootGrids)
+		for (auto& rEntry : m_RootGridMap)
 		{
 			SRootGrid& rRootGrid = rEntry.second;
 
@@ -1337,7 +1309,7 @@ namespace MR
 
         ContextManager::SetShaderCS(m_RaycastCSPtr);
 
-		ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_RootGrids[Int3(0, 0, 0)].m_TSDFVolumePtr));
+		ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_RootGridMap[Int3(0, 0, 0)].m_TSDFVolumePtr));
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
 
         ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RaycastVertexMapPtr[0]));
@@ -1353,7 +1325,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::ClearAtomicCounterImage()
+    void CScalableSLAMReconstructor::ClearAtomicCounterBuffer()
     {
         const int WorkGroups = m_AtomicCounterBufferPtr->GetNumberOfBytes() / sizeof(uint32_t);
 
@@ -1370,7 +1342,7 @@ namespace MR
 
     void CScalableSLAMReconstructor::ResetReconstruction(const SReconstructionSettings* pReconstructionSettings)
     {
-		m_RootGrids.clear();
+		m_RootGridMap.clear();
 
         if (pReconstructionSettings != nullptr)
         {
