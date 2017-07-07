@@ -104,8 +104,8 @@ namespace
     
     struct SIndexedIndirect 
     {
-        uint32_t m_Count;
-        uint32_t m_PrimCount;
+        uint32_t m_IndexCount;
+        uint32_t m_InstanceCount;
         uint32_t m_FirstIndex;
         uint32_t m_BaseVertex;
         uint32_t m_BaseInstance;
@@ -593,6 +593,10 @@ namespace MR
         ContextManager::Barrier();
 
         ContextManager::SetShaderCS(m_GatherCountersCSPtr);
+
+        SIndexedIndirect IndirectBufferData = {};
+        IndirectBufferData.m_IndexCount = 36;
+        BufferManager::UploadConstantBufferData(m_IndexedIndirectBufferPtr, &IndirectBufferData);
 
         ContextManager::SetConstantBuffer(0, m_GatherCountersBufferPtr);
         ContextManager::SetResourceBuffer(0, m_AtomicCounterBufferPtr);
