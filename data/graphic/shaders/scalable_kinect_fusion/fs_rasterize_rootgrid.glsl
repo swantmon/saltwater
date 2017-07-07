@@ -2,6 +2,8 @@
 #ifndef __INCLUDE_FS_RASTERIZE_ROOTGRID_GLSL__
 #define __INCLUDE_FS_RASTERIZE_ROOTGRID_GLSL__
 
+#include "scalable_kinect_fusion/common_tracking.glsl"
+
 // -----------------------------------------------------------------------------
 // Shader storage buffers
 // -----------------------------------------------------------------------------
@@ -61,6 +63,7 @@ bool InBox()
     vec3 AABBMax = AABBPosition + VOLUME_SIZE;
 
     vec3 Vertex = imageLoad(cs_Vertex, ivec2(gl_FragCoord.xy)).xyz;
+    Vertex = (g_PoseMatrix * vec4(Vertex, 1.0f)).xyz; 
 
     return 
         Vertex.x > AABBMin.x && Vertex.x < AABBMax.x &&
@@ -80,7 +83,7 @@ void main()
     {
         atomicAdd(g_Counters[in_Index], 1);
     }
-    out_Color = vec4(InBox);
+    out_Color = InBox ? vec4(1.0f) : vec4(0.5f);
 }
 
 #endif // __INCLUDE_FS_RASTERIZE_ROOTGRID_GLSL__
