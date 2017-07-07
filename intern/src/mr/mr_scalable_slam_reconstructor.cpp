@@ -102,6 +102,15 @@ namespace
         int m_Index;
     };
     
+    struct SIndexedIndirect 
+    {
+        uint32_t m_Count;
+        uint32_t m_PrimCount;
+        uint32_t m_FirstIndex;
+        uint32_t m_BaseVertex;
+        uint32_t m_BaseInstance;
+    };
+
 } // namespace
 
 namespace MR
@@ -381,6 +390,7 @@ namespace MR
         m_ReduceSumCSPtr = 0;
         m_ClearVolumeCSPtr = 0;
 		m_RootgridDepthCSPtr = 0;
+        m_GatherCountersCSPtr = 0;
 
         m_RasterizeRootGridVSPtr = 0;
         m_RasterizeRootGridFSPtr = 0;
@@ -414,10 +424,11 @@ namespace MR
         m_IncPoseMatrixConstantBufferPtr = 0;
         m_BilateralFilterConstantBufferPtr = 0;
 		m_PositionConstantBufferPtr = 0;
-		m_DepthCounterBufferPtr = 0;
+		m_GatherCountersBufferPtr = 0;
         m_HierarchyConstantBufferPtr = 0;
         m_AtomicCounterBufferPtr = 0;
         m_RootGridInstanceBufferPtr = 0;
+        m_IndexedIndirectBufferPtr = 0;
     }
     
     // -----------------------------------------------------------------------------
@@ -478,6 +489,7 @@ namespace MR
         m_RasterizeRootGridVSPtr   = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_rasterize_rootgrid.glsl" , "main", DefineString.c_str());
         m_RasterizeRootGridFSPtr   = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_rasterize_rootgrid.glsl" , "main", DefineString.c_str());
         m_ClearAtomicCountersCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_clear_atomic_buffer.glsl", "main", DefineString.c_str());
+        m_GatherCountersCSPtr      = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_gather_counters.glsl"    , "main", DefineString.c_str());
 
         SInputElementDescriptor InputLayoutDesc = {};
 
@@ -535,6 +547,59 @@ namespace MR
 
 		return true;
 	}
+
+    // -----------------------------------------------------------------------------
+
+    void CScalableSLAMReconstructor::RasterizeRootGrids()
+    {
+        TargetSetManager::ClearTargetSet(m_TargetSetPtr);
+
+        ContextManager::SetViewPortSet(m_DepthViewPortSetPtr);
+        ContextManager::SetTargetSet(m_TargetSetPtr);
+
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBufferSet(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
+
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
+        ContextManager::SetConstantBuffer(3, m_HierarchyConstantBufferPtr);
+
+        ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
+        ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
+
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawVertexMapPtr));
+
+        ContextManager::SetResourceBuffer(0, m_AtomicCounterBufferPtr);
+        ContextManager::SetResourceBuffer(1, m_RootGridInstanceBufferPtr);
+
+        ContextManager::Barrier();
+
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+        const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
+        const unsigned int InstanceCount = static_cast<unsigned int>(m_RootGridMap.size());
+        ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
+
+        ContextManager::ResetShaderVS();
+        ContextManager::ResetShaderPS();
+    }
+
+    void CScalableSLAMReconstructor::GatherCounters()
+    {
+        ContextManager::Barrier();
+
+        ContextManager::SetShaderCS(m_GatherCountersCSPtr);
+
+        ContextManager::SetConstantBuffer(0, m_GatherCountersBufferPtr);
+        ContextManager::SetResourceBuffer(0, m_AtomicCounterBufferPtr);
+        ContextManager::SetResourceBuffer(1, m_IndexedIndirectBufferPtr);
+        
+        ContextManager::Dispatch(static_cast<unsigned int>(m_RootGridMap.size()), 1, 1);
+    }
 
 	// -----------------------------------------------------------------------------
     
@@ -637,6 +702,7 @@ namespace MR
         BufferManager::UnmapConstantBuffer(m_RootGridInstanceBufferPtr);
 
         RasterizeRootGrids();
+        GatherCounters();
 
         /*{
             GLint Memory;
@@ -829,21 +895,18 @@ namespace MR
         m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         m_RootGridInstanceBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
-		unsigned int Zero = 0;
-				
-		ConstantBufferDesc.m_Binding = CBuffer::AtomicCounterBuffer;
-		ConstantBufferDesc.m_Access = CBuffer::CPURead;
-		ConstantBufferDesc.m_NumberOfBytes = 4;
-		ConstantBufferDesc.m_pBytes = &Zero;
-#ifdef USE_PERISTENT_MAPPING
-		ConstantBufferDesc.m_Usage = CBuffer::Persistent;
-		m_DepthCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-		BufferManager::MapAtomicCounterBufferRange(m_DepthCounterBufferPtr, CBuffer::ReadWritePersistent, 0, 4);
-#else
-		ConstantBufferDesc.m_Usage = CBuffer::GPUToCPU;
-		m_DepthCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-#endif // USE_PERISTENT_MAPPING
-
+        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
+        ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
+        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(SIndexedIndirect);
+        m_IndexedIndirectBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        				
+		ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
+		ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
+		ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t);
+		ConstantBufferDesc.m_pBytes = nullptr;
+		ConstantBufferDesc.m_Usage = CBuffer::GPURead;
+		m_GatherCountersBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
 
     // -----------------------------------------------------------------------------
@@ -929,10 +992,6 @@ namespace MR
             Performance::BeginEvent("Old integration");
             IntegrateOld();
             Performance::EndEvent();
-
-            /*Performance::BeginEvent("New integration");
-            RasterizeRootGrids();
-            Performance::EndEvent();*/
         }
 
         Raycast();
@@ -1197,47 +1256,7 @@ namespace MR
         rIncPoseMatrix = Translation * Rotation * rIncPoseMatrix;
 
         return true;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CScalableSLAMReconstructor::RasterizeRootGrids()
-    {
-        TargetSetManager::ClearTargetSet(m_TargetSetPtr);
-
-        ContextManager::SetViewPortSet(m_DepthViewPortSetPtr);
-        ContextManager::SetTargetSet(m_TargetSetPtr);
-
-        const unsigned int Offset = 0;
-        ContextManager::SetVertexBufferSet(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
-        ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
-        ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
-
-        ContextManager::SetTopology(STopology::TriangleList);
-
-        ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
-        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
-        ContextManager::SetConstantBuffer(3, m_HierarchyConstantBufferPtr);
-
-        ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
-        ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
-
-        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawVertexMapPtr));
-
-        ContextManager::SetResourceBuffer(0, m_AtomicCounterBufferPtr);
-        ContextManager::SetResourceBuffer(1, m_RootGridInstanceBufferPtr);
-
-        ContextManager::Barrier();
-
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-        const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
-        const unsigned int InstanceCount = static_cast<unsigned int>(m_RootGridMap.size());
-        ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
-
-        ContextManager::ResetShaderVS();
-        ContextManager::ResetShaderPS();
-    }
+    }    
 
     // -----------------------------------------------------------------------------
 

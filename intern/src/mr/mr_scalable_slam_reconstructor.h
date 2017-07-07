@@ -115,6 +115,8 @@ namespace MR
 
         void CreateReferencePyramid();
         void RasterizeRootGrids();
+        void GatherCounters();
+
         void IntegrateOld();
         void Raycast();
         void CreateRaycastPyramid();
@@ -148,8 +150,9 @@ namespace MR
         Gfx::CBufferPtr m_PositionConstantBufferPtr;
         Gfx::CBufferPtr m_HierarchyConstantBufferPtr;
         Gfx::CBufferPtr m_RootGridInstanceBufferPtr;
+        Gfx::CBufferPtr m_IndexedIndirectBufferPtr;
 
-		Gfx::CBufferPtr m_DepthCounterBufferPtr;
+		Gfx::CBufferPtr m_GatherCountersBufferPtr;
 
         Gfx::CShaderPtr m_ClearVolumeCSPtr;
         Gfx::CShaderPtr m_BilateralFilterCSPtr;
@@ -162,6 +165,7 @@ namespace MR
         Gfx::CShaderPtr m_DetermineSummandsCSPtr;
         Gfx::CShaderPtr m_ReduceSumCSPtr;
 		Gfx::CShaderPtr m_RootgridDepthCSPtr;
+        Gfx::CShaderPtr m_GatherCountersCSPtr;
 
         Gfx::CShaderPtr m_RasterizeRootGridVSPtr;
         Gfx::CShaderPtr m_RasterizeRootGridFSPtr;
