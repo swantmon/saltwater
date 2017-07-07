@@ -550,7 +550,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::RasterizeRootGrids()
+    void CScalableSLAMReconstructor::RasterizeRootVolumes()
     {
         TargetSetManager::ClearTargetSet(m_TargetSetPtr);
 
@@ -689,7 +689,7 @@ namespace MR
 
         BufferManager::UnmapConstantBuffer(m_RootGridInstanceBufferPtr);
 
-        RasterizeRootGrids();
+        RasterizeRootVolumes();
         GatherCounters();
 
         /*{
