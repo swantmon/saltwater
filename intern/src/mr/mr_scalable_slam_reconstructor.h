@@ -103,7 +103,8 @@ namespace MR
 		bool RootGridInFrustum(const Base::Int3& rKey);
 		bool RootGridContainsDepth(const Base::Int3& rKey);
 		void UpdateRootrids();
-        void ClearAtomicCounterBuffer();
+        void ResizeInstanceBuffers(size_t Size);
+        void ClearAtomicCounterBuffer(size_t Size);
 
 		void SetupData();
         void SetupMeshes();

@@ -649,24 +649,8 @@ namespace MR
 			}
 		}
 
-        if (m_RootGridMap.size() > m_AtomicCounterBufferPtr->GetNumberOfBytes() / sizeof(uint32_t))
-        {
-            SBufferDescriptor BufferDesc = {};
-
-            BufferDesc.m_Usage = CBuffer::GPUToCPU;
-            BufferDesc.m_Binding = CBuffer::ResourceBuffer;
-            BufferDesc.m_Access = CBuffer::CPURead;
-            BufferDesc.m_NumberOfBytes = static_cast<unsigned int>(sizeof(uint32_t) * m_RootGridMap.size());
-            BufferDesc.m_pBytes = nullptr;
-            m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(BufferDesc);
-
-            BufferDesc.m_Usage = CBuffer::GPURead;
-            BufferDesc.m_Binding = CBuffer::ResourceBuffer;
-            BufferDesc.m_Access = CBuffer::CPUWrite;
-            BufferDesc.m_NumberOfBytes = static_cast<unsigned int>(sizeof(SInstanceData) * m_RootGridMap.size());
-            m_RootGridInstanceBufferPtr = BufferManager::CreateBuffer(BufferDesc);
-        }
-        ClearAtomicCounterBuffer();
+        ResizeInstanceBuffers(m_RootGridMap.size());
+        ClearAtomicCounterBuffer(m_RootGridMap.size());
         
         STextureDescriptor TextureDescriptor = {};
 
@@ -1369,9 +1353,32 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::ClearAtomicCounterBuffer()
+    void CScalableSLAMReconstructor::ResizeInstanceBuffers(size_t Size)
     {
-        const int WorkGroups = m_AtomicCounterBufferPtr->GetNumberOfBytes() / sizeof(uint32_t);
+        if (Size > m_AtomicCounterBufferPtr->GetNumberOfBytes() / sizeof(uint32_t))
+        {
+            SBufferDescriptor BufferDesc = {};
+
+            BufferDesc.m_Usage = CBuffer::GPUToCPU;
+            BufferDesc.m_Binding = CBuffer::ResourceBuffer;
+            BufferDesc.m_Access = CBuffer::CPURead;
+            BufferDesc.m_NumberOfBytes = static_cast<unsigned int>(sizeof(uint32_t) * Size);
+            BufferDesc.m_pBytes = nullptr;
+            m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(BufferDesc);
+
+            BufferDesc.m_Usage = CBuffer::GPURead;
+            BufferDesc.m_Binding = CBuffer::ResourceBuffer;
+            BufferDesc.m_Access = CBuffer::CPUWrite;
+            BufferDesc.m_NumberOfBytes = static_cast<unsigned int>(sizeof(SInstanceData) * Size);
+            m_RootGridInstanceBufferPtr = BufferManager::CreateBuffer(BufferDesc);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CScalableSLAMReconstructor::ClearAtomicCounterBuffer(size_t Size)
+    {
+        const int WorkGroups = static_cast<int>(Size);
 
         ContextManager::SetShaderCS(m_ClearAtomicCountersCSPtr);
         
