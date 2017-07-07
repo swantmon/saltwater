@@ -588,6 +588,8 @@ namespace MR
         ContextManager::ResetShaderPS();
     }
 
+    // -----------------------------------------------------------------------------
+
     void CScalableSLAMReconstructor::GatherCounters()
     {
         ContextManager::Barrier();
@@ -691,6 +693,10 @@ namespace MR
 
         RasterizeRootVolumes();
         GatherCounters();
+
+        SIndexedIndirect* pIndirectData = static_cast<SIndexedIndirect*>(BufferManager::MapConstantBuffer(m_IndexedIndirectBufferPtr, CBuffer::ReadWrite));
+
+        BufferManager::UnmapConstantBuffer(m_IndexedIndirectBufferPtr);
 
         /*{
             GLint Memory;
