@@ -391,6 +391,7 @@ namespace MR
         m_ClearVolumeCSPtr = 0;
 		m_RootgridDepthCSPtr = 0;
         m_GatherCountersCSPtr = 0;
+        m_RasterizationBufferPtr = 0;
 
         m_RasterizeRootGridVSPtr = 0;
         m_RasterizeRootGridFSPtr = 0;
@@ -566,6 +567,7 @@ namespace MR
 
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
+        ContextManager::SetConstantBuffer(2, m_RasterizationBufferPtr);
         ContextManager::SetConstantBuffer(3, m_HierarchyConstantBufferPtr);
 
         ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
@@ -691,6 +693,7 @@ namespace MR
 
         BufferManager::UnmapConstantBuffer(m_RootGridInstanceBufferPtr);
 
+        BufferManager::UploadConstantBufferData(m_RasterizationBufferPtr, &m_GridSizes[0]);
         RasterizeRootVolumes();
         GatherCounters();
 
@@ -897,10 +900,17 @@ namespace MR
         				
 		ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
 		ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
-		ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t);
+		ConstantBufferDesc.m_NumberOfBytes = 16;
 		ConstantBufferDesc.m_pBytes = nullptr;
 		ConstantBufferDesc.m_Usage = CBuffer::GPURead;
 		m_GatherCountersBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
+        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
+        ConstantBufferDesc.m_NumberOfBytes = 16;
+        ConstantBufferDesc.m_pBytes = nullptr;
+        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
+        m_RasterizationBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
 
     // -----------------------------------------------------------------------------
