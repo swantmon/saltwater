@@ -102,7 +102,7 @@ namespace MR
 		float GetPointPlaneDistance(const Base::Float3& rPoint, const Base::Float4& rPlane);
 		bool RootGridInFrustum(const Base::Int3& rKey);
 		void UpdateRootrids();
-        void IntegrateRootgrid(unsigned int Index);
+        void IntegrateSingleRootGrid(unsigned int Index);
         void ResizeInstanceBuffers(size_t Size);
         void ClearAtomicCounterBuffer(size_t Size);
 
@@ -152,7 +152,7 @@ namespace MR
         Gfx::CBufferPtr m_HierarchyConstantBufferPtr;
         Gfx::CBufferPtr m_RootGridInstanceBufferPtr;
         Gfx::CBufferPtr m_IndexedIndirectBufferPtr;
-		Gfx::CBufferPtr m_VolumelQueueBufferPtr;
+		Gfx::CBufferPtr m_VolumeQueueBufferPtr;
 
         Gfx::CShaderPtr m_ClearVolumeCSPtr;
         Gfx::CShaderPtr m_BilateralFilterCSPtr;

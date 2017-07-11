@@ -424,7 +424,7 @@ namespace MR
         m_IncPoseMatrixConstantBufferPtr = 0;
         m_BilateralFilterConstantBufferPtr = 0;
 		m_PositionConstantBufferPtr = 0;
-		m_VolumelQueueBufferPtr = 0;
+		m_VolumeQueueBufferPtr = 0;
         m_HierarchyConstantBufferPtr = 0;
         m_AtomicCounterBufferPtr = 0;
         m_RootGridInstanceBufferPtr = 0;
@@ -604,9 +604,9 @@ namespace MR
 
         ContextManager::SetResourceBuffer(0, m_AtomicCounterBufferPtr);
         ContextManager::SetResourceBuffer(1, m_IndexedIndirectBufferPtr);
-        ContextManager::SetResourceBuffer(2, m_VolumelQueueBufferPtr);
+        ContextManager::SetResourceBuffer(2, m_VolumeQueueBufferPtr);
         
-        ContextManager::Dispatch(Size, 1, 1);
+        ContextManager::Dispatch(GetWorkGroupCount(Size, g_TileSize1D), 1, 1);
     }
 
 	// -----------------------------------------------------------------------------
@@ -752,14 +752,17 @@ namespace MR
         // Integrate depth into individual root volume grids
         ////////////////////////////////////////////////////////////////////////////////
 
-        std::vector<uint32_t> VolumeQueue(VolumeCount);
-        uint32_t* pVoxelQueue = static_cast<uint32_t*>(BufferManager::MapConstantBufferRange(m_VolumelQueueBufferPtr, CBuffer::Read, 0, VolumeCount * sizeof(uint32_t)));
-        memcpy(VolumeQueue.data(), pVoxelQueue, sizeof(uint32_t) * VolumeCount);
-        BufferManager::UnmapConstantBuffer(m_VolumelQueueBufferPtr);
-
-        for (uint32_t VolumeIndex : VolumeQueue)
+        if (VolumeCount > 0)
         {
-            IntegrateSingleRootGrid(VolumeIndex);
+            std::vector<uint32_t> VolumeQueue(VolumeCount);
+            uint32_t* pVoxelQueue = static_cast<uint32_t*>(BufferManager::MapConstantBufferRange(m_VolumeQueueBufferPtr, CBuffer::Read, 0, VolumeCount * sizeof(uint32_t)));
+            memcpy(VolumeQueue.data(), pVoxelQueue, sizeof(uint32_t) * VolumeCount);
+            BufferManager::UnmapConstantBuffer(m_VolumeQueueBufferPtr);
+
+            for (uint32_t VolumeIndex : VolumeQueue)
+            {
+                IntegrateSingleRootGrid(VolumeIndex);
+            }
         }
 
         /*{
@@ -964,7 +967,7 @@ namespace MR
         ConstantBufferDesc.m_NumberOfBytes = 16;
         ConstantBufferDesc.m_pBytes = nullptr;
         ConstantBufferDesc.m_Usage = CBuffer::GPURead;
-        m_VolumelQueueBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        m_VolumeQueueBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
 
     // -----------------------------------------------------------------------------
@@ -1447,7 +1450,7 @@ namespace MR
             m_RootGridInstanceBufferPtr = BufferManager::CreateBuffer(BufferDesc);
 
             BufferDesc.m_NumberOfBytes = static_cast<unsigned int>(sizeof(uint32_t) * Size);
-            m_VolumelQueueBufferPtr = BufferManager::CreateBuffer(BufferDesc);
+            m_VolumeQueueBufferPtr = BufferManager::CreateBuffer(BufferDesc);
         }
     }
 
