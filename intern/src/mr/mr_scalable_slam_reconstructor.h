@@ -166,7 +166,10 @@ namespace MR
         Gfx::CShaderPtr m_DetermineSummandsCSPtr;
         Gfx::CShaderPtr m_ReduceSumCSPtr;
 		Gfx::CShaderPtr m_RootgridDepthCSPtr;
-        Gfx::CShaderPtr m_GatherCountersCSPtr;
+        Gfx::CShaderPtr m_VolumeCountersCSPtr;
+        Gfx::CShaderPtr m_RasterizeRootVolumeVSPtr;
+        Gfx::CShaderPtr m_RasterizeRootVolumeFSPtr;
+        Gfx::CShaderPtr m_GridCountersCSPtr;
 
         Gfx::CShaderPtr m_RasterizeRootGridVSPtr;
         Gfx::CShaderPtr m_RasterizeRootGridFSPtr;

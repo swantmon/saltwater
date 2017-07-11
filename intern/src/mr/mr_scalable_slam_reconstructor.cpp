@@ -390,11 +390,11 @@ namespace MR
         m_ReduceSumCSPtr = 0;
         m_ClearVolumeCSPtr = 0;
 		m_RootgridDepthCSPtr = 0;
-        m_GatherCountersCSPtr = 0;
+        m_VolumeCountersCSPtr = 0;
         m_RasterizationBufferPtr = 0;
 
-        m_RasterizeRootGridVSPtr = 0;
-        m_RasterizeRootGridFSPtr = 0;
+        m_RasterizeRootVolumeVSPtr = 0;
+        m_RasterizeRootVolumeFSPtr = 0;
         m_ClearAtomicCountersCSPtr = 0;
 
         m_CubeMeshPtr = 0;
@@ -487,10 +487,13 @@ namespace MR
         m_ReduceSumCSPtr           = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_reduce_sum.glsl"            , "main", DefineString.c_str());
         m_ClearVolumeCSPtr         = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_clear_volume.glsl"          , "main", DefineString.c_str());
 		m_RootgridDepthCSPtr       = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_rootgrid_depth.glsl"        , "main", DefineString.c_str());
-        m_RasterizeRootGridVSPtr   = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_rasterize_rootvolume.glsl"  , "main", DefineString.c_str());
-        m_RasterizeRootGridFSPtr   = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_rasterize_rootvolume.glsl"  , "main", DefineString.c_str());
+        m_RasterizeRootVolumeVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_rasterize_rootvolume.glsl"  , "main", DefineString.c_str());
+        m_RasterizeRootVolumeFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_rasterize_rootvolume.glsl"  , "main", DefineString.c_str());
         m_ClearAtomicCountersCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_clear_atomic_buffer.glsl"   , "main", DefineString.c_str());
-        m_GatherCountersCSPtr      = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_gather_volume_counters.glsl", "main", DefineString.c_str());
+        m_VolumeCountersCSPtr      = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_volume_counters.glsl"       , "main", DefineString.c_str());
+        m_RasterizeRootGridVSPtr   = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_rasterize_grid.glsl"        , "main", DefineString.c_str());
+        m_RasterizeRootGridFSPtr   = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_rasterize_grid.glsl"        , "main", DefineString.c_str());
+        m_GridCountersCSPtr        = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_grid_counters.glsl"         , "main", DefineString.c_str());
 
         SInputElementDescriptor InputLayoutDesc = {};
 
@@ -503,7 +506,7 @@ namespace MR
         InputLayoutDesc.m_InputSlotClass = CInputLayout::PerVertex;
         InputLayoutDesc.m_InstanceDataStepRate = 0;
 
-        m_CubeInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_RasterizeRootGridVSPtr);
+        m_CubeInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_RasterizeRootVolumeVSPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -570,8 +573,8 @@ namespace MR
         ContextManager::SetConstantBuffer(2, m_RasterizationBufferPtr);
         ContextManager::SetConstantBuffer(3, m_HierarchyConstantBufferPtr);
 
-        ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
-        ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
+        ContextManager::SetShaderVS(m_RasterizeRootVolumeVSPtr);
+        ContextManager::SetShaderPS(m_RasterizeRootVolumeFSPtr);
 
         ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawVertexMapPtr));
 
@@ -596,7 +599,7 @@ namespace MR
     {
         ContextManager::Barrier();
 
-        ContextManager::SetShaderCS(m_GatherCountersCSPtr);
+        ContextManager::SetShaderCS(m_VolumeCountersCSPtr);
 
         SIndexedIndirect IndirectBufferData = {};
         IndirectBufferData.m_IndexCount = 36;
@@ -613,7 +616,9 @@ namespace MR
     
     void CScalableSLAMReconstructor::IntegrateRootgrid(unsigned int Index)
     {
+        SRootGrid& rRootGrid = *m_RootGridVector[Index];
 
+        
     }
 
     // -----------------------------------------------------------------------------
