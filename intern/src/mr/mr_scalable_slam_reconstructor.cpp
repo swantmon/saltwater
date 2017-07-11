@@ -679,7 +679,9 @@ namespace MR
 
         BufferManager::UploadConstantBufferData(m_GridRasterizationBufferPtr, &GridData);
 
-        int InstanceCount = GridData.m_Resolution * GridData.m_Resolution * GridData.m_Resolution;        
+        int InstanceCount = GridData.m_Resolution * GridData.m_Resolution * GridData.m_Resolution;
+
+        ClearBuffer(m_GridAtomicCounterBufferPtr, 4096); // todo: remove
 
         const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
@@ -742,7 +744,7 @@ namespace MR
         ////////////////////////////////////////////////////////////////////////////////
 
         ResizeInstanceBuffers(m_RootGridMap.size());
-        ClearAtomicCounterBuffer(m_RootGridMap.size());
+        ClearBuffer(m_AtomicCounterBufferPtr, m_RootGridMap.size());
         
         ////////////////////////////////////////////////////////////////////////////////
         // Create vector and instance buffer for root grid volumes
@@ -1502,13 +1504,13 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::ClearAtomicCounterBuffer(size_t Size)
+    void CScalableSLAMReconstructor::ClearBuffer(CBufferPtr BufferPtr, size_t Size)
     {
         const int WorkGroups = static_cast<int>(Size);
 
         ContextManager::SetShaderCS(m_ClearAtomicCountersCSPtr);
         
-        ContextManager::SetResourceBuffer(0, m_AtomicCounterBufferPtr);
+        ContextManager::SetResourceBuffer(0, BufferPtr);
         
         ContextManager::Barrier();
 
