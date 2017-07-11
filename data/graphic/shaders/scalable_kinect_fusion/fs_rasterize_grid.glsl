@@ -4,33 +4,33 @@
 
 #include "scalable_kinect_fusion/common_tracking.glsl"
 
+uvec3 Indexto3D(uint Index, uint Resolution)
+{
+    uint z = Index / (Resolution * Resolution);
+    Index -= (z * Resolution * Resolution);
+    uint y = Index / Resolution;
+    uint x = Index % Resolution;
+    return uvec3(x, y, z);
+}
+
 // -----------------------------------------------------------------------------
 // Shader storage buffers
 // -----------------------------------------------------------------------------
 
-struct SInstanceData
-{
-    ivec3 m_Offset;
-    int m_Index;
-};
-
-layout(std430, binding = 0) buffer AtomicBuffer
+layout(std430, binding = 1) buffer AtomicCounterBuffer
 {
     uint g_Counters[];
-};
-
-layout(std430, binding = 1) buffer InstanceBuffer
-{
-    SInstanceData g_InstanceData[];
 };
 
 // -----------------------------------------------------------------------------
 // Uniform buffers
 // -----------------------------------------------------------------------------
 
-layout(row_major, std140, binding = 3) uniform UBOHierarchy
+layout(row_major, std140, binding = 2) uniform UBOTransform
 {
-    float g_HierarchyResolutions[HIERARCHY_LEVELS];
+    uint g_Resolution;
+    float g_CubeSize;
+    ivec3 g_Offset;
 };
 
 // -----------------------------------------------------------------------------
@@ -43,7 +43,7 @@ layout(binding = 0, MAP_TEXTURE_FORMAT) readonly uniform image2D cs_Vertex;
 // Input
 // -----------------------------------------------------------------------------
 
-layout(location = 0) in flat int in_Index;
+layout(location = 0) in flat uint in_Index;
 
 // -----------------------------------------------------------------------------
 // Output
@@ -57,7 +57,7 @@ layout(location = 0) out vec4 out_Color;
 
 bool InBox()
 {
-    vec3 AABBPosition = g_InstanceData[in_Index].m_Offset * VOLUME_SIZE;
+    vec3 AABBPosition = Indexto3D(in_Index, g_Resolution) * float(VOLUME_SIZE);
     
     vec3 AABBMin = AABBPosition;
     vec3 AABBMax = AABBPosition + VOLUME_SIZE;

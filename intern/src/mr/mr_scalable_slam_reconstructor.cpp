@@ -111,6 +111,13 @@ namespace
         uint32_t m_BaseInstance;
     };
 
+    struct SGridRasterization
+    {
+        uint32_t m_Resolution;
+        float m_GridSize;
+        Base::Int3 m_Offset;
+    };
+
 } // namespace
 
 namespace MR
@@ -427,8 +434,10 @@ namespace MR
 		m_VolumeQueueBufferPtr = 0;
         m_HierarchyConstantBufferPtr = 0;
         m_AtomicCounterBufferPtr = 0;
-        m_RootGridInstanceBufferPtr = 0;
+        m_RootVolumeInstanceBufferPtr = 0;
         m_IndexedIndirectBufferPtr = 0;
+        m_GridRasterizationBufferPtr = 0;
+        m_GridQueueBufferPtr = 0;
     }
     
     // -----------------------------------------------------------------------------
@@ -576,7 +585,7 @@ namespace MR
         ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawVertexMapPtr));
 
         ContextManager::SetResourceBuffer(0, m_AtomicCounterBufferPtr);
-        ContextManager::SetResourceBuffer(1, m_RootGridInstanceBufferPtr);
+        ContextManager::SetResourceBuffer(1, m_RootVolumeInstanceBufferPtr);
 
         ContextManager::Barrier();
 
@@ -631,23 +640,19 @@ namespace MR
 
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
-        ContextManager::SetConstantBuffer(3, m_HierarchyConstantBufferPtr);
+        ContextManager::SetConstantBuffer(2, m_GridRasterizationBufferPtr);
 
         ContextManager::SetShaderVS(m_RasterizeRootVolumeVSPtr);
         ContextManager::SetShaderPS(m_RasterizeRootVolumeFSPtr);
 
         ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawVertexMapPtr));
 
-        ContextManager::SetResourceBuffer(0, m_AtomicCounterBufferPtr);
-        ContextManager::SetResourceBuffer(1, m_RootGridInstanceBufferPtr);
+        ContextManager::SetResourceBuffer(0, m_GridAtomicCounterBufferPtr);
+        ContextManager::SetResourceBuffer(1, m_GridQueueBufferPtr);
 
         ContextManager::Barrier();
 
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-        const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
-        const unsigned int InstanceCount = static_cast<unsigned int>(m_RootGridMap.size());
-        ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
 
         ////////////////////////////////////////////////////////////////////////////////
         // Integrate individual grids
@@ -655,6 +660,7 @@ namespace MR
 
         for (uint32_t VolumeIndex : rVolumeQueue)
         {
+            assert(m_RootGridVector[VolumeIndex] != nullptr);
             IntegrateSingleRootGrid(*m_RootGridVector[VolumeIndex]);
         }
 
@@ -666,7 +672,17 @@ namespace MR
 
     void CScalableSLAMReconstructor::IntegrateSingleRootGrid(SRootGrid& rRootGrid)
     {
+        SGridRasterization GridData = {};
+        GridData.m_Resolution = m_ReconstructionSettings.m_GridResolutions[0];
+        GridData.m_GridSize = m_GridSizes[0] / GridData.m_Resolution;
+        GridData.m_Offset = rRootGrid.m_Offset;
 
+        BufferManager::UploadConstantBufferData(m_GridRasterizationBufferPtr, &GridData);
+
+        int InstanceCount = GridData.m_Resolution * GridData.m_Resolution * GridData.m_Resolution;        
+
+        const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
+        ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
     }
 
     // -----------------------------------------------------------------------------
@@ -734,7 +750,7 @@ namespace MR
 
         m_RootGridVector.resize(m_RootGridMap.size());
         int Index = 0;
-        SInstanceData* pInstanceData = static_cast<SInstanceData*>(BufferManager::MapConstantBuffer(m_RootGridInstanceBufferPtr, CBuffer::Write));
+        SInstanceData* pInstanceData = static_cast<SInstanceData*>(BufferManager::MapConstantBuffer(m_RootVolumeInstanceBufferPtr, CBuffer::Write));
 
 		for (auto& rPair : m_RootGridMap)
 		{
@@ -752,7 +768,7 @@ namespace MR
             ++pInstanceData;
         }
 
-        BufferManager::UnmapConstantBuffer(m_RootGridInstanceBufferPtr);
+        BufferManager::UnmapConstantBuffer(m_RootVolumeInstanceBufferPtr);
 
         ////////////////////////////////////////////////////////////////////////////////
         // Check all possible root grid volumes for depth data
@@ -969,7 +985,7 @@ namespace MR
         ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t);
         ConstantBufferDesc.m_pBytes = nullptr;
         m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-        m_RootGridInstanceBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        m_RootVolumeInstanceBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
         ConstantBufferDesc.m_Usage = CBuffer::GPURead;
         ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
@@ -983,6 +999,21 @@ namespace MR
         ConstantBufferDesc.m_pBytes = nullptr;
         ConstantBufferDesc.m_Usage = CBuffer::GPURead;
         m_VolumeQueueBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
+        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(SGridRasterization);
+        ConstantBufferDesc.m_pBytes = nullptr;
+        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
+        m_GridRasterizationBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
+        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
+        ConstantBufferDesc.m_NumberOfBytes = 4096 * sizeof(uint32_t); // todo: remove magic number
+        ConstantBufferDesc.m_pBytes = nullptr;
+        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
+        m_GridAtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        m_GridQueueBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
 
     // -----------------------------------------------------------------------------
@@ -1462,7 +1493,7 @@ namespace MR
             BufferDesc.m_Binding = CBuffer::ResourceBuffer;
             BufferDesc.m_Access = CBuffer::CPUWrite;
             BufferDesc.m_NumberOfBytes = static_cast<unsigned int>(sizeof(SInstanceData) * Size);
-            m_RootGridInstanceBufferPtr = BufferManager::CreateBuffer(BufferDesc);
+            m_RootVolumeInstanceBufferPtr = BufferManager::CreateBuffer(BufferDesc);
 
             BufferDesc.m_NumberOfBytes = static_cast<unsigned int>(sizeof(uint32_t) * Size);
             m_VolumeQueueBufferPtr = BufferManager::CreateBuffer(BufferDesc);
