@@ -592,7 +592,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::GatherCounters()
+    void CScalableSLAMReconstructor::GatherCounters(unsigned int Size)
     {
         ContextManager::Barrier();
 
@@ -606,7 +606,7 @@ namespace MR
         ContextManager::SetResourceBuffer(0, m_AtomicCounterBufferPtr);
         ContextManager::SetResourceBuffer(1, m_IndexedIndirectBufferPtr);
         
-        ContextManager::Dispatch(static_cast<unsigned int>(m_RootGridMap.size()), 1, 1);
+        ContextManager::Dispatch(Size, 1, 1);
     }
 
 	// -----------------------------------------------------------------------------
@@ -695,7 +695,7 @@ namespace MR
 
         BufferManager::UploadConstantBufferData(m_RasterizationBufferPtr, &m_GridSizes[0]);
         RasterizeRootVolumes();
-        GatherCounters();
+        GatherCounters(static_cast<unsigned int>(m_RootGridMap.size()));
 
         SIndexedIndirect* pIndirectData = static_cast<SIndexedIndirect*>(BufferManager::MapConstantBuffer(m_IndexedIndirectBufferPtr, CBuffer::ReadWrite));
 

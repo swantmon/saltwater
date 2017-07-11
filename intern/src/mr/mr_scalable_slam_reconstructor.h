@@ -115,7 +115,7 @@ namespace MR
 
         void CreateReferencePyramid();
         void RasterizeRootVolumes();
-        void GatherCounters();
+        void GatherCounters(unsigned int Size);
 
         void IntegrateOld();
         void Raycast();
