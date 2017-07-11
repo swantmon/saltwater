@@ -611,9 +611,11 @@ namespace MR
 
 	// -----------------------------------------------------------------------------
     
-    void CScalableSLAMReconstructor::IntegrateSingleRootGrid(unsigned int Index)
+    void CScalableSLAMReconstructor::IntegrateSingleRootGrids(std::vector<uint32_t>& rVolumeQueue)
     {
-        SRootGrid& rRootGrid = *m_RootGridVector[Index];
+        ////////////////////////////////////////////////////////////////////////////////
+        // Prepare pipeline
+        ////////////////////////////////////////////////////////////////////////////////
 
         TargetSetManager::ClearTargetSet(m_TargetSetPtr);
 
@@ -646,6 +648,17 @@ namespace MR
         const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         const unsigned int InstanceCount = static_cast<unsigned int>(m_RootGridMap.size());
         ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // Integrate individual grids
+        ////////////////////////////////////////////////////////////////////////////////
+
+        for (uint32_t VolumeIndex : rVolumeQueue)
+        {
+            SRootGrid& rRootGrid = *m_RootGridVector[VolumeIndex];
+
+
+        }
 
         ContextManager::ResetShaderVS();
         ContextManager::ResetShaderPS();
@@ -759,10 +772,7 @@ namespace MR
             memcpy(VolumeQueue.data(), pVoxelQueue, sizeof(uint32_t) * VolumeCount);
             BufferManager::UnmapConstantBuffer(m_VolumeQueueBufferPtr);
 
-            for (uint32_t VolumeIndex : VolumeQueue)
-            {
-                IntegrateSingleRootGrid(VolumeIndex);
-            }
+            IntegrateSingleRootGrids(VolumeQueue);
         }
 
         /*{
