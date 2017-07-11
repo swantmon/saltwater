@@ -1,6 +1,6 @@
 
-#ifndef __INCLUDE_FS_RASTERIZE_ROOTGRID_GLSL__
-#define __INCLUDE_FS_RASTERIZE_ROOTGRID_GLSL__
+#ifndef __INCLUDE_FS_RASTERIZE_ROOTVOLUME_GLSL__
+#define __INCLUDE_FS_RASTERIZE_ROOTVOLUME_GLSL__
 
 #include "scalable_kinect_fusion/common_tracking.glsl"
 
@@ -22,15 +22,6 @@ layout(std430, binding = 0) buffer AtomicBuffer
 layout(std430, binding = 1) buffer InstanceBuffer
 {
     SInstanceData g_InstanceData[];
-};
-
-// -----------------------------------------------------------------------------
-// Uniform buffers
-// -----------------------------------------------------------------------------
-
-layout(row_major, std140, binding = 2) uniform UBOHierarchy
-{
-    float g_HierarchyResolutions[HIERARCHY_LEVELS];
 };
 
 // -----------------------------------------------------------------------------
@@ -86,4 +77,4 @@ void main()
     out_Color = InBox ? vec4(1.0f) : vec4(0.5f);
 }
 
-#endif // __INCLUDE_FS_RASTERIZE_ROOTGRID_GLSL__
+#endif // __INCLUDE_FS_RASTERIZE_ROOTVOLUME_GLSL__

@@ -569,15 +569,14 @@ namespace MR
 
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
-        ContextManager::SetConstantBuffer(2, m_HierarchyConstantBufferPtr);
 
         ContextManager::SetShaderVS(m_RasterizeRootVolumeVSPtr);
         ContextManager::SetShaderPS(m_RasterizeRootVolumeFSPtr);
 
         ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawVertexMapPtr));
 
-        ContextManager::SetResourceBuffer(0, m_AtomicCounterBufferPtr);
-        ContextManager::SetResourceBuffer(1, m_RootGridInstanceBufferPtr);
+        //ContextManager::SetResourceBuffer(0, m_AtomicCounterBufferPtr);
+        //ContextManager::SetResourceBuffer(1, m_RootGridInstanceBufferPtr);
 
         ContextManager::Barrier();
 

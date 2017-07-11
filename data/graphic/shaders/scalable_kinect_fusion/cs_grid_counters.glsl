@@ -1,6 +1,6 @@
 
-#ifndef __INCLUDE_CS_GATHER_COUNTERS_GLSL__
-#define __INCLUDE_CS_GATHER_COUNTERS_GLSL__
+#ifndef __INCLUDE_CS_GRID_COUNTERS_GLSL__
+#define __INCLUDE_CS_GRID_COUNTERS_GLSL__
 
 // -----------------------------------------------------------------------------
 // Buffers
@@ -43,4 +43,4 @@ void main()
     }
 }
 
-#endif // __INCLUDE_CS_GATHER_COUNTERS_GLSL__
+#endif // __INCLUDE_CS_GRID_COUNTERS_GLSL__

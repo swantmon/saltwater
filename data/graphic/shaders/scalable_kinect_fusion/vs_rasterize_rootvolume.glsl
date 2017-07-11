@@ -1,6 +1,6 @@
 
-#ifndef __INCLUDE_VS_RASTERIZE_ROOTGRID_GLSL__
-#define __INCLUDE_VS_RASTERIZE_ROOTGRID_GLSL__
+#ifndef __INCLUDE_VS_RASTERIZE_ROOTVOLUME_GLSL__
+#define __INCLUDE_VS_RASTERIZE_ROOTVOLUME_GLSL__
 
 #include "scalable_kinect_fusion/common_tracking.glsl"
 
@@ -55,4 +55,4 @@ void main()
     gl_Position = Vertex;
 }
 
-#endif // __INCLUDE_VS_RASTERIZE_ROOTGRID_GLSL__
+#endif // __INCLUDE_VS_RASTERIZE_ROOTVOLUME_GLSL__
