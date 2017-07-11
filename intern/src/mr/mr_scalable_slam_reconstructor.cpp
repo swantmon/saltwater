@@ -649,7 +649,6 @@ namespace MR
         ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawVertexMapPtr));
 
         ContextManager::SetResourceBuffer(0, m_GridAtomicCounterBufferPtr);
-        ContextManager::SetResourceBuffer(1, m_GridQueueBufferPtr);
 
         ContextManager::Barrier();
 

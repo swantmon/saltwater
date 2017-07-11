@@ -17,7 +17,7 @@ uvec3 Indexto3D(uint Index, uint Resolution)
 // Shader storage buffers
 // -----------------------------------------------------------------------------
 
-layout(std430, binding = 1) buffer AtomicCounterBuffer
+layout(std430, binding = 0) buffer AtomicCounterBuffer
 {
     uint g_Counters[];
 };
@@ -57,10 +57,11 @@ layout(location = 0) out vec4 out_Color;
 
 bool InBox()
 {
-    vec3 AABBPosition = Indexto3D(in_Index, g_Resolution) * float(VOLUME_SIZE);
+    vec3 AABBPosition = g_Offset * float(VOLUME_SIZE);
+    AABBPosition += Indexto3D(in_Index, g_Resolution) * g_CubeSize;
     
     vec3 AABBMin = AABBPosition;
-    vec3 AABBMax = AABBPosition + VOLUME_SIZE;
+    vec3 AABBMax = AABBPosition + g_CubeSize;
 
     vec3 Vertex = imageLoad(cs_Vertex, ivec2(gl_FragCoord.xy)).xyz;
     Vertex = (g_PoseMatrix * vec4(Vertex, 1.0f)).xyz; 
