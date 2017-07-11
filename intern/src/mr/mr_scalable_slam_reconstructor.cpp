@@ -656,6 +656,10 @@ namespace MR
 
 	void CScalableSLAMReconstructor::UpdateRootrids()
 	{
+        ////////////////////////////////////////////////////////////////////////////////
+        // Create all root grid volumes that are in the view frustum 
+        ////////////////////////////////////////////////////////////////////////////////
+
 		Float3 BBMax = m_FrustumPoints[0];
 		Float3 BBMin = m_FrustumPoints[0];
 
@@ -700,19 +704,16 @@ namespace MR
 			}
 		}
 
+        ////////////////////////////////////////////////////////////////////////////////
+        // Prepare instance buffers
+        ////////////////////////////////////////////////////////////////////////////////
+
         ResizeInstanceBuffers(m_RootGridMap.size());
         ClearAtomicCounterBuffer(m_RootGridMap.size());
         
-        STextureDescriptor TextureDescriptor = {};
-
-        TextureDescriptor.m_NumberOfMipMaps = 1;
-        TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding = CTextureBase::ShaderResource;
-        TextureDescriptor.m_Access = CTextureBase::CPUWrite;
-        TextureDescriptor.m_Usage = CTextureBase::GPUReadWrite;
-        TextureDescriptor.m_Semantic = CTextureBase::UndefinedSemantic;
-        TextureDescriptor.m_pFileName = 0;
-        TextureDescriptor.m_pPixels = 0;
+        ////////////////////////////////////////////////////////////////////////////////
+        // Create vector and instance buffer for root grid volumes
+        ////////////////////////////////////////////////////////////////////////////////
 
         m_RootGridVector.resize(m_RootGridMap.size());
         int Index = 0;
@@ -736,6 +737,10 @@ namespace MR
 
         BufferManager::UnmapConstantBuffer(m_RootGridInstanceBufferPtr);
 
+        ////////////////////////////////////////////////////////////////////////////////
+        // Check all possible root grid volumes for depth data
+        ////////////////////////////////////////////////////////////////////////////////
+
         RasterizeRootVolumes();
         GatherCounters(static_cast<unsigned int>(m_RootGridMap.size()));
 
@@ -743,6 +748,10 @@ namespace MR
         SIndexedIndirect* pIndirectData = static_cast<SIndexedIndirect*>(BufferManager::MapConstantBuffer(m_IndexedIndirectBufferPtr, CBuffer::ReadWrite));
         int VolumeCount = pIndirectData->m_InstanceCount;
         BufferManager::UnmapConstantBuffer(m_IndexedIndirectBufferPtr);
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // Integrate depth into individual root volume grids
+        ////////////////////////////////////////////////////////////////////////////////
 
         std::vector<uint32_t> VolumeQueue(VolumeCount);
         uint32_t* pVoxelQueue = static_cast<uint32_t*>(BufferManager::MapConstantBufferRange(m_VolumelQueueBufferPtr, CBuffer::Read, 0, VolumeCount * sizeof(uint32_t)));
