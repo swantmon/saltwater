@@ -615,7 +615,7 @@ namespace MR
         ContextManager::SetResourceBuffer(1, m_IndexedIndirectBufferPtr);
         ContextManager::SetResourceBuffer(2, m_VolumeQueueBufferPtr);
         
-        ContextManager::Dispatch(GetWorkGroupCount(Size, g_TileSize1D), 1, 1);
+        ContextManager::Dispatch(Size, 1, 1);
     }
 
 	// -----------------------------------------------------------------------------

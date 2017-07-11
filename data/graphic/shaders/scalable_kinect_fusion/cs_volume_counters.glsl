@@ -27,7 +27,7 @@ layout(std430, binding = 1) buffer IndirectBuffer
 
 layout(std430, binding = 2) buffer VolumeQueue
 {
-    uint g_PerInstanceCount[];
+    uint g_VolumeID[];
 };
 
 // -------------------------------------------------------------------------------------
@@ -39,7 +39,7 @@ void main()
     if (g_Counters[gl_GlobalInvocationID.x] > 0)
     {
         uint InstanceIndex = atomicAdd(g_Indirect.m_InstanceCount, 1);
-        g_PerInstanceCount[InstanceIndex] = gl_GlobalInvocationID.x;
+        g_VolumeID[InstanceIndex] = gl_GlobalInvocationID.x;
     }
 }
 
