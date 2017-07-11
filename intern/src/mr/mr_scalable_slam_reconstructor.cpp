@@ -611,7 +611,7 @@ namespace MR
 
 	// -----------------------------------------------------------------------------
     
-    void CScalableSLAMReconstructor::IntegrateSingleRootGrids(std::vector<uint32_t>& rVolumeQueue)
+    void CScalableSLAMReconstructor::IntegrateRootGrids(std::vector<uint32_t>& rVolumeQueue)
     {
         ////////////////////////////////////////////////////////////////////////////////
         // Prepare pipeline
@@ -655,13 +655,18 @@ namespace MR
 
         for (uint32_t VolumeIndex : rVolumeQueue)
         {
-            SRootGrid& rRootGrid = *m_RootGridVector[VolumeIndex];
-
-
+            IntegrateSingleRootGrid(*m_RootGridVector[VolumeIndex]);
         }
 
         ContextManager::ResetShaderVS();
         ContextManager::ResetShaderPS();
+    }
+    
+    // -----------------------------------------------------------------------------
+
+    void CScalableSLAMReconstructor::IntegrateSingleRootGrid(SRootGrid& rRootGrid)
+    {
+
     }
 
     // -----------------------------------------------------------------------------
@@ -772,7 +777,7 @@ namespace MR
             memcpy(VolumeQueue.data(), pVoxelQueue, sizeof(uint32_t) * VolumeCount);
             BufferManager::UnmapConstantBuffer(m_VolumeQueueBufferPtr);
 
-            IntegrateSingleRootGrids(VolumeQueue);
+            IntegrateRootGrids(VolumeQueue);
         }
 
         /*{
