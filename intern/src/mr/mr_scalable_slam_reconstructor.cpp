@@ -425,7 +425,7 @@ namespace MR
         m_IncPoseMatrixConstantBufferPtr = 0;
         m_BilateralFilterConstantBufferPtr = 0;
 		m_PositionConstantBufferPtr = 0;
-		m_GatherCountersBufferPtr = 0;
+		m_VolumelQueueBufferPtr = 0;
         m_HierarchyConstantBufferPtr = 0;
         m_AtomicCounterBufferPtr = 0;
         m_RootGridInstanceBufferPtr = 0;
@@ -602,9 +602,9 @@ namespace MR
         IndirectBufferData.m_IndexCount = 36;
         BufferManager::UploadConstantBufferData(m_IndexedIndirectBufferPtr, &IndirectBufferData);
 
-        ContextManager::SetConstantBuffer(0, m_GatherCountersBufferPtr);
         ContextManager::SetResourceBuffer(0, m_AtomicCounterBufferPtr);
         ContextManager::SetResourceBuffer(1, m_IndexedIndirectBufferPtr);
+        ContextManager::SetResourceBuffer(2, m_VolumelQueueBufferPtr);
         
         ContextManager::Dispatch(Size, 1, 1);
     }
@@ -697,9 +697,14 @@ namespace MR
         RasterizeRootVolumes();
         GatherCounters(static_cast<unsigned int>(m_RootGridMap.size()));
 
+        // todo: try to get rid of mapping
         SIndexedIndirect* pIndirectData = static_cast<SIndexedIndirect*>(BufferManager::MapConstantBuffer(m_IndexedIndirectBufferPtr, CBuffer::ReadWrite));
-
+        int VolumeCount = pIndirectData->m_InstanceCount;
         BufferManager::UnmapConstantBuffer(m_IndexedIndirectBufferPtr);
+
+        uint32_t* pVoxelQueue = static_cast<uint32_t*>(BufferManager::MapConstantBufferRange(m_VolumelQueueBufferPtr, CBuffer::Read, 0, VolumeCount * sizeof(uint32_t)));
+        
+        BufferManager::UnmapConstantBuffer(m_VolumelQueueBufferPtr);
 
         /*{
             GLint Memory;
@@ -897,20 +902,20 @@ namespace MR
         ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
         ConstantBufferDesc.m_NumberOfBytes = sizeof(SIndexedIndirect);
         m_IndexedIndirectBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-        				
-		ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
-		ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
-		ConstantBufferDesc.m_NumberOfBytes = 16;
-		ConstantBufferDesc.m_pBytes = nullptr;
-		ConstantBufferDesc.m_Usage = CBuffer::GPURead;
-		m_GatherCountersBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-
+        
         ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
         ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
         ConstantBufferDesc.m_NumberOfBytes = 16;
         ConstantBufferDesc.m_pBytes = nullptr;
         ConstantBufferDesc.m_Usage = CBuffer::GPURead;
         m_RasterizationBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
+        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
+        ConstantBufferDesc.m_NumberOfBytes = 16;
+        ConstantBufferDesc.m_pBytes = nullptr;
+        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
+        m_VolumelQueueBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
 
     // -----------------------------------------------------------------------------
@@ -1385,12 +1390,15 @@ namespace MR
             BufferDesc.m_NumberOfBytes = static_cast<unsigned int>(sizeof(uint32_t) * Size);
             BufferDesc.m_pBytes = nullptr;
             m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(BufferDesc);
-
+            
             BufferDesc.m_Usage = CBuffer::GPURead;
             BufferDesc.m_Binding = CBuffer::ResourceBuffer;
             BufferDesc.m_Access = CBuffer::CPUWrite;
             BufferDesc.m_NumberOfBytes = static_cast<unsigned int>(sizeof(SInstanceData) * Size);
             m_RootGridInstanceBufferPtr = BufferManager::CreateBuffer(BufferDesc);
+
+            BufferDesc.m_NumberOfBytes = static_cast<unsigned int>(sizeof(uint32_t) * Size);
+            m_VolumelQueueBufferPtr = BufferManager::CreateBuffer(BufferDesc);
         }
     }
 

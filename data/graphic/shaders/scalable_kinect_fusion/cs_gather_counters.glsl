@@ -25,9 +25,9 @@ layout(std430, binding = 1) buffer IndirectBuffer
     SIndexedIndirect g_Indirect;
 };
 
-layout(row_major, std140, binding = 0) uniform UBO
+layout(std430, binding = 2) buffer VolumeQueue
 {
-    int g_InstanceCount;
+    uint g_PerInstanceCount[];
 };
 
 // -------------------------------------------------------------------------------------
@@ -38,7 +38,8 @@ void main()
 {
     if (g_Counters[gl_GlobalInvocationID.x] > 0)
     {
-        atomicAdd(g_Indirect.m_InstanceCount, 1);
+        uint InstanceIndex = atomicAdd(g_Indirect.m_InstanceCount, 1);
+        g_PerInstanceCount[InstanceIndex] = gl_GlobalInvocationID.x;
     }
 }
 
