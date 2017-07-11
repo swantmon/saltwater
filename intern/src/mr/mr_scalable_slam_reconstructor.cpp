@@ -681,7 +681,7 @@ namespace MR
 
         int InstanceCount = GridData.m_Resolution * GridData.m_Resolution * GridData.m_Resolution;
 
-        ClearBuffer(m_GridAtomicCounterBufferPtr, 4096); // todo: remove
+        ClearBuffer(m_GridAtomicCounterBufferPtr, InstanceCount);
 
         const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
