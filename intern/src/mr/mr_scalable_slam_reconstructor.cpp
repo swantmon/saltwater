@@ -391,7 +391,6 @@ namespace MR
         m_ClearVolumeCSPtr = 0;
 		m_RootgridDepthCSPtr = 0;
         m_VolumeCountersCSPtr = 0;
-        m_RasterizationBufferPtr = 0;
 
         m_RasterizeRootVolumeVSPtr = 0;
         m_RasterizeRootVolumeFSPtr = 0;
@@ -570,8 +569,7 @@ namespace MR
 
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
-        ContextManager::SetConstantBuffer(2, m_RasterizationBufferPtr);
-        ContextManager::SetConstantBuffer(3, m_HierarchyConstantBufferPtr);
+        ContextManager::SetConstantBuffer(2, m_HierarchyConstantBufferPtr);
 
         ContextManager::SetShaderVS(m_RasterizeRootVolumeVSPtr);
         ContextManager::SetShaderPS(m_RasterizeRootVolumeFSPtr);
@@ -618,7 +616,40 @@ namespace MR
     {
         SRootGrid& rRootGrid = *m_RootGridVector[Index];
 
-        
+        TargetSetManager::ClearTargetSet(m_TargetSetPtr);
+
+        ContextManager::SetViewPortSet(m_DepthViewPortSetPtr);
+        ContextManager::SetTargetSet(m_TargetSetPtr);
+
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBufferSet(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
+
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
+        ContextManager::SetConstantBuffer(3, m_HierarchyConstantBufferPtr);
+
+        ContextManager::SetShaderVS(m_RasterizeRootVolumeVSPtr);
+        ContextManager::SetShaderPS(m_RasterizeRootVolumeFSPtr);
+
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawVertexMapPtr));
+
+        ContextManager::SetResourceBuffer(0, m_AtomicCounterBufferPtr);
+        ContextManager::SetResourceBuffer(1, m_RootGridInstanceBufferPtr);
+
+        ContextManager::Barrier();
+
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+        const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
+        const unsigned int InstanceCount = static_cast<unsigned int>(m_RootGridMap.size());
+        ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
+
+        ContextManager::ResetShaderVS();
+        ContextManager::ResetShaderPS();
     }
 
     // -----------------------------------------------------------------------------
@@ -705,7 +736,6 @@ namespace MR
 
         BufferManager::UnmapConstantBuffer(m_RootGridInstanceBufferPtr);
 
-        BufferManager::UploadConstantBufferData(m_RasterizationBufferPtr, &m_GridSizes[0]);
         RasterizeRootVolumes();
         GatherCounters(static_cast<unsigned int>(m_RootGridMap.size()));
 
@@ -921,13 +951,6 @@ namespace MR
         ConstantBufferDesc.m_NumberOfBytes = sizeof(SIndexedIndirect);
         m_IndexedIndirectBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         
-        ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
-        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
-        ConstantBufferDesc.m_NumberOfBytes = 16;
-        ConstantBufferDesc.m_pBytes = nullptr;
-        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
-        m_RasterizationBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-
         ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
         ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
         ConstantBufferDesc.m_NumberOfBytes = 16;

@@ -153,7 +153,6 @@ namespace MR
         Gfx::CBufferPtr m_RootGridInstanceBufferPtr;
         Gfx::CBufferPtr m_IndexedIndirectBufferPtr;
 		Gfx::CBufferPtr m_VolumelQueueBufferPtr;
-        Gfx::CBufferPtr m_RasterizationBufferPtr;
 
         Gfx::CShaderPtr m_ClearVolumeCSPtr;
         Gfx::CShaderPtr m_BilateralFilterCSPtr;

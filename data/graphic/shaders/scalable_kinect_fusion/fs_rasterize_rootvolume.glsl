@@ -28,7 +28,7 @@ layout(std430, binding = 1) buffer InstanceBuffer
 // Uniform buffers
 // -----------------------------------------------------------------------------
 
-layout(row_major, std140, binding = 3) uniform UBOHierarchy
+layout(row_major, std140, binding = 2) uniform UBOHierarchy
 {
     float g_HierarchyResolutions[HIERARCHY_LEVELS];
 };
