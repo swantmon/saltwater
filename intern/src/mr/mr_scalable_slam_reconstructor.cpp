@@ -116,6 +116,7 @@ namespace
         uint32_t m_Resolution;
         float m_GridSize;
         Base::Int3 m_Offset;
+        float Padding[3];
     };
 
 } // namespace
