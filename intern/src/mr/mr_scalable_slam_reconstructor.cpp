@@ -611,6 +611,13 @@ namespace MR
 
 	// -----------------------------------------------------------------------------
     
+    void CScalableSLAMReconstructor::IntegrateRootgrid(unsigned int Index)
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
 	void CScalableSLAMReconstructor::UpdateRootrids()
 	{
 		Float3 BBMax = m_FrustumPoints[0];
@@ -702,9 +709,15 @@ namespace MR
         int VolumeCount = pIndirectData->m_InstanceCount;
         BufferManager::UnmapConstantBuffer(m_IndexedIndirectBufferPtr);
 
+        std::vector<uint32_t> VolumeQueue(VolumeCount);
         uint32_t* pVoxelQueue = static_cast<uint32_t*>(BufferManager::MapConstantBufferRange(m_VolumelQueueBufferPtr, CBuffer::Read, 0, VolumeCount * sizeof(uint32_t)));
-        
+        memcpy(VolumeQueue.data(), pVoxelQueue, sizeof(uint32_t) * VolumeCount);
         BufferManager::UnmapConstantBuffer(m_VolumelQueueBufferPtr);
+
+        for (uint32_t VolumeIndex : VolumeQueue)
+        {
+            IntegrateRootgrid(VolumeIndex);
+        }
 
         /*{
             GLint Memory;

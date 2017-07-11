@@ -102,6 +102,7 @@ namespace MR
 		float GetPointPlaneDistance(const Base::Float3& rPoint, const Base::Float4& rPlane);
 		bool RootGridInFrustum(const Base::Int3& rKey);
 		void UpdateRootrids();
+        void IntegrateRootgrid(unsigned int Index);
         void ResizeInstanceBuffers(size_t Size);
         void ClearAtomicCounterBuffer(size_t Size);
 
