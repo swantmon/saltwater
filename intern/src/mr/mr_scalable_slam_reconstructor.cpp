@@ -642,8 +642,8 @@ namespace MR
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
         ContextManager::SetConstantBuffer(2, m_GridRasterizationBufferPtr);
 
-        ContextManager::SetShaderVS(m_RasterizeRootVolumeVSPtr);
-        ContextManager::SetShaderPS(m_RasterizeRootVolumeFSPtr);
+        ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
+        ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
 
         ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawVertexMapPtr));
 
@@ -748,7 +748,7 @@ namespace MR
         // Create vector and instance buffer for root grid volumes
         ////////////////////////////////////////////////////////////////////////////////
 
-        m_RootGridVector.resize(m_RootGridMap.size());
+        m_RootGridVector.clear();
         int Index = 0;
         SInstanceData* pInstanceData = static_cast<SInstanceData*>(BufferManager::MapConstantBuffer(m_RootVolumeInstanceBufferPtr, CBuffer::Write));
 
