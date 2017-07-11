@@ -575,8 +575,8 @@ namespace MR
 
         ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawVertexMapPtr));
 
-        //ContextManager::SetResourceBuffer(0, m_AtomicCounterBufferPtr);
-        //ContextManager::SetResourceBuffer(1, m_RootGridInstanceBufferPtr);
+        ContextManager::SetResourceBuffer(0, m_AtomicCounterBufferPtr);
+        ContextManager::SetResourceBuffer(1, m_RootGridInstanceBufferPtr);
 
         ContextManager::Barrier();
 
@@ -611,7 +611,7 @@ namespace MR
 
 	// -----------------------------------------------------------------------------
     
-    void CScalableSLAMReconstructor::IntegrateRootgrid(unsigned int Index)
+    void CScalableSLAMReconstructor::IntegrateSingleRootGrid(unsigned int Index)
     {
         SRootGrid& rRootGrid = *m_RootGridVector[Index];
 
@@ -759,7 +759,7 @@ namespace MR
 
         for (uint32_t VolumeIndex : VolumeQueue)
         {
-            IntegrateRootgrid(VolumeIndex);
+            IntegrateSingleRootGrid(VolumeIndex);
         }
 
         /*{
