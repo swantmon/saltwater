@@ -58,7 +58,7 @@ layout(location = 0) out vec4 out_Color;
 
 bool InBox()
 {
-    vec3 AABBPosition = g_Offset * float(VOLUME_SIZE);
+    vec3 AABBPosition = g_Offset * g_ParentSize;
     AABBPosition += Indexto3D(int(in_Index), g_Resolution) * g_CubeSize;
     
     vec3 AABBMin = AABBPosition;

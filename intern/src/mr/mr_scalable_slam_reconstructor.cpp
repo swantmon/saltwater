@@ -29,6 +29,7 @@
 #include "mr/mr_kinect_control.h"
 #include "mr/mr_realsense_control.h"
 
+#include <iostream>
 #include <limits>
 #include <memory>
 #include <sstream>
@@ -656,8 +657,9 @@ namespace MR
         ////////////////////////////////////////////////////////////////////////////////
         // Integrate individual grids
         ////////////////////////////////////////////////////////////////////////////////
-
+        
         for (uint32_t VolumeIndex : rVolumeQueue)
+
         {
             assert(m_RootGridVector[VolumeIndex] != nullptr);
             TargetSetManager::ClearTargetSet(m_TargetSetPtr);
