@@ -58,7 +58,7 @@ void main()
     
 	Vertex.xy = Vertex.xy * g_Intrinsics[0].m_FocalLength / Vertex.z + g_Intrinsics[0].m_FocalPoint;
 	Vertex.xy = Vertex.xy / vec2(DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT) * 2.0f - 1.0f;
-    Vertex.z = 1.0f;
+    Vertex.z = 0.0f;
 
     gl_Position = Vertex;
 }

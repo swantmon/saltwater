@@ -211,7 +211,7 @@ namespace MR
         RendertargetDescriptor.m_Format = CTextureBase::Unknown;
         RendertargetDescriptor.m_Usage = CTextureBase::GPURead;
         RendertargetDescriptor.m_Semantic = CTextureBase::Diffuse;
-        RendertargetDescriptor.m_Format = CTextureBase::R16G16B16A16_FLOAT;
+        RendertargetDescriptor.m_Format = CTextureBase::R8_BYTE;
 
         CTextureBasePtr RenderTarget = TextureManager::CreateTexture2D(RendertargetDescriptor);
         
@@ -571,7 +571,7 @@ namespace MR
 
         ContextManager::SetViewPortSet(m_DepthViewPortSetPtr);
         ContextManager::SetTargetSet(m_TargetSetPtr);
-
+        
         const unsigned int Offset = 0;
         ContextManager::SetVertexBufferSet(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
         ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
@@ -592,7 +592,11 @@ namespace MR
 
         ContextManager::Barrier();
 
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_FRONT);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_MULTISAMPLE);
 
         const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         const unsigned int InstanceCount = static_cast<unsigned int>(m_RootGridMap.size());
@@ -652,7 +656,7 @@ namespace MR
 
         ContextManager::Barrier();
 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
         ////////////////////////////////////////////////////////////////////////////////
         // Integrate individual grids
@@ -661,6 +665,7 @@ namespace MR
         for (uint32_t VolumeIndex : rVolumeQueue)
         {
             assert(m_RootGridVector[VolumeIndex] != nullptr);
+            TargetSetManager::ClearTargetSet(m_TargetSetPtr);
             IntegrateSingleRootGrid(*m_RootGridVector[VolumeIndex]);
         }
 
