@@ -113,7 +113,7 @@ namespace
 
     struct SGridRasterization
     {
-        uint32_t m_Resolution;
+        int32_t m_Resolution;
         float m_CubeSize;
         float m_ParentSize;
         Base::Int3 m_Offset;

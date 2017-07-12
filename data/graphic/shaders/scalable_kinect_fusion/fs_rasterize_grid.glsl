@@ -4,13 +4,13 @@
 
 #include "scalable_kinect_fusion/common_tracking.glsl"
 
-uvec3 Indexto3D(uint Index, uint Resolution)
+vec3 Indexto3D(int Index, int Resolution)
 {
-    uint z = Index / (Resolution * Resolution);
+    int z = Index / (Resolution * Resolution);
     Index -= (z * Resolution * Resolution);
-    uint y = Index / Resolution;
-    uint x = Index % Resolution;
-    return uvec3(x, y, z);
+    int y = Index / Resolution;
+    int x = Index % Resolution;
+    return vec3(x, y, z);
 }
 
 // -----------------------------------------------------------------------------
@@ -28,7 +28,7 @@ layout(std430, binding = 0) buffer AtomicCounterBuffer
 
 layout(row_major, std140, binding = 2) uniform UBOTransform
 {
-    uint g_Resolution;
+    int g_Resolution;
     float g_CubeSize;
     float g_ParentSize;
     ivec3 g_Offset;
@@ -59,7 +59,7 @@ layout(location = 0) out vec4 out_Color;
 bool InBox()
 {
     vec3 AABBPosition = g_Offset * float(VOLUME_SIZE);
-    AABBPosition += Indexto3D(in_Index, g_Resolution) * g_CubeSize;
+    AABBPosition += Indexto3D(int(in_Index), g_Resolution) * g_CubeSize;
     
     vec3 AABBMin = AABBPosition;
     vec3 AABBMax = AABBPosition + g_CubeSize;
