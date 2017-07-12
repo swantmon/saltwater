@@ -114,10 +114,10 @@ namespace
 
     struct SGridRasterization
     {
+        Base::Int3 m_Offset;
         int32_t m_Resolution;
         float m_CubeSize;
         float m_ParentSize;
-        Base::Int3 m_Offset;
         float Padding[2];
     };
 
@@ -661,7 +661,6 @@ namespace MR
         for (uint32_t VolumeIndex : rVolumeQueue)
         {
             assert(m_RootGridVector[VolumeIndex] != nullptr);
-            TargetSetManager::ClearTargetSet(m_TargetSetPtr);
             IntegrateSingleRootGrid(*m_RootGridVector[VolumeIndex]);
         }
 

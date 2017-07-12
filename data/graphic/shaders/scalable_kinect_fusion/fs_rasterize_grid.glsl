@@ -28,10 +28,10 @@ layout(std430, binding = 0) buffer AtomicCounterBuffer
 
 layout(row_major, std140, binding = 2) uniform UBOTransform
 {
+    ivec3 g_Offset;
     int g_Resolution;
     float g_CubeSize;
     float g_ParentSize;
-    ivec3 g_Offset;
 };
 
 // -----------------------------------------------------------------------------
