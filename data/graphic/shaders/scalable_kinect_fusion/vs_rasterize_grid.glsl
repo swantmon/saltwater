@@ -35,7 +35,7 @@ layout(location = 0) in vec3 in_VertexPosition;
 // Outputs
 // -----------------------------------------------------------------------------
 
-layout(location = 0) out flat uint out_Index;
+layout(location = 0) out uint out_Index;
 layout(location = 1) out vec3 out_AABBMin;
 layout(location = 2) out vec3 out_AABBMax;
 

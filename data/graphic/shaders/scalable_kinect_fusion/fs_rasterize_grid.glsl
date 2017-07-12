@@ -4,15 +4,6 @@
 
 #include "scalable_kinect_fusion/common_tracking.glsl"
 
-vec3 Indexto3D(int Index, int Resolution)
-{
-    int z = Index / (Resolution * Resolution);
-    Index -= (z * Resolution * Resolution);
-    int y = Index / Resolution;
-    int x = Index % Resolution;
-    return vec3(x, y, z);
-}
-
 // -----------------------------------------------------------------------------
 // Shader storage buffers
 // -----------------------------------------------------------------------------
