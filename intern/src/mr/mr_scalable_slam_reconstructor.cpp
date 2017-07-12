@@ -294,7 +294,16 @@ namespace MR
 
 	void CScalableSLAMReconstructor::SetupData()
 	{
-		const float VolumeSize = m_ReconstructionSettings.m_VolumeSize;
+        const int GridLevelCount = MR::SReconstructionSettings::GRID_LEVELS;
+
+        m_GridSizes.resize(GridLevelCount);
+        m_GridSizes[GridLevelCount - 1] = m_ReconstructionSettings.m_VoxelSize * m_ReconstructionSettings.m_GridResolutions[GridLevelCount - 1];
+        for (int i = GridLevelCount - 2; i >= 0; --i)
+        {
+            m_GridSizes[i] = m_GridSizes[i + 1] * m_ReconstructionSettings.m_GridResolutions[i];
+        }
+
+		const float VolumeSize = m_GridSizes[0];
 		Float4x4 PoseRotation, PoseTranslation;
 		
 		PoseRotation.SetRotation(g_InitialCameraRotation[0], g_InitialCameraRotation[1], g_InitialCameraRotation[2]);
@@ -309,15 +318,6 @@ namespace MR
 		m_IntegratedFrameCount = 0;
 		m_FrameCount = 0;
 		m_TrackingLost = true;
-		
-		const int GridLevelCount = MR::SReconstructionSettings::GRID_LEVELS;
-
-		m_GridSizes.resize(GridLevelCount);
-		m_GridSizes[GridLevelCount - 1] = m_ReconstructionSettings.m_VoxelSize * m_ReconstructionSettings.m_GridResolutions[GridLevelCount - 1];
-		for (int i = GridLevelCount - 2; i >= 0; -- i)
-		{
-			m_GridSizes[i] = m_GridSizes[i + 1] * m_ReconstructionSettings.m_GridResolutions[i];
-		}
 
 		UpdateFrustum();
 	}
@@ -454,7 +454,7 @@ namespace MR
         const float SummandsLog2 = Log2(static_cast<float>(Summands));
         const int SummandsPOT = 1 << (static_cast<int>(SummandsLog2) + 1);
         
-        const float VoxelSize = m_ReconstructionSettings.m_VolumeSize / m_ReconstructionSettings.m_VolumeResolution;
+        const float VoxelSize = m_ReconstructionSettings.m_VoxelSize;
 
         const std::string InternalFormatString = g_UseHighPrecisionMaps ? "rgba32f" : "rgba16f";
 
@@ -462,7 +462,7 @@ namespace MR
 
         DefineStream
             << "#define PYRAMID_LEVELS "         << m_ReconstructionSettings.m_PyramidLevelCount    << " \n"
-            << "#define VOLUME_RESOLUTION "      << m_ReconstructionSettings.m_VolumeResolution     << " \n"
+            << "#define VOLUME_RESOLUTION "      << m_ReconstructionSettings.m_GridResolutions[0]   << " \n"
             << "#define VOXEL_SIZE "             << VoxelSize                                       << " \n"
             << "#define VOLUME_SIZE "            << m_GridSizes[0]                                  << " \n"
             << "#define DEPTH_IMAGE_WIDTH "      << m_pRGBDCameraControl->GetDepthWidth()           << " \n"
@@ -528,8 +528,8 @@ namespace MR
 
 		for (int PlaneIndex = 0; PlaneIndex < 3; ++PlaneIndex)
 		{
-			AABB[PlaneIndex * 2] = rKey[PlaneIndex] * m_ReconstructionSettings.m_VolumeSize;
-			AABB[PlaneIndex * 2 + 1] = AABB[PlaneIndex * 2] + m_ReconstructionSettings.m_VolumeSize;
+			AABB[PlaneIndex * 2] = rKey[PlaneIndex] * m_GridSizes[0];
+			AABB[PlaneIndex * 2 + 1] = AABB[PlaneIndex * 2] + m_GridSizes[0];
 		}
 
 		Float3 Cube[8] =
@@ -715,8 +715,8 @@ namespace MR
 
 		for (int i = 0; i < 3; ++ i)
 		{
-			MaxIndex[i] = static_cast<int>(BBMax[i] / m_ReconstructionSettings.m_VolumeSize);
-			MinIndex[i] = static_cast<int>(BBMin[i] / m_ReconstructionSettings.m_VolumeSize);
+			MaxIndex[i] = static_cast<int>(BBMax[i] / m_GridSizes[0]);
+			MinIndex[i] = static_cast<int>(BBMin[i] / m_GridSizes[0]);
 		}
 
 		SRootGrid RootGrid;
@@ -800,31 +800,6 @@ namespace MR
 
             IntegrateRootGrids(VolumeQueue);
         }
-
-        /*{
-            GLint Memory;
-            glGetIntegerv(0x9049, &Memory);
-
-            if (Memory < 1000000)
-            {
-                BASE_CONSOLE_ERROR("Out of GPU memory");
-                throw std::exception("Out of GPU memory");
-            }
-
-            TextureDescriptor.m_NumberOfPixelsU = m_ReconstructionSettings.m_VolumeResolution;
-            TextureDescriptor.m_NumberOfPixelsV = m_ReconstructionSettings.m_VolumeResolution;
-            TextureDescriptor.m_NumberOfPixelsW = m_ReconstructionSettings.m_VolumeResolution;
-            TextureDescriptor.m_Format = CTextureBase::R16G16_FLOAT;
-
-            RootGrid.m_TSDFVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
-
-            if (m_ReconstructionSettings.m_CaptureColor)
-            {
-                TextureDescriptor.m_Format = CTextureBase::R8G8B8A8_UBYTE;
-
-                RootGrid.m_ColorVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
-            }
-        }*/
 	}
 
 	// -----------------------------------------------------------------------------
