@@ -36,6 +36,8 @@ layout(location = 0) in vec3 in_VertexPosition;
 // -----------------------------------------------------------------------------
 
 layout(location = 0) out flat uint out_Index;
+layout(location = 1) out vec3 out_AABBMin;
+layout(location = 2) out vec3 out_AABBMax;
 
 out gl_PerVertex
 {
@@ -59,6 +61,12 @@ void main()
 	Vertex.xy = Vertex.xy * g_Intrinsics[0].m_FocalLength / Vertex.z + g_Intrinsics[0].m_FocalPoint;
 	Vertex.xy = Vertex.xy / vec2(DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT) * 2.0f - 1.0f;
     Vertex.z = 0.0f;
+
+    vec3 AABBPosition = g_Offset * g_ParentSize;
+    AABBPosition += Indexto3D(int(gl_InstanceID), g_Resolution) * g_CubeSize;
+    
+    out_AABBMin = AABBPosition;
+    out_AABBMax = AABBPosition + g_CubeSize;
 
     gl_Position = Vertex;
 }

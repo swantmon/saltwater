@@ -45,6 +45,8 @@ layout(binding = 0, MAP_TEXTURE_FORMAT) readonly uniform image2D cs_Vertex;
 // -----------------------------------------------------------------------------
 
 layout(location = 0) in flat uint in_Index;
+layout(location = 1) in vec3 in_AABBMin;
+layout(location = 2) in vec3 in_AABBMax;
 
 // -----------------------------------------------------------------------------
 // Output
@@ -58,19 +60,13 @@ layout(location = 0) out vec4 out_Color;
 
 bool InBox()
 {
-    vec3 AABBPosition = g_Offset * g_ParentSize;
-    AABBPosition += Indexto3D(int(in_Index), g_Resolution) * g_CubeSize;
-    
-    vec3 AABBMin = AABBPosition;
-    vec3 AABBMax = AABBPosition + g_CubeSize;
-
     vec3 Vertex = imageLoad(cs_Vertex, ivec2(gl_FragCoord.xy)).xyz;
     Vertex = (g_PoseMatrix * vec4(Vertex, 1.0f)).xyz; 
 
     return 
-        Vertex.x > AABBMin.x && Vertex.x < AABBMax.x &&
-        Vertex.y > AABBMin.y && Vertex.y < AABBMax.y &&
-        Vertex.z > AABBMin.z && Vertex.z < AABBMax.z;
+        Vertex.x > in_AABBMin.x && Vertex.x < in_AABBMax.x &&
+        Vertex.y > in_AABBMin.y && Vertex.y < in_AABBMax.y &&
+        Vertex.z > in_AABBMin.z && Vertex.z < in_AABBMax.z;
 }
 
 // -----------------------------------------------------------------------------

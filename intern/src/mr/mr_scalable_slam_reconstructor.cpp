@@ -592,7 +592,7 @@ namespace MR
 
         ContextManager::Barrier();
 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
         glDisable(GL_DEPTH_TEST);
