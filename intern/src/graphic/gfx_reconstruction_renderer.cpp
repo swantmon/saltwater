@@ -707,9 +707,6 @@ namespace
 
 	void CGfxReconstructionRenderer::RenderGrid()
 	{
-		MR::SReconstructionSettings Settings;
-		m_pScalableReconstructor->GetReconstructionSettings(&Settings);
-
 		ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
 		ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
@@ -731,6 +728,8 @@ namespace
 		Float4x4 Scaling;
 		Float4x4 Translation;
 
+        const auto& GridSizes = m_pScalableReconstructor->GetGridSizes();
+
 		for (auto& rPair : m_pScalableReconstructor->GetRootGridMap())
 		{
 			auto& rRootGrid = rPair.second;
@@ -739,9 +738,9 @@ namespace
 			Position[1] = static_cast<float>(rRootGrid.m_Offset[1]);
 			Position[2] = static_cast<float>(rRootGrid.m_Offset[2]);
 
-			Position = Position * Settings.m_VolumeSize;
+			Position = Position * GridSizes[0];
 			
-			Scaling.SetScale(Settings.m_VolumeSize);
+			Scaling.SetScale(GridSizes[0]);
 			Translation.SetTranslation(Position);
 
 			BufferData.m_WorldMatrix = Translation * Scaling;
