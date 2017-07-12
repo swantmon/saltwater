@@ -1539,6 +1539,11 @@ namespace MR
 		SetupShaders();
     }
 
+    const std::vector<float>& CScalableSLAMReconstructor::GetGridSizes() const
+    {
+        return m_GridSizes;
+    }
+
     // -----------------------------------------------------------------------------
     
     void CScalableSLAMReconstructor::PauseIntegration(bool _Paused)

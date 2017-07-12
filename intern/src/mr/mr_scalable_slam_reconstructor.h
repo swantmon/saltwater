@@ -91,6 +91,8 @@ namespace MR
 		CRootGridMap& GetRootGridMap();
         CRootGridVector& GetRootGridVector();
 
+        const std::vector<float>& GetGridSizes() const;
+
         void GetReconstructionSettings(SReconstructionSettings* pReconstructionSettings);
 
     private:
