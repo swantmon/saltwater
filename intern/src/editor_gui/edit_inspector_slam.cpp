@@ -77,9 +77,9 @@ namespace Edit
 		const bool IsScalable = DefaultSettings.m_IsScalable;
 
 		m_pScalableCB->setChecked(IsScalable);
-		//m_pSizeHS->setEnabled(!IsScalable);
-		//m_pResolutionHS->setEnabled(!IsScalable);
-		//m_pVoxelSizeHS->setEnabled(IsScalable);
+		m_pSizeHS->setEnabled(!IsScalable);
+		m_pResolutionHS->setEnabled(!IsScalable);
+		m_pVoxelSizeHS->setEnabled(IsScalable);
     }
 
     // -----------------------------------------------------------------------------
@@ -199,9 +199,9 @@ namespace Edit
 	{
 		const bool isScalable = State == Qt::CheckState::Checked;
 
-		//m_pSizeHS->setEnabled(!isScalable);
-		//m_pResolutionHS->setEnabled(!isScalable); 
-		//m_pVoxelSizeHS->setEnabled(isScalable);
+		m_pSizeHS->setEnabled(!isScalable);
+		m_pResolutionHS->setEnabled(!isScalable); 
+		m_pVoxelSizeHS->setEnabled(isScalable);
 	}
 
 	// -----------------------------------------------------------------------------
