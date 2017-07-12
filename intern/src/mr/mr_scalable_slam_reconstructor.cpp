@@ -659,7 +659,6 @@ namespace MR
         ////////////////////////////////////////////////////////////////////////////////
         
         for (uint32_t VolumeIndex : rVolumeQueue)
-
         {
             assert(m_RootGridVector[VolumeIndex] != nullptr);
             TargetSetManager::ClearTargetSet(m_TargetSetPtr);
