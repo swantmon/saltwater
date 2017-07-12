@@ -21,6 +21,7 @@ layout(row_major, std140, binding = 2) uniform UBOTransform
 {
     uint g_Resolution;
     float g_CubeSize;
+    float g_ParentSize;
     ivec3 g_Offset;
 };
 
@@ -47,17 +48,17 @@ out gl_PerVertex
 
 void main()
 {
-    uint Index = gl_InstanceID;
-    out_Index = Index;
+    out_Index = gl_InstanceID;
 
-    uvec3 GridOffset = Indexto3D(Index, g_Resolution);
+    vec3 GridOffset = Indexto3D(gl_InstanceID, g_Resolution);
 
-    vec4 Vertex = vec4((in_VertexPosition + g_Offset) * g_CubeSize, 1.0f);
-    Vertex.xyz += GridOffset * g_CubeSize;
+    vec4 Vertex = vec4(g_Offset * g_ParentSize, 1.0f);
+    Vertex.xyz += GridOffset * g_CubeSize + in_VertexPosition;
 	Vertex = (g_PoseMatrix * Vertex);
     
 	Vertex.xy = Vertex.xy * g_Intrinsics[0].m_FocalLength / Vertex.z + g_Intrinsics[0].m_FocalPoint;
 	Vertex.xy = Vertex.xy / vec2(DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT) * 2.0f - 1.0f;
+    Vertex.z = 1.0f;
 
     gl_Position = Vertex;
 }

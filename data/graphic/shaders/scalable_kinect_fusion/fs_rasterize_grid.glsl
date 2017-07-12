@@ -30,6 +30,7 @@ layout(row_major, std140, binding = 2) uniform UBOTransform
 {
     uint g_Resolution;
     float g_CubeSize;
+    float g_ParentSize;
     ivec3 g_Offset;
 };
 

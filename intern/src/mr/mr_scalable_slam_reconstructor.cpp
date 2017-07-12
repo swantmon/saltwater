@@ -114,9 +114,10 @@ namespace
     struct SGridRasterization
     {
         uint32_t m_Resolution;
-        float m_GridSize;
+        float m_CubeSize;
+        float m_ParentSize;
         Base::Int3 m_Offset;
-        float Padding[3];
+        float Padding[2];
     };
 
 } // namespace
@@ -462,7 +463,7 @@ namespace MR
             << "#define PYRAMID_LEVELS "         << m_ReconstructionSettings.m_PyramidLevelCount    << " \n"
             << "#define VOLUME_RESOLUTION "      << m_ReconstructionSettings.m_VolumeResolution     << " \n"
             << "#define VOXEL_SIZE "             << VoxelSize                                       << " \n"
-            << "#define VOLUME_SIZE "            << m_ReconstructionSettings.m_VolumeSize           << " \n"
+            << "#define VOLUME_SIZE "            << m_GridSizes[0]                                  << " \n"
             << "#define DEPTH_IMAGE_WIDTH "      << m_pRGBDCameraControl->GetDepthWidth()           << " \n"
             << "#define DEPTH_IMAGE_HEIGHT "     << m_pRGBDCameraControl->GetDepthHeight()          << " \n"
             << "#define TILE_SIZE1D "            << g_TileSize1D                                    << " \n"
@@ -627,8 +628,6 @@ namespace MR
         // Prepare pipeline
         ////////////////////////////////////////////////////////////////////////////////
 
-        TargetSetManager::ClearTargetSet(m_TargetSetPtr);
-
         ContextManager::SetViewPortSet(m_DepthViewPortSetPtr);
         ContextManager::SetTargetSet(m_TargetSetPtr);
 
@@ -652,7 +651,7 @@ namespace MR
 
         ContextManager::Barrier();
 
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
         ////////////////////////////////////////////////////////////////////////////////
         // Integrate individual grids
@@ -661,6 +660,7 @@ namespace MR
         for (uint32_t VolumeIndex : rVolumeQueue)
         {
             assert(m_RootGridVector[VolumeIndex] != nullptr);
+            TargetSetManager::ClearTargetSet(m_TargetSetPtr);
             IntegrateSingleRootGrid(*m_RootGridVector[VolumeIndex]);
         }
 
@@ -674,7 +674,8 @@ namespace MR
     {
         SGridRasterization GridData = {};
         GridData.m_Resolution = m_ReconstructionSettings.m_GridResolutions[0];
-        GridData.m_GridSize = m_GridSizes[0] / GridData.m_Resolution;
+        GridData.m_CubeSize = m_GridSizes[1];
+        GridData.m_ParentSize = m_GridSizes[0];
         GridData.m_Offset = rRootGrid.m_Offset;
 
         BufferManager::UploadConstantBufferData(m_GridRasterizationBufferPtr, &GridData);
