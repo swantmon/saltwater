@@ -60,7 +60,7 @@ void main()
     
 	Vertex.xy = Vertex.xy * g_Intrinsics[0].m_FocalLength / Vertex.z + g_Intrinsics[0].m_FocalPoint;
 	Vertex.xy = Vertex.xy / vec2(DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT) * 2.0f - 1.0f;
-    Vertex.z = 0.0f;
+    Vertex.z = ((Vertex.z - 0.5f) / 7.5f) * 2.0f - 1.0f;
 
     vec3 AABBPosition = g_Offset * g_ParentSize;
     AABBPosition += Indexto3D(int(gl_InstanceID), g_Resolution) * g_CubeSize;
