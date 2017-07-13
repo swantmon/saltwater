@@ -106,6 +106,7 @@ namespace MR
 		void UpdateRootrids();
         void IntegrateRootGrids(std::vector<uint32_t>& rVolumeQueue);
         void IntegrateSingleRootGrid(SRootGrid& rRootGrid);
+        void GatherRootGridCounters();
         void ResizeInstanceBuffers(size_t Size);
         void ClearBuffer(Gfx::CBufferPtr BufferPtr, size_t Size);
 

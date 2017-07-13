@@ -643,30 +643,31 @@ namespace MR
 
         ContextManager::SetTopology(STopology::TriangleList);
 
-        ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
-        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
-        ContextManager::SetConstantBuffer(2, m_GridRasterizationBufferPtr);
-
-        ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
-        ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
-
-        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawVertexMapPtr));
-
-        ContextManager::SetResourceBuffer(0, m_GridAtomicCounterBufferPtr);
-
-        ContextManager::Barrier();
-
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
         ////////////////////////////////////////////////////////////////////////////////
         // Integrate individual grids
         ////////////////////////////////////////////////////////////////////////////////
-        
+
         for (uint32_t VolumeIndex : rVolumeQueue)
         {
             assert(m_RootGridVector[VolumeIndex] != nullptr);
-            TargetSetManager::ClearTargetSet(m_TargetSetPtr);
+
+            ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
+            ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
+            ContextManager::SetConstantBuffer(2, m_GridRasterizationBufferPtr);
+
+            ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
+            ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
+
+            ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawVertexMapPtr));
+
+            ContextManager::SetResourceBuffer(0, m_GridAtomicCounterBufferPtr);
+
+            ContextManager::Barrier();
+            //TargetSetManager::ClearTargetSet(m_TargetSetPtr);
             IntegrateSingleRootGrid(*m_RootGridVector[VolumeIndex]);
+            GatherRootGridCounters();
         }
 
         ContextManager::ResetShaderVS();
@@ -691,8 +692,14 @@ namespace MR
 
         const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
+    }
 
+    // -----------------------------------------------------------------------------
+
+    void CScalableSLAMReconstructor::GatherRootGridCounters()
+    {
         ContextManager::SetShaderCS(m_GridCountersCSPtr);
+
         ContextManager::SetResourceBuffer(0, m_GridAtomicCounterBufferPtr);
         ContextManager::SetResourceBuffer(1, m_IndexedIndirectBufferPtr);
         ContextManager::SetResourceBuffer(2, m_VolumeQueueBufferPtr);
