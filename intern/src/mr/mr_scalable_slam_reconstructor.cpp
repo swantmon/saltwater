@@ -691,6 +691,13 @@ namespace MR
 
         const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
+
+        ContextManager::SetShaderCS(m_GridCountersCSPtr);
+        ContextManager::SetResourceBuffer(0, m_GridAtomicCounterBufferPtr);
+        ContextManager::SetResourceBuffer(1, m_IndexedIndirectBufferPtr);
+        ContextManager::SetResourceBuffer(2, m_VolumeQueueBufferPtr);
+
+        ContextManager::Dispatch(4096, 1, 1);
     }
 
     // -----------------------------------------------------------------------------
@@ -976,13 +983,6 @@ namespace MR
         ConstantBufferDesc.m_NumberOfBytes = sizeof(SIndexedIndirect);
         m_IndexedIndirectBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         
-        ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
-        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
-        ConstantBufferDesc.m_NumberOfBytes = 16;
-        ConstantBufferDesc.m_pBytes = nullptr;
-        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
-        m_VolumeQueueBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-
         ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
         ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
         ConstantBufferDesc.m_NumberOfBytes = sizeof(SGridRasterization);
@@ -997,6 +997,7 @@ namespace MR
         ConstantBufferDesc.m_Usage = CBuffer::GPURead;
         m_GridAtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         m_GridQueueBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        m_VolumeQueueBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
 
     // -----------------------------------------------------------------------------
@@ -1479,7 +1480,6 @@ namespace MR
             m_RootVolumeInstanceBufferPtr = BufferManager::CreateBuffer(BufferDesc);
 
             BufferDesc.m_NumberOfBytes = static_cast<unsigned int>(sizeof(uint32_t) * Size);
-            m_VolumeQueueBufferPtr = BufferManager::CreateBuffer(BufferDesc);
         }
     }
 
