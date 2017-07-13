@@ -36,8 +36,8 @@ layout(binding = 0, MAP_TEXTURE_FORMAT) readonly uniform image2D cs_Vertex;
 // -----------------------------------------------------------------------------
 
 layout(location = 0) in flat uint in_Index;
-layout(location = 1) in vec3 in_AABBMin;
-layout(location = 2) in vec3 in_AABBMax;
+layout(location = 1) in flat vec3 in_AABBMin;
+layout(location = 2) in flat vec3 in_AABBMax;
 
 // -----------------------------------------------------------------------------
 // Output
