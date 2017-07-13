@@ -698,6 +698,10 @@ namespace MR
 
     void CScalableSLAMReconstructor::GatherRootGridCounters()
     {
+        SIndexedIndirect IndirectData = {};
+        IndirectData.m_IndexCount = 36;
+        BufferManager::UploadConstantBufferData(m_IndexedIndirectBufferPtr, &IndirectData);
+
         ContextManager::SetShaderCS(m_GridCountersCSPtr);
 
         ContextManager::SetResourceBuffer(0, m_GridAtomicCounterBufferPtr);
