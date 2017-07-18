@@ -1219,10 +1219,10 @@ namespace MATH
     template <typename T>
     inline typename CMatrix4x4<T>::CThis& CMatrix4x4<T>::SetRHPerspective(X _Width, X _Height, X _Near, X _Far)
     {
-        m_V[A11] = X(2) * _Near / _Width; m_V[A12] =                   X(0); m_V[A13] =                             X(0); m_V[A14] = X( 0);
-        m_V[A21] =                  X(0); m_V[A22] = X(2) * _Near / _Height; m_V[A23] =                             X(0); m_V[A24] = X( 0);
-        m_V[A31] =                  X(0); m_V[A32] =                   X(0); m_V[A33] = -(_Far + _Near) / (_Far - _Near); m_V[A34] = - X(2) * _Far * _Near / (_Far - _Near);
-        m_V[A41] =                  X(0); m_V[A42] =                   X(0); m_V[A43] =                            X(-1); m_V[A44] = X( 0);
+        m_V[A11] = X(2) * _Near / _Width; m_V[A12] =                   X(0); m_V[A13] =                  X(0); m_V[A14] = X( 0);
+        m_V[A21] =                  X(0); m_V[A22] = X(2) * _Near / _Height; m_V[A23] =                  X(0); m_V[A24] = X( 0);
+        m_V[A31] =                  X(0); m_V[A32] =                   X(0); m_V[A33] = _Far / (_Near - _Far); m_V[A34] = _Far * _Near / (_Near - _Far);
+        m_V[A41] =                  X(0); m_V[A42] =                   X(0); m_V[A43] =                 X(-1); m_V[A44] = X( 0);
         
         return *this;
     }
@@ -1232,10 +1232,10 @@ namespace MATH
     template <typename T>
     inline typename CMatrix4x4<T>::CThis& CMatrix4x4<T>::SetRHPerspective(X _Left, X _Right, X _Bottom, X _Top, X _Near, X _Far)
     {
-        m_V[A11] = X(2) * _Near / (_Right - _Left); m_V[A12] =                            X(0); m_V[A13] =                             X(0); m_V[A14] = X( 0);
-        m_V[A21] =                            X(0); m_V[A22] = X(2) * _Near / (_Top - _Bottom); m_V[A23] =                             X(0); m_V[A24] = X( 0);
-        m_V[A31] =                            X(0); m_V[A32] =                            X(0); m_V[A33] = -(_Far + _Near) / (_Far - _Near); m_V[A34] = - X(2) * _Far * _Near / (_Far - _Near);
-        m_V[A41] =                            X(0); m_V[A42] =                            X(0); m_V[A43] =                            X(-1); m_V[A44] = X( 0);
+        m_V[A11] = X(2) * _Near / (_Right - _Left); m_V[A12] =                            X(0); m_V[A13] =                  X(0); m_V[A14] = X( 0);
+        m_V[A21] =                            X(0); m_V[A22] = X(2) * _Near / (_Top - _Bottom); m_V[A23] =                  X(0); m_V[A24] = X( 0);
+        m_V[A31] =                            X(0); m_V[A32] =                            X(0); m_V[A33] = _Far / (_Near - _Far); m_V[A34] = _Far * _Near / (_Near - _Far);
+        m_V[A41] =                            X(0); m_V[A42] =                            X(0); m_V[A43] =                 X(-1); m_V[A44] = X( 0);
         
         return *this;
     }
@@ -1250,10 +1250,10 @@ namespace MATH
         float CX = _CameraMatrix[0][2];  //< Camera primary point x
         float CY = _CameraMatrix[1][2];  //< Camera primary point y
 
-        m_V[A11] = FX / CX; m_V[A12] =    X(0); m_V[A13] =                             X(0); m_V[A14] = X( 0);
-        m_V[A21] =    X(0); m_V[A22] = FY / CY; m_V[A23] =                             X(0); m_V[A24] = X( 0);
-        m_V[A31] =    X(0); m_V[A32] =    X(0); m_V[A33] = -(_Far + _Near) / (_Far - _Near); m_V[A34] = - X(2) * _Near * _Far / (_Far - _Near);
-        m_V[A41] =    X(0); m_V[A42] =    X(0); m_V[A43] =                            X(-1); m_V[A44] = X( 0);
+        m_V[A11] = FX / CX; m_V[A12] =    X(0); m_V[A13] =                  X(0); m_V[A14] = X( 0);
+        m_V[A21] =    X(0); m_V[A22] = FY / CY; m_V[A23] =                  X(0); m_V[A24] = X( 0);
+        m_V[A31] =    X(0); m_V[A32] =    X(0); m_V[A33] = _Far / (_Near - _Far); m_V[A34] = _Far * _Near / (_Near - _Far);
+        m_V[A41] =    X(0); m_V[A42] =    X(0); m_V[A43] =                 X(-1); m_V[A44] = X( 0);
         
         return *this;
     }
@@ -1267,10 +1267,10 @@ namespace MATH
         const X ScaleY = Base::Cos(Radian) / Base::Sin(Radian);
         const X ScaleX = ScaleY / _Aspect;
         
-        m_V[A11] = ScaleX; m_V[A12] =   X(0); m_V[A13] =                              X(0); m_V[A14] = X( 0);
-        m_V[A21] = X(0)  ; m_V[A22] = ScaleY; m_V[A23] =                              X(0); m_V[A24] = X( 0);
-        m_V[A31] = X(0)  ; m_V[A32] =   X(0); m_V[A33] =  -(_Far + _Near) / (_Far - _Near); m_V[A34] = - X(2) * _Near * _Far / (_Far - _Near);
-        m_V[A41] = X(0)  ; m_V[A42] =   X(0); m_V[A43] =                             X(-1); m_V[A44] = X( 0);
+        m_V[A11] = ScaleX; m_V[A12] =   X(0); m_V[A13] =                  X(0); m_V[A14] = X( 0);
+        m_V[A21] = X(0)  ; m_V[A22] = ScaleY; m_V[A23] =                  X(0); m_V[A24] = X( 0);
+        m_V[A31] = X(0)  ; m_V[A32] =   X(0); m_V[A33] = _Far / (_Near - _Far); m_V[A34] = _Far * _Near / (_Near - _Far);
+        m_V[A41] = X(0)  ; m_V[A42] =   X(0); m_V[A43] =                 X(-1); m_V[A44] = X( 0);
         
         return *this;
     }
@@ -1280,10 +1280,10 @@ namespace MATH
     template <typename T>
     inline typename CMatrix4x4<T>::CThis& CMatrix4x4<T>::SetRHOrthographic(X _Width, X _Height, X _Near, X _Far)
     {
-        m_V[A11] = X(1) / _Width; m_V[A12] =           X(0); m_V[A13] =                   X(0); m_V[A14] = X(0);
-        m_V[A21] =          X(0); m_V[A22] = X(1) / _Height; m_V[A23] =                   X(0); m_V[A24] = X(0);
-        m_V[A31] =          X(0); m_V[A32] =           X(0); m_V[A33] = -X(2) / (_Far - _Near); m_V[A34] = -(_Far + _Near) / (_Far - _Near);
-        m_V[A41] =          X(0); m_V[A42] =           X(0); m_V[A43] =                   X(0); m_V[A44] = X(1);
+        m_V[A11] = X(1) / _Width; m_V[A12] =           X(0); m_V[A13] =                  X(0); m_V[A14] = X(0);
+        m_V[A21] =          X(0); m_V[A22] = X(1) / _Height; m_V[A23] =                  X(0); m_V[A24] = X(0);
+        m_V[A31] =          X(0); m_V[A32] =           X(0); m_V[A33] = X(1) / (_Near - _Far); m_V[A34] = -_Near / (_Near - _Far);
+        m_V[A41] =          X(0); m_V[A42] =           X(0); m_V[A43] =                  X(0); m_V[A44] = X(1);
 
         return *this;
     }
@@ -1293,10 +1293,10 @@ namespace MATH
     template <typename T>
     inline typename CMatrix4x4<T>::CThis& CMatrix4x4<T>::SetRHOrthographic(X _Left, X _Right, X _Bottom, X _Top, X _Near, X _Far)
     {
-        m_V[A11] = X(2) / (_Right - _Left); m_V[A12] =                    X(0); m_V[A13] =                   X(0); m_V[A14] = -(_Right + _Left) / (_Right - _Left);
-        m_V[A21] =                    X(0); m_V[A22] = X(2) / (_Top - _Bottom); m_V[A23] =                   X(0); m_V[A24] = -(_Top + _Bottom) / (_Top - _Bottom);
-        m_V[A31] =                    X(0); m_V[A32] =                    X(0); m_V[A33] = -X(2) / (_Far - _Near); m_V[A34] = -(_Far + _Near) / (_Far - _Near);
-        m_V[A41] =                    X(0); m_V[A42] =                    X(0); m_V[A43] =                   X(0); m_V[A44] = X(1);
+        m_V[A11] = X(2) / (_Right - _Left); m_V[A12] =                    X(0); m_V[A13] =                  X(0); m_V[A14] = -(_Right + _Left) / (_Right - _Left);
+        m_V[A21] =                    X(0); m_V[A22] = X(2) / (_Top - _Bottom); m_V[A23] =                  X(0); m_V[A24] = -(_Top + _Bottom) / (_Top - _Bottom);
+        m_V[A31] =                    X(0); m_V[A32] =                    X(0); m_V[A33] = X(1) / (_Near - _Far); m_V[A34] = -_Near / (_Near - _Far);
+        m_V[A41] =                    X(0); m_V[A42] =                    X(0); m_V[A43] =                  X(0); m_V[A44] = X(1);
 
         return *this;
     }
