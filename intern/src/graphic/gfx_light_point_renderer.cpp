@@ -95,10 +95,6 @@ namespace
             Dt::CEntity*          m_pLevelEntity;
             
             Gfx::CPointLightFacet* m_pGfxLightFacet;
-            CShaderPtr  m_ShadowVS;
-            CShaderPtr  m_ShadowPS;
-            CShaderPtr  m_LightVS;
-            CShaderPtr  m_LightPS;
         };
         
     private:
@@ -108,15 +104,11 @@ namespace
     private:
         
         CMeshPtr          m_SphereModelPtr;
-        
+
         CBufferSetPtr     m_MainVSBufferPtr;
-        
+
         CBufferSetPtr     m_PunctualLightPSBufferPtr;
         
-        CInputLayoutPtr   m_LightProbeInputLayoutPtr;
-        
-        CShaderPtr        m_ModelVSPtr;
-
         CShaderPtr        m_PunctualLightShaderPSPtr;
 
         CRenderContextPtr m_LightRenderContextPtr;
@@ -136,8 +128,6 @@ namespace
         : m_SphereModelPtr            ()
         , m_MainVSBufferPtr           ()
         , m_PunctualLightPSBufferPtr  ()
-        , m_LightProbeInputLayoutPtr  ()
-        , m_ModelVSPtr                ()
         , m_PunctualLightShaderPSPtr  ()
         , m_PunctualLightRenderJobs   ()
     {
@@ -163,8 +153,6 @@ namespace
         m_SphereModelPtr                    = 0;
         m_MainVSBufferPtr                   = 0;
         m_PunctualLightPSBufferPtr          = 0;
-        m_LightProbeInputLayoutPtr          = 0;
-        m_ModelVSPtr                        = 0;
         m_PunctualLightShaderPSPtr          = 0;
         m_LightRenderContextPtr             = 0;
         
@@ -175,18 +163,7 @@ namespace
     
     void CGfxPointLightRenderer::OnSetupShader()
     {
-        m_ModelVSPtr = ShaderManager::CompileVS("vs_m_p.glsl", "main");
-     
         m_PunctualLightShaderPSPtr = ShaderManager::CompilePS("fs_light_punctuallight.glsl", "main");
-        
-        // -----------------------------------------------------------------------------
-        
-        const SInputElementDescriptor PositionInputLayout[] =
-        {
-            { "POSITION", 0, CInputLayout::Float3Format, 0, 0, 12, CInputLayout::PerVertex, 0, },
-        };
-        
-        m_LightProbeInputLayoutPtr = ShaderManager::CreateInputLayout(PositionInputLayout, 1, m_ModelVSPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -211,7 +188,7 @@ namespace
 
         CViewPortSetPtr     ViewPortSetPtr     = ViewManager     ::GetViewPortSet();
 
-        CRenderStatePtr     LightStatePtr      = StateManager    ::GetRenderState(CRenderState::AdditionBlend);
+        CRenderStatePtr     LightStatePtr      = StateManager    ::GetRenderState(CRenderState::AdditionBlend | CRenderState::NoCull);
 
         CTargetSetPtr       LightTargetSetPtr  = TargetSetManager::GetLightAccumulationTargetSet();
 
@@ -394,6 +371,34 @@ namespace
         ContextManager::SetTopology(STopology::TriangleList);
 
         // -----------------------------------------------------------------------------
+        // Set static stuff
+        // -----------------------------------------------------------------------------
+        ContextManager::SetShaderVS(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetMVPShaderVS());
+
+        ContextManager::SetShaderPS(m_PunctualLightShaderPSPtr);
+
+        ContextManager::SetVertexBufferSet(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+
+        ContextManager::SetIndexBuffer(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+
+        ContextManager::SetInputLayout(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetMVPShaderVS()->GetInputLayout());
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+
+        ContextManager::SetConstantBuffer(1, m_MainVSBufferPtr->GetBuffer(0));
+
+        ContextManager::SetConstantBuffer(2, m_PunctualLightPSBufferPtr->GetBuffer(0));
+
+        ContextManager::SetConstantBuffer(3, m_PunctualLightPSBufferPtr->GetBuffer(1));
+
+        ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
+
+        ContextManager::SetTexture(0, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0));
+        ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1));
+        ContextManager::SetTexture(2, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2));
+        ContextManager::SetTexture(3, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
+
+        // -----------------------------------------------------------------------------
         // Iterate over every point light
         // -----------------------------------------------------------------------------
         CurrentRenderJob = m_PunctualLightRenderJobs.begin();
@@ -444,34 +449,6 @@ namespace
             BufferManager::UploadConstantBufferData(m_PunctualLightPSBufferPtr->GetBuffer(1), &LightBuffer);
 
             // -----------------------------------------------------------------------------
-            // Render punctual lights
-            // -----------------------------------------------------------------------------
-            ContextManager::SetShaderVS(m_ModelVSPtr);
-
-            ContextManager::SetShaderPS(m_PunctualLightShaderPSPtr);
-
-            ContextManager::SetVertexBufferSet(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
-
-            ContextManager::SetIndexBuffer(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
-
-            ContextManager::SetInputLayout(m_LightProbeInputLayoutPtr);
-
-            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-
-            ContextManager::SetConstantBuffer(1, m_MainVSBufferPtr->GetBuffer(0));
-
-            ContextManager::SetConstantBuffer(2, m_PunctualLightPSBufferPtr->GetBuffer(0));
-
-            ContextManager::SetConstantBuffer(3, m_PunctualLightPSBufferPtr->GetBuffer(1));
-
-            ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
-
-            ContextManager::SetTexture(0, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0));
-            ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1));
-            ContextManager::SetTexture(2, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2));
-            ContextManager::SetTexture(3, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
-            
-            // -----------------------------------------------------------------------------
             // Set shadow map
             // -----------------------------------------------------------------------------
             if (pDtLightFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows)
@@ -483,34 +460,31 @@ namespace
             // Draw light
             // -----------------------------------------------------------------------------
             ContextManager::DrawIndexed(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
-
-            ContextManager::ResetTexture(0);
-            ContextManager::ResetTexture(1);
-            ContextManager::ResetTexture(2);
-            ContextManager::ResetTexture(3);
-            ContextManager::ResetTexture(4);
-
-            ContextManager::ResetInputLayout();
-
-            ContextManager::ResetConstantBuffer(0);
-            ContextManager::ResetConstantBuffer(1);
-            ContextManager::ResetConstantBuffer(2);
-            ContextManager::ResetConstantBuffer(3);
-
-            ContextManager::ResetResourceBuffer(0);
-
-            ContextManager::ResetIndexBuffer();
-
-            ContextManager::ResetVertexBufferSet();
-
-            ContextManager::ResetShaderVS();
-
-            ContextManager::ResetShaderPS();
         }
+
+        ContextManager::ResetTexture(0);
+        ContextManager::ResetTexture(1);
+        ContextManager::ResetTexture(2);
+        ContextManager::ResetTexture(3);
+        ContextManager::ResetTexture(4);
+
+        ContextManager::ResetInputLayout();
+
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
+        ContextManager::ResetConstantBuffer(2);
+        ContextManager::ResetConstantBuffer(3);
+
+        ContextManager::ResetResourceBuffer(0);
+
+        ContextManager::ResetIndexBuffer();
+
+        ContextManager::ResetVertexBufferSet();
+
+        ContextManager::ResetShaderVS();
+
+        ContextManager::ResetShaderPS();
         
-        // -----------------------------------------------------------------------------
-        // Reset non-dynamic objects
-        // -----------------------------------------------------------------------------
         ContextManager::ResetTopology();
         
         ContextManager::ResetSampler(0);
@@ -556,9 +530,6 @@ namespace
             NewRenderJob.m_pDataLightFacet        = pDataLightFacet;
             NewRenderJob.m_pLevelEntity           = &rCurrentEntity;
             NewRenderJob.m_pGfxLightFacet     = pGraphicLightFacet;
-                
-            NewRenderJob.m_LightVS = m_ModelVSPtr;
-            NewRenderJob.m_LightPS = m_PunctualLightShaderPSPtr;
 
             m_PunctualLightRenderJobs.push_back(NewRenderJob);
             

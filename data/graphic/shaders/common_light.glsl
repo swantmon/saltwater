@@ -35,10 +35,10 @@
 // -----------------------------------------------------------------------------
 // Shadowing
 // -----------------------------------------------------------------------------
-float GetShadowAtPosition(in vec3 _WSPosition, in mat4 _LightViewProjection, in sampler2D _Shadowmap)
+float GetShadowAtPosition(in vec3 _WSPosition, in mat4 _LightViewProjection, in sampler2D _Shadowmap, in float _Bias = 0.001f)
 {
     vec4  LSPosition;
-    vec3  ShadowCoord;
+    vec2  ShadowCoord;
     float DepthValue;
     float Shadow;
 
@@ -56,17 +56,17 @@ float GetShadowAtPosition(in vec3 _WSPosition, in mat4 _LightViewProjection, in 
     // -----------------------------------------------------------------------------
     // Get uv texcoords for this position
     // -----------------------------------------------------------------------------
-    ShadowCoord = LSPosition.xyz * 0.5f + 0.5f;
+    ShadowCoord = LSPosition.xy * 0.5f + 0.5f;
     
     // -----------------------------------------------------------------------------
     // Get final depth at this texcoord and compare it with the real
     // position z value (do a manual depth test)
     // -----------------------------------------------------------------------------
-    DepthValue = texture(_Shadowmap, ShadowCoord.xy).r;
+    DepthValue = texture(_Shadowmap, ShadowCoord).r;
     
     Shadow = 1.0f;
     
-    if (ShadowCoord.z - 0.001f > DepthValue)
+    if (LSPosition.z - _Bias > DepthValue)
     {
         Shadow = 0.0f;
     }
@@ -79,7 +79,7 @@ float GetShadowAtPosition(in vec3 _WSPosition, in mat4 _LightViewProjection, in 
 float GetShadowAtPositionWithPCF(in vec3 _WSPosition, in mat4 _LightViewProjection, in sampler2DShadow _Shadowmap)
 {
     vec4  LSPosition;
-    vec3  ShadowCoord;
+    vec2  ShadowCoord;
     vec2  ShadowMapSize;
     float DepthValue;
     float Shadow;
@@ -104,7 +104,7 @@ float GetShadowAtPositionWithPCF(in vec3 _WSPosition, in mat4 _LightViewProjecti
     // -----------------------------------------------------------------------------
     // Get uv texcoords for this position
     // -----------------------------------------------------------------------------
-    ShadowCoord = LSPosition.xyz * 0.5f + 0.5f;
+    ShadowCoord = LSPosition.xy * 0.5f + 0.5f;
     
     // -----------------------------------------------------------------------------
     // Get final depth at this texcoord and compare it with the real
@@ -117,9 +117,9 @@ float GetShadowAtPositionWithPCF(in vec3 _WSPosition, in mat4 _LightViewProjecti
     {
         for(int TexCoordY = -2; TexCoordY <= 2; ++TexCoordY)
         {
-            vec2 Offset = ShadowCoord.xy + (vec2(TexCoordX, TexCoordY) / ShadowMapSize);
+            vec2 Offset = ShadowCoord + (vec2(TexCoordX, TexCoordY) / ShadowMapSize);
             
-            Shadow += texture( _Shadowmap, vec3(Offset.x, Offset.y, ShadowCoord.z));
+            Shadow += texture( _Shadowmap, vec3(Offset.x, Offset.y, LSPosition.z));
         }
     }
     
