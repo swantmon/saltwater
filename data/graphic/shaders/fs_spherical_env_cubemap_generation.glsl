@@ -41,7 +41,7 @@ vec4 GetTextureSpherical(in vec3 _Normal, in float _LOD)
 
     TexCoord = acos(TexCoord) * INV_PI;
     
-    TexCoord.x = (_Normal.z > 0.0) ? TexCoord.x * 0.5f : 1.0f - (TexCoord.x * 0.5f);
+    TexCoord.x = (_Normal.z > 0.0) ? 1.0f - (TexCoord.x * 0.5f) : (TexCoord.x * 0.5f);
 
     TexCoord.y = 1.0f - TexCoord.y;
 
