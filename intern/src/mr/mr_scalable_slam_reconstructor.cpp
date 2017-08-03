@@ -211,7 +211,7 @@ namespace MR
         RendertargetDescriptor.m_Format = CTextureBase::Unknown;
         RendertargetDescriptor.m_Usage = CTextureBase::GPURead;
         RendertargetDescriptor.m_Semantic = CTextureBase::Diffuse;
-        RendertargetDescriptor.m_Format = CTextureBase::R8_BYTE;
+        RendertargetDescriptor.m_Format = CTextureBase::R16G16B16A16_FLOAT;
 
         CTextureBasePtr RenderTarget = TextureManager::CreateTexture2D(RendertargetDescriptor);
         
@@ -651,6 +651,8 @@ namespace MR
 
         for (uint32_t VolumeIndex : rVolumeQueue)
         {
+            Performance::BeginEvent("Integrate into Root Volume");
+
             assert(m_RootGridVector[VolumeIndex] != nullptr);
 
             ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
@@ -668,6 +670,8 @@ namespace MR
             //TargetSetManager::ClearTargetSet(m_TargetSetPtr);
             IntegrateSingleRootGrid(*m_RootGridVector[VolumeIndex]);
             GatherRootGridCounters();
+
+            Performance::EndEvent();
         }
 
         ContextManager::ResetShaderVS();
@@ -689,7 +693,7 @@ namespace MR
         int InstanceCount = GridData.m_Resolution * GridData.m_Resolution * GridData.m_Resolution;
 
         ClearBuffer(m_GridAtomicCounterBufferPtr, InstanceCount);
-
+        TargetSetManager::ClearTargetSet(m_TargetSetPtr);
         const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
     }
@@ -800,8 +804,12 @@ namespace MR
         // Check all possible root grid volumes for depth data
         ////////////////////////////////////////////////////////////////////////////////
 
+        Performance::BeginEvent("Check Root Volumes");
+
         RasterizeRootVolumes();
         GatherCounters(static_cast<unsigned int>(m_RootGridMap.size()));
+
+        Performance::EndEvent();
 
         // todo: try to get rid of mapping
         SIndexedIndirect* pIndirectData = static_cast<SIndexedIndirect*>(BufferManager::MapConstantBuffer(m_IndexedIndirectBufferPtr, CBuffer::ReadWrite));
@@ -1518,6 +1526,7 @@ namespace MR
         if (pReconstructionSettings != nullptr)
         {
 			assert(pReconstructionSettings->m_IsScalable);
+            TargetSetManager::ClearTargetSet(m_TargetSetPtr);
             m_ReconstructionSettings = *pReconstructionSettings;
         }
 
