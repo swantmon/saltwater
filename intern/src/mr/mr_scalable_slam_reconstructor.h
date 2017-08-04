@@ -105,7 +105,7 @@ namespace MR
 		bool RootGridInFrustum(const Base::Int3& rKey);
 		void UpdateRootrids();
         void IntegrateRootGrids(std::vector<uint32_t>& rVolumeQueue);
-        void IntegrateSingleRootGrid(SRootGrid& rRootGrid);
+        void RasterizeRootGrid(SRootGrid& rRootGrid);
         void GatherRootGridCounters();
         void ResizeInstanceBuffers(size_t Size);
         void ClearBuffer(Gfx::CBufferPtr BufferPtr, size_t Size);

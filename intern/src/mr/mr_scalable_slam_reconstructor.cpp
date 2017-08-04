@@ -668,7 +668,7 @@ namespace MR
 
             ContextManager::Barrier();
             //TargetSetManager::ClearTargetSet(m_TargetSetPtr);
-            IntegrateSingleRootGrid(*m_RootGridVector[VolumeIndex]);
+            RasterizeRootGrid(*m_RootGridVector[VolumeIndex]);
             GatherRootGridCounters();
 
             Performance::EndEvent();
@@ -680,7 +680,7 @@ namespace MR
     
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::IntegrateSingleRootGrid(SRootGrid& rRootGrid)
+    void CScalableSLAMReconstructor::RasterizeRootGrid(SRootGrid& rRootGrid)
     {
         SGridRasterization GridData = {};
         GridData.m_Resolution = m_ReconstructionSettings.m_GridResolutions[0];
