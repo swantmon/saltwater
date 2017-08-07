@@ -608,7 +608,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::GatherCounters(unsigned int Size)
+    void CScalableSLAMReconstructor::GatherCounters(unsigned int Count, CBufferPtr CounterBuffer, CBufferPtr QueueBuffer, CBufferPtr IndirectBuffer)
     {
         ContextManager::Barrier();
 
@@ -616,13 +616,13 @@ namespace MR
 
         SIndexedIndirect IndirectBufferData = {};
         IndirectBufferData.m_IndexCount = 36;
-        BufferManager::UploadConstantBufferData(m_IndexedIndirectBufferPtr, &IndirectBufferData);
+        BufferManager::UploadConstantBufferData(IndirectBuffer, &IndirectBufferData);
 
-        ContextManager::SetResourceBuffer(0, m_AtomicCounterBufferPtr);
-        ContextManager::SetResourceBuffer(1, m_IndexedIndirectBufferPtr);
-        ContextManager::SetResourceBuffer(2, m_VolumeQueueBufferPtr);
+        ContextManager::SetResourceBuffer(0, CounterBuffer);
+        ContextManager::SetResourceBuffer(1, IndirectBuffer);
+        ContextManager::SetResourceBuffer(2, QueueBuffer);
         
-        ContextManager::Dispatch(Size, 1, 1);
+        ContextManager::Dispatch(Count, 1, 1);
     }
 
 	// -----------------------------------------------------------------------------
@@ -669,7 +669,7 @@ namespace MR
             ContextManager::Barrier();
             //TargetSetManager::ClearTargetSet(m_TargetSetPtr);
             RasterizeRootGrid(*m_RootGridVector[VolumeIndex]);
-            GatherRootGridCounters();
+            GatherCounters(4096, m_GridAtomicCounterBufferPtr, m_VolumeQueueBufferPtr, m_IndexedIndirectBufferPtr);
 
             Performance::EndEvent();
         }
@@ -696,23 +696,6 @@ namespace MR
         TargetSetManager::ClearTargetSet(m_TargetSetPtr);
         const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CScalableSLAMReconstructor::GatherRootGridCounters()
-    {
-        SIndexedIndirect IndirectData = {};
-        IndirectData.m_IndexCount = 36;
-        BufferManager::UploadConstantBufferData(m_IndexedIndirectBufferPtr, &IndirectData);
-
-        ContextManager::SetShaderCS(m_GridCountersCSPtr);
-
-        ContextManager::SetResourceBuffer(0, m_GridAtomicCounterBufferPtr);
-        ContextManager::SetResourceBuffer(1, m_IndexedIndirectBufferPtr);
-        ContextManager::SetResourceBuffer(2, m_VolumeQueueBufferPtr);
-
-        ContextManager::Dispatch(4096, 1, 1);
     }
 
     // -----------------------------------------------------------------------------
@@ -807,7 +790,7 @@ namespace MR
         Performance::BeginEvent("Check Root Volumes");
 
         RasterizeRootVolumes();
-        GatherCounters(static_cast<unsigned int>(m_RootGridMap.size()));
+        GatherCounters(static_cast<unsigned int>(m_RootGridMap.size()), m_AtomicCounterBufferPtr, m_VolumeQueueBufferPtr, m_IndexedIndirectBufferPtr);
 
         Performance::EndEvent();
 

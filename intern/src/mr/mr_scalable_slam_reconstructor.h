@@ -106,7 +106,7 @@ namespace MR
 		void UpdateRootrids();
         void IntegrateRootGrids(std::vector<uint32_t>& rVolumeQueue);
         void RasterizeRootGrid(SRootGrid& rRootGrid);
-        void GatherRootGridCounters();
+
         void ResizeInstanceBuffers(size_t Size);
         void ClearBuffer(Gfx::CBufferPtr BufferPtr, size_t Size);
 
@@ -120,7 +120,7 @@ namespace MR
 
         void CreateReferencePyramid();
         void RasterizeRootVolumes();
-        void GatherCounters(unsigned int Size);
+        void GatherCounters(unsigned int Count, Gfx::CBufferPtr CounterBufferPtr, Gfx::CBufferPtr QueueBuffer, Gfx::CBufferPtr IndirectBufferPtr);
 
         void IntegrateOld();
         void Raycast();
