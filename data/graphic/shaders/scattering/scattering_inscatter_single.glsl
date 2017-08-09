@@ -32,9 +32,12 @@ void Integrate(float _Radius, float _Mu, float _MuS, float _Nu, float _T, out ve
 {
     _Rayleigh = vec3(0.0f);
     _Mie = vec3(0.0f);
+
     float Ri = sqrt(_Radius * _Radius + _T * _T + 2.0f * _Radius * _Mu * _T);
     float MuSi = (_Nu * _T + _MuS * _Radius) / Ri;
+
     Ri = max(g_RadiusGround, Ri);
+    
     if (MuSi >= -sqrt(1.0f - g_RadiusGround * g_RadiusGround / (Ri * Ri)))
     {
         vec3 Ti = GetTransmittance(_Radius, _Mu, _T) * GetTransmittance(Ri, MuSi);
@@ -49,10 +52,11 @@ void Inscatter(float _Radius, float _Mu, float _MuS, float _Nu, out vec3 _Raylei
     float Xi = 0.0f;
     vec3 Rayleighi = vec3(0.0f);
     vec3 Miei = vec3(0.0f);
+
+    _Rayleigh = vec3(0.0f);
+    _Mie = vec3(0.0f);
+
     Integrate(_Radius, _Mu, _MuS, _Nu, 0.0f, Rayleighi, Miei);
-    
-    vec3 tRayleigh = vec3(0.0f);
-    vec3 tMie = vec3(0.0f);
 
     #pragma unroll
     for (int i = 1; i <= g_InscatterIntegralSampleCount; ++ i)
@@ -61,15 +65,15 @@ void Inscatter(float _Radius, float _Mu, float _MuS, float _Nu, out vec3 _Raylei
         vec3 Rayleighj = vec3(0.0f);
         vec3 Miej = vec3(0.0f);
         Integrate(_Radius, _Mu, _MuS, _Nu, Xj, Rayleighj, Miej);
-        tRayleigh += (Rayleighi + Rayleighj) / 2.0f * Dx;
-        tMie += (Miei + Miej) / 2.0f * Dx;
+        _Rayleigh += (Rayleighi + Rayleighj) / 2.0f * Dx;
+        _Mie += (Miei + Miej) / 2.0f * Dx;
         Xi = Xj;
         Rayleighi = Rayleighj;
         Miei = Miej;
     }
 
-    _Rayleigh = tRayleigh * g_BetaRayleigh;
-    _Mie      = tMie * g_BetaMie;
+    _Rayleigh *= g_BetaRayleigh;
+    _Mie *= g_BetaMie;
 }
 
 void main()
