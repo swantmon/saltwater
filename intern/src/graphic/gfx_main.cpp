@@ -232,7 +232,7 @@ namespace
             const int Attributes[] =
             {
                 WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
-                WGL_CONTEXT_MINOR_VERSION_ARB, 5,
+                WGL_CONTEXT_MINOR_VERSION_ARB, 6,
                 WGL_CONTEXT_PROFILE_MASK_ARB , WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
                 WGL_CONTEXT_FLAGS_ARB        , APP_DEBUG_MODE ? WGL_CONTEXT_DEBUG_BIT_ARB : 0,
                 0,        //End
@@ -308,9 +308,9 @@ namespace
 
             assert(pInfoGLEWVersion && pInfoGLVersion && pInfoGLGLSLVersion && pInfoGLVendor && pInfoGLRenderer);
 
-            if (!GLEW_VERSION_4_5)
+            if (!GLEW_VERSION_4_6)
             {
-                BASE_THROWV("GL 4.5 can't be initialized. Available version %s is to old!", pInfoGLVersion);
+                BASE_THROWV("GL 4.6 can't be initialized. Available version %s is to old!", pInfoGLVersion);
             }
 
             BASE_CONSOLE_INFOV("Window ID: %i", IndexOfWindow);
@@ -328,9 +328,7 @@ namespace
             glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 #endif
 
-
             glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
-
 
             // -----------------------------------------------------------------------------
             // Save created data
