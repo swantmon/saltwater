@@ -358,7 +358,7 @@ namespace
 
         PreprocessorShader(ShaderFileContent);
 
-        ShaderFileContent = "#version 450 \n" + ShaderFileContent;
+        ShaderFileContent = "#version 460 \n" + ShaderFileContent;
 
         ShaderLength = ShaderFileContent.size();
 
