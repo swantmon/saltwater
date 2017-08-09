@@ -50,6 +50,9 @@ void Inscatter(float _Radius, float _Mu, float _MuS, float _Nu, out vec3 _Raylei
     vec3 Rayleighi = vec3(0.0f);
     vec3 Miei = vec3(0.0f);
     Integrate(_Radius, _Mu, _MuS, _Nu, 0.0f, Rayleighi, Miei);
+    
+    vec3 tRayleigh = vec3(0.0f);
+    vec3 tMie = vec3(0.0f);
 
     #pragma unroll
     for (int i = 1; i <= g_InscatterIntegralSampleCount; ++ i)
@@ -58,15 +61,15 @@ void Inscatter(float _Radius, float _Mu, float _MuS, float _Nu, out vec3 _Raylei
         vec3 Rayleighj = vec3(0.0f);
         vec3 Miej = vec3(0.0f);
         Integrate(_Radius, _Mu, _MuS, _Nu, Xj, Rayleighj, Miej);
-        _Rayleigh += (Rayleighi + Rayleighj) / 2.0f * Dx;
-        _Mie += (Miei + Miej) / 2.0f * Dx;
+        tRayleigh += (Rayleighi + Rayleighj) / 2.0f * Dx;
+        tMie += (Miei + Miej) / 2.0f * Dx;
         Xi = Xj;
         Rayleighi = Rayleighj;
         Miei = Miej;
     }
 
-    _Rayleigh *= g_BetaRayleigh;
-    _Mie *= g_BetaMie;
+    _Rayleigh = tRayleigh * g_BetaRayleigh;
+    _Mie      = tMie * g_BetaMie;
 }
 
 void main()
