@@ -32,9 +32,12 @@ void Integrate(float _Radius, float _Mu, float _MuS, float _Nu, float _T, out ve
 {
     _Rayleigh = vec3(0.0f);
     _Mie = vec3(0.0f);
+
     float Ri = sqrt(_Radius * _Radius + _T * _T + 2.0f * _Radius * _Mu * _T);
     float MuSi = (_Nu * _T + _MuS * _Radius) / Ri;
+
     Ri = max(g_RadiusGround, Ri);
+    
     if (MuSi >= -sqrt(1.0f - g_RadiusGround * g_RadiusGround / (Ri * Ri)))
     {
         vec3 Ti = GetTransmittance(_Radius, _Mu, _T) * GetTransmittance(Ri, MuSi);
@@ -49,6 +52,10 @@ void Inscatter(float _Radius, float _Mu, float _MuS, float _Nu, out vec3 _Raylei
     float Xi = 0.0f;
     vec3 Rayleighi = vec3(0.0f);
     vec3 Miei = vec3(0.0f);
+
+    _Rayleigh = vec3(0.0f);
+    _Mie = vec3(0.0f);
+
     Integrate(_Radius, _Mu, _MuS, _Nu, 0.0f, Rayleighi, Miei);
 
     #pragma unroll
