@@ -53,7 +53,7 @@ bool InBox()
     vec3 AABBMin = AABBPosition;
     vec3 AABBMax = AABBPosition + VOLUME_SIZE;
 
-    vec3 Vertex = imageLoad(cs_Vertex, ivec2(DEPTH_IMAGE_WIDTH - gl_FragCoord.x, gl_FragCoord.y)).xyz;
+    vec3 Vertex = imageLoad(cs_Vertex, ivec2(gl_FragCoord.x)).xyz;
     Vertex = (g_PoseMatrix * vec4(Vertex, 1.0f)).xyz; 
 
     return 
