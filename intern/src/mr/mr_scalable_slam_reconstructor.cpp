@@ -682,7 +682,7 @@ namespace MR
     
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::RasterizeRootGrid(SRootGrid& rRootGrid)
+    void CScalableSLAMReconstructor::RasterizeRootGrid(SRootVolume& rRootGrid)
     {
         SGridRasterization GridData = {};
         GridData.m_Resolution = m_ReconstructionSettings.m_GridResolutions[0];
@@ -729,7 +729,7 @@ namespace MR
 			MinIndex[i] = static_cast<int>(BBMin[i] / m_GridSizes[0]);
 		}
 
-		SRootGrid RootGrid;
+		SRootVolume RootGrid;
 
 		for (int x = MinIndex[0] - 1; x <= MaxIndex[0]; ++ x)
 		{
@@ -743,8 +743,9 @@ namespace MR
 					{
 						RootGrid.m_Offset = Key;
 						RootGrid.m_IsVisible = true;
-                        RootGrid.m_TSDFVolumePtr = nullptr;
-                        RootGrid.m_ColorVolumePtr = nullptr;
+                        RootGrid.m_RootGridBufferPtr = nullptr;
+                        RootGrid.m_Level1GridBufferPtr = nullptr;
+                        RootGrid.m_TSDFBufferPtr = nullptr;
 
 						m_RootGridMap[Key] = RootGrid;
 					}
@@ -1078,19 +1079,15 @@ namespace MR
         // Integrate and raycast pyramid
         //////////////////////////////////////////////////////////////////////////////////////
 
-		Performance::BeginEvent("Updating root grid");
-
-		UpdateFrustum();
-		UpdateRootrids();
-
-		Performance::EndEvent();
-
         Performance::BeginEvent("TSDF Integration and Raycasting");
 
         if (!m_IsIntegrationPaused)
         {
-            Performance::BeginEvent("Old integration");
-            IntegrateOld();
+            Performance::BeginEvent("Updating root grid");
+
+            UpdateFrustum();
+            UpdateRootrids();
+
             Performance::EndEvent();
         }
 
@@ -1357,62 +1354,7 @@ namespace MR
 
         return true;
     }    
-
-    // -----------------------------------------------------------------------------
-
-    void CScalableSLAMReconstructor::IntegrateOld()
-    {
-        const int WorkGroups = GetWorkGroupCount(m_ReconstructionSettings.m_VolumeResolution, g_TileSize2D);
-
-        ContextManager::SetShaderCS(m_IntegrationCSPtr);
-
-        ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
-        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);        
-		ContextManager::SetConstantBuffer(2, m_PositionConstantBufferPtr);
-
-        ContextManager::Barrier();
-
-		ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
-
-		if (m_ReconstructionSettings.m_CaptureColor)
-		{
-			ContextManager::SetImageTexture(3, static_cast<CTextureBasePtr>(m_RawCameraFramePtr));
-		}
-		else
-		{
-			ContextManager::ResetImageTexture(3);
-		}
-
-		for (auto& rEntry : m_RootGridMap)
-		{
-			SRootGrid& rRootGrid = rEntry.second;
-
-			if (rRootGrid.m_IsVisible)
-			{
-				Float3 Position;
-
-				Position[0] = rRootGrid.m_Offset[0] * m_ReconstructionSettings.m_VolumeSize;
-				Position[1] = rRootGrid.m_Offset[1] * m_ReconstructionSettings.m_VolumeSize;
-				Position[2] = rRootGrid.m_Offset[2] * m_ReconstructionSettings.m_VolumeSize;
-
-				BufferManager::UploadConstantBufferData(m_PositionConstantBufferPtr, &Position);
-
-				ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(rRootGrid.m_TSDFVolumePtr));
-
-				if (m_ReconstructionSettings.m_CaptureColor)
-				{
-					ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(rRootGrid.m_ColorVolumePtr));
-				}
-
-				ContextManager::Dispatch(WorkGroups, WorkGroups, 1);
-			}
-		}
-		ContextManager::ResetImageTexture(0);
-		ContextManager::ResetImageTexture(1);
-		ContextManager::ResetImageTexture(2);
-		ContextManager::ResetImageTexture(3);
-    }
-    
+        
     // -----------------------------------------------------------------------------
 
     void CScalableSLAMReconstructor::CreateRaycastPyramid()
@@ -1448,23 +1390,7 @@ namespace MR
 
     void CScalableSLAMReconstructor::Raycast()
     {
-        const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth(), g_TileSize2D);
-        const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
-
-        ContextManager::SetShaderCS(m_RaycastCSPtr);
-
-		ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_RootGridMap[Int3(0, 0, 0)].m_TSDFVolumePtr));
-        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
-
-        ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RaycastVertexMapPtr[0]));
-        ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(m_RaycastNormalMapPtr[0]));
-
-        ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
-        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
         
-        ContextManager::Barrier();
-
-        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
     }
 
     // -----------------------------------------------------------------------------

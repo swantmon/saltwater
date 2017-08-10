@@ -62,16 +62,17 @@ namespace MR
     {
 	public:
 
-		struct SRootGrid
+		struct SRootVolume
 		{
-			Gfx::CTexture3DPtr m_TSDFVolumePtr;
-			Gfx::CTexture3DPtr m_ColorVolumePtr;
-			Base::Int3 m_Offset;
-			bool m_IsVisible;
+            Base::Int3 m_Offset;
+            bool m_IsVisible;
+            Gfx::CBufferPtr m_RootGridBufferPtr;
+            Gfx::CBufferPtr m_Level1GridBufferPtr;
+            Gfx::CBufferPtr m_TSDFBufferPtr;
 		};
 
-        typedef std::map<Base::Int3, SRootGrid, IndexCompare> CRootVolumeMap;
-        typedef std::vector<SRootGrid*> CRootVolumeVector;
+        typedef std::map<Base::Int3, SRootVolume, IndexCompare> CRootVolumeMap;
+        typedef std::vector<SRootVolume*> CRootVolumeVector;
 
     public:
 
@@ -107,7 +108,7 @@ namespace MR
 		bool RootGridInFrustum(const Base::Int3& rKey);
 		void UpdateRootrids();
         void IntegrateRootGrids(std::vector<uint32_t>& rVolumeQueue);
-        void RasterizeRootGrid(SRootGrid& rRootGrid);
+        void RasterizeRootGrid(SRootVolume& rRootGrid);
 
         void ResizeInstanceBuffers(size_t Size);
         void ClearBuffer(Gfx::CBufferPtr BufferPtr, size_t Size);
@@ -124,7 +125,6 @@ namespace MR
         void RasterizeRootVolumes();
         void GatherCounters(unsigned int Count, Gfx::CBufferPtr CounterBufferPtr, Gfx::CBufferPtr QueueBuffer, Gfx::CBufferPtr IndirectBufferPtr);
 
-        void IntegrateOld();
         void Raycast();
         void CreateRaycastPyramid();
 
