@@ -95,6 +95,8 @@ namespace MR
 
         void GetReconstructionSettings(SReconstructionSettings* pReconstructionSettings);
 
+        Gfx::CTexture2DPtr GetVertexMap();
+
     private:
 
         void Start();
@@ -133,7 +135,7 @@ namespace MR
         void DetermineSummands(int PyramidLevel, const Base::Float4x4& rIncPoseMatrix);
         void ReduceSum(int PyramidLevel);
         bool CalculatePoseMatrix(Base::Float4x4& rIncPoseMatrix);
-
+        
     private:
 
         static int GetWorkGroupCount(int TotalShaderCount, int WorkGroupSize);

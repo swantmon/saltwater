@@ -655,6 +655,8 @@ namespace MR
 
             assert(m_RootGridVector[VolumeIndex] != nullptr);
 
+            m_RootGridVector[VolumeIndex]->m_IsVisible = true;
+
             ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
             ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
             ContextManager::SetConstantBuffer(2, m_GridRasterizationBufferPtr);
@@ -803,13 +805,18 @@ namespace MR
         // Integrate depth into individual root volume grids
         ////////////////////////////////////////////////////////////////////////////////
 
+        for (auto& rRootGrid : m_RootGridVector)
+        {
+            rRootGrid->m_IsVisible = false;
+        }
+
         if (VolumeCount > 0)
         {
             std::vector<uint32_t> VolumeQueue(VolumeCount);
             uint32_t* pVoxelQueue = static_cast<uint32_t*>(BufferManager::MapConstantBufferRange(m_VolumeQueueBufferPtr, CBuffer::Read, 0, VolumeCount * sizeof(uint32_t)));
             memcpy(VolumeQueue.data(), pVoxelQueue, sizeof(uint32_t) * VolumeCount);
             BufferManager::UnmapConstantBuffer(m_VolumeQueueBufferPtr);
-
+            
             IntegrateRootGrids(VolumeQueue);
         }
 	}
@@ -1545,6 +1552,13 @@ namespace MR
     {
         assert(pReconstructionSettings != nullptr);
         *pReconstructionSettings = m_ReconstructionSettings;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Gfx::CTexture2DPtr CScalableSLAMReconstructor::GetVertexMap()
+    {
+        return m_RawVertexMapPtr;
     }
 
     // -----------------------------------------------------------------------------
