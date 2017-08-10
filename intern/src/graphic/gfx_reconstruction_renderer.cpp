@@ -87,7 +87,7 @@ namespace
 		void RenderVolume();
 
 		void RenderScalableVolume();
-		void RenderGrid();
+		void RenderRootVolumes();
 
         void RenderCamera();
 
@@ -690,22 +690,22 @@ namespace
 
 		ContextManager::SetTopology(STopology::TriangleList);
 
-		for (auto& rPair : m_pScalableReconstructor->GetRootGridMap())
+		for (auto& rPair : m_pScalableReconstructor->GetRootVolumeMap())
 		{
-			auto& rRootGrid = rPair.second;
+			auto& rRootVolume = rPair.second;
 						
-			RaycastData[0][0] = rRootGrid.m_Offset[0] * Settings.m_VolumeSize;
-			RaycastData[0][1] = rRootGrid.m_Offset[1] * Settings.m_VolumeSize;
-			RaycastData[0][2] = rRootGrid.m_Offset[2] * Settings.m_VolumeSize;
+			RaycastData[0][0] = rRootVolume.m_Offset[0] * Settings.m_VolumeSize;
+			RaycastData[0][1] = rRootVolume.m_Offset[1] * Settings.m_VolumeSize;
+			RaycastData[0][2] = rRootVolume.m_Offset[2] * Settings.m_VolumeSize;
 			
 			BufferManager::UploadConstantBufferData(m_RaycastConstantBufferPtr, RaycastData);
 
-			ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(rRootGrid.m_TSDFVolumePtr));
+			ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(rRootVolume.m_TSDFVolumePtr));
 			ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
 
 			if (Settings.m_CaptureColor)
 			{
-				ContextManager::SetTexture(1, static_cast<CTextureBasePtr>(rRootGrid.m_ColorVolumePtr));
+				ContextManager::SetTexture(1, static_cast<CTextureBasePtr>(rRootVolume.m_ColorVolumePtr));
 				ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
 			}
 
@@ -715,7 +715,7 @@ namespace
 
 	// -----------------------------------------------------------------------------
 
-	void CGfxReconstructionRenderer::RenderGrid()
+	void CGfxReconstructionRenderer::RenderRootVolumes()
 	{
 		ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
@@ -740,7 +740,7 @@ namespace
 
         const auto& GridSizes = m_pScalableReconstructor->GetGridSizes();
 
-		for (auto& rPair : m_pScalableReconstructor->GetRootGridMap())
+		for (auto& rPair : m_pScalableReconstructor->GetRootVolumeMap())
 		{
 			auto& rRootGrid = rPair.second;
 
@@ -850,7 +850,7 @@ namespace
 		{
 			RenderScalableVolume();
             RenderVertexMap();
-			RenderGrid();
+			RenderRootVolumes();
 		}
 		else
 		{

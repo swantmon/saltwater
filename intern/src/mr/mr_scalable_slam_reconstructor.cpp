@@ -162,14 +162,14 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-	CScalableSLAMReconstructor::CRootGridMap& CScalableSLAMReconstructor::GetRootGridMap()
+	CScalableSLAMReconstructor::CRootVolumeMap& CScalableSLAMReconstructor::GetRootVolumeMap()
     {
         return m_RootGridMap;
     }
 
     // -----------------------------------------------------------------------------
 
-    CScalableSLAMReconstructor::CRootGridVector& CScalableSLAMReconstructor::GetRootGridVector()
+    CScalableSLAMReconstructor::CRootVolumeVector& CScalableSLAMReconstructor::GetRootVolumeVector()
     {
         return m_RootGridVector;
     }

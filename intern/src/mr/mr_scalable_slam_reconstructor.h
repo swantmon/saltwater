@@ -70,8 +70,8 @@ namespace MR
 			bool m_IsVisible;
 		};
 
-        typedef std::map<Base::Int3, SRootGrid, IndexCompare> CRootGridMap;
-        typedef std::vector<SRootGrid*> CRootGridVector;
+        typedef std::map<Base::Int3, SRootGrid, IndexCompare> CRootVolumeMap;
+        typedef std::vector<SRootGrid*> CRootVolumeVector;
 
     public:
 
@@ -88,8 +88,8 @@ namespace MR
         bool IsTrackingLost() const;
         Base::Float4x4 GetPoseMatrix() const;
 
-		CRootGridMap& GetRootGridMap();
-        CRootGridVector& GetRootGridVector();
+		CRootVolumeMap& GetRootVolumeMap();
+        CRootVolumeVector& GetRootVolumeVector();
 
         const std::vector<float>& GetGridSizes() const;
 
@@ -201,8 +201,8 @@ namespace MR
 
         Gfx::CBufferPtr m_AtomicCounterBufferPtr;
 
-		CRootGridMap m_RootGridMap;
-        CRootGridVector m_RootGridVector;
+		CRootVolumeMap m_RootGridMap;
+        CRootVolumeVector m_RootGridVector;
 
         Gfx::CBufferPtr m_ICPResourceBufferPtr;
 
