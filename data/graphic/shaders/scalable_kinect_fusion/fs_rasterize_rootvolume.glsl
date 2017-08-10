@@ -57,6 +57,7 @@ bool InBox()
     Vertex = (g_PoseMatrix * vec4(Vertex, 1.0f)).xyz; 
 
     return 
+        Vertex.x != 0.0f &&
         Vertex.x > AABBMin.x && Vertex.x < AABBMax.x &&
         Vertex.y > AABBMin.y && Vertex.y < AABBMax.y &&
         Vertex.z > AABBMin.z && Vertex.z < AABBMax.z;
