@@ -31,7 +31,8 @@ void main()
     const vec2 FocalPoint = g_Intrinsics[PyramidLevel].m_FocalPoint;
     const vec2 InvFocalLength = g_Intrinsics[PyramidLevel].m_InvFocalLength;
 
-	const float Depth = imageLoad(cs_DepthBuffer, ivec2(ImagePos)).x / 1000.0f;
+    const ivec2 DepthPos = ivec2(DEPTH_IMAGE_WIDTH - ImagePos.x, ImagePos.y);
+	const float Depth = imageLoad(cs_DepthBuffer, DepthPos).x / 1000.0f;
 	
 	vec4 Vertex;	
 	Vertex.xy = Depth * (ImagePos - FocalPoint) * InvFocalLength;
