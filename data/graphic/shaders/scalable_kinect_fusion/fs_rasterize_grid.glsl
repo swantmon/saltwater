@@ -51,7 +51,7 @@ layout(location = 0) out vec4 out_Color;
 
 bool InBox()
 {
-    vec3 Vertex = imageLoad(cs_Vertex, ivec2(DEPTH_IMAGE_WIDTH - gl_FragCoord.x, gl_FragCoord.y)).xyz;
+    vec3 Vertex = imageLoad(cs_Vertex, ivec2(gl_FragCoord)).xyz;
     Vertex = (g_PoseMatrix * vec4(Vertex, 1.0f)).xyz; 
 
     return 

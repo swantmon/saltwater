@@ -56,7 +56,7 @@ void main()
 
     vec4 Vertex = vec4(g_Offset * g_ParentSize, 1.0f);
     Vertex.xyz += (GridOffset + in_VertexPosition) * g_CubeSize;
-	Vertex = (g_PoseMatrix * Vertex);
+	Vertex = (g_InvPoseMatrix * Vertex);
     
 	Vertex.xy = Vertex.xy * g_Intrinsics[0].m_FocalLength / Vertex.z + g_Intrinsics[0].m_FocalPoint;
 	Vertex.xy = Vertex.xy / vec2(DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT) * 2.0f - 1.0f;
