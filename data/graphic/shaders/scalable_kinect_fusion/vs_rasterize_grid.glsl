@@ -2,16 +2,8 @@
 #ifndef __INCLUDE_VS_RASTERIZE_GRID_GLSL__
 #define __INCLUDE_VS_RASTERIZE_GRID_GLSL__
 
+#include "scalable_kinect_fusion/common_scalable.glsl"
 #include "scalable_kinect_fusion/common_tracking.glsl"
-
-vec3 Indexto3D(int Index, int Resolution)
-{
-    int z = Index / (Resolution * Resolution);
-    Index -= (z * Resolution * Resolution);
-    int y = Index / Resolution;
-    int x = Index % Resolution;
-    return vec3(x, y, z);
-}
 
 // -----------------------------------------------------------------------------
 // Uniform buffers
