@@ -44,7 +44,7 @@ void main()
 {
     out_Index = gl_InstanceID;
 
-    vec3 GridOffset = Indexto3D(gl_InstanceID, g_Resolution);
+    vec3 GridOffset = IndextoOffset(gl_InstanceID, g_Resolution);
 
     vec4 Vertex = vec4(g_Offset * g_ParentSize, 1.0f);
     Vertex.xyz += (GridOffset + in_VertexPosition) * g_CubeSize;
@@ -55,7 +55,7 @@ void main()
     Vertex.z = ((Vertex.z - 0.5f) / 7.5f) * 2.0f - 1.0f;
 
     vec3 AABBPosition = g_Offset * g_ParentSize;
-    AABBPosition += Indexto3D(int(gl_InstanceID), g_Resolution) * g_CubeSize;
+    AABBPosition += IndextoOffset(int(gl_InstanceID), g_Resolution) * g_CubeSize;
     
     out_AABBMin = AABBPosition;
     out_AABBMax = AABBPosition + g_CubeSize;
