@@ -66,9 +66,8 @@ namespace MR
 		{
             Base::Int3 m_Offset;
             bool m_IsVisible;
-            Gfx::CBufferPtr m_RootGridBufferPtr;
-            Gfx::CBufferPtr m_Level1GridBufferPtr;
-            Gfx::CBufferPtr m_TSDFBufferPtr;
+            Gfx::CBufferPtr m_Level1QueuePtr;
+            Gfx::CBufferPtr m_Level2QueuePtr;
 		};
 
         typedef std::map<Base::Int3, SRootVolume, IndexCompare> CRootVolumeMap;
@@ -97,6 +96,14 @@ namespace MR
         void GetReconstructionSettings(SReconstructionSettings* pReconstructionSettings);
 
         Gfx::CTexture2DPtr GetVertexMap();
+
+    private:
+
+        struct SGridDescriptor
+        {
+            int PoolIndex;
+            bool m_NearSurface;
+        };
 
     private:
 
@@ -156,13 +163,18 @@ namespace MR
         Gfx::CBufferPtr m_BilateralFilterConstantBufferPtr;
         Gfx::CBufferPtr m_PositionConstantBufferPtr;
         Gfx::CBufferPtr m_HierarchyConstantBufferPtr;
+
         Gfx::CBufferPtr m_RootVolumeInstanceBufferPtr;
         Gfx::CBufferPtr m_IndexedIndirectBufferPtr;
-		Gfx::CBufferPtr m_VolumeQueueBufferPtr;
-        
+                
+        Gfx::CBufferPtr m_VolumeAtomicCounterBufferPtr;
+        Gfx::CBufferPtr m_VolumeQueueBufferPtr;
+
         Gfx::CBufferPtr m_GridRasterizationBufferPtr;
-        Gfx::CBufferPtr m_GridAtomicCounterBufferPtr;
-        Gfx::CBufferPtr m_GridQueueBufferPtr;
+
+        Gfx::CBufferPtr m_RootVolumePoolPtr;
+        Gfx::CBufferPtr m_Level1PoolPtr;
+        Gfx::CBufferPtr m_TSDFPoolPtr;
 
         Gfx::CShaderPtr m_ClearVolumeCSPtr;
         Gfx::CShaderPtr m_BilateralFilterCSPtr;

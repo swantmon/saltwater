@@ -434,13 +434,12 @@ namespace MR
         m_IncPoseMatrixConstantBufferPtr = 0;
         m_BilateralFilterConstantBufferPtr = 0;
 		m_PositionConstantBufferPtr = 0;
-		m_VolumeQueueBufferPtr = 0;
         m_HierarchyConstantBufferPtr = 0;
         m_AtomicCounterBufferPtr = 0;
         m_RootVolumeInstanceBufferPtr = 0;
         m_IndexedIndirectBufferPtr = 0;
         m_GridRasterizationBufferPtr = 0;
-        m_GridQueueBufferPtr = 0;
+        m_VolumeQueueBufferPtr = 0;
     }
     
     // -----------------------------------------------------------------------------
@@ -658,27 +657,7 @@ namespace MR
             auto& rRootGrid = *m_RootGridVector[VolumeIndex];
 
             rRootGrid.m_IsVisible = true;
-
-            if (rRootGrid.m_RootGridBufferPtr == nullptr)
-            {
-                int Count = m_ReconstructionSettings.m_GridResolutions[0];
-                Count = Count * Count * Count;
-
-                SBufferDescriptor ConstantBufferDesc = {};
-
-                ConstantBufferDesc.m_Stride = 0;
-                ConstantBufferDesc.m_Usage = CBuffer::GPUToCPU;
-                ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
-                ConstantBufferDesc.m_Access = CBuffer::CPUReadWrite;
-                ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * Count;
-                ConstantBufferDesc.m_pBytes = nullptr;
-                ConstantBufferDesc.m_pClassKey = 0;
-
-                rRootGrid.m_RootGridBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-            }
-
-            ClearBuffer(rRootGrid.m_RootGridBufferPtr, sizeof(uint32_t) * m_GridSizes[0] * m_GridSizes[0] * m_GridSizes[0]);
-
+            
             ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
             ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
             ContextManager::SetConstantBuffer(2, m_GridRasterizationBufferPtr);
@@ -687,13 +666,11 @@ namespace MR
             ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
 
             ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawVertexMapPtr));
-
-            ContextManager::SetResourceBuffer(0, rRootGrid.m_RootGridBufferPtr);
-
+            
             ContextManager::Barrier();
             //TargetSetManager::ClearTargetSet(m_TargetSetPtr);
             RasterizeRootGrid(*m_RootGridVector[VolumeIndex]);
-            GatherCounters(m_ReconstructionSettings.m_VoxelsPerGrid[0], rRootGrid.m_RootGridBufferPtr, m_VolumeQueueBufferPtr, m_IndexedIndirectBufferPtr);
+            //GatherCounters(m_ReconstructionSettings.m_VoxelsPerGrid[0], , m_VolumeQueueBufferPtr, m_IndexedIndirectBufferPtr);
 
             Performance::EndEvent();
         }
@@ -716,7 +693,7 @@ namespace MR
 
         int InstanceCount = GridData.m_Resolution * GridData.m_Resolution * GridData.m_Resolution;
 
-        ClearBuffer(m_GridAtomicCounterBufferPtr, InstanceCount);
+        ClearBuffer(m_VolumeAtomicCounterBufferPtr, InstanceCount);
 
         const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
@@ -765,9 +742,6 @@ namespace MR
 					{
 						RootVolume.m_Offset = Key;
 						RootVolume.m_IsVisible = true;
-                        RootVolume.m_RootGridBufferPtr = nullptr;
-                        RootVolume.m_Level1GridBufferPtr = nullptr;
-                        RootVolume.m_TSDFBufferPtr = nullptr;
 
 						m_RootGridMap[Key] = RootVolume;
 					}
@@ -803,7 +777,7 @@ namespace MR
             InstanceData.m_Offset = rRootGrid.m_Offset;
 
             *pInstanceData = InstanceData;
-            ++pInstanceData;
+            ++ pInstanceData;
         }
 
         BufferManager::UnmapConstantBuffer(m_RootVolumeInstanceBufferPtr);
@@ -1027,8 +1001,13 @@ namespace MR
         ConstantBufferDesc.m_NumberOfBytes = m_ReconstructionSettings.m_VoxelsPerGrid[0] * sizeof(uint32_t);
         ConstantBufferDesc.m_pBytes = nullptr;
         ConstantBufferDesc.m_Usage = CBuffer::GPURead;
-        m_GridAtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-        m_GridQueueBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        m_VolumeAtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        m_VolumeQueueBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        ConstantBufferDesc.m_NumberOfBytes = 128u * 1024u * 1024u; // 128 MB
+        m_GridRasterizationBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        m_VolumeAtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        ConstantBufferDesc.m_NumberOfBytes = 16u * 128u * 1024u * 1024u; // 2 GB;
         m_VolumeQueueBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
 
