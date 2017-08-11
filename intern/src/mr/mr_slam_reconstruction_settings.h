@@ -30,6 +30,7 @@ namespace MR
 		bool m_IsScalable;
 
 		int m_GridResolutions[GRID_LEVELS];
+        int m_VoxelsPerGrid[GRID_LEVELS];
 
 		SReconstructionSettings();
 	};

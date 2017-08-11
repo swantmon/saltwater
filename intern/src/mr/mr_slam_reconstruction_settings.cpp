@@ -23,5 +23,10 @@ namespace MR
 		m_GridResolutions[0] = 16;
 		m_GridResolutions[1] =  8;
 		m_GridResolutions[2] =  8;
+
+        for (int i = 0; i < GRID_LEVELS; ++ i)
+        {
+            m_VoxelsPerGrid[i] = m_GridResolutions[i] * m_GridResolutions[i] * m_GridResolutions[i];
+        }
     }
 } // namespace MR
