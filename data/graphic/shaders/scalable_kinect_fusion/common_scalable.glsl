@@ -11,4 +11,10 @@ vec3 IndextoOffset(int Index, int Resolution)
     return vec3(x, y, z);
 }
 
+int OffsetToIndex(vec3 Offset, int Resolution)
+{
+    ivec3 iOffset = ivec3(Offset);
+    return (iOffset.z * Resolution * Resolution) + (iOffset.y * Resolution) + iOffset.x;
+}
+
 #endif // __INCLUDE_SCALABLE_COMMON_GLSL__
