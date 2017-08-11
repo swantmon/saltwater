@@ -1005,10 +1005,10 @@ namespace MR
         m_VolumeQueueBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
         ConstantBufferDesc.m_NumberOfBytes = 128u * 1024u * 1024u; // 128 MB
-        m_GridRasterizationBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-        m_VolumeAtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        m_RootVolumePoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        m_Level1PoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         ConstantBufferDesc.m_NumberOfBytes = 16u * 128u * 1024u * 1024u; // 2 GB;
-        m_VolumeQueueBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        m_TSDFPoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
 
     // -----------------------------------------------------------------------------
