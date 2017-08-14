@@ -97,28 +97,7 @@ namespace MR
         void GetReconstructionSettings(SReconstructionSettings* pReconstructionSettings);
 
         Gfx::CTexture2DPtr GetVertexMap();
-
-    private:
-
-        struct SVolumePoolItem
-        {
-            int m_PoolIndex;
-            Base::Int3 m_Offset;
-            bool m_NearSurface;
-        };
-
-        struct SGridPoolItem
-        {
-            int m_PoolIndex;
-            bool m_NearSurface;
-        };
-
-        struct STSDFPoolItem
-        {
-            uint16_t m_TSDF;
-            uint16_t m_Weight;
-        };
-
+        
     private:
 
         void Start();

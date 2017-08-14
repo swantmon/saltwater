@@ -96,13 +96,7 @@ namespace
     {
         Base::Float4x4 m_WorldMatrix;
     };
-
-    struct SInstanceData
-    {
-        Base::Int3 m_Offset;
-        int m_Index;
-    };
-    
+        
     struct SIndexedIndirect 
     {
         uint32_t m_IndexCount;
@@ -119,6 +113,25 @@ namespace
         float m_CubeSize;
         float m_ParentSize;
         float Padding[2];
+    };
+
+    struct SVolumePoolItem
+    {
+        Base::Int3 m_Offset;
+        int m_PoolIndex;
+        bool m_NearSurface;
+    };
+
+    struct SGridPoolItem
+    {
+        int m_PoolIndex;
+        bool m_NearSurface;
+    };
+
+    struct STSDFPoolItem
+    {
+        uint16_t m_TSDF;
+        uint16_t m_Weight;
     };
 
 } // namespace
@@ -765,8 +778,8 @@ namespace MR
         ////////////////////////////////////////////////////////////////////////////////
 
         m_RootVolumeVector.clear();
-        int Index = 0;
-        SInstanceData* pInstanceData = static_cast<SInstanceData*>(BufferManager::MapConstantBuffer(m_RootVolumePoolPtr, CBuffer::Write));
+
+        SVolumePoolItem* pInstanceData = static_cast<SVolumePoolItem*>(BufferManager::MapConstantBuffer(m_RootVolumePoolPtr, CBuffer::Write));
 
 		for (auto& rPair : m_RootVolumeMap)
 		{
@@ -776,10 +789,9 @@ namespace MR
             
             m_RootVolumeVector.push_back(&rRootGrid);
 
-            SInstanceData InstanceData;
-            InstanceData.m_Index = Index++;
+            SVolumePoolItem InstanceData;
             InstanceData.m_Offset = rRootGrid.m_Offset;
-
+            
             *pInstanceData = InstanceData;
             ++ pInstanceData;
         }

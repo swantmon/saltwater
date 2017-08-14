@@ -12,6 +12,7 @@ struct SInstanceData
 {
     ivec3 m_Offset;
     int m_Index;
+    bool m_NearSurface;
 };
 
 layout(std430, binding = 0) buffer AtomicBuffer
