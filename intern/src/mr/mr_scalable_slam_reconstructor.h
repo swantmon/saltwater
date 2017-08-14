@@ -66,7 +66,7 @@ namespace MR
 		{
             Base::Int3 m_Offset;
             bool m_IsVisible;
-            unsigned int m_BufferIndex;
+            unsigned int m_PoolIndex;
             Gfx::CBufferPtr m_Level1QueuePtr;
             Gfx::CBufferPtr m_Level2QueuePtr;
 		};
