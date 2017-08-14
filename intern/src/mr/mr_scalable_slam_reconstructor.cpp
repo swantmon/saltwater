@@ -164,7 +164,7 @@ namespace MR
 
 	CScalableSLAMReconstructor::CRootVolumeMap& CScalableSLAMReconstructor::GetRootVolumeMap()
     {
-        return m_RootGridMap;
+        return m_RootVolumeMap;
     }
 
     // -----------------------------------------------------------------------------
@@ -296,14 +296,14 @@ namespace MR
 	{
         const int GridLevelCount = MR::SReconstructionSettings::GRID_LEVELS;
 
-        m_GridSizes.resize(GridLevelCount);
-        m_GridSizes[GridLevelCount - 1] = m_ReconstructionSettings.m_VoxelSize * m_ReconstructionSettings.m_GridResolutions[GridLevelCount - 1];
+        m_VolumeSizes.resize(GridLevelCount);
+        m_VolumeSizes[GridLevelCount - 1] = m_ReconstructionSettings.m_VoxelSize * m_ReconstructionSettings.m_GridResolutions[GridLevelCount - 1];
         for (int i = GridLevelCount - 2; i >= 0; --i)
         {
-            m_GridSizes[i] = m_GridSizes[i + 1] * m_ReconstructionSettings.m_GridResolutions[i];
+            m_VolumeSizes[i] = m_VolumeSizes[i + 1] * m_ReconstructionSettings.m_GridResolutions[i];
         }
 
-		const float VolumeSize = m_GridSizes[0];
+		const float VolumeSize = m_VolumeSizes[0];
 		Float4x4 PoseRotation, PoseTranslation;
 		
 		PoseRotation.SetRotation(g_InitialCameraRotation[0], g_InitialCameraRotation[1], g_InitialCameraRotation[2]);
@@ -424,7 +424,7 @@ namespace MR
             m_RaycastNormalMapPtr[i] = 0;
         }
 
-        m_RootGridMap.clear();
+        m_RootVolumeMap.clear();
 
         m_IntrinsicsConstantBufferPtr = 0;
         m_TrackingDataConstantBufferPtr = 0;
@@ -463,7 +463,7 @@ namespace MR
             << "#define PYRAMID_LEVELS "         << m_ReconstructionSettings.m_PyramidLevelCount    << " \n"
             << "#define VOLUME_RESOLUTION "      << m_ReconstructionSettings.m_GridResolutions[0]   << " \n"
             << "#define VOXEL_SIZE "             << VoxelSize                                       << " \n"
-            << "#define VOLUME_SIZE "            << m_GridSizes[0]                                  << " \n"
+            << "#define VOLUME_SIZE "            << m_VolumeSizes[0]                                  << " \n"
             << "#define DEPTH_IMAGE_WIDTH "      << m_pRGBDCameraControl->GetDepthWidth()           << " \n"
             << "#define DEPTH_IMAGE_HEIGHT "     << m_pRGBDCameraControl->GetDepthHeight()          << " \n"
             << "#define TILE_SIZE1D "            << g_TileSize1D                                    << " \n"
@@ -527,8 +527,8 @@ namespace MR
 
 		for (int PlaneIndex = 0; PlaneIndex < 3; ++PlaneIndex)
 		{
-			AABB[PlaneIndex * 2] = rKey[PlaneIndex] * m_GridSizes[0];
-			AABB[PlaneIndex * 2 + 1] = AABB[PlaneIndex * 2] + m_GridSizes[0];
+			AABB[PlaneIndex * 2] = rKey[PlaneIndex] * m_VolumeSizes[0];
+			AABB[PlaneIndex * 2 + 1] = AABB[PlaneIndex * 2] + m_VolumeSizes[0];
 		}
 
 		Float3 Cube[8] =
@@ -598,7 +598,7 @@ namespace MR
         glDisable(GL_MULTISAMPLE);
 
         const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
-        const unsigned int InstanceCount = static_cast<unsigned int>(m_RootGridMap.size());
+        const unsigned int InstanceCount = static_cast<unsigned int>(m_RootVolumeMap.size());
         ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
 
         ContextManager::ResetShaderVS();
@@ -685,8 +685,8 @@ namespace MR
     {
         SGridRasterization GridData = {};
         GridData.m_Resolution = m_ReconstructionSettings.m_GridResolutions[0];
-        GridData.m_CubeSize = m_GridSizes[1];
-        GridData.m_ParentSize = m_GridSizes[0];
+        GridData.m_CubeSize = m_VolumeSizes[1];
+        GridData.m_ParentSize = m_VolumeSizes[0];
         GridData.m_Offset = rRootGrid.m_Offset;
 
         BufferManager::UploadConstantBufferData(m_GridRasterizationBufferPtr, &GridData);
@@ -724,8 +724,8 @@ namespace MR
 
 		for (int i = 0; i < 3; ++ i)
 		{
-			MaxIndex[i] = static_cast<int>(BBMax[i] / m_GridSizes[0]);
-			MinIndex[i] = static_cast<int>(BBMin[i] / m_GridSizes[0]);
+			MaxIndex[i] = static_cast<int>(BBMax[i] / m_VolumeSizes[0]);
+			MinIndex[i] = static_cast<int>(BBMin[i] / m_VolumeSizes[0]);
 		}
 
 		SRootVolume RootVolume;
@@ -738,12 +738,12 @@ namespace MR
 				{
 					Int3 Key = Int3(x, y, z);
 					
-					if (m_RootGridMap.count(Key) == 0 && RootGridInFrustum(Key))
+					if (m_RootVolumeMap.count(Key) == 0 && RootGridInFrustum(Key))
 					{
 						RootVolume.m_Offset = Key;
 						RootVolume.m_IsVisible = true;
 
-						m_RootGridMap[Key] = RootVolume;
+						m_RootVolumeMap[Key] = RootVolume;
 					}
 				}
 			}
@@ -753,8 +753,8 @@ namespace MR
         // Prepare instance buffers
         ////////////////////////////////////////////////////////////////////////////////
 
-        ResizeInstanceBuffers(m_RootGridMap.size());
-        ClearBuffer(m_AtomicCounterBufferPtr, m_RootGridMap.size());
+        ResizeInstanceBuffers(m_RootVolumeMap.size());
+        ClearBuffer(m_AtomicCounterBufferPtr, m_RootVolumeMap.size());
         
         ////////////////////////////////////////////////////////////////////////////////
         // Create vector and instance buffer for root grid volumes
@@ -764,7 +764,7 @@ namespace MR
         int Index = 0;
         SInstanceData* pInstanceData = static_cast<SInstanceData*>(BufferManager::MapConstantBuffer(m_RootVolumeInstanceBufferPtr, CBuffer::Write));
 
-		for (auto& rPair : m_RootGridMap)
+		for (auto& rPair : m_RootVolumeMap)
 		{
 			auto& rRootGrid = rPair.second;
 
@@ -789,7 +789,7 @@ namespace MR
         Performance::BeginEvent("Check Root Volumes");
 
         RasterizeRootVolumes();
-        GatherCounters(static_cast<unsigned int>(m_RootGridMap.size()), m_AtomicCounterBufferPtr, m_VolumeQueueBufferPtr, m_IndexedIndirectBufferPtr);
+        GatherCounters(static_cast<unsigned int>(m_RootVolumeMap.size()), m_AtomicCounterBufferPtr, m_VolumeQueueBufferPtr, m_IndexedIndirectBufferPtr);
 
         Performance::EndEvent();
 
@@ -1438,7 +1438,7 @@ namespace MR
 
     void CScalableSLAMReconstructor::ResetReconstruction(const SReconstructionSettings* pReconstructionSettings)
     {
-		m_RootGridMap.clear();
+		m_RootVolumeMap.clear();
 
         if (pReconstructionSettings != nullptr)
         {
@@ -1453,9 +1453,9 @@ namespace MR
 		SetupShaders();
     }
 
-    const std::vector<float>& CScalableSLAMReconstructor::GetGridSizes() const
+    const std::vector<float>& CScalableSLAMReconstructor::GetVolumeSizes() const
     {
-        return m_GridSizes;
+        return m_VolumeSizes;
     }
 
     // -----------------------------------------------------------------------------

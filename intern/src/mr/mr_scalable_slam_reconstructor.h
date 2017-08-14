@@ -66,6 +66,7 @@ namespace MR
 		{
             Base::Int3 m_Offset;
             bool m_IsVisible;
+            unsigned int m_BufferIndex;
             Gfx::CBufferPtr m_Level1QueuePtr;
             Gfx::CBufferPtr m_Level2QueuePtr;
 		};
@@ -91,7 +92,7 @@ namespace MR
 		CRootVolumeMap& GetRootVolumeMap();
         CRootVolumeVector& GetRootVolumeVector();
 
-        const std::vector<float>& GetGridSizes() const;
+        const std::vector<float>& GetVolumeSizes() const;
 
         void GetReconstructionSettings(SReconstructionSettings* pReconstructionSettings);
 
@@ -211,9 +212,10 @@ namespace MR
         std::vector<Gfx::CTexture2DPtr> m_RaycastVertexMapPtr;
         std::vector<Gfx::CTexture2DPtr> m_RaycastNormalMapPtr;
 
+
         Gfx::CBufferPtr m_AtomicCounterBufferPtr;
 
-		CRootVolumeMap m_RootGridMap;
+		CRootVolumeMap m_RootVolumeMap;
         CRootVolumeVector m_RootVolumeVector;
 
         Gfx::CBufferPtr m_ICPResourceBufferPtr;
@@ -233,7 +235,7 @@ namespace MR
         bool m_IsIntegrationPaused;
         bool m_IsTrackingPaused;
 
-		std::vector<float> m_GridSizes;
+		std::vector<float> m_VolumeSizes;
         
 		std::array<Base::Float3, 8> m_FrustumPoints;
 		std::array<Base::Float4, 6> m_FrustumPlanes;
