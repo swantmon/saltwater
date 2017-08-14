@@ -171,7 +171,7 @@ namespace MR
 
     CScalableSLAMReconstructor::CRootVolumeVector& CScalableSLAMReconstructor::GetRootVolumeVector()
     {
-        return m_RootGridVector;
+        return m_RootVolumeVector;
     }
 
     // -----------------------------------------------------------------------------
@@ -652,9 +652,9 @@ namespace MR
         {
             Performance::BeginEvent("Integrate into Root Volume");
 
-            assert(m_RootGridVector[VolumeIndex] != nullptr);
+            assert(m_RootVolumeVector[VolumeIndex] != nullptr);
 
-            auto& rRootGrid = *m_RootGridVector[VolumeIndex];
+            auto& rRootGrid = *m_RootVolumeVector[VolumeIndex];
 
             rRootGrid.m_IsVisible = true;
             
@@ -669,7 +669,7 @@ namespace MR
             
             ContextManager::Barrier();
             //TargetSetManager::ClearTargetSet(m_TargetSetPtr);
-            RasterizeRootGrid(*m_RootGridVector[VolumeIndex]);
+            RasterizeRootGrid(*m_RootVolumeVector[VolumeIndex]);
             //GatherCounters(m_ReconstructionSettings.m_VoxelsPerGrid[0], , m_VolumeQueueBufferPtr, m_IndexedIndirectBufferPtr);
 
             Performance::EndEvent();
@@ -760,7 +760,7 @@ namespace MR
         // Create vector and instance buffer for root grid volumes
         ////////////////////////////////////////////////////////////////////////////////
 
-        m_RootGridVector.clear();
+        m_RootVolumeVector.clear();
         int Index = 0;
         SInstanceData* pInstanceData = static_cast<SInstanceData*>(BufferManager::MapConstantBuffer(m_RootVolumeInstanceBufferPtr, CBuffer::Write));
 
@@ -770,7 +770,7 @@ namespace MR
 
 			rRootGrid.m_IsVisible = RootGridInFrustum(rRootGrid.m_Offset);
             
-            m_RootGridVector.push_back(&rRootGrid);
+            m_RootVolumeVector.push_back(&rRootGrid);
 
             SInstanceData InstanceData;
             InstanceData.m_Index = Index++;
@@ -802,9 +802,9 @@ namespace MR
         // Integrate depth into individual root volume grids
         ////////////////////////////////////////////////////////////////////////////////
 
-        for (auto& rRootGrid : m_RootGridVector)
+        for (auto& rRootVolume : m_RootVolumeVector)
         {
-            rRootGrid->m_IsVisible = false;
+            rRootVolume->m_IsVisible = false;
         }
 
         if (VolumeCount > 0)

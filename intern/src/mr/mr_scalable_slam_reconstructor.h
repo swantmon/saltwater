@@ -214,7 +214,7 @@ namespace MR
         Gfx::CBufferPtr m_AtomicCounterBufferPtr;
 
 		CRootVolumeMap m_RootGridMap;
-        CRootVolumeVector m_RootGridVector;
+        CRootVolumeVector m_RootVolumeVector;
 
         Gfx::CBufferPtr m_ICPResourceBufferPtr;
 
