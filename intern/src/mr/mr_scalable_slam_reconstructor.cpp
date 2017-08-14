@@ -193,6 +193,7 @@ namespace MR
 
 		m_IsIntegrationPaused = false;
 		m_IsTrackingPaused = false;
+        ClearBuffer(m_PoolItemCountBufferPtr, sizeof(uint32_t) * m_ReconstructionSettings.GRID_LEVELS);
     }
 
     // -----------------------------------------------------------------------------
@@ -436,10 +437,14 @@ namespace MR
 		m_PositionConstantBufferPtr = 0;
         m_HierarchyConstantBufferPtr = 0;
         m_AtomicCounterBufferPtr = 0;
-        m_RootVolumeInstanceBufferPtr = 0;
         m_IndexedIndirectBufferPtr = 0;
         m_GridRasterizationBufferPtr = 0;
         m_VolumeQueueBufferPtr = 0;
+
+        m_RootVolumePoolPtr = 0;
+        m_Level1PoolPtr = 0;
+        m_TSDFPoolPtr = 0;
+        m_PoolItemCountBufferPtr = 0;
     }
     
     // -----------------------------------------------------------------------------
@@ -587,7 +592,7 @@ namespace MR
         ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawVertexMapPtr));
 
         ContextManager::SetResourceBuffer(0, m_AtomicCounterBufferPtr);
-        ContextManager::SetResourceBuffer(1, m_RootVolumeInstanceBufferPtr);
+        ContextManager::SetResourceBuffer(1, m_RootVolumePoolPtr);
 
         ContextManager::Barrier();
 
@@ -753,7 +758,6 @@ namespace MR
         // Prepare instance buffers
         ////////////////////////////////////////////////////////////////////////////////
 
-        ResizeInstanceBuffers(m_RootVolumeMap.size());
         ClearBuffer(m_AtomicCounterBufferPtr, m_RootVolumeMap.size());
         
         ////////////////////////////////////////////////////////////////////////////////
@@ -762,7 +766,7 @@ namespace MR
 
         m_RootVolumeVector.clear();
         int Index = 0;
-        SInstanceData* pInstanceData = static_cast<SInstanceData*>(BufferManager::MapConstantBuffer(m_RootVolumeInstanceBufferPtr, CBuffer::Write));
+        SInstanceData* pInstanceData = static_cast<SInstanceData*>(BufferManager::MapConstantBuffer(m_RootVolumePoolPtr, CBuffer::Write));
 
 		for (auto& rPair : m_RootVolumeMap)
 		{
@@ -780,7 +784,7 @@ namespace MR
             ++ pInstanceData;
         }
 
-        BufferManager::UnmapConstantBuffer(m_RootVolumeInstanceBufferPtr);
+        BufferManager::UnmapConstantBuffer(m_RootVolumePoolPtr);
 
         ////////////////////////////////////////////////////////////////////////////////
         // Check all possible root grid volumes for depth data
@@ -975,14 +979,6 @@ namespace MR
         ConstantBufferDesc.m_pBytes = m_ReconstructionSettings.m_GridResolutions;
         m_HierarchyConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
-        ConstantBufferDesc.m_Usage = CBuffer::GPUToCPU;
-        ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
-        ConstantBufferDesc.m_Access = CBuffer::CPURead;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t);
-        ConstantBufferDesc.m_pBytes = nullptr;
-        m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-        m_RootVolumeInstanceBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-
         ConstantBufferDesc.m_Usage = CBuffer::GPURead;
         ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
         ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
@@ -1009,6 +1005,9 @@ namespace MR
         m_Level1PoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         ConstantBufferDesc.m_NumberOfBytes = 16u * 128u * 1024u * 1024u; // 2 GB;
         m_TSDFPoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * m_ReconstructionSettings.GRID_LEVELS;
+        m_PoolItemCountBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
 
     // -----------------------------------------------------------------------------
@@ -1393,32 +1392,7 @@ namespace MR
     {
         
     }
-
-    // -----------------------------------------------------------------------------
-
-    void CScalableSLAMReconstructor::ResizeInstanceBuffers(size_t Size)
-    {
-        if (Size > m_AtomicCounterBufferPtr->GetNumberOfBytes() / sizeof(uint32_t))
-        {
-            SBufferDescriptor BufferDesc = {};
-
-            BufferDesc.m_Usage = CBuffer::GPUToCPU;
-            BufferDesc.m_Binding = CBuffer::ResourceBuffer;
-            BufferDesc.m_Access = CBuffer::CPURead;
-            BufferDesc.m_NumberOfBytes = static_cast<unsigned int>(sizeof(uint32_t) * Size);
-            BufferDesc.m_pBytes = nullptr;
-            m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(BufferDesc);
-            
-            BufferDesc.m_Usage = CBuffer::GPURead;
-            BufferDesc.m_Binding = CBuffer::ResourceBuffer;
-            BufferDesc.m_Access = CBuffer::CPUWrite;
-            BufferDesc.m_NumberOfBytes = static_cast<unsigned int>(sizeof(SInstanceData) * Size);
-            m_RootVolumeInstanceBufferPtr = BufferManager::CreateBuffer(BufferDesc);
-
-            BufferDesc.m_NumberOfBytes = static_cast<unsigned int>(sizeof(uint32_t) * Size);
-        }
-    }
-
+    
     // -----------------------------------------------------------------------------
 
     void CScalableSLAMReconstructor::ClearBuffer(CBufferPtr BufferPtr, size_t Size)
@@ -1451,6 +1425,8 @@ namespace MR
 		SetupTextures();
 		SetupBuffers();
 		SetupShaders();
+
+        ClearBuffer(m_PoolItemCountBufferPtr, sizeof(uint32_t) * m_ReconstructionSettings.GRID_LEVELS);
     }
 
     const std::vector<float>& CScalableSLAMReconstructor::GetVolumeSizes() const

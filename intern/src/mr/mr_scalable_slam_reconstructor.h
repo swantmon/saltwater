@@ -100,10 +100,23 @@ namespace MR
 
     private:
 
-        struct SGridDescriptor
+        struct SVolumePoolItem
         {
-            int PoolIndex;
+            int m_PoolIndex;
+            Base::Int3 m_Offset;
             bool m_NearSurface;
+        };
+
+        struct SGridPoolItem
+        {
+            int m_PoolIndex;
+            bool m_NearSurface;
+        };
+
+        struct STSDFPoolItem
+        {
+            uint16_t m_TSDF;
+            uint16_t m_Weight;
         };
 
     private:
@@ -118,7 +131,6 @@ namespace MR
         void IntegrateRootGrids(std::vector<uint32_t>& rVolumeQueue);
         void RasterizeRootGrid(SRootVolume& rRootGrid);
 
-        void ResizeInstanceBuffers(size_t Size);
         void ClearBuffer(Gfx::CBufferPtr BufferPtr, size_t Size);
 
 		void SetupData();
@@ -165,7 +177,6 @@ namespace MR
         Gfx::CBufferPtr m_PositionConstantBufferPtr;
         Gfx::CBufferPtr m_HierarchyConstantBufferPtr;
 
-        Gfx::CBufferPtr m_RootVolumeInstanceBufferPtr;
         Gfx::CBufferPtr m_IndexedIndirectBufferPtr;
                 
         Gfx::CBufferPtr m_VolumeAtomicCounterBufferPtr;
@@ -176,6 +187,7 @@ namespace MR
         Gfx::CBufferPtr m_RootVolumePoolPtr;
         Gfx::CBufferPtr m_Level1PoolPtr;
         Gfx::CBufferPtr m_TSDFPoolPtr;
+        Gfx::CBufferPtr m_PoolItemCountBufferPtr;
 
         Gfx::CShaderPtr m_ClearVolumeCSPtr;
         Gfx::CShaderPtr m_BilateralFilterCSPtr;
