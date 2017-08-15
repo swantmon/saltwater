@@ -672,25 +672,25 @@ namespace MR
         // Integrate individual grids
         ////////////////////////////////////////////////////////////////////////////////
 
+        ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
+        ContextManager::SetConstantBuffer(2, m_GridRasterizationBufferPtr);
+
+        ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
+        ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
+
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawVertexMapPtr));
+
         for (uint32_t VolumeIndex : rVolumeQueue)
         {
-            Performance::BeginEvent("Integrate into Root Volume");
+            Performance::BeginEvent("Rasterize Level 1 Grid");
 
             assert(m_RootVolumeVector[VolumeIndex] != nullptr);
 
             auto& rRootGrid = *m_RootVolumeVector[VolumeIndex];
 
             rRootGrid.m_IsVisible = true;
-            
-            ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
-            ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
-            ContextManager::SetConstantBuffer(2, m_GridRasterizationBufferPtr);
 
-            ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
-            ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
-
-            ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawVertexMapPtr));
-            
             ContextManager::Barrier();
             //TargetSetManager::ClearTargetSet(m_TargetSetPtr);
             RasterizeRootGrid(rRootGrid);
