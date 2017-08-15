@@ -693,8 +693,9 @@ namespace MR
             
             ContextManager::Barrier();
             //TargetSetManager::ClearTargetSet(m_TargetSetPtr);
-            RasterizeRootGrid(*m_RootVolumeVector[VolumeIndex]);
-            //GatherCounters(m_ReconstructionSettings.m_VoxelsPerGrid[0], , m_VolumeQueueBufferPtr, m_IndexedIndirectBufferPtr);
+            RasterizeRootGrid(rRootGrid);
+            GatherCounters(m_ReconstructionSettings.m_VoxelsPerGrid[0], m_VolumeAtomicCounterBufferPtr,
+                           rRootGrid.m_Level1QueuePtr, m_IndexedIndirectBufferPtr);
 
             Performance::EndEvent();
         }
