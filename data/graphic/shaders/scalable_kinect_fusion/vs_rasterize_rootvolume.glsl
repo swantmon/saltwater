@@ -43,7 +43,7 @@ out gl_PerVertex
 void main()
 {
     SInstanceData InstanceData = g_InstanceData[gl_InstanceID];
-    out_Index = InstanceData.m_Index;
+    out_Index = gl_InstanceID;
     vec3 Offset = InstanceData.m_Offset;
 
 	vec4 Vertex = (g_InvPoseMatrix * vec4((in_VertexPosition + Offset) * VOLUME_SIZE, 1.0f));
