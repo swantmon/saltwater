@@ -709,7 +709,7 @@ namespace
 				ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
 			}
 
-			ContextManager::DrawIndexed(36, 0, 0);
+			//ContextManager::DrawIndexed(36, 0, 0);
 		}
 	}
 
@@ -738,7 +738,7 @@ namespace
 		Float4x4 Scaling;
 		Float4x4 Translation;
 
-        const auto& GridSizes = m_pScalableReconstructor->GetGridSizes();
+        const auto& GridSizes = m_pScalableReconstructor->GetVolumeSizes();
 
 		for (auto& rPair : m_pScalableReconstructor->GetRootVolumeMap())
 		{
