@@ -687,16 +687,20 @@ namespace MR
 
             assert(m_RootVolumeVector[VolumeIndex] != nullptr);
 
-            auto& rRootGrid = *m_RootVolumeVector[VolumeIndex];
+            auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
-            rRootGrid.m_IsVisible = true;
+            rRootVolume.m_IsVisible = true;
 
             ContextManager::Barrier();
             //TargetSetManager::ClearTargetSet(m_TargetSetPtr);
-            RasterizeRootGrid(rRootGrid);
+            RasterizeRootGrid(rRootVolume);
             GatherCounters(m_ReconstructionSettings.m_VoxelsPerGrid[0], m_VolumeAtomicCounterBufferPtr,
-                           rRootGrid.m_Level1QueuePtr, m_IndexedIndirectBufferPtr);
+                           rRootVolume.m_Level1QueuePtr, m_IndexedIndirectBufferPtr);
 
+            SIndexedIndirect* pIndirect = static_cast<SIndexedIndirect*>(BufferManager::MapConstantBuffer(m_IndexedIndirectBufferPtr, CBuffer::EMap::Read));
+
+            BufferManager::UnmapConstantBuffer(m_IndexedIndirectBufferPtr);
+            rRootVolume.m_Level1QueueSize = pIndirect->m_InstanceCount;
             Performance::EndEvent();
         }
 

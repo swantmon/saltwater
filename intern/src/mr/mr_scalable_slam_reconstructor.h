@@ -69,6 +69,8 @@ namespace MR
             unsigned int m_PoolIndex;
             Gfx::CBufferPtr m_Level1QueuePtr;
             Gfx::CBufferPtr m_Level2QueuePtr;
+            int m_Level1QueueSize;
+            int m_Level2QueueSize;
 		};
 
         typedef std::map<Base::Int3, SRootVolume, IndexCompare> CRootVolumeMap;
