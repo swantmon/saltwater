@@ -106,6 +106,12 @@ namespace
         uint32_t m_BaseInstance;
     };
 
+    struct SInstanceData
+    {
+        Base::Int3 m_Offset;
+        int m_Index;
+    };
+
     struct SGridRasterization
     {
         Base::Int3 m_Offset;
@@ -453,7 +459,7 @@ namespace MR
         m_IndexedIndirectBufferPtr = 0;
         m_GridRasterizationBufferPtr = 0;
         m_VolumeQueueBufferPtr = 0;
-
+        m_RootVolumeInstanceBufferPtr = 0;
         m_RootVolumePoolPtr = 0;
         m_Level1PoolPtr = 0;
         m_TSDFPoolPtr = 0;
@@ -605,7 +611,7 @@ namespace MR
         ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawVertexMapPtr));
 
         ContextManager::SetResourceBuffer(0, m_AtomicCounterBufferPtr);
-        ContextManager::SetResourceBuffer(1, m_RootVolumePoolPtr);
+        ContextManager::SetResourceBuffer(1, m_RootVolumeInstanceBufferPtr);
 
         ContextManager::Barrier();
 
@@ -644,7 +650,7 @@ namespace MR
 
 	// -----------------------------------------------------------------------------
     
-    void CScalableSLAMReconstructor::IntegrateRootGrids(std::vector<uint32_t>& rVolumeQueue)
+    void CScalableSLAMReconstructor::IntegrateRootVolumes(std::vector<uint32_t>& rVolumeQueue)
     {
         ////////////////////////////////////////////////////////////////////////////////
         // Prepare pipeline
@@ -779,7 +785,16 @@ namespace MR
 
         m_RootVolumeVector.clear();
 
-        SVolumePoolItem* pInstanceData = static_cast<SVolumePoolItem*>(BufferManager::MapConstantBuffer(m_RootVolumePoolPtr, CBuffer::Write));
+        // todo: check if resizing is necessary
+        SBufferDescriptor ConstantBufferDesc = {};
+        ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
+        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(SInstanceData) * static_cast<unsigned int>(m_RootVolumeMap.size());
+        ConstantBufferDesc.m_pBytes = nullptr;
+        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
+        m_RootVolumeInstanceBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        SInstanceData* pInstanceData = static_cast<SInstanceData*>(BufferManager::MapConstantBuffer(m_RootVolumeInstanceBufferPtr, CBuffer::Write));
 
 		for (auto& rPair : m_RootVolumeMap)
 		{
@@ -789,14 +804,15 @@ namespace MR
             
             m_RootVolumeVector.push_back(&rRootGrid);
 
-            SVolumePoolItem InstanceData;
+            SInstanceData InstanceData;
             InstanceData.m_Offset = rRootGrid.m_Offset;
-            
+            InstanceData.m_Index = 0; // todo: remove
+
             *pInstanceData = InstanceData;
             ++ pInstanceData;
         }
 
-        BufferManager::UnmapConstantBuffer(m_RootVolumePoolPtr);
+        BufferManager::UnmapConstantBuffer(m_RootVolumeInstanceBufferPtr);
 
         ////////////////////////////////////////////////////////////////////////////////
         // Check all possible root grid volumes for depth data
@@ -830,7 +846,7 @@ namespace MR
             memcpy(VolumeQueue.data(), pVoxelQueue, sizeof(uint32_t) * VolumeCount);
             BufferManager::UnmapConstantBuffer(m_VolumeQueueBufferPtr);
             
-            IntegrateRootGrids(VolumeQueue);
+            IntegrateRootVolumes(VolumeQueue);
         }
 	}
 
@@ -1019,7 +1035,7 @@ namespace MR
         m_TSDFPoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
         ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * m_ReconstructionSettings.GRID_LEVELS;
-        m_PoolItemCountBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        m_PoolItemCountBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);        
     }
 
     // -----------------------------------------------------------------------------

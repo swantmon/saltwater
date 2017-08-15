@@ -106,8 +106,10 @@ namespace MR
 		Base::Float4 GetHessianNormalForm(const Base::Float3& rA, const Base::Float3& rB, const Base::Float3& rC);
 		float GetPointPlaneDistance(const Base::Float3& rPoint, const Base::Float4& rPlane);
 		bool RootGridInFrustum(const Base::Int3& rKey);
+
 		void UpdateRootrids();
-        void IntegrateRootGrids(std::vector<uint32_t>& rVolumeQueue);
+        void IntegrateRootVolumes(std::vector<uint32_t>& rVolumeQueue);
+
         void RasterizeRootGrid(SRootVolume& rRootGrid);
 
         void ClearBuffer(Gfx::CBufferPtr BufferPtr, size_t Size);
@@ -157,7 +159,8 @@ namespace MR
         Gfx::CBufferPtr m_HierarchyConstantBufferPtr;
 
         Gfx::CBufferPtr m_IndexedIndirectBufferPtr;
-                
+        
+        Gfx::CBufferPtr m_RootVolumeInstanceBufferPtr;
         Gfx::CBufferPtr m_VolumeAtomicCounterBufferPtr;
         Gfx::CBufferPtr m_VolumeQueueBufferPtr;
 
