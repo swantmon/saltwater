@@ -87,7 +87,8 @@ namespace
 		void RenderVolume();
 
 		void RenderScalableVolume();
-		void RenderRootVolumes();
+        void RenderRootVolumes();
+        void RenderLevel1Grids();
 
         void RenderCamera();
 
@@ -767,6 +768,13 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxReconstructionRenderer::RenderLevel1Grids()
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxReconstructionRenderer::RenderCamera()
     {
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
@@ -851,6 +859,7 @@ namespace
 			RenderScalableVolume();
             RenderVertexMap();
 			RenderRootVolumes();
+            RenderLevel1Grids();
 		}
 		else
 		{
