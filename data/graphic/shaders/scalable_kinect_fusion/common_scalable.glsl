@@ -2,7 +2,7 @@
 #ifndef __INCLUDE_SCALABLE_COMMON_GLSL__
 #define __INCLUDE_SCALABLE_COMMON_GLSL__
 
-vec3 IndextoOffset(int Index, int Resolution)
+vec3 IndexToOffset(int Index, int Resolution)
 {
     int z = Index / (Resolution * Resolution);
     Index -= (z * Resolution * Resolution);

@@ -101,6 +101,10 @@ namespace
         
         CShaderPtr m_OutlineVSPtr;
         CShaderPtr m_OutlineFSPtr;
+
+        CShaderPtr m_OutlineLevel1VSPtr;
+        CShaderPtr m_OutlineLevel1FSPtr;
+
         CShaderPtr m_RaycastVSPtr;
         CShaderPtr m_RaycastFSPtr;
 
@@ -169,6 +173,8 @@ namespace
     {
         m_OutlineVSPtr = 0;
         m_OutlineFSPtr = 0;
+        m_OutlineLevel1VSPtr = 0;
+        m_OutlineLevel1FSPtr = 0;
         m_RaycastVSPtr = 0;
         m_RaycastFSPtr = 0;
         
@@ -216,12 +222,14 @@ namespace
 
 			std::string DefineString = DefineStream.str();
 
-			m_OutlineVSPtr    = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_outline.glsl"    , "main", DefineString.c_str());
-			m_OutlineFSPtr    = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_outline.glsl"    , "main", DefineString.c_str());
-			m_RaycastVSPtr    = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_raycast.glsl"    , "main", DefineString.c_str());
-			m_RaycastFSPtr    = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_raycast.glsl"    , "main", DefineString.c_str());
-            m_PointCloudVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_point_cloud.glsl", "main", DefineString.c_str());
-            m_PointCloudFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_point_cloud.glsl", "main", DefineString.c_str());
+			m_OutlineVSPtr       = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_outline.glsl"       , "main", DefineString.c_str());
+			m_OutlineFSPtr       = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_outline.glsl"       , "main", DefineString.c_str());
+            m_OutlineLevel1VSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_outline_level1.glsl", "main", DefineString.c_str());
+            m_OutlineLevel1FSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_outline_level1.glsl", "main", DefineString.c_str());
+			m_RaycastVSPtr       = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_raycast.glsl"       , "main", DefineString.c_str());
+			m_RaycastFSPtr       = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_raycast.glsl"       , "main", DefineString.c_str());
+            m_PointCloudVSPtr    = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_point_cloud.glsl"   , "main", DefineString.c_str());
+            m_PointCloudFSPtr    = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_point_cloud.glsl"   , "main", DefineString.c_str());
         }
 		else
 		{
@@ -770,7 +778,58 @@ namespace
 
     void CGfxReconstructionRenderer::RenderLevel1Grids()
     {
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
+        ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
+        ContextManager::SetShaderVS(m_OutlineLevel1VSPtr);
+        ContextManager::SetShaderPS(m_OutlineLevel1FSPtr);
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
+
+        SDrawCallConstantBuffer BufferData;
+
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBufferSet(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetInputLayout(m_CubeOutlineInputLayoutPtr);
+
+        ContextManager::SetTopology(STopology::LineList);
+
+        Float3 Position;
+        Float4x4 Scaling;
+        Float4x4 Translation;
+
+        const auto& VolumeSizes = m_pScalableReconstructor->GetVolumeSizes();
+
+        for (auto& rPair : m_pScalableReconstructor->GetRootVolumeMap())
+        {
+            auto& rRootGrid = rPair.second;
+
+            if (rRootGrid.m_IsVisible)
+            {
+                Position[0] = static_cast<float>(rRootGrid.m_Offset[0]);
+                Position[1] = static_cast<float>(rRootGrid.m_Offset[1]);
+                Position[2] = static_cast<float>(rRootGrid.m_Offset[2]);
+
+                Position = Position * VolumeSizes[0];
+
+                Scaling.SetScale(VolumeSizes[1]);
+                Translation.SetTranslation(Position);
+
+                BufferData.m_WorldMatrix = Translation * Scaling;
+                BufferData.m_Color = Float4(0.0f, 0.0f, 1.0f, 1.0f);
+
+                BufferManager::UploadConstantBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+
+                ContextManager::SetResourceBuffer(2, rRootGrid.m_Level1QueuePtr);
+
+                int VertexCount = m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfVertices();
+                if (rRootGrid.m_Level1QueueSize > 0)
+                {
+                    ContextManager::DrawInstanced(VertexCount, rRootGrid.m_Level1QueueSize, 0);
+                }
+            }
+        }
     }
 
     // -----------------------------------------------------------------------------
