@@ -328,6 +328,10 @@ namespace
             glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 #endif
 
+
+            glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
+
+
             // -----------------------------------------------------------------------------
             // Save created data
             // -----------------------------------------------------------------------------

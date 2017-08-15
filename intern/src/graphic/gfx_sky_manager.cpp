@@ -509,6 +509,18 @@ namespace
         UpDirection   = Base::Float3::s_AxisY;
         
         DefaultGSValues.m_CubeViewMatrix[5].LookAt(EyePosition, LookDirection, UpDirection);
+
+        // -----------------------------------------------------------------------------
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SCubemapBufferGS);
+        ConstanteBufferDesc.m_pBytes        = &DefaultGSValues;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        CBufferPtr CubemapGSWorldUnrotatedBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
         
         // -----------------------------------------------------------------------------
         
@@ -527,125 +539,7 @@ namespace
         ConstanteBufferDesc.m_pBytes        = &DefaultGSValues;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr CubemapGSSphericalBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
-
-        // -----------------------------------------------------------------------------
-
-        // -----------------------------------------------------------------------------
-        // Creating VS matrix for cube map to cube map:
-        // -> Orientation of every side is flipped
-        // -> Mirroring isn't necessary because it is done inside the cubemap
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition + Base::Float3::s_AxisX;
-        UpDirection   = Base::Float3::s_AxisY;
-        
-        DefaultGSValues.m_CubeViewMatrix[0].LookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition - Base::Float3::s_AxisX;
-        UpDirection   = Base::Float3::s_AxisY;
-        
-        DefaultGSValues.m_CubeViewMatrix[1].LookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition + Base::Float3::s_AxisY;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisZ;
-        
-        DefaultGSValues.m_CubeViewMatrix[2].LookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition - Base::Float3::s_AxisY;
-        UpDirection   = Base::Float3::s_AxisZ;
-        
-        DefaultGSValues.m_CubeViewMatrix[3].LookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition + Base::Float3::s_AxisZ;
-        UpDirection   = Base::Float3::s_AxisY;
-        
-        DefaultGSValues.m_CubeViewMatrix[4].LookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition - Base::Float3::s_AxisZ;
-        UpDirection   = Base::Float3::s_AxisY;
-        
-        DefaultGSValues.m_CubeViewMatrix[5].LookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        ConstanteBufferDesc.m_Stride        = 0;
-        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
-        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
-        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SCubemapBufferGS);
-        ConstanteBufferDesc.m_pBytes        = &DefaultGSValues;
-        ConstanteBufferDesc.m_pClassKey     = 0;
-        
-        CBufferPtr CubemapGSCubemapBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
-
-        // -----------------------------------------------------------------------------
-        // Creating VS matrix for world space to cube map:
-        // -> Orientation of every side is flipped
-        // -> Mirroring isn't necessary because it is done inside the cubemap
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition - Base::Float3::s_AxisX;
-        UpDirection   = Base::Float3::s_AxisY;
-        
-        DefaultGSValues.m_CubeViewMatrix[0].LookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition + Base::Float3::s_AxisX;
-        UpDirection   = Base::Float3::s_AxisY;
-        
-        DefaultGSValues.m_CubeViewMatrix[1].LookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition + Base::Float3::s_AxisY;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisZ;
-        
-        DefaultGSValues.m_CubeViewMatrix[2].LookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition - Base::Float3::s_AxisY;
-        UpDirection   = Base::Float3::s_AxisZ;
-        
-        DefaultGSValues.m_CubeViewMatrix[3].LookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition + Base::Float3::s_AxisZ;
-        UpDirection   = Base::Float3::s_AxisY;
-        
-        DefaultGSValues.m_CubeViewMatrix[4].LookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition - Base::Float3::s_AxisZ;
-        UpDirection   = Base::Float3::s_AxisY;
-        
-        DefaultGSValues.m_CubeViewMatrix[5].LookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        ConstanteBufferDesc.m_Stride        = 0;
-        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
-        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
-        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SCubemapBufferGS);
-        ConstanteBufferDesc.m_pBytes        = &DefaultGSValues;
-        ConstanteBufferDesc.m_pClassKey     = 0;
-        
-        CBufferPtr CubemapGSWorldBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        CBufferPtr CubemapGSWorldRotatedBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
                
         // -----------------------------------------------------------------------------
 
@@ -686,27 +580,27 @@ namespace
         // -----------------------------------------------------------------------------
 
         m_SkyboxFromAtmosphere.m_VSBufferSetPtr = 0;
-        m_SkyboxFromAtmosphere.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSSphericalBuffer);
+        m_SkyboxFromAtmosphere.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSWorldRotatedBuffer);
         m_SkyboxFromAtmosphere.m_PSBufferSetPtr = BufferManager::CreateBufferSet(PSPASSettings);
 
         m_SkyboxFromPanorama.m_VSBufferSetPtr = 0;
-        m_SkyboxFromPanorama.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSSphericalBuffer);
+        m_SkyboxFromPanorama.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSWorldRotatedBuffer);
         m_SkyboxFromPanorama.m_PSBufferSetPtr = BufferManager::CreateBufferSet(OuputPSBufferPtr);
 
         m_SkyboxFromCubemap.m_VSBufferSetPtr = 0;
-        m_SkyboxFromCubemap.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSCubemapBuffer);
+        m_SkyboxFromCubemap.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSWorldRotatedBuffer);
         m_SkyboxFromCubemap.m_PSBufferSetPtr = BufferManager::CreateBufferSet(OuputPSBufferPtr);
 
         m_SkyboxFromTexture.m_VSBufferSetPtr = BufferManager::CreateBufferSet(ModelMatrixBufferPtr);
-        m_SkyboxFromTexture.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSWorldBuffer);
+        m_SkyboxFromTexture.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSWorldUnrotatedBuffer);
         m_SkyboxFromTexture.m_PSBufferSetPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer(), OuputPSBufferPtr);
 
         m_SkyboxFromGeometry.m_VSBufferSetPtr = BufferManager::CreateBufferSet(ModelMatrixBufferPtr);
-        m_SkyboxFromGeometry.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSWorldBuffer);
+        m_SkyboxFromGeometry.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSWorldUnrotatedBuffer);
         m_SkyboxFromGeometry.m_PSBufferSetPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer(), OuputPSBufferPtr);
 
         m_SkyboxFromLUT.m_VSBufferSetPtr = 0;
-        m_SkyboxFromLUT.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSSphericalBuffer, ModelMatrixBufferPtr);
+        m_SkyboxFromLUT.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSWorldRotatedBuffer, ModelMatrixBufferPtr);
         m_SkyboxFromLUT.m_PSBufferSetPtr = BufferManager::CreateBufferSet(OuputPSBufferPtr);
 
         // -----------------------------------------------------------------------------
@@ -1576,7 +1470,6 @@ namespace
         SModelMatrixBuffer ViewBuffer;
 
         ViewBuffer.m_ModelMatrix  = Base::Float4x4::s_Identity;
-        ViewBuffer.m_ModelMatrix *= Base::Float4x4().SetScale(-1.0f, 1.0f, 1.0f);
         ViewBuffer.m_ModelMatrix *= MainViewPtr->GetRotationMatrix().GetTransposed();
         ViewBuffer.m_ModelMatrix *= Base::Float4x4().SetTranslation(0.0f, 0.0f, -0.1f);
         ViewBuffer.m_ModelMatrix *= Base::Float4x4().SetScale(ScaleY, ScaleX, 1.0f);
@@ -1741,8 +1634,7 @@ namespace
         // -----------------------------------------------------------------------------
         SModelMatrixBuffer ViewBuffer;
 
-        ViewBuffer.m_ModelMatrix  = Base::Float4x4::s_Identity;
-        ViewBuffer.m_ModelMatrix *= Base::Float4x4().SetScale(-1.0f, 1.0f, 1.0f);
+        ViewBuffer.m_ModelMatrix = Base::Float4x4::s_Identity;
 
         BufferManager::UploadConstantBufferData(VSBufferSetPtr->GetBuffer(0), &ViewBuffer);
 

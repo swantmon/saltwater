@@ -38,7 +38,7 @@ vec3 GetViewSpacePositionFromDepth(in float _Depth, in vec2 _ScreenPosition, in 
     
     ScreenPosition.x = _ScreenPosition.x * 2.0f - 1.0f;
     ScreenPosition.y = _ScreenPosition.y * 2.0f - 1.0f;
-    ScreenPosition.z = _Depth * 2.0f - 1.0f;
+    ScreenPosition.z = _Depth;
     ScreenPosition.w = 1.0f;
     
     // -----------------------------------------------------------------------------
