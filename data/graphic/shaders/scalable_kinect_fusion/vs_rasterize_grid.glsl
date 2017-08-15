@@ -55,7 +55,7 @@ void main()
     Vertex.z = ((Vertex.z - 0.5f) / 7.5f) * 2.0f - 1.0f;
 
     vec3 AABBPosition = g_Offset * g_ParentSize;
-    AABBPosition += IndextoOffset(int(gl_InstanceID), g_Resolution) * g_CubeSize;
+    AABBPosition += IndextoOffset(gl_InstanceID, g_Resolution) * g_CubeSize;
     
     out_AABBMin = AABBPosition;
     out_AABBMax = AABBPosition + g_CubeSize;
