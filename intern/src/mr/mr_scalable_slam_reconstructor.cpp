@@ -44,7 +44,7 @@ using namespace Gfx;
 namespace
 {
 	//*
-	const Base::Float3 g_InitialCameraPosition = Base::Float3(0.5f, 0.5f, 1.5f);
+	const Base::Float3 g_InitialCameraPosition = Base::Float3(0.0f, 0.0f, 0.0f);
 	const Base::Float3 g_InitialCameraRotation = Base::Float3(3.14f, 0.0f, 0.0f);
 	/*/
 	const Base::Float3 g_InitialCameraPosition = Base::Float3(0.5f, 0.5f, -0.5f);
@@ -690,6 +690,18 @@ namespace MR
             auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
             rRootVolume.m_IsVisible = true;
+
+            if (rRootVolume.m_Level1QueuePtr == nullptr)
+            {
+                SBufferDescriptor ConstantBufferDesc = {};
+                ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
+                ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
+                ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * m_ReconstructionSettings.m_VoxelsPerGrid[0];
+                ConstantBufferDesc.m_pBytes = nullptr;
+                ConstantBufferDesc.m_Usage = CBuffer::GPURead;
+                rRootVolume.m_Level1QueuePtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+                rRootVolume.m_Level2QueuePtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+            }
 
             ContextManager::Barrier();
             //TargetSetManager::ClearTargetSet(m_TargetSetPtr);
