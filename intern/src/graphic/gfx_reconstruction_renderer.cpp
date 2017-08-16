@@ -821,6 +821,7 @@ namespace
 
                 BufferManager::UploadConstantBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
+                assert(rRootGrid.m_Level1QueuePtr != nullptr);
                 ContextManager::SetResourceBuffer(2, rRootGrid.m_Level1QueuePtr);
 
                 int VertexCount = m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfVertices();
