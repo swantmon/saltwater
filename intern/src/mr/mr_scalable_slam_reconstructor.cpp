@@ -231,7 +231,7 @@ namespace MR
         RendertargetDescriptor.m_Format = CTextureBase::Unknown;
         RendertargetDescriptor.m_Usage = CTextureBase::GPURead;
         RendertargetDescriptor.m_Semantic = CTextureBase::Diffuse;
-        RendertargetDescriptor.m_Format = CTextureBase::R16G16B16A16_FLOAT;
+        RendertargetDescriptor.m_Format = CTextureBase::R8_BYTE;
 
         CTextureBasePtr RenderTarget = TextureManager::CreateTexture2D(RendertargetDescriptor);
         
@@ -631,7 +631,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::GatherCounters(unsigned int Count, CBufferPtr CounterBuffer, CBufferPtr QueueBuffer, CBufferPtr IndirectBuffer)
+    void CScalableSLAMReconstructor::GatherVolumeCounters(unsigned int Count, CBufferPtr CounterBuffer, CBufferPtr QueueBuffer, CBufferPtr IndirectBuffer)
     {
         ContextManager::Barrier();
 
@@ -645,6 +645,25 @@ namespace MR
         ContextManager::SetResourceBuffer(1, IndirectBuffer);
         ContextManager::SetResourceBuffer(2, QueueBuffer);
         
+        ContextManager::Dispatch(Count, 1, 1);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CScalableSLAMReconstructor::GatherGridCounters(unsigned int Count, CBufferPtr CounterBuffer, CBufferPtr QueueBuffer, CBufferPtr IndirectBuffer)
+    {
+        ContextManager::Barrier();
+
+        ContextManager::SetShaderCS(m_GridCountersCSPtr);
+
+        SIndexedIndirect IndirectBufferData = {};
+        IndirectBufferData.m_IndexCount = 36;
+        BufferManager::UploadConstantBufferData(IndirectBuffer, &IndirectBufferData);
+
+        ContextManager::SetResourceBuffer(0, CounterBuffer);
+        ContextManager::SetResourceBuffer(1, IndirectBuffer);
+        ContextManager::SetResourceBuffer(2, QueueBuffer);
+
         ContextManager::Dispatch(Count, 1, 1);
     }
 
@@ -706,13 +725,13 @@ namespace MR
             ContextManager::Barrier();
             //TargetSetManager::ClearTargetSet(m_TargetSetPtr);
             RasterizeRootGrid(rRootVolume);
-            GatherCounters(m_ReconstructionSettings.m_VoxelsPerGrid[0], m_VolumeAtomicCounterBufferPtr,
+            GatherGridCounters(m_ReconstructionSettings.m_VoxelsPerGrid[0], m_VolumeAtomicCounterBufferPtr,
                            rRootVolume.m_Level1QueuePtr, m_IndexedIndirectBufferPtr);
 
             SIndexedIndirect* pIndirect = static_cast<SIndexedIndirect*>(BufferManager::MapConstantBuffer(m_IndexedIndirectBufferPtr, CBuffer::EMap::Read));
-
-            BufferManager::UnmapConstantBuffer(m_IndexedIndirectBufferPtr);
             rRootVolume.m_Level1QueueSize = pIndirect->m_InstanceCount;
+            BufferManager::UnmapConstantBuffer(m_IndexedIndirectBufferPtr);
+
             Performance::EndEvent();
         }
 
@@ -838,7 +857,7 @@ namespace MR
         Performance::BeginEvent("Check Root Volumes");
 
         RasterizeRootVolumes();
-        GatherCounters(static_cast<unsigned int>(m_RootVolumeMap.size()), m_AtomicCounterBufferPtr, m_VolumeQueueBufferPtr, m_IndexedIndirectBufferPtr);
+        GatherVolumeCounters(static_cast<unsigned int>(m_RootVolumeMap.size()), m_AtomicCounterBufferPtr, m_VolumeQueueBufferPtr, m_IndexedIndirectBufferPtr);
 
         Performance::EndEvent();
 
