@@ -752,7 +752,16 @@ namespace MR
             ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
             ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
 
+            if (rRootVolume.m_Level1QueueSize)
+            {
+                RasterizeLevel1Grid(rRootVolume);
+                GatherGridCounters(rRootVolume.m_Level1QueueSize, m_VolumeAtomicCounterBufferPtr,
+                    rRootVolume.m_Level2QueuePtr, m_IndexedIndirectBufferPtr);
 
+                pIndirect = static_cast<SIndexedIndirect*>(BufferManager::MapConstantBuffer(m_IndexedIndirectBufferPtr, CBuffer::EMap::Read));
+                rRootVolume.m_Level2QueueSize = pIndirect->m_InstanceCount;
+                BufferManager::UnmapConstantBuffer(m_IndexedIndirectBufferPtr);
+            }                       
 
             Performance::EndEvent();
         }
@@ -787,8 +796,8 @@ namespace MR
     {
         SGridRasterization GridData = {};
         GridData.m_Resolution = m_ReconstructionSettings.m_GridResolutions[1];
-        GridData.m_CubeSize = m_VolumeSizes[1];
-        GridData.m_ParentSize = m_VolumeSizes[0];
+        GridData.m_CubeSize = m_VolumeSizes[2];
+        GridData.m_ParentSize = m_VolumeSizes[1];
         GridData.m_Offset = rRootGrid.m_Offset;
 
         BufferManager::UploadConstantBufferData(m_GridRasterizationBufferPtr, &GridData);
@@ -1503,6 +1512,8 @@ namespace MR
 
     void CScalableSLAMReconstructor::ClearBuffer(CBufferPtr BufferPtr, size_t Size)
     {
+        assert(Size > 0);
+
         const int WorkGroups = static_cast<int>(Size);
 
         ContextManager::SetShaderCS(m_ClearAtomicCountersCSPtr);
