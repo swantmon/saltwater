@@ -749,10 +749,10 @@ namespace MR
             // Integrate into level 1 grid
             ////////////////////////////////////////////////////////////////////////////////////////////////
 
-            ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
-            ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
+            ContextManager::SetShaderVS(m_RasterizeLevel1GridVSPtr);
+            ContextManager::SetShaderPS(m_RasterizeLevel1GridFSPtr);
 
-            if (rRootVolume.m_Level1QueueSize)
+            if (rRootVolume.m_Level1QueueSize > 0)
             {
                 RasterizeLevel1Grid(rRootVolume);
                 GatherGridCounters(rRootVolume.m_Level1QueueSize, m_VolumeAtomicCounterBufferPtr,
@@ -761,7 +761,7 @@ namespace MR
                 pIndirect = static_cast<SIndexedIndirect*>(BufferManager::MapConstantBuffer(m_IndexedIndirectBufferPtr, CBuffer::EMap::Read));
                 rRootVolume.m_Level2QueueSize = pIndirect->m_InstanceCount;
                 BufferManager::UnmapConstantBuffer(m_IndexedIndirectBufferPtr);
-            }                       
+            }
 
             Performance::EndEvent();
         }
