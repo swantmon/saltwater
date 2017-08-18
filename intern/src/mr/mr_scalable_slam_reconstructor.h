@@ -113,6 +113,7 @@ namespace MR
         void IntegrateRootVolumes(std::vector<uint32_t>& rVolumeQueue);
 
         void RasterizeRootGrid(SRootVolume& rRootGrid);
+        void RasterizeLevel1Grid(SRootVolume& rRootGrid);
 
         void ClearBuffer(Gfx::CBufferPtr BufferPtr, size_t Size);
 
@@ -192,6 +193,8 @@ namespace MR
 
         Gfx::CShaderPtr m_RasterizeRootGridVSPtr;
         Gfx::CShaderPtr m_RasterizeRootGridFSPtr;
+        Gfx::CShaderPtr m_RasterizeLevel1GridVSPtr;
+        Gfx::CShaderPtr m_RasterizeLevel1GridFSPtr;
 
         Gfx::CShaderPtr m_ClearAtomicCountersCSPtr;
 

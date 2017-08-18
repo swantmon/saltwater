@@ -424,6 +424,13 @@ namespace MR
 
         m_RasterizeRootVolumeVSPtr = 0;
         m_RasterizeRootVolumeFSPtr = 0;
+
+        m_RasterizeRootGridVSPtr = 0;
+        m_RasterizeRootGridFSPtr = 0;
+
+        m_RasterizeLevel1GridVSPtr = 0;
+        m_RasterizeLevel1GridFSPtr = 0;
+
         m_ClearAtomicCountersCSPtr = 0;
 
         m_CubeMeshPtr = 0;
@@ -527,6 +534,8 @@ namespace MR
         m_VolumeCountersCSPtr      = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_volume_counters.glsl"       , "main", DefineString.c_str());
         m_RasterizeRootGridVSPtr   = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_rasterize_grid.glsl"        , "main", DefineString.c_str());
         m_RasterizeRootGridFSPtr   = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_rasterize_grid.glsl"        , "main", DefineString.c_str());
+        m_RasterizeLevel1GridVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_rasterize_level1_grid.glsl" , "main", DefineString.c_str());
+        m_RasterizeLevel1GridFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_rasterize_level1_grid.glsl" , "main", DefineString.c_str());
         m_GridCountersCSPtr        = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_grid_counters.glsl"         , "main", DefineString.c_str());
 
         SInputElementDescriptor InputLayoutDesc = {};
@@ -695,9 +704,6 @@ namespace MR
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
         ContextManager::SetConstantBuffer(2, m_GridRasterizationBufferPtr);
 
-        ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
-        ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
-
         ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawVertexMapPtr));
 
         for (uint32_t VolumeIndex : rVolumeQueue)
@@ -722,6 +728,13 @@ namespace MR
                 rRootVolume.m_Level2QueuePtr = BufferManager::CreateBuffer(ConstantBufferDesc);
             }
 
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+            // Integrate into level 0 grid
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+
+            ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
+            ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
+
             ContextManager::Barrier();
             //TargetSetManager::ClearTargetSet(m_TargetSetPtr);
             RasterizeRootGrid(rRootVolume);
@@ -731,6 +744,15 @@ namespace MR
             SIndexedIndirect* pIndirect = static_cast<SIndexedIndirect*>(BufferManager::MapConstantBuffer(m_IndexedIndirectBufferPtr, CBuffer::EMap::Read));
             rRootVolume.m_Level1QueueSize = pIndirect->m_InstanceCount;
             BufferManager::UnmapConstantBuffer(m_IndexedIndirectBufferPtr);
+            
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+            // Integrate into level 1 grid
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+
+            ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
+            ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
+
+
 
             Performance::EndEvent();
         }
@@ -752,6 +774,26 @@ namespace MR
         BufferManager::UploadConstantBufferData(m_GridRasterizationBufferPtr, &GridData);
 
         int InstanceCount = GridData.m_Resolution * GridData.m_Resolution * GridData.m_Resolution;
+
+        ClearBuffer(m_VolumeAtomicCounterBufferPtr, InstanceCount);
+
+        const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
+        ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CScalableSLAMReconstructor::RasterizeLevel1Grid(SRootVolume& rRootGrid)
+    {
+        SGridRasterization GridData = {};
+        GridData.m_Resolution = m_ReconstructionSettings.m_GridResolutions[1];
+        GridData.m_CubeSize = m_VolumeSizes[1];
+        GridData.m_ParentSize = m_VolumeSizes[0];
+        GridData.m_Offset = rRootGrid.m_Offset;
+
+        BufferManager::UploadConstantBufferData(m_GridRasterizationBufferPtr, &GridData);
+
+        int InstanceCount = GridData.m_Resolution * GridData.m_Resolution * GridData.m_Resolution * rRootGrid.m_Level1QueueSize;
 
         ClearBuffer(m_VolumeAtomicCounterBufferPtr, InstanceCount);
 
