@@ -623,13 +623,7 @@ namespace MR
         ContextManager::SetResourceBuffer(1, m_RootVolumeInstanceBufferPtr);
 
         ContextManager::Barrier();
-
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_FRONT);
-        glDisable(GL_DEPTH_TEST);
-        glDisable(GL_MULTISAMPLE);
-
+        
         const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         const unsigned int InstanceCount = static_cast<unsigned int>(m_RootVolumeMap.size());
         ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
@@ -774,6 +768,12 @@ namespace MR
 
     void CScalableSLAMReconstructor::RasterizeRootGrid(SRootVolume& rRootGrid)
     {
+        TargetSetManager::ClearTargetSet(m_TargetSetPtr);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_FRONT);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_MULTISAMPLE);
         SGridRasterization GridData = {};
         GridData.m_Resolution = m_ReconstructionSettings.m_GridResolutions[0];
         GridData.m_CubeSize = m_VolumeSizes[1];
@@ -794,6 +794,13 @@ namespace MR
 
     void CScalableSLAMReconstructor::RasterizeLevel1Grid(SRootVolume& rRootGrid)
     {
+        TargetSetManager::ClearTargetSet(m_TargetSetPtr);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);        
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_FRONT);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_MULTISAMPLE);
+
         SGridRasterization GridData = {};
         GridData.m_Resolution = m_ReconstructionSettings.m_GridResolutions[1];
         GridData.m_CubeSize = m_VolumeSizes[2];
@@ -806,8 +813,11 @@ namespace MR
 
         ClearBuffer(m_VolumeAtomicCounterBufferPtr, InstanceCount);
 
+        ContextManager::SetResourceBuffer(2, rRootGrid.m_Level1QueuePtr);
+
         const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
     // -----------------------------------------------------------------------------

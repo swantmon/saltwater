@@ -17,6 +17,11 @@ layout(row_major, std140, binding = 2) uniform UBOTransform
     float g_ParentSize;
 };
 
+layout(std430, binding = 2) buffer VolumeQueue
+{
+    uint g_VolumeID[];
+};
+
 // -----------------------------------------------------------------------------
 // Inputs
 // -----------------------------------------------------------------------------
@@ -42,24 +47,28 @@ out gl_PerVertex
 
 void main()
 {
-    out_Index = gl_InstanceID;
+    uint ParentIndex = g_VolumeID[gl_InstanceID / 256];
+    uint GridIndex = gl_InstanceID % 256;
 
-    vec3 GridOffset = IndexToOffset(gl_InstanceID / 256, 16 * 8);
+    uint Level1Index = ParentIndex * 256 + GridIndex;
 
-    vec4 Vertex = vec4(g_Offset * g_ParentSize, 1.0f);
-    Vertex.xyz += (GridOffset + in_VertexPosition) * g_CubeSize;
+    vec3 ParentOffset = IndexToOffset(ParentIndex, 16) * g_ParentSize;
+    vec3 Level1Offset = IndexToOffset(GridIndex, 8) * g_CubeSize;
 
-	Vertex = (g_InvPoseMatrix * Vertex);    
+    vec4 Vertex = vec4(g_Offset * VOLUME_SIZE, 1.0f);
+    Vertex.xyz += (in_VertexPosition * g_CubeSize) + Level1Offset + ParentOffset;
+
+	Vertex = (g_InvPoseMatrix * Vertex);
 	Vertex.xy = Vertex.xy * g_Intrinsics[0].m_FocalLength / Vertex.z + g_Intrinsics[0].m_FocalPoint;
 	Vertex.xy = Vertex.xy / vec2(DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT) * 2.0f - 1.0f;
-    Vertex.z = Vertex.z / (8.0f + VOLUME_SIZE);
+    Vertex.z = 1.0f;//Vertex.z / (8.0f + VOLUME_SIZE);
 
     vec3 AABBPosition = g_Offset * g_ParentSize;
-    AABBPosition += IndexToOffset(gl_InstanceID, g_Resolution) * g_CubeSize;
+    AABBPosition += IndexToOffset(Level1Index, g_Resolution) * g_CubeSize;
     
     out_AABBMin = AABBPosition;
     out_AABBMax = AABBPosition + g_CubeSize;
-
+    out_Index = Level1Index;
     gl_Position = Vertex;
 }
 
