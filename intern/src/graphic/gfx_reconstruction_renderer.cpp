@@ -89,6 +89,7 @@ namespace
 		void RenderScalableVolume();
         void RenderRootVolumes();
         void RenderLevel1Grids();
+        void RenderLevel2Grids();
 
         void RenderCamera();
 
@@ -104,6 +105,8 @@ namespace
 
         CShaderPtr m_OutlineLevel1VSPtr;
         CShaderPtr m_OutlineLevel1FSPtr;
+        CShaderPtr m_OutlineLevel2VSPtr;
+        CShaderPtr m_OutlineLevel2FSPtr;
 
         CShaderPtr m_RaycastVSPtr;
         CShaderPtr m_RaycastFSPtr;
@@ -175,6 +178,8 @@ namespace
         m_OutlineFSPtr = 0;
         m_OutlineLevel1VSPtr = 0;
         m_OutlineLevel1FSPtr = 0;
+        m_OutlineLevel2VSPtr = 0;
+        m_OutlineLevel2FSPtr = 0;
         m_RaycastVSPtr = 0;
         m_RaycastFSPtr = 0;
         
@@ -226,6 +231,8 @@ namespace
 			m_OutlineFSPtr       = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_outline.glsl"       , "main", DefineString.c_str());
             m_OutlineLevel1VSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_outline_level1.glsl", "main", DefineString.c_str());
             m_OutlineLevel1FSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_outline_level1.glsl", "main", DefineString.c_str());
+            m_OutlineLevel2VSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_outline_level2.glsl", "main", DefineString.c_str());
+            m_OutlineLevel2FSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_outline_level2.glsl", "main", DefineString.c_str());
 			m_RaycastVSPtr       = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_raycast.glsl"       , "main", DefineString.c_str());
 			m_RaycastFSPtr       = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_raycast.glsl"       , "main", DefineString.c_str());
             m_PointCloudVSPtr    = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_point_cloud.glsl"   , "main", DefineString.c_str());
@@ -835,6 +842,65 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxReconstructionRenderer::RenderLevel2Grids()
+    {
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+        ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
+        ContextManager::SetShaderVS(m_OutlineLevel2VSPtr);
+        ContextManager::SetShaderPS(m_OutlineLevel2FSPtr);
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
+
+        SDrawCallConstantBuffer BufferData;
+
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBufferSet(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetInputLayout(m_CubeOutlineInputLayoutPtr);
+
+        ContextManager::SetTopology(STopology::LineList);
+
+        Float3 Position;
+        Float4x4 Scaling;
+        Float4x4 Translation;
+
+        const auto& VolumeSizes = m_pScalableReconstructor->GetVolumeSizes();
+
+        for (auto& rPair : m_pScalableReconstructor->GetRootVolumeMap())
+        {
+            auto& rRootGrid = rPair.second;
+
+            if (rRootGrid.m_IsVisible)
+            {
+                Position[0] = static_cast<float>(rRootGrid.m_Offset[0]);
+                Position[1] = static_cast<float>(rRootGrid.m_Offset[1]);
+                Position[2] = static_cast<float>(rRootGrid.m_Offset[2]);
+
+                Position = Position * VolumeSizes[0];
+
+                Scaling.SetScale(VolumeSizes[2]);
+                Translation.SetTranslation(Position);
+
+                BufferData.m_WorldMatrix = Translation * Scaling;
+                BufferData.m_Color = Float4(0.0f, 0.0f, 1.0f, 1.0f);
+
+                BufferManager::UploadConstantBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+
+                assert(rRootGrid.m_Level2QueuePtr != nullptr);
+                ContextManager::SetResourceBuffer(2, rRootGrid.m_Level2QueuePtr);
+
+                int VertexCount = m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfVertices();
+                if (rRootGrid.m_Level2QueueSize > 0)
+                {
+                    ContextManager::DrawInstanced(VertexCount, rRootGrid.m_Level2QueueSize, 0);
+                }
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxReconstructionRenderer::RenderCamera()
     {
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
@@ -905,7 +971,7 @@ namespace
 		else
 		{
 			m_pReconstructor->Update();
-		}        
+		}
 
         Performance::BeginEvent("SLAM Reconstruction Rendering");
         
@@ -919,7 +985,8 @@ namespace
 			RenderScalableVolume();
             RenderVertexMap();
 			RenderRootVolumes();
-            RenderLevel1Grids();
+            //RenderLevel1Grids();
+            RenderLevel2Grids();
 		}
 		else
 		{

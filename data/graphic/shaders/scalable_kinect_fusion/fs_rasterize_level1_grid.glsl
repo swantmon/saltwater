@@ -1,6 +1,6 @@
 
-#ifndef __INCLUDE_FS_RASTERIZE_GRID_GLSL__
-#define __INCLUDE_FS_RASTERIZE_GRID_GLSL__
+#ifndef __INCLUDE_FS_RASTERIZE_LEVEL1_GRID_GLSL__
+#define __INCLUDE_FS_RASTERIZE_LEVEL1_GRID_GLSL__
 
 #include "scalable_kinect_fusion/common_tracking.glsl"
 
@@ -75,4 +75,4 @@ void main()
     out_Color = InBox ? vec4(1.0f) : vec4(0.5f);
 }
 
-#endif // __INCLUDE_FS_RASTERIZE_GRID_GLSL__
+#endif // __INCLUDE_FS_RASTERIZE_LEVEL1_GRID_GLSL__
