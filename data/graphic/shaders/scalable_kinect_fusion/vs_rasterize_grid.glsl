@@ -42,9 +42,9 @@ out gl_PerVertex
 
 void main()
 {
-    out_Index = gl_InstanceID;
+    out_Index = gl_VertexID / 8;
 
-    vec3 GridOffset = IndexToOffset(gl_InstanceID, g_Resolution);
+    vec3 GridOffset = IndexToOffset(out_Index, g_Resolution);
 
     vec4 Vertex = vec4(g_Offset * g_ParentSize, 1.0f);
     Vertex.xyz += (GridOffset + in_VertexPosition) * g_CubeSize;
@@ -55,7 +55,7 @@ void main()
     Vertex.z = Vertex.z / (8.0f + VOLUME_SIZE);
 
     vec3 AABBPosition = g_Offset * g_ParentSize;
-    AABBPosition += IndexToOffset(gl_InstanceID, g_Resolution) * g_CubeSize;
+    AABBPosition += IndexToOffset(out_Index, g_Resolution) * g_CubeSize;
     
     out_AABBMin = AABBPosition;
     out_AABBMax = AABBPosition + g_CubeSize;

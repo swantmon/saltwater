@@ -793,6 +793,7 @@ namespace MR
 
             ContextManager::Barrier();
             //TargetSetManager::ClearTargetSet(m_TargetSetPtr);
+
             RasterizeRootGrid(rRootVolume);
             GatherGridCounters(m_ReconstructionSettings.m_VoxelsPerGrid[0], m_VolumeAtomicCounterBufferPtr,
                            rRootVolume.m_Level1QueuePtr, m_IndexedIndirectBufferPtr);
@@ -836,6 +837,7 @@ namespace MR
         glCullFace(GL_FRONT);
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_MULTISAMPLE);
+
         SGridRasterization GridData = {};
         GridData.m_Resolution = m_ReconstructionSettings.m_GridResolutions[0];
         GridData.m_CubeSize = m_VolumeSizes[1];
@@ -843,13 +845,16 @@ namespace MR
         GridData.m_Offset = rRootGrid.m_Offset;
 
         BufferManager::UploadConstantBufferData(m_GridRasterizationBufferPtr, &GridData);
+        
+        ClearBuffer(m_VolumeAtomicCounterBufferPtr, GridData.m_Resolution * GridData.m_Resolution * GridData.m_Resolution);
 
-        int InstanceCount = GridData.m_Resolution * GridData.m_Resolution * GridData.m_Resolution;
-
-        ClearBuffer(m_VolumeAtomicCounterBufferPtr, InstanceCount);
-
-        const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
-        ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBufferSet(m_Grid16MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetIndexBuffer(m_Grid16MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
+        ContextManager::SetTopology(STopology::TriangleList);
+        const unsigned int IndexCount = m_Grid16MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
+        ContextManager::DrawIndexed(IndexCount, 0, 0);
     }
 
     // -----------------------------------------------------------------------------
