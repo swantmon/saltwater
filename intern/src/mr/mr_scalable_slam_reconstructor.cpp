@@ -667,8 +667,8 @@ namespace MR
         ContextManager::SetTargetSet(m_TargetSetPtr);
         
         const unsigned int Offset = 0;
-        ContextManager::SetVertexBufferSet(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
-        ContextManager::SetIndexBuffer(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetVertexBufferSet(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
         ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
 
         ContextManager::SetTopology(STopology::TriangleList);
@@ -686,7 +686,7 @@ namespace MR
 
         ContextManager::Barrier();
         
-        const unsigned int IndexCount = m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
+        const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         const unsigned int InstanceCount = static_cast<unsigned int>(m_RootVolumeMap.size());
         ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
 
