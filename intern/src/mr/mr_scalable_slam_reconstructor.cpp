@@ -320,11 +320,11 @@ namespace MR
         std::vector<Float3> Vertices;
         std::vector<unsigned int> Indices;
 
-        for (int x = 0; x < Width; ++ x)
+        for (int z = 0; z < Width; ++ z)
         {
             for (int y = 0; y < Width; ++ y)
             {
-                for (int z = 0; z < Width; ++ z)
+                for (int x = 0; x < Width; ++ x)
                 {
                     for (int i = 0; i < 8; ++ i)
                     {
@@ -336,16 +336,15 @@ namespace MR
 
                         Vertices.push_back(Vertex);
                     }
-
-                    for (int i = 0; i < 36; ++ i)
-                    {
-                        unsigned int Index = CubeIndices[i];
-
-                        Index += x + (y * Width) + (z * Width * Width);
-
-                        Indices.push_back(Index);
-                    }
                 }
+            }
+        }
+
+        for (int i = 0; i < Width * Width * Width; ++ i)
+        {
+            for (int j = 0; j < 36; ++ j)
+            {
+                Indices.push_back(CubeIndices[j] + i * 8);
             }
         }
 
@@ -668,8 +667,8 @@ namespace MR
         ContextManager::SetTargetSet(m_TargetSetPtr);
         
         const unsigned int Offset = 0;
-        ContextManager::SetVertexBufferSet(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
-        ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetVertexBufferSet(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetIndexBuffer(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
         ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
 
         ContextManager::SetTopology(STopology::TriangleList);
@@ -687,7 +686,7 @@ namespace MR
 
         ContextManager::Barrier();
         
-        const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
+        const unsigned int IndexCount = m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         const unsigned int InstanceCount = static_cast<unsigned int>(m_RootVolumeMap.size());
         ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
 
