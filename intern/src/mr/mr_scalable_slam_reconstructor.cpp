@@ -310,6 +310,7 @@ namespace MR
         m_CubeMeshPtr = MeshManager::CreateMesh(MeshDesc);
         
         m_Grid8MeshPtr = CreateGridMesh(8);
+        m_Grid16MeshPtr = CreateGridMesh(16);
     }
 
     // -----------------------------------------------------------------------------
@@ -319,13 +320,13 @@ namespace MR
         std::vector<Float3> Vertices;
         std::vector<unsigned int> Indices;
 
-        for (int x = 0; x < Width; ++x)
+        for (int x = 0; x < Width; ++ x)
         {
-            for (int y = 0; y < Width; ++y)
+            for (int y = 0; y < Width; ++ y)
             {
-                for (int z = 0; z < Width; ++z)
+                for (int z = 0; z < Width; ++ z)
                 {
-                    for (int i = 0; i < 8; ++i)
+                    for (int i = 0; i < 8; ++ i)
                     {
                         Float3 Vertex = CubeVertices[i];
 
@@ -336,7 +337,7 @@ namespace MR
                         Vertices.push_back(Vertex);
                     }
 
-                    for (int i = 0; i < 36; ++i)
+                    for (int i = 0; i < 36; ++ i)
                     {
                         unsigned int Index = CubeIndices[i];
 
