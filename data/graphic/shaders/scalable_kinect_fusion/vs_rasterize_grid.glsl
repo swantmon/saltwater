@@ -44,10 +44,8 @@ void main()
 {
     out_Index = gl_VertexID / 8;
 
-    vec3 GridOffset = IndexToOffset(out_Index, g_Resolution);
-
     vec4 Vertex = vec4(g_Offset * g_ParentSize, 1.0f);
-    Vertex.xyz += (GridOffset + in_VertexPosition) * g_CubeSize;
+    Vertex.xyz += in_VertexPosition * g_CubeSize;
 	Vertex = (g_InvPoseMatrix * Vertex);
     
 	Vertex.xy = Vertex.xy * g_Intrinsics[0].m_FocalLength / Vertex.z + g_Intrinsics[0].m_FocalPoint;

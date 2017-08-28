@@ -670,7 +670,6 @@ namespace MR
         ContextManager::SetVertexBufferSet(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
         ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
         ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
-
         ContextManager::SetTopology(STopology::TriangleList);
 
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
@@ -797,6 +796,11 @@ namespace MR
             RasterizeRootGrid(rRootVolume);
             GatherGridCounters(m_ReconstructionSettings.m_VoxelsPerGrid[0], m_VolumeAtomicCounterBufferPtr,
                            rRootVolume.m_Level1QueuePtr, m_IndexedIndirectBufferPtr);
+
+            ContextManager::SetVertexBufferSet(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+            ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+            ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
+            ContextManager::SetTopology(STopology::TriangleList);
 
             SIndexedIndirect* pIndirect = static_cast<SIndexedIndirect*>(BufferManager::MapConstantBuffer(m_IndexedIndirectBufferPtr, CBuffer::EMap::Read));
             rRootVolume.m_Level1QueueSize = pIndirect->m_InstanceCount;
