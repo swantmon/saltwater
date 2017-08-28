@@ -836,7 +836,7 @@ namespace MR
     void CScalableSLAMReconstructor::RasterizeRootGrid(SRootVolume& rRootGrid)
     {
         TargetSetManager::ClearTargetSet(m_TargetSetPtr);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
         glDisable(GL_DEPTH_TEST);
@@ -866,7 +866,7 @@ namespace MR
     void CScalableSLAMReconstructor::RasterizeLevel1Grid(SRootVolume& rRootGrid)
     {
         TargetSetManager::ClearTargetSet(m_TargetSetPtr);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);        
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);        
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
         glDisable(GL_DEPTH_TEST);
@@ -880,15 +880,21 @@ namespace MR
 
         BufferManager::UploadConstantBufferData(m_GridRasterizationBufferPtr, &GridData);
 
-        int InstanceCount = GridData.m_Resolution * GridData.m_Resolution * GridData.m_Resolution * rRootGrid.m_Level1QueueSize;
+        int InstanceCount = rRootGrid.m_Level1QueueSize;
 
         ClearBuffer(m_VolumeAtomicCounterBufferPtr, InstanceCount);
 
         ContextManager::SetResourceBuffer(2, rRootGrid.m_Level1QueuePtr);
 
-        const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
+        unsigned int Offset = 0;
+        ContextManager::SetVertexBufferSet(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetIndexBuffer(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        const unsigned int IndexCount = m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
     // -----------------------------------------------------------------------------
