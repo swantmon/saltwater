@@ -140,6 +140,8 @@ namespace MR
         void DetermineSummands(int PyramidLevel, const Base::Float4x4& rIncPoseMatrix);
         void ReduceSum(int PyramidLevel);
         bool CalculatePoseMatrix(Base::Float4x4& rIncPoseMatrix);
+
+        Gfx::CMeshPtr CreateGridMesh(int Width);
         
     private:
 
@@ -199,6 +201,9 @@ namespace MR
         Gfx::CShaderPtr m_ClearAtomicCountersCSPtr;
 
         Gfx::CMeshPtr m_CubeMeshPtr;
+        Gfx::CMeshPtr m_Grid8MeshPtr;
+        Gfx::CMeshPtr m_Grid16MeshPtr;
+        
         Gfx::CInputLayoutPtr m_CubeInputLayoutPtr;
         Gfx::CTargetSetPtr m_TargetSetPtr;
         Gfx::CViewPortSetPtr m_DepthViewPortSetPtr;

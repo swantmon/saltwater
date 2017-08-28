@@ -62,6 +62,39 @@ namespace
 
     const bool g_UseHighPrecisionMaps = false;
 
+    Base::Float3 CubeVertices[] =
+    {
+        Base::Float3(0.0f, 0.0f, 0.0f),
+        Base::Float3(1.0f, 0.0f, 0.0f),
+        Base::Float3(1.0f, 1.0f, 0.0f),
+        Base::Float3(0.0f, 1.0f, 0.0f),
+        Base::Float3(0.0f, 0.0f, 1.0f),
+        Base::Float3(1.0f, 0.0f, 1.0f),
+        Base::Float3(1.0f, 1.0f, 1.0f),
+        Base::Float3(0.0f, 1.0f, 1.0f),
+    };
+
+    unsigned int CubeIndices[] =
+    {
+        0, 1, 2,
+        0, 2, 3,
+
+        5, 2, 1,
+        5, 6, 2,
+
+        4, 5, 1,
+        4, 1, 0,
+
+        4, 0, 7,
+        0, 3, 7,
+
+        7, 2, 6,
+        7, 3, 2,
+
+        4, 7, 6,
+        4, 6, 5,
+    };
+
     struct SIntrinsics
     {
         Base::Float4x4 m_KMatrix;
@@ -255,39 +288,6 @@ namespace MR
 
     void CScalableSLAMReconstructor::SetupMeshes()
     {
-        Float3 CubeVertices[] =
-        {
-            Float3(0.0f, 0.0f, 0.0f),
-            Float3(1.0f, 0.0f, 0.0f),
-            Float3(1.0f, 1.0f, 0.0f),
-            Float3(0.0f, 1.0f, 0.0f),
-            Float3(0.0f, 0.0f, 1.0f),
-            Float3(1.0f, 0.0f, 1.0f),
-            Float3(1.0f, 1.0f, 1.0f),
-            Float3(0.0f, 1.0f, 1.0f),
-        };
-
-        unsigned int CubeIndices[] =
-        {
-            0, 1, 2,
-            0, 2, 3,
-
-            5, 2, 1,
-            5, 6, 2,
-
-            4, 5, 1,
-            4, 1, 0,
-
-            4, 0, 7,
-            0, 3, 7,
-
-            7, 2, 6,
-            7, 3, 2,
-
-            4, 7, 6,
-            4, 6, 5,
-        };
-
         Dt::CSurface* pSurface = new Dt::CSurface;
         Dt::CLOD* pLOD = new Dt::CLOD;
         Dt::CMesh* pMesh = new Dt::CMesh;
@@ -308,6 +308,66 @@ namespace MR
         MeshDesc.m_pMesh = pMesh;
 
         m_CubeMeshPtr = MeshManager::CreateMesh(MeshDesc);
+        
+        m_Grid8MeshPtr = CreateGridMesh(8);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Gfx::CMeshPtr CScalableSLAMReconstructor::CreateGridMesh(int Width)
+    {
+        std::vector<Float3> Vertices;
+        std::vector<unsigned int> Indices;
+
+        for (int x = 0; x < Width; ++x)
+        {
+            for (int y = 0; y < Width; ++y)
+            {
+                for (int z = 0; z < Width; ++z)
+                {
+                    for (int i = 0; i < 8; ++i)
+                    {
+                        Float3 Vertex = CubeVertices[i];
+
+                        Vertex[0] += x;
+                        Vertex[1] += y;
+                        Vertex[2] += z;
+
+                        Vertices.push_back(Vertex);
+                    }
+
+                    for (int i = 0; i < 36; ++i)
+                    {
+                        unsigned int Index = CubeIndices[i];
+
+                        Index += x + (y * Width) + (z * Width * Width);
+
+                        Indices.push_back(Index);
+                    }
+                }
+            }
+        }
+
+        Dt::CSurface* pSurface = new Dt::CSurface;
+        Dt::CLOD* pLOD = new Dt::CLOD;
+        Dt::CMesh* pMesh = new Dt::CMesh;
+
+        pSurface->SetPositions(Vertices.data());
+        pSurface->SetNumberOfVertices(static_cast<unsigned int>(Vertices.size()));
+        pSurface->SetIndices(Indices.data());
+        pSurface->SetNumberOfIndices(static_cast<unsigned int>(Indices.size()));
+        pSurface->SetElements(0);
+
+        pLOD->SetSurface(0, pSurface);
+        pLOD->SetNumberOfSurfaces(1);
+
+        pMesh->SetLOD(0, pLOD);
+        pMesh->SetNumberOfLODs(1);
+
+        SMeshDescriptor MeshDesc = {};
+        MeshDesc.m_pMesh = pMesh;
+
+        return MeshManager::CreateMesh(MeshDesc);
     }
 
 	// -----------------------------------------------------------------------------
@@ -434,6 +494,8 @@ namespace MR
         m_ClearAtomicCountersCSPtr = 0;
 
         m_CubeMeshPtr = 0;
+        m_Grid8MeshPtr = 0;
+        m_Grid16MeshPtr = 0;
         m_CubeInputLayoutPtr = 0;
 
         m_RawVertexMapPtr = 0;
