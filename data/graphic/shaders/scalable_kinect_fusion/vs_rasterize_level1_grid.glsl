@@ -62,8 +62,7 @@ void main()
 	Vertex.xy = Vertex.xy / vec2(DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT) * 2.0f - 1.0f;
     Vertex.z = 1.0f;//Vertex.z / (8.0f + VOLUME_SIZE);
 
-    vec3 AABBPosition = g_Offset * g_ParentSize;
-    AABBPosition += IndexToOffset(GridIndex, g_Resolution) * g_CubeSize;
+    vec3 AABBPosition = g_Offset * VOLUME_SIZE + ParentOffset;
     
     out_AABBMin = AABBPosition;
     out_AABBMax = AABBPosition + g_CubeSize;
