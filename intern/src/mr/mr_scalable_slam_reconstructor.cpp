@@ -776,10 +776,11 @@ namespace MR
                 SBufferDescriptor ConstantBufferDesc = {};
                 ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
                 ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
-                ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 1024 * 1024;
+                ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * m_ReconstructionSettings.m_VoxelsPerGrid[0];
                 ConstantBufferDesc.m_pBytes = nullptr;
                 ConstantBufferDesc.m_Usage = CBuffer::GPURead;
                 rRootVolume.m_Level1QueuePtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+                ConstantBufferDesc.m_NumberOfBytes *= m_ReconstructionSettings.m_VoxelsPerGrid[1];
                 rRootVolume.m_Level2QueuePtr = BufferManager::CreateBuffer(ConstantBufferDesc);
             }
 
