@@ -1197,7 +1197,9 @@ namespace MR
 
         ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
         ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
-        ConstantBufferDesc.m_NumberOfBytes = m_ReconstructionSettings.m_VoxelsPerGrid[0] * sizeof(uint32_t);
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 
+            m_ReconstructionSettings.m_VoxelsPerGrid[0] * 
+            m_ReconstructionSettings.m_VoxelsPerGrid[0];
         ConstantBufferDesc.m_pBytes = nullptr;
         ConstantBufferDesc.m_Usage = CBuffer::GPURead;
         m_VolumeAtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
