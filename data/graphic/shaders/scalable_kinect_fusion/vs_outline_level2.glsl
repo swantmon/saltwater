@@ -29,7 +29,7 @@ out gl_PerVertex
 
 void main()
 {
-    vec3 Offset = IndexToOffset(int(g_VolumeID[gl_InstanceID]), 16);
+    vec3 Offset = IndexToOffset(int(g_VolumeID[gl_InstanceID]), 16 * 8);
     vec4 WSPosition = g_WorldMatrix * vec4(in_VertexPosition + Offset, 1.0f);
     gl_Position = g_WorldToScreen * WSPosition;
 }
