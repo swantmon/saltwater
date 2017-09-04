@@ -17,7 +17,7 @@ layout(row_major, std140, binding = 2) uniform UBOTransform
     float g_ParentSize;
 };
 
-layout(std430, binding = 2) buffer VolumeQueue
+layout(std430, binding = 2) buffer Level1Queue
 {
     uint g_VolumeID[];
 };
