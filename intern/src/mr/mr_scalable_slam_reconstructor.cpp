@@ -794,9 +794,8 @@ namespace MR
             ContextManager::Barrier();
             //TargetSetManager::ClearTargetSet(m_TargetSetPtr);
 
+            ClearBuffer(m_VolumeAtomicCounterBufferPtr, 4096);
             RasterizeRootGrid(rRootVolume);
-            GatherGridCounters(m_ReconstructionSettings.m_VoxelsPerGrid[0], m_VolumeAtomicCounterBufferPtr,
-                           rRootVolume.m_Level1QueuePtr, m_IndexedIndirectBufferPtr);
 
             ContextManager::SetVertexBufferSet(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
             ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
@@ -814,7 +813,7 @@ namespace MR
             ContextManager::SetShaderVS(m_RasterizeLevel1GridVSPtr);
             ContextManager::SetShaderPS(m_RasterizeLevel1GridFSPtr);
 
-            if (rRootVolume.m_Level1QueueSize > 0)
+            if (false)// (rRootVolume.m_Level1QueueSize > 0)
             {
                 RasterizeLevel1Grid(rRootVolume);
                 GatherGridCounters(rRootVolume.m_Level1QueueSize, m_VolumeAtomicCounterBufferPtr,
@@ -850,8 +849,16 @@ namespace MR
         GridData.m_Offset = rRootGrid.m_Offset;
 
         BufferManager::UploadConstantBufferData(m_GridRasterizationBufferPtr, &GridData);
+
+        SIndexedIndirect IndirectBufferData = {};
+        IndirectBufferData.m_IndexCount = 36;
+        BufferManager::UploadConstantBufferData(m_IndexedIndirectBufferPtr, &IndirectBufferData);
         
         ClearBuffer(m_VolumeAtomicCounterBufferPtr, GridData.m_Resolution * GridData.m_Resolution * GridData.m_Resolution);
+
+        ContextManager::SetResourceBuffer(3, rRootGrid.m_Level1QueuePtr);
+        ContextManager::SetResourceBuffer(4, m_VolumeAtomicCounterBufferPtr);
+        ContextManager::SetResourceBuffer(5, m_IndexedIndirectBufferPtr);
 
         const unsigned int Offset = 0;
         ContextManager::SetVertexBufferSet(m_Grid16MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);

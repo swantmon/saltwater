@@ -4,14 +4,19 @@
 
 #include "scalable_kinect_fusion/common_tracking.glsl"
 
+struct SIndexedIndirect
+{
+    uint  m_IndexCount;
+    uint  m_InstanceCount;
+    uint  m_FirstIndex;
+    uint  m_BaseVertex;
+    uint  m_BaseInstance;
+};
+
 // -----------------------------------------------------------------------------
 // Shader storage buffers
 // -----------------------------------------------------------------------------
 
-layout(std430, binding = 0) buffer AtomicCounterBuffer
-{
-    uint g_Counters[];
-};
 
 // -----------------------------------------------------------------------------
 // Uniform buffers
@@ -23,6 +28,21 @@ layout(row_major, std140, binding = 2) uniform UBOTransform
     int g_Resolution;
     float g_CubeSize;
     float g_ParentSize;
+};
+
+layout(std430, binding = 3) buffer VolumeQueue
+{
+    uint g_VolumeID[];
+};
+
+layout(std430, binding = 4) buffer AtomicBuffer
+{
+    uint g_Counters[];
+};
+
+layout(std430, binding = 5) buffer IndirectBuffer
+{
+    SIndexedIndirect g_Indirect;
 };
 
 // -----------------------------------------------------------------------------
@@ -70,7 +90,12 @@ void main()
 
     if (InBox)
     {
-        atomicAdd(g_Counters[in_Index], 1);
+        uint Count = atomicAdd(g_Counters[in_Index], 1);
+        if (Count == 1)
+        {
+            uint Index = atomicAdd(g_Indirect.m_InstanceCount, 1);
+            g_VolumeID[Index] = in_Index;
+        }
     }
     out_Color = InBox ? vec4(1.0f) : vec4(0.5f);
 }
