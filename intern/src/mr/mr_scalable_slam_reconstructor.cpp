@@ -36,6 +36,8 @@
 
 #include <gl/glew.h>
 
+#include "graphic/gfx_native_buffer.h"
+
 using namespace MR;
 using namespace Gfx;
 
@@ -687,6 +689,7 @@ namespace MR
         
         const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         const unsigned int InstanceCount = static_cast<unsigned int>(m_RootVolumeMap.size());
+        ClearBuffer(m_AtomicCounterBufferPtr, InstanceCount);
         ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
 
         ContextManager::ResetShaderVS();
@@ -1616,17 +1619,23 @@ namespace MR
 
     void CScalableSLAMReconstructor::ClearBuffer(CBufferPtr BufferPtr, size_t Size)
     {
+        // todo: use glClearBufferSubData for better performance
         assert(Size > 0);
         assert(BufferPtr.IsValid());
+        
+        GLuint NativeBuffer = static_cast<CNativeBuffer*>(BufferPtr.GetPtr())->m_NativeBuffer;
+        GLuint Zero = 0;
+
+        /*glBindBuffer(GL_SHADER_STORAGE_BUFFER, NativeBuffer);
+        //glClearNamedBufferSubData(NativeBuffer, GL_R32UI, 0, Size * sizeof(uint32_t), GL_RED_INTEGER, GL_UNSIGNED_INT, &Zero);
+        glClearBufferSubData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, 0, Size * sizeof(uint32_t), GL_RED_INTEGER, GL_UNSIGNED_INT, &Zero);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);*/
         
         const int WorkGroups = static_cast<int>(Size);
 
         ContextManager::SetShaderCS(m_ClearAtomicCountersCSPtr);
-        
         ContextManager::SetResourceBuffer(0, BufferPtr);
-        
         ContextManager::Barrier();
-
         ContextManager::Dispatch(WorkGroups, 1, 1);
     }
 
