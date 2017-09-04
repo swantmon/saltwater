@@ -216,8 +216,7 @@ namespace MR
         std::vector<Gfx::CTexture2DPtr> m_ReferenceNormalMapPtr;
         std::vector<Gfx::CTexture2DPtr> m_RaycastVertexMapPtr;
         std::vector<Gfx::CTexture2DPtr> m_RaycastNormalMapPtr;
-
-
+        
         Gfx::CBufferPtr m_AtomicCounterBufferPtr;
 
 		CRootVolumeMap m_RootVolumeMap;

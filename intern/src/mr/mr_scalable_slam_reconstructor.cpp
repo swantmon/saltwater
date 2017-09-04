@@ -245,7 +245,7 @@ namespace MR
 
 		m_IsIntegrationPaused = false;
 		m_IsTrackingPaused = false;
-        ClearBuffer(m_PoolItemCountBufferPtr, sizeof(uint32_t) * m_ReconstructionSettings.GRID_LEVELS);
+        ClearBuffer(m_PoolItemCountBufferPtr, m_ReconstructionSettings.GRID_LEVELS);
     }
 
     // -----------------------------------------------------------------------------
@@ -661,7 +661,7 @@ namespace MR
 
     void CScalableSLAMReconstructor::RasterizeRootVolumes()
     {
-        TargetSetManager::ClearTargetSet(m_TargetSetPtr);
+        //TargetSetManager::ClearTargetSet(m_TargetSetPtr);
 
         ContextManager::SetViewPortSet(m_DepthViewPortSetPtr);
         ContextManager::SetTargetSet(m_TargetSetPtr);
@@ -794,7 +794,6 @@ namespace MR
             ContextManager::Barrier();
             //TargetSetManager::ClearTargetSet(m_TargetSetPtr);
 
-            ClearBuffer(m_VolumeAtomicCounterBufferPtr, 4096);
             RasterizeRootGrid(rRootVolume);
 
             ContextManager::SetVertexBufferSet(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
@@ -813,11 +812,9 @@ namespace MR
             ContextManager::SetShaderVS(m_RasterizeLevel1GridVSPtr);
             ContextManager::SetShaderPS(m_RasterizeLevel1GridFSPtr);
 
-            if (false)// (rRootVolume.m_Level1QueueSize > 0)
+            if (rRootVolume.m_Level1QueueSize > 0)
             {
                 RasterizeLevel1Grid(rRootVolume);
-                GatherGridCounters(rRootVolume.m_Level1QueueSize, m_VolumeAtomicCounterBufferPtr,
-                    rRootVolume.m_Level2QueuePtr, m_IndexedIndirectBufferPtr);
 
                 pIndirect = static_cast<SIndexedIndirect*>(BufferManager::MapConstantBuffer(m_IndexedIndirectBufferPtr, CBuffer::EMap::Read));
                 rRootVolume.m_Level2QueueSize = pIndirect->m_InstanceCount;
@@ -835,7 +832,7 @@ namespace MR
 
     void CScalableSLAMReconstructor::RasterizeRootGrid(SRootVolume& rRootGrid)
     {
-        TargetSetManager::ClearTargetSet(m_TargetSetPtr);
+        //TargetSetManager::ClearTargetSet(m_TargetSetPtr);
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
@@ -889,11 +886,18 @@ namespace MR
         BufferManager::UploadConstantBufferData(m_GridRasterizationBufferPtr, &GridData);
 
         int InstanceCount = rRootGrid.m_Level1QueueSize;
-
-        ClearBuffer(m_VolumeAtomicCounterBufferPtr, InstanceCount);
-
+        
         ContextManager::SetResourceBuffer(2, rRootGrid.m_Level1QueuePtr);
+        ContextManager::SetResourceBuffer(3, rRootGrid.m_Level2QueuePtr);
+        ContextManager::SetResourceBuffer(4, m_VolumeAtomicCounterBufferPtr);
+        ContextManager::SetResourceBuffer(5, m_IndexedIndirectBufferPtr);
 
+        SIndexedIndirect IndirectBufferData = {};
+        IndirectBufferData.m_IndexCount = 36;
+        BufferManager::UploadConstantBufferData(m_IndexedIndirectBufferPtr, &IndirectBufferData);
+
+        ClearBuffer(m_VolumeAtomicCounterBufferPtr, 128 * 128 * 128);
+        
         unsigned int Offset = 0;
         ContextManager::SetVertexBufferSet(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
         ContextManager::SetIndexBuffer(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
@@ -1204,13 +1208,16 @@ namespace MR
 
         ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
         ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 
-            m_ReconstructionSettings.m_VoxelsPerGrid[0] * 
-            m_ReconstructionSettings.m_VoxelsPerGrid[0];
+        ConstantBufferDesc.m_NumberOfBytes = m_ReconstructionSettings.m_GridResolutions[0] * m_ReconstructionSettings.m_GridResolutions[1];
+        ConstantBufferDesc.m_NumberOfBytes = ConstantBufferDesc.m_NumberOfBytes *
+                                             ConstantBufferDesc.m_NumberOfBytes *
+                                             ConstantBufferDesc.m_NumberOfBytes * sizeof(uint32_t);
         ConstantBufferDesc.m_pBytes = nullptr;
         ConstantBufferDesc.m_Usage = CBuffer::GPURead;
         m_VolumeAtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         m_VolumeQueueBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 2048;
+        m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
         ConstantBufferDesc.m_NumberOfBytes = 128u * 1024u * 1024u; // 128 MB
         m_RootVolumePoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
@@ -1610,7 +1617,8 @@ namespace MR
     void CScalableSLAMReconstructor::ClearBuffer(CBufferPtr BufferPtr, size_t Size)
     {
         assert(Size > 0);
-
+        assert(BufferPtr.IsValid());
+        
         const int WorkGroups = static_cast<int>(Size);
 
         ContextManager::SetShaderCS(m_ClearAtomicCountersCSPtr);
@@ -1640,7 +1648,7 @@ namespace MR
 		SetupBuffers();
 		SetupShaders();
 
-        ClearBuffer(m_PoolItemCountBufferPtr, sizeof(uint32_t) * m_ReconstructionSettings.GRID_LEVELS);
+        ClearBuffer(m_PoolItemCountBufferPtr, m_ReconstructionSettings.GRID_LEVELS);
     }
 
     const std::vector<float>& CScalableSLAMReconstructor::GetVolumeSizes() const
