@@ -985,7 +985,7 @@ namespace
 			RenderScalableVolume();
             RenderVertexMap();
 			RenderRootVolumes();
-            //RenderLevel1Grids();
+            RenderLevel1Grids();
             RenderLevel2Grids();
 		}
 		else

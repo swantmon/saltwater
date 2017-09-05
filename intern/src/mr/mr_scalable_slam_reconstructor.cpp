@@ -1625,9 +1625,9 @@ namespace MR
         assert(BufferPtr.IsValid());
         
         GLuint NativeBuffer = static_cast<CNativeBuffer*>(BufferPtr.GetPtr())->m_NativeBuffer;
-        GLint Zero[] = { 0, 0, 0, 0 };
 
-        glClearNamedBufferSubData(NativeBuffer, GL_R32UI, 0, Size * sizeof(uint32_t), GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
+        //glClearNamedBufferSubData(NativeBuffer, GL_R32UI, 0, Size * sizeof(uint32_t), GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
+        glClearNamedBufferData(NativeBuffer, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
     }
 
     // -----------------------------------------------------------------------------
