@@ -247,7 +247,7 @@ namespace MR
 
 		m_IsIntegrationPaused = false;
 		m_IsTrackingPaused = false;
-        //ClearBuffer(m_PoolItemCountBufferPtr, m_ReconstructionSettings.GRID_LEVELS);
+        ClearBuffer(m_PoolItemCountBufferPtr, m_ReconstructionSettings.GRID_LEVELS);
     }
 
     // -----------------------------------------------------------------------------
@@ -1645,10 +1645,10 @@ namespace MR
 		SetupData();
 
 		SetupTextures();
-		SetupBuffers();
+		//SetupBuffers(); // todo: find out why calling this method crashes the application
 		SetupShaders();
 
-        //ClearBuffer(m_PoolItemCountBufferPtr, m_ReconstructionSettings.GRID_LEVELS);
+        ClearBuffer(m_PoolItemCountBufferPtr, m_ReconstructionSettings.GRID_LEVELS);
     }
 
     const std::vector<float>& CScalableSLAMReconstructor::GetVolumeSizes() const
