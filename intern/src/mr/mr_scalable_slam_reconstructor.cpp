@@ -247,7 +247,7 @@ namespace MR
 
 		m_IsIntegrationPaused = false;
 		m_IsTrackingPaused = false;
-        ClearBuffer(m_PoolItemCountBufferPtr, m_ReconstructionSettings.GRID_LEVELS);
+        //ClearBuffer(m_PoolItemCountBufferPtr, m_ReconstructionSettings.GRID_LEVELS);
     }
 
     // -----------------------------------------------------------------------------
@@ -1009,6 +1009,8 @@ namespace MR
 
         Performance::BeginEvent("Check Root Volumes");
 
+        ContextManager::ResetShaderCS();
+
         RasterizeRootVolumes();
         GatherVolumeCounters(static_cast<unsigned int>(m_RootVolumeMap.size()), m_AtomicCounterBufferPtr, m_VolumeQueueBufferPtr, m_IndexedIndirectBufferPtr);
 
@@ -1228,7 +1230,7 @@ namespace MR
         ConstantBufferDesc.m_NumberOfBytes = 16u * 128u * 1024u * 1024u; // 2 GB;
         m_TSDFPoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * m_ReconstructionSettings.GRID_LEVELS;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 4;// m_ReconstructionSettings.GRID_LEVELS;
         m_PoolItemCountBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);        
     }
 
@@ -1619,24 +1621,13 @@ namespace MR
 
     void CScalableSLAMReconstructor::ClearBuffer(CBufferPtr BufferPtr, size_t Size)
     {
-        // todo: use glClearBufferSubData for better performance
         assert(Size > 0);
         assert(BufferPtr.IsValid());
         
         GLuint NativeBuffer = static_cast<CNativeBuffer*>(BufferPtr.GetPtr())->m_NativeBuffer;
-        GLuint Zero = 0;
+        GLint Zero[] = { 0, 0, 0, 0 };
 
-        /*glBindBuffer(GL_SHADER_STORAGE_BUFFER, NativeBuffer);
-        //glClearNamedBufferSubData(NativeBuffer, GL_R32UI, 0, Size * sizeof(uint32_t), GL_RED_INTEGER, GL_UNSIGNED_INT, &Zero);
-        glClearBufferSubData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, 0, Size * sizeof(uint32_t), GL_RED_INTEGER, GL_UNSIGNED_INT, &Zero);
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);*/
-        
-        const int WorkGroups = static_cast<int>(Size);
-
-        ContextManager::SetShaderCS(m_ClearAtomicCountersCSPtr);
-        ContextManager::SetResourceBuffer(0, BufferPtr);
-        ContextManager::Barrier();
-        ContextManager::Dispatch(WorkGroups, 1, 1);
+        glClearNamedBufferSubData(NativeBuffer, GL_R32UI, 0, Size * sizeof(uint32_t), GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
     }
 
     // -----------------------------------------------------------------------------
@@ -1657,7 +1648,7 @@ namespace MR
 		SetupBuffers();
 		SetupShaders();
 
-        ClearBuffer(m_PoolItemCountBufferPtr, m_ReconstructionSettings.GRID_LEVELS);
+        //ClearBuffer(m_PoolItemCountBufferPtr, m_ReconstructionSettings.GRID_LEVELS);
     }
 
     const std::vector<float>& CScalableSLAMReconstructor::GetVolumeSizes() const
