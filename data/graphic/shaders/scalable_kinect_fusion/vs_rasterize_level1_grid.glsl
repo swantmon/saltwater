@@ -50,7 +50,7 @@ void main()
     uint ParentIndex = g_VolumeID[gl_InstanceID];
     uint GridIndex = gl_VertexID / 8;
 
-    uint Level1Index = ParentIndex * 256 + GridIndex;
+    uint Level1Index = ParentIndex * 512 + GridIndex;
 
     vec3 ParentOffset = IndexToOffset(ParentIndex, 16) * g_ParentSize;
 
