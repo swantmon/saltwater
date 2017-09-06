@@ -788,7 +788,7 @@ namespace MR
             }
 
             ////////////////////////////////////////////////////////////////////////////////////////////////
-            // Integrate into level 0 grid
+            // Integrate into level 1 grid
             ////////////////////////////////////////////////////////////////////////////////////////////////
 
             ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
@@ -874,7 +874,7 @@ namespace MR
     void CScalableSLAMReconstructor::RasterizeLevel1Grid(SRootVolume& rRootGrid)
     {
         TargetSetManager::ClearTargetSet(m_TargetSetPtr);
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);        
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
         glDisable(GL_DEPTH_TEST);
