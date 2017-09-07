@@ -980,6 +980,11 @@ namespace
         //Base::Float4 ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         //TargetSetManager::ClearTargetSet(TargetSetManager::GetDeferredTargetSet(), ClearColor);
 
+        if (!m_UseTrackingCamera)
+        {
+            RenderCamera();
+        }
+
 		if (m_pScalableReconstructor != nullptr)
 		{
 			RenderScalableVolume();
@@ -992,11 +997,6 @@ namespace
 		{
 			RenderVolume();
 		}
-
-        if (!m_UseTrackingCamera)
-        {
-            RenderCamera();
-        }
         
         Performance::EndEvent();
     }
