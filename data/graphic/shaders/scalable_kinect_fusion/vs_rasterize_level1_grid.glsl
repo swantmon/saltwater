@@ -53,7 +53,7 @@ void main()
     uint Level1Index = ParentIndex * 512 + GridIndex;
 
     vec3 ParentOffset = IndexToOffset(ParentIndex, 16) * g_ParentSize;
-
+    
     vec4 Vertex = vec4(g_Offset * VOLUME_SIZE, 1.0f);
     Vertex.xyz += (in_VertexPosition * g_CubeSize) + ParentOffset;
 

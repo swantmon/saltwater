@@ -29,7 +29,15 @@ out gl_PerVertex
 
 void main()
 {
-    vec3 Offset = IndexToOffset(g_VolumeID[gl_InstanceID], 16 * 8);
+    uint VolumeID = g_VolumeID[gl_InstanceID];
+    uint ParentIndex = VolumeID / 512;
+    uint ChildIndex = VolumeID % 512;
+
+    vec3 ParentOffset = IndexToOffset(ParentIndex, 16);
+    vec3 ChildOffset = IndexToOffset(ChildIndex, 8);
+
+    vec3 Offset = ParentOffset * (0.004 * 8 * 8) + ChildOffset * (0.004 * 8);
+    
     vec4 WSPosition = g_WorldMatrix * vec4(in_VertexPosition + Offset, 1.0f);
     gl_Position = g_WorldToScreen * WSPosition;
 }
