@@ -53,6 +53,7 @@ void main()
     uint Level1Index = ParentIndex * 512 + GridIndex;
 
     vec3 ParentOffset = IndexToOffset(ParentIndex, 16) * g_ParentSize;
+    vec3 GridOffset = IndexToOffset(GridIndex, 8) * g_CubeSize;
     
     vec4 Vertex = vec4(g_Offset * VOLUME_SIZE, 1.0f);
     Vertex.xyz += (in_VertexPosition * g_CubeSize) + ParentOffset;
@@ -62,7 +63,7 @@ void main()
 	Vertex.xy = Vertex.xy / vec2(DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT) * 2.0f - 1.0f;
     Vertex.z = 1.0f;//Vertex.z / (8.0f + VOLUME_SIZE);
 
-    vec3 AABBPosition = g_Offset * VOLUME_SIZE + ParentOffset;
+    vec3 AABBPosition = g_Offset * VOLUME_SIZE + ParentOffset + GridOffset;
     
     out_AABBMin = AABBPosition;
     out_AABBMax = AABBPosition + g_CubeSize;
