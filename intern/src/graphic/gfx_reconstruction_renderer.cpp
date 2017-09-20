@@ -862,7 +862,6 @@ namespace
         ContextManager::SetTopology(STopology::LineList);
 
         Float3 Position;
-        Float4x4 Scaling;
         Float4x4 Translation;
 
         const auto& VolumeSizes = m_pScalableReconstructor->GetVolumeSizes();
@@ -879,10 +878,9 @@ namespace
 
                 Position = Position * VolumeSizes[0];
 
-                Scaling.SetScale(VolumeSizes[2]);
                 Translation.SetTranslation(Position);
 
-                BufferData.m_WorldMatrix = Translation * Scaling;
+                BufferData.m_WorldMatrix = Translation;
                 BufferData.m_Color = Float4(0.0f, 0.0f, 1.0f, 1.0f);
 
                 BufferManager::UploadConstantBufferData(m_DrawCallConstantBufferPtr, &BufferData);

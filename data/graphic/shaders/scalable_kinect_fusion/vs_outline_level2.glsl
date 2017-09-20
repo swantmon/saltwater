@@ -37,8 +37,8 @@ void main()
     vec3 ChildOffset = IndexToOffset(ChildIndex, 8);
 
     vec3 Offset = ParentOffset * (0.004 * 8 * 8) + ChildOffset * (0.004 * 8);
-    
-    vec4 WSPosition = g_WorldMatrix * vec4(in_VertexPosition + Offset, 1.0f);
+
+    vec4 WSPosition = g_WorldMatrix * vec4(in_VertexPosition * 0.004 * 8 + Offset, 1.0f);
     gl_Position = g_WorldToScreen * WSPosition;
 }
 
