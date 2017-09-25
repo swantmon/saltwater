@@ -85,8 +85,8 @@ void main()
 
     if (InBox)
     {
-        uint Count = atomicAdd(g_Counters[in_Index], 1);
-        if (Count == 1)
+        uint Count = atomicCompSwap(g_Counters[in_Index], 0, 1);
+        if (Count == 0)
         {
             uint Index = atomicAdd(g_Indirect.m_InstanceCount, 1);
             g_VolumeID[Index] = in_Index;
