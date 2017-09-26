@@ -397,6 +397,7 @@ namespace MR
 		);
 		m_PoseMatrix = PoseTranslation * PoseRotation;
 
+        m_RootVolumePoolItemCount = 0;
 		m_IntegratedFrameCount = 0;
 		m_FrameCount = 0;
 		m_TrackingLost = true;
@@ -845,7 +846,7 @@ namespace MR
 
             if (rRootVolume.m_PoolIndex == -1)
             {
-
+                rRootVolume.m_PoolIndex = m_RootVolumePoolItemCount ++;
             }
 
             Performance::EndEvent();

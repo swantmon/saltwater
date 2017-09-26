@@ -232,6 +232,8 @@ namespace MR
         std::vector<unsigned short> m_DepthPixels;
         std::vector<Base::Byte4> m_CameraPixels;
 
+        int m_RootVolumePoolItemCount;
+
         int m_IntegratedFrameCount;
         int m_FrameCount;
 
