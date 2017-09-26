@@ -736,7 +736,7 @@ namespace MR
 
 	// -----------------------------------------------------------------------------
     
-    void CScalableSLAMReconstructor::IntegrateRootVolumes(std::vector<uint32_t>& rVolumeQueue)
+    void CScalableSLAMReconstructor::CreateIntegrationQueues(std::vector<uint32_t>& rVolumeQueue)
     {
         ////////////////////////////////////////////////////////////////////////////////
         // Prepare pipeline
@@ -1037,7 +1037,7 @@ namespace MR
             memcpy(VolumeQueue.data(), pVoxelQueue, sizeof(uint32_t) * VolumeCount);
             BufferManager::UnmapConstantBuffer(m_VolumeQueueBufferPtr);
             
-            IntegrateRootVolumes(VolumeQueue);
+            CreateIntegrationQueues(VolumeQueue);
         }
 	}
 
@@ -1239,7 +1239,7 @@ namespace MR
     void CScalableSLAMReconstructor::Update()
     {
         const bool CaptureColor = m_ReconstructionSettings.m_CaptureColor;
-
+        
         unsigned short* pDepth = m_DepthPixels.data();
         Base::Byte4* pColor = m_CameraPixels.data();
 

@@ -110,7 +110,7 @@ namespace MR
 		bool RootGridInFrustum(const Base::Int3& rKey);
 
 		void UpdateRootrids();
-        void IntegrateRootVolumes(std::vector<uint32_t>& rVolumeQueue);
+        void CreateIntegrationQueues(std::vector<uint32_t>& rVolumeQueue);
 
         void RasterizeRootGrid(SRootVolume& rRootGrid);
         void RasterizeLevel1Grid(SRootVolume& rRootGrid);
