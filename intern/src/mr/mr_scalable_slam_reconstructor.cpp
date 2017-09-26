@@ -183,53 +183,6 @@ namespace MR
     
     // -----------------------------------------------------------------------------
 
-    CScalableSLAMReconstructor::CScalableSLAMReconstructor(const SReconstructionSettings* pReconstructionSettings)
-    {
-        if (pReconstructionSettings != nullptr)
-        {
-			assert(pReconstructionSettings->m_IsScalable);
-            m_ReconstructionSettings = *pReconstructionSettings;
-        }
-        Start();
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CScalableSLAMReconstructor::~CScalableSLAMReconstructor()
-    {
-        Exit();
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    bool CScalableSLAMReconstructor::IsTrackingLost() const
-    {
-        return !m_IsTrackingPaused && m_TrackingLost;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Float4x4 CScalableSLAMReconstructor::GetPoseMatrix() const
-    {
-        return m_PoseMatrix;
-    }
-
-    // -----------------------------------------------------------------------------
-
-	CScalableSLAMReconstructor::CRootVolumeMap& CScalableSLAMReconstructor::GetRootVolumeMap()
-    {
-        return m_RootVolumeMap;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CScalableSLAMReconstructor::CRootVolumeVector& CScalableSLAMReconstructor::GetRootVolumeVector()
-    {
-        return m_RootVolumeVector;
-    }
-
-    // -----------------------------------------------------------------------------
-
     void CScalableSLAMReconstructor::Start()
     {
         m_pRGBDCameraControl.reset(new MR::CKinectControl);
@@ -1674,6 +1627,55 @@ namespace MR
 
         ClearBuffer(m_PoolItemCountBufferPtr, m_ReconstructionSettings.GRID_LEVELS);
     }
+
+    // -----------------------------------------------------------------------------
+
+    CScalableSLAMReconstructor::CScalableSLAMReconstructor(const SReconstructionSettings* pReconstructionSettings)
+    {
+        if (pReconstructionSettings != nullptr)
+        {
+            assert(pReconstructionSettings->m_IsScalable);
+            m_ReconstructionSettings = *pReconstructionSettings;
+        }
+        Start();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CScalableSLAMReconstructor::~CScalableSLAMReconstructor()
+    {
+        Exit();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CScalableSLAMReconstructor::IsTrackingLost() const
+    {
+        return !m_IsTrackingPaused && m_TrackingLost;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Float4x4 CScalableSLAMReconstructor::GetPoseMatrix() const
+    {
+        return m_PoseMatrix;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CScalableSLAMReconstructor::CRootVolumeMap& CScalableSLAMReconstructor::GetRootVolumeMap()
+    {
+        return m_RootVolumeMap;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CScalableSLAMReconstructor::CRootVolumeVector& CScalableSLAMReconstructor::GetRootVolumeVector()
+    {
+        return m_RootVolumeVector;
+    }
+
+    // -----------------------------------------------------------------------------
 
     const std::vector<float>& CScalableSLAMReconstructor::GetVolumeSizes() const
     {
