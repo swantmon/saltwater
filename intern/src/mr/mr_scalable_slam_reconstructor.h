@@ -66,7 +66,7 @@ namespace MR
 		{
             Base::Int3 m_Offset;
             bool m_IsVisible;
-            unsigned int m_PoolIndex;
+            int m_PoolIndex;
             Gfx::CBufferPtr m_Level1QueuePtr;
             Gfx::CBufferPtr m_Level2QueuePtr;
             int m_Level1QueueSize;
@@ -111,6 +111,7 @@ namespace MR
 
 		void UpdateRootrids();
         void CreateIntegrationQueues(std::vector<uint32_t>& rVolumeQueue);
+        void IntegrateHierarchies(std::vector<uint32_t>& rVolumeQueue);
 
         void RasterizeRootGrid(SRootVolume& rRootGrid);
         void RasterizeLevel1Grid(SRootVolume& rRootGrid);

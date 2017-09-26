@@ -833,6 +833,27 @@ namespace MR
     
     // -----------------------------------------------------------------------------
 
+    void CScalableSLAMReconstructor::IntegrateHierarchies(std::vector<uint32_t>& rVolumeQueue)
+    {
+        for (uint32_t VolumeIndex : rVolumeQueue)
+        {
+            Performance::BeginEvent("Integrate into hierarchy");
+
+            assert(m_RootVolumeVector[VolumeIndex] != nullptr);
+
+            auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
+
+            if (rRootVolume.m_PoolIndex == -1)
+            {
+
+            }
+
+            Performance::EndEvent();
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CScalableSLAMReconstructor::RasterizeRootGrid(SRootVolume& rRootGrid)
     {
         //TargetSetManager::ClearTargetSet(m_TargetSetPtr);
@@ -942,6 +963,7 @@ namespace MR
 		}
 
 		SRootVolume RootVolume;
+        RootVolume.m_PoolIndex = -1;
 
 		for (int x = MinIndex[0] - 1; x <= MaxIndex[0]; ++ x)
 		{
@@ -1038,6 +1060,7 @@ namespace MR
             BufferManager::UnmapConstantBuffer(m_VolumeQueueBufferPtr);
             
             CreateIntegrationQueues(VolumeQueue);
+            IntegrateHierarchies(VolumeQueue);
         }
 	}
 
