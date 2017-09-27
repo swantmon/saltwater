@@ -159,7 +159,6 @@ namespace
     struct SVolumePoolItem
     {
         Base::Int3 m_Offset;
-        int m_PoolIndex;
         bool m_NearSurface;
     };
 
@@ -801,6 +800,14 @@ namespace MR
             if (rRootVolume.m_PoolIndex == -1)
             {
                 rRootVolume.m_PoolIndex = m_RootVolumePoolItemCount ++;
+
+                int Range = sizeof(SVolumePoolItem);
+                int Offset = rRootVolume.m_PoolIndex * sizeof(SVolumePoolItem);
+
+                SVolumePoolItem* pItem = static_cast<SVolumePoolItem*>(BufferManager::MapConstantBufferRange(m_RootVolumePoolPtr, CBuffer::WriteDiscard, Offset, Range));
+                pItem->m_NearSurface = false;
+                pItem->m_Offset = rRootVolume.m_Offset;
+                BufferManager::UnmapConstantBuffer(m_RootVolumePoolPtr);
             }
 
             Performance::EndEvent();

@@ -5,7 +5,6 @@
 struct SVolumePoolItem
 {
     ivec3 m_Offset;
-    int m_PoolIndex;
     bool m_NearSurface;
 };
 
@@ -13,6 +12,27 @@ struct SGridPoolItem
 {
     int m_PoolIndex;
     bool m_NearSurface;
+};
+
+layout(std430, binding = 0) buffer RootVolumePool
+{
+    int g_CurrentVolumeIndex;
+    SVolumePoolItem g_RootVolumePool[];
+};
+
+layout(std430, binding = 1) buffer RootGridPool
+{
+    SGridPoolItem g_RootGridPool[];
+};
+
+layout(std430, binding = 2) buffer Level1Pool
+{
+    SGridPoolItem g_Level1GridPool[];
+};
+
+layout(std430, binding = 3) buffer TSDFPool
+{
+    uint g_TSDFPool; // two 16 bit floats packed with packUnorm2x16
 };
 
 vec3 IndexToOffset(uint Index, int Resolution)
