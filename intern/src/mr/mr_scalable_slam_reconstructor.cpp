@@ -803,6 +803,7 @@ namespace MR
 
                 int Range = sizeof(SVolumePoolItem);
                 int Offset = rRootVolume.m_PoolIndex * sizeof(SVolumePoolItem);
+                Offset += sizeof(uint32_t); // the first 4 bytes contain the index of the current volume
 
                 SVolumePoolItem* pItem = static_cast<SVolumePoolItem*>(BufferManager::MapConstantBufferRange(m_RootVolumePoolPtr, CBuffer::WriteDiscard, Offset, Range));
                 pItem->m_NearSurface = false;
