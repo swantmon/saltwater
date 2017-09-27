@@ -797,7 +797,11 @@ namespace MR
 
             auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
-            if (rRootVolume.m_PoolIndex == -1)
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+            // Assign GPU memory to volume when necessary
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+
+            if (rRootVolume.m_PoolIndex == -1) // Allocate pool memory for volume
             {
                 rRootVolume.m_PoolIndex = m_RootVolumePoolItemCount ++;
 
@@ -810,6 +814,14 @@ namespace MR
                 pItem->m_Offset = rRootVolume.m_Offset;
                 BufferManager::UnmapConstantBuffer(m_RootVolumePoolPtr);
             }
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+            // Fill root grid
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+
+            uint32_t* pIndex = static_cast<uint32_t*>(BufferManager::MapConstantBufferRange(m_RootVolumePoolPtr, CBuffer::WriteDiscard, 0, sizeof(uint32_t)));
+            *pIndex = rRootVolume.m_PoolIndex;
+            BufferManager::UnmapConstantBuffer(m_RootVolumePoolPtr);
 
             Performance::EndEvent();
         }
