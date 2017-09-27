@@ -2,6 +2,19 @@
 #ifndef __INCLUDE_SCALABLE_COMMON_GLSL__
 #define __INCLUDE_SCALABLE_COMMON_GLSL__
 
+struct SVolumePoolItem
+{
+    ivec3 m_Offset;
+    int m_PoolIndex;
+    bool m_NearSurface;
+};
+
+struct SGridPoolItem
+{
+    int m_PoolIndex;
+    bool m_NearSurface;
+};
+
 vec3 IndexToOffset(uint Index, int Resolution)
 {
     uint z = Index / (Resolution * Resolution);
