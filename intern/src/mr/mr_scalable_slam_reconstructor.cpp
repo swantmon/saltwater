@@ -486,6 +486,7 @@ namespace MR
         m_VolumeQueueBufferPtr = 0;
         m_RootVolumeInstanceBufferPtr = 0;
         m_RootVolumePoolPtr = 0;
+        m_RootGridPoolPtr = 0;
         m_Level1PoolPtr = 0;
         m_TSDFPoolPtr = 0;
         m_PoolItemCountBufferPtr = 0;
@@ -703,7 +704,7 @@ namespace MR
         ContextManager::SetVertexBufferSet(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
         ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
         ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
-
+        
         ContextManager::SetTopology(STopology::TriangleList);
 
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -1201,13 +1202,15 @@ namespace MR
         ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 2048;
         m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
-        ConstantBufferDesc.m_NumberOfBytes = 128u * 1024u * 1024u; // 128 MB
+        ConstantBufferDesc.m_NumberOfBytes = 1024u * 1024u; // 1 MB
         m_RootVolumePoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        ConstantBufferDesc.m_NumberOfBytes = 128u * 1024u * 1024u; // 128 MB
+        m_RootGridPoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         m_Level1PoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         ConstantBufferDesc.m_NumberOfBytes = 16u * 128u * 1024u * 1024u; // 2 GB;
         m_TSDFPoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 4;// m_ReconstructionSettings.GRID_LEVELS;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 4;// m_ReconstructionSettings.GRID_LEVELS + 1;
         m_PoolItemCountBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);        
     }
 

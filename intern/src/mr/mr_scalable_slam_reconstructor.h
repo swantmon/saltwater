@@ -173,9 +173,10 @@ namespace MR
 
         Gfx::CBufferPtr m_GridRasterizationBufferPtr;
 
-        Gfx::CBufferPtr m_RootVolumePoolPtr;
-        Gfx::CBufferPtr m_Level1PoolPtr;
-        Gfx::CBufferPtr m_TSDFPoolPtr;
+        Gfx::CBufferPtr m_RootVolumePoolPtr;       // Individual Volumes
+        Gfx::CBufferPtr m_RootGridPoolPtr;         // Highest level grids (16x16x16)
+        Gfx::CBufferPtr m_Level1PoolPtr;           // Internal Grid       ( 8x 8x 8)
+        Gfx::CBufferPtr m_TSDFPoolPtr;             // TSDF Data           ( 8x 8x 8)
         Gfx::CBufferPtr m_PoolItemCountBufferPtr;
 
         Gfx::CShaderPtr m_ClearVolumeCSPtr;
