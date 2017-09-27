@@ -35,6 +35,13 @@ layout(std430, binding = 3) buffer TSDFPool
     uint g_TSDFPool; // two 16 bit floats packed with packUnorm2x16
 };
 
+layout(std430, binding = 4) buffer PoolItemCounts
+{
+    uint g_RootGridPoolItemCount;
+    uint g_Level1GridPoolItemCount;
+    uint g_TSDFPoolItemCount;
+};
+
 vec3 IndexToOffset(uint Index, int Resolution)
 {
     uint z = Index / (Resolution * Resolution);
