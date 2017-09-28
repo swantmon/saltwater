@@ -796,8 +796,6 @@ namespace MR
     {
         for (uint32_t VolumeIndex : rVolumeQueue)
         {
-            Performance::BeginEvent("Integrate into hierarchy");
-
             assert(m_RootVolumeVector[VolumeIndex] != nullptr);
 
             auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
@@ -823,15 +821,74 @@ namespace MR
                 *pCount = m_RootVolumePoolItemCount;
                 BufferManager::UnmapConstantBuffer(m_PoolItemCountBufferPtr);
             }
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+        // Fill root grids
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+
+        for (uint32_t VolumeIndex : rVolumeQueue)
+        {
+            Performance::BeginEvent("Fill root grids");
+            
+            auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
             ////////////////////////////////////////////////////////////////////////////////////////////////
-            // Fill root grid
+            // Set current item index
             ////////////////////////////////////////////////////////////////////////////////////////////////
 
             uint32_t* pIndex = static_cast<uint32_t*>(BufferManager::MapConstantBufferRange(m_RootVolumePoolPtr, CBuffer::WriteDiscard, 0, sizeof(uint32_t)));
             *pIndex = rRootVolume.m_PoolIndex;
             BufferManager::UnmapConstantBuffer(m_RootVolumePoolPtr);
-            
+
+
+
+            Performance::EndEvent();
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+        // Fill intenal grids
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+
+        for (uint32_t VolumeIndex : rVolumeQueue)
+        {
+            Performance::BeginEvent("Fill internal grids");
+
+            auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+            // Set current item index
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+
+            uint32_t* pIndex = static_cast<uint32_t*>(BufferManager::MapConstantBufferRange(m_RootVolumePoolPtr, CBuffer::WriteDiscard, 0, sizeof(uint32_t)));
+            *pIndex = rRootVolume.m_PoolIndex;
+            BufferManager::UnmapConstantBuffer(m_RootVolumePoolPtr);
+
+
+
+            Performance::EndEvent();
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+        // Compute new TSDF values
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+
+        for (uint32_t VolumeIndex : rVolumeQueue)
+        {
+            Performance::BeginEvent("Compute new TSDF");
+
+            auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+            // Set current item index
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+
+            uint32_t* pIndex = static_cast<uint32_t*>(BufferManager::MapConstantBufferRange(m_RootVolumePoolPtr, CBuffer::WriteDiscard, 0, sizeof(uint32_t)));
+            *pIndex = rRootVolume.m_PoolIndex;
+            BufferManager::UnmapConstantBuffer(m_RootVolumePoolPtr);
+
+
+
             Performance::EndEvent();
         }
     }
