@@ -53,6 +53,11 @@ namespace
 	const Base::Float3 g_InitialCameraRotation = Base::Float3(0.0f, 0.0f, 0.0f);
 	//*/
     
+    const unsigned int g_RootVolumePoolSize =              1024u * 1024u; //    1 MB
+    const unsigned int g_RootGridPoolSize   =       128u * 1024u * 1024u; //  128 MB
+    const unsigned int g_Level1GridPoolSize =       128u * 1024u * 1024u; //  128 MB
+    const unsigned int g_TSDFPoolSize       = 16u * 128u * 1024u * 1024u; // 2048 GB;
+    
     const float g_EpsilonDistance = 0.1f;
     const float g_EpsilonAngle = 0.75f;
     
@@ -1293,15 +1298,16 @@ namespace MR
         ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 2048;
         m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
-        ConstantBufferDesc.m_NumberOfBytes = 1024u * 1024u; // 1 MB
+        ConstantBufferDesc.m_NumberOfBytes = g_RootVolumePoolSize;
         m_RootVolumePoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-        ConstantBufferDesc.m_NumberOfBytes = 128u * 1024u * 1024u; // 128 MB
+        ConstantBufferDesc.m_NumberOfBytes = g_RootGridPoolSize;
         m_RootGridPoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        ConstantBufferDesc.m_NumberOfBytes = g_Level1GridPoolSize;
         m_Level1PoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-        ConstantBufferDesc.m_NumberOfBytes = 16u * 128u * 1024u * 1024u; // 2 GB;
-        m_TSDFPoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        ConstantBufferDesc.m_NumberOfBytes = g_TSDFPoolSize;
+        m_TSDFPoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);   
 
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 4;// m_ReconstructionSettings.GRID_LEVELS + 1;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 4;// m_ReconstructionSettings.GRID_LEVELS + current index;
         m_PoolItemCountBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);        
     }
 
