@@ -178,7 +178,7 @@ namespace MR
         Gfx::CBufferPtr m_Level1PoolPtr;           // Internal Grid       ( 8x 8x 8)
         Gfx::CBufferPtr m_TSDFPoolPtr;             // TSDF Data           ( 8x 8x 8)
         Gfx::CBufferPtr m_PoolItemCountBufferPtr;
-        Gfx::CBufferPtr m_PerVolumeQueueBufferPtr;
+        Gfx::CBufferPtr m_VolumeQueueSizesBufferPtr;
 
         Gfx::CShaderPtr m_ClearVolumeCSPtr;
         Gfx::CShaderPtr m_BilateralFilterCSPtr;

@@ -852,7 +852,7 @@ namespace MR
             uint32_t* pIndex = static_cast<uint32_t*>(BufferManager::MapConstantBuffer(m_VolumeQueueSizesBufferPtr, CBuffer::WriteDiscard));
             *pIndex = rRootVolume.m_PoolIndex;
             *(pIndex + 1) = rRootVolume.m_Level1QueueSize;
-            *(pIndex + 1) = rRootVolume.m_Level2QueueSize;
+            *(pIndex + 2) = rRootVolume.m_Level2QueueSize;
             BufferManager::UnmapConstantBuffer(m_VolumeQueueSizesBufferPtr);
 
             ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -884,7 +884,7 @@ namespace MR
             uint32_t* pIndex = static_cast<uint32_t*>(BufferManager::MapConstantBuffer(m_VolumeQueueSizesBufferPtr, CBuffer::WriteDiscard));
             *pIndex = rRootVolume.m_PoolIndex;
             *(pIndex + 1) = rRootVolume.m_Level1QueueSize;
-            *(pIndex + 1) = rRootVolume.m_Level2QueueSize;
+            *(pIndex + 2) = rRootVolume.m_Level2QueueSize;
             BufferManager::UnmapConstantBuffer(m_VolumeQueueSizesBufferPtr);
 
             ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -913,7 +913,7 @@ namespace MR
             uint32_t* pIndex = static_cast<uint32_t*>(BufferManager::MapConstantBuffer(m_VolumeQueueSizesBufferPtr, CBuffer::WriteDiscard));
             *pIndex = rRootVolume.m_PoolIndex;
             *(pIndex + 1) = rRootVolume.m_Level1QueueSize;
-            *(pIndex + 1) = rRootVolume.m_Level2QueueSize;
+            *(pIndex + 2) = rRootVolume.m_Level2QueueSize;
             BufferManager::UnmapConstantBuffer(m_VolumeQueueSizesBufferPtr);
 
             ////////////////////////////////////////////////////////////////////////////////////////////////
