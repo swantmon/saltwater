@@ -1,6 +1,6 @@
 
-#ifndef __INCLUDE_CS_KINECT_INTEGRATE_GLSL__
-#define __INCLUDE_CS_KINECT_INTEGRATE_GLSL__
+#ifndef __INCLUDE_CS_KINECT_INTEGRATE_TSDF_GLSL__
+#define __INCLUDE_CS_KINECT_INTEGRATE_TSDF_GLSL__
 
 #include "scalable_kinect_fusion/common_tracking.glsl"
 
@@ -86,4 +86,4 @@ void main()
     }
 }
 
-#endif // __INCLUDE_CS_KINECT_INTEGRATE_GLSL__
+#endif // __INCLUDE_CS_KINECT_INTEGRATE_TSDF_GLSL__
