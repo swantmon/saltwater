@@ -52,8 +52,8 @@ layout(std430, binding = 4) buffer PoolItemCounts
 layout(std430, binding = 5) buffer VolumeQueueSizes
 {
     uint g_CurrentVolumeIndex;
-    uint g_Level1Queue;
-    uint g_Level2Queue;
+    uint g_Level1QueueSize;
+    uint g_Level2QueueSize;
 };
 
 ////////////////////////////////////////////////////////////////////////
