@@ -63,7 +63,7 @@ namespace
     
     const int g_ICPValueCount = 27;
 
-    const unsigned int g_TileSize1D = 512;
+    const unsigned int g_TileSize1D = 64;
     const unsigned int g_TileSize2D = 16;
     const unsigned int g_TileSize3D = 8;
 
@@ -851,7 +851,7 @@ namespace MR
             *pIndex = rRootVolume.m_PoolIndex;
             BufferManager::UnmapConstantBuffer(m_PoolItemCountBufferPtr);
 
-
+            ContextManager::SetShaderCS(m_IntegrateRootGridCSPtr);
 
             Performance::EndEvent();
         }
@@ -874,7 +874,7 @@ namespace MR
             *pIndex = rRootVolume.m_PoolIndex;
             BufferManager::UnmapConstantBuffer(m_PoolItemCountBufferPtr);
 
-
+            ContextManager::SetShaderCS(m_IntegrateLevel1GridCSPtr);
 
             Performance::EndEvent();
         }
@@ -897,7 +897,7 @@ namespace MR
             *pIndex = rRootVolume.m_PoolIndex;
             BufferManager::UnmapConstantBuffer(m_PoolItemCountBufferPtr);
 
-
+            ContextManager::SetShaderCS(m_IntegrateTSDFCSPtr);
 
             Performance::EndEvent();
         }
