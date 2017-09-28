@@ -810,7 +810,6 @@ namespace MR
 
                 int Range = sizeof(SVolumePoolItem);
                 int Offset = rRootVolume.m_PoolIndex * sizeof(SVolumePoolItem);
-                Offset += sizeof(uint32_t); // the first 4 bytes contain the index of the current volume
 
                 SVolumePoolItem* pItem = static_cast<SVolumePoolItem*>(BufferManager::MapConstantBufferRange(m_RootVolumePoolPtr, CBuffer::WriteDiscard, Offset, Range));
                 pItem->m_NearSurface = false;
@@ -837,9 +836,9 @@ namespace MR
             // Set current item index
             ////////////////////////////////////////////////////////////////////////////////////////////////
 
-            uint32_t* pIndex = static_cast<uint32_t*>(BufferManager::MapConstantBufferRange(m_RootVolumePoolPtr, CBuffer::WriteDiscard, 0, sizeof(uint32_t)));
+            uint32_t* pIndex = static_cast<uint32_t*>(BufferManager::MapConstantBufferRange(m_PoolItemCountBufferPtr, CBuffer::WriteDiscard, 0, sizeof(uint32_t)));
             *pIndex = rRootVolume.m_PoolIndex;
-            BufferManager::UnmapConstantBuffer(m_RootVolumePoolPtr);
+            BufferManager::UnmapConstantBuffer(m_PoolItemCountBufferPtr);
 
 
 
@@ -860,9 +859,9 @@ namespace MR
             // Set current item index
             ////////////////////////////////////////////////////////////////////////////////////////////////
 
-            uint32_t* pIndex = static_cast<uint32_t*>(BufferManager::MapConstantBufferRange(m_RootVolumePoolPtr, CBuffer::WriteDiscard, 0, sizeof(uint32_t)));
+            uint32_t* pIndex = static_cast<uint32_t*>(BufferManager::MapConstantBufferRange(m_PoolItemCountBufferPtr, CBuffer::WriteDiscard, 0, sizeof(uint32_t)));
             *pIndex = rRootVolume.m_PoolIndex;
-            BufferManager::UnmapConstantBuffer(m_RootVolumePoolPtr);
+            BufferManager::UnmapConstantBuffer(m_PoolItemCountBufferPtr);
 
 
 
@@ -883,9 +882,9 @@ namespace MR
             // Set current item index
             ////////////////////////////////////////////////////////////////////////////////////////////////
 
-            uint32_t* pIndex = static_cast<uint32_t*>(BufferManager::MapConstantBufferRange(m_RootVolumePoolPtr, CBuffer::WriteDiscard, 0, sizeof(uint32_t)));
+            uint32_t* pIndex = static_cast<uint32_t*>(BufferManager::MapConstantBufferRange(m_PoolItemCountBufferPtr, CBuffer::WriteDiscard, 0, sizeof(uint32_t)));
             *pIndex = rRootVolume.m_PoolIndex;
-            BufferManager::UnmapConstantBuffer(m_RootVolumePoolPtr);
+            BufferManager::UnmapConstantBuffer(m_PoolItemCountBufferPtr);
 
 
 
