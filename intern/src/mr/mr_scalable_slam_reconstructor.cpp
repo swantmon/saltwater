@@ -861,6 +861,8 @@ namespace MR
 
             ContextManager::SetShaderCS(m_IntegrateRootGridCSPtr);
 
+            ContextManager::SetResourceBuffer(6, rRootVolume.m_Level1QueuePtr);
+
             int WorkGroupCount = GetWorkGroupCount(rRootVolume.m_Level1QueueSize, g_TileSize1D);
             ContextManager::Dispatch(WorkGroupCount, 1, 1);
 
