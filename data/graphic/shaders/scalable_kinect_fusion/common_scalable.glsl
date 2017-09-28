@@ -44,10 +44,16 @@ layout(std430, binding = 3) buffer TSDFPool
 
 layout(std430, binding = 4) buffer PoolItemCounts
 {
-    int g_CurrentVolumeIndex;
     uint g_RootGridPoolItemCount;
     uint g_Level1GridPoolItemCount;
     uint g_TSDFPoolItemCount;
+};
+
+layout(std430, binding = 5) buffer VolumeQueueSizes
+{
+    uint g_CurrentVolumeIndex;
+    uint g_Level1Queue;
+    uint g_Level2Queue;
 };
 
 ////////////////////////////////////////////////////////////////////////

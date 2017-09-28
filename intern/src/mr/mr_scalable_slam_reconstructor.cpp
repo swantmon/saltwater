@@ -497,6 +497,7 @@ namespace MR
         m_Level1PoolPtr = 0;
         m_TSDFPoolPtr = 0;
         m_PoolItemCountBufferPtr = 0;
+        m_VolumeQueueSizesBufferPtr = 0;
     }
     
     // -----------------------------------------------------------------------------
@@ -831,7 +832,8 @@ namespace MR
         ContextManager::SetResourceBuffer(1, m_RootGridPoolPtr);
         ContextManager::SetResourceBuffer(2, m_Level1PoolPtr);
         ContextManager::SetResourceBuffer(3, m_TSDFPoolPtr);
-        ContextManager::SetResourceBuffer(4, m_PoolItemCountBufferPtr);
+        ContextManager::SetResourceBuffer(4, m_PoolItemCountBufferPtr); 
+        ContextManager::SetResourceBuffer(5, m_VolumeQueueSizesBufferPtr);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
         // Fill root grids
@@ -844,14 +846,23 @@ namespace MR
             auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
             ////////////////////////////////////////////////////////////////////////////////////////////////
-            // Set current item index
+            // Set current volume
             ////////////////////////////////////////////////////////////////////////////////////////////////
 
-            uint32_t* pIndex = static_cast<uint32_t*>(BufferManager::MapConstantBufferRange(m_PoolItemCountBufferPtr, CBuffer::WriteDiscard, 0, sizeof(uint32_t)));
+            uint32_t* pIndex = static_cast<uint32_t*>(BufferManager::MapConstantBuffer(m_VolumeQueueSizesBufferPtr, CBuffer::WriteDiscard));
             *pIndex = rRootVolume.m_PoolIndex;
-            BufferManager::UnmapConstantBuffer(m_PoolItemCountBufferPtr);
+            *(pIndex + 1) = rRootVolume.m_Level1QueueSize;
+            *(pIndex + 1) = rRootVolume.m_Level2QueueSize;
+            BufferManager::UnmapConstantBuffer(m_VolumeQueueSizesBufferPtr);
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+            // Integrate into root grid
+            ////////////////////////////////////////////////////////////////////////////////////////////////
 
             ContextManager::SetShaderCS(m_IntegrateRootGridCSPtr);
+
+            int WorkGroupCount = GetWorkGroupCount(rRootVolume.m_Level1QueueSize, g_TileSize1D);
+            ContextManager::Dispatch(WorkGroupCount, 1, 1);
 
             Performance::EndEvent();
         }
@@ -867,12 +878,18 @@ namespace MR
             auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
             ////////////////////////////////////////////////////////////////////////////////////////////////
-            // Set current item index
+            // Set current volume
             ////////////////////////////////////////////////////////////////////////////////////////////////
 
-            uint32_t* pIndex = static_cast<uint32_t*>(BufferManager::MapConstantBufferRange(m_PoolItemCountBufferPtr, CBuffer::WriteDiscard, 0, sizeof(uint32_t)));
+            uint32_t* pIndex = static_cast<uint32_t*>(BufferManager::MapConstantBuffer(m_VolumeQueueSizesBufferPtr, CBuffer::WriteDiscard));
             *pIndex = rRootVolume.m_PoolIndex;
-            BufferManager::UnmapConstantBuffer(m_PoolItemCountBufferPtr);
+            *(pIndex + 1) = rRootVolume.m_Level1QueueSize;
+            *(pIndex + 1) = rRootVolume.m_Level2QueueSize;
+            BufferManager::UnmapConstantBuffer(m_VolumeQueueSizesBufferPtr);
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+            // Integrate into internal grid
+            ////////////////////////////////////////////////////////////////////////////////////////////////
 
             ContextManager::SetShaderCS(m_IntegrateLevel1GridCSPtr);
 
@@ -890,12 +907,18 @@ namespace MR
             auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
             ////////////////////////////////////////////////////////////////////////////////////////////////
-            // Set current item index
+            // Set current volume
             ////////////////////////////////////////////////////////////////////////////////////////////////
 
-            uint32_t* pIndex = static_cast<uint32_t*>(BufferManager::MapConstantBufferRange(m_PoolItemCountBufferPtr, CBuffer::WriteDiscard, 0, sizeof(uint32_t)));
+            uint32_t* pIndex = static_cast<uint32_t*>(BufferManager::MapConstantBuffer(m_VolumeQueueSizesBufferPtr, CBuffer::WriteDiscard));
             *pIndex = rRootVolume.m_PoolIndex;
-            BufferManager::UnmapConstantBuffer(m_PoolItemCountBufferPtr);
+            *(pIndex + 1) = rRootVolume.m_Level1QueueSize;
+            *(pIndex + 1) = rRootVolume.m_Level2QueueSize;
+            BufferManager::UnmapConstantBuffer(m_VolumeQueueSizesBufferPtr);
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+            // Integrate into TSDF grids
+            ////////////////////////////////////////////////////////////////////////////////////////////////
 
             ContextManager::SetShaderCS(m_IntegrateTSDFCSPtr);
 
@@ -1307,8 +1330,10 @@ namespace MR
         ConstantBufferDesc.m_NumberOfBytes = g_TSDFPoolSize;
         m_TSDFPoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);   
 
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 4;// m_ReconstructionSettings.GRID_LEVELS + current index;
-        m_PoolItemCountBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);        
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 4;// m_ReconstructionSettings.GRID_LEVELS;
+        m_PoolItemCountBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 4;// current volume index + queue sizes
+        m_VolumeQueueSizesBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
 
     // -----------------------------------------------------------------------------
