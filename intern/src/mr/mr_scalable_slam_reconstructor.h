@@ -184,7 +184,7 @@ namespace MR
         Gfx::CShaderPtr m_VertexMapCSPtr;
         Gfx::CShaderPtr m_NormalMapCSPtr;
         Gfx::CShaderPtr m_DownSampleDepthCSPtr;
-        Gfx::CShaderPtr m_IntegrationCSPtr;
+        Gfx::CShaderPtr m_IntegrateTSDFCSPtr;
         Gfx::CShaderPtr m_RaycastCSPtr;
         Gfx::CShaderPtr m_RaycastPyramidCSPtr;
         Gfx::CShaderPtr m_DetermineSummandsCSPtr;

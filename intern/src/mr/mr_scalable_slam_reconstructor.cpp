@@ -428,7 +428,7 @@ namespace MR
         m_VertexMapCSPtr = 0;
         m_NormalMapCSPtr = 0;
         m_DownSampleDepthCSPtr = 0;
-        m_IntegrationCSPtr = 0;
+        m_IntegrateTSDFCSPtr = 0;
         m_RaycastCSPtr = 0;
         m_RaycastPyramidCSPtr = 0;
         m_DetermineSummandsCSPtr = 0;
@@ -539,7 +539,7 @@ namespace MR
         m_VertexMapCSPtr           = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_vertex_map.glsl"            , "main", DefineString.c_str());
         m_NormalMapCSPtr           = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_normal_map.glsl"            , "main", DefineString.c_str());
         m_DownSampleDepthCSPtr     = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_downsample_depth.glsl"      , "main", DefineString.c_str());
-        m_IntegrationCSPtr         = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_integrate.glsl"             , "main", DefineString.c_str());        
+        m_IntegrateTSDFCSPtr       = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_integrate_tsdf.glsl"        , "main", DefineString.c_str());        
         m_RaycastCSPtr             = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_raycast.glsl"               , "main", DefineString.c_str());
         m_RaycastPyramidCSPtr      = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_raycast_pyramid.glsl"       , "main", DefineString.c_str());
         m_DetermineSummandsCSPtr   = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_determine_summands.glsl"    , "main", DefineString.c_str());
