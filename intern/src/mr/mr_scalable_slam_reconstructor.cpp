@@ -535,26 +535,26 @@ namespace MR
 
         std::string DefineString = DefineStream.str();
         
-        m_BilateralFilterCSPtr     = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_bilateral_filter.glsl"      , "main", DefineString.c_str());
-        m_VertexMapCSPtr           = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_vertex_map.glsl"            , "main", DefineString.c_str());
-        m_NormalMapCSPtr           = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_normal_map.glsl"            , "main", DefineString.c_str());
-        m_DownSampleDepthCSPtr     = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_downsample_depth.glsl"      , "main", DefineString.c_str());
-        m_IntegrateTSDFCSPtr       = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_integrate_tsdf.glsl"        , "main", DefineString.c_str());        
-        m_RaycastCSPtr             = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_raycast.glsl"               , "main", DefineString.c_str());
-        m_RaycastPyramidCSPtr      = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_raycast_pyramid.glsl"       , "main", DefineString.c_str());
-        m_DetermineSummandsCSPtr   = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_determine_summands.glsl"    , "main", DefineString.c_str());
-        m_ReduceSumCSPtr           = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_reduce_sum.glsl"            , "main", DefineString.c_str());
-        m_ClearVolumeCSPtr         = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_clear_volume.glsl"          , "main", DefineString.c_str());
-		m_RootgridDepthCSPtr       = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_rootgrid_depth.glsl"        , "main", DefineString.c_str());
-        m_RasterizeRootVolumeVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_rasterize_rootvolume.glsl"  , "main", DefineString.c_str());
-        m_RasterizeRootVolumeFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_rasterize_rootvolume.glsl"  , "main", DefineString.c_str());
-        m_ClearAtomicCountersCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_clear_atomic_buffer.glsl"   , "main", DefineString.c_str());
-        m_VolumeCountersCSPtr      = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_volume_counters.glsl"       , "main", DefineString.c_str());
-        m_RasterizeRootGridVSPtr   = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_rasterize_grid.glsl"        , "main", DefineString.c_str());
-        m_RasterizeRootGridFSPtr   = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_rasterize_grid.glsl"        , "main", DefineString.c_str());
-        m_RasterizeLevel1GridVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\vs_rasterize_level1_grid.glsl" , "main", DefineString.c_str());
-        m_RasterizeLevel1GridFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\fs_rasterize_level1_grid.glsl" , "main", DefineString.c_str());
-        m_GridCountersCSPtr        = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_grid_counters.glsl"         , "main", DefineString.c_str());
+        m_BilateralFilterCSPtr     = ShaderManager::CompileCS("scalable_kinect_fusion\\pyramid_creation\\cs_bilateral_filter.glsl"   , "main", DefineString.c_str());
+        m_VertexMapCSPtr           = ShaderManager::CompileCS("scalable_kinect_fusion\\pyramid_creation\\cs_vertex_map.glsl"         , "main", DefineString.c_str());
+        m_NormalMapCSPtr           = ShaderManager::CompileCS("scalable_kinect_fusion\\pyramid_creation\\cs_normal_map.glsl"         , "main", DefineString.c_str());
+        m_DownSampleDepthCSPtr     = ShaderManager::CompileCS("scalable_kinect_fusion\\pyramid_creation\\cs_downsample_depth.glsl"   , "main", DefineString.c_str());
+        m_RaycastPyramidCSPtr      = ShaderManager::CompileCS("scalable_kinect_fusion\\pyramid_creation\\cs_raycast_pyramid.glsl"    , "main", DefineString.c_str());
+        m_RaycastCSPtr             = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_raycast.glsl"                              , "main", DefineString.c_str());
+        m_DetermineSummandsCSPtr   = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_determine_summands.glsl"                   , "main", DefineString.c_str());
+        m_ReduceSumCSPtr           = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_reduce_sum.glsl"                           , "main", DefineString.c_str());
+        m_ClearVolumeCSPtr         = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_clear_volume.glsl"                         , "main", DefineString.c_str());
+		m_RootgridDepthCSPtr       = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_rootgrid_depth.glsl"                       , "main", DefineString.c_str());
+        m_ClearAtomicCountersCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_clear_atomic_buffer.glsl"                  , "main", DefineString.c_str());
+        m_VolumeCountersCSPtr      = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_volume_counters.glsl"                      , "main", DefineString.c_str());
+        m_GridCountersCSPtr        = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_grid_counters.glsl"                        , "main", DefineString.c_str());
+        m_RasterizeRootVolumeVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\rasterization\\vs_rasterize_rootvolume.glsl"  , "main", DefineString.c_str());
+        m_RasterizeRootVolumeFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\rasterization\\fs_rasterize_rootvolume.glsl"  , "main", DefineString.c_str());
+        m_RasterizeRootGridVSPtr   = ShaderManager::CompileVS("scalable_kinect_fusion\\rasterization\\vs_rasterize_grid.glsl"        , "main", DefineString.c_str());
+        m_RasterizeRootGridFSPtr   = ShaderManager::CompilePS("scalable_kinect_fusion\\rasterization\\fs_rasterize_grid.glsl"        , "main", DefineString.c_str());
+        m_RasterizeLevel1GridVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\rasterization\\vs_rasterize_level1_grid.glsl" , "main", DefineString.c_str());
+        m_RasterizeLevel1GridFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\rasterization\\fs_rasterize_level1_grid.glsl" , "main", DefineString.c_str());
+        m_IntegrateTSDFCSPtr       = ShaderManager::CompileCS("scalable_kinect_fusion\\integration\\cs_integrate_tsdf.glsl"          , "main", DefineString.c_str());
 
         SInputElementDescriptor InputLayoutDesc = {};
 
