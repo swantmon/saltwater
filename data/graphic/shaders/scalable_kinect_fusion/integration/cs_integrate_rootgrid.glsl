@@ -15,9 +15,18 @@ void main()
     if (gl_GlobalInvocationID.x < g_Level1QueueSize)
     {
         uint VoxelIndex = g_VolumeID[gl_GlobalInvocationID.x];
-    }
 
-    
+        // Add voxel to pool
+
+        uint Level1PoolIndex = atomicAdd(g_Level1GridPoolItemCount, 1);
+
+        // Add voxel in higher grid level
+
+        uint RootGridPoolIndex = g_CurrentVolumeIndex * 16 * 16 * 16;
+        RootGridPoolIndex += gl_GlobalInvocationID.x;
+
+        RootGridPoolIndex = Level1PoolIndex;
+    }
 }
 
 #endif // __INCLUDE_CS_KINECT_INTEGRATE_ROOTGRID_GLSL__
