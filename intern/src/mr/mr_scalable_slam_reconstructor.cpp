@@ -818,6 +818,10 @@ namespace MR
                 pItem->m_NearSurface = false;
                 pItem->m_Offset = rRootVolume.m_Offset;
                 BufferManager::UnmapConstantBuffer(m_RootVolumePoolPtr);
+
+                uint32_t* pCount = static_cast<uint32_t*>(BufferManager::MapConstantBufferRange(m_PoolItemCountBufferPtr, CBuffer::WriteDiscard, 0, sizeof(uint32_t)));
+                *pCount = m_RootVolumePoolItemCount;
+                BufferManager::UnmapConstantBuffer(m_PoolItemCountBufferPtr);
             }
 
             ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -827,7 +831,7 @@ namespace MR
             uint32_t* pIndex = static_cast<uint32_t*>(BufferManager::MapConstantBufferRange(m_RootVolumePoolPtr, CBuffer::WriteDiscard, 0, sizeof(uint32_t)));
             *pIndex = rRootVolume.m_PoolIndex;
             BufferManager::UnmapConstantBuffer(m_RootVolumePoolPtr);
-
+            
             Performance::EndEvent();
         }
     }
