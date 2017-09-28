@@ -822,6 +822,12 @@ namespace MR
             }
         }
 
+        ContextManager::SetResourceBuffer(0, m_RootVolumePoolPtr);
+        ContextManager::SetResourceBuffer(1, m_RootGridPoolPtr);
+        ContextManager::SetResourceBuffer(2, m_Level1PoolPtr);
+        ContextManager::SetResourceBuffer(3, m_TSDFPoolPtr);
+        ContextManager::SetResourceBuffer(4, m_PoolItemCountBufferPtr);
+
         ////////////////////////////////////////////////////////////////////////////////////////////////
         // Fill root grids
         ////////////////////////////////////////////////////////////////////////////////////////////////
