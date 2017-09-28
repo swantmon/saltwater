@@ -117,6 +117,7 @@ namespace MR
         void RasterizeLevel1Grid(SRootVolume& rRootGrid);
 
         void ClearBuffer(Gfx::CBufferPtr BufferPtr, size_t Size);
+        void ClearPool();
 
 		void SetupData();
         void SetupMeshes();

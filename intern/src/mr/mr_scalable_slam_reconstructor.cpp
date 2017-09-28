@@ -205,6 +205,7 @@ namespace MR
 		m_IsIntegrationPaused = false;
 		m_IsTrackingPaused = false;
         ClearBuffer(m_PoolItemCountBufferPtr, m_ReconstructionSettings.GRID_LEVELS);
+        ClearPool();
     }
 
     // -----------------------------------------------------------------------------
@@ -1736,6 +1737,13 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
+    void CScalableSLAMReconstructor::ClearPool()
+    {
+        // todo
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CScalableSLAMReconstructor::ResetReconstruction(const SReconstructionSettings* pReconstructionSettings)
     {
 		m_RootVolumeMap.clear();
@@ -1753,6 +1761,7 @@ namespace MR
 		SetupShaders();
 
         ClearBuffer(m_PoolItemCountBufferPtr, m_ReconstructionSettings.GRID_LEVELS);
+        ClearPool();
     }
 
     // -----------------------------------------------------------------------------
