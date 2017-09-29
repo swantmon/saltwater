@@ -673,53 +673,44 @@ namespace
 
 	void CGfxReconstructionRenderer::RenderScalableVolume()
 	{
-		MR::SReconstructionSettings Settings;
-		m_pScalableReconstructor->GetReconstructionSettings(&Settings);
+        MR::SReconstructionSettings Settings;
+        m_pScalableReconstructor->GetReconstructionSettings(&Settings);
 
-		Float4x4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
+        Float4x4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
 
-		Float4 RaycastData[2];
-		if (Settings.m_CaptureColor)
-		{
-			RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 0.0f, 0.0f, 1.0f);
-		}
-		else
-		{
-			RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 1.0f, 0.0f, 1.0f);
-		}
+        Float4 RaycastData[2];
+        PoseMatrix.GetTranslation(RaycastData[0][0], RaycastData[0][1], RaycastData[0][2]);
+        RaycastData[0][3] = 1.0f;
+        if (Settings.m_CaptureColor)
+        {
+            RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 0.0f, 0.0f, 1.0f);
+        }
+        else
+        {
+            RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 1.0f, 0.0f, 1.0f);
+        }
 
-		ContextManager::SetShaderVS(m_RaycastVSPtr);
-		ContextManager::SetShaderPS(m_RaycastFSPtr);
+        BufferManager::UploadConstantBufferData(m_RaycastConstantBufferPtr, RaycastData);
 
-		ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-		ContextManager::SetConstantBuffer(1, m_RaycastConstantBufferPtr);
+        ContextManager::SetShaderVS(m_RaycastVSPtr);
+        ContextManager::SetShaderPS(m_RaycastFSPtr);
+                
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_RaycastConstantBufferPtr);
 
-		ContextManager::Barrier();
+        ContextManager::Barrier();
 
-		ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
-		ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
-		const unsigned int Offset = 0;
-		ContextManager::SetVertexBufferSet(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
-		ContextManager::SetIndexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
-		ContextManager::SetInputLayout(m_VolumeInputLayoutPtr);
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBufferSet(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetIndexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetInputLayout(m_VolumeInputLayoutPtr);
 
-		ContextManager::SetTopology(STopology::TriangleList);
+        ContextManager::SetTopology(STopology::TriangleList);
 
-		for (auto& rPair : m_pScalableReconstructor->GetRootVolumeMap())
-		{
-			auto& rRootVolume = rPair.second;
-						
-			RaycastData[0][0] = rRootVolume.m_Offset[0] * Settings.m_VolumeSize;
-			RaycastData[0][1] = rRootVolume.m_Offset[1] * Settings.m_VolumeSize;
-			RaycastData[0][2] = rRootVolume.m_Offset[2] * Settings.m_VolumeSize;
-			
-			BufferManager::UploadConstantBufferData(m_RaycastConstantBufferPtr, RaycastData);
-
-			//ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(rRootVolume.m_TSDFVolumePtr));
-            
-			//ContextManager::DrawIndexed(36, 0, 0);
-		}
+        //ContextManager::DrawIndexed(36, 0, 0);
 	}
 
 	// -----------------------------------------------------------------------------
