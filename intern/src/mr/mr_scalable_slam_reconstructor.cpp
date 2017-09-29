@@ -1135,6 +1135,25 @@ namespace MR
             uint32_t* pVoxelQueue = static_cast<uint32_t*>(BufferManager::MapConstantBufferRange(m_VolumeQueueBufferPtr, CBuffer::Read, 0, VolumeCount * sizeof(uint32_t)));
             memcpy(VolumeQueue.data(), pVoxelQueue, sizeof(uint32_t) * VolumeCount);
             BufferManager::UnmapConstantBuffer(m_VolumeQueueBufferPtr);
+
+            // Compute the AABB for the whole reconstruction
+            
+            Base::Int3 TotalAABBMin = m_RootVolumeVector[VolumeQueue[0]]->m_Offset;
+            Base::Int3 TotalAABBMax = TotalAABBMin;
+
+            for (int i = 1; i < VolumeQueue.size(); ++i)
+            {
+                Base::Int3 AABBMin = m_RootVolumeVector[VolumeQueue[i]]->m_Offset;
+                Base::Int3 AABBMax = AABBMin;
+
+                TotalAABBMin[0] = Base::Min(TotalAABBMin[0], AABBMin[0]);
+                TotalAABBMin[1] = Base::Min(TotalAABBMin[1], AABBMin[1]);
+                TotalAABBMin[2] = Base::Min(TotalAABBMin[2], AABBMin[2]);
+
+                TotalAABBMax[0] = Base::Max(TotalAABBMax[0], AABBMax[0]);
+                TotalAABBMax[1] = Base::Max(TotalAABBMax[1], AABBMax[1]);
+                TotalAABBMax[2] = Base::Max(TotalAABBMax[2], AABBMax[2]);
+            }
             
             CreateIntegrationQueues(VolumeQueue);
             IntegrateHierarchies(VolumeQueue);
