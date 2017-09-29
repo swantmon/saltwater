@@ -16,16 +16,20 @@ void main()
     {
         uint VoxelIndex = g_VolumeID[gl_GlobalInvocationID.x];
 
-        // Add voxel to pool
+        // Check if voxel is already in hierarchy
 
-        uint Level1PoolIndex = atomicAdd(g_Level1GridPoolItemCount, 1);
+        uint CurrentRootGridIndex = g_CurrentVolumeIndex * 16 * 16 * 16 + VoxelIndex;
+        SGridPoolItem RootGridItem = g_RootGridPool[CurrentRootGridIndex];
 
-        // Add voxel in higher grid level
+        if (RootGridItem.m_PoolIndex == 0) // Is the voxel empty?
+        {
+            // Add voxel to pool and to root grid
 
-        uint RootGridPoolIndex = g_CurrentVolumeIndex * 16 * 16 * 16;
-        RootGridPoolIndex += gl_GlobalInvocationID.x;
+            uint Level1PoolIndex = atomicAdd(g_Level1GridPoolItemCount, 8 * 8 * 8);
 
-        RootGridPoolIndex = Level1PoolIndex;
+            RootGridItem.m_PoolIndex = Level1PoolIndex;
+            g_RootGridPool[CurrentRootGridIndex] = RootGridItem;
+        }
     }
 }
 

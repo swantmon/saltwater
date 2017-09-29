@@ -14,7 +14,7 @@ struct SVolumePoolItem
 
 struct SGridPoolItem
 {
-    int m_PoolIndex;
+    uint m_PoolIndex;
     bool m_NearSurface;
 };
 
