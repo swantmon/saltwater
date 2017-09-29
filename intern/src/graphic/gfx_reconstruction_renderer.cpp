@@ -717,14 +717,7 @@ namespace
 			BufferManager::UploadConstantBufferData(m_RaycastConstantBufferPtr, RaycastData);
 
 			//ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(rRootVolume.m_TSDFVolumePtr));
-			ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
-
-			if (Settings.m_CaptureColor)
-			{
-				//ContextManager::SetTexture(1, static_cast<CTextureBasePtr>(rRootVolume.m_ColorVolumePtr));
-				ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
-			}
-
+            
 			//ContextManager::DrawIndexed(36, 0, 0);
 		}
 	}
