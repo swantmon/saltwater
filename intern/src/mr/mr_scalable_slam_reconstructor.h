@@ -73,6 +73,15 @@ namespace MR
             int m_Level2QueueSize;
 		};
 
+        struct SScalableVolume
+        {
+            Gfx::CBufferPtr m_RootVolumePoolPtr;       // Individual Volumes
+            Gfx::CBufferPtr m_RootGridPoolPtr;         // Highest level grids (16x16x16)
+            Gfx::CBufferPtr m_Level1PoolPtr;           // Internal Grid       ( 8x 8x 8)
+            Gfx::CBufferPtr m_TSDFPoolPtr;             // TSDF Data           ( 8x 8x 8)
+            Gfx::CBufferPtr m_PoolItemCountBufferPtr;
+        };
+
         typedef std::map<Base::Int3, SRootVolume, IndexCompare> CRootVolumeMap;
         typedef std::vector<SRootVolume*> CRootVolumeVector;
 
@@ -93,6 +102,8 @@ namespace MR
 
 		CRootVolumeMap& GetRootVolumeMap();
         CRootVolumeVector& GetRootVolumeVector();
+
+        SScalableVolume& GetVolume();
 
         const std::vector<float>& GetVolumeSizes() const;
 
@@ -174,11 +185,8 @@ namespace MR
 
         Gfx::CBufferPtr m_GridRasterizationBufferPtr;
 
-        Gfx::CBufferPtr m_RootVolumePoolPtr;       // Individual Volumes
-        Gfx::CBufferPtr m_RootGridPoolPtr;         // Highest level grids (16x16x16)
-        Gfx::CBufferPtr m_Level1PoolPtr;           // Internal Grid       ( 8x 8x 8)
-        Gfx::CBufferPtr m_TSDFPoolPtr;             // TSDF Data           ( 8x 8x 8)
-        Gfx::CBufferPtr m_PoolItemCountBufferPtr;
+        SScalableVolume m_VolumeBuffers;
+
         Gfx::CBufferPtr m_VolumeQueueSizesBufferPtr;
 
         Gfx::CShaderPtr m_ClearVolumeCSPtr;

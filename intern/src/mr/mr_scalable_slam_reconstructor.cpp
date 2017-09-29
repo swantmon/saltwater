@@ -204,7 +204,7 @@ namespace MR
 
 		m_IsIntegrationPaused = false;
 		m_IsTrackingPaused = false;
-        ClearBuffer(m_PoolItemCountBufferPtr, m_ReconstructionSettings.GRID_LEVELS);
+        ClearBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr, m_ReconstructionSettings.GRID_LEVELS);
         ClearPool();
     }
 
@@ -493,11 +493,11 @@ namespace MR
         m_GridRasterizationBufferPtr = 0;
         m_VolumeQueueBufferPtr = 0;
         m_RootVolumeInstanceBufferPtr = 0;
-        m_RootVolumePoolPtr = 0;
-        m_RootGridPoolPtr = 0;
-        m_Level1PoolPtr = 0;
-        m_TSDFPoolPtr = 0;
-        m_PoolItemCountBufferPtr = 0;
+        m_VolumeBuffers.m_RootVolumePoolPtr = 0;
+        m_VolumeBuffers.m_RootGridPoolPtr = 0;
+        m_VolumeBuffers.m_Level1PoolPtr = 0;
+        m_VolumeBuffers.m_TSDFPoolPtr = 0;
+        m_VolumeBuffers.m_PoolItemCountBufferPtr = 0;
         m_VolumeQueueSizesBufferPtr = 0;
     }
     
@@ -818,22 +818,22 @@ namespace MR
                 int Range = sizeof(SVolumePoolItem);
                 int Offset = rRootVolume.m_PoolIndex * sizeof(SVolumePoolItem);
 
-                SVolumePoolItem* pItem = static_cast<SVolumePoolItem*>(BufferManager::MapConstantBufferRange(m_RootVolumePoolPtr, CBuffer::WriteDiscard, Offset, Range));
+                SVolumePoolItem* pItem = static_cast<SVolumePoolItem*>(BufferManager::MapConstantBufferRange(m_VolumeBuffers.m_RootVolumePoolPtr, CBuffer::WriteDiscard, Offset, Range));
                 pItem->m_NearSurface = false;
                 pItem->m_Offset = rRootVolume.m_Offset;
-                BufferManager::UnmapConstantBuffer(m_RootVolumePoolPtr);
+                BufferManager::UnmapConstantBuffer(m_VolumeBuffers.m_RootVolumePoolPtr);
 
-                uint32_t* pCount = static_cast<uint32_t*>(BufferManager::MapConstantBufferRange(m_PoolItemCountBufferPtr, CBuffer::WriteDiscard, 0, sizeof(uint32_t)));
+                uint32_t* pCount = static_cast<uint32_t*>(BufferManager::MapConstantBufferRange(m_VolumeBuffers.m_PoolItemCountBufferPtr, CBuffer::WriteDiscard, 0, sizeof(uint32_t)));
                 *pCount = m_RootVolumePoolItemCount;
-                BufferManager::UnmapConstantBuffer(m_PoolItemCountBufferPtr);
+                BufferManager::UnmapConstantBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr);
             }
         }
 
-        ContextManager::SetResourceBuffer(0, m_RootVolumePoolPtr);
-        ContextManager::SetResourceBuffer(1, m_RootGridPoolPtr);
-        ContextManager::SetResourceBuffer(2, m_Level1PoolPtr);
-        ContextManager::SetResourceBuffer(3, m_TSDFPoolPtr);
-        ContextManager::SetResourceBuffer(4, m_PoolItemCountBufferPtr); 
+        ContextManager::SetResourceBuffer(0, m_VolumeBuffers.m_RootVolumePoolPtr);
+        ContextManager::SetResourceBuffer(1, m_VolumeBuffers.m_RootGridPoolPtr);
+        ContextManager::SetResourceBuffer(2, m_VolumeBuffers.m_Level1PoolPtr);
+        ContextManager::SetResourceBuffer(3, m_VolumeBuffers.m_TSDFPoolPtr);
+        ContextManager::SetResourceBuffer(4, m_VolumeBuffers.m_PoolItemCountBufferPtr);
         ContextManager::SetResourceBuffer(5, m_VolumeQueueSizesBufferPtr);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1325,16 +1325,16 @@ namespace MR
         m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
         ConstantBufferDesc.m_NumberOfBytes = g_RootVolumePoolSize;
-        m_RootVolumePoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        m_VolumeBuffers.m_RootVolumePoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         ConstantBufferDesc.m_NumberOfBytes = g_RootGridPoolSize;
-        m_RootGridPoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        m_VolumeBuffers.m_RootGridPoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         ConstantBufferDesc.m_NumberOfBytes = g_Level1GridPoolSize;
-        m_Level1PoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        m_VolumeBuffers.m_Level1PoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         ConstantBufferDesc.m_NumberOfBytes = g_TSDFPoolSize;
-        m_TSDFPoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);   
+        m_VolumeBuffers.m_TSDFPoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
         ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 4;// m_ReconstructionSettings.GRID_LEVELS;
-        m_PoolItemCountBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        m_VolumeBuffers.m_PoolItemCountBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 4;// current volume index + queue sizes
         m_VolumeQueueSizesBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
@@ -1760,7 +1760,7 @@ namespace MR
 		//SetupBuffers(); // todo: find out why calling this method crashes the application
 		SetupShaders();
 
-        ClearBuffer(m_PoolItemCountBufferPtr, m_ReconstructionSettings.GRID_LEVELS);
+        ClearBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr, m_ReconstructionSettings.GRID_LEVELS);
         ClearPool();
     }
 
@@ -1809,6 +1809,13 @@ namespace MR
     CScalableSLAMReconstructor::CRootVolumeVector& CScalableSLAMReconstructor::GetRootVolumeVector()
     {
         return m_RootVolumeVector;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CScalableSLAMReconstructor::SScalableVolume& CScalableSLAMReconstructor::GetVolume()
+    {
+        return m_VolumeBuffers;
     }
 
     // -----------------------------------------------------------------------------
