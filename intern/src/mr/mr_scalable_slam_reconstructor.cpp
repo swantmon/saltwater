@@ -732,8 +732,6 @@ namespace MR
 
         for (uint32_t VolumeIndex : rVolumeQueue)
         {
-            Performance::BeginEvent("Rasterize Level 1 Grid");
-
             assert(m_RootVolumeVector[VolumeIndex] != nullptr);
 
             auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
@@ -756,46 +754,73 @@ namespace MR
                 rRootVolume.m_IndirectLevel1Buffer = BufferManager::CreateBuffer(ConstantBufferDesc);
                 rRootVolume.m_IndirectLevel2Buffer = BufferManager::CreateBuffer(ConstantBufferDesc);
             }
+        }
 
-            ////////////////////////////////////////////////////////////////////////////////////////////////
-            // Integrate into level 1 grid
-            ////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+        // Rasterize root grids
+        ////////////////////////////////////////////////////////////////////////////////////////////////
 
-            ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
-            ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
+        Performance::BeginEvent("Rasterize Root Grids");
 
-            ContextManager::Barrier();
+        ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
+        ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
+        ContextManager::SetVertexBufferSet(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
+        ContextManager::SetTopology(STopology::TriangleList);
+        ContextManager::Barrier();
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_FRONT);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_MULTISAMPLE);
+        ContextManager::SetVertexBufferSet(m_Grid16MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetIndexBuffer(m_Grid16MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        for (uint32_t VolumeIndex : rVolumeQueue)
+        {
+            auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
+
             //TargetSetManager::ClearTargetSet(m_TargetSetPtr);
 
             RasterizeRootGrid(rRootVolume);
 
-            ContextManager::SetVertexBufferSet(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
-            ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
-            ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
-            ContextManager::SetTopology(STopology::TriangleList);
-
             SIndexedIndirect* pIndirect = static_cast<SIndexedIndirect*>(BufferManager::MapConstantBuffer(rRootVolume.m_IndirectLevel1Buffer, CBuffer::EMap::Read));
             rRootVolume.m_Level1QueueSize = pIndirect->m_InstanceCount;
             BufferManager::UnmapConstantBuffer(rRootVolume.m_IndirectLevel1Buffer);
-            
-            ////////////////////////////////////////////////////////////////////////////////////////////////
-            // Integrate into level 1 grid
-            ////////////////////////////////////////////////////////////////////////////////////////////////
+        }
 
-            ContextManager::SetShaderVS(m_RasterizeLevel1GridVSPtr);
-            ContextManager::SetShaderPS(m_RasterizeLevel1GridFSPtr);
+        Performance::EndEvent();
+        
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+        // Rasterize level1 grids
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+
+        Performance::BeginEvent("Rasterize Level 1 Grids");
+
+        ContextManager::SetShaderVS(m_RasterizeLevel1GridVSPtr);
+        ContextManager::SetShaderPS(m_RasterizeLevel1GridFSPtr);
+        ContextManager::SetVertexBufferSet(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetIndexBuffer(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        for (uint32_t VolumeIndex : rVolumeQueue)
+        {
+            auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
             if (rRootVolume.m_Level1QueueSize > 0)
             {
                 RasterizeLevel1Grid(rRootVolume);
 
-                pIndirect = static_cast<SIndexedIndirect*>(BufferManager::MapConstantBuffer(rRootVolume.m_IndirectLevel2Buffer, CBuffer::EMap::Read));
+                SIndexedIndirect* pIndirect = static_cast<SIndexedIndirect*>(BufferManager::MapConstantBuffer(rRootVolume.m_IndirectLevel2Buffer, CBuffer::EMap::Read));
                 rRootVolume.m_Level2QueueSize = pIndirect->m_InstanceCount;
                 BufferManager::UnmapConstantBuffer(rRootVolume.m_IndirectLevel2Buffer);
             }
-
-            Performance::EndEvent();
         }
+
+        Performance::EndEvent();
 
         ContextManager::ResetShaderVS();
         ContextManager::ResetShaderPS();
@@ -939,11 +964,7 @@ namespace MR
     {
         //TargetSetManager::ClearTargetSet(m_TargetSetPtr);
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_FRONT);
-        glDisable(GL_DEPTH_TEST);
-        glDisable(GL_MULTISAMPLE);
-
+        
         SGridRasterization GridData = {};
         GridData.m_Resolution = m_ReconstructionSettings.m_GridResolutions[0];
         GridData.m_CubeSize = m_VolumeSizes[1];
@@ -962,11 +983,6 @@ namespace MR
         ContextManager::SetResourceBuffer(4, m_VolumeAtomicCounterBufferPtr);
         ContextManager::SetResourceBuffer(5, rRootGrid.m_IndirectLevel1Buffer);
 
-        const unsigned int Offset = 0;
-        ContextManager::SetVertexBufferSet(m_Grid16MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
-        ContextManager::SetIndexBuffer(m_Grid16MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
-        ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
-        ContextManager::SetTopology(STopology::TriangleList);
         const unsigned int IndexCount = m_Grid16MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         ContextManager::DrawIndexed(IndexCount, 0, 0);
     }
@@ -977,10 +993,6 @@ namespace MR
     {
         //TargetSetManager::ClearTargetSet(m_TargetSetPtr);
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_FRONT);
-        glDisable(GL_DEPTH_TEST);
-        glDisable(GL_MULTISAMPLE);
 
         SGridRasterization GridData = {};
         GridData.m_Resolution = m_ReconstructionSettings.m_GridResolutions[1];
@@ -1003,12 +1015,6 @@ namespace MR
 
         ClearBuffer(m_VolumeAtomicCounterBufferPtr, 128 * 128 * 128);
         
-        unsigned int Offset = 0;
-        ContextManager::SetVertexBufferSet(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
-        ContextManager::SetIndexBuffer(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
-        ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
-        ContextManager::SetTopology(STopology::TriangleList);
-
         const unsigned int IndexCount = m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
         //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
