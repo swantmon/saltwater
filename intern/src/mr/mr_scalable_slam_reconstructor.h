@@ -71,6 +71,8 @@ namespace MR
             Gfx::CBufferPtr m_Level2QueuePtr;
             int m_Level1QueueSize;
             int m_Level2QueueSize;
+            Gfx::CBufferPtr m_IndirectLevel1Buffer;
+            Gfx::CBufferPtr m_IndirectLevel2Buffer;
 		};
 
         struct SScalableVolume
