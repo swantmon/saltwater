@@ -953,7 +953,7 @@ namespace MR
         BufferManager::UploadConstantBufferData(m_GridRasterizationBufferPtr, &GridData);
 
         SIndexedIndirect IndirectBufferData = {};
-        IndirectBufferData.m_IndexCount = 36;
+        IndirectBufferData.m_IndexCount = m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         BufferManager::UploadConstantBufferData(rRootGrid.m_IndirectLevel1Buffer, &IndirectBufferData);
         
         ClearBuffer(m_VolumeAtomicCounterBufferPtr, GridData.m_Resolution * GridData.m_Resolution * GridData.m_Resolution);
@@ -998,7 +998,7 @@ namespace MR
         ContextManager::SetResourceBuffer(5, rRootGrid.m_IndirectLevel2Buffer);
 
         SIndexedIndirect IndirectBufferData = {};
-        IndirectBufferData.m_IndexCount = 36;
+        IndirectBufferData.m_IndexCount = m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         BufferManager::UploadConstantBufferData(rRootGrid.m_IndirectLevel2Buffer, &IndirectBufferData);
 
         ClearBuffer(m_VolumeAtomicCounterBufferPtr, 128 * 128 * 128);
@@ -1160,7 +1160,7 @@ namespace MR
             }
             
             CreateIntegrationQueues(VolumeQueue);
-            IntegrateHierarchies(VolumeQueue);
+            //IntegrateHierarchies(VolumeQueue);
         }
 	}
 
