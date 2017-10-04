@@ -29,9 +29,9 @@ layout(location = 2) out vec4 out_GBuffer2;
 
 void main()
 {
-    out_GBuffer0 = vec4(0.0f, 0.0f, 0.0f, 1.0f); 
-    out_GBuffer1 = vec4(0.0f, 0.0f, 0.0f, 1.0f); 
-    out_GBuffer2 = vec4(0.0f, 0.0f, 0.0f, 1.0f); 
+    out_GBuffer0 = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    out_GBuffer1 = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    out_GBuffer2 = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
 #endif // __INCLUDE_FS_KINECT_RAYCAST_GLSL__
