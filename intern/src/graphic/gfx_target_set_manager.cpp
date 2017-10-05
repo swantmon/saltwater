@@ -40,6 +40,8 @@ namespace
         CTargetSetPtr GetHitProxyTargetSet();
 
         CTargetSetPtr CreateTargetSet(CTextureBasePtr* _pTargetPtrs, unsigned int _NumberOfTargets);
+
+        CTargetSetPtr CreateEmptyTargetSet(int _Width, int _Height, int _Layers);
         
         void ClearTargetSet(CTargetSetPtr _TargetPtr, float _Depth);
         void ClearTargetSet(CTargetSetPtr _TargetPtr, const Base::Float4& _rColor);
@@ -345,6 +347,42 @@ namespace
             BASE_THROWM("Can't create an acceptable frame buffer.");
         }
         
+        return CTargetSetPtr(TargetSetPtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTargetSetPtr CGfxTargetSetManager::CreateEmptyTargetSet(int _Width, int _Height, int _Layers)
+    {
+        CTargetSets::CPtr TargetSetPtr = m_TargetSets.Allocate();
+
+        CInternTargetSet& rTargetSet = *TargetSetPtr;
+
+        GLuint Framebuffer;
+
+        // -----------------------------------------------------------------------------
+        // ARB_framebuffer_no_attachments
+        // -----------------------------------------------------------------------------
+
+        glCreateFramebuffers(1, &Framebuffer);
+
+        glNamedFramebufferParameteri(Framebuffer, GL_FRAMEBUFFER_DEFAULT_WIDTH, _Width);
+        glNamedFramebufferParameteri(Framebuffer, GL_FRAMEBUFFER_DEFAULT_HEIGHT, _Height);
+        glNamedFramebufferParameteri(Framebuffer, GL_FRAMEBUFFER_DEFAULT_LAYERS, _Layers);
+
+        rTargetSet.m_NumberOfRenderTargets = 0;
+        rTargetSet.m_NativeTargetSet = Framebuffer;
+
+        // -----------------------------------------------------------------------------
+        // Check status
+        // -----------------------------------------------------------------------------
+        GLenum Status = glCheckNamedFramebufferStatus(Framebuffer, GL_FRAMEBUFFER);
+
+        if (Status != GL_FRAMEBUFFER_COMPLETE)
+        {
+            BASE_THROWM("Can't create an acceptable frame buffer.");
+        }
+
         return CTargetSetPtr(TargetSetPtr);
     }
 
@@ -727,6 +765,13 @@ namespace TargetSetManager
     CTargetSetPtr CreateTargetSet(CTextureBasePtr* _pTargetPtrs, unsigned int _NumberOfTargets)
     {
         return CGfxTargetSetManager::GetInstance().CreateTargetSet(_pTargetPtrs, _NumberOfTargets);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTargetSetPtr CreateEmptyTargetSet(int _Width, int _Height, int _Layers /* = 0 */)
+    {
+        return CGfxTargetSetManager::GetInstance().CreateEmptyTargetSet(_Width, _Height, _Layers);
     }
     
     // -----------------------------------------------------------------------------
