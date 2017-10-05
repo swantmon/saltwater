@@ -212,23 +212,7 @@ namespace MR
 
     void CScalableSLAMReconstructor::SetupRenderStates()
     {
-        STextureDescriptor RendertargetDescriptor = {};
-
-        RendertargetDescriptor.m_NumberOfPixelsU = m_pRGBDCameraControl->GetDepthWidth();
-        RendertargetDescriptor.m_NumberOfPixelsV = m_pRGBDCameraControl->GetDepthHeight();
-        RendertargetDescriptor.m_NumberOfPixelsW = 1;
-        RendertargetDescriptor.m_NumberOfMipMaps = 1;
-        RendertargetDescriptor.m_NumberOfTextures = 1;
-        RendertargetDescriptor.m_Binding = CTextureBase::RenderTarget | CTextureBase::ShaderResource;
-        RendertargetDescriptor.m_Access = CTextureBase::CPUWrite;
-        RendertargetDescriptor.m_Format = CTextureBase::Unknown;
-        RendertargetDescriptor.m_Usage = CTextureBase::GPURead;
-        RendertargetDescriptor.m_Semantic = CTextureBase::Diffuse;
-        RendertargetDescriptor.m_Format = CTextureBase::R8_BYTE;
-
-        CTextureBasePtr RenderTarget = TextureManager::CreateTexture2D(RendertargetDescriptor);
-        
-        m_TargetSetPtr = TargetSetManager::CreateTargetSet(RenderTarget);
+        m_TargetSetPtr = TargetSetManager::CreateEmptyTargetSet(m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight());
 
         SViewPortDescriptor ViewPortDescriptor = {};
 
