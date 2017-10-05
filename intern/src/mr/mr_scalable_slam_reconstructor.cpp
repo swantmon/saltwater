@@ -612,12 +612,7 @@ namespace MR
     // -----------------------------------------------------------------------------
 
     void CScalableSLAMReconstructor::RasterizeRootVolumes()
-    {
-        //TargetSetManager::ClearTargetSet(m_TargetSetPtr);
-
-        ContextManager::SetViewPortSet(m_DepthViewPortSetPtr);
-        ContextManager::SetTargetSet(m_TargetSetPtr);
-        
+    {        
         const unsigned int Offset = 0;
         ContextManager::SetVertexBufferSet(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
         ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
@@ -689,23 +684,7 @@ namespace MR
     void CScalableSLAMReconstructor::CreateIntegrationQueues(std::vector<uint32_t>& rVolumeQueue)
     {
         ////////////////////////////////////////////////////////////////////////////////
-        // Prepare pipeline
-        ////////////////////////////////////////////////////////////////////////////////
-
-        ContextManager::SetViewPortSet(m_DepthViewPortSetPtr);
-        ContextManager::SetTargetSet(m_TargetSetPtr);
-
-        const unsigned int Offset = 0;
-        ContextManager::SetVertexBufferSet(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
-        ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
-        ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
-        
-        ContextManager::SetTopology(STopology::TriangleList);
-
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-        ////////////////////////////////////////////////////////////////////////////////
-        // Integrate individual grids
+        // Create buffers for new volumes
         ////////////////////////////////////////////////////////////////////////////////
 
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
@@ -746,12 +725,9 @@ namespace MR
 
         Performance::BeginEvent("Rasterize Root Grids");
 
+        const unsigned int Offset = 0;
         ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
         ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
-        ContextManager::SetVertexBufferSet(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
-        ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
-        ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
-        ContextManager::SetTopology(STopology::TriangleList);
         ContextManager::Barrier();
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
@@ -765,9 +741,7 @@ namespace MR
         for (uint32_t VolumeIndex : rVolumeQueue)
         {
             auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
-
-            //TargetSetManager::ClearTargetSet(m_TargetSetPtr);
-
+            
             RasterizeRootGrid(rRootVolume);
 
             SIndexedIndirect* pIndirect = static_cast<SIndexedIndirect*>(BufferManager::MapConstantBuffer(rRootVolume.m_IndirectLevel1Buffer, CBuffer::EMap::Read));
@@ -945,10 +919,7 @@ namespace MR
     // -----------------------------------------------------------------------------
 
     void CScalableSLAMReconstructor::RasterizeRootGrid(SRootVolume& rRootGrid)
-    {
-        //TargetSetManager::ClearTargetSet(m_TargetSetPtr);
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        
+    {        
         SGridRasterization GridData = {};
         GridData.m_Resolution = m_ReconstructionSettings.m_GridResolutions[0];
         GridData.m_CubeSize = m_VolumeSizes[1];
@@ -975,9 +946,6 @@ namespace MR
 
     void CScalableSLAMReconstructor::RasterizeLevel1Grid(SRootVolume& rRootGrid)
     {
-        //TargetSetManager::ClearTargetSet(m_TargetSetPtr);
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
         SGridRasterization GridData = {};
         GridData.m_Resolution = m_ReconstructionSettings.m_GridResolutions[1];
         GridData.m_CubeSize = m_VolumeSizes[2];
@@ -1001,7 +969,6 @@ namespace MR
         
         const unsigned int IndexCount = m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
     // -----------------------------------------------------------------------------
@@ -1099,6 +1066,9 @@ namespace MR
         ////////////////////////////////////////////////////////////////////////////////
         // Check all possible root grid volumes for depth data
         ////////////////////////////////////////////////////////////////////////////////
+
+        ContextManager::SetTargetSet(m_TargetSetPtr);
+        ContextManager::SetViewPortSet(m_DepthViewPortSetPtr);
 
         Performance::BeginEvent("Check Root Volumes");
 
