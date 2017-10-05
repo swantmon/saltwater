@@ -764,9 +764,9 @@ namespace MR
         {
             auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
-            SIndexedIndirect* pIndirect = static_cast<SIndexedIndirect*>(BufferManager::MapConstantBuffer(rRootVolume.m_IndirectLevel1Buffer, CBuffer::EMap::Read));
-            rRootVolume.m_Level1QueueSize = pIndirect->m_InstanceCount;
-            BufferManager::UnmapConstantBuffer(rRootVolume.m_IndirectLevel1Buffer);
+            //SIndexedIndirect* pIndirect = static_cast<SIndexedIndirect*>(BufferManager::MapConstantBuffer(rRootVolume.m_IndirectLevel1Buffer, CBuffer::EMap::Read));
+            //rRootVolume.m_Level1QueueSize = pIndirect->m_InstanceCount;
+            //BufferManager::UnmapConstantBuffer(rRootVolume.m_IndirectLevel1Buffer);
 
             RasterizeLevel1Grid(rRootVolume);
         }
@@ -775,7 +775,11 @@ namespace MR
         {
             auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
-            SIndexedIndirect* pIndirect = static_cast<SIndexedIndirect*>(BufferManager::MapConstantBuffer(rRootVolume.m_IndirectLevel2Buffer, CBuffer::EMap::Read));
+            SIndexedIndirect* pIndirect = static_cast<SIndexedIndirect*>(BufferManager::MapConstantBuffer(rRootVolume.m_IndirectLevel1Buffer, CBuffer::EMap::Read));
+            rRootVolume.m_Level1QueueSize = pIndirect->m_InstanceCount;
+            BufferManager::UnmapConstantBuffer(rRootVolume.m_IndirectLevel1Buffer);
+
+            pIndirect = static_cast<SIndexedIndirect*>(BufferManager::MapConstantBuffer(rRootVolume.m_IndirectLevel2Buffer, CBuffer::EMap::Read));
             rRootVolume.m_Level2QueueSize = pIndirect->m_InstanceCount;
             BufferManager::UnmapConstantBuffer(rRootVolume.m_IndirectLevel2Buffer);
         }
@@ -955,9 +959,7 @@ namespace MR
         GridData.m_Offset = rRootGrid.m_Offset;
 
         BufferManager::UploadConstantBufferData(m_GridRasterizationBufferPtr, &GridData);
-
-        int InstanceCount = rRootGrid.m_Level1QueueSize;
-        
+                
         ContextManager::SetResourceBuffer(2, rRootGrid.m_Level1QueuePtr);
         ContextManager::SetResourceBuffer(3, rRootGrid.m_Level2QueuePtr);
         ContextManager::SetResourceBuffer(4, m_VolumeAtomicCounterBufferPtr);
@@ -969,8 +971,8 @@ namespace MR
 
         ClearBuffer(m_VolumeAtomicCounterBufferPtr, 128 * 128 * 128);
         
-        const unsigned int IndexCount = m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
-        ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
+        //ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
+        ContextManager::DrawIndexedIndirect(rRootGrid.m_IndirectLevel1Buffer);
     }
 
     // -----------------------------------------------------------------------------
