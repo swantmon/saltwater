@@ -845,11 +845,14 @@ namespace MR
             // Set current volume
             ////////////////////////////////////////////////////////////////////////////////////////////////
 
-            uint32_t* pIndex = static_cast<uint32_t*>(BufferManager::MapConstantBuffer(m_VolumeQueueSizesBufferPtr, CBuffer::WriteDiscard));
-            *pIndex = rRootVolume.m_PoolIndex;
-            *(pIndex + 1) = rRootVolume.m_Level1QueueSize;
-            *(pIndex + 2) = rRootVolume.m_Level2QueueSize;
-            BufferManager::UnmapConstantBuffer(m_VolumeQueueSizesBufferPtr);
+            uint32_t Data[] =
+            {
+                rRootVolume.m_PoolIndex,
+                rRootVolume.m_Level1QueueSize,
+                rRootVolume.m_Level2QueueSize,
+            };
+
+            BufferManager::UploadConstantBufferData(m_VolumeQueueSizesBufferPtr, &Data);
             
             ////////////////////////////////////////////////////////////////////////////////////////////////
             // Integrate into root grid
