@@ -92,7 +92,6 @@ void main()
             g_VolumeID[Index] = in_Index;
         }
     }
-    out_Color = InBox ? vec4(1.0f) : vec4(0.1f);
 }
 
 #endif // __INCLUDE_FS_RASTERIZE_LEVEL1GRID_GLSL__

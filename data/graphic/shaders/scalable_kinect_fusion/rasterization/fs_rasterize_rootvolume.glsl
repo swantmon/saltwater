@@ -75,7 +75,6 @@ void main()
     {
         atomicAdd(g_Counters[in_Index], 1);
     }
-    out_Color = InBox ? vec4(1.0f) : vec4(0.5f);
 }
 
 #endif // __INCLUDE_FS_RASTERIZE_ROOTVOLUME_GLSL__
