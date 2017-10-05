@@ -827,10 +827,10 @@ namespace MR
         // Fill root grids
         ////////////////////////////////////////////////////////////////////////////////////////////////
 
+        Performance::BeginEvent("Fill root grids");
+
         for (uint32_t VolumeIndex : rVolumeQueue)
         {
-            Performance::BeginEvent("Fill root grids");
-            
             auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
             ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -853,18 +853,18 @@ namespace MR
 
             int WorkGroupCount = GetWorkGroupCount(rRootVolume.m_Level1QueueSize, g_TileSize1D);
             ContextManager::Dispatch(WorkGroupCount, 1, 1);
-
-            Performance::EndEvent();
         }
+
+        Performance::EndEvent();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
         // Fill intenal grids
         ////////////////////////////////////////////////////////////////////////////////////////////////
 
+        Performance::BeginEvent("Fill internal grids");
+
         for (uint32_t VolumeIndex : rVolumeQueue)
         {
-            Performance::BeginEvent("Fill internal grids");
-
             auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
             ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -882,18 +882,18 @@ namespace MR
             ////////////////////////////////////////////////////////////////////////////////////////////////
 
             ContextManager::SetShaderCS(m_IntegrateLevel1GridCSPtr);
-
-            Performance::EndEvent();
         }
+
+        Performance::EndEvent();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
         // Compute new TSDF values
         ////////////////////////////////////////////////////////////////////////////////////////////////
 
+        Performance::BeginEvent("Compute new TSDF");
+
         for (uint32_t VolumeIndex : rVolumeQueue)
         {
-            Performance::BeginEvent("Compute new TSDF");
-
             auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
             ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -911,9 +911,9 @@ namespace MR
             ////////////////////////////////////////////////////////////////////////////////////////////////
 
             ContextManager::SetShaderCS(m_IntegrateTSDFCSPtr);
-
-            Performance::EndEvent();
         }
+
+        Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------
@@ -975,6 +975,8 @@ namespace MR
 
 	void CScalableSLAMReconstructor::UpdateRootrids()
 	{
+        Performance::BeginEvent("Update root grids");
+
         ////////////////////////////////////////////////////////////////////////////////
         // Create all root grid volumes that are in the view frustum 
         ////////////////////////////////////////////////////////////////////////////////
@@ -1100,8 +1102,13 @@ namespace MR
             memcpy(VolumeQueue.data(), pVoxelQueue, sizeof(uint32_t) * VolumeCount);
             BufferManager::UnmapConstantBuffer(m_VolumeQueueBufferPtr);
 
+            Performance::BeginEvent("Rasterize voxels");
             CreateIntegrationQueues(VolumeQueue);
-            //IntegrateHierarchies(VolumeQueue);
+            Performance::EndEvent();
+            
+            Performance::BeginEvent("Integrate hierarchy");
+            IntegrateHierarchies(VolumeQueue);
+            Performance::EndEvent();
 
             // Compute the AABB for the whole reconstruction
             
@@ -1122,6 +1129,8 @@ namespace MR
                 TotalAABBMax[2] = Base::Max(TotalAABBMax[2], AABBMax[2]);
             }
         }
+
+        Performance::EndEvent();
 	}
 
 	// -----------------------------------------------------------------------------
