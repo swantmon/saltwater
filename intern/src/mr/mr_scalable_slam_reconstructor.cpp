@@ -835,6 +835,8 @@ namespace MR
 
         Performance::BeginEvent("Fill root grids");
 
+        ContextManager::SetShaderCS(m_IntegrateRootGridCSPtr);
+
         for (uint32_t VolumeIndex : rVolumeQueue)
         {
             auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
@@ -848,12 +850,10 @@ namespace MR
             *(pIndex + 1) = rRootVolume.m_Level1QueueSize;
             *(pIndex + 2) = rRootVolume.m_Level2QueueSize;
             BufferManager::UnmapConstantBuffer(m_VolumeQueueSizesBufferPtr);
-
+            
             ////////////////////////////////////////////////////////////////////////////////////////////////
             // Integrate into root grid
             ////////////////////////////////////////////////////////////////////////////////////////////////
-
-            ContextManager::SetShaderCS(m_IntegrateRootGridCSPtr);
 
             ContextManager::SetResourceBuffer(6, rRootVolume.m_Level1QueuePtr);
 
@@ -1111,7 +1111,7 @@ namespace MR
             Performance::EndEvent();
             
             Performance::BeginEvent("Integrate hierarchy");
-            //IntegrateHierarchies(VolumeQueue);
+            IntegrateHierarchies(VolumeQueue);
             Performance::EndEvent();
 
             // Compute the AABB for the whole reconstruction
