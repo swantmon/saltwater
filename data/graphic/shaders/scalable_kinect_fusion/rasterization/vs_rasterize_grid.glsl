@@ -55,8 +55,8 @@ void main()
     vec3 AABBPosition = g_Offset * g_ParentSize;
     AABBPosition += IndexToOffset(out_Index, g_Resolution) * g_CubeSize;
     
-    out_AABBMin = AABBPosition;
-    out_AABBMax = AABBPosition + g_CubeSize;
+    out_AABBMin = AABBPosition - TRUNCATED_DISTANCE / 1000.0f;
+    out_AABBMax = AABBPosition + TRUNCATED_DISTANCE / 1000.0f + g_CubeSize;
 
     gl_Position = Vertex;
 }

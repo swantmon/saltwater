@@ -64,9 +64,9 @@ void main()
     Vertex.z = 1.0f;//Vertex.z / (8.0f + VOLUME_SIZE);
 
     vec3 AABBPosition = g_Offset * VOLUME_SIZE + ParentOffset + GridOffset;
-    
-    out_AABBMin = AABBPosition;
-    out_AABBMax = AABBPosition + g_CubeSize;
+
+    out_AABBMin = AABBPosition - TRUNCATED_DISTANCE / 1000.0f;
+    out_AABBMax = AABBPosition + TRUNCATED_DISTANCE / 1000.0f + g_CubeSize;
     out_Index = Level1Index;
     gl_Position = Vertex;
 }
