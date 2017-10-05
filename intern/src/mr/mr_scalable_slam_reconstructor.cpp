@@ -743,10 +743,6 @@ namespace MR
             auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
             
             RasterizeRootGrid(rRootVolume);
-
-            SIndexedIndirect* pIndirect = static_cast<SIndexedIndirect*>(BufferManager::MapConstantBuffer(rRootVolume.m_IndirectLevel1Buffer, CBuffer::EMap::Read));
-            rRootVolume.m_Level1QueueSize = pIndirect->m_InstanceCount;
-            BufferManager::UnmapConstantBuffer(rRootVolume.m_IndirectLevel1Buffer);
         }
 
         Performance::EndEvent();
@@ -768,14 +764,20 @@ namespace MR
         {
             auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
-            if (rRootVolume.m_Level1QueueSize > 0)
-            {
-                RasterizeLevel1Grid(rRootVolume);
+            SIndexedIndirect* pIndirect = static_cast<SIndexedIndirect*>(BufferManager::MapConstantBuffer(rRootVolume.m_IndirectLevel1Buffer, CBuffer::EMap::Read));
+            rRootVolume.m_Level1QueueSize = pIndirect->m_InstanceCount;
+            BufferManager::UnmapConstantBuffer(rRootVolume.m_IndirectLevel1Buffer);
 
-                SIndexedIndirect* pIndirect = static_cast<SIndexedIndirect*>(BufferManager::MapConstantBuffer(rRootVolume.m_IndirectLevel2Buffer, CBuffer::EMap::Read));
-                rRootVolume.m_Level2QueueSize = pIndirect->m_InstanceCount;
-                BufferManager::UnmapConstantBuffer(rRootVolume.m_IndirectLevel2Buffer);
-            }
+            RasterizeLevel1Grid(rRootVolume);
+        }
+
+        for (uint32_t VolumeIndex : rVolumeQueue)
+        {
+            auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
+
+            SIndexedIndirect* pIndirect = static_cast<SIndexedIndirect*>(BufferManager::MapConstantBuffer(rRootVolume.m_IndirectLevel2Buffer, CBuffer::EMap::Read));
+            rRootVolume.m_Level2QueueSize = pIndirect->m_InstanceCount;
+            BufferManager::UnmapConstantBuffer(rRootVolume.m_IndirectLevel2Buffer);
         }
 
         Performance::EndEvent();
@@ -1107,7 +1109,7 @@ namespace MR
             Performance::EndEvent();
             
             Performance::BeginEvent("Integrate hierarchy");
-            IntegrateHierarchies(VolumeQueue);
+            //IntegrateHierarchies(VolumeQueue);
             Performance::EndEvent();
 
             // Compute the AABB for the whole reconstruction
