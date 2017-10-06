@@ -161,6 +161,13 @@ namespace
         float Padding[2];
     };
 
+    struct SPointRasterization
+    {
+        Base::Int3 m_Offset;
+        int32_t m_Resolution;
+        Base::Float4x4 m_WorldViewProjection;
+    };
+
     struct SVolumePoolItem
     {
         Base::Int3 m_Offset;
@@ -338,7 +345,7 @@ namespace MR
 			g_InitialCameraPosition[2] * VolumeSize
 		);
 		m_PoseMatrix = PoseTranslation * PoseRotation;
-
+        
         m_RootVolumePoolItemCount = 0;
 		m_IntegratedFrameCount = 0;
 		m_FrameCount = 0;
@@ -972,7 +979,33 @@ namespace MR
         // Render point cloud into 3D texture
         ////////////////////////////////////////////////////////////////////////////////
 
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
+        ContextManager::SetShaderVS(m_PointsRootGridVSPtr);
+        ContextManager::SetShaderGS(m_PointsRootGridGSPtr);
+        ContextManager::SetShaderPS(m_PointsRootGridFSPtr);
+
+        SPointRasterization BufferData;
+
+        BufferData.m_Offset = rRootGrid.m_Offset;
+        BufferData.m_Resolution = m_ReconstructionSettings.m_GridResolutions[0];
+        //BufferData.m_WorldViewProjection = Projection * View * World;
+
+        BufferManager::UploadConstantBufferData(m_PointRasterizationBufferPtr, &BufferData);
+
+        /*ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
+
+        ContextManager::SetImageTexture(0, static_cast<Gfx::CTextureBasePtr>(m_pScalableReconstructor->GetVertexMap()));
+
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBufferSet(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetIndexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+
+        ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
+        ContextManager::SetTopology(STopology::PointList);
+
+        ContextManager::Draw(512 * 424, 0);*/
 
         ////////////////////////////////////////////////////////////////////////////////
         // Gather all tagged voxels
@@ -1244,8 +1277,6 @@ namespace MR
         TextureDescriptor.m_Access = CTextureBase::CPUWrite;
         TextureDescriptor.m_Usage = CTextureBase::GPUReadWrite;
         TextureDescriptor.m_Semantic = CTextureBase::UndefinedSemantic;
-        TextureDescriptor.m_pFileName = nullptr;
-        TextureDescriptor.m_pPixels = 0;
         TextureDescriptor.m_Format = CTextureBase::R8_UINT;
 
         m_RootGridVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
@@ -1354,6 +1385,9 @@ namespace MR
         ConstantBufferDesc.m_pBytes = nullptr;
         ConstantBufferDesc.m_Usage = CBuffer::GPURead;
         m_GridRasterizationBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(SPointRasterization);
+        m_PointRasterizationBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
         ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
         ConstantBufferDesc.m_Access = CBuffer::CPUWrite;

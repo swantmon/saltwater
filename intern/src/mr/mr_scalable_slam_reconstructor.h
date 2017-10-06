@@ -189,6 +189,7 @@ namespace MR
         Gfx::CBufferPtr m_VolumeQueueBufferPtr;
 
         Gfx::CBufferPtr m_GridRasterizationBufferPtr;
+        Gfx::CBufferPtr m_PointRasterizationBufferPtr;
 
         SScalableVolume m_VolumeBuffers;
 

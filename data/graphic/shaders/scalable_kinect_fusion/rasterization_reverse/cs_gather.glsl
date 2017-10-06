@@ -33,7 +33,7 @@ layout(std430, binding = 2) buffer VolumeQueue
 // -------------------------------------------------------------------------------------
 // Compute Shader
 // -------------------------------------------------------------------------------------
-layout (local_size_x = 16, local_size_y = 16, local_size_z = 16) in;
+layout (local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 void main()
 {
     if (g_Counters[gl_GlobalInvocationID.x] > 0)

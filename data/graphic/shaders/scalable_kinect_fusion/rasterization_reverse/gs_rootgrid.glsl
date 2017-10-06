@@ -2,11 +2,28 @@
 #ifndef __INCLUDE_GS_RASTERIZATION_ROOTGRID_GLSL__
 #define __INCLUDE_GS_RASTERIZATION_ROOTGRID_GLSL__
 
-layout(location = 0) out vec4 out_Color;
+in gl_PerVertex
+{
+    vec4 gl_Position;
+} gl_in[];
+
+out gl_PerVertex
+{
+    vec4 gl_Position;
+};
+
+layout(points) in;
+layout(line_strip, max_vertices = 2) out;
 
 void main()
 {
-    out_Color = vec4(0.0f, 1.0f, 0.0f, 1.0f);
+    gl_Position = gl_in[0].gl_Position + vec4(-0.1, 0.0, 0.0, 0.0);
+    EmitVertex();
+
+    gl_Position = gl_in[0].gl_Position + vec4(0.1, 0.0, 0.0, 0.0);
+    EmitVertex();
+
+    EndPrimitive();
 }
 
 #endif // __INCLUDE_GS_RASTERIZATION_ROOTGRID_GLSL__
