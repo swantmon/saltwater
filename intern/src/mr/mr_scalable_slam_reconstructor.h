@@ -230,8 +230,11 @@ namespace MR
         Gfx::CMeshPtr m_Grid16MeshPtr;
         
         Gfx::CInputLayoutPtr m_CubeInputLayoutPtr;
-        Gfx::CTargetSetPtr m_TargetSetPtr;
+        Gfx::CTargetSetPtr m_EmptyTargetSetPtr;
         Gfx::CViewPortSetPtr m_DepthViewPortSetPtr;
+
+        Gfx::CTargetSetPtr m_RootGridVolumeTargetSetPtr;
+        Gfx::CViewPortSetPtr m_RootGridViewPort;
 
         Gfx::CTexture2DPtr m_RawDepthBufferPtr;
         Gfx::CTexture2DPtr m_RawCameraFramePtr;

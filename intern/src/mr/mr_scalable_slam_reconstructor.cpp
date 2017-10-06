@@ -235,6 +235,11 @@ namespace MR
         Gfx::CViewPortPtr DepthViewPort = ViewManager::CreateViewPort(ViewPortDescriptor);
 
         m_DepthViewPortSetPtr = ViewManager::CreateViewPortSet(DepthViewPort);
+
+        ViewPortDescriptor.m_Width = static_cast<float>(m_ReconstructionSettings.m_GridResolutions[0]);
+        ViewPortDescriptor.m_Height = static_cast<float>(m_ReconstructionSettings.m_GridResolutions[0]);
+
+        m_RootGridViewPort = ViewManager::CreateViewPortSet(DepthViewPort);
     }
 
     // -----------------------------------------------------------------------------
@@ -1318,6 +1323,8 @@ namespace MR
         TextureDescriptor.m_Format = CTextureBase::R8_UINT;
 
         m_RootGridVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
+
+        m_RootGridVolumeTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_RootGridVolumePtr));
     }
     
     // -----------------------------------------------------------------------------
