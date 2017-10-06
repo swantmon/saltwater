@@ -742,7 +742,8 @@ namespace MR
         {
             auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
             
-            RasterizeRootGrid(rRootVolume);
+            //RasterizeRootGrid(rRootVolume);
+            RasterizeRootGridReverse(rRootVolume);
         }
 
         Performance::EndEvent();
@@ -928,7 +929,7 @@ namespace MR
     // -----------------------------------------------------------------------------
 
     void CScalableSLAMReconstructor::RasterizeRootGrid(SRootVolume& rRootGrid)
-    {        
+    {
         SGridRasterization GridData = {};
         GridData.m_Resolution = m_ReconstructionSettings.m_GridResolutions[0];
         GridData.m_CubeSize = m_VolumeSizes[1];
@@ -953,6 +954,23 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
+    void CScalableSLAMReconstructor::RasterizeRootGridReverse(SRootVolume& rRootGrid)
+    {
+        ////////////////////////////////////////////////////////////////////////////////
+        // Render point cloud into 3D texture
+        ////////////////////////////////////////////////////////////////////////////////
+
+
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // Gather all tagged voxels
+        ////////////////////////////////////////////////////////////////////////////////
+
+
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CScalableSLAMReconstructor::RasterizeLevel1Grid(SRootVolume& rRootGrid)
     {
         SGridRasterization GridData = {};
@@ -962,7 +980,7 @@ namespace MR
         GridData.m_Offset = rRootGrid.m_Offset;
 
         BufferManager::UploadConstantBufferData(m_GridRasterizationBufferPtr, &GridData);
-                
+        
         ContextManager::SetResourceBuffer(2, rRootGrid.m_Level1QueuePtr);
         ContextManager::SetResourceBuffer(3, rRootGrid.m_Level2QueuePtr);
         ContextManager::SetResourceBuffer(4, m_VolumeAtomicCounterBufferPtr);
@@ -1114,7 +1132,7 @@ namespace MR
             Performance::EndEvent();
             
             Performance::BeginEvent("Integrate hierarchy");
-            IntegrateHierarchies(VolumeQueue);
+            //IntegrateHierarchies(VolumeQueue);
             Performance::EndEvent();
 
             // Compute the AABB for the whole reconstruction

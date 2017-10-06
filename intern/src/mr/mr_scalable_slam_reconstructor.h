@@ -129,6 +129,7 @@ namespace MR
         void IntegrateHierarchies(std::vector<uint32_t>& rVolumeQueue);
 
         void RasterizeRootGrid(SRootVolume& rRootGrid);
+        void RasterizeRootGridReverse(SRootVolume& rRootGrid);
         void RasterizeLevel1Grid(SRootVolume& rRootGrid);
 
         void ClearBuffer(Gfx::CBufferPtr BufferPtr, size_t Size);
