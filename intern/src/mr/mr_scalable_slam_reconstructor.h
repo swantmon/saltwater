@@ -217,6 +217,11 @@ namespace MR
         Gfx::CShaderPtr m_RasterizeLevel1GridVSPtr;
         Gfx::CShaderPtr m_RasterizeLevel1GridFSPtr;
 
+        Gfx::CShaderPtr m_PointsRootGridVSPtr;
+        Gfx::CShaderPtr m_PointsRootGridGSPtr;
+        Gfx::CShaderPtr m_PointsRootGridFSPtr;
+        Gfx::CShaderPtr m_PointsRootGridCSPtr;
+
         Gfx::CShaderPtr m_ClearAtomicCountersCSPtr;
 
         Gfx::CMeshPtr m_CubeMeshPtr;
@@ -236,6 +241,8 @@ namespace MR
         std::vector<Gfx::CTexture2DPtr> m_RaycastVertexMapPtr;
         std::vector<Gfx::CTexture2DPtr> m_RaycastNormalMapPtr;
         
+        Gfx::CTexture3DPtr m_RootGridVolumePtr;
+
         Gfx::CBufferPtr m_AtomicCounterBufferPtr;
 
 		CRootVolumeMap m_RootVolumeMap;

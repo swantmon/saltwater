@@ -427,6 +427,11 @@ namespace MR
 		m_RootgridDepthCSPtr = 0;
         m_VolumeCountersCSPtr = 0;
 
+        m_RasterizeRootGridVSPtr = 0;
+        m_RasterizeRootGridFSPtr = 0;
+        m_RasterizeLevel1GridVSPtr = 0;
+        m_RasterizeLevel1GridFSPtr = 0;
+
         m_RasterizeRootVolumeVSPtr = 0;
         m_RasterizeRootVolumeFSPtr = 0;
 
@@ -462,6 +467,8 @@ namespace MR
         }
 
         m_RootVolumeMap.clear();
+
+        m_RootGridVolumePtr = 0;
 
         m_IntrinsicsConstantBufferPtr = 0;
         m_TrackingDataConstantBufferPtr = 0;
@@ -551,6 +558,11 @@ namespace MR
         m_IntegrateRootGridCSPtr   = ShaderManager::CompileCS("scalable_kinect_fusion\\integration\\cs_integrate_rootgrid.glsl"     , "main", DefineString.c_str());
         m_IntegrateLevel1GridCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\integration\\cs_integrate_level1grid.glsl"   , "main", DefineString.c_str());
         m_IntegrateTSDFCSPtr       = ShaderManager::CompileCS("scalable_kinect_fusion\\integration\\cs_integrate_tsdf.glsl"         , "main", DefineString.c_str());
+
+        m_PointsRootGridVSPtr      = ShaderManager::CompileVS("scalable_kinect_fusion\\rasterization_reverse\\vs_rootgrid.glsl"     , "main", DefineString.c_str());
+        m_PointsRootGridGSPtr      = ShaderManager::CompileGS("scalable_kinect_fusion\\rasterization_reverse\\gs_rootgrid.glsl"     , "main", DefineString.c_str());
+        m_PointsRootGridFSPtr      = ShaderManager::CompilePS("scalable_kinect_fusion\\rasterization_reverse\\fs_rootgrid.glsl"     , "main", DefineString.c_str());
+        m_PointsRootGridCSPtr      = ShaderManager::CompileCS("scalable_kinect_fusion\\rasterization_reverse\\cs_gather.glsl"       , "main", DefineString.c_str());
 
         SInputElementDescriptor InputLayoutDesc = {};
 
@@ -1221,7 +1233,22 @@ namespace MR
 			TextureDescriptor.m_Format = CTextureBase::R8G8B8A8_UBYTE;
 
 			m_RawCameraFramePtr = TextureManager::CreateTexture2D(TextureDescriptor);
-		}        
+		}
+
+        TextureDescriptor.m_NumberOfPixelsU = 16;
+        TextureDescriptor.m_NumberOfPixelsV = 16;
+        TextureDescriptor.m_NumberOfPixelsW = 16;
+        TextureDescriptor.m_NumberOfMipMaps = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding = CTextureBase::ShaderResource;
+        TextureDescriptor.m_Access = CTextureBase::CPUWrite;
+        TextureDescriptor.m_Usage = CTextureBase::GPUReadWrite;
+        TextureDescriptor.m_Semantic = CTextureBase::UndefinedSemantic;
+        TextureDescriptor.m_pFileName = nullptr;
+        TextureDescriptor.m_pPixels = 0;
+        TextureDescriptor.m_Format = CTextureBase::R8_UINT;
+
+        m_RootGridVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
     }
     
     // -----------------------------------------------------------------------------
