@@ -2,18 +2,11 @@
 #ifndef __INCLUDE_CS_VOLUME_COUNTERS_GLSL__
 #define __INCLUDE_CS_VOLUME_COUNTERS_GLSL__
 
+#include "scalable_kinect_fusion/common_indirect.glsl"
+
 // -----------------------------------------------------------------------------
 // Buffers
 // -----------------------------------------------------------------------------
-
-struct SIndexedIndirect
-{
-    uint  m_IndexCount;
-    uint  m_InstanceCount;
-    uint  m_FirstIndex;
-    uint  m_BaseVertex;
-    uint  m_BaseInstance;
-};
 
 layout(std430, binding = 0) buffer AtomicBuffer
 {
@@ -22,7 +15,7 @@ layout(std430, binding = 0) buffer AtomicBuffer
 
 layout(std430, binding = 1) buffer IndirectBuffer
 {
-    SIndexedIndirect g_Indirect;
+    SIndirectBuffers g_Indirect;
 };
 
 layout(std430, binding = 2) buffer VolumeQueue
@@ -38,7 +31,7 @@ void main()
 {
     if (g_Counters[gl_GlobalInvocationID.x] > 100)
     {
-        uint InstanceIndex = atomicAdd(g_Indirect.m_InstanceCount, 1);
+        uint InstanceIndex = atomicAdd(g_Indirect.m_Indexed.m_InstanceCount, 1);
         g_VolumeID[InstanceIndex] = gl_GlobalInvocationID.x;
     }
 }

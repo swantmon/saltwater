@@ -3,15 +3,7 @@
 #define __INCLUDE_FS_RASTERIZE_LEVEL1GRID_GLSL__
 
 #include "scalable_kinect_fusion/common_tracking.glsl"
-
-struct SIndexedIndirect
-{
-    uint  m_IndexCount;
-    uint  m_InstanceCount;
-    uint  m_FirstIndex;
-    uint  m_BaseVertex;
-    uint  m_BaseInstance;
-};
+#include "scalable_kinect_fusion/common_indirect.glsl"
 
 // -----------------------------------------------------------------------------
 // Uniform buffers
@@ -37,7 +29,7 @@ layout(std430, binding = 4) buffer AtomicBuffer
 
 layout(std430, binding = 5) buffer IndirectBuffer
 {
-    SIndexedIndirect g_Indirect;
+    SIndirectBuffers g_Indirect;
 };
 
 // -----------------------------------------------------------------------------
@@ -88,7 +80,7 @@ void main()
         uint Count = atomicCompSwap(g_Counters[in_Index], 0, 1);
         if (Count == 0)
         {
-            uint Index = atomicAdd(g_Indirect.m_InstanceCount, 1);
+            uint Index = atomicAdd(g_Indirect.m_Indexed.m_InstanceCount, 1);
             g_VolumeID[Index] = in_Index;
         }
     }
