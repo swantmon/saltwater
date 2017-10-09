@@ -103,14 +103,17 @@ namespace ContextManager
 
     void ResetConstantBuffer(unsigned int _Unit);
     void SetConstantBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
+    void SetConstantBufferRange(unsigned int _Unit, CBufferPtr _BufferPtr, unsigned int _Offset, unsigned int _Range);
     CBufferPtr GetConstantBuffer(unsigned int _Unit);
 
     void ResetResourceBuffer(unsigned int _Unit);
     void SetResourceBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
+    void SetResourceBufferRange(unsigned int _Unit, CBufferPtr _BufferPtr, unsigned int _Offset, unsigned int _Range);
     CBufferPtr GetResourceBuffer(unsigned int _Unit);
 
 	void ResetAtomicCounterBuffer(unsigned int _Unit);
 	void SetAtomicCounterBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
+    void SetAtomicCounterBufferRange(unsigned int _Unit, CBufferPtr _BufferPtr, unsigned int _Offset, unsigned int _Range);
 	CBufferPtr GetAtomicCounterBuffer(unsigned int _Unit);
 
     void Barrier();
@@ -120,10 +123,10 @@ namespace ContextManager
     void DrawIndexed(unsigned int _NumberOfIndices, unsigned int _IndexOfFirstIndex, int _BaseVertexLocation);
     void DrawInstanced(unsigned int _NumberOfVertices, unsigned int _NumberOfInstances, unsigned int _IndexOfFirstVertex);
     void DrawIndexedInstanced(unsigned int _NumberOfIndices, unsigned int _NumberOfInstances, unsigned int _IndexOfFirstIndex, int _BaseVertexLocation, unsigned int _StartInstanceLocation);
-    void DrawIndirect(CBufferPtr _IndirectBufferPtr);
-    void DrawIndexedIndirect(CBufferPtr _IndirectBufferPtr);
+    void DrawIndirect(CBufferPtr _IndirectBufferPtr, unsigned int _Offset = 0);
+    void DrawIndexedIndirect(CBufferPtr _IndirectBufferPtr, unsigned int _Offset = 0);
 
     void Dispatch(unsigned int _NumberOfThreadGroupsX, unsigned int _NumberOfThreadGroupsY, unsigned int _NumberOfThreadGroupsZ);
-    void DispatchIndirect(CBufferPtr _IndirectBufferPtr);
+    void DispatchIndirect(CBufferPtr _IndirectBufferPtr, unsigned int _Offset = 0);
 } // namespace ContextManager
 } // namespace Gfx
