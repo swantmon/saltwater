@@ -147,7 +147,7 @@ namespace
         uint32_t m_BaseIndex;
     };
 
-    struct SIndexedIndirectParameters
+    struct SIndexedParameters
     {
         uint32_t m_IndexCount;
         uint32_t m_InstanceCount;
@@ -156,7 +156,7 @@ namespace
         uint32_t m_BaseInstance;
     };
 
-    struct SComputeIndirectParameters
+    struct SComputeParameters
     {
         uint32_t m_WorkGroupsX;
         uint32_t m_WorkGroupsY;
@@ -166,8 +166,8 @@ namespace
     struct SIndirectBuffers
     {
         SIndirectParameters m_Draw;
-        SIndexedIndirectParameters m_DrawIndexed;
-        SComputeIndirectParameters m_DispatchCompute;
+        SIndexedParameters m_Indexed;
+        SComputeParameters m_Compute;
     };
 
     struct SInstanceData
@@ -695,7 +695,7 @@ namespace MR
 
         ContextManager::SetShaderCS(m_VolumeCountersCSPtr);
 
-        SIndexedIndirectParameters IndirectBufferData = {};
+        SIndexedParameters IndirectBufferData = {};
         IndirectBufferData.m_IndexCount = 36;
         BufferManager::UploadConstantBufferData(IndirectBuffer, &IndirectBufferData);
 
@@ -714,7 +714,7 @@ namespace MR
 
         ContextManager::SetShaderCS(m_GridCountersCSPtr);
 
-        SIndexedIndirectParameters IndirectBufferData = {};
+        SIndexedParameters IndirectBufferData = {};
         IndirectBufferData.m_IndexCount = 36;
         BufferManager::UploadConstantBufferData(IndirectBuffer, &IndirectBufferData);
 
@@ -761,7 +761,7 @@ namespace MR
                 ConstantBufferDesc.m_NumberOfBytes *= m_ReconstructionSettings.m_VoxelsPerGrid[1];
                 rRootVolume.m_Level2QueuePtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
-                ConstantBufferDesc.m_NumberOfBytes = sizeof(SIndexedIndirectParameters);
+                ConstantBufferDesc.m_NumberOfBytes = sizeof(SIndexedParameters);
                 rRootVolume.m_IndirectLevel1Buffer = BufferManager::CreateBuffer(ConstantBufferDesc);
                 rRootVolume.m_IndirectLevel2Buffer = BufferManager::CreateBuffer(ConstantBufferDesc);
             }
@@ -867,11 +867,11 @@ namespace MR
         {
             auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
-            SIndexedIndirectParameters* pIndirect = static_cast<SIndexedIndirectParameters*>(BufferManager::MapConstantBuffer(rRootVolume.m_IndirectLevel1Buffer, CBuffer::EMap::Read));
+            SIndexedParameters* pIndirect = static_cast<SIndexedParameters*>(BufferManager::MapConstantBuffer(rRootVolume.m_IndirectLevel1Buffer, CBuffer::EMap::Read));
             rRootVolume.m_Level1QueueSize = pIndirect->m_InstanceCount;
             BufferManager::UnmapConstantBuffer(rRootVolume.m_IndirectLevel1Buffer);
 
-            pIndirect = static_cast<SIndexedIndirectParameters*>(BufferManager::MapConstantBuffer(rRootVolume.m_IndirectLevel2Buffer, CBuffer::EMap::Read));
+            pIndirect = static_cast<SIndexedParameters*>(BufferManager::MapConstantBuffer(rRootVolume.m_IndirectLevel2Buffer, CBuffer::EMap::Read));
             rRootVolume.m_Level2QueueSize = pIndirect->m_InstanceCount;
             BufferManager::UnmapConstantBuffer(rRootVolume.m_IndirectLevel2Buffer);
         }
@@ -1030,7 +1030,7 @@ namespace MR
 
         BufferManager::UploadConstantBufferData(m_GridRasterizationBufferPtr, &GridData);
 
-        SIndexedIndirectParameters IndirectBufferData = {};
+        SIndexedParameters IndirectBufferData = {};
         IndirectBufferData.m_IndexCount = m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         BufferManager::UploadConstantBufferData(rRootGrid.m_IndirectLevel1Buffer, &IndirectBufferData);
         
@@ -1094,7 +1094,7 @@ namespace MR
         ContextManager::SetResourceBuffer(4, m_VolumeAtomicCounterBufferPtr);
         ContextManager::SetResourceBuffer(5, rRootGrid.m_IndirectLevel2Buffer);
 
-        SIndexedIndirectParameters IndirectBufferData = {};
+        SIndexedParameters IndirectBufferData = {};
         IndirectBufferData.m_IndexCount = m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         BufferManager::UploadConstantBufferData(rRootGrid.m_IndirectLevel2Buffer, &IndirectBufferData);
 
@@ -1215,7 +1215,7 @@ namespace MR
         Performance::EndEvent();
 
         // todo: try to get rid of mapping
-        SIndexedIndirectParameters* pIndirectData = static_cast<SIndexedIndirectParameters*>(BufferManager::MapConstantBuffer(m_IndexedIndirectBufferPtr, CBuffer::ReadWrite));
+        SIndexedParameters* pIndirectData = static_cast<SIndexedParameters*>(BufferManager::MapConstantBuffer(m_IndexedIndirectBufferPtr, CBuffer::ReadWrite));
         int VolumeCount = pIndirectData->m_InstanceCount;
         BufferManager::UnmapConstantBuffer(m_IndexedIndirectBufferPtr);
 
@@ -1442,7 +1442,7 @@ namespace MR
         ConstantBufferDesc.m_Usage = CBuffer::GPURead;
         ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
         ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(SIndexedIndirectParameters);
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(SIndexedParameters);
         m_IndexedIndirectBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         
         ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
