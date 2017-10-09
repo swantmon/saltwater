@@ -60,7 +60,7 @@ namespace
     const unsigned int g_RootVolumePoolSize =              1024u * 1024u; //    1 MB
     const unsigned int g_RootGridPoolSize   =       128u * 1024u * 1024u; //  128 MB
     const unsigned int g_Level1GridPoolSize =       128u * 1024u * 1024u; //  128 MB
-    const unsigned int g_TSDFPoolSize       = 16u * 128u * 1024u * 1024u; // 2048 GB;
+    const unsigned int g_TSDFPoolSize       = 16u * 128u * 1024u * 1024u; // 2048 MB
     
     const float g_EpsilonDistance = 0.1f;
     const float g_EpsilonAngle = 0.75f;
