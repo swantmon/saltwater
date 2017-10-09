@@ -120,10 +120,10 @@ namespace ContextManager
     void DrawIndexed(unsigned int _NumberOfIndices, unsigned int _IndexOfFirstIndex, int _BaseVertexLocation);
     void DrawInstanced(unsigned int _NumberOfVertices, unsigned int _NumberOfInstances, unsigned int _IndexOfFirstVertex);
     void DrawIndexedInstanced(unsigned int _NumberOfIndices, unsigned int _NumberOfInstances, unsigned int _IndexOfFirstIndex, int _BaseVertexLocation, unsigned int _StartInstanceLocation);
-    void DrawIndirect(CBufferPtr _IndirectBufferPtr);
-    void DrawIndexedIndirect(CBufferPtr _IndirectBufferPtr);
+    void DrawIndirect(CBufferPtr _IndirectBufferPtr, unsigned int _Offset = 0);
+    void DrawIndexedIndirect(CBufferPtr _IndirectBufferPtr, unsigned int _Offset = 0);
 
     void Dispatch(unsigned int _NumberOfThreadGroupsX, unsigned int _NumberOfThreadGroupsY, unsigned int _NumberOfThreadGroupsZ);
-    void DispatchIndirect(CBufferPtr _IndirectBufferPtr);
+    void DispatchIndirect(CBufferPtr _IndirectBufferPtr, unsigned int _Offset = 0);
 } // namespace ContextManager
 } // namespace Gfx

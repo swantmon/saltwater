@@ -140,11 +140,11 @@ namespace
         void DrawIndexed(unsigned int _NumberOfIndices, unsigned int _IndexOfFirstIndex, int _BaseVertexLocation);
         void DrawInstanced(unsigned int _NumberOfVertices, unsigned int _NumberOfInstances, unsigned int _IndexOfFirstVertex);
         void DrawIndexedInstanced(unsigned int _NumberOfIndices, unsigned int _NumberOfInstances, unsigned int _IndexOfFirstIndex, int _BaseVertexLocation, unsigned int _StartInstanceLocation);
-        void DrawIndirect(CBufferPtr _IndirectBufferPtr);
-        void DrawIndexedIndirect(CBufferPtr _IndirectBufferPtr);
+        void DrawIndirect(CBufferPtr _IndirectBufferPtr, unsigned int _Offset);
+        void DrawIndexedIndirect(CBufferPtr _IndirectBufferPtr, unsigned int _Offset);
         
         void Dispatch(unsigned int _NumberOfThreadGroupsX, unsigned int _NumberOfThreadGroupsY, unsigned int _NumberOfThreadGroupsZ);
-        void DispatchIndirect(CBufferPtr _IndirectBufferPtr);
+        void DispatchIndirect(CBufferPtr _IndirectBufferPtr, unsigned int _Offset);
     
     private:
     
@@ -1534,26 +1534,26 @@ namespace
     
     // -----------------------------------------------------------------------------
 
-    void CGfxContextManager::DrawIndirect(CBufferPtr _IndirectBufferPtr)
+    void CGfxContextManager::DrawIndirect(CBufferPtr _IndirectBufferPtr, unsigned int _Offset)
     {
         Gfx::CNativeBuffer& rNativeBuffer = *static_cast<Gfx::CNativeBuffer*>(_IndirectBufferPtr.GetPtr());
 
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, rNativeBuffer.m_NativeBuffer);
 
-        glDrawArraysIndirect(s_NativeTopologies[m_Topology], 0);
+        glDrawArraysIndirect(s_NativeTopologies[m_Topology], reinterpret_cast<void*>(_Offset));
 
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxContextManager::DrawIndexedIndirect(CBufferPtr _IndirectBufferPtr)
+    void CGfxContextManager::DrawIndexedIndirect(CBufferPtr _IndirectBufferPtr, unsigned int _Offset)
     {
         Gfx::CNativeBuffer& rNativeBuffer = *static_cast<Gfx::CNativeBuffer*>(_IndirectBufferPtr.GetPtr());
 
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, rNativeBuffer.m_NativeBuffer);
 
-        glDrawElementsIndirect(s_NativeTopologies[m_Topology], GL_UNSIGNED_INT, 0);
+        glDrawElementsIndirect(s_NativeTopologies[m_Topology], GL_UNSIGNED_INT, reinterpret_cast<void*>(_Offset));
 
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
     }
@@ -1569,13 +1569,13 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxContextManager::DispatchIndirect(CBufferPtr _IndirectBufferPtr)
+    void CGfxContextManager::DispatchIndirect(CBufferPtr _IndirectBufferPtr, unsigned int _Offset)
     {
         Gfx::CNativeBuffer& rNativeBuffer = *static_cast<Gfx::CNativeBuffer*>(_IndirectBufferPtr.GetPtr());
 
         glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, rNativeBuffer.m_NativeBuffer);
 
-        glDispatchComputeIndirect(0);
+        glDispatchComputeIndirect(_Offset);
 
         glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, 0);
     }
@@ -2267,16 +2267,16 @@ namespace ContextManager
     
     // -----------------------------------------------------------------------------
 
-    void DrawIndirect(CBufferPtr _IndirectBufferPtr)
+    void DrawIndirect(CBufferPtr _IndirectBufferPtr, unsigned int _Offset)
     {
-        CGfxContextManager::GetInstance().DrawIndirect(_IndirectBufferPtr);
+        CGfxContextManager::GetInstance().DrawIndirect(_IndirectBufferPtr, _Offset);
     }
 
     // -----------------------------------------------------------------------------
 
-    void DrawIndexedIndirect(CBufferPtr _IndirectBufferPtr)
+    void DrawIndexedIndirect(CBufferPtr _IndirectBufferPtr, unsigned int _Offset)
     {
-        CGfxContextManager::GetInstance().DrawIndexedIndirect(_IndirectBufferPtr);
+        CGfxContextManager::GetInstance().DrawIndexedIndirect(_IndirectBufferPtr, _Offset);
     }
 
     // -----------------------------------------------------------------------------
@@ -2288,9 +2288,9 @@ namespace ContextManager
 
     // -----------------------------------------------------------------------------
 
-    void DispatchIndirect(CBufferPtr _IndirectBufferPtr)
+    void DispatchIndirect(CBufferPtr _IndirectBufferPtr, unsigned int _Offset)
     {
-        CGfxContextManager::GetInstance().DispatchIndirect(_IndirectBufferPtr);
+        CGfxContextManager::GetInstance().DispatchIndirect(_IndirectBufferPtr, _Offset);
     }
 } // ContextManager
 } // namespace Gfx
