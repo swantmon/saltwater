@@ -191,7 +191,6 @@ namespace
     {
         Base::Int3 m_Offset;
         int32_t m_Resolution;
-        Base::Float4x4 m_WorldViewProjection;
     };
 
     struct SVolumePoolItem
@@ -1060,7 +1059,6 @@ namespace MR
 
         BufferData.m_Offset = rRootGrid.m_Offset;
         BufferData.m_Resolution = m_ReconstructionSettings.m_GridResolutions[0];
-        //BufferData.m_WorldViewProjection = Projection * View * World;
 
         BufferManager::UploadConstantBufferData(m_PointRasterizationBufferPtr, &BufferData);
 
