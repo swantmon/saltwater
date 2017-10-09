@@ -793,14 +793,14 @@ namespace MR
             ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
             ContextManager::SetTopology(STopology::PointList);
 
-            glEnable(GL_CONSERVATIVE_RASTERIZATION_NV);
+            //glEnable(GL_CONSERVATIVE_RASTERIZATION_NV);
             for (uint32_t VolumeIndex : rVolumeQueue)
             {
                 auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
                 RasterizeRootGridReverse(rRootVolume);
             }
-            glDisable(GL_CONSERVATIVE_RASTERIZATION_NV);
+            //glDisable(GL_CONSERVATIVE_RASTERIZATION_NV);
 
             Performance::EndEvent();
         }
@@ -1061,11 +1061,10 @@ namespace MR
 
         BufferData.m_Offset = rRootGrid.m_Offset;
         BufferData.m_Resolution = m_ReconstructionSettings.m_GridResolutions[0];
-
         BufferManager::UploadConstantBufferData(m_PointRasterizationBufferPtr, &BufferData);
 
         ContextManager::SetConstantBuffer(0, m_PointRasterizationBufferPtr);
-        
+
         ContextManager::Draw(m_pRGBDCameraControl->GetDepthPixelCount(), 0);
 
         ////////////////////////////////////////////////////////////////////////////////
@@ -1074,7 +1073,13 @@ namespace MR
 
         ContextManager::SetShaderCS(m_PointsRootGridCSPtr);
 
+        SIndirectBuffers IndirectBufferData = {};
+        IndirectBufferData.m_Indexed.m_IndexCount = m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
+        BufferManager::UploadConstantBufferData(rRootGrid.m_IndirectLevel1Buffer, &IndirectBufferData);
+
         ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RootGridVolumePtr));
+        ContextManager::SetResourceBuffer(2, rRootGrid.m_Level1QueuePtr);
+        ContextManager::SetResourceBuffer(3, rRootGrid.m_IndirectLevel1Buffer);
 
         ContextManager::Dispatch(1, 1, 16);
     }
