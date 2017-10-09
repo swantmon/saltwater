@@ -168,6 +168,10 @@ namespace
         SIndirectParameters m_Draw;
         SIndexedParameters m_Indexed;
         SComputeParameters m_Compute;
+
+        static const int s_DrawOffset = 0;
+        static const int s_IndexOffset = sizeof(SIndexedParameters);
+        static const int s_ComputeOffset = sizeof(SIndexedParameters) + sizeof(SComputeParameters);
     };
 
     struct SInstanceData
