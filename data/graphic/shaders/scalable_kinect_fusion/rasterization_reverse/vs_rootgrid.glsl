@@ -14,13 +14,7 @@ layout(row_major, std140, binding = 0) uniform PerVolumeData
     int g_Resolution;
 };
 
-layout (binding = 0, rgba16f) uniform image2D cs_VertexMap;
-
-// -----------------------------------------------------------------------------
-// Output
-// -----------------------------------------------------------------------------
-
-layout(location = 0) out vec3 out_WSPosition;
+layout(location = 0) out flat int out_VertexID;
 
 // -----------------------------------------------------------------------------
 // Functions
@@ -28,12 +22,7 @@ layout(location = 0) out vec3 out_WSPosition;
 
 void main()
 {
-    ivec2 UV;
-    UV.x = gl_VertexID % 512;
-    UV.y = gl_VertexID / 512;
-    out_WSPosition = imageLoad(cs_VertexMap, UV);
-    out_WSPosition.w = 1.0f;
-    out_WSPosition = g_WorldMatrix * WSPosition;
+    out_VertexID = gl_VertexID;
 }
 
 #endif // __INCLUDE_VS_RASTERIZATION_ROOTGRID_GLSL__
