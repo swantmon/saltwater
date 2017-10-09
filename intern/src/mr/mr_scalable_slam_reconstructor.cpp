@@ -41,8 +41,6 @@
 using namespace MR;
 using namespace Gfx;
 
-//#define USE_PERISTENT_MAPPING
-
 namespace
 {
 	//*
@@ -53,7 +51,7 @@ namespace
 	const Base::Float3 g_InitialCameraRotation = Base::Float3(0.0f, 0.0f, 0.0f);
 	//*/
 
-    const bool g_UseReverseIntegration = false;
+    const bool g_UseReverseIntegration = true;
 
     const bool g_UseHighPrecisionMaps = false;
     
