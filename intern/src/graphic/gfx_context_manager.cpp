@@ -2169,6 +2169,13 @@ namespace ContextManager
 
     // -----------------------------------------------------------------------------
 
+    void SetConstantBufferRange(unsigned int _Unit, CBufferPtr _BufferPtr, unsigned int _Offset, unsigned int _Range)
+    {
+        CGfxContextManager::GetInstance().SetConstantBufferRange(_Unit, _BufferPtr, _Offset, _Range);
+    }
+
+    // -----------------------------------------------------------------------------
+
     CBufferPtr GetConstantBuffer(unsigned int _Unit)
     {
         return CGfxContextManager::GetInstance().GetConstantBuffer(_Unit);
@@ -2186,6 +2193,13 @@ namespace ContextManager
     void SetResourceBuffer(unsigned int _Unit, CBufferPtr _BufferPtr)
     {
         CGfxContextManager::GetInstance().SetResourceBuffer(_Unit, _BufferPtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SetResourceBufferRange(unsigned int _Unit, CBufferPtr _BufferPtr, unsigned int _Offset, unsigned int _Range)
+    {
+        CGfxContextManager::GetInstance().SetResourceBufferRange(_Unit, _BufferPtr, _Offset, _Range);
     }
 
     // -----------------------------------------------------------------------------
@@ -2208,6 +2222,13 @@ namespace ContextManager
 	{
 		CGfxContextManager::GetInstance().SetAtomicCounterBuffer(_Unit, _BufferPtr);
 	}
+
+    // -----------------------------------------------------------------------------
+
+    void SetAtomicCounterBufferRange(unsigned int _Unit, CBufferPtr _BufferPtr, unsigned int _Offset, unsigned int _Range)
+    {
+        CGfxContextManager::GetInstance().SetAtomicCounterBufferRange(_Unit, _BufferPtr, _Offset, _Range);
+    }
 
 	// -----------------------------------------------------------------------------
 

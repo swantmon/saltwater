@@ -103,14 +103,17 @@ namespace ContextManager
 
     void ResetConstantBuffer(unsigned int _Unit);
     void SetConstantBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
+    void SetConstantBufferRange(unsigned int _Unit, CBufferPtr _BufferPtr, unsigned int _Offset, unsigned int _Range);
     CBufferPtr GetConstantBuffer(unsigned int _Unit);
 
     void ResetResourceBuffer(unsigned int _Unit);
     void SetResourceBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
+    void SetResourceBufferRange(unsigned int _Unit, CBufferPtr _BufferPtr, unsigned int _Offset, unsigned int _Range);
     CBufferPtr GetResourceBuffer(unsigned int _Unit);
 
 	void ResetAtomicCounterBuffer(unsigned int _Unit);
 	void SetAtomicCounterBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
+    void SetAtomicCounterBufferRange(unsigned int _Unit, CBufferPtr _BufferPtr, unsigned int _Offset, unsigned int _Range);
 	CBufferPtr GetAtomicCounterBuffer(unsigned int _Unit);
 
     void Draw(unsigned int _NumberOfVertices, unsigned int _IndexOfFirstVertex);
