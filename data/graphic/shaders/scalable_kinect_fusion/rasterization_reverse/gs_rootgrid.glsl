@@ -52,8 +52,9 @@ void main()
     vec3 VSPosition = WSPosition - g_Offset * VOLUME_SIZE;
     VSPosition = (VSPosition / VOLUME_SIZE) * 2.0f - 1.0f;
     VSPosition.z = VSPosition.z * 0.5f + 0.5f;
-    VSPosition.z = 0.5f;
-    gl_Layer = 0;
+
+    gl_Layer = int(VSPosition.z * 16);
+    //gl_Layer = 0;
 
     gl_Position = vec4(VSPosition, 1.0f);
     EmitVertex();
