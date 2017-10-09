@@ -969,11 +969,11 @@ namespace
 
 		if (m_pScalableReconstructor != nullptr)
 		{
-			RenderScalableVolume();
+			//RenderScalableVolume();
             RenderVertexMap();
-            //RenderRootVolumes();
+            RenderRootVolumes();
             //RenderLevel1Grids();
-            RenderLevel2Grids();
+            //RenderLevel2Grids();
 		}
 		else
 		{

@@ -858,7 +858,7 @@ namespace MR
         {
             auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
             
-            RasterizeLevel1Grid(rRootVolume);
+            //RasterizeLevel1Grid(rRootVolume);
         }
 
         for (uint32_t VolumeIndex : rVolumeQueue)
@@ -1072,7 +1072,11 @@ namespace MR
         // Gather all tagged voxels
         ////////////////////////////////////////////////////////////////////////////////
 
+        ContextManager::SetShaderCS(m_PointsRootGridCSPtr);
 
+        ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RootGridVolumePtr));
+
+        ContextManager::Dispatch(1, 1, 16);
     }
 
     // -----------------------------------------------------------------------------

@@ -1,46 +1,21 @@
 
-#ifndef __INCLUDE_VS_RASTERIZATION_GATHER_GLSL__
-#define __INCLUDE_VS_RASTERIZATION_GATHER_GLSL__
+#ifndef __INCLUDE_CS_GATHER_GATHER_GLSL__
+#define __INCLUDE_CS_GATHER_GATHER_GLSL__
 
 // -----------------------------------------------------------------------------
 // Buffers
 // -----------------------------------------------------------------------------
 
-struct SIndexedIndirect
-{
-    uint  m_IndexCount;
-    uint  m_InstanceCount;
-    uint  m_FirstIndex;
-    uint  m_BaseVertex;
-    uint  m_BaseInstance;
-};
+layout(binding = 1, r8ui) uniform uimage3D cs_Volume;
 
-layout(std430, binding = 0) buffer AtomicBuffer
-{
-    uint g_Counters[];
-};
-
-layout(std430, binding = 1) buffer IndirectBuffer
-{
-    SIndexedIndirect g_Indirect;
-};
-
-layout(std430, binding = 2) buffer VolumeQueue
-{
-    uint g_VolumeID[];
-};
-
-// -------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // Compute Shader
-// -------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+
 layout (local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 void main()
 {
-    if (g_Counters[gl_GlobalInvocationID.x] > 0)
-    {
-        uint InstanceIndex = atomicAdd(g_Indirect.m_InstanceCount, 1);
-        g_VolumeID[InstanceIndex] = gl_GlobalInvocationID.x;
-    }
+    imageStore(cs_Volume, ivec3(gl_GlobalInvocationID), vec4(0.0f));
 }
 
-#endif // __INCLUDE_VS_RASTERIZATION_GATHER_GLSL__
+#endif // __INCLUDE_CS_GATHER_GATHER_GLSL__
