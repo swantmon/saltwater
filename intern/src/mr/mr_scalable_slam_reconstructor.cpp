@@ -54,6 +54,8 @@ namespace
 	//*/
 
     const bool g_UseReverseIntegration = true;
+
+    const bool g_UseHighPrecisionMaps = false;
     
     const unsigned int g_RootVolumePoolSize =              1024u * 1024u; //    1 MB
     const unsigned int g_RootGridPoolSize   =       128u * 1024u * 1024u; //  128 MB
@@ -68,8 +70,6 @@ namespace
     const unsigned int g_TileSize1D = 64;
     const unsigned int g_TileSize2D = 16;
     const unsigned int g_TileSize3D = 8;
-
-    const bool g_UseHighPrecisionMaps = false;
 
     Base::Float3 CubeVertices[] =
     {
@@ -221,8 +221,6 @@ namespace MR
 
     void CScalableSLAMReconstructor::SetupRenderStates()
     {
-        m_EmptyTargetSetPtr = TargetSetManager::CreateEmptyTargetSet(m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight());
-
         SViewPortDescriptor ViewPortDescriptor = {};
 
         ViewPortDescriptor.m_MinDepth = 0.0f;
@@ -1316,15 +1314,16 @@ namespace MR
         TextureDescriptor.m_NumberOfPixelsW = 16;
         TextureDescriptor.m_NumberOfMipMaps = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding = CTextureBase::ShaderResource;
+        TextureDescriptor.m_Binding = CTextureBase::RenderTarget | CTextureBase::ShaderResource;
         TextureDescriptor.m_Access = CTextureBase::CPUWrite;
         TextureDescriptor.m_Usage = CTextureBase::GPUReadWrite;
         TextureDescriptor.m_Semantic = CTextureBase::UndefinedSemantic;
         TextureDescriptor.m_Format = CTextureBase::R8_UINT;
 
         m_RootGridVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
-
         m_RootGridVolumeTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_RootGridVolumePtr));
+
+        m_EmptyTargetSetPtr = TargetSetManager::CreateEmptyTargetSet(m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight());
     }
     
     // -----------------------------------------------------------------------------
