@@ -4,14 +4,23 @@
 
 #include "common_global.glsl"
 
-layout(row_major, std140, binding = 1) uniform PerDrawCallData
+// -----------------------------------------------------------------------------
+// Buffers
+// -----------------------------------------------------------------------------
+
+layout(row_major, std140, binding = 0) uniform PerVolumeData
 {
-    mat4 g_WorldMatrix;
-    vec4 g_Color;
+    ivec3 g_Offset;
+    int g_Resolution;
 };
 
 layout (binding = 0, rgba16f) uniform image2D cs_VertexMap;
 
+// -----------------------------------------------------------------------------
+// Output
+// -----------------------------------------------------------------------------
+
+layout(location = 0) out vec3 out_WSPosition;
 
 // -----------------------------------------------------------------------------
 // Functions
@@ -22,10 +31,9 @@ void main()
     ivec2 UV;
     UV.x = gl_VertexID % 512;
     UV.y = gl_VertexID / 512;
-    vec4 WSPosition = imageLoad(cs_VertexMap, UV);
-    WSPosition.w = 1.0f;
-    WSPosition = g_WorldMatrix * WSPosition;
-    //gl_Position = g_WorldToScreen * WSPosition;
+    out_WSPosition = imageLoad(cs_VertexMap, UV);
+    out_WSPosition.w = 1.0f;
+    out_WSPosition = g_WorldMatrix * WSPosition;
 }
 
 #endif // __INCLUDE_VS_RASTERIZATION_ROOTGRID_GLSL__
