@@ -123,14 +123,17 @@ namespace
 
         void ResetConstantBuffer(unsigned int _Unit);
         void SetConstantBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
+        void SetConstantBufferRange(unsigned int _Unit, CBufferPtr _BufferPtr, unsigned int _Offset, unsigned int _Range);
         CBufferPtr GetConstantBuffer(unsigned int _Unit);
 
         void ResetResourceBuffer(unsigned int _Unit);
         void SetResourceBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
+        void SetResourceBufferRange(unsigned int _Unit, CBufferPtr _BufferPtr, unsigned int _Offset, unsigned int _Range);
         CBufferPtr GetResourceBuffer(unsigned int _Unit);
 
 		void ResetAtomicCounterBuffer(unsigned int _Unit);
 		void SetAtomicCounterBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
+        void SetAtomicCounterBufferRange(unsigned int _Unit, CBufferPtr _BufferPtr, unsigned int _Offset, unsigned int _Range);
 		CBufferPtr GetAtomicCounterBuffer(unsigned int _Unit);
 
         void Draw(unsigned int _NumberOfVertices, unsigned int _IndexOfFirstVertex);
@@ -1342,6 +1345,27 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxContextManager::SetConstantBufferRange(unsigned int _Unit, CBufferPtr _BufferPtr, unsigned int _Offset, unsigned int _Range)
+    {
+        if (_BufferPtr == nullptr) return;
+
+        CNativeBuffer* pNativeBuffer = 0;
+
+        assert(_Unit < s_NumberOfBufferUnits);
+
+        if (m_BufferUnits[_Unit] == _BufferPtr) return;
+
+        pNativeBuffer = static_cast<CNativeBuffer*>(_BufferPtr.GetPtr());
+
+        assert(pNativeBuffer->GetBinding() == CBuffer::ConstantBuffer);
+
+        glBindBufferRange(GL_UNIFORM_BUFFER, _Unit, pNativeBuffer->m_NativeBuffer, _Offset, _Range);
+
+        m_BufferUnits[_Unit] = 0; // TODO: store range binding
+    }
+
+    // -----------------------------------------------------------------------------
+
     CBufferPtr CGfxContextManager::GetConstantBuffer(unsigned int _Unit)
     {
         assert(_Unit < s_NumberOfBufferUnits);
@@ -1379,6 +1403,27 @@ namespace
         glBindBufferRange(GL_SHADER_STORAGE_BUFFER, _Unit, pNativeBuffer->m_NativeBuffer, 0, pNativeBuffer->GetNumberOfBytes());
 		
         m_ResourceUnits[_Unit] = _BufferPtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxContextManager::SetResourceBufferRange(unsigned int _Unit, CBufferPtr _BufferPtr, unsigned int _Offset, unsigned int _Range)
+    {
+        if (_BufferPtr == nullptr) return;
+
+        CNativeBuffer* pNativeBuffer = 0;
+
+        assert(_Unit < s_NumberOfResourceUnits);
+
+        if (m_ResourceUnits[_Unit] == _BufferPtr) return;
+
+        pNativeBuffer = static_cast<CNativeBuffer*>(_BufferPtr.GetPtr());
+
+        assert(pNativeBuffer->GetBinding() == CBuffer::ResourceBuffer);
+
+        glBindBufferRange(GL_SHADER_STORAGE_BUFFER, _Unit, pNativeBuffer->m_NativeBuffer, _Offset, _Range);
+
+        m_ResourceUnits[_Unit] = 0; // TODO: store range binding
     }
 
     // -----------------------------------------------------------------------------
@@ -1421,6 +1466,27 @@ namespace
 
 		m_AtomicUnits[_Unit] = _BufferPtr;
 	}
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxContextManager::SetAtomicCounterBufferRange(unsigned int _Unit, CBufferPtr _BufferPtr, unsigned int _Offset, unsigned int _Range)
+    {
+        if (_BufferPtr == nullptr) return;
+
+        CNativeBuffer* pNativeBuffer = 0;
+
+        assert(_Unit < s_NumberOfAtomicUnits);
+
+        if (m_AtomicUnits[_Unit] == _BufferPtr) return;
+
+        pNativeBuffer = static_cast<CNativeBuffer*>(_BufferPtr.GetPtr());
+
+        assert(pNativeBuffer->GetBinding() == CBuffer::AtomicCounterBuffer);
+
+        glBindBufferRange(GL_ATOMIC_COUNTER_BUFFER, _Unit, pNativeBuffer->m_NativeBuffer, _Offset, _Range);
+
+        m_AtomicUnits[_Unit] = 0; // TODO: store range binding
+    }
 
 	// -----------------------------------------------------------------------------
 
