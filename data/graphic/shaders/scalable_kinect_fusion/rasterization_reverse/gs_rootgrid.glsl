@@ -38,6 +38,8 @@ out gl_PerVertex
 
 out int gl_Layer;
 
+layout(location = 0) out flat vec3 out_WSPosition;
+
 // -----------------------------------------------------------------------------
 // Geometry shader
 // -----------------------------------------------------------------------------
@@ -81,6 +83,7 @@ void main()
         {
             gl_Layer = LayerIndex;
             gl_Position = vec4(VSLinePositions[i], 1.0f);
+            out_WSPosition = WSPosition;
 
             EmitVertex();
         }
