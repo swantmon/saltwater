@@ -33,6 +33,9 @@ void main()
     AABBMin += g_Offset;
     vec3 AABBMax = AABBMin + VOLUME_SIZE / 16.0f;
 
+    AABBMin -= TRUNCATED_DISTANCE / 1000.0f;
+    AABBMax += TRUNCATED_DISTANCE / 1000.0f;
+
     if (in_WSPosition.z > AABBMin.z && in_WSPosition.z < AABBMax.z)
     {
         if (in_WSPosition.y > AABBMin.y && in_WSPosition.y < AABBMax.y)
