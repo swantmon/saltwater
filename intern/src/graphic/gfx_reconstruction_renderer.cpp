@@ -973,7 +973,7 @@ namespace
             RenderVertexMap();
             RenderRootVolumes();
             RenderLevel1Grids();
-            //RenderLevel2Grids();
+            RenderLevel2Grids();
 		}
 		else
 		{
