@@ -22,7 +22,7 @@ layout(binding = 0, rgba16f) uniform image2D cs_VertexMap;
 
 in gl_PerVertex
 {
-  vec4 gl_Position;
+    vec4 gl_Position;
 } gl_in[];
 
 layout(location = 0) in flat int in_VertexID[];
