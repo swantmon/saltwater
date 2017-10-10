@@ -1066,6 +1066,7 @@ namespace MR
         BufferManager::UploadConstantBufferData(m_PointRasterizationBufferPtr, &BufferData);
 
         ContextManager::SetConstantBuffer(0, m_PointRasterizationBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
 
         ContextManager::Draw(m_pRGBDCameraControl->GetDepthPixelCount(), 0);
 

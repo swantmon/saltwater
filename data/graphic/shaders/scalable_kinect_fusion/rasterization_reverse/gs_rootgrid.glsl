@@ -2,6 +2,8 @@
 #ifndef __INCLUDE_GS_RASTERIZATION_ROOTGRID_GLSL__
 #define __INCLUDE_GS_RASTERIZATION_ROOTGRID_GLSL__
 
+#include "scalable_kinect_fusion/common_tracking.glsl"
+
 // -----------------------------------------------------------------------------
 // Buffer
 // -----------------------------------------------------------------------------
@@ -48,13 +50,13 @@ void main()
     UV.x = in_VertexID[0] % DEPTH_IMAGE_WIDTH;
     UV.y = in_VertexID[0] / DEPTH_IMAGE_WIDTH;
     vec3 WSPosition = imageLoad(cs_VertexMap, UV).xyz;
+    WSPosition = (g_PoseMatrix * vec4(WSPosition, 1.0f)).xyz;
 
     vec3 VSPosition = WSPosition - g_Offset * VOLUME_SIZE;
     VSPosition = (VSPosition / VOLUME_SIZE) * 2.0f - 1.0f;
     VSPosition.z = VSPosition.z * 0.5f + 0.5f;
 
     gl_Layer = int(VSPosition.z * 16);
-    //gl_Layer = 0;
 
     gl_Position = vec4(VSPosition, 1.0f);
     EmitVertex();
