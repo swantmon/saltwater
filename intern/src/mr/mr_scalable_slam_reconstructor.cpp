@@ -260,7 +260,9 @@ namespace MR
         ViewPortDescriptor.m_Width = static_cast<float>(m_ReconstructionSettings.m_GridResolutions[0]);
         ViewPortDescriptor.m_Height = static_cast<float>(m_ReconstructionSettings.m_GridResolutions[0]);
 
-        m_RootGridViewPort = ViewManager::CreateViewPortSet(DepthViewPort);
+        Gfx::CViewPortPtr RootGridViewPort = ViewManager::CreateViewPort(ViewPortDescriptor);
+
+        m_RootGridViewPort = ViewManager::CreateViewPortSet(RootGridViewPort);
     }
 
     // -----------------------------------------------------------------------------
@@ -1114,8 +1116,6 @@ namespace MR
 
 	void CScalableSLAMReconstructor::UpdateRootrids()
 	{
-        Performance::BeginEvent("Update root grids");
-
         ////////////////////////////////////////////////////////////////////////////////
         // Create all root grid volumes that are in the view frustum 
         ////////////////////////////////////////////////////////////////////////////////
@@ -1268,8 +1268,6 @@ namespace MR
                 TotalAABBMax[2] = Base::Max(TotalAABBMax[2], AABBMax[2]);
             }
         }
-
-        Performance::EndEvent();
 	}
 
 	// -----------------------------------------------------------------------------
