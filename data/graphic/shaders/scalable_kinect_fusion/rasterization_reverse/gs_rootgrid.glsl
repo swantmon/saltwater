@@ -43,7 +43,7 @@ out int gl_Layer;
 // -----------------------------------------------------------------------------
 
 layout(points) in;
-layout(points, max_vertices = 1) out;
+layout(line_strip, max_vertices = 2) out;
 void main()
 {
     ivec2 UV;
@@ -52,16 +52,40 @@ void main()
     vec3 WSPosition = imageLoad(cs_VertexMap, UV).xyz;
     WSPosition = (g_PoseMatrix * vec4(WSPosition, 1.0f)).xyz;
 
-    vec3 VSPosition = WSPosition - g_Offset * VOLUME_SIZE;
-    VSPosition = (VSPosition / VOLUME_SIZE) * 2.0f - 1.0f;
-    VSPosition.z = VSPosition.z * 0.5f + 0.5f;
+    vec3 CameraDirection = normalize(WSPosition - g_PoseMatrix[3].xyz);
 
-    gl_Layer = int(VSPosition.z * 16);
+    vec3 WSLinePositions[2];
+    WSLinePositions[0] = WSPosition - CameraDirection * TRUNCATED_DISTANCE / 1000.0f;
+    WSLinePositions[1] = WSPosition + CameraDirection * TRUNCATED_DISTANCE / 1000.0f;
 
-    gl_Position = vec4(VSPosition, 1.0f);
-    EmitVertex();
+    vec3 VSLinePositions[2];
+    for(int i = 0; i < 2; ++ i)
+    {
+        VSLinePositions[i] = WSLinePositions[i] - g_Offset * VOLUME_SIZE;
+        VSLinePositions[i] = (VSLinePositions[i] / VOLUME_SIZE) * 2.0f - 1.0f;
+        VSLinePositions[i].z = VSLinePositions[i].z * 0.5f + 0.5f;
+    }
 
-    EndPrimitive();
+    int Layers[2];
+    for(int i = 0; i < 2; ++ i)
+    {
+        Layers[i] = int(VSLinePositions[i].z * 16);
+    }
+
+    int MinLayer = min(Layers[0], Layers[1]);
+    int MaxLayer = max(Layers[0], Layers[1]);
+
+    for(int LayerIndex = MinLayer; LayerIndex <= MaxLayer; ++ LayerIndex)
+    {
+        for(int i = 0; i < 2; ++ i)
+        {
+            gl_Layer = LayerIndex;
+            gl_Position = vec4(VSLinePositions[i], 1.0f);
+
+            EmitVertex();
+        }
+        EndPrimitive();
+    }
 }
 
 #endif // __INCLUDE_GS_RASTERIZATION_ROOTGRID_GLSL__
