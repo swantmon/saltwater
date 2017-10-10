@@ -795,14 +795,14 @@ namespace MR
             ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
             ContextManager::SetTopology(STopology::PointList);
 
-            //glEnable(GL_CONSERVATIVE_RASTERIZATION_NV);
+            glEnable(GL_CONSERVATIVE_RASTERIZATION_NV);
             for (uint32_t VolumeIndex : rVolumeQueue)
             {
                 auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
                 RasterizeRootGridReverse(rRootVolume);
             }
-            //glDisable(GL_CONSERVATIVE_RASTERIZATION_NV);
+            glDisable(GL_CONSERVATIVE_RASTERIZATION_NV);
 
             Performance::EndEvent();
         }
@@ -861,7 +861,7 @@ namespace MR
         {
             auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
             
-            //RasterizeLevel1Grid(rRootVolume);
+            RasterizeLevel1Grid(rRootVolume);
         }
 
         for (uint32_t VolumeIndex : rVolumeQueue)
@@ -1065,7 +1065,7 @@ namespace MR
         BufferData.m_Resolution = m_ReconstructionSettings.m_GridResolutions[0];
         BufferManager::UploadConstantBufferData(m_PointRasterizationBufferPtr, &BufferData);
 
-        ContextManager::SetConstantBuffer(0, m_PointRasterizationBufferPtr);
+        ContextManager::SetConstantBuffer(3, m_PointRasterizationBufferPtr);
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
 
         ContextManager::Draw(m_pRGBDCameraControl->GetDepthPixelCount(), 0);
