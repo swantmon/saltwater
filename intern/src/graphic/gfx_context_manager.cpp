@@ -793,6 +793,11 @@ namespace
             unsigned int Stride            = rElement.GetStride();
             unsigned int AlignedByteOffset = rElement.GetAlignedByteOffset();
 
+            if (rElement.GetInputSlot() != 0)
+            {
+                BASE_CONSOLE_WARNING("Multiple vertex buffer objects are currently not supported. Undefined behavior expected.");
+            }
+
             glVertexAttribPointer(IndexOfElement, FormatSize, NativeFormat, GL_FALSE, Stride, (char *)NULL + AlignedByteOffset);
 
             glEnableVertexAttribArray(IndexOfElement);
