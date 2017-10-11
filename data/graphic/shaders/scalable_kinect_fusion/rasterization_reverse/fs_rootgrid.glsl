@@ -30,7 +30,8 @@ void main()
 {
     vec3 AABBMin = vec3(gl_FragCoord.xy, gl_Layer);
     AABBMin /= 16.0f;
-    AABBMin += g_Offset;
+    AABBMin *= VOLUME_SIZE;
+    AABBMin += g_Offset * VOLUME_SIZE;
     vec3 AABBMax = AABBMin + VOLUME_SIZE / 16.0f;
 
     AABBMin -= TRUNCATED_DISTANCE / 1000.0f;
