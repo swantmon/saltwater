@@ -273,7 +273,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Rendering
         // -----------------------------------------------------------------------------
-        const unsigned int pOffset[] = { 0, 0 };
+        
 
         ContextManager::SetRenderContext(m_LightRenderContextPtr);
 

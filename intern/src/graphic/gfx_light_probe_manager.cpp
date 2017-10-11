@@ -766,8 +766,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Render environment as reflection into cube map
         // -----------------------------------------------------------------------------
-        const unsigned int pOffset[] = { 0, 0 };
-
         ContextManager::SetTargetSet        (_rInterLightProbeFacet.m_TargetSetPtr);
         ContextManager::SetViewPortSet      (_rInterLightProbeFacet.m_ViewPortSetPtr);
         ContextManager::SetBlendState       (StateManager::GetBlendState(0));
@@ -921,7 +919,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Prepare renderer
         // -----------------------------------------------------------------------------
-        const unsigned int pOffset[] = { 0, 0 };
+        
 
         ContextManager::SetTargetSet        (_rInterLightProbeFacet.m_TargetSetPtr);
         ContextManager::SetViewPortSet      (_rInterLightProbeFacet.m_ViewPortSetPtr);
@@ -1138,7 +1136,7 @@ namespace
 
     void CGfxLightProbeManager::RenderFiltering(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet& _rDtLightProbeFacet)
     {
-        const unsigned int pOffset[] = { 0, 0 };
+        
 
         // -----------------------------------------------------------------------------
         // Start updating/filtering

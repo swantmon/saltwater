@@ -619,7 +619,7 @@ namespace
 
         Performance::BeginEvent("SSAO");
 
-        const unsigned int pOffset[] = { 0, 0 };
+        
 
         // -----------------------------------------------------------------------------
         // Get screen resolutions

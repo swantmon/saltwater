@@ -340,7 +340,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Prepare renderer
         // -----------------------------------------------------------------------------
-        const unsigned int pOffset[] = { 0, 0 };
+        
 
         ContextManager::SetRenderContext(m_DeferredContextPtr);
 
@@ -458,8 +458,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Prepare renderer
         // -----------------------------------------------------------------------------
-        const unsigned int pOffset[] = { 0, 0 };
-
         ContextManager::SetRenderContext(m_HitProxyContextPtr);
 
         ContextManager::SetTopology(STopology::TriangleList);

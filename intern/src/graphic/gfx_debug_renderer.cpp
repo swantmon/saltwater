@@ -614,7 +614,6 @@ namespace
             ContextManager::DrawIndexed(6, 0, 0);
         };
 
-        const unsigned int pOffset[] = {0, 0};
         CDebugCameras::const_iterator CurrentCamera = m_DebugCameras.begin();
         CDebugCameras::const_iterator EndOfCameras  = m_DebugCameras.end();
 
@@ -692,8 +691,6 @@ namespace
     void CGfxDebugRenderer::RenderGizmo()
     {
         if (!m_IsGizmoVisible) return;
-
-        const unsigned int pOffset[] = {0, 0};
 
         Performance::BeginEvent("Gizmo");
 
@@ -773,7 +770,7 @@ namespace
 
     void CGfxDebugRenderer::RenderTextures()
     {
-        const unsigned int pOffset[] = { 0, 0 };
+        
         CDebugTextures::iterator CurrentTexture = m_DebugTextures.begin();
         CDebugTextures::iterator EndOfTextures  = m_DebugTextures.end();
 
@@ -873,11 +870,7 @@ namespace
 
     void CGfxDebugRenderer::RenderTexts()
     {
-        const unsigned int      pOffset[] = { 0, 0 };
-        void*                   pInstances;
-        SPerTextInstanceBuffer* pInstance;
-        unsigned int            NumberOfLetters = 0;
-        Base::Int2              ScreenSize = Main::GetActiveWindowSize();
+        Base::Int2 ScreenSize = Main::GetActiveWindowSize();
 
         CDebugTexts::const_iterator CurrentText = m_DebugTexts.begin();
         CDebugTexts::const_iterator EndOfTexts  = m_DebugTexts.end();

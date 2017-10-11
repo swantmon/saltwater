@@ -749,7 +749,7 @@ namespace
 
             BufferManager::UploadConstantBufferData(m_DownSamplePropertiesBufferPtr, &DownSampleSettings);
 
-            const unsigned int pOffset[] = { 0, 0 };
+            
 
             ContextManager::SetRenderContext(m_DownSampleRenderContextPtrs[IndexOfDownSample]);
 
@@ -891,8 +891,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Rendering
         // -----------------------------------------------------------------------------
-        const unsigned int pOffset[] = {0, 0};
-
         ContextManager::SetRenderContext(m_SwapContextPtrs[NextSwapBufferCount]);
         
         ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
@@ -970,8 +968,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Rendering
         // -----------------------------------------------------------------------------
-        const unsigned int pOffset[] = {0, 0};
-        
         ContextManager::SetRenderContext(m_SwapContextPtrs[NextSwapBufferCount]);
 
         ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());

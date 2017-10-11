@@ -693,7 +693,7 @@ namespace
 
         Performance::BeginEvent("IBL");
 
-        const unsigned int pOffset[] = { 0, 0 };
+        
 
         // -----------------------------------------------------------------------------
         // IBL data
@@ -827,7 +827,7 @@ namespace
 
         Performance::BeginEvent("HCB");
 
-        const unsigned int pOffset[] = { 0, 0 };
+        
 
         ContextManager::SetBlendState(StateManager::GetBlendState(0));
 
@@ -936,7 +936,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Screen Space Reflections
         // -----------------------------------------------------------------------------
-        const unsigned int pOffset[] = { 0, 0 };
+        
 
         ContextManager::SetBlendState(StateManager::GetBlendState(0));
 

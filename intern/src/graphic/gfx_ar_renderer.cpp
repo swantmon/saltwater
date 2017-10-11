@@ -481,7 +481,7 @@ namespace
 
         Performance::BeginEvent("AR");
 
-        const unsigned int pOffset[] = { 0, 0 };
+        
 
         MR::CControl* pControl = MR::ControlManager::GetActiveControl();
 
@@ -707,7 +707,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Prepare renderer
         // -----------------------------------------------------------------------------
-        const unsigned int pOffset[] = { 0, 0 };
+        
 
         ContextManager::SetRenderContext(m_HitProxyContextPtr);
 
