@@ -45,7 +45,7 @@ layout(location = 0) out flat vec3 out_WSPosition;
 // -----------------------------------------------------------------------------
 
 layout(points) in;
-layout(line_strip, max_vertices = 2) out;
+layout(line_strip, max_vertices = 4) out;
 void main()
 {
     ivec2 UV;
