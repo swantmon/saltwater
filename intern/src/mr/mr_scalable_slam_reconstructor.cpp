@@ -1318,7 +1318,7 @@ namespace MR
             memcpy(VolumeQueue.data(), pVoxelQueue, sizeof(uint32_t) * VolumeCount);
             BufferManager::UnmapConstantBuffer(m_VolumeQueueBufferPtr);
 
-            Performance::BeginEvent("Rasterize voxels");
+            Performance::BeginEvent("Create integration queues");
             CreateIntegrationQueues(VolumeQueue);
             Performance::EndEvent();
             
