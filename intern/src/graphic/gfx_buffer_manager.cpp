@@ -155,10 +155,7 @@ namespace
 
     CGfxBufferManager::CInternBufferSet::~CInternBufferSet()
     {
-        if (m_NativeBufferArrayHandle != 0)
-        {
-            glDeleteVertexArrays(1, &m_NativeBufferArrayHandle);
-        }
+
     }
 
     // -----------------------------------------------------------------------------
@@ -168,11 +165,6 @@ namespace
         unsigned int IndexOfBuffer;
 
         if (m_NumberOfBuffers != _rBufferSet.m_NumberOfBuffers)
-        {
-            return false;
-        }
-        
-        if (m_NativeBufferArrayHandle != _rBufferSet.m_NativeBufferArrayHandle)
         {
             return false;
         }
@@ -195,11 +187,6 @@ namespace
         unsigned int IndexOfBuffer;
 
         if (m_NumberOfBuffers != _rBufferSet.m_NumberOfBuffers)
-        {
-            return true;
-        }
-        
-        if (m_NativeBufferArrayHandle != _rBufferSet.m_NativeBufferArrayHandle)
         {
             return true;
         }
@@ -393,7 +380,7 @@ namespace
 
     CBufferSetPtr CGfxBufferManager::CreateBufferSet(CBufferPtr* _pBufferPtrs, unsigned int _NumberOfBuffers)
     {
-        CBufferPtr         BufferPtr;
+        CBufferPtr BufferPtr;
         
         // -----------------------------------------------------------------------------
         // Allocate item in buffer
@@ -405,8 +392,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Fill internal buffer set with general data
         // -----------------------------------------------------------------------------
-        rBufferSet.m_NumberOfBuffers         = _NumberOfBuffers;
-        rBufferSet.m_NativeBufferArrayHandle = 0;
+        rBufferSet.m_NumberOfBuffers = _NumberOfBuffers;
         
         // -----------------------------------------------------------------------------
         // Setup internal buffer set with buffer information and define buffer array
@@ -426,49 +412,31 @@ namespace
     
     CBufferSetPtr CGfxBufferManager::CreateVertexBufferSet(CBufferPtr* _pBufferPtrs, unsigned int _NumberOfBuffers)
     {
-        CInternBuffer*           pBuffer;
-        CBufferPtr               BufferPtr;
-        Gfx::CNativeBufferHandle BufferArrayHandle;
-        
+        CBufferPtr BufferPtr;
+
         // -----------------------------------------------------------------------------
         // Allocate item in buffer
         // -----------------------------------------------------------------------------
         CBufferSets::CPtr BufferSetPtr = m_BufferSets.Allocate();
-        
+
         CInternBufferSet& rBufferSet = *BufferSetPtr;
-        
-        // -----------------------------------------------------------------------------
-        // Setup an buffer array object as a set of buffer
-        // -----------------------------------------------------------------------------
-        glCreateVertexArrays(1, &BufferArrayHandle);
-        
-        glBindVertexArray(BufferArrayHandle);
-        
+
         // -----------------------------------------------------------------------------
         // Fill internal buffer set with general data
         // -----------------------------------------------------------------------------
-        rBufferSet.m_NumberOfBuffers         = _NumberOfBuffers;
-        rBufferSet.m_NativeBufferArrayHandle = BufferArrayHandle;
-        
+        rBufferSet.m_NumberOfBuffers = _NumberOfBuffers;
+
         // -----------------------------------------------------------------------------
-        // Setup internal bufferset with buffer information and define buffer array
+        // Setup internal buffer set with buffer information and define buffer array
         // by binding all buffers to it.
         // -----------------------------------------------------------------------------
         for (unsigned int CurrentBuffer = 0; CurrentBuffer < _NumberOfBuffers; ++CurrentBuffer)
         {
             BufferPtr = _pBufferPtrs[CurrentBuffer];
-            pBuffer   = static_cast<CInternBuffer*>(BufferPtr.GetPtr());
-            
+
             rBufferSet.m_BufferPtrs[CurrentBuffer] = _pBufferPtrs[CurrentBuffer];
-            
-            glBindBuffer(ConvertBindFlag(pBuffer->GetBinding()), pBuffer->m_NativeBuffer);
         }
-        
-        // -----------------------------------------------------------------------------
-        // Unbind new vertex array object
-        // -----------------------------------------------------------------------------
-        glBindVertexArray(0);
-        
+
         return CBufferSetPtr(BufferSetPtr);
     }
 
@@ -613,7 +581,7 @@ namespace
             GL_ELEMENT_ARRAY_BUFFER,    //> Indices
             GL_UNIFORM_BUFFER,          //> Constant Buffer
             GL_SHADER_STORAGE_BUFFER,   //> Resource Buffer
-			GL_ATOMIC_COUNTER_BUFFER,   //> Atomic Counter
+            GL_ATOMIC_COUNTER_BUFFER,   //> Atomic Counter
         };
 
         return s_NativeBindFlag[_BindFlag];

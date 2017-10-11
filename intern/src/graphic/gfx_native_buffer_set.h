@@ -14,8 +14,5 @@ namespace Gfx
 {
     class CNativeBufferSet : public CBufferSet
     {
-    public:
-        
-        Gfx::CNativeBufferHandle m_NativeBufferArrayHandle;
     };
 } // namespace Gfx
