@@ -942,6 +942,11 @@ namespace
         Gfx::CNativeBufferSet& rNativeBuffer = *static_cast<Gfx::CNativeBufferSet*>(_BufferSetPtr.GetPtr());
         
         unsigned int NumberOfBuffers = rNativeBuffer.GetNumberOfBuffers();
+
+        if (NumberOfBuffers > 1)
+        {
+            BASE_CONSOLE_WARNING("Multiple vertex buffer objects are currently not supported. Undefined behavior expected.");
+        }
         
         if (m_VertexBufferSetPtr != _BufferSetPtr || m_NumberOfVertexBuffers != NumberOfBuffers)
         {            
@@ -966,6 +971,11 @@ namespace
         Gfx::CNativeBufferSet& rNativeBuffer = *static_cast<Gfx::CNativeBufferSet*>(_BufferSetPtr.GetPtr());
         
         unsigned int NumberOfBuffers = rNativeBuffer.GetNumberOfBuffers();
+
+        if (NumberOfBuffers > 1)
+        {
+            BASE_CONSOLE_WARNING("Multiple vertex buffer objects are currently not supported. Undefined behavior expected.");
+        }
         
         if (m_VertexBufferSetPtr != _BufferSetPtr || m_NumberOfVertexBuffers != NumberOfBuffers)
         {
