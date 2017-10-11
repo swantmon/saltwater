@@ -526,11 +526,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Render sky box in background
         // -----------------------------------------------------------------------------
-        const unsigned int pOffset[] = {0, 0};
-        
         ContextManager::SetRenderContext(RenderContextPtr);
                 
-        ContextManager::SetVertexBufferSet(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
         
         ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
         
@@ -574,7 +572,7 @@ namespace
         
         ContextManager::ResetIndexBuffer();
         
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
         
         ContextManager::ResetShaderVS();
         
@@ -667,11 +665,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Rendering
         // -----------------------------------------------------------------------------
-        const unsigned int pOffset[] = { 0, 0 };
-
         ContextManager::SetRenderContext(RenderContextPtr);
 
-        ContextManager::SetVertexBufferSet(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
 
         ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
@@ -715,7 +711,7 @@ namespace
 
         ContextManager::ResetIndexBuffer();
 
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 

@@ -842,7 +842,7 @@ namespace
 
         ContextManager::SetRenderContext(m_LightRenderContextPtr);
 
-        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
 
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
@@ -886,7 +886,7 @@ namespace
 
         ContextManager::ResetIndexBuffer();
 
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 

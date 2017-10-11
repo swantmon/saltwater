@@ -532,7 +532,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Set items to context manager
                 // -----------------------------------------------------------------------------
-                ContextManager::SetVertexBufferSet(SurfacePtr->GetVertexBuffer(), pOffset);
+                ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
 
                 ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
 
@@ -552,7 +552,7 @@ namespace
 
                 ContextManager::ResetIndexBuffer();
 
-                ContextManager::ResetVertexBufferSet();
+                ContextManager::ResetVertexBuffer();
 
                 ContextManager::ResetConstantBuffer(0);
                 ContextManager::ResetConstantBuffer(1);
@@ -644,7 +644,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Set items to context manager
             // -----------------------------------------------------------------------------
-            ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+            ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
 
             ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
@@ -676,7 +676,7 @@ namespace
 
             ContextManager::ResetIndexBuffer();
 
-            ContextManager::ResetVertexBufferSet();
+            ContextManager::ResetVertexBuffer();
 
             ContextManager::ResetConstantBuffer(0);
 
@@ -748,7 +748,7 @@ namespace
             ContextManager::SetConstantBuffer(1, m_ModelBufferPtr);
             ContextManager::SetConstantBuffer(2, m_HitProxyPassPSBufferPtr);
 
-            ContextManager::SetVertexBufferSet(SurfacePtr->GetVertexBuffer(), pOffset);
+            ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
 
             ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
 
@@ -760,7 +760,7 @@ namespace
 
             ContextManager::ResetIndexBuffer();
 
-            ContextManager::ResetVertexBufferSet();
+            ContextManager::ResetVertexBuffer();
 
             ContextManager::ResetConstantBuffer(0);
             ContextManager::ResetConstantBuffer(1);

@@ -40,29 +40,23 @@ namespace BufferManager
     CBufferSetPtr CreateBufferSet(CBufferPtr _Buffer1Ptr, CBufferPtr _Buffer2Ptr, CBufferPtr _Buffer3Ptr, CBufferPtr _Buffer4Ptr);
     CBufferSetPtr CreateBufferSet(CBufferPtr* _pBufferPtrs, unsigned int _NumberOfBuffers);
     
-    CBufferSetPtr CreateVertexBufferSet(CBufferPtr _Buffer1Ptr);
-    CBufferSetPtr CreateVertexBufferSet(CBufferPtr _Buffer1Ptr, CBufferPtr _Buffer2Ptr);
-    CBufferSetPtr CreateVertexBufferSet(CBufferPtr _Buffer1Ptr, CBufferPtr _Buffer2Ptr, CBufferPtr _Buffer3Ptr);
-    CBufferSetPtr CreateVertexBufferSet(CBufferPtr _Buffer1Ptr, CBufferPtr _Buffer2Ptr, CBufferPtr _Buffer3Ptr, CBufferPtr _Buffer4Ptr);
-    CBufferSetPtr CreateVertexBufferSet(CBufferPtr* _pBufferPtrs, unsigned int _NumberOfBuffers);
-    
     void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr);
 
     void* MapVertexBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map);
-	void* MapVertexBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range);
+    void* MapVertexBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range);
     void UnmapVertexBuffer(CBufferPtr _BufferPtr);
 
     void* MapIndexBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map);
-	void* MapIndexBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range);
+    void* MapIndexBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range);
     void UnmapIndexBuffer(CBufferPtr _BufferPtr);
 
     void* MapConstantBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map);
-	void* MapConstantBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range);
+    void* MapConstantBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range);
     void UnmapConstantBuffer(CBufferPtr _BufferPtr);
 
-	void* MapAtomicCounterBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map);
-	void* MapAtomicCounterBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range);
-	void UnmapAtomicCounterBuffer(CBufferPtr _BufferPtr);
+    void* MapAtomicCounterBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map);
+    void* MapAtomicCounterBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range);
+    void UnmapAtomicCounterBuffer(CBufferPtr _BufferPtr);
 
     void UploadVertexBufferData(CBufferPtr _BufferPtr, const void* _pData);
     void UploadConstantBufferData(CBufferPtr _BufferPtr, const void* _pData);

@@ -85,10 +85,9 @@ namespace
         void SetIndexBuffer(CBufferPtr _BufferPtr, unsigned int _Stride, unsigned int _Offset);
         CBufferPtr GetIndexBuffer();
 
-        void ResetVertexBufferSet();
-        void SetVertexBufferSet(CBufferSetPtr _BufferSetPtr, const unsigned int* _pOffsets);
-        void SetVertexBufferSet(CBufferSetPtr _BufferSetPtr, const unsigned int* _pStrides, const unsigned int* _pOffsets);
-        CBufferSetPtr GetVertexBufferSet();
+        void ResetVertexBuffer();
+        void SetVertexBuffer(CBufferPtr _BufferPtr);
+        CBufferPtr GetVertexBuffer();
 
         void ResetShaderVS();
         void SetShaderVS(CShaderPtr _ShaderSetPtr);
@@ -181,10 +180,9 @@ namespace
         CBufferPtr            m_IndexBufferPtr;
         unsigned int          m_IndexBufferStride;
         unsigned int          m_IndexBufferOffset;
-        unsigned int          m_NumberOfVertexBuffers;
         unsigned int          m_VertexBufferStrides[CBufferSet::s_MaxNumberOfBuffers];
         unsigned int          m_VertexBufferOffsets[CBufferSet::s_MaxNumberOfBuffers];
-        CBufferSetPtr         m_VertexBufferSetPtr;
+        CBufferPtr            m_VertexBufferPtr;
         CInputLayoutPtr       m_InputLayoutPtr;
         CTargetSetPtr         m_TargetSetPtr;;
         CViewPortSetPtr       m_ViewPortSetPtr;
@@ -196,12 +194,10 @@ namespace
         CTextureBasePtr       m_ImageUnits[s_NumberOfImageUnits];
         CBufferPtr            m_BufferUnits[s_NumberOfBufferUnits];
         CBufferPtr            m_ResourceUnits[s_NumberOfResourceUnits];
-		CBufferPtr            m_AtomicUnits[s_NumberOfAtomicUnits];
+        CBufferPtr            m_AtomicUnits[s_NumberOfAtomicUnits];
 
     private:
 
-        bool ContainsNewStridesOrOffsets(const unsigned int* _pStrides, const unsigned int* _pOffsets) const;
-    
         int ConvertInputLayoutFormat(Gfx::CInputLayout::EFormat _Format) const;
         int ConvertInputLayoutFormatSize(Gfx::CInputLayout::EFormat _Format) const;
 
@@ -239,8 +235,7 @@ namespace
         , m_IndexBufferPtr        ()
         , m_IndexBufferStride     (0)
         , m_IndexBufferOffset     (0)
-        , m_NumberOfVertexBuffers (0)
-        , m_VertexBufferSetPtr    ()
+        , m_VertexBufferPtr       ()
         , m_InputLayoutPtr        ()
         , m_TargetSetPtr          ()
         , m_ViewPortSetPtr        ()
@@ -344,7 +339,7 @@ namespace
         ResetRasterizerState();
         ResetTopology();
         ResetIndexBuffer();
-        ResetVertexBufferSet();
+        ResetVertexBuffer();
         ResetInputLayout();
         ResetShaderVS();
         ResetShaderGS();
@@ -916,9 +911,9 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxContextManager::ResetVertexBufferSet()
+    void CGfxContextManager::ResetVertexBuffer()
     {
-        if (m_VertexBufferSetPtr == nullptr) return;
+        if (m_VertexBufferPtr == nullptr) return;
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         
@@ -928,71 +923,30 @@ namespace
             m_VertexBufferOffsets[IndexOfVertexBuffer] = 0;
         }
         
-        m_VertexBufferSetPtr = nullptr;
+        m_VertexBufferPtr = nullptr;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxContextManager::SetVertexBufferSet(CBufferSetPtr _BufferSetPtr, const unsigned int* _pOffsets)
+    void CGfxContextManager::SetVertexBuffer(CBufferPtr _BufferPtr)
     {
-        BASE_UNUSED(_pOffsets);
-
-        assert(_BufferSetPtr != nullptr);
+        assert(_BufferPtr != nullptr);
         
-        Gfx::CNativeBufferSet& rNativeBuffer = *static_cast<Gfx::CNativeBufferSet*>(_BufferSetPtr.GetPtr());
+        Gfx::CNativeBuffer& rNativeBuffer = *static_cast<Gfx::CNativeBuffer*>(_BufferPtr.GetPtr());
         
-        unsigned int NumberOfBuffers = rNativeBuffer.GetNumberOfBuffers();
-
-        if (NumberOfBuffers > 1)
-        {
-            BASE_CONSOLE_WARNING("Multiple vertex buffer objects are currently not supported. Undefined behavior expected.");
-        }
-        
-        if (m_VertexBufferSetPtr != _BufferSetPtr || m_NumberOfVertexBuffers != NumberOfBuffers)
+        if (m_VertexBufferPtr != _BufferPtr)
         {            
-            Gfx::CNativeBuffer& rNativeSingleBuffer = *static_cast<Gfx::CNativeBuffer*>(_BufferSetPtr->GetBuffer(0).GetPtr());
-
-            glBindBuffer(GL_ARRAY_BUFFER, rNativeSingleBuffer.m_NativeBuffer);
+            glBindBuffer(GL_ARRAY_BUFFER, rNativeBuffer.m_NativeBuffer);
             
-            m_VertexBufferSetPtr    = _BufferSetPtr;
-            m_NumberOfVertexBuffers = NumberOfBuffers;
+            m_VertexBufferPtr = _BufferPtr;
         }
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxContextManager::SetVertexBufferSet(CBufferSetPtr _BufferSetPtr, const unsigned int* _pStrides, const unsigned int* _pOffsets)
+    CBufferPtr CGfxContextManager::GetVertexBuffer()
     {
-        BASE_UNUSED(_pStrides);
-        BASE_UNUSED(_pOffsets);
-
-        assert(_BufferSetPtr != nullptr);
-        
-        Gfx::CNativeBufferSet& rNativeBuffer = *static_cast<Gfx::CNativeBufferSet*>(_BufferSetPtr.GetPtr());
-        
-        unsigned int NumberOfBuffers = rNativeBuffer.GetNumberOfBuffers();
-
-        if (NumberOfBuffers > 1)
-        {
-            BASE_CONSOLE_WARNING("Multiple vertex buffer objects are currently not supported. Undefined behavior expected.");
-        }
-        
-        if (m_VertexBufferSetPtr != _BufferSetPtr || m_NumberOfVertexBuffers != NumberOfBuffers)
-        {
-            Gfx::CNativeBuffer& rNativeSingleBuffer = *static_cast<Gfx::CNativeBuffer*>(_BufferSetPtr->GetBuffer(0).GetPtr());
-
-            glBindBuffer(GL_ARRAY_BUFFER, rNativeSingleBuffer.m_NativeBuffer);
-            
-            m_VertexBufferSetPtr    = _BufferSetPtr;
-            m_NumberOfVertexBuffers = NumberOfBuffers;
-        }
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CBufferSetPtr CGfxContextManager::GetVertexBufferSet()
-    {
-        return m_VertexBufferSetPtr;
+        return m_VertexBufferPtr;
     }
 
     // -----------------------------------------------------------------------------
@@ -1511,23 +1465,6 @@ namespace
 
         glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, 0);
     }
-
-    // -----------------------------------------------------------------------------
-
-    bool CGfxContextManager::ContainsNewStridesOrOffsets(const unsigned int* _pStrides, const unsigned int* _pOffsets) const
-    {
-        unsigned int IndexOfVertexBuffer;
-
-        assert((_pStrides != nullptr) && (_pOffsets != nullptr));
-
-        for (IndexOfVertexBuffer = 0; IndexOfVertexBuffer < m_NumberOfVertexBuffers; ++IndexOfVertexBuffer)
-        {
-            if (m_VertexBufferStrides[IndexOfVertexBuffer] != _pStrides[IndexOfVertexBuffer]) return true;
-            if (m_VertexBufferOffsets[IndexOfVertexBuffer] != _pOffsets[IndexOfVertexBuffer]) return true;
-        }
-
-        return false;
-    }
     
     // -----------------------------------------------------------------------------
     
@@ -1869,30 +1806,23 @@ namespace ContextManager
 
     // -----------------------------------------------------------------------------
 
-    void ResetVertexBufferSet()
+    void ResetVertexBuffer()
     {
-        CGfxContextManager::GetInstance().ResetVertexBufferSet();
+        CGfxContextManager::GetInstance().ResetVertexBuffer();
     }
 
     // -----------------------------------------------------------------------------
 
-    void SetVertexBufferSet(CBufferSetPtr _BufferSetPtr, const unsigned int* _pOffsets)
+    void SetVertexBuffer(CBufferPtr _BufferPtr)
     {
-        CGfxContextManager::GetInstance().SetVertexBufferSet(_BufferSetPtr, _pOffsets);
+        CGfxContextManager::GetInstance().SetVertexBuffer(_BufferPtr);
     }
 
     // -----------------------------------------------------------------------------
 
-    void SetVertexBufferSet(CBufferSetPtr _BufferSetPtr, const unsigned int* _pStrides, const unsigned int* _pOffsets)
+    CBufferPtr GetVertexBuffer()
     {
-        CGfxContextManager::GetInstance().SetVertexBufferSet(_BufferSetPtr, _pStrides, _pOffsets);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CBufferSetPtr GetVertexBufferSet()
-    {
-        return CGfxContextManager::GetInstance().GetVertexBufferSet();
+        return CGfxContextManager::GetInstance().GetVertexBuffer();
     }
 
     // -----------------------------------------------------------------------------

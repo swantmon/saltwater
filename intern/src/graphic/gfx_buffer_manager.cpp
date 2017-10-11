@@ -50,7 +50,6 @@ namespace
     public:
 
         CBufferSetPtr CreateBufferSet(CBufferPtr* _pBufferPtrs, unsigned int _NumberOfBuffers);
-        CBufferSetPtr CreateVertexBufferSet(CBufferPtr* _pBufferPtrs, unsigned int _NumberOfBuffers);
 
     public:
 
@@ -407,38 +406,6 @@ namespace
         
         return CBufferSetPtr(BufferSetPtr);
     }
-    
-    // -----------------------------------------------------------------------------
-    
-    CBufferSetPtr CGfxBufferManager::CreateVertexBufferSet(CBufferPtr* _pBufferPtrs, unsigned int _NumberOfBuffers)
-    {
-        CBufferPtr BufferPtr;
-
-        // -----------------------------------------------------------------------------
-        // Allocate item in buffer
-        // -----------------------------------------------------------------------------
-        CBufferSets::CPtr BufferSetPtr = m_BufferSets.Allocate();
-
-        CInternBufferSet& rBufferSet = *BufferSetPtr;
-
-        // -----------------------------------------------------------------------------
-        // Fill internal buffer set with general data
-        // -----------------------------------------------------------------------------
-        rBufferSet.m_NumberOfBuffers = _NumberOfBuffers;
-
-        // -----------------------------------------------------------------------------
-        // Setup internal buffer set with buffer information and define buffer array
-        // by binding all buffers to it.
-        // -----------------------------------------------------------------------------
-        for (unsigned int CurrentBuffer = 0; CurrentBuffer < _NumberOfBuffers; ++CurrentBuffer)
-        {
-            BufferPtr = _pBufferPtrs[CurrentBuffer];
-
-            rBufferSet.m_BufferPtrs[CurrentBuffer] = _pBufferPtrs[CurrentBuffer];
-        }
-
-        return CBufferSetPtr(BufferSetPtr);
-    }
 
     // -----------------------------------------------------------------------------
 
@@ -696,49 +663,6 @@ namespace BufferManager
     {
         return CGfxBufferManager::GetInstance().CreateBufferSet(_pBufferPtrs, _NumberOfBuffers);
     }
-    
-    // -----------------------------------------------------------------------------
-    
-    CBufferSetPtr CreateVertexBufferSet(CBufferPtr _Buffer1Ptr)
-    {
-        CBufferPtr BufferPtrs[] = { _Buffer1Ptr, };
-        
-        return CGfxBufferManager::GetInstance().CreateVertexBufferSet(BufferPtrs, 1);
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CBufferSetPtr CreateVertexBufferSet(CBufferPtr _Buffer1Ptr, CBufferPtr _Buffer2Ptr)
-    {
-        CBufferPtr BufferPtrs[] = { _Buffer1Ptr, _Buffer2Ptr, };
-        
-        return CGfxBufferManager::GetInstance().CreateVertexBufferSet(BufferPtrs, 2);
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CBufferSetPtr CreateVertexBufferSet(CBufferPtr _Buffer1Ptr, CBufferPtr _Buffer2Ptr, CBufferPtr _Buffer3Ptr)
-    {
-        CBufferPtr BufferPtrs[] = { _Buffer1Ptr, _Buffer2Ptr, _Buffer3Ptr, };
-        
-        return CGfxBufferManager::GetInstance().CreateVertexBufferSet(BufferPtrs, 3);
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CBufferSetPtr CreateVertexBufferSet(CBufferPtr _Buffer1Ptr, CBufferPtr _Buffer2Ptr, CBufferPtr _Buffer3Ptr, CBufferPtr _Buffer4Ptr)
-    {
-        CBufferPtr BufferPtrs[] = { _Buffer1Ptr, _Buffer2Ptr, _Buffer3Ptr, _Buffer4Ptr, };
-        
-        return CGfxBufferManager::GetInstance().CreateVertexBufferSet(BufferPtrs, 4);
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CBufferSetPtr CreateVertexBufferSet(CBufferPtr* _pBufferPtrs, unsigned int _NumberOfBuffers)
-    {
-        return CGfxBufferManager::GetInstance().CreateVertexBufferSet(_pBufferPtrs, _NumberOfBuffers);
-    }
 
     // -----------------------------------------------------------------------------
 
@@ -796,12 +720,12 @@ namespace BufferManager
         return CGfxBufferManager::GetInstance().MapBuffer(_BufferPtr, _Map);
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void* MapConstantBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range)
-	{
-		return CGfxBufferManager::GetInstance().MapBufferRange(_BufferPtr, _Map, _Offset, _Range);
-	}
+    void* MapConstantBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range)
+    {
+        return CGfxBufferManager::GetInstance().MapBufferRange(_BufferPtr, _Map, _Offset, _Range);
+    }
 
     // -----------------------------------------------------------------------------
 
@@ -810,7 +734,7 @@ namespace BufferManager
         CGfxBufferManager::GetInstance().UnmapBuffer(_BufferPtr);
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
 	void* MapAtomicCounterBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map)
 	{

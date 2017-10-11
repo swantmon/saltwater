@@ -1105,11 +1105,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Rendering: Copy from one swap buffer to the other one
         // -----------------------------------------------------------------------------
-        const unsigned int pOffset[] = {0, 0};
-
         ContextManager::SetRenderContext(m_SwapRenderContextPtrs[NextSwapBufferCount]);
         
-        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
         
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
         
@@ -1141,7 +1139,7 @@ namespace
         
         ContextManager::ResetIndexBuffer();
         
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
         
         ContextManager::ResetShaderVS();
         
@@ -1154,7 +1152,7 @@ namespace
         // -----------------------------------------------------------------------------        
         ContextManager::SetRenderContext(m_QuarterRenderContextPtrs[0]);
         
-        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
         
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
         
@@ -1194,7 +1192,7 @@ namespace
         
         ContextManager::ResetIndexBuffer();
         
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
         
         ContextManager::ResetShaderVS();
         
@@ -1217,7 +1215,7 @@ namespace
         
         ContextManager::SetRenderContext(m_QuarterRenderContextPtrs[1]);
 
-        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
         
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
         
@@ -1258,7 +1256,7 @@ namespace
         
         ContextManager::ResetIndexBuffer();
         
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
         
         ContextManager::ResetShaderVS();
         
@@ -1270,7 +1268,7 @@ namespace
         
         ContextManager::SetRenderContext(m_QuarterRenderContextPtrs[2]);
 
-        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
         
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
         
@@ -1311,7 +1309,7 @@ namespace
         
         ContextManager::ResetIndexBuffer();
         
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
         
         ContextManager::ResetShaderVS();
         
@@ -1324,7 +1322,7 @@ namespace
         // -----------------------------------------------------------------------------        
         ContextManager::SetRenderContext(m_QuarterRenderContextPtrs[1]);
         
-        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
         
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
         
@@ -1360,7 +1358,7 @@ namespace
         
         ContextManager::ResetIndexBuffer();
         
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
         
         ContextManager::ResetShaderVS();
         
@@ -1373,7 +1371,7 @@ namespace
         // -----------------------------------------------------------------------------        
         ContextManager::SetRenderContext(m_QuarterRenderContextPtrs[0]);
         
-        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
         
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
         
@@ -1405,7 +1403,7 @@ namespace
         
         ContextManager::ResetIndexBuffer();
         
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
         
         ContextManager::ResetShaderVS();
         
@@ -1420,7 +1418,7 @@ namespace
         
         ContextManager::SetRenderContext(m_SwapRenderContextPtrs[NextSwapBufferCount]);
         
-        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
         
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
         
@@ -1468,7 +1466,7 @@ namespace
         
         ContextManager::ResetIndexBuffer();
         
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
         
         ContextManager::ResetShaderVS();
         
@@ -1520,11 +1518,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Rendering
         // -----------------------------------------------------------------------------
-        const unsigned int pOffset[] = {0, 0};
-        
         ContextManager::SetRenderContext(m_SwapRenderContextPtrs[NextSwapBufferCount]);
         
-        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
         
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
         
@@ -1560,7 +1556,7 @@ namespace
         
         ContextManager::ResetIndexBuffer();
         
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
         
         ContextManager::ResetShaderVS();
         
@@ -1586,15 +1582,13 @@ namespace
         TargetSetManager::ClearTargetSet(m_SMAAEdgeTargetSetPtr);
         TargetSetManager::ClearTargetSet(m_SMAAWeightsCalcTargetSetPtr);
 
-        const unsigned int pOffset[] = { 0, 0 };
-
         // -----------------------------------------------------------------------------
         // Edge detection
         // -----------------------------------------------------------------------------
 
         ContextManager::SetRenderContext(m_SMAAEdgeDetectContextPtr);
 
-        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
 
         ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
 
@@ -1615,7 +1609,7 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(m_SMAAWeightCalcContextPtr);
 
-        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
 
         ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
 
@@ -1640,7 +1634,7 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(m_SwapRenderContextPtrs[NextSwapBufferCount]);
 
-        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
 
         ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
 
@@ -1675,7 +1669,7 @@ namespace
 
         ContextManager::ResetIndexBuffer();
 
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 
@@ -1700,11 +1694,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Rendering
         // -----------------------------------------------------------------------------
-        const unsigned int pOffset[] = {0, 0};
-        
         ContextManager::SetRenderContext(m_SystemContextPtr);
         
-        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
         
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
         
@@ -1736,7 +1728,7 @@ namespace
         
         ContextManager::ResetIndexBuffer();
         
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
         
         ContextManager::ResetShaderVS();
         

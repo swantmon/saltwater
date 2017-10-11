@@ -136,7 +136,7 @@ namespace
         CBufferSetPtr     m_GaussianPSBufferPtr;
         CBufferSetPtr     m_ShadingPSBufferPtr;
         CBufferPtr        m_ParticleInstanceBufferPtr;
-        CBufferSetPtr     m_ParticleInstanceBufferSetPtr;
+        CBufferPtr        m_ParticleInstanceBufferSetPtr;
         CShaderPtr        m_LiquidShaderVSPtrs[NumberOfParts];
         CShaderPtr        m_LiquidShaderPSPtrs[NumberOfParts];
         CRenderContextPtr m_LiquidContextPtrs[6];
@@ -566,8 +566,6 @@ namespace
         m_ParticleModelPtr = MeshManager::CreateRectangle(-0.5f, -0.5f, 1.0f, 1.0f);
         
         m_QuadModelPtr     = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
-        
-        m_ParticleInstanceBufferSetPtr = BufferManager::CreateVertexBufferSet(m_ParticleModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer()->GetBuffer(0), m_ParticleInstanceBufferPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -645,12 +643,11 @@ namespace
         void*                             pInstances;
         SPerInstanceBuffer*               pInstance;
         unsigned int                      NumberOfParticles = 0;
-        const unsigned int                pOffset[] = { 0, 0 };
         CParticleEntities::const_iterator EndOfParticles;
 
         ContextManager::SetRenderContext(m_LiquidContextPtrs[0]);
 
-        ContextManager::SetVertexBufferSet(m_ParticleInstanceBufferSetPtr, pOffset);
+        ContextManager::SetVertexBuffer(m_ParticleInstanceBufferSetPtr);
 
         ContextManager::SetIndexBuffer(m_ParticleModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
@@ -676,38 +673,40 @@ namespace
 
         BufferManager::UploadConstantBufferData(m_LiquidPSBufferPtr->GetBuffer(0), &LiquidBuffer);
 
-        pInstances = BufferManager::MapVertexBuffer(m_ParticleInstanceBufferSetPtr->GetBuffer(1), CBuffer::Write);
-
-        assert(pInstances != 0);
-
-        EndOfParticles = m_Particles.end();
-
-        for (CParticleEntities::const_iterator CurrentParticle = m_Particles.begin(); CurrentParticle != EndOfParticles; ++CurrentParticle)
-        {
-            pInstance = &(static_cast<SPerInstanceBuffer*>(pInstances))[NumberOfParticles++];
-
-            pInstance->m_Offset = CurrentParticle->m_Position;
-
-            if (NumberOfParticles == s_MaxNumberOfInstances)
-            {
-                BufferManager::UnmapVertexBuffer(m_ParticleInstanceBufferSetPtr->GetBuffer(1));
-
-                ContextManager::DrawIndexedInstanced(m_ParticleModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), NumberOfParticles, 0, 0, 0);
-
-                pInstances = BufferManager::MapVertexBuffer(m_ParticleInstanceBufferSetPtr->GetBuffer(1), CBuffer::Write);
-
-                NumberOfParticles = 0;
-            }
-        }
-
-        if (NumberOfParticles > 0)
-        {
-            BufferManager::UnmapVertexBuffer(m_ParticleInstanceBufferSetPtr->GetBuffer(1));
-
-            ContextManager::DrawIndexedInstanced(m_ParticleModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), NumberOfParticles, 0, 0, 0);
-
-            NumberOfParticles = 0;
-        }
+        // TODO by tschwandt
+        // Use a global buffer with instance ID instead of multiple vertex buffer objects
+//         pInstances = BufferManager::MapVertexBuffer(m_ParticleInstanceBufferSetPtr->GetBuffer(1), CBuffer::Write);
+// 
+//         assert(pInstances != 0);
+// 
+//         EndOfParticles = m_Particles.end();
+// 
+//         for (CParticleEntities::const_iterator CurrentParticle = m_Particles.begin(); CurrentParticle != EndOfParticles; ++CurrentParticle)
+//         {
+//             pInstance = &(static_cast<SPerInstanceBuffer*>(pInstances))[NumberOfParticles++];
+// 
+//             pInstance->m_Offset = CurrentParticle->m_Position;
+// 
+//             if (NumberOfParticles == s_MaxNumberOfInstances)
+//             {
+//                 BufferManager::UnmapVertexBuffer(m_ParticleInstanceBufferSetPtr->GetBuffer(1));
+// 
+//                 ContextManager::DrawIndexedInstanced(m_ParticleModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), NumberOfParticles, 0, 0, 0);
+// 
+//                 pInstances = BufferManager::MapVertexBuffer(m_ParticleInstanceBufferSetPtr->GetBuffer(1), CBuffer::Write);
+// 
+//                 NumberOfParticles = 0;
+//             }
+//         }
+// 
+//         if (NumberOfParticles > 0)
+//         {
+//             BufferManager::UnmapVertexBuffer(m_ParticleInstanceBufferSetPtr->GetBuffer(1));
+// 
+//             ContextManager::DrawIndexedInstanced(m_ParticleModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), NumberOfParticles, 0, 0, 0);
+// 
+//             NumberOfParticles = 0;
+//         }
 
         ContextManager::ResetConstantBuffer(0);
         ContextManager::ResetConstantBuffer(1);
@@ -719,7 +718,7 @@ namespace
 
         ContextManager::ResetIndexBuffer();
 
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 
@@ -733,7 +732,7 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(m_LiquidContextPtrs[1]);
 
-        ContextManager::SetVertexBufferSet(m_ParticleInstanceBufferSetPtr, pOffset);
+        ContextManager::SetVertexBuffer(m_ParticleInstanceBufferSetPtr);
 
         ContextManager::SetIndexBuffer(m_ParticleModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
@@ -748,38 +747,38 @@ namespace
         ContextManager::SetConstantBuffer(0, m_LiquidVSBufferPtr->GetBuffer(0));
         ContextManager::SetConstantBuffer(1, m_LiquidVSBufferPtr->GetBuffer(1));
 
-        pInstances = BufferManager::MapVertexBuffer(m_ParticleInstanceBufferSetPtr->GetBuffer(1), CBuffer::Write);
-
-        assert(pInstances != 0);
-
-        EndOfParticles = m_Particles.end();
-
-        for (CParticleEntities::const_iterator CurrentParticle = m_Particles.begin(); CurrentParticle != EndOfParticles; ++CurrentParticle)
-        {
-            pInstance = &(static_cast<SPerInstanceBuffer*>(pInstances))[NumberOfParticles++];
-
-            pInstance->m_Offset = CurrentParticle->m_Position;
-
-            if (NumberOfParticles == s_MaxNumberOfInstances)
-            {
-                BufferManager::UnmapVertexBuffer(m_ParticleInstanceBufferSetPtr->GetBuffer(1));
-
-                ContextManager::DrawIndexedInstanced(m_ParticleModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), NumberOfParticles, 0, 0, 0);
-
-                pInstances = BufferManager::MapVertexBuffer(m_ParticleInstanceBufferSetPtr->GetBuffer(1), CBuffer::Write);
-
-                NumberOfParticles = 0;
-            }
-        }
-
-        if (NumberOfParticles > 0)
-        {
-            BufferManager::UnmapVertexBuffer(m_ParticleInstanceBufferSetPtr->GetBuffer(1));
-
-            ContextManager::DrawIndexedInstanced(m_ParticleModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), NumberOfParticles, 0, 0, 0);
-
-            NumberOfParticles = 0;
-        }
+//         pInstances = BufferManager::MapVertexBuffer(m_ParticleInstanceBufferSetPtr->GetBuffer(1), CBuffer::Write);
+// 
+//         assert(pInstances != 0);
+// 
+//         EndOfParticles = m_Particles.end();
+// 
+//         for (CParticleEntities::const_iterator CurrentParticle = m_Particles.begin(); CurrentParticle != EndOfParticles; ++CurrentParticle)
+//         {
+//             pInstance = &(static_cast<SPerInstanceBuffer*>(pInstances))[NumberOfParticles++];
+// 
+//             pInstance->m_Offset = CurrentParticle->m_Position;
+// 
+//             if (NumberOfParticles == s_MaxNumberOfInstances)
+//             {
+//                 BufferManager::UnmapVertexBuffer(m_ParticleInstanceBufferSetPtr->GetBuffer(1));
+// 
+//                 ContextManager::DrawIndexedInstanced(m_ParticleModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), NumberOfParticles, 0, 0, 0);
+// 
+//                 pInstances = BufferManager::MapVertexBuffer(m_ParticleInstanceBufferSetPtr->GetBuffer(1), CBuffer::Write);
+// 
+//                 NumberOfParticles = 0;
+//             }
+//         }
+// 
+//         if (NumberOfParticles > 0)
+//         {
+//             BufferManager::UnmapVertexBuffer(m_ParticleInstanceBufferSetPtr->GetBuffer(1));
+// 
+//             ContextManager::DrawIndexedInstanced(m_ParticleModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), NumberOfParticles, 0, 0, 0);
+// 
+//             NumberOfParticles = 0;
+//         }
 
         ContextManager::ResetConstantBuffer(0);
         ContextManager::ResetConstantBuffer(1);
@@ -790,7 +789,7 @@ namespace
 
         ContextManager::ResetIndexBuffer();
 
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 
@@ -805,7 +804,7 @@ namespace
 
         ContextManager::SetRenderContext(m_LiquidContextPtrs[2]);
 
-        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
 
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
@@ -844,7 +843,7 @@ namespace
 
         ContextManager::ResetIndexBuffer();
 
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 
@@ -856,7 +855,7 @@ namespace
 
         ContextManager::SetRenderContext(m_LiquidContextPtrs[3]);
 
-        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
 
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
@@ -895,7 +894,7 @@ namespace
 
         ContextManager::ResetIndexBuffer();
 
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 
@@ -918,7 +917,7 @@ namespace
 
         ContextManager::SetRenderContext(m_LiquidContextPtrs[2]);
 
-        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
 
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
@@ -957,7 +956,7 @@ namespace
 
         ContextManager::ResetIndexBuffer();
 
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 
@@ -969,7 +968,7 @@ namespace
 
         ContextManager::SetRenderContext(m_LiquidContextPtrs[4]);
 
-        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
 
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
@@ -1008,7 +1007,7 @@ namespace
 
         ContextManager::ResetIndexBuffer();
 
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 
@@ -1032,7 +1031,7 @@ namespace
 
         ContextManager::SetRenderContext(m_LiquidContextPtrs[5]);
 
-        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
 
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
@@ -1074,7 +1073,7 @@ namespace
 
         ContextManager::ResetIndexBuffer();
 
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 

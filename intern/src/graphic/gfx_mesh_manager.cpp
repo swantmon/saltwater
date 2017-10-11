@@ -418,9 +418,7 @@ namespace
                 VertexBufferDesc.m_pBytes        = pUploadVertexData;
                 VertexBufferDesc.m_pClassKey     = 0;
                 
-                CBufferPtr PositionBuffer = BufferManager::CreateBuffer(VertexBufferDesc);
-                
-                rSurface.m_VertexBufferPtr = BufferManager::CreateVertexBufferSet(PositionBuffer);
+                rSurface.m_VertexBufferPtr = BufferManager::CreateBuffer(VertexBufferDesc);
                 
                 // -----------------------------------------------------------------------------
                 
@@ -642,9 +640,7 @@ namespace
         BufferDesc.m_pBytes        = pVertices;
         BufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr ConePositionBuffer = BufferManager::CreateBuffer(BufferDesc);
-        
-        rSurface.m_VertexBufferPtr  = BufferManager::CreateVertexBufferSet(ConePositionBuffer);
+        rSurface.m_VertexBufferPtr  = BufferManager::CreateBuffer(BufferDesc);
         rSurface.m_NumberOfVertices = NumberOfVertices;
         
         // -----------------------------------------------------------------------------
@@ -825,10 +821,8 @@ namespace
         BufferDesc.m_NumberOfBytes = sizeof(Base::Float3) * NumberOfVertices * 2;
         BufferDesc.m_pBytes        = pVertices;
         BufferDesc.m_pClassKey     = 0;
-        
-        CBufferPtr ConePositionBuffer = BufferManager::CreateBuffer(BufferDesc);
-        
-        rSurface.m_VertexBufferPtr  = BufferManager::CreateVertexBufferSet(ConePositionBuffer);
+
+        rSurface.m_VertexBufferPtr  = BufferManager::CreateBuffer(BufferDesc);
         rSurface.m_NumberOfVertices = NumberOfVertices;
         
         // -----------------------------------------------------------------------------
@@ -985,9 +979,7 @@ namespace
         BufferDesc.m_pBytes        = pVertices;
         BufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr ConePositionBuffer = BufferManager::CreateBuffer(BufferDesc);
-        
-        rSurface.m_VertexBufferPtr  = BufferManager::CreateVertexBufferSet(ConePositionBuffer);
+        rSurface.m_VertexBufferPtr  = BufferManager::CreateBuffer(BufferDesc);
         rSurface.m_NumberOfVertices = NumberOfVertices;
         
         // -----------------------------------------------------------------------------
@@ -1109,9 +1101,7 @@ namespace
         BufferDesc.m_pBytes        = pVertices;
         BufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr RectanglePositionBuffer = BufferManager::CreateBuffer(BufferDesc);
-        
-        rSurface.m_VertexBufferPtr  = BufferManager::CreateVertexBufferSet(RectanglePositionBuffer);
+        rSurface.m_VertexBufferPtr  = BufferManager::CreateBuffer(BufferDesc);
         rSurface.m_NumberOfVertices = NumberOfVertices;
         
         // -----------------------------------------------------------------------------
