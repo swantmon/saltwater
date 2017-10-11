@@ -51,8 +51,8 @@ namespace
 	const Base::Float3 g_InitialCameraRotation = Base::Float3(0.0f, 0.0f, 0.0f);
 	//*/
 
+    const bool g_UseFullVolumeIntegration = true;
     const bool g_UseReverseIntegration = true;
-
     const bool g_UseHighPrecisionMaps = false;
     
     const unsigned int g_RootVolumePoolSize =              1024u * 1024u; //    1 MB
@@ -269,7 +269,7 @@ namespace MR
 
         Gfx::CViewPortPtr FullVolumeViewPort = ViewManager::CreateViewPort(ViewPortDescriptor);
 
-        m_FullVolumeViewPort = ViewManager::CreateViewPortSet(RootGridViewPort);
+        m_FullVolumeViewPort = ViewManager::CreateViewPortSet(FullVolumeViewPort);
     }
 
     // -----------------------------------------------------------------------------
@@ -777,16 +777,16 @@ namespace MR
             }
         }
 
-        if (g_UseReverseIntegration)
+        if (g_UseFullVolumeIntegration)
         {
             ////////////////////////////////////////////////////////////////////////////////////////////////
-            // Render point cloud to root grids
+            // Render point cloud to full volume
             ////////////////////////////////////////////////////////////////////////////////////////////////
 
-            Performance::BeginEvent("Rasterize point cloud to root grids");
+            Performance::BeginEvent("Rasterize point cloud to full volume");
 
-            ContextManager::SetTargetSet(m_RootGridVolumeTargetSetPtr);
-            ContextManager::SetViewPortSet(m_RootGridViewPort);
+            ContextManager::SetTargetSet(m_FullVolumeTargetSetPtr);
+            ContextManager::SetViewPortSet(m_FullVolumeViewPort);
 
             const unsigned int Offset = 0;
             ContextManager::SetShaderVS(m_PointsRootGridVSPtr);
@@ -797,39 +797,108 @@ namespace MR
             glCullFace(GL_FRONT);
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_MULTISAMPLE);
-            ContextManager::SetVertexBufferSet(m_Grid16MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
-            ContextManager::SetIndexBuffer(m_Grid16MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+            ContextManager::SetVertexBufferSet(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+            ContextManager::SetIndexBuffer(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
             ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
             ContextManager::SetTopology(STopology::PointList);
 
-            glEnable(GL_CONSERVATIVE_RASTERIZATION_NV);
+            //glEnable(GL_CONSERVATIVE_RASTERIZATION_NV);
             for (uint32_t VolumeIndex : rVolumeQueue)
             {
                 auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
-                RasterizeRootGridReverse(rRootVolume);
+                RasterizeFullVolumeReverse(rRootVolume);
             }
-            glDisable(GL_CONSERVATIVE_RASTERIZATION_NV);
+            //glDisable(GL_CONSERVATIVE_RASTERIZATION_NV);
 
             Performance::EndEvent();
         }
         else
         {
+            if (g_UseReverseIntegration)
+            {
+                ////////////////////////////////////////////////////////////////////////////////////////////////
+                // Render point cloud to root grids
+                ////////////////////////////////////////////////////////////////////////////////////////////////
+
+                Performance::BeginEvent("Rasterize point cloud to root grids");
+
+                ContextManager::SetTargetSet(m_RootGridVolumeTargetSetPtr);
+                ContextManager::SetViewPortSet(m_RootGridViewPort);
+
+                const unsigned int Offset = 0;
+                ContextManager::SetShaderVS(m_PointsRootGridVSPtr);
+                ContextManager::SetShaderPS(m_PointsRootGridGSPtr);
+                ContextManager::SetShaderPS(m_PointsRootGridFSPtr);
+                ContextManager::Barrier();
+                glEnable(GL_CULL_FACE);
+                glCullFace(GL_FRONT);
+                glDisable(GL_DEPTH_TEST);
+                glDisable(GL_MULTISAMPLE);
+                ContextManager::SetVertexBufferSet(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+                ContextManager::SetIndexBuffer(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+                ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
+                ContextManager::SetTopology(STopology::PointList);
+
+                glEnable(GL_CONSERVATIVE_RASTERIZATION_NV);
+                for (uint32_t VolumeIndex : rVolumeQueue)
+                {
+                    auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
+
+                    RasterizeRootGridReverse(rRootVolume);
+                }
+                glDisable(GL_CONSERVATIVE_RASTERIZATION_NV);
+
+                Performance::EndEvent();
+            }
+            else
+            {
+                ////////////////////////////////////////////////////////////////////////////////////////////////
+                // Rasterize root grids
+                ////////////////////////////////////////////////////////////////////////////////////////////////
+
+                Performance::BeginEvent("Rasterize Root Grids");
+
+                ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
+                ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
+                ContextManager::Barrier();
+                glEnable(GL_CULL_FACE);
+                glCullFace(GL_FRONT);
+                glDisable(GL_DEPTH_TEST);
+                glDisable(GL_MULTISAMPLE);
+                ContextManager::SetVertexBufferSet(m_Grid16MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+                ContextManager::SetIndexBuffer(m_Grid16MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+                ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
+                ContextManager::SetTopology(STopology::TriangleList);
+
+                for (uint32_t VolumeIndex : rVolumeQueue)
+                {
+                    auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
+
+                    RasterizeRootGrid(rRootVolume);
+                }
+
+                Performance::EndEvent();
+            }
+
+            ContextManager::ResetShaderVS();
+            ContextManager::ResetShaderGS();
+            ContextManager::ResetShaderPS();
+            ContextManager::ResetShaderCS();
+
             ////////////////////////////////////////////////////////////////////////////////////////////////
-            // Rasterize root grids
+            // Rasterize level1 grids
             ////////////////////////////////////////////////////////////////////////////////////////////////
 
-            Performance::BeginEvent("Rasterize Root Grids");
+            Performance::BeginEvent("Rasterize Level 1 Grids");
 
-            ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
-            ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
-            ContextManager::Barrier();
-            glEnable(GL_CULL_FACE);
-            glCullFace(GL_FRONT);
-            glDisable(GL_DEPTH_TEST);
-            glDisable(GL_MULTISAMPLE);
-            ContextManager::SetVertexBufferSet(m_Grid16MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
-            ContextManager::SetIndexBuffer(m_Grid16MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+            ContextManager::SetTargetSet(m_EmptyTargetSetPtr);
+            ContextManager::SetViewPortSet(m_DepthViewPortSetPtr);
+
+            ContextManager::SetShaderVS(m_RasterizeLevel1GridVSPtr);
+            ContextManager::SetShaderPS(m_RasterizeLevel1GridFSPtr);
+            ContextManager::SetVertexBufferSet(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+            ContextManager::SetIndexBuffer(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
             ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
             ContextManager::SetTopology(STopology::TriangleList);
 
@@ -837,38 +906,10 @@ namespace MR
             {
                 auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
-                RasterizeRootGrid(rRootVolume);
+                RasterizeLevel1Grid(rRootVolume);
             }
 
             Performance::EndEvent();
-        }
-
-        ContextManager::ResetShaderVS();
-        ContextManager::ResetShaderGS();
-        ContextManager::ResetShaderPS();
-        ContextManager::ResetShaderCS();
-        
-        ////////////////////////////////////////////////////////////////////////////////////////////////
-        // Rasterize level1 grids
-        ////////////////////////////////////////////////////////////////////////////////////////////////
-
-        Performance::BeginEvent("Rasterize Level 1 Grids");
-
-        ContextManager::SetTargetSet(m_EmptyTargetSetPtr);
-        ContextManager::SetViewPortSet(m_DepthViewPortSetPtr);
-
-        ContextManager::SetShaderVS(m_RasterizeLevel1GridVSPtr);
-        ContextManager::SetShaderPS(m_RasterizeLevel1GridFSPtr);
-        ContextManager::SetVertexBufferSet(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
-        ContextManager::SetIndexBuffer(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
-        ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
-        ContextManager::SetTopology(STopology::TriangleList);
-
-        for (uint32_t VolumeIndex : rVolumeQueue)
-        {
-            auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
-            
-            RasterizeLevel1Grid(rRootVolume);
         }
 
         for (uint32_t VolumeIndex : rVolumeQueue)
@@ -883,8 +924,6 @@ namespace MR
             rRootVolume.m_Level2QueueSize = pIndirect->m_Indexed.m_InstanceCount;
             BufferManager::UnmapConstantBuffer(rRootVolume.m_IndirectLevel2Buffer);
         }
-
-        Performance::EndEvent();
 
         ContextManager::ResetShaderVS();
         ContextManager::ResetShaderGS();
@@ -1094,6 +1133,32 @@ namespace MR
         ContextManager::Dispatch(1, 1, 16);
 
         ContextManager::Barrier();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CScalableSLAMReconstructor::RasterizeFullVolumeReverse(SRootVolume& rRootGrid)
+    {
+        ////////////////////////////////////////////////////////////////////////////////
+        // Render point cloud into 3D texture
+        ////////////////////////////////////////////////////////////////////////////////
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+        ContextManager::SetShaderVS(m_PointsRootGridVSPtr);
+        ContextManager::SetShaderGS(m_PointsRootGridGSPtr);
+        ContextManager::SetShaderPS(m_PointsRootGridFSPtr);
+
+        SPointRasterization BufferData;
+
+        BufferData.m_Offset = rRootGrid.m_Offset;
+        BufferData.m_Resolution = 128;
+        BufferManager::UploadConstantBufferData(m_PointRasterizationBufferPtr, &BufferData);
+
+        ContextManager::SetConstantBuffer(3, m_PointRasterizationBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
+
+        ContextManager::Draw(m_pRGBDCameraControl->GetDepthPixelCount(), 0);
     }
 
     // -----------------------------------------------------------------------------
