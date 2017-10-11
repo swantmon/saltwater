@@ -74,11 +74,11 @@ void main()
         int Layers[2];
         for(int i = 0; i < 2; ++ i)
         {
-            Layers[i] = int(VSLinePositions[i].z * 16);
+            Layers[i] = int(VSLinePositions[i].z * g_Resolution);
         }
 
-        int MinLayer = max( 0, min(Layers[0], Layers[1]));
-        int MaxLayer = min(15, max(Layers[0], Layers[1]));
+        int MinLayer = max(               0, min(Layers[0], Layers[1]));
+        int MaxLayer = min(g_Resolution - 1, max(Layers[0], Layers[1]));
 
         for(int LayerIndex = MinLayer; LayerIndex <= MaxLayer; ++ LayerIndex)
         {

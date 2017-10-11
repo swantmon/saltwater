@@ -29,10 +29,10 @@ layout(pixel_center_integer) in vec4 gl_FragCoord;
 void main()
 {
     vec3 AABBMin = vec3(gl_FragCoord.xy, gl_Layer);
-    AABBMin /= 16.0f;
+    AABBMin /= g_Resolution;
     AABBMin *= VOLUME_SIZE;
     AABBMin += g_Offset * VOLUME_SIZE;
-    vec3 AABBMax = AABBMin + VOLUME_SIZE / 16.0f;
+    vec3 AABBMax = AABBMin + VOLUME_SIZE / float(g_Resolution);
 
     AABBMin -= TRUNCATED_DISTANCE / 1000.0f;
     AABBMax += TRUNCATED_DISTANCE / 1000.0f;
