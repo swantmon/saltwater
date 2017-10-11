@@ -804,14 +804,14 @@ namespace MR
             ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
             ContextManager::SetTopology(STopology::PointList);
 
-            //glEnable(GL_CONSERVATIVE_RASTERIZATION_NV);
+            glEnable(GL_CONSERVATIVE_RASTERIZATION_NV);
             for (uint32_t VolumeIndex : rVolumeQueue)
             {
                 auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
                 RasterizeFullVolumeReverse(rRootVolume);
             }
-            //glDisable(GL_CONSERVATIVE_RASTERIZATION_NV);
+            glDisable(GL_CONSERVATIVE_RASTERIZATION_NV);
 
             Performance::EndEvent();
         }
