@@ -1085,6 +1085,8 @@ namespace MR
         ContextManager::SetResourceBuffer(3, rRootGrid.m_IndirectLevel1Buffer);
 
         ContextManager::Dispatch(1, 1, 16);
+
+        ContextManager::Barrier();
     }
 
     // -----------------------------------------------------------------------------
