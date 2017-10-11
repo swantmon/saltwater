@@ -233,8 +233,13 @@ namespace MR
         Gfx::CTargetSetPtr m_EmptyTargetSetPtr;
         Gfx::CViewPortSetPtr m_DepthViewPortSetPtr;
 
+        Gfx::CTexture3DPtr m_RootGridVolumePtr;
         Gfx::CTargetSetPtr m_RootGridVolumeTargetSetPtr;
         Gfx::CViewPortSetPtr m_RootGridViewPort;
+
+        Gfx::CTexture3DPtr m_FullVolumePtr;
+        Gfx::CTargetSetPtr m_FullVolumeTargetSetPtr;
+        Gfx::CViewPortSetPtr m_FullVolumeViewPort;
 
         Gfx::CTexture2DPtr m_RawDepthBufferPtr;
         Gfx::CTexture2DPtr m_RawCameraFramePtr;
@@ -245,8 +250,6 @@ namespace MR
         std::vector<Gfx::CTexture2DPtr> m_RaycastVertexMapPtr;
         std::vector<Gfx::CTexture2DPtr> m_RaycastNormalMapPtr;
         
-        Gfx::CTexture3DPtr m_RootGridVolumePtr;
-
         Gfx::CBufferPtr m_AtomicCounterBufferPtr;
 
 		CRootVolumeMap m_RootVolumeMap;

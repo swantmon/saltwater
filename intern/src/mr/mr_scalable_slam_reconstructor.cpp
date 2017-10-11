@@ -263,6 +263,13 @@ namespace MR
         Gfx::CViewPortPtr RootGridViewPort = ViewManager::CreateViewPort(ViewPortDescriptor);
 
         m_RootGridViewPort = ViewManager::CreateViewPortSet(RootGridViewPort);
+
+        ViewPortDescriptor.m_Width = 128.0f;
+        ViewPortDescriptor.m_Height = 128.0f;
+
+        Gfx::CViewPortPtr FullVolumeViewPort = ViewManager::CreateViewPort(ViewPortDescriptor);
+
+        m_FullVolumeViewPort = ViewManager::CreateViewPortSet(RootGridViewPort);
     }
 
     // -----------------------------------------------------------------------------
@@ -1351,6 +1358,13 @@ namespace MR
 
         m_RootGridVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
         m_RootGridVolumeTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_RootGridVolumePtr));
+
+        TextureDescriptor.m_NumberOfPixelsU = 16 * 8;
+        TextureDescriptor.m_NumberOfPixelsV = 16 * 8;
+        TextureDescriptor.m_NumberOfPixelsW = 16 * 8;
+
+        m_FullVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);;
+        m_FullVolumeTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_RootGridVolumePtr));
 
         m_EmptyTargetSetPtr = TargetSetManager::CreateEmptyTargetSet(m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight());
     }
