@@ -74,8 +74,8 @@ void main()
         Layers[i] = int(VSLinePositions[i].z * 16);
     }
 
-    int MinLayer = min(Layers[0], Layers[1]);
-    int MaxLayer = max(Layers[0], Layers[1]);
+    int MinLayer = max( 0, min(Layers[0], Layers[1]));
+    int MaxLayer = min(15, max(Layers[0], Layers[1]));
 
     for(int LayerIndex = MinLayer; LayerIndex <= MaxLayer; ++ LayerIndex)
     {
