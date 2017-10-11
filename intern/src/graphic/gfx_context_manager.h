@@ -66,7 +66,7 @@ namespace ContextManager
     CBufferPtr GetIndexBuffer();
 
     void ResetVertexBuffer();
-    void SetVertexBuffer(CBufferPtr _BufferSetPtr);
+    void SetVertexBuffer(CBufferPtr _BufferSetPtr, bool _UseActiveInputLayout = true);
     CBufferPtr GetVertexBuffer();
 
     void ResetShaderVS();
