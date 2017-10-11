@@ -1431,7 +1431,7 @@ namespace MR
         TextureDescriptor.m_NumberOfPixelsW = 16 * 8;
 
         m_FullVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);;
-        m_FullVolumeTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_RootGridVolumePtr));
+        m_FullVolumeTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_FullVolumePtr));
 
         m_EmptyTargetSetPtr = TargetSetManager::CreateEmptyTargetSet(m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight());
     }
