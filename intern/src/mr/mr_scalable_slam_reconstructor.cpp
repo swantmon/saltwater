@@ -771,7 +771,9 @@ namespace MR
                 ConstantBufferDesc.m_NumberOfBytes *= m_ReconstructionSettings.m_VoxelsPerGrid[1];
                 rRootVolume.m_Level2QueuePtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
+                SIndirectBuffers InitialData = {};
                 ConstantBufferDesc.m_NumberOfBytes = sizeof(SIndirectBuffers);
+                ConstantBufferDesc.m_pBytes = &InitialData;
                 rRootVolume.m_IndirectLevel1Buffer = BufferManager::CreateBuffer(ConstantBufferDesc);
                 rRootVolume.m_IndirectLevel2Buffer = BufferManager::CreateBuffer(ConstantBufferDesc);
             }
