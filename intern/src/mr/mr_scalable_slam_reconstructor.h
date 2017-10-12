@@ -281,5 +281,7 @@ namespace MR
         
 		std::array<Base::Float3, 8> m_FrustumPoints;
 		std::array<Base::Float4, 6> m_FrustumPlanes;
+        
+        bool m_IsConservativeRasterizationAvailable;
     };
 } // namespace MR

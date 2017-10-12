@@ -222,6 +222,39 @@ namespace MR
 
     void CScalableSLAMReconstructor::Start()
     {
+        ////////////////////////////////////////////////////////////////////////////////
+        // Check if conservative rasterization is available
+        ////////////////////////////////////////////////////////////////////////////////
+
+        m_IsConservativeRasterizationAvailable = false;
+
+        GLint ExtensionCount;
+        glGetIntegerv(GL_NUM_EXTENSIONS, &ExtensionCount);
+
+        for (int i = 0; i < ExtensionCount; ++ i)
+        {
+            std::string Name = reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i));
+
+            if (Name == "GL_NV_conservative_raster")
+            {
+                m_IsConservativeRasterizationAvailable = true;
+                break;
+            }
+        }
+
+        if (m_IsConservativeRasterizationAvailable)
+        {
+            BASE_CONSOLE_INFO("Conservative rasterization is available");
+        }
+        else
+        {
+            BASE_CONSOLE_INFO("Conservative rasterization is not available. Will use fallback method");
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // Setup data, buffer etc.
+        ////////////////////////////////////////////////////////////////////////////////
+
         m_pRGBDCameraControl.reset(new MR::CKinectControl);
         BASE_CONSOLE_INFO("Using Kinect for SLAM");
 
@@ -580,6 +613,10 @@ namespace MR
         if (m_ReconstructionSettings.m_CaptureColor)
         {
             DefineStream << "#define CAPTURE_COLOR\n";
+        }
+        if (m_IsConservativeRasterizationAvailable)
+        {
+            DefineStream << "#define CONSERVATIVE_RASTERIZATION_AVAILABLE\n";
         }
 
         std::string DefineString = DefineStream.str();
