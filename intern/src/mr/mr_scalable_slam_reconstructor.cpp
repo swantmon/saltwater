@@ -607,6 +607,7 @@ namespace MR
         m_PointsRootGridGSPtr      = ShaderManager::CompileGS("scalable_kinect_fusion\\rasterization_reverse\\gs_rootgrid.glsl"     , "main", DefineString.c_str());
         m_PointsRootGridFSPtr      = ShaderManager::CompilePS("scalable_kinect_fusion\\rasterization_reverse\\fs_rootgrid.glsl"     , "main", DefineString.c_str());
         m_PointsRootGridCSPtr      = ShaderManager::CompileCS("scalable_kinect_fusion\\rasterization_reverse\\cs_gather.glsl"       , "main", DefineString.c_str());
+        m_PointsFullCSPtr          = ShaderManager::CompileCS("scalable_kinect_fusion\\rasterization_reverse\\cs_gather_full.glsl"  , "main", DefineString.c_str());
 
         SInputElementDescriptor InputLayoutDesc = {};
 
@@ -781,6 +782,10 @@ namespace MR
 
         if (g_UseFullVolumeIntegration)
         {
+            GLuint query;
+            glGenQueries(1, &query);
+            glBeginQuery(GL_TIME_ELAPSED, query);
+
             ////////////////////////////////////////////////////////////////////////////////////////////////
             // Render point cloud to full volume
             ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -804,16 +809,39 @@ namespace MR
             ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
             ContextManager::SetTopology(STopology::PointList);
 
+
             glEnable(GL_CONSERVATIVE_RASTERIZATION_NV);
             for (uint32_t VolumeIndex : rVolumeQueue)
             {
+                ContextManager::SetShaderVS(m_PointsRootGridVSPtr);
+                ContextManager::SetShaderPS(m_PointsRootGridGSPtr);
+                ContextManager::SetShaderPS(m_PointsRootGridFSPtr);
+
                 auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
                 RasterizeFullVolumeReverse(rRootVolume);
+
+                ContextManager::SetShaderCS(m_PointsFullCSPtr);
+                
+                ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_FullVolumePtr));
+
+                ContextManager::Dispatch(16, 16, 16);
+
+                ContextManager::Barrier();
             }
             glDisable(GL_CONSERVATIVE_RASTERIZATION_NV);
-
+            
             Performance::EndEvent();
+
+            glEndQuery(GL_TIME_ELAPSED);
+            GLint done = false;
+            while (!done) {
+                glGetQueryObjectiv(query, GL_QUERY_RESULT_AVAILABLE, &done);
+            }
+            GLuint64 elapsed_time;
+            glGetQueryObjectui64v(query, GL_QUERY_RESULT, &elapsed_time);
+
+            std::cout << elapsed_time / 1000000.0f << std::endl;
         }
         else
         {

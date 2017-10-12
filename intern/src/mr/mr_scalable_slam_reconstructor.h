@@ -224,6 +224,7 @@ namespace MR
         Gfx::CShaderPtr m_PointsRootGridGSPtr;
         Gfx::CShaderPtr m_PointsRootGridFSPtr;
         Gfx::CShaderPtr m_PointsRootGridCSPtr;
+        Gfx::CShaderPtr m_PointsFullCSPtr;
 
         Gfx::CShaderPtr m_ClearAtomicCountersCSPtr;
 
