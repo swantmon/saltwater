@@ -44,6 +44,8 @@ layout(location = 0) out flat vec3 out_WSPosition;
 // Geometry shader
 // -----------------------------------------------------------------------------
 
+#ifdef CONSERVATIVE_RASTERIZATION_AVAILABLE
+
 layout(points) in;
 layout(line_strip, max_vertices = 8) out;
 void main()
@@ -103,5 +105,105 @@ void main()
         }
     }
 }
+
+#else
+
+layout(points) in;
+layout(triangle_strip, max_vertices = 24) out;
+void main()
+{
+    ivec2 UV;
+    UV.x = in_VertexID[0] % DEPTH_IMAGE_WIDTH;
+    UV.y = in_VertexID[0] / DEPTH_IMAGE_WIDTH;
+    vec3 Position = imageLoad(cs_VertexMap, UV).xyz;
+
+    if (Position.x != 0.0f)
+    {
+        vec3 WSPosition = (g_PoseMatrix * vec4(Position, 1.0f)).xyz;
+
+        vec3 AABBMin = g_Offset * VOLUME_SIZE;
+        vec3 AABBMax = AABBMin + VOLUME_SIZE + TRUNCATED_DISTANCE / 1000.0f;
+        AABBMin -= TRUNCATED_DISTANCE / 1000.0f;
+
+        if (WSPosition.x > AABBMin.x && WSPosition.x < AABBMax.x &&
+            WSPosition.y > AABBMin.y && WSPosition.y < AABBMax.y &&
+            WSPosition.z > AABBMin.z && WSPosition.z < AABBMax.z)
+        {
+            vec3 CameraDirection = normalize(WSPosition - g_PoseMatrix[3].xyz);
+
+            vec3 WSLinePositions[2];
+            WSLinePositions[0] = WSPosition - CameraDirection * TRUNCATED_DISTANCE / 1000.0f;
+            WSLinePositions[1] = WSPosition + CameraDirection * TRUNCATED_DISTANCE / 1000.0f;
+
+            vec3 VSLinePositions[2];
+            for(int i = 0; i < 2; ++ i)
+            {
+                VSLinePositions[i] = WSLinePositions[i] - g_Offset * VOLUME_SIZE;
+                VSLinePositions[i] = (VSLinePositions[i] / VOLUME_SIZE) * 2.0f - 1.0f;
+                VSLinePositions[i].z = VSLinePositions[i].z * 0.5f + 0.5f;
+            }
+
+            int Layers[2];
+            for(int i = 0; i < 2; ++ i)
+            {
+                Layers[i] = int(VSLinePositions[i].z * g_Resolution);
+            }
+
+            int MinLayer = max(               0, min(Layers[0], Layers[1]));
+            int MaxLayer = min(g_Resolution - 1, max(Layers[0], Layers[1]));
+
+            vec2 AABBMin = VSLinePositions[0].xy;
+            vec2 AABBMax = VSLinePositions[1].xy;
+
+            if (AABBMin.x > AABBMax.x)
+            {
+                vec2 Temp = AABBMin;
+                AABBMin = AABBMax;
+                AABBMax = Temp;
+            }
+            AABBMin -= 1.0f / g_Resolution;
+            AABBMax += 1.0f / g_Resolution;
+
+            for(int LayerIndex = MinLayer; LayerIndex <= MaxLayer; ++ LayerIndex)
+            {
+                // Face 1
+                gl_Layer = LayerIndex;
+                gl_Position = vec4(AABBMin.x, AABBMin.y, 1.0f, 1.0f);
+                out_WSPosition = WSPosition;
+                EmitVertex();
+
+                gl_Layer = LayerIndex;
+                gl_Position = vec4(AABBMax.x, AABBMin.y, 1.0f, 1.0f);
+                out_WSPosition = WSPosition;
+                EmitVertex();
+
+                gl_Layer = LayerIndex;
+                gl_Position = vec4(AABBMax.x, AABBMax.y, 1.0f, 1.0f);
+                out_WSPosition = WSPosition;
+                EmitVertex();
+
+                // Face 2
+                gl_Layer = LayerIndex;
+                gl_Position = vec4(AABBMax.x, AABBMax.y, 1.0f, 1.0f);
+                out_WSPosition = WSPosition;
+                EmitVertex();
+
+                gl_Layer = LayerIndex;
+                gl_Position = vec4(AABBMin.x, AABBMax.y, 1.0f, 1.0f);
+                out_WSPosition = WSPosition;
+                EmitVertex();
+
+                gl_Layer = LayerIndex;
+                gl_Position = vec4(AABBMin.x, AABBMin.y, 1.0f, 1.0f);
+                out_WSPosition = WSPosition;
+                EmitVertex();
+
+                EndPrimitive();
+            }
+        }
+    }
+}
+
+#endif
 
 #endif // __INCLUDE_GS_RASTERIZATION_ROOTGRID_GLSL__
