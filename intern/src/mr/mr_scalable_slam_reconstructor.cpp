@@ -847,7 +847,10 @@ namespace MR
             ContextManager::SetTopology(STopology::PointList);
 
 
-            glEnable(GL_CONSERVATIVE_RASTERIZATION_NV);
+            if (m_IsConservativeRasterizationAvailable)
+            {
+                glEnable(GL_CONSERVATIVE_RASTERIZATION_NV);
+            }
             for (uint32_t VolumeIndex : rVolumeQueue)
             {
                 ContextManager::SetShaderVS(m_PointsRootGridVSPtr);
@@ -876,7 +879,10 @@ namespace MR
 
                 ContextManager::Barrier();
             }
-            glDisable(GL_CONSERVATIVE_RASTERIZATION_NV);
+            if (m_IsConservativeRasterizationAvailable)
+            {
+                glDisable(GL_CONSERVATIVE_RASTERIZATION_NV);
+            }
             
             Performance::EndEvent();
         }
@@ -907,14 +913,20 @@ namespace MR
                 ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
                 ContextManager::SetTopology(STopology::PointList);
 
-                glEnable(GL_CONSERVATIVE_RASTERIZATION_NV);
+                if (m_IsConservativeRasterizationAvailable)
+                {
+                    glEnable(GL_CONSERVATIVE_RASTERIZATION_NV);
+                }
                 for (uint32_t VolumeIndex : rVolumeQueue)
                 {
                     auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
                     RasterizeRootGridReverse(rRootVolume);
                 }
-                glDisable(GL_CONSERVATIVE_RASTERIZATION_NV);
+                if (m_IsConservativeRasterizationAvailable)
+                {
+                    glDisable(GL_CONSERVATIVE_RASTERIZATION_NV);
+                }
 
                 Performance::EndEvent();
             }
