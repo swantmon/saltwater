@@ -220,10 +220,14 @@ namespace
 				<< "#define VOLUME_SIZE "        << Settings.m_VolumeSize << " \n"
 				<< "#define VOXEL_SIZE "         << Settings.m_VolumeSize / Settings.m_VolumeResolution << " \n";
 
-			if (Settings.m_CaptureColor)
-			{
-				DefineStream << "#define CAPTURE_COLOR\n";
-			}
+            if (Settings.m_CaptureColor)
+            {
+                DefineStream << "#define CAPTURE_COLOR\n";
+            }
+            if (Settings.m_UseFullVolumeIntegration)
+            {
+                DefineStream << "#define FULL_VOLUME_INTEGRATION\n";
+            }
 
 			std::string DefineString = DefineStream.str();
 

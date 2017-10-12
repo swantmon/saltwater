@@ -51,8 +51,6 @@ namespace
 	const Base::Float3 g_InitialCameraRotation = Base::Float3(0.0f, 0.0f, 0.0f);
 	//*/
 
-    const bool g_UseFullVolumeIntegration = true;
-    const bool g_UseReverseIntegration = true;
     const bool g_UseHighPrecisionMaps = false;
     
     const unsigned int g_RootVolumePoolSize =              1024u * 1024u; //    1 MB
@@ -780,12 +778,8 @@ namespace MR
             }
         }
 
-        if (g_UseFullVolumeIntegration)
+        if (m_ReconstructionSettings.m_UseFullVolumeIntegration)
         {
-            GLuint query;
-            glGenQueries(1, &query);
-            glBeginQuery(GL_TIME_ELAPSED, query);
-
             ////////////////////////////////////////////////////////////////////////////////////////////////
             // Render point cloud to full volume
             ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -825,6 +819,16 @@ namespace MR
                 
                 ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_FullVolumePtr));
 
+                SIndirectBuffers IndirectBufferData = {};
+                IndirectBufferData.m_Indexed.m_IndexCount = m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
+                BufferManager::UploadConstantBufferData(rRootVolume.m_IndirectLevel1Buffer, &IndirectBufferData);
+                BufferManager::UploadConstantBufferData(rRootVolume.m_IndirectLevel2Buffer, &IndirectBufferData);
+
+                ContextManager::SetResourceBuffer(0, rRootVolume.m_IndirectLevel1Buffer);
+                ContextManager::SetResourceBuffer(1, rRootVolume.m_IndirectLevel2Buffer);
+                ContextManager::SetResourceBuffer(2, rRootVolume.m_Level1QueuePtr);
+                ContextManager::SetResourceBuffer(3, rRootVolume.m_Level2QueuePtr);
+
                 ContextManager::Dispatch(16, 16, 16);
 
                 ContextManager::Barrier();
@@ -832,20 +836,10 @@ namespace MR
             glDisable(GL_CONSERVATIVE_RASTERIZATION_NV);
             
             Performance::EndEvent();
-
-            glEndQuery(GL_TIME_ELAPSED);
-            GLint done = false;
-            while (!done) {
-                glGetQueryObjectiv(query, GL_QUERY_RESULT_AVAILABLE, &done);
-            }
-            GLuint64 elapsed_time;
-            glGetQueryObjectui64v(query, GL_QUERY_RESULT, &elapsed_time);
-
-            std::cout << elapsed_time / 1000000.0f << std::endl;
         }
         else
         {
-            if (g_UseReverseIntegration)
+            if (m_ReconstructionSettings.m_UseReverseIntegration)
             {
                 ////////////////////////////////////////////////////////////////////////////////////////////////
                 // Render point cloud to root grids

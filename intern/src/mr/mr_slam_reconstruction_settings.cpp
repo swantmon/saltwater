@@ -15,6 +15,8 @@ namespace MR
         , m_DepthThreshold(500, 8000)
         , m_CaptureColor(false)
 		, m_IsScalable(true)
+        , m_UseFullVolumeIntegration(true)
+        , m_UseReverseIntegration(true)
     {
         m_PyramidLevelIterations[0] = 10;
         m_PyramidLevelIterations[1] = 5;

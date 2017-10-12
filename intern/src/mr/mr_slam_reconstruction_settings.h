@@ -32,6 +32,9 @@ namespace MR
 		int m_GridResolutions[GRID_LEVELS];
         int m_VoxelsPerGrid[GRID_LEVELS];
 
+        bool m_UseFullVolumeIntegration;
+        bool m_UseReverseIntegration;
+
 		SReconstructionSettings();
 	};
 } // namespace MR
