@@ -57,40 +57,49 @@ void main()
     {
         vec3 WSPosition = (g_PoseMatrix * vec4(Position, 1.0f)).xyz;
 
-        vec3 CameraDirection = normalize(WSPosition - g_PoseMatrix[3].xyz);
+        vec3 AABBMin = g_Offset * VOLUME_SIZE;
+        vec3 AABBMax = AABBMin + VOLUME_SIZE + TRUNCATED_DISTANCE / 1000.0f;
+        AABBMin -= TRUNCATED_DISTANCE / 1000.0f;
 
-        vec3 WSLinePositions[2];
-        WSLinePositions[0] = WSPosition - CameraDirection * TRUNCATED_DISTANCE / 1000.0f;
-        WSLinePositions[1] = WSPosition + CameraDirection * TRUNCATED_DISTANCE / 1000.0f;
-
-        vec3 VSLinePositions[2];
-        for(int i = 0; i < 2; ++ i)
+        if (WSPosition.x > AABBMin.x && WSPosition.x < AABBMax.x &&
+            WSPosition.y > AABBMin.y && WSPosition.y < AABBMax.y &&
+            WSPosition.z > AABBMin.z && WSPosition.z < AABBMax.z)
         {
-            VSLinePositions[i] = WSLinePositions[i] - g_Offset * VOLUME_SIZE;
-            VSLinePositions[i] = (VSLinePositions[i] / VOLUME_SIZE) * 2.0f - 1.0f;
-            VSLinePositions[i].z = VSLinePositions[i].z * 0.5f + 0.5f;
-        }
+            vec3 CameraDirection = normalize(WSPosition - g_PoseMatrix[3].xyz);
 
-        int Layers[2];
-        for(int i = 0; i < 2; ++ i)
-        {
-            Layers[i] = int(VSLinePositions[i].z * g_Resolution);
-        }
+            vec3 WSLinePositions[2];
+            WSLinePositions[0] = WSPosition - CameraDirection * TRUNCATED_DISTANCE / 1000.0f;
+            WSLinePositions[1] = WSPosition + CameraDirection * TRUNCATED_DISTANCE / 1000.0f;
 
-        int MinLayer = max(               0, min(Layers[0], Layers[1]));
-        int MaxLayer = min(g_Resolution - 1, max(Layers[0], Layers[1]));
-
-        for(int LayerIndex = MinLayer; LayerIndex <= MaxLayer; ++ LayerIndex)
-        {
+            vec3 VSLinePositions[2];
             for(int i = 0; i < 2; ++ i)
             {
-                gl_Layer = LayerIndex;
-                gl_Position = vec4(VSLinePositions[i], 1.0f);
-                out_WSPosition = WSPosition;
-
-                EmitVertex();
+                VSLinePositions[i] = WSLinePositions[i] - g_Offset * VOLUME_SIZE;
+                VSLinePositions[i] = (VSLinePositions[i] / VOLUME_SIZE) * 2.0f - 1.0f;
+                VSLinePositions[i].z = VSLinePositions[i].z * 0.5f + 0.5f;
             }
-            EndPrimitive();
+
+            int Layers[2];
+            for(int i = 0; i < 2; ++ i)
+            {
+                Layers[i] = int(VSLinePositions[i].z * g_Resolution);
+            }
+
+            int MinLayer = max(               0, min(Layers[0], Layers[1]));
+            int MaxLayer = min(g_Resolution - 1, max(Layers[0], Layers[1]));
+
+            for(int LayerIndex = MinLayer; LayerIndex <= MaxLayer; ++ LayerIndex)
+            {
+                for(int i = 0; i < 2; ++ i)
+                {
+                    gl_Layer = LayerIndex;
+                    gl_Position = vec4(VSLinePositions[i], 1.0f);
+                    out_WSPosition = WSPosition;
+
+                    EmitVertex();
+                }
+                EndPrimitive();
+            }
         }
     }
 }
