@@ -51,6 +51,9 @@ namespace
 	const Base::Float3 g_InitialCameraRotation = Base::Float3(0.0f, 0.0f, 0.0f);
 	//*/
 
+    const bool g_UseFullVolumeIntegration = true;
+    const bool g_UseReverseIntegration = true;
+
     const bool g_UseHighPrecisionMaps = false;
     
     const unsigned int g_RootVolumePoolSize =              1024u * 1024u; //    1 MB
@@ -360,6 +363,9 @@ namespace MR
 
 	void CScalableSLAMReconstructor::SetupData()
 	{
+        m_ReconstructionSettings.m_UseFullVolumeIntegration = g_UseFullVolumeIntegration;
+        m_ReconstructionSettings.m_UseReverseIntegration = g_UseReverseIntegration;
+
         const int GridLevelCount = MR::SReconstructionSettings::GRID_LEVELS;
 
         m_VolumeSizes.resize(GridLevelCount);
