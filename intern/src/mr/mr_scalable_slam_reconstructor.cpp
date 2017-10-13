@@ -1003,19 +1003,6 @@ namespace MR
 
         Performance::EndEvent();
 
-        for (uint32_t VolumeIndex : rVolumeQueue)
-        {
-            auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
-
-            SIndirectBuffers* pIndirect = static_cast<SIndirectBuffers*>(BufferManager::MapConstantBuffer(rRootVolume.m_IndirectLevel1Buffer, CBuffer::EMap::Read));
-            rRootVolume.m_Level1QueueSize = pIndirect->m_Indexed.m_InstanceCount;
-            BufferManager::UnmapConstantBuffer(rRootVolume.m_IndirectLevel1Buffer);
-
-            pIndirect = static_cast<SIndirectBuffers*>(BufferManager::MapConstantBuffer(rRootVolume.m_IndirectLevel2Buffer, CBuffer::EMap::Read));
-            rRootVolume.m_Level2QueueSize = pIndirect->m_Indexed.m_InstanceCount;
-            BufferManager::UnmapConstantBuffer(rRootVolume.m_IndirectLevel2Buffer);
-        }
-
         ContextManager::ResetShaderVS();
         ContextManager::ResetShaderGS();
         ContextManager::ResetShaderPS();
@@ -1412,8 +1399,24 @@ namespace MR
             Performance::EndEvent();
             
             Performance::BeginEvent("Integrate hierarchy");
-            IntegrateHierarchies(VolumeQueue);
+            //IntegrateHierarchies(VolumeQueue);
             Performance::EndEvent();
+
+            // Fetch the queue sizes
+            // We do this now to mostly prevent CPU<->GPU sync
+
+            for (uint32_t VolumeIndex : VolumeQueue)
+            {
+                auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
+
+                SIndirectBuffers* pIndirect = static_cast<SIndirectBuffers*>(BufferManager::MapConstantBuffer(rRootVolume.m_IndirectLevel1Buffer, CBuffer::EMap::Read));
+                rRootVolume.m_Level1QueueSize = pIndirect->m_Indexed.m_InstanceCount;
+                BufferManager::UnmapConstantBuffer(rRootVolume.m_IndirectLevel1Buffer);
+
+                pIndirect = static_cast<SIndirectBuffers*>(BufferManager::MapConstantBuffer(rRootVolume.m_IndirectLevel2Buffer, CBuffer::EMap::Read));
+                rRootVolume.m_Level2QueueSize = pIndirect->m_Indexed.m_InstanceCount;
+                BufferManager::UnmapConstantBuffer(rRootVolume.m_IndirectLevel2Buffer);
+            }
 
             // Compute the AABB for the whole reconstruction
             
