@@ -195,7 +195,7 @@ namespace MR
 
         SScalableVolume m_VolumeBuffers;
 
-        Gfx::CBufferPtr m_VolumeQueueSizesBufferPtr;
+        Gfx::CBufferPtr m_VolumeIndexBufferPtr;
 
         Gfx::CShaderPtr m_ClearVolumeCSPtr;
         Gfx::CShaderPtr m_BilateralFilterCSPtr;

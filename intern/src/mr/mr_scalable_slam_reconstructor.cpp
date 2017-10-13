@@ -570,7 +570,7 @@ namespace MR
         m_VolumeBuffers.m_Level1PoolPtr = 0;
         m_VolumeBuffers.m_TSDFPoolPtr = 0;
         m_VolumeBuffers.m_PoolItemCountBufferPtr = 0;
-        m_VolumeQueueSizesBufferPtr = 0;
+        m_VolumeIndexBufferPtr = 0;
     }
     
     // -----------------------------------------------------------------------------
@@ -1045,7 +1045,7 @@ namespace MR
         ContextManager::SetResourceBuffer(2, m_VolumeBuffers.m_Level1PoolPtr);
         ContextManager::SetResourceBuffer(3, m_VolumeBuffers.m_TSDFPoolPtr);
         ContextManager::SetResourceBuffer(4, m_VolumeBuffers.m_PoolItemCountBufferPtr);
-        ContextManager::SetResourceBuffer(5, m_VolumeQueueSizesBufferPtr);
+        ContextManager::SetResourceBuffer(5, m_VolumeIndexBufferPtr);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
         // Fill root grids
@@ -1062,21 +1062,16 @@ namespace MR
             ////////////////////////////////////////////////////////////////////////////////////////////////
             // Set current volume
             ////////////////////////////////////////////////////////////////////////////////////////////////
-
-            uint32_t Data[] =
-            {
-                rRootVolume.m_PoolIndex,
-                rRootVolume.m_Level1QueueSize,
-                rRootVolume.m_Level2QueueSize,
-            };
-
-            BufferManager::UploadConstantBufferData(m_VolumeQueueSizesBufferPtr, &Data);
+            
+            BufferManager::UploadConstantBufferData(m_VolumeIndexBufferPtr, &rRootVolume.m_PoolIndex);
             
             ////////////////////////////////////////////////////////////////////////////////////////////////
             // Integrate into root grid
             ////////////////////////////////////////////////////////////////////////////////////////////////
 
             ContextManager::SetResourceBuffer(6, rRootVolume.m_Level1QueuePtr);
+
+            ContextManager::SetResourceBuffer(7, rRootVolume.m_IndirectLevel1Buffer);
 
             ContextManager::DispatchIndirect(rRootVolume.m_IndirectLevel1Buffer, SIndirectBuffers::s_ComputeOffset);
         }
@@ -1097,11 +1092,7 @@ namespace MR
             // Set current volume
             ////////////////////////////////////////////////////////////////////////////////////////////////
 
-            uint32_t* pIndex = static_cast<uint32_t*>(BufferManager::MapConstantBuffer(m_VolumeQueueSizesBufferPtr, CBuffer::WriteDiscard));
-            *pIndex = rRootVolume.m_PoolIndex;
-            *(pIndex + 1) = rRootVolume.m_Level1QueueSize;
-            *(pIndex + 2) = rRootVolume.m_Level2QueueSize;
-            BufferManager::UnmapConstantBuffer(m_VolumeQueueSizesBufferPtr);
+            BufferManager::UploadConstantBufferData(m_VolumeIndexBufferPtr, &rRootVolume.m_PoolIndex);
 
             ////////////////////////////////////////////////////////////////////////////////////////////////
             // Integrate into internal grid
@@ -1126,11 +1117,7 @@ namespace MR
             // Set current volume
             ////////////////////////////////////////////////////////////////////////////////////////////////
 
-            uint32_t* pIndex = static_cast<uint32_t*>(BufferManager::MapConstantBuffer(m_VolumeQueueSizesBufferPtr, CBuffer::WriteDiscard));
-            *pIndex = rRootVolume.m_PoolIndex;
-            *(pIndex + 1) = rRootVolume.m_Level1QueueSize;
-            *(pIndex + 2) = rRootVolume.m_Level2QueueSize;
-            BufferManager::UnmapConstantBuffer(m_VolumeQueueSizesBufferPtr);
+            BufferManager::UploadConstantBufferData(m_VolumeIndexBufferPtr, &rRootVolume.m_PoolIndex);
 
             ////////////////////////////////////////////////////////////////////////////////////////////////
             // Integrate into TSDF grids
@@ -1658,8 +1645,8 @@ namespace MR
 
         ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 4;// m_ReconstructionSettings.GRID_LEVELS;
         m_VolumeBuffers.m_PoolItemCountBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 4;// current volume index + queue sizes
-        m_VolumeQueueSizesBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 4;// 16 bytes = minimum
+        m_VolumeIndexBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
 
     // -----------------------------------------------------------------------------

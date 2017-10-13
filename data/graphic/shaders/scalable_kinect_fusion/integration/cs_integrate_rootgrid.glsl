@@ -3,16 +3,22 @@
 #define __INCLUDE_CS_KINECT_INTEGRATE_ROOTGRID_GLSL__
 
 #include "scalable_kinect_fusion/common_scalable.glsl"
+#include "scalable_kinect_fusion/common_indirect.glsl"
 
 layout(std430, binding = 6) buffer Level1Queue
 {
     uint g_VolumeID[];
 };
 
+layout(std430, binding = 7) buffer Indirect
+{
+    SIndirectBuffers g_Indirect;
+};
+
 layout (local_size_x = TILE_SIZE1D, local_size_y = 1, local_size_z = 1) in;
 void main()
 {
-    if (gl_GlobalInvocationID.x < g_Level1QueueSize)
+    if (gl_GlobalInvocationID.x < g_Indirect.m_Indexed.m_InstanceCount)
     {
         uint VoxelIndex = g_VolumeID[gl_GlobalInvocationID.x];
 
