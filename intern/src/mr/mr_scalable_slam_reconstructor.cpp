@@ -51,15 +51,22 @@ namespace
 	const Base::Float3 g_InitialCameraRotation = Base::Float3(0.0f, 0.0f, 0.0f);
 	//*/
 
-    const bool g_UseFullVolumeIntegration = true;
-    const bool g_UseReverseIntegration = true;
-
-    const bool g_UseHighPrecisionMaps = false;
-    
+    //*
+    const unsigned int g_RootVolumePoolSize =       1024u * 1024u; //  1 MB
+    const unsigned int g_RootGridPoolSize   =  8u * 1024u * 1024u; //  8 MB
+    const unsigned int g_Level1GridPoolSize =  8u * 1024u * 1024u; //  8 MB
+    const unsigned int g_TSDFPoolSize       = 32u * 1024u * 1024u; // 32 MB
+    /*/
     const unsigned int g_RootVolumePoolSize =              1024u * 1024u; //    1 MB
     const unsigned int g_RootGridPoolSize   =       128u * 1024u * 1024u; //  128 MB
     const unsigned int g_Level1GridPoolSize =       128u * 1024u * 1024u; //  128 MB
     const unsigned int g_TSDFPoolSize       = 16u * 128u * 1024u * 1024u; // 2048 MB
+    //*/
+
+    const bool g_UseFullVolumeIntegration = true;
+    const bool g_UseReverseIntegration = true;
+
+    const bool g_UseHighPrecisionMaps = false;
     
     const float g_EpsilonDistance = 0.1f;
     const float g_EpsilonAngle = 0.75f;
