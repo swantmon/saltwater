@@ -87,9 +87,9 @@ namespace
 		void RenderVolume();
 
 		void RenderScalableVolume();
-        void RenderRootVolumes();
-        void RenderLevel1Grids();
-        void RenderLevel2Grids();
+        void RenderQueuedRootVolumes();
+        void RenderQueuedLevel1Grids();
+        void RenderQueuedLevel2Grids();
 
         void RenderCamera();
 
@@ -719,7 +719,7 @@ namespace
 
 	// -----------------------------------------------------------------------------
 
-	void CGfxReconstructionRenderer::RenderRootVolumes()
+	void CGfxReconstructionRenderer::RenderQueuedRootVolumes()
 	{
 		ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
@@ -771,7 +771,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::RenderLevel1Grids()
+    void CGfxReconstructionRenderer::RenderQueuedLevel1Grids()
     {
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
@@ -830,7 +830,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::RenderLevel2Grids()
+    void CGfxReconstructionRenderer::RenderQueuedLevel2Grids()
     {
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
@@ -974,10 +974,12 @@ namespace
 		if (m_pScalableReconstructor != nullptr)
 		{
 			RenderScalableVolume();
+
             RenderVertexMap();
-            RenderRootVolumes();
-            RenderLevel1Grids();
-            RenderLevel2Grids();
+
+            RenderQueuedRootVolumes();
+            RenderQueuedLevel1Grids();
+            RenderQueuedLevel2Grids();
 		}
 		else
 		{
