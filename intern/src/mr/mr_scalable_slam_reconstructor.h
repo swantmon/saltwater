@@ -228,6 +228,8 @@ namespace MR
 
         Gfx::CShaderPtr m_ClearAtomicCountersCSPtr;
 
+        Gfx::CShaderPtr m_FillIndirectBufferCSPtr;
+
         Gfx::CMeshPtr m_CubeMeshPtr;
         Gfx::CMeshPtr m_Grid8MeshPtr;
         Gfx::CMeshPtr m_Grid16MeshPtr;

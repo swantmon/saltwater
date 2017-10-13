@@ -237,7 +237,7 @@ namespace MR
 
             if (Name == "GL_NV_conservative_raster")
             {
-                m_IsConservativeRasterizationAvailable = true;
+                //m_IsConservativeRasterizationAvailable = true;
                 break;
             }
         }
@@ -643,12 +643,12 @@ namespace MR
         m_IntegrateRootGridCSPtr   = ShaderManager::CompileCS("scalable_kinect_fusion\\integration\\cs_integrate_rootgrid.glsl"     , "main", DefineString.c_str());
         m_IntegrateLevel1GridCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\integration\\cs_integrate_level1grid.glsl"   , "main", DefineString.c_str());
         m_IntegrateTSDFCSPtr       = ShaderManager::CompileCS("scalable_kinect_fusion\\integration\\cs_integrate_tsdf.glsl"         , "main", DefineString.c_str());
-
         m_PointsRootGridVSPtr      = ShaderManager::CompileVS("scalable_kinect_fusion\\rasterization_reverse\\vs_rootgrid.glsl"     , "main", DefineString.c_str());
         m_PointsRootGridGSPtr      = ShaderManager::CompileGS("scalable_kinect_fusion\\rasterization_reverse\\gs_rootgrid.glsl"     , "main", DefineString.c_str());
         m_PointsRootGridFSPtr      = ShaderManager::CompilePS("scalable_kinect_fusion\\rasterization_reverse\\fs_rootgrid.glsl"     , "main", DefineString.c_str());
         m_PointsRootGridCSPtr      = ShaderManager::CompileCS("scalable_kinect_fusion\\rasterization_reverse\\cs_gather.glsl"       , "main", DefineString.c_str());
         m_PointsFullCSPtr          = ShaderManager::CompileCS("scalable_kinect_fusion\\rasterization_reverse\\cs_gather_full.glsl"  , "main", DefineString.c_str());
+        m_FillIndirectBufferCSPtr  = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_fill_indirect.glsl"                       , "main", DefineString.c_str());
 
         SInputElementDescriptor InputLayoutDesc = {};
 
@@ -853,10 +853,6 @@ namespace MR
             }
             for (uint32_t VolumeIndex : rVolumeQueue)
             {
-                ContextManager::SetShaderVS(m_PointsRootGridVSPtr);
-                ContextManager::SetShaderPS(m_PointsRootGridGSPtr);
-                ContextManager::SetShaderPS(m_PointsRootGridFSPtr);
-
                 auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
                 RasterizeFullVolumeReverse(rRootVolume);
@@ -990,6 +986,22 @@ namespace MR
 
             Performance::EndEvent();
         }
+
+        ContextManager::SetShaderCS(m_FillIndirectBufferCSPtr);
+
+        Performance::BeginEvent("Fill indirect buffers");
+
+        for (uint32_t VolumeIndex : rVolumeQueue)
+        {
+            auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
+
+            ContextManager::SetResourceBuffer(0, rRootVolume.m_IndirectLevel1Buffer);
+            ContextManager::SetResourceBuffer(1, rRootVolume.m_IndirectLevel2Buffer);
+
+            ContextManager::Dispatch(1, 1, 1);
+        }
+
+        Performance::EndEvent();
 
         for (uint32_t VolumeIndex : rVolumeQueue)
         {
@@ -1400,7 +1412,7 @@ namespace MR
             Performance::EndEvent();
             
             Performance::BeginEvent("Integrate hierarchy");
-            //IntegrateHierarchies(VolumeQueue);
+            IntegrateHierarchies(VolumeQueue);
             Performance::EndEvent();
 
             // Compute the AABB for the whole reconstruction

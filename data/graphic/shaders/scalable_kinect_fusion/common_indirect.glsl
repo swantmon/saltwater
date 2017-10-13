@@ -22,10 +22,9 @@ struct SIndexedIndirect
 
 struct SComputeIndirect
 {
-    uint m_Count;
-    uint m_InstanceCount;
-    uint m_FirstIndex;
-    uint m_BaseIndex;
+    uint m_WorkGroupsX;
+    uint m_WorkGroupsY;
+    uint m_WorkGroupsZ;
 };
 
 struct SIndirectBuffers
