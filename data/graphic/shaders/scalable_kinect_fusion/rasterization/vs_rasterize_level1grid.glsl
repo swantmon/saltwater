@@ -50,11 +50,14 @@ void main()
     uint ParentIndex = g_VolumeID[gl_InstanceID];
     uint GridIndex = gl_VertexID / 8;
 
-    uint Level1Index = ParentIndex * 512 + GridIndex;
+    vec3 ParentOffset = IndexToOffset(ParentIndex, 16);
+    vec3 GridOffset = IndexToOffset(GridIndex, 8);
 
-    vec3 ParentOffset = IndexToOffset(ParentIndex, 16) * g_ParentSize;
-    vec3 GridOffset = IndexToOffset(GridIndex, 8) * g_CubeSize;
-    
+    uint Level1Index = OffsetToIndex(ParentOffset * 8 + GridOffset, 128);
+
+    ParentOffset *= g_ParentSize;
+    GridOffset *= g_CubeSize;
+
     vec4 Vertex = vec4(g_Offset * VOLUME_SIZE, 1.0f);
     Vertex.xyz += (in_VertexPosition * g_CubeSize) + ParentOffset;
 

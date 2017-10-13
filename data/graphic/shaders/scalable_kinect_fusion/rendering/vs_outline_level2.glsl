@@ -27,8 +27,6 @@ out gl_PerVertex
 // Functions
 // -----------------------------------------------------------------------------
 
-#ifdef FULL_VOLUME_INTEGRATION
-
 void main()
 {
     uint VolumeID = g_VolumeID[gl_InstanceID];
@@ -40,24 +38,5 @@ void main()
     vec4 WSPosition = g_WorldMatrix * vec4(in_VertexPosition * 0.004 * 8 + Offset, 1.0f);
     gl_Position = g_WorldToScreen * WSPosition;
 }
-
-#else
-
-void main()
-{
-    uint VolumeID = g_VolumeID[gl_InstanceID];
-    uint ParentIndex = VolumeID / 512;
-    uint ChildIndex = VolumeID % 512;
-
-    vec3 ParentOffset = IndexToOffset(ParentIndex, 16);
-    vec3 ChildOffset = IndexToOffset(ChildIndex, 8);
-
-    vec3 Offset = ParentOffset * (0.004 * 8 * 8) + ChildOffset * (0.004 * 8);
-
-    vec4 WSPosition = g_WorldMatrix * vec4(in_VertexPosition * 0.004 * 8 + Offset, 1.0f);
-    gl_Position = g_WorldToScreen * WSPosition;
-}
-
-#endif
 
 #endif // __INCLUDE_VS_OUTLINE_GLSL__

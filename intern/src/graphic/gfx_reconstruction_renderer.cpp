@@ -224,10 +224,6 @@ namespace
             {
                 DefineStream << "#define CAPTURE_COLOR\n";
             }
-            if (Settings.m_UseFullVolumeIntegration)
-            {
-                DefineStream << "#define FULL_VOLUME_INTEGRATION\n";
-            }
 
 			std::string DefineString = DefineStream.str();
 
