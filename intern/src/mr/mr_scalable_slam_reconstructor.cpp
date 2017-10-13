@@ -170,7 +170,7 @@ namespace
 
         static const int s_DrawOffset = 0;
         static const int s_IndexedOffset = sizeof(SIndirectParameters);
-        static const int s_ComputeOffset = s_DrawOffset + sizeof(SIndexedParameters);
+        static const int s_ComputeOffset = s_IndexedOffset + sizeof(SIndexedParameters);
     };
 
     struct SInstanceData
