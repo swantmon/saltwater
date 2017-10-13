@@ -63,6 +63,7 @@ namespace
     const unsigned int g_TSDFPoolSize       = 16u * 128u * 1024u * 1024u; // 2048 MB
     //*/
 
+    const bool g_UseConservativeRasterization = false;
     const bool g_UseFullVolumeIntegration = true;
     const bool g_UseReverseIntegration = true;
 
@@ -235,17 +236,20 @@ namespace MR
 
         m_IsConservativeRasterizationAvailable = false;
 
-        GLint ExtensionCount;
-        glGetIntegerv(GL_NUM_EXTENSIONS, &ExtensionCount);
-
-        for (int i = 0; i < ExtensionCount; ++ i)
+        if (g_UseConservativeRasterization)
         {
-            std::string Name = reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i));
+            GLint ExtensionCount;
+            glGetIntegerv(GL_NUM_EXTENSIONS, &ExtensionCount);
 
-            if (Name == "GL_NV_conservative_raster")
+            for (int i = 0; i < ExtensionCount; ++i)
             {
-                //m_IsConservativeRasterizationAvailable = true;
-                break;
+                std::string Name = reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i));
+
+                if (Name == "GL_NV_conservative_raster")
+                {
+                    m_IsConservativeRasterizationAvailable = true;
+                    break;
+                }
             }
         }
 
