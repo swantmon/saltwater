@@ -1081,7 +1081,6 @@ namespace MR
             ////////////////////////////////////////////////////////////////////////////////////////////////
 
             ContextManager::SetResourceBuffer(6, rRootVolume.m_Level1QueuePtr);
-
             ContextManager::SetResourceBuffer(7, rRootVolume.m_IndirectLevel1Buffer);
 
             ContextManager::DispatchIndirect(rRootVolume.m_IndirectLevel1Buffer, SIndirectBuffers::s_ComputeOffset);
