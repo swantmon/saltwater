@@ -24,8 +24,8 @@ void main()
 
         // Check if voxel is already in hierarchy
 
-        uint CurrentRootGridIndex = g_CurrentVolumeIndex * 16 * 16 * 16 + VoxelIndex;
-        SGridPoolItem RootGridItem = g_RootGridPool[CurrentRootGridIndex];
+        uint CurrentRootGridItemIndex = g_CurrentVolumeIndex * 16 * 16 * 16 + VoxelIndex;
+        SGridPoolItem RootGridItem = g_RootGridPool[CurrentRootGridItemIndex];
 
         if (RootGridItem.m_PoolIndex == 0) // Is the voxel empty?
         {
@@ -34,7 +34,7 @@ void main()
             uint Level1PoolIndex = atomicAdd(g_Level1GridPoolItemCount, 8 * 8 * 8);
 
             RootGridItem.m_PoolIndex = Level1PoolIndex;
-            g_RootGridPool[CurrentRootGridIndex] = RootGridItem;
+            g_RootGridPool[CurrentRootGridItemIndex] = RootGridItem;
         }
     }
 }
