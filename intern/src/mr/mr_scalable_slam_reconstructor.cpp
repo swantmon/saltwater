@@ -1078,8 +1078,7 @@ namespace MR
 
             ContextManager::SetResourceBuffer(6, rRootVolume.m_Level1QueuePtr);
 
-            int WorkGroupCount = GetWorkGroupCount(rRootVolume.m_Level1QueueSize, g_TileSize1D);
-            ContextManager::Dispatch(WorkGroupCount, 1, 1);
+            ContextManager::DispatchIndirect(rRootVolume.m_IndirectLevel1Buffer, SIndirectBuffers::s_ComputeOffset);
         }
 
         Performance::EndEvent();
@@ -1399,11 +1398,11 @@ namespace MR
             Performance::EndEvent();
             
             Performance::BeginEvent("Integrate hierarchy");
-            //IntegrateHierarchies(VolumeQueue);
+            IntegrateHierarchies(VolumeQueue);
             Performance::EndEvent();
 
             // Fetch the queue sizes
-            // We do this now to mostly prevent CPU<->GPU sync
+            // We do this now to mostly prevent CPU<->GPU syncs
 
             for (uint32_t VolumeIndex : VolumeQueue)
             {
