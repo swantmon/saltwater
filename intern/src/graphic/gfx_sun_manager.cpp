@@ -479,7 +479,7 @@ namespace
 
         ViewBuffer.vs_ViewProjectionMatrix = _rInternLight.m_RenderContextPtr->GetCamera()->GetViewProjectionMatrix();
             
-        BufferManager::UploadConstantBufferData(m_LightCameraVSBufferPtr->GetBuffer(0), &ViewBuffer);
+        BufferManager::UploadBufferData(m_LightCameraVSBufferPtr->GetBuffer(0), &ViewBuffer);
             
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
@@ -515,7 +515,7 @@ namespace
                 
             ModelBuffer.m_ModelMatrix = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
                 
-            BufferManager::UploadConstantBufferData(m_LightCameraVSBufferPtr->GetBuffer(1), &ModelBuffer);
+            BufferManager::UploadBufferData(m_LightCameraVSBufferPtr->GetBuffer(1), &ModelBuffer);
                 
             // -----------------------------------------------------------------------------
             // Render every surface of this entity

@@ -512,7 +512,7 @@ namespace
 
         ViewBuffer.m_View.InjectTranslation(0.0f, 0.0f, 0.0f);
 
-        BufferManager::UploadConstantBufferData(VSBufferSetPtr->GetBuffer(0), &ViewBuffer);
+        BufferManager::UploadBufferData(VSBufferSetPtr->GetBuffer(0), &ViewBuffer);
 
         // -----------------------------------------------------------------------------
 
@@ -521,7 +521,7 @@ namespace
         PSBuffer.m_InvertedScreenSize   = Base::Float4(1.0f / Main::GetActiveWindowSize()[0], 1.0f / Main::GetActiveWindowSize()[1], 0, 0);
         PSBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
         
-        BufferManager::UploadConstantBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
+        BufferManager::UploadBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
         
         // -----------------------------------------------------------------------------
         // Render sky box in background
@@ -660,7 +660,7 @@ namespace
         PSBuffer.m_IsHDR         = rRenderJob.m_pGraphicCamera->GetBackgroundTexture2D()->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
         PSBuffer.m_ExposureIndex = static_cast<float>(HistogramRenderer::GetLastExposureHistoryIndex());
 
-        BufferManager::UploadConstantBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
+        BufferManager::UploadBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
 
         // -----------------------------------------------------------------------------
         // Rendering

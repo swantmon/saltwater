@@ -512,9 +512,9 @@ namespace
 
                 ModelBuffer.m_ModelMatrix = CurrentRenderJob->m_ModelMatrix;
 
-                BufferManager::UploadConstantBufferData(m_ModelBufferPtr, &ModelBuffer);
+                BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
 
-                BufferManager::UploadConstantBufferData(m_MaterialPSBufferPtr, &CurrentRenderJob->m_SurfaceMaterialPtr->GetMaterialAttributes());
+                BufferManager::UploadBufferData(m_MaterialPSBufferPtr, &CurrentRenderJob->m_SurfaceMaterialPtr->GetMaterialAttributes());
 
                 // -----------------------------------------------------------------------------
                 // Render
@@ -729,13 +729,13 @@ namespace
 
             ModelBuffer.m_ModelMatrix = CurrentRenderJob->m_ModelMatrix;
 
-            BufferManager::UploadConstantBufferData(m_ModelBufferPtr, &ModelBuffer);
+            BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
 
             SHitProxyProperties HitProxyProperties;
 
             HitProxyProperties.m_ID = CurrentRenderJob->m_EntityID;
 
-            BufferManager::UploadConstantBufferData(m_HitProxyPassPSBufferPtr, &HitProxyProperties);
+            BufferManager::UploadBufferData(m_HitProxyPassPSBufferPtr, &HitProxyProperties);
 
             // -----------------------------------------------------------------------------
             // Render

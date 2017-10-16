@@ -54,6 +54,7 @@ namespace
     public:
 
         void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr);
+        void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, unsigned int _ReadOffset, unsigned int _WriteOffset, unsigned int _Range);
 
     public:
 
@@ -61,8 +62,8 @@ namespace
 		void* MapBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range);
         void UnmapBuffer(CBufferPtr _BufferPtr);
 
-        void UploadVertexBufferData(CBufferPtr _BufferPtr, const void* _pData);
-        void UploadConstantBufferData(CBufferPtr _BufferPtr, const void* _pData);
+        void UploadBufferData(CBufferPtr _BufferPtr, const void* _pData);
+        void UploadBufferData(CBufferPtr _BufferPtr, const void* _pData, unsigned int _Offset, unsigned int _Range);
 
     private:
 
@@ -424,6 +425,24 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxBufferManager::CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, unsigned int _ReadOffset, unsigned int _WriteOffset, unsigned int _Range)
+    {
+        if (_TargetBufferPtr != _SourceBufferPtr)
+        {
+            CInternBuffer& rTargetBuffer = *static_cast<CInternBuffer*>(&(*_TargetBufferPtr));
+            CInternBuffer& rSourceBuffer = *static_cast<CInternBuffer*>(&(*_SourceBufferPtr));
+
+            unsigned int ReadBufferSize = rTargetBuffer.m_NumberOfBytes;
+            unsigned int WriteBufferSize = rSourceBuffer.m_NumberOfBytes;
+            assert(_ReadOffset + _Range <= ReadBufferSize);
+            assert(_WriteOffset + _Range <= WriteBufferSize);
+
+            glCopyNamedBufferSubData(rTargetBuffer.m_NativeBuffer, rSourceBuffer.m_NativeBuffer, _ReadOffset, _WriteOffset, _Range);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
     void* CGfxBufferManager::MapBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map)
     {
         assert(_BufferPtr != nullptr && _BufferPtr.IsValid());
@@ -465,12 +484,12 @@ namespace
         glUnmapNamedBuffer(pBuffer->m_NativeBuffer);
         pBuffer->m_pStorage = nullptr;
     }
-
+    
     // -----------------------------------------------------------------------------
-	    
-    void CGfxBufferManager::UploadVertexBufferData(CBufferPtr _BufferPtr, const void* _pData)
+
+    void CGfxBufferManager::UploadBufferData(CBufferPtr _BufferPtr, const void* _pData)
     {
-        assert(_BufferPtr != nullptr && _BufferPtr.IsValid());
+        assert(_BufferPtr != nullptr && _BufferPtr.IsValid() && _pData);
 
         CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
 
@@ -481,15 +500,16 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxBufferManager::UploadConstantBufferData(CBufferPtr _BufferPtr, const void* _pData)
+    void CGfxBufferManager::UploadBufferData(CBufferPtr _BufferPtr, const void* _pData, unsigned int _Offset, unsigned int _Range)
     {
-        assert(_BufferPtr != nullptr && _BufferPtr.IsValid() && _pData);
+        assert(_BufferPtr != nullptr && _BufferPtr.IsValid() && _pData && _Range > 0);
 
         CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
 
         assert(pBuffer != nullptr);
+        assert(pBuffer->m_NumberOfBytes <= _Offset + _Range);
 
-        glNamedBufferSubData(pBuffer->m_NativeBuffer, 0, pBuffer->m_NumberOfBytes, _pData);
+        glNamedBufferSubData(pBuffer->m_NativeBuffer, _Offset, _Range, _pData);
     }
 
     // -----------------------------------------------------------------------------
@@ -673,100 +693,45 @@ namespace BufferManager
 
     // -----------------------------------------------------------------------------
 
-    void* MapVertexBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map)
+    void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, unsigned int _ReadOffset, unsigned int _WriteOffset, unsigned int _Range)
     {
-        return CGfxBufferManager::GetInstance().MapBuffer(_BufferPtr, _Map);
+        CGfxBufferManager::GetInstance().CopyBufferToBuffer(_TargetBufferPtr, _SourceBufferPtr, _ReadOffset, _WriteOffset, _Range);
     }
-
-	// -----------------------------------------------------------------------------
-
-	void* MapVertexBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range)
-	{
-		return CGfxBufferManager::GetInstance().MapBufferRange(_BufferPtr, _Map, _Offset, _Range);
-	}
-
+    
     // -----------------------------------------------------------------------------
 
-    void UnmapVertexBuffer(CBufferPtr _BufferPtr)
-    {
-        CGfxBufferManager::GetInstance().UnmapBuffer(_BufferPtr);
-    }
-
-	// -----------------------------------------------------------------------------
-
-	void* MapIndexBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range)
-	{
-		return CGfxBufferManager::GetInstance().MapBufferRange(_BufferPtr, _Map, _Offset, _Range);
-	}
-
-    // -----------------------------------------------------------------------------
-
-    void* MapIndexBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map)
+    void* MapBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map)
     {
         return CGfxBufferManager::GetInstance().MapBuffer(_BufferPtr, _Map);
     }
 
     // -----------------------------------------------------------------------------
 
-    void UnmapIndexBuffer(CBufferPtr _BufferPtr)
-    {
-        CGfxBufferManager::GetInstance().UnmapBuffer(_BufferPtr);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void* MapConstantBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map)
-    {
-        return CGfxBufferManager::GetInstance().MapBuffer(_BufferPtr, _Map);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void* MapConstantBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range)
+    void* MapBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range)
     {
         return CGfxBufferManager::GetInstance().MapBufferRange(_BufferPtr, _Map, _Offset, _Range);
     }
 
     // -----------------------------------------------------------------------------
 
-    void UnmapConstantBuffer(CBufferPtr _BufferPtr)
+    void UnmapBuffer(CBufferPtr _BufferPtr)
     {
         CGfxBufferManager::GetInstance().UnmapBuffer(_BufferPtr);
     }
 
     // -----------------------------------------------------------------------------
 
-	void* MapAtomicCounterBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map)
-	{
-		return CGfxBufferManager::GetInstance().MapBuffer(_BufferPtr, _Map);
-	}
-
-	// -----------------------------------------------------------------------------
-
-	void* MapAtomicCounterBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range)
-	{
-		return CGfxBufferManager::GetInstance().MapBufferRange(_BufferPtr, _Map, _Offset, _Range);
-	}
-
-	// -----------------------------------------------------------------------------
-
-	void UnmapAtomicCounterBuffer(CBufferPtr _BufferPtr)
-	{
-		CGfxBufferManager::GetInstance().UnmapBuffer(_BufferPtr);
-	}
-
-    // -----------------------------------------------------------------------------
-
-    void UploadVertexBufferData(CBufferPtr _BufferPtr, const void* _pData)
+    void UploadBufferData(CBufferPtr _BufferPtr, const void* _pData)
     {
-        CGfxBufferManager::GetInstance().UploadVertexBufferData(_BufferPtr, _pData);
+        CGfxBufferManager::GetInstance().UploadBufferData(_BufferPtr, _pData);
     }
 
     // -----------------------------------------------------------------------------
 
-    void UploadConstantBufferData(CBufferPtr _BufferPtr, const void* _pData)
+    void UploadBufferData(CBufferPtr _BufferPtr, const void* _pData, unsigned int _Offset, unsigned int _Range)
     {
-        CGfxBufferManager::GetInstance().UploadConstantBufferData(_BufferPtr, _pData);
+        CGfxBufferManager::GetInstance().UploadBufferData(_BufferPtr, _pData, _Offset, _Range);
     }
+
 } // namespace BufferManager
 } // namespace Gfx

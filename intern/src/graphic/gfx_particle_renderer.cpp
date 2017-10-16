@@ -618,7 +618,7 @@ namespace
         PerFrameConstantBuffer.m_LiquidMatrix *= Base::Float4x4().SetRotation(Base::DegreesToRadians(-180.0f), 0.0f, 0.0f);
         PerFrameConstantBuffer.m_LiquidMatrix *= Base::Float4x4().SetScale(0.3f);
         
-        BufferManager::UploadConstantBufferData(m_LiquidVSBufferPtr->GetBuffer(0), &PerFrameConstantBuffer);
+        BufferManager::UploadBufferData(m_LiquidVSBufferPtr->GetBuffer(0), &PerFrameConstantBuffer);
         
         // -----------------------------------------------------------------------------
         // Clear render targets
@@ -640,9 +640,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Screen-Space liquid spheres (depth)
         // -----------------------------------------------------------------------------
-        void*                             pInstances;
-        SPerInstanceBuffer*               pInstance;
-        unsigned int                      NumberOfParticles = 0;
         CParticleEntities::const_iterator EndOfParticles;
 
         ContextManager::SetRenderContext(m_LiquidContextPtrs[0]);
@@ -671,7 +668,7 @@ namespace
         LiquidBuffer.m_Color = Base::Float4(0.0f, 0.0f, 1.0f, 1.0f);
         LiquidBuffer.m_SphereRadius = 0.3f;
 
-        BufferManager::UploadConstantBufferData(m_LiquidPSBufferPtr->GetBuffer(0), &LiquidBuffer);
+        BufferManager::UploadBufferData(m_LiquidPSBufferPtr->GetBuffer(0), &LiquidBuffer);
 
         // TODO by tschwandt
         // Use a global buffer with instance ID instead of multiple vertex buffer objects
@@ -822,7 +819,7 @@ namespace
         BilateralSettings.m_Direction[0] = 1.0f * 1.0f / static_cast<float>(1280.0f);
         BilateralSettings.m_Direction[1] = 0.0f * 1.0f / static_cast<float>(800.0f);
 
-        BufferManager::UploadConstantBufferData(m_BilateralPSBufferPtr->GetBuffer(0), &BilateralSettings);
+        BufferManager::UploadBufferData(m_BilateralPSBufferPtr->GetBuffer(0), &BilateralSettings);
 
         ContextManager::SetTexture(0, m_TextureSetPtrs[0]->GetTexture(0));
 
@@ -873,7 +870,7 @@ namespace
         BilateralSettings.m_Direction[0] = 0.0f * 1.0f / static_cast<float>(1280.0f);
         BilateralSettings.m_Direction[1] = 1.0f * 1.0f / static_cast<float>(800.0f);
 
-        BufferManager::UploadConstantBufferData(m_BilateralPSBufferPtr->GetBuffer(0), &BilateralSettings);
+        BufferManager::UploadBufferData(m_BilateralPSBufferPtr->GetBuffer(0), &BilateralSettings);
 
         ContextManager::SetTexture(0, m_TextureSetPtrs[2]->GetTexture(0));
 
@@ -935,7 +932,7 @@ namespace
         GaussianSettings.m_Direction[0] = 1.0f * 1.0f / static_cast<float>(1280);
         GaussianSettings.m_Direction[1] = 0.0f * 1.0f / static_cast<float>(800);
 
-        BufferManager::UploadConstantBufferData(m_GaussianPSBufferPtr->GetBuffer(0), &GaussianSettings);
+        BufferManager::UploadBufferData(m_GaussianPSBufferPtr->GetBuffer(0), &GaussianSettings);
 
         ContextManager::SetTexture(0, m_TextureSetPtrs[1]->GetTexture(0));
 
@@ -986,7 +983,7 @@ namespace
         GaussianSettings.m_Direction[0] = 0.0f * 1.0f / static_cast<float>(1280);
         GaussianSettings.m_Direction[1] = 1.0f * 1.0f / static_cast<float>(800);
 
-        BufferManager::UploadConstantBufferData(m_GaussianPSBufferPtr->GetBuffer(0), &GaussianSettings);
+        BufferManager::UploadBufferData(m_GaussianPSBufferPtr->GetBuffer(0), &GaussianSettings);
 
         ContextManager::SetTexture(0, m_TextureSetPtrs[2]->GetTexture(0));
 
@@ -1027,7 +1024,7 @@ namespace
         ShadingSettings.m_InvertedScreensize[0] = 1.0f / static_cast<float>(1280.0f);
         ShadingSettings.m_InvertedScreensize[1] = 1.0f / static_cast<float>(800.0f);
 
-        BufferManager::UploadConstantBufferData(m_ShadingPSBufferPtr->GetBuffer(0), &ShadingSettings);
+        BufferManager::UploadBufferData(m_ShadingPSBufferPtr->GetBuffer(0), &ShadingSettings);
 
         ContextManager::SetRenderContext(m_LiquidContextPtrs[5]);
 

@@ -413,7 +413,7 @@ namespace
         ViewBuffer[18] = 0.0f;
         ViewBuffer[19] = 1.0f;
 
-        BufferManager::UploadVertexBufferData(pGfxLightFacet->m_PlaneVertexBufferSetPtr, ViewBuffer);
+        BufferManager::UploadBufferData(pGfxLightFacet->m_PlaneVertexBufferSetPtr, ViewBuffer);
 
         // -----------------------------------------------------------------------------
         // Set time
@@ -446,7 +446,7 @@ namespace
 
         FilterSettings.m_InverseSizeAndOffset = Base::Float4(1.0f / static_cast<float>(m_BackgroundTexturePtr->GetNumberOfPixelsU()), 1.0f / static_cast<float>(m_BackgroundTexturePtr->GetNumberOfPixelsV()), 0.125f, 0.125f);
 
-        BufferManager::UploadConstantBufferData(m_FilterPropertiesPtr, &FilterSettings);
+        BufferManager::UploadBufferData(m_FilterPropertiesPtr, &FilterSettings);
 
         ContextManager::SetShaderCS(m_FilterShaderPtr);
 
@@ -519,7 +519,7 @@ namespace
 
         FilterSettings.m_InverseSizeAndOffset = Base::Float4(1.0f / static_cast<float>(MipmapLevel0Ptr->GetNumberOfPixelsU()), 1.0f / static_cast<float>(MipmapLevel0Ptr->GetNumberOfPixelsV()), 0.125f, 0.125f);
 
-        BufferManager::UploadConstantBufferData(m_FilterPropertiesPtr, &FilterSettings);
+        BufferManager::UploadBufferData(m_FilterPropertiesPtr, &FilterSettings);
 
         ContextManager::SetShaderCS(m_CombineShaderPtr);
 
@@ -566,11 +566,11 @@ namespace
             GaussianSettings.m_Direction[1] = 0;
             GaussianSettings.m_LOD          = IndexOfMipmap - 1;
 
-            BufferManager::UploadConstantBufferData(m_GaussianPropertiesPtr, &GaussianSettings);
+            BufferManager::UploadBufferData(m_GaussianPropertiesPtr, &GaussianSettings);
 
             FilterSettings.m_InverseSizeAndOffset = Base::Float4(1.0f / static_cast<float>(CurrentMipmapLevel->GetNumberOfPixelsU()), 1.0f / static_cast<float>(CurrentMipmapLevel->GetNumberOfPixelsV()), 0.125f, 0.125f);
 
-            BufferManager::UploadConstantBufferData(m_FilterPropertiesPtr, &FilterSettings);
+            BufferManager::UploadBufferData(m_FilterPropertiesPtr, &FilterSettings);
 
             ContextManager::SetShaderCS(m_ForegroundBlurShaderPtr);
 
@@ -604,7 +604,7 @@ namespace
             GaussianSettings.m_Direction[1] = 1;
             GaussianSettings.m_LOD          = IndexOfMipmap;
 
-            BufferManager::UploadConstantBufferData(m_GaussianPropertiesPtr, &GaussianSettings);
+            BufferManager::UploadBufferData(m_GaussianPropertiesPtr, &GaussianSettings);
 
             ContextManager::SetShaderCS(m_ForegroundBlurShaderPtr);
 
