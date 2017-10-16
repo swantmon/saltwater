@@ -432,6 +432,11 @@ namespace
             CInternBuffer& rTargetBuffer = *static_cast<CInternBuffer*>(&(*_TargetBufferPtr));
             CInternBuffer& rSourceBuffer = *static_cast<CInternBuffer*>(&(*_SourceBufferPtr));
 
+            unsigned int ReadBufferSize = rTargetBuffer.m_NumberOfBytes;
+            unsigned int WriteBufferSize = rSourceBuffer.m_NumberOfBytes;
+            assert(_ReadOffset + _Range <= ReadBufferSize);
+            assert(_WriteOffset + _Range <= WriteBufferSize);
+
             glCopyNamedBufferSubData(rTargetBuffer.m_NativeBuffer, rSourceBuffer.m_NativeBuffer, _ReadOffset, _WriteOffset, _Range);
         }
     }
@@ -502,7 +507,7 @@ namespace
         CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
 
         assert(pBuffer != nullptr);
-        assert(pBuffer->m_NumberOfBytes < _Offset + _Range);
+        assert(pBuffer->m_NumberOfBytes <= _Offset + _Range);
 
         glNamedBufferSubData(pBuffer->m_NativeBuffer, _Offset, _Range, _pData);
     }
