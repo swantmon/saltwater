@@ -116,6 +116,8 @@ namespace
 
 	void CGfxPerformance::StartDurationQuery(unsigned int _ID, Gfx::Performance::CDurationQueryDelegate _Delegate)
 	{
+        assert(_Delegate);
+
 		GLuint StartQuery = 0;
 		GLuint EndQuery = 0;
 
