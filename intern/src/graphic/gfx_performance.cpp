@@ -82,6 +82,8 @@ namespace
                 glGetQueryObjectui64v(rItem.m_StartQuery, GL_QUERY_RESULT, &StartTime);
                 glGetQueryObjectui64v(rItem.m_EndQuery, GL_QUERY_RESULT, &EndTime);
 
+                assert(rItem.m_Callback);
+                
                 rItem.m_Callback(rItem.m_ID, (EndTime - StartTime) / 1000000.0f);
 
                 i = m_Queries.erase(i);
