@@ -47,5 +47,6 @@ namespace BufferManager
     void UnmapBuffer(CBufferPtr _BufferPtr);
     
     void UploadBufferData(CBufferPtr _BufferPtr, const void* _pData);
+    void UploadBufferDataRange(CBufferPtr _BufferPtr, const void* _pData, unsigned int _Offset, unsigned int _Range);
 } // namespace BufferManager
 } // namespace Gfx

@@ -62,6 +62,7 @@ namespace
         void UnmapBuffer(CBufferPtr _BufferPtr);
 
         void UploadBufferData(CBufferPtr _BufferPtr, const void* _pData);
+        void UploadBufferDataRange(CBufferPtr _BufferPtr, const void* _pData, unsigned int _Offset, unsigned int _Range);
 
     private:
 
@@ -480,6 +481,20 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxBufferManager::UploadBufferDataRange(CBufferPtr _BufferPtr, const void* _pData, unsigned int _Offset, unsigned int _Range)
+    {
+        assert(_BufferPtr != nullptr && _BufferPtr.IsValid() && _pData && _Range > 0);
+
+        CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
+
+        assert(pBuffer != nullptr);
+        assert(pBuffer->m_NumberOfBytes < _Offset + _Range);
+
+        glNamedBufferSubData(pBuffer->m_NativeBuffer, _Offset, _Range, _pData);
+    }
+
+    // -----------------------------------------------------------------------------
+
     GLenum  CGfxBufferManager::ConvertUsage(CBuffer::EUsage _Usage)
     {
         // -----------------------------------------------------------------------------
@@ -683,6 +698,13 @@ namespace BufferManager
     void UploadBufferData(CBufferPtr _BufferPtr, const void* _pData)
     {
         CGfxBufferManager::GetInstance().UploadBufferData(_BufferPtr, _pData);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void UploadBufferDataRange(CBufferPtr _BufferPtr, const void* _pData, unsigned int _Offset, unsigned int _Range)
+    {
+        CGfxBufferManager::GetInstance().UploadBufferDataRange(_BufferPtr, _pData, _Offset, _Range);
     }
 
 } // namespace BufferManager
