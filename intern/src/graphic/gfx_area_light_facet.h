@@ -19,7 +19,7 @@ namespace Gfx
     public:
 
         CBufferPtr GetPlaneIndexBuffer() const;
-        CBufferSetPtr GetPlaneVertexBuffer() const;
+        CBufferPtr GetPlaneVertexBuffer() const;
 
         Base::Float4 GetDirectionX() const;
         Base::Float4 GetDirectionY() const;
@@ -35,7 +35,7 @@ namespace Gfx
     protected:
 
         CBufferPtr    m_PlaneIndexBufferPtr;
-        CBufferSetPtr m_PlaneVertexBufferSetPtr;
+        CBufferPtr    m_PlaneVertexBufferSetPtr;
         CTexture2DPtr m_TexturePtr;
         CTexture2DPtr m_FilteredTexturePtr;
         Base::Float4  m_DirectionX;

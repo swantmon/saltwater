@@ -30,7 +30,7 @@ namespace Gfx
         m_MVPVertexShaderPtr = 0;
     }
     
-    CBufferSetPtr CSurface::GetVertexBuffer() const
+    CBufferPtr CSurface::GetVertexBuffer() const
     {
         return m_VertexBufferPtr;
     }

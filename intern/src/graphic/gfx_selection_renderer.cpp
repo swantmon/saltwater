@@ -724,7 +724,7 @@ namespace
 
         ContextManager::ResetIndexBuffer();
 
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetConstantBuffer(0);
 
@@ -755,8 +755,6 @@ namespace
 
     void CGfxSelectionRenderer::RenderHighlightSurfaces()
     {
-        const unsigned int pOffset[] = { 0, 0 };
-
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
 
         ContextManager::SetShaderPS(m_HighlightPSPtr);
@@ -785,7 +783,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Set items to context manager
             // -----------------------------------------------------------------------------
-            ContextManager::SetVertexBufferSet(SurfacePtr->GetVertexBuffer(), pOffset);
+            ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
 
             ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
 
@@ -799,8 +797,6 @@ namespace
 
     void CGfxSelectionRenderer::RenderHighlightProbes()
     {
-        const unsigned int pOffset[] = { 0, 0 };
-
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(0));
 
         ContextManager::SetShaderPS(m_TextureCubePSPtr);
@@ -829,7 +825,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Set items to context manager
             // -----------------------------------------------------------------------------
-            ContextManager::SetVertexBufferSet(SurfacePtr->GetVertexBuffer(), pOffset);
+            ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
 
             ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
 
@@ -871,7 +867,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Set items to context manager
             // -----------------------------------------------------------------------------
-            ContextManager::SetVertexBufferSet(SurfacePtr->GetVertexBuffer(), pOffset);
+            ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
 
             ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
 

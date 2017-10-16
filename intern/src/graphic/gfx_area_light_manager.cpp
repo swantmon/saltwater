@@ -279,9 +279,7 @@ namespace
             BufferDesc.m_pBytes        = &PlaneVertexBufferData[0];
             BufferDesc.m_pClassKey     = 0;
         
-            CBufferPtr PlanePositionBuffer = BufferManager::CreateBuffer(BufferDesc);
-        
-            rGfxLightFacet.m_PlaneVertexBufferSetPtr = BufferManager::CreateVertexBufferSet(PlanePositionBuffer);
+            rGfxLightFacet.m_PlaneVertexBufferSetPtr = BufferManager::CreateBuffer(BufferDesc);
         
             // -----------------------------------------------------------------------------
         
@@ -415,7 +413,7 @@ namespace
         ViewBuffer[18] = 0.0f;
         ViewBuffer[19] = 1.0f;
 
-        BufferManager::UploadVertexBufferData(pGfxLightFacet->m_PlaneVertexBufferSetPtr->GetBuffer(0), ViewBuffer);
+        BufferManager::UploadVertexBufferData(pGfxLightFacet->m_PlaneVertexBufferSetPtr, ViewBuffer);
 
         // -----------------------------------------------------------------------------
         // Set time

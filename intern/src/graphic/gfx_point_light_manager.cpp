@@ -800,7 +800,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Set items to context manager
                 // -----------------------------------------------------------------------------
-                ContextManager::SetVertexBufferSet(SurfacePtr->GetVertexBuffer(), pOffset);
+                ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
                     
                 ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
                     
@@ -816,7 +816,7 @@ namespace
                     
                 ContextManager::ResetIndexBuffer();
                     
-                ContextManager::ResetVertexBufferSet();
+                ContextManager::ResetVertexBuffer();
             }
                 
             // -----------------------------------------------------------------------------

@@ -65,10 +65,9 @@ namespace ContextManager
     void SetIndexBuffer(CBufferPtr _BufferPtr, unsigned int _Stride, unsigned int _Offset);
     CBufferPtr GetIndexBuffer();
 
-    void ResetVertexBufferSet();
-    void SetVertexBufferSet(CBufferSetPtr _BufferSetPtr, const unsigned int* _pOffsets);
-    void SetVertexBufferSet(CBufferSetPtr _BufferSetPtr, const unsigned int* _pStrides, const unsigned int* _pOffsets);
-    CBufferSetPtr GetVertexBufferSet();
+    void ResetVertexBuffer();
+    void SetVertexBuffer(CBufferPtr _BufferSetPtr, bool _UseActiveInputLayout = true);
+    CBufferPtr GetVertexBuffer();
 
     void ResetShaderVS();
     void SetShaderVS(CShaderPtr _ShaderSetPtr);

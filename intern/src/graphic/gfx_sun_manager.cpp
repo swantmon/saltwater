@@ -450,11 +450,6 @@ namespace
         Performance::BeginEvent("Sun Shadows");
 
         // -----------------------------------------------------------------------------
-        // Prepare renderer
-        // -----------------------------------------------------------------------------
-        const unsigned int pOffset[] = {0, 0};
-
-        // -----------------------------------------------------------------------------
         // Prepare shadow
         // -----------------------------------------------------------------------------
         TargetSetManager::ClearTargetSet(_rInternLight.m_RenderContextPtr->GetTargetSet());
@@ -546,7 +541,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Set items to context manager
                 // -----------------------------------------------------------------------------
-                ContextManager::SetVertexBufferSet(SurfacePtr->GetVertexBuffer(), pOffset);
+                ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
                     
                 ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
                     
@@ -562,7 +557,7 @@ namespace
                     
                 ContextManager::ResetIndexBuffer();
                     
-                ContextManager::ResetVertexBufferSet();
+                ContextManager::ResetVertexBuffer();
             }
                 
             // -----------------------------------------------------------------------------

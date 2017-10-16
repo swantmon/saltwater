@@ -35,7 +35,7 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    CBufferSetPtr CAreaLightFacet::GetPlaneVertexBuffer() const
+    CBufferPtr CAreaLightFacet::GetPlaneVertexBuffer() const
     {
         return m_PlaneVertexBufferSetPtr;
     }
