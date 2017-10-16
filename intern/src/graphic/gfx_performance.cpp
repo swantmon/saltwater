@@ -68,12 +68,15 @@ namespace
         {
             SQueryStackItem& rItem = *i;
 
+			GLuint StartQuery = rItem.m_StartQuery;
             GLuint EndQuery = rItem.m_EndQuery;
 
-            GLint IsQueryAvailable;
-            glGetQueryObjectiv(EndQuery, GL_QUERY_RESULT_AVAILABLE, &IsQueryAvailable);
+            GLint IsStartQueryAvailable;
+            glGetQueryObjectiv(StartQuery, GL_QUERY_RESULT_AVAILABLE, &IsStartQueryAvailable);
+			GLint IsEndQueryAvailable;
+			glGetQueryObjectiv(EndQuery, GL_QUERY_RESULT_AVAILABLE, &IsEndQueryAvailable);
 
-            if (IsQueryAvailable == GL_TRUE)
+            if (IsStartQueryAvailable == GL_TRUE && IsEndQueryAvailable == GL_TRUE)
             {
                 GLuint64 StartTime, EndTime;
                 glGetQueryObjectui64v(rItem.m_StartQuery, GL_QUERY_RESULT, &StartTime);
@@ -82,6 +85,9 @@ namespace
                 rItem.m_Callback(rItem.m_ID, (EndTime - StartTime) / 1000000.0f);
 
                 i = m_Queries.erase(i);
+
+				glDeleteQueries(1, &StartQuery);
+				glDeleteQueries(1, &EndQuery);
             }
             else
             {
