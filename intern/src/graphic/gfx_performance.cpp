@@ -157,16 +157,6 @@ namespace
 
         glQueryCounter(Item.m_EndQuery, GL_TIMESTAMP);
 
-        GLint IsQueryAvailable = false;
-        IsQueryAvailable = false;
-        while (!IsQueryAvailable) {
-            glGetQueryObjectiv(Item.m_StartQuery, GL_QUERY_RESULT_AVAILABLE, &IsQueryAvailable);
-        }
-        IsQueryAvailable = false;
-        while (!IsQueryAvailable) {
-            glGetQueryObjectiv(Item.m_EndQuery, GL_QUERY_RESULT_AVAILABLE, &IsQueryAvailable);
-        }
-
         GLuint64 StartTime, EndTime;
         glGetQueryObjectui64v(Item.m_StartQuery, GL_QUERY_RESULT, &StartTime);
         glGetQueryObjectui64v(Item.m_EndQuery, GL_QUERY_RESULT, &EndTime);
