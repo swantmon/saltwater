@@ -13,6 +13,8 @@
 
 #include <functional>
 
+#define GFX_BIND_DURATION_QUERY_METHOD(_Method) std::bind(_Method, this, std::placeholders::_1, std::placeholders::_2)
+
 namespace Gfx
 {
 namespace Performance
