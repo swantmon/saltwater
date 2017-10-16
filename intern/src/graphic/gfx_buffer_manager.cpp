@@ -54,6 +54,7 @@ namespace
     public:
 
         void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr);
+        void CopyBufferToBufferRange(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, unsigned int _ReadOffset, unsigned int _WriteOffset, unsigned int _Range);
 
     public:
 
@@ -424,6 +425,19 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxBufferManager::CopyBufferToBufferRange(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, unsigned int _ReadOffset, unsigned int _WriteOffset, unsigned int _Range)
+    {
+        if (_TargetBufferPtr != _SourceBufferPtr)
+        {
+            CInternBuffer& rTargetBuffer = *static_cast<CInternBuffer*>(&(*_TargetBufferPtr));
+            CInternBuffer& rSourceBuffer = *static_cast<CInternBuffer*>(&(*_SourceBufferPtr));
+
+            glCopyNamedBufferSubData(rTargetBuffer.m_NativeBuffer, rSourceBuffer.m_NativeBuffer, _ReadOffset, _WriteOffset, _Range);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
     void* CGfxBufferManager::MapBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map)
     {
         assert(_BufferPtr != nullptr && _BufferPtr.IsValid());
@@ -670,6 +684,13 @@ namespace BufferManager
     void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr)
     {
         CGfxBufferManager::GetInstance().CopyBufferToBuffer(_TargetBufferPtr, _SourceBufferPtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CopyBufferToBufferRange(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, unsigned int _ReadOffset, unsigned int _WriteOffset, unsigned int _Range)
+    {
+        CGfxBufferManager::GetInstance().CopyBufferToBufferRange(_TargetBufferPtr, _SourceBufferPtr, _ReadOffset, _WriteOffset, _Range);
     }
     
     // -----------------------------------------------------------------------------
