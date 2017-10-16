@@ -23,6 +23,10 @@ namespace
     public:
         void BeginEvent(const Base::Char* _pEventName);
         void EndEvent();
+
+        void StartDurationQuery(unsigned int _ID, Gfx::Performance::CDurationQueryDelegate _Delegate);
+        void EndDurationQuery();
+        float EndDurationQueryWithSync();
     };
 } // namespace 
 
@@ -55,6 +59,27 @@ namespace
     {
         glPopDebugGroup();
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxPerformance::StartDurationQuery(unsigned int _ID, Gfx::Performance::CDurationQueryDelegate _Delegate)
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxPerformance::EndDurationQuery()
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CGfxPerformance::EndDurationQueryWithSync()
+    {
+        return 0.0f;
+    }
 } // namespace 
 
 namespace Gfx
@@ -71,6 +96,27 @@ namespace Performance
     void EndEvent()
     {
         CGfxPerformance::GetInstance().EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void StartDurationQuery(unsigned int _ID, CDurationQueryDelegate _Delegate)
+    {
+        CGfxPerformance::GetInstance().StartDurationQuery(_ID, _Delegate);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void EndDurationQuery()
+    {
+        CGfxPerformance::GetInstance().EndDurationQuery();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float EndDurationQueryWithSync()
+    {
+        return CGfxPerformance::GetInstance().EndDurationQueryWithSync();
     }
 } // namespace Performance
 } // namespace Gfx

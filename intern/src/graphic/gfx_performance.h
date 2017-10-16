@@ -11,11 +11,19 @@
 
 #include "base/base_typedef.h"
 
+#include <functional>
+
 namespace Gfx
 {
 namespace Performance
 {
+    typedef std::function<void(int, int)> CDurationQueryDelegate;
+
     void BeginEvent(const Base::Char* _pEventName);
     void EndEvent();
+
+    void StartDurationQuery(unsigned int _ID, CDurationQueryDelegate _Delegate);
+    void EndDurationQuery();
+    float EndDurationQueryWithSync();
 } // namespace Performance
 } // namespace Gfx
