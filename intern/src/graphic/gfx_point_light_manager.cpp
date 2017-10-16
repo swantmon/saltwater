@@ -652,12 +652,7 @@ namespace
         if (_rInternLight.m_CurrentShadowType == Dt::CPointLightFacet::NoShadows) return;
 
         Performance::BeginEvent("Point Light Shadows");
-
-        // -----------------------------------------------------------------------------
-        // Prepare renderer
-        // -----------------------------------------------------------------------------
-        const unsigned int pOffset[] = {0, 0};
-
+        
         // -----------------------------------------------------------------------------
         // Prepare shadow
         // -----------------------------------------------------------------------------

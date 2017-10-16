@@ -640,9 +640,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Screen-Space liquid spheres (depth)
         // -----------------------------------------------------------------------------
-        void*                             pInstances;
-        SPerInstanceBuffer*               pInstance;
-        unsigned int                      NumberOfParticles = 0;
         CParticleEntities::const_iterator EndOfParticles;
 
         ContextManager::SetRenderContext(m_LiquidContextPtrs[0]);

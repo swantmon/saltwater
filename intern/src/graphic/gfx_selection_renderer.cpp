@@ -611,7 +611,7 @@ namespace
         IndexOfLastRequest = (rTicket.m_IndexOfPopRequest > 0) ? rTicket.m_IndexOfPopRequest - 1 : CInternSelectionTicket::s_MaxNumberOfRequests - 1;
         IndexOfBuffer      = rTicket.m_IndexOfTicket * s_MaxNumberOfTickets + IndexOfLastRequest;
 
-        SSelectionOutput* pOutput = static_cast<SSelectionOutput*>(BufferManager::MapConstantBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1), CBuffer::Read));
+        SSelectionOutput* pOutput = static_cast<SSelectionOutput*>(BufferManager::MapBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1), CBuffer::Read));
 
         rTicket.m_WSPosition = Base::Float3(pOutput->m_WSPosition[0], pOutput->m_WSPosition[1], pOutput->m_WSPosition[2]);
         rTicket.m_WSNormal   = Base::Float3(pOutput->m_WSNormal[0], pOutput->m_WSNormal[1], pOutput->m_WSNormal[2]);
@@ -626,7 +626,7 @@ namespace
             rTicket.m_pObject = &Dt::EntityManager::GetEntityByID(pOutput->m_EntityID);
         }
 
-        BufferManager::UnmapConstantBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1));
+        BufferManager::UnmapBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1));
 
         return true;
     }

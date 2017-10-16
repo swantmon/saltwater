@@ -338,7 +338,6 @@ namespace
         // -----------------------------------------------------------------------------
         CRenderJobs::const_iterator CurrentRenderJob;
         CRenderJobs::const_iterator EndOfRenderJobs;
-        const unsigned int          pOffset[]       = {0, 0};
 
         // -----------------------------------------------------------------------------
         // Upload data

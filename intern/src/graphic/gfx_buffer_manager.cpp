@@ -715,21 +715,21 @@ namespace BufferManager
 
     // -----------------------------------------------------------------------------
 
-    void* MapConstantBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map)
+    void* MapBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map)
     {
         return CGfxBufferManager::GetInstance().MapBuffer(_BufferPtr, _Map);
     }
 
     // -----------------------------------------------------------------------------
 
-    void* MapConstantBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range)
+    void* MapBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range)
     {
         return CGfxBufferManager::GetInstance().MapBufferRange(_BufferPtr, _Map, _Offset, _Range);
     }
 
     // -----------------------------------------------------------------------------
 
-    void UnmapConstantBuffer(CBufferPtr _BufferPtr)
+    void UnmapBuffer(CBufferPtr _BufferPtr)
     {
         CGfxBufferManager::GetInstance().UnmapBuffer(_BufferPtr);
     }
