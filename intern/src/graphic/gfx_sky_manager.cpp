@@ -89,7 +89,7 @@ namespace
             CBufferSetPtr     m_PSBufferSetPtr;
             CInputLayoutPtr   m_InputLayoutPtr;
             CMeshPtr          m_MeshPtr;
-            CBufferSetPtr     m_VertexBufferSetPtr;
+            CBufferPtr        m_VertexBufferSetPtr;
             CBufferPtr        m_IndexBufferPtr;
             CTextureSetPtr    m_TextureSetPtr;
         };
@@ -686,7 +686,7 @@ namespace
         m_SkyboxFromTexture.m_IndexBufferPtr     = 0;
 
         m_SkyboxFromGeometry.m_MeshPtr            = 0;
-        m_SkyboxFromGeometry.m_VertexBufferSetPtr = BufferManager::CreateVertexBufferSet(PlanePositionBufferPtr);;
+        m_SkyboxFromGeometry.m_VertexBufferSetPtr = PlanePositionBufferPtr;
         m_SkyboxFromGeometry.m_IndexBufferPtr     = PlaneIndexBufferPtr;
 
         m_SkyboxFromLUT.m_MeshPtr            = CubemapTextureSpherePtr;
@@ -1129,7 +1129,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Environment to cube map
         // -----------------------------------------------------------------------------           
-        const unsigned int pOffset[] = { 0, 0 };
 
         // -----------------------------------------------------------------------------
         // Setup
@@ -1152,7 +1151,7 @@ namespace
 
         ContextManager::SetShaderPS(PSPtr);
 
-        ContextManager::SetVertexBufferSet(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
 
         ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
@@ -1198,7 +1197,7 @@ namespace
 
         ContextManager::ResetIndexBuffer();
 
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 
@@ -1255,7 +1254,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Environment to cube map
         // -----------------------------------------------------------------------------           
-        const unsigned int pOffset[] = { 0, 0 };
 
         // -----------------------------------------------------------------------------
         // Setup
@@ -1270,7 +1268,7 @@ namespace
 
         ContextManager::SetShaderPS(PSPtr);
 
-        ContextManager::SetVertexBufferSet(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
 
         ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
@@ -1304,7 +1302,7 @@ namespace
 
         ContextManager::ResetIndexBuffer();
 
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 
@@ -1361,7 +1359,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Environment to cube map
         // -----------------------------------------------------------------------------           
-        const unsigned int pOffset[] = { 0, 0 };
 
         // -----------------------------------------------------------------------------
         // Setup
@@ -1376,7 +1373,7 @@ namespace
 
         ContextManager::SetShaderPS(PSPtr);
 
-        ContextManager::SetVertexBufferSet(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
 
         ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
@@ -1410,7 +1407,7 @@ namespace
 
         ContextManager::ResetIndexBuffer();
 
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 
@@ -1488,7 +1485,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Environment to cube map
         // -----------------------------------------------------------------------------           
-        const unsigned int pOffset[] = { 0, 0 };
 
         // -----------------------------------------------------------------------------
         // Setup
@@ -1503,7 +1499,7 @@ namespace
 
         ContextManager::SetShaderPS(PSPtr);
 
-        ContextManager::SetVertexBufferSet(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
 
         ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
@@ -1542,7 +1538,7 @@ namespace
 
         ContextManager::ResetIndexBuffer();
 
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 
@@ -1582,7 +1578,7 @@ namespace
         CBufferSetPtr     GSBufferSetPtr     = m_SkyboxFromGeometry.m_GSBufferSetPtr;
         CBufferSetPtr     PSBufferSetPtr     = m_SkyboxFromGeometry.m_PSBufferSetPtr;
         CInputLayoutPtr   InputLayoutPtr     = m_SkyboxFromGeometry.m_InputLayoutPtr;
-        CBufferSetPtr     VertexBufferSetPtr = m_SkyboxFromGeometry.m_VertexBufferSetPtr;
+        CBufferPtr        VertexBufferSetPtr = m_SkyboxFromGeometry.m_VertexBufferSetPtr;
         CBufferPtr        IndexBufferPtr     = m_SkyboxFromGeometry.m_IndexBufferPtr;
         CTextureSetPtr    TextureSetPtr      = m_SkyboxFromGeometry.m_TextureSetPtr;
 
@@ -1627,7 +1623,7 @@ namespace
         PlaneGeometryBuffer[18] = 0.0f;
         PlaneGeometryBuffer[19] = 0.0f;
 
-        BufferManager::UploadVertexBufferData(VertexBufferSetPtr->GetBuffer(0), &PlaneGeometryBuffer);
+        BufferManager::UploadVertexBufferData(VertexBufferSetPtr, &PlaneGeometryBuffer);
 
         // -----------------------------------------------------------------------------
         // Setup constant buffer
@@ -1650,7 +1646,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Environment to cube map
         // -----------------------------------------------------------------------------           
-        const unsigned int pOffset[] = { 0, 0 };
+        
 
         // -----------------------------------------------------------------------------
         // Setup
@@ -1665,7 +1661,7 @@ namespace
 
         ContextManager::SetShaderPS(PSPtr);
 
-        ContextManager::SetVertexBufferSet(VertexBufferSetPtr, pOffset);
+        ContextManager::SetVertexBuffer(VertexBufferSetPtr);
 
         ContextManager::SetIndexBuffer(IndexBufferPtr, 0);
 
@@ -1704,7 +1700,7 @@ namespace
 
         ContextManager::ResetIndexBuffer();
 
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 
@@ -1779,7 +1775,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Environment to cube map
         // -----------------------------------------------------------------------------           
-        const unsigned int pOffset[] = { 0, 0 };
+        
 
         // -----------------------------------------------------------------------------
         // Setup
@@ -1794,7 +1790,7 @@ namespace
 
         ContextManager::SetShaderPS(PSPtr);
 
-        ContextManager::SetVertexBufferSet(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
 
         ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
@@ -1835,7 +1831,7 @@ namespace
 
         ContextManager::ResetIndexBuffer();
 
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 
@@ -2020,14 +2016,12 @@ namespace
 
         CBufferPtr EmptyVertexBufferPtr = BufferManager::CreateBuffer(BufferDesc);
 
-        CBufferSetPtr EmptyVertexBufferSetPtr = BufferManager::CreateVertexBufferSet(EmptyVertexBufferPtr);
-
         // -----------------------------------------------------------------------------
         // Render
         // -----------------------------------------------------------------------------
         Performance::BeginEvent("Precompute Atmospheric Scattering");
 
-        const unsigned int pOffset[] = { 0, 0 };
+        
 
         auto GetLayerValues = [&](unsigned int _Layer, float& _rRadius, Base::Float4& _rDhdH)
         {
@@ -2081,7 +2075,7 @@ namespace
 
         ContextManager::SetShaderPS(m_TransmittanceMaterial);
 
-        ContextManager::SetVertexBufferSet(EmptyVertexBufferSetPtr, pOffset);
+        ContextManager::SetVertexBuffer(EmptyVertexBufferPtr);
 
         ContextManager::SetConstantBuffer(1, m_PSPrecomputeConstants);
 

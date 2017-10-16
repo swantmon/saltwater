@@ -131,10 +131,10 @@ namespace
         CBufferSetPtr     m_ViewModelVSBuffer;
         CBufferSetPtr     m_BaseModelVSBuffer;
         CBufferSetPtr     m_ViewPSBuffer;
-        CBufferSetPtr     m_PlaneBuffer;
+        CBufferPtr        m_PlaneBuffer;
         CBufferSetPtr     m_DeferredPassPSBuffer;
         CBufferPtr        m_TextInstanceBufferPtr;
-        CBufferSetPtr     m_TextInstanceBufferSetPtr;
+        CBufferPtr        m_TextInstanceBufferSetPtr;
         CBufferPtr        m_PlaneIndexBuffer;
         CRenderContextPtr m_RenderContextPtr;
         CShaderPtr        m_PositionShaderVSPtr;
@@ -435,18 +435,6 @@ namespace
         CBufferPtr PropertiesBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
         
         m_ViewPSBuffer = BufferManager::CreateBufferSet(PropertiesBuffer);
-
-        // -----------------------------------------------------------------------------
-
-        ConstanteBufferDesc.m_Stride        = 0;
-        ConstanteBufferDesc.m_Usage         = CBuffer::GPUReadWrite;
-        ConstanteBufferDesc.m_Binding       = CBuffer::VertexBuffer;
-        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SPerTextInstanceBuffer) * s_MaxNumberOfInstances;
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
-
-        m_TextInstanceBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -465,7 +453,7 @@ namespace
 
         m_QuadModelPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
 
-        m_TextInstanceBufferSetPtr = BufferManager::CreateVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer()->GetBuffer(0), m_TextInstanceBufferPtr);
+        m_TextInstanceBufferSetPtr = m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer();
 
         // -----------------------------------------------------------------------------
 
@@ -508,9 +496,7 @@ namespace
         BufferDesc.m_pBytes        = &PlaneVertexBufferData[0];
         BufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr PlanePositionBuffer = BufferManager::CreateBuffer(BufferDesc);
-        
-        m_PlaneBuffer = BufferManager::CreateVertexBufferSet(PlanePositionBuffer);
+        m_PlaneBuffer = BufferManager::CreateBuffer(BufferDesc);
         
         // -----------------------------------------------------------------------------
         
@@ -610,7 +596,7 @@ namespace
             ViewBuffer[10] = _rBottomLeft[1];
             ViewBuffer[11] = _rBottomLeft[2];
 
-            BufferManager::UploadVertexBufferData(m_PlaneBuffer->GetBuffer(0), ViewBuffer);
+            BufferManager::UploadVertexBufferData(m_PlaneBuffer, ViewBuffer);
 
             // -----------------------------------------------------------------------------
 
@@ -628,7 +614,6 @@ namespace
             ContextManager::DrawIndexed(6, 0, 0);
         };
 
-        const unsigned int pOffset[] = {0, 0};
         CDebugCameras::const_iterator CurrentCamera = m_DebugCameras.begin();
         CDebugCameras::const_iterator EndOfCameras  = m_DebugCameras.end();
 
@@ -641,7 +626,7 @@ namespace
         
         ContextManager::SetRenderContext(m_RenderContextPtr);
         
-        ContextManager::SetVertexBufferSet(m_PlaneBuffer, pOffset);
+        ContextManager::SetVertexBuffer(m_PlaneBuffer);
         
         ContextManager::SetIndexBuffer(m_PlaneIndexBuffer, 0);
         
@@ -690,7 +675,7 @@ namespace
         
         ContextManager::ResetIndexBuffer();
         
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
         
         ContextManager::ResetShaderVS();
         
@@ -706,8 +691,6 @@ namespace
     void CGfxDebugRenderer::RenderGizmo()
     {
         if (!m_IsGizmoVisible) return;
-
-        const unsigned int pOffset[] = {0, 0};
 
         Performance::BeginEvent("Gizmo");
 
@@ -743,7 +726,7 @@ namespace
             // -----------------------------------------------------------------------------        
             ContextManager::SetRenderContext(m_RenderContextPtr);
 
-            ContextManager::SetVertexBufferSet(m_GizmoModelPtr->GetLOD(0)->GetSurface(IndexOfSurface)->GetVertexBuffer(), pOffset);
+            ContextManager::SetVertexBuffer(m_GizmoModelPtr->GetLOD(0)->GetSurface(IndexOfSurface)->GetVertexBuffer());
 
             ContextManager::SetIndexBuffer(m_GizmoModelPtr->GetLOD(0)->GetSurface(IndexOfSurface)->GetIndexBuffer(), 0);
 
@@ -771,7 +754,7 @@ namespace
 
             ContextManager::ResetIndexBuffer();
 
-            ContextManager::ResetVertexBufferSet();
+            ContextManager::ResetVertexBuffer();
 
             ContextManager::ResetShaderVS();
 
@@ -787,7 +770,7 @@ namespace
 
     void CGfxDebugRenderer::RenderTextures()
     {
-        const unsigned int pOffset[] = { 0, 0 };
+        
         CDebugTextures::iterator CurrentTexture = m_DebugTextures.begin();
         CDebugTextures::iterator EndOfTextures  = m_DebugTextures.end();
 
@@ -802,7 +785,7 @@ namespace
 
         ContextManager::SetRenderContext(m_RenderContextPtr);
 
-        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
  
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
@@ -868,7 +851,7 @@ namespace
 
         ContextManager::ResetIndexBuffer();
 
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
         
@@ -887,11 +870,7 @@ namespace
 
     void CGfxDebugRenderer::RenderTexts()
     {
-        const unsigned int      pOffset[] = { 0, 0 };
-        void*                   pInstances;
-        SPerTextInstanceBuffer* pInstance;
-        unsigned int            NumberOfLetters = 0;
-        Base::Int2              ScreenSize = Main::GetActiveWindowSize();
+        Base::Int2 ScreenSize = Main::GetActiveWindowSize();
 
         CDebugTexts::const_iterator CurrentText = m_DebugTexts.begin();
         CDebugTexts::const_iterator EndOfTexts  = m_DebugTexts.end();
@@ -907,7 +886,7 @@ namespace
 
         ContextManager::SetRenderContext(m_RenderContextPtr);
 
-        ContextManager::SetVertexBufferSet(m_TextInstanceBufferSetPtr, pOffset);
+        ContextManager::SetVertexBuffer(m_TextInstanceBufferSetPtr);
 
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
@@ -925,65 +904,69 @@ namespace
 
         ContextManager::SetTexture(0, m_ConsolasTexturePtr);
 
-        pInstances = BufferManager::MapVertexBuffer(m_TextInstanceBufferSetPtr->GetBuffer(1), CBuffer::Write);
 
-        assert(pInstances != 0);
+        // TODO by tschwandt
+        // This should be done without using a second vertex buffer object!
 
-        for (; CurrentText != EndOfTexts; ++CurrentText)
-        {
-            Base::Float2 Start    = CurrentText->m_ScreenPosition * Base::Float2(static_cast<float>(ScreenSize[0]), static_cast<float>(ScreenSize[1]));
-            Base::Float2 Padding  = Start;
-            std::string  Text     = CurrentText->m_Text;
-            float        TextSize = static_cast<float>(CurrentText->m_TextSize);
-
-            for (unsigned int IndexOfLetter = 0; IndexOfLetter < Text.length(); ++ IndexOfLetter)
-            {
-                unsigned char CurrentLetter = Text[IndexOfLetter];
-
-                if (CurrentLetter == '\n')
-                {
-                    Padding[0]  = Start[0];
-                    Padding[1] += TextSize;
-
-                    continue;
-                }
-
-                unsigned char DrawLetter = CurrentLetter - 32;
-
-                Base::Float2 LetterPosition;
-
-                LetterPosition[0] = static_cast<float>(DrawLetter % 16);
-                LetterPosition[1] = static_cast<float>(DrawLetter / 16);
-
-                pInstance = &(static_cast<SPerTextInstanceBuffer*>(pInstances))[NumberOfLetters++];
-
-                pInstance->m_TextSettings = Base::Float3(TextSize, Padding[0], Padding[1]);
-                pInstance->m_CharSettings = Base::Float3(1.0f / 16.0f, LetterPosition[0], LetterPosition[1]);
-                pInstance->m_CharColor    = CurrentText->m_Color;
-
-                if (NumberOfLetters == s_MaxNumberOfInstances)
-                {
-                    BufferManager::UnmapVertexBuffer(m_TextInstanceBufferSetPtr->GetBuffer(1));
-
-                    ContextManager::DrawIndexedInstanced(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), NumberOfLetters, 0, 0, 0);
-
-                    pInstances = BufferManager::MapVertexBuffer(m_TextInstanceBufferSetPtr->GetBuffer(1), CBuffer::Write);
-
-                    NumberOfLetters = 0;
-                }
-
-                Padding[0] += TextSize;
-            }
-        }
-
-        if (NumberOfLetters > 0)
-        {
-            BufferManager::UnmapVertexBuffer(m_TextInstanceBufferSetPtr->GetBuffer(1));
-
-            ContextManager::DrawIndexedInstanced(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), NumberOfLetters, 0, 0, 0);
-
-            NumberOfLetters = 0;
-        }
+//         pInstances = BufferManager::MapVertexBuffer(m_TextInstanceBufferSetPtr->GetBuffer(1), CBuffer::Write);
+// 
+//         assert(pInstances != 0);
+// 
+//         for (; CurrentText != EndOfTexts; ++CurrentText)
+//         {
+//             Base::Float2 Start    = CurrentText->m_ScreenPosition * Base::Float2(static_cast<float>(ScreenSize[0]), static_cast<float>(ScreenSize[1]));
+//             Base::Float2 Padding  = Start;
+//             std::string  Text     = CurrentText->m_Text;
+//             float        TextSize = static_cast<float>(CurrentText->m_TextSize);
+// 
+//             for (unsigned int IndexOfLetter = 0; IndexOfLetter < Text.length(); ++ IndexOfLetter)
+//             {
+//                 unsigned char CurrentLetter = Text[IndexOfLetter];
+// 
+//                 if (CurrentLetter == '\n')
+//                 {
+//                     Padding[0]  = Start[0];
+//                     Padding[1] += TextSize;
+// 
+//                     continue;
+//                 }
+// 
+//                 unsigned char DrawLetter = CurrentLetter - 32;
+// 
+//                 Base::Float2 LetterPosition;
+// 
+//                 LetterPosition[0] = static_cast<float>(DrawLetter % 16);
+//                 LetterPosition[1] = static_cast<float>(DrawLetter / 16);
+// 
+//                 pInstance = &(static_cast<SPerTextInstanceBuffer*>(pInstances))[NumberOfLetters++];
+// 
+//                 pInstance->m_TextSettings = Base::Float3(TextSize, Padding[0], Padding[1]);
+//                 pInstance->m_CharSettings = Base::Float3(1.0f / 16.0f, LetterPosition[0], LetterPosition[1]);
+//                 pInstance->m_CharColor    = CurrentText->m_Color;
+// 
+//                 if (NumberOfLetters == s_MaxNumberOfInstances)
+//                 {
+//                     BufferManager::UnmapVertexBuffer(m_TextInstanceBufferSetPtr->GetBuffer(1));
+// 
+//                     ContextManager::DrawIndexedInstanced(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), NumberOfLetters, 0, 0, 0);
+// 
+//                     pInstances = BufferManager::MapVertexBuffer(m_TextInstanceBufferSetPtr->GetBuffer(1), CBuffer::Write);
+// 
+//                     NumberOfLetters = 0;
+//                 }
+// 
+//                 Padding[0] += TextSize;
+//             }
+//         }
+// 
+//         if (NumberOfLetters > 0)
+//         {
+//             BufferManager::UnmapVertexBuffer(m_TextInstanceBufferSetPtr->GetBuffer(1));
+// 
+//             ContextManager::DrawIndexedInstanced(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), NumberOfLetters, 0, 0, 0);
+// 
+//             NumberOfLetters = 0;
+//         }
 
         ContextManager::ResetTexture(0);
 
@@ -997,7 +980,7 @@ namespace
 
         ContextManager::ResetIndexBuffer();
 
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 

@@ -619,7 +619,7 @@ namespace
 
         Performance::BeginEvent("SSAO");
 
-        const unsigned int pOffset[] = { 0, 0 };
+        
 
         // -----------------------------------------------------------------------------
         // Get screen resolutions
@@ -640,7 +640,7 @@ namespace
         
         ContextManager::SetRenderContext(m_HalfContextPtr);
 
-        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
 
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
@@ -700,7 +700,7 @@ namespace
 
         ContextManager::ResetIndexBuffer();
 
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 
@@ -772,7 +772,7 @@ namespace
         // -----------------------------------------------------------------------------        
         ContextManager::SetRenderContext(m_DeferredRenderContextPtr);
         
-        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
         
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
         
@@ -816,7 +816,7 @@ namespace
         
         ContextManager::ResetIndexBuffer();
         
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
         
         ContextManager::ResetShaderVS();
         

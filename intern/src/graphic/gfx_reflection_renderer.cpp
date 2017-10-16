@@ -693,7 +693,7 @@ namespace
 
         Performance::BeginEvent("IBL");
 
-        const unsigned int pOffset[] = { 0, 0 };
+        
 
         // -----------------------------------------------------------------------------
         // IBL data
@@ -743,7 +743,7 @@ namespace
         
         ContextManager::SetShaderPS(m_ImageLightShaderPSPtr);
         
-        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
         
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
         
@@ -806,7 +806,7 @@ namespace
         
         ContextManager::ResetIndexBuffer();
         
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
         
         ContextManager::ResetShaderVS();
         
@@ -827,7 +827,7 @@ namespace
 
         Performance::BeginEvent("HCB");
 
-        const unsigned int pOffset[] = { 0, 0 };
+        
 
         ContextManager::SetBlendState(StateManager::GetBlendState(0));
 
@@ -841,7 +841,7 @@ namespace
 
         ContextManager::SetShaderPS(m_HCBShaderPSPtr);
 
-        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
 
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
@@ -891,7 +891,7 @@ namespace
 
         ContextManager::ResetIndexBuffer();
 
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 
@@ -936,7 +936,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Screen Space Reflections
         // -----------------------------------------------------------------------------
-        const unsigned int pOffset[] = { 0, 0 };
+        
 
         ContextManager::SetBlendState(StateManager::GetBlendState(0));
 
@@ -954,7 +954,7 @@ namespace
 
         ContextManager::SetShaderPS(m_SSRShaderPSPtr);
 
-        ContextManager::SetVertexBufferSet(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
 
         ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
@@ -1006,7 +1006,7 @@ namespace
 
         ContextManager::ResetIndexBuffer();
 
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 

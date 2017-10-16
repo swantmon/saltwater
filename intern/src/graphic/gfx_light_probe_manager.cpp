@@ -766,8 +766,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Render environment as reflection into cube map
         // -----------------------------------------------------------------------------
-        const unsigned int pOffset[] = { 0, 0 };
-
         ContextManager::SetTargetSet        (_rInterLightProbeFacet.m_TargetSetPtr);
         ContextManager::SetViewPortSet      (_rInterLightProbeFacet.m_ViewPortSetPtr);
         ContextManager::SetBlendState       (StateManager::GetBlendState(0));
@@ -851,7 +849,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Render
                 // -----------------------------------------------------------------------------
-                ContextManager::SetVertexBufferSet(SurfacePtr->GetVertexBuffer(), pOffset);
+                ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
 
                 ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
 
@@ -863,7 +861,7 @@ namespace
 
                 ContextManager::ResetIndexBuffer();
 
-                ContextManager::ResetVertexBufferSet();
+                ContextManager::ResetVertexBuffer();
 
                 ContextManager::ResetSampler(0);
 
@@ -921,7 +919,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Prepare renderer
         // -----------------------------------------------------------------------------
-        const unsigned int pOffset[] = { 0, 0 };
+        
 
         ContextManager::SetTargetSet        (_rInterLightProbeFacet.m_TargetSetPtr);
         ContextManager::SetViewPortSet      (_rInterLightProbeFacet.m_ViewPortSetPtr);
@@ -1078,7 +1076,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Render
                 // -----------------------------------------------------------------------------
-                ContextManager::SetVertexBufferSet(SurfacePtr->GetVertexBuffer(), pOffset);
+                ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
 
                 ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
 
@@ -1104,7 +1102,7 @@ namespace
 
         ContextManager::ResetIndexBuffer();
 
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetConstantBuffer(0);
         ContextManager::ResetConstantBuffer(1);
@@ -1138,7 +1136,7 @@ namespace
 
     void CGfxLightProbeManager::RenderFiltering(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet& _rDtLightProbeFacet)
     {
-        const unsigned int pOffset[] = { 0, 0 };
+        
 
         // -----------------------------------------------------------------------------
         // Start updating/filtering
@@ -1175,7 +1173,7 @@ namespace
 
         ContextManager::SetShaderPS(m_FilteringSpecularPSPtr);
 
-        ContextManager::SetVertexBufferSet(m_EnvironmentSpherePtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), pOffset);
+        ContextManager::SetVertexBuffer(m_EnvironmentSpherePtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
 
         ContextManager::SetIndexBuffer(m_EnvironmentSpherePtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
@@ -1271,7 +1269,7 @@ namespace
 
         ContextManager::ResetIndexBuffer();
 
-        ContextManager::ResetVertexBufferSet();
+        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 
