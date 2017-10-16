@@ -721,9 +721,9 @@ namespace MR
     // -----------------------------------------------------------------------------
 
     void CScalableSLAMReconstructor::RasterizeRootVolumes()
-    {        
+    {
         const unsigned int Offset = 0;
-        ContextManager::SetVertexBufferSet(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetVertexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
         ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
         ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
         ContextManager::SetTopology(STopology::TriangleList);
@@ -852,7 +852,7 @@ namespace MR
             glCullFace(GL_FRONT);
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_MULTISAMPLE);
-            ContextManager::SetVertexBufferSet(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+            ContextManager::SetVertexBuffer(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
             ContextManager::SetIndexBuffer(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
             ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
             ContextManager::SetTopology(STopology::PointList);
@@ -915,7 +915,7 @@ namespace MR
                 glCullFace(GL_FRONT);
                 glDisable(GL_DEPTH_TEST);
                 glDisable(GL_MULTISAMPLE);
-                ContextManager::SetVertexBufferSet(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+                ContextManager::SetVertexBuffer(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
                 ContextManager::SetIndexBuffer(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
                 ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
                 ContextManager::SetTopology(STopology::PointList);
@@ -952,7 +952,7 @@ namespace MR
                 glCullFace(GL_FRONT);
                 glDisable(GL_DEPTH_TEST);
                 glDisable(GL_MULTISAMPLE);
-                ContextManager::SetVertexBufferSet(m_Grid16MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+                ContextManager::SetVertexBuffer(m_Grid16MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
                 ContextManager::SetIndexBuffer(m_Grid16MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
                 ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
                 ContextManager::SetTopology(STopology::TriangleList);
@@ -983,7 +983,7 @@ namespace MR
 
             ContextManager::SetShaderVS(m_RasterizeLevel1GridVSPtr);
             ContextManager::SetShaderPS(m_RasterizeLevel1GridFSPtr);
-            ContextManager::SetVertexBufferSet(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+            ContextManager::SetVertexBuffer(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
             ContextManager::SetIndexBuffer(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
             ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
             ContextManager::SetTopology(STopology::TriangleList);

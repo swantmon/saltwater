@@ -635,7 +635,7 @@ namespace
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
         
         const unsigned int Offset = 0;
-        ContextManager::SetVertexBufferSet(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetVertexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
         ContextManager::SetIndexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
         ContextManager::SetInputLayout(m_VolumeInputLayoutPtr);
         
@@ -661,7 +661,7 @@ namespace
 		ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 		ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
 		
-		ContextManager::SetVertexBufferSet(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+		ContextManager::SetVertexBuffer(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
 		ContextManager::SetInputLayout(m_CubeOutlineInputLayoutPtr);
 
 		ContextManager::SetTopology(STopology::LineList);
@@ -704,7 +704,7 @@ namespace
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
         const unsigned int Offset = 0;
-        ContextManager::SetVertexBufferSet(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetVertexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
         ContextManager::SetIndexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
         ContextManager::SetInputLayout(m_VolumeInputLayoutPtr);
 
@@ -728,8 +728,7 @@ namespace
 
 		SDrawCallConstantBuffer BufferData;
 
-		const unsigned int Offset = 0;
-		ContextManager::SetVertexBufferSet(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+		ContextManager::SetVertexBuffer(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
 		ContextManager::SetInputLayout(m_CubeOutlineInputLayoutPtr);
 
 		ContextManager::SetTopology(STopology::LineList);
@@ -780,8 +779,7 @@ namespace
 
         SDrawCallConstantBuffer BufferData;
 
-        const unsigned int Offset = 0;
-        ContextManager::SetVertexBufferSet(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetVertexBuffer(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
         ContextManager::SetInputLayout(m_CubeOutlineInputLayoutPtr);
 
         ContextManager::SetTopology(STopology::LineList);
@@ -839,8 +837,7 @@ namespace
 
         SDrawCallConstantBuffer BufferData;
 
-        const unsigned int Offset = 0;
-        ContextManager::SetVertexBufferSet(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetVertexBuffer(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
         ContextManager::SetInputLayout(m_CubeOutlineInputLayoutPtr);
 
         ContextManager::SetTopology(STopology::LineList);
@@ -902,7 +899,7 @@ namespace
         ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
 
         const unsigned int Offset = 0;
-        ContextManager::SetVertexBufferSet(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetVertexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
         ContextManager::SetIndexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
 
         ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
@@ -933,7 +930,7 @@ namespace
         ContextManager::SetImageTexture(0, static_cast<Gfx::CTextureBasePtr>(m_pScalableReconstructor->GetVertexMap()));
 
         const unsigned int Offset = 0;
-        ContextManager::SetVertexBufferSet(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Offset);
+        ContextManager::SetVertexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
         ContextManager::SetIndexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
 
         ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
