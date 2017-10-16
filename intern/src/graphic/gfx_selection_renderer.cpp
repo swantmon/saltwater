@@ -708,7 +708,7 @@ namespace
 
         SelectionSettings.m_ColorAlpha = Base::Float4(0.31f, 0.45f, 0.64f, 0.4f);
 
-        BufferManager::UploadConstantBufferData(m_HighlightPSBufferPtr, &SelectionSettings);
+        BufferManager::UploadBufferData(m_HighlightPSBufferPtr, &SelectionSettings);
 
         // -----------------------------------------------------------------------------
         // Render
@@ -773,7 +773,7 @@ namespace
 
             ModelBuffer.m_ModelMatrix = CurrentSurfaceRenderJob->m_ModelMatrix;
 
-            BufferManager::UploadConstantBufferData(m_ModelBufferPtr, &ModelBuffer);
+            BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
 
             // -----------------------------------------------------------------------------
             // Render
@@ -815,7 +815,7 @@ namespace
 
             ModelBuffer.m_ModelMatrix = CurrentProbeRenderJob->m_ModelMatrix;
 
-            BufferManager::UploadConstantBufferData(m_ModelBufferPtr, &ModelBuffer);
+            BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
 
             // -----------------------------------------------------------------------------
             // Render
@@ -857,7 +857,7 @@ namespace
             ModelBuffer.m_ModelMatrix  = CurrentProbeRenderJob->m_ModelMatrix;
             ModelBuffer.m_ModelMatrix *= Base::Float4x4().SetScale(CurrentProbeRenderJob->m_pDtProbeFacet->GetBoxSize());
 
-            BufferManager::UploadConstantBufferData(m_ModelBufferPtr, &ModelBuffer);
+            BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
 
             // -----------------------------------------------------------------------------
             // Render
@@ -930,7 +930,7 @@ namespace
                 Settings.m_MaxX = MaxX;
                 Settings.m_MaxY = MaxY;
 
-                BufferManager::UploadConstantBufferData(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(0), &Settings);
+                BufferManager::UploadBufferData(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(0), &Settings);
 
                 // -----------------------------------------------------------------------------
                 // Execute

@@ -648,7 +648,7 @@ namespace
         GaussianSettings.m_Direction[0] = 1;
         GaussianSettings.m_Direction[1] = 0;
 
-        BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0), &GaussianSettings);
+        BufferManager::UploadBufferData(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0), &GaussianSettings);
 
         ContextManager::SetShaderCS(m_GaussianBlurShaderPtr);
 
@@ -673,7 +673,7 @@ namespace
         GaussianSettings.m_Direction[0] = 0;
         GaussianSettings.m_Direction[1] = 1;
 
-        BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0), &GaussianSettings);
+        BufferManager::UploadBufferData(m_GaussianBlurPropertiesCSBufferSetPtr->GetBuffer(0), &GaussianSettings);
 
         ContextManager::SetShaderCS(m_GaussianBlurShaderPtr);
 
@@ -718,7 +718,7 @@ namespace
         LightBuffer.m_SunAngularRadius     = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
         LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
-        BufferManager::UploadConstantBufferData(m_VolumeLightingCSBufferSetPtr->GetBuffer(0), &LightBuffer);
+        BufferManager::UploadBufferData(m_VolumeLightingCSBufferSetPtr->GetBuffer(0), &LightBuffer);
 
         // -----------------------------------------------------------------------------
 
@@ -733,7 +733,7 @@ namespace
         VolumeProperties.m_DensityLevel                       = pDataVolumeFogFacet->GetDensityLevel();
         VolumeProperties.m_DensityAttenuation                 = pDataVolumeFogFacet->GetDensityAttenuation();
 
-        BufferManager::UploadConstantBufferData(m_VolumeLightingCSBufferSetPtr->GetBuffer(1), &VolumeProperties);
+        BufferManager::UploadBufferData(m_VolumeLightingCSBufferSetPtr->GetBuffer(1), &VolumeProperties);
 
         // -----------------------------------------------------------------------------
 
@@ -833,7 +833,7 @@ namespace
 
         FogApplyProperties.m_FrustumDepthInMeter = pDataVolumeFogFacet->GetFrustumDepthInMeter();
 
-        BufferManager::UploadConstantBufferData(m_FogApplyBufferPtr->GetBuffer(0), &FogApplyProperties);
+        BufferManager::UploadBufferData(m_FogApplyBufferPtr->GetBuffer(0), &FogApplyProperties);
 
         // -----------------------------------------------------------------------------
         // Rendering

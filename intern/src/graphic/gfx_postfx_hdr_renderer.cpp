@@ -747,7 +747,7 @@ namespace
             DownSampleSettings.m_InvertTexturesize[0] = 1.0f / static_cast<float>(m_DownSampleSizes[IndexOfDownSample][0] * 2);
             DownSampleSettings.m_InvertTexturesize[1] = 1.0f / static_cast<float>(m_DownSampleSizes[IndexOfDownSample][1] * 2);
 
-            BufferManager::UploadConstantBufferData(m_DownSamplePropertiesBufferPtr, &DownSampleSettings);
+            BufferManager::UploadBufferData(m_DownSamplePropertiesBufferPtr, &DownSampleSettings);
 
             
 
@@ -829,7 +829,7 @@ namespace
             GaussianSettings.m_Direction[0] = 1;
             GaussianSettings.m_Direction[1] = 0;
 
-            BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesBufferPtr, &GaussianSettings);
+            BufferManager::UploadBufferData(m_GaussianBlurPropertiesBufferPtr, &GaussianSettings);
 
             ContextManager::SetShaderCS(m_GaussianBlurShaderPtr);
 
@@ -853,7 +853,7 @@ namespace
             GaussianSettings.m_Direction[0] = 0;
             GaussianSettings.m_Direction[1] = 1;
 
-            BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesBufferPtr, &GaussianSettings);
+            BufferManager::UploadBufferData(m_GaussianBlurPropertiesBufferPtr, &GaussianSettings);
 
             ContextManager::SetShaderCS(m_GaussianBlurShaderPtr);
 
@@ -886,7 +886,7 @@ namespace
         BloomShaderProperties.m_BloomThresholdValue = Base::Float4(static_cast<float>(pDataBloomFacet->GetTreshhold()), 0, 0, pDataBloomFacet->GetExposureScale());
         BloomShaderProperties.m_BloomTintIntensity  = pDataBloomFacet->GetTint() * pDataBloomFacet->GetIntensity();
 
-        BufferManager::UploadConstantBufferData(m_BloomPropertiesBufferPtr, &BloomShaderProperties);
+        BufferManager::UploadBufferData(m_BloomPropertiesBufferPtr, &BloomShaderProperties);
 
         // -----------------------------------------------------------------------------
         // Rendering

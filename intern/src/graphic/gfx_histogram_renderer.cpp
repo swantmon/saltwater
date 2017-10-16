@@ -431,7 +431,7 @@ namespace
         HistogramSettings.m_ISO                      = m_ConstantBufferPS.m_ISO;
         HistogramSettings.m_ResetEyeAdaption         = m_ConstantBufferPS.m_ResetEyeAdaption;
         
-        BufferManager::UploadConstantBufferData(m_HistogramBufferSetPtrs[HistogramEvaluate]->GetBuffer(2), &HistogramSettings);
+        BufferManager::UploadBufferData(m_HistogramBufferSetPtrs[HistogramEvaluate]->GetBuffer(2), &HistogramSettings);
 
         // -----------------------------------------------------------------------------
         // 1. pass: Build partial histograms

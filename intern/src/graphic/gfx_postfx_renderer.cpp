@@ -1090,7 +1090,7 @@ namespace
         DOFDownProperties.m_DofNear     = pDataDOFFacet->GetNear();
         DOFDownProperties.m_DofRowDelta = Base::Float2(1.0f, 0.25f / Size[1]);
 
-        BufferManager::UploadConstantBufferData(m_DOFDownPropertiesPSBufferPtr->GetBuffer(0), &DOFDownProperties);
+        BufferManager::UploadBufferData(m_DOFDownPropertiesPSBufferPtr->GetBuffer(0), &DOFDownProperties);
 
         // -----------------------------------------------------------------------------
 
@@ -1100,7 +1100,7 @@ namespace
         DOFApplyProperties.m_DofLerpBias  = pDataDOFFacet->GetLerpBias();
         DOFApplyProperties.m_DofLerpScale = pDataDOFFacet->GetLerpScale();
 
-        BufferManager::UploadConstantBufferData(m_DOFApplyPropertiesPSBufferPtr->GetBuffer(0), &DOFApplyProperties);
+        BufferManager::UploadBufferData(m_DOFApplyPropertiesPSBufferPtr->GetBuffer(0), &DOFApplyProperties);
         
         // -----------------------------------------------------------------------------
         // Rendering: Copy from one swap buffer to the other one
@@ -1234,7 +1234,7 @@ namespace
         GaussianSettings.m_Direction[0] = 1.0f * 1.0f / static_cast<float>(QuarterSize[0]);
         GaussianSettings.m_Direction[1] = 0.0f * 1.0f / static_cast<float>(QuarterSize[1]);
         
-        BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesPSBufferPtr->GetBuffer(0), &GaussianSettings);
+        BufferManager::UploadBufferData(m_GaussianBlurPropertiesPSBufferPtr->GetBuffer(0), &GaussianSettings);
         
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
@@ -1287,7 +1287,7 @@ namespace
         GaussianSettings.m_Direction[0] = 0.0f * 1.0f / static_cast<float>(QuarterSize[0]);
         GaussianSettings.m_Direction[1] = 1.0f * 1.0f / static_cast<float>(QuarterSize[1]);
         
-        BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesPSBufferPtr->GetBuffer(0), &GaussianSettings);
+        BufferManager::UploadBufferData(m_GaussianBlurPropertiesPSBufferPtr->GetBuffer(0), &GaussianSettings);
         
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 

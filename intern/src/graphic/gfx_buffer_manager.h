@@ -46,7 +46,6 @@ namespace BufferManager
     void* MapBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range);
     void UnmapBuffer(CBufferPtr _BufferPtr);
     
-    void UploadVertexBufferData(CBufferPtr _BufferPtr, const void* _pData);
-    void UploadConstantBufferData(CBufferPtr _BufferPtr, const void* _pData);
+    void UploadBufferData(CBufferPtr _BufferPtr, const void* _pData);
 } // namespace BufferManager
 } // namespace Gfx

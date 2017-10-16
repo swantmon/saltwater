@@ -329,7 +329,7 @@ namespace
             LightBuffer.m_SunAngularRadius     = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
             LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
     
-            BufferManager::UploadConstantBufferData(m_SunLightPSBufferPtr, &LightBuffer);
+            BufferManager::UploadBufferData(m_SunLightPSBufferPtr, &LightBuffer);
     
             // -----------------------------------------------------------------------------
             // Prepare last context

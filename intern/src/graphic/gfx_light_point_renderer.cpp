@@ -354,7 +354,7 @@ namespace
         CameraProperties.m_InvertedScreenSize      = Base::Float4(1.0f / Main::GetActiveWindowSize()[0], 1.0f / Main::GetActiveWindowSize()[1], 0, 0);
         CameraProperties.m_ExposureHistoryIndex    = HistogramRenderer::GetLastExposureHistoryIndex();
         
-        BufferManager::UploadConstantBufferData(m_PunctualLightPSBufferPtr->GetBuffer(0), &CameraProperties);
+        BufferManager::UploadBufferData(m_PunctualLightPSBufferPtr->GetBuffer(0), &CameraProperties);
         
         // -----------------------------------------------------------------------------
         // Rendering of light sources point
@@ -419,7 +419,7 @@ namespace
             ModelBuffer.m_ModelMatrix *= Base::Float4x4().SetTranslation(pEntity->GetWorldPosition());
             ModelBuffer.m_ModelMatrix *= Base::Float4x4().SetScale(pDtLightFacet->GetAttenuationRadius());
             
-            BufferManager::UploadConstantBufferData(m_MainVSBufferPtr->GetBuffer(0), &ModelBuffer);
+            BufferManager::UploadBufferData(m_MainVSBufferPtr->GetBuffer(0), &ModelBuffer);
             
             // -----------------------------------------------------------------------------
             // Upload buffer data
@@ -445,7 +445,7 @@ namespace
                 LightBuffer.m_LightViewProjection = CurrentRenderJob->m_pGfxLightFacet->GetCamera()->GetViewProjectionMatrix();
             }
             
-            BufferManager::UploadConstantBufferData(m_PunctualLightPSBufferPtr->GetBuffer(1), &LightBuffer);
+            BufferManager::UploadBufferData(m_PunctualLightPSBufferPtr->GetBuffer(1), &LightBuffer);
 
             // -----------------------------------------------------------------------------
             // Set shadow map

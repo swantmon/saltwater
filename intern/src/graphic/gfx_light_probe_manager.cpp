@@ -950,7 +950,7 @@ namespace
         ViewBuffer.m_Projection = Base::Float4x4::s_Identity;
         ViewBuffer.m_View       = Base::Float4x4::s_Identity;
 
-        BufferManager::UploadConstantBufferData(m_GeometryVPBufferPtr, &ViewBuffer);
+        BufferManager::UploadBufferData(m_GeometryVPBufferPtr, &ViewBuffer);
 
         // -----------------------------------------------------------------------------
         // Bind shadow and reflection textures
@@ -1015,7 +1015,7 @@ namespace
             ProbeProperties.m_CameraPosition       = Base::Float4(_rPosition, 1.0f);
             ProbeProperties.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
-            BufferManager::UploadConstantBufferData(m_CameraPropertiesBufferPtr, &ProbeProperties);
+            BufferManager::UploadBufferData(m_CameraPropertiesBufferPtr, &ProbeProperties);
 
             // -----------------------------------------------------------------------------
 
@@ -1023,7 +1023,7 @@ namespace
 
             ModelBuffer.m_ModelMatrix = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
 
-            BufferManager::UploadConstantBufferData(m_GeometryMBufferPtr, &ModelBuffer);
+            BufferManager::UploadBufferData(m_GeometryMBufferPtr, &ModelBuffer);
 
             // -----------------------------------------------------------------------------
             // Set every surface of this entity into a new render job
@@ -1054,7 +1054,7 @@ namespace
 
                 assert(MaterialPtr != 0);
 
-                BufferManager::UploadConstantBufferData(m_SurfaceMaterialBufferPtr, &MaterialPtr->GetMaterialAttributes());
+                BufferManager::UploadBufferData(m_SurfaceMaterialBufferPtr, &MaterialPtr->GetMaterialAttributes());
 
                 // -----------------------------------------------------------------------------
                 // Set shader
@@ -1152,7 +1152,7 @@ namespace
         CubemapSettings.m_NumberOfMiplevels = 0.0f;
         CubemapSettings.m_Intensity         = _rDtLightProbeFacet.GetIntensity();
 
-        BufferManager::UploadConstantBufferData(m_FilteringPSBufferPtr, &CubemapSettings);
+        BufferManager::UploadBufferData(m_FilteringPSBufferPtr, &CubemapSettings);
 
         UpdateGeometryBuffer(Base::Float3::s_Zero, 0.1f, 1000.0f);
 
@@ -1211,7 +1211,7 @@ namespace
             CubemapSettings.m_NumberOfMiplevels = NumberOfMiplevels - 1.0f;
             CubemapSettings.m_Intensity         = _rDtLightProbeFacet.GetIntensity();
 
-            BufferManager::UploadConstantBufferData(m_FilteringPSBufferPtr, &CubemapSettings);
+            BufferManager::UploadBufferData(m_FilteringPSBufferPtr, &CubemapSettings);
 
             ContextManager::SetTargetSet(rSpecularTargetSets[IndexOfMipmap]);
 
@@ -1240,7 +1240,7 @@ namespace
             CubemapSettings.m_NumberOfMiplevels = 0.0f;
             CubemapSettings.m_Intensity         = _rDtLightProbeFacet.GetIntensity();
 
-            BufferManager::UploadConstantBufferData(m_FilteringPSBufferPtr, &CubemapSettings);
+            BufferManager::UploadBufferData(m_FilteringPSBufferPtr, &CubemapSettings);
 
             // -----------------------------------------------------------------------------
 
@@ -1435,7 +1435,7 @@ namespace
             CurrentLightEntity = CurrentLightEntity.Next(Dt::SEntityCategory::Light);
         }
 
-        BufferManager::UploadConstantBufferData(m_LightPropertiesBufferPtr, &LightBuffer);
+        BufferManager::UploadBufferData(m_LightPropertiesBufferPtr, &LightBuffer);
     }
 
     // -----------------------------------------------------------------------------
@@ -1495,7 +1495,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Upload data
         // -----------------------------------------------------------------------------
-        BufferManager::UploadConstantBufferData(m_CubemapGSBufferPtr, &Values);
+        BufferManager::UploadBufferData(m_CubemapGSBufferPtr, &Values);
     }
 } // namespace 
 

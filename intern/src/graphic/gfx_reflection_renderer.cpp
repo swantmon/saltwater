@@ -703,7 +703,7 @@ namespace
         IBLSettings.m_IBLSettings    = Base::Float4::s_Zero;
         IBLSettings.m_IBLSettings[0] = m_SSRRenderJobs.size() > 0 ? 1.0f : 0.0f;
 
-        BufferManager::UploadConstantBufferData(m_ImageLightBufferPtr, &IBLSettings);
+        BufferManager::UploadBufferData(m_ImageLightBufferPtr, &IBLSettings);
 
         // -----------------------------------------------------------------------------
         // Bind shadow and reflection textures
@@ -868,7 +868,7 @@ namespace
                 HCBProperties.m_InverseTextureSize = Base::Float2(1.0f / m_HCBViewPortSetPtrs[IndexOfMipmap - 1]->GetViewPorts()[0]->GetWidth(), 1.0f / m_HCBViewPortSetPtrs[IndexOfMipmap - 1]->GetViewPorts()[0]->GetHeight());
             }
 
-            BufferManager::UploadConstantBufferData(m_HCBBufferPtr, &HCBProperties);
+            BufferManager::UploadBufferData(m_HCBBufferPtr, &HCBProperties);
 
             // -----------------------------------------------------------------------------
 
@@ -931,7 +931,7 @@ namespace
         SSRProperties.m_SSRDistance          = pDataSSRFacet->GetDistance();
         SSRProperties.m_PreviousFrame        = pDataSSRFacet->GetUseLastFrame() ? 1.0f : 0.0f;
 
-        BufferManager::UploadConstantBufferData(m_SSRLightBufferPtr, &SSRProperties);
+        BufferManager::UploadBufferData(m_SSRLightBufferPtr, &SSRProperties);
 
         // -----------------------------------------------------------------------------
         // Screen Space Reflections
@@ -1100,7 +1100,7 @@ namespace
             CurrentLightEntity = CurrentLightEntity.Next(Dt::SEntityCategory::Light);
         }
 
-        BufferManager::UploadConstantBufferData(m_ProbePropertiesBufferPtr, &LightBuffer);
+        BufferManager::UploadBufferData(m_ProbePropertiesBufferPtr, &LightBuffer);
 
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map

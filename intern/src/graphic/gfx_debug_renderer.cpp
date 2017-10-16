@@ -596,7 +596,7 @@ namespace
             ViewBuffer[10] = _rBottomLeft[1];
             ViewBuffer[11] = _rBottomLeft[2];
 
-            BufferManager::UploadVertexBufferData(m_PlaneBuffer, ViewBuffer);
+            BufferManager::UploadBufferData(m_PlaneBuffer, ViewBuffer);
 
             // -----------------------------------------------------------------------------
 
@@ -607,7 +607,7 @@ namespace
             Properties.m_Color[2] = _rColor[2];
             Properties.m_Color[3] = 0.5f;
 
-            BufferManager::UploadConstantBufferData(m_ViewPSBuffer->GetBuffer(0), &Properties);
+            BufferManager::UploadBufferData(m_ViewPSBuffer->GetBuffer(0), &Properties);
 
             // -----------------------------------------------------------------------------
 
@@ -706,7 +706,7 @@ namespace
         ViewBuffer.m_ModelMatrix *= Base::Float4x4().SetTranslation(0.0f, 0.0f, -1.0f);
         ViewBuffer.m_ModelMatrix *= Base::Float4x4().SetScale(0.1f) * ViewManager::GetMainCamera()->GetView()->GetRotationMatrix();
 
-        BufferManager::UploadConstantBufferData(m_ViewModelVSBuffer->GetBuffer(0), &ViewBuffer);
+        BufferManager::UploadBufferData(m_ViewModelVSBuffer->GetBuffer(0), &ViewBuffer);
 
         // -----------------------------------------------------------------------------
         // Per surface
@@ -719,7 +719,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Buffer
             // -----------------------------------------------------------------------------
-            BufferManager::UploadConstantBufferData(m_DeferredPassPSBuffer->GetBuffer(0), &m_GizmoModelPtr->GetLOD(0)->GetSurface(IndexOfSurface)->GetMaterial()->GetMaterialAttributes());
+            BufferManager::UploadBufferData(m_DeferredPassPSBuffer->GetBuffer(0), &m_GizmoModelPtr->GetLOD(0)->GetSurface(IndexOfSurface)->GetMaterial()->GetMaterialAttributes());
 
             // -----------------------------------------------------------------------------
             // Render
@@ -826,7 +826,7 @@ namespace
             ModelBuffer.m_ModelMatrix.SetScale(Difference[0], Difference[1], 1.0f);
             ModelBuffer.m_ModelMatrix.InjectTranslation(MinPoint[0], MinPoint[1], 1.0f);
 
-            BufferManager::UploadConstantBufferData(m_BaseModelVSBuffer->GetBuffer(0), &ModelBuffer);
+            BufferManager::UploadBufferData(m_BaseModelVSBuffer->GetBuffer(0), &ModelBuffer);
 
             // -----------------------------------------------------------------------------
 

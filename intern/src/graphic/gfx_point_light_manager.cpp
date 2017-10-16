@@ -670,7 +670,7 @@ namespace
             
         ViewBuffer.vs_ViewProjectionMatrix = _rInternLight.m_RenderContextPtr->GetCamera()->GetViewProjectionMatrix();
             
-        BufferManager::UploadConstantBufferData(m_LightCameraVSBufferPtr->GetBuffer(0), &ViewBuffer);
+        BufferManager::UploadBufferData(m_LightCameraVSBufferPtr->GetBuffer(0), &ViewBuffer);
             
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
@@ -706,7 +706,7 @@ namespace
                 
             ModelBuffer.m_ModelMatrix = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
                 
-            BufferManager::UploadConstantBufferData(m_LightCameraVSBufferPtr->GetBuffer(1), &ModelBuffer);
+            BufferManager::UploadBufferData(m_LightCameraVSBufferPtr->GetBuffer(1), &ModelBuffer);
                 
             // -----------------------------------------------------------------------------
             // Render every surface of this entity
@@ -759,7 +759,7 @@ namespace
                         ContextManager::SetShaderPS(m_ShadowRSMShaderPSPtr);
                     }
 
-                    BufferManager::UploadConstantBufferData(m_RSMPSBuffer->GetBuffer(0), &MaterialPtr->GetMaterialAttributes());
+                    BufferManager::UploadBufferData(m_RSMPSBuffer->GetBuffer(0), &MaterialPtr->GetMaterialAttributes());
 
                     // -----------------------------------------------------------------------------
 
@@ -774,7 +774,7 @@ namespace
                     PunctualLightProperties.m_LightColor     = Base::Float4(_pDtPointLight->GetLightness(), 1.0f);
                     PunctualLightProperties.m_LightSettings  = Base::Float4(InvSqrAttenuationRadius, AngleScale, AngleOffset, 0.0f);
 
-                    BufferManager::UploadConstantBufferData(m_RSMPSBuffer->GetBuffer(1), &PunctualLightProperties);
+                    BufferManager::UploadBufferData(m_RSMPSBuffer->GetBuffer(1), &PunctualLightProperties);
 
                     ContextManager::SetConstantBuffer(2, m_RSMPSBuffer->GetBuffer(0));
 
