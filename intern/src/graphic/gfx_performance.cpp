@@ -21,6 +21,8 @@ namespace
        ~CGfxPerformance();
     
     public:
+        void Update();
+
         void BeginEvent(const Base::Char* _pEventName);
         void EndEvent();
 
@@ -40,6 +42,13 @@ namespace
     // -----------------------------------------------------------------------------
 
     CGfxPerformance::~CGfxPerformance()
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxPerformance::Update()
     {
 
     }
@@ -86,6 +95,11 @@ namespace Gfx
 {
 namespace Performance
 {
+    void Update()
+    {
+        CGfxPerformance::GetInstance().Update();
+    }
+
     void BeginEvent(const Base::Char* _pEventName)
     {
         CGfxPerformance::GetInstance().BeginEvent(_pEventName);

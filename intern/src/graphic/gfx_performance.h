@@ -19,6 +19,8 @@ namespace Performance
 {
     typedef std::function<void(int, int)> CDurationQueryDelegate;
 
+    void Update();
+
     void BeginEvent(const Base::Char* _pEventName);
     void EndEvent();
 
