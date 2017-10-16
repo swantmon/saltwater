@@ -350,7 +350,7 @@ namespace
                 IndirectLightBuffer.m_RSMSettings[3] = 0.0f;
                 IndirectLightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
-                Gfx::BufferManager::UploadConstantBufferData(m_IndirectLightPSBufferPtr, &IndirectLightBuffer);
+                Gfx::BufferManager::UploadBufferData(m_IndirectLightPSBufferPtr, &IndirectLightBuffer);
 
                 // -----------------------------------------------------------------------------
                 // Draw

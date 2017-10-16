@@ -1124,7 +1124,7 @@ namespace
         PSBuffer.g_SunIntensity           = Base::Float4(_Intensity);
         PSBuffer.ps_ExposureHistoryIndex  = 0;
 
-        BufferManager::UploadConstantBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
+        BufferManager::UploadBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
 
         // -----------------------------------------------------------------------------
         // Environment to cube map
@@ -1249,7 +1249,7 @@ namespace
         PSBuffer.m_HDRFactor = _Intensity;
         PSBuffer.m_IsHDR     = _pOutput->m_InputTexture2DPtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
 
-        BufferManager::UploadConstantBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
+        BufferManager::UploadBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
 
         // -----------------------------------------------------------------------------
         // Environment to cube map
@@ -1354,7 +1354,7 @@ namespace
         PSBuffer.m_HDRFactor = _Intensity;
         PSBuffer.m_IsHDR     = _pOutput->m_InputTexture2DPtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
 
-        BufferManager::UploadConstantBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
+        BufferManager::UploadBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
 
         // -----------------------------------------------------------------------------
         // Environment to cube map
@@ -1471,7 +1471,7 @@ namespace
         ViewBuffer.m_ModelMatrix *= Base::Float4x4().SetTranslation(0.0f, 0.0f, -0.1f);
         ViewBuffer.m_ModelMatrix *= Base::Float4x4().SetScale(ScaleY, ScaleX, 1.0f);
 
-        BufferManager::UploadConstantBufferData(VSBufferSetPtr->GetBuffer(0), &ViewBuffer);
+        BufferManager::UploadBufferData(VSBufferSetPtr->GetBuffer(0), &ViewBuffer);
 
         // -----------------------------------------------------------------------------
 
@@ -1480,7 +1480,7 @@ namespace
         PSBuffer.m_HDRFactor = _Intensity;
         PSBuffer.m_IsHDR     = _pOutput->m_InputTexture2DPtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
 
-        BufferManager::UploadConstantBufferData(PSBufferSetPtr->GetBuffer(1), &PSBuffer);
+        BufferManager::UploadBufferData(PSBufferSetPtr->GetBuffer(1), &PSBuffer);
 
         // -----------------------------------------------------------------------------
         // Environment to cube map
@@ -1623,7 +1623,7 @@ namespace
         PlaneGeometryBuffer[18] = 0.0f;
         PlaneGeometryBuffer[19] = 0.0f;
 
-        BufferManager::UploadVertexBufferData(VertexBufferSetPtr, &PlaneGeometryBuffer);
+        BufferManager::UploadBufferData(VertexBufferSetPtr, &PlaneGeometryBuffer);
 
         // -----------------------------------------------------------------------------
         // Setup constant buffer
@@ -1632,7 +1632,7 @@ namespace
 
         ViewBuffer.m_ModelMatrix = Base::Float4x4::s_Identity;
 
-        BufferManager::UploadConstantBufferData(VSBufferSetPtr->GetBuffer(0), &ViewBuffer);
+        BufferManager::UploadBufferData(VSBufferSetPtr->GetBuffer(0), &ViewBuffer);
 
         // -----------------------------------------------------------------------------
 
@@ -1641,7 +1641,7 @@ namespace
         PSBuffer.m_HDRFactor = _Intensity;
         PSBuffer.m_IsHDR = _pOutput->m_InputTexture2DPtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
 
-        BufferManager::UploadConstantBufferData(PSBufferSetPtr->GetBuffer(1), &PSBuffer);
+        BufferManager::UploadBufferData(PSBufferSetPtr->GetBuffer(1), &PSBuffer);
 
         // -----------------------------------------------------------------------------
         // Environment to cube map
@@ -1760,7 +1760,7 @@ namespace
         ViewBuffer.m_ModelMatrix  = Base::Float4x4::s_Identity;
         ViewBuffer.m_ModelMatrix *= Base::Float4x4().SetRotationY(Rotation[1]);
 
-        BufferManager::UploadConstantBufferData(GSBufferSetPtr->GetBuffer(1), &ViewBuffer);
+        BufferManager::UploadBufferData(GSBufferSetPtr->GetBuffer(1), &ViewBuffer);
 
         // -----------------------------------------------------------------------------
         // Setup constant buffer
@@ -1770,7 +1770,7 @@ namespace
         PSBuffer.m_HDRFactor = _Intensity;
         PSBuffer.m_IsHDR     = _pOutput->m_InputTexture2DPtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
 
-        BufferManager::UploadConstantBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
+        BufferManager::UploadBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
 
         // -----------------------------------------------------------------------------
         // Environment to cube map
@@ -2055,7 +2055,7 @@ namespace
         PrecomuteBuffer.m_InscatterNu         = static_cast<float>(g_InscatterNu);
         PrecomuteBuffer.m_InscatterAltitude   = static_cast<float>(g_InscatterAltitude);
         
-        BufferManager::UploadConstantBufferData(m_PSPrecomputeConstants, &PrecomuteBuffer);
+        BufferManager::UploadBufferData(m_PSPrecomputeConstants, &PrecomuteBuffer);
 
         Performance::BeginEvent("Transmittance");
 
@@ -2128,7 +2128,7 @@ namespace
 
             GSLayer.m_Layer = Layer;
 
-            BufferManager::UploadConstantBufferData(m_GSLayer, &GSLayer);
+            BufferManager::UploadBufferData(m_GSLayer, &GSLayer);
 
             GetLayerValues(Layer, Radius, Dhdh);
 
@@ -2137,7 +2137,7 @@ namespace
             PSLayerValues.m_Dhdh   = Dhdh;
             PSLayerValues.m_Radius = Radius;
 
-            BufferManager::UploadConstantBufferData(m_PSLayerValues, &PSLayerValues);
+            BufferManager::UploadBufferData(m_PSLayerValues, &PSLayerValues);
 
             ContextManager::Draw(3, 0);
         }
@@ -2153,7 +2153,7 @@ namespace
 
         PSIrradianceK.k = 0;
 
-        BufferManager::UploadConstantBufferData(m_PSIrradianceK, &PSIrradianceK);
+        BufferManager::UploadBufferData(m_PSIrradianceK, &PSIrradianceK);
 
         Performance::BeginEvent("Copy Irradiance");
 
@@ -2202,7 +2202,7 @@ namespace
 
             GSLayer.m_Layer = Layer;
 
-            BufferManager::UploadConstantBufferData(m_GSLayer, &GSLayer);
+            BufferManager::UploadBufferData(m_GSLayer, &GSLayer);
 
             ContextManager::Draw(3, 0);
         }
@@ -2228,7 +2228,7 @@ namespace
 
             PSScatteringOrder.m_FirstOrder = (Order == 2 ? 1.0f : 0.0f);
 
-            BufferManager::UploadConstantBufferData(m_PSScatteringOrder, &PSScatteringOrder);
+            BufferManager::UploadBufferData(m_PSScatteringOrder, &PSScatteringOrder);
 
             // -----------------------------------------------------------------------------
             // DeltaJ Inscatter
@@ -2255,7 +2255,7 @@ namespace
 
                 GSLayer.m_Layer = Layer;
 
-                BufferManager::UploadConstantBufferData(m_GSLayer, &GSLayer);
+                BufferManager::UploadBufferData(m_GSLayer, &GSLayer);
 
                 GetLayerValues(Layer, Radius, Dhdh);
 
@@ -2264,7 +2264,7 @@ namespace
                 PSLayerValues.m_Dhdh = Dhdh;
                 PSLayerValues.m_Radius = Radius;
 
-                BufferManager::UploadConstantBufferData(m_PSLayerValues, &PSLayerValues);
+                BufferManager::UploadBufferData(m_PSLayerValues, &PSLayerValues);
 
                 ContextManager::Draw(3, 0);
             }
@@ -2313,7 +2313,7 @@ namespace
 
                 GSLayer.m_Layer = Layer;
 
-                BufferManager::UploadConstantBufferData(m_GSLayer, &GSLayer);
+                BufferManager::UploadBufferData(m_GSLayer, &GSLayer);
 
                 GetLayerValues(Layer, Radius, Dhdh);
 
@@ -2322,7 +2322,7 @@ namespace
                 PSLayerValues.m_Dhdh = Dhdh;
                 PSLayerValues.m_Radius = Radius;
 
-                BufferManager::UploadConstantBufferData(m_PSLayerValues, &PSLayerValues);
+                BufferManager::UploadBufferData(m_PSLayerValues, &PSLayerValues);
 
                 ContextManager::Draw(3, 0);
             }
@@ -2343,7 +2343,7 @@ namespace
 
             PSIrradianceK.k = 1;
 
-            BufferManager::UploadConstantBufferData(m_PSIrradianceK, &PSIrradianceK);
+            BufferManager::UploadBufferData(m_PSIrradianceK, &PSIrradianceK);
 
             Performance::BeginEvent("Add DeltaE to Irradiance");
 
@@ -2376,7 +2376,7 @@ namespace
 
                 GSLayer.m_Layer = Layer;
 
-                BufferManager::UploadConstantBufferData(m_GSLayer, &GSLayer);
+                BufferManager::UploadBufferData(m_GSLayer, &GSLayer);
 
                 GetLayerValues(Layer, Radius, Dhdh);
 
@@ -2385,7 +2385,7 @@ namespace
                 PSLayerValues.m_Dhdh = Dhdh;
                 PSLayerValues.m_Radius = Radius;
 
-                BufferManager::UploadConstantBufferData(m_PSLayerValues, &PSLayerValues);
+                BufferManager::UploadBufferData(m_PSLayerValues, &PSLayerValues);
 
                 ContextManager::Draw(3, 0);
             }

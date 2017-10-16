@@ -652,7 +652,7 @@ namespace
         m_PerFrameConstantBuffer.m_WorldParameters0               .Set(WorldNumberOfMetersX, WorldNumberOfMetersY, WorldNumberOfMetersZ, 0.0f);
         m_PerFrameConstantBuffer.m_FrameParameters0               .Set(FrameNumber, FrameDeltaTime, 0.0f, 0.0f);
         
-        BufferManager::UploadConstantBufferData(m_PerFrameConstantBufferBufferPtr, &m_PerFrameConstantBuffer);
+        BufferManager::UploadBufferData(m_PerFrameConstantBufferBufferPtr, &m_PerFrameConstantBuffer);
     }
     
     // -----------------------------------------------------------------------------

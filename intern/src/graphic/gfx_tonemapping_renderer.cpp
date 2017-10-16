@@ -282,7 +282,7 @@ namespace
         ConstantBufferPS.m_ColorShadow_Tint1                = m_ConstantBufferPS.m_ColorShadow_Tint1;
         ConstantBufferPS.m_ColorShadow_Tint2                = m_ConstantBufferPS.m_ColorShadow_Tint2;
 
-        BufferManager::UploadConstantBufferData(m_TonemapBufferPtr, &ConstantBufferPS);
+        BufferManager::UploadBufferData(m_TonemapBufferPtr, &ConstantBufferPS);
 
         // -----------------------------------------------------------------------------
         // Prepare renderer

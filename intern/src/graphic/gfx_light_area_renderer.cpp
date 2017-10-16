@@ -392,7 +392,6 @@ namespace
         // -----------------------------------------------------------------------------
         CRenderJobs::const_iterator CurrentRenderJob;
         CRenderJobs::const_iterator EndOfRenderJobs;
-        const unsigned int          pOffset[] = { 0, 0 };
 
         ContextManager::SetRenderContext(m_LightRenderContextPtr);
 
@@ -458,7 +457,7 @@ namespace
             LightBuffer.m_IsTextured           = pGfxLightFacet->HasTexture() ? 1.0f : 0.0f;
             LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
-            BufferManager::UploadConstantBufferData(m_AreaLightBufferPtr, &LightBuffer);
+            BufferManager::UploadBufferData(m_AreaLightBufferPtr, &LightBuffer);
 
             // -----------------------------------------------------------------------------
             // Set texture
@@ -523,7 +522,6 @@ namespace
         // -----------------------------------------------------------------------------
         CRenderJobs::const_iterator CurrentRenderJob;
         CRenderJobs::const_iterator EndOfRenderJobs;
-        const unsigned int          pOffset[] = { 0, 0 };
 
         // -----------------------------------------------------------------------------
         // Render
@@ -561,7 +559,7 @@ namespace
 
             LightBuffer.m_Color = Base::Float4(pDtLightFacet->GetColor(), pGfxLightFacet->HasTexture() ? 1.0f : 0.0f);
 
-            BufferManager::UploadConstantBufferData(m_AreaLightbulbBufferPtr, &LightBuffer);
+            BufferManager::UploadBufferData(m_AreaLightbulbBufferPtr, &LightBuffer);
 
             // -----------------------------------------------------------------------------
 

@@ -666,7 +666,7 @@ namespace
             SSAOSettings.m_Kernel[IndexOfNoiseSeq] = m_Kernel[IndexOfNoiseSeq];
         }
 
-        BufferManager::UploadConstantBufferData(m_SSAOPropertiesPSBufferPtr, &SSAOSettings);
+        BufferManager::UploadBufferData(m_SSAOPropertiesPSBufferPtr, &SSAOSettings);
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
@@ -737,7 +737,7 @@ namespace
             GaussianSettings.m_Direction[0] = 1;
             GaussianSettings.m_Direction[1] = 0;
 
-            BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesCSBufferPtr, &GaussianSettings);
+            BufferManager::UploadBufferData(m_GaussianBlurPropertiesCSBufferPtr, &GaussianSettings);
 
             ContextManager::SetImageTexture(0, m_BilateralBlurHTextureSetPtr->GetTexture(0));
             ContextManager::SetImageTexture(1, m_BilateralBlurHTextureSetPtr->GetTexture(1));
@@ -750,7 +750,7 @@ namespace
             GaussianSettings.m_Direction[0] = 0;
             GaussianSettings.m_Direction[1] = 1;
 
-            BufferManager::UploadConstantBufferData(m_GaussianBlurPropertiesCSBufferPtr, &GaussianSettings);
+            BufferManager::UploadBufferData(m_GaussianBlurPropertiesCSBufferPtr, &GaussianSettings);
 
             ContextManager::SetImageTexture(0, m_BilateralBlurVTextureSetPtr->GetTexture(0));
             ContextManager::SetImageTexture(1, m_BilateralBlurVTextureSetPtr->GetTexture(1));

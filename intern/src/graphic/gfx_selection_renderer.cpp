@@ -611,7 +611,7 @@ namespace
         IndexOfLastRequest = (rTicket.m_IndexOfPopRequest > 0) ? rTicket.m_IndexOfPopRequest - 1 : CInternSelectionTicket::s_MaxNumberOfRequests - 1;
         IndexOfBuffer      = rTicket.m_IndexOfTicket * s_MaxNumberOfTickets + IndexOfLastRequest;
 
-        SSelectionOutput* pOutput = static_cast<SSelectionOutput*>(BufferManager::MapConstantBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1), CBuffer::Read));
+        SSelectionOutput* pOutput = static_cast<SSelectionOutput*>(BufferManager::MapBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1), CBuffer::Read));
 
         rTicket.m_WSPosition = Base::Float3(pOutput->m_WSPosition[0], pOutput->m_WSPosition[1], pOutput->m_WSPosition[2]);
         rTicket.m_WSNormal   = Base::Float3(pOutput->m_WSNormal[0], pOutput->m_WSNormal[1], pOutput->m_WSNormal[2]);
@@ -626,7 +626,7 @@ namespace
             rTicket.m_pObject = &Dt::EntityManager::GetEntityByID(pOutput->m_EntityID);
         }
 
-        BufferManager::UnmapConstantBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1));
+        BufferManager::UnmapBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1));
 
         return true;
     }
@@ -708,7 +708,7 @@ namespace
 
         SelectionSettings.m_ColorAlpha = Base::Float4(0.31f, 0.45f, 0.64f, 0.4f);
 
-        BufferManager::UploadConstantBufferData(m_HighlightPSBufferPtr, &SelectionSettings);
+        BufferManager::UploadBufferData(m_HighlightPSBufferPtr, &SelectionSettings);
 
         // -----------------------------------------------------------------------------
         // Render
@@ -773,7 +773,7 @@ namespace
 
             ModelBuffer.m_ModelMatrix = CurrentSurfaceRenderJob->m_ModelMatrix;
 
-            BufferManager::UploadConstantBufferData(m_ModelBufferPtr, &ModelBuffer);
+            BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
 
             // -----------------------------------------------------------------------------
             // Render
@@ -815,7 +815,7 @@ namespace
 
             ModelBuffer.m_ModelMatrix = CurrentProbeRenderJob->m_ModelMatrix;
 
-            BufferManager::UploadConstantBufferData(m_ModelBufferPtr, &ModelBuffer);
+            BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
 
             // -----------------------------------------------------------------------------
             // Render
@@ -857,7 +857,7 @@ namespace
             ModelBuffer.m_ModelMatrix  = CurrentProbeRenderJob->m_ModelMatrix;
             ModelBuffer.m_ModelMatrix *= Base::Float4x4().SetScale(CurrentProbeRenderJob->m_pDtProbeFacet->GetBoxSize());
 
-            BufferManager::UploadConstantBufferData(m_ModelBufferPtr, &ModelBuffer);
+            BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
 
             // -----------------------------------------------------------------------------
             // Render
@@ -930,7 +930,7 @@ namespace
                 Settings.m_MaxX = MaxX;
                 Settings.m_MaxY = MaxY;
 
-                BufferManager::UploadConstantBufferData(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(0), &Settings);
+                BufferManager::UploadBufferData(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(0), &Settings);
 
                 // -----------------------------------------------------------------------------
                 // Execute
