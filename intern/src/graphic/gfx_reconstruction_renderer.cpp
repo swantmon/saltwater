@@ -612,7 +612,7 @@ namespace
             RaycastData[1] = m_pReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 1.0f, 0.0f, 1.0f);
         }
 
-        BufferManager::UploadConstantBufferData(m_RaycastConstantBufferPtr, RaycastData);
+        BufferManager::UploadBufferData(m_RaycastConstantBufferPtr, RaycastData);
         
         ContextManager::SetShaderVS(m_RaycastVSPtr);
         ContextManager::SetShaderPS(m_RaycastFSPtr);
@@ -656,7 +656,7 @@ namespace
 		BufferData.m_WorldMatrix.SetScale(Settings.m_VolumeSize);
 		BufferData.m_Color = Float4(0.0f, 0.0f, 1.0f, 1.0f);
 
-		BufferManager::UploadConstantBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+		BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
 		ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 		ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
@@ -690,7 +690,7 @@ namespace
             RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 1.0f, 0.0f, 1.0f);
         }
 
-        BufferManager::UploadConstantBufferData(m_RaycastConstantBufferPtr, RaycastData);
+        BufferManager::UploadBufferData(m_RaycastConstantBufferPtr, RaycastData);
 
         ContextManager::SetShaderVS(m_RaycastVSPtr);
         ContextManager::SetShaderPS(m_RaycastFSPtr);
@@ -757,7 +757,7 @@ namespace
                 BufferData.m_WorldMatrix = Translation * Scaling;
                 BufferData.m_Color = Float4(0.0f, 0.0f, 1.0f, 1.0f);
 
-                BufferManager::UploadConstantBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+                BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
                 ContextManager::Draw(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfVertices(), 0);
 			}
@@ -808,7 +808,7 @@ namespace
                 BufferData.m_WorldMatrix = Translation * Scaling;
                 BufferData.m_Color = Float4(0.0f, 0.0f, 1.0f, 1.0f);
 
-                BufferManager::UploadConstantBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+                BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
                 assert(rRootGrid.m_Level1QueuePtr != nullptr);
                 ContextManager::SetResourceBuffer(2, rRootGrid.m_Level1QueuePtr);
@@ -864,7 +864,7 @@ namespace
                 BufferData.m_WorldMatrix = Translation;
                 BufferData.m_Color = Float4(0.0f, 0.0f, 1.0f, 1.0f);
 
-                BufferManager::UploadConstantBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+                BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
                 assert(rRootGrid.m_Level2QueuePtr != nullptr);
                 ContextManager::SetResourceBuffer(2, rRootGrid.m_Level2QueuePtr);
@@ -893,7 +893,7 @@ namespace
 		BufferData.m_WorldMatrix = (m_pScalableReconstructor != nullptr) ? m_pScalableReconstructor->GetPoseMatrix() : m_pReconstructor->GetPoseMatrix();
 		BufferData.m_Color = Float4(1.0f, 0.0f, 1.0f, 1.0f);
 
-		BufferManager::UploadConstantBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+		BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
@@ -922,7 +922,7 @@ namespace
         BufferData.m_WorldMatrix = m_pScalableReconstructor->GetPoseMatrix();
         BufferData.m_Color = Float4(1.0f, 0.0f, 1.0f, 1.0f);
 
-        BufferManager::UploadConstantBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+        BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);

@@ -496,7 +496,7 @@ namespace MR
             TrackingData.m_PoseMatrix = m_PoseMatrix;
             TrackingData.m_InvPoseMatrix = m_PoseMatrix.GetInverted();
 
-            BufferManager::UploadConstantBufferData(m_TrackingDataConstantBufferPtr, &TrackingData);
+            BufferManager::UploadBufferData(m_TrackingDataConstantBufferPtr, &TrackingData);
 
             Performance::EndEvent();
         }
@@ -634,7 +634,7 @@ namespace MR
         TrackingData.m_InvPoseMatrix = rIncPoseMatrix.GetInverted();
         TrackingData.m_PyramidLevel = PyramidLevel;
         
-        BufferManager::UploadConstantBufferData(m_IncPoseMatrixConstantBufferPtr, &TrackingData);
+        BufferManager::UploadBufferData(m_IncPoseMatrixConstantBufferPtr, &TrackingData);
 
         ContextManager::SetShaderCS(m_DetermineSummandsCSPtr);
         ContextManager::SetResourceBuffer(0, m_ICPResourceBufferPtr);
@@ -666,7 +666,7 @@ namespace MR
         BufferData[0] = Summands / 2;
         BufferData[1] = SummandsPOT / 2;
 
-        BufferManager::UploadConstantBufferData(m_ICPSummationConstantBufferPtr, &BufferData);
+        BufferManager::UploadBufferData(m_ICPSummationConstantBufferPtr, &BufferData);
 
         ContextManager::SetShaderCS(m_ReduceSumCSPtr);
         ContextManager::SetResourceBuffer(0, m_ICPResourceBufferPtr);
@@ -687,9 +687,9 @@ namespace MR
         Scalar b[6];
         
         float ICPValues[g_ICPValueCount];
-        void* pICPBuffer = BufferManager::MapConstantBufferRange(m_ICPResourceBufferPtr, CBuffer::EMap::Read, 0, sizeof(float) * g_ICPValueCount);
+        void* pICPBuffer = BufferManager::MapBufferRange(m_ICPResourceBufferPtr, CBuffer::EMap::Read, 0, sizeof(float) * g_ICPValueCount);
         memcpy(ICPValues, pICPBuffer, sizeof(ICPValues[0]) * g_ICPValueCount);
-        BufferManager::UnmapConstantBuffer(m_ICPResourceBufferPtr);
+        BufferManager::UnmapBuffer(m_ICPResourceBufferPtr);
 
         int ValueIndex = 0;
         for (int i = 0; i < 6; ++ i)
@@ -805,7 +805,7 @@ namespace MR
             const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
 
             float Normalized = 0.0f;
-            BufferManager::UploadConstantBufferData(m_RaycastPyramidConstantBufferPtr, &Normalized);
+            BufferManager::UploadBufferData(m_RaycastPyramidConstantBufferPtr, &Normalized);
             
             ContextManager::Barrier();
             ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RaycastVertexMapPtr[PyramidLevel - 1]));
@@ -813,7 +813,7 @@ namespace MR
             ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
             Normalized = 1.0f;
-            BufferManager::UploadConstantBufferData(m_RaycastPyramidConstantBufferPtr, &Normalized);
+            BufferManager::UploadBufferData(m_RaycastPyramidConstantBufferPtr, &Normalized);
 
             ContextManager::Barrier();
             ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RaycastNormalMapPtr[PyramidLevel - 1]));
@@ -878,7 +878,7 @@ namespace MR
         TrackingData.m_PoseMatrix = m_PoseMatrix;
         TrackingData.m_InvPoseMatrix = m_PoseMatrix.GetInverted();
         
-        BufferManager::UploadConstantBufferData(m_TrackingDataConstantBufferPtr, &TrackingData);
+        BufferManager::UploadBufferData(m_TrackingDataConstantBufferPtr, &TrackingData);
                 
         ClearVolume();
     }
