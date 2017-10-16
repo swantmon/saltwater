@@ -6,7 +6,9 @@
 
 #include "graphic/gfx_performance.h"
 
+#include <cassert>
 #include <string.h>
+#include <vector>
 
 #include "GL/glew.h"
 
@@ -29,6 +31,18 @@ namespace
         void StartDurationQuery(unsigned int _ID, Gfx::Performance::CDurationQueryDelegate _Delegate);
         void EndDurationQuery();
         float EndDurationQueryWithSync();
+
+    private:
+        struct SQueryStackItem
+        {
+            unsigned int m_ID;
+            GLuint m_StartQuery;
+            GLuint m_EndQuery;
+            Gfx::Performance::CDurationQueryDelegate m_Callback;
+        };
+
+        std::vector<SQueryStackItem> m_Queries;
+        std::vector<SQueryStackItem> m_QueryStack;
     };
 } // namespace 
 
@@ -50,7 +64,30 @@ namespace
 
     void CGfxPerformance::Update()
     {
+        for (auto i = m_Queries.begin(); i < m_Queries.end();)
+        {
+            SQueryStackItem& rItem = *i;
 
+            GLuint EndQuery = rItem.m_EndQuery;
+
+            GLint IsQueryAvailable;
+            glGetQueryObjectiv(EndQuery, GL_QUERY_RESULT_AVAILABLE, &IsQueryAvailable);
+
+            if (IsQueryAvailable == GL_TRUE)
+            {
+                GLuint64 StartTime, EndTime;
+                glGetQueryObjectui64v(rItem.m_StartQuery, GL_QUERY_RESULT, &StartTime);
+                glGetQueryObjectui64v(rItem.m_EndQuery, GL_QUERY_RESULT, &EndTime);
+
+                rItem.m_Callback(rItem.m_ID, (EndTime - StartTime) / 1000000.0f);
+
+                i = m_Queries.erase(i);
+            }
+            else
+            {
+                ++i;
+            }
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -73,21 +110,58 @@ namespace
 
     void CGfxPerformance::StartDurationQuery(unsigned int _ID, Gfx::Performance::CDurationQueryDelegate _Delegate)
     {
+        GLuint StartQuery = 0;
+        GLuint EndQuery = 0;
 
+        glCreateQueries(GL_TIMESTAMP, 1, &StartQuery);
+        glCreateQueries(GL_TIMESTAMP, 1, &EndQuery);
+
+        glQueryCounter(StartQuery, GL_TIMESTAMP);
+
+        SQueryStackItem Item = { _ID, StartQuery, EndQuery, _Delegate };
+        m_QueryStack.push_back(Item);
     }
 
     // -----------------------------------------------------------------------------
 
     void CGfxPerformance::EndDurationQuery()
     {
+        assert(!m_QueryStack.empty());
 
+        SQueryStackItem Item = m_QueryStack.back();
+        m_QueryStack.pop_back();
+
+        glQueryCounter(Item.m_EndQuery, GL_TIMESTAMP);
+
+        m_Queries.push_back(Item);
     }
 
     // -----------------------------------------------------------------------------
 
     float CGfxPerformance::EndDurationQueryWithSync()
     {
-        return 0.0f;
+        assert(!m_QueryStack.empty());
+
+        SQueryStackItem Item = m_QueryStack.back();
+        m_QueryStack.pop_back();
+
+        glQueryCounter(Item.m_EndQuery, GL_TIMESTAMP);
+
+        GLint IsQueryAvailable = false;
+        IsQueryAvailable = false;
+        while (!IsQueryAvailable) {
+            glGetQueryObjectiv(Item.m_StartQuery, GL_QUERY_RESULT_AVAILABLE, &IsQueryAvailable);
+        }
+        IsQueryAvailable = false;
+        while (!IsQueryAvailable) {
+            glGetQueryObjectiv(Item.m_EndQuery, GL_QUERY_RESULT_AVAILABLE, &IsQueryAvailable);
+        }
+
+        GLuint64 StartTime, EndTime;
+        glGetQueryObjectui64v(Item.m_StartQuery, GL_QUERY_RESULT, &StartTime);
+        glGetQueryObjectui64v(Item.m_EndQuery, GL_QUERY_RESULT, &EndTime);
+
+        return (EndTime - StartTime) / 1000000.0f;
     }
 } // namespace 
 

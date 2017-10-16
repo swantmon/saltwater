@@ -17,7 +17,7 @@ namespace Gfx
 {
 namespace Performance
 {
-    typedef std::function<void(int, int)> CDurationQueryDelegate;
+    typedef std::function<void(int, float)> CDurationQueryDelegate;
 
     void Update();
 
