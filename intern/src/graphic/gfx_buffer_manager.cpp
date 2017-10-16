@@ -54,7 +54,7 @@ namespace
     public:
 
         void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr);
-        void CopyBufferToBufferRange(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, unsigned int _ReadOffset, unsigned int _WriteOffset, unsigned int _Range);
+        void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, unsigned int _ReadOffset, unsigned int _WriteOffset, unsigned int _Range);
 
     public:
 
@@ -63,7 +63,7 @@ namespace
         void UnmapBuffer(CBufferPtr _BufferPtr);
 
         void UploadBufferData(CBufferPtr _BufferPtr, const void* _pData);
-        void UploadBufferDataRange(CBufferPtr _BufferPtr, const void* _pData, unsigned int _Offset, unsigned int _Range);
+        void UploadBufferData(CBufferPtr _BufferPtr, const void* _pData, unsigned int _Offset, unsigned int _Range);
 
     private:
 
@@ -425,7 +425,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxBufferManager::CopyBufferToBufferRange(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, unsigned int _ReadOffset, unsigned int _WriteOffset, unsigned int _Range)
+    void CGfxBufferManager::CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, unsigned int _ReadOffset, unsigned int _WriteOffset, unsigned int _Range)
     {
         if (_TargetBufferPtr != _SourceBufferPtr)
         {
@@ -500,7 +500,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxBufferManager::UploadBufferDataRange(CBufferPtr _BufferPtr, const void* _pData, unsigned int _Offset, unsigned int _Range)
+    void CGfxBufferManager::UploadBufferData(CBufferPtr _BufferPtr, const void* _pData, unsigned int _Offset, unsigned int _Range)
     {
         assert(_BufferPtr != nullptr && _BufferPtr.IsValid() && _pData && _Range > 0);
 
@@ -693,9 +693,9 @@ namespace BufferManager
 
     // -----------------------------------------------------------------------------
 
-    void CopyBufferToBufferRange(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, unsigned int _ReadOffset, unsigned int _WriteOffset, unsigned int _Range)
+    void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, unsigned int _ReadOffset, unsigned int _WriteOffset, unsigned int _Range)
     {
-        CGfxBufferManager::GetInstance().CopyBufferToBufferRange(_TargetBufferPtr, _SourceBufferPtr, _ReadOffset, _WriteOffset, _Range);
+        CGfxBufferManager::GetInstance().CopyBufferToBuffer(_TargetBufferPtr, _SourceBufferPtr, _ReadOffset, _WriteOffset, _Range);
     }
     
     // -----------------------------------------------------------------------------
@@ -728,9 +728,9 @@ namespace BufferManager
 
     // -----------------------------------------------------------------------------
 
-    void UploadBufferDataRange(CBufferPtr _BufferPtr, const void* _pData, unsigned int _Offset, unsigned int _Range)
+    void UploadBufferData(CBufferPtr _BufferPtr, const void* _pData, unsigned int _Offset, unsigned int _Range)
     {
-        CGfxBufferManager::GetInstance().UploadBufferDataRange(_BufferPtr, _pData, _Offset, _Range);
+        CGfxBufferManager::GetInstance().UploadBufferData(_BufferPtr, _pData, _Offset, _Range);
     }
 
 } // namespace BufferManager

@@ -41,13 +41,13 @@ namespace BufferManager
     CBufferSetPtr CreateBufferSet(CBufferPtr* _pBufferPtrs, unsigned int _NumberOfBuffers);
     
     void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr);
-    void CopyBufferToBufferRange(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, unsigned int _ReadOffset, unsigned int _WriteOffset, unsigned int _Range);
+    void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, unsigned int _ReadOffset, unsigned int _WriteOffset, unsigned int _Range);
     
     void* MapBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map);
     void* MapBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range);
     void UnmapBuffer(CBufferPtr _BufferPtr);
     
     void UploadBufferData(CBufferPtr _BufferPtr, const void* _pData);
-    void UploadBufferDataRange(CBufferPtr _BufferPtr, const void* _pData, unsigned int _Offset, unsigned int _Range);
+    void UploadBufferData(CBufferPtr _BufferPtr, const void* _pData, unsigned int _Offset, unsigned int _Range);
 } // namespace BufferManager
 } // namespace Gfx
