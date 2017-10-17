@@ -193,6 +193,9 @@
     <ClInclude Include="..\..\..\src\base\base_math_limits.h">
       <Filter>math</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_program_paramaters.h">
+      <Filter>io</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="container">
