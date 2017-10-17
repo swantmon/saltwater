@@ -507,7 +507,7 @@ namespace
         CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
 
         assert(pBuffer != nullptr);
-        assert(pBuffer->m_NumberOfBytes <= _Offset + _Range);
+        assert(_Offset + _Range <= pBuffer->m_NumberOfBytes);
 
         glNamedBufferSubData(pBuffer->m_NativeBuffer, _Offset, _Range, _pData);
     }
