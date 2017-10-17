@@ -3,6 +3,8 @@
 
 #include "base/base_program_parameters.h"
 
+#include <algorithm> 
+#include <cctype>
 #include <fstream>
 #include <sstream>
 #include <iterator>
@@ -69,7 +71,7 @@ namespace IO
 
             for (auto& rElement : m_Container)
             {
-                File << rElement.first << "=" << rElement.second << std::endl;
+                File << rElement.first << " = " << rElement.second << std::endl;
             }
 
             File.close();
@@ -190,6 +192,32 @@ namespace IO
     void CProgramParameters::InternParseString(const std::string& _rString, const char _Delimiter)
     {
         // -----------------------------------------------------------------------------
+        // Trimming
+        // Code from: https://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
+        // -----------------------------------------------------------------------------
+        auto TrimLeft = [&](std::string& _rString) 
+        {
+            _rString.erase(_rString.begin(), std::find_if(_rString.begin(), _rString.end(), [](int _Character) 
+            {
+                return !std::isspace(_Character);
+            }));
+        };
+
+        auto TrimRight = [&](std::string& _rString) 
+        {
+            _rString.erase(std::find_if(_rString.rbegin(), _rString.rend(), [](int _Character) 
+            {
+                return !std::isspace(_Character);
+            }).base(), _rString.end());
+        };
+
+        auto Trim = [&](std::string& _rString) 
+        {
+            TrimLeft(_rString);
+            TrimRight(_rString);
+        };
+
+        // -----------------------------------------------------------------------------
         // Split string into several parameters
         // -----------------------------------------------------------------------------
         std::stringstream StreamOfParameter(_rString);
@@ -203,7 +231,10 @@ namespace IO
             size_t PositionOfDelimiter = Parameter.find_first_of('=');
 
             std::string Option = Parameter.substr(0, PositionOfDelimiter);
-            std::string Value = Parameter.substr(PositionOfDelimiter + 1, Parameter.length());
+            std::string Value  = Parameter.substr(PositionOfDelimiter + 1, Parameter.length());
+
+            Trim(Option);
+            Trim(Value);
 
             AddParameter(Option, Value);
         }
