@@ -259,6 +259,13 @@ namespace
         {
             Iter->second.m_AccumulatedTime = 0;
             Iter->second.m_NumberOfMarkers = 0;
+
+            for (auto QueryPair : Iter->second.m_PendingQueries)
+            {
+                glDeleteQueries(1, &QueryPair.first);
+                glDeleteQueries(1, &QueryPair.second);
+            }
+            Iter->second.m_PendingQueries.clear();
         }
     }
 
