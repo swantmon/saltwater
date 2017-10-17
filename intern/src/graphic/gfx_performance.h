@@ -22,11 +22,12 @@ namespace Performance
     typedef std::function<void(int, float)> CDurationQueryDelegate;
 
     void Update();
+    void OnExit();
 
     void BeginEvent(const Base::Char* _pEventName);
     void EndEvent();
 
-    void StartDurationQuery(unsigned int _ID, CDurationQueryDelegate _Delegate);
+    void StartDurationQuery(unsigned int _ID = 0, CDurationQueryDelegate _Delegate = nullptr);
     void EndDurationQuery();
     float EndDurationQueryWithSync();
 } // namespace Performance
