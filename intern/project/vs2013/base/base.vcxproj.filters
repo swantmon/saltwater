@@ -11,6 +11,9 @@
       <Filter>container</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\base_precompiled.cpp" />
+    <ClCompile Include="..\..\..\src\base\base_program_parameters.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\base_aabb2.h">
@@ -192,6 +195,9 @@
     <ClInclude Include="..\..\..\src\base\base_precompiled.h" />
     <ClInclude Include="..\..\..\src\base\base_math_limits.h">
       <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_program_parameters.h">
+      <Filter>io</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

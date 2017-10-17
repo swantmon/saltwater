@@ -31,6 +31,7 @@
     <ClInclude Include="..\..\..\src\base\base_event_queue.h" />
     <ClInclude Include="..\..\..\src\base\base_exception.h" />
     <ClInclude Include="..\..\..\src\base\base_precompiled.h" />
+    <ClInclude Include="..\..\..\src\base\base_program_parameters.h" />
     <ClInclude Include="..\..\..\src\base\base_tokenizer.h" />
     <ClInclude Include="..\..\..\src\base\base_frustum.h" />
     <ClInclude Include="..\..\..\src\base\base_input_event.h" />
@@ -90,6 +91,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\base_program_parameters.cpp" />
     <ClCompile Include="..\..\..\src\base\base_test_suite.cpp" />
     <ClCompile Include="..\..\..\src\base\base_tokenizer.cpp" />
   </ItemGroup>

@@ -3,11 +3,14 @@
 
 #include "base/base_console.h"
 #include "base/base_exception.h"
+#include "base/base_program_parameters.h"
 
 #include "editor/edit_application.h"
 
 int main(int _Argc, char* _pArgv[])
-{    
+{
+    Base::CProgramParameters::GetInstance().ParseFile("editor.config");
+
     try
     {
         Edit::Application::OnStart(_Argc, _pArgv);
@@ -41,6 +44,8 @@ int main(int _Argc, char* _pArgv[])
     {
         BASE_CONSOLE_ERROR("An undefined exception stops application");
     }
+
+    Base::CProgramParameters::GetInstance().WriteFile("editor.config");
 
     return 0;
 }

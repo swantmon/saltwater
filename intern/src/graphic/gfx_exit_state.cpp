@@ -26,6 +26,7 @@
 #include "graphic/gfx_mesh_actor_manager.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_particle_renderer.h"
+#include "graphic/gfx_performance.h"
 #include "graphic/gfx_point_light_manager.h"
 #include "graphic/gfx_postfx_hdr_renderer.h"
 #include "graphic/gfx_postfx_renderer.h"
@@ -124,6 +125,8 @@ namespace
         ViewManager     ::OnExit();
 
         BASE_CONSOLE_STREAMINFO("Gfx> Finished exiting manager.");
+
+        Performance::OnExit();
     }
     
     // -----------------------------------------------------------------------------
