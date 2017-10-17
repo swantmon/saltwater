@@ -28,6 +28,7 @@
     <ClCompile Include="..\..\..\test\base\test_base_memory.cpp" />
     <ClCompile Include="..\..\..\test\base\test_base_plane.cpp" />
     <ClCompile Include="..\..\..\test\base\test_base_pool.cpp" />
+    <ClCompile Include="..\..\..\test\base\test_base_program_parameters.cpp" />
     <ClCompile Include="..\..\..\test\base\test_base_sphere.cpp" />
     <ClCompile Include="..\..\..\test\base\test_base_tokenizer.cpp" />
     <ClCompile Include="..\..\..\test\base\test_base_vector3.cpp" />
