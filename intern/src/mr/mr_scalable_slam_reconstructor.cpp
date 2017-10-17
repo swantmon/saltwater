@@ -1,6 +1,7 @@
 
 #include "mr/mr_precompiled.h"
 
+#include "base/base_program_parameters.h"
 #include "base/base_vector3.h"
 #include "base/base_matrix4x4.h"
 #include "base/base_singleton.h"
@@ -63,7 +64,6 @@ namespace
     const unsigned int g_TSDFPoolSize       = 16u * 128u * 1024u * 1024u; // 2048 MB
     //*/
 
-    const bool g_UseConservativeRasterization = false;
     const bool g_UseFullVolumeIntegration = true;
     const bool g_UseReverseIntegration = true;
 
@@ -234,9 +234,11 @@ namespace MR
         // Check if conservative rasterization is available
         ////////////////////////////////////////////////////////////////////////////////
 
+        const bool EnableConservativeRaster = Base::CProgramParameters::GetInstance().GetBoolean("conservative_raster_enable ");
+
         m_IsConservativeRasterizationAvailable = false;
 
-        if (g_UseConservativeRasterization)
+        if (EnableConservativeRaster)
         {
             GLint ExtensionCount;
             glGetIntegerv(GL_NUM_EXTENSIONS, &ExtensionCount);
@@ -248,18 +250,18 @@ namespace MR
                 if (Name == "GL_NV_conservative_raster")
                 {
                     m_IsConservativeRasterizationAvailable = true;
+                    BASE_CONSOLE_INFO("Conservative rasterization is activated");
                     break;
                 }
             }
-        }
-
-        if (m_IsConservativeRasterizationAvailable)
-        {
-            BASE_CONSOLE_INFO("Conservative rasterization is available");
+            if (!m_IsConservativeRasterizationAvailable)
+            {
+                BASE_CONSOLE_INFO("Conservative rasterization is not available. Will use fallback method");
+            }
         }
         else
         {
-            BASE_CONSOLE_INFO("Conservative rasterization is not available. Will use fallback method");
+            BASE_CONSOLE_INFO("Conservative rasterization is deactivated");
         }
 
         ////////////////////////////////////////////////////////////////////////////////
