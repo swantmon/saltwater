@@ -1,14 +1,15 @@
 
 #include "graphic/gfx_precompiled.h"
 
+#include "base/base_console.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
 #include "graphic/gfx_performance.h"
 
 #include <cassert>
-#include <iostream>
 #include <unordered_map>
+#include <sstream>
 #include <stack>
 #include <string>
 #include <vector>
@@ -132,10 +133,14 @@ namespace
                     rItem.m_AccumulatedTime += QueryDuration;
                     ++rItem.m_NumberOfMarkers;
                 }
+
+                std::stringstream Stream;
                 
-                std::cout << rItemPair.first << '\n'
+                Stream << '\n' << rItemPair.first << '\n'
                     << rItem.m_NumberOfMarkers << " Times called\n"
-                    << rItem.m_AccumulatedTime / rItem.m_NumberOfMarkers << " ms avarage time\n\n";
+                    << rItem.m_AccumulatedTime / rItem.m_NumberOfMarkers << " ms average time\n";
+
+                BASE_CONSOLE_STREAMINFO(Stream.str());
             }
         }
     }
@@ -229,7 +234,6 @@ namespace
             std::string Name = _pEventName;
 
             auto& Item = m_PerformanceMarkerTimings[Name];
-            ++ Item.m_NumberOfMarkers;
 
             GLuint StartQuery;
             glCreateQueries(GL_TIMESTAMP, 1, &StartQuery);
