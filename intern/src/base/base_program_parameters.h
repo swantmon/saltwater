@@ -1,9 +1,13 @@
 
 #pragma once
 
-#include "base/base_crc.h"
+#include "base/base_console.h"
 
+#include <fstream>
 #include <map>
+#include <string>
+#include <sstream>
+#include <iterator>
 
 namespace IO
 {
@@ -15,6 +19,11 @@ namespace IO
 
     public:
 
+        void ParseArguments(const std::string& _rArguments);
+        void ParseFile(const std::string& _rFile);
+
+    public:
+
         template<typename T>
         void AddParameter(const std::string& _rOption, const T _rParameter);
         void AddParameter(const std::string& _rOption, bool _Bool);
@@ -22,9 +31,6 @@ namespace IO
         void AddParameter(const std::string& _rOption, const std::string& _rText);
 
     public:
-
-        short GetShort(const std::string& _rOption);
-        unsigned short GetUShort(const std::string& _rOption);
 
         int GetInt(const std::string& _rOption);
         unsigned int GetUInt(const std::string& _rOption);
@@ -57,12 +63,17 @@ namespace IO
 
     private:
 
+        COptionParameter m_Container;
+
+    private:
+
         CProgramParameters();
         ~CProgramParameters();
 
     private:
 
-        COptionParameter m_Container;
+        void InternParseString(const std::string& _rString, const char _Delimiter);
+    
     };
 } // namespace IO
 
@@ -80,7 +91,6 @@ namespace IO
 {
     CProgramParameters::CProgramParameters()
     {
-
     }
 
     // -----------------------------------------------------------------------------
@@ -88,6 +98,31 @@ namespace IO
     CProgramParameters::~CProgramParameters()
     {
         m_Container.clear();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CProgramParameters::ParseArguments(const std::string& _rArguments)
+    {
+        InternParseString(_rArguments, ';');
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CProgramParameters::ParseFile(const std::string& _rFile)
+    {
+        std::ifstream File(_rFile.c_str());
+
+        if (File.is_open())
+        {
+            std::string FileContent((std::istreambuf_iterator<char>(File)), std::istreambuf_iterator<char>());
+
+            InternParseString(FileContent, '\n');
+        }
+        else
+        {
+            BASE_CONSOLE_ERRORV("The file %s could not be passed.", _rFile.c_str());
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -201,5 +236,29 @@ namespace IO
     bool CProgramParameters::HasParameter(const std::string& _rOption)
     {
         return m_Container.find(_rOption) != m_Container.end();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CProgramParameters::InternParseString(const std::string& _rString, const char _Delimiter)
+    {
+        // -----------------------------------------------------------------------------
+        // Split string into several parameters
+        // -----------------------------------------------------------------------------
+        std::stringstream StreamOfParameter(_rString);
+        std::string Parameter;
+
+        while (std::getline(StreamOfParameter, Parameter, _Delimiter))
+        {
+            // -----------------------------------------------------------------------------
+            // Add parameter to container
+            // -----------------------------------------------------------------------------
+            size_t PositionOfDelimiter = Parameter.find_first_of('=');
+
+            std::string Option = Parameter.substr(0, PositionOfDelimiter);
+            std::string Value = Parameter.substr(PositionOfDelimiter + 1, Parameter.length());
+
+            AddParameter(Option, Value);
+        }
     }
 } // namespace IO
