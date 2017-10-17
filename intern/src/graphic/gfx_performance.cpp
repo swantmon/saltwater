@@ -40,7 +40,7 @@ namespace
         void OnExit();
 
         void BeginEvent(const Base::Char* _pEventName);
-        void ResetEvent(const Base::Char* _pEventName);
+        void ResetEventStatistics(const Base::Char* _pEventName);
         void EndEvent();
 
         void StartDurationQuery(unsigned int _ID, Gfx::Performance::CDurationQueryDelegate _Delegate);
@@ -251,9 +251,15 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxPerformance::ResetEvent(const Base::Char* _pEventName)
+    void CGfxPerformance::ResetEventStatistics(const Base::Char* _pEventName)
     {
-        m_PerformanceMarkerTimings.erase(_pEventName);
+        auto Iter = m_PerformanceMarkerTimings.find(_pEventName);
+
+        if (Iter != m_PerformanceMarkerTimings.end())
+        {
+            Iter->second.m_AccumulatedTime = 0;
+            Iter->second.m_NumberOfMarkers = 0;
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -349,9 +355,9 @@ namespace Performance
 
     // -----------------------------------------------------------------------------
 
-    void ResetEvent(const Base::Char* _pEventName)
+    void ResetEventStatistics(const Base::Char* _pEventName)
     {
-        CGfxPerformance::GetInstance().ResetEvent(_pEventName);
+        CGfxPerformance::GetInstance().ResetEventStatistics(_pEventName);
     }
 
     // -----------------------------------------------------------------------------
