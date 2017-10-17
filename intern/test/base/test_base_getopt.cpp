@@ -23,8 +23,6 @@ BASE_TEST(GetOptDefault)
     int MoreArguments;
     const char* pValue;
 
-    int a = 0;
-
     for (; (MoreArguments = Base::GetOption(Argc, pArgv, "hf:-:")) != -1; )
     {
         switch (MoreArguments)
