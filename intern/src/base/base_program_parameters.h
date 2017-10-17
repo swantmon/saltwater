@@ -24,6 +24,10 @@ namespace IO
 
     public:
 
+        void WriteFile(const std::string& _rFile);
+
+    public:
+
         template<typename T>
         void AddParameter(const std::string& _rOption, const T _rParameter);
         void AddParameter(const std::string& _rOption, bool _Bool);
@@ -118,10 +122,35 @@ namespace IO
             std::string FileContent((std::istreambuf_iterator<char>(File)), std::istreambuf_iterator<char>());
 
             InternParseString(FileContent, '\n');
+
+            File.close();
         }
         else
         {
             BASE_CONSOLE_ERRORV("The file %s could not be passed.", _rFile.c_str());
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CProgramParameters::WriteFile(const std::string& _rFile)
+    {
+        std::ofstream File(_rFile.c_str());
+
+        if (File.is_open())
+        {
+            File.clear();
+
+            for (auto& rElement : m_Container)
+            {
+                File << rElement.first << "=" << rElement.second << std::endl;
+            }
+
+            File.close();
+        }
+        else
+        {
+            BASE_CONSOLE_ERRORV("Save file %s could not be opened.", _rFile.c_str());
         }
     }
 

@@ -102,7 +102,7 @@ BASE_TEST(ProgramParametersDefault)
     }
 }
 
-BASE_TEST(ProgramParametersParseString)
+BASE_TEST(ProgramParametersParseArguments)
 {
     const char* pParameters = "";
 
@@ -147,4 +147,33 @@ BASE_TEST(ProgramParametersParseString)
 
 BASE_TEST(ProgramParametersParseFile)
 {
+    BASE_CHECK(CProgramParameters::GetInstance().HasParameter("file_read") == false);
+
+    BASE_CHECK(CProgramParameters::GetInstance().HasParameter("file_size") == false);
+
+    BASE_CHECK(CProgramParameters::GetInstance().HasParameter("file_type") == false);
+
+    // -----------------------------------------------------------------------------
+
+    CProgramParameters::GetInstance().ParseFile("test.config");
+
+    // -----------------------------------------------------------------------------
+
+    BASE_CHECK(CProgramParameters::GetInstance().HasParameter("file_read") == true);
+
+    BASE_CHECK(CProgramParameters::GetInstance().HasParameter("file_size") == true);
+
+    BASE_CHECK(CProgramParameters::GetInstance().HasParameter("file_type") == true);
+
+    // -----------------------------------------------------------------------------
+
+    BASE_CHECK(CProgramParameters::GetInstance().GetBoolean("file_read") == true);
+
+    BASE_CHECK(CProgramParameters::GetInstance().GetInt("file_size") == 1337);
+
+    BASE_CHECK(CProgramParameters::GetInstance().GetStdString("file_type") == "config");
+
+    // -----------------------------------------------------------------------------
+
+    CProgramParameters::GetInstance().WriteFile("test.config");
 }
