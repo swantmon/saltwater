@@ -52,16 +52,18 @@ namespace
 	const Base::Float3 g_InitialCameraRotation = Base::Float3(0.0f, 0.0f, 0.0f);
 	//*/
 
-    //*
-    const unsigned int g_RootVolumePoolSize =       1024u * 1024u; //  1 MB
-    const unsigned int g_RootGridPoolSize   =  8u * 1024u * 1024u; //  8 MB
-    const unsigned int g_Level1GridPoolSize =  8u * 1024u * 1024u; //  8 MB
-    const unsigned int g_TSDFPoolSize       = 32u * 1024u * 1024u; // 32 MB
+    const unsigned int g_MegabyteSize = 1024u * 1024u;
+
+    /*
+    const unsigned int g_RootVolumePoolSize =       g_MegabyteSize; //  1 MB
+    const unsigned int g_RootGridPoolSize   =  8u * g_MegabyteSize; //  8 MB
+    const unsigned int g_Level1GridPoolSize =  8u * g_MegabyteSize; //  8 MB
+    const unsigned int g_TSDFPoolSize       = 32u * g_MegabyteSize; // 32 MB
     /*/
-    const unsigned int g_RootVolumePoolSize =              1024u * 1024u; //    1 MB
-    const unsigned int g_RootGridPoolSize   =       128u * 1024u * 1024u; //  128 MB
-    const unsigned int g_Level1GridPoolSize =       128u * 1024u * 1024u; //  128 MB
-    const unsigned int g_TSDFPoolSize       = 16u * 128u * 1024u * 1024u; // 2048 MB
+    const unsigned int g_RootVolumePoolSize =              g_MegabyteSize; //    1 MB
+    const unsigned int g_RootGridPoolSize   =       128u * g_MegabyteSize; //  128 MB
+    const unsigned int g_Level1GridPoolSize =       128u * g_MegabyteSize; //  128 MB
+    const unsigned int g_TSDFPoolSize       = 16u * 128u * g_MegabyteSize; // 2048 MB
     //*/
 
     const bool g_UseFullVolumeIntegration = true;
@@ -281,10 +283,11 @@ namespace MR
 		SetupTextures();
 		SetupBuffers();
 
-		m_IsIntegrationPaused = false;
-		m_IsTrackingPaused = false;
         ClearBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr, m_ReconstructionSettings.GRID_LEVELS);
         ClearPool();
+
+        m_IsIntegrationPaused = false;
+        m_IsTrackingPaused = false;
     }
 
     // -----------------------------------------------------------------------------
@@ -590,8 +593,8 @@ namespace MR
     
     void CScalableSLAMReconstructor::SetupShaders()
     {
-        const int SummandsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth(), g_TileSize2D);
-        const int SummandsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
+        const int SummandsX = DivUp(m_pRGBDCameraControl->GetDepthWidth(), g_TileSize2D);
+        const int SummandsY = DivUp(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
 
         const int Summands = SummandsX * SummandsY;
         const float SummandsLog2 = Log2(static_cast<float>(Summands));
@@ -1600,8 +1603,8 @@ namespace MR
 		ConstantBufferDesc.m_pBytes = nullptr;
 		m_PositionConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
-        const int ICPRowCount = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() , g_TileSize2D) *
-                                GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
+        const int ICPRowCount = DivUp(m_pRGBDCameraControl->GetDepthWidth() , g_TileSize2D) *
+                                DivUp(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
 
         ConstantBufferDesc.m_Usage = CBuffer::GPUToCPU;
         ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
@@ -1764,8 +1767,8 @@ namespace MR
 
     void CScalableSLAMReconstructor::CreateReferencePyramid()
     {
-        const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth(), g_TileSize2D);
-        const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
+        const int WorkGroupsX = DivUp(m_pRGBDCameraControl->GetDepthWidth(), g_TileSize2D);
+        const int WorkGroupsY = DivUp(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
 
         //////////////////////////////////////////////////////////////////////////////////////
         // Bilateral Filter
@@ -1785,8 +1788,8 @@ namespace MR
 
         for (int PyramidLevel = 1; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++ PyramidLevel)
         {
-            const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
-            const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
+            const int WorkGroupsX = DivUp(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
+            const int WorkGroupsY = DivUp(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
             
             ContextManager::SetShaderCS(m_DownSampleDepthCSPtr);
 
@@ -1807,8 +1810,8 @@ namespace MR
         ContextManager::SetShaderCS(m_VertexMapCSPtr);
         for (int PyramidLevel = 0; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++ PyramidLevel)
         {
-            const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
-            const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
+            const int WorkGroupsX = DivUp(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
+            const int WorkGroupsY = DivUp(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
 
             ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_SmoothDepthBufferPtr[PyramidLevel]));
             ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ReferenceVertexMapPtr[PyramidLevel]));
@@ -1834,8 +1837,8 @@ namespace MR
         ContextManager::SetShaderCS(m_NormalMapCSPtr);
         for (int PyramidLevel = 0; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++ PyramidLevel)
         {
-            const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
-            const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
+            const int WorkGroupsX = DivUp(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
+            const int WorkGroupsY = DivUp(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
                         
             ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_ReferenceVertexMapPtr[PyramidLevel]));
             ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ReferenceNormalMapPtr[PyramidLevel]));
@@ -1871,8 +1874,8 @@ namespace MR
 
     void CScalableSLAMReconstructor::DetermineSummands(int PyramidLevel, const Float4x4& rIncPoseMatrix)
     {
-        const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
-        const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
+        const int WorkGroupsX = DivUp(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
+        const int WorkGroupsY = DivUp(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
         
         SIncBuffer TrackingData;
         TrackingData.m_PoseMatrix = rIncPoseMatrix;
@@ -1900,8 +1903,8 @@ namespace MR
 
     void CScalableSLAMReconstructor::ReduceSum(int PyramidLevel)
     {
-        const int SummandsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
-        const int SummandsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
+        const int SummandsX = DivUp(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
+        const int SummandsY = DivUp(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
 
         const int Summands = SummandsX * SummandsY;
         const float SummandsLog2 = Log2(static_cast<float>(Summands));
@@ -2016,8 +2019,8 @@ namespace MR
         
         for (int PyramidLevel = 1; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++PyramidLevel)
         {
-            const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
-            const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
+            const int WorkGroupsX = DivUp(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
+            const int WorkGroupsY = DivUp(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
 
             float Normalized = 0.0f;
             BufferManager::UploadBufferData(m_RaycastPyramidConstantBufferPtr, &Normalized);
@@ -2061,7 +2064,27 @@ namespace MR
 
     void CScalableSLAMReconstructor::ClearPool()
     {
-        // todo
+        const uint32_t DataSize = g_MegabyteSize / 4;
+
+        std::vector<int> Data(g_MegabyteSize / sizeof(int));
+        std::memset(Data.data(), -1, DataSize);
+
+        for (int i = 0; i < g_RootVolumePoolSize / g_MegabyteSize; ++ i)
+        {
+            BufferManager::UploadBufferData(m_VolumeBuffers.m_RootVolumePoolPtr, Data.data(), i * DataSize, DataSize);
+        }
+        for (int i = 0; i < g_RootGridPoolSize / g_MegabyteSize; ++ i)
+        {
+            BufferManager::UploadBufferData(m_VolumeBuffers.m_RootGridPoolPtr, Data.data(), i * DataSize, DataSize);
+        }
+        for (int i = 0; i < g_Level1GridPoolSize / g_MegabyteSize; ++ i)
+        {
+            BufferManager::UploadBufferData(m_VolumeBuffers.m_Level1PoolPtr, Data.data(), i * DataSize, DataSize);
+        }
+        for (int i = 0; i < g_TSDFPoolSize / g_MegabyteSize; ++ i)
+        {
+            BufferManager::UploadBufferData(m_VolumeBuffers.m_TSDFPoolPtr, Data.data(), i * DataSize, DataSize);
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -2178,7 +2201,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    int CScalableSLAMReconstructor::GetWorkGroupCount(int TotalShaderCount, int WorkGroupSize)
+    int CScalableSLAMReconstructor::DivUp(int TotalShaderCount, int WorkGroupSize)
     {
         return (TotalShaderCount + WorkGroupSize - 1) / WorkGroupSize;
     }

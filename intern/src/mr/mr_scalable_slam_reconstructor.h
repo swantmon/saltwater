@@ -165,7 +165,7 @@ namespace MR
         
     private:
 
-        static int GetWorkGroupCount(int TotalShaderCount, int WorkGroupSize);
+        static int DivUp(int TotalShaderCount, int WorkGroupSize);
 
 	private:
 
