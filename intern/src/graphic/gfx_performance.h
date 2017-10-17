@@ -25,6 +25,7 @@ namespace Performance
     void OnExit();
 
     void BeginEvent(const Base::Char* _pEventName);
+    void ResetEvent(const Base::Char* _pEventName);
     void EndEvent();
 
     void StartDurationQuery(unsigned int _ID = 0, CDurationQueryDelegate _Delegate = nullptr);

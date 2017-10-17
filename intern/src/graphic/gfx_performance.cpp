@@ -40,6 +40,7 @@ namespace
         void OnExit();
 
         void BeginEvent(const Base::Char* _pEventName);
+        void ResetEvent(const Base::Char* _pEventName);
         void EndEvent();
 
         void StartDurationQuery(unsigned int _ID, Gfx::Performance::CDurationQueryDelegate _Delegate);
@@ -250,6 +251,13 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxPerformance::ResetEvent(const Base::Char* _pEventName)
+    {
+        m_PerformanceMarkerTimings.erase(_pEventName);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxPerformance::EndEvent()
     {
         glPopDebugGroup();
@@ -337,6 +345,13 @@ namespace Performance
     void BeginEvent(const Base::Char* _pEventName)
     {
         CGfxPerformance::GetInstance().BeginEvent(_pEventName);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ResetEvent(const Base::Char* _pEventName)
+    {
+        CGfxPerformance::GetInstance().ResetEvent(_pEventName);
     }
 
     // -----------------------------------------------------------------------------
