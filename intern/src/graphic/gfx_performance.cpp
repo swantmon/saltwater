@@ -5,6 +5,8 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_time.h"
+
 #include "graphic/gfx_performance.h"
 
 #include <cassert>
@@ -51,9 +53,10 @@ namespace
 
         struct SQueryStackItem
         {
-            unsigned int m_ID;
+            Base::U32 m_ID;
             GLuint m_StartQuery;
             GLuint m_EndQuery;
+            Base::U64 m_Frame;
             Gfx::Performance::CDurationQueryDelegate m_Callback;
         };
 
@@ -169,7 +172,7 @@ namespace
 
                 assert(rItem.m_Callback);
 
-                rItem.m_Callback(rItem.m_ID, (EndTime - StartTime) / 1000000.0f);
+                rItem.m_Callback(rItem.m_ID, (EndTime - StartTime) / 1000000.0f, rItem.m_Frame);
 
                 i = m_Queries.erase(i);
 
@@ -274,7 +277,7 @@ namespace
 
         glQueryCounter(StartQuery, GL_TIMESTAMP);
 
-        SQueryStackItem Item = { _ID, StartQuery, EndQuery, _Delegate };
+        SQueryStackItem Item = { _ID, StartQuery, EndQuery, Core::Time::GetNumberOfFrame(), _Delegate };
         m_QueryStack.push_back(Item);
     }
 
