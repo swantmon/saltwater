@@ -31,7 +31,7 @@
     <ClInclude Include="..\..\..\src\base\base_event_queue.h" />
     <ClInclude Include="..\..\..\src\base\base_exception.h" />
     <ClInclude Include="..\..\..\src\base\base_precompiled.h" />
-    <ClInclude Include="..\..\..\src\base\base_program_paramaters.h" />
+    <ClInclude Include="..\..\..\src\base\base_program_parameters.h" />
     <ClInclude Include="..\..\..\src\base\base_tokenizer.h" />
     <ClInclude Include="..\..\..\src\base\base_frustum.h" />
     <ClInclude Include="..\..\..\src\base\base_input_event.h" />
