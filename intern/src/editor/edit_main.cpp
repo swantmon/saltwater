@@ -3,13 +3,44 @@
 
 #include "base/base_console.h"
 #include "base/base_exception.h"
+#include "base/base_getopt.h"
 #include "base/base_program_parameters.h"
 
 #include "editor/edit_application.h"
 
+#include <string>
+
 int main(int _Argc, char* _pArgv[])
 {
-    Base::CProgramParameters::GetInstance().ParseFile("editor.config");
+    int MoreArguments;
+    const char* pValue;
+    std::string ParameterFile = "editor.config";
+
+    for (; (MoreArguments = Base::GetOption(_Argc, _pArgv, "f:-:")) != -1; )
+    {
+        switch (MoreArguments)
+        {
+        case 'f':
+            ParameterFile = Base::GetArgument();
+            break;
+
+        case '-':
+            std::string Argument = Base::GetArgument();
+
+            size_t PositionOfSpace = Argument.find_first_of(' ');
+
+            std::string Option = Argument.substr(0, PositionOfSpace);
+            std::string Value  = Argument.substr(PositionOfSpace + 1, Argument.length());
+
+            if (Option == "parameters")
+            {
+                Base::CProgramParameters::GetInstance().ParseArguments(Value);
+            }
+            break;
+        }
+    }
+
+    Base::CProgramParameters::GetInstance().ParseFile(ParameterFile);
 
     try
     {
@@ -45,7 +76,7 @@ int main(int _Argc, char* _pArgv[])
         BASE_CONSOLE_ERROR("An undefined exception stops application");
     }
 
-    Base::CProgramParameters::GetInstance().WriteFile("editor.config");
+    Base::CProgramParameters::GetInstance().WriteFile(ParameterFile);
 
     return 0;
 }
