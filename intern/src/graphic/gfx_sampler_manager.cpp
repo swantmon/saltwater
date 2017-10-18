@@ -189,20 +189,32 @@ namespace
         }
 
         try
-        {
-            for (IndexOfSampler = 0; IndexOfSampler < CSampler::NumberOfSamplers; ++ IndexOfSampler)
-            {
-                m_SamplerPtrs[IndexOfSampler] = m_Samplers.Allocate();
-            }
-            
+        {           
             // -----------------------------------------------------------------------------
             // Generate samplers
             // -----------------------------------------------------------------------------
-            glGenSamplers(CSampler::NumberOfSamplers, m_NativeSampler);
-            
+			glCreateSamplers(CSampler::NumberOfSamplers, m_NativeSampler);
+
             for (IndexOfSampler = 0; IndexOfSampler < CSampler::NumberOfSamplers; ++ IndexOfSampler)
             {
+				// -----------------------------------------------------------------------------
+				// Create sampler
+				// -----------------------------------------------------------------------------
+				m_SamplerPtrs[IndexOfSampler] = m_Samplers.Allocate();
+
+				m_SamplerPtrs[IndexOfSampler]->m_Type			    = static_cast<CSampler::ESampler>(IndexOfSampler);
+				m_SamplerPtrs[IndexOfSampler]->m_AddressMode[0]     = s_NativeSamplerDescriptors[IndexOfSampler].AddressModeU;
+				m_SamplerPtrs[IndexOfSampler]->m_AddressMode[1]     = s_NativeSamplerDescriptors[IndexOfSampler].AddressModeV;
+				m_SamplerPtrs[IndexOfSampler]->m_AddressMode[2]     = s_NativeSamplerDescriptors[IndexOfSampler].AddressModeW;
+				m_SamplerPtrs[IndexOfSampler]->m_Filter		        = s_NativeSamplerDescriptors[IndexOfSampler].Filter;
+				m_SamplerPtrs[IndexOfSampler]->m_ComparisonFunction = s_NativeSamplerDescriptors[IndexOfSampler].ComparisonFunction;
+
+				// -----------------------------------------------------------------------------
+				// Create native sampler
+				// -----------------------------------------------------------------------------
                 GLuint NativeSampler = m_NativeSampler[IndexOfSampler];
+
+				glObjectLabel(GL_SAMPLER, NativeSampler, -1, m_SamplerPtrs[IndexOfSampler]->GetName());
                 
                 int AdressModeU = ConvertAddressMode(s_NativeSamplerDescriptors[IndexOfSampler].AddressModeU);
                 int AdressModeV = ConvertAddressMode(s_NativeSamplerDescriptors[IndexOfSampler].AddressModeV);
