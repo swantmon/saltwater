@@ -250,39 +250,25 @@ namespace
         // -----------------------------------------------------------------------------
         // Create dummy textures from file
         // -----------------------------------------------------------------------------
-        Gfx::STextureDescriptor RendertargetDescriptor;
+        Gfx::STextureDescriptor TextureDescriptor;
         
-        RendertargetDescriptor.m_NumberOfPixelsU  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
-        RendertargetDescriptor.m_NumberOfPixelsV  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
-        RendertargetDescriptor.m_NumberOfPixelsW  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
-        RendertargetDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
-        RendertargetDescriptor.m_NumberOfTextures = Gfx::STextureDescriptor::s_NumberOfTexturesFromSource;
-        RendertargetDescriptor.m_Binding          = Gfx::CTextureBase::ShaderResource;
-        RendertargetDescriptor.m_Access           = Gfx::CTextureBase::CPUWrite;
-        RendertargetDescriptor.m_Format           = Gfx::CTextureBase::Unknown;
-        RendertargetDescriptor.m_Usage            = Gfx::CTextureBase::GPURead;
-        RendertargetDescriptor.m_Semantic         = Gfx::CTextureBase::Diffuse;
-        RendertargetDescriptor.m_pFileName        = "dummy_1d.tga";
-        RendertargetDescriptor.m_pPixels          = 0;
-        RendertargetDescriptor.m_Format           = Gfx::CTextureBase::R8G8B8_UBYTE;
+        TextureDescriptor.m_NumberOfPixelsU  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
+        TextureDescriptor.m_NumberOfPixelsV  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
+        TextureDescriptor.m_NumberOfPixelsW  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
+        TextureDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
+        TextureDescriptor.m_NumberOfTextures = Gfx::STextureDescriptor::s_NumberOfTexturesFromSource;
+        TextureDescriptor.m_Binding          = Gfx::CTextureBase::ShaderResource;
+        TextureDescriptor.m_Access           = Gfx::CTextureBase::CPUWrite;
+        TextureDescriptor.m_Format           = Gfx::CTextureBase::Unknown;
+        TextureDescriptor.m_Usage            = Gfx::CTextureBase::GPURead;
+        TextureDescriptor.m_Semantic         = Gfx::CTextureBase::Diffuse;
+        TextureDescriptor.m_pFileName        = "dummy_2d.tga";
+        TextureDescriptor.m_pPixels          = 0;
+        TextureDescriptor.m_Format           = Gfx::CTextureBase::R8G8B8_UBYTE;
         
-        m_Texture1DPtr = CreateTexture1D(RendertargetDescriptor, true, SDataBehavior::LeftAlone);
-        
-        RendertargetDescriptor.m_NumberOfPixelsU  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
-        RendertargetDescriptor.m_NumberOfPixelsV  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
-        RendertargetDescriptor.m_NumberOfPixelsW  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
-        RendertargetDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
-        RendertargetDescriptor.m_NumberOfTextures = Gfx::STextureDescriptor::s_NumberOfTexturesFromSource;
-        RendertargetDescriptor.m_Binding          = Gfx::CTextureBase::ShaderResource;
-        RendertargetDescriptor.m_Access           = Gfx::CTextureBase::CPUWrite;
-        RendertargetDescriptor.m_Format           = Gfx::CTextureBase::Unknown;
-        RendertargetDescriptor.m_Usage            = Gfx::CTextureBase::GPURead;
-        RendertargetDescriptor.m_Semantic         = Gfx::CTextureBase::Diffuse;
-        RendertargetDescriptor.m_pFileName        = "dummy_2d.tga";
-        RendertargetDescriptor.m_pPixels          = 0;
-        RendertargetDescriptor.m_Format           = Gfx::CTextureBase::R8G8B8_UBYTE;
-        
-        m_Texture2DPtr = CreateTexture2D(RendertargetDescriptor, true, SDataBehavior::LeftAlone);
+        m_Texture2DPtr = CreateTexture2D(TextureDescriptor, true, SDataBehavior::LeftAlone);
+
+		SetTextureLabel(static_cast<CTextureBasePtr>(m_Texture2DPtr), "Dummy Texture 2D");
         
         // -----------------------------------------------------------------------------
         // Setup default settings in OpenGL
@@ -1236,9 +1222,6 @@ namespace
         // -----------------------------------------------------------------------------
         glCreateTextures(GL_TEXTURE_3D, 1, &NativeTextureHandle);
 
-        // -----------------------------------------------------------------------------
-        // Binding
-        // -----------------------------------------------------------------------------
         // -----------------------------------------------------------------------------
         // Binding
         // -----------------------------------------------------------------------------

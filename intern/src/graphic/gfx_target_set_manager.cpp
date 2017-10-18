@@ -147,6 +147,8 @@ namespace
         RendertargetDescriptor.m_Format        = CTextureBase::R8G8B8A8_UBYTE;
         
         CTexture2DPtr AlbedoPtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // RGB Albedo
+
+		TextureManager::SetTextureLabel(static_cast<CTextureBasePtr>(AlbedoPtr), "RT: Default RGB");
         
         // -----------------------------------------------------------------------------
         
@@ -154,6 +156,8 @@ namespace
         RendertargetDescriptor.m_Format        = CTextureBase::R8G8B8A8_UBYTE;
         
         CTexture2DPtr GBuffer1Ptr = TextureManager::CreateTexture2D(RendertargetDescriptor); // G-Buffer 1
+
+		TextureManager::SetTextureLabel(static_cast<CTextureBasePtr>(GBuffer1Ptr), "RT: Gbuffer 1");
         
         // -----------------------------------------------------------------------------
 
@@ -161,6 +165,8 @@ namespace
         RendertargetDescriptor.m_Format        = CTextureBase::R8G8B8A8_UBYTE;
         
         CTexture2DPtr GBuffer2Ptr = TextureManager::CreateTexture2D(RendertargetDescriptor); // G-Buffer 2
+
+		TextureManager::SetTextureLabel(static_cast<CTextureBasePtr>(GBuffer2Ptr), "RT: Gbuffer 2");
         
         // -----------------------------------------------------------------------------
         
@@ -168,6 +174,8 @@ namespace
         RendertargetDescriptor.m_Format        = CTextureBase::R8G8B8A8_UBYTE;
         
         CTexture2DPtr GBuffer3Ptr = TextureManager::CreateTexture2D(RendertargetDescriptor); // G-Buffer 3
+
+		TextureManager::SetTextureLabel(static_cast<CTextureBasePtr>(GBuffer3Ptr), "RT: Gbuffer 3");
         
         // -----------------------------------------------------------------------------
         
@@ -175,6 +183,8 @@ namespace
         RendertargetDescriptor.m_Format        = CTextureBase::R16G16B16A16_FLOAT;
         
         CTexture2DPtr LightAccumulationTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Light Accumulation (HDR)
+
+		TextureManager::SetTextureLabel(static_cast<CTextureBasePtr>(LightAccumulationTexturePtr), "RT: Light Accumulation (HDR)");
         
         // -----------------------------------------------------------------------------
         
@@ -182,6 +192,8 @@ namespace
         RendertargetDescriptor.m_Format        = CTextureBase::R32_UINT;
 
         CTexture2DPtr HitProxyTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Hit Proxy (ID)
+
+		TextureManager::SetTextureLabel(static_cast<CTextureBasePtr>(HitProxyTexturePtr), "RT: Hit Proxy (ID)");
         
         // -----------------------------------------------------------------------------
         
@@ -189,6 +201,8 @@ namespace
         RendertargetDescriptor.m_Format        = CTextureBase::R32_FLOAT;
         
         CTexture2DPtr DepthTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Depth
+
+		TextureManager::SetTextureLabel(static_cast<CTextureBasePtr>(DepthTexturePtr), "RT: Depth");
         
         // -----------------------------------------------------------------------------
         // Create system target set
@@ -211,6 +225,8 @@ namespace
         DefaultRenderbuffer[1] = DepthTexturePtr;
         
         m_DefaultTargetSet = CreateTargetSet(DefaultRenderbuffer, 2);
+
+		SetTargetSetLabel(m_DefaultTargetSet, "FB: Default");
         
         // -----------------------------------------------------------------------------
         // Create deferred target set
@@ -223,6 +239,8 @@ namespace
         DeferredRenderbuffer[3] = DepthTexturePtr;
         
         m_DeferredTargetSet = CreateTargetSet(DeferredRenderbuffer, 4);
+
+		SetTargetSetLabel(m_DeferredTargetSet, "FB: Deferred");
         
         // -----------------------------------------------------------------------------
         // Create light accumulation target set
@@ -233,6 +251,8 @@ namespace
 
         m_LightAccumulationTargetSet = CreateTargetSet(LightAccumulationRenderbuffer, 1);
 
+		SetTargetSetLabel(m_LightAccumulationTargetSet, "FB: Light Accumulation");
+
         // -----------------------------------------------------------------------------
         // Create hit proxy target set
         // -----------------------------------------------------------------------------
@@ -242,6 +262,8 @@ namespace
         HitProxyRenderbuffer[1] = DepthTexturePtr;
 
         m_HitProxyTargetSet = CreateTargetSet(HitProxyRenderbuffer, 2);
+
+		SetTargetSetLabel(m_HitProxyTargetSet, "FB: Hit Proxy");
     }
     
     // -----------------------------------------------------------------------------
