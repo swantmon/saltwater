@@ -394,6 +394,8 @@ namespace
 
         if (NativeShaderHandle != 0)
         {
+			glObjectLabel(GL_SHADER, NativeShaderHandle, -1, (std::string(_pFileName) + " : " + std::string(_pShaderName)).c_str());
+
             glShaderSource(NativeShaderHandle, 1, &pRAW, NULL);
 
             glCompileShader(NativeShaderHandle);
@@ -545,6 +547,8 @@ namespace
 
         if (NativeShaderHandle != 0)
         {
+			glObjectLabel(GL_SHADER, NativeShaderHandle, -1, (rShader.m_FileName + " : " + rShader.m_ShaderName).c_str());
+
             glShaderSource(NativeShaderHandle, 1, &pRAW, NULL);
 
             glCompileShader(NativeShaderHandle);
