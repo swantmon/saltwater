@@ -119,5 +119,7 @@ namespace MR
 
         bool m_IsIntegrationPaused;
         bool m_IsTrackingPaused;
+
+        bool m_UseShuffleIntrinsics;
     };
 } // namespace MR

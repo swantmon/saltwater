@@ -23,12 +23,16 @@
 #include "graphic/gfx_view_manager.h"
 
 #include "base/base_console.h"
+#include "base/base_program_parameters.h"
 
 #include "mr/mr_slam_reconstructor.h"
 #include "mr/mr_rgbd_camera_control.h"
 #include "mr/mr_kinect_control.h"
 #include "mr/mr_realsense_control.h"
 
+#include <gl/glew.h>
+
+#include <iostream>
 #include <limits>
 #include <memory>
 #include <sstream>
@@ -143,6 +147,36 @@ namespace MR
 
     void CSLAMReconstructor::Start()
     {
+        m_UseShuffleIntrinsics = false;
+
+        const bool EnableShuffleIntrinsics = Base::CProgramParameters::GetInstance().GetBoolean("tracking_with_shuffle_intrinsics");
+        
+        if (EnableShuffleIntrinsics)
+        {
+            GLint ExtensionCount;
+            glGetIntegerv(GL_NUM_EXTENSIONS, &ExtensionCount);
+
+            for (int i = 0; i < ExtensionCount; ++i)
+            {
+                std::string Name = reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i));
+
+                if (Name == "GL_NV_shader_thread_shuffle")
+                {
+                    m_UseShuffleIntrinsics = true;
+                    BASE_CONSOLE_INFO("Shuffle intrinsics for tracking are activated");
+                    break;
+                }
+            }
+            if (!m_UseShuffleIntrinsics)
+            {
+                BASE_CONSOLE_INFO("Shuffle intrinsics are not available. Will use fallback method");
+            }
+        }
+        else
+        {
+            BASE_CONSOLE_INFO("Shuffle intrinsics are deactivated");
+        }
+
         m_pRGBDCameraControl.reset(new MR::CKinectControl);
         BASE_CONSOLE_INFO("Using Kinect for SLAM");
 
@@ -250,6 +284,10 @@ namespace MR
         if (m_ReconstructionSettings.m_CaptureColor)
         {
             DefineStream << "#define CAPTURE_COLOR\n";
+        }
+        if (m_UseShuffleIntrinsics)
+        {
+            DefineStream << "#define USE_SHUFFLE_INTRINSICS\n";
         }
 
         std::string DefineString = DefineStream.str();
@@ -603,6 +641,8 @@ namespace MR
 
     void CSLAMReconstructor::PerformTracking()
     {
+        Performance::StartDurationQuery();
+
         Float4x4 IncPoseMatrix = m_PoseMatrix;
 
         for (int PyramidLevel = m_ReconstructionSettings.m_PyramidLevelCount - 1; PyramidLevel >= 0; -- PyramidLevel)

@@ -1,4 +1,7 @@
 
+#extension GL_NV_shader_thread_shuffle : enable
+#extension GL_NV_shader_thread_group : enable
+
 #ifndef __INCLUDE_CS_DETERMINE_SUMMANDS_GLSL__
 #define __INCLUDE_CS_DETERMINE_SUMMANDS_GLSL__
 
@@ -24,11 +27,47 @@ layout(row_major, std140, binding = 2) uniform UBOInc
 
 // -------------------------------------------------------------------------------------
 
-shared float g_SharedData[WORKGROUP_SIZE];
+#ifdef USE_SHUFFLE_INTRINSICS
 
-// -------------------------------------------------------------------------------------
-// Functions
-// -------------------------------------------------------------------------------------
+shared float g_SharedData[8];
+
+void reduce(float _Input)
+{
+    float Data = _Input;
+
+    Data += shuffleDownNV(Data, 16, 32);
+    Data += shuffleDownNV(Data,  8, 32);
+    Data += shuffleDownNV(Data,  4, 32);
+    Data += shuffleDownNV(Data,  2, 32);
+    Data += shuffleDownNV(Data,  1, 32);
+
+    if (gl_LocalInvocationIndex % 32 == 0)
+    {
+        g_SharedData[gl_LocalInvocationIndex / 32] = Data;
+    }
+
+    barrier();
+
+    if (gl_LocalInvocationIndex < 8)
+    {
+        Data = g_SharedData[gl_LocalInvocationIndex];
+
+        Data += shuffleDownNV(Data,  4, 32);
+        Data += shuffleDownNV(Data,  2, 32);
+        Data += shuffleDownNV(Data,  1, 32);
+
+        if (gl_LocalInvocationIndex == 0)
+        {
+            g_SharedData[0] == Data; 
+        }
+    }
+
+    barrier();
+}
+
+#else
+
+shared float g_SharedData[WORKGROUP_SIZE];
 
 void reduce()
 {
@@ -41,6 +80,8 @@ void reduce()
 		barrier();
 	}
 }
+
+#endif
 
 bool findCorrespondence(out vec3 ReferenceVertex, out vec3 RaycastVertex, out vec3 RaycastNormal)
 {
@@ -142,6 +183,14 @@ void main()
         {
             barrier();
             
+            #ifdef USE_SHUFFLE_INTRINSICS
+            reduce(Row[i] * Row[j]);
+            
+            if (gl_LocalInvocationIndex == 0)
+            {
+                g_ICPData[ICPSummandIndex][ICPValueIndex++] = g_SharedData[0];
+            }
+            #else
             g_SharedData[gl_LocalInvocationIndex] = Row[i] * Row[j];
 
             barrier();
@@ -152,6 +201,7 @@ void main()
             {
                 g_ICPData[ICPSummandIndex][ICPValueIndex++] = g_SharedData[0];
             }
+            #endif
         }
     }
 }
