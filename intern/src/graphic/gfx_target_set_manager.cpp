@@ -46,6 +46,8 @@ namespace
         void ClearTargetSet(CTargetSetPtr _TargetPtr, float _Depth);
         void ClearTargetSet(CTargetSetPtr _TargetPtr, const Base::Float4& _rColor);
         void ClearTargetSet(CTargetSetPtr _TargetPtr, const Base::Float4& _rColor, float _Depth);
+
+		void SetTargetSetLabel(CTargetSetPtr _TargetSetPtr, const char* _pLabel);
         
     private:
         
@@ -420,6 +422,17 @@ namespace
 
         glClearNamedFramebufferfv(rNativeTargetSet.m_NativeTargetSet, GL_DEPTH, 0, &_Depth);
     }
+
+	// -----------------------------------------------------------------------------
+
+	void CGfxTargetSetManager::SetTargetSetLabel(CTargetSetPtr _TargetSetPtr, const char* _pLabel)
+	{
+		assert(_pLabel != nullptr);
+
+		CNativeTargetSet* pNativeTargetSet = static_cast<CNativeTargetSet*>(_TargetSetPtr.GetPtr());
+
+		glObjectLabel(GL_FRAMEBUFFER, pNativeTargetSet->m_NativeTargetSet, -1, _pLabel);
+	}
     
     // -----------------------------------------------------------------------------
 
@@ -801,5 +814,12 @@ namespace TargetSetManager
     {
         CGfxTargetSetManager::GetInstance().ClearTargetSet(_TargetPtr, Base::Float4(0.0f), 1.0f);
     }
+
+	// -----------------------------------------------------------------------------
+
+	void SetTargetSetLabel(CTargetSetPtr _TargetSetPtr, const char* _pLabel)
+	{
+		CGfxTargetSetManager::GetInstance().SetTargetSetLabel(_TargetSetPtr, _pLabel);
+	}
 } // namespace TargetSetManager
 } // namespace Gfx

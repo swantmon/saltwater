@@ -66,6 +66,10 @@ namespace
 
         CInputLayoutPtr CreateInputLayout(const SInputElementDescriptor* _pDescriptors, unsigned int _NumberOfDescriptors, CShaderPtr _ShaderVSPtr);
 
+	public:
+
+		void SetShaderLabel(CShaderPtr _ShaderPtr, const char* _pLabel);
+
     private:
 
         // -----------------------------------------------------------------------------
@@ -304,6 +308,17 @@ namespace
 
         return CInputLayoutPtr(InputLayoutPtr);
     }
+
+	// -----------------------------------------------------------------------------
+
+	void CGfxShaderManager::SetShaderLabel(CShaderPtr _ShaderPtr, const char* _pLabel)
+	{
+		assert(_pLabel != nullptr);
+
+		CInternShader* pInternShader = static_cast<CInternShader*>(_ShaderPtr.GetPtr());
+
+		glObjectLabel(GL_SHADER, pInternShader->m_NativeShader, -1, _pLabel);
+	}
 
     // -----------------------------------------------------------------------------
 
@@ -758,5 +773,12 @@ namespace ShaderManager
     {
         return CGfxShaderManager::GetInstance().CreateInputLayout(_pDescriptors, _NumberOfDescriptors, _VertexShaderPtr);
     }
+
+	// -----------------------------------------------------------------------------
+
+	void SetShaderLabel(CShaderPtr _ShaderPtr, const char* _pLabel)
+	{
+		CGfxShaderManager::GetInstance().SetShaderLabel(_ShaderPtr, _pLabel);
+	}
 } // namespace ShaderManager
 } // namespace Gfx

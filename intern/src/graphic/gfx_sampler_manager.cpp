@@ -55,6 +55,10 @@ namespace
 
         CSamplerSetPtr CreateSamplerSet(CSamplerPtr* _pSamplerPtrs, unsigned int _NumberOfSamplers);
 
+	public:
+
+		void SetSamplerLabel(CSamplerPtr _SamplerPtr, const char* _pLabel);
+
     private:
 
         // -----------------------------------------------------------------------------
@@ -313,6 +317,17 @@ namespace
         // -----------------------------------------------------------------------------
         return CSamplerSetPtr(SamplerSetPtr);
     }
+
+	// -----------------------------------------------------------------------------
+
+	void CGfxSamplerManager::SetSamplerLabel(CSamplerPtr _SamplerPtr, const char* _pLabel)
+	{
+		assert(_pLabel != nullptr);
+
+		CInternSampler* pInternSampler = static_cast<CInternSampler*>(_SamplerPtr.GetPtr());
+
+		glObjectLabel(GL_SAMPLER, pInternSampler->m_NativeSampler, -1, _pLabel);
+	}
     
     // -----------------------------------------------------------------------------
     
@@ -560,5 +575,12 @@ namespace SamplerManager
     {
         return CGfxSamplerManager::GetInstance().CreateSamplerSet(_pSamplerPtrs, _NumberOfSamplers);
     }
+
+	// -----------------------------------------------------------------------------
+
+	void SetSamplerLabel(CSamplerPtr _SamplerPtr, const char* _pLabel)
+	{
+		CGfxSamplerManager::GetInstance().SetSamplerLabel(_SamplerPtr, _pLabel);
+	}
 } // SamplerManager
 } // namespace Gfx

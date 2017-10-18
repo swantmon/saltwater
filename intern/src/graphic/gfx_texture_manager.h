@@ -79,5 +79,7 @@ namespace TextureManager
     CTexture2DPtr GetMipmapFromTexture2D(CTexture2DPtr _TexturePtr, unsigned int _Mipmap);
     
     void UpdateMipmap(CTexture2DPtr _TexturePtr);
+
+	void SetTextureLabel(CTextureBasePtr _TexturePtr, const char* _pLabel);
 } // namespace TextureManager
 } // namespace Gfx

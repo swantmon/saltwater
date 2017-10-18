@@ -82,6 +82,8 @@ namespace
         
         void UpdateMipmap(CTexture2DPtr _TexturePtr);
 
+		void SetTextureLabel(CTextureBasePtr _TexturePtr, const char* _pLabel);
+
     private:
 
         // -----------------------------------------------------------------------------
@@ -707,6 +709,17 @@ namespace
 
         glGenerateTextureMipmap(pInternTexture->m_NativeTexture);
     }
+
+	// -----------------------------------------------------------------------------
+
+	void CGfxTextureManager::SetTextureLabel(CTextureBasePtr _TexturePtr, const char* _pLabel)
+	{
+		assert(_pLabel != nullptr);
+
+		CInternTexture2D* pInternTexture = static_cast<CInternTexture2D*>(_TexturePtr.GetPtr());
+
+		glObjectLabel(GL_TEXTURE, pInternTexture->m_NativeTexture, -1, _pLabel);
+	}
 
     // -----------------------------------------------------------------------------
 
@@ -2638,5 +2651,12 @@ namespace TextureManager
     {
         CGfxTextureManager::GetInstance().UpdateMipmap(_TexturePtr);
     }
+
+	// -----------------------------------------------------------------------------
+
+	void SetTextureLabel(CTextureBasePtr _TexturePtr, const char* _pLabel)
+	{
+		CGfxTextureManager::GetInstance().SetTextureLabel(_TexturePtr, _pLabel);
+	}
 } // namespace TextureManager
 } // namespace Gfx

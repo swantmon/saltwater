@@ -65,6 +65,10 @@ namespace
         void UploadBufferData(CBufferPtr _BufferPtr, const void* _pData);
         void UploadBufferData(CBufferPtr _BufferPtr, const void* _pData, unsigned int _Offset, unsigned int _Range);
 
+	public:
+
+		void SetBufferLabel(CBufferPtr _BufferPtr, const char* _pLabel);
+
     private:
 
         class CInternBuffer : public CNativeBuffer
@@ -512,6 +516,17 @@ namespace
         glNamedBufferSubData(pBuffer->m_NativeBuffer, _Offset, _Range, _pData);
     }
 
+	// -----------------------------------------------------------------------------
+
+	void CGfxBufferManager::SetBufferLabel(CBufferPtr _BufferPtr, const char* _pLabel)
+	{
+		assert(_pLabel != nullptr);
+
+		CInternBuffer* pInternBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
+
+		glObjectLabel(pInternBuffer->m_NativeBinding, pInternBuffer->m_NativeBuffer, -1, _pLabel);
+	}
+
     // -----------------------------------------------------------------------------
 
     GLenum  CGfxBufferManager::ConvertUsage(CBuffer::EUsage _Usage)
@@ -733,5 +748,11 @@ namespace BufferManager
         CGfxBufferManager::GetInstance().UploadBufferData(_BufferPtr, _pData, _Offset, _Range);
     }
 
+	// -----------------------------------------------------------------------------
+
+	void SetBufferLabel(CBufferPtr _BufferPtr, const char* _pLabel)
+	{
+		CGfxBufferManager::GetInstance().SetBufferLabel(_BufferPtr, _pLabel);
+	}
 } // namespace BufferManager
 } // namespace Gfx
