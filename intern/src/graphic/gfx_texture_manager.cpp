@@ -56,8 +56,6 @@ namespace
         CTexture3DPtr GetDummyTexture3D();
         CTexture2DPtr GetDummyCubeTexture();
 
-        CTextureBasePtr CreateTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
-
         CTexture1DPtr CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
         CTexture2DPtr CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
         CTexture3DPtr CreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
@@ -82,7 +80,8 @@ namespace
         
         void UpdateMipmap(CTexture2DPtr _TexturePtr);
 
-		void SetTextureLabel(CTextureBasePtr _TexturePtr, const char* _pLabel);
+		void SetTexture2DLabel(CTexture2DPtr _TexturePtr, const char* _pLabel);
+		void SetTexture3DLabel(CTexture3DPtr _TexturePtr, const char* _pLabel);
 
     private:
 
@@ -268,7 +267,7 @@ namespace
         
         m_Texture2DPtr = CreateTexture2D(TextureDescriptor, true, SDataBehavior::LeftAlone);
 
-		SetTextureLabel(static_cast<CTextureBasePtr>(m_Texture2DPtr), "Dummy Texture 2D");
+		SetTexture2DLabel(m_Texture2DPtr, "Dummy Texture 2D");
         
         // -----------------------------------------------------------------------------
         // Setup default settings in OpenGL
@@ -338,17 +337,6 @@ namespace
 
     CTexture2DPtr CGfxTextureManager::GetDummyCubeTexture()
     {
-        return nullptr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CTextureBasePtr CGfxTextureManager::CreateTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
-    {
-        BASE_UNUSED(_rDescriptor);
-        BASE_UNUSED(_IsDeleteable);
-        BASE_UNUSED(_Behavior);
-
         return nullptr;
     }
 
@@ -698,11 +686,22 @@ namespace
 
 	// -----------------------------------------------------------------------------
 
-	void CGfxTextureManager::SetTextureLabel(CTextureBasePtr _TexturePtr, const char* _pLabel)
+	void CGfxTextureManager::SetTexture2DLabel(CTexture2DPtr _TexturePtr, const char* _pLabel)
 	{
 		assert(_pLabel != nullptr);
 
 		CInternTexture2D* pInternTexture = static_cast<CInternTexture2D*>(_TexturePtr.GetPtr());
+
+		glObjectLabel(GL_TEXTURE, pInternTexture->m_NativeTexture, -1, _pLabel);
+	}
+
+	// -----------------------------------------------------------------------------
+
+	void CGfxTextureManager::SetTexture3DLabel(CTexture3DPtr _TexturePtr, const char* _pLabel)
+	{
+		assert(_pLabel != nullptr);
+
+		CInternTexture3D* pInternTexture = static_cast<CInternTexture3D*>(_TexturePtr.GetPtr());
 
 		glObjectLabel(GL_TEXTURE, pInternTexture->m_NativeTexture, -1, _pLabel);
 	}
@@ -769,6 +768,9 @@ namespace
                     return ;
                 }
 
+				// -----------------------------------------------------------------------------
+				// Create
+				// -----------------------------------------------------------------------------
                 if (_pTexture->IsCube())
                 {
                     Dt::CTextureCube* pDataTexture = static_cast<Dt::CTextureCube*>(_pTexture);
@@ -789,6 +791,19 @@ namespace
                     Texture2DPtr = InternCreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
                 }
 
+				// -----------------------------------------------------------------------------
+				// Label
+				// -----------------------------------------------------------------------------
+				const char* pLabel = _pTexture->GetIdentifier().length() > 0 ? _pTexture->GetIdentifier().c_str() : _pTexture->GetFileName().length() > 0 ? _pTexture->GetFileName().c_str() : 0;
+
+				if (pLabel != 0)
+				{
+					SetTexture2DLabel(Texture2DPtr, pLabel);
+				}
+
+				// -----------------------------------------------------------------------------
+				// Set to container
+				// -----------------------------------------------------------------------------
                 CInternTexture2D* pInternTexture2D = static_cast<CInternTexture2D*>(Texture2DPtr.GetPtr());
 
                 if (pInternTexture2D == nullptr)
@@ -2482,13 +2497,6 @@ namespace TextureManager
 
     // -----------------------------------------------------------------------------
 
-    CTextureBasePtr CreateTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
-    {
-        return CGfxTextureManager::GetInstance().CreateTexture(_rDescriptor, _IsDeleteable, _Behavior);
-    }
-
-    // -----------------------------------------------------------------------------
-
     CTexture1DPtr CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
         return CGfxTextureManager::GetInstance().CreateTexture1D(_rDescriptor, _IsDeleteable, _Behavior);
@@ -2637,9 +2645,16 @@ namespace TextureManager
 
 	// -----------------------------------------------------------------------------
 
-	void SetTextureLabel(CTextureBasePtr _TexturePtr, const char* _pLabel)
+	void SetTexture2DLabel(CTexture2DPtr _TexturePtr, const char* _pLabel)
 	{
-		CGfxTextureManager::GetInstance().SetTextureLabel(_TexturePtr, _pLabel);
+		CGfxTextureManager::GetInstance().SetTexture2DLabel(_TexturePtr, _pLabel);
+	}
+
+	// -----------------------------------------------------------------------------
+
+	void SetTexture3DLabel(CTexture3DPtr _TexturePtr, const char* _pLabel)
+	{
+		CGfxTextureManager::GetInstance().SetTexture3DLabel(_TexturePtr, _pLabel);
 	}
 } // namespace TextureManager
 } // namespace Gfx

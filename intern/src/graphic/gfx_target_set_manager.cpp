@@ -148,7 +148,7 @@ namespace
         
         CTexture2DPtr AlbedoPtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // RGB Albedo
 
-		TextureManager::SetTextureLabel(static_cast<CTextureBasePtr>(AlbedoPtr), "RT: Default RGB");
+		TextureManager::SetTexture2DLabel(AlbedoPtr, "RT: Default RGB");
         
         // -----------------------------------------------------------------------------
         
@@ -157,7 +157,7 @@ namespace
         
         CTexture2DPtr GBuffer1Ptr = TextureManager::CreateTexture2D(RendertargetDescriptor); // G-Buffer 1
 
-		TextureManager::SetTextureLabel(static_cast<CTextureBasePtr>(GBuffer1Ptr), "RT: Gbuffer 1");
+		TextureManager::SetTexture2DLabel(GBuffer1Ptr, "RT: Gbuffer 1");
         
         // -----------------------------------------------------------------------------
 
@@ -166,7 +166,7 @@ namespace
         
         CTexture2DPtr GBuffer2Ptr = TextureManager::CreateTexture2D(RendertargetDescriptor); // G-Buffer 2
 
-		TextureManager::SetTextureLabel(static_cast<CTextureBasePtr>(GBuffer2Ptr), "RT: Gbuffer 2");
+		TextureManager::SetTexture2DLabel(GBuffer2Ptr, "RT: Gbuffer 2");
         
         // -----------------------------------------------------------------------------
         
@@ -175,7 +175,7 @@ namespace
         
         CTexture2DPtr GBuffer3Ptr = TextureManager::CreateTexture2D(RendertargetDescriptor); // G-Buffer 3
 
-		TextureManager::SetTextureLabel(static_cast<CTextureBasePtr>(GBuffer3Ptr), "RT: Gbuffer 3");
+		TextureManager::SetTexture2DLabel(GBuffer3Ptr, "RT: Gbuffer 3");
         
         // -----------------------------------------------------------------------------
         
@@ -184,7 +184,7 @@ namespace
         
         CTexture2DPtr LightAccumulationTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Light Accumulation (HDR)
 
-		TextureManager::SetTextureLabel(static_cast<CTextureBasePtr>(LightAccumulationTexturePtr), "RT: Light Accumulation (HDR)");
+		TextureManager::SetTexture2DLabel(LightAccumulationTexturePtr, "RT: Light Accumulation (HDR)");
         
         // -----------------------------------------------------------------------------
         
@@ -193,7 +193,7 @@ namespace
 
         CTexture2DPtr HitProxyTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Hit Proxy (ID)
 
-		TextureManager::SetTextureLabel(static_cast<CTextureBasePtr>(HitProxyTexturePtr), "RT: Hit Proxy (ID)");
+		TextureManager::SetTexture2DLabel(HitProxyTexturePtr, "RT: Hit Proxy (ID)");
         
         // -----------------------------------------------------------------------------
         
@@ -202,7 +202,7 @@ namespace
         
         CTexture2DPtr DepthTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Depth
 
-		TextureManager::SetTextureLabel(static_cast<CTextureBasePtr>(DepthTexturePtr), "RT: Depth");
+		TextureManager::SetTexture2DLabel(DepthTexturePtr, "RT: Depth");
         
         // -----------------------------------------------------------------------------
         // Create system target set
@@ -489,6 +489,8 @@ namespace
         RendertargetDescriptor.m_Format        = CTextureBase::R8G8B8A8_UBYTE;
         
         CTexture2DPtr AlbedoPtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // RGB Albedo
+
+		TextureManager::SetTexture2DLabel(AlbedoPtr, "RT: Default RGB");
         
         // -----------------------------------------------------------------------------
         
@@ -496,6 +498,8 @@ namespace
         RendertargetDescriptor.m_Format        = CTextureBase::R8G8B8A8_UBYTE;
         
         CTexture2DPtr GBuffer1Ptr = TextureManager::CreateTexture2D(RendertargetDescriptor); // G-Buffer 1
+
+		TextureManager::SetTexture2DLabel(GBuffer1Ptr, "RT: Gbuffer 1");
         
         // -----------------------------------------------------------------------------
 
@@ -503,6 +507,8 @@ namespace
         RendertargetDescriptor.m_Format        = CTextureBase::R8G8B8A8_UBYTE;
         
         CTexture2DPtr GBuffer2Ptr = TextureManager::CreateTexture2D(RendertargetDescriptor); // G-Buffer 2
+
+		TextureManager::SetTexture2DLabel(GBuffer2Ptr, "RT: Gbuffer 2");
         
         // -----------------------------------------------------------------------------
         
@@ -510,6 +516,8 @@ namespace
         RendertargetDescriptor.m_Format        = CTextureBase::R8G8B8A8_UBYTE;
         
         CTexture2DPtr GBuffer3Ptr = TextureManager::CreateTexture2D(RendertargetDescriptor); // G-Buffer 3
+
+		TextureManager::SetTexture2DLabel(GBuffer3Ptr, "RT: Gbuffer 3");
         
         // -----------------------------------------------------------------------------
         
@@ -517,6 +525,8 @@ namespace
         RendertargetDescriptor.m_Format        = CTextureBase::R16G16B16A16_FLOAT;
         
         CTexture2DPtr LightAccumulationTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Light Accumulation (HDR)
+
+		TextureManager::SetTexture2DLabel(LightAccumulationTexturePtr, "RT: Light Accumulation (HDR)");
         
         // -----------------------------------------------------------------------------
         
@@ -524,6 +534,8 @@ namespace
         RendertargetDescriptor.m_Format        = CTextureBase::R32_UINT;
 
         CTexture2DPtr HitProxyTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Hit Proxy (ID)
+
+		TextureManager::SetTexture2DLabel(HitProxyTexturePtr, "RT: Hit Proxy (ID)");
         
         // -----------------------------------------------------------------------------
         
@@ -531,6 +543,8 @@ namespace
         RendertargetDescriptor.m_Format        = CTextureBase::R32_FLOAT;
         
         CTexture2DPtr DepthTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Depth
+
+		TextureManager::SetTexture2DLabel(DepthTexturePtr, "RT: Depth");
                 
         // -----------------------------------------------------------------------------
         // Create default target set

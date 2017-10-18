@@ -50,8 +50,6 @@ namespace TextureManager
     CTexture3DPtr GetDummyTexture3D();
     CTexture2DPtr GetDummyCubeTexture();
 
-    CTextureBasePtr CreateTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::LeftAlone);
-
     CTexture1DPtr CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::LeftAlone);
     CTexture2DPtr CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::LeftAlone);
     CTexture3DPtr CreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::LeftAlone);
@@ -80,6 +78,7 @@ namespace TextureManager
     
     void UpdateMipmap(CTexture2DPtr _TexturePtr);
 
-	void SetTextureLabel(CTextureBasePtr _TexturePtr, const char* _pLabel);
+	void SetTexture2DLabel(CTexture2DPtr _TexturePtr, const char* _pLabel);
+	void SetTexture3DLabel(CTexture3DPtr _TexturePtr, const char* _pLabel);
 } // namespace TextureManager
 } // namespace Gfx
