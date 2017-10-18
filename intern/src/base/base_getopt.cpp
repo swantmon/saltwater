@@ -5,6 +5,7 @@
 
 #include "base/base_precompiled.h"
 
+#include "base/base_console.h"
 #include "base/base_getopt.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
@@ -62,17 +63,11 @@ namespace
 
     int CGetOpt::GetOption(int _Argc, char* _pArgv[], char* _pOptions)
     {
-        auto WriteError =[&](const char* _pDescription, int _Argument)
+        auto WriteError = [&](const char* _pDescription, int _Argument)
         {
             if (m_OptionError)
             {
-                char ErrorBuffer[2];
-
-                ErrorBuffer[0] = _Argument; ErrorBuffer[1] = '\n';
-
-                fputs(_pArgv[0], stderr);
-                fputs(_pDescription, stderr);
-                fputc(_Argument, stderr);
+				BASE_CONSOLE_ERRORV("Getting option \"%s\" and argument \"%s\" failed with message: %s", static_cast<char>(m_OptionError), static_cast<char>(_Argument), _pDescription);
             }
         };
 
@@ -120,6 +115,7 @@ namespace
             {
                 WriteError(": option requires an argument -- ", Argument);
                 m_ArgumentIndex = 1;
+
                 return('?');
             }
             else
@@ -136,6 +132,7 @@ namespace
                 m_ArgumentIndex = 1;
                 m_OptionIndex++;
             }
+
             m_pOptionArgument = 0;
         }
 
