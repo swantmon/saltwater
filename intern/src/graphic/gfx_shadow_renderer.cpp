@@ -157,7 +157,7 @@ namespace
         , m_GaussianBlurPropertiesCSBufferPtr()
         , m_QuadInputLayoutPtr               ()
         , m_FullquadShaderVSPtr              ()
-        , m_GaussianBlurShaderCSPtr         ()
+        , m_GaussianBlurShaderCSPtr          ()
         , m_BilateralBlurHTextureSetPtr      ()
         , m_BilateralBlurVTextureSetPtr      ()
         , m_NoiseTexturePtr                  ()
@@ -287,6 +287,8 @@ namespace
         RendertargetDescriptor.m_pPixels          = 0;
 
         CTexture2DPtr HalfTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
+
+		TextureManager::SetTexture2DLabel(HalfTexturePtr, "SSAO");
         
         // -----------------------------------------------------------------------------
         // Create render target
@@ -296,6 +298,8 @@ namespace
         HalfRenderbuffer[0] = HalfTexturePtr;
 
         m_HalfRenderbufferPtr = TargetSetManager::CreateTargetSet(HalfRenderbuffer, 1);
+
+		TargetSetManager::SetTargetSetLabel(m_HalfRenderbufferPtr, "SSAO");
     }
     
     // -----------------------------------------------------------------------------

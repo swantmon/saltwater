@@ -309,6 +309,8 @@ namespace
         
         m_ESMTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
 
+		TextureManager::SetTexture2DLabel(m_ESMTexturePtr, "Fog ESM");
+
         CTexture2DPtr ESMSwapTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
 
         // -----------------------------------------------------------------------------
@@ -424,6 +426,8 @@ namespace
 
         m_GradientPermutationTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
 
+		TextureManager::SetTexture2DLabel(m_GradientPermutationTexturePtr, "Fog Gradient Permutation");
+
         Base::CMemory::Free(pPermutationGradientData);
 
         // -----------------------------------------------------------------------------
@@ -443,7 +447,11 @@ namespace
 
         m_VolumeTexturePtr = TextureManager::CreateTexture3D(RendertargetDescriptor);
 
+		TextureManager::SetTexture3DLabel(m_VolumeTexturePtr, "Fog Volume Texture");
+
         m_ScatteringTexturePtr = TextureManager::CreateTexture3D(RendertargetDescriptor);
+
+		TextureManager::SetTexture3DLabel(m_VolumeTexturePtr, "Fog Scattering Texture");
 
         // -----------------------------------------------------------------------------
 

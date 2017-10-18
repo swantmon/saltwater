@@ -66,6 +66,10 @@ namespace
 
         CInputLayoutPtr CreateInputLayout(const SInputElementDescriptor* _pDescriptors, unsigned int _NumberOfDescriptors, CShaderPtr _ShaderVSPtr);
 
+	public:
+
+		void SetShaderLabel(CShaderPtr _ShaderPtr, const char* _pLabel);
+
     private:
 
         // -----------------------------------------------------------------------------
@@ -305,6 +309,17 @@ namespace
         return CInputLayoutPtr(InputLayoutPtr);
     }
 
+	// -----------------------------------------------------------------------------
+
+	void CGfxShaderManager::SetShaderLabel(CShaderPtr _ShaderPtr, const char* _pLabel)
+	{
+		assert(_pLabel != nullptr);
+
+		CInternShader* pInternShader = static_cast<CInternShader*>(_ShaderPtr.GetPtr());
+
+		glObjectLabel(GL_SHADER, pInternShader->m_NativeShader, -1, _pLabel);
+	}
+
     // -----------------------------------------------------------------------------
 
     CShaderPtr CGfxShaderManager::InternCompileShader(CShader::EType _Type, const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderDefines, const Base::Char* _pShaderDescription, unsigned int _Categories, bool _HasAlpha, bool _Debug)
@@ -379,6 +394,8 @@ namespace
 
         if (NativeShaderHandle != 0)
         {
+			glObjectLabel(GL_SHADER, NativeShaderHandle, -1, (std::string(_pFileName) + " : " + std::string(_pShaderName)).c_str());
+
             glShaderSource(NativeShaderHandle, 1, &pRAW, NULL);
 
             glCompileShader(NativeShaderHandle);
@@ -530,6 +547,8 @@ namespace
 
         if (NativeShaderHandle != 0)
         {
+			glObjectLabel(GL_SHADER, NativeShaderHandle, -1, (rShader.m_FileName + " : " + rShader.m_ShaderName).c_str());
+
             glShaderSource(NativeShaderHandle, 1, &pRAW, NULL);
 
             glCompileShader(NativeShaderHandle);
@@ -758,5 +777,12 @@ namespace ShaderManager
     {
         return CGfxShaderManager::GetInstance().CreateInputLayout(_pDescriptors, _NumberOfDescriptors, _VertexShaderPtr);
     }
+
+	// -----------------------------------------------------------------------------
+
+	void SetShaderLabel(CShaderPtr _ShaderPtr, const char* _pLabel)
+	{
+		CGfxShaderManager::GetInstance().SetShaderLabel(_ShaderPtr, _pLabel);
+	}
 } // namespace ShaderManager
 } // namespace Gfx

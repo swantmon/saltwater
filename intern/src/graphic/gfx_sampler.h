@@ -86,6 +86,8 @@ namespace Gfx
 
             ESampler GetType() const;
 
+			const char* GetName() const;
+
         protected:
 
             EFilter             m_Filter;
