@@ -379,21 +379,16 @@ namespace
 
         CInternTexture2D* pInternTexture2D = static_cast<CInternTexture2D*>(Texture2DPtr.GetPtr());
 
-        if (pInternTexture2D == nullptr)
-        {
-            pInternTexture2D = static_cast<CInternTexture2D*>(m_Texture2DPtr.GetPtr());
-        }
+		if (pInternTexture2D == nullptr)
+		{
+			return GetDummyTexture2D();
+		}
 
         if (Hash != 0)
         {
             pInternTexture2D->m_Hash = Hash;
 
             m_Textures2DByHash[Hash] = Texture2DPtr;
-        }
-
-        if (pInternTexture2D == nullptr)
-        {
-            return GetDummyTexture2D();
         }
 
         return Texture2DPtr;
@@ -792,9 +787,9 @@ namespace
                 }
 
 				// -----------------------------------------------------------------------------
-				// Label
+				// Label if an identifier exists
 				// -----------------------------------------------------------------------------
-				const char* pLabel = _pTexture->GetIdentifier().length() > 0 ? _pTexture->GetIdentifier().c_str() : _pTexture->GetFileName().length() > 0 ? _pTexture->GetFileName().c_str() : 0;
+				const char* pLabel = _pTexture->GetIdentifier().length() > 0 ? _pTexture->GetIdentifier().c_str() : 0;
 
 				if (pLabel != 0)
 				{
@@ -1008,6 +1003,14 @@ namespace
         // Generate OpenGL texture or render buffer
         // -----------------------------------------------------------------------------
         glCreateTextures(GL_TEXTURE_2D, 1, &NativeTextureHandle);
+
+		// -----------------------------------------------------------------------------
+		// Label texture if file name exists
+		// -----------------------------------------------------------------------------
+		if (_rDescriptor.m_pFileName != nullptr)
+		{
+			glObjectLabel(GL_TEXTURE, NativeTextureHandle, -1, _rDescriptor.m_pFileName);
+		}
 
         // -----------------------------------------------------------------------------
         // Binding
@@ -1235,7 +1238,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Generate OpenGL texture or render buffer
         // -----------------------------------------------------------------------------
-        glCreateTextures(GL_TEXTURE_3D, 1, &NativeTextureHandle);
+		glCreateTextures(GL_TEXTURE_3D, 1, &NativeTextureHandle);
+
+		// -----------------------------------------------------------------------------
+		// Label texture if file name exists
+		// -----------------------------------------------------------------------------
+		if (_rDescriptor.m_pFileName != nullptr)
+		{
+			glObjectLabel(GL_TEXTURE, NativeTextureHandle, -1, _rDescriptor.m_pFileName);
+		}
 
         // -----------------------------------------------------------------------------
         // Binding
@@ -1508,7 +1519,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Generate OpenGL texture or render buffer
         // -----------------------------------------------------------------------------
-        glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &NativeTextureHandle);
+		glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &NativeTextureHandle);
+
+		// -----------------------------------------------------------------------------
+		// Label texture if file name exists
+		// -----------------------------------------------------------------------------
+		if (_rDescriptor.m_pFileName != nullptr)
+		{
+			glObjectLabel(GL_TEXTURE, NativeTextureHandle, -1, _rDescriptor.m_pFileName);
+		}
 
         // -----------------------------------------------------------------------------
         // Binding
