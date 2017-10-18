@@ -236,7 +236,7 @@ namespace MR
         // Check if conservative rasterization is available
         ////////////////////////////////////////////////////////////////////////////////
 
-        const bool EnableConservativeRaster = Base::CProgramParameters::GetInstance().GetBoolean("conservative_raster_enable ");
+        const bool EnableConservativeRaster = Base::CProgramParameters::GetInstance().GetBoolean("conservative_raster_enable");
 
         m_IsConservativeRasterizationAvailable = false;
 
