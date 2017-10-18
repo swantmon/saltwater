@@ -184,6 +184,7 @@ void main()
             barrier();
             
             #ifdef USE_SHUFFLE_INTRINSICS
+
             reduce(Row[i] * Row[j]);
             
             if (gl_LocalInvocationIndex == 0)
@@ -191,6 +192,7 @@ void main()
                 g_ICPData[ICPSummandIndex][ICPValueIndex++] = g_SharedData[0];
             }
             #else
+
             g_SharedData[gl_LocalInvocationIndex] = Row[i] * Row[j];
 
             barrier();
@@ -201,6 +203,7 @@ void main()
             {
                 g_ICPData[ICPSummandIndex][ICPValueIndex++] = g_SharedData[0];
             }
+            
             #endif
         }
     }
