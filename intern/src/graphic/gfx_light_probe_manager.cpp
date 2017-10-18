@@ -588,6 +588,8 @@ namespace
 
         rGfxLightProbeFacet.m_ReflectionCubemapPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
+		TextureManager::SetTexture2DLabel(rGfxLightProbeFacet.m_ReflectionCubemapPtr, "Light Probe Reflection Texture");
+
         // -----------------------------------------------------------------------------
 
         TextureDescriptor.m_NumberOfPixelsU = _SpecularFaceSize;
@@ -598,9 +600,13 @@ namespace
 
         rGfxLightProbeFacet.m_DepthPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
+		TextureManager::SetTexture2DLabel(rGfxLightProbeFacet.m_DepthPtr, "Light Probe Depth Texture");
+
         // -----------------------------------------------------------------------------
 
         CTargetSetPtr ReflectionTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(rGfxLightProbeFacet.m_ReflectionCubemapPtr), static_cast<CTextureBasePtr>(rGfxLightProbeFacet.m_DepthPtr));
+
+		TargetSetManager::SetTargetSetLabel(ReflectionTargetSetPtr, "Light Probe Reflection Target");
 
         // -----------------------------------------------------------------------------
 
@@ -640,6 +646,8 @@ namespace
         TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
         
         rGfxLightProbeFacet.m_SpecularPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
+
+		TextureManager::SetTexture2DLabel(rGfxLightProbeFacet.m_SpecularPtr, "Light Probe Specular Texture");
         
         // -----------------------------------------------------------------------------
         
@@ -650,6 +658,8 @@ namespace
         TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
         
         rGfxLightProbeFacet.m_DiffusePtr = TextureManager::CreateCubeTexture(TextureDescriptor);
+
+		TextureManager::SetTexture2DLabel(rGfxLightProbeFacet.m_DiffusePtr, "Light Probe Diffuse Texture");
         
         // -----------------------------------------------------------------------------
         // For all cube maps create a render target for every mip map

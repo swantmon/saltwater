@@ -375,6 +375,8 @@ namespace
         
         CTexture2DPtr ColorTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Swap Color
 
+		TextureManager::SetTexture2DLabel(ColorTexturePtr, "PostFX Swap");
+
         // -----------------------------------------------------------------------------
         
         RendertargetDescriptor.m_NumberOfPixelsU = Size[0];
@@ -382,12 +384,16 @@ namespace
 
         CTexture2DPtr FullTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // First Full
 
+		TextureManager::SetTexture2DLabel(FullTexturePtr, "PostFX Temp Full Resolution");
+
         // -----------------------------------------------------------------------------
         
         RendertargetDescriptor.m_NumberOfPixelsU = HalfSize[0];
         RendertargetDescriptor.m_NumberOfPixelsV = HalfSize[1];
 
         CTexture2DPtr HalfTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // First Half
+
+		TextureManager::SetTexture2DLabel(HalfTexturePtr, "PostFX Temp Half Resolution");
         
         // -----------------------------------------------------------------------------
         
@@ -397,6 +403,10 @@ namespace
         CTexture2DPtr QuarterOneTexturePtr   = TextureManager::CreateTexture2D(RendertargetDescriptor); // First Quarter
         CTexture2DPtr QuarterTwoTexturePtr   = TextureManager::CreateTexture2D(RendertargetDescriptor); // Second Quarter
         CTexture2DPtr QuarterThreeTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Third Quarter
+
+		TextureManager::SetTexture2DLabel(QuarterOneTexturePtr, "PostFX Temp Quarter One");
+		TextureManager::SetTexture2DLabel(QuarterTwoTexturePtr, "PostFX Temp Quarter Two");
+		TextureManager::SetTexture2DLabel(QuarterThreeTexturePtr, "PostFX Temp Quarter Three");
         
         // -----------------------------------------------------------------------------
         // Create swap buffer target set
@@ -440,28 +450,32 @@ namespace
         // SMAA Render Targets
         //////////////////////////////////////////////////////////
 
-        RendertargetDescriptor.m_NumberOfPixelsU = Size[0];
-        RendertargetDescriptor.m_NumberOfPixelsV = Size[1];
-        RendertargetDescriptor.m_NumberOfPixelsW = 1;
-        RendertargetDescriptor.m_NumberOfMipMaps = 1;
+        RendertargetDescriptor.m_NumberOfPixelsU  = Size[0];
+        RendertargetDescriptor.m_NumberOfPixelsV  = Size[1];
+        RendertargetDescriptor.m_NumberOfPixelsW  = 1;
+        RendertargetDescriptor.m_NumberOfMipMaps  = 1;
         RendertargetDescriptor.m_NumberOfTextures = 1;
-        RendertargetDescriptor.m_Binding = CTextureBase::RenderTarget | CTextureBase::ShaderResource;
-        RendertargetDescriptor.m_Access = CTextureBase::CPUWrite;
-        RendertargetDescriptor.m_Format = CTextureBase::Unknown;
-        RendertargetDescriptor.m_Usage = CTextureBase::GPURead;
-        RendertargetDescriptor.m_Semantic = CTextureBase::Diffuse;
-        RendertargetDescriptor.m_pFileName = 0;
-        RendertargetDescriptor.m_pPixels = 0;
-        RendertargetDescriptor.m_Format = CTextureBase::R8G8_UBYTE;
+        RendertargetDescriptor.m_Binding          = CTextureBase::RenderTarget | CTextureBase::ShaderResource;
+        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
+        RendertargetDescriptor.m_Format           = CTextureBase::Unknown;
+        RendertargetDescriptor.m_Usage            = CTextureBase::GPURead;
+        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_pFileName        = 0;
+        RendertargetDescriptor.m_pPixels          = 0;
+        RendertargetDescriptor.m_Format           = CTextureBase::R8G8_UBYTE;
 
-        CTextureBasePtr EdgesTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
+        CTexture2DPtr EdgesTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
+
+		TextureManager::SetTexture2DLabel(EdgesTexturePtr, "SMAA Target Texture");
 
         RendertargetDescriptor.m_Format = CTextureBase::R8G8B8A8_UBYTE;
 
-        CTextureBasePtr BlendWeightsTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
+        CTexture2DPtr BlendWeightsTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
 
-        m_SMAAEdgeTargetSetPtr = TargetSetManager::CreateTargetSet(EdgesTexturePtr);
-        m_SMAAWeightsCalcTargetSetPtr = TargetSetManager::CreateTargetSet(BlendWeightsTexturePtr);
+		TextureManager::SetTexture2DLabel(BlendWeightsTexturePtr, "SMAA Blend Weights Texture");
+
+        m_SMAAEdgeTargetSetPtr        = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(EdgesTexturePtr));
+        m_SMAAWeightsCalcTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(BlendWeightsTexturePtr));
     }
     
     // -----------------------------------------------------------------------------
@@ -655,6 +669,8 @@ namespace
 
         m_SMAAAreaTexture = TextureManager::CreateTexture2D(AreaTexDescriptor);
 
+		TextureManager::SetTexture2DLabel(m_SMAAAreaTexture, "SMAA Area Texture");
+
         STextureDescriptor SearchTexDescriptor = {};
 
         SearchTexDescriptor.m_NumberOfPixelsU  = SEARCHTEX_WIDTH;
@@ -671,6 +687,8 @@ namespace
         SearchTexDescriptor.m_pPixels          = const_cast<void*>(static_cast<const void*>(&searchTexBytes[0]));
 
         m_SMAASearchTexture = TextureManager::CreateTexture2D(SearchTexDescriptor);
+
+		TextureManager::SetTexture2DLabel(m_SMAASearchTexture, "SMAA Search Texture");
 
         auto EdgesTexPtr = m_SMAAEdgeTargetSetPtr->GetRenderTarget(0);
         auto WeightsTexPtr = m_SMAAWeightsCalcTargetSetPtr->GetRenderTarget(0);
@@ -857,21 +875,27 @@ namespace
         RendertargetDescriptor.m_pPixels          = 0;
         RendertargetDescriptor.m_Format           = CTextureBase::R8G8B8A8_UBYTE;
         
-        CTexture2DPtr ColorTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Swap Color
+		CTexture2DPtr ColorTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Swap Color
 
-        // -----------------------------------------------------------------------------
-        
-        RendertargetDescriptor.m_NumberOfPixelsU = Size[0];
-        RendertargetDescriptor.m_NumberOfPixelsV = Size[1];
+		TextureManager::SetTexture2DLabel(ColorTexturePtr, "PostFX Swap");
 
-        CTexture2DPtr FullTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // First Full
+		// -----------------------------------------------------------------------------
 
-        // -----------------------------------------------------------------------------
-        
-        RendertargetDescriptor.m_NumberOfPixelsU = HalfSize[0];
-        RendertargetDescriptor.m_NumberOfPixelsV = HalfSize[1];
+		RendertargetDescriptor.m_NumberOfPixelsU = Size[0];
+		RendertargetDescriptor.m_NumberOfPixelsV = Size[1];
 
-        CTexture2DPtr HalfTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // First Half
+		CTexture2DPtr FullTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // First Full
+
+		TextureManager::SetTexture2DLabel(FullTexturePtr, "PostFX Temp Full Resolution");
+
+		// -----------------------------------------------------------------------------
+
+		RendertargetDescriptor.m_NumberOfPixelsU = HalfSize[0];
+		RendertargetDescriptor.m_NumberOfPixelsV = HalfSize[1];
+
+		CTexture2DPtr HalfTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // First Half
+
+		TextureManager::SetTexture2DLabel(HalfTexturePtr, "PostFX Temp Half Resolution");
         
         // -----------------------------------------------------------------------------
         
@@ -881,6 +905,10 @@ namespace
         CTexture2DPtr QuarterOneTexturePtr   = TextureManager::CreateTexture2D(RendertargetDescriptor); // First Quarter
         CTexture2DPtr QuarterTwoTexturePtr   = TextureManager::CreateTexture2D(RendertargetDescriptor); // Second Quarter
         CTexture2DPtr QuarterThreeTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Third Quarter
+
+		TextureManager::SetTexture2DLabel(QuarterOneTexturePtr, "PostFX Temp Quarter One");
+		TextureManager::SetTexture2DLabel(QuarterTwoTexturePtr, "PostFX Temp Quarter Two");
+		TextureManager::SetTexture2DLabel(QuarterThreeTexturePtr, "PostFX Temp Quarter Three");
         
         // -----------------------------------------------------------------------------
         // Create swap buffer target set
@@ -938,14 +966,18 @@ namespace
         RendertargetDescriptor.m_pPixels          = 0;
         RendertargetDescriptor.m_Format           = CTextureBase::R8G8_UBYTE;
 
-        CTextureBasePtr EdgesTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
+		CTexture2DPtr EdgesTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
 
-        RendertargetDescriptor.m_Format = CTextureBase::R8G8B8A8_UBYTE;
+		TextureManager::SetTexture2DLabel(EdgesTexturePtr, "SMAA Target Texture");
 
-        CTextureBasePtr BlendWeightsTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
+		RendertargetDescriptor.m_Format = CTextureBase::R8G8B8A8_UBYTE;
 
-        m_SMAAEdgeTargetSetPtr        = TargetSetManager::CreateTargetSet(EdgesTexturePtr);
-        m_SMAAWeightsCalcTargetSetPtr = TargetSetManager::CreateTargetSet(BlendWeightsTexturePtr);
+		CTexture2DPtr BlendWeightsTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
+
+		TextureManager::SetTexture2DLabel(BlendWeightsTexturePtr, "SMAA Blend Weights Texture");
+
+		m_SMAAEdgeTargetSetPtr        = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(EdgesTexturePtr));
+		m_SMAAWeightsCalcTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(BlendWeightsTexturePtr));
 
         // -----------------------------------------------------------------------------
 

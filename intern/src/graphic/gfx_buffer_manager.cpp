@@ -524,7 +524,7 @@ namespace
 
 		CInternBuffer* pInternBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
 
-		glObjectLabel(pInternBuffer->m_NativeBinding, pInternBuffer->m_NativeBuffer, -1, _pLabel);
+		glObjectLabel(GL_BUFFER, pInternBuffer->m_NativeBuffer, -1, _pLabel);
 	}
 
     // -----------------------------------------------------------------------------

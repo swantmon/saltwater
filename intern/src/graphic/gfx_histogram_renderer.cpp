@@ -258,6 +258,8 @@ namespace
         
         m_ExposureHistoryBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
+		BufferManager::SetBufferLabel(m_ExposureHistoryBufferPtr, "Histogram Exposure History");
+
         // -----------------------------------------------------------------------------
 
         ConstanteBufferDesc.m_Stride        = 0;
@@ -269,6 +271,8 @@ namespace
         ConstanteBufferDesc.m_pClassKey     = 0;
 
         CBufferPtr HistogramSettingsBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+		BufferManager::SetBufferLabel(m_ExposureHistoryBufferPtr, "Histogram Settings");
 
         // -----------------------------------------------------------------------------
         
@@ -282,6 +286,8 @@ namespace
         
         CBufferPtr HistogramPerThreadGroupBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
+		BufferManager::SetBufferLabel(m_ExposureHistoryBufferPtr, "Histogram Per Thread Group");
+
         // -----------------------------------------------------------------------------
         
         ConstanteBufferDesc.m_Stride        = 0;
@@ -293,6 +299,8 @@ namespace
         ConstanteBufferDesc.m_pClassKey     = 0;
         
         CBufferPtr HistogramBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+		BufferManager::SetBufferLabel(m_ExposureHistoryBufferPtr, "Histogram");
 
         // -----------------------------------------------------------------------------
 

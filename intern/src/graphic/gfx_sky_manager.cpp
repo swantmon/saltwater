@@ -864,6 +864,8 @@ namespace
         
         rInternSky.m_InputTexture2DPtr  = TextureManager::CreateCubeTexture(TextureDescriptor);
 
+		TextureManager::SetTexture2DLabel(rInternSky.m_InputTexture2DPtr, "Sky Input Texture");
+
         rInternSky.m_InputTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(rInternSky.m_InputTexture2DPtr));
 
         // -----------------------------------------------------------------------------
@@ -1027,6 +1029,8 @@ namespace
         TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
         
         rGraphicSkyboxFacet.m_CubemapPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
+
+		TextureManager::SetTexture2DLabel(rGraphicSkyboxFacet.m_CubemapPtr, "Sky Texture");
 
         rGraphicSkyboxFacet.m_CubemapSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(rGraphicSkyboxFacet.m_CubemapPtr));
 
@@ -1894,6 +1898,13 @@ namespace
         CTexture3DPtr m_DeltaSM        = TextureManager::CreateTexture3D(TextureDesc);
         CTexture3DPtr m_DeltaJ         = TextureManager::CreateTexture3D(TextureDesc);
 
+		// -----------------------------------------------------------------------------
+		// Labels
+		// -----------------------------------------------------------------------------
+		TextureManager::SetTexture2DLabel(m_TransmittanceTable, "PAS: Transmittance Table");
+		TextureManager::SetTexture2DLabel(m_IrradianceTable, "PAS: Irradiance Table");
+		TextureManager::SetTexture3DLabel(m_InscatterTable, "PAS: Inscatter Table");
+
         // -----------------------------------------------------------------------------
         // Target sets & view ports
         // -----------------------------------------------------------------------------
@@ -2020,8 +2031,6 @@ namespace
         // Render
         // -----------------------------------------------------------------------------
         Performance::BeginEvent("Precompute Atmospheric Scattering");
-
-        
 
         auto GetLayerValues = [&](unsigned int _Layer, float& _rRadius, Base::Float4& _rDhdH)
         {
@@ -2683,6 +2692,8 @@ namespace
         TextureDescriptor.m_Format           = CTextureBase::R32G32_FLOAT;
         
         m_LookUpTexturePtr = TextureManager::CreateCubeTexture(TextureDescriptor);
+
+		TextureManager::SetTexture2DLabel(m_LookUpTexturePtr, "LUT: AR Global Lighting");
 
         m_LookupTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_LookUpTexturePtr));
 
