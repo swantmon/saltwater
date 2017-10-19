@@ -24,6 +24,7 @@
 #include "GL/glew.h"
 #include "GL/wglew.h"
 
+#include <unordered_set>
 #include <vector>
 #include <windows.h>
 
@@ -167,7 +168,9 @@ namespace
 
         SPerFrameConstantBuffer m_PerFrameConstantBuffer;
 
-        CBufferPtr m_PerFrameConstantBufferBufferPtr;   
+        CBufferPtr m_PerFrameConstantBufferBufferPtr;
+
+        std::unordered_set<std::string> m_AvailableExtensions;
     };
 } // namespace
 
@@ -328,9 +331,17 @@ namespace
             glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 #endif
 
-
             glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
 
+            GLint ExtensionCount;
+            glGetIntegerv(GL_NUM_EXTENSIONS, &ExtensionCount);
+
+            for (int i = 0; i < ExtensionCount; ++i)
+            {
+                std::string Name = reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i));
+
+                m_AvailableExtensions.insert(Name);
+            }
 
             // -----------------------------------------------------------------------------
             // Save created data
