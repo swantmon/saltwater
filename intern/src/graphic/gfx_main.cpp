@@ -24,6 +24,7 @@
 #include "GL/glew.h"
 #include "GL/wglew.h"
 
+#include <unordered_set>
 #include <vector>
 #include <windows.h>
 
@@ -100,6 +101,8 @@ namespace
         void OnResize(unsigned int _WindowID, unsigned int _Width, unsigned int _Height);
 
         void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile);
+
+        bool IsExtensionAvailable(const std::string& _Name);
         
     public:
         
@@ -167,7 +170,9 @@ namespace
 
         SPerFrameConstantBuffer m_PerFrameConstantBuffer;
 
-        CBufferPtr m_PerFrameConstantBufferBufferPtr;   
+        CBufferPtr m_PerFrameConstantBufferBufferPtr;
+
+        std::unordered_set<std::string> m_AvailableExtensions;
     };
 } // namespace
 
@@ -328,9 +333,17 @@ namespace
             glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 #endif
 
-
             glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
 
+            GLint ExtensionCount;
+            glGetIntegerv(GL_NUM_EXTENSIONS, &ExtensionCount);
+
+            for (int i = 0; i < ExtensionCount; ++i)
+            {
+                std::string Name = reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i));
+
+                m_AvailableExtensions.insert(Name);
+            }
 
             // -----------------------------------------------------------------------------
             // Save created data
@@ -491,6 +504,13 @@ namespace
         Base::CMemory::Free(pPixels);
     }
     
+    // -----------------------------------------------------------------------------
+
+    bool CGfxMain::IsExtensionAvailable(const std::string& _Name)
+    {
+        return m_AvailableExtensions.count(_Name) == 1;
+    }
+
     // -----------------------------------------------------------------------------
     
     void CGfxMain::BeginFrame()
@@ -733,6 +753,13 @@ namespace Main
     void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile)
     {
         CGfxMain::GetInstance().TakeScreenshot(_WindowID, _pPathToFile);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool IsExtensionAvailable(const std::string& _Name)
+    {
+        return CGfxMain::GetInstance().IsExtensionAvailable(_Name);
     }
     
     // -----------------------------------------------------------------------------
