@@ -47,6 +47,8 @@ namespace Main
 
     void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile);
 
+    bool IsExtensionAvailable(const std::string& _Name);
+
     void BeginFrame();
     void EndFrame();
     
