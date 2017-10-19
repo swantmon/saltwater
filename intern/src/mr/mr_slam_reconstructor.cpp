@@ -153,28 +153,12 @@ namespace MR
         
         if (EnableShuffleIntrinsics)
         {
-            GLint ExtensionCount;
-            glGetIntegerv(GL_NUM_EXTENSIONS, &ExtensionCount);
+            m_UseShuffleIntrinsics = Main::IsExtensionAvailable("GL_NV_shader_thread_shuffle");
 
-            for (int i = 0; i < ExtensionCount; ++i)
-            {
-                std::string Name = reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i));
-
-                if (Name == "GL_NV_shader_thread_shuffle")
-                {
-                    m_UseShuffleIntrinsics = true;
-                    BASE_CONSOLE_INFO("Shuffle intrinsics for tracking are activated");
-                    break;
-                }
-            }
             if (!m_UseShuffleIntrinsics)
             {
                 BASE_CONSOLE_INFO("Shuffle intrinsics are not available. Will use fallback method");
             }
-        }
-        else
-        {
-            BASE_CONSOLE_INFO("Shuffle intrinsics are deactivated");
         }
 
         m_pRGBDCameraControl.reset(new MR::CKinectControl);
