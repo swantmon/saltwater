@@ -38,5 +38,7 @@ namespace TargetSetManager
     void ClearTargetSet(CTargetSetPtr _TargetPtr, const Base::Float4& _rColor);
     void ClearTargetSet(CTargetSetPtr _TargetPtr, float _Depth);
     void ClearTargetSet(CTargetSetPtr _TargetPtr);
+
+	void SetTargetSetLabel(CTargetSetPtr _TargetSetPtr, const char* _pLabel);
 } // namespace TargetSetManager
 } // namespace Gfx

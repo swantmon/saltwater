@@ -68,10 +68,10 @@
       <Filter>engine\shaders</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_sampler.cpp">
-      <Filter>engine\sampler</Filter>
+      <Filter>engine\samplers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_sampler_set.cpp">
-      <Filter>engine\sampler</Filter>
+      <Filter>engine\samplers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_blend_state.cpp">
       <Filter>engine\states</Filter>
@@ -329,10 +329,10 @@
       <Filter>engine\shaders</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_sampler.h">
-      <Filter>engine\sampler</Filter>
+      <Filter>engine\samplers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_sampler_set.h">
-      <Filter>engine\sampler</Filter>
+      <Filter>engine\samplers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_blend_description.h">
       <Filter>engine\states\description</Filter>
@@ -407,7 +407,7 @@
       <Filter>engine\context</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_sampler_manager.h">
-      <Filter>engine\sampler</Filter>
+      <Filter>engine\samplers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_shader_manager.h">
       <Filter>engine\shaders</Filter>
@@ -589,9 +589,6 @@
     <Filter Include="engine\layout">
       <UniqueIdentifier>{36f689bb-358d-4f30-9578-61c582279950}</UniqueIdentifier>
     </Filter>
-    <Filter Include="engine\sampler">
-      <UniqueIdentifier>{7ba8ed96-cc8c-4b77-a570-b8aeb9711e1b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="engine\shaders">
       <UniqueIdentifier>{051943dc-b6ca-46f5-a521-b6c3b25482bc}</UniqueIdentifier>
     </Filter>
@@ -726,6 +723,9 @@
     </Filter>
     <Filter Include="interface\manager">
       <UniqueIdentifier>{841a4b6d-81ea-4cf1-8a3b-39d4f2a87df2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\samplers">
+      <UniqueIdentifier>{7ba8ed96-cc8c-4b77-a570-b8aeb9711e1b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

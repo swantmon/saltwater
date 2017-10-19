@@ -56,8 +56,6 @@ namespace
         CTexture3DPtr GetDummyTexture3D();
         CTexture2DPtr GetDummyCubeTexture();
 
-        CTextureBasePtr CreateTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
-
         CTexture1DPtr CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
         CTexture2DPtr CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
         CTexture3DPtr CreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
@@ -81,6 +79,9 @@ namespace
         CTexture2DPtr GetMipmapFromTexture2D(CTexture2DPtr _TexturePtr, unsigned int _Mipmap);
         
         void UpdateMipmap(CTexture2DPtr _TexturePtr);
+
+		void SetTexture2DLabel(CTexture2DPtr _TexturePtr, const char* _pLabel);
+		void SetTexture3DLabel(CTexture3DPtr _TexturePtr, const char* _pLabel);
 
     private:
 
@@ -248,39 +249,25 @@ namespace
         // -----------------------------------------------------------------------------
         // Create dummy textures from file
         // -----------------------------------------------------------------------------
-        Gfx::STextureDescriptor RendertargetDescriptor;
+        Gfx::STextureDescriptor TextureDescriptor;
         
-        RendertargetDescriptor.m_NumberOfPixelsU  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
-        RendertargetDescriptor.m_NumberOfPixelsV  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
-        RendertargetDescriptor.m_NumberOfPixelsW  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
-        RendertargetDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
-        RendertargetDescriptor.m_NumberOfTextures = Gfx::STextureDescriptor::s_NumberOfTexturesFromSource;
-        RendertargetDescriptor.m_Binding          = Gfx::CTextureBase::ShaderResource;
-        RendertargetDescriptor.m_Access           = Gfx::CTextureBase::CPUWrite;
-        RendertargetDescriptor.m_Format           = Gfx::CTextureBase::Unknown;
-        RendertargetDescriptor.m_Usage            = Gfx::CTextureBase::GPURead;
-        RendertargetDescriptor.m_Semantic         = Gfx::CTextureBase::Diffuse;
-        RendertargetDescriptor.m_pFileName        = "dummy_1d.tga";
-        RendertargetDescriptor.m_pPixels          = 0;
-        RendertargetDescriptor.m_Format           = Gfx::CTextureBase::R8G8B8_UBYTE;
+        TextureDescriptor.m_NumberOfPixelsU  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
+        TextureDescriptor.m_NumberOfPixelsV  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
+        TextureDescriptor.m_NumberOfPixelsW  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
+        TextureDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
+        TextureDescriptor.m_NumberOfTextures = Gfx::STextureDescriptor::s_NumberOfTexturesFromSource;
+        TextureDescriptor.m_Binding          = Gfx::CTextureBase::ShaderResource;
+        TextureDescriptor.m_Access           = Gfx::CTextureBase::CPUWrite;
+        TextureDescriptor.m_Format           = Gfx::CTextureBase::Unknown;
+        TextureDescriptor.m_Usage            = Gfx::CTextureBase::GPURead;
+        TextureDescriptor.m_Semantic         = Gfx::CTextureBase::Diffuse;
+        TextureDescriptor.m_pFileName        = "dummy_2d.tga";
+        TextureDescriptor.m_pPixels          = 0;
+        TextureDescriptor.m_Format           = Gfx::CTextureBase::R8G8B8_UBYTE;
         
-        m_Texture1DPtr = CreateTexture1D(RendertargetDescriptor, true, SDataBehavior::LeftAlone);
-        
-        RendertargetDescriptor.m_NumberOfPixelsU  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
-        RendertargetDescriptor.m_NumberOfPixelsV  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
-        RendertargetDescriptor.m_NumberOfPixelsW  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
-        RendertargetDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
-        RendertargetDescriptor.m_NumberOfTextures = Gfx::STextureDescriptor::s_NumberOfTexturesFromSource;
-        RendertargetDescriptor.m_Binding          = Gfx::CTextureBase::ShaderResource;
-        RendertargetDescriptor.m_Access           = Gfx::CTextureBase::CPUWrite;
-        RendertargetDescriptor.m_Format           = Gfx::CTextureBase::Unknown;
-        RendertargetDescriptor.m_Usage            = Gfx::CTextureBase::GPURead;
-        RendertargetDescriptor.m_Semantic         = Gfx::CTextureBase::Diffuse;
-        RendertargetDescriptor.m_pFileName        = "dummy_2d.tga";
-        RendertargetDescriptor.m_pPixels          = 0;
-        RendertargetDescriptor.m_Format           = Gfx::CTextureBase::R8G8B8_UBYTE;
-        
-        m_Texture2DPtr = CreateTexture2D(RendertargetDescriptor, true, SDataBehavior::LeftAlone);
+        m_Texture2DPtr = CreateTexture2D(TextureDescriptor, true, SDataBehavior::LeftAlone);
+
+		SetTexture2DLabel(m_Texture2DPtr, "Dummy Texture 2D");
         
         // -----------------------------------------------------------------------------
         // Setup default settings in OpenGL
@@ -355,17 +342,6 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CTextureBasePtr CGfxTextureManager::CreateTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
-    {
-        BASE_UNUSED(_rDescriptor);
-        BASE_UNUSED(_IsDeleteable);
-        BASE_UNUSED(_Behavior);
-
-        return nullptr;
-    }
-
-    // -----------------------------------------------------------------------------
-
     CTexture1DPtr CGfxTextureManager::CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
         return InternCreateTexture1D(_rDescriptor, _IsDeleteable, _Behavior);
@@ -403,21 +379,16 @@ namespace
 
         CInternTexture2D* pInternTexture2D = static_cast<CInternTexture2D*>(Texture2DPtr.GetPtr());
 
-        if (pInternTexture2D == nullptr)
-        {
-            pInternTexture2D = static_cast<CInternTexture2D*>(m_Texture2DPtr.GetPtr());
-        }
+		if (pInternTexture2D == nullptr)
+		{
+			return GetDummyTexture2D();
+		}
 
         if (Hash != 0)
         {
             pInternTexture2D->m_Hash = Hash;
 
             m_Textures2DByHash[Hash] = Texture2DPtr;
-        }
-
-        if (pInternTexture2D == nullptr)
-        {
-            return GetDummyTexture2D();
         }
 
         return Texture2DPtr;
@@ -708,6 +679,28 @@ namespace
         glGenerateTextureMipmap(pInternTexture->m_NativeTexture);
     }
 
+	// -----------------------------------------------------------------------------
+
+	void CGfxTextureManager::SetTexture2DLabel(CTexture2DPtr _TexturePtr, const char* _pLabel)
+	{
+		assert(_pLabel != nullptr);
+
+		CInternTexture2D* pInternTexture = static_cast<CInternTexture2D*>(_TexturePtr.GetPtr());
+
+		glObjectLabel(GL_TEXTURE, pInternTexture->m_NativeTexture, -1, _pLabel);
+	}
+
+	// -----------------------------------------------------------------------------
+
+	void CGfxTextureManager::SetTexture3DLabel(CTexture3DPtr _TexturePtr, const char* _pLabel)
+	{
+		assert(_pLabel != nullptr);
+
+		CInternTexture3D* pInternTexture = static_cast<CInternTexture3D*>(_TexturePtr.GetPtr());
+
+		glObjectLabel(GL_TEXTURE, pInternTexture->m_NativeTexture, -1, _pLabel);
+	}
+
     // -----------------------------------------------------------------------------
 
     void CGfxTextureManager::OnDirtyTexture(Dt::CTextureBase* _pTexture)
@@ -770,6 +763,9 @@ namespace
                     return ;
                 }
 
+				// -----------------------------------------------------------------------------
+				// Create
+				// -----------------------------------------------------------------------------
                 if (_pTexture->IsCube())
                 {
                     Dt::CTextureCube* pDataTexture = static_cast<Dt::CTextureCube*>(_pTexture);
@@ -790,6 +786,19 @@ namespace
                     Texture2DPtr = InternCreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
                 }
 
+				// -----------------------------------------------------------------------------
+				// Label if an identifier exists
+				// -----------------------------------------------------------------------------
+				const char* pLabel = _pTexture->GetIdentifier().length() > 0 ? _pTexture->GetIdentifier().c_str() : 0;
+
+				if (pLabel != 0)
+				{
+					SetTexture2DLabel(Texture2DPtr, pLabel);
+				}
+
+				// -----------------------------------------------------------------------------
+				// Set to container
+				// -----------------------------------------------------------------------------
                 CInternTexture2D* pInternTexture2D = static_cast<CInternTexture2D*>(Texture2DPtr.GetPtr());
 
                 if (pInternTexture2D == nullptr)
@@ -994,6 +1003,14 @@ namespace
         // Generate OpenGL texture or render buffer
         // -----------------------------------------------------------------------------
         glCreateTextures(GL_TEXTURE_2D, 1, &NativeTextureHandle);
+
+		// -----------------------------------------------------------------------------
+		// Label texture if file name exists
+		// -----------------------------------------------------------------------------
+		if (_rDescriptor.m_pFileName != nullptr)
+		{
+			glObjectLabel(GL_TEXTURE, NativeTextureHandle, -1, _rDescriptor.m_pFileName);
+		}
 
         // -----------------------------------------------------------------------------
         // Binding
@@ -1221,11 +1238,16 @@ namespace
         // -----------------------------------------------------------------------------
         // Generate OpenGL texture or render buffer
         // -----------------------------------------------------------------------------
-        glCreateTextures(GL_TEXTURE_3D, 1, &NativeTextureHandle);
+		glCreateTextures(GL_TEXTURE_3D, 1, &NativeTextureHandle);
 
-        // -----------------------------------------------------------------------------
-        // Binding
-        // -----------------------------------------------------------------------------
+		// -----------------------------------------------------------------------------
+		// Label texture if file name exists
+		// -----------------------------------------------------------------------------
+		if (_rDescriptor.m_pFileName != nullptr)
+		{
+			glObjectLabel(GL_TEXTURE, NativeTextureHandle, -1, _rDescriptor.m_pFileName);
+		}
+
         // -----------------------------------------------------------------------------
         // Binding
         // -----------------------------------------------------------------------------
@@ -1497,7 +1519,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Generate OpenGL texture or render buffer
         // -----------------------------------------------------------------------------
-        glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &NativeTextureHandle);
+		glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &NativeTextureHandle);
+
+		// -----------------------------------------------------------------------------
+		// Label texture if file name exists
+		// -----------------------------------------------------------------------------
+		if (_rDescriptor.m_pFileName != nullptr)
+		{
+			glObjectLabel(GL_TEXTURE, NativeTextureHandle, -1, _rDescriptor.m_pFileName);
+		}
 
         // -----------------------------------------------------------------------------
         // Binding
@@ -2486,13 +2516,6 @@ namespace TextureManager
 
     // -----------------------------------------------------------------------------
 
-    CTextureBasePtr CreateTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
-    {
-        return CGfxTextureManager::GetInstance().CreateTexture(_rDescriptor, _IsDeleteable, _Behavior);
-    }
-
-    // -----------------------------------------------------------------------------
-
     CTexture1DPtr CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
         return CGfxTextureManager::GetInstance().CreateTexture1D(_rDescriptor, _IsDeleteable, _Behavior);
@@ -2638,5 +2661,19 @@ namespace TextureManager
     {
         CGfxTextureManager::GetInstance().UpdateMipmap(_TexturePtr);
     }
+
+	// -----------------------------------------------------------------------------
+
+	void SetTexture2DLabel(CTexture2DPtr _TexturePtr, const char* _pLabel)
+	{
+		CGfxTextureManager::GetInstance().SetTexture2DLabel(_TexturePtr, _pLabel);
+	}
+
+	// -----------------------------------------------------------------------------
+
+	void SetTexture3DLabel(CTexture3DPtr _TexturePtr, const char* _pLabel)
+	{
+		CGfxTextureManager::GetInstance().SetTexture3DLabel(_TexturePtr, _pLabel);
+	}
 } // namespace TextureManager
 } // namespace Gfx

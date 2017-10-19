@@ -18,6 +18,8 @@ namespace SamplerManager
     CSamplerSetPtr CreateSamplerSet(CSamplerPtr _Sampler1Ptr, CSamplerPtr _Sampler2Ptr, CSamplerPtr _Sampler3Ptr);
     CSamplerSetPtr CreateSamplerSet(CSamplerPtr _Sampler1Ptr, CSamplerPtr _Sampler2Ptr, CSamplerPtr _Sampler3Ptr, CSamplerPtr _Sampler4Ptr);
     CSamplerSetPtr CreateSamplerSet(CSamplerPtr* _pSamplerPtrs, unsigned int _NumberOfSamplers);
+
+	void SetSamplerLabel(CSamplerPtr _SamplerPtr, const char* _pLabel);
 } // namespace SamplerManager
 } // namespace Gfx
 

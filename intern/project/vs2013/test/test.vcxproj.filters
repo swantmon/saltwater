@@ -48,6 +48,9 @@
     <ClCompile Include="..\..\..\test\base\test_base_program_parameters.cpp">
       <Filter>base</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\test\base\test_base_getopt.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="core">

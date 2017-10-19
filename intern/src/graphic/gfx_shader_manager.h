@@ -39,5 +39,7 @@ namespace ShaderManager
     void ReloadAllShaders();
 
     CInputLayoutPtr CreateInputLayout(const SInputElementDescriptor* _pDescriptors, unsigned int _NumberOfDescriptors, CShaderPtr _ShaderVSPtr);
+
+	void SetShaderLabel(CShaderPtr _ShaderPtr, const char* _pLabel);
 } // namespace ShaderManager
 } // namespace Gfx

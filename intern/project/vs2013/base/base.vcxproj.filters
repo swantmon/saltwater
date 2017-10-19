@@ -14,6 +14,9 @@
     <ClCompile Include="..\..\..\src\base\base_program_parameters.cpp">
       <Filter>io</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\base_getopt.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\base_aabb2.h">
@@ -197,6 +200,9 @@
       <Filter>math</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\base_program_parameters.h">
+      <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_getopt.h">
       <Filter>io</Filter>
     </ClInclude>
   </ItemGroup>

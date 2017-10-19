@@ -277,6 +277,8 @@ namespace
         
         CTexture2DPtr LTCMaterialTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
+		TextureManager::SetTexture2DLabel(LTCMaterialTexturePtr, "Area light LTC Material Texture");
+
         // -----------------------------------------------------------------------------
 
         TextureDescriptor.m_NumberOfPixelsU  = 32;
@@ -294,6 +296,8 @@ namespace
         TextureDescriptor.m_Format           = CTextureBase::R16G16_FLOAT;
         
         CTexture2DPtr LTCMagTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+
+		TextureManager::SetTexture2DLabel(LTCMagTexturePtr, "Area light LTC Mag Texture");
 
         // -----------------------------------------------------------------------------
 
