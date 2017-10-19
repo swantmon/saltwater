@@ -242,28 +242,12 @@ namespace MR
 
         if (EnableConservativeRaster)
         {
-            GLint ExtensionCount;
-            glGetIntegerv(GL_NUM_EXTENSIONS, &ExtensionCount);
+            m_IsConservativeRasterizationAvailable = Main::IsExtensionAvailable("GL_NV_conservative_raster");
 
-            for (int i = 0; i < ExtensionCount; ++i)
-            {
-                std::string Name = reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i));
-
-                if (Name == "GL_NV_conservative_raster")
-                {
-                    m_IsConservativeRasterizationAvailable = true;
-                    BASE_CONSOLE_INFO("Conservative rasterization is activated");
-                    break;
-                }
-            }
             if (!m_IsConservativeRasterizationAvailable)
             {
                 BASE_CONSOLE_INFO("Conservative rasterization is not available. Will use fallback method");
             }
-        }
-        else
-        {
-            BASE_CONSOLE_INFO("Conservative rasterization is deactivated");
         }
 
         ////////////////////////////////////////////////////////////////////////////////
