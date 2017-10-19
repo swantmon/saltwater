@@ -101,6 +101,8 @@ namespace
         void OnResize(unsigned int _WindowID, unsigned int _Width, unsigned int _Height);
 
         void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile);
+
+        bool IsExtensionAvailable(const std::string& _Name);
         
     public:
         
@@ -503,6 +505,13 @@ namespace
     }
     
     // -----------------------------------------------------------------------------
+
+    bool CGfxMain::IsExtensionAvailable(const std::string& _Name)
+    {
+        return m_AvailableExtensions.count(_Name) == 1;
+    }
+
+    // -----------------------------------------------------------------------------
     
     void CGfxMain::BeginFrame()
     {
@@ -744,6 +753,13 @@ namespace Main
     void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile)
     {
         CGfxMain::GetInstance().TakeScreenshot(_WindowID, _pPathToFile);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool IsExtensionAvailable(const std::string& _Name)
+    {
+        return CGfxMain::GetInstance().IsExtensionAvailable(_Name);
     }
     
     // -----------------------------------------------------------------------------
