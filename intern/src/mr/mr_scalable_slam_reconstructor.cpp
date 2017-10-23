@@ -1438,7 +1438,7 @@ namespace MR
                 // Store pool indices in root volume position buffer
 
                 const int Width = m_VolumeBuffers.m_RootVolumeTotalWidth;
-                const Base::Int3 Offset = RootVolume.m_Offset + Width / 2; // 
+                const Base::Int3 Offset = RootVolume.m_Offset + Width / 2; // Offset value by half of width so it is positive
                 const int Index = Offset[0] + (Offset[1] * Width) + (Offset[2] * Width * Width);
 
                 BufferManager::UploadBufferData(m_VolumeBuffers.m_RootVolumePositionBufferPtr, &rRootVolume.m_PoolIndex, Index * sizeof(uint32_t), sizeof(uint32_t));
