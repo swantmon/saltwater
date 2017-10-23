@@ -87,6 +87,11 @@ namespace
 		void RenderVolume();
 
 		void RenderScalableVolume();
+
+        void RenderRootVolumes();
+        void RenderLevel1Grids();
+        void RenderLevel2Grids();
+
         void RenderQueuedRootVolumes();
         void RenderQueuedLevel1Grids();
         void RenderQueuedLevel2Grids();
@@ -713,6 +718,27 @@ namespace
         //ContextManager::DrawIndexed(36, 0, 0);
 	}
 
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::RenderRootVolumes()
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::RenderLevel1Grids()
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::RenderLevel2Grids()
+    {
+
+    }
+
 	// -----------------------------------------------------------------------------
 
 	void CGfxReconstructionRenderer::RenderQueuedRootVolumes()
@@ -970,9 +996,13 @@ namespace
 
             RenderVertexMap();
 
-            RenderQueuedRootVolumes();
-            RenderQueuedLevel1Grids();
-            RenderQueuedLevel2Grids();
+            RenderRootVolumes();
+            RenderLevel1Grids();
+            RenderLevel2Grids();
+
+            //RenderQueuedRootVolumes();
+            //RenderQueuedLevel1Grids();
+            //RenderQueuedLevel2Grids();
 		}
 		else
 		{
