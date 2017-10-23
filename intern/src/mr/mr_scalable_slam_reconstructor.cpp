@@ -54,7 +54,7 @@ namespace
 
     const unsigned int g_MegabyteSize = 1024u * 1024u;
 
-    const unsigned int g_VolumeRootStartWidth = 8;
+    const unsigned int g_AABB = 8;
 
     /*
     const unsigned int g_RootVolumePoolSize =       g_MegabyteSize; //  1 MB
@@ -427,7 +427,7 @@ namespace MR
 		m_FrameCount = 0;
 		m_TrackingLost = true;
 
-        m_VolumeBuffers.m_RootVolumeTotalWidth = g_VolumeRootStartWidth;
+        m_VolumeBuffers.m_RootVolumeTotalWidth = g_AABB;
 
 		UpdateFrustum();
 	}
@@ -1410,8 +1410,8 @@ namespace MR
 
             const int CurrentWidth = m_VolumeBuffers.m_RootVolumeTotalWidth / 2;
 
-            if (TotalAABBMin[0] < -CurrentWidth || TotalAABBMin[1] < -CurrentWidth || TotalAABBMin[2] < -CurrentWidth ||
-                TotalAABBMax[0] >  CurrentWidth || TotalAABBMax[1] >  CurrentWidth || TotalAABBMax[2] >  CurrentWidth)
+            if (TotalAABBMin[0] <= -CurrentWidth || TotalAABBMin[1] <= -CurrentWidth || TotalAABBMin[2] <= -CurrentWidth ||
+                TotalAABBMax[0] >   CurrentWidth || TotalAABBMax[1] >   CurrentWidth || TotalAABBMax[2] >   CurrentWidth)
             {
                 // TODO: resize buffer
                 assert(false);
@@ -1420,12 +1420,12 @@ namespace MR
             m_VolumeBuffers.m_AABBMin = TotalAABBMin;
             m_VolumeBuffers.m_AABBMax = TotalAABBMax;
 
-            // Fetch the queue sizes
-            // We do this now to mostly prevent CPU<->GPU syncs
-
             for (uint32_t VolumeIndex : VolumeQueue)
             {
                 auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
+
+                // Fetch the queue sizes
+                // We do this now to mostly prevent CPU<->GPU syncs
 
                 SIndirectBuffers* pIndirect = static_cast<SIndirectBuffers*>(BufferManager::MapBuffer(rRootVolume.m_IndirectLevel1Buffer, CBuffer::EMap::Read));
                 rRootVolume.m_Level1QueueSize = pIndirect->m_Indexed.m_InstanceCount;
@@ -1434,6 +1434,14 @@ namespace MR
                 pIndirect = static_cast<SIndirectBuffers*>(BufferManager::MapBuffer(rRootVolume.m_IndirectLevel2Buffer, CBuffer::EMap::Read));
                 rRootVolume.m_Level2QueueSize = pIndirect->m_Indexed.m_InstanceCount;
                 BufferManager::UnmapBuffer(rRootVolume.m_IndirectLevel2Buffer);
+
+                // Store pool indices in root volume position buffer
+
+                const int Width = m_VolumeBuffers.m_RootVolumeTotalWidth;
+                const Base::Int3 Offset = RootVolume.m_Offset + Width / 2; // 
+                const int Index = Offset[0] + (Offset[1] * Width) + (Offset[2] * Width * Width);
+
+                BufferManager::UploadBufferData(m_VolumeBuffers.m_RootVolumePositionBufferPtr, &rRootVolume.m_PoolIndex, Index * sizeof(uint32_t), sizeof(uint32_t));
             }
         }
 	}
@@ -1647,7 +1655,7 @@ namespace MR
         ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 2048;
         m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
-        const unsigned int RootVolumePositionBufferSize = 8 * 8 * 8;
+        const unsigned int RootVolumePositionBufferSize = g_AABB * g_AABB * g_AABB * sizeof(uint32_t);
 
         ConstantBufferDesc.m_NumberOfBytes = RootVolumePositionBufferSize;
         m_VolumeBuffers.m_RootVolumePositionBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
