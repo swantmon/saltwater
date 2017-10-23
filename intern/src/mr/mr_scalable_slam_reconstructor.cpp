@@ -54,6 +54,8 @@ namespace
 
     const unsigned int g_MegabyteSize = 1024u * 1024u;
 
+    const unsigned int g_VolumeRootStartWidth = 8;
+
     /*
     const unsigned int g_RootVolumePoolSize =       g_MegabyteSize; //  1 MB
     const unsigned int g_RootGridPoolSize   =  8u * g_MegabyteSize; //  8 MB
@@ -1631,6 +1633,10 @@ namespace MR
         ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 2048;
         m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
+        const unsigned int RootVolumePositionBufferSize = 8 * 8 * 8;
+
+        ConstantBufferDesc.m_NumberOfBytes = RootVolumePositionBufferSize;
+        m_VolumeBuffers.m_RootVolumePositionBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         ConstantBufferDesc.m_NumberOfBytes = g_RootVolumePoolSize;
         m_VolumeBuffers.m_RootVolumePoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         ConstantBufferDesc.m_NumberOfBytes = g_RootGridPoolSize;
@@ -2067,6 +2073,7 @@ namespace MR
         {
             BufferManager::UploadBufferData(m_VolumeBuffers.m_TSDFPoolPtr, Data.data(), i * DataSize, DataSize);
         }
+        BufferManager::UploadBufferData(m_VolumeBuffers.m_RootVolumePositionBufferPtr, Data.data());
     }
 
     // -----------------------------------------------------------------------------

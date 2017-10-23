@@ -77,12 +77,13 @@ namespace MR
 
         struct SScalableVolume
         {
-            Gfx::CBufferPtr m_RootVolumePoolPtr;       // Individual Volumes
-            Gfx::CBufferPtr m_RootGridPoolPtr;         // Highest level grids (16x16x16)
-            Gfx::CBufferPtr m_Level1PoolPtr;           // Internal Grid       ( 8x 8x 8)
-            Gfx::CBufferPtr m_TSDFPoolPtr;             // TSDF Data           ( 8x 8x 8)
+            Gfx::CBufferPtr m_RootVolumePositionBufferPtr;// 3D Buffer with indices to m_RootVolumePoolPtr
+            Gfx::CBufferPtr m_RootVolumePoolPtr;          // Individual Volumes
+            Gfx::CBufferPtr m_RootGridPoolPtr;            // Highest level grids (16x16x16)
+            Gfx::CBufferPtr m_Level1PoolPtr;              // Internal Grid       ( 8x 8x 8)
+            Gfx::CBufferPtr m_TSDFPoolPtr;                // TSDF Data           ( 8x 8x 8)
             Gfx::CBufferPtr m_PoolItemCountBufferPtr;
-            Base::Int3 m_AABBMin;                      // AABB of the whole reconstruction
+            Base::Int3 m_AABBMin;                         // AABB of the whole reconstruction
             Base::Int3 m_AABBMax;
         };
 
