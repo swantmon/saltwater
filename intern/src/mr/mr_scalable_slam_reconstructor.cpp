@@ -427,6 +427,8 @@ namespace MR
 		m_FrameCount = 0;
 		m_TrackingLost = true;
 
+        m_VolumeBuffers.m_RootVolumeTotalWidth = g_VolumeRootStartWidth;
+
 		UpdateFrustum();
 	}
 
@@ -1405,6 +1407,18 @@ namespace MR
                 TotalAABBMax[1] = Base::Max(TotalAABBMax[1], AABBMax[1]);
                 TotalAABBMax[2] = Base::Max(TotalAABBMax[2], AABBMax[2]);
             }
+
+            const int CurrentWidth = m_VolumeBuffers.m_RootVolumeTotalWidth / 2;
+
+            if (TotalAABBMin[0] < -CurrentWidth || TotalAABBMin[1] < -CurrentWidth || TotalAABBMin[2] < -CurrentWidth ||
+                TotalAABBMax[0] >  CurrentWidth || TotalAABBMax[1] >  CurrentWidth || TotalAABBMax[2] >  CurrentWidth)
+            {
+                // TODO: resize buffer
+                assert(false);
+            }
+
+            m_VolumeBuffers.m_AABBMin = TotalAABBMin;
+            m_VolumeBuffers.m_AABBMax = TotalAABBMax;
 
             // Fetch the queue sizes
             // We do this now to mostly prevent CPU<->GPU syncs

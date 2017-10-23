@@ -85,6 +85,7 @@ namespace MR
             Gfx::CBufferPtr m_PoolItemCountBufferPtr;
             Base::Int3 m_AABBMin;                         // AABB of the whole reconstruction
             Base::Int3 m_AABBMax;
+            int m_RootVolumeTotalWidth;
         };
 
         typedef std::map<Base::Int3, SRootVolume, IndexCompare> CRootVolumeMap;
