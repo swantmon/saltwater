@@ -1024,19 +1024,17 @@ namespace MR
 
             if (rRootVolume.m_PoolIndex == -1) // Allocate pool memory for volume
             {
-                rRootVolume.m_PoolIndex = m_RootVolumePoolItemCount ++;
+                rRootVolume.m_PoolIndex = m_RootVolumePoolItemCount++;
 
                 int Range = sizeof(SVolumePoolItem);
                 int Offset = rRootVolume.m_PoolIndex * sizeof(SVolumePoolItem);
 
-                SVolumePoolItem* pItem = static_cast<SVolumePoolItem*>(BufferManager::MapBufferRange(m_VolumeBuffers.m_RootVolumePoolPtr, CBuffer::WriteDiscard, Offset, Range));
-                pItem->m_NearSurface = false;
-                pItem->m_Offset = rRootVolume.m_Offset;
-                BufferManager::UnmapBuffer(m_VolumeBuffers.m_RootVolumePoolPtr);
+                SVolumePoolItem Item;
+                Item.m_NearSurface = false;
+                Item.m_Offset = rRootVolume.m_Offset;
 
-                uint32_t* pCount = static_cast<uint32_t*>(BufferManager::MapBufferRange(m_VolumeBuffers.m_PoolItemCountBufferPtr, CBuffer::WriteDiscard, 0, sizeof(uint32_t)));
-                *pCount = m_RootVolumePoolItemCount;
-                BufferManager::UnmapBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr);
+                BufferManager::UploadBufferData(m_VolumeBuffers.m_RootVolumePoolPtr, &Item, Offset, Range);
+                BufferManager::UploadBufferData(m_VolumeBuffers.m_PoolItemCountBufferPtr, &m_RootVolumePoolItemCount, 0, sizeof(uint32_t));
             }
         }
 
