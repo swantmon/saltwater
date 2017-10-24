@@ -33,7 +33,7 @@ out gl_PerVertex
 
 void main()
 {
-	const vec3 WSPosition = in_VertexPosition * VOLUME_SIZE + g_Offset.xyz;
+	const vec3 WSPosition = in_VertexPosition * VOLUME_SIZE;
 
     out_WSRayDirection = WSPosition - g_ViewPosition.xyz;
 

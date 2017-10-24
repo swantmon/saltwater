@@ -760,16 +760,30 @@ namespace
 
         ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+                
+        const Float3 Min = Float3(
+            static_cast<float>(rVolume.m_MinOffset[0]),
+            static_cast<float>(rVolume.m_MinOffset[1]),
+            static_cast<float>(rVolume.m_MinOffset[2])
+        );
 
-        const int Width = rVolume.m_RootVolumeTotalWidth;
+        const Float3 Max = Float3(
+            rVolume.m_MaxOffset[0] + 1.0f, // Add 1.0f because MaxOffset stores the max volume offset
+            rVolume.m_MaxOffset[1] + 1.0f, // and we have to consider the volume size
+            rVolume.m_MaxOffset[2] + 1.0f
+        );
 
-        Float3 Vertices[8];
-        for (int i = 0; i < 8; ++ i)
+        Float3 Vertices[8] =
         {
-            Vertices[i][0] = (g_CubeVertices[i][0] - 0.5f) * Width;
-            Vertices[i][1] = (g_CubeVertices[i][1] - 0.5f) * Width;
-            Vertices[i][2] = (g_CubeVertices[i][2] - 0.5f) * Width;
-        }
+            Float3(Min[0], Min[1], Min[2]),
+            Float3(Max[0], Min[1], Min[2]),
+            Float3(Max[0], Max[1], Min[2]),
+            Float3(Min[0], Max[1], Min[2]),
+            Float3(Min[0], Min[1], Max[2]),
+            Float3(Max[0], Min[1], Max[2]),
+            Float3(Max[0], Max[1], Max[2]),
+            Float3(Min[0], Max[1], Max[2]),
+        };
 
         BufferManager::UploadBufferData(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Vertices);
 
@@ -1058,9 +1072,9 @@ namespace
             RenderLevel1Grids();
             RenderLevel2Grids();
 
-            //RenderQueuedRootVolumes();
-            //RenderQueuedLevel1Grids();
-            //RenderQueuedLevel2Grids();
+            RenderQueuedRootVolumes();
+            RenderQueuedLevel1Grids();
+            RenderQueuedLevel2Grids();
 		}
 		else
 		{
