@@ -83,8 +83,8 @@ namespace MR
             Gfx::CBufferPtr m_Level1PoolPtr;              // Internal Grid       ( 8x 8x 8)
             Gfx::CBufferPtr m_TSDFPoolPtr;                // TSDF Data           ( 8x 8x 8)
             Gfx::CBufferPtr m_PoolItemCountBufferPtr;
-            Base::Int3 m_AABBMin;                         // AABB of the whole reconstruction
-            Base::Int3 m_AABBMax;
+            Base::Int3 m_MinOffset;                         // AABB of the whole reconstruction
+            Base::Int3 m_MaxOffset;
             int m_RootVolumeTotalWidth;
         };
 

@@ -1391,34 +1391,34 @@ namespace MR
 
             // Compute the AABB for the whole reconstruction
 
-            Base::Int3 TotalAABBMin = m_RootVolumeVector[VolumeQueue[0]]->m_Offset;
-            Base::Int3 TotalAABBMax = TotalAABBMin;
+            Base::Int3 TotalMinOffset = m_RootVolumeVector[VolumeQueue[0]]->m_Offset;
+            Base::Int3 TotalMaxOffset = TotalMinOffset;
 
             for (int i = 1; i < VolumeQueue.size(); ++i)
             {
-                Base::Int3 AABBMin = m_RootVolumeVector[VolumeQueue[i]]->m_Offset;
-                Base::Int3 AABBMax = AABBMin;
+                Base::Int3 MinOffset = m_RootVolumeVector[VolumeQueue[i]]->m_Offset;
+                Base::Int3 MaxOffset = MinOffset;
 
-                TotalAABBMin[0] = Base::Min(TotalAABBMin[0], AABBMin[0]);
-                TotalAABBMin[1] = Base::Min(TotalAABBMin[1], AABBMin[1]);
-                TotalAABBMin[2] = Base::Min(TotalAABBMin[2], AABBMin[2]);
+                TotalMinOffset[0] = Base::Min(TotalMinOffset[0], MinOffset[0]);
+                TotalMinOffset[1] = Base::Min(TotalMinOffset[1], MinOffset[1]);
+                TotalMinOffset[2] = Base::Min(TotalMinOffset[2], MinOffset[2]);
 
-                TotalAABBMax[0] = Base::Max(TotalAABBMax[0], AABBMax[0]);
-                TotalAABBMax[1] = Base::Max(TotalAABBMax[1], AABBMax[1]);
-                TotalAABBMax[2] = Base::Max(TotalAABBMax[2], AABBMax[2]);
+                TotalMaxOffset[0] = Base::Max(TotalMaxOffset[0], MaxOffset[0]);
+                TotalMaxOffset[1] = Base::Max(TotalMaxOffset[1], MaxOffset[1]);
+                TotalMaxOffset[2] = Base::Max(TotalMaxOffset[2], MaxOffset[2]);
             }
 
             const int CurrentWidth = m_VolumeBuffers.m_RootVolumeTotalWidth / 2;
 
-            if (TotalAABBMin[0] <= -CurrentWidth || TotalAABBMin[1] <= -CurrentWidth || TotalAABBMin[2] <= -CurrentWidth ||
-                TotalAABBMax[0] >   CurrentWidth || TotalAABBMax[1] >   CurrentWidth || TotalAABBMax[2] >   CurrentWidth)
+            if (TotalMinOffset[0] <= -CurrentWidth || TotalMinOffset[1] <= -CurrentWidth || TotalMinOffset[2] <= -CurrentWidth ||
+                TotalMaxOffset[0] >   CurrentWidth || TotalMaxOffset[1] >   CurrentWidth || TotalMaxOffset[2] >   CurrentWidth)
             {
                 // TODO: resize buffer
                 assert(false);
             }
 
-            m_VolumeBuffers.m_AABBMin = TotalAABBMin;
-            m_VolumeBuffers.m_AABBMax = TotalAABBMax;
+            m_VolumeBuffers.m_MinOffset = TotalMinOffset;
+            m_VolumeBuffers.m_MaxOffset = TotalMaxOffset;
 
             for (uint32_t VolumeIndex : VolumeQueue)
             {
