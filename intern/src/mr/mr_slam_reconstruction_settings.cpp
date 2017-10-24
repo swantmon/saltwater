@@ -30,9 +30,18 @@ namespace MR
 		m_GridResolutions[1] =  8;
 		m_GridResolutions[2] =  8;
 
+        if (m_IsScalable)
+        {
+            m_VolumeSize = m_VoxelSize;
+        }
+
         for (int i = 0; i < GRID_LEVELS; ++ i)
         {
             m_VoxelsPerGrid[i] = m_GridResolutions[i] * m_GridResolutions[i] * m_GridResolutions[i];
+            if (m_IsScalable)
+            {
+                m_VolumeSize *= m_GridResolutions[i];
+            }
         }
     }
 } // namespace MR
