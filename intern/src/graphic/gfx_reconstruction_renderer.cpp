@@ -97,13 +97,13 @@ namespace
 
     private:
 
-		void RenderVolume();
+		void RaycastVolume();
 
-		void RenderScalableVolume();
+		void RaycastScalableVolume();
 
-        void RenderRootVolumes();
-        void RenderLevel1Grids();
-        void RenderLevel2Grids();
+        void RaycastRootVolumes();
+        void RaycastLevel1Grids();
+        void RaycastLevel2Grids();
 
         void RenderQueuedRootVolumes();
         void RenderQueuedLevel1Grids();
@@ -542,7 +542,7 @@ namespace
 		if (_Settings.m_IsScalable && m_pScalableReconstructor == nullptr)
 		{
 			m_pReconstructor = nullptr;
-			m_pScalableReconstructor.reset(new MR::CScalableSLAMReconstructor);			
+			m_pScalableReconstructor.reset(new MR::CScalableSLAMReconstructor);
 		}
 		else if (!_Settings.m_IsScalable && m_pReconstructor == nullptr)
 		{
@@ -611,7 +611,7 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    void CGfxReconstructionRenderer::RenderVolume()
+    void CGfxReconstructionRenderer::RaycastVolume()
     {
         MR::SReconstructionSettings Settings;
         m_pReconstructor->GetReconstructionSettings(&Settings);
@@ -689,7 +689,7 @@ namespace
 
 	// -----------------------------------------------------------------------------
 
-	void CGfxReconstructionRenderer::RenderScalableVolume()
+	void CGfxReconstructionRenderer::RaycastScalableVolume()
 	{
         MR::SReconstructionSettings Settings;
         m_pScalableReconstructor->GetReconstructionSettings(&Settings);
@@ -733,7 +733,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::RenderRootVolumes()
+    void CGfxReconstructionRenderer::RaycastRootVolumes()
     {
         MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
 
@@ -800,14 +800,14 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::RenderLevel1Grids()
+    void CGfxReconstructionRenderer::RaycastLevel1Grids()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::RenderLevel2Grids()
+    void CGfxReconstructionRenderer::RaycastLevel2Grids()
     {
 
     }
@@ -1065,13 +1065,13 @@ namespace
 
 		if (m_pScalableReconstructor != nullptr)
 		{
-			RenderScalableVolume();
+			RaycastScalableVolume();
 
             RenderVertexMap();
 
-            RenderRootVolumes();
-            RenderLevel1Grids();
-            RenderLevel2Grids();
+            RaycastRootVolumes();
+            RaycastLevel1Grids();
+            RaycastLevel2Grids();
 
             RenderQueuedRootVolumes();
             RenderQueuedLevel1Grids();
@@ -1079,7 +1079,7 @@ namespace
 		}
 		else
 		{
-			RenderVolume();
+			RaycastVolume();
 		}
         
         Performance::EndEvent();
