@@ -559,6 +559,7 @@ namespace
 			m_pReconstructor->ResetReconstruction(&_Settings);
 		}
 
+        BufferManager::UploadBufferData(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &g_CubeVertices);
         OnSetupShader();
     }
     
