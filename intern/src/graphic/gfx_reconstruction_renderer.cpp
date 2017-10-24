@@ -113,6 +113,9 @@ namespace
         CShaderPtr m_OutlineLevel2VSPtr;
         CShaderPtr m_OutlineLevel2FSPtr;
 
+        CShaderPtr m_RootVolumesVSPtr;
+        CShaderPtr m_RootVolumesFSPtr;
+
         CShaderPtr m_RaycastVSPtr;
         CShaderPtr m_RaycastFSPtr;
 
@@ -238,8 +241,8 @@ namespace
             m_OutlineLevel1FSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\rendering\\fs_outline_level1.glsl", "main", DefineString.c_str());
             m_OutlineLevel2VSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\rendering\\vs_outline_level2.glsl", "main", DefineString.c_str());
             m_OutlineLevel2FSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\rendering\\fs_outline_level2.glsl", "main", DefineString.c_str());
-			m_RaycastVSPtr       = ShaderManager::CompileVS("scalable_kinect_fusion\\rendering\\vs_raycast.glsl"       , "main", DefineString.c_str());
-			m_RaycastFSPtr       = ShaderManager::CompilePS("scalable_kinect_fusion\\rendering\\fs_raycast.glsl"       , "main", DefineString.c_str());
+			m_RootVolumesVSPtr   = ShaderManager::CompileVS("scalable_kinect_fusion\\rendering\\vs_rootvolumes.glsl"   , "main", DefineString.c_str());
+            m_RootVolumesFSPtr   = ShaderManager::CompilePS("scalable_kinect_fusion\\rendering\\fs_rootvolumes.glsl"   , "main", DefineString.c_str());
             m_PointCloudVSPtr    = ShaderManager::CompileVS("scalable_kinect_fusion\\rendering\\vs_point_cloud.glsl"   , "main", DefineString.c_str());
             m_PointCloudFSPtr    = ShaderManager::CompilePS("scalable_kinect_fusion\\rendering\\fs_point_cloud.glsl"   , "main", DefineString.c_str());
         }
@@ -722,7 +725,46 @@ namespace
 
     void CGfxReconstructionRenderer::RenderRootVolumes()
     {
+        MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
 
+        MR::SReconstructionSettings Settings;
+        m_pScalableReconstructor->GetReconstructionSettings(&Settings);
+
+        Float4x4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
+
+        Float4 RaycastData[2];
+        PoseMatrix.GetTranslation(RaycastData[0][0], RaycastData[0][1], RaycastData[0][2]);
+        RaycastData[0][3] = 1.0f;
+        if (Settings.m_CaptureColor)
+        {
+            RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 0.0f, 0.0f, 1.0f);
+        }
+        else
+        {
+            RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 1.0f, 0.0f, 1.0f);
+        }
+
+        BufferManager::UploadBufferData(m_RaycastConstantBufferPtr, RaycastData);
+
+        ContextManager::SetShaderVS(m_RaycastVSPtr);
+        ContextManager::SetShaderPS(m_RaycastFSPtr);
+
+        ContextManager::SetResourceBuffer(0, rVolume.m_RootVolumePositionBufferPtr);
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_RaycastConstantBufferPtr);
+
+        ContextManager::Barrier();
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetInputLayout(m_VolumeInputLayoutPtr);
+
+        ContextManager::SetTopology(STopology::TriangleList);
     }
 
     // -----------------------------------------------------------------------------

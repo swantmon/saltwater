@@ -1,6 +1,6 @@
 
-#ifndef __INCLUDE_VS_KINECT_RAYCAST_GLSL__
-#define __INCLUDE_VS_KINECT_RAYCAST_GLSL__
+#ifndef __INCLUDE_VS_ROOTVOLUMES_GLSL__
+#define __INCLUDE_VS_ROOTVOLUMES_GLSL__
 
 #include "common_global.glsl"
 
@@ -40,4 +40,4 @@ void main()
     gl_Position = g_WorldToScreen * vec4(WSPosition, 1.0f);
 }
 
-#endif // __INCLUDE_VS_KINECT_RAYCAST_GLSL__
+#endif // __INCLUDE_VS_ROOTVOLUMES_GLSL__

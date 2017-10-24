@@ -1,6 +1,6 @@
 
-#ifndef __INCLUDE_FS_KINECT_RAYCAST_GLSL__
-#define __INCLUDE_FS_KINECT_RAYCAST_GLSL__
+#ifndef __INCLUDE_FS_ROOTVOLUMES_GLSL__
+#define __INCLUDE_FS_ROOTVOLUMES_GLSL__
 
 #include "common_global.glsl"
 #include "scalable_kinect_fusion/common_raycast.glsl"
@@ -8,17 +8,12 @@
 #include "common_gbuffer.glsl"
 
 // -----------------------------------------------------------------------------
-// Constants
-// -----------------------------------------------------------------------------
-
-// -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
 
-layout(row_major, std140, binding = 1) uniform PerDrawCallData
+layout(std430, binding = 0) buffer RootVolumeBuffer
 {
-    vec4 g_Offset;
-    vec4 g_Color;
+    uint g_RootVolumeBuffer[];
 };
 
 layout(location = 0) in vec3 in_WSRayDirection;
@@ -34,4 +29,4 @@ void main()
     out_GBuffer2 = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
-#endif // __INCLUDE_FS_KINECT_RAYCAST_GLSL__
+#endif // __INCLUDE_FS_ROOTVOLUMES_GLSL__
