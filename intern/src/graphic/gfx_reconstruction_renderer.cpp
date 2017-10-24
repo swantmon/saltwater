@@ -34,10 +34,23 @@
 #include <memory>
 #include <sstream>
 
+using namespace Base;
 using namespace Gfx;
 
 namespace
 {
+    Float3 g_CubeVertices[] =
+    {
+        Float3(0.0f, 0.0f, 0.0f),
+        Float3(1.0f, 0.0f, 0.0f),
+        Float3(1.0f, 1.0f, 0.0f),
+        Float3(0.0f, 1.0f, 0.0f),
+        Float3(0.0f, 0.0f, 1.0f),
+        Float3(1.0f, 0.0f, 1.0f),
+        Float3(1.0f, 1.0f, 1.0f),
+        Float3(0.0f, 1.0f, 1.0f),
+    };
+
 	struct SDrawCallConstantBuffer
 	{
 		Base::Float4x4 m_WorldMatrix;
@@ -419,34 +432,22 @@ namespace
 
         m_CameraMeshPtr = MeshManager::CreateMesh(MeshDesc);
 
-        Float3 CubeVertices[] =
-        {
-            Float3(0.0f, 0.0f, 0.0f),
-            Float3(1.0f, 0.0f, 0.0f),
-            Float3(1.0f, 1.0f, 0.0f),
-            Float3(0.0f, 1.0f, 0.0f),
-            Float3(0.0f, 0.0f, 1.0f),
-            Float3(1.0f, 0.0f, 1.0f),
-            Float3(1.0f, 1.0f, 1.0f),
-            Float3(0.0f, 1.0f, 1.0f),
-        };
-
 		Float3 CubeLines[24] =
 		{
-			CubeVertices[0], CubeVertices[1],
-			CubeVertices[1], CubeVertices[2],
-			CubeVertices[2], CubeVertices[3],
-			CubeVertices[3], CubeVertices[0],
+			g_CubeVertices[0], g_CubeVertices[1],
+			g_CubeVertices[1], g_CubeVertices[2],
+			g_CubeVertices[2], g_CubeVertices[3],
+			g_CubeVertices[3], g_CubeVertices[0],
 
-			CubeVertices[0], CubeVertices[4],
-			CubeVertices[1], CubeVertices[5],
-			CubeVertices[2], CubeVertices[6],
-			CubeVertices[3], CubeVertices[7],
+			g_CubeVertices[0], g_CubeVertices[4],
+			g_CubeVertices[1], g_CubeVertices[5],
+			g_CubeVertices[2], g_CubeVertices[6],
+			g_CubeVertices[3], g_CubeVertices[7],
 
-			CubeVertices[4], CubeVertices[5],
-			CubeVertices[5], CubeVertices[6],
-			CubeVertices[6], CubeVertices[7],
-			CubeVertices[7], CubeVertices[4],
+			g_CubeVertices[4], g_CubeVertices[5],
+			g_CubeVertices[5], g_CubeVertices[6],
+			g_CubeVertices[6], g_CubeVertices[7],
+			g_CubeVertices[7], g_CubeVertices[4],
 		};
 
         unsigned int CubeIndices[] =
@@ -474,8 +475,8 @@ namespace
         pLOD = new Dt::CLOD;
         pMesh = new Dt::CMesh;
 
-        pSurface->SetPositions(CubeVertices);
-        pSurface->SetNumberOfVertices(sizeof(CubeVertices) / sizeof(CubeVertices[0]));
+        pSurface->SetPositions(g_CubeVertices);
+        pSurface->SetNumberOfVertices(sizeof(g_CubeVertices) / sizeof(g_CubeVertices[0]));
         pSurface->SetIndices(CubeIndices);
         pSurface->SetNumberOfIndices(sizeof(CubeIndices) / sizeof(CubeIndices[0]));
         pSurface->SetElements(0);
@@ -760,12 +761,26 @@ namespace
         ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
+        const int Width = rVolume.m_RootVolumeTotalWidth;
+
+        Float3 Vertices[8];
+        for (int i = 0; i < 8; ++ i)
+        {
+            Vertices[i][0] = (g_CubeVertices[i][0] - 0.5f) * Width;
+            Vertices[i][1] = (g_CubeVertices[i][1] - 0.5f) * Width;
+            Vertices[i][2] = (g_CubeVertices[i][2] - 0.5f) * Width;
+        }
+
+        BufferManager::UploadBufferData(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Vertices);
+
         const unsigned int Offset = 0;
         ContextManager::SetVertexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
         ContextManager::SetIndexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
         ContextManager::SetInputLayout(m_VolumeInputLayoutPtr);
 
         ContextManager::SetTopology(STopology::TriangleList);
+
+        ContextManager::DrawIndexed(36, 0, 0);
     }
 
     // -----------------------------------------------------------------------------
