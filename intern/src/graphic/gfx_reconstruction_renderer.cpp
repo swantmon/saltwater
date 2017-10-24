@@ -363,7 +363,7 @@ namespace
             Float3( x * 8.0f, -y * 8.0f, 8.0f),
             Float3( x * 8.0f,  y * 8.0f, 8.0f),
             Float3(-x * 8.0f,  y * 8.0f, 8.0f),
-            Float3( 0.0f,  0.0f, 0.0f),
+            Float3(     0.0f,      0.0f, 0.0f),
 			Float3(-x * 0.5f, -y * 0.5f, 0.5f),
 			Float3( x * 0.5f, -y * 0.5f, 0.5f),
 			Float3( x * 0.5f,  y * 0.5f, 0.5f),
@@ -735,19 +735,12 @@ namespace
         Float4 RaycastData[2];
         PoseMatrix.GetTranslation(RaycastData[0][0], RaycastData[0][1], RaycastData[0][2]);
         RaycastData[0][3] = 1.0f;
-        if (Settings.m_CaptureColor)
-        {
-            RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 0.0f, 0.0f, 1.0f);
-        }
-        else
-        {
-            RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 1.0f, 0.0f, 1.0f);
-        }
+        RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 1.0f, 0.0f, 1.0f);
 
         BufferManager::UploadBufferData(m_RaycastConstantBufferPtr, RaycastData);
 
-        ContextManager::SetShaderVS(m_RaycastVSPtr);
-        ContextManager::SetShaderPS(m_RaycastFSPtr);
+        ContextManager::SetShaderVS(m_RootVolumesVSPtr);
+        ContextManager::SetShaderPS(m_RootVolumesFSPtr);
 
         ContextManager::SetResourceBuffer(0, rVolume.m_RootVolumePositionBufferPtr);
 
