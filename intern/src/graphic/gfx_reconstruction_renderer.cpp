@@ -761,7 +761,7 @@ namespace
 
         ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
-                
+        
         const Float3 Min = Float3(
             static_cast<float>(rVolume.m_MinOffset[0]),
             static_cast<float>(rVolume.m_MinOffset[1]),
@@ -1073,9 +1073,9 @@ namespace
             RaycastLevel1Grids();
             RaycastLevel2Grids();
 
-            RenderQueuedRootVolumes();
-            RenderQueuedLevel1Grids();
-            RenderQueuedLevel2Grids();
+            //RenderQueuedRootVolumes();
+            //RenderQueuedLevel1Grids();
+            //RenderQueuedLevel2Grids();
 		}
 		else
 		{
