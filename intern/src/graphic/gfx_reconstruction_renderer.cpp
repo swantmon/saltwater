@@ -59,8 +59,8 @@ namespace
 
     struct SScalableRaycastConstantBuffer
     {
-        Int3 m_MinOffset;
-        Int3 m_MaxOffset;
+        Float3 m_AABBMin;
+        Float3 m_AABBMax;
         int m_VolumeTextureWidth;
     };
 
@@ -643,7 +643,7 @@ namespace
             RaycastData[1] = m_pReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 1.0f, 0.0f, 1.0f);
         }
 
-        BufferManager::UploadBufferData(m_RaycastConstantBufferPtr, RaycastData);
+        BufferManager::UploadBufferData(m_ScalableRaycastBufferPtr, RaycastData);
         
         ContextManager::SetShaderVS(m_RaycastVSPtr);
         ContextManager::SetShaderPS(m_RaycastFSPtr);
@@ -658,7 +658,7 @@ namespace
         }
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-        ContextManager::SetConstantBuffer(1, m_RaycastConstantBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_ScalableRaycastBufferPtr);
 
         ContextManager::Barrier();
 
@@ -1079,12 +1079,18 @@ namespace
 
 		if (m_pScalableReconstructor != nullptr)
 		{
+            MR::SReconstructionSettings Settings;
+            m_pScalableReconstructor->GetReconstructionSettings(&Settings);
             const auto& rVolume = m_pScalableReconstructor->GetVolume();
 
             SScalableRaycastConstantBuffer Data;
 
-            Data.m_MinOffset = rVolume.m_MinOffset;
-            Data.m_MaxOffset = rVolume.m_MaxOffset;
+            for (int i = 0; i < 3; ++ i)
+            {
+                Data.m_AABBMin[i] = rVolume.m_MinOffset[i] * Settings.m_VolumeSize;
+                Data.m_AABBMax[i] = (rVolume.m_MaxOffset[i] + 1.0f) * Settings.m_VolumeSize;
+            }
+
             Data.m_VolumeTextureWidth = rVolume.m_RootVolumeTotalWidth;
 
             BufferManager::UploadBufferData(m_RaycastConstantBufferPtr, &Data);
