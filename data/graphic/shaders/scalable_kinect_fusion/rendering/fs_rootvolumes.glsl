@@ -38,18 +38,18 @@ layout(location = 2) out vec4 out_GBuffer2;
 
 float GetStartLength(vec3 Start, vec3 Direction)
 {
-    float xmin = ((Direction.x > 0.0f ? 0.0f : VOLUME_SIZE) - Start.x) / Direction.x;
-    float ymin = ((Direction.y > 0.0f ? 0.0f : VOLUME_SIZE) - Start.y) / Direction.y;
-    float zmin = ((Direction.z > 0.0f ? 0.0f : VOLUME_SIZE) - Start.z) / Direction.z;
+    float xmin = ((Direction.x > 0.0f ? m_AABBMin.x : m_AABBMax.x) - Start.x) / Direction.x;
+    float ymin = ((Direction.y > 0.0f ? m_AABBMin.y : m_AABBMax.y) - Start.y) / Direction.y;
+    float zmin = ((Direction.z > 0.0f ? m_AABBMin.z : m_AABBMax.z) - Start.z) / Direction.z;
 
     return max(max(xmin, ymin), zmin);
 }
 
 float GetEndLength(vec3 Start, vec3 Direction)
 {
-    float xmax = ((Direction.x > 0.0f ? VOLUME_SIZE : 0.0f) - Start.x) / Direction.x;
-    float ymax = ((Direction.y > 0.0f ? VOLUME_SIZE : 0.0f) - Start.y) / Direction.y;
-    float zmax = ((Direction.z > 0.0f ? VOLUME_SIZE : 0.0f) - Start.z) / Direction.z;
+    float xmax = ((Direction.x > 0.0f ? m_AABBMax.x : m_AABBMin.x) - Start.x) / Direction.x;
+    float ymax = ((Direction.y > 0.0f ? m_AABBMax.y : m_AABBMin.y) - Start.y) / Direction.y;
+    float zmax = ((Direction.z > 0.0f ? m_AABBMax.z : m_AABBMin.z) - Start.z) / Direction.z;
 
     return min(min(xmax, ymax), zmax);
 }
@@ -65,7 +65,7 @@ void main()
     float StartLength = GetStartLength(g_ViewPosition.xyz, RayDirection);
     float EndLength = GetEndLength(g_ViewPosition.xyz, RayDirection);
 
-    out_GBuffer0 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+    out_GBuffer0 = vec4(StartLength, EndLength, 0.0f, 1.0f);
     out_GBuffer1 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
     out_GBuffer2 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
 }
