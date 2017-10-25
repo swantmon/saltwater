@@ -45,8 +45,27 @@ namespace Edit
         MR::SReconstructionSettings DefaultSettings;
         
         m_pSizeHS->setRange(1, 1000);
-        m_pSizeHS->setValue(DefaultSettings.m_VolumeSize * 100);
-        m_pSizeTL->setText(QString::number(DefaultSettings.m_VolumeSize));
+
+        if (DefaultSettings.m_IsScalable)
+        {
+            MR::SReconstructionSettings DefaultSettings;
+
+            int VoxelCount = 1;
+            for (int i = 0; i < DefaultSettings.GRID_LEVELS; ++i)
+            {
+                VoxelCount *= DefaultSettings.m_GridResolutions[i];
+            }
+
+            float VolumeSize = DefaultSettings.m_VoxelSize * VoxelCount;
+
+            m_pSizeTL->setText(QString::number(VolumeSize));
+            m_pSizeHS->setValue(VolumeSize * 100);
+        }
+        else
+        {
+            m_pSizeHS->setValue(DefaultSettings.m_VolumeSize * 100);
+            m_pSizeTL->setText(QString::number(DefaultSettings.m_VolumeSize));
+        }
 
 		m_pVoxelSizeHS->setRange(1, 10);
 		m_pVoxelSizeHS->setValue(DefaultSettings.m_VoxelSize * 1000.0f); // meter to millimeter
@@ -97,15 +116,31 @@ namespace Edit
         // Read values
         // -----------------------------------------------------------------------------
         
-        const float VolumeSize = static_cast<float>(m_pSizeHS->value() / 100.0f);
-        const int Resolution = g_Resolutions[m_pResolutionHS->value()];
-		const float VoxelSize = static_cast<float>(m_pVoxelSizeHS->value() / 1000.0f);
-        const float TruncatedDistance = static_cast<float>(m_pTruncatedDistanceHS->value());
-        const int MaxIntegrationWeight = m_pWeightHS->value();
-        const int MinDepth = m_pMinDepthLE->text().toInt();
-        const int MaxDepth = m_pMaxDepthLE->text().toInt();
-        const bool CaptureColor = m_pCaptureColorCB->checkState() == Qt::CheckState::Checked;
-		const bool IsScalable = m_pScalableCB->checkState() == Qt::CheckState::Checked;
+        float VolumeSize = static_cast<float>(m_pSizeHS->value() / 100.0f);
+        int Resolution = g_Resolutions[m_pResolutionHS->value()];
+		float VoxelSize = static_cast<float>(m_pVoxelSizeHS->value() / 1000.0f);
+        float TruncatedDistance = static_cast<float>(m_pTruncatedDistanceHS->value());
+        int MaxIntegrationWeight = m_pWeightHS->value();
+        int MinDepth = m_pMinDepthLE->text().toInt();
+        int MaxDepth = m_pMaxDepthLE->text().toInt();
+        bool CaptureColor = m_pCaptureColorCB->checkState() == Qt::CheckState::Checked;
+		bool IsScalable = m_pScalableCB->checkState() == Qt::CheckState::Checked;
+
+        if (IsScalable)
+        {
+            MR::SReconstructionSettings DefaultSettings;
+
+            int VoxelCount = 1;
+            for (int i = 0; i < DefaultSettings.GRID_LEVELS; ++ i)
+            {
+                VoxelCount *= DefaultSettings.m_GridResolutions[i];
+            }
+
+            VolumeSize = VoxelSize * VoxelCount;
+
+            m_pSizeTL->setText(QString::number(VolumeSize));
+            m_pSizeHS->setValue(VolumeSize * 100);
+        }
         
         // -----------------------------------------------------------------------------
         // Send message
