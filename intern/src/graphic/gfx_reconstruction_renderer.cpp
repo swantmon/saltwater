@@ -60,7 +60,9 @@ namespace
     struct SScalableRaycastConstantBuffer
     {
         Float3 m_AABBMin;
+        float Padding;
         Float3 m_AABBMax;
+        float Padding2;
         int m_VolumeTextureWidth;
     };
 
@@ -643,7 +645,7 @@ namespace
             RaycastData[1] = m_pReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 1.0f, 0.0f, 1.0f);
         }
 
-        BufferManager::UploadBufferData(m_ScalableRaycastBufferPtr, RaycastData);
+        BufferManager::UploadBufferData(m_RaycastConstantBufferPtr, RaycastData);
         
         ContextManager::SetShaderVS(m_RaycastVSPtr);
         ContextManager::SetShaderPS(m_RaycastFSPtr);
@@ -658,7 +660,7 @@ namespace
         }
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-        ContextManager::SetConstantBuffer(1, m_ScalableRaycastBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_RaycastConstantBufferPtr);
 
         ContextManager::Barrier();
 
@@ -760,16 +762,15 @@ namespace
         RaycastData[0][3] = 1.0f;
         RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 1.0f, 0.0f, 1.0f);
 
-        BufferManager::UploadBufferData(m_RaycastConstantBufferPtr, RaycastData);
+        BufferManager::UploadBufferData(m_ScalableRaycastBufferPtr, RaycastData);
 
         ContextManager::SetShaderVS(m_RootVolumesVSPtr);
         ContextManager::SetShaderPS(m_RootVolumesFSPtr);
 
         ContextManager::SetResourceBuffer(0, rVolume.m_RootVolumePositionBufferPtr);
-        ContextManager::SetConstantBuffer(0, m_ScalableRaycastBufferPtr);
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-        ContextManager::SetConstantBuffer(1, m_RaycastConstantBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_ScalableRaycastBufferPtr);
 
         ContextManager::Barrier();
 
@@ -1093,7 +1094,7 @@ namespace
 
             Data.m_VolumeTextureWidth = rVolume.m_RootVolumeTotalWidth;
 
-            BufferManager::UploadBufferData(m_RaycastConstantBufferPtr, &Data);
+            BufferManager::UploadBufferData(m_ScalableRaycastBufferPtr, &Data);
 
 			RaycastScalableVolume();
 
