@@ -763,15 +763,15 @@ namespace
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
         
         const Float3 Min = Float3(
-            static_cast<float>(rVolume.m_MinOffset[0]),
-            static_cast<float>(rVolume.m_MinOffset[1]),
-            static_cast<float>(rVolume.m_MinOffset[2])
+            rVolume.m_MinOffset[0] * Settings.m_VolumeSize,
+            rVolume.m_MinOffset[1] * Settings.m_VolumeSize,
+            rVolume.m_MinOffset[2] * Settings.m_VolumeSize
         );
 
         const Float3 Max = Float3(
-            rVolume.m_MaxOffset[0] + 1.0f, // Add 1.0f because MaxOffset stores the max volume offset
-            rVolume.m_MaxOffset[1] + 1.0f, // and we have to consider the volume size
-            rVolume.m_MaxOffset[2] + 1.0f
+            (rVolume.m_MaxOffset[0] + 1.0f) * Settings.m_VolumeSize, // Add 1.0f because MaxOffset stores the max volume offset
+            (rVolume.m_MaxOffset[1] + 1.0f) * Settings.m_VolumeSize, // and we have to consider the volume size
+            (rVolume.m_MaxOffset[2] + 1.0f) * Settings.m_VolumeSize
         );
 
         Float3 Vertices[8] =
@@ -1073,7 +1073,7 @@ namespace
             RaycastLevel1Grids();
             RaycastLevel2Grids();
 
-            //RenderQueuedRootVolumes();
+            RenderQueuedRootVolumes();
             //RenderQueuedLevel1Grids();
             //RenderQueuedLevel2Grids();
 		}
