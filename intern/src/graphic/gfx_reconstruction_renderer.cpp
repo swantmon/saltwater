@@ -53,9 +53,16 @@ namespace
 
 	struct SDrawCallConstantBuffer
 	{
-		Base::Float4x4 m_WorldMatrix;
-		Base::Float4 m_Color;
+		Float4x4 m_WorldMatrix;
+		Float4 m_Color;
 	};
+
+    struct SScalableRaycastConstantBuffer
+    {
+        Float3 m_AABBMin;
+        Float3 m_AABBMax;
+        int m_Width;
+    };
 
     class CGfxReconstructionRenderer : private Base::CUncopyable
     {
@@ -134,6 +141,8 @@ namespace
 
         CBufferPtr m_RaycastConstantBufferPtr;
         CBufferPtr m_DrawCallConstantBufferPtr;
+
+        CBufferPtr m_ScalableRaycastBufferPtr;
         
         CMeshPtr m_CameraMeshPtr;
 		CInputLayoutPtr m_CameraInputLayoutPtr;
@@ -209,6 +218,8 @@ namespace
         
         m_RaycastConstantBufferPtr = 0;
         m_DrawCallConstantBufferPtr = 0;
+
+        m_ScalableRaycastBufferPtr = 0;
         
         m_CameraMeshPtr = 0;
         m_VolumeMeshPtr = 0;
@@ -358,8 +369,10 @@ namespace
         m_RaycastConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         
         ConstantBufferDesc.m_NumberOfBytes = sizeof(SDrawCallConstantBuffer);
-
         m_DrawCallConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(SScalableRaycastConstantBuffer);
+        m_ScalableRaycastBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
     
     // -----------------------------------------------------------------------------
