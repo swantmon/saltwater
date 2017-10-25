@@ -766,6 +766,7 @@ namespace
         ContextManager::SetShaderPS(m_RootVolumesFSPtr);
 
         ContextManager::SetResourceBuffer(0, rVolume.m_RootVolumePositionBufferPtr);
+        ContextManager::SetConstantBuffer(0, m_ScalableRaycastBufferPtr);
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_RaycastConstantBufferPtr);
@@ -1078,6 +1079,16 @@ namespace
 
 		if (m_pScalableReconstructor != nullptr)
 		{
+            const auto& rVolume = m_pScalableReconstructor->GetVolume();
+
+            SScalableRaycastConstantBuffer Data;
+
+            Data.m_MinOffset = rVolume.m_MinOffset;
+            Data.m_MaxOffset = rVolume.m_MaxOffset;
+            Data.m_VolumeTextureWidth = rVolume.m_RootVolumeTotalWidth;
+
+            BufferManager::UploadBufferData(m_RaycastConstantBufferPtr, &Data);
+
 			RaycastScalableVolume();
 
             RenderVertexMap();
