@@ -59,9 +59,9 @@ namespace
 
     struct SScalableRaycastConstantBuffer
     {
-        Float3 m_AABBMin;
-        Float3 m_AABBMax;
-        int m_Width;
+        Int3 m_MinOffset;
+        Int3 m_MaxOffset;
+        int m_VolumeTextureWidth;
     };
 
     class CGfxReconstructionRenderer : private Base::CUncopyable

@@ -16,6 +16,13 @@ layout(std430, binding = 0) buffer RootVolumeBuffer
     uint g_RootVolumeBuffer[];
 };
 
+layout(row_major, std140, binding = 1) uniform ScalableRaycastConstantBuffer
+{
+    ivec3 m_MinOffset;
+    ivec3 m_MaxOffset;
+    int m_VolumeTextureWidth;
+};
+
 layout(location = 0) in vec3 in_WSRayDirection;
 
 layout(location = 0) out vec4 out_GBuffer0;
