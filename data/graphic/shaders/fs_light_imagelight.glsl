@@ -164,12 +164,12 @@ void main()
     // -----------------------------------------------------------------------------
     ivec2 DFGSize = textureSize(ps_BRDF, 0);
 
-    float ClampNdotV = max(NdotV, 0.5f / DFGSize.x);
+    float ClampNdotV = max(NdotV, 0.5f / float(DFGSize.x));
     
     // -----------------------------------------------------------------------------
     // Get data
     // -----------------------------------------------------------------------------
-    vec3 PreDFGF = textureLod(ps_BRDF, vec2(NdotV, Data.m_Roughness), 0).rgb;
+    vec3 PreDFGF = textureLod(ps_BRDF, vec2(NdotV, Data.m_Roughness), 0.0f).rgb;
 
     // -----------------------------------------------------------------------------
     // Lighting
@@ -192,7 +192,7 @@ void main()
         vec4 IBL = vec4(0.0f);
         
         #pragma unroll
-        for (uint IndexOfLight = 0; IndexOfLight < MAX_NUMBER_OF_PROBES; ++ IndexOfLight)
+        for (int IndexOfLight = 0; IndexOfLight < MAX_NUMBER_OF_PROBES; ++ IndexOfLight)
         {
             SProbeProperties LightProb = ps_LightProperties[IndexOfLight];
 

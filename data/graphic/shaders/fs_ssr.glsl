@@ -510,7 +510,7 @@ void main(void)
 
         float NdotV  = clamp( dot( Data.m_WSNormal, WSViewDirection), 0.0, 1.0f); 
 
-        vec3 PreDFGF = textureLod(ps_BRDF, vec2(NdotV, Data.m_Roughness), 0).rgb;
+        vec3 PreDFGF = textureLod(ps_BRDF, vec2(NdotV, Data.m_Roughness), 0.0f).rgb;
 
         float F90 = clamp(50.0f * dot(Data.m_SpecularAlbedo, vec3(0.33f)), 0.0f, 1.0f);
 

@@ -16,7 +16,7 @@ vec4 InverseToneMapping(in vec4 _Color)
 {
     float Luminosity = 0.3f * _Color.r + 0.59f * _Color.g + 0.11f * _Color.b;
 
-    float LuminosityScale = 10 * pow(Luminosity, 10.0f) + 1.8f;
+    float LuminosityScale = 10.0f * pow(Luminosity, 10.0f) + 1.8f;
 
     return LuminosityScale * _Color;
 }

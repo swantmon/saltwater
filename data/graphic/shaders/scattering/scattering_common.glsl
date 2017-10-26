@@ -73,7 +73,7 @@ vec3 GetTransmittance(float _Radius, float _Mu)
 {
 	vec2 UV = GetTransmittanceUV(_Radius, _Mu);
 
-    return textureLod(g_TransmittanceTable, UV, 0).rgb;
+    return textureLod(g_TransmittanceTable, UV, 0.0f).rgb;
 }
 
 vec3 GetTransmittanceWithShadow(float _Radius, float _Mu)
@@ -161,8 +161,8 @@ vec4 Texture4DSample(in sampler3D _Texture, in float _Radius, in float _Mu, in f
 
     LerpValue = LerpValue - MuNu;
 
-    return textureLod(_Texture, vec3((MuNu + MuMuS) / g_InscatterNu, MuMu, MuR), 0) * (1.0f - LerpValue) +
-           textureLod(_Texture, vec3((MuNu + MuMuS + 1.0f) / g_InscatterNu, MuMu, MuR), 0) * LerpValue;
+    return textureLod(_Texture, vec3((MuNu + MuMuS) / g_InscatterNu, MuMu, MuR), 0.0f) * (1.0f - LerpValue) +
+           textureLod(_Texture, vec3((MuNu + MuMuS + 1.0f) / g_InscatterNu, MuMu, MuR), 0.0f) * LerpValue;
 }
 
 float Mod(float _X, float _Y)  // HLSL fmod behaves differently than GLSL 
@@ -202,7 +202,7 @@ void GetMuMuSNu(vec2 _UV, float _Radius, vec4 _Dhdh, out float _Mu, out float _M
 
 float Limit(float _Radius, float _Mu) 
 {
-    float Dout = -_Radius * _Mu + sqrt(_Radius * _Radius * (_Mu * _Mu - 1.0) + (g_RadiusAtmosphere + 1) * (g_RadiusAtmosphere + 1));
+    float Dout = -_Radius * _Mu + sqrt(_Radius * _Radius * (_Mu * _Mu - 1.0f) + (g_RadiusAtmosphere + 1.0f) * (g_RadiusAtmosphere + 1.0f));
     float Delta2 = _Radius * _Radius * (_Mu * _Mu - 1.0) + g_RadiusGround * g_RadiusGround;
     if (Delta2 >= 0.0f) 
 	{
@@ -233,7 +233,7 @@ float PhaseFunctionM(float _Mu)
 vec3 GetIrradiance(in sampler2D _Texture, in float _Radius, in float _MuS)
 {
     vec2 UV = GetIrradianceUV(_Radius, _MuS);
-    return textureLod(_Texture, UV, 0).rgb;
+    return textureLod(_Texture, UV, 0.0f).rgb;
 }
 
 #endif // __SCATTERING_COMMON__

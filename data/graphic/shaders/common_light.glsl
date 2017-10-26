@@ -88,7 +88,7 @@ float GetShadowAtPositionWithPCF(in vec3 _WSPosition, in mat4 _LightViewProjecti
     // -----------------------------------------------------------------------------
     // Get shadowmap size
     // -----------------------------------------------------------------------------
-    ShadowMapSize = textureSize(_Shadowmap, 0);
+    ShadowMapSize = vec2(textureSize(_Shadowmap, 0));
     
     // -----------------------------------------------------------------------------
     // Set worls space coord into light projection by multiply with light
@@ -349,14 +349,14 @@ vec3 GetFresnelFresnel(in vec3 _F0, in float _U )
 
     SpecularColorSqrt = sqrt(clamp(vec3(0.0f, 0.0f, 0.0f), vec3(0.99f, 0.99f, 0.99f), _F0 ));
 
-    Normal = ( 1 + SpecularColorSqrt ) / ( 1 - SpecularColorSqrt );
+    Normal = ( 1.0f + SpecularColorSqrt ) / ( 1.0f - SpecularColorSqrt );
 
     G = sqrt( Normal * Normal + _U * _U - 1.0f );
 
     GU1 = (G - _U) / (G + _U);
     GU2 = ((G + _U) * _U - 1.0f) / ((G - _U) * _U + 1.0f);
 
-    return 0.5f * GU1 * GU1 * ( 1 + GU2 * GU2 );
+    return 0.5f * GU1 * GU1 * ( 1.0f + GU2 * GU2 );
 }
 
 // -----------------------------------------------------------------------------
@@ -692,7 +692,7 @@ vec3 BRDF(in vec3 _L, in vec3 _V, in vec3 _N, in SSurfaceData _Data)
 vec3 EvaluateDiffuseIBL(in samplerCube _Cubemap, in SSurfaceData _Data, in vec3 _WSViewDirection, in float _PreF, in float _NdotV)
 {
     vec3 DiffuseDominantN = GetDiffuseDominantDir(_Data.m_WSNormal, _WSViewDirection, _NdotV, _Data.m_Roughness);
-    vec3 DiffuseIBL       = textureLod(_Cubemap, DiffuseDominantN, 0).rgb;
+    vec3 DiffuseIBL       = textureLod(_Cubemap, DiffuseDominantN, 0.0f).rgb;
     
     DiffuseIBL = mix(DiffuseIBL * 0.3f, DiffuseIBL, _Data.m_AmbientOcclusion);
 

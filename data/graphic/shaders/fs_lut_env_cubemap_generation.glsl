@@ -37,7 +37,7 @@ layout(location = 0) out vec4 out_Output;
 // -----------------------------------------------------------------------------
 void main(void)
 {
-	vec4 LookUp = textureLod(PSLookUpTexture, in_Normal, 0);
+	vec4 LookUp = textureLod(PSLookUpTexture, in_Normal, 0.0f);
 
     vec4 FinalColor = texture(PSBackgroundTexture, LookUp.xy);
     

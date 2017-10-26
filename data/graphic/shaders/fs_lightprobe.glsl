@@ -43,7 +43,7 @@ void main(void)
     // -----------------------------------------------------------------------------
     // Get color from cube map
     // -----------------------------------------------------------------------------
-    vec4 FinalColor = textureLod(PSEnvironmentTexture, in_Normal, 0);
+    vec4 FinalColor = textureLod(PSEnvironmentTexture, in_Normal, 0.0f);
 
     // -----------------------------------------------------------------------------
     // Exposure data
