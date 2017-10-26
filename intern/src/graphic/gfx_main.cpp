@@ -87,7 +87,7 @@ namespace
     public:
         
         void RegisterResizeHandler(Gfx::Main::CResizeDelegate _NewDelgate);
-
+        
     public:
 
         unsigned int RegisterWindow(void* _pWindow, unsigned int _VSync);
@@ -103,6 +103,7 @@ namespace
 
         void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile);
 
+        GraphicAPIs GetGraphicsAPI();
         bool IsExtensionAvailable(const std::string& _Name);
         
     public:
@@ -173,6 +174,7 @@ namespace
 
         CBufferPtr m_PerFrameConstantBufferBufferPtr;
 
+        GraphicAPIs m_GraphicsAPI;
         std::unordered_set<std::string> m_AvailableExtensions;
     };
 } // namespace
@@ -257,10 +259,27 @@ namespace
 
             const std::string GraphicsAPI = Base::CProgramParameters::GetInstance().GetStdString("graphics_api");
 
-            bool UseGLES = GraphicsAPI == "gles32";
+            if (GraphicsAPI == "gles32")
+            {
+                m_GraphicsAPI = GLES32;
+            }
+            else if (GraphicsAPI == "gl46")
+            {
+                m_GraphicsAPI = GL46;
+            }
+            else if (GraphicsAPI == "gl45")
+            {
+                m_GraphicsAPI = GL45;
+            }
+            else
+            {
+                std::string Message = "Graphics API " + GraphicsAPI + " is not supported";
+                BASE_CONSOLE_ERROR(Message.c_str());
+            }
+
             bool GLESAvailable;
 
-            if (UseGLES)
+            if (m_GraphicsAPI == GLES32)
             {
                 typedef const char* (WINAPI * PFNWGLGETEXTENSIONSSTRINGARBPROC)(HDC hdc);
                 PROC Function = wglGetProcAddress("wglGetExtensionsStringARB");
@@ -273,7 +292,8 @@ namespace
 
                 if (!GLESAvailable)
                 {
-                    BASE_CONSOLE_ERROR("OpenGL ES 3.2 is not availble!");
+                    BASE_CONSOLE_ERROR("OpenGL ES 3.2 is not availble! Will try OpenGL 4.5 instead");
+                    m_GraphicsAPI = GL45;
                 }
             }
 
@@ -529,6 +549,13 @@ namespace
     
     // -----------------------------------------------------------------------------
 
+    GraphicAPIs CGfxMain::GetGraphicsAPI()
+    {
+        return m_GraphicsAPI;
+    }
+
+    // -----------------------------------------------------------------------------
+
     bool CGfxMain::IsExtensionAvailable(const std::string& _Name)
     {
         return m_AvailableExtensions.count(_Name) == 1;
@@ -776,6 +803,13 @@ namespace Main
     void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile)
     {
         CGfxMain::GetInstance().TakeScreenshot(_WindowID, _pPathToFile);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    GraphicAPIs GetGraphicsAPI()
+    {
+        return CGfxMain::GetInstance().GetGraphicsAPI();
     }
 
     // -----------------------------------------------------------------------------
