@@ -293,7 +293,7 @@ namespace
         }
         else
         {
-            pShader = "#version 430 \n void main(void) { }";
+            pShader = "#version 450 \n void main(void) { }";
         }
 
         ProgramHandle = glCreateShaderProgramv(GL_VERTEX_SHADER, 1, &pShader);
