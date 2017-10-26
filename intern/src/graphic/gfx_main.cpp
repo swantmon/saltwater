@@ -317,16 +317,31 @@ namespace
             // -----------------------------------------------------------------------------
             // Create final OpenGL context with attributes
             // -----------------------------------------------------------------------------
-            const int Attributes[] =
+            
+            if (m_GraphicsAPI == GLES32)
             {
-                WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
-                WGL_CONTEXT_MINOR_VERSION_ARB, 5,
-                WGL_CONTEXT_PROFILE_MASK_ARB , WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-                WGL_CONTEXT_FLAGS_ARB        , APP_DEBUG_MODE ? WGL_CONTEXT_DEBUG_BIT_ARB : 0,
-                0,        //End
-            };
-
-            pNativeOpenGLContextHandle = ::wglCreateContextAttribsARB(pNativeDeviceContextHandle, 0, Attributes);
+                const int Attributes[] =
+                {
+                    WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+                    WGL_CONTEXT_MINOR_VERSION_ARB, 2,
+                    WGL_CONTEXT_PROFILE_MASK_ARB , WGL_CONTEXT_ES2_PROFILE_BIT_EXT,
+                    WGL_CONTEXT_FLAGS_ARB        , APP_DEBUG_MODE ? WGL_CONTEXT_DEBUG_BIT_ARB : 0,
+                    0,        //End
+                };
+                pNativeOpenGLContextHandle = ::wglCreateContextAttribsARB(pNativeDeviceContextHandle, 0, Attributes);
+            }
+            else
+            {
+                const int Attributes[] =
+                {
+                    WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
+                    WGL_CONTEXT_MINOR_VERSION_ARB, m_GraphicsAPI == GL46 ? 6 : 5,
+                    WGL_CONTEXT_PROFILE_MASK_ARB , WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+                    WGL_CONTEXT_FLAGS_ARB        , APP_DEBUG_MODE ? WGL_CONTEXT_DEBUG_BIT_ARB : 0,
+                    0,        //End
+                };
+                pNativeOpenGLContextHandle = ::wglCreateContextAttribsARB(pNativeDeviceContextHandle, 0, Attributes);
+            }
 
             if (pNativeDeviceContextHandle == 0)
             {
