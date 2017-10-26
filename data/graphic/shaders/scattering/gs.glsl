@@ -38,7 +38,6 @@ layout(location = 2) in vec2 in_UV[];
 // Output to next stage
 // -----------------------------------------------------------------------------
 layout(location = 2) out vec2 out_UV;
-layout(location = 4) out flat uint out_Layer;
 
 // -----------------------------------------------------------------------------
 // Main
@@ -50,7 +49,6 @@ void main()
     for( int IndexOfVertex = 0; IndexOfVertex < 3; IndexOfVertex++ )
     {
         out_UV    = in_UV[IndexOfVertex];
-        out_Layer = m_Layer;
         
         gl_Position = gl_in[IndexOfVertex].gl_Position;
 

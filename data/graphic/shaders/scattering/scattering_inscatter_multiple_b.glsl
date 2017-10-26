@@ -19,7 +19,6 @@ layout(row_major, std140, binding = 3) uniform PSLayerValues
 // Input to fragment from previous stage
 // -----------------------------------------------------------------------------
 layout(location = 2) in vec2 in_UV;
-layout(location = 4) in flat uint in_Layer;
 
 // -----------------------------------------------------------------------------
 // Output to fragment
