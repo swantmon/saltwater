@@ -23,8 +23,8 @@ void main()
 {
     vec3 UVW = vec3(gl_FragCoord.xy, in_Layer) / vec3(g_InscatterMuS * g_InscatterNu, g_InscatterMu, g_InscatterAltitude);
 
-    vec3 Rayleigh = textureLod(g_DeltaSR, UVW, 0).rgb;
-    vec3 Mie      = textureLod(g_DeltaSM, UVW, 0).rgb;
+    vec3 Rayleigh = textureLod(g_DeltaSR, UVW, 0.0f).rgb;
+    vec3 Mie      = textureLod(g_DeltaSM, UVW, 0.0f).rgb;
 
     out_Output = vec4(Rayleigh, Mie.r);
 }

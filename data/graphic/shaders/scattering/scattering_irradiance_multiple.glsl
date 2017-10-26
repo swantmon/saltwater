@@ -8,8 +8,8 @@
 // -----------------------------------------------------------------------------
 // Defines
 // -----------------------------------------------------------------------------
-const float g_DeltaPhi   = g_PI / g_IrradianceIntegralSampleCount;
-const float g_DeltaTheta = g_PI / g_IrradianceIntegralSampleCount;
+const float g_DeltaPhi   = g_PI / float(g_IrradianceIntegralSampleCount);
+const float g_DeltaTheta = g_PI / float(g_IrradianceIntegralSampleCount);
 
 // -----------------------------------------------------------------------------
 // Input from engine
@@ -47,11 +47,11 @@ void main()
     
     for (int iPhi = 0; iPhi < g_IrradianceIntegralSampleCount * 2; ++ iPhi)
     {
-        float Phi = (iPhi + 0.5f) * g_DeltaPhi;
+        float Phi = (float(iPhi) + 0.5f) * g_DeltaPhi;
 
         for (int iTheta = 0; iTheta < g_IrradianceIntegralSampleCount / 2; ++ iTheta)
         {
-            float Theta = (iTheta + 0.5f) * g_DeltaTheta;
+            float Theta = (float(iTheta) + 0.5f) * g_DeltaTheta;
             float Dw = g_DeltaTheta * g_DeltaPhi * sin(Theta);
             vec3 W = vec3(cos(Phi) * sin(Theta), sin(Phi) * sin(Theta), cos(Theta));
             float Nu = dot(S, W);

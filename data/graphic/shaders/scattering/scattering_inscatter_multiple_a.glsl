@@ -8,8 +8,8 @@
 // -----------------------------------------------------------------------------
 // Defines
 // -----------------------------------------------------------------------------
-const float g_DeltaPhi = g_PI / g_InscatterIntegralSphereSampleCount;
-const float g_DeltaTheta = g_PI / g_InscatterIntegralSphereSampleCount;
+const float g_DeltaPhi = g_PI / float(g_InscatterIntegralSphereSampleCount);
+const float g_DeltaTheta = g_PI / float(g_InscatterIntegralSphereSampleCount);
 
 // -----------------------------------------------------------------------------
 // Input from engine
@@ -57,7 +57,7 @@ void Inscatter(float _Radius, float _Mu, float _MuS, float _Nu, out vec3 _rRayle
 
     for (int iTheta = 0; iTheta < g_InscatterIntegralSphereSampleCount; ++ iTheta) 
 	{
-        float Theta = (iTheta + 0.5f) * g_DeltaTheta;
+        float Theta = (float(iTheta) + 0.5f) * g_DeltaTheta;
         float CTheta = cos(Theta);
 
         float GReflectance = 0.0f;
@@ -73,7 +73,7 @@ void Inscatter(float _Radius, float _Mu, float _MuS, float _Nu, out vec3 _rRayle
 
         for (int iPhi = 0; iPhi < g_InscatterIntegralSphereSampleCount * 2; ++ iPhi) 
 		{
-            float Phi = (iPhi + 0.5f) * g_DeltaPhi;
+            float Phi = (float(iPhi) + 0.5f) * g_DeltaPhi;
             float Dw = g_DeltaTheta * g_DeltaPhi * sin(Theta);
             vec3 W = vec3(cos(Phi) * sin(Theta), sin(Phi) * sin(Theta), CTheta);
 

@@ -48,7 +48,7 @@ void Integrate(float _Radius, float _Mu, float _MuS, float _Nu, float _T, out ve
 
 void Inscatter(float _Radius, float _Mu, float _MuS, float _Nu, out vec3 _Rayleigh, out vec3 _Mie) // single scattering
 {
-    float Dx = Limit(_Radius, _Mu) / g_InscatterIntegralSampleCount;
+    float Dx = Limit(_Radius, _Mu) / float(g_InscatterIntegralSampleCount);
     float Xi = 0.0f;
     vec3 Rayleighi = vec3(0.0f);
     vec3 Miei = vec3(0.0f);
