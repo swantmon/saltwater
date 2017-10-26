@@ -8,6 +8,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "graphic/gfx_main.h"
 #include "graphic/gfx_native_shader.h"
 #include "graphic/gfx_native_types.h"
 #include "graphic/gfx_shader_manager.h"
@@ -373,7 +374,18 @@ namespace
 
         PreprocessorShader(ShaderFileContent);
 
-        ShaderFileContent = "#version 450 \n" + ShaderFileContent;
+        if (Main::GetGraphicsAPI() == GLES32)
+        {
+            ShaderFileContent = "precision lowp sampler2D; \n" + ShaderFileContent;
+            ShaderFileContent = "precision lowp sampler3D; \n" + ShaderFileContent;
+            ShaderFileContent = "precision lowp samplerCube; \n" + ShaderFileContent;
+            ShaderFileContent = "precision mediump float; \n" + ShaderFileContent;
+            ShaderFileContent = "#version 320 es \n" + ShaderFileContent;
+        }
+        else
+        {
+            ShaderFileContent = "#version 450 \n" + ShaderFileContent;
+        }        
 
         ShaderLength = ShaderFileContent.size();
 
@@ -526,7 +538,18 @@ namespace
 
         PreprocessorShader(ShaderFileContent);
 
-        ShaderFileContent = "#version 450 \n" + ShaderFileContent;
+        if (Main::GetGraphicsAPI() == GLES32)
+        {
+            ShaderFileContent = "precision lowp sampler2D; \n" + ShaderFileContent;
+            ShaderFileContent = "precision lowp sampler3D; \n" + ShaderFileContent;
+            ShaderFileContent = "precision lowp samplerCube; \n" + ShaderFileContent;
+            ShaderFileContent = "precision mediump float; \n" + ShaderFileContent;
+            ShaderFileContent = "#version 320 es \n" + ShaderFileContent;
+        }
+        else
+        {
+            ShaderFileContent = "#version 450 \n" + ShaderFileContent;
+        }
 
         ShaderLength = ShaderFileContent.size();
 
