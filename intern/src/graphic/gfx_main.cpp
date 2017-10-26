@@ -276,9 +276,7 @@ namespace
                 std::string Message = "Graphics API " + GraphicsAPI + " is not supported";
                 BASE_CONSOLE_ERROR(Message.c_str());
             }
-
-            bool GLESAvailable;
-
+            
             if (m_GraphicsAPI == GLES32)
             {
                 typedef const char* (WINAPI * PFNWGLGETEXTENSIONSSTRINGARBPROC)(HDC hdc);
@@ -288,7 +286,7 @@ namespace
                 std::string wglExtensions = wglGetExtensionsStringARB(pNativeDeviceContextHandle);
 
                 std::size_t found = wglExtensions.find("WGL_EXT_create_context_es2_profile");
-                GLESAvailable = found != std::string::npos;
+                bool GLESAvailable = found != std::string::npos;
 
                 if (!GLESAvailable)
                 {
