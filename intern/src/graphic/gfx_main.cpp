@@ -4,6 +4,7 @@
 #include "base/base_console.h"
 #include "base/base_exception.h"
 #include "base/base_matrix4x4.h"
+#include "base/base_program_parameters.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 #include "base/base_vector3.h"
@@ -233,35 +234,48 @@ namespace
                 0,
                 0, 0, 0
             };
-
-            const int Attributes[] =
-            {
-                WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
-                WGL_CONTEXT_MINOR_VERSION_ARB, 5,
-                WGL_CONTEXT_PROFILE_MASK_ARB , WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-                WGL_CONTEXT_FLAGS_ARB        , APP_DEBUG_MODE ? WGL_CONTEXT_DEBUG_BIT_ARB : 0,
-                0,        //End
-            };
-
+            
             // -----------------------------------------------------------------------------
             // Create OpenGL specific stuff with dummy context
             // -----------------------------------------------------------------------------
             pNativeWindowHandle = rWindowInfo.m_pNativeWindowHandle;
 
             pNativeDeviceContextHandle = ::GetDC(pNativeWindowHandle);
-
+            
             Format = ChoosePixelFormat(pNativeDeviceContextHandle, &PixelFormatDesc);
 
             SetPixelFormat(pNativeDeviceContextHandle, Format, &PixelFormatDesc);
 
             pDummyNativeOpenGLContextHandle = ::wglCreateContext(pNativeDeviceContextHandle);
-
+            
             if (pDummyNativeOpenGLContextHandle == 0)
             {
                 BASE_THROWM("OpenGL dummy context creation failed.");
             }
 
             wglMakeCurrent(pNativeDeviceContextHandle, pDummyNativeOpenGLContextHandle);
+
+            const std::string GraphicsAPI = Base::CProgramParameters::GetInstance().GetStdString("graphics_api");
+
+            bool UseGLES = GraphicsAPI == "gles32";
+            bool GLESAvailable;
+
+            if (UseGLES)
+            {
+                typedef const char* (WINAPI * PFNWGLGETEXTENSIONSSTRINGARBPROC)(HDC hdc);
+                PROC Function = wglGetProcAddress("wglGetExtensionsStringARB");
+                PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB = reinterpret_cast<PFNWGLGETEXTENSIONSSTRINGARBPROC>(Function);
+
+                std::string wglExtensions = wglGetExtensionsStringARB(pNativeDeviceContextHandle);
+
+                std::size_t found = wglExtensions.find("WGL_EXT_create_context_es2_profile");
+                GLESAvailable = found != std::string::npos;
+
+                if (!GLESAvailable)
+                {
+                    BASE_CONSOLE_ERROR("OpenGL ES 3.2 is not availble!");
+                }
+            }
 
             // -----------------------------------------------------------------------------
             // Activate GLEW. GLEW is an extension manager which handles all different
@@ -283,6 +297,15 @@ namespace
             // -----------------------------------------------------------------------------
             // Create final OpenGL context with attributes
             // -----------------------------------------------------------------------------
+            const int Attributes[] =
+            {
+                WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
+                WGL_CONTEXT_MINOR_VERSION_ARB, 5,
+                WGL_CONTEXT_PROFILE_MASK_ARB , WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+                WGL_CONTEXT_FLAGS_ARB        , APP_DEBUG_MODE ? WGL_CONTEXT_DEBUG_BIT_ARB : 0,
+                0,        //End
+            };
+
             pNativeOpenGLContextHandle = ::wglCreateContextAttribsARB(pNativeDeviceContextHandle, 0, Attributes);
 
             if (pNativeDeviceContextHandle == 0)
