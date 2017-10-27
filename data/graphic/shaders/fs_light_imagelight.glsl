@@ -15,8 +15,8 @@
 #define USE_PARALLAX
 #define MAX_NUMBER_OF_PROBES 4
 
-#define SKY_PROBE 1
-#define LOCAL_PROBE 2
+#define SKY_PROBE 1u
+#define LOCAL_PROBE 2u
 
 struct SProbeProperties
 {
@@ -179,7 +179,7 @@ void main()
 #ifdef USE_SSR
     if (ps_UseSSR == 1.0f)
     {    
-        vec4 SSR = textureLod(ps_SSR, in_UV, 0);
+        vec4 SSR = textureLod(ps_SSR, in_UV, 0.0f);
 
         SpecularLighting.rgb = SSR.rgb;
         SpecularLighting.a   = 1.0f - clamp(SSR.a, 0.0f, 1.0f);
@@ -198,7 +198,7 @@ void main()
 
             float NumberOfMiplevelsSpecularIBL = LightProb.ps_LightSettings.x;
 
-            if (LightProb.ps_ProbeType != 0)
+            if (LightProb.ps_ProbeType != 0u)
             {
                 bool IsInside = IsPositionInProbe(Data.m_WSPosition, LightProb);
                 

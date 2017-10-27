@@ -74,14 +74,14 @@ vec4 SampleLightFromTexture(in sampler2D _Texture, in vec3 _HitUVz, in float _Le
         vec2 PreviousUV              = PreviousScreen.xy * g_ScreenPositionScaleBias.xy + g_ScreenPositionScaleBias.zw;
         
         OutColor.rgb = textureLod( _Texture, PreviousUV.xy, _Level).rgb;
-        OutColor.a = 1;
+        OutColor.a = 1.0f;
 
         DistanceFromCenter = distance(PreviousUV.xy, vec2(0.5f)) * 2.0f;
     }
     else
     {
         OutColor.rgb = textureLod( _Texture, _HitUVz.xy, _Level).rgb;
-        OutColor.a = 1;
+        OutColor.a = 1.0f;
 
         DistanceFromCenter = distance(_HitUVz.xy, vec2(0.5f)) * 2.0f;
     }
@@ -108,10 +108,10 @@ vec4 SampleDepthFromTexture(in sampler2D _Texture, in vec4 _SampleUV0, in vec4 _
 {
     vec4 SampleDepth;
 
-    SampleDepth.x = textureLod( _Texture, _SampleUV0.xy, 0 ).r;
-    SampleDepth.y = textureLod( _Texture, _SampleUV0.zw, 0 ).r;
-    SampleDepth.z = textureLod( _Texture, _SampleUV1.xy, 0 ).r;
-    SampleDepth.w = textureLod( _Texture, _SampleUV1.zw, 0 ).r;
+    SampleDepth.x = textureLod(_Texture, _SampleUV0.xy, 0.0f).r;
+    SampleDepth.y = textureLod(_Texture, _SampleUV0.zw, 0.0f).r;
+    SampleDepth.z = textureLod(_Texture, _SampleUV1.xy, 0.0f).r;
+    SampleDepth.w = textureLod(_Texture, _SampleUV1.zw, 0.0f).r;
 
     return SampleDepth;
 }
@@ -133,21 +133,21 @@ void RayCast(
     // -----------------------------------------------------------------------------
     // Transform ray from world to view and from view to screen/clip
     // -----------------------------------------------------------------------------
-    const vec4 RayStartV = g_WorldToView * vec4(_RayOriginTranslatedWorld, 1.0f);
-    const vec4 RayDirV   = g_WorldToView * vec4(_RayDirection * _SceneDepth, 0.0f);
-    const vec4 RayEndV   = RayStartV + RayDirV;
+    vec4 RayStartV = g_WorldToView * vec4(_RayOriginTranslatedWorld, 1.0f);
+    vec4 RayDirV   = g_WorldToView * vec4(_RayDirection * _SceneDepth, 0.0f);
+    vec4 RayEndV   = RayStartV + RayDirV;
 
-    const float RayEndRadiusV = length(RayDirV.xyz) * tan(_ConeAngleWorld * 0.4f);
-    const vec2  RayEndBorderV = RayEndV.xy + RayEndRadiusV / sqrt(2.0f);
+    float RayEndRadiusV = length(RayDirV.xyz) * tan(_ConeAngleWorld * 0.4f);
+    vec2  RayEndBorderV = RayEndV.xy + RayEndRadiusV / sqrt(2.0f);
 
-    const vec4 RayStartClip         = g_ViewToScreen * RayStartV;
-    const vec4 RayEndClip           = g_ViewToScreen * RayEndV;
-    const vec4 TempRayEndBorderClip = g_ViewToScreen * vec4(RayEndBorderV, RayEndV.zw);
-    const vec2 RayEndBorderClip     = TempRayEndBorderClip.xy;
+    vec4 RayStartClip         = g_ViewToScreen * RayStartV;
+    vec4 RayEndClip           = g_ViewToScreen * RayEndV;
+    vec4 TempRayEndBorderClip = g_ViewToScreen * vec4(RayEndBorderV, RayEndV.zw);
+    vec2 RayEndBorderClip     = TempRayEndBorderClip.xy;
 
-    const vec3 RayStartScreen     = RayStartClip.xyz / RayStartClip.w;
-    const vec3 RayEndScreen       = RayEndClip.xyz / RayEndClip.w;
-    const vec2 RayEndBorderScreen = RayEndBorderClip.xy / RayEndClip.w;
+    vec3 RayStartScreen     = RayStartClip.xyz / RayStartClip.w;
+    vec3 RayEndScreen       = RayEndClip.xyz / RayEndClip.w;
+    vec2 RayEndBorderScreen = RayEndBorderClip.xy / RayEndClip.w;
     
     vec3 RayStepScreen       = (RayEndScreen - RayStartScreen);
     vec2 RayStepRadiusScreen = (RayEndBorderScreen - RayEndScreen.xy);
@@ -157,10 +157,10 @@ void RayCast(
     // Computes the scale down factor for RayStepScreen required to fit on 
     // the X and Y axis in order to clip it in the viewport
     // -----------------------------------------------------------------------------
-    const float RayStepScreenInvFactor = 0.5f * length( RayStepScreen.xy );
-    const vec2  AbsRayStepScreen       = abs(RayStepScreen.xy);
-    const vec2  S                      = (AbsRayStepScreen - max(abs(RayStepScreen.xy + RayStartScreen.xy * RayStepScreenInvFactor) - RayStepScreenInvFactor, 0.0f)) / AbsRayStepScreen;
-    const float RayStepFactor          = min(S.x, S.y) / RayStepScreenInvFactor;
+    float RayStepScreenInvFactor = 0.5f * length( RayStepScreen.xy );
+    vec2  AbsRayStepScreen       = abs(RayStepScreen.xy);
+    vec2  S                      = (AbsRayStepScreen - max(abs(RayStepScreen.xy + RayStartScreen.xy * RayStepScreenInvFactor) - RayStepScreenInvFactor, 0.0f)) / AbsRayStepScreen;
+    float RayStepFactor          = min(S.x, S.y) / RayStepScreenInvFactor;
 
     RayStepScreen       *= RayStepFactor;
     RayStepRadiusScreen *= RayStepFactor;
@@ -168,21 +168,21 @@ void RayCast(
     // -----------------------------------------------------------------------------
     // Transform from screen space to UV coordinates
     // -----------------------------------------------------------------------------
-    const vec3 RayStartUVz     = vec3((RayStartScreen.xy * g_ScreenPositionScaleBias.xy + g_ScreenPositionScaleBias.zw), RayStartScreen.z);
-    const vec3 RayStepUVz      = vec3(RayStepScreen.xy   * g_ScreenPositionScaleBias.xy, RayStepScreen.z);
-    const vec2 RayStepRadiusUV = RayStepRadiusScreen.xy  * g_ScreenPositionScaleBias.xy;
+    vec3 RayStartUVz     = vec3((RayStartScreen.xy * g_ScreenPositionScaleBias.xy + g_ScreenPositionScaleBias.zw), RayStartScreen.z);
+    vec3 RayStepUVz      = vec3(RayStepScreen.xy   * g_ScreenPositionScaleBias.xy, RayStepScreen.z);
+    vec2 RayStepRadiusUV = RayStepRadiusScreen.xy  * g_ScreenPositionScaleBias.xy;
     
     // -----------------------------------------------------------------------------
     // Step width
     // -----------------------------------------------------------------------------
-    const float RayStepRadiusFactor = length(RayStepRadiusUV * g_InvertedScreensizeAndScreensize.zw);
-    const float Step = 1.0f / (_NumSteps + 1);
+    float RayStepRadiusFactor = length(RayStepRadiusUV * g_InvertedScreensizeAndScreensize.zw);
+    float Step = 1.0f / float(_NumSteps + 1);
 
     // -----------------------------------------------------------------------------
     // *2 to get less morie pattern in extreme cases, larger values make object 
     // appear not grounded in reflections
     // -----------------------------------------------------------------------------
-    const float CompareTolerance = abs(RayStepUVz.z) * Step * 2.0f;
+    float CompareTolerance = abs(RayStepUVz.z) * Step * 2.0f;
 
     // -----------------------------------------------------------------------------
     // Avoid bugs with early returns inside of loops on certain platform compilers.

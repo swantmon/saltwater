@@ -105,7 +105,7 @@ void CalculateUVAndLOD(vec3 _p0_27, vec3 _p0_24, vec3 _p0_32, out vec2 _UV, out 
     _UV.x = ((dot (A, D) * InverseAdotA) - ((AdotB * InverseAdotA) * _UV.y));
 
     _UV  = (vec2(0.125f, 0.125f) + (0.75f * _UV));
-    _LOD = (log(float((textureSize(ps_FilteredMap, 0).x) * (abs(tmpvar_40) / pow (CdotC, 0.75f)))) / 1.098612f);
+    _LOD = (log((vec2(textureSize(ps_FilteredMap, 0)).x * (abs(tmpvar_40) / pow(CdotC, 0.75f)))) / 1.098612f);
 }
 
 
