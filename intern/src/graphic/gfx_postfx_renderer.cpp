@@ -280,9 +280,9 @@ namespace
 
         std::stringstream SMAADefineStream;
 
-        SMAADefineStream << "#define SMAA_RT_METRICS " << "vec4(1.0 / "
-            << WindowSize[0] << ", 1.0 / " << WindowSize[1] << ", "
-            << WindowSize[0] << ", " << WindowSize[1] << ")";
+        SMAADefineStream << "#define SMAA_RT_METRICS " << "vec4(1.0f / "
+            << WindowSize[0] << ".0f, 1.0f / " << WindowSize[1] << ".0f, "
+            << WindowSize[0] << ".0f, " << WindowSize[1] << ".0f)";
 
         std::string SMAADefineString = SMAADefineStream.str();
         

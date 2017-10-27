@@ -81,7 +81,7 @@ void main()
 
     vec4 Sample[4];
 
-    for(uint IndexOfSample = 0; IndexOfSample < 4; ++ IndexOfSample)
+    for(int IndexOfSample = 0; IndexOfSample < 4; ++ IndexOfSample)
     {
         Sample[IndexOfSample] = texture(ps_InputTexture, DownSampleUV[IndexOfSample]);
     }
@@ -117,7 +117,7 @@ void main()
 
     vec3 Sample[4];
 
-    for(uint IndexOfSample = 0; IndexOfSample < 4; ++ IndexOfSample)
+    for(int IndexOfSample = 0; IndexOfSample < 4; ++ IndexOfSample)
     {
         Sample[IndexOfSample] = texture(ps_InputTexture, DownSampleUV[IndexOfSample]).rgb;
     }
