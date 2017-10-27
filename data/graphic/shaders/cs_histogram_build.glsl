@@ -58,16 +58,16 @@ float GetBin(float _Luminance, float _HistogramLogMin, float _HistogramLogMax, f
 layout( local_size_x = THREAD_GROUP_SIZE_X, local_size_y = THREAD_GROUP_SIZE_Y, local_size_z = 1 ) in;
 void main()
 {
-    uint   IndexOfPixel;
-    uint   IndexOfBin;
-    uint   IndexOfBin0;
-    uint   IndexOfBin1;
-    uint   PixelX;
-    uint   PixelY;
-    uvec2  PixelCoord;
-    uvec2  PixelOffset;
-    uint   ThreadX;
-    uint   ThreadY;
+    int    IndexOfPixel;
+    int    IndexOfBin;
+    int    IndexOfBin0;
+    int    IndexOfBin1;
+    int    PixelX;
+    int    PixelY;
+    ivec2  PixelCoord;
+    ivec2  PixelOffset;
+    int    ThreadX;
+    int    ThreadY;
     float  Exposure;
     vec4   LuminanceRGBA;
     vec3   LuminanceRGB;
@@ -76,10 +76,10 @@ void main()
     float  Weight0;
     float  Weight1;
     
-    uvec2 cs_MinPixelCoord        = cs_ConstantData0.xy;
-    uvec2 cs_MaxPixelCoord        = cs_ConstantData0.zw;
-    uvec2 cs_NumberOfThreadGroups = cs_ConstantData1.xy;
-    uint  cs_LastHistoryIndex     = cs_ConstantData1.w;
+    ivec2 cs_MinPixelCoord        = ivec2(cs_ConstantData0.xy);
+    ivec2 cs_MaxPixelCoord        = ivec2(cs_ConstantData0.zw);
+    ivec2 cs_NumberOfThreadGroups = ivec2(cs_ConstantData1.xy);
+    int   cs_LastHistoryIndex     = int(cs_ConstantData1.w);
     float cs_HistogramLogMin      = cs_ConstantData3.x;
     float cs_HistogramLogMax      = cs_ConstantData3.y;
     float cs_HistogramScale       = cs_ConstantData3.z;
@@ -101,13 +101,13 @@ void main()
     // -------------------------------------------------------------------------------------
     // Calculate histogram of this thread
     // -------------------------------------------------------------------------------------
-    PixelOffset = cs_MinPixelCoord + gl_GlobalInvocationID.xy * uvec2(TILE_SIZE, TILE_SIZE);
+    PixelOffset = cs_MinPixelCoord + ivec2(gl_GlobalInvocationID.xy) * ivec2(TILE_SIZE, TILE_SIZE);
     
     for (PixelY = 0; PixelY < TILE_SIZE; ++ PixelY)
     {
         for (PixelX = 0; PixelX < TILE_SIZE; ++ PixelX)
         {            
-            PixelCoord = PixelOffset + uvec2(PixelX, PixelY);
+            PixelCoord = PixelOffset + ivec2(PixelX, PixelY);
             
             bvec2 IsInside;
 
@@ -129,7 +129,7 @@ void main()
                 
                 Bin = GetBin(Luminance, cs_HistogramLogMin, cs_HistogramLogMax, cs_HistogramScale);
                 
-                IndexOfBin0 = uint(Bin);
+                IndexOfBin0 = int(Bin);
                 IndexOfBin1 = IndexOfBin0 + 1;
                 
                 Weight1 = Bin - floor(Bin);
@@ -159,7 +159,7 @@ void main()
         }
     }
 
-    IndexOfPixel = (gl_WorkGroupID.x + gl_WorkGroupID.y * cs_NumberOfThreadGroups.x) * HISTOGRAM_SIZE + gl_LocalInvocationIndex;
+    IndexOfPixel = int(gl_WorkGroupID.x + gl_WorkGroupID.y) * cs_NumberOfThreadGroups.x * HISTOGRAM_SIZE + int(gl_LocalInvocationIndex);
 
     m_HistogramPerGroup[IndexOfPixel] = SumInBin;
 }

@@ -59,7 +59,7 @@ float Function3(vec3 CurrentEdgeVertex, vec3 PreviousEdgeVertex)
 {
     float Temp = clamp(dot (CurrentEdgeVertex, PreviousEdgeVertex), -0.9999f, 0.9999f);
 
-    return PI/2 - (sign(Temp) * (PI / 2 - (sqrt((1.0f - abs(Temp))) * (PI/2 + (abs(Temp) * (-0.2146018f + (abs(Temp) * (0.08656672f + (abs(Temp) * -0.03102955f)))))))));
+    return PI / 2.0f - (sign(Temp) * (PI / 2.0f - (sqrt((1.0f - abs(Temp))) * (PI / 2.0f + (abs(Temp) * (-0.2146018f + (abs(Temp) * (0.08656672f + (abs(Temp) * -0.03102955f)))))))));
 }
 
 vec3 Function2(vec3 _NextEdge, vec3 _CurrentEdge)
@@ -105,7 +105,7 @@ void CalculateUVAndLOD(vec3 _p0_27, vec3 _p0_24, vec3 _p0_32, out vec2 _UV, out 
     _UV.x = ((dot (A, D) * InverseAdotA) - ((AdotB * InverseAdotA) * _UV.y));
 
     _UV  = (vec2(0.125f, 0.125f) + (0.75f * _UV));
-    _LOD = (log((textureSize(ps_FilteredMap, 0).x * (abs(tmpvar_40) / pow (CdotC, 0.75f)))) / 1.098612f);
+    _LOD = (log(float((textureSize(ps_FilteredMap, 0).x) * (abs(tmpvar_40) / pow (CdotC, 0.75f)))) / 1.098612f);
 }
 
 
@@ -305,7 +305,7 @@ void main()
 
     vec2 UV = vec2(Data.m_Roughness, Theta / (0.5f * PI)) * LUT_SCALE + LUT_BIAS;
         
-    vec4 LTCMaterial = texture2D(ps_LTCMaterial, UV);
+    vec4 LTCMaterial = texture(ps_LTCMaterial, UV);
 
     mat3 LTCMatrix = mat3(
         vec3(1.0f         , 0.0f         , LTCMaterial.y),

@@ -102,8 +102,8 @@ float Lerp(float _Start, float _End, float _Weight)
 layout( local_size_x = 1, local_size_y = 1, local_size_z = 1 ) in;
 void main()
 {
-    uint  cs_HistoryIndex             = cs_ConstantData1.z;
-    uint  cs_LastHistoryIndex         = cs_ConstantData1.w;
+    int  cs_HistoryIndex              = int(cs_ConstantData1.z);
+    int  cs_LastHistoryIndex          = int(cs_ConstantData1.w);
     float cs_Time                     = cs_ConstantData2.y;
     float cs_HistogramLowerBound      = cs_ConstantData2.z;
     float cs_HistogramUpperBound      = cs_ConstantData2.w;
@@ -119,7 +119,7 @@ void main()
     float cs_ISO                      = cs_ConstantData5.z;
     float cs_ResetEyeAdaption         = cs_ConstantData5.w;
     
-    uint   IndexOfBin;
+    int    IndexOfBin;
     float  Delta;
     float  SumInBin;
     float  SumInHistogram;
