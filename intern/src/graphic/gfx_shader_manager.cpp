@@ -389,7 +389,7 @@ namespace
         else
         {
             ShaderFileContent = "#version 450 \n" + ShaderFileContent;
-        }        
+        }
 
         ShaderLength = ShaderFileContent.size();
 
@@ -542,11 +542,15 @@ namespace
 
         PreprocessorShader(ShaderFileContent);
 
-        if (Main::GetGraphicsAPI() == GLES32)
+        if(Main::GetGraphicsAPI() == GLES32)
         {
             ShaderFileContent = "precision lowp sampler2D; \n" + ShaderFileContent;
             ShaderFileContent = "precision lowp sampler3D; \n" + ShaderFileContent;
             ShaderFileContent = "precision lowp samplerCube; \n" + ShaderFileContent;
+            ShaderFileContent = "precision lowp image2D; \n" + ShaderFileContent;
+            ShaderFileContent = "precision lowp image3D; \n" + ShaderFileContent;
+            ShaderFileContent = "precision lowp uimage2D; \n" + ShaderFileContent;
+            ShaderFileContent = "precision lowp sampler2DShadow; \n" + ShaderFileContent;
             ShaderFileContent = "precision mediump float; \n" + ShaderFileContent;
             ShaderFileContent = "#version 320 es \n" + ShaderFileContent;
         }
