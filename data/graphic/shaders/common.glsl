@@ -97,9 +97,9 @@ float GetRadicalInverseVdC(in uint _Bits)
 
 // -----------------------------------------------------------------------------
 
-vec2 GetHammersley(uint _Index, uint _Sum)
+vec2 GetHammersley(int _Index, int _Sum)
 {
-    return vec2(float(_Index)/float(_Sum), GetRadicalInverseVdC(_Index));
+    return vec2(float(_Index)/float(_Sum), GetRadicalInverseVdC(uint(_Index)));
 }
 
 // -----------------------------------------------------------------------------

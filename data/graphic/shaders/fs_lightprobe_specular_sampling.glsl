@@ -48,11 +48,11 @@ vec3 GetImportanceSampleSpecular(in vec3 _Reflection, in float _Roughness)
     vec3 N = _Reflection;
     vec3 V = _Reflection;
 
-    const uint NumSamples = NUM_SAMPLES;
+    const int NumSamples = NUM_SAMPLES;
     
     ivec2 CubeSize = textureSize(ps_EnvironmentCubemap, 0);
     
-    for(uint IndexOfSample = 0; IndexOfSample < NumSamples; IndexOfSample++ )
+    for(int IndexOfSample = 0; IndexOfSample < NumSamples; IndexOfSample++ )
     {
         vec2  Xi    = GetHammersley(IndexOfSample, NumSamples);
         vec3  H     = GetImportanceSampleGGX( Xi, _Roughness, N);
@@ -83,8 +83,8 @@ vec3 GetImportanceSampleSpecular(in vec3 _Reflection, in float _Roughness)
             // -----------------------------------------------------------------------------
             float PDF = GetDistributionGGX(NdotH, _Roughness) * INV_PI / 4.0f;
             
-            float OmegaS   = 1.0 / (NumSamples * PDF);
-            float OmegaP   = 4.0 * PI / (6.0f * CubeSize.x * CubeSize.x);
+            float OmegaS   = 1.0 / (float(NumSamples) * PDF);
+            float OmegaP   = 4.0 * PI / (6.0f * float(CubeSize.x * CubeSize.x));
             
             const float LODBias = 1.0f;
             
