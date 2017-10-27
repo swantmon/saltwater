@@ -22,6 +22,15 @@
 
 using namespace Gfx;
 
+#define VALIDATE_PIPELINE
+
+#ifdef VALIDATE_PIPELINE
+#ifndef _DEBUG
+static_assert(false, "Pipeline Validation is still active in release mode!");
+#endif
+#endif // VALIDATE_PIPELINE
+
+
 namespace
 {
     class CGfxContextManager : private Base::CUncopyable
@@ -144,7 +153,11 @@ namespace
         
         void Dispatch(unsigned int _NumberOfThreadGroupsX, unsigned int _NumberOfThreadGroupsY, unsigned int _NumberOfThreadGroupsZ);
         void DispatchIndirect(CBufferPtr _IndirectBufferPtr, unsigned int _Offset);
-    
+ 
+    private:
+
+        void ValidatePipeline();
+
     private:
     
         static const unsigned int s_NumberOfTextureUnits  = 16;
@@ -285,7 +298,7 @@ namespace
         // -----------------------------------------------------------------------------        
         unsigned int ProgramHandle = 0;
 
-        const char* pShader = "#version 430 \n void main(void) { }";
+        const char* pShader = "#version 450 \n void main(void) { }";
 
         ProgramHandle = glCreateShaderProgramv(GL_VERTEX_SHADER, 1, &pShader);
 
@@ -1465,6 +1478,7 @@ namespace
 
     void CGfxContextManager::Draw(unsigned int _NumberOfVertices, unsigned int _IndexOfFirstVertex)
     {
+        ValidatePipeline();
         glDrawArrays(s_NativeTopologies[m_Topology], _IndexOfFirstVertex, _NumberOfVertices);
     }
 
@@ -1475,6 +1489,7 @@ namespace
         BASE_UNUSED(_IndexOfFirstIndex);
         BASE_UNUSED(_BaseVertexLocation);
         
+        ValidatePipeline();
         glDrawElements(s_NativeTopologies[m_Topology], _NumberOfIndices, GL_UNSIGNED_INT, 0);
     }
 
@@ -1482,6 +1497,7 @@ namespace
 
     void CGfxContextManager::DrawInstanced(unsigned int _NumberOfVertices, unsigned int _NumberOfInstances, unsigned int _IndexOfFirstVertex)
     {
+        ValidatePipeline();
         glDrawArraysInstanced(s_NativeTopologies[m_Topology], _IndexOfFirstVertex, _NumberOfVertices, _NumberOfInstances);
     }
 
@@ -1493,6 +1509,7 @@ namespace
         BASE_UNUSED(_BaseVertexLocation);
         BASE_UNUSED(_StartInstanceLocation);
 
+        ValidatePipeline();
         glDrawElementsInstanced(s_NativeTopologies[m_Topology], _NumberOfIndices, GL_UNSIGNED_INT, 0, _NumberOfInstances);
     }
     
@@ -1504,6 +1521,7 @@ namespace
 
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, rNativeBuffer.m_NativeBuffer);
 
+        ValidatePipeline();
         glDrawArraysIndirect(s_NativeTopologies[m_Topology], reinterpret_cast<void*>(_Offset));
 
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
@@ -1517,6 +1535,7 @@ namespace
 
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, rNativeBuffer.m_NativeBuffer);
 
+        ValidatePipeline();
         glDrawElementsIndirect(s_NativeTopologies[m_Topology], GL_UNSIGNED_INT, reinterpret_cast<void*>(_Offset));
 
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
@@ -1528,6 +1547,7 @@ namespace
     {
         assert(_NumberOfThreadGroupsX > 0 && _NumberOfThreadGroupsY > 0 && _NumberOfThreadGroupsZ > 0);
 
+        ValidatePipeline();
         glDispatchCompute(_NumberOfThreadGroupsX, _NumberOfThreadGroupsY, _NumberOfThreadGroupsZ);
     }
 
@@ -1539,11 +1559,33 @@ namespace
 
         glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, rNativeBuffer.m_NativeBuffer);
 
+        ValidatePipeline();
         glDispatchComputeIndirect(_Offset);
 
         glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, 0);
     }
     
+    void CGfxContextManager::ValidatePipeline()
+    {
+#ifdef VALIDATE_PIPELINE
+
+        glValidateProgramPipeline(m_NativeShaderPipeline);
+        GLint IsValid;
+        glGetProgramPipelineiv(m_NativeShaderPipeline, GL_VALIDATE_STATUS, &IsValid);
+
+        if (IsValid != GL_TRUE)
+        {
+            GLint LogLength;
+            glGetProgramPipelineiv(m_NativeShaderPipeline, GL_INFO_LOG_LENGTH, &LogLength);
+
+            GLchar* pInfoLog = new char[LogLength];
+            glGetProgramPipelineInfoLog(m_NativeShaderPipeline, LogLength, &LogLength, pInfoLog);
+            BASE_CONSOLE_ERROR(pInfoLog);
+            delete[] pInfoLog;
+        }
+#endif
+    }
+
     // -----------------------------------------------------------------------------
     
     int CGfxContextManager::ConvertInputLayoutFormat(Gfx::CInputLayout::EFormat _Format) const
