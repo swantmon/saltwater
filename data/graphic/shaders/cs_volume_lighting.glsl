@@ -61,7 +61,7 @@ vec4 SamplePermutation(in vec2 _UV)
 
 float SampleGradientPermutation(in float _U, in vec3 _Point)
 {
-    return dot(imageLoad(cs_PermutationGradientImage, ivec2(_U * 256, 0)).xyz, _Point);
+    return dot(imageLoad(cs_PermutationGradientImage, ivec2(_U * 256.0f, 0)).xyz, _Point);
 }
 
 // -------------------------------------------------------------------------------------
@@ -105,8 +105,8 @@ float ImprovedPerlinNoise3D(in vec3 _Seed)
 
 vec3 GetWorldPositionFromThread(in uvec3 _ThreadID)
 {
-    vec2  TexCoord    = vec2(_ThreadID.x / 160.0f, _ThreadID.y / 90.0f);
-    float LinearDepth = max(_ThreadID.z * cs_FrustumDepthInMeter / 128.0f, 0.00001f);
+    vec2  TexCoord    = vec2(float(_ThreadID.x) / 160.0f, float(_ThreadID.y) / 90.0f);
+    float LinearDepth = max(float(_ThreadID.z) * cs_FrustumDepthInMeter / 128.0f, 0.00001f);
     
     float SSDepth = ConvertToHyperbolicDepth(LinearDepth, g_ViewToScreen);
     

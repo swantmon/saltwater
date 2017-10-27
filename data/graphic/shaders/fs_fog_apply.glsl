@@ -38,7 +38,7 @@ void main(void)
     
     float Transmittance = Scattering.a;
 
-    out_Output = vec4(Light.rgb * Transmittance.xxx + InScattering, Light.a);
+    out_Output = vec4(Light.rgb * vec3(Transmittance) + InScattering, Light.a);
 }
 
 #endif // __INCLUDE_FS_FOG_APPLY_GLSL__
