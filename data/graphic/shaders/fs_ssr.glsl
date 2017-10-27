@@ -233,7 +233,7 @@ void RayCast(
             // -----------------------------------------------------------------------------
             vec4 DepthDiff0 = vec4( LastDiff, DepthDiff1.xyz );
             vec4 TimeLerp = clamp( DepthDiff0 / (DepthDiff0 - DepthDiff1) , 0.0f, 1.0f);
-            vec4 IntersectTime = SampleTime + (TimeLerp - 1.0f) / (_NumSteps + 1);
+            vec4 IntersectTime = SampleTime + (TimeLerp - 1.0f) / float(_NumSteps + 1);
 
             vec4 HitTime;
 
@@ -282,10 +282,10 @@ float GetRoughnessFade(in float _Roughness)
 uint ReverseUIntBits(in uint _Bits)
 {
     //_Bits = ( _Bits << 16) | ( _Bits >> 16);
-    //_Bits = ( (_Bits & 0x00ff00ff) << 8 ) | ( (_Bits & 0xff00ff00) >> 8 );
-    //_Bits = ( (_Bits & 0x0f0f0f0f) << 4 ) | ( (_Bits & 0xf0f0f0f0) >> 4 );
-    _Bits = ( (_Bits & 0x33333333) << 2 ) | ( (_Bits & 0xcccccccc) >> 2 );
-    _Bits = ( (_Bits & 0x55555555) << 1 ) | ( (_Bits & 0xaaaaaaaa) >> 1 );
+    //_Bits = ( (_Bits & 0x00ff00ffu) << 8 ) | ( (_Bits & 0xff00ff00u) >> 8 );
+    //_Bits = ( (_Bits & 0x0f0f0f0fu) << 4 ) | ( (_Bits & 0xf0f0f0f0u) >> 4 );
+    _Bits = ( (_Bits & 0x33333333u) << 2 ) | ( (_Bits & 0xccccccccu) >> 2 );
+    _Bits = ( (_Bits & 0x55555555u) << 1 ) | ( (_Bits & 0xaaaaaaaau) >> 1 );
     return _Bits;
 }
 
@@ -293,10 +293,10 @@ uint ReverseUIntBits(in uint _Bits)
 
 uint MortonCode(in uint _Code)
 {
-    //_Code = (_Code ^ (_Code <<  8)) & 0x00ff00ff;
-    //_Code = (_Code ^ (_Code <<  4)) & 0x0f0f0f0f;
-    _Code = (_Code ^ (_Code <<  2)) & 0x33333333;
-    _Code = (_Code ^ (_Code <<  1)) & 0x55555555;
+    //_Code = (_Code ^ (_Code <<  8)) & 0x00ff00ffu;
+    //_Code = (_Code ^ (_Code <<  4)) & 0x0f0f0f0fu;
+    _Code = (_Code ^ (_Code <<  2)) & 0x33333333u;
+    _Code = (_Code ^ (_Code <<  1)) & 0x55555555u;
     return _Code;
 }
 
@@ -305,10 +305,10 @@ uint MortonCode(in uint _Code)
 uint ReverseBits32(in uint Bits)
 {
     Bits = ( Bits << 16) | ( Bits >> 16);
-    Bits = ( (Bits & 0x00ff00ff) << 8 ) | ( (Bits & 0xff00ff00) >> 8 );
-    Bits = ( (Bits & 0x0f0f0f0f) << 4 ) | ( (Bits & 0xf0f0f0f0) >> 4 );
-    Bits = ( (Bits & 0x33333333) << 2 ) | ( (Bits & 0xcccccccc) >> 2 );
-    Bits = ( (Bits & 0x55555555) << 1 ) | ( (Bits & 0xaaaaaaaa) >> 1 );
+    Bits = ( (Bits & 0x00ff00ffu) << 8 ) | ( (Bits & 0xff00ff00u) >> 8 );
+    Bits = ( (Bits & 0x0f0f0f0fu) << 4 ) | ( (Bits & 0xf0f0f0f0u) >> 4 );
+    Bits = ( (Bits & 0x33333333u) << 2 ) | ( (Bits & 0xccccccccu) >> 2 );
+    Bits = ( (Bits & 0x55555555u) << 1 ) | ( (Bits & 0xaaaaaaaau) >> 1 );
     return Bits;
 }
 
@@ -369,18 +369,18 @@ uint ReverseBits32(in uint Bits)
     vec4 ImportanceSampleBlinn( vec2 E, float Roughness )
     {
         float m = Roughness * Roughness;
-        float n = 2 / (m*m) - 2;
+        float n = 2.0f / (m * m) - 2.0f;
 
-        float Phi = 2 * PI * E.x;
-        float CosTheta = ClampedPow( E.y, 1 / (n + 1) );
-        float SinTheta = sqrt( 1 - CosTheta * CosTheta );
+        float Phi = 2.0f * PI * E.x;
+        float CosTheta = ClampedPow( E.y, 1.0f / (n + 1.0f) );
+        float SinTheta = sqrt( 1.0f - CosTheta * CosTheta );
 
         vec3 H;
         H.x = SinTheta * cos( Phi );
         H.y = SinTheta * sin( Phi );
         H.z = CosTheta;
 
-        float D = (n+2)/ (2*PI) * ClampedPow( CosTheta, n );
+        float D = (n + 2.0f)/ (2.0f * PI) * ClampedPow( CosTheta, n );
         float PDF = D * CosTheta;
 
         return vec4( H, PDF );
@@ -460,36 +460,36 @@ void main(void)
     // -----------------------------------------------------------------------------
     // Vectors
     // -----------------------------------------------------------------------------
-    const vec3 WSViewDirection = normalize(g_ViewPosition.xyz - Data.m_WSPosition);
+    vec3 WSViewDirection = normalize(g_ViewPosition.xyz - Data.m_WSPosition);
     
     // -----------------------------------------------------------------------------
     // Frame
     // -----------------------------------------------------------------------------
-    uint FrameRandom = 0;
+    int FrameRandom = 0;
 
-    const uint RandomizeOverNFrames = 8;
-    FrameRandom = (uint(0) % RandomizeOverNFrames) * 1551;
+    int RandomizeOverNFrames = 8;
+    FrameRandom = (int(0) % RandomizeOverNFrames) * 1551;
 
-    const int NumSteps = 128;
-    const int NumRays  = 1;
+    int NumSteps = 128;
+    int NumRays  = 1;
 
 
 #ifdef SSR_CONE_QUALITY
 
 
     PixelPos.xy  = ScreenPos * g_InvertedScreensizeAndScreensize.zw + g_InvertedScreensizeAndScreensize.zw / vec2(2.0f);
-    const vec2 E = vec2(PseudoRandom(PixelPos + ivec2(FrameRandom, 0)), PseudoRandom(PixelPos + ivec2(0, FrameRandom)));
+    vec2 E = vec2(PseudoRandom(PixelPos + vec2(FrameRandom, 0)), PseudoRandom(PixelPos + vec2(0, FrameRandom)));
 
-    const float StepOffset = PseudoRandom(PixelPos + FrameRandom);
+    float StepOffset = PseudoRandom(PixelPos + float(FrameRandom));
 
-    const vec4 HNAndPDF          = ImportanceSampleBlinn(E, Data.m_Roughness);
-    const vec3 H                 = TangentToWorld(HNAndPDF.xyz, Data.m_WSNormal);
-    const vec3 ViewMirrorUnitDir = 2.0f * dot( WSViewDirection, H ) * H - WSViewDirection;
+    vec4 HNAndPDF          = ImportanceSampleBlinn(E, Data.m_Roughness);
+    vec3 H                 = TangentToWorld(HNAndPDF.xyz, Data.m_WSNormal);
+    vec3 ViewMirrorUnitDir = 2.0f * dot( WSViewDirection, H ) * H - WSViewDirection;
 
-    const float ReflectPDF       = HNAndPDF.w / (4.0f * clamp(dot(WSViewDirection, H), 0.0f, 1.0f));
-    const float TotalSamples     = 8.0f;
-    const float SolidAngleSample = 1.0 / (TotalSamples * ReflectPDF);
-    const float ConeAngleWorld   = acos(1.0f - SolidAngleSample / (2.0f * PI));
+    float ReflectPDF       = HNAndPDF.w / (4.0f * clamp(dot(WSViewDirection, H), 0.0f, 1.0f));
+    float TotalSamples     = 8.0f;
+    float SolidAngleSample = 1.0 / (TotalSamples * ReflectPDF);
+    float ConeAngleWorld   = acos(1.0f - SolidAngleSample / (2.0f * PI));
 
     vec4 HitUVzTime;
     float HCBLevel;
@@ -504,7 +504,7 @@ void main(void)
     // -----------------------------------------------------------------------------
     // Is there a hit?
     // -----------------------------------------------------------------------------
-    if( HitUVzTime.w < 1 )
+    if( HitUVzTime.w < 1.0f )
     {
         vec3 LightColor = SampleLightFromTexture(ps_LightAccumulationBuffer, HitUVzTime.xyz, HCBLevel).rgb;
 
@@ -552,7 +552,7 @@ void main(void)
     // -----------------------------------------------------------------------------
     // Is there a hit?
     // -----------------------------------------------------------------------------
-    if( HitUVzTime.w < 1 )
+    if( HitUVzTime.w < 1.0f )
     {
         vec3 LightColor = SampleLightFromTexture(ps_LightAccumulationBuffer, HitUVzTime.xyz, HCBLevel).rgb;      
 
