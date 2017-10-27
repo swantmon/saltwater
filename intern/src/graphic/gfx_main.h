@@ -30,6 +30,7 @@ enum GraphicAPIs
     GLES32,
     GL45,
     GL46,
+    UNDEFINED_GRAPHICS_API = -1,
 };
 
 namespace Gfx

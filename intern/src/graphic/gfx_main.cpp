@@ -273,7 +273,8 @@ namespace
             }
             else
             {
-                std::string Message = "Graphics API " + GraphicsAPI + " is not supported";
+                m_GraphicsAPI = UNDEFINED_GRAPHICS_API;
+                std::string Message = "Graphics API " + GraphicsAPI + " is not supported! Will try OpenGL 4.5 instead";
                 BASE_CONSOLE_ERROR(Message.c_str());
             }
             
