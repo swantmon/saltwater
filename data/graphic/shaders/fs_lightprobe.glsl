@@ -28,7 +28,10 @@ layout(binding = 0) uniform samplerCube PSEnvironmentTexture;
 // -----------------------------------------------------------------------------
 // Input to fragment from previous stage
 // -----------------------------------------------------------------------------
+layout(location = 0) in vec3 in_Position;
 layout(location = 1) in vec3 in_Normal;
+layout(location = 2) in vec2 in_UV;
+layout(location = 3) in mat3 in_WSNormalMatrix;
 
 // -----------------------------------------------------------------------------
 // Output to fragment
