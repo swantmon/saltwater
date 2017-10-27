@@ -66,10 +66,10 @@ void main()
     // That implementation is for a first test and will be replaced as soon
     // as needed.
     // -----------------------------------------------------------------------------
-    ivec2 UV = ivec2(m_MinX, g_InvertedScreensizeAndScreensize.w - m_MinY);
+    ivec2 UV = ivec2(m_MinX, g_InvertedScreensizeAndScreensize.w - float(m_MinY));
 
 
-    vec2 HomogeneousUV = UV * g_InvertedScreensizeAndScreensize.xy;
+    vec2 HomogeneousUV = vec2(UV) * g_InvertedScreensizeAndScreensize.xy;
 
     // -----------------------------------------------------------------------------
     // Get data
@@ -77,7 +77,7 @@ void main()
     vec4  GBuffer0 = imageLoad(cs_GBuffer0, UV);
     vec4  GBuffer1 = imageLoad(cs_GBuffer1, UV);
     vec4  GBuffer2 = imageLoad(cs_GBuffer2, UV);
-    float VSDepth  = texture2D(cs_Depth   , HomogeneousUV).x;
+    float VSDepth  = texture(cs_Depth, HomogeneousUV).x;
     uint  ID       = imageLoad(cs_HitProxy, UV).x;
 
     // -----------------------------------------------------------------------------
