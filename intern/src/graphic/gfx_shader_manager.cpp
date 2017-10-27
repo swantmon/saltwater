@@ -379,6 +379,8 @@ namespace
             ShaderFileContent = "precision lowp sampler2D; \n" + ShaderFileContent;
             ShaderFileContent = "precision lowp sampler3D; \n" + ShaderFileContent;
             ShaderFileContent = "precision lowp samplerCube; \n" + ShaderFileContent;
+            ShaderFileContent = "precision lowp image2D; \n" + ShaderFileContent;
+            ShaderFileContent = "precision lowp image3D; \n" + ShaderFileContent;
             ShaderFileContent = "precision mediump float; \n" + ShaderFileContent;
             ShaderFileContent = "#version 320 es \n" + ShaderFileContent;
         }
