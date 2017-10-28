@@ -274,8 +274,8 @@ namespace
             else
             {
                 m_GraphicsAPI = UNDEFINED_GRAPHICS_API;
-                std::string Message = "Graphics API " + GraphicsAPI + " is not supported! Will try OpenGL 4.5 instead";
-                BASE_CONSOLE_ERROR(Message.c_str());
+                std::string Message = "Graphics API " + GraphicsAPI + " is not supported!";
+                BASE_THROWV(Message.c_str());
             }
             
             if (m_GraphicsAPI == GLES32)
