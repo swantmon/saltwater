@@ -62,7 +62,6 @@ namespace
         Float3 m_AABBMin;
         float Padding;
         Float3 m_AABBMax;
-        float Padding2;
         int m_VolumeTextureWidth;
     };
 
@@ -756,14 +755,7 @@ namespace
         m_pScalableReconstructor->GetReconstructionSettings(&Settings);
 
         Float4x4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
-
-        Float4 RaycastData[2];
-        PoseMatrix.GetTranslation(RaycastData[0][0], RaycastData[0][1], RaycastData[0][2]);
-        RaycastData[0][3] = 1.0f;
-        RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 1.0f, 0.0f, 1.0f);
-
-        BufferManager::UploadBufferData(m_ScalableRaycastBufferPtr, RaycastData);
-
+        
         ContextManager::SetShaderVS(m_RootVolumesVSPtr);
         ContextManager::SetShaderPS(m_RootVolumesFSPtr);
 
