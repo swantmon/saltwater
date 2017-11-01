@@ -384,9 +384,6 @@ namespace
             ShaderFileContent = "precision lowp uimage2D; \n" + ShaderFileContent;
             ShaderFileContent = "precision lowp sampler2DShadow; \n" + ShaderFileContent;
             ShaderFileContent = "precision mediump float; \n" + ShaderFileContent;
-            ShaderFileContent = "#extension GL_EXT_tessellation_point_size : enable \n" + ShaderFileContent;
-            ShaderFileContent = "#extension GL_OES_tessellation_point_size : enable \n" + ShaderFileContent;
-            ShaderFileContent = "#extension GL_EXT_clip_cull_distance : enable \n" + ShaderFileContent;
             ShaderFileContent = "#version 320 es \n" + ShaderFileContent;
         }
         else
