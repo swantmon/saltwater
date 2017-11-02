@@ -1067,7 +1067,7 @@ namespace
 
         if (!m_UseTrackingCamera)
         {
-            RenderCamera();
+            //RenderCamera();
         }
 
 		if (m_pScalableReconstructor != nullptr)
@@ -1088,9 +1088,9 @@ namespace
 
             BufferManager::UploadBufferData(m_ScalableRaycastBufferPtr, &Data);
 
-			RaycastScalableVolume();
+			//RaycastScalableVolume();
 
-            RenderVertexMap();
+            //RenderVertexMap();
 
             RaycastRootVolumes();
             RaycastLevel1Grids();
