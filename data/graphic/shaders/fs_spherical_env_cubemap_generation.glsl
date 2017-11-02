@@ -53,7 +53,7 @@ vec4 GetTextureSpherical(in vec3 _Normal, in float _LOD)
 // -----------------------------------------------------------------------------
 void main(void)
 {
-    vec4 FinalColor = GetTextureSpherical(-in_Normal, 0);
+    vec4 FinalColor = GetTextureSpherical(-in_Normal, 0.0f);
     
     if (m_IsHDR == 0.0f)
     {

@@ -19,11 +19,6 @@ out gl_PerVertex
     vec4 gl_Position;
 };
 
-vec4 mad(vec4 x, vec4 y, vec4 z)
-{
-	return x * y + z;
-}
-
 layout(location = 0) out vec2 out_UV;
 layout(location = 1) out vec4 out_Offset[3];
 

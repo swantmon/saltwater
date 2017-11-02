@@ -20,7 +20,7 @@ layout (binding = 0, rgba32f) writeonly uniform image2D PSTextureBRDF;
 // -------------------------------------------------------------------------------------
 vec3 IntegrateDFG(in float _Roughness, in float _NdotV)
 {
-    const uint NumSamples = 64;
+    const int NumSamples = 64;
 
     uint   Sample;
     float  Geometry;
@@ -45,7 +45,7 @@ vec3 IntegrateDFG(in float _Roughness, in float _NdotV)
 
     NdotV = clamp(dot(NormalUnitDir, ViewUnitDir), 0.0f, 1.0f);
     
-    for (uint IndexOfSample = 0; IndexOfSample < NumSamples; IndexOfSample++)
+    for (int IndexOfSample = 0; IndexOfSample < NumSamples; IndexOfSample++)
     {
         // -----------------------------------------------------------------------------
         // Specular

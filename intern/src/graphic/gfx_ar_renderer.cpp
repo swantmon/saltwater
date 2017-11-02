@@ -293,7 +293,7 @@ namespace
         TextureDescriptor.m_NumberOfPixelsU  = 1280;
         TextureDescriptor.m_NumberOfPixelsV  = 720;
         TextureDescriptor.m_NumberOfPixelsW  = 1;
-        TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
+        TextureDescriptor.m_NumberOfMipMaps  = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
         TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
         TextureDescriptor.m_Access           = CTextureBase::CPUWrite;

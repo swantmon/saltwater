@@ -36,28 +36,28 @@ void main(void)
 {
     if (ps_MipmapLevel == 0.0f)
     {
-        out_Output  = textureLod(ps_Texture0, in_UV, 0);
+        out_Output  = textureLod(ps_Texture0, in_UV, 0.0f);
     }
     else
     {
-        const vec2 InUVMinBound = ps_UVBoundaries.xy;
-        const vec2 InUVMaxBound = ps_UVBoundaries.zw;
+        vec2 InUVMinBound = ps_UVBoundaries.xy;
+        vec2 InUVMaxBound = ps_UVBoundaries.zw;
         
-        const vec2 Radius = 2.0 * ps_InverseTextureSize;
-        // sigma = 0.5
+        vec2 Radius = 2.0f * ps_InverseTextureSize;
+        // sigma = 0.5f
         const float C = 0.130371;
         const float A = 0.115349;
         const float B = 0.102059;
 
-        out_Output  = textureLod(ps_Texture0, clamp(in_UV, InUVMinBound, InUVMaxBound), 0) * C;
-        out_Output += textureLod(ps_Texture0, clamp(in_UV + vec2( 1,  1) * Radius, InUVMinBound, InUVMaxBound), 0) * B;
-        out_Output += textureLod(ps_Texture0, clamp(in_UV + vec2( 0,  1) * Radius, InUVMinBound, InUVMaxBound), 0) * A;
-        out_Output += textureLod(ps_Texture0, clamp(in_UV + vec2(-1,  1) * Radius, InUVMinBound, InUVMaxBound), 0) * B;
-        out_Output += textureLod(ps_Texture0, clamp(in_UV + vec2(-1,  0) * Radius, InUVMinBound, InUVMaxBound), 0) * A;
-        out_Output += textureLod(ps_Texture0, clamp(in_UV + vec2(-1, -1) * Radius, InUVMinBound, InUVMaxBound), 0) * B;
-        out_Output += textureLod(ps_Texture0, clamp(in_UV + vec2( 0, -1) * Radius, InUVMinBound, InUVMaxBound), 0) * A;
-        out_Output += textureLod(ps_Texture0, clamp(in_UV + vec2( 1, -1) * Radius, InUVMinBound, InUVMaxBound), 0) * B;
-        out_Output += textureLod(ps_Texture0, clamp(in_UV + vec2( 1,  0) * Radius, InUVMinBound, InUVMaxBound), 0) * A;
+        out_Output  = textureLod(ps_Texture0, clamp(in_UV, InUVMinBound, InUVMaxBound), 0.0f) * C;
+        out_Output += textureLod(ps_Texture0, clamp(in_UV + vec2( 1,  1) * Radius, InUVMinBound, InUVMaxBound), 0.0f) * B;
+        out_Output += textureLod(ps_Texture0, clamp(in_UV + vec2( 0,  1) * Radius, InUVMinBound, InUVMaxBound), 0.0f) * A;
+        out_Output += textureLod(ps_Texture0, clamp(in_UV + vec2(-1,  1) * Radius, InUVMinBound, InUVMaxBound), 0.0f) * B;
+        out_Output += textureLod(ps_Texture0, clamp(in_UV + vec2(-1,  0) * Radius, InUVMinBound, InUVMaxBound), 0.0f) * A;
+        out_Output += textureLod(ps_Texture0, clamp(in_UV + vec2(-1, -1) * Radius, InUVMinBound, InUVMaxBound), 0.0f) * B;
+        out_Output += textureLod(ps_Texture0, clamp(in_UV + vec2( 0, -1) * Radius, InUVMinBound, InUVMaxBound), 0.0f) * A;
+        out_Output += textureLod(ps_Texture0, clamp(in_UV + vec2( 1, -1) * Radius, InUVMinBound, InUVMaxBound), 0.0f) * B;
+        out_Output += textureLod(ps_Texture0, clamp(in_UV + vec2( 1,  0) * Radius, InUVMinBound, InUVMaxBound), 0.0f) * A;
     }
 }
 

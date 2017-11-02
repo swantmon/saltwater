@@ -39,7 +39,7 @@ void main()
 	
 	WriteScattering(ivec3(X, Y, 0), CurrentSlice);
 	
-	for (uint SliceZ = 1; SliceZ < 128; ++ SliceZ)
+	for (int SliceZ = 1; SliceZ < 128; ++ SliceZ)
 	{
 		vec4 NextSlice = ReadScattering(ivec3(X, Y, SliceZ));
 		

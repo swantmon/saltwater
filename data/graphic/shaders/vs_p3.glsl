@@ -4,7 +4,10 @@
 
 layout(location = 0) in vec3 in_Position;
 
+layout(location = 0) out vec3 out_Position;
 layout(location = 1) out vec3 out_Normal;
+layout(location = 2) out vec2 out_UV;
+layout(location = 3) out mat3 out_WSNormalMatrix;
 
 out gl_PerVertex
 {

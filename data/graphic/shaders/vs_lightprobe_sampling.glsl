@@ -20,8 +20,10 @@ layout(location = 2) in vec2 VertexTexCoord;
 // -----------------------------------------------------------------------------
 // Output to next stage
 // -----------------------------------------------------------------------------
+layout(location = 0) out vec3 out_Position;
 layout(location = 1) out vec3 out_Normal;
 layout(location = 2) out vec2 out_UV;
+layout(location = 3) out mat3 out_WSNormalMatrix;
 
 // -----------------------------------------------------------------------------
 // Main

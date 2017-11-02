@@ -65,7 +65,7 @@ void main()
     const int   HalfKernelSize      = (KERNEL_SIZE - 1) / 2;
     const float KernelWeights[KERNEL_SIZE] = float[KERNEL_SIZE]( 0.106004, 0.109777, 0.11255, 0.114253, 0.114825, 0.114253, 0.112553, 0.109777, 0.106004);
 
-    const float bZ = 1.0 / normpdf(0.0, BSIGMA);
+    float bZ = 1.0 / normpdf(0.0, BSIGMA);
 
     for (int IndexOfKernelStep = 0; IndexOfKernelStep <= KERNEL_SIZE; ++IndexOfKernelStep)
     {

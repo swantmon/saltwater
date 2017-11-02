@@ -7,6 +7,7 @@
 
 #include "core/core_time.h"
 
+#include "graphic/gfx_main.h"
 #include "graphic/gfx_performance.h"
 
 #include <cassert>
@@ -233,19 +234,22 @@ namespace
 
         glPushDebugGroup(GL_DEBUG_SOURCE_THIRD_PARTY, 0, LengthOfEventName, _pEventName);
 
-        if (g_QueryPerformanceMarkerDurations)
+        if (Gfx::Main::GetGraphicsAPI() != GLES32)
         {
-            std::string Name = _pEventName;
+            if (g_QueryPerformanceMarkerDurations)
+            {
+                std::string Name = _pEventName;
 
-            auto& Item = m_PerformanceMarkerTimings[Name];
+                auto& Item = m_PerformanceMarkerTimings[Name];
 
-            GLuint StartQuery;
-            glCreateQueries(GL_TIMESTAMP, 1, &StartQuery);
-            glQueryCounter(StartQuery, GL_TIMESTAMP);
+                GLuint StartQuery;
+                glCreateQueries(GL_TIMESTAMP, 1, &StartQuery);
+                glQueryCounter(StartQuery, GL_TIMESTAMP);
 
-            Item.m_PendingQueries.push_back(std::make_pair(StartQuery, 0));
+                Item.m_PendingQueries.push_back(std::make_pair(StartQuery, 0));
 
-            m_OpenedMarkerStack.push(&Item);
+                m_OpenedMarkerStack.push(&Item);
+            }
         }
     }
 
@@ -275,15 +279,18 @@ namespace
     {
         glPopDebugGroup();
 
-        if (g_QueryPerformanceMarkerDurations)
+        if (Gfx::Main::GetGraphicsAPI() != GLES32)
         {
-            GLuint EndQuery;
-            glCreateQueries(GL_TIMESTAMP, 1, &EndQuery);
-            glQueryCounter(EndQuery, GL_TIMESTAMP);
+            if (g_QueryPerformanceMarkerDurations)
+            {
+                GLuint EndQuery;
+                glCreateQueries(GL_TIMESTAMP, 1, &EndQuery);
+                glQueryCounter(EndQuery, GL_TIMESTAMP);
 
-            m_OpenedMarkerStack.top()->m_PendingQueries.back().second = EndQuery;
-            m_OpenedMarkerStack.pop();
-        }
+                m_OpenedMarkerStack.top()->m_PendingQueries.back().second = EndQuery;
+                m_OpenedMarkerStack.pop();
+            }
+        }        
     }
 
     // -----------------------------------------------------------------------------

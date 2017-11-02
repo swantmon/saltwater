@@ -33,7 +33,10 @@ layout(binding = 0) uniform samplerCube ps_EnvironmentCubemap;
 // -----------------------------------------------------------------------------
 // Input to fragment from VS
 // -----------------------------------------------------------------------------
+layout(location = 0) in vec3 in_Position;
 layout(location = 1) in vec3 in_Normal;
+layout(location = 2) in vec2 in_UV;
+layout(location = 3) in mat3 in_WSNormalMatrix;
 
 // -----------------------------------------------------------------------------
 // Output to fragment
@@ -51,11 +54,11 @@ vec3 GetImportanceSampleDiffuseFrostbite(in vec3 _NormalReflection)
     float NdotL;
     float PDF;
     
-    const uint NumSamples = NUM_SAMPLES;
+    const int NumSamples = NUM_SAMPLES;
     
     Result = vec3(0.0f);
     
-    for(uint IndexOfSample = 0; IndexOfSample < NumSamples; ++IndexOfSample )
+    for(int IndexOfSample = 0; IndexOfSample < NumSamples; ++IndexOfSample )
     {
         Xi = GetHammersley(IndexOfSample, NumSamples);
         
@@ -65,11 +68,11 @@ vec3 GetImportanceSampleDiffuseFrostbite(in vec3 _NormalReflection)
         
         if (NdotL > 0.0f)
         {
-            Result += textureLod(ps_EnvironmentCubemap, L, 0).rgb;
+            Result += textureLod(ps_EnvironmentCubemap, L, 0.0f).rgb;
         }
     }
     
-    return Result * (1.0f / NumSamples);
+    return Result * (1.0f / float(NumSamples));
 }
 
 // -----------------------------------------------------------------------------
@@ -79,11 +82,11 @@ vec3 GetImportanceSampleDiffuseMipmapped(in vec3 _NormalReflection)
     vec3 V = _NormalReflection;
     vec4 Result = vec4(0.0f);
     
-    const uint NumSamples = NUM_SAMPLES;
+    const int NumSamples = NUM_SAMPLES;
     
     ivec2 CubeSize = textureSize(ps_EnvironmentCubemap, 0);
     
-    for(uint IndexOfSample = 0; IndexOfSample < NumSamples; ++IndexOfSample )
+    for(int IndexOfSample = 0; IndexOfSample < NumSamples; ++IndexOfSample )
     {
         vec2  Xi  = GetHammersley(IndexOfSample, NumSamples);
         vec3  H   = GetImportanceSampleCosDirection(Xi, _NormalReflection);
@@ -97,8 +100,8 @@ vec3 GetImportanceSampleDiffuseMipmapped(in vec3 _NormalReflection)
         // -----------------------------------------------------------------------------
         float PDF = max(0.0, dot(_NormalReflection, L) * INV_PI);
         
-        float SolidAngleTexel  = 4.0f * PI / (6.0f * CubeSize.x * CubeSize.y);
-        float SolidAngleSample = 1.0f / (NumSamples * PDF);
+        float SolidAngleTexel  = 4.0f * PI / (6.0f * float(CubeSize.x * CubeSize.y));
+        float SolidAngleSample = 1.0f / (float(NumSamples) * PDF);
         
         //TODO: add mip count to constantbuffer
         float LOD = 0.5f * log2(SolidAngleSample / SolidAngleTexel);

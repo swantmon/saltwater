@@ -18,7 +18,6 @@ layout(row_major, std140, binding = 3) uniform PSLayerValues
 // Input to fragment from previous stage
 // -----------------------------------------------------------------------------
 layout(location = 2) in vec2 in_UV;
-layout(location = 4) in flat uint in_Layer;
 
 // -----------------------------------------------------------------------------
 // Output to fragment
@@ -34,7 +33,7 @@ void main()
 
     GetMuMuSNu(gl_FragCoord.xy, g_Radius, g_Dhdh, Mu, MuS, Nu);
 
-    vec3 UVW = vec3(gl_FragCoord.xy, in_Layer) / vec3(g_InscatterMuS * g_InscatterNu, g_InscatterMu, g_InscatterAltitude);
+    vec3 UVW = vec3(gl_FragCoord.xy, gl_Layer) / vec3(g_InscatterMuS * g_InscatterNu, g_InscatterMu, g_InscatterAltitude);
 
     out_Output = vec4(texture(g_DeltaSR, UVW).rgb / PhaseFunctionR(Nu), 0.0f);
 }

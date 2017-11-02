@@ -13,9 +13,9 @@
 // -----------------------------------------------------------------------------
 #define MAX_NUMBER_OF_LIGHTS 4
 
-#define SUN_LIGHT 1
-#define POINT_LIGHT 2
-#define LIGHT_PROBE 3
+#define SUN_LIGHT 1u
+#define POINT_LIGHT 2u
+#define LIGHT_PROBE 3u
 
 struct SLightProperties
 {
@@ -132,7 +132,7 @@ void main(void)
     // Forward pass for each light
     // -----------------------------------------------------------------------------
     #pragma unroll
-    for (uint IndexOfLight = 0; IndexOfLight < MAX_NUMBER_OF_LIGHTS; ++ IndexOfLight)
+    for (int IndexOfLight = 0; IndexOfLight < MAX_NUMBER_OF_LIGHTS; ++ IndexOfLight)
     {
         SLightProperties LightProb = ps_LightProperties[IndexOfLight];
 
@@ -225,12 +225,12 @@ void main(void)
             // -----------------------------------------------------------------------------
             ivec2 DFGSize = textureSize(ps_BRDF, 0);
 
-            float ClampNdotV = max(NdotV, 0.5f / DFGSize.x);
+            float ClampNdotV = max(NdotV, 0.5f / float(DFGSize.x));
             
             // -----------------------------------------------------------------------------
             // Get data
             // -----------------------------------------------------------------------------
-            vec3 PreDFGF = textureLod(ps_BRDF, vec2(NdotV, Data.m_Roughness), 0).rgb;
+            vec3 PreDFGF = textureLod(ps_BRDF, vec2(NdotV, Data.m_Roughness), 0.0f).rgb;
             
             vec3 DiffuseIBL  = EvaluateDiffuseIBL(ps_DiffuseCubemap, Data, WSViewDirection, PreDFGF.z, NdotV);
             vec3 SpecularIBL = EvaluateSpecularIBL(ps_SpecularCubemap, Data, WSReflectVector, PreDFGF.xy, ClampNdotV, NumberOfMiplevels);

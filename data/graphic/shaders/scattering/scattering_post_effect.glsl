@@ -260,7 +260,7 @@ vec4 GetAtmosphericFog(vec3 _Position, vec3 _ViewDirection, float _Depth, vec3 _
 
 	vec3 Attenuation = vec3(1.0f);
 
-	vec3 InscatterColor = GetInscatterColor(1, _Position, T, _ViewDirection, normalize(g_SunDirection.xyz), Radius, Mu, Attenuation, IsSceneGeometry); // TODO: understand FogDepth
+	vec3 InscatterColor = GetInscatterColor(1.0f, _Position, T, _ViewDirection, normalize(g_SunDirection.xyz), Radius, Mu, Attenuation, IsSceneGeometry); // TODO: understand FogDepth
     vec3 GroundColor = GetGroundColor(vec4(_SceneColor, 1.0f), _Position, T, _ViewDirection, normalize(g_SunDirection.xyz), Radius, Attenuation, IsSceneGeometry);
     vec3 Sun = GetSunColor(_Position, T, _ViewDirection, normalize(g_SunDirection.xyz), Radius, Mu);
 

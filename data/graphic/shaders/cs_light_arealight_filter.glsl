@@ -151,23 +151,23 @@ void BlurBackground()
     
         vec4 BlurredTexture = vec4(0.0f);
         
-        float Count = 0;
+        float Count = 0.0f;
 
         for (int Y = -Area; Y <= Area; ++ Y)
         {
             for (int X = -Area; X <= Area; ++ X)
             {
-                vec2 ReadUV = UV + ivec2(X, Y) * cs_InverseSizeAndOffset.xy;
+                vec2 ReadUV = UV + vec2(X, Y) * cs_InverseSizeAndOffset.xy;
                 
                 vec4 Color = texture(in_Texture0, ReadUV);
             
                 BlurredTexture += Color;
                 
-                if (Color.a > 0) Count += Color.a;
+                if (Color.a > 0.0f) Count += Color.a;
             }
         }
         
-        Output = BlurredTexture / Count;
+        Output = BlurredTexture / float(Count);
                         
         imageStore(out_Texture, ivec2(PixelCoordX, PixelCoordY), Output);
     }
@@ -198,16 +198,16 @@ void BlurForeground()
     {
         vec4 BlurredTexture = vec4(0.0f); 
      
-        int Area = int(cs_LOD * 2.0f); 
+        int Area = int(cs_LOD) * int(2.0f); 
 
         for (int Index = -Area; Index <= Area; ++ Index) 
         { 
             vec2 TexCoord = UV + (vec2(Index) * vec2(cs_Direction) * cs_InverseSizeAndOffset.xy);
 
-            BlurredTexture += textureLod(in_Texture0, TexCoord, cs_LOD);
+            BlurredTexture += textureLod(in_Texture0, TexCoord, float(cs_LOD));
         } 
 
-        Output = BlurredTexture / (Area + Area + 1); 
+        Output = BlurredTexture / float((Area + Area + 1)); 
     }
     else
     {
@@ -238,7 +238,7 @@ void Combine()
     // -------------------------------------------------------------------------------------
     vec2 UV =  vec2(PixelCoordX, PixelCoordY) * cs_InverseSizeAndOffset.xy;
     
-    vec2 ClampedUV = (UV - cs_InverseSizeAndOffset.zw) * (1 + 0.334f);
+    vec2 ClampedUV = (UV - cs_InverseSizeAndOffset.zw) * (1.0f + 0.334f);
 
     // -------------------------------------------------------------------------------------
     // Combine inner and outer part

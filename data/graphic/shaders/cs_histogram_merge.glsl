@@ -38,12 +38,12 @@ layout(std140, binding = 0) uniform UHistogramSettingBuffer
 layout( local_size_x = HISTOGRAM_SIZE, local_size_y = 1, local_size_z = 1 ) in;
 void main()
 {
-    uvec2 cs_NumberOfThreadGroups     = cs_ConstantData1.xy;
+    ivec2 cs_NumberOfThreadGroups     = ivec2(cs_ConstantData1.xy);
     float cs_ReciprocalNumberOfPixels = cs_ConstantData2.x;
 
-    uint  IndexOfPixel;
-    uint  ThreadGroupX;
-    uint  ThreadGroupY;
+    int  IndexOfPixel;
+    int  ThreadGroupX;
+    int  ThreadGroupY;
     float SumInBin;
 
     SumInBin = 0.0f;
@@ -52,7 +52,7 @@ void main()
     {
         for (ThreadGroupX = 0; ThreadGroupX < cs_NumberOfThreadGroups.x; ++ ThreadGroupX)
         {
-            IndexOfPixel = (ThreadGroupX + ThreadGroupY * cs_NumberOfThreadGroups.x) * HISTOGRAM_SIZE + gl_LocalInvocationIndex;
+            IndexOfPixel = (ThreadGroupX + ThreadGroupY * cs_NumberOfThreadGroups.x) * HISTOGRAM_SIZE + int(gl_LocalInvocationIndex);
 
             SumInBin += m_HistogramPerGroup[IndexOfPixel];
         }
