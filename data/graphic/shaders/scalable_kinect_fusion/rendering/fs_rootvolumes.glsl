@@ -86,7 +86,7 @@ void main()
             out_GBuffer2 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
             
             vec4 CSPosition = g_WorldToScreen * vec4(CurrentPosition, 1.0f);
-            gl_FragDepth = (CSPosition.z / CSPosition.w) * 0.5f + 0.5f;
+            gl_FragDepth = (CSPosition.z / CSPosition.w);
 
             return;
         }

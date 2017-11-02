@@ -68,7 +68,7 @@ void main()
         out_GBuffer2 = GBuffer.m_Color2;
 
         vec4 CSPosition = g_WorldToScreen * vec4(WSPosition, 1.0f);
-        gl_FragDepth = (CSPosition.z / CSPosition.w) * 0.5f + 0.5f;
+        gl_FragDepth = (CSPosition.z / CSPosition.w) ;
     }
     else
     {

@@ -76,17 +76,17 @@ void main()
         vec3 CurrentPosition = CameraPosition + RayLength * RayDirection;
 
         vec3 BufferPosition = CurrentPosition / VOLUME_SIZE + m_VolumeTextureWidth / 2.0f;
-        uint VoxelIndex = OffsetToIndex(BufferPosition, m_VolumeTextureWidth);
-        int Voxel = g_RootVolumePositionBuffer[VoxelIndex];
+        uint VolumeIndex = OffsetToIndex(BufferPosition, m_VolumeTextureWidth);
+        int Volume = g_RootVolumePositionBuffer[VolumeIndex];
 
-        if (Voxel != -1)
+        if (Volume != -1)
         {
             out_GBuffer0 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
             out_GBuffer1 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
             out_GBuffer2 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
             
             vec4 CSPosition = g_WorldToScreen * vec4(CurrentPosition, 1.0f);
-            gl_FragDepth = (CSPosition.z / CSPosition.w) * 0.5f + 0.5f;
+            gl_FragDepth = (CSPosition.z / CSPosition.w);
 
             return;
         }
