@@ -10,9 +10,9 @@
 // Input from engine
 // -----------------------------------------------------------------------------
 
-layout(std430, binding = 0) buffer RootVolumeBuffer
+layout(std430, binding = 0) buffer RootVolumePositionBuffer
 {
-    uint g_RootVolumeBuffer[];
+    int g_RootVolumePositionBuffer[];
 };
 
 layout(row_major, std140, binding = 1) uniform ScalableRaycastConstantBuffer
@@ -56,18 +56,41 @@ float GetEndLength(vec3 Start, vec3 Direction)
 
 void main()
 {
+    vec3 CameraPosition = g_ViewPosition.xyz;
     vec3 RayDirection = normalize(in_WSRayDirection);
 
     RayDirection.x = RayDirection.x == 0.0f ? 1e-15f : RayDirection.x;
     RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
     RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
 
-    float StartLength = GetStartLength(g_ViewPosition.xyz, RayDirection);
-    float EndLength = GetEndLength(g_ViewPosition.xyz, RayDirection);
+    float StartLength = GetStartLength(CameraPosition, RayDirection);
+    float EndLength = GetEndLength(CameraPosition, RayDirection);
 
-    out_GBuffer0 = vec4(StartLength, EndLength, 0.0f, 1.0f);
-    out_GBuffer1 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-    out_GBuffer2 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+    float RayLength = StartLength;
+    float Step = TRUNCATED_DISTANCE / 1000.0f;
+
+    while (RayLength < EndLength)
+    {
+        vec3 PreviousPosition = CameraPosition + RayLength * RayDirection;
+        RayLength += Step;
+        vec3 CurrentPosition = CameraPosition + RayLength * RayDirection;
+
+        vec3 BufferPosition = CurrentPosition / VOLUME_SIZE - m_VolumeTextureWidth / 2.0f;
+        uint VoxelIndex = OffsetToIndex(BufferPosition, m_VolumeTextureWidth);
+        int Voxel = g_RootVolumePositionBuffer[VoxelIndex];
+
+        if (Voxel != -1)
+        {
+            out_GBuffer0 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+            out_GBuffer1 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+            out_GBuffer2 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+            
+            vec4 CSPosition = g_WorldToScreen * vec4(CurrentPosition, 1.0f);
+            gl_FragDepth = (CSPosition.z / CSPosition.w) * 0.5f + 0.5f;
+        }
+    }
+
+    discard;
 }
 
 #endif // __INCLUDE_FS_ROOTVOLUMES_GLSL__
