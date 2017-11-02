@@ -17,9 +17,9 @@ layout(std430, binding = 0) buffer RootVolumePositionBuffer
 
 layout(row_major, std140, binding = 1) uniform ScalableRaycastConstantBuffer
 {
-    vec3 m_AABBMin;
-    vec3 m_AABBMax;
-    int m_VolumeTextureWidth;
+    vec3 g_AABBMin;
+    vec3 g_AABBMax;
+    int g_VolumeTextureWidth;
 };
 
 // -----------------------------------------------------------------------------
@@ -36,20 +36,20 @@ layout(location = 2) out vec4 out_GBuffer2;
 // Helper functions
 // -----------------------------------------------------------------------------
 
-float GetStartLength(vec3 Start, vec3 Direction)
+float GetStartLength(vec3 Start, vec3 Direction, vec3 AABBMin, vec3 AABBMax)
 {
-    float xmin = ((Direction.x > 0.0f ? m_AABBMin.x : m_AABBMax.x) - Start.x) / Direction.x;
-    float ymin = ((Direction.y > 0.0f ? m_AABBMin.y : m_AABBMax.y) - Start.y) / Direction.y;
-    float zmin = ((Direction.z > 0.0f ? m_AABBMin.z : m_AABBMax.z) - Start.z) / Direction.z;
+    float xmin = ((Direction.x > 0.0f ? AABBMin.x : AABBMax.x) - Start.x) / Direction.x;
+    float ymin = ((Direction.y > 0.0f ? AABBMin.y : AABBMax.y) - Start.y) / Direction.y;
+    float zmin = ((Direction.z > 0.0f ? AABBMin.z : AABBMax.z) - Start.z) / Direction.z;
 
     return max(max(xmin, ymin), zmin);
 }
 
-float GetEndLength(vec3 Start, vec3 Direction)
+float GetEndLength(vec3 Start, vec3 Direction, vec3 AABBMin, vec3 AABBMax)
 {
-    float xmax = ((Direction.x > 0.0f ? m_AABBMax.x : m_AABBMin.x) - Start.x) / Direction.x;
-    float ymax = ((Direction.y > 0.0f ? m_AABBMax.y : m_AABBMin.y) - Start.y) / Direction.y;
-    float zmax = ((Direction.z > 0.0f ? m_AABBMax.z : m_AABBMin.z) - Start.z) / Direction.z;
+    float xmax = ((Direction.x > 0.0f ? AABBMax.x : AABBMin.x) - Start.x) / Direction.x;
+    float ymax = ((Direction.y > 0.0f ? AABBMax.y : AABBMin.y) - Start.y) / Direction.y;
+    float zmax = ((Direction.z > 0.0f ? AABBMax.z : AABBMin.z) - Start.z) / Direction.z;
 
     return min(min(xmax, ymax), zmax);
 }
@@ -63,8 +63,8 @@ void main()
     RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
     RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
 
-    float StartLength = GetStartLength(CameraPosition, RayDirection);
-    float EndLength = GetEndLength(CameraPosition, RayDirection);
+    float StartLength = GetStartLength(CameraPosition, RayDirection, g_AABBMin, g_AABBMax);
+    float EndLength = GetEndLength(CameraPosition, RayDirection, g_AABBMin, g_AABBMax);
 
     float RayLength = StartLength;
     float Step = TRUNCATED_DISTANCE / 1000.0f;
@@ -75,8 +75,8 @@ void main()
         RayLength += Step;
         vec3 CurrentPosition = CameraPosition + RayLength * RayDirection;
 
-        vec3 BufferPosition = CurrentPosition / VOLUME_SIZE + m_VolumeTextureWidth / 2.0f;
-        uint VolumeIndex = OffsetToIndex(BufferPosition, m_VolumeTextureWidth);
+        vec3 BufferPosition = CurrentPosition / VOLUME_SIZE + g_VolumeTextureWidth / 2.0f;
+        uint VolumeIndex = OffsetToIndex(BufferPosition, g_VolumeTextureWidth);
         int Volume = g_RootVolumePositionBuffer[VolumeIndex];
 
         if (Volume != -1)
