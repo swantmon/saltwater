@@ -22,7 +22,7 @@
 
 using namespace Gfx;
 
-#ifdef DEBUG
+#ifndef NDEBUG
 #define VALIDATE_PIPELINE
 #endif // DEBUG
 
