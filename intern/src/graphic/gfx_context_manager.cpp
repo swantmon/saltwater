@@ -22,14 +22,9 @@
 
 using namespace Gfx;
 
+#ifndef NDEBUG
 #define VALIDATE_PIPELINE
-
-#ifdef VALIDATE_PIPELINE
-#ifndef _DEBUG
-static_assert(false, "Pipeline Validation is still active in release mode!");
-#endif
-#endif // VALIDATE_PIPELINE
-
+#endif // !NDEBUG
 
 namespace
 {
