@@ -15,8 +15,8 @@
 #define USE_PARALLAX
 #define MAX_NUMBER_OF_PROBES 4
 
-#define SKY_PROBE 1
-#define LOCAL_PROBE 2
+#define SKY_PROBE 1u
+#define LOCAL_PROBE 2u
 
 struct SProbeProperties
 {
@@ -164,12 +164,12 @@ void main()
     // -----------------------------------------------------------------------------
     ivec2 DFGSize = textureSize(ps_BRDF, 0);
 
-    float ClampNdotV = max(NdotV, 0.5f / DFGSize.x);
+    float ClampNdotV = max(NdotV, 0.5f / float(DFGSize.x));
     
     // -----------------------------------------------------------------------------
     // Get data
     // -----------------------------------------------------------------------------
-    vec3 PreDFGF = textureLod(ps_BRDF, vec2(NdotV, Data.m_Roughness), 0).rgb;
+    vec3 PreDFGF = textureLod(ps_BRDF, vec2(NdotV, Data.m_Roughness), 0.0f).rgb;
 
     // -----------------------------------------------------------------------------
     // Lighting
@@ -179,7 +179,7 @@ void main()
 #ifdef USE_SSR
     if (ps_UseSSR == 1.0f)
     {    
-        vec4 SSR = textureLod(ps_SSR, in_UV, 0);
+        vec4 SSR = textureLod(ps_SSR, in_UV, 0.0f);
 
         SpecularLighting.rgb = SSR.rgb;
         SpecularLighting.a   = 1.0f - clamp(SSR.a, 0.0f, 1.0f);
@@ -192,13 +192,13 @@ void main()
         vec4 IBL = vec4(0.0f);
         
         #pragma unroll
-        for (uint IndexOfLight = 0; IndexOfLight < MAX_NUMBER_OF_PROBES; ++ IndexOfLight)
+        for (int IndexOfLight = 0; IndexOfLight < MAX_NUMBER_OF_PROBES; ++ IndexOfLight)
         {
             SProbeProperties LightProb = ps_LightProperties[IndexOfLight];
 
             float NumberOfMiplevelsSpecularIBL = LightProb.ps_LightSettings.x;
 
-            if (LightProb.ps_ProbeType != 0)
+            if (LightProb.ps_ProbeType != 0u)
             {
                 bool IsInside = IsPositionInProbe(Data.m_WSPosition, LightProb);
                 

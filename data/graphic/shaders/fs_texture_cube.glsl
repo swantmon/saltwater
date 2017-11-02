@@ -25,7 +25,7 @@ void main(void)
     // -----------------------------------------------------------------------------
     // Read data from engine
     // -----------------------------------------------------------------------------
-    vec4 CurrentLightColor = textureLod(ps_InputTexture, in_Normal, 0).rgba;
+    vec4 CurrentLightColor = textureLod(ps_InputTexture, in_Normal, 0.0f).rgba;
 
     // -----------------------------------------------------------------------------
     // Return final color

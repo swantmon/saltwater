@@ -16,7 +16,7 @@ vec4 InverseToneMapping(in vec4 _Color)
 {
     float Luminosity = 0.3f * _Color.r + 0.59f * _Color.g + 0.11f * _Color.b;
 
-    float LuminosityScale = 10 * pow(Luminosity, 10.0f) + 1.8f;
+    float LuminosityScale = 10.0f * pow(Luminosity, 10.0f) + 1.8f;
 
     return LuminosityScale * _Color;
 }
@@ -97,9 +97,9 @@ float GetRadicalInverseVdC(in uint _Bits)
 
 // -----------------------------------------------------------------------------
 
-vec2 GetHammersley(uint _Index, uint _Sum)
+vec2 GetHammersley(int _Index, int _Sum)
 {
-    return vec2(float(_Index)/float(_Sum), GetRadicalInverseVdC(_Index));
+    return vec2(float(_Index)/float(_Sum), GetRadicalInverseVdC(uint(_Index)));
 }
 
 // -----------------------------------------------------------------------------

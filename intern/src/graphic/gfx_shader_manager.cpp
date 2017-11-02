@@ -8,6 +8,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "graphic/gfx_main.h"
 #include "graphic/gfx_native_shader.h"
 #include "graphic/gfx_native_types.h"
 #include "graphic/gfx_shader_manager.h"
@@ -129,7 +130,7 @@ namespace
 
         void InternReloadShader(CInternShader* _pInternShader);
 
-        void PreprocessorShader(std::string& _rShaderContent);
+        void PreprocessorShader(std::string& _rShaderContent, bool _AddVersion);
 
         int ConvertShaderType(CShader::EType _Type);
 
@@ -371,9 +372,7 @@ namespace
 
         ShaderFileContent = "#define " + std::string(_pShaderName) + " main\n" + ShaderFileContent;
 
-        PreprocessorShader(ShaderFileContent);
-
-        ShaderFileContent = "#version 450 \n" + ShaderFileContent;
+        PreprocessorShader(ShaderFileContent, true);
 
         ShaderLength = ShaderFileContent.size();
 
@@ -524,10 +523,8 @@ namespace
 
         ShaderFileContent = "#define " + rShader.m_ShaderName + " main\n" + ShaderFileContent;
 
-        PreprocessorShader(ShaderFileContent);
-
-        ShaderFileContent = "#version 450 \n" + ShaderFileContent;
-
+        PreprocessorShader(ShaderFileContent, true);
+        
         ShaderLength = ShaderFileContent.size();
 
         const char* pRAW = ShaderFileContent.c_str();
@@ -616,7 +613,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxShaderManager::PreprocessorShader(std::string& _rShaderContent)
+    void CGfxShaderManager::PreprocessorShader(std::string& _rShaderContent, bool _AddVersion)
     {
         Base::Size FoundPosition     = 0;
         Base::Size UndefinedPosition = std::string::npos;
@@ -640,11 +637,31 @@ namespace
 
                 std::string ShaderFileContent((std::istreambuf_iterator<char>(ShaderFile)), std::istreambuf_iterator<char>());
 
-                PreprocessorShader(ShaderFileContent);
+                PreprocessorShader(ShaderFileContent, false);
 
                 _rShaderContent.replace(FoundPosition, EndOfInclude - FoundPosition + 1, ShaderFileContent);
 
                 FoundPosition += 1;
+            }
+        }
+
+        if (_AddVersion)
+        {
+            if (Main::GetGraphicsAPI() == GLES32)
+            {
+                _rShaderContent = "precision lowp sampler2D; \n" + _rShaderContent;
+                _rShaderContent = "precision lowp sampler3D; \n" + _rShaderContent;
+                _rShaderContent = "precision lowp samplerCube; \n" + _rShaderContent;
+                _rShaderContent = "precision lowp image2D; \n" + _rShaderContent;
+                _rShaderContent = "precision lowp image3D; \n" + _rShaderContent;
+                _rShaderContent = "precision lowp uimage2D; \n" + _rShaderContent;
+                _rShaderContent = "precision lowp sampler2DShadow; \n" + _rShaderContent;
+                _rShaderContent = "precision highp float; \n" + _rShaderContent;
+                _rShaderContent = "#version 320 es \n" + _rShaderContent;
+            }
+            else
+            {
+                _rShaderContent = "#version 450 \n" + _rShaderContent;
             }
         }
     }

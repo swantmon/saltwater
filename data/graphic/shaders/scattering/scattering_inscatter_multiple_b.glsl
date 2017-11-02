@@ -19,7 +19,6 @@ layout(row_major, std140, binding = 3) uniform PSLayerValues
 // Input to fragment from previous stage
 // -----------------------------------------------------------------------------
 layout(location = 2) in vec2 in_UV;
-layout(location = 4) in flat uint in_Layer;
 
 // -----------------------------------------------------------------------------
 // Output to fragment
@@ -41,13 +40,13 @@ vec3 Integrate(float _Radius, float _Mu, float _MuS, float _Nu, float _T)
 vec3 Inscatter(float _Radius, float _Mu, float _MuS, float _Nu)
 {
     vec3 RayleighMie = vec3(0.0f);
-    float Dx = Limit(_Radius, _Mu) / g_InscatterIntegralSampleCount;
+    float Dx = Limit(_Radius, _Mu) / float(g_InscatterIntegralSampleCount);
     float Xi = 0.0;
     vec3 RayleighMiei = Integrate(_Radius, _Mu, _MuS, _Nu, 0.0f);
 
     for (int i = 1; i <= g_InscatterIntegralSampleCount; ++ i)
     {
-        float Xj = i * Dx;
+        float Xj = float(i) * Dx;
         vec3 RayleighMiej = Integrate(_Radius, _Mu, _MuS, _Nu, Xj);
 
         RayleighMie += (RayleighMiei + RayleighMiej) / 2.0f * Dx;

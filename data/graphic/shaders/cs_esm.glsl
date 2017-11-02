@@ -1,7 +1,7 @@
 #ifndef __INCLUDE_CS_ESM_GLSL__
 #define __INCLUDE_CS_ESM_GLSL__
 
-#define EXPONENT 1
+#define EXPONENT 1.0f
 
 layout (binding = 0) uniform sampler2D cs_InputImage;
 layout (binding = 0, r32f) writeonly uniform image2D cs_OutputImage;
@@ -13,13 +13,13 @@ layout (binding = 0, r32f) writeonly uniform image2D cs_OutputImage;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main()
 {
-	uint OutputX = gl_WorkGroupID.x;
-	uint OutputY = gl_WorkGroupID.y;
+	int OutputX = int(gl_WorkGroupID.x);
+	int OutputY = int(gl_WorkGroupID.y);
 	
-	uint InputX = gl_GlobalInvocationID.x * 8;
-    uint InputY = gl_GlobalInvocationID.y * 8;
+	int InputX = int(gl_GlobalInvocationID.x) * 8;
+    int InputY = int(gl_GlobalInvocationID.y) * 8;
 	
-	vec2 UVNorm = vec2(InputX, InputY) / textureSize(cs_InputImage, 0);
+	vec2 UVNorm = vec2(InputX, InputY) / vec2(textureSize(cs_InputImage, 0));
 	
 	vec4 Accumulation = vec4(0.0f);
 	
@@ -30,7 +30,7 @@ void main()
 	
 	float Depth  = dot(Accumulation, vec4(1.0f / 16.0f));
 	
-    imageStore(cs_OutputImage, ivec2(OutputX, OutputY), Depth.rrrr);
+    imageStore(cs_OutputImage, ivec2(OutputX, OutputY), vec4(Depth));
 }
 
 #endif // __INCLUDE_CS_ESM_GLSL__

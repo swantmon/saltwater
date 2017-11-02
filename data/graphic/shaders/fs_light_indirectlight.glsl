@@ -94,7 +94,7 @@ void main()
     // -----------------------------------------------------------------------------
     // Create an spectrum of light sending from the current world-space position
     // -----------------------------------------------------------------------------
-    for (int IndexOfSample = 0; IndexOfSample < m_RSMSettings.z; ++ IndexOfSample)
+    for (int IndexOfSample = 0; IndexOfSample < int(m_RSMSettings.z); ++ IndexOfSample)
     {
         // -----------------------------------------------------------------------------
         // Get necessary data

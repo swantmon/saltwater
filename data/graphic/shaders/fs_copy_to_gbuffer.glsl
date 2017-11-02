@@ -63,11 +63,11 @@ float SampleDepthTexture(in sampler2D _DepthTexture, in vec2 _DepthUV)
     // P. Lensing originally used RGB char depth texture from Kinect 1:
     // float depth = v.r*31*2048 + v.g*63*32  + v.b*31;
     // -----------------------------------------------------------------------------
-    Depth = textureLod( _DepthTexture, _DepthUV, 0 ).z;
+    Depth = textureLod(_DepthTexture, _DepthUV, 0.0f).z;
     
     if (isinf(abs(Depth)))
     {
-        return 10000;
+        return 10000.0f;
     }
 
     return Depth;
@@ -171,7 +171,7 @@ vec3 GetVSNormal(in vec2 _DepthUV)
 
 vec3 blend_linear(in vec4 _Normal1, in vec4 _Normal2)
 {
-    vec3 r = ((_Normal1 + _Normal2)*2 - 2).xyz;
+    vec3 r = ((_Normal1 + _Normal2) * 2.0f - 2.0f).xyz;
     
     return normalize(r);
 }
@@ -180,9 +180,9 @@ vec3 blend_linear(in vec4 _Normal1, in vec4 _Normal2)
 
 vec3 blend_pd(in vec4 _Normal1, in vec4 _Normal2)
 {
-    _Normal1 = _Normal1*2 - 1;
-    _Normal2 = _Normal2.xyzz*vec4(2, 2, 2, 0) + vec4(-1, -1, -1, 0);
-    vec3 r = _Normal1.xyz*_Normal2.z + _Normal2.xyw*_Normal1.z;
+    _Normal1 = _Normal1 * 2.0f - 1.0f;
+    _Normal2 = _Normal2.xyzz * vec4(2, 2, 2, 0) + vec4(-1, -1, -1, 0);
+    vec3 r = _Normal1.xyz * _Normal2.z + _Normal2.xyw * _Normal1.z;
 
     return normalize(r);
 }
@@ -191,9 +191,9 @@ vec3 blend_pd(in vec4 _Normal1, in vec4 _Normal2)
 
 vec3 blend_whiteout(in vec4 _Normal1, in vec4 _Normal2)
 {
-    _Normal1 = _Normal1*2 - 1;
-    _Normal2 = _Normal2*2 - 1;
-    vec3 r = vec3(_Normal1.xy + _Normal2.xy, _Normal1.z*_Normal2.z);
+    _Normal1 = _Normal1 * 2.0f - 1.0f;
+    _Normal2 = _Normal2 * 2.0f - 1.0f;
+    vec3 r = vec3(_Normal1.xy + _Normal2.xy, _Normal1.z * _Normal2.z);
 
     return normalize(r);
 }
@@ -204,8 +204,8 @@ vec3 blend_udn(in vec4 _Normal1, in vec4 _Normal2)
 {
     vec3 c = vec3(2, 1, 0);
     vec3 r;
-    r = _Normal2.xyz*c.yyz + _Normal1.xyz;
-    r =  r*c.xxx -  c.xxy;
+    r = _Normal2.xyz * c.yyz + _Normal1.xyz;
+    r = r * c.xxx -  c.xxy;
 
     return normalize(r);
 }
@@ -226,7 +226,7 @@ vec3 blend_rnm(in vec4 _Normal1, in vec4 _Normal2)
 vec3 blend_unity(in vec4 _Normal1, in vec4 _Normal2)
 {
     _Normal1 = _Normal1.xyzz*vec4(2, 2, 2, -2) + vec4(-1, -1, -1, 1);
-    _Normal2 = _Normal2*2 - 1;
+    _Normal2 = _Normal2 * 2.0f - 1.0f;
     
     vec3 r;
     r.x = dot(_Normal1.zxx,  _Normal2.xyz);
@@ -261,9 +261,9 @@ void main()
     // -----------------------------------------------------------------------------
     // Color
     // -----------------------------------------------------------------------------
-    vec3  Color    = textureLod(ps_Texture0, TexCoord, 0).rgb;
-    vec2  NormalXY = textureLod(ps_Texture2, TexCoord, 0).rg;
-    float NormalZ  = textureLod(ps_Texture3, TexCoord, 0).a;
+    vec3  Color    = textureLod(ps_Texture0, TexCoord, 0.0f).rgb;
+    vec2  NormalXY = textureLod(ps_Texture2, TexCoord, 0.0f).rg;
+    float NormalZ  = textureLod(ps_Texture3, TexCoord, 0.0f).a;
 
     vec4 GBufferWSNormal = vec4(NormalXY, NormalZ, 0);
     // vec4 GBufferWSNormal = vec4(0, 0, 1, 0);

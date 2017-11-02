@@ -31,7 +31,7 @@ void main()
     // -----------------------------------------------------------------------------
     // Copy texture
     // -----------------------------------------------------------------------------
-    out_Output = k * textureLod(g_DeltaE, in_UV, 0);
+    out_Output = k * textureLod(g_DeltaE, in_UV, 0.0f);
 }
 
 #endif // __INCLUDE_FS_IRRADIANCE_COPY_GLSL__

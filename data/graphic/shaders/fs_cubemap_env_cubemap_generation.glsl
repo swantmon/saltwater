@@ -35,7 +35,7 @@ layout(location = 0) out vec4 out_Output;
 // -----------------------------------------------------------------------------
 void main(void)
 {
-    vec4 FinalColor = textureLod(PSEnvironmentTexture, in_Normal, 0);
+    vec4 FinalColor = textureLod(PSEnvironmentTexture, in_Normal, 0.0f);
 
     if (m_IsHDR == 0.0f)
     {

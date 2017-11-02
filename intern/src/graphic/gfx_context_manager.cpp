@@ -296,7 +296,16 @@ namespace
         // -----------------------------------------------------------------------------        
         unsigned int ProgramHandle = 0;
 
-        const char* pShader = "#version 450 \n void main(void) { }";
+        char* pShader;
+
+        if (Main::GetGraphicsAPI() == GLES32)
+        {
+            pShader = "#version 320 es \n void main(void) { }";
+        }
+        else
+        {
+            pShader = "#version 450 \n void main(void) { }";
+        }
 
         ProgramHandle = glCreateShaderProgramv(GL_VERTEX_SHADER, 1, &pShader);
 

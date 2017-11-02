@@ -4,6 +4,7 @@
 #include "base/base_console.h"
 #include "base/base_exception.h"
 #include "base/base_matrix4x4.h"
+#include "base/base_program_parameters.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 #include "base/base_vector3.h"
@@ -86,7 +87,7 @@ namespace
     public:
         
         void RegisterResizeHandler(Gfx::Main::CResizeDelegate _NewDelgate);
-
+        
     public:
 
         unsigned int RegisterWindow(void* _pWindow, unsigned int _VSync);
@@ -102,6 +103,7 @@ namespace
 
         void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile);
 
+        GraphicAPIs GetGraphicsAPI();
         bool IsExtensionAvailable(const std::string& _Name);
         
     public:
@@ -172,6 +174,7 @@ namespace
 
         CBufferPtr m_PerFrameConstantBufferBufferPtr;
 
+        GraphicAPIs m_GraphicsAPI;
         std::unordered_set<std::string> m_AvailableExtensions;
     };
 } // namespace
@@ -233,35 +236,65 @@ namespace
                 0,
                 0, 0, 0
             };
-
-            const int Attributes[] =
-            {
-                WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
-                WGL_CONTEXT_MINOR_VERSION_ARB, 5,
-                WGL_CONTEXT_PROFILE_MASK_ARB , WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-                WGL_CONTEXT_FLAGS_ARB        , APP_DEBUG_MODE ? WGL_CONTEXT_DEBUG_BIT_ARB : 0,
-                0,        //End
-            };
-
+            
             // -----------------------------------------------------------------------------
             // Create OpenGL specific stuff with dummy context
             // -----------------------------------------------------------------------------
             pNativeWindowHandle = rWindowInfo.m_pNativeWindowHandle;
 
             pNativeDeviceContextHandle = ::GetDC(pNativeWindowHandle);
-
+            
             Format = ChoosePixelFormat(pNativeDeviceContextHandle, &PixelFormatDesc);
 
             SetPixelFormat(pNativeDeviceContextHandle, Format, &PixelFormatDesc);
 
             pDummyNativeOpenGLContextHandle = ::wglCreateContext(pNativeDeviceContextHandle);
-
+            
             if (pDummyNativeOpenGLContextHandle == 0)
             {
                 BASE_THROWM("OpenGL dummy context creation failed.");
             }
 
             wglMakeCurrent(pNativeDeviceContextHandle, pDummyNativeOpenGLContextHandle);
+
+            const std::string GraphicsAPI = Base::CProgramParameters::GetInstance().GetStdString("graphics_api");
+
+            if (GraphicsAPI == "gles32")
+            {
+                m_GraphicsAPI = GLES32;
+            }
+            else if (GraphicsAPI == "gl46")
+            {
+                m_GraphicsAPI = GL46;
+            }
+            else if (GraphicsAPI == "gl45")
+            {
+                m_GraphicsAPI = GL45;
+            }
+            else
+            {
+                m_GraphicsAPI = UNDEFINED_GRAPHICS_API;
+                std::string Message = "Graphics API " + GraphicsAPI + " is not supported!";
+                BASE_THROWV(Message.c_str());
+            }
+            
+            if (m_GraphicsAPI == GLES32)
+            {
+                typedef const char* (WINAPI * PFNWGLGETEXTENSIONSSTRINGARBPROC)(HDC hdc);
+                PROC Function = wglGetProcAddress("wglGetExtensionsStringARB");
+                PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB = reinterpret_cast<PFNWGLGETEXTENSIONSSTRINGARBPROC>(Function);
+
+                std::string wglExtensions = wglGetExtensionsStringARB(pNativeDeviceContextHandle);
+
+                std::size_t found = wglExtensions.find("WGL_EXT_create_context_es2_profile");
+                bool GLESAvailable = found != std::string::npos;
+
+                if (!GLESAvailable)
+                {
+                    BASE_CONSOLE_ERROR("OpenGL ES 3.2 is not availble! Will try OpenGL 4.5 instead");
+                    m_GraphicsAPI = GL45;
+                }
+            }
 
             // -----------------------------------------------------------------------------
             // Activate GLEW. GLEW is an extension manager which handles all different
@@ -283,7 +316,31 @@ namespace
             // -----------------------------------------------------------------------------
             // Create final OpenGL context with attributes
             // -----------------------------------------------------------------------------
-            pNativeOpenGLContextHandle = ::wglCreateContextAttribsARB(pNativeDeviceContextHandle, 0, Attributes);
+            
+            if (m_GraphicsAPI == GLES32)
+            {
+                const int Attributes[] =
+                {
+                    WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+                    WGL_CONTEXT_MINOR_VERSION_ARB, 2,
+                    WGL_CONTEXT_PROFILE_MASK_ARB , WGL_CONTEXT_ES2_PROFILE_BIT_EXT,
+                    WGL_CONTEXT_FLAGS_ARB        , APP_DEBUG_MODE ? WGL_CONTEXT_DEBUG_BIT_ARB : 0,
+                    0,        //End
+                };
+                pNativeOpenGLContextHandle = ::wglCreateContextAttribsARB(pNativeDeviceContextHandle, 0, Attributes);
+            }
+            else
+            {
+                const int Attributes[] =
+                {
+                    WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
+                    WGL_CONTEXT_MINOR_VERSION_ARB, m_GraphicsAPI == GL46 ? 6 : 5,
+                    WGL_CONTEXT_PROFILE_MASK_ARB , WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+                    WGL_CONTEXT_FLAGS_ARB        , APP_DEBUG_MODE ? WGL_CONTEXT_DEBUG_BIT_ARB : 0,
+                    0,        //End
+                };
+                pNativeOpenGLContextHandle = ::wglCreateContextAttribsARB(pNativeDeviceContextHandle, 0, Attributes);
+            }
 
             if (pNativeDeviceContextHandle == 0)
             {
@@ -504,6 +561,13 @@ namespace
         Base::CMemory::Free(pPixels);
     }
     
+    // -----------------------------------------------------------------------------
+
+    GraphicAPIs CGfxMain::GetGraphicsAPI()
+    {
+        return m_GraphicsAPI;
+    }
+
     // -----------------------------------------------------------------------------
 
     bool CGfxMain::IsExtensionAvailable(const std::string& _Name)
@@ -753,6 +817,13 @@ namespace Main
     void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile)
     {
         CGfxMain::GetInstance().TakeScreenshot(_WindowID, _pPathToFile);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    GraphicAPIs GetGraphicsAPI()
+    {
+        return CGfxMain::GetInstance().GetGraphicsAPI();
     }
 
     // -----------------------------------------------------------------------------
