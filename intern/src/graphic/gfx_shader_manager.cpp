@@ -656,7 +656,7 @@ namespace
                 _rShaderContent = "precision lowp image3D; \n" + _rShaderContent;
                 _rShaderContent = "precision lowp uimage2D; \n" + _rShaderContent;
                 _rShaderContent = "precision lowp sampler2DShadow; \n" + _rShaderContent;
-                _rShaderContent = "precision mediump float; \n" + _rShaderContent;
+                _rShaderContent = "precision highp float; \n" + _rShaderContent;
                 _rShaderContent = "#version 320 es \n" + _rShaderContent;
             }
             else
