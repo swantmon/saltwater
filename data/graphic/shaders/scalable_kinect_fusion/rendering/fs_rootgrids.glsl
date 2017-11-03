@@ -80,11 +80,11 @@ void main()
 
             vec3 AABBMin = g_RootVolumePool[VolumeIndex].m_Offset * VOLUME_SIZE;
 
-            RayLength = GetEndLength(CameraPosition, RayDirection, AABBMin, AABBMin + VOLUME_SIZE);
+            //RayLength = GetEndLength(CameraPosition, RayDirection, AABBMin, AABBMin + VOLUME_SIZE);
         }
         else
         {
-            
+
         }
     }
 

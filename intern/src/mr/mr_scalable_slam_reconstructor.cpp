@@ -269,7 +269,6 @@ namespace MR
 		SetupTextures();
 		SetupBuffers();
 
-        ClearBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr, m_ReconstructionSettings.GRID_LEVELS);
         ClearPool();
 
         m_IsIntegrationPaused = false;
@@ -2099,6 +2098,7 @@ namespace MR
             BufferManager::UploadBufferData(m_VolumeBuffers.m_TSDFPoolPtr, Data.data(), i * DataSize, DataSize);
         }
         BufferManager::UploadBufferData(m_VolumeBuffers.m_RootVolumePositionBufferPtr, Data.data());
+        ClearBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr, m_ReconstructionSettings.GRID_LEVELS);
     }
 
     // -----------------------------------------------------------------------------
@@ -2119,7 +2119,6 @@ namespace MR
 		//SetupBuffers(); // todo: find out why calling this method crashes the application
 		SetupShaders();
 
-        ClearBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr, m_ReconstructionSettings.GRID_LEVELS);
         ClearPool();
     }
 
