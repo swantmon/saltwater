@@ -612,7 +612,10 @@ namespace MR
             << "#define REDUCTION_SHADER_COUNT " << SummandsPOT / 2                                 << " \n"
             << "#define ICP_SUMMAND_COUNT "      << Summands                                        << " \n"
             << "#define MAP_TEXTURE_FORMAT "     << InternalFormatString                            << " \n"
-            << "#define HIERARCHY_LEVELS "       << MR::SReconstructionSettings::GRID_LEVELS        << " \n";
+            << "#define HIERARCHY_LEVELS "       << MR::SReconstructionSettings::GRID_LEVELS        << " \n"
+            << "#define VOXELS_PER_ROOTGRID "    << m_ReconstructionSettings.m_VoxelsPerGrid[0]     << " \n"
+            << "#define VOXELS_PER_LEVEL1Grid "  << m_ReconstructionSettings.m_VoxelsPerGrid[1]     << " \n"
+            << "#define VOXELS_PER_LEVEL2Grid "  << m_ReconstructionSettings.m_VoxelsPerGrid[2]     << " \n";
 
         if (m_ReconstructionSettings.m_CaptureColor)
         {
