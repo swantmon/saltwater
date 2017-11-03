@@ -10,11 +10,6 @@
 // Input from engine
 // -----------------------------------------------------------------------------
 
-layout(std430, binding = 0) buffer RootVolumePositionBuffer
-{
-    int g_RootVolumePositionBuffer[];
-};
-
 layout(row_major, std140, binding = 1) uniform ScalableRaycastConstantBuffer
 {
     vec3 m_AABBMin;

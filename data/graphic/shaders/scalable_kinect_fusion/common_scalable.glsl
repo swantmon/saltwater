@@ -54,6 +54,11 @@ layout(std430, binding = 5) buffer VolumeQueueSizes
     uint g_CurrentVolumeIndex;
 };
 
+layout(std430, binding = 6) buffer RootVolumePositionBuffer
+{
+    int g_RootVolumePositionBuffer[];
+};
+
 ////////////////////////////////////////////////////////////////////////
 // Some helper functions
 ////////////////////////////////////////////////////////////////////////

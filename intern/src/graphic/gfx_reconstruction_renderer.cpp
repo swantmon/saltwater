@@ -768,7 +768,7 @@ namespace
         ContextManager::SetShaderVS(m_RootVolumesVSPtr);
         ContextManager::SetShaderPS(m_RootVolumesFSPtr);
 
-        ContextManager::SetResourceBuffer(0, rVolume.m_RootVolumePositionBufferPtr);
+        ContextManager::SetResourceBuffer(6, rVolume.m_RootVolumePositionBufferPtr);
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_ScalableRaycastBufferPtr);
@@ -828,7 +828,7 @@ namespace
         ContextManager::SetShaderVS(m_RootGridsVSPtr);
         ContextManager::SetShaderPS(m_RootGridsFSPtr);
 
-        ContextManager::SetResourceBuffer(0, rVolume.m_RootVolumePositionBufferPtr);
+        ContextManager::SetResourceBuffer(6, rVolume.m_RootVolumePositionBufferPtr);
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_ScalableRaycastBufferPtr);
@@ -1150,17 +1150,17 @@ namespace
 
             BufferManager::UploadBufferData(m_ScalableRaycastBufferPtr, &Data);
 
-			//RaycastScalableVolume();
+			RaycastScalableVolume();
 
-            //RenderVertexMap();
+            RenderVertexMap();
 
-            //RaycastRootVolumes();
-            RaycastRootGrids();
-            RaycastLevelGrids();
+            RaycastRootVolumes();
+            //RaycastRootGrids();
+            //RaycastLevelGrids();
 
-            RenderQueuedRootVolumes();
-            //RenderQueuedLevel1Grids();
-            //RenderQueuedLevel2Grids();
+            //RenderQueuedRootVolumes();
+            RenderQueuedLevel1Grids();
+            RenderQueuedLevel2Grids();
 		}
 		else
 		{

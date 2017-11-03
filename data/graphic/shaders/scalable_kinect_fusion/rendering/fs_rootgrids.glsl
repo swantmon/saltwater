@@ -10,11 +10,6 @@
 // Input from engine
 // -----------------------------------------------------------------------------
 
-layout(std430, binding = 0) buffer RootVolumePositionBuffer
-{
-    int g_RootVolumePositionBuffer[];
-};
-
 layout(row_major, std140, binding = 1) uniform ScalableRaycastConstantBuffer
 {
     vec3 g_AABBMin;
@@ -63,8 +58,8 @@ void main()
     RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
     RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
 
-    float StartLength = GetStartLength(CameraPosition, RayDirection, g_AABBMin, g_AABBMax);
-    float EndLength = GetEndLength(CameraPosition, RayDirection, g_AABBMin, g_AABBMax);
+    const float StartLength = GetStartLength(CameraPosition, RayDirection, g_AABBMin, g_AABBMax);
+    const float EndLength = GetEndLength(CameraPosition, RayDirection, g_AABBMin, g_AABBMax);
 
     float RayLength = StartLength;
     float Step = TRUNCATED_DISTANCE / 1000.0f;
@@ -79,18 +74,25 @@ void main()
         uint VolumeIndex = OffsetToIndex(BufferPosition, g_VolumeTextureWidth);
         int Volume = g_RootVolumePositionBuffer[VolumeIndex];
 
-        if (Volume != -1)
+        if (Volume == -1)
         {
-            out_GBuffer0 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-            out_GBuffer1 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-            out_GBuffer2 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-            
-            vec4 CSPosition = g_WorldToScreen * vec4(CurrentPosition, 1.0f);
-            gl_FragDepth = (CSPosition.z / CSPosition.w);
 
-            return;
+            //RayLength = GetEndLength(CameraPosition, Direction, )
+        }
+        else
+        {
+
         }
     }
+
+    out_GBuffer0 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+    out_GBuffer1 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+    out_GBuffer2 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+    
+    //vec4 CSPosition = g_WorldToScreen * vec4(CurrentPosition, 1.0f);
+    //gl_FragDepth = (CSPosition.z / CSPosition.w);
+
+    return;
 
     discard;
 }
