@@ -1158,9 +1158,9 @@ namespace
             //RaycastRootGrids();
             //RaycastLevelGrids();
 
-            //RenderQueuedRootVolumes();
-            RenderQueuedLevel1Grids();
-            RenderQueuedLevel2Grids();
+            RenderQueuedRootVolumes();
+            //RenderQueuedLevel1Grids();
+            //RenderQueuedLevel2Grids();
 		}
 		else
 		{

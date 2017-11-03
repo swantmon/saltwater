@@ -76,12 +76,15 @@ void main()
 
         if (Volume == -1)
         {
+            // Compute length where ray leaves volume and directly jump to point
 
-            //RayLength = GetEndLength(CameraPosition, Direction, )
+            vec3 AABBMin = g_RootVolumePool[VolumeIndex].m_Offset * VOLUME_SIZE;
+
+            RayLength = GetEndLength(CameraPosition, RayDirection, AABBMin, AABBMin + VOLUME_SIZE);
         }
         else
         {
-
+            
         }
     }
 
