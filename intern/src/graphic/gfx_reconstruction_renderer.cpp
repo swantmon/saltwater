@@ -186,6 +186,8 @@ namespace
     
     void CGfxReconstructionRenderer::OnStart()
     {
+        assert(Main::GetGraphicsAPI() == GL45);
+
         Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxReconstructionRenderer::OnResize));
         
 		MR::SReconstructionSettings DefaultSettings;
@@ -1154,8 +1156,8 @@ namespace
 
             RenderVertexMap();
 
-            RaycastRootVolumes();
-            //RaycastRootGrids();
+            //RaycastRootVolumes();
+            RaycastRootGrids();
             //RaycastLevelGrids();
 
             RenderQueuedRootVolumes();
