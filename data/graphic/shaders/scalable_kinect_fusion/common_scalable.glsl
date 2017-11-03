@@ -49,7 +49,7 @@ layout(std430, binding = 4) buffer PoolItemCounts
     int g_TSDFPoolItemCount;
 };
 
-layout(std430, binding = 5) buffer VolumeQueueSizes
+layout(std430, binding = 5) buffer VolumeIndexBuffer
 {
     int g_CurrentVolumeIndex;
 };
