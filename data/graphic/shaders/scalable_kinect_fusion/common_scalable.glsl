@@ -14,7 +14,7 @@ struct SVolumePoolItem
 
 struct SGridPoolItem
 {
-    uint m_PoolIndex;
+    int m_PoolIndex;
     bool m_NearSurface;
 };
 
@@ -44,14 +44,14 @@ layout(std430, binding = 3) buffer TSDFPool
 
 layout(std430, binding = 4) buffer PoolItemCounts
 {
-    uint g_RootGridPoolItemCount;
-    uint g_Level1GridPoolItemCount;
-    uint g_TSDFPoolItemCount;
+    int g_RootGridPoolItemCount;
+    int g_Level1GridPoolItemCount;
+    int g_TSDFPoolItemCount;
 };
 
 layout(std430, binding = 5) buffer VolumeQueueSizes
 {
-    uint g_CurrentVolumeIndex;
+    int g_CurrentVolumeIndex;
 };
 
 layout(std430, binding = 6) buffer RootVolumePositionBuffer

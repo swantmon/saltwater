@@ -1673,7 +1673,7 @@ namespace MR
 
         ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 4;// m_ReconstructionSettings.GRID_LEVELS;
         m_VolumeBuffers.m_PoolItemCountBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 4;// 16 bytes = minimum
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(int32_t) * 4;// 16 bytes = minimum
         m_VolumeIndexBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
 
