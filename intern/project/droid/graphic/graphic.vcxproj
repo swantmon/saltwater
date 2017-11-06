@@ -1,21 +1,29 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|ARM64">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM64">
+      <Configuration>Release</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x86">
+      <Configuration>Debug</Configuration>
+      <Platform>x86</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x86">
+      <Configuration>Release</Configuration>
+      <Platform>x86</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\graphic\gfx_texture_base.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_texture_manager.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_texture_set.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_tonemapping_renderer.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_topology.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_unload_map_state.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_view.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_view_manager.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_view_port.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_view_port_set.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_actor_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_application_interface.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_ar_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_area_light_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_area_light_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_ar_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_background_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_blend_description.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_blend_state.h" />
@@ -42,7 +50,6 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_light_area_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_indirect_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_point_renderer.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_description.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_sun_renderer.h" />
@@ -79,9 +86,9 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_rasterizer_state.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_reflection_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_release.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_renderer_interface.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_render_context.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_render_state.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_renderer_interface.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_sampler.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_sampler_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_sampler_set.h" />
@@ -103,21 +110,23 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_texture_1d.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_texture_2d.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_texture_3d.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_texture_base.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_texture_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_texture_set.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_tonemapping_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_topology.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_unload_map_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_view.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_view_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_view_port.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_view_port_set.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\graphic\gfx_texture_manager.cpp" />
-    <ClCompile Include="..\..\..\src\graphic\gfx_texture_set.cpp" />
-    <ClCompile Include="..\..\..\src\graphic\gfx_tonemapping_renderer.cpp" />
-    <ClCompile Include="..\..\..\src\graphic\gfx_unload_map_state.cpp" />
-    <ClCompile Include="..\..\..\src\graphic\gfx_view.cpp" />
-    <ClCompile Include="..\..\..\src\graphic\gfx_view_manager.cpp" />
-    <ClCompile Include="..\..\..\src\graphic\gfx_view_port.cpp" />
-    <ClCompile Include="..\..\..\src\graphic\gfx_view_port_set.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_actor_renderer.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_application_interface.cpp" />
-    <ClCompile Include="..\..\..\src\graphic\gfx_ar_renderer.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_area_light_facet.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_area_light_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_ar_renderer.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_background_renderer.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_blend_state.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_buffer.cpp" />
@@ -165,9 +174,9 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_precompiled.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_rasterizer_state.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_reflection_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_renderer_interface.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_render_context.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_render_state.cpp" />
-    <ClCompile Include="..\..\..\src\graphic\gfx_renderer_interface.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_sampler.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_sampler_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_sampler_set.cpp" />
@@ -188,5 +197,98 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_texture_2d.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_texture_3d.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_texture_base.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_texture_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_texture_set.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_tonemapping_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_unload_map_state.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_view.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_view_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_view_port.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_view_port_set.cpp" />
   </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{b911725e-f4e9-4120-b302-6d0fdf3f3ce4}</ProjectGuid>
+    <Keyword>Android</Keyword>
+    <RootNamespace>gfx</RootNamespace>
+    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
+    <ApplicationType>Android</ApplicationType>
+    <ApplicationTypeRevision>3.0</ApplicationTypeRevision>
+    <ProjectName>graphic</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>Clang_3_8</PlatformToolset>
+    <AndroidAPILevel>android-24</AndroidAPILevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>Clang_3_8</PlatformToolset>
+    <AndroidAPILevel>android-24</AndroidAPILevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>Clang_3_8</PlatformToolset>
+    <AndroidAPILevel>android-24</AndroidAPILevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>Clang_3_8</PlatformToolset>
+    <AndroidAPILevel>android-24</AndroidAPILevel>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <OutDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <OutDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <OutDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <OutDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>../../../src/gfx/gfx_precompiled.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>..\..\..\src;$(Sysroot)\usr\include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>../../../src/gfx/gfx_precompiled.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>..\..\..\src;$(Sysroot)\usr\include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>../../../src/gfx/gfx_precompiled.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>..\..\..\src;$(Sysroot)\usr\include;$(StlIncludeDirectories)%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>../../../src/gfx/gfx_precompiled.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>..\..\..\src;$(Sysroot)\usr\include;$(StlIncludeDirectories)%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
 </Project>

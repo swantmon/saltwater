@@ -47,14 +47,6 @@
     <ClInclude Include="..\..\..\..\src\app_droid\app_state.h" />
     <ClInclude Include="..\..\..\..\src\app_droid\pch.h" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\base\base.vcxproj">
-      <Project>{e0291846-fb7c-4725-a4d0-d8307a3638b2}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\gfx\gfx.vcxproj">
-      <Project>{b911725e-f4e9-4120-b302-6d0fdf3f3ce4}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{cd9de705-7605-4d57-91e9-faf9b6712f4d}</ProjectGuid>
     <Keyword>Android</Keyword>

@@ -2,10 +2,6 @@
 #include "app_droid/app_application.h"
 #include "app_droid/app_play_state.h"
 
-#include "base\base_io.h"
-
-#include "gfx/gfx_main.h"
-
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "AndroidProject1.NativeActivity", __VA_ARGS__))
 #define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "AndroidProject1.NativeActivity", __VA_ARGS__))
 
@@ -99,7 +95,7 @@ namespace
 		// -----------------------------------------------------------------------------
 		// Set base
 		// -----------------------------------------------------------------------------
-		Base::SetInternalStoragePath(_pAndroidApp->activity->internalDataPath);
+		// Base::SetInternalStoragePath(_pAndroidApp->activity->internalDataPath);
 
         // -----------------------------------------------------------------------------
         // Set engine
@@ -123,7 +119,6 @@ namespace
     
     void CApplication::OnExit()
     {
-        Gfx::Main::OnExit();
     }
     
     // -----------------------------------------------------------------------------
@@ -149,19 +144,6 @@ namespace
                     AndroidPollSource->process(m_AppSetup.m_AndroidApp, AndroidPollSource);
                 }
 
-                if (Identifcation == LOOPER_ID_USER) 
-                {
-                    if (m_AppSetup.m_AccelerometerSensor != NULL) 
-                    {
-                        ASensorEvent SensorEvent;
-
-                        while (ASensorEventQueue_getEvents(m_AppSetup.m_SensorEventQueue, &SensorEvent, 1) > 0) 
-                        {
-                            // LOGI("accelerometer: x=%f y=%f z=%f", SensorEvent.acceleration.x, SensorEvent.acceleration.y, SensorEvent.acceleration.z);
-                        }
-                    }
-                }
-
                 if (m_AppSetup.m_AndroidApp->destroyRequested != 0 || m_AppSetup.m_TerminateRequested != 0) 
                 {
                     ApplicationMessage = 1;
@@ -173,12 +155,6 @@ namespace
                 App::CState::EStateType NextState;
 
                 NextState = s_pStates[m_CurrentState]->OnRun();
-
-                Gfx::Main::BeginFrame();
-
-                Gfx::Main::DrawTriangle();
-
-                Gfx::Main::EndFrame();
 
                 if (NextState != m_CurrentState)
                 {
@@ -225,19 +201,21 @@ namespace
             break;
 
         case APP_CMD_INIT_WINDOW:
+            // -----------------------------------------------------------------------------
             // The window is being shown, get it ready.
+            // -----------------------------------------------------------------------------
             if (AppSetup->m_AndroidApp->window != NULL) 
             {
-                Gfx::Main::RegisterWindow(AppSetup->m_AndroidApp->window);
-
-                Gfx::Main::OnStart();
+                // Gfx::Main::RegisterWindow(AppSetup->m_AndroidApp->window);
 
                 AppSetup->m_IsStarted = true;
             }
             break;
 
         case APP_CMD_TERM_WINDOW:
+            // -----------------------------------------------------------------------------
             // The window is being hidden or closed, clean it up.
+            // -----------------------------------------------------------------------------
             AppSetup->m_TerminateRequested = true;
             break;
 
