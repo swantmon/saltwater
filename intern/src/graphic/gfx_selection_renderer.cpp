@@ -510,8 +510,8 @@ namespace
         rTicket.m_SizeY         = _SizeY;
         rTicket.m_IndexOfTicket = IndexOfTicket;
         rTicket.m_Flags         = _Flags;
-        rTicket.m_WSPosition    = Base::Float3::s_Zero;
-        rTicket.m_WSNormal      = Base::Float3::s_Zero;
+        rTicket.m_WSPosition    = Base::Float3::s_AxisZero;
+        rTicket.m_WSNormal      = Base::Float3::s_AxisZero;
         rTicket.m_Depth         = -1.0f;
         rTicket.m_pObject       = 0;
         rTicket.m_Frame         = Core::Time::GetNumberOfFrame() - 1;

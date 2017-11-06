@@ -264,29 +264,41 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>../../../src/gfx/gfx_precompiled.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\..\..\src;$(Sysroot)\usr\include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeaderFile>../../../src/graphic/gfx_precompiled.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\devil\include;..\..\..\..\extern\tinyxml2\include;$(Sysroot)\usr\include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <CppLanguageStandard>c++1y</CppLanguageStandard>
+      <CompileAs>Default</CompileAs>
+      <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>../../../src/gfx/gfx_precompiled.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\..\..\src;$(Sysroot)\usr\include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeaderFile>../../../src/graphic/gfx_precompiled.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\devil\include;..\..\..\..\extern\tinyxml2\include;$(Sysroot)\usr\include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <CppLanguageStandard>c++1y</CppLanguageStandard>
+      <CompileAs>Default</CompileAs>
+      <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>../../../src/gfx/gfx_precompiled.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\..\..\src;$(Sysroot)\usr\include;$(StlIncludeDirectories)%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeaderFile>../../../src/graphic/gfx_precompiled.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\devil\include;..\..\..\..\extern\tinyxml2\include;$(Sysroot)\usr\include;$(StlIncludeDirectories)%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <CppLanguageStandard>c++1y</CppLanguageStandard>
+      <CompileAs>Default</CompileAs>
+      <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>../../../src/gfx/gfx_precompiled.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\..\..\src;$(Sysroot)\usr\include;$(StlIncludeDirectories)%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeaderFile>../../../src/graphic/gfx_precompiled.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\devil\include;..\..\..\..\extern\tinyxml2\include;$(Sysroot)\usr\include;$(StlIncludeDirectories)%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <CppLanguageStandard>c++1y</CppLanguageStandard>
+      <CompileAs>Default</CompileAs>
+      <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

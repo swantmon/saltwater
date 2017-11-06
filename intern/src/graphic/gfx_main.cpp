@@ -390,7 +390,7 @@ namespace
             glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 #endif
 
-            glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
+            glClipControl(GL_LOWER_LEFT, GL_AxisZERO_TO_ONE);
 
             GLint ExtensionCount;
             glGetIntegerv(GL_NUM_EXTENSIONS, &ExtensionCount);

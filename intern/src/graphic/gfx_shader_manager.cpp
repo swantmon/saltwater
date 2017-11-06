@@ -13,8 +13,6 @@
 #include "graphic/gfx_native_types.h"
 #include "graphic/gfx_shader_manager.h"
 
-#include "GL/glew.h"
-
 #include <assert.h>
 #include <exception>
 #include <fstream>

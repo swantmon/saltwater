@@ -52,7 +52,7 @@ namespace Cam
     void SetRotationMatrix(const Base::Float3x3& _rMatrix);
     const Base::Float3x3& GetRotationMatrix();
 
-    void SetPosition(float _X, float _Y, float _Z);
+    void SetPosition(float _AxisX, float _AxisY, float _AxisZ);
     void SetPosition(const Base::Float3& _rPosition);
     const Base::Float3& GetPosition();
 

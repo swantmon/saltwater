@@ -335,7 +335,7 @@ namespace
         
         m_CubemapGSBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
-        UpdateGeometryBuffer(Base::Float3::s_Zero, 0.1f, 1000.0f);
+        UpdateGeometryBuffer(Base::Float3::s_AxisZero, 0.1f, 1000.0f);
 
         // -----------------------------------------------------------------------------
 
@@ -802,11 +802,11 @@ namespace
         // -----------------------------------------------------------------------------
         // Upload data
         // -----------------------------------------------------------------------------
-        UpdateGeometryBuffer(Base::Float3::s_Zero, 0.2f, 2.0f);
+        UpdateGeometryBuffer(Base::Float3::s_AxisZero, 0.2f, 2.0f);
 
         SReflectionProbePropertiesBuffer ReflectionProbePropertiesBuffer;
 
-        ReflectionProbePropertiesBuffer.m_Properties    = Base::Float4::s_Zero;
+        ReflectionProbePropertiesBuffer.m_Properties    = Base::Float4::s_AxisZero;
         ReflectionProbePropertiesBuffer.m_Properties[0] = static_cast<float>(HistogramRenderer::GetCurrentExposureHistoryIndex());
         ReflectionProbePropertiesBuffer.m_Properties[1] = 1.0f;
 
@@ -1164,7 +1164,7 @@ namespace
 
         BufferManager::UploadBufferData(m_FilteringPSBufferPtr, &CubemapSettings);
 
-        UpdateGeometryBuffer(Base::Float3::s_Zero, 0.1f, 1000.0f);
+        UpdateGeometryBuffer(Base::Float3::s_AxisZero, 0.1f, 1000.0f);
 
         // -----------------------------------------------------------------------------
         // Prepare
@@ -1477,7 +1477,7 @@ namespace
         // -----------------------------------------------------------------------------
 
         TargetPosition = EyePosition + Base::Float3::s_AxisY;
-        UpDirection    = Base::Float3::s_Zero - Base::Float3::s_AxisZ;
+        UpDirection    = Base::Float3::s_AxisZero - Base::Float3::s_AxisZ;
 
         Values.m_CubeViewMatrix[2].LookAt(EyePosition, TargetPosition, UpDirection);
 

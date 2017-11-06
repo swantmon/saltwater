@@ -237,12 +237,12 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
-    void SetPosition(float _X, float _Y, float _Z)
+    void SetPosition(float _AxisX, float _AxisY, float _AxisZ)
     {
         CCamera& rCamera = *ViewManager::GetMainCamera();
         CView&   rView   = *rCamera.GetView();
 
-        rView.SetPosition(_X, _Y, _Z);
+        rView.SetPosition(_AxisX, _AxisY, _AxisZ);
     }
 
     // -----------------------------------------------------------------------------

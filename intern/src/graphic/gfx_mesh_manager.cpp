@@ -144,7 +144,7 @@ namespace
         CMeshPtr CreateBox(float _Width, float _Height, float _Depth);
         CMeshPtr CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices);
         CMeshPtr CreateCone(float _Radius, float _Height, unsigned int _Slices);
-        CMeshPtr CreateRectangle(float _X, float _Y, float _Width, float _Height);
+        CMeshPtr CreateRectangle(float _AxisX, float _AxisY, float _Width, float _Height);
 
     private:
         
@@ -1016,7 +1016,7 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    CMeshPtr CGfxMeshManager::CreateRectangle(float _X, float _Y, float _Width, float _Height)
+    CMeshPtr CGfxMeshManager::CreateRectangle(float _AxisX, float _AxisY, float _Width, float _Height)
     {
         // -----------------------------------------------------------------------------
         // Create model with LOD, surface and materials
@@ -1067,10 +1067,10 @@ namespace
         // -----------------------------------------------------------------------------
         unsigned int IndexOfVertex = 0;
         
-        pVertices[IndexOfVertex ++] = Base::Float2(_X         , _Y + _Height);
-        pVertices[IndexOfVertex ++] = Base::Float2(_X + _Width, _Y +_Height);
-        pVertices[IndexOfVertex ++] = Base::Float2(_X + _Width, _Y);
-        pVertices[IndexOfVertex ++] = Base::Float2(_X         , _Y);
+        pVertices[IndexOfVertex ++] = Base::Float2(_AxisX         , _AxisY + _Height);
+        pVertices[IndexOfVertex ++] = Base::Float2(_AxisX + _Width, _AxisY +_Height);
+        pVertices[IndexOfVertex ++] = Base::Float2(_AxisX + _Width, _AxisY);
+        pVertices[IndexOfVertex ++] = Base::Float2(_AxisX         , _AxisY);
         
         assert(IndexOfVertex == NumberOfVertices);
         
@@ -1263,9 +1263,9 @@ namespace MeshManager
     
     // -----------------------------------------------------------------------------
     
-    CMeshPtr CreateRectangle(float _X, float _Y, float _Width, float _Height)
+    CMeshPtr CreateRectangle(float _AxisX, float _AxisY, float _Width, float _Height)
     {
-        return CGfxMeshManager::GetInstance().CreateRectangle(_X, _Y, _Width, _Height);
+        return CGfxMeshManager::GetInstance().CreateRectangle(_AxisX, _AxisY, _Width, _Height);
     }
 } // namespace MeshManager
 } // namespace Gfx

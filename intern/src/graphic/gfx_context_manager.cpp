@@ -18,8 +18,6 @@
 
 #include <assert.h>
 
-#include "GL/glew.h"
-
 using namespace Gfx;
 
 #ifndef NDEBUG

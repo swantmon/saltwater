@@ -22,7 +22,7 @@ namespace MATH
 
     public:
 
-        static const CMatrix3x3<T> s_Zero;
+        static const CMatrix3x3<T> s_AxisZero;
         static const CMatrix3x3<T> s_Identity;
 
     public:
@@ -127,7 +127,7 @@ namespace MATH
         // -----------------------------------------------------------------------------
 
         inline CThis& SetScale(X _Scale);
-        inline CThis& SetScale(X _X, X _Y, X _Z);
+        inline CThis& SetScale(X _AxisX, X _AxisY, X _AxisZ);
         inline CThis& SetScale(CVector3<T>& _rVector);
         inline CThis& SetScale(const CLine& _rVector);
 
@@ -180,7 +180,7 @@ namespace MATH
 {
 
     template<typename T>
-    const CMatrix3x3<T> CMatrix3x3<T>::s_Zero     = CMatrix3x3(T(0));
+    const CMatrix3x3<T> CMatrix3x3<T>::s_AxisZero     = CMatrix3x3(T(0));
 
     template<typename T>
     const CMatrix3x3<T> CMatrix3x3<T>::s_Identity = CMatrix3x3(
@@ -547,7 +547,7 @@ namespace MATH
     template<typename T>
     inline typename CMatrix3x3<T>::CThis& CMatrix3x3<T>::SetZero()
     {
-        return Set(s_Zero);
+        return Set(s_AxisZero);
     }
 
     // -----------------------------------------------------------------------------
@@ -759,13 +759,13 @@ namespace MATH
     // -----------------------------------------------------------------------------
 
     template<typename T>
-    inline typename CMatrix3x3<T>::CThis& CMatrix3x3<T>::SetScale(X _X, X _Y, X _Z)
+    inline typename CMatrix3x3<T>::CThis& CMatrix3x3<T>::SetScale(X _AxisX, X _AxisY, X _AxisZ)
     {
         SetIdentity();
 
-        m_V[A11] = _X;
-        m_V[A22] = _Y;
-        m_V[A33] = _Z;
+        m_V[A11] = _AxisX;
+        m_V[A22] = _AxisY;
+        m_V[A33] = _AxisZ;
 
         return *this;
     }

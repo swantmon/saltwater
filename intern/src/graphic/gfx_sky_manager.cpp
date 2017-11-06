@@ -420,7 +420,7 @@ namespace
         // -----------------------------------------------------------------------------
         SBufferDescriptor ConstanteBufferDesc;
 
-        Base::Float3 EyePosition = Base::Float3::s_Zero;
+        Base::Float3 EyePosition = Base::Float3::s_AxisZero;
         Base::Float3 UpDirection;
         Base::Float3 LookDirection;
         
@@ -485,7 +485,7 @@ namespace
         // -----------------------------------------------------------------------------
         
         LookDirection = EyePosition + Base::Float3::s_AxisY;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisZ;
+        UpDirection   = Base::Float3::s_AxisZero - Base::Float3::s_AxisZ;
         
         DefaultGSValues.m_CubeViewMatrix[2].LookAt(EyePosition, LookDirection, UpDirection);
         

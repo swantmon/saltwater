@@ -47,7 +47,7 @@ namespace MATH
 
     public:
 
-        static const CVector3<T> s_Zero;
+        static const CVector3<T> s_AxisZero;
         static const CVector3<T> s_One;
         static const CVector3<T> s_AxisX;
         static const CVector3<T> s_AxisY;
@@ -145,7 +145,7 @@ namespace MATH
 namespace MATH
 {
     template<typename T>
-    const CVector3<T> CVector3<T>::s_Zero  = CVector3(T(0));
+    const CVector3<T> CVector3<T>::s_AxisZero  = CVector3(T(0));
 
     template<typename T>
     const CVector3<T> CVector3<T>::s_One   = CVector3(T(1), T(1), T(1));

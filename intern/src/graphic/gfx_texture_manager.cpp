@@ -14,8 +14,6 @@
 #include "graphic/gfx_native_texture_3d.h"
 #include "graphic/gfx_texture_manager.h"
 
-#include "GL/glew.h"
-
 #include "IL/il.h"
 #include "IL/ilu.h"
 

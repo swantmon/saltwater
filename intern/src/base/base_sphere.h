@@ -42,7 +42,7 @@ namespace MATH
         
         inline  CSphere();
         inline  CSphere(const CVector& _rCenter, X _Radius);
-        inline  CSphere(X _X, X _Y, X _Z, X _Radius);
+        inline  CSphere(X _AxisX, X _AxisY, X _AxisZ, X _Radius);
         inline  CSphere(const CSphere& _rCpy);
         inline ~CSphere();
         
@@ -58,7 +58,7 @@ namespace MATH
     public:
         
         inline void Set(const CVector& _rCenter, X _Radius);
-        inline void Set(X _X, X _Y, X _Z, X _Radius);
+        inline void Set(X _AxisX, X _AxisY, X _AxisZ, X _Radius);
         
     public:
         
@@ -113,8 +113,8 @@ namespace MATH
     // -----------------------------------------------------------------------------
 
     template<typename T>
-    CSphere<T>::CSphere(X _X, X _Y, X _Z, X _Radius)
-        : m_Center(_X, _Y, _Z)
+    CSphere<T>::CSphere(X _AxisX, X _AxisY, X _AxisZ, X _Radius)
+        : m_Center(_AxisX, _AxisY, _AxisZ)
         , m_Radius(_Radius)
     {
     }
@@ -176,11 +176,11 @@ namespace MATH
     // -----------------------------------------------------------------------------
 
     template<typename T>
-    void CSphere<T>::Set(X _X, X _Y, X _Z, X _Radius)
+    void CSphere<T>::Set(X _AxisX, X _AxisY, X _AxisZ, X _Radius)
     {
-        m_Center[0] = _X;
-        m_Center[1] = _Y;
-        m_Center[2] = _Z;
+        m_Center[0] = _AxisX;
+        m_Center[1] = _AxisY;
+        m_Center[2] = _AxisZ;
         m_Radius    = _Radius;
     }
     

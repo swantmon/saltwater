@@ -23,8 +23,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "GL/glew.h"
-
 using namespace Gfx;
 
 namespace 

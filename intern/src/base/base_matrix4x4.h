@@ -23,7 +23,7 @@ namespace MATH
 
     public:
 
-        static const CMatrix4x4<T> s_Zero;
+        static const CMatrix4x4<T> s_AxisZero;
         static const CMatrix4x4<T> s_Identity;
 
     public:
@@ -139,11 +139,11 @@ namespace MATH
 
     public:
 
-        inline CThis& InjectTranslation(X _X, X _Y, X _Z);
+        inline CThis& InjectTranslation(X _AxisX, X _AxisY, X _AxisZ);
         inline CThis& InjectTranslation(CVector3<T>& _rVector);
         inline CThis& InjectTranslation(const CLine& _rVector);
 
-        inline CThis& SetTranslation(X _X, X _Y, X _Z);
+        inline CThis& SetTranslation(X _AxisX, X _AxisY, X _AxisZ);
         inline CThis& SetTranslation(CVector3<T>& _rVector);
         inline CThis& SetTranslation(const CLine& _rVector);
 
@@ -154,12 +154,12 @@ namespace MATH
         // -----------------------------------------------------------------------------
 
         inline CThis& InjectScale(X _Scale);
-        inline CThis& InjectScale(X _X, X _Y, X _Z);
+        inline CThis& InjectScale(X _AxisX, X _AxisY, X _AxisZ);
         inline CThis& InjectScale(CVector3<T>& _rVector);
         inline CThis& InjectScale(const CLine& _rVector);
 
         inline CThis& SetScale(X _Scale);
-        inline CThis& SetScale(X _X, X _Y, X _Z);
+        inline CThis& SetScale(X _AxisX, X _AxisY, X _AxisZ);
         inline CThis& SetScale(const CVector3<T>& _rVector);
         inline CThis& SetScale(const CLine& _rVector);
 
@@ -227,7 +227,7 @@ namespace MATH
 {
 
 	template<typename T>
-    const CMatrix4x4<T> CMatrix4x4<T>::s_Zero     = CMatrix4x4(T(0));
+    const CMatrix4x4<T> CMatrix4x4<T>::s_AxisZero     = CMatrix4x4(T(0));
 
     template<typename T>
     const CMatrix4x4<T> CMatrix4x4<T>::s_Identity = CMatrix4x4(
@@ -600,7 +600,7 @@ namespace MATH
     template<typename T>
     inline typename CMatrix4x4<T>::CThis& CMatrix4x4<T>::SetZero()
     {
-        return Set(s_Zero);
+        return Set(s_AxisZero);
     }
 
     // -----------------------------------------------------------------------------
@@ -876,11 +876,11 @@ namespace MATH
     // -----------------------------------------------------------------------------
 
     template<typename T>
-    inline typename CMatrix4x4<T>::CThis& CMatrix4x4<T>::InjectTranslation(X _X, X _Y, X _Z)
+    inline typename CMatrix4x4<T>::CThis& CMatrix4x4<T>::InjectTranslation(X _AxisX, X _AxisY, X _AxisZ)
     {
-        m_V[A14] = _X;
-        m_V[A24] = _Y;
-        m_V[A34] = _Z;
+        m_V[A14] = _AxisX;
+        m_V[A24] = _AxisY;
+        m_V[A34] = _AxisZ;
 
         return *this;
     }
@@ -904,11 +904,11 @@ namespace MATH
     // -----------------------------------------------------------------------------
 
     template<typename T>
-    inline typename CMatrix4x4<T>::CThis& CMatrix4x4<T>::SetTranslation(X _X, X _Y, X _Z)
+    inline typename CMatrix4x4<T>::CThis& CMatrix4x4<T>::SetTranslation(X _AxisX, X _AxisY, X _AxisZ)
     {
         SetIdentity();
 
-        return InjectTranslation(_X, _Y, _Z);
+        return InjectTranslation(_AxisX, _AxisY, _AxisZ);
     }
 
     // -----------------------------------------------------------------------------
@@ -969,11 +969,11 @@ namespace MATH
     // -----------------------------------------------------------------------------
 
     template<typename T>
-    inline typename CMatrix4x4<T>::CThis& CMatrix4x4<T>::InjectScale(X _X, X _Y, X _Z)
+    inline typename CMatrix4x4<T>::CThis& CMatrix4x4<T>::InjectScale(X _AxisX, X _AxisY, X _AxisZ)
     {
-        m_V[A11] = _X;
-        m_V[A22] = _Y;
-        m_V[A33] = _Z;
+        m_V[A11] = _AxisX;
+        m_V[A22] = _AxisY;
+        m_V[A33] = _AxisZ;
 
         return *this;
     }
@@ -1005,11 +1005,11 @@ namespace MATH
     // -----------------------------------------------------------------------------
 
     template<typename T>
-    inline typename CMatrix4x4<T>::CThis& CMatrix4x4<T>::SetScale(X _X, X _Y, X _Z)
+    inline typename CMatrix4x4<T>::CThis& CMatrix4x4<T>::SetScale(X _AxisX, X _AxisY, X _AxisZ)
     {
         SetIdentity();
 
-        return InjectScale(_X, _Y, _Z);
+        return InjectScale(_AxisX, _AxisY, _AxisZ);
     }
 
     // -----------------------------------------------------------------------------

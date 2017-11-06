@@ -12,8 +12,6 @@
 #include "graphic/gfx_native_sampler_set.h"
 #include "graphic/gfx_sampler_manager.h"
 
-#include "GL/glew.h"
-
 using namespace Gfx;
 
 namespace

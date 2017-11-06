@@ -35,6 +35,6 @@ namespace MeshManager
     CMeshPtr CreateBox(float _Width, float _Height, float _Depth);
     CMeshPtr CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices);
     CMeshPtr CreateCone(float _Radius, float _Height, unsigned int _Slices);
-    CMeshPtr CreateRectangle(float _X, float _Y, float _Width, float _Height);
+    CMeshPtr CreateRectangle(float _AxisX, float _AxisY, float _Width, float _Height);
 } // namespace MeshManager
 } // namespace Gfx
