@@ -78,9 +78,9 @@ void main()
         {
             // Compute length where ray leaves volume and directly jump to point
 
-            vec3 AABBMin = g_RootVolumePool[VolumeIndex].m_Offset * VOLUME_SIZE;
+            vec3 AABBMin = ivec3(CurrentPosition / VOLUME_SIZE);
 
-            //RayLength = GetEndLength(CameraPosition, RayDirection, AABBMin, AABBMin + VOLUME_SIZE);
+            //RayLength = GetEndLength(CurrentPosition, RayDirection, AABBMin, AABBMin + VOLUME_SIZE);
         }
         else
         {
@@ -94,10 +94,6 @@ void main()
     
     //vec4 CSPosition = g_WorldToScreen * vec4(CurrentPosition, 1.0f);
     //gl_FragDepth = (CSPosition.z / CSPosition.w);
-
-    return;
-
-    discard;
 }
 
 #endif // __INCLUDE_FS_ROOTGRIDS_GLSL__
