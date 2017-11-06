@@ -86,35 +86,35 @@
   <ImportGroup Label="Shared" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-    <OutDir>$(SolutionDir)..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
-    <OutDir>$(SolutionDir)..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-    <OutDir>$(SolutionDir)..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
-    <OutDir>$(SolutionDir)..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <OutDir>$(SolutionDir)..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-    <OutDir>$(SolutionDir)..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">

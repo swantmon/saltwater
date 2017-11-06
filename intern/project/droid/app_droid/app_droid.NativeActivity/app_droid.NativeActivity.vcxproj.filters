@@ -1,27 +1,27 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\app_droid\main.cpp" />
-    <ClCompile Include="..\..\..\src\app_droid\android_native_app_glue.c">
+    <ClCompile Include="..\..\..\..\src\app_droid\app_application.cpp" />
+    <ClCompile Include="..\..\..\..\src\app_droid\main.cpp" />
+    <ClCompile Include="..\..\..\..\src\app_droid\android_native_app_glue.c">
       <Filter>native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\app_droid\app_application.cpp" />
-    <ClCompile Include="..\..\..\src\app_droid\app_play_state.cpp">
+    <ClCompile Include="..\..\..\..\src\app_droid\app_play_state.cpp">
       <Filter>states</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\app_droid\android_native_app_glue.h">
+    <ClInclude Include="..\..\..\..\src\app_droid\app_application.h" />
+    <ClInclude Include="..\..\..\..\src\app_droid\pch.h" />
+    <ClInclude Include="..\..\..\..\src\app_droid\android_native_app_glue.h">
       <Filter>native</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\app_droid\app_application.h" />
-    <ClInclude Include="..\..\..\src\app_droid\app_play_state.h">
+    <ClInclude Include="..\..\..\..\src\app_droid\app_play_state.h">
       <Filter>states</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\app_droid\app_state.h">
+    <ClInclude Include="..\..\..\..\src\app_droid\app_state.h">
       <Filter>states</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\app_droid\pch.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="states">
