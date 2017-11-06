@@ -47,6 +47,11 @@
     <ClInclude Include="..\..\..\..\src\app_droid\app_state.h" />
     <ClInclude Include="..\..\..\..\src\app_droid\pch.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\base\base.vcxproj">
+      <Project>{e0291846-fb7c-4725-a4d0-d8307a3638b2}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{cd9de705-7605-4d57-91e9-faf9b6712f4d}</ProjectGuid>
     <Keyword>Android</Keyword>
@@ -173,6 +178,7 @@
       <PrecompiledHeaderFile>..\..\..\..\src\app_droid\pch.h</PrecompiledHeaderFile>
       <CompileAs>CompileAsCpp</CompileAs>
       <AdditionalIncludeDirectories>..\..\..\..\src;$(Sysroot)\usr\include;$(StlIncludeDirectories)%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
     <Link>
       <LibraryDependencies>%(LibraryDependencies);GLESv3;EGL;</LibraryDependencies>
@@ -184,6 +190,7 @@
       <PrecompiledHeaderFile>..\..\..\..\src\app_droid\pch.h</PrecompiledHeaderFile>
       <CompileAs>CompileAsCpp</CompileAs>
       <AdditionalIncludeDirectories>..\..\..\..\src;$(Sysroot)\usr\include;$(StlIncludeDirectories)%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
     <Link>
       <LibraryDependencies>%(LibraryDependencies);GLESv3;EGL;</LibraryDependencies>
@@ -195,6 +202,7 @@
       <PrecompiledHeaderFile>..\..\..\..\src\app_droid\pch.h</PrecompiledHeaderFile>
       <CompileAs>CompileAsCpp</CompileAs>
       <AdditionalIncludeDirectories>..\..\..\..\src;$(Sysroot)\usr\include;$(StlIncludeDirectories)%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
     <Link>
       <LibraryDependencies>%(LibraryDependencies);GLESv3;EGL;</LibraryDependencies>
@@ -206,6 +214,7 @@
       <PrecompiledHeaderFile>..\..\..\..\src\app_droid\pch.h</PrecompiledHeaderFile>
       <CompileAs>CompileAsCpp</CompileAs>
       <AdditionalIncludeDirectories>..\..\..\..\src;$(Sysroot)\usr\include;$(StlIncludeDirectories)%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
     <Link>
       <LibraryDependencies>%(LibraryDependencies);GLESv3;EGL;</LibraryDependencies>
@@ -217,6 +226,7 @@
       <PrecompiledHeaderFile>..\..\..\..\src\app_droid\pch.h</PrecompiledHeaderFile>
       <CompileAs>CompileAsCpp</CompileAs>
       <AdditionalIncludeDirectories>..\..\..\..\src;$(Sysroot)\usr\include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
     <Link>
       <LibraryDependencies>%(LibraryDependencies);GLESv3;EGL;</LibraryDependencies>
@@ -228,6 +238,7 @@
       <PrecompiledHeaderFile>..\..\..\..\src\app_droid\pch.h</PrecompiledHeaderFile>
       <CompileAs>CompileAsCpp</CompileAs>
       <AdditionalIncludeDirectories>..\..\..\..\src;$(Sysroot)\usr\include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
     <Link>
       <LibraryDependencies>%(LibraryDependencies);GLESv3;EGL;</LibraryDependencies>
@@ -239,6 +250,7 @@
       <PrecompiledHeaderFile>..\..\..\..\src\app_droid\pch.h</PrecompiledHeaderFile>
       <CompileAs>CompileAsCpp</CompileAs>
       <AdditionalIncludeDirectories>..\..\..\..\src;$(Sysroot)\usr\include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
     <Link>
       <LibraryDependencies>%(LibraryDependencies);GLESv3;EGL;</LibraryDependencies>
@@ -250,6 +262,7 @@
       <PrecompiledHeaderFile>..\..\..\..\src\app_droid\pch.h</PrecompiledHeaderFile>
       <CompileAs>CompileAsCpp</CompileAs>
       <AdditionalIncludeDirectories>..\..\..\..\src;$(Sysroot)\usr\include;$(StlIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
     <Link>
       <LibraryDependencies>%(LibraryDependencies);GLESv3;EGL;</LibraryDependencies>

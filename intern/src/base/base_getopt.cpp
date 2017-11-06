@@ -82,7 +82,7 @@ namespace
             {
                 return -1;
             }
-            else if (strcmp(_pArgv[m_OptionIndex], "--") == NULL)
+            else if (strcmp(_pArgv[m_OptionIndex], "--") == 0)
             {
                 m_OptionIndex++;
 

@@ -55,7 +55,7 @@ namespace IO
         
         char Buffer[s_MaxNumberOfFormatCharacters];
         
-#if defined (__APPLE__)
+#if __APPLE__ || __ANDROID__
         vsnprintf(Buffer, s_MaxNumberOfFormatCharacters, _pFormat, pArguments);
 #else
         vsnprintf_s(Buffer, s_MaxNumberOfFormatCharacters, _pFormat, pArguments);
