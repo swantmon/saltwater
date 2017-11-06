@@ -14,6 +14,8 @@
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
+#include "core/core_time.h"
+
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "AndroidProject1.NativeActivity", __VA_ARGS__))
 #define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "AndroidProject1.NativeActivity", __VA_ARGS__))
 
@@ -122,6 +124,11 @@ namespace
         m_AppSetup.m_SensorEventQueue    = ASensorManager_createEventQueue(m_AppSetup.m_SensorManager, _pAndroidApp->looper, LOOPER_ID_USER, NULL, NULL);
 
         // -----------------------------------------------------------------------------
+        // Start timing
+        // -----------------------------------------------------------------------------
+        Core::Time::OnStart();
+
+        // -----------------------------------------------------------------------------
         // From now on we can start the state engine and enter the first state
         // -----------------------------------------------------------------------------        
         s_pStates[m_CurrentState]->OnEnter();
@@ -145,6 +152,11 @@ namespace
         s_pStates[m_CurrentState]->OnRun();
 
         s_pStates[m_CurrentState]->OnLeave();
+
+        // -----------------------------------------------------------------------------
+        // Stop timing
+        // -----------------------------------------------------------------------------
+        Core::Time::OnExit();
     }
     
     // -----------------------------------------------------------------------------
@@ -159,6 +171,9 @@ namespace
 
         for (; ApplicationMessage == 0 ; )
         {
+            // -----------------------------------------------------------------------------
+            // Events and inputs
+            // -----------------------------------------------------------------------------
             int Identifcation;
             int Events;
             struct android_poll_source* AndroidPollSource;
@@ -176,6 +191,14 @@ namespace
                 }
             }
 
+            // -----------------------------------------------------------------------------
+            // Time
+            // -----------------------------------------------------------------------------
+            Core::Time::Update();
+
+            // -----------------------------------------------------------------------------
+            // States
+            // -----------------------------------------------------------------------------
             App::CState::EStateType NextState;
 
             NextState = s_pStates[m_CurrentState]->OnRun();

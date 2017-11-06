@@ -63,6 +63,9 @@
     <ProjectReference Include="..\..\base\base.vcxproj">
       <Project>{e0291846-fb7c-4725-a4d0-d8307a3638b2}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\core\core.vcxproj">
+      <Project>{00398f89-7117-403d-a781-a65ab2da93a8}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{cd9de705-7605-4d57-91e9-faf9b6712f4d}</ProjectGuid>
