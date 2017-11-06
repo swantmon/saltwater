@@ -1,11 +1,11 @@
 
-#include "app_droid/app_play_state.h"
+#include "app_droid/app_exit_state.h"
 
 namespace App
 {
-    CPlayState& CPlayState::GetInstance()
+    CExitState& CExitState::GetInstance()
     {
-        static CPlayState s_Singleton;
+        static CExitState s_Singleton;
 
         return s_Singleton;
     }
@@ -13,37 +13,37 @@ namespace App
 
 namespace App
 {
-    CPlayState::CPlayState()
+    CExitState::CExitState()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    CPlayState::~CPlayState()
+    CExitState::~CExitState()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CPlayState::InternOnEnter()
+    CState::EStateType CExitState::InternOnEnter()
     {
-        return App::CState::Play;
+        return App::CState::Exit;
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CPlayState::InternOnLeave()
+    CState::EStateType CExitState::InternOnLeave()
     {
-        return App::CState::Play;
+        return App::CState::Exit;
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CPlayState::InternOnRun()
+    CState::EStateType CExitState::InternOnRun()
     {
-        CState::EStateType NextState = CState::Play;
+        CState::EStateType NextState = CState::Exit;
 
         return NextState;
     }

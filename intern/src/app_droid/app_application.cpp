@@ -1,21 +1,27 @@
 
 #include "app_droid/app_application.h"
+#include "app_droid/app_exit_state.h"
+#include "app_droid/app_intro_state.h"
+#include "app_droid/app_load_map_state.h"
+#include "app_droid/app_main_menu_state.h"
 #include "app_droid/app_play_state.h"
+#include "app_droid/app_start_state.h"
+#include "app_droid/app_unload_map_state.h"
+
+#include "base/base_console.h"
+#include "base/base_exception.h"
+#include "base/base_input_event.h"
+#include "base/base_uncopyable.h"
+#include "base/base_singleton.h"
 
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "AndroidProject1.NativeActivity", __VA_ARGS__))
 #define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "AndroidProject1.NativeActivity", __VA_ARGS__))
 
 namespace
 {
-    class CApplication
+    class CApplication : private Base::CUncopyable
     {
-    public:
-
-        static CApplication& GetInstance()
-        {
-            static CApplication s_Instance;
-            return s_Instance;
-        };
+        BASE_SINGLETON_FUNC(CApplication)
         
     public:
         
@@ -64,14 +70,20 @@ namespace
 {
     App::CState* CApplication::s_pStates[] =
     {
+        &App::CStartState    ::GetInstance(),
+        &App::CIntroState    ::GetInstance(),
+        &App::CLoadMapState  ::GetInstance(),
+        &App::CMainMenuState ::GetInstance(),
         &App::CPlayState     ::GetInstance(),
+        &App::CUnloadMapState::GetInstance(),
+        &App::CExitState     ::GetInstance(),
     };
 } // namespace
 
 namespace
 {
     CApplication::CApplication()
-        : m_CurrentState(App::CState::Play)
+        : m_CurrentState(App::CState::Start)
     {
         memset(&m_AppSetup, 0, sizeof(m_AppSetup));
     }
@@ -119,6 +131,20 @@ namespace
     
     void CApplication::OnExit()
     {
+        // -----------------------------------------------------------------------------
+        // Make last transition to exit
+        // -----------------------------------------------------------------------------
+        OnTranslation(App::CState::UnloadMap);
+
+        s_pStates[m_CurrentState]->OnRun();
+
+        s_pStates[m_CurrentState]->OnLeave();
+
+        OnTranslation(App::CState::Exit);
+
+        s_pStates[m_CurrentState]->OnRun();
+
+        s_pStates[m_CurrentState]->OnLeave();
     }
     
     // -----------------------------------------------------------------------------
@@ -150,16 +176,13 @@ namespace
                 }
             }
 
-            if (m_AppSetup.m_IsStarted)
+            App::CState::EStateType NextState;
+
+            NextState = s_pStates[m_CurrentState]->OnRun();
+
+            if (NextState != m_CurrentState)
             {
-                App::CState::EStateType NextState;
-
-                NextState = s_pStates[m_CurrentState]->OnRun();
-
-                if (NextState != m_CurrentState)
-                {
-                    OnTranslation(NextState);
-                }
+                OnTranslation(NextState);
             }
         }
     }

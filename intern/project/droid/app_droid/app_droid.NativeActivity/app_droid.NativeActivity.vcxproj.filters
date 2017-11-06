@@ -9,6 +9,24 @@
     <ClCompile Include="..\..\..\..\src\app_droid\app_play_state.cpp">
       <Filter>states</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\app_droid\app_start_state.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\app_droid\app_intro_state.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\app_droid\app_load_map_state.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\app_droid\app_main_menu_state.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\app_droid\app_unload_map_state.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\app_droid\app_exit_state.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\src\app_droid\app_application.h" />
@@ -20,6 +38,24 @@
       <Filter>states</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\app_droid\app_state.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\app_droid\app_start_state.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\app_droid\app_intro_state.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\app_droid\app_load_map_state.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\app_droid\app_main_menu_state.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\app_droid\app_unload_map_state.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\app_droid\app_exit_state.h">
       <Filter>states</Filter>
     </ClInclude>
   </ItemGroup>

@@ -10,7 +10,13 @@ namespace App
 
         enum EStateType
         {
+            Start,
+            Intro,
+            LoadMap,
+            MainMenu,
             Play,
+            UnloadMap,
+            Exit,
             NumberOfStateTypes,
             UndefinedStateType = -1
         };

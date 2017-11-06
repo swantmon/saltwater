@@ -1,11 +1,11 @@
 
-#include "app_droid/app_play_state.h"
+#include "app_droid/app_intro_state.h"
 
 namespace App
 {
-    CPlayState& CPlayState::GetInstance()
+    CIntroState& CIntroState::GetInstance()
     {
-        static CPlayState s_Singleton;
+        static CIntroState s_Singleton;
 
         return s_Singleton;
     }
@@ -13,37 +13,37 @@ namespace App
 
 namespace App
 {
-    CPlayState::CPlayState()
+    CIntroState::CIntroState()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    CPlayState::~CPlayState()
+    CIntroState::~CIntroState()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CPlayState::InternOnEnter()
+    CState::EStateType CIntroState::InternOnEnter()
     {
-        return App::CState::Play;
+        return App::CState::Intro;
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CPlayState::InternOnLeave()
+    CState::EStateType CIntroState::InternOnLeave()
     {
-        return App::CState::Play;
+        return App::CState::Intro;
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CPlayState::InternOnRun()
+    CState::EStateType CIntroState::InternOnRun()
     {
-        CState::EStateType NextState = CState::Play;
+        CState::EStateType NextState = CState::LoadMap;
 
         return NextState;
     }

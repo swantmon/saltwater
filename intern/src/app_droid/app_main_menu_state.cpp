@@ -1,11 +1,11 @@
 
-#include "app_droid/app_play_state.h"
+#include "app_droid/app_main_menu_state.h"
 
 namespace App
 {
-    CPlayState& CPlayState::GetInstance()
+    CMainMenuState& CMainMenuState::GetInstance()
     {
-        static CPlayState s_Singleton;
+        static CMainMenuState s_Singleton;
 
         return s_Singleton;
     }
@@ -13,37 +13,37 @@ namespace App
 
 namespace App
 {
-    CPlayState::CPlayState()
+    CMainMenuState::CMainMenuState()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    CPlayState::~CPlayState()
+    CMainMenuState::~CMainMenuState()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CPlayState::InternOnEnter()
+    CState::EStateType CMainMenuState::InternOnEnter()
     {
-        return App::CState::Play;
+        return App::CState::MainMenu;
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CPlayState::InternOnLeave()
+    CState::EStateType CMainMenuState::InternOnLeave()
     {
-        return App::CState::Play;
+        return App::CState::MainMenu;
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CPlayState::InternOnRun()
+    CState::EStateType CMainMenuState::InternOnRun()
     {
-        CState::EStateType NextState = CState::Play;
+        CState::EStateType NextState = CState::MainMenu;
 
         return NextState;
     }

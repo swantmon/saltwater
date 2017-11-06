@@ -1,11 +1,11 @@
 
-#include "app_droid/app_play_state.h"
+#include "app_droid/app_unload_map_state.h"
 
 namespace App
 {
-    CPlayState& CPlayState::GetInstance()
+    CUnloadMapState& CUnloadMapState::GetInstance()
     {
-        static CPlayState s_Singleton;
+        static CUnloadMapState s_Singleton;
 
         return s_Singleton;
     }
@@ -13,37 +13,37 @@ namespace App
 
 namespace App
 {
-    CPlayState::CPlayState()
+    CUnloadMapState::CUnloadMapState()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    CPlayState::~CPlayState()
+    CUnloadMapState::~CUnloadMapState()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CPlayState::InternOnEnter()
+    CState::EStateType CUnloadMapState::InternOnEnter()
     {
-        return App::CState::Play;
+        return App::CState::UnloadMap;
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CPlayState::InternOnLeave()
+    CState::EStateType CUnloadMapState::InternOnLeave()
     {
-        return App::CState::Play;
+        return App::CState::UnloadMap;
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CPlayState::InternOnRun()
+    CState::EStateType CUnloadMapState::InternOnRun()
     {
-        CState::EStateType NextState = CState::Play;
+        CState::EStateType NextState = CState::Exit;
 
         return NextState;
     }

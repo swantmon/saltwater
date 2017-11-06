@@ -1,11 +1,11 @@
 
-#include "app_droid/app_play_state.h"
+#include "app_droid/app_load_map_state.h"
 
 namespace App
 {
-    CPlayState& CPlayState::GetInstance()
+    CLoadMapState& CLoadMapState::GetInstance()
     {
-        static CPlayState s_Singleton;
+        static CLoadMapState s_Singleton;
 
         return s_Singleton;
     }
@@ -13,35 +13,35 @@ namespace App
 
 namespace App
 {
-    CPlayState::CPlayState()
+    CLoadMapState::CLoadMapState()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    CPlayState::~CPlayState()
+    CLoadMapState::~CLoadMapState()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CPlayState::InternOnEnter()
+    CState::EStateType CLoadMapState::InternOnEnter()
     {
-        return App::CState::Play;
+        return App::CState::LoadMap;
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CPlayState::InternOnLeave()
+    CState::EStateType CLoadMapState::InternOnLeave()
     {
-        return App::CState::Play;
+        return App::CState::LoadMap;
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CPlayState::InternOnRun()
+    CState::EStateType CLoadMapState::InternOnRun()
     {
         CState::EStateType NextState = CState::Play;
 
