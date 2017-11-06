@@ -39,7 +39,7 @@ namespace
 
         CRegion* GetRegions() const;
         CRegion& GetRegionByID(unsigned int _RegionID) const;
-        CRegion& GetRegionByPosition(float _X, float _Y) const;
+        CRegion& GetRegionByPosition(float _AxisX, float _AxisY) const;
         CRegion& GetRegionByPosition(const Base::Float3& _rPosition) const;
 
         Base::Size GetNumberOfRegions() const;
@@ -310,7 +310,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CRegion& CDtLvlMap::GetRegionByPosition(float _X, float _Y) const
+    CRegion& CDtLvlMap::GetRegionByPosition(float _AxisX, float _AxisY) const
     {
         Base::Size RegionX;
         Base::Size RegionY;
@@ -319,8 +319,8 @@ namespace
         assert(m_pRegions != nullptr);
         assert(m_NumberOfRegions > 0);
 
-        RegionX  = static_cast<Base::Size>(_X) / CRegion::s_NumberOfMetersX;
-        RegionY  = static_cast<Base::Size>(_Y) / CRegion::s_NumberOfMetersY;
+        RegionX  = static_cast<Base::Size>(_AxisX) / CRegion::s_NumberOfMetersX;
+        RegionY  = static_cast<Base::Size>(_AxisY) / CRegion::s_NumberOfMetersY;
         RegionID = RegionX + RegionY * m_NumberOfRegionsX;
 
         RegionID = Base::Clamp(RegionID, static_cast<Base::Size>(0), m_NumberOfRegionsX * m_NumberOfRegionsY - static_cast<Base::Size>(1));
@@ -1212,9 +1212,9 @@ namespace Map
 
     // -----------------------------------------------------------------------------
 
-    CRegion& GetRegionByPosition(float _X, float _Y)
+    CRegion& GetRegionByPosition(float _AxisX, float _AxisY)
     {
-        return CDtLvlMap::GetInstance().GetRegionByPosition(_X, _Y);
+        return CDtLvlMap::GetInstance().GetRegionByPosition(_AxisX, _AxisY);
     }
 
     // -----------------------------------------------------------------------------

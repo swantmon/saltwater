@@ -1,0 +1,419 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\data\data_entity.h">
+      <Filter>map\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_entity_manager.h">
+      <Filter>map\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_entity_folder.h">
+      <Filter>map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_map.h">
+      <Filter>map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_region.h">
+      <Filter>map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_model.h">
+      <Filter>models</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_model_manager.h">
+      <Filter>models</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_material.h">
+      <Filter>materials</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_material_manager.h">
+      <Filter>materials</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_transformation_facet.h">
+      <Filter>map\entity\facets\transformation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_hierarchy_facet.h">
+      <Filter>map\entity\facets\hierarchy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_lod.h">
+      <Filter>models</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_surface.h">
+      <Filter>models</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_texture_1d.h">
+      <Filter>textures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_texture_2d.h">
+      <Filter>textures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_texture_base.h">
+      <Filter>textures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_texture_cube.h">
+      <Filter>textures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_texture_manager.h">
+      <Filter>textures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_data_behavior.h">
+      <Filter>textures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_precompiled.h" />
+    <ClInclude Include="..\..\..\src\data\data_script_facet.h">
+      <Filter>map\scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_script_manager.h">
+      <Filter>map\scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_script_interface.h">
+      <Filter>interface\script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_mesh.h">
+      <Filter>models</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_point_light_facet.h">
+      <Filter>map\lights\point light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_point_light_manager.h">
+      <Filter>map\lights\point light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_light_probe_facet.h">
+      <Filter>map\lights\light probe</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_light_probe_manager.h">
+      <Filter>map\lights\light probe</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_sun_facet.h">
+      <Filter>map\lights\sun</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_sun_manager.h">
+      <Filter>map\lights\sun</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_sky_facet.h">
+      <Filter>map\lights\sky</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_sky_manager.h">
+      <Filter>map\lights\sky</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_light_type.h">
+      <Filter>map\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_ar_controller_facet.h">
+      <Filter>map\plugins\AR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_ar_controller_manager.h">
+      <Filter>map\plugins\AR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_ar_tracked_object_facet.h">
+      <Filter>map\plugins\AR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_ar_tracked_object_manager.h">
+      <Filter>map\plugins\AR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_plugin_type.h">
+      <Filter>map\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_volume_fog_manager.h">
+      <Filter>map\fx\volume fog</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_volume_fog_facet.h">
+      <Filter>map\fx\volume fog</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_ssr_manager.h">
+      <Filter>map\fx\ssr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_ssr_facet.h">
+      <Filter>map\fx\ssr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_ssao_manager.h">
+      <Filter>map\fx\ssao</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_ssao_facet.h">
+      <Filter>map\fx\ssao</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_dof_manager.h">
+      <Filter>map\fx\dof</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_dof_facet.h">
+      <Filter>map\fx\dof</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_bloom_manager.h">
+      <Filter>map\fx\bloom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_bloom_facet.h">
+      <Filter>map\fx\bloom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_fx_type.h">
+      <Filter>map\fx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_mesh_manager.h">
+      <Filter>map\actors\mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_actor_type.h">
+      <Filter>map\actors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_camera_actor_facet.h">
+      <Filter>map\actors\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_camera_actor_manager.h">
+      <Filter>map\actors\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_mesh_actor_facet.h">
+      <Filter>map\actors\mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_post_aa_facet.h">
+      <Filter>map\fx\post_aa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_post_aa_manager.h">
+      <Filter>map\fx\post_aa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_area_light_facet.h">
+      <Filter>map\lights\area light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_area_light_manager.h">
+      <Filter>map\lights\area light</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\data\data_entity_manager.cpp">
+      <Filter>map\entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_map.cpp">
+      <Filter>map</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_model_manager.cpp">
+      <Filter>models</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_material_manager.cpp">
+      <Filter>materials</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_transformation_facet.cpp">
+      <Filter>map\entity\facets\transformation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_hierarchy_facet.cpp">
+      <Filter>map\entity\facets\hierarchy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_entity.cpp">
+      <Filter>map\entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_texture_1d.cpp">
+      <Filter>textures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_texture_2d.cpp">
+      <Filter>textures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_texture_base.cpp">
+      <Filter>textures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_texture_cube.cpp">
+      <Filter>textures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_texture_manager.cpp">
+      <Filter>textures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_precompiled.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_script_manager.cpp">
+      <Filter>map\scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_script_facet.cpp">
+      <Filter>map\scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_model.cpp">
+      <Filter>models</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_lod.cpp">
+      <Filter>models</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_surface.cpp">
+      <Filter>models</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_material.cpp">
+      <Filter>materials</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_mesh.cpp">
+      <Filter>models</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_point_light_facet.cpp">
+      <Filter>map\lights\point light</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_point_light_manager.cpp">
+      <Filter>map\lights\point light</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_light_probe_facet.cpp">
+      <Filter>map\lights\light probe</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_light_probe_manager.cpp">
+      <Filter>map\lights\light probe</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_sun_facet.cpp">
+      <Filter>map\lights\sun</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_sun_manager.cpp">
+      <Filter>map\lights\sun</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_sky_facet.cpp">
+      <Filter>map\lights\sky</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_sky_manager.cpp">
+      <Filter>map\lights\sky</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_ar_controller_facet.cpp">
+      <Filter>map\plugins\AR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_ar_controller_manager.cpp">
+      <Filter>map\plugins\AR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_ar_tracked_object_manager.cpp">
+      <Filter>map\plugins\AR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_ar_tracked_object_facet.cpp">
+      <Filter>map\plugins\AR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_volume_fog_facet.cpp">
+      <Filter>map\fx\volume fog</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_volume_fog_manager.cpp">
+      <Filter>map\fx\volume fog</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_ssr_facet.cpp">
+      <Filter>map\fx\ssr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_ssr_manager.cpp">
+      <Filter>map\fx\ssr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_ssao_facet.cpp">
+      <Filter>map\fx\ssao</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_ssao_manager.cpp">
+      <Filter>map\fx\ssao</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_dof_facet.cpp">
+      <Filter>map\fx\dof</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_dof_manager.cpp">
+      <Filter>map\fx\dof</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_bloom_facet.cpp">
+      <Filter>map\fx\bloom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_bloom_manager.cpp">
+      <Filter>map\fx\bloom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_mesh_manager.cpp">
+      <Filter>map\actors\mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_camera_actor_facet.cpp">
+      <Filter>map\actors\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_camera_actor_manager.cpp">
+      <Filter>map\actors\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_mesh_actor_facet.cpp">
+      <Filter>map\actors\mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_post_aa_facet.cpp">
+      <Filter>map\fx\post_aa</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_post_aa_manager.cpp">
+      <Filter>map\fx\post_aa</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_area_light_manager.cpp">
+      <Filter>map\lights\area light</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_area_light_facet.cpp">
+      <Filter>map\lights\area light</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="map">
+      <UniqueIdentifier>{2d413bd3-cc5f-4d49-b3a7-61af8f04aae4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\entity">
+      <UniqueIdentifier>{0081c5c6-e624-464e-9e2e-f6be46fa927e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\entity\facets">
+      <UniqueIdentifier>{4061613e-2268-438e-97e0-c5c68674cf92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\entity\facets\transformation">
+      <UniqueIdentifier>{74a7c44f-de3e-4e35-9285-0db47ceda8fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\entity\facets\hierarchy">
+      <UniqueIdentifier>{b4ebd438-b7be-4be9-81c4-8f15b0d57b60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="materials">
+      <UniqueIdentifier>{ccc2916e-d14c-45a4-ae67-e8fe96b262ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="models">
+      <UniqueIdentifier>{07e34a49-6329-43c1-9b85-20225bbfc5ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\actors">
+      <UniqueIdentifier>{d34f13b4-e357-49b8-8290-e4c854b0353f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\lights">
+      <UniqueIdentifier>{63d59431-f218-40ff-b88f-6a6a4290ed5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\fx">
+      <UniqueIdentifier>{1b041ed4-ca9c-472b-b2b9-017f5f782f57}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="textures">
+      <UniqueIdentifier>{71afbfc9-2627-4eba-a9d3-f355b40c9a27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\plugins">
+      <UniqueIdentifier>{7ffd24e8-c227-4102-88eb-f81cc0290671}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="interface">
+      <UniqueIdentifier>{457423ce-2a73-42ec-88ad-91117d644247}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="interface\script">
+      <UniqueIdentifier>{f2d82096-23d7-4fc1-83bc-29fe07616da0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\scripts">
+      <UniqueIdentifier>{a0851fd6-c93a-42c8-a39a-0062d242c79b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\lights\light probe">
+      <UniqueIdentifier>{dd3080f5-fba1-4d78-b7d9-1aee5fc0d0c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\lights\point light">
+      <UniqueIdentifier>{8eda5cad-d4bb-458b-8e6b-178dda009f9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\lights\sky">
+      <UniqueIdentifier>{0ce16624-8746-4388-91ee-c41ffe8cb4d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\lights\sun">
+      <UniqueIdentifier>{e0f2f524-9458-45f1-8368-558fbbe75641}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\plugins\AR">
+      <UniqueIdentifier>{d67d8b33-b962-4ca4-945b-f24048380089}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\fx\bloom">
+      <UniqueIdentifier>{3a7ffc7a-f08e-47b5-a9fe-e4d2c6579b1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\fx\dof">
+      <UniqueIdentifier>{dc4a0cbe-7703-497d-973f-49ed484d2443}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\fx\ssao">
+      <UniqueIdentifier>{82c81c63-4158-48e8-9ee4-6dc0558f41de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\fx\ssr">
+      <UniqueIdentifier>{22d3eaa0-0bc0-4be8-8182-1f5a4a7b79ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\fx\volume fog">
+      <UniqueIdentifier>{0456c7d1-ffb4-4a56-916b-44ea551038cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\actors\node">
+      <UniqueIdentifier>{d838610a-1186-493d-8adf-b3078c1c2f14}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\actors\mesh">
+      <UniqueIdentifier>{4810099f-6ede-482d-b04b-ad6e69f2d148}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\actors\camera">
+      <UniqueIdentifier>{e6e96045-c296-40c6-b9f2-1f9f46701d11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\fx\post_aa">
+      <UniqueIdentifier>{cc4d74eb-3e0b-4be2-b81b-8ce81125f7f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\lights\area light">
+      <UniqueIdentifier>{ca13568f-5167-48be-a0a7-4e8fb1077983}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

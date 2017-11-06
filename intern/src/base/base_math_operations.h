@@ -1,10 +1,3 @@
-//
-//  base_operations.h
-//  base
-//
-//  Created by Tobias Schwandt on 24/09/14.
-//  Copyright (c) 2014 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
 
@@ -75,14 +68,22 @@ namespace MATH
 
     inline float Log(float _Value)
     {
+#ifdef __ANDROID__
+        return ::logf(_Value);
+#else
         return std::logf(_Value);
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     inline float Log2(float _Value)
     {
+#ifdef __ANDROID__
+        return ::log2f(_Value);
+#else
         return std::log2f(_Value);
+#endif
     }
     
     // -----------------------------------------------------------------------------
@@ -143,9 +144,20 @@ namespace MATH
 
     // -----------------------------------------------------------------------------
 
+    inline unsigned long Min(unsigned long _Value1, unsigned long _Value2)
+    {
+        return std::min(_Value1, _Value2);
+    }
+
+    // -----------------------------------------------------------------------------
+
     inline float Min(float _Value1, float _Value2)
     {
+#ifdef __ANDROID__
+        return fmin(_Value1, _Value2);
+#else
         return std::fmin(_Value1, _Value2);
+#endif 
     }
 
     // -----------------------------------------------------------------------------
@@ -164,9 +176,20 @@ namespace MATH
 
     // -----------------------------------------------------------------------------
 
+    inline unsigned long Max(unsigned long _Value1, unsigned long _Value2)
+    {
+        return std::max(_Value1, _Value2);
+    }
+
+    // -----------------------------------------------------------------------------
+
     inline float Max(float _Value1, float _Value2)
     {
+#ifdef __ANDROID__
+        return fmax(_Value1, _Value2);
+#else
         return std::fmax(_Value1, _Value2);
+#endif 
     }
     
     // -----------------------------------------------------------------------------
@@ -180,16 +203,25 @@ namespace MATH
 
     // -----------------------------------------------------------------------------
 
-    inline unsigned int Pow(unsigned int _X, unsigned int _Y)
+    inline unsigned int Pow(unsigned int _Base, unsigned int _Exponent)
     {
-        return static_cast<unsigned int>(std::powf(static_cast<float>(_X), static_cast<float>(_Y)));
+#ifdef __ANDROID__
+        return static_cast<unsigned int>(::powf(static_cast<float>(_Base), static_cast<float>(_Exponent)));
+#else
+        return static_cast<unsigned int>(std::powf(static_cast<float>(_Base), static_cast<float>(_Exponent)));
+#endif 
     }
 
     // -----------------------------------------------------------------------------
 
-    inline float Pow(float _X, float _Y)
+    inline float Pow(float _Base, float _Exponent)
     {
-        return std::powf(_X, _Y);
+#ifdef __ANDROID__
+        return ::powf(_Base, _Exponent);
+#else
+        return std::powf(_Base, _Exponent);
+#endif 
+        
     }
     
     // -----------------------------------------------------------------------------
@@ -203,28 +235,28 @@ namespace MATH
 
     inline int Clamp(int _Source, int _Min, int _Max)
     {
-        return std::max(_Min, std::min(_Source, _Max));
+        return Max(_Min, Min(_Source, _Max));
     }
 
     // -----------------------------------------------------------------------------
 
     inline unsigned int Clamp(unsigned int _Source, unsigned int _Min, unsigned int _Max)
     {
-        return std::max(_Min, std::min(_Source, _Max));
+        return Max(_Min, Min(_Source, _Max));
     }
 
     // -----------------------------------------------------------------------------
 
-    inline size_t Clamp(size_t _Source, size_t _Min, size_t _Max)
+    inline unsigned long Clamp(unsigned long _Source, unsigned long _Min, unsigned long _Max)
     {
-        return std::max(_Min, std::min(_Source, _Max));
+        return Max(_Min, Min(_Source, _Max));
     }
     
     // -----------------------------------------------------------------------------
     
     inline float Clamp(float _Source, float _Min, float _Max)
     {
-        return std::fmax(_Min, std::fmin(_Source, _Max));
+        return Max(_Min, Min(_Source, _Max));
     }
     
     // -----------------------------------------------------------------------------

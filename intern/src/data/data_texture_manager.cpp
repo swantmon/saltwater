@@ -298,7 +298,11 @@ namespace
 
             PathToTexture = g_PathToAssets + _rDescriptor.m_pFileName;
 
+#if __ANDROID__
+            const char* pPathToTexture = PathToTexture.c_str();
+#else
             const wchar_t* pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
+#endif
 
             Result = ilLoadImage(pPathToTexture) == IL_TRUE;
 
@@ -456,7 +460,11 @@ namespace
             NativeILFormat = ConvertILImageFormat(_rDescriptor.m_Format);
             NativeILType   = ConvertILImageType(_rDescriptor.m_Format);
 
+#if __ANDROID__
+            const char* pPathToTexture = PathToTexture.c_str();
+#else
             const wchar_t* pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
+#endif
             
             Result = ilLoadImage(pPathToTexture) == IL_TRUE;
             
@@ -682,7 +690,11 @@ namespace
             NativeILFormat = ConvertILImageFormat(_rDescriptor.m_Format);
             NativeILType   = ConvertILImageType(_rDescriptor.m_Format);
 
+#if __ANDROID__
+            const char* pPathToTexture = PathToTexture.c_str();
+#else
             const wchar_t* pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
+#endif
 
             ImageIsLoaded = ilLoadImage(pPathToTexture) == IL_TRUE;
 

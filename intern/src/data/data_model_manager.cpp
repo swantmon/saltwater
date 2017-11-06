@@ -65,7 +65,7 @@ namespace
         CModel& CreateBox(float _Width, float _Height, float _Depth);
         CModel& CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices);
         CModel& CreateCone(float _Radius, float _Height, unsigned int _Slices);
-        CModel& CreateRectangle(float _X, float _Y, float _Width, float _Height);
+        CModel& CreateRectangle(float _AxisX, float _AxisY, float _Width, float _Height);
         
         void FreeModel(CModel& _rModel);
         
@@ -793,7 +793,7 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    CModel& CDtModelManager::CreateRectangle(float _X, float _Y, float _Width, float _Height)
+    CModel& CDtModelManager::CreateRectangle(float _AxisX, float _AxisY, float _Width, float _Height)
     {
         // -----------------------------------------------------------------------------
         // Calculate Data
@@ -830,10 +830,10 @@ namespace
         // -----------------------------------------------------------------------------
         unsigned int IndexOfVertex = 0;
         
-        rBoxSurface.m_pPositions[IndexOfVertex ++] = Base::Float3(_X         , _Y + _Height, 0.0f);
-        rBoxSurface.m_pPositions[IndexOfVertex ++] = Base::Float3(_X + _Width, _Y +_Height , 0.0f);
-        rBoxSurface.m_pPositions[IndexOfVertex ++] = Base::Float3(_X + _Width, _Y          , 0.0f);
-        rBoxSurface.m_pPositions[IndexOfVertex ++] = Base::Float3(_X         , _Y          , 0.0f);
+        rBoxSurface.m_pPositions[IndexOfVertex ++] = Base::Float3(_AxisX         , _AxisY + _Height, 0.0f);
+        rBoxSurface.m_pPositions[IndexOfVertex ++] = Base::Float3(_AxisX + _Width, _AxisY +_Height , 0.0f);
+        rBoxSurface.m_pPositions[IndexOfVertex ++] = Base::Float3(_AxisX + _Width, _AxisY          , 0.0f);
+        rBoxSurface.m_pPositions[IndexOfVertex ++] = Base::Float3(_AxisX         , _AxisY          , 0.0f);
         
         assert(IndexOfVertex == NumberOfVertices);
         
@@ -1121,9 +1121,9 @@ namespace ModelManager
     
     // -----------------------------------------------------------------------------
     
-    CModel& CreateRectangle(float _X, float _Y, float _Width, float _Height)
+    CModel& CreateRectangle(float _AxisX, float _AxisY, float _Width, float _Height)
     {
-        return CDtModelManager::GetInstance().CreateRectangle(_X, _Y, _Width, _Height);
+        return CDtModelManager::GetInstance().CreateRectangle(_AxisX, _AxisY, _Width, _Height);
     }
     
     // -----------------------------------------------------------------------------
