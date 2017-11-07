@@ -5,6 +5,8 @@
 
 #include <stdarg.h>
 
+#include "android/log.h"
+
 namespace IO
 {
 
@@ -27,28 +29,20 @@ namespace IO
 
     CConsole::~CConsole() 
     {
-        m_OutputStream << std::endl;
-
-        fprintf(stdout, "%s", m_OutputStream.str().c_str());
-        fflush(stdout);
+        Out(Info, m_OutputStream.str().c_str());
     }
     
     // -----------------------------------------------------------------------------
     
     void CConsole::Entry(EConsoleLevel _ConsoleLevel, const Char* _pText)
     {
-        std::string LogString = GetLevelString(_ConsoleLevel);
-        
-        fprintf(stdout, "%s: %s\n", LogString.c_str(), _pText);
-        fflush(stdout);
+        Out(_ConsoleLevel, _pText);
     }
     
     // -----------------------------------------------------------------------------
     
     void CConsole::Entry(EConsoleLevel _ConsoleLevel, Char*, const Char* _pFormat, ...)
     {
-        std::string LogString = GetLevelString(_ConsoleLevel);
-        
         va_list pArguments;
         
         va_start(pArguments, _pFormat);
@@ -63,8 +57,7 @@ namespace IO
         
         va_end(pArguments);
         
-        fprintf(stdout, "%s: %s\n", LogString.c_str(), Buffer);
-        fflush(stdout);
+        Out(_ConsoleLevel, Buffer);
     }
 
     // -----------------------------------------------------------------------------
@@ -77,7 +70,7 @@ namespace IO
         m_Clock.OnFrame();
         
         double      CurrentTime = m_Clock.GetTime();
-        std::string LogString   = GetLevelString(_ConsoleLevel);
+        std::string LogString   = GetLogLevelString(_ConsoleLevel);
 
         // -----------------------------------------------------------------------------
         // Init new Console entry with timestamp and Console level
@@ -100,20 +93,42 @@ namespace IO
     {
         m_OutputStream.clear();
     }
-    
+
     // -----------------------------------------------------------------------------
-    
-    std::string CConsole::GetLevelString(EConsoleLevel _Level)
+
+    const std::string& CConsole::GetLogLevelString(EConsoleLevel _ConsoleLevel) const
     {
-        static std::string s_LogString[] =
+        static const std::string s_LogString[] =
         {
+            "Default",
             "Error",
             "Warning",
             "Info",
             "Debug"
         };
-        
-        return s_LogString[_Level];
+
+        return s_LogString[_ConsoleLevel];
     }
 
+    // -----------------------------------------------------------------------------
+
+    void CConsole::Out(EConsoleLevel _ConsoleLevel, const Char* _pText) const
+    {
+#ifdef __ANDROID__
+        static const int s_LogLevel[] =
+        {
+            ANDROID_LOG_DEFAULT,
+            ANDROID_LOG_ERROR,
+            ANDROID_LOG_WARN,
+            ANDROID_LOG_INFO,
+            ANDROID_LOG_DEBUG,
+    };
+
+        __android_log_print(s_LogLevel[_ConsoleLevel], "Base.Console", "%s\n", _pText);
+#else
+
+        fprintf(stdout, "%s: %s\n", GetLogLevelString(_ConsoleLevel).c_str(), _pText);
+        fflush(stdout);
+#endif // __ANDROID__
+    }
 } // namespace IO
