@@ -1,4 +1,5 @@
 
+#include "app_droid/app_application.h"
 #include "app_droid/app_main_menu_state.h"
 
 namespace App
@@ -27,24 +28,20 @@ namespace App
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CMainMenuState::InternOnEnter()
+    void CMainMenuState::InternOnEnter()
     {
-        return App::CState::MainMenu;
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CMainMenuState::InternOnLeave()
+    void CMainMenuState::InternOnLeave()
     {
-        return App::CState::MainMenu;
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CMainMenuState::InternOnRun()
+    void CMainMenuState::InternOnRun()
     {
-        CState::EStateType NextState = CState::MainMenu;
-
-        return NextState;
+        App::Application::ChangeState(CState::MainMenu);
     }
 } // namespace App

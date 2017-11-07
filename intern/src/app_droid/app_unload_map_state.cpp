@@ -1,4 +1,5 @@
 
+#include "app_droid/app_application.h"
 #include "app_droid/app_unload_map_state.h"
 
 namespace App
@@ -27,24 +28,20 @@ namespace App
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CUnloadMapState::InternOnEnter()
+    void CUnloadMapState::InternOnEnter()
     {
-        return App::CState::UnloadMap;
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CUnloadMapState::InternOnLeave()
+    void CUnloadMapState::InternOnLeave()
     {
-        return App::CState::UnloadMap;
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CUnloadMapState::InternOnRun()
+    void CUnloadMapState::InternOnRun()
     {
-        CState::EStateType NextState = CState::Exit;
-
-        return NextState;
+        App::Application::ChangeState(App::CState::Exit);
     }
 } // namespace App

@@ -1,4 +1,5 @@
 
+#include "app_droid/app_application.h"
 #include "app_droid/app_load_map_state.h"
 
 namespace App
@@ -27,24 +28,22 @@ namespace App
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CLoadMapState::InternOnEnter()
+    void CLoadMapState::InternOnEnter()
     {
-        return App::CState::LoadMap;
+
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CLoadMapState::InternOnLeave()
+    void CLoadMapState::InternOnLeave()
     {
-        return App::CState::LoadMap;
+
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CLoadMapState::InternOnRun()
+    void CLoadMapState::InternOnRun()
     {
-        CState::EStateType NextState = CState::Play;
-
-        return NextState;
+        App::Application::ChangeState(CState::Play);
     }
 } // namespace App

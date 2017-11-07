@@ -19,9 +19,9 @@ namespace App
 
     private:
 
-        virtual CState::EStateType InternOnEnter();
-        virtual CState::EStateType InternOnLeave();
-        virtual CState::EStateType InternOnRun();
+        virtual void InternOnEnter();
+        virtual void InternOnLeave();
+        virtual void InternOnRun();
 
     };
 } // namespace App

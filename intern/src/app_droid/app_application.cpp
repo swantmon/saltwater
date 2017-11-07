@@ -16,6 +16,8 @@
 
 #include "core/core_time.h"
 
+#include "graphic/gfx_application_interface.h"
+
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "AndroidProject1.NativeActivity", __VA_ARGS__))
 #define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "AndroidProject1.NativeActivity", __VA_ARGS__))
 
@@ -35,6 +37,10 @@ namespace
         void OnStart(android_app* _pAndroidApp);
         void OnExit();
         void OnRun();
+
+        void ChangeState(unsigned int _State);
+
+        const Base::Char* GetAssetPath();
         
     private:
         
@@ -44,19 +50,20 @@ namespace
 
         struct SApplicationSetup 
         {
-            struct android_app* m_AndroidApp;
+            struct android_app* m_pAndroidApp;
 
             ASensorManager* m_SensorManager;
             const ASensor* m_AccelerometerSensor;
             ASensorEventQueue* m_SensorEventQueue;
 
-            bool m_IsStarted;
+            unsigned int m_WindowID;
             bool m_TerminateRequested;
         };
         
     private:
         
         App::CState::EStateType m_CurrentState;
+        App::CState::EStateType m_RequestState;
         SApplicationSetup       m_AppSetup;
         
     private:
@@ -86,6 +93,7 @@ namespace
 {
     CApplication::CApplication()
         : m_CurrentState(App::CState::Start)
+        , m_RequestState(App::CState::Start)
     {
         memset(&m_AppSetup, 0, sizeof(m_AppSetup));
     }
@@ -106,15 +114,10 @@ namespace
         _pAndroidApp->onAppCmd     = CApplication::HandleEvents;
         _pAndroidApp->onInputEvent = CApplication::HandleInputs;
 
-		// -----------------------------------------------------------------------------
-		// Set base
-		// -----------------------------------------------------------------------------
-		// Base::SetInternalStoragePath(_pAndroidApp->activity->internalDataPath);
-
         // -----------------------------------------------------------------------------
         // Set engine
         // -----------------------------------------------------------------------------
-        m_AppSetup.m_AndroidApp = _pAndroidApp;
+        m_AppSetup.m_pAndroidApp = _pAndroidApp;
 
         // -----------------------------------------------------------------------------
         // Prepare to monitor accelerometer
@@ -182,10 +185,10 @@ namespace
             {
                 if (AndroidPollSource != NULL) 
                 {
-                    AndroidPollSource->process(m_AppSetup.m_AndroidApp, AndroidPollSource);
+                    AndroidPollSource->process(m_AppSetup.m_pAndroidApp, AndroidPollSource);
                 }
 
-                if (m_AppSetup.m_AndroidApp->destroyRequested != 0 || m_AppSetup.m_TerminateRequested != 0) 
+                if (m_AppSetup.m_pAndroidApp->destroyRequested != 0 || m_AppSetup.m_TerminateRequested != 0) 
                 {
                     ApplicationMessage = 1;
                 }
@@ -199,15 +202,27 @@ namespace
             // -----------------------------------------------------------------------------
             // States
             // -----------------------------------------------------------------------------
-            App::CState::EStateType NextState;
+            s_pStates[m_CurrentState]->OnRun();
 
-            NextState = s_pStates[m_CurrentState]->OnRun();
-
-            if (NextState != m_CurrentState)
+            if (m_RequestState != m_CurrentState)
             {
-                OnTranslation(NextState);
+                OnTranslation(m_RequestState);
             }
         }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CApplication::ChangeState(unsigned int _State)
+    {
+        m_RequestState = static_cast<App::CState::EStateType>(_State);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const Base::Char* CApplication::GetAssetPath()
+    {
+        return m_AppSetup.m_pAndroidApp->activity->internalDataPath;
     }
     
     // -----------------------------------------------------------------------------
@@ -223,11 +238,11 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    int32_t CApplication::HandleInputs(struct android_app* app, AInputEvent* event)
+    int32_t CApplication::HandleInputs(struct android_app* _pAndroidApp, AInputEvent* _pEvent)
     {
-        CApplication::SApplicationSetup* AppSetup = static_cast<CApplication::SApplicationSetup*>(app->userData);
+        CApplication::SApplicationSetup* AppSetup = static_cast<CApplication::SApplicationSetup*>(_pAndroidApp->userData);
 
-        if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) 
+        if (AInputEvent_getType(_pEvent) == AINPUT_EVENT_TYPE_MOTION) 
         {
             return 1;
         }
@@ -237,11 +252,11 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CApplication::HandleEvents(struct android_app* app, int32_t cmd)
+    void CApplication::HandleEvents(struct android_app* _pAndroidApp, int32_t _Command)
     {
-        CApplication::SApplicationSetup* AppSetup = static_cast<CApplication::SApplicationSetup*>(app->userData);
+        CApplication::SApplicationSetup* AppSetup = static_cast<CApplication::SApplicationSetup*>(_pAndroidApp->userData);
 
-        switch (cmd) 
+        switch (_Command) 
         {
         case APP_CMD_SAVE_STATE:
             break;
@@ -250,11 +265,15 @@ namespace
             // -----------------------------------------------------------------------------
             // The window is being shown, get it ready.
             // -----------------------------------------------------------------------------
-            if (AppSetup->m_AndroidApp->window != NULL) 
+            if (AppSetup->m_pAndroidApp->window != NULL) 
             {
-                // Gfx::Main::RegisterWindow(AppSetup->m_AndroidApp->window);
+//                 unsigned int WindowID = Gfx::App::RegisterWindow(AppSetup->m_pAndroidApp->window);
+// 
+//                 Gfx::App::ActivateWindow(WindowID);
+// 
+//                 AppSetup->m_WindowID = WindowID;
 
-                AppSetup->m_IsStarted = true;
+                App::Application::ChangeState(App::CState::Intro);
             }
             break;
 
@@ -315,6 +334,20 @@ namespace Application
     void OnRun()
     {
         CApplication::GetInstance().OnRun();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ChangeState(unsigned int _State)
+    {
+        CApplication::GetInstance().ChangeState(_State);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const Base::Char* GetAssetPath()
+    {
+        return CApplication::GetInstance().GetAssetPath();
     }
 } // namespace Application
 } // namespace App

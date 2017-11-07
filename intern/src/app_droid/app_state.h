@@ -23,37 +23,37 @@ namespace App
 
     public:
 
-        inline CState::EStateType OnEnter();
-        inline CState::EStateType OnLeave();
-        inline CState::EStateType OnRun();
+        inline void OnEnter();
+        inline void OnLeave();
+        inline void OnRun();
 
     private:
 
-        virtual CState::EStateType InternOnEnter() = 0;
-        virtual CState::EStateType InternOnLeave() = 0;
-        virtual CState::EStateType InternOnRun() = 0;
+        virtual void InternOnEnter() = 0;
+        virtual void InternOnLeave() = 0;
+        virtual void InternOnRun() = 0;
 
     };
 } // namespace App
 
 namespace App
 {
-    CState::EStateType CState::OnEnter()
+    void CState::OnEnter()
     {
-        return InternOnEnter();
+        InternOnEnter();
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CState::OnLeave()
+    void CState::OnLeave()
     {
-        return InternOnLeave();
+        InternOnLeave();
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CState::OnRun()
+    void CState::OnRun()
     {
-        return InternOnRun();
+        InternOnRun();
     }
 } // namespace App

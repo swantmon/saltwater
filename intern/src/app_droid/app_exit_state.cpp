@@ -27,24 +27,21 @@ namespace App
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CExitState::InternOnEnter()
+    void CExitState::InternOnEnter()
     {
-        return App::CState::Exit;
+
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CExitState::InternOnLeave()
+    void CExitState::InternOnLeave()
     {
-        return App::CState::Exit;
+
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CExitState::InternOnRun()
+    void CExitState::InternOnRun()
     {
-        CState::EStateType NextState = CState::Exit;
-
-        return NextState;
     }
 } // namespace App

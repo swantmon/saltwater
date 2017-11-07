@@ -1,4 +1,5 @@
 
+#include "app_droid/app_application.h"
 #include "app_droid/app_intro_state.h"
 
 namespace App
@@ -27,24 +28,20 @@ namespace App
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CIntroState::InternOnEnter()
+    void CIntroState::InternOnEnter()
     {
-        return App::CState::Intro;
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CIntroState::InternOnLeave()
+    void CIntroState::InternOnLeave()
     {
-        return App::CState::Intro;
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CIntroState::InternOnRun()
+    void CIntroState::InternOnRun()
     {
-        CState::EStateType NextState = CState::LoadMap;
-
-        return NextState;
+        App::Application::ChangeState(CState::LoadMap);
     }
 } // namespace App

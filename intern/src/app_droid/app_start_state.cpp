@@ -1,4 +1,5 @@
 
+#include "app_droid/app_application.h"
 #include "app_droid/app_start_state.h"
 
 namespace App
@@ -27,24 +28,20 @@ namespace App
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CStartState::InternOnEnter()
+    void CStartState::InternOnEnter()
     {
-        return App::CState::Start;
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CStartState::InternOnLeave()
+    void CStartState::InternOnLeave()
     {
-        return App::CState::Start;
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CStartState::InternOnRun()
+    void CStartState::InternOnRun()
     {
-        CState::EStateType NextState = CState::Start;
-
-        return NextState;
+        App::Application::ChangeState(CState::Start);
     }
 } // namespace App

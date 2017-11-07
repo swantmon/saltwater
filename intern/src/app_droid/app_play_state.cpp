@@ -1,4 +1,5 @@
 
+#include "app_droid/app_application.h"
 #include "app_droid/app_play_state.h"
 
 namespace App
@@ -27,24 +28,20 @@ namespace App
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CPlayState::InternOnEnter()
+    void CPlayState::InternOnEnter()
     {
-        return App::CState::Play;
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CPlayState::InternOnLeave()
+    void CPlayState::InternOnLeave()
     {
-        return App::CState::Play;
     }
 
     // -----------------------------------------------------------------------------
 
-    CState::EStateType CPlayState::InternOnRun()
+    void CPlayState::InternOnRun()
     {
-        CState::EStateType NextState = CState::Play;
-
-        return NextState;
+        App::Application::ChangeState(CState::Play);
     }
 } // namespace App
