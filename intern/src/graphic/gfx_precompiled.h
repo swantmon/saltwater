@@ -1,5 +1,6 @@
 
-#pragma once
+#ifndef GFX_PRECOMPILED_H
+#define GFX_PRECOMPILED_H
 
 #ifdef __ANDROID__
 
@@ -27,7 +28,7 @@
 
 #define GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT_EXT    0x00004000
 
-typedef void (GFX_APIENTRY *GfxBufferStorageEXT)(enum target, GLsizeiptr size, const void * data, GLbitfield flags);
+typedef void (GFX_APIENTRY *GfxBufferStorageEXT)(GLenum target, GLsizeiptr size, const void * data, GLbitfield flags);
 
 GfxBufferStorageEXT glBufferStorage = 0;
 
@@ -42,5 +43,7 @@ GfxBufferStorageEXT glBufferStorage = 0;
 // Global defines
 // -----------------------------------------------------------------------------
 #define GFX_APIENTRY GLAPIENTRY
+
+#endif
 
 #endif
