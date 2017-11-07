@@ -830,6 +830,8 @@ namespace
         ContextManager::SetShaderVS(m_RootGridsVSPtr);
         ContextManager::SetShaderPS(m_RootGridsFSPtr);
 
+        ContextManager::SetResourceBuffer(0, rVolume.m_RootVolumePoolPtr);
+        ContextManager::SetResourceBuffer(1, rVolume.m_RootGridPoolPtr);
         ContextManager::SetResourceBuffer(6, rVolume.m_RootVolumePositionBufferPtr);
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
@@ -1152,9 +1154,9 @@ namespace
 
             BufferManager::UploadBufferData(m_ScalableRaycastBufferPtr, &Data);
 
-			RaycastScalableVolume();
+			//RaycastScalableVolume();
 
-            RenderVertexMap();
+            //RenderVertexMap();
 
             //RaycastRootVolumes();
             RaycastRootGrids();
