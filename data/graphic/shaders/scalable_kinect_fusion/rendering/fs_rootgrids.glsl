@@ -89,7 +89,6 @@ void main()
         vec3 CurrentPosition = CameraPosition + RayLength * RayDirection;
 
         int GridIndex = GetRootGridItemIndex(CurrentPosition);
-
         SGridPoolItem Grid = g_RootGridPool[GridIndex];
 
         if (Grid.m_PoolIndex != -1)
@@ -97,6 +96,8 @@ void main()
             out_GBuffer0 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
             out_GBuffer1 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
             out_GBuffer2 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+
+            return;
         }
     }
     
