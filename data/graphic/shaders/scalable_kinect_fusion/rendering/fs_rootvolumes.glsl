@@ -12,9 +12,9 @@
 
 layout(row_major, std140, binding = 1) uniform ScalableRaycastConstantBuffer
 {
-    vec3 m_AABBMin;
-    vec3 m_AABBMax;
-    int m_VolumeTextureWidth;
+    vec3 g_AABBMin;
+    vec3 g_AABBMax;
+    int g_VolumeTextureWidth;
 };
 
 // -----------------------------------------------------------------------------
@@ -33,18 +33,18 @@ layout(location = 2) out vec4 out_GBuffer2;
 
 float GetStartLength(vec3 Start, vec3 Direction)
 {
-    float xmin = ((Direction.x > 0.0f ? m_AABBMin.x : m_AABBMax.x) - Start.x) / Direction.x;
-    float ymin = ((Direction.y > 0.0f ? m_AABBMin.y : m_AABBMax.y) - Start.y) / Direction.y;
-    float zmin = ((Direction.z > 0.0f ? m_AABBMin.z : m_AABBMax.z) - Start.z) / Direction.z;
+    float xmin = ((Direction.x > 0.0f ? g_AABBMin.x : g_AABBMax.x) - Start.x) / Direction.x;
+    float ymin = ((Direction.y > 0.0f ? g_AABBMin.y : g_AABBMax.y) - Start.y) / Direction.y;
+    float zmin = ((Direction.z > 0.0f ? g_AABBMin.z : g_AABBMax.z) - Start.z) / Direction.z;
 
     return max(max(xmin, ymin), zmin);
 }
 
 float GetEndLength(vec3 Start, vec3 Direction)
 {
-    float xmax = ((Direction.x > 0.0f ? m_AABBMax.x : m_AABBMin.x) - Start.x) / Direction.x;
-    float ymax = ((Direction.y > 0.0f ? m_AABBMax.y : m_AABBMin.y) - Start.y) / Direction.y;
-    float zmax = ((Direction.z > 0.0f ? m_AABBMax.z : m_AABBMin.z) - Start.z) / Direction.z;
+    float xmax = ((Direction.x > 0.0f ? g_AABBMax.x : g_AABBMin.x) - Start.x) / Direction.x;
+    float ymax = ((Direction.y > 0.0f ? g_AABBMax.y : g_AABBMin.y) - Start.y) / Direction.y;
+    float zmax = ((Direction.z > 0.0f ? g_AABBMax.z : g_AABBMin.z) - Start.z) / Direction.z;
 
     return min(min(xmax, ymax), zmax);
 }
@@ -70,8 +70,8 @@ void main()
         RayLength += Step;
         vec3 CurrentPosition = CameraPosition + RayLength * RayDirection;
 
-        vec3 BufferPosition = CurrentPosition / VOLUME_SIZE + m_VolumeTextureWidth / 2.0f;
-        uint VoxelIndex = OffsetToIndex(BufferPosition, m_VolumeTextureWidth);
+        vec3 BufferPosition = CurrentPosition / VOLUME_SIZE + g_VolumeTextureWidth / 2.0f;
+        uint VoxelIndex = OffsetToIndex(BufferPosition, g_VolumeTextureWidth);
         int Voxel = g_RootVolumePositionBuffer[VoxelIndex];
 
         if (Voxel != -1)
