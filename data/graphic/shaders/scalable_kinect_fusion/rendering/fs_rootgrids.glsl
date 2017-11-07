@@ -49,6 +49,24 @@ float GetEndLength(vec3 Start, vec3 Direction, vec3 AABBMin, vec3 AABBMax)
     return min(min(xmax, ymax), zmax);
 }
 
+int GetRootVolumeIndex(vec3 Position)
+{
+    vec3 BufferPosition = Position / VOLUME_SIZE + g_VolumeTextureWidth / 2.0f;
+    uint VolumeIndex = OffsetToIndex(BufferPosition, g_VolumeTextureWidth);
+    return g_RootVolumePositionBuffer[VolumeIndex];
+}
+
+int GetRootGridItemIndex(vec3 Position)
+{
+    vec3 BufferPosition = Position / VOLUME_SIZE + g_VolumeTextureWidth / 2.0f;
+    int VolumeIndex = OffsetToIndex(BufferPosition, g_VolumeTextureWidth);
+    int Volume = g_RootVolumePositionBuffer[VolumeIndex];
+
+    BufferPosition = (Position / VOLUME_SIZE - g_RootVolumePool[Volume].m_Offset) / 16.0f;
+    int GridIndex = OffsetToIndex(BufferPosition, 16);
+    return VolumeIndex * 4096 + GridIndex;
+}
+
 void main()
 {
     vec3 CameraPosition = g_ViewPosition.xyz;
@@ -70,30 +88,22 @@ void main()
         RayLength += Step;
         vec3 CurrentPosition = CameraPosition + RayLength * RayDirection;
 
-        vec3 BufferPosition = CurrentPosition / VOLUME_SIZE + g_VolumeTextureWidth / 2.0f;
-        uint VolumeIndex = OffsetToIndex(BufferPosition, g_VolumeTextureWidth);
-        int Volume = g_RootVolumePositionBuffer[VolumeIndex];
+        int GridIndex = GetRootGridItemIndex(CurrentPosition);
 
-        if (Volume == -1)
+        SGridPoolItem Grid = g_RootGridPool[GridIndex];
+
+        if (Grid.m_PoolIndex != -1)
         {
-            // Compute length where ray leaves volume and directly jump to point
-
-            vec3 AABBMin = ivec3(CurrentPosition / VOLUME_SIZE);
-
-            //RayLength = GetEndLength(CurrentPosition, RayDirection, AABBMin, AABBMin + VOLUME_SIZE);
-        }
-        else
-        {
-
+            out_GBuffer0 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+            out_GBuffer1 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+            out_GBuffer2 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
         }
     }
-
-    out_GBuffer0 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-    out_GBuffer1 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-    out_GBuffer2 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
     
     //vec4 CSPosition = g_WorldToScreen * vec4(CurrentPosition, 1.0f);
     //gl_FragDepth = (CSPosition.z / CSPosition.w);
+
+    discard;
 }
 
 #endif // __INCLUDE_FS_ROOTGRIDS_GLSL__
