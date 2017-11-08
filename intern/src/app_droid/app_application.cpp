@@ -18,9 +18,6 @@
 
 #include "graphic/gfx_application_interface.h"
 
-#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "AndroidProject1.NativeActivity", __VA_ARGS__))
-#define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "AndroidProject1.NativeActivity", __VA_ARGS__))
-
 namespace
 {
     class CApplication : private Base::CUncopyable
