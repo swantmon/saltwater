@@ -13,8 +13,6 @@
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_manager.h"
 
-#include "GL/glew.h"
-
 using namespace Gfx;
 
 namespace
@@ -328,7 +326,9 @@ namespace
         
         GLuint Framebuffer;
             
-        glCreateFramebuffers(1, &Framebuffer);
+        glGenFramebuffers(1, &Framebuffer);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
             
         for (unsigned int IndexOfTexture = 0; IndexOfTexture < _NumberOfTargets; ++ IndexOfTexture)
         {
@@ -337,17 +337,21 @@ namespace
             GLuint TextureHandle = rNativeTexture.m_NativeTexture;
 
             unsigned int MipmapLevel = rNativeTexture.GetCurrentMipLevel();
+
+            unsigned int BindingTarget = rNativeTexture.IsCube() == true ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D;
+
+            glBindTexture(BindingTarget, TextureHandle);
                 
             if ((rNativeTexture.GetBinding() & CTexture2D::DepthStencilTarget) != 0)
             {
-                glNamedFramebufferTexture(Framebuffer, GL_DEPTH_ATTACHMENT, TextureHandle, MipmapLevel);
-                    
+                glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, TextureHandle, MipmapLevel);
+
                 rTargetSet.m_DepthStencilTargetPtr = _pTargetPtrs[IndexOfTexture];
             }
             else if ((rNativeTexture.GetBinding() & CTexture2D::RenderTarget) != 0)
             {
-                glNamedFramebufferTexture(Framebuffer, GL_COLOR_ATTACHMENT0 + NumberOfColorAttachments, TextureHandle, MipmapLevel);
-                    
+                glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + NumberOfColorAttachments, TextureHandle, MipmapLevel);
+
                 rTargetSet.m_RenderTargetPtrs[NumberOfColorAttachments] = _pTargetPtrs[IndexOfTexture];
                     
                 ++ NumberOfColorAttachments;
@@ -364,12 +368,17 @@ namespace
         // -----------------------------------------------------------------------------
         // Check status
         // -----------------------------------------------------------------------------
-        GLenum Status = glCheckNamedFramebufferStatus(Framebuffer, GL_FRAMEBUFFER);
+        GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
             
         if(Status != GL_FRAMEBUFFER_COMPLETE)
         {
             BASE_THROWM("Can't create an acceptable frame buffer.");
         }
+
+        // -----------------------------------------------------------------------------
+        // Unbind
+        // -----------------------------------------------------------------------------
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
         
         return CTargetSetPtr(TargetSetPtr);
     }
@@ -388,11 +397,13 @@ namespace
         // ARB_framebuffer_no_attachments
         // -----------------------------------------------------------------------------
 
-        glCreateFramebuffers(1, &Framebuffer);
+        glGenFramebuffers(1, &Framebuffer);
 
-        glNamedFramebufferParameteri(Framebuffer, GL_FRAMEBUFFER_DEFAULT_WIDTH, _Width);
-        glNamedFramebufferParameteri(Framebuffer, GL_FRAMEBUFFER_DEFAULT_HEIGHT, _Height);
-        glNamedFramebufferParameteri(Framebuffer, GL_FRAMEBUFFER_DEFAULT_LAYERS, _Layers);
+        glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
+
+        glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_WIDTH, _Width);
+        glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_HEIGHT, _Height);
+        glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_LAYERS, _Layers);
 
         rTargetSet.m_NumberOfRenderTargets = 0;
         rTargetSet.m_NativeTargetSet = Framebuffer;
@@ -400,12 +411,17 @@ namespace
         // -----------------------------------------------------------------------------
         // Check status
         // -----------------------------------------------------------------------------
-        GLenum Status = glCheckNamedFramebufferStatus(Framebuffer, GL_FRAMEBUFFER);
+        GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
         if (Status != GL_FRAMEBUFFER_COMPLETE)
         {
             BASE_THROWM("Can't create an acceptable frame buffer.");
         }
+
+        // -----------------------------------------------------------------------------
+        // Unbind
+        // -----------------------------------------------------------------------------
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         return CTargetSetPtr(TargetSetPtr);
     }
@@ -416,7 +432,9 @@ namespace
     {
         CNativeTargetSet& rNativeTargetSet = *static_cast<CNativeTargetSet*>(_TargetPtr.GetPtr());
 
-        glClearNamedFramebufferfv(rNativeTargetSet.m_NativeTargetSet, GL_DEPTH, 0, &_Depth);
+        glBindFramebuffer(GL_FRAMEBUFFER, rNativeTargetSet.m_NativeTargetSet);
+
+        glClearBufferfv(GL_DEPTH, 0, &_Depth);
     }
 
     // -----------------------------------------------------------------------------
@@ -425,9 +443,11 @@ namespace
     {
         CNativeTargetSet& rNativeTargetSet = *static_cast<CNativeTargetSet*>(_TargetPtr.GetPtr());
 
+        glBindFramebuffer(GL_FRAMEBUFFER, rNativeTargetSet.m_NativeTargetSet);
+
         for (unsigned int Index = 0; Index <_TargetPtr->GetNumberOfRenderTargets(); ++ Index)
         {
-            glClearNamedFramebufferfv(rNativeTargetSet.m_NativeTargetSet, GL_COLOR, Index, const_cast<GLfloat*>(&_rColor[0]));
+            glClearBufferfv(GL_COLOR, Index, const_cast<GLfloat*>(&_rColor[0]));
         }
     }
     
@@ -436,13 +456,15 @@ namespace
     void CGfxTargetSetManager::ClearTargetSet(CTargetSetPtr _TargetPtr, const Base::Float4& _rColor, float _Depth)
     {
         CNativeTargetSet& rNativeTargetSet = *static_cast<CNativeTargetSet*>(_TargetPtr.GetPtr());
+
+        glBindFramebuffer(GL_FRAMEBUFFER, rNativeTargetSet.m_NativeTargetSet);
        
         for (unsigned int Index = 0; Index < _TargetPtr->GetNumberOfRenderTargets(); ++Index)
         {
-            glClearNamedFramebufferfv(rNativeTargetSet.m_NativeTargetSet, GL_COLOR, Index, const_cast<GLfloat*>(&_rColor[0]));
+            glClearBufferfv(GL_COLOR, Index, const_cast<GLfloat*>(&_rColor[0]));
         }
 
-        glClearNamedFramebufferfv(rNativeTargetSet.m_NativeTargetSet, GL_DEPTH, 0, &_Depth);
+        glClearBufferfv(GL_DEPTH, 0, &_Depth);
     }
 
 	// -----------------------------------------------------------------------------
@@ -597,6 +619,9 @@ namespace
         CInternTargetSet& rTargetSet = *static_cast<CInternTargetSet*>(_TargetSetPtr.GetPtr());
 
         // -----------------------------------------------------------------------------
+        // Binding
+        // -----------------------------------------------------------------------------
+        glBindFramebuffer(GL_FRAMEBUFFER, rTargetSet.m_NativeTargetSet);
 
         for (unsigned int IndexOfTexture = 0; IndexOfTexture < _NumberOfTargets; ++IndexOfTexture)
         {
@@ -606,16 +631,20 @@ namespace
 
             unsigned int MipmapLevel = rNativeTexture.GetCurrentMipLevel();
 
+            unsigned int BindingTarget = rNativeTexture.IsCube() == true ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D;
+
+            glBindTexture(BindingTarget, TextureHandle);
+
             if ((rNativeTexture.GetBinding() & CTexture2D::DepthStencilTarget) != 0)
             {
-                glNamedFramebufferTexture(rTargetSet.m_NativeTargetSet, GL_DEPTH_ATTACHMENT, TextureHandle, MipmapLevel);
+                glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, TextureHandle, MipmapLevel);
 
                 rTargetSet.m_DepthStencilTargetPtr = 0;
                 rTargetSet.m_DepthStencilTargetPtr = _pTargetPtrs[IndexOfTexture];
             }
             else if ((rNativeTexture.GetBinding() & CTexture2D::RenderTarget) != 0)
             {
-                glNamedFramebufferTexture(rTargetSet.m_NativeTargetSet, GL_COLOR_ATTACHMENT0 + NumberOfColorAttachments, TextureHandle, MipmapLevel);
+                glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + NumberOfColorAttachments, TextureHandle, MipmapLevel);
 
                 rTargetSet.m_RenderTargetPtrs[NumberOfColorAttachments] = 0;
                 rTargetSet.m_RenderTargetPtrs[NumberOfColorAttachments] = _pTargetPtrs[IndexOfTexture];
@@ -633,12 +662,17 @@ namespace
         // -----------------------------------------------------------------------------
         // Check status
         // -----------------------------------------------------------------------------
-        GLenum Status = glCheckNamedFramebufferStatus(rTargetSet.m_NativeTargetSet, GL_FRAMEBUFFER);
+        GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
         if (Status != GL_FRAMEBUFFER_COMPLETE)
         {
             BASE_THROWM("Can't create an acceptable frame buffer.");
         }
+
+        // -----------------------------------------------------------------------------
+        // Unbind
+        // -----------------------------------------------------------------------------
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 } // namespace
 
