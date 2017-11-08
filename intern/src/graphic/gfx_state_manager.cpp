@@ -13,8 +13,6 @@
 #include "graphic/gfx_rasterizer_description.h"
 #include "graphic/gfx_state_manager.h"
 
-#include "GL/glew.h"
-
 #include <assert.h>
 #include <exception>
 
