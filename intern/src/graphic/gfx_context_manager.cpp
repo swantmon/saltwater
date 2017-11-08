@@ -230,8 +230,8 @@ namespace
         GL_TRIANGLE_STRIP,
         GL_TRIANGLE_FAN,
         GL_QUADS,
-        GL_QUAD_STRIP,
-        GL_POLYGON,
+        GL_NONE, // GL_QUAD_STRIP,
+        GL_NONE, // GL_POLYGON,
         GL_PATCHES,
     };
 } // namespace
@@ -317,11 +317,11 @@ namespace
         // -----------------------------------------------------------------------------
         GLuint VertexArrayID;
 
-        glCreateVertexArrays(1, &VertexArrayID);
+        glGenVertexArrays(1, &VertexArrayID);
 
         glBindVertexArray(VertexArrayID);
 
-        glCreateBuffers(1, &m_EmptyVertexBuffer);
+        glGenBuffers(1, &m_EmptyVertexBuffer);
 
         glBindBuffer(GL_ARRAY_BUFFER, m_EmptyVertexBuffer);
     }
@@ -566,7 +566,10 @@ namespace
             if (rDescription.StencilEnable == GL_TRUE)
             {
                 glEnable(GL_STENCIL_TEST);
+
+#ifndef __ANDROID__
                 glEnable(GL_STENCIL_TEST_TWO_SIDE_EXT);
+#endif // !__ANDROID__
                 
                 // -----------------------------------------------------------------------------
                 
@@ -578,7 +581,9 @@ namespace
                 
                 // -----------------------------------------------------------------------------
                 
+#ifndef __ANDROID__
                 glActiveStencilFaceEXT(GL_FRONT);
+#endif // !__ANDROID__
                 
                 StencilFunc = rDescription.FrontFace.StencilFunc;
                 Mask        = rDescription.StencilReadMask;
@@ -594,7 +599,9 @@ namespace
                 
                 // -----------------------------------------------------------------------------
                 
+#ifndef __ANDROID__
                 glActiveStencilFaceEXT(GL_BACK);
+#endif // !__ANDROID__
                 
                 StencilFunc = rDescription.BackFace.StencilFunc;
                 Mask        = rDescription.StencilWriteMask;
@@ -653,7 +660,9 @@ namespace
                 
                 glCullFace(CullMode);
                 
+#ifndef __ANDROID__
                 glPolygonMode(GL_FRONT_AND_BACK, FillMode);
+#endif // !__ANDROID__
                 
                 glFrontFace(FrontFace);
             }
@@ -1212,7 +1221,16 @@ namespace
     {
         assert(_Unit < s_NumberOfTextureUnits);
 
-        glBindTextureUnit(_Unit, 0);
+        CNativeTexture2D& rNativeTexture = *static_cast<CNativeTexture2D*>(m_TextureUnits[_Unit].GetPtr());
+
+        GLuint TextureBinding = rNativeTexture.m_NativeDimension;
+
+        if (rNativeTexture.IsCube())
+        {
+            TextureBinding = GL_TEXTURE_CUBE_MAP;
+        }
+
+        glBindTexture(TextureBinding, 0);
 
         m_TextureUnits[_Unit] = 0;
     }
@@ -1229,9 +1247,18 @@ namespace
 
         if (m_TextureUnits[_Unit] == _TextureBasePtr) return;
 
-        pNativeTexture = static_cast<CNativeTexture2D*>(_TextureBasePtr.GetPtr());
+        CNativeTexture2D& rNativeTexture = *static_cast<CNativeTexture2D*>(m_TextureUnits[_Unit].GetPtr());
 
-        glBindTextureUnit(_Unit, pNativeTexture->m_NativeTexture);
+        GLuint TextureBinding = rNativeTexture.m_NativeDimension;
+
+        if (rNativeTexture.IsCube())
+        {
+            TextureBinding = GL_TEXTURE_CUBE_MAP;
+        }
+
+        glActiveTexture(GL_TEXTURE0 + _Unit);
+
+        glBindTexture(TextureBinding, rNativeTexture.m_NativeTexture);
 
         m_TextureUnits[_Unit] = _TextureBasePtr;
     }
