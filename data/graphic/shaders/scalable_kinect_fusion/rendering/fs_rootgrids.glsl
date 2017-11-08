@@ -58,13 +58,12 @@ int GetRootVolumeIndex(vec3 Position)
 
 int GetRootGridItemIndex(vec3 Position)
 {
-    vec3 BufferPosition = Position / VOLUME_SIZE + g_VolumeTextureWidth / 2.0f;
-    int VolumeIndex = OffsetToIndex(BufferPosition, g_VolumeTextureWidth);
-    int Volume = g_RootVolumePositionBuffer[VolumeIndex];
-
-    BufferPosition = (Position / VOLUME_SIZE - g_RootVolumePool[Volume].m_Offset) / 16.0f;
-    int GridIndex = OffsetToIndex(BufferPosition, 16);
-    return VolumeIndex * 4096 + GridIndex;
+    ivec3 ItemOffset = ivec3(Position / (VOLUME_SIZE / 16.0f));
+    ivec3 VolumeOffset = ivec3(ItemOffset.x, ItemOffset.y, ItemOffset.z) % 16;
+    
+    int BufferOffset = VolumeOffset.z * 16 * 16 + VolumeOffset.y * 16 + VolumeOffset.x;
+    
+    return GetRootVolumeIndex(Position) * 4096 + BufferOffset;
 }
 
 void main()
@@ -88,15 +87,14 @@ void main()
         RayLength += Step;
         vec3 CurrentPosition = CameraPosition + RayLength * RayDirection;
 
-        int GridIndex = GetRootGridItemIndex(CurrentPosition);
-        SGridPoolItem Grid = g_RootGridPool[GridIndex];
-
-        if (Grid.m_PoolIndex != -1)
+        int Offset = GetRootGridItemIndex(CurrentPosition);
+        
+        if (g_RootGridPool[Offset].m_PoolIndex != -1)
         {
-            out_GBuffer0 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+            out_GBuffer0 = vec4(Offset / 8192.0f, 0.0f, 0.0f, 1.0f);
             out_GBuffer1 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
             out_GBuffer2 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-
+        
             return;
         }
     }
