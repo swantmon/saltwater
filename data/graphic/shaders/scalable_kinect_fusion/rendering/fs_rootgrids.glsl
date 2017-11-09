@@ -49,9 +49,14 @@ float GetEndLength(vec3 Start, vec3 Direction, vec3 AABBMin, vec3 AABBMax)
     return min(min(xmax, ymax), zmax);
 }
 
-int GetRootVolumeBufferIndex(vec3 GLobalPosition)
+vec3 GetRootVolumeOffset(vec3 GlobalPosition)
 {
-    vec3 BufferPosition = GLobalPosition / VOLUME_SIZE + g_VolumeTextureWidth / 2.0f;
+    return GlobalPosition - mod(GlobalPosition, VOLUME_SIZE);
+}
+
+int GetRootVolumeBufferIndex(vec3 GlobalPosition)
+{
+    vec3 BufferPosition = GlobalPosition / VOLUME_SIZE + g_VolumeTextureWidth / 2.0f;
     uint VolumeIndex = OffsetToIndex(BufferPosition, g_VolumeTextureWidth);
     return g_RootVolumePositionBuffer[VolumeIndex];
 }
@@ -99,13 +104,24 @@ void main()
             {
                 if (g_RootGridPool[GridItemBufferOffset].m_PoolIndex != -1)
                 {
-                    out_GBuffer0 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-                    out_GBuffer1 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+                    out_GBuffer0 = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+                    out_GBuffer1 = vec4(0.0f, 0.0f, 0.0f, 1.0f);
                     out_GBuffer2 = vec4(0.0f, 0.0f, 0.0f, 1.0f);
                 
                     return;
                 }
             }
+        }
+        else
+        {
+            vec3 AABB = GetRootVolumeOffset(CurrentPosition);
+            float NewRayLength = min(GetEndLength(CameraPosition, RayDirection, AABB, AABB + VOLUME_SIZE), RayLength);
+
+            out_GBuffer0 = vec4(RayLength - NewRayLength, 0.0f, 0.0f, 1.0f);            
+            out_GBuffer1 = vec4(NewRayLength, 1.0f);
+            out_GBuffer2 = vec4(AABB, 1.0f);
+
+            return;
         }
     }
     
