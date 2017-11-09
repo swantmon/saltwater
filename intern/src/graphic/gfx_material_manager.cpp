@@ -654,7 +654,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Create material
         // -----------------------------------------------------------------------------
-        CMaterialPtr MaterialPtr = m_Materials.Allocate();
+        CMaterialPtr MaterialPtr = static_cast<CMaterialPtr>(m_Materials.Allocate());
 
         CInternMaterial* pInternMaterial = static_cast<CInternMaterial*>(MaterialPtr.GetPtr());
         

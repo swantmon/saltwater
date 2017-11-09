@@ -28,7 +28,7 @@ namespace Gfx
         , m_ISO                 (0.0f)
         , m_EC                  (0.0f)
         , m_Size                (0.0f)
-        , m_BackgroundColor     (Base::Float3::s_AxisZero)
+        , m_BackgroundColor     (Base::Float3::s_Zero)
         , m_WorldAABB           ()
         , m_ViewportRect        ()
         , m_pSibling            (nullptr)
