@@ -109,7 +109,6 @@ namespace
 
 		void RaycastScalableVolume();
 
-        void RaycastRootVolumes();
         void RaycastRootGrids();
         void RaycastLevelGrids();
 
@@ -134,11 +133,11 @@ namespace
         CShaderPtr m_OutlineLevel2VSPtr;
         CShaderPtr m_OutlineLevel2FSPtr;
 
-        CShaderPtr m_RootVolumesVSPtr;
-        CShaderPtr m_RootVolumesFSPtr;
+        CShaderPtr m_RaycastRootGridsVSPtr;
+        CShaderPtr m_RaycastRootGridsFSPtr;
 
-        CShaderPtr m_RootGridsVSPtr;
-        CShaderPtr m_RootGridsFSPtr;
+        CShaderPtr m_RaycastLevel1VSPtr;
+        CShaderPtr m_RaycastLevel1FSPtr;
 
         CShaderPtr m_RaycastVSPtr;
         CShaderPtr m_RaycastFSPtr;
@@ -219,11 +218,11 @@ namespace
         m_RaycastVSPtr = 0;
         m_RaycastFSPtr = 0;
 
-        m_RootVolumesVSPtr = 0;
-        m_RootVolumesFSPtr = 0;
+        m_RaycastLevel1VSPtr = 0;
+        m_RaycastLevel1FSPtr = 0;
 
-        m_RootGridsVSPtr = 0;
-        m_RootGridsFSPtr = 0;
+        m_RaycastRootGridsVSPtr = 0;
+        m_RaycastRootGridsFSPtr = 0;
         
         m_RaycastConstantBufferPtr = 0;
         m_DrawCallConstantBufferPtr = 0;
@@ -278,14 +277,14 @@ namespace
             m_OutlineLevel2VSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\rendering\\vs_outline_level2.glsl", "main", DefineString.c_str());
             m_OutlineLevel2FSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\rendering\\fs_outline_level2.glsl", "main", DefineString.c_str());
 			
-            m_PointCloudVSPtr    = ShaderManager::CompileVS("scalable_kinect_fusion\\rendering\\vs_point_cloud.glsl"   , "main", DefineString.c_str());
-            m_PointCloudFSPtr    = ShaderManager::CompilePS("scalable_kinect_fusion\\rendering\\fs_point_cloud.glsl"   , "main", DefineString.c_str());
+            m_PointCloudVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\rendering\\vs_point_cloud.glsl", "main", DefineString.c_str());
+            m_PointCloudFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\rendering\\fs_point_cloud.glsl", "main", DefineString.c_str());
 
-            m_RootVolumesVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\rendering\\vs_rootvolumes.glsl", "main", DefineString.c_str());
-            m_RootVolumesFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\rendering\\fs_rootvolumes.glsl", "main", DefineString.c_str());
+            m_RaycastRootGridsVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\rendering\\vs_raycast_level1.glsl", "main", DefineString.c_str());
+            m_RaycastRootGridsFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\rendering\\fs_raycast_level1.glsl", "main", DefineString.c_str());
 
-            m_RootGridsVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\rendering\\vs_rootgrids.glsl", "main", DefineString.c_str());
-            m_RootGridsFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\rendering\\fs_rootgrids.glsl", "main", DefineString.c_str());
+            m_RaycastLevel1VSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\rendering\\vs_raycast_rootvolumes.glsl", "main", DefineString.c_str());
+            m_RaycastLevel1FSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\rendering\\fs_raycast_rootvolumes.glsl", "main", DefineString.c_str());
 
             m_RaycastVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\rendering\\vs_raycast.glsl", "main", DefineString.c_str());
             m_RaycastFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\rendering\\fs_raycast.glsl", "main", DefineString.c_str());
@@ -755,67 +754,7 @@ namespace
 
         //ContextManager::DrawIndexed(36, 0, 0);
 	}
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxReconstructionRenderer::RaycastRootVolumes()
-    {
-        MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
-
-        MR::SReconstructionSettings Settings;
-        m_pScalableReconstructor->GetReconstructionSettings(&Settings);
-
-        Float4x4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
-        
-        ContextManager::SetShaderVS(m_RootVolumesVSPtr);
-        ContextManager::SetShaderPS(m_RootVolumesFSPtr);
-
-        ContextManager::SetResourceBuffer(6, rVolume.m_RootVolumePositionBufferPtr);
-
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-        ContextManager::SetConstantBuffer(1, m_ScalableRaycastBufferPtr);
-
-        ContextManager::Barrier();
-
-        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
-        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
-        
-        const Float3 Min = Float3(
-            rVolume.m_MinOffset[0] * Settings.m_VolumeSize,
-            rVolume.m_MinOffset[1] * Settings.m_VolumeSize,
-            rVolume.m_MinOffset[2] * Settings.m_VolumeSize
-        );
-
-        const Float3 Max = Float3(
-            (rVolume.m_MaxOffset[0] + 1.0f) * Settings.m_VolumeSize, // Add 1.0f because MaxOffset stores the max volume offset
-            (rVolume.m_MaxOffset[1] + 1.0f) * Settings.m_VolumeSize, // and we have to consider the volume size
-            (rVolume.m_MaxOffset[2] + 1.0f) * Settings.m_VolumeSize
-        );
-
-        Float3 Vertices[8] =
-        {
-            Float3(Min[0], Min[1], Min[2]),
-            Float3(Max[0], Min[1], Min[2]),
-            Float3(Max[0], Max[1], Min[2]),
-            Float3(Min[0], Max[1], Min[2]),
-            Float3(Min[0], Min[1], Max[2]),
-            Float3(Max[0], Min[1], Max[2]),
-            Float3(Max[0], Max[1], Max[2]),
-            Float3(Min[0], Max[1], Max[2]),
-        };
-
-        BufferManager::UploadBufferData(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Vertices);
-
-        const unsigned int Offset = 0;
-        ContextManager::SetVertexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
-        ContextManager::SetIndexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
-        ContextManager::SetInputLayout(m_VolumeInputLayoutPtr);
-
-        ContextManager::SetTopology(STopology::TriangleList);
-
-        ContextManager::DrawIndexed(36, 0, 0);
-    }
-
+    
     // -----------------------------------------------------------------------------
 
     void CGfxReconstructionRenderer::RaycastRootGrids()
@@ -827,8 +766,8 @@ namespace
 
         Float4x4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
 
-        ContextManager::SetShaderVS(m_RootGridsVSPtr);
-        ContextManager::SetShaderPS(m_RootGridsFSPtr);
+        ContextManager::SetShaderVS(m_RaycastRootGridsVSPtr);
+        ContextManager::SetShaderPS(m_RaycastRootGridsFSPtr);
 
         ContextManager::SetResourceBuffer(0, rVolume.m_RootVolumePoolPtr);
         ContextManager::SetResourceBuffer(1, rVolume.m_RootGridPoolPtr);
@@ -882,7 +821,62 @@ namespace
 
     void CGfxReconstructionRenderer::RaycastLevelGrids()
     {
+        MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
 
+        MR::SReconstructionSettings Settings;
+        m_pScalableReconstructor->GetReconstructionSettings(&Settings);
+
+        Float4x4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
+
+        ContextManager::SetShaderVS(m_RaycastLevel1VSPtr);
+        ContextManager::SetShaderPS(m_RaycastLevel1FSPtr);
+
+        ContextManager::SetResourceBuffer(0, rVolume.m_RootVolumePoolPtr);
+        ContextManager::SetResourceBuffer(1, rVolume.m_RootGridPoolPtr);
+        ContextManager::SetResourceBuffer(6, rVolume.m_RootVolumePositionBufferPtr);
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_ScalableRaycastBufferPtr);
+
+        ContextManager::Barrier();
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+        const Float3 Min = Float3(
+            rVolume.m_MinOffset[0] * Settings.m_VolumeSize,
+            rVolume.m_MinOffset[1] * Settings.m_VolumeSize,
+            rVolume.m_MinOffset[2] * Settings.m_VolumeSize
+        );
+
+        const Float3 Max = Float3(
+            (rVolume.m_MaxOffset[0] + 1.0f) * Settings.m_VolumeSize, // Add 1.0f because MaxOffset stores the max volume offset
+            (rVolume.m_MaxOffset[1] + 1.0f) * Settings.m_VolumeSize, // and we have to consider the volume size
+            (rVolume.m_MaxOffset[2] + 1.0f) * Settings.m_VolumeSize
+        );
+
+        Float3 Vertices[8] =
+        {
+            Float3(Min[0], Min[1], Min[2]),
+            Float3(Max[0], Min[1], Min[2]),
+            Float3(Max[0], Max[1], Min[2]),
+            Float3(Min[0], Max[1], Min[2]),
+            Float3(Min[0], Min[1], Max[2]),
+            Float3(Max[0], Min[1], Max[2]),
+            Float3(Max[0], Max[1], Max[2]),
+            Float3(Min[0], Max[1], Max[2]),
+        };
+
+        BufferManager::UploadBufferData(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Vertices);
+
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetInputLayout(m_VolumeInputLayoutPtr);
+
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        ContextManager::DrawIndexed(36, 0, 0);
     }
 
 	// -----------------------------------------------------------------------------
@@ -1158,9 +1152,8 @@ namespace
 
             //RenderVertexMap();
 
-            //RaycastRootVolumes();
-            RaycastRootGrids();
-            //RaycastLevelGrids();
+            //RaycastRootGrids();
+            RaycastLevelGrids();
 
             RenderQueuedRootVolumes();
             RenderQueuedLevel1Grids();

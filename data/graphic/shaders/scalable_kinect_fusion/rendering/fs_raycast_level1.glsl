@@ -1,6 +1,6 @@
 
-#ifndef __INCLUDE_FS_ROOTGRIDS_GLSL__
-#define __INCLUDE_FS_ROOTGRIDS_GLSL__
+#ifndef __INCLUDE_FS_RAYCAST_LEVEL1_GLSL__
+#define __INCLUDE_FS_RAYCAST_LEVEL1_GLSL__
 
 #include "common_global.glsl"
 #include "scalable_kinect_fusion/common_scalable.glsl"
@@ -125,4 +125,4 @@ void main()
     discard;
 }
 
-#endif // __INCLUDE_FS_ROOTGRIDS_GLSL__
+#endif // __INCLUDE_FS_RAYCAST_LEVEL1_GLSL__
