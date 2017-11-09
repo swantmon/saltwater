@@ -49,30 +49,21 @@ float GetEndLength(vec3 Start, vec3 Direction, vec3 AABBMin, vec3 AABBMax)
     return min(min(xmax, ymax), zmax);
 }
 
-int GetRootVolumeIndex(vec3 Position)
+int GetRootVolumeBufferIndex(vec3 Position)
 {
     vec3 BufferPosition = Position / VOLUME_SIZE + g_VolumeTextureWidth / 2.0f;
     uint VolumeIndex = OffsetToIndex(BufferPosition, g_VolumeTextureWidth);
     return g_RootVolumePositionBuffer[VolumeIndex];
 }
 
-int GetRootGridItemIndex(vec3 Position)
-{
-    int VolumeIndex = GetRootVolumeIndex(Position);
-    
-    if (VolumeIndex == -1)
-    {
-        return -1;
-    }
-    
-    Position -= g_RootVolumePool[VolumeIndex].m_Offset * VOLUME_SIZE;
-    
+int GetRootGridItemIndex(vec3 Position, int VolumeBufferOffset)
+{    
     ivec3 ItemOffset = ivec3(Position / (VOLUME_SIZE / 16.0f));
     ivec3 VolumeOffset = ItemOffset % 16;
     
     int BufferOffset = VolumeOffset.z * 16 * 16 + VolumeOffset.y * 16 + VolumeOffset.x;
     
-    return VolumeIndex * 16 * 16 * 16 + BufferOffset;
+    return VolumeBufferOffset * 16 * 16 * 16 + BufferOffset;
 }
 
 void main()
@@ -96,17 +87,24 @@ void main()
         RayLength += Step;
         vec3 CurrentPosition = CameraPosition + RayLength * RayDirection;
 
-        int Offset = GetRootGridItemIndex(CurrentPosition);
-        
-        if (Offset != -1)
+        int VolumeBufferOffset = GetRootVolumeBufferIndex(CurrentPosition);
+
+        if (VolumeBufferOffset != -1)
         {
-            if (g_RootGridPool[Offset].m_PoolIndex != -1)
-            {
-                out_GBuffer0 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-                out_GBuffer1 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-                out_GBuffer2 = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+            vec3 VolumeOffset = g_RootVolumePool[VolumeBufferOffset].m_Offset * VOLUME_SIZE;
+
+            int GridItemBufferOffset = GetRootGridItemIndex(CurrentPosition - VolumeOffset, VolumeBufferOffset);
             
-                return;
+            if (GridItemBufferOffset != -1)
+            {
+                if (g_RootGridPool[GridItemBufferOffset].m_PoolIndex != -1)
+                {
+                    out_GBuffer0 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+                    out_GBuffer1 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+                    out_GBuffer2 = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+                
+                    return;
+                }
             }
         }
     }
