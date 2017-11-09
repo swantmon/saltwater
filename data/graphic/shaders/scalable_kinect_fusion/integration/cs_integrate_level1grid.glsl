@@ -3,6 +3,7 @@
 #define __INCLUDE_CS_KINECT_INTEGRATE_LEVEL1_GLSL__
 
 #include "scalable_kinect_fusion/common_scalable.glsl"
+#include "scalable_kinect_fusion/common_indirect.glsl"
 
 layout(std430, binding = 6) buffer Level2Queue
 {
