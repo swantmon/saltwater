@@ -104,8 +104,8 @@ void main()
             {
                 if (g_RootGridPool[GridItemBufferOffset].m_PoolIndex != -1)
                 {
-                    out_GBuffer0 = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-                    out_GBuffer1 = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+                    out_GBuffer0 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+                    out_GBuffer1 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
                     out_GBuffer2 = vec4(0.0f, 0.0f, 0.0f, 1.0f);
                 
                     return;
@@ -115,13 +115,7 @@ void main()
         else
         {
             vec3 AABB = GetRootVolumeOffset(CurrentPosition);
-            float NewRayLength = min(GetEndLength(CameraPosition, RayDirection, AABB, AABB + VOLUME_SIZE), RayLength);
-
-            out_GBuffer0 = vec4(RayLength - NewRayLength, 0.0f, 0.0f, 1.0f);            
-            out_GBuffer1 = vec4(NewRayLength, 1.0f);
-            out_GBuffer2 = vec4(AABB, 1.0f);
-
-            return;
+            RayLength = max(GetEndLength(CameraPosition, RayDirection, AABB, AABB + VOLUME_SIZE), RayLength);
         }
     }
     
