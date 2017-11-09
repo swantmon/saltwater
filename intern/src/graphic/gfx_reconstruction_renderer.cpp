@@ -110,7 +110,7 @@ namespace
 		void RaycastScalableVolume();
 
         void RaycastRootGrids();
-        void RaycastLevelGrids();
+        void RaycastLevel1Grids();
 
         void RenderQueuedRootVolumes();
         void RenderQueuedLevel1Grids();
@@ -819,7 +819,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::RaycastLevelGrids()
+    void CGfxReconstructionRenderer::RaycastLevel1Grids()
     {
         MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
 
@@ -1153,11 +1153,11 @@ namespace
             //RenderVertexMap();
 
             //RaycastRootGrids();
-            RaycastLevelGrids();
+            RaycastLevel1Grids();
 
             RenderQueuedRootVolumes();
-            RenderQueuedLevel1Grids();
-            //RenderQueuedLevel2Grids();
+            //RenderQueuedLevel1Grids();
+            RenderQueuedLevel2Grids();
 		}
 		else
 		{
