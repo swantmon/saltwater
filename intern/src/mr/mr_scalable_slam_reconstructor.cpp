@@ -1087,6 +1087,8 @@ namespace MR
 
         Performance::BeginEvent("Fill internal grids");
 
+        ContextManager::SetShaderCS(m_IntegrateLevel1GridCSPtr);
+
         for (uint32_t VolumeIndex : rVolumeQueue)
         {
             auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
@@ -1098,10 +1100,13 @@ namespace MR
             BufferManager::UploadBufferData(m_VolumeIndexBufferPtr, &rRootVolume.m_PoolIndex);
 
             ////////////////////////////////////////////////////////////////////////////////////////////////
-            // Integrate into internal grid
+            // Integrate into root grid
             ////////////////////////////////////////////////////////////////////////////////////////////////
 
-            ContextManager::SetShaderCS(m_IntegrateLevel1GridCSPtr);
+            ContextManager::SetResourceBuffer(6, rRootVolume.m_Level2QueuePtr);
+            ContextManager::SetResourceBuffer(7, rRootVolume.m_IndirectLevel2Buffer);
+
+            ContextManager::DispatchIndirect(rRootVolume.m_IndirectLevel2Buffer, SIndirectBuffers::s_ComputeOffset);
         }
 
         Performance::EndEvent();
