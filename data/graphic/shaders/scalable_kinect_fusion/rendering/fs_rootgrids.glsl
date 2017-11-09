@@ -65,6 +65,8 @@ int GetRootGridItemIndex(vec3 Position)
         return -1;
     }
     
+    Position -= g_RootVolumePool[VolumeIndex].m_Offset * VOLUME_SIZE;
+    
     ivec3 ItemOffset = ivec3(Position / (VOLUME_SIZE / 16.0f));
     ivec3 VolumeOffset = ItemOffset % 16;
     
