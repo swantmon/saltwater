@@ -17,8 +17,6 @@
 #include <string>
 #include <vector>
 
-#include "GL/glew.h"
-
 namespace
 {
     bool g_QueryPerformanceMarkerDurations = true;
@@ -118,6 +116,7 @@ namespace
 
     void CGfxPerformance::OnExit()
     {
+#ifndef __ANDROID__
         if (g_QueryPerformanceMarkerDurations)
         {
             for (auto& rItemPair : m_PerformanceMarkerTimings)
@@ -148,12 +147,16 @@ namespace
                 BASE_CONSOLE_STREAMINFO(Stream.str());
             }
         }
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CGfxPerformance::CheckDurationQueries()
     {
+#ifdef __ANDROID__
+        BASE_CONSOLE_STREAMDEFAULT("Queries are currently not supported on Android.")
+#else // !__ANDROID__
         for (auto i = m_Queries.begin(); i < m_Queries.end();)
         {
             SQueryStackItem& rItem = *i;
@@ -186,12 +189,16 @@ namespace
                 ++ i;
             }
         }
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CGfxPerformance::CheckPerformanceMarkerQueries()
     {
+#ifdef __ANDROID__
+        BASE_CONSOLE_STREAMDEFAULT("Queries are currently not supported on Android.")
+#else // !__ANDROID__
         for (auto& rItemPair : m_PerformanceMarkerTimings)
         {
             auto& rItem = rItemPair.second;
@@ -224,6 +231,7 @@ namespace
                 }
             }
         }
+#endif
     }
 
     // -----------------------------------------------------------------------------
@@ -234,6 +242,7 @@ namespace
 
         glPushDebugGroup(GL_DEBUG_SOURCE_THIRD_PARTY, 0, LengthOfEventName, _pEventName);
 
+#ifndef __ANDROID__
         if (Gfx::Main::GetGraphicsAPI() != GLES32)
         {
             if (g_QueryPerformanceMarkerDurations)
@@ -251,6 +260,7 @@ namespace
                 m_OpenedMarkerStack.push(&Item);
             }
         }
+#endif
     }
 
     // -----------------------------------------------------------------------------
@@ -279,6 +289,7 @@ namespace
     {
         glPopDebugGroup();
 
+#ifndef __ANDROID__
         if (Gfx::Main::GetGraphicsAPI() != GLES32)
         {
             if (g_QueryPerformanceMarkerDurations)
@@ -291,12 +302,16 @@ namespace
                 m_OpenedMarkerStack.pop();
             }
         }        
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CGfxPerformance::StartDurationQuery(unsigned int _ID, Gfx::Performance::CDurationQueryDelegate _Delegate)
     {
+#ifdef __ANDROID__
+        BASE_CONSOLE_STREAMDEFAULT("Queries are currently not supported on Android.")
+#else // !__ANDROID__
         GLuint StartQuery = 0;
         GLuint EndQuery = 0;
 
@@ -307,12 +322,16 @@ namespace
 
         SQueryStackItem Item = { _ID, StartQuery, EndQuery, Core::Time::GetNumberOfFrame(), _Delegate };
         m_QueryStack.push_back(Item);
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CGfxPerformance::EndDurationQuery()
     {
+#ifdef __ANDROID__
+        BASE_CONSOLE_STREAMDEFAULT("Queries are currently not supported on Android.")
+#else // !__ANDROID__
         assert(!m_QueryStack.empty());
 
         SQueryStackItem Item = m_QueryStack.back();
@@ -321,12 +340,16 @@ namespace
         glQueryCounter(Item.m_EndQuery, GL_TIMESTAMP);
 
         m_Queries.push_back(Item);
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     float CGfxPerformance::EndDurationQueryWithSync()
     {
+#ifdef __ANDROID__
+        BASE_CONSOLE_STREAMDEFAULT("Queries are currently not supported on Android.")
+#else // !__ANDROID__
         assert(!m_QueryStack.empty());
 
         SQueryStackItem Item = m_QueryStack.back();
@@ -341,6 +364,7 @@ namespace
         glDeleteQueries(1, &Item.m_EndQuery);
 
         return (EndTime - StartTime) / 1000000.0f;
+#endif
     }
 } // namespace 
 
