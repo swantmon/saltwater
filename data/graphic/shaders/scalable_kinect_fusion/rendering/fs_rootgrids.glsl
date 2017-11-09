@@ -49,16 +49,16 @@ float GetEndLength(vec3 Start, vec3 Direction, vec3 AABBMin, vec3 AABBMax)
     return min(min(xmax, ymax), zmax);
 }
 
-int GetRootVolumeBufferIndex(vec3 Position)
+int GetRootVolumeBufferIndex(vec3 GLobalPosition)
 {
-    vec3 BufferPosition = Position / VOLUME_SIZE + g_VolumeTextureWidth / 2.0f;
+    vec3 BufferPosition = GLobalPosition / VOLUME_SIZE + g_VolumeTextureWidth / 2.0f;
     uint VolumeIndex = OffsetToIndex(BufferPosition, g_VolumeTextureWidth);
     return g_RootVolumePositionBuffer[VolumeIndex];
 }
 
-int GetRootGridItemIndex(vec3 Position, int VolumeBufferOffset)
+int GetRootGridItemIndex(vec3 PositionInVolume, int VolumeBufferOffset)
 {    
-    ivec3 ItemOffset = ivec3(Position / (VOLUME_SIZE / 16.0f));
+    ivec3 ItemOffset = ivec3(PositionInVolume / (VOLUME_SIZE / 16.0f));
     ivec3 VolumeOffset = ItemOffset % 16;
     
     int BufferOffset = VolumeOffset.z * 16 * 16 + VolumeOffset.y * 16 + VolumeOffset.x;
