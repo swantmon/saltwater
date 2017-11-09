@@ -1163,7 +1163,7 @@ namespace
             //RaycastLevelGrids();
 
             RenderQueuedRootVolumes();
-            //RenderQueuedLevel1Grids();
+            RenderQueuedLevel1Grids();
             //RenderQueuedLevel2Grids();
 		}
 		else

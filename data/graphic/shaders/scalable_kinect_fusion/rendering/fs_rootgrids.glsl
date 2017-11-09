@@ -58,14 +58,19 @@ int GetRootVolumeIndex(vec3 Position)
 
 int GetRootGridItemIndex(vec3 Position)
 {
+    int VolumeIndex = GetRootVolumeIndex(Position);
+    
+    if (VolumeIndex == -1)
+    {
+        return -1;
+    }
+    
     ivec3 ItemOffset = ivec3(Position / (VOLUME_SIZE / 16.0f));
     ivec3 VolumeOffset = ItemOffset % 16;
     
     int BufferOffset = VolumeOffset.z * 16 * 16 + VolumeOffset.y * 16 + VolumeOffset.x;
     
-    int VolumeIndex = GetRootVolumeIndex(Position);
-    
-    return VolumeIndex == -1 ? -1 : VolumeIndex * 4096 + BufferOffset;
+    return VolumeIndex * 16 * 16 * 16 + BufferOffset;
 }
 
 void main()
