@@ -161,14 +161,14 @@ namespace
         // -----------------------------------------------------------------------------
         { // Default
             GL_FALSE, GL_FALSE,
-            GL_FALSE, GL_ONE, GL_AxisZERO, GL_FUNC_ADD, GL_ONE, GL_AxisZERO, GL_FUNC_ADD, 0,
-            GL_FALSE, GL_ONE, GL_AxisZERO, GL_FUNC_ADD, GL_ONE, GL_AxisZERO, GL_FUNC_ADD, 0,
-            GL_FALSE, GL_ONE, GL_AxisZERO, GL_FUNC_ADD, GL_ONE, GL_AxisZERO, GL_FUNC_ADD, 0,
-            GL_FALSE, GL_ONE, GL_AxisZERO, GL_FUNC_ADD, GL_ONE, GL_AxisZERO, GL_FUNC_ADD, 0,
-            GL_FALSE, GL_ONE, GL_AxisZERO, GL_FUNC_ADD, GL_ONE, GL_AxisZERO, GL_FUNC_ADD, 0,
-            GL_FALSE, GL_ONE, GL_AxisZERO, GL_FUNC_ADD, GL_ONE, GL_AxisZERO, GL_FUNC_ADD, 0,
-            GL_FALSE, GL_ONE, GL_AxisZERO, GL_FUNC_ADD, GL_ONE, GL_AxisZERO, GL_FUNC_ADD, 0,
-            GL_FALSE, GL_ONE, GL_AxisZERO, GL_FUNC_ADD, GL_ONE, GL_AxisZERO, GL_FUNC_ADD, 0,
+            GL_FALSE, GL_ONE, GL_ZERO, GL_FUNC_ADD, GL_ONE, GL_ZERO, GL_FUNC_ADD, 0,
+            GL_FALSE, GL_ONE, GL_ZERO, GL_FUNC_ADD, GL_ONE, GL_ZERO, GL_FUNC_ADD, 0,
+            GL_FALSE, GL_ONE, GL_ZERO, GL_FUNC_ADD, GL_ONE, GL_ZERO, GL_FUNC_ADD, 0,
+            GL_FALSE, GL_ONE, GL_ZERO, GL_FUNC_ADD, GL_ONE, GL_ZERO, GL_FUNC_ADD, 0,
+            GL_FALSE, GL_ONE, GL_ZERO, GL_FUNC_ADD, GL_ONE, GL_ZERO, GL_FUNC_ADD, 0,
+            GL_FALSE, GL_ONE, GL_ZERO, GL_FUNC_ADD, GL_ONE, GL_ZERO, GL_FUNC_ADD, 0,
+            GL_FALSE, GL_ONE, GL_ZERO, GL_FUNC_ADD, GL_ONE, GL_ZERO, GL_FUNC_ADD, 0,
+            GL_FALSE, GL_ONE, GL_ZERO, GL_FUNC_ADD, GL_ONE, GL_ZERO, GL_FUNC_ADD, 0,
         },
         { // Alpha Blending
             GL_FALSE, GL_FALSE,
