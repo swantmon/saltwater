@@ -264,11 +264,11 @@ namespace
             // -----------------------------------------------------------------------------
             if (AppSetup->m_pAndroidApp->window != NULL) 
             {
-//                 unsigned int WindowID = Gfx::App::RegisterWindow(AppSetup->m_pAndroidApp->window);
-// 
-//                 Gfx::App::ActivateWindow(WindowID);
-// 
-//                 AppSetup->m_WindowID = WindowID;
+                unsigned int WindowID = Gfx::App::RegisterWindow(AppSetup->m_pAndroidApp->window);
+
+                Gfx::App::ActivateWindow(WindowID);
+
+                AppSetup->m_WindowID = WindowID;
 
                 App::Application::ChangeState(App::CState::Intro);
             }
