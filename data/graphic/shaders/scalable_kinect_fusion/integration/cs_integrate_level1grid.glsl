@@ -20,21 +20,27 @@ void main()
 {
     if (gl_GlobalInvocationID.x < g_Indirect.m_Indexed.m_InstanceCount)
     {
-        int VoxelIndex = int(g_VolumeID[gl_GlobalInvocationID.x]);
+        int VoxelLevel1Index = int(g_VolumeID[gl_GlobalInvocationID.x]);
 
-        // Check if voxel is already in hierarchy
+        ivec3 Level1GridOffset = IndexToOffset(VoxelIndex);
+        ivec3 RootGridOffset = Level1GridOffset / 8;
 
-        int CurrentRootGridItemIndex = g_CurrentVolumeIndex * VOXELS_PER_ROOTGRID + VoxelIndex;
+        int VoxelRootGridIndex = OffsetToIndex(RootGridOffset);
+
+        int CurrentRootGridItemIndex = g_CurrentVolumeIndex * VOXELS_PER_ROOTGRID + VoxelRootGridIndex;
+        SGridPoolItem RootGridItem = g_RootGridPool[CurrentRootGridItemIndex];
+
+        int CurrentLevel1GridItemIndex = CurrentRootGridItemIndex + 
         SGridPoolItem RootGridItem = g_RootGridPool[CurrentRootGridItemIndex];
 
         if (RootGridItem.m_PoolIndex == -1) // Is the voxel empty?
         {
             // Add voxel to pool and to root grid
 
-            int Level1PoolIndex = atomicAdd(g_Level1GridPoolItemCount, 1);
+            int Level2PoolIndex = atomicAdd(g_Level2GridPoolItemCount, 1);
 
-            RootGridItem.m_PoolIndex = Level1PoolIndex;
-            g_RootGridPool[CurrentRootGridItemIndex] = RootGridItem;
+            Level1GridItem.m_PoolIndex = Level2PoolIndex;
+            g_Level1GridPool[CurrentRootGridItemIndex] = Level1GridItem;
         }
     }
 }
