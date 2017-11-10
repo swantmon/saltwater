@@ -30,7 +30,7 @@ void main()
         int CurrentRootGridItemIndex = g_CurrentVolumeIndex * VOXELS_PER_ROOTGRID + VoxelRootGridIndex;
         SGridPoolItem RootGridItem = g_RootGridPool[CurrentRootGridItemIndex];
 
-        int CurrentLevel1GridItemIndex = RootGridItem.m_PoolIndex + CurrentRootGridItemIndex;
+        int CurrentLevel1GridItemIndex = RootGridItem.m_PoolIndex * VOXELS_PER_LEVEL1GRID + CurrentRootGridItemIndex;
         SGridPoolItem Level1GridItem = g_Level1GridPool[CurrentLevel1GridItemIndex];
 
         if (Level1GridItem.m_PoolIndex == -1) // Is the voxel empty?
