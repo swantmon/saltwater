@@ -71,16 +71,6 @@ int GetRootGridItemIndex(vec3 PositionInVolume, int VolumeBufferOffset)
     return VolumeBufferOffset * 16 * 16 * 16 + BufferOffset;
 }
 
-int GetLevel1GridItemIndex(vec3 PositionInVolume, int VolumeBufferOffset)
-{    
-    ivec3 ItemOffset = ivec3(PositionInVolume / (VOLUME_SIZE / (16.0f * 8.0f)));
-    ivec3 VolumeOffset = ItemOffset % 8;
-    
-    int BufferOffset = VolumeOffset.z * 8 * 8 + VolumeOffset.y * 8 + VolumeOffset.x;
-    
-    return VolumeBufferOffset * 8 * 8 * 8 + BufferOffset;
-}
-
 void main()
 {
     vec3 CameraPosition = g_ViewPosition.xyz;
@@ -115,16 +105,26 @@ void main()
             
             if (RootGridItemBufferOffset != -1)
             {
-                // Pool index of whole level 1 grid
+                // Pool index of whole level 1 grid                
                 int Level1VolumeBufferOffset = g_RootGridPool[RootGridItemBufferOffset].m_PoolIndex;
 
-                if (Level1BufferOffset != -1)
+                if (Level1VolumeBufferOffset != -1)
                 {
-                    out_GBuffer0 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-                    out_GBuffer1 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-                    out_GBuffer2 = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-                
-                    return;
+                    // Offset of level 1 volume in rootgrid
+                    ivec3 Level1VolumeOffset = ivec3(CurrentPosition / (VOLUME_SIZE / (16.0f * 8.0f)));
+                    Level1VolumeOffset %= 8;
+
+                    int Level1BufferOffset = Level1VolumeOffset.x * 8 * 8 + Level1VolumeOffset.y * 8 + Level1VolumeOffset.z;
+                    Level1VolumeOffset += Level1VolumeBufferOffset;
+
+                    if (Level1BufferOffset != -1)
+                    {
+                        out_GBuffer0 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+                        out_GBuffer1 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+                        out_GBuffer2 = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+                    
+                        return;
+                    }
                 }
             }
         }
