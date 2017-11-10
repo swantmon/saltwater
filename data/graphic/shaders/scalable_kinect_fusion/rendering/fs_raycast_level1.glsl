@@ -74,7 +74,7 @@ int GetRootGridItemIndex(vec3 PositionInVolume, int VolumeBufferOffset)
 int GetLevel1GridItemIndex(vec3 PositionInVolume, int VolumeBufferOffset)
 {    
     ivec3 ItemOffset = ivec3(PositionInVolume / (VOLUME_SIZE / (16.0f * 8.0f)));
-    ivec3 VolumeOffset = ItemOffset % (16 * 8);
+    ivec3 VolumeOffset = ItemOffset % 8;
     
     int BufferOffset = VolumeOffset.z * 8 * 8 + VolumeOffset.y * 8 + VolumeOffset.x;
     
@@ -102,17 +102,23 @@ void main()
         RayLength += Step;
         vec3 CurrentPosition = CameraPosition + RayLength * RayDirection;
 
+        // Index of the first element of the current rootgrid in the rootgrid pool
         int VolumeBufferOffset = GetRootVolumeBufferIndex(CurrentPosition);
 
         if (VolumeBufferOffset != -1)
         {
+            // Global offset of the rootvolume
             vec3 VolumeOffset = g_RootVolumePool[VolumeBufferOffset].m_Offset * VOLUME_SIZE;
 
-            int GridItemBufferOffset = GetRootGridItemIndex(CurrentPosition - VolumeOffset, VolumeBufferOffset);
+            // Index to rootgrid pool of the current root grid item
+            int RootGridItemBufferOffset = GetRootGridItemIndex(CurrentPosition - VolumeOffset, VolumeBufferOffset);
             
-            if (GridItemBufferOffset != -1)
+            if (RootGridItemBufferOffset != -1)
             {
-                if (g_RootGridPool[GridItemBufferOffset].m_PoolIndex != -1)
+                // Pool index of whole level 1 grid
+                int Level1VolumeBufferOffset = g_RootGridPool[RootGridItemBufferOffset].m_PoolIndex;
+
+                if (Level1BufferOffset != -1)
                 {
                     out_GBuffer0 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
                     out_GBuffer1 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
@@ -121,11 +127,6 @@ void main()
                     return;
                 }
             }
-        }
-        else
-        {
-            vec3 AABB = GetRootVolumeOffset(CurrentPosition);
-            RayLength = max(GetEndLength(CameraPosition, RayDirection, AABB, AABB + VOLUME_SIZE), RayLength);
         }
     }
     
