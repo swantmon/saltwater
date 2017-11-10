@@ -71,6 +71,16 @@ int GetRootGridItemIndex(vec3 PositionInVolume, int VolumeBufferOffset)
     return VolumeBufferOffset * 16 * 16 * 16 + BufferOffset;
 }
 
+int GetLevel1GridItemIndex(vec3 PositionInVolume, int VolumeBufferOffset)
+{    
+    ivec3 ItemOffset = ivec3(PositionInVolume / (VOLUME_SIZE / (16.0f * 8.0f)));
+    ivec3 VolumeOffset = ItemOffset % (16 * 8);
+    
+    int BufferOffset = VolumeOffset.z * 8 * 8 + VolumeOffset.y * 8 + VolumeOffset.x;
+    
+    return VolumeBufferOffset * 8 * 8 * 8 + BufferOffset;
+}
+
 void main()
 {
     vec3 CameraPosition = g_ViewPosition.xyz;
