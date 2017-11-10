@@ -280,11 +280,11 @@ namespace
             m_PointCloudVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\rendering\\vs_point_cloud.glsl", "main", DefineString.c_str());
             m_PointCloudFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\rendering\\fs_point_cloud.glsl", "main", DefineString.c_str());
 
-            m_RaycastRootGridsVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\rendering\\vs_raycast_level1.glsl", "main", DefineString.c_str());
-            m_RaycastRootGridsFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\rendering\\fs_raycast_level1.glsl", "main", DefineString.c_str());
+            m_RaycastRootGridsVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\rendering\\vs_raycast_rootvolumes.glsl", "main", DefineString.c_str());
+            m_RaycastRootGridsFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\rendering\\fs_raycast_rootvolumes.glsl", "main", DefineString.c_str());
 
-            m_RaycastLevel1VSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\rendering\\vs_raycast_rootvolumes.glsl", "main", DefineString.c_str());
-            m_RaycastLevel1FSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\rendering\\fs_raycast_rootvolumes.glsl", "main", DefineString.c_str());
+            m_RaycastLevel1VSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\rendering\\vs_raycast_level1.glsl", "main", DefineString.c_str());
+            m_RaycastLevel1FSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\rendering\\fs_raycast_level1.glsl", "main", DefineString.c_str());
 
             m_RaycastVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\rendering\\vs_raycast.glsl", "main", DefineString.c_str());
             m_RaycastFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\rendering\\fs_raycast.glsl", "main", DefineString.c_str());
