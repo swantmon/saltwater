@@ -37,7 +37,7 @@ void main()
         {
             // Add voxel to pool and to root grid
 
-            int Level2PoolIndex = atomicAdd(g_Level1GridPoolItemCount, 1);
+            int Level2PoolIndex = atomicAdd(g_TSDFPoolItemCount, 1);
 
             Level1GridItem.m_PoolIndex = Level2PoolIndex;
             g_Level1GridPool[CurrentRootGridItemIndex] = Level1GridItem;
