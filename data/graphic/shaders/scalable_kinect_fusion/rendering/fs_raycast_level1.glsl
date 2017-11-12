@@ -117,7 +117,7 @@ void main()
                     int Level1BufferOffset = Level1VolumeOffset.x * 8 * 8 + Level1VolumeOffset.y * 8 + Level1VolumeOffset.z;
                     Level1VolumeOffset += Level1VolumeBufferOffset;
 
-                    if (Level1BufferOffset != -1)
+                    if (g_Level1GridPool[Level1BufferOffset].m_PoolIndex != -1)
                     {
                         out_GBuffer0 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
                         out_GBuffer1 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
