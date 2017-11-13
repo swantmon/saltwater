@@ -1079,6 +1079,8 @@ namespace MR
             ContextManager::DispatchIndirect(rRootVolume.m_IndirectLevel1Buffer, SIndirectBuffers::s_ComputeOffset);
         }
 
+        ContextManager::Barrier();
+
         Performance::EndEvent();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1109,6 +1111,8 @@ namespace MR
             ContextManager::DispatchIndirect(rRootVolume.m_IndirectLevel2Buffer, SIndirectBuffers::s_ComputeOffset);
         }
 
+        ContextManager::Barrier();
+
         Performance::EndEvent();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1133,6 +1137,8 @@ namespace MR
 
             ContextManager::SetShaderCS(m_IntegrateTSDFCSPtr);
         }
+
+        ContextManager::Barrier();
 
         Performance::EndEvent();
     }
