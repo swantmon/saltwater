@@ -114,7 +114,7 @@ void main()
                     ivec3 Level1VolumeOffset = ivec3(CurrentPosition / (VOLUME_SIZE / (16.0f * 8.0f)));
                     Level1VolumeOffset %= 8;
 
-                    int Level1BufferOffset = Level1VolumeOffset.x * 8 * 8 + Level1VolumeOffset.y * 8 + Level1VolumeOffset.z;
+                    int Level1BufferOffset = OffsetToIndex(Level1VolumeOffset, 8);
                     Level1VolumeOffset += Level1VolumeBufferOffset;
 
                     if (g_Level1GridPool[Level1BufferOffset].m_PoolIndex != -1)
