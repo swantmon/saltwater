@@ -1,6 +1,7 @@
 
 #include "app_droid/app_application.h"
 #include "app_droid/app_exit_state.h"
+#include "app_droid/app_init_state.h"
 #include "app_droid/app_intro_state.h"
 #include "app_droid/app_load_map_state.h"
 #include "app_droid/app_main_menu_state.h"
@@ -76,6 +77,7 @@ namespace
 {
     App::CState* CApplication::s_pStates[] =
     {
+        &App::CInitState     ::GetInstance(),
         &App::CStartState    ::GetInstance(),
         &App::CIntroState    ::GetInstance(),
         &App::CLoadMapState  ::GetInstance(),
@@ -89,8 +91,8 @@ namespace
 namespace
 {
     CApplication::CApplication()
-        : m_CurrentState(App::CState::Start)
-        , m_RequestState(App::CState::Start)
+        : m_CurrentState(App::CState::Init)
+        , m_RequestState(App::CState::Init)
     {
         memset(&m_AppSetup, 0, sizeof(m_AppSetup));
     }
@@ -268,9 +270,11 @@ namespace
 
                 Gfx::App::ActivateWindow(WindowID);
 
+                Gfx::App::OnResize(WindowID, 1920, 1080);
+
                 AppSetup->m_WindowID = WindowID;
 
-                App::Application::ChangeState(App::CState::Intro);
+                App::Application::ChangeState(App::CState::Start);
             }
             break;
 

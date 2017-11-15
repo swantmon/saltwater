@@ -107,6 +107,9 @@
       <CLanguageStandard>Default</CLanguageStandard>
       <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\$(TargetFileName) $(SolutionDir)..\..\build\$(Platform)\</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
     <ClCompile>
@@ -117,6 +120,9 @@
       <CLanguageStandard>Default</CLanguageStandard>
       <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\$(TargetFileName) $(SolutionDir)..\..\build\$(Platform)\</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <ClCompile>
@@ -131,6 +137,9 @@
       <CLanguageStandard>Default</CLanguageStandard>
       <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\$(TargetFileName) $(SolutionDir)..\..\build\$(Platform)\</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <ClCompile>
@@ -141,6 +150,9 @@
       <CLanguageStandard>Default</CLanguageStandard>
       <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\$(TargetFileName) $(SolutionDir)..\..\build\$(Platform)\</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

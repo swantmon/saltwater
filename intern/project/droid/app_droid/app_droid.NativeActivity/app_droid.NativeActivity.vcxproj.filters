@@ -27,6 +27,9 @@
     <ClCompile Include="..\..\..\..\src\app_droid\app_exit_state.cpp">
       <Filter>states</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\app_droid\app_init_state.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\src\app_droid\app_application.h" />
@@ -56,6 +59,9 @@
       <Filter>states</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\app_droid\app_exit_state.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\app_droid\app_init_state.h">
       <Filter>states</Filter>
     </ClInclude>
   </ItemGroup>

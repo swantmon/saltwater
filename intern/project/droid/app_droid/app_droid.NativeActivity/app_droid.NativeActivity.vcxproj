@@ -38,6 +38,7 @@
     <ClCompile Include="..\..\..\..\src\app_droid\android_native_app_glue.c" />
     <ClCompile Include="..\..\..\..\src\app_droid\app_application.cpp" />
     <ClCompile Include="..\..\..\..\src\app_droid\app_exit_state.cpp" />
+    <ClCompile Include="..\..\..\..\src\app_droid\app_init_state.cpp" />
     <ClCompile Include="..\..\..\..\src\app_droid\app_intro_state.cpp" />
     <ClCompile Include="..\..\..\..\src\app_droid\app_load_map_state.cpp" />
     <ClCompile Include="..\..\..\..\src\app_droid\app_main_menu_state.cpp" />
@@ -50,6 +51,7 @@
     <ClInclude Include="..\..\..\..\src\app_droid\android_native_app_glue.h" />
     <ClInclude Include="..\..\..\..\src\app_droid\app_application.h" />
     <ClInclude Include="..\..\..\..\src\app_droid\app_exit_state.h" />
+    <ClInclude Include="..\..\..\..\src\app_droid\app_init_state.h" />
     <ClInclude Include="..\..\..\..\src\app_droid\app_intro_state.h" />
     <ClInclude Include="..\..\..\..\src\app_droid\app_load_map_state.h" />
     <ClInclude Include="..\..\..\..\src\app_droid\app_main_menu_state.h" />
@@ -203,7 +205,8 @@
       <CppLanguageStandard>c++1y</CppLanguageStandard>
     </ClCompile>
     <Link>
-      <LibraryDependencies>%(LibraryDependencies);GLESv3;EGL;</LibraryDependencies>
+      <LibraryDependencies>base;core;data;graphic;GLESv3;EGL;m;%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\..\build\$(Platform)\;%(AdditionalLibraryDirectories);$(ToolchainPrebuiltPath)\lib\gcc\$(ToolchainName)\$(ToolchainFullVersionName);$(StlLibraryPath)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
@@ -216,7 +219,8 @@
       <CppLanguageStandard>c++1y</CppLanguageStandard>
     </ClCompile>
     <Link>
-      <LibraryDependencies>%(LibraryDependencies);GLESv3;EGL;</LibraryDependencies>
+      <LibraryDependencies>base;core;data;graphic;GLESv3;EGL;m;%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\..\build\$(Platform)\;%(AdditionalLibraryDirectories);$(ToolchainPrebuiltPath)\lib\gcc\$(ToolchainName)\$(ToolchainFullVersionName);$(StlLibraryPath)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
@@ -229,7 +233,8 @@
       <CppLanguageStandard>c++1y</CppLanguageStandard>
     </ClCompile>
     <Link>
-      <LibraryDependencies>%(LibraryDependencies);GLESv3;EGL;</LibraryDependencies>
+      <LibraryDependencies>base;core;data;graphic;GLESv3;EGL;m;%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\..\build\$(Platform)\;%(AdditionalLibraryDirectories);$(ToolchainPrebuiltPath)\lib\gcc\$(ToolchainName)\$(ToolchainFullVersionName)\$(PlatformShortName);$(StlLibraryPath)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
@@ -242,7 +247,8 @@
       <CppLanguageStandard>c++1y</CppLanguageStandard>
     </ClCompile>
     <Link>
-      <LibraryDependencies>%(LibraryDependencies);GLESv3;EGL;</LibraryDependencies>
+      <LibraryDependencies>base;core;data;graphic;GLESv3;EGL;m;%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\..\build\$(Platform)\;%(AdditionalLibraryDirectories);$(ToolchainPrebuiltPath)\lib\gcc\$(ToolchainName)\$(ToolchainFullVersionName)\$(PlatformShortName);$(StlLibraryPath)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -255,7 +261,8 @@
       <CppLanguageStandard>c++1y</CppLanguageStandard>
     </ClCompile>
     <Link>
-      <LibraryDependencies>%(LibraryDependencies);GLESv3;EGL;</LibraryDependencies>
+      <LibraryDependencies>base;core;data;graphic;GLESv3;EGL;m;%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\..\build\$(Platform)\;%(AdditionalLibraryDirectories);$(ToolchainPrebuiltPath)\lib\gcc\x86_64-linux-android\$(ToolchainFullVersionName);$(StlLibraryPath)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -268,7 +275,8 @@
       <CppLanguageStandard>c++1y</CppLanguageStandard>
     </ClCompile>
     <Link>
-      <LibraryDependencies>%(LibraryDependencies);GLESv3;EGL;</LibraryDependencies>
+      <LibraryDependencies>base;core;data;graphic;GLESv3;EGL;m;%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\..\build\$(Platform)\;%(AdditionalLibraryDirectories);$(ToolchainPrebuiltPath)\lib\gcc\x86_64-linux-android\$(ToolchainFullVersionName);$(StlLibraryPath)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
@@ -281,7 +289,8 @@
       <CppLanguageStandard>c++1y</CppLanguageStandard>
     </ClCompile>
     <Link>
-      <LibraryDependencies>%(LibraryDependencies);GLESv3;EGL;</LibraryDependencies>
+      <LibraryDependencies>base;core;data;graphic;GLESv3;EGL;m;%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\..\build\$(Platform)\;%(AdditionalLibraryDirectories);$(ToolchainPrebuiltPath)\lib\gcc\i686-linux-android\$(ToolchainFullVersionName);$(StlLibraryPath)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
@@ -294,7 +303,8 @@
       <CppLanguageStandard>c++1y</CppLanguageStandard>
     </ClCompile>
     <Link>
-      <LibraryDependencies>%(LibraryDependencies);GLESv3;EGL;</LibraryDependencies>
+      <LibraryDependencies>base;core;data;graphic;GLESv3;EGL;m;%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\..\build\$(Platform)\;%(AdditionalLibraryDirectories);$(ToolchainPrebuiltPath)\lib\gcc\i686-linux-android\$(ToolchainFullVersionName);$(StlLibraryPath)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

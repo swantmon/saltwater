@@ -209,7 +209,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{b911725e-f4e9-4120-b302-6d0fdf3f3ce4}</ProjectGuid>
     <Keyword>Android</Keyword>
-    <RootNamespace>gfx</RootNamespace>
+    <RootNamespace>graphic</RootNamespace>
     <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
     <ApplicationType>Android</ApplicationType>
     <ApplicationTypeRevision>3.0</ApplicationTypeRevision>
@@ -270,6 +270,9 @@
       <CompileAs>Default</CompileAs>
       <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\$(TargetFileName) $(SolutionDir)..\..\build\$(Platform)\</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
     <ClCompile>
@@ -280,6 +283,9 @@
       <CompileAs>Default</CompileAs>
       <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\$(TargetFileName) $(SolutionDir)..\..\build\$(Platform)\</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <ClCompile>
@@ -290,6 +296,9 @@
       <CompileAs>Default</CompileAs>
       <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\$(TargetFileName) $(SolutionDir)..\..\build\$(Platform)\</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <ClCompile>
@@ -300,6 +309,9 @@
       <CompileAs>Default</CompileAs>
       <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\$(TargetFileName) $(SolutionDir)..\..\build\$(Platform)\</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

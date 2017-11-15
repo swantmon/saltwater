@@ -1,14 +1,12 @@
 
 #include "app_droid/app_application.h"
-#include "app_droid/app_intro_state.h"
-
-#include "graphic/gfx_intro_state.h"
+#include "app_droid/app_init_state.h"
 
 namespace App
 {
-    CIntroState& CIntroState::GetInstance()
+    CInitState& CInitState::GetInstance()
     {
-        static CIntroState s_Singleton;
+        static CInitState s_Singleton;
 
         return s_Singleton;
     }
@@ -16,38 +14,33 @@ namespace App
 
 namespace App
 {
-    CIntroState::CIntroState()
+    CInitState::CInitState()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    CIntroState::~CIntroState()
+    CInitState::~CInitState()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    void CIntroState::InternOnEnter()
+    void CInitState::InternOnEnter()
     {
-        Gfx::Intro::OnEnter();
     }
 
     // -----------------------------------------------------------------------------
 
-    void CIntroState::InternOnLeave()
+    void CInitState::InternOnLeave()
     {
-        Gfx::Intro::OnLeave();
     }
 
     // -----------------------------------------------------------------------------
 
-    void CIntroState::InternOnRun()
+    void CInitState::InternOnRun()
     {
-        Gfx::Intro::OnRun();
-
-        App::Application::ChangeState(CState::LoadMap);
     }
 } // namespace App

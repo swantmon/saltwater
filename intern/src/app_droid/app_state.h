@@ -10,6 +10,7 @@ namespace App
 
         enum EStateType
         {
+            Init,
             Start,
             Intro,
             LoadMap,
