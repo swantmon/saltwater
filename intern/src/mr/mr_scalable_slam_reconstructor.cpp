@@ -1040,9 +1040,10 @@ namespace MR
                 Item.m_Offset = rRootVolume.m_Offset;
 
                 BufferManager::UploadBufferData(m_VolumeBuffers.m_RootVolumePoolPtr, &Item, Offset, Range);
-                BufferManager::UploadBufferData(m_VolumeBuffers.m_PoolItemCountBufferPtr, &m_RootVolumePoolItemCount, 0, sizeof(uint32_t));
             }
         }
+
+        BufferManager::UploadBufferData(m_VolumeBuffers.m_PoolItemCountBufferPtr, &m_RootVolumePoolItemCount, 0, sizeof(uint32_t));
 
         ContextManager::SetResourceBuffer(0, m_VolumeBuffers.m_RootVolumePoolPtr);
         ContextManager::SetResourceBuffer(1, m_VolumeBuffers.m_RootGridPoolPtr);
