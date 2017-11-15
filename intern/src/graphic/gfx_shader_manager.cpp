@@ -362,7 +362,7 @@ namespace
 
         std::ifstream ShaderFile(PathToShader.c_str());
 
-        if (ShaderFile.is_open())
+        if (!ShaderFile.is_open())
         {
             BASE_THROWV("Shader '%s' can't be opened!", PathToShader.c_str());
         }
