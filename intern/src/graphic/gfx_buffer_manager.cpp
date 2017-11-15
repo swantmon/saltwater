@@ -23,6 +23,8 @@
 #include <unordered_map>
 #include <vector>
 
+GfxBufferStorageEXT glBufferStorage = 0;
+
 using namespace Gfx;
 
 namespace 

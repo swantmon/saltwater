@@ -254,7 +254,7 @@ namespace
         , m_RenderContexts        ()
         , m_NativeShaderPipeline  (0)
     {
-        Reset();
+/*        Reset();*/
     }
 
     // -----------------------------------------------------------------------------

@@ -12,7 +12,7 @@
 
 #include "data/data_texture_manager.h"
 
-#include "IL/il.h"
+/*#include "IL/il.h"*/
 
 #include <unordered_map>
 
@@ -158,11 +158,11 @@ namespace
 
         int ConvertFormatToBytesPerPixel(Dt::CTextureBase::EFormat _Format) const;
 
-        Dt::CTextureBase::EFormat ConvertImageFormat(ILenum _ILFormat, ILenum _ILType) const;
-
-        ILenum ConvertILImageFormat(Dt::CTextureBase::EFormat _Format) const;
-        ILenum ConvertILImageType(Dt::CTextureBase::EFormat _Format) const;
-        ILubyte ConvertILImageChannels(Dt::CTextureBase::EFormat _Format) const;
+//         Dt::CTextureBase::EFormat ConvertImageFormat(ILenum _ILFormat, ILenum _ILType) const;
+// 
+//         ILenum ConvertILImageFormat(Dt::CTextureBase::EFormat _Format) const;
+//         ILenum ConvertILImageType(Dt::CTextureBase::EFormat _Format) const;
+//         ILubyte ConvertILImageChannels(Dt::CTextureBase::EFormat _Format) const;
     };
 } // namespace
 
@@ -192,7 +192,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Initialize devil image engine. But we only initialize core part.
         // -----------------------------------------------------------------------------
-        ilInit();
+//         ilInit();
     }
 
     // -----------------------------------------------------------------------------
@@ -228,8 +228,8 @@ namespace
         int               NumberOfFaces;
         unsigned int      NumberOfBytes;
         bool              Result;
-        ILenum            NativeILFormat;
-        ILenum            NativeILType;
+//         ILenum            NativeILFormat;
+//         ILenum            NativeILType;
 
         pHashIdentifier = nullptr;
         pBytes          = nullptr;
@@ -287,9 +287,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Create and bin texture on DevIL
             // -----------------------------------------------------------------------------
-            NativeImageName = ilGenImage();
-
-            ilBindImage(NativeImageName);
+//             NativeImageName = ilGenImage();
+// 
+//             ilBindImage(NativeImageName);
 
             // -----------------------------------------------------------------------------
             // Load texture from file (either in assets or data)
@@ -304,53 +304,53 @@ namespace
             const wchar_t* pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
 #endif
 
-            Result = ilLoadImage(pPathToTexture) == IL_TRUE;
-
-            if (Result)
-            {
-                NativeILFormat  = ilGetInteger(IL_IMAGE_FORMAT);
-                NativeILType    = ilGetInteger(IL_IMAGE_TYPE);
-                NumberOfPixelsU = ilGetInteger(IL_IMAGE_WIDTH);
-                NumberOfPixelsV = ilGetInteger(IL_IMAGE_HEIGHT);
-                NumberOfPixelsW = ilGetInteger(IL_IMAGE_DEPTH);
-                NumberOfFaces   = ilGetInteger(IL_NUM_FACES);
-
-                CTextureBase::EFormat Format = ConvertImageFormat(NativeILFormat, NativeILType);
-
-                TextureDescriptor.m_NumberOfPixelsU  = NumberOfPixelsU;
-                TextureDescriptor.m_NumberOfPixelsV  = NumberOfPixelsV;
-                TextureDescriptor.m_NumberOfPixelsW  = NumberOfPixelsW;
-                TextureDescriptor.m_Format           = Format;
-
-                ilDeleteImage(NativeImageName);
-
-                ilBindImage(0);
-
-                if (NumberOfFaces == 5)
-                {
-                    return CreateCubeTexture(TextureDescriptor, _IsDeleteable, _Behavior, _IsInternal);
-                }
-                else if (NumberOfPixelsW > 1)
-                {
-                    // return CreateTexture3D(TextureDescriptor, _IsDeleteable, _Behavior, _IsInternal);
-                }
-                else if (NumberOfPixelsV > 1)
-                {
-                    return CreateTexture2D(TextureDescriptor, _IsDeleteable, _Behavior, _IsInternal);
-                }
-                else if (NumberOfPixelsU > 1)
-                {
-                    return CreateTexture1D(TextureDescriptor, _IsDeleteable, _Behavior, _IsInternal);
-                }
-            }
-            else
-            {
-                BASE_CONSOLE_STREAMERROR("Failed loading image '" << PathToTexture.c_str() << "' from file.");
-
-                ilDeleteImage(NativeImageName);
-
-                return nullptr;
-            }
+//             Result = ilLoadImage(pPathToTexture) == IL_TRUE;
+// 
+//             if (Result)
+//             {
+//                 NativeILFormat  = ilGetInteger(IL_IMAGE_FORMAT);
+//                 NativeILType    = ilGetInteger(IL_IMAGE_TYPE);
+//                 NumberOfPixelsU = ilGetInteger(IL_IMAGE_WIDTH);
+//                 NumberOfPixelsV = ilGetInteger(IL_IMAGE_HEIGHT);
+//                 NumberOfPixelsW = ilGetInteger(IL_IMAGE_DEPTH);
+//                 NumberOfFaces   = ilGetInteger(IL_NUM_FACES);
+// 
+//                 CTextureBase::EFormat Format = ConvertImageFormat(NativeILFormat, NativeILType);
+// 
+//                 TextureDescriptor.m_NumberOfPixelsU  = NumberOfPixelsU;
+//                 TextureDescriptor.m_NumberOfPixelsV  = NumberOfPixelsV;
+//                 TextureDescriptor.m_NumberOfPixelsW  = NumberOfPixelsW;
+//                 TextureDescriptor.m_Format           = Format;
+// 
+//                 ilDeleteImage(NativeImageName);
+// 
+//                 ilBindImage(0);
+// 
+//                 if (NumberOfFaces == 5)
+//                 {
+//                     return CreateCubeTexture(TextureDescriptor, _IsDeleteable, _Behavior, _IsInternal);
+//                 }
+//                 else if (NumberOfPixelsW > 1)
+//                 {
+//                     // return CreateTexture3D(TextureDescriptor, _IsDeleteable, _Behavior, _IsInternal);
+//                 }
+//                 else if (NumberOfPixelsV > 1)
+//                 {
+//                     return CreateTexture2D(TextureDescriptor, _IsDeleteable, _Behavior, _IsInternal);
+//                 }
+//                 else if (NumberOfPixelsU > 1)
+//                 {
+//                     return CreateTexture1D(TextureDescriptor, _IsDeleteable, _Behavior, _IsInternal);
+//                 }
+//             }
+//             else
+//             {
+//                 BASE_CONSOLE_STREAMERROR("Failed loading image '" << PathToTexture.c_str() << "' from file.");
+// 
+//                 ilDeleteImage(NativeImageName);
+// 
+//                 return nullptr;
+//             }
         }
 
         // -----------------------------------------------------------------------------
@@ -398,8 +398,8 @@ namespace
         int               NumberOfPixel;
         int               NumberOfBytes;
         bool              Result;
-        ILenum            NativeILFormat;
-        ILenum            NativeILType;
+//         ILenum            NativeILFormat;
+//         ILenum            NativeILType;
 
         pHashIdentifier = nullptr;
         pBytes          = nullptr;
@@ -441,62 +441,62 @@ namespace
         // -----------------------------------------------------------------------------
         // Load texture from file if one is set in descriptor
         // -----------------------------------------------------------------------------
-        if (_rDescriptor.m_pFileName != nullptr && _rDescriptor.m_pPixels == nullptr && _Behavior != SDataBehavior::Listen && _IsInternal == false)
-        {
-            // -----------------------------------------------------------------------------
-            // Create and bin texture on DevIL
-            // -----------------------------------------------------------------------------
-            NativeImageName = ilGenImage();
-
-            ilBindImage(NativeImageName);
-
-            // -----------------------------------------------------------------------------
-            // Load texture from file (either in assets or data)
-            // -----------------------------------------------------------------------------
-            std::string PathToTexture;
-
-			PathToTexture = g_PathToAssets + _rDescriptor.m_pFileName;
-
-            NativeILFormat = ConvertILImageFormat(_rDescriptor.m_Format);
-            NativeILType   = ConvertILImageType(_rDescriptor.m_Format);
-
-#if __ANDROID__
-            const char* pPathToTexture = PathToTexture.c_str();
-#else
-            const wchar_t* pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
-#endif
-            
-            Result = ilLoadImage(pPathToTexture) == IL_TRUE;
-            
-            if (Result)
-            {
-                ILenum CheckILFormat = ilGetInteger(IL_IMAGE_FORMAT);
-                ILenum CheckILType   = ilGetInteger(IL_IMAGE_TYPE);
-
-                if (CheckILFormat != NativeILFormat || CheckILType != NativeILType)
-                {
-                    ilConvertImage(NativeILFormat, NativeILType);
-                }
-                
-                pTextureData = ilGetData();
-                
-                ImageWidth    = ilGetInteger(IL_IMAGE_WIDTH);
-                ImageHeight   = ilGetInteger(IL_IMAGE_HEIGHT);
-                NumberOfBytes = ilGetInteger(IL_IMAGE_SIZE_OF_DATA);
-                
-                assert(ImageWidth    > 0);
-                assert(ImageHeight   > 0);
-                assert(NumberOfBytes > 0);
-            }
-            else
-            {
-                BASE_CONSOLE_STREAMERROR("Failed loading image '" << PathToTexture.c_str() << "' from file.");
-
-                ilDeleteImage(NativeImageName);
-                
-                return nullptr;
-            }
-        }
+//         if (_rDescriptor.m_pFileName != nullptr && _rDescriptor.m_pPixels == nullptr && _Behavior != SDataBehavior::Listen && _IsInternal == false)
+//         {
+//             // -----------------------------------------------------------------------------
+//             // Create and bin texture on DevIL
+//             // -----------------------------------------------------------------------------
+//             NativeImageName = ilGenImage();
+// 
+//             ilBindImage(NativeImageName);
+// 
+//             // -----------------------------------------------------------------------------
+//             // Load texture from file (either in assets or data)
+//             // -----------------------------------------------------------------------------
+//             std::string PathToTexture;
+// 
+// 			PathToTexture = g_PathToAssets + _rDescriptor.m_pFileName;
+// 
+//             NativeILFormat = ConvertILImageFormat(_rDescriptor.m_Format);
+//             NativeILType   = ConvertILImageType(_rDescriptor.m_Format);
+// 
+// #if __ANDROID__
+//             const char* pPathToTexture = PathToTexture.c_str();
+// #else
+//             const wchar_t* pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
+// #endif
+//             
+//             Result = ilLoadImage(pPathToTexture) == IL_TRUE;
+//             
+//             if (Result)
+//             {
+//                 ILenum CheckILFormat = ilGetInteger(IL_IMAGE_FORMAT);
+//                 ILenum CheckILType   = ilGetInteger(IL_IMAGE_TYPE);
+// 
+//                 if (CheckILFormat != NativeILFormat || CheckILType != NativeILType)
+//                 {
+//                     ilConvertImage(NativeILFormat, NativeILType);
+//                 }
+//                 
+//                 pTextureData = ilGetData();
+//                 
+//                 ImageWidth    = ilGetInteger(IL_IMAGE_WIDTH);
+//                 ImageHeight   = ilGetInteger(IL_IMAGE_HEIGHT);
+//                 NumberOfBytes = ilGetInteger(IL_IMAGE_SIZE_OF_DATA);
+//                 
+//                 assert(ImageWidth    > 0);
+//                 assert(ImageHeight   > 0);
+//                 assert(NumberOfBytes > 0);
+//             }
+//             else
+//             {
+//                 BASE_CONSOLE_STREAMERROR("Failed loading image '" << PathToTexture.c_str() << "' from file.");
+// 
+//                 ilDeleteImage(NativeImageName);
+//                 
+//                 return nullptr;
+//             }
+//         }
 
         // -----------------------------------------------------------------------------
         // Generate texture inside texture manager
@@ -597,9 +597,9 @@ namespace
             // -----------------------------------------------------------------------------
             if (_rDescriptor.m_pFileName != nullptr && _rDescriptor.m_pPixels == nullptr)
             {
-                ilDeleteImage(NativeImageName);
-
-                ilBindImage(0);
+//                 ilDeleteImage(NativeImageName);
+// 
+//                 ilBindImage(0);
             }
         }
         catch (...)
@@ -624,8 +624,8 @@ namespace
         int               NumberOfBytes;
         unsigned int      NativeImageName;
         bool              ImageIsLoaded;
-        ILenum            NativeILFormat;
-        ILenum            NativeILType;
+//         ILenum            NativeILFormat;
+//         ILenum            NativeILType;
         unsigned int      NumberOfFaces;
 
         NumberOfFaces   = 1;
@@ -635,8 +635,8 @@ namespace
         pTextureData    = nullptr;
         Hash            = 0;
         NativeImageName = 0;
-        NativeILFormat  = 0;
-        NativeILType    = 0;
+//         NativeILFormat  = 0;
+//         NativeILType    = 0;
         
         // -----------------------------------------------------------------------------
         // Create hash value over user identifier or filename
@@ -671,69 +671,69 @@ namespace
         // -----------------------------------------------------------------------------
         // Load texture from file if one is set in descriptor
         // -----------------------------------------------------------------------------
-        if (_rDescriptor.m_pFileName != nullptr && _rDescriptor.m_pPixels == nullptr && _Behavior != SDataBehavior::Listen && _IsInternal == false)
-        {
-            // -----------------------------------------------------------------------------
-            // Create and bin texture on DevIL
-            // -----------------------------------------------------------------------------
-            NativeImageName = ilGenImage();
-
-            ilBindImage(NativeImageName);
-
-            // -----------------------------------------------------------------------------
-            // Load texture from file (either in assets or data)
-            // -----------------------------------------------------------------------------
-            std::string PathToTexture;
-
-            PathToTexture = g_PathToAssets + _rDescriptor.m_pFileName;
-
-            NativeILFormat = ConvertILImageFormat(_rDescriptor.m_Format);
-            NativeILType   = ConvertILImageType(_rDescriptor.m_Format);
-
-#if __ANDROID__
-            const char* pPathToTexture = PathToTexture.c_str();
-#else
-            const wchar_t* pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
-#endif
-
-            ImageIsLoaded = ilLoadImage(pPathToTexture) == IL_TRUE;
-
-            if (ImageIsLoaded)
-            {
-                NumberOfFaces = ilGetInteger(IL_NUM_FACES);
-            }
-
-            if (ImageIsLoaded && NumberOfFaces == 5)
-            {
-                ILenum CheckILFormat = ilGetInteger(IL_IMAGE_FORMAT);
-                ILenum CheckILType   = ilGetInteger(IL_IMAGE_TYPE);
-
-                if (CheckILFormat != NativeILFormat || CheckILType != NativeILType)
-                {
-                    ilConvertImage(NativeILFormat, NativeILType);
-                }
-
-                pTextureData = ilGetData();
-
-                ImageWidth    = ilGetInteger(IL_IMAGE_WIDTH);
-                ImageHeight   = ilGetInteger(IL_IMAGE_HEIGHT);
-                NumberOfBytes = ilGetInteger(IL_IMAGE_SIZE_OF_DATA);
-
-                assert(ImageWidth > 0);
-                assert(ImageHeight > 0);
-                assert(NumberOfBytes > 0);
-            }
-            else
-            {
-                BASE_CONSOLE_STREAMERROR("Failed loading cubemap '" << PathToTexture.c_str() << "' from file.");
-
-                ilDeleteImage(NativeImageName);
-
-                ilBindImage(0);
-
-                return nullptr;
-            }
-        }
+//         if (_rDescriptor.m_pFileName != nullptr && _rDescriptor.m_pPixels == nullptr && _Behavior != SDataBehavior::Listen && _IsInternal == false)
+//         {
+//             // -----------------------------------------------------------------------------
+//             // Create and bin texture on DevIL
+//             // -----------------------------------------------------------------------------
+//             NativeImageName = ilGenImage();
+// 
+//             ilBindImage(NativeImageName);
+// 
+//             // -----------------------------------------------------------------------------
+//             // Load texture from file (either in assets or data)
+//             // -----------------------------------------------------------------------------
+//             std::string PathToTexture;
+// 
+//             PathToTexture = g_PathToAssets + _rDescriptor.m_pFileName;
+// 
+//             NativeILFormat = ConvertILImageFormat(_rDescriptor.m_Format);
+//             NativeILType   = ConvertILImageType(_rDescriptor.m_Format);
+// 
+// #if __ANDROID__
+//             const char* pPathToTexture = PathToTexture.c_str();
+// #else
+//             const wchar_t* pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
+// #endif
+// 
+//             ImageIsLoaded = ilLoadImage(pPathToTexture) == IL_TRUE;
+// 
+//             if (ImageIsLoaded)
+//             {
+//                 NumberOfFaces = ilGetInteger(IL_NUM_FACES);
+//             }
+// 
+//             if (ImageIsLoaded && NumberOfFaces == 5)
+//             {
+//                 ILenum CheckILFormat = ilGetInteger(IL_IMAGE_FORMAT);
+//                 ILenum CheckILType   = ilGetInteger(IL_IMAGE_TYPE);
+// 
+//                 if (CheckILFormat != NativeILFormat || CheckILType != NativeILType)
+//                 {
+//                     ilConvertImage(NativeILFormat, NativeILType);
+//                 }
+// 
+//                 pTextureData = ilGetData();
+// 
+//                 ImageWidth    = ilGetInteger(IL_IMAGE_WIDTH);
+//                 ImageHeight   = ilGetInteger(IL_IMAGE_HEIGHT);
+//                 NumberOfBytes = ilGetInteger(IL_IMAGE_SIZE_OF_DATA);
+// 
+//                 assert(ImageWidth > 0);
+//                 assert(ImageHeight > 0);
+//                 assert(NumberOfBytes > 0);
+//             }
+//             else
+//             {
+//                 BASE_CONSOLE_STREAMERROR("Failed loading cubemap '" << PathToTexture.c_str() << "' from file.");
+// 
+//                 ilDeleteImage(NativeImageName);
+// 
+//                 ilBindImage(0);
+// 
+//                 return nullptr;
+//             }
+//         }
 
         // -----------------------------------------------------------------------------
         // Generate texture inside texture manager
@@ -846,21 +846,21 @@ namespace
             {
                 for (unsigned int IndexOfFace = 0; IndexOfFace < NumberOfFaces; IndexOfFace++)
                 {
-                    ilBindImage(NativeImageName);
-
-                    ilActiveFace(IndexOfFace);
-
-                    ILenum CheckILFormat = ilGetInteger(IL_IMAGE_FORMAT);
-                    ILenum CheckILType = ilGetInteger(IL_IMAGE_TYPE);
-
-                    if (CheckILFormat != NativeILFormat || CheckILType != NativeILType)
-                    {
-                        ilConvertImage(NativeILFormat, NativeILType);
-                    }
-
-                    pTextureData = ilGetData();
-
-                    CopyToTexture2D(rTexture.m_pFaces[IndexOfFace], pTextureData);
+//                     ilBindImage(NativeImageName);
+// 
+//                     ilActiveFace(IndexOfFace);
+// 
+//                     ILenum CheckILFormat = ilGetInteger(IL_IMAGE_FORMAT);
+//                     ILenum CheckILType = ilGetInteger(IL_IMAGE_TYPE);
+// 
+//                     if (CheckILFormat != NativeILFormat || CheckILType != NativeILType)
+//                     {
+//                         ilConvertImage(NativeILFormat, NativeILType);
+//                     }
+// 
+//                     pTextureData = ilGetData();
+// 
+//                     CopyToTexture2D(rTexture.m_pFaces[IndexOfFace], pTextureData);
                 }
             }
 
@@ -869,9 +869,9 @@ namespace
             // -----------------------------------------------------------------------------
             if (ImageIsLoaded)
             {
-                ilDeleteImage(NativeImageName);
-
-                ilBindImage(0);
+//                 ilDeleteImage(NativeImageName);
+// 
+//                 ilBindImage(0);
             }
         }
         catch (...)
@@ -1085,34 +1085,34 @@ namespace
 
         CInternTexture2D* pInternTexture2D = static_cast<CInternTexture2D*>(_pTexture2D);
 
-        // -----------------------------------------------------------------------------
-        // Variables
-        // -----------------------------------------------------------------------------
-        ILuint  NativeImageHandle;
-        ILenum  NativeFormat;
-        ILenum  NativeImageType;
-        ILubyte NativeNumberOfChannels;
-
-        // -----------------------------------------------------------------------------
-        // Create devIL image
-        // -----------------------------------------------------------------------------
-        ilEnable(IL_FILE_OVERWRITE);
-        ilGenImages(1, &NativeImageHandle);
-        ilBindImage(NativeImageHandle);
-
-        NativeFormat           = ConvertILImageFormat(pInternTexture2D->GetFormat());
-        NativeImageType        = ConvertILImageType(pInternTexture2D->GetFormat());
-        NativeNumberOfChannels = ConvertILImageChannels(pInternTexture2D->GetFormat());
-
-        // -----------------------------------------------------------------------------
-        // Save date to image
-        // -----------------------------------------------------------------------------
-        ilTexImage(pInternTexture2D->GetNumberOfPixelsU(), pInternTexture2D->GetNumberOfPixelsV(), 1, NativeNumberOfChannels, NativeFormat, NativeImageType, pInternTexture2D->GetPixels());
-
-        // -----------------------------------------------------------------------------
-        // Save image on file system
-        // -----------------------------------------------------------------------------
-        ilSave(IL_PNG, (const ILstring)_pPathToFile);
+//         // -----------------------------------------------------------------------------
+//         // Variables
+//         // -----------------------------------------------------------------------------
+//         ILuint  NativeImageHandle;
+//         ILenum  NativeFormat;
+//         ILenum  NativeImageType;
+//         ILubyte NativeNumberOfChannels;
+// 
+//         // -----------------------------------------------------------------------------
+//         // Create devIL image
+//         // -----------------------------------------------------------------------------
+//         ilEnable(IL_FILE_OVERWRITE);
+//         ilGenImages(1, &NativeImageHandle);
+//         ilBindImage(NativeImageHandle);
+// 
+//         NativeFormat           = ConvertILImageFormat(pInternTexture2D->GetFormat());
+//         NativeImageType        = ConvertILImageType(pInternTexture2D->GetFormat());
+//         NativeNumberOfChannels = ConvertILImageChannels(pInternTexture2D->GetFormat());
+// 
+//         // -----------------------------------------------------------------------------
+//         // Save date to image
+//         // -----------------------------------------------------------------------------
+//         ilTexImage(pInternTexture2D->GetNumberOfPixelsU(), pInternTexture2D->GetNumberOfPixelsV(), 1, NativeNumberOfChannels, NativeFormat, NativeImageType, pInternTexture2D->GetPixels());
+// 
+//         // -----------------------------------------------------------------------------
+//         // Save image on file system
+//         // -----------------------------------------------------------------------------
+//         ilSave(IL_PNG, (const ILstring)_pPathToFile);
     }
 
     // -----------------------------------------------------------------------------
@@ -1236,378 +1236,378 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    Dt::CTextureBase::EFormat CDtTextureManager::ConvertImageFormat(ILenum _ILFormat, ILenum _ILType) const
-    {
-        // -----------------------------------------------------------------------------
-        // Format
-        // -----------------------------------------------------------------------------
-        unsigned int Index = 0;
-
-        if (_ILFormat == IL_LUMINANCE)
-        {
-            Index = 0;
-        }
-        else if (_ILFormat == IL_LUMINANCE_ALPHA)
-        {
-            Index = 1;
-        }
-        else if (_ILFormat == IL_RGB)
-        {
-            Index = 2;
-        }
-        else // (_ILFormat == IL_RGBA)
-        {
-            Index = 3;
-        }
-
-        // -----------------------------------------------------------------------------
-        // Type
-        // -----------------------------------------------------------------------------
-        if (_ILType == IL_BYTE)
-        {
-            static Dt::CTextureBase::EFormat s_Formats[] =
-            {
-                Dt::CTextureBase::R8_BYTE,
-                Dt::CTextureBase::R8G8_BYTE,
-                Dt::CTextureBase::R8G8B8_BYTE,
-                Dt::CTextureBase::R8G8B8A8_BYTE,
-            };
-            
-            return s_Formats[Index];
-        }
-        else if (_ILType == IL_UNSIGNED_BYTE)
-        {
-            static Dt::CTextureBase::EFormat s_Formats[] =
-            {
-                Dt::CTextureBase::R8_UBYTE,
-                Dt::CTextureBase::R8G8_UBYTE,
-                Dt::CTextureBase::R8G8B8_UBYTE,
-                Dt::CTextureBase::R8G8B8A8_UBYTE,
-            };
-
-            return s_Formats[Index];
-        }
-        else if (_ILType == IL_SHORT)
-        {
-            static Dt::CTextureBase::EFormat s_Formats[] =
-            {
-                Dt::CTextureBase::R8_SHORT,
-                Dt::CTextureBase::R8G8_SHORT,
-                Dt::CTextureBase::R8G8B8_SHORT,
-                Dt::CTextureBase::R8G8B8A8_SHORT,
-            };
-
-            return s_Formats[Index];
-        }
-        else if (_ILType == IL_UNSIGNED_SHORT)
-        {
-            static Dt::CTextureBase::EFormat s_Formats[] =
-            {
-                Dt::CTextureBase::R8_USHORT,
-                Dt::CTextureBase::R8G8_USHORT,
-                Dt::CTextureBase::R8G8B8_USHORT,
-                Dt::CTextureBase::R8G8B8A8_USHORT,
-            };
-
-            return s_Formats[Index];
-        }
-        else if (_ILType == IL_INT)
-        {
-            static Dt::CTextureBase::EFormat s_Formats[] =
-            {
-                Dt::CTextureBase::R8_INT,
-                Dt::CTextureBase::R8G8_INT,
-                Dt::CTextureBase::R8G8B8_INT,
-                Dt::CTextureBase::R8G8B8A8_INT,
-            };
-
-            return s_Formats[Index];
-        }
-        else if (_ILType == IL_UNSIGNED_INT)
-        {
-            static Dt::CTextureBase::EFormat s_Formats[] =
-            {
-                Dt::CTextureBase::R8_UINT,
-                Dt::CTextureBase::R8G8_UINT,
-                Dt::CTextureBase::R8G8B8_UINT,
-                Dt::CTextureBase::R8G8B8A8_UINT,
-            };
-
-            return s_Formats[Index];
-        }
-        else if (_ILType == IL_HALF)
-        {
-            static Dt::CTextureBase::EFormat s_Formats[] =
-            {
-                Dt::CTextureBase::R16_FLOAT,
-                Dt::CTextureBase::R16G16_FLOAT,
-                Dt::CTextureBase::R16G16B16_FLOAT,
-                Dt::CTextureBase::R16G16B16A16_FLOAT,
-            };
-
-            return s_Formats[Index];
-        }
-        else if (_ILType == IL_FLOAT || _ILType == IL_DOUBLE)
-        {
-            static Dt::CTextureBase::EFormat s_Formats[] =
-            {
-                Dt::CTextureBase::R32_FLOAT,
-                Dt::CTextureBase::R32G32_FLOAT,
-                Dt::CTextureBase::R32G32B32_FLOAT,
-                Dt::CTextureBase::R32G32B32A32_FLOAT,
-            };
-
-            return s_Formats[Index];
-        }
-
-        return Dt::CTextureBase::UndefinedFormat;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    ILenum CDtTextureManager::ConvertILImageFormat(Dt::CTextureBase::EFormat _Format) const
-    {
-        static ILenum s_NativeFormat[] =
-        {
-            IL_LUMINANCE,
-            0,
-            IL_RGB,
-            IL_RGBA,
-            IL_LUMINANCE,
-            0,
-            IL_RGB,
-            IL_RGBA,
-            IL_LUMINANCE,
-            0,
-            IL_RGB,
-            IL_RGBA,
-            IL_LUMINANCE,
-            0,
-            IL_RGB,
-            IL_RGBA,
-            IL_LUMINANCE,
-            0,
-            IL_RGB,
-            IL_RGBA,
-            IL_LUMINANCE,
-            0,
-            IL_RGB,
-            IL_RGBA,
-
-            IL_LUMINANCE,
-            0,
-            IL_RGB,
-            IL_RGBA,
-            IL_LUMINANCE,
-            0,
-            IL_RGB,
-            IL_RGBA,
-            IL_LUMINANCE,
-            0,
-            IL_RGB,
-            IL_RGBA,
-            IL_LUMINANCE,
-            0,
-            IL_RGB,
-            IL_RGBA,
-            IL_LUMINANCE,
-            0,
-            IL_RGB,
-            IL_RGBA,
-            IL_LUMINANCE,
-            0,
-            IL_RGB,
-            IL_RGBA,
-            IL_LUMINANCE,
-            0,
-            IL_RGB,
-            IL_RGBA,
-
-            IL_LUMINANCE,
-            0,
-            IL_RGB,
-            IL_RGBA,
-            IL_LUMINANCE,
-            0,
-            IL_RGB,
-            IL_RGBA,
-            IL_LUMINANCE,
-            0,
-            IL_RGB,
-            IL_RGBA,
-
-            IL_RGB,
-            IL_RGBA,
-            IL_RGBA,
-            IL_RGBA,
-        };
-
-        return s_NativeFormat[_Format];
-    }
-
-    // -----------------------------------------------------------------------------
-
-    ILenum CDtTextureManager::ConvertILImageType(Dt::CTextureBase::EFormat _Format) const
-    {
-        static int s_NativeType[] =
-        {
-            IL_BYTE,
-            IL_BYTE,
-            IL_BYTE,
-            IL_BYTE,
-            IL_UNSIGNED_BYTE,
-            IL_UNSIGNED_BYTE,
-            IL_UNSIGNED_BYTE,
-            IL_UNSIGNED_BYTE,
-            IL_SHORT,
-            IL_SHORT,
-            IL_SHORT,
-            IL_SHORT,
-            IL_UNSIGNED_SHORT,
-            IL_UNSIGNED_SHORT,
-            IL_UNSIGNED_SHORT,
-            IL_UNSIGNED_SHORT,
-            IL_INT,
-            IL_INT,
-            IL_INT,
-            IL_INT,
-            IL_UNSIGNED_INT,
-            IL_UNSIGNED_INT,
-            IL_UNSIGNED_INT,
-            IL_UNSIGNED_INT,
-
-            IL_BYTE,
-            IL_BYTE,
-            IL_BYTE,
-            IL_BYTE,
-            IL_UNSIGNED_BYTE,
-            IL_UNSIGNED_BYTE,
-            IL_UNSIGNED_BYTE,
-            IL_UNSIGNED_BYTE,
-            IL_SHORT,
-            IL_SHORT,
-            IL_SHORT,
-            IL_SHORT,
-            IL_UNSIGNED_SHORT,
-            IL_UNSIGNED_SHORT,
-            IL_UNSIGNED_SHORT,
-            IL_UNSIGNED_SHORT,
-            IL_INT,
-            IL_INT,
-            IL_INT,
-            IL_INT,
-            IL_UNSIGNED_INT,
-            IL_UNSIGNED_INT,
-            IL_UNSIGNED_INT,
-            IL_UNSIGNED_INT,
-            IL_FLOAT,
-            IL_FLOAT,
-            IL_FLOAT,
-            IL_FLOAT,
-
-            IL_INT,
-            IL_INT,
-            IL_INT,
-            IL_INT,
-            IL_UNSIGNED_INT,
-            IL_UNSIGNED_INT,
-            IL_UNSIGNED_INT,
-            IL_UNSIGNED_INT,
-            IL_FLOAT,
-            IL_FLOAT,
-            IL_FLOAT,
-            IL_FLOAT,
-
-            0,
-            0,
-            0,
-            0,
-        };
-
-        return s_NativeType[_Format];
-    }
-
-    // -----------------------------------------------------------------------------
-
-    ILubyte CDtTextureManager::ConvertILImageChannels(Dt::CTextureBase::EFormat _Format) const
-    {
-        static ILubyte s_NativeFormat[] =
-        {
-            1,
-            0,
-            3,
-            4,
-            1,
-            0,
-            3,
-            4,
-            1,
-            0,
-            3,
-            4,
-            1,
-            0,
-            3,
-            4,
-            1,
-            0,
-            3,
-            4,
-            1,
-            0,
-            3,
-            4,
-
-            1,
-            0,
-            3,
-            4,
-            1,
-            0,
-            3,
-            4,
-            1,
-            0,
-            3,
-            4,
-            1,
-            0,
-            3,
-            4,
-            1,
-            0,
-            3,
-            4,
-            1,
-            0,
-            3,
-            4,
-            1,
-            0,
-            3,
-            4,
-
-            1,
-            0,
-            3,
-            4,
-            1,
-            0,
-            3,
-            4,
-            1,
-            0,
-            3,
-            4,
-
-            3,
-            4,
-            4,
-            4,
-        };
-
-        return s_NativeFormat[_Format];
-    }
+//     Dt::CTextureBase::EFormat CDtTextureManager::ConvertImageFormat(ILenum _ILFormat, ILenum _ILType) const
+//     {
+//         // -----------------------------------------------------------------------------
+//         // Format
+//         // -----------------------------------------------------------------------------
+//         unsigned int Index = 0;
+// 
+//         if (_ILFormat == IL_LUMINANCE)
+//         {
+//             Index = 0;
+//         }
+//         else if (_ILFormat == IL_LUMINANCE_ALPHA)
+//         {
+//             Index = 1;
+//         }
+//         else if (_ILFormat == IL_RGB)
+//         {
+//             Index = 2;
+//         }
+//         else // (_ILFormat == IL_RGBA)
+//         {
+//             Index = 3;
+//         }
+// 
+//         // -----------------------------------------------------------------------------
+//         // Type
+//         // -----------------------------------------------------------------------------
+//         if (_ILType == IL_BYTE)
+//         {
+//             static Dt::CTextureBase::EFormat s_Formats[] =
+//             {
+//                 Dt::CTextureBase::R8_BYTE,
+//                 Dt::CTextureBase::R8G8_BYTE,
+//                 Dt::CTextureBase::R8G8B8_BYTE,
+//                 Dt::CTextureBase::R8G8B8A8_BYTE,
+//             };
+//             
+//             return s_Formats[Index];
+//         }
+//         else if (_ILType == IL_UNSIGNED_BYTE)
+//         {
+//             static Dt::CTextureBase::EFormat s_Formats[] =
+//             {
+//                 Dt::CTextureBase::R8_UBYTE,
+//                 Dt::CTextureBase::R8G8_UBYTE,
+//                 Dt::CTextureBase::R8G8B8_UBYTE,
+//                 Dt::CTextureBase::R8G8B8A8_UBYTE,
+//             };
+// 
+//             return s_Formats[Index];
+//         }
+//         else if (_ILType == IL_SHORT)
+//         {
+//             static Dt::CTextureBase::EFormat s_Formats[] =
+//             {
+//                 Dt::CTextureBase::R8_SHORT,
+//                 Dt::CTextureBase::R8G8_SHORT,
+//                 Dt::CTextureBase::R8G8B8_SHORT,
+//                 Dt::CTextureBase::R8G8B8A8_SHORT,
+//             };
+// 
+//             return s_Formats[Index];
+//         }
+//         else if (_ILType == IL_UNSIGNED_SHORT)
+//         {
+//             static Dt::CTextureBase::EFormat s_Formats[] =
+//             {
+//                 Dt::CTextureBase::R8_USHORT,
+//                 Dt::CTextureBase::R8G8_USHORT,
+//                 Dt::CTextureBase::R8G8B8_USHORT,
+//                 Dt::CTextureBase::R8G8B8A8_USHORT,
+//             };
+// 
+//             return s_Formats[Index];
+//         }
+//         else if (_ILType == IL_INT)
+//         {
+//             static Dt::CTextureBase::EFormat s_Formats[] =
+//             {
+//                 Dt::CTextureBase::R8_INT,
+//                 Dt::CTextureBase::R8G8_INT,
+//                 Dt::CTextureBase::R8G8B8_INT,
+//                 Dt::CTextureBase::R8G8B8A8_INT,
+//             };
+// 
+//             return s_Formats[Index];
+//         }
+//         else if (_ILType == IL_UNSIGNED_INT)
+//         {
+//             static Dt::CTextureBase::EFormat s_Formats[] =
+//             {
+//                 Dt::CTextureBase::R8_UINT,
+//                 Dt::CTextureBase::R8G8_UINT,
+//                 Dt::CTextureBase::R8G8B8_UINT,
+//                 Dt::CTextureBase::R8G8B8A8_UINT,
+//             };
+// 
+//             return s_Formats[Index];
+//         }
+//         else if (_ILType == IL_HALF)
+//         {
+//             static Dt::CTextureBase::EFormat s_Formats[] =
+//             {
+//                 Dt::CTextureBase::R16_FLOAT,
+//                 Dt::CTextureBase::R16G16_FLOAT,
+//                 Dt::CTextureBase::R16G16B16_FLOAT,
+//                 Dt::CTextureBase::R16G16B16A16_FLOAT,
+//             };
+// 
+//             return s_Formats[Index];
+//         }
+//         else if (_ILType == IL_FLOAT || _ILType == IL_DOUBLE)
+//         {
+//             static Dt::CTextureBase::EFormat s_Formats[] =
+//             {
+//                 Dt::CTextureBase::R32_FLOAT,
+//                 Dt::CTextureBase::R32G32_FLOAT,
+//                 Dt::CTextureBase::R32G32B32_FLOAT,
+//                 Dt::CTextureBase::R32G32B32A32_FLOAT,
+//             };
+// 
+//             return s_Formats[Index];
+//         }
+// 
+//         return Dt::CTextureBase::UndefinedFormat;
+//     }
+// 
+//     // -----------------------------------------------------------------------------
+// 
+//     ILenum CDtTextureManager::ConvertILImageFormat(Dt::CTextureBase::EFormat _Format) const
+//     {
+//         static ILenum s_NativeFormat[] =
+//         {
+//             IL_LUMINANCE,
+//             0,
+//             IL_RGB,
+//             IL_RGBA,
+//             IL_LUMINANCE,
+//             0,
+//             IL_RGB,
+//             IL_RGBA,
+//             IL_LUMINANCE,
+//             0,
+//             IL_RGB,
+//             IL_RGBA,
+//             IL_LUMINANCE,
+//             0,
+//             IL_RGB,
+//             IL_RGBA,
+//             IL_LUMINANCE,
+//             0,
+//             IL_RGB,
+//             IL_RGBA,
+//             IL_LUMINANCE,
+//             0,
+//             IL_RGB,
+//             IL_RGBA,
+// 
+//             IL_LUMINANCE,
+//             0,
+//             IL_RGB,
+//             IL_RGBA,
+//             IL_LUMINANCE,
+//             0,
+//             IL_RGB,
+//             IL_RGBA,
+//             IL_LUMINANCE,
+//             0,
+//             IL_RGB,
+//             IL_RGBA,
+//             IL_LUMINANCE,
+//             0,
+//             IL_RGB,
+//             IL_RGBA,
+//             IL_LUMINANCE,
+//             0,
+//             IL_RGB,
+//             IL_RGBA,
+//             IL_LUMINANCE,
+//             0,
+//             IL_RGB,
+//             IL_RGBA,
+//             IL_LUMINANCE,
+//             0,
+//             IL_RGB,
+//             IL_RGBA,
+// 
+//             IL_LUMINANCE,
+//             0,
+//             IL_RGB,
+//             IL_RGBA,
+//             IL_LUMINANCE,
+//             0,
+//             IL_RGB,
+//             IL_RGBA,
+//             IL_LUMINANCE,
+//             0,
+//             IL_RGB,
+//             IL_RGBA,
+// 
+//             IL_RGB,
+//             IL_RGBA,
+//             IL_RGBA,
+//             IL_RGBA,
+//         };
+// 
+//         return s_NativeFormat[_Format];
+//     }
+// 
+//     // -----------------------------------------------------------------------------
+// 
+//     ILenum CDtTextureManager::ConvertILImageType(Dt::CTextureBase::EFormat _Format) const
+//     {
+//         static int s_NativeType[] =
+//         {
+//             IL_BYTE,
+//             IL_BYTE,
+//             IL_BYTE,
+//             IL_BYTE,
+//             IL_UNSIGNED_BYTE,
+//             IL_UNSIGNED_BYTE,
+//             IL_UNSIGNED_BYTE,
+//             IL_UNSIGNED_BYTE,
+//             IL_SHORT,
+//             IL_SHORT,
+//             IL_SHORT,
+//             IL_SHORT,
+//             IL_UNSIGNED_SHORT,
+//             IL_UNSIGNED_SHORT,
+//             IL_UNSIGNED_SHORT,
+//             IL_UNSIGNED_SHORT,
+//             IL_INT,
+//             IL_INT,
+//             IL_INT,
+//             IL_INT,
+//             IL_UNSIGNED_INT,
+//             IL_UNSIGNED_INT,
+//             IL_UNSIGNED_INT,
+//             IL_UNSIGNED_INT,
+// 
+//             IL_BYTE,
+//             IL_BYTE,
+//             IL_BYTE,
+//             IL_BYTE,
+//             IL_UNSIGNED_BYTE,
+//             IL_UNSIGNED_BYTE,
+//             IL_UNSIGNED_BYTE,
+//             IL_UNSIGNED_BYTE,
+//             IL_SHORT,
+//             IL_SHORT,
+//             IL_SHORT,
+//             IL_SHORT,
+//             IL_UNSIGNED_SHORT,
+//             IL_UNSIGNED_SHORT,
+//             IL_UNSIGNED_SHORT,
+//             IL_UNSIGNED_SHORT,
+//             IL_INT,
+//             IL_INT,
+//             IL_INT,
+//             IL_INT,
+//             IL_UNSIGNED_INT,
+//             IL_UNSIGNED_INT,
+//             IL_UNSIGNED_INT,
+//             IL_UNSIGNED_INT,
+//             IL_FLOAT,
+//             IL_FLOAT,
+//             IL_FLOAT,
+//             IL_FLOAT,
+// 
+//             IL_INT,
+//             IL_INT,
+//             IL_INT,
+//             IL_INT,
+//             IL_UNSIGNED_INT,
+//             IL_UNSIGNED_INT,
+//             IL_UNSIGNED_INT,
+//             IL_UNSIGNED_INT,
+//             IL_FLOAT,
+//             IL_FLOAT,
+//             IL_FLOAT,
+//             IL_FLOAT,
+// 
+//             0,
+//             0,
+//             0,
+//             0,
+//         };
+// 
+//         return s_NativeType[_Format];
+//     }
+// 
+//     // -----------------------------------------------------------------------------
+// 
+//     ILubyte CDtTextureManager::ConvertILImageChannels(Dt::CTextureBase::EFormat _Format) const
+//     {
+//         static ILubyte s_NativeFormat[] =
+//         {
+//             1,
+//             0,
+//             3,
+//             4,
+//             1,
+//             0,
+//             3,
+//             4,
+//             1,
+//             0,
+//             3,
+//             4,
+//             1,
+//             0,
+//             3,
+//             4,
+//             1,
+//             0,
+//             3,
+//             4,
+//             1,
+//             0,
+//             3,
+//             4,
+// 
+//             1,
+//             0,
+//             3,
+//             4,
+//             1,
+//             0,
+//             3,
+//             4,
+//             1,
+//             0,
+//             3,
+//             4,
+//             1,
+//             0,
+//             3,
+//             4,
+//             1,
+//             0,
+//             3,
+//             4,
+//             1,
+//             0,
+//             3,
+//             4,
+//             1,
+//             0,
+//             3,
+//             4,
+// 
+//             1,
+//             0,
+//             3,
+//             4,
+//             1,
+//             0,
+//             3,
+//             4,
+//             1,
+//             0,
+//             3,
+//             4,
+// 
+//             3,
+//             4,
+//             4,
+//             4,
+//         };
+// 
+//         return s_NativeFormat[_Format];
+//     }
 } // namespace
 
 namespace

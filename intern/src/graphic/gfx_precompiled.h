@@ -1,6 +1,5 @@
 
-#ifndef GFX_PRECOMPILED_H
-#define GFX_PRECOMPILED_H
+#pragma once
 
 #ifdef __ANDROID__
 
@@ -30,7 +29,7 @@
 
 typedef void (GFX_APIENTRY *GfxBufferStorageEXT)(GLenum target, GLsizeiptr size, const void * data, GLbitfield flags);
 
-GfxBufferStorageEXT glBufferStorage = 0;
+
 
 #else // __ANDROID__
 
@@ -43,7 +42,5 @@ GfxBufferStorageEXT glBufferStorage = 0;
 // Global defines
 // -----------------------------------------------------------------------------
 #define GFX_APIENTRY GLAPIENTRY
-
-#endif
 
 #endif

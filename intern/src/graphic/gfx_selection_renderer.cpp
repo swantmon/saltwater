@@ -564,7 +564,7 @@ namespace
         SRequest& rRequest = rTicket.m_Requests[rTicket.m_IndexOfPushRequest];
 
         rRequest.m_Cursor    = _rCursor;
-        rRequest.m_TimeStamp = Base::SLimits<Base::U64>::s_Max;
+        rRequest.m_TimeStamp = Base::SLimits<Base::U32>::s_Max;
 
         // -----------------------------------------------------------------------------
         // Set push index
