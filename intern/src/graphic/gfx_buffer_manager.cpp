@@ -279,7 +279,7 @@ namespace
         {
             NativeUsage = ConvertUsage(_rDescriptor.m_Usage);
 
-            glBufferStorage(NativeBinding, _rDescriptor.m_NumberOfBytes, _rDescriptor.m_pBytes, NativeUsage);
+            glBufferData(NativeBuffer, _rDescriptor.m_NumberOfBytes, _rDescriptor.m_pBytes, NativeUsage);
         }
 
         // ----------------------------------------------------------------------------- 
