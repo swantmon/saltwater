@@ -302,6 +302,9 @@ namespace
                 throw;
             }
 
+            // -----------------------------------------------------------------------------
+            // Make current
+            // -----------------------------------------------------------------------------
             Status = eglMakeCurrent(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface, rWindowInfo.m_EglSurface, rWindowInfo.m_EglContext);
 
             if (Status == EGL_FALSE)
@@ -310,6 +313,11 @@ namespace
 
                 throw;
             }
+
+            // -----------------------------------------------------------------------------
+            // Set engine graphics API
+            // -----------------------------------------------------------------------------
+            m_GraphicsAPI = GLES32;
 
 #else
 
