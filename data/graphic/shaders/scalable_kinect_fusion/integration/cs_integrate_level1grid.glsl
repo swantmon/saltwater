@@ -21,29 +21,20 @@ void main()
     if (gl_GlobalInvocationID.x < g_Indirect.m_Indexed.m_InstanceCount)
     {
         int VoxelLevel1Index = int(g_VolumeID[gl_GlobalInvocationID.x]);
-
-        ivec3 Level1GridOffset = ivec3(IndexToOffset(VoxelLevel1Index, 16 * 8));
-        ivec3 RootGridOffset = Level1GridOffset / 8;
-        ivec3 Level1GridInnerOffset = Level1GridOffset % 8;
-
-        int VoxelRootGridIndex = OffsetToIndex(RootGridOffset, 16);
-
-        int CurrentRootGridItemIndex = g_CurrentVolumeIndex * VOXELS_PER_ROOTGRID + VoxelRootGridIndex;
-        SGridPoolItem RootGridItem = g_RootGridPool[CurrentRootGridItemIndex];
-
-        int Level1InnerIndex = OffsetToIndex(Level1GridInnerOffset, 8);
-
-        int CurrentLevel1GridItemIndex = RootGridItem.m_PoolIndex * VOXELS_PER_LEVEL1GRID + Level1InnerIndex;
-        SGridPoolItem Level1GridItem = g_Level1GridPool[CurrentLevel1GridItemIndex];
-
-        if (Level1GridItem.m_PoolIndex == -1) // Is the voxel empty?
+        
+        ivec3 VoxelLevel1Offset = ivec3(IndexToOffset(VoxelLevel1Index, 16 * 8));
+        ivec3 VoxelRootOffset = VoxelLevel1Offset / 8;
+        ivec3 VoxelLevel1InnerOffset = VoxelLevel1Offset % 8;
+        
+        int RootGridBufferOffset = g_CurrentVolumeIndex * VOXELS_PER_ROOTGRID;
+        RootGridBufferOffset += OffsetToIndex(VoxelRootOffset, 16);
+        int Level1GridBufferOffset = g_RootGridPool[RootGridBufferOffset].m_PoolIndex * VOXELS_PER_LEVEL1GRID;
+        Level1GridBufferOffset += OffsetToIndex(VoxelLevel1InnerOffset, 8);
+        
+        if (g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex == -1)
         {
-            // Add voxel to pool and to root grid
-
-            int Level2PoolIndex = atomicAdd(g_TSDFPoolItemCount, 1);
-
-            Level1GridItem.m_PoolIndex = Level2PoolIndex;
-            g_Level1GridPool[CurrentLevel1GridItemIndex] = Level1GridItem;
+            int Index = atomicAdd(g_TSDFPoolItemCount, 1);
+            g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex = Index;
         }
     }
 }
