@@ -26,7 +26,7 @@ using namespace Gfx::ShaderManager;
 
 namespace
 {
-    static const char* g_PathToDataShader = "data/graphic/shaders/";
+    static const char* g_PathToDataShader = "/data/graphic/shaders/";
 } // namespace
 
 namespace
@@ -362,7 +362,10 @@ namespace
 
         std::ifstream ShaderFile(PathToShader.c_str());
 
-        assert(ShaderFile.is_open());
+        if (ShaderFile.is_open())
+        {
+            BASE_THROWV("Shader '%s' can't be opened!", PathToShader.c_str());
+        }
 
         std::string ShaderFileContent((std::istreambuf_iterator<char>(ShaderFile)), std::istreambuf_iterator<char>());  
 
@@ -628,7 +631,8 @@ namespace
                 Base::Size BeginOfInclude = _rShaderContent.find('\"', FoundPosition) + 1;
                 Base::Size EndOfInclude   = _rShaderContent.find('\"', BeginOfInclude);
 
-                std::string IncludeFile = g_PathToDataShader + _rShaderContent.substr(BeginOfInclude, EndOfInclude - BeginOfInclude);
+                std::string PathToAssets = App::Application::GetAssetPath();
+                std::string IncludeFile  = PathToAssets + g_PathToDataShader + _rShaderContent.substr(BeginOfInclude, EndOfInclude - BeginOfInclude);
 
                 // -----------------------------------------------------------------------------
                 // Load included file and replace include directive with new file
