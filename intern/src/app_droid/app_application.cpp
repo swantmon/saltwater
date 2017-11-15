@@ -221,7 +221,7 @@ namespace
 
     const Base::Char* CApplication::GetAssetPath()
     {
-        return m_AppSetup.m_pAndroidApp->activity->internalDataPath;
+        return m_AppSetup.m_pAndroidApp->activity->externalDataPath;
     }
     
     // -----------------------------------------------------------------------------
