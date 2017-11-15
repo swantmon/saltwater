@@ -1076,10 +1076,10 @@ namespace MR
             ContextManager::SetResourceBuffer(6, rRootVolume.m_Level1QueuePtr);
             ContextManager::SetResourceBuffer(7, rRootVolume.m_IndirectLevel1Buffer);
 
+            ContextManager::Barrier();
+
             ContextManager::DispatchIndirect(rRootVolume.m_IndirectLevel1Buffer, SIndirectBuffers::s_ComputeOffset);
         }
-
-        ContextManager::Barrier();
 
         Performance::EndEvent();
 
@@ -1108,10 +1108,10 @@ namespace MR
             ContextManager::SetResourceBuffer(6, rRootVolume.m_Level2QueuePtr);
             ContextManager::SetResourceBuffer(7, rRootVolume.m_IndirectLevel2Buffer);
 
+            ContextManager::Barrier();
+
             ContextManager::DispatchIndirect(rRootVolume.m_IndirectLevel2Buffer, SIndirectBuffers::s_ComputeOffset);
         }
-
-        ContextManager::Barrier();
 
         Performance::EndEvent();
 
@@ -1135,10 +1135,10 @@ namespace MR
             // Integrate into TSDF grids
             ////////////////////////////////////////////////////////////////////////////////////////////////
 
-            ContextManager::SetShaderCS(m_IntegrateTSDFCSPtr);
-        }
+            ContextManager::Barrier();
 
-        ContextManager::Barrier();
+            //ContextManager::SetShaderCS(m_IntegrateTSDFCSPtr);
+        }
 
         Performance::EndEvent();
     }
