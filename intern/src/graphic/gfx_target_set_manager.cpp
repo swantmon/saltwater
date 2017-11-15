@@ -333,8 +333,20 @@ namespace
         for (unsigned int IndexOfTexture = 0; IndexOfTexture < _NumberOfTargets; ++ IndexOfTexture)
         {
             CNativeTexture2D& rNativeTexture = *static_cast<CNativeTexture2D*>(_pTargetPtrs[IndexOfTexture].GetPtr());
-                
+
+            
+
+
+
+
+            // TODO by tschwandt
+            // Distinguish between 2D and 3D textures because the handle could be wrong!
             GLuint TextureHandle = rNativeTexture.m_NativeTexture;
+
+
+
+
+
 
             unsigned int MipmapLevel = rNativeTexture.GetCurrentMipLevel();
 
