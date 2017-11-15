@@ -74,14 +74,15 @@ namespace
         // -----------------------------------------------------------------------------
         BASE_CONSOLE_STREAMINFO("Gfx> Start manager...");
 
-        ViewManager     ::OnStart();
-        StateManager    ::OnStart();
-        ContextManager  ::OnStart();
-        SamplerManager  ::OnStart();
-        TextureManager  ::OnStart();
-        BufferManager   ::OnStart();
-        ShaderManager   ::OnStart();
-        TargetSetManager::OnStart();
+        BASE_CONSOLE_INFO("0");
+        ViewManager     ::OnStart(); BASE_CONSOLE_INFO("1");
+        StateManager    ::OnStart(); BASE_CONSOLE_INFO("2");
+        ContextManager  ::OnStart(); BASE_CONSOLE_INFO("3");
+        SamplerManager  ::OnStart(); BASE_CONSOLE_INFO("4");
+        TextureManager  ::OnStart(); BASE_CONSOLE_INFO("5");
+        BufferManager   ::OnStart(); BASE_CONSOLE_INFO("6");
+        ShaderManager   ::OnStart(); BASE_CONSOLE_INFO("7");
+        TargetSetManager::OnStart(); BASE_CONSOLE_INFO("8");
 
         BASE_CONSOLE_STREAMINFO("Gfx> Finished starting manager.");
 
@@ -100,15 +101,15 @@ namespace
         // -----------------------------------------------------------------------------
         BASE_CONSOLE_STREAMINFO("Gfx> Start entity/facet manager...");
 
-        MeshActorManager  ::OnStart();
-        CameraActorManager::OnStart();
-        SunManager        ::OnStart();
-        MeshManager       ::OnStart();
-        MaterialManager   ::OnStart();
-        SkyManager        ::OnStart();
-        LightProbeManager ::OnStart();
-        PointLightManager ::OnStart();
-        AreaLightManager  ::OnStart();
+        MeshActorManager  ::OnStart(); BASE_CONSOLE_INFO("9");
+        CameraActorManager::OnStart(); BASE_CONSOLE_INFO("10");
+        SunManager        ::OnStart(); BASE_CONSOLE_INFO("11");
+        MeshManager       ::OnStart(); BASE_CONSOLE_INFO("12");
+        MaterialManager   ::OnStart(); BASE_CONSOLE_INFO("13");
+        SkyManager        ::OnStart(); BASE_CONSOLE_INFO("14");
+        LightProbeManager ::OnStart(); BASE_CONSOLE_INFO("15");
+        PointLightManager ::OnStart(); BASE_CONSOLE_INFO("16");
+        AreaLightManager  ::OnStart(); BASE_CONSOLE_INFO("17");
 
         BASE_CONSOLE_STREAMINFO("Gfx> Finished starting entity/facet manager.");
 
@@ -125,23 +126,23 @@ namespace
         // -----------------------------------------------------------------------------
         BASE_CONSOLE_STREAMINFO("Gfx> Start renderer...");
 
-        HistogramRenderer    ::OnStart();
-        BackgroundRenderer   ::OnStart();
-        LightAreaRenderer    ::OnStart();
-        ReflectionRenderer   ::OnStart();
-        LightPointRenderer   ::OnStart();
-        LightSunRenderer     ::OnStart();
-        LightIndirectRenderer::OnStart();
-        ShadowRenderer       ::OnStart();
-        FogRenderer          ::OnStart();
-        ARRenderer           ::OnStart();
-        ActorRenderer        ::OnStart();
-        ParticleRenderer     ::OnStart();
-        PostFXHDR            ::OnStart();
-        PostFX               ::OnStart();
-        DebugRenderer        ::OnStart();
-        SelectionRenderer    ::OnStart();
-        TonemappingRenderer  ::OnStart();
+        HistogramRenderer    ::OnStart(); BASE_CONSOLE_INFO("18");
+        BackgroundRenderer   ::OnStart(); BASE_CONSOLE_INFO("19");
+        LightAreaRenderer    ::OnStart(); BASE_CONSOLE_INFO("20");
+        ReflectionRenderer   ::OnStart(); BASE_CONSOLE_INFO("21");
+        LightPointRenderer   ::OnStart(); BASE_CONSOLE_INFO("22");
+        LightSunRenderer     ::OnStart(); BASE_CONSOLE_INFO("23");
+        LightIndirectRenderer::OnStart(); BASE_CONSOLE_INFO("24");
+        ShadowRenderer       ::OnStart(); BASE_CONSOLE_INFO("25");
+        FogRenderer          ::OnStart(); BASE_CONSOLE_INFO("26");
+        ARRenderer           ::OnStart(); BASE_CONSOLE_INFO("27");
+        ActorRenderer        ::OnStart(); BASE_CONSOLE_INFO("28");
+        ParticleRenderer     ::OnStart(); BASE_CONSOLE_INFO("29");
+        PostFXHDR            ::OnStart(); BASE_CONSOLE_INFO("30");
+        PostFX               ::OnStart(); BASE_CONSOLE_INFO("31");
+        DebugRenderer        ::OnStart(); BASE_CONSOLE_INFO("32");
+        SelectionRenderer    ::OnStart(); BASE_CONSOLE_INFO("33");
+        TonemappingRenderer  ::OnStart(); BASE_CONSOLE_INFO("34");
         
         
         // -----------------------------------------------------------------------------

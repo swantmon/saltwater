@@ -604,28 +604,28 @@ namespace
         // -----------------------------------------------------------------------------
         // Models
         // -----------------------------------------------------------------------------
-        SMeshDescriptor ModelDescr;
-        Dt::SModelFileDescriptor ModelFileDesc;
-
-        ModelFileDesc.m_pFileName = "envsphere.obj";
-        ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::Nothing;
-
-        Dt::CModel& rSphereModel = Dt::ModelManager::CreateModel(ModelFileDesc);
-
-        ModelDescr.m_pMesh = &rSphereModel.GetMesh(0);
-
-        CMeshPtr CubemapTextureSpherePtr = MeshManager::CreateMesh(ModelDescr);
-
-        // -----------------------------------------------------------------------------
-
-        ModelFileDesc.m_pFileName = "curvedplane.obj";
-        ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::Nothing;
-
-        Dt::CModel& rCurvedPlaneModel = Dt::ModelManager::CreateModel(ModelFileDesc);
-
-        ModelDescr.m_pMesh = &rCurvedPlaneModel.GetMesh(0);
-
-        CMeshPtr CurvedPlanePtr = MeshManager::CreateMesh(ModelDescr);
+//         SMeshDescriptor ModelDescr;
+//         Dt::SModelFileDescriptor ModelFileDesc;
+// 
+//         ModelFileDesc.m_pFileName = "envsphere.obj";
+//         ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::Nothing;
+// 
+//         Dt::CModel& rSphereModel = Dt::ModelManager::CreateModel(ModelFileDesc);
+// 
+//         ModelDescr.m_pMesh = &rSphereModel.GetMesh(0);
+// 
+//         CMeshPtr CubemapTextureSpherePtr = MeshManager::CreateMesh(ModelDescr);
+// 
+//         // -----------------------------------------------------------------------------
+// 
+//         ModelFileDesc.m_pFileName = "curvedplane.obj";
+//         ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::Nothing;
+// 
+//         Dt::CModel& rCurvedPlaneModel = Dt::ModelManager::CreateModel(ModelFileDesc);
+// 
+//         ModelDescr.m_pMesh = &rCurvedPlaneModel.GetMesh(0);
+// 
+//         CMeshPtr CurvedPlanePtr = MeshManager::CreateMesh(ModelDescr);
 
         // -----------------------------------------------------------------------------
 
@@ -667,19 +667,19 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        m_SkyboxFromAtmosphere.m_MeshPtr            = CubemapTextureSpherePtr;
+        m_SkyboxFromAtmosphere.m_MeshPtr            = 0; //CubemapTextureSpherePtr;
         m_SkyboxFromAtmosphere.m_VertexBufferSetPtr = 0;
         m_SkyboxFromAtmosphere.m_IndexBufferPtr     = 0;
 
-        m_SkyboxFromPanorama.m_MeshPtr            = CubemapTextureSpherePtr;
+        m_SkyboxFromPanorama.m_MeshPtr            = 0; //CubemapTextureSpherePtr;
         m_SkyboxFromPanorama.m_VertexBufferSetPtr = 0;
         m_SkyboxFromPanorama.m_IndexBufferPtr     = 0;
 
-        m_SkyboxFromCubemap.m_MeshPtr            = CubemapTextureSpherePtr;
+        m_SkyboxFromCubemap.m_MeshPtr            = 0; //CubemapTextureSpherePtr;
         m_SkyboxFromCubemap.m_VertexBufferSetPtr = 0;
         m_SkyboxFromCubemap.m_IndexBufferPtr     = 0;
 
-        m_SkyboxFromTexture.m_MeshPtr            = CurvedPlanePtr;
+        m_SkyboxFromTexture.m_MeshPtr            = 0; //CurvedPlanePtr;
         m_SkyboxFromTexture.m_VertexBufferSetPtr = 0;
         m_SkyboxFromTexture.m_IndexBufferPtr     = 0;
 
@@ -687,7 +687,7 @@ namespace
         m_SkyboxFromGeometry.m_VertexBufferSetPtr = PlanePositionBufferPtr;
         m_SkyboxFromGeometry.m_IndexBufferPtr     = PlaneIndexBufferPtr;
 
-        m_SkyboxFromLUT.m_MeshPtr            = CubemapTextureSpherePtr;
+        m_SkyboxFromLUT.m_MeshPtr            = 0; //CubemapTextureSpherePtr;
         m_SkyboxFromLUT.m_VertexBufferSetPtr = 0;
         m_SkyboxFromLUT.m_IndexBufferPtr     = 0;
 
@@ -704,7 +704,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Precompute Scattering
         // -----------------------------------------------------------------------------
+        BASE_CONSOLE_INFO("13.1");
         PrecomputeScattering();
+        BASE_CONSOLE_INFO("13.2");
     }
 
     // -----------------------------------------------------------------------------
@@ -1901,20 +1903,21 @@ namespace
         // -----------------------------------------------------------------------------
         // Target sets & view ports
         // -----------------------------------------------------------------------------
+        BASE_CONSOLE_INFO("13.1.1");
         CTargetSetPtr m_TransmittanceTableTS = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_TransmittanceTable));
-
+        BASE_CONSOLE_INFO("13.1.2");
         CTargetSetPtr m_DeltaETS = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_DeltaE));
-
+        BASE_CONSOLE_INFO("13.1.3");
         CTargetSetPtr m_DeltaSRSMTS = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_DeltaSR), static_cast<CTextureBasePtr>(m_DeltaSM));
-
+        BASE_CONSOLE_INFO("13.1.4");
         CTargetSetPtr m_IrradianceTableTS = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_IrradianceTable));
-
+        BASE_CONSOLE_INFO("13.1.5");
         CTargetSetPtr m_InscatterTableTS = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_InscatterTable));
-
+        BASE_CONSOLE_INFO("13.1.6");
         CTargetSetPtr m_DeltaJTS = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_DeltaJ));
-
+        BASE_CONSOLE_INFO("13.1.7");
         CTargetSetPtr m_DeltaSRTS = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_DeltaSR));
-
+        BASE_CONSOLE_INFO("13.1.8");
         SViewPortDescriptor ViewPortDesc;
 
         ViewPortDesc.m_TopLeftX = 0;
@@ -1976,15 +1979,15 @@ namespace
         CShaderPtr VSPtr = ShaderManager::CompileVS("scattering/vs.glsl", "main");;
         CShaderPtr GSPtr = ShaderManager::CompileGS("scattering/gs.glsl", "main");;
 
-        //////////////////////////////////////////////////////////////
+        // -----------------------------------------------------------------------------
         // Transmittance
-        //////////////////////////////////////////////////////////////
+        // -----------------------------------------------------------------------------
 
         CShaderPtr m_TransmittanceMaterial = ShaderManager::CompilePS("scattering/scattering_transmittance.glsl", "main");
 
-        //////////////////////////////////////////////////////////////
+        // -----------------------------------------------------------------------------
         // Irradiance
-        //////////////////////////////////////////////////////////////
+        // -----------------------------------------------------------------------------
 
         CShaderPtr m_IrradianceSingleMaterial = ShaderManager::CompilePS("scattering/scattering_irradiance_single.glsl", "main");
 
@@ -1992,9 +1995,9 @@ namespace
 
         CShaderPtr m_IrradianceCopyMaterial = ShaderManager::CompilePS("scattering/scattering_irradiance_copy.glsl", "main");
 
-        //////////////////////////////////////////////////////////////
+        // -----------------------------------------------------------------------------
         // Inscatter
-        //////////////////////////////////////////////////////////////
+        // -----------------------------------------------------------------------------
 
         CShaderPtr m_InscatterSingleMaterial = ShaderManager::CompilePS("scattering/scattering_inscatter_single.glsl", "main");
 

@@ -262,9 +262,9 @@ namespace
         TextureDescriptor.m_pPixels          = 0;
         TextureDescriptor.m_Format           = Gfx::CTextureBase::R8G8B8_UBYTE;
         
-        m_Texture2DPtr = CreateTexture2D(TextureDescriptor, true, SDataBehavior::LeftAlone);
+        // m_Texture2DPtr = CreateTexture2D(TextureDescriptor, true, SDataBehavior::LeftAlone);
 
-        SetTexture2DLabel(m_Texture2DPtr, "Dummy Texture 2D");
+        // SetTexture2DLabel(m_Texture2DPtr, "Dummy Texture 2D");
         
         // -----------------------------------------------------------------------------
         // Setup default settings in OpenGL
@@ -1347,6 +1347,9 @@ namespace
             rTexture.m_NativeUsage          = GLUsage;
             rTexture.m_NativeInternalFormat = GLInternalFormat;
             rTexture.m_NativeDimension      = GL_TEXTURE_3D;
+
+
+            BASE_CONSOLE_INFOV("Create 3d texture %i", rTexture.m_NativeTexture);
             
             // -----------------------------------------------------------------------------
             // Check the behavior.

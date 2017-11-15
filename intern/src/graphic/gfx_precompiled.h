@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "base/base_console.h"
+
 #ifdef __ANDROID__
 
 #define GL_GLEXT_PROTOTYPES
