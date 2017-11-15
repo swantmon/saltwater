@@ -41,19 +41,19 @@ namespace
         switch (_Type)
         {
         case GL_DEBUG_TYPE_ERROR:
-            BASE_CONSOLE_ERRORV("%s\n", _pMessage);
+            BASE_CONSOLE_ERRORV("%s", _pMessage);
             break;
         case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-            BASE_CONSOLE_WARNINGV("%s\n", _pMessage);
+            BASE_CONSOLE_WARNINGV("%s", _pMessage);
             break;
         case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-            BASE_CONSOLE_WARNINGV("%s\n", _pMessage);
+            BASE_CONSOLE_WARNINGV("%s", _pMessage);
             break;
         case GL_DEBUG_TYPE_PORTABILITY:
-            BASE_CONSOLE_INFOV("%s\n", _pMessage);
+            BASE_CONSOLE_INFOV("%s", _pMessage);
             break;
         case GL_DEBUG_TYPE_PERFORMANCE:
-            BASE_CONSOLE_INFOV("%s\n", _pMessage);
+            BASE_CONSOLE_INFOV("%s", _pMessage);
             break;
         case GL_DEBUG_TYPE_OTHER:
             // -----------------------------------------------------------------------------
