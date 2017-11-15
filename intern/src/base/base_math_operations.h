@@ -1,12 +1,10 @@
 
 #pragma once
 
+#include "base/base_precompiled.h"
+
 #include "base/base_defines.h"
 #include "base/base_math_constants.h"
-
-#include <algorithm>
-#include <cmath>
-#include <random>
 
 namespace MATH
 {

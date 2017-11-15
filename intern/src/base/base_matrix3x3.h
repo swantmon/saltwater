@@ -6,9 +6,6 @@
 #include "base/base_vector3.h"
 #include "base/base_vector4.h"
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
 namespace MATH
 {
     template<typename T>
