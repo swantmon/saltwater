@@ -28,6 +28,7 @@ void main()
         
         int RootGridBufferOffset = g_CurrentVolumeIndex * VOXELS_PER_ROOTGRID;
         RootGridBufferOffset += OffsetToIndex(VoxelRootOffset, 16);
+        
         int Level1GridBufferOffset = g_RootGridPool[RootGridBufferOffset].m_PoolIndex * VOXELS_PER_LEVEL1GRID;
         Level1GridBufferOffset += OffsetToIndex(VoxelLevel1InnerOffset, 8);
         
