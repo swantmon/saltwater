@@ -104,20 +104,19 @@ void main()
             int RootGridItemBufferOffset = GetRootGridItemIndex(CurrentPosition - VolumeOffset, VolumeBufferOffset);
             
             if (RootGridItemBufferOffset != -1)
-            {
+            {               
                 // Pool index of whole level 1 grid                
                 int Level1VolumeBufferOffset = g_RootGridPool[RootGridItemBufferOffset].m_PoolIndex;
 
                 if (Level1VolumeBufferOffset != -1)
                 {
                     // Offset of level 1 volume in rootgrid
-                    ivec3 Level1VolumeOffset = ivec3(CurrentPosition / (VOLUME_SIZE / (16.0f * 8.0f)));
+                    ivec3 Level1VolumeOffset = ivec3((CurrentPosition / VOLUME_SIZE) * 16.0f * 8.0f);
                     Level1VolumeOffset %= 8;
 
-                    int Level1BufferOffset = OffsetToIndex(Level1VolumeOffset, 8);
-                    Level1VolumeOffset += Level1VolumeBufferOffset;
+                    int Level1BufferInnerOffset = OffsetToIndex(Level1VolumeOffset, 8);
 
-                    if (g_Level1GridPool[Level1BufferOffset].m_PoolIndex != -1)
+                    if (g_Level1GridPool[Level1VolumeBufferOffset * 512 + Level1BufferInnerOffset].m_PoolIndex != -1)
                     {
                         out_GBuffer0 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
                         out_GBuffer1 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
