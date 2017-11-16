@@ -1221,11 +1221,9 @@ namespace
     {
         assert(_Unit < s_NumberOfTextureUnits);
 
-        CNativeTexture2D& rNativeTexture = *static_cast<CNativeTexture2D*>(m_TextureUnits[_Unit].GetPtr());
+        GLuint TextureBinding = GL_TEXTURE_2D;
 
-        GLuint TextureBinding = rNativeTexture.m_NativeDimension;
-
-        if (rNativeTexture.IsCube())
+        if (m_TextureUnits[_Unit]->IsCube())
         {
             TextureBinding = GL_TEXTURE_CUBE_MAP;
         }
@@ -1247,18 +1245,36 @@ namespace
 
         if (m_TextureUnits[_Unit] == _TextureBasePtr) return;
 
-        CNativeTexture2D& rNativeTexture = *static_cast<CNativeTexture2D*>(m_TextureUnits[_Unit].GetPtr());
+        GLuint TextureBinding = 0;
+        GLuint TextureHandle = 0;
 
-        GLuint TextureBinding = rNativeTexture.m_NativeDimension;
+        if (_TextureBasePtr->GetDimension() == CTextureBase::Dim2D)
+        {
+            CNativeTexture2D& rNativeTexture = *static_cast<CNativeTexture2D*>(m_TextureUnits[_Unit].GetPtr());
 
-        if (rNativeTexture.IsCube())
+            TextureBinding = rNativeTexture.m_NativeDimension;
+            TextureHandle  = rNativeTexture.m_NativeTexture;
+        }
+        else if (_TextureBasePtr->GetDimension() == CTextureBase::Dim3D)
+        {
+            CNativeTexture3D& rNativeTexture = *static_cast<CNativeTexture3D*>(m_TextureUnits[_Unit].GetPtr());
+
+            TextureBinding = rNativeTexture.m_NativeDimension;
+            TextureHandle  = rNativeTexture.m_NativeTexture;
+        }
+        else
+        {
+            BASE_CONSOLE_ERROR("Unexpected texture type set to context");
+        }
+
+        if (_TextureBasePtr->IsCube())
         {
             TextureBinding = GL_TEXTURE_CUBE_MAP;
         }
 
         glActiveTexture(GL_TEXTURE0 + _Unit);
 
-        glBindTexture(TextureBinding, rNativeTexture.m_NativeTexture);
+        glBindTexture(TextureBinding, TextureHandle);
 
         m_TextureUnits[_Unit] = _TextureBasePtr;
     }
@@ -1287,23 +1303,39 @@ namespace
 
     void CGfxContextManager::SetImageTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr)
     {
-        GLboolean IsLayered = GL_FALSE;
-
-        if (_TextureBasePtr == nullptr) return;
-
-        CNativeTexture2D* pNativeTexture = 0;
-
         assert(_Unit < s_NumberOfImageUnits);
 
-        if (m_ImageUnits[_Unit] == _TextureBasePtr) return;
+        if (_TextureBasePtr == nullptr || m_ImageUnits[_Unit] == _TextureBasePtr) return;
 
-        pNativeTexture = static_cast<CNativeTexture2D*>(_TextureBasePtr.GetPtr());
+        GLboolean IsLayered  = GL_FALSE;
+        GLuint TextureUsage  = 0;
+        GLuint TextureHandle = 0;
+        GLuint TextureFormat = 0;
 
-        assert(pNativeTexture);
+        if (_TextureBasePtr->GetDimension() == CTextureBase::Dim2D)
+        {
+            CNativeTexture2D& rNativeTexture = *static_cast<CNativeTexture2D*>(m_TextureUnits[_Unit].GetPtr());
 
-        if (pNativeTexture->GetDimension() == CTextureBase::Dim3D) IsLayered = GL_TRUE;
+            TextureHandle = rNativeTexture.m_NativeTexture;
+            TextureUsage  = rNativeTexture.m_NativeUsage;
+            TextureFormat = rNativeTexture.m_NativeInternalFormat;
+        }
+        else if (_TextureBasePtr->GetDimension() == CTextureBase::Dim3D)
+        {
+            CNativeTexture3D& rNativeTexture = *static_cast<CNativeTexture3D*>(m_TextureUnits[_Unit].GetPtr());
 
-        glBindImageTexture(_Unit, pNativeTexture->m_NativeTexture, pNativeTexture->GetCurrentMipLevel(), IsLayered, 0, pNativeTexture->m_NativeUsage, pNativeTexture->m_NativeInternalFormat);
+            TextureHandle = rNativeTexture.m_NativeTexture;
+            TextureUsage  = rNativeTexture.m_NativeUsage;
+            TextureFormat = rNativeTexture.m_NativeInternalFormat;
+        }
+        else
+        {
+            BASE_CONSOLE_ERROR("Unexpected image texture type set to context");
+        }
+
+        if (_TextureBasePtr->GetDimension() == CTextureBase::Dim3D) IsLayered = GL_TRUE;
+
+        glBindImageTexture(_Unit, TextureHandle, _TextureBasePtr->GetCurrentMipLevel(), IsLayered, 0, TextureUsage, TextureFormat);
 
         m_ImageUnits[_Unit] = _TextureBasePtr;
     }

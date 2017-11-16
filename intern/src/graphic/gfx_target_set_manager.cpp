@@ -10,6 +10,7 @@
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_native_target_set.h"
 #include "graphic/gfx_native_texture_2d.h"
+#include "graphic/gfx_native_texture_3d.h"
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_manager.h"
 
@@ -332,35 +333,36 @@ namespace
             
         for (unsigned int IndexOfTexture = 0; IndexOfTexture < _NumberOfTargets; ++ IndexOfTexture)
         {
-            CNativeTexture2D& rNativeTexture = *static_cast<CNativeTexture2D*>(_pTargetPtrs[IndexOfTexture].GetPtr());
+            CTextureBasePtr TextureBasePtr = _pTargetPtrs[IndexOfTexture];
 
-            
+            GLuint TextureHandle = 0;
 
+            if (TextureBasePtr->GetDimension() == CTextureBase::Dim2D)
+            {
+                CNativeTexture2D& rNativeTexture = *static_cast<CNativeTexture2D*>(TextureBasePtr.GetPtr());
 
+                TextureHandle = rNativeTexture.m_NativeTexture;
+            }
+            else if (TextureBasePtr->GetDimension() == CTextureBase::Dim3D)
+            {
+                CNativeTexture3D& rNativeTexture = *static_cast<CNativeTexture3D*>(TextureBasePtr.GetPtr());
 
+                TextureHandle = rNativeTexture.m_NativeTexture;
+            }
 
-            // TODO by tschwandt
-            // Distinguish between 2D and 3D textures because the handle could be wrong!
-            GLuint TextureHandle = rNativeTexture.m_NativeTexture;
+            unsigned int MipmapLevel = TextureBasePtr->GetCurrentMipLevel();
 
-
-
-
-
-
-            unsigned int MipmapLevel = rNativeTexture.GetCurrentMipLevel();
-
-            unsigned int BindingTarget = rNativeTexture.IsCube() == true ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D;
+            unsigned int BindingTarget = TextureBasePtr->IsCube() == true ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D;
 
             glBindTexture(BindingTarget, TextureHandle);
                 
-            if ((rNativeTexture.GetBinding() & CTexture2D::DepthStencilTarget) != 0)
+            if ((TextureBasePtr->GetBinding() & CTexture2D::DepthStencilTarget) != 0)
             {
                 glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, TextureHandle, MipmapLevel);
 
                 rTargetSet.m_DepthStencilTargetPtr = _pTargetPtrs[IndexOfTexture];
             }
-            else if ((rNativeTexture.GetBinding() & CTexture2D::RenderTarget) != 0)
+            else if ((TextureBasePtr->GetBinding() & CTexture2D::RenderTarget) != 0)
             {
                 glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + NumberOfColorAttachments, TextureHandle, MipmapLevel);
 
