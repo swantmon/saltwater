@@ -143,6 +143,7 @@ namespace
         CMeshPtr CreateMesh(const SMeshDescriptor& _rDescriptor);
         CMeshPtr CreateBox(float _Width, float _Height, float _Depth);
         CMeshPtr CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices);
+        CMeshPtr CreateSphereIsometric(float _Radius, unsigned int _Refinement);
         CMeshPtr CreateCone(float _Radius, float _Height, unsigned int _Slices);
         CMeshPtr CreateRectangle(float _X, float _Y, float _Width, float _Height);
 
@@ -859,6 +860,157 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    CMeshPtr CGfxMeshManager::CreateSphereIsometric(float _Radius, unsigned int _Refinement)
+    {
+        // -----------------------------------------------------------------------------
+        // Create model with LOD, surface and materials
+        // -----------------------------------------------------------------------------
+        CModels::CPtr MeshPtr = m_Meshes.Allocate();
+        
+        CInternModel& rModel = *MeshPtr;
+        
+        CLODs::CPtr LODPtr = m_LODs.Allocate();
+        
+        CInternLOD& rLOD = *LODPtr;
+        
+        CSurfaces::CPtr SurfacePtr = m_Surfaces.Allocate();
+        
+        CInternSurface& rSurface = *SurfacePtr;
+        
+        rSurface.m_MaterialPtr = nullptr;
+        
+        rModel.m_NumberOfLODs = 1;
+        rModel.m_LODs[0] = LODPtr;
+
+        rLOD.m_NumberOfSurfaces = 1;
+        rLOD.m_Surfaces[0] = SurfacePtr;
+
+        // -----------------------------------------------------------------------------
+        // Prepare surface
+        // -----------------------------------------------------------------------------
+        rSurface.m_SurfaceKey.m_Key          = 0;
+        rSurface.m_SurfaceKey.m_HasPosition  = true;
+        rSurface.m_SurfaceKey.m_HasNormal    = true;
+        rSurface.m_SurfaceKey.m_HasTangent   = false;
+        rSurface.m_SurfaceKey.m_HasBitangent = false;
+        rSurface.m_SurfaceKey.m_HasTexCoords = false;
+        
+        // -----------------------------------------------------------------------------
+        // Calculate data
+        // -----------------------------------------------------------------------------
+        std::vector<Base::Float3> LightVertices;
+        std::vector<Base::UInt3>  LightTriangles;
+
+        // Create a simple tetrahedron
+        LightVertices.push_back(Base::Float3(-1.0f, -1.0f, -1.0f));
+        LightVertices.push_back(Base::Float3(1.0f, -1.0f, 1.0f));
+        LightVertices.push_back(Base::Float3(-1.0f, 1.0f, 1.0f));
+        LightVertices.push_back(Base::Float3(1.0f, 1.0f, -1.0f));
+
+        LightTriangles.push_back(Base::UInt3(0, 3, 2));
+        LightTriangles.push_back(Base::UInt3(0, 1, 3));
+        LightTriangles.push_back(Base::UInt3(1, 0, 2));
+        LightTriangles.push_back(Base::UInt3(1, 2, 3));
+
+        // Split the faces of the tetrahedron
+        for (unsigned int RefinementStep = 0; RefinementStep < _Refinement; ++RefinementStep)
+        {
+            std::vector<Base::Float3> Vertices;
+            std::vector<Base::UInt3>  Triangles;
+
+            unsigned int NextVertexIndex = 0;
+
+            for (unsigned int IndexOfTriangle = 0; IndexOfTriangle < LightTriangles.size(); ++IndexOfTriangle)
+            {
+                Base::Float3 NewVertices[6];
+
+                for (unsigned int IndexOfVertex = 0; IndexOfVertex < 3; ++IndexOfVertex)
+                {
+                    NewVertices[IndexOfVertex] = LightVertices[LightTriangles[IndexOfTriangle][IndexOfVertex]];
+                }
+
+                Base::Float3 StartVertex, EndVertex;
+
+                for (unsigned int IndexOfVertex = 0; IndexOfVertex < 3; ++IndexOfVertex)
+                {
+                    StartVertex  = NewVertices[IndexOfVertex];
+                    EndVertex    = NewVertices[(IndexOfVertex + 1) % 3];
+
+                    NewVertices[IndexOfVertex + 3] = (StartVertex + EndVertex) / 2.0f;
+                }
+
+                for (unsigned int IndexOfVertex = 0; IndexOfVertex < 6; ++IndexOfVertex)
+                {
+                    Vertices.push_back(NewVertices[IndexOfVertex]);
+                }
+
+                Triangles.push_back(Base::UInt3(NextVertexIndex + 0, NextVertexIndex + 3, NextVertexIndex + 5));
+                Triangles.push_back(Base::UInt3(NextVertexIndex + 3, NextVertexIndex + 1, NextVertexIndex + 4));
+                Triangles.push_back(Base::UInt3(NextVertexIndex + 3, NextVertexIndex + 4, NextVertexIndex + 5));
+                Triangles.push_back(Base::UInt3(NextVertexIndex + 5, NextVertexIndex + 4, NextVertexIndex + 2));
+
+                NextVertexIndex += 6;
+            }
+
+            LightVertices  = std::move(Vertices);
+            LightTriangles = std::move(Triangles);
+        }
+
+        // We want a unit sphere
+        std::vector<Base::Float3> VerticesNormal;
+
+        for (unsigned int IndexOfVertex = 0; IndexOfVertex < LightVertices.size(); ++IndexOfVertex)
+        {
+            Base::Float3 Vertex = LightVertices[IndexOfVertex].Normalize();
+
+            VerticesNormal.push_back(Vertex * _Radius);
+            VerticesNormal.push_back(Vertex);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Create buffer on graphic device and setup surface
+        // -----------------------------------------------------------------------------        
+        SBufferDescriptor BufferDesc;
+        
+        BufferDesc.m_Stride        = 0;
+        BufferDesc.m_Usage         = CBuffer::GPURead;
+        BufferDesc.m_Binding       = CBuffer::VertexBuffer;
+        BufferDesc.m_Access        = CBuffer::CPUWrite;
+        BufferDesc.m_NumberOfBytes = sizeof(VerticesNormal[0]) * VerticesNormal.size();
+        BufferDesc.m_pBytes        = VerticesNormal.data();
+        BufferDesc.m_pClassKey     = 0;
+
+        rSurface.m_VertexBufferPtr  = BufferManager::CreateBuffer(BufferDesc);
+        rSurface.m_NumberOfVertices = VerticesNormal.size() / 2;
+        
+        // -----------------------------------------------------------------------------
+        
+        BufferDesc.m_Stride        = 0;
+        BufferDesc.m_Usage         = CBuffer::GPURead;
+        BufferDesc.m_Binding       = CBuffer::IndexBuffer;
+        BufferDesc.m_Access        = CBuffer::CPUWrite;
+        BufferDesc.m_NumberOfBytes = sizeof(LightTriangles[0]) * LightTriangles.size();
+        BufferDesc.m_pBytes        = LightTriangles.data();
+        BufferDesc.m_pClassKey     = 0;
+        
+        rSurface.m_IndexBufferPtr  = BufferManager::CreateBuffer(BufferDesc);
+        rSurface.m_NumberOfIndices = LightTriangles.size() * 3;
+
+        // -----------------------------------------------------------------------------
+        // Vertex Shader
+        // -----------------------------------------------------------------------------
+        SetVertexShaderOfSurface(rSurface);
+
+        // -----------------------------------------------------------------------------
+        // Material
+        // -----------------------------------------------------------------------------
+        rSurface.m_MaterialPtr = Gfx::MaterialManager::GetDefaultMaterial();
+
+        return CMeshPtr(MeshPtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
     CMeshPtr CGfxMeshManager::CreateCone(float _Radius, float _Height, unsigned int _Slices)
     {
         // -----------------------------------------------------------------------------
@@ -1252,6 +1404,13 @@ namespace MeshManager
     CMeshPtr CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices)
     {
         return CGfxMeshManager::GetInstance().CreateSphere(_Radius, _Stacks, _Slices);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CMeshPtr CreateSphereIsometric(float _Radius, unsigned int _Refinement)
+    {
+        return CGfxMeshManager::GetInstance().CreateSphereIsometric(_Radius, _Refinement);
     }
 
     // -----------------------------------------------------------------------------
