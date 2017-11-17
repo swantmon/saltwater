@@ -118,19 +118,25 @@ void main()
 
                     if (g_Level1GridPool[Level1VolumeBufferOffset * 512 + Level1BufferInnerOffset].m_PoolIndex != -1)
                     {
-                        out_GBuffer0 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-                        out_GBuffer1 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-                        out_GBuffer2 = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-                    
-                        return;
+                        break;
                     }
                 }
             }
         }
     }
-    
-    //vec4 CSPosition = g_WorldToScreen * vec4(CurrentPosition, 1.0f);
-    //gl_FragDepth = (CSPosition.z / CSPosition.w);
+
+    if (RayLength <= EndLength)
+    {
+        out_GBuffer0 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+        out_GBuffer1 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+        out_GBuffer2 = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+        vec3 CurrentPosition = CameraPosition + RayLength * RayDirection;
+        vec4 CSPosition = g_WorldToScreen * vec4(CurrentPosition, 1.0f);
+        gl_FragDepth = (CSPosition.z / CSPosition.w);
+
+        return;
+    }
 
     discard;
 }
