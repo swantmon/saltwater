@@ -111,7 +111,7 @@ void main()
                 if (Level1VolumeBufferOffset != -1)
                 {
                     // Offset of level 1 volume in rootgrid
-                    ivec3 Level1VolumeOffset = ivec3((CurrentPosition / VOLUME_SIZE) * 16.0f * 8.0f);
+                    ivec3 Level1VolumeOffset = ivec3(floor((CurrentPosition / VOLUME_SIZE) * 16.0f * 8.0f));
                     Level1VolumeOffset %= 8;
 
                     int Level1BufferInnerOffset = OffsetToIndex(Level1VolumeOffset, 8);
