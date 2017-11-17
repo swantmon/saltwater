@@ -115,8 +115,9 @@ void main()
                     Level1VolumeOffset %= 8;
 
                     int Level1BufferInnerOffset = OffsetToIndex(Level1VolumeOffset, 8);
+                    int Level1BufferIndex = Level1VolumeBufferOffset * 8 * 8 * 8 + Level1BufferInnerOffset;
 
-                    if (g_Level1GridPool[Level1VolumeBufferOffset * 512 + Level1BufferInnerOffset].m_PoolIndex != -1)
+                    if (g_Level1GridPool[Level1BufferIndex].m_PoolIndex != -1)
                     {
                         break;
                     }
