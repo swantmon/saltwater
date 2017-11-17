@@ -180,7 +180,6 @@ namespace
         CBufferPtr m_GeometryVPBufferPtr;
         CBufferPtr m_GeometryMBufferPtr;
 
-        CInputLayoutPtr m_P3N3T2InputLayoutPtr;
         CInputLayoutPtr m_P3N3InputLayoutPtr;
 
         CLightProbeFacets m_LightprobeFacets;
@@ -245,7 +244,7 @@ namespace
         , m_FilteringSpecularPSPtr()
         , m_CubemapGSBufferPtr    ()
         , m_FilteringPSBufferPtr  ()
-        , m_P3N3T2InputLayoutPtr  ()
+        , m_P3N3InputLayoutPtr    ()
         , m_LightprobeFacets      ()
     {
 
@@ -278,15 +277,6 @@ namespace
         m_CubemapPSPtr = ShaderManager::CompilePS("fs_lightprobe.glsl", "main");
 
         // -----------------------------------------------------------------------------
-
-        const SInputElementDescriptor PositionInputLayout[] =
-        {
-            { "POSITION", 0, CInputLayout::Float3Format, 0, 0 , 32, CInputLayout::PerVertex, 0 },
-            { "NORMAL"  , 0, CInputLayout::Float3Format, 0, 12, 32, CInputLayout::PerVertex, 0 },
-            { "TEXCOORD", 0, CInputLayout::Float2Format, 0, 24, 32, CInputLayout::PerVertex, 0 },
-        };
-
-        m_P3N3T2InputLayoutPtr = ShaderManager::CreateInputLayout(PositionInputLayout, 3, m_FilteringVSPtr);
 
         const SInputElementDescriptor TriangleInputLayout[] =
         {
@@ -400,20 +390,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Models
         // -----------------------------------------------------------------------------
-//         Dt::SModelFileDescriptor ModelFileDesc;
-// 
-//         ModelFileDesc.m_pFileName = "envsphere.obj";
-//         ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::Nothing;
-// 
-//         Dt::CModel& rSphereModel = Dt::ModelManager::CreateModel(ModelFileDesc);
-// 
-//         SMeshDescriptor ModelDesc;
-// 
-//         ModelDesc.m_pMesh = &rSphereModel.GetMesh(0);
-// 
-//         m_EnvironmentSpherePtr = MeshManager::CreateMesh(ModelDesc);
-// 
-//         m_SkyboxBoxPtr = MeshManager::CreateBox(2.0f, 2.0f, 2.0f);
+        m_EnvironmentSpherePtr = MeshManager::CreateSphereIsometric(1.0f, 3);
+
+        m_SkyboxBoxPtr = MeshManager::CreateBox(2.0f, 2.0f, 2.0f);
 
         // -----------------------------------------------------------------------------
         // Register dirty entity handler for automatic light probe / reflection
@@ -447,7 +426,6 @@ namespace
         m_GeometryVPBufferPtr = 0;
         m_GeometryMBufferPtr  = 0;
 
-        m_P3N3T2InputLayoutPtr = 0;
         m_P3N3InputLayoutPtr = 0;
 
         for (unsigned int IndexOfTexture = 0; IndexOfTexture < s_MaxNumberOfLightsPerProbe; ++IndexOfTexture)
@@ -1185,7 +1163,7 @@ namespace
 
         ContextManager::SetIndexBuffer(m_EnvironmentSpherePtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
-        ContextManager::SetInputLayout(m_P3N3T2InputLayoutPtr);
+        ContextManager::SetInputLayout(m_EnvironmentSpherePtr->GetLOD(0)->GetSurface(0)->GetMVPShaderVS()->GetInputLayout());
 
         ContextManager::SetConstantBuffer(2, m_CubemapGSBufferPtr);
 
