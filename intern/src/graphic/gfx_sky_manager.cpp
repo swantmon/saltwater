@@ -219,8 +219,6 @@ namespace
         void RenderSkyboxFromLUT(CInternSkyFacet* _pOutput, float _Intensity = 1.0f);
 
         void PrecomputeScattering();
-
-        void PrecomputeLUT();
     };
 } // namespace 
 
