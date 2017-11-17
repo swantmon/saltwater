@@ -400,20 +400,20 @@ namespace
         // -----------------------------------------------------------------------------
         // Models
         // -----------------------------------------------------------------------------
-        Dt::SModelFileDescriptor ModelFileDesc;
-
-        ModelFileDesc.m_pFileName = "envsphere.obj";
-        ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::Nothing;
-
-        Dt::CModel& rSphereModel = Dt::ModelManager::CreateModel(ModelFileDesc);
-
-        SMeshDescriptor ModelDesc;
-
-        ModelDesc.m_pMesh = &rSphereModel.GetMesh(0);
-
-        m_EnvironmentSpherePtr = MeshManager::CreateMesh(ModelDesc);
-
-        m_SkyboxBoxPtr = MeshManager::CreateBox(2.0f, 2.0f, 2.0f);
+//         Dt::SModelFileDescriptor ModelFileDesc;
+// 
+//         ModelFileDesc.m_pFileName = "envsphere.obj";
+//         ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::Nothing;
+// 
+//         Dt::CModel& rSphereModel = Dt::ModelManager::CreateModel(ModelFileDesc);
+// 
+//         SMeshDescriptor ModelDesc;
+// 
+//         ModelDesc.m_pMesh = &rSphereModel.GetMesh(0);
+// 
+//         m_EnvironmentSpherePtr = MeshManager::CreateMesh(ModelDesc);
+// 
+//         m_SkyboxBoxPtr = MeshManager::CreateBox(2.0f, 2.0f, 2.0f);
 
         // -----------------------------------------------------------------------------
         // Register dirty entity handler for automatic light probe / reflection
@@ -488,7 +488,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 if (pDtProbeFacet->GetRefreshMode() == Dt::CLightProbeFacet::Dynamic || pGfxProbeFacet->m_TimeStamp >= Core::Time::GetNumberOfFrame() - 1)
                 {
-                    Render(rCurrentEntity, *pGfxProbeFacet, *pDtProbeFacet);
+                    // Render(rCurrentEntity, *pGfxProbeFacet, *pDtProbeFacet);
                 }
             }
 
@@ -1146,8 +1146,6 @@ namespace
 
     void CGfxLightProbeManager::RenderFiltering(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet& _rDtLightProbeFacet)
     {
-        
-
         // -----------------------------------------------------------------------------
         // Start updating/filtering
         // -----------------------------------------------------------------------------
