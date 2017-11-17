@@ -976,12 +976,12 @@ namespace
         BufferDesc.m_Usage         = CBuffer::GPURead;
         BufferDesc.m_Binding       = CBuffer::VertexBuffer;
         BufferDesc.m_Access        = CBuffer::CPUWrite;
-        BufferDesc.m_NumberOfBytes = sizeof(VerticesNormal[0]) * VerticesNormal.size();
+        BufferDesc.m_NumberOfBytes = sizeof(VerticesNormal[0]) * static_cast<unsigned int>(VerticesNormal.size());
         BufferDesc.m_pBytes        = VerticesNormal.data();
         BufferDesc.m_pClassKey     = 0;
 
         rSurface.m_VertexBufferPtr  = BufferManager::CreateBuffer(BufferDesc);
-        rSurface.m_NumberOfVertices = VerticesNormal.size() / 2;
+        rSurface.m_NumberOfVertices = static_cast<unsigned int>(VerticesNormal.size()) / 2;
         
         // -----------------------------------------------------------------------------
         
@@ -989,12 +989,12 @@ namespace
         BufferDesc.m_Usage         = CBuffer::GPURead;
         BufferDesc.m_Binding       = CBuffer::IndexBuffer;
         BufferDesc.m_Access        = CBuffer::CPUWrite;
-        BufferDesc.m_NumberOfBytes = sizeof(LightTriangles[0]) * LightTriangles.size();
+        BufferDesc.m_NumberOfBytes = sizeof(LightTriangles[0]) * static_cast<unsigned int>(LightTriangles.size());
         BufferDesc.m_pBytes        = LightTriangles.data();
         BufferDesc.m_pClassKey     = 0;
         
         rSurface.m_IndexBufferPtr  = BufferManager::CreateBuffer(BufferDesc);
-        rSurface.m_NumberOfIndices = LightTriangles.size() * 3;
+        rSurface.m_NumberOfIndices = static_cast<unsigned int>(LightTriangles.size()) * 3;
 
         // -----------------------------------------------------------------------------
         // Vertex Shader

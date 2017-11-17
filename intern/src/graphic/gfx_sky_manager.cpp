@@ -87,7 +87,6 @@ namespace
             CBufferSetPtr     m_VSBufferSetPtr;
             CBufferSetPtr     m_GSBufferSetPtr;
             CBufferSetPtr     m_PSBufferSetPtr;
-            CInputLayoutPtr   m_InputLayoutPtr;
             CMeshPtr          m_MeshPtr;
             CBufferPtr        m_VertexBufferSetPtr;
             CBufferPtr        m_IndexBufferPtr;
@@ -189,10 +188,9 @@ namespace
         SRenderContext    m_SkyboxFromLUT;
         CTexture2DPtr     m_LookUpTexturePtr;
         CTextureSetPtr    m_LookupTextureSetPtr;
+        CInputLayoutPtr   m_P3T2CubemapInputLayoutPtr;
         CSelectionTicket* m_pSelectionTicket;
         CSkyfacets        m_Skyfacets;
-
-
 
         CBufferPtr m_PSPrecomputeConstants;
 
@@ -286,7 +284,6 @@ namespace
         m_SkyboxFromAtmosphere.m_VSBufferSetPtr     = 0;
         m_SkyboxFromAtmosphere.m_GSBufferSetPtr     = 0;
         m_SkyboxFromAtmosphere.m_PSBufferSetPtr     = 0;
-        m_SkyboxFromAtmosphere.m_InputLayoutPtr     = 0;
         m_SkyboxFromAtmosphere.m_MeshPtr            = 0;
         m_SkyboxFromAtmosphere.m_VertexBufferSetPtr = 0;
         m_SkyboxFromAtmosphere.m_IndexBufferPtr     = 0;
@@ -298,7 +295,6 @@ namespace
         m_SkyboxFromPanorama.m_VSBufferSetPtr     = 0;
         m_SkyboxFromPanorama.m_GSBufferSetPtr     = 0;
         m_SkyboxFromPanorama.m_PSBufferSetPtr     = 0;
-        m_SkyboxFromPanorama.m_InputLayoutPtr     = 0;
         m_SkyboxFromPanorama.m_MeshPtr            = 0;
         m_SkyboxFromPanorama.m_VertexBufferSetPtr = 0;
         m_SkyboxFromPanorama.m_IndexBufferPtr     = 0;
@@ -310,7 +306,6 @@ namespace
         m_SkyboxFromCubemap.m_VSBufferSetPtr     = 0;
         m_SkyboxFromCubemap.m_GSBufferSetPtr     = 0;
         m_SkyboxFromCubemap.m_PSBufferSetPtr     = 0;
-        m_SkyboxFromCubemap.m_InputLayoutPtr     = 0;
         m_SkyboxFromCubemap.m_MeshPtr            = 0;
         m_SkyboxFromCubemap.m_VertexBufferSetPtr = 0;
         m_SkyboxFromCubemap.m_IndexBufferPtr     = 0;
@@ -322,7 +317,6 @@ namespace
         m_SkyboxFromTexture.m_VSBufferSetPtr     = 0;
         m_SkyboxFromTexture.m_GSBufferSetPtr     = 0;
         m_SkyboxFromTexture.m_PSBufferSetPtr     = 0;
-        m_SkyboxFromTexture.m_InputLayoutPtr     = 0;
         m_SkyboxFromTexture.m_MeshPtr            = 0;
         m_SkyboxFromTexture.m_VertexBufferSetPtr = 0;
         m_SkyboxFromTexture.m_IndexBufferPtr     = 0;
@@ -334,7 +328,6 @@ namespace
         m_SkyboxFromGeometry.m_VSBufferSetPtr     = 0;
         m_SkyboxFromGeometry.m_GSBufferSetPtr     = 0;
         m_SkyboxFromGeometry.m_PSBufferSetPtr     = 0;
-        m_SkyboxFromGeometry.m_InputLayoutPtr     = 0;
         m_SkyboxFromGeometry.m_MeshPtr            = 0;
         m_SkyboxFromGeometry.m_VertexBufferSetPtr = 0;
         m_SkyboxFromGeometry.m_IndexBufferPtr     = 0;
@@ -346,12 +339,10 @@ namespace
         m_SkyboxFromLUT.m_VSBufferSetPtr     = 0;
         m_SkyboxFromLUT.m_GSBufferSetPtr     = 0;
         m_SkyboxFromLUT.m_PSBufferSetPtr     = 0;
-        m_SkyboxFromLUT.m_InputLayoutPtr     = 0;
         m_SkyboxFromLUT.m_MeshPtr            = 0;
         m_SkyboxFromLUT.m_VertexBufferSetPtr = 0;
         m_SkyboxFromLUT.m_IndexBufferPtr     = 0;
         m_SkyboxFromLUT.m_TextureSetPtr      = 0;
-
 
         // -----------------------------------------------------------------------------
         // Shader
@@ -368,52 +359,37 @@ namespace
 
         CShaderPtr m_PostEffectMaterial = ShaderManager::CompilePS("scattering/scattering_post_effect.glsl", "main");
 
-        const SInputElementDescriptor P3N3T2InputLayout[] =
-        {
-            { "POSITION", 0, CInputLayout::Float3Format, 0, 0 , 32, CInputLayout::PerVertex, 0 },
-            { "NORMAL"  , 0, CInputLayout::Float3Format, 0, 12, 32, CInputLayout::PerVertex, 0 },
-            { "TEXCOORD", 0, CInputLayout::Float2Format, 0, 24, 32, CInputLayout::PerVertex, 0 },
-        };
-
-        CInputLayoutPtr P3N3T2CubemapInputLayoutPtr = ShaderManager::CreateInputLayout(P3N3T2InputLayout, 3, CubemapVSPtr);
-
         const SInputElementDescriptor P3T2InputLayout[] =
         {
             { "POSITION", 0, CInputLayout::Float3Format, 0,  0, 20, CInputLayout::PerVertex, 0 },
             { "TEXCOORD", 0, CInputLayout::Float2Format, 0, 12, 20, CInputLayout::PerVertex, 0 },
         };
 
-        CInputLayoutPtr P3T2CubemapInputLayoutPtr = ShaderManager::CreateInputLayout(P3T2InputLayout, 2, CubemapVSPtr);
+        m_P3T2CubemapInputLayoutPtr = ShaderManager::CreateInputLayout(P3T2InputLayout, 2, CubemapVSPtr);
 
         m_SkyboxFromAtmosphere.m_VSPtr          = CubemapVSPtr;
         m_SkyboxFromAtmosphere.m_GSPtr          = CubemapGSPtr;
         m_SkyboxFromAtmosphere.m_PSPtr          = m_PostEffectMaterial;
-        m_SkyboxFromAtmosphere.m_InputLayoutPtr = P3N3T2CubemapInputLayoutPtr;
 
         m_SkyboxFromPanorama.m_VSPtr          = CubemapVSPtr;
         m_SkyboxFromPanorama.m_GSPtr          = CubemapGSPtr;
         m_SkyboxFromPanorama.m_PSPtr          = CubemapPanoramaPSPtr;
-        m_SkyboxFromPanorama.m_InputLayoutPtr = P3N3T2CubemapInputLayoutPtr;
 
         m_SkyboxFromCubemap.m_VSPtr          = CubemapVSPtr;
         m_SkyboxFromCubemap.m_GSPtr          = CubemapGSPtr;
         m_SkyboxFromCubemap.m_PSPtr          = CubemapCubemapPSPtr;
-        m_SkyboxFromCubemap.m_InputLayoutPtr = P3N3T2CubemapInputLayoutPtr;
 
         m_SkyboxFromTexture.m_VSPtr          = CubemapTextureVSPtr;
         m_SkyboxFromTexture.m_GSPtr          = CubemapGSPtr;
         m_SkyboxFromTexture.m_PSPtr          = CubemapTexturePSPtr;
-        m_SkyboxFromTexture.m_InputLayoutPtr = P3N3T2CubemapInputLayoutPtr;
 
         m_SkyboxFromGeometry.m_VSPtr          = CubemapGeometryVSPtr;
         m_SkyboxFromGeometry.m_GSPtr          = CubemapGSPtr;
         m_SkyboxFromGeometry.m_PSPtr          = CubemapTexturePSPtr;
-        m_SkyboxFromGeometry.m_InputLayoutPtr = P3T2CubemapInputLayoutPtr;
 
         m_SkyboxFromLUT.m_VSPtr          = CubemapVSPtr;
         m_SkyboxFromLUT.m_GSPtr          = CubemapRotateGSPtr;
         m_SkyboxFromLUT.m_PSPtr          = CubemapLUTPSPtr;
-        m_SkyboxFromLUT.m_InputLayoutPtr = P3N3T2CubemapInputLayoutPtr;
 
         // -----------------------------------------------------------------------------
         // Buffer
@@ -606,19 +582,12 @@ namespace
         // -----------------------------------------------------------------------------
         // Models
         // -----------------------------------------------------------------------------
-        SMeshDescriptor ModelDescr;
-        Dt::SModelFileDescriptor ModelFileDesc;
-
-        ModelFileDesc.m_pFileName = "envsphere.obj";
-        ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::Nothing;
-
-        Dt::CModel& rSphereModel = Dt::ModelManager::CreateModel(ModelFileDesc);
-
-        ModelDescr.m_pMesh = &rSphereModel.GetMesh(0);
-
-        CMeshPtr CubemapTextureSpherePtr = MeshManager::CreateMesh(ModelDescr);
+        CMeshPtr CubemapTextureSpherePtr = MeshManager::CreateSphereIsometric(1.0f, 3);
 
         // -----------------------------------------------------------------------------
+
+        SMeshDescriptor ModelDescr;
+        Dt::SModelFileDescriptor ModelFileDesc;
 
         ModelFileDesc.m_pFileName = "curvedplane.obj";
         ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::Nothing;
@@ -726,7 +695,6 @@ namespace
         m_SkyboxFromAtmosphere.m_VSBufferSetPtr     = 0;
         m_SkyboxFromAtmosphere.m_GSBufferSetPtr     = 0;
         m_SkyboxFromAtmosphere.m_PSBufferSetPtr     = 0;
-        m_SkyboxFromAtmosphere.m_InputLayoutPtr     = 0;
         m_SkyboxFromAtmosphere.m_MeshPtr            = 0;
         m_SkyboxFromAtmosphere.m_VertexBufferSetPtr = 0;
         m_SkyboxFromAtmosphere.m_IndexBufferPtr     = 0;
@@ -738,7 +706,6 @@ namespace
         m_SkyboxFromPanorama.m_VSBufferSetPtr     = 0;
         m_SkyboxFromPanorama.m_GSBufferSetPtr     = 0;
         m_SkyboxFromPanorama.m_PSBufferSetPtr     = 0;
-        m_SkyboxFromPanorama.m_InputLayoutPtr     = 0;
         m_SkyboxFromPanorama.m_MeshPtr            = 0;
         m_SkyboxFromPanorama.m_VertexBufferSetPtr = 0;
         m_SkyboxFromPanorama.m_IndexBufferPtr     = 0;
@@ -750,7 +717,6 @@ namespace
         m_SkyboxFromCubemap.m_VSBufferSetPtr     = 0;
         m_SkyboxFromCubemap.m_GSBufferSetPtr     = 0;
         m_SkyboxFromCubemap.m_PSBufferSetPtr     = 0;
-        m_SkyboxFromCubemap.m_InputLayoutPtr     = 0;
         m_SkyboxFromCubemap.m_MeshPtr            = 0;
         m_SkyboxFromCubemap.m_VertexBufferSetPtr = 0;
         m_SkyboxFromCubemap.m_IndexBufferPtr     = 0;
@@ -762,7 +728,6 @@ namespace
         m_SkyboxFromTexture.m_VSBufferSetPtr     = 0;
         m_SkyboxFromTexture.m_GSBufferSetPtr     = 0;
         m_SkyboxFromTexture.m_PSBufferSetPtr     = 0;
-        m_SkyboxFromTexture.m_InputLayoutPtr     = 0;
         m_SkyboxFromTexture.m_MeshPtr            = 0;
         m_SkyboxFromTexture.m_VertexBufferSetPtr = 0;
         m_SkyboxFromTexture.m_IndexBufferPtr     = 0;
@@ -774,7 +739,6 @@ namespace
         m_SkyboxFromGeometry.m_VSBufferSetPtr     = 0;
         m_SkyboxFromGeometry.m_GSBufferSetPtr     = 0;
         m_SkyboxFromGeometry.m_PSBufferSetPtr     = 0;
-        m_SkyboxFromGeometry.m_InputLayoutPtr     = 0;
         m_SkyboxFromGeometry.m_MeshPtr            = 0;
         m_SkyboxFromGeometry.m_VertexBufferSetPtr = 0;
         m_SkyboxFromGeometry.m_IndexBufferPtr     = 0;
@@ -786,7 +750,6 @@ namespace
         m_SkyboxFromLUT.m_VSBufferSetPtr     = 0;
         m_SkyboxFromLUT.m_GSBufferSetPtr     = 0;
         m_SkyboxFromLUT.m_PSBufferSetPtr     = 0;
-        m_SkyboxFromLUT.m_InputLayoutPtr     = 0;
         m_SkyboxFromLUT.m_MeshPtr            = 0;
         m_SkyboxFromLUT.m_VertexBufferSetPtr = 0;
         m_SkyboxFromLUT.m_IndexBufferPtr     = 0;
@@ -794,6 +757,8 @@ namespace
 
         m_LookUpTexturePtr    = 0;
         m_LookupTextureSetPtr = 0;
+
+        m_P3T2CubemapInputLayoutPtr = 0;
 
         m_PSPrecomputeConstants = 0;
 
@@ -1101,7 +1066,6 @@ namespace
         CShaderPtr        PSPtr            = m_SkyboxFromAtmosphere.m_PSPtr;
         CBufferSetPtr     GSBufferSetPtr   = m_SkyboxFromAtmosphere.m_GSBufferSetPtr;
         CBufferSetPtr     PSBufferSetPtr   = m_SkyboxFromAtmosphere.m_PSBufferSetPtr;
-        CInputLayoutPtr   InputLayoutPtr   = m_SkyboxFromAtmosphere.m_InputLayoutPtr;
         CMeshPtr          MeshPtr          = m_SkyboxFromAtmosphere.m_MeshPtr;
 
         // -----------------------------------------------------------------------------
@@ -1133,10 +1097,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Environment to cube map
         // -----------------------------------------------------------------------------           
-
-        // -----------------------------------------------------------------------------
-        // Setup
-        // -----------------------------------------------------------------------------
         ContextManager::SetTargetSet(_pOutput->m_RenderContextPtr->GetTargetSet());
 
         ContextManager::SetViewPortSet(_pOutput->m_RenderContextPtr->GetViewPortSet());
@@ -1159,7 +1119,7 @@ namespace
 
         ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
-        ContextManager::SetInputLayout(InputLayoutPtr);
+        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface(0)->GetMVPShaderVS()->GetInputLayout());
 
         ContextManager::SetConstantBuffer(2, GSBufferSetPtr->GetBuffer(0));
 
@@ -1239,7 +1199,6 @@ namespace
         CShaderPtr        PSPtr            = m_SkyboxFromPanorama.m_PSPtr;
         CBufferSetPtr     GSBufferSetPtr   = m_SkyboxFromPanorama.m_GSBufferSetPtr;
         CBufferSetPtr     PSBufferSetPtr   = m_SkyboxFromPanorama.m_PSBufferSetPtr;
-        CInputLayoutPtr   InputLayoutPtr   = m_SkyboxFromPanorama.m_InputLayoutPtr;
         CMeshPtr          MeshPtr          = m_SkyboxFromPanorama.m_MeshPtr;
         CTextureSetPtr    TextureSetPtr    = m_SkyboxFromPanorama.m_TextureSetPtr;
 
@@ -1276,7 +1235,7 @@ namespace
 
         ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
-        ContextManager::SetInputLayout(InputLayoutPtr);
+        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface(0)->GetMVPShaderVS()->GetInputLayout());
 
         ContextManager::SetConstantBuffer(2, GSBufferSetPtr->GetBuffer(0));
 
@@ -1344,7 +1303,6 @@ namespace
         CShaderPtr        PSPtr            = m_SkyboxFromCubemap.m_PSPtr;
         CBufferSetPtr     GSBufferSetPtr   = m_SkyboxFromCubemap.m_GSBufferSetPtr;
         CBufferSetPtr     PSBufferSetPtr   = m_SkyboxFromCubemap.m_PSBufferSetPtr;
-        CInputLayoutPtr   InputLayoutPtr   = m_SkyboxFromCubemap.m_InputLayoutPtr;
         CMeshPtr          MeshPtr          = m_SkyboxFromCubemap.m_MeshPtr;
         CTextureSetPtr    TextureSetPtr    = m_SkyboxFromCubemap.m_TextureSetPtr;
 
@@ -1381,7 +1339,7 @@ namespace
 
         ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
-        ContextManager::SetInputLayout(InputLayoutPtr);
+        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface(0)->GetMVPShaderVS()->GetInputLayout());
 
         ContextManager::SetConstantBuffer(2, GSBufferSetPtr->GetBuffer(0));
 
@@ -1450,7 +1408,6 @@ namespace
         CBufferSetPtr     VSBufferSetPtr   = m_SkyboxFromTexture.m_VSBufferSetPtr;
         CBufferSetPtr     GSBufferSetPtr   = m_SkyboxFromTexture.m_GSBufferSetPtr;
         CBufferSetPtr     PSBufferSetPtr   = m_SkyboxFromTexture.m_PSBufferSetPtr;
-        CInputLayoutPtr   InputLayoutPtr   = m_SkyboxFromTexture.m_InputLayoutPtr;
         CMeshPtr          MeshPtr          = m_SkyboxFromTexture.m_MeshPtr;
         CTextureSetPtr    TextureSetPtr    = m_SkyboxFromTexture.m_TextureSetPtr;
 
@@ -1507,7 +1464,7 @@ namespace
 
         ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
-        ContextManager::SetInputLayout(InputLayoutPtr);
+        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface(0)->GetMVPShaderVS()->GetInputLayout());
 
         ContextManager::SetConstantBuffer(1, VSBufferSetPtr->GetBuffer(0));
 
@@ -1581,7 +1538,6 @@ namespace
         CBufferSetPtr     VSBufferSetPtr     = m_SkyboxFromGeometry.m_VSBufferSetPtr;
         CBufferSetPtr     GSBufferSetPtr     = m_SkyboxFromGeometry.m_GSBufferSetPtr;
         CBufferSetPtr     PSBufferSetPtr     = m_SkyboxFromGeometry.m_PSBufferSetPtr;
-        CInputLayoutPtr   InputLayoutPtr     = m_SkyboxFromGeometry.m_InputLayoutPtr;
         CBufferPtr        VertexBufferSetPtr = m_SkyboxFromGeometry.m_VertexBufferSetPtr;
         CBufferPtr        IndexBufferPtr     = m_SkyboxFromGeometry.m_IndexBufferPtr;
         CTextureSetPtr    TextureSetPtr      = m_SkyboxFromGeometry.m_TextureSetPtr;
@@ -1669,7 +1625,7 @@ namespace
 
         ContextManager::SetIndexBuffer(IndexBufferPtr, 0);
 
-        ContextManager::SetInputLayout(InputLayoutPtr);
+        ContextManager::SetInputLayout(m_P3T2CubemapInputLayoutPtr);
 
         ContextManager::SetConstantBuffer(1, VSBufferSetPtr->GetBuffer(0));
 
@@ -1743,7 +1699,6 @@ namespace
         CBufferSetPtr     VSBufferSetPtr   = m_SkyboxFromLUT.m_VSBufferSetPtr;
         CBufferSetPtr     GSBufferSetPtr   = m_SkyboxFromLUT.m_GSBufferSetPtr;
         CBufferSetPtr     PSBufferSetPtr   = m_SkyboxFromLUT.m_PSBufferSetPtr;
-        CInputLayoutPtr   InputLayoutPtr   = m_SkyboxFromLUT.m_InputLayoutPtr;
         CMeshPtr          MeshPtr          = m_SkyboxFromLUT.m_MeshPtr;
         CTextureSetPtr    TextureSetPtr    = m_SkyboxFromLUT.m_TextureSetPtr;
 
@@ -1798,7 +1753,7 @@ namespace
 
         ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
 
-        ContextManager::SetInputLayout(InputLayoutPtr);
+        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface(0)->GetMVPShaderVS()->GetInputLayout());
 
         ContextManager::SetConstantBuffer(2, GSBufferSetPtr->GetBuffer(0));
         ContextManager::SetConstantBuffer(3, GSBufferSetPtr->GetBuffer(1));
