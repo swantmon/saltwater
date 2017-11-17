@@ -1,6 +1,8 @@
 
 #pragma once
 
+#ifndef __ANDROID__
+
 #include "base/base_vector4.h"
 
 #include "core/core_lua_export.h"
@@ -220,7 +222,7 @@ LUA_DEFINE_FUNCTION(BaseFloat4ObjFuncs, __tostring)
 
     std::string String;
 
-    // String = "{" + std::to_string(rVector[0]) + ", " + std::to_string(rVector[1]) + ", " + std::to_string(rVector[2]) + ", " + std::to_string(rVector[3]) + "}";
+    String = "{" + std::to_string(rVector[0]) + ", " + std::to_string(rVector[1]) + ", " + std::to_string(rVector[2]) + ", " + std::to_string(rVector[3]) + "}";
 
     Core::Lua::State::PushString(_State, String.c_str());
 
@@ -246,3 +248,5 @@ LUA_DEFINE_FUNCTION(BaseFloat4LibFuncs, New)
 
     return 1;
 }
+
+#endif

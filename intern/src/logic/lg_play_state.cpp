@@ -31,8 +31,6 @@
 #include "logic/lg_play_state.h"
 #include "logic/lg_script_manager.h"
 
-#include "mr/mr_control_manager.h"
-
 namespace
 {
     class CLgPlayState : private Base::CUncopyable
@@ -110,8 +108,6 @@ namespace
         Dt::ScriptManager     ::Update();
 
         Lg::ScriptManager::Update();
-
-        MR::ControlManager::Update();
 
         // -----------------------------------------------------------------------------
         // Get main camera entity and set this entity to the camera project

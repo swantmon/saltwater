@@ -241,6 +241,8 @@ namespace
     {
         CApplication::SApplicationSetup* AppSetup = static_cast<CApplication::SApplicationSetup*>(_pAndroidApp->userData);
 
+        BASE_UNUSED(AppSetup);
+
         if (AInputEvent_getType(_pEvent) == AINPUT_EVENT_TYPE_MOTION) 
         {
             return 1;

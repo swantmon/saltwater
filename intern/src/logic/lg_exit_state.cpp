@@ -28,8 +28,6 @@
 #include "logic/lg_exit_state.h"
 #include "logic/lg_script_manager.h"
 
-#include "mr/mr_control_manager.h"
-
 namespace
 {
     class CLgExitState : private Base::CUncopyable
@@ -49,11 +47,6 @@ namespace
 {
     int CLgExitState::OnEnter()
     {
-        // -----------------------------------------------------------------------------
-        // External
-        // -----------------------------------------------------------------------------
-        MR::ControlManager::OnExit();
-
         // -----------------------------------------------------------------------------
         // Logic
         // -----------------------------------------------------------------------------

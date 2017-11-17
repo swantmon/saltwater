@@ -14,7 +14,11 @@
 #include "data/data_entity_manager.h"
 #include "data/data_script_manager.h"
 
+#ifndef __ANDROID__
+
 #include "gui/gui_script_interface.h"
+
+#endif
 
 #include "logic/lg_script_manager.h"
 
@@ -186,6 +190,8 @@ namespace
     }
 } // namespace 
 
+#ifndef __ANDROID__
+
 namespace 
 {
 	LUA_REGISTER_OBJECT(Core::Lua::Main::GetMainState(), BaseFloat3ObjFuncs, Base_Vector3)
@@ -223,6 +229,8 @@ namespace
 
     LUA_REGISTER_FUNCTIONS(Core::Lua::Main::GetMainState(), ScriptFunctions)
 } // namespace 
+
+#endif
 
 namespace Lg
 {

@@ -1,6 +1,8 @@
 
 #pragma once
 
+#ifndef __ANDROID__
+
 #include "core/core_lua_export.h"
 
 #include "base/base_matrix3x3.h"
@@ -145,10 +147,10 @@ LUA_DEFINE_FUNCTION(BaseMatrix3x3ObjFuncs, __tostring)
 
     std::string String;
 
-//     String = 
-//         "{{" + std::to_string(rMatrix[0][0]) + ", " + std::to_string(rMatrix[0][1]) + ", " + std::to_string(rMatrix[0][2]) + "}," 
-//          "{" + std::to_string(rMatrix[1][0]) + ", " + std::to_string(rMatrix[1][1]) + ", " + std::to_string(rMatrix[1][2]) + "},"
-//          "{" + std::to_string(rMatrix[2][0]) + ", " + std::to_string(rMatrix[2][1]) + ", " + std::to_string(rMatrix[2][2]) + "}}";
+    String = 
+        "{{" + std::to_string(rMatrix[0][0]) + ", " + std::to_string(rMatrix[0][1]) + ", " + std::to_string(rMatrix[0][2]) + "}," 
+         "{" + std::to_string(rMatrix[1][0]) + ", " + std::to_string(rMatrix[1][1]) + ", " + std::to_string(rMatrix[1][2]) + "},"
+         "{" + std::to_string(rMatrix[2][0]) + ", " + std::to_string(rMatrix[2][1]) + ", " + std::to_string(rMatrix[2][2]) + "}}";
 
     Core::Lua::State::PushString(_State, String.c_str());
 
@@ -169,3 +171,5 @@ LUA_DEFINE_FUNCTION(BaseMatrix3x3LibFuncs, New)
 
     return 1;
 }
+
+#endif

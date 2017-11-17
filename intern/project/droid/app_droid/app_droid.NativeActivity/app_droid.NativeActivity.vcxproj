@@ -77,6 +77,9 @@
     <ProjectReference Include="..\..\graphic\graphic.vcxproj">
       <Project>{b911725e-f4e9-4120-b302-6d0fdf3f3ce4}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\gui\gui.vcxproj">
+      <Project>{2d216c2f-b60b-4fa7-b263-c6c31f233caf}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\logic\logic.vcxproj">
       <Project>{81893477-890c-455d-94c5-1027376a3067}</Project>
     </ProjectReference>
@@ -211,7 +214,7 @@
       <CppLanguageStandard>c++1y</CppLanguageStandard>
     </ClCompile>
     <Link>
-      <LibraryDependencies>base;core;data;graphic;GLESv3;EGL;m;%(LibraryDependencies)</LibraryDependencies>
+      <LibraryDependencies>base;camera;core;data;graphic;gui;logic;GLESv3;EGL;m;%(LibraryDependencies)</LibraryDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)..\..\build\$(Platform)\;%(AdditionalLibraryDirectories);$(ToolchainPrebuiltPath)\lib\gcc\$(ToolchainName)\$(ToolchainFullVersionName);$(StlLibraryPath)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -225,7 +228,7 @@
       <CppLanguageStandard>c++1y</CppLanguageStandard>
     </ClCompile>
     <Link>
-      <LibraryDependencies>base;core;data;graphic;GLESv3;EGL;m;%(LibraryDependencies)</LibraryDependencies>
+      <LibraryDependencies>base;camera;core;data;graphic;gui;logic;GLESv3;EGL;m;%(LibraryDependencies)</LibraryDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)..\..\build\$(Platform)\;%(AdditionalLibraryDirectories);$(ToolchainPrebuiltPath)\lib\gcc\$(ToolchainName)\$(ToolchainFullVersionName);$(StlLibraryPath)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -239,7 +242,7 @@
       <CppLanguageStandard>c++1y</CppLanguageStandard>
     </ClCompile>
     <Link>
-      <LibraryDependencies>base;core;data;graphic;GLESv3;EGL;m;%(LibraryDependencies)</LibraryDependencies>
+      <LibraryDependencies>base;camera;core;data;graphic;gui;logic;GLESv3;EGL;m;%(LibraryDependencies)</LibraryDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)..\..\build\$(Platform)\;%(AdditionalLibraryDirectories);$(ToolchainPrebuiltPath)\lib\gcc\$(ToolchainName)\$(ToolchainFullVersionName)\$(PlatformShortName);$(StlLibraryPath)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -253,7 +256,7 @@
       <CppLanguageStandard>c++1y</CppLanguageStandard>
     </ClCompile>
     <Link>
-      <LibraryDependencies>base;core;data;graphic;GLESv3;EGL;m;%(LibraryDependencies)</LibraryDependencies>
+      <LibraryDependencies>base;camera;core;data;graphic;gui;logic;GLESv3;EGL;m;%(LibraryDependencies)</LibraryDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)..\..\build\$(Platform)\;%(AdditionalLibraryDirectories);$(ToolchainPrebuiltPath)\lib\gcc\$(ToolchainName)\$(ToolchainFullVersionName)\$(PlatformShortName);$(StlLibraryPath)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -267,7 +270,7 @@
       <CppLanguageStandard>c++1y</CppLanguageStandard>
     </ClCompile>
     <Link>
-      <LibraryDependencies>base;core;data;graphic;GLESv3;EGL;m;%(LibraryDependencies)</LibraryDependencies>
+      <LibraryDependencies>base;camera;core;data;graphic;gui;logic;GLESv3;EGL;m;%(LibraryDependencies)</LibraryDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)..\..\build\$(Platform)\;%(AdditionalLibraryDirectories);$(ToolchainPrebuiltPath)\lib\gcc\x86_64-linux-android\$(ToolchainFullVersionName);$(StlLibraryPath)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -281,7 +284,7 @@
       <CppLanguageStandard>c++1y</CppLanguageStandard>
     </ClCompile>
     <Link>
-      <LibraryDependencies>base;core;data;graphic;GLESv3;EGL;m;%(LibraryDependencies)</LibraryDependencies>
+      <LibraryDependencies>base;camera;core;data;graphic;gui;logic;GLESv3;EGL;m;%(LibraryDependencies)</LibraryDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)..\..\build\$(Platform)\;%(AdditionalLibraryDirectories);$(ToolchainPrebuiltPath)\lib\gcc\x86_64-linux-android\$(ToolchainFullVersionName);$(StlLibraryPath)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -295,7 +298,7 @@
       <CppLanguageStandard>c++1y</CppLanguageStandard>
     </ClCompile>
     <Link>
-      <LibraryDependencies>base;core;data;graphic;GLESv3;EGL;m;%(LibraryDependencies)</LibraryDependencies>
+      <LibraryDependencies>base;camera;core;data;graphic;gui;logic;GLESv3;EGL;m;%(LibraryDependencies)</LibraryDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)..\..\build\$(Platform)\;%(AdditionalLibraryDirectories);$(ToolchainPrebuiltPath)\lib\gcc\i686-linux-android\$(ToolchainFullVersionName);$(StlLibraryPath)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -309,7 +312,7 @@
       <CppLanguageStandard>c++1y</CppLanguageStandard>
     </ClCompile>
     <Link>
-      <LibraryDependencies>base;core;data;graphic;GLESv3;EGL;m;%(LibraryDependencies)</LibraryDependencies>
+      <LibraryDependencies>base;camera;core;data;graphic;gui;logic;GLESv3;EGL;m;%(LibraryDependencies)</LibraryDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)..\..\build\$(Platform)\;%(AdditionalLibraryDirectories);$(ToolchainPrebuiltPath)\lib\gcc\i686-linux-android\$(ToolchainFullVersionName);$(StlLibraryPath)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>

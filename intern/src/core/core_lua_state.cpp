@@ -1,4 +1,6 @@
 
+#pragma once
+
 #include "core/core_precompiled.h"
 
 #include "base/base_console.h"
@@ -10,9 +12,10 @@
 #include "core/core_lua_state.h"
 #include "core/core_lua_typedef.h"
 
-#include "lua.hpp"
-
 using namespace Core::Lua;
+
+#ifndef __ANDROID__
+#include "lua.hpp"
 
 namespace 
 {
@@ -26,6 +29,8 @@ namespace
         }
     }
 } // namespace 
+
+#endif
 
 namespace 
 {
@@ -94,9 +99,11 @@ namespace
 
     private:
 
+#ifndef __ANDROID__
         lua_State* GetNativeState(BState _State);
         void Push(lua_State* _pState, const CArgument& _rArgument);
         void Pop(lua_State* _pState, CResult& _rResult);
+#endif
     };
 } // namespace 
 
@@ -118,6 +125,7 @@ namespace
 
     BState CLuaStateManager::CreateState(const Base::Char* _pName)
     {
+#ifndef __ANDROID__
         BASE_UNUSED(_pName);
 
         lua_State* pLuaState;
@@ -139,21 +147,27 @@ namespace
         luaL_openlibs(pLuaState);
 
         return pLuaState;
+#else
+        return 0;
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CLuaStateManager::DeleteState(BState _State)
     {
+#ifndef __ANDROID__
         lua_State* pNativeState = GetNativeState(_State);
 
         lua_close(pNativeState);
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CLuaStateManager::LoadScript(BState _State, const Base::Char* _pFilename, int _Flags)
     {
+#ifndef __ANDROID__
         int        Result;
         lua_State* pNativeState = GetNativeState(_State);
 
@@ -179,12 +193,14 @@ namespace
                 }
             }
         }
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     bool CLuaStateManager::CallFunction(BState _State, const Base::Char* _pFunction, const CArgument** _ppArguments, unsigned int _NumberOfArguments, CResult* _pResult)
     {
+#ifndef __ANDROID__
         int        Result;
         lua_State* pNativeState = GetNativeState(_State);
 
@@ -227,34 +243,42 @@ namespace
         }
 
         return false;
+#else
+        return false;
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CLuaStateManager::RequireLibrary(BState _State, const Base::Char* _pLibraryName, FLuaCFunc _pFunction)
     {
+#ifndef __ANDROID__
         assert(_pLibraryName != 0 && _pFunction != 0);
 
         lua_State* pNativeState = GetNativeState(_State);
 
         luaL_requiref(pNativeState, _pLibraryName, reinterpret_cast<lua_CFunction>(_pFunction), 1);
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CLuaStateManager::RegisterFunction(BState _State, const Base::Char* _pFunctionName, FLuaCFunc _pFunction)
     {
+#ifndef __ANDROID__
         assert(_pFunctionName != 0 && _pFunction != 0);
 
         lua_State* pNativeState = GetNativeState(_State);
 
         lua_register(pNativeState, _pFunctionName, reinterpret_cast<lua_CFunction>(_pFunction));
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CLuaStateManager::RegisterLibrary(BState _State, const Base::Char* _pLibraryName, const Base::Char* _pFunctionName, FLuaCFunc _pFunction)
     {
+#ifndef __ANDROID__
         assert(_pLibraryName != 0 && _pFunctionName != 0 && _pFunction != 0);
 
         lua_State* pNativeState = GetNativeState(_State);
@@ -298,12 +322,14 @@ namespace
         lua_pushstring(pNativeState, _pFunctionName);
         lua_pushcfunction(pNativeState, reinterpret_cast<lua_CFunction>(_pFunction));
         lua_settable(pNativeState, -3);
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CLuaStateManager::RegisterObject(BState _State, const Base::Char* _pObjectName, const Base::Char* _pFunctionName, FLuaCFunc _pFunction)
     {
+#ifndef __ANDROID__
         lua_State* pNativeState = GetNativeState(_State);
 
         // -----------------------------------------------------------------------------
@@ -334,117 +360,149 @@ namespace
         // Pop metatable
         // -----------------------------------------------------------------------------
         lua_pop(pNativeState, 1);
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CLuaStateManager::PushBoolean(BState _State, bool _Value)
     {
-        ::lua_pushboolean(GetNativeState(_State), _Value);
+#ifndef __ANDROID__ 
+        ::lua_pushboolean(GetNativeState(_State), _Value); 
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CLuaStateManager::PushSChar(BState _State, signed char _Value)
     {
+#ifndef __ANDROID__ 
         ::lua_pushnumber(GetNativeState(_State), static_cast<lua_Number>(_Value));
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CLuaStateManager::PushUChar(BState _State, unsigned char _Value)
     {
+#ifndef __ANDROID__ 
         ::lua_pushnumber(GetNativeState(_State), static_cast<lua_Number>(_Value));
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CLuaStateManager::PushSShort(BState _State, signed short _Value)
     {
+#ifndef __ANDROID__ 
         ::lua_pushnumber(GetNativeState(_State), static_cast<lua_Number>(_Value));
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CLuaStateManager::PushUShort(BState _State, unsigned short _Value)
     {
+#ifndef __ANDROID__ 
         ::lua_pushnumber(GetNativeState(_State), static_cast<lua_Number>(_Value));
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CLuaStateManager::PushSInt(BState _State, signed int _Value)
     {
+#ifndef __ANDROID__ 
         ::lua_pushnumber(GetNativeState(_State), static_cast<lua_Number>(_Value));
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CLuaStateManager::PushUInt(BState _State, unsigned int _Value)
     {
+#ifndef __ANDROID__ 
         ::lua_pushnumber(GetNativeState(_State), static_cast<lua_Number>(_Value));
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CLuaStateManager::PushSLong(BState _State, signed long _Value)
     {
+#ifndef __ANDROID__ 
         ::lua_pushnumber(GetNativeState(_State), static_cast<lua_Number>(_Value));
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CLuaStateManager::PushULong(BState _State, unsigned long _Value)
     {
+#ifndef __ANDROID__ 
         ::lua_pushnumber(GetNativeState(_State), static_cast<lua_Number>(_Value));
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CLuaStateManager::PushSLongLong(BState _State, signed long long _Value)
     {
+#ifndef __ANDROID__ 
         ::lua_pushnumber(GetNativeState(_State), static_cast<lua_Number>(_Value));
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CLuaStateManager::PushULongLong(BState _State, unsigned long long _Value)
     {
-        ::lua_pushnumber(GetNativeState(_State), static_cast<lua_Number>(_Value));
+#ifndef __ANDROID__ 
+        ::lua_pushnumber(GetNativeState(_State), static_cast<lua_Number>(_Value)); 
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CLuaStateManager::PushFloat(BState _State, float _Value)
     {
-        ::lua_pushnumber(GetNativeState(_State), static_cast<lua_Number>(_Value));
+#ifndef __ANDROID__ 
+        ::lua_pushnumber(GetNativeState(_State), static_cast<lua_Number>(_Value)); 
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CLuaStateManager::PushDouble(BState _State, double _Value)
     {
-        ::lua_pushnumber(GetNativeState(_State), static_cast<lua_Number>(_Value));
+#ifndef __ANDROID__ 
+        ::lua_pushnumber(GetNativeState(_State), static_cast<lua_Number>(_Value)); 
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CLuaStateManager::PushLongDouble(BState _State, long double _Value)
     {
-        ::lua_pushnumber(GetNativeState(_State), static_cast<lua_Number>(_Value));
+#ifndef __ANDROID__ 
+        ::lua_pushnumber(GetNativeState(_State), static_cast<lua_Number>(_Value)); 
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CLuaStateManager::PushString(BState _State, const Base::Char* _pString)
     {
-        ::lua_pushlstring(GetNativeState(_State), _pString, strlen(_pString));
+#ifndef __ANDROID__ 
+        ::lua_pushlstring(GetNativeState(_State), _pString, strlen(_pString)); 
+#endif
     }
     
     // -----------------------------------------------------------------------------
 
     void* CLuaStateManager::PushUserData(BState _State, unsigned int _NumberOfBytes, const Base::Char* _pObjectName)
     {
+#ifndef __ANDROID__ 
         void* pUserData = 0;
 
         pUserData = lua_newuserdata(GetNativeState(_State), _NumberOfBytes);
@@ -452,6 +510,9 @@ namespace
         lua_setmetatable(GetNativeState(_State), -2);
 
         return pUserData;
+#else
+        return 0;
+#endif
     }
 
     // -----------------------------------------------------------------------------
@@ -460,170 +521,251 @@ namespace
     {
         BASE_UNUSED(_DefaultValue);
 
+#ifndef __ANDROID__ 
         return ::lua_toboolean(GetNativeState(_State), _IndexOfStack) != 0;
+#else
+        return false;
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     signed char CLuaStateManager::GetSChar(BState _State, int _IndexOfStack, signed char _DefaultValue)
     {
+#ifndef __ANDROID__ 
         const lua_Number Value = ::luaL_optnumber(GetNativeState(_State), _IndexOfStack, static_cast<lua_Number>(_DefaultValue));
 
         return static_cast<signed char>(Value);
+#else
+        return 0;
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     unsigned char CLuaStateManager::GetUChar(BState _State, int _IndexOfStack, unsigned char _DefaultValue)
     {
+#ifndef __ANDROID__ 
         const lua_Number Value = ::luaL_optnumber(GetNativeState(_State), _IndexOfStack, static_cast<lua_Number>(_DefaultValue));
 
         return static_cast<unsigned char>(Value);
+#else
+        return 0;
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     signed short CLuaStateManager::GetSShort(BState _State, int _IndexOfStack, signed short _DefaultValue)
     {
+#ifndef __ANDROID__ 
         const lua_Number Value = ::luaL_optnumber(GetNativeState(_State), _IndexOfStack, static_cast<lua_Number>(_DefaultValue));
 
         return static_cast<signed short>(Value);
+#else
+        return 0;
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     unsigned short CLuaStateManager::GetUShort(BState _State, int _IndexOfStack, unsigned short _DefaultValue)
     {
+#ifndef __ANDROID__ 
         const lua_Number Value = ::luaL_optnumber(GetNativeState(_State), _IndexOfStack, static_cast<lua_Number>(_DefaultValue));
 
         return static_cast<unsigned short>(Value);
+#else
+        return 0;
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     signed int CLuaStateManager::GetSInt(BState _State, int _IndexOfStack, signed int _DefaultValue)
     {
+#ifndef __ANDROID__ 
         const lua_Number Value = ::luaL_optnumber(GetNativeState(_State), _IndexOfStack, static_cast<lua_Number>(_DefaultValue));
 
         return static_cast<signed int>(Value);
+#else
+        return 0;
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     unsigned int CLuaStateManager::GetUInt(BState _State, int _IndexOfStack, unsigned int _DefaultValue)
     {
+#ifndef __ANDROID__ 
         const lua_Number Value = ::luaL_optnumber(GetNativeState(_State), _IndexOfStack, static_cast<lua_Number>(_DefaultValue));
 
         return static_cast<unsigned int>(Value);
+#else
+        return 0;
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     signed long CLuaStateManager::GetSLong(BState _State, int _IndexOfStack, signed long _DefaultValue)
     {
+#ifndef __ANDROID__ 
         const lua_Number Value = ::luaL_optnumber(GetNativeState(_State), _IndexOfStack, static_cast<lua_Number>(_DefaultValue));
 
         return static_cast<signed long>(Value);
+#else
+        return 0;
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     unsigned long CLuaStateManager::GetULong(BState _State, int _IndexOfStack, unsigned long _DefaultValue)
     {
+#ifndef __ANDROID__ 
         const lua_Number Value = ::luaL_optnumber(GetNativeState(_State), _IndexOfStack, static_cast<lua_Number>(_DefaultValue));
 
         return static_cast<unsigned long>(Value);
+#else
+        return 0;
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     signed long long CLuaStateManager::GetSLongLong(BState _State, int _IndexOfStack, signed long long _DefaultValue)
     {
+#ifndef __ANDROID__ 
         const lua_Number Value = ::luaL_optnumber(GetNativeState(_State), _IndexOfStack, static_cast<lua_Number>(_DefaultValue));
 
         return static_cast<signed long long>(Value);
+#else
+        return 0;
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     unsigned long long CLuaStateManager::GetULongLong(BState _State, int _IndexOfStack, unsigned long long _DefaultValue)
     {
+#ifndef __ANDROID__ 
         const lua_Number Value = ::luaL_optnumber(GetNativeState(_State), _IndexOfStack, static_cast<lua_Number>(_DefaultValue));
 
         return static_cast<unsigned long long>(Value);
+#else
+        return 0;
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     float CLuaStateManager::GetFloat(BState _State, int _IndexOfStack, float _DefaultValue)
     {
+#ifndef __ANDROID__ 
         const lua_Number Value = ::luaL_optnumber(GetNativeState(_State), _IndexOfStack, static_cast<lua_Number>(_DefaultValue));
 
         return static_cast<float>(Value);
+#else
+        return 0;
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     double CLuaStateManager::GetDouble(BState _State, int _IndexOfStack, double _DefaultValue)
     {
+#ifndef __ANDROID__ 
         const lua_Number Value = ::luaL_optnumber(GetNativeState(_State), _IndexOfStack, static_cast<lua_Number>(_DefaultValue));
 
         return static_cast<double>(Value);
+#else
+        return 0;
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     long double CLuaStateManager::GetLongDouble(BState _State, int _IndexOfStack, long double _DefaultValue)
     {
+#ifndef __ANDROID__ 
         const lua_Number Value = ::luaL_optnumber(GetNativeState(_State), _IndexOfStack, static_cast<lua_Number>(_DefaultValue));
 
         return static_cast<long double>(Value);
+#else
+        return 0;
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     const Base::Char* CLuaStateManager::GetString(BState _State, int _IndexOfStack)
     {
+#ifndef __ANDROID__ 
         return luaL_optstring(GetNativeState(_State), _IndexOfStack, "");
+#else
+        return 0;
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void* CLuaStateManager::GetUserData(BState _State, int _IndexOfStack)
     {
+#ifndef __ANDROID__ 
         return lua_touserdata(GetNativeState(_State), _IndexOfStack);
+#else
+        return 0;
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     bool CLuaStateManager::IsBoolean(BState _State, int _IndexOfStack)
     {
+#ifndef __ANDROID__ 
         return lua_isboolean(GetNativeState(_State), _IndexOfStack) == true;
+#else
+        return false;
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     bool CLuaStateManager::IsNumber(BState _State, int _IndexOfStack)
     {
+#ifndef __ANDROID__ 
         return ::lua_isnumber(GetNativeState(_State), _IndexOfStack) == 1;
+#else
+        return false;
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     bool CLuaStateManager::IsString(BState _State, int _IndexOfStack)
     {
+#ifndef __ANDROID__ 
         return ::lua_isstring(GetNativeState(_State), _IndexOfStack) == 1;
+#else
+        return false;
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     bool CLuaStateManager::IsPointer(BState _State, int _IndexOfStack)
     {
+#ifndef __ANDROID__ 
         return lua_islightuserdata(GetNativeState(_State), _IndexOfStack) == 1;
+#else
+        return false;
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
+#ifndef __ANDROID__ 
     lua_State* CLuaStateManager::GetNativeState(BState _State)
     {
         return static_cast<lua_State*>(_State);
@@ -675,7 +817,9 @@ namespace
 
         ::lua_pop(_pState, 1);
     }
+#endif
 } // namespace 
+
 
 namespace Core
 {
@@ -1036,3 +1180,4 @@ namespace State
 } // namespace State
 } // namespace Lua
 } // namespace Core
+

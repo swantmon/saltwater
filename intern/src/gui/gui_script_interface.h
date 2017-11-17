@@ -1,6 +1,8 @@
 
 #pragma once
 
+#ifndef __ANDROID__
+
 #include "core/core_lua_export.h"
 #include "core/core_lua_main.h"
 #include "core/core_lua_state.h"
@@ -103,3 +105,5 @@ LUA_DEFINE_FUNCTION(GuiInputLibFuncs, GetMouseScrollDelta)
 
     return 1;
 }
+
+#endif

@@ -1,6 +1,8 @@
 
 #pragma once
 
+#ifndef __ANDROID__
+
 #include "core/core_lua_export.h"
 
 #include "core/core_lua_state.h"
@@ -19,3 +21,5 @@ LUA_DEFINE_FUNCTION(CoreTimeLibFuncs, DeltaTime)
 
     return 1;
 }
+
+#endif

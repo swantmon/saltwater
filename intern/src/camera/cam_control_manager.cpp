@@ -3,6 +3,9 @@
 
 #include "base/base_console.h"
 #include "base/base_input_event.h"
+#include "base/base_memory.h"
+#include "base/base_uncopyable.h"
+#include "base/base_singleton.h"
 
 #include "camera/cam_control_manager.h"
 #include "camera/cam_editor_control.h"
@@ -13,10 +16,6 @@
 #include "gui/gui_event_handler.h"
 
 #include "graphic/gfx_camera_interface.h"
-
-#include "base/base_memory.h"
-#include "base/base_uncopyable.h"
-#include "base/base_singleton.h"
 
 using namespace Cam;
 
