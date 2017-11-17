@@ -157,10 +157,18 @@ void main()
 
             if (AABBMin.x > AABBMax.x)
             {
-                vec2 Temp = AABBMin;
-                AABBMin = AABBMax;
-                AABBMax = Temp;
+                float Temp = AABBMin.x;
+                AABBMin.x = AABBMax.x;
+                AABBMax.x = Temp;
             }
+
+            if (AABBMin.y > AABBMax.y)
+            {
+                float Temp = AABBMin.y;
+                AABBMin.y = AABBMax.y;
+                AABBMax.y = Temp;
+            }
+
             AABBMin -= 1.0f / g_Resolution;
             AABBMax += 1.0f / g_Resolution;
 
