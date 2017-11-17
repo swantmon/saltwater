@@ -1250,14 +1250,14 @@ namespace
 
         if (_TextureBasePtr->GetDimension() == CTextureBase::Dim2D)
         {
-            CNativeTexture2D& rNativeTexture = *static_cast<CNativeTexture2D*>(m_TextureUnits[_Unit].GetPtr());
+            CNativeTexture2D& rNativeTexture = *static_cast<CNativeTexture2D*>(_TextureBasePtr.GetPtr());
 
             TextureBinding = rNativeTexture.m_NativeDimension;
             TextureHandle  = rNativeTexture.m_NativeTexture;
         }
         else if (_TextureBasePtr->GetDimension() == CTextureBase::Dim3D)
         {
-            CNativeTexture3D& rNativeTexture = *static_cast<CNativeTexture3D*>(m_TextureUnits[_Unit].GetPtr());
+            CNativeTexture3D& rNativeTexture = *static_cast<CNativeTexture3D*>(_TextureBasePtr.GetPtr());
 
             TextureBinding = rNativeTexture.m_NativeDimension;
             TextureHandle  = rNativeTexture.m_NativeTexture;
