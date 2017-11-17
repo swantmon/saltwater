@@ -704,9 +704,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Precompute Scattering
         // -----------------------------------------------------------------------------
-        BASE_CONSOLE_INFO("13.1");
         PrecomputeScattering();
-        BASE_CONSOLE_INFO("13.2");
     }
 
     // -----------------------------------------------------------------------------
@@ -1903,21 +1901,20 @@ namespace
         // -----------------------------------------------------------------------------
         // Target sets & view ports
         // -----------------------------------------------------------------------------
-        BASE_CONSOLE_INFO("13.1.1");
         CTargetSetPtr m_TransmittanceTableTS = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_TransmittanceTable));
-        BASE_CONSOLE_INFO("13.1.2");
+
         CTargetSetPtr m_DeltaETS = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_DeltaE));
-        BASE_CONSOLE_INFO("13.1.3");
+
         CTargetSetPtr m_DeltaSRSMTS = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_DeltaSR), static_cast<CTextureBasePtr>(m_DeltaSM));
-        BASE_CONSOLE_INFO("13.1.4");
+
         CTargetSetPtr m_IrradianceTableTS = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_IrradianceTable));
-        BASE_CONSOLE_INFO("13.1.5");
+
         CTargetSetPtr m_InscatterTableTS = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_InscatterTable));
-        BASE_CONSOLE_INFO("13.1.6");
+
         CTargetSetPtr m_DeltaJTS = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_DeltaJ));
-        BASE_CONSOLE_INFO("13.1.7");
+
         CTargetSetPtr m_DeltaSRTS = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(m_DeltaSR));
-        BASE_CONSOLE_INFO("13.1.8");
+
         SViewPortDescriptor ViewPortDesc;
 
         ViewPortDesc.m_TopLeftX = 0;
@@ -2008,7 +2005,6 @@ namespace
         CShaderPtr m_InscatterCopySingleMaterial = ShaderManager::CompilePS("scattering/scattering_inscatter_copy_single.glsl", "main");
 
         CShaderPtr m_InscatterCopyMultipleMaterial = ShaderManager::CompilePS("scattering/scattering_inscatter_copy_multiple.glsl", "main");
-
 
         // -----------------------------------------------------------------------------
         // Mesh

@@ -1347,9 +1347,6 @@ namespace
             rTexture.m_NativeUsage          = GLUsage;
             rTexture.m_NativeInternalFormat = GLInternalFormat;
             rTexture.m_NativeDimension      = GL_TEXTURE_3D;
-
-
-            BASE_CONSOLE_INFOV("Create 3d texture %i", rTexture.m_NativeTexture);
             
             // -----------------------------------------------------------------------------
             // Check the behavior.
