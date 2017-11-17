@@ -63,7 +63,7 @@ int GetRootVolumeBufferIndex(vec3 GlobalPosition)
 
 int GetRootGridItemIndex(vec3 PositionInVolume, int VolumeBufferOffset)
 {    
-    ivec3 ItemOffset = ivec3(PositionInVolume / (VOLUME_SIZE / 16.0f));
+    ivec3 ItemOffset = ivec3(floor(PositionInVolume / (VOLUME_SIZE / 16.0f)));
     ivec3 VolumeOffset = ItemOffset % 16;
     
     int BufferOffset = VolumeOffset.z * 16 * 16 + VolumeOffset.y * 16 + VolumeOffset.x;
@@ -104,7 +104,7 @@ void main()
             int RootGridItemBufferOffset = GetRootGridItemIndex(CurrentPosition - VolumeOffset, VolumeBufferOffset);
             
             if (RootGridItemBufferOffset != -1)
-            {               
+            {
                 // Pool index of whole level 1 grid                
                 int Level1VolumeBufferOffset = g_RootGridPool[RootGridItemBufferOffset].m_PoolIndex;
 
