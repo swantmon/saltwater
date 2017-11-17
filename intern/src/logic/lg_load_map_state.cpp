@@ -2,7 +2,6 @@
 #include "logic/lg_precompiled.h"
 
 #include "base/base_console.h"
-#include "base/base_serialize_text_reader.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 #include "base/base_vector3.h"
@@ -65,16 +64,13 @@ namespace
 {
     int CLgLoadMapState::OnEnter(Base::CTextReader& _rSerializer)
     {
+        BASE_UNUSED(_rSerializer);
+
         // -----------------------------------------------------------------------------
         // Give serialize module to all data items that is needed for loading a
         // certain map
         // -----------------------------------------------------------------------------
-
-        int LevelIndexDebug;
-        
-        _rSerializer >> LevelIndexDebug;
-
-        BASE_CONSOLE_STREAMINFO("Logic> Loading level number " << LevelIndexDebug);
+        BASE_CONSOLE_STREAMINFO("Logic> Loading level");
         
         // CreateEmptyScene();
         CreateDefaultScene();

@@ -28,7 +28,7 @@
 #include "logic/lg_script_manager.h"
 #include "logic/lg_start_state.h"
 
-#include "mr/mr_control_manager.h"
+/*#include "mr/mr_control_manager.h"*/
 
 namespace
 {
@@ -79,7 +79,7 @@ namespace
         // -----------------------------------------------------------------------------
         // External
         // -----------------------------------------------------------------------------
-        MR::ControlManager::OnStart();
+/*        MR::ControlManager::OnStart();*/
 
         return Lg::Start::SResult::Start;
     }

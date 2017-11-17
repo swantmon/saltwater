@@ -187,7 +187,7 @@ LUA_DEFINE_FUNCTION(DataEntityObjFuncs, __tostring)
 
     std::string String;
 
-    String = "Entity (" + std::to_string(rEntity.GetID()) + ")";
+//    String = "Entity (" + std::to_string(rEntity.GetID()) + ")";
 
     Core::Lua::State::PushString(_State, String.c_str());
 

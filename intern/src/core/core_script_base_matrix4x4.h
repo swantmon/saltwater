@@ -115,11 +115,11 @@ LUA_DEFINE_FUNCTION(BaseMatrix4x4ObjFuncs, __tostring)
 
     std::string String;
 
-    String = 
-        "{{" + std::to_string(rMatrix[0][0]) + ", " + std::to_string(rMatrix[0][1]) + ", " + std::to_string(rMatrix[0][2]) + ", " + std::to_string(rMatrix[0][3]) + "},"
-         "{" + std::to_string(rMatrix[1][0]) + ", " + std::to_string(rMatrix[1][1]) + ", " + std::to_string(rMatrix[1][2]) + ", " + std::to_string(rMatrix[1][3]) + "},"
-         "{" + std::to_string(rMatrix[2][0]) + ", " + std::to_string(rMatrix[2][1]) + ", " + std::to_string(rMatrix[2][2]) + ", " + std::to_string(rMatrix[2][3]) + "},"
-         "{" + std::to_string(rMatrix[3][0]) + ", " + std::to_string(rMatrix[3][1]) + ", " + std::to_string(rMatrix[3][2]) + ", " + std::to_string(rMatrix[3][3]) + "}}";
+//     String = 
+//         "{{" + std::to_string(rMatrix[0][0]) + ", " + std::to_string(rMatrix[0][1]) + ", " + std::to_string(rMatrix[0][2]) + ", " + std::to_string(rMatrix[0][3]) + "},"
+//          "{" + std::to_string(rMatrix[1][0]) + ", " + std::to_string(rMatrix[1][1]) + ", " + std::to_string(rMatrix[1][2]) + ", " + std::to_string(rMatrix[1][3]) + "},"
+//          "{" + std::to_string(rMatrix[2][0]) + ", " + std::to_string(rMatrix[2][1]) + ", " + std::to_string(rMatrix[2][2]) + ", " + std::to_string(rMatrix[2][3]) + "},"
+//          "{" + std::to_string(rMatrix[3][0]) + ", " + std::to_string(rMatrix[3][1]) + ", " + std::to_string(rMatrix[3][2]) + ", " + std::to_string(rMatrix[3][3]) + "}}";
 
     Core::Lua::State::PushString(_State, String.c_str());
 

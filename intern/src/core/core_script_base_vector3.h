@@ -244,7 +244,7 @@ LUA_DEFINE_FUNCTION(BaseFloat3ObjFuncs, __tostring)
 
     std::string String;
 
-    String = "{" + std::to_string(rVector[0]) + ", " + std::to_string(rVector[1]) + ", " + std::to_string(rVector[2]) + "}";
+    // String = "{" + std::to_string(rVector[0]) + ", " + std::to_string(rVector[1]) + ", " + std::to_string(rVector[2]) + "}";
 
     Core::Lua::State::PushString(_State, String.c_str());
 

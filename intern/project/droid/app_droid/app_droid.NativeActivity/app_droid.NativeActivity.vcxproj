@@ -65,6 +65,9 @@
     <ProjectReference Include="..\..\base\base.vcxproj">
       <Project>{e0291846-fb7c-4725-a4d0-d8307a3638b2}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\camera\camera.vcxproj">
+      <Project>{a31a8057-5327-4939-bcb7-c3777b233090}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\core\core.vcxproj">
       <Project>{00398f89-7117-403d-a781-a65ab2da93a8}</Project>
     </ProjectReference>
@@ -73,6 +76,9 @@
     </ProjectReference>
     <ProjectReference Include="..\..\graphic\graphic.vcxproj">
       <Project>{b911725e-f4e9-4120-b302-6d0fdf3f3ce4}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\logic\logic.vcxproj">
+      <Project>{81893477-890c-455d-94c5-1027376a3067}</Project>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
