@@ -9,8 +9,10 @@
 // Constants
 // -----------------------------------------------------------------------------
 
-#include "scalable_kinect_fusion/common_scalable.glsl"
+
 #include "scalable_kinect_fusion/common_indirect.glsl"
+#include "scalable_kinect_fusion/common_scalable.glsl"
+#include "scalable_kinect_fusion/common_tracking.glsl"
 
 layout(std430, binding = 6) buffer Level2Queue
 {
@@ -21,34 +23,23 @@ layout(std430, binding = 7) buffer Indirect
 {
     SIndirectBuffers g_Indirect;
 };
-// -----------------------------------------------------------------------------
-// Input from engine
-// -----------------------------------------------------------------------------
-
-layout(binding = 0, rg16f) uniform image3D cs_TSDFVolume;
-layout(binding = 1, r16ui) readonly uniform uimage2D cs_Depth;
-
-#ifdef CAPTURE_COLOR
-layout(binding = 2, rgba8) uniform image3D cs_ColorVolume;
-layout(binding = 3, rgba8) readonly uniform image2D cs_Color;
-#endif
 
 // -------------------------------------------------------------------------------------
 // Functions
 // -------------------------------------------------------------------------------------
 
-layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
+layout (local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 void main()
 {
-    /*const int x = int(gl_GlobalInvocationID.x);
+    const int x = int(gl_GlobalInvocationID.x);
     const int y = int(gl_GlobalInvocationID.y);
     
     const vec3 CameraPosition = g_PoseMatrix[3].xyz;
     ivec3 VoxelCoords = ivec3(x, y, 0);
 
-    for (VoxelCoords.z = 0; VoxelCoords.z < VOLUME_RESOLUTION; ++ VoxelCoords.z)
+    for (VoxelCoords.z = 0; VoxelCoords.z < 8; ++ VoxelCoords.z)
     {
-        vec3 WSVoxelPosition = (VoxelCoords + vec3(0.5f, 0.5f, 0.0f)) * VOXEL_SIZE;
+        /*vec3 WSVoxelPosition = (VoxelCoords + vec3(0.5f, 0.5f, 0.0f)) * VOXEL_SIZE;
 		WSVoxelPosition += g_Offset;
 		
         vec3 VSVoxelPosition = (g_InvPoseMatrix * vec4(WSVoxelPosition, 1.0f)).xyz;
@@ -90,8 +81,8 @@ void main()
                     #endif
                 }
             }
-        }
-    }*/
+        }*/
+    }
 }
 
 #endif // __INCLUDE_CS_KINECT_INTEGRATE_TSDF_GLSL__
