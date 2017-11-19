@@ -2,17 +2,25 @@
 #ifndef __INCLUDE_CS_KINECT_INTEGRATE_TSDF_GLSL__
 #define __INCLUDE_CS_KINECT_INTEGRATE_TSDF_GLSL__
 
-#include "scalable_kinect_fusion/common_tracking.glsl"
+#include "scalable_kinect_fusion/common_scalable.glsl"
+#include "scalable_kinect_fusion/common_indirect.glsl"
 
 // -----------------------------------------------------------------------------
 // Constants
 // -----------------------------------------------------------------------------
 
-layout(row_major, std140, binding = 2) uniform UBOOffset
+#include "scalable_kinect_fusion/common_scalable.glsl"
+#include "scalable_kinect_fusion/common_indirect.glsl"
+
+layout(std430, binding = 6) buffer Level2Queue
 {
-    vec3 g_Offset;
+    uint g_VolumeID[];
 };
 
+layout(std430, binding = 7) buffer Indirect
+{
+    SIndirectBuffers g_Indirect;
+};
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
@@ -32,7 +40,7 @@ layout(binding = 3, rgba8) readonly uniform image2D cs_Color;
 layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
 void main()
 {
-    const int x = int(gl_GlobalInvocationID.x);
+    /*const int x = int(gl_GlobalInvocationID.x);
     const int y = int(gl_GlobalInvocationID.y);
     
     const vec3 CameraPosition = g_PoseMatrix[3].xyz;
@@ -83,7 +91,7 @@ void main()
                 }
             }
         }
-    }
+    }*/
 }
 
 #endif // __INCLUDE_CS_KINECT_INTEGRATE_TSDF_GLSL__
