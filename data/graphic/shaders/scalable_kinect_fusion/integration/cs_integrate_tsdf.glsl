@@ -31,17 +31,18 @@ layout(binding = 0, r16ui) readonly uniform uimage2D cs_Depth;
 
 layout (local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 void main()
-{
-    const int x = int(gl_GlobalInvocationID.x);
-    const int y = int(gl_GlobalInvocationID.y);
-    
+{    
     const vec3 CameraPosition = g_PoseMatrix[3].xyz;
-    ivec3 VoxelCoords = ivec3(x, y, 0);
+    const vec3 VolumeOffset = g_RootVolumePool[g_CurrentVolumeIndex].m_Offset;    
+    
+    ivec3 VoxelCoords = ivec3(IndexToOffset(g_VolumeID[gl_GlobalInvocationID.x], 16 * 8));
 
-    for (VoxelCoords.z = 0; VoxelCoords.z < 8; ++ VoxelCoords.z)
+    for (int i = 0; i < 8; ++ i)
     {
-        /*vec3 WSVoxelPosition = (VoxelCoords + vec3(0.5f, 0.5f, 0.0f)) * VOXEL_SIZE;
-		WSVoxelPosition += g_Offset;
+        ++ VoxelCoords.z;
+        
+        vec3 WSVoxelPosition = (VoxelCoords + vec3(0.5f, 0.5f, 0.0f)) * VOXEL_SIZE;
+		WSVoxelPosition += VolumeOffset;
 		
         vec3 VSVoxelPosition = (g_InvPoseMatrix * vec4(WSVoxelPosition, 1.0f)).xyz;
 
@@ -62,27 +63,17 @@ void main()
                 
                 if (SDF >= -TRUNCATED_DISTANCE)
                 {
-                    const float TSDF = min(SDF / TRUNCATED_DISTANCE, 1.0f);
+                    /*const float TSDF = min(SDF / TRUNCATED_DISTANCE, 1.0f);
 
                     vec2 Voxel = imageLoad(cs_TSDFVolume, VoxelCoords).xy;
 
                     Voxel.x = (Voxel.x * Voxel.y + TSDF) / (Voxel.y + 1.0f);
                     Voxel.y = min(MAX_INTEGRATION_WEIGHT, Voxel.y + 1.0f);
 
-                    imageStore(cs_TSDFVolume, VoxelCoords, vec4(Voxel, 0.0f, 0.0f));
-
-                    #ifdef CAPTURE_COLOR
-                    const vec3 OldColor = imageLoad(cs_ColorVolume, VoxelCoords).rgb;
-                    const vec3 Color = imageLoad(cs_Color, DepthCoords).rgb;
-                    if (Color.r != 0.0f && Color.g != 0.0f && Color.b != 0.0f)
-                    {
-                        const vec3 NewColor = mix(OldColor, Color, abs(TSDF));
-                        imageStore(cs_ColorVolume, VoxelCoords, vec4(NewColor, 1.0f));
-                    }
-                    #endif
+                    imageStore(cs_TSDFVolume, VoxelCoords, vec4(Voxel, 0.0f, 0.0f));*/
                 }
             }
-        }*/
+        }
     }
 }
 
