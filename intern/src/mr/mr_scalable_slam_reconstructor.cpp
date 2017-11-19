@@ -2113,12 +2113,15 @@ namespace MR
         {
             BufferManager::UploadBufferData(m_VolumeBuffers.m_Level1PoolPtr, Data.data(), i * DataSize, DataSize);
         }
+
+        BufferManager::UploadBufferData(m_VolumeBuffers.m_RootVolumePositionBufferPtr, Data.data());
+        ClearBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr, m_ReconstructionSettings.GRID_LEVELS);
+
+        std::memset(Data.data(), 0, DataSize);
         for (int i = 0; i < g_TSDFPoolSize / g_MegabyteSize; ++ i)
         {
             BufferManager::UploadBufferData(m_VolumeBuffers.m_TSDFPoolPtr, Data.data(), i * DataSize, DataSize);
         }
-        BufferManager::UploadBufferData(m_VolumeBuffers.m_RootVolumePositionBufferPtr, Data.data());
-        ClearBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr, m_ReconstructionSettings.GRID_LEVELS);
     }
 
     // -----------------------------------------------------------------------------
