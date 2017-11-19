@@ -35,11 +35,11 @@ void main()
     const vec3 CameraPosition = g_PoseMatrix[3].xyz;
     const vec3 VolumeOffset = g_RootVolumePool[g_CurrentVolumeIndex].m_Offset;    
     
-    ivec3 VoxelCoords = ivec3(IndexToOffset(g_VolumeID[gl_GlobalInvocationID.x], 16 * 8));
-
+    vec3 ParentOffset = IndexToOffset(g_VolumeID[gl_WorkGroupID.x], 16 * 8) * VOXEL_SIZE * 8 + VolumeOffset;
+    
     for (int i = 0; i < 8; ++ i)
     {
-        ++ VoxelCoords.z;
+        vec3 VoxelCoords = ParentOffset + vec3(gl_GlobalInvocationID.xy, i) * VOXEL_SIZE * 8;
         
         vec3 WSVoxelPosition = (VoxelCoords + vec3(0.5f, 0.5f, 0.0f)) * VOXEL_SIZE;
 		WSVoxelPosition += VolumeOffset;
