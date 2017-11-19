@@ -64,7 +64,20 @@ void main()
                 
                 if (SDF >= -TRUNCATED_DISTANCE)
                 {
-                    /*const float TSDF = min(SDF / TRUNCATED_DISTANCE, 1.0f);
+                    const float TSDF = min(SDF / TRUNCATED_DISTANCE, 1.0f);
+                    
+                    ivec3 VoxelRootOffset = Level1Offset / 8;
+                    ivec3 VoxelLevel1InnerOffset = Level1Offset % 8;
+        
+                    int RootGridBufferOffset = g_CurrentVolumeIndex * VOXELS_PER_ROOTGRID;
+                    RootGridBufferOffset += OffsetToIndex(VoxelRootOffset, 16);
+                    
+                    int Level1GridBufferOffset = g_RootGridPool[RootGridBufferOffset].m_PoolIndex * VOXELS_PER_LEVEL1GRID;
+                    Level1GridBufferOffset += OffsetToIndex(VoxelLevel1InnerOffset, 8);
+                    
+                    int TSDFIndex = g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex + OffsetToIndex(vec3(gl_GlobalInvocationID.xy, i), 8);
+                    
+                    /*
 
                     vec2 Voxel = imageLoad(cs_TSDFVolume, VoxelCoords).xy;
 
