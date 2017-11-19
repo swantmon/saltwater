@@ -1124,6 +1124,8 @@ namespace MR
 
         Performance::BeginEvent("Compute new TSDF");
 
+        ContextManager::SetShaderCS(m_IntegrateTSDFCSPtr);
+
         for (uint32_t VolumeIndex : rVolumeQueue)
         {
             auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
@@ -1138,9 +1140,12 @@ namespace MR
             // Integrate into TSDF grids
             ////////////////////////////////////////////////////////////////////////////////////////////////
 
+            ContextManager::SetResourceBuffer(6, rRootVolume.m_Level2QueuePtr);
+            ContextManager::SetResourceBuffer(7, rRootVolume.m_IndirectLevel2Buffer);
+
             ContextManager::Barrier();
 
-            //ContextManager::SetShaderCS(m_IntegrateTSDFCSPtr);
+            ContextManager::DispatchIndirect(rRootVolume.m_IndirectLevel2Buffer, SIndirectBuffers::s_ComputeOffset);
         }
 
         Performance::EndEvent();
