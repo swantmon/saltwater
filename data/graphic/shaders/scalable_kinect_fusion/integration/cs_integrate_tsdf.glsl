@@ -77,14 +77,16 @@ void main()
                     
                     int TSDFIndex = g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex + OffsetToIndex(vec3(gl_GlobalInvocationID.xy, i), 8);
                     
-                    /*
-
-                    vec2 Voxel = imageLoad(cs_TSDFVolume, VoxelCoords).xy;
+                    uint TSDFPoolValue = g_TSDFPool[TSDFIndex];
+                    
+                    vec2 Voxel = unpackUnorm2x16(TSDFPoolValue);
 
                     Voxel.x = (Voxel.x * Voxel.y + TSDF) / (Voxel.y + 1.0f);
                     Voxel.y = min(MAX_INTEGRATION_WEIGHT, Voxel.y + 1.0f);
 
-                    imageStore(cs_TSDFVolume, VoxelCoords, vec4(Voxel, 0.0f, 0.0f));*/
+                    TSDFPoolValue = packUnorm2x16(Voxel);
+                    
+                    g_TSDFPool[TSDFIndex] = TSDFPoolValue;
                 }
             }
         }
