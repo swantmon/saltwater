@@ -178,11 +178,13 @@ namespace
     {
         SIndirectParameters m_Draw;
         SIndexedParameters m_Indexed;
+        SComputeParameters m_ComputeDiv;
         SComputeParameters m_Compute;
 
         static const int s_DrawOffset = 0;
         static const int s_IndexedOffset = sizeof(SIndirectParameters);
-        static const int s_ComputeOffset = s_IndexedOffset + sizeof(SIndexedParameters);
+        static const int s_ComputeDivOffset = s_IndexedOffset + sizeof(SIndexedParameters);
+        static const int s_ComputeOffset = s_ComputeDivOffset + sizeof(SComputeParameters);
     };
 
     struct SInstanceData
@@ -1079,7 +1081,7 @@ namespace MR
 
             ContextManager::Barrier();
 
-            ContextManager::DispatchIndirect(rRootVolume.m_IndirectLevel1Buffer, SIndirectBuffers::s_ComputeOffset);
+            ContextManager::DispatchIndirect(rRootVolume.m_IndirectLevel1Buffer, SIndirectBuffers::s_ComputeDivOffset);
         }
 
         Performance::EndEvent();
@@ -1111,7 +1113,7 @@ namespace MR
 
             ContextManager::Barrier();
 
-            ContextManager::DispatchIndirect(rRootVolume.m_IndirectLevel2Buffer, SIndirectBuffers::s_ComputeOffset);
+            ContextManager::DispatchIndirect(rRootVolume.m_IndirectLevel2Buffer, SIndirectBuffers::s_ComputeDivOffset);
         }
 
         Performance::EndEvent();

@@ -29,14 +29,22 @@ void main()
     uint InstanceCount = g_Indirect1.m_Indexed.m_InstanceCount;
     g_Indirect1.m_Draw.m_InstanceCount = InstanceCount;
 
-    g_Indirect1.m_Compute.m_WorkGroupsX = (InstanceCount + TILE_SIZE1D - 1) / TILE_SIZE1D;
+    g_Indirect1.m_ComputeDiv.m_WorkGroupsX = (InstanceCount + TILE_SIZE1D - 1) / TILE_SIZE1D;
+    g_Indirect1.m_ComputeDiv.m_WorkGroupsY = 1;
+    g_Indirect1.m_ComputeDiv.m_WorkGroupsZ = 1;
+	
+	g_Indirect1.m_Compute.m_WorkGroupsX = InstanceCount;
     g_Indirect1.m_Compute.m_WorkGroupsY = 1;
     g_Indirect1.m_Compute.m_WorkGroupsZ = 1;
 
     InstanceCount = g_Indirect2.m_Indexed.m_InstanceCount;
     g_Indirect2.m_Draw.m_InstanceCount = InstanceCount;
 
-    g_Indirect2.m_Compute.m_WorkGroupsX = (InstanceCount + TILE_SIZE1D - 1) / TILE_SIZE1D;
+    g_Indirect2.m_ComputeDiv.m_WorkGroupsX = (InstanceCount + TILE_SIZE1D - 1) / TILE_SIZE1D;
+    g_Indirect2.m_ComputeDiv.m_WorkGroupsY = 1;
+    g_Indirect2.m_ComputeDiv.m_WorkGroupsZ = 1;
+	
+	g_Indirect2.m_Compute.m_WorkGroupsX = InstanceCount;
     g_Indirect2.m_Compute.m_WorkGroupsY = 1;
     g_Indirect2.m_Compute.m_WorkGroupsZ = 1;
 }

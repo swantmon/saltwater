@@ -31,5 +31,6 @@ struct SIndirectBuffers
 {
     SIndirect m_Draw;
     SIndexedIndirect m_Indexed;
+    SComputeIndirect m_ComputeDiv;
     SComputeIndirect m_Compute;
 };
