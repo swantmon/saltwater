@@ -1124,6 +1124,7 @@ namespace MR
 
         Performance::BeginEvent("Compute new TSDF");
 
+        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
         ContextManager::SetShaderCS(m_IntegrateTSDFCSPtr);
 
         for (uint32_t VolumeIndex : rVolumeQueue)

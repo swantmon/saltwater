@@ -9,7 +9,6 @@
 // Constants
 // -----------------------------------------------------------------------------
 
-
 #include "scalable_kinect_fusion/common_indirect.glsl"
 #include "scalable_kinect_fusion/common_scalable.glsl"
 #include "scalable_kinect_fusion/common_tracking.glsl"
@@ -23,6 +22,8 @@ layout(std430, binding = 7) buffer Indirect
 {
     SIndirectBuffers g_Indirect;
 };
+
+layout(binding = 0, r16ui) readonly uniform uimage2D cs_Depth; 
 
 // -------------------------------------------------------------------------------------
 // Functions
