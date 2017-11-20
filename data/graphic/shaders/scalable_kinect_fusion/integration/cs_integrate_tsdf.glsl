@@ -37,7 +37,18 @@ void main()
     
     ivec3 Level1Offset = ivec3(IndexToOffset(g_VolumeID[gl_WorkGroupID.x], 16 * 8));
     vec3 ParentOffset = Level1Offset * VOXEL_SIZE * 8 + VolumeOffset;
+
+    ivec3 VoxelRootOffset = Level1Offset / 8;
+    ivec3 VoxelLevel1InnerOffset = Level1Offset % 8;
     
+    int RootGridBufferOffset = g_CurrentVolumeIndex * VOXELS_PER_ROOTGRID;
+    RootGridBufferOffset += OffsetToIndex(VoxelRootOffset, 16);
+    
+    int Level1GridBufferOffset = g_RootGridPool[RootGridBufferOffset].m_PoolIndex * VOXELS_PER_LEVEL1GRID;
+    Level1GridBufferOffset += OffsetToIndex(VoxelLevel1InnerOffset, 8);
+
+    int Level1PoolIndex = g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex * 8 * 8 * 8;
+
     for (int i = 0; i < 8; ++ i)
     {
         vec3 VoxelCoords = ParentOffset + vec3(gl_LocalInvocationID.xy, i) * VOXEL_SIZE;
@@ -50,16 +61,7 @@ void main()
         vec2 CSVoxelPosition = VSVoxelPosition.xy * g_Intrinsics[0].m_FocalLength / VSVoxelPosition.z + g_Intrinsics[0].m_FocalPoint;
         //CSVoxelPosition.xy += vec2(0.5f);
 
-        ivec3 VoxelRootOffset = Level1Offset / 8;
-        ivec3 VoxelLevel1InnerOffset = Level1Offset % 8;
-        
-        int RootGridBufferOffset = g_CurrentVolumeIndex * VOXELS_PER_ROOTGRID;
-        RootGridBufferOffset += OffsetToIndex(VoxelRootOffset, 16);
-        
-        int Level1GridBufferOffset = g_RootGridPool[RootGridBufferOffset].m_PoolIndex * VOXELS_PER_LEVEL1GRID;
-        Level1GridBufferOffset += OffsetToIndex(VoxelLevel1InnerOffset, 8);
-        
-        int TSDFIndex = g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex + OffsetToIndex(vec3(gl_LocalInvocationID.xy, i), 8);
+        int TSDFIndex = Level1PoolIndex + OffsetToIndex(vec3(gl_LocalInvocationID.xy, i), 8);
         
         if (CSVoxelPosition.x > 0 && CSVoxelPosition.x < DEPTH_IMAGE_WIDTH && CSVoxelPosition.y > 0 && CSVoxelPosition.y < DEPTH_IMAGE_HEIGHT && VSVoxelPosition.z > 0.0f)
         {
