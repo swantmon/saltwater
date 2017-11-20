@@ -40,7 +40,7 @@ void main()
     
     for (int i = 0; i < 8; ++ i)
     {
-        vec3 VoxelCoords = ParentOffset + vec3(gl_GlobalInvocationID.xy, i) * VOXEL_SIZE * 8;
+        vec3 VoxelCoords = ParentOffset + vec3(gl_GlobalInvocationID.xy, i) * VOXEL_SIZE;
         
         vec3 WSVoxelPosition = (VoxelCoords + vec3(0.5f, 0.5f, 0.0f)) * VOXEL_SIZE;
 		WSVoxelPosition += VolumeOffset;
