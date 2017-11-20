@@ -61,8 +61,6 @@ void main()
         vec2 CSVoxelPosition = VSVoxelPosition.xy * g_Intrinsics[0].m_FocalLength / VSVoxelPosition.z + g_Intrinsics[0].m_FocalPoint;
         //CSVoxelPosition.xy += vec2(0.5f);
 
-        int TSDFIndex = Level1PoolIndex + OffsetToIndex(vec3(gl_LocalInvocationID.xy, i), 8);
-        
         if (CSVoxelPosition.x > 0 && CSVoxelPosition.x < DEPTH_IMAGE_WIDTH && CSVoxelPosition.y > 0 && CSVoxelPosition.y < DEPTH_IMAGE_HEIGHT && VSVoxelPosition.z > 0.0f)
         {
 			const ivec2 DepthCoords = ivec2(DEPTH_IMAGE_WIDTH - CSVoxelPosition.x, CSVoxelPosition.y);
@@ -78,7 +76,9 @@ void main()
                 if (SDF >= -TRUNCATED_DISTANCE)
                 {
                     const float TSDF = min(SDF / TRUNCATED_DISTANCE, 1.0f);
-                    
+
+                    int TSDFIndex = Level1PoolIndex + OffsetToIndex(vec3(gl_LocalInvocationID.xy, i), 8);
+
                     uint TSDFPoolValue = g_TSDFPool[TSDFIndex];
                     
                     vec2 Voxel = unpackUnorm2x16(TSDFPoolValue);
