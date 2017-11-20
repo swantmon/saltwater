@@ -117,9 +117,22 @@ void main()
                     int Level1BufferInnerOffset = OffsetToIndex(Level1VolumeOffset, 8);
                     int Level1BufferIndex = Level1VolumeBufferOffset * 8 * 8 * 8 + Level1BufferInnerOffset;
 
-                    if (g_Level1GridPool[Level1BufferIndex].m_PoolIndex != -1)
+                    int TSDFVolumeBufferOffset = g_Level1GridPool[Level1BufferIndex].m_PoolIndex;
+
+                    if (TSDFVolumeBufferOffset != -1)
                     {
-                        break;
+                        ivec3 TSDFVolumeOffset = ivec3(floor((CurrentPosition / VOLUME_SIZE) * 16.0f * 8.0f * 8.0f));
+                        TSDFVolumeOffset %= 8;
+
+                        int TSDFBufferInnerOffset = OffsetToIndex(TSDFVolumeOffset, 8);
+                        int TSDFBufferIndex = TSDFVolumeBufferOffset * 8 * 8 * 8 + TSDFBufferInnerOffset;
+
+                        uint TSDF = g_TSDFPool[TSDFBufferIndex];
+
+                        if (TSDF == 0)
+                        {
+                            break;
+                        }
                     }
                 }
             }
