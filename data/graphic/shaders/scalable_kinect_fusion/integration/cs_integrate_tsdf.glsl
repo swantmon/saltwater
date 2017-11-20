@@ -51,9 +51,7 @@ void main()
 
     for (int i = 0; i < 8; ++ i)
     {
-        vec3 VoxelCoords = ParentOffset + vec3(gl_LocalInvocationID.xy, i) * VOXEL_SIZE;
-        
-        vec3 WSVoxelPosition = (VoxelCoords + vec3(0.5f, 0.5f, 0.0f)) * VOXEL_SIZE;
+        vec3 WSVoxelPosition = ParentOffset + vec3(gl_LocalInvocationID.xy, i) * VOXEL_SIZE;
 		
         vec3 VSVoxelPosition = (g_InvPoseMatrix * vec4(WSVoxelPosition, 1.0f)).xyz;
 
