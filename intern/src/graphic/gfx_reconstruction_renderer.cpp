@@ -722,8 +722,8 @@ namespace
 
         Float4x4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
 
-        ContextManager::SetShaderVS(m_RaycastLevel1VSPtr);
-        ContextManager::SetShaderPS(m_RaycastLevel1FSPtr);
+        ContextManager::SetShaderVS(m_RaycastVSPtr);
+        ContextManager::SetShaderPS(m_RaycastFSPtr);
 
         ContextManager::SetResourceBuffer(0, rVolume.m_RootVolumePoolPtr);
         ContextManager::SetResourceBuffer(1, rVolume.m_RootGridPoolPtr);
