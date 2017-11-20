@@ -40,7 +40,7 @@ void main()
     
     for (int i = 0; i < 8; ++ i)
     {
-        vec3 VoxelCoords = ParentOffset + vec3(gl_GlobalInvocationID.xy, i) * VOXEL_SIZE;
+        vec3 VoxelCoords = ParentOffset + vec3(gl_LocalInvocationID.xy, i) * VOXEL_SIZE;
         
         vec3 WSVoxelPosition = (VoxelCoords + vec3(0.5f, 0.5f, 0.0f)) * VOXEL_SIZE;
 		WSVoxelPosition += VolumeOffset;
@@ -75,7 +75,7 @@ void main()
                     int Level1GridBufferOffset = g_RootGridPool[RootGridBufferOffset].m_PoolIndex * VOXELS_PER_LEVEL1GRID;
                     Level1GridBufferOffset += OffsetToIndex(VoxelLevel1InnerOffset, 8);
                     
-                    int TSDFIndex = g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex + OffsetToIndex(vec3(gl_GlobalInvocationID.xy, i), 8);
+                    int TSDFIndex = g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex + OffsetToIndex(vec3(gl_LocalInvocationID.xy, i), 8);
                     
                     uint TSDFPoolValue = g_TSDFPool[TSDFIndex];
                     
