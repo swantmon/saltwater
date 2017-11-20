@@ -33,7 +33,7 @@ layout (local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 void main()
 {    
     const vec3 CameraPosition = g_PoseMatrix[3].xyz;
-    const vec3 VolumeOffset = g_RootVolumePool[g_CurrentVolumeIndex].m_Offset;    
+    const vec3 VolumeOffset = g_RootVolumePool[g_CurrentVolumeIndex].m_Offset * VOLUME_SIZE;    
     
     ivec3 Level1Offset = ivec3(IndexToOffset(g_VolumeID[gl_WorkGroupID.x], 16 * 8));
     vec3 ParentOffset = Level1Offset * VOXEL_SIZE * 8 + VolumeOffset;
