@@ -1,16 +1,8 @@
 
-#ifndef __INCLUDE_VS_KINECT_RAYCAST_GLSL__
-#define __INCLUDE_VS_KINECT_RAYCAST_GLSL__
+#ifndef __INCLUDE_VS_RAYCAST_GLSL__
+#define __INCLUDE_VS_RAYCAST_GLSL__
 
 #include "common_global.glsl"
-
-// -----------------------------------------------------------------------------
-// Constants
-// -----------------------------------------------------------------------------
-
-// -----------------------------------------------------------------------------
-// Input from engine
-// -----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
 // Functions
@@ -27,11 +19,9 @@ out gl_PerVertex
 
 void main()
 {
-	const vec3 WSPosition = in_VertexPosition * VOLUME_SIZE;
+    out_WSRayDirection = in_VertexPosition - g_ViewPosition.xyz;
 
-    out_WSRayDirection = WSPosition - g_ViewPosition.xyz;
-
-    gl_Position = g_WorldToScreen * vec4(WSPosition, 1.0f);
+    gl_Position = g_WorldToScreen * vec4(in_VertexPosition, 1.0f);
 }
 
-#endif // __INCLUDE_VS_KINECT_RAYCAST_GLSL__
+#endif // __INCLUDE_VS_RAYCAST_GLSL__

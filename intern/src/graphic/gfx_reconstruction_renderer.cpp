@@ -715,35 +715,54 @@ namespace
 
 	void CGfxReconstructionRenderer::RaycastScalableVolume()
 	{
+        MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
+
         MR::SReconstructionSettings Settings;
         m_pScalableReconstructor->GetReconstructionSettings(&Settings);
 
         Float4x4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
 
-        Float4 RaycastData[2];
-        PoseMatrix.GetTranslation(RaycastData[0][0], RaycastData[0][1], RaycastData[0][2]);
-        RaycastData[0][3] = 1.0f;
-        if (Settings.m_CaptureColor)
-        {
-            RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 0.0f, 0.0f, 1.0f);
-        }
-        else
-        {
-            RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 1.0f, 0.0f, 1.0f);
-        }
+        ContextManager::SetShaderVS(m_RaycastLevel1VSPtr);
+        ContextManager::SetShaderPS(m_RaycastLevel1FSPtr);
 
-        BufferManager::UploadBufferData(m_RaycastConstantBufferPtr, RaycastData);
+        ContextManager::SetResourceBuffer(0, rVolume.m_RootVolumePoolPtr);
+        ContextManager::SetResourceBuffer(1, rVolume.m_RootGridPoolPtr);
+        ContextManager::SetResourceBuffer(2, rVolume.m_Level1PoolPtr);
+        ContextManager::SetResourceBuffer(6, rVolume.m_RootVolumePositionBufferPtr);
 
-        ContextManager::SetShaderVS(m_RaycastVSPtr);
-        ContextManager::SetShaderPS(m_RaycastFSPtr);
-                
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-        ContextManager::SetConstantBuffer(1, m_RaycastConstantBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_ScalableRaycastBufferPtr);
 
         ContextManager::Barrier();
 
         ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+        const Float3 Min = Float3(
+            rVolume.m_MinOffset[0] * Settings.m_VolumeSize,
+            rVolume.m_MinOffset[1] * Settings.m_VolumeSize,
+            rVolume.m_MinOffset[2] * Settings.m_VolumeSize
+        );
+
+        const Float3 Max = Float3(
+            (rVolume.m_MaxOffset[0] + 1.0f) * Settings.m_VolumeSize, // Add 1.0f because MaxOffset stores the max volume offset
+            (rVolume.m_MaxOffset[1] + 1.0f) * Settings.m_VolumeSize, // and we have to consider the volume size
+            (rVolume.m_MaxOffset[2] + 1.0f) * Settings.m_VolumeSize
+        );
+
+        Float3 Vertices[8] =
+        {
+            Float3(Min[0], Min[1], Min[2]),
+            Float3(Max[0], Min[1], Min[2]),
+            Float3(Max[0], Max[1], Min[2]),
+            Float3(Min[0], Max[1], Min[2]),
+            Float3(Min[0], Min[1], Max[2]),
+            Float3(Max[0], Min[1], Max[2]),
+            Float3(Max[0], Max[1], Max[2]),
+            Float3(Min[0], Max[1], Max[2]),
+        };
+
+        BufferManager::UploadBufferData(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Vertices);
 
         const unsigned int Offset = 0;
         ContextManager::SetVertexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
@@ -752,7 +771,7 @@ namespace
 
         ContextManager::SetTopology(STopology::TriangleList);
 
-        //ContextManager::DrawIndexed(36, 0, 0);
+        ContextManager::DrawIndexed(36, 0, 0);
 	}
     
     // -----------------------------------------------------------------------------
@@ -1148,13 +1167,12 @@ namespace
             Data.m_VolumeTextureWidth = rVolume.m_RootVolumeTotalWidth;
 
             BufferManager::UploadBufferData(m_ScalableRaycastBufferPtr, &Data);
-
-			//RaycastScalableVolume();
-
+            
             //RenderVertexMap();
 
             //RaycastRootGrids();
-            RaycastLevel1Grids();
+            //RaycastLevel1Grids();
+            RaycastScalableVolume();
 
             RenderQueuedRootVolumes();
             //RenderQueuedLevel1Grids();
