@@ -54,7 +54,6 @@ void main()
         vec3 VoxelCoords = ParentOffset + vec3(gl_LocalInvocationID.xy, i) * VOXEL_SIZE;
         
         vec3 WSVoxelPosition = (VoxelCoords + vec3(0.5f, 0.5f, 0.0f)) * VOXEL_SIZE;
-		WSVoxelPosition += VolumeOffset;
 		
         vec3 VSVoxelPosition = (g_InvPoseMatrix * vec4(WSVoxelPosition, 1.0f)).xyz;
 
