@@ -47,7 +47,7 @@ void main()
     int Level1GridBufferOffset = g_RootGridPool[RootGridBufferOffset].m_PoolIndex * VOXELS_PER_LEVEL1GRID;
     Level1GridBufferOffset += OffsetToIndex(VoxelLevel1InnerOffset, 8);
 
-    int Level1PoolIndex = g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex * 8 * 8 * 8;
+    int Level1PoolIndex = g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex * VOXELS_PER_LEVEL2GRID;
 
     for (int i = 0; i < 8; ++ i)
     {
