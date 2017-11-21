@@ -248,6 +248,9 @@ namespace
                 throw;
             }
 
+            // -----------------------------------------------------------------------------
+            // Configuration
+            // -----------------------------------------------------------------------------
             const EGLint ConfigAttributes[] =
             {
                 EGL_SURFACE_TYPE,  EGL_WINDOW_BIT,
@@ -269,10 +272,19 @@ namespace
             }
             else
             {
-                BASE_CONSOLE_STREAMERROR("Can not choose config from device.");
+                BASE_CONSOLE_STREAMERROR("Unable to choose config from device.");
 
                 throw;
             }
+
+            // -----------------------------------------------------------------------------
+            // Format
+            // -----------------------------------------------------------------------------
+            EGLint Format;
+
+            eglGetConfigAttrib(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglConfig, EGL_NATIVE_VISUAL_ID, &Format);
+
+            ANativeWindow_setBuffersGeometry(pNativeWindowHandle, 0, 0, Format);
 
             // -----------------------------------------------------------------------------
             // Surface
@@ -287,17 +299,17 @@ namespace
             // -----------------------------------------------------------------------------
             // Context
             // -----------------------------------------------------------------------------
-            EGLint contextAttributes[] =
+            EGLint ContextAttributes[] =
             {
                 EGL_CONTEXT_CLIENT_VERSION, 3,
                 EGL_NONE
             };
 
-            rWindowInfo.m_EglContext = eglCreateContext(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglConfig, NULL, contextAttributes);
+            rWindowInfo.m_EglContext = eglCreateContext(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglConfig, NULL, ContextAttributes);
 
-            if (rWindowInfo.m_EglContext == 0)
+            if (rWindowInfo.m_EglContext == EGL_NO_CONTEXT)
             {
-                BASE_CONSOLE_STREAMERROR("Can not create context.");
+                BASE_CONSOLE_STREAMERROR("Unable to create context.");
 
                 throw;
             }
@@ -309,7 +321,7 @@ namespace
 
             if (Status == EGL_FALSE)
             {
-                BASE_CONSOLE_STREAMERROR("Can not set current EGL stuff.");
+                BASE_CONSOLE_STREAMERROR("Unable to set current EGL stuff.");
 
                 throw;
             }
@@ -319,6 +331,15 @@ namespace
             // -----------------------------------------------------------------------------
             m_GraphicsAPI = GLES32;
 
+            // -----------------------------------------------------------------------------
+            // Test
+            // -----------------------------------------------------------------------------
+            int w, h;
+
+            eglQuerySurface(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface, EGL_WIDTH, &w);
+            eglQuerySurface(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface, EGL_HEIGHT, &h);
+
+            BASE_CONSOLE_INFOV("W=%i, H=%i", w, h);
 #else
 
             HWND  pNativeWindowHandle;
@@ -481,6 +502,9 @@ namespace
             rWindowInfo.m_pNativeOpenGLContextHandle = pNativeOpenGLContextHandle;
 #endif
 
+            // -----------------------------------------------------------------------------
+            // DEBUG
+            // -----------------------------------------------------------------------------
 #if APP_DEBUG_MODE == 1
             glDebugMessageCallback(OpenGLDebugCallback, NULL);
 
@@ -523,6 +547,14 @@ namespace
     
     void CGfxMain::OnExit()
     {
+#ifdef __ANDROID__
+        for (SWindowInfo& rWindowInfo : m_WindowInfos)
+        {
+            eglMakeCurrent(rWindowInfo.m_pNativeWindowHandle, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
+            eglTerminate(rWindowInfo.m_pNativeWindowHandle);
+        }
+#endif // __ANDROID__
     }
     
     // -----------------------------------------------------------------------------
