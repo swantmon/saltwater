@@ -47,7 +47,7 @@ void main()
     int Level1GridBufferOffset = g_RootGridPool[RootGridBufferOffset].m_PoolIndex * VOXELS_PER_LEVEL1GRID;
     Level1GridBufferOffset += OffsetToIndex(VoxelLevel1InnerOffset, 8);
 
-    int Level1PoolIndex = g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex * VOXELS_PER_LEVEL2GRID;
+    int Level2GridBufferOffset = g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex * VOXELS_PER_LEVEL2GRID;
 
     for (int i = 0; i < 8; ++ i)
     {
@@ -73,7 +73,7 @@ void main()
                 {
                     const float TSDF = min(SDF / TRUNCATED_DISTANCE, 1.0f);
 
-                    int TSDFIndex = Level1PoolIndex + OffsetToIndex(vec3(gl_LocalInvocationID.xy, i), 8);
+                    int TSDFIndex = Level2GridBufferOffset + OffsetToIndex(vec3(gl_LocalInvocationID.xy, i), 8);
 
                     uint TSDFPoolValue = g_TSDFPool[TSDFIndex];
                     
