@@ -34,8 +34,7 @@ void main()
         
         if (g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex == -1)
         {
-            int Index = atomicAdd(g_TSDFPoolItemCount, 1);
-            g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex = Index;
+            g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex = atomicAdd(g_TSDFPoolItemCount, 1);
         }
     }
 }
