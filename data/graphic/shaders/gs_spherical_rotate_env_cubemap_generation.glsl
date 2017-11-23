@@ -24,13 +24,13 @@ layout(triangle_strip, max_vertices = 18) out;
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(row_major, std140, binding = 2) uniform UB0
+layout(row_major, std140, binding = 2) uniform UB2
 {
     mat4 m_CubeProjectionMatrix;
     mat4 m_CubeViewMatrix[6];
 };
 
-layout(row_major, std140, binding = 3) uniform UB1
+layout(row_major, std140, binding = 3) uniform UB3
 {
     mat4 m_ModelMatrix;
 };
