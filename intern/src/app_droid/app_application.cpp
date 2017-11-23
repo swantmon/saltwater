@@ -56,6 +56,7 @@ namespace
 
             unsigned int m_WindowID;
             bool m_TerminateRequested;
+            int m_Animating;
         };
         
     private:
@@ -117,6 +118,7 @@ namespace
         // Set engine
         // -----------------------------------------------------------------------------
         m_AppSetup.m_pAndroidApp = _pAndroidApp;
+        m_AppSetup.m_Animating   = 1;
 
         // -----------------------------------------------------------------------------
         // Prepare to monitor accelerometer
@@ -180,11 +182,24 @@ namespace
             int Events;
             struct android_poll_source* AndroidPollSource;
 
-            while ((Identifcation = ALooper_pollAll(0, NULL, &Events, (void**)&AndroidPollSource)) >= 0) 
+            while ((Identifcation = ALooper_pollAll(m_AppSetup.m_Animating ? 0 : -1, NULL, &Events, (void**)&AndroidPollSource)) >= 0) 
             {
                 if (AndroidPollSource != NULL) 
                 {
                     AndroidPollSource->process(m_AppSetup.m_pAndroidApp, AndroidPollSource);
+                }
+
+                if (Identifcation == LOOPER_ID_USER) 
+                {
+                    if (m_AppSetup.m_AccelerometerSensor != NULL)
+                    {
+                        ASensorEvent SensorEvent;
+
+                        while (ASensorEventQueue_getEvents(m_AppSetup.m_SensorEventQueue, &SensorEvent, 1) > 0)
+                        {
+                            // BASE_CONSOLE_INFOV("Accelerometer: x=%f y=%f z=%f", SensorEvent.acceleration.x, SensorEvent.acceleration.y, SensorEvent.acceleration.z);
+                        }
+                    }
                 }
 
                 if (m_AppSetup.m_pAndroidApp->destroyRequested != 0 || m_AppSetup.m_TerminateRequested != 0) 
@@ -193,19 +208,22 @@ namespace
                 }
             }
 
-            // -----------------------------------------------------------------------------
-            // Time
-            // -----------------------------------------------------------------------------
-            Core::Time::Update();
-
-            // -----------------------------------------------------------------------------
-            // States
-            // -----------------------------------------------------------------------------
-            s_pStates[m_CurrentState]->OnRun();
-
-            if (m_RequestState != m_CurrentState)
+            if (m_AppSetup.m_Animating)
             {
-                OnTranslation(m_RequestState);
+                // -----------------------------------------------------------------------------
+                // Time
+                // -----------------------------------------------------------------------------
+                Core::Time::Update();
+
+                // -----------------------------------------------------------------------------
+                // States
+                // -----------------------------------------------------------------------------
+                s_pStates[m_CurrentState]->OnRun();
+
+                if (m_RequestState != m_CurrentState)
+                {
+                    OnTranslation(m_RequestState);
+                }
             }
         }
     }
@@ -272,7 +290,7 @@ namespace
 
                 Gfx::App::ActivateWindow(WindowID);
 
-                Gfx::App::OnResize(WindowID, 1920, 1080);
+                Gfx::App::OnResize(WindowID, 1440, 2560);
 
                 AppSetup->m_WindowID = WindowID;
 
@@ -311,6 +329,8 @@ namespace
             {
                 ASensorEventQueue_disableSensor(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor);
             }
+
+            AppSetup->m_Animating = 0;
             break;
         }
     }
