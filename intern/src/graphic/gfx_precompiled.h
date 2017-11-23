@@ -5,6 +5,8 @@
 
 #ifdef __ANDROID__
 
+#include <android/native_window.h>
+
 #define GL_GLEXT_PROTOTYPES
 
 #include <EGL/egl.h>

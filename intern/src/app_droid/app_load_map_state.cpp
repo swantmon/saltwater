@@ -18,6 +18,13 @@ namespace App
     }
 } // namespace App
 
+namespace Base
+{
+    class CTextReader
+    {
+    };
+} // namespace Base
+
 namespace App
 {
     CLoadMapState::CLoadMapState()
@@ -37,10 +44,11 @@ namespace App
     void CLoadMapState::InternOnEnter()
     {
         BASE_CONSOLE_STREAMINFO("Enter load level state.");
+        Base::CTextReader TextReader;
 
-        // Lg ::LoadMap::OnEnter(TextReader);
-        // Gui::LoadMap::OnEnter(TextReader);
-        // Gfx::LoadMap::OnEnter(TextReader);
+        Lg ::LoadMap::OnEnter(TextReader);
+        Gui::LoadMap::OnEnter(TextReader);
+        Gfx::LoadMap::OnEnter(TextReader);
     }
 
     // -----------------------------------------------------------------------------

@@ -1141,9 +1141,9 @@ namespace
 
         ContextManager::ResetSampler(0);
 
-        ContextManager::ResetConstantBuffer(2);
+        ContextManager::ResetConstantBuffer(0);
 
-        ContextManager::ResetConstantBuffer(4);
+        ContextManager::ResetConstantBuffer(3);
 
         ContextManager::ResetInputLayout();
 

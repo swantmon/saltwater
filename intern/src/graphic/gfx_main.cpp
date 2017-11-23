@@ -220,32 +220,28 @@ namespace
             EGLNativeWindowType  pNativeWindowHandle;
             EGLNativeDisplayType pNativeDeviceContextHandle;
             EGLBoolean           Status;
+            EGLint               Error;
 
             // -----------------------------------------------------------------------------
             // Cast data
             // -----------------------------------------------------------------------------
-            pNativeWindowHandle        = static_cast<EGLNativeWindowType>(rWindowInfo.m_pNativeWindowHandle);
-            pNativeDeviceContextHandle = EGL_DEFAULT_DISPLAY;
+            pNativeWindowHandle = static_cast<EGLNativeWindowType>(rWindowInfo.m_pNativeWindowHandle);
 
             // -----------------------------------------------------------------------------
-            // Create OpenGL specific stuff with dummy context
+            // Create OpenGLES
             // -----------------------------------------------------------------------------
-            rWindowInfo.m_EglDisplay = eglGetDisplay(pNativeDeviceContextHandle);
+            rWindowInfo.m_EglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
             if (rWindowInfo.m_EglDisplay == EGL_NO_DISPLAY)
             {
-                BASE_CONSOLE_STREAMERROR("Failed to get an EGLDisplay.");
-                
-                throw;
+                BASE_THROWM("Failed to get an EGLDisplay.");
             }
 
             Status = eglInitialize(rWindowInfo.m_EglDisplay, 0, 0);
 
             if (Status == EGL_FALSE)
             {
-                BASE_CONSOLE_STREAMERROR("Failed to initialize the EGLDisplay.");
-                
-                throw;
+                BASE_THROWM("Failed to initialize the EGLDisplay.");
             }
 
             // -----------------------------------------------------------------------------
@@ -291,9 +287,11 @@ namespace
             // -----------------------------------------------------------------------------
             rWindowInfo.m_EglSurface = eglCreateWindowSurface(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglConfig, pNativeWindowHandle, NULL);
 
-            if (rWindowInfo.m_EglSurface == EGL_NO_SURFACE)
+            Error = eglGetError();
+
+            if (rWindowInfo.m_EglSurface == EGL_NO_SURFACE || Error != EGL_SUCCESS)
             {
-                return;
+                BASE_THROWV("Unable to create surface because of %i.", Error);
             }
 
             // -----------------------------------------------------------------------------
@@ -305,13 +303,13 @@ namespace
                 EGL_NONE
             };
 
-            rWindowInfo.m_EglContext = eglCreateContext(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglConfig, NULL, ContextAttributes);
+            rWindowInfo.m_EglContext = eglCreateContext(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglConfig, EGL_NO_CONTEXT, ContextAttributes);
 
-            if (rWindowInfo.m_EglContext == EGL_NO_CONTEXT)
+            Error = eglGetError();
+
+            if (rWindowInfo.m_EglContext == EGL_NO_CONTEXT || Error != EGL_SUCCESS)
             {
-                BASE_CONSOLE_STREAMERROR("Unable to create context.");
-
-                throw;
+                BASE_THROWV("Unable to create context because of %i.", Error);
             }
 
             // -----------------------------------------------------------------------------
@@ -319,11 +317,11 @@ namespace
             // -----------------------------------------------------------------------------
             Status = eglMakeCurrent(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface, rWindowInfo.m_EglSurface, rWindowInfo.m_EglContext);
 
-            if (Status == EGL_FALSE)
-            {
-                BASE_CONSOLE_STREAMERROR("Unable to set current EGL stuff.");
+            Error = eglGetError();
 
-                throw;
+            if (Status == EGL_FALSE || Error != EGL_SUCCESS)
+            {
+                BASE_THROWV("Unable to set current EGL stuff because of %i.", Error);
             }
 
             // -----------------------------------------------------------------------------
