@@ -631,15 +631,15 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        m_SkyboxFromAtmosphere.m_MeshPtr            = 0; //CubemapTextureSpherePtr;
+        m_SkyboxFromAtmosphere.m_MeshPtr            = CubemapTextureSpherePtr;
         m_SkyboxFromAtmosphere.m_VertexBufferSetPtr = 0;
         m_SkyboxFromAtmosphere.m_IndexBufferPtr     = 0;
 
-        m_SkyboxFromPanorama.m_MeshPtr            = 0; //CubemapTextureSpherePtr;
+        m_SkyboxFromPanorama.m_MeshPtr            = CubemapTextureSpherePtr;
         m_SkyboxFromPanorama.m_VertexBufferSetPtr = 0;
         m_SkyboxFromPanorama.m_IndexBufferPtr     = 0;
 
-        m_SkyboxFromCubemap.m_MeshPtr            = 0; //CubemapTextureSpherePtr;
+        m_SkyboxFromCubemap.m_MeshPtr            = CubemapTextureSpherePtr;
         m_SkyboxFromCubemap.m_VertexBufferSetPtr = 0;
         m_SkyboxFromCubemap.m_IndexBufferPtr     = 0;
 
@@ -925,7 +925,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
-            pGraphicSkyboxFacet = &AllocateSkyFacet(2048);
+            pGraphicSkyboxFacet = &AllocateSkyFacet(512);
 
             // -----------------------------------------------------------------------------
             // Update
