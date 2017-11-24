@@ -36,7 +36,7 @@ void main()
     const vec3 VolumeOffset = g_RootVolumePool[g_CurrentVolumeIndex].m_Offset * VOLUME_SIZE;    
     
     ivec3 Level1Offset = ivec3(IndexToOffset(g_VolumeID[gl_WorkGroupID.x], 16 * 8));
-    vec3 ParentOffset = Level1Offset * VOXEL_SIZE * 8 + VolumeOffset;
+    vec3 ParentOffset = Level1Offset * VOXEL_SIZE * 8.0f + VolumeOffset;
 
     ivec3 VoxelRootOffset = Level1Offset / 8;
     ivec3 VoxelLevel1InnerOffset = Level1Offset % 8;
