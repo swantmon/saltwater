@@ -2128,7 +2128,8 @@ namespace MR
 
     void CScalableSLAMReconstructor::ResetReconstruction(const SReconstructionSettings* pReconstructionSettings)
     {
-		m_RootVolumeMap.clear();
+        m_RootVolumeMap.clear();
+        m_RootVolumeVector.clear();
 
         if (pReconstructionSettings != nullptr)
         {
