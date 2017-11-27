@@ -8,6 +8,7 @@
 #include "app_droid/app_play_state.h"
 #include "app_droid/app_start_state.h"
 #include "app_droid/app_unload_map_state.h"
+#include "app_droid/pch.h"
 
 #include "base/base_console.h"
 #include "base/base_exception.h"

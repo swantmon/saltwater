@@ -58,7 +58,7 @@ endforeach()
 # Java Interface
 # ---------------------------------------
 file(
-    GLOB_RECURSE ${SourceDir}app_droid
+    GLOB_RECURSE TargetSources
     LIST_DIRECTORIES false
     ${SourceDir}app_droid/*.c*
     ${SourceDir}app_droid/*.h*
@@ -116,4 +116,4 @@ target_link_libraries( # Specifies the target library.
 
                        # Links the target library to the log library
                        # included in the NDK.
-                       ${log-lib} base )
+                       ${log-lib} app_droid )
