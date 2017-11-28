@@ -1,18 +1,5 @@
 
-cmake_minimum_required(VERSION 3.5.0)
-
-
-
-
-
-
-
-
-
-
-
-
-
+cmake_minimum_required(VERSION 3.6.0)
 
 # ---------------------------------------
 # Project & setup
@@ -33,13 +20,13 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # 06. gui
 # 07. logic
 # ---------------------------------------
-set(MyLibaries base camera core data graphic gui logic)
+set(MyLibraries base camera core data graphic gui logic)
 
 include_directories(${IncludeDir})
 
-foreach(MyLibary IN ITEMS ${MyLibaries})
+foreach(MyLibrary IN ITEMS ${MyLibraries})
 
-    set(TargetName ${MyLibary})
+    set(TargetName ${MyLibrary})
     set(TargetSourceDir ${SourceDir}${TargetName})
 
     file(
@@ -66,7 +53,7 @@ file(
 
 add_library( app_droid SHARED ${TargetSources} )
 
-target_link_libraries( app_droid ${MyLibaries} libc++_shared log GLESv3 EGL android)
+target_link_libraries( app_droid ${MyLibraries} libc++_shared log GLESv3 EGL android)
 
 
 
