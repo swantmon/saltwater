@@ -1,7 +1,8 @@
 
+#include "app_droid/app_precompiled.h"
+
 #include "app_droid/app_application.h"
 #include "app_droid/app_load_map_state.h"
-#include "app_droid/pch.h"
 
 #include "graphic/gfx_load_map_state.h"
 
