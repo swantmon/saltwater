@@ -1,4 +1,6 @@
 
+#include "app_droid/app_precompiled.h"
+
 #include "app_droid/app_application.h"
 #include "app_droid/app_main_menu_state.h"
 

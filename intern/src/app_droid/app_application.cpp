@@ -1,4 +1,6 @@
 
+#include "app_droid/app_precompiled.h"
+
 #include "app_droid/app_application.h"
 #include "app_droid/app_exit_state.h"
 #include "app_droid/app_init_state.h"
@@ -8,7 +10,6 @@
 #include "app_droid/app_play_state.h"
 #include "app_droid/app_start_state.h"
 #include "app_droid/app_unload_map_state.h"
-#include "app_droid/pch.h"
 
 #include "base/base_console.h"
 #include "base/base_exception.h"

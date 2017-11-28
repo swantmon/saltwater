@@ -66,7 +66,7 @@ file(
 
 add_library( app_droid SHARED ${TargetSources} )
 
-target_link_libraries( app_droid ${MyLibaries} stdc++ log GLESv3 EGL android)
+target_link_libraries( app_droid ${MyLibaries} libc++_shared log GLESv3 EGL android)
 
 
 

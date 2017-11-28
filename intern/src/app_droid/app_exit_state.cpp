@@ -1,6 +1,7 @@
 
+#include "app_droid/app_precompiled.h"
+
 #include "app_droid/app_exit_state.h"
-#include "app_droid/pch.h"
 
 #include "graphic/gfx_exit_state.h"
 
