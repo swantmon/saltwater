@@ -53,4 +53,4 @@ file(
 
 add_library( app_droid SHARED ${TargetSources} )
 
-target_link_libraries( app_droid ${MyLibraries} log GLESv3 EGL )
+target_link_libraries( app_droid ${MyLibraries} log GLESv3 EGL android )
