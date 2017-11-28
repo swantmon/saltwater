@@ -59,7 +59,7 @@
     <ClInclude Include="..\..\..\..\src\app_droid\app_start_state.h" />
     <ClInclude Include="..\..\..\..\src\app_droid\app_state.h" />
     <ClInclude Include="..\..\..\..\src\app_droid\app_unload_map_state.h" />
-    <ClInclude Include="..\..\..\..\src\app_droid\pch.h" />
+    <ClInclude Include="..\..\..\..\src\app_droid\app_precompiled.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\base\base.vcxproj">

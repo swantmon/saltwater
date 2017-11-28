@@ -33,7 +33,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\src\app_droid\app_application.h" />
-    <ClInclude Include="..\..\..\..\src\app_droid\pch.h" />
     <ClInclude Include="..\..\..\..\src\app_droid\android_native_app_glue.h">
       <Filter>native</Filter>
     </ClInclude>
@@ -64,6 +63,7 @@
     <ClInclude Include="..\..\..\..\src\app_droid\app_init_state.h">
       <Filter>states</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\src\app_droid\app_precompiled.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="states">
