@@ -57,15 +57,15 @@ namespace
     const unsigned int g_AABB = 8;
 
     //*
-    const unsigned int g_RootVolumePoolSize =        g_MegabyteSize; //   1 MB
-    const unsigned int g_RootGridPoolSize   =  16u * g_MegabyteSize; //  16 MB
-    const unsigned int g_Level1GridPoolSize =  16u * g_MegabyteSize; //  16 MB
-    const unsigned int g_TSDFPoolSize       = 128u * g_MegabyteSize; // 128 MB
+    const unsigned int g_RootVolumePoolSize =        g_MegabyteSize;
+    const unsigned int g_RootGridPoolSize   =  16u * g_MegabyteSize;
+    const unsigned int g_Level1GridPoolSize =  64u * g_MegabyteSize;
+    const unsigned int g_TSDFPoolSize       = 512u * g_MegabyteSize;
     /*/
-    const unsigned int g_RootVolumePoolSize =              g_MegabyteSize; //    1 MB
-    const unsigned int g_RootGridPoolSize   =       128u * g_MegabyteSize; //  128 MB
-    const unsigned int g_Level1GridPoolSize =       128u * g_MegabyteSize; //  128 MB
-    const unsigned int g_TSDFPoolSize       = 16u * 128u * g_MegabyteSize; // 2048 MB
+    const unsigned int g_RootVolumePoolSize =              g_MegabyteSize;
+    const unsigned int g_RootGridPoolSize   =       128u * g_MegabyteSize;
+    const unsigned int g_Level1GridPoolSize =       128u * g_MegabyteSize;
+    const unsigned int g_TSDFPoolSize       = 16u * 128u * g_MegabyteSize;
     //*/
 
     const bool g_UseFullVolumeIntegration = true;
