@@ -127,9 +127,9 @@ void main()
                         int TSDFBufferInnerOffset = OffsetToIndex(TSDFVolumeOffset, 8);
                         int TSDFBufferIndex = TSDFVolumeBufferOffset * 8 * 8 * 8 + TSDFBufferInnerOffset;
 
-                        uint TSDF = g_TSDFPool[TSDFBufferIndex];
+                        vec2 Voxel = unpackUnorm2x16(g_TSDFPool[TSDFBufferIndex]);
 
-                        if (TSDF == 0)
+                        if (abs(Voxel.x) < 0.1)
                         {
                             break;
                         }
