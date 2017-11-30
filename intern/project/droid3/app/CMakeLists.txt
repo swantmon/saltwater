@@ -4,11 +4,11 @@ cmake_minimum_required(VERSION 3.6.0)
 # ---------------------------------------
 # Project & setup
 # ---------------------------------------
-set(InternDir  ../../../../intern/)
-set(SourceDir  ../../../../intern/src/)
-set(IncludeDir ../../../../intern/src/)
+set( InternDir  ../../../../intern/ )
+set( SourceDir  ../../../../intern/src/ )
+set( IncludeDir ../../../../intern/src/ )
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set( CMAKE_INCLUDE_CURRENT_DIR ON )
 
 # ---------------------------------------
 # Internal libaries
@@ -20,14 +20,14 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # 06. gui
 # 07. logic
 # ---------------------------------------
-set(MyLibraries base camera core data graphic gui logic)
+set( MyLibraries camera graphic logic data gui core base )
 
-include_directories(${IncludeDir})
+include_directories( ${IncludeDir} )
 
-foreach(MyLibrary IN ITEMS ${MyLibraries})
+foreach( MyLibrary IN ITEMS ${MyLibraries} )
 
-    set(TargetName ${MyLibrary})
-    set(TargetSourceDir ${SourceDir}${TargetName})
+    set( TargetName ${MyLibrary} )
+    set( TargetSourceDir ${SourceDir}${TargetName} )
 
     file(
         GLOB_RECURSE TargetSources
@@ -36,7 +36,7 @@ foreach(MyLibrary IN ITEMS ${MyLibraries})
         ${TargetSourceDir}/*.h*
     )
 
-    add_library(${TargetName} STATIC ${TargetSources})
+    add_library( ${TargetName} STATIC ${TargetSources} )
 
 endforeach()
 
@@ -51,23 +51,8 @@ file(
      ${SourceDir}app_droid/*.h*
 )
 
-add_library(app_droid STATIC ${TargetSources})
+add_library( app_droid SHARED ${TargetSources} )
 
+target_link_libraries( app_droid EGL GLESv3 log android m )
 
-
-# ---------------------------------------
-# Example
-# ---------------------------------------
-include_directories(${CMAKE_BINARY_DIR})
-
-add_library(native-lib SHARED src/main/cpp/native-lib.cpp)
-
-target_link_libraries( native-lib
-                       ${CMAKE_BINARY_DIR}/libbase.a
-                       ${CMAKE_BINARY_DIR}/libcamera.a
-                       ${CMAKE_BINARY_DIR}/libcore.a
-                       ${CMAKE_BINARY_DIR}/libdata.a
-                       ${CMAKE_BINARY_DIR}/libgraphic.a
-                       ${CMAKE_BINARY_DIR}/libgui.a
-                       ${CMAKE_BINARY_DIR}/liblogic.a
-                       log EGL GLESv3 android)
+target_link_libraries( app_droid camera graphic logic data gui core base )
