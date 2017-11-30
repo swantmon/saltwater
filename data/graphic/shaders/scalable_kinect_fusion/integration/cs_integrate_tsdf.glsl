@@ -77,12 +77,12 @@ void main()
 
                     uint TSDFPoolValue = g_TSDFPool[TSDFIndex];
                     
-                    vec2 Voxel = unpackUnorm2x16(TSDFPoolValue);
+                    vec2 Voxel = unpackSnorm2x16(TSDFPoolValue);
 
                     Voxel.x = (Voxel.x * Voxel.y + TSDF) / (Voxel.y + 1.0f);
                     Voxel.y = min(MAX_INTEGRATION_WEIGHT, Voxel.y + 1.0f);
 
-                    TSDFPoolValue = packUnorm2x16(Voxel);
+                    TSDFPoolValue = packSnorm2x16(Voxel);
                     
                     g_TSDFPool[TSDFIndex] = TSDFPoolValue;
                 }
