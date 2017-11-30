@@ -44,9 +44,6 @@ endforeach()
 # ---------------------------------------
 # Java Interface
 # ---------------------------------------
-include_directories(${CMAKE_BINARY_DIR})
-message(STATUS "TEST OUTPUT VAR: ${CMAKE_BINARY_DIR}")
-
 file(
      GLOB_RECURSE TargetSources
      LIST_DIRECTORIES false
@@ -54,9 +51,18 @@ file(
      ${SourceDir}app_droid/*.h*
 )
 
-add_library( app_droid SHARED ${SourceDir}app_droid/app_droid.cpp )
+add_library(app_droid STATIC ${TargetSources})
 
-target_link_libraries( app_droid
+
+
+# ---------------------------------------
+# Example
+# ---------------------------------------
+include_directories(${CMAKE_BINARY_DIR})
+
+add_library(native-lib SHARED src/main/cpp/native-lib.cpp)
+
+target_link_libraries( native-lib
                        ${CMAKE_BINARY_DIR}/libbase.a
                        ${CMAKE_BINARY_DIR}/libcamera.a
                        ${CMAKE_BINARY_DIR}/libcore.a
@@ -65,18 +71,3 @@ target_link_libraries( app_droid
                        ${CMAKE_BINARY_DIR}/libgui.a
                        ${CMAKE_BINARY_DIR}/liblogic.a
                        log EGL GLESv3 android)
-
-
-# ---------------------------------------
-# Example
-# ---------------------------------------
-#add_library(native-lib SHARED src/main/cpp/native-lib.cpp)
-
-#find_library(log-lib log)
-
-#target_link_libraries( # Specifies the target library.
-#                       native-lib
-
-                       # Links the target library to the log library
-                       # included in the NDK.
-#                       ${log-lib} ${CMAKE_BINARY_DIR}/libbase.a ${CMAKE_BINARY_DIR}/libcore.a)
