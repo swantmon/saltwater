@@ -129,7 +129,7 @@ void main()
 
                         vec2 Voxel = unpackUnorm2x16(g_TSDFPool[TSDFBufferIndex]);
 
-                        if (abs(Voxel.x) < 0.1)
+                        if (abs(Voxel.x) < 0.1f)
                         {
                             break;
                         }
