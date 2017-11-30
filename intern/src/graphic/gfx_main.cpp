@@ -330,14 +330,20 @@ namespace
             m_GraphicsAPI = GLES32;
 
             // -----------------------------------------------------------------------------
-            // Test
+            // Get native size
             // -----------------------------------------------------------------------------
-            int w, h;
+            int Width, Height;
 
-            eglQuerySurface(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface, EGL_WIDTH, &w);
-            eglQuerySurface(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface, EGL_HEIGHT, &h);
+            eglQuerySurface(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface, EGL_WIDTH, &Width);
+            eglQuerySurface(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface, EGL_HEIGHT, &Height);
 
-            BASE_CONSOLE_INFOV("W=%i, H=%i", w, h);
+            m_pActiveWindowInfo->m_WindowSize[0] = Width;
+            m_pActiveWindowInfo->m_WindowSize[0] = Height;
+
+            // -----------------------------------------------------------------------------
+            // Swap buffer at the beginning
+            // -----------------------------------------------------------------------------
+            eglSwapBuffers(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface);
 #else
 
             HWND  pNativeWindowHandle;
