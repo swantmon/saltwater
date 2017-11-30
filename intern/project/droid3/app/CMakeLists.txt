@@ -44,6 +44,9 @@ endforeach()
 # ---------------------------------------
 # Java Interface
 # ---------------------------------------
+include_directories(${CMAKE_BINARY_DIR})
+message(STATUS "TEST OUTPUT VAR: ${CMAKE_BINARY_DIR}")
+
 file(
      GLOB_RECURSE TargetSources
      LIST_DIRECTORIES false
@@ -51,34 +54,29 @@ file(
      ${SourceDir}app_droid/*.h*
 )
 
-add_library( app_droid SHARED ${TargetSources} )
+add_library( app_droid SHARED ${SourceDir}app_droid/app_droid.cpp )
 
-target_link_libraries( app_droid base core log )
-
+target_link_libraries( app_droid
+                       ${CMAKE_BINARY_DIR}/libbase.a
+                       ${CMAKE_BINARY_DIR}/libcamera.a
+                       ${CMAKE_BINARY_DIR}/libcore.a
+                       ${CMAKE_BINARY_DIR}/libdata.a
+                       ${CMAKE_BINARY_DIR}/libgraphic.a
+                       ${CMAKE_BINARY_DIR}/libgui.a
+                       ${CMAKE_BINARY_DIR}/liblogic.a
+                       log EGL GLESv3 android)
 
 
 # ---------------------------------------
 # Example
 # ---------------------------------------
-add_library( # Sets the name of the library.
-             native-lib
+#add_library(native-lib SHARED src/main/cpp/native-lib.cpp)
 
-             # Sets the library as a shared library.
-             SHARED
+#find_library(log-lib log)
 
-             # Provides a relative path to your source file(s).
-             src/main/cpp/native-lib.cpp )
-
-find_library( # Sets the name of the path variable.
-              log-lib
-
-              # Specifies the name of the NDK library that
-              # you want CMake to locate.
-              log )
-
-target_link_libraries( # Specifies the target library.
-                       native-lib
+#target_link_libraries( # Specifies the target library.
+#                       native-lib
 
                        # Links the target library to the log library
                        # included in the NDK.
-                       ${log-lib} )
+#                       ${log-lib} ${CMAKE_BINARY_DIR}/libbase.a ${CMAKE_BINARY_DIR}/libcore.a)
