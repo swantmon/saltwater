@@ -55,4 +55,4 @@ add_library( app_droid SHARED ${TargetSources} )
 
 target_link_libraries( app_droid EGL GLESv3 log android m )
 
-target_link_libraries( app_droid camera graphic logic data gui core base )
+target_link_libraries( app_droid camera graphic logic core data gui base )
