@@ -1762,6 +1762,16 @@ namespace MR
         }
 
         //////////////////////////////////////////////////////////////////////////////////////
+        // Read pool sizes
+        //////////////////////////////////////////////////////////////////////////////////////
+
+        int* pPoolSizes = static_cast<int*>(BufferManager::MapBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr, CBuffer::EMap::Read));
+        m_VolumeBuffers.m_RootGridPoolSize = pPoolSizes[0];
+        m_VolumeBuffers.m_Level1PoolSize = pPoolSizes[1];
+        m_VolumeBuffers.m_TSDFPoolSize = pPoolSizes[2];
+        BufferManager::UnmapBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr);
+
+        //////////////////////////////////////////////////////////////////////////////////////
         // Integrate and raycast pyramid
         //////////////////////////////////////////////////////////////////////////////////////
 

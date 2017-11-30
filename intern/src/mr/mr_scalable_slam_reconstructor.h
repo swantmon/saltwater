@@ -86,6 +86,9 @@ namespace MR
             Base::Int3 m_MinOffset;                         // AABB of the whole reconstruction
             Base::Int3 m_MaxOffset;
             int m_RootVolumeTotalWidth;
+            int m_RootGridPoolSize;
+            int m_Level1PoolSize;
+            int m_TSDFPoolSize;
         };
 
         typedef std::map<Base::Int3, SRootVolume, IndexCompare> CRootVolumeMap;
