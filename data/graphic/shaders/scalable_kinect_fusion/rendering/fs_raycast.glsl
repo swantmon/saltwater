@@ -141,7 +141,7 @@ void main()
         vec3 CurrentPosition = CameraPosition + RayLength * RayDirection;
 
         PreviousTSDF = CurrentTSDF;
-        CurrentTSDF = GetVoxel(CurrentPosition + RayLength * RayDirection).x;
+        CurrentTSDF = GetVoxel(CurrentPosition).x;
 
         if (CurrentTSDF < 0.0f && PreviousTSDF > 0.0f)
         {
