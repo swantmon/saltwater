@@ -6,11 +6,11 @@
 #include "base/base_console.h"
 #include "base/base_exception.h"
 
-extern "C"
-JNIEXPORT jstring
+#include <android/native_window.h>
+#include <android/native_window_jni.h>
 
-JNICALL
-Java_de_tu_1ilmenau_saltwater_MainActivity_stringFromJNI(JNIEnv *env, jobject /* this */)
+extern "C"
+JNIEXPORT jstring JNICALL Java_de_tu_1ilmenau_saltwater_MainActivity_stringFromJNI(JNIEnv *env, jobject /* this */)
 {
     try
     {
@@ -48,4 +48,53 @@ Java_de_tu_1ilmenau_saltwater_MainActivity_stringFromJNI(JNIEnv *env, jobject /*
 
     std::string hello = "Hello from C++";
     return env->NewStringUTF(hello.c_str());
+}
+
+
+
+class Renderer
+{
+
+};
+
+static ANativeWindow *window = 0;
+static Renderer *renderer = 0;
+
+extern "C" {
+    JNIEXPORT void JNICALL Java_de_tu_1ilmenau_saltwater_MainActivity_nativeOnStart(JNIEnv *jenv, jobject obj)
+    {
+        renderer = new Renderer();
+        return;
+    }
+
+    JNIEXPORT void JNICALL Java_de_tu_1ilmenau_saltwater_MainActivity_nativeOnResume(JNIEnv *jenv, jobject obj)
+    {
+        return;
+    }
+
+    JNIEXPORT void JNICALL Java_de_tu_1ilmenau_saltwater_MainActivity_nativeOnPause(JNIEnv *jenv, jobject obj)
+    {
+        return;
+    }
+
+    JNIEXPORT void JNICALL Java_de_tu_1ilmenau_saltwater_MainActivity_nativeOnStop(JNIEnv *jenv, jobject obj)
+    {
+        delete renderer;
+        renderer = 0;
+        return;
+    }
+
+    JNIEXPORT void JNICALL Java_de_tu_1ilmenau_saltwater_MainActivity_nativeSetSurface(JNIEnv *jenv, jobject obj, jobject surface)
+    {
+        if (surface != 0)
+        {
+            window = ANativeWindow_fromSurface(jenv, surface);
+        }
+        else
+        {
+            ANativeWindow_release(window);
+        }
+
+        return;
+    }
 }
