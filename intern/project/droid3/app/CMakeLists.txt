@@ -20,7 +20,7 @@ set( CMAKE_INCLUDE_CURRENT_DIR ON )
 # 06. gui
 # 07. logic
 # ---------------------------------------
-set( MyLibraries camera graphic logic data gui core base )
+set( MyLibraries camera graphic logic core data gui base )
 
 include_directories( ${IncludeDir} )
 
@@ -55,4 +55,4 @@ add_library( app_droid SHARED ${TargetSources} )
 
 target_link_libraries( app_droid EGL GLESv3 log android m )
 
-target_link_libraries( app_droid camera graphic logic core data gui base )
+target_link_libraries( app_droid ${MyLibraries} )
