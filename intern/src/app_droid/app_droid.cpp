@@ -6,8 +6,6 @@
 #include "base/base_console.h"
 #include "base/base_exception.h"
 
-#include "core/core_time.h"
-
 extern "C"
 JNIEXPORT jstring
 
@@ -47,14 +45,6 @@ Java_de_tu_1ilmenau_saltwater_MainActivity_stringFromJNI(JNIEnv *env, jobject /*
     {
         BASE_CONSOLE_ERROR("An undefined exception stops application");
     }
-
-    Core::Time::Update();
-    Core::Time::Update();
-    Core::Time::Update();
-
-    int Frame = Core::Time::GetNumberOfFrame();
-
-    double D = Core::Time::GetDeltaTimeLastFrame();
 
     std::string hello = "Hello from C++";
     return env->NewStringUTF(hello.c_str());
