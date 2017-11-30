@@ -49,11 +49,6 @@ float GetEndLength(vec3 Start, vec3 Direction, vec3 AABBMin, vec3 AABBMax)
     return min(min(xmax, ymax), zmax);
 }
 
-vec3 GetRootVolumeOffset(vec3 GlobalPosition)
-{
-    return GlobalPosition - mod(GlobalPosition, VOLUME_SIZE);
-}
-
 int GetRootVolumeBufferIndex(vec3 GlobalPosition)
 {
     vec3 BufferPosition = GlobalPosition / VOLUME_SIZE + g_VolumeTextureWidth / 2.0f;
