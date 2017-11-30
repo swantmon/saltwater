@@ -2,6 +2,13 @@
 cmake_minimum_required(VERSION 3.6.0)
 
 # ---------------------------------------
+# Native App GLUE
+# ---------------------------------------
+add_library(native_app_glue STATIC ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c)
+
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
+
+# ---------------------------------------
 # Project & setup
 # ---------------------------------------
 set( InternDir  ../../../../intern/ )
@@ -40,7 +47,6 @@ foreach( MyLibrary IN ITEMS ${MyLibraries} )
 
 endforeach()
 
-
 # ---------------------------------------
 # Java Interface
 # ---------------------------------------
@@ -53,6 +59,8 @@ file(
 
 add_library( app_droid SHARED ${TargetSources} )
 
-target_link_libraries( app_droid EGL GLESv3 log android m )
+target_include_directories( app_droid PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue )
+
+target_link_libraries( app_droid EGL GLESv3 log android m native_app_glue)
 
 target_link_libraries( app_droid ${MyLibraries} )
