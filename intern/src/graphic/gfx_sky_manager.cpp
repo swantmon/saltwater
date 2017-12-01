@@ -2032,6 +2032,8 @@ namespace
 
         ContextManager::Draw(3, 0);
 
+        glFinish();
+
         Performance::EndEvent();
 
         // -----------------------------------------------------------------------------
@@ -2050,6 +2052,8 @@ namespace
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
         ContextManager::Draw(3, 0);
+
+        glFinish();
 
         Performance::EndEvent();
 
@@ -2091,6 +2095,8 @@ namespace
             BufferManager::UploadBufferData(m_PSLayerValues, &PSLayerValues);
 
             ContextManager::Draw(3, 0);
+
+            glFinish();
         }
 
         ContextManager::ResetShaderGS();
@@ -2121,6 +2127,8 @@ namespace
         ContextManager::SetConstantBuffer(5, m_PSIrradianceK);
 
         ContextManager::Draw(3, 0);
+
+        glFinish();
 
         Performance::EndEvent();
 
@@ -2156,6 +2164,8 @@ namespace
             BufferManager::UploadBufferData(m_GSLayer, &GSLayer);
 
             ContextManager::Draw(3, 0);
+
+            glFinish();
         }
 
         ContextManager::ResetShaderGS();
@@ -2218,6 +2228,8 @@ namespace
                 BufferManager::UploadBufferData(m_PSLayerValues, &PSLayerValues);
 
                 ContextManager::Draw(3, 0);
+
+                glFinish();
             }
 
             ContextManager::ResetShaderGS();
@@ -2236,6 +2248,8 @@ namespace
             ContextManager::SetShaderPS(m_IrradianceMultipleMaterial);
 
             ContextManager::Draw(3, 0);
+
+            glFinish();
 
             Performance::EndEvent();
 
@@ -2276,6 +2290,8 @@ namespace
                 BufferManager::UploadBufferData(m_PSLayerValues, &PSLayerValues);
 
                 ContextManager::Draw(3, 0);
+
+                glFinish();
             }
 
             ContextManager::ResetShaderGS();
@@ -2305,6 +2321,8 @@ namespace
             ContextManager::SetShaderPS(m_IrradianceCopyMaterial);
 
             ContextManager::Draw(3, 0);
+
+            glFinish();
 
             Performance::EndEvent();
 
@@ -2339,6 +2357,8 @@ namespace
                 BufferManager::UploadBufferData(m_PSLayerValues, &PSLayerValues);
 
                 ContextManager::Draw(3, 0);
+
+                glFinish();
             }
 
             ContextManager::ResetShaderGS();

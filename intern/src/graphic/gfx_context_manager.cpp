@@ -1631,7 +1631,9 @@ namespace
 #ifdef VALIDATE_PIPELINE
 
         glValidateProgramPipeline(m_NativeShaderPipeline);
-        GLint IsValid;
+
+        GLint IsValid = GL_TRUE;
+
         glGetProgramPipelineiv(m_NativeShaderPipeline, GL_VALIDATE_STATUS, &IsValid);
 
         if (IsValid != GL_TRUE)
