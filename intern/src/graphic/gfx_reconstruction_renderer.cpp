@@ -1001,10 +1001,9 @@ namespace
                 ContextManager::SetResourceBuffer(2, rRootGrid.m_Level1QueuePtr);
 
                 int VertexCount = m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfVertices();
-                if (rRootGrid.m_Level1QueueSize > 0)
-                {
-                    ContextManager::DrawInstanced(VertexCount, rRootGrid.m_Level1QueueSize, 0);
-                }
+                BufferManager::UploadBufferData(rRootGrid.m_IndirectLevel1Buffer, &VertexCount, 0, sizeof(uint32_t));
+
+                ContextManager::DrawIndirect(rRootGrid.m_IndirectLevel1Buffer, MR::CScalableSLAMReconstructor::SIndirectBuffers::s_DrawOffset);
             }
         }
     }
@@ -1057,10 +1056,9 @@ namespace
                 ContextManager::SetResourceBuffer(2, rRootGrid.m_Level2QueuePtr);
 
                 int VertexCount = m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfVertices();
-                if (rRootGrid.m_Level2QueueSize > 0)
-                {
-                    ContextManager::DrawInstanced(VertexCount, rRootGrid.m_Level2QueueSize, 0);
-                }
+                BufferManager::UploadBufferData(rRootGrid.m_IndirectLevel2Buffer, &VertexCount, 0, sizeof(uint32_t));
+
+                ContextManager::DrawIndirect(rRootGrid.m_IndirectLevel2Buffer, MR::CScalableSLAMReconstructor::SIndirectBuffers::s_DrawOffset);
             }
         }
     }
