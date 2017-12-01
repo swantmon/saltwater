@@ -292,8 +292,6 @@ namespace
 
                 Gfx::App::ActivateWindow(WindowID);
 
-                Gfx::App::OnResize(WindowID, 1440, 2560);
-
                 AppSetup->m_WindowID = WindowID;
 
                 App::Application::ChangeState(App::CState::Start);

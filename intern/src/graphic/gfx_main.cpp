@@ -218,7 +218,6 @@ namespace
 #ifdef __ANDROID__
 
             EGLNativeWindowType  pNativeWindowHandle;
-            EGLNativeDisplayType pNativeDeviceContextHandle;
             EGLBoolean           Status;
             EGLint               Error;
 
@@ -249,12 +248,11 @@ namespace
             // -----------------------------------------------------------------------------
             const EGLint ConfigAttributes[] =
             {
-                EGL_SURFACE_TYPE,  EGL_WINDOW_BIT,
-                EGL_BLUE_SIZE,     8,
-                EGL_GREEN_SIZE,    8,
-                EGL_RED_SIZE,      8,
-                EGL_ALPHA_SIZE,    8,
-                EGL_DEPTH_SIZE,   24,
+                EGL_SURFACE_TYPE,    EGL_WINDOW_BIT | EGL_PBUFFER_BIT,
+                EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT_KHR,
+                EGL_BLUE_SIZE,       8,
+                EGL_GREEN_SIZE,      8,
+                EGL_RED_SIZE,        8,
                 EGL_NONE
             };
 
@@ -278,7 +276,12 @@ namespace
             // -----------------------------------------------------------------------------
             EGLint Format;
 
-            eglGetConfigAttrib(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglConfig, EGL_NATIVE_VISUAL_ID, &Format);
+            Status = eglGetConfigAttrib(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglConfig, EGL_NATIVE_VISUAL_ID, &Format);
+
+            if (Status == EGL_FALSE)
+            {
+                BASE_THROWM("Failed to get native visual ID.");
+            }
 
             ANativeWindow_setBuffersGeometry(pNativeWindowHandle, 0, 0, Format);
 
@@ -338,7 +341,7 @@ namespace
             eglQuerySurface(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface, EGL_HEIGHT, &Height);
 
             m_pActiveWindowInfo->m_WindowSize[0] = Width;
-            m_pActiveWindowInfo->m_WindowSize[0] = Height;
+            m_pActiveWindowInfo->m_WindowSize[1] = Height;
 
             // -----------------------------------------------------------------------------
             // Swap buffer at the beginning
@@ -720,15 +723,22 @@ namespace
         SWindowInfo& rWindowInfo = *m_pActiveWindowInfo;
 
 #ifdef __ANDROID__
-        eglMakeCurrent(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface, rWindowInfo.m_EglSurface, rWindowInfo.m_EglContext);
+        EGLBoolean Status = eglMakeCurrent(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface, rWindowInfo.m_EglSurface, rWindowInfo.m_EglContext);
+
+        EGLint Error = eglGetError();
+
+        if (Status == EGL_FALSE || Error != EGL_SUCCESS)
+        {
+            BASE_THROWV("Unable to set current EGL stuff because of %i.", Error);
+        }
 #else
         wglMakeCurrent(rWindowInfo.m_pNativeDeviceContextHandle, rWindowInfo.m_pNativeOpenGLContextHandle);
 #endif
 
-        Gfx::TargetSetManager::ClearTargetSet(Gfx::TargetSetManager::GetSystemTargetSet());
-        Gfx::TargetSetManager::ClearTargetSet(Gfx::TargetSetManager::GetDefaultTargetSet(), 1.0f);
-        Gfx::TargetSetManager::ClearTargetSet(Gfx::TargetSetManager::GetDeferredTargetSet());
-        Gfx::TargetSetManager::ClearTargetSet(Gfx::TargetSetManager::GetLightAccumulationTargetSet());
+        //Gfx::TargetSetManager::ClearTargetSet(Gfx::TargetSetManager::GetSystemTargetSet());
+        //Gfx::TargetSetManager::ClearTargetSet(Gfx::TargetSetManager::GetDefaultTargetSet(), 1.0f);
+        //Gfx::TargetSetManager::ClearTargetSet(Gfx::TargetSetManager::GetDeferredTargetSet());
+        //Gfx::TargetSetManager::ClearTargetSet(Gfx::TargetSetManager::GetLightAccumulationTargetSet());
     }
     
     // -----------------------------------------------------------------------------
