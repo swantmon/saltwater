@@ -51,14 +51,14 @@ float GetEndLength(vec3 Start, vec3 Direction, vec3 AABBMin, vec3 AABBMax)
 
 int GetRootVolumeBufferIndex(vec3 GlobalPosition)
 {
-    vec3 BufferPosition = GlobalPosition / VOLUME_SIZE + g_VolumeTextureWidth / 2.0f;
+    vec3 BufferPosition = GlobalPosition + g_VolumeTextureWidth / 2.0f;
     uint VolumeIndex = OffsetToIndex(BufferPosition, g_VolumeTextureWidth);
     return g_RootVolumePositionBuffer[VolumeIndex];
 }
 
 int GetRootGridItemIndex(vec3 PositionInVolume, int VolumeBufferOffset)
 {    
-    ivec3 ItemOffset = ivec3(floor(PositionInVolume / (VOLUME_SIZE / 16.0f)));
+    ivec3 ItemOffset = ivec3(floor(PositionInVolume * 16.0f));
     ivec3 VolumeOffset = ItemOffset % 16;
     
     int BufferOffset = VolumeOffset.z * 16 * 16 + VolumeOffset.y * 16 + VolumeOffset.x;
@@ -74,7 +74,7 @@ vec2 GetVoxel(vec3 Position)
     if (VolumeBufferOffset != -1)
     {
         // Global offset of the rootvolume
-        vec3 VolumeOffset = g_RootVolumePool[VolumeBufferOffset].m_Offset * VOLUME_SIZE;
+        vec3 VolumeOffset = g_RootVolumePool[VolumeBufferOffset].m_Offset;
 
         // Index to rootgrid pool of the current root grid item
         int RootGridItemBufferOffset = GetRootGridItemIndex(Position - VolumeOffset, VolumeBufferOffset);
@@ -87,7 +87,7 @@ vec2 GetVoxel(vec3 Position)
             if (Level1VolumeBufferOffset != -1)
             {
                 // Offset of level 1 volume in rootgrid
-                ivec3 Level1VolumeOffset = ivec3(floor((Position / VOLUME_SIZE) * 16.0f * 8.0f));
+                ivec3 Level1VolumeOffset = ivec3(floor(Position * 16.0f * 8.0f));
                 Level1VolumeOffset %= 8;
 
                 int Level1BufferInnerOffset = OffsetToIndex(Level1VolumeOffset, 8);
@@ -97,7 +97,7 @@ vec2 GetVoxel(vec3 Position)
 
                 if (TSDFVolumeBufferOffset != -1)
                 {
-                    ivec3 TSDFVolumeOffset = ivec3(floor((Position / VOLUME_SIZE) * 16.0f * 8.0f * 8.0f));
+                    ivec3 TSDFVolumeOffset = ivec3(floor(Position * 16.0f * 8.0f * 8.0f));
                     TSDFVolumeOffset %= 8;
 
                     int TSDFBufferInnerOffset = OffsetToIndex(TSDFVolumeOffset, 8);
@@ -108,6 +108,30 @@ vec2 GetVoxel(vec3 Position)
             }
         }
     }
+}
+
+vec2 GetVoxelFromPosition(vec3 Position)
+{
+    return GetVoxel(Position / VOLUME_SIZE);
+}
+
+float GetInterpolatedTSDF(vec3 Position)
+{
+    ivec3 g = ivec3(floor(Position / VOXEL_SIZE));
+
+    const float vx = (g.x + 0.5f) * VOXEL_SIZE;
+    const float vy = (g.y + 0.5f) * VOXEL_SIZE;
+    const float vz = (g.z + 0.5f) * VOXEL_SIZE;
+
+    g.x = (Position.x < vx) ? (g.x - 1) : g.x;
+    g.y = (Position.y < vy) ? (g.y - 1) : g.y;
+    g.z = (Position.z < vz) ? (g.z - 1) : g.z;
+
+    const float a = (Position.x - (g.x + 0.5f) * VOXEL_SIZE) / VOXEL_SIZE;
+    const float b = (Position.y - (g.y + 0.5f) * VOXEL_SIZE) / VOXEL_SIZE;
+    const float c = (Position.z - (g.z + 0.5f) * VOXEL_SIZE) / VOXEL_SIZE;
+
+    return 0.0f;
 }
 
 void main()
@@ -127,7 +151,7 @@ void main()
     float RayLength = StartLength;
     float Step = TruncatedDistance;
 
-    float CurrentTSDF = GetVoxel(CameraPosition + RayLength * RayDirection).x;
+    float CurrentTSDF = GetVoxelFromPosition(CameraPosition + RayLength * RayDirection).x;
     float PreviousTSDF;
     RayLength += Step;
 
@@ -138,7 +162,7 @@ void main()
         vec3 CurrentPosition = CameraPosition + RayLength * RayDirection;
 
         PreviousTSDF = CurrentTSDF;
-        CurrentTSDF = GetVoxel(CurrentPosition).x;
+        CurrentTSDF = GetVoxelFromPosition(CurrentPosition).x;
 
         if (CurrentTSDF < 0.0f && PreviousTSDF > 0.0f)
         {
