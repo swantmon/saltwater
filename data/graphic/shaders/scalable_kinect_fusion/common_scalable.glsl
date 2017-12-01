@@ -39,7 +39,7 @@ layout(std430, binding = 2) buffer Level1Pool
 
 layout(std430, binding = 3) buffer TSDFPool
 {
-    uint g_TSDFPool[]; // two 16 bit floats packed with packUnorm2x16
+    uint g_TSDFPool[]; // two 16 bit floats packed with packSnorm2x16
 };
 
 layout(std430, binding = 4) buffer PoolItemCounts
