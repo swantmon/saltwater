@@ -681,9 +681,18 @@ namespace
 
         assert(pInternTexture);
 
-        glBindTexture(GL_TEXTURE_2D, pInternTexture->m_NativeTexture);
+        if (pInternTexture->IsCube())
+        {
+            glBindTexture(GL_TEXTURE_CUBE_MAP, pInternTexture->m_NativeTexture);
 
-        glGenerateMipmap(GL_TEXTURE_2D);
+            glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+        }
+        else
+        {
+            glBindTexture(GL_TEXTURE_2D, pInternTexture->m_NativeTexture);
+
+            glGenerateMipmap(GL_TEXTURE_2D);
+        }
     }
 
     // -----------------------------------------------------------------------------
