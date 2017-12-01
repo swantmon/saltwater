@@ -1294,7 +1294,7 @@ namespace
     {
         assert(_Unit < s_NumberOfImageUnits);
 
-        glBindImageTexture(_Unit, 0, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R8);
+        glBindImageTexture(_Unit, 0, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA8);
 
         m_ImageUnits[_Unit] = 0;
     }
@@ -1314,7 +1314,7 @@ namespace
 
         if (_TextureBasePtr->GetDimension() == CTextureBase::Dim2D)
         {
-            CNativeTexture2D& rNativeTexture = *static_cast<CNativeTexture2D*>(m_TextureUnits[_Unit].GetPtr());
+            CNativeTexture2D& rNativeTexture = *static_cast<CNativeTexture2D*>(_TextureBasePtr.GetPtr());
 
             TextureHandle = rNativeTexture.m_NativeTexture;
             TextureUsage  = rNativeTexture.m_NativeUsage;
@@ -1322,7 +1322,7 @@ namespace
         }
         else if (_TextureBasePtr->GetDimension() == CTextureBase::Dim3D)
         {
-            CNativeTexture3D& rNativeTexture = *static_cast<CNativeTexture3D*>(m_TextureUnits[_Unit].GetPtr());
+            CNativeTexture3D& rNativeTexture = *static_cast<CNativeTexture3D*>(_TextureBasePtr.GetPtr());
 
             TextureHandle = rNativeTexture.m_NativeTexture;
             TextureUsage  = rNativeTexture.m_NativeUsage;
