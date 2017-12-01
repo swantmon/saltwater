@@ -151,7 +151,7 @@ void main()
 
     if (RayLength <= EndLength)
     {
-        out_GBuffer0 = vec4(RayLength, 0.0f, 0.0f, 1.0f);
+        out_GBuffer0 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
         out_GBuffer1 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
         out_GBuffer2 = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
