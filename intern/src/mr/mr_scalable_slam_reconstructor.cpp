@@ -150,43 +150,6 @@ namespace
         Base::Float4x4 m_WorldMatrix;
     };
 
-    struct SIndirectParameters
-    {
-        uint32_t m_Count;
-        uint32_t m_InstanceCount;
-        uint32_t m_FirstIndex;
-        uint32_t m_BaseIndex;
-    };
-
-    struct SIndexedParameters
-    {
-        uint32_t m_IndexCount;
-        uint32_t m_InstanceCount;
-        uint32_t m_FirstIndex;
-        uint32_t m_BaseVertex;
-        uint32_t m_BaseInstance;
-    };
-
-    struct SComputeParameters
-    {
-        uint32_t m_WorkGroupsX;
-        uint32_t m_WorkGroupsY;
-        uint32_t m_WorkGroupsZ;
-    };
-
-    struct SIndirectBuffers
-    {
-        SIndirectParameters m_Draw;
-        SIndexedParameters m_Indexed;
-        SComputeParameters m_ComputeDiv;
-        SComputeParameters m_Compute;
-
-        static const int s_DrawOffset = 0;
-        static const int s_IndexedOffset = sizeof(SIndirectParameters);
-        static const int s_ComputeDivOffset = s_IndexedOffset + sizeof(SIndexedParameters);
-        static const int s_ComputeOffset = s_ComputeDivOffset + sizeof(SComputeParameters);
-    };
-
     struct SInstanceData
     {
         Base::Int3 m_Offset;
