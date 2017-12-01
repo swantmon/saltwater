@@ -112,6 +112,8 @@ vec2 GetVoxel(vec3 Position)
 
 void main()
 {
+    const float TruncatedDistance = TRUNCATED_DISTANCE / 1000.0f;
+
     vec3 CameraPosition = g_ViewPosition.xyz;
     vec3 RayDirection = normalize(in_WSRayDirection);
 
@@ -123,7 +125,7 @@ void main()
     const float EndLength = GetEndLength(CameraPosition, RayDirection, g_AABBMin, g_AABBMax);
 
     float RayLength = StartLength;
-    float Step = TRUNCATED_DISTANCE / 1000.0f;
+    float Step = TruncatedDistance;
 
     float CurrentTSDF = GetVoxel(CameraPosition + RayLength * RayDirection).x;
     float PreviousTSDF;
@@ -143,10 +145,8 @@ void main()
             break;
         }
         
-        if (CurrentTSDF < 1.0f)
-        {
-            Step = VOXEL_SIZE;
-        }
+        Step = CurrentTSDF < 1.0f ? VOXEL_SIZE : TruncatedDistance;
+
     }
 
     if (RayLength <= EndLength)
