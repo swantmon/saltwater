@@ -256,19 +256,28 @@ namespace
                 EGL_NONE
             };
 
-            EGLint NumberOfConfigs;
+            EGLint NumConfigs;
 
-            eglChooseConfig(rWindowInfo.m_EglDisplay, ConfigAttributes, 0, 0, &NumberOfConfigs);
+            eglChooseConfig(rWindowInfo.m_EglDisplay, ConfigAttributes, &rWindowInfo.m_EglConfig, 1, &NumConfigs);
 
-            if (NumberOfConfigs > 0)
+//             EGLint NumberOfConfigs;
+// 
+//             eglChooseConfig(rWindowInfo.m_EglDisplay, ConfigAttributes, 0, 0, &NumberOfConfigs);
+// 
+//             if (NumberOfConfigs > 0)
+//             {
+//                 eglChooseConfig(rWindowInfo.m_EglDisplay, ConfigAttributes, &rWindowInfo.m_EglConfig, 1, &NumberOfConfigs);
+//             }
+//             else
+//             {
+//                 BASE_CONSOLE_INFO("Unable to choose config from device.");
+// 
+//                 throw;
+//             }
+
+            if (NumConfigs != 1)
             {
-                eglChooseConfig(rWindowInfo.m_EglDisplay, ConfigAttributes, &rWindowInfo.m_EglConfig, 1, &NumberOfConfigs);
-            }
-            else
-            {
-                BASE_CONSOLE_STREAMERROR("Unable to choose config from device.");
-
-                throw;
+                BASE_THROWM("Failed to choose config.");
             }
 
             // -----------------------------------------------------------------------------
@@ -735,10 +744,10 @@ namespace
         wglMakeCurrent(rWindowInfo.m_pNativeDeviceContextHandle, rWindowInfo.m_pNativeOpenGLContextHandle);
 #endif
 
-        //Gfx::TargetSetManager::ClearTargetSet(Gfx::TargetSetManager::GetSystemTargetSet());
-        //Gfx::TargetSetManager::ClearTargetSet(Gfx::TargetSetManager::GetDefaultTargetSet(), 1.0f);
-        //Gfx::TargetSetManager::ClearTargetSet(Gfx::TargetSetManager::GetDeferredTargetSet());
-        //Gfx::TargetSetManager::ClearTargetSet(Gfx::TargetSetManager::GetLightAccumulationTargetSet());
+        Gfx::TargetSetManager::ClearTargetSet(Gfx::TargetSetManager::GetSystemTargetSet());
+        Gfx::TargetSetManager::ClearTargetSet(Gfx::TargetSetManager::GetDefaultTargetSet(), 1.0f);
+        Gfx::TargetSetManager::ClearTargetSet(Gfx::TargetSetManager::GetDeferredTargetSet());
+        Gfx::TargetSetManager::ClearTargetSet(Gfx::TargetSetManager::GetLightAccumulationTargetSet());
     }
     
     // -----------------------------------------------------------------------------
@@ -750,7 +759,12 @@ namespace
         SWindowInfo& rWindowInfo = *m_pActiveWindowInfo;
 
 #ifdef __ANDROID__
-        eglSwapBuffers(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface);
+        EGLBoolean Status = eglSwapBuffers(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface);
+
+        if (Status == EGL_FALSE)
+        {
+            BASE_THROWM("Unable to swap buffer.");
+        }
 #else
         SwapBuffers(rWindowInfo.m_pNativeDeviceContextHandle);
 #endif
