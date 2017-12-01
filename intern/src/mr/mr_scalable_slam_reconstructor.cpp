@@ -1408,18 +1408,7 @@ namespace MR
             for (uint32_t VolumeIndex : VolumeQueue)
             {
                 auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
-
-                // Fetch the queue sizes
-                // We do this now to mostly prevent CPU<->GPU syncs
-
-                SIndirectBuffers* pIndirect = static_cast<SIndirectBuffers*>(BufferManager::MapBuffer(rRootVolume.m_IndirectLevel1Buffer, CBuffer::EMap::Read));
-                rRootVolume.m_Level1QueueSize = pIndirect->m_Indexed.m_InstanceCount;
-                BufferManager::UnmapBuffer(rRootVolume.m_IndirectLevel1Buffer);
-
-                pIndirect = static_cast<SIndirectBuffers*>(BufferManager::MapBuffer(rRootVolume.m_IndirectLevel2Buffer, CBuffer::EMap::Read));
-                rRootVolume.m_Level2QueueSize = pIndirect->m_Indexed.m_InstanceCount;
-                BufferManager::UnmapBuffer(rRootVolume.m_IndirectLevel2Buffer);
-
+                
                 // Store pool indices in root volume position buffer
 
                 const int Width = m_VolumeBuffers.m_RootVolumeTotalWidth;
