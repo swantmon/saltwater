@@ -466,7 +466,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 if (pDtProbeFacet->GetRefreshMode() == Dt::CLightProbeFacet::Dynamic || pGfxProbeFacet->m_TimeStamp >= Core::Time::GetNumberOfFrame() - 1)
                 {
-                    // Render(rCurrentEntity, *pGfxProbeFacet, *pDtProbeFacet);
+                    Render(rCurrentEntity, *pGfxProbeFacet, *pDtProbeFacet);
                 }
             }
 
