@@ -68,6 +68,8 @@ int GetRootGridItemIndex(vec3 PositionInVolume, int VolumeBufferOffset)
 
 vec2 GetVoxel(vec3 Position)
 {
+    Position /= VOLUME_SIZE;
+
     // Index of the first element of the current rootgrid in the rootgrid pool
     int VolumeBufferOffset = GetRootVolumeBufferIndex(Position);
 
@@ -196,7 +198,7 @@ void main()
     float RayLength = StartLength;
     float Step = TruncatedDistance;
 
-    float CurrentTSDF = GetVoxelFromPosition(CameraPosition + RayLength * RayDirection).x;
+    float CurrentTSDF = GetVoxel(CameraPosition + RayLength * RayDirection).x;
     float PreviousTSDF;
     RayLength += Step;
 
@@ -209,7 +211,7 @@ void main()
         vec3 CurrentPosition = CameraPosition + RayLength * RayDirection;
 
         PreviousTSDF = CurrentTSDF;
-        CurrentTSDF = GetVoxelFromPosition(CurrentPosition).x;
+        CurrentTSDF = GetVoxel(CurrentPosition).x;
 
         if (CurrentTSDF < 0.0f && PreviousTSDF > 0.0f)
         {
