@@ -117,7 +117,7 @@ vec2 GetVoxelFromPosition(vec3 Position)
 
 float GetInterpolatedTSDF(vec3 Position)
 {
-    ivec3 g = ivec3(floor(Position / VOXEL_SIZE));
+    vec3 g = ivec3(floor(Position / VOXEL_SIZE));
 
     const float vx = (g.x + 0.5f) * VOXEL_SIZE;
     const float vy = (g.y + 0.5f) * VOXEL_SIZE;
@@ -131,7 +131,51 @@ float GetInterpolatedTSDF(vec3 Position)
     const float b = (Position.y - (g.y + 0.5f) * VOXEL_SIZE) / VOXEL_SIZE;
     const float c = (Position.z - (g.z + 0.5f) * VOXEL_SIZE) / VOXEL_SIZE;
 
-    return 0.0f;
+    g = (g * VOLUME_SIZE) / 1024;
+
+    const float result =
+    GetVoxel(vec3(g.x             , g.y             , g.z             )).x * (1.0f - a) * (1.0f - b) * (1.0f - c) +
+    GetVoxel(vec3(g.x             , g.y             , g.z + VOXEL_SIZE)).x * (1.0f - a) * (1.0f - b) *         c  +
+    GetVoxel(vec3(g.x             , g.y + VOXEL_SIZE, g.z             )).x * (1.0f - a) *         b  * (1.0f - c) +
+    GetVoxel(vec3(g.x             , g.y + VOXEL_SIZE, g.z + VOXEL_SIZE)).x * (1.0f - a) *         b  *         c  +
+    GetVoxel(vec3(g.x + VOXEL_SIZE, g.y             , g.z             )).x *         a  * (1.0f - b) * (1.0f - c) +
+    GetVoxel(vec3(g.x + VOXEL_SIZE, g.y             , g.z + VOXEL_SIZE)).x *         a  * (1.0f - b) *         c  +
+    GetVoxel(vec3(g.x + VOXEL_SIZE, g.y + VOXEL_SIZE, g.z             )).x *         a  *         b  * (1.0f - c) +
+    GetVoxel(vec3(g.x + VOXEL_SIZE, g.y + VOXEL_SIZE, g.z + VOXEL_SIZE)).x *         a  *         b  *         c ;
+
+    return result;
+}
+
+vec3 GetNormal(vec3 Vertex)
+{
+    vec3 T, Normal;
+
+    T = Vertex;
+    T.x += VOXEL_SIZE;
+    float Fx1 = GetInterpolatedTSDF(T);
+    T = Vertex;
+    T.x -= VOXEL_SIZE;
+    float Fx2 = GetInterpolatedTSDF(T);
+
+    T = Vertex;
+    T.y += VOXEL_SIZE;
+    float Fy1 = GetInterpolatedTSDF(T);
+    T = Vertex;
+    T.y -= VOXEL_SIZE;
+    float Fy2 = GetInterpolatedTSDF(T);
+
+    T = Vertex;
+    T.z += VOXEL_SIZE;
+    float Fz1 = GetInterpolatedTSDF(T);
+    T = Vertex;
+    T.z -= VOXEL_SIZE;
+    float Fz2 = GetInterpolatedTSDF(T);
+
+    Normal.x = Fx2 - Fx1;
+    Normal.y = Fy2 - Fy1;
+    Normal.z = Fz2 - Fz1;
+
+    return normalize(Normal);
 }
 
 void main()
@@ -155,6 +199,8 @@ void main()
     float PreviousTSDF;
     RayLength += Step;
 
+    vec3 Vertex;
+
     while (RayLength < EndLength)
     {
         vec3 PreviousPosition = CameraPosition + RayLength * RayDirection;
@@ -166,6 +212,12 @@ void main()
 
         if (CurrentTSDF < 0.0f && PreviousTSDF > 0.0f)
         {
+            float Ft = GetInterpolatedTSDF(PreviousPosition);
+            float Ftdt = GetInterpolatedTSDF(CurrentPosition);
+            float Ts = RayLength - Step * Ft / (Ftdt - Ft);
+
+            Vertex = CameraPosition + RayDirection * Ts;
+
             break;
         }
         
@@ -175,12 +227,22 @@ void main()
 
     if (RayLength <= EndLength)
     {
-        out_GBuffer0 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-        out_GBuffer1 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-        out_GBuffer2 = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+        vec3 Color = vec3(1.0f, 0.0f, 0.0f);
 
-        vec3 CurrentPosition = CameraPosition + RayLength * RayDirection;
-        vec4 CSPosition = g_WorldToScreen * vec4(CurrentPosition, 1.0f);
+        vec3 WSNormal = GetNormal(Vertex);
+                
+        WSNormal.x = -WSNormal.x;
+        WSNormal.z = -WSNormal.z;
+                
+        SGBuffer GBuffer;
+
+        PackGBuffer(Color, WSNormal, 0.5f, vec3(0.5f), 0.0f, 1.0f, GBuffer);
+
+        out_GBuffer0 = GBuffer.m_Color0;
+        out_GBuffer1 = GBuffer.m_Color1;
+        out_GBuffer2 = GBuffer.m_Color2;
+
+        vec4 CSPosition = g_WorldToScreen * vec4(Vertex, 1.0f);
         gl_FragDepth = (CSPosition.z / CSPosition.w);
 
         return;
