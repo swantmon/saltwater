@@ -108,6 +108,7 @@ vec2 GetVoxel(vec3 Position)
             }
         }
     }
+    return vec2(0.0f);
 }
 
 vec2 GetVoxelFromPosition(vec3 Position)
