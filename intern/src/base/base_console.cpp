@@ -5,7 +5,9 @@
 
 #include <stdarg.h>
 
+#if __ANDROID__
 #include "android/log.h"
+#endif // __ANDROID__
 
 namespace IO
 {

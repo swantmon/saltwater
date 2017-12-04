@@ -40,19 +40,19 @@ namespace
     const float g_RadiusGround     = 6360.0f;
     const float g_RadiusAtmosphere = 6420.0f;
 
-    const uint g_TransmittanceWidth  = 256;
-    const uint g_TransmittanceHeight = 64;
+    const unsigned int g_TransmittanceWidth  = 256;
+    const unsigned int g_TransmittanceHeight = 64;
 
-    const uint g_InscatterAltitude = 128;
-    const uint g_InscatterMu       = 128;         // view / zenith
-    const uint g_InscatterMuS      = 32;          // sun / zenith
-    const uint g_InscatterNu       = 8;           // view / sun
-    const uint g_InscatterWidth    = g_InscatterMuS * g_InscatterNu;
-    const uint g_InscatterHeight   = g_InscatterMu;
-    const uint g_InscatterDepth    = g_InscatterAltitude;
+    const unsigned int g_InscatterAltitude = 128;
+    const unsigned int g_InscatterMu       = 128;         // view / zenith
+    const unsigned int g_InscatterMuS      = 32;          // sun / zenith
+    const unsigned int g_InscatterNu       = 8;           // view / sun
+    const unsigned int g_InscatterWidth    = g_InscatterMuS * g_InscatterNu;
+    const unsigned int g_InscatterHeight   = g_InscatterMu;
+    const unsigned int g_InscatterDepth    = g_InscatterAltitude;
 
-    const uint g_IrradianceWidth  = 64;
-    const uint g_IrradianceHeight = 16;
+    const unsigned int g_IrradianceWidth  = 64;
+    const unsigned int g_IrradianceHeight = 16;
 }
 
 namespace 
@@ -128,7 +128,7 @@ namespace
 
         struct SGSLayer
         {
-            uint m_Layer;
+            unsigned int m_Layer;
             float Padding[3];
         };
 
@@ -149,7 +149,7 @@ namespace
         {
             Base::Float4 g_SunDirection;
             Base::Float4 g_SunIntensity;
-            uint         ps_ExposureHistoryIndex;
+            unsigned int ps_ExposureHistoryIndex;
         };
 
         class CInternSkyFacet : public CSkyFacet

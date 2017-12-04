@@ -6,6 +6,9 @@
 #include "base/base_defines.h"
 #include "base/base_math_constants.h"
 
+#undef max
+#undef min
+
 namespace MATH
 {
     inline float Sqrt(float _Radians)

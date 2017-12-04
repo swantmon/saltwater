@@ -1,7 +1,11 @@
 
 #include "graphic/gfx_precompiled.h"
 
+#if __ANDROID__
 #include "app_droid/app_application.h"
+#else
+#include "editor/edit_application.h"
+#endif // __ANDROID__
 
 #include "base/base_console.h"
 #include "base/base_crc.h"
@@ -334,7 +338,12 @@ namespace
         // -----------------------------------------------------------------------------
         // Build path to shader in file system
         // -----------------------------------------------------------------------------
-        std::string PathToAssets  = App::Application::GetAssetPath();
+#ifdef __ANDROID__
+        std::string PathToAssets = App::Application::GetAssetPath();
+#else
+        std::string PathToAssets = Edit::Application::GetAssetPath();
+#endif // __ANDROID__
+
         std::string PathToShaders = g_PathToDataShader;
         std::string PathToShader  = PathToAssets + PathToShaders + _pFileName;
 
@@ -654,7 +663,12 @@ namespace
                 Base::Size BeginOfInclude = _rShaderContent.find('\"', FoundPosition) + 1;
                 Base::Size EndOfInclude   = _rShaderContent.find('\"', BeginOfInclude);
 
+#ifdef __ANDROID__
                 std::string PathToAssets = App::Application::GetAssetPath();
+#else
+                std::string PathToAssets = Edit::Application::GetAssetPath();
+#endif // __ANDROID__
+
                 std::string IncludeFile  = PathToAssets + g_PathToDataShader + _rShaderContent.substr(BeginOfInclude, EndOfInclude - BeginOfInclude);
 
                 // -----------------------------------------------------------------------------

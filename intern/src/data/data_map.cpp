@@ -323,7 +323,7 @@ namespace
         RegionY  = static_cast<Base::Size>(_AxisY) / CRegion::s_NumberOfMetersY;
         RegionID = RegionX + RegionY * m_NumberOfRegionsX;
 
-        RegionID = Base::Clamp(RegionID, static_cast<Base::Size>(0), m_NumberOfRegionsX * m_NumberOfRegionsY - static_cast<Base::Size>(1));
+        RegionID = Base::Clamp(static_cast<unsigned int>(RegionID), 0u, static_cast<unsigned int>(m_NumberOfRegionsX * m_NumberOfRegionsY - 1));
 
         return m_pRegions[RegionID];
     }

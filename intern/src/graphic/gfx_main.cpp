@@ -387,7 +387,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Create OpenGL specific stuff with dummy context
             // -----------------------------------------------------------------------------
-            pNativeWindowHandle = rWindowInfo.m_pNativeWindowHandle;
+            pNativeWindowHandle = static_cast<HWND>(rWindowInfo.m_pNativeWindowHandle);
 
             pNativeDeviceContextHandle = ::GetDC(pNativeWindowHandle);
 
@@ -496,7 +496,7 @@ namespace
 
             if (!GLEW_VERSION_4_5)
             {
-                BASE_THROWV("GL 4.5 can't be initialized. Available version %s is to old!", pInfoGLVersion);
+                BASE_THROWV("GL 4.5 can't be initialized. Available version is to old!");
             }
 
             wglMakeCurrent(pNativeDeviceContextHandle, pNativeOpenGLContextHandle);

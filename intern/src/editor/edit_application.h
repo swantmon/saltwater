@@ -9,6 +9,8 @@ namespace Application
     void OnExit();
     void OnRun();
 
+    const char* GetAssetPath();
+
     unsigned int GetEditWindowID();
 } // namespace Application
 } // namespace Edit

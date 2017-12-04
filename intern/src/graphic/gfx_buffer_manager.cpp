@@ -23,7 +23,9 @@
 #include <unordered_map>
 #include <vector>
 
+#ifdef __ANDROID__
 GfxBufferStorageEXT glBufferStorage = 0;
+#endif // __ANDROID__
 
 using namespace Gfx;
 

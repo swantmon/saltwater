@@ -474,6 +474,13 @@ namespace Application
 
     // -----------------------------------------------------------------------------
 
+    const char* GetAssetPath()
+    {
+        return "../";
+    }
+
+    // -----------------------------------------------------------------------------
+
     unsigned int GetEditWindowID()
     {
         return CApplication::GetInstance().GetEditWindowID();
