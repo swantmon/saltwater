@@ -732,7 +732,7 @@ namespace
         ContextManager::SetResourceBuffer(6, rVolume.m_RootVolumePositionBufferPtr);
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-        ContextManager::SetConstantBuffer(1, m_ScalableRaycastBufferPtr);
+        ContextManager::SetConstantBuffer(2, m_ScalableRaycastBufferPtr);
 
         ContextManager::Barrier();
 
