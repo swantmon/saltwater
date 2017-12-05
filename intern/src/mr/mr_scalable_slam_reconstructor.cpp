@@ -1738,8 +1738,10 @@ namespace MR
 
             Performance::EndEvent();
         }
-
+        Performance::BeginEvent("Raycasting");
         Raycast();
+        Performance::EndEvent();
+
         CreateRaycastPyramid();
 
         Performance::EndEvent();
