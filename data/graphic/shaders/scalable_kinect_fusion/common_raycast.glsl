@@ -97,11 +97,6 @@ vec2 GetVoxel(vec3 Position)
     return vec2(0.0f);
 }
 
-vec2 GetVoxelFromPosition(vec3 Position)
-{
-    return GetVoxel(Position / VOLUME_SIZE);
-}
-
 float GetInterpolatedTSDF(vec3 Position)
 {
     vec3 g = ivec3(floor(Position / VOXEL_SIZE));
@@ -121,14 +116,14 @@ float GetInterpolatedTSDF(vec3 Position)
     g = g * VOXEL_SIZE;
 
     const float result =
-    GetVoxelFromPosition(vec3(g.x             , g.y             , g.z             )).x * (1.0f - a) * (1.0f - b) * (1.0f - c) +
-    GetVoxelFromPosition(vec3(g.x             , g.y             , g.z + VOXEL_SIZE)).x * (1.0f - a) * (1.0f - b) *         c  +
-    GetVoxelFromPosition(vec3(g.x             , g.y + VOXEL_SIZE, g.z             )).x * (1.0f - a) *         b  * (1.0f - c) +
-    GetVoxelFromPosition(vec3(g.x             , g.y + VOXEL_SIZE, g.z + VOXEL_SIZE)).x * (1.0f - a) *         b  *         c  +
-    GetVoxelFromPosition(vec3(g.x + VOXEL_SIZE, g.y             , g.z             )).x *         a  * (1.0f - b) * (1.0f - c) +
-    GetVoxelFromPosition(vec3(g.x + VOXEL_SIZE, g.y             , g.z + VOXEL_SIZE)).x *         a  * (1.0f - b) *         c  +
-    GetVoxelFromPosition(vec3(g.x + VOXEL_SIZE, g.y + VOXEL_SIZE, g.z             )).x *         a  *         b  * (1.0f - c) +
-    GetVoxelFromPosition(vec3(g.x + VOXEL_SIZE, g.y + VOXEL_SIZE, g.z + VOXEL_SIZE)).x *         a  *         b  *         c ;
+    GetVoxel(vec3(g.x             , g.y             , g.z             )).x * (1.0f - a) * (1.0f - b) * (1.0f - c) +
+    GetVoxel(vec3(g.x             , g.y             , g.z + VOXEL_SIZE)).x * (1.0f - a) * (1.0f - b) *         c  +
+    GetVoxel(vec3(g.x             , g.y + VOXEL_SIZE, g.z             )).x * (1.0f - a) *         b  * (1.0f - c) +
+    GetVoxel(vec3(g.x             , g.y + VOXEL_SIZE, g.z + VOXEL_SIZE)).x * (1.0f - a) *         b  *         c  +
+    GetVoxel(vec3(g.x + VOXEL_SIZE, g.y             , g.z             )).x *         a  * (1.0f - b) * (1.0f - c) +
+    GetVoxel(vec3(g.x + VOXEL_SIZE, g.y             , g.z + VOXEL_SIZE)).x *         a  * (1.0f - b) *         c  +
+    GetVoxel(vec3(g.x + VOXEL_SIZE, g.y + VOXEL_SIZE, g.z             )).x *         a  *         b  * (1.0f - c) +
+    GetVoxel(vec3(g.x + VOXEL_SIZE, g.y + VOXEL_SIZE, g.z + VOXEL_SIZE)).x *         a  *         b  *         c ;
 
     return result;
 }
