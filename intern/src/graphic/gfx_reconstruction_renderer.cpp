@@ -57,14 +57,6 @@ namespace
 		Float4 m_Color;
 	};
 
-    struct SScalableRaycastConstantBuffer
-    {
-        Float3 m_AABBMin;
-        float Padding;
-        Float3 m_AABBMax;
-        int m_VolumeTextureWidth;
-    };
-
     class CGfxReconstructionRenderer : private Base::CUncopyable
     {
         BASE_SINGLETON_FUNC(CGfxReconstructionRenderer)
@@ -144,9 +136,7 @@ namespace
 
         CBufferPtr m_RaycastConstantBufferPtr;
         CBufferPtr m_DrawCallConstantBufferPtr;
-
-        CBufferPtr m_ScalableRaycastBufferPtr;
-        
+                
         CMeshPtr m_CameraMeshPtr;
 		CInputLayoutPtr m_CameraInputLayoutPtr;
 
@@ -226,9 +216,7 @@ namespace
         
         m_RaycastConstantBufferPtr = 0;
         m_DrawCallConstantBufferPtr = 0;
-
-        m_ScalableRaycastBufferPtr = 0;
-        
+                
         m_CameraMeshPtr = 0;
         m_VolumeMeshPtr = 0;
 		m_CubeOutlineMeshPtr = 0;
@@ -381,9 +369,6 @@ namespace
         
         ConstantBufferDesc.m_NumberOfBytes = sizeof(SDrawCallConstantBuffer);
         m_DrawCallConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(SScalableRaycastConstantBuffer);
-        m_ScalableRaycastBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -732,7 +717,7 @@ namespace
         ContextManager::SetResourceBuffer(6, rVolume.m_RootVolumePositionBufferPtr);
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-        ContextManager::SetConstantBuffer(2, m_ScalableRaycastBufferPtr);
+        ContextManager::SetConstantBuffer(2, rVolume.m_ScalableRaycastBufferPtr);
 
         ContextManager::Barrier();
 
@@ -794,7 +779,7 @@ namespace
         ContextManager::SetResourceBuffer(6, rVolume.m_RootVolumePositionBufferPtr);
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-        ContextManager::SetConstantBuffer(1, m_ScalableRaycastBufferPtr);
+        ContextManager::SetConstantBuffer(2, rVolume.m_ScalableRaycastBufferPtr);
 
         ContextManager::Barrier();
 
@@ -857,7 +842,7 @@ namespace
         ContextManager::SetResourceBuffer(6, rVolume.m_RootVolumePositionBufferPtr);
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-        ContextManager::SetConstantBuffer(1, m_ScalableRaycastBufferPtr);
+        ContextManager::SetConstantBuffer(2, rVolume.m_ScalableRaycastBufferPtr);
 
         ContextManager::Barrier();
 
@@ -1155,18 +1140,6 @@ namespace
             m_pScalableReconstructor->GetReconstructionSettings(&Settings);
             const auto& rVolume = m_pScalableReconstructor->GetVolume();
 
-            SScalableRaycastConstantBuffer Data;
-
-            for (int i = 0; i < 3; ++ i)
-            {
-                Data.m_AABBMin[i] = rVolume.m_MinOffset[i] * Settings.m_VolumeSize;
-                Data.m_AABBMax[i] = (rVolume.m_MaxOffset[i] + 1.0f) * Settings.m_VolumeSize;
-            }
-
-            Data.m_VolumeTextureWidth = rVolume.m_RootVolumeTotalWidth;
-
-            BufferManager::UploadBufferData(m_ScalableRaycastBufferPtr, &Data);
-            
             //RenderVertexMap();
 
             //RaycastRootGrids();
