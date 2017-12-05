@@ -717,7 +717,7 @@ namespace
         ContextManager::SetResourceBuffer(6, rVolume.m_RootVolumePositionBufferPtr);
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-        ContextManager::SetConstantBuffer(2, rVolume.m_ScalableRaycastBufferPtr);
+        ContextManager::SetConstantBuffer(2, rVolume.m_AABBBufferPtr);
 
         ContextManager::Barrier();
 
@@ -779,7 +779,7 @@ namespace
         ContextManager::SetResourceBuffer(6, rVolume.m_RootVolumePositionBufferPtr);
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-        ContextManager::SetConstantBuffer(2, rVolume.m_ScalableRaycastBufferPtr);
+        ContextManager::SetConstantBuffer(2, rVolume.m_AABBBufferPtr);
 
         ContextManager::Barrier();
 
@@ -842,7 +842,7 @@ namespace
         ContextManager::SetResourceBuffer(6, rVolume.m_RootVolumePositionBufferPtr);
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-        ContextManager::SetConstantBuffer(2, rVolume.m_ScalableRaycastBufferPtr);
+        ContextManager::SetConstantBuffer(2, rVolume.m_AABBBufferPtr);
 
         ContextManager::Barrier();
 

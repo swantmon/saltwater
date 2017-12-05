@@ -1650,7 +1650,7 @@ namespace MR
 
         ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
         ConstantBufferDesc.m_NumberOfBytes = sizeof(SScalableRaycastConstantBuffer);
-        m_VolumeBuffers.m_ScalableRaycastBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        m_VolumeBuffers.m_AABBBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
 
     // -----------------------------------------------------------------------------
@@ -1762,7 +1762,7 @@ namespace MR
 
         Data.m_VolumeTextureWidth = m_VolumeBuffers.m_RootVolumeTotalWidth;
 
-        BufferManager::UploadBufferData(m_VolumeBuffers.m_ScalableRaycastBufferPtr, &Data);
+        BufferManager::UploadBufferData(m_VolumeBuffers.m_AABBBufferPtr, &Data);
 
         Raycast();
         Performance::EndEvent();
@@ -2065,7 +2065,7 @@ namespace MR
 
     void CScalableSLAMReconstructor::Raycast()
     {
-        /*const int WorkGroupsX = DivUp(m_pRGBDCameraControl->GetDepthWidth(), g_TileSize2D);
+        const int WorkGroupsX = DivUp(m_pRGBDCameraControl->GetDepthWidth(), g_TileSize2D);
         const int WorkGroupsY = DivUp(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
 
         ContextManager::SetShaderCS(m_RaycastCSPtr);
@@ -2081,11 +2081,11 @@ namespace MR
 
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
-        ContextManager::SetConstantBuffer(2, m_ScalableRaycastBufferPtr);
+        ContextManager::SetConstantBuffer(2, m_VolumeBuffers.m_AABBBufferPtr);
 
         ContextManager::Barrier();
 
-        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);*/
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
     }
     
     // -----------------------------------------------------------------------------

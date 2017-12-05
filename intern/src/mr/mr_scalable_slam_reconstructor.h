@@ -110,6 +110,14 @@ namespace MR
             Gfx::CBufferPtr m_IndirectLevel2Buffer;
 		};
 
+        struct SScalableRaycastConstantBuffer
+        {
+            Base::Float3 m_AABBMin;
+            float Padding;
+            Base::Float3 m_AABBMax;
+            int m_VolumeTextureWidth;
+        };
+
         struct SScalableVolume
         {
             Gfx::CBufferPtr m_RootVolumePositionBufferPtr;// 3D Buffer with indices to m_RootVolumePoolPtr
@@ -118,6 +126,7 @@ namespace MR
             Gfx::CBufferPtr m_Level1PoolPtr;              // Internal Grid       ( 8x 8x 8)
             Gfx::CBufferPtr m_TSDFPoolPtr;                // TSDF Data           ( 8x 8x 8)
             Gfx::CBufferPtr m_PoolItemCountBufferPtr;
+            Gfx::CBufferPtr m_AABBBufferPtr;
             Base::Int3 m_MinOffset;                         // AABB of the whole reconstruction
             Base::Int3 m_MaxOffset;
             int m_RootVolumeTotalWidth;
