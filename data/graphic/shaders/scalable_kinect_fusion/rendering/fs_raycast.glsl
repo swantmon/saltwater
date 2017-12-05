@@ -134,17 +134,17 @@ float GetInterpolatedTSDF(vec3 Position)
     const float b = (Position.y - (g.y + 0.5f) * VOXEL_SIZE) / VOXEL_SIZE;
     const float c = (Position.z - (g.z + 0.5f) * VOXEL_SIZE) / VOXEL_SIZE;
 
-    g = (g * VOLUME_SIZE) / 1024.0f;
+    g = g * VOXEL_SIZE;
 
     const float result =
-    GetVoxel(vec3(g.x             , g.y             , g.z             ) * VOLUME_SIZE).x * (1.0f - a) * (1.0f - b) * (1.0f - c) +
-    GetVoxel(vec3(g.x             , g.y             , g.z + VOXEL_SIZE) * VOLUME_SIZE).x * (1.0f - a) * (1.0f - b) *         c  +
-    GetVoxel(vec3(g.x             , g.y + VOXEL_SIZE, g.z             ) * VOLUME_SIZE).x * (1.0f - a) *         b  * (1.0f - c) +
-    GetVoxel(vec3(g.x             , g.y + VOXEL_SIZE, g.z + VOXEL_SIZE) * VOLUME_SIZE).x * (1.0f - a) *         b  *         c  +
-    GetVoxel(vec3(g.x + VOXEL_SIZE, g.y             , g.z             ) * VOLUME_SIZE).x *         a  * (1.0f - b) * (1.0f - c) +
-    GetVoxel(vec3(g.x + VOXEL_SIZE, g.y             , g.z + VOXEL_SIZE) * VOLUME_SIZE).x *         a  * (1.0f - b) *         c  +
-    GetVoxel(vec3(g.x + VOXEL_SIZE, g.y + VOXEL_SIZE, g.z             ) * VOLUME_SIZE).x *         a  *         b  * (1.0f - c) +
-    GetVoxel(vec3(g.x + VOXEL_SIZE, g.y + VOXEL_SIZE, g.z + VOXEL_SIZE) * VOLUME_SIZE).x *         a  *         b  *         c ;
+    GetVoxelFromPosition(vec3(g.x             , g.y             , g.z             )).x * (1.0f - a) * (1.0f - b) * (1.0f - c) +
+    GetVoxelFromPosition(vec3(g.x             , g.y             , g.z + VOXEL_SIZE)).x * (1.0f - a) * (1.0f - b) *         c  +
+    GetVoxelFromPosition(vec3(g.x             , g.y + VOXEL_SIZE, g.z             )).x * (1.0f - a) *         b  * (1.0f - c) +
+    GetVoxelFromPosition(vec3(g.x             , g.y + VOXEL_SIZE, g.z + VOXEL_SIZE)).x * (1.0f - a) *         b  *         c  +
+    GetVoxelFromPosition(vec3(g.x + VOXEL_SIZE, g.y             , g.z             )).x *         a  * (1.0f - b) * (1.0f - c) +
+    GetVoxelFromPosition(vec3(g.x + VOXEL_SIZE, g.y             , g.z + VOXEL_SIZE)).x *         a  * (1.0f - b) *         c  +
+    GetVoxelFromPosition(vec3(g.x + VOXEL_SIZE, g.y + VOXEL_SIZE, g.z             )).x *         a  *         b  * (1.0f - c) +
+    GetVoxelFromPosition(vec3(g.x + VOXEL_SIZE, g.y + VOXEL_SIZE, g.z + VOXEL_SIZE)).x *         a  *         b  *         c ;
 
     return result;
 }
@@ -181,16 +181,9 @@ vec3 GetNormal(vec3 Vertex)
     return normalize(Normal);
 }
 
-void main()
+vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection)
 {
     const float TruncatedDistance = TRUNCATED_DISTANCE / 1000.0f;
-
-    vec3 CameraPosition = g_ViewPosition.xyz;
-    vec3 RayDirection = normalize(in_WSRayDirection);
-
-    RayDirection.x = RayDirection.x == 0.0f ? 1e-15f : RayDirection.x;
-    RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
-    RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
 
     const float StartLength = GetStartLength(CameraPosition, RayDirection, g_AABBMin, g_AABBMax);
     const float EndLength = GetEndLength(CameraPosition, RayDirection, g_AABBMin, g_AABBMax);
@@ -202,7 +195,7 @@ void main()
     float PreviousTSDF;
     RayLength += Step;
 
-    vec3 Vertex;
+    vec3 Vertex = vec3(0.0f);
 
     while (RayLength < EndLength)
     {
@@ -225,14 +218,26 @@ void main()
         }
         
         Step = CurrentTSDF < 1.0f ? VOXEL_SIZE : TruncatedDistance;
-
     }
 
-    if (RayLength <= EndLength)
-    {
-        vec3 Color = vec3(1.0f, 0.0f, 0.0f);
+    return Vertex;
+}
 
-        vec3 WSNormal = GetNormal(Vertex);
+void main()
+{
+    vec3 RayDirection = normalize(in_WSRayDirection);
+
+    RayDirection.x = RayDirection.x == 0.0f ? 1e-15f : RayDirection.x;
+    RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
+    RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
+
+    vec3 WSPosition = GetPosition(g_ViewPosition.xyz, RayDirection);
+
+    if (WSPosition.x != 0.0f)
+    {
+        vec3 WSNormal = GetNormal(WSPosition);
+
+        vec3 Color = WSNormal;
                 
         WSNormal.x = -WSNormal.x;
         WSNormal.z = -WSNormal.z;
@@ -245,7 +250,7 @@ void main()
         out_GBuffer1 = GBuffer.m_Color1;
         out_GBuffer2 = GBuffer.m_Color2;
 
-        vec4 CSPosition = g_WorldToScreen * vec4(Vertex, 1.0f);
+        vec4 CSPosition = g_WorldToScreen * vec4(WSPosition, 1.0f);
         gl_FragDepth = (CSPosition.z / CSPosition.w);
 
         return;
