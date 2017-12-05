@@ -1727,14 +1727,7 @@ namespace MR
         m_VolumeBuffers.m_Level1PoolSize = pPoolSizes[1];
         m_VolumeBuffers.m_TSDFPoolSize = pPoolSizes[2];
         BufferManager::UnmapBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr);
-
-        if (m_IntegratedFrameCount % 30 == 0)
-        {
-            std::cout << (m_VolumeBuffers.m_RootGridPoolSize * 16 * 16 * 16 * 8.0f) / (1024 * 1024) << '\n';
-            std::cout << (m_VolumeBuffers.m_Level1PoolSize   *  8 *  8 *  8 * 8.0f) / (1024 * 1024) << '\n';
-            std::cout << (m_VolumeBuffers.m_TSDFPoolSize     *  8 *  8 *  8 * 4.0f) / (1024 * 1024) << '\n' << std::endl;
-        }
-
+        
         //////////////////////////////////////////////////////////////////////////////////////
         // Integrate and raycast pyramid
         //////////////////////////////////////////////////////////////////////////////////////
