@@ -1136,10 +1136,6 @@ namespace
 
 		if (m_pScalableReconstructor != nullptr)
 		{
-            MR::SReconstructionSettings Settings;
-            m_pScalableReconstructor->GetReconstructionSettings(&Settings);
-            const auto& rVolume = m_pScalableReconstructor->GetVolume();
-
             //RenderVertexMap();
 
             //RaycastRootGrids();
