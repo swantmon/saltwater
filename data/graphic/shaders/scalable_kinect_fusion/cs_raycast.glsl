@@ -13,7 +13,6 @@
 // Input from engine
 // -----------------------------------------------------------------------------
 
-layout (binding = 0) uniform sampler3D cs_Volume;
 layout (binding = 1, MAP_TEXTURE_FORMAT) writeonly uniform image2D cs_Vertex;
 layout (binding = 2, MAP_TEXTURE_FORMAT) writeonly uniform image2D cs_Normal;
 
