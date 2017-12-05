@@ -1146,7 +1146,7 @@ namespace
 
         if (!m_UseTrackingCamera)
         {
-            RenderCamera();
+            //RenderCamera();
         }
 
 		if (m_pScalableReconstructor != nullptr)
