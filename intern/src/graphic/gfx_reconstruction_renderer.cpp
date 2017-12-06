@@ -1131,7 +1131,7 @@ namespace
 
         if (!m_UseTrackingCamera)
         {
-            //RenderCamera();
+            RenderCamera();
         }
 
 		if (m_pScalableReconstructor != nullptr)
@@ -1142,7 +1142,7 @@ namespace
             //RaycastLevel1Grids();
             RaycastScalableVolume();
 
-            //RenderQueuedRootVolumes();
+            RenderQueuedRootVolumes();
             //RenderQueuedLevel1Grids();
             //RenderQueuedLevel2Grids();
 		}
