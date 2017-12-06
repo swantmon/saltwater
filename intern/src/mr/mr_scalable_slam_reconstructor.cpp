@@ -1746,6 +1746,19 @@ namespace MR
         m_VolumeBuffers.m_TSDFPoolSize = pPoolSizes[2];
         BufferManager::UnmapBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr);
         
+        if (m_VolumeBuffers.m_RootGridPoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[0] * sizeof(SGridPoolItem) > g_RootGridPoolSize)
+        {
+            BASE_CONSOLE_ERROR("Rootgrid pool is full!");
+        }
+        if (m_VolumeBuffers.m_Level1PoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[1] * sizeof(SGridPoolItem) > g_Level1GridPoolSize)
+        {
+            BASE_CONSOLE_ERROR("Level1 pool is full!");
+        }
+        if (m_VolumeBuffers.m_TSDFPoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[2] * sizeof(STSDFPoolItem) > g_TSDFPoolSize)
+        {
+            BASE_CONSOLE_ERROR("TSDF pool buffer is full!");
+        }
+
         //////////////////////////////////////////////////////////////////////////////////////
         // Integrate and raycast pyramid
         //////////////////////////////////////////////////////////////////////////////////////
