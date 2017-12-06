@@ -205,15 +205,29 @@ namespace MR
 
         const bool EnableConservativeRaster = Base::CProgramParameters::GetInstance().GetBoolean("conservative_raster_enable");
 
-        m_IsConservativeRasterizationAvailable = false;
+        m_UseConservativeRasterization = false;
 
         if (EnableConservativeRaster)
         {
-            m_IsConservativeRasterizationAvailable = Main::IsExtensionAvailable("GL_NV_conservative_raster");
+            m_UseConservativeRasterization = Main::IsExtensionAvailable("GL_NV_conservative_raster");
 
-            if (!m_IsConservativeRasterizationAvailable)
+            if (!m_UseConservativeRasterization)
             {
                 BASE_CONSOLE_INFO("Conservative rasterization is not available. Will use fallback method");
+            }
+        }
+
+        m_UseShuffleIntrinsics = false;
+
+        const bool EnableShuffleIntrinsics = Base::CProgramParameters::GetInstance().GetBoolean("tracking_with_shuffle_intrinsics");
+
+        if (EnableShuffleIntrinsics)
+        {
+            m_UseShuffleIntrinsics = Main::IsExtensionAvailable("GL_NV_shader_thread_shuffle");
+
+            if (!m_UseShuffleIntrinsics)
+            {
+                BASE_CONSOLE_INFO("Shuffle intrinsics are not available. Will use fallback method");
             }
         }
 
@@ -585,9 +599,13 @@ namespace MR
         {
             DefineStream << "#define CAPTURE_COLOR\n";
         }
-        if (m_IsConservativeRasterizationAvailable)
+        if (m_UseConservativeRasterization)
         {
             DefineStream << "#define CONSERVATIVE_RASTERIZATION_AVAILABLE\n";
+        }
+        if (m_UseShuffleIntrinsics)
+        {
+            DefineStream << "#define USE_SHUFFLE_INTRINSICS\n";
         }
 
         std::string DefineString = DefineStream.str();
@@ -818,7 +836,7 @@ namespace MR
             ContextManager::SetTopology(STopology::PointList);
 
 
-            if (m_IsConservativeRasterizationAvailable)
+            if (m_UseConservativeRasterization)
             {
                 glEnable(GL_CONSERVATIVE_RASTERIZATION_NV);
             }
@@ -846,7 +864,7 @@ namespace MR
 
                 ContextManager::Barrier();
             }
-            if (m_IsConservativeRasterizationAvailable)
+            if (m_UseConservativeRasterization)
             {
                 glDisable(GL_CONSERVATIVE_RASTERIZATION_NV);
             }
@@ -880,7 +898,7 @@ namespace MR
                 ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
                 ContextManager::SetTopology(STopology::PointList);
 
-                if (m_IsConservativeRasterizationAvailable)
+                if (m_UseConservativeRasterization)
                 {
                     glEnable(GL_CONSERVATIVE_RASTERIZATION_NV);
                 }
@@ -890,7 +908,7 @@ namespace MR
 
                     RasterizeRootGridReverse(rRootVolume);
                 }
-                if (m_IsConservativeRasterizationAvailable)
+                if (m_UseConservativeRasterization)
                 {
                     glDisable(GL_CONSERVATIVE_RASTERIZATION_NV);
                 }
