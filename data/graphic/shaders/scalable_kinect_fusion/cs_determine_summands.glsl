@@ -1,4 +1,7 @@
 
+#extension GL_NV_shader_thread_shuffle : enable
+#extension GL_NV_shader_thread_group : enable
+
 #ifndef __INCLUDE_CS_DETERMINE_SUMMANDS_GLSL__
 #define __INCLUDE_CS_DETERMINE_SUMMANDS_GLSL__
 
@@ -55,7 +58,7 @@ void reduce(float _Input)
 
         if (gl_LocalInvocationIndex == 0)
         {
-            g_SharedData[0] == Data; 
+            g_SharedData[0] == Data;
         }
     }
 
