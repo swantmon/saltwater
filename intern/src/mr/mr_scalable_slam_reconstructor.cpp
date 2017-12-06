@@ -2160,7 +2160,7 @@ namespace MR
 		SetupData();
 
 		SetupTextures();
-		//SetupBuffers(); // todo: find out why calling this method crashes the application
+		SetupBuffers();
 		SetupShaders();
 
         ClearPool();
