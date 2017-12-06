@@ -79,8 +79,12 @@ void main()
                     
                     vec2 Voxel = unpackSnorm2x16(TSDFPoolValue);
 
+                    Voxel.y *= MAX_INTEGRATION_WEIGHT;
+
                     Voxel.x = (Voxel.x * Voxel.y + TSDF) / (Voxel.y + 1.0f);
                     Voxel.y = min(MAX_INTEGRATION_WEIGHT, Voxel.y + 1.0f);
+                    
+                    Voxel.y /= MAX_INTEGRATION_WEIGHT;
 
                     TSDFPoolValue = packSnorm2x16(Voxel);
                     
