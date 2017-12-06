@@ -13,7 +13,7 @@ struct SIntrinics
 
 layout(row_major, std140, binding = 0) uniform UBOIntrinsics
 {
-	SIntrinics g_Intrinisics[PYRAMID_LEVELS];
+	SIntrinics g_Intrinsics[PYRAMID_LEVELS];
 };
 
 layout(row_major, std140, binding = 1) uniform UBOTrackingData

@@ -24,30 +24,68 @@ layout(row_major, std140, binding = 2) uniform UBOInc
 
 // -------------------------------------------------------------------------------------
 
-shared float g_SharedData[WORKGROUP_SIZE];
+#ifdef USE_SHUFFLE_INTRINSICS
 
-// -------------------------------------------------------------------------------------
-// Functions
-// -------------------------------------------------------------------------------------
+shared float g_SharedData[8];
+
+void reduce(float _Input)
+{
+    float Data = _Input;
+
+    Data += shuffleDownNV(Data, 16, 32);
+    Data += shuffleDownNV(Data,  8, 32);
+    Data += shuffleDownNV(Data,  4, 32);
+    Data += shuffleDownNV(Data,  2, 32);
+    Data += shuffleDownNV(Data,  1, 32);
+
+    if (gl_LocalInvocationIndex % 32 == 0)
+    {
+        g_SharedData[gl_LocalInvocationIndex / 32] = Data;
+    }
+
+    barrier();
+
+    if (gl_LocalInvocationIndex < 8)
+    {
+        Data = g_SharedData[gl_LocalInvocationIndex];
+
+        Data += shuffleDownNV(Data,  4, 32);
+        Data += shuffleDownNV(Data,  2, 32);
+        Data += shuffleDownNV(Data,  1, 32);
+
+        if (gl_LocalInvocationIndex == 0)
+        {
+            g_SharedData[0] == Data; 
+        }
+    }
+
+    barrier();
+}
+
+#else
+
+shared float g_SharedData[WORKGROUP_SIZE];
 
 void reduce()
 {
-	for (int i = WORKGROUP_SIZE; i >= 1; i /= 2)
-	{
-		if (gl_LocalInvocationIndex < i / 2)
-		{
-			g_SharedData[gl_LocalInvocationIndex] += g_SharedData[gl_LocalInvocationIndex + i / 2];
-		}
-		barrier();
-	}
+    for (int i = WORKGROUP_SIZE; i >= 1; i /= 2)
+    {
+        if (gl_LocalInvocationIndex < i / 2)
+        {
+            g_SharedData[gl_LocalInvocationIndex] += g_SharedData[gl_LocalInvocationIndex + i / 2];
+        }
+        barrier();
+    }
 }
+
+#endif
 
 bool findCorrespondence(out vec3 ReferenceVertex, out vec3 RaycastVertex, out vec3 RaycastNormal)
 {
     const int x = int(gl_GlobalInvocationID.x);
     const int y = int(gl_GlobalInvocationID.y);
-	
-	const ivec2 ImageSize = imageSize(cs_VertexMap);
+    
+    const ivec2 ImageSize = imageSize(cs_VertexMap);
 
     vec3 Vertex = imageLoad(cs_VertexMap, ivec2(x, y)).xyz;
 
@@ -142,6 +180,16 @@ void main()
         {
             barrier();
             
+            #ifdef USE_SHUFFLE_INTRINSICS
+
+            reduce(Row[i] * Row[j]);
+            
+            if (gl_LocalInvocationIndex == 0)
+            {
+                g_ICPData[ICPSummandIndex][ICPValueIndex++] = g_SharedData[0];
+            }
+            #else
+
             g_SharedData[gl_LocalInvocationIndex] = Row[i] * Row[j];
 
             barrier();
@@ -152,6 +200,8 @@ void main()
             {
                 g_ICPData[ICPSummandIndex][ICPValueIndex++] = g_SharedData[0];
             }
+            
+            #endif
         }
     }
 }
