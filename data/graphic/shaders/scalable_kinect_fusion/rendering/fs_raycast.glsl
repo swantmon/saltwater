@@ -34,17 +34,17 @@ void main()
     RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
     RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
 
-    vec3 WSPosition = GetPosition(g_ViewPosition.xyz, RayDirection);
+    vec3 WSPosition, Color;
+
+    GetPositionAndColor(g_ViewPosition.xyz, RayDirection, WSPosition, Color);
 
     if (WSPosition.x != 0.0f)
     {
         vec3 WSNormal = GetNormal(WSPosition);
-
-        vec3 Color = g_Color.xyz;
-                
+        
         WSNormal.x = -WSNormal.x;
         WSNormal.z = -WSNormal.z;
-                
+        
         SGBuffer GBuffer;
 
         PackGBuffer(Color, WSNormal, 0.5f, vec3(0.5f), 0.0f, 1.0f, GBuffer);

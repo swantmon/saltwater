@@ -62,9 +62,9 @@ layout(std430, binding = 6) buffer RootVolumePositionBuffer
 uint PackVoxel(float TSDF, float Weight, vec3 Color)
 {
     uvec3 RGB565 = uvec3(Color * 255.0f);
-    RGB565.r = (RGB565.r >> 3) & 0x1F;
-    RGB565.g = (RGB565.g >> 2) & 0x3F << 5;
-    RGB565.b = (RGB565.b >> 3) & 0x1F << 11;
+    RGB565.r = ((RGB565.r >> 3) & 0x1F);
+    RGB565.g = ((RGB565.g >> 2) & 0x3F) << 5;
+    RGB565.b = ((RGB565.b >> 3) & 0x1F) << 11;
 
     uint PackedColor = (RGB565.r | RGB565.g | RGB565.b) << 16;
 
@@ -86,9 +86,9 @@ vec2 UnpackVoxel(uint Voxel, out vec3 Color)
     Voxel = Voxel >> 16;
 
     uvec3 RGB565;
-    RGB565.r = (Voxel & 0x1F);
-    RGB565.g = (Voxel & 0x3F) >> 5;
-    RGB565.b = (Voxel & 0x1F) >> 11;
+    RGB565.r = (Voxel & 0x1F) << 3;
+    RGB565.g = ((Voxel >> 5) & 0x3F) << 2;
+    RGB565.b = ((Voxel >> 11) & 0x1F) << 3;
 
     Color = RGB565 / 255.0f;
 

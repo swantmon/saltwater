@@ -74,7 +74,7 @@ void main()
                 
                 if (SDF >= -TRUNCATED_DISTANCE)
                 {
-                    vec3 Color;
+                    vec3 Color = imageLoad(cs_Color, DepthCoords).rgb;
 
                     const float TSDF = min(SDF / TRUNCATED_DISTANCE, 1.0f);
 
