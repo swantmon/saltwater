@@ -23,8 +23,11 @@ layout(std430, binding = 7) buffer Indirect
     SIndirectBuffers g_Indirect;
 };
 
-layout(binding = 0, r16ui) readonly uniform uimage2D cs_Depth; 
+layout(binding = 0, r16ui) readonly uniform uimage2D cs_Depth;
 
+#ifdef CAPTURE_COLOR
+layout(binding = 1, rgba8) readonly uniform image2D cs_Color;
+#endif
 // -------------------------------------------------------------------------------------
 // Functions
 // -------------------------------------------------------------------------------------
@@ -83,7 +86,7 @@ void main()
 
                     Voxel.x = (Voxel.x * Voxel.y + TSDF) / (Voxel.y + 1.0f);
                     Voxel.y = min(MAX_INTEGRATION_WEIGHT, Voxel.y + 1.0f);
-                    
+
                     Voxel.y /= MAX_INTEGRATION_WEIGHT;
 
                     TSDFPoolValue = packSnorm2x16(Voxel);
