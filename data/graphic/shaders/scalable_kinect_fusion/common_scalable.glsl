@@ -66,10 +66,10 @@ uint PackVoxel(float TSDF, float Weight, vec3 Color)
     RGB565.g = (RGB565.g >> 2) & 0x3F << 5;
     RGB565.b = (RGB565.b >> 3) & 0x1F << 11;
 
-    uint PackedColor = RGB565.r | RGB565.g | RGB565.b << 16;
+    uint PackedColor = (RGB565.r | RGB565.g | RGB565.b) << 16;
 
-    uint PackedWeight = uint(Weight) & 0x5F << 11;
-    uint PackedTSDF = uint((TSDF * 0.5f + 0.5f) * 2048.0f);
+    uint PackedWeight = (uint(Weight) & 0x1F) << 11;
+    uint PackedTSDF = uint((TSDF * 0.5f + 0.5f) * 2048.0f) & 0x7FF;
 
     return PackedColor | PackedWeight | PackedTSDF;
 }
@@ -91,6 +91,18 @@ vec2 UnpackVoxel(uint Voxel, out vec3 Color)
     RGB565.b = (Voxel & 0x1F) >> 11;
 
     Color = RGB565 / 255.0f;
+
+    return Result;
+}
+
+vec2 UnpackVoxel(uint Voxel)
+{
+    uint PackedTSDF = Voxel & 0x7FF;
+    uint PackedWeight = (Voxel >> 11) & 0x1F;
+
+    vec2 Result;
+    Result.x = (float(PackedTSDF) / 2048.0f) * 2.0f - 1.0f;
+    Result.y = float(PackedWeight);
 
     return Result;
 }
