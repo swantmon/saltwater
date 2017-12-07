@@ -1420,8 +1420,13 @@ namespace MR
                 assert(false);
             }
 
-            m_VolumeBuffers.m_MinOffset = TotalMinOffset;
-            m_VolumeBuffers.m_MaxOffset = TotalMaxOffset;
+            m_VolumeBuffers.m_MinOffset[0] = Base::Min(TotalMinOffset[0], m_VolumeBuffers.m_MinOffset[0]);
+            m_VolumeBuffers.m_MinOffset[1] = Base::Min(TotalMinOffset[1], m_VolumeBuffers.m_MinOffset[1]);
+            m_VolumeBuffers.m_MinOffset[2] = Base::Min(TotalMinOffset[2], m_VolumeBuffers.m_MinOffset[2]);
+
+            m_VolumeBuffers.m_MaxOffset[0] = Base::Max(TotalMaxOffset[0], m_VolumeBuffers.m_MaxOffset[0]);
+            m_VolumeBuffers.m_MaxOffset[1] = Base::Max(TotalMaxOffset[1], m_VolumeBuffers.m_MaxOffset[1]);
+            m_VolumeBuffers.m_MaxOffset[2] = Base::Max(TotalMaxOffset[2], m_VolumeBuffers.m_MaxOffset[2]);
 
             for (uint32_t VolumeIndex : VolumeQueue)
             {
