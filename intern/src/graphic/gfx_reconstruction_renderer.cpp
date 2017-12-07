@@ -717,6 +717,7 @@ namespace
         ContextManager::SetResourceBuffer(6, rVolume.m_RootVolumePositionBufferPtr);
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_RaycastConstantBufferPtr);
         ContextManager::SetConstantBuffer(2, rVolume.m_AABBBufferPtr);
 
         ContextManager::Barrier();
@@ -747,6 +748,19 @@ namespace
             Float3(Max[0], Max[1], Max[2]),
             Float3(Min[0], Max[1], Max[2]),
         };
+
+        Float4 RaycastData[2];
+        PoseMatrix.GetTranslation(RaycastData[0][0], RaycastData[0][1], RaycastData[0][2]);
+        RaycastData[0][3] = 1.0f;
+        if (Settings.m_CaptureColor)
+        {
+            RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 0.0f, 0.0f, 1.0f);
+        }
+        else
+        {
+            RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 1.0f, 0.0f, 1.0f);
+        }
+        BufferManager::UploadBufferData(m_RaycastConstantBufferPtr, RaycastData);
 
         BufferManager::UploadBufferData(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Vertices);
 
@@ -1136,7 +1150,7 @@ namespace
 
 		if (m_pScalableReconstructor != nullptr)
 		{
-            //RenderVertexMap();
+            RenderVertexMap();
 
             //RaycastRootGrids();
             //RaycastLevel1Grids();

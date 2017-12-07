@@ -56,7 +56,7 @@ namespace
 
     const unsigned int g_AABB = 8;
 
-    //*
+    /*
     const unsigned int g_RootVolumePoolSize =        g_MegabyteSize;
     const unsigned int g_RootGridPoolSize   =  16u * g_MegabyteSize;
     const unsigned int g_Level1GridPoolSize =  64u * g_MegabyteSize;
