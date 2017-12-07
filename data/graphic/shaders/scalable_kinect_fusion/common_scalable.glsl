@@ -39,7 +39,7 @@ layout(std430, binding = 2) buffer Level1Pool
 
 layout(std430, binding = 3) buffer TSDFPool
 {
-    uint g_TSDFPool[]; // two 16 bit floats packed with packSnorm2x16
+    uint g_TSDFPool[];
 };
 
 layout(std430, binding = 4) buffer PoolItemCounts
@@ -58,6 +58,42 @@ layout(std430, binding = 6) buffer RootVolumePositionBuffer
 {
     int g_RootVolumePositionBuffer[];
 };
+
+uint PackVoxel(float TSDF, float Weight, vec3 Color)
+{
+    uvec3 RGB565 = uvec3(Color * 255.0f);
+    RGB565.r = (RGB565.r >> 3) & 0x1F;
+    RGB565.g = (RGB565.g >> 2) & 0x3F << 5;
+    RGB565.b = (RGB565.b >> 3) & 0x1F << 11;
+
+    uint PackedColor = RGB565.r | RGB565.g | RGB565.b << 16;
+
+    uint PackedWeight = uint(Weight) & 0x5F << 11;
+    uint PackedTSDF = uint((TSDF * 0.5f + 0.5f) * 2048.0f);
+
+    return PackedColor | PackedWeight | PackedTSDF;
+}
+
+vec2 UnpackVoxel(uint Voxel, out vec3 Color)
+{
+    uint PackedTSDF = Voxel & 0x7FF;
+    uint PackedWeight = (Voxel >> 11) & 0x1F;
+
+    vec2 Result;
+    Result.x = (float(PackedTSDF) / 2048.0f) * 2.0f - 1.0f;
+    Result.y = float(PackedWeight);
+
+    Voxel = Voxel >> 16;
+
+    uvec3 RGB565;
+    RGB565.r = (Voxel & 0x1F);
+    RGB565.g = (Voxel & 0x3F) >> 5;
+    RGB565.b = (Voxel & 0x1F) >> 11;
+
+    Color = RGB565 / 255.0f;
+
+    return Result;
+}
 
 ////////////////////////////////////////////////////////////////////////
 // Some helper functions
