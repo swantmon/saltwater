@@ -89,7 +89,7 @@ vec2 GetVoxel(vec3 Position)
                     int TSDFBufferInnerOffset = OffsetToIndex(TSDFVolumeOffset, 8);
                     int TSDFBufferIndex = TSDFVolumeBufferOffset * 8 * 8 * 8 + TSDFBufferInnerOffset;
 
-                    return unpackSnorm2x16(g_TSDFPool[TSDFBufferIndex]);
+                    return UnpackVoxel(g_TSDFPool[TSDFBufferIndex]);
                 }
             }
         }

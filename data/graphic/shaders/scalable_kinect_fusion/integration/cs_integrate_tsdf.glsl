@@ -74,22 +74,20 @@ void main()
                 
                 if (SDF >= -TRUNCATED_DISTANCE)
                 {
+                    vec3 Color;
+
                     const float TSDF = min(SDF / TRUNCATED_DISTANCE, 1.0f);
 
                     int TSDFIndex = Level2GridBufferOffset + OffsetToIndex(vec3(gl_LocalInvocationID.xy, i), 8);
 
                     uint TSDFPoolValue = g_TSDFPool[TSDFIndex];
                     
-                    vec2 Voxel = unpackSnorm2x16(TSDFPoolValue);
-
-                    Voxel.y *= MAX_INTEGRATION_WEIGHT;
+                    vec2 Voxel = UnpackVoxel(TSDFPoolValue);
 
                     Voxel.x = (Voxel.x * Voxel.y + TSDF) / (Voxel.y + 1.0f);
                     Voxel.y = min(MAX_INTEGRATION_WEIGHT, Voxel.y + 1.0f);
 
-                    Voxel.y /= MAX_INTEGRATION_WEIGHT;
-
-                    TSDFPoolValue = packSnorm2x16(Voxel);
+                    TSDFPoolValue = PackVoxel(Voxel.x, Voxel.y, Color);
                     
                     g_TSDFPool[TSDFIndex] = TSDFPoolValue;
                 }
