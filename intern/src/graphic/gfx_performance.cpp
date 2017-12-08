@@ -41,8 +41,10 @@ namespace
         void OnExit();
 
         void BeginEvent(const Base::Char* _pEventName);
+        void BeginDurationEvent(const Base::Char* _pEventName);
         void ResetEventStatistics(const Base::Char* _pEventName);
         void EndEvent();
+        void EndDurationEvent();
 
         void StartDurationQuery(unsigned int _ID, Gfx::Performance::CDurationQueryDelegate _Delegate);
         void EndDurationQuery();
@@ -233,6 +235,15 @@ namespace
         GLsizei LengthOfEventName = static_cast<GLsizei>(strlen(_pEventName));
 
         glPushDebugGroup(GL_DEBUG_SOURCE_THIRD_PARTY, 0, LengthOfEventName, _pEventName);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxPerformance::BeginDurationEvent(const Base::Char* _pEventName)
+    {
+        GLsizei LengthOfEventName = static_cast<GLsizei>(strlen(_pEventName));
+
+        glPushDebugGroup(GL_DEBUG_SOURCE_THIRD_PARTY, 0, LengthOfEventName, _pEventName);
 
         if (Gfx::Main::GetGraphicsAPI() != GLES32)
         {
@@ -277,6 +288,13 @@ namespace
 
     void CGfxPerformance::EndEvent()
     {
+        glPopDebugGroup();  
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxPerformance::EndDurationEvent()
+    {
         glPopDebugGroup();
 
         if (Gfx::Main::GetGraphicsAPI() != GLES32)
@@ -290,7 +308,7 @@ namespace
                 m_OpenedMarkerStack.top()->m_PendingQueries.back().second = EndQuery;
                 m_OpenedMarkerStack.pop();
             }
-        }        
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -369,6 +387,13 @@ namespace Performance
 
     // -----------------------------------------------------------------------------
 
+    void BeginDurationEvent(const Base::Char* _pEventName)
+    {
+        CGfxPerformance::GetInstance().BeginDurationEvent(_pEventName);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void ResetEventStatistics(const Base::Char* _pEventName)
     {
         CGfxPerformance::GetInstance().ResetEventStatistics(_pEventName);
@@ -379,6 +404,13 @@ namespace Performance
     void EndEvent()
     {
         CGfxPerformance::GetInstance().EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void EndDurationEvent()
+    {
+        CGfxPerformance::GetInstance().EndDurationEvent();
     }
 
     // -----------------------------------------------------------------------------
