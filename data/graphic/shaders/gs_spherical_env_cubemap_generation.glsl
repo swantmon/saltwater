@@ -47,10 +47,10 @@ void main()
 {
     for( int FaceIndex = 0; FaceIndex < 6; ++FaceIndex )
     {
-        gl_Layer = FaceIndex;
-
         for( int IndexOfVertex = 0; IndexOfVertex < 3; IndexOfVertex++ )
         {
+            gl_Layer = FaceIndex;
+
             out_Normal  = -in_Normal[IndexOfVertex];
             gl_Position = m_CubeProjectionMatrix * m_CubeViewMatrix[FaceIndex] * gl_in[IndexOfVertex].gl_Position;
 
