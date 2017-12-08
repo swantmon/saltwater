@@ -89,12 +89,59 @@ vec2 GetVoxel(vec3 Position)
                     int TSDFBufferInnerOffset = OffsetToIndex(TSDFVolumeOffset, 8);
                     int TSDFBufferIndex = TSDFVolumeBufferOffset * 8 * 8 * 8 + TSDFBufferInnerOffset;
 
-                    return unpackSnorm2x16(g_TSDFPool[TSDFBufferIndex]);
+                    return UnpackVoxel(g_TSDFPool[TSDFBufferIndex]);
                 }
             }
         }
     }
     return vec2(0.0f);
+}
+
+uint GetRawVoxel(vec3 Position)
+{
+    Position /= VOLUME_SIZE;
+
+    // Index of the first element of the current rootgrid in the rootgrid pool
+    int VolumeBufferOffset = GetRootVolumeBufferIndex(Position);
+
+    if (VolumeBufferOffset != -1)
+    {
+        // Global offset of the rootvolume
+        vec3 VolumeOffset = g_RootVolumePool[VolumeBufferOffset].m_Offset;
+
+        // Index to rootgrid pool of the current root grid item
+        int RootGridItemBufferOffset = GetRootGridItemIndex(Position - VolumeOffset, VolumeBufferOffset);
+        
+        if (RootGridItemBufferOffset != -1)
+        {
+            // Pool index of whole level 1 grid                
+            int Level1VolumeBufferOffset = g_RootGridPool[RootGridItemBufferOffset].m_PoolIndex;
+
+            if (Level1VolumeBufferOffset != -1)
+            {
+                // Offset of level 1 volume in rootgrid
+                ivec3 Level1VolumeOffset = ivec3(floor(Position * 16.0f * 8.0f));
+                Level1VolumeOffset %= 8;
+
+                int Level1BufferInnerOffset = OffsetToIndex(Level1VolumeOffset, 8);
+                int Level1BufferIndex = Level1VolumeBufferOffset * 8 * 8 * 8 + Level1BufferInnerOffset;
+
+                int TSDFVolumeBufferOffset = g_Level1GridPool[Level1BufferIndex].m_PoolIndex;
+
+                if (TSDFVolumeBufferOffset != -1)
+                {
+                    ivec3 TSDFVolumeOffset = ivec3(floor(Position * 16.0f * 8.0f * 8.0f));
+                    TSDFVolumeOffset %= 8;
+
+                    int TSDFBufferInnerOffset = OffsetToIndex(TSDFVolumeOffset, 8);
+                    int TSDFBufferIndex = TSDFVolumeBufferOffset * 8 * 8 * 8 + TSDFBufferInnerOffset;
+
+                    return g_TSDFPool[TSDFBufferIndex];
+                }
+            }
+        }
+    }
+    return 0;
 }
 
 float GetInterpolatedTSDF(vec3 Position)
@@ -126,6 +173,28 @@ float GetInterpolatedTSDF(vec3 Position)
     GetVoxel(vec3(g.x + VOXEL_SIZE, g.y + VOXEL_SIZE, g.z + VOXEL_SIZE)).x *         a  *         b  *         c ;
 
     return result;
+}
+
+vec3 GetColor(vec3 Position)
+{
+    vec3 g = ivec3(floor(Position / VOXEL_SIZE));
+
+    const float vx = (g.x + 0.5f) * VOXEL_SIZE;
+    const float vy = (g.y + 0.5f) * VOXEL_SIZE;
+    const float vz = (g.z + 0.5f) * VOXEL_SIZE;
+
+    g.x = (Position.x < vx) ? (g.x - 1) : g.x;
+    g.y = (Position.y < vy) ? (g.y - 1) : g.y;
+    g.z = (Position.z < vz) ? (g.z - 1) : g.z;
+
+    g = g * VOXEL_SIZE;
+
+    uint Voxel = GetRawVoxel(g);
+
+    vec3 Color;
+    vec2 Unused = UnpackVoxel(Voxel, Color);
+
+    return Color;
 }
 
 vec3 GetNormal(vec3 Vertex)
@@ -200,6 +269,48 @@ vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection)
     }
 
     return Vertex;
+}
+
+void GetPositionAndColor(vec3 CameraPosition, vec3 RayDirection, out vec3 Vertex, out vec3 Color)
+{
+    const float TruncatedDistance = TRUNCATED_DISTANCE / 1000.0f;
+
+    const float StartLength = GetStartLength(CameraPosition, RayDirection, g_AABBMin, g_AABBMax);
+    const float EndLength = GetEndLength(CameraPosition, RayDirection, g_AABBMin, g_AABBMax);
+
+    float RayLength = StartLength;
+    float Step = TruncatedDistance;
+
+    float CurrentTSDF = GetVoxel(CameraPosition + RayLength * RayDirection).x;
+    float PreviousTSDF;
+    RayLength += Step;
+
+    Vertex = vec3(0.0f);
+    Color = vec3(0.0f);
+
+    while (RayLength < EndLength)
+    {
+        vec3 PreviousPosition = CameraPosition + RayLength * RayDirection;
+        RayLength += Step;
+        vec3 CurrentPosition = CameraPosition + RayLength * RayDirection;
+
+        PreviousTSDF = CurrentTSDF;
+        CurrentTSDF = GetVoxel(CurrentPosition).x;
+
+        if (CurrentTSDF < 0.0f && PreviousTSDF > 0.0f)
+        {
+            float Ft = GetInterpolatedTSDF(PreviousPosition);
+            float Ftdt = GetInterpolatedTSDF(CurrentPosition);
+            float Ts = RayLength - Step * Ft / (Ftdt - Ft);
+
+            Vertex = CameraPosition + RayDirection * Ts;
+            Color = GetColor(PreviousPosition);
+
+            break;
+        }
+        
+        Step = CurrentTSDF < 1.0f ? VOXEL_SIZE : TruncatedDistance;
+    }
 }
 
 #endif // __INCLUDE_COMMON_RAYCAST_GLSL__

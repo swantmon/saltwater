@@ -43,5 +43,7 @@ namespace MR
                 m_VolumeSize *= m_GridResolutions[i];
             }
         }
+
+        m_CaptureColor = Base::CProgramParameters::GetInstance().GetBoolean("capture_color");
     }
 } // namespace MR
