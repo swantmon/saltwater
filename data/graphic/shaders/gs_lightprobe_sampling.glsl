@@ -53,10 +53,10 @@ void main()
 {
     for( int FaceIndex = 0; FaceIndex < 6; ++FaceIndex )
     {
-        gl_Layer = FaceIndex;
-
         for( int IndexOfVertex = 0; IndexOfVertex < 3; IndexOfVertex++ )
         {
+            gl_Layer = FaceIndex;
+
             out_Position       = in_Position[IndexOfVertex];
             out_Normal         = in_Normal[IndexOfVertex];
             out_UV             = in_UV[IndexOfVertex];
