@@ -36,7 +36,17 @@ void main()
 
     vec3 WSPosition, Color;
 
+#ifdef CAPTURE_COLOR
+
     GetPositionAndColor(g_ViewPosition.xyz, RayDirection, WSPosition, Color);
+
+#else
+
+    WSPosition = GetPosition(g_ViewPosition.xyz, RayDirection);
+    Color = g_Color.rgb;
+
+#endif
+
 
     if (WSPosition.x != 0.0f)
     {

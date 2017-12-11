@@ -175,6 +175,8 @@ float GetInterpolatedTSDF(vec3 Position)
     return result;
 }
 
+#ifdef CAPTURE_COLOR
+
 vec3 GetColor(vec3 Position)
 {
     vec3 g = ivec3(floor(Position / VOXEL_SIZE));
@@ -196,6 +198,8 @@ vec3 GetColor(vec3 Position)
 
     return Color;
 }
+
+#endif
 
 vec3 GetNormal(vec3 Vertex)
 {
@@ -271,6 +275,8 @@ vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection)
     return Vertex;
 }
 
+#ifdef CAPTURE_COLOR
+
 void GetPositionAndColor(vec3 CameraPosition, vec3 RayDirection, out vec3 Vertex, out vec3 Color)
 {
     const float TruncatedDistance = TRUNCATED_DISTANCE / 1000.0f;
@@ -312,5 +318,8 @@ void GetPositionAndColor(vec3 CameraPosition, vec3 RayDirection, out vec3 Vertex
         Step = CurrentTSDF < 1.0f ? VOXEL_SIZE : TruncatedDistance;
     }
 }
+
+
+#endif
 
 #endif // __INCLUDE_COMMON_RAYCAST_GLSL__

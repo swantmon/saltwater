@@ -59,6 +59,8 @@ layout(std430, binding = 6) buffer RootVolumePositionBuffer
     int g_RootVolumePositionBuffer[];
 };
 
+#ifdef CAPTURE_COLOR
+
 uint PackVoxel(float TSDF, float Weight, vec3 Color)
 {
     uvec3 RGB565 = uvec3(Color * 255.0f);
@@ -106,6 +108,24 @@ vec2 UnpackVoxel(uint Voxel)
 
     return Result;
 }
+
+#else
+
+uint PackVoxel(float TSDF, float Weight)
+{
+    return packSnorm2x16(vec2(TSDF, Weight / MAX_INTEGRATION_WEIGHT));
+}
+
+vec2 UnpackVoxel(uint Voxel)
+{
+    vec2 Data = unpackSnorm2x16(Voxel);
+
+    Data.y *= MAX_INTEGRATION_WEIGHT;
+
+    return Data;
+}
+
+#endif
 
 ////////////////////////////////////////////////////////////////////////
 // Some helper functions
