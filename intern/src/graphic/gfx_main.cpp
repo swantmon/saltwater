@@ -253,6 +253,7 @@ namespace
                 EGL_BLUE_SIZE,       8,
                 EGL_GREEN_SIZE,      8,
                 EGL_RED_SIZE,        8,
+                EGL_DEPTH_SIZE,      24,
                 EGL_NONE
             };
 
@@ -732,14 +733,7 @@ namespace
         SWindowInfo& rWindowInfo = *m_pActiveWindowInfo;
 
 #ifdef __ANDROID__
-        EGLBoolean Status = eglMakeCurrent(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface, rWindowInfo.m_EglSurface, rWindowInfo.m_EglContext);
-
-        EGLint Error = eglGetError();
-
-        if (Status == EGL_FALSE || Error != EGL_SUCCESS)
-        {
-            BASE_THROWV("Unable to set current EGL stuff because of %i.", Error);
-        }
+        eglMakeCurrent(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface, rWindowInfo.m_EglSurface, rWindowInfo.m_EglContext);
 #else
         wglMakeCurrent(rWindowInfo.m_pNativeDeviceContextHandle, rWindowInfo.m_pNativeOpenGLContextHandle);
 #endif
@@ -759,12 +753,7 @@ namespace
         SWindowInfo& rWindowInfo = *m_pActiveWindowInfo;
 
 #ifdef __ANDROID__
-        EGLBoolean Status = eglSwapBuffers(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface);
-
-        if (Status == EGL_FALSE)
-        {
-            BASE_THROWM("Unable to swap buffer.");
-        }
+        eglSwapBuffers(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface);
 #else
         SwapBuffers(rWindowInfo.m_pNativeDeviceContextHandle);
 #endif
