@@ -125,7 +125,7 @@ vec2 UnpackVoxel(uint Voxel)
     return Data;
 }
 
-#endif
+#endif // CAPTURE_COLOR
 
 ////////////////////////////////////////////////////////////////////////
 // Some helper functions
