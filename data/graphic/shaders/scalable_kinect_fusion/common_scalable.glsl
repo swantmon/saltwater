@@ -111,9 +111,37 @@ vec2 UnpackVoxel(uint Voxel)
 
 #else
 
+/*uint PackVoxel(float TSDF, float Weight)
+{
+    Weight /= MAX_INTEGRATION_WEIGHT;
+
+    uint uTSDF = uint((TSDF * 0.5f + 0.5f) * 16777216.0f);
+    uint uWeight = uint(Weight * 256.0f);
+
+    uint PackedTSDF = (uTSDF & 0xFFFFFF) << 8;
+    uint PackedWeight = (uWeight & 0xFF);
+
+    return PackedTSDF | PackedWeight;
+}
+
+vec2 UnpackVoxel(uint Voxel)
+{
+    uint uTSDF = (Voxel >> 8) & 0xFFFFFF;
+    uint uWeight = Voxel & 0xFF;
+
+    float TSDF = (uTSDF / 16777216.0f) * 2.0f - 1.0f;
+    float Weight = uWeight / 256.0f;
+
+    Weight *= MAX_INTEGRATION_WEIGHT;
+
+    return vec2(TSDF, Weight);
+}*/
+
 uint PackVoxel(float TSDF, float Weight)
 {
-    return packSnorm2x16(vec2(TSDF, Weight / MAX_INTEGRATION_WEIGHT));
+    Weight /= MAX_INTEGRATION_WEIGHT;
+
+    return packSnorm2x16(vec2(TSDF, Weight));
 }
 
 vec2 UnpackVoxel(uint Voxel)
