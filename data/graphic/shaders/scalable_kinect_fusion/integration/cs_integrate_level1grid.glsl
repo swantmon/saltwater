@@ -36,6 +36,11 @@ void main()
         {
             g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex = atomicAdd(g_TSDFPoolItemCount, 1);
         }
+        else
+        {
+            int Weight = g_Level1GridPool[Level1GridBufferOffset].m_Weight;
+            atomicMax(g_RootGridPool[RootGridBufferOffset].m_Weight, Weight);
+        }
     }
 }
 

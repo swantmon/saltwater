@@ -52,6 +52,7 @@ void main()
 
     int Level2GridBufferOffset = g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex * VOXELS_PER_LEVEL2GRID;
 
+    int MaxWeight = 0;
     for (int i = 0; i < 8; ++ i)
     {
         vec3 WSVoxelPosition = ParentOffset + vec3(gl_LocalInvocationID.xy, i) * VOXEL_SIZE;
@@ -102,10 +103,13 @@ void main()
                 #endif // CAPTURE_COLOR
                     
                     g_TSDFPool[TSDFIndex] = TSDFPoolValue;
+
+                    MaxWeight = max(MaxWeight, int(Voxel.y));
                 }
             }
         }
     }
+    atomicMax(g_Level1GridPool[Level1GridBufferOffset].m_Weight, MaxWeight);
 }
 
 #endif // __INCLUDE_CS_KINECT_INTEGRATE_TSDF_GLSL__
