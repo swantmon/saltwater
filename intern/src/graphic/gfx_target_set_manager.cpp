@@ -336,29 +336,22 @@ namespace
             CTextureBasePtr TextureBasePtr = _pTargetPtrs[IndexOfTexture];
 
             GLuint TextureHandle = 0;
-            unsigned int BindingTarget = 0;
 
             if (TextureBasePtr->GetDimension() == CTextureBase::Dim2D)
             {
                 CNativeTexture2D& rNativeTexture = *static_cast<CNativeTexture2D*>(TextureBasePtr.GetPtr());
 
                 TextureHandle = rNativeTexture.m_NativeTexture;
-                BindingTarget = GL_TEXTURE_2D;
             }
             else if (TextureBasePtr->GetDimension() == CTextureBase::Dim3D)
             {
                 CNativeTexture3D& rNativeTexture = *static_cast<CNativeTexture3D*>(TextureBasePtr.GetPtr());
 
                 TextureHandle = rNativeTexture.m_NativeTexture;
-                BindingTarget = GL_TEXTURE_3D;
             }
 
             unsigned int MipmapLevel = TextureBasePtr->GetCurrentMipLevel();
 
-            BindingTarget = TextureBasePtr->IsCube() == true ? GL_TEXTURE_CUBE_MAP : BindingTarget;
-
-            glBindTexture(BindingTarget, TextureHandle);
-                
             if ((TextureBasePtr->GetBinding() & CTexture2D::DepthStencilTarget) != 0)
             {
                 glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, TextureHandle, MipmapLevel);
