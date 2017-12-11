@@ -246,10 +246,11 @@ namespace
 			std::stringstream DefineStream;
 
 			DefineStream
-				<< "#define VOLUME_RESOLUTION "  << Settings.m_VolumeResolution << " \n"
-				<< "#define TRUNCATED_DISTANCE " << Settings.m_TruncatedDistance << " \n"
-				<< "#define VOLUME_SIZE "        << Settings.m_VolumeSize << " \n"
-				<< "#define VOXEL_SIZE "         << Settings.m_VolumeSize / Settings.m_VolumeResolution << " \n";
+			    << "#define VOLUME_RESOLUTION "      << Settings.m_VolumeResolution << " \n"
+			    << "#define TRUNCATED_DISTANCE "     << Settings.m_TruncatedDistance << " \n"
+			    << "#define VOLUME_SIZE "            << Settings.m_VolumeSize << " \n"
+			    << "#define VOXEL_SIZE "             << Settings.m_VolumeSize / Settings.m_VolumeResolution << " \n"
+		        << "#define MAX_INTEGRATION_WEIGHT " << Settings.m_MaxIntegrationWeight << '\n';
 
             if (Settings.m_CaptureColor)
             {
