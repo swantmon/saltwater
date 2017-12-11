@@ -9,13 +9,13 @@
 struct SVolumePoolItem
 {
     ivec3 m_Offset;
-    bool m_NearSurface;
+    int m_Weight;
 };
 
 struct SGridPoolItem
 {
     int m_PoolIndex;
-    bool m_NearSurface;
+    int m_Weight;
 };
 
 ////////////////////////////////////////////////////////////////////////
