@@ -519,7 +519,7 @@ namespace
 
         ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_BRDFTexture2DPtr));
 
-        ContextManager::Dispatch(512, 512, 1);
+        ContextManager::Dispatch(64, 64, 1);
 
         ContextManager::ResetImageTexture(0);
 
