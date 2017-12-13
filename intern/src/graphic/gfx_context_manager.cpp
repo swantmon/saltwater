@@ -1559,8 +1559,6 @@ namespace
     {
         ValidatePipeline();
         glDrawArrays(s_NativeTopologies[m_Topology], _IndexOfFirstVertex, _NumberOfVertices);
-
-        glFinish();
     }
 
     // -----------------------------------------------------------------------------
@@ -1572,8 +1570,6 @@ namespace
 
         ValidatePipeline();
         glDrawElements(s_NativeTopologies[m_Topology], _NumberOfIndices, GL_UNSIGNED_INT, 0);
-
-        glFinish();
     }
 
     // -----------------------------------------------------------------------------
@@ -1582,8 +1578,6 @@ namespace
     {
         ValidatePipeline();
         glDrawArraysInstanced(s_NativeTopologies[m_Topology], _IndexOfFirstVertex, _NumberOfVertices, _NumberOfInstances);
-
-        glFinish();
     }
 
     // -----------------------------------------------------------------------------
@@ -1596,8 +1590,6 @@ namespace
 
         ValidatePipeline();
         glDrawElementsInstanced(s_NativeTopologies[m_Topology], _NumberOfIndices, GL_UNSIGNED_INT, 0, _NumberOfInstances);
-
-        glFinish();
     }
 
     // -----------------------------------------------------------------------------
@@ -1610,8 +1602,6 @@ namespace
 
         ValidatePipeline();
         glDrawArraysIndirect(s_NativeTopologies[m_Topology], reinterpret_cast<void*>(_Offset));
-
-        glFinish();
 
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
     }
@@ -1627,8 +1617,6 @@ namespace
         ValidatePipeline();
         glDrawElementsIndirect(s_NativeTopologies[m_Topology], GL_UNSIGNED_INT, reinterpret_cast<void*>(_Offset));
 
-        glFinish();
-
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
     }
 
@@ -1640,8 +1628,6 @@ namespace
 
         ValidatePipeline();
         glDispatchCompute(_NumberOfThreadGroupsX, _NumberOfThreadGroupsY, _NumberOfThreadGroupsZ);
-
-        glFinish();
     }
 
     // -----------------------------------------------------------------------------
@@ -1654,8 +1640,6 @@ namespace
 
         ValidatePipeline();
         glDispatchComputeIndirect(_Offset);
-
-        glFinish();
 
         glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, 0);
     }
