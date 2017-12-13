@@ -137,6 +137,8 @@ namespace
         void SetAtomicCounterBufferRange(unsigned int _Unit, CBufferPtr _BufferPtr, unsigned int _Offset, unsigned int _Range);
 		CBufferPtr GetAtomicCounterBuffer(unsigned int _Unit);
 
+        void Flush();
+
         void Draw(unsigned int _NumberOfVertices, unsigned int _IndexOfFirstVertex);
         void DrawIndexed(unsigned int _NumberOfIndices, unsigned int _IndexOfFirstIndex, int _BaseVertexLocation);
         void DrawInstanced(unsigned int _NumberOfVertices, unsigned int _NumberOfInstances, unsigned int _IndexOfFirstVertex);
@@ -1537,6 +1539,13 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxContextManager::Flush()
+    {
+        glFinish();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxContextManager::Draw(unsigned int _NumberOfVertices, unsigned int _IndexOfFirstVertex)
     {
         ValidatePipeline();
@@ -1641,6 +1650,8 @@ namespace
 
         glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, 0);
     }
+
+    // -----------------------------------------------------------------------------
     
     void CGfxContextManager::ValidatePipeline()
     {
@@ -2297,6 +2308,13 @@ namespace ContextManager
 	{
 		return CGfxContextManager::GetInstance().GetAtomicCounterBuffer(_Unit);
 	}
+
+    // -----------------------------------------------------------------------------
+
+    void Flush()
+    {
+        CGfxContextManager::GetInstance().Flush();
+    }
 
     // -----------------------------------------------------------------------------
 
