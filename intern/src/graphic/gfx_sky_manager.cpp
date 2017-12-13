@@ -925,7 +925,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
-            pGraphicSkyboxFacet = &AllocateSkyFacet(512);
+            pGraphicSkyboxFacet = &AllocateSkyFacet(2048);
 
             // -----------------------------------------------------------------------------
             // Update
@@ -2032,7 +2032,7 @@ namespace
 
         ContextManager::Draw(3, 0);
 
-        glFinish();
+        ContextManager::Flush();
 
         Performance::EndEvent();
 
@@ -2053,7 +2053,7 @@ namespace
 
         ContextManager::Draw(3, 0);
 
-        glFinish();
+        ContextManager::Flush();
 
         Performance::EndEvent();
 
@@ -2096,7 +2096,7 @@ namespace
 
             ContextManager::Draw(3, 0);
 
-            glFinish();
+            ContextManager::Flush();
         }
 
         ContextManager::ResetShaderGS();
@@ -2128,7 +2128,7 @@ namespace
 
         ContextManager::Draw(3, 0);
 
-        glFinish();
+        ContextManager::Flush();
 
         Performance::EndEvent();
 
@@ -2165,7 +2165,7 @@ namespace
 
             ContextManager::Draw(3, 0);
 
-            glFinish();
+            ContextManager::Flush();
         }
 
         ContextManager::ResetShaderGS();
@@ -2229,7 +2229,7 @@ namespace
 
                 ContextManager::Draw(3, 0);
 
-                glFinish();
+                ContextManager::Flush();
             }
 
             ContextManager::ResetShaderGS();
@@ -2249,7 +2249,7 @@ namespace
 
             ContextManager::Draw(3, 0);
 
-            glFinish();
+            ContextManager::Flush();
 
             Performance::EndEvent();
 
@@ -2291,7 +2291,7 @@ namespace
 
                 ContextManager::Draw(3, 0);
 
-                glFinish();
+                ContextManager::Flush();
             }
 
             ContextManager::ResetShaderGS();
@@ -2322,7 +2322,7 @@ namespace
 
             ContextManager::Draw(3, 0);
 
-            glFinish();
+            ContextManager::Flush();
 
             Performance::EndEvent();
 
@@ -2358,7 +2358,7 @@ namespace
 
                 ContextManager::Draw(3, 0);
 
-                glFinish();
+                ContextManager::Flush();
             }
 
             ContextManager::ResetShaderGS();
