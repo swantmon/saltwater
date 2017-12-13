@@ -139,6 +139,8 @@ namespace
 
         void Flush();
 
+        void Barrier();
+
         void Draw(unsigned int _NumberOfVertices, unsigned int _IndexOfFirstVertex);
         void DrawIndexed(unsigned int _NumberOfIndices, unsigned int _IndexOfFirstIndex, int _BaseVertexLocation);
         void DrawInstanced(unsigned int _NumberOfVertices, unsigned int _NumberOfInstances, unsigned int _IndexOfFirstVertex);
@@ -1546,6 +1548,13 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxContextManager::Barrier()
+    {
+        glMemoryBarrier(GL_ALL_BARRIER_BITS);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxContextManager::Draw(unsigned int _NumberOfVertices, unsigned int _IndexOfFirstVertex)
     {
         ValidatePipeline();
@@ -2314,6 +2323,13 @@ namespace ContextManager
     void Flush()
     {
         CGfxContextManager::GetInstance().Flush();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void Barrier()
+    {
+        CGfxContextManager::GetInstance().Barrier();
     }
 
     // -----------------------------------------------------------------------------
