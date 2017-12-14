@@ -11,6 +11,7 @@ set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_o
 # ---------------------------------------
 # Project & setup
 # ---------------------------------------
+set( ExternDir  ../../../../extern/ )
 set( InternDir  ../../../../intern/ )
 set( SourceDir  ../../../../intern/src/ )
 set( IncludeDir ../../../../intern/src/ )
@@ -48,6 +49,13 @@ foreach( MyLibrary IN ITEMS ${MyLibraries} )
 endforeach()
 
 # ---------------------------------------
+# Special dependencies and includes
+# ---------------------------------------
+target_include_directories( graphic PRIVATE ${ExternDir}/tinyxml2/include )
+
+link_directories ( ${ExternDir}/tinyxml2/lib/${ANDROID_ABI} )
+
+# ---------------------------------------
 # Java Interface
 # ---------------------------------------
 file(
@@ -62,5 +70,7 @@ add_library( app_droid SHARED ${TargetSources} )
 target_include_directories( app_droid PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue )
 
 target_link_libraries( app_droid EGL GLESv3 log android m native_app_glue)
+
+target_link_libraries( app_droid tinyxml2)
 
 target_link_libraries( app_droid ${MyLibraries} )

@@ -22,9 +22,32 @@
 #include "graphic/gfx_shader.h"
 #include "graphic/gfx_shader_manager.h"
 
-/*#include "tinyxml2.h"*/
+#include "tinyxml2.h"
 
 #include <unordered_map>
+
+
+
+
+
+
+
+
+
+
+#if __ANDROID__
+#include "app_droid/app_application.h"
+#else
+#include "editor/edit_application.h"
+#endif // __ANDROID__
+
+
+
+
+
+
+
+
 
 using namespace Gfx;
 
@@ -111,7 +134,7 @@ namespace
 
 namespace
 {
-    std::string g_PathToAssets = "../assets/";
+    std::string g_PathToAssets = "/assets/";
 } // namespace 
 
 namespace
@@ -511,7 +534,7 @@ namespace
         float                 Displacement;
         Base::Float3          AlbedoColor;
         Base::Float4          TilingOffset;
-        /*tinyxml2::XMLDocument MaterialFile;*/
+        tinyxml2::XMLDocument MaterialFile;
 
         pMaterialName   = _rDescriptor.m_pMaterialName;
         pColorMap       = _rDescriptor.m_pColorMap;
@@ -527,129 +550,135 @@ namespace
         AlbedoColor     = _rDescriptor.m_AlbedoColor;
         TilingOffset    = _rDescriptor.m_TilingOffset;
 
-//         if (_rDescriptor.m_pFileName != nullptr && strlen(_rDescriptor.m_pFileName) > 0)
-//         {
-//             // -----------------------------------------------------------------------------
-//             // Build path to texture in file system
-//             // -----------------------------------------------------------------------------
-//             std::string PathToMaterial = g_PathToAssets + _rDescriptor.m_pFileName;
-//         
-//             // -----------------------------------------------------------------------------
-//             // Load material file
-//             // -----------------------------------------------------------------------------
-//             int Error = MaterialFile.LoadFile(PathToMaterial.c_str());
-// 
-//             if (Error != tinyxml2::XML_NO_ERROR)
-//             {
-//                 BASE_THROWV("Error loading material file '%s'.", PathToMaterial.c_str());
-//             }
-//         
-//             tinyxml2::XMLElement* pMaterialDefinition = MaterialFile.FirstChildElement("MaterialDefinition");
-//         
-//             // -----------------------------------------------------------------------------
-//             // Pull general informations from file
-//             // -----------------------------------------------------------------------------
-//             pMaterialName = pMaterialDefinition->Attribute("Name");
-//         
-//             assert(pMaterialName != 0);
-//         
-//             // -----------------------------------------------------------------------------
-//             // Color
-//             // -----------------------------------------------------------------------------
-//             tinyxml2::XMLElement* pMaterialColor = pMaterialDefinition->FirstChildElement("Color");
-//         
-//             assert(pMaterialColor != 0);
-//         
-//             float ColorR = pMaterialColor->FloatAttribute("R");
-//             float ColorG = pMaterialColor->FloatAttribute("G");
-//             float ColorB = pMaterialColor->FloatAttribute("B");
-// 
-//             AlbedoColor = Base::Float3(ColorR, ColorG, ColorB);
-//         
-//             pColorMap = pMaterialColor->Attribute("Map");
-//         
-//             // -----------------------------------------------------------------------------
-//             // Normal
-//             // -----------------------------------------------------------------------------
-//             tinyxml2::XMLElement* pMaterialNormal = pMaterialDefinition->FirstChildElement("Normal");
-//         
-//             assert(pMaterialNormal != 0);
-//         
-//             pNormalMap = pMaterialNormal->Attribute("Map");
-//         
-//             // -----------------------------------------------------------------------------
-//             // Roughness
-//             // -----------------------------------------------------------------------------
-//             tinyxml2::XMLElement* pMaterialRoughness = pMaterialDefinition->FirstChildElement("Roughness");
-//         
-//             assert(pMaterialRoughness != 0);
-//         
-//             Roughness = pMaterialRoughness->FloatAttribute("V");
-//         
-//             pRoughnessMap = pMaterialRoughness->Attribute("Map");
-//         
-//             // -----------------------------------------------------------------------------
-//             // Reflectance
-//             // -----------------------------------------------------------------------------
-//             tinyxml2::XMLElement* pMaterialReflectance = pMaterialDefinition->FirstChildElement("Reflectance");
-//         
-//             assert(pMaterialReflectance != 0);
-//         
-//             Reflectance = pMaterialReflectance->FloatAttribute("V");
-//         
-//             // -----------------------------------------------------------------------------
-//             // Metallic
-//             // -----------------------------------------------------------------------------
-//             tinyxml2::XMLElement* pMaterialMetallic = pMaterialDefinition->FirstChildElement("Metallic");
-//         
-//             assert(pMaterialMetallic != 0);
-//         
-//             MetalMask = pMaterialMetallic->FloatAttribute("V");
-//         
-//             pMetalMaskMap = pMaterialMetallic->Attribute("Map");
-//         
-//             // -----------------------------------------------------------------------------
-//             // Ambient Occlusion
-//             // -----------------------------------------------------------------------------
-//             tinyxml2::XMLElement* pAO = pMaterialDefinition->FirstChildElement("AO");
-//         
-//             pAOMap = 0;
-//         
-//             if (pAO != 0)
-//             {
-//                 pAOMap = pAO->Attribute("Map");
-//             }
-//         
-//             // -----------------------------------------------------------------------------
-//             // Bump
-//             // -----------------------------------------------------------------------------
-//             tinyxml2::XMLElement* pBump = pMaterialDefinition->FirstChildElement("Bump");
-//         
-//             pBumpMap = 0;
-//         
-//             if (pBump != 0)
-//             {
-//                 pBumpMap = pBump->Attribute("Map");
-//             }
-//         
-//             // -----------------------------------------------------------------------------
-//             // Tiling & offset
-//             // -----------------------------------------------------------------------------
-//             tinyxml2::XMLElement* pTiling = pMaterialDefinition->FirstChildElement("Tiling");
-//             tinyxml2::XMLElement* pOffset = pMaterialDefinition->FirstChildElement("Offset");
-//         
-//             if (pTiling)
-//             {
-//                 TilingOffset[0] = pTiling->FloatAttribute("X");
-//                 TilingOffset[1] = pTiling->FloatAttribute("Y");
-//             }
-//         
-//             if (pOffset)
-//             {
-//                 TilingOffset[2] = pOffset->FloatAttribute("X");
-//                 TilingOffset[3] = pOffset->FloatAttribute("Y");
-//             }
-//         }
+        if (_rDescriptor.m_pFileName != nullptr && strlen(_rDescriptor.m_pFileName) > 0)
+        {
+#ifdef __ANDROID__
+            std::string PathToAssets = App::Application::GetAssetPath();
+#else
+            std::string PathToAssets = Edit::Application::GetAssetPath();
+#endif // __ANDROID__
+
+            // -----------------------------------------------------------------------------
+            // Build path to texture in file system
+            // -----------------------------------------------------------------------------
+            std::string PathToMaterial = PathToAssets + g_PathToAssets + _rDescriptor.m_pFileName;
+
+            // -----------------------------------------------------------------------------
+            // Load material file
+            // -----------------------------------------------------------------------------
+            int Error = MaterialFile.LoadFile(PathToMaterial.c_str());
+
+            if (Error != tinyxml2::XML_SUCCESS)
+            {
+                BASE_THROWV("Error loading material file '%s'.", PathToMaterial.c_str());
+            }
+
+            tinyxml2::XMLElement* pMaterialDefinition = MaterialFile.FirstChildElement("MaterialDefinition");
+
+            // -----------------------------------------------------------------------------
+            // Pull general information from file
+            // -----------------------------------------------------------------------------
+            pMaterialName = pMaterialDefinition->Attribute("Name");
+
+            assert(pMaterialName != 0);
+
+            // -----------------------------------------------------------------------------
+            // Color
+            // -----------------------------------------------------------------------------
+            tinyxml2::XMLElement* pMaterialColor = pMaterialDefinition->FirstChildElement("Color");
+
+            assert(pMaterialColor != 0);
+
+            float ColorR = pMaterialColor->FloatAttribute("R");
+            float ColorG = pMaterialColor->FloatAttribute("G");
+            float ColorB = pMaterialColor->FloatAttribute("B");
+
+            AlbedoColor = Base::Float3(ColorR, ColorG, ColorB);
+
+            pColorMap = pMaterialColor->Attribute("Map");
+
+            // -----------------------------------------------------------------------------
+            // Normal
+            // -----------------------------------------------------------------------------
+            tinyxml2::XMLElement* pMaterialNormal = pMaterialDefinition->FirstChildElement("Normal");
+
+            assert(pMaterialNormal != 0);
+
+            pNormalMap = pMaterialNormal->Attribute("Map");
+
+            // -----------------------------------------------------------------------------
+            // Roughness
+            // -----------------------------------------------------------------------------
+            tinyxml2::XMLElement* pMaterialRoughness = pMaterialDefinition->FirstChildElement("Roughness");
+
+            assert(pMaterialRoughness != 0);
+
+            Roughness = pMaterialRoughness->FloatAttribute("V");
+
+            pRoughnessMap = pMaterialRoughness->Attribute("Map");
+
+            // -----------------------------------------------------------------------------
+            // Reflectance
+            // -----------------------------------------------------------------------------
+            tinyxml2::XMLElement* pMaterialReflectance = pMaterialDefinition->FirstChildElement("Reflectance");
+
+            assert(pMaterialReflectance != 0);
+
+            Reflectance = pMaterialReflectance->FloatAttribute("V");
+
+            // -----------------------------------------------------------------------------
+            // Metallic
+            // -----------------------------------------------------------------------------
+            tinyxml2::XMLElement* pMaterialMetallic = pMaterialDefinition->FirstChildElement("Metallic");
+
+            assert(pMaterialMetallic != 0);
+
+            MetalMask = pMaterialMetallic->FloatAttribute("V");
+
+            pMetalMaskMap = pMaterialMetallic->Attribute("Map");
+
+            // -----------------------------------------------------------------------------
+            // Ambient Occlusion
+            // -----------------------------------------------------------------------------
+            tinyxml2::XMLElement* pAO = pMaterialDefinition->FirstChildElement("AO");
+
+            pAOMap = 0;
+
+            if (pAO != 0)
+            {
+                pAOMap = pAO->Attribute("Map");
+            }
+
+            // -----------------------------------------------------------------------------
+            // Bump
+            // -----------------------------------------------------------------------------
+            tinyxml2::XMLElement* pBump = pMaterialDefinition->FirstChildElement("Bump");
+
+            pBumpMap = 0;
+
+            if (pBump != 0)
+            {
+                pBumpMap = pBump->Attribute("Map");
+            }
+
+            // -----------------------------------------------------------------------------
+            // Tiling & offset
+            // -----------------------------------------------------------------------------
+            tinyxml2::XMLElement* pTiling = pMaterialDefinition->FirstChildElement("Tiling");
+            tinyxml2::XMLElement* pOffset = pMaterialDefinition->FirstChildElement("Offset");
+
+            if (pTiling)
+            {
+                TilingOffset[0] = pTiling->FloatAttribute("X");
+                TilingOffset[1] = pTiling->FloatAttribute("Y");
+            }
+
+            if (pOffset)
+            {
+                TilingOffset[2] = pOffset->FloatAttribute("X");
+                TilingOffset[3] = pOffset->FloatAttribute("Y");
+            }
+        }
 
         // -----------------------------------------------------------------------------
         // Create material
