@@ -51,8 +51,16 @@ endforeach()
 # ---------------------------------------
 # Special dependencies and includes
 # ---------------------------------------
+target_include_directories( data PRIVATE ${ExternDir}/assimp/include )
+target_include_directories( data PRIVATE ${ExternDir}/devil/include )
+target_include_directories( data PRIVATE ${ExternDir}/tinyxml2/include )
+
+target_include_directories( graphic PRIVATE ${ExternDir}/assimp/include )
+target_include_directories( graphic PRIVATE ${ExternDir}/devil/include )
 target_include_directories( graphic PRIVATE ${ExternDir}/tinyxml2/include )
 
+link_directories ( ${ExternDir}/assimp/lib/${ANDROID_ABI} )
+link_directories ( ${ExternDir}/devil/lib/${ANDROID_ABI} )
 link_directories ( ${ExternDir}/tinyxml2/lib/${ANDROID_ABI} )
 
 # ---------------------------------------
@@ -71,6 +79,6 @@ target_include_directories( app_droid PRIVATE ${ANDROID_NDK}/sources/android/nat
 
 target_link_libraries( app_droid EGL GLESv3 log android m native_app_glue)
 
-target_link_libraries( app_droid tinyxml2)
+target_link_libraries( app_droid assimp IL ILU tinyxml2)
 
 target_link_libraries( app_droid ${MyLibraries} )
