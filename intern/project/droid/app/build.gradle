@@ -23,7 +23,7 @@ android {
     }
     sourceSets {
         main {
-            jniLibs.srcDirs = ['../../../../extern/tinyxml2/lib']
+            jniLibs.srcDirs = ['../../../../extern/assimp/lib', '../../../../extern/devil/lib', '../../../../extern/tinyxml2/lib']
         }
     }
     externalNativeBuild {

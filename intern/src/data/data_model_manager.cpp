@@ -26,9 +26,9 @@
 #include "data/data_texture_2d.h"
 #include "data/data_texture_manager.h"
 
-// #include "assimp/Importer.hpp"
-// #include "assimp/postprocess.h"
-// #include "assimp/scene.h"
+#include "assimp/Importer.hpp"
+#include "assimp/postprocess.h"
+#include "assimp/scene.h"
 
 #include <unordered_map>
 #include <functional>
@@ -38,8 +38,8 @@ using namespace Dt::ModelManager;
 
 namespace
 {
-	std::string g_PathToAssets	   = "../assets/";
-	std::string g_PathToDataModels = "../data/graphic/models/";
+	std::string g_PathToAssets	   = "/assets/";
+	std::string g_PathToDataModels = "/data/graphic/models/";
 } // namespace 
 
 namespace
@@ -190,8 +190,8 @@ namespace
 
     CModel& CDtModelManager::CreateModel(const SModelFileDescriptor& _rDescriptor)
     {
-// 		Assimp::Importer Importer;
-// 		const aiScene*   pScene;
+ 		Assimp::Importer Importer;
+		const aiScene*   pScene;
 		std::string      PathToModel;
 		unsigned int	 Flags;
 
@@ -214,20 +214,20 @@ namespace
         // Build path to texture in file system and load model
         // -----------------------------------------------------------------------------
 		PathToModel = g_PathToAssets + _rDescriptor.m_pFileName;
-        
-//         pScene = Importer.ReadFile(PathToModel.c_str(), Flags);
-// 
-// 		if (!pScene)
-// 		{
-// 			PathToModel = g_PathToDataModels + _rDescriptor.m_pFileName;
-// 
-// 			pScene = Importer.ReadFile(PathToModel.c_str(), Flags);
-// 		}
-//         
-//         if( !pScene)
-//         {
-//             BASE_THROWV("Can't load model file %s; Code: %s", _rDescriptor.m_pFileName, Importer.GetErrorString());
-//         }
+
+        pScene = Importer.ReadFile(PathToModel.c_str(), Flags);
+
+		if (!pScene)
+		{
+			PathToModel = g_PathToDataModels + _rDescriptor.m_pFileName;
+
+			pScene = Importer.ReadFile(PathToModel.c_str(), Flags);
+		}
+
+        if( !pScene)
+        {
+            BASE_THROWV("Can't load model file %s; Code: %s", _rDescriptor.m_pFileName, Importer.GetErrorString());
+        }
         
 
 
