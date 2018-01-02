@@ -33,6 +33,20 @@
 #include <unordered_map>
 #include <functional>
 
+
+
+
+
+// TODO
+#if __ANDROID__
+#include "app_droid/app_application.h"
+#else
+#include "editor/edit_application.h"
+#endif // __ANDROID__
+
+
+
+
 using namespace Dt;
 using namespace Dt::ModelManager;
 
@@ -213,13 +227,19 @@ namespace
         // -----------------------------------------------------------------------------
         // Build path to texture in file system and load model
         // -----------------------------------------------------------------------------
-		PathToModel = g_PathToAssets + _rDescriptor.m_pFileName;
+#ifdef __ANDROID__
+        std::string PathToAssets = App::Application::GetAssetPath();
+#else
+        std::string PathToAssets = Edit::Application::GetAssetPath();
+#endif // __ANDROID__
+
+		PathToModel = PathToAssets + g_PathToAssets + _rDescriptor.m_pFileName;
 
         pScene = Importer.ReadFile(PathToModel.c_str(), Flags);
 
 		if (!pScene)
 		{
-			PathToModel = g_PathToDataModels + _rDescriptor.m_pFileName;
+			PathToModel = PathToAssets + g_PathToDataModels + _rDescriptor.m_pFileName;
 
 			pScene = Importer.ReadFile(PathToModel.c_str(), Flags);
 		}
@@ -234,278 +254,278 @@ namespace
         // -----------------------------------------------------------------------------
         // Recursive construction of scene entities
         // -----------------------------------------------------------------------------
-//         std::function<void(const aiNode*, CInternModel&, const aiScene*)> CreateMeshesFromModel = [&](const aiNode* _pNode, CInternModel& _rModel, const aiScene* _pScene)
-//         {
-//             // -----------------------------------------------------------------------------
-//             // If we have some mesh data send this mesh to graphic and set facet on entity.
-//             // This collection of mesh is a model with different surfaces!
-//             // -----------------------------------------------------------------------------
-//             if (_pNode->mNumMeshes > 0)
-//             {
-//                 // -----------------------------------------------------------------------------
-//                 // If we have some mesh data send this mesh to graphic and set facet on entity.
-//                 // This collection of mesh is a model with different surfaces!
-//                 // -----------------------------------------------------------------------------
-//                 if (_pNode == 0 || _pScene == 0)
-//                 {
-//                     BASE_THROWM("Can't create model because of missing informations!");
-//                 }
-// 
-//                 // -----------------------------------------------------------------------------
-//                 // Create model
-//                 // -----------------------------------------------------------------------------
-//                 CInternMesh& rNewModel = AllocateMesh(_pNode->mName.C_Str());
-//                                 
-//                 // -----------------------------------------------------------------------------
-//                 // Setup model
-//                 // -----------------------------------------------------------------------------
-//                 if (rNewModel.m_NumberOfLODs == 0)
-//                 {
-//                     rNewModel.m_NumberOfLODs = 1;
-//                     
-//                     for (unsigned int IndexOfLOD = 0; IndexOfLOD < rNewModel.m_NumberOfLODs; IndexOfLOD++)
-//                     {
-//                         // -----------------------------------------------------------------------------
-//                         // Create LOD
-//                         // -----------------------------------------------------------------------------
-//                         CInternLOD& rNewLOD = static_cast<CInternLOD&>(AllocateLOD());
-//                         
-//                         // -----------------------------------------------------------------------------
-//                         // Link
-//                         // -----------------------------------------------------------------------------
-//                         rNewModel.m_LODs[IndexOfLOD] = & rNewLOD;
-//                         
-//                         // -----------------------------------------------------------------------------
-//                         // Setup
-//                         // -----------------------------------------------------------------------------
-//                         rNewLOD.m_NumberOfSurfaces = _pNode->mNumMeshes;
-//                         
-//                         for (unsigned int IndexOfSurface = 0; IndexOfSurface < rNewLOD.m_NumberOfSurfaces; ++IndexOfSurface)
-//                         {
-//                             // -----------------------------------------------------------------------------
-//                             // Get data from Assimp
-//                             // -----------------------------------------------------------------------------
-//                             unsigned int MeshIndex = _pNode->mMeshes[IndexOfSurface];
-//                             
-//                             aiMesh* pMesh = pScene->mMeshes[MeshIndex];
-//                             
-//                             unsigned int NumberOfVertices       = pMesh->mNumVertices;
-//                             unsigned int NumberOfFaces          = pMesh->mNumFaces;
-//                             unsigned int NumberOfIndicesPerFace = pMesh->mFaces->mNumIndices;
-//                             unsigned int NumberOfIndices        = NumberOfFaces * NumberOfIndicesPerFace;
-//                             
-//                             assert(NumberOfIndicesPerFace == 3);
-//                             
-//                             aiVector3D* pVertexData    = pMesh->mVertices;
-//                             aiVector3D* pNormalData    = pMesh->mNormals;
-//                             aiVector3D* pTangentData   = pMesh->mTangents;
-//                             aiVector3D* pBitangentData = pMesh->mBitangents;
-//                             aiVector3D* pTextureData   = pMesh->mTextureCoords[0];
-//                             
-//                             unsigned int Elements = CSurface::Position;
-//                             
-//                             assert(pVertexData != 0);
-//                             
-//                             if (pMesh->mNormals          != nullptr) Elements |= CSurface::Normal;
-//                             if (pMesh->mTangents         != nullptr) Elements |= CSurface::Tangent;
-//                             if (pMesh->mBitangents       != nullptr) Elements |= CSurface::Tangent;
-//                             if (pMesh->mTextureCoords[0] != nullptr) Elements |= CSurface::TexCoord0;
-//                             
-//                             // -----------------------------------------------------------------------------
-//                             // Create surface
-//                             // -----------------------------------------------------------------------------
-//                             CInternSurface& rNewSurface = static_cast<CInternSurface&>(AllocateSurface(NumberOfVertices, NumberOfIndices, Elements));
-//                             
-//                             // -----------------------------------------------------------------------------
-//                             // Link
-//                             // -----------------------------------------------------------------------------
-//                             rNewLOD.m_Surfaces[IndexOfSurface] = &rNewSurface;
-//                             
-//                             // -----------------------------------------------------------------------------
-//                             // Setup surface
-//                             // -----------------------------------------------------------------------------
-//                             for (unsigned int IndexOfFace = 0; IndexOfFace < NumberOfFaces; ++IndexOfFace)
-//                             {
-//                                 aiFace CurrentFace = pMesh->mFaces[IndexOfFace];
-//                                 
-//                                 for (unsigned int IndexOfIndice = 0; IndexOfIndice < NumberOfIndicesPerFace; ++IndexOfIndice)
-//                                 {
-//                                     rNewSurface.m_pIndices[IndexOfFace * NumberOfIndicesPerFace + IndexOfIndice] = CurrentFace.mIndices[IndexOfIndice];
-//                                 }
-//                             }
-//           
-//                             for (unsigned int CurrentVertex = 0; CurrentVertex < NumberOfVertices; ++CurrentVertex)
-//                             {
-//                                 Base::Float3 CurrentPosition(pVertexData[CurrentVertex].x, pVertexData[CurrentVertex].y, pVertexData[CurrentVertex].z);
-//                                   
-//                                 rNewSurface.m_pPositions[CurrentVertex][0] = pVertexData[CurrentVertex].x;
-//                                 rNewSurface.m_pPositions[CurrentVertex][1] = pVertexData[CurrentVertex].y;
-//                                 rNewSurface.m_pPositions[CurrentVertex][2] = pVertexData[CurrentVertex].z;
-//                                 
-//                                 if (rNewSurface.m_Elements & CSurface::Normal)
-//                                 {
-//                                     rNewSurface.m_pNormals[CurrentVertex][0] = pNormalData[CurrentVertex].x;
-//                                     rNewSurface.m_pNormals[CurrentVertex][1] = pNormalData[CurrentVertex].y;
-//                                     rNewSurface.m_pNormals[CurrentVertex][2] = pNormalData[CurrentVertex].z;
-//                                 }
-//                                 
-//                                 if (rNewSurface.m_Elements & CSurface::Tangent)
-//                                 {
-//                                     assert(pTangentData != 0);
-//                                     
-//                                     rNewSurface.m_pTangents[CurrentVertex][0] = pTangentData[CurrentVertex].x;
-//                                     rNewSurface.m_pTangents[CurrentVertex][1] = pTangentData[CurrentVertex].y;
-//                                     rNewSurface.m_pTangents[CurrentVertex][2] = pTangentData[CurrentVertex].z;
-//                                 }
-//                                 
-//                                 if (rNewSurface.m_Elements & CSurface::Tangent)
-//                                 {
-//                                     assert(pBitangentData != 0);
-//                                     
-//                                     rNewSurface.m_pBitangents[CurrentVertex][0] = pBitangentData[CurrentVertex].x;
-//                                     rNewSurface.m_pBitangents[CurrentVertex][1] = pBitangentData[CurrentVertex].y;
-//                                     rNewSurface.m_pBitangents[CurrentVertex][2] = pBitangentData[CurrentVertex].z;
-//                                 }
-//                                 
-//                                 if (rNewSurface.m_Elements & CSurface::TexCoord0)
-//                                 {
-//                                     rNewSurface.m_pTexCoords[CurrentVertex][0] = pTextureData[CurrentVertex].x;
-//                                     rNewSurface.m_pTexCoords[CurrentVertex][1] = pTextureData[CurrentVertex].y;
-//                                 }
-//                             }
-//                             
-//                             // -----------------------------------------------------------------------------
-//                             // Create default material from file
-//                             // -----------------------------------------------------------------------------
-//                             unsigned int MaterialIndex = pScene->mMeshes[_pNode->mMeshes[IndexOfSurface]]->mMaterialIndex;;
-//                             
-//                             aiMaterial* pMaterial = pScene->mMaterials[MaterialIndex];
-//                             
-//                             // -----------------------------------------------------------------------------
-//                             // Check if material has an engine material indicator
-//                             // -----------------------------------------------------------------------------
-//                             aiString    NativeMaterialExaminer;
-//                             std::string MaterialExaminer;
-//                             
-//                             if (pMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &NativeMaterialExaminer) == AI_SUCCESS)
-//                             {
-//                                 // -----------------------------------------------------------------------------
-//                                 // Load material from file and link with surface
-//                                 // -----------------------------------------------------------------------------
-//                                 MaterialExaminer = std::string(NativeMaterialExaminer.data);
-//                                 
-//                                 if (MaterialExaminer.find(".mat") != std::string::npos)
-//                                 {
-//                                     SMaterialDescriptor MaterialDescriptor;
-// 
-//                                     MaterialDescriptor.m_pMaterialName   = 0;
-//                                     MaterialDescriptor.m_pColorMap       = 0;
-//                                     MaterialDescriptor.m_pNormalMap      = 0;
-//                                     MaterialDescriptor.m_pRoughnessMap   = 0;
-//                                     MaterialDescriptor.m_pMetalMaskMap   = 0;
-//                                     MaterialDescriptor.m_pAOMap          = 0;
-//                                     MaterialDescriptor.m_pBumpMap        = 0;
-//                                     MaterialDescriptor.m_Roughness       = 1.0f;
-//                                     MaterialDescriptor.m_Reflectance     = 0.0f;
-//                                     MaterialDescriptor.m_MetalMask       = 0.0f;
-//                                     MaterialDescriptor.m_AlbedoColor     = Base::Float3(1.0f);
-//                                     MaterialDescriptor.m_TilingOffset    = Base::Float4(1.0f, 1.0f, 0.0f, 0.0f);
-//                                     MaterialDescriptor.m_pFileName       = MaterialExaminer.c_str();
-// 
-//                                     rNewSurface.m_pMaterial = &MaterialManager::CreateMaterial(MaterialDescriptor);
-//                                 
-//                                     MaterialManager::MarkMaterialAsDirty(*rNewSurface.m_pMaterial, CMaterial::DirtyCreate);
-//                                 }
-//                             }
-//                             else
-//                             {
-//                                 SMaterialDescriptor MaterialDescriptor;
-// 
-//                                 MaterialDescriptor.m_pMaterialName   = "DEFAULT MATERIAL";
-//                                 MaterialDescriptor.m_pColorMap       = 0;
-//                                 MaterialDescriptor.m_pNormalMap      = 0;
-//                                 MaterialDescriptor.m_pRoughnessMap   = 0;
-//                                 MaterialDescriptor.m_pMetalMaskMap   = 0;
-//                                 MaterialDescriptor.m_pAOMap          = 0;
-//                                 MaterialDescriptor.m_pBumpMap        = 0;
-//                                 MaterialDescriptor.m_Roughness       = 1.0f;
-//                                 MaterialDescriptor.m_Reflectance     = 0.0f;
-//                                 MaterialDescriptor.m_MetalMask       = 0.0f;
-//                                 MaterialDescriptor.m_AlbedoColor     = Base::Float3(1.0f);
-//                                 MaterialDescriptor.m_TilingOffset    = Base::Float4(1.0f, 1.0f, 0.0f, 0.0f);
-//                                 MaterialDescriptor.m_pFileName       = 0;
-// 
-//                                 // -----------------------------------------------------------------------------
-//                                 // Get model specific attributes
-//                                 // -----------------------------------------------------------------------------
-//                                 aiString  NativeString;
-//                                 aiColor4D DiffuseColor;
-// 
-//                                 if (pMaterial->Get(AI_MATKEY_NAME, NativeString) == AI_SUCCESS)
-//                                 {
-//                                     // TODO by tschwandt
-//                                     // What is to do if no name exists? Create new material or use the default one?
-//                                     MaterialDescriptor.m_pMaterialName = NativeString.data;
-//                                 }
-//                                 
-//                                 if (pMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, DiffuseColor) == AI_SUCCESS)
-//                                 {
-//                                     MaterialDescriptor.m_AlbedoColor[0] = DiffuseColor.r;
-//                                     MaterialDescriptor.m_AlbedoColor[1] = DiffuseColor.g;
-//                                     MaterialDescriptor.m_AlbedoColor[2] = DiffuseColor.b;
-//                                 }
-// 
-//                                 if (pMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &NativeString) == AI_SUCCESS)
-//                                 {
-//                                     MaterialDescriptor.m_pColorMap = NativeString.data;
-//                                 }
-//                                 
-//                                 // -----------------------------------------------------------------------------
-//                                 // Normal
-//                                 // -----------------------------------------------------------------------------
-//                                 if (pMaterial->GetTexture(aiTextureType_HEIGHT, 0, &NativeString) == AI_SUCCESS)
-//                                 {
-//                                     MaterialDescriptor.m_pNormalMap = NativeString.data;
-//                                 }
-// 
-//                                 // -----------------------------------------------------------------------------
-//                                 // Create and link
-//                                 // -----------------------------------------------------------------------------
-//                                 CMaterial& rNewMaterial = MaterialManager::CreateMaterial(MaterialDescriptor);
-// 
-//                                 rNewSurface.m_pMaterial = &rNewMaterial;
-// 
-//                                 MaterialManager::MarkMaterialAsDirty(rNewMaterial, CMaterial::DirtyCreate);
-//                             }
-//                         }
-//                     }
-//                 }
-// 
-//                 _rModel.m_Meshes.push_back(&rNewModel);
-//             }
-// 
-//             // -----------------------------------------------------------------------------
-//             // Check sub entities
-//             // -----------------------------------------------------------------------------
-//             unsigned int NumberOfEntities = _pNode->mNumChildren;
-// 
-//             for (unsigned int IndexOfEntity = 0; IndexOfEntity < NumberOfEntities; ++IndexOfEntity)
-//             {
-//                 aiNode* pChildren = _pNode->mChildren[IndexOfEntity];
-// 
-//                 // -----------------------------------------------------------------------------
-//                 // Check this new child on new child and important data like meshes, lights,
-//                 // ...
-//                 // -----------------------------------------------------------------------------
-//                 CreateMeshesFromModel(pChildren, _rModel, _pScene);
-//             }
-//         };
-// 
-// 
-//         // -----------------------------------------------------------------------------
-//         // Entities with model data
-//         // -----------------------------------------------------------------------------
-//         CreateMeshesFromModel(pScene->mRootNode, rNewModel, pScene);
+        std::function<void(const aiNode*, CInternModel&, const aiScene*)> CreateMeshesFromModel = [&](const aiNode* _pNode, CInternModel& _rModel, const aiScene* _pScene)
+        {
+            // -----------------------------------------------------------------------------
+            // If we have some mesh data send this mesh to graphic and set facet on entity.
+            // This collection of mesh is a model with different surfaces!
+            // -----------------------------------------------------------------------------
+            if (_pNode->mNumMeshes > 0)
+            {
+                // -----------------------------------------------------------------------------
+                // If we have some mesh data send this mesh to graphic and set facet on entity.
+                // This collection of mesh is a model with different surfaces!
+                // -----------------------------------------------------------------------------
+                if (_pNode == 0 || _pScene == 0)
+                {
+                    BASE_THROWM("Can't create model because of missing informations!");
+                }
+
+                // -----------------------------------------------------------------------------
+                // Create model
+                // -----------------------------------------------------------------------------
+                CInternMesh& rNewModel = AllocateMesh(_pNode->mName.C_Str());
+
+                // -----------------------------------------------------------------------------
+                // Setup model
+                // -----------------------------------------------------------------------------
+                if (rNewModel.m_NumberOfLODs == 0)
+                {
+                    rNewModel.m_NumberOfLODs = 1;
+
+                    for (unsigned int IndexOfLOD = 0; IndexOfLOD < rNewModel.m_NumberOfLODs; IndexOfLOD++)
+                    {
+                        // -----------------------------------------------------------------------------
+                        // Create LOD
+                        // -----------------------------------------------------------------------------
+                        CInternLOD& rNewLOD = static_cast<CInternLOD&>(AllocateLOD());
+
+                        // -----------------------------------------------------------------------------
+                        // Link
+                        // -----------------------------------------------------------------------------
+                        rNewModel.m_LODs[IndexOfLOD] = & rNewLOD;
+
+                        // -----------------------------------------------------------------------------
+                        // Setup
+                        // -----------------------------------------------------------------------------
+                        rNewLOD.m_NumberOfSurfaces = _pNode->mNumMeshes;
+
+                        for (unsigned int IndexOfSurface = 0; IndexOfSurface < rNewLOD.m_NumberOfSurfaces; ++IndexOfSurface)
+                        {
+                            // -----------------------------------------------------------------------------
+                            // Get data from Assimp
+                            // -----------------------------------------------------------------------------
+                            unsigned int MeshIndex = _pNode->mMeshes[IndexOfSurface];
+
+                            aiMesh* pMesh = pScene->mMeshes[MeshIndex];
+
+                            unsigned int NumberOfVertices       = pMesh->mNumVertices;
+                            unsigned int NumberOfFaces          = pMesh->mNumFaces;
+                            unsigned int NumberOfIndicesPerFace = pMesh->mFaces->mNumIndices;
+                            unsigned int NumberOfIndices        = NumberOfFaces * NumberOfIndicesPerFace;
+
+                            assert(NumberOfIndicesPerFace == 3);
+
+                            aiVector3D* pVertexData    = pMesh->mVertices;
+                            aiVector3D* pNormalData    = pMesh->mNormals;
+                            aiVector3D* pTangentData   = pMesh->mTangents;
+                            aiVector3D* pBitangentData = pMesh->mBitangents;
+                            aiVector3D* pTextureData   = pMesh->mTextureCoords[0];
+
+                            unsigned int Elements = CSurface::Position;
+
+                            assert(pVertexData != 0);
+
+                            if (pMesh->mNormals          != nullptr) Elements |= CSurface::Normal;
+                            if (pMesh->mTangents         != nullptr) Elements |= CSurface::Tangent;
+                            if (pMesh->mBitangents       != nullptr) Elements |= CSurface::Tangent;
+                            if (pMesh->mTextureCoords[0] != nullptr) Elements |= CSurface::TexCoord0;
+
+                            // -----------------------------------------------------------------------------
+                            // Create surface
+                            // -----------------------------------------------------------------------------
+                            CInternSurface& rNewSurface = static_cast<CInternSurface&>(AllocateSurface(NumberOfVertices, NumberOfIndices, Elements));
+
+                            // -----------------------------------------------------------------------------
+                            // Link
+                            // -----------------------------------------------------------------------------
+                            rNewLOD.m_Surfaces[IndexOfSurface] = &rNewSurface;
+
+                            // -----------------------------------------------------------------------------
+                            // Setup surface
+                            // -----------------------------------------------------------------------------
+                            for (unsigned int IndexOfFace = 0; IndexOfFace < NumberOfFaces; ++IndexOfFace)
+                            {
+                                aiFace CurrentFace = pMesh->mFaces[IndexOfFace];
+
+                                for (unsigned int IndexOfIndice = 0; IndexOfIndice < NumberOfIndicesPerFace; ++IndexOfIndice)
+                                {
+                                    rNewSurface.m_pIndices[IndexOfFace * NumberOfIndicesPerFace + IndexOfIndice] = CurrentFace.mIndices[IndexOfIndice];
+                                }
+                            }
+
+                            for (unsigned int CurrentVertex = 0; CurrentVertex < NumberOfVertices; ++CurrentVertex)
+                            {
+                                Base::Float3 CurrentPosition(pVertexData[CurrentVertex].x, pVertexData[CurrentVertex].y, pVertexData[CurrentVertex].z);
+
+                                rNewSurface.m_pPositions[CurrentVertex][0] = pVertexData[CurrentVertex].x;
+                                rNewSurface.m_pPositions[CurrentVertex][1] = pVertexData[CurrentVertex].y;
+                                rNewSurface.m_pPositions[CurrentVertex][2] = pVertexData[CurrentVertex].z;
+
+                                if (rNewSurface.m_Elements & CSurface::Normal)
+                                {
+                                    rNewSurface.m_pNormals[CurrentVertex][0] = pNormalData[CurrentVertex].x;
+                                    rNewSurface.m_pNormals[CurrentVertex][1] = pNormalData[CurrentVertex].y;
+                                    rNewSurface.m_pNormals[CurrentVertex][2] = pNormalData[CurrentVertex].z;
+                                }
+
+                                if (rNewSurface.m_Elements & CSurface::Tangent)
+                                {
+                                    assert(pTangentData != 0);
+
+                                    rNewSurface.m_pTangents[CurrentVertex][0] = pTangentData[CurrentVertex].x;
+                                    rNewSurface.m_pTangents[CurrentVertex][1] = pTangentData[CurrentVertex].y;
+                                    rNewSurface.m_pTangents[CurrentVertex][2] = pTangentData[CurrentVertex].z;
+                                }
+
+                                if (rNewSurface.m_Elements & CSurface::Tangent)
+                                {
+                                    assert(pBitangentData != 0);
+
+                                    rNewSurface.m_pBitangents[CurrentVertex][0] = pBitangentData[CurrentVertex].x;
+                                    rNewSurface.m_pBitangents[CurrentVertex][1] = pBitangentData[CurrentVertex].y;
+                                    rNewSurface.m_pBitangents[CurrentVertex][2] = pBitangentData[CurrentVertex].z;
+                                }
+
+                                if (rNewSurface.m_Elements & CSurface::TexCoord0)
+                                {
+                                    rNewSurface.m_pTexCoords[CurrentVertex][0] = pTextureData[CurrentVertex].x;
+                                    rNewSurface.m_pTexCoords[CurrentVertex][1] = pTextureData[CurrentVertex].y;
+                                }
+                            }
+
+                            // -----------------------------------------------------------------------------
+                            // Create default material from file
+                            // -----------------------------------------------------------------------------
+                            unsigned int MaterialIndex = pScene->mMeshes[_pNode->mMeshes[IndexOfSurface]]->mMaterialIndex;;
+
+                            aiMaterial* pMaterial = pScene->mMaterials[MaterialIndex];
+
+                            // -----------------------------------------------------------------------------
+                            // Check if material has an engine material indicator
+                            // -----------------------------------------------------------------------------
+                            aiString    NativeMaterialExaminer;
+                            std::string MaterialExaminer;
+
+                            if (pMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &NativeMaterialExaminer) == AI_SUCCESS)
+                            {
+                                // -----------------------------------------------------------------------------
+                                // Load material from file and link with surface
+                                // -----------------------------------------------------------------------------
+                                MaterialExaminer = std::string(NativeMaterialExaminer.data);
+
+                                if (MaterialExaminer.find(".mat") != std::string::npos)
+                                {
+                                    SMaterialDescriptor MaterialDescriptor;
+
+                                    MaterialDescriptor.m_pMaterialName   = 0;
+                                    MaterialDescriptor.m_pColorMap       = 0;
+                                    MaterialDescriptor.m_pNormalMap      = 0;
+                                    MaterialDescriptor.m_pRoughnessMap   = 0;
+                                    MaterialDescriptor.m_pMetalMaskMap   = 0;
+                                    MaterialDescriptor.m_pAOMap          = 0;
+                                    MaterialDescriptor.m_pBumpMap        = 0;
+                                    MaterialDescriptor.m_Roughness       = 1.0f;
+                                    MaterialDescriptor.m_Reflectance     = 0.0f;
+                                    MaterialDescriptor.m_MetalMask       = 0.0f;
+                                    MaterialDescriptor.m_AlbedoColor     = Base::Float3(1.0f);
+                                    MaterialDescriptor.m_TilingOffset    = Base::Float4(1.0f, 1.0f, 0.0f, 0.0f);
+                                    MaterialDescriptor.m_pFileName       = MaterialExaminer.c_str();
+
+                                    rNewSurface.m_pMaterial = &MaterialManager::CreateMaterial(MaterialDescriptor);
+
+                                    MaterialManager::MarkMaterialAsDirty(*rNewSurface.m_pMaterial, CMaterial::DirtyCreate);
+                                }
+                            }
+                            else
+                            {
+                                SMaterialDescriptor MaterialDescriptor;
+
+                                MaterialDescriptor.m_pMaterialName   = "DEFAULT MATERIAL";
+                                MaterialDescriptor.m_pColorMap       = 0;
+                                MaterialDescriptor.m_pNormalMap      = 0;
+                                MaterialDescriptor.m_pRoughnessMap   = 0;
+                                MaterialDescriptor.m_pMetalMaskMap   = 0;
+                                MaterialDescriptor.m_pAOMap          = 0;
+                                MaterialDescriptor.m_pBumpMap        = 0;
+                                MaterialDescriptor.m_Roughness       = 1.0f;
+                                MaterialDescriptor.m_Reflectance     = 0.0f;
+                                MaterialDescriptor.m_MetalMask       = 0.0f;
+                                MaterialDescriptor.m_AlbedoColor     = Base::Float3(1.0f);
+                                MaterialDescriptor.m_TilingOffset    = Base::Float4(1.0f, 1.0f, 0.0f, 0.0f);
+                                MaterialDescriptor.m_pFileName       = 0;
+
+                                // -----------------------------------------------------------------------------
+                                // Get model specific attributes
+                                // -----------------------------------------------------------------------------
+                                aiString  NativeString;
+                                aiColor4D DiffuseColor;
+
+                                if (pMaterial->Get(AI_MATKEY_NAME, NativeString) == AI_SUCCESS)
+                                {
+                                    // TODO by tschwandt
+                                    // What is to do if no name exists? Create new material or use the default one?
+                                    MaterialDescriptor.m_pMaterialName = NativeString.data;
+                                }
+
+                                if (pMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, DiffuseColor) == AI_SUCCESS)
+                                {
+                                    MaterialDescriptor.m_AlbedoColor[0] = DiffuseColor.r;
+                                    MaterialDescriptor.m_AlbedoColor[1] = DiffuseColor.g;
+                                    MaterialDescriptor.m_AlbedoColor[2] = DiffuseColor.b;
+                                }
+
+                                if (pMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &NativeString) == AI_SUCCESS)
+                                {
+                                    MaterialDescriptor.m_pColorMap = NativeString.data;
+                                }
+
+                                // -----------------------------------------------------------------------------
+                                // Normal
+                                // -----------------------------------------------------------------------------
+                                if (pMaterial->GetTexture(aiTextureType_HEIGHT, 0, &NativeString) == AI_SUCCESS)
+                                {
+                                    MaterialDescriptor.m_pNormalMap = NativeString.data;
+                                }
+
+                                // -----------------------------------------------------------------------------
+                                // Create and link
+                                // -----------------------------------------------------------------------------
+                                CMaterial& rNewMaterial = MaterialManager::CreateMaterial(MaterialDescriptor);
+
+                                rNewSurface.m_pMaterial = &rNewMaterial;
+
+                                MaterialManager::MarkMaterialAsDirty(rNewMaterial, CMaterial::DirtyCreate);
+                            }
+                        }
+                    }
+                }
+
+                _rModel.m_Meshes.push_back(&rNewModel);
+            }
+
+            // -----------------------------------------------------------------------------
+            // Check sub entities
+            // -----------------------------------------------------------------------------
+            unsigned int NumberOfEntities = _pNode->mNumChildren;
+
+            for (unsigned int IndexOfEntity = 0; IndexOfEntity < NumberOfEntities; ++IndexOfEntity)
+            {
+                aiNode* pChildren = _pNode->mChildren[IndexOfEntity];
+
+                // -----------------------------------------------------------------------------
+                // Check this new child on new child and important data like meshes, lights,
+                // ...
+                // -----------------------------------------------------------------------------
+                CreateMeshesFromModel(pChildren, _rModel, _pScene);
+            }
+        };
+
+
+        // -----------------------------------------------------------------------------
+        // Entities with model data
+        // -----------------------------------------------------------------------------
+        CreateMeshesFromModel(pScene->mRootNode, rNewModel, pScene);
 
         return rNewModel;
     }
