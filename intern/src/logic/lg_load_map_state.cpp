@@ -205,6 +205,122 @@ namespace
 
             Dt::EntityManager::MarkEntityAsDirty(rEnvironment, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
+
+        // -----------------------------------------------------------------------------
+        // Setup light
+        // -----------------------------------------------------------------------------
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
+            EntityDesc.m_EntityType     = Dt::SLightType::LightProbe;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+
+            Dt::CEntity& rGlobalProbeLight = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            rGlobalProbeLight.SetName("Local light probe");
+
+            Dt::CTransformationFacet* pTransformationFacet = rGlobalProbeLight.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 5.0f));
+            pTransformationFacet->SetScale   (Base::Float3(1.0f));
+            pTransformationFacet->SetRotation(Base::Float3(0.0f));
+
+            Dt::CLightProbeFacet* pProbeLightFacet = Dt::LightProbeManager::CreateLightProbe();
+
+            pProbeLightFacet->SetType(Dt::CLightProbeFacet::Sky);
+            pProbeLightFacet->SetQuality(Dt::CLightProbeFacet::PX256);
+            pProbeLightFacet->SetIntensity(1.0f);
+            pProbeLightFacet->SetRefreshMode(Dt::CLightProbeFacet::Static);
+            pProbeLightFacet->SetNear(2.0f);
+            pProbeLightFacet->SetFar(100.0f);
+            pProbeLightFacet->SetParallaxCorrection(true);
+            pProbeLightFacet->SetBoxSize(Base::Float3(10.0f));
+
+            rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pProbeLightFacet);
+
+            //Dt::EntityManager::MarkEntityAsDirty(rGlobalProbeLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
+            EntityDesc.m_EntityType     = Dt::SLightType::Sun;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+
+            Dt::CEntity& rSunLight = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            rSunLight.SetName("Sun");
+
+            // -----------------------------------------------------------------------------
+            // Transformation
+            // -----------------------------------------------------------------------------
+            Dt::CTransformationFacet* pTransformationFacet = rSunLight.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 20.0f));
+            pTransformationFacet->SetScale   (Base::Float3(1.0f));
+            pTransformationFacet->SetRotation(Base::Float3(0.0f));
+
+            Dt::CSunLightFacet* pSunLightFacet = Dt::SunManager::CreateSunLight();
+
+            pSunLightFacet->EnableTemperature(false);
+            pSunLightFacet->SetColor         (Base::Float3(1.0f, 1.0f, 1.0f));
+            pSunLightFacet->SetDirection     (Base::Float3(0.0f, 0.01f, -1.0f));
+            pSunLightFacet->SetIntensity     (90600.0f);
+            pSunLightFacet->SetTemperature   (0);
+            pSunLightFacet->SetRefreshMode   (Dt::CSunLightFacet::Dynamic);
+
+            pSunLightFacet->UpdateLightness();
+
+            rSunLight.SetDetailFacet(Dt::SFacetCategory::Data, pSunLightFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rSunLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Setup entities
+        // -----------------------------------------------------------------------------
+        {
+            Dt::SModelFileDescriptor ModelFileDesc;
+
+            ModelFileDesc.m_pFileName = "models/MatTester.obj";
+            ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::DefaultFlipUVs;
+
+            Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
+
+            // -----------------------------------------------------------------------------
+
+            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntityFromModel(rModel);
+
+            rSphere.SetName("Sphere");
+
+            Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, -10.0f));
+            pTransformationFacet->SetScale(Base::Float3(0.1f));
+            pTransformationFacet->SetRotation(Base::Float3(0.0f));
+
+            // -----------------------------------------------------------------------------
+
+            Dt::CEntity* pSubEntity = rSphere.GetHierarchyFacet()->GetFirstChild();
+
+            Dt::CMeshActorFacet* pModelActorFacet = static_cast<Dt::CMeshActorFacet*>(pSubEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+
+            Dt::SMaterialDescriptor MaterialFileDesc;
+
+            MaterialFileDesc.m_pFileName = "materials/naturals/metals/Gold_Worn_00.mat";
+
+            Dt::CMaterial& rMaterial = Dt::MaterialManager::CreateMaterial(MaterialFileDesc);
+
+            pModelActorFacet->SetMaterial(0, &rMaterial);
+
+            Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyCreate);
+
+            // -----------------------------------------------------------------------------
+
+            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
     }
 } // namespace
 
