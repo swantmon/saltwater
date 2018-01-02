@@ -165,12 +165,8 @@ namespace Cam
     
     void CGameControl::InternUpdate()
     {
-        static float Test = 0.0f;
-
-        Test += 1.0f;
-
-        Gfx::Cam::SetPosition(Base::Float3::s_Zero);
-        Gfx::Cam::SetRotationMatrix(Base::Float3x3().SetRotationX(Base::DegreesToRadians(-90.0f - Test)));
+        Gfx::Cam::SetPosition(m_Position);
+        Gfx::Cam::SetRotationMatrix(m_RotationMatrix);
 
         Gfx::Cam::Update();
     }
