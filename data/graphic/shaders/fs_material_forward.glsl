@@ -30,7 +30,7 @@ struct SLightProperties
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(std140, binding = 3) uniform UB4
+layout(std140, binding = 3) uniform UB3
 {
     vec4  ps_TilingOffset;
     vec3  ps_Color;
@@ -39,7 +39,7 @@ layout(std140, binding = 3) uniform UB4
     float ps_MetalMask;
 };
 
-layout(std140, binding = 4) uniform UB5
+layout(std140, binding = 4) uniform UB4
 {
     vec4 ps_CameraPosition;
     uint ps_ExposureHistoryIndex;

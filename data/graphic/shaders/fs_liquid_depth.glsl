@@ -7,7 +7,7 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(row_major, std140, binding = 2) uniform UB0
+layout(row_major, std140, binding = 2) uniform UB2
 {
     mat4  ps_ViewMatrix;
     mat4  ps_ProjectionMatrix;

@@ -5,7 +5,7 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(std140, binding = 1) uniform UB0
+layout(std140, binding = 1) uniform UB1
 {
     vec4 ps_ConstantValues0;
     vec4 ps_ConstantValues1;
