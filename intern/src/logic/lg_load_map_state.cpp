@@ -231,7 +231,7 @@ namespace
             pProbeLightFacet->SetType(Dt::CLightProbeFacet::Sky);
             pProbeLightFacet->SetQuality(Dt::CLightProbeFacet::PX256);
             pProbeLightFacet->SetIntensity(1.0f);
-            pProbeLightFacet->SetRefreshMode(Dt::CLightProbeFacet::Static);
+            pProbeLightFacet->SetRefreshMode(Dt::CLightProbeFacet::Dynamic);
             pProbeLightFacet->SetNear(2.0f);
             pProbeLightFacet->SetFar(100.0f);
             pProbeLightFacet->SetParallaxCorrection(true);
@@ -239,7 +239,7 @@ namespace
 
             rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pProbeLightFacet);
 
-            //Dt::EntityManager::MarkEntityAsDirty(rGlobalProbeLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::EntityManager::MarkEntityAsDirty(rGlobalProbeLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         {
@@ -298,8 +298,8 @@ namespace
             Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
 
             pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, -10.0f));
-            pTransformationFacet->SetScale(Base::Float3(0.1f));
-            pTransformationFacet->SetRotation(Base::Float3(0.0f));
+            pTransformationFacet->SetScale(Base::Float3(0.2f));
+            pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-45.0f), 0.0f, 0.0f));
 
             // -----------------------------------------------------------------------------
 

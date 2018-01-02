@@ -17,8 +17,14 @@ out gl_PerVertex
 void main(void)
 {
     gl_Position = vec4(in_Position.xyz, 1.0f);
+
+    out_Position = in_Position;
     
     out_Normal = in_Position;
+
+    out_UV = vec2(0.0f);
+
+    out_WSNormalMatrix = mat3(0.0f);
 }
 
 #endif // __INCLUDE_VS_P3_GLSL__
