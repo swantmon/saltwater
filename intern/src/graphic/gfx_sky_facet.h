@@ -18,6 +18,7 @@ namespace Gfx
 
         CTexture2DPtr GetCubemapPtr() const;
 
+        // TODO: Remove this method because only the other one is needed!
         CTextureSetPtr GetCubemapSetPtr() const;
 
         Base::U64 GetTimeStamp() const;
