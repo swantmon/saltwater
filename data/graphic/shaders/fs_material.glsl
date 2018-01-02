@@ -79,7 +79,7 @@ void PSShaderMaterialDisney(void)
 
     PackGBuffer(Color, WSNormal, Roughness, vec3(ps_Reflectance), MetalMask, AO, GBuffer);
 
-    out_GBuffer0 = GBuffer.m_Color0;
+    out_GBuffer0 = vec4(1, 0, 0, 0);
     out_GBuffer1 = GBuffer.m_Color1;
     out_GBuffer2 = GBuffer.m_Color2;
 }

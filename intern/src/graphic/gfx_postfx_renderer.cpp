@@ -1744,7 +1744,7 @@ namespace
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
-        ContextManager::SetTexture(0, m_SwapTextureSetPtrs[CurrentSwapBufferCount]->GetTexture(0));
+        ContextManager::SetTexture(0, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0));
 
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
 
