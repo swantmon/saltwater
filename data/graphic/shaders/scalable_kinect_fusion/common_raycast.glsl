@@ -128,7 +128,7 @@ float GetInterpolatedTSDF(vec3 Position)
     GetVoxel(vec3(g.x + VOXEL_SIZE, g.y             , g.z             )).x *         a  * (1.0f - b) * (1.0f - c) +
     GetVoxel(vec3(g.x + VOXEL_SIZE, g.y             , g.z + VOXEL_SIZE)).x *         a  * (1.0f - b) *         c  +
     GetVoxel(vec3(g.x + VOXEL_SIZE, g.y + VOXEL_SIZE, g.z             )).x *         a  *         b  * (1.0f - c) +
-    GetVoxel(vec3(g.x + VOXEL_SIZE, g.y + VOXEL_SIZE, g.z + VOXEL_SIZE)).x *         a  *         b  *         c ;
+    GetVoxel(vec3(g.x + VOXEL_SIZE, g.y + VOXEL_SIZE, g.z + VOXEL_SIZE)).x *         a  *         b  *         c;
 
     return result;
 }
