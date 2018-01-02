@@ -1227,7 +1227,7 @@ namespace
 
         GLuint TextureBinding = GL_TEXTURE_2D;
 
-        if (m_TextureUnits[_Unit]->IsCube())
+        if (m_TextureUnits[_Unit] != NULL && m_TextureUnits[_Unit]->IsCube())
         {
             TextureBinding = GL_TEXTURE_CUBE_MAP;
         }
