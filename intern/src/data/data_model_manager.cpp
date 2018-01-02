@@ -1076,16 +1076,15 @@ namespace
     
     unsigned int CDtModelManager::ConvertGenerationPresets(unsigned int _EngineFlag)
     {
-//         static const unsigned int s_AssimpGenerationPresets[] =
-//         {
-//             aiProcess_Triangulate,
-//             aiProcess_CalcTangentSpace | aiProcess_GenNormals | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices,
-//             aiProcess_CalcTangentSpace | aiProcess_GenNormals | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_FlipUVs,
-//             aiProcess_CalcTangentSpace | aiProcess_GenNormals | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_GenUVCoords | aiProcess_SortByPType,
-//         };
-//         
-//         return s_AssimpGenerationPresets[_EngineFlag];
-        return 0;
+        static const unsigned int s_AssimpGenerationPresets[] =
+        {
+            aiProcess_Triangulate,
+            aiProcess_CalcTangentSpace | aiProcess_GenNormals | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices,
+            aiProcess_CalcTangentSpace | aiProcess_GenNormals | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_FlipUVs,
+            aiProcess_CalcTangentSpace | aiProcess_GenNormals | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_GenUVCoords | aiProcess_SortByPType,
+        };
+
+        return s_AssimpGenerationPresets[_EngineFlag];
     };
 } // namespace
 
