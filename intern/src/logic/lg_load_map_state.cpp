@@ -222,7 +222,7 @@ namespace
 
             Dt::CTransformationFacet* pTransformationFacet = rGlobalProbeLight.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 5.0f));
+            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.0f));
             pTransformationFacet->SetScale   (Base::Float3(1.0f));
             pTransformationFacet->SetRotation(Base::Float3(0.0f));
 
@@ -232,10 +232,10 @@ namespace
             pProbeLightFacet->SetQuality(Dt::CLightProbeFacet::PX256);
             pProbeLightFacet->SetIntensity(1.0f);
             pProbeLightFacet->SetRefreshMode(Dt::CLightProbeFacet::Dynamic);
-            pProbeLightFacet->SetNear(2.0f);
-            pProbeLightFacet->SetFar(100.0f);
-            pProbeLightFacet->SetParallaxCorrection(true);
-            pProbeLightFacet->SetBoxSize(Base::Float3(10.0f));
+            pProbeLightFacet->SetNear(0.01f);
+            pProbeLightFacet->SetFar(1024.0f);
+            pProbeLightFacet->SetParallaxCorrection(false);
+            pProbeLightFacet->SetBoxSize(Base::Float3(1024.0f));
 
             rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pProbeLightFacet);
 

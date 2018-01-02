@@ -788,6 +788,8 @@ namespace
         ReflectionProbePropertiesBuffer.m_Properties[0] = static_cast<float>(HistogramRenderer::GetCurrentExposureHistoryIndex());
         ReflectionProbePropertiesBuffer.m_Properties[1] = 1.0f;
 
+        BufferManager::UploadBufferData(m_ReflectionProbePropertiesBufferPtr, &ReflectionProbePropertiesBuffer);
+
         // -----------------------------------------------------------------------------
         // Actors
         // -----------------------------------------------------------------------------
