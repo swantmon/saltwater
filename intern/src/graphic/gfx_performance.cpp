@@ -39,6 +39,7 @@ namespace
         void OnExit();
 
         void BeginEvent(const Base::Char* _pEventName);
+        void BeginDurationEvent(const Base::Char* _pEventName);
         void ResetEventStatistics(const Base::Char* _pEventName);
         void EndEvent();
 
@@ -67,9 +68,12 @@ namespace
 
             std::vector<std::pair<GLuint, GLuint>> m_PendingQueries;
 
+            bool m_HasStatistics;
+
             SPerformanceMarker()
                 : m_NumberOfMarkers(0)
                 , m_AccumulatedTime(0.0f)
+                , m_HasStatistics(false)
             {
 
             }
@@ -123,28 +127,31 @@ namespace
             {
                 auto& rItem = rItemPair.second;
 
-                while (!rItem.m_PendingQueries.empty())
+                if (rItem.m_HasStatistics)
                 {
-                    auto QueryPair = rItem.m_PendingQueries.back();
-                    rItem.m_PendingQueries.pop_back();
+                    while (!rItem.m_PendingQueries.empty())
+                    {
+                        auto QueryPair = rItem.m_PendingQueries.back();
+                        rItem.m_PendingQueries.pop_back();
 
-                    GLuint64 StartTime, EndTime;
-                    glGetQueryObjectui64v(QueryPair.first, GL_QUERY_RESULT, &StartTime);
-                    glGetQueryObjectui64v(QueryPair.second, GL_QUERY_RESULT, &EndTime);
+                        GLuint64 StartTime, EndTime;
+                        glGetQueryObjectui64v(QueryPair.first, GL_QUERY_RESULT, &StartTime);
+                        glGetQueryObjectui64v(QueryPair.second, GL_QUERY_RESULT, &EndTime);
 
-                    float QueryDuration = (EndTime - StartTime) / 1000000.0f;
+                        float QueryDuration = (EndTime - StartTime) / 1000000.0f;
 
-                    rItem.m_AccumulatedTime += QueryDuration;
-                    ++rItem.m_NumberOfMarkers;
+                        rItem.m_AccumulatedTime += QueryDuration;
+                        ++rItem.m_NumberOfMarkers;
+                    }
+
+                    std::stringstream Stream;
+
+                    Stream << '\n' << rItemPair.first << '\n'
+                        << rItem.m_NumberOfMarkers << " Times called\n"
+                        << rItem.m_AccumulatedTime / rItem.m_NumberOfMarkers << " ms average time\n";
+
+                    BASE_CONSOLE_STREAMINFO(Stream.str());
                 }
-
-                std::stringstream Stream;
-                
-                Stream << '\n' << rItemPair.first << '\n'
-                    << rItem.m_NumberOfMarkers << " Times called\n"
-                    << rItem.m_AccumulatedTime / rItem.m_NumberOfMarkers << " ms average time\n";
-
-                BASE_CONSOLE_STREAMINFO(Stream.str());
             }
         }
 #endif
@@ -251,6 +258,8 @@ namespace
 
                 auto& Item = m_PerformanceMarkerTimings[Name];
 
+                Item.m_HasStatistics = false;
+
                 GLuint StartQuery;
                 glCreateQueries(GL_TIMESTAMP, 1, &StartQuery);
                 glQueryCounter(StartQuery, GL_TIMESTAMP);
@@ -261,6 +270,35 @@ namespace
             }
         }
 #endif
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxPerformance::BeginDurationEvent(const Base::Char* _pEventName)
+    {
+        GLsizei LengthOfEventName = static_cast<GLsizei>(strlen(_pEventName));
+
+        glPushDebugGroup(GL_DEBUG_SOURCE_THIRD_PARTY, 0, LengthOfEventName, _pEventName);
+
+        if (Gfx::Main::GetGraphicsAPI() != GLES32)
+        {
+            if (g_QueryPerformanceMarkerDurations)
+            {
+                std::string Name = _pEventName;
+
+                auto& Item = m_PerformanceMarkerTimings[Name];
+
+                Item.m_HasStatistics = true;
+
+                GLuint StartQuery;
+                glCreateQueries(GL_TIMESTAMP, 1, &StartQuery);
+                glQueryCounter(StartQuery, GL_TIMESTAMP);
+
+                Item.m_PendingQueries.push_back(std::make_pair(StartQuery, 0));
+
+                m_OpenedMarkerStack.push(&Item);
+            }
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -393,6 +431,13 @@ namespace Performance
 
     // -----------------------------------------------------------------------------
 
+    void BeginDurationEvent(const Base::Char* _pEventName)
+    {
+        CGfxPerformance::GetInstance().BeginDurationEvent(_pEventName);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void ResetEventStatistics(const Base::Char* _pEventName)
     {
         CGfxPerformance::GetInstance().ResetEventStatistics(_pEventName);
@@ -404,7 +449,7 @@ namespace Performance
     {
         CGfxPerformance::GetInstance().EndEvent();
     }
-
+    
     // -----------------------------------------------------------------------------
 
     void StartDurationQuery(unsigned int _ID, CDurationQueryDelegate _Delegate)
