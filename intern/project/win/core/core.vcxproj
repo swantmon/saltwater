@@ -22,23 +22,10 @@
     <ClInclude Include="..\..\..\src\core\core_asset_manager.h" />
     <ClInclude Include="..\..\..\src\core\core_config.h" />
     <ClInclude Include="..\..\..\src\core\core_precompiled.h" />
-    <ClInclude Include="..\..\..\src\core\core_script_base_matrix3x3.h" />
-    <ClInclude Include="..\..\..\src\core\core_script_base_matrix4x4.h" />
-    <ClInclude Include="..\..\..\src\core\core_script_base_vector3.h" />
-    <ClInclude Include="..\..\..\src\core\core_script_base_vector4.h" />
-    <ClInclude Include="..\..\..\src\core\core_script_core_time.h" />
-    <ClInclude Include="..\..\..\src\core\core_script_interface.h" />
     <ClInclude Include="..\..\..\src\core\core_time.h" />
-    <ClInclude Include="..\..\..\src\core\core_lua_argument.h" />
-    <ClInclude Include="..\..\..\src\core\core_lua_export.h" />
-    <ClInclude Include="..\..\..\src\core\core_lua_main.h" />
-    <ClInclude Include="..\..\..\src\core\core_lua_result.h" />
-    <ClInclude Include="..\..\..\src\core\core_lua_state.h" />
-    <ClInclude Include="..\..\..\src\core\core_lua_typedef.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\core\core_asset_manager.cpp" />
-    <ClCompile Include="..\..\..\src\core\core_lua_result.cpp" />
     <ClCompile Include="..\..\..\src\core\core_precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -46,10 +33,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\..\..\src\core\core_time.cpp" />
-    <ClCompile Include="..\..\..\src\core\core_lua_argument.cpp" />
-    <ClCompile Include="..\..\..\src\core\core_lua_export.cpp" />
-    <ClCompile Include="..\..\..\src\core\core_lua_main.cpp" />
-    <ClCompile Include="..\..\..\src\core\core_lua_state.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8BF7FB01-1873-4CB2-85A8-57EF3ED5AFD4}</ProjectGuid>

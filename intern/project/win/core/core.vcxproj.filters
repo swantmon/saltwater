@@ -4,44 +4,8 @@
     <ClInclude Include="..\..\..\src\core\core_time.h">
       <Filter>time</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\core\core_lua_argument.h">
-      <Filter>lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\core\core_lua_export.h">
-      <Filter>lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\core\core_lua_main.h">
-      <Filter>lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\core\core_lua_result.h">
-      <Filter>lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\core\core_lua_state.h">
-      <Filter>lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\core\core_lua_typedef.h">
-      <Filter>lua</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\core\core_config.h" />
     <ClInclude Include="..\..\..\src\core\core_precompiled.h" />
-    <ClInclude Include="..\..\..\src\core\core_script_base_vector3.h">
-      <Filter>interface\script</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\core\core_script_base_vector4.h">
-      <Filter>interface\script</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\core\core_script_core_time.h">
-      <Filter>interface\script</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\core\core_script_interface.h">
-      <Filter>interface\script</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\core\core_script_base_matrix3x3.h">
-      <Filter>interface\script</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\core\core_script_base_matrix4x4.h">
-      <Filter>interface\script</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\core\core_asset_manager.h">
       <Filter>assets</Filter>
     </ClInclude>
@@ -49,21 +13,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\src\core\core_time.cpp">
       <Filter>time</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\core\core_lua_argument.cpp">
-      <Filter>lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\core\core_lua_export.cpp">
-      <Filter>lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\core\core_lua_main.cpp">
-      <Filter>lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\core\core_lua_result.cpp">
-      <Filter>lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\core\core_lua_state.cpp">
-      <Filter>lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\core\core_precompiled.cpp" />
     <ClCompile Include="..\..\..\src\core\core_asset_manager.cpp">
@@ -73,15 +22,6 @@
   <ItemGroup>
     <Filter Include="time">
       <UniqueIdentifier>{11f879af-229b-4063-b024-0b178902d5e5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lua">
-      <UniqueIdentifier>{2be001e9-db45-4288-80ad-bd4da4bc1ce1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="interface">
-      <UniqueIdentifier>{69036678-d5a4-4af0-a324-8d9c7bb1e4b5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="interface\script">
-      <UniqueIdentifier>{6309367c-ebc4-4677-82ed-50420d47abce}</UniqueIdentifier>
     </Filter>
     <Filter Include="assets">
       <UniqueIdentifier>{197f6d8a-8ad1-4341-a0e2-052ab55915df}</UniqueIdentifier>

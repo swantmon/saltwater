@@ -30,8 +30,6 @@
 #include "data/data_light_probe_manager.h"
 #include "data/data_sun_manager.h"
 #include "data/data_sky_manager.h"
-#include "data/data_script_facet.h"
-#include "data/data_script_manager.h"
 #include "data/data_ssao_manager.h"
 #include "data/data_ssr_manager.h"
 #include "data/data_texture_manager.h"
@@ -128,12 +126,6 @@ namespace
             pFacet->SetMainCamera(true);
 
             rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
-
-            Dt::CScriptFacet* pScriptFacet = Dt::ScriptManager::CreateScript();
-
-            pScriptFacet->SetScriptFile("scripts/camera_behavior.lua");
-
-            rEntity.SetDetailFacet(Dt::SFacetCategory::Script, pScriptFacet);
 
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }

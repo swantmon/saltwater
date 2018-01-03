@@ -17,7 +17,6 @@
 #include "data/data_mesh_manager.h"
 #include "data/data_model_manager.h"
 #include "data/data_point_light_manager.h"
-#include "data/data_script_manager.h"
 #include "data/data_sky_manager.h"
 #include "data/data_ssao_manager.h"
 #include "data/data_ssr_manager.h"
@@ -26,7 +25,6 @@
 #include "data/data_volume_fog_manager.h"
 
 #include "logic/lg_exit_state.h"
-#include "logic/lg_script_manager.h"
 
 namespace
 {
@@ -48,11 +46,6 @@ namespace
     int CLgExitState::OnEnter()
     {
         // -----------------------------------------------------------------------------
-        // Logic
-        // -----------------------------------------------------------------------------
-        Lg::ScriptManager::OnExit();
-
-        // -----------------------------------------------------------------------------
         // Data
         // -----------------------------------------------------------------------------
         Dt::TextureManager    ::OnExit();
@@ -72,7 +65,6 @@ namespace
         Dt::PointLightManager ::OnExit();
         Dt::AreaLightManager  ::OnExit();
         Dt::SkyManager        ::OnExit();
-        Dt::ScriptManager     ::OnExit();
 
         return Lg::Exit::SResult::Exit;
     }

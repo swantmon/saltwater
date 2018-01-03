@@ -34,7 +34,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\logic\lg_start_state.cpp" />
     <ClCompile Include="..\..\..\src\logic\lg_unload_map_state.cpp" />
-    <ClCompile Include="..\..\..\src\logic\lg_script_manager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\logic\lg_debug_state.h" />
@@ -45,7 +44,6 @@
     <ClInclude Include="..\..\..\src\logic\lg_main_menu_state.h" />
     <ClInclude Include="..\..\..\src\logic\lg_play_state.h" />
     <ClInclude Include="..\..\..\src\logic\lg_precompiled.h" />
-    <ClInclude Include="..\..\..\src\logic\lg_script_manager.h" />
     <ClInclude Include="..\..\..\src\logic\lg_start_state.h" />
     <ClInclude Include="..\..\..\src\logic\lg_unload_map_state.h" />
   </ItemGroup>

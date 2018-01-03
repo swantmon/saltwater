@@ -22,14 +22,12 @@
 #include "data/data_map.h"
 #include "data/data_mesh_manager.h"
 #include "data/data_point_light_manager.h"
-#include "data/data_script_manager.h"
 #include "data/data_sky_manager.h"
 #include "data/data_sun_manager.h"
 
 #include "gui/gui_event_handler.h"
 
 #include "logic/lg_play_state.h"
-#include "logic/lg_script_manager.h"
 
 namespace
 {
@@ -105,9 +103,6 @@ namespace
         Dt::PointLightManager ::Update();
         Dt::AreaLightManager  ::Update();
         Dt::SkyManager        ::Update();
-        Dt::ScriptManager     ::Update();
-
-        Lg::ScriptManager::Update();
 
         // -----------------------------------------------------------------------------
         // Get main camera entity and set this entity to the camera project

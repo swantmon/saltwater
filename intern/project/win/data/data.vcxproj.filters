@@ -59,15 +59,6 @@
       <Filter>textures</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_precompiled.h" />
-    <ClInclude Include="..\..\..\src\data\data_script_facet.h">
-      <Filter>map\scripts</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_script_manager.h">
-      <Filter>map\scripts</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_script_interface.h">
-      <Filter>interface\script</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_mesh.h">
       <Filter>models</Filter>
     </ClInclude>
@@ -212,12 +203,6 @@
       <Filter>textures</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_precompiled.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_script_manager.cpp">
-      <Filter>map\scripts</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_script_facet.cpp">
-      <Filter>map\scripts</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_model.cpp">
       <Filter>models</Filter>
     </ClCompile>
@@ -360,15 +345,6 @@
     </Filter>
     <Filter Include="map\plugins">
       <UniqueIdentifier>{7ffd24e8-c227-4102-88eb-f81cc0290671}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="interface">
-      <UniqueIdentifier>{457423ce-2a73-42ec-88ad-91117d644247}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="interface\script">
-      <UniqueIdentifier>{f2d82096-23d7-4fc1-83bc-29fe07616da0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="map\scripts">
-      <UniqueIdentifier>{a0851fd6-c93a-42c8-a39a-0062d242c79b}</UniqueIdentifier>
     </Filter>
     <Filter Include="map\lights\light probe">
       <UniqueIdentifier>{dd3080f5-fba1-4d78-b7d9-1aee5fc0d0c2}</UniqueIdentifier>

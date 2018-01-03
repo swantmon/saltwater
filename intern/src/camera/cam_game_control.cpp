@@ -17,15 +17,12 @@ namespace Cam
         : CControl           (CControl::GameControl)
         , m_pMainCameraEntity(nullptr)
     {
-        
     }
     
     // -----------------------------------------------------------------------------
     
     CGameControl::~CGameControl()
     {
-
-        
     }
 
     // -----------------------------------------------------------------------------

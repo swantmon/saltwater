@@ -21,7 +21,6 @@ namespace Dt
     {
         m_pDetailFacets[SFacetCategory::Data]    = 0;
         m_pDetailFacets[SFacetCategory::Graphic] = 0;
-        m_pDetailFacets[SFacetCategory::Script]  = 0;
 
         m_Flags.m_Key = 0;
     }
