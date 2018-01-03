@@ -45,12 +45,7 @@ namespace Game
         Lg ::Exit::OnEnter();
         Gfx::Exit::OnEnter();
         Gui::Exit::OnEnter();
-        
-        // -----------------------------------------------------------------------------
-        // Stop engine
-        // -----------------------------------------------------------------------------
-        Gfx::Main::OnExit();
-        
+
         return Game::CState::Exit;
     }
     
