@@ -25,11 +25,11 @@ namespace Gfx
 
     // --------------------------------------------------------------------------------
 
-    void CView::SetPosition(float _X, float _Y, float _Z)
+    void CView::SetPosition(float _AxisX, float _AxisY, float _AxisZ)
     {
-        m_Position[0] = _X;
-        m_Position[1] = _Y;
-        m_Position[2] = _Z;
+        m_Position[0] = _AxisX;
+        m_Position[1] = _AxisY;
+        m_Position[2] = _AxisZ;
     }
 
     // --------------------------------------------------------------------------------

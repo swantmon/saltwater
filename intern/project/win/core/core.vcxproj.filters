@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\core\core_time.h">
+      <Filter>time</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\core_config.h" />
+    <ClInclude Include="..\..\..\src\core\core_precompiled.h" />
+    <ClInclude Include="..\..\..\src\core\core_asset_manager.h">
+      <Filter>assets</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\core\core_time.cpp">
+      <Filter>time</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\core_precompiled.cpp" />
+    <ClCompile Include="..\..\..\src\core\core_asset_manager.cpp">
+      <Filter>assets</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="time">
+      <UniqueIdentifier>{11f879af-229b-4063-b024-0b178902d5e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assets">
+      <UniqueIdentifier>{197f6d8a-8ad1-4341-a0e2-052ab55915df}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

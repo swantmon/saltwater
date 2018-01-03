@@ -21,6 +21,7 @@ namespace Performance
 {
     typedef std::function<void(Base::U32, Base::F32, Base::U64)> CDurationQueryDelegate;
 
+    void OnStart();
     void Update();
     void OnExit();
 

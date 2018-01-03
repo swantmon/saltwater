@@ -11,3 +11,8 @@
 #include <new>
 #include <stdlib.h>
 #include <chrono>
+#include <algorithm>
+#include <random>
+
+#define _USE_MATH_DEFINES
+#include <cmath>

@@ -14,6 +14,8 @@
 #include "base/base_vector3.h"
 #include "base/base_pool.h"
 
+#include "core/core_asset_manager.h"
+
 #include "data/data_actor_type.h"
 #include "data/data_lod.h"
 #include "data/data_map.h"
@@ -38,8 +40,7 @@ using namespace Dt::ModelManager;
 
 namespace
 {
-	std::string g_PathToAssets	   = "../assets/";
-	std::string g_PathToDataModels = "../data/graphic/models/";
+    std::string g_PathToDataModels = "/graphic/models/";
 } // namespace 
 
 namespace
@@ -65,7 +66,7 @@ namespace
         CModel& CreateBox(float _Width, float _Height, float _Depth);
         CModel& CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices);
         CModel& CreateCone(float _Radius, float _Height, unsigned int _Slices);
-        CModel& CreateRectangle(float _X, float _Y, float _Width, float _Height);
+        CModel& CreateRectangle(float _AxisX, float _AxisY, float _Width, float _Height);
         
         void FreeModel(CModel& _rModel);
         
@@ -190,7 +191,7 @@ namespace
 
     CModel& CDtModelManager::CreateModel(const SModelFileDescriptor& _rDescriptor)
     {
-		Assimp::Importer Importer;
+ 		Assimp::Importer Importer;
 		const aiScene*   pScene;
 		std::string      PathToModel;
 		unsigned int	 Flags;
@@ -213,17 +214,17 @@ namespace
         // -----------------------------------------------------------------------------
         // Build path to texture in file system and load model
         // -----------------------------------------------------------------------------
-		PathToModel = g_PathToAssets + _rDescriptor.m_pFileName;
-        
+		PathToModel = Core::AssetManager::GetPathToAssets() + "/" + _rDescriptor.m_pFileName;
+
         pScene = Importer.ReadFile(PathToModel.c_str(), Flags);
 
 		if (!pScene)
 		{
-			PathToModel = g_PathToDataModels + _rDescriptor.m_pFileName;
+			PathToModel = Core::AssetManager::GetPathToData() + g_PathToDataModels + _rDescriptor.m_pFileName;
 
 			pScene = Importer.ReadFile(PathToModel.c_str(), Flags);
 		}
-        
+
         if( !pScene)
         {
             BASE_THROWV("Can't load model file %s; Code: %s", _rDescriptor.m_pFileName, Importer.GetErrorString());
@@ -255,145 +256,145 @@ namespace
                 // Create model
                 // -----------------------------------------------------------------------------
                 CInternMesh& rNewModel = AllocateMesh(_pNode->mName.C_Str());
-                                
+
                 // -----------------------------------------------------------------------------
                 // Setup model
                 // -----------------------------------------------------------------------------
                 if (rNewModel.m_NumberOfLODs == 0)
                 {
                     rNewModel.m_NumberOfLODs = 1;
-                    
+
                     for (unsigned int IndexOfLOD = 0; IndexOfLOD < rNewModel.m_NumberOfLODs; IndexOfLOD++)
                     {
                         // -----------------------------------------------------------------------------
                         // Create LOD
                         // -----------------------------------------------------------------------------
                         CInternLOD& rNewLOD = static_cast<CInternLOD&>(AllocateLOD());
-                        
+
                         // -----------------------------------------------------------------------------
                         // Link
                         // -----------------------------------------------------------------------------
                         rNewModel.m_LODs[IndexOfLOD] = & rNewLOD;
-                        
+
                         // -----------------------------------------------------------------------------
                         // Setup
                         // -----------------------------------------------------------------------------
                         rNewLOD.m_NumberOfSurfaces = _pNode->mNumMeshes;
-                        
+
                         for (unsigned int IndexOfSurface = 0; IndexOfSurface < rNewLOD.m_NumberOfSurfaces; ++IndexOfSurface)
                         {
                             // -----------------------------------------------------------------------------
                             // Get data from Assimp
                             // -----------------------------------------------------------------------------
                             unsigned int MeshIndex = _pNode->mMeshes[IndexOfSurface];
-                            
+
                             aiMesh* pMesh = pScene->mMeshes[MeshIndex];
-                            
+
                             unsigned int NumberOfVertices       = pMesh->mNumVertices;
                             unsigned int NumberOfFaces          = pMesh->mNumFaces;
                             unsigned int NumberOfIndicesPerFace = pMesh->mFaces->mNumIndices;
                             unsigned int NumberOfIndices        = NumberOfFaces * NumberOfIndicesPerFace;
-                            
+
                             assert(NumberOfIndicesPerFace == 3);
-                            
+
                             aiVector3D* pVertexData    = pMesh->mVertices;
                             aiVector3D* pNormalData    = pMesh->mNormals;
                             aiVector3D* pTangentData   = pMesh->mTangents;
                             aiVector3D* pBitangentData = pMesh->mBitangents;
                             aiVector3D* pTextureData   = pMesh->mTextureCoords[0];
-                            
+
                             unsigned int Elements = CSurface::Position;
-                            
+
                             assert(pVertexData != 0);
-                            
+
                             if (pMesh->mNormals          != nullptr) Elements |= CSurface::Normal;
                             if (pMesh->mTangents         != nullptr) Elements |= CSurface::Tangent;
                             if (pMesh->mBitangents       != nullptr) Elements |= CSurface::Tangent;
                             if (pMesh->mTextureCoords[0] != nullptr) Elements |= CSurface::TexCoord0;
-                            
+
                             // -----------------------------------------------------------------------------
                             // Create surface
                             // -----------------------------------------------------------------------------
                             CInternSurface& rNewSurface = static_cast<CInternSurface&>(AllocateSurface(NumberOfVertices, NumberOfIndices, Elements));
-                            
+
                             // -----------------------------------------------------------------------------
                             // Link
                             // -----------------------------------------------------------------------------
                             rNewLOD.m_Surfaces[IndexOfSurface] = &rNewSurface;
-                            
+
                             // -----------------------------------------------------------------------------
                             // Setup surface
                             // -----------------------------------------------------------------------------
                             for (unsigned int IndexOfFace = 0; IndexOfFace < NumberOfFaces; ++IndexOfFace)
                             {
                                 aiFace CurrentFace = pMesh->mFaces[IndexOfFace];
-                                
+
                                 for (unsigned int IndexOfIndice = 0; IndexOfIndice < NumberOfIndicesPerFace; ++IndexOfIndice)
                                 {
                                     rNewSurface.m_pIndices[IndexOfFace * NumberOfIndicesPerFace + IndexOfIndice] = CurrentFace.mIndices[IndexOfIndice];
                                 }
                             }
-          
+
                             for (unsigned int CurrentVertex = 0; CurrentVertex < NumberOfVertices; ++CurrentVertex)
                             {
                                 Base::Float3 CurrentPosition(pVertexData[CurrentVertex].x, pVertexData[CurrentVertex].y, pVertexData[CurrentVertex].z);
-                                  
+
                                 rNewSurface.m_pPositions[CurrentVertex][0] = pVertexData[CurrentVertex].x;
                                 rNewSurface.m_pPositions[CurrentVertex][1] = pVertexData[CurrentVertex].y;
                                 rNewSurface.m_pPositions[CurrentVertex][2] = pVertexData[CurrentVertex].z;
-                                
+
                                 if (rNewSurface.m_Elements & CSurface::Normal)
                                 {
                                     rNewSurface.m_pNormals[CurrentVertex][0] = pNormalData[CurrentVertex].x;
                                     rNewSurface.m_pNormals[CurrentVertex][1] = pNormalData[CurrentVertex].y;
                                     rNewSurface.m_pNormals[CurrentVertex][2] = pNormalData[CurrentVertex].z;
                                 }
-                                
+
                                 if (rNewSurface.m_Elements & CSurface::Tangent)
                                 {
                                     assert(pTangentData != 0);
-                                    
+
                                     rNewSurface.m_pTangents[CurrentVertex][0] = pTangentData[CurrentVertex].x;
                                     rNewSurface.m_pTangents[CurrentVertex][1] = pTangentData[CurrentVertex].y;
                                     rNewSurface.m_pTangents[CurrentVertex][2] = pTangentData[CurrentVertex].z;
                                 }
-                                
+
                                 if (rNewSurface.m_Elements & CSurface::Tangent)
                                 {
                                     assert(pBitangentData != 0);
-                                    
+
                                     rNewSurface.m_pBitangents[CurrentVertex][0] = pBitangentData[CurrentVertex].x;
                                     rNewSurface.m_pBitangents[CurrentVertex][1] = pBitangentData[CurrentVertex].y;
                                     rNewSurface.m_pBitangents[CurrentVertex][2] = pBitangentData[CurrentVertex].z;
                                 }
-                                
+
                                 if (rNewSurface.m_Elements & CSurface::TexCoord0)
                                 {
                                     rNewSurface.m_pTexCoords[CurrentVertex][0] = pTextureData[CurrentVertex].x;
                                     rNewSurface.m_pTexCoords[CurrentVertex][1] = pTextureData[CurrentVertex].y;
                                 }
                             }
-                            
+
                             // -----------------------------------------------------------------------------
                             // Create default material from file
                             // -----------------------------------------------------------------------------
                             unsigned int MaterialIndex = pScene->mMeshes[_pNode->mMeshes[IndexOfSurface]]->mMaterialIndex;;
-                            
+
                             aiMaterial* pMaterial = pScene->mMaterials[MaterialIndex];
-                            
+
                             // -----------------------------------------------------------------------------
                             // Check if material has an engine material indicator
                             // -----------------------------------------------------------------------------
                             aiString    NativeMaterialExaminer;
                             std::string MaterialExaminer;
-                            
+
                             if (pMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &NativeMaterialExaminer) == AI_SUCCESS)
                             {
                                 // -----------------------------------------------------------------------------
                                 // Load material from file and link with surface
                                 // -----------------------------------------------------------------------------
                                 MaterialExaminer = std::string(NativeMaterialExaminer.data);
-                                
+
                                 if (MaterialExaminer.find(".mat") != std::string::npos)
                                 {
                                     SMaterialDescriptor MaterialDescriptor;
@@ -413,7 +414,7 @@ namespace
                                     MaterialDescriptor.m_pFileName       = MaterialExaminer.c_str();
 
                                     rNewSurface.m_pMaterial = &MaterialManager::CreateMaterial(MaterialDescriptor);
-                                
+
                                     MaterialManager::MarkMaterialAsDirty(*rNewSurface.m_pMaterial, CMaterial::DirtyCreate);
                                 }
                             }
@@ -447,7 +448,7 @@ namespace
                                     // What is to do if no name exists? Create new material or use the default one?
                                     MaterialDescriptor.m_pMaterialName = NativeString.data;
                                 }
-                                
+
                                 if (pMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, DiffuseColor) == AI_SUCCESS)
                                 {
                                     MaterialDescriptor.m_AlbedoColor[0] = DiffuseColor.r;
@@ -459,7 +460,7 @@ namespace
                                 {
                                     MaterialDescriptor.m_pColorMap = NativeString.data;
                                 }
-                                
+
                                 // -----------------------------------------------------------------------------
                                 // Normal
                                 // -----------------------------------------------------------------------------
@@ -793,7 +794,7 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    CModel& CDtModelManager::CreateRectangle(float _X, float _Y, float _Width, float _Height)
+    CModel& CDtModelManager::CreateRectangle(float _AxisX, float _AxisY, float _Width, float _Height)
     {
         // -----------------------------------------------------------------------------
         // Calculate Data
@@ -830,10 +831,10 @@ namespace
         // -----------------------------------------------------------------------------
         unsigned int IndexOfVertex = 0;
         
-        rBoxSurface.m_pPositions[IndexOfVertex ++] = Base::Float3(_X         , _Y + _Height, 0.0f);
-        rBoxSurface.m_pPositions[IndexOfVertex ++] = Base::Float3(_X + _Width, _Y +_Height , 0.0f);
-        rBoxSurface.m_pPositions[IndexOfVertex ++] = Base::Float3(_X + _Width, _Y          , 0.0f);
-        rBoxSurface.m_pPositions[IndexOfVertex ++] = Base::Float3(_X         , _Y          , 0.0f);
+        rBoxSurface.m_pPositions[IndexOfVertex ++] = Base::Float3(_AxisX         , _AxisY + _Height, 0.0f);
+        rBoxSurface.m_pPositions[IndexOfVertex ++] = Base::Float3(_AxisX + _Width, _AxisY +_Height , 0.0f);
+        rBoxSurface.m_pPositions[IndexOfVertex ++] = Base::Float3(_AxisX + _Width, _AxisY          , 0.0f);
+        rBoxSurface.m_pPositions[IndexOfVertex ++] = Base::Float3(_AxisX         , _AxisY          , 0.0f);
         
         assert(IndexOfVertex == NumberOfVertices);
         
@@ -1063,7 +1064,7 @@ namespace
             aiProcess_CalcTangentSpace | aiProcess_GenNormals | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_FlipUVs,
             aiProcess_CalcTangentSpace | aiProcess_GenNormals | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_GenUVCoords | aiProcess_SortByPType,
         };
-        
+
         return s_AssimpGenerationPresets[_EngineFlag];
     };
 } // namespace
@@ -1121,9 +1122,9 @@ namespace ModelManager
     
     // -----------------------------------------------------------------------------
     
-    CModel& CreateRectangle(float _X, float _Y, float _Width, float _Height)
+    CModel& CreateRectangle(float _AxisX, float _AxisY, float _Width, float _Height)
     {
-        return CDtModelManager::GetInstance().CreateRectangle(_X, _Y, _Width, _Height);
+        return CDtModelManager::GetInstance().CreateRectangle(_AxisX, _AxisY, _Width, _Height);
     }
     
     // -----------------------------------------------------------------------------

@@ -1,20 +1,23 @@
 ﻿
 #include "graphic/gfx_precompiled.h"
 
+#include "app_droid/app_application.h"
+
 #include "base/base_crc.h"
 #include "base/base_console.h"
 #include "base/base_exception.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_asset_manager.h"
+
 #include "data/data_texture_manager.h"
+#include "data/data_texture_base.h"
 
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_native_texture_2d.h"
 #include "graphic/gfx_native_texture_3d.h"
 #include "graphic/gfx_texture_manager.h"
-
-#include "GL/glew.h"
 
 #include "IL/il.h"
 #include "IL/ilu.h"
@@ -25,8 +28,7 @@ using namespace Gfx;
 
 namespace
 {
-    std::string g_PathToAssets         = "../assets/";
-    std::string g_PathToDataTextures = "../data/graphic/textures/";
+    std::string g_PathToDataTextures = "/graphic/textures/";
 } // namespace
 
 namespace
@@ -80,8 +82,8 @@ namespace
         
         void UpdateMipmap(CTexture2DPtr _TexturePtr);
 
-		void SetTexture2DLabel(CTexture2DPtr _TexturePtr, const char* _pLabel);
-		void SetTexture3DLabel(CTexture3DPtr _TexturePtr, const char* _pLabel);
+        void SetTexture2DLabel(CTexture2DPtr _TexturePtr, const char* _pLabel);
+        void SetTexture3DLabel(CTexture3DPtr _TexturePtr, const char* _pLabel);
 
     private:
 
@@ -158,10 +160,6 @@ namespace
         typedef Base::CManagedPool<CInternTexture1D,  16, 0> CTexture1Ds;
         typedef Base::CManagedPool<CInternTexture2D, 256, 0> CTexture2Ds;
         typedef Base::CManagedPool<CInternTexture3D,  16, 0> CTexture3Ds;
-
-        typedef CTexture1Ds::CIterator CTexture1DIterator;
-        typedef CTexture2Ds::CIterator CTexture2DIterator;
-        typedef CTexture3Ds::CIterator CTexture3DIterator;
         
         typedef std::unordered_map<unsigned int, CTexture1DPtr> CTexture1DByHashs;
         typedef std::unordered_map<unsigned int, CTexture2DPtr> CTexture2DByHashs;
@@ -267,12 +265,14 @@ namespace
         
         m_Texture2DPtr = CreateTexture2D(TextureDescriptor, true, SDataBehavior::LeftAlone);
 
-		SetTexture2DLabel(m_Texture2DPtr, "Dummy Texture 2D");
+        SetTexture2DLabel(m_Texture2DPtr, "Dummy Texture 2D");
         
         // -----------------------------------------------------------------------------
         // Setup default settings in OpenGL
         // -----------------------------------------------------------------------------
+#ifndef __ANDROID__
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+#endif // __ANDROID__
 
         // -----------------------------------------------------------------------------
         // Set dirty handler of data textures
@@ -379,10 +379,10 @@ namespace
 
         CInternTexture2D* pInternTexture2D = static_cast<CInternTexture2D*>(Texture2DPtr.GetPtr());
 
-		if (pInternTexture2D == nullptr)
-		{
-			return GetDummyTexture2D();
-		}
+        if (pInternTexture2D == nullptr)
+        {
+            return GetDummyTexture2D();
+        }
 
         if (Hash != 0)
         {
@@ -518,11 +518,13 @@ namespace
         // -----------------------------------------------------------------------------
         // Upload data to texture
         // -----------------------------------------------------------------------------
-        glTextureSubImage2D(TextureHandle, 0, Offset[0], Offset[1], UpdateSize[0], UpdateSize[1], Format, Type, _pBytes);
+        glBindTexture(GL_TEXTURE_2D, TextureHandle);
+
+        glTexSubImage2D(GL_TEXTURE_2D, 0, Offset[0], Offset[1], UpdateSize[0], UpdateSize[1], Format, Type, _pBytes);
         
         if (_UpdateMipLevels)
         {
-            glGenerateTextureMipmap(TextureHandle);
+            glGenerateMipmap(GL_TEXTURE_2D);
         }
     }
 
@@ -560,7 +562,9 @@ namespace
         // -----------------------------------------------------------------------------
         if (pInternTextureArray->m_Info.m_IsCubeTexture)
         {
-            glTextureSubImage3D(TextureHandle, 0, Offset[0], Offset[1], _IndexOfSlice, UpdateSize[0], UpdateSize[1], 1, Format, Type, _pBytes);
+            glBindTexture(GL_TEXTURE_2D, TextureHandle);
+
+            glTexSubImage3D(GL_TEXTURE_2D, 0, Offset[0], Offset[1], _IndexOfSlice, UpdateSize[0], UpdateSize[1], 1, Format, Type, _pBytes);
         }
         else
         {
@@ -603,7 +607,9 @@ namespace
         // -----------------------------------------------------------------------------
         if (pInternTextureArray->m_Info.m_IsCubeTexture)
         {
-            glTextureSubImage3D(TextureHandle, 0, Offset[0], Offset[1], _IndexOfSlice, UpdateSize[0], UpdateSize[1], 1, Format, Type, pInternTexture->GetPixels());
+            glBindTexture(GL_TEXTURE_2D, TextureHandle);
+
+            glTexSubImage3D(GL_TEXTURE_2D, 0, Offset[0], Offset[1], _IndexOfSlice, UpdateSize[0], UpdateSize[1], 1, Format, Type, pInternTexture->GetPixels());
         }
         else
         {
@@ -676,30 +682,41 @@ namespace
 
         assert(pInternTexture);
 
-        glGenerateTextureMipmap(pInternTexture->m_NativeTexture);
+        if (pInternTexture->IsCube())
+        {
+            glBindTexture(GL_TEXTURE_CUBE_MAP, pInternTexture->m_NativeTexture);
+
+            glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+        }
+        else
+        {
+            glBindTexture(GL_TEXTURE_2D, pInternTexture->m_NativeTexture);
+
+            glGenerateMipmap(GL_TEXTURE_2D);
+        }
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void CGfxTextureManager::SetTexture2DLabel(CTexture2DPtr _TexturePtr, const char* _pLabel)
-	{
-		assert(_pLabel != nullptr);
+    void CGfxTextureManager::SetTexture2DLabel(CTexture2DPtr _TexturePtr, const char* _pLabel)
+    {
+        assert(_pLabel != nullptr);
 
-		CInternTexture2D* pInternTexture = static_cast<CInternTexture2D*>(_TexturePtr.GetPtr());
+        CInternTexture2D* pInternTexture = static_cast<CInternTexture2D*>(_TexturePtr.GetPtr());
 
-		glObjectLabel(GL_TEXTURE, pInternTexture->m_NativeTexture, -1, _pLabel);
-	}
+        glObjectLabel(GL_TEXTURE, pInternTexture->m_NativeTexture, -1, _pLabel);
+    }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void CGfxTextureManager::SetTexture3DLabel(CTexture3DPtr _TexturePtr, const char* _pLabel)
-	{
-		assert(_pLabel != nullptr);
+    void CGfxTextureManager::SetTexture3DLabel(CTexture3DPtr _TexturePtr, const char* _pLabel)
+    {
+        assert(_pLabel != nullptr);
 
-		CInternTexture3D* pInternTexture = static_cast<CInternTexture3D*>(_TexturePtr.GetPtr());
+        CInternTexture3D* pInternTexture = static_cast<CInternTexture3D*>(_TexturePtr.GetPtr());
 
-		glObjectLabel(GL_TEXTURE, pInternTexture->m_NativeTexture, -1, _pLabel);
-	}
+        glObjectLabel(GL_TEXTURE, pInternTexture->m_NativeTexture, -1, _pLabel);
+    }
 
     // -----------------------------------------------------------------------------
 
@@ -763,9 +780,9 @@ namespace
                     return ;
                 }
 
-				// -----------------------------------------------------------------------------
-				// Create
-				// -----------------------------------------------------------------------------
+                // -----------------------------------------------------------------------------
+                // Create
+                // -----------------------------------------------------------------------------
                 if (_pTexture->IsCube())
                 {
                     Dt::CTextureCube* pDataTexture = static_cast<Dt::CTextureCube*>(_pTexture);
@@ -786,19 +803,19 @@ namespace
                     Texture2DPtr = InternCreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
                 }
 
-				// -----------------------------------------------------------------------------
-				// Label if an identifier exists
-				// -----------------------------------------------------------------------------
-				const char* pLabel = _pTexture->GetIdentifier().length() > 0 ? _pTexture->GetIdentifier().c_str() : 0;
+                // -----------------------------------------------------------------------------
+                // Label if an identifier exists
+                // -----------------------------------------------------------------------------
+                const char* pLabel = _pTexture->GetIdentifier().length() > 0 ? _pTexture->GetIdentifier().c_str() : 0;
 
-				if (pLabel != 0)
-				{
-					SetTexture2DLabel(Texture2DPtr, pLabel);
-				}
+                if (pLabel != 0)
+                {
+                    SetTexture2DLabel(Texture2DPtr, pLabel);
+                }
 
-				// -----------------------------------------------------------------------------
-				// Set to container
-				// -----------------------------------------------------------------------------
+                // -----------------------------------------------------------------------------
+                // Set to container
+                // -----------------------------------------------------------------------------
                 CInternTexture2D* pInternTexture2D = static_cast<CInternTexture2D*>(Texture2DPtr.GetPtr());
 
                 if (pInternTexture2D == nullptr)
@@ -942,24 +959,36 @@ namespace
             // -----------------------------------------------------------------------------
             // Load texture from file (either in assets or data)
             // -----------------------------------------------------------------------------
-            std::string    PathToTexture;
+            std::string PathToTexture;
+
+            PathToTexture = Core::AssetManager::GetPathToAssets() + "/" + _rDescriptor.m_pFileName;
+
+#ifdef __ANDROID__
+            const char* pPathToTexture = 0;
+
+            pPathToTexture = PathToTexture.c_str();
+#else
             const wchar_t* pPathToTexture = 0;
 
-            PathToTexture = g_PathToAssets + _rDescriptor.m_pFileName;
-
             pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
-            
+#endif
+
             Result = ilLoadImage(pPathToTexture) == IL_TRUE;
 
             if (!Result)
             {
-                PathToTexture = g_PathToDataTextures + _rDescriptor.m_pFileName;
+                PathToTexture = Core::AssetManager::GetPathToData() + g_PathToDataTextures + _rDescriptor.m_pFileName;
 
+#ifdef __ANDROID__
+                pPathToTexture = PathToTexture.c_str();
+#else
                 pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
+#endif
+
 
                 Result = ilLoadImage(pPathToTexture) == IL_TRUE;
             }
-            
+
             if (Result)
             {
                 ILenum CheckILFormat = ilGetInteger(IL_IMAGE_FORMAT);
@@ -969,13 +998,13 @@ namespace
                 {
                     ilConvertImage(NativeILFormat, NativeILType);
                 }
-                
+
                 pTextureData = ilGetData();
-                
+
                 ImageWidth    = ilGetInteger(IL_IMAGE_WIDTH);
                 ImageHeight   = ilGetInteger(IL_IMAGE_HEIGHT);
                 NumberOfBytes = ilGetInteger(IL_IMAGE_SIZE_OF_DATA);
-                
+
                 assert(ImageWidth    > 0);
                 assert(ImageHeight   > 0);
                 assert(NumberOfBytes > 0);
@@ -1002,30 +1031,32 @@ namespace
         // -----------------------------------------------------------------------------
         // Generate OpenGL texture or render buffer
         // -----------------------------------------------------------------------------
-        glCreateTextures(GL_TEXTURE_2D, 1, &NativeTextureHandle);
+        glGenTextures(1, &NativeTextureHandle);
 
-		// -----------------------------------------------------------------------------
-		// Label texture if file name exists
-		// -----------------------------------------------------------------------------
-		if (_rDescriptor.m_pFileName != nullptr)
-		{
-			glObjectLabel(GL_TEXTURE, NativeTextureHandle, -1, _rDescriptor.m_pFileName);
-		}
+        glBindTexture(GL_TEXTURE_2D, NativeTextureHandle);
+
+        // -----------------------------------------------------------------------------
+        // Label texture if file name exists
+        // -----------------------------------------------------------------------------
+        if (_rDescriptor.m_pFileName != nullptr)
+        {
+            glObjectLabel(GL_TEXTURE, NativeTextureHandle, -1, _rDescriptor.m_pFileName);
+        }
 
         // -----------------------------------------------------------------------------
         // Binding
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_Binding & Gfx::CTextureBase::DepthStencilTarget)
         {
-            glTextureStorage2D(NativeTextureHandle, NumberOfMipmaps, GL_DEPTH_COMPONENT32F, ImageWidth, ImageHeight);
+            glTexStorage2D(GL_TEXTURE_2D, NumberOfMipmaps, GL_DEPTH_COMPONENT32F, ImageWidth, ImageHeight);
         }
         else if (_rDescriptor.m_Binding & Gfx::CTextureBase::RenderTarget)
         {   
-            glTextureStorage2D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
+            glTexStorage2D(GL_TEXTURE_2D, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
         }
         else
         {
-            glTextureStorage2D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
+            glTexStorage2D(GL_TEXTURE_2D, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
         }
 
         // -----------------------------------------------------------------------------
@@ -1033,7 +1064,7 @@ namespace
         // -----------------------------------------------------------------------------
         if (pTextureData != 0)
         {
-            glTextureSubImage2D(NativeTextureHandle, 0, 0, 0, ImageWidth, ImageHeight, GLFormat, GLType, pTextureData);
+            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, ImageWidth, ImageHeight, GLFormat, GLType, pTextureData);
 
             if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_NumberOfMipMapsFromSource && NumberOfMipmaps > 1)
             {
@@ -1055,7 +1086,7 @@ namespace
                     ImageHeight  = ilGetInteger(IL_IMAGE_HEIGHT);
                     pTextureData = ilGetData();
 
-                    glTextureSubImage2D(NativeTextureHandle, IndexOfMipMap, 0, 0, ImageWidth, ImageHeight, GLFormat, GLType, pTextureData);
+                    glTexSubImage2D(GL_TEXTURE_2D, IndexOfMipMap, 0, 0, ImageWidth, ImageHeight, GLFormat, GLType, pTextureData);
                 }
             }
         }
@@ -1065,13 +1096,18 @@ namespace
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
         {
-            glGenerateTextureMipmap(NativeTextureHandle);
+            glGenerateMipmap(GL_TEXTURE_2D);
         }
+
+        // -----------------------------------------------------------------------------
+        // Unbind
+        // -----------------------------------------------------------------------------
+        glBindTexture(GL_TEXTURE_2D, 0);
 
         // -----------------------------------------------------------------------------
         // Generate texture inside texture manager
         // -----------------------------------------------------------------------------
-        CTexture2DPtr Texture2DPtr = m_Textures2D.Allocate();
+        CTexture2DPtr Texture2DPtr = static_cast<CTexture2DPtr>(m_Textures2D.Allocate());
         
         assert(NumberOfBytes > 0);
         
@@ -1175,9 +1211,9 @@ namespace
             // -----------------------------------------------------------------------------
             if (_rDescriptor.m_pFileName != nullptr && _rDescriptor.m_pPixels == nullptr)
             {
-                ilDeleteImage(NativeImageName);
-
-                ilBindImage(0);
+//                 ilDeleteImage(NativeImageName);
+// 
+//                 ilBindImage(0);
             }
         }
         catch (...)
@@ -1238,30 +1274,32 @@ namespace
         // -----------------------------------------------------------------------------
         // Generate OpenGL texture or render buffer
         // -----------------------------------------------------------------------------
-		glCreateTextures(GL_TEXTURE_3D, 1, &NativeTextureHandle);
+        glGenTextures(1, &NativeTextureHandle);
 
-		// -----------------------------------------------------------------------------
-		// Label texture if file name exists
-		// -----------------------------------------------------------------------------
-		if (_rDescriptor.m_pFileName != nullptr)
-		{
-			glObjectLabel(GL_TEXTURE, NativeTextureHandle, -1, _rDescriptor.m_pFileName);
-		}
+        glBindTexture(GL_TEXTURE_3D, NativeTextureHandle);
+
+        // -----------------------------------------------------------------------------
+        // Label texture if file name exists
+        // -----------------------------------------------------------------------------
+        if (_rDescriptor.m_pFileName != nullptr)
+        {
+            glObjectLabel(GL_TEXTURE, NativeTextureHandle, -1, _rDescriptor.m_pFileName);
+        }
 
         // -----------------------------------------------------------------------------
         // Binding
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_Binding & Gfx::CTextureBase::DepthStencilTarget)
         {
-            glTextureStorage3D(NativeTextureHandle, NumberOfMipmaps, GL_DEPTH_COMPONENT32F, ImageWidth, ImageHeight, ImageDepth);
+            glTexStorage3D(GL_TEXTURE_3D, NumberOfMipmaps, GL_DEPTH_COMPONENT32F, ImageWidth, ImageHeight, ImageDepth);
         }
         else if (_rDescriptor.m_Binding & Gfx::CTextureBase::RenderTarget)
         {
-            glTextureStorage3D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight, ImageDepth);
+            glTexStorage3D(GL_TEXTURE_3D, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight, ImageDepth);
         }
         else
         {
-            glTextureStorage3D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight, ImageDepth);
+            glTexStorage3D(GL_TEXTURE_3D, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight, ImageDepth);
         }
 
         // -----------------------------------------------------------------------------
@@ -1269,7 +1307,7 @@ namespace
         // -----------------------------------------------------------------------------
         if (pTextureData != 0)
         {
-            glTextureSubImage3D(NativeTextureHandle, 0, 0, 0, 0, ImageWidth, ImageHeight, ImageDepth, GLFormat, GLType, pTextureData);
+            glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, ImageWidth, ImageHeight, ImageDepth, GLFormat, GLType, pTextureData);
         }
 
         // -----------------------------------------------------------------------------
@@ -1277,13 +1315,13 @@ namespace
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
         {
-            glGenerateTextureMipmap(NativeTextureHandle);
+            glGenerateMipmap(GL_TEXTURE_3D);
         }
 
         // -----------------------------------------------------------------------------
         // Generate texture inside texture manager
         // -----------------------------------------------------------------------------
-        CTexture3DPtr Texture3DPtr = m_Textures3D.Allocate();
+        CTexture3DPtr Texture3DPtr = static_cast<CTexture3DPtr>(m_Textures3D.Allocate());
 
         assert(NumberOfBytes > 0);
 
@@ -1456,20 +1494,31 @@ namespace
             // -----------------------------------------------------------------------------
             // Load texture from file (either in assets or data)
             // -----------------------------------------------------------------------------
-            std::string    PathToTexture;
+            std::string PathToTexture;
+
+            PathToTexture = Core::AssetManager::GetPathToAssets() + "/" + _rDescriptor.m_pFileName;
+
+#ifdef __ANDROID__
+            const char* pPathToTexture = 0;
+
+            pPathToTexture = PathToTexture.c_str();
+#else
             const wchar_t* pPathToTexture = 0;
 
-            PathToTexture = g_PathToAssets + _rDescriptor.m_pFileName;
-
             pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
-            
+#endif
+
             ImageIsLoaded = ilLoadImage(pPathToTexture) == IL_TRUE;
 
             if (!ImageIsLoaded)
             {
-                PathToTexture = g_PathToDataTextures + _rDescriptor.m_pFileName;
+                PathToTexture = Core::AssetManager::GetPathToData() + g_PathToDataTextures + _rDescriptor.m_pFileName;
 
+#ifdef __ANDROID__
+                pPathToTexture = PathToTexture.c_str();
+#else
                 pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
+#endif
 
                 ImageIsLoaded = ilLoadImage(pPathToTexture) == IL_TRUE;
             }
@@ -1478,7 +1527,7 @@ namespace
             {
                 NumberOfFaces = ilGetInteger(IL_NUM_FACES);
             }
-            
+
             if (ImageIsLoaded && NumberOfFaces == 5)
             {
                 ILenum CheckILFormat = ilGetInteger(IL_IMAGE_FORMAT);
@@ -1488,13 +1537,13 @@ namespace
                 {
                     ilConvertImage(NativeILFormat, NativeILType);
                 }
-                
+
                 pTextureData = ilGetData();
-                
+
                 ImageWidth    = ilGetInteger(IL_IMAGE_WIDTH);
                 ImageHeight   = ilGetInteger(IL_IMAGE_HEIGHT);
                 NumberOfBytes = ilGetInteger(IL_IMAGE_SIZE_OF_DATA);
-                
+
                 assert(ImageWidth    > 0);
                 assert(ImageHeight   > 0);
                 assert(NumberOfBytes > 0);
@@ -1519,30 +1568,32 @@ namespace
         // -----------------------------------------------------------------------------
         // Generate OpenGL texture or render buffer
         // -----------------------------------------------------------------------------
-		glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &NativeTextureHandle);
+        glGenTextures(1, &NativeTextureHandle);
 
-		// -----------------------------------------------------------------------------
-		// Label texture if file name exists
-		// -----------------------------------------------------------------------------
-		if (_rDescriptor.m_pFileName != nullptr)
-		{
-			glObjectLabel(GL_TEXTURE, NativeTextureHandle, -1, _rDescriptor.m_pFileName);
-		}
+        glBindTexture(GL_TEXTURE_CUBE_MAP, NativeTextureHandle);
+
+        // -----------------------------------------------------------------------------
+        // Label texture if file name exists
+        // -----------------------------------------------------------------------------
+        if (_rDescriptor.m_pFileName != nullptr)
+        {
+            glObjectLabel(GL_TEXTURE, NativeTextureHandle, -1, _rDescriptor.m_pFileName);
+        }
 
         // -----------------------------------------------------------------------------
         // Binding
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_Binding & Gfx::CTextureBase::DepthStencilTarget)
         {
-            glTextureStorage2D(NativeTextureHandle, NumberOfMipmaps, GL_DEPTH_COMPONENT32F, ImageWidth, ImageHeight);
+            glTexStorage2D(GL_TEXTURE_CUBE_MAP, NumberOfMipmaps, GL_DEPTH_COMPONENT32F, ImageWidth, ImageHeight);
         }
         else if (_rDescriptor.m_Binding & Gfx::CTextureBase::RenderTarget)
         {
-            glTextureStorage2D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
+            glTexStorage2D(GL_TEXTURE_CUBE_MAP, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
         }
         else
         {
-            glTextureStorage2D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
+            glTexStorage2D(GL_TEXTURE_CUBE_MAP, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
         }
 
         // -----------------------------------------------------------------------------
@@ -1550,7 +1601,7 @@ namespace
         // -----------------------------------------------------------------------------
         if (ImageIsLoaded)
         {
-            for (ILuint IndexOfFace = 0; IndexOfFace <= NumberOfFaces; ++IndexOfFace)
+            for (int IndexOfFace = 0; IndexOfFace <= NumberOfFaces; ++IndexOfFace)
             {
                 ilBindImage(NativeImageName);
 
@@ -1573,7 +1624,7 @@ namespace
 
                 pTextureData = ilGetData();
 
-                glTextureSubImage3D(NativeTextureHandle, 0, 0, 0, IndexOfFace, ImageWidth, ImageHeight, 1, GLFormat, GLType, pTextureData);
+                glTexSubImage3D(GL_TEXTURE_CUBE_MAP, 0, 0, 0, IndexOfFace, ImageWidth, ImageHeight, 1, GLFormat, GLType, pTextureData);
             }
         }
 
@@ -1582,13 +1633,18 @@ namespace
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
         {
-            glGenerateTextureMipmap(NativeTextureHandle);
+            glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
         }
+
+        // -----------------------------------------------------------------------------
+        // Unbind
+        // -----------------------------------------------------------------------------
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
         // -----------------------------------------------------------------------------
         // Generate texture inside texture manager
         // -----------------------------------------------------------------------------
-        CTexture2DPtr Texture2DPtr = m_Textures2D.Allocate();
+        CTexture2DPtr Texture2DPtr = static_cast<CTexture2DPtr>(m_Textures2D.Allocate());
 
         assert(NumberOfBytes > 0);
 
@@ -1833,22 +1889,22 @@ namespace
             GL_RGB8UI,
             GL_RGBA8UI,
             
-            GL_R16,
-            GL_RG16,
-            GL_RGB16,
-            GL_RGBA16,
-            GL_R16,
-            GL_RG16,
-            GL_RGB16,
-            GL_RGBA16,
-            GL_R16,
-            GL_RG16,
-            GL_RGB16,
-            GL_RGBA16,
-            GL_R16,
-            GL_RG16,
-            GL_RGB16,
-            GL_RGBA16,
+            GL_NONE, //GL_R16,
+            GL_NONE, //GL_RG16,
+            GL_NONE, //GL_RGB16,
+            GL_NONE, //GL_RGBA16,
+            GL_NONE, //GL_R16,
+            GL_NONE, //GL_RG16,
+            GL_NONE, //GL_RGB16,
+            GL_NONE, //GL_RGBA16,
+            GL_NONE, //GL_R16,
+            GL_NONE, //GL_RG16,
+            GL_NONE, //GL_RGB16,
+            GL_NONE, //GL_RGBA16,
+            GL_NONE, //GL_R16,
+            GL_NONE, //GL_RG16,
+            GL_NONE, //GL_RGB16,
+            GL_NONE, //GL_RGBA16,
             GL_R16I,
             GL_RG16I,
             GL_RGB16I,
@@ -1875,7 +1931,7 @@ namespace
             GL_RGB32F,
             GL_RGBA32F,
             
-            GL_R3_G3_B2,
+            GL_NONE, //GL_R3_G3_B2,
             GL_RGBA4,
             GL_RGB5_A1,
             GL_RGB10_A2,
@@ -2039,10 +2095,10 @@ namespace
             GL_FLOAT,
             GL_FLOAT,
             
-            GL_UNSIGNED_BYTE_3_3_2,
+            GL_NONE, //GL_UNSIGNED_BYTE_3_3_2,
             GL_UNSIGNED_SHORT_4_4_4_4,
             GL_UNSIGNED_SHORT_5_5_5_1,
-            GL_UNSIGNED_INT_10_10_10_2,
+            GL_NONE, //GL_UNSIGNED_INT_10_10_10_2,
         };
         
         return s_NativeType[_Format];
@@ -2662,18 +2718,18 @@ namespace TextureManager
         CGfxTextureManager::GetInstance().UpdateMipmap(_TexturePtr);
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void SetTexture2DLabel(CTexture2DPtr _TexturePtr, const char* _pLabel)
-	{
-		CGfxTextureManager::GetInstance().SetTexture2DLabel(_TexturePtr, _pLabel);
-	}
+    void SetTexture2DLabel(CTexture2DPtr _TexturePtr, const char* _pLabel)
+    {
+        CGfxTextureManager::GetInstance().SetTexture2DLabel(_TexturePtr, _pLabel);
+    }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void SetTexture3DLabel(CTexture3DPtr _TexturePtr, const char* _pLabel)
-	{
-		CGfxTextureManager::GetInstance().SetTexture3DLabel(_TexturePtr, _pLabel);
-	}
+    void SetTexture3DLabel(CTexture3DPtr _TexturePtr, const char* _pLabel)
+    {
+        CGfxTextureManager::GetInstance().SetTexture3DLabel(_TexturePtr, _pLabel);
+    }
 } // namespace TextureManager
 } // namespace Gfx

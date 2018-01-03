@@ -7,7 +7,7 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(std140, binding = 2) uniform UB0
+layout(std140, binding = 2) uniform UB2
 {
     vec4  ps_TilingOffset;
     vec3  ps_Color;
@@ -16,7 +16,7 @@ layout(std140, binding = 2) uniform UB0
     float ps_MetalMask;
 };
 
-layout(row_major, std140, binding = 3) uniform UB1
+layout(row_major, std140, binding = 3) uniform UB3
 {
     vec4 ps_LightPosition;
     vec4 ps_LightDirection;

@@ -7,14 +7,9 @@
 #include "common_gbuffer.glsl"
 
 // -----------------------------------------------------------------------------
-// Input from system
-// -----------------------------------------------------------------------------
-in vec4 gl_FragCoord;
-
-// -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(row_major, std140, binding = 2) uniform UB0
+layout(row_major, std140, binding = 2) uniform UB2
 {
     mat4 ps_InverseCameraProjection;
     mat4 ps_InverseCameraView;
@@ -23,7 +18,7 @@ layout(row_major, std140, binding = 2) uniform UB0
     uint ps_ExposureHistoryIndex;
 };
 
-layout(row_major, std140, binding = 3) uniform UB1
+layout(row_major, std140, binding = 3) uniform UB3
 {
     vec4  ps_LightPosition;
     vec4  ps_LightDirection;

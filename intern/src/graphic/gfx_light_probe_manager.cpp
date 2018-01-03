@@ -788,6 +788,8 @@ namespace
         ReflectionProbePropertiesBuffer.m_Properties[0] = static_cast<float>(HistogramRenderer::GetCurrentExposureHistoryIndex());
         ReflectionProbePropertiesBuffer.m_Properties[1] = 1.0f;
 
+        BufferManager::UploadBufferData(m_ReflectionProbePropertiesBufferPtr, &ReflectionProbePropertiesBuffer);
+
         // -----------------------------------------------------------------------------
         // Actors
         // -----------------------------------------------------------------------------
@@ -832,7 +834,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-                ContextManager::SetTexture(0, pSkyFacet->GetCubemapSetPtr()->GetTexture(0));
+                ContextManager::SetTexture(0, static_cast<Gfx::CTextureBasePtr>(pSkyFacet->GetCubemapPtr()));
 
                 // -----------------------------------------------------------------------------
                 // Render

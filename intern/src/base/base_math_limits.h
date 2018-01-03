@@ -69,15 +69,17 @@ namespace MATH
     template <>
     const typename SLimits<unsigned long>::X SLimits<unsigned long>::s_Max = X(ULONG_MAX);
 
+#ifndef __ANDROID__
     template <>
     const typename SLimits<long long>::X SLimits<long long>::s_Min = X(-_LLONG_MAX - _C2);
     template <>
     const typename SLimits<long long>::X SLimits<long long>::s_Max = X(_LLONG_MAX);
-    
+
     template <>
     const typename SLimits<unsigned long long>::X SLimits<unsigned long long>::s_Min = X(0);
     template <>
     const typename SLimits<unsigned long long>::X SLimits<unsigned long long>::s_Max = X(_ULLONG_MAX);
+#endif // __ANDROID__
     
     template <>
     const typename SLimits<float>::X SLimits<float>::s_Min = X(FLT_MIN);
@@ -89,8 +91,10 @@ namespace MATH
     template <>
     const typename SLimits<double>::X SLimits<double>::s_Max = X(DBL_MAX);
     
+#ifndef __ANDROID__
     template <>
     const typename SLimits<long double>::X SLimits<long double>::s_Min = X(LDBL_MIN);
     template <>
     const typename SLimits<long double>::X SLimits<long double>::s_Max = X(LDBL_MAX);
+#endif
 } // namespace MATH

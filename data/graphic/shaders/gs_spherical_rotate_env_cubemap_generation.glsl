@@ -24,13 +24,13 @@ layout(triangle_strip, max_vertices = 18) out;
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(row_major, std140, binding = 2) uniform UB0
+layout(row_major, std140, binding = 2) uniform UB2
 {
     mat4 m_CubeProjectionMatrix;
     mat4 m_CubeViewMatrix[6];
 };
 
-layout(row_major, std140, binding = 3) uniform UB1
+layout(row_major, std140, binding = 3) uniform UB3
 {
     mat4 m_ModelMatrix;
 };
@@ -54,10 +54,10 @@ void main()
 {
     for( int FaceIndex = 0; FaceIndex < 6; ++FaceIndex )
     {
-        gl_Layer = FaceIndex;
-
         for( int IndexOfVertex = 0; IndexOfVertex < 3; IndexOfVertex++ )
         {
+            gl_Layer = FaceIndex;
+            
             out_Normal  = -in_Normal[IndexOfVertex];
             out_UV      = in_UV[IndexOfVertex];
             gl_Position = m_CubeProjectionMatrix * m_CubeViewMatrix[FaceIndex] * m_ModelMatrix * gl_in[IndexOfVertex].gl_Position;

@@ -8,6 +8,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_asset_manager.h"
 #include "core/core_time.h"
 
 #include "data/data_texture_manager.h"
@@ -18,11 +19,6 @@
 
 using namespace Dt;
 using namespace Dt::TextureManager;
-
-namespace
-{
-	std::string g_PathToAssets = "../assets/";
-} // namespace
 
 namespace
 {
@@ -192,7 +188,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Initialize devil image engine. But we only initialize core part.
         // -----------------------------------------------------------------------------
-        ilInit();
+//         ilInit();
     }
 
     // -----------------------------------------------------------------------------
@@ -296,9 +292,13 @@ namespace
             // -----------------------------------------------------------------------------
             std::string PathToTexture;
 
-            PathToTexture = g_PathToAssets + _rDescriptor.m_pFileName;
+            PathToTexture = Core::AssetManager::GetPathToAssets() + "/" + _rDescriptor.m_pFileName;
 
+#if __ANDROID__
+            const char* pPathToTexture = PathToTexture.c_str();
+#else
             const wchar_t* pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
+#endif
 
             Result = ilLoadImage(pPathToTexture) == IL_TRUE;
 
@@ -451,12 +451,16 @@ namespace
             // -----------------------------------------------------------------------------
             std::string PathToTexture;
 
-			PathToTexture = g_PathToAssets + _rDescriptor.m_pFileName;
+			PathToTexture = Core::AssetManager::GetPathToAssets() + "/" + _rDescriptor.m_pFileName;
 
             NativeILFormat = ConvertILImageFormat(_rDescriptor.m_Format);
             NativeILType   = ConvertILImageType(_rDescriptor.m_Format);
 
+#if __ANDROID__
+            const char* pPathToTexture = PathToTexture.c_str();
+#else
             const wchar_t* pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
+#endif
             
             Result = ilLoadImage(pPathToTexture) == IL_TRUE;
             
@@ -589,9 +593,9 @@ namespace
             // -----------------------------------------------------------------------------
             if (_rDescriptor.m_pFileName != nullptr && _rDescriptor.m_pPixels == nullptr)
             {
-                ilDeleteImage(NativeImageName);
-
-                ilBindImage(0);
+//                 ilDeleteImage(NativeImageName);
+// 
+//                 ilBindImage(0);
             }
         }
         catch (...)
@@ -677,12 +681,16 @@ namespace
             // -----------------------------------------------------------------------------
             std::string PathToTexture;
 
-            PathToTexture = g_PathToAssets + _rDescriptor.m_pFileName;
+            PathToTexture = Core::AssetManager::GetPathToAssets() + "/" + _rDescriptor.m_pFileName;
 
             NativeILFormat = ConvertILImageFormat(_rDescriptor.m_Format);
             NativeILType   = ConvertILImageType(_rDescriptor.m_Format);
 
+#if __ANDROID__
+            const char* pPathToTexture = PathToTexture.c_str();
+#else
             const wchar_t* pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
+#endif
 
             ImageIsLoaded = ilLoadImage(pPathToTexture) == IL_TRUE;
 
@@ -739,7 +747,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Setup the new texture inside manager
             // -----------------------------------------------------------------------------
-            if (_rDescriptor.m_pFileName)   rTexture.m_FileName = _rDescriptor.m_pFileName;
+            if (_rDescriptor.m_pFileName)   rTexture.m_FileName   = _rDescriptor.m_pFileName;
             if (_rDescriptor.m_pIdentifier) rTexture.m_Identifier = _rDescriptor.m_pIdentifier;
 
             rTexture.m_Hash              = Hash;

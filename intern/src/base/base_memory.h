@@ -12,7 +12,8 @@
 #include "base/base_typedef.h"
 
 #include <assert.h>
-#include <memory>
+#include <cstdlib>
+#include <cstring>
 #include <new>
 
 namespace MEM
@@ -53,7 +54,7 @@ namespace MEM
 {
     void* CMemory::Allocate(Size _NumberOfBytes)
     {
-        return ::malloc(_NumberOfBytes);
+        return std::malloc(_NumberOfBytes);
     }
     
     // -----------------------------------------------------------------------------
@@ -61,8 +62,8 @@ namespace MEM
     void* CMemory::Copy(Size _NumberOfBytes, void* _pChunk)
     {
         void* pCopy = Allocate(_NumberOfBytes);
-        
-        ::memcpy(pCopy, _pChunk, _NumberOfBytes);
+
+        std::memcpy(pCopy, _pChunk, _NumberOfBytes);
         
         return pCopy;
     }
@@ -71,21 +72,21 @@ namespace MEM
 
     void CMemory::Copy(void* _pChunkTo, const void* _pChunkFrom, Size _NumberOfBytes)
     {
-        ::memcpy(_pChunkTo, _pChunkFrom, _NumberOfBytes);
+        std::memcpy(_pChunkTo, _pChunkFrom, _NumberOfBytes);
     }
     
     // -----------------------------------------------------------------------------
     
     void CMemory::Free(void* _pChunk)
     {
-        ::free(_pChunk);
+        std::free(_pChunk);
     }
     
     // -----------------------------------------------------------------------------
     
     void CMemory::Zero(void* _pChunk, Size _NumberOfBytes)
     {
-        ::memset(_pChunk, 0, _NumberOfBytes);
+        std::memset(_pChunk, 0, _NumberOfBytes);
     }
     
     // -----------------------------------------------------------------------------

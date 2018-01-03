@@ -389,6 +389,8 @@ namespace
     
     void CGfxAreaLightRenderer::Render()
     {
+        if (m_RenderJobs.size() == 0) return;
+
         Performance::BeginEvent("Area Lights");
 
         // -----------------------------------------------------------------------------

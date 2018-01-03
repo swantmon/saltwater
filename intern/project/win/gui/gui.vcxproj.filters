@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\gui\gui_event_handler.cpp">
+      <Filter>interface\events</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\gui_debug_state.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\gui_exit_state.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\gui_intro_state.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\gui_load_map_state.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\gui_main_menu_state.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\gui_play_state.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\gui_start_state.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\gui_unload_map_state.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\gui_edit_state.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\gui_precompiled.cpp" />
+    <ClCompile Include="..\..\..\src\gui\gui_input_manager.cpp">
+      <Filter>input</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\gui\gui_event_delegate.h">
+      <Filter>interface\events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\gui_event_handler.h">
+      <Filter>interface\events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\gui_debug_state.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\gui_exit_state.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\gui_intro_state.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\gui_load_map_state.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\gui_main_menu_state.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\gui_play_state.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\gui_start_state.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\gui_unload_map_state.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\gui_edit_state.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\gui_precompiled.h" />
+    <ClInclude Include="..\..\..\src\gui\gui_input_manager.h">
+      <Filter>input</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="interface">
+      <UniqueIdentifier>{e54da3b6-6eca-43af-9f49-83c1363dfe93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="interface\events">
+      <UniqueIdentifier>{2b7670eb-7d68-4b72-8b3a-1702290ae162}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="states">
+      <UniqueIdentifier>{2aa2998c-e628-4bd0-8b46-ed4de4242779}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="input">
+      <UniqueIdentifier>{32741b68-19ae-4dd2-8ddf-a33c9bbc8b52}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -33,7 +33,7 @@ namespace MATH
 
         inline  CCircle();
         inline  CCircle(const CVector& _rCenter, X _Radius);
-        inline  CCircle(X _X, X _Y, X _Radius);
+        inline  CCircle(X _AxisX, X _AxisY, X _Radius);
         inline  CCircle(const CCircle& _rCpy);
         inline ~CCircle();
 
@@ -50,7 +50,7 @@ namespace MATH
 
         inline void Set(const CThis& _rCircle);
         inline void Set(const CVector& _rCenter, X _Radius);
-        inline void Set(X _X, X _Y, X _Radius);
+        inline void Set(X _AxisX, X _AxisY, X _Radius);
 
     public:
 
@@ -100,8 +100,8 @@ namespace MATH
     // -----------------------------------------------------------------------------
 
     template<typename T>
-    CCircle<T>::CCircle<T>(X _X, X _Y, X _Radius)
-        : m_Center(_X, _Y)
+    CCircle<T>::CCircle<T>(X _AxisX, X _AxisY, X _Radius)
+        : m_Center(_AxisX, _AxisY)
         , m_Radius(_Radius)
     {
     }
@@ -170,10 +170,10 @@ namespace MATH
     // -----------------------------------------------------------------------------
 
     template<typename T>
-    void CCircle<T>::Set(X _X, X _Y, X _Radius)
+    void CCircle<T>::Set(X _AxisX, X _AxisY, X _Radius)
     {
-        m_Center[0] = _X;
-        m_Center[1] = _Y;
+        m_Center[0] = _AxisX;
+        m_Center[1] = _AxisY;
         m_Radius = _Radius;
     }
 

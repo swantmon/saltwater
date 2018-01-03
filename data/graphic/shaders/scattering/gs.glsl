@@ -44,10 +44,10 @@ layout(location = 2) out vec2 out_UV;
 // -----------------------------------------------------------------------------
 void main() 
 {
-    gl_Layer = int(m_Layer);
-
     for( int IndexOfVertex = 0; IndexOfVertex < 3; IndexOfVertex++ )
     {
+        gl_Layer = int(m_Layer);
+
         out_UV    = in_UV[IndexOfVertex];
         
         gl_Position = gl_in[IndexOfVertex].gl_Position;

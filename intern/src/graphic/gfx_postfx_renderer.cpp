@@ -695,8 +695,8 @@ namespace
 
         CTextureBasePtr TexturePtrs[2][5] =
         {
-            { ColorOneTexturePtr, EdgesTexPtr, WeightsTexPtr, m_SMAAAreaTexture, m_SMAASearchTexture },
-            { ColorTwoTexturePtr, EdgesTexPtr, WeightsTexPtr, m_SMAAAreaTexture, m_SMAASearchTexture }
+            { ColorOneTexturePtr, EdgesTexPtr, WeightsTexPtr, static_cast<CTextureBasePtr>(m_SMAAAreaTexture), static_cast<CTextureBasePtr>(m_SMAASearchTexture) },
+            { ColorTwoTexturePtr, EdgesTexPtr, WeightsTexPtr, static_cast<CTextureBasePtr>(m_SMAAAreaTexture), static_cast<CTextureBasePtr>(m_SMAASearchTexture) }
         };
 
         m_SMAATextureSetPtr[0] = TextureManager::CreateTextureSet(TexturePtrs[0], 5);
@@ -1056,8 +1056,8 @@ namespace
 
         CTextureBasePtr TexturePtrs[2][5] =
         {
-            { ColorOneTexturePtr, EdgesTexPtr, WeightsTexPtr, m_SMAAAreaTexture, m_SMAASearchTexture },
-            { ColorTwoTexturePtr, EdgesTexPtr, WeightsTexPtr, m_SMAAAreaTexture, m_SMAASearchTexture }
+            { ColorOneTexturePtr, EdgesTexPtr, WeightsTexPtr, static_cast<CTextureBasePtr>(m_SMAAAreaTexture), static_cast<CTextureBasePtr>(m_SMAASearchTexture) },
+            { ColorTwoTexturePtr, EdgesTexPtr, WeightsTexPtr, static_cast<CTextureBasePtr>(m_SMAAAreaTexture), static_cast<CTextureBasePtr>(m_SMAASearchTexture) }
         };
 
         m_SMAATextureSetPtr[0] = TextureManager::CreateTextureSet(TexturePtrs[0], 5);

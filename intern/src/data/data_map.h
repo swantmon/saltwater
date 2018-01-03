@@ -90,7 +90,7 @@ namespace Map
 
     CRegion* GetRegions();                                                                                                                                          ///< Returns a pointer to the region array.
     CRegion& GetRegionByID(unsigned int _RegionID);                                                                                                                 ///< Returns the regions with the passed ID.
-    CRegion& GetRegionByPosition(float _X, float _Y);                                                                                                               ///< Returns the region that covers the given world coordinate.
+    CRegion& GetRegionByPosition(float _AxisX, float _AxisY);                                                                                                               ///< Returns the region that covers the given world coordinate.
     CRegion& GetRegionByPosition(const Base::Float3& _rPosition);                                                                                                   ///< Returns the region that covers the given world coordinate.
     
     Base::Size GetNumberOfRegions();                                                                                                                                ///< Returns the number of regions in the map.

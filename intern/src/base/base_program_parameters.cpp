@@ -107,42 +107,66 @@ namespace IO
 
     int CProgramParameters::GetInt(const std::string& _rOption)
     {
+#ifdef __ANDROID__ 
+        return atoi(m_Container[_rOption].c_str());
+#else
         return std::stoi(m_Container[_rOption]);
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     unsigned int CProgramParameters::GetUInt(const std::string& _rOption)
     {
+#ifdef __ANDROID__ 
+        return atoi(m_Container[_rOption].c_str());
+#else
         return std::stoul(m_Container[_rOption]);
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     long CProgramParameters::GetLong(const std::string& _rOption)
     {
+#ifdef __ANDROID__ 
+        return strtol(m_Container[_rOption].c_str(), NULL, 0);
+#else
         return std::stol(m_Container[_rOption]);
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     unsigned long CProgramParameters::GetULong(const std::string& _rOption)
     {
+#ifdef __ANDROID__ 
+        return strtoul(m_Container[_rOption].c_str(), NULL, 0);
+#else
         return std::stoul(m_Container[_rOption]);
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     long long CProgramParameters::GetLongLong(const std::string& _rOption)
     {
+#ifdef __ANDROID__ 
+        return strtoll(m_Container[_rOption].c_str(), NULL, 0);
+#else
         return std::stoll(m_Container[_rOption]);
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     unsigned long long CProgramParameters::GetULongLong(const std::string& _rOption)
     {
+#ifdef __ANDROID__ 
+        return strtoull(m_Container[_rOption].c_str(), NULL, 0);
+#else
         return std::stoull(m_Container[_rOption]);
+#endif
     }
 
     // -----------------------------------------------------------------------------
@@ -156,14 +180,22 @@ namespace IO
 
     float CProgramParameters::GetFloat(const std::string& _rOption)
     {
+#ifdef __ANDROID__ 
+        return atof(m_Container[_rOption].c_str());
+#else
         return std::stof(m_Container[_rOption]);
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     double CProgramParameters::GetDouble(const std::string& _rOption)
     {
+#ifdef __ANDROID__ 
+        return strtod(m_Container[_rOption].c_str(), NULL);
+#else
         return std::stod(m_Container[_rOption]);
+#endif
     }
 
     // -----------------------------------------------------------------------------

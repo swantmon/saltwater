@@ -33,8 +33,6 @@
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
 
-#include "opencv2/opencv.hpp"
-
 using namespace Gfx;
 
 namespace
@@ -42,19 +40,19 @@ namespace
     const float g_RadiusGround     = 6360.0f;
     const float g_RadiusAtmosphere = 6420.0f;
 
-    const uint g_TransmittanceWidth  = 256;
-    const uint g_TransmittanceHeight = 64;
+    const unsigned int g_TransmittanceWidth  = 256;
+    const unsigned int g_TransmittanceHeight = 64;
 
-    const uint g_InscatterAltitude = 128;
-    const uint g_InscatterMu       = 128;         // view / zenith
-    const uint g_InscatterMuS      = 32;          // sun / zenith
-    const uint g_InscatterNu       = 8;           // view / sun
-    const uint g_InscatterWidth    = g_InscatterMuS * g_InscatterNu;
-    const uint g_InscatterHeight   = g_InscatterMu;
-    const uint g_InscatterDepth    = g_InscatterAltitude;
+    const unsigned int g_InscatterAltitude = 128;
+    const unsigned int g_InscatterMu       = 128;         // view / zenith
+    const unsigned int g_InscatterMuS      = 32;          // sun / zenith
+    const unsigned int g_InscatterNu       = 8;           // view / sun
+    const unsigned int g_InscatterWidth    = g_InscatterMuS * g_InscatterNu;
+    const unsigned int g_InscatterHeight   = g_InscatterMu;
+    const unsigned int g_InscatterDepth    = g_InscatterAltitude;
 
-    const uint g_IrradianceWidth  = 64;
-    const uint g_IrradianceHeight = 16;
+    const unsigned int g_IrradianceWidth  = 64;
+    const unsigned int g_IrradianceHeight = 16;
 }
 
 namespace 
@@ -130,7 +128,7 @@ namespace
 
         struct SGSLayer
         {
-            uint m_Layer;
+            unsigned int m_Layer;
             float Padding[3];
         };
 
@@ -151,7 +149,7 @@ namespace
         {
             Base::Float4 g_SunDirection;
             Base::Float4 g_SunIntensity;
-            uint         ps_ExposureHistoryIndex;
+            unsigned int ps_ExposureHistoryIndex;
         };
 
         class CInternSkyFacet : public CSkyFacet
@@ -221,8 +219,6 @@ namespace
         void RenderSkyboxFromLUT(CInternSkyFacet* _pOutput, float _Intensity = 1.0f);
 
         void PrecomputeScattering();
-
-        void PrecomputeLUT();
     };
 } // namespace 
 
@@ -671,11 +667,6 @@ namespace
         // Acquire an selection ticket at selection renderer
         // -----------------------------------------------------------------------------
         m_pSelectionTicket = &SelectionRenderer::AcquireTicket(0, 0, 1, 1, SPickFlag::AR);
-
-        // -----------------------------------------------------------------------------
-        // Generate LUT
-        // -----------------------------------------------------------------------------
-        PrecomputeLUT();
 
         // -----------------------------------------------------------------------------
         // Precompute Scattering
@@ -1153,9 +1144,9 @@ namespace
 
         ContextManager::ResetSampler(0);
 
-        ContextManager::ResetConstantBuffer(2);
+        ContextManager::ResetConstantBuffer(0);
 
-        ContextManager::ResetConstantBuffer(4);
+        ContextManager::ResetConstantBuffer(3);
 
         ContextManager::ResetInputLayout();
 
@@ -1938,15 +1929,15 @@ namespace
         CShaderPtr VSPtr = ShaderManager::CompileVS("scattering/vs.glsl", "main");;
         CShaderPtr GSPtr = ShaderManager::CompileGS("scattering/gs.glsl", "main");;
 
-        //////////////////////////////////////////////////////////////
+        // -----------------------------------------------------------------------------
         // Transmittance
-        //////////////////////////////////////////////////////////////
+        // -----------------------------------------------------------------------------
 
         CShaderPtr m_TransmittanceMaterial = ShaderManager::CompilePS("scattering/scattering_transmittance.glsl", "main");
 
-        //////////////////////////////////////////////////////////////
+        // -----------------------------------------------------------------------------
         // Irradiance
-        //////////////////////////////////////////////////////////////
+        // -----------------------------------------------------------------------------
 
         CShaderPtr m_IrradianceSingleMaterial = ShaderManager::CompilePS("scattering/scattering_irradiance_single.glsl", "main");
 
@@ -1954,9 +1945,9 @@ namespace
 
         CShaderPtr m_IrradianceCopyMaterial = ShaderManager::CompilePS("scattering/scattering_irradiance_copy.glsl", "main");
 
-        //////////////////////////////////////////////////////////////
+        // -----------------------------------------------------------------------------
         // Inscatter
-        //////////////////////////////////////////////////////////////
+        // -----------------------------------------------------------------------------
 
         CShaderPtr m_InscatterSingleMaterial = ShaderManager::CompilePS("scattering/scattering_inscatter_single.glsl", "main");
 
@@ -1967,7 +1958,6 @@ namespace
         CShaderPtr m_InscatterCopySingleMaterial = ShaderManager::CompilePS("scattering/scattering_inscatter_copy_single.glsl", "main");
 
         CShaderPtr m_InscatterCopyMultipleMaterial = ShaderManager::CompilePS("scattering/scattering_inscatter_copy_multiple.glsl", "main");
-
 
         // -----------------------------------------------------------------------------
         // Mesh
@@ -2045,6 +2035,8 @@ namespace
 
         ContextManager::Draw(3, 0);
 
+        ContextManager::Flush();
+
         Performance::EndEvent();
 
         // -----------------------------------------------------------------------------
@@ -2063,6 +2055,8 @@ namespace
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
         ContextManager::Draw(3, 0);
+
+        ContextManager::Flush();
 
         Performance::EndEvent();
 
@@ -2104,6 +2098,8 @@ namespace
             BufferManager::UploadBufferData(m_PSLayerValues, &PSLayerValues);
 
             ContextManager::Draw(3, 0);
+
+            ContextManager::Flush();
         }
 
         ContextManager::ResetShaderGS();
@@ -2134,6 +2130,8 @@ namespace
         ContextManager::SetConstantBuffer(5, m_PSIrradianceK);
 
         ContextManager::Draw(3, 0);
+
+        ContextManager::Flush();
 
         Performance::EndEvent();
 
@@ -2169,6 +2167,8 @@ namespace
             BufferManager::UploadBufferData(m_GSLayer, &GSLayer);
 
             ContextManager::Draw(3, 0);
+
+            ContextManager::Flush();
         }
 
         ContextManager::ResetShaderGS();
@@ -2231,6 +2231,8 @@ namespace
                 BufferManager::UploadBufferData(m_PSLayerValues, &PSLayerValues);
 
                 ContextManager::Draw(3, 0);
+
+                ContextManager::Flush();
             }
 
             ContextManager::ResetShaderGS();
@@ -2249,6 +2251,8 @@ namespace
             ContextManager::SetShaderPS(m_IrradianceMultipleMaterial);
 
             ContextManager::Draw(3, 0);
+
+            ContextManager::Flush();
 
             Performance::EndEvent();
 
@@ -2289,6 +2293,8 @@ namespace
                 BufferManager::UploadBufferData(m_PSLayerValues, &PSLayerValues);
 
                 ContextManager::Draw(3, 0);
+
+                ContextManager::Flush();
             }
 
             ContextManager::ResetShaderGS();
@@ -2318,6 +2324,8 @@ namespace
             ContextManager::SetShaderPS(m_IrradianceCopyMaterial);
 
             ContextManager::Draw(3, 0);
+
+            ContextManager::Flush();
 
             Performance::EndEvent();
 
@@ -2352,6 +2360,8 @@ namespace
                 BufferManager::UploadBufferData(m_PSLayerValues, &PSLayerValues);
 
                 ContextManager::Draw(3, 0);
+
+                ContextManager::Flush();
             }
 
             ContextManager::ResetShaderGS();
@@ -2369,301 +2379,6 @@ namespace
         Performance::EndEvent();
 
         Performance::EndEvent();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxSkyManager::PrecomputeLUT()
-    {
-        using namespace cv;
-
-        #define CROP_PERCENTAGE 0.8f
-        #define IMAGE_EDGE_LENGTH 512
-
-        auto CropImage = [&](const Mat& _rOriginal, Mat& _rCroppedImage, Mat& _rLeftPart, Mat& _rRightPart, Mat& _rTopPart, Mat& _rBottomPart)
-        {
-            int LengthX;
-            int LengthY;
-            int ShortedLength;
-            int PercentualShortedLength;
-
-            LengthX = _rOriginal.size[0];
-            LengthY = _rOriginal.size[1];
-
-            ShortedLength = LengthX < LengthY ? LengthX : LengthY;
-
-            PercentualShortedLength = static_cast<int>(static_cast<float>(ShortedLength) * CROP_PERCENTAGE);
-
-            unsigned int X = (LengthX - PercentualShortedLength) / 2;
-            unsigned int Y = (LengthY - PercentualShortedLength) / 2;
-
-            Rect CroppedRectangel(Y, X, PercentualShortedLength, PercentualShortedLength);
-
-            _rCroppedImage = _rOriginal(CroppedRectangel);
-
-            resize(_rCroppedImage, _rCroppedImage, Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH));
-
-            // -----------------------------------------------------------------------------
-
-            _rLeftPart   = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, _rOriginal.type());
-            _rRightPart  = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, _rOriginal.type());
-            _rTopPart    = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, _rOriginal.type());
-            _rBottomPart = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, _rOriginal.type());
-
-            // -----------------------------------------------------------------------------
-
-            Point2f MaskPoints[4];
-            Point2f DestPoints[4];
-            Mat     WarpMat;
-
-            DestPoints[0] = Point2f(static_cast<float>(0)                    , static_cast<float>(0));
-            DestPoints[1] = Point2f(static_cast<float>(0)                    , static_cast<float>(IMAGE_EDGE_LENGTH - 1));
-            DestPoints[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH - 1), static_cast<float>(IMAGE_EDGE_LENGTH - 1));
-            DestPoints[3] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH - 1), static_cast<float>(0));
-
-            // -----------------------------------------------------------------------------
-
-            MaskPoints[0] = Point2f(static_cast<float>(0)    , static_cast<float>(0));
-            MaskPoints[1] = Point2f(static_cast<float>(0)    , static_cast<float>(LengthX - 1));
-            MaskPoints[2] = Point2f(static_cast<float>(Y - 1), static_cast<float>(X + PercentualShortedLength - 1));
-            MaskPoints[3] = Point2f(static_cast<float>(Y - 1), static_cast<float>(X - 1));
-
-            WarpMat = getPerspectiveTransform(MaskPoints, DestPoints);
-
-            warpPerspective(_rOriginal, _rLeftPart, WarpMat, _rLeftPart.size());
-
-            // -----------------------------------------------------------------------------
-
-            MaskPoints[0] = Point2f(static_cast<float>(Y + PercentualShortedLength - 1), static_cast<float>(X - 1));
-            MaskPoints[1] = Point2f(static_cast<float>(Y + PercentualShortedLength - 1), static_cast<float>(X + PercentualShortedLength - 1));
-            MaskPoints[2] = Point2f(static_cast<float>(LengthY - 1)                    , static_cast<float>(LengthX - 1));
-            MaskPoints[3] = Point2f(static_cast<float>(LengthY - 1)                    , static_cast<float>(0));
-
-            WarpMat = getPerspectiveTransform(MaskPoints, DestPoints);
-
-            warpPerspective(_rOriginal, _rRightPart, WarpMat, _rRightPart.size());
-
-            // -----------------------------------------------------------------------------
-
-            MaskPoints[0] = Point2f(static_cast<float>(0)                              , static_cast<float>(0));
-            MaskPoints[1] = Point2f(static_cast<float>(Y - 1)                          , static_cast<float>(X - 1));
-            MaskPoints[2] = Point2f(static_cast<float>(Y + PercentualShortedLength - 1), static_cast<float>(X - 1));
-            MaskPoints[3] = Point2f(static_cast<float>(LengthY - 1)                    , static_cast<float>(0));
-
-            WarpMat = getPerspectiveTransform(MaskPoints, DestPoints);
-
-            warpPerspective(_rOriginal, _rTopPart, WarpMat, _rTopPart.size());
-
-            // -----------------------------------------------------------------------------
-
-            MaskPoints[0] = Point2f(static_cast<float>(Y - 1)                          , static_cast<float>(X + PercentualShortedLength - 1));
-            MaskPoints[1] = Point2f(static_cast<float>(0)                              , static_cast<float>(LengthX - 1));
-            MaskPoints[2] = Point2f(static_cast<float>(LengthY - 1)                    , static_cast<float>(LengthX - 1));
-            MaskPoints[3] = Point2f(static_cast<float>(Y + PercentualShortedLength - 1), static_cast<float>(X + PercentualShortedLength - 1));
-
-            WarpMat = getPerspectiveTransform(MaskPoints, DestPoints);
-
-            warpPerspective(_rOriginal, _rBottomPart, WarpMat, _rBottomPart.size());
-        };
-
-        // -----------------------------------------------------------------------------
-
-        auto CombineFaces = [&](const Mat& _rOne, const Mat& _rTwo, const Point2f* _pDestinationOne, const Point2f* _pDestinationTwo)->cv::Mat
-        {
-            Mat CombinedOne, CombinedTwo;
-
-            CombinedOne = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, _rOne.type());
-            CombinedTwo = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, _rOne.type());
-
-            // -----------------------------------------------------------------------------
-
-            Point2f MaskPoints[3];
-
-            MaskPoints[0] = Point2f(static_cast<float>(0)                , static_cast<float>(0));
-            MaskPoints[1] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH));
-            MaskPoints[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH));
-
-            Mat WarpMat;
-
-            // -----------------------------------------------------------------------------
-
-            WarpMat = getAffineTransform(MaskPoints, _pDestinationOne);
-
-            warpAffine(_rOne, CombinedOne, WarpMat, CombinedOne.size());
-
-            // -----------------------------------------------------------------------------
-
-            WarpMat = getAffineTransform(MaskPoints, _pDestinationTwo);
-
-            warpAffine(_rTwo, CombinedTwo, WarpMat, CombinedTwo.size());
-
-            return CombinedOne + CombinedTwo;
-        };
-
-        // -----------------------------------------------------------------------------
-
-        auto CombineRightFaces = [&](const Mat& _rOne, const Mat& _rTwo)->cv::Mat
-        {
-            Point2f DestPointsOne[3];
-            Point2f DestPointsTwo[3];
-
-            DestPointsOne[0] = Point2f(static_cast<float>(0)                    , static_cast<float>(0));
-            DestPointsOne[1] = Point2f(static_cast<float>(0)                    , static_cast<float>(IMAGE_EDGE_LENGTH));
-            DestPointsOne[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2), static_cast<float>(IMAGE_EDGE_LENGTH));
-
-            DestPointsTwo[0] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2), static_cast<float>(0));
-            DestPointsTwo[1] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2), static_cast<float>(IMAGE_EDGE_LENGTH));
-            DestPointsTwo[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH)    , static_cast<float>(IMAGE_EDGE_LENGTH));
-
-            Mat Combination = CombineFaces(_rOne, _rTwo, DestPointsOne, DestPointsTwo);
-
-            return Combination;
-        };
-
-        // -----------------------------------------------------------------------------
-
-        auto CombineLeftFaces = [&](const Mat& _rOne, const Mat& _rTwo)->cv::Mat
-        {
-            Point2f DestPointsOne[3];
-            Point2f DestPointsTwo[3];
-
-            DestPointsOne[0] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2), static_cast<float>(0));
-            DestPointsOne[1] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2), static_cast<float>(IMAGE_EDGE_LENGTH));
-            DestPointsOne[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH)    , static_cast<float>(IMAGE_EDGE_LENGTH));
-
-            DestPointsTwo[0] = Point2f(static_cast<float>(0)                    , static_cast<float>(0));
-            DestPointsTwo[1] = Point2f(static_cast<float>(0)                    , static_cast<float>(IMAGE_EDGE_LENGTH));
-            DestPointsTwo[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2), static_cast<float>(IMAGE_EDGE_LENGTH));
-
-            Mat Combination = CombineFaces(_rOne, _rTwo, DestPointsOne, DestPointsTwo);
-
-            return Combination;
-        };
-
-        // -----------------------------------------------------------------------------
-
-        auto CombineTopFaces = [&](const Mat& _rOne, const Mat& _rTwo)->cv::Mat
-        {
-            Point2f DestPointsOne[3];
-            Point2f DestPointsTwo[3];
-
-            DestPointsOne[0] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH / 2));
-            DestPointsOne[1] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH));
-            DestPointsOne[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH));
-
-            DestPointsTwo[0] = Point2f(static_cast<float>(0)                , static_cast<float>(0));
-            DestPointsTwo[1] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH / 2));
-            DestPointsTwo[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH / 2));
-
-            Mat Combination = CombineFaces(_rOne, _rTwo, DestPointsOne, DestPointsTwo);
-
-            return Combination;
-        };
-
-        // -----------------------------------------------------------------------------
-
-        auto CombineBottomFaces = [&](const Mat& _rOne, const Mat& _rTwo)->cv::Mat
-        {
-            Point2f DestPointsOne[3];
-            Point2f DestPointsTwo[3];
-
-            DestPointsOne[0] = Point2f(static_cast<float>(0)                , static_cast<float>(0));
-            DestPointsOne[1] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH / 2));
-            DestPointsOne[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH / 2));
-
-            DestPointsTwo[0] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH / 2));
-            DestPointsTwo[1] = Point2f(static_cast<float>(0)                , static_cast<float>(IMAGE_EDGE_LENGTH));
-            DestPointsTwo[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH));
-
-            Mat Combination = CombineFaces(_rOne, _rTwo, DestPointsOne, DestPointsTwo);
-
-            return Combination;
-        };
-
-        cv::Mat OriginalFrontImage, FrontCroped, FrontLeftPart, FrontRightPart, FrontTopPart, FrontBottomPart;
-        cv::Mat OriginalBackImage, BackCroped, BackLeftPart, BackRightPart, BackTopPart, BackBottomPart;
-
-        cv::Mat CombinedRight, CombinedLeft, CombinedTop, CombinedBottom;
-
-        CombinedRight .create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_32FC2);
-        CombinedLeft  .create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_32FC2);
-        CombinedTop   .create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_32FC2);
-        CombinedBottom.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_32FC2);
-        FrontCroped   .create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_32FC2);
-        BackCroped    .create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_32FC2);
-
-        OriginalFrontImage.create(cv::Size(1280, 720), CV_32FC2);
-
-        for (int CurrentY = 0; CurrentY < OriginalFrontImage.rows; CurrentY++)
-        {
-            for (int CurrentX = 0; CurrentX < OriginalFrontImage.cols; CurrentX++)
-            {
-                OriginalFrontImage.at<Vec2f>(Point(CurrentX, CurrentY)) = cv::Vec2f(static_cast<float>(CurrentX) / static_cast<float>(OriginalFrontImage.cols), static_cast<float>(CurrentY) / static_cast<float>(OriginalFrontImage.rows));
-            }
-        }
-
-        // -----------------------------------------------------------------------------
-
-        flip(OriginalFrontImage, OriginalBackImage, 1);
-
-        // -----------------------------------------------------------------------------
-        // Crop front image
-        // -----------------------------------------------------------------------------
-        CropImage(OriginalFrontImage, FrontCroped, FrontLeftPart, FrontRightPart, FrontTopPart, FrontBottomPart);
-        CropImage(OriginalBackImage, BackCroped, BackLeftPart, BackRightPart, BackTopPart, BackBottomPart);
-
-        // -----------------------------------------------------------------------------
-        // Flip back images because of negative direction on back face
-        // -----------------------------------------------------------------------------
-        flip(BackTopPart, BackTopPart, -1);
-        flip(BackBottomPart, BackBottomPart, -1);
-
-        // -----------------------------------------------------------------------------
-        // Fill Images
-        // -----------------------------------------------------------------------------
-        CombinedRight  = CombineRightFaces(FrontRightPart, BackLeftPart);
-        CombinedLeft   = CombineLeftFaces(FrontLeftPart, BackRightPart);
-        CombinedTop    = CombineTopFaces(FrontTopPart, BackTopPart);
-        CombinedBottom = CombineBottomFaces(FrontBottomPart, BackBottomPart);
-
-
-        // -----------------------------------------------------------------------------
-        // Create and update texture
-        // -----------------------------------------------------------------------------
-        STextureDescriptor TextureDescriptor;
-        
-        TextureDescriptor.m_NumberOfPixelsU  = IMAGE_EDGE_LENGTH;
-        TextureDescriptor.m_NumberOfPixelsV  = IMAGE_EDGE_LENGTH;
-        TextureDescriptor.m_NumberOfPixelsW  = 1;
-        TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
-        TextureDescriptor.m_NumberOfTextures = 6;
-        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
-        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-        TextureDescriptor.m_Format           = CTextureBase::Unknown;
-        TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
-        TextureDescriptor.m_pFileName        = 0;
-        TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = CTextureBase::R32G32_FLOAT;
-        
-        m_LookUpTexturePtr = TextureManager::CreateCubeTexture(TextureDescriptor);
-
-		TextureManager::SetTexture2DLabel(m_LookUpTexturePtr, "LUT: AR Global Lighting");
-
-        m_LookupTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_LookUpTexturePtr));
-
-        Base::UInt2 CubemapResolution = Base::UInt2(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH);
-
-        Base::AABB2UInt CubemapRect(Base::UInt2(0), CubemapResolution);
-
-        Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 0, CubemapRect, CubemapRect[1][0], CombinedRight.data, false);
-        Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 1, CubemapRect, CubemapRect[1][0], CombinedLeft.data, false);
-        Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 2, CubemapRect, CubemapRect[1][0], CombinedTop.data, false);
-        Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 3, CubemapRect, CubemapRect[1][0], CombinedBottom.data, false);
-        Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 4, CubemapRect, CubemapRect[1][0], FrontCroped.data, false);
-        Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 5, CubemapRect, CubemapRect[1][0], BackCroped.data, false);
-
-        Gfx::TextureManager::UpdateMipmap(m_LookUpTexturePtr);
     }
 } // namespace 
 

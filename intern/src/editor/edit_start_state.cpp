@@ -49,8 +49,6 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Cam::ControlManager::CreateControl(Cam::CControl::EditorControl);
         Cam::ControlManager::CreateControl(Cam::CControl::GameControl);
-         
-        Gfx::Main::OnStart();
         
         // -----------------------------------------------------------------------------
         // Start normal states

@@ -23,7 +23,9 @@
 #include <unordered_map>
 #include <vector>
 
-#include "GL/glew.h"
+#ifdef __ANDROID__
+GfxBufferStorageEXT glBufferStorage = 0;
+#endif // __ANDROID__
 
 using namespace Gfx;
 
@@ -59,15 +61,15 @@ namespace
     public:
 
         void* MapBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map);
-		void* MapBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range);
+        void* MapBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range);
         void UnmapBuffer(CBufferPtr _BufferPtr);
 
         void UploadBufferData(CBufferPtr _BufferPtr, const void* _pData);
         void UploadBufferData(CBufferPtr _BufferPtr, const void* _pData, unsigned int _Offset, unsigned int _Range);
 
-	public:
+    public:
 
-		void SetBufferLabel(CBufferPtr _BufferPtr, const char* _pLabel);
+        void SetBufferLabel(CBufferPtr _BufferPtr, const char* _pLabel);
 
     private:
 
@@ -219,6 +221,16 @@ namespace
 
     void CGfxBufferManager::OnStart()
     {
+#ifdef __ANDROID__
+        if (Main::IsExtensionAvailable("GL_EXT_buffer_storage"))
+        {
+            glBufferStorage = reinterpret_cast<GfxBufferStorageEXT>(eglGetProcAddress("glBufferStorageEXT"));
+        }
+        else
+        {
+            BASE_THROWM("GL_EXT_buffer_storage is not supported but it is highly needed!");
+        }
+#endif
     }
 
     // -----------------------------------------------------------------------------
@@ -237,9 +249,9 @@ namespace
     CBufferPtr CGfxBufferManager::CreateBuffer(const SBufferDescriptor& _rDescriptor, SDataBehavior::Enum _Behavior)
     {
         void*                    pBytes;
-        int                      NativeBinding;
+        GLenum                   NativeBinding;
         int                      NativeUsage;
-		GLbitfield               Flags;
+        GLbitfield               Flags;
         Gfx::CNativeBufferHandle NativeBuffer;
 
         // -----------------------------------------------------------------------------
@@ -254,23 +266,32 @@ namespace
         // -----------------------------------------------------------------------------
         // Generate OpenGL buffer
         // -----------------------------------------------------------------------------
-        glCreateBuffers(1, &NativeBuffer);
-               
+        glGenBuffers(1, &NativeBuffer);
+
+        glBindBuffer(NativeBinding, NativeBuffer);
+
         // -----------------------------------------------------------------------------
         // Setup storage of buffer.
         // If pBytes is NULL, a data store of the specified size is still created,
         // but its contents remain uninitialized and thus undefined.
         // -----------------------------------------------------------------------------
-		if (_rDescriptor.m_Usage == CBuffer::Persistent)
-		{
-			Flags = GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_DYNAMIC_STORAGE_BIT;
-			glNamedBufferStorage(NativeBuffer, _rDescriptor.m_NumberOfBytes, _rDescriptor.m_pBytes, Flags);
-		}
-		else
-		{
-			NativeUsage = ConvertUsage(_rDescriptor.m_Usage);
-			glNamedBufferData(NativeBuffer, _rDescriptor.m_NumberOfBytes, _rDescriptor.m_pBytes, NativeUsage);
-		}
+        if (_rDescriptor.m_Usage == CBuffer::Persistent)
+        {
+            Flags = GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_DYNAMIC_STORAGE_BIT;
+
+            glBufferStorage(NativeBinding, _rDescriptor.m_NumberOfBytes, _rDescriptor.m_pBytes, Flags);
+        }
+        else
+        {
+            NativeUsage = ConvertUsage(_rDescriptor.m_Usage);
+
+            glBufferData(NativeBinding, _rDescriptor.m_NumberOfBytes, _rDescriptor.m_pBytes, NativeUsage);
+        }
+
+        // ----------------------------------------------------------------------------- 
+        // Unbound buffer now 
+        // ----------------------------------------------------------------------------- 
+        glBindBuffer(NativeBinding, 0);
                
         // -----------------------------------------------------------------------------
         // Create the core resource behavior on the owner policy.
@@ -422,8 +443,8 @@ namespace
             CInternBuffer& rSourceBuffer = *static_cast<CInternBuffer*>(&(*_SourceBufferPtr));
             
             unsigned int NumberOfBytes = Base::Min(rTargetBuffer.m_NumberOfBytes, rSourceBuffer.m_NumberOfBytes);
-            
-            glCopyNamedBufferSubData(rTargetBuffer.m_NativeBuffer, rSourceBuffer.m_NativeBuffer, 0, 0, NumberOfBytes);
+
+            glCopyBufferSubData(rTargetBuffer.m_NativeBuffer, rSourceBuffer.m_NativeBuffer, 0, 0, NumberOfBytes);
         }
     }
 
@@ -441,7 +462,7 @@ namespace
             assert(_ReadOffset + _Range <= ReadBufferSize);
             assert(_WriteOffset + _Range <= WriteBufferSize);
 
-            glCopyNamedBufferSubData(rTargetBuffer.m_NativeBuffer, rSourceBuffer.m_NativeBuffer, _ReadOffset, _WriteOffset, _Range);
+            glCopyBufferSubData(rTargetBuffer.m_NativeBuffer, rSourceBuffer.m_NativeBuffer, _ReadOffset, _WriteOffset, _Range);
         }
     }
 
@@ -455,25 +476,31 @@ namespace
 
         assert(pBuffer != nullptr);
 
-        GLbitfield NativeMap = ConvertMap(_Map);
+        GLbitfield NativeMap     = ConvertMap(_Map);
+        GLenum     NativeBinding = ConvertBindFlag(pBuffer->GetBinding());
+ 
+        glBindBuffer(NativeBinding, pBuffer->m_NativeBuffer);
 
-        return pBuffer->m_pStorage = glMapNamedBufferRange(pBuffer->m_NativeBuffer, 0, pBuffer->m_NumberOfBytes, NativeMap);
+        return pBuffer->m_pStorage = glMapBufferRange(NativeBinding, 0, pBuffer->m_NumberOfBytes, NativeMap);
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void* CGfxBufferManager::MapBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range)
-	{
-		assert(_BufferPtr != nullptr && _BufferPtr.IsValid());
+    void* CGfxBufferManager::MapBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range)
+    {
+        assert(_BufferPtr != nullptr && _BufferPtr.IsValid());
 
-		CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
+        CInternBuffer* pBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
 
-		assert(pBuffer != nullptr);
+        assert(pBuffer != nullptr);
 
-		GLbitfield NativeMap = ConvertMap(_Map);
+        GLbitfield NativeMap = ConvertMap(_Map);
+        GLenum     NativeBinding = ConvertBindFlag(pBuffer->GetBinding());
 
-		return pBuffer->m_pStorage = glMapNamedBufferRange(pBuffer->m_NativeBuffer, _Offset, _Range, NativeMap);
-	}
+        glBindBuffer(NativeBinding, pBuffer->m_NativeBuffer);
+
+        return pBuffer->m_pStorage = glMapBufferRange(NativeBinding, _Offset, _Range, NativeMap);
+    }
 
     // -----------------------------------------------------------------------------
 
@@ -485,7 +512,10 @@ namespace
 
         assert(pBuffer != nullptr);
 
-        glUnmapNamedBuffer(pBuffer->m_NativeBuffer);
+        GLenum NativeBinding = ConvertBindFlag(pBuffer->GetBinding());
+
+        glUnmapBuffer(NativeBinding);
+
         pBuffer->m_pStorage = nullptr;
     }
     
@@ -499,7 +529,11 @@ namespace
 
         assert(pBuffer != nullptr);
 
-        glNamedBufferSubData(pBuffer->m_NativeBuffer, 0, pBuffer->m_NumberOfBytes, _pData);
+        GLenum NativeBinding = ConvertBindFlag(pBuffer->GetBinding());
+
+        glBindBuffer(NativeBinding, pBuffer->m_NativeBuffer);
+
+        glBufferSubData(NativeBinding, 0, pBuffer->m_NumberOfBytes, _pData);
     }
 
     // -----------------------------------------------------------------------------
@@ -513,19 +547,23 @@ namespace
         assert(pBuffer != nullptr);
         assert(_Offset + _Range <= pBuffer->m_NumberOfBytes);
 
-        glNamedBufferSubData(pBuffer->m_NativeBuffer, _Offset, _Range, _pData);
+        GLenum NativeBinding = ConvertBindFlag(pBuffer->GetBinding());
+
+        glBindBuffer(NativeBinding, pBuffer->m_NativeBuffer);
+
+        glBufferSubData(NativeBinding, _Offset, _Range, _pData);
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void CGfxBufferManager::SetBufferLabel(CBufferPtr _BufferPtr, const char* _pLabel)
-	{
-		assert(_pLabel != nullptr);
+    void CGfxBufferManager::SetBufferLabel(CBufferPtr _BufferPtr, const char* _pLabel)
+    {
+        assert(_pLabel != nullptr);
 
-		CInternBuffer* pInternBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
+        CInternBuffer* pInternBuffer = static_cast<CInternBuffer*>(_BufferPtr.GetPtr());
 
-		glObjectLabel(GL_BUFFER, pInternBuffer->m_NativeBuffer, -1, _pLabel);
-	}
+        glObjectLabel(GL_BUFFER, pInternBuffer->m_NativeBuffer, -1, _pLabel);
+    }
 
     // -----------------------------------------------------------------------------
 
@@ -610,16 +648,16 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    GLbitfield  CGfxBufferManager::ConvertMap(CBuffer::EMap _Map)
+    GLbitfield CGfxBufferManager::ConvertMap(CBuffer::EMap _Map)
     {
-        static const GLenum  s_NativeMap[] =
+        static const GLenum s_NativeMap[] =
         {
             GL_MAP_READ_BIT,
-			GL_MAP_WRITE_BIT,
-			GL_MAP_READ_BIT | GL_MAP_WRITE_BIT,
-			GL_MAP_READ_BIT,
-			GL_MAP_WRITE_BIT,
-			GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT,
+            GL_MAP_WRITE_BIT,
+            GL_MAP_READ_BIT | GL_MAP_WRITE_BIT,
+            GL_MAP_READ_BIT,
+            GL_MAP_WRITE_BIT,
+            GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT,
         };
 
         return s_NativeMap[_Map];
@@ -748,11 +786,11 @@ namespace BufferManager
         CGfxBufferManager::GetInstance().UploadBufferData(_BufferPtr, _pData, _Offset, _Range);
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void SetBufferLabel(CBufferPtr _BufferPtr, const char* _pLabel)
-	{
-		CGfxBufferManager::GetInstance().SetBufferLabel(_BufferPtr, _pLabel);
-	}
+    void SetBufferLabel(CBufferPtr _BufferPtr, const char* _pLabel)
+    {
+        CGfxBufferManager::GetInstance().SetBufferLabel(_BufferPtr, _pLabel);
+    }
 } // namespace BufferManager
 } // namespace Gfx
