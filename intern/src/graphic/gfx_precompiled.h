@@ -35,6 +35,28 @@
 typedef void (GFX_APIENTRY *GfxBufferStorageEXT)(GLenum target, GLsizeiptr size, const void * data, GLbitfield flags);
 
 
+// -----------------------------------------------------------------------------
+// Extension: EXT_disjoint_timer_query
+// -----------------------------------------------------------------------------
+#define GL_QUERY_COUNTER_BITS_EXT                       0x8864
+#define GL_CURRENT_QUERY_EXT                            0x8865
+#define GL_QUERY_RESULT_EXT                             0x8866
+#define GL_QUERY_RESULT_AVAILABLE_EXT                   0x8867
+#define GL_TIME_ELAPSED_EXT                             0x88BF
+#define GL_TIMESTAMP_EXT                                0x8E28
+#define GL_GPU_DISJOINT_EXT                             0x8FBB
+
+typedef void (GFX_APIENTRY *GfxGenQueriesEXT)(GLsizei n, GLuint *ids);
+typedef void (GFX_APIENTRY *GfxDeleteQueriesEXT)(GLsizei n, const GLuint *ids);
+typedef GLboolean (GFX_APIENTRY *GfxIsQueryEXT)(GLuint id);
+typedef void (GFX_APIENTRY *GfxBeginQueryEXT)(GLenum target, GLuint id);
+typedef void (GFX_APIENTRY *GfxEndQueryEXT)(GLenum target);
+typedef void (GFX_APIENTRY *GfxQueryCounterEXT)(uint id, GLenum target);
+typedef void (GFX_APIENTRY *GfxGetQueryivEXT)(GLenum target, GLenum pname, GLint *params);
+typedef void (GFX_APIENTRY *GfxGetQueryObjectivEXT)(GLuint id, GLenum pname, GLint *params);
+typedef void (GFX_APIENTRY *GfxGetQueryObjectuivEXT)(GLuint id, GLenum pname, GLuint *params);
+typedef void (GFX_APIENTRY *GfxGetQueryObjecti64vEXT)(GLuint id, GLenum pname, GLint64 *params);
+typedef void (GFX_APIENTRY *GfxGetQueryObjectui64vEXT)(GLuint id, GLenum pname, GLuint64 *params);
 
 #else // __ANDROID__
 

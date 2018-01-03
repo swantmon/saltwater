@@ -226,6 +226,10 @@ namespace
         {
             glBufferStorage = reinterpret_cast<GfxBufferStorageEXT>(eglGetProcAddress("glBufferStorageEXT"));
         }
+        else
+        {
+            BASE_THROWM("GL_EXT_buffer_storage is not supported but it is highly needed!");
+        }
 #endif
     }
 
