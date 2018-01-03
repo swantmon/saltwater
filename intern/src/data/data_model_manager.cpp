@@ -14,6 +14,8 @@
 #include "base/base_vector3.h"
 #include "base/base_pool.h"
 
+#include "core/core_asset_manager.h"
+
 #include "data/data_actor_type.h"
 #include "data/data_lod.h"
 #include "data/data_map.h"
@@ -33,27 +35,12 @@
 #include <unordered_map>
 #include <functional>
 
-
-
-
-
-// TODO
-#if __ANDROID__
-#include "app_droid/app_application.h"
-#else
-#include "editor/edit_application.h"
-#endif // __ANDROID__
-
-
-
-
 using namespace Dt;
 using namespace Dt::ModelManager;
 
 namespace
 {
-	std::string g_PathToAssets	   = "/assets/";
-	std::string g_PathToDataModels = "/data/graphic/models/";
+    std::string g_PathToDataModels = "graphic/models/";
 } // namespace 
 
 namespace
@@ -227,19 +214,13 @@ namespace
         // -----------------------------------------------------------------------------
         // Build path to texture in file system and load model
         // -----------------------------------------------------------------------------
-#ifdef __ANDROID__
-        std::string PathToAssets = App::Application::GetAssetPath();
-#else
-        std::string PathToAssets = Edit::Application::GetAssetPath();
-#endif // __ANDROID__
-
-		PathToModel = PathToAssets + g_PathToAssets + _rDescriptor.m_pFileName;
+		PathToModel = Core::AssetManager::GetPathToAssets() + _rDescriptor.m_pFileName;
 
         pScene = Importer.ReadFile(PathToModel.c_str(), Flags);
 
 		if (!pScene)
 		{
-			PathToModel = PathToAssets + g_PathToDataModels + _rDescriptor.m_pFileName;
+			PathToModel = Core::AssetManager::GetPathToData() + g_PathToDataModels + _rDescriptor.m_pFileName;
 
 			pScene = Importer.ReadFile(PathToModel.c_str(), Flags);
 		}

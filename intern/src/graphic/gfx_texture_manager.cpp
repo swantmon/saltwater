@@ -9,6 +9,8 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_asset_manager.h"
+
 #include "data/data_texture_manager.h"
 #include "data/data_texture_base.h"
 
@@ -22,30 +24,11 @@
 
 #include <unordered_map>
 
-
-
-
-
-
-
-// TODO
-#if __ANDROID__
-#include "app_droid/app_application.h"
-#else
-#include "editor/edit_application.h"
-#endif // __ANDROID__
-
-
-
-
-
-
 using namespace Gfx;
 
 namespace
 {
-    std::string g_PathToAssets       = "/assets/";
-    std::string g_PathToDataTextures = "/data/graphic/textures/";
+    std::string g_PathToDataTextures = "/graphic/textures/";
 } // namespace
 
 namespace
@@ -961,13 +944,6 @@ namespace
 
         NativeImageName = 0;
 
-
-#ifdef __ANDROID__
-        std::string PathToAssets = App::Application::GetAssetPath();
-#else
-        std::string PathToAssets = Edit::Application::GetAssetPath();
-#endif // __ANDROID__
-
         // -----------------------------------------------------------------------------
         // Load texture from file if one is set in descriptor
         // -----------------------------------------------------------------------------
@@ -985,7 +961,7 @@ namespace
             // -----------------------------------------------------------------------------
             std::string PathToTexture;
 
-            PathToTexture = PathToAssets + g_PathToAssets + _rDescriptor.m_pFileName;
+            PathToTexture = Core::AssetManager::GetPathToAssets() + _rDescriptor.m_pFileName;
 
 #ifdef __ANDROID__
             const char* pPathToTexture = 0;
@@ -1001,7 +977,7 @@ namespace
 
             if (!Result)
             {
-                PathToTexture = App::Application::GetAssetPath() + g_PathToDataTextures + _rDescriptor.m_pFileName;
+                PathToTexture = Core::AssetManager::GetPathToData() + g_PathToDataTextures + _rDescriptor.m_pFileName;
 
 #ifdef __ANDROID__
                 pPathToTexture = PathToTexture.c_str();
@@ -1049,7 +1025,7 @@ namespace
         }
         else if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_NumberOfMipMapsFromSource)
         {
-            // NumberOfMipmaps = ilGetInteger(IL_NUM_MIPMAPS);
+            NumberOfMipmaps = ilGetInteger(IL_NUM_MIPMAPS);
         }
         
         // -----------------------------------------------------------------------------
@@ -1520,7 +1496,7 @@ namespace
             // -----------------------------------------------------------------------------
             std::string PathToTexture;
 
-            PathToTexture = App::Application::GetAssetPath() + g_PathToAssets + _rDescriptor.m_pFileName;
+            PathToTexture = Core::AssetManager::GetPathToAssets() + _rDescriptor.m_pFileName;
 
 #ifdef __ANDROID__
             const char* pPathToTexture = 0;
@@ -1536,7 +1512,7 @@ namespace
 
             if (!ImageIsLoaded)
             {
-                PathToTexture = App::Application::GetAssetPath() + g_PathToDataTextures + _rDescriptor.m_pFileName;
+                PathToTexture = Core::AssetManager::GetPathToData() + g_PathToDataTextures + _rDescriptor.m_pFileName;
 
 #ifdef __ANDROID__
                 pPathToTexture = PathToTexture.c_str();

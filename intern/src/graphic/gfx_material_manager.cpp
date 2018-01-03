@@ -14,6 +14,8 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_asset_manager.h"
+
 #include "data/data_material_manager.h"
 
 #include "graphic/gfx_material_manager.h"
@@ -25,29 +27,6 @@
 #include "tinyxml2.h"
 
 #include <unordered_map>
-
-
-
-
-
-
-
-
-
-// TODO
-#if __ANDROID__
-#include "app_droid/app_application.h"
-#else
-#include "editor/edit_application.h"
-#endif // __ANDROID__
-
-
-
-
-
-
-
-
 
 using namespace Gfx;
 
@@ -552,16 +531,10 @@ namespace
 
         if (_rDescriptor.m_pFileName != nullptr && strlen(_rDescriptor.m_pFileName) > 0)
         {
-#ifdef __ANDROID__
-            std::string PathToAssets = App::Application::GetAssetPath();
-#else
-            std::string PathToAssets = Edit::Application::GetAssetPath();
-#endif // __ANDROID__
-
             // -----------------------------------------------------------------------------
             // Build path to texture in file system
             // -----------------------------------------------------------------------------
-            std::string PathToMaterial = PathToAssets + g_PathToAssets + _rDescriptor.m_pFileName;
+            std::string PathToMaterial = Core::AssetManager::GetPathToAssets() + _rDescriptor.m_pFileName;
 
             // -----------------------------------------------------------------------------
             // Load material file

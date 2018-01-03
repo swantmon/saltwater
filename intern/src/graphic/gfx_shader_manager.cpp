@@ -1,18 +1,14 @@
 
 #include "graphic/gfx_precompiled.h"
 
-#if __ANDROID__
-#include "app_droid/app_application.h"
-#else
-#include "editor/edit_application.h"
-#endif // __ANDROID__
-
 #include "base/base_console.h"
 #include "base/base_crc.h"
 #include "base/base_exception.h"
 #include "base/base_managed_pool.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
+
+#include "core/core_asset_manager.h"
 
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_native_shader.h"
@@ -30,7 +26,7 @@ using namespace Gfx::ShaderManager;
 
 namespace
 {
-    static const char* g_PathToDataShader = "/data/graphic/shaders/";
+    static const char* g_PathToDataShader = "graphic/shaders/";
 } // namespace
 
 namespace
@@ -338,14 +334,8 @@ namespace
         // -----------------------------------------------------------------------------
         // Build path to shader in file system
         // -----------------------------------------------------------------------------
-#ifdef __ANDROID__
-        std::string PathToAssets = App::Application::GetAssetPath();
-#else
-        std::string PathToAssets = Edit::Application::GetAssetPath();
-#endif // __ANDROID__
-
         std::string PathToShaders = g_PathToDataShader;
-        std::string PathToShader  = PathToAssets + PathToShaders + _pFileName;
+        std::string PathToShader  = Core::AssetManager::GetPathToData() + PathToShaders + _pFileName;
 
         // -----------------------------------------------------------------------------
         // Create hash and try to take an existing shader
@@ -663,13 +653,7 @@ namespace
                 Base::Size BeginOfInclude = _rShaderContent.find('\"', FoundPosition) + 1;
                 Base::Size EndOfInclude   = _rShaderContent.find('\"', BeginOfInclude);
 
-#ifdef __ANDROID__
-                std::string PathToAssets = App::Application::GetAssetPath();
-#else
-                std::string PathToAssets = Edit::Application::GetAssetPath();
-#endif // __ANDROID__
-
-                std::string IncludeFile  = PathToAssets + g_PathToDataShader + _rShaderContent.substr(BeginOfInclude, EndOfInclude - BeginOfInclude);
+                std::string IncludeFile  = Core::AssetManager::GetPathToData() + g_PathToDataShader + _rShaderContent.substr(BeginOfInclude, EndOfInclude - BeginOfInclude);
 
                 // -----------------------------------------------------------------------------
                 // Load included file and replace include directive with new file

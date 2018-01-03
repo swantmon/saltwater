@@ -17,6 +17,8 @@
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
+#include "core/core_asset_manager.h"
+
 #include "core/core_time.h"
 
 #include "graphic/gfx_application_interface.h"
@@ -39,8 +41,6 @@ namespace
         void OnRun();
 
         void ChangeState(unsigned int _State);
-
-        const Base::Char* GetAssetPath();
         
     private:
         
@@ -128,6 +128,11 @@ namespace
         m_AppSetup.m_SensorManager       = ASensorManager_getInstance();
         m_AppSetup.m_AccelerometerSensor = ASensorManager_getDefaultSensor(m_AppSetup.m_SensorManager, ASENSOR_TYPE_ACCELEROMETER);
         m_AppSetup.m_SensorEventQueue    = ASensorManager_createEventQueue(m_AppSetup.m_SensorManager, _pAndroidApp->looper, LOOPER_ID_USER, NULL, NULL);
+
+        // -----------------------------------------------------------------------------
+        // Setup asset manager
+        // -----------------------------------------------------------------------------
+        Core::AssetManager::SetFilePath(_pAndroidApp->activity->externalDataPath);
 
         // -----------------------------------------------------------------------------
         // Start timing
@@ -235,13 +240,6 @@ namespace
     void CApplication::ChangeState(unsigned int _State)
     {
         m_RequestState = static_cast<App::CState::EStateType>(_State);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const Base::Char* CApplication::GetAssetPath()
-    {
-        return m_AppSetup.m_pAndroidApp->activity->externalDataPath;
     }
     
     // -----------------------------------------------------------------------------
@@ -364,13 +362,6 @@ namespace Application
     void ChangeState(unsigned int _State)
     {
         CApplication::GetInstance().ChangeState(_State);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const Base::Char* GetAssetPath()
-    {
-        return CApplication::GetInstance().GetAssetPath();
     }
 } // namespace Application
 } // namespace App

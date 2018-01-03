@@ -14,6 +14,7 @@
 #include "base/base_vector3.h"
 #include "base/base_pool.h"
 
+#include "core/core_asset_manager.h"
 #include "core/core_time.h"
 
 #include "data/data_entity.h"
@@ -30,25 +31,8 @@
 #include <unordered_map>
 #include <functional>
 
-
-
-// TODO
-#if __ANDROID__
-#include "app_droid/app_application.h"
-#else
-#include "editor/edit_application.h"
-#endif // __ANDROID__
-
-
-
-
 using namespace Dt;
 using namespace Dt::MaterialManager;
-
-namespace
-{
-    std::string g_PathToAssets = "/assets/";
-} // namespace 
 
 namespace
 {
@@ -231,16 +215,10 @@ namespace
 
         if (_rDescriptor.m_pFileName != nullptr)
         {
-#ifdef __ANDROID__
-            std::string PathToAssets = App::Application::GetAssetPath();
-#else
-            std::string PathToAssets = Edit::Application::GetAssetPath();
-#endif // __ANDROID__
-
             // -----------------------------------------------------------------------------
             // Build path to texture in file system
             // -----------------------------------------------------------------------------
-            std::string PathToMaterial = PathToAssets + g_PathToAssets + _rDescriptor.m_pFileName;
+            std::string PathToMaterial = Core::AssetManager::GetPathToAssets() + _rDescriptor.m_pFileName;
         
             // -----------------------------------------------------------------------------
             // Load material file

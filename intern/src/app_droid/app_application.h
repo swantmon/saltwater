@@ -20,7 +20,5 @@ namespace Application
     void OnRun();
 
     void ChangeState(unsigned int _State);
-
-    const Base::Char* GetAssetPath();
 } // namespace Application
 } // namespace App

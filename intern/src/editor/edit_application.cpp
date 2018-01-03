@@ -6,8 +6,9 @@
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
-#include "core/core_time.h"
+#include "core/core_asset_manager.h"
 #include "core/core_config.h"
+#include "core/core_time.h"
 
 #include "editor/edit_actor_helper.h"
 #include "editor/edit_application.h"
@@ -116,6 +117,11 @@ namespace
     
     void CApplication::OnStart(int& _rArgc, char** _ppArgv)
     {   
+        // -----------------------------------------------------------------------------
+        // Setup asset manager
+        // -----------------------------------------------------------------------------
+        Core::AssetManager::SetFilePath("../");
+
         // -----------------------------------------------------------------------------
         // Initialize GUI.
         // -----------------------------------------------------------------------------
@@ -470,13 +476,6 @@ namespace Application
     void OnRun()
     {
         CApplication::GetInstance().OnRun();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const char* GetAssetPath()
-    {
-        return "../";
     }
 
     // -----------------------------------------------------------------------------
