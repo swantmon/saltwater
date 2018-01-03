@@ -710,7 +710,7 @@ namespace
         // -----------------------------------------------------------------------------
         SIBLSettings IBLSettings;
 
-        IBLSettings.m_IBLSettings    = Base::Float4::s_AxisZero;
+        IBLSettings.m_IBLSettings    = Base::Float4::s_Zero;
         IBLSettings.m_IBLSettings[0] = m_SSRRenderJobs.size() > 0 ? 1.0f : 0.0f;
 
         BufferManager::UploadBufferData(m_ImageLightBufferPtr, &IBLSettings);
@@ -1047,9 +1047,9 @@ namespace
         {
             LightBuffer[IndexOfLight].m_LightType      = 0;
             LightBuffer[IndexOfLight].m_WorldToProbeLS = Base::Float4x4::s_Identity;
-            LightBuffer[IndexOfLight].m_ProbePosition  = Base::Float4::s_AxisZero;
+            LightBuffer[IndexOfLight].m_ProbePosition  = Base::Float4::s_Zero;
             LightBuffer[IndexOfLight].m_UnitaryBox     = Base::Float4::s_One;
-            LightBuffer[IndexOfLight].m_LightSettings  = Base::Float4::s_AxisZero;
+            LightBuffer[IndexOfLight].m_LightSettings  = Base::Float4::s_Zero;
         }
 
         // -----------------------------------------------------------------------------

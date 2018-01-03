@@ -40,7 +40,7 @@ using namespace Dt::ModelManager;
 
 namespace
 {
-    std::string g_PathToDataModels = "graphic/models/";
+    std::string g_PathToDataModels = "/graphic/models/";
 } // namespace 
 
 namespace
@@ -214,7 +214,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Build path to texture in file system and load model
         // -----------------------------------------------------------------------------
-		PathToModel = Core::AssetManager::GetPathToAssets() + _rDescriptor.m_pFileName;
+		PathToModel = Core::AssetManager::GetPathToAssets() + "/" + _rDescriptor.m_pFileName;
 
         pScene = Importer.ReadFile(PathToModel.c_str(), Flags);
 

@@ -20,7 +20,7 @@ namespace MATH
 
     public:
 
-        static const CMatrix4x4<T> s_AxisZero;
+        static const CMatrix4x4<T> s_Zero;
         static const CMatrix4x4<T> s_Identity;
 
     public:
@@ -224,7 +224,7 @@ namespace MATH
 {
 
 	template<typename T>
-    const CMatrix4x4<T> CMatrix4x4<T>::s_AxisZero     = CMatrix4x4(T(0));
+    const CMatrix4x4<T> CMatrix4x4<T>::s_Zero     = CMatrix4x4(T(0));
 
     template<typename T>
     const CMatrix4x4<T> CMatrix4x4<T>::s_Identity = CMatrix4x4(
@@ -597,7 +597,7 @@ namespace MATH
     template<typename T>
     inline typename CMatrix4x4<T>::CThis& CMatrix4x4<T>::SetZero()
     {
-        return Set(s_AxisZero);
+        return Set(s_Zero);
     }
 
     // -----------------------------------------------------------------------------

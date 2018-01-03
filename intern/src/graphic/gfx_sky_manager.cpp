@@ -579,17 +579,20 @@ namespace
         // Models
         // -----------------------------------------------------------------------------
         CMeshPtr CubemapTextureSpherePtr = MeshManager::CreateSphereIsometric(1.0f, 3);
-// 
-//         // -----------------------------------------------------------------------------
-// 
-//         ModelFileDesc.m_pFileName = "curvedplane.obj";
-//         ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::Nothing;
-// 
-//         Dt::CModel& rCurvedPlaneModel = Dt::ModelManager::CreateModel(ModelFileDesc);
-// 
-//         ModelDescr.m_pMesh = &rCurvedPlaneModel.GetMesh(0);
-// 
-//         CMeshPtr CurvedPlanePtr = MeshManager::CreateMesh(ModelDescr);
+
+        // -----------------------------------------------------------------------------
+
+        SMeshDescriptor ModelDescr;
+        Dt::SModelFileDescriptor ModelFileDesc;
+
+        ModelFileDesc.m_pFileName = "curvedplane.obj";
+        ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::Nothing;
+
+        Dt::CModel& rCurvedPlaneModel = Dt::ModelManager::CreateModel(ModelFileDesc);
+
+        ModelDescr.m_pMesh = &rCurvedPlaneModel.GetMesh(0);
+
+        CMeshPtr CurvedPlanePtr = MeshManager::CreateMesh(ModelDescr);
 
         // -----------------------------------------------------------------------------
 
@@ -643,7 +646,7 @@ namespace
         m_SkyboxFromCubemap.m_VertexBufferSetPtr = 0;
         m_SkyboxFromCubemap.m_IndexBufferPtr     = 0;
 
-        m_SkyboxFromTexture.m_MeshPtr            = 0; //CurvedPlanePtr;
+        m_SkyboxFromTexture.m_MeshPtr            = CurvedPlanePtr;
         m_SkyboxFromTexture.m_VertexBufferSetPtr = 0;
         m_SkyboxFromTexture.m_IndexBufferPtr     = 0;
 
@@ -651,7 +654,7 @@ namespace
         m_SkyboxFromGeometry.m_VertexBufferSetPtr = PlanePositionBufferPtr;
         m_SkyboxFromGeometry.m_IndexBufferPtr     = PlaneIndexBufferPtr;
 
-        m_SkyboxFromLUT.m_MeshPtr            = 0; //CubemapTextureSpherePtr;
+        m_SkyboxFromLUT.m_MeshPtr            = CubemapTextureSpherePtr;
         m_SkyboxFromLUT.m_VertexBufferSetPtr = 0;
         m_SkyboxFromLUT.m_IndexBufferPtr     = 0;
 

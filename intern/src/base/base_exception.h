@@ -136,7 +136,7 @@ namespace CORE
         
         char Buffer[s_MaxNumberOfFormatCharacters];
         
-#if __APPLE__ || __ANDROID__
+#if __ANDROID__
         vsnprintf(Buffer, s_MaxNumberOfFormatCharacters, _pFormat, pArguments);
 #else
         vsnprintf_s(Buffer, s_MaxNumberOfFormatCharacters, _pFormat, pArguments);
@@ -161,7 +161,7 @@ namespace CORE
         
         char Buffer[s_MaxNumberOfFormatCharacters];
         
-#if __APPLE__ || __ANDROID__
+#if __ANDROID__
         vsnprintf(Buffer, s_MaxNumberOfFormatCharacters, _pFormat, pArguments);
 #else
         vsnprintf_s(Buffer, s_MaxNumberOfFormatCharacters, _pFormat, pArguments);

@@ -34,7 +34,7 @@ namespace
 namespace 
 {
     CCoreAssetManager::CCoreAssetManager()
-        : m_PathToFiles("./")
+        : m_PathToFiles(".")
     {
 
     }
@@ -62,14 +62,14 @@ namespace
 
     const std::string CCoreAssetManager::GetPathToAssets()
     {
-        return m_PathToFiles + "assets/";
+        return m_PathToFiles + "/assets";
     }
 
     // -----------------------------------------------------------------------------
 
     const std::string CCoreAssetManager::GetPathToData()
     {
-        return m_PathToFiles + "data/";
+        return m_PathToFiles + "/data";
     }
 } // namespace 
 

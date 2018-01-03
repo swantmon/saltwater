@@ -784,7 +784,7 @@ namespace
 
         SReflectionProbePropertiesBuffer ReflectionProbePropertiesBuffer;
 
-        ReflectionProbePropertiesBuffer.m_Properties    = Base::Float4::s_AxisZero;
+        ReflectionProbePropertiesBuffer.m_Properties    = Base::Float4::s_Zero;
         ReflectionProbePropertiesBuffer.m_Properties[0] = static_cast<float>(HistogramRenderer::GetCurrentExposureHistoryIndex());
         ReflectionProbePropertiesBuffer.m_Properties[1] = 1.0f;
 

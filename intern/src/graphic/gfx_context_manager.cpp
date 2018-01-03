@@ -224,6 +224,7 @@ namespace
 
 namespace
 {
+#ifdef __ANDROID__
     const GLenum CGfxContextManager::s_NativeTopologies[] =
     {
         GL_POINTS,
@@ -234,10 +235,26 @@ namespace
         GL_TRIANGLE_STRIP,
         GL_TRIANGLE_FAN,
         GL_QUADS,
-        GL_NONE, // GL_QUAD_STRIP,
-        GL_NONE, // GL_POLYGON,
+        GL_NONE,
+        GL_NONE,
         GL_PATCHES,
     };
+#else
+    const GLenum CGfxContextManager::s_NativeTopologies[] =
+    {
+        GL_POINTS,
+        GL_LINES,
+        GL_LINE_STRIP,
+        GL_LINE_LOOP,
+        GL_TRIANGLES,
+        GL_TRIANGLE_STRIP,
+        GL_TRIANGLE_FAN,
+        GL_QUADS,
+        GL_QUAD_STRIP,
+        GL_POLYGON,
+        GL_PATCHES,
+    };
+#endif
 } // namespace
 
 namespace
@@ -258,7 +275,6 @@ namespace
         , m_RenderContexts        ()
         , m_NativeShaderPipeline  (0)
     {
-/*        Reset();*/
     }
 
     // -----------------------------------------------------------------------------

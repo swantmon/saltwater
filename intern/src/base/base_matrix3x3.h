@@ -19,7 +19,7 @@ namespace MATH
 
     public:
 
-        static const CMatrix3x3<T> s_AxisZero;
+        static const CMatrix3x3<T> s_Zero;
         static const CMatrix3x3<T> s_Identity;
 
     public:
@@ -177,7 +177,7 @@ namespace MATH
 {
 
     template<typename T>
-    const CMatrix3x3<T> CMatrix3x3<T>::s_AxisZero     = CMatrix3x3(T(0));
+    const CMatrix3x3<T> CMatrix3x3<T>::s_Zero     = CMatrix3x3(T(0));
 
     template<typename T>
     const CMatrix3x3<T> CMatrix3x3<T>::s_Identity = CMatrix3x3(
@@ -544,7 +544,7 @@ namespace MATH
     template<typename T>
     inline typename CMatrix3x3<T>::CThis& CMatrix3x3<T>::SetZero()
     {
-        return Set(s_AxisZero);
+        return Set(s_Zero);
     }
 
     // -----------------------------------------------------------------------------

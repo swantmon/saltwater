@@ -26,7 +26,7 @@ using namespace Gfx::ShaderManager;
 
 namespace
 {
-    static const char* g_PathToDataShader = "graphic/shaders/";
+    static const char* g_PathToDataShader = "/graphic/shaders/";
 } // namespace
 
 namespace
@@ -334,8 +334,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Build path to shader in file system
         // -----------------------------------------------------------------------------
-        std::string PathToShaders = g_PathToDataShader;
-        std::string PathToShader  = Core::AssetManager::GetPathToData() + PathToShaders + _pFileName;
+        std::string PathToShader  = Core::AssetManager::GetPathToData() + g_PathToDataShader + _pFileName;
 
         // -----------------------------------------------------------------------------
         // Create hash and try to take an existing shader

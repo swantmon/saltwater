@@ -218,7 +218,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Build path to texture in file system
             // -----------------------------------------------------------------------------
-            std::string PathToMaterial = Core::AssetManager::GetPathToAssets() + _rDescriptor.m_pFileName;
+            std::string PathToMaterial = Core::AssetManager::GetPathToAssets() + "/" + _rDescriptor.m_pFileName;
         
             // -----------------------------------------------------------------------------
             // Load material file

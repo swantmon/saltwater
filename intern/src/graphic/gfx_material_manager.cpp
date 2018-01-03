@@ -534,7 +534,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Build path to texture in file system
             // -----------------------------------------------------------------------------
-            std::string PathToMaterial = Core::AssetManager::GetPathToAssets() + _rDescriptor.m_pFileName;
+            std::string PathToMaterial = Core::AssetManager::GetPathToAssets() + "/" + _rDescriptor.m_pFileName;
 
             // -----------------------------------------------------------------------------
             // Load material file
@@ -773,7 +773,7 @@ namespace
 
         if (_rDescriptor.m_pFileName != 0)
         {
-            /*MaterialFile.Clear();*/
+            MaterialFile.Clear();
         }
 
         // -----------------------------------------------------------------------------

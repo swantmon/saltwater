@@ -444,28 +444,7 @@ namespace
             
             unsigned int NumberOfBytes = Base::Min(rTargetBuffer.m_NumberOfBytes, rSourceBuffer.m_NumberOfBytes);
 
-
-
-
-
-
-
-
-
-
-            // TODO
             glCopyBufferSubData(rTargetBuffer.m_NativeBuffer, rSourceBuffer.m_NativeBuffer, 0, 0, NumberOfBytes);
-
-
-
-
-
-
-
-
-
-
-
         }
     }
 
@@ -483,28 +462,7 @@ namespace
             assert(_ReadOffset + _Range <= ReadBufferSize);
             assert(_WriteOffset + _Range <= WriteBufferSize);
 
-
-
-
-
-
-
-
-
-
-            // TODO
             glCopyBufferSubData(rTargetBuffer.m_NativeBuffer, rSourceBuffer.m_NativeBuffer, _ReadOffset, _WriteOffset, _Range);
-
-
-
-
-
-
-
-
-
-
-
         }
     }
 

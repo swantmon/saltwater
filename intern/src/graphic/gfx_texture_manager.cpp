@@ -961,7 +961,7 @@ namespace
             // -----------------------------------------------------------------------------
             std::string PathToTexture;
 
-            PathToTexture = Core::AssetManager::GetPathToAssets() + _rDescriptor.m_pFileName;
+            PathToTexture = Core::AssetManager::GetPathToAssets() + "/" + _rDescriptor.m_pFileName;
 
 #ifdef __ANDROID__
             const char* pPathToTexture = 0;
@@ -1496,7 +1496,7 @@ namespace
             // -----------------------------------------------------------------------------
             std::string PathToTexture;
 
-            PathToTexture = Core::AssetManager::GetPathToAssets() + _rDescriptor.m_pFileName;
+            PathToTexture = Core::AssetManager::GetPathToAssets() + "/" + _rDescriptor.m_pFileName;
 
 #ifdef __ANDROID__
             const char* pPathToTexture = 0;
