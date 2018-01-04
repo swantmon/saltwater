@@ -1258,8 +1258,6 @@ namespace
     {
         if (_TextureBasePtr == nullptr) return;
 
-        CNativeTexture* pNativeTexture  = 0;
-
         assert(_Unit < s_NumberOfTextureUnits);
 
         if (m_TextureUnits[_Unit] == _TextureBasePtr) return;

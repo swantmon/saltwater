@@ -11,7 +11,7 @@ namespace Gfx
         , m_FileName("")
         , m_Hash    (static_cast<unsigned int>(-1))
     {
-        Base::CMemory::Zero(m_NumberOfPixels, sizeof(m_NumberOfPixels) * 3);
+        Base::CMemory::Zero(m_NumberOfPixels, sizeof(m_NumberOfPixels));
     }
 
     // -----------------------------------------------------------------------------
