@@ -381,8 +381,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Create texture for shadow mapping
         // -----------------------------------------------------------------------------
-        CTexturePtr ShadowRenderbuffer[1];
-        
         STextureDescriptor RendertargetDescriptor;
         
         RendertargetDescriptor.m_NumberOfPixelsU  = NumberOfShadowMapPixel;
@@ -405,7 +403,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Create target set for shadow mapping
         // -----------------------------------------------------------------------------
-        CTargetSetPtr ShadowTargetSetPtr = TargetSetManager::CreateTargetSet(ShadowRenderbuffer, 1);
+        CTargetSetPtr ShadowTargetSetPtr = TargetSetManager::CreateTargetSet(_rInternLight.m_TextureSMPtr);
 
 		TargetSetManager::SetTargetSetLabel(ShadowTargetSetPtr, "Sun: Shadowmap");
         
