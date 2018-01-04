@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "graphic/gfx_texture_2d.h"
+#include "graphic/gfx_texture.h"
 #include "graphic/gfx_texture_set.h"
 
 namespace Gfx
@@ -10,8 +10,8 @@ namespace Gfx
     {
     public:
 
-        void SetBackgroundTexture2D(CTexture2DPtr _Texture2DPtr);
-        CTexture2DPtr GetBackgroundTexture2D();
+        void SetBackgroundTexture2D(CTexturePtr _Texture2DPtr);
+        CTexturePtr GetBackgroundTexture2D();
 
         void SetBackgroundTextureSet(CTextureSetPtr _TextureSetPtr);
         CTextureSetPtr GetBackgroundTextureSet();
@@ -26,7 +26,7 @@ namespace Gfx
 
     protected:
 
-        CTexture2DPtr     m_BackgroundTexture2DPtr;
+        CTexturePtr     m_BackgroundTexture2DPtr;
         CTextureSetPtr    m_BackgroundTextureSetPtr;
         Base::U64         m_TimeStamp;
     };

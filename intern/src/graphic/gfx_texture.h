@@ -8,7 +8,7 @@
 
 namespace Gfx
 {
-    class CTextureBase : public Base::CManagedPoolItemBase
+    class CTexture : public Base::CManagedPoolItemBase
     {
         public:
         
@@ -142,6 +142,9 @@ namespace Gfx
             unsigned int GetNumberOfTextures() const;
             unsigned int GetNumberOfMipLevels() const;
             unsigned int GetCurrentMipLevel() const;
+            BPixels GetNumberOfPixelsU() const;
+            BPixels GetNumberOfPixelsV() const;
+            BPixels GetNumberOfPixelsW() const;
 
             bool IsArray() const;
             bool IsCube() const;
@@ -182,6 +185,7 @@ namespace Gfx
         
         protected:
 
+            BPixels      m_NumberOfPixels[3];
             SInfo        m_Info;
             void*        m_pPixels;
             std::string  m_FileName;
@@ -189,12 +193,12 @@ namespace Gfx
 
         protected:
 
-            CTextureBase();
-           ~CTextureBase();
+            CTexture();
+           ~CTexture();
     };
 } // namespace Gfx
 
 namespace Gfx
 {
-    typedef Base::CManagedPoolItemPtr<CTextureBase> CTextureBasePtr;
+    typedef Base::CManagedPoolItemPtr<CTexture> CTexturePtr;
 } // namespace Gfx

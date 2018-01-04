@@ -13,7 +13,7 @@
 #include "base/base_vector3.h"
 
 #include "graphic/gfx_camera.h"
-#include "graphic/gfx_texture_base.h"
+#include "graphic/gfx_texture.h"
 
 #include <string>
 
@@ -41,7 +41,7 @@ namespace DebugRenderer
 
     void DrawCamera(Gfx::CCameraPtr _CameraPtr);
     void DrawGizmo(bool _Flag);
-    void DrawTexture(Gfx::CTextureBasePtr _TexturePtr, const Base::AABB2Float& _rScreenRegion);
+    void DrawTexture(Gfx::CTexturePtr _TexturePtr, const Base::AABB2Float& _rScreenRegion);
     void DrawText(const std::string& _rText, const Base::Float2& _rScreenPosition, const Base::Float4& _rColor, unsigned int _TextSize);
 } // namespace DebugRenderer
 } // namespace Gfx

@@ -30,7 +30,6 @@
 #include "graphic/gfx_sun_facet.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
-#include "graphic/gfx_texture_2d.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
 
@@ -130,17 +129,17 @@ namespace
         CShaderPtr        m_VolumeScatteringCSPtr;
         CShaderPtr        m_ApplyPSPtr;
         CRenderContextPtr m_LightRenderContextPtr;
-        CTexture2DPtr     m_ESMTexturePtr;
+        CTexturePtr     m_ESMTexturePtr;
         CTextureSetPtr    m_ESMTextureSetPtr;
 
-        CTexture3DPtr     m_VolumeTexturePtr;
+        CTexturePtr     m_VolumeTexturePtr;
         CTextureSetPtr    m_VolumeTextureSetPtr;
 
-        CTexture3DPtr     m_ScatteringTexturePtr;
+        CTexturePtr     m_ScatteringTexturePtr;
         CTextureSetPtr    m_ScatteringTextureSetPtr;
 
-        CTexture2DPtr m_PermutationTexturePtr;
-        CTexture2DPtr m_GradientPermutationTexturePtr;
+        CTexturePtr m_PermutationTexturePtr;
+        CTexturePtr m_GradientPermutationTexturePtr;
 
         CBufferSetPtr m_FogApplyBufferPtr;
 
@@ -299,19 +298,19 @@ namespace
         RendertargetDescriptor.m_NumberOfPixelsW  = 1;
         RendertargetDescriptor.m_NumberOfMipMaps  = 1;
         RendertargetDescriptor.m_NumberOfTextures = 1;
-        RendertargetDescriptor.m_Binding          = CTextureBase::ShaderResource;
-        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
-        RendertargetDescriptor.m_Format           = CTextureBase::R32_FLOAT;
-        RendertargetDescriptor.m_Usage            = CTextureBase::GPUReadWrite;
-        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_Binding          = CTexture::ShaderResource;
+        RendertargetDescriptor.m_Access           = CTexture::CPUWrite;
+        RendertargetDescriptor.m_Format           = CTexture::R32_FLOAT;
+        RendertargetDescriptor.m_Usage            = CTexture::GPUReadWrite;
+        RendertargetDescriptor.m_Semantic         = CTexture::Diffuse;
         RendertargetDescriptor.m_pFileName        = 0;
         RendertargetDescriptor.m_pPixels          = 0;
         
         m_ESMTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
 
-		TextureManager::SetTexture2DLabel(m_ESMTexturePtr, "Fog ESM");
+		TextureManager::SetTextureLabel(m_ESMTexturePtr, "Fog ESM");
 
-        CTexture2DPtr ESMSwapTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
+        CTexturePtr ESMSwapTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
 
         // -----------------------------------------------------------------------------
 
@@ -365,11 +364,11 @@ namespace
         RendertargetDescriptor.m_NumberOfPixelsW  = 1;
         RendertargetDescriptor.m_NumberOfMipMaps  = 1;
         RendertargetDescriptor.m_NumberOfTextures = 1;
-        RendertargetDescriptor.m_Binding          = CTextureBase::ShaderResource;
-        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
-        RendertargetDescriptor.m_Format           = CTextureBase::R32G32B32A32_FLOAT;
-        RendertargetDescriptor.m_Usage            = CTextureBase::GPUReadWrite;
-        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_Binding          = CTexture::ShaderResource;
+        RendertargetDescriptor.m_Access           = CTexture::CPUWrite;
+        RendertargetDescriptor.m_Format           = CTexture::R32G32B32A32_FLOAT;
+        RendertargetDescriptor.m_Usage            = CTexture::GPUReadWrite;
+        RendertargetDescriptor.m_Semantic         = CTexture::Diffuse;
         RendertargetDescriptor.m_pFileName        = 0;
         RendertargetDescriptor.m_pPixels          = pPermutationData;
 
@@ -416,17 +415,17 @@ namespace
         RendertargetDescriptor.m_NumberOfPixelsW  = 1;
         RendertargetDescriptor.m_NumberOfMipMaps  = 1;
         RendertargetDescriptor.m_NumberOfTextures = 1;
-        RendertargetDescriptor.m_Binding          = CTextureBase::ShaderResource;
-        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
-        RendertargetDescriptor.m_Format           = CTextureBase::R32G32B32A32_FLOAT;
-        RendertargetDescriptor.m_Usage            = CTextureBase::GPUReadWrite;
-        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_Binding          = CTexture::ShaderResource;
+        RendertargetDescriptor.m_Access           = CTexture::CPUWrite;
+        RendertargetDescriptor.m_Format           = CTexture::R32G32B32A32_FLOAT;
+        RendertargetDescriptor.m_Usage            = CTexture::GPUReadWrite;
+        RendertargetDescriptor.m_Semantic         = CTexture::Diffuse;
         RendertargetDescriptor.m_pFileName        = 0;
         RendertargetDescriptor.m_pPixels          = pPermutationGradientData;
 
         m_GradientPermutationTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
 
-		TextureManager::SetTexture2DLabel(m_GradientPermutationTexturePtr, "Fog Gradient Permutation");
+		TextureManager::SetTextureLabel(m_GradientPermutationTexturePtr, "Fog Gradient Permutation");
 
         Base::CMemory::Free(pPermutationGradientData);
 
@@ -437,34 +436,34 @@ namespace
         RendertargetDescriptor.m_NumberOfPixelsW  = 128;
         RendertargetDescriptor.m_NumberOfMipMaps  = 1;
         RendertargetDescriptor.m_NumberOfTextures = 1;
-        RendertargetDescriptor.m_Binding          = CTextureBase::ShaderResource;
-        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
-        RendertargetDescriptor.m_Format           = CTextureBase::R32G32B32A32_FLOAT;
-        RendertargetDescriptor.m_Usage            = CTextureBase::GPUReadWrite;
-        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_Binding          = CTexture::ShaderResource;
+        RendertargetDescriptor.m_Access           = CTexture::CPUWrite;
+        RendertargetDescriptor.m_Format           = CTexture::R32G32B32A32_FLOAT;
+        RendertargetDescriptor.m_Usage            = CTexture::GPUReadWrite;
+        RendertargetDescriptor.m_Semantic         = CTexture::Diffuse;
         RendertargetDescriptor.m_pFileName        = 0;
         RendertargetDescriptor.m_pPixels          = 0;
 
         m_VolumeTexturePtr = TextureManager::CreateTexture3D(RendertargetDescriptor);
 
-		TextureManager::SetTexture3DLabel(m_VolumeTexturePtr, "Fog Volume Texture");
+		TextureManager::SetTextureLabel(m_VolumeTexturePtr, "Fog Volume Texture");
 
         m_ScatteringTexturePtr = TextureManager::CreateTexture3D(RendertargetDescriptor);
 
-		TextureManager::SetTexture3DLabel(m_VolumeTexturePtr, "Fog Scattering Texture");
+		TextureManager::SetTextureLabel(m_VolumeTexturePtr, "Fog Scattering Texture");
 
         // -----------------------------------------------------------------------------
 
-        m_VolumeTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_VolumeTexturePtr), static_cast<CTextureBasePtr>(m_PermutationTexturePtr), static_cast<CTextureBasePtr>(m_GradientPermutationTexturePtr), static_cast<CTextureBasePtr>(m_ESMTexturePtr));
+        m_VolumeTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTexturePtr>(m_VolumeTexturePtr), static_cast<CTexturePtr>(m_PermutationTexturePtr), static_cast<CTexturePtr>(m_GradientPermutationTexturePtr), static_cast<CTexturePtr>(m_ESMTexturePtr));
 
         // -----------------------------------------------------------------------------
 
-        m_ScatteringTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_VolumeTexturePtr), static_cast<CTextureBasePtr>(m_ScatteringTexturePtr));
+        m_ScatteringTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTexturePtr>(m_VolumeTexturePtr), static_cast<CTexturePtr>(m_ScatteringTexturePtr));
         
         // -----------------------------------------------------------------------------
 
-        m_BlurStagesTextureSetPtrs[0] = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_ESMTexturePtr), static_cast<CTextureBasePtr>(ESMSwapTexturePtr));
-        m_BlurStagesTextureSetPtrs[1] = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(ESMSwapTexturePtr), static_cast<CTextureBasePtr>(m_ESMTexturePtr));
+        m_BlurStagesTextureSetPtrs[0] = TextureManager::CreateTextureSet(static_cast<CTexturePtr>(m_ESMTexturePtr), static_cast<CTexturePtr>(ESMSwapTexturePtr));
+        m_BlurStagesTextureSetPtrs[1] = TextureManager::CreateTextureSet(static_cast<CTexturePtr>(ESMSwapTexturePtr), static_cast<CTexturePtr>(m_ESMTexturePtr));
     }
     
     // -----------------------------------------------------------------------------
@@ -629,7 +628,7 @@ namespace
 
         ContextManager::SetTexture(0, pGfxSunFacet->GetTextureSMSet()->GetTexture(0));
 
-        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_ESMTexturePtr));
+        ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_ESMTexturePtr));
 
         ContextManager::Dispatch(256, 256, 1);
 
@@ -872,7 +871,7 @@ namespace
 
         ContextManager::SetTexture(0, TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0));
         ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
-        ContextManager::SetTexture(2, static_cast<CTextureBasePtr>(m_ScatteringTexturePtr));
+        ContextManager::SetTexture(2, static_cast<CTexturePtr>(m_ScatteringTexturePtr));
 
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
 

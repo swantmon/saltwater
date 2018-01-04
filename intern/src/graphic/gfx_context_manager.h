@@ -12,7 +12,7 @@
 #include "graphic/gfx_sampler_set.h"
 #include "graphic/gfx_shader.h"
 #include "graphic/gfx_target_set.h"
-#include "graphic/gfx_texture_base.h"
+#include "graphic/gfx_texture.h"
 #include "graphic/gfx_texture_set.h"
 #include "graphic/gfx_topology.h"
 #include "graphic/gfx_view_port_set.h"
@@ -93,12 +93,12 @@ namespace ContextManager
     CSamplerPtr GetSampler(unsigned int _Unit);
 
     void ResetTexture(unsigned int _Unit);
-    void SetTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr);
-    CTextureBasePtr GetTexture(unsigned int _Unit);
+    void SetTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr);
+    CTexturePtr GetTexture(unsigned int _Unit);
 
     void ResetImageTexture(unsigned int _Unit);
-    void SetImageTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr);
-    CTextureBasePtr GetImageTexture(unsigned int _Unit);
+    void SetImageTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr);
+    CTexturePtr GetImageTexture(unsigned int _Unit);
 
     void ResetConstantBuffer(unsigned int _Unit);
     void SetConstantBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);

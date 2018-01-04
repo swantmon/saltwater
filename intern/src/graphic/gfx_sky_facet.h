@@ -2,7 +2,7 @@
 
 #include "base/base_managed_pool.h"
 
-#include "graphic/gfx_texture_2d.h"
+#include "graphic/gfx_texture.h"
 #include "graphic/gfx_texture_set.h"
 
 namespace Gfx
@@ -16,7 +16,7 @@ namespace Gfx
 
     public:
 
-        CTexture2DPtr GetCubemapPtr() const;
+        CTexturePtr GetCubemapPtr() const;
 
         // TODO: Remove this method because only the other one is needed!
         CTextureSetPtr GetCubemapSetPtr() const;
@@ -25,7 +25,7 @@ namespace Gfx
 
     protected:
 
-        CTexture2DPtr  m_CubemapPtr;
+        CTexturePtr  m_CubemapPtr;
         CTextureSetPtr m_CubemapSetPtr;
         Base::U64      m_TimeStamp;
     };

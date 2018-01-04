@@ -23,7 +23,7 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    CTexture2DPtr CSkyFacet::GetCubemapPtr() const
+    CTexturePtr CSkyFacet::GetCubemapPtr() const
     {
         return m_CubemapPtr;
     }

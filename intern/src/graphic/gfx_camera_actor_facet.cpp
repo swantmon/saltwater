@@ -23,14 +23,14 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    void CCameraActorFacet::SetBackgroundTexture2D(CTexture2DPtr _Texture2DPtr)
+    void CCameraActorFacet::SetBackgroundTexture2D(CTexturePtr _Texture2DPtr)
     {
         m_BackgroundTexture2DPtr = _Texture2DPtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    CTexture2DPtr CCameraActorFacet::GetBackgroundTexture2D()
+    CTexturePtr CCameraActorFacet::GetBackgroundTexture2D()
     {
         return m_BackgroundTexture2DPtr;
     }

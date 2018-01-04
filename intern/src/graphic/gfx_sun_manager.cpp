@@ -28,7 +28,6 @@
 #include "graphic/gfx_sun_manager.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
-#include "graphic/gfx_texture_2d.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
 
@@ -382,7 +381,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Create texture for shadow mapping
         // -----------------------------------------------------------------------------
-        CTextureBasePtr ShadowRenderbuffer[1];
+        CTexturePtr ShadowRenderbuffer[1];
         
         STextureDescriptor RendertargetDescriptor;
         
@@ -391,17 +390,17 @@ namespace
         RendertargetDescriptor.m_NumberOfPixelsW  = 1;
         RendertargetDescriptor.m_NumberOfMipMaps  = 1;
         RendertargetDescriptor.m_NumberOfTextures = 1;
-        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
-        RendertargetDescriptor.m_Usage            = CTextureBase::GPURead;
-        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_Access           = CTexture::CPUWrite;
+        RendertargetDescriptor.m_Usage            = CTexture::GPURead;
+        RendertargetDescriptor.m_Semantic         = CTexture::Diffuse;
         RendertargetDescriptor.m_pFileName        = 0;
         RendertargetDescriptor.m_pPixels          = 0;
-        RendertargetDescriptor.m_Binding          = CTextureBase::DepthStencilTarget | CTextureBase::RenderTarget;
-        RendertargetDescriptor.m_Format           = CTextureBase::R32_FLOAT;
+        RendertargetDescriptor.m_Binding          = CTexture::DepthStencilTarget | CTexture::RenderTarget;
+        RendertargetDescriptor.m_Format           = CTexture::R32_FLOAT;
         
-        CTexture2DPtr ShadowmapTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Depth only
+        CTexturePtr ShadowmapTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Depth only
 
-		TextureManager::SetTexture2DLabel(ShadowmapTexturePtr, "Sun: Shadowmap");
+		TextureManager::SetTextureLabel(ShadowmapTexturePtr, "Sun: Shadowmap");
 
 		ShadowRenderbuffer[0] = ShadowmapTexturePtr;
         

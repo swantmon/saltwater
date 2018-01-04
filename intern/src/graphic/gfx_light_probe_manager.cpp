@@ -39,7 +39,6 @@
 #include "graphic/gfx_sun_facet.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
-#include "graphic/gfx_texture_2d.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_texture_set.h"
 #include "graphic/gfx_view_manager.h"
@@ -72,9 +71,9 @@ namespace
 
         struct SLightJob
         {
-            CTextureBasePtr m_ShadowTexturePtrs[s_MaxNumberOfLightsPerProbe];
-            CTextureBasePtr m_SpecularTexturePtr;
-            CTextureBasePtr m_DiffuseTexturePtr;
+            CTexturePtr m_ShadowTexturePtrs[s_MaxNumberOfLightsPerProbe];
+            CTexturePtr m_SpecularTexturePtr;
+            CTexturePtr m_DiffuseTexturePtr;
         };
 
         struct SGeometryVPBuffer
@@ -142,7 +141,7 @@ namespace
             CTargetSetPtr   m_TargetSetPtr;
             CViewPortSetPtr m_ViewPortSetPtr;
 
-            CTexture2DPtr m_ReflectionCubemapPtr;
+            CTexturePtr m_ReflectionCubemapPtr;
 
             CTargetSets   m_SpecularHDRTargetSetPtrs;
             CViewPortSets m_SpecularViewPortSetPtrs;
@@ -555,34 +554,34 @@ namespace
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
         TextureDescriptor.m_NumberOfTextures = 6;
-        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource | CTextureBase::RenderTarget;
-        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-        TextureDescriptor.m_Format           = CTextureBase::Unknown;
-        TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        TextureDescriptor.m_Binding          = CTexture::ShaderResource | CTexture::RenderTarget;
+        TextureDescriptor.m_Access           = CTexture::CPUWrite;
+        TextureDescriptor.m_Format           = CTexture::Unknown;
+        TextureDescriptor.m_Usage            = CTexture::GPURead;
+        TextureDescriptor.m_Semantic         = CTexture::Diffuse;
         TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        TextureDescriptor.m_Format           = CTexture::R16G16B16A16_FLOAT;
 
         rGfxLightProbeFacet.m_ReflectionCubemapPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
-		TextureManager::SetTexture2DLabel(rGfxLightProbeFacet.m_ReflectionCubemapPtr, "Light Probe Reflection Texture");
+		TextureManager::SetTextureLabel(rGfxLightProbeFacet.m_ReflectionCubemapPtr, "Light Probe Reflection Texture");
 
         // -----------------------------------------------------------------------------
 
         TextureDescriptor.m_NumberOfPixelsU = _SpecularFaceSize;
         TextureDescriptor.m_NumberOfPixelsV = _SpecularFaceSize;
         TextureDescriptor.m_NumberOfMipMaps = 1;
-        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource | CTextureBase::DepthStencilTarget;
-        TextureDescriptor.m_Format           = CTextureBase::R32_FLOAT;
+        TextureDescriptor.m_Binding          = CTexture::ShaderResource | CTexture::DepthStencilTarget;
+        TextureDescriptor.m_Format           = CTexture::R32_FLOAT;
 
         rGfxLightProbeFacet.m_DepthPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
-		TextureManager::SetTexture2DLabel(rGfxLightProbeFacet.m_DepthPtr, "Light Probe Depth Texture");
+		TextureManager::SetTextureLabel(rGfxLightProbeFacet.m_DepthPtr, "Light Probe Depth Texture");
 
         // -----------------------------------------------------------------------------
 
-        CTargetSetPtr ReflectionTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(rGfxLightProbeFacet.m_ReflectionCubemapPtr), static_cast<CTextureBasePtr>(rGfxLightProbeFacet.m_DepthPtr));
+        CTargetSetPtr ReflectionTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(rGfxLightProbeFacet.m_ReflectionCubemapPtr), static_cast<CTexturePtr>(rGfxLightProbeFacet.m_DepthPtr));
 
 		TargetSetManager::SetTargetSetLabel(ReflectionTargetSetPtr, "Light Probe Reflection Target");
 
@@ -614,30 +613,30 @@ namespace
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
         TextureDescriptor.m_NumberOfTextures = 6;
-        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource | CTextureBase::RenderTarget;
-        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-        TextureDescriptor.m_Format           = CTextureBase::Unknown;
-        TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        TextureDescriptor.m_Binding          = CTexture::ShaderResource | CTexture::RenderTarget;
+        TextureDescriptor.m_Access           = CTexture::CPUWrite;
+        TextureDescriptor.m_Format           = CTexture::Unknown;
+        TextureDescriptor.m_Usage            = CTexture::GPURead;
+        TextureDescriptor.m_Semantic         = CTexture::Diffuse;
         TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        TextureDescriptor.m_Format           = CTexture::R16G16B16A16_FLOAT;
         
         rGfxLightProbeFacet.m_SpecularPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
-		TextureManager::SetTexture2DLabel(rGfxLightProbeFacet.m_SpecularPtr, "Light Probe Specular Texture");
+		TextureManager::SetTextureLabel(rGfxLightProbeFacet.m_SpecularPtr, "Light Probe Specular Texture");
         
         // -----------------------------------------------------------------------------
         
         TextureDescriptor.m_NumberOfPixelsU  = SizeOfDiffuseCubemap;
         TextureDescriptor.m_NumberOfPixelsV  = SizeOfDiffuseCubemap;
         TextureDescriptor.m_NumberOfMipMaps  = 1;
-        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource | CTextureBase::RenderTarget;
-        TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        TextureDescriptor.m_Binding          = CTexture::ShaderResource | CTexture::RenderTarget;
+        TextureDescriptor.m_Format           = CTexture::R16G16B16A16_FLOAT;
         
         rGfxLightProbeFacet.m_DiffusePtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
-		TextureManager::SetTexture2DLabel(rGfxLightProbeFacet.m_DiffusePtr, "Light Probe Diffuse Texture");
+		TextureManager::SetTextureLabel(rGfxLightProbeFacet.m_DiffusePtr, "Light Probe Diffuse Texture");
         
         // -----------------------------------------------------------------------------
         // For all cube maps create a render target for every mip map
@@ -655,9 +654,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Target set
             // -----------------------------------------------------------------------------
-            CTexture2DPtr MipmapCubeTexture = TextureManager::GetMipmapFromTexture2D(rGfxLightProbeFacet.m_SpecularPtr, IndexOfMipmap);
+            CTexturePtr MipmapCubeTexture = TextureManager::GetMipmapFromTexture2D(rGfxLightProbeFacet.m_SpecularPtr, IndexOfMipmap);
             
-            CTargetSetPtr SpecularMipmapTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(MipmapCubeTexture));
+            CTargetSetPtr SpecularMipmapTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(MipmapCubeTexture));
             
             // -----------------------------------------------------------------------------
             // View port
@@ -682,7 +681,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Target set
             // -----------------------------------------------------------------------------
-            CTargetSetPtr DiffuseMipmapTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(rGfxLightProbeFacet.m_DiffusePtr));
+            CTargetSetPtr DiffuseMipmapTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(rGfxLightProbeFacet.m_DiffusePtr));
             
             // -----------------------------------------------------------------------------
             // View port
@@ -834,7 +833,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-                ContextManager::SetTexture(0, static_cast<Gfx::CTextureBasePtr>(pSkyFacet->GetCubemapPtr()));
+                ContextManager::SetTexture(0, static_cast<Gfx::CTexturePtr>(pSkyFacet->GetCubemapPtr()));
 
                 // -----------------------------------------------------------------------------
                 // Render
@@ -1173,7 +1172,7 @@ namespace
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(_rInterLightProbeFacet.m_ReflectionCubemapPtr));
+        ContextManager::SetTexture(0, static_cast<CTexturePtr>(_rInterLightProbeFacet.m_ReflectionCubemapPtr));
 
         // -----------------------------------------------------------------------------
         // Refine HDR specular from HDR cube map

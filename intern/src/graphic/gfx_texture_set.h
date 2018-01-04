@@ -3,7 +3,7 @@
 
 #include "base/base_managed_pool.h"
 
-#include "graphic/gfx_texture_base.h"
+#include "graphic/gfx_texture.h"
 
 namespace Gfx
 {
@@ -22,13 +22,13 @@ namespace Gfx
 
             unsigned int GetNumberOfTextures() const;
 
-            CTextureBasePtr GetTexture(unsigned int _Index);
+            CTexturePtr GetTexture(unsigned int _Index);
 
         protected:
 
             unsigned int              m_ID;
             unsigned int              m_NumberOfTextures;
-            CTextureBasePtr           m_TexturePtrs[s_MaxNumberOfTextures];
+            CTexturePtr           m_TexturePtrs[s_MaxNumberOfTextures];
 
         protected:
 

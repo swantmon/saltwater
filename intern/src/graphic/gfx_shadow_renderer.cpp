@@ -30,7 +30,6 @@
 #include "graphic/gfx_state_manager.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
-#include "graphic/gfx_texture_2d.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
 
@@ -126,7 +125,7 @@ namespace
         CShaderPtr m_SSAOShaderPSPtrs[NumberOfSSAOs];
         CShaderPtr m_GaussianBlurShaderCSPtr;
 
-        CTextureBasePtr m_NoiseTexturePtr;
+        CTexturePtr m_NoiseTexturePtr;
 
         CTextureSetPtr m_HalfTexturePtrs[2];
         CTextureSetPtr m_BilateralBlurHTextureSetPtr;
@@ -278,22 +277,22 @@ namespace
         RendertargetDescriptor.m_NumberOfPixelsW  = 1;
         RendertargetDescriptor.m_NumberOfMipMaps  = 1;
         RendertargetDescriptor.m_NumberOfTextures = 1;
-        RendertargetDescriptor.m_Binding          = CTextureBase::RenderTarget;
-        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
-        RendertargetDescriptor.m_Format           = CTextureBase::R8G8B8A8_UBYTE;
-        RendertargetDescriptor.m_Usage            = CTextureBase::GPURead;
-        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_Binding          = CTexture::RenderTarget;
+        RendertargetDescriptor.m_Access           = CTexture::CPUWrite;
+        RendertargetDescriptor.m_Format           = CTexture::R8G8B8A8_UBYTE;
+        RendertargetDescriptor.m_Usage            = CTexture::GPURead;
+        RendertargetDescriptor.m_Semantic         = CTexture::Diffuse;
         RendertargetDescriptor.m_pFileName        = 0;
         RendertargetDescriptor.m_pPixels          = 0;
 
-        CTexture2DPtr HalfTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
+        CTexturePtr HalfTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
 
-		TextureManager::SetTexture2DLabel(HalfTexturePtr, "SSAO");
+		TextureManager::SetTextureLabel(HalfTexturePtr, "SSAO");
         
         // -----------------------------------------------------------------------------
         // Create render target
         // -----------------------------------------------------------------------------
-        CTextureBasePtr HalfRenderbuffer[1];
+        CTexturePtr HalfRenderbuffer[1];
 
         HalfRenderbuffer[0] = HalfTexturePtr;
 
@@ -375,7 +374,7 @@ namespace
         
         Base::Int2 HalfSize(Size[0] / 2, Size[1] / 2);
 
-        CTextureBasePtr HalfTextureOnePtr = m_HalfRenderbufferPtr->GetRenderTarget(0);
+        CTexturePtr HalfTextureOnePtr = m_HalfRenderbufferPtr->GetRenderTarget(0);
 
         // -----------------------------------------------------------------------------
         // Create texture for result of blurring
@@ -387,15 +386,15 @@ namespace
         RendertargetDescriptor.m_NumberOfPixelsW  = 1;
         RendertargetDescriptor.m_NumberOfMipMaps  = 1;
         RendertargetDescriptor.m_NumberOfTextures = 1;
-        RendertargetDescriptor.m_Binding          = CTextureBase::RenderTarget;
-        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
-        RendertargetDescriptor.m_Format           = CTextureBase::R8G8B8A8_UBYTE;
-        RendertargetDescriptor.m_Usage            = CTextureBase::GPURead;
-        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_Binding          = CTexture::RenderTarget;
+        RendertargetDescriptor.m_Access           = CTexture::CPUWrite;
+        RendertargetDescriptor.m_Format           = CTexture::R8G8B8A8_UBYTE;
+        RendertargetDescriptor.m_Usage            = CTexture::GPURead;
+        RendertargetDescriptor.m_Semantic         = CTexture::Diffuse;
         RendertargetDescriptor.m_pFileName        = 0;
         RendertargetDescriptor.m_pPixels          = 0;
         
-        CTexture2DPtr HalfTextureTwoPtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
+        CTexturePtr HalfTextureTwoPtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
 
         // -----------------------------------------------------------------------------
         // Noise textures
@@ -425,24 +424,24 @@ namespace
         NoiseTextureDescriptor.m_NumberOfPixelsW  = 1;
         NoiseTextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
         NoiseTextureDescriptor.m_NumberOfTextures = 1;
-        NoiseTextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
-        NoiseTextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-        NoiseTextureDescriptor.m_Format           = CTextureBase::Unknown;
-        NoiseTextureDescriptor.m_Usage            = CTextureBase::GPURead;
-        NoiseTextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        NoiseTextureDescriptor.m_Binding          = CTexture::ShaderResource;
+        NoiseTextureDescriptor.m_Access           = CTexture::CPUWrite;
+        NoiseTextureDescriptor.m_Format           = CTexture::Unknown;
+        NoiseTextureDescriptor.m_Usage            = CTexture::GPURead;
+        NoiseTextureDescriptor.m_Semantic         = CTexture::Diffuse;
         NoiseTextureDescriptor.m_pFileName        = 0;
         NoiseTextureDescriptor.m_pPixels          = NoiseColor;
-        NoiseTextureDescriptor.m_Format           = CTextureBase::R8G8B8_UBYTE;
+        NoiseTextureDescriptor.m_Format           = CTexture::R8G8B8_UBYTE;
 
-        m_NoiseTexturePtr = static_cast<CTextureBasePtr>(TextureManager::CreateTexture2D(NoiseTextureDescriptor));
+        m_NoiseTexturePtr = static_cast<CTexturePtr>(TextureManager::CreateTexture2D(NoiseTextureDescriptor));
 
         // -----------------------------------------------------------------------------
         
         m_HalfTexturePtrs[0]     = TextureManager::CreateTextureSet(HalfTextureOnePtr);
-        m_HalfTexturePtrs[1]     = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(HalfTextureTwoPtr));
+        m_HalfTexturePtrs[1]     = TextureManager::CreateTextureSet(static_cast<CTexturePtr>(HalfTextureTwoPtr));
 
-        m_BilateralBlurHTextureSetPtr = TextureManager::CreateTextureSet(HalfTextureOnePtr, static_cast<CTextureBasePtr>(HalfTextureTwoPtr));
-        m_BilateralBlurVTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(HalfTextureTwoPtr), HalfTextureOnePtr);
+        m_BilateralBlurHTextureSetPtr = TextureManager::CreateTextureSet(HalfTextureOnePtr, static_cast<CTexturePtr>(HalfTextureTwoPtr));
+        m_BilateralBlurVTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTexturePtr>(HalfTextureTwoPtr), HalfTextureOnePtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -540,21 +539,21 @@ namespace
         RendertargetDescriptor.m_NumberOfPixelsW  = 1;
         RendertargetDescriptor.m_NumberOfMipMaps  = 1;
         RendertargetDescriptor.m_NumberOfTextures = 1;
-        RendertargetDescriptor.m_Binding          = CTextureBase::RenderTarget;
-        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
-        RendertargetDescriptor.m_Format           = CTextureBase::R8G8B8A8_UBYTE;
-        RendertargetDescriptor.m_Usage            = CTextureBase::GPURead;
-        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_Binding          = CTexture::RenderTarget;
+        RendertargetDescriptor.m_Access           = CTexture::CPUWrite;
+        RendertargetDescriptor.m_Format           = CTexture::R8G8B8A8_UBYTE;
+        RendertargetDescriptor.m_Usage            = CTexture::GPURead;
+        RendertargetDescriptor.m_Semantic         = CTexture::Diffuse;
         RendertargetDescriptor.m_pFileName        = 0;
         RendertargetDescriptor.m_pPixels          = 0;
 
-        CTexture2DPtr HalfTexturePtr    = TextureManager::CreateTexture2D(RendertargetDescriptor);
-        CTexture2DPtr HalfTextureTwoPtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
+        CTexturePtr HalfTexturePtr    = TextureManager::CreateTexture2D(RendertargetDescriptor);
+        CTexturePtr HalfTextureTwoPtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
         
         // -----------------------------------------------------------------------------
         // Create render target
         // -----------------------------------------------------------------------------
-        CTextureBasePtr HalfRenderbuffer[1];
+        CTexturePtr HalfRenderbuffer[1];
 
         HalfRenderbuffer[0] = HalfTexturePtr;
 
@@ -585,16 +584,16 @@ namespace
         // -----------------------------------------------------------------------------
         // Initiate target set
         // -----------------------------------------------------------------------------
-        CTextureBasePtr HalfTextureOnePtr  = m_HalfRenderbufferPtr->GetRenderTarget(0);
+        CTexturePtr HalfTextureOnePtr  = m_HalfRenderbufferPtr->GetRenderTarget(0);
         
         // -----------------------------------------------------------------------------
         // Create texture sets
         // -----------------------------------------------------------------------------
         m_HalfTexturePtrs[0] = TextureManager::CreateTextureSet(HalfTextureOnePtr);
-        m_HalfTexturePtrs[1] = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(HalfTextureTwoPtr));
+        m_HalfTexturePtrs[1] = TextureManager::CreateTextureSet(static_cast<CTexturePtr>(HalfTextureTwoPtr));
 
-        m_BilateralBlurHTextureSetPtr = TextureManager::CreateTextureSet(HalfTextureOnePtr, static_cast<CTextureBasePtr>(HalfTextureTwoPtr));
-        m_BilateralBlurVTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(HalfTextureTwoPtr), HalfTextureOnePtr);
+        m_BilateralBlurHTextureSetPtr = TextureManager::CreateTextureSet(HalfTextureOnePtr, static_cast<CTexturePtr>(HalfTextureTwoPtr));
+        m_BilateralBlurVTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTexturePtr>(HalfTextureTwoPtr), HalfTextureOnePtr);
     }
     
     // -----------------------------------------------------------------------------

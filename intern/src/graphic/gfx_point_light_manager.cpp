@@ -29,7 +29,6 @@
 #include "graphic/gfx_state_manager.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
-#include "graphic/gfx_texture_2d.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
 
@@ -483,7 +482,7 @@ namespace
         // 2 = Flux
         // 3 = Depth
         // -----------------------------------------------------------------------------
-        CTextureBasePtr ShadowRenderbuffer[4];
+        CTexturePtr ShadowRenderbuffer[4];
         
         STextureDescriptor RendertargetDescriptor;
         
@@ -492,28 +491,28 @@ namespace
         RendertargetDescriptor.m_NumberOfPixelsW  = 1;
         RendertargetDescriptor.m_NumberOfMipMaps  = 1;
         RendertargetDescriptor.m_NumberOfTextures = 1;
-        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
-        RendertargetDescriptor.m_Usage            = CTextureBase::GPURead;
-        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_Access           = CTexture::CPUWrite;
+        RendertargetDescriptor.m_Usage            = CTexture::GPURead;
+        RendertargetDescriptor.m_Semantic         = CTexture::Diffuse;
         RendertargetDescriptor.m_pFileName        = 0;
         RendertargetDescriptor.m_pPixels          = 0;
-        RendertargetDescriptor.m_Binding          = CTextureBase::RenderTarget;
-        RendertargetDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        RendertargetDescriptor.m_Binding          = CTexture::RenderTarget;
+        RendertargetDescriptor.m_Format           = CTexture::R16G16B16A16_FLOAT;
         
         ShadowRenderbuffer[0] = TextureManager::CreateTexture2D(RendertargetDescriptor); // Position
         
-        RendertargetDescriptor.m_Binding = CTextureBase::RenderTarget;
-        RendertargetDescriptor.m_Format  = CTextureBase::R16G16B16A16_FLOAT;
+        RendertargetDescriptor.m_Binding = CTexture::RenderTarget;
+        RendertargetDescriptor.m_Format  = CTexture::R16G16B16A16_FLOAT;
         
         ShadowRenderbuffer[1] = TextureManager::CreateTexture2D(RendertargetDescriptor); // Normal
         
-        RendertargetDescriptor.m_Binding = CTextureBase::RenderTarget;
-        RendertargetDescriptor.m_Format  = CTextureBase::R16G16B16A16_FLOAT;
+        RendertargetDescriptor.m_Binding = CTexture::RenderTarget;
+        RendertargetDescriptor.m_Format  = CTexture::R16G16B16A16_FLOAT;
         
         ShadowRenderbuffer[2] = TextureManager::CreateTexture2D(RendertargetDescriptor); // Flux
         
-        RendertargetDescriptor.m_Binding = CTextureBase::DepthStencilTarget | CTextureBase::RenderTarget;
-        RendertargetDescriptor.m_Format  = CTextureBase::R32_FLOAT;
+        RendertargetDescriptor.m_Binding = CTexture::DepthStencilTarget | CTexture::RenderTarget;
+        RendertargetDescriptor.m_Format  = CTexture::R32_FLOAT;
         
         ShadowRenderbuffer[3] = TextureManager::CreateTexture2D(RendertargetDescriptor); // Depth
         
@@ -577,7 +576,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Create texture for shadow mapping
         // -----------------------------------------------------------------------------
-        CTextureBasePtr ShadowRenderbuffer[1];
+        CTexturePtr ShadowRenderbuffer[1];
         
         STextureDescriptor RendertargetDescriptor;
         
@@ -586,13 +585,13 @@ namespace
         RendertargetDescriptor.m_NumberOfPixelsW  = 1;
         RendertargetDescriptor.m_NumberOfMipMaps  = 1;
         RendertargetDescriptor.m_NumberOfTextures = 1;
-        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
-        RendertargetDescriptor.m_Usage            = CTextureBase::GPURead;
-        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_Access           = CTexture::CPUWrite;
+        RendertargetDescriptor.m_Usage            = CTexture::GPURead;
+        RendertargetDescriptor.m_Semantic         = CTexture::Diffuse;
         RendertargetDescriptor.m_pFileName        = 0;
         RendertargetDescriptor.m_pPixels          = 0;
-        RendertargetDescriptor.m_Binding          = CTextureBase::DepthStencilTarget | CTextureBase::RenderTarget;
-        RendertargetDescriptor.m_Format           = CTextureBase::R32_FLOAT;
+        RendertargetDescriptor.m_Binding          = CTexture::DepthStencilTarget | CTexture::RenderTarget;
+        RendertargetDescriptor.m_Format           = CTexture::R32_FLOAT;
         
         ShadowRenderbuffer[0] = TextureManager::CreateTexture2D(RendertargetDescriptor); // Depth only
         
