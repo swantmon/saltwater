@@ -333,7 +333,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Prepare last context
             // -----------------------------------------------------------------------------
-            ContextManager::SetTexture(4, pGraphicSunFacet->GetTextureSMSet()->GetTexture(0));
+            ContextManager::SetTexture(4, pGraphicSunFacet->GetShadowMapPtr());
     
             // -----------------------------------------------------------------------------
             // Draw

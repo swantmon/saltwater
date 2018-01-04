@@ -626,7 +626,7 @@ namespace
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
-        ContextManager::SetTexture(0, pGfxSunFacet->GetTextureSMSet()->GetTexture(0));
+        ContextManager::SetTexture(0, pGfxSunFacet->GetShadowMapPtr());
 
         ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_ESMTexturePtr));
 

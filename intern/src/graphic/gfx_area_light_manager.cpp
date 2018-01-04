@@ -317,7 +317,7 @@ namespace
             {
                 if (pGfxLightFacet->m_TexturePtr == 0 || pGfxLightFacet->m_TexturePtr != 0 && pGfxLightFacet->m_TexturePtr->GetHash() != pDtLightFacet->GetTexture()->GetHash())
                 {
-                    Gfx::CTexturePtr GfxTexturePtr = Gfx::TextureManager::GetTexture2DByHash(pDtLightFacet->GetTexture()->GetHash());
+                    Gfx::CTexturePtr GfxTexturePtr = Gfx::TextureManager::GetTextureByHash(pDtLightFacet->GetTexture()->GetHash());
 
                     if (GfxTexturePtr != 0 && GfxTexturePtr.IsValid())
                     {

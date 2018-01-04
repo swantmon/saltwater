@@ -756,7 +756,7 @@ namespace
             // -----------------------------------------------------------------------------
             if (Hash != 0)
             {
-                CTexturePtr TexturePtr = TextureManager::GetTexture2DByHash(Hash);
+                CTexturePtr TexturePtr = TextureManager::GetTextureByHash(Hash);
 
                 if (TexturePtr.IsValid())
                 {

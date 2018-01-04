@@ -398,13 +398,9 @@ namespace
         RendertargetDescriptor.m_Binding          = CTexture::DepthStencilTarget | CTexture::RenderTarget;
         RendertargetDescriptor.m_Format           = CTexture::R32_FLOAT;
         
-        CTexturePtr ShadowmapTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Depth only
+        _rInternLight.m_TextureSMPtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Depth only
 
-		TextureManager::SetTextureLabel(ShadowmapTexturePtr, "Sun: Shadowmap");
-
-		ShadowRenderbuffer[0] = ShadowmapTexturePtr;
-        
-        _rInternLight.m_TextureSMPtr  = TextureManager::CreateTextureSet(ShadowRenderbuffer, 1);
+		TextureManager::SetTextureLabel(_rInternLight.m_TextureSMPtr, "Sun: Shadowmap");
         
         // -----------------------------------------------------------------------------
         // Create target set for shadow mapping

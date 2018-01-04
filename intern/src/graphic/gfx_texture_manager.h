@@ -15,10 +15,10 @@ namespace Gfx
 {
     struct STextureDescriptor
     {
-        static const unsigned int          s_NumberOfPixelsFromSource   = static_cast<unsigned int>(-1);
-        static const unsigned int          s_NumberOfMipMapsFromSource  = static_cast<unsigned int>(-1);
-        static const unsigned int          s_GenerateAllMipMaps         = static_cast<unsigned int>( 0);
-        static const unsigned int          s_NumberOfTexturesFromSource = static_cast<unsigned int>(-1);
+        static const unsigned int      s_NumberOfPixelsFromSource   = static_cast<unsigned int>(-1);
+        static const unsigned int      s_NumberOfMipMapsFromSource  = static_cast<unsigned int>(-1);
+        static const unsigned int      s_GenerateAllMipMaps         = static_cast<unsigned int>( 0);
+        static const unsigned int      s_NumberOfTexturesFromSource = static_cast<unsigned int>(-1);
         static const CTexture::EFormat s_FormatFromSource           = CTexture::Unknown;
 
         unsigned int            m_NumberOfPixelsU;
@@ -60,9 +60,7 @@ namespace TextureManager
     CTextureSetPtr CreateTextureSet(CTexturePtr _Texture1Ptr, CTexturePtr _Texture2Ptr, CTexturePtr _Texture3Ptr, CTexturePtr _Texture4Ptr);
     CTextureSetPtr CreateTextureSet(CTexturePtr* _pTexturePtrs, unsigned int _NumberOfTextures);
 
-    CTexturePtr GetTexture1DByHash(unsigned int _Hash);
-    CTexturePtr GetTexture2DByHash(unsigned int _Hash);
-    CTexturePtr GetTexture3DByHash(unsigned int _Hash);
+    CTexturePtr GetTextureByHash(unsigned int _Hash);
 
     void ClearTexture1D(CTexturePtr _TexturePtr, const Base::Float4& _rColor);
     void ClearTexture2D(CTexturePtr _TexturePtr, const Base::Float4& _rColor);

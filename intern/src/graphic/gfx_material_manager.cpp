@@ -418,42 +418,42 @@ namespace
             {
                 unsigned int Hash = rDataMaterial.GetColorTexture()->GetHash();
 
-                TexturePtrs[0] = TextureManager::GetTexture2DByHash(Hash);
+                TexturePtrs[0] = TextureManager::GetTextureByHash(Hash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasNormalTex)
             {
                 unsigned int Hash = rDataMaterial.GetNormalTexture()->GetHash();
 
-                TexturePtrs[1] = TextureManager::GetTexture2DByHash(Hash);
+                TexturePtrs[1] = TextureManager::GetTextureByHash(Hash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasRoughnessTex)
             {
                 unsigned int Hash = rDataMaterial.GetRoughnessTexture()->GetHash();
 
-                TexturePtrs[2] = TextureManager::GetTexture2DByHash(Hash);
+                TexturePtrs[2] = TextureManager::GetTextureByHash(Hash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasMetallicTex)
             {
                 unsigned int Hash = rDataMaterial.GetMetalTexture()->GetHash();
 
-                TexturePtrs[3] = TextureManager::GetTexture2DByHash(Hash);
+                TexturePtrs[3] = TextureManager::GetTextureByHash(Hash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasAOTex)
             {
                 unsigned int Hash = rDataMaterial.GetAmbientOcclusionTexture()->GetHash();
 
-                TexturePtrs[4] = TextureManager::GetTexture2DByHash(Hash);
+                TexturePtrs[4] = TextureManager::GetTextureByHash(Hash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasBumpTex)
             {
                 unsigned int Hash = rDataMaterial.GetBumpTexture()->GetHash();
 
-                TexturePtrs[5] = TextureManager::GetTexture2DByHash(Hash);
+                TexturePtrs[5] = TextureManager::GetTextureByHash(Hash);
             }
 
             rMaterial.m_TextureSetPtrs[CShader::Pixel] = TextureManager::CreateTextureSet(TexturePtrs, CMaterial::SMaterialKey::s_NumberOfTextures);

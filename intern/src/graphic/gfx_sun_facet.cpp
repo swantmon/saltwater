@@ -23,7 +23,7 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    CTextureSetPtr CSunFacet::GetTextureSMSet() const
+    CTexturePtr CSunFacet::GetShadowMapPtr() const
     {
         return m_TextureSMPtr;
     }

@@ -187,7 +187,7 @@ namespace
             {
                 unsigned int Hash = pDataCamera->GetTexture()->GetHash();
 
-                CTexturePtr BackgroundTexturePtr = TextureManager::GetTexture2DByHash(Hash);
+                CTexturePtr BackgroundTexturePtr = TextureManager::GetTextureByHash(Hash);
 
                 if (BackgroundTexturePtr.IsValid())
                 {
@@ -228,7 +228,7 @@ namespace
         {
             unsigned int Hash = pDataCamera->GetTexture()->GetHash();
 
-            CTexturePtr BackgroundTexturePtr = TextureManager::GetTexture2DByHash(Hash);
+            CTexturePtr BackgroundTexturePtr = TextureManager::GetTextureByHash(Hash);
 
             if (BackgroundTexturePtr.IsValid())
             {

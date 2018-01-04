@@ -17,7 +17,7 @@ namespace Gfx
 
     public:
 
-        CTextureSetPtr GetTextureSMSet() const;
+        CTexturePtr GetShadowMapPtr() const;
 
         CCameraPtr GetCamera() const;
 
@@ -25,9 +25,9 @@ namespace Gfx
 
     protected:
 
-        CTextureSetPtr m_TextureSMPtr;
-        CCameraPtr     m_CameraPtr;
-        Base::U64      m_TimeStamp;
+        CTexturePtr m_TextureSMPtr;
+        CCameraPtr  m_CameraPtr;
+        Base::U64   m_TimeStamp;
     };
 } // namespace Gfx
 

@@ -65,9 +65,7 @@ namespace
 
         CTextureSetPtr CreateTextureSet(CTexturePtr* _pTexturePtrs, unsigned int _NumberOfTextures);
 
-        CTexturePtr GetTexture1DByHash(unsigned int _Hash);
-        CTexturePtr GetTexture2DByHash(unsigned int _Hash);
-        CTexturePtr GetTexture3DByHash(unsigned int _Hash);
+        CTexturePtr GetTextureByHash(unsigned int _Hash);
 
         void ClearTexture1D(CTexturePtr _TexturePtr, const Base::Float4& _rColor);
         void ClearTexture2D(CTexturePtr _TexturePtr, const Base::Float4& _rColor);
@@ -389,30 +387,12 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CTexturePtr CGfxTextureManager::GetTexture1DByHash(unsigned int _Hash)
-    {
-        BASE_UNUSED(_Hash);
-
-        return nullptr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CTexturePtr CGfxTextureManager::GetTexture2DByHash(unsigned int _Hash)
+    CTexturePtr CGfxTextureManager::GetTextureByHash(unsigned int _Hash)
     {
         if (m_TexturesByHash.find(_Hash) != m_TexturesByHash.end())
         {
             return m_TexturesByHash.at(_Hash);
         }
-
-        return nullptr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CTexturePtr CGfxTextureManager::GetTexture3DByHash(unsigned int _Hash)
-    {
-        BASE_UNUSED(_Hash);
 
         return nullptr;
     }
@@ -1081,7 +1061,7 @@ namespace
             rTexture.m_NativeTexture        = NativeTextureHandle;
             rTexture.m_NativeUsage          = GLUsage;
             rTexture.m_NativeInternalFormat = GLInternalFormat;
-            rTexture.m_NativeBinding      = GL_TEXTURE_2D;
+            rTexture.m_NativeBinding        = GL_TEXTURE_2D;
             
             // -----------------------------------------------------------------------------
             // Check the behavior.
@@ -1151,9 +1131,9 @@ namespace
             // -----------------------------------------------------------------------------
             if (_rDescriptor.m_pFileName != nullptr && _rDescriptor.m_pPixels == nullptr)
             {
-//                 ilDeleteImage(NativeImageName);
-// 
-//                 ilBindImage(0);
+                ilDeleteImage(NativeImageName);
+
+                ilBindImage(0);
             }
         }
         catch (...)
@@ -1541,7 +1521,7 @@ namespace
         // -----------------------------------------------------------------------------
         if (ImageIsLoaded)
         {
-            for (int IndexOfFace = 0; IndexOfFace <= NumberOfFaces; ++IndexOfFace)
+            for (unsigned int IndexOfFace = 0; IndexOfFace <= NumberOfFaces; ++IndexOfFace)
             {
                 ilBindImage(NativeImageName);
 
@@ -2551,23 +2531,9 @@ namespace TextureManager
 
     // -----------------------------------------------------------------------------
 
-    CTexturePtr GetTexture1DByHash(unsigned int _Hash)
+    CTexturePtr GetTextureByHash(unsigned int _Hash)
     {
-        return CGfxTextureManager::GetInstance().GetTexture1DByHash(_Hash);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CTexturePtr GetTexture2DByHash(unsigned int _Hash)
-    {
-        return CGfxTextureManager::GetInstance().GetTexture2DByHash(_Hash);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CTexturePtr GetTexture3DByHash(unsigned int _Hash)
-    {
-        return CGfxTextureManager::GetInstance().GetTexture3DByHash(_Hash);
+        return CGfxTextureManager::GetInstance().GetTextureByHash(_Hash);
     }
     
     // -----------------------------------------------------------------------------

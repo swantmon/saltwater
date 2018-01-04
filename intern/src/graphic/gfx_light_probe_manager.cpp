@@ -1346,7 +1346,7 @@ namespace
 
                     // -----------------------------------------------------------------------------
 
-                    m_LightJob.m_ShadowTexturePtrs[IndexOfLight] = pGfxSunFacet->GetTextureSMSet()->GetTexture(0);
+                    m_LightJob.m_ShadowTexturePtrs[IndexOfLight] = pGfxSunFacet->GetShadowMapPtr();
 
                     // -----------------------------------------------------------------------------
 
