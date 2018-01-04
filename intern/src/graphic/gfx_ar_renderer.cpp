@@ -121,10 +121,10 @@ namespace
         CShaderPtr m_DifferentialGBufferShaderPSPtr;
         CShaderPtr m_HitProxyShaderPtr;
 
-        CTexture2DPtr m_BackgroundTexturePtr;
-        CTexture2DPtr m_VSPositionTexturePtr;
-        CTexture2DPtr m_VSPositionTempTexturePtr;
-        CTexture2DPtr m_WebcamTexturePtr;
+        CTexturePtr m_BackgroundTexturePtr;
+        CTexturePtr m_VSPositionTexturePtr;
+        CTexturePtr m_VSPositionTempTexturePtr;
+        CTexturePtr m_WebcamTexturePtr;
 
         CRenderJobs m_RenderJobs;
 
@@ -295,14 +295,14 @@ namespace
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
-        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-        TextureDescriptor.m_Format           = CTextureBase::Unknown;
-        TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        TextureDescriptor.m_Binding          = CTexture::ShaderResource;
+        TextureDescriptor.m_Access           = CTexture::CPUWrite;
+        TextureDescriptor.m_Format           = CTexture::Unknown;
+        TextureDescriptor.m_Usage            = CTexture::GPURead;
+        TextureDescriptor.m_Semantic         = CTexture::Diffuse;
         TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = CTextureBase::R8G8B8_UBYTE;
+        TextureDescriptor.m_Format           = CTexture::R8G8B8_UBYTE;
         
         m_WebcamTexturePtr     = TextureManager::CreateTexture2D(TextureDescriptor);
         
@@ -310,7 +310,7 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        TextureDescriptor.m_Format = CTextureBase::R32G32B32_FLOAT;
+        TextureDescriptor.m_Format = CTexture::R32G32B32_FLOAT;
 
         m_VSPositionTexturePtr     = TextureManager::CreateTexture2D(TextureDescriptor);
 

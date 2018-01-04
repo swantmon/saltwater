@@ -173,7 +173,7 @@ namespace
         struct SProbeRenderJob
         {
             Base::Float4x4        m_ModelMatrix;
-            Gfx::CTextureBasePtr  m_TextureCubePtr;
+            Gfx::CTexturePtr  m_TextureCubePtr;
             Dt::CLightProbeFacet* m_pDtProbeFacet;
         };
 

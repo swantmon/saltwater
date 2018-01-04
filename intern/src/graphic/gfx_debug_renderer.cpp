@@ -66,7 +66,7 @@ namespace
 
         void DrawCamera(CCameraPtr _CameraPtr);
         void DrawGizmo(bool _Flag);
-        void DrawTexture(CTextureBasePtr _TexturePtr, const Base::AABB2Float& _rScreenRegion);
+        void DrawTexture(CTexturePtr _TexturePtr, const Base::AABB2Float& _rScreenRegion);
         void DrawText(const std::string& _rText, const Base::Float2& _rScreenPosition, const Base::Float4& _rColor, unsigned int m_TextSize);
         
     private:
@@ -145,7 +145,7 @@ namespace
         CShaderPtr        m_QuadTextureShaderPSPtr;
         CShaderPtr        m_QuadTextShaderVSPtr;
         CShaderPtr        m_QuadTextShaderPSPtr;
-        CTextureBasePtr   m_ConsolasTexturePtr;
+        CTexturePtr   m_ConsolasTexturePtr;
 
         CDebugCameras  m_DebugCameras;
         CDebugTextures m_DebugTextures;
@@ -363,16 +363,16 @@ namespace
         TextTextureDescriptor.m_NumberOfPixelsW  = 1;
         TextTextureDescriptor.m_NumberOfMipMaps  = 1;
         TextTextureDescriptor.m_NumberOfTextures = 1;
-        TextTextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
-        TextTextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-        TextTextureDescriptor.m_Format           = CTextureBase::Unknown;
-        TextTextureDescriptor.m_Usage            = CTextureBase::GPURead;
-        TextTextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        TextTextureDescriptor.m_Binding          = CTexture::ShaderResource;
+        TextTextureDescriptor.m_Access           = CTexture::CPUWrite;
+        TextTextureDescriptor.m_Format           = CTexture::Unknown;
+        TextTextureDescriptor.m_Usage            = CTexture::GPURead;
+        TextTextureDescriptor.m_Semantic         = CTexture::Diffuse;
         TextTextureDescriptor.m_pFileName        = "Consolas.tga";
         TextTextureDescriptor.m_pPixels          = 0;
-        TextTextureDescriptor.m_Format           = CTextureBase::R8G8B8_UBYTE;
+        TextTextureDescriptor.m_Format           = CTexture::R8G8B8_UBYTE;
 
-        m_ConsolasTexturePtr = static_cast<CTextureBasePtr>(TextureManager::CreateTexture2D(TextTextureDescriptor));
+        m_ConsolasTexturePtr = static_cast<CTexturePtr>(TextureManager::CreateTexture2D(TextTextureDescriptor));
     }
     
     // -----------------------------------------------------------------------------
@@ -1015,11 +1015,11 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxDebugRenderer::DrawTexture(CTextureBasePtr _TexturePtr, const Base::AABB2Float& _rScreenRegion)
+    void CGfxDebugRenderer::DrawTexture(CTexturePtr _TexturePtr, const Base::AABB2Float& _rScreenRegion)
     {
         SDebugTexture NewDebugTexture;
 
-        NewDebugTexture.m_TexturePtr   = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(_TexturePtr));
+        NewDebugTexture.m_TexturePtr   = TextureManager::CreateTextureSet(static_cast<CTexturePtr>(_TexturePtr));
         NewDebugTexture.m_ScreenRegion = _rScreenRegion;
 
         m_DebugTextures.push_back(NewDebugTexture);
@@ -1158,7 +1158,7 @@ namespace DebugRenderer
 
     // -----------------------------------------------------------------------------
 
-    void DrawTexture(CTextureBasePtr _TexturePtr, const Base::AABB2Float& _rScreenRegion)
+    void DrawTexture(CTexturePtr _TexturePtr, const Base::AABB2Float& _rScreenRegion)
     {
         CGfxDebugRenderer::GetInstance().DrawTexture(_TexturePtr, _rScreenRegion);
     }

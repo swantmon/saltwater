@@ -49,18 +49,6 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_target_set.cpp">
       <Filter>engine\target sets</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_texture_1d.cpp">
-      <Filter>engine\textures</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_texture_2d.cpp">
-      <Filter>engine\textures</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_texture_3d.cpp">
-      <Filter>engine\textures</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_texture_base.cpp">
-      <Filter>engine\textures</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_texture_set.cpp">
       <Filter>engine\textures</Filter>
     </ClCompile>
@@ -248,6 +236,9 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_manager_interface.cpp">
       <Filter>interface\manager</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_texture.cpp">
+      <Filter>engine\textures</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\graphic\gfx_camera_interface.h">
@@ -307,18 +298,6 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_target_set.h">
       <Filter>engine\target sets</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_texture_1d.h">
-      <Filter>engine\textures</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_texture_2d.h">
-      <Filter>engine\textures</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_texture_3d.h">
-      <Filter>engine\textures</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_texture_base.h">
-      <Filter>engine\textures</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_texture_set.h">
       <Filter>engine\textures</Filter>
     </ClInclude>
@@ -375,9 +354,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_native_buffer.h">
       <Filter>ogl\buffers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_native_texture_2d.h">
-      <Filter>ogl\textures</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_native_target_set.h">
       <Filter>ogl\target sets</Filter>
@@ -473,9 +449,6 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_fog_renderer.h">
       <Filter>engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_native_texture_3d.h">
-      <Filter>ogl\textures</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_mesh.h">
       <Filter>engine\models</Filter>
     </ClInclude>
@@ -550,6 +523,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_manager_interface.h">
       <Filter>interface\manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_texture.h">
+      <Filter>engine\textures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_texture.h">
+      <Filter>ogl\textures</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

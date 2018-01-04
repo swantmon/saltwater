@@ -8,8 +8,6 @@
 
 #pragma once
 
-#include "graphic/gfx_texture_2d.h"
-
 namespace Gfx
 {
 namespace ARRenderer

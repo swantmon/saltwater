@@ -96,10 +96,7 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_surface.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_target_set.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_target_set_manager.cpp" />
-    <ClCompile Include="..\..\..\src\graphic\gfx_texture_1d.cpp" />
-    <ClCompile Include="..\..\..\src\graphic\gfx_texture_2d.cpp" />
-    <ClCompile Include="..\..\..\src\graphic\gfx_texture_3d.cpp" />
-    <ClCompile Include="..\..\..\src\graphic\gfx_texture_base.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_texture.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_texture_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_texture_set.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_unload_map_state.cpp" />
@@ -134,7 +131,6 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_ar_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_sun_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_fog_renderer.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_native_texture_3d.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_performance.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_histogram_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_postfx_hdr_renderer.h" />
@@ -175,7 +171,7 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_native_sampler_set.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_native_shader.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_native_target_set.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_native_texture_2d.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_texture.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_native_types.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_particle_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_play_state.h" />
@@ -198,10 +194,7 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_surface.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_target_set.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_target_set_manager.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_texture_1d.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_texture_2d.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_texture_3d.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_texture_base.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_texture.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_texture_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_texture_set.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_topology.h" />

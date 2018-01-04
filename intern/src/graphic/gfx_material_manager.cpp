@@ -405,7 +405,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Create and setup shader, texture and sampler (setup material)
             // -----------------------------------------------------------------------------
-            CTextureBasePtr TexturePtrs[CMaterial::SMaterialKey::s_NumberOfTextures];
+            CTexturePtr TexturePtrs[CMaterial::SMaterialKey::s_NumberOfTextures];
 
             TexturePtrs[0] = 0;
             TexturePtrs[1] = 0;
@@ -418,42 +418,42 @@ namespace
             {
                 unsigned int Hash = rDataMaterial.GetColorTexture()->GetHash();
 
-                TexturePtrs[0] = TextureManager::GetTexture2DByHash(Hash);
+                TexturePtrs[0] = TextureManager::GetTextureByHash(Hash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasNormalTex)
             {
                 unsigned int Hash = rDataMaterial.GetNormalTexture()->GetHash();
 
-                TexturePtrs[1] = TextureManager::GetTexture2DByHash(Hash);
+                TexturePtrs[1] = TextureManager::GetTextureByHash(Hash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasRoughnessTex)
             {
                 unsigned int Hash = rDataMaterial.GetRoughnessTexture()->GetHash();
 
-                TexturePtrs[2] = TextureManager::GetTexture2DByHash(Hash);
+                TexturePtrs[2] = TextureManager::GetTextureByHash(Hash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasMetallicTex)
             {
                 unsigned int Hash = rDataMaterial.GetMetalTexture()->GetHash();
 
-                TexturePtrs[3] = TextureManager::GetTexture2DByHash(Hash);
+                TexturePtrs[3] = TextureManager::GetTextureByHash(Hash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasAOTex)
             {
                 unsigned int Hash = rDataMaterial.GetAmbientOcclusionTexture()->GetHash();
 
-                TexturePtrs[4] = TextureManager::GetTexture2DByHash(Hash);
+                TexturePtrs[4] = TextureManager::GetTextureByHash(Hash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasBumpTex)
             {
                 unsigned int Hash = rDataMaterial.GetBumpTexture()->GetHash();
 
-                TexturePtrs[5] = TextureManager::GetTexture2DByHash(Hash);
+                TexturePtrs[5] = TextureManager::GetTextureByHash(Hash);
             }
 
             rMaterial.m_TextureSetPtrs[CShader::Pixel] = TextureManager::CreateTextureSet(TexturePtrs, CMaterial::SMaterialKey::s_NumberOfTextures);
@@ -698,7 +698,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Create and setup shader, texture and sampler (setup material)
         // -----------------------------------------------------------------------------
-        CTextureBasePtr    TexturePtrs[CMaterial::SMaterialKey::s_NumberOfTextures];
+        CTexturePtr    TexturePtrs[CMaterial::SMaterialKey::s_NumberOfTextures];
         CSamplerPtr        SamplerPtrs[CMaterial::SMaterialKey::s_NumberOfTextures];
         STextureDescriptor TextureDescriptor;
 
@@ -707,11 +707,11 @@ namespace
         TextureDescriptor.m_NumberOfPixelsW  = STextureDescriptor::s_NumberOfPixelsFromSource;
         TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
         TextureDescriptor.m_NumberOfTextures = STextureDescriptor::s_NumberOfTexturesFromSource;
-        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
-        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-        TextureDescriptor.m_Format           = CTextureBase::R8G8B8_UBYTE;
-        TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        TextureDescriptor.m_Binding          = CTexture::ShaderResource;
+        TextureDescriptor.m_Access           = CTexture::CPUWrite;
+        TextureDescriptor.m_Format           = CTexture::R8G8B8_UBYTE;
+        TextureDescriptor.m_Usage            = CTexture::GPURead;
+        TextureDescriptor.m_Semantic         = CTexture::Diffuse;
         TextureDescriptor.m_pPixels          = 0;
         TextureDescriptor.m_pFileName        = 0;
 
@@ -763,7 +763,7 @@ namespace
         if (rMaterial.m_MaterialKey.m_HasBumpTex)
         {
             TextureDescriptor.m_NumberOfPixelsW = 1;
-            TextureDescriptor.m_Format          = CTextureBase::R8_UBYTE;
+            TextureDescriptor.m_Format          = CTexture::R8_UBYTE;
             TextureDescriptor.m_pFileName       = pBumpMap;
 
             TexturePtrs[5] = TextureManager::CreateTexture2D(TextureDescriptor);

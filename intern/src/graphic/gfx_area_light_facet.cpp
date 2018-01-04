@@ -77,14 +77,14 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    CTexture2DPtr CAreaLightFacet::GetTexturePtr() const
+    CTexturePtr CAreaLightFacet::GetTexturePtr() const
     {
         return m_TexturePtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    CTexture2DPtr CAreaLightFacet::GetFilteredTexturePtr() const
+    CTexturePtr CAreaLightFacet::GetFilteredTexturePtr() const
     {
         return m_FilteredTexturePtr;
     }

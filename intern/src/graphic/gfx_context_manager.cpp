@@ -12,8 +12,7 @@
 #include "graphic/gfx_native_sampler.h"
 #include "graphic/gfx_native_shader.h"
 #include "graphic/gfx_native_target_set.h"
-#include "graphic/gfx_native_texture_2d.h"
-#include "graphic/gfx_native_texture_3d.h"
+#include "graphic/gfx_native_texture.h"
 #include "graphic/gfx_state_manager.h"
 
 #include <assert.h>
@@ -115,12 +114,12 @@ namespace
         CSamplerPtr GetSampler(unsigned int _Unit);
 
         void ResetTexture(unsigned int _Unit);
-        void SetTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr);
-        CTextureBasePtr GetTexture(unsigned int _Unit);
+        void SetTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr);
+        CTexturePtr GetTexture(unsigned int _Unit);
 
         void ResetImageTexture(unsigned int _Unit);
-        void SetImageTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr);
-        CTextureBasePtr GetImageTexture(unsigned int _Unit);
+        void SetImageTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr);
+        CTexturePtr GetImageTexture(unsigned int _Unit);
 
         void ResetConstantBuffer(unsigned int _Unit);
         void SetConstantBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
@@ -202,9 +201,9 @@ namespace
         CRenderContexts       m_RenderContexts;
         GLuint                m_NativeShaderPipeline;
         CShaderPtr            m_ShaderSlots[CShader::NumberOfTypes];
-        CTextureBasePtr       m_TextureUnits[s_NumberOfTextureUnits];
+        CTexturePtr       m_TextureUnits[s_NumberOfTextureUnits];
         CSamplerPtr           m_SamplerUnits[s_NumberOfTextureUnits];
-        CTextureBasePtr       m_ImageUnits[s_NumberOfImageUnits];
+        CTexturePtr       m_ImageUnits[s_NumberOfImageUnits];
         CBufferPtr            m_BufferUnits[s_NumberOfBufferUnits];
         CBufferPtr            m_ResourceUnits[s_NumberOfResourceUnits];
         CBufferPtr            m_AtomicUnits[s_NumberOfAtomicUnits];
@@ -1255,42 +1254,18 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxContextManager::SetTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr)
+    void CGfxContextManager::SetTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr)
     {
         if (_TextureBasePtr == nullptr) return;
-
-        CNativeTexture2D* pNativeTexture  = 0;
 
         assert(_Unit < s_NumberOfTextureUnits);
 
         if (m_TextureUnits[_Unit] == _TextureBasePtr) return;
 
-        GLuint TextureBinding = 0;
-        GLuint TextureHandle = 0;
+        CNativeTexture& rNativeTexture = *static_cast<CNativeTexture*>(_TextureBasePtr.GetPtr());
 
-        if (_TextureBasePtr->GetDimension() == CTextureBase::Dim2D)
-        {
-            CNativeTexture2D& rNativeTexture = *static_cast<CNativeTexture2D*>(_TextureBasePtr.GetPtr());
-
-            TextureBinding = rNativeTexture.m_NativeDimension;
-            TextureHandle  = rNativeTexture.m_NativeTexture;
-        }
-        else if (_TextureBasePtr->GetDimension() == CTextureBase::Dim3D)
-        {
-            CNativeTexture3D& rNativeTexture = *static_cast<CNativeTexture3D*>(_TextureBasePtr.GetPtr());
-
-            TextureBinding = rNativeTexture.m_NativeDimension;
-            TextureHandle  = rNativeTexture.m_NativeTexture;
-        }
-        else
-        {
-            BASE_CONSOLE_ERROR("Unexpected texture type set to context");
-        }
-
-        if (_TextureBasePtr->IsCube())
-        {
-            TextureBinding = GL_TEXTURE_CUBE_MAP;
-        }
+        GLenum TextureBinding = rNativeTexture.m_NativeBinding;
+        GLuint TextureHandle  = rNativeTexture.m_NativeTexture;
 
         glActiveTexture(GL_TEXTURE0 + _Unit);
 
@@ -1301,7 +1276,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CTextureBasePtr CGfxContextManager::GetTexture(unsigned int _Unit)
+    CTexturePtr CGfxContextManager::GetTexture(unsigned int _Unit)
     {
         assert(_Unit < s_NumberOfTextureUnits);
 
@@ -1321,39 +1296,21 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxContextManager::SetImageTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr)
+    void CGfxContextManager::SetImageTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr)
     {
         assert(_Unit < s_NumberOfImageUnits);
 
         if (_TextureBasePtr == nullptr || m_ImageUnits[_Unit] == _TextureBasePtr) return;
 
         GLboolean IsLayered  = GL_FALSE;
-        GLuint TextureUsage  = 0;
-        GLuint TextureHandle = 0;
-        GLuint TextureFormat = 0;
 
-        if (_TextureBasePtr->GetDimension() == CTextureBase::Dim2D)
-        {
-            CNativeTexture2D& rNativeTexture = *static_cast<CNativeTexture2D*>(_TextureBasePtr.GetPtr());
+        CNativeTexture& rNativeTexture = *static_cast<CNativeTexture*>(_TextureBasePtr.GetPtr());
 
-            TextureHandle = rNativeTexture.m_NativeTexture;
-            TextureUsage  = rNativeTexture.m_NativeUsage;
-            TextureFormat = rNativeTexture.m_NativeInternalFormat;
-        }
-        else if (_TextureBasePtr->GetDimension() == CTextureBase::Dim3D)
-        {
-            CNativeTexture3D& rNativeTexture = *static_cast<CNativeTexture3D*>(_TextureBasePtr.GetPtr());
+        GLuint TextureHandle = rNativeTexture.m_NativeTexture;
+        GLenum TextureUsage  = rNativeTexture.m_NativeUsage;
+        GLenum TextureFormat = rNativeTexture.m_NativeInternalFormat;
 
-            TextureHandle = rNativeTexture.m_NativeTexture;
-            TextureUsage  = rNativeTexture.m_NativeUsage;
-            TextureFormat = rNativeTexture.m_NativeInternalFormat;
-        }
-        else
-        {
-            BASE_CONSOLE_ERROR("Unexpected image texture type set to context");
-        }
-
-        if (_TextureBasePtr->GetDimension() == CTextureBase::Dim3D) IsLayered = GL_TRUE;
+        if (_TextureBasePtr->GetDimension() == CTexture::Dim3D) IsLayered = GL_TRUE;
 
         glBindImageTexture(_Unit, TextureHandle, _TextureBasePtr->GetCurrentMipLevel(), IsLayered, 0, TextureUsage, TextureFormat);
 
@@ -1362,7 +1319,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CTextureBasePtr CGfxContextManager::GetImageTexture(unsigned int _Unit)
+    CTexturePtr CGfxContextManager::GetImageTexture(unsigned int _Unit)
     {
         assert(_Unit < s_NumberOfImageUnits);
 
@@ -2201,14 +2158,14 @@ namespace ContextManager
 
     // -----------------------------------------------------------------------------
 
-    void SetTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr)
+    void SetTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr)
     {
         CGfxContextManager::GetInstance().SetTexture(_Unit, _TextureBasePtr);
     }
 
     // -----------------------------------------------------------------------------
 
-    CTextureBasePtr GetTexture(unsigned int _Unit)
+    CTexturePtr GetTexture(unsigned int _Unit)
     {
         return CGfxContextManager::GetInstance().GetTexture(_Unit);
     }
@@ -2222,14 +2179,14 @@ namespace ContextManager
 
     // -----------------------------------------------------------------------------
 
-    void SetImageTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr)
+    void SetImageTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr)
     {
         CGfxContextManager::GetInstance().SetImageTexture(_Unit, _TextureBasePtr);
     }
 
     // -----------------------------------------------------------------------------
 
-    CTextureBasePtr GetImageTexture(unsigned int _Unit)
+    CTexturePtr GetImageTexture(unsigned int _Unit)
     {
         return CGfxContextManager::GetInstance().GetImageTexture(_Unit);
     }

@@ -19,7 +19,7 @@ namespace Gfx
     
     // -----------------------------------------------------------------------------
     
-    CTextureBasePtr CTargetSet::GetRenderTarget(unsigned int _Index)
+    CTexturePtr CTargetSet::GetRenderTarget(unsigned int _Index)
     {
         assert(_Index < m_NumberOfRenderTargets);
         
@@ -28,7 +28,7 @@ namespace Gfx
     
     // -----------------------------------------------------------------------------
     
-    CTextureBasePtr CTargetSet::GetDepthStencilTarget()
+    CTexturePtr CTargetSet::GetDepthStencilTarget()
     {
         return m_DepthStencilTargetPtr;
     }

@@ -35,7 +35,7 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    CTextureBasePtr CTextureSet::GetTexture(unsigned int _Index)
+    CTexturePtr CTextureSet::GetTexture(unsigned int _Index)
     {
         assert(_Index < s_MaxNumberOfTextures);
 

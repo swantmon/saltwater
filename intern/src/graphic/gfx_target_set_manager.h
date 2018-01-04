@@ -11,7 +11,7 @@
 #include "base/base_vector4.h"
 
 #include "graphic/gfx_target_set.h"
-#include "graphic/gfx_texture_base.h"
+#include "graphic/gfx_texture.h"
 
 namespace Gfx
 {
@@ -26,11 +26,11 @@ namespace TargetSetManager
     CTargetSetPtr GetLightAccumulationTargetSet();
     CTargetSetPtr GetHitProxyTargetSet();
     
-    CTargetSetPtr CreateTargetSet(CTextureBasePtr _Target1Ptr);
-    CTargetSetPtr CreateTargetSet(CTextureBasePtr _Target1Ptr, CTextureBasePtr _Target2Ptr);
-    CTargetSetPtr CreateTargetSet(CTextureBasePtr _Target1Ptr, CTextureBasePtr _Target2Ptr, CTextureBasePtr _Target3Ptr);
-    CTargetSetPtr CreateTargetSet(CTextureBasePtr _Target1Ptr, CTextureBasePtr _Target2Ptr, CTextureBasePtr _Target3Ptr, CTextureBasePtr _Target4Ptr);
-    CTargetSetPtr CreateTargetSet(CTextureBasePtr* _pTargetPtrs, unsigned int _NumberOfTargets);
+    CTargetSetPtr CreateTargetSet(CTexturePtr _Target1Ptr);
+    CTargetSetPtr CreateTargetSet(CTexturePtr _Target1Ptr, CTexturePtr _Target2Ptr);
+    CTargetSetPtr CreateTargetSet(CTexturePtr _Target1Ptr, CTexturePtr _Target2Ptr, CTexturePtr _Target3Ptr);
+    CTargetSetPtr CreateTargetSet(CTexturePtr _Target1Ptr, CTexturePtr _Target2Ptr, CTexturePtr _Target3Ptr, CTexturePtr _Target4Ptr);
+    CTargetSetPtr CreateTargetSet(CTexturePtr* _pTargetPtrs, unsigned int _NumberOfTargets);
     
     CTargetSetPtr CreateEmptyTargetSet(int _Width, int _Height, int _Layers = 0);
 
