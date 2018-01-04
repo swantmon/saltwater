@@ -163,7 +163,7 @@ namespace
             CRenderContextPtr m_RenderContextPtr;
             CTargetSetPtr     m_TargetSetPtr;
             CViewPortSetPtr   m_ViewPortSetPtr;
-            CTexturePtr     m_InputTexture2DPtr;
+            CTexturePtr       m_InputTexture2DPtr;
             CTextureSetPtr    m_InputTextureSetPtr;
 
         private:
@@ -986,8 +986,6 @@ namespace
         rGraphicSkyboxFacet.m_CubemapPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
 		TextureManager::SetTextureLabel(rGraphicSkyboxFacet.m_CubemapPtr, "Sky Texture");
-
-        rGraphicSkyboxFacet.m_CubemapSetPtr = TextureManager::CreateTextureSet(static_cast<CTexturePtr>(rGraphicSkyboxFacet.m_CubemapPtr));
 
         // -----------------------------------------------------------------------------
         // Target Set
