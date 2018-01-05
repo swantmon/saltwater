@@ -33,24 +33,24 @@ namespace IO
 
     public:
 
-        int GetInt(const std::string& _rOption);
-        unsigned int GetUInt(const std::string& _rOption);
+        int GetInt(const std::string& _rOption, int _Default = 0);
+        unsigned int GetUInt(const std::string& _rOption,  unsigned int _Default = 0);
 
-        long GetLong(const std::string& _rOption);
-        unsigned long GetULong(const std::string& _rOption);
+        long GetLong(const std::string& _rOption, long _Default = 0);
+        unsigned long GetULong(const std::string& _rOption, unsigned long _Default = 0);
 
-        long long GetLongLong(const std::string& _rOption);
-        unsigned long long GetULongLong(const std::string& _rOption);
+        long long GetLongLong(const std::string& _rOption, long long _Default = 0);
+        unsigned long long GetULongLong(const std::string& _rOption, unsigned long long _Default = 0);
 
-        bool GetBoolean(const std::string& _rOption);
+        bool GetBoolean(const std::string& _rOption, bool _Default = 0);
 
-        float GetFloat(const std::string& _rOption);
+        float GetFloat(const std::string& _rOption, float _Default = 0);
 
-        double GetDouble(const std::string& _rOption);
+        double GetDouble(const std::string& _rOption, double _Default = 0);
 
-        const char* GetString(const std::string& _rOption);
+        const char* GetString(const std::string& _rOption, const char* _Default = 0);
 
-        const std::string& GetStdString(const std::string& _rOption);
+        const std::string& GetStdString(const std::string& _rOption, const std::string& _rDefault = "");
 
     public:
 
@@ -59,7 +59,6 @@ namespace IO
     private:
 
         typedef std::map<std::string, std::string>  COptionParameter;
-        typedef COptionParameter::iterator          COptionParameterIterator;
         typedef std::pair<std::string, std::string> COptionParameterPair;
 
     private:
