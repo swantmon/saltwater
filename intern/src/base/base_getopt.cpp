@@ -67,7 +67,7 @@ namespace
         {
             if (m_OptionError)
             {
-				BASE_CONSOLE_ERRORV("Getting option \"%s\" and argument \"%s\" failed with message: %s", static_cast<char>(m_OptionError), static_cast<char>(_Argument), _pDescription);
+				BASE_CONSOLE_ERRORV("Getting argument \"%c\" failed with message: %s", static_cast<char>(_Argument), _pDescription);
             }
         };
 
