@@ -25,11 +25,6 @@ GfxGetQueryObjectui64vEXT glGetQueryObjectui64v = 0;
 
 namespace
 {
-    bool g_QueryPerformanceMarkerDurations = true;
-}
-
-namespace 
-{
     class CGfxPerformance : public Base::CUncopyable
     {
         BASE_SINGLETON_FUNC(CGfxPerformance);
@@ -91,16 +86,19 @@ namespace
 
         std::unordered_map<std::string, SPerformanceMarker> m_PerformanceMarkerTimings;
         std::stack<SPerformanceMarker*> m_OpenedMarkerStack;
+
+        bool m_UsePerformanceMarker;
     };
 } // namespace 
 
 namespace 
 {
     CGfxPerformance::CGfxPerformance()
-        : m_Queries()
-        , m_QueryStack()
+        : m_Queries                 ()
+        , m_QueryStack              ()
         , m_PerformanceMarkerTimings()
-        , m_OpenedMarkerStack()
+        , m_OpenedMarkerStack       ()
+        , m_UsePerformanceMarker    (true)
     {
 
     }
@@ -124,7 +122,9 @@ namespace
         }
         else
         {
-            BASE_THROWM("GL_EXT_disjoint_timer_query is not supported but it is highly needed!");
+            m_UsePerformanceMarker = false;
+
+            BASE_CONSOLE_WARNING("GL_EXT_disjoint_timer_query is not available. So, time measurements can not be computed!");
         }
 #endif
     }
@@ -134,7 +134,8 @@ namespace
     void CGfxPerformance::Update()
     {
         CheckDurationQueries();
-        if (g_QueryPerformanceMarkerDurations)
+
+        if (m_UsePerformanceMarker)
         {
             CheckPerformanceMarkerQueries();
         }
@@ -144,7 +145,7 @@ namespace
 
     void CGfxPerformance::OnExit()
     {
-        if (g_QueryPerformanceMarkerDurations)
+        if (m_UsePerformanceMarker)
         {
             for (auto& rItemPair : m_PerformanceMarkerTimings)
             {
@@ -183,6 +184,8 @@ namespace
 
     void CGfxPerformance::CheckDurationQueries()
     {
+        if (!m_UsePerformanceMarker) return;
+
         for (auto i = m_Queries.begin(); i < m_Queries.end();)
         {
             SQueryStackItem& rItem = *i;
@@ -222,6 +225,8 @@ namespace
 
     void CGfxPerformance::CheckPerformanceMarkerQueries()
     {
+        if (!m_UsePerformanceMarker) return;
+
         for (auto& rItemPair : m_PerformanceMarkerTimings)
         {
             auto& rItem = rItemPair.second;
@@ -265,29 +270,26 @@ namespace
 
         glPushDebugGroup(GL_DEBUG_SOURCE_THIRD_PARTY, 0, LengthOfEventName, _pEventName);
 
-        if (Gfx::Main::GetGraphicsAPI() != Gfx::OpenGLES)
+        if (m_UsePerformanceMarker)
         {
-            if (g_QueryPerformanceMarkerDurations)
-            {
-                std::string Name = _pEventName;
+            std::string Name = _pEventName;
 
-                auto& Item = m_PerformanceMarkerTimings[Name];
+            auto& Item = m_PerformanceMarkerTimings[Name];
 
-                Item.m_HasStatistics = false;
+            Item.m_HasStatistics = false;
 
-                GLuint StartQuery;
+            GLuint StartQuery;
 #ifdef __ANDROID__
-                glGenQueries(1, &StartQuery);
-                glQueryCounter(StartQuery, GL_TIMESTAMP_EXT);
+            glGenQueries(1, &StartQuery);
+            glQueryCounter(StartQuery, GL_TIMESTAMP_EXT);
 #else
-                glCreateQueries(GL_TIMESTAMP, 1, &StartQuery);
-                glQueryCounter(StartQuery, GL_TIMESTAMP);
+            glCreateQueries(GL_TIMESTAMP, 1, &StartQuery);
+            glQueryCounter(StartQuery, GL_TIMESTAMP);
 #endif
 
-                Item.m_PendingQueries.push_back(std::make_pair(StartQuery, 0));
+            Item.m_PendingQueries.push_back(std::make_pair(StartQuery, 0));
 
-                m_OpenedMarkerStack.push(&Item);
-            }
+            m_OpenedMarkerStack.push(&Item);
         }
     }
 
@@ -299,29 +301,26 @@ namespace
 
         glPushDebugGroup(GL_DEBUG_SOURCE_THIRD_PARTY, 0, LengthOfEventName, _pEventName);
 
-        if (Gfx::Main::GetGraphicsAPI() != Gfx::OpenGLES)
+        if (m_UsePerformanceMarker)
         {
-            if (g_QueryPerformanceMarkerDurations)
-            {
-                std::string Name = _pEventName;
+            std::string Name = _pEventName;
 
-                auto& Item = m_PerformanceMarkerTimings[Name];
+            auto& Item = m_PerformanceMarkerTimings[Name];
 
-                Item.m_HasStatistics = true;
+            Item.m_HasStatistics = true;
 
-                GLuint StartQuery;
+            GLuint StartQuery;
 #ifdef __ANDROID__
-                glGenQueries(1, &StartQuery);
-                glQueryCounter(StartQuery, GL_TIMESTAMP_EXT);
+            glGenQueries(1, &StartQuery);
+            glQueryCounter(StartQuery, GL_TIMESTAMP_EXT);
 #else
-                glCreateQueries(GL_TIMESTAMP, 1, &StartQuery);
-                glQueryCounter(StartQuery, GL_TIMESTAMP);
+            glCreateQueries(GL_TIMESTAMP, 1, &StartQuery);
+            glQueryCounter(StartQuery, GL_TIMESTAMP);
 #endif
 
-                Item.m_PendingQueries.push_back(std::make_pair(StartQuery, 0));
+            Item.m_PendingQueries.push_back(std::make_pair(StartQuery, 0));
 
-                m_OpenedMarkerStack.push(&Item);
-            }
+            m_OpenedMarkerStack.push(&Item);
         }
     }
 
@@ -351,23 +350,20 @@ namespace
     {
         glPopDebugGroup();
 
-        if (Gfx::Main::GetGraphicsAPI() != Gfx::OpenGLES)
+        if (m_UsePerformanceMarker)
         {
-            if (g_QueryPerformanceMarkerDurations)
-            {
-                GLuint EndQuery;
+            GLuint EndQuery;
 #ifdef __ANDROID__
-                glGenQueries(1, &EndQuery);
+            glGenQueries(1, &EndQuery);
 
-                glQueryCounter(EndQuery, GL_TIMESTAMP_EXT);
+            glQueryCounter(EndQuery, GL_TIMESTAMP_EXT);
 #else
-                glCreateQueries(GL_TIMESTAMP, 1, &EndQuery);
-                glQueryCounter(EndQuery, GL_TIMESTAMP);
+            glCreateQueries(GL_TIMESTAMP, 1, &EndQuery);
+            glQueryCounter(EndQuery, GL_TIMESTAMP);
 #endif
 
-                m_OpenedMarkerStack.top()->m_PendingQueries.back().second = EndQuery;
-                m_OpenedMarkerStack.pop();
-            }
+            m_OpenedMarkerStack.top()->m_PendingQueries.back().second = EndQuery;
+            m_OpenedMarkerStack.pop();
         }
     }
 
