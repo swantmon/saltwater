@@ -20,7 +20,7 @@ namespace MR
         , m_UseFullVolumeIntegration(true)
         , m_UseReverseIntegration(true)
     {
-        m_IsScalable = Base::CProgramParameters::GetInstance().GetBoolean("scalable_slam");
+        m_IsScalable = Base::CProgramParameters::GetInstance().GetBoolean("scalable_slam", true);
 
         m_PyramidLevelIterations[0] = 10;
         m_PyramidLevelIterations[1] = 5;
@@ -44,6 +44,6 @@ namespace MR
             }
         }
 
-        m_CaptureColor = Base::CProgramParameters::GetInstance().GetBoolean("capture_color");
+        m_CaptureColor = Base::CProgramParameters::GetInstance().GetBoolean("capture_color", false);
     }
 } // namespace MR
