@@ -57,7 +57,7 @@ namespace Main
     void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile);
 
     EGraphicAPIs GetGraphicsAPI();
-    int GetGraphicsMayorVersion();
+    int GetGraphicsMajorVersion();
     int GetGraphicsMinorVersion();
     bool IsExtensionAvailable(const std::string& _Name);
 
