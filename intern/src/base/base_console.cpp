@@ -96,6 +96,8 @@ namespace IO
 
     void CConsole::SetVerbosityLevel(int _Level)
     {
+        assert(_Level >= -1 && _Level < 6);
+
         m_VerbosityLevel = _Level;
     }
 
