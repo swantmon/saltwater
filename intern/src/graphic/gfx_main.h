@@ -25,13 +25,14 @@ namespace Main
 
 #define GFX_BIND_RESIZE_METHOD(_Method) std::bind(_Method, this, std::placeholders::_1, std::placeholders::_2)
 
-enum GraphicAPIs
+namespace Gfx
 {
-    GLES32,
-    GL45,
-    GL46,
-    UNDEFINED_GRAPHICS_API = -1,
-};
+    enum EGraphicAPIs
+    {
+        OpenGL,
+        OpenGLES,
+    };
+} // namespace Gfx
 
 namespace Gfx
 {
@@ -55,7 +56,9 @@ namespace Main
 
     void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile);
 
-    GraphicAPIs GetGraphicsAPI();
+    EGraphicAPIs GetGraphicsAPI();
+    int GetGraphicsMayorVersion();
+    int GetGraphicsMinorVersion();
     bool IsExtensionAvailable(const std::string& _Name);
 
     void BeginFrame();

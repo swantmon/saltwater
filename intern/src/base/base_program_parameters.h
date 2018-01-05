@@ -59,7 +59,6 @@ namespace IO
     private:
 
         typedef std::map<std::string, std::string>  COptionParameter;
-        typedef COptionParameter::iterator          COptionParameterIterator;
         typedef std::pair<std::string, std::string> COptionParameterPair;
 
     private:

@@ -265,7 +265,7 @@ namespace
 
         glPushDebugGroup(GL_DEBUG_SOURCE_THIRD_PARTY, 0, LengthOfEventName, _pEventName);
 
-        if (Gfx::Main::GetGraphicsAPI() != GLES32)
+        if (Gfx::Main::GetGraphicsAPI() != Gfx::OpenGLES)
         {
             if (g_QueryPerformanceMarkerDurations)
             {
@@ -299,7 +299,7 @@ namespace
 
         glPushDebugGroup(GL_DEBUG_SOURCE_THIRD_PARTY, 0, LengthOfEventName, _pEventName);
 
-        if (Gfx::Main::GetGraphicsAPI() != GLES32)
+        if (Gfx::Main::GetGraphicsAPI() != Gfx::OpenGLES)
         {
             if (g_QueryPerformanceMarkerDurations)
             {
@@ -351,7 +351,7 @@ namespace
     {
         glPopDebugGroup();
 
-        if (Gfx::Main::GetGraphicsAPI() != GLES32)
+        if (Gfx::Main::GetGraphicsAPI() != Gfx::OpenGLES)
         {
             if (g_QueryPerformanceMarkerDurations)
             {
