@@ -312,7 +312,7 @@ namespace
 
         char* pShader;
 
-        if (Main::GetGraphicsAPI() == GLES32)
+        if (Main::GetGraphicsAPI() == OpenGLES)
         {
             pShader = "#version 320 es \n void main(void) { }";
         }
