@@ -87,9 +87,9 @@ namespace IO
             // Init new Console entry with timestamp and Console level
             // -----------------------------------------------------------------------------
             m_OutputStream << "(" << CurrentTime << " sec.) " << LogString << ": ";
+        }
 
-            return m_OutputStream;
-        }       
+        return m_OutputStream;
     }
     
     // -----------------------------------------------------------------------------
