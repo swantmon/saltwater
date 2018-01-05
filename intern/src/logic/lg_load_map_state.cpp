@@ -67,13 +67,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Give serialize module to all data items that is needed for loading a
         // certain map
-        // -----------------------------------------------------------------------------
-        BASE_CONSOLE_STREAMINFO("Logic> Loading level");
-        
-        _rSerializer >> LevelIndexDebug;
-
-        BASE_CONSOLE_STREAMINFO("Logic> Loading level number " << LevelIndexDebug);
-        
+        // -----------------------------------------------------------------------------        
         //CreateEmptyScene();
         CreateDefaultScene();
 

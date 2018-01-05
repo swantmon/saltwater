@@ -15,11 +15,11 @@
 #include "mr/mr_slam_reconstruction_settings.h"
 
 #include "graphic/gfx_shader.h"
-#include "graphic/gfx_texture_2d.h"
-#include "graphic/gfx_texture_3d.h"
+#include "graphic/gfx_texture.h"
 
 #include <array>
 #include <map>
+#include <memory>
 #include <vector>
 
 namespace MR
@@ -162,7 +162,7 @@ namespace MR
 
         void GetReconstructionSettings(SReconstructionSettings* pReconstructionSettings);
 
-        Gfx::CTexture2DPtr GetVertexMap();
+        Gfx::CTexturePtr GetVertexMap();
         
     private:
 
@@ -287,22 +287,22 @@ namespace MR
         Gfx::CTargetSetPtr m_EmptyTargetSetPtr;
         Gfx::CViewPortSetPtr m_DepthViewPortSetPtr;
 
-        Gfx::CTexture3DPtr m_RootGridVolumePtr;
+        Gfx::CTexturePtr m_RootGridVolumePtr;
         Gfx::CTargetSetPtr m_RootGridVolumeTargetSetPtr;
         Gfx::CViewPortSetPtr m_RootGridViewPort;
 
-        Gfx::CTexture3DPtr m_FullVolumePtr;
+        Gfx::CTexturePtr m_FullVolumePtr;
         Gfx::CTargetSetPtr m_FullVolumeTargetSetPtr;
         Gfx::CViewPortSetPtr m_FullVolumeViewPort;
 
-        Gfx::CTexture2DPtr m_RawDepthBufferPtr;
-        Gfx::CTexture2DPtr m_RawCameraFramePtr;
-        Gfx::CTexture2DPtr m_RawVertexMapPtr;
-        std::vector<Gfx::CTexture2DPtr> m_SmoothDepthBufferPtr;
-        std::vector<Gfx::CTexture2DPtr> m_ReferenceVertexMapPtr;
-        std::vector<Gfx::CTexture2DPtr> m_ReferenceNormalMapPtr;
-        std::vector<Gfx::CTexture2DPtr> m_RaycastVertexMapPtr;
-        std::vector<Gfx::CTexture2DPtr> m_RaycastNormalMapPtr;
+        Gfx::CTexturePtr m_RawDepthBufferPtr;
+        Gfx::CTexturePtr m_RawCameraFramePtr;
+        Gfx::CTexturePtr m_RawVertexMapPtr;
+        std::vector<Gfx::CTexturePtr> m_SmoothDepthBufferPtr;
+        std::vector<Gfx::CTexturePtr> m_ReferenceVertexMapPtr;
+        std::vector<Gfx::CTexturePtr> m_ReferenceNormalMapPtr;
+        std::vector<Gfx::CTexturePtr> m_RaycastVertexMapPtr;
+        std::vector<Gfx::CTexturePtr> m_RaycastNormalMapPtr;
         
         Gfx::CBufferPtr m_AtomicCounterBufferPtr;
 

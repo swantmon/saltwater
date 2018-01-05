@@ -15,9 +15,9 @@
 #include "mr/mr_slam_reconstruction_settings.h"
 
 #include "graphic/gfx_shader.h"
-#include "graphic/gfx_texture_2d.h"
-#include "graphic/gfx_texture_3d.h"
+#include "graphic/gfx_texture.h"
 
+#include <memory>
 #include <vector>
 
 namespace MR
@@ -40,8 +40,8 @@ namespace MR
         void PauseTracking(bool _Paused);
         bool IsTrackingLost() const;
         Base::Float4x4 GetPoseMatrix() const;
-        Gfx::CTexture3DPtr GetTSDFVolume();
-        Gfx::CTexture3DPtr GetColorVolume();
+        Gfx::CTexturePtr GetTSDFVolume();
+        Gfx::CTexturePtr GetColorVolume();
 
         void GetReconstructionSettings(SReconstructionSettings* pReconstructionSettings);
 
@@ -92,16 +92,16 @@ namespace MR
         Gfx::CShaderPtr m_DetermineSummandsCSPtr;
         Gfx::CShaderPtr m_ReduceSumCSPtr;
 
-        Gfx::CTexture2DPtr m_RawDepthBufferPtr;
-        Gfx::CTexture2DPtr m_RawCameraFramePtr;
-        std::vector<Gfx::CTexture2DPtr> m_SmoothDepthBufferPtr;
-        std::vector<Gfx::CTexture2DPtr> m_ReferenceVertexMapPtr;
-        std::vector<Gfx::CTexture2DPtr> m_ReferenceNormalMapPtr;
-        std::vector<Gfx::CTexture2DPtr> m_RaycastVertexMapPtr;
-        std::vector<Gfx::CTexture2DPtr> m_RaycastNormalMapPtr;
+        Gfx::CTexturePtr m_RawDepthBufferPtr;
+        Gfx::CTexturePtr m_RawCameraFramePtr;
+        std::vector<Gfx::CTexturePtr> m_SmoothDepthBufferPtr;
+        std::vector<Gfx::CTexturePtr> m_ReferenceVertexMapPtr;
+        std::vector<Gfx::CTexturePtr> m_ReferenceNormalMapPtr;
+        std::vector<Gfx::CTexturePtr> m_RaycastVertexMapPtr;
+        std::vector<Gfx::CTexturePtr> m_RaycastNormalMapPtr;
 
-        Gfx::CTexture3DPtr m_TSDFVolumePtr;
-        Gfx::CTexture3DPtr m_ColorVolumePtr;
+        Gfx::CTexturePtr m_TSDFVolumePtr;
+        Gfx::CTexturePtr m_ColorVolumePtr;
 
         Gfx::CBufferPtr m_ICPResourceBufferPtr;
 

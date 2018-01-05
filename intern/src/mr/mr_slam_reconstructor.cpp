@@ -18,7 +18,7 @@
 #include "graphic/gfx_state_manager.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
-#include "graphic/gfx_texture_2d.h"
+#include "graphic/gfx_texture.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
 
@@ -131,14 +131,14 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    Gfx::CTexture3DPtr CSLAMReconstructor::GetTSDFVolume()
+    Gfx::CTexturePtr CSLAMReconstructor::GetTSDFVolume()
     {
         return m_TSDFVolumePtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    Gfx::CTexture3DPtr CSLAMReconstructor::GetColorVolume()
+    Gfx::CTexturePtr CSLAMReconstructor::GetColorVolume()
     {
         return m_ColorVolumePtr;
     }
@@ -307,17 +307,17 @@ namespace MR
             TextureDescriptor.m_NumberOfPixelsW = 1;
             TextureDescriptor.m_NumberOfMipMaps = 1;
             TextureDescriptor.m_NumberOfTextures = 1;
-            TextureDescriptor.m_Binding = CTextureBase::ShaderResource;
-            TextureDescriptor.m_Access = CTextureBase::CPUWrite;
-            TextureDescriptor.m_Usage = CTextureBase::GPUReadWrite;
-            TextureDescriptor.m_Semantic = CTextureBase::UndefinedSemantic;
+            TextureDescriptor.m_Binding = CTexture::ShaderResource;
+            TextureDescriptor.m_Access = CTexture::CPUWrite;
+            TextureDescriptor.m_Usage = CTexture::GPUReadWrite;
+            TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
             TextureDescriptor.m_pFileName = 0;
             TextureDescriptor.m_pPixels = 0;
-            TextureDescriptor.m_Format = CTextureBase::R16_UINT;
+            TextureDescriptor.m_Format = CTexture::R16_UINT;
 
             m_SmoothDepthBufferPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
 
-            TextureDescriptor.m_Format = g_UseHighPrecisionMaps ? CTextureBase::R32G32B32A32_FLOAT : CTextureBase::R16G16B16A16_FLOAT;
+            TextureDescriptor.m_Format = g_UseHighPrecisionMaps ? CTexture::R32G32B32A32_FLOAT : CTexture::R16G16B16A16_FLOAT;
 
             m_ReferenceVertexMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
             m_ReferenceNormalMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
@@ -330,13 +330,13 @@ namespace MR
         TextureDescriptor.m_NumberOfPixelsW = m_ReconstructionSettings.m_VolumeResolution;
         TextureDescriptor.m_NumberOfMipMaps = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding = CTextureBase::ShaderResource;
-        TextureDescriptor.m_Access = CTextureBase::CPUWrite;
-        TextureDescriptor.m_Usage = CTextureBase::GPUReadWrite;
-        TextureDescriptor.m_Semantic = CTextureBase::UndefinedSemantic;
+        TextureDescriptor.m_Binding = CTexture::ShaderResource;
+        TextureDescriptor.m_Access = CTexture::CPUWrite;
+        TextureDescriptor.m_Usage = CTexture::GPUReadWrite;
+        TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
         TextureDescriptor.m_pFileName = 0;
         TextureDescriptor.m_pPixels = 0;
-        TextureDescriptor.m_Format = CTextureBase::R16G16_FLOAT;
+        TextureDescriptor.m_Format = CTexture::R16G16_FLOAT;
 
         m_TSDFVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
 
@@ -345,13 +345,13 @@ namespace MR
         TextureDescriptor.m_NumberOfPixelsW = 1;
         TextureDescriptor.m_NumberOfMipMaps = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding = CTextureBase::ShaderResource;
-        TextureDescriptor.m_Access = CTextureBase::CPUWrite;
-        TextureDescriptor.m_Usage = CTextureBase::GPUReadWrite;
-        TextureDescriptor.m_Semantic = CTextureBase::UndefinedSemantic;
+        TextureDescriptor.m_Binding = CTexture::ShaderResource;
+        TextureDescriptor.m_Access = CTexture::CPUWrite;
+        TextureDescriptor.m_Usage = CTexture::GPUReadWrite;
+        TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
         TextureDescriptor.m_pFileName = nullptr;
         TextureDescriptor.m_pPixels = 0;
-        TextureDescriptor.m_Format = CTextureBase::R16_UINT;
+        TextureDescriptor.m_Format = CTexture::R16_UINT;
 
         m_RawDepthBufferPtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
@@ -359,14 +359,14 @@ namespace MR
         {
             TextureDescriptor.m_NumberOfPixelsU = m_pRGBDCameraControl->GetDepthWidth();
             TextureDescriptor.m_NumberOfPixelsV = m_pRGBDCameraControl->GetDepthHeight();
-            TextureDescriptor.m_Format = CTextureBase::R8G8B8A8_UBYTE;
+            TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
 
             m_RawCameraFramePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
             TextureDescriptor.m_NumberOfPixelsU = m_ReconstructionSettings.m_VolumeResolution;
             TextureDescriptor.m_NumberOfPixelsV = m_ReconstructionSettings.m_VolumeResolution;
             TextureDescriptor.m_NumberOfPixelsW = m_ReconstructionSettings.m_VolumeResolution;
-            TextureDescriptor.m_Format = CTextureBase::R8G8B8A8_UBYTE;
+            TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
 
             m_ColorVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
         }
@@ -567,8 +567,8 @@ namespace MR
 
         ContextManager::SetShaderCS(m_BilateralFilterCSPtr);
         ContextManager::SetConstantBuffer(0, m_BilateralFilterConstantBufferPtr);
-        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
-        ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_SmoothDepthBufferPtr[0]));
+        ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_RawDepthBufferPtr));
+        ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_SmoothDepthBufferPtr[0]));
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
         //////////////////////////////////////////////////////////////////////////////////////
@@ -582,8 +582,8 @@ namespace MR
             
             ContextManager::SetShaderCS(m_DownSampleDepthCSPtr);
 
-            ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_SmoothDepthBufferPtr[PyramidLevel - 1]));
-            ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_SmoothDepthBufferPtr[PyramidLevel]));
+            ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_SmoothDepthBufferPtr[PyramidLevel - 1]));
+            ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_SmoothDepthBufferPtr[PyramidLevel]));
             ContextManager::Barrier();
 
             ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
@@ -602,8 +602,8 @@ namespace MR
             const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
 
             ContextManager::SetShaderCS(m_VertexMapCSPtr);
-            ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_SmoothDepthBufferPtr[PyramidLevel]));
-            ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ReferenceVertexMapPtr[PyramidLevel]));
+            ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_SmoothDepthBufferPtr[PyramidLevel]));
+            ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_ReferenceVertexMapPtr[PyramidLevel]));
             ContextManager::Barrier();
             ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);			
         }
@@ -614,8 +614,8 @@ namespace MR
             const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
 
             ContextManager::SetShaderCS(m_NormalMapCSPtr);
-            ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_ReferenceVertexMapPtr[PyramidLevel]));
-            ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ReferenceNormalMapPtr[PyramidLevel]));
+            ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_ReferenceVertexMapPtr[PyramidLevel]));
+            ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_ReferenceNormalMapPtr[PyramidLevel]));
             ContextManager::Barrier();
             ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
         }
@@ -663,10 +663,10 @@ namespace MR
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
         ContextManager::SetConstantBuffer(2, m_IncPoseMatrixConstantBufferPtr);
         
-        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_ReferenceVertexMapPtr[PyramidLevel]));
-        ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ReferenceNormalMapPtr[PyramidLevel]));
-        ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(m_RaycastVertexMapPtr[PyramidLevel]));
-        ContextManager::SetImageTexture(3, static_cast<CTextureBasePtr>(m_RaycastNormalMapPtr[PyramidLevel]));
+        ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_ReferenceVertexMapPtr[PyramidLevel]));
+        ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_ReferenceNormalMapPtr[PyramidLevel]));
+        ContextManager::SetImageTexture(2, static_cast<CTexturePtr>(m_RaycastVertexMapPtr[PyramidLevel]));
+        ContextManager::SetImageTexture(3, static_cast<CTexturePtr>(m_RaycastNormalMapPtr[PyramidLevel]));
 
         ContextManager::Barrier();
 
@@ -791,13 +791,13 @@ namespace MR
 
         ContextManager::SetShaderCS(m_IntegrationCSPtr);
 
-        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_TSDFVolumePtr));
-        ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RawDepthBufferPtr));
+        ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_TSDFVolumePtr));
+        ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_RawDepthBufferPtr));
         
         if (m_ReconstructionSettings.m_CaptureColor)
         {
-            ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(m_ColorVolumePtr));
-            ContextManager::SetImageTexture(3, static_cast<CTextureBasePtr>(m_RawCameraFramePtr));
+            ContextManager::SetImageTexture(2, static_cast<CTexturePtr>(m_ColorVolumePtr));
+            ContextManager::SetImageTexture(3, static_cast<CTexturePtr>(m_RawCameraFramePtr));
         }
         else
         {
@@ -830,16 +830,16 @@ namespace MR
             BufferManager::UploadBufferData(m_RaycastPyramidConstantBufferPtr, &Normalized);
             
             ContextManager::Barrier();
-            ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RaycastVertexMapPtr[PyramidLevel - 1]));
-            ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RaycastVertexMapPtr[PyramidLevel]));
+            ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_RaycastVertexMapPtr[PyramidLevel - 1]));
+            ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_RaycastVertexMapPtr[PyramidLevel]));
             ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
             Normalized = 1.0f;
             BufferManager::UploadBufferData(m_RaycastPyramidConstantBufferPtr, &Normalized);
 
             ContextManager::Barrier();
-            ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_RaycastNormalMapPtr[PyramidLevel - 1]));
-            ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RaycastNormalMapPtr[PyramidLevel]));
+            ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_RaycastNormalMapPtr[PyramidLevel - 1]));
+            ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_RaycastNormalMapPtr[PyramidLevel]));
             ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
         }
     }
@@ -853,11 +853,11 @@ namespace MR
 
         ContextManager::SetShaderCS(m_RaycastCSPtr);
 
-        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_TSDFVolumePtr));
+        ContextManager::SetTexture(0, static_cast<CTexturePtr>(m_TSDFVolumePtr));
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
 
-        ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_RaycastVertexMapPtr[0]));
-        ContextManager::SetImageTexture(2, static_cast<CTextureBasePtr>(m_RaycastNormalMapPtr[0]));
+        ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_RaycastVertexMapPtr[0]));
+        ContextManager::SetImageTexture(2, static_cast<CTexturePtr>(m_RaycastNormalMapPtr[0]));
 
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
@@ -925,11 +925,11 @@ namespace MR
     {
         ContextManager::SetShaderCS(m_ClearVolumeCSPtr);
 
-        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_TSDFVolumePtr));
+        ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_TSDFVolumePtr));
 
         if (m_ReconstructionSettings.m_CaptureColor)
         {
-            ContextManager::SetImageTexture(1, static_cast<CTextureBasePtr>(m_ColorVolumePtr));
+            ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_ColorVolumePtr));
         }
         else
         {

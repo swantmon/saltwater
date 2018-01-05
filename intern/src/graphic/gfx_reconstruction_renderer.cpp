@@ -22,7 +22,7 @@
 #include "graphic/gfx_state_manager.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
-#include "graphic/gfx_texture_2d.h"
+#include "graphic/gfx_texture.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
 
@@ -645,12 +645,12 @@ namespace
         ContextManager::SetShaderVS(m_RaycastVSPtr);
         ContextManager::SetShaderPS(m_RaycastFSPtr);
 
-        ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_pReconstructor->GetTSDFVolume()));
+        ContextManager::SetTexture(0, m_pReconstructor->GetTSDFVolume());
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
 
         if (Settings.m_CaptureColor)
         {
-            ContextManager::SetTexture(1, static_cast<CTextureBasePtr>(m_pReconstructor->GetColorVolume()));
+            ContextManager::SetTexture(1, m_pReconstructor->GetColorVolume());
             ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
         }
 
@@ -1112,7 +1112,7 @@ namespace
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
 
-        ContextManager::SetImageTexture(0, static_cast<Gfx::CTextureBasePtr>(m_pScalableReconstructor->GetVertexMap()));
+        ContextManager::SetImageTexture(0, m_pScalableReconstructor->GetVertexMap());
 
         const unsigned int Offset = 0;
         ContextManager::SetVertexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
