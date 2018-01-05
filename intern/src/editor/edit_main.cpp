@@ -44,13 +44,16 @@ int main(int _Argc, char* _pArgv[])
         }
     }
 
-    VerbosityLevel = Base::CProgramParameters::GetInstance().GetInt(VerbosityNameString);
-
-    Base::CProgramParameters::GetInstance().AddParameter(VerbosityNameString, VerbosityLevel);
-
-    Base::CProgramParameters::GetInstance().ParseFile(ParameterFile);
-
-    VerbosityLevel = Base::CProgramParameters::GetInstance().GetInt(VerbosityNameString, 3);
+    if (VerbosityLevel == 0)
+    {
+        Base::CProgramParameters::GetInstance().ParseFile(ParameterFile);
+        VerbosityLevel = Base::CProgramParameters::GetInstance().GetInt(VerbosityNameString, 3);
+    }
+    else
+    {
+        VerbosityLevel = Base::CProgramParameters::GetInstance().GetInt(VerbosityNameString, VerbosityLevel);
+        Base::CProgramParameters::GetInstance().ParseFile(ParameterFile);
+    }
 
     Base::CConsole::GetInstance().SetVerbosityLevel(VerbosityLevel);
 
