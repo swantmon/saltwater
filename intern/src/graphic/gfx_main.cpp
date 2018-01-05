@@ -99,7 +99,9 @@ namespace
 
         void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile);
 
-        GraphicAPIs GetGraphicsAPI();
+        EGraphicAPIs GetGraphicsAPI();
+        int GetGraphicsMajorVersion();
+        int GetGraphicsMinorVersion();
         bool IsExtensionAvailable(const std::string& _Name);
         
     public:
@@ -137,6 +139,13 @@ namespace
             Base::Int2   m_WindowSize;
             unsigned int m_VSync;
         };
+
+        struct SGraphicsInfo
+        {
+            EGraphicAPIs m_GraphicsAPI;
+            int          m_MajorVersion;
+            int          m_MinorVersion;
+        };
         
         struct SPerFrameConstantBuffer
         {
@@ -168,6 +177,8 @@ namespace
         
     private:
 
+        SGraphicsInfo m_GraphicsInfo;
+
         SWindowInfo  m_WindowInfos[s_MaxNumberOfWindows];
         SWindowInfo* m_pActiveWindowInfo;
         unsigned int m_NumberOfWindows;
@@ -178,7 +189,6 @@ namespace
 
         CBufferPtr m_PerFrameConstantBufferBufferPtr;
 
-        GraphicAPIs m_GraphicsAPI;
         std::unordered_set<std::string> m_AvailableExtensions;
     };
 } // namespace
@@ -192,7 +202,26 @@ namespace
         , m_PerFrameConstantBuffer         ()
         , m_PerFrameConstantBufferBufferPtr()
     {
-        
+        // -----------------------------------------------------------------------------
+        // Load graphics API
+        // -----------------------------------------------------------------------------
+#ifdef __ANDROID__
+        const std::string GraphicsAPI = Base::CProgramParameters::GetInstance().GetStdString("graphics_api", "gles");
+#else
+        const std::string GraphicsAPI = Base::CProgramParameters::GetInstance().GetStdString("graphics_api", "gl");
+#endif
+
+        if      (GraphicsAPI == "gles") m_GraphicsInfo.m_GraphicsAPI = OpenGLES;
+        else if (GraphicsAPI == "gl")   m_GraphicsInfo.m_GraphicsAPI = OpenGL;
+        else BASE_THROWV("Graphics API %s is not supported! Possible options are \"gles\" or \"gl\"", GraphicsAPI.c_str());
+
+#ifdef __ANDROID__
+        m_GraphicsInfo.m_MajorVersion = Base::CProgramParameters::GetInstance().GetInt("graphics_api_major_version", 3);
+        m_GraphicsInfo.m_MinorVersion = Base::CProgramParameters::GetInstance().GetInt("graphics_api_minor_version", 2);
+#else
+        m_GraphicsInfo.m_MajorVersion = Base::CProgramParameters::GetInstance().GetInt("graphics_api_major_version", 4);
+        m_GraphicsInfo.m_MinorVersion = Base::CProgramParameters::GetInstance().GetInt("graphics_api_minor_version", 5);
+#endif
     }
     
     // -----------------------------------------------------------------------------
@@ -205,7 +234,7 @@ namespace
     // -----------------------------------------------------------------------------
     
     void CGfxMain::OnStart()
-    {                
+    {
         // -----------------------------------------------------------------------------
         // Show information of windows and initialize them
         // -----------------------------------------------------------------------------
@@ -216,10 +245,22 @@ namespace
             SWindowInfo& rWindowInfo = m_WindowInfos[IndexOfWindow];
 
 #ifdef __ANDROID__
-
             EGLNativeWindowType  pNativeWindowHandle;
             EGLBoolean           Status;
             EGLint               Error;
+
+            // -----------------------------------------------------------------------------
+            // Check OpenGLES
+            // -----------------------------------------------------------------------------
+            if (m_GraphicsInfo.m_GraphicsAPI != OpenGLES)
+            {
+                BASE_THROWM("Only OpenGLES is supported on Android devices. Please change graphics API in the config file.")
+            }
+
+            if (!(m_GraphicsInfo.m_MajorVersion >= 3 && m_GraphicsInfo.m_MinorVersion >= 2))
+            {
+                BASE_THROWM("Lower versions as OpenGLES 3.2 is not supported.")
+            }
 
             // -----------------------------------------------------------------------------
             // Cast data
@@ -261,21 +302,6 @@ namespace
 
             eglChooseConfig(rWindowInfo.m_EglDisplay, ConfigAttributes, &rWindowInfo.m_EglConfig, 1, &NumConfigs);
 
-//             EGLint NumberOfConfigs;
-// 
-//             eglChooseConfig(rWindowInfo.m_EglDisplay, ConfigAttributes, 0, 0, &NumberOfConfigs);
-// 
-//             if (NumberOfConfigs > 0)
-//             {
-//                 eglChooseConfig(rWindowInfo.m_EglDisplay, ConfigAttributes, &rWindowInfo.m_EglConfig, 1, &NumberOfConfigs);
-//             }
-//             else
-//             {
-//                 BASE_CONSOLE_INFO("Unable to choose config from device.");
-// 
-//                 throw;
-//             }
-
             if (NumConfigs != 1)
             {
                 BASE_THROWM("Failed to choose config.");
@@ -312,7 +338,7 @@ namespace
             // -----------------------------------------------------------------------------
             EGLint ContextAttributes[] =
             {
-                EGL_CONTEXT_CLIENT_VERSION, 3,
+                EGL_CONTEXT_CLIENT_VERSION, m_GraphicsInfo.m_MajorVersion,
                 EGL_NONE
             };
 
@@ -338,11 +364,6 @@ namespace
             }
 
             // -----------------------------------------------------------------------------
-            // Set engine graphics API
-            // -----------------------------------------------------------------------------
-            m_GraphicsAPI = GLES32;
-
-            // -----------------------------------------------------------------------------
             // Get native size
             // -----------------------------------------------------------------------------
             int Width, Height;
@@ -358,7 +379,6 @@ namespace
             // -----------------------------------------------------------------------------
             eglSwapBuffers(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface);
 #else
-
             HWND  pNativeWindowHandle;
             HDC   pNativeDeviceContextHandle;
             HGLRC pNativeOpenGLContextHandle;
@@ -405,28 +425,10 @@ namespace
 
             wglMakeCurrent(pNativeDeviceContextHandle, pDummyNativeOpenGLContextHandle);
 
-            const std::string GraphicsAPI = Base::CProgramParameters::GetInstance().GetStdString("graphics_api");
-
-            if (GraphicsAPI == "gles32")
-            {
-                m_GraphicsAPI = GLES32;
-            }
-            else if (GraphicsAPI == "gl46")
-            {
-                m_GraphicsAPI = GL46;
-            }
-            else if (GraphicsAPI == "gl45")
-            {
-                m_GraphicsAPI = GL45;
-            }
-            else
-            {
-                m_GraphicsAPI = UNDEFINED_GRAPHICS_API;
-                std::string Message = "Graphics API " + GraphicsAPI + " is not supported!";
-                BASE_THROWV(Message.c_str());
-            }
-
-            if (m_GraphicsAPI == GLES32)
+            // -----------------------------------------------------------------------------
+            // Check if OpenGLES is available on desktop graphics card
+            // -----------------------------------------------------------------------------
+            if (m_GraphicsInfo.m_GraphicsAPI == OpenGLES)
             {
                 typedef const char* (WINAPI * PFNWGLGETEXTENSIONSSTRINGARBPROC)(HDC hdc);
                 PROC Function = wglGetProcAddress("wglGetExtensionsStringARB");
@@ -439,8 +441,7 @@ namespace
 
                 if (!GLESAvailable)
                 {
-                    BASE_CONSOLE_ERROR("OpenGL ES 3.2 is not availble! Will try OpenGL 4.5 instead");
-                    m_GraphicsAPI = GL45;
+                    BASE_THROWM("OpenGL ES 3.2 extension on desktop is not available! Please change graphics API back to \"gl\" inside config.");
                 }
             }
 
@@ -464,40 +465,20 @@ namespace
             // -----------------------------------------------------------------------------
             // Create final OpenGL context with attributes
             // -----------------------------------------------------------------------------
+            const int Attributes[] =
+            {
+                WGL_CONTEXT_MAJOR_VERSION_ARB, m_GraphicsInfo.m_MajorVersion,
+                WGL_CONTEXT_MINOR_VERSION_ARB, m_GraphicsInfo.m_MinorVersion,
+                WGL_CONTEXT_PROFILE_MASK_ARB , m_GraphicsInfo.m_GraphicsAPI == OpenGLES ? WGL_CONTEXT_ES2_PROFILE_BIT_EXT : WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+                WGL_CONTEXT_FLAGS_ARB        , APP_DEBUG_MODE ? WGL_CONTEXT_DEBUG_BIT_ARB : 0,
+                0,
+            };
 
-            if (m_GraphicsAPI == GLES32)
-            {
-                const int Attributes[] =
-                {
-                    WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-                    WGL_CONTEXT_MINOR_VERSION_ARB, 2,
-                    WGL_CONTEXT_PROFILE_MASK_ARB , WGL_CONTEXT_ES2_PROFILE_BIT_EXT,
-                    WGL_CONTEXT_FLAGS_ARB        , APP_DEBUG_MODE ? WGL_CONTEXT_DEBUG_BIT_ARB : 0,
-                    0,        //End
-                };
-                pNativeOpenGLContextHandle = ::wglCreateContextAttribsARB(pNativeDeviceContextHandle, 0, Attributes);
-            }
-            else
-            {
-                const int Attributes[] =
-                {
-                    WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
-                    WGL_CONTEXT_MINOR_VERSION_ARB, m_GraphicsAPI == GL46 ? 6 : 5,
-                    WGL_CONTEXT_PROFILE_MASK_ARB , WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-                    WGL_CONTEXT_FLAGS_ARB        , APP_DEBUG_MODE ? WGL_CONTEXT_DEBUG_BIT_ARB : 0,
-                    0,        //End
-                };
-                pNativeOpenGLContextHandle = ::wglCreateContextAttribsARB(pNativeDeviceContextHandle, 0, Attributes);
-            }
+            pNativeOpenGLContextHandle = ::wglCreateContextAttribsARB(pNativeDeviceContextHandle, 0, Attributes);
 
             if (pNativeDeviceContextHandle == 0)
             {
                 BASE_THROWM("OpenGL context creation failed.");
-            }
-
-            if (!GLEW_VERSION_4_5)
-            {
-                BASE_THROWV("GL 4.5 can't be initialized. Available version is to old!");
             }
 
             wglMakeCurrent(pNativeDeviceContextHandle, pNativeOpenGLContextHandle);
@@ -712,9 +693,23 @@ namespace
     
     // -----------------------------------------------------------------------------
 
-    GraphicAPIs CGfxMain::GetGraphicsAPI()
+    EGraphicAPIs CGfxMain::GetGraphicsAPI()
     {
-        return m_GraphicsAPI;
+        return m_GraphicsInfo.m_GraphicsAPI;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    int CGfxMain::GetGraphicsMajorVersion()
+    {
+        return m_GraphicsInfo.m_MajorVersion;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    int CGfxMain::GetGraphicsMinorVersion()
+    {
+        return m_GraphicsInfo.m_MinorVersion;
     }
 
     // -----------------------------------------------------------------------------
@@ -979,9 +974,23 @@ namespace Main
 
     // -----------------------------------------------------------------------------
 
-    GraphicAPIs GetGraphicsAPI()
+    EGraphicAPIs GetGraphicsAPI()
     {
         return CGfxMain::GetInstance().GetGraphicsAPI();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    int GetGraphicsMajorVersion()
+    {
+        return CGfxMain::GetInstance().GetGraphicsMajorVersion();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    int GetGraphicsMinorVersion()
+    {
+        return CGfxMain::GetInstance().GetGraphicsMinorVersion();
     }
 
     // -----------------------------------------------------------------------------

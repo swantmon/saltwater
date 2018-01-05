@@ -53,9 +53,9 @@ namespace
 
         CSamplerSetPtr CreateSamplerSet(CSamplerPtr* _pSamplerPtrs, unsigned int _NumberOfSamplers);
 
-	public:
+    public:
 
-		void SetSamplerLabel(CSamplerPtr _SamplerPtr, const char* _pLabel);
+        void SetSamplerLabel(CSamplerPtr _SamplerPtr, const char* _pLabel);
 
     private:
 
@@ -187,33 +187,31 @@ namespace
         }
 
         try
-        {           
+        {
             // -----------------------------------------------------------------------------
             // Generate samplers
             // -----------------------------------------------------------------------------
-			glGenSamplers(CSampler::NumberOfSamplers, m_NativeSampler);
+            glGenSamplers(CSampler::NumberOfSamplers, m_NativeSampler);
 
             for (IndexOfSampler = 0; IndexOfSampler < CSampler::NumberOfSamplers; ++ IndexOfSampler)
             {
-				// -----------------------------------------------------------------------------
-				// Create sampler
-				// -----------------------------------------------------------------------------
-				m_SamplerPtrs[IndexOfSampler] = m_Samplers.Allocate();
+                // -----------------------------------------------------------------------------
+                // Create sampler
+                // -----------------------------------------------------------------------------
+                m_SamplerPtrs[IndexOfSampler] = m_Samplers.Allocate();
 
-				m_SamplerPtrs[IndexOfSampler]->m_Type			    = static_cast<CSampler::ESampler>(IndexOfSampler);
-				m_SamplerPtrs[IndexOfSampler]->m_AddressMode[0]     = s_NativeSamplerDescriptors[IndexOfSampler].AddressModeU;
-				m_SamplerPtrs[IndexOfSampler]->m_AddressMode[1]     = s_NativeSamplerDescriptors[IndexOfSampler].AddressModeV;
-				m_SamplerPtrs[IndexOfSampler]->m_AddressMode[2]     = s_NativeSamplerDescriptors[IndexOfSampler].AddressModeW;
-				m_SamplerPtrs[IndexOfSampler]->m_Filter		        = s_NativeSamplerDescriptors[IndexOfSampler].Filter;
-				m_SamplerPtrs[IndexOfSampler]->m_ComparisonFunction = s_NativeSamplerDescriptors[IndexOfSampler].ComparisonFunction;
+                m_SamplerPtrs[IndexOfSampler]->m_Type               = static_cast<CSampler::ESampler>(IndexOfSampler);
+                m_SamplerPtrs[IndexOfSampler]->m_AddressMode[0]     = s_NativeSamplerDescriptors[IndexOfSampler].AddressModeU;
+                m_SamplerPtrs[IndexOfSampler]->m_AddressMode[1]     = s_NativeSamplerDescriptors[IndexOfSampler].AddressModeV;
+                m_SamplerPtrs[IndexOfSampler]->m_AddressMode[2]     = s_NativeSamplerDescriptors[IndexOfSampler].AddressModeW;
+                m_SamplerPtrs[IndexOfSampler]->m_Filter             = s_NativeSamplerDescriptors[IndexOfSampler].Filter;
+                m_SamplerPtrs[IndexOfSampler]->m_ComparisonFunction = s_NativeSamplerDescriptors[IndexOfSampler].ComparisonFunction;
 
-				// -----------------------------------------------------------------------------
-				// Create native sampler
-				// -----------------------------------------------------------------------------
+                // -----------------------------------------------------------------------------
+                // Create native sampler
+                // -----------------------------------------------------------------------------
                 GLuint NativeSampler = m_NativeSampler[IndexOfSampler];
 
-				glObjectLabel(GL_SAMPLER, NativeSampler, -1, m_SamplerPtrs[IndexOfSampler]->GetName());
-                
                 int AdressModeU = ConvertAddressMode(s_NativeSamplerDescriptors[IndexOfSampler].AddressModeU);
                 int AdressModeV = ConvertAddressMode(s_NativeSamplerDescriptors[IndexOfSampler].AddressModeV);
                 int AdressModeW = ConvertAddressMode(s_NativeSamplerDescriptors[IndexOfSampler].AddressModeW);
@@ -249,6 +247,8 @@ namespace
 
                     glSamplerParameteri(NativeSampler, GL_TEXTURE_COMPARE_FUNC, ComparisonMode);
                 }
+
+                glObjectLabel(GL_SAMPLER, NativeSampler, -1, m_SamplerPtrs[IndexOfSampler]->GetName());
             }
         }
         catch (...)
@@ -330,16 +330,16 @@ namespace
         return CSamplerSetPtr(SamplerSetPtr);
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void CGfxSamplerManager::SetSamplerLabel(CSamplerPtr _SamplerPtr, const char* _pLabel)
-	{
-		assert(_pLabel != nullptr);
+    void CGfxSamplerManager::SetSamplerLabel(CSamplerPtr _SamplerPtr, const char* _pLabel)
+    {
+        assert(_pLabel != nullptr);
 
-		CInternSampler* pInternSampler = static_cast<CInternSampler*>(_SamplerPtr.GetPtr());
+        CInternSampler* pInternSampler = static_cast<CInternSampler*>(_SamplerPtr.GetPtr());
 
-		glObjectLabel(GL_SAMPLER, pInternSampler->m_NativeSampler, -1, _pLabel);
-	}
+        glObjectLabel(GL_SAMPLER, pInternSampler->m_NativeSampler, -1, _pLabel);
+    }
     
     // -----------------------------------------------------------------------------
     
@@ -588,11 +588,11 @@ namespace SamplerManager
         return CGfxSamplerManager::GetInstance().CreateSamplerSet(_pSamplerPtrs, _NumberOfSamplers);
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void SetSamplerLabel(CSamplerPtr _SamplerPtr, const char* _pLabel)
-	{
-		CGfxSamplerManager::GetInstance().SetSamplerLabel(_SamplerPtr, _pLabel);
-	}
+    void SetSamplerLabel(CSamplerPtr _SamplerPtr, const char* _pLabel)
+    {
+        CGfxSamplerManager::GetInstance().SetSamplerLabel(_SamplerPtr, _pLabel);
+    }
 } // SamplerManager
 } // namespace Gfx

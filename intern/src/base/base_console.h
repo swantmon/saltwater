@@ -50,6 +50,8 @@ namespace IO
         void Entry(EConsoleLevel _ConsoleLevel, const Char* _pText);
         void Entry(EConsoleLevel _ConsoleLevel, Char*, const Char* _pFormat, ...);
         std::ostringstream& StreamEntry(EConsoleLevel _ConsoleLevel);
+
+        void SetVerbosityLevel(int _Level);
         
     public:
         
@@ -73,6 +75,8 @@ namespace IO
         std::ostringstream      m_OutputStream;
         Base::CPerformanceClock m_Clock;
         
+        int m_VerbosityLevel;
+
     private:
 
         const std::string& GetLogLevelString(EConsoleLevel _ConsoleLevel) const;
