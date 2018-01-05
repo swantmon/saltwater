@@ -16,12 +16,18 @@ int main(int _Argc, char* _pArgv[])
     const char* pValue;
     std::string ParameterFile = "editor.config";
 
-    for (; (MoreArguments = Base::GetOption(_Argc, _pArgv, "f:-:")) != -1; )
+    int VerbosityLevel = 0;
+
+    for (; (MoreArguments = Base::GetOption(_Argc, _pArgv, "f:-:v")) != -1; )
     {
         switch (MoreArguments)
         {
         case 'f':
             ParameterFile = Base::GetArgument();
+            break;
+
+        case 'v':
+            ++ VerbosityLevel;
             break;
 
         case '-':
@@ -41,6 +47,13 @@ int main(int _Argc, char* _pArgv[])
     }
 
     Base::CProgramParameters::GetInstance().ParseFile(ParameterFile);
+
+    if (VerbosityLevel == 0)
+    {
+        VerbosityLevel = Base::CProgramParameters::GetInstance().GetInt("console_verbosity_Level", 3);
+    }
+
+    Base::CConsole::GetInstance().SetVerbosityLevel(VerbosityLevel);
 
     try
     {
