@@ -405,7 +405,7 @@ namespace
 
             wglMakeCurrent(pNativeDeviceContextHandle, pDummyNativeOpenGLContextHandle);
 
-            const std::string GraphicsAPI = Base::CProgramParameters::GetInstance().GetStdString("graphics_api");
+            const std::string GraphicsAPI = Base::CProgramParameters::GetInstance().GetStdString("graphics_api", "gl45");
 
             if (GraphicsAPI == "gles32")
             {

@@ -55,7 +55,7 @@ namespace IO
         }
         else
         {
-            BASE_CONSOLE_ERRORV("The file %s could not be passed.", _rFile.c_str());
+            BASE_CONSOLE_WARNINGV("Config file %s does not exists!", _rFile.c_str());
         }
     }
 
@@ -105,111 +105,147 @@ namespace IO
 
     // -----------------------------------------------------------------------------
 
-    int CProgramParameters::GetInt(const std::string& _rOption)
+    int CProgramParameters::GetInt(const std::string& _rOption, int _Default)
     {
 #ifdef __ANDROID__ 
-        return atoi(m_Container[_rOption].c_str());
+        if (HasParameter(_rOption)) return atoi(m_Container[_rOption].c_str());
 #else
-        return std::stoi(m_Container[_rOption]);
+        if (HasParameter(_rOption)) return std::stoi(m_Container[_rOption]);
 #endif
+        AddParameter(_rOption, _Default);
+
+        return _Default;
     }
 
     // -----------------------------------------------------------------------------
 
-    unsigned int CProgramParameters::GetUInt(const std::string& _rOption)
+    unsigned int CProgramParameters::GetUInt(const std::string& _rOption, unsigned int _Default)
     {
 #ifdef __ANDROID__ 
-        return atoi(m_Container[_rOption].c_str());
+        if (HasParameter(_rOption)) return atoi(m_Container[_rOption].c_str());
 #else
-        return std::stoul(m_Container[_rOption]);
+        if (HasParameter(_rOption)) return std::stoul(m_Container[_rOption]);
 #endif
+        AddParameter(_rOption, _Default);
+
+        return _Default;
     }
 
     // -----------------------------------------------------------------------------
 
-    long CProgramParameters::GetLong(const std::string& _rOption)
+    long CProgramParameters::GetLong(const std::string& _rOption, long _Default)
     {
 #ifdef __ANDROID__ 
-        return strtol(m_Container[_rOption].c_str(), NULL, 0);
+        if (HasParameter(_rOption)) return strtol(m_Container[_rOption].c_str());
 #else
-        return std::stol(m_Container[_rOption]);
+        if (HasParameter(_rOption)) return std::stol(m_Container[_rOption]);
 #endif
+        AddParameter(_rOption, _Default);
+
+        return _Default;
     }
 
     // -----------------------------------------------------------------------------
 
-    unsigned long CProgramParameters::GetULong(const std::string& _rOption)
+    unsigned long CProgramParameters::GetULong(const std::string& _rOption, unsigned long _Default)
     {
 #ifdef __ANDROID__ 
-        return strtoul(m_Container[_rOption].c_str(), NULL, 0);
+        if (HasParameter(_rOption)) return strtoul(m_Container[_rOption].c_str());
 #else
-        return std::stoul(m_Container[_rOption]);
+        if (HasParameter(_rOption)) return std::stoul(m_Container[_rOption]);
 #endif
+        AddParameter(_rOption, _Default);
+
+        return _Default;
     }
 
     // -----------------------------------------------------------------------------
 
-    long long CProgramParameters::GetLongLong(const std::string& _rOption)
+    long long CProgramParameters::GetLongLong(const std::string& _rOption, long long _Default)
     {
 #ifdef __ANDROID__ 
-        return strtoll(m_Container[_rOption].c_str(), NULL, 0);
+        if (HasParameter(_rOption)) return strtoll(m_Container[_rOption].c_str());
 #else
-        return std::stoll(m_Container[_rOption]);
+        if (HasParameter(_rOption)) return std::stoll(m_Container[_rOption]);
 #endif
+        AddParameter(_rOption, _Default);
+
+        return _Default;
     }
 
     // -----------------------------------------------------------------------------
 
-    unsigned long long CProgramParameters::GetULongLong(const std::string& _rOption)
+    unsigned long long CProgramParameters::GetULongLong(const std::string& _rOption, unsigned long long _Default)
     {
 #ifdef __ANDROID__ 
-        return strtoull(m_Container[_rOption].c_str(), NULL, 0);
+        if (HasParameter(_rOption)) return strtoull(m_Container[_rOption].c_str());
 #else
-        return std::stoull(m_Container[_rOption]);
+        if (HasParameter(_rOption)) return std::stoull(m_Container[_rOption]);
 #endif
+        AddParameter(_rOption, _Default);
+
+        return _Default;
     }
 
     // -----------------------------------------------------------------------------
 
-    bool CProgramParameters::GetBoolean(const std::string& _rOption)
+    bool CProgramParameters::GetBoolean(const std::string& _rOption, bool _Default)
     {
-        return m_Container[_rOption] == "1" ? true : false;
+        if (HasParameter(_rOption)) return m_Container[_rOption] == "1" ? true : false;
+
+        AddParameter(_rOption, _Default);
+
+        return _Default;
     }
 
     // -----------------------------------------------------------------------------
 
-    float CProgramParameters::GetFloat(const std::string& _rOption)
+    float CProgramParameters::GetFloat(const std::string& _rOption, float _Default)
     {
 #ifdef __ANDROID__ 
-        return atof(m_Container[_rOption].c_str());
+        if (HasParameter(_rOption)) return atof(m_Container[_rOption].c_str());
 #else
-        return std::stof(m_Container[_rOption]);
+        if (HasParameter(_rOption)) return std::stof(m_Container[_rOption]);
 #endif
+        AddParameter(_rOption, _Default);
+
+        return _Default;
     }
 
     // -----------------------------------------------------------------------------
 
-    double CProgramParameters::GetDouble(const std::string& _rOption)
+    double CProgramParameters::GetDouble(const std::string& _rOption, double _Default)
     {
 #ifdef __ANDROID__ 
-        return strtod(m_Container[_rOption].c_str(), NULL);
+        if (HasParameter(_rOption)) return strtod(m_Container[_rOption].c_str());
 #else
-        return std::stod(m_Container[_rOption]);
+        if (HasParameter(_rOption)) return std::stod(m_Container[_rOption]);
 #endif
+        AddParameter(_rOption, _Default);
+
+        return _Default;
     }
 
     // -----------------------------------------------------------------------------
 
-    const char* CProgramParameters::GetString(const std::string& _rOption)
+    const char* CProgramParameters::GetString(const std::string& _rOption, const char* _Default)
     {
-        return m_Container[_rOption].c_str();
+        if (HasParameter(_rOption)) return m_Container[_rOption].c_str();
+
+        AddParameter(_rOption, _Default);
+
+        return _Default;
     }
 
     // -----------------------------------------------------------------------------
 
-    const std::string& CProgramParameters::GetStdString(const std::string& _rOption)
+    const std::string& CProgramParameters::GetStdString(const std::string& _rOption, const std::string& _rDefault)
     {
-        return m_Container[_rOption];
+        if (HasParameter(_rOption)) return m_Container[_rOption];
+
+        AddParameter(_rOption, _rDefault);
+
+        return _rDefault;
     }
 
     // -----------------------------------------------------------------------------
