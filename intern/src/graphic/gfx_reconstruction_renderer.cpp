@@ -175,7 +175,7 @@ namespace
     
     void CGfxReconstructionRenderer::OnStart()
     {
-        assert(Main::GetGraphicsAPI() == GL45);
+        assert(Main::GetGraphicsAPI() == OpenGL);
 
         Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxReconstructionRenderer::OnResize));
         
