@@ -121,7 +121,7 @@ namespace IO
 
     unsigned int CProgramParameters::GetUInt(const std::string& _rOption, unsigned int _Default)
     {
-#ifdef __ANDROID__ 
+#ifdef __ANDROID__
         if (HasParameter(_rOption)) return atoi(m_Container[_rOption].c_str());
 #else
         if (HasParameter(_rOption)) return std::stoul(m_Container[_rOption]);
@@ -135,8 +135,9 @@ namespace IO
 
     long CProgramParameters::GetLong(const std::string& _rOption, long _Default)
     {
-#ifdef __ANDROID__ 
-        if (HasParameter(_rOption)) return strtol(m_Container[_rOption].c_str());
+#ifdef __ANDROID__
+        char* pEnd;
+        if (HasParameter(_rOption)) return strtol(m_Container[_rOption].c_str(), &pEnd, 10);
 #else
         if (HasParameter(_rOption)) return std::stol(m_Container[_rOption]);
 #endif
@@ -149,8 +150,9 @@ namespace IO
 
     unsigned long CProgramParameters::GetULong(const std::string& _rOption, unsigned long _Default)
     {
-#ifdef __ANDROID__ 
-        if (HasParameter(_rOption)) return strtoul(m_Container[_rOption].c_str());
+#ifdef __ANDROID__
+        char* pEnd;
+        if (HasParameter(_rOption)) return strtoul(m_Container[_rOption].c_str(), &pEnd, 10);
 #else
         if (HasParameter(_rOption)) return std::stoul(m_Container[_rOption]);
 #endif
@@ -163,8 +165,9 @@ namespace IO
 
     long long CProgramParameters::GetLongLong(const std::string& _rOption, long long _Default)
     {
-#ifdef __ANDROID__ 
-        if (HasParameter(_rOption)) return strtoll(m_Container[_rOption].c_str());
+#ifdef __ANDROID__
+        char* pEnd;
+        if (HasParameter(_rOption)) return strtoll(m_Container[_rOption].c_str(), &pEnd, 10);
 #else
         if (HasParameter(_rOption)) return std::stoll(m_Container[_rOption]);
 #endif
@@ -177,8 +180,9 @@ namespace IO
 
     unsigned long long CProgramParameters::GetULongLong(const std::string& _rOption, unsigned long long _Default)
     {
-#ifdef __ANDROID__ 
-        if (HasParameter(_rOption)) return strtoull(m_Container[_rOption].c_str());
+#ifdef __ANDROID__
+        char* pEnd;
+        if (HasParameter(_rOption)) return strtoull(m_Container[_rOption].c_str(), &pEnd, 10);
 #else
         if (HasParameter(_rOption)) return std::stoull(m_Container[_rOption]);
 #endif
@@ -216,8 +220,9 @@ namespace IO
 
     double CProgramParameters::GetDouble(const std::string& _rOption, double _Default)
     {
-#ifdef __ANDROID__ 
-        if (HasParameter(_rOption)) return strtod(m_Container[_rOption].c_str());
+#ifdef __ANDROID__
+        char* pEnd;
+        if (HasParameter(_rOption)) return strtod(m_Container[_rOption].c_str(), &pEnd);
 #else
         if (HasParameter(_rOption)) return std::stod(m_Container[_rOption]);
 #endif

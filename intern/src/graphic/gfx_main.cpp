@@ -213,7 +213,7 @@ namespace
 
         if      (GraphicsAPI == "gles") m_GraphicsInfo.m_GraphicsAPI = OpenGLES;
         else if (GraphicsAPI == "gl")   m_GraphicsInfo.m_GraphicsAPI = OpenGL;
-        else BASE_THROWV("Graphics API %s is not supported! Possible options are \"gles\" or \"gl\"", GraphicsAPI);
+        else BASE_THROWV("Graphics API %s is not supported! Possible options are \"gles\" or \"gl\"", GraphicsAPI.c_str());
 
 #ifdef __ANDROID__
         m_GraphicsInfo.m_MayorVersion = Base::CProgramParameters::GetInstance().GetInt("graphics_api_mayor_version", 3);
