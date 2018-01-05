@@ -63,27 +63,27 @@ namespace Gfx
         return m_Type;
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	const char* CSampler::GetName() const
-	{
-		const char* pNames[NumberOfSamplers] =
-		{
-			{ "MinMagMipPointClamp" },
-			{ "MinMagMipPointWrap" },
-			{ "MinMagMipPointBorder" },
-			{ "MinMagMipPointMirror" },
-			{ "MinMagLinearMipPointClamp" },
-			{ "MinMagLinearMipPointWrap" },
-			{ "MinMagLinearMipPointBorder" },
-			{ "MinMagLinearMipPointMirror" },
-			{ "MinMagMipLinearClamp" },
-			{ "MinMagMipLinearWrap" },
-			{ "MinMagMipLinearBorder" },
-			{ "MinMagMipLinearMirror" },
-			{ "PCF" },
-		};
+    const char* CSampler::GetName() const
+    {
+        const char* pNames[NumberOfSamplers] =
+        {
+            { "MinMagMipPointClamp" },
+            { "MinMagMipPointWrap" },
+            { "MinMagMipPointBorder" },
+            { "MinMagMipPointMirror" },
+            { "MinMagLinearMipPointClamp" },
+            { "MinMagLinearMipPointWrap" },
+            { "MinMagLinearMipPointBorder" },
+            { "MinMagLinearMipPointMirror" },
+            { "MinMagMipLinearClamp" },
+            { "MinMagMipLinearWrap" },
+            { "MinMagMipLinearBorder" },
+            { "MinMagMipLinearMirror" },
+            { "PCF" },
+        };
 
-		return pNames[m_Type];
-	}
+        return pNames[m_Type];
+    }
 } // namespace Gfx
