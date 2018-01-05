@@ -39,48 +39,57 @@ namespace IO
     
     void CConsole::Entry(EConsoleLevel _ConsoleLevel, const Char* _pText)
     {
-        Out(_ConsoleLevel, _pText);
+        if (m_VerbosityLevel >= _ConsoleLevel)
+        {
+            Out(_ConsoleLevel, _pText);
+        }
     }
     
     // -----------------------------------------------------------------------------
     
     void CConsole::Entry(EConsoleLevel _ConsoleLevel, Char*, const Char* _pFormat, ...)
     {
-        va_list pArguments;
-        
-        va_start(pArguments, _pFormat);
-        
-        char Buffer[s_MaxNumberOfFormatCharacters];
-        
+        if (m_VerbosityLevel >= _ConsoleLevel)
+        {
+            va_list pArguments;
+
+            va_start(pArguments, _pFormat);
+
+            char Buffer[s_MaxNumberOfFormatCharacters];
+
 #if __APPLE__ || __ANDROID__
-        vsnprintf(Buffer, s_MaxNumberOfFormatCharacters, _pFormat, pArguments);
+            vsnprintf(Buffer, s_MaxNumberOfFormatCharacters, _pFormat, pArguments);
 #else
-        vsnprintf_s(Buffer, s_MaxNumberOfFormatCharacters, _pFormat, pArguments);
+            vsnprintf_s(Buffer, s_MaxNumberOfFormatCharacters, _pFormat, pArguments);
 #endif
-        
-        va_end(pArguments);
-        
-        Out(_ConsoleLevel, Buffer);
+
+            va_end(pArguments);
+
+            Out(_ConsoleLevel, Buffer);
+        }
     }
 
     // -----------------------------------------------------------------------------
 
     std::ostringstream& CConsole::StreamEntry(EConsoleLevel _ConsoleLevel)
     {
-        // -----------------------------------------------------------------------------
-        // Get current time stamp
-        // -----------------------------------------------------------------------------
-        m_Clock.OnFrame();
-        
-        double      CurrentTime = m_Clock.GetTime();
-        std::string LogString   = GetLogLevelString(_ConsoleLevel);
+        if (m_VerbosityLevel >= _ConsoleLevel)
+        {
+            // -----------------------------------------------------------------------------
+            // Get current time stamp
+            // -----------------------------------------------------------------------------
+            m_Clock.OnFrame();
 
-        // -----------------------------------------------------------------------------
-        // Init new Console entry with timestamp and Console level
-        // -----------------------------------------------------------------------------
-        m_OutputStream << "(" << CurrentTime << " sec.) " << LogString << ": ";
+            double      CurrentTime = m_Clock.GetTime();
+            std::string LogString = GetLogLevelString(_ConsoleLevel);
 
-        return m_OutputStream;
+            // -----------------------------------------------------------------------------
+            // Init new Console entry with timestamp and Console level
+            // -----------------------------------------------------------------------------
+            m_OutputStream << "(" << CurrentTime << " sec.) " << LogString << ": ";
+
+            return m_OutputStream;
+        }       
     }
     
     // -----------------------------------------------------------------------------
