@@ -411,7 +411,7 @@ namespace CON
         {
             const FRelease ReleaseFtr = _rItem.m_ReleaseFtr;
             
-            assert(ReleaseFtr != nullptr);
+            assert(ReleaseFtr != 0);
             
             ReleaseFtr(_rItem);
         }
@@ -431,7 +431,7 @@ namespace CON
 {
     template<class T>
     inline CManagedPoolItemPtr<T>::CManagedPoolItemPtr()
-        : m_pItem(nullptr)
+        : m_pItem(0)
     {
         
     }
@@ -535,7 +535,7 @@ namespace CON
     template<class T>
     inline bool CManagedPoolItemPtr<T>::operator ! () const
     {
-        return m_pItem == nullptr;
+        return m_pItem == 0;
     }
     
     // -----------------------------------------------------------------------------
@@ -639,7 +639,7 @@ namespace CON
     template<class T>
     inline bool CManagedPoolItemPtr<T>::IsValid() const
     {
-        return m_pItem != nullptr;
+        return m_pItem != 0;
     }
     
     // -----------------------------------------------------------------------------
@@ -647,7 +647,7 @@ namespace CON
     template<class T>
     inline int CManagedPoolItemPtr<T>::AddRef(XPtr _pItem)
     {
-        if (_pItem == nullptr)
+        if (_pItem == 0)
         {
             return 0;
         }
@@ -660,7 +660,7 @@ namespace CON
     template<class T>
     inline int CManagedPoolItemPtr<T>::Release(XPtr _pItem)
     {
-        if (_pItem == nullptr)
+        if (_pItem == 0)
         {
             return 0;
         }
@@ -674,10 +674,10 @@ namespace CON
     template <class T, unsigned int TNumberOfItemsPerPage, unsigned int TDataPolicy>
     inline CManagedPool<T, TNumberOfItemsPerPage, TDataPolicy>::CManagedPool()
         : m_NumberOfSetNodes(0)
-        , m_ppFirstPage     (nullptr)
-        , m_ppLastPage      (nullptr)
-        , m_ppEndPage       (nullptr)
-        , m_pFirstFreeNode  (nullptr)
+        , m_ppFirstPage     (0)
+        , m_ppLastPage      (0)
+        , m_ppEndPage       (0)
+        , m_pFirstFreeNode  (0)
     {
         m_EndOfSetNodes.m_pNext     = &m_EndOfSetNodes;
         m_EndOfSetNodes.m_pPrevious = &m_EndOfSetNodes;
@@ -730,7 +730,7 @@ namespace CON
         // -----------------------------------------------------------------------------
         // Free the page pointer array.
         // -----------------------------------------------------------------------------
-        if (m_ppFirstPage != nullptr)
+        if (m_ppFirstPage != 0)
         {
             Base::CMemory::Free(m_ppFirstPage);
         }
@@ -739,10 +739,10 @@ namespace CON
         // Reset the members.
         // -----------------------------------------------------------------------------
         m_NumberOfSetNodes = 0;
-        m_pFirstFreeNode   = nullptr;
-        m_ppFirstPage      = nullptr;
-        m_ppLastPage       = nullptr;
-        m_ppEndPage        = nullptr;
+        m_pFirstFreeNode   = 0;
+        m_ppFirstPage      = 0;
+        m_ppLastPage       = 0;
+        m_ppEndPage        = 0;
         
         // -----------------------------------------------------------------------------
         // Reset the used node list.
@@ -778,17 +778,17 @@ namespace CON
             // -----------------------------------------------------------------------------
             // There is not a free node, so we have to allocate a new page.
             // -----------------------------------------------------------------------------
-            ppFirstPage = nullptr;
+            ppFirstPage = 0;
             
             pPage = static_cast<SPage*>(Base::CMemory::Allocate(sizeof(SPage)));
             
-            if (pPage == nullptr)
+            if (pPage == 0)
             {
                 throw std::bad_alloc();
             }
             
             pNodes = pPage->m_Nodes;
-            pItem  = nullptr;
+            pItem  = 0;
             
             try
             {
@@ -807,7 +807,7 @@ namespace CON
                     
                     ppFirstPage = static_cast<SPage**>(Base::CMemory::Allocate(NewNumberOfPages * sizeof(SPage)));
                     
-                    if (ppFirstPage == nullptr)
+                    if (ppFirstPage == 0)
                     {
                         throw std::bad_alloc();
                     }
@@ -815,7 +815,7 @@ namespace CON
                     // -----------------------------------------------------------------------------
                     // No exception from now on, so free the old page array.
                     // -----------------------------------------------------------------------------
-                    if (m_ppFirstPage != nullptr)
+                    if (m_ppFirstPage != 0)
                     {
                         ::memcpy(ppFirstPage, m_ppFirstPage, OldNumberOfPages * sizeof(*m_ppFirstPage));
                         

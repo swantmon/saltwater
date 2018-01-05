@@ -7,7 +7,7 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(row_major, std140, binding = 8) uniform UB0
+layout(row_major, std140, binding = 8) uniform UB8
 {
     vec4 m_ConstantBufferData0;
 };

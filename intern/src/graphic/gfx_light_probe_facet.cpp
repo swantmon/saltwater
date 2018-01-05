@@ -25,21 +25,21 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    CTexture2DPtr CLightProbeFacet::GetDiffusePtr() const
+    CTexturePtr CLightProbeFacet::GetDiffusePtr() const
     {
         return m_DiffusePtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    CTexture2DPtr CLightProbeFacet::GetSpecularPtr() const
+    CTexturePtr CLightProbeFacet::GetSpecularPtr() const
     {
         return m_SpecularPtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    CTexture2DPtr CLightProbeFacet::GetDepthPtr() const
+    CTexturePtr CLightProbeFacet::GetDepthPtr() const
     {
         return m_DepthPtr;
     }

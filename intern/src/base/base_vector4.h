@@ -5,7 +5,6 @@
 #include "base/base_math_operations.h"
 
 #include <assert.h>
-#include <math.h>
 
 namespace MATH
 {

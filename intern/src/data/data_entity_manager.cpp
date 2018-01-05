@@ -18,10 +18,6 @@
 #include "data/data_model_manager.h"
 #include "data/data_transformation_facet.h"
 
-#include "assimp/Importer.hpp"
-#include "assimp/postprocess.h"
-#include "assimp/scene.h"
-
 #include <assert.h>
 #include <unordered_map>
 #include <vector>

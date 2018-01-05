@@ -35,7 +35,6 @@
 #include "graphic/gfx_sun_manager.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
-#include "graphic/gfx_texture_2d.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
 
@@ -89,7 +88,6 @@ namespace
             CBufferSetPtr     m_PSBufferSetPtr;
             CInputLayoutPtr   m_InputLayoutPtr;
             CMeshPtr          m_MeshPtr;
-            CTextureSetPtr    m_TextureSetPtr;
         };
 
         struct SCameraRenderJob
@@ -179,7 +177,6 @@ namespace
         m_BackgroundFromSkybox.m_PSBufferSetPtr   = 0;
         m_BackgroundFromSkybox.m_InputLayoutPtr   = 0;
         m_BackgroundFromSkybox.m_MeshPtr          = 0;
-        m_BackgroundFromSkybox.m_TextureSetPtr    = 0;
 
         m_BackgroundFromTexture.m_RenderContextPtr = 0;
         m_BackgroundFromTexture.m_VSPtr            = 0;
@@ -188,7 +185,6 @@ namespace
         m_BackgroundFromTexture.m_PSBufferSetPtr   = 0;
         m_BackgroundFromTexture.m_InputLayoutPtr   = 0;
         m_BackgroundFromTexture.m_MeshPtr          = 0;
-        m_BackgroundFromTexture.m_TextureSetPtr    = 0;
 
         m_CameraRenderJobs.clear();
     }
@@ -277,11 +273,6 @@ namespace
     
     void CGfxBackgroundRenderer::OnSetupTextures()
     {
-        CTextureSetPtr DepthTextureSetPtr = TextureManager::CreateTextureSet(TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
-
-        m_BackgroundFromSkybox.m_TextureSetPtr = DepthTextureSetPtr;
-
-        m_BackgroundFromTexture.m_TextureSetPtr = DepthTextureSetPtr;
     }
     
     // -----------------------------------------------------------------------------
@@ -396,16 +387,6 @@ namespace
     {
         BASE_UNUSED(_Width);
         BASE_UNUSED(_Height);
-
-        m_BackgroundFromSkybox.m_TextureSetPtr = 0;
-
-        m_BackgroundFromTexture.m_TextureSetPtr = 0;
-
-        CTextureSetPtr DepthTextureSetPtr = TextureManager::CreateTextureSet(TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
-
-        m_BackgroundFromSkybox.m_TextureSetPtr = DepthTextureSetPtr;
-
-        m_BackgroundFromTexture.m_TextureSetPtr = DepthTextureSetPtr;
     }
     
     // -----------------------------------------------------------------------------
@@ -455,7 +436,6 @@ namespace
         CBufferSetPtr     PSBufferSetPtr   = m_BackgroundFromSkybox.m_PSBufferSetPtr;
         CInputLayoutPtr   InputLayoutPtr   = m_BackgroundFromSkybox.m_InputLayoutPtr;
         CMeshPtr          MeshPtr          = m_BackgroundFromSkybox.m_MeshPtr;
-        CTextureSetPtr    TextureSetPtr    = m_BackgroundFromSkybox.m_TextureSetPtr;
 
         // -----------------------------------------------------------------------------
         // Find sky entity
@@ -547,10 +527,10 @@ namespace
         ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
-        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         
-        ContextManager::SetTexture(0, pSkyFacet->GetCubemapSetPtr()->GetTexture(0));
-        ContextManager::SetTexture(1, TextureSetPtr->GetTexture(0));
+        ContextManager::SetTexture(0, pSkyFacet->GetCubemapPtr());
+        ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
         
         ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
         
@@ -644,7 +624,6 @@ namespace
         CBufferSetPtr     PSBufferSetPtr   = m_BackgroundFromTexture.m_PSBufferSetPtr;
         CInputLayoutPtr   InputLayoutPtr   = m_BackgroundFromTexture.m_InputLayoutPtr;
         CMeshPtr          MeshPtr          = m_BackgroundFromTexture.m_MeshPtr;
-        CTextureSetPtr    TextureSetPtr    = m_BackgroundFromTexture.m_TextureSetPtr;
 
         // -----------------------------------------------------------------------------
         // Render sky texture
@@ -689,7 +668,7 @@ namespace
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
         ContextManager::SetTexture(0, rRenderJob.m_pGraphicCamera->GetBackgroundTextureSet()->GetTexture(0));
-        ContextManager::SetTexture(1, TextureSetPtr->GetTexture(0));
+        ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
 
         ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
 

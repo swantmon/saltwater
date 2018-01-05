@@ -27,7 +27,6 @@
 #include "graphic/gfx_state_manager.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
-#include "graphic/gfx_texture_2d.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
 
@@ -266,18 +265,18 @@ namespace
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
-        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-        TextureDescriptor.m_Format           = CTextureBase::Unknown;
-        TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        TextureDescriptor.m_Binding          = CTexture::ShaderResource;
+        TextureDescriptor.m_Access           = CTexture::CPUWrite;
+        TextureDescriptor.m_Format           = CTexture::Unknown;
+        TextureDescriptor.m_Usage            = CTexture::GPURead;
+        TextureDescriptor.m_Semantic         = CTexture::Diffuse;
         TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pPixels          = s_LTCMaterial;
-        TextureDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        TextureDescriptor.m_Format           = CTexture::R16G16B16A16_FLOAT;
         
-        CTexture2DPtr LTCMaterialTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+        CTexturePtr LTCMaterialTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
-		TextureManager::SetTexture2DLabel(LTCMaterialTexturePtr, "Area light LTC Material Texture");
+		TextureManager::SetTextureLabel(LTCMaterialTexturePtr, "Area light LTC Material Texture");
 
         // -----------------------------------------------------------------------------
 
@@ -286,22 +285,22 @@ namespace
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
-        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-        TextureDescriptor.m_Format           = CTextureBase::Unknown;
-        TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        TextureDescriptor.m_Binding          = CTexture::ShaderResource;
+        TextureDescriptor.m_Access           = CTexture::CPUWrite;
+        TextureDescriptor.m_Format           = CTexture::Unknown;
+        TextureDescriptor.m_Usage            = CTexture::GPURead;
+        TextureDescriptor.m_Semantic         = CTexture::Diffuse;
         TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pPixels          = s_LTCMag;
-        TextureDescriptor.m_Format           = CTextureBase::R16G16_FLOAT;
+        TextureDescriptor.m_Format           = CTexture::R16G16_FLOAT;
         
-        CTexture2DPtr LTCMagTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+        CTexturePtr LTCMagTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
-		TextureManager::SetTexture2DLabel(LTCMagTexturePtr, "Area light LTC Mag Texture");
+		TextureManager::SetTextureLabel(LTCMagTexturePtr, "Area light LTC Mag Texture");
 
         // -----------------------------------------------------------------------------
 
-        m_LTCTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(LTCMaterialTexturePtr), static_cast<CTextureBasePtr>(LTCMagTexturePtr));
+        m_LTCTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTexturePtr>(LTCMaterialTexturePtr), static_cast<CTexturePtr>(LTCMagTexturePtr));
     }
     
     // -----------------------------------------------------------------------------
@@ -389,6 +388,8 @@ namespace
     
     void CGfxAreaLightRenderer::Render()
     {
+        if (m_RenderJobs.size() == 0) return;
+
         Performance::BeginEvent("Area Lights");
 
         // -----------------------------------------------------------------------------
@@ -470,7 +471,7 @@ namespace
             {
                 ContextManager::SetSampler(6, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-                ContextManager::SetTexture(6, static_cast<Gfx::CTextureBasePtr>(pGfxLightFacet->GetFilteredTexturePtr()));
+                ContextManager::SetTexture(6, static_cast<Gfx::CTexturePtr>(pGfxLightFacet->GetFilteredTexturePtr()));
             }
 
             ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
@@ -571,7 +572,7 @@ namespace
             {
                 ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-                ContextManager::SetTexture(0, static_cast<Gfx::CTextureBasePtr>(pGfxLightFacet->GetTexturePtr()));
+                ContextManager::SetTexture(0, static_cast<Gfx::CTexturePtr>(pGfxLightFacet->GetTexturePtr()));
             }
 
             // -----------------------------------------------------------------------------

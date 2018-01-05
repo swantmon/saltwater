@@ -54,7 +54,7 @@ namespace ModelManager
     CModel& CreateBox(float _Width, float _Height, float _Depth);
     CModel& CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices);
     CModel& CreateCone(float _Radius, float _Height, unsigned int _Slices);
-    CModel& CreateRectangle(float _X, float _Y, float _Width, float _Height);
+    CModel& CreateRectangle(float _AxisX, float _AxisY, float _Width, float _Height);
 
     void FreeModel(CModel& _rModel);
 } // namespace ModelManager

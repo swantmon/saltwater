@@ -17,7 +17,6 @@
 #include "data/data_mesh_manager.h"
 #include "data/data_model_manager.h"
 #include "data/data_point_light_manager.h"
-#include "data/data_script_manager.h"
 #include "data/data_sky_manager.h"
 #include "data/data_ssao_manager.h"
 #include "data/data_ssr_manager.h"
@@ -25,10 +24,9 @@
 #include "data/data_texture_manager.h"
 #include "data/data_volume_fog_manager.h"
 
-#include "logic/lg_script_manager.h"
 #include "logic/lg_start_state.h"
 
-#include "mr/mr_control_manager.h"
+/*#include "mr/mr_control_manager.h"*/
 
 namespace
 {
@@ -68,18 +66,12 @@ namespace
         Dt::VolumeFogManager  ::OnStart();
         Dt::ModelManager      ::OnStart();
         Dt::MaterialManager   ::OnStart();
-        Dt::ScriptManager     ::OnStart();
         Dt::TextureManager    ::OnStart();
-
-        // -----------------------------------------------------------------------------
-        // Logic
-        // -----------------------------------------------------------------------------
-        Lg::ScriptManager::OnStart();
 
         // -----------------------------------------------------------------------------
         // External
         // -----------------------------------------------------------------------------
-        MR::ControlManager::OnStart();
+/*        MR::ControlManager::OnStart();*/
 
         return Lg::Start::SResult::Start;
     }

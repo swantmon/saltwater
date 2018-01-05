@@ -12,8 +12,6 @@
 #include "graphic/gfx_native_sampler_set.h"
 #include "graphic/gfx_sampler_manager.h"
 
-#include "GL/glew.h"
-
 using namespace Gfx;
 
 namespace
@@ -193,7 +191,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Generate samplers
             // -----------------------------------------------------------------------------
-			glCreateSamplers(CSampler::NumberOfSamplers, m_NativeSampler);
+			glGenSamplers(CSampler::NumberOfSamplers, m_NativeSampler);
 
             for (IndexOfSampler = 0; IndexOfSampler < CSampler::NumberOfSamplers; ++ IndexOfSampler)
             {
@@ -237,7 +235,9 @@ namespace
                 glSamplerParameterf(NativeSampler, GL_TEXTURE_MIN_LOD, s_NativeSamplerDescriptors[IndexOfSampler].MinLOD);
                 glSamplerParameterf(NativeSampler, GL_TEXTURE_MAX_LOD, s_NativeSamplerDescriptors[IndexOfSampler].MaxLOD);
                 
+#ifndef __ANDROID__
                 glSamplerParameterf(NativeSampler, GL_TEXTURE_LOD_BIAS, s_NativeSamplerDescriptors[IndexOfSampler].Bias);
+#endif // !__ANDROID__
                 
                 glSamplerParameteri(NativeSampler, GL_TEXTURE_COMPARE_MODE, GL_NONE);
 

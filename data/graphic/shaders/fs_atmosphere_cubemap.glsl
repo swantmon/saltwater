@@ -3,14 +3,9 @@
 #define __INCLUDE_FS_ATMOSPHERE_CUBEMAP_GLSL__
 
 // -----------------------------------------------------------------------------
-// Input from system
-// -----------------------------------------------------------------------------
-in vec4 gl_FragCoord;
-
-// -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(row_major, std140, binding = 8) uniform UB0
+layout(row_major, std140, binding = 8) uniform UB8
 {
     vec4 ps_InvertedScreenSize;
     uint ps_ExposureHistoryIndex;

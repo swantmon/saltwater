@@ -3,7 +3,7 @@
 
 #include "base/base_managed_pool.h"
 
-#include "graphic/gfx_texture_base.h"
+#include "graphic/gfx_texture.h"
 
 namespace Gfx
 {
@@ -15,15 +15,15 @@ namespace Gfx
 
     public:
 
-        CTextureBasePtr GetRenderTarget(unsigned int _Index);
-        CTextureBasePtr GetDepthStencilTarget();
+        CTexturePtr GetRenderTarget(unsigned int _Index);
+        CTexturePtr GetDepthStencilTarget();
         unsigned int GetNumberOfRenderTargets() const;
     
     protected:
 
         unsigned int            m_NumberOfRenderTargets;
-        CTextureBasePtr         m_RenderTargetPtrs[s_MaxNumberOfRenderTargets];
-        CTextureBasePtr         m_DepthStencilTargetPtr;
+        CTexturePtr         m_RenderTargetPtrs[s_MaxNumberOfRenderTargets];
+        CTexturePtr         m_DepthStencilTargetPtr;
 
     protected:
 

@@ -325,23 +325,23 @@ namespace
         RendertargetDescriptor.m_NumberOfPixelsW  = 1;
         RendertargetDescriptor.m_NumberOfMipMaps  = 1;
         RendertargetDescriptor.m_NumberOfTextures = 1;
-        RendertargetDescriptor.m_Binding          = CTextureBase::RenderTarget;
-        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
-        RendertargetDescriptor.m_Format           = CTextureBase::Unknown;
-        RendertargetDescriptor.m_Usage            = CTextureBase::GPURead;
-        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_Binding          = CTexture::RenderTarget;
+        RendertargetDescriptor.m_Access           = CTexture::CPUWrite;
+        RendertargetDescriptor.m_Format           = CTexture::Unknown;
+        RendertargetDescriptor.m_Usage            = CTexture::GPURead;
+        RendertargetDescriptor.m_Semantic         = CTexture::Diffuse;
         RendertargetDescriptor.m_pFileName        = 0;
         RendertargetDescriptor.m_pPixels          = 0;
-        RendertargetDescriptor.m_Format           = CTextureBase::R32_FLOAT;
+        RendertargetDescriptor.m_Format           = CTexture::R32_FLOAT;
         
-        CTexture2DPtr DepthTexturePtr     = TextureManager::CreateTexture2D(RendertargetDescriptor); // Depth
-        CTexture2DPtr ThicknessTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Thickness
-        CTexture2DPtr SwapTexturePtr      = TextureManager::CreateTexture2D(RendertargetDescriptor); // Swap
+        CTexturePtr DepthTexturePtr     = TextureManager::CreateTexture2D(RendertargetDescriptor); // Depth
+        CTexturePtr ThicknessTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Thickness
+        CTexturePtr SwapTexturePtr      = TextureManager::CreateTexture2D(RendertargetDescriptor); // Swap
         
         // -----------------------------------------------------------------------------
         // Create liquid buffer target set
         // -----------------------------------------------------------------------------
-        CTextureBasePtr LiquidDepthRenderbufferPtrs[2];
+        CTexturePtr LiquidDepthRenderbufferPtrs[2];
         
         LiquidDepthRenderbufferPtrs[0] = DepthTexturePtr;
         LiquidDepthRenderbufferPtrs[1] = TargetSetManager::GetDefaultTargetSet()->GetDepthStencilTarget();
@@ -351,7 +351,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Create thickness render target set
         // -----------------------------------------------------------------------------
-        CTextureBasePtr LiquidThicknessRenderbufferPtrs[1];
+        CTexturePtr LiquidThicknessRenderbufferPtrs[1];
         
         LiquidThicknessRenderbufferPtrs[0] = ThicknessTexturePtr;
         
@@ -360,7 +360,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Create bilateral filtering target set
         // -----------------------------------------------------------------------------
-        CTextureBasePtr SwapRenderbufferPtrs[1];
+        CTexturePtr SwapRenderbufferPtrs[1];
         
         SwapRenderbufferPtrs[0] = SwapTexturePtr;
         

@@ -207,7 +207,6 @@ namespace Edit
 
         bool HasDetailData    = _rMessage.GetBool();
         bool HasDetailGraphic = _rMessage.GetBool();
-        bool HasDetailScript  = _rMessage.GetBool();
 
         // -----------------------------------------------------------------------------
         // General informations

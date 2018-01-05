@@ -8,12 +8,12 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_asset_manager.h"
+
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_native_shader.h"
 #include "graphic/gfx_native_types.h"
 #include "graphic/gfx_shader_manager.h"
-
-#include "GL/glew.h"
 
 #include <assert.h>
 #include <exception>
@@ -26,7 +26,7 @@ using namespace Gfx::ShaderManager;
 
 namespace
 {
-	static const char* g_PathToDataShader = "../data/graphic/shaders/";
+    static const char* g_PathToDataShader = "/graphic/shaders/";
 } // namespace
 
 namespace
@@ -67,9 +67,9 @@ namespace
 
         CInputLayoutPtr CreateInputLayout(const SInputElementDescriptor* _pDescriptors, unsigned int _NumberOfDescriptors, CShaderPtr _ShaderVSPtr);
 
-	public:
+    public:
 
-		void SetShaderLabel(CShaderPtr _ShaderPtr, const char* _pLabel);
+        void SetShaderLabel(CShaderPtr _ShaderPtr, const char* _pLabel);
 
     private:
 
@@ -310,16 +310,16 @@ namespace
         return CInputLayoutPtr(InputLayoutPtr);
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void CGfxShaderManager::SetShaderLabel(CShaderPtr _ShaderPtr, const char* _pLabel)
-	{
-		assert(_pLabel != nullptr);
+    void CGfxShaderManager::SetShaderLabel(CShaderPtr _ShaderPtr, const char* _pLabel)
+    {
+        assert(_pLabel != nullptr);
 
-		CInternShader* pInternShader = static_cast<CInternShader*>(_ShaderPtr.GetPtr());
+        CInternShader* pInternShader = static_cast<CInternShader*>(_ShaderPtr.GetPtr());
 
-		glObjectLabel(GL_SHADER, pInternShader->m_NativeShader, -1, _pLabel);
-	}
+        glObjectLabel(GL_SHADER, pInternShader->m_NativeShader, -1, _pLabel);
+    }
 
     // -----------------------------------------------------------------------------
 
@@ -334,8 +334,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Build path to shader in file system
         // -----------------------------------------------------------------------------
-		std::string PathToShaders = g_PathToDataShader;
-        std::string PathToShader  = PathToShaders + _pFileName;
+        std::string PathToShader  = Core::AssetManager::GetPathToData() + g_PathToDataShader + _pFileName;
 
         // -----------------------------------------------------------------------------
         // Create hash and try to take an existing shader
@@ -361,7 +360,10 @@ namespace
 
         std::ifstream ShaderFile(PathToShader.c_str());
 
-        assert(ShaderFile.is_open());
+        if (!ShaderFile.is_open())
+        {
+            BASE_THROWV("Shader '%s' can't be opened!", PathToShader.c_str());
+        }
 
         std::string ShaderFileContent((std::istreambuf_iterator<char>(ShaderFile)), std::istreambuf_iterator<char>());  
 
@@ -393,7 +395,7 @@ namespace
 
         if (NativeShaderHandle != 0)
         {
-			glObjectLabel(GL_SHADER, NativeShaderHandle, -1, (std::string(_pFileName) + " : " + std::string(_pShaderName)).c_str());
+            glObjectLabel(GL_SHADER, NativeShaderHandle, -1, (std::string(_pFileName) + " : " + std::string(_pShaderName)).c_str());
 
             glShaderSource(NativeShaderHandle, 1, &pRAW, NULL);
 
@@ -409,7 +411,30 @@ namespace
                 char* pErrorInfo = new char[InfoLength];
                 glGetShaderInfoLog(NativeShaderHandle, InfoLength, &InfoLength, pErrorInfo);
 
-                BASE_CONSOLE_ERRORV("Error creating shader '%s' with info: \n %s", PathToShader.c_str(), pErrorInfo);
+                BASE_CONSOLE_ERRORV("Error creating shader '%s' with error log:\n%s\n", PathToShader.c_str(), pErrorInfo);
+
+// #define GFX_SHADER_SHOW_SOURCE_ON_ERROR
+#ifdef GFX_SHADER_SHOW_SOURCE_ON_ERROR
+                BASE_CONSOLE_INFO("Full source code of shader:");
+                std::stringstream Line;
+                int LineNumber = 0;
+
+                for (int i = 0; i < strlen(pRAW); ++i)
+                {
+                    if (pRAW[i] == '\n')
+                    {
+                        BASE_CONSOLE_INFOV("%i: %s", LineNumber, Line.str().c_str());
+
+                        Line.str("");
+
+                        LineNumber ++;
+
+                        continue;
+                    }
+
+                    Line << pRAW[i];
+                }
+#endif
 
                 delete[] pErrorInfo;
             }
@@ -457,7 +482,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Create shader
         // -----------------------------------------------------------------------------
-        CShaderPtr ShaderPtr = m_Shaders[_Type].Allocate();
+        CShaderPtr ShaderPtr = static_cast<CShaderPtr>(m_Shaders[_Type].Allocate());
 
         CInternShader& rShader = *static_cast<CInternShader*>(ShaderPtr.GetPtr());
 
@@ -544,7 +569,7 @@ namespace
 
         if (NativeShaderHandle != 0)
         {
-			glObjectLabel(GL_SHADER, NativeShaderHandle, -1, (rShader.m_FileName + " : " + rShader.m_ShaderName).c_str());
+            glObjectLabel(GL_SHADER, NativeShaderHandle, -1, (rShader.m_FileName + " : " + rShader.m_ShaderName).c_str());
 
             glShaderSource(NativeShaderHandle, 1, &pRAW, NULL);
 
@@ -627,7 +652,7 @@ namespace
                 Base::Size BeginOfInclude = _rShaderContent.find('\"', FoundPosition) + 1;
                 Base::Size EndOfInclude   = _rShaderContent.find('\"', BeginOfInclude);
 
-                std::string IncludeFile = g_PathToDataShader + _rShaderContent.substr(BeginOfInclude, EndOfInclude - BeginOfInclude);
+                std::string IncludeFile  = Core::AssetManager::GetPathToData() + g_PathToDataShader + _rShaderContent.substr(BeginOfInclude, EndOfInclude - BeginOfInclude);
 
                 // -----------------------------------------------------------------------------
                 // Load included file and replace include directive with new file
@@ -795,11 +820,11 @@ namespace ShaderManager
         return CGfxShaderManager::GetInstance().CreateInputLayout(_pDescriptors, _NumberOfDescriptors, _VertexShaderPtr);
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void SetShaderLabel(CShaderPtr _ShaderPtr, const char* _pLabel)
-	{
-		CGfxShaderManager::GetInstance().SetShaderLabel(_ShaderPtr, _pLabel);
-	}
+    void SetShaderLabel(CShaderPtr _ShaderPtr, const char* _pLabel)
+    {
+        CGfxShaderManager::GetInstance().SetShaderLabel(_ShaderPtr, _pLabel);
+    }
 } // namespace ShaderManager
 } // namespace Gfx

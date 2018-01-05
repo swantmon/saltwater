@@ -31,7 +31,7 @@ namespace Native
     typedef U32                Time32;                                              ///< 32 bit time
     typedef U64                Time64;                                              ///< 64 bit time
     typedef size_t             Size;                                                ///< Portable unsigned integral size type
-#if __APPLE__
+#if __ANDROID__
     typedef decltype(nullptr)  NullPtr;                                             ///< Null pointer type
 #else
     typedef nullptr_t          NullPtr;                                             ///< Null pointer type

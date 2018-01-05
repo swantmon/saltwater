@@ -43,7 +43,6 @@ namespace Dt
         {
             Data,                                           //< General informations about this entity available in the whole project
             Graphic,                                        //< Graphic specific informations like target sets, buffer, ...
-            Script,                                         //< Scripting the logical behavior of an entity
             NumberOfCategories,
             UndefinedCategory = -1,
         };

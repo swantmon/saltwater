@@ -10,7 +10,6 @@
 #include "data/data_light_probe_manager.h"
 #include "data/data_mesh_manager.h"
 #include "data/data_point_light_manager.h"
-#include "data/data_script_manager.h"
 #include "data/data_sky_manager.h"
 #include "data/data_sun_manager.h"
 
@@ -61,8 +60,7 @@ namespace
         Dt::LightProbeManager ::Update();
         Dt::PointLightManager ::Update();
         Dt::AreaLightManager  ::Update();
-        Dt::SkyManager        ::Update();  
-        Dt::ScriptManager     ::Update();
+        Dt::SkyManager        ::Update();
         
         // -----------------------------------------------------------------------------
         // Return state changes

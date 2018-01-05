@@ -602,7 +602,7 @@ namespace
                 assert(MaterialPtr != 0 && MaterialPtr.IsValid());
 
                 // -----------------------------------------------------------------------------
-                // Set informations to render job
+                // Set information to render job
                 // -----------------------------------------------------------------------------
                 SRenderJob NewRenderJob;
 

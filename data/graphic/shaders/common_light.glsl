@@ -35,7 +35,7 @@
 // -----------------------------------------------------------------------------
 // Shadowing
 // -----------------------------------------------------------------------------
-float GetShadowAtPosition(in vec3 _WSPosition, in mat4 _LightViewProjection, in sampler2D _Shadowmap, in float _Bias = 0.001f)
+float GetShadowAtPosition(in vec3 _WSPosition, in mat4 _LightViewProjection, in sampler2D _Shadowmap, in float _Bias)
 {
     vec4  LSPosition;
     vec2  ShadowCoord;
@@ -72,6 +72,13 @@ float GetShadowAtPosition(in vec3 _WSPosition, in mat4 _LightViewProjection, in 
     }
     
     return Shadow;
+}
+
+// -----------------------------------------------------------------------------
+
+float GetShadowAtPosition(in vec3 _WSPosition, in mat4 _LightViewProjection, in sampler2D _Shadowmap)
+{
+    return GetShadowAtPosition(_WSPosition, _LightViewProjection, _Shadowmap, 0.001f);
 }
 
 // -----------------------------------------------------------------------------

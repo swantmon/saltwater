@@ -31,7 +31,6 @@
 #include "graphic/gfx_sun_facet.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
-#include "graphic/gfx_texture_2d.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
 
@@ -72,7 +71,7 @@ namespace
         void Update();
         void Render();
 
-        CTextureBasePtr GetBRDF();
+        CTexturePtr GetBRDF();
 
     private:
 
@@ -82,9 +81,9 @@ namespace
 
         struct SLightProbeRenderJob
         {
-            CTextureBasePtr m_Texture0Ptr;
-            CTextureBasePtr m_Texture1Ptr;
-            CTextureBasePtr m_Texture2Ptr;
+            CTexturePtr m_Texture0Ptr;
+            CTexturePtr m_Texture1Ptr;
+            CTexturePtr m_Texture2Ptr;
         };
 
         struct SSSRRenderJob
@@ -158,15 +157,15 @@ namespace
 
         CShaderPtr        m_BRDFShaderPtr;
         
-        CTexture2DPtr     m_BRDFTexture2DPtr;
+        CTexturePtr     m_BRDFTexture2DPtr;
 
-        CTexture2DPtr     m_HCBTexture2DPtr;
+        CTexturePtr     m_HCBTexture2DPtr;
 
         CTargetSetPtr     m_SSRTargetSetPtr;
         
         CRenderContextPtr m_LightAccumulationRenderContextPtr;
 
-        std::vector<CTextureBasePtr>   m_HCBTexturePtrs;
+        std::vector<CTexturePtr>   m_HCBTexturePtrs;
 
         std::vector<CTargetSetPtr>     m_HCBTargetSetPtrs;
 
@@ -311,18 +310,18 @@ namespace
         RendertargetDescriptor.m_NumberOfPixelsW  = 1;
         RendertargetDescriptor.m_NumberOfMipMaps  = 1;
         RendertargetDescriptor.m_NumberOfTextures = 1;
-        RendertargetDescriptor.m_Binding          = CTextureBase::RenderTarget | CTextureBase::ShaderResource;
-        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
-        RendertargetDescriptor.m_Format           = CTextureBase::Unknown;
-        RendertargetDescriptor.m_Usage            = CTextureBase::GPURead;
-        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_Binding          = CTexture::RenderTarget | CTexture::ShaderResource;
+        RendertargetDescriptor.m_Access           = CTexture::CPUWrite;
+        RendertargetDescriptor.m_Format           = CTexture::Unknown;
+        RendertargetDescriptor.m_Usage            = CTexture::GPURead;
+        RendertargetDescriptor.m_Semantic         = CTexture::Diffuse;
         RendertargetDescriptor.m_pFileName        = 0;
         RendertargetDescriptor.m_pPixels          = 0;
-        RendertargetDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        RendertargetDescriptor.m_Format           = CTexture::R16G16B16A16_FLOAT;
         
-        CTexture2DPtr SSRTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // SSR
+        CTexturePtr SSRTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // SSR
 
-		TextureManager::SetTexture2DLabel(SSRTexturePtr, "Screen Space Reflection Target");
+		TextureManager::SetTextureLabel(SSRTexturePtr, "Screen Space Reflection Target");
 
         // -----------------------------------------------------------------------------
 
@@ -331,25 +330,25 @@ namespace
         RendertargetDescriptor.m_NumberOfPixelsW  = 1;
         RendertargetDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
         RendertargetDescriptor.m_NumberOfTextures = 1;
-        RendertargetDescriptor.m_Binding          = CTextureBase::RenderTarget | CTextureBase::ShaderResource;
-        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
-        RendertargetDescriptor.m_Format           = CTextureBase::Unknown;
-        RendertargetDescriptor.m_Usage            = CTextureBase::GPURead;
-        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_Binding          = CTexture::RenderTarget | CTexture::ShaderResource;
+        RendertargetDescriptor.m_Access           = CTexture::CPUWrite;
+        RendertargetDescriptor.m_Format           = CTexture::Unknown;
+        RendertargetDescriptor.m_Usage            = CTexture::GPURead;
+        RendertargetDescriptor.m_Semantic         = CTexture::Diffuse;
         RendertargetDescriptor.m_pFileName        = 0;
         RendertargetDescriptor.m_pPixels          = 0;
-        RendertargetDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        RendertargetDescriptor.m_Format           = CTexture::R16G16B16A16_FLOAT;
         
         m_HCBTexture2DPtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // HCB
 
-		TextureManager::SetTexture2DLabel(m_HCBTexture2DPtr, "Hierarchical Color Buffer Target");
+		TextureManager::SetTextureLabel(m_HCBTexture2DPtr, "Hierarchical Color Buffer Target");
 
         TextureManager::UpdateMipmap(m_HCBTexture2DPtr);
 
         // -----------------------------------------------------------------------------
         // Create target set
         // -----------------------------------------------------------------------------
-        m_SSRTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(SSRTexturePtr));
+        m_SSRTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(SSRTexturePtr));
 
         // -----------------------------------------------------------------------------
 
@@ -365,9 +364,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Target set
             // -----------------------------------------------------------------------------
-            CTexture2DPtr MipmapTexture = TextureManager::GetMipmapFromTexture2D(m_HCBTexture2DPtr, IndexOfMipmap);
+            CTexturePtr MipmapTexture = TextureManager::GetMipmapFromTexture2D(m_HCBTexture2DPtr, IndexOfMipmap);
 
-            CTargetSetPtr MipmapTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(MipmapTexture));
+            CTargetSetPtr MipmapTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(MipmapTexture));
 
             // -----------------------------------------------------------------------------
             // View port
@@ -420,17 +419,17 @@ namespace
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
-        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-        TextureDescriptor.m_Format           = CTextureBase::R32G32B32A32_FLOAT;
-        TextureDescriptor.m_Usage            = CTextureBase::GPUReadWrite;
-        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        TextureDescriptor.m_Binding          = CTexture::ShaderResource;
+        TextureDescriptor.m_Access           = CTexture::CPUWrite;
+        TextureDescriptor.m_Format           = CTexture::R32G32B32A32_FLOAT;
+        TextureDescriptor.m_Usage            = CTexture::GPUReadWrite;
+        TextureDescriptor.m_Semantic         = CTexture::Diffuse;
         TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pPixels          = 0;
         
         m_BRDFTexture2DPtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
-		TextureManager::SetTexture2DLabel(m_BRDFTexture2DPtr, "BRDF");
+		TextureManager::SetTextureLabel(m_BRDFTexture2DPtr, "BRDF");
         
         // -----------------------------------------------------------------------------
 
@@ -517,9 +516,9 @@ namespace
     {
         ContextManager::SetShaderCS(m_BRDFShaderPtr);
 
-        ContextManager::SetImageTexture(0, static_cast<CTextureBasePtr>(m_BRDFTexture2DPtr));
+        ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_BRDFTexture2DPtr));
 
-        ContextManager::Dispatch(512, 512, 1);
+        ContextManager::Dispatch(64, 64, 1);
 
         ContextManager::ResetImageTexture(0);
 
@@ -581,18 +580,18 @@ namespace
         RendertargetDescriptor.m_NumberOfPixelsW  = 1;
         RendertargetDescriptor.m_NumberOfMipMaps  = 1;
         RendertargetDescriptor.m_NumberOfTextures = 1;
-        RendertargetDescriptor.m_Binding          = CTextureBase::RenderTarget | CTextureBase::ShaderResource;
-        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
-        RendertargetDescriptor.m_Format           = CTextureBase::Unknown;
-        RendertargetDescriptor.m_Usage            = CTextureBase::GPURead;
-        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_Binding          = CTexture::RenderTarget | CTexture::ShaderResource;
+        RendertargetDescriptor.m_Access           = CTexture::CPUWrite;
+        RendertargetDescriptor.m_Format           = CTexture::Unknown;
+        RendertargetDescriptor.m_Usage            = CTexture::GPURead;
+        RendertargetDescriptor.m_Semantic         = CTexture::Diffuse;
         RendertargetDescriptor.m_pFileName        = 0;
         RendertargetDescriptor.m_pPixels          = 0;
-        RendertargetDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        RendertargetDescriptor.m_Format           = CTexture::R16G16B16A16_FLOAT;
         
-        CTexture2DPtr SSRTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // SSR
+        CTexturePtr SSRTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // SSR
 
-		TextureManager::SetTexture2DLabel(SSRTexturePtr, "Screen Space Reflection Target");
+		TextureManager::SetTextureLabel(SSRTexturePtr, "Screen Space Reflection Target");
 
         // -----------------------------------------------------------------------------
 
@@ -601,25 +600,25 @@ namespace
         RendertargetDescriptor.m_NumberOfPixelsW  = 1;
         RendertargetDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
         RendertargetDescriptor.m_NumberOfTextures = 1;
-        RendertargetDescriptor.m_Binding          = CTextureBase::RenderTarget | CTextureBase::ShaderResource;
-        RendertargetDescriptor.m_Access           = CTextureBase::CPUWrite;
-        RendertargetDescriptor.m_Format           = CTextureBase::Unknown;
-        RendertargetDescriptor.m_Usage            = CTextureBase::GPURead;
-        RendertargetDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        RendertargetDescriptor.m_Binding          = CTexture::RenderTarget | CTexture::ShaderResource;
+        RendertargetDescriptor.m_Access           = CTexture::CPUWrite;
+        RendertargetDescriptor.m_Format           = CTexture::Unknown;
+        RendertargetDescriptor.m_Usage            = CTexture::GPURead;
+        RendertargetDescriptor.m_Semantic         = CTexture::Diffuse;
         RendertargetDescriptor.m_pFileName        = 0;
         RendertargetDescriptor.m_pPixels          = 0;
-        RendertargetDescriptor.m_Format           = CTextureBase::R16G16B16A16_FLOAT;
+        RendertargetDescriptor.m_Format           = CTexture::R16G16B16A16_FLOAT;
         
         m_HCBTexture2DPtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // HCB
 
-		TextureManager::SetTexture2DLabel(m_HCBTexture2DPtr, "Hierarchical Color Buffer Target");
+		TextureManager::SetTextureLabel(m_HCBTexture2DPtr, "Hierarchical Color Buffer Target");
 
         TextureManager::UpdateMipmap(m_HCBTexture2DPtr);
 
         // -----------------------------------------------------------------------------
         // Create target set
         // -----------------------------------------------------------------------------
-        m_SSRTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(SSRTexturePtr));
+        m_SSRTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(SSRTexturePtr));
 
         // -----------------------------------------------------------------------------
 
@@ -635,9 +634,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Target set
             // -----------------------------------------------------------------------------
-            CTexture2DPtr MipmapTexture = TextureManager::GetMipmapFromTexture2D(m_HCBTexture2DPtr, IndexOfMipmap);
+            CTexturePtr MipmapTexture = TextureManager::GetMipmapFromTexture2D(m_HCBTexture2DPtr, IndexOfMipmap);
 
-            CTargetSetPtr MipmapTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTextureBasePtr>(MipmapTexture));
+            CTargetSetPtr MipmapTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(MipmapTexture));
 
             // -----------------------------------------------------------------------------
             // View port
@@ -690,9 +689,9 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CTextureBasePtr CGfxReflectionRenderer::GetBRDF()
+    CTexturePtr CGfxReflectionRenderer::GetBRDF()
     {
-        return static_cast<CTextureBasePtr>(m_BRDFTexture2DPtr);
+        return static_cast<CTexturePtr>(m_BRDFTexture2DPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -775,7 +774,7 @@ namespace
         ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1));
         ContextManager::SetTexture(2, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2));
         ContextManager::SetTexture(3, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
-        ContextManager::SetTexture(4, static_cast<CTextureBasePtr>(m_BRDFTexture2DPtr));
+        ContextManager::SetTexture(4, static_cast<CTexturePtr>(m_BRDFTexture2DPtr));
         ContextManager::SetTexture(5, m_SSRTargetSetPtr->GetRenderTarget(0));
             
         // -----------------------------------------------------------------------------
@@ -985,8 +984,8 @@ namespace
         ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1));
         ContextManager::SetTexture(2, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2));
         ContextManager::SetTexture(3, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
-        ContextManager::SetTexture(4, static_cast<CTextureBasePtr>(m_HCBTexture2DPtr));
-        ContextManager::SetTexture(5, static_cast<CTextureBasePtr>(m_BRDFTexture2DPtr));
+        ContextManager::SetTexture(4, static_cast<CTexturePtr>(m_HCBTexture2DPtr));
+        ContextManager::SetTexture(5, static_cast<CTexturePtr>(m_BRDFTexture2DPtr));
 
         // -----------------------------------------------------------------------------
         // Draw
@@ -1266,7 +1265,7 @@ namespace ReflectionRenderer
 
     // -----------------------------------------------------------------------------
 
-    CTextureBasePtr GetBRDF()
+    CTexturePtr GetBRDF()
     {
         return CGfxReflectionRenderer::GetInstance().GetBRDF();
     }

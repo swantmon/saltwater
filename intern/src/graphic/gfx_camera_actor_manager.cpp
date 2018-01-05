@@ -187,13 +187,13 @@ namespace
             {
                 unsigned int Hash = pDataCamera->GetTexture()->GetHash();
 
-                CTexture2DPtr BackgroundTexturePtr = TextureManager::GetTexture2DByHash(Hash);
+                CTexturePtr BackgroundTexturePtr = TextureManager::GetTextureByHash(Hash);
 
                 if (BackgroundTexturePtr.IsValid())
                 {
                     pGraphicCamera->SetBackgroundTexture2D(BackgroundTexturePtr);
 
-                    pGraphicCamera->SetBackgroundTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(BackgroundTexturePtr)));
+                    pGraphicCamera->SetBackgroundTextureSet(TextureManager::CreateTextureSet(static_cast<CTexturePtr>(BackgroundTexturePtr)));
                 }
             }
         }        
@@ -228,13 +228,13 @@ namespace
         {
             unsigned int Hash = pDataCamera->GetTexture()->GetHash();
 
-            CTexture2DPtr BackgroundTexturePtr = TextureManager::GetTexture2DByHash(Hash);
+            CTexturePtr BackgroundTexturePtr = TextureManager::GetTextureByHash(Hash);
 
             if (BackgroundTexturePtr.IsValid())
             {
                 rGraphicCamera.SetBackgroundTexture2D(BackgroundTexturePtr);
 
-                rGraphicCamera.SetBackgroundTextureSet(TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(BackgroundTexturePtr)));
+                rGraphicCamera.SetBackgroundTextureSet(TextureManager::CreateTextureSet(static_cast<CTexturePtr>(BackgroundTexturePtr)));
             }
         }
 

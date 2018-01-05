@@ -1,20 +1,22 @@
 ﻿
 #include "graphic/gfx_precompiled.h"
 
+#include "app_droid/app_application.h"
+
 #include "base/base_crc.h"
 #include "base/base_console.h"
 #include "base/base_exception.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_asset_manager.h"
+
 #include "data/data_texture_manager.h"
+#include "data/data_texture_base.h"
 
 #include "graphic/gfx_main.h"
-#include "graphic/gfx_native_texture_2d.h"
-#include "graphic/gfx_native_texture_3d.h"
+#include "graphic/gfx_native_texture.h"
 #include "graphic/gfx_texture_manager.h"
-
-#include "GL/glew.h"
 
 #include "IL/il.h"
 #include "IL/ilu.h"
@@ -25,8 +27,7 @@ using namespace Gfx;
 
 namespace
 {
-    std::string g_PathToAssets         = "../assets/";
-    std::string g_PathToDataTextures = "../data/graphic/textures/";
+    std::string g_PathToDataTextures = "/graphic/textures/";
 } // namespace
 
 namespace
@@ -51,79 +52,46 @@ namespace
 
     public:
 
-        CTexture1DPtr GetDummyTexture1D();
-        CTexture2DPtr GetDummyTexture2D();
-        CTexture3DPtr GetDummyTexture3D();
-        CTexture2DPtr GetDummyCubeTexture();
+        CTexturePtr GetDummyTexture1D();
+        CTexturePtr GetDummyTexture2D();
+        CTexturePtr GetDummyTexture3D();
+        CTexturePtr GetDummyCubeTexture();
 
-        CTexture1DPtr CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
-        CTexture2DPtr CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
-        CTexture3DPtr CreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
+        CTexturePtr CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
+        CTexturePtr CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
+        CTexturePtr CreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
 
-        CTexture2DPtr CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
+        CTexturePtr CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
 
-        CTextureSetPtr CreateTextureSet(CTextureBasePtr* _pTexturePtrs, unsigned int _NumberOfTextures);
+        CTextureSetPtr CreateTextureSet(CTexturePtr* _pTexturePtrs, unsigned int _NumberOfTextures);
 
-        CTexture1DPtr GetTexture1DByHash(unsigned int _Hash);
-        CTexture2DPtr GetTexture2DByHash(unsigned int _Hash);
-        CTexture3DPtr GetTexture3DByHash(unsigned int _Hash);
+        CTexturePtr GetTextureByHash(unsigned int _Hash);
 
-        void ClearTexture1D(CTexture1DPtr _TexturePtr, const Base::Float4& _rColor);
-        void ClearTexture2D(CTexture2DPtr _TexturePtr, const Base::Float4& _rColor);
-        void ClearTexture3D(CTexture3DPtr _TexturePtr, const Base::Float4& _rColor);
+        void ClearTexture1D(CTexturePtr _TexturePtr, const Base::Float4& _rColor);
+        void ClearTexture2D(CTexturePtr _TexturePtr, const Base::Float4& _rColor);
+        void ClearTexture3D(CTexturePtr _TexturePtr, const Base::Float4& _rColor);
 
-        void CopyToTexture2D(CTexture2DPtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels);
-        void CopyToTextureArray2D(CTexture2DPtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels);
-        void CopyToTextureArray2D(CTexture2DPtr _TextureArrayPtr, unsigned int _IndexOfSlice, CTexture2DPtr _TexturePtr, bool _UpdateMipLevels);
+        void CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels);
+        void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels);
+        void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, CTexturePtr _TexturePtr, bool _UpdateMipLevels);
 
-        CTexture2DPtr GetMipmapFromTexture2D(CTexture2DPtr _TexturePtr, unsigned int _Mipmap);
+        CTexturePtr GetMipmapFromTexture2D(CTexturePtr _TexturePtr, unsigned int _Mipmap);
         
-        void UpdateMipmap(CTexture2DPtr _TexturePtr);
+        void UpdateMipmap(CTexturePtr _TexturePtr);
 
-		void SetTexture2DLabel(CTexture2DPtr _TexturePtr, const char* _pLabel);
-		void SetTexture3DLabel(CTexture3DPtr _TexturePtr, const char* _pLabel);
+        void SetTextureLabel(CTexturePtr _TexturePtr, const char* _pLabel);
 
     private:
 
         // -----------------------------------------------------------------------------
-        // Represents a 1D texture.
-        // -----------------------------------------------------------------------------
-        class CInternTexture1D : public CTexture1D
-        {
-            public:
-
-                CInternTexture1D();
-               ~CInternTexture1D();
-
-            private:
-
-                friend class  CGfxTextureManager;
-        };
-
-        // -----------------------------------------------------------------------------
         // Represents a 2D texture.
         // -----------------------------------------------------------------------------
-        class CInternTexture2D : public CNativeTexture2D
+        class CInternTexture : public CNativeTexture
         {
             public:
 
-                CInternTexture2D();
-               ~CInternTexture2D();
-
-            private:
-
-                friend class  CGfxTextureManager;
-        };
-
-        // -----------------------------------------------------------------------------
-        // Represents a 3D texture.
-        // -----------------------------------------------------------------------------
-        class CInternTexture3D : public CNativeTexture3D
-        {
-            public:
-
-                CInternTexture3D();
-               ~CInternTexture3D();
+                CInternTexture();
+               ~CInternTexture();
 
             private:
 
@@ -155,53 +123,40 @@ namespace
         // -----------------------------------------------------------------------------
         // There are way more 2D textures than 1D or 3D ones, so use bigger pages here.
         // -----------------------------------------------------------------------------
-        typedef Base::CManagedPool<CInternTexture1D,  16, 0> CTexture1Ds;
-        typedef Base::CManagedPool<CInternTexture2D, 256, 0> CTexture2Ds;
-        typedef Base::CManagedPool<CInternTexture3D,  16, 0> CTexture3Ds;
-
-        typedef CTexture1Ds::CIterator CTexture1DIterator;
-        typedef CTexture2Ds::CIterator CTexture2DIterator;
-        typedef CTexture3Ds::CIterator CTexture3DIterator;
+        typedef Base::CManagedPool<CInternTexture, 256, 0> CTextures;
         
-        typedef std::unordered_map<unsigned int, CTexture1DPtr> CTexture1DByHashs;
-        typedef std::unordered_map<unsigned int, CTexture2DPtr> CTexture2DByHashs;
-        typedef std::unordered_map<unsigned int, CTexture3DPtr> CTexture3DByHashs;
+        typedef std::unordered_map<unsigned int, CTexturePtr> CTextureByHashs;
 
     private:
 
-        CTexture1Ds          m_Textures1D;
-        CTexture2Ds          m_Textures2D;
-        CTexture3Ds          m_Textures3D;
-        CTexture1DByHashs    m_Textures1DByHash;
-        CTexture2DByHashs    m_Textures2DByHash;
-        CTexture3DByHashs    m_Textures3DByHash;
-        CTextureSets         m_TextureSets;
-        
-        CTexture1DPtr        m_Texture1DPtr;
-        CTexture2DPtr        m_Texture2DPtr;
+        CTextures       m_Textures;
+        CTextureByHashs m_TexturesByHash;
+        CTextureSets    m_TextureSets;
+        CTexturePtr     m_Texture1DPtr;
+        CTexturePtr     m_Texture2DPtr;
 
     private:
 
         void OnDirtyTexture(Dt::CTextureBase* _pTexture);
 
-        CTexture1DPtr InternCreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
-        CTexture2DPtr InternCreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
-        CTexture3DPtr InternCreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
+        CTexturePtr InternCreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
+        CTexturePtr InternCreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
+        CTexturePtr InternCreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
 
-        CTexture2DPtr InternCreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
+        CTexturePtr InternCreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
 
-        int ConvertGLFormatToBytesPerPixel(Gfx::CTextureBase::EFormat _Format) const;
-        int ConvertGLImageUsage(Gfx::CTextureBase::EUsage _Usage) const;
-        int ConvertGLInternalImageFormat(Gfx::CTextureBase::EFormat _Format) const;
-        int ConvertGLImageFormat(Gfx::CTextureBase::EFormat _Format) const;
-        int ConvertGLImageType(Gfx::CTextureBase::EFormat _Format) const;
+        int ConvertGLFormatToBytesPerPixel(Gfx::CTexture::EFormat _Format) const;
+        int ConvertGLImageUsage(Gfx::CTexture::EUsage _Usage) const;
+        int ConvertGLInternalImageFormat(Gfx::CTexture::EFormat _Format) const;
+        int ConvertGLImageFormat(Gfx::CTexture::EFormat _Format) const;
+        int ConvertGLImageType(Gfx::CTexture::EFormat _Format) const;
 
-        ILenum ConvertILImageFormat(Gfx::CTextureBase::EFormat _Format) const;
-        ILenum ConvertILImageType(Gfx::CTextureBase::EFormat _Format) const;
+        ILenum ConvertILImageFormat(Gfx::CTexture::EFormat _Format) const;
+        ILenum ConvertILImageType(Gfx::CTexture::EFormat _Format) const;
 
-        Gfx::CTextureBase::EDimension ConvertDataDimension(Dt::CTextureBase::EDimension _Dimension);
-        Gfx::CTextureBase::EFormat ConvertDataFormat(Dt::CTextureBase::EFormat _Format);
-        Gfx::CTextureBase::ESemantic ConvertDataSemantic(Dt::CTextureBase::ESemantic _Semantic);
+        Gfx::CTexture::EDimension ConvertDataDimension(Dt::CTextureBase::EDimension _Dimension);
+        Gfx::CTexture::EFormat ConvertDataFormat(Dt::CTextureBase::EFormat _Format);
+        Gfx::CTexture::ESemantic ConvertDataSemantic(Dt::CTextureBase::ESemantic _Semantic);
         unsigned int ConvertDataBinding(unsigned int _Binding);
 
     private:
@@ -214,15 +169,11 @@ namespace
 namespace
 {
     CGfxTextureManager::CGfxTextureManager()
-        : m_Textures1D               ()
-        , m_Textures2D               ()
-        , m_Textures3D               ()
-        , m_Textures1DByHash         ()
-        , m_Textures2DByHash         ()
-        , m_Textures3DByHash         ()
-        , m_TextureSets              ()
-        , m_Texture1DPtr             ()
-        , m_Texture2DPtr             ()
+        : m_Textures      ()
+        , m_TexturesByHash()
+        , m_TextureSets   ()
+        , m_Texture1DPtr  ()
+        , m_Texture2DPtr  ()
     {
     }
 
@@ -256,23 +207,25 @@ namespace
         TextureDescriptor.m_NumberOfPixelsW  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
         TextureDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
         TextureDescriptor.m_NumberOfTextures = Gfx::STextureDescriptor::s_NumberOfTexturesFromSource;
-        TextureDescriptor.m_Binding          = Gfx::CTextureBase::ShaderResource;
-        TextureDescriptor.m_Access           = Gfx::CTextureBase::CPUWrite;
-        TextureDescriptor.m_Format           = Gfx::CTextureBase::Unknown;
-        TextureDescriptor.m_Usage            = Gfx::CTextureBase::GPURead;
-        TextureDescriptor.m_Semantic         = Gfx::CTextureBase::Diffuse;
+        TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
+        TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
+        TextureDescriptor.m_Format           = Gfx::CTexture::Unknown;
+        TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
+        TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
         TextureDescriptor.m_pFileName        = "dummy_2d.tga";
         TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = Gfx::CTextureBase::R8G8B8_UBYTE;
+        TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8_UBYTE;
         
         m_Texture2DPtr = CreateTexture2D(TextureDescriptor, true, SDataBehavior::LeftAlone);
 
-		SetTexture2DLabel(m_Texture2DPtr, "Dummy Texture 2D");
+        SetTextureLabel(m_Texture2DPtr, "Dummy Texture 2D");
         
         // -----------------------------------------------------------------------------
         // Setup default settings in OpenGL
         // -----------------------------------------------------------------------------
+#ifndef __ANDROID__
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+#endif // __ANDROID__
 
         // -----------------------------------------------------------------------------
         // Set dirty handler of data textures
@@ -290,13 +243,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Clear all the pools with the textures.
         // -----------------------------------------------------------------------------
-        m_Textures1DByHash.clear();
-        m_Textures2DByHash.clear();
-        m_Textures3DByHash.clear();
+        m_TexturesByHash.clear();
 
-        m_Textures1D.Clear();
-        m_Textures2D.Clear();
-        m_Textures3D.Clear();
+        m_Textures.Clear();
 
         // -----------------------------------------------------------------------------
         // Clear all the sets.
@@ -314,42 +263,42 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    CTexture1DPtr CGfxTextureManager::GetDummyTexture1D()
+    CTexturePtr CGfxTextureManager::GetDummyTexture1D()
     {
         return m_Texture1DPtr;
     }
     
     // -----------------------------------------------------------------------------
 
-    CTexture2DPtr CGfxTextureManager::GetDummyTexture2D()
+    CTexturePtr CGfxTextureManager::GetDummyTexture2D()
     {
         return m_Texture2DPtr;
     }
     
     // -----------------------------------------------------------------------------
 
-    CTexture3DPtr CGfxTextureManager::GetDummyTexture3D()
+    CTexturePtr CGfxTextureManager::GetDummyTexture3D()
     {
         return nullptr;
     }
     
     // -----------------------------------------------------------------------------
 
-    CTexture2DPtr CGfxTextureManager::GetDummyCubeTexture()
+    CTexturePtr CGfxTextureManager::GetDummyCubeTexture()
     {
         return nullptr;
     }
 
     // -----------------------------------------------------------------------------
 
-    CTexture1DPtr CGfxTextureManager::CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
+    CTexturePtr CGfxTextureManager::CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
         return InternCreateTexture1D(_rDescriptor, _IsDeleteable, _Behavior);
     }
 
     // -----------------------------------------------------------------------------
 
-    CTexture2DPtr CGfxTextureManager::CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
+    CTexturePtr CGfxTextureManager::CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
         int          NumberOfBytes;
         unsigned int Hash;
@@ -366,29 +315,29 @@ namespace
             
             Hash = Base::CRC32(pData, NumberOfBytes);
             
-            if (m_Textures2DByHash.find(Hash) != m_Textures2DByHash.end())
+            if (m_TexturesByHash.find(Hash) != m_TexturesByHash.end())
             {
-                return m_Textures2DByHash.at(Hash);
+                return m_TexturesByHash.at(Hash);
             }
         }            
 
         // -----------------------------------------------------------------------------
         // Texture
         // -----------------------------------------------------------------------------
-        CTexture2DPtr Texture2DPtr = InternCreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior);
+        CTexturePtr Texture2DPtr = InternCreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior);
 
-        CInternTexture2D* pInternTexture2D = static_cast<CInternTexture2D*>(Texture2DPtr.GetPtr());
+        CInternTexture* pInternTexture2D = static_cast<CInternTexture*>(Texture2DPtr.GetPtr());
 
-		if (pInternTexture2D == nullptr)
-		{
-			return GetDummyTexture2D();
-		}
+        if (pInternTexture2D == nullptr)
+        {
+            return GetDummyTexture2D();
+        }
 
         if (Hash != 0)
         {
             pInternTexture2D->m_Hash = Hash;
 
-            m_Textures2DByHash[Hash] = Texture2DPtr;
+            m_TexturesByHash[Hash] = Texture2DPtr;
         }
 
         return Texture2DPtr;
@@ -396,21 +345,21 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CTexture3DPtr CGfxTextureManager::CreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
+    CTexturePtr CGfxTextureManager::CreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
         return InternCreateTexture3D(_rDescriptor, _IsDeleteable, _Behavior);
     }
 
     // -----------------------------------------------------------------------------
 
-    CTexture2DPtr CGfxTextureManager::CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
+    CTexturePtr CGfxTextureManager::CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
         return InternCreateCubeTexture(_rDescriptor, _IsDeleteable, _Behavior);
     }
 
     // -----------------------------------------------------------------------------
 
-    CTextureSetPtr CGfxTextureManager::CreateTextureSet(CTextureBasePtr* _pTexturePtrs, unsigned int _NumberOfTextures)
+    CTextureSetPtr CGfxTextureManager::CreateTextureSet(CTexturePtr* _pTexturePtrs, unsigned int _NumberOfTextures)
     {
         // -----------------------------------------------------------------------------
         // Allocate item in texture set array
@@ -438,20 +387,11 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CTexture1DPtr CGfxTextureManager::GetTexture1DByHash(unsigned int _Hash)
+    CTexturePtr CGfxTextureManager::GetTextureByHash(unsigned int _Hash)
     {
-        BASE_UNUSED(_Hash);
-
-        return nullptr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CTexture2DPtr CGfxTextureManager::GetTexture2DByHash(unsigned int _Hash)
-    {
-        if (m_Textures2DByHash.find(_Hash) != m_Textures2DByHash.end())
+        if (m_TexturesByHash.find(_Hash) != m_TexturesByHash.end())
         {
-            return m_Textures2DByHash.at(_Hash);
+            return m_TexturesByHash.at(_Hash);
         }
 
         return nullptr;
@@ -459,16 +399,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CTexture3DPtr CGfxTextureManager::GetTexture3DByHash(unsigned int _Hash)
-    {
-        BASE_UNUSED(_Hash);
-
-        return nullptr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxTextureManager::ClearTexture1D(CTexture1DPtr _TexturePtr, const Base::Float4& _rColor)
+    void CGfxTextureManager::ClearTexture1D(CTexturePtr _TexturePtr, const Base::Float4& _rColor)
     {
         BASE_UNUSED(_TexturePtr);
         BASE_UNUSED(_rColor);
@@ -476,7 +407,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxTextureManager::ClearTexture2D(CTexture2DPtr _TexturePtr, const Base::Float4& _rColor)
+    void CGfxTextureManager::ClearTexture2D(CTexturePtr _TexturePtr, const Base::Float4& _rColor)
     {
         BASE_UNUSED(_TexturePtr);
         BASE_UNUSED(_rColor);
@@ -484,7 +415,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxTextureManager::ClearTexture3D(CTexture3DPtr _TexturePtr, const Base::Float4& _rColor)
+    void CGfxTextureManager::ClearTexture3D(CTexturePtr _TexturePtr, const Base::Float4& _rColor)
     {
         BASE_UNUSED(_TexturePtr);
         BASE_UNUSED(_rColor);
@@ -492,7 +423,7 @@ namespace
 
     // -----------------------------------------------------------------------------
     
-    void CGfxTextureManager::CopyToTexture2D(CTexture2DPtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels)
+    void CGfxTextureManager::CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels)
     {
         BASE_UNUSED(_NumberOfBytesPerLine);
 
@@ -508,7 +439,7 @@ namespace
         assert(_TexturePtr->GetNumberOfPixelsU() <= UpdateSize[0] + Offset[0]);
         assert(_TexturePtr->GetNumberOfPixelsV() <= UpdateSize[1] + Offset[1]);
         
-        CInternTexture2D* pInternTexture = static_cast<CInternTexture2D*>(_TexturePtr.GetPtr());
+        CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
         
         Gfx::CNativeTextureHandle TextureHandle = pInternTexture->m_NativeTexture;
         
@@ -518,17 +449,19 @@ namespace
         // -----------------------------------------------------------------------------
         // Upload data to texture
         // -----------------------------------------------------------------------------
-        glTextureSubImage2D(TextureHandle, 0, Offset[0], Offset[1], UpdateSize[0], UpdateSize[1], Format, Type, _pBytes);
+        glBindTexture(GL_TEXTURE_2D, TextureHandle);
+
+        glTexSubImage2D(GL_TEXTURE_2D, 0, Offset[0], Offset[1], UpdateSize[0], UpdateSize[1], Format, Type, _pBytes);
         
         if (_UpdateMipLevels)
         {
-            glGenerateTextureMipmap(TextureHandle);
+            glGenerateMipmap(GL_TEXTURE_2D);
         }
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxTextureManager::CopyToTextureArray2D(CTexture2DPtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels)
+    void CGfxTextureManager::CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels)
     {
         BASE_UNUSED(_UpdateMipLevels);
         BASE_UNUSED(_NumberOfBytesPerLine);
@@ -548,7 +481,7 @@ namespace
         assert(Size[0] <= UpdateSize[0] + Offset[0]);
         assert(Size[1] <= UpdateSize[1] + Offset[1]);
         
-        CInternTexture2D* pInternTextureArray = static_cast<CInternTexture2D*>(_TextureArrayPtr.GetPtr());
+        CInternTexture* pInternTextureArray = static_cast<CInternTexture*>(_TextureArrayPtr.GetPtr());
 
         Gfx::CNativeTextureHandle TextureHandle = pInternTextureArray->m_NativeTexture;
 
@@ -560,7 +493,9 @@ namespace
         // -----------------------------------------------------------------------------
         if (pInternTextureArray->m_Info.m_IsCubeTexture)
         {
-            glTextureSubImage3D(TextureHandle, 0, Offset[0], Offset[1], _IndexOfSlice, UpdateSize[0], UpdateSize[1], 1, Format, Type, _pBytes);
+            glBindTexture(GL_TEXTURE_2D, TextureHandle);
+
+            glTexSubImage3D(GL_TEXTURE_2D, 0, Offset[0], Offset[1], _IndexOfSlice, UpdateSize[0], UpdateSize[1], 1, Format, Type, _pBytes);
         }
         else
         {
@@ -573,7 +508,7 @@ namespace
 
     // -----------------------------------------------------------------------------
     
-    void CGfxTextureManager::CopyToTextureArray2D(CTexture2DPtr _TextureArrayPtr, unsigned int _IndexOfSlice, CTexture2DPtr _TexturePtr, bool _UpdateMipLevels)
+    void CGfxTextureManager::CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, CTexturePtr _TexturePtr, bool _UpdateMipLevels)
     {
         BASE_UNUSED(_UpdateMipLevels);
 
@@ -590,8 +525,8 @@ namespace
         assert(_TexturePtr->GetNumberOfPixelsU() <= UpdateSize[0] + Offset[0]);
         assert(_TexturePtr->GetNumberOfPixelsV() <= UpdateSize[1] + Offset[1]);
         
-        CInternTexture2D* pInternTextureArray = static_cast<CInternTexture2D*>(_TextureArrayPtr.GetPtr());
-        CInternTexture2D* pInternTexture = static_cast<CInternTexture2D*>(_TexturePtr.GetPtr());
+        CInternTexture* pInternTextureArray = static_cast<CInternTexture*>(_TextureArrayPtr.GetPtr());
+        CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
         
         Gfx::CNativeTextureHandle TextureHandle = pInternTextureArray->m_NativeTexture;
         
@@ -603,7 +538,9 @@ namespace
         // -----------------------------------------------------------------------------
         if (pInternTextureArray->m_Info.m_IsCubeTexture)
         {
-            glTextureSubImage3D(TextureHandle, 0, Offset[0], Offset[1], _IndexOfSlice, UpdateSize[0], UpdateSize[1], 1, Format, Type, pInternTexture->GetPixels());
+            glBindTexture(GL_TEXTURE_2D, TextureHandle);
+
+            glTexSubImage3D(GL_TEXTURE_2D, 0, Offset[0], Offset[1], _IndexOfSlice, UpdateSize[0], UpdateSize[1], 1, Format, Type, pInternTexture->GetPixels());
         }
         else
         {
@@ -616,20 +553,20 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CTexture2DPtr CGfxTextureManager::GetMipmapFromTexture2D(CTexture2DPtr _TexturePtr, unsigned int _Mipmap)
+    CTexturePtr CGfxTextureManager::GetMipmapFromTexture2D(CTexturePtr _TexturePtr, unsigned int _Mipmap)
     {
         // -----------------------------------------------------------------------------
         // Generate texture inside texture manager
         // -----------------------------------------------------------------------------
-        CTexture2Ds::CPtr Texture2DPtr;
+        CTextures::CPtr Texture2DPtr;
 
         assert(_Mipmap < _TexturePtr->GetNumberOfMipLevels());
 
         try
         {
-            Texture2DPtr = m_Textures2D.Allocate();
+            Texture2DPtr = m_Textures.Allocate();
             
-            CInternTexture2D& rTexture = *Texture2DPtr;
+            CInternTexture& rTexture = *Texture2DPtr;
             
             unsigned int MipmapPow = Base::Pow(2, _Mipmap);
 
@@ -651,10 +588,10 @@ namespace
             rTexture.m_Info.m_Semantic          = _TexturePtr->GetSemantic();
             rTexture.m_Info.m_Usage             = _TexturePtr->GetUsage();
             
-            CInternTexture2D* pInternalTexture = static_cast<CInternTexture2D*>(_TexturePtr.GetPtr());
+            CInternTexture* pInternalTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
 
             rTexture.m_NativeTexture        = pInternalTexture->m_NativeTexture;
-            rTexture.m_NativeDimension      = pInternalTexture->m_NativeDimension;
+            rTexture.m_NativeBinding        = pInternalTexture->m_NativeBinding;
             rTexture.m_NativeInternalFormat = pInternalTexture->m_NativeInternalFormat;
             rTexture.m_NativeUsage          = pInternalTexture->m_NativeUsage;
         }
@@ -663,43 +600,43 @@ namespace
             BASE_THROWM("Error creating texture in texture manager.");
         }
         
-        return CTexture2DPtr(Texture2DPtr);
+        return CTexturePtr(Texture2DPtr);
     }
     
     // -----------------------------------------------------------------------------
     
-    void CGfxTextureManager::UpdateMipmap(CTexture2DPtr _TexturePtr)
+    void CGfxTextureManager::UpdateMipmap(CTexturePtr _TexturePtr)
     {
         assert(_TexturePtr != 0);
         
-        CInternTexture2D* pInternTexture = static_cast<CInternTexture2D*>(_TexturePtr.GetPtr());
+        CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
 
         assert(pInternTexture);
 
-        glGenerateTextureMipmap(pInternTexture->m_NativeTexture);
+        if (pInternTexture->IsCube())
+        {
+            glBindTexture(GL_TEXTURE_CUBE_MAP, pInternTexture->m_NativeTexture);
+
+            glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+        }
+        else
+        {
+            glBindTexture(GL_TEXTURE_2D, pInternTexture->m_NativeTexture);
+
+            glGenerateMipmap(GL_TEXTURE_2D);
+        }
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void CGfxTextureManager::SetTexture2DLabel(CTexture2DPtr _TexturePtr, const char* _pLabel)
-	{
-		assert(_pLabel != nullptr);
+    void CGfxTextureManager::SetTextureLabel(CTexturePtr _TexturePtr, const char* _pLabel)
+    {
+        assert(_pLabel != nullptr);
 
-		CInternTexture2D* pInternTexture = static_cast<CInternTexture2D*>(_TexturePtr.GetPtr());
+        CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
 
-		glObjectLabel(GL_TEXTURE, pInternTexture->m_NativeTexture, -1, _pLabel);
-	}
-
-	// -----------------------------------------------------------------------------
-
-	void CGfxTextureManager::SetTexture3DLabel(CTexture3DPtr _TexturePtr, const char* _pLabel)
-	{
-		assert(_pLabel != nullptr);
-
-		CInternTexture3D* pInternTexture = static_cast<CInternTexture3D*>(_TexturePtr.GetPtr());
-
-		glObjectLabel(GL_TEXTURE, pInternTexture->m_NativeTexture, -1, _pLabel);
-	}
+        glObjectLabel(GL_TEXTURE, pInternTexture->m_NativeTexture, -1, _pLabel);
+    }
 
     // -----------------------------------------------------------------------------
 
@@ -731,8 +668,8 @@ namespace
             TextureDescriptor.m_NumberOfPixelsW  = 1;
             TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
             TextureDescriptor.m_NumberOfTextures = 1;
-            TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-            TextureDescriptor.m_Usage            = CTextureBase::GPURead;
+            TextureDescriptor.m_Access           = CTexture::CPUWrite;
+            TextureDescriptor.m_Usage            = CTexture::GPURead;
             TextureDescriptor.m_Semantic         = ConvertDataSemantic(_pTexture->GetSemantic());
             TextureDescriptor.m_pFileName        = 0;
             TextureDescriptor.m_pPixels          = _pTexture->GetPixels();
@@ -754,18 +691,18 @@ namespace
             }
             else if (_pTexture->GetDimension() == Dt::CTextureBase::Dim2D)
             {
-                CTexture2DPtr Texture2DPtr = nullptr;
+                CTexturePtr Texture2DPtr = nullptr;
 
-                if (m_Textures2DByHash.find(Hash) != m_Textures2DByHash.end())
+                if (m_TexturesByHash.find(Hash) != m_TexturesByHash.end())
                 {
                     BASE_CONSOLE_STREAMWARNING("Trying to re-create an already created data texture in graphics texture manager. Creation aborted...");
 
                     return ;
                 }
 
-				// -----------------------------------------------------------------------------
-				// Create
-				// -----------------------------------------------------------------------------
+                // -----------------------------------------------------------------------------
+                // Create
+                // -----------------------------------------------------------------------------
                 if (_pTexture->IsCube())
                 {
                     Dt::CTextureCube* pDataTexture = static_cast<Dt::CTextureCube*>(_pTexture);
@@ -786,31 +723,31 @@ namespace
                     Texture2DPtr = InternCreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
                 }
 
-				// -----------------------------------------------------------------------------
-				// Label if an identifier exists
-				// -----------------------------------------------------------------------------
-				const char* pLabel = _pTexture->GetIdentifier().length() > 0 ? _pTexture->GetIdentifier().c_str() : 0;
+                // -----------------------------------------------------------------------------
+                // Label if an identifier exists
+                // -----------------------------------------------------------------------------
+                const char* pLabel = _pTexture->GetIdentifier().length() > 0 ? _pTexture->GetIdentifier().c_str() : 0;
 
-				if (pLabel != 0)
-				{
-					SetTexture2DLabel(Texture2DPtr, pLabel);
-				}
+                if (pLabel != 0)
+                {
+                    SetTextureLabel(Texture2DPtr, pLabel);
+                }
 
-				// -----------------------------------------------------------------------------
-				// Set to container
-				// -----------------------------------------------------------------------------
-                CInternTexture2D* pInternTexture2D = static_cast<CInternTexture2D*>(Texture2DPtr.GetPtr());
+                // -----------------------------------------------------------------------------
+                // Set to container
+                // -----------------------------------------------------------------------------
+                CInternTexture* pInternTexture2D = static_cast<CInternTexture*>(Texture2DPtr.GetPtr());
 
                 if (pInternTexture2D == nullptr)
                 {
-                    pInternTexture2D = static_cast<CInternTexture2D*>(m_Texture2DPtr.GetPtr());
+                    pInternTexture2D = static_cast<CInternTexture*>(m_Texture2DPtr.GetPtr());
                 }
 
                 if (Hash != 0)
                 {
                     pInternTexture2D->m_Hash = Hash;
 
-                    m_Textures2DByHash[Hash] = pInternTexture2D;
+                    m_TexturesByHash[Hash] = pInternTexture2D;
                 }
             }
             else if (_pTexture->GetDimension() == Dt::CTextureBase::Dim3D)
@@ -829,7 +766,7 @@ namespace
         {
             if (_pTexture->GetDimension() == Dt::CTextureBase::Dim2D)
             {
-                if (m_Textures2DByHash.find(Hash) == m_Textures2DByHash.end())
+                if (m_TexturesByHash.find(Hash) == m_TexturesByHash.end())
                 {
                     BASE_CONSOLE_STREAMWARNING("Data texture manager tried to update data from non-created graphic texture.");
 
@@ -838,8 +775,8 @@ namespace
 
                 if (_pTexture->IsCube())
                 {
-                    Gfx::CTexture2D*  pGraphicTexture = m_Textures2DByHash.at(Hash);
-                    Dt::CTextureCube* pDataTexture = static_cast<Dt::CTextureCube*>(_pTexture);
+                    Gfx::CTexture*    pGraphicTexture = m_TexturesByHash.at(Hash);
+                    Dt::CTextureCube* pDataTexture    = static_cast<Dt::CTextureCube*>(_pTexture);
 
                     Base::UInt2 CubemapResolution = Base::UInt2(pDataTexture->GetNumberOfPixelsU(), pDataTexture->GetNumberOfPixelsV());
 
@@ -856,8 +793,8 @@ namespace
                 }
                 else
                 {
-                    Gfx::CTexture2D* pGraphicTexture = m_Textures2DByHash.at(Hash);
-                    Dt::CTexture2D*  pDataTexture = static_cast<Dt::CTexture2D*>(_pTexture);
+                    Gfx::CTexture*  pGraphicTexture = m_TexturesByHash.at(Hash);
+                    Dt::CTexture2D* pDataTexture    = static_cast<Dt::CTexture2D*>(_pTexture);
 
                     if (pDataTexture->GetPixels() != nullptr)
                     {   
@@ -874,7 +811,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CTexture1DPtr CGfxTextureManager::InternCreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
+    CTexturePtr CGfxTextureManager::InternCreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
         BASE_UNUSED(_rDescriptor);
         BASE_UNUSED(_IsDeleteable);
@@ -885,7 +822,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CTexture2DPtr CGfxTextureManager::InternCreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
+    CTexturePtr CGfxTextureManager::InternCreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
         bool         Result;
         void*        pBytes;
@@ -942,24 +879,36 @@ namespace
             // -----------------------------------------------------------------------------
             // Load texture from file (either in assets or data)
             // -----------------------------------------------------------------------------
-            std::string    PathToTexture;
+            std::string PathToTexture;
+
+            PathToTexture = Core::AssetManager::GetPathToAssets() + "/" + _rDescriptor.m_pFileName;
+
+#ifdef __ANDROID__
+            const char* pPathToTexture = 0;
+
+            pPathToTexture = PathToTexture.c_str();
+#else
             const wchar_t* pPathToTexture = 0;
 
-            PathToTexture = g_PathToAssets + _rDescriptor.m_pFileName;
-
             pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
-            
+#endif
+
             Result = ilLoadImage(pPathToTexture) == IL_TRUE;
 
             if (!Result)
             {
-                PathToTexture = g_PathToDataTextures + _rDescriptor.m_pFileName;
+                PathToTexture = Core::AssetManager::GetPathToData() + g_PathToDataTextures + _rDescriptor.m_pFileName;
 
+#ifdef __ANDROID__
+                pPathToTexture = PathToTexture.c_str();
+#else
                 pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
+#endif
+
 
                 Result = ilLoadImage(pPathToTexture) == IL_TRUE;
             }
-            
+
             if (Result)
             {
                 ILenum CheckILFormat = ilGetInteger(IL_IMAGE_FORMAT);
@@ -969,13 +918,13 @@ namespace
                 {
                     ilConvertImage(NativeILFormat, NativeILType);
                 }
-                
+
                 pTextureData = ilGetData();
-                
+
                 ImageWidth    = ilGetInteger(IL_IMAGE_WIDTH);
                 ImageHeight   = ilGetInteger(IL_IMAGE_HEIGHT);
                 NumberOfBytes = ilGetInteger(IL_IMAGE_SIZE_OF_DATA);
-                
+
                 assert(ImageWidth    > 0);
                 assert(ImageHeight   > 0);
                 assert(NumberOfBytes > 0);
@@ -1002,30 +951,32 @@ namespace
         // -----------------------------------------------------------------------------
         // Generate OpenGL texture or render buffer
         // -----------------------------------------------------------------------------
-        glCreateTextures(GL_TEXTURE_2D, 1, &NativeTextureHandle);
+        glGenTextures(1, &NativeTextureHandle);
 
-		// -----------------------------------------------------------------------------
-		// Label texture if file name exists
-		// -----------------------------------------------------------------------------
-		if (_rDescriptor.m_pFileName != nullptr)
-		{
-			glObjectLabel(GL_TEXTURE, NativeTextureHandle, -1, _rDescriptor.m_pFileName);
-		}
+        glBindTexture(GL_TEXTURE_2D, NativeTextureHandle);
+
+        // -----------------------------------------------------------------------------
+        // Label texture if file name exists
+        // -----------------------------------------------------------------------------
+        if (_rDescriptor.m_pFileName != nullptr)
+        {
+            glObjectLabel(GL_TEXTURE, NativeTextureHandle, -1, _rDescriptor.m_pFileName);
+        }
 
         // -----------------------------------------------------------------------------
         // Binding
         // -----------------------------------------------------------------------------
-        if (_rDescriptor.m_Binding & Gfx::CTextureBase::DepthStencilTarget)
+        if (_rDescriptor.m_Binding & Gfx::CTexture::DepthStencilTarget)
         {
-            glTextureStorage2D(NativeTextureHandle, NumberOfMipmaps, GL_DEPTH_COMPONENT32F, ImageWidth, ImageHeight);
+            glTexStorage2D(GL_TEXTURE_2D, NumberOfMipmaps, GL_DEPTH_COMPONENT32F, ImageWidth, ImageHeight);
         }
-        else if (_rDescriptor.m_Binding & Gfx::CTextureBase::RenderTarget)
+        else if (_rDescriptor.m_Binding & Gfx::CTexture::RenderTarget)
         {   
-            glTextureStorage2D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
+            glTexStorage2D(GL_TEXTURE_2D, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
         }
         else
         {
-            glTextureStorage2D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
+            glTexStorage2D(GL_TEXTURE_2D, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
         }
 
         // -----------------------------------------------------------------------------
@@ -1033,7 +984,7 @@ namespace
         // -----------------------------------------------------------------------------
         if (pTextureData != 0)
         {
-            glTextureSubImage2D(NativeTextureHandle, 0, 0, 0, ImageWidth, ImageHeight, GLFormat, GLType, pTextureData);
+            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, ImageWidth, ImageHeight, GLFormat, GLType, pTextureData);
 
             if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_NumberOfMipMapsFromSource && NumberOfMipmaps > 1)
             {
@@ -1055,7 +1006,7 @@ namespace
                     ImageHeight  = ilGetInteger(IL_IMAGE_HEIGHT);
                     pTextureData = ilGetData();
 
-                    glTextureSubImage2D(NativeTextureHandle, IndexOfMipMap, 0, 0, ImageWidth, ImageHeight, GLFormat, GLType, pTextureData);
+                    glTexSubImage2D(GL_TEXTURE_2D, IndexOfMipMap, 0, 0, ImageWidth, ImageHeight, GLFormat, GLType, pTextureData);
                 }
             }
         }
@@ -1065,19 +1016,24 @@ namespace
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
         {
-            glGenerateTextureMipmap(NativeTextureHandle);
+            glGenerateMipmap(GL_TEXTURE_2D);
         }
+
+        // -----------------------------------------------------------------------------
+        // Unbind
+        // -----------------------------------------------------------------------------
+        glBindTexture(GL_TEXTURE_2D, 0);
 
         // -----------------------------------------------------------------------------
         // Generate texture inside texture manager
         // -----------------------------------------------------------------------------
-        CTexture2DPtr Texture2DPtr = m_Textures2D.Allocate();
+        CTexturePtr Texture2DPtr = static_cast<CTexturePtr>(m_Textures.Allocate());
         
         assert(NumberOfBytes > 0);
         
         try
         {
-            CInternTexture2D& rTexture = *static_cast<CInternTexture2D*>(Texture2DPtr.GetPtr());
+            CInternTexture& rTexture = *static_cast<CInternTexture*>(Texture2DPtr.GetPtr());
             
             // -----------------------------------------------------------------------------
             // Setup the new texture inside manager
@@ -1085,13 +1041,13 @@ namespace
             if (_rDescriptor.m_pFileName != 0) rTexture.m_FileName = _rDescriptor.m_pFileName;
 
             rTexture.m_pPixels           = _rDescriptor.m_pPixels;
-            rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTextureBase::BPixels>(ImageWidth);
-            rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTextureBase::BPixels>(ImageHeight);
+            rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTexture::BPixels>(ImageWidth);
+            rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTexture::BPixels>(ImageHeight);
             rTexture.m_Hash              = 0;
             
             rTexture.m_Info.m_Access            = _rDescriptor.m_Access;
             rTexture.m_Info.m_Binding           = _rDescriptor.m_Binding;
-            rTexture.m_Info.m_Dimension         = CTextureBase::Dim2D;
+            rTexture.m_Info.m_Dimension         = CTexture::Dim2D;
             rTexture.m_Info.m_Format            = _rDescriptor.m_Format;
             rTexture.m_Info.m_IsCubeTexture     = false;
             rTexture.m_Info.m_IsDeletable       = _IsDeleteable;
@@ -1105,7 +1061,7 @@ namespace
             rTexture.m_NativeTexture        = NativeTextureHandle;
             rTexture.m_NativeUsage          = GLUsage;
             rTexture.m_NativeInternalFormat = GLInternalFormat;
-            rTexture.m_NativeDimension      = GL_TEXTURE_2D;
+            rTexture.m_NativeBinding        = GL_TEXTURE_2D;
             
             // -----------------------------------------------------------------------------
             // Check the behavior.
@@ -1190,7 +1146,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CTexture3DPtr CGfxTextureManager::InternCreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
+    CTexturePtr CGfxTextureManager::InternCreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
         void*        pBytes;
         void*        pTextureData;
@@ -1238,30 +1194,32 @@ namespace
         // -----------------------------------------------------------------------------
         // Generate OpenGL texture or render buffer
         // -----------------------------------------------------------------------------
-		glCreateTextures(GL_TEXTURE_3D, 1, &NativeTextureHandle);
+        glGenTextures(1, &NativeTextureHandle);
 
-		// -----------------------------------------------------------------------------
-		// Label texture if file name exists
-		// -----------------------------------------------------------------------------
-		if (_rDescriptor.m_pFileName != nullptr)
-		{
-			glObjectLabel(GL_TEXTURE, NativeTextureHandle, -1, _rDescriptor.m_pFileName);
-		}
+        glBindTexture(GL_TEXTURE_3D, NativeTextureHandle);
+
+        // -----------------------------------------------------------------------------
+        // Label texture if file name exists
+        // -----------------------------------------------------------------------------
+        if (_rDescriptor.m_pFileName != nullptr)
+        {
+            glObjectLabel(GL_TEXTURE, NativeTextureHandle, -1, _rDescriptor.m_pFileName);
+        }
 
         // -----------------------------------------------------------------------------
         // Binding
         // -----------------------------------------------------------------------------
-        if (_rDescriptor.m_Binding & Gfx::CTextureBase::DepthStencilTarget)
+        if (_rDescriptor.m_Binding & Gfx::CTexture::DepthStencilTarget)
         {
-            glTextureStorage3D(NativeTextureHandle, NumberOfMipmaps, GL_DEPTH_COMPONENT32F, ImageWidth, ImageHeight, ImageDepth);
+            glTexStorage3D(GL_TEXTURE_3D, NumberOfMipmaps, GL_DEPTH_COMPONENT32F, ImageWidth, ImageHeight, ImageDepth);
         }
-        else if (_rDescriptor.m_Binding & Gfx::CTextureBase::RenderTarget)
+        else if (_rDescriptor.m_Binding & Gfx::CTexture::RenderTarget)
         {
-            glTextureStorage3D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight, ImageDepth);
+            glTexStorage3D(GL_TEXTURE_3D, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight, ImageDepth);
         }
         else
         {
-            glTextureStorage3D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight, ImageDepth);
+            glTexStorage3D(GL_TEXTURE_3D, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight, ImageDepth);
         }
 
         // -----------------------------------------------------------------------------
@@ -1269,7 +1227,7 @@ namespace
         // -----------------------------------------------------------------------------
         if (pTextureData != 0)
         {
-            glTextureSubImage3D(NativeTextureHandle, 0, 0, 0, 0, ImageWidth, ImageHeight, ImageDepth, GLFormat, GLType, pTextureData);
+            glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, ImageWidth, ImageHeight, ImageDepth, GLFormat, GLType, pTextureData);
         }
 
         // -----------------------------------------------------------------------------
@@ -1277,19 +1235,19 @@ namespace
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
         {
-            glGenerateTextureMipmap(NativeTextureHandle);
+            glGenerateMipmap(GL_TEXTURE_3D);
         }
 
         // -----------------------------------------------------------------------------
         // Generate texture inside texture manager
         // -----------------------------------------------------------------------------
-        CTexture3DPtr Texture3DPtr = m_Textures3D.Allocate();
+        CTexturePtr Texture3DPtr = static_cast<CTexturePtr>(m_Textures.Allocate());
 
         assert(NumberOfBytes > 0);
 
         try
         {
-            CInternTexture3D& rTexture = *static_cast<CInternTexture3D*>(Texture3DPtr.GetPtr());
+            CInternTexture& rTexture = *static_cast<CInternTexture*>(Texture3DPtr.GetPtr());
             
             // -----------------------------------------------------------------------------
             // Setup the new texture inside manager
@@ -1297,14 +1255,14 @@ namespace
             if (_rDescriptor.m_pFileName != 0) rTexture.m_FileName = _rDescriptor.m_pFileName;
 
             rTexture.m_pPixels           = _rDescriptor.m_pPixels;
-            rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTextureBase::BPixels>(ImageWidth);
-            rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTextureBase::BPixels>(ImageHeight);
-            rTexture.m_NumberOfPixels[2] = static_cast<Gfx::CTextureBase::BPixels>(ImageDepth);
+            rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTexture::BPixels>(ImageWidth);
+            rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTexture::BPixels>(ImageHeight);
+            rTexture.m_NumberOfPixels[2] = static_cast<Gfx::CTexture::BPixels>(ImageDepth);
             rTexture.m_Hash              = 0;
             
             rTexture.m_Info.m_Access            = _rDescriptor.m_Access;
             rTexture.m_Info.m_Binding           = _rDescriptor.m_Binding;
-            rTexture.m_Info.m_Dimension         = CTextureBase::Dim3D;
+            rTexture.m_Info.m_Dimension         = CTexture::Dim3D;
             rTexture.m_Info.m_Format            = _rDescriptor.m_Format;
             rTexture.m_Info.m_IsCubeTexture     = false;
             rTexture.m_Info.m_IsDeletable       = _IsDeleteable;
@@ -1318,7 +1276,7 @@ namespace
             rTexture.m_NativeTexture        = NativeTextureHandle;
             rTexture.m_NativeUsage          = GLUsage;
             rTexture.m_NativeInternalFormat = GLInternalFormat;
-            rTexture.m_NativeDimension      = GL_TEXTURE_3D;
+            rTexture.m_NativeBinding        = GL_TEXTURE_3D;
             
             // -----------------------------------------------------------------------------
             // Check the behavior.
@@ -1393,7 +1351,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CTexture2DPtr CGfxTextureManager::InternCreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
+    CTexturePtr CGfxTextureManager::InternCreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
         bool         ImageIsLoaded;
         void*        pBytes;
@@ -1456,20 +1414,31 @@ namespace
             // -----------------------------------------------------------------------------
             // Load texture from file (either in assets or data)
             // -----------------------------------------------------------------------------
-            std::string    PathToTexture;
+            std::string PathToTexture;
+
+            PathToTexture = Core::AssetManager::GetPathToAssets() + "/" + _rDescriptor.m_pFileName;
+
+#ifdef __ANDROID__
+            const char* pPathToTexture = 0;
+
+            pPathToTexture = PathToTexture.c_str();
+#else
             const wchar_t* pPathToTexture = 0;
 
-            PathToTexture = g_PathToAssets + _rDescriptor.m_pFileName;
-
             pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
-            
+#endif
+
             ImageIsLoaded = ilLoadImage(pPathToTexture) == IL_TRUE;
 
             if (!ImageIsLoaded)
             {
-                PathToTexture = g_PathToDataTextures + _rDescriptor.m_pFileName;
+                PathToTexture = Core::AssetManager::GetPathToData() + g_PathToDataTextures + _rDescriptor.m_pFileName;
 
+#ifdef __ANDROID__
+                pPathToTexture = PathToTexture.c_str();
+#else
                 pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
+#endif
 
                 ImageIsLoaded = ilLoadImage(pPathToTexture) == IL_TRUE;
             }
@@ -1478,7 +1447,7 @@ namespace
             {
                 NumberOfFaces = ilGetInteger(IL_NUM_FACES);
             }
-            
+
             if (ImageIsLoaded && NumberOfFaces == 5)
             {
                 ILenum CheckILFormat = ilGetInteger(IL_IMAGE_FORMAT);
@@ -1488,13 +1457,13 @@ namespace
                 {
                     ilConvertImage(NativeILFormat, NativeILType);
                 }
-                
+
                 pTextureData = ilGetData();
-                
+
                 ImageWidth    = ilGetInteger(IL_IMAGE_WIDTH);
                 ImageHeight   = ilGetInteger(IL_IMAGE_HEIGHT);
                 NumberOfBytes = ilGetInteger(IL_IMAGE_SIZE_OF_DATA);
-                
+
                 assert(ImageWidth    > 0);
                 assert(ImageHeight   > 0);
                 assert(NumberOfBytes > 0);
@@ -1519,30 +1488,32 @@ namespace
         // -----------------------------------------------------------------------------
         // Generate OpenGL texture or render buffer
         // -----------------------------------------------------------------------------
-		glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &NativeTextureHandle);
+        glGenTextures(1, &NativeTextureHandle);
 
-		// -----------------------------------------------------------------------------
-		// Label texture if file name exists
-		// -----------------------------------------------------------------------------
-		if (_rDescriptor.m_pFileName != nullptr)
-		{
-			glObjectLabel(GL_TEXTURE, NativeTextureHandle, -1, _rDescriptor.m_pFileName);
-		}
+        glBindTexture(GL_TEXTURE_CUBE_MAP, NativeTextureHandle);
+
+        // -----------------------------------------------------------------------------
+        // Label texture if file name exists
+        // -----------------------------------------------------------------------------
+        if (_rDescriptor.m_pFileName != nullptr)
+        {
+            glObjectLabel(GL_TEXTURE, NativeTextureHandle, -1, _rDescriptor.m_pFileName);
+        }
 
         // -----------------------------------------------------------------------------
         // Binding
         // -----------------------------------------------------------------------------
-        if (_rDescriptor.m_Binding & Gfx::CTextureBase::DepthStencilTarget)
+        if (_rDescriptor.m_Binding & Gfx::CTexture::DepthStencilTarget)
         {
-            glTextureStorage2D(NativeTextureHandle, NumberOfMipmaps, GL_DEPTH_COMPONENT32F, ImageWidth, ImageHeight);
+            glTexStorage2D(GL_TEXTURE_CUBE_MAP, NumberOfMipmaps, GL_DEPTH_COMPONENT32F, ImageWidth, ImageHeight);
         }
-        else if (_rDescriptor.m_Binding & Gfx::CTextureBase::RenderTarget)
+        else if (_rDescriptor.m_Binding & Gfx::CTexture::RenderTarget)
         {
-            glTextureStorage2D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
+            glTexStorage2D(GL_TEXTURE_CUBE_MAP, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
         }
         else
         {
-            glTextureStorage2D(NativeTextureHandle, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
+            glTexStorage2D(GL_TEXTURE_CUBE_MAP, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
         }
 
         // -----------------------------------------------------------------------------
@@ -1550,7 +1521,7 @@ namespace
         // -----------------------------------------------------------------------------
         if (ImageIsLoaded)
         {
-            for (ILuint IndexOfFace = 0; IndexOfFace <= NumberOfFaces; ++IndexOfFace)
+            for (unsigned int IndexOfFace = 0; IndexOfFace <= NumberOfFaces; ++IndexOfFace)
             {
                 ilBindImage(NativeImageName);
 
@@ -1573,7 +1544,7 @@ namespace
 
                 pTextureData = ilGetData();
 
-                glTextureSubImage3D(NativeTextureHandle, 0, 0, 0, IndexOfFace, ImageWidth, ImageHeight, 1, GLFormat, GLType, pTextureData);
+                glTexSubImage3D(GL_TEXTURE_CUBE_MAP, 0, 0, 0, IndexOfFace, ImageWidth, ImageHeight, 1, GLFormat, GLType, pTextureData);
             }
         }
 
@@ -1582,19 +1553,24 @@ namespace
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
         {
-            glGenerateTextureMipmap(NativeTextureHandle);
+            glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
         }
+
+        // -----------------------------------------------------------------------------
+        // Unbind
+        // -----------------------------------------------------------------------------
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
         // -----------------------------------------------------------------------------
         // Generate texture inside texture manager
         // -----------------------------------------------------------------------------
-        CTexture2DPtr Texture2DPtr = m_Textures2D.Allocate();
+        CTexturePtr Texture2DPtr = static_cast<CTexturePtr>(m_Textures.Allocate());
 
         assert(NumberOfBytes > 0);
 
         try
         {
-            CInternTexture2D& rTexture = *static_cast<CInternTexture2D*>(Texture2DPtr.GetPtr());
+            CInternTexture& rTexture = *static_cast<CInternTexture*>(Texture2DPtr.GetPtr());
             
             // -----------------------------------------------------------------------------
             // Setup the new texture inside manager
@@ -1602,13 +1578,13 @@ namespace
             if (_rDescriptor.m_pFileName != 0) rTexture.m_FileName = _rDescriptor.m_pFileName;
 
             rTexture.m_pPixels           = _rDescriptor.m_pPixels;
-            rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTextureBase::BPixels>(ImageWidth);
-            rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTextureBase::BPixels>(ImageHeight);
+            rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTexture::BPixels>(ImageWidth);
+            rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTexture::BPixels>(ImageHeight);
             rTexture.m_Hash              = 0;
             
             rTexture.m_Info.m_Access            = _rDescriptor.m_Access;
             rTexture.m_Info.m_Binding           = _rDescriptor.m_Binding;
-            rTexture.m_Info.m_Dimension         = CTextureBase::Dim2D;
+            rTexture.m_Info.m_Dimension         = CTexture::Dim2D;
             rTexture.m_Info.m_Format            = _rDescriptor.m_Format;
             rTexture.m_Info.m_IsCubeTexture     = true;
             rTexture.m_Info.m_IsDeletable       = _IsDeleteable;
@@ -1622,7 +1598,7 @@ namespace
             rTexture.m_NativeTexture        = NativeTextureHandle;
             rTexture.m_NativeUsage          = GLUsage;
             rTexture.m_NativeInternalFormat = GLInternalFormat;
-            rTexture.m_NativeDimension      = GL_TEXTURE_2D;
+            rTexture.m_NativeBinding        = GL_TEXTURE_CUBE_MAP;
             
             // -----------------------------------------------------------------------------
             // Check the behavior.
@@ -1707,7 +1683,7 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    int CGfxTextureManager::ConvertGLFormatToBytesPerPixel(Gfx::CTextureBase::EFormat _Format) const
+    int CGfxTextureManager::ConvertGLFormatToBytesPerPixel(Gfx::CTexture::EFormat _Format) const
     {
         static int s_NativeFormat[] =
         {
@@ -1789,7 +1765,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    int CGfxTextureManager::ConvertGLImageUsage(Gfx::CTextureBase::EUsage _Usage) const
+    int CGfxTextureManager::ConvertGLImageUsage(Gfx::CTexture::EUsage _Usage) const
     {
         static int s_NativeUsage[] =
         {
@@ -1804,7 +1780,7 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    int CGfxTextureManager::ConvertGLInternalImageFormat(Gfx::CTextureBase::EFormat _Format) const
+    int CGfxTextureManager::ConvertGLInternalImageFormat(Gfx::CTexture::EFormat _Format) const
     {
         static int s_NativeFormat[] =
         {
@@ -1833,22 +1809,22 @@ namespace
             GL_RGB8UI,
             GL_RGBA8UI,
             
-            GL_R16,
-            GL_RG16,
-            GL_RGB16,
-            GL_RGBA16,
-            GL_R16,
-            GL_RG16,
-            GL_RGB16,
-            GL_RGBA16,
-            GL_R16,
-            GL_RG16,
-            GL_RGB16,
-            GL_RGBA16,
-            GL_R16,
-            GL_RG16,
-            GL_RGB16,
-            GL_RGBA16,
+            GL_NONE, //GL_R16,
+            GL_NONE, //GL_RG16,
+            GL_NONE, //GL_RGB16,
+            GL_NONE, //GL_RGBA16,
+            GL_NONE, //GL_R16,
+            GL_NONE, //GL_RG16,
+            GL_NONE, //GL_RGB16,
+            GL_NONE, //GL_RGBA16,
+            GL_NONE, //GL_R16,
+            GL_NONE, //GL_RG16,
+            GL_NONE, //GL_RGB16,
+            GL_NONE, //GL_RGBA16,
+            GL_NONE, //GL_R16,
+            GL_NONE, //GL_RG16,
+            GL_NONE, //GL_RGB16,
+            GL_NONE, //GL_RGBA16,
             GL_R16I,
             GL_RG16I,
             GL_RGB16I,
@@ -1875,7 +1851,7 @@ namespace
             GL_RGB32F,
             GL_RGBA32F,
             
-            GL_R3_G3_B2,
+            GL_NONE, //GL_R3_G3_B2,
             GL_RGBA4,
             GL_RGB5_A1,
             GL_RGB10_A2,
@@ -1886,7 +1862,7 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    int CGfxTextureManager::ConvertGLImageFormat(Gfx::CTextureBase::EFormat _Format) const
+    int CGfxTextureManager::ConvertGLImageFormat(Gfx::CTexture::EFormat _Format) const
     {
         static int s_NativeFormat[] =
         {
@@ -1968,7 +1944,7 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    int CGfxTextureManager::ConvertGLImageType(Gfx::CTextureBase::EFormat _Format) const
+    int CGfxTextureManager::ConvertGLImageType(Gfx::CTexture::EFormat _Format) const
     {
         static int s_NativeType[] =
         {
@@ -2039,10 +2015,10 @@ namespace
             GL_FLOAT,
             GL_FLOAT,
             
-            GL_UNSIGNED_BYTE_3_3_2,
+            GL_NONE, //GL_UNSIGNED_BYTE_3_3_2,
             GL_UNSIGNED_SHORT_4_4_4_4,
             GL_UNSIGNED_SHORT_5_5_5_1,
-            GL_UNSIGNED_INT_10_10_10_2,
+            GL_NONE, //GL_UNSIGNED_INT_10_10_10_2,
         };
         
         return s_NativeType[_Format];
@@ -2050,7 +2026,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    ILenum CGfxTextureManager::ConvertILImageFormat(Gfx::CTextureBase::EFormat _Format) const
+    ILenum CGfxTextureManager::ConvertILImageFormat(Gfx::CTexture::EFormat _Format) const
     {
         static ILenum s_NativeFormat[] =
         {
@@ -2132,7 +2108,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    ILenum CGfxTextureManager::ConvertILImageType(Gfx::CTextureBase::EFormat _Format) const
+    ILenum CGfxTextureManager::ConvertILImageType(Gfx::CTexture::EFormat _Format) const
     {
         static int s_NativeType[] =
         {
@@ -2214,13 +2190,13 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    Gfx::CTextureBase::EDimension CGfxTextureManager::ConvertDataDimension(Dt::CTextureBase::EDimension _Dimension)
+    Gfx::CTexture::EDimension CGfxTextureManager::ConvertDataDimension(Dt::CTextureBase::EDimension _Dimension)
     {
-        static Gfx::CTextureBase::EDimension s_Types[] =
+        static Gfx::CTexture::EDimension s_Types[] =
         {
-            Gfx::CTextureBase::Dim1D,
-            Gfx::CTextureBase::Dim2D,
-            Gfx::CTextureBase::Dim3D,
+            Gfx::CTexture::Dim1D,
+            Gfx::CTexture::Dim2D,
+            Gfx::CTexture::Dim3D,
         };
 
         return s_Types[_Dimension];
@@ -2228,81 +2204,81 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    Gfx::CTextureBase::EFormat CGfxTextureManager::ConvertDataFormat(Dt::CTextureBase::EFormat _Format)
+    Gfx::CTexture::EFormat CGfxTextureManager::ConvertDataFormat(Dt::CTextureBase::EFormat _Format)
     {
-        static Gfx::CTextureBase::EFormat s_Types[] =
+        static Gfx::CTexture::EFormat s_Types[] =
         {
-            Gfx::CTextureBase::R8_BYTE,
-            Gfx::CTextureBase::R8G8_BYTE,
-            Gfx::CTextureBase::R8G8B8_BYTE,
-            Gfx::CTextureBase::R8G8B8A8_BYTE,
-            Gfx::CTextureBase::R8_UBYTE,
-            Gfx::CTextureBase::R8G8_UBYTE,
-            Gfx::CTextureBase::R8G8B8_UBYTE,
-            Gfx::CTextureBase::R8G8B8A8_UBYTE,
-            Gfx::CTextureBase::R8_SHORT,
-            Gfx::CTextureBase::R8G8_SHORT,
-            Gfx::CTextureBase::R8G8B8_SHORT,
-            Gfx::CTextureBase::R8G8B8A8_SHORT,
-            Gfx::CTextureBase::R8_USHORT,
-            Gfx::CTextureBase::R8G8_USHORT,
-            Gfx::CTextureBase::R8G8B8_USHORT,
-            Gfx::CTextureBase::R8G8B8A8_USHORT,
-            Gfx::CTextureBase::R8_INT,
-            Gfx::CTextureBase::R8G8_INT,
-            Gfx::CTextureBase::R8G8B8_INT,
-            Gfx::CTextureBase::R8G8B8A8_INT,
-            Gfx::CTextureBase::R8_UINT,
-            Gfx::CTextureBase::R8G8_UINT,
-            Gfx::CTextureBase::R8G8B8_UINT,
-            Gfx::CTextureBase::R8G8B8A8_UINT,
+            Gfx::CTexture::R8_BYTE,
+            Gfx::CTexture::R8G8_BYTE,
+            Gfx::CTexture::R8G8B8_BYTE,
+            Gfx::CTexture::R8G8B8A8_BYTE,
+            Gfx::CTexture::R8_UBYTE,
+            Gfx::CTexture::R8G8_UBYTE,
+            Gfx::CTexture::R8G8B8_UBYTE,
+            Gfx::CTexture::R8G8B8A8_UBYTE,
+            Gfx::CTexture::R8_SHORT,
+            Gfx::CTexture::R8G8_SHORT,
+            Gfx::CTexture::R8G8B8_SHORT,
+            Gfx::CTexture::R8G8B8A8_SHORT,
+            Gfx::CTexture::R8_USHORT,
+            Gfx::CTexture::R8G8_USHORT,
+            Gfx::CTexture::R8G8B8_USHORT,
+            Gfx::CTexture::R8G8B8A8_USHORT,
+            Gfx::CTexture::R8_INT,
+            Gfx::CTexture::R8G8_INT,
+            Gfx::CTexture::R8G8B8_INT,
+            Gfx::CTexture::R8G8B8A8_INT,
+            Gfx::CTexture::R8_UINT,
+            Gfx::CTexture::R8G8_UINT,
+            Gfx::CTexture::R8G8B8_UINT,
+            Gfx::CTexture::R8G8B8A8_UINT,
 
-            Gfx::CTextureBase::R16_BYTE,
-            Gfx::CTextureBase::R16G16_BYTE,
-            Gfx::CTextureBase::R16G16B16_BYTE,
-            Gfx::CTextureBase::R16G16B16A16_BYTE,
-            Gfx::CTextureBase::R16_UBYTE,
-            Gfx::CTextureBase::R16G16_UBYTE,
-            Gfx::CTextureBase::R16G16B16_UBYTE,
-            Gfx::CTextureBase::R16G16B16A16_UBYTE,
-            Gfx::CTextureBase::R16_SHORT,
-            Gfx::CTextureBase::R16G16_SHORT,
-            Gfx::CTextureBase::R16G16B16_SHORT,
-            Gfx::CTextureBase::R16G16B16A16_SHORT,
-            Gfx::CTextureBase::R16_USHORT,
-            Gfx::CTextureBase::R16G16_USHORT,
-            Gfx::CTextureBase::R16G16B16_USHORT,
-            Gfx::CTextureBase::R16G16B16A16_USHORT,
-            Gfx::CTextureBase::R16_INT,
-            Gfx::CTextureBase::R16G16_INT,
-            Gfx::CTextureBase::R16G16B16_INT,
-            Gfx::CTextureBase::R16G16B16A16_INT,
-            Gfx::CTextureBase::R16_UINT,
-            Gfx::CTextureBase::R16G16_UINT,
-            Gfx::CTextureBase::R16G16B16_UINT,
-            Gfx::CTextureBase::R16G16B16A16_UINT,
-            Gfx::CTextureBase::R16_FLOAT,
-            Gfx::CTextureBase::R16G16_FLOAT,
-            Gfx::CTextureBase::R16G16B16_FLOAT,
-            Gfx::CTextureBase::R16G16B16A16_FLOAT,
+            Gfx::CTexture::R16_BYTE,
+            Gfx::CTexture::R16G16_BYTE,
+            Gfx::CTexture::R16G16B16_BYTE,
+            Gfx::CTexture::R16G16B16A16_BYTE,
+            Gfx::CTexture::R16_UBYTE,
+            Gfx::CTexture::R16G16_UBYTE,
+            Gfx::CTexture::R16G16B16_UBYTE,
+            Gfx::CTexture::R16G16B16A16_UBYTE,
+            Gfx::CTexture::R16_SHORT,
+            Gfx::CTexture::R16G16_SHORT,
+            Gfx::CTexture::R16G16B16_SHORT,
+            Gfx::CTexture::R16G16B16A16_SHORT,
+            Gfx::CTexture::R16_USHORT,
+            Gfx::CTexture::R16G16_USHORT,
+            Gfx::CTexture::R16G16B16_USHORT,
+            Gfx::CTexture::R16G16B16A16_USHORT,
+            Gfx::CTexture::R16_INT,
+            Gfx::CTexture::R16G16_INT,
+            Gfx::CTexture::R16G16B16_INT,
+            Gfx::CTexture::R16G16B16A16_INT,
+            Gfx::CTexture::R16_UINT,
+            Gfx::CTexture::R16G16_UINT,
+            Gfx::CTexture::R16G16B16_UINT,
+            Gfx::CTexture::R16G16B16A16_UINT,
+            Gfx::CTexture::R16_FLOAT,
+            Gfx::CTexture::R16G16_FLOAT,
+            Gfx::CTexture::R16G16B16_FLOAT,
+            Gfx::CTexture::R16G16B16A16_FLOAT,
 
-            Gfx::CTextureBase::R32_INT,
-            Gfx::CTextureBase::R32G32_INT,
-            Gfx::CTextureBase::R32G32B32_INT,
-            Gfx::CTextureBase::R32G32B32A32_INT,
-            Gfx::CTextureBase::R32_UINT,
-            Gfx::CTextureBase::R32G32_UINT,
-            Gfx::CTextureBase::R32G32B32_UINT,
-            Gfx::CTextureBase::R32G32B32A32_UINT,
-            Gfx::CTextureBase::R32_FLOAT,
-            Gfx::CTextureBase::R32G32_FLOAT,
-            Gfx::CTextureBase::R32G32B32_FLOAT,
-            Gfx::CTextureBase::R32G32B32A32_FLOAT,
+            Gfx::CTexture::R32_INT,
+            Gfx::CTexture::R32G32_INT,
+            Gfx::CTexture::R32G32B32_INT,
+            Gfx::CTexture::R32G32B32A32_INT,
+            Gfx::CTexture::R32_UINT,
+            Gfx::CTexture::R32G32_UINT,
+            Gfx::CTexture::R32G32B32_UINT,
+            Gfx::CTexture::R32G32B32A32_UINT,
+            Gfx::CTexture::R32_FLOAT,
+            Gfx::CTexture::R32G32_FLOAT,
+            Gfx::CTexture::R32G32B32_FLOAT,
+            Gfx::CTexture::R32G32B32A32_FLOAT,
 
-            Gfx::CTextureBase::R3G3B2_UBYTE,
-            Gfx::CTextureBase::R4G4B4A4_USHORT,
-            Gfx::CTextureBase::R5G5G5A1_USHORT,
-            Gfx::CTextureBase::R10G10B10A2_UINT,
+            Gfx::CTexture::R3G3B2_UBYTE,
+            Gfx::CTexture::R4G4B4A4_USHORT,
+            Gfx::CTexture::R5G5G5A1_USHORT,
+            Gfx::CTexture::R10G10B10A2_UINT,
         };
 
         return s_Types[_Format];
@@ -2310,14 +2286,14 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    Gfx::CTextureBase::ESemantic CGfxTextureManager::ConvertDataSemantic(Dt::CTextureBase::ESemantic _Semantic)
+    Gfx::CTexture::ESemantic CGfxTextureManager::ConvertDataSemantic(Dt::CTextureBase::ESemantic _Semantic)
     {
-        static Gfx::CTextureBase::ESemantic s_Types[] =
+        static Gfx::CTexture::ESemantic s_Types[] =
         {
-            Gfx::CTextureBase::Diffuse,
-            Gfx::CTextureBase::Normal,
-            Gfx::CTextureBase::Height,
-            Gfx::CTextureBase::Diffuse,
+            Gfx::CTexture::Diffuse,
+            Gfx::CTexture::Normal,
+            Gfx::CTexture::Height,
+            Gfx::CTexture::Diffuse,
         };
 
         return s_Types[_Semantic];
@@ -2331,17 +2307,17 @@ namespace
 
         if ((_Binding & Dt::CTextureBase::ShaderResource) != 0)
         {
-            Binding |= Gfx::CTextureBase::ShaderResource;
+            Binding |= Gfx::CTexture::ShaderResource;
         }
         
         if ((_Binding & Dt::CTextureBase::RenderTarget) != 0)
         {
-            Binding |= Gfx::CTextureBase::RenderTarget;
+            Binding |= Gfx::CTexture::RenderTarget;
         }
 
         if ((_Binding & Dt::CTextureBase::DepthStencilTarget) != 0)
         {
-            Binding |= Gfx::CTextureBase::DepthStencilTarget;
+            Binding |= Gfx::CTexture::DepthStencilTarget;
         }
 
         return Binding;
@@ -2350,46 +2326,14 @@ namespace
 
 namespace
 {
-    CGfxTextureManager::CInternTexture1D::CInternTexture1D()
-        : CTexture1D()
+    CGfxTextureManager::CInternTexture::CInternTexture()
+        : CNativeTexture()
     {
     }
 
     // -----------------------------------------------------------------------------
 
-    CGfxTextureManager::CInternTexture1D::~CInternTexture1D()
-    {
-    }
-} // namespace
-
-namespace
-{
-    CGfxTextureManager::CInternTexture2D::CInternTexture2D()
-        : CNativeTexture2D()
-    {
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CGfxTextureManager::CInternTexture2D::~CInternTexture2D()
-    {
-        if (m_Info.m_IsDeletable)
-        {
-            glDeleteTextures(1, &m_NativeTexture);
-        }
-    }
-} // namespace
-
-namespace
-{
-    CGfxTextureManager::CInternTexture3D::CInternTexture3D()
-        : CNativeTexture3D()
-    {
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CGfxTextureManager::CInternTexture3D::~CInternTexture3D()
+    CGfxTextureManager::CInternTexture::~CInternTexture()
     {
         if (m_Info.m_IsDeletable)
         {
@@ -2488,192 +2432,171 @@ namespace TextureManager
 
     // -----------------------------------------------------------------------------
 
-    CTexture1DPtr GetDummyTexture1D()
+    CTexturePtr GetDummyTexture1D()
     {
         return CGfxTextureManager::GetInstance().GetDummyTexture1D();
     }
 
     // -----------------------------------------------------------------------------
 
-    CTexture2DPtr GetDummyTexture2D()
+    CTexturePtr GetDummyTexture2D()
     {
         return CGfxTextureManager::GetInstance().GetDummyTexture2D();
     }
 
     // -----------------------------------------------------------------------------
 
-    CTexture3DPtr GetDummyTexture3D()
+    CTexturePtr GetDummyTexture3D()
     {
         return CGfxTextureManager::GetInstance().GetDummyTexture3D();
     }
 
     // -----------------------------------------------------------------------------
 
-    CTexture2DPtr GetDummyCubeTexture()
+    CTexturePtr GetDummyCubeTexture()
     {
         return CGfxTextureManager::GetInstance().GetDummyCubeTexture();
     }
 
     // -----------------------------------------------------------------------------
 
-    CTexture1DPtr CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
+    CTexturePtr CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
         return CGfxTextureManager::GetInstance().CreateTexture1D(_rDescriptor, _IsDeleteable, _Behavior);
     }
 
     // -----------------------------------------------------------------------------
 
-    CTexture2DPtr CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
+    CTexturePtr CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
         return CGfxTextureManager::GetInstance().CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior);
     }
 
     // -----------------------------------------------------------------------------
 
-    CTexture3DPtr CreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
+    CTexturePtr CreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
         return CGfxTextureManager::GetInstance().CreateTexture3D(_rDescriptor, _IsDeleteable, _Behavior);
     }
 
     // -----------------------------------------------------------------------------
 
-    CTexture2DPtr CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
+    CTexturePtr CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
         return CGfxTextureManager::GetInstance().CreateCubeTexture(_rDescriptor, _IsDeleteable, _Behavior);
     }
 
     // -----------------------------------------------------------------------------
 
-    CTextureSetPtr CreateTextureSet(CTextureBasePtr _Texture1Ptr)
+    CTextureSetPtr CreateTextureSet(CTexturePtr _Texture1Ptr)
     {
-        CTextureBasePtr TexturePtrs[] = { _Texture1Ptr, };
+        CTexturePtr TexturePtrs[] = { _Texture1Ptr, };
 
         return CGfxTextureManager::GetInstance().CreateTextureSet(TexturePtrs, 1);
     }
 
     // -----------------------------------------------------------------------------
 
-    CTextureSetPtr CreateTextureSet(CTextureBasePtr _Texture1Ptr, CTextureBasePtr _Texture2Ptr)
+    CTextureSetPtr CreateTextureSet(CTexturePtr _Texture1Ptr, CTexturePtr _Texture2Ptr)
     {
-        CTextureBasePtr TexturePtrs[] = { _Texture1Ptr, _Texture2Ptr, };
+        CTexturePtr TexturePtrs[] = { _Texture1Ptr, _Texture2Ptr, };
 
         return CGfxTextureManager::GetInstance().CreateTextureSet(TexturePtrs, 2);
     }
 
     // -----------------------------------------------------------------------------
 
-    CTextureSetPtr CreateTextureSet(CTextureBasePtr _Texture1Ptr, CTextureBasePtr _Texture2Ptr, CTextureBasePtr _Texture3Ptr)
+    CTextureSetPtr CreateTextureSet(CTexturePtr _Texture1Ptr, CTexturePtr _Texture2Ptr, CTexturePtr _Texture3Ptr)
     {
-        CTextureBasePtr TexturePtrs[] = { _Texture1Ptr, _Texture2Ptr, _Texture3Ptr, };
+        CTexturePtr TexturePtrs[] = { _Texture1Ptr, _Texture2Ptr, _Texture3Ptr, };
 
         return CGfxTextureManager::GetInstance().CreateTextureSet(TexturePtrs, 3);
     }
 
     // -----------------------------------------------------------------------------
 
-    CTextureSetPtr CreateTextureSet(CTextureBasePtr _Texture1Ptr, CTextureBasePtr _Texture2Ptr, CTextureBasePtr _Texture3Ptr, CTextureBasePtr _Texture4Ptr)
+    CTextureSetPtr CreateTextureSet(CTexturePtr _Texture1Ptr, CTexturePtr _Texture2Ptr, CTexturePtr _Texture3Ptr, CTexturePtr _Texture4Ptr)
     {
-        CTextureBasePtr TexturePtrs[] = { _Texture1Ptr, _Texture2Ptr, _Texture3Ptr, _Texture4Ptr, };
+        CTexturePtr TexturePtrs[] = { _Texture1Ptr, _Texture2Ptr, _Texture3Ptr, _Texture4Ptr, };
 
         return CGfxTextureManager::GetInstance().CreateTextureSet(TexturePtrs, 4);
     }
 
     // -----------------------------------------------------------------------------
 
-    CTextureSetPtr CreateTextureSet(CTextureBasePtr* _pTexturePtrs, unsigned int _NumberOfTextures)
+    CTextureSetPtr CreateTextureSet(CTexturePtr* _pTexturePtrs, unsigned int _NumberOfTextures)
     {
         return CGfxTextureManager::GetInstance().CreateTextureSet(_pTexturePtrs, _NumberOfTextures);
     }
 
     // -----------------------------------------------------------------------------
 
-    CTexture1DPtr GetTexture1DByHash(unsigned int _Hash)
+    CTexturePtr GetTextureByHash(unsigned int _Hash)
     {
-        return CGfxTextureManager::GetInstance().GetTexture1DByHash(_Hash);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CTexture2DPtr GetTexture2DByHash(unsigned int _Hash)
-    {
-        return CGfxTextureManager::GetInstance().GetTexture2DByHash(_Hash);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CTexture3DPtr GetTexture3DByHash(unsigned int _Hash)
-    {
-        return CGfxTextureManager::GetInstance().GetTexture3DByHash(_Hash);
+        return CGfxTextureManager::GetInstance().GetTextureByHash(_Hash);
     }
     
     // -----------------------------------------------------------------------------
 
-    void ClearTexture1D(CTexture1DPtr _TexturePtr, const Base::Float4& _rColor)
+    void ClearTexture1D(CTexturePtr _TexturePtr, const Base::Float4& _rColor)
     {
         CGfxTextureManager::GetInstance().ClearTexture1D(_TexturePtr, _rColor);
     }
 
     // -----------------------------------------------------------------------------
 
-    void ClearTexture2D(CTexture2DPtr _TexturePtr, const Base::Float4& _rColor)
+    void ClearTexture2D(CTexturePtr _TexturePtr, const Base::Float4& _rColor)
     {
         CGfxTextureManager::GetInstance().ClearTexture2D(_TexturePtr, _rColor);
     }
 
     // -----------------------------------------------------------------------------
 
-    void ClearTexture3D(CTexture3DPtr _TexturePtr, const Base::Float4& _rColor)
+    void ClearTexture3D(CTexturePtr _TexturePtr, const Base::Float4& _rColor)
     {
         CGfxTextureManager::GetInstance().ClearTexture3D(_TexturePtr, _rColor);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CopyToTexture2D(CTexture2DPtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels)
+    void CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels)
     {
         CGfxTextureManager::GetInstance().CopyToTexture2D(_TexturePtr, _rTargetRect, _NumberOfBytesPerLine, _pBytes, _UpdateMipLevels);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CopyToTextureArray2D(CTexture2DPtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels)
+    void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels)
     {
         CGfxTextureManager::GetInstance().CopyToTextureArray2D(_TextureArrayPtr, _IndexOfSlice, _rTargetRect, _NumberOfBytesPerLine, _pBytes, _UpdateMipLevels);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CopyToTextureArray2D(CTexture2DPtr _TextureArrayPtr, unsigned int _IndexOfSlice, CTexture2DPtr _TexturePtr, bool _UpdateMipLevels)
+    void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, CTexturePtr _TexturePtr, bool _UpdateMipLevels)
     {
         CGfxTextureManager::GetInstance().CopyToTextureArray2D(_TextureArrayPtr, _IndexOfSlice, _TexturePtr, _UpdateMipLevels);
     }
 
     // -----------------------------------------------------------------------------
 
-    CTexture2DPtr GetMipmapFromTexture2D(CTexture2DPtr _TexturePtr, unsigned int _Mipmap)
+    CTexturePtr GetMipmapFromTexture2D(CTexturePtr _TexturePtr, unsigned int _Mipmap)
     {
         return CGfxTextureManager::GetInstance().GetMipmapFromTexture2D(_TexturePtr, _Mipmap);
     }
     
     // -----------------------------------------------------------------------------
     
-    void UpdateMipmap(CTexture2DPtr _TexturePtr)
+    void UpdateMipmap(CTexturePtr _TexturePtr)
     {
         CGfxTextureManager::GetInstance().UpdateMipmap(_TexturePtr);
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void SetTexture2DLabel(CTexture2DPtr _TexturePtr, const char* _pLabel)
-	{
-		CGfxTextureManager::GetInstance().SetTexture2DLabel(_TexturePtr, _pLabel);
-	}
-
-	// -----------------------------------------------------------------------------
-
-	void SetTexture3DLabel(CTexture3DPtr _TexturePtr, const char* _pLabel)
-	{
-		CGfxTextureManager::GetInstance().SetTexture3DLabel(_TexturePtr, _pLabel);
-	}
+    void SetTextureLabel(CTexturePtr _TexturePtr, const char* _pLabel)
+    {
+        CGfxTextureManager::GetInstance().SetTextureLabel(_TexturePtr, _pLabel);
+    }
 } // namespace TextureManager
 } // namespace Gfx

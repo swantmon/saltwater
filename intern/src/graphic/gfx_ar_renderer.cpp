@@ -30,9 +30,9 @@
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
 
-#include "mr/mr_control_manager.h"
-#include "mr/mr_kinect_control.h"
-#include "mr/mr_webcam_control.h"
+// #include "mr/mr_control_manager.h"
+// #include "mr/mr_kinect_control.h"
+// #include "mr/mr_webcam_control.h"
 
 using namespace Gfx;
 
@@ -121,10 +121,10 @@ namespace
         CShaderPtr m_DifferentialGBufferShaderPSPtr;
         CShaderPtr m_HitProxyShaderPtr;
 
-        CTexture2DPtr m_BackgroundTexturePtr;
-        CTexture2DPtr m_VSPositionTexturePtr;
-        CTexture2DPtr m_VSPositionTempTexturePtr;
-        CTexture2DPtr m_WebcamTexturePtr;
+        CTexturePtr m_BackgroundTexturePtr;
+        CTexturePtr m_VSPositionTexturePtr;
+        CTexturePtr m_VSPositionTempTexturePtr;
+        CTexturePtr m_WebcamTexturePtr;
 
         CRenderJobs m_RenderJobs;
 
@@ -295,14 +295,14 @@ namespace
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding          = CTextureBase::ShaderResource;
-        TextureDescriptor.m_Access           = CTextureBase::CPUWrite;
-        TextureDescriptor.m_Format           = CTextureBase::Unknown;
-        TextureDescriptor.m_Usage            = CTextureBase::GPURead;
-        TextureDescriptor.m_Semantic         = CTextureBase::Diffuse;
+        TextureDescriptor.m_Binding          = CTexture::ShaderResource;
+        TextureDescriptor.m_Access           = CTexture::CPUWrite;
+        TextureDescriptor.m_Format           = CTexture::Unknown;
+        TextureDescriptor.m_Usage            = CTexture::GPURead;
+        TextureDescriptor.m_Semantic         = CTexture::Diffuse;
         TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = CTextureBase::R8G8B8_UBYTE;
+        TextureDescriptor.m_Format           = CTexture::R8G8B8_UBYTE;
         
         m_WebcamTexturePtr     = TextureManager::CreateTexture2D(TextureDescriptor);
         
@@ -310,7 +310,7 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        TextureDescriptor.m_Format = CTextureBase::R32G32B32_FLOAT;
+        TextureDescriptor.m_Format = CTexture::R32G32B32_FLOAT;
 
         m_VSPositionTexturePtr     = TextureManager::CreateTexture2D(TextureDescriptor);
 
@@ -424,276 +424,276 @@ namespace
 
     void CGfxARRenderer::Update()
     {
-        if (!MR::ControlManager::IsActive()) return;
+        /*if (!MR::ControlManager::IsActive()) return;*/
 
         // -----------------------------------------------------------------------------
         // Set render jobs depending on camera. At the end we have to iterate throw
         // the map only once. Then we can order the render jobs and we get as less
         // state changes as possible.
         // -----------------------------------------------------------------------------
-        BuildRenderJobs();
+        //BuildRenderJobs();
 
         // -----------------------------------------------------------------------------
         // Check if camera has video output
         // -----------------------------------------------------------------------------
-        MR::CControl* pControl = MR::ControlManager::GetActiveControl();
-
-        if (pControl != nullptr && pControl->GetType() == MR::CControl::Webcam)
-        {
-            MR::CWebcamControl& rWebcamControl = static_cast<MR::CWebcamControl&>(*pControl);
-
-            if (rWebcamControl.GetConvertedFrame()->GetPixels() != nullptr)
-            {
-                // -----------------------------------------------------------------------------
-                // Upload to texture on graphic card
-                // TODO: Target rectangle should be variable
-                // TODO: Use image from main camera?
-                // -----------------------------------------------------------------------------
-                Base::AABB2UInt TargetRect(Base::UInt2(0), Base::UInt2(1280, 720));
-
-                TextureManager::CopyToTexture2D(m_WebcamTexturePtr, TargetRect, TargetRect[1][0], rWebcamControl.GetConvertedFrame()->GetPixels());
-            }
-        }
-        else if (pControl != nullptr && pControl->GetType() == MR::CControl::Kinect)
-        {
-            // -----------------------------------------------------------------------------
-            // Copy data from kinect
-            // TODO: It is generally outdated because of the branch of ckunert and should
-            // be edited according to his work.
-            // -----------------------------------------------------------------------------
-            //MR::CKinectControl& rKinectControl = static_cast<MR::CKinectControl&>(*pControl);
-            //
-            //Base::AABB2UInt TargetRect(Base::UInt2(0), Base::UInt2(1280, 720));
-            //
-            //TextureManager::CopyToTexture2D(m_BackgroundTexturePtr, TargetRect, TargetRect[1][0], rKinectControl.GetConvertedFrame()->GetPixels());
-            //
-            //TextureManager::CopyToTexture2D(m_VSPositionTexturePtr, TargetRect, TargetRect[1][0], rKinectControl.GetConvertedDepthFrame());
-            //
-            //TextureManager::CopyToTexture2D(m_WebcamTexturePtr, TargetRect, TargetRect[1][0], rKinectControl.GetConvertedFrame()->GetPixels());
-        }
+//         MR::CControl* pControl = MR::ControlManager::GetActiveControl();
+// 
+//         if (pControl != nullptr && pControl->GetType() == MR::CControl::Webcam)
+//         {
+//             MR::CWebcamControl& rWebcamControl = static_cast<MR::CWebcamControl&>(*pControl);
+// 
+//             if (rWebcamControl.GetConvertedFrame()->GetPixels() != nullptr)
+//             {
+//                 // -----------------------------------------------------------------------------
+//                 // Upload to texture on graphic card
+//                 // TODO: Target rectangle should be variable
+//                 // TODO: Use image from main camera?
+//                 // -----------------------------------------------------------------------------
+//                 Base::AABB2UInt TargetRect(Base::UInt2(0), Base::UInt2(1280, 720));
+// 
+//                 TextureManager::CopyToTexture2D(m_WebcamTexturePtr, TargetRect, TargetRect[1][0], rWebcamControl.GetConvertedFrame()->GetPixels());
+//             }
+//         }
+//         else if (pControl != nullptr && pControl->GetType() == MR::CControl::Kinect)
+//         {
+//             // -----------------------------------------------------------------------------
+//             // Copy data from kinect
+//             // TODO: It is generally outdated because of the branch of ckunert and should
+//             // be edited according to his work.
+//             // -----------------------------------------------------------------------------
+//             MR::CKinectControl& rKinectControl = static_cast<MR::CKinectControl&>(*pControl);
+// 
+//             Base::AABB2UInt TargetRect(Base::UInt2(0), Base::UInt2(1280, 720));
+// 
+//             TextureManager::CopyToTexture2D(m_BackgroundTexturePtr, TargetRect, TargetRect[1][0], rKinectControl.GetConvertedFrame()->GetPixels());
+// 
+//             TextureManager::CopyToTexture2D(m_VSPositionTexturePtr, TargetRect, TargetRect[1][0], rKinectControl.GetConvertedDepthFrame());
+// 
+//             TextureManager::CopyToTexture2D(m_WebcamTexturePtr, TargetRect, TargetRect[1][0], rKinectControl.GetConvertedFrame()->GetPixels());
+//         }
     }
 
     // -----------------------------------------------------------------------------
 
     void CGfxARRenderer::Render()
     {
-        if (!MR::ControlManager::IsActive()) return;
-
-        Performance::BeginEvent("AR");
-
-        
-
-        MR::CControl* pControl = MR::ControlManager::GetActiveControl();
-
-        // -----------------------------------------------------------------------------
-
-        if (m_RenderJobs.size() > 0)
-        {
-            Performance::BeginEvent("Local Scene to GBuffer");
-
-            // -----------------------------------------------------------------------------
-            // Prepare renderer
-            // -----------------------------------------------------------------------------
-            ContextManager::SetRenderContext(m_DeferredRenderContextPtr);
-
-            // -----------------------------------------------------------------------------
-            // First pass: iterate throw render jobs and compute all meshes
-            // -----------------------------------------------------------------------------
-            CRenderJobs::const_iterator EndOfRenderJobs = m_RenderJobs.end();
-
-            for (CRenderJobs::const_iterator CurrentRenderJob = m_RenderJobs.begin(); CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
-            {
-                CSurfacePtr SurfacePtr = CurrentRenderJob->m_SurfacePtr;
-
-                // -----------------------------------------------------------------------------
-                // Upload data to buffer
-                // -----------------------------------------------------------------------------
-                SPerDrawCallConstantBufferVS ModelBuffer;
-
-                ModelBuffer.m_ModelMatrix = CurrentRenderJob->m_ModelMatrix;
-
-                BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
-
-                BufferManager::UploadBufferData(m_MaterialPSBufferPtr, &CurrentRenderJob->m_SurfaceMaterialPtr->GetMaterialAttributes());
-
-                // -----------------------------------------------------------------------------
-                // Render
-                // -----------------------------------------------------------------------------
-                ContextManager::SetTopology(STopology::TriangleList);
-
-                ContextManager::SetShaderVS(SurfacePtr->GetShaderVS());
-
-                ContextManager::SetShaderPS(m_DifferentialGBufferShaderPSPtr);
-
-                ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-                ContextManager::SetConstantBuffer(1, m_ModelBufferPtr);
-                ContextManager::SetConstantBuffer(2, m_MaterialPSBufferPtr);
-
-                // -----------------------------------------------------------------------------
-                // Set items to context manager
-                // -----------------------------------------------------------------------------
-                ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
-
-                ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
-
-                ContextManager::SetInputLayout(SurfacePtr->GetShaderVS()->GetInputLayout());
-
-                ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
-
-                ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_WebcamTexturePtr));
-
-                ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
-
-                ContextManager::ResetTexture(0);
-
-                ContextManager::ResetSampler(0);
-
-                ContextManager::ResetInputLayout();
-
-                ContextManager::ResetIndexBuffer();
-
-                ContextManager::ResetVertexBuffer();
-
-                ContextManager::ResetConstantBuffer(0);
-                ContextManager::ResetConstantBuffer(1);
-                ContextManager::ResetConstantBuffer(2);
-            }
-
-            ContextManager::ResetSampler(0);
-
-            ContextManager::ResetShaderVS();
-
-            ContextManager::ResetShaderPS();
-
-            ContextManager::ResetRenderContext();
-
-            ContextManager::ResetTopology();
-
-            Performance::EndEvent();
-        }
-
-        // -----------------------------------------------------------------------------
-
-        if (pControl->GetType() == MR::CControl::Kinect)
-        {
-            // TODO: Remove texture set
-            //m_BilateralBlurTempTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_VSPositionTexturePtr), static_cast<CTextureBasePtr>(m_VSPositionTempTexturePtr));
-            //m_BilateralBlurTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_VSPositionTempTexturePtr), static_cast<CTextureBasePtr>(m_VSPositionTexturePtr));
-
-//             SBilateralBlurConstantBufferCS* pBilateralBlurConstantBuffer;
-//             
-//             pBilateralBlurConstantBuffer = static_cast<SBilateralBlurConstantBufferCS*>(BufferManager::MapConstantBuffer(m_BilateralBlurCSBufferSetPtr->GetBuffer(0)));
-//             
-//             pBilateralBlurConstantBuffer->m_Direction = Base::UInt4(1, 0, 0, 0);
-//             
-//             BufferManager::UnmapConstantBuffer(m_BilateralBlurCSBufferSetPtr->GetBuffer(0));
-//             
-//             ContextManager::SetShaderCS(m_BilateralBlurShaderCSPtr);
-//             
-//             ContextManager::SetConstantBufferSetCS(m_BilateralBlurCSBufferSetPtr);
-//             
-//             ContextManager::SetTextureSetCS(m_BilateralBlurTempTextureSetPtr);
-//             
-//             ContextManager::Dispatch(1280 / 16, 720 / 16, 1);
-//             
-//             ContextManager::ResetShaderCS();
-//             
-//             ContextManager::ResetTextureSetCS();
-//             
-//             ContextManager::ResetConstantBufferSetCS();
-//             
+//         if (!MR::ControlManager::IsActive()) return;
+// 
+//         Performance::BeginEvent("AR");
+// 
+//         
+// 
+//         MR::CControl* pControl = MR::ControlManager::GetActiveControl();
+// 
+//         // -----------------------------------------------------------------------------
+// 
+//         if (m_RenderJobs.size() > 0)
+//         {
+//             Performance::BeginEvent("Local Scene to GBuffer");
+// 
 //             // -----------------------------------------------------------------------------
-//             
-//             pBilateralBlurConstantBuffer = static_cast<SBilateralBlurConstantBufferCS*>(BufferManager::MapConstantBuffer(m_BilateralBlurCSBufferSetPtr->GetBuffer(0)));
-//             
-//             pBilateralBlurConstantBuffer->m_Direction = Base::UInt4(0, 1, 0, 0);
-//             
-//             BufferManager::UnmapConstantBuffer(m_BilateralBlurCSBufferSetPtr->GetBuffer(0));
-//             
-//             ContextManager::SetShaderCS(m_BilateralBlurShaderCSPtr);
-//             
-//             ContextManager::SetConstantBufferSetCS(m_BilateralBlurCSBufferSetPtr);
-//             
-//             ContextManager::SetTextureSetCS(m_BilateralBlurTextureSetPtr);
-//             
-//             ContextManager::Dispatch(1280 / 16, 720 / 16, 1);
-//             
-//             ContextManager::ResetShaderCS();
-//             
-//             ContextManager::ResetTextureSetCS();
-//             
-//             ContextManager::ResetConstantBufferSetCS();
-
-            // -----------------------------------------------------------------------------
-
-            Performance::BeginEvent("Copy Kinect to G-Buffer");
-
-            ContextManager::SetRenderContext(m_DeferredRenderContextPtr);
-
-            // -----------------------------------------------------------------------------
-            // Render
-            // -----------------------------------------------------------------------------
-            ContextManager::SetTopology(STopology::TriangleList);
-
-            ContextManager::SetShaderVS(m_RectangleShaderVSPtr);
-
-            ContextManager::SetShaderPS(m_CopyToGBufferShaderPSPtr);
-
-            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-
-            // -----------------------------------------------------------------------------
-            // Set items to context manager
-            // -----------------------------------------------------------------------------
-            ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
-
-            ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
-
-            ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
-
-            ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
-            ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
-            ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
-            ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
-
-            ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_BackgroundTexturePtr));
-            ContextManager::SetTexture(1, static_cast<CTextureBasePtr>(m_VSPositionTexturePtr));
-            ContextManager::SetTexture(2, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0));
-            ContextManager::SetTexture(3, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1));
-
-            ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
-
-            ContextManager::ResetTexture(0);
-            ContextManager::ResetTexture(1);
-            ContextManager::ResetTexture(2);
-            ContextManager::ResetTexture(3);
-
-            ContextManager::ResetSampler(0);
-            ContextManager::ResetSampler(1);
-            ContextManager::ResetSampler(2);
-            ContextManager::ResetSampler(3);
-
-            ContextManager::ResetInputLayout();
-
-            ContextManager::ResetIndexBuffer();
-
-            ContextManager::ResetVertexBuffer();
-
-            ContextManager::ResetConstantBuffer(0);
-
-            ContextManager::ResetShaderVS();
-
-            ContextManager::ResetShaderPS();
-
-            ContextManager::ResetRenderContext();
-
-            ContextManager::ResetTopology();
-
-            Performance::EndEvent();
-        }
-
-        // -----------------------------------------------------------------------------
-
-        Performance::EndEvent();
+//             // Prepare renderer
+//             // -----------------------------------------------------------------------------
+//             ContextManager::SetRenderContext(m_DeferredRenderContextPtr);
+// 
+//             // -----------------------------------------------------------------------------
+//             // First pass: iterate throw render jobs and compute all meshes
+//             // -----------------------------------------------------------------------------
+//             CRenderJobs::const_iterator EndOfRenderJobs = m_RenderJobs.end();
+// 
+//             for (CRenderJobs::const_iterator CurrentRenderJob = m_RenderJobs.begin(); CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
+//             {
+//                 CSurfacePtr SurfacePtr = CurrentRenderJob->m_SurfacePtr;
+// 
+//                 // -----------------------------------------------------------------------------
+//                 // Upload data to buffer
+//                 // -----------------------------------------------------------------------------
+//                 SPerDrawCallConstantBufferVS ModelBuffer;
+// 
+//                 ModelBuffer.m_ModelMatrix = CurrentRenderJob->m_ModelMatrix;
+// 
+//                 BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
+// 
+//                 BufferManager::UploadBufferData(m_MaterialPSBufferPtr, &CurrentRenderJob->m_SurfaceMaterialPtr->GetMaterialAttributes());
+// 
+//                 // -----------------------------------------------------------------------------
+//                 // Render
+//                 // -----------------------------------------------------------------------------
+//                 ContextManager::SetTopology(STopology::TriangleList);
+// 
+//                 ContextManager::SetShaderVS(SurfacePtr->GetShaderVS());
+// 
+//                 ContextManager::SetShaderPS(m_DifferentialGBufferShaderPSPtr);
+// 
+//                 ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+//                 ContextManager::SetConstantBuffer(1, m_ModelBufferPtr);
+//                 ContextManager::SetConstantBuffer(2, m_MaterialPSBufferPtr);
+// 
+//                 // -----------------------------------------------------------------------------
+//                 // Set items to context manager
+//                 // -----------------------------------------------------------------------------
+//                 ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
+// 
+//                 ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
+// 
+//                 ContextManager::SetInputLayout(SurfacePtr->GetShaderVS()->GetInputLayout());
+// 
+//                 ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+// 
+//                 ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_WebcamTexturePtr));
+// 
+//                 ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
+// 
+//                 ContextManager::ResetTexture(0);
+// 
+//                 ContextManager::ResetSampler(0);
+// 
+//                 ContextManager::ResetInputLayout();
+// 
+//                 ContextManager::ResetIndexBuffer();
+// 
+//                 ContextManager::ResetVertexBuffer();
+// 
+//                 ContextManager::ResetConstantBuffer(0);
+//                 ContextManager::ResetConstantBuffer(1);
+//                 ContextManager::ResetConstantBuffer(2);
+//             }
+// 
+//             ContextManager::ResetSampler(0);
+// 
+//             ContextManager::ResetShaderVS();
+// 
+//             ContextManager::ResetShaderPS();
+// 
+//             ContextManager::ResetRenderContext();
+// 
+//             ContextManager::ResetTopology();
+// 
+//             Performance::EndEvent();
+//         }
+// 
+//         // -----------------------------------------------------------------------------
+// 
+//         if (pControl->GetType() == MR::CControl::Kinect)
+//         {
+//             // TODO: Remove texture set
+//             //m_BilateralBlurTempTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_VSPositionTexturePtr), static_cast<CTextureBasePtr>(m_VSPositionTempTexturePtr));
+//             //m_BilateralBlurTextureSetPtr = TextureManager::CreateTextureSet(static_cast<CTextureBasePtr>(m_VSPositionTempTexturePtr), static_cast<CTextureBasePtr>(m_VSPositionTexturePtr));
+// 
+// //             SBilateralBlurConstantBufferCS* pBilateralBlurConstantBuffer;
+// //             
+// //             pBilateralBlurConstantBuffer = static_cast<SBilateralBlurConstantBufferCS*>(BufferManager::MapConstantBuffer(m_BilateralBlurCSBufferSetPtr->GetBuffer(0)));
+// //             
+// //             pBilateralBlurConstantBuffer->m_Direction = Base::UInt4(1, 0, 0, 0);
+// //             
+// //             BufferManager::UnmapConstantBuffer(m_BilateralBlurCSBufferSetPtr->GetBuffer(0));
+// //             
+// //             ContextManager::SetShaderCS(m_BilateralBlurShaderCSPtr);
+// //             
+// //             ContextManager::SetConstantBufferSetCS(m_BilateralBlurCSBufferSetPtr);
+// //             
+// //             ContextManager::SetTextureSetCS(m_BilateralBlurTempTextureSetPtr);
+// //             
+// //             ContextManager::Dispatch(1280 / 16, 720 / 16, 1);
+// //             
+// //             ContextManager::ResetShaderCS();
+// //             
+// //             ContextManager::ResetTextureSetCS();
+// //             
+// //             ContextManager::ResetConstantBufferSetCS();
+// //             
+// //             // -----------------------------------------------------------------------------
+// //             
+// //             pBilateralBlurConstantBuffer = static_cast<SBilateralBlurConstantBufferCS*>(BufferManager::MapConstantBuffer(m_BilateralBlurCSBufferSetPtr->GetBuffer(0)));
+// //             
+// //             pBilateralBlurConstantBuffer->m_Direction = Base::UInt4(0, 1, 0, 0);
+// //             
+// //             BufferManager::UnmapConstantBuffer(m_BilateralBlurCSBufferSetPtr->GetBuffer(0));
+// //             
+// //             ContextManager::SetShaderCS(m_BilateralBlurShaderCSPtr);
+// //             
+// //             ContextManager::SetConstantBufferSetCS(m_BilateralBlurCSBufferSetPtr);
+// //             
+// //             ContextManager::SetTextureSetCS(m_BilateralBlurTextureSetPtr);
+// //             
+// //             ContextManager::Dispatch(1280 / 16, 720 / 16, 1);
+// //             
+// //             ContextManager::ResetShaderCS();
+// //             
+// //             ContextManager::ResetTextureSetCS();
+// //             
+// //             ContextManager::ResetConstantBufferSetCS();
+// 
+//             // -----------------------------------------------------------------------------
+// 
+//             Performance::BeginEvent("Copy Kinect to G-Buffer");
+// 
+//             ContextManager::SetRenderContext(m_DeferredRenderContextPtr);
+// 
+//             // -----------------------------------------------------------------------------
+//             // Render
+//             // -----------------------------------------------------------------------------
+//             ContextManager::SetTopology(STopology::TriangleList);
+// 
+//             ContextManager::SetShaderVS(m_RectangleShaderVSPtr);
+// 
+//             ContextManager::SetShaderPS(m_CopyToGBufferShaderPSPtr);
+// 
+//             ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+// 
+//             // -----------------------------------------------------------------------------
+//             // Set items to context manager
+//             // -----------------------------------------------------------------------------
+//             ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+// 
+//             ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+// 
+//             ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
+// 
+//             ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+//             ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+//             ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+//             ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+// 
+//             ContextManager::SetTexture(0, static_cast<CTextureBasePtr>(m_BackgroundTexturePtr));
+//             ContextManager::SetTexture(1, static_cast<CTextureBasePtr>(m_VSPositionTexturePtr));
+//             ContextManager::SetTexture(2, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0));
+//             ContextManager::SetTexture(3, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1));
+// 
+//             ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+// 
+//             ContextManager::ResetTexture(0);
+//             ContextManager::ResetTexture(1);
+//             ContextManager::ResetTexture(2);
+//             ContextManager::ResetTexture(3);
+// 
+//             ContextManager::ResetSampler(0);
+//             ContextManager::ResetSampler(1);
+//             ContextManager::ResetSampler(2);
+//             ContextManager::ResetSampler(3);
+// 
+//             ContextManager::ResetInputLayout();
+// 
+//             ContextManager::ResetIndexBuffer();
+// 
+//             ContextManager::ResetVertexBuffer();
+// 
+//             ContextManager::ResetConstantBuffer(0);
+// 
+//             ContextManager::ResetShaderVS();
+// 
+//             ContextManager::ResetShaderPS();
+// 
+//             ContextManager::ResetRenderContext();
+// 
+//             ContextManager::ResetTopology();
+// 
+//             Performance::EndEvent();
+//         }
+// 
+//         // -----------------------------------------------------------------------------
+// 
+//         Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------

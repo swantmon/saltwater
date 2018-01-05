@@ -29,7 +29,6 @@
 #include "graphic/gfx_sun_manager.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
-#include "graphic/gfx_texture_2d.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
 
@@ -334,7 +333,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Prepare last context
             // -----------------------------------------------------------------------------
-            ContextManager::SetTexture(4, pGraphicSunFacet->GetTextureSMSet()->GetTexture(0));
+            ContextManager::SetTexture(4, pGraphicSunFacet->GetShadowMapPtr());
     
             // -----------------------------------------------------------------------------
             // Draw

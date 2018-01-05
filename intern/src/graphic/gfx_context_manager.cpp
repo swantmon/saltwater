@@ -12,13 +12,10 @@
 #include "graphic/gfx_native_sampler.h"
 #include "graphic/gfx_native_shader.h"
 #include "graphic/gfx_native_target_set.h"
-#include "graphic/gfx_native_texture_2d.h"
-#include "graphic/gfx_native_texture_3d.h"
+#include "graphic/gfx_native_texture.h"
 #include "graphic/gfx_state_manager.h"
 
 #include <assert.h>
-
-#include "GL/glew.h"
 
 using namespace Gfx;
 
@@ -117,12 +114,12 @@ namespace
         CSamplerPtr GetSampler(unsigned int _Unit);
 
         void ResetTexture(unsigned int _Unit);
-        void SetTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr);
-        CTextureBasePtr GetTexture(unsigned int _Unit);
+        void SetTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr);
+        CTexturePtr GetTexture(unsigned int _Unit);
 
         void ResetImageTexture(unsigned int _Unit);
-        void SetImageTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr);
-        CTextureBasePtr GetImageTexture(unsigned int _Unit);
+        void SetImageTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr);
+        CTexturePtr GetImageTexture(unsigned int _Unit);
 
         void ResetConstantBuffer(unsigned int _Unit);
         void SetConstantBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
@@ -139,8 +136,9 @@ namespace
         void SetAtomicCounterBufferRange(unsigned int _Unit, CBufferPtr _BufferPtr, unsigned int _Offset, unsigned int _Range);
 		CBufferPtr GetAtomicCounterBuffer(unsigned int _Unit);
 
-        void Barrier();
         void Flush();
+
+        void Barrier();
 
         void Draw(unsigned int _NumberOfVertices, unsigned int _IndexOfFirstVertex);
         void DrawIndexed(unsigned int _NumberOfIndices, unsigned int _IndexOfFirstIndex, int _BaseVertexLocation);
@@ -203,9 +201,9 @@ namespace
         CRenderContexts       m_RenderContexts;
         GLuint                m_NativeShaderPipeline;
         CShaderPtr            m_ShaderSlots[CShader::NumberOfTypes];
-        CTextureBasePtr       m_TextureUnits[s_NumberOfTextureUnits];
+        CTexturePtr       m_TextureUnits[s_NumberOfTextureUnits];
         CSamplerPtr           m_SamplerUnits[s_NumberOfTextureUnits];
-        CTextureBasePtr       m_ImageUnits[s_NumberOfImageUnits];
+        CTexturePtr       m_ImageUnits[s_NumberOfImageUnits];
         CBufferPtr            m_BufferUnits[s_NumberOfBufferUnits];
         CBufferPtr            m_ResourceUnits[s_NumberOfResourceUnits];
         CBufferPtr            m_AtomicUnits[s_NumberOfAtomicUnits];
@@ -225,6 +223,22 @@ namespace
 
 namespace
 {
+#ifdef __ANDROID__
+    const GLenum CGfxContextManager::s_NativeTopologies[] =
+    {
+        GL_POINTS,
+        GL_LINES,
+        GL_LINE_STRIP,
+        GL_LINE_LOOP,
+        GL_TRIANGLES,
+        GL_TRIANGLE_STRIP,
+        GL_TRIANGLE_FAN,
+        GL_QUADS,
+        GL_NONE,
+        GL_NONE,
+        GL_PATCHES,
+    };
+#else
     const GLenum CGfxContextManager::s_NativeTopologies[] =
     {
         GL_POINTS,
@@ -239,6 +253,7 @@ namespace
         GL_POLYGON,
         GL_PATCHES,
     };
+#endif
 } // namespace
 
 namespace
@@ -259,7 +274,6 @@ namespace
         , m_RenderContexts        ()
         , m_NativeShaderPipeline  (0)
     {
-        Reset();
     }
 
     // -----------------------------------------------------------------------------
@@ -322,11 +336,11 @@ namespace
         // -----------------------------------------------------------------------------
         GLuint VertexArrayID;
 
-        glCreateVertexArrays(1, &VertexArrayID);
+        glGenVertexArrays(1, &VertexArrayID);
 
         glBindVertexArray(VertexArrayID);
 
-        glCreateBuffers(1, &m_EmptyVertexBuffer);
+        glGenBuffers(1, &m_EmptyVertexBuffer);
 
         glBindBuffer(GL_ARRAY_BUFFER, m_EmptyVertexBuffer);
     }
@@ -571,7 +585,10 @@ namespace
             if (rDescription.StencilEnable == GL_TRUE)
             {
                 glEnable(GL_STENCIL_TEST);
+
+#ifndef __ANDROID__
                 glEnable(GL_STENCIL_TEST_TWO_SIDE_EXT);
+#endif // !__ANDROID__
                 
                 // -----------------------------------------------------------------------------
                 
@@ -583,7 +600,9 @@ namespace
                 
                 // -----------------------------------------------------------------------------
                 
+#ifndef __ANDROID__
                 glActiveStencilFaceEXT(GL_FRONT);
+#endif // !__ANDROID__
                 
                 StencilFunc = rDescription.FrontFace.StencilFunc;
                 Mask        = rDescription.StencilReadMask;
@@ -599,7 +618,9 @@ namespace
                 
                 // -----------------------------------------------------------------------------
                 
+#ifndef __ANDROID__
                 glActiveStencilFaceEXT(GL_BACK);
+#endif // !__ANDROID__
                 
                 StencilFunc = rDescription.BackFace.StencilFunc;
                 Mask        = rDescription.StencilWriteMask;
@@ -658,7 +679,9 @@ namespace
                 
                 glCullFace(CullMode);
                 
+#ifndef __ANDROID__
                 glPolygonMode(GL_FRONT_AND_BACK, FillMode);
+#endif // !__ANDROID__
                 
                 glFrontFace(FrontFace);
             }
@@ -1217,33 +1240,43 @@ namespace
     {
         assert(_Unit < s_NumberOfTextureUnits);
 
-        glBindTextureUnit(_Unit, 0);
+        GLuint TextureBinding = GL_TEXTURE_2D;
+
+        if (m_TextureUnits[_Unit] != NULL && m_TextureUnits[_Unit]->IsCube())
+        {
+            TextureBinding = GL_TEXTURE_CUBE_MAP;
+        }
+
+        glBindTexture(TextureBinding, 0);
 
         m_TextureUnits[_Unit] = 0;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxContextManager::SetTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr)
+    void CGfxContextManager::SetTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr)
     {
         if (_TextureBasePtr == nullptr) return;
-
-        CNativeTexture2D* pNativeTexture  = 0;
 
         assert(_Unit < s_NumberOfTextureUnits);
 
         if (m_TextureUnits[_Unit] == _TextureBasePtr) return;
 
-        pNativeTexture = static_cast<CNativeTexture2D*>(_TextureBasePtr.GetPtr());
+        CNativeTexture& rNativeTexture = *static_cast<CNativeTexture*>(_TextureBasePtr.GetPtr());
 
-        glBindTextureUnit(_Unit, pNativeTexture->m_NativeTexture);
+        GLenum TextureBinding = rNativeTexture.m_NativeBinding;
+        GLuint TextureHandle  = rNativeTexture.m_NativeTexture;
+
+        glActiveTexture(GL_TEXTURE0 + _Unit);
+
+        glBindTexture(TextureBinding, TextureHandle);
 
         m_TextureUnits[_Unit] = _TextureBasePtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    CTextureBasePtr CGfxContextManager::GetTexture(unsigned int _Unit)
+    CTexturePtr CGfxContextManager::GetTexture(unsigned int _Unit)
     {
         assert(_Unit < s_NumberOfTextureUnits);
 
@@ -1256,39 +1289,37 @@ namespace
     {
         assert(_Unit < s_NumberOfImageUnits);
 
-        glBindImageTexture(_Unit, 0, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R8);
+        glBindImageTexture(_Unit, 0, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA8);
 
         m_ImageUnits[_Unit] = 0;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxContextManager::SetImageTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr)
+    void CGfxContextManager::SetImageTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr)
     {
-        GLboolean IsLayered = GL_FALSE;
-
-        if (_TextureBasePtr == nullptr) return;
-
-        CNativeTexture2D* pNativeTexture = 0;
-
         assert(_Unit < s_NumberOfImageUnits);
 
-        if (m_ImageUnits[_Unit] == _TextureBasePtr) return;
+        if (_TextureBasePtr == nullptr || m_ImageUnits[_Unit] == _TextureBasePtr) return;
 
-        pNativeTexture = static_cast<CNativeTexture2D*>(_TextureBasePtr.GetPtr());
+        GLboolean IsLayered  = GL_FALSE;
 
-        assert(pNativeTexture);
+        CNativeTexture& rNativeTexture = *static_cast<CNativeTexture*>(_TextureBasePtr.GetPtr());
 
-        if (pNativeTexture->GetDimension() == CTextureBase::Dim3D) IsLayered = GL_TRUE;
+        GLuint TextureHandle = rNativeTexture.m_NativeTexture;
+        GLenum TextureUsage  = rNativeTexture.m_NativeUsage;
+        GLenum TextureFormat = rNativeTexture.m_NativeInternalFormat;
 
-        glBindImageTexture(_Unit, pNativeTexture->m_NativeTexture, pNativeTexture->GetCurrentMipLevel(), IsLayered, 0, pNativeTexture->m_NativeUsage, pNativeTexture->m_NativeInternalFormat);
+        if (_TextureBasePtr->GetDimension() == CTexture::Dim3D) IsLayered = GL_TRUE;
+
+        glBindImageTexture(_Unit, TextureHandle, _TextureBasePtr->GetCurrentMipLevel(), IsLayered, 0, TextureUsage, TextureFormat);
 
         m_ImageUnits[_Unit] = _TextureBasePtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    CTextureBasePtr CGfxContextManager::GetImageTexture(unsigned int _Unit)
+    CTexturePtr CGfxContextManager::GetImageTexture(unsigned int _Unit)
     {
         assert(_Unit < s_NumberOfImageUnits);
 
@@ -1483,16 +1514,16 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxContextManager::Barrier()
+    void CGfxContextManager::Flush()
     {
-        glMemoryBarrier(GL_ALL_BARRIER_BITS);
+        glFinish();
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxContextManager::Flush()
+    void CGfxContextManager::Barrier()
     {
-        glFinish();
+        glMemoryBarrier(GL_ALL_BARRIER_BITS);
     }
 
     // -----------------------------------------------------------------------------
@@ -1509,7 +1540,7 @@ namespace
     {
         BASE_UNUSED(_IndexOfFirstIndex);
         BASE_UNUSED(_BaseVertexLocation);
-        
+
         ValidatePipeline();
         glDrawElements(s_NativeTopologies[m_Topology], _NumberOfIndices, GL_UNSIGNED_INT, 0);
     }
@@ -1533,7 +1564,7 @@ namespace
         ValidatePipeline();
         glDrawElementsInstanced(s_NativeTopologies[m_Topology], _NumberOfIndices, GL_UNSIGNED_INT, 0, _NumberOfInstances);
     }
-    
+
     // -----------------------------------------------------------------------------
 
     void CGfxContextManager::DrawIndirect(CBufferPtr _IndirectBufferPtr, unsigned int _Offset)
@@ -1563,7 +1594,7 @@ namespace
     }
 
     // -----------------------------------------------------------------------------
-    
+
     void CGfxContextManager::Dispatch(unsigned int _NumberOfThreadGroupsX, unsigned int _NumberOfThreadGroupsY, unsigned int _NumberOfThreadGroupsZ)
     {
         assert(_NumberOfThreadGroupsX > 0 && _NumberOfThreadGroupsY > 0 && _NumberOfThreadGroupsZ > 0);
@@ -1585,13 +1616,17 @@ namespace
 
         glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, 0);
     }
+
+    // -----------------------------------------------------------------------------
     
     void CGfxContextManager::ValidatePipeline()
     {
 #ifdef VALIDATE_PIPELINE
 
         glValidateProgramPipeline(m_NativeShaderPipeline);
-        GLint IsValid;
+
+        GLint IsValid = GL_TRUE;
+
         glGetProgramPipelineiv(m_NativeShaderPipeline, GL_VALIDATE_STATUS, &IsValid);
 
         if (IsValid != GL_TRUE)
@@ -2123,14 +2158,14 @@ namespace ContextManager
 
     // -----------------------------------------------------------------------------
 
-    void SetTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr)
+    void SetTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr)
     {
         CGfxContextManager::GetInstance().SetTexture(_Unit, _TextureBasePtr);
     }
 
     // -----------------------------------------------------------------------------
 
-    CTextureBasePtr GetTexture(unsigned int _Unit)
+    CTexturePtr GetTexture(unsigned int _Unit)
     {
         return CGfxContextManager::GetInstance().GetTexture(_Unit);
     }
@@ -2144,14 +2179,14 @@ namespace ContextManager
 
     // -----------------------------------------------------------------------------
 
-    void SetImageTexture(unsigned int _Unit, CTextureBasePtr _TextureBasePtr)
+    void SetImageTexture(unsigned int _Unit, CTexturePtr _TextureBasePtr)
     {
         CGfxContextManager::GetInstance().SetImageTexture(_Unit, _TextureBasePtr);
     }
 
     // -----------------------------------------------------------------------------
 
-    CTextureBasePtr GetImageTexture(unsigned int _Unit)
+    CTexturePtr GetImageTexture(unsigned int _Unit)
     {
         return CGfxContextManager::GetInstance().GetImageTexture(_Unit);
     }
@@ -2242,16 +2277,16 @@ namespace ContextManager
 
     // -----------------------------------------------------------------------------
 
-    void Barrier()
+    void Flush()
     {
-        CGfxContextManager::GetInstance().Barrier();
+        CGfxContextManager::GetInstance().Flush();
     }
 
     // -----------------------------------------------------------------------------
 
-    void Flush()
+    void Barrier()
     {
-        CGfxContextManager::GetInstance().Flush();
+        CGfxContextManager::GetInstance().Barrier();
     }
 
     // -----------------------------------------------------------------------------

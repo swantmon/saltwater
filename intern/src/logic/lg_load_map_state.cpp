@@ -2,7 +2,6 @@
 #include "logic/lg_precompiled.h"
 
 #include "base/base_console.h"
-#include "base/base_serialize_text_reader.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 #include "base/base_vector3.h"
@@ -31,8 +30,6 @@
 #include "data/data_light_probe_manager.h"
 #include "data/data_sun_manager.h"
 #include "data/data_sky_manager.h"
-#include "data/data_script_facet.h"
-#include "data/data_script_manager.h"
 #include "data/data_ssao_manager.h"
 #include "data/data_ssr_manager.h"
 #include "data/data_texture_manager.h"
@@ -65,12 +62,13 @@ namespace
 {
     int CLgLoadMapState::OnEnter(Base::CTextReader& _rSerializer)
     {
+        BASE_UNUSED(_rSerializer);
+
         // -----------------------------------------------------------------------------
         // Give serialize module to all data items that is needed for loading a
         // certain map
         // -----------------------------------------------------------------------------
-
-        int LevelIndexDebug;
+        BASE_CONSOLE_STREAMINFO("Logic> Loading level");
         
         _rSerializer >> LevelIndexDebug;
 
@@ -133,12 +131,6 @@ namespace
 
             rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
 
-            Dt::CScriptFacet* pScriptFacet = Dt::ScriptManager::CreateScript();
-
-            pScriptFacet->SetScriptFile("scripts/camera_behavior.lua");
-
-            rEntity.SetDetailFacet(Dt::SFacetCategory::Script, pScriptFacet);
-
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
     }
@@ -182,12 +174,6 @@ namespace
 
             rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
 
-//             Dt::CScriptFacet* pScriptFacet = Dt::ScriptManager::CreateScript();
-// 
-//             pScriptFacet->SetScriptFile("scripts/camera_behavior.lua");
-// 
-//             rEntity.SetDetailFacet(Dt::SFacetCategory::Script, pScriptFacet);
-
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
@@ -217,45 +203,6 @@ namespace
         }
 
         // -----------------------------------------------------------------------------
-        // Setup effects
-        // -----------------------------------------------------------------------------
-        {
-            Dt::SEntityDescriptor EntityDesc;
-
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::FX;
-            EntityDesc.m_EntityType     = Dt::SFXType::PostAA;
-            EntityDesc.m_FacetFlags     = 0;
-
-            Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
-
-            rEffectEntity.SetName("PostAA");
-
-            Dt::CPostAAFXFacet* pEffectFacet = Dt::PostAAManager::CreatePostAAFX();
-
-            rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
-
-            Dt::EntityManager::MarkEntityAsDirty(rEffectEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-        }
-
-//         {
-//             Dt::SEntityDescriptor EntityDesc;
-// 
-//             EntityDesc.m_EntityCategory = Dt::SEntityCategory::FX;
-//             EntityDesc.m_EntityType     = Dt::SFXType::SSR;
-//             EntityDesc.m_FacetFlags     = 0;
-// 
-//             Dt::CEntity& rEffectEntity = Dt::EntityManager::CreateEntity(EntityDesc);
-// 
-//             rEffectEntity.SetName("SSR");
-// 
-//             Dt::CSSRFXFacet* pEffectFacet = Dt::SSRFXManager::CreateSSRFX();
-// 
-//             rEffectEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
-// 
-//             Dt::EntityManager::MarkEntityAsDirty(rEffectEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-//         }
-
-        // -----------------------------------------------------------------------------
         // Setup light
         // -----------------------------------------------------------------------------
         {
@@ -271,20 +218,20 @@ namespace
 
             Dt::CTransformationFacet* pTransformationFacet = rGlobalProbeLight.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 5.0f));
+            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.0f));
             pTransformationFacet->SetScale   (Base::Float3(1.0f));
             pTransformationFacet->SetRotation(Base::Float3(0.0f));
 
             Dt::CLightProbeFacet* pProbeLightFacet = Dt::LightProbeManager::CreateLightProbe();
 
-            pProbeLightFacet->SetType(Dt::CLightProbeFacet::Local);
-            pProbeLightFacet->SetQuality(Dt::CLightProbeFacet::PX512);
+            pProbeLightFacet->SetType(Dt::CLightProbeFacet::Sky);
+            pProbeLightFacet->SetQuality(Dt::CLightProbeFacet::PX256);
             pProbeLightFacet->SetIntensity(1.0f);
             pProbeLightFacet->SetRefreshMode(Dt::CLightProbeFacet::Dynamic);
-            pProbeLightFacet->SetNear(2.0f);
-            pProbeLightFacet->SetFar(100.0f);
-            pProbeLightFacet->SetParallaxCorrection(true);
-            pProbeLightFacet->SetBoxSize(Base::Float3(10.0f));
+            pProbeLightFacet->SetNear(0.01f);
+            pProbeLightFacet->SetFar(1024.0f);
+            pProbeLightFacet->SetParallaxCorrection(false);
+            pProbeLightFacet->SetBoxSize(Base::Float3(1024.0f));
 
             rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pProbeLightFacet);
 
@@ -333,7 +280,7 @@ namespace
         {
             Dt::SModelFileDescriptor ModelFileDesc;
 
-            ModelFileDesc.m_pFileName = "models/sphere.obj";
+            ModelFileDesc.m_pFileName = "models/MatTester.obj";
             ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::DefaultFlipUVs;
 
             Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
@@ -368,211 +315,7 @@ namespace
 
             // -----------------------------------------------------------------------------
 
-            //Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-
-
-//             Dt::CScriptFacet* pScriptFacet = Dt::ScriptManager::CreateScript();
-// 
-//             pScriptFacet->SetScriptFile("scripts/move_circle.lua");
-// 
-//             rSphere.SetDetailFacet(Dt::SFacetCategory::Script, pScriptFacet);
-        }
-
-        // -----------------------------------------------------------------------------
-
-        {
-            Dt::SModelFileDescriptor ModelFileDesc;
-
-            ModelFileDesc.m_pFileName = "models/cube.obj";
-            ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::DefaultFlipUVs;
-
-            Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
-
-            // -----------------------------------------------------------------------------
-
-            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntityFromModel(rModel);
-
-            rSphere.SetName("Cube");
-
-            Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
-
-            pTransformationFacet->SetPosition(Base::Float3(2.0f, 0.0f, 0.5f));
-            pTransformationFacet->SetScale(Base::Float3(1.0f));
-            pTransformationFacet->SetRotation(Base::Float3(0.0f));
-
-            // -----------------------------------------------------------------------------
-
-            Dt::CEntity* pSubEntity = rSphere.GetHierarchyFacet()->GetFirstChild();
-
-            Dt::CMeshActorFacet* pModelActorFacet = static_cast<Dt::CMeshActorFacet*>(pSubEntity->GetDetailFacet(Dt::SFacetCategory::Data));
-
-            Dt::SMaterialDescriptor MaterialFileDesc;
-
-            MaterialFileDesc.m_pMaterialName = "Red Alert";
-            MaterialFileDesc.m_pColorMap     = 0;
-            MaterialFileDesc.m_pNormalMap    = 0;
-            MaterialFileDesc.m_pRoughnessMap = 0;
-            MaterialFileDesc.m_pMetalMaskMap = 0;
-            MaterialFileDesc.m_pAOMap        = 0;
-            MaterialFileDesc.m_pBumpMap      = 0;
-            MaterialFileDesc.m_Roughness     = 1.0f;
-            MaterialFileDesc.m_Reflectance   = 0.0f;
-            MaterialFileDesc.m_MetalMask     = 0.0f;
-            MaterialFileDesc.m_Displacement  = 0.0f;
-            MaterialFileDesc.m_AlbedoColor   = Base::Float3(1.0f, 0.0f, 0.0f);
-            MaterialFileDesc.m_TilingOffset  = Base::Float4(0.0f, 0.0f, 0.0f, 0.0f);
-            MaterialFileDesc.m_pFileName     = 0;
-
-            Dt::CMaterial& rMaterial = Dt::MaterialManager::CreateMaterial(MaterialFileDesc);
-
-            pModelActorFacet->SetMaterial(0, &rMaterial);
-
-            Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyCreate);
-
-            // -----------------------------------------------------------------------------
-
-            //Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-        }
-
-        // -----------------------------------------------------------------------------
-
-        {
-            Dt::SModelFileDescriptor ModelFileDesc;
-
-            ModelFileDesc.m_pFileName = "models/cube.obj";
-            ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::DefaultFlipUVs;
-
-            Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
-
-            // -----------------------------------------------------------------------------
-
-            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntityFromModel(rModel);
-
-            rSphere.SetName("Cube");
-
-            Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
-
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.0f));
-            pTransformationFacet->SetScale(Base::Float3(4.0f, 4.0f, 0.05f));
-            pTransformationFacet->SetRotation(Base::Float3(0.0f));
-
-            // -----------------------------------------------------------------------------
-
-            Dt::CEntity* pSubEntity = rSphere.GetHierarchyFacet()->GetFirstChild();
-
-            Dt::CMeshActorFacet* pModelActorFacet = static_cast<Dt::CMeshActorFacet*>(pSubEntity->GetDetailFacet(Dt::SFacetCategory::Data));
-
-            Dt::SMaterialDescriptor MaterialFileDesc;
-
-            MaterialFileDesc.m_pFileName = "materials/tests/background.mat";
-
-            Dt::CMaterial& rMaterial = Dt::MaterialManager::CreateMaterial(MaterialFileDesc);
-
-            pModelActorFacet->SetMaterial(0, &rMaterial);
-
-            Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyCreate);
-
-            // -----------------------------------------------------------------------------
-
-            //Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-        }
-
-        // -----------------------------------------------------------------------------
-
-        {
-            Dt::SModelFileDescriptor ModelFileDesc;
-
-            ModelFileDesc.m_pFileName = "models/plane.obj";
-            ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::DefaultFlipUVs;
-
-            Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
-
-            // -----------------------------------------------------------------------------
-
-            Dt::CEntity& rPlane = Dt::EntityManager::CreateEntityFromModel(rModel);
-
-            Dt::CTransformationFacet* pTransformationFacet = rPlane.GetTransformationFacet();
-
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, -30.0f));
-            pTransformationFacet->SetScale(Base::Float3(1.0f));
-            pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-90.0f), 0.0f, 0.0f));
-
-            // -----------------------------------------------------------------------------
-
-            Dt::CEntity* pSubEntity = rPlane.GetHierarchyFacet()->GetFirstChild();
-
-            pSubEntity->SetLayer(Dt::SEntityLayer::Default);
-
-            Dt::CMeshActorFacet* pModelActorFacet = static_cast<Dt::CMeshActorFacet*>(pSubEntity->GetDetailFacet(Dt::SFacetCategory::Data));
-
-            Dt::SMaterialDescriptor MaterialFileDesc;
-
-            MaterialFileDesc.m_pFileName = "materials/tests/background.mat";
-
-            Dt::CMaterial& rMaterial = Dt::MaterialManager::CreateMaterial(MaterialFileDesc);
-
-            pModelActorFacet->SetMaterial(0, &rMaterial);
-
-            Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyCreate);
-
-            // -----------------------------------------------------------------------------
-
-            //Dt::EntityManager::MarkEntityAsDirty(rPlane, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-        }
-
-        // -----------------------------------------------------------------------------
-
-        {
-            Dt::SEntityDescriptor EntityDesc;
-
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Plugin;
-            EntityDesc.m_EntityType = Dt::SPluginType::ARControlManager;
-            EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy;
-
-            Dt::CEntity& rCurrentEntity = Dt::EntityManager::CreateEntity(EntityDesc);
-
-            rCurrentEntity.SetName("AR Plugin Controller");
-
-            Dt::STextureDescriptor TextureDescriptor;
-
-            TextureDescriptor.m_NumberOfPixelsU  = 1280;
-            TextureDescriptor.m_NumberOfPixelsV  = 720;
-            TextureDescriptor.m_NumberOfPixelsW  = 1;
-            TextureDescriptor.m_Format           = Dt::CTextureBase::R8G8B8_UBYTE;
-            TextureDescriptor.m_Semantic         = Dt::CTextureBase::Diffuse;
-            TextureDescriptor.m_Binding          = Dt::CTextureBase::ShaderResource;
-            TextureDescriptor.m_pPixels          = 0;
-            TextureDescriptor.m_pFileName        = 0;
-            TextureDescriptor.m_pIdentifier      = "AR_BACKGROUND_TEXTURE";
-
-            Dt::CTexture2D* pBackgroundTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
-
-            Dt::TextureManager::MarkTextureAsDirty(pBackgroundTexture, Dt::CTextureBase::DirtyCreate);
-
-            // -----------------------------------------------------------------------------
-
-            Dt::CARControllerPluginFacet* pFacet = Dt::ARControllerManager::CreateARControllerPlugin();
-
-            pFacet->SetCameraEntity       (0);
-            pFacet->SetConfiguration      ("-device=WinDS -flipV -showDialog");
-            pFacet->SetCameraParameterFile("ar/configurations/logitech_para.dat");
-            pFacet->SetOutputBackground   (pBackgroundTexture);
-            pFacet->SetDeviceType         (Dt::CARControllerPluginFacet::Webcam);
-            pFacet->SetNumberOfMarker     (1);
-            pFacet->SetCameraEntity       (pCameraEntity);
-            
-            Dt::CARControllerPluginFacet::SMarker& rMarkerOne = pFacet->GetMarker(0);
-
-            rMarkerOne.m_UID          = 0;
-            rMarkerOne.m_Type         = Dt::CARControllerPluginFacet::SMarker::Square;
-            rMarkerOne.m_WidthInMeter = 0.08f;
-            rMarkerOne.m_PatternFile  = "ar/patterns/patt.hiro";
-
-            rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
-
-            // -----------------------------------------------------------------------------
-
-            //Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
     }
 } // namespace

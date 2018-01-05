@@ -7,15 +7,21 @@
 #include "graphic/gfx_state_manager.h"
 #include "graphic/gfx_view_manager.h"
 
+#include <assert.h>
+
 namespace Gfx
 {
 namespace Cam
 {
     void SetFieldOfView(float _FOVY, float _Near, float _Far)
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
 
         Base::Int2 ScreenSize = Main::GetActiveWindowSize();
+
+        assert(ScreenSize[0] > 0 && ScreenSize[1] > 0);
 
         float Width  = static_cast<float>(ScreenSize[0]);
         float Height = static_cast<float>(ScreenSize[1]);
@@ -29,6 +35,8 @@ namespace Cam
 
     void SetPerspective(float _Left, float _Right, float _Bottom, float _Top, float _Near, float _Far)
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
 
         return rCamera.SetPerspective(_Left, _Right, _Bottom, _Top, _Near, _Far);
@@ -38,6 +46,8 @@ namespace Cam
 
     void SetOrthographic(float _Left, float _Right, float _Bottom, float _Top, float _Near, float _Far)
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
 
         return rCamera.SetOrthographic(_Left, _Right, _Bottom, _Top, _Near, _Far);
@@ -47,6 +57,8 @@ namespace Cam
 
     void SetBackgroundColor(Base::Float3& _rBackgroundColor)
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
 
         return rCamera.SetBackgroundColor(_rBackgroundColor);
@@ -56,6 +68,8 @@ namespace Cam
 
     const Base::Float3& GetBackgroundColor()
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
 
         return rCamera.GetBackgroundColor();
@@ -65,6 +79,8 @@ namespace Cam
 
     void SetCullingMask(unsigned int _CullingMask)
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
 
         rCamera.SetCullingMask(_CullingMask);
@@ -74,6 +90,8 @@ namespace Cam
 
     unsigned int GetCullingMask()
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
 
         return rCamera.GetCullingMask();
@@ -83,6 +101,8 @@ namespace Cam
 
     void SetViewportRect(Base::AABB2Float& _rViewportRect)
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
 
         rCamera.SetViewportRect(_rViewportRect);
@@ -92,6 +112,8 @@ namespace Cam
 
     const Base::AABB2Float& GetViewportRect()
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
 
         return rCamera.GetViewportRect();
@@ -101,6 +123,8 @@ namespace Cam
 
     void SetDepth(float _Depth)
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
 
         rCamera.SetDepth(_Depth);
@@ -110,6 +134,8 @@ namespace Cam
 
     float GetDepth()
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
 
         return rCamera.GetDepth();
@@ -119,6 +145,8 @@ namespace Cam
 
     void SetAutoCameraMode()
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
 
         rCamera.SetCameraMode(Gfx::CCamera::Auto);
@@ -128,6 +156,8 @@ namespace Cam
 
     void SetManualCameraMode()
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
 
         rCamera.SetCameraMode(Gfx::CCamera::Manual);
@@ -137,6 +167,8 @@ namespace Cam
 
     void SetShutterSpeed(float _ShutterSpeed)
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
 
         rCamera.SetShutterSpeed(_ShutterSpeed);
@@ -146,6 +178,8 @@ namespace Cam
 
     float GetShutterSpeed()
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
 
         return rCamera.GetShutterSpeed();
@@ -155,6 +189,8 @@ namespace Cam
 
     void SetAperture(float _Aperture)
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
 
         rCamera.SetAperture(_Aperture);
@@ -164,6 +200,8 @@ namespace Cam
 
     float GetAperture()
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
 
         return rCamera.GetAperture();
@@ -173,6 +211,8 @@ namespace Cam
 
     void SetISO(float _ISO)
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
 
         rCamera.SetISO(_ISO);
@@ -182,6 +222,8 @@ namespace Cam
 
     float GetISO()
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
 
         return rCamera.GetISO();
@@ -191,6 +233,8 @@ namespace Cam
 
     void SetEC(float _EC)
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
 
         rCamera.SetEC(_EC);
@@ -200,6 +244,8 @@ namespace Cam
 
     float GetEC()
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
 
         return rCamera.GetEC();
@@ -209,6 +255,9 @@ namespace Cam
 
     void SetRotationMatrix()
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+        assert(ViewManager::GetMainCamera()->GetView() != nullptr && ViewManager::GetMainCamera()->GetView().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
         CView&   rView   = *rCamera.GetView();
 
@@ -219,6 +268,9 @@ namespace Cam
 
     void SetRotationMatrix(const Base::Float3x3& _rMatrix)
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+        assert(ViewManager::GetMainCamera()->GetView() != nullptr && ViewManager::GetMainCamera()->GetView().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
         CView&   rView   = *rCamera.GetView();
 
@@ -229,6 +281,9 @@ namespace Cam
 
     const Base::Float3x3& GetRotationMatrix()
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+        assert(ViewManager::GetMainCamera()->GetView() != nullptr && ViewManager::GetMainCamera()->GetView().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
         CView&   rView   = *rCamera.GetView();
 
@@ -237,18 +292,24 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
-    void SetPosition(float _X, float _Y, float _Z)
+    void SetPosition(float _AxisX, float _AxisY, float _AxisZ)
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+        assert(ViewManager::GetMainCamera()->GetView() != nullptr && ViewManager::GetMainCamera()->GetView().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
         CView&   rView   = *rCamera.GetView();
 
-        rView.SetPosition(_X, _Y, _Z);
+        rView.SetPosition(_AxisX, _AxisY, _AxisZ);
     }
 
     // -----------------------------------------------------------------------------
 
     void SetPosition(const Base::Float3& _rPosition)
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+        assert(ViewManager::GetMainCamera()->GetView() != nullptr && ViewManager::GetMainCamera()->GetView().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
         CView&   rView   = *rCamera.GetView();
 
@@ -259,6 +320,9 @@ namespace Cam
 
     const Base::Float3& GetPosition()
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+        assert(ViewManager::GetMainCamera()->GetView() != nullptr && ViewManager::GetMainCamera()->GetView().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
         CView&   rView   = *rCamera.GetView();
 
@@ -269,6 +333,9 @@ namespace Cam
 
     void SetViewMatrix(const Base::Float4x4& _rViewMatrix)
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+        assert(ViewManager::GetMainCamera()->GetView() != nullptr && ViewManager::GetMainCamera()->GetView().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
         CView&   rView   = *rCamera.GetView();
 
@@ -279,6 +346,9 @@ namespace Cam
 
     const Base::Float4x4& GetViewMatrix()
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+        assert(ViewManager::GetMainCamera()->GetView() != nullptr && ViewManager::GetMainCamera()->GetView().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
         CView&   rView   = *rCamera.GetView();
 
@@ -289,6 +359,9 @@ namespace Cam
 
     void Update()
     {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+        assert(ViewManager::GetMainCamera()->GetView() != nullptr && ViewManager::GetMainCamera()->GetView().IsValid());
+
         CCamera& rCamera = *ViewManager::GetMainCamera();
         CView&   rView   = *rCamera.GetView();
 

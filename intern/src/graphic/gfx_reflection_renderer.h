@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include "graphic/gfx_texture.h"
+
 namespace Gfx
 {
 namespace ReflectionRenderer
@@ -32,6 +34,6 @@ namespace ReflectionRenderer
     void Update();
     void Render();
 
-    CTextureBasePtr GetBRDF();
+    CTexturePtr GetBRDF();
 } // namespace ReflectionRenderer
 } // namespace Gfx

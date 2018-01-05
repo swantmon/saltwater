@@ -7,7 +7,6 @@ namespace Gfx
 {
     CSkyFacet::CSkyFacet()
         : m_CubemapPtr   ()
-        , m_CubemapSetPtr()
         , m_TimeStamp    (static_cast<Base::U64>(-1))
     {
 
@@ -17,22 +16,14 @@ namespace Gfx
 
     CSkyFacet::~CSkyFacet()
     {
-        m_CubemapPtr    = 0;
-        m_CubemapSetPtr = 0;
+        m_CubemapPtr = 0;
     }
 
     // -----------------------------------------------------------------------------
 
-    CTexture2DPtr CSkyFacet::GetCubemapPtr() const
+    CTexturePtr CSkyFacet::GetCubemapPtr() const
     {
         return m_CubemapPtr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CTextureSetPtr CSkyFacet::GetCubemapSetPtr() const
-    {
-        return m_CubemapSetPtr;
     }
 
     // -----------------------------------------------------------------------------

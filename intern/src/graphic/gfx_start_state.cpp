@@ -25,6 +25,7 @@
 #include "graphic/gfx_mesh_actor_manager.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_particle_renderer.h"
+#include "graphic/gfx_performance.h"
 #include "graphic/gfx_point_light_manager.h"
 #include "graphic/gfx_postfx_hdr_renderer.h"
 #include "graphic/gfx_postfx_renderer.h"
@@ -64,6 +65,16 @@ namespace
 {
     void CGfxStartState::OnEnter()
     {
+        // -----------------------------------------------------------------------------
+        // Start engine
+        // -----------------------------------------------------------------------------
+        Main::OnStart();
+
+        // -----------------------------------------------------------------------------
+        // Start performance tools
+        // -----------------------------------------------------------------------------
+        Performance::OnStart();
+
         // -----------------------------------------------------------------------------
         // Start manager. We have to take care on a specific order because of
         // dependencies.
