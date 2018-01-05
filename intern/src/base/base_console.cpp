@@ -22,8 +22,9 @@ namespace IO
     // -----------------------------------------------------------------------------
 
     CConsole::CConsole()
-        : m_OutputStream()
-        , m_Clock       ()
+        : m_OutputStream  ( )
+        , m_Clock         ( )
+        , m_VerbosityLevel(3)
     {
     }
 
@@ -82,6 +83,13 @@ namespace IO
         return m_OutputStream;
     }
     
+    // -----------------------------------------------------------------------------
+
+    void CConsole::SetVerbosityLevel(int _Level)
+    {
+        m_VerbosityLevel = _Level;
+    }
+
     // -----------------------------------------------------------------------------
     
     const Char* CConsole::GetText() const
