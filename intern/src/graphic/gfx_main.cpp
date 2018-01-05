@@ -100,7 +100,7 @@ namespace
         void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile);
 
         EGraphicAPIs GetGraphicsAPI();
-        int GetGraphicsMayorVersion();
+        int GetGraphicsMajorVersion();
         int GetGraphicsMinorVersion();
         bool IsExtensionAvailable(const std::string& _Name);
         
@@ -143,7 +143,7 @@ namespace
         struct SGraphicsInfo
         {
             EGraphicAPIs m_GraphicsAPI;
-            int          m_MayorVersion;
+            int          m_MajorVersion;
             int          m_MinorVersion;
         };
         
@@ -216,10 +216,10 @@ namespace
         else BASE_THROWV("Graphics API %s is not supported! Possible options are \"gles\" or \"gl\"", GraphicsAPI.c_str());
 
 #ifdef __ANDROID__
-        m_GraphicsInfo.m_MayorVersion = Base::CProgramParameters::GetInstance().GetInt("graphics_api_mayor_version", 3);
+        m_GraphicsInfo.m_MajorVersion = Base::CProgramParameters::GetInstance().GetInt("graphics_api_major_version", 3);
         m_GraphicsInfo.m_MinorVersion = Base::CProgramParameters::GetInstance().GetInt("graphics_api_minor_version", 2);
 #else
-        m_GraphicsInfo.m_MayorVersion = Base::CProgramParameters::GetInstance().GetInt("graphics_api_mayor_version", 4);
+        m_GraphicsInfo.m_MajorVersion = Base::CProgramParameters::GetInstance().GetInt("graphics_api_major_version", 4);
         m_GraphicsInfo.m_MinorVersion = Base::CProgramParameters::GetInstance().GetInt("graphics_api_minor_version", 5);
 #endif
     }
@@ -257,7 +257,7 @@ namespace
                 BASE_THROWM("Only OpenGLES is supported on Android devices. Please change graphics API in the config file.")
             }
 
-            if (!(m_GraphicsInfo.m_MayorVersion >= 3 && m_GraphicsInfo.m_MinorVersion >= 2))
+            if (!(m_GraphicsInfo.m_MajorVersion >= 3 && m_GraphicsInfo.m_MinorVersion >= 2))
             {
                 BASE_THROWM("Lower versions as OpenGLES 3.2 is not supported.")
             }
@@ -338,7 +338,7 @@ namespace
             // -----------------------------------------------------------------------------
             EGLint ContextAttributes[] =
             {
-                EGL_CONTEXT_CLIENT_VERSION, m_GraphicsInfo.m_MayorVersion,
+                EGL_CONTEXT_CLIENT_VERSION, m_GraphicsInfo.m_MajorVersion,
                 EGL_NONE
             };
 
@@ -467,7 +467,7 @@ namespace
             // -----------------------------------------------------------------------------
             const int Attributes[] =
             {
-                WGL_CONTEXT_MAJOR_VERSION_ARB, m_GraphicsInfo.m_MayorVersion,
+                WGL_CONTEXT_MAJOR_VERSION_ARB, m_GraphicsInfo.m_MajorVersion,
                 WGL_CONTEXT_MINOR_VERSION_ARB, m_GraphicsInfo.m_MinorVersion,
                 WGL_CONTEXT_PROFILE_MASK_ARB , m_GraphicsInfo.m_GraphicsAPI == OpenGLES ? WGL_CONTEXT_ES2_PROFILE_BIT_EXT : WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
                 WGL_CONTEXT_FLAGS_ARB        , APP_DEBUG_MODE ? WGL_CONTEXT_DEBUG_BIT_ARB : 0,
@@ -700,9 +700,9 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    int CGfxMain::GetGraphicsMayorVersion()
+    int CGfxMain::GetGraphicsMajorVersion()
     {
-        return m_GraphicsInfo.m_MayorVersion;
+        return m_GraphicsInfo.m_MajorVersion;
     }
 
     // -----------------------------------------------------------------------------
@@ -981,9 +981,9 @@ namespace Main
 
     // -----------------------------------------------------------------------------
 
-    int GetGraphicsMayorVersion()
+    int GetGraphicsMajorVersion()
     {
-        return CGfxMain::GetInstance().GetGraphicsMayorVersion();
+        return CGfxMain::GetInstance().GetGraphicsMajorVersion();
     }
 
     // -----------------------------------------------------------------------------
