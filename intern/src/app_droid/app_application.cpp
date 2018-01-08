@@ -23,6 +23,8 @@
 
 #include "graphic/gfx_application_interface.h"
 
+#include "mr/mr_control_manager.h"
+
 namespace
 {
     class CApplication : private Base::CUncopyable
@@ -133,6 +135,16 @@ namespace
         // Setup asset manager
         // -----------------------------------------------------------------------------
         Core::AssetManager::SetFilePath(_pAndroidApp->activity->externalDataPath);
+
+        // -----------------------------------------------------------------------------
+        // Setup mixed reality
+        // -----------------------------------------------------------------------------
+        MR::ControlManager::SConfiguration Config;
+
+        Config.m_pEnv     = _pAndroidApp->activity->env;
+        Config.m_pContext = 0;
+
+        MR::ControlManager::OnStart(Config);
 
         // -----------------------------------------------------------------------------
         // Start timing

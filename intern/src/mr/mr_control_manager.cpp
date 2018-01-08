@@ -21,14 +21,14 @@
 
 #include "mr/mr_control_manager.h"
 
-#include <AR/ar.h>
-#include <AR/gsub_lite.h>
+#include "arcore_c_api.h"
 
 #include <assert.h>
 #include <unordered_map>
 #include <vector>
 
 using namespace MR;
+using namespace MR::ControlManager;
 
 namespace
 {
@@ -47,9 +47,14 @@ namespace
 
     public:
 
-        void OnStart();
+        void OnStart(const SConfiguration& _rConfiguration);
         void OnExit();
         void Update();
+
+    private:
+
+        ArSession* ar_session_ = nullptr;
+        ArFrame* ar_frame_ = nullptr;
 
     private:
 
@@ -71,9 +76,19 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CMRControlManager::OnStart()
+    void CMRControlManager::OnStart(const SConfiguration& _rConfiguration)
     {
         Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CMRControlManager::OnDirtyEntity));
+
+        ArStatus Status;
+
+        Status = ArSession_create(_rConfiguration.m_pEnv, _rConfiguration.m_pContext, &ar_session_);
+
+        if (Status == AR_SUCCESS)
+        {
+            ArConfig* ar_config = nullptr;
+            ArConfig_create(ar_session_, &ar_config);
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -114,9 +129,9 @@ namespace MR
 {
 namespace ControlManager
 {
-    void OnStart()
+    void OnStart(const SConfiguration& _rConfiguration)
     {
-        CMRControlManager::GetInstance().OnStart();
+        CMRControlManager::GetInstance().OnStart(_rConfiguration);
     }
 
     // -----------------------------------------------------------------------------

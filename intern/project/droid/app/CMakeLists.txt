@@ -27,8 +27,9 @@ set( CMAKE_INCLUDE_CURRENT_DIR ON )
 # 05. graphic
 # 06. gui
 # 07. logic
+# 08. logic
 # ---------------------------------------
-set( MyLibraries camera graphic logic core data gui base )
+set( MyLibraries camera graphic logic mr core data gui base )
 
 include_directories( ${IncludeDir} )
 
@@ -59,6 +60,9 @@ target_include_directories( graphic PRIVATE ${ExternDir}/assimp/include )
 target_include_directories( graphic PRIVATE ${ExternDir}/devil/include )
 target_include_directories( graphic PRIVATE ${ExternDir}/tinyxml2/include )
 
+target_include_directories( mr PRIVATE ${ExternDir}/arcore/include )
+
+link_directories ( ${ExternDir}/arcore/lib/${ANDROID_ABI} )
 link_directories ( ${ExternDir}/assimp/lib/${ANDROID_ABI} )
 link_directories ( ${ExternDir}/devil/lib/${ANDROID_ABI} )
 link_directories ( ${ExternDir}/tinyxml2/lib/${ANDROID_ABI} )
@@ -77,7 +81,7 @@ add_library( app_droid SHARED ${TargetSources} )
 
 target_include_directories( app_droid PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue )
 
-target_link_libraries( app_droid EGL GLESv3 log android m native_app_glue)
+target_link_libraries( app_droid EGL GLESv3 arcore_sdk log android m native_app_glue)
 
 target_link_libraries( app_droid assimp IL ILU tinyxml2)
 
