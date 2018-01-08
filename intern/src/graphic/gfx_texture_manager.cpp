@@ -52,7 +52,6 @@ namespace
 
     public:
 
-        CTexturePtr GetDummyTexture1D();
         CTexturePtr GetDummyTexture2D();
         CTexturePtr GetDummyTexture3D();
         CTexturePtr GetDummyCubeTexture();
@@ -132,7 +131,6 @@ namespace
         CTextures       m_Textures;
         CTextureByHashs m_TexturesByHash;
         CTextureSets    m_TextureSets;
-        CTexturePtr     m_Texture1DPtr;
         CTexturePtr     m_Texture2DPtr;
 
     private:
@@ -172,7 +170,6 @@ namespace
         : m_Textures      ()
         , m_TexturesByHash()
         , m_TextureSets   ()
-        , m_Texture1DPtr  ()
         , m_Texture2DPtr  ()
     {
     }
@@ -198,24 +195,31 @@ namespace
         Gfx::Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxTextureManager::OnResize));
         
         // -----------------------------------------------------------------------------
-        // Create dummy textures from file
+        // Create 2x2 dummy texture
         // -----------------------------------------------------------------------------
+
+        Base::Byte4 Pixels[4];
+        Pixels[0] = Base::Byte4(1, 0, 0, 1);
+        Pixels[1] = Base::Byte4(0, 1, 0, 1);
+        Pixels[2] = Base::Byte4(0, 0, 1, 1);
+        Pixels[3] = Base::Byte4(1, 1, 0, 1);
+
         Gfx::STextureDescriptor TextureDescriptor;
-        
-        TextureDescriptor.m_NumberOfPixelsU  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
-        TextureDescriptor.m_NumberOfPixelsV  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
-        TextureDescriptor.m_NumberOfPixelsW  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
+
+        TextureDescriptor.m_NumberOfPixelsU  = 2;
+        TextureDescriptor.m_NumberOfPixelsV  = 2;
+        TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
-        TextureDescriptor.m_NumberOfTextures = Gfx::STextureDescriptor::s_NumberOfTexturesFromSource;
+        TextureDescriptor.m_NumberOfTextures = 1;
         TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
         TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
         TextureDescriptor.m_Format           = Gfx::CTexture::Unknown;
         TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
         TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
-        TextureDescriptor.m_pFileName        = "dummy_2d.tga";
-        TextureDescriptor.m_pPixels          = 0;
+        TextureDescriptor.m_pFileName        = nullptr;
+        TextureDescriptor.m_pPixels          = Pixels;
         TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8_UBYTE;
-        
+
         m_Texture2DPtr = CreateTexture2D(TextureDescriptor, true, SDataBehavior::LeftAlone);
 
         SetTextureLabel(m_Texture2DPtr, "Dummy Texture 2D");
@@ -237,7 +241,6 @@ namespace
 
     void CGfxTextureManager::OnExit()
     {
-        m_Texture1DPtr = 0;
         m_Texture2DPtr = 0;
 
         // -----------------------------------------------------------------------------
@@ -260,14 +263,7 @@ namespace
         BASE_UNUSED(_Width);
         BASE_UNUSED(_Height);
     }
-    
-    // -----------------------------------------------------------------------------
-    
-    CTexturePtr CGfxTextureManager::GetDummyTexture1D()
-    {
-        return m_Texture1DPtr;
-    }
-    
+
     // -----------------------------------------------------------------------------
 
     CTexturePtr CGfxTextureManager::GetDummyTexture2D()
@@ -279,6 +275,8 @@ namespace
 
     CTexturePtr CGfxTextureManager::GetDummyTexture3D()
     {
+        assert(false); // TODO: create dummy texture
+
         return nullptr;
     }
     
@@ -286,6 +284,8 @@ namespace
 
     CTexturePtr CGfxTextureManager::GetDummyCubeTexture()
     {
+        assert(false); // TODO: create dummy texture
+
         return nullptr;
     }
 
@@ -635,6 +635,8 @@ namespace
 
         CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
 
+        assert(pInternTexture != nullptr);
+        
         glObjectLabel(GL_TEXTURE, pInternTexture->m_NativeTexture, -1, _pLabel);
     }
 
@@ -2428,13 +2430,6 @@ namespace TextureManager
     void OnExit()
     {
         CGfxTextureManager::GetInstance().OnExit();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CTexturePtr GetDummyTexture1D()
-    {
-        return CGfxTextureManager::GetInstance().GetDummyTexture1D();
     }
 
     // -----------------------------------------------------------------------------
