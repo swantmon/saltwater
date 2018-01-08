@@ -29,15 +29,15 @@ namespace Gfx
 {
     struct SGraphicsInfo
     {
-        enum EGraphicAPIs
+        enum EGraphicAPI
         {
             OpenGL,
             OpenGLES,
         };
 
-        EGraphicAPIs m_GraphicsAPI;
-        int          m_MajorVersion;
-        int          m_MinorVersion;
+        EGraphicAPI m_GraphicsAPI;
+        int         m_MajorVersion;
+        int         m_MinorVersion;
     };
 } // namespace Gfx
 
