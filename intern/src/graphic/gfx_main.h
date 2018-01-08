@@ -27,10 +27,17 @@ namespace Main
 
 namespace Gfx
 {
-    enum EGraphicAPIs
+    struct SGraphicsInfo
     {
-        OpenGL,
-        OpenGLES,
+        enum EGraphicAPIs
+        {
+            OpenGL,
+            OpenGLES,
+        };
+
+        EGraphicAPIs m_GraphicsAPI;
+        int          m_MajorVersion;
+        int          m_MinorVersion;
     };
 } // namespace Gfx
 
@@ -56,9 +63,7 @@ namespace Main
 
     void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile);
 
-    EGraphicAPIs GetGraphicsAPI();
-    int GetGraphicsMajorVersion();
-    int GetGraphicsMinorVersion();
+    const SGraphicsInfo& GetGraphicsAPI();
     bool IsExtensionAvailable(const std::string& _Name);
 
     void BeginFrame();
