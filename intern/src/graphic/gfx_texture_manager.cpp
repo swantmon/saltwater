@@ -268,6 +268,8 @@ namespace
 
     CTexturePtr CGfxTextureManager::GetDummyTexture3D()
     {
+        assert(false); // TODO: create dummy texture
+
         return nullptr;
     }
     
@@ -275,6 +277,8 @@ namespace
 
     CTexturePtr CGfxTextureManager::GetDummyCubeTexture()
     {
+        assert(false); // TODO: create dummy texture
+
         return nullptr;
     }
 
