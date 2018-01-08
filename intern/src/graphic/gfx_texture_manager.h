@@ -43,7 +43,6 @@ namespace TextureManager
     void OnStart();
     void OnExit();
 
-    CTexturePtr GetDummyTexture1D();
     CTexturePtr GetDummyTexture2D();
     CTexturePtr GetDummyTexture3D();
     CTexturePtr GetDummyCubeTexture();

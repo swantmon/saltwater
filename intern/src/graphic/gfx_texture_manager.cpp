@@ -52,7 +52,6 @@ namespace
 
     public:
 
-        CTexturePtr GetDummyTexture1D();
         CTexturePtr GetDummyTexture2D();
         CTexturePtr GetDummyTexture3D();
         CTexturePtr GetDummyCubeTexture();
@@ -132,7 +131,6 @@ namespace
         CTextures       m_Textures;
         CTextureByHashs m_TexturesByHash;
         CTextureSets    m_TextureSets;
-        CTexturePtr     m_Texture1DPtr;
         CTexturePtr     m_Texture2DPtr;
 
     private:
@@ -172,7 +170,6 @@ namespace
         : m_Textures      ()
         , m_TexturesByHash()
         , m_TextureSets   ()
-        , m_Texture1DPtr  ()
         , m_Texture2DPtr  ()
     {
     }
@@ -237,7 +234,6 @@ namespace
 
     void CGfxTextureManager::OnExit()
     {
-        m_Texture1DPtr = 0;
         m_Texture2DPtr = 0;
 
         // -----------------------------------------------------------------------------
@@ -260,14 +256,7 @@ namespace
         BASE_UNUSED(_Width);
         BASE_UNUSED(_Height);
     }
-    
-    // -----------------------------------------------------------------------------
-    
-    CTexturePtr CGfxTextureManager::GetDummyTexture1D()
-    {
-        return m_Texture1DPtr;
-    }
-    
+
     // -----------------------------------------------------------------------------
 
     CTexturePtr CGfxTextureManager::GetDummyTexture2D()
@@ -2430,13 +2419,6 @@ namespace TextureManager
     void OnExit()
     {
         CGfxTextureManager::GetInstance().OnExit();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CTexturePtr GetDummyTexture1D()
-    {
-        return CGfxTextureManager::GetInstance().GetDummyTexture1D();
     }
 
     // -----------------------------------------------------------------------------
