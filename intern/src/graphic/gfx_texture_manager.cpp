@@ -635,6 +635,8 @@ namespace
 
         CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
 
+        assert(pInternTexture != nullptr);
+        
         glObjectLabel(GL_TEXTURE, pInternTexture->m_NativeTexture, -1, _pLabel);
     }
 
