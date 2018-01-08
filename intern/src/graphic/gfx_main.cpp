@@ -99,9 +99,7 @@ namespace
 
         void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile);
 
-        EGraphicAPIs GetGraphicsAPI();
-        int GetGraphicsMajorVersion();
-        int GetGraphicsMinorVersion();
+        const SGraphicsInfo& GetGraphicsAPI();
         bool IsExtensionAvailable(const std::string& _Name);
         
     public:
@@ -138,13 +136,6 @@ namespace
 #endif
             Base::Int2   m_WindowSize;
             unsigned int m_VSync;
-        };
-
-        struct SGraphicsInfo
-        {
-            EGraphicAPIs m_GraphicsAPI;
-            int          m_MajorVersion;
-            int          m_MinorVersion;
         };
         
         struct SPerFrameConstantBuffer
@@ -211,8 +202,8 @@ namespace
         const std::string GraphicsAPI = Base::CProgramParameters::GetInstance().GetStdString("graphics_api", "gl");
 #endif
 
-        if      (GraphicsAPI == "gles") m_GraphicsInfo.m_GraphicsAPI = OpenGLES;
-        else if (GraphicsAPI == "gl")   m_GraphicsInfo.m_GraphicsAPI = OpenGL;
+        if      (GraphicsAPI == "gles") m_GraphicsInfo.m_GraphicsAPI = SGraphicsInfo::OpenGLES;
+        else if (GraphicsAPI == "gl")   m_GraphicsInfo.m_GraphicsAPI = SGraphicsInfo::OpenGL;
         else BASE_THROWV("Graphics API %s is not supported! Possible options are \"gles\" or \"gl\"", GraphicsAPI.c_str());
 
 #ifdef __ANDROID__
@@ -252,7 +243,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Check OpenGLES
             // -----------------------------------------------------------------------------
-            if (m_GraphicsInfo.m_GraphicsAPI != OpenGLES)
+            if (m_GraphicsInfo.m_GraphicsAPI != SGraphicsInfo::OpenGLES)
             {
                 BASE_THROWM("Only OpenGLES is supported on Android devices. Please change graphics API in the config file.")
             }
@@ -428,7 +419,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Check if OpenGLES is available on desktop graphics card
             // -----------------------------------------------------------------------------
-            if (m_GraphicsInfo.m_GraphicsAPI == OpenGLES)
+            if (m_GraphicsInfo.m_GraphicsAPI == SGraphicsInfo::OpenGLES)
             {
                 typedef const char* (WINAPI * PFNWGLGETEXTENSIONSSTRINGARBPROC)(HDC hdc);
                 PROC Function = wglGetProcAddress("wglGetExtensionsStringARB");
@@ -469,7 +460,7 @@ namespace
             {
                 WGL_CONTEXT_MAJOR_VERSION_ARB, m_GraphicsInfo.m_MajorVersion,
                 WGL_CONTEXT_MINOR_VERSION_ARB, m_GraphicsInfo.m_MinorVersion,
-                WGL_CONTEXT_PROFILE_MASK_ARB , m_GraphicsInfo.m_GraphicsAPI == OpenGLES ? WGL_CONTEXT_ES2_PROFILE_BIT_EXT : WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+                WGL_CONTEXT_PROFILE_MASK_ARB , m_GraphicsInfo.m_GraphicsAPI == SGraphicsInfo::OpenGLES ? WGL_CONTEXT_ES2_PROFILE_BIT_EXT : WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
                 WGL_CONTEXT_FLAGS_ARB        , APP_DEBUG_MODE ? WGL_CONTEXT_DEBUG_BIT_ARB : 0,
                 0,
             };
@@ -693,23 +684,9 @@ namespace
     
     // -----------------------------------------------------------------------------
 
-    EGraphicAPIs CGfxMain::GetGraphicsAPI()
+    const SGraphicsInfo&  CGfxMain::GetGraphicsAPI()
     {
-        return m_GraphicsInfo.m_GraphicsAPI;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    int CGfxMain::GetGraphicsMajorVersion()
-    {
-        return m_GraphicsInfo.m_MajorVersion;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    int CGfxMain::GetGraphicsMinorVersion()
-    {
-        return m_GraphicsInfo.m_MinorVersion;
+        return m_GraphicsInfo;
     }
 
     // -----------------------------------------------------------------------------
@@ -974,23 +951,9 @@ namespace Main
 
     // -----------------------------------------------------------------------------
 
-    EGraphicAPIs GetGraphicsAPI()
+    const SGraphicsInfo& GetGraphicsAPI()
     {
         return CGfxMain::GetInstance().GetGraphicsAPI();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    int GetGraphicsMajorVersion()
-    {
-        return CGfxMain::GetInstance().GetGraphicsMajorVersion();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    int GetGraphicsMinorVersion()
-    {
-        return CGfxMain::GetInstance().GetGraphicsMinorVersion();
     }
 
     // -----------------------------------------------------------------------------
