@@ -221,7 +221,7 @@ namespace
             pProbeLightFacet->SetType(Dt::CLightProbeFacet::Sky);
             pProbeLightFacet->SetQuality(Dt::CLightProbeFacet::PX256);
             pProbeLightFacet->SetIntensity(1.0f);
-            pProbeLightFacet->SetRefreshMode(Dt::CLightProbeFacet::Dynamic);
+            pProbeLightFacet->SetRefreshMode(Dt::CLightProbeFacet::Static);
             pProbeLightFacet->SetNear(0.01f);
             pProbeLightFacet->SetFar(1024.0f);
             pProbeLightFacet->SetParallaxCorrection(false);

@@ -7,7 +7,6 @@
 #include "base/base_vector4.h"
 
 #include "data/data_data_behavior.h"
-#include "data/data_texture_1d.h"
 #include "data/data_texture_2d.h"
 #include "data/data_texture_cube.h"
 
@@ -54,7 +53,6 @@ namespace TextureManager
     void OnExit();
 
     CTextureBase* CreateTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::Listen);
-    CTexture1D* CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::Listen);
     CTexture2D* CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::Listen);
 
     CTextureCube* CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::Listen);

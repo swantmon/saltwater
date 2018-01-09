@@ -21,18 +21,18 @@ namespace Gfx
         static const unsigned int      s_NumberOfTexturesFromSource = static_cast<unsigned int>(-1);
         static const CTexture::EFormat s_FormatFromSource           = CTexture::Unknown;
 
-        unsigned int            m_NumberOfPixelsU;
-        unsigned int            m_NumberOfPixelsV;
-        unsigned int            m_NumberOfPixelsW;
-        unsigned int            m_NumberOfMipMaps;
-        unsigned int            m_NumberOfTextures;
-        unsigned int            m_Binding;
-        unsigned int            m_Access;
+        unsigned int        m_NumberOfPixelsU;
+        unsigned int        m_NumberOfPixelsV;
+        unsigned int        m_NumberOfPixelsW;
+        unsigned int        m_NumberOfMipMaps;
+        unsigned int        m_NumberOfTextures;
+        unsigned int        m_Binding;
+        unsigned int        m_Access;
         CTexture::EFormat   m_Format;
         CTexture::EUsage    m_Usage;
         CTexture::ESemantic m_Semantic;
-        const Base::Char*       m_pFileName;
-        void*                   m_pPixels;
+        const Base::Char*   m_pFileName;
+        void*               m_pPixels;
     };
 } // namespace Gfx
 
@@ -43,12 +43,10 @@ namespace TextureManager
     void OnStart();
     void OnExit();
 
-    CTexturePtr GetDummyTexture1D();
     CTexturePtr GetDummyTexture2D();
     CTexturePtr GetDummyTexture3D();
     CTexturePtr GetDummyCubeTexture();
 
-    CTexturePtr CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::LeftAlone);
     CTexturePtr CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::LeftAlone);
     CTexturePtr CreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::LeftAlone);
 
@@ -62,7 +60,6 @@ namespace TextureManager
 
     CTexturePtr GetTextureByHash(unsigned int _Hash);
 
-    void ClearTexture1D(CTexturePtr _TexturePtr, const Base::Float4& _rColor);
     void ClearTexture2D(CTexturePtr _TexturePtr, const Base::Float4& _rColor);
     void ClearTexture3D(CTexturePtr _TexturePtr, const Base::Float4& _rColor);
 
