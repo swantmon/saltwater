@@ -52,12 +52,10 @@ namespace
 
     public:
 
-        CTexturePtr GetDummyTexture1D();
         CTexturePtr GetDummyTexture2D();
         CTexturePtr GetDummyTexture3D();
         CTexturePtr GetDummyCubeTexture();
 
-        CTexturePtr CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
         CTexturePtr CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
         CTexturePtr CreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
 
@@ -67,7 +65,6 @@ namespace
 
         CTexturePtr GetTextureByHash(unsigned int _Hash);
 
-        void ClearTexture1D(CTexturePtr _TexturePtr, const Base::Float4& _rColor);
         void ClearTexture2D(CTexturePtr _TexturePtr, const Base::Float4& _rColor);
         void ClearTexture3D(CTexturePtr _TexturePtr, const Base::Float4& _rColor);
 
@@ -121,7 +118,7 @@ namespace
         typedef Base::CManagedPool<CInternTextureSet, 16> CTextureSets;
 
         // -----------------------------------------------------------------------------
-        // There are way more 2D textures than 1D or 3D ones, so use bigger pages here.
+        // There are way more 2D textures than 3D ones, so use bigger pages here.
         // -----------------------------------------------------------------------------
         typedef Base::CManagedPool<CInternTexture, 256, 0> CTextures;
         
@@ -132,14 +129,12 @@ namespace
         CTextures       m_Textures;
         CTextureByHashs m_TexturesByHash;
         CTextureSets    m_TextureSets;
-        CTexturePtr     m_Texture1DPtr;
         CTexturePtr     m_Texture2DPtr;
 
     private:
 
         void OnDirtyTexture(Dt::CTextureBase* _pTexture);
 
-        CTexturePtr InternCreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
         CTexturePtr InternCreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
         CTexturePtr InternCreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
 
@@ -172,7 +167,6 @@ namespace
         : m_Textures      ()
         , m_TexturesByHash()
         , m_TextureSets   ()
-        , m_Texture1DPtr  ()
         , m_Texture2DPtr  ()
     {
     }
@@ -198,24 +192,31 @@ namespace
         Gfx::Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxTextureManager::OnResize));
         
         // -----------------------------------------------------------------------------
-        // Create dummy textures from file
+        // Create 2x2 dummy texture
         // -----------------------------------------------------------------------------
+
+        Base::Byte4 Pixels[4];
+        Pixels[0] = Base::Byte4(1, 0, 0, 1);
+        Pixels[1] = Base::Byte4(0, 1, 0, 1);
+        Pixels[2] = Base::Byte4(0, 0, 1, 1);
+        Pixels[3] = Base::Byte4(1, 1, 0, 1);
+
         Gfx::STextureDescriptor TextureDescriptor;
-        
-        TextureDescriptor.m_NumberOfPixelsU  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
-        TextureDescriptor.m_NumberOfPixelsV  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
-        TextureDescriptor.m_NumberOfPixelsW  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
+
+        TextureDescriptor.m_NumberOfPixelsU  = 2;
+        TextureDescriptor.m_NumberOfPixelsV  = 2;
+        TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
-        TextureDescriptor.m_NumberOfTextures = Gfx::STextureDescriptor::s_NumberOfTexturesFromSource;
+        TextureDescriptor.m_NumberOfTextures = 1;
         TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
         TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
         TextureDescriptor.m_Format           = Gfx::CTexture::Unknown;
         TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
         TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
-        TextureDescriptor.m_pFileName        = "dummy_2d.tga";
-        TextureDescriptor.m_pPixels          = 0;
+        TextureDescriptor.m_pFileName        = nullptr;
+        TextureDescriptor.m_pPixels          = Pixels;
         TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8_UBYTE;
-        
+
         m_Texture2DPtr = CreateTexture2D(TextureDescriptor, true, SDataBehavior::LeftAlone);
 
         SetTextureLabel(m_Texture2DPtr, "Dummy Texture 2D");
@@ -237,7 +238,6 @@ namespace
 
     void CGfxTextureManager::OnExit()
     {
-        m_Texture1DPtr = 0;
         m_Texture2DPtr = 0;
 
         // -----------------------------------------------------------------------------
@@ -260,14 +260,7 @@ namespace
         BASE_UNUSED(_Width);
         BASE_UNUSED(_Height);
     }
-    
-    // -----------------------------------------------------------------------------
-    
-    CTexturePtr CGfxTextureManager::GetDummyTexture1D()
-    {
-        return m_Texture1DPtr;
-    }
-    
+
     // -----------------------------------------------------------------------------
 
     CTexturePtr CGfxTextureManager::GetDummyTexture2D()
@@ -279,6 +272,8 @@ namespace
 
     CTexturePtr CGfxTextureManager::GetDummyTexture3D()
     {
+        assert(false); // TODO: create dummy texture
+
         return nullptr;
     }
     
@@ -286,16 +281,11 @@ namespace
 
     CTexturePtr CGfxTextureManager::GetDummyCubeTexture()
     {
+        assert(false); // TODO: create dummy texture
+
         return nullptr;
     }
-
-    // -----------------------------------------------------------------------------
-
-    CTexturePtr CGfxTextureManager::CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
-    {
-        return InternCreateTexture1D(_rDescriptor, _IsDeleteable, _Behavior);
-    }
-
+    
     // -----------------------------------------------------------------------------
 
     CTexturePtr CGfxTextureManager::CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
@@ -396,19 +386,13 @@ namespace
 
         return nullptr;
     }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxTextureManager::ClearTexture1D(CTexturePtr _TexturePtr, const Base::Float4& _rColor)
-    {
-        BASE_UNUSED(_TexturePtr);
-        BASE_UNUSED(_rColor);
-    }
-
+    
     // -----------------------------------------------------------------------------
 
     void CGfxTextureManager::ClearTexture2D(CTexturePtr _TexturePtr, const Base::Float4& _rColor)
     {
+        assert(false); //TODO: implement
+
         BASE_UNUSED(_TexturePtr);
         BASE_UNUSED(_rColor);
     }
@@ -417,6 +401,8 @@ namespace
 
     void CGfxTextureManager::ClearTexture3D(CTexturePtr _TexturePtr, const Base::Float4& _rColor)
     {
+        assert(false); //TODO: implement
+
         BASE_UNUSED(_TexturePtr);
         BASE_UNUSED(_rColor);
     }
@@ -635,6 +621,8 @@ namespace
 
         CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
 
+        assert(pInternTexture != nullptr);
+        
         glObjectLabel(GL_TEXTURE, pInternTexture->m_NativeTexture, -1, _pLabel);
     }
 
@@ -681,15 +669,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Depending on dimension create the texture
             // -----------------------------------------------------------------------------
-            if (_pTexture->GetDimension() == Dt::CTextureBase::Dim1D)
-            {
-                Dt::CTexture1D* pDataTexture = static_cast<Dt::CTexture1D*>(_pTexture);
-
-                TextureDescriptor.m_NumberOfPixelsU = pDataTexture->GetNumberOfPixelsU();
-
-                InternCreateTexture1D(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
-            }
-            else if (_pTexture->GetDimension() == Dt::CTextureBase::Dim2D)
+            if (_pTexture->GetDimension() == Dt::CTextureBase::Dim2D)
             {
                 CTexturePtr Texture2DPtr = nullptr;
 
@@ -808,18 +788,7 @@ namespace
             }
         }
     }
-
-    // -----------------------------------------------------------------------------
-
-    CTexturePtr CGfxTextureManager::InternCreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
-    {
-        BASE_UNUSED(_rDescriptor);
-        BASE_UNUSED(_IsDeleteable);
-        BASE_UNUSED(_Behavior);
-
-        return nullptr;
-    }
-
+    
     // -----------------------------------------------------------------------------
 
     CTexturePtr CGfxTextureManager::InternCreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
@@ -2194,7 +2163,6 @@ namespace
     {
         static Gfx::CTexture::EDimension s_Types[] =
         {
-            Gfx::CTexture::Dim1D,
             Gfx::CTexture::Dim2D,
             Gfx::CTexture::Dim3D,
         };
@@ -2432,13 +2400,6 @@ namespace TextureManager
 
     // -----------------------------------------------------------------------------
 
-    CTexturePtr GetDummyTexture1D()
-    {
-        return CGfxTextureManager::GetInstance().GetDummyTexture1D();
-    }
-
-    // -----------------------------------------------------------------------------
-
     CTexturePtr GetDummyTexture2D()
     {
         return CGfxTextureManager::GetInstance().GetDummyTexture2D();
@@ -2457,14 +2418,7 @@ namespace TextureManager
     {
         return CGfxTextureManager::GetInstance().GetDummyCubeTexture();
     }
-
-    // -----------------------------------------------------------------------------
-
-    CTexturePtr CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
-    {
-        return CGfxTextureManager::GetInstance().CreateTexture1D(_rDescriptor, _IsDeleteable, _Behavior);
-    }
-
+    
     // -----------------------------------------------------------------------------
 
     CTexturePtr CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
@@ -2536,13 +2490,6 @@ namespace TextureManager
         return CGfxTextureManager::GetInstance().GetTextureByHash(_Hash);
     }
     
-    // -----------------------------------------------------------------------------
-
-    void ClearTexture1D(CTexturePtr _TexturePtr, const Base::Float4& _rColor)
-    {
-        CGfxTextureManager::GetInstance().ClearTexture1D(_TexturePtr, _rColor);
-    }
-
     // -----------------------------------------------------------------------------
 
     void ClearTexture2D(CTexturePtr _TexturePtr, const Base::Float4& _rColor)

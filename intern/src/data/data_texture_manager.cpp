@@ -39,7 +39,6 @@ namespace
     public:
 
         CTextureBase* CreateTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::Listen, bool _IsInternal = false);
-        CTexture1D* CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _IsInternal = false);
         CTexture2D* CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _IsInternal = false);
 
         CTextureCube* CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _IsInternal = false);
@@ -77,22 +76,7 @@ namespace
 
             friend class  CDtTextureManager;
         };
-
-        // -----------------------------------------------------------------------------
-        // Represents a 1D texture.
-        // -----------------------------------------------------------------------------
-        class CInternTexture1D : public CTexture1D
-        {
-            public:
-
-                CInternTexture1D();
-               ~CInternTexture1D();
-
-            private:
-
-                friend class  CDtTextureManager;
-        };
-
+        
         // -----------------------------------------------------------------------------
         // Represents a 2D texture.
         // -----------------------------------------------------------------------------
@@ -124,17 +108,14 @@ namespace
         };
 
         // -----------------------------------------------------------------------------
-        // There are way more 2D textures than 1D or 3D ones, so use bigger pages here.
+        // There are way more 2D textures than 3D ones, so use bigger pages here.
         // -----------------------------------------------------------------------------
-        typedef Base::CPool<CInternTexture1D,    16> CTexture1Ds;
         typedef Base::CPool<CInternTexture2D,   256> CTexture2Ds;
         typedef Base::CPool<CInternTextureCube,  16> CTextureCubes;
 
-        typedef CTexture1Ds::CIterator   CTexture1DIterator;
         typedef CTexture2Ds::CIterator   CTexture2DIterator;
         typedef CTextureCubes::CIterator CTextureCubeIterator;
         
-        typedef std::unordered_map<unsigned int, CInternTexture1D*> CTexture1DByHashs;
         typedef std::unordered_map<unsigned int, CInternTexture2D*> CTexture2DByHashs;
         typedef std::unordered_map<unsigned int, CInternTextureCube*> CTextureCubeByHashs;
 
@@ -142,10 +123,8 @@ namespace
 
     private:
 
-        CTexture1Ds          m_Textures1D;
         CTexture2Ds          m_Textures2D;
         CTextureCubes        m_TexturesCube;
-        CTexture1DByHashs    m_Textures1DByHash;
         CTexture2DByHashs    m_Textures2DByHash;
         CTextureCubeByHashs  m_TexturesCubeByHash;
         CTextureDelegates    m_TextureDelegates;
@@ -165,10 +144,8 @@ namespace
 namespace
 {
     CDtTextureManager::CDtTextureManager()
-        : m_Textures1D        ()
-        , m_Textures2D        ()
+        : m_Textures2D        ()
         , m_TexturesCube      ()
-        , m_Textures1DByHash  ()
         , m_Textures2DByHash  ()
         , m_TexturesCubeByHash()
         , m_TextureDelegates  ()
@@ -198,11 +175,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Clear all the pools with the textures.
         // -----------------------------------------------------------------------------
-        m_Textures1D  .Clear();
         m_Textures2D  .Clear();
         m_TexturesCube.Clear();
 
-        m_Textures1DByHash  .clear();
         m_Textures2DByHash  .clear();
         m_TexturesCubeByHash.clear();
 
@@ -245,12 +220,7 @@ namespace
             pData = static_cast<const void*>(pHashIdentifier);
 
             Hash = Base::CRC32(pData, NumberOfBytes);
-
-            if (m_Textures1DByHash.find(Hash) != m_Textures1DByHash.end())
-            {
-                return m_Textures1DByHash.at(Hash);
-            }
-
+            
             if (m_Textures2DByHash.find(Hash) != m_Textures2DByHash.end())
             {
                 return m_Textures2DByHash.at(Hash);
@@ -334,10 +304,6 @@ namespace
                 {
                     return CreateTexture2D(TextureDescriptor, _IsDeleteable, _Behavior, _IsInternal);
                 }
-                else if (NumberOfPixelsU > 1)
-                {
-                    return CreateTexture1D(TextureDescriptor, _IsDeleteable, _Behavior, _IsInternal);
-                }
             }
             else
             {
@@ -360,26 +326,10 @@ namespace
         {
             return CreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior, _IsInternal);
         }
-        else if (_rDescriptor.m_NumberOfPixelsU > 1 && _rDescriptor.m_NumberOfPixelsU != Dt::STextureDescriptor::s_NumberOfPixelsFromSource)
-        {
-            return CreateTexture1D(_rDescriptor, _IsDeleteable, _Behavior, _IsInternal);
-        }
 
         return nullptr;
     }
-
-    // -----------------------------------------------------------------------------
-
-    CTexture1D* CDtTextureManager::CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _IsInternal)
-    {
-        BASE_UNUSED(_rDescriptor);
-        BASE_UNUSED(_IsDeleteable);
-        BASE_UNUSED(_Behavior);
-        BASE_UNUSED(_IsInternal);
-
-        return nullptr;
-    }
-
+    
     // -----------------------------------------------------------------------------
 
     CTexture2D* CDtTextureManager::CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior, bool _IsInternal)
@@ -882,11 +832,6 @@ namespace
 
     CTextureBase* CDtTextureManager::GetTextureByHash(unsigned int _Hash)
     {
-        if (m_Textures1DByHash.find(_Hash) != m_Textures1DByHash.end())
-        {
-            return m_Textures1DByHash.at(_Hash);
-        }
-
         if (m_Textures2DByHash.find(_Hash) != m_Textures2DByHash.end())
         {
             return m_Textures2DByHash.at(_Hash);
@@ -1622,30 +1567,6 @@ namespace
 
 namespace
 {
-    CDtTextureManager::CInternTexture1D::CInternTexture1D()
-        : CTexture1D()
-    {
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CDtTextureManager::CInternTexture1D::~CInternTexture1D()
-    {
-        if (m_Info.m_IsDeletable)
-        {
-            m_FileName  .clear();
-            m_Identifier.clear();
-
-            if (m_Info.m_IsPixelOwner)
-            {
-                Base::CMemory::Free(m_pPixels);
-            }
-        }
-    }
-} // namespace
-
-namespace
-{
     CDtTextureManager::CInternTexture2D::CInternTexture2D()
         : CTexture2D()
     {
@@ -1725,13 +1646,6 @@ namespace TextureManager
         return CDtTextureManager::GetInstance().CreateTexture(_rDescriptor, _IsDeleteable, _Behavior);
     }
     
-    // -----------------------------------------------------------------------------
-
-    CTexture1D* CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
-    {
-        return CDtTextureManager::GetInstance().CreateTexture1D(_rDescriptor, _IsDeleteable, _Behavior);
-    }
-
     // -----------------------------------------------------------------------------
 
     CTexture2D* CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
