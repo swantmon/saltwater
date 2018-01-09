@@ -56,7 +56,6 @@ namespace
         CTexturePtr GetDummyTexture3D();
         CTexturePtr GetDummyCubeTexture();
 
-        CTexturePtr CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
         CTexturePtr CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
         CTexturePtr CreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
 
@@ -66,7 +65,6 @@ namespace
 
         CTexturePtr GetTextureByHash(unsigned int _Hash);
 
-        void ClearTexture1D(CTexturePtr _TexturePtr, const Base::Float4& _rColor);
         void ClearTexture2D(CTexturePtr _TexturePtr, const Base::Float4& _rColor);
         void ClearTexture3D(CTexturePtr _TexturePtr, const Base::Float4& _rColor);
 
@@ -120,7 +118,7 @@ namespace
         typedef Base::CManagedPool<CInternTextureSet, 16> CTextureSets;
 
         // -----------------------------------------------------------------------------
-        // There are way more 2D textures than 1D or 3D ones, so use bigger pages here.
+        // There are way more 2D textures than 3D ones, so use bigger pages here.
         // -----------------------------------------------------------------------------
         typedef Base::CManagedPool<CInternTexture, 256, 0> CTextures;
         
@@ -137,7 +135,6 @@ namespace
 
         void OnDirtyTexture(Dt::CTextureBase* _pTexture);
 
-        CTexturePtr InternCreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
         CTexturePtr InternCreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
         CTexturePtr InternCreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
 
@@ -288,14 +285,7 @@ namespace
 
         return nullptr;
     }
-
-    // -----------------------------------------------------------------------------
-
-    CTexturePtr CGfxTextureManager::CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
-    {
-        return InternCreateTexture1D(_rDescriptor, _IsDeleteable, _Behavior);
-    }
-
+    
     // -----------------------------------------------------------------------------
 
     CTexturePtr CGfxTextureManager::CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
@@ -396,19 +386,13 @@ namespace
 
         return nullptr;
     }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxTextureManager::ClearTexture1D(CTexturePtr _TexturePtr, const Base::Float4& _rColor)
-    {
-        BASE_UNUSED(_TexturePtr);
-        BASE_UNUSED(_rColor);
-    }
-
+    
     // -----------------------------------------------------------------------------
 
     void CGfxTextureManager::ClearTexture2D(CTexturePtr _TexturePtr, const Base::Float4& _rColor)
     {
+        assert(false); //TODO: implement
+
         BASE_UNUSED(_TexturePtr);
         BASE_UNUSED(_rColor);
     }
@@ -417,6 +401,8 @@ namespace
 
     void CGfxTextureManager::ClearTexture3D(CTexturePtr _TexturePtr, const Base::Float4& _rColor)
     {
+        assert(false); //TODO: implement
+
         BASE_UNUSED(_TexturePtr);
         BASE_UNUSED(_rColor);
     }
@@ -683,15 +669,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Depending on dimension create the texture
             // -----------------------------------------------------------------------------
-            if (_pTexture->GetDimension() == Dt::CTextureBase::Dim1D)
-            {
-                Dt::CTexture1D* pDataTexture = static_cast<Dt::CTexture1D*>(_pTexture);
-
-                TextureDescriptor.m_NumberOfPixelsU = pDataTexture->GetNumberOfPixelsU();
-
-                InternCreateTexture1D(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
-            }
-            else if (_pTexture->GetDimension() == Dt::CTextureBase::Dim2D)
+            if (_pTexture->GetDimension() == Dt::CTextureBase::Dim2D)
             {
                 CTexturePtr Texture2DPtr = nullptr;
 
@@ -810,18 +788,7 @@ namespace
             }
         }
     }
-
-    // -----------------------------------------------------------------------------
-
-    CTexturePtr CGfxTextureManager::InternCreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
-    {
-        BASE_UNUSED(_rDescriptor);
-        BASE_UNUSED(_IsDeleteable);
-        BASE_UNUSED(_Behavior);
-
-        return nullptr;
-    }
-
+    
     // -----------------------------------------------------------------------------
 
     CTexturePtr CGfxTextureManager::InternCreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
@@ -2196,7 +2163,6 @@ namespace
     {
         static Gfx::CTexture::EDimension s_Types[] =
         {
-            Gfx::CTexture::Dim1D,
             Gfx::CTexture::Dim2D,
             Gfx::CTexture::Dim3D,
         };
@@ -2452,14 +2418,7 @@ namespace TextureManager
     {
         return CGfxTextureManager::GetInstance().GetDummyCubeTexture();
     }
-
-    // -----------------------------------------------------------------------------
-
-    CTexturePtr CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
-    {
-        return CGfxTextureManager::GetInstance().CreateTexture1D(_rDescriptor, _IsDeleteable, _Behavior);
-    }
-
+    
     // -----------------------------------------------------------------------------
 
     CTexturePtr CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
@@ -2531,13 +2490,6 @@ namespace TextureManager
         return CGfxTextureManager::GetInstance().GetTextureByHash(_Hash);
     }
     
-    // -----------------------------------------------------------------------------
-
-    void ClearTexture1D(CTexturePtr _TexturePtr, const Base::Float4& _rColor)
-    {
-        CGfxTextureManager::GetInstance().ClearTexture1D(_TexturePtr, _rColor);
-    }
-
     // -----------------------------------------------------------------------------
 
     void ClearTexture2D(CTexturePtr _TexturePtr, const Base::Float4& _rColor)

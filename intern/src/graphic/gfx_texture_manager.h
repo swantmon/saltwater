@@ -47,7 +47,6 @@ namespace TextureManager
     CTexturePtr GetDummyTexture3D();
     CTexturePtr GetDummyCubeTexture();
 
-    CTexturePtr CreateTexture1D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::LeftAlone);
     CTexturePtr CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::LeftAlone);
     CTexturePtr CreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::LeftAlone);
 
@@ -61,7 +60,6 @@ namespace TextureManager
 
     CTexturePtr GetTextureByHash(unsigned int _Hash);
 
-    void ClearTexture1D(CTexturePtr _TexturePtr, const Base::Float4& _rColor);
     void ClearTexture2D(CTexturePtr _TexturePtr, const Base::Float4& _rColor);
     void ClearTexture3D(CTexturePtr _TexturePtr, const Base::Float4& _rColor);
 

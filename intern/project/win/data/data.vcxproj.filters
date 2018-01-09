@@ -40,9 +40,6 @@
     <ClInclude Include="..\..\..\src\data\data_surface.h">
       <Filter>models</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_texture_1d.h">
-      <Filter>textures</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_texture_2d.h">
       <Filter>textures</Filter>
     </ClInclude>
@@ -186,9 +183,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_entity.cpp">
       <Filter>map\entity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_texture_1d.cpp">
-      <Filter>textures</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_texture_2d.cpp">
       <Filter>textures</Filter>
