@@ -139,10 +139,34 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup mixed reality
         // -----------------------------------------------------------------------------
+        JNIEnv *env = 0;
+        jobject contextObj = 0;
+
+        try
+        {
+            _pAndroidApp->activity->vm->AttachCurrentThread(&env, NULL);
+
+            jclass contextClass = env->GetObjectClass(_pAndroidApp->activity->clazz);
+
+            jmethodID contextMethod = env->GetMethodID(contextClass, "getApplicationContext", "()Landroid/content/Context;");
+
+            contextObj = env->CallObjectMethod(_pAndroidApp->activity->clazz, contextMethod);
+
+        }
+        catch(...)
+        {
+            JNIEnv *env;
+            _pAndroidApp->activity->vm->AttachCurrentThread(&env, NULL);
+            jclass contextClass = env->FindClass("android/content/Context");
+            jclass activityClass = env->FindClass("android/app/NativeActivity");
+            jmethodID contextMethod = env->GetMethodID(activityClass, "getApplicationContext", "()Landroid/content/Context;");
+            jobject contextObj = env->CallObjectMethod(_pAndroidApp->activity->clazz, contextMethod);
+        }
+
         MR::ControlManager::SConfiguration Config;
 
-        Config.m_pEnv     = _pAndroidApp->activity->env;
-        Config.m_pContext = 0;
+        Config.m_pEnv     = env;
+        Config.m_pContext = contextObj;
 
         MR::ControlManager::OnStart(Config);
 

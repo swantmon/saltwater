@@ -20,8 +20,7 @@
             android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen"
             android:screenOrientation="landscape"
             android:configChanges="orientation|keyboardHidden|screenSize">
-            <meta-data android:name="android.app.lib_name"
-                android:value="app_droid" />
+            <meta-data android:name="android.app.lib_name" android:value="app_droid" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

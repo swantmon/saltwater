@@ -38,10 +38,6 @@ namespace
 
     public:
 
-        static const unsigned int s_NumberOfFramesUntilCameraIsInvisible = 0;
-        
-    public:
-
         CMRControlManager();
        ~CMRControlManager();
 
@@ -82,12 +78,22 @@ namespace
 
         ArStatus Status;
 
+        // env: 0x0000007ed9ccc1c0
+        // context: 0x0000007fd20b742c
         Status = ArSession_create(_rConfiguration.m_pEnv, _rConfiguration.m_pContext, &ar_session_);
 
         if (Status == AR_SUCCESS)
         {
             ArConfig* ar_config = nullptr;
             ArConfig_create(ar_session_, &ar_config);
+
+            Status = ArSession_checkSupported(ar_session_, ar_config);
+
+            Status = ArSession_configure(ar_session_, ar_config);
+
+            ArConfig_destroy(ar_config);
+
+            ArFrame_create(ar_session_, &ar_frame_);
         }
     }
 
