@@ -146,9 +146,9 @@ namespace
         {
             _pAndroidApp->activity->vm->AttachCurrentThread(&env, NULL);
 
-            jclass contextClass = env->GetObjectClass(_pAndroidApp->activity->clazz);
+            jclass activityClass = env->GetObjectClass(_pAndroidApp->activity->clazz);
 
-            jmethodID contextMethod = env->GetMethodID(contextClass, "getApplicationContext", "()Landroid/content/Context;");
+            jmethodID contextMethod = env->GetMethodID(activityClass, "getApplicationContext", "()Landroid/content/Context;");
 
             contextObj = env->CallObjectMethod(_pAndroidApp->activity->clazz, contextMethod);
 
