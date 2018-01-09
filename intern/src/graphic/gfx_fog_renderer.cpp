@@ -764,7 +764,7 @@ namespace
 
         unsigned int s_TileSizeX = 16;
         unsigned int s_TileSizeY = 10;
-        unsigned int s_TileSizeZ = 8;
+        unsigned int s_TileSizeZ = 1;
 
         NumberOfThreadGroupsX = (160 + s_TileSizeX - 1) / (s_TileSizeX);
         NumberOfThreadGroupsY = ( 90 + s_TileSizeY - 1) / (s_TileSizeY);
