@@ -151,7 +151,6 @@ namespace
             jmethodID contextMethod = env->GetMethodID(activityClass, "getApplicationContext", "()Landroid/content/Context;");
 
             contextObj = env->CallObjectMethod(_pAndroidApp->activity->clazz, contextMethod);
-
         }
         catch(...)
         {
@@ -165,7 +164,7 @@ namespace
 
         MR::ControlManager::SConfiguration Config;
 
-        Config.m_pEnv     = env;
+        Config.m_pEnv     = _pAndroidApp->activity->env;
         Config.m_pContext = contextObj;
 
         MR::ControlManager::OnStart(Config);
