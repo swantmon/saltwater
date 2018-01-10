@@ -112,6 +112,7 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_camera_actor_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_camera_actor_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_edit_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_graphics_info.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_indirect_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_facet.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_manager.h" />

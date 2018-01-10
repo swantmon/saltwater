@@ -59,8 +59,6 @@ namespace
         void OnNewMap();
         void OnUnloadMap();
 
-        void OnResize(unsigned int _Width, unsigned int _Height);
-
         void Update();
         void Render();
         void RenderHitProxy();
@@ -117,11 +115,6 @@ namespace
         , m_HitProxyContextPtr      ()
         , m_DeferredRenderJobs      ()
     {
-        // -----------------------------------------------------------------------------
-        // Register resize delegate
-        // -----------------------------------------------------------------------------
-        Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxActorRenderer::OnResize));
-
         // -----------------------------------------------------------------------------
         // Reserve some jobs
         // -----------------------------------------------------------------------------
@@ -307,14 +300,6 @@ namespace
     void CGfxActorRenderer::OnUnloadMap()
     {
 
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxActorRenderer::OnResize(unsigned int _Width, unsigned int _Height)
-    {
-        BASE_UNUSED(_Width);
-        BASE_UNUSED(_Height);
     }
 
     // -----------------------------------------------------------------------------

@@ -15,6 +15,7 @@
 #include "base/base_exception.h"
 #include "base/base_input_event.h"
 #include "base/base_uncopyable.h"
+#include "base/base_program_parameters.h"
 #include "base/base_singleton.h"
 
 #include "core/core_asset_manager.h"
@@ -66,6 +67,7 @@ namespace
         App::CState::EStateType m_CurrentState;
         App::CState::EStateType m_RequestState;
         SApplicationSetup       m_AppSetup;
+        std::string             m_ParameterFile;
         
     private:
         
@@ -94,8 +96,9 @@ namespace
 namespace
 {
     CApplication::CApplication()
-        : m_CurrentState(App::CState::Init)
-        , m_RequestState(App::CState::Init)
+        : m_CurrentState (App::CState::Init)
+        , m_RequestState (App::CState::Init)
+        , m_ParameterFile("/android.config")
     {
         memset(&m_AppSetup, 0, sizeof(m_AppSetup));
     }
@@ -128,6 +131,19 @@ namespace
         m_AppSetup.m_SensorManager       = ASensorManager_getInstance();
         m_AppSetup.m_AccelerometerSensor = ASensorManager_getDefaultSensor(m_AppSetup.m_SensorManager, ASENSOR_TYPE_ACCELEROMETER);
         m_AppSetup.m_SensorEventQueue    = ASensorManager_createEventQueue(m_AppSetup.m_SensorManager, _pAndroidApp->looper, LOOPER_ID_USER, NULL, NULL);
+
+        // -----------------------------------------------------------------------------
+        // Load configuration file
+        // -----------------------------------------------------------------------------
+        const std::string VerbosityNameString = "console_verbose"; // TODO: this should be somewhere else - available for every application
+
+        int VerbosityLevel = 0;
+
+        Base::CProgramParameters::GetInstance().ParseFile(m_AppSetup.m_pAndroidApp->activity->externalDataPath + m_ParameterFile);
+
+        VerbosityLevel = Base::CProgramParameters::GetInstance().GetInt(VerbosityNameString, 3);
+
+        Base::CConsole::GetInstance().SetVerbosityLevel(VerbosityLevel);
 
         // -----------------------------------------------------------------------------
         // Setup asset manager
@@ -168,6 +184,11 @@ namespace
         // Stop timing
         // -----------------------------------------------------------------------------
         Core::Time::OnExit();
+
+        // -----------------------------------------------------------------------------
+        // Save configuration
+        // -----------------------------------------------------------------------------
+        Base::CProgramParameters::GetInstance().WriteFile(m_AppSetup.m_pAndroidApp->activity->externalDataPath + m_ParameterFile);
     }
     
     // -----------------------------------------------------------------------------

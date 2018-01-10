@@ -147,8 +147,6 @@ namespace
 
         Gfx::App::ActivateWindow(m_EditWindowID);
 
-        Gfx::App::OnResize(m_EditWindowID, 1280, 720);
-
         // -----------------------------------------------------------------------------
         // From now on we can start the state engine and enter the first state
         // -----------------------------------------------------------------------------

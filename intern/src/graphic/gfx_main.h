@@ -12,6 +12,7 @@
 #include "base/base_vector2.h"
 
 #include "graphic/gfx_buffer.h"
+#include "graphic/gfx_graphics_info.h"
 
 #include <functional>
 
@@ -24,22 +25,6 @@ namespace Main
 } // namespace Gfx
 
 #define GFX_BIND_RESIZE_METHOD(_Method) std::bind(_Method, this, std::placeholders::_1, std::placeholders::_2)
-
-namespace Gfx
-{
-    struct SGraphicsInfo
-    {
-        enum EGraphicAPI
-        {
-            OpenGL,
-            OpenGLES,
-        };
-
-        EGraphicAPI m_GraphicsAPI;
-        int         m_MajorVersion;
-        int         m_MinorVersion;
-    };
-} // namespace Gfx
 
 namespace Gfx
 {
@@ -59,11 +44,14 @@ namespace Main
     const Base::Int2& GetActiveWindowSize();
     const Base::Int2& GetWindowSize(unsigned int _WindowID);
 
+    const Base::Int2& GetActiveNativeWindowSize();
+    const Base::Int2& GetNativeWindowSize(unsigned int _WindowID);
+
     void OnResize(unsigned int _WindowID, unsigned int _Width, unsigned int _Height);
 
     void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile);
 
-    const SGraphicsInfo& GetGraphicsAPI();
+    const CGraphicsInfo& GetGraphicsAPI();
     bool IsExtensionAvailable(const std::string& _Name);
 
     void BeginFrame();
