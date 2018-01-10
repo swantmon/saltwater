@@ -30,8 +30,8 @@ namespace
                 
     private:
         
-        Base::CDefaultClock m_Clock;
-        Base::U64           m_NumberOfFrame;
+        Base::CPerformanceClock m_Clock;
+        Base::U64               m_NumberOfFrame;
     };
 } // namespace
 
