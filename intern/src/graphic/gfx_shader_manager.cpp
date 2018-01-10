@@ -672,7 +672,7 @@ namespace
 
         if (_AddVersion)
         {
-            if (Main::GetGraphicsAPI().m_GraphicsAPI == SGraphicsInfo::OpenGLES)
+            if (Main::GetGraphicsAPI().m_GraphicsAPI == CGraphicsInfo::OpenGLES)
             {
                 _rShaderContent = "precision lowp sampler2D; \n" + _rShaderContent;
                 _rShaderContent = "precision lowp sampler3D; \n" + _rShaderContent;

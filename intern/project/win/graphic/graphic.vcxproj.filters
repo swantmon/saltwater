@@ -530,6 +530,9 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_native_texture.h">
       <Filter>ogl\textures</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_graphics_info.h">
+      <Filter>engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="interface">
