@@ -18,6 +18,8 @@ public class GameActivity extends NativeActivity
     public void onStart()
     {
         super.onStart();
+
+        System.out.println("onStart");
     }
 
     @Override
