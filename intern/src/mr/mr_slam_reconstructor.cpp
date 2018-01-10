@@ -149,7 +149,7 @@ namespace MR
     {
         m_UseShuffleIntrinsics = false;
 
-        const bool EnableShuffleIntrinsics = Base::CProgramParameters::GetInstance().GetBoolean("tracking_with_shuffle_intrinsics", true);
+        const bool EnableShuffleIntrinsics = Base::CProgramParameters::GetInstance().GetBoolean("mr_slam_use_shuffle_intrinsics", true);
         
         if (EnableShuffleIntrinsics)
         {
