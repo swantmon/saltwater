@@ -9,8 +9,7 @@ public class GameActivity extends NativeActivity
 {
     static GameActivity s_Instance;
 
-    /** Access singleton activity for game. **/
-    public static GameActivity Get()
+    public static GameActivity GetInstance()
     {
         return s_Instance;
     }
