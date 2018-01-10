@@ -215,7 +215,7 @@ namespace
         TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
         TextureDescriptor.m_pFileName        = nullptr;
         TextureDescriptor.m_pPixels          = Pixels;
-        TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8_UBYTE;
+        TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_UBYTE;
 
         m_Texture2DPtr = CreateTexture2D(TextureDescriptor, true, SDataBehavior::LeftAlone);
 
