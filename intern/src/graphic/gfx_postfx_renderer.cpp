@@ -486,7 +486,7 @@ namespace
         // Get screen resolutions
         // -----------------------------------------------------------------------------
         Base::Int2 Size       = Main::GetActiveWindowSize();
-        Base::Int2 NativeSize = Main::GetActiveWindowSize(true);
+        Base::Int2 NativeSize = Main::GetActiveNativeWindowSize();
         
         Base::Int2 HalfSize   (Size[0] / 2, Size[1] / 2);
         Base::Int2 QuarterSize(Size[0] / 4, Size[1] / 4);
@@ -991,7 +991,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Build view ports
         // -----------------------------------------------------------------------------
-        Base::Int2 NativeSize = Main::GetActiveWindowSize(true);
+        Base::Int2 NativeSize = Main::GetActiveNativeWindowSize();
 
         SViewPortDescriptor ViewPortDesc;
 

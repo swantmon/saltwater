@@ -41,8 +41,11 @@ namespace Main
 
     void ActivateWindow(unsigned int _WindowID);
 
-    const Base::Int2& GetActiveWindowSize(bool _RequestNative = false);
-    const Base::Int2& GetWindowSize(unsigned int _WindowID, bool _RequestNative = false);
+    const Base::Int2& GetActiveWindowSize();
+    const Base::Int2& GetWindowSize(unsigned int _WindowID);
+
+    const Base::Int2& GetActiveNativeWindowSize();
+    const Base::Int2& GetNativeWindowSize(unsigned int _WindowID);
 
     void OnResize(unsigned int _WindowID, unsigned int _Width, unsigned int _Height);
 
