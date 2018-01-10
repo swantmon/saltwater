@@ -162,6 +162,8 @@ namespace
         {
             _pAndroidApp->activity->vm->AttachCurrentThread(&env, NULL);
 
+            jclass GameActivity = env->FindClass("de/tu_ilmenau/saltwater/GameActivity");
+
             jclass activityClass = env->GetObjectClass(_pAndroidApp->activity->clazz);
 
             jmethodID contextMethod = env->GetMethodID(activityClass, "getApplicationContext", "()Landroid/content/Context;");
@@ -183,7 +185,7 @@ namespace
         Config.m_pEnv     = _pAndroidApp->activity->env;
         Config.m_pContext = contextObj;
 
-        MR::ControlManager::OnStart(Config);
+        // MR::ControlManager::OnStart(Config);
 
         // -----------------------------------------------------------------------------
         // Start timing
