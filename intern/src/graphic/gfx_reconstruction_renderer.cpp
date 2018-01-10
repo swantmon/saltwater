@@ -1098,6 +1098,7 @@ namespace
     void CGfxReconstructionRenderer::RenderVertexMap()
     {
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+        ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
 
         ContextManager::SetShaderVS(m_PointCloudVSPtr);
         ContextManager::SetShaderPS(m_PointCloudFSPtr);
