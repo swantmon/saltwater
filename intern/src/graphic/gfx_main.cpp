@@ -121,6 +121,21 @@ namespace
         
     private:
 
+        class CInternGraphicInfo : SGraphicInfo
+        {
+        public:
+
+            enum EPixelMatching
+            {
+                PixelPerfect,       //< The resolution of the renderer is equal to the native size
+                Scale,              //< The resolution of the renderer is scaled
+                Fix,                //< The resolution of the renderer is fixed
+            };
+
+            EPixelMatching m_PixelMatching;
+
+        };
+
         struct SWindowInfo
         {
             void* m_pNativeWindowHandle;
@@ -134,7 +149,8 @@ namespace
             HDC   m_pNativeDeviceContextHandle;
             HGLRC m_pNativeOpenGLContextHandle;
 #endif
-            Base::Int2   m_WindowSize;
+            Base::Int2   m_InternalWindowSize;
+            Base::Int2   m_NativeWindowSize;
             unsigned int m_VSync;
         };
         
@@ -168,7 +184,7 @@ namespace
         
     private:
 
-        SGraphicsInfo m_GraphicsInfo;
+        CInternGraphicsInfo m_GraphicsInfo;
 
         SWindowInfo  m_WindowInfos[s_MaxNumberOfWindows];
         SWindowInfo* m_pActiveWindowInfo;
@@ -213,6 +229,11 @@ namespace
         m_GraphicsInfo.m_MajorVersion = Base::CProgramParameters::GetInstance().GetInt("graphics_api_major_version", 4);
         m_GraphicsInfo.m_MinorVersion = Base::CProgramParameters::GetInstance().GetInt("graphics_api_minor_version", 5);
 #endif
+
+        // -----------------------------------------------------------------------------
+        // Load pixel matching behavior
+        // -----------------------------------------------------------------------------
+        m_GraphicsInfo.m_PixelMatching = static_cast<CInternGraphicInfo::EPixelMatching>(Base::CProgramParameters::GetInstance().GetInt("graphics_pixel_matching", 0);
     }
     
     // -----------------------------------------------------------------------------
@@ -355,15 +376,37 @@ namespace
             }
 
             // -----------------------------------------------------------------------------
-            // Get native size
+            // Get native resolution
             // -----------------------------------------------------------------------------
             int Width, Height;
 
             eglQuerySurface(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface, EGL_WIDTH, &Width);
             eglQuerySurface(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface, EGL_HEIGHT, &Height);
 
-            m_pActiveWindowInfo->m_WindowSize[0] = Width;
-            m_pActiveWindowInfo->m_WindowSize[1] = Height;
+            m_pActiveWindowInfo->m_NativeWindowSize[0] = Width;
+            m_pActiveWindowInfo->m_NativeWindowSize[1] = Height;
+
+            // -----------------------------------------------------------------------------
+            // Get internal resolution
+            // -----------------------------------------------------------------------------
+            switch (m_GraphicsInfo.m_PixelMatching)
+            {
+                case CInternGraphicInfo::PixelPerfect:
+                    m_pActiveWindowInfo->m_InternalWindowSize[0] = Width;
+                    m_pActiveWindowInfo->m_InternalWindowSize[1] = Height;
+                    break;
+                case CInternGraphicInfo::Scale:
+                    float Scale = Base::CProgramParameters::GetInstance().GetFloat("graphics_pixel_matching_scale", 1.0f);
+
+                    m_pActiveWindowInfo->m_InternalWindowSize[0] = Width  * Scale;
+                    m_pActiveWindowInfo->m_InternalWindowSize[1] = Height * Scale;
+                    break;
+                case CInternGraphicInfo::Fix:
+                    m_pActiveWindowInfo->m_InternalWindowSize[0] = Base::CProgramParameters::GetInstance().GetUInt("graphics_pixel_matching_w", 1280);
+                    m_pActiveWindowInfo->m_InternalWindowSize[1] = Base::CProgramParameters::GetInstance().GetUInt("graphics_pixel_matching_h", 720);
+                    break;
+            };
+
 
             // -----------------------------------------------------------------------------
             // Swap buffer at the beginning
@@ -594,7 +637,7 @@ namespace
     {
         assert(m_pActiveWindowInfo != 0);
 
-        return m_pActiveWindowInfo->m_WindowSize;
+        return m_pActiveWindowInfo->m_InternalWindowSize;
     }
 
     // -----------------------------------------------------------------------------
@@ -603,7 +646,7 @@ namespace
     {
         assert(_WindowID < m_NumberOfWindows);
 
-        return m_WindowInfos[_WindowID].m_WindowSize;
+        return m_WindowInfos[_WindowID].m_InternalWindowSize;
     }
 
     // -----------------------------------------------------------------------------
@@ -617,8 +660,11 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup view port of render target (back buffer, ...).
         // -----------------------------------------------------------------------------
-        m_WindowInfos[_WindowID].m_WindowSize[0] = _Width;
-        m_WindowInfos[_WindowID].m_WindowSize[1] = _Height;
+        m_WindowInfos[_WindowID].m_InternalWindowSize[0] = _Width;
+        m_WindowInfos[_WindowID].m_InternalWindowSize[1] = _Height;
+
+        m_WindowInfos[_WindowID].m_NativeWindowSize[0] = _Width;
+        m_WindowInfos[_WindowID].m_NativeWindowSize[1] = _Height;
 
         // -----------------------------------------------------------------------------
         // Send to every delegate that resize has changed

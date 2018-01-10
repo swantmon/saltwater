@@ -27,8 +27,10 @@ namespace Main
 
 namespace Gfx
 {
-    struct SGraphicsInfo
+    class SGraphicsInfo
     {
+    public:
+
         enum EGraphicAPI
         {
             OpenGL,
