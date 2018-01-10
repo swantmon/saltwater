@@ -119,6 +119,8 @@ namespace
     private:
         
         CMeshPtr          m_QuadModelPtr;
+
+        CViewPortSetPtr   m_SystemViewPortSetPtr;
         
         CBufferSetPtr     m_DOFVSBufferSetPtr;
         CBufferSetPtr     m_DOFDownPropertiesPSBufferPtr;
@@ -128,7 +130,6 @@ namespace
         CInputLayoutPtr   m_FullQuadInputLayoutPtr;
         CShaderPtr        m_RectangleShaderVSPtr;
         CShaderPtr        m_PassThroughShaderPSPtr;
-        CRenderContextPtr m_SystemContextPtr;
         
         CShaderPtr        m_PostEffectShaderVSPtrs[NumberOfPostEffects];
         CShaderPtr        m_PostEffectShaderPSPtrs[NumberOfPostEffects];
@@ -153,8 +154,8 @@ namespace
         CRenderContextPtr m_SMAAWeightCalcContextPtr;
         CTargetSetPtr     m_SMAAEdgeTargetSetPtr;
         CTargetSetPtr     m_SMAAWeightsCalcTargetSetPtr;
-        CTexturePtr     m_SMAAAreaTexture;
-        CTexturePtr     m_SMAASearchTexture;
+        CTexturePtr       m_SMAAAreaTexture;
+        CTexturePtr       m_SMAASearchTexture;
 
         CPostAARenderJobs m_PostAARenderJobs;
         CDOFRenderJobs  m_DOFRenderJobs;
@@ -166,7 +167,7 @@ namespace
         void RenderDOF();
         void RenderPostAA();
         void RenderFXAA();
-		void RenderSMAA();
+        void RenderSMAA();
         void RenderToSystem();
 
         void BuildRenderJobs();
@@ -177,6 +178,7 @@ namespace
 {
     CGfxPostFXRenderer::CGfxPostFXRenderer()
         : m_QuadModelPtr                     ()
+        , m_SystemViewPortSetPtr             ()
         , m_FullQuadInputLayoutPtr           ()
         , m_RectangleShaderVSPtr             ()
         , m_PassThroughShaderPSPtr           ()
@@ -184,7 +186,6 @@ namespace
         , m_DOFDownPropertiesPSBufferPtr     ()
         , m_DOFApplyPropertiesPSBufferPtr    ()
         , m_GaussianBlurPropertiesPSBufferPtr()
-        , m_SystemContextPtr                 ()
         , m_SwapTargetSetPtrs                ()
         , m_SMAAAreaTexture                  ()
         , m_SMAASearchTexture                ()
@@ -193,7 +194,7 @@ namespace
         , m_SwapCounter                      (0)
     {
         m_PostAARenderJobs.reserve(2);
-        m_DOFRenderJobs .reserve(2);
+        m_DOFRenderJobs   .reserve(2);
 
         Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxPostFXRenderer::OnResize));
     }
@@ -215,6 +216,7 @@ namespace
     void CGfxPostFXRenderer::OnExit()
     {
         m_QuadModelPtr                      = 0;
+        m_SystemViewPortSetPtr              = 0;
         m_FullQuadInputLayoutPtr            = 0;
         m_RectangleShaderVSPtr              = 0;
         m_PassThroughShaderPSPtr            = 0;
@@ -222,7 +224,6 @@ namespace
         m_DOFDownPropertiesPSBufferPtr      = 0;
         m_DOFApplyPropertiesPSBufferPtr     = 0;
         m_GaussianBlurPropertiesPSBufferPtr = 0;
-        m_SystemContextPtr                  = 0;
         m_SwapTextureSetPtrs[0]             = 0;
         m_SwapTextureSetPtrs[1]             = 0;
         m_SwapRenderContextPtrs[0]          = 0;
@@ -374,7 +375,7 @@ namespace
         
         CTexturePtr ColorTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Swap Color
 
-		TextureManager::SetTextureLabel(ColorTexturePtr, "PostFX Swap");
+        TextureManager::SetTextureLabel(ColorTexturePtr, "PostFX Swap");
 
         // -----------------------------------------------------------------------------
         
@@ -383,7 +384,7 @@ namespace
 
         CTexturePtr FullTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // First Full
 
-		TextureManager::SetTextureLabel(FullTexturePtr, "PostFX Temp Full Resolution");
+        TextureManager::SetTextureLabel(FullTexturePtr, "PostFX Temp Full Resolution");
 
         // -----------------------------------------------------------------------------
         
@@ -392,7 +393,7 @@ namespace
 
         CTexturePtr HalfTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // First Half
 
-		TextureManager::SetTextureLabel(HalfTexturePtr, "PostFX Temp Half Resolution");
+        TextureManager::SetTextureLabel(HalfTexturePtr, "PostFX Temp Half Resolution");
         
         // -----------------------------------------------------------------------------
         
@@ -403,9 +404,9 @@ namespace
         CTexturePtr QuarterTwoTexturePtr   = TextureManager::CreateTexture2D(RendertargetDescriptor); // Second Quarter
         CTexturePtr QuarterThreeTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Third Quarter
 
-		TextureManager::SetTextureLabel(QuarterOneTexturePtr, "PostFX Temp Quarter One");
-		TextureManager::SetTextureLabel(QuarterTwoTexturePtr, "PostFX Temp Quarter Two");
-		TextureManager::SetTextureLabel(QuarterThreeTexturePtr, "PostFX Temp Quarter Three");
+        TextureManager::SetTextureLabel(QuarterOneTexturePtr, "PostFX Temp Quarter One");
+        TextureManager::SetTextureLabel(QuarterTwoTexturePtr, "PostFX Temp Quarter Two");
+        TextureManager::SetTextureLabel(QuarterThreeTexturePtr, "PostFX Temp Quarter Three");
         
         // -----------------------------------------------------------------------------
         // Create swap buffer target set
@@ -445,9 +446,9 @@ namespace
         m_QuarterTargetSetPtrs[1] = TargetSetManager::CreateTargetSet(QuarterTwoRenderbuffer  , 1);
         m_QuarterTargetSetPtrs[2] = TargetSetManager::CreateTargetSet(QuarterThreeRenderbuffer, 1);
 
-        //////////////////////////////////////////////////////////
+        // -----------------------------------------------------------------------------
         // SMAA Render Targets
-        //////////////////////////////////////////////////////////
+        // -----------------------------------------------------------------------------
 
         RendertargetDescriptor.m_NumberOfPixelsU  = Size[0];
         RendertargetDescriptor.m_NumberOfPixelsV  = Size[1];
@@ -465,13 +466,13 @@ namespace
 
         CTexturePtr EdgesTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
 
-		TextureManager::SetTextureLabel(EdgesTexturePtr, "SMAA Target Texture");
+        TextureManager::SetTextureLabel(EdgesTexturePtr, "SMAA Target Texture");
 
         RendertargetDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
 
         CTexturePtr BlendWeightsTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
 
-		TextureManager::SetTextureLabel(BlendWeightsTexturePtr, "SMAA Blend Weights Texture");
+        TextureManager::SetTextureLabel(BlendWeightsTexturePtr, "SMAA Blend Weights Texture");
 
         m_SMAAEdgeTargetSetPtr        = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(EdgesTexturePtr));
         m_SMAAWeightsCalcTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(BlendWeightsTexturePtr));
@@ -484,7 +485,8 @@ namespace
         // -----------------------------------------------------------------------------
         // Get screen resolutions
         // -----------------------------------------------------------------------------
-        Base::Int2 Size = Main::GetActiveWindowSize();
+        Base::Int2 Size       = Main::GetActiveWindowSize();
+        Base::Int2 NativeSize = Main::GetActiveNativeWindowSize();
         
         Base::Int2 HalfSize   (Size[0] / 2, Size[1] / 2);
         Base::Int2 QuarterSize(Size[0] / 4, Size[1] / 4);
@@ -496,6 +498,19 @@ namespace
 
         ViewPortDesc.m_TopLeftX = 0.0f;
         ViewPortDesc.m_TopLeftY = 0.0f;
+        ViewPortDesc.m_Width    = static_cast<float>(NativeSize[0]);
+        ViewPortDesc.m_Height   = static_cast<float>(NativeSize[1]);
+        ViewPortDesc.m_MinDepth = 0.0f;
+        ViewPortDesc.m_MaxDepth = 1.0f;
+        
+        CViewPortPtr SystemViewPort = ViewManager::CreateViewPort(ViewPortDesc);
+
+        m_SystemViewPortSetPtr = ViewManager::CreateViewPortSet(SystemViewPort);
+
+        // -----------------------------------------------------------------------------
+
+        ViewPortDesc.m_TopLeftX = 0.0f;
+        ViewPortDesc.m_TopLeftY = 0.0f;
         ViewPortDesc.m_Width    = static_cast<float>(HalfSize[0]);
         ViewPortDesc.m_Height   = static_cast<float>(HalfSize[1]);
         ViewPortDesc.m_MinDepth = 0.0f;
@@ -504,6 +519,8 @@ namespace
         CViewPortPtr HalfViewPort = ViewManager::CreateViewPort(ViewPortDesc);
         
         CViewPortSetPtr HalfViewPortSetPtr = ViewManager::CreateViewPortSet(HalfViewPort);
+
+        // -----------------------------------------------------------------------------
         
         ViewPortDesc.m_TopLeftX = 0.0f;
         ViewPortDesc.m_TopLeftY = 0.0f;
@@ -523,15 +540,6 @@ namespace
         CViewPortSetPtr     ViewPortSetPtr     = ViewManager     ::GetViewPortSet();
         CRenderStatePtr     RenderStatePtr     = StateManager    ::GetRenderState(CRenderState::NoDepth);
         CTargetSetPtr       TargetSetPtr       = TargetSetManager::GetSystemTargetSet();
-        
-        CRenderContextPtr SystemContextPtr = ContextManager::CreateRenderContext();
-        
-        SystemContextPtr->SetCamera(CameraPtr);
-        SystemContextPtr->SetViewPortSet(ViewPortSetPtr);
-        SystemContextPtr->SetTargetSet(TargetSetPtr);
-        SystemContextPtr->SetRenderState(RenderStatePtr);
-        
-        m_SystemContextPtr = SystemContextPtr;
         
         // -----------------------------------------------------------------------------
         
@@ -668,7 +676,7 @@ namespace
 
         m_SMAAAreaTexture = TextureManager::CreateTexture2D(AreaTexDescriptor);
 
-		TextureManager::SetTextureLabel(m_SMAAAreaTexture, "SMAA Area Texture");
+        TextureManager::SetTextureLabel(m_SMAAAreaTexture, "SMAA Area Texture");
 
         STextureDescriptor SearchTexDescriptor = {};
 
@@ -687,7 +695,7 @@ namespace
 
         m_SMAASearchTexture = TextureManager::CreateTexture2D(SearchTexDescriptor);
 
-		TextureManager::SetTextureLabel(m_SMAASearchTexture, "SMAA Search Texture");
+        TextureManager::SetTextureLabel(m_SMAASearchTexture, "SMAA Search Texture");
 
         auto EdgesTexPtr = m_SMAAEdgeTargetSetPtr->GetRenderTarget(0);
         auto WeightsTexPtr = m_SMAAWeightsCalcTargetSetPtr->GetRenderTarget(0);
@@ -874,27 +882,27 @@ namespace
         RendertargetDescriptor.m_pPixels          = 0;
         RendertargetDescriptor.m_Format           = CTexture::R8G8B8A8_UBYTE;
         
-		CTexturePtr ColorTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Swap Color
+        CTexturePtr ColorTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Swap Color
 
-		TextureManager::SetTextureLabel(ColorTexturePtr, "PostFX Swap");
+        TextureManager::SetTextureLabel(ColorTexturePtr, "PostFX Swap");
 
-		// -----------------------------------------------------------------------------
+        // -----------------------------------------------------------------------------
 
-		RendertargetDescriptor.m_NumberOfPixelsU = Size[0];
-		RendertargetDescriptor.m_NumberOfPixelsV = Size[1];
+        RendertargetDescriptor.m_NumberOfPixelsU = Size[0];
+        RendertargetDescriptor.m_NumberOfPixelsV = Size[1];
 
-		CTexturePtr FullTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // First Full
+        CTexturePtr FullTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // First Full
 
-		TextureManager::SetTextureLabel(FullTexturePtr, "PostFX Temp Full Resolution");
+        TextureManager::SetTextureLabel(FullTexturePtr, "PostFX Temp Full Resolution");
 
-		// -----------------------------------------------------------------------------
+        // -----------------------------------------------------------------------------
 
-		RendertargetDescriptor.m_NumberOfPixelsU = HalfSize[0];
-		RendertargetDescriptor.m_NumberOfPixelsV = HalfSize[1];
+        RendertargetDescriptor.m_NumberOfPixelsU = HalfSize[0];
+        RendertargetDescriptor.m_NumberOfPixelsV = HalfSize[1];
 
-		CTexturePtr HalfTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // First Half
+        CTexturePtr HalfTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // First Half
 
-		TextureManager::SetTextureLabel(HalfTexturePtr, "PostFX Temp Half Resolution");
+        TextureManager::SetTextureLabel(HalfTexturePtr, "PostFX Temp Half Resolution");
         
         // -----------------------------------------------------------------------------
         
@@ -905,9 +913,9 @@ namespace
         CTexturePtr QuarterTwoTexturePtr   = TextureManager::CreateTexture2D(RendertargetDescriptor); // Second Quarter
         CTexturePtr QuarterThreeTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Third Quarter
 
-		TextureManager::SetTextureLabel(QuarterOneTexturePtr, "PostFX Temp Quarter One");
-		TextureManager::SetTextureLabel(QuarterTwoTexturePtr, "PostFX Temp Quarter Two");
-		TextureManager::SetTextureLabel(QuarterThreeTexturePtr, "PostFX Temp Quarter Three");
+        TextureManager::SetTextureLabel(QuarterOneTexturePtr, "PostFX Temp Quarter One");
+        TextureManager::SetTextureLabel(QuarterTwoTexturePtr, "PostFX Temp Quarter Two");
+        TextureManager::SetTextureLabel(QuarterThreeTexturePtr, "PostFX Temp Quarter Three");
         
         // -----------------------------------------------------------------------------
         // Create swap buffer target set
@@ -965,25 +973,40 @@ namespace
         RendertargetDescriptor.m_pPixels          = 0;
         RendertargetDescriptor.m_Format           = CTexture::R8G8_UBYTE;
 
-		CTexturePtr EdgesTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
+        CTexturePtr EdgesTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
 
-		TextureManager::SetTextureLabel(EdgesTexturePtr, "SMAA Target Texture");
+        TextureManager::SetTextureLabel(EdgesTexturePtr, "SMAA Target Texture");
 
-		RendertargetDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
+        RendertargetDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
 
-		CTexturePtr BlendWeightsTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
+        CTexturePtr BlendWeightsTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
 
-		TextureManager::SetTextureLabel(BlendWeightsTexturePtr, "SMAA Blend Weights Texture");
+        TextureManager::SetTextureLabel(BlendWeightsTexturePtr, "SMAA Blend Weights Texture");
 
-		m_SMAAEdgeTargetSetPtr        = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(EdgesTexturePtr));
-		m_SMAAWeightsCalcTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(BlendWeightsTexturePtr));
+        m_SMAAEdgeTargetSetPtr        = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(EdgesTexturePtr));
+        m_SMAAWeightsCalcTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(BlendWeightsTexturePtr));
 
         // -----------------------------------------------------------------------------
 
         // -----------------------------------------------------------------------------
         // Build view ports
         // -----------------------------------------------------------------------------
+        Base::Int2 NativeSize = Main::GetActiveNativeWindowSize();
+
         SViewPortDescriptor ViewPortDesc;
+
+        ViewPortDesc.m_TopLeftX = 0.0f;
+        ViewPortDesc.m_TopLeftY = 0.0f;
+        ViewPortDesc.m_Width    = static_cast<float>(NativeSize[0]);
+        ViewPortDesc.m_Height   = static_cast<float>(NativeSize[1]);
+        ViewPortDesc.m_MinDepth = 0.0f;
+        ViewPortDesc.m_MaxDepth = 1.0f;
+
+        CViewPortPtr SystemViewPort = ViewManager::CreateViewPort(ViewPortDesc);
+
+        m_SystemViewPortSetPtr = ViewManager::CreateViewPortSet(SystemViewPort);
+
+        // -----------------------------------------------------------------------------
 
         ViewPortDesc.m_TopLeftX = 0.0f;
         ViewPortDesc.m_TopLeftY = 0.0f;
@@ -995,6 +1018,8 @@ namespace
         CViewPortPtr HalfViewPort = ViewManager::CreateViewPort(ViewPortDesc);
         
         CViewPortSetPtr HalfViewPortSetPtr = ViewManager::CreateViewPortSet(HalfViewPort);
+
+        // -----------------------------------------------------------------------------
         
         ViewPortDesc.m_TopLeftX = 0.0f;
         ViewPortDesc.m_TopLeftY = 0.0f;
@@ -1725,7 +1750,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Rendering
         // -----------------------------------------------------------------------------
-        ContextManager::SetRenderContext(m_SystemContextPtr);
+        ContextManager::SetTargetSet(TargetSetManager::GetSystemTargetSet());
+
+        ContextManager::SetViewPortSet(m_SystemViewPortSetPtr);
+
+        ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::Default));
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
         
         ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
         
@@ -1741,7 +1774,7 @@ namespace
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
-        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
         ContextManager::SetTexture(0, m_SwapTextureSetPtrs[CurrentSwapBufferCount]->GetTexture(0));
 

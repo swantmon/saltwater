@@ -48,10 +48,6 @@ namespace
 
     public:
 
-        void OnResize(int _Width, int _Height);
-
-    public:
-
         CTexturePtr GetDummyTexture2D();
         CTexturePtr GetDummyTexture3D();
         CTexturePtr GetDummyCubeTexture();
@@ -185,16 +181,10 @@ namespace
         // Initialize devil image engine. But we only initialize core part.
         // -----------------------------------------------------------------------------
         ilInit();
-        
-        // -----------------------------------------------------------------------------
-        // Register for resizing events
-        // -----------------------------------------------------------------------------
-        Gfx::Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxTextureManager::OnResize));
-        
+
         // -----------------------------------------------------------------------------
         // Create 2x2 dummy texture
         // -----------------------------------------------------------------------------
-
         Base::Byte4 Pixels[4];
         Pixels[0] = Base::Byte4(1, 0, 0, 1);
         Pixels[1] = Base::Byte4(0, 1, 0, 1);
@@ -215,7 +205,7 @@ namespace
         TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
         TextureDescriptor.m_pFileName        = nullptr;
         TextureDescriptor.m_pPixels          = Pixels;
-        TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8_UBYTE;
+        TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_UBYTE;
 
         m_Texture2DPtr = CreateTexture2D(TextureDescriptor, true, SDataBehavior::LeftAlone);
 
@@ -251,14 +241,6 @@ namespace
         // Clear all the sets.
         // -----------------------------------------------------------------------------
         m_TextureSets.Clear();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxTextureManager::OnResize(int _Width, int _Height)
-    {
-        BASE_UNUSED(_Width);
-        BASE_UNUSED(_Height);
     }
 
     // -----------------------------------------------------------------------------

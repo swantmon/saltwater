@@ -45,7 +45,7 @@ namespace
         void ClearTargetSet(CTargetSetPtr _TargetPtr, const Base::Float4& _rColor);
         void ClearTargetSet(CTargetSetPtr _TargetPtr, const Base::Float4& _rColor, float _Depth);
 
-		void SetTargetSetLabel(CTargetSetPtr _TargetSetPtr, const char* _pLabel);
+        void SetTargetSetLabel(CTargetSetPtr _TargetSetPtr, const char* _pLabel);
         
     private:
         
@@ -146,7 +146,7 @@ namespace
         
         CTexturePtr AlbedoPtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // RGB Albedo
 
-		TextureManager::SetTextureLabel(AlbedoPtr, "RT: Default RGB");
+        TextureManager::SetTextureLabel(AlbedoPtr, "RT: Default RGB");
         
         // -----------------------------------------------------------------------------
         
@@ -155,7 +155,7 @@ namespace
         
         CTexturePtr GBuffer1Ptr = TextureManager::CreateTexture2D(RendertargetDescriptor); // G-Buffer 1
 
-		TextureManager::SetTextureLabel(GBuffer1Ptr, "RT: Gbuffer 1");
+        TextureManager::SetTextureLabel(GBuffer1Ptr, "RT: Gbuffer 1");
         
         // -----------------------------------------------------------------------------
 
@@ -164,7 +164,7 @@ namespace
         
         CTexturePtr GBuffer2Ptr = TextureManager::CreateTexture2D(RendertargetDescriptor); // G-Buffer 2
 
-		TextureManager::SetTextureLabel(GBuffer2Ptr, "RT: Gbuffer 2");
+        TextureManager::SetTextureLabel(GBuffer2Ptr, "RT: Gbuffer 2");
         
         // -----------------------------------------------------------------------------
         
@@ -173,7 +173,7 @@ namespace
         
         CTexturePtr GBuffer3Ptr = TextureManager::CreateTexture2D(RendertargetDescriptor); // G-Buffer 3
 
-		TextureManager::SetTextureLabel(GBuffer3Ptr, "RT: Gbuffer 3");
+        TextureManager::SetTextureLabel(GBuffer3Ptr, "RT: Gbuffer 3");
         
         // -----------------------------------------------------------------------------
         
@@ -182,7 +182,7 @@ namespace
         
         CTexturePtr LightAccumulationTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Light Accumulation (HDR)
 
-		TextureManager::SetTextureLabel(LightAccumulationTexturePtr, "RT: Light Accumulation (HDR)");
+        TextureManager::SetTextureLabel(LightAccumulationTexturePtr, "RT: Light Accumulation (HDR)");
         
         // -----------------------------------------------------------------------------
         
@@ -191,7 +191,7 @@ namespace
 
         CTexturePtr HitProxyTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Hit Proxy (ID)
 
-		TextureManager::SetTextureLabel(HitProxyTexturePtr, "RT: Hit Proxy (ID)");
+        TextureManager::SetTextureLabel(HitProxyTexturePtr, "RT: Hit Proxy (ID)");
         
         // -----------------------------------------------------------------------------
         
@@ -200,7 +200,7 @@ namespace
         
         CTexturePtr DepthTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Depth
 
-		TextureManager::SetTextureLabel(DepthTexturePtr, "RT: Depth");
+        TextureManager::SetTextureLabel(DepthTexturePtr, "RT: Depth");
         
         // -----------------------------------------------------------------------------
         // Create system target set
@@ -224,7 +224,7 @@ namespace
         
         m_DefaultTargetSet = CreateTargetSet(DefaultRenderbuffer, 2);
 
-		SetTargetSetLabel(m_DefaultTargetSet, "FB: Default");
+        SetTargetSetLabel(m_DefaultTargetSet, "FB: Default");
         
         // -----------------------------------------------------------------------------
         // Create deferred target set
@@ -238,7 +238,7 @@ namespace
         
         m_DeferredTargetSet = CreateTargetSet(DeferredRenderbuffer, 4);
 
-		SetTargetSetLabel(m_DeferredTargetSet, "FB: Deferred");
+        SetTargetSetLabel(m_DeferredTargetSet, "FB: Deferred");
         
         // -----------------------------------------------------------------------------
         // Create light accumulation target set
@@ -249,7 +249,7 @@ namespace
 
         m_LightAccumulationTargetSet = CreateTargetSet(LightAccumulationRenderbuffer, 1);
 
-		SetTargetSetLabel(m_LightAccumulationTargetSet, "FB: Light Accumulation");
+        SetTargetSetLabel(m_LightAccumulationTargetSet, "FB: Light Accumulation");
 
         // -----------------------------------------------------------------------------
         // Create hit proxy target set
@@ -261,7 +261,7 @@ namespace
 
         m_HitProxyTargetSet = CreateTargetSet(HitProxyRenderbuffer, 2);
 
-		SetTargetSetLabel(m_HitProxyTargetSet, "FB: Hit Proxy");
+        SetTargetSetLabel(m_HitProxyTargetSet, "FB: Hit Proxy");
     }
     
     // -----------------------------------------------------------------------------
@@ -467,16 +467,16 @@ namespace
         glClearBufferfv(GL_DEPTH, 0, &_Depth);
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void CGfxTargetSetManager::SetTargetSetLabel(CTargetSetPtr _TargetSetPtr, const char* _pLabel)
-	{
-		assert(_pLabel != nullptr);
+    void CGfxTargetSetManager::SetTargetSetLabel(CTargetSetPtr _TargetSetPtr, const char* _pLabel)
+    {
+        assert(_pLabel != nullptr);
 
-		CNativeTargetSet* pNativeTargetSet = static_cast<CNativeTargetSet*>(_TargetSetPtr.GetPtr());
+        CNativeTargetSet* pNativeTargetSet = static_cast<CNativeTargetSet*>(_TargetSetPtr.GetPtr());
 
-		glObjectLabel(GL_FRAMEBUFFER, pNativeTargetSet->m_NativeTargetSet, -1, _pLabel);
-	}
+        glObjectLabel(GL_FRAMEBUFFER, pNativeTargetSet->m_NativeTargetSet, -1, _pLabel);
+    }
     
     // -----------------------------------------------------------------------------
 
@@ -512,7 +512,7 @@ namespace
         
         CTexturePtr AlbedoPtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // RGB Albedo
 
-		TextureManager::SetTextureLabel(AlbedoPtr, "RT: Default RGB");
+        TextureManager::SetTextureLabel(AlbedoPtr, "RT: Default RGB");
         
         // -----------------------------------------------------------------------------
         
@@ -521,7 +521,7 @@ namespace
         
         CTexturePtr GBuffer1Ptr = TextureManager::CreateTexture2D(RendertargetDescriptor); // G-Buffer 1
 
-		TextureManager::SetTextureLabel(GBuffer1Ptr, "RT: Gbuffer 1");
+        TextureManager::SetTextureLabel(GBuffer1Ptr, "RT: Gbuffer 1");
         
         // -----------------------------------------------------------------------------
 
@@ -530,7 +530,7 @@ namespace
         
         CTexturePtr GBuffer2Ptr = TextureManager::CreateTexture2D(RendertargetDescriptor); // G-Buffer 2
 
-		TextureManager::SetTextureLabel(GBuffer2Ptr, "RT: Gbuffer 2");
+        TextureManager::SetTextureLabel(GBuffer2Ptr, "RT: Gbuffer 2");
         
         // -----------------------------------------------------------------------------
         
@@ -539,7 +539,7 @@ namespace
         
         CTexturePtr GBuffer3Ptr = TextureManager::CreateTexture2D(RendertargetDescriptor); // G-Buffer 3
 
-		TextureManager::SetTextureLabel(GBuffer3Ptr, "RT: Gbuffer 3");
+        TextureManager::SetTextureLabel(GBuffer3Ptr, "RT: Gbuffer 3");
         
         // -----------------------------------------------------------------------------
         
@@ -548,7 +548,7 @@ namespace
         
         CTexturePtr LightAccumulationTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Light Accumulation (HDR)
 
-		TextureManager::SetTextureLabel(LightAccumulationTexturePtr, "RT: Light Accumulation (HDR)");
+        TextureManager::SetTextureLabel(LightAccumulationTexturePtr, "RT: Light Accumulation (HDR)");
         
         // -----------------------------------------------------------------------------
         
@@ -557,7 +557,7 @@ namespace
 
         CTexturePtr HitProxyTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Hit Proxy (ID)
 
-		TextureManager::SetTextureLabel(HitProxyTexturePtr, "RT: Hit Proxy (ID)");
+        TextureManager::SetTextureLabel(HitProxyTexturePtr, "RT: Hit Proxy (ID)");
         
         // -----------------------------------------------------------------------------
         
@@ -566,7 +566,7 @@ namespace
         
         CTexturePtr DepthTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Depth
 
-		TextureManager::SetTextureLabel(DepthTexturePtr, "RT: Depth");
+        TextureManager::SetTextureLabel(DepthTexturePtr, "RT: Depth");
                 
         // -----------------------------------------------------------------------------
         // Create default target set
@@ -885,11 +885,11 @@ namespace TargetSetManager
         CGfxTargetSetManager::GetInstance().ClearTargetSet(_TargetPtr, Base::Float4(0.0f), 1.0f);
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void SetTargetSetLabel(CTargetSetPtr _TargetSetPtr, const char* _pLabel)
-	{
-		CGfxTargetSetManager::GetInstance().SetTargetSetLabel(_TargetSetPtr, _pLabel);
-	}
+    void SetTargetSetLabel(CTargetSetPtr _TargetSetPtr, const char* _pLabel)
+    {
+        CGfxTargetSetManager::GetInstance().SetTargetSetLabel(_TargetSetPtr, _pLabel);
+    }
 } // namespace TargetSetManager
 } // namespace Gfx

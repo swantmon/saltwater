@@ -3,6 +3,7 @@
 
 #include "base/base_console.h"
 #include "base/base_pool.h"
+#include "base/base_program_parameters.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -1659,6 +1660,11 @@ namespace
 
     void CGfxSkyManager::PrecomputeScattering()
     {
+        // Determine the number of steps for multiple scattering
+
+        const std::string OrderParameter = "graphics_atmosphere_order_count";
+        const int OrderCount = Base::CProgramParameters::GetInstance().GetInt(OrderParameter, 4);
+
         // -----------------------------------------------------------------------------
         // Textures
         // -----------------------------------------------------------------------------
@@ -2038,7 +2044,7 @@ namespace
 
         ContextManager::SetSampler(5, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        for (unsigned int Order = 2; Order <= 4; ++Order)
+        for (int Order = 2; Order <= OrderCount; ++Order)
         {
             Performance::BeginEvent("Order");
 

@@ -59,7 +59,6 @@ namespace
         void OnSetupEnd();
         
         void OnReload();
-        void OnResize(unsigned int _Width, unsigned int _Height);
         
         void Update();
         void Render();
@@ -190,10 +189,6 @@ namespace
         , m_DebugTexts              ()
         , m_IsGizmoVisible          (false)
     {
-        // -----------------------------------------------------------------------------
-        // Register resize delegate
-        // -----------------------------------------------------------------------------
-        Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxDebugRenderer::OnResize));
     }
     
     // -----------------------------------------------------------------------------
@@ -524,15 +519,7 @@ namespace
     {
         
     }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGfxDebugRenderer::OnResize(unsigned int _Width, unsigned int _Height)
-    {
-        BASE_UNUSED(_Width);
-        BASE_UNUSED(_Height);
-    }
-    
+
     // -----------------------------------------------------------------------------
     
     void CGfxDebugRenderer::Update()

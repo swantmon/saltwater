@@ -95,11 +95,14 @@ namespace
         const Base::Int2& GetActiveWindowSize();
         const Base::Int2& GetWindowSize(unsigned int _WindowID);
 
+        const Base::Int2& GetActiveNativeWindowSize();
+        const Base::Int2& GetNativeWindowSize(unsigned int _WindowID);
+
         void OnResize(unsigned int _WindowID, unsigned int _Width, unsigned int _Height);
 
         void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile);
 
-        const SGraphicsInfo& GetGraphicsAPI();
+        const CGraphicsInfo& GetGraphicsAPI();
         bool IsExtensionAvailable(const std::string& _Name);
         
     public:
@@ -121,6 +124,21 @@ namespace
         
     private:
 
+        class CInternGraphicsInfo : public CGraphicsInfo
+        {
+        public:
+
+            enum EPixelMatching
+            {
+                PixelPerfect,       //< The resolution of the renderer is equal to the native size
+                Scale,              //< The resolution of the renderer is scaled
+                Fix,                //< The resolution of the renderer is fixed
+            };
+
+            EPixelMatching m_PixelMatching;
+
+        };
+
         struct SWindowInfo
         {
             void* m_pNativeWindowHandle;
@@ -134,7 +152,8 @@ namespace
             HDC   m_pNativeDeviceContextHandle;
             HGLRC m_pNativeOpenGLContextHandle;
 #endif
-            Base::Int2   m_WindowSize;
+            Base::Int2   m_InternalWindowSize;
+            Base::Int2   m_NativeWindowSize;
             unsigned int m_VSync;
         };
         
@@ -168,7 +187,7 @@ namespace
         
     private:
 
-        SGraphicsInfo m_GraphicsInfo;
+        CInternGraphicsInfo m_GraphicsInfo;
 
         SWindowInfo  m_WindowInfos[s_MaxNumberOfWindows];
         SWindowInfo* m_pActiveWindowInfo;
@@ -181,6 +200,10 @@ namespace
         CBufferPtr m_PerFrameConstantBufferBufferPtr;
 
         std::unordered_set<std::string> m_AvailableExtensions;
+
+    private:
+
+        void SetWindowSize(SWindowInfo* _pWindowInfo, int _Width, int _Height);
     };
 } // namespace
 
@@ -202,8 +225,8 @@ namespace
         const std::string GraphicsAPI = Base::CProgramParameters::GetInstance().GetStdString("graphics_api", "gl");
 #endif
 
-        if      (GraphicsAPI == "gles") m_GraphicsInfo.m_GraphicsAPI = SGraphicsInfo::OpenGLES;
-        else if (GraphicsAPI == "gl")   m_GraphicsInfo.m_GraphicsAPI = SGraphicsInfo::OpenGL;
+        if      (GraphicsAPI == "gles") m_GraphicsInfo.m_GraphicsAPI = CGraphicsInfo::OpenGLES;
+        else if (GraphicsAPI == "gl")   m_GraphicsInfo.m_GraphicsAPI = CGraphicsInfo::OpenGL;
         else BASE_THROWV("Graphics API %s is not supported! Possible options are \"gles\" or \"gl\"", GraphicsAPI.c_str());
 
 #ifdef __ANDROID__
@@ -213,6 +236,11 @@ namespace
         m_GraphicsInfo.m_MajorVersion = Base::CProgramParameters::GetInstance().GetInt("graphics_api_major_version", 4);
         m_GraphicsInfo.m_MinorVersion = Base::CProgramParameters::GetInstance().GetInt("graphics_api_minor_version", 5);
 #endif
+
+        // -----------------------------------------------------------------------------
+        // Load pixel matching behavior
+        // -----------------------------------------------------------------------------
+        m_GraphicsInfo.m_PixelMatching = static_cast<CInternGraphicsInfo::EPixelMatching>(Base::CProgramParameters::GetInstance().GetInt("graphics_pixel_matching", 0));
     }
     
     // -----------------------------------------------------------------------------
@@ -243,7 +271,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Check OpenGLES
             // -----------------------------------------------------------------------------
-            if (m_GraphicsInfo.m_GraphicsAPI != SGraphicsInfo::OpenGLES)
+            if (m_GraphicsInfo.m_GraphicsAPI != CGraphicsInfo::OpenGLES)
             {
                 BASE_THROWM("Only OpenGLES is supported on Android devices. Please change graphics API in the config file.")
             }
@@ -355,20 +383,14 @@ namespace
             }
 
             // -----------------------------------------------------------------------------
-            // Get native size
+            // Get native resolution
             // -----------------------------------------------------------------------------
             int Width, Height;
 
             eglQuerySurface(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface, EGL_WIDTH, &Width);
             eglQuerySurface(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface, EGL_HEIGHT, &Height);
 
-            m_pActiveWindowInfo->m_WindowSize[0] = Width;
-            m_pActiveWindowInfo->m_WindowSize[1] = Height;
-
-            // -----------------------------------------------------------------------------
-            // Swap buffer at the beginning
-            // -----------------------------------------------------------------------------
-            eglSwapBuffers(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface);
+            SetWindowSize(m_pActiveWindowInfo, Width, Height);
 #else
             HWND  pNativeWindowHandle;
             HDC   pNativeDeviceContextHandle;
@@ -419,7 +441,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Check if OpenGLES is available on desktop graphics card
             // -----------------------------------------------------------------------------
-            if (m_GraphicsInfo.m_GraphicsAPI == SGraphicsInfo::OpenGLES)
+            if (m_GraphicsInfo.m_GraphicsAPI == CGraphicsInfo::OpenGLES)
             {
                 typedef const char* (WINAPI * PFNWGLGETEXTENSIONSSTRINGARBPROC)(HDC hdc);
                 PROC Function = wglGetProcAddress("wglGetExtensionsStringARB");
@@ -460,7 +482,7 @@ namespace
             {
                 WGL_CONTEXT_MAJOR_VERSION_ARB, m_GraphicsInfo.m_MajorVersion,
                 WGL_CONTEXT_MINOR_VERSION_ARB, m_GraphicsInfo.m_MinorVersion,
-                WGL_CONTEXT_PROFILE_MASK_ARB , m_GraphicsInfo.m_GraphicsAPI == SGraphicsInfo::OpenGLES ? WGL_CONTEXT_ES2_PROFILE_BIT_EXT : WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+                WGL_CONTEXT_PROFILE_MASK_ARB , m_GraphicsInfo.m_GraphicsAPI == CGraphicsInfo::OpenGLES ? WGL_CONTEXT_ES2_PROFILE_BIT_EXT : WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
                 WGL_CONTEXT_FLAGS_ARB        , APP_DEBUG_MODE ? WGL_CONTEXT_DEBUG_BIT_ARB : 0,
                 0,
             };
@@ -483,6 +505,18 @@ namespace
             // Clip Control
             // -----------------------------------------------------------------------------
             glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
+
+            // -----------------------------------------------------------------------------
+            // Get native resolution
+            // -----------------------------------------------------------------------------
+            RECT WindowRect;
+
+            GetWindowRect(pNativeWindowHandle, &WindowRect);
+
+            int Width  = Base::Abs(WindowRect.right - WindowRect.left);
+            int Height = Base::Abs(WindowRect.bottom - WindowRect.top);
+
+            SetWindowSize(m_pActiveWindowInfo, Width, Height);
 
             // -----------------------------------------------------------------------------
             // Save created data
@@ -594,7 +628,7 @@ namespace
     {
         assert(m_pActiveWindowInfo != 0);
 
-        return m_pActiveWindowInfo->m_WindowSize;
+        return m_pActiveWindowInfo->m_InternalWindowSize;
     }
 
     // -----------------------------------------------------------------------------
@@ -603,7 +637,25 @@ namespace
     {
         assert(_WindowID < m_NumberOfWindows);
 
-        return m_WindowInfos[_WindowID].m_WindowSize;
+        return m_WindowInfos[_WindowID].m_InternalWindowSize;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const Base::Int2& CGfxMain::GetActiveNativeWindowSize()
+    {
+        assert(m_pActiveWindowInfo != 0);
+
+        return m_pActiveWindowInfo->m_NativeWindowSize;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const Base::Int2& CGfxMain::GetNativeWindowSize(unsigned int _WindowID)
+    {
+        assert(_WindowID < m_NumberOfWindows);
+
+        return m_WindowInfos[_WindowID].m_NativeWindowSize;
     }
 
     // -----------------------------------------------------------------------------
@@ -615,10 +667,9 @@ namespace
         if (_WindowID >= m_NumberOfWindows) return;
 
         // -----------------------------------------------------------------------------
-        // Setup view port of render target (back buffer, ...).
+        // Setup window info
         // -----------------------------------------------------------------------------
-        m_WindowInfos[_WindowID].m_WindowSize[0] = _Width;
-        m_WindowInfos[_WindowID].m_WindowSize[1] = _Height;
+        SetWindowSize(&m_WindowInfos[_WindowID], _Width, _Height);
 
         // -----------------------------------------------------------------------------
         // Send to every delegate that resize has changed
@@ -627,7 +678,7 @@ namespace
 
         for (CResizeDelegateIterator CurrentDelegate = m_ResizeDelegates.begin(); CurrentDelegate != EndOfDelegates; ++CurrentDelegate)
         {
-            (*CurrentDelegate)(_Width, _Height);
+            (*CurrentDelegate)(m_WindowInfos[_WindowID].m_InternalWindowSize[0], m_WindowInfos[_WindowID].m_InternalWindowSize[1]);
         }
     }
 
@@ -646,8 +697,8 @@ namespace
         // -----------------------------------------------------------------------------
         SWindowInfo& rWindowInfo = m_WindowInfos[_WindowID];
 
-        Width  = rWindowInfo.m_WindowSize[0];
-        Height = rWindowInfo.m_WindowSize[1];
+        Width  = rWindowInfo.m_NativeWindowSize[0];
+        Height = rWindowInfo.m_NativeWindowSize[1];
 
         pPixels = static_cast<char*>(Base::CMemory::Allocate(3 * Width * Height * sizeof(char)));
 
@@ -684,7 +735,7 @@ namespace
     
     // -----------------------------------------------------------------------------
 
-    const SGraphicsInfo&  CGfxMain::GetGraphicsAPI()
+    const CGraphicsInfo&  CGfxMain::GetGraphicsAPI()
     {
         return m_GraphicsInfo;
     }
@@ -823,8 +874,8 @@ namespace
         NumberOfMetersPerRegionRow    = static_cast<float>(Dt::CRegion::s_NumberOfMetersX);
         NumberOfMetersPerRegionColumn = static_cast<float>(Dt::CRegion::s_NumberOfMetersY);
         
-        ScreensizeX = static_cast<float>(m_pActiveWindowInfo->m_WindowSize[0]);
-        ScreensizeY = static_cast<float>(m_pActiveWindowInfo->m_WindowSize[1]);
+        ScreensizeX = static_cast<float>(m_pActiveWindowInfo->m_InternalWindowSize[0]);
+        ScreensizeY = static_cast<float>(m_pActiveWindowInfo->m_InternalWindowSize[1]);
 
         InvertedScreensizeX = 1.0f / ScreensizeX;
         InvertedScreensizeY = 1.0f / ScreensizeY;
@@ -874,6 +925,41 @@ namespace
     CBufferPtr CGfxMain::GetPerFrameConstantBuffer()
     {
         return m_PerFrameConstantBufferBufferPtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxMain::SetWindowSize(SWindowInfo* _pWindowInfo, int _Width, int _Height)
+    {
+        // -----------------------------------------------------------------------------
+        // Set native resolution
+        // -----------------------------------------------------------------------------
+        _pWindowInfo->m_NativeWindowSize[0] = _Width;
+        _pWindowInfo->m_NativeWindowSize[1] = _Height;
+
+        // -----------------------------------------------------------------------------
+        // Calculate internal resolution
+        // -----------------------------------------------------------------------------
+        _pWindowInfo->m_InternalWindowSize[0] = _pWindowInfo->m_NativeWindowSize[0];
+        _pWindowInfo->m_InternalWindowSize[1] = _pWindowInfo->m_NativeWindowSize[1];
+
+        switch (m_GraphicsInfo.m_PixelMatching)
+        {
+        case CInternGraphicsInfo::Scale:
+        {
+            float Scale = Base::CProgramParameters::GetInstance().GetFloat("graphics_pixel_matching_scale", 1.0f);
+
+            _pWindowInfo->m_InternalWindowSize[0] = static_cast<int>(static_cast<float>(_pWindowInfo->m_NativeWindowSize[0]) * Scale);
+            _pWindowInfo->m_InternalWindowSize[1] = static_cast<int>(static_cast<float>(_pWindowInfo->m_NativeWindowSize[1]) * Scale);
+        }
+        break;
+        case CInternGraphicsInfo::Fix:
+        {
+            _pWindowInfo->m_InternalWindowSize[0] = Base::CProgramParameters::GetInstance().GetUInt("graphics_pixel_matching_w", _Width);
+            _pWindowInfo->m_InternalWindowSize[1] = Base::CProgramParameters::GetInstance().GetUInt("graphics_pixel_matching_h", _Height);
+        }
+        break;
+        };
     }
 } // namespace
 
@@ -937,6 +1023,20 @@ namespace Main
 
     // -----------------------------------------------------------------------------
 
+    const Base::Int2& GetActiveNativeWindowSize()
+    {
+        return CGfxMain::GetInstance().GetActiveNativeWindowSize();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const Base::Int2& GetNativeWindowSize(unsigned int _WindowID)
+    {
+        return CGfxMain::GetInstance().GetNativeWindowSize(_WindowID);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void OnResize(unsigned int _WindowID, unsigned int _Width, unsigned int _Height)
     {
         return CGfxMain::GetInstance().OnResize(_WindowID, _Width, _Height);
@@ -951,7 +1051,7 @@ namespace Main
 
     // -----------------------------------------------------------------------------
 
-    const SGraphicsInfo& GetGraphicsAPI()
+    const CGraphicsInfo& GetGraphicsAPI()
     {
         return CGfxMain::GetInstance().GetGraphicsAPI();
     }
