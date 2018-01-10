@@ -7,12 +7,12 @@ import android.os.Bundle;
 
 public class GameActivity extends NativeActivity
 {
-    static GameActivity _activity;
+    static GameActivity s_Instance;
 
     /** Access singleton activity for game. **/
     public static GameActivity Get()
     {
-        return _activity;
+        return s_Instance;
     }
 
     @Override
@@ -26,7 +26,7 @@ public class GameActivity extends NativeActivity
     {
         super.onCreate(savedInstanceState);
 
-        _activity = this;
+        s_Instance = this;
     }
 
     @Override
