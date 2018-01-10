@@ -92,8 +92,8 @@ namespace
 
         void ActivateWindow(unsigned int _WindowID);
 
-        const Base::Int2& GetActiveWindowSize();
-        const Base::Int2& GetWindowSize(unsigned int _WindowID);
+        const Base::Int2& GetActiveWindowSize(bool _RequestNative);
+        const Base::Int2& GetWindowSize(unsigned int _WindowID, bool _RequestNative);
 
         void OnResize(unsigned int _WindowID, unsigned int _Width, unsigned int _Height);
 
@@ -621,20 +621,24 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    const Base::Int2& CGfxMain::GetActiveWindowSize()
+    const Base::Int2& CGfxMain::GetActiveWindowSize(bool _RequestNative)
     {
         assert(m_pActiveWindowInfo != 0);
 
-        return m_pActiveWindowInfo->m_InternalWindowSize;
+        Base::Int2 RequestedSize = _RequestNative ? m_pActiveWindowInfo->m_NativeWindowSize : m_pActiveWindowInfo->m_InternalWindowSize;
+
+        return RequestedSize;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Int2& CGfxMain::GetWindowSize(unsigned int _WindowID)
+    const Base::Int2& CGfxMain::GetWindowSize(unsigned int _WindowID, bool _RequestNative)
     {
         assert(_WindowID < m_NumberOfWindows);
 
-        return m_WindowInfos[_WindowID].m_InternalWindowSize;
+        Base::Int2 RequestedSize = _RequestNative ? m_WindowInfos[_WindowID].m_NativeWindowSize : m_WindowInfos[_WindowID].m_InternalWindowSize;
+
+        return RequestedSize;
     }
 
     // -----------------------------------------------------------------------------
@@ -657,7 +661,7 @@ namespace
 
         for (CResizeDelegateIterator CurrentDelegate = m_ResizeDelegates.begin(); CurrentDelegate != EndOfDelegates; ++CurrentDelegate)
         {
-            (*CurrentDelegate)(_Width, _Height);
+            (*CurrentDelegate)(m_WindowInfos[_WindowID].m_InternalWindowSize[0], m_WindowInfos[_WindowID].m_InternalWindowSize[1]);
         }
     }
 
@@ -988,16 +992,16 @@ namespace Main
 
     // -----------------------------------------------------------------------------
 
-    const Base::Int2& GetActiveWindowSize()
+    const Base::Int2& GetActiveWindowSize(bool _RequestNative)
     {
-        return CGfxMain::GetInstance().GetActiveWindowSize();
+        return CGfxMain::GetInstance().GetActiveWindowSize(_RequestNative);
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Int2& GetWindowSize(unsigned int _WindowID)
+    const Base::Int2& GetWindowSize(unsigned int _WindowID, bool _RequestNative)
     {
-        return CGfxMain::GetInstance().GetWindowSize(_WindowID);
+        return CGfxMain::GetInstance().GetWindowSize(_WindowID, _RequestNative);
     }
 
     // -----------------------------------------------------------------------------

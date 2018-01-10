@@ -63,7 +63,6 @@ namespace
         void OnSetupEnd();
         
         void OnReload();
-        void OnResize(unsigned int _Width, unsigned int _Height);
         
         void Update();
         void Render();
@@ -254,11 +253,6 @@ namespace
         , m_pSelectedEntity       (0)
     {
         ResetTickets();
-
-        // -----------------------------------------------------------------------------
-        // Register resize delegate
-        // -----------------------------------------------------------------------------
-        Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxSelectionRenderer::OnResize));
     }
     
     // -----------------------------------------------------------------------------
@@ -438,14 +432,6 @@ namespace
     void CGfxSelectionRenderer::OnReload()
     {
         
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGfxSelectionRenderer::OnResize(unsigned int _Width, unsigned int _Height)
-    {
-        BASE_UNUSED(_Width);
-        BASE_UNUSED(_Height);
     }
     
     // -----------------------------------------------------------------------------
