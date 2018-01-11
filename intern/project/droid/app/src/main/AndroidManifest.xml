@@ -12,9 +12,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:hasCode="true">
-
-        <activity android:name=".GameActivity" />
+        android:hasCode="false">
 
         <activity android:name="android.app.NativeActivity"
             android:label="@string/app_name"

@@ -1,8 +1,6 @@
 
 package de.tu_ilmenau.saltwater;
 
-import android.os.Bundle;
-
 public class GameActivity
 {
     static GameActivity s_Instance;
