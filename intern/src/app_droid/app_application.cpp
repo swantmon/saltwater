@@ -15,6 +15,7 @@
 #include "base/base_exception.h"
 #include "base/base_input_event.h"
 #include "base/base_uncopyable.h"
+#include "base/base_memory.h"
 #include "base/base_program_parameters.h"
 #include "base/base_singleton.h"
 
@@ -102,7 +103,7 @@ namespace
         , m_RequestState (App::CState::Init)
         , m_ParameterFile("/android.config")
     {
-        memset(&m_AppSetup, 0, sizeof(m_AppSetup));
+        Base::CMemory::Zero(&m_AppSetup, sizeof(m_AppSetup));
     }
     
     // -----------------------------------------------------------------------------
@@ -155,37 +156,72 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup mixed reality
         // -----------------------------------------------------------------------------
-        JNIEnv *env = 0;
-        jobject contextObj = 0;
+        JNIEnv *env;
 
-        try
-        {
-            _pAndroidApp->activity->vm->AttachCurrentThread(&env, NULL);
+        _pAndroidApp->activity->vm->AttachCurrentThread(&env, NULL);
 
-            jclass GameActivity = env->FindClass("de/tu_ilmenau/saltwater/GameActivity");
+        jclass LocalActivity = env->GetObjectClass(_pAndroidApp->activity->clazz);
 
-            jclass activityClass = env->GetObjectClass(_pAndroidApp->activity->clazz);
+        jmethodID GetClassLoaderId = env->GetMethodID(LocalActivity, "getClassLoader", "()Ljava/lang/ClassLoader;");
 
-            jmethodID contextMethod = env->GetMethodID(activityClass, "getApplicationContext", "()Landroid/content/Context;");
+        jobject cls = env->CallObjectMethod(_pAndroidApp->activity->clazz, GetClassLoaderId);
 
-            contextObj = env->CallObjectMethod(_pAndroidApp->activity->clazz, contextMethod);
-        }
-        catch(...)
-        {
-            JNIEnv *env;
-            _pAndroidApp->activity->vm->AttachCurrentThread(&env, NULL);
-            jclass contextClass = env->FindClass("android/content/Context");
-            jclass activityClass = env->FindClass("android/app/NativeActivity");
-            jmethodID contextMethod = env->GetMethodID(activityClass, "getApplicationContext", "()Landroid/content/Context;");
-            jobject contextObj = env->CallObjectMethod(_pAndroidApp->activity->clazz, contextMethod);
-        }
+        jclass classLoader = env->FindClass("java/lang/ClassLoader");
 
+        jmethodID findClass = env->GetMethodID(classLoader, "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
+
+        jstring strClassName = env->NewStringUTF("de/tu_ilmenau/saltwater/GameActivity");
+
+        jclass flurryClass = (jclass)(env->CallObjectMethod(cls, findClass, strClassName));
+
+        env->NewGlobalRef(flurryClass);
+
+        jmethodID GetConstructorID = env->GetMethodID(flurryClass, "<init>", "()V");
+
+        jmethodID GetHelloID = env->GetMethodID(flurryClass, "GetHello", "()I");
+
+        jmethodID GetHello2ID = env->GetMethodID(flurryClass, "GetHello2", "()I");
+
+
+
+        // jobject GameWindow = env->NewObject(flurryClass, GetConstructorID);
+
+        // jobject GameWindow2 = env->AllocObject(flurryClass);
+
+
+
+
+        env->DeleteLocalRef(strClassName);
+
+
+
+        /*
+        JNIEnv *env;
+
+        _pAndroidApp->activity->vm->AttachCurrentThread(&env, NULL);
+
+        jclass localGameActivityClass  = env->FindClass("de/tu_ilmenau/saltwarer/GameActivity");
+
+        jclass GameActivityClassID = (jclass)env->NewGlobalRef(localGameActivityClass );
+
+        env->DeleteLocalRef(localGameActivityClass );
+
+        jmethodID methodid = env->GetMethodID(GameActivityClassID, "GetHello", "()Ljava/lang/String;");
+        */
+
+        // In onCreate call a function in cpp and save thiz pointer
+        // {
+            // jobject GameActivityThis = env->NewGlobalRef(thiz);
+        // }
+
+        /*
         MR::ControlManager::SConfiguration Config;
 
         Config.m_pEnv     = _pAndroidApp->activity->env;
-        Config.m_pContext = contextObj;
+        Config.m_pContext = &contextObj;
 
-        // MR::ControlManager::OnStart(Config);
+        MR::ControlManager::OnStart(Config);
+        */
 
         // -----------------------------------------------------------------------------
         // Start timing

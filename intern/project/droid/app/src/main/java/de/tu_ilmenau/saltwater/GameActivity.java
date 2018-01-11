@@ -1,11 +1,9 @@
 
 package de.tu_ilmenau.saltwater;
 
-import android.app.NativeActivity;
-
 import android.os.Bundle;
 
-public class GameActivity extends NativeActivity
+public class GameActivity
 {
     static GameActivity s_Instance;
 
@@ -14,42 +12,15 @@ public class GameActivity extends NativeActivity
         return s_Instance;
     }
 
-    @Override
-    public void onStart()
+    public GameActivity()
     {
-        super.onStart();
-
-        System.out.println("onStart");
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
-        super.onCreate(savedInstanceState);
+        int a = 42;
 
         s_Instance = this;
     }
 
-    @Override
-    public void onResume()
+    public int GetHello()
     {
-        super.onResume();
-    }
-
-    @Override
-    public void onPause ()
-    {
-        super.onPause();
-    }
-
-    @Override
-    public void onStop()
-    {
-        super.onStop();
-    }
-
-    public String GetHello()
-    {
-        return ("Hello CPP engine");
+        return 42;
     }
 }
