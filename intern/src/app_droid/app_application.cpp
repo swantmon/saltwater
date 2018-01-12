@@ -5,6 +5,7 @@
 #include "app_droid/app_exit_state.h"
 #include "app_droid/app_init_state.h"
 #include "app_droid/app_intro_state.h"
+#include "app_droid/app_jni_interface.h"
 #include "app_droid/app_load_map_state.h"
 #include "app_droid/app_main_menu_state.h"
 #include "app_droid/app_play_state.h"
@@ -158,7 +159,7 @@ namespace
         // -----------------------------------------------------------------------------
         JNIEnv *env;
 
-        _pAndroidApp->activity->vm->AttachCurrentThread(&env, NULL);
+        g_pJavaVM->AttachCurrentThread(&env, NULL);
 
         jclass LocalActivity = env->GetObjectClass(_pAndroidApp->activity->clazz);
 
@@ -174,11 +175,9 @@ namespace
 
         jclass flurryClass = (jclass)(env->CallObjectMethod(cls, findClass, strClassName));
 
-        jmethodID GetConstructorID = env->GetMethodID(flurryClass, "<init>", "()V");
+        jmethodID GetHelloID = env->GetMethodID(LocalActivity, "GetHello", "()I");
 
-        jmethodID GetHelloID = env->GetMethodID(flurryClass, "GetHello", "()I");
-
-        jmethodID GetHello2ID = env->GetMethodID(flurryClass, "GetHello2", "()I");
+        jmethodID GetHello2ID = env->GetMethodID(LocalActivity, "GetHello2", "()I");
 
         //jmethodID GetInstanceID = env->GetStaticMethodID(flurryClass, "GetTest", "()I");
 

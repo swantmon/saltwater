@@ -9,13 +9,6 @@ public class GameActivity extends NativeActivity
     // -----------------------------------------------------------------------------
     // Testing area
     // -----------------------------------------------------------------------------
-    static GameActivity s_Instance;
-
-    public static GameActivity GetInstance()
-    {
-        return s_Instance;
-    }
-
     public static int GetTest() {return 42; }
 
     public int GetHello()
@@ -23,9 +16,14 @@ public class GameActivity extends NativeActivity
         return 42;
     }
 
-    static
+    // -----------------------------------------------------------------------------
+    // Instance
+    // -----------------------------------------------------------------------------
+    static GameActivity s_Instance;
+
+    public static GameActivity GetInstance()
     {
-        System.loadLibrary("app_droid");
+        return s_Instance;
     }
 
     // -----------------------------------------------------------------------------
@@ -66,5 +64,13 @@ public class GameActivity extends NativeActivity
     public void onDestroy()
     {
         super.onDestroy();
+    }
+
+    // -----------------------------------------------------------------------------
+    // Load libraries. E.g. app with native JNI interface
+    // -----------------------------------------------------------------------------
+    static
+    {
+        System.loadLibrary("app_droid");
     }
 }

@@ -77,7 +77,7 @@ file(
      ${SourceDir}app_droid/*.h*
 )
 
-add_library( app_droid SHARED ${TargetSources} )
+add_library( app_droid SHARED ${TargetSources} ${SourceDir}app_droid/app_jni_interface.cpp)
 
 target_include_directories( app_droid PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue )
 
