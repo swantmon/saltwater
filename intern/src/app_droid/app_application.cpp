@@ -174,24 +174,42 @@ namespace
 
         jclass flurryClass = (jclass)(env->CallObjectMethod(cls, findClass, strClassName));
 
-        env->NewGlobalRef(flurryClass);
-
         jmethodID GetConstructorID = env->GetMethodID(flurryClass, "<init>", "()V");
 
         jmethodID GetHelloID = env->GetMethodID(flurryClass, "GetHello", "()I");
 
         jmethodID GetHello2ID = env->GetMethodID(flurryClass, "GetHello2", "()I");
 
+        //jmethodID GetInstanceID = env->GetStaticMethodID(flurryClass, "GetTest", "()I");
 
+        // -----------------------------------------------------------------------------
+        // Signature	                Java Type
+        // V	                        void
+        // Z	                        boolean
+        // B	                        byte
+        // C        	                char
+        // S        	                short
+        // I        	                int
+        // J        	                long
+        // F        	                float
+        // D        	                double
+        // L fully-qualified-class ;	fully-qualified-class
+        // [ type	                    type[]
+        // ( arg-types ) ret-type	    method type
+        //
+        // Example: (Ljava/lang/String;)Ljava/lang/String;
+        // -----------------------------------------------------------------------------
 
-        // jobject GameWindow = env->NewObject(flurryClass, GetConstructorID);
+        //env->NewGlobalRef(flurryClass);
+
+        //jobject GameWindow = env->NewObject(flurryClass, GetConstructorID);
 
         // jobject GameWindow2 = env->AllocObject(flurryClass);
 
 
 
 
-        env->DeleteLocalRef(strClassName);
+        //env->DeleteLocalRef(strClassName);
 
 
 

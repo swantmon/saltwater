@@ -1,8 +1,14 @@
 
 package de.tu_ilmenau.saltwater;
 
-public class GameActivity
+import android.app.NativeActivity;
+import android.os.Bundle;
+
+public class GameActivity extends NativeActivity
 {
+    // -----------------------------------------------------------------------------
+    // Testing area
+    // -----------------------------------------------------------------------------
     static GameActivity s_Instance;
 
     public static GameActivity GetInstance()
@@ -10,15 +16,50 @@ public class GameActivity
         return s_Instance;
     }
 
-    public GameActivity()
-    {
-        int a = 42;
-
-        s_Instance = this;
-    }
+    public static int GetTest() {return 42; }
 
     public int GetHello()
     {
         return 42;
+    }
+
+    // -----------------------------------------------------------------------------
+    // App lifecycle
+    // -----------------------------------------------------------------------------
+    @Override
+    public void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+
+        s_Instance = this;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause()
+    {
+        super.onPause();
+    }
+
+    @Override
+    public void onStop()
+    {
+        super.onStop();
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
     }
 }
