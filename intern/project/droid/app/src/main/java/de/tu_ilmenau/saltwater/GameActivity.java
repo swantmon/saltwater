@@ -38,15 +38,13 @@ public class GameActivity extends NativeActivity
     // App lifecycle
     // -----------------------------------------------------------------------------
     @Override
-    public void onCreate(Bundle savedInstanceState)
+    public void onCreate(Bundle _SavedInstanceState)
     {
-        super.onCreate(savedInstanceState);
+        super.onCreate(_SavedInstanceState);
 
         s_Instance = this;
 
-        Context Test = getApplicationContext();
-
-        nativeSetContext(Test);
+        nativeSetContext(getApplicationContext());
     }
 
     @Override

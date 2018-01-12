@@ -1,8 +1,6 @@
 
 #include "app_droid/app_jni_interface.h"
 
-#include <assert.h>
-
 #define JNI_CURRENT_VERSION JNI_VERSION_1_6
 
 extern "C"
