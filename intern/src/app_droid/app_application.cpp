@@ -234,7 +234,7 @@ namespace
         MR::ControlManager::SConfiguration Config;
 
         Config.m_pEnv     = _pAndroidApp->activity->env;
-        Config.m_pContext = CJNIInterface::GetInstance().s_pContext;
+        Config.m_pContext = App::JNI::GetContext();
 
         //MR::ControlManager::OnStart(Config);
 

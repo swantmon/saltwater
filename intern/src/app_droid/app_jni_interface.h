@@ -3,16 +3,11 @@
 
 #include <jni.h>
 
-class CJNIInterface
+namespace App
 {
-public:
-    static CJNIInterface& GetInstance()
-    {
-        static CJNIInterface s_Singleton;
-
-        return s_Singleton;
-    }
-
-public:
-    void* s_pContext = 0;
-};
+namespace JNI
+{
+    void SetContext(void* _pContext);
+    void* GetContext();
+} // namespace JNI
+} // namespace App
