@@ -1,8 +1,29 @@
 
 #include "app_droid/app_jni_interface.h"
 
+#include "base/base_exception.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
+
+#include <jni.h>
+
+// -----------------------------------------------------------------------------
+// Signature	                Java Type
+// V	                        void
+// Z	                        boolean
+// B	                        byte
+// C        	                char
+// S        	                short
+// I        	                int
+// J        	                long
+// F        	                float
+// D        	                double
+// L fully-qualified-class ;	fully-qualified-class
+// [ type	                    type[]
+// ( arg-types ) ret-type	    method type
+//
+// Example: (Ljava/lang/String;)Ljava/lang/String;
+// -----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
 // Setup
@@ -20,8 +41,16 @@ namespace
 
     public:
 
-        void SetContext(void* _pContext);
-        void* GetContext();
+        void InitializeJNI(JavaVM* _pJavaVM, jint _Version);
+
+        void FindClassesAndMethods();
+
+        JNIEnv* GetJavaEnvironment();
+
+        void SetActivity(jobject _Activity);
+
+        void SetContext(jobject _pContext);
+        jobject GetContext();
 
     public:
 
@@ -30,14 +59,28 @@ namespace
 
     private:
 
-        void* m_pContext;
+        jobject m_pContext;
+        JavaVM* m_pCurrentJavaVM;
+        JNIEnv* m_pEnvironment;
+        jint m_CurrentJavaVersion;
+        jobject m_GameActivityThiz;
+        jclass m_GameActivityID;
+        jobject m_GlobalClassLoader;
+        jmethodID m_FindClassMethod;
     };
 }
 
 namespace
 {
     CJNIInterface::CJNIInterface()
-        : m_pContext(0)
+        : m_pContext          (0)
+        , m_pCurrentJavaVM    (0)
+        , m_pEnvironment      (0)
+        , m_CurrentJavaVersion(0)
+        , m_GameActivityThiz  (0)
+        , m_GameActivityID    (0)
+        , m_GlobalClassLoader (0)
+        , m_FindClassMethod   (0)
     {
 
     };
@@ -51,26 +94,78 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CJNIInterface::SetContext(void* _pContext)
+    void CJNIInterface::InitializeJNI(JavaVM* _pJavaVM, jint _Version)
+    {
+        if (m_pCurrentJavaVM == 0)
+        {
+            m_pCurrentJavaVM     = _pJavaVM;
+            m_CurrentJavaVersion = _Version;
+
+            jint Result = m_pCurrentJavaVM->GetEnv((void **)&m_pEnvironment, m_CurrentJavaVersion);
+
+            if(Result != JNI_OK) BASE_THROWM("Can't get Java environment.");
+
+            jclass MainClass        = m_pEnvironment->FindClass("de/tu_ilmenau/saltwater/GameActivity");
+            jclass ClassClass       = m_pEnvironment->FindClass("java/lang/Class");
+            jclass ClassLoaderClass = m_pEnvironment->FindClass("java/lang/ClassLoader");
+
+            jmethodID GetClassLoaderMethod = m_pEnvironment->GetMethodID(ClassClass, "getClassLoader", "()Ljava/lang/ClassLoader;");
+
+            jobject LocalClassLoader = m_pEnvironment->CallObjectMethod(MainClass, GetClassLoaderMethod);
+
+            m_GlobalClassLoader = m_pEnvironment->NewGlobalRef(LocalClassLoader);
+            m_FindClassMethod   = m_pEnvironment->GetMethodID(ClassLoaderClass, "findClass", "(Ljava/lang/String;)Ljava/lang/Class;");
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CJNIInterface::FindClassesAndMethods()
+    {
+        jclass LocalGameActivityClass = m_pEnvironment->FindClass("de/tu_ilmenau/saltwater/GameActivity");
+
+        m_GameActivityID = (jclass)m_pEnvironment->NewGlobalRef(LocalGameActivityClass);
+
+        // TODO: Add some real methods!
+        jmethodID GetHelloID = m_pEnvironment->GetMethodID(m_GameActivityID, "GetNumber", "()I");
+    }
+
+    // -----------------------------------------------------------------------------
+
+    JNIEnv* CJNIInterface::GetJavaEnvironment()
+    {
+        return m_pEnvironment;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CJNIInterface::SetContext(jobject _pContext)
     {
         m_pContext = _pContext;
     };
 
     // -----------------------------------------------------------------------------
 
-    void* CJNIInterface::GetContext()
+    jobject CJNIInterface::GetContext()
     {
         return m_pContext;
     };
+
+    // -----------------------------------------------------------------------------
+
+    void CJNIInterface::SetActivity(jobject _Activity)
+    {
+        m_GameActivityThiz = _Activity;
+    }
 }
 
 namespace App
 {
 namespace JNI
 {
-    void SetContext(void* _pContext)
+    void* GetJavaEnvironment()
     {
-        CJNIInterface::GetInstance().SetContext(_pContext);
+        return CJNIInterface::GetInstance().GetJavaEnvironment();
     }
 
     // -----------------------------------------------------------------------------
@@ -87,9 +182,13 @@ namespace JNI
 // -----------------------------------------------------------------------------
 extern "C"
 {
-    JNIEXPORT void JNICALL Java_de_tu_1ilmenau_saltwater_GameActivity_nativeSetContext(JNIEnv* _pEnv, jobject _LocalThizz, jobject _Context)
+    JNIEXPORT void JNICALL Java_de_tu_1ilmenau_saltwater_GameActivity_nativeSetActivityAndContext(JNIEnv* _pEnv, jobject _LocalThiz, jobject _Context)
     {
+        CJNIInterface::GetInstance().SetActivity(_pEnv->NewGlobalRef(_LocalThiz));
+
         CJNIInterface::GetInstance().SetContext(_Context);
+
+        CJNIInterface::GetInstance().FindClassesAndMethods();
     }
 }; // extern "C"
 
@@ -98,8 +197,7 @@ extern "C"
 // -----------------------------------------------------------------------------
 JNIEXPORT jint JNI_OnLoad(JavaVM* _pJavaVM, void* _pReserved)
 {
-    // TODO:
-    // Initialize interface and preload class loader + methods
+    CJNIInterface::GetInstance().InitializeJNI(_pJavaVM, JNI_CURRENT_VERSION);
 
     return JNI_CURRENT_VERSION;
 }

@@ -157,86 +157,12 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup mixed reality
         // -----------------------------------------------------------------------------
-        JNIEnv *env;
-
-        _pAndroidApp->activity->vm->AttachCurrentThread(&env, NULL);
-
-        jclass LocalActivity = env->GetObjectClass(_pAndroidApp->activity->clazz);
-
-        jmethodID GetClassLoaderId = env->GetMethodID(LocalActivity, "getClassLoader", "()Ljava/lang/ClassLoader;");
-
-        jobject cls = env->CallObjectMethod(_pAndroidApp->activity->clazz, GetClassLoaderId);
-
-        jclass classLoader = env->FindClass("java/lang/ClassLoader");
-
-        jmethodID findClass = env->GetMethodID(classLoader, "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
-
-        jstring strClassName = env->NewStringUTF("de/tu_ilmenau/saltwater/GameActivity");
-
-        jclass flurryClass = (jclass)(env->CallObjectMethod(cls, findClass, strClassName));
-
-        jmethodID GetHelloID = env->GetMethodID(LocalActivity, "GetHello", "()I");
-
-        jmethodID GetHello2ID = env->GetMethodID(LocalActivity, "GetContext", "()Landroid/content/Context;");
-
-        jobject contextObj = env->CallObjectMethod(_pAndroidApp->activity->clazz, GetHello2ID);
-
-        // -----------------------------------------------------------------------------
-        // Signature	                Java Type
-        // V	                        void
-        // Z	                        boolean
-        // B	                        byte
-        // C        	                char
-        // S        	                short
-        // I        	                int
-        // J        	                long
-        // F        	                float
-        // D        	                double
-        // L fully-qualified-class ;	fully-qualified-class
-        // [ type	                    type[]
-        // ( arg-types ) ret-type	    method type
-        //
-        // Example: (Ljava/lang/String;)Ljava/lang/String;
-        // -----------------------------------------------------------------------------
-
-        //env->NewGlobalRef(flurryClass);
-
-        //jobject GameWindow = env->NewObject(flurryClass, GetConstructorID);
-
-        // jobject GameWindow2 = env->AllocObject(flurryClass);
-
-
-
-
-        //env->DeleteLocalRef(strClassName);
-
-
-
-        /*
-        JNIEnv *env;
-
-        _pAndroidApp->activity->vm->AttachCurrentThread(&env, NULL);
-
-        jclass localGameActivityClass  = env->FindClass("de/tu_ilmenau/saltwarer/GameActivity");
-
-        jclass GameActivityClassID = (jclass)env->NewGlobalRef(localGameActivityClass );
-
-        env->DeleteLocalRef(localGameActivityClass );
-
-        jmethodID methodid = env->GetMethodID(GameActivityClassID, "GetHello", "()Ljava/lang/String;");
-        */
-
-        // In onCreate call a function in cpp and save thiz pointer
-        // {
-            // jobject GameActivityThis = env->NewGlobalRef(thiz);
-        // }
-
         MR::ControlManager::SConfiguration Config;
 
-        Config.m_pEnv     = _pAndroidApp->activity->env;
+        Config.m_pEnv     = App::JNI::GetJavaEnvironment();
         Config.m_pContext = App::JNI::GetContext();
 
-        //MR::ControlManager::OnStart(Config);
+        MR::ControlManager::OnStart(Config);
 
         // -----------------------------------------------------------------------------
         // Start timing

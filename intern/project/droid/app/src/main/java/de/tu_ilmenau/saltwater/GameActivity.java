@@ -12,16 +12,9 @@ public class GameActivity extends NativeActivity
     // -----------------------------------------------------------------------------
     // Testing area
     // -----------------------------------------------------------------------------
-    public static int GetTest() {return 42; }
-
-    public int GetHello()
+    public int GetNumber()
     {
         return 42;
-    }
-
-    public Context GetContext()
-    {
-        return getApplicationContext();
     }
 
     // -----------------------------------------------------------------------------
@@ -44,7 +37,7 @@ public class GameActivity extends NativeActivity
 
         s_Instance = this;
 
-        nativeSetContext(getApplicationContext());
+        nativeSetActivityAndContext(getApplicationContext());
     }
 
     @Override
@@ -79,7 +72,7 @@ public class GameActivity extends NativeActivity
     // -----------------------------------------------------------------------------
     // Native functions
     // -----------------------------------------------------------------------------
-    public native void nativeSetContext(Context context);
+    public native void nativeSetActivityAndContext(Context context);
 
     // -----------------------------------------------------------------------------
     // Load libraries. E.g. app with native JNI interface
