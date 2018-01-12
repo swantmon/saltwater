@@ -2,6 +2,9 @@
 package de.tu_ilmenau.saltwater;
 
 import android.app.NativeActivity;
+
+import android.content.Context;
+
 import android.os.Bundle;
 
 public class GameActivity extends NativeActivity
@@ -14,6 +17,11 @@ public class GameActivity extends NativeActivity
     public int GetHello()
     {
         return 42;
+    }
+
+    public Context GetContext()
+    {
+        return getApplicationContext();
     }
 
     // -----------------------------------------------------------------------------
@@ -35,6 +43,10 @@ public class GameActivity extends NativeActivity
         super.onCreate(savedInstanceState);
 
         s_Instance = this;
+
+        Context Test = getApplicationContext();
+
+        nativeSetContext(Test);
     }
 
     @Override
@@ -65,6 +77,11 @@ public class GameActivity extends NativeActivity
     {
         super.onDestroy();
     }
+
+    // -----------------------------------------------------------------------------
+    // Native functions
+    // -----------------------------------------------------------------------------
+    public native void nativeSetContext(Context context);
 
     // -----------------------------------------------------------------------------
     // Load libraries. E.g. app with native JNI interface

@@ -3,4 +3,16 @@
 
 #include <jni.h>
 
-extern JavaVM* g_pJavaVM;
+class CJNIInterface
+{
+public:
+    static CJNIInterface& GetInstance()
+    {
+        static CJNIInterface s_Singleton;
+
+        return s_Singleton;
+    }
+
+public:
+    void* s_pContext = 0;
+};

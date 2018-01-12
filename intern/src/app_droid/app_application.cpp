@@ -159,7 +159,7 @@ namespace
         // -----------------------------------------------------------------------------
         JNIEnv *env;
 
-        g_pJavaVM->AttachCurrentThread(&env, NULL);
+        _pAndroidApp->activity->vm->AttachCurrentThread(&env, NULL);
 
         jclass LocalActivity = env->GetObjectClass(_pAndroidApp->activity->clazz);
 
@@ -177,9 +177,9 @@ namespace
 
         jmethodID GetHelloID = env->GetMethodID(LocalActivity, "GetHello", "()I");
 
-        jmethodID GetHello2ID = env->GetMethodID(LocalActivity, "GetHello2", "()I");
+        jmethodID GetHello2ID = env->GetMethodID(LocalActivity, "GetContext", "()Landroid/content/Context;");
 
-        //jmethodID GetInstanceID = env->GetStaticMethodID(flurryClass, "GetTest", "()I");
+        jobject contextObj = env->CallObjectMethod(_pAndroidApp->activity->clazz, GetHello2ID);
 
         // -----------------------------------------------------------------------------
         // Signature	                Java Type
@@ -231,14 +231,12 @@ namespace
             // jobject GameActivityThis = env->NewGlobalRef(thiz);
         // }
 
-        /*
         MR::ControlManager::SConfiguration Config;
 
         Config.m_pEnv     = _pAndroidApp->activity->env;
-        Config.m_pContext = &contextObj;
+        Config.m_pContext = CJNIInterface::GetInstance().s_pContext;
 
-        MR::ControlManager::OnStart(Config);
-        */
+        //MR::ControlManager::OnStart(Config);
 
         // -----------------------------------------------------------------------------
         // Start timing
