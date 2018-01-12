@@ -23,6 +23,11 @@ public class GameActivity extends NativeActivity
         return 42;
     }
 
+    static
+    {
+        System.loadLibrary("app_droid");
+    }
+
     // -----------------------------------------------------------------------------
     // App lifecycle
     // -----------------------------------------------------------------------------
