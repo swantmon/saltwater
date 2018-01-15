@@ -162,6 +162,8 @@ namespace
         Config.m_pEnv     = App::JNI::GetJavaEnvironment();
         Config.m_pContext = App::JNI::GetContext();
 
+        while (Config.m_pContext == nullptr) Config.m_pContext = App::JNI::GetContext();
+
         MR::ControlManager::OnStart(Config);
 
         // -----------------------------------------------------------------------------

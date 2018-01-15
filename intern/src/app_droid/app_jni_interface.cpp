@@ -1,6 +1,7 @@
 
 #include "app_droid/app_jni_interface.h"
 
+#include "base/base_console.h"
 #include "base/base_exception.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
@@ -61,7 +62,6 @@ namespace
 
         jobject m_pContext;
         JavaVM* m_pCurrentJavaVM;
-        JNIEnv* m_pEnvironment;
         jint m_CurrentJavaVersion;
         jobject m_GameActivityThiz;
         jclass m_GameActivityID;
@@ -75,7 +75,6 @@ namespace
     CJNIInterface::CJNIInterface()
         : m_pContext          (0)
         , m_pCurrentJavaVM    (0)
-        , m_pEnvironment      (0)
         , m_CurrentJavaVersion(0)
         , m_GameActivityThiz  (0)
         , m_GameActivityID    (0)
@@ -101,20 +100,18 @@ namespace
             m_pCurrentJavaVM     = _pJavaVM;
             m_CurrentJavaVersion = _Version;
 
-            jint Result = m_pCurrentJavaVM->GetEnv((void **)&m_pEnvironment, m_CurrentJavaVersion);
+            JNIEnv* pEnvironment = GetJavaEnvironment();
 
-            if(Result != JNI_OK) BASE_THROWM("Can't get Java environment.");
+            jclass MainClass        = pEnvironment->FindClass("de/tu_ilmenau/saltwater/GameActivity");
+            jclass ClassClass       = pEnvironment->FindClass("java/lang/Class");
+            jclass ClassLoaderClass = pEnvironment->FindClass("java/lang/ClassLoader");
 
-            jclass MainClass        = m_pEnvironment->FindClass("de/tu_ilmenau/saltwater/GameActivity");
-            jclass ClassClass       = m_pEnvironment->FindClass("java/lang/Class");
-            jclass ClassLoaderClass = m_pEnvironment->FindClass("java/lang/ClassLoader");
+            jmethodID GetClassLoaderMethod = pEnvironment->GetMethodID(ClassClass, "getClassLoader", "()Ljava/lang/ClassLoader;");
 
-            jmethodID GetClassLoaderMethod = m_pEnvironment->GetMethodID(ClassClass, "getClassLoader", "()Ljava/lang/ClassLoader;");
+            jobject LocalClassLoader = pEnvironment->CallObjectMethod(MainClass, GetClassLoaderMethod);
 
-            jobject LocalClassLoader = m_pEnvironment->CallObjectMethod(MainClass, GetClassLoaderMethod);
-
-            m_GlobalClassLoader = m_pEnvironment->NewGlobalRef(LocalClassLoader);
-            m_FindClassMethod   = m_pEnvironment->GetMethodID(ClassLoaderClass, "findClass", "(Ljava/lang/String;)Ljava/lang/Class;");
+            m_GlobalClassLoader = pEnvironment->NewGlobalRef(LocalClassLoader);
+            m_FindClassMethod   = pEnvironment->GetMethodID(ClassLoaderClass, "findClass", "(Ljava/lang/String;)Ljava/lang/Class;");
         }
     }
 
@@ -122,19 +119,43 @@ namespace
 
     void CJNIInterface::FindClassesAndMethods()
     {
-        jclass LocalGameActivityClass = m_pEnvironment->FindClass("de/tu_ilmenau/saltwater/GameActivity");
+        JNIEnv* pEnvironment = GetJavaEnvironment();
 
-        m_GameActivityID = (jclass)m_pEnvironment->NewGlobalRef(LocalGameActivityClass);
+        jclass LocalGameActivityClass = pEnvironment->FindClass("de/tu_ilmenau/saltwater/GameActivity");
+
+        m_GameActivityID = (jclass)pEnvironment->NewGlobalRef(LocalGameActivityClass);
 
         // TODO: Add some real methods!
-        jmethodID GetHelloID = m_pEnvironment->GetMethodID(m_GameActivityID, "GetNumber", "()I");
+        jmethodID GetHelloID = pEnvironment->GetMethodID(m_GameActivityID, "GetNumber", "()I");
     }
 
     // -----------------------------------------------------------------------------
 
     JNIEnv* CJNIInterface::GetJavaEnvironment()
     {
-        return m_pEnvironment;
+        JNIEnv* pEnvironment = nullptr;
+
+        jint Result = m_pCurrentJavaVM->GetEnv((void **)&pEnvironment, JNI_CURRENT_VERSION);
+
+        if (Result == JNI_EDETACHED)
+        {
+            jint AttachResult = m_pCurrentJavaVM->AttachCurrentThread(&pEnvironment, NULL);
+
+            if (AttachResult == JNI_ERR)
+            {
+                BASE_CONSOLE_ERROR("UNIT TEST -- Failed to attach thread to get the JNI environment!");
+
+                return nullptr;
+            }
+        }
+        else if (Result != JNI_OK)
+        {
+            BASE_CONSOLE_ERRORV("UNIT TEST -- Failed to get the JNI environment! Result = %d", Result);
+
+            return nullptr;
+        }
+
+        return pEnvironment;
     }
 
     // -----------------------------------------------------------------------------
