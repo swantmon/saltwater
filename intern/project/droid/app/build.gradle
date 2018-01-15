@@ -1,5 +1,9 @@
 apply plugin: 'com.android.application'
 
+def arcore_libpath = "${buildDir}/arcore-native"
+
+configurations { natives }
+
 android {
     compileSdkVersion 27
     defaultConfig {
@@ -11,6 +15,7 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags "-std=c++14 -frtti -fexceptions"
+                arguments "-DANDROID_STL=c++_static", "-DARCORE_LIBPATH=${arcore_libpath}/jni"
             }
         }
         ndk {
@@ -25,7 +30,7 @@ android {
     }
     sourceSets {
         main {
-            jniLibs.srcDirs = [ '../../../../extern/arcore/lib', '../../../../extern/assimp/lib', '../../../../extern/devil/lib', '../../../../extern/tinyxml2/lib']
+            jniLibs.srcDirs = ['../../../../extern/assimp/lib', '../../../../extern/devil/lib', '../../../../extern/tinyxml2/lib']
         }
     }
     externalNativeBuild {
@@ -36,9 +41,21 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    // ARCore library
+    implementation 'com.google.ar:core:0.91.0'
+    natives 'com.google.ar:core:0.91.0'
 
+    // Other
     implementation 'com.android.support:appcompat-v7:27.0.2'
     implementation 'com.android.support:design:27.0.2'
+}
+
+task extractNativeLibraries() {
+    configurations.natives.files.each { f ->
+        copy {
+            from zipTree(f)
+            into arcore_libpath
+            include "jni/**/*"
+        }
+    }
 }
