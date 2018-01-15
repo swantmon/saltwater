@@ -19,10 +19,6 @@ allprojects {
     repositories {
         google()
         jcenter()
-        mavenLocal()
-        maven {
-            url "${project.rootDir}/../../../extern/arcore/lib"
-        }
     }
 }
 

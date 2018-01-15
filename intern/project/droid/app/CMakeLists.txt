@@ -9,13 +9,6 @@ add_library(native_app_glue STATIC ${ANDROID_NDK}/sources/android/native_app_glu
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
 
 # ---------------------------------------
-# ARCore library
-# ---------------------------------------
-add_library(arcore SHARED IMPORTED)
-
-set_target_properties(arcore PROPERTIES IMPORTED_LOCATION ${ARCORE_LIBPATH}/${ANDROID_ABI}/libarcore_sdk.so)
-
-# ---------------------------------------
 # Project & setup
 # ---------------------------------------
 set( ExternDir  ../../../../extern/ )
@@ -88,7 +81,7 @@ add_library( app_droid SHARED ${TargetSources} ${SourceDir}app_droid/app_jni_int
 
 target_include_directories( app_droid PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue ${ExternDir}/arcore/include )
 
-target_link_libraries( app_droid EGL GLESv3 arcore log android m native_app_glue)
+target_link_libraries( app_droid EGL GLESv3 arcore_sdk log android m native_app_glue)
 
 target_link_libraries( app_droid assimp IL ILU tinyxml2)
 
