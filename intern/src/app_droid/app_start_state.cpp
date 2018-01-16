@@ -2,6 +2,7 @@
 #include "app_droid/app_precompiled.h"
 
 #include "app_droid/app_application.h"
+#include "app_droid/app_jni_interface.h"
 #include "app_droid/app_start_state.h"
 
 #include "camera/cam_control_manager.h"
@@ -11,6 +12,8 @@
 #include "gui/gui_start_state.h"
 
 #include "logic/lg_start_state.h"
+
+#include "mr/mr_control_manager.h"
 
 namespace App
 {
@@ -53,6 +56,16 @@ namespace App
         Lg ::Start::OnEnter();
         Gui::Start::OnEnter();
         Gfx::Start::OnEnter();
+
+        // -----------------------------------------------------------------------------
+        // Setup mixed reality
+        // -----------------------------------------------------------------------------
+        MR::ControlManager::SConfiguration Config;
+
+        Config.m_pEnv     = App::JNI::GetJavaEnvironment();
+        Config.m_pContext = App::JNI::GetContext();
+
+        MR::ControlManager::OnStart(Config);
     }
 
     // -----------------------------------------------------------------------------

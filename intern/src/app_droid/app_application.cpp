@@ -21,7 +21,6 @@
 #include "base/base_singleton.h"
 
 #include "core/core_asset_manager.h"
-
 #include "core/core_time.h"
 
 #include "graphic/gfx_application_interface.h"
@@ -153,18 +152,6 @@ namespace
         // Setup asset manager
         // -----------------------------------------------------------------------------
         Core::AssetManager::SetFilePath(_pAndroidApp->activity->externalDataPath);
-
-        // -----------------------------------------------------------------------------
-        // Setup mixed reality
-        // -----------------------------------------------------------------------------
-        MR::ControlManager::SConfiguration Config;
-
-        Config.m_pEnv     = App::JNI::GetJavaEnvironment();
-        Config.m_pContext = App::JNI::GetContext();
-
-        while (Config.m_pContext == nullptr) Config.m_pContext = App::JNI::GetContext();
-
-        MR::ControlManager::OnStart(Config);
 
         // -----------------------------------------------------------------------------
         // Start timing

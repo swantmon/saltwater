@@ -9,6 +9,8 @@
 
 #include "logic/lg_exit_state.h"
 
+#include "mr/mr_control_manager.h"
+
 namespace App
 {
     CExitState& CExitState::GetInstance()
@@ -51,6 +53,11 @@ namespace App
         Gfx::Exit::OnLeave();
         Gui::Exit::OnLeave();
         Lg ::Exit::OnLeave();
+
+        // -----------------------------------------------------------------------------
+        // Exit mixed reality
+        // -----------------------------------------------------------------------------
+        MR::ControlManager::OnExit();
 
         BASE_CONSOLE_STREAMINFO("Leave exit state.");
     }
