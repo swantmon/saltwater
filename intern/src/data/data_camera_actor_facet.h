@@ -19,6 +19,7 @@ namespace Dt
         {
             Skybox,
             Texture,
+            Webcam,
             SolidColor,
             DepthOnly,
             DontClear,
