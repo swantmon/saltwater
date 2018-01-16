@@ -49,8 +49,8 @@ namespace
 
     private:
 
-        ArSession* ar_session_ = nullptr;
-        ArFrame* ar_frame_ = nullptr;
+        ArSession* m_pARSession;
+        ArFrame* m_pARFrame;
 
     private:
 
@@ -61,6 +61,8 @@ namespace
 namespace
 {
     CMRControlManager::CMRControlManager()
+        : m_pARSession(0)
+        , m_pARFrame  (0)
     {
     }
 
@@ -78,20 +80,21 @@ namespace
 
         ArStatus Status;
 
-        Status = ArSession_create(_rConfiguration.m_pEnv, _rConfiguration.m_pContext, &ar_session_);
+        Status = ArSession_create(_rConfiguration.m_pEnv, _rConfiguration.m_pContext, &m_pARSession);
 
         if (Status == AR_SUCCESS)
         {
             ArConfig* ar_config = nullptr;
-            ArConfig_create(ar_session_, &ar_config);
 
-            Status = ArSession_checkSupported(ar_session_, ar_config);
+            ArConfig_create(m_pARSession, &ar_config);
 
-            Status = ArSession_configure(ar_session_, ar_config);
+            Status = ArSession_checkSupported(m_pARSession, ar_config);
+
+            Status = ArSession_configure(m_pARSession, ar_config);
 
             ArConfig_destroy(ar_config);
 
-            ArFrame_create(ar_session_, &ar_frame_);
+            ArFrame_create(m_pARSession, &m_pARFrame);
         }
     }
 
