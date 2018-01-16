@@ -38,6 +38,8 @@
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
 
+#include "mr/mr_control_manager.h"
+
 #include <string>
 
 using namespace Gfx;
@@ -127,6 +129,10 @@ namespace
         SRenderContext m_BackgroundFromSkybox;
         SRenderContext m_BackgroundFromTexture;
 
+        CTexturePtr m_WebcamTexturePtr;
+
+        CTargetSetPtr m_WebcamTargetSetPtr;
+
         CCameraRenderJobs m_CameraRenderJobs;
         
     private:
@@ -134,6 +140,8 @@ namespace
         void RenderBackgroundFromSkybox();
 
         void RenderBackgroundFromTexture();
+
+        void RenderBackgroundFromWebcam();
 
         void BuildRenderJobs();
     };
@@ -144,6 +152,8 @@ namespace
     CGfxBackgroundRenderer::CGfxBackgroundRenderer()
         : m_BackgroundFromSkybox       ()
         , m_BackgroundFromTexture      ()
+        , m_WebcamTexturePtr           ()
+        , m_WebcamTargetSetPtr         ()
         , m_CameraRenderJobs           ()
     {
     }
@@ -179,6 +189,10 @@ namespace
         m_BackgroundFromTexture.m_PSBufferSetPtr   = 0;
         m_BackgroundFromTexture.m_InputLayoutPtr   = 0;
         m_BackgroundFromTexture.m_MeshPtr          = 0;
+
+        m_WebcamTexturePtr = 0;
+
+        m_WebcamTargetSetPtr = 0;
 
         m_CameraRenderJobs.clear();
     }
@@ -236,7 +250,33 @@ namespace
     
     void CGfxBackgroundRenderer::OnSetupRenderTargets()
     {
+        STextureDescriptor TextureDesc;
 
+        TextureDesc.m_NumberOfPixelsU  = 1920;
+        TextureDesc.m_NumberOfPixelsV  = 1080;
+        TextureDesc.m_NumberOfPixelsW  = 1;
+        TextureDesc.m_NumberOfMipMaps  = 1;
+        TextureDesc.m_NumberOfTextures = 1;
+        TextureDesc.m_Binding          = CTexture::RenderTarget | CTexture::ShaderResource;
+        TextureDesc.m_Access           = CTexture::CPUWrite;
+        TextureDesc.m_Format           = CTexture::Unknown;
+        TextureDesc.m_Usage            = CTexture::GPURead;
+        TextureDesc.m_Semantic         = CTexture::Diffuse;
+        TextureDesc.m_pFileName        = 0;
+        TextureDesc.m_pPixels          = 0;
+        TextureDesc.m_Format           = CTexture::R8G8B8A8_UBYTE;
+
+        m_WebcamTexturePtr = TextureManager::CreateTexture2D(TextureDesc);
+
+        // -----------------------------------------------------------------------------
+        // Labels
+        // -----------------------------------------------------------------------------
+        TextureManager::SetTextureLabel(m_WebcamTexturePtr, "Webcam texture");
+
+        // -----------------------------------------------------------------------------
+        // Target sets & view ports
+        // -----------------------------------------------------------------------------
+        m_WebcamTargetSetPtr = TargetSetManager::CreateTargetSet(m_WebcamTexturePtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -401,6 +441,10 @@ namespace
             else if (rRenderJob.m_pDataCamera->GetClearFlag() == Dt::CCameraActorFacet::Texture)
             {
                 RenderBackgroundFromTexture();
+            }
+            else if (rRenderJob.m_pDataCamera->GetClearFlag() == Dt::CCameraActorFacet::Webcam)
+            {
+                RenderBackgroundFromWebcam();
             }
             else
             {
@@ -654,6 +698,147 @@ namespace
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
         ContextManager::SetTexture(0, rRenderJob.m_pGraphicCamera->GetBackgroundTextureSet()->GetTexture(0));
+        ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
+
+        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+
+        ContextManager::ResetTexture(0);
+        ContextManager::ResetTexture(1);
+
+        ContextManager::ResetSampler(0);
+        ContextManager::ResetSampler(1);
+
+        ContextManager::ResetConstantBuffer(0);
+
+        ContextManager::ResetConstantBuffer(8);
+
+        ContextManager::ResetResourceBuffer(0);
+
+        ContextManager::ResetTopology();
+
+        ContextManager::ResetInputLayout();
+
+        ContextManager::ResetIndexBuffer();
+
+        ContextManager::ResetVertexBuffer();
+
+        ContextManager::ResetShaderVS();
+
+        ContextManager::ResetShaderPS();
+
+        ContextManager::ResetRenderContext();
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxBackgroundRenderer::RenderBackgroundFromWebcam()
+    {
+        // -----------------------------------------------------------------------------
+        // Find sky entity
+        // -----------------------------------------------------------------------------
+        float HDRIntensity = 1.0f;
+
+        Dt::Map::CEntityIterator CurrentEntity;
+        Dt::Map::CEntityIterator EndOfEntities;
+
+        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
+        EndOfEntities = Dt::Map::EntitiesEnd();
+
+        Dt::CEntity* pSkyEntity = 0;
+
+        for (; CurrentEntity != EndOfEntities; )
+        {
+            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+
+            // -----------------------------------------------------------------------------
+            // Get graphic facet
+            // -----------------------------------------------------------------------------
+            if (rCurrentEntity.GetType() == Dt::SLightType::Sky)
+            {
+                pSkyEntity = &rCurrentEntity;
+            }
+
+            // -----------------------------------------------------------------------------
+            // Next entity
+            // -----------------------------------------------------------------------------
+            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
+        }
+
+        if (pSkyEntity != 0)
+        {
+            Dt::CSkyFacet* pSkyFacet = static_cast<Dt::CSkyFacet*>(pSkyEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+
+            assert(pSkyFacet);
+
+            HDRIntensity = pSkyFacet->GetIntensity();
+        }
+
+        // -----------------------------------------------------------------------------
+        // Prepare value from sky / environment
+        // -----------------------------------------------------------------------------
+        CRenderContextPtr RenderContextPtr = m_BackgroundFromTexture.m_RenderContextPtr;
+        CShaderPtr        VSPtr            = m_BackgroundFromTexture.m_VSPtr;
+        CShaderPtr        PSPtr            = m_BackgroundFromTexture.m_PSPtr;
+        CBufferSetPtr     VSBufferSetPtr   = m_BackgroundFromTexture.m_VSBufferSetPtr;
+        CBufferSetPtr     PSBufferSetPtr   = m_BackgroundFromTexture.m_PSBufferSetPtr;
+        CInputLayoutPtr   InputLayoutPtr   = m_BackgroundFromTexture.m_InputLayoutPtr;
+        CMeshPtr          MeshPtr          = m_BackgroundFromTexture.m_MeshPtr;
+
+        // -----------------------------------------------------------------------------
+        // Render sky texture
+        // -----------------------------------------------------------------------------
+        Performance::BeginEvent("Background from Webcam");
+
+
+        // -----------------------------------------------------------------------------
+        // Render webcam to target set
+        // -----------------------------------------------------------------------------
+        ContextManager::SetTargetSet(m_WebcamTargetSetPtr);
+
+        MR::ControlManager::OnDraw();
+
+        ContextManager::ResetRenderContext();
+
+        // -----------------------------------------------------------------------------
+        // Data
+        // -----------------------------------------------------------------------------
+        SSkytextureBufferPS PSBuffer;
+
+        PSBuffer.m_HDRFactor     = HDRIntensity;
+        PSBuffer.m_IsHDR         = 0.0f;
+        PSBuffer.m_ExposureIndex = static_cast<float>(HistogramRenderer::GetLastExposureHistoryIndex());
+
+        BufferManager::UploadBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
+
+        // -----------------------------------------------------------------------------
+        // Rendering
+        // -----------------------------------------------------------------------------
+        ContextManager::SetRenderContext(RenderContextPtr);
+
+        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+
+        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+
+        ContextManager::SetInputLayout(InputLayoutPtr);
+
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        ContextManager::SetShaderVS(VSPtr);
+
+        ContextManager::SetShaderPS(PSPtr);
+
+        ContextManager::SetConstantBuffer(0, VSBufferSetPtr->GetBuffer(0));
+
+        ContextManager::SetConstantBuffer(8, PSBufferSetPtr->GetBuffer(0));
+
+        ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
+
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(0, m_WebcamTexturePtr);
         ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
 
         ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
