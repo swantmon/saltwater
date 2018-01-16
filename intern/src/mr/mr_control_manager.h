@@ -25,5 +25,7 @@ namespace ControlManager
     void OnResume();
 
     void OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height);
+
+    void OnDraw();
 } // namespace ControlManager
 } // namespace MR
