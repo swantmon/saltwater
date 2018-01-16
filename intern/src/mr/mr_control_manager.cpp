@@ -78,8 +78,6 @@ namespace
 
         ArStatus Status;
 
-        // env: 0x0000007ed9ccc1c0
-        // context: 0x0000007fd20b742c
         Status = ArSession_create(_rConfiguration.m_pEnv, _rConfiguration.m_pContext, &ar_session_);
 
         if (Status == AR_SUCCESS)

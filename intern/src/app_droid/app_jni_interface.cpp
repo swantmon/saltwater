@@ -135,22 +135,22 @@ namespace
     {
         JNIEnv* pEnvironment = nullptr;
 
-        jint Result = m_pCurrentJavaVM->GetEnv((void **)&pEnvironment, JNI_CURRENT_VERSION);
+        jint GetResult = m_pCurrentJavaVM->GetEnv((void **)&pEnvironment, JNI_CURRENT_VERSION);
 
-        if (Result == JNI_EDETACHED)
+        if (GetResult == JNI_EDETACHED)
         {
             jint AttachResult = m_pCurrentJavaVM->AttachCurrentThread(&pEnvironment, NULL);
 
             if (AttachResult == JNI_ERR)
             {
-                BASE_CONSOLE_ERROR("UNIT TEST -- Failed to attach thread to get the JNI environment!");
+                BASE_CONSOLE_ERROR("Failed to attach thread to get the JNI environment!");
 
                 return nullptr;
             }
         }
-        else if (Result != JNI_OK)
+        else if (GetResult != JNI_OK)
         {
-            BASE_CONSOLE_ERRORV("UNIT TEST -- Failed to get the JNI environment! Result = %d", Result);
+            BASE_CONSOLE_ERRORV("Failed to get the JNI environment! Result = %d", GetResult);
 
             return nullptr;
         }
@@ -207,7 +207,7 @@ extern "C"
     {
         CJNIInterface::GetInstance().SetActivity(_pEnv->NewGlobalRef(_LocalThiz));
 
-        CJNIInterface::GetInstance().SetContext(_Context);
+        CJNIInterface::GetInstance().SetContext(_pEnv->NewGlobalRef(_Context));
 
         CJNIInterface::GetInstance().FindClassesAndMethods();
     }
