@@ -24,7 +24,7 @@
 #include "arcore_c_api.h"
 
 #include <assert.h>
-#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 using namespace MR;
@@ -54,8 +54,13 @@ namespace
 
     private:
 
+        typedef std::unordered_set<ArAnchor*> CTrackedObjects;
+
+    private:
+
         ArSession* m_pARSession;
         ArFrame* m_pARFrame;
+        CTrackedObjects m_TrackedObjects;
 
     private:
 
@@ -66,8 +71,9 @@ namespace
 namespace
 {
     CMRControlManager::CMRControlManager()
-        : m_pARSession(0)
-        , m_pARFrame  (0)
+        : m_pARSession    (0)
+        , m_pARFrame      (0)
+        , m_TrackedObjects()
     {
     }
 
@@ -119,16 +125,19 @@ namespace
         ArSession_destroy(m_pARSession);
 
         ArFrame_destroy(m_pARFrame);
+
+        m_TrackedObjects.clear();
     }
 
     // -----------------------------------------------------------------------------
 
     void CMRControlManager::Update()
     {
-        if (ArSession_update(m_pARSession, m_pARFrame) != AR_SUCCESS)
-        {
-            BASE_CONSOLE_ERROR("HelloArApplication::OnDrawFrame ArSession_update error");
-        }
+        ArStatus Result;
+
+        Result = ArSession_update(m_pARSession, m_pARFrame);
+
+        if (Result != AR_SUCCESS) BASE_CONSOLE_ERROR("ArSession_update error");
 
         // -----------------------------------------------------------------------------
         // Update camera
@@ -137,8 +146,8 @@ namespace
 
         ArFrame_acquireCamera(m_pARSession, m_pARFrame, &pARCamera);
 
-        Base::Float4x4 ViewMatrix;
-        Base::Float4x4 ProjectionMatrix;
+        Base::Float4x4 ViewMatrix       = Base::Float4x4::s_Identity;
+        Base::Float4x4 ProjectionMatrix = Base::Float4x4::s_Identity;
 
         ArCamera_getViewMatrix(m_pARSession, pARCamera, &ViewMatrix[0][0]);
 
@@ -147,7 +156,7 @@ namespace
         ArCamera_release(pARCamera);
 
         // TODO: send view and proj. matrix to camera
-
+        
         // -----------------------------------------------------------------------------
         // Light estimation
         // Intensity value ranges from 0.0f to 1.0f.
@@ -175,8 +184,26 @@ namespace
         // TODO: use light estimation for our lighting
 
         // -----------------------------------------------------------------------------
-        // Find trackables
+        // Use tracked objects matrices
         // -----------------------------------------------------------------------------
+        Base::Float4x4 ModelMatrix = Base::Float4x4::s_Identity;
+
+        for (const auto& rObject : m_TrackedObjects)
+        {
+            ArTrackingState TrackingState = AR_TRACKING_STATE_STOPPED;
+
+            ArPose* pARPose = 0;
+
+            ArPose_create(m_pARSession, 0, &pARPose);
+
+            ArAnchor_getPose(m_pARSession, rObject, pARPose);
+
+            ArPose_getMatrix(m_pARSession, pARPose, &ModelMatrix[0][0]);
+
+            ArPose_destroy(pARPose);
+        }
+
+        // TODO: render objects depending on the position / model matrix
     }
 
     // -----------------------------------------------------------------------------
