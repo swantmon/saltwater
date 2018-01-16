@@ -37,7 +37,7 @@ public class GameActivity extends NativeActivity
 
         s_Instance = this;
 
-        nativeSetActivityAndContext(getApplicationContext());
+        native_InitializeInterface(getApplicationContext());
     }
 
     @Override
@@ -72,7 +72,7 @@ public class GameActivity extends NativeActivity
     // -----------------------------------------------------------------------------
     // Native functions
     // -----------------------------------------------------------------------------
-    public native void nativeSetActivityAndContext(Context context);
+    public native void native_InitializeInterface(Context context);
 
     // -----------------------------------------------------------------------------
     // Load libraries. E.g. app with native JNI interface

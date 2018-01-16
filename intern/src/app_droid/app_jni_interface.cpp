@@ -203,7 +203,7 @@ namespace JNI
 // -----------------------------------------------------------------------------
 extern "C"
 {
-    JNIEXPORT void JNICALL Java_de_tu_1ilmenau_saltwater_GameActivity_nativeSetActivityAndContext(JNIEnv* _pEnv, jobject _LocalThiz, jobject _Context)
+    JNIEXPORT void JNICALL Java_de_tu_1ilmenau_saltwater_GameActivity_native_1InitializeInterface(JNIEnv* _pEnv, jobject _LocalThiz, jobject _Context)
     {
         CJNIInterface::GetInstance().SetActivity(_pEnv->NewGlobalRef(_LocalThiz));
 
