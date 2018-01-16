@@ -47,6 +47,11 @@ namespace
         void OnExit();
         void Update();
 
+        void OnPause();
+        void OnResume();
+
+        void OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height);
+
     private:
 
         ArSession* m_pARSession;
@@ -82,32 +87,119 @@ namespace
 
         Status = ArSession_create(_rConfiguration.m_pEnv, _rConfiguration.m_pContext, &m_pARSession);
 
-        if (Status == AR_SUCCESS)
-        {
-            ArConfig* ar_config = nullptr;
+        assert(Status == AR_SUCCESS);
 
-            ArConfig_create(m_pARSession, &ar_config);
+        assert(m_pARSession != 0);
 
-            Status = ArSession_checkSupported(m_pARSession, ar_config);
+        ArConfig* ARConfig = 0;
 
-            Status = ArSession_configure(m_pARSession, ar_config);
+        ArConfig_create(m_pARSession, &ARConfig);
 
-            ArConfig_destroy(ar_config);
+        assert(ARConfig != 0);
 
-            ArFrame_create(m_pARSession, &m_pARFrame);
-        }
+        Status = ArSession_checkSupported(m_pARSession, ARConfig);
+
+        assert(Status == AR_SUCCESS);
+
+        Status = ArSession_configure(m_pARSession, ARConfig);
+
+        assert(Status == AR_SUCCESS);
+
+        ArConfig_destroy(ARConfig);
+
+        ArFrame_create(m_pARSession, &m_pARFrame);
+
+        assert(m_pARFrame != 0);
     }
 
     // -----------------------------------------------------------------------------
 
     void CMRControlManager::OnExit()
     {
+        ArSession_destroy(m_pARSession);
+
+        ArFrame_destroy(m_pARFrame);
     }
 
     // -----------------------------------------------------------------------------
 
     void CMRControlManager::Update()
     {
+        if (ArSession_update(m_pARSession, m_pARFrame) != AR_SUCCESS)
+        {
+            BASE_CONSOLE_ERROR("HelloArApplication::OnDrawFrame ArSession_update error");
+        }
+
+        // -----------------------------------------------------------------------------
+        // Update camera
+        // -----------------------------------------------------------------------------
+        ArCamera* pARCamera;
+
+        ArFrame_acquireCamera(m_pARSession, m_pARFrame, &pARCamera);
+
+        Base::Float4x4 ViewMatrix;
+        Base::Float4x4 ProjectionMatrix;
+
+        ArCamera_getViewMatrix(m_pARSession, pARCamera, &ViewMatrix[0][0]);
+
+        ArCamera_getProjectionMatrix(m_pARSession, pARCamera, 0.1f, 100.0f, &ProjectionMatrix[0][0]);
+
+        ArCamera_release(pARCamera);
+
+        // TODO: send view and proj. matrix to camera
+
+        // -----------------------------------------------------------------------------
+        // Light estimation
+        // Intensity value ranges from 0.0f to 1.0f.
+        // -----------------------------------------------------------------------------
+        ArLightEstimate* ARLightEstimate;
+        ArLightEstimateState ARLightEstimateState;
+
+        ArLightEstimate_create(m_pARSession, &ARLightEstimate);
+
+        ArFrame_getLightEstimate(m_pARSession, m_pARFrame, ARLightEstimate);
+
+        ArLightEstimate_getState(m_pARSession, ARLightEstimate, &ARLightEstimateState);
+
+        float LightIntensity = 0.8f;
+
+        if (ARLightEstimateState == AR_LIGHT_ESTIMATE_STATE_VALID)
+        {
+            ArLightEstimate_getPixelIntensity(m_pARSession, ARLightEstimate, &LightIntensity);
+        }
+
+        ArLightEstimate_destroy(ARLightEstimate);
+
+        ARLightEstimate = nullptr;
+
+        // TODO: use light estimation for our lighting
+
+        // -----------------------------------------------------------------------------
+        // Find trackables
+        // -----------------------------------------------------------------------------
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMRControlManager::OnPause()
+    {
+        ArSession_pause(m_pARSession);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMRControlManager::OnResume()
+    {
+        ArStatus Status = ArSession_resume(m_pARSession);
+
+        assert(Status == AR_SUCCESS);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMRControlManager::OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height)
+    {
+        ArSession_setDisplayGeometry(m_pARSession, _DisplayRotation, _Width, _Height);
     }
 
     // -----------------------------------------------------------------------------
@@ -153,6 +245,27 @@ namespace ControlManager
     void Update()
     {
         CMRControlManager::GetInstance().Update();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void OnPause()
+    {
+        CMRControlManager::GetInstance().OnPause();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void OnResume()
+    {
+        CMRControlManager::GetInstance().OnResume();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height)
+    {
+        CMRControlManager::GetInstance().OnDisplayGeometryChanged(_DisplayRotation, _Width, _Height);
     }
 } // namespace ControlManager
 } // namespace MR

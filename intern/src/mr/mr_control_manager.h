@@ -20,5 +20,10 @@ namespace ControlManager
     void OnStart(const SConfiguration& _rConfiguration);
     void OnExit();
     void Update();
+
+    void OnPause();
+    void OnResume();
+
+    void OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height);
 } // namespace ControlManager
 } // namespace MR
