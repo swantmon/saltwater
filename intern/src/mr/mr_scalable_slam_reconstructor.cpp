@@ -1704,7 +1704,7 @@ namespace MR
             return;
         }
 
-        Performance::BeginEvent("Kinect Fusion");
+        Performance::BeginEvent("Scalable Kinect Fusion");
 
         Performance::BeginEvent("Data Input");
 
