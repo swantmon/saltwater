@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "base/base_vector2.h"
 #include "base/base_typedef.h"
 
 // -----------------------------------------------------------------------------
@@ -20,5 +21,7 @@ namespace Application
     void OnRun();
 
     void ChangeState(unsigned int _State);
+
+    const Base::Int2& GetWindowSize();
 } // namespace Application
 } // namespace App

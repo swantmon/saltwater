@@ -46,6 +46,8 @@ namespace
         void OnRun();
 
         void ChangeState(unsigned int _State);
+
+        const Base::Int2& GetWindowSize();
         
     private:
         
@@ -72,6 +74,7 @@ namespace
         App::CState::EStateType m_RequestState;
         SApplicationSetup       m_AppSetup;
         std::string             m_ParameterFile;
+        Base::Int2              m_WindowSize;
         
     private:
         
@@ -266,6 +269,23 @@ namespace
     {
         m_RequestState = static_cast<App::CState::EStateType>(_State);
     }
+
+    // -----------------------------------------------------------------------------
+
+    const Base::Int2& CApplication::GetWindowSize()
+    {
+        ARect Rectangle = m_AppSetup.m_pAndroidApp->contentRect;
+
+        int Width  = Base::Abs(Rectangle.left   - Rectangle.right);
+        int Height = Base::Abs(Rectangle.bottom - Rectangle.top);
+
+        // TODO: Rectangle is 0
+
+        m_WindowSize[0] = 2712;
+        m_WindowSize[1] = 1440;
+
+        return m_WindowSize;
+    }
     
     // -----------------------------------------------------------------------------
     
@@ -335,9 +355,9 @@ namespace
                     // -----------------------------------------------------------------------------
                     ARect Rectangle = AppSetup->m_pAndroidApp->pendingContentRect;
 
-                    int Width = Base::Abs(Rectangle.left - Rectangle.right);
+                    int Width  = Base::Abs(Rectangle.left   - Rectangle.right);
                     int Height = Base::Abs(Rectangle.bottom - Rectangle.top);
-    
+
                     int Rotation = App::JNI::GetDeviceRotation();
 
                     MR::ControlManager::OnDisplayGeometryChanged(Rotation, Width, Height);
@@ -407,6 +427,13 @@ namespace Application
     void ChangeState(unsigned int _State)
     {
         CApplication::GetInstance().ChangeState(_State);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const Base::Int2& GetWindowSize()
+    {
+        return CApplication::GetInstance().GetWindowSize();
     }
 } // namespace Application
 } // namespace App
