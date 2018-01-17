@@ -36,34 +36,50 @@ using namespace MR::ControlManager;
 
 namespace
 {
-    const float kVertices[] = {
-            -1.0f, -1.0f, 0.0f, +1.0f, -1.0f, 0.0f,
-            -1.0f, +1.0f, 0.0f, +1.0f, +1.0f, 0.0f,
-    };
-
     const float kUvs[] = {
             0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
     };
 
     constexpr char kVertexShader[] = R"(
-    #version 100
-    attribute vec4 vertex;
-    attribute vec2 textureCoords;
-    varying vec2 v_textureCoords;
-    void main() {
-      v_textureCoords = textureCoords;
-      gl_Position = vertex;
-    })";
+        #version  320 es
+
+        layout(location = 0) in vec2 in_UV;
+
+        layout(location = 0) out vec2 out_UV;
+
+        void main()
+        {
+            vec2 Vertices[4];
+
+            Vertices[0] = vec2(-1.0f, -1.0f);
+            Vertices[1] = vec2( 1.0f, -1.0f);
+            Vertices[2] = vec2(-1.0f,  1.0f);
+            Vertices[3] = vec2( 1.0f,  1.0f);
+
+            out_UV = in_UV;
+
+            gl_Position = vec4(Vertices[gl_VertexID], 0.0f, 1.0f);
+        }
+    )";
 
     constexpr char kFragmentShader[] = R"(
-    #version 100
-    #extension GL_OES_EGL_image_external : require
-    precision mediump float;
-    uniform samplerExternalOES texture;
-    varying vec2 v_textureCoords;
-    void main() {
-      gl_FragColor = texture2D(texture, v_textureCoords);
-    })";
+        #version 320 es
+
+        #extension GL_OES_EGL_image_external_essl3 : require
+
+        precision mediump float;
+
+        layout(location = 0) uniform samplerExternalOES in_ExtOESTexture;
+
+        layout(location = 0) in vec2 in_UV;
+
+        layout(location = 0) out vec4 out_Output;
+
+        void main()
+        {
+            out_Output = texture(in_ExtOESTexture, in_UV); //vec4(in_UV, 0, 1);
+        }
+    )";
 
     static GLuint LoadShader(GLenum _Type, const char* _pSource)
     {
@@ -135,8 +151,6 @@ namespace
 
     unsigned int s_ShaderProgram;
     unsigned int s_TextureID;
-    unsigned int s_UniformTexture;
-    unsigned int s_AttributeVertices;
     unsigned int s_AttributeUVs;
 
     static constexpr int s_NumberOfVertices = 4;
@@ -244,14 +258,20 @@ namespace
         s_ShaderProgram = CreateProgram(kVertexShader, kFragmentShader);
 
         glGenTextures(1, &s_TextureID);
+
         glBindTexture(GL_TEXTURE_EXTERNAL_OES, s_TextureID);
 
         glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
         glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        s_UniformTexture    = glGetUniformLocation(s_ShaderProgram, "texture");
-        s_AttributeVertices = glGetAttribLocation(s_ShaderProgram, "vertex");
-        s_AttributeUVs      = glGetAttribLocation(s_ShaderProgram, "textureCoords");
+        glGenBuffers(1, &s_AttributeUVs);
+
+        glBindBuffer(GL_ARRAY_BUFFER, s_AttributeUVs);
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(kUvs), &kUvs, GL_DYNAMIC_DRAW);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         ArSession_setCameraTextureName(m_pARSession, s_TextureID);
     }
@@ -389,6 +409,12 @@ namespace
         {
             ArFrame_transformDisplayUvCoords(m_pARSession, m_pARFrame, s_NumberOfVertices * 2, kUvs, s_TransformedUVs);
 
+            glBindBuffer(GL_ARRAY_BUFFER, s_AttributeUVs);
+
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(s_TransformedUVs), &s_TransformedUVs);
+
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+
             s_IsUVsInitialized = true;
         }
 
@@ -396,29 +422,31 @@ namespace
 
         glDepthMask(GL_FALSE);
 
-        glUniform1i(s_UniformTexture, 1);
+        glDisable(GL_BLEND);
 
-        glActiveTexture(GL_TEXTURE1);
+        //glActiveTexture(GL_TEXTURE0);
 
-        glBindTexture(GL_TEXTURE_EXTERNAL_OES, s_TextureID);
+        //glBindTexture(GL_TEXTURE_EXTERNAL_OES, s_TextureID);
 
-        glEnableVertexAttribArray(s_AttributeVertices);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        glVertexAttribPointer(s_AttributeVertices, 3, GL_FLOAT, GL_FALSE, 0, kVertices);
+        glBindBuffer(GL_ARRAY_BUFFER, s_AttributeUVs);
 
-        glEnableVertexAttribArray(s_AttributeUVs);
+        glEnableVertexAttribArray(0);
 
-        glVertexAttribPointer(s_AttributeUVs, 2, GL_FLOAT, GL_FALSE, 0, s_TransformedUVs);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-        glDisableVertexAttribArray(s_AttributeUVs);
+        glDisableVertexAttribArray(0);
 
-        glDisableVertexAttribArray(s_AttributeVertices);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        glBindTexture(GL_TEXTURE_EXTERNAL_OES, 0);
+        //glBindTexture(GL_TEXTURE_EXTERNAL_OES, 0);
 
         glDepthMask(GL_TRUE);
+
+        glEnable(GL_BLEND);
 
         glUseProgram(0);
     }
