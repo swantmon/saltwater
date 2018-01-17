@@ -2,6 +2,7 @@
 #include "mr/mr_precompiled.h"
 
 #include "base/base_console.h"
+#include "base/base_exception.h"
 #include "base/base_input_event.h"
 #include "base/base_memory.h"
 #include "base/base_pool.h"
@@ -94,12 +95,34 @@ namespace
 
         glCompileShader(Shader);
 
-        GLint compiled = 0;
+        GLint CompileStatus = 0;
 
-        glGetShaderiv(Shader, GL_COMPILE_STATUS, &compiled);
+        glGetShaderiv(Shader, GL_COMPILE_STATUS, &CompileStatus);
 
-        if (!compiled)
+        if (!CompileStatus)
         {
+            GLint InfoLogLength = 0;
+
+            glGetShaderiv(Shader, GL_INFO_LOG_LENGTH, &InfoLogLength);
+
+            if (!InfoLogLength)
+            {
+                return Shader;
+            }
+
+            char* pBuffer = reinterpret_cast<char*>(malloc(InfoLogLength));
+
+            if (!pBuffer)
+            {
+                return Shader;
+            }
+
+            glGetShaderInfoLog(Shader, InfoLogLength, nullptr, pBuffer);
+
+            BASE_CONSOLE_WARNINGV("Could not compile shader in MR %d:\n%s\n", _Type, pBuffer);
+
+            free(pBuffer);
+
             glDeleteShader(Shader);
 
             Shader = 0;
@@ -134,11 +157,11 @@ namespace
 
             glLinkProgram(Program);
 
-            GLint link_status = GL_FALSE;
+            GLint LinkStatus= GL_FALSE;
 
-            glGetProgramiv(Program, GL_LINK_STATUS, &link_status);
+            glGetProgramiv(Program, GL_LINK_STATUS, &LinkStatus);
 
-            if (link_status != GL_TRUE)
+            if (LinkStatus != GL_TRUE)
             {
                 glDeleteProgram(Program);
 
@@ -256,6 +279,8 @@ namespace
         // OpenGLES
         // -----------------------------------------------------------------------------
         s_ShaderProgram = CreateProgram(kVertexShader, kFragmentShader);
+
+        if (s_ShaderProgram == 0) BASE_THROWM("Failed creating shader capturing webcam image.")
 
         glGenTextures(1, &s_TextureID);
 
@@ -424,9 +449,9 @@ namespace
 
         glDisable(GL_BLEND);
 
-        //glActiveTexture(GL_TEXTURE0);
+        glActiveTexture(GL_TEXTURE0);
 
-        //glBindTexture(GL_TEXTURE_EXTERNAL_OES, s_TextureID);
+        glBindTexture(GL_TEXTURE_EXTERNAL_OES, s_TextureID);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
@@ -442,7 +467,7 @@ namespace
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        //glBindTexture(GL_TEXTURE_EXTERNAL_OES, 0);
+        glBindTexture(GL_TEXTURE_EXTERNAL_OES, 0);
 
         glDepthMask(GL_TRUE);
 
