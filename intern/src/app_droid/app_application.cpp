@@ -16,6 +16,7 @@
 #include "base/base_exception.h"
 #include "base/base_input_event.h"
 #include "base/base_uncopyable.h"
+#include "base/base_math_operations.h"
 #include "base/base_memory.h"
 #include "base/base_program_parameters.h"
 #include "base/base_singleton.h"
@@ -325,6 +326,20 @@ namespace
                 // The window is being hidden or closed, clean it up.
                 // -----------------------------------------------------------------------------
                 AppSetup->m_TerminateRequested = true;
+                break;
+
+            case APP_CMD_CONTENT_RECT_CHANGED:
+                // -----------------------------------------------------------------------------
+                // The window has changed the rectangle
+                // -----------------------------------------------------------------------------
+                ARect Rectangle = AppSetup->m_pAndroidApp->pendingContentRect;
+
+                int Width  = Base::Abs(Rectangle.left   - Rectangle.right);
+                int Height = Base::Abs(Rectangle.bottom - Rectangle.top);
+
+                int Rotation = App::JNI::GetDeviceRotation();
+
+                MR::ControlManager::OnDisplayGeometryChanged(Rotation, Width, Height);
                 break;
 
             case APP_CMD_GAINED_FOCUS:
