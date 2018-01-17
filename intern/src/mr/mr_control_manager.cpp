@@ -46,6 +46,7 @@ namespace
     };
 
     constexpr char kVertexShader[] = R"(
+    #version 100
     attribute vec4 vertex;
     attribute vec2 textureCoords;
     varying vec2 v_textureCoords;
@@ -55,6 +56,7 @@ namespace
     })";
 
     constexpr char kFragmentShader[] = R"(
+    #version 100
     #extension GL_OES_EGL_image_external : require
     precision mediump float;
     uniform samplerExternalOES texture;
@@ -234,6 +236,8 @@ namespace
 
         assert(m_pARFrame != 0);
 
+        ArSession_setDisplayGeometry(m_pARSession, _rConfiguration.m_Rotation, _rConfiguration.m_Width, _rConfiguration.m_Height);
+
         // -----------------------------------------------------------------------------
         // OpenGLES
         // -----------------------------------------------------------------------------
@@ -248,6 +252,8 @@ namespace
         s_UniformTexture    = glGetUniformLocation(s_ShaderProgram, "texture");
         s_AttributeVertices = glGetAttribLocation(s_ShaderProgram, "vertex");
         s_AttributeUVs      = glGetAttribLocation(s_ShaderProgram, "textureCoords");
+
+        ArSession_setCameraTextureName(m_pARSession, s_TextureID);
     }
 
     // -----------------------------------------------------------------------------

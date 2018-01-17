@@ -64,6 +64,9 @@ namespace App
 
         Config.m_pEnv     = App::JNI::GetJavaEnvironment();
         Config.m_pContext = App::JNI::GetContext();
+        Config.m_Rotation = MR::ControlManager::SConfiguration::Rotation90;
+        Config.m_Width    = 1920;
+        Config.m_Height   = 1080;
 
         MR::ControlManager::OnStart(Config);
     }

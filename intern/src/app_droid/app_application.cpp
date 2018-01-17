@@ -301,59 +301,63 @@ namespace
 
         switch (_Command) 
         {
-        case APP_CMD_SAVE_STATE:
-            break;
+            case APP_CMD_SAVE_STATE:
+                break;
 
-        case APP_CMD_INIT_WINDOW:
-            // -----------------------------------------------------------------------------
-            // The window is being shown, get it ready.
-            // -----------------------------------------------------------------------------
-            if (AppSetup->m_pAndroidApp->window != NULL) 
-            {
-                unsigned int WindowID = Gfx::App::RegisterWindow(AppSetup->m_pAndroidApp->window);
-
-                Gfx::App::ActivateWindow(WindowID);
-
-                AppSetup->m_WindowID = WindowID;
-
-                App::Application::ChangeState(App::CState::Start);
-            }
-            break;
-
-        case APP_CMD_TERM_WINDOW:
-            // -----------------------------------------------------------------------------
-            // The window is being hidden or closed, clean it up.
-            // -----------------------------------------------------------------------------
-            AppSetup->m_TerminateRequested = true;
-            break;
-
-        case APP_CMD_GAINED_FOCUS:
-            // -----------------------------------------------------------------------------
-            // When our app gains focus, we start monitoring the accelerometer.
-            // -----------------------------------------------------------------------------
-            if (AppSetup->m_AccelerometerSensor != NULL) 
-            {
-                ASensorEventQueue_enableSensor(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor);
-
+            case APP_CMD_INIT_WINDOW:
                 // -----------------------------------------------------------------------------
-                // We'd like to get 60 events per second (in us).
+                // The window is being shown, get it ready.
                 // -----------------------------------------------------------------------------
-                ASensorEventQueue_setEventRate(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor, (1000L / 60) * 1000);
-            }
-            break;
+                if (AppSetup->m_pAndroidApp->window != NULL)
+                {
+                    unsigned int WindowID = Gfx::App::RegisterWindow(AppSetup->m_pAndroidApp->window);
 
-        case APP_CMD_LOST_FOCUS:
-            // -----------------------------------------------------------------------------
-            // When our app loses focus, we stop monitoring the accelerometer.
-            // This is to avoid consuming battery while not being used.
-            // -----------------------------------------------------------------------------
-            if (AppSetup->m_AccelerometerSensor != NULL) 
-            {
-                ASensorEventQueue_disableSensor(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor);
-            }
+                    Gfx::App::ActivateWindow(WindowID);
 
-            AppSetup->m_Animating = 0;
-            break;
+                    AppSetup->m_WindowID = WindowID;
+
+                    App::Application::ChangeState(App::CState::Start);
+                }
+                break;
+
+            case APP_CMD_TERM_WINDOW:
+                // -----------------------------------------------------------------------------
+                // The window is being hidden or closed, clean it up.
+                // -----------------------------------------------------------------------------
+                AppSetup->m_TerminateRequested = true;
+                break;
+
+            case APP_CMD_GAINED_FOCUS:
+                // -----------------------------------------------------------------------------
+                // When our app gains focus, we start monitoring the accelerometer.
+                // -----------------------------------------------------------------------------
+                MR::ControlManager::OnResume();
+
+                if (AppSetup->m_AccelerometerSensor != NULL)
+                {
+                    ASensorEventQueue_enableSensor(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor);
+
+                    // -----------------------------------------------------------------------------
+                    // We'd like to get 60 events per second (in us).
+                    // -----------------------------------------------------------------------------
+                    ASensorEventQueue_setEventRate(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor, (1000L / 60) * 1000);
+                }
+                break;
+
+            case APP_CMD_LOST_FOCUS:
+                // -----------------------------------------------------------------------------
+                // When our app loses focus, we stop monitoring the accelerometer.
+                // This is to avoid consuming battery while not being used.
+                // -----------------------------------------------------------------------------
+                MR::ControlManager::OnPause();
+
+                if (AppSetup->m_AccelerometerSensor != NULL)
+                {
+                    ASensorEventQueue_disableSensor(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor);
+                }
+
+                AppSetup->m_Animating = 0;
+                break;
         }
     }
 }
