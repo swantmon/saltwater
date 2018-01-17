@@ -527,8 +527,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Build path to shader in file system
         // -----------------------------------------------------------------------------
-        std::string PathToShaders = g_PathToDataShader;
-        std::string PathToShader = PathToShaders + rShader.m_FileName;
+        std::string PathToShader = Core::AssetManager::GetPathToData() + g_PathToDataShader + _pInternShader->GetFileName();
 
         // -----------------------------------------------------------------------------
         // Load file data from given filename
