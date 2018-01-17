@@ -35,6 +35,8 @@ namespace
         void SetContext(jobject _pContext);
         jobject GetContext();
 
+        int GetDeviceRotation();
+
         bool HasCameraPermission();
 
     public:
@@ -52,6 +54,7 @@ namespace
         jobject m_GlobalClassLoader;
         jmethodID m_FindClassMethod;
         jmethodID m_HasCameraPermissionMethod;
+        jmethodID m_GetDeviceRotationMethod;
     };
 }
 
@@ -66,6 +69,7 @@ namespace
         , m_GlobalClassLoader        (0)
         , m_FindClassMethod          (0)
         , m_HasCameraPermissionMethod(0)
+        , m_GetDeviceRotationMethod  (0)
     {
 
     };
@@ -130,6 +134,8 @@ namespace
         m_GameActivityID = (jclass)pEnvironment->NewGlobalRef(LocalGameActivityClass);
 
         m_HasCameraPermissionMethod = pEnvironment->GetMethodID(m_GameActivityID, "HasCameraPermission", "()Z");
+
+        m_GetDeviceRotationMethod = pEnvironment->GetMethodID(m_GameActivityID, "GetDeviceRotation", "()I");
     }
 
     // -----------------------------------------------------------------------------
@@ -184,6 +190,17 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    int CJNIInterface::GetDeviceRotation()
+    {
+        JNIEnv* pEnvironment = GetJavaEnvironment();
+
+        jint DeviceRotation = (jint)pEnvironment->CallIntMethod(m_GameActivityThiz, m_GetDeviceRotationMethod);
+
+        return DeviceRotation;
+    }
+
+    // -----------------------------------------------------------------------------
+
     bool CJNIInterface::HasCameraPermission()
     {
         JNIEnv* pEnvironment = GetJavaEnvironment();
@@ -208,6 +225,13 @@ namespace JNI
     void* GetContext()
     {
         return CJNIInterface::GetInstance().GetContext();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    int GetDeviceRotation()
+    {
+        return CJNIInterface::GetInstance().GetDeviceRotation();
     }
 
     // -----------------------------------------------------------------------------

@@ -64,7 +64,7 @@ namespace App
 
         Config.m_pEnv     = App::JNI::GetJavaEnvironment();
         Config.m_pContext = App::JNI::GetContext();
-        Config.m_Rotation = MR::ControlManager::SConfiguration::Rotation90;
+        Config.m_Rotation = static_cast<MR::ControlManager::SConfiguration::EDisplayRotation>(App::JNI::GetDeviceRotation());
         Config.m_Width    = 1920;
         Config.m_Height   = 1080;
 

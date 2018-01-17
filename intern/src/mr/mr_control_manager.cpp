@@ -83,7 +83,7 @@ namespace
 
         void main()
         {
-            out_Output = texture(in_ExtOESTexture, in_UV); //vec4(in_UV, 0, 1);
+            out_Output = texture(in_ExtOESTexture, in_UV);
         }
     )";
 

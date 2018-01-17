@@ -9,6 +9,8 @@ namespace JNI
 
     void* GetContext();
 
+    int GetDeviceRotation();
+
     bool HasCameraPermission();
 } // namespace JNI
 } // namespace App
