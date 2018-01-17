@@ -252,8 +252,8 @@ namespace
     {
         STextureDescriptor TextureDesc;
 
-        TextureDesc.m_NumberOfPixelsU  = 1920;
-        TextureDesc.m_NumberOfPixelsV  = 1080;
+        TextureDesc.m_NumberOfPixelsU  = Gfx::Main::GetActiveWindowSize()[0];
+        TextureDesc.m_NumberOfPixelsV  = Gfx::Main::GetActiveWindowSize()[1];
         TextureDesc.m_NumberOfPixelsW  = 1;
         TextureDesc.m_NumberOfMipMaps  = 1;
         TextureDesc.m_NumberOfTextures = 1;
@@ -797,7 +797,11 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetTargetSet(m_WebcamTargetSetPtr);
 
+        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+
         MR::ControlManager::OnDraw();
+
+        ContextManager::ResetViewPortSet();
 
         ContextManager::ResetRenderContext();
 
