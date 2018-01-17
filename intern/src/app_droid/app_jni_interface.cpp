@@ -9,24 +9,6 @@
 #include <jni.h>
 
 // -----------------------------------------------------------------------------
-// Signature	                Java Type
-// V	                        void
-// Z	                        boolean
-// B	                        byte
-// C        	                char
-// S        	                short
-// I        	                int
-// J        	                long
-// F        	                float
-// D        	                double
-// L fully-qualified-class ;	fully-qualified-class
-// [ type	                    type[]
-// ( arg-types ) ret-type	    method type
-//
-// Example: (Ljava/lang/String;)Ljava/lang/String;
-// -----------------------------------------------------------------------------
-
-// -----------------------------------------------------------------------------
 // Setup
 // -----------------------------------------------------------------------------
 #define JNI_CURRENT_VERSION JNI_VERSION_1_6
@@ -53,6 +35,8 @@ namespace
         void SetContext(jobject _pContext);
         jobject GetContext();
 
+        bool HasCameraPermission();
+
     public:
 
         CJNIInterface();
@@ -67,19 +51,21 @@ namespace
         jclass m_GameActivityID;
         jobject m_GlobalClassLoader;
         jmethodID m_FindClassMethod;
+        jmethodID m_HasCameraPermissionMethod;
     };
 }
 
 namespace
 {
     CJNIInterface::CJNIInterface()
-        : m_pContext          (0)
-        , m_pCurrentJavaVM    (0)
-        , m_CurrentJavaVersion(0)
-        , m_GameActivityThiz  (0)
-        , m_GameActivityID    (0)
-        , m_GlobalClassLoader (0)
-        , m_FindClassMethod   (0)
+        : m_pContext                 (0)
+        , m_pCurrentJavaVM           (0)
+        , m_CurrentJavaVersion       (0)
+        , m_GameActivityThiz         (0)
+        , m_GameActivityID           (0)
+        , m_GlobalClassLoader        (0)
+        , m_FindClassMethod          (0)
+        , m_HasCameraPermissionMethod(0)
     {
 
     };
@@ -119,14 +105,31 @@ namespace
 
     void CJNIInterface::FindClassesAndMethods()
     {
+        // -----------------------------------------------------------------------------
+        // Signature	                Java Type
+        // V	                        void
+        // Z	                        boolean
+        // B	                        byte
+        // C        	                char
+        // S        	                short
+        // I        	                int
+        // J        	                long
+        // F        	                float
+        // D        	                double
+        // L fully-qualified-class ;	fully-qualified-class
+        // [ type	                    type[]
+        // ( arg-types ) ret-type	    method type
+        //
+        // Example: (Ljava/lang/String;)Ljava/lang/String;
+        // -----------------------------------------------------------------------------
+
         JNIEnv* pEnvironment = GetJavaEnvironment();
 
         jclass LocalGameActivityClass = pEnvironment->FindClass("de/tu_ilmenau/saltwater/GameActivity");
 
         m_GameActivityID = (jclass)pEnvironment->NewGlobalRef(LocalGameActivityClass);
 
-        // TODO: Add some real methods!
-        jmethodID GetHelloID = pEnvironment->GetMethodID(m_GameActivityID, "GetNumber", "()I");
+        m_HasCameraPermissionMethod = pEnvironment->GetMethodID(m_GameActivityID, "HasCameraPermission", "()Z");
     }
 
     // -----------------------------------------------------------------------------
@@ -178,6 +181,17 @@ namespace
     {
         m_GameActivityThiz = _Activity;
     }
+
+    // -----------------------------------------------------------------------------
+
+    bool CJNIInterface::HasCameraPermission()
+    {
+        JNIEnv* pEnvironment = GetJavaEnvironment();
+
+        jboolean HasCameraPermission = (jboolean)pEnvironment->CallBooleanMethod(m_GameActivityThiz, m_HasCameraPermissionMethod);
+
+        return HasCameraPermission == JNI_TRUE;
+    }
 }
 
 namespace App
@@ -194,6 +208,13 @@ namespace JNI
     void* GetContext()
     {
         return CJNIInterface::GetInstance().GetContext();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool HasCameraPermission()
+    {
+        return CJNIInterface::GetInstance().HasCameraPermission();
     }
 } // namespace JNI
 } // namespace App
