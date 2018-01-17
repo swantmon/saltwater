@@ -450,9 +450,11 @@ namespace
 
         glUseProgram(s_ShaderProgram);
 
-        glDepthMask(GL_FALSE);
+        glDisable(GL_DEPTH_TEST);
 
         glDisable(GL_BLEND);
+
+        glDisable(GL_CULL_FACE);
 
         glActiveTexture(GL_TEXTURE0);
 
@@ -473,10 +475,6 @@ namespace
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         glBindTexture(GL_TEXTURE_EXTERNAL_OES, 0);
-
-        glDepthMask(GL_TRUE);
-
-        glEnable(GL_BLEND);
 
         glUseProgram(0);
     }
