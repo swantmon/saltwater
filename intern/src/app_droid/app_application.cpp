@@ -329,17 +329,19 @@ namespace
                 break;
 
             case APP_CMD_CONTENT_RECT_CHANGED:
-                // -----------------------------------------------------------------------------
-                // The window has changed the rectangle
-                // -----------------------------------------------------------------------------
-                ARect Rectangle = AppSetup->m_pAndroidApp->pendingContentRect;
+                {
+                    // -----------------------------------------------------------------------------
+                    // The window has changed the rectangle
+                    // -----------------------------------------------------------------------------
+                    ARect Rectangle = AppSetup->m_pAndroidApp->pendingContentRect;
 
-                int Width  = Base::Abs(Rectangle.left   - Rectangle.right);
-                int Height = Base::Abs(Rectangle.bottom - Rectangle.top);
+                    int Width = Base::Abs(Rectangle.left - Rectangle.right);
+                    int Height = Base::Abs(Rectangle.bottom - Rectangle.top);
+    
+                    int Rotation = App::JNI::GetDeviceRotation();
 
-                int Rotation = App::JNI::GetDeviceRotation();
-
-                MR::ControlManager::OnDisplayGeometryChanged(Rotation, Width, Height);
+                    MR::ControlManager::OnDisplayGeometryChanged(Rotation, Width, Height);
+                }
                 break;
 
             case APP_CMD_GAINED_FOCUS:
