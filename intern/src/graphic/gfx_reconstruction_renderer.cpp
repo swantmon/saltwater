@@ -180,6 +180,7 @@ namespace
         Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxReconstructionRenderer::OnResize));
         
 		MR::SReconstructionSettings DefaultSettings;
+        MR::SReconstructionSettings::SetDefaultSettings(DefaultSettings);
 
 		if (DefaultSettings.m_IsScalable)
 		{			

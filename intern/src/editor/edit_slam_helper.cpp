@@ -85,6 +85,7 @@ namespace
     void CSLAMHelper::OnSLAMReconstructionUpdate(Edit::CMessage& _rMessage)
     {        
         MR::SReconstructionSettings Settings;
+        MR::SReconstructionSettings::SetDefaultSettings(Settings);
 
         Settings.m_VolumeSize = _rMessage.GetFloat();
 		Settings.m_VolumeResolution = _rMessage.GetInt();

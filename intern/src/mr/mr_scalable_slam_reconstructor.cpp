@@ -2197,6 +2197,10 @@ namespace MR
             assert(pReconstructionSettings->m_IsScalable);
             m_ReconstructionSettings = *pReconstructionSettings;
         }
+        else
+        {
+            MR:SReconstructionSettings::SetDefaultSettings(m_ReconstructionSettings);
+        }
         Start();
     }
 

@@ -34,7 +34,7 @@ namespace MR
 
         bool m_UseFullVolumeIntegration;
         bool m_UseReverseIntegration;
-
-		SReconstructionSettings();
+        
+        static void SetDefaultSettings(SReconstructionSettings& _Settings);
 	};
 } // namespace MR

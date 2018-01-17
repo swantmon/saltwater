@@ -43,13 +43,12 @@ namespace Edit
         setupUi(this);
 
         MR::SReconstructionSettings DefaultSettings;
+        MR::SReconstructionSettings::SetDefaultSettings(DefaultSettings);
         
         m_pSizeHS->setRange(1, 1000);
 
         if (DefaultSettings.m_IsScalable)
         {
-            MR::SReconstructionSettings DefaultSettings;
-
             int VoxelCount = 1;
             for (int i = 0; i < DefaultSettings.GRID_LEVELS; ++i)
             {
