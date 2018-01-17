@@ -25,12 +25,17 @@
 #include "arcore_c_api.h"
 
 #include "GLES3/gl3.h"
-#define __gl2_h_
-#include "GLES2/gl2ext.h"
 
 #include <assert.h>
 #include <unordered_set>
 #include <vector>
+
+#ifndef GL_OES_EGL_image_external
+#define GL_OES_EGL_image_external 1
+#define GL_TEXTURE_EXTERNAL_OES           0x8D65
+#define GL_TEXTURE_BINDING_EXTERNAL_OES   0x8D67
+#define GL_REQUIRED_TEXTURE_IMAGE_UNITS_OES 0x8D68
+#endif /* GL_OES_EGL_image_external */
 
 using namespace MR;
 using namespace MR::ControlManager;
